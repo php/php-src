@@ -89,6 +89,7 @@ mysqlnd_run_authentication(
 			}
 		}
 
+
 		{
 			zend_uchar * switch_to_auth_protocol_data = NULL;
 			size_t switch_to_auth_protocol_data_len = 0;
@@ -113,10 +114,11 @@ mysqlnd_run_authentication(
 			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
 			/* The data should be allocated with malloc() */
 			if (auth_plugin) {
-				scrambled_data =
-					auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-													   plugin_data, plugin_data_len, session_options,
-													   conn->protocol_frame_codec->data, mysql_flags);
+				scrambled_data = auth_plugin->methods.get_auth_data(
+					NULL, &scrambled_data_len, conn, user, passwd,
+					passwd_len, plugin_data, plugin_data_len,
+					session_options, conn->protocol_frame_codec->data,
+					mysql_flags);
 			}
 
 			if (conn->error_info->error_no) {
@@ -127,6 +129,7 @@ mysqlnd_run_authentication(
 											charset_no,
 											first_call,
 											requested_protocol,
+											auth_plugin, plugin_data, plugin_data_len,
 											scrambled_data, scrambled_data_len,
 											&switch_to_auth_protocol, &switch_to_auth_protocol_len,
 											&switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
@@ -248,6 +251,9 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  unsigned int server_charset_no,
 							  zend_bool use_full_blown_auth_packet,
 							  const char * const auth_protocol,
+							  struct st_mysqlnd_authentication_plugin * auth_plugin,
+							  const zend_uchar * const orig_auth_plugin_data,
+							  const size_t orig_auth_plugin_data_len,
 							  const zend_uchar * const auth_plugin_data,
 							  const size_t auth_plugin_data_len,
 							  char ** switch_to_auth_protocol,
@@ -316,6 +322,11 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 	}
 	if (use_full_blown_auth_packet == TRUE) {
 		conn->charset = mysqlnd_find_charset_nr(auth_packet->charset_no);
+	}
+
+	if (auth_plugin && auth_plugin->methods.handle_server_response) {
+		auth_plugin->methods.handle_server_response(auth_plugin, conn,
+			orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len);
 	}
 
 	if (FAIL == PACKET_READ(auth_resp_packet) || auth_resp_packet->response_code >= 0xFE) {
@@ -613,7 +624,8 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_native_auth_plugin =
 		}
 	},
 	{/* methods */
-		mysqlnd_native_auth_get_auth_data
+		mysqlnd_native_auth_get_auth_data,
+		NULL
 	}
 };
 
@@ -662,7 +674,8 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_pam_authentication_plugin
 		}
 	},
 	{/* methods */
-		mysqlnd_pam_auth_get_auth_data
+		mysqlnd_pam_auth_get_auth_data,
+		NULL
 	}
 };
 
@@ -846,10 +859,275 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_sha256_authentication_plu
 		}
 	},
 	{/* methods */
-		mysqlnd_sha256_auth_get_auth_data
+		mysqlnd_sha256_auth_get_auth_data,
+		NULL
 	}
 };
 #endif
+
+/*************************************** CACHING SHA2 Password *******************************/
+
+#undef L64
+
+#include "ext/hash/php_hash.h"
+#include "ext/hash/php_hash_sha.h"
+
+#define SHA256_LENGTH 32
+
+/* {{{ php_mysqlnd_scramble_sha2 */
+void php_mysqlnd_scramble_sha2(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const password, const size_t password_len)
+{
+	PHP_SHA256_CTX context;
+	zend_uchar sha1[SHA256_LENGTH];
+	zend_uchar sha2[SHA256_LENGTH];
+
+	/* Phase 1: hash password */
+	PHP_SHA256Init(&context);
+	PHP_SHA256Update(&context, password, password_len);
+	PHP_SHA256Final(sha1, &context);
+
+	/* Phase 2: hash sha1 */
+	PHP_SHA256Init(&context);
+	PHP_SHA256Update(&context, (zend_uchar*)sha1, SHA256_LENGTH);
+	PHP_SHA256Final(sha2, &context);
+
+	/* Phase 3: hash scramble + sha2 */
+	PHP_SHA256Init(&context);
+	PHP_SHA256Update(&context, (zend_uchar*)sha2, SHA256_LENGTH);
+	PHP_SHA256Update(&context, scramble, SCRAMBLE_LENGTH);
+	PHP_SHA256Final(buffer, &context);
+
+	/* let's crypt buffer now */
+	php_mysqlnd_crypt(buffer, (const zend_uchar *)sha1, (const zend_uchar *)buffer, SHA256_LENGTH);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_native_auth_get_auth_data */
+static zend_uchar *
+mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
+								   size_t * auth_data_len,
+							 	   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
+								   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+								   const MYSQLND_SESSION_OPTIONS * const session_options,
+								   const MYSQLND_PFC_DATA * const pfc_data,
+								   zend_ulong mysql_flags
+								  )
+{
+	zend_uchar * ret = NULL;
+	DBG_ENTER("mysqlnd_caching_sha2_get_auth_data");
+	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
+	*auth_data_len = 0;
+
+	DBG_INF("First auth step: send hashed password");
+	/* copy scrambled pass*/
+	if (passwd && passwd_len) {
+		ret = malloc(SHA256_LENGTH + 1);
+		*auth_data_len = SHA256_LENGTH;
+		php_mysqlnd_scramble_sha2((zend_uchar*)ret, auth_plugin_data, (zend_uchar*)passwd, passwd_len);
+		ret[SHA256_LENGTH] = '\0';
+		DBG_INF_FMT("hash(%d)=[%.*s]", *auth_data_len, *auth_data_len, ret);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+#ifdef MYSQLND_HAVE_SSL
+static RSA *
+mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
+{
+	RSA * ret = NULL;
+	const MYSQLND_PFC_DATA * const pfc_data = conn->protocol_frame_codec->data;
+	const char * fname = (pfc_data->sha256_server_public_key && pfc_data->sha256_server_public_key[0] != '\0')?
+								pfc_data->sha256_server_public_key:
+								MYSQLND_G(sha256_server_public_key);
+	php_stream * stream;
+	DBG_ENTER("mysqlnd_cached_sha2_get_key");
+	DBG_INF_FMT("options_s256_pk=[%s] MYSQLND_G(sha256_server_public_key)=[%s]",
+				 pfc_data->sha256_server_public_key? pfc_data->sha256_server_public_key:"n/a",
+				 MYSQLND_G(sha256_server_public_key)? MYSQLND_G(sha256_server_public_key):"n/a");
+	if (!fname || fname[0] == '\0') {
+		MYSQLND_PACKET_CACHED_SHA2_RESULT *req_packet = NULL;
+		MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE *pk_resp_packet = NULL;
+
+		do {
+			DBG_INF("requesting the public key from the server");
+			req_packet = conn->payload_decoder_factory->m.get_cached_sha2_result_packet(conn->payload_decoder_factory, FALSE);
+			pk_resp_packet = conn->payload_decoder_factory->m.get_sha256_pk_request_response_packet(conn->payload_decoder_factory, FALSE);
+			req_packet->request = 1;
+
+			if (! PACKET_WRITE(req_packet)) {
+				DBG_ERR_FMT("Error while sending public key request packet");
+				php_error(E_WARNING, "Error while sending public key request packet. PID=%d", getpid());
+				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+				break;
+			}
+			if (FAIL == PACKET_READ(pk_resp_packet) || NULL == pk_resp_packet->public_key) {
+				DBG_ERR_FMT("Error while receiving public key");
+				php_error(E_WARNING, "Error while receiving public key. PID=%d", getpid());
+				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+				break;
+			}
+			DBG_INF_FMT("Public key(%d):\n%s", pk_resp_packet->public_key_len, pk_resp_packet->public_key);
+			/* now extract the public key */
+			{
+				BIO * bio = BIO_new_mem_buf(pk_resp_packet->public_key, pk_resp_packet->public_key_len);
+				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
+				BIO_free(bio);
+			}
+		} while (0);
+		PACKET_FREE(req_packet);
+		PACKET_FREE(pk_resp_packet);
+
+		DBG_INF_FMT("ret=%p", ret);
+		DBG_RETURN(ret);
+
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE,
+			"caching_sha2_server_public_key is not set for the connection or as mysqlnd.sha256_server_public_key");
+		DBG_ERR("server_public_key is not set");
+		DBG_RETURN(NULL);
+	} else {
+		zend_string * key_str;
+		DBG_INF_FMT("Key in a file. [%s]", fname);
+		stream = php_stream_open_wrapper((char *) fname, "rb", REPORT_ERRORS, NULL);
+
+		if (stream) {
+			if ((key_str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
+				BIO * bio = BIO_new_mem_buf(ZSTR_VAL(key_str), ZSTR_LEN(key_str));
+				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
+				BIO_free(bio);
+				DBG_INF("Successfully loaded");
+				DBG_INF_FMT("Public key:%*.s", ZSTR_LEN(key_str), ZSTR_VAL(key_str));
+				zend_string_release(key_str);
+			}
+			php_stream_close(stream);
+		}
+	}
+	DBG_RETURN(ret);
+
+}
+#endif
+
+
+/* {{{ mysqlnd_caching_sha2_get_key */
+static size_t
+mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
+		const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+		unsigned char **crypted,
+		const char * const passwd,
+		const size_t passwd_len)
+{
+#ifdef MYSQLND_HAVE_SSL
+	static RSA *server_public_key;
+	server_public_key = mysqlnd_caching_sha2_get_key(conn);
+
+	DBG_ENTER("mysqlnd_caching_sha2_get_and_use_key(");
+
+	if (server_public_key) {
+		int server_public_key_len;
+		char xor_str[passwd_len + 1];
+		memcpy(xor_str, passwd, passwd_len);
+		xor_str[passwd_len] = '\0';
+		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
+
+		server_public_key_len = RSA_size(server_public_key);
+		/*
+		  Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
+		  RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
+		  http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
+		*/
+		if ((size_t) server_public_key_len - 41 <= passwd_len) {
+			/* password message is to long */
+			SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
+			DBG_ERR("password is too long");
+			DBG_RETURN(0);
+		}
+
+		*crypted = emalloc(server_public_key_len);
+		RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, *crypted, server_public_key, RSA_PKCS1_OAEP_PADDING);
+		DBG_RETURN(server_public_key_len);
+	}
+	DBG_RETURN(0);
+#else
+	DBG_ENTER("mysqlnd_caching_sha2_get_and_use_key(");
+	php_error_docref(NULL, E_WARNING, "PHP was built without openssl extension, can't send password encrypted");
+	DBG_RETURN(0);
+#endif
+}
+/* }}} */
+
+/* {{{ mysqlnd_native_auth_get_auth_data */
+static void
+mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plugin *self,
+		MYSQLND_CONN_DATA * conn,
+		const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+		const char * const passwd,
+		const size_t passwd_len)
+{
+	DBG_ENTER("mysqlnd_caching_sha2_handle_server_response");
+	MYSQLND_PACKET_CACHED_SHA2_RESULT *result_packet;
+	result_packet = conn->payload_decoder_factory->m.get_cached_sha2_result_packet(conn->payload_decoder_factory, FALSE);
+
+	if (FAIL == PACKET_READ(result_packet)) {
+		DBG_VOID_RETURN;
+	}
+
+	switch (result_packet->response_code) {
+		case 3:
+			DBG_INF("fast path suceeded");
+			PACKET_FREE(result_packet);
+			DBG_VOID_RETURN;
+		case 4:
+			if (conn->vio->data->ssl || conn->unix_socket.s) {
+				DBG_INF("fast path failed, doing full auth via SSL");
+				result_packet->password = (zend_uchar *)passwd;
+				result_packet->password_len = passwd_len + 1;
+				PACKET_WRITE(result_packet);
+			} else {
+				DBG_INF("fast path failed, doing full auth without SSL");
+				result_packet->password_len = mysqlnd_caching_sha2_get_and_use_key(conn, auth_plugin_data, auth_plugin_data_len, &result_packet->password, passwd, passwd_len);
+				PACKET_WRITE(result_packet);
+				efree(result_packet->password);
+			}
+			PACKET_FREE(result_packet);
+			DBG_VOID_RETURN;
+		case 2:
+			// The server tried to send a key, which we didn't expect
+			// fall-through
+		default:
+			php_error_docref(NULL, E_WARNING, "Unexpected server respose while doing caching_sha2 auth: %i", result_packet->response_code);
+	}
+
+	PACKET_FREE(result_packet);
+
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+static struct st_mysqlnd_authentication_plugin mysqlnd_caching_sha2_auth_plugin =
+{
+	{
+		MYSQLND_PLUGIN_API_VERSION,
+		"auth_plugin_caching_sha2_password",
+		MYSQLND_VERSION_ID,
+		PHP_MYSQLND_VERSION,
+		"PHP License 3.01",
+		"Johannes Schlüter <johannes.schlueter@php.net>",
+		{
+			NULL, /* no statistics , will be filled later if there are some */
+			NULL, /* no statistics */
+		},
+		{
+			NULL /* plugin shutdown */
+		}
+	},
+	{/* methods */
+		mysqlnd_caching_sha2_get_auth_data,
+		mysqlnd_caching_sha2_handle_server_response
+	}
+};
+
 
 /* {{{ mysqlnd_register_builtin_authentication_plugins */
 void
@@ -857,6 +1135,7 @@ mysqlnd_register_builtin_authentication_plugins(void)
 {
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_native_auth_plugin);
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_pam_authentication_plugin);
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_caching_sha2_auth_plugin);
 #ifdef MYSQLND_HAVE_SSL
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_sha256_authentication_plugin);
 #endif

@@ -968,8 +968,8 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_RETURN_REF 1
 
 
-#define ZEND_RETURNS_FUNCTION 1<<0
-#define ZEND_RETURNS_VALUE    1<<1
+#define ZEND_RETURNS_FUNCTION (1<<0)
+#define ZEND_RETURNS_VALUE    (1<<1)
 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)

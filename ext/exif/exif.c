@@ -4324,7 +4324,7 @@ static int exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, i
 			zend_string *base;
 			if ((st.st_mode & S_IFMT) != S_IFREG) {
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Not a file");
-				php_stream_close(ImageInfo->infile);
+				ImageInfo->infile = NULL;
 				return FALSE;
 			}
 
