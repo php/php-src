@@ -27,6 +27,10 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fix arginfo wrt. optional/required parameters. (cmb)
 
+- Reflection:
+  . Fixed bug #76536 (PHP crashes with core dump when throwing exception in
+    error handler). (Laruence)
+
 - Standard:
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
     (Laruence)
