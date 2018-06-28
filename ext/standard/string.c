@@ -3670,7 +3670,7 @@ PHP_FUNCTION(addcslashes)
 		RETURN_STR_COPY(str);
 	}
 
-	RETURN_STR(php_addcslashes(str, 0, ZSTR_VAL(what), ZSTR_LEN(what)));
+	RETURN_STR(php_addcslashes_str(ZSTR_VAL(str), ZSTR_LEN(str), ZSTR_VAL(what), ZSTR_LEN(what)));
 }
 /* }}} */
 
@@ -3688,7 +3688,7 @@ PHP_FUNCTION(addslashes)
 		RETURN_EMPTY_STRING();
 	}
 
-	RETURN_STR(php_addslashes(str, 0));
+	RETURN_STR(php_addslashes(str));
 }
 /* }}} */
 
@@ -3804,20 +3804,20 @@ PHPAPI void php_stripcslashes(zend_string *str)
 }
 /* }}} */
 
-/* {{{ php_addcslashes
+/* {{{ php_addcslashes_str
  */
-PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *what, size_t wlength)
+PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, char *what, size_t wlength)
 {
 	char flags[256];
 	char *target;
 	const char *source, *end;
 	char c;
 	size_t  newlen;
-	zend_string *new_str = zend_string_safe_alloc(4, ZSTR_LEN(str), 0, 0);
+	zend_string *new_str = zend_string_safe_alloc(4, len, 0, 0);
 
 	php_charmask((unsigned char *)what, wlength, flags);
 
-	for (source = (char*)ZSTR_VAL(str), end = source + ZSTR_LEN(str), target = ZSTR_VAL(new_str); source < end; source++) {
+	for (source = str, end = source + len, target = ZSTR_VAL(new_str); source < end; source++) {
 		c = *source;
 		if (flags[(unsigned char)c]) {
 			if ((unsigned char) c < 32 || (unsigned char) c > 126) {
@@ -3840,13 +3840,18 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 	}
 	*target = 0;
 	newlen = target - ZSTR_VAL(new_str);
-	if (newlen < ZSTR_LEN(str) * 4) {
+	if (newlen < len * 4) {
 		new_str = zend_string_truncate(new_str, newlen, 0);
 	}
-	if (should_free) {
-		zend_string_release_ex(str, 0);
-	}
 	return new_str;
+}
+/* }}} */
+
+/* {{{ php_addcslashes
+ */
+PHPAPI zend_string *php_addcslashes(zend_string *str, char *what, size_t wlength)
+{
+	return php_addcslashes_str(ZSTR_VAL(str), ZSTR_LEN(str), what, wlength);
 }
 /* }}} */
 
@@ -3860,14 +3865,14 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 # include "Zend/zend_bitset.h"
 # include "Zend/zend_cpuinfo.h"
 
-ZEND_INTRIN_SSE4_2_FUNC_DECL(zend_string *php_addslashes_sse42(zend_string *str, int should_free));
-zend_string *php_addslashes_default(zend_string *str, int should_free);
+ZEND_INTRIN_SSE4_2_FUNC_DECL(zend_string *php_addslashes_sse42(zend_string *str));
+zend_string *php_addslashes_default(zend_string *str);
 
 ZEND_INTRIN_SSE4_2_FUNC_DECL(void php_stripslashes_sse42(zend_string *str));
 void php_stripslashes_default(zend_string *str);
 
 # if ZEND_INTRIN_SSE4_2_FUNC_PROTO
-PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) __attribute__((ifunc("resolve_addslashes")));
+PHPAPI zend_string *php_addslashes(zend_string *str) __attribute__((ifunc("resolve_addslashes")));
 PHPAPI void php_stripslashes(zend_string *str) __attribute__((ifunc("resolve_stripslashes")));
 
 static void *resolve_addslashes() {
@@ -3885,7 +3890,7 @@ static void *resolve_stripslashes() {
 }
 # else /* ZEND_INTRIN_SSE4_2_FUNC_PTR */
 
-PHPAPI zend_string *(*php_addslashes)(zend_string *str, int should_free) = NULL;
+PHPAPI zend_string *(*php_addslashes)(zend_string *str) = NULL;
 PHPAPI void (*php_stripslashes)(zend_string *str) = NULL;
 
 /* {{{ PHP_MINIT_FUNCTION
@@ -3907,9 +3912,9 @@ PHP_MINIT_FUNCTION(string_intrin)
 
 #if ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER
 # if ZEND_INTRIN_SSE4_2_NATIVE
-PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) /* {{{ */
+PHPAPI zend_string *php_addslashes(zend_string *str) /* {{{ */
 # elif ZEND_INTRIN_SSE4_2_RESOLVER
-zend_string *php_addslashes_sse42(zend_string *str, int should_free)
+zend_string *php_addslashes_sse42(zend_string *str)
 # endif
 {
 	ZEND_SET_ALIGNED(16, static const char slashchars[16]) = "\'\"\\\0";
@@ -3953,11 +3958,7 @@ zend_string *php_addslashes_sse42(zend_string *str, int should_free)
 		}
 	}
 
-	if (!should_free) {
-		return zend_string_copy(str);
-	}
-
-	return str;
+	return zend_string_copy(str);
 
 do_escape:
 	offset = source - (char *)ZSTR_VAL(str);
@@ -4039,9 +4040,6 @@ do_escape:
 	}
 
 	*target = '\0';
-	if (should_free) {
-		zend_string_release_ex(str, 0);
-	}
 
 	if (ZSTR_LEN(new_str) - (target - ZSTR_VAL(new_str)) > 16) {
 		new_str = zend_string_truncate(new_str, target - ZSTR_VAL(new_str), 0);
@@ -4056,9 +4054,9 @@ do_escape:
 
 #if !ZEND_INTRIN_SSE4_2_NATIVE
 # if ZEND_INTRIN_SSE4_2_RESOLVER
-zend_string *php_addslashes_default(zend_string *str, int should_free) /* {{{ */
+zend_string *php_addslashes_default(zend_string *str) /* {{{ */
 # else
-PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)
+PHPAPI zend_string *php_addslashes(zend_string *str)
 # endif
 {
 	/* maximum string length, worst case situation */
@@ -4087,11 +4085,7 @@ PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)
 		}
 	}
 
-	if (!should_free) {
-		return zend_string_copy(str);
-	}
-
-	return str;
+	return zend_string_copy(str);
 
 do_escape:
 	offset = source - (char *)ZSTR_VAL(str);
@@ -4118,9 +4112,6 @@ do_escape:
 	}
 
 	*target = '\0';
-	if (should_free) {
-		zend_string_release_ex(str, 0);
-	}
 
 	if (ZSTR_LEN(new_str) - (target - ZSTR_VAL(new_str)) > 16) {
 		new_str = zend_string_truncate(new_str, target - ZSTR_VAL(new_str), 0);

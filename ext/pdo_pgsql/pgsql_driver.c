@@ -66,9 +66,7 @@ static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 static zend_string* _pdo_pgsql_escape_credentials(char *str)
 {
 	if (str) {
-		zend_string *tmp = zend_string_init(str, strlen(str), 0);
-
-		return php_addcslashes(tmp, 1, "\\'", sizeof("\\'"));
+		return php_addcslashes_str(str, strlen(str), "\\'", sizeof("\\'"));
 	}
 
 	return NULL;
