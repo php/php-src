@@ -35,6 +35,27 @@ var_dump(null <=> new Comparable(1));
 var_dump(null <=> new Comparable(0));
 var_dump(new Comparable(0) <=> null);
 
+echo "\n";
+
+/**
+ * Check that default behaviour still works as expected.
+ */
+var_dump(new stdClass ==  null);
+var_dump(new stdClass >=  null);
+var_dump(new stdClass <=  null);
+var_dump(new stdClass <   null);
+var_dump(new stdClass >   null);
+var_dump(new stdClass <=> null);
+
+echo "\n";
+
+var_dump(null ==  new stdClass);
+var_dump(null >=  new stdClass);
+var_dump(null <=  new stdClass);
+var_dump(null <   new stdClass);
+var_dump(null >   new stdClass);
+var_dump(null <=> new stdClass);
+
 ?>
 --EXPECT--
 Comparing!
@@ -45,3 +66,17 @@ Comparing!
 int(0)
 Comparing!
 int(0)
+
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+int(1)
+
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+int(-1)

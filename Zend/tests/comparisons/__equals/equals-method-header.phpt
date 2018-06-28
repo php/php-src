@@ -15,6 +15,14 @@ class C {
     static public function __equals() {}
 }
 
+class D {
+    function __equals() {} // This is okay.
+}
+
+class E {
+    public function __equals(E $value): bool {} // This is okay.
+}
+
 ?>
 --EXPECTF--
 Warning: The magic method __equals() must have public visibility and cannot be static in %s on line %d

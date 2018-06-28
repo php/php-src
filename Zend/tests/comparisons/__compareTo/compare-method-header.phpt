@@ -15,6 +15,14 @@ class C {
 	static public function __compareTo() {}
 }
 
+class D {
+    function __compareTo() {} // This is okay.
+}
+
+class E {
+    public function __compareTo(E $value): E {} // This is okay.
+}
+
 ?>
 --EXPECTF--
 Warning: The magic method __compareTo() must have public visibility and cannot be static in %s on line %d

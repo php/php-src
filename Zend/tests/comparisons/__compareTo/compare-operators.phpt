@@ -1,8 +1,8 @@
 --TEST--
-__compareTo: Basic comparison behaviour
+__compareTo: Basic comparison operator behaviour
 --FILE--
 <?php
-include("setup.inc");
+include("Comparable.inc");
 
 var_dump(new Comparable(1) < new Comparable(0)); // false
 var_dump(new Comparable(1) < new Comparable(1)); // false

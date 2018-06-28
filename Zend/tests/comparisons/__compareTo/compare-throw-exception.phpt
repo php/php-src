@@ -1,10 +1,10 @@
 --TEST--
-__compareTo: Throwing exception in __compareTo is caught
+__compareTo: Throwing exception is caught
 --FILE--
 <?php
 
 /**
- * Check that throwing an exception in the comparison function works.
+ * Check that throwing an exception in the comparison function is caught.
  */
 class BrokenComparison
 {

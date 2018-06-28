@@ -1,8 +1,8 @@
 --TEST--
-__compareTo: Supported by array functions with ordering semantics (sorting)
+__compareTo: Called by array functions with ordering semantics (sorting)
 --FILE--
 <?php
-include("setup.inc");
+include("Comparable.inc");
 
 $a = new Comparable(3);
 $b = new Comparable(1);

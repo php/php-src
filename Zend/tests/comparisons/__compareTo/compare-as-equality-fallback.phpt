@@ -1,5 +1,5 @@
 --TEST--
-__compareTo: __compareTo should be called when comparing for equality
+__compareTo: Should be called when comparing for equality
 --FILE--
 <?php
 class A

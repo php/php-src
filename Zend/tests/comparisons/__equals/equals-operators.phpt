@@ -1,8 +1,8 @@
 --TEST--
-__equals: Basic equality behaviour
+__equals: Basic equality operator behaviour
 --FILE--
 <?php
-include("setup.inc");
+include("Equatable.inc");
 
 var_dump(new Equatable(1) < new Equatable(0)); // true
 var_dump(new Equatable(1) < new Equatable(1)); // false
