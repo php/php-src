@@ -2705,6 +2705,18 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 	if (opline->op1_type == IS_CONST && (opline->op2_type == IS_CONST || (opline->op2_type == IS_UNUSED && (opline->op2.num == ZEND_FETCH_CLASS_SELF || opline->op2.num == ZEND_FETCH_CLASS_PARENT))) && EXPECTED(CACHED_PTR(cache_slot) != NULL)) {
 		*retval = CACHED_PTR(cache_slot + sizeof(void *));
 		property_info = CACHED_PTR(cache_slot + sizeof(void *) * 2);
+
+		if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW)
+				&& UNEXPECTED(Z_TYPE_P(*retval) == IS_UNDEF) && UNEXPECTED(property_info->type != 0)) {
+			const char *class_name, *prop_name;
+			zend_unmangle_property_name_ex(property_info->name, &class_name, &prop_name, NULL);
+			zend_throw_exception_ex(zend_ce_type_error,
+				ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
+				"Typed static property %s::$%s must not be accessed before initialization",
+				ZSTR_VAL(property_info->ce->name),
+				prop_name);
+			return FAILURE;
+		}
 	} else {
 		success = zend_fetch_static_property_address_ex(retval, &property_info, cache_slot, fetch_type OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(success != SUCCESS)) {
@@ -2712,7 +2724,7 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 		}
 	}
 
-	if (flags && UNEXPECTED(property_info)) {
+	if (flags) {
 		if ((flags & ZEND_FETCH_DIM_WRITE) && (Z_TYPE_P(*retval) <= IS_FALSE || (Z_ISREF_P(*retval) && Z_TYPE_P(Z_REFVAL_P(*retval)) == IS_NULL)) && !zend_verify_ref_type_assignable(property_info->type, IS_ARRAY)) {
 			zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
 				"Cannot write an array to a null property which does not allow for array");
