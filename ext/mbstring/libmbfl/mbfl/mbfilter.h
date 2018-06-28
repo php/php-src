@@ -114,6 +114,13 @@
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY 3
 
 /*
+ * convenience macros
+ */
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+
+/*
  * buffering converter
  */
 typedef struct _mbfl_buffer_converter mbfl_buffer_converter;
