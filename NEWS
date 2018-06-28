@@ -13,6 +13,10 @@ PHP                                                                        NEWS
     their parent by ref). (Nikita)
   . Fixed bug #76439 (Changed behaviour in unclosed HereDoc). (Nikita, tpunt)
 
+- DOM:
+  . Fixed bug #76285 (DOMDocument::formatOutput attribute sometimes ignored).
+    (Andrew Nester)
+
 - FPM:
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
