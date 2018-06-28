@@ -5495,18 +5495,16 @@ ZEND_METHOD(reflection_property, getValue)
 		return;
 	}
 
-	if ((ref->prop.flags & ZEND_ACC_STATIC)) {
-		if (UNEXPECTED(zend_update_class_constants(intern->ce) != SUCCESS)) {
-			return;
+	if (ref->prop.flags & ZEND_ACC_STATIC) {
+		zend_class_entry *old_scope = EG(fake_scope);
+		EG(fake_scope) = ref->ce;
+		member_p = zend_std_get_static_property(ref->ce, ref->unmangled_name, 0);
+		EG(fake_scope) = old_scope;
+
+		if (member_p) {
+			ZVAL_DEREF(member_p);
+			ZVAL_COPY(return_value, member_p);
 		}
-		if (Z_TYPE(CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]) == IS_UNDEF) {
-			zend_throw_error(NULL, "Internal error: Could not find the property %s::%s", ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->prop.name));
-			return;
-		}
-		member_p = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
-		ZVAL_DEINDIRECT(member_p);
-		ZVAL_DEREF(member_p);
-		ZVAL_COPY(return_value, member_p);
 	} else {
 		zval rv;
 
@@ -5554,34 +5552,27 @@ ZEND_METHOD(reflection_property, setValue)
 		return;
 	}
 
-	if ((ref->prop.flags & ZEND_ACC_STATIC)) {
+	if (ref->prop.flags & ZEND_ACC_STATIC) {
+		zend_class_entry *old_scope;
+		zval garbage;
+
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &tmp, &value) == FAILURE) {
 				return;
 			}
 		}
-		if (UNEXPECTED(zend_update_class_constants(intern->ce) != SUCCESS)) {
-			return;
-		}
 
-		if (Z_TYPE(CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]) == IS_UNDEF) {
-			zend_throw_error(NULL, "Internal error: Could not find the property %s::%s", ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->prop.name));
-			return;
-		}
-		variable_ptr = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
-		ZVAL_DEINDIRECT(variable_ptr);
-		if (variable_ptr != value) {
-			zval garbage;
+		old_scope = EG(fake_scope);
+		EG(fake_scope) = ref->ce;
+		variable_ptr = zend_std_get_static_property(ref->ce, ref->unmangled_name, 0);
+		EG(fake_scope) = old_scope;
 
-			ZVAL_DEREF(variable_ptr);
-			ZVAL_DEREF(value);
+		ZVAL_DEREF(variable_ptr);
+		ZVAL_DEREF(value);
 
-			ZVAL_COPY_VALUE(&garbage, variable_ptr);
-
-			ZVAL_COPY(variable_ptr, value);
-
-			zval_ptr_dtor(&garbage);
-		}
+		ZVAL_COPY_VALUE(&garbage, variable_ptr);
+		ZVAL_COPY(variable_ptr, value);
+		zval_ptr_dtor(&garbage);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
 			return;
