@@ -1875,7 +1875,7 @@ mbfl_strimwidth(
 	mbfl_string_init(result);
 	result->no_language = string->no_language;
 	result->no_encoding = string->no_encoding;
-	mbfl_memory_device_init(&pc.device, width, 0);
+	mbfl_memory_device_init(&pc.device, MIN(string->len, width), 0);
 
 	/* output code filter */
 	pc.decoder = mbfl_convert_filter_new(
