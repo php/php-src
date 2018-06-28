@@ -17,16 +17,6 @@ pcntl_signal(SIGUSR1, function($signo, $siginfo){
 posix_kill(posix_getpid(), SIGUSR1);
 pcntl_signal_dispatch();
 
-if (defined('SIGRTMIN')) {
-    pcntl_signal(SIGRTMIN, function ($signo, $siginfo) {
-        printf("got real time signal from %s, ruid:%s\n", $siginfo['pid'] ?? '', $siginfo['uid'] ?? '');
-    });
-    posix_kill(posix_getpid(), SIGRTMIN);
-    pcntl_signal_dispatch();
-} else {
-    echo "real time signal not supported\n";
-}
-
 var_dump(pcntl_signal());
 var_dump(pcntl_signal(SIGALRM, SIG_IGN));
 var_dump(pcntl_signal(-1, -1));
@@ -41,7 +31,6 @@ echo "ok\n";
 --EXPECTF--
 signal dispatched
 got signal from %r\d+|nobody%r
-%rgot real time signal from \d+, ruid:\d+|real time signal not supported%r
 
 Warning: pcntl_signal() expects at least 2 parameters, 0 given in %s
 NULL
