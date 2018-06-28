@@ -5538,10 +5538,8 @@ ZEND_VM_C_LABEL(unset_dim_array):
 ZEND_VM_C_LABEL(offset_again):
 			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 				key = Z_STR_P(offset);
-				if (OP2_TYPE != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(key, hval)) {
-						ZEND_VM_C_GOTO(num_index_dim);
-					}
+				if (ZEND_HANDLE_NUMERIC(key, hval)) {
+					ZEND_VM_C_GOTO(num_index_dim);
 				}
 ZEND_VM_C_LABEL(str_index_dim):
 				if (ht == &EG(symbol_table)) {
@@ -6286,10 +6284,8 @@ ZEND_VM_C_LABEL(isset_dim_obj_array):
 ZEND_VM_C_LABEL(isset_again):
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if (OP2_TYPE != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					ZEND_VM_C_GOTO(num_index_prop);
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				ZEND_VM_C_GOTO(num_index_prop);
 			}
 			value = zend_hash_find_ex_ind(ht, str, OP2_TYPE == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
