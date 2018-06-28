@@ -20,6 +20,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   q. sapi_cli_single_write()
   r. php_url
   s. zend_function.reserved[]
+  t. zif_handler
 
 2. Build system changes
   a. Unix build system changes
@@ -133,6 +134,9 @@ PHP 7.3 INTERNALS UPGRADE NOTES
  s. Special purpose zend_functions marked by ZEND_ACC_CALL_VIA_TRAMPOLINE or
     ZEND_ACC_FAKE_CLOSURE flags use reserved[0] for internal purpose.
     Third party extensions must not modify reserved[] fields of these functions.
+
+ t. For internal functions the typedef zif_handler has been introduced.  It is
+    recommended to use this from now on, instead of defining own handler types.
 
 ========================
 2. Build system changes
