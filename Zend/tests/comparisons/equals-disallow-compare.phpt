@@ -34,7 +34,7 @@ var_dump(new Comparable(1) == new Comparable(2));
 var_dump(new Comparable(2) == new Comparable(2));
 
 /**
- * This should call __compareTo which is explicitly unsupported.
+ * These should call __compareTo which is explicitly unsupported.
  */
 try {
     new Comparable(2) <= new Comparable(2);
@@ -42,9 +42,6 @@ try {
     var_dump($e->getMessage());
 }
 
-/**
- * These should call __compareTo which is explicitly unsupported.
- */
 try {
     new Comparable(1) > new Comparable(1);
 } catch (Exception $e) {
@@ -79,6 +76,7 @@ try {
 --EXPECT--
 bool(false)
 bool(true)
+string(39) "This object does not support comparison"
 string(39) "This object does not support comparison"
 string(39) "This object does not support comparison"
 string(39) "This object does not support comparison"
