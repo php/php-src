@@ -13,6 +13,10 @@ PHP                                                                        NEWS
     their parent by ref). (Nikita)
   . Fixed bug #76439 (Changed behaviour in unclosed HereDoc). (Nikita, tpunt)
 
+- DOM:
+  . Fixed bug #76285 (DOMDocument::formatOutput attribute sometimes ignored).
+    (Andrew Nester)
+
 - FPM:
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
@@ -25,9 +29,17 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fix arginfo wrt. optional/required parameters. (cmb)
 
+- Reflection:
+  . Fixed bug #76536 (PHP crashes with core dump when throwing exception in
+    error handler). (Laruence)
+
 - Standard:
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
     (Laruence)
+
+- Tokenizer:
+  . Fixed bug #76538 (token_get_all with TOKEN_PARSE flag fails to recognise
+    close tag with newline). (Nikita)
 
 21 Jun 2018, PHP 7.3.0alpha2
 

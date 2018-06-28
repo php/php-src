@@ -4,14 +4,17 @@ Bug #76437 (token_get_all with TOKEN_PARSE flag fails to recognise close tag)
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
-$open_tag1 = token_get_all('<?=$a?>')[0];
-$open_tag2 = token_get_all('<?=$a?>', TOKEN_PARSE)[0];
-var_dump($open_tag1);
-var_dump($open_tag1 === $open_tag2);
-$open_tag1 = token_get_all('<?php echo 2; ?>')[6];
-$open_tag2 = token_get_all('<?php echo 2; ?>', TOKEN_PARSE)[6];
-var_dump($open_tag1);
-var_dump($open_tag1 === $open_tag2);
+$tests = [
+    ['<?=$a?>', 0],
+    ['<?php echo 2; ?>', 6],
+    ["<?php echo 2; ?>\n", 6],
+];
+foreach ($tests as [$code, $index]) {
+    $open_tag1 = token_get_all($code)[$index];
+    $open_tag2 = token_get_all($code, TOKEN_PARSE)[$index];
+    var_dump($open_tag1);
+    var_dump($open_tag1 === $open_tag2);
+}
 ?>
 --EXPECT--
 array(3) {
@@ -28,6 +31,16 @@ array(3) {
   int(381)
   [1]=>
   string(2) "?>"
+  [2]=>
+  int(1)
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(381)
+  [1]=>
+  string(3) "?>
+"
   [2]=>
   int(1)
 }
