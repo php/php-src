@@ -56,6 +56,7 @@ configuration-parser.h
 configuration-parser.output
 configuration-scanner.c
 configure
+configure.lineno
 conftest
 conftest.c
 debug.log
