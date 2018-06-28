@@ -2612,7 +2612,7 @@ static zend_bool is_this_fetch(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
+static zend_op *zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
 {
 	if (is_this_fetch(ast)) {
 		zend_op *opline = zend_emit_op(result, ZEND_FETCH_THIS, NULL, NULL);
@@ -2620,9 +2620,11 @@ static void zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type,
 			opline->result_type = IS_TMP_VAR;
 			result->op_type = IS_TMP_VAR;
 		}
+		return opline;
 	} else if (zend_try_compile_cv(result, ast) == FAILURE) {
-		zend_compile_simple_var_no_cv(result, ast, type, delayed);
+		return zend_compile_simple_var_no_cv(result, ast, type, delayed);
 	}
+	return NULL;
 }
 /* }}} */
 
@@ -2640,7 +2642,7 @@ static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, uint32_t
 }
 /* }}} */
 
-void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, zend_bool by_ref);
+zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, zend_bool by_ref);
 void zend_compile_assign(znode *result, zend_ast *ast);
 
 static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) /* {{{ */
@@ -2661,7 +2663,11 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 
 	znode var_node, dim_node;
 
-	zend_delayed_compile_var(&var_node, var_ast, type, 0);
+	opline = zend_delayed_compile_var(&var_node, var_ast, type, 0);
+	if (opline && type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
+		opline->extended_value |= ZEND_FETCH_DIM_WRITE;
+	}
+
 	zend_separate_if_call_and_write(&var_node, var_ast, type);
 
 	if (dim_ast == NULL) {
@@ -2679,6 +2685,7 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_DIM_R, &var_node, &dim_node);
 	zend_adjust_for_fetch_type(opline, result, type);
+
 	return opline;
 }
 /* }}} */
@@ -8496,35 +8503,31 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_var(znode *result, zend_ast *ast, uint32_t type, int by_ref) /* {{{ */
+zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, int by_ref) /* {{{ */
 {
 	CG(zend_lineno) = zend_ast_get_lineno(ast);
 
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
-			zend_compile_simple_var(result, ast, type, 0);
-			return;
+			return zend_compile_simple_var(result, ast, type, 0);
 		case ZEND_AST_DIM:
-			zend_compile_dim(result, ast, type);
-			return;
+			return zend_compile_dim(result, ast, type);
 		case ZEND_AST_PROP:
-			zend_compile_prop(result, ast, type, by_ref);
-			return;
+			return zend_compile_prop(result, ast, type, by_ref);
 		case ZEND_AST_STATIC_PROP:
-			zend_compile_static_prop(result, ast, type, by_ref, 0);
-			return;
+			return zend_compile_static_prop(result, ast, type, by_ref, 0);
 		case ZEND_AST_CALL:
 			zend_compile_call(result, ast, type);
-			return;
+			return NULL;
 		case ZEND_AST_METHOD_CALL:
 			zend_compile_method_call(result, ast, type);
-			return;
+			return NULL;
 		case ZEND_AST_STATIC_CALL:
 			zend_compile_static_call(result, ast, type);
-			return;
+			return NULL;
 		case ZEND_AST_ZNODE:
 			*result = *zend_ast_get_znode(ast);
-			return;
+			return NULL;
 		default:
 			if (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) {
 				zend_error_noreturn(E_COMPILE_ERROR,
@@ -8532,34 +8535,30 @@ void zend_compile_var(znode *result, zend_ast *ast, uint32_t type, int by_ref) /
 			}
 
 			zend_compile_expr(result, ast);
-			return;
+			return NULL;
 	}
 }
 /* }}} */
 
-void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, zend_bool by_ref) /* {{{ */
+zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, zend_bool by_ref) /* {{{ */
 {
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
-			zend_compile_simple_var(result, ast, type, 1);
-			return;
+			return zend_compile_simple_var(result, ast, type, 1);
 		case ZEND_AST_DIM:
-			zend_delayed_compile_dim(result, ast, type);
-			return;
+			return zend_delayed_compile_dim(result, ast, type);
 		case ZEND_AST_PROP:
 		{
 			zend_op *opline = zend_delayed_compile_prop(result, ast, type);
 			if (by_ref) {
 				opline->extended_value |= ZEND_FETCH_REF;
 			}
-			return;
+			return opline;
 		}
 		case ZEND_AST_STATIC_PROP:
-			zend_compile_static_prop(result, ast, type, by_ref, 1);
-			return;
+			return zend_compile_static_prop(result, ast, type, by_ref, 1);
 		default:
-			zend_compile_var(result, ast, type, 0);
-			return;
+			return zend_compile_var(result, ast, type, 0);
 	}
 }
 /* }}} */

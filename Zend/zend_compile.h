@@ -133,7 +133,7 @@ typedef union _zend_parser_stack_elem {
 void zend_compile_top_stmt(zend_ast *ast);
 void zend_compile_stmt(zend_ast *ast);
 void zend_compile_expr(znode *node, zend_ast *ast);
-void zend_compile_var(znode *node, zend_ast *ast, uint32_t type, int by_ref);
+zend_op *zend_compile_var(znode *node, zend_ast *ast, uint32_t type, int by_ref);
 void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
@@ -879,6 +879,7 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_TYPE_MASK	0xe
 
 #define ZEND_FETCH_REF			(1<<0)
+#define ZEND_FETCH_DIM_WRITE		(1<<1)
 
 #define ZEND_ISEMPTY			(1<<0)
 

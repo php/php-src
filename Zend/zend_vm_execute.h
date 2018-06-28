@@ -4738,7 +4738,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_REF, type, opline->extended_value & ZEND_FETCH_REF OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -8437,7 +8437,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_REF, type, opline->extended_value & ZEND_FETCH_REF OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -9311,7 +9311,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_REF, type, opline->extended_value & ZEND_FETCH_REF OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -14568,7 +14568,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_REF, type, opline->extended_value & ZEND_FETCH_REF OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -17164,7 +17164,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_REF, type, opline->extended_value & ZEND_FETCH_REF OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -17797,7 +17797,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_REF, type, opline->extended_value & ZEND_FETCH_REF OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -25060,7 +25060,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 
 	property = RT_CONSTANT(opline, opline->op2);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
 
 	if (IS_VAR == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -25717,14 +25717,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_D
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -25778,6 +25778,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -25804,14 +25813,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_D
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -25866,6 +25875,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -25892,14 +25910,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_D
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -25954,6 +25972,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -25980,14 +26007,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_D
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -26041,6 +26068,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -27881,7 +27917,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_VAR == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -28539,14 +28575,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op2;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -28600,6 +28636,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -28626,14 +28671,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op2, free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -28688,6 +28733,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -28714,14 +28768,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op2, free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -28776,6 +28830,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -28802,14 +28865,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op2;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -28863,6 +28926,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -30410,14 +30482,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -30471,6 +30543,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -30497,14 +30578,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -30559,6 +30640,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -30585,14 +30675,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -30647,6 +30737,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -30673,14 +30772,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -30734,6 +30833,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -32167,7 +32275,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
 
 	if (IS_VAR == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -32824,14 +32932,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -32885,6 +32993,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -32911,14 +33028,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -32973,6 +33090,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -32999,14 +33125,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -33061,6 +33187,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -33087,14 +33222,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -33148,6 +33283,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -34750,7 +34894,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 
 	property = RT_CONSTANT(opline, opline->op2);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
 
 	if (IS_UNUSED == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -36824,7 +36968,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_UNUSED == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -39524,7 +39668,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
 
 	if (IS_UNUSED == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -44366,7 +44510,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_REF, type, opline->extended_value & ZEND_FETCH_REF OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -44650,7 +44794,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 
 	property = RT_CONSTANT(opline, opline->op2);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
 
 	if (IS_CV == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -45609,14 +45753,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DA
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -45670,6 +45814,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -45696,14 +45849,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DA
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -45758,6 +45911,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -45784,14 +45946,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DA
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -45846,6 +46008,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -45872,14 +46043,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DA
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -45933,6 +46104,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -49149,7 +49329,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_CV == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -49902,14 +50082,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_D
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op2;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -49963,6 +50143,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -49989,14 +50178,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_D
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op2, free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -50051,6 +50240,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -50077,14 +50275,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_D
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op2, free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -50139,6 +50337,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -50165,14 +50372,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_D
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op2;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -50226,6 +50433,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -51406,7 +51622,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_REF, type, opline->extended_value & ZEND_FETCH_REF OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -52639,7 +52855,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_REF, type, opline->extended_value & ZEND_FETCH_REF OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -52951,14 +53167,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_D
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -53012,6 +53228,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -53038,14 +53263,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_D
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -53100,6 +53325,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -53126,14 +53360,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_D
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -53188,6 +53422,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -53214,14 +53457,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_D
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -53275,6 +53518,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -55667,7 +55919,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
 
 	if (IS_CV == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -56418,14 +56670,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -56479,6 +56731,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -56505,14 +56766,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -56567,6 +56828,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -56593,14 +56863,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 	zend_free_op free_op_data;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -56655,6 +56925,15 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {
@@ -56681,14 +56960,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_
 {
 	USE_OPLINE
 
-	zval *object_ptr;
+	zval *object_ptr, *orig_object_ptr;
 
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	orig_object_ptr = object_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
@@ -56742,6 +57021,15 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_object_ptr), IS_ARRAY)) {
+				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_object_ptr)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_object_ptr)),
+					"Cannot write an array to a null or false reference which does not allow for array");
+
+
+
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
 			ZVAL_ARR(object_ptr, zend_new_array(8));
 			goto try_assign_dim_array;
 		} else {

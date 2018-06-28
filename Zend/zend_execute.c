@@ -2127,7 +2127,7 @@ static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_
 
 static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *container, zval *dim, int dim_type, int type EXECUTE_DATA_DC)
 {
-    zval *retval;
+	zval *retval, *orig_container = container;
 
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 try_array:
@@ -2208,8 +2208,13 @@ fetch_from_array:
 		}
 		if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (type != BP_VAR_UNSET) {
-				array_init(container);
-				goto fetch_from_array;
+				if (UNEXPECTED(orig_container != container) && Z_ISREF_P(orig_container) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(orig_container), IS_ARRAY)) {
+					zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(Z_REFTYPE_P(orig_container)) ? IS_OBJECT : ZEND_TYPE_CODE(Z_REFTYPE_P(orig_container)),
+						"Cannot write an array to a null or false reference which does not allow for array");
+				} else {
+					array_init(container);
+					goto fetch_from_array;
+				}
 			} else {
 				/* for read-mode only */
 				ZVAL_NULL(result);
@@ -2507,7 +2512,7 @@ str_offset:
 	}
 }
 
-static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t by_ref OPLINE_DC)
+static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t flags OPLINE_DC)
 {
 	zval *ptr;
 
@@ -2538,9 +2543,10 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			if (EXPECTED(Z_TYPE_P(ptr) != IS_UNDEF)) {
 return_indirect:
 				ZVAL_INDIRECT(result, ptr);
-				if (by_ref
+				if (flags
 				 && (prop_op_type == IS_CONST || EXPECTED(Z_TYPE_P(prop_ptr) == IS_STRING))
-				 && Z_TYPE_P(ptr) != IS_REFERENCE) {
+				 && (((flags & ZEND_FETCH_REF) && Z_TYPE_P(ptr) != IS_REFERENCE)
+				     || ((flags & ZEND_FETCH_DIM_WRITE) && (Z_TYPE_P(ptr) <= IS_FALSE || (Z_ISREF_P(ptr) && Z_TYPE_P(Z_REFVAL_P(ptr)) == IS_NULL))))) {
 					zend_property_info *prop_info;
 
 					if (prop_op_type == IS_CONST) {
@@ -2549,6 +2555,15 @@ return_indirect:
 						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), Z_STR_P(prop_ptr), NULL);
 					}
 					if (UNEXPECTED(prop_info)) {
+						if ((flags & ZEND_FETCH_DIM_WRITE) && (Z_TYPE_P(ptr) <= IS_FALSE || (Z_ISREF_P(ptr) && Z_TYPE_P(Z_REFVAL_P(ptr)) == IS_NULL))) {
+							if (!zend_verify_ref_type_assignable(prop_info->type, IS_ARRAY)) {
+								zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(prop_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(prop_info->type),
+								"Cannot write an array to a null property which does not allow for array");
+								ZVAL_UNDEF(ptr);
+								ZVAL_ERROR(result);
+							}
+							return;
+						}
 						if (!ZEND_TYPE_ALLOW_NULL(prop_info->type) && Z_TYPE_P(ptr) == IS_NULL) {
 							zend_throw_error(NULL, "Cannot access uninitialized non-nullable property by reference");
 							ZVAL_UNDEF(ptr);
@@ -2683,7 +2698,7 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 }
 
 
-static zend_always_inline int zend_fetch_static_property_address(zval **retval, zend_property_info **prop_info, uint32_t cache_slot, int fetch_type, int by_ref OPLINE_DC EXECUTE_DATA_DC) {
+static zend_always_inline int zend_fetch_static_property_address(zval **retval, zend_property_info **prop_info, uint32_t cache_slot, int fetch_type, int flags OPLINE_DC EXECUTE_DATA_DC) {
 	int success;
 	zend_property_info *property_info;
 
@@ -2697,15 +2712,22 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 		}
 	}
 
-	if (by_ref && UNEXPECTED(property_info) && Z_TYPE_P(*retval) != IS_REFERENCE) {
-		zval *ref = *retval;
-		if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(*retval) <= IS_NULL)) {
-			zend_throw_error(NULL, "Cannot access uninitialized property by reference");
+	if (flags && UNEXPECTED(property_info)) {
+		if ((flags & ZEND_FETCH_DIM_WRITE) && (Z_TYPE_P(*retval) <= IS_FALSE || (Z_ISREF_P(*retval) && Z_TYPE_P(Z_REFVAL_P(*retval)) == IS_NULL)) && !zend_verify_ref_type_assignable(property_info->type, IS_ARRAY)) {
+			zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
+				"Cannot write an array to a null property which does not allow for array");
 			return FAILURE;
 		}
-		ZVAL_NEW_REF(ref, ref);
-		Z_REFTYPE_P(ref) = zend_get_prop_info_ref_type(property_info);
-		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ref), property_info);
+		if ((flags & ZEND_FETCH_REF) && Z_TYPE_P(*retval) != IS_REFERENCE) {
+			zval *ref = *retval;
+			if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(*retval) <= IS_NULL)) {
+				zend_throw_error(NULL, "Cannot access uninitialized property by reference");
+				return FAILURE;
+			}
+			ZVAL_NEW_REF(ref, ref);
+			Z_REFTYPE_P(ref) = zend_get_prop_info_ref_type(property_info);
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ref), property_info);
+		}
 	}
 
 	if (prop_info) {
