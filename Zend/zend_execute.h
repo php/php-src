@@ -75,6 +75,9 @@ static zend_always_inline zend_type zend_get_prop_info_ref_type(zend_property_in
 
 /* do not call when new_type == IS_REFERENCE or new_type == IS_OBJECT! */
 static zend_always_inline zend_bool zend_verify_ref_type_assignable(zend_type type, zend_uchar new_type) {
+	if (!type) {
+		return 1;
+	}
 	zend_uchar cur_type = ZEND_TYPE_CODE(type);
 	return new_type == cur_type
 	    || (ZEND_TYPE_ALLOW_NULL(type) && new_type == IS_NULL)
