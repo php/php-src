@@ -4469,7 +4469,7 @@ ZEND_METHOD(reflection_class, getConstants)
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 		if (UNEXPECTED(zval_update_constant_ex(&c->value, ce) != SUCCESS)) {
 			zend_array_destroy(Z_ARRVAL_P(return_value));
-			return;
+			RETURN_NULL();
 		}
 		ZVAL_COPY_OR_DUP(&val, &c->value);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &val);
