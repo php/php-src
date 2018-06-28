@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0beta1
 
+- Core:
+  . Fixed bug #76392 (Error relocating sapi/cli/php: unsupported relocation
+    type 37). (Peter Kokot)
+
 - FPM:
   . Fixed bug #62596 (getallheaders() missing with PHP-FPM). (Remi)
 

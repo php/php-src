@@ -581,8 +581,12 @@ AC_TYPE_UID_T
 dnl Checks for sockaddr_storage and sockaddr.sa_len
 PHP_SOCKADDR_CHECKS
 
-AX_GCC_FUNC_ATTRIBUTE([ifunc])
-AX_GCC_FUNC_ATTRIBUTE([target])
+dnl Checks for GCC function attributes on all systems except ones without glibc
+dnl Fix for these systems is already included in GCC 7, but not on GCC 6
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*], [true], [
+  AX_GCC_FUNC_ATTRIBUTE([ifunc])
+  AX_GCC_FUNC_ATTRIBUTE([target])
+])
 
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
