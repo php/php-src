@@ -185,18 +185,15 @@ typedef struct _zend_fcall_info_cache {
 #endif
 
 #define INIT_CLASS_ENTRY(class_container, class_name, functions) \
-	INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, NULL, NULL, NULL)
+	INIT_CLASS_ENTRY_EX(class_container, class_name, sizeof(class_name)-1, functions)
 
 #define INIT_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions) \
-	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, NULL, NULL, NULL, NULL, NULL)
-
-#define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
 		class_container.name = zend_string_init_interned(class_name, class_name_len, 1); \
-		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
+		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions) \
 	}
 
-#define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
+#define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions) \
 	{															\
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
@@ -206,16 +203,16 @@ typedef struct _zend_fcall_info_cache {
 		class_container.create_object = NULL;					\
 		class_container.interface_gets_implemented = NULL;		\
 		class_container.get_static_method = NULL;				\
-		class_container.__call = handle_fcall;					\
+		class_container.__call = NULL;							\
 		class_container.__callstatic = NULL;					\
 		class_container.__tostring = NULL;						\
-		class_container.__get = handle_propget;					\
-		class_container.__set = handle_propset;					\
-		class_container.__unset = handle_propunset;				\
-		class_container.__isset = handle_propisset;				\
-		class_container.__debugInfo = NULL;					\
-		class_container.serialize_func = NULL;					\
-		class_container.unserialize_func = NULL;				\
+		class_container.__get = NULL;							\
+		class_container.__set = NULL;							\
+		class_container.__unset = NULL;							\
+		class_container.__isset = NULL;							\
+		class_container.__debugInfo = NULL;						\
+		class_container.serialize = NULL;						\
+		class_container.unserialize = NULL;						\
 		class_container.parent = NULL;							\
 		class_container.num_interfaces = 0;						\
 		class_container.traits = NULL;							\
@@ -229,15 +226,9 @@ typedef struct _zend_fcall_info_cache {
 		class_container.info.internal.builtin_functions = functions;	\
 	}
 
-#define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
-	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, sizeof(class_name)-1, functions, handle_fcall, handle_propget, handle_propset, NULL, NULL)
 
 #define INIT_NS_CLASS_ENTRY(class_container, ns, class_name, functions) \
 	INIT_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions)
-#define INIT_OVERLOADED_NS_CLASS_ENTRY_EX(class_container, ns, class_name, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
-	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, ZEND_NS_NAME(ns, class_name), sizeof(ZEND_NS_NAME(ns, class_name))-1, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset)
-#define INIT_OVERLOADED_NS_CLASS_ENTRY(class_container, ns, class_name, functions, handle_fcall, handle_propget, handle_propset) \
-	INIT_OVERLOADED_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions, handle_fcall, handle_propget, handle_propset)
 
 #ifdef ZTS
 #	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members_table:CG(static_members_table)[(zend_intptr_t)(ce)->static_members_table])
