@@ -2655,6 +2655,7 @@ PHP_FUNCTION(pg_fetch_result)
 		if (pgsql_row >= PQntuples(pgsql_result)) {
 			RETURN_FALSE;
 		}
+		pg_result->row++;
 	} else {
 		if (row < 0 || row >= PQntuples(pgsql_result)) {
 			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
