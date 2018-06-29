@@ -5488,6 +5488,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
 		}
 
+		if (ZEND_TYPE_CODE(arg_infos->type) == IS_MIXED && ZEND_TYPE_ALLOW_NULL(arg_infos->type)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Mixed type cannot be nullable");
+		}
+
 		arg_infos++;
 		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 	} else {
@@ -5581,6 +5585,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 
 			if (ZEND_TYPE_CODE(arg_info->type) == IS_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
+			}
+
+			if (ZEND_TYPE_CODE(arg_info->type) == IS_MIXED && ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Mixed type cannot be nullable");
 			}
 
 			if (type_ast->kind == ZEND_AST_TYPE) {
