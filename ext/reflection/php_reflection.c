@@ -5496,11 +5496,7 @@ ZEND_METHOD(reflection_property, getValue)
 	}
 
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
-		zend_class_entry *old_scope = EG(fake_scope);
-		EG(fake_scope) = ref->ce;
-		member_p = zend_std_get_static_property(ref->ce, ref->unmangled_name, 0);
-		EG(fake_scope) = old_scope;
-
+		member_p = zend_read_static_property_ex(ref->ce, ref->unmangled_name, 0);
 		if (member_p) {
 			ZVAL_DEREF(member_p);
 			ZVAL_COPY(return_value, member_p);

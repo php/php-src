@@ -4175,17 +4175,24 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 }
 /* }}} */
 
-ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, zend_bool silent) /* {{{ */
+ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, zend_bool silent) /* {{{ */
 {
 	zval *property;
 	zend_class_entry *old_scope = EG(fake_scope);
-	zend_string *key = zend_string_init(name, name_length, 0);
 
 	EG(fake_scope) = scope;
-	property = zend_std_get_static_property(scope, key, silent);
+	property = zend_std_get_static_property(scope, name, silent);
 	EG(fake_scope) = old_scope;
-	zend_string_efree(key);
 
+	return property;
+}
+/* }}} */
+
+ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, zend_bool silent) /* {{{ */
+{
+	zend_string *key = zend_string_init(name, name_length, 0);
+	zval *property = zend_std_get_static_property(scope, key, silent);
+	zend_string_efree(key);
 	return property;
 }
 /* }}} */
