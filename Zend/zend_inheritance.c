@@ -253,7 +253,10 @@ static int zend_do_perform_arg_type_hint_check(const zend_function *fe, zend_arg
 	}
 
 	if (!ZEND_TYPE_IS_SET(proto_arg_info->type)) {
-		/* Child defines a type, but parent doesn't, violates LSP */
+		/* Child defines a type, but parent doesn't, violates LSP, unless it's a mixed type */
+		if (ZEND_TYPE_CODE(fe_arg_info->type) == IS_MIXED) {
+			return 1;
+		}
 		return 0;
 	}
 
@@ -359,6 +362,9 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	if (proto->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		/* Removing a return type is not valid. */
 		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+			if (ZEND_TYPE_CODE(proto->common.arg_info[-1].type) == IS_MIXED) {
+				return 1;
+			}
 			return 0;
 		}
 

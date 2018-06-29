@@ -176,6 +176,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("void")},
 	{ZEND_STRL("iterable")},
 	{ZEND_STRL("object")},
+	{ZEND_STRL("mixed")},
 	{NULL, 0}
 };
 
@@ -222,6 +223,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("void"), IS_VOID},
 	{ZEND_STRL("iterable"), IS_ITERABLE},
 	{ZEND_STRL("object"), IS_OBJECT},
+	{ZEND_STRL("mixed"), IS_MIXED},
 	{NULL, 0, IS_UNDEF}
 };
 
