@@ -2535,8 +2535,10 @@ static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_arr
 }
 /* }}} */
 
-static zend_always_inline zend_function* ZEND_FASTCALL init_func_run_time_cache_i(zend_op_array *op_array, zval *zv) /* {{{ */
+static zend_always_inline zend_function* ZEND_FASTCALL init_func_run_time_cache_i(zval *zv) /* {{{ */
 {
+	zend_op_array *op_array = Z_PTR_P(zv);
+
 	ZEND_ASSERT(op_array->run_time_cache == NULL);
 	if (op_array->fn_flags & ZEND_ACC_IMMUTABLE) {
 		zend_op_array *new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array) + op_array->cache_size);
@@ -2555,9 +2557,9 @@ static zend_always_inline zend_function* ZEND_FASTCALL init_func_run_time_cache_
 }
 /* }}} */
 
-static zend_never_inline zend_function* ZEND_FASTCALL init_func_run_time_cache_ex(zend_op_array *op_array, zval *zv) /* {{{ */
+static zend_never_inline zend_function* init_func_run_time_cache_ex(zval *zv) /* {{{ */
 {
-	return init_func_run_time_cache_i(op_array, zv);
+	return init_func_run_time_cache_i(zv);
 }
 /* }}} */
 
@@ -2569,7 +2571,7 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /*
 		zend_function *fbc = Z_FUNC_P(zv);
 
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-			fbc = (zend_function*)init_func_run_time_cache_i(&fbc->op_array, zv);
+			fbc = (zend_function*)init_func_run_time_cache_i(zv);
 		}
 		return fbc;
 	}
@@ -2584,7 +2586,7 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name,
 		zend_function *fbc = Z_FUNC_P(zv);
 
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-			fbc = (zend_function*)init_func_run_time_cache_i(&fbc->op_array, zv);
+			fbc = (zend_function*)init_func_run_time_cache_i(zv);
 		}
 		return fbc;
 	}
@@ -3002,7 +3004,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-			fbc = init_func_run_time_cache_ex(&fbc->op_array, func);
+			fbc = init_func_run_time_cache_ex(func);
 		}
 		called_scope = NULL;
 	}
