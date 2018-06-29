@@ -3060,11 +3060,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						tmp |= MAY_BE_ARRAY_KEY_LONG;
 					}
 					if (t2 & (MAY_BE_STRING)) {
-						tmp |= MAY_BE_ARRAY_KEY_STRING;
-						if (opline->op2_type != IS_CONST) {
-							// FIXME: numeric string
-							tmp |= MAY_BE_ARRAY_KEY_LONG;
-						}
+						tmp |= (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING);
 					}
 					if (t2 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
 						tmp |= MAY_BE_ARRAY_KEY_STRING;
@@ -3189,11 +3185,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 							tmp |= MAY_BE_ARRAY_KEY_LONG;
 						}
 						if (t2 & MAY_BE_STRING) {
-							tmp |= MAY_BE_ARRAY_KEY_STRING;
-							if (opline->op2_type != IS_CONST) {
-								// FIXME: numeric string
-								tmp |= MAY_BE_ARRAY_KEY_LONG;
-							}
+							tmp |= (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING);
 						}
 						if (t2 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
 							tmp |= MAY_BE_ARRAY_KEY_STRING;
