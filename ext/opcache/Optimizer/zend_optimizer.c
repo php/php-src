@@ -526,6 +526,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 					ZVAL_LONG(val, index);
 				}
 			}
+			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			break;
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
