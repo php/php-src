@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fixed bug #76477 (Opcache causes empty return value).
     (Nikita, Laruence)
 
+- PGSQL:
+  . Fixed bug #76548 (pg_fetch_result did not fetch the next row). (Anatol)
+
 - phpdbg:
   . Fix arginfo wrt. optional/required parameters. (cmb)
 
