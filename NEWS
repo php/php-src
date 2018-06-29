@@ -19,6 +19,9 @@ PHP                                                                        NEWS
   . Fixed bug #76532 (Integer overflow and excessive memory usage
     in mb_strimwidth). (MarcusSchwarz)
 
+- PGSQL:
+  . Fixed bug #76548 (pg_fetch_result did not fetch the next row). (Anatol)
+
 - phpdbg:
   . Fix arginfo wrt. optional/required parameters. (cmb)
 
