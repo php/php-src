@@ -1705,13 +1705,13 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 			prop = Z_REFVAL_P(prop);
 		}
 
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), prop);
+		ZVAL_COPY(EX_VAR(opline->result.var), prop);
 
 		if (UNEXPECTED(ref_type || prop_info)) {
 			/* special case for typed properties */
 			zval z_copy;
 
-			ZVAL_DUP(&z_copy, prop);
+			ZVAL_COPY(&z_copy, prop);
 			if (inc) {
 				increment_function(&z_copy);
 			} else {
@@ -1727,10 +1727,8 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 					zend_verify_property_type_error(prop_info, prop_info->name, &z_copy);
 				}
 				zval_ptr_dtor(&z_copy);
-				Z_TRY_ADDREF_P(prop); /* we copied by value into result.var */
 			}
 		} else {
-			zval_opt_copy_ctor(prop);
 			if (inc) {
 				increment_function(prop);
 			} else {
