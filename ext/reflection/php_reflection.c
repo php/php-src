@@ -5669,6 +5669,62 @@ ZEND_METHOD(reflection_property, setValue)
 }
 /* }}} */
 
+/* {{{ proto public mixed ReflectionProperty::isInitialized([stdclass object])
+   Returns this property's value */
+ZEND_METHOD(reflection_property, isInitialized)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zval *object, *name;
+	zval *member_p = NULL;
+
+	METHOD_NOTSTATIC(reflection_property_ptr);
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (!(ref->prop.flags & (ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC)) && intern->ignore_visibility == 0) {
+		name = _default_load_name(getThis());
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Cannot access non-public member %s::%s", ZSTR_VAL(intern->ce->name), Z_STRVAL_P(name));
+		return;
+	}
+
+	if (ref->prop.flags & ZEND_ACC_IMPLICIT_PUBLIC) {
+		RETURN_TRUE;
+	}
+
+	if (ref->prop.flags & ZEND_ACC_STATIC) {
+		zend_property_info *dummy;
+		zend_class_entry *old_scope = EG(fake_scope);
+		EG(fake_scope) = ref->ce;
+		member_p = zend_std_get_static_property(ref->ce, ref->unmangled_name, BP_VAR_IS, &dummy);
+		EG(fake_scope) = old_scope;
+
+		if (member_p) {
+			ZVAL_DEREF(member_p);
+			RETURN_BOOL(!Z_ISUNDEF_P(member_p))
+		}
+		RETURN_FALSE;
+	} else {
+		zval rv;
+
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
+			return;
+		}
+
+		if (!instanceof_function(Z_OBJCE_P(object), ref->ce)) {
+			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			/* Returns from this function */
+		}
+
+		member_p = zend_read_property_ex(ref->ce, object, ref->unmangled_name, 1, &rv);
+		RETVAL_BOOL(member_p != &EG(uninitialized_zval));
+		if (member_p == &rv) {
+			zval_ptr_dtor(member_p);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ proto public ReflectionClass ReflectionProperty::getDeclaringClass()
    Get the declaring class */
 ZEND_METHOD(reflection_property, getDeclaringClass)
@@ -6621,6 +6677,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_property_setValue, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_property_isInitialized, 0, 0, 0)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_setAccessible, 0)
 	ZEND_ARG_INFO(0, visible)
 ZEND_END_ARG_INFO()
@@ -6633,6 +6693,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, getName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getValue, arginfo_reflection_property_getValue, 0)
 	ZEND_ME(reflection_property, setValue, arginfo_reflection_property_setValue, 0)
+	ZEND_ME(reflection_property, isInitialized, arginfo_reflection_property_isInitialized, 0)
 	ZEND_ME(reflection_property, isPublic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, isPrivate, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, isProtected, arginfo_reflection__void, 0)
