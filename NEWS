@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
 
+- intl:
+  . Fixed bug #76556 (get_debug_info handler for BreakIterator shows wrong
+    type). (cmb)
+
 - mbstring:
   . Fixed bug #76532 (Integer overflow and excessive memory usage
     in mb_strimwidth). (MarcusSchwarz)
