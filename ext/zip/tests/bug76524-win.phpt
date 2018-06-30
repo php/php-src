@@ -3,7 +3,7 @@ ZipArchive Bug #76524 (memory leak with ZipArchive::OVERWRITE flag and empty arc
 --SKIPIF--
 <?php
 if(!extension_loaded('zip')) die('skip');
-if (substr(PHP_OS, 0, 3) == 'WIN') die('skip');
+if (substr(PHP_OS, 0, 3) != 'WIN') die('skip');
 ?>
 --FILE--
 <?php
@@ -16,4 +16,3 @@ echo 'ok';
 ?>
 --EXPECTF--
 ok
-Warning: Unknown: Cannot destroy the zip context: Can't remove file: No such file or directory in Unknown on line 0
