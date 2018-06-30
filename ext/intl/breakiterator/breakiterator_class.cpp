@@ -167,7 +167,7 @@ static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp)
 	}
 
 	ZVAL_STRING(&val, const_cast<char*>(typeid(*biter).name()));
-	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &bio->text);
+	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &val);
 
 	return debug_info;
 }
