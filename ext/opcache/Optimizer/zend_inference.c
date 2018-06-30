@@ -2480,7 +2480,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 
 			if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				if (opline->op1_type == IS_CV) {
-					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op1_type);
+					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op2_type);
 					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
 					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 				}
