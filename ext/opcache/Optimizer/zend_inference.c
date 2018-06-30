@@ -2100,7 +2100,7 @@ static uint32_t get_dim_array_key_type(uint32_t dim_type, zend_uchar dim_op_type
 
 			if (dim_op_type != IS_CONST) {
 				tmp |= MAY_BE_ARRAY_KEY_LONG;
-			} else {
+			} else if (dim_op) {
 				zend_ulong hval;
 				if (ZEND_HANDLE_NUMERIC(Z_STR_P(dim_op), hval)) {
 					tmp |= MAY_BE_ARRAY_KEY_LONG;
@@ -2515,8 +2515,8 @@ static int zend_update_type_info(const zend_op_array *op_array,
 
 			if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				if (opline->op1_type == IS_CV) {
-					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op2_type, 
-						CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants));
+					zval *zv = opline->op2_type == IS_CONST ? CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants) : NULL; 
+					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op2_type, zv);
 					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
 					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 				}
@@ -2678,9 +2678,8 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			break;
 		case ZEND_ASSIGN_DIM:
 			if (opline->op1_type == IS_CV) {
-				tmp = assign_dim_result_type(t1, t2, OP1_DATA_INFO(), opline->op2_type, 
-					CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants));
-
+				zval *zv = opline->op2_type == IS_CONST ? CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants) : NULL;
+				tmp = assign_dim_result_type(t1, t2, OP1_DATA_INFO(), opline->op2_type, zv);
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 			}
@@ -3080,7 +3079,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					tmp |= ssa_var_info[ssa_ops[i].result_use].type;
 				}
 				tmp |= get_dim_array_key_type(t2, opline->op2_type, 
-					CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants));
+					opline->op2_type == IS_CONST ? CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants) : NULL);
 
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
@@ -3195,7 +3194,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						tmp |= t1 & (MAY_BE_RC1|MAY_BE_RCN);
 					}
 					tmp |= get_dim_array_key_type(t2, opline->op2_type, 
-						CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants));
+						opline->op2_type == IS_CONST ? CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants) : NULL);
 
 				} else if (opline->opcode == ZEND_FETCH_DIM_UNSET) {
 					if (t1 & MAY_BE_ARRAY) {
