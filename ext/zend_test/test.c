@@ -37,6 +37,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_nullable_array_return, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_void_return, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_terminate_string, 0, 0, 1)
 	ZEND_ARG_INFO(1, str)
 ZEND_END_ARG_INFO()
@@ -62,6 +65,11 @@ ZEND_FUNCTION(zend_test_nullable_array_return)
 	zval *arg1, *arg2;
 
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
+}
+
+ZEND_FUNCTION(zend_test_void_return)
+{
+	/* dummy */
 }
 
 /* Create a string without terminating null byte. Must be termined with
@@ -239,6 +247,7 @@ PHP_MINFO_FUNCTION(zend_test)
 static const zend_function_entry zend_test_functions[] = {
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
+	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
 	ZEND_FE(zend_create_unterminated_string, NULL)
 	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
 	ZEND_FE(zend_leak_bytes, NULL)
