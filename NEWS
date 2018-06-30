@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
     (Laruence)
+  . Fixed bug #71848 (getimagesize with $imageinfo returns false). (cmb)
 
 22 Jun 2019, PHP 7.1.19
 
