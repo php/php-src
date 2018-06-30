@@ -2678,7 +2678,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			break;
 		case ZEND_ASSIGN_DIM:
 			if (opline->op1_type == IS_CV) {
-				tmp = assign_dim_result_type(t1, t2, OP1_DATA_INFO(), opline->op1_type, 
+				tmp = assign_dim_result_type(t1, t2, OP1_DATA_INFO(), opline->op2_type, 
 					CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants));
 
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
