@@ -18,6 +18,6 @@ object(IntlRuleBasedBreakIterator)#%d (3) {
   ["text"]=>
   string(3) "foo"
   ["type"]=>
-  string(%d) "%sRuleBasedBreakIterator%s"
+  string(%d) "%SRuleBasedBreakIterator%S"
 }
 ===DONE===
