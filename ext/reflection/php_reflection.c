@@ -5580,12 +5580,7 @@ ZEND_METHOD(reflection_property, getValue)
 	}
 
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
-		zend_property_info *dummy;
-		zend_class_entry *old_scope = EG(fake_scope);
-		EG(fake_scope) = ref->ce;
-		member_p = zend_std_get_static_property(ref->ce, ref->unmangled_name, BP_VAR_R, &dummy);
-		EG(fake_scope) = old_scope;
-
+		member_p = zend_read_static_property_ex(ref->ce, ref->unmangled_name, 0);
 		if (member_p) {
 			ZVAL_DEREF(member_p);
 			ZVAL_COPY(return_value, member_p);
@@ -5622,7 +5617,6 @@ ZEND_METHOD(reflection_property, setValue)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zval *variable_ptr;
 	zval *object, *name;
 	zval *value;
 	zval *tmp;
@@ -5638,27 +5632,13 @@ ZEND_METHOD(reflection_property, setValue)
 	}
 
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
-		zend_property_info *dummy;
-		zend_class_entry *old_scope;
-		zval garbage;
-
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &tmp, &value) == FAILURE) {
 				return;
 			}
 		}
 
-		old_scope = EG(fake_scope);
-		EG(fake_scope) = ref->ce;
-		variable_ptr = zend_std_get_static_property(ref->ce, ref->unmangled_name, BP_VAR_W, &dummy);
-		EG(fake_scope) = old_scope;
-
-		ZVAL_DEREF(variable_ptr);
-		ZVAL_DEREF(value);
-
-		ZVAL_COPY_VALUE(&garbage, variable_ptr);
-		ZVAL_COPY(variable_ptr, value);
-		zval_ptr_dtor(&garbage);
+		zend_update_static_property_ex(ref->ce, ref->unmangled_name, value);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
 			return;
@@ -5693,12 +5673,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 	}
 
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
-		zend_property_info *dummy;
-		zend_class_entry *old_scope = EG(fake_scope);
-		EG(fake_scope) = ref->ce;
-		member_p = zend_std_get_static_property(ref->ce, ref->unmangled_name, BP_VAR_IS, &dummy);
-		EG(fake_scope) = old_scope;
-
+		member_p = zend_read_static_property_ex(ref->ce, ref->unmangled_name, 1);
 		if (member_p) {
 			ZVAL_DEREF(member_p);
 			RETURN_BOOL(!Z_ISUNDEF_P(member_p))

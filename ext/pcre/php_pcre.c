@@ -720,6 +720,13 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(locale_string));
 		if (!tables) {
 			tables = pcre2_maketables(gctx);
+			if (UNEXPECTED(!tables)) {
+				php_error_docref(NULL,E_WARNING, "Failed to generate locale character tables");
+				pcre_handle_exec_error(PCRE2_ERROR_NOMEMORY);
+				zend_string_release_ex(key, 0);
+				efree(pattern);
+				return NULL;
+			}
 			zend_hash_add_ptr(&char_tables, BG(locale_string), (void *)tables);
 		}
 		pcre2_set_character_tables(cctx, tables);

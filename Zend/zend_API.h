@@ -185,18 +185,15 @@ typedef struct _zend_fcall_info_cache {
 #endif
 
 #define INIT_CLASS_ENTRY(class_container, class_name, functions) \
-	INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, NULL, NULL, NULL)
+	INIT_CLASS_ENTRY_EX(class_container, class_name, sizeof(class_name)-1, functions)
 
 #define INIT_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions) \
-	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, NULL, NULL, NULL, NULL, NULL)
-
-#define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
 		class_container.name = zend_string_init_interned(class_name, class_name_len, 1); \
-		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
+		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions) \
 	}
 
-#define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
+#define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions) \
 	{															\
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
@@ -206,14 +203,14 @@ typedef struct _zend_fcall_info_cache {
 		class_container.create_object = NULL;					\
 		class_container.interface_gets_implemented = NULL;		\
 		class_container.get_static_method = NULL;				\
-		class_container.__call = handle_fcall;					\
+		class_container.__call = NULL;							\
 		class_container.__callstatic = NULL;					\
 		class_container.__tostring = NULL;						\
-		class_container.__get = handle_propget;					\
-		class_container.__set = handle_propset;					\
-		class_container.__unset = handle_propunset;				\
-		class_container.__isset = handle_propisset;				\
-		class_container.__debugInfo = NULL;					\
+		class_container.__get = NULL;							\
+		class_container.__set = NULL;							\
+		class_container.__unset = NULL;							\
+		class_container.__isset = NULL;							\
+		class_container.__debugInfo = NULL;						\
 		class_container.serialize_func = NULL;					\
 		class_container.unserialize_func = NULL;				\
 		class_container.parent = NULL;							\
@@ -229,15 +226,9 @@ typedef struct _zend_fcall_info_cache {
 		class_container.info.internal.builtin_functions = functions;	\
 	}
 
-#define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
-	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, sizeof(class_name)-1, functions, handle_fcall, handle_propget, handle_propset, NULL, NULL)
 
 #define INIT_NS_CLASS_ENTRY(class_container, ns, class_name, functions) \
 	INIT_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions)
-#define INIT_OVERLOADED_NS_CLASS_ENTRY_EX(class_container, ns, class_name, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
-	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, ZEND_NS_NAME(ns, class_name), sizeof(ZEND_NS_NAME(ns, class_name))-1, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset)
-#define INIT_OVERLOADED_NS_CLASS_ENTRY(class_container, ns, class_name, functions, handle_fcall, handle_propget, handle_propset) \
-	INIT_OVERLOADED_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions, handle_fcall, handle_propget, handle_propset)
 
 #ifdef ZTS
 #	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members_table:CG(static_members_table)[(zend_intptr_t)(ce)->static_members_table])
@@ -357,6 +348,7 @@ ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object,
 ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, const char *name, size_t name_length, const char *value, size_t value_length);
 ZEND_API void zend_unset_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length);
 
+ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string *name, zval *value);
 ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *name, size_t name_length, zval *value);
 ZEND_API int zend_update_static_property_null(zend_class_entry *scope, const char *name, size_t name_length);
 ZEND_API int zend_update_static_property_bool(zend_class_entry *scope, const char *name, size_t name_length, zend_long value);
@@ -368,6 +360,7 @@ ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const 
 ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zval *object, zend_string *name, zend_bool silent, zval *rv);
 ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent, zval *rv);
 
+ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, zend_bool silent);
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, zend_bool silent);
 
 ZEND_API char *zend_get_type_by_const(int type);

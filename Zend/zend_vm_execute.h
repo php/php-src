@@ -2088,7 +2088,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME
 		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-			fbc = init_func_run_time_cache_ex(&fbc->op_array, func);
+			fbc = init_func_run_time_cache_ex(func);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -2177,7 +2177,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-			fbc = init_func_run_time_cache_ex(&fbc->op_array, func);
+			fbc = init_func_run_time_cache_ex(func);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -2208,7 +2208,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CO
 		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-			fbc = init_func_run_time_cache_ex(&fbc->op_array, func);
+			fbc = init_func_run_time_cache_ex(func);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}

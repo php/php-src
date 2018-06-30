@@ -21,10 +21,17 @@ PHP                                                                        NEWS
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
 
+- mbstring:
+  . Fixed bug #76532 (Integer overflow and excessive memory usage
+    in mb_strimwidth). (MarcusSchwarz)
+
 - PCRE:
   . Fixed bug #76512 (\w no longer includes unicode characters). (cmb)
   . Fixed bug #76514 (Regression in preg_match makes it fail with
     PREG_JIT_STACKLIMIT_ERROR). (Anatol)
+
+- PGSQL:
+  . Fixed bug #76548 (pg_fetch_result did not fetch the next row). (Anatol)
 
 - phpdbg:
   . Fix arginfo wrt. optional/required parameters. (cmb)

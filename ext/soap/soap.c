@@ -647,20 +647,7 @@ PHP_MINIT_FUNCTION(soap)
 		soap_call_function_handler should be of type struct _zend_function, not (*handle_function_call).
 	*/
 	{
-		zend_internal_function fe;
-
-		fe.type = ZEND_INTERNAL_FUNCTION;
-		fe.handler = ZEND_MN(SoapClient___call);
-		fe.function_name = NULL;
-		fe.scope = NULL;
-		fe.fn_flags = 0;
-		fe.prototype = NULL;
-		fe.num_args = 2;
-		fe.arg_info = NULL;
-		zend_set_function_arg_flags((zend_function*)&fe);
-
-		INIT_OVERLOADED_CLASS_ENTRY(ce, PHP_SOAP_CLIENT_CLASSNAME, soap_client_functions,
-			(zend_function *)&fe, NULL, NULL);
+		INIT_CLASS_ENTRY(ce, PHP_SOAP_CLIENT_CLASSNAME, soap_client_functions);
 		soap_class_entry = zend_register_internal_class(&ce);
 	}
 	/* Register SoapVar class */
