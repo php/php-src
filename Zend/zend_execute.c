@@ -1042,9 +1042,12 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 	zend_internal_arg_info *ret_info = zf->internal_function.arg_info - 1;
 	zend_class_entry *ce = NULL;
 
-	if (UNEXPECTED(ret_info->type_hint == IS_VOID && Z_TYPE_P(ret) != IS_NULL)) {
-		zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
-		return 0;
+	if (ret_info->type_hint == IS_VOID) {
+		if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
+			zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
+			return 0;
+		}
+		return 1;
 	}
 
 	if (UNEXPECTED(!zend_check_internal_type(zf, ret_info, ret, &ce, 1))) {
