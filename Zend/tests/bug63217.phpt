@@ -60,16 +60,31 @@ function test(): string {
 var_dump(test());
 
 /**
- * Just to make sure we don't break arrays.
+ * Make sure we don't break arrays.
  */
+$array = [];
+
 $key = '123';
 
-$array = [];
 $array[$key] = 1;
 $array['321'] = 2;
 $array['abc'] = 3;
 
 var_dump($array);
+
+/**
+ * Make sure that we haven't broken ArrayObject
+ */
+$ao = new ArrayObject();
+
+$key = '123';
+
+$ao = [];
+$ao[$key] = 1;
+$ao['321'] = 2;
+$ao['abc'] = 3;
+
+var_dump($ao);
 
 ?>
 --EXPECT--
@@ -90,6 +105,14 @@ offsetSet given string(3) "123"
 offsetGet given string(1) "0"
 offsetGet given string(3) "123"
 string(2) "10"
+array(3) {
+  [123]=>
+  int(1)
+  [321]=>
+  int(2)
+  ["abc"]=>
+  int(3)
+}
 array(3) {
   [123]=>
   int(1)
