@@ -919,6 +919,7 @@ default_socket_timeout = 60
 
 ;extension=soap
 ;extension=sockets
+;extension=sodium
 ;extension=sqlite3
 ;extension=tidy
 ;extension=xmlrpc
