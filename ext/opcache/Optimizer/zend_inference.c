@@ -2100,14 +2100,14 @@ static inline uint32_t get_dim_array_key_type(uint32_t dim_type, zend_uchar dim_
 			tmp |= MAY_BE_ARRAY_KEY_LONG;
 		}
 		if (dim_type & MAY_BE_STRING) {
-			tmp |= MAY_BE_ARRAY_KEY_STRING;
-
 			if (dim_op_type != IS_CONST) {
-				tmp |= MAY_BE_ARRAY_KEY_LONG;
+				tmp |= MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_KEY_LONG;
 			} else {
 				zend_ulong hval;
 				if (ZEND_HANDLE_NUMERIC(Z_STR_P(dim_op), hval)) {
 					tmp |= MAY_BE_ARRAY_KEY_LONG;
+				} else {
+					tmp |= MAY_BE_ARRAY_KEY_STRING;
 				}
 			}
 		}
@@ -2115,7 +2115,7 @@ static inline uint32_t get_dim_array_key_type(uint32_t dim_type, zend_uchar dim_
 			tmp |= MAY_BE_ARRAY_KEY_STRING;
 		}
 	}
-
+	
 	return tmp;
 }
 
