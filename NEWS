@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug #76509 (Inherited static properties can be desynchronized from
     their parent by ref). (Nikita)
   . Fixed bug #76439 (Changed behaviour in unclosed HereDoc). (Nikita, tpunt)
+  . Added syslog.facility and syslog.ident INI entries for customizing syslog
+    logging. (Philip Prindeville)
 
 - DOM:
   . Fixed bug #76285 (DOMDocument::formatOutput attribute sometimes ignored).
