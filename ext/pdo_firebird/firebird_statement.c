@@ -294,7 +294,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 		unsigned short seg_len;
 		ISC_STATUS stat;
 
-		*ptr = S->fetch_buf[colno] = erealloc(*ptr, *len+1);
+		*ptr = S->fetch_buf[colno] = erealloc(S->fetch_buf[colno], *len+1);
 
 		for (cur_len = stat = 0; (!stat || stat == isc_segment) && cur_len < *len; cur_len += seg_len) {
 
