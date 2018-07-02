@@ -22,6 +22,8 @@ PDO_Firebird:
     logging. (Philip Prindeville)
   . Fixed bug #63217 (Constant numeric strings become integers when used as
     ArrayAccess offset). (Rudi Theunissen, Dmitry)
+  . Added user-defined object comparison. 
+    (https://wiki.php.net/rfc/object-comparison) (Rudi Theunissen)
 
 - DOM:
   . Fixed bug #76285 (DOMDocument::formatOutput attribute sometimes ignored).

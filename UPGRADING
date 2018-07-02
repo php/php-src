@@ -247,6 +247,30 @@ Core:
     are available under Linux, FreeBSD, Windows, Mac, SunOS, AIX and their
     derivatives. If no required timers are provided by a corresponding
     platform, the function returns false.
+  . Added two new magic methods: __compareTo and __equals. Classes may choose to
+    implement these to define relative natural ordering and equality, which 
+    affects functions like in_array() and sort(), and comparison operators: 
+    <, >, <=, >=, <=>, ==, !=. The behaviour of === and !== has not changed.
+    Classes that do not implement these methods will continue to be compared 
+    according to the rules that were introduced in PHP 5. 
+    (RFC: https://wiki.php.net/rfc/object-comparison)
+
+
+    +Changes to object comparison behaviour
++--------------------------------------
++
++* Classes may now implement a Comparable interface to override how objects are
++  compared to other values. If implemented, the class must implement a public
++  compareTo() method with the signature:
++
++      public function compareTo($other)
++
++  This method must return a negative integer to signal that the object is less
++  than $other, zero to signal that the object is equal to $other, or a positive
++  integer to signal that the object is greater than $other.
++
++  Objects that don't implement Comparable will continue to be compared
++  according to the rules used in PHP 5.
 
 Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
