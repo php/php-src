@@ -6,6 +6,7 @@ ReflectionProperty::getValue() on typed static property
 class Test {
     public static int $x = 42;
     public static int $y;
+    public static $z;
 }
 
 $rp = new ReflectionProperty('Test', 'x');
@@ -18,7 +19,33 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+$rp->setValue("24");
+var_dump($rp->getValue());
+
+try {
+    $rp->setValue("foo");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+var_dump($rp->getValue());
+
+Test::$z =& Test::$y;
+
+$rp = new ReflectionProperty('Test', 'z');
+try {
+    $rp->setValue("foo");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+var_dump($rp->getValue());
+
+
 ?>
 --EXPECT--
 int(42)
 Typed static property Test::$y must not be accessed before initialization
+int(24)
+Typed property Test::$y must be int, string used
+int(24)
+Cannot assign string to reference of type int
+int(24)

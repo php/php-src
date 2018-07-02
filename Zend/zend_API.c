@@ -4104,7 +4104,7 @@ ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object
 
 ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string *name, zval *value) /* {{{ */
 {
-	zval *property;
+	zval *property, tmp;
 	zend_property_info *prop_info;
 	zend_class_entry *old_scope = EG(fake_scope);
 
@@ -4116,14 +4116,18 @@ ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string
 		return FAILURE;
 	}
 
-	if (property != value) {
-		zval garbage;
-		ZVAL_DEREF(property);
-		ZVAL_DEREF(value);
-		ZVAL_COPY_VALUE(&garbage, property);
-		ZVAL_COPY(property, value);
-		zval_ptr_dtor(&garbage);
+	Z_TRY_ADDREF_P(value);
+	if (prop_info->type) {
+		zval *val = zend_verify_property_type(prop_info, value, &tmp, /* strict */ 0);
+		if (UNEXPECTED(!val)) {
+			zend_verify_property_type_error(prop_info, name, value);
+			Z_TRY_DELREF_P(value);
+			return FAILURE;
+		}
+		value = val;
 	}
+
+	zend_assign_to_variable(property, value, IS_VAR, /* strict */ 0);
 	return SUCCESS;
 }
 /* }}} */
