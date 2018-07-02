@@ -16,7 +16,7 @@ PHP                                                                        NEWS
     non-blocking). (Nikita)
 
 - GMP:
-  . Fixed bug #76470 (Integer Underflow when unserializing GMP and possible
+  . Fixed bug #74670 (Integer Underflow when unserializing GMP and possible
     other classes). (Nikita)
 
 - intl:
