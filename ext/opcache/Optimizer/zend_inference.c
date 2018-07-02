@@ -2376,6 +2376,13 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_IN_ARRAY:
 			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_TRUE, ssa_ops[i].result_def);
 			break;
+		case ZEND_ARRAY_KEY_EXISTS:
+			tmp = MAY_BE_FALSE|MAY_BE_TRUE;
+			if (t2 & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_ARRAY|MAY_BE_OBJECT))) {
+				tmp |= MAY_BE_NULL;
+			}
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+			break;
 		case ZEND_CAST:
 			if (ssa_ops[i].op1_def >= 0) {
 				tmp = t1;

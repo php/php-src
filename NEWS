@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0alpha1
 
+- Core:
+  . Implemented request #76148 (Add array_key_exists() to the list of
+    specially compiled functions). (Majkl578)
+
 - CURL:
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
     (Pierrick)
