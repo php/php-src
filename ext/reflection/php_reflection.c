@@ -5455,7 +5455,7 @@ ZEND_METHOD(reflection_property, getValue)
 			return;
 		}
 
-		if (!instanceof_function(Z_OBJCE_P(object), ref->ce)) {
+		if (!instanceof_function(Z_OBJCE_P(object), ref->prop.ce)) {
 			_DO_THROW("Given object is not an instance of the class this property was declared in");
 			/* Returns from this function */
 		}
