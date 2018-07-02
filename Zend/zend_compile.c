@@ -2088,6 +2088,7 @@ ZEND_API int zend_is_smart_branch(zend_op *opline) /* {{{ */
 		case ZEND_TYPE_CHECK:
 		case ZEND_DEFINED:
 		case ZEND_IN_ARRAY:
+		case ZEND_ARRAY_KEY_EXISTS:
 			return 1;
 		default:
 			return 0;
@@ -3758,6 +3759,22 @@ int zend_compile_func_get_args(znode *result, zend_ast_list *args) /* {{{ */
 }
 /* }}} */
 
+int zend_compile_func_array_key_exists(znode *result, zend_ast_list *args) /* {{{ */
+{
+	znode subject, needle;
+
+	if (args->children != 2) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&needle, args->child[0]);
+	zend_compile_expr(&subject, args->child[1]);
+
+	zend_emit_op_tmp(result, ZEND_ARRAY_KEY_EXISTS, &needle, &subject);
+	return SUCCESS;
+}
+/* }}} */
+
 int zend_compile_func_array_slice(znode *result, zend_ast_list *args) /* {{{ */
 {
 	if (CG(active_op_array)->function_name
@@ -3869,6 +3886,8 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_get_args(result, args);
 	} else if (zend_string_equals_literal(lcname, "array_slice")) {
 		return zend_compile_func_array_slice(result, args);
+	} else if (zend_string_equals_literal(lcname, "array_key_exists")) {
+		return zend_compile_func_array_key_exists(result, args);
 	} else {
 		return FAILURE;
 	}
