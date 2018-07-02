@@ -10,7 +10,11 @@ class A {
 	public ?int $iv = null;
 	public ?int $i;
 	public $n;
+
+    private int $p;
 }
+
+class B extends A { }
 
 echo "Static properties:\n";
 var_dump((new ReflectionProperty(A::class, 'ssv'))->isInitialized());
@@ -38,6 +42,26 @@ var_dump($rp->isInitialized($a));
 unset($a->d);
 var_dump($rp->isInitialized($a));
 
+echo "Visibility handling:\n";
+$rp = new ReflectionProperty('A', 'p');
+try {
+    var_dump($rp->isInitialized($a));
+} catch (ReflectionException $e) {
+    echo $e->getMessage(), "\n";
+}
+$rp->setAccessible(true);
+var_dump($rp->isInitialized($a));
+
+echo "Object type:\n";
+$rp = new ReflectionProperty('B', 'i');
+var_dump($rp->isInitialized($a));
+
+try {
+    var_dump($rp->isInitialized(new stdClass));
+} catch (ReflectionException $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 Static properties:
@@ -55,3 +79,9 @@ bool(false)
 Dynamic properties:
 bool(true)
 bool(false)
+Visibility handling:
+Cannot access non-public member A::$p
+bool(false)
+Object type:
+bool(false)
+Given object is not an instance of the class this property was declared in
