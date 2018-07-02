@@ -1959,7 +1959,6 @@ static void ZEND_FASTCALL convert_compare_result_to_long(zval *result) /* {{{ */
 
 ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-
 	int ret;
 	int converted = 0;
 	zval op1_copy, op2_copy;
@@ -2058,6 +2057,7 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 					continue;
 				}
 
+				/* compare handlers fall through if not successful */
 				if (Z_TYPE_P(op1) == IS_OBJECT) {
 					if (Z_OBJ_HANDLER_P(op1, compare) && Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2) == SUCCESS) {
  						convert_compare_result_to_long(result);
@@ -2264,8 +2264,6 @@ ZEND_API int ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *
 	if (is_equal_function(result, op1, op2) == FAILURE) {
 		return FAILURE;
 	}
-
-	/* */
 	ZVAL_BOOL(result, Z_TYPE_P(result) == IS_TRUE ? 0 : 1);
 	return SUCCESS;
 }
