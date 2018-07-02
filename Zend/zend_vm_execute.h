@@ -6100,10 +6100,8 @@ isset_dim_obj_array:
 isset_again:
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if (IS_CONST != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					goto num_index_prop;
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_prop;
 			}
 			value = zend_hash_find_ex_ind(ht, str, IS_CONST == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -8146,10 +8144,8 @@ isset_dim_obj_array:
 isset_again:
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					goto num_index_prop;
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_prop;
 			}
 			value = zend_hash_find_ex_ind(ht, str, (IS_TMP_VAR|IS_VAR) == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -11802,10 +11798,8 @@ isset_dim_obj_array:
 isset_again:
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if (IS_CV != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					goto num_index_prop;
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_prop;
 			}
 			value = zend_hash_find_ex_ind(ht, str, IS_CV == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -15548,10 +15542,8 @@ isset_dim_obj_array:
 isset_again:
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if (IS_CONST != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					goto num_index_prop;
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_prop;
 			}
 			value = zend_hash_find_ex_ind(ht, str, IS_CONST == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -17010,10 +17002,8 @@ isset_dim_obj_array:
 isset_again:
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					goto num_index_prop;
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_prop;
 			}
 			value = zend_hash_find_ex_ind(ht, str, (IS_TMP_VAR|IS_VAR) == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -19292,10 +19282,8 @@ isset_dim_obj_array:
 isset_again:
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if (IS_CV != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					goto num_index_prop;
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_prop;
 			}
 			value = zend_hash_find_ex_ind(ht, str, IS_CV == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -26725,10 +26713,8 @@ unset_dim_array:
 offset_again:
 			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 				key = Z_STR_P(offset);
-				if (IS_CONST != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(key, hval)) {
-						goto num_index_dim;
-					}
+				if (ZEND_HANDLE_NUMERIC(key, hval)) {
+					goto num_index_dim;
 				}
 str_index_dim:
 				if (ht == &EG(symbol_table)) {
@@ -29456,10 +29442,8 @@ unset_dim_array:
 offset_again:
 			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 				key = Z_STR_P(offset);
-				if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(key, hval)) {
-						goto num_index_dim;
-					}
+				if (ZEND_HANDLE_NUMERIC(key, hval)) {
+					goto num_index_dim;
 				}
 str_index_dim:
 				if (ht == &EG(symbol_table)) {
@@ -33917,10 +33901,8 @@ unset_dim_array:
 offset_again:
 			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 				key = Z_STR_P(offset);
-				if (IS_CV != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(key, hval)) {
-						goto num_index_dim;
-					}
+				if (ZEND_HANDLE_NUMERIC(key, hval)) {
+					goto num_index_dim;
 				}
 str_index_dim:
 				if (ht == &EG(symbol_table)) {
@@ -46922,10 +46904,8 @@ unset_dim_array:
 offset_again:
 			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 				key = Z_STR_P(offset);
-				if (IS_CONST != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(key, hval)) {
-						goto num_index_dim;
-					}
+				if (ZEND_HANDLE_NUMERIC(key, hval)) {
+					goto num_index_dim;
 				}
 str_index_dim:
 				if (ht == &EG(symbol_table)) {
@@ -47071,10 +47051,8 @@ isset_dim_obj_array:
 isset_again:
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if (IS_CONST != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					goto num_index_prop;
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_prop;
 			}
 			value = zend_hash_find_ex_ind(ht, str, IS_CONST == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -51074,10 +51052,8 @@ unset_dim_array:
 offset_again:
 			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 				key = Z_STR_P(offset);
-				if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(key, hval)) {
-						goto num_index_dim;
-					}
+				if (ZEND_HANDLE_NUMERIC(key, hval)) {
+					goto num_index_dim;
 				}
 str_index_dim:
 				if (ht == &EG(symbol_table)) {
@@ -51203,10 +51179,8 @@ isset_dim_obj_array:
 isset_again:
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					goto num_index_prop;
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_prop;
 			}
 			value = zend_hash_find_ex_ind(ht, str, (IS_TMP_VAR|IS_VAR) == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -57766,10 +57740,8 @@ unset_dim_array:
 offset_again:
 			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 				key = Z_STR_P(offset);
-				if (IS_CV != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(key, hval)) {
-						goto num_index_dim;
-					}
+				if (ZEND_HANDLE_NUMERIC(key, hval)) {
+					goto num_index_dim;
 				}
 str_index_dim:
 				if (ht == &EG(symbol_table)) {
@@ -57893,10 +57865,8 @@ isset_dim_obj_array:
 isset_again:
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if (IS_CV != IS_CONST) {
-				if (ZEND_HANDLE_NUMERIC(str, hval)) {
-					goto num_index_prop;
-				}
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_prop;
 			}
 			value = zend_hash_find_ex_ind(ht, str, IS_CV == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {

@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #76509 (Inherited static properties can be desynchronized from
     their parent by ref). (Nikita)
   . Fixed bug #76439 (Changed behaviour in unclosed HereDoc). (Nikita, tpunt)
+  . Added syslog.facility and syslog.ident INI entries for customizing syslog
+    logging. (Philip Prindeville)
+  . Fixed bug #63217 (Constant numeric strings become integers when used as
+    ArrayAccess offset). (Rudi Theunissen)
 
 - DOM:
   . Fixed bug #76285 (DOMDocument::formatOutput attribute sometimes ignored).
@@ -21,9 +25,21 @@ PHP                                                                        NEWS
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
 
+- GMP:
+  . Fixed bug #74670 (Integer Underflow when unserializing GMP and possible
+    other classes). (Nikita)
+
+- intl:
+  . Fixed bug #76556 (get_debug_info handler for BreakIterator shows wrong
+    type). (cmb)
+
 - mbstring:
   . Fixed bug #76532 (Integer overflow and excessive memory usage
     in mb_strimwidth). (MarcusSchwarz)
+
+- OpenSSL:
+  . Add min_proto_version and max_proto_version ssl stream options as well as
+    related constants for possible TLS protocol values. (Jakub Zelenka)
 
 - PCRE:
   . Fixed bug #76512 (\w no longer includes unicode characters). (cmb)
@@ -39,10 +55,13 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #76536 (PHP crashes with core dump when throwing exception in
     error handler). (Laruence)
+  . Fixed bug #75231 (ReflectionProperty#getValue() incorrectly works with
+    inherited classes). (Nikita)
 
 - Standard:
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
     (Laruence)
+  . Fixed bug #71848 (getimagesize with $imageinfo returns false). (cmb)
 
 - Tokenizer:
   . Fixed bug #76538 (token_get_all with TOKEN_PARSE flag fails to recognise

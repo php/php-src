@@ -125,6 +125,12 @@ PHP_MSHUTDOWN_FUNCTION(syslog)
 	return SUCCESS;
 }
 
+void php_openlog(const char *ident, int option, int facility)
+{
+	openlog(ident, option, facility);
+	PG(have_called_openlog) = 1;
+}
+
 /* {{{ proto bool openlog(string ident, int option, int facility)
    Open connection to system logger */
 /*
@@ -151,7 +157,7 @@ PHP_FUNCTION(openlog)
 	if(BG(syslog_device) == NULL) {
 		RETURN_FALSE;
 	}
-	openlog(BG(syslog_device), option, facility);
+	php_openlog(BG(syslog_device), option, facility);
 	RETURN_TRUE;
 }
 /* }}} */

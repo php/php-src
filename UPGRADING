@@ -44,6 +44,12 @@ Core:
     the following "FOO;" will cause a syntax error. This issue can always be
     resolved by choosing an ending label that does not occur within the contents
     of the string.
+  . Array accesses of type $obj["123"], where $obj implements ArrayAccess and
+    "123" is an integral string literal will no longer result in an implicit
+    conversion to integer, i.e., $obj->offsetGet("123") will be called instead
+    of $obj->offsetGet(123). This matches existing behavior for non-literals.
+    The behavior of arrays is not affected in any way, they continue to
+    implicitly convert integeral string keys to integers.
   . In PHP, static properties are shared between inheriting classes, unless the
     static property is explicitly overridden in a child class. However, due to
     an implementation artifact it was possible to separate the static properties
@@ -371,6 +377,14 @@ Standard:
 - opcache.inherited_hack
   . This INI directive has been removed. The value has already been ignored
     since PHP 5.3.0.
+
+- syslog.facility
+  - New INI to set syslog facility which specifies what type of program is
+    logging the message. It is used only when error_log is set to syslog.
+
+- syslog.ident
+  . New INI to set syslog ident string which is prepended to every message. It
+    is used only when error_log is set syslog.
 
 ========================================
 12. Windows Support

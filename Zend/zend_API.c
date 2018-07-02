@@ -2125,6 +2125,11 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	char lcname[16];
 	size_t name_len;
 
+	if (ZSTR_VAL(fptr->common.function_name)[0] != '_'
+	 || ZSTR_VAL(fptr->common.function_name)[1] != '_') {
+		return;
+	}
+
 	/* we don't care if the function name is longer, in fact lowercasing only
 	 * the beginning of the name speeds up the check process */
 	name_len = ZSTR_LEN(fptr->common.function_name);
@@ -2368,6 +2373,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			 */
 			if ((fname_len == class_name_len) && !ctor && !memcmp(ZSTR_VAL(lowercase_name), lc_class_name, class_name_len+1)) {
 				ctor = reg_function;
+			} else if (ZSTR_VAL(lowercase_name)[0] != '_' || ZSTR_VAL(lowercase_name)[1] != '_') {
+				reg_function = NULL;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 				ctor = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_DESTRUCTOR_FUNC_NAME)) {

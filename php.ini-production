@@ -584,6 +584,16 @@ html_errors = On
 ;error_log = php_errors.log
 ; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
+; Log errors to syslog (Event Log on Windows).
+;error_log = syslog
+
+; The syslog ident is a string which is prepended to every message logged
+; to syslog. Only used when error_log is set to syslog.
+;syslog.ident = php
+
+; The syslog facility is used to specify what type of program is logging 
+; the message. Only used when error_log is set to syslog.
+;syslog.facility = user
 
 ;windows.show_crt_warning
 ; Default value: 0
@@ -919,6 +929,7 @@ default_socket_timeout = 60
 
 ;extension=soap
 ;extension=sockets
+;extension=sodium
 ;extension=sqlite3
 ;extension=tidy
 ;extension=xmlrpc

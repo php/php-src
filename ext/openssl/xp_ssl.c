@@ -15,6 +15,7 @@
   | Authors: Wez Furlong <wez@thebrainroom.com>                          |
   |          Daniel Lowrey <rdlowrey@php.net>                            |
   |          Chris Wright <daverandom@php.net>                           |
+  |          Jakub Zelenka <bukka@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
@@ -52,9 +53,22 @@
 #undef X509_EXTENSIONS
 #endif
 
+/* Flags for determining allowed stream crypto methods */
+#define STREAM_CRYPTO_IS_CLIENT            (1<<0)
+#define STREAM_CRYPTO_METHOD_SSLv2         (1<<1)
+#define STREAM_CRYPTO_METHOD_SSLv3         (1<<2)
+#define STREAM_CRYPTO_METHOD_TLSv1_0       (1<<3)
+#define STREAM_CRYPTO_METHOD_TLSv1_1       (1<<4)
+#define STREAM_CRYPTO_METHOD_TLSv1_2       (1<<5)
+
 #ifndef OPENSSL_NO_SSL3
 #define HAVE_SSL3 1
+#define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_SSLv3
+#else
+#define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_0
 #endif
+#define PHP_OPENSSL_MAX_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_2
+
 
 #define HAVE_TLS11 1
 #define HAVE_TLS12 1
@@ -73,14 +87,6 @@
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
 #define HAVE_SEC_LEVEL 1
 #endif
-
-/* Flags for determining allowed stream crypto methods */
-#define STREAM_CRYPTO_IS_CLIENT            (1<<0)
-#define STREAM_CRYPTO_METHOD_SSLv2         (1<<1)
-#define STREAM_CRYPTO_METHOD_SSLv3         (1<<2)
-#define STREAM_CRYPTO_METHOD_TLSv1_0       (1<<3)
-#define STREAM_CRYPTO_METHOD_TLSv1_1       (1<<4)
-#define STREAM_CRYPTO_METHOD_TLSv1_2       (1<<5)
 
 /* Simplify ssl context option retrieval */
 #define GET_VER_OPT(name) \
@@ -945,46 +951,6 @@ static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ *
 }
 /* }}} */
 
-static const SSL_METHOD *php_openssl_select_crypto_method(zend_long method_value, int is_client) /* {{{ */
-{
-	if (method_value == STREAM_CRYPTO_METHOD_SSLv2) {
-		php_error_docref(NULL, E_WARNING,
-				"SSLv2 unavailable in this PHP version");
-		return NULL;
-	} else if (method_value == STREAM_CRYPTO_METHOD_SSLv3) {
-#ifdef HAVE_SSL3
-		return is_client ? SSLv3_client_method() : SSLv3_server_method();
-#else
-		php_error_docref(NULL, E_WARNING,
-				"SSLv3 unavailable in the OpenSSL library against which PHP is linked");
-		return NULL;
-#endif
-	} else if (method_value == STREAM_CRYPTO_METHOD_TLSv1_0) {
-		return is_client ? TLSv1_client_method() : TLSv1_server_method();
-	} else if (method_value == STREAM_CRYPTO_METHOD_TLSv1_1) {
-#ifdef HAVE_TLS11
-		return is_client ? TLSv1_1_client_method() : TLSv1_1_server_method();
-#else
-		php_error_docref(NULL, E_WARNING,
-				"TLSv1.1 unavailable in the OpenSSL library against which PHP is linked");
-		return NULL;
-#endif
-	} else if (method_value == STREAM_CRYPTO_METHOD_TLSv1_2) {
-#ifdef HAVE_TLS12
-		return is_client ? TLSv1_2_client_method() : TLSv1_2_server_method();
-#else
-		php_error_docref(NULL, E_WARNING,
-				"TLSv1.2 unavailable in the OpenSSL library against which PHP is linked");
-		return NULL;
-#endif
-	} else {
-		php_error_docref(NULL, E_WARNING,
-				"Invalid crypto method");
-		return NULL;
-	}
-}
-/* }}} */
-
 #define PHP_SSL_MAX_VERSION_LEN 32
 
 static char *php_openssl_cipher_get_version(const SSL_CIPHER *c, char *buffer, size_t max_len) /* {{{ */
@@ -1000,6 +966,7 @@ static char *php_openssl_cipher_get_version(const SSL_CIPHER *c, char *buffer, s
 }
 /* }}} */
 
+#if PHP_OPENSSL_API_VERSION < 0x10100
 static int php_openssl_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
 {
 	int ssl_ctx_options = SSL_OP_ALL;
@@ -1027,6 +994,89 @@ static int php_openssl_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
 #endif
 
 	return ssl_ctx_options;
+}
+/* }}} */
+#endif
+
+static inline int php_openssl_get_min_proto_version_flag(int flags) /* {{{ */
+{
+	int ver;
+	for (ver = PHP_OPENSSL_MIN_PROTO_VERSION; ver <= PHP_OPENSSL_MAX_PROTO_VERSION; ver <<= 1) {
+		if (flags & ver) {
+			return ver;
+		}
+	}
+	return STREAM_CRYPTO_METHOD_TLSv1_2;
+}
+/* }}} */
+
+static inline int php_openssl_get_max_proto_version_flag(int flags) /* {{{ */
+{
+	int ver;
+	for (ver = PHP_OPENSSL_MAX_PROTO_VERSION; ver >= PHP_OPENSSL_MIN_PROTO_VERSION; ver >>= 1) {
+		if (flags & ver) {
+			return ver;
+		}
+	}
+	return STREAM_CRYPTO_METHOD_TLSv1_2;
+}
+/* }}} */
+
+#if PHP_OPENSSL_API_VERSION >= 0x10100
+static inline int php_openssl_map_proto_version(int flag) /* {{{ */
+{
+	switch (flag) {
+#ifdef HAVE_SSL3
+		case STREAM_CRYPTO_METHOD_SSLv3:
+			return SSL3_VERSION;
+#endif
+		case STREAM_CRYPTO_METHOD_TLSv1_0:
+			return TLS1_VERSION;
+		case STREAM_CRYPTO_METHOD_TLSv1_1:
+			return TLS1_1_VERSION;
+		/* case STREAM_CRYPTO_METHOD_TLSv1_2: */
+		default:
+			return TLS1_2_VERSION;
+
+	}
+}
+/* }}} */
+
+static int php_openssl_get_min_proto_version(int flags) /* {{{ */
+{
+	return php_openssl_map_proto_version(php_openssl_get_min_proto_version_flag(flags));
+}
+/* }}} */
+
+static int php_openssl_get_max_proto_version(int flags) /* {{{ */
+{
+	return php_openssl_map_proto_version(php_openssl_get_max_proto_version_flag(flags));
+}
+/* }}} */
+#endif
+
+static int php_openssl_get_proto_version_flags(int flags, int min, int max) /* {{{ */
+{
+	int ver;
+
+	if (!min) {
+		min = php_openssl_get_min_proto_version_flag(flags);
+	}
+	if (!max) {
+		max = php_openssl_get_max_proto_version_flag(flags);
+	}
+
+	for (ver = PHP_OPENSSL_MIN_PROTO_VERSION; ver <= PHP_OPENSSL_MAX_PROTO_VERSION; ver <<= 1) {
+		if (ver >= min && ver <= max) {
+			if (!(flags & ver)) {
+				flags |= ver;
+			}
+		} else if (flags & ver) {
+			flags &= ~ver;
+		}
+	}
+
+	return flags;
 }
 /* }}} */
 
@@ -1538,6 +1588,8 @@ int php_openssl_setup_crypto(php_stream *stream,
 	const SSL_METHOD *method;
 	int ssl_ctx_options;
 	int method_flags;
+	zend_long min_version = 0;
+	zend_long max_version = 0;
 	char *cipherlist = NULL;
 	char *alpn_protocols = NULL;
 	zval *val;
@@ -1558,22 +1610,17 @@ int php_openssl_setup_crypto(php_stream *stream,
 	sslsock->is_client = cparam->inputs.method & STREAM_CRYPTO_IS_CLIENT;
 	method_flags = ((cparam->inputs.method >> 1) << 1);
 
-	/* Should we use a specific crypto method or is generic SSLv23 okay? */
-	if ((method_flags & (method_flags-1)) == 0) {
-		ssl_ctx_options = SSL_OP_ALL;
-		method = php_openssl_select_crypto_method(method_flags, sslsock->is_client);
-		if (method == NULL) {
-			return FAILURE;
-		}
-	} else {
-		method = sslsock->is_client ? SSLv23_client_method() : SSLv23_server_method();
-		ssl_ctx_options = php_openssl_get_crypto_method_ctx_flags(method_flags);
-		if (ssl_ctx_options == -1) {
-			return FAILURE;
-		}
-	}
-
+	method = sslsock->is_client ? SSLv23_client_method() : SSLv23_server_method();
 	sslsock->ctx = SSL_CTX_new(method);
+
+	GET_VER_OPT_LONG("min_proto_version", min_version);
+	GET_VER_OPT_LONG("max_proto_version", max_version);
+	method_flags = php_openssl_get_proto_version_flags(method_flags, min_version, max_version);
+#if PHP_OPENSSL_API_VERSION < 0x10100
+	ssl_ctx_options = php_openssl_get_crypto_method_ctx_flags(method_flags);
+#else
+	ssl_ctx_options = SSL_OP_ALL;
+#endif
 
 	if (sslsock->ctx == NULL) {
 		php_error_docref(NULL, E_WARNING, "SSL context creation failure");
@@ -1662,6 +1709,11 @@ int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 	SSL_CTX_set_options(sslsock->ctx, ssl_ctx_options);
+
+#if PHP_OPENSSL_API_VERSION >= 0x10100
+	SSL_CTX_set_min_proto_version(sslsock->ctx, php_openssl_get_min_proto_version(method_flags));
+	SSL_CTX_set_max_proto_version(sslsock->ctx, php_openssl_get_max_proto_version(method_flags));
+#endif
 
 	if (sslsock->is_client == 0 &&
 		PHP_STREAM_CONTEXT(stream) &&

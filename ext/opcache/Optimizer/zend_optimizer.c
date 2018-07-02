@@ -539,19 +539,7 @@ handle_static_prop:
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			}
 			break;
-		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 		case ZEND_ADD_ARRAY_ELEMENT:
-		case ZEND_INIT_ARRAY:
-		case ZEND_ASSIGN_DIM:
-		case ZEND_UNSET_DIM:
-		case ZEND_FETCH_DIM_R:
-		case ZEND_FETCH_DIM_W:
-		case ZEND_FETCH_DIM_RW:
-		case ZEND_FETCH_DIM_IS:
-		case ZEND_FETCH_DIM_FUNC_ARG:
-		case ZEND_FETCH_DIM_UNSET:
-		case ZEND_FETCH_LIST_R:
-		case ZEND_FETCH_LIST_W:
 			if (Z_TYPE_P(val) == IS_STRING) {
 				zend_ulong index;
 				if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {

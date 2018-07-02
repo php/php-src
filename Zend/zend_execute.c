@@ -1226,9 +1226,12 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 	zend_class_entry *ce = NULL;
 	void *dummy_cache_slot = NULL;
 
-	if (UNEXPECTED(ZEND_TYPE_CODE(ret_info->type) == IS_VOID && Z_TYPE_P(ret) != IS_NULL)) {
-		zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
-		return 0;
+	if (ZEND_TYPE_CODE(ret_info->type) == IS_VOID) {
+		if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
+			zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
+			return 0;
+		}
+		return 1;
 	}
 
 	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, &dummy_cache_slot, NULL, NULL, 1))) {
@@ -2023,10 +2026,8 @@ num_undef:
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
-		if (dim_type != IS_CONST) {
-			if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
-				goto num_index;
-			}
+		if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+			goto num_index;
 		}
 str_index:
 		retval = zend_hash_find_ex(ht, offset_key, dim_type == IS_CONST);

@@ -3567,7 +3567,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	if (PHAR_G(has_bz2)) {
 		php_info_print_table_row(2, "bzip2 compression", "enabled");
 	} else {
-		php_info_print_table_row(2, "bzip2 compression", "disabled (install pecl/bz2)");
+		php_info_print_table_row(2, "bzip2 compression", "disabled (install ext/bz2)");
 	}
 #ifdef PHAR_HAVE_OPENSSL
 	php_info_print_table_row(2, "Native OpenSSL support", "enabled");

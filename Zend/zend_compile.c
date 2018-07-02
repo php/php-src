@@ -2680,7 +2680,6 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 		dim_node.op_type = IS_UNUSED;
 	} else {
 		zend_compile_expr(&dim_node, dim_ast);
-		zend_handle_numeric_op(&dim_node);
 	}
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_DIM_R, &var_node, &dim_node);
@@ -5821,7 +5820,9 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	}
 
 	if (in_interface) {
-		if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
+		if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
+			/* pass */
+		} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __call() must have "
 					"public visibility and cannot be static");
@@ -5871,6 +5872,10 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 		if (!in_trait && zend_string_equals_ci(lcname, ce->name)) {
 			if (!ce->constructor) {
 				ce->constructor = (zend_function *) op_array;
+			}
+		} else if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
+			if (!is_static) {
+				op_array->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 			ce->constructor = (zend_function *) op_array;

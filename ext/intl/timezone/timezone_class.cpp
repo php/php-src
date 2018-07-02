@@ -98,7 +98,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 			goto error;
 		}
 		ZVAL_STR(&arg, u8str);
-		zend_call_method_with_1_params(ret, NULL, NULL, "__construct", NULL, &arg);
+		zend_call_method_with_1_params(ret, NULL, &Z_OBJCE_P(ret)->constructor, "__construct", NULL, &arg);
 		if (EG(exception)) {
 			spprintf(&message, 0,
 				"%s: DateTimeZone constructor threw exception", func);
