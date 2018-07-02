@@ -2431,6 +2431,26 @@ static inline void zend_handle_numeric_op(znode *node) /* {{{ */
 }
 /* }}} */
 
+static inline void zend_handle_numeric_dim(zend_op *opline, znode *dim_node) /* {{{ */
+{
+	if (Z_TYPE(dim_node->u.constant) == IS_STRING) {
+		zend_ulong index;
+
+		if (ZEND_HANDLE_NUMERIC(Z_STR(dim_node->u.constant), index)) {
+			/* For numeric indexs we also keep the original value to use by ArrayAccess
+			 * See bug #63217
+			 */
+			int c = zend_add_literal(CG(active_op_array), &dim_node->u.constant);
+			ZEND_ASSERT(opline->op2.constant + 1 == c);
+			ZVAL_LONG(CT_CONSTANT(opline->op2), index);
+			Z_EXTRA_P(CT_CONSTANT(opline->op2)) = ZEND_EXTRA_VALUE;
+			return;
+		}
+	}
+	Z_EXTRA_P(CT_CONSTANT(opline->op2)) = 0;
+}
+/* }}} */
+
 static inline void zend_set_class_name_op1(zend_op *opline, znode *class_node) /* {{{ */
 {
 	if (class_node->op_type == IS_CONST) {
@@ -2672,11 +2692,14 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 		dim_node.op_type = IS_UNUSED;
 	} else {
 		zend_compile_expr(&dim_node, dim_ast);
-		zend_handle_numeric_op(&dim_node);
 	}
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_DIM_R, &var_node, &dim_node);
 	zend_adjust_for_fetch_type(opline, result, type);
+
+	if (dim_node.op_type == IS_CONST) {
+		zend_handle_numeric_dim(opline, &dim_node);
+	}
 	return opline;
 }
 /* }}} */
@@ -2816,6 +2839,7 @@ static void zend_compile_list_assign(
 		zend_ast *elem_ast = list->child[i];
 		zend_ast *var_ast, *key_ast;
 		znode fetch_result, dim_node;
+		zend_op *opline;
 
 		if (elem_ast == NULL) {
 			if (is_keyed) {
@@ -2853,8 +2877,12 @@ static void zend_compile_list_assign(
 
 		zend_verify_list_assign_target(var_ast, old_style);
 
-		zend_emit_op(&fetch_result,
+		opline = zend_emit_op(&fetch_result,
 			elem_ast->attr ? ZEND_FETCH_LIST_W : ZEND_FETCH_LIST_R, expr_node, &dim_node);
+
+		if (dim_node.op_type == IS_CONST) {
+			zend_handle_numeric_dim(opline, &dim_node);
+		}
 
 		if (var_ast->kind == ZEND_AST_ARRAY) {
 			if (elem_ast->attr) {

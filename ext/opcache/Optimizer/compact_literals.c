@@ -242,6 +242,12 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					if (opline->op2_type == IS_CONST) {
 						if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 							LITERAL_INFO(opline->op2.constant, LITERAL_PROPERTY, 1);
+						} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
+							if (Z_EXTRA(op_array->literals[opline->op2.constant]) == ZEND_EXTRA_VALUE) {
+								LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 2);
+							} else {
+								LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 1);
+							}
 						} else {
 							LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 1);
 						}
@@ -258,6 +264,28 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_DECLARE_INHERITED_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
 					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
+					break;
+				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+				case ZEND_ASSIGN_DIM:
+				case ZEND_UNSET_DIM:
+				case ZEND_FETCH_DIM_R:
+				case ZEND_FETCH_DIM_W:
+				case ZEND_FETCH_DIM_RW:
+				case ZEND_FETCH_DIM_IS:
+				case ZEND_FETCH_DIM_FUNC_ARG:
+				case ZEND_FETCH_DIM_UNSET:
+				case ZEND_FETCH_LIST_R:
+				case ZEND_FETCH_LIST_W:
+					if (opline->op1_type == IS_CONST) {
+						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1);
+					}
+					if (opline->op2_type == IS_CONST) {
+						if (Z_EXTRA(op_array->literals[opline->op2.constant]) == ZEND_EXTRA_VALUE) {
+							LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 2);
+						} else {
+							LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 1);
+						}
+					}
 					break;
 				default:
 					if (opline->op1_type == IS_CONST) {
@@ -337,17 +365,42 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					map[i] = l_true;
 					break;
 				case IS_LONG:
-					if ((pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != NULL) {
-						map[i] = Z_LVAL_P(pos);
-					} else {
-						map[i] = j;
-						ZVAL_LONG(&zv, j);
-						zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
-						if (i != j) {
-							op_array->literals[j] = op_array->literals[i];
-							info[j] = info[i];
+					if (LITERAL_NUM_RELATED(info[i].flags) == 1) {
+						if ((pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != NULL) {
+							map[i] = Z_LVAL_P(pos);
+						} else {
+							map[i] = j;
+							ZVAL_LONG(&zv, j);
+							zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
+							if (i != j) {
+								op_array->literals[j] = op_array->literals[i];
+								info[j] = info[i];
+							}
+							j++;
 						}
-						j++;
+					} else {
+						ZEND_ASSERT(LITERAL_NUM_RELATED(info[i].flags) == 2);
+						key = zend_string_init(Z_STRVAL(op_array->literals[i+1]), Z_STRLEN(op_array->literals[i+1]), 0);
+						ZSTR_H(key) = ZSTR_HASH(Z_STR(op_array->literals[i+1])) + 100 +
+							LITERAL_NUM_RELATED(info[i].flags) - 1;
+						if ((pos = zend_hash_find(&hash, key)) != NULL
+						 && LITERAL_NUM_RELATED(info[Z_LVAL_P(pos)].flags) == 2) {
+							map[i] = Z_LVAL_P(pos);
+							zval_ptr_dtor_nogc(&op_array->literals[i+1]);
+						} else {
+							map[i] = j;
+							ZVAL_LONG(&zv, j);
+							zend_hash_add_new(&hash, key, &zv);
+							if (i != j) {
+								op_array->literals[j] = op_array->literals[i];
+								info[j] = info[i];
+								op_array->literals[j+1] = op_array->literals[i+1];
+								info[j+1] = info[i+1];
+							}
+							j += 2;
+						}
+						zend_string_release_ex(key, 0);
+						i++;
 					}
 					break;
 				case IS_DOUBLE:
