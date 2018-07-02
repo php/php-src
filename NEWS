@@ -45,6 +45,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #76536 (PHP crashes with core dump when throwing exception in
     error handler). (Laruence)
+  . Fixed bug #75231 (ReflectionProperty#getValue() incorrectly works with
+    inherited classes). (Nikita)
 
 - Standard:
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
