@@ -74,14 +74,6 @@ PHPAPI zend_class_entry *reflection_class_constant_ptr;
 PHPAPI zend_class_entry *reflection_extension_ptr;
 PHPAPI zend_class_entry *reflection_zend_extension_ptr;
 
-/* Method macros */
-
-#define METHOD_NOTSTATIC(ce)                                                                                \
-	if ((Z_TYPE(EX(This)) != IS_OBJECT) || !instanceof_function(Z_OBJCE(EX(This)), ce)) {           \
-		php_error_docref(NULL, E_ERROR, "%s() cannot be called statically", get_active_function_name());        \
-		return;                                                                                             \
-	}                                                                                                       \
-
 /* Exception throwing macro */
 #define _DO_THROW(msg)                                                                                      \
 	zend_throw_exception(reflection_exception_ptr, msg, 0);                                       \
@@ -1729,7 +1721,6 @@ ZEND_METHOD(reflection_function, isDisabled)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	RETURN_BOOL(fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.handler == zif_display_disabled_function);
 }
@@ -1853,7 +1844,6 @@ ZEND_METHOD(reflection_function, invoke)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &params, &num_args) == FAILURE) {
@@ -1903,7 +1893,6 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	zend_function *fptr;
 	zval *param_array;
 
-	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &param_array) == FAILURE) {
@@ -1960,7 +1949,6 @@ ZEND_METHOD(reflection_function, returnsReference)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	RETURN_BOOL((fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0);
@@ -1975,7 +1963,6 @@ ZEND_METHOD(reflection_function, getNumberOfParameters)
 	zend_function *fptr;
 	uint32_t num_args;
 
-	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	num_args = fptr->common.num_args;
@@ -1994,7 +1981,6 @@ ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	RETURN_LONG(fptr->common.required_num_args);
@@ -2010,7 +1996,6 @@ ZEND_METHOD(reflection_function, getParameters)
 	uint32_t i, num_args;
 	struct _zend_arg_info *arg_info;
 
-	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	arg_info= fptr->common.arg_info;
@@ -2051,7 +2036,6 @@ ZEND_METHOD(reflection_function, getExtension)
 	zend_function *fptr;
 	zend_internal_function *internal;
 
-	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
@@ -2075,7 +2059,6 @@ ZEND_METHOD(reflection_function, getExtensionName)
 	zend_function *fptr;
 	zend_internal_function *internal;
 
-	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
@@ -3065,7 +3048,6 @@ ZEND_METHOD(reflection_method, getClosure)
 	zval *obj;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC(reflection_method_ptr);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
@@ -3104,8 +3086,6 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	zend_fcall_info_cache fcc;
 	zend_class_entry *obj_ce;
 	zval *param_array;
-
-	METHOD_NOTSTATIC(reflection_method_ptr);
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
@@ -3473,7 +3453,6 @@ ZEND_METHOD(reflection_method, getDeclaringClass)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC(reflection_method_ptr);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -3491,7 +3470,6 @@ ZEND_METHOD(reflection_method, getPrototype)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC(reflection_method_ptr);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -4102,7 +4080,6 @@ ZEND_METHOD(reflection_class, hasMethod)
 	char *name, *lc_name;
 	size_t name_len;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -4132,7 +4109,6 @@ ZEND_METHOD(reflection_class, getMethod)
 	char *name, *lc_name;
 	size_t name_len;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -4212,7 +4188,6 @@ ZEND_METHOD(reflection_class, getMethods)
 	zend_long filter = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (argc) {
 		if (zend_parse_parameters(argc, "|l", &filter) == FAILURE) {
 			return;
@@ -4246,7 +4221,6 @@ ZEND_METHOD(reflection_class, hasProperty)
 	zend_string *name;
 	zval property;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
@@ -4282,7 +4256,6 @@ ZEND_METHOD(reflection_class, getProperty)
 	char *tmp, *str_name;
 	size_t classname_len, str_name_len;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
@@ -4407,7 +4380,6 @@ ZEND_METHOD(reflection_class, getProperties)
 	zend_long filter = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (argc) {
 		if (zend_parse_parameters(argc, "|l", &filter) == FAILURE) {
 			return;
@@ -4437,7 +4409,6 @@ ZEND_METHOD(reflection_class, hasConstant)
 	zend_class_entry *ce;
 	zend_string *name;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
@@ -4508,7 +4479,6 @@ ZEND_METHOD(reflection_class, getConstant)
 	zend_class_constant *c;
 	zend_string *name;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
@@ -4679,7 +4649,6 @@ ZEND_METHOD(reflection_class, isInstance)
 	zend_class_entry *ce;
 	zval *object;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
 		return;
 	}
@@ -4697,7 +4666,6 @@ ZEND_METHOD(reflection_class, newInstance)
 	zend_class_entry *ce, *old_scope;
 	zend_function *constructor;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
@@ -4766,7 +4734,6 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (ce->create_object != NULL && ce->ce_flags & ZEND_ACC_FINAL) {
@@ -4789,8 +4756,6 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	HashTable *args;
 	zend_function *constructor;
 
-
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|h", &args) == FAILURE) {
@@ -5034,7 +4999,6 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 	zend_class_entry *ce, *class_ce;
 	zval *class_name;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &class_name) == FAILURE) {
@@ -5078,7 +5042,6 @@ ZEND_METHOD(reflection_class, implementsInterface)
 	zend_class_entry *ce, *interface_ce;
 	zval *interface;
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &interface) == FAILURE) {
@@ -5130,7 +5093,6 @@ ZEND_METHOD(reflection_class, isIterable)
 		return;
 	}
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS |
@@ -5153,7 +5115,6 @@ ZEND_METHOD(reflection_class, getExtension)
 		return;
 	}
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module) {
@@ -5173,7 +5134,6 @@ ZEND_METHOD(reflection_class, getExtensionName)
 		return;
 	}
 
-	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module) {
@@ -5485,7 +5445,6 @@ ZEND_METHOD(reflection_property, getValue)
 	zval *object, *name;
 	zval *member_p = NULL;
 
-	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(ref->prop.flags & (ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC)) && intern->ignore_visibility == 0) {
@@ -5537,7 +5496,6 @@ ZEND_METHOD(reflection_property, setValue)
 	zval *value;
 	zval *tmp;
 
-	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(ref->prop.flags & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
