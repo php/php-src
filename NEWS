@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
 
+- GMP:
+  . Fixed bug #76470 (Integer Underflow when unserializing GMP and possible
+    other classes). (Nikita)
+
 - intl:
   . Fixed bug #76556 (get_debug_info handler for BreakIterator shows wrong
     type). (cmb)
