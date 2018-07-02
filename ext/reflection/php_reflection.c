@@ -3089,21 +3089,19 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	if ((!(mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		 || (mptr->common.fn_flags & ZEND_ACC_ABSTRACT))
-		 && intern->ignore_visibility == 0)
-	{
-		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Trying to invoke abstract method %s::%s()",
-				ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
-		} else {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Trying to invoke %s method %s::%s() from scope %s",
-				mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
-				ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name),
-				ZSTR_VAL(Z_OBJCE_P(getThis())->name));
-		}
+	if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Trying to invoke abstract method %s::%s()",
+			ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
+		return;
+	}
+
+	if (!(mptr->common.fn_flags & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Trying to invoke %s method %s::%s() from scope %s",
+			mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
+			ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name),
+			ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 
