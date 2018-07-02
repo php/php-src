@@ -481,6 +481,13 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		return 0;
 	}
 
+	/* Check that '}' is present before calling ce->unserialize() to mitigate issues
+	 * with unserialize reading past the end of the passed buffer if the string is not
+	 * appropriately terminated (usually NUL terminated, but '}' is also sufficient.) */
+	if ((*p)[datalen] != '}') {
+		return 0;
+	}
+
 	if (ce->unserialize == NULL) {
 		zend_error(E_WARNING, "Class %s has no unserializer", ZSTR_VAL(ce->name));
 		object_init_ex(rval, ce);
@@ -488,9 +495,8 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		return 0;
 	}
 
-	(*p) += datalen;
-
-	return finish_nested_data(UNSERIALIZE_PASSTHRU);
+	(*p) += datalen + 1; /* +1 for '}' */
+	return 1;
 }
 
 static inline zend_long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
