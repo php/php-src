@@ -435,7 +435,6 @@ static zval *sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bo
 	int             test = 0;
 	int				new_value = 0;
 	zend_long            cnt = 0;
-	int				retval = SUCCESS;
 	zval            tmp_zv, zval_copy;
 	zend_string    *trim_str;
 
@@ -628,14 +627,12 @@ next_iter:
 			} else if (!member || Z_TYPE_P(member) == IS_LONG) {
 				if (member && cnt < Z_LVAL_P(member)) {
 					php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only " ZEND_LONG_FMT " such elements exist", mynode->name, Z_LVAL_P(member), cnt);
-					retval = FAILURE;
 				}
 				newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
 			}
 		} else if (attribs) {
 			if (Z_TYPE_P(member) == IS_LONG) {
 				php_error_docref(NULL, E_WARNING, "Cannot change attribute number " ZEND_LONG_FMT " when only %d attributes exist", Z_LVAL_P(member), nodendx);
-				retval = FAILURE;
 			} else {
 				newnode = (xmlNodePtr)xmlNewProp(node, (xmlChar *)Z_STRVAL_P(member), value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
 			}
@@ -650,7 +647,6 @@ next_iter:
 	}
 	if (new_value) {
 		zval_ptr_dtor(value);
-		return new_value;
 	}
 	return value;
 }

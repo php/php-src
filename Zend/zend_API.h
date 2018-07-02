@@ -679,17 +679,18 @@ END_EXTERN_C()
 #define ZEND_GSHUTDOWN_FUNCTION		ZEND_MODULE_GLOBALS_DTOR_D
 
 static zend_always_inline int zend_try_assign_ex(zval *zv, zval *arg, zend_bool silent, zend_bool strict) {
-	zend_type ref_type;
-	if (EXPECTED(Z_ISREF_P(zv)) && UNEXPECTED(ZEND_TYPE_IS_SET(ref_type = Z_REFTYPE_P(zv)))) {
+	zend_reference *ref;
+	if (EXPECTED(Z_ISREF_P(zv)) && UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref = Z_REF_P(zv)))) {
+		zend_property_info *error_prop;
 		zval tmp;
 		ZVAL_COPY_VALUE(&tmp, arg);
-		if (zend_verify_ref_type_assignable_zval(ref_type, &tmp, strict)) {
+		if (EXPECTED((error_prop = zend_verify_ref_assignable_zval(ref, &tmp, strict)) == NULL)) {
 			zv = Z_REFVAL_P(zv);
 			zval_ptr_dtor(zv);
 			ZVAL_COPY_VALUE(zv, &tmp);
 		} else {
 			if (!silent) {
-				zend_throw_ref_type_error(ref_type, &tmp);
+				zend_throw_ref_type_error_zval(error_prop, &tmp);
 			}
 			zval_ptr_dtor(&tmp);
 			return FAILURE;
@@ -1186,7 +1187,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 /* old "t" */
 #define Z_PARAM_ARRAY_ASSIGNABLE_EX(dest, check_null, separate) \
 		Z_PARAM_PROLOGUE(1, separate); \
-		if (Z_ISREF_P(_real_arg) && Z_REFTYPE_P(_real_arg) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(_real_arg), IS_ARRAY)) { \
+		if (Z_ISREF_P(_real_arg) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(_real_arg)) && zend_verify_ref_assignable_type(Z_REF_P(_real_arg), ZEND_TYPE_ENCODE(IS_ARRAY, 0)) != NULL) { \
 			_expected_type = Z_EXPECTED_ARRAY; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \

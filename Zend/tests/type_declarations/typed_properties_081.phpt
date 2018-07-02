@@ -13,11 +13,11 @@ $test2 = clone $test;
 unset($test);
 try {
 	$x = "foo";
-} catch (TypeError $e) { var_dump($e->getMessage()); }
+} catch (TypeError $e) { echo $e->getMessage(), "\n"; }
 var_dump($test2->x);
 
 ?>
 --EXPECT--
-string(45) "Cannot assign string to reference of type int"
+Cannot assign string to reference held by property Test->x of type int
 int(42)
 

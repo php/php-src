@@ -59,7 +59,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 					zend_property_info *prop_info;
 					ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
 						if (prop_info->ce == object->ce && p == OBJ_PROP(object, prop_info->offset)) {
-							Z_REFTYPE_P(p) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
 							break; /* stop iteration here, the array might be realloc()'ed */
 						}
 					} ZEND_REF_FOREACH_TYPE_SOURCES_END();
@@ -203,7 +203,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 			i_zval_ptr_dtor(dst ZEND_FILE_LINE_CC);
 			ZVAL_COPY_VALUE(dst, src);
 			zval_add_ref(dst);
-			if (UNEXPECTED(Z_ISREF_P(dst)) && UNEXPECTED(Z_REFTYPE_P(dst) != NULL)) {
+			if (UNEXPECTED(Z_ISREF_P(dst))) {
 				zend_property_info *prop_info;
 				ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(dst), prop_info) {
 					if (prop_info->ce == new_object->ce && dst == OBJ_PROP(new_object, prop_info->offset)) {

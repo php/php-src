@@ -22,7 +22,7 @@ var_dump(nonNumericStringRef());
 
 ?>
 --EXPECTF--
-Cannot assign string to reference of type int
+Typed property Foo::$i must be int, string used
 Typed static property Foo::$i must not be accessed before initialization
 string(1) "x"
 

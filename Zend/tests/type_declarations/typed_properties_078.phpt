@@ -45,15 +45,15 @@ var_dump($ref instanceof ArrayIterator);
 --EXPECT--
 array(0) {
 }
-string(71) "Property and reference types ?Traversable and ?array are not compatible"
+string(114) "Property type ?Traversable is not compatible with the reference held by property class@anonymous->a of type ?array"
 array(0) {
 }
 array(1) {
   [0]=>
   int(1)
 }
-string(55) "Cannot assign ArrayIterator to reference of type ?array"
+string(91) "Cannot assign ArrayIterator to reference held by property class@anonymous->a of type ?array"
 bool(false)
-string(53) "Cannot assign array to reference of type ?Traversable"
+string(89) "Cannot assign array to reference held by property class@anonymous->t of type ?Traversable"
 bool(false)
 bool(true)

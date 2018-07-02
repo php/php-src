@@ -58,7 +58,7 @@ ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 
-ZEND_API zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type old_type, zend_type ref_type);
+ZEND_API zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type type, zend_reference *ref);
 
 ZEND_API zend_bool zend_load_property_class_type(zend_property_info *info);
 
@@ -74,7 +74,7 @@ static zend_always_inline zend_type zend_get_prop_info_ref_type(zend_property_in
 }
 
 /* do not call when new_type == IS_REFERENCE or new_type == IS_OBJECT! */
-static zend_always_inline zend_bool zend_verify_ref_type_assignable(zend_type type, zend_uchar new_type) {
+static zend_always_inline zend_bool zend_verify_type_assignable(zend_type type, zend_uchar new_type) {
 	if (!type) {
 		return 1;
 	}
@@ -85,8 +85,20 @@ static zend_always_inline zend_bool zend_verify_ref_type_assignable(zend_type ty
 	    || (cur_type == IS_ITERABLE && new_type == IS_ARRAY);
 }
 
-ZEND_API zend_bool zend_verify_ref_type_assignable_zval(zend_type type, zval *zv, zend_bool strict);
-ZEND_API ZEND_COLD void zend_throw_ref_type_error(zend_type type, zval *zv);
+ZEND_API zend_property_info *zend_verify_ref_assignable_type(zend_reference *ref, zend_type type);
+ZEND_API zend_property_info *zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict);
+
+ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv);
+ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(const char *source, zend_property_info *prop, zend_type type);
+
+#define ZEND_REF_TYPE_SOURCES(ref) \
+	(ref)->sources
+
+#define ZEND_REF_HAS_TYPE_SOURCES(ref) \
+	(ZEND_REF_TYPE_SOURCES(ref).ptr != NULL)
+
+ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
+ZEND_API void zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
 {
@@ -103,14 +115,15 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			zend_refcounted *garbage;
 
 			if (Z_ISREF_P(variable_ptr)) {
-				if (UNEXPECTED(Z_REFTYPE_P(variable_ptr))) {
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
+					zend_property_info *error_prop;
 					zend_bool need_copy = (value_type & (IS_CONST|IS_CV)) || ((value_type & IS_VAR) && UNEXPECTED(ref) && Z_REFCOUNT_P(variable_ptr) > 1);
 					if (need_copy) {
 						ZVAL_COPY(&tmp, value);
 						value = &tmp;
 					}
-					if (!zend_verify_ref_type_assignable_zval(Z_REFTYPE_P(variable_ptr), value, strict)) {
-						zend_throw_ref_type_error(Z_REFTYPE_P(variable_ptr), value);
+					if ((error_prop = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict)) != NULL) {
+						zend_throw_ref_type_error_zval(error_prop, value);
 						zval_ptr_dtor(value);
 						return Z_REFVAL_P(variable_ptr);
 					}
@@ -471,16 +484,7 @@ static zend_always_inline zend_property_info* zend_object_fetch_property_type_in
 }
 
 zval* zend_verify_property_type(zend_property_info *info, zval *property, zval *tmp, zend_bool strict);
-ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property);
-
-#define ZEND_REF_TYPE_SOURCES(ref) \
-	(ref)->sources
-
-#define ZEND_REF_HAS_TYPE_SOURCES(ref) \
-	(ZEND_REF_TYPE_SOURCES(ref).ptr != NULL)
-
-ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
-ZEND_API zend_type zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
+ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *property);
 
 #define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \
 	zend_ref_add_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
@@ -513,6 +517,7 @@ ZEND_API zend_type zend_ref_del_type_source(zend_property_info_source_list *sour
 			} \
 		} \
 	} while (0)
+
 
 END_EXTERN_C()
 

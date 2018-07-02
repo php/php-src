@@ -3948,17 +3948,18 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	}
 
 	if (Z_ISREF_P(variable_ptr)) {
-		zend_type ref_type = Z_REFTYPE_P(variable_ptr);
+		zend_property_info *error_prop;
+		zend_reference *ref = Z_REF_P(variable_ptr);
 		variable_ptr = Z_REFVAL_P(variable_ptr);
 
-		if (ref_type && !zend_verify_ref_type_assignable_zval(ref_type, value, 0)) {
-			zend_throw_ref_type_error(ref_type, value);
+		if ((error_prop = zend_verify_ref_assignable_zval(ref, value, 0)) != NULL) {
+			zend_throw_ref_type_error_zval(error_prop, value);
 			return;
 		}
 	}
 
 	if (prop_info->type && !zend_verify_property_type(prop_info, value, value, 0)) {
-        	zend_verify_property_type_error(prop_info, prop_info->name, value);
+        	zend_verify_property_type_error(prop_info, value);
 		return;
 	}
 

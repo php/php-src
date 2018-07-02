@@ -26,9 +26,9 @@ var_dump($a);
 
 ?>
 --EXPECT--
-string(54) "Cannot assign ArrayIterator to reference of type array"
+string(78) "Cannot assign ArrayIterator to reference held by property A::$a of type ?array"
 array(0) {
 }
-string(45) "Cannot assign int to reference of type ?array"
+string(68) "Cannot assign int to reference held by property A::$a of type ?array"
 NULL
 

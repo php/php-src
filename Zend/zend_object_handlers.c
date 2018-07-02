@@ -733,8 +733,10 @@ ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void
 				zval *val = retval;
 
 				if (Z_ISREF_P(val)) {
+					zend_property_info *error_prop;
 					/* the overloaded property type must be compatible with the reference type so that we don't coercively cast and end up with a value type not matching the reference type */
-					if (zend_check_typed_assign_typed_ref("Property", Z_REFTYPE_P(val), zend_get_prop_info_ref_type(prop_info)) == 0) {
+					if ((error_prop = zend_verify_ref_assignable_type(Z_REF_P(val), zend_get_prop_info_ref_type(prop_info)))) {
+						zend_throw_ref_type_error_type("Property", error_prop, zend_get_prop_info_ref_type(prop_info));
 						goto exit;
 					}
 					/* we do not add a reference type here - reference types must be backed up by references being assigned to an actual typed container */
@@ -742,7 +744,7 @@ ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void
 				}
 
 				if (UNEXPECTED(zend_verify_property_type(prop_info, val, val, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES)) == NULL)) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(member), val);
+					zend_verify_property_type_error(prop_info, val);
 				}
 			}
 			goto exit;
@@ -808,7 +810,7 @@ ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, 
 			if (UNEXPECTED(prop_info)) {
 				val = zend_verify_property_type(prop_info, value, &tmp, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
 				if (UNEXPECTED(!val)) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
+					zend_verify_property_type_error(prop_info, value);
 					Z_TRY_DELREF_P(value);
 					value = &EG(error_zval);
 					goto exit;
@@ -879,7 +881,7 @@ write_std_property:
 			if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(member), cache_slot))) {
 				val = zend_verify_property_type(prop_info, value, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
 				if (UNEXPECTED(!val)) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
+					zend_verify_property_type_error(prop_info, value);
 					zval_ptr_dtor(value);
 					goto exit;
 				}
@@ -1097,7 +1099,7 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 			if (UNEXPECTED(Z_ISREF_P(slot)) && Z_REFCOUNT_P(slot) > 1) {
 				zend_property_info *prop_info = zend_hash_find_ptr(&zobj->ce->properties_info, Z_STR_P(member));
 				if (UNEXPECTED(prop_info->type)) {
-					Z_REFTYPE_P(slot) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(slot), prop_info);
+					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(slot), prop_info);
 				}
 			}
 			zval_ptr_dtor(slot);

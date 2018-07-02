@@ -244,7 +244,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 						zend_property_info *prop_info;
 						ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
 							if (prop_info->ce == ce && p - ce->default_static_members_table == prop_info->offset) {
-								Z_REFTYPE_P(p) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+								ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
 								break; /* stop iteration here, the array might be realloc()'ed */
 							}
 						} ZEND_REF_FOREACH_TYPE_SOURCES_END();

@@ -81,7 +81,7 @@ int(3)
 int(3)
 int(4)
 int(4)
-Cannot assign null to reference of type int
+Cannot assign null to reference held by property Foo::$i of type int
 int(4)
 int(4)
 Typed property Foo::$i must be int, null used
@@ -91,12 +91,12 @@ string(1) "5"
 int(5)
 int(0)
 string(1) "0"
-Cannot assign string to reference of type int
+Typed property Foo::$i must be int, string used
 int(0)
 string(1) "x"
-Static property and reference types int and string are not compatible
+Static property type int is not compatible with the reference held by property Foo::$s of type string
 int(0)
 string(1) "5"
-Static property and reference types string and int are not compatible
+Static property type string is not compatible with the reference held by property Foo::$i of type int
 int(0)
 string(1) "5"

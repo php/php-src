@@ -404,7 +404,6 @@ typedef union {
 struct _zend_reference {
 	zend_refcounted_h              gc;
 	zval                           val;
-	zend_type                      type;
 	zend_property_info_source_list sources;
 };
 
@@ -722,9 +721,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_REFVAL(zval)				&Z_REF(zval)->val
 #define Z_REFVAL_P(zval_p)			Z_REFVAL(*(zval_p))
 
-#define Z_REFTYPE(zval)				Z_REF(zval)->type
-#define Z_REFTYPE_P(zval_p)			Z_REFTYPE(*(zval_p))
-
 #define Z_AST(zval)					(zval).value.ast
 #define Z_AST_P(zval_p)				Z_AST(*(zval_p))
 
@@ -890,7 +886,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
-		_ref->type = 0;									\
 		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
@@ -902,7 +897,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
-		_ref->type = 0;									\
 		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
@@ -915,7 +909,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_SET_REFCOUNT(_ref, (refcount));						\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, _z);						\
-		_ref->type = 0;									\
 		_ref->sources.ptr = NULL;									\
 		Z_REF_P(_z) = _ref;										\
 		Z_TYPE_INFO_P(_z) = IS_REFERENCE_EX;					\
@@ -928,7 +921,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_TYPE_INFO(_ref) = IS_REFERENCE |						\
 			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
-		_ref->type = 0;									\
 		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\

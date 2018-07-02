@@ -38,11 +38,11 @@ var_dump($foo);
 ?>
 --EXPECTF--
 int(42)
-Cannot assign null to reference of type int
+Typed property class@anonymous::$baz must be int, null used
 int(1)
 int(10)
 int(10)
-Cannot assign null to reference of type int
+Cannot assign null to reference held by property class@anonymous->baz of type int
 object(class@anonymous)#1 (2) {
   ["bar"]=>
   &int(10)

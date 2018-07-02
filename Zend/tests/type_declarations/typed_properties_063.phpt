@@ -51,14 +51,14 @@ var_dump($a->foo);
 --EXPECT--
 int(2)
 int(21)
-Cannot assign string to reference of type int
+Cannot assign string to reference held by property class@anonymous->foo of type int
 int(21)
 int(20)
 int(19)
-Cannot assign float to reference of type int
+Cannot assign float to reference held by property class@anonymous->foo of type int
 integer
-Cannot assign float to reference of type int
+Cannot assign float to reference held by property class@anonymous->foo of type int
 integer
-Cannot assign array to reference of type int
+Cannot assign array to reference held by property class@anonymous->foo of type int
 int(0)
 int(1)

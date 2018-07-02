@@ -47,5 +47,5 @@ Typed static property Test::$y must not be accessed before initialization
 int(24)
 Typed property Test::$y must be int, string used
 int(24)
-Cannot assign string to reference of type int
+Cannot assign string to reference held by property Test::$y of type int
 int(24)

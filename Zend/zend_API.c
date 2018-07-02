@@ -704,7 +704,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				zval **p = va_arg(*va, zval **);
 
-				if (Z_ISREF_P(real_arg) && Z_REFTYPE_P(real_arg) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(real_arg), IS_ARRAY)) {
+				if (Z_ISREF_P(real_arg) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(real_arg)) && !zend_verify_ref_assignable_type(Z_REF_P(real_arg), ZEND_TYPE_ENCODE(IS_ARRAY, 0))) {
 					return "array";
 				}
 
@@ -1193,7 +1193,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 							}
 							v = zend_verify_property_type(prop_info, &tmp, &tmp2, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
 							if (UNEXPECTED(!v)) {
-								zend_verify_property_type_error(prop_info, prop_info->name, &tmp);
+								zend_verify_property_type_error(prop_info, &tmp);
 								class_type->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 								zval_ptr_dtor(&tmp);
 								return FAILURE;
@@ -1261,7 +1261,7 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 
 					val = zend_verify_property_type(property_info, prop, &tmp, 0);
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(property_info, key, prop);
+						zend_verify_property_type_error(property_info, prop);
 						continue;
 					}
 					ZVAL_COPY_VALUE(slot, val);
@@ -4127,7 +4127,7 @@ ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string
 	if (prop_info->type) {
 		zval *val = zend_verify_property_type(prop_info, value, &tmp, /* strict */ 0);
 		if (UNEXPECTED(!val)) {
-			zend_verify_property_type_error(prop_info, name, value);
+			zend_verify_property_type_error(prop_info, value);
 			Z_TRY_DELREF_P(value);
 			return FAILURE;
 		}
