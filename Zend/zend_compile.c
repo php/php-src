@@ -5772,7 +5772,9 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	}
 
 	if (in_interface) {
-		if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
+		if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
+			/* pass */
+		} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __call() must have "
 					"public visibility and cannot be static");
@@ -5822,6 +5824,10 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 		if (!in_trait && zend_string_equals_ci(lcname, ce->name)) {
 			if (!ce->constructor) {
 				ce->constructor = (zend_function *) op_array;
+			}
+		} else if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
+			if (!is_static) {
+				op_array->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 			ce->constructor = (zend_function *) op_array;
