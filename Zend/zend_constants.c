@@ -46,7 +46,7 @@ void free_zend_constant(zval *zv)
 		}
 		efree(c);
 	} else {
-		zval_internal_dtor(&c->value);
+		zval_internal_ptr_dtor(&c->value);
 		if (c->name) {
 			zend_string_release_ex(c->name, 1);
 		}

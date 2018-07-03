@@ -3523,7 +3523,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_CONST_H
 						break;
 					}
 				}
-				zend_print_variable(ptr);
+				zend_print_zval(ptr, 0);
 			}
 		} while (0);
 
@@ -12727,7 +12727,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_TMPVAR_
 						break;
 					}
 				}
-				zend_print_variable(ptr);
+				zend_print_zval(ptr, 0);
 			}
 		} while (0);
 		zval_ptr_dtor_nogc(free_op1);
@@ -30417,7 +30417,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_UNUSED_
 						break;
 					}
 				}
-				zend_print_variable(ptr);
+				zend_print_zval(ptr, 0);
 			}
 		} while (0);
 
@@ -37487,7 +37487,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_CV_HAND
 						break;
 					}
 				}
-				zend_print_variable(ptr);
+				zend_print_zval(ptr, 0);
 			}
 		} while (0);
 

@@ -6412,7 +6412,7 @@ ZEND_VM_COLD_HANDLER(79, ZEND_EXIT, CONST|TMPVAR|UNUSED|CV, ANY)
 						break;
 					}
 				}
-				zend_print_variable(ptr);
+				zend_print_zval(ptr, 0);
 			}
 		} while (0);
 		FREE_OP1();

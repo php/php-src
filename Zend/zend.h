@@ -243,6 +243,10 @@ ZEND_API size_t zend_print_zval(zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
 ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent);
 ZEND_API void zend_print_flat_zval_r(zval *expr);
+
+#define zend_print_variable(var) \
+	zend_print_zval((var), 0)
+
 ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 ZEND_API void zend_activate(void);
