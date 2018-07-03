@@ -4261,7 +4261,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 	/* If search is an array */
 	if (Z_TYPE_P(search) == IS_ARRAY) {
 		/* Duplicate subject string for repeated replacement */
-		ZVAL_STR_COPY(result, subject_str);
+		zend_string_addref(subject_str);
 
 		if (Z_TYPE_P(replace) == IS_ARRAY) {
 			replace_idx = 0;
@@ -4276,14 +4276,6 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			/* Make sure we're dealing with strings. */
 			zend_string *tmp_search_str;
 			zend_string *search_str = zval_get_tmp_string(search_entry, &tmp_search_str);
-
-			if (ZSTR_LEN(search_str) == 0) {
-				if (Z_TYPE_P(replace) == IS_ARRAY) {
-					replace_idx++;
-				}
-				zend_tmp_string_release(tmp_search_str);
-				continue;
-			}
 
 			/* If replace is an array. */
 			if (Z_TYPE_P(replace) == IS_ARRAY) {
@@ -4314,7 +4306,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			if (ZSTR_LEN(search_str) == 1) {
 				zend_long old_replace_count = replace_count;
 
-				tmp_result = php_char_to_str_ex(Z_STR_P(result),
+				tmp_result = php_char_to_str_ex(subject_str,
 								ZSTR_VAL(search_str)[0],
 								replace_value,
 								replace_len,
@@ -4326,22 +4318,25 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				}
 			} else if (ZSTR_LEN(search_str) > 1) {
 				if (case_sensitivity) {
-					tmp_result = php_str_to_str_ex(Z_STR_P(result),
+					tmp_result = php_str_to_str_ex(subject_str,
 							ZSTR_VAL(search_str), ZSTR_LEN(search_str),
 							replace_value, replace_len, &replace_count);
 				} else {
 					zend_long old_replace_count = replace_count;
 
 					if (!lc_subject_str) {
-						lc_subject_str = php_string_tolower(Z_STR_P(result));
+						lc_subject_str = php_string_tolower(subject_str);
 					}
-					tmp_result = php_str_to_str_i_ex(Z_STR_P(result), ZSTR_VAL(lc_subject_str),
+					tmp_result = php_str_to_str_i_ex(subject_str, ZSTR_VAL(lc_subject_str),
 							search_str, replace_value, replace_len, &replace_count);
 					if (replace_count != old_replace_count) {
 						zend_string_release_ex(lc_subject_str, 0);
 						lc_subject_str = NULL;
 					}
 				}
+			} else {
+				zend_tmp_string_release(tmp_search_str);
+				continue;
 			}
 
 			zend_tmp_string_release(tmp_search_str);
@@ -4350,17 +4345,24 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				zend_string_release_ex(tmp_replace_entry_str, 0);
 				tmp_replace_entry_str = NULL;
 			}
-			zend_string_release_ex(Z_STR_P(result), 0);
-			ZVAL_STR(result, tmp_result);
 
-			if (Z_STRLEN_P(result) == 0) {
-				if (lc_subject_str) {
-					zend_string_release_ex(lc_subject_str, 0);
+			if (subject_str == tmp_result) {
+				zend_string_delref(subject_str);
+			} else {
+				zend_string_release_ex(subject_str, 0);
+				subject_str = tmp_result;
+				if (ZSTR_LEN(subject_str) == 0) {
+					zend_string_release_ex(subject_str, 0);
+					ZVAL_EMPTY_STRING(result);
+					if (lc_subject_str) {
+						zend_string_release_ex(lc_subject_str, 0);
+					}
+					zend_tmp_string_release(tmp_subject_str);
+					return replace_count;
 				}
-				zend_tmp_string_release(tmp_subject_str);
-				return replace_count;
 			}
 		} ZEND_HASH_FOREACH_END();
+		ZVAL_STR(result, subject_str);
 		if (lc_subject_str) {
 			zend_string_release_ex(lc_subject_str, 0);
 		}
