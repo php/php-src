@@ -448,7 +448,7 @@ PHP_FUNCTION(proc_open)
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_STRING(command, command_len)
 		Z_PARAM_ARRAY(descriptorspec)
-		Z_PARAM_ARRAY_ASSIGNABLE(pipes)
+		Z_PARAM_ZVAL(pipes)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_EX(cwd, cwd_len, 1, 0)
 		Z_PARAM_ARRAY_EX(environment, 1, 0)
@@ -863,6 +863,11 @@ PHP_FUNCTION(proc_open)
 #endif
 	/* we forked/spawned and this is the parent */
 
+	pipes = zend_try_array_init(pipes);
+	if (!pipes) {
+		goto exit_fail;
+	}
+
 	proc = (struct php_process_handle*)pemalloc(sizeof(struct php_process_handle), is_persistent);
 	proc->is_persistent = is_persistent;
 	proc->command = command;
@@ -873,9 +878,6 @@ PHP_FUNCTION(proc_open)
 	proc->childHandle = childHandle;
 #endif
 	proc->env = env;
-
-	zval_ptr_dtor(pipes);
-	array_init(pipes);
 
 #if PHP_CAN_DO_PTS
 	if (dev_ptmx >= 0) {

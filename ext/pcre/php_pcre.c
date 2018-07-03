@@ -949,7 +949,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		Z_PARAM_STR(regex)
 		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_ASSIGNABLE(subpats)
+		Z_PARAM_ZVAL(subpats)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_LONG(start_offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -994,8 +994,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 
 	/* Overwrite the passed-in value for subpatterns with an empty array. */
 	if (subpats != NULL) {
-		zval_ptr_dtor(subpats);
-		array_init(subpats);
+		subpats = zend_try_array_init(subpats);
+		if (!subpats) {
+			return;
+		}
 	}
 
 	subpats_order = global ? PREG_PATTERN_ORDER : 0;

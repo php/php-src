@@ -1206,19 +1206,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 #define Z_PARAM_STR(dest) \
 	Z_PARAM_STR_EX(dest, 0, 0)
 
-/* old "t" */
-#define Z_PARAM_ARRAY_ASSIGNABLE_EX(dest, check_null, separate) \
-		Z_PARAM_PROLOGUE(1, separate); \
-		if (Z_ISREF_P(_real_arg) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(_real_arg)) && zend_verify_ref_assignable_type(Z_REF_P(_real_arg), ZEND_TYPE_ENCODE(IS_ARRAY, 0)) != NULL) { \
-			_expected_type = Z_EXPECTED_ARRAY; \
-			error_code = ZPP_ERROR_WRONG_ARG; \
-			break; \
-		} \
-		zend_parse_arg_zval_deref(_arg, &dest, check_null);
-
-#define Z_PARAM_ARRAY_ASSIGNABLE(dest) \
-	Z_PARAM_ARRAY_ASSIGNABLE_EX(dest, 0, 0)
-
 /* old "z" */
 #define Z_PARAM_ZVAL_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \

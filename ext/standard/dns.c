@@ -811,18 +811,22 @@ PHP_FUNCTION(dns_get_record)
 		Z_PARAM_STRING(hostname, hostname_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(type_param)
-		Z_PARAM_ARRAY_ASSIGNABLE(authns)
-		Z_PARAM_ARRAY_ASSIGNABLE(addtl)
+		Z_PARAM_ZVAL(authns)
+		Z_PARAM_ZVAL(addtl)
 		Z_PARAM_BOOL(raw)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (authns) {
-		zval_ptr_dtor(authns);
-		array_init(authns);
+		authns = zend_try_array_init(authns);
+		if (!authns) {
+			return;
+		}
 	}
 	if (addtl) {
-		zval_ptr_dtor(addtl);
-		array_init(addtl);
+		addtl = zend_try_array_init(addtl);
+		if (!addtl) {
+			return;
+		}
 	}
 
 	if (!raw) {
@@ -1044,17 +1048,21 @@ PHP_FUNCTION(dns_get_mx)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(hostname, hostname_len)
-		Z_PARAM_ARRAY_ASSIGNABLE(mx_list)
+		Z_PARAM_ZVAL(mx_list)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_ASSIGNABLE(weight_list)
+		Z_PARAM_ZVAL(weight_list)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_ptr_dtor(mx_list);
-	array_init(mx_list);
+	mx_list = zend_try_array_init(mx_list);
+	if (!mx_list) {
+		return;
+	}
 
 	if (weight_list) {
-		zval_ptr_dtor(weight_list);
-		array_init(weight_list);
+		weight_list = zend_try_array_init(weight_list);
+		if (!weight_list) {
+			return;
+		}
 	}
 
 #if defined(HAVE_DNS_SEARCH)

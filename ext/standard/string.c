@@ -4870,7 +4870,7 @@ PHP_FUNCTION(parse_str)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(arg, arglen)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_ASSIGNABLE(arrayArg)
+		Z_PARAM_ZVAL(arrayArg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	res = estrndup(arg, arglen);
@@ -4892,9 +4892,11 @@ PHP_FUNCTION(parse_str)
 			zend_throw_error(NULL, "Cannot re-assign $this");
 		}
 	} else 	{
-		/* Clear out the array that was passed in. */
-		zval_ptr_dtor(arrayArg);
-		array_init(arrayArg);
+		arrayArg = zend_try_array_init(arrayArg);
+		if (!arrayArg) {
+			return;
+		}
+
 		sapi_module.treat_data(PARSE_STRING, res, arrayArg);
 	}
 }
