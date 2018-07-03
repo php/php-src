@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_PS_TITLE_HEADER
 #define PHP_PS_TITLE_HEADER
 

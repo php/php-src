@@ -4,7 +4,6 @@ XMLReader: libxml2 XML Reader, parser property set/get
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
 <?php 
-/* $Id$ */
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books></books>';

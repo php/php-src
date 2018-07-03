@@ -1,4 +1,4 @@
-dnl $Id$ -*- autoconf -*-
+dnl -*- autoconf -*-
 
 dnl
 dnl Check if flush should be called explicitly after buffered io

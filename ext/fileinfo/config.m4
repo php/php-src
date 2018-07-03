@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension fileinfo
 
 PHP_ARG_ENABLE(fileinfo, for fileinfo support,

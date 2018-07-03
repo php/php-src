@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension pdo_dblib
 
 PHP_ARG_WITH(pdo-dblib, for PDO_DBLIB support via FreeTDS,
 [  --with-pdo-dblib[=DIR]    PDO: DBLIB-DB support.  DIR is the FreeTDS home directory])

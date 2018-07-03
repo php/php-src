@@ -1,5 +1,4 @@
 /* This is a template RC file.
- * $Id$
  * Do not edit with MSVC */
 #ifdef APSTUDIO_INVOKED
 # error dont edit with MSVC

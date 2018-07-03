@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "phar_internal.h"
 
 phar_path_check_result phar_path_check(char **s, size_t *len, const char **error)

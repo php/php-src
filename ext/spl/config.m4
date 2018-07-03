@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension SPL
 
   AC_DEFINE(HAVE_SPL, 1, [Whether you want SPL (Standard PHP Library) support]) 

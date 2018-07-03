@@ -3,7 +3,7 @@ bzip2.compress (with convert.base64-encode)
 --SKIPIF--
 <?php if (!extension_loaded("bz2")) print "skip"; ?>
 --FILE--
-<?php /* $Id$ */
+<?php
 $text = 'I am the very model of a modern major general, I\'ve information vegetable, animal, and mineral.';
 
 $fp = fopen('php://stdout', 'w');

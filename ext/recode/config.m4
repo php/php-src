@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension recode
 
 PHP_ARG_WITH(recode,for recode support,
 [  --with-recode[=DIR]       Include recode support])

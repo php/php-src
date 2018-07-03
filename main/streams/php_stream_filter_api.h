@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* The filter API works on the principle of "Bucket-Brigades".  This is
  * partially inspired by the Apache 2 method of doing things, although
  * it is intentially a light-weight implementation.

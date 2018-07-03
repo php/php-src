@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension xmlrpc
 
 sinclude(ext/xmlrpc/libxmlrpc/acinclude.m4)
 sinclude(ext/xmlrpc/libxmlrpc/xmlrpc.m4)

@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension sysvsem
 
 PHP_ARG_ENABLE(sysvsem,whether to enable System V semaphore support,
 [  --enable-sysvsem        Enable System V semaphore support])

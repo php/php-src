@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension openssl
 
 PHP_ARG_WITH(openssl, for OpenSSL support,
 [  --with-openssl[=DIR]      Include OpenSSL support (requires OpenSSL >= 1.0.1)])

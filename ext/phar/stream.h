@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 BEGIN_EXTERN_C()
 
 php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options);

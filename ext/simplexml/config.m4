@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension simplexml
 
 PHP_ARG_ENABLE(simplexml, whether to enable SimpleXML support,

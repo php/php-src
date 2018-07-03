@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for sapi litespeed
 
 AC_MSG_CHECKING(for LiteSpeed support)
 

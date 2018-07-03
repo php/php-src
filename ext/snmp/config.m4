@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension snmp
 
 PHP_ARG_WITH(snmp,for SNMP support,
 [  --with-snmp[=DIR]         Include SNMP support])

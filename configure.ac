@@ -1,4 +1,4 @@
-## $Id$ -*- autoconf -*-
+## -*- autoconf -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
 dnl include Zend specific macro definitions first

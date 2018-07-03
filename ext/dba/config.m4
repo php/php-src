@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension dba
 
 dnl Suppose we need FlatFile if no support or only CDB is used.
 

@@ -15,7 +15,6 @@
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #ifdef PHP_WIN32
 typedef HANDLE php_file_descriptor_t;

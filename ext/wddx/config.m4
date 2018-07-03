@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension wddx
 
 PHP_ARG_ENABLE(wddx,whether to enable WDDX support,
 [  --enable-wddx           Enable WDDX support])

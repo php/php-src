@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension gettext
 
 PHP_ARG_WITH(gettext,for GNU gettext support,
 [  --with-gettext[=DIR]      Include GNU gettext support])

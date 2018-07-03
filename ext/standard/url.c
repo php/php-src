@@ -15,7 +15,6 @@
    | Author: Jim Winstead <jimw@php.net>                                  |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include <stdlib.h>
 #include <string.h>

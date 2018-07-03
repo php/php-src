@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for date extension
 
 sinclude(ext/date/lib/timelib.m4)

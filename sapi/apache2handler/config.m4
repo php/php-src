@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for sapi apache2handler
 
 PHP_ARG_WITH(apxs2,,
 [  --with-apxs2[=FILE]       Build shared Apache 2.0 Handler module. FILE is the optional

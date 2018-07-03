@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension json
 
 PHP_ARG_ENABLE(json, whether to enable JavaScript Object Serialization support,
 [  --disable-json          Disable JavaScript Object Serialization support], yes)

@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_PORTABILITY_H
 #define ZEND_PORTABILITY_H
 

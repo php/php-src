@@ -6,7 +6,6 @@ if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
 <?php 
-/* $Id$ */
 
 $doc_dest = '001.xml';
 $xw = xmlwriter_open_uri($doc_dest);

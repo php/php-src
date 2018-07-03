@@ -1,7 +1,7 @@
 --TEST--
 Various pow() tests
 --FILE--
-<?php // $Id$
+<?php
 
 $x = 2;
 $x **= 3;

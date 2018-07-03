@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension bz2
 
 PHP_ARG_WITH(bz2, for BZip2 support,
 [  --with-bz2[=DIR]          Include BZip2 support])
