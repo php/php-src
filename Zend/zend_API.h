@@ -774,6 +774,28 @@ static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
 	zend_try_assign(zv, &_zv); \
 } while (0)
 
+/* Initializes a reference to an empty array and returns dereferenced zval,
+ * or NULL if the initialization failed. */
+static zend_always_inline zval *zend_try_array_init(zval *zv) {
+	zval tmp;
+	ZVAL_ARR(&tmp, zend_new_array(0));
+	if (UNEXPECTED(zend_try_assign(zv, &tmp) == FAILURE)) {
+		return NULL;
+	}
+	ZVAL_DEREF(zv);
+	return zv;
+}
+
+static zend_always_inline zval *zend_try_array_init_size(zval *zv, size_t size) {
+	zval tmp;
+	ZVAL_ARR(&tmp, zend_new_array(size));
+	if (UNEXPECTED(zend_try_assign(zv, &tmp) == FAILURE)) {
+		return NULL;
+	}
+	ZVAL_DEREF(zv);
+	return zv;
+}
+
 /* Fast parameter parsing API */
 
 /* Fast ZPP is always enabled now; this define is left in for compatibility

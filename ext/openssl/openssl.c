@@ -2959,7 +2959,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	BIO * bio_in = NULL;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sts", &zp12, &zp12_len, &zout, &pass, &pass_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szs", &zp12, &zp12_len, &zout, &pass, &pass_len) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
@@ -2977,8 +2977,10 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		BIO * bio_out;
 		int cert_num;
 
-		zval_dtor(zout);
-		array_init(zout);
+		zout = zend_try_array_init(zout);
+		if (!zout) {
+			goto cleanup;
+		}
 
 		if (cert) {
 			bio_out = BIO_new(BIO_s_mem());
@@ -5342,7 +5344,7 @@ PHP_FUNCTION(openssl_pkcs7_read)
 	PKCS7 * p7 = NULL;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "st", &p7b, &p7b_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &p7b, &p7b_len,
 				&zout) == FAILURE) {
 		return;
 	}
@@ -5384,8 +5386,10 @@ PHP_FUNCTION(openssl_pkcs7_read)
 			break;
 	}
 
-	zval_dtor(zout);
-	array_init(zout);
+	zout = zend_try_array_init(zout);
+	if (!zout) {
+		goto clean_exit;
+	}
 
 	if (certs != NULL) {
 		for (i = 0; i < sk_X509_num(certs); i++) {
@@ -6058,7 +6062,7 @@ PHP_FUNCTION(openssl_seal)
 	const EVP_CIPHER *cipher;
 	EVP_CIPHER_CTX *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szta|sz", &data, &data_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szza|sz", &data, &data_len,
 				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv) == FAILURE) {
 		return;
 	}
@@ -6135,8 +6139,12 @@ PHP_FUNCTION(openssl_seal)
 		ZEND_TRY_ASSIGN_NEW_STR(sealdata, zend_string_init((char*)buf, len1 + len2, 0));
 		efree(buf);
 
-		zval_dtor(ekeys);
-		array_init(ekeys);
+		ekeys = zend_try_array_init(ekeys);
+		if (!ekeys) {
+			EVP_CIPHER_CTX_free(ctx);
+			goto clean_exit;
+		}
+
 		for (i=0; i<nkeys; i++) {
 			eks[i][eksl[i]] = '\0';
 			add_next_index_stringl(ekeys, (const char*)eks[i], eksl[i]);

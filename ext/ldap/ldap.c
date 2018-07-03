@@ -578,7 +578,11 @@ static void _php_ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* arr
 	zval tmp1;
 	LDAPControl **ctrlp;
 
-	array_init(array);
+	array = zend_try_array_init(array);
+	if (!array) {
+		return;
+	}
+
 	if (ctrls == NULL) {
 		return;
 	}
@@ -3330,7 +3334,7 @@ PHP_FUNCTION(ldap_parse_result)
 	char *lmatcheddn, *lerrmsg;
 	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrz|zztt", &link, &result, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrz|zzzz", &link, &result, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
 		return;
 	}
 
@@ -3360,8 +3364,10 @@ PHP_FUNCTION(ldap_parse_result)
 		case 7:
 			_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
 		case 6:
-			zval_ptr_dtor(referrals);
-			array_init(referrals);
+			referrals = zend_try_array_init(referrals);
+			if (!referrals) {
+				return;
+			}
 			if (lreferrals != NULL) {
 				refp = lreferrals;
 				while (*refp) {
@@ -3525,7 +3531,7 @@ PHP_FUNCTION(ldap_parse_reference)
 	ldap_resultentry *resultentry;
 	char **lreferrals, **refp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrt", &link, &result_entry, &referrals) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrz", &link, &result_entry, &referrals) != SUCCESS) {
 		return;
 	}
 
@@ -3541,8 +3547,11 @@ PHP_FUNCTION(ldap_parse_reference)
 		RETURN_FALSE;
 	}
 
-	zval_ptr_dtor(referrals);
-	array_init(referrals);
+	referrals = zend_try_array_init(referrals);
+	if (!referrals) {
+		return;
+	}
+
 	if (lreferrals != NULL) {
 		refp = lreferrals;
 		while (*refp) {
@@ -4207,7 +4216,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	int rc, myargcount = ZEND_NUM_ARGS(), msgid, err;
 	char* errmsg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|zzzt", &link, &user, &oldpw, &newpw, &serverctrls) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|zzzz", &link, &user, &oldpw, &newpw, &serverctrls) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

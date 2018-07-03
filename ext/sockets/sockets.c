@@ -2214,7 +2214,7 @@ PHP_FUNCTION(socket_create_pair)
 	PHP_SOCKET	fds_array[2];
 	zend_long		domain, type, protocol;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lllt", &domain, &type, &protocol, &fds_array_zval) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lllz", &domain, &type, &protocol, &fds_array_zval) == FAILURE) {
 		return;
 	}
 
@@ -2243,8 +2243,12 @@ PHP_FUNCTION(socket_create_pair)
 		RETURN_FALSE;
 	}
 
-	zval_ptr_dtor(fds_array_zval);
-	array_init(fds_array_zval);
+	fds_array_zval = zend_try_array_init(fds_array_zval);
+	if (!fds_array_zval) {
+		efree(php_sock[0]);
+		efree(php_sock[1]);
+		return;
+	}
 
 	php_sock[0]->bsd_socket = fds_array[0];
 	php_sock[1]->bsd_socket = fds_array[1];

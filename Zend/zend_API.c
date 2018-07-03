@@ -700,18 +700,6 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
-		case 't':
-			{
-				zval **p = va_arg(*va, zval **);
-
-				if (Z_ISREF_P(real_arg) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(real_arg)) && !zend_verify_ref_assignable_type(Z_REF_P(real_arg), ZEND_TYPE_ENCODE(IS_ARRAY, 0))) {
-					return "array";
-				}
-
-				zend_parse_arg_zval_deref(arg, p, check_null);
-			}
-			break;
-
 		case 'o':
 			{
 				zval **p = va_arg(*va, zval **);

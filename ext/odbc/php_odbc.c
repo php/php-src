@@ -1880,13 +1880,13 @@ PHP_FUNCTION(odbc_fetch_into)
 #endif /* HAVE_SQL_EXTENDED_FETCH */
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rt|l", &pv_res, &pv_res_arr, &pv_row) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|l", &pv_res, &pv_res_arr, &pv_row) == FAILURE) {
 		return;
 	}
 
 	rownum = pv_row;
 #else
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rt", &pv_res, &pv_res_arr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &pv_res, &pv_res_arr) == FAILURE) {
 		return;
 	}
 #endif /* HAVE_SQL_EXTENDED_FETCH */
@@ -1900,8 +1900,9 @@ PHP_FUNCTION(odbc_fetch_into)
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_P(pv_res_arr) != IS_ARRAY) {
-		array_init(pv_res_arr);
+	pv_res_arr = zend_try_array_init(pv_res_arr);
+	if (!pv_res_arr) {
+		return;
 	}
 
 #ifdef HAVE_SQL_EXTENDED_FETCH

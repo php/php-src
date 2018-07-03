@@ -665,7 +665,7 @@ PHP_FUNCTION(pcntl_waitpid)
 	struct rusage rusage;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz|lt", &pid, &z_status, &options, &z_rusage) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz|lz", &pid, &z_status, &options, &z_rusage) == FAILURE) {
 		return;
 	}
 
@@ -673,8 +673,10 @@ PHP_FUNCTION(pcntl_waitpid)
 
 #ifdef HAVE_WAIT4
 	if (z_rusage) {
-		zval_dtor(z_rusage);
-		array_init(z_rusage);
+		z_rusage = zend_try_array_init(z_rusage);
+		if (!z_rusage) {
+			return;
+		}
 
 		memset(&rusage, 0, sizeof(struct rusage));
 		child_id = wait4((pid_t) pid, &status, options, &rusage);
@@ -713,15 +715,17 @@ PHP_FUNCTION(pcntl_wait)
 	struct rusage rusage;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lt", &z_status, &options, &z_rusage) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lz", &z_status, &options, &z_rusage) == FAILURE) {
 		return;
 	}
 
 	status = zval_get_long(z_status);
 #ifdef HAVE_WAIT3
 	if (z_rusage) {
-		zval_dtor(z_rusage);
-		array_init(z_rusage);
+		z_rusage = zend_try_array_init(z_rusage);
+		if (!z_rusage) {
+			return;
+		}
 
 		memset(&rusage, 0, sizeof(struct rusage));
 		child_id = wait3(&status, options, &rusage);
@@ -1097,7 +1101,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	zval         *user_set, *user_oldset = NULL, *user_signo;
 	sigset_t      set, oldset;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "la|t", &how, &user_set, &user_oldset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "la|z", &how, &user_set, &user_oldset) == FAILURE) {
 		return;
 	}
 
@@ -1123,8 +1127,10 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	}
 
 	if (user_oldset != NULL) {
-		zval_dtor(user_oldset);
-		array_init(user_oldset);
+		user_oldset = zend_try_array_init(user_oldset);
+		if (!user_oldset) {
+			return;
+		}
 
 		for (signo = 1; signo < NSIG; ++signo) {
 			if (sigismember(&oldset, signo) != 1) {
@@ -1151,11 +1157,11 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	struct timespec  timeout;
 
 	if (timedwait) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|tll", &user_set, &user_siginfo, &tv_sec, &tv_nsec) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|zll", &user_set, &user_siginfo, &tv_sec, &tv_nsec) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|t", &user_set, &user_siginfo) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|z", &user_set, &user_siginfo) == FAILURE) {
 			return;
 		}
 	}
@@ -1219,8 +1225,10 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_siginfo) /* {{{ */
 {
 	if (signo > 0 && user_siginfo) {
-		zval_dtor(user_siginfo);
-		array_init(user_siginfo);
+		user_siginfo = zend_try_array_init(user_siginfo);
+		if (!user_siginfo) {
+			return;
+		}
 
 		add_assoc_long_ex(user_siginfo, "signo", sizeof("signo")-1, siginfo->si_signo);
 		add_assoc_long_ex(user_siginfo, "errno", sizeof("errno")-1, siginfo->si_errno);
