@@ -689,7 +689,7 @@ dnl Also check for working getaddrinfo
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
 [AC_TRY_LINK([#include <netdb.h>],
                 [struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);], 
-  AC_TRY_RUN([
+  [AC_TRY_RUN([
 #include <netdb.h>
 #include <sys/types.h>
 #ifndef AF_INET
@@ -725,7 +725,7 @@ int main(void) {
   freeaddrinfo(ai);
   exit(0);
 }
-  ],ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no, ac_cv_func_getaddrinfo=no),
+  ],ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no, ac_cv_func_getaddrinfo=no)],
 ac_cv_func_getaddrinfo=no)])
 if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
