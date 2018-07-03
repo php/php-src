@@ -1211,6 +1211,7 @@ void zend_do_early_binding(void) /* {{{ */
 		case ZEND_VERIFY_ABSTRACT_CLASS:
 		case ZEND_ADD_INTERFACE:
 		case ZEND_ADD_TRAIT:
+		case ZEND_ADD_FRIEND:
 		case ZEND_BIND_TRAITS:
 			/* We currently don't early-bind classes that implement interfaces */
 			/* Classes with traits are handled exactly the same, no early-bind here */
@@ -1758,6 +1759,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->traits = NULL;
 		ce->trait_aliases = NULL;
 		ce->trait_precedences = NULL;
+		ce->num_friends = 0;
+		ce->friends = NULL;
 		ce->serialize = NULL;
 		ce->unserialize = NULL;
 		ce->serialize_func = NULL;
@@ -6285,6 +6288,26 @@ void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+void zend_compile_friend(zend_ast *ast) /* {{{ */
+{
+	zend_ast_list *friends = zend_ast_get_list(ast->child[0]);
+	zend_class_entry *ce = CG(active_class_entry);
+	zend_op *opline;
+	uint32_t i;
+
+	for (i = 0; i < friends->children; ++i) {
+		zend_ast *friend_ast = friends->child[i];
+		
+	 	opline = zend_emit_op(NULL, ZEND_ADD_FRIEND, &FC(implementing_class), NULL);
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), 
+			zend_resolve_class_name_ast(friend_ast));
+
+	 	ce->num_friends++;
+	}
+}
+/* }}} */
+
 void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -6494,6 +6517,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
 
 		zend_emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL);
+	}
+
+	if (ce->num_friends > 0) {
+		ce->friends = NULL;
+		ce->num_friends = 0;
 	}
 
 	if (implements_ast) {
@@ -8233,6 +8261,9 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_USE_TRAIT:
 			zend_compile_use_trait(ast);
 			break;
+		case ZEND_AST_FRIEND:
+			zend_compile_friend(ast);
+			break;	
 		case ZEND_AST_CLASS:
 			zend_compile_class_decl(ast);
 			break;

@@ -314,6 +314,20 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* 
 }
 /* }}} */
 
+static zend_always_inline zend_bool is_friend_of(zend_class_entry *class, zend_class_entry *candidate) /* {{{ */
+{
+	uint32_t i;
+
+	for (i = 0; i < class->num_friends; i++) {
+		if (class->friends[i] == candidate) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
 static zend_always_inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce) /* {{{ */
 {
 	zend_class_entry *scope;
@@ -333,7 +347,7 @@ static zend_always_inline int zend_verify_property_access(zend_property_info *pr
 		} else {
 			scope = zend_get_executed_scope();
 		}
-		return zend_check_protected(property_info->ce, scope);
+		return (zend_check_protected(property_info->ce, scope) || is_friend_of(ce, scope));
 	}
 	return 0;
 }

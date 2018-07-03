@@ -278,6 +278,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 			_destroy_zend_class_traits_info(ce);
 
+			if (ce->num_friends > 0 && ce->friends) {
+				efree(ce->friends);
+			}
+
 			break;
 		case ZEND_INTERNAL_CLASS:
 			if (ce->default_properties_table) {

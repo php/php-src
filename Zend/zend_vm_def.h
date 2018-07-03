@@ -5149,6 +5149,30 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(199, ZEND_ADD_FRIEND, ANY, CONST)
+{
+	USE_OPLINE
+	zend_class_entry *ce = Z_CE_P(EX_VAR(opline->op1.var));
+	zend_class_entry *friend;
+
+	SAVE_OPLINE();
+	friend = Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op2));
+
+	if (UNEXPECTED(friend == NULL)) {
+		friend = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)),
+										 RT_CONSTANT(opline, opline->op2) + 1,
+										 ZEND_FETCH_CLASS_DEFAULT);
+
+		if (UNEXPECTED(friend == NULL)) {
+			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		}
+	}
+
+	zend_do_implement_friend(ce, friend);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV, REF)
 {
 	USE_OPLINE

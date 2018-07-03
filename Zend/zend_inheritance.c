@@ -1102,6 +1102,32 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 }
 /* }}} */
 
+ZEND_API void zend_do_implement_friend(zend_class_entry *ce, zend_class_entry *friend) /* {{{ */
+{
+	uint32_t i, ignore = 0;
+	uint32_t current_friend_num = ce->num_friends;
+	uint32_t parent_friend_num  = ce->parent ? ce->parent->num_friends : 0;
+
+	for (i = 0; i < ce->num_friends; i++) {
+		if (ce->friends[i] == NULL) {
+			memmove(ce->friends + i, ce->friends + i + 1, sizeof(zend_class_entry*) * (--ce->num_friends - i));
+			i--;
+		} else if (ce->friends[i] == friend) {
+			if (i < parent_friend_num) {
+				ignore = 1;
+			}
+		}
+	}
+
+	if (!ignore) {
+		if (ce->num_friends >= current_friend_num) {
+			ce->friends = (zend_class_entry **) erealloc(ce->friends, sizeof(zend_class_entry *) * (++current_friend_num));
+		}
+		ce->friends[ce->num_friends++] = friend;
+	}
+}
+/* }}} */
+
 static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_function *other_fn) /* {{{ */
 {
 	uint32_t    fn_flags = fn->common.scope->ce_flags;
