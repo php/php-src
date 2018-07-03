@@ -907,6 +907,9 @@ ZEND_VM_C_LABEL(assign_dim_op_convert_to_array):
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 			value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
+			if (OP2_TYPE == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+				dim++;
+			}
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op EXECUTE_DATA_CC);
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
@@ -1644,6 +1647,9 @@ ZEND_VM_C_LABEL(fetch_dim_r_array):
 			}
 		} else {
 ZEND_VM_C_LABEL(fetch_dim_r_slow):
+			if (OP2_TYPE == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+				dim++;
+			}
 			zend_fetch_dimension_address_read_R_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} else {
@@ -2048,7 +2054,7 @@ ZEND_VM_HANDLER(98, ZEND_FETCH_LIST_R, CONST|TMPVARCV, CONST|TMPVAR|CV)
 
 	SAVE_OPLINE();
 	container = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
-	zend_fetch_dimension_address_LIST_r(container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R) OPLINE_CC EXECUTE_DATA_CC);
+	zend_fetch_dimension_address_LIST_r(container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R), OP2_TYPE OPLINE_CC EXECUTE_DATA_CC);
 	FREE_OP2();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -2068,9 +2074,9 @@ ZEND_VM_HANDLER(198, ZEND_FETCH_LIST_W, VAR|CV, CONST|TMPVAR|CV)
 		&& UNEXPECTED(!Z_ISREF_P(container))
 	) {
 		zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
-		zend_fetch_dimension_address_LIST_r(container, dim OPLINE_CC EXECUTE_DATA_CC);
+		zend_fetch_dimension_address_LIST_r(container, dim, OP2_TYPE OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		zend_fetch_dimension_address_LIST_w(container, dim OPLINE_CC EXECUTE_DATA_CC);
+		zend_fetch_dimension_address_LIST_w(container, dim, OP2_TYPE OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 	FREE_OP2();
@@ -2247,6 +2253,9 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 			value = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
 
+			if (OP2_TYPE == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+				dim++;
+			}
 			zend_assign_to_object_dim(object_ptr, dim, value OPLINE_CC EXECUTE_DATA_CC);
 
 			FREE_OP_DATA();
@@ -5538,8 +5547,10 @@ ZEND_VM_C_LABEL(unset_dim_array):
 ZEND_VM_C_LABEL(offset_again):
 			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 				key = Z_STR_P(offset);
-				if (ZEND_HANDLE_NUMERIC(key, hval)) {
-					ZEND_VM_C_GOTO(num_index_dim);
+				if (OP2_TYPE != IS_CONST) {
+					if (ZEND_HANDLE_NUMERIC(key, hval)) {
+						ZEND_VM_C_GOTO(num_index_dim);
+					}
 				}
 ZEND_VM_C_LABEL(str_index_dim):
 				if (ht == &EG(symbol_table)) {
@@ -5593,6 +5604,9 @@ ZEND_VM_C_LABEL(num_index_dim):
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_use_object_as_array();
 			} else {
+				if (OP2_TYPE == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
+					offset++;
+				}
 				Z_OBJ_HT_P(container)->unset_dimension(container, offset);
 			}
 		} else if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
@@ -6284,8 +6298,10 @@ ZEND_VM_C_LABEL(isset_dim_obj_array):
 ZEND_VM_C_LABEL(isset_again):
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
-			if (ZEND_HANDLE_NUMERIC(str, hval)) {
-				ZEND_VM_C_GOTO(num_index_prop);
+			if (OP2_TYPE != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					ZEND_VM_C_GOTO(num_index_prop);
+				}
 			}
 			value = zend_hash_find_ex_ind(ht, str, OP2_TYPE == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -6314,6 +6330,9 @@ ZEND_VM_C_LABEL(num_index_prop):
 		}
 	}
 
+	if (OP2_TYPE == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
+		offset++;
+	}
 	if (!(opline->extended_value & ZEND_ISEMPTY)) {
 		result = zend_isset_dim_slow(container, offset EXECUTE_DATA_CC);
 	} else {
@@ -8680,6 +8699,9 @@ ZEND_VM_C_LABEL(fetch_dim_r_index_array):
 	} else {
 ZEND_VM_C_LABEL(fetch_dim_r_index_slow):
 		SAVE_OPLINE();
+		if (OP2_TYPE == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+			dim++;
+		}
 		zend_fetch_dimension_address_read_R_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 		FREE_OP1();
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

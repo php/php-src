@@ -514,11 +514,53 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				TO_STRING_NOWARN(val);
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 				(opline+1)->extended_value = alloc_cache_slots(op_array, 2);
+			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
+				if (Z_TYPE_P(val) == IS_STRING) {
+					zend_ulong index;
+
+					if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
+						ZVAL_LONG(&tmp, index);
+						opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
+						zend_string_hash_val(Z_STR_P(val));
+						zend_optimizer_add_literal(op_array, val);
+						Z_EXTRA(op_array->literals[opline->op2.constant]) = ZEND_EXTRA_VALUE;
+						break;
+					}
+				}
+				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
+				Z_EXTRA(op_array->literals[opline->op2.constant]) = 0;
 			} else {
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			}
 			break;
+		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+		case ZEND_ASSIGN_DIM:
+		case ZEND_UNSET_DIM:
+		case ZEND_FETCH_DIM_R:
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_IS:
+		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_FETCH_LIST_R:
+		case ZEND_FETCH_LIST_W:
+			if (Z_TYPE_P(val) == IS_STRING) {
+				zend_ulong index;
+
+				if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
+					ZVAL_LONG(&tmp, index);
+					opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
+					zend_string_hash_val(Z_STR_P(val));
+					zend_optimizer_add_literal(op_array, val);
+					Z_EXTRA(op_array->literals[opline->op2.constant]) = ZEND_EXTRA_VALUE;
+					break;
+				}
+			}
+			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
+			Z_EXTRA(op_array->literals[opline->op2.constant]) = 0;
+			break;
 		case ZEND_ADD_ARRAY_ELEMENT:
+		case ZEND_INIT_ARRAY:
 			if (Z_TYPE_P(val) == IS_STRING) {
 				zend_ulong index;
 				if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
