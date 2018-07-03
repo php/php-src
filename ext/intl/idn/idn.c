@@ -16,7 +16,6 @@
    |         Gustavo Lopes  <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 /* {{{ includes */
 #ifdef HAVE_CONFIG_H

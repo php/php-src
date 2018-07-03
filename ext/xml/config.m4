@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension xml
 
 PHP_ARG_ENABLE(xml,whether to enable XML support,
 [  --disable-xml           Disable XML support], yes)

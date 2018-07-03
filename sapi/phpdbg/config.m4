@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for sapi phpdbg
 
 PHP_ARG_ENABLE(phpdbg, for phpdbg support,
 [  --enable-phpdbg         Build phpdbg], yes, yes)

@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_OUTPUT_DEBUG
 # define PHP_OUTPUT_DEBUG 0
 #endif

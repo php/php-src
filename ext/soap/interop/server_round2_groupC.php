@@ -15,9 +15,6 @@
 // +----------------------------------------------------------------------+
 // | Authors: Shane Caraveo <Shane@Caraveo.com>                           |
 // +----------------------------------------------------------------------+
-//
-// $Id$
-//
 
 class SOAP_Interop_GroupC {
     var $method_namespace = 'http://soapinterop.org/echoheader/';

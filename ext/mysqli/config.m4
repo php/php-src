@@ -1,5 +1,3 @@
-dnl
-dnl $Id$
 dnl config.m4 for extension mysqli
 
 dnl ext/pdo_mysql/config.m4 also depends on this macro.

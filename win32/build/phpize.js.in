@@ -16,7 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 // This generates a configure script for win32 build
 
 var STDOUT = WScript.StdOut;

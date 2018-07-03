@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension zlib
 
 PHP_ARG_WITH(zlib,for ZLIB support,
 [  --with-zlib[=DIR]         Include ZLIB support (requires zlib >= 1.0.9)])

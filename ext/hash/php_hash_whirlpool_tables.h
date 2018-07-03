@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_HASH_WHIRLPOOL_TABLES_H
 #define PHP_HASH_WHIRLPOOL_TABLES_H
 

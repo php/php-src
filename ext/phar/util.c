@@ -18,8 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "phar_internal.h"
 #ifdef PHAR_HASH_OK
 #include "ext/hash/php_hash_sha.h"

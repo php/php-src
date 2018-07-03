@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension ldap
 
 AC_DEFUN([PHP_LDAP_CHECKS], [
   if test -f $1/include/ldap.h; then

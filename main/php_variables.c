@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/php_standard.h"

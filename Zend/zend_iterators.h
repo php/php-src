@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* These iterators were designed to operate within the foreach()
  * structures provided by the engine, but could be extended for use
  * with other iterative engine opcodes.

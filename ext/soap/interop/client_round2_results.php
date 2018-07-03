@@ -18,9 +18,7 @@
 // +----------------------------------------------------------------------+
 // | Authors: Shane Caraveo <Shane@Caraveo.com>                           |
 // +----------------------------------------------------------------------+
-//
-// $Id$
-//
+
 require_once 'client_round2_interop.php';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">

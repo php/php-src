@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for sapi cli
 
 PHP_ARG_ENABLE(cli,,
 [  --disable-cli           Disable building CLI version of PHP

@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend_ast.h"
 #include "zend_API.h"
 #include "zend_operators.h"

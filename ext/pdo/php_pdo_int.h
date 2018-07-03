@@ -18,8 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* Stuff private to the PDO extension and not for consumption by PDO drivers
  * */
 

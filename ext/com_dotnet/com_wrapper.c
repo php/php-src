@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* This module exports a PHP object as a COM object by wrapping it
  * using IDispatchEx */
 

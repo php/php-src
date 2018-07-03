@@ -1,5 +1,3 @@
-dnl $Id$
-dnl
 dnl This file contains local autoconf functions.
 
 AC_DEFUN([LIBZEND_BISON_CHECK],[

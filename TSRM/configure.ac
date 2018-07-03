@@ -1,4 +1,3 @@
-dnl $Id$
 dnl
 dnl Minimalistic configure.ac for TSRM.
 dnl

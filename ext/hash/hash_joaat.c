@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* Implements Jenkins's one-at-a-time hashing algorithm as presented on
  * http://www.burtleburtle.net/bob/hash/doobs.html.
  */

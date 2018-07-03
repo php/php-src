@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension odbc
 
 AC_DEFUN([PHP_ODBC_CHECK_HEADER],[
 if ! test -f "$ODBC_INCDIR/$1"; then

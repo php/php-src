@@ -1,5 +1,4 @@
 // vim:ft=javascript
-// $Id$
 
 ARG_ENABLE('apache2handler', 'Build Apache 2.x handler', 'no');
 

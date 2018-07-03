@@ -1,6 +1,4 @@
 dnl
-dnl $Id$
-dnl
 dnl This file contains Zend specific autoconf functions.
 dnl
 

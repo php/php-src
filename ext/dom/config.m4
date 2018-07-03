@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension dom
 
 PHP_ARG_ENABLE(dom, whether to enable DOM support,
 [  --disable-dom           Disable DOM support], yes)

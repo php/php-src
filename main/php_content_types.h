@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_CONTENT_TYPES_H
 #define PHP_CONTENT_TYPES_H
 

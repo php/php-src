@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend_compile.h"
 #include "zend.h"
 #include "zend_list.h"

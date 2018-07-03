@@ -5,7 +5,6 @@ Chuck Burgess
 ashnazg@php.net
 --SKIPIF--
 <?php
-/* $Id$ */
 if (!extension_loaded('mbstring') || !extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 require dirname(__FILE__).'/../../pdo/tests/pdo_test.inc';
 if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=al32utf8')) die('skip expected output valid for AL32UTF8 character set');

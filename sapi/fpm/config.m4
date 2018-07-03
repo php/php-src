@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for sapi fpm
 
 PHP_ARG_ENABLE(fpm,,
 [  --enable-fpm            Enable building of the fpm SAPI executable], no, no)

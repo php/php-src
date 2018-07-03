@@ -18,8 +18,6 @@
 
  */
 
-/* $Id$ */
-
 #ifndef ZEND_SIGNAL_H
 #define ZEND_SIGNAL_H
 

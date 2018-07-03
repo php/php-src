@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension xsl
 
 PHP_ARG_WITH(xsl, for XSL support,
 [  --with-xsl[=DIR]          Include XSL support.  DIR is the libxslt base

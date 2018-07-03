@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension xmlwriter
 
 PHP_ARG_ENABLE(xmlwriter, whether to enable XMLWriter support,
 [  --disable-xmlwriter     Disable XMLWriter support], yes)
