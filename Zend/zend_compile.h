@@ -147,9 +147,10 @@ struct _zend_op {
 	uint32_t extended_value;
 	uint32_t lineno;
 	zend_uchar opcode;
-	zend_uchar op1_type;
-	zend_uchar op2_type;
+	zend_uchar op1_type : 4;
+	zend_uchar op2_type : 4;
 	zend_uchar result_type;
+	zend_uchar ex_flags;
 };
 
 
@@ -782,6 +783,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
 ZEND_API int zend_is_smart_branch(zend_op *opline);
+ZEND_API void zend_set_smart_branch_flags(zend_op *opline, const zend_op *end);
 
 static zend_always_inline uint32_t get_next_op_number(zend_op_array *op_array)
 {
@@ -877,9 +879,11 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_TYPE_MASK	0xe
 
-#define ZEND_ISEMPTY			(1<<0)
-
+/* Flags stored in ex_flags */
 #define ZEND_LAST_CATCH			(1<<0)
+#define ZEND_ISEMPTY			(1<<0)
+#define ZEND_SMART_BRANCH_JMPZ	(1<<1)
+#define ZEND_SMART_BRANCH_JMPNZ	(1<<2)
 
 #define ZEND_FREE_ON_RETURN     (1<<0)
 

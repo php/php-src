@@ -802,8 +802,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/opline->extended_value\s*==\s*0/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_DIM/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_OBJ/",
-			"/opline->extended_value\s*&\s*ZEND_ISEMPTY/",
-			"/opline->extended_value\s*&\s*~\s*ZEND_ISEMPTY/",
+			"/opline->ex_flags\s*&\s*ZEND_ISEMPTY/",
 		),
 		array(
 			$op1_type[$op1],
@@ -872,9 +871,6 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 				: "\\0",
 			isset($extra_spec['ISSET']) ?
 				($extra_spec['ISSET'] == 0 ? "0" : "1")
-				: "\\0",
-			isset($extra_spec['ISSET']) ?
-				($extra_spec['ISSET'] == 0 ? "\\0" : "opline->extended_value")
 				: "\\0",
 		),
 		$code);
@@ -2719,9 +2715,9 @@ function gen_vm($def, $skel) {
 			if (isset($used_extra_spec["SMART_BRANCH"])) {
 				out($f, "\t\t{$else}if (spec & SPEC_RULE_SMART_BRANCH) {\n");
 				out($f,	"\t\t\toffset = offset * 3;\n");
-				out($f, "\t\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
+				out($f, "\t\t\tif (op->ex_flags & ZEND_SMART_BRANCH_JMPZ) {\n");
 				out($f,	"\t\t\t\toffset += 1;\n");
-				out($f, "\t\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
+				out($f, "\t\t\t} else if (op->ex_flags & ZEND_SMART_BRANCH_JMPNZ) {\n");
 				out($f,	"\t\t\t\toffset += 2;\n");
 				out($f, "\t\t\t}\n");
 				out($f, "\t\t}\n");
@@ -2739,7 +2735,7 @@ function gen_vm($def, $skel) {
 				$else = "else ";
 			}
 			if (isset($used_extra_spec["ISSET"])) {
-				out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);\n");
+				out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->ex_flags & ZEND_ISEMPTY);\n");
 				$else = "else ";
 			}
 			out($f, "\t}\n");
@@ -2807,9 +2803,9 @@ function gen_vm($def, $skel) {
 				if (isset($used_extra_spec["SMART_BRANCH"])) {
 					out($f, "\t\t{$else}if (spec & SPEC_RULE_SMART_BRANCH) {\n");
 					out($f,	"\t\t\toffset = offset * 3;\n");
-					out($f, "\t\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
+					out($f, "\t\t\tif (op->ex_flags & ZEND_SMART_BRANCH_JMPZ) {\n");
 					out($f,	"\t\t\t\toffset += 1;\n");
-					out($f, "\t\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
+					out($f, "\t\t\t} else if (op->ex_flags & ZEND_SMART_BRANCH_JMPNZ) {\n");
 					out($f,	"\t\t\t\toffset += 2;\n");
 					out($f, "\t\t\t}\n");
 					out($f, "\t\t}\n");
@@ -2827,7 +2823,7 @@ function gen_vm($def, $skel) {
 					$else = "else ";
 				}
 				if (isset($used_extra_spec["ISSET"])) {
-					out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);\n");
+					out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->ex_flags & ZEND_ISEMPTY);\n");
 					$else = "else ";
 				}
 				out($f, "\t}\n");

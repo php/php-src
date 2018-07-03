@@ -419,7 +419,7 @@ static inline int ct_eval_fetch_dim(zval *result, zval *op1, zval *op2, int supp
 	return FAILURE;
 }
 
-static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
+static inline int ct_eval_isset_dim(zval *result, zend_uchar ex_flags, zval *op1, zval *op2) {
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
 		zval *value;
 		if (fetch_array_elem(&value, op1, op2) == FAILURE) {
@@ -428,7 +428,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		if (IS_PARTIAL_ARRAY(op1) && (!value || IS_BOT(value))) {
 			return FAILURE;
 		}
-		if (!(extended_value & ZEND_ISEMPTY)) {
+		if (!(ex_flags & ZEND_ISEMPTY)) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
@@ -438,7 +438,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		// TODO
 		return FAILURE;
 	} else {
-		ZVAL_BOOL(result, (extended_value & ZEND_ISEMPTY));
+		ZVAL_BOOL(result, (ex_flags & ZEND_ISEMPTY));
 		return SUCCESS;
 	}
 }
@@ -576,7 +576,7 @@ static inline int ct_eval_fetch_obj(zval *result, zval *op1, zval *op2) {
 	return FAILURE;
 }
 
-static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
+static inline int ct_eval_isset_obj(zval *result, zend_uchar ex_flags, zval *op1, zval *op2) {
 	if (IS_PARTIAL_OBJECT(op1)) {
 		zval *value;
 		if (fetch_obj_prop(&value, op1, op2) == FAILURE) {
@@ -585,14 +585,14 @@ static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval 
 		if (!value || IS_BOT(value)) {
 			return FAILURE;
 		}
-		if (!(extended_value & ZEND_ISEMPTY)) {
+		if (!(ex_flags & ZEND_ISEMPTY)) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
 		}
 		return SUCCESS;
 	} else {
-		ZVAL_BOOL(result, (extended_value & ZEND_ISEMPTY));
+		ZVAL_BOOL(result, (ex_flags & ZEND_ISEMPTY));
 		return SUCCESS;
 	}
 }
@@ -650,8 +650,8 @@ static inline int ct_eval_incdec(zval *result, zend_uchar opcode, zval *op1) {
 	return SUCCESS;
 }
 
-static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, zval *op1) {
-	if (!(extended_value & ZEND_ISEMPTY)) {
+static inline int ct_eval_isset_isempty(zval *result, zend_uchar ex_flags, zval *op1) {
+	if (!(ex_flags & ZEND_ISEMPTY)) {
 		ZVAL_BOOL(result, Z_TYPE_P(op1) != IS_NULL);
 	} else {
 		ZVAL_BOOL(result, !zend_is_true(op1));
@@ -1588,7 +1588,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
-			if (ct_eval_isset_dim(&zv, opline->extended_value, op1, op2) == SUCCESS) {
+			if (ct_eval_isset_dim(&zv, opline->ex_flags, op1, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;
@@ -1614,7 +1614,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				SKIP_IF_TOP(op1);
 				SKIP_IF_TOP(op2);
 
-				if (ct_eval_isset_obj(&zv, opline->extended_value, op1, op2) == SUCCESS) {
+				if (ct_eval_isset_obj(&zv, opline->ex_flags, op1, op2) == SUCCESS) {
 					SET_RESULT(result, &zv);
 					zval_ptr_dtor_nogc(&zv);
 					break;
@@ -1638,7 +1638,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 #endif
 		case ZEND_ISSET_ISEMPTY_CV:
 			SKIP_IF_TOP(op1);
-			if (ct_eval_isset_isempty(&zv, opline->extended_value, op1) == SUCCESS) {
+			if (ct_eval_isset_isempty(&zv, opline->ex_flags, op1) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;

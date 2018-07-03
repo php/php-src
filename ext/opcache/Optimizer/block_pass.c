@@ -91,17 +91,7 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 static void strip_leading_nops(zend_op_array *op_array, zend_basic_block *b)
 {
 	zend_op *opcodes = op_array->opcodes;
-
 	while (b->len > 0 && opcodes[b->start].opcode == ZEND_NOP) {
-	    /* check if NOP breaks incorrect smart branch */
-		if (b->len == 2
-		 && (op_array->opcodes[b->start + 1].opcode == ZEND_JMPZ
-		  || op_array->opcodes[b->start + 1].opcode == ZEND_JMPNZ)
-		 && (op_array->opcodes[b->start + 1].op1_type & (IS_CV|IS_CONST))
-		 && b->start > 0
-		 && zend_is_smart_branch(op_array->opcodes + b->start - 1)) {
-			break;
-		}
 		b->start++;
 		b->len--;
 	}
@@ -123,14 +113,6 @@ static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 			if (i != j) {
 				op_array->opcodes[j] = op_array->opcodes[i];
 			}
-			j++;
-		}
-		if (i + 1 < b->start + b->len
-		 && (op_array->opcodes[i+1].opcode == ZEND_JMPZ
-		  || op_array->opcodes[i+1].opcode == ZEND_JMPNZ)
-		 && op_array->opcodes[i+1].op1_type & (IS_CV|IS_CONST)
-		 && zend_is_smart_branch(op_array->opcodes + j - 1)) {
-			/* don't remove NOP, that splits incorrect smart branch */
 			j++;
 		}
 		i++;
@@ -993,7 +975,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				break;
 			case ZEND_CATCH:
-				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+				if (!(opline->ex_flags & ZEND_LAST_CATCH)) {
 					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				}
 				break;

@@ -95,6 +95,7 @@ static void init_op(zend_op *op)
 {
 	MAKE_NOP(op);
 	op->extended_value = 0;
+	op->ex_flags = 0;
 	op->lineno = CG(zend_lineno);
 }
 
@@ -2204,19 +2205,30 @@ ZEND_API int zend_is_smart_branch(zend_op *opline) /* {{{ */
 }
 /* }}} */
 
+ZEND_API void zend_set_smart_branch_flags(zend_op *opline, const zend_op *end) /* {{{ */
+{
+	zend_op *next_op = opline + 1;
+	opline->ex_flags &= ~(ZEND_SMART_BRANCH_JMPZ|ZEND_SMART_BRANCH_JMPNZ);
+
+	if (next_op < end &&
+		(next_op->opcode == ZEND_JMPZ || next_op->opcode == ZEND_JMPNZ) &&
+		(opline->result_type & (IS_VAR|IS_TMP_VAR)) &&
+		next_op->op1_type == opline->result_type &&
+		next_op->op1.var == opline->result.var
+	) {
+		if (next_op->opcode == ZEND_JMPZ) {
+			opline->ex_flags |= ZEND_SMART_BRANCH_JMPZ;
+		} else {
+			opline->ex_flags |= ZEND_SMART_BRANCH_JMPNZ;
+		}
+	}
+}
+/* }}} */
+
 static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint32_t opnum_target) /* {{{ */
 {
 	uint32_t opnum = get_next_op_number(CG(active_op_array));
-	zend_op *opline;
-
-	if ((cond->op_type & (IS_CV|IS_CONST))
-	 && opnum > 0
-	 && zend_is_smart_branch(CG(active_op_array)->opcodes + opnum - 1)) {
-		/* emit extra NOP to avoid incorrect SMART_BRANCH in very rare cases */
-		zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
-		opnum = get_next_op_number(CG(active_op_array));
-	}
-	opline = zend_emit_op(NULL, opcode, cond, NULL);
+	zend_op *opline = zend_emit_op(NULL, opcode, cond, NULL);
 	opline->op2.opline_num = opnum_target;
 	return opnum;
 }
@@ -5174,7 +5186,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 			opline->result.var = lookup_cv(CG(active_op_array), var_name);
 
 			if (is_last_catch && is_last_class) {
-				opline->extended_value |= ZEND_LAST_CATCH;
+				opline->ex_flags |= ZEND_LAST_CATCH;
 			}
 
 			if (!is_last_class) {
@@ -7549,7 +7561,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 
 	result->op_type = opline->result_type = IS_TMP_VAR;
 	if (!(ast->kind == ZEND_AST_ISSET)) {
-		opline->extended_value |= ZEND_ISEMPTY;
+		opline->ex_flags |= ZEND_ISEMPTY;
 	}
 }
 /* }}} */
