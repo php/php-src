@@ -45,7 +45,7 @@ var_dump($ref instanceof ArrayIterator);
 --EXPECT--
 array(0) {
 }
-string(114) "Property type ?Traversable is not compatible with the reference held by property class@anonymous->a of type ?array"
+string(89) "Typed property class@anonymous::$t must be an instance of Traversable or null, array used"
 array(0) {
 }
 array(1) {

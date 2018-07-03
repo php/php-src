@@ -730,22 +730,7 @@ ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void
 
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) &&
 				(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(member), cache_slot)))) {
-				zval *val = retval;
-
-				if (Z_ISREF_P(val)) {
-					zend_property_info *error_prop;
-					/* the overloaded property type must be compatible with the reference type so that we don't coercively cast and end up with a value type not matching the reference type */
-					if ((error_prop = zend_verify_ref_assignable_type(Z_REF_P(val), zend_get_prop_info_ref_type(prop_info)))) {
-						zend_throw_ref_type_error_type("Property", error_prop, zend_get_prop_info_ref_type(prop_info));
-						goto exit;
-					}
-					/* we do not add a reference type here - reference types must be backed up by references being assigned to an actual typed container */
-					val = Z_REFVAL_P(val);
-				}
-
-				if (UNEXPECTED(zend_verify_property_type(prop_info, val, val, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES)) == NULL)) {
-					zend_verify_property_type_error(prop_info, val);
-				}
+				zend_verify_prop_assignable_by_ref(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
 			}
 			goto exit;
 		} else if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {

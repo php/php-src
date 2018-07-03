@@ -85,17 +85,24 @@ static zend_always_inline zend_bool zend_verify_type_assignable(zend_type type, 
 	    || (cur_type == IS_ITERABLE && new_type == IS_ARRAY);
 }
 
-ZEND_API zend_property_info *zend_verify_ref_assignable_type(zend_reference *ref, zend_type type);
+ZEND_API zend_property_info *zend_check_ref_array_assignable(zend_reference *ref);
 ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict);
+ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict);
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv);
-ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(const char *source, zend_property_info *prop, zend_type type);
+ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1, zend_property_info *prop2, zval *zv);
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
 	(ref)->sources
 
 #define ZEND_REF_HAS_TYPE_SOURCES(ref) \
 	(ZEND_REF_TYPE_SOURCES(ref).ptr != NULL)
+
+#define ZEND_REF_FIRST_SOURCE(ref) \
+	(ZEND_PROPERTY_INFO_SOURCE_IS_LIST((ref)->sources.list) \
+		? ZEND_PROPERTY_INFO_SOURCE_TO_LIST((ref)->sources.list)->ptr[0] \
+		: (ref)->sources.ptr)
+
 
 ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
@@ -492,26 +499,21 @@ ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *p
 
 #define ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) do { \
 		zend_property_info_source_list *_source_list = &ZEND_REF_TYPE_SOURCES(ref); \
-		size_t _num; \
-		zend_property_info *_prop; \
+		zend_property_info **_prop, **_end; \
 		zend_property_info_list *_list; \
 		if (_source_list->ptr) { \
 			if (ZEND_PROPERTY_INFO_SOURCE_IS_LIST(_source_list->list)) { \
 				_list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(_source_list->list); \
-				_num = _list->num; \
-				_prop = _list->ptr[--_num]; \
+				_prop = _list->ptr; \
+				_end = _list->ptr + _list->num; \
 			} else { \
-				_prop = _source_list->ptr; \
-				_num = 0; \
+				_prop = &_source_list->ptr; \
+				_end = _prop + 1; \
 			} \
-			while (1) { \
-				prop = _prop; \
+			for (; _prop < _end; _prop++) { \
+				prop = *_prop; \
 
 #define ZEND_REF_FOREACH_TYPE_SOURCES_END() \
-				if (_num == 0) { \
-					break; \
-				} \
-				_prop = _list->ptr[--_num]; \
 			} \
 		} \
 	} while (0)

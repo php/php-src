@@ -94,9 +94,9 @@ string(1) "0"
 Typed property Foo::$i must be int, string used
 int(0)
 string(1) "x"
-Static property type int is not compatible with the reference held by property Foo::$s of type string
+Reference with value of type string held by property Foo::$s of type string is not compatible with property Foo::$i of type int
 int(0)
 string(1) "5"
-Static property type string is not compatible with the reference held by property Foo::$i of type int
+Reference with value of type int held by property Foo::$i of type int is not compatible with property Foo::$s of type string
 int(0)
 string(1) "5"
