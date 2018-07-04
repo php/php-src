@@ -1814,7 +1814,7 @@ static PHP_FUNCTION(session_module_name)
 		if (!_php_find_ps_module(ZSTR_VAL(name))) {
 			php_error_docref(NULL, E_WARNING, "Cannot find named PHP session module (%s)", ZSTR_VAL(name));
 
-			zval_dtor(return_value);
+			zval_ptr_dtor_str(return_value);
 			RETURN_FALSE;
 		}
 		if (PS(mod_data) || PS(mod_user_implemented)) {
@@ -2019,7 +2019,7 @@ static PHP_FUNCTION(session_save_path)
 	if (name) {
 		if (memchr(ZSTR_VAL(name), '\0', ZSTR_LEN(name)) != NULL) {
 			php_error_docref(NULL, E_WARNING, "The save_path cannot contain NULL characters");
-			zval_dtor(return_value);
+			zval_ptr_dtor_str(return_value);
 			RETURN_FALSE;
 		}
 		ini_name = zend_string_init("session.save_path", sizeof("session.save_path") - 1, 0);

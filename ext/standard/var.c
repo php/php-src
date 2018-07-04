@@ -680,7 +680,7 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 	BG(serialize_lock)++;
 	res = call_user_function(CG(function_table), struc, &fname, retval, 0, 0);
 	BG(serialize_lock)--;
-	zval_dtor(&fname);
+	zval_ptr_dtor_str(&fname);
 
 	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
 		zval_ptr_dtor(retval);

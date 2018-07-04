@@ -931,7 +931,7 @@ static PHP_METHOD(UConverter, getAliases) {
 		alias = ucnv_getAlias(name, i, &error);
 		if (U_FAILURE(error)) {
 			THROW_UFAILURE(NULL, "ucnv_getAlias", error);
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_NULL();
 		}
 		add_next_index_string(return_value, alias);
@@ -959,7 +959,7 @@ static PHP_METHOD(UConverter, getStandards) {
 		const char *name = ucnv_getStandard(i, &error);
 		if (U_FAILURE(error)) {
 			THROW_UFAILURE(NULL, "ucnv_getStandard", error);
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_NULL();
 		}
 		add_next_index_string(return_value, name);

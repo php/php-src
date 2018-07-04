@@ -26,7 +26,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 static void phpdbg_rebuild_http_globals_array(int type, const char *name) {
 	zval *zvp;
 	if (Z_TYPE(PG(http_globals)[type]) != IS_UNDEF) {
-		zval_dtor(&PG(http_globals)[type]);
+		zval_ptr_dtor_nogc(&PG(http_globals)[type]);
 	}
 	if ((zvp = zend_hash_str_find(&EG(symbol_table), name, strlen(name)))) {
 		Z_ADDREF_P(zvp);

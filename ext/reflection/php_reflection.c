@@ -1452,7 +1452,7 @@ ZEND_METHOD(reflection, export)
 	/* Invoke the __toString() method */
 	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);
 	result= call_user_function(NULL, object, &fname, &retval, 0, NULL);
-	zval_dtor(&fname);
+	zval_ptr_dtor_str(&fname);
 
 	if (result == FAILURE) {
 		_DO_THROW("Invocation of method __toString() failed");
@@ -2976,7 +2976,7 @@ ZEND_METHOD(reflection_method, __construct)
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Class %s does not exist", Z_STRVAL_P(classname));
 				if (classname == &ztmp) {
-					zval_dtor(&ztmp);
+					zval_ptr_dtor_str(&ztmp);
 				}
 				return;
 			}
@@ -2988,14 +2988,14 @@ ZEND_METHOD(reflection_method, __construct)
 
 		default:
 			if (classname == &ztmp) {
-				zval_dtor(&ztmp);
+				zval_ptr_dtor_str(&ztmp);
 			}
 			_DO_THROW("The parameter class is expected to be either a string or an object");
 			/* returns out of this function */
 	}
 
 	if (classname == &ztmp) {
-		zval_dtor(&ztmp);
+		zval_ptr_dtor_str(&ztmp);
 	}
 
 	lcname = zend_str_tolower_dup(name_str, name_len);

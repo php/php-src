@@ -3730,7 +3730,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 
 #define TMP_CLEAN \
 	if (Z_TYPE(tmp) == IS_STRING) {\
-		zval_dtor(&tmp); \
+		zval_ptr_dtor_str(&tmp); \
 	} \
 	return NULL;
 
@@ -3796,7 +3796,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 				TMP_CLEAN;
 			} else {
 				if (Z_TYPE(tmp) == IS_STRING) {
-					zval_dtor(&tmp);
+					zval_ptr_dtor_str(&tmp);
 				}
 				/* got the key - return it */
 				return (EVP_PKEY*)what;
@@ -3885,7 +3885,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 		*resourceval = zend_register_resource(key, le_key);
 	}
 	if (Z_TYPE(tmp) == IS_STRING) {
-		zval_dtor(&tmp);
+		zval_ptr_dtor_str(&tmp);
 	}
 	return key;
 }

@@ -1195,7 +1195,7 @@ static zend_bool strip_multiline_string_indentation(
 	return 1;
 
 error:
-	zval_dtor(zendlval);
+	zval_ptr_dtor_str(zendlval);
 	ZVAL_UNDEF(zendlval);
 
 	return 0;
@@ -4743,7 +4743,7 @@ yy397:
 
 			ZVAL_UNDEF(&zv);
 			retval = lex_scan(&zv, NULL);
-			zval_dtor(&zv);
+			zval_ptr_dtor_nogc(&zv);
 
 			if (EG(exception)) {
 				zend_clear_exception();

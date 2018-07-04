@@ -1448,7 +1448,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				str_key = estrndup(Z_STRVAL(key), str_key_len);
 
 				save = str_key;
-				zval_dtor(&key);
+				zval_ptr_dtor_str(&key);
 			} else {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
@@ -1576,7 +1576,7 @@ phar_spl_fileinfo:
 			str_key = estrndup(Z_STRVAL(key), str_key_len);
 
 			save = str_key;
-			zval_dtor(&key);
+			zval_ptr_dtor_str(&key);
 		} else {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 			return ZEND_HASH_APPLY_STOP;

@@ -577,7 +577,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 
 	gmp_strval(&zv, gmpnum, 10);
 	php_var_serialize(&buf, &zv, &serialize_data);
-	zval_dtor(&zv);
+	zval_ptr_dtor_str(&zv);
 
 	ZVAL_ARR(&zv, zend_std_get_properties(object));
 	php_var_serialize(&buf, &zv, &serialize_data);

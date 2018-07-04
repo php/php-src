@@ -840,7 +840,7 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 
 	new_break.ops = zend_compile_string(&pv, "Conditional Breakpoint Code");
 
-	zval_dtor(&pv);
+	zval_ptr_dtor_str(&pv);
 
 	if (new_break.ops) {
 		brake = zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash, &new_break, sizeof(phpdbg_breakcond_t));

@@ -2435,7 +2435,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 
 	if (err != PHP_ICONV_ERR_SUCCESS) {
 		_php_iconv_show_error(err, charset, "???");
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	}
 }

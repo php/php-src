@@ -986,7 +986,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRLEN(v));
 				/* Clean up */
 				smart_str_free(&eval_buf);
-				zval_dtor(&v);
+				zval_ptr_dtor_str(&v);
 			} else if (is_callable) {
 				zval args[1];
 				zval subpats, retval;
@@ -1146,7 +1146,7 @@ PHP_FUNCTION(mb_split)
 		OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 		onig_error_code_to_str(err_str, err);
 		php_error_docref(NULL, E_WARNING, "mbregex search failure in mbsplit(): %s", err_str);
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 

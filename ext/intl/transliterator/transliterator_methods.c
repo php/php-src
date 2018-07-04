@@ -281,7 +281,7 @@ PHP_FUNCTION( transliterator_list_ids )
 	intl_error_set_code( NULL, status );
 	if( U_FAILURE( status ) )
 	{
-		zval_dtor( return_value );
+		zend_array_destroy( Z_ARR_P(return_value) );
 		RETVAL_FALSE;
 		intl_error_set_custom_msg( NULL, "transliterator_list_ids: "
 			"Failed to build array of registered transliterators", 0 );

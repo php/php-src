@@ -2190,7 +2190,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 									if ((size_t)temp_len > (size_t)(limit - buf)) {
 										goto quit_loop_2;
 									}
-									zval_dtor(return_value);
+									zend_array_destroy(Z_ARR_P(return_value));
 									RETVAL_FALSE;
 									goto out;
 								}

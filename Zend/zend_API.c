@@ -3465,7 +3465,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_nam
 
 	if (zend_is_callable_ex(callable, NULL, IS_CALLABLE_STRICT, callable_name, &fcc, NULL)) {
 		if (Z_TYPE_P(callable) == IS_STRING && fcc.calling_scope) {
-			zval_dtor(callable);
+			zval_ptr_dtor_str(callable);
 			array_init(callable);
 			add_next_index_str(callable, zend_string_copy(fcc.calling_scope->name));
 			add_next_index_str(callable, zend_string_copy(fcc.function_handler->common.function_name));

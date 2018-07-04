@@ -305,7 +305,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	ZVAL_UNDEF(&retval);
 	if ((ret = php_wddx_deserialize_ex(val, vallen, &retval)) == SUCCESS) {
 		if (Z_TYPE(retval) != IS_ARRAY) {
-			zval_dtor(&retval);
+			zval_ptr_dtor_nogc(&retval);
 			return FAILURE;
 		}
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), idx, key, ent) {
@@ -1065,7 +1065,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 					memcpy(ZSTR_VAL(str), Z_STRVAL(ent->data), Z_STRLEN(ent->data));
 					memcpy(ZSTR_VAL(str) + Z_STRLEN(ent->data), s, len);
 					ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
-					zval_dtor(&ent->data);
+					zval_ptr_dtor_str(&ent->data);
 				} else {
 					str = zend_string_init((char *)s, len, 0);
 				}

@@ -457,7 +457,7 @@ PHP_FUNCTION(dns_get_record)
 					continue;
 				} else {
 					php_error_docref(NULL, E_WARNING, "DNS Query failed");
-					zval_dtor(return_value);
+					zend_array_destroy(Z_ARR_P(return_value));
 					RETURN_FALSE;
 				}
 			}

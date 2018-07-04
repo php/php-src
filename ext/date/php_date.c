@@ -2064,7 +2064,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	if (!obj->initialized) {
 		retval = zend_std_has_property(object, member, type, cache_slot);
 		if (member == &tmp_member) {
-			zval_dtor(member);
+			zval_ptr_dtor_str(&tmp_member);
 		}
 		return retval;
 	}
@@ -2084,7 +2084,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -4159,7 +4159,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 	if (!obj->initialized) {
 		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 		if (member == &tmp_member) {
-			zval_dtor(member);
+			zval_ptr_dtor_str(&tmp_member);
 		}
 		return retval;
 	}
@@ -4186,7 +4186,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 
 		if (member == &tmp_member) {
-			zval_dtor(member);
+			zval_ptr_dtor_str(&tmp_member);
 		}
 
 		return retval;
@@ -4203,7 +4203,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -4227,7 +4227,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 	if (!obj->initialized) {
 		zend_std_write_property(object, member, value, cache_slot);
 		if (member == &tmp_member) {
-			zval_dtor(member);
+			zval_ptr_dtor_str(&tmp_member);
 		}
 		return;
 	}
@@ -4255,7 +4255,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 	} while(0);
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 }
 /* }}} */
@@ -4287,7 +4287,7 @@ static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int 
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return ret;

@@ -1715,10 +1715,10 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 	array_init_size(return_value, mysqlnd_num_fields(result) * 2);
 	if (FAIL == result->m.fetch_row(result, (void *)return_value, flags, &fetched_anything)) {
 		php_error_docref(NULL, E_WARNING, "Error while reading a row");
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	} else if (fetched_anything == FALSE) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		switch (extension) {
 			case MYSQLND_MYSQLI:
 				RETVAL_NULL();

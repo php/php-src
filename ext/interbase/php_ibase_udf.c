@@ -302,7 +302,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 			}
 		}
 
-		zval_dtor(&callback);
+		zval_ptr_dtor_str(&callback);
 
 		/* return whatever type we got back from the callback: let DB handle conversion */
 		switch (Z_TYPE(return_value)) {

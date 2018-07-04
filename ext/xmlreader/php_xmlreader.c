@@ -139,7 +139,7 @@ zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, void 
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -176,7 +176,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type, void **cache
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 	return retval;
 }
@@ -206,7 +206,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value, void **ca
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 }
 /* }}} */
