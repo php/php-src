@@ -20,4 +20,4 @@ var_dump($test->i, $test->s);
 --EXPECT--
 Cannot assign string to reference held by property Test->i of type int
 int(0)
-string(2) "42"
+string(0) ""

@@ -1801,9 +1801,8 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 			}
 			ZVAL_DEREF(entry);
 			Z_TRY_ADDREF_P(entry);
-			if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
-				exception_thrown = 1;
-				continue;
+			if (zend_try_assign_ex(orig_var, entry, 0) == FAILURE) {
+				return -1;
 			}
 			count++;
 		}
@@ -1887,9 +1886,8 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 			}
 			ZVAL_DEREF(entry);
 			Z_TRY_ADDREF_P(entry);
-			if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
-				exception_thrown = 1;
-				continue;
+			if (zend_try_assign_ex(orig_var, entry, 0) == FAILURE) {
+				return -1;
 			}
 		} else {
 			ZVAL_DEREF(entry);
@@ -1992,9 +1990,9 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 							orig_var = Z_INDIRECT_P(orig_var);
 						}
 						Z_TRY_ADDREF_P(entry);
-						if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
-							exception_thrown = 1;
-							continue;
+						if (zend_try_assign_ex(orig_var, entry, 0) == FAILURE) {
+							zend_string_release_ex(Z_STR(final_name), 0);
+							return -1;
 						}
 					} else {
 						Z_TRY_ADDREF_P(entry);
@@ -2121,9 +2119,9 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 							orig_var = Z_INDIRECT_P(orig_var);
 						}
 						Z_TRY_ADDREF_P(entry);
-						if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
-							exception_thrown = 1;
-							continue;
+						if (zend_try_assign_ex(orig_var, entry, 0) == FAILURE) {
+							zend_string_release_ex(Z_STR(final_name), 0);
+							return -1;
 						}
 					} else {
 						Z_TRY_ADDREF_P(entry);
@@ -2228,9 +2226,9 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 						orig_var = Z_INDIRECT_P(orig_var);
 					}
 					Z_TRY_ADDREF_P(entry);
-					if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
-						exception_thrown = 1;
-						continue;
+					if (zend_try_assign_ex(orig_var, entry, 0) == FAILURE) {
+						zend_string_release_ex(Z_STR(final_name), 0);
+						return -1;
 					}
 				} else {
 					Z_TRY_ADDREF_P(entry);
@@ -2337,9 +2335,9 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 					orig_var = Z_INDIRECT_P(orig_var);
 				}
 				Z_TRY_ADDREF_P(entry);
-				if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
-					exception_thrown = 1;
-					continue;
+				if (zend_try_assign_ex(orig_var, entry, 0) == FAILURE) {
+					zend_string_release_ex(Z_STR(final_name), 0);
+					return -1;
 				}
 			} else {
 				Z_TRY_ADDREF_P(entry);
