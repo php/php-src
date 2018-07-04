@@ -5981,6 +5981,12 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		zend_error(E_DEPRECATED, "__autoload() is deprecated, use spl_autoload_register() instead");
 	}
 
+	if (zend_string_equals_literal_ci(unqualified_name, "assert")) {
+		zend_error(E_DEPRECATED,
+			"Defining a custom assert() function is deprecated, "
+			"as the function has special semantics");
+	}
+
 	key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
 	zend_hash_update_ptr(CG(function_table), key, op_array);
 	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
