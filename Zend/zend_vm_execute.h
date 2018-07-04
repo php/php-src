@@ -1359,10 +1359,11 @@ send_again:
 					}
 
 					if (UNEXPECTED(Z_TYPE(key) != IS_LONG)) {
-						ZEND_ASSERT(Z_TYPE(key) == IS_STRING);
 						zend_throw_error(NULL,
-							"Cannot unpack Traversable with string keys");
-						zval_ptr_dtor_str(&key);
+							(Z_TYPE(key) == IS_STRING) ?
+								"Cannot unpack Traversable with string keys" :
+								"Cannot unpack Traversable with non-integer keys");
+						zval_ptr_dtor(&key);
 						break;
 					}
 				}

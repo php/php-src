@@ -80,6 +80,19 @@ Core:
     note that reading and writing a value inside a single expression remains
     undefined behavior and may change again in the future.
 
+  . Argument unpacking stopped working with Traversables with non-integer keys.
+    The following code worked in PHP 7.0-7.2 by accident.
+
+        function foo(...$args) {
+            var_dump($args);
+        }
+        function gen() {
+            yield 1.23 => 123;
+        }
+        foo(...gen());
+
+    Now it generates an exception.
+
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
     Formerly some warnings have directly been written to stderr.
