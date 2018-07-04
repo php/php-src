@@ -481,7 +481,7 @@ string_key:
 							ZEND_ASSERT(existing_propinfo->flags & ZEND_ACC_PUBLIC);
 							new_key = unmangled;
 						}
-						zend_string_release_ex(Z_STR(key), 0);
+						zval_ptr_dtor_str(&key);
 						ZVAL_STR(&key, new_key);
 					} else {
 						zend_string_release_ex(unmangled, 0);

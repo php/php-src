@@ -572,7 +572,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		     EXPECTED(zend_string_equal_content(str, member)))) {
 			return &Z_PROPERTY_GUARD_P(zv);
 		} else if (EXPECTED(Z_PROPERTY_GUARD_P(zv) == 0)) {
-			zend_string_release_ex(Z_STR_P(zv), 0);
+			zval_ptr_dtor_str(zv);
 			ZVAL_STR_COPY(zv, member);
 			return &Z_PROPERTY_GUARD_P(zv);
 		} else {
@@ -581,7 +581,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 			/* mark pointer as "special" using low bit */
 			zend_hash_add_new_ptr(guards, str,
 				(void*)(((zend_uintptr_t)&Z_PROPERTY_GUARD_P(zv)) | 1));
-			zend_string_release_ex(Z_STR_P(zv), 0);
+			zval_ptr_dtor_str(zv);
 			ZVAL_ARR(zv, guards);
 		}
 	} else if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {

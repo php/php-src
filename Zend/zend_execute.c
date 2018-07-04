@@ -3169,7 +3169,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 						zend_destroy_file_handle(&file_handle);
 						zend_string_release_ex(resolved_path, 0);
 						if (Z_TYPE(tmp_inc_filename) != IS_UNDEF) {
-							zend_string_release_ex(Z_STR(tmp_inc_filename), 0);
+							zval_ptr_dtor_str(&tmp_inc_filename);
 						}
 						return op_array;
 					} else {
@@ -3207,7 +3207,7 @@ already_compiled:
 	}
 
 	if (Z_TYPE(tmp_inc_filename) != IS_UNDEF) {
-		zend_string_release_ex(Z_STR(tmp_inc_filename), 0);
+		zval_ptr_dtor_str(&tmp_inc_filename);
 	}
 	return new_op_array;
 }

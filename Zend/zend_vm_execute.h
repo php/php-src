@@ -1362,7 +1362,7 @@ send_again:
 						ZEND_ASSERT(Z_TYPE(key) == IS_STRING);
 						zend_throw_error(NULL,
 							"Cannot unpack Traversable with string keys");
-						zend_string_release_ex(Z_STR(key), 0);
+						zval_ptr_dtor_str(&key);
 						break;
 					}
 				}

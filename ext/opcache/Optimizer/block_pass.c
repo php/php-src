@@ -704,7 +704,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						Z_TYPE_INFO(ZEND_OP2_LITERAL(src)) = IS_STRING_EX;
 						memcpy(Z_STRVAL(ZEND_OP2_LITERAL(src)) + old_len, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
 						Z_STRVAL(ZEND_OP2_LITERAL(src))[l] = '\0';
-						zend_string_release_ex(Z_STR(ZEND_OP2_LITERAL(opline)), 0);
+						zval_ptr_dtor_str(&ZEND_OP2_LITERAL(opline));
 						ZVAL_STR(&ZEND_OP2_LITERAL(opline), zend_new_interned_string(Z_STR(ZEND_OP2_LITERAL(src))));
 						ZVAL_NULL(&ZEND_OP2_LITERAL(src));
 						MAKE_NOP(src);
