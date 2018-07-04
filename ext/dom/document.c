@@ -2188,7 +2188,11 @@ PHP_FUNCTION(dom_document_save_html)
 
 			for (node = node->children; node; node = node->next) {
 				htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
+#ifdef LIBXML2_NEW_BUFFER
 				one_size = !outBuf->error ? xmlOutputBufferGetSize(outBuf) : -1;
+#else
+				one_size = !outBuf->error ? outBuf->buffer->use : -1;
+#endif
 				if (one_size >= 0) {
 					size = one_size;
 				} else {
@@ -2198,10 +2202,18 @@ PHP_FUNCTION(dom_document_save_html)
 			}
 		} else {
 			htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
+#ifdef LIBXML2_NEW_BUFFER
 			size = !outBuf->error ? xmlOutputBufferGetSize(outBuf): -1;
+#else
+			size = !outBuf->error ? outBuf->buffer->use : -1;
+#endif
 		}
 		if (size >= 0) {
+#ifdef LIBXML2_NEW_BUFFER
 			mem = (xmlChar*) xmlOutputBufferGetContent(outBuf);
+#else
+			mem = (xmlChar*) outBuf->buffer->content;
+#endif
 			if (!mem) {
 				RETVAL_FALSE;
 			} else {
