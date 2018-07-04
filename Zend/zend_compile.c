@@ -4560,13 +4560,13 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 	if (depth_ast) {
 		zval *depth_zv;
 		if (depth_ast->kind != ZEND_AST_ZVAL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator with non-constant operand "
+			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator with non-integer operand "
 				"is no longer supported", ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 		}
 
 		depth_zv = zend_ast_get_zval(depth_ast);
 		if (Z_TYPE_P(depth_zv) != IS_LONG || Z_LVAL_P(depth_zv) < 1) {
-			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator accepts only positive numbers",
+			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator accepts only positive integers",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 		}
 
