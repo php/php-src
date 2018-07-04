@@ -1555,7 +1555,7 @@ ZEND_API int zend_std_equals(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	if (Z_TYPE_P(op1) == IS_OBJECT) {
 		zend_class_entry *ce = Z_OBJCE_P(op1);
-
+		
 		if (ce->__equals) {
 			zend_call_method_with_1_params(op1, ce, &ce->__equals, ZEND_EQUALS_FUNC_NAME, result, op2);
 			
@@ -1564,7 +1564,6 @@ ZEND_API int zend_std_equals(zval *result, zval *op1, zval *op2) /* {{{ */
 			}
 		}
 	}
-
 	return FAILURE;
 }
 /* }}} */
@@ -1582,7 +1581,6 @@ ZEND_API int zend_std_compare(zval *result, zval *op1, zval *op2) /* {{{ */
 			}
 		}
 	}
-
 	return FAILURE;
 }
 /* }}} */
