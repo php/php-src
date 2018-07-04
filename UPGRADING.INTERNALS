@@ -21,6 +21,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   r. php_url
   s. zend_function.reserved[]
   t. zif_handler
+  u. GC_G
 
 2. Build system changes
   a. Unix build system changes
@@ -137,6 +138,9 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
  t. For internal functions the typedef zif_handler has been introduced.  It is
     recommended to use this from now on, instead of defining own handler types.
+
+ u. The GC globals (GC_G) are now private. Use the new zend_gc_get_status() to
+    retrieve status information of the GC.
 
 ========================
 2. Build system changes
