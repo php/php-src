@@ -1933,15 +1933,10 @@ ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2) /* {{{
 }
 /* }}} */
 
-static inline void zend_free_obj_get_result(zval *op) /* {{{ */
+static zend_always_inline void zend_free_obj_get_result(zval *op) /* {{{ */
 {
-	if (Z_REFCOUNTED_P(op)) {
-		if (Z_REFCOUNT_P(op) == 0) {
-			zval_dtor(op);
-		} else {
-			zval_ptr_dtor(op);
-		}
-	}
+	ZEND_ASSERT(!Z_REFCOUNTED_P(op) || Z_REFCOUNT_P(op) != 0);
+	zval_ptr_dtor(op);
 }
 /* }}} */
 
