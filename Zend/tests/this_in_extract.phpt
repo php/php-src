@@ -3,15 +3,17 @@ $this re-assign in extract()
 --FILE--
 <?php
 function foo() {
-	extract(["this"=>42]);
-	var_dump($this);
+    try {
+        extract(["this"=>42, "a"=>24]);
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+    var_dump($a);
 }
 foo();
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot re-assign $this in %sthis_in_extract.php:3
-Stack trace:
-#0 %sthis_in_extract.php(3): extract(Array)
-#1 %sthis_in_extract.php(6): foo()
-#2 {main}
-  thrown in %sthis_in_extract.php on line 3
+Cannot re-assign $this
+
+Notice: Undefined variable: a in %s on line %d
+NULL

@@ -679,6 +679,8 @@ struct _zend_execute_data {
 #define IS_VAR		(1<<2)
 #define IS_CV		(1<<3)	/* Compiled variable */
 
+#define ZEND_EXTRA_VALUE 1
+
 #include "zend_globals.h"
 
 BEGIN_EXTERN_C()

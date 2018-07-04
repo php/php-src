@@ -528,23 +528,6 @@ ZEND_API zend_bool zend_is_executing(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
-{
-	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_RELAY_CC);
-}
-/* }}} */
-
-ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
-{
-	if (Z_REFCOUNTED_P(zval_ptr)) {
-		Z_DELREF_P(zval_ptr);
-		if (Z_REFCOUNT_P(zval_ptr) == 0) {
-			_zval_internal_dtor_for_ptr(zval_ptr ZEND_FILE_LINE_CC);
-		}
-	}
-}
-/* }}} */
-
 ZEND_API int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result) /* {{{ */
 {
 	char *colon;

@@ -535,11 +535,54 @@ handle_static_prop:
 				(opline+1)->extended_value = alloc_cache_slots(op_array, 3);
 			} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
 				goto handle_static_prop;
+				(opline+1)->extended_value = alloc_cache_slots(op_array, 2);
+			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
+				if (Z_TYPE_P(val) == IS_STRING) {
+					zend_ulong index;
+
+					if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
+						ZVAL_LONG(&tmp, index);
+						opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
+						zend_string_hash_val(Z_STR_P(val));
+						zend_optimizer_add_literal(op_array, val);
+						Z_EXTRA(op_array->literals[opline->op2.constant]) = ZEND_EXTRA_VALUE;
+						break;
+					}
+				}
+				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
+				Z_EXTRA(op_array->literals[opline->op2.constant]) = 0;
 			} else {
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			}
 			break;
+		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+		case ZEND_ASSIGN_DIM:
+		case ZEND_UNSET_DIM:
+		case ZEND_FETCH_DIM_R:
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_IS:
+		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_FETCH_LIST_R:
+		case ZEND_FETCH_LIST_W:
+			if (Z_TYPE_P(val) == IS_STRING) {
+				zend_ulong index;
+
+				if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
+					ZVAL_LONG(&tmp, index);
+					opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
+					zend_string_hash_val(Z_STR_P(val));
+					zend_optimizer_add_literal(op_array, val);
+					Z_EXTRA(op_array->literals[opline->op2.constant]) = ZEND_EXTRA_VALUE;
+					break;
+				}
+			}
+			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
+			Z_EXTRA(op_array->literals[opline->op2.constant]) = 0;
+			break;
 		case ZEND_ADD_ARRAY_ELEMENT:
+		case ZEND_INIT_ARRAY:
 			if (Z_TYPE_P(val) == IS_STRING) {
 				zend_ulong index;
 				if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
@@ -1285,21 +1328,24 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
-		zend_vm_set_opcode_handler_ex(opline,
-			opline->op1_type == IS_UNUSED ? 0 : (OP1_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY)),
-			opline->op2_type == IS_UNUSED ? 0 : (OP2_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY)),
+		uint32_t op1_info = opline->op1_type == IS_UNUSED ? 0 : (OP1_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY));
+		uint32_t op2_info = opline->op1_type == IS_UNUSED ? 0 : (OP2_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY));
+		uint32_t res_info =
 			(opline->opcode == ZEND_PRE_INC ||
 			 opline->opcode == ZEND_PRE_DEC ||
 			 opline->opcode == ZEND_POST_INC ||
 			 opline->opcode == ZEND_POST_DEC) ?
 				((ssa->ops[opline - op_array->opcodes].op1_def >= 0) ? (OP1_DEF_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY)) : MAY_BE_ANY) :
-				(opline->result_type == IS_UNUSED ? 0 : (RES_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY))));
+				(opline->result_type == IS_UNUSED ? 0 : (RES_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY)));
+
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
 		}
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		}
+
+		zend_vm_set_opcode_handler_ex(opline, op1_info, op2_info, res_info);
 #if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
 		if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
 			/* fix jumps to point to new array */

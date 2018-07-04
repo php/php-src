@@ -262,7 +262,7 @@ static zend_never_inline ZEND_COLD void zval_undefined_cv(uint32_t var EXECUTE_D
 	}
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, uint32_t var, int type EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD zval *_get_zval_cv_lookup(zval *ptr, uint32_t var, int type EXECUTE_DATA_DC)
 {
 	switch (type) {
 		case BP_VAR_R:
@@ -282,28 +282,22 @@ static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, uint32_t var, int 
 	return ptr;
 }
 
-static zend_always_inline zval *_get_zval_cv_lookup_BP_VAR_R(zval *ptr, uint32_t var EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD zval *_get_zval_cv_lookup_BP_VAR_R(zval *ptr, uint32_t var EXECUTE_DATA_DC)
 {
 	zval_undefined_cv(var EXECUTE_DATA_CC);
 	return &EG(uninitialized_zval);
 }
 
-static zend_always_inline zval *_get_zval_cv_lookup_BP_VAR_UNSET(zval *ptr, uint32_t var EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD zval *_get_zval_cv_lookup_BP_VAR_UNSET(zval *ptr, uint32_t var EXECUTE_DATA_DC)
 {
 	zval_undefined_cv(var EXECUTE_DATA_CC);
 	return &EG(uninitialized_zval);
 }
 
-static zend_always_inline zval *_get_zval_cv_lookup_BP_VAR_RW(zval *ptr, uint32_t var EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD zval *_get_zval_cv_lookup_BP_VAR_RW(zval *ptr, uint32_t var EXECUTE_DATA_DC)
 {
 	ZVAL_NULL(ptr);
 	zval_undefined_cv(var EXECUTE_DATA_CC);
-	return ptr;
-}
-
-static zend_always_inline zval *_get_zval_cv_lookup_BP_VAR_W(zval *ptr, uint32_t var EXECUTE_DATA_DC)
-{
-	ZVAL_NULL(ptr);
 	return ptr;
 }
 
@@ -312,14 +306,13 @@ static zend_always_inline zval *_get_zval_ptr_cv(uint32_t var, int type EXECUTE_
 	zval *ret = EX_VAR(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup(ret, var, type EXECUTE_DATA_CC);
+		if (type == BP_VAR_W) {
+			ZVAL_NULL(ret);
+		} else {
+			return _get_zval_cv_lookup(ret, var, type EXECUTE_DATA_CC);
+		}
 	}
 	return ret;
-}
-
-static zend_always_inline zval *_get_zval_ptr_cv_undef(uint32_t var EXECUTE_DATA_DC)
-{
-	return EX_VAR(var);
 }
 
 static zend_always_inline zval *_get_zval_ptr_cv_deref(uint32_t var, int type EXECUTE_DATA_DC)
@@ -327,7 +320,12 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref(uint32_t var, int type EX
 	zval *ret = EX_VAR(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup(ret, var, type EXECUTE_DATA_CC);
+		if (type == BP_VAR_W) {
+			ZVAL_NULL(ret);
+			return ret;
+		} else {
+			return _get_zval_cv_lookup(ret, var, type EXECUTE_DATA_CC);
+		}
 	}
 	ZVAL_DEREF(ret);
 	return ret;
@@ -416,24 +414,9 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(uint32_t var EXECUTE_D
 	zval *ret = EX_VAR(var);
 
 	if (Z_TYPE_P(ret) == IS_UNDEF) {
-		return _get_zval_cv_lookup_BP_VAR_W(ret, var EXECUTE_DATA_CC);
+		ZVAL_NULL(ret);
 	}
 	return ret;
-}
-
-static zend_always_inline zval *_get_zval_ptr_cv_undef_BP_VAR_W(uint32_t var EXECUTE_DATA_DC)
-{
-	return EX_VAR(var);
-}
-
-static zend_always_inline zval *_get_zval_ptr_cv_undef_BP_VAR_RW(uint32_t var EXECUTE_DATA_DC)
-{
-	return EX_VAR(var);
-}
-
-static zend_always_inline zval *_get_zval_ptr_cv_undef_BP_VAR_UNSET(uint32_t var EXECUTE_DATA_DC)
-{
-	return EX_VAR(var);
 }
 
 static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(uint32_t var EXECUTE_DATA_DC)
@@ -441,7 +424,8 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(uint32_t var EXE
 	zval *ret = EX_VAR(var);
 
 	if (Z_TYPE_P(ret) == IS_UNDEF) {
-		return _get_zval_cv_lookup_BP_VAR_W(ret, var EXECUTE_DATA_CC);
+		ZVAL_NULL(ret);
+		return ret;
 	}
 	ZVAL_DEREF(ret);
 	return ret;
@@ -545,7 +529,7 @@ static zend_always_inline zval *_get_zval_ptr_undef(int op_type, znode_op node, 
 		if (op_type == IS_CONST) {
 			return RT_CONSTANT(opline, node);
 		} else if (op_type == IS_CV) {
-			return _get_zval_ptr_cv_undef(node.var EXECUTE_DATA_CC);
+			return EX_VAR(node.var);
 		} else {
 			return NULL;
 		}
@@ -574,11 +558,6 @@ static inline zval *_get_zval_ptr_ptr(int op_type, znode_op node, zend_free_op *
 		ZEND_ASSERT(op_type == IS_VAR);
 		return _get_zval_ptr_ptr_var(node.var, should_free EXECUTE_DATA_CC);
 	}
-}
-
-static zend_always_inline zval *_get_obj_zval_ptr_unused(EXECUTE_DATA_D)
-{
-	return &EX(This);
 }
 
 static inline zval *_get_obj_zval_ptr(int op_type, znode_op op, zend_free_op *should_free, int type EXECUTE_DATA_DC OPLINE_DC)
@@ -2029,8 +2008,10 @@ num_undef:
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
-		if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
-			goto num_index;
+		if (dim_type != IS_CONST) {
+			if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+				goto num_index;
+			}
 		}
 str_index:
 		retval = zend_hash_find_ex(ht, offset_key, dim_type == IS_CONST);
@@ -2174,6 +2155,9 @@ fetch_from_array:
 			zend_use_object_as_array();
 			ZVAL_ERROR(result);
 		} else {
+			if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+				dim++;
+			}
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
 
 			if (UNEXPECTED(retval == &EG(uninitialized_zval))) {
@@ -2337,6 +2321,9 @@ try_string_offset:
 			zend_use_object_as_array();
 			ZVAL_NULL(result);
 		} else {
+			if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+				dim++;
+			}
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
 
 			ZEND_ASSERT(result != NULL);
@@ -2379,16 +2366,16 @@ static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_read_IS
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0 EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_w(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_w(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *result = EX_VAR(opline->result.var);
-	zend_fetch_dimension_address(result, container, dim, IS_TMP_VAR, BP_VAR_W EXECUTE_DATA_CC);
+	zend_fetch_dimension_address(result, container, dim, dim_type, BP_VAR_W EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_r(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_r(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *result = EX_VAR(opline->result.var);
-	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, BP_VAR_R, 0, 0 EXECUTE_DATA_CC);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 0, 0 EXECUTE_DATA_CC);
 }
 
 ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type)

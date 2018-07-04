@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0alpha3
+?? ??? ????, PHP 7.3.0beta1
+
+PDO_Firebird:
+  . Fixed bug #74462 (PDO_Firebird returns only NULLs for results with boolean
+    for FIREBIRD >= 3.0). (Dorin Marcoci)
+
+05 Jul 2018, PHP 7.3.0alpha3
 
 - Core:
   . Fixed bug #76534 (PHP hangs on 'illegal string offset on string references
@@ -15,7 +21,7 @@ PHP                                                                        NEWS
   . Added syslog.facility and syslog.ident INI entries for customizing syslog
     logging. (Philip Prindeville)
   . Fixed bug #63217 (Constant numeric strings become integers when used as
-    ArrayAccess offset). (Rudi Theunissen)
+    ArrayAccess offset). (Rudi Theunissen, Dmitry)
 
 - DOM:
   . Fixed bug #76285 (DOMDocument::formatOutput attribute sometimes ignored).

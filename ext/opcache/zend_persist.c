@@ -432,6 +432,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 #if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				opline->op1.zv = (zval*)((char*)opline->op1.zv + ((char*)op_array->literals - (char*)orig_literals));
+				if (opline->opcode == ZEND_SEND_VAL
+				 || opline->opcode == ZEND_SEND_VAL_EX
+				 || opline->opcode == ZEND_QM_ASSIGN) {
+					/* Update handlers to eliminate REFCOUNTED check */
+					zend_vm_set_opcode_handler_ex(opline, 0, 0, 0);
+				}
 			}
 			if (opline->op2_type == IS_CONST) {
 				opline->op2.zv = (zval*)((char*)opline->op2.zv + ((char*)op_array->literals - (char*)orig_literals));
@@ -443,6 +449,11 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 						((zval*)((char*)(op_array->opcodes + (opline - new_opcodes)) +
 						(int32_t)opline->op1.constant) - orig_literals)) -
 					(char*)opline;
+				if (opline->opcode == ZEND_SEND_VAL
+				 || opline->opcode == ZEND_SEND_VAL_EX
+				 || opline->opcode == ZEND_QM_ASSIGN) {
+					zend_vm_set_opcode_handler_ex(opline, 0, 0, 0);
+				}
 			}
 			if (opline->op2_type == IS_CONST) {
 				opline->op2.constant =

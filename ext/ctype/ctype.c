@@ -142,8 +142,8 @@ static PHP_MINFO_FUNCTION(ctype)
 
 /* {{{ ctype
  */
-#define CTYPE(iswhat) \
-	zval *c, tmp; \
+#define CTYPE(iswhat, allow_digits, allow_minus) \
+	zval *c; \
 	ZEND_PARSE_PARAMETERS_START(1, 1); \
 		Z_PARAM_ZVAL(c) \
 	ZEND_PARSE_PARAMETERS_END(); \
@@ -152,24 +152,21 @@ static PHP_MINFO_FUNCTION(ctype)
 			RETURN_BOOL(iswhat((int)Z_LVAL_P(c))); \
 		} else if (Z_LVAL_P(c) >= -128 && Z_LVAL_P(c) < 0) { \
 			RETURN_BOOL(iswhat((int)Z_LVAL_P(c) + 256)); \
+		} else if (Z_LVAL_P(c) >= 0) { \
+			RETURN_BOOL(allow_digits); \
+		} else { \
+			RETURN_BOOL(allow_minus); \
 		} \
-		ZVAL_STR(&tmp, zval_get_string_func(c)); \
-	} else { \
-		ZVAL_COPY_VALUE(&tmp, c); \
-	} \
-	if (Z_TYPE(tmp) == IS_STRING) { \
-		char *p = Z_STRVAL(tmp), *e = Z_STRVAL(tmp) + Z_STRLEN(tmp); \
+	} else if (Z_TYPE_P(c) == IS_STRING) { \
+		char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c); \
 		if (e == p) {	\
-			if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
 			RETURN_FALSE;	\
 		}	\
 		while (p < e) { \
 			if(!iswhat((int)*(unsigned char *)(p++))) { \
-				if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
 				RETURN_FALSE; \
 			} \
 		} \
-		if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
 		RETURN_TRUE; \
 	} else { \
 		RETURN_FALSE; \
@@ -181,7 +178,7 @@ static PHP_MINFO_FUNCTION(ctype)
    Checks for alphanumeric character(s) */
 static PHP_FUNCTION(ctype_alnum)
 {
-	CTYPE(isalnum);
+	CTYPE(isalnum, 1, 0);
 }
 /* }}} */
 
@@ -189,7 +186,7 @@ static PHP_FUNCTION(ctype_alnum)
    Checks for alphabetic character(s) */
 static PHP_FUNCTION(ctype_alpha)
 {
-	CTYPE(isalpha);
+	CTYPE(isalpha, 0, 0);
 }
 /* }}} */
 
@@ -197,7 +194,7 @@ static PHP_FUNCTION(ctype_alpha)
    Checks for control character(s) */
 static PHP_FUNCTION(ctype_cntrl)
 {
-	CTYPE(iscntrl);
+	CTYPE(iscntrl, 0, 0);
 }
 /* }}} */
 
@@ -205,7 +202,7 @@ static PHP_FUNCTION(ctype_cntrl)
    Checks for numeric character(s) */
 static PHP_FUNCTION(ctype_digit)
 {
-	CTYPE(isdigit);
+	CTYPE(isdigit, 1, 0);
 }
 /* }}} */
 
@@ -213,7 +210,7 @@ static PHP_FUNCTION(ctype_digit)
    Checks for lowercase character(s)  */
 static PHP_FUNCTION(ctype_lower)
 {
-	CTYPE(islower);
+	CTYPE(islower, 0, 0);
 }
 /* }}} */
 
@@ -221,7 +218,7 @@ static PHP_FUNCTION(ctype_lower)
    Checks for any printable character(s) except space */
 static PHP_FUNCTION(ctype_graph)
 {
-	CTYPE(isgraph);
+	CTYPE(isgraph, 1, 1);
 }
 /* }}} */
 
@@ -229,7 +226,7 @@ static PHP_FUNCTION(ctype_graph)
    Checks for printable character(s) */
 static PHP_FUNCTION(ctype_print)
 {
-	CTYPE(isprint);
+	CTYPE(isprint, 1, 1);
 }
 /* }}} */
 
@@ -237,7 +234,7 @@ static PHP_FUNCTION(ctype_print)
    Checks for any printable character which is not whitespace or an alphanumeric character */
 static PHP_FUNCTION(ctype_punct)
 {
-	CTYPE(ispunct);
+	CTYPE(ispunct, 0, 0);
 }
 /* }}} */
 
@@ -245,7 +242,7 @@ static PHP_FUNCTION(ctype_punct)
    Checks for whitespace character(s)*/
 static PHP_FUNCTION(ctype_space)
 {
-	CTYPE(isspace);
+	CTYPE(isspace, 0, 0);
 }
 /* }}} */
 
@@ -253,7 +250,7 @@ static PHP_FUNCTION(ctype_space)
    Checks for uppercase character(s) */
 static PHP_FUNCTION(ctype_upper)
 {
-	CTYPE(isupper);
+	CTYPE(isupper, 0, 0);
 }
 /* }}} */
 
@@ -261,7 +258,7 @@ static PHP_FUNCTION(ctype_upper)
    Checks for character(s) representing a hexadecimal digit */
 static PHP_FUNCTION(ctype_xdigit)
 {
-	CTYPE(isxdigit);
+	CTYPE(isxdigit, 1, 0);
 }
 /* }}} */
 

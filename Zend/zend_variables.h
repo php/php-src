@@ -71,42 +71,33 @@ static zend_always_inline void _zval_opt_copy_ctor(zval *zvalue ZEND_FILE_LINE_D
 	}
 }
 
-ZEND_API size_t zend_print_variable(zval *var);
 ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC);
-ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC);
-ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_ptr_dtor(zval *zvalue ZEND_FILE_LINE_DC);
-ZEND_API void _zval_dtor_wrapper(zval *zvalue);
 #define zval_copy_ctor(zvalue) _zval_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_opt_copy_ctor(zvalue) _zval_opt_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
-#define zval_dtor(zvalue) zval_ptr_dtor_nogc(zvalue)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor_nogc(zval_ptr) _zval_ptr_dtor_nogc((zval_ptr) ZEND_FILE_LINE_CC)
-#define zval_internal_dtor(zvalue) _zval_internal_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_internal_ptr_dtor(zvalue) _zval_internal_ptr_dtor((zvalue) ZEND_FILE_LINE_CC)
-#define zval_dtor_wrapper _zval_dtor_wrapper
+
+/* Kept for compatibility */
+#define zval_dtor(zvalue) zval_ptr_dtor_nogc(zvalue)
+#define zval_internal_dtor(zvalue) _zval_internal_ptr_dtor((zvalue) ZEND_FILE_LINE_CC)
 
 #if ZEND_DEBUG
 ZEND_API void _zval_ptr_dtor_wrapper(zval *zval_ptr);
-ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue);
 ZEND_API void _zval_internal_ptr_dtor_wrapper(zval *zvalue);
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor_wrapper
-#define zval_internal_dtor_wrapper _zval_internal_dtor_wrapper
 #define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor_wrapper
 #else
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor
-#define zval_internal_dtor_wrapper _zval_internal_dtor
 #define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor
 #endif
 
 ZEND_API void zval_add_ref(zval *p);
-ZEND_API void zval_add_ref_unref(zval *p);
 
 END_EXTERN_C()
 
-#define ZVAL_DESTRUCTOR zval_dtor_wrapper
 #define ZVAL_PTR_DTOR zval_ptr_dtor_wrapper
-#define ZVAL_INTERNAL_DTOR zval_internal_dtor_wrapper
 #define ZVAL_INTERNAL_PTR_DTOR zval_internal_ptr_dtor_wrapper
 
 #endif
