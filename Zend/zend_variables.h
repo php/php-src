@@ -71,6 +71,16 @@ static zend_always_inline void _zval_opt_copy_ctor(zval *zvalue ZEND_FILE_LINE_D
 	}
 }
 
+static zend_always_inline void zval_ptr_dtor_str(zval *zval_ptr)
+{
+	if (Z_REFCOUNTED_P(zval_ptr) && !Z_DELREF_P(zval_ptr)) {
+		ZEND_ASSERT(Z_TYPE_P(zval_ptr) == IS_STRING);
+		ZEND_ASSERT(!ZSTR_IS_INTERNED(Z_STR_P(zval_ptr)));
+		ZEND_ASSERT(!(GC_FLAGS(Z_STR_P(zval_ptr)) & IS_STR_PERSISTENT));
+		efree(Z_STR_P(zval_ptr));
+	}
+}
+
 ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_ptr_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 #define zval_copy_ctor(zvalue) _zval_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
