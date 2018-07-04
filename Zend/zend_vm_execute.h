@@ -1358,14 +1358,13 @@ send_again:
 						break;
 					}
 
-					if (Z_TYPE(key) == IS_STRING) {
+					if (UNEXPECTED(Z_TYPE(key) != IS_LONG)) {
+						ZEND_ASSERT(Z_TYPE(key) == IS_STRING);
 						zend_throw_error(NULL,
 							"Cannot unpack Traversable with string keys");
 						zend_string_release_ex(Z_STR(key), 0);
 						break;
 					}
-
-					zval_dtor(&key);
 				}
 
 				if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
