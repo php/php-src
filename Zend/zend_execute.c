@@ -1297,12 +1297,10 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 			ZVAL_COPY_VALUE(z, value);
 		}
 		if (UNEXPECTED(Z_ISREF_P(z))) {
-			zend_property_info *error_prop;
 			zend_reference *ref = Z_REF_P(z);
 			zval *refval = Z_REFVAL_P(z);
 			binary_op(&res, refval, value);
-			if (ZEND_REF_HAS_TYPE_SOURCES(ref) && (error_prop = zend_verify_ref_assignable_zval(ref, &res, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) != NULL) {
-				zend_throw_ref_type_error_zval(error_prop, &res);
+			if (ZEND_REF_HAS_TYPE_SOURCES(ref) && !zend_verify_ref_assignable_zval(ref, &res, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 				zval_ptr_dtor(&res);
 				if (z == &rv) {
 					zval_ptr_dtor(&rv);
@@ -1632,13 +1630,11 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 			} else {
 				decrement_function(&z_copy);
 			}
-			if (EXPECTED(ref ? (prop_info = zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES())) == NULL : zend_verify_property_type(prop_info, &z_copy, &z_copy, EX_USES_STRICT_TYPES()) != NULL)) {
+			if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, &z_copy, EX_USES_STRICT_TYPES()) != NULL)) {
 				zval_ptr_dtor(prop);
 				ZVAL_COPY_VALUE(prop, &z_copy);
 			} else {
-				if (ref) {
-					zend_throw_ref_type_error_zval(prop_info, &z_copy);
-				} else {
+				if (!ref) {
 					zend_verify_property_type_error(prop_info, &z_copy);
 				}
 				zval_ptr_dtor(&z_copy);
@@ -1702,13 +1698,11 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 			} else {
 				decrement_function(&z_copy);
 			}
-			if (EXPECTED(ref ? (prop_info = zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES())) == NULL : zend_verify_property_type(prop_info, &z_copy, &z_copy, EX_USES_STRICT_TYPES()) != NULL)) {
+			if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, &z_copy, EX_USES_STRICT_TYPES()) != NULL)) {
 				zval_ptr_dtor(prop);
 				ZVAL_COPY_VALUE(prop, &z_copy);
 			} else {
-				if (ref) {
-					zend_throw_ref_type_error_zval(prop_info, &z_copy);
-				} else {
+				if (!ref) {
 					zend_verify_property_type_error(prop_info, &z_copy);
 				}
 				zval_ptr_dtor(&z_copy);
@@ -2838,19 +2832,20 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop,
 	);
 }
 
-static zend_always_inline zend_property_info *i_zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict) {
+static zend_always_inline zend_bool i_zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict) {
 	zend_property_info *prop;
 
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
 		if (!i_zend_verify_type_assignable_zval(prop->type, zv, strict)) {
-			return prop;
+			zend_throw_ref_type_error_zval(prop, zv);
+			return 0;
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
 
-	return NULL;
+	return 1;
 }
 
-ZEND_API zend_property_info *zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict)
+ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict)
 {
 	return i_zend_verify_ref_assignable_zval(ref, zv, strict);
 }

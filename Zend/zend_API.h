@@ -681,15 +681,13 @@ END_EXTERN_C()
 static zend_always_inline int zend_try_assign_ex(zval *zv, zval *arg, zend_bool strict) {
 	zend_reference *ref;
 	if (EXPECTED(Z_ISREF_P(zv)) && UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref = Z_REF_P(zv)))) {
-		zend_property_info *error_prop;
 		zval tmp;
 		ZVAL_COPY_VALUE(&tmp, arg);
-		if (EXPECTED((error_prop = zend_verify_ref_assignable_zval(ref, &tmp, strict)) == NULL)) {
+		if (EXPECTED(zend_verify_ref_assignable_zval(ref, &tmp, strict))) {
 			zv = Z_REFVAL_P(zv);
 			zval_ptr_dtor(zv);
 			ZVAL_COPY_VALUE(zv, &tmp);
 		} else {
-			zend_throw_ref_type_error_zval(error_prop, &tmp);
 			zval_ptr_dtor(&tmp);
 			return FAILURE;
 		}

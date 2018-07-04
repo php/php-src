@@ -86,7 +86,7 @@ static zend_always_inline zend_bool zend_verify_type_assignable(zend_type type, 
 }
 
 ZEND_API zend_property_info *zend_verify_ref_assignable_type(zend_reference *ref, zend_type type);
-ZEND_API zend_property_info *zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict);
+ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict);
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv);
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(const char *source, zend_property_info *prop, zend_type type);
@@ -116,14 +116,12 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 
 			if (Z_ISREF_P(variable_ptr)) {
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
-					zend_property_info *error_prop;
 					zend_bool need_copy = (value_type & (IS_CONST|IS_CV)) || ((value_type & IS_VAR) && UNEXPECTED(ref) && Z_REFCOUNT_P(variable_ptr) > 1);
 					if (need_copy) {
 						ZVAL_COPY(&tmp, value);
 						value = &tmp;
 					}
-					if ((error_prop = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict)) != NULL) {
-						zend_throw_ref_type_error_zval(error_prop, value);
+					if (!zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict)) {
 						zval_ptr_dtor(value);
 						return Z_REFVAL_P(variable_ptr);
 					}
