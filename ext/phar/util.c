@@ -1404,18 +1404,18 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 	}
 
 	if ((size_t)end != Z_STRLEN(zp[0])) {
-		zval_dtor(&zp[0]);
-		zval_dtor(&zp[1]);
-		zval_dtor(&zp[2]);
-		zval_dtor(&openssl);
+		zval_ptr_dtor_str(&zp[0]);
+		zval_ptr_dtor_str(&zp[1]);
+		zval_ptr_dtor_str(&zp[2]);
+		zval_ptr_dtor_str(&openssl);
 		return FAILURE;
 	}
 
 	if (FAILURE == zend_fcall_info_init(&openssl, 0, &fci, &fcc, NULL, NULL)) {
-		zval_dtor(&zp[0]);
-		zval_dtor(&zp[1]);
-		zval_dtor(&zp[2]);
-		zval_dtor(&openssl);
+		zval_ptr_dtor_str(&zp[0]);
+		zval_ptr_dtor_str(&zp[1]);
+		zval_ptr_dtor_str(&zp[2]);
+		zval_ptr_dtor_str(&openssl);
 		return FAILURE;
 	}
 
@@ -1432,14 +1432,14 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 	fci.retval = &retval;
 
 	if (FAILURE == zend_call_function(&fci, &fcc)) {
-		zval_dtor(&zp[0]);
-		zval_dtor(&zp[1]);
-		zval_dtor(&zp[2]);
-		zval_dtor(&openssl);
+		zval_ptr_dtor_str(&zp[0]);
+		zval_ptr_dtor(&zp[1]);
+		zval_ptr_dtor_str(&zp[2]);
+		zval_ptr_dtor_str(&openssl);
 		return FAILURE;
 	}
 
-	zval_dtor(&openssl);
+	zval_ptr_dtor_str(&openssl);
 	Z_DELREF(zp[0]);
 
 	if (is_sign) {
@@ -1449,13 +1449,13 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 	}
 	Z_DELREF(zp[2]);
 
-	zval_dtor(&zp[0]);
-	zval_dtor(&zp[2]);
+	zval_ptr_dtor_str(&zp[0]);
+	zval_ptr_dtor_str(&zp[2]);
 
 	switch (Z_TYPE(retval)) {
 		default:
 		case IS_LONG:
-			zval_dtor(&zp[1]);
+			zval_ptr_dtor(&zp[1]);
 			if (1 == Z_LVAL(retval)) {
 				return SUCCESS;
 			}
@@ -1463,10 +1463,10 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 		case IS_TRUE:
 			*signature = estrndup(Z_STRVAL(zp[1]), Z_STRLEN(zp[1]));
 			*signature_len = Z_STRLEN(zp[1]);
-			zval_dtor(&zp[1]);
+			zval_ptr_dtor(&zp[1]);
 			return SUCCESS;
 		case IS_FALSE:
-			zval_dtor(&zp[1]);
+			zval_ptr_dtor(&zp[1]);
 			return FAILURE;
 	}
 }

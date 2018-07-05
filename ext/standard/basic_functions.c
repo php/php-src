@@ -5998,7 +5998,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			if (Z_TYPE_P(find_hash) != IS_ARRAY) {
-				zval_dtor(find_hash);
+				zval_ptr_dtor_nogc(find_hash);
 				array_init(find_hash);
 			}
 

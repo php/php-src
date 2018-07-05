@@ -1180,7 +1180,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 				}
 				zend_hash_next_index_insert(Z_ARRVAL(grp), return_value);
 			}
-			zval_dtor(&grp_val);
+			zval_ptr_dtor_str(&grp_val);
 		}
 
 	}
@@ -2579,7 +2579,7 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 
 					fetch_value(stmt, &val, colno, NULL);
 					res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
-					zval_dtor(&val);
+					zval_ptr_dtor_nogc(&val);
 
 					return res;
 			}

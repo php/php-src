@@ -487,7 +487,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 	}
 
 	if (Z_TYPE_P(param) != IS_STRING) {
-		zval_dtor(&data);
+		zval_ptr_dtor_str(&data);
 	}
 
 	if (isc_close_blob(H->isc_status, &h)) {

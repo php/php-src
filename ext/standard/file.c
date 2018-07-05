@@ -700,7 +700,7 @@ PHP_FUNCTION(file_put_contents)
 						php_error_docref(NULL, E_WARNING, "Only "ZEND_LONG_FMT" of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
 						numbytes = -1;
 					}
-					zval_dtor(&out);
+					zval_ptr_dtor_str(&out);
 					break;
 				}
 			}

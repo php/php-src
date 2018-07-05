@@ -320,11 +320,11 @@ static UBool enumCharNames_callback(enumCharNames_data *context,
 		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR);
 		intl_error_set_custom_msg(NULL, "enumCharNames callback failed", 0);
 		zval_dtor(&retval);
-		zval_dtor(&args[2]);
+		zval_ptr_dtor_str(&args[2]);
 		return 0;
 	}
 	zval_dtor(&retval);
-	zval_dtor(&args[2]);
+	zval_ptr_dtor_str(&args[2]);
 	return 1;
 }
 IC_METHOD(enumCharNames) {

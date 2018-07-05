@@ -971,7 +971,7 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNo
 	xmlAddChild(ret, text);
 	efree(str);
 	if (data == &tmp) {
-		zval_dtor(&tmp);
+		zval_ptr_dtor_str(&tmp);
 	}
 
 	if (style == SOAP_ENCODED) {
@@ -3069,7 +3069,9 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 		}
 		smart_str_free(&list);
 		efree(str);
-		if (data == &tmp) {zval_dtor(&tmp);}
+		if (data == &tmp) {
+			zval_ptr_dtor_str(&tmp);
+		}
 	}
 	return ret;
 }
