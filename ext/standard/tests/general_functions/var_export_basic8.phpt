@@ -30,17 +30,17 @@ var_export($b);
 ===DONE===
 --EXPECT--
 -- Var export on a simple  object --
-stdClass::__set_state(array(
+(object) array(
    'a' => 1,
    'b' => 
   array (
     'k' => 2,
   ),
    'x' => 
-  stdClass::__set_state(array(
+  (object) array(
      'p' => '22',
-  )),
-))
+  ),
+)
 
 -- Var export on an simple array --
 array (
@@ -57,15 +57,15 @@ array (
     'one' => 'first',
   ),
   'bar' => 
-  stdClass::__set_state(array(
+  (object) array(
      'a' => 1,
      'b' => 
     array (
       'k' => 2,
     ),
      'x' => 
-    stdClass::__set_state(array(
+    (object) array(
        'p' => '22',
-    )),
-  )),
+    ),
+  ),
 )===DONE===

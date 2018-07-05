@@ -356,6 +356,11 @@ PCRE:
     behavioral changes, and augments the existing regular expression syntax.
     See <https://wiki.php.net/rfc/pcre2-migration> for details.
 
+ Standard:
+  . var_export() now exports stdClass objects as an array casted to an object
+    (`(object) array( ... )`), rather than using the nonexistent method
+    stdClass::__setState().
+
  ZIP:
   . Bundled libzip has been dropped,
     system library is now required.
