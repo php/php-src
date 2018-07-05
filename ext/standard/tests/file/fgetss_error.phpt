@@ -2,6 +2,8 @@
 Test fgetss() function : error conditions
 --FILE--
 <?php
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 /*
  Prototype: string fgetss ( resource $handle [, int $length [, string $allowable_tags]] );
  Description: Gets line from file pointer and strip HTML tags
