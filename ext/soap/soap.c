@@ -1540,7 +1540,7 @@ PHP_METHOD(SoapServer, handle)
 
 			zval_ptr_dtor(&param);
 			zval_ptr_dtor_str(&readfile);
-			zval_dtor(&readfile_ret);
+			zval_ptr_dtor(&readfile_ret);
 
 			SOAP_SERVER_END_CODE();
 			return;
@@ -1699,12 +1699,12 @@ PHP_METHOD(SoapServer, handle)
 					php_output_discard();
 					_soap_server_exception(service, function, getThis());
 					zval_ptr_dtor_str(&constructor);
-					zval_dtor(&c_ret);
+					zval_ptr_dtor(&c_ret);
 					zval_ptr_dtor(&tmp_soap);
 					goto fail;
 				}
 				zval_ptr_dtor_str(&constructor);
-				zval_dtor(&c_ret);
+				zval_ptr_dtor(&c_ret);
 			} else {
 				int class_name_len = ZSTR_LEN(service->soap_class.ce->name);
 				char *class_name = emalloc(class_name_len+1);
@@ -1722,14 +1722,14 @@ PHP_METHOD(SoapServer, handle)
 						php_output_discard();
 						_soap_server_exception(service, function, getThis());
 						zval_ptr_dtor_str(&constructor);
-						zval_dtor(&c_ret);
+						zval_ptr_dtor(&c_ret);
 						efree(class_name);
 						zval_ptr_dtor(&tmp_soap);
 						goto fail;
 					}
 
 					zval_ptr_dtor_str(&constructor);
-					zval_dtor(&c_ret);
+					zval_ptr_dtor(&c_ret);
 				}
 				efree(class_name);
 			}
@@ -1953,7 +1953,7 @@ fail:
 			efree(h->parameters);
 		}
 		zval_ptr_dtor_str(&h->function_name);
-		zval_dtor(&h->retval);
+		zval_ptr_dtor(&h->retval);
 		efree(h);
 	}
 	service->soap_headers_ptr = NULL;
@@ -2683,7 +2683,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 					encode_finish();
 				}
 
-				zval_dtor(&response);
+				zval_ptr_dtor(&response);
 
 	 		} else {
 	 			smart_str error = {0};
@@ -2728,7 +2728,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 					encode_finish();
 				}
 
-				zval_dtor(&response);
+				zval_ptr_dtor(&response);
 			}
 	 	}
 

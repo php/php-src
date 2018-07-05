@@ -334,7 +334,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 				break;
 		}
 
-		zval_dtor(&return_value);
+		zval_ptr_dtor(&return_value);
 
 		return;
 
