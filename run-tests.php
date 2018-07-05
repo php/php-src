@@ -1458,6 +1458,8 @@ NAME_AND_SHAME;
 	echo "====⚡️===========================================================⚡️====\n";
 	echo "\n";
 
+	$rawMessageBuffers = [];
+
 escape:
 	while ($testDirsToGo || ($testDirsInProgress > 0)) {
 		$toRead = array_values($workerSocks);
@@ -1470,8 +1472,17 @@ escape:
 					kill_children($workerProcs);
 					error("Could not find worker stdout in array of worker stdouts, THIS SHOULD NOT HAPPEN.");
 				}
-				// Some tests have *very* long output and fgets() seems to truncate to 8KiB unless we say we want more
-				while (FALSE !== ($rawMessage = fgets($workerSock, 64 * 1024))) {
+				while (FALSE !== ($rawMessage = fgets($workerSock))) {
+					// work around fgets truncating things
+					if (($rawMessageBuffers[$i] ?? '') !== '') {
+						$rawMessage = $rawMessageBuffers[$i] . $rawMessage;
+						$rawMessageBuffers[$i] = '';
+					}
+					if ($rawMessage[-1] !== "\n") {
+						$rawMessageBuffers[$i] = $rawMessage;
+						continue;
+					}
+
 					$message = unserialize(base64_decode($rawMessage));
 					if (!$message) {
 						kill_children($workerProcs);
