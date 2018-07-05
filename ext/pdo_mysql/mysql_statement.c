@@ -34,7 +34,7 @@
 
 #ifdef PDO_USE_MYSQLND
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_mysqlnd(stmt)
-#	define pdo_free_bound_result(res) zval_dtor(res.zv)
+#	define pdo_free_bound_result(res) zval_ptr_dtor(res.zv)
 #	define pdo_mysql_stmt_close(stmt) mysqlnd_stmt_close(stmt, 0)
 #else
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_libmysql(stmt)

@@ -1503,7 +1503,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 cleanup:
 	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
-		zval_dtor(&args[i]);
+		zval_ptr_dtor(&args[i]);
 	}
 	efree(args);
 	smart_str_free(&str);
@@ -1511,7 +1511,7 @@ cleanup:
 
 err:
 	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
-		zval_dtor(&args[i]);
+		zval_ptr_dtor(&args[i]);
 	}
 	efree(args);
 	smart_str_free(&str);

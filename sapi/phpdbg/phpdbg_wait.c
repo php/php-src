@@ -327,7 +327,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	zval_dtor(&zv);
+	zval_ptr_dtor(&zv);
 	if (free_zv) {
 		/* separate freeing to not dtor the symtable too, just the container zval... */
 		efree(free_zv);

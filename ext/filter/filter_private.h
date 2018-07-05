@@ -97,7 +97,7 @@
 || id == FILTER_CALLBACK)
 
 #define RETURN_VALIDATION_FAILED	\
-	zval_dtor(value);	\
+	zval_ptr_dtor(value);	\
 	if (flags & FILTER_NULL_ON_FAILURE) {	\
 		ZVAL_NULL(value);	\
 	} else {	\

@@ -57,7 +57,7 @@ void _php_ibase_free_event(ibase_event *event) /* {{{ */
 	}
 
 	if (Z_TYPE(event->callback) != IS_UNDEF) {
-		zval_dtor(&event->callback);
+		zval_ptr_dtor(&event->callback);
 		ZVAL_UNDEF(&event->callback);
 
 		_php_ibase_event_free(event->event_buffer,event->result_buffer);

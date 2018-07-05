@@ -358,7 +358,7 @@ double_case:
 		break;
 	}
 
-	zval_dtor(&lzval);
+	zval_ptr_dtor(&lzval);
 
 	return ret;
 }
