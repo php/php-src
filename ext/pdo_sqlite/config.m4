@@ -68,6 +68,10 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     PHP_CHECK_LIBRARY(sqlite3,sqlite3_key,[
       AC_DEFINE(HAVE_SQLITE3_KEY,1, [have commercial sqlite3 with crypto support])
     ])
+    PHP_CHECK_LIBRARY(sqlite3,sqlite3_load_extension,
+    [],
+    [AC_DEFINE(SQLITE_OMIT_LOAD_EXTENSION, 1, [have sqlite3 with extension support])
+    ])
     PHP_CHECK_LIBRARY(sqlite3,sqlite3_close_v2,[
       AC_DEFINE(HAVE_SQLITE3_CLOSE_V2, 1, [have sqlite3_close_v2])
     ])

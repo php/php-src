@@ -31,6 +31,8 @@
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
 
+ZEND_DECLARE_MODULE_GLOBALS(pdo_sqlite)
+
 /* {{{ pdo_sqlite_functions[] */
 const zend_function_entry pdo_sqlite_functions[] = {
 	PHP_FE_END
@@ -66,6 +68,13 @@ zend_module_entry pdo_sqlite_module_entry = {
 ZEND_GET_MODULE(pdo_sqlite)
 #endif
 
+/* {{{ PHP_INI
+*/
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("pdo_sqlite.extension_dir",  NULL, PHP_INI_SYSTEM, OnUpdateString, extension_dir, zend_pdo_sqlite_globals, pdo_sqlite_globals)
+PHP_INI_END()
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_sqlite)
 {
@@ -93,6 +102,8 @@ PHP_MINFO_FUNCTION(pdo_sqlite)
 	php_info_print_table_header(2, "PDO Driver for SQLite 3.x", "enabled");
 	php_info_print_table_row(2, "SQLite Library", sqlite3_libversion());
 	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 

@@ -42,11 +42,12 @@ PHP_MINFO_FUNCTION(pdo_sqlite);
   	Declare any global variables you may need between the BEGIN
 	and END macros here:
 
-ZEND_BEGIN_MODULE_GLOBALS(pdo_sqlite)
-	long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(pdo_sqlite)
 */
+ZEND_BEGIN_MODULE_GLOBALS(pdo_sqlite)
+	char *extension_dir;
+ZEND_END_MODULE_GLOBALS(pdo_sqlite)
+
+ZEND_EXTERN_MODULE_GLOBALS(pdo_sqlite)
 
 #ifdef ZTS
 #define PDO_SQLITE_G(v) TSRMG(pdo_sqlite_globals_id, zend_pdo_sqlite_globals *, v)

@@ -31,6 +31,8 @@
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
 
+ZEND_DECLARE_MODULE_GLOBALS(pdo_sqlite)
+
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
@@ -694,10 +696,92 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 }
 /* }}} */
 
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
+/* {{{ bool SQLite::sqliteLoadExtension(string name, mixed callback)
+   Registers a collation with the sqlite db handle */
+static PHP_METHOD(SQLite, sqliteLoadExtension)
+{
+	char *extension, *lib_path, *extension_dir, *errtext = NULL;
+	char fullpath[MAXPATHLEN];
+	size_t extension_len, extension_dir_len;
+	pdo_dbh_t *dbh;
+	pdo_sqlite_db_handle *H;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(extension, extension_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
+	dbh = Z_PDO_DBH_P(getThis());
+	PDO_CONSTRUCT_CHECK;
+
+#ifdef ZTS
+	if ((strncmp(sapi_module.name, "cgi", 3) != 0) &&
+		(strcmp(sapi_module.name, "cli") != 0) &&
+		(strncmp(sapi_module.name, "embed", 5) != 0)
+	) {	
+		php_error_docref(NULL, E_WARNING, "Not supported in multithreaded Web servers");
+		RETURN_FALSE;
+	}
+#endif
+
+
+	H = (pdo_sqlite_db_handle *)dbh->driver_data;
+
+	if (!PDO_SQLITE_G(extension_dir)) {
+		php_error_docref(NULL, E_WARNING, "SQLite Extension are disabled");
+		RETURN_FALSE;
+	}
+
+	if (extension_len == 0) {
+		php_error_docref(NULL, E_WARNING, "Empty string as an extension");
+		RETURN_FALSE;
+	}
+
+	extension_dir = PDO_SQLITE_G(extension_dir);
+	extension_dir_len = strlen(PDO_SQLITE_G(extension_dir));
+
+	if (IS_SLASH(extension_dir[extension_dir_len-1])) {
+		spprintf(&lib_path, 0, "%s%s", extension_dir, extension);
+	} else {
+		spprintf(&lib_path, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, extension);
+	}
+
+	if (!VCWD_REALPATH(lib_path, fullpath)) {
+		php_error_docref(NULL, E_WARNING, "Unable to load extension at '%s'", lib_path);
+		efree(lib_path);
+		RETURN_FALSE;
+	}
+
+	efree(lib_path);
+
+	if (strncmp(fullpath, extension_dir, extension_dir_len) != 0) {
+		php_error_docref(NULL, E_WARNING, "Unable to open extensions outside the defined directory");
+		RETURN_FALSE;
+	}
+
+	/* Extension loading should only be enabled for when we attempt to load */
+	sqlite3_enable_load_extension(H->db, 1);
+	if (sqlite3_load_extension(H->db, fullpath, 0, &errtext) != SQLITE_OK) {
+		php_error_docref(NULL, E_WARNING, "%s", errtext);
+		sqlite3_free(errtext);
+		sqlite3_enable_load_extension(H->db, 0);
+		RETURN_FALSE;
+	}
+	sqlite3_enable_load_extension(H->db, 0);
+
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
+
 static const zend_function_entry dbh_methods[] = {
 	PHP_ME(SQLite, sqliteCreateFunction, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(SQLite, sqliteCreateAggregate, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(SQLite, sqliteCreateCollation, NULL, ZEND_ACC_PUBLIC)
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
+	PHP_ME(SQLite, sqliteLoadExtension, NULL, ZEND_ACC_PUBLIC)
+#endif
 	PHP_FE_END
 };
 
