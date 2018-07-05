@@ -914,12 +914,12 @@ string(41) "array (
 *** Output for objects ***
 
 Iteration 1
-stdClass::__set_state(array(
-))
-stdClass::__set_state(array(
-))
-string(31) "stdClass::__set_state(array(
-))"
+(object) array(
+)
+(object) array(
+)
+string(17) "(object) array(
+)"
 
 
 Iteration 2

@@ -99,6 +99,7 @@ PHP                                                                        NEWS
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
     (Laruence)
   . Fixed bug #71848 (getimagesize with $imageinfo returns false). (cmb)
+  . Fixed bug #48016 (stdClass::__setState is not defined although var_export() uses it). (Andrea)
 
 - Tokenizer:
   . Fixed bug #76538 (token_get_all with TOKEN_PARSE flag fails to recognise
