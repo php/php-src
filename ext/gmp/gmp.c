@@ -549,7 +549,7 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 	retval = gmp_do_operation_ex(opcode, result, op1, op2);
 
 	if (retval == SUCCESS && op1 == &op1_copy) {
-		zval_dtor(op1);
+		zval_ptr_dtor(op1);
 	}
 
 	return retval;
