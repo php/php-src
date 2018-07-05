@@ -4127,7 +4127,7 @@ ZEND_METHOD(reflection_class, getMethod)
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value);
-		zval_dtor(&obj_tmp);
+		zval_ptr_dtor(&obj_tmp);
 		efree(lc_name);
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lc_name, name_len)) != NULL) {
 		reflection_method_factory(ce, mptr, NULL, return_value);
@@ -4571,7 +4571,7 @@ ZEND_METHOD(reflection_class, isCloneable)
 				return;
 			}
 			RETVAL_BOOL(Z_OBJ_HANDLER(obj, clone_obj) != NULL);
-			zval_dtor(&obj);
+			zval_ptr_dtor(&obj);
 		}
 	}
 }

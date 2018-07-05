@@ -1767,7 +1767,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 		if (SUCCESS != object_init_ex(&regexiter, spl_ce_RegexIterator)) {
 			zval_ptr_dtor(&iteriter);
-			zval_dtor(&regexiter);
+			zval_ptr_dtor(&regexiter);
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate regex iterator for %s", phar_obj->archive->fname);
 			RETURN_FALSE;
 		}
@@ -2218,7 +2218,7 @@ its_ok:
 
 	ZVAL_NULL(&ret);
 	if (SUCCESS != object_init_ex(&ret, ce)) {
-		zval_dtor(&ret);
+		zval_ptr_dtor(&ret);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate phar object when converting archive \"%s\"", phar->fname);
 		return NULL;
 	}
