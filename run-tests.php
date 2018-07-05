@@ -1470,7 +1470,8 @@ escape:
 					kill_children($workerProcs);
 					error("Could not find worker stdout in array of worker stdouts, THIS SHOULD NOT HAPPEN.");
 				}
-				while (FALSE !== ($rawMessage = fgets($workerSock))) {
+				// Some tests have *very* long output and fgets() seems to truncate to 8KiB unless we say we want more
+				while (FALSE !== ($rawMessage = fgets($workerSock, 64 * 1024))) {
 					$message = unserialize(base64_decode($rawMessage));
 					if (!$message) {
 						kill_children($workerProcs);
