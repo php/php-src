@@ -542,7 +542,8 @@ static void php_converter_resolve_callback(zval *zobj,
 	if (zend_fcall_info_init(&caller, 0, finfo, fcache, NULL, &errstr) == FAILURE) {
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Error setting converter callback: %s", errstr);
 	}
-	zval_dtor(&caller);
+	zend_array_destroy(Z_ARR(caller));
+	ZVAL_UNDEF(&finfo->function_name);
 	if (errstr) {
 		efree(errstr);
 	}
