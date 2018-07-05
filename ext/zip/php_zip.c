@@ -2260,9 +2260,9 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
-	zval_dtor(z_opsys);
+	zval_ptr_dtor(z_opsys);
 	ZVAL_LONG(z_opsys, opsys);
-	zval_dtor(z_attr);
+	zval_ptr_dtor(z_attr);
 	ZVAL_LONG(z_attr, attr);
 	RETURN_TRUE;
 }

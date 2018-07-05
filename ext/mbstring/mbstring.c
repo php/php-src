@@ -2139,7 +2139,7 @@ PHP_FUNCTION(mb_parse_str)
 
 	if (track_vars_array != NULL) {
 		/* Clear out the array */
-		zval_dtor(track_vars_array);
+		zval_ptr_dtor(track_vars_array);
 		array_init(track_vars_array);
 	}
 

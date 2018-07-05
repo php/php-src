@@ -701,7 +701,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (array != NULL) {
-		zval_dtor(array);
+		zval_ptr_dtor(array);
 		array_init(array);
 	}
 

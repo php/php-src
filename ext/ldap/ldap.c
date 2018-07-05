@@ -3066,7 +3066,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (!timeout) {
 				RETURN_FALSE;
 			}
-			zval_dtor(retval);
+			zval_ptr_dtor(retval);
 			ZVAL_LONG(retval, timeout->tv_sec);
 			ldap_memfree(timeout);
 		} break;
@@ -3435,7 +3435,7 @@ PHP_FUNCTION(ldap_parse_exop)
 	/* Reverse -> fall through */
 	switch (myargcount) {
 		case 4:
-			zval_dtor(retoid);
+			zval_ptr_dtor(retoid);
 			if (lretoid == NULL) {
 				ZVAL_EMPTY_STRING(retoid);
 			} else {
@@ -3444,7 +3444,7 @@ PHP_FUNCTION(ldap_parse_exop)
 			}
 		case 3:
 			/* use arg #3 as the data returned by the server */
-			zval_dtor(retdata);
+			zval_ptr_dtor(retdata);
 			if (lretdata == NULL) {
 				ZVAL_EMPTY_STRING(retdata);
 			} else {
@@ -4084,7 +4084,7 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 	ldap_controls_free(lserverctrls);
 	if (myargcount == 4) {
-		zval_dtor(estimated);
+		zval_ptr_dtor(estimated);
 		ZVAL_LONG(estimated, lestimated);
 	}
 
@@ -4155,7 +4155,7 @@ PHP_FUNCTION(ldap_exop)
 		}
 
 		if (retoid) {
-			zval_dtor(retoid);
+			zval_ptr_dtor(retoid);
 			if (lretoid) {
 				ZVAL_STRING(retoid, lretoid);
 				ldap_memfree(lretoid);
@@ -4164,7 +4164,7 @@ PHP_FUNCTION(ldap_exop)
 			}
 		}
 
-		zval_dtor(retdata);
+		zval_ptr_dtor(retdata);
 		if (lretdata) {
 			ZVAL_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
 			ldap_memfree(lretdata->bv_val);

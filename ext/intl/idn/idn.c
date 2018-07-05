@@ -319,7 +319,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 				"4 arguments were provided, but INTL_IDNA_VARIANT_2003 only "
 				"takes 3 - extra argument ignored");
 		} else {
-			zval_dtor(idna_info);
+			zval_ptr_dtor(idna_info);
 			array_init(idna_info);
 		}
 	}

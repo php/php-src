@@ -4647,13 +4647,13 @@ PHP_FUNCTION(exif_thumbnail)
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo);
 		}
-		zval_dtor(z_width);
-		zval_dtor(z_height);
+		zval_ptr_dtor(z_width);
+		zval_ptr_dtor(z_height);
 		ZVAL_LONG(z_width,  ImageInfo.Thumbnail.width);
 		ZVAL_LONG(z_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
-		zval_dtor(z_imagetype);
+		zval_ptr_dtor(z_imagetype);
 		ZVAL_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
