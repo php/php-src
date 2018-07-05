@@ -1345,9 +1345,10 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_L
 }
 /* }}} */
 
-ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API int object_init(zval *arg) /* {{{ */
 {
-	return _object_init_ex(arg, zend_standard_class_def ZEND_FILE_LINE_RELAY_CC);
+	ZVAL_OBJ(arg, zend_objects_new(zend_standard_class_def));
+	return SUCCESS;
 }
 /* }}} */
 
