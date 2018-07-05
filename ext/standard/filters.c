@@ -176,14 +176,14 @@ typedef struct _php_strip_tags_filter {
 	int persistent;
 } php_strip_tags_filter;
 
-static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, const char *allowed_tags, size_t allowed_tags_len, int persistent)
+static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, zend_string *allowed_tags, int persistent)
 {
 	if (allowed_tags != NULL) {
-		if (NULL == (inst->allowed_tags = pemalloc(allowed_tags_len, persistent))) {
+		if (NULL == (inst->allowed_tags = pemalloc(ZSTR_LEN(allowed_tags) + 1, persistent))) {
 			return FAILURE;
 		}
-		memcpy((char *)inst->allowed_tags, allowed_tags, allowed_tags_len);
-		inst->allowed_tags_len = (int)allowed_tags_len;
+		memcpy((char *)inst->allowed_tags, ZSTR_VAL(allowed_tags), ZSTR_LEN(allowed_tags) + 1);
+		inst->allowed_tags_len = (int)ZSTR_LEN(allowed_tags);
 	} else {
 		inst->allowed_tags = NULL;
 	}
@@ -247,7 +247,8 @@ static php_stream_filter_ops strfilter_strip_tags_ops = {
 static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zval *filterparams, int persistent)
 {
 	php_strip_tags_filter *inst;
-	smart_str tags_ss = {0};
+	php_stream_filter *filter = NULL;
+	zend_string *allowed_tags = NULL;;
 
 	inst = pemalloc(sizeof(php_strip_tags_filter), persistent);
 
@@ -258,6 +259,7 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 
 	if (filterparams != NULL) {
 		if (Z_TYPE_P(filterparams) == IS_ARRAY) {
+			smart_str tags_ss = {0};
 			zval *tmp;
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(filterparams), tmp) {
@@ -267,22 +269,23 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 				smart_str_appendc(&tags_ss, '>');
 			} ZEND_HASH_FOREACH_END();
 			smart_str_0(&tags_ss);
+			allowed_tags = tags_ss.s;
 		} else {
-			/* FIXME: convert_to_* may clutter zvals and lead it into segfault ? */
-			convert_to_string_ex(filterparams);
-			smart_str_setl(&tags_ss, Z_STRVAL_P(filterparams), Z_STRLEN_P(filterparams));
+			allowed_tags = zval_get_string(filterparams);
 		}
 	}
 
-	if (php_strip_tags_filter_ctor(inst, ZSTR_VAL(tags_ss.s), ZSTR_LEN(tags_ss.s), persistent) != SUCCESS) {
-		smart_str_free(&tags_ss);
+	if (php_strip_tags_filter_ctor(inst, allowed_tags, persistent) == SUCCESS) {
+		filter = php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
+	} else {
 		pefree(inst, persistent);
-		return NULL;
 	}
 
-	smart_str_free(&tags_ss);
+	if (allowed_tags) {
+		zend_string_release(allowed_tags);
+	}
 
-	return php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
+	return filter;
 }
 
 static php_stream_filter_factory strfilter_strip_tags_factory = {
