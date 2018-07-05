@@ -437,7 +437,13 @@ ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_D
 		convert_to_explicit_type(pzv, str_type);	\
 	}
 
-#define convert_to_boolean_ex(pzv)	convert_to_ex_master(pzv, boolean, _IS_BOOL)
+#define convert_to_boolean_ex(pzv)	do { \
+		if (Z_TYPE_INFO_P(pzv) > IS_TRUE) { \
+			convert_to_boolean(pzv); \
+		} else if (Z_TYPE_INFO_P(pzv) < IS_FALSE) { \
+			ZVAL_FALSE(pzv); \
+		} \
+	} while (0)
 #define convert_to_long_ex(pzv)		convert_to_ex_master(pzv, long, IS_LONG)
 #define convert_to_double_ex(pzv)	convert_to_ex_master(pzv, double, IS_DOUBLE)
 #define convert_to_string_ex(pzv)	convert_to_ex_master(pzv, string, IS_STRING)

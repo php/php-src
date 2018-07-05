@@ -374,9 +374,8 @@ try_again:
 				zval_dtor(op);
 
 				if (Z_TYPE(dst) == IS_LONG) {
-					ZVAL_COPY_VALUE(op, &dst);
+					ZVAL_LONG(op, Z_LVAL(dst));
 				} else {
-
 					ZVAL_LONG(op, 1);
 				}
 				return;
@@ -434,7 +433,7 @@ try_again:
 				zval_dtor(op);
 
 				if (Z_TYPE(dst) == IS_DOUBLE) {
-					ZVAL_COPY_VALUE(op, &dst);
+					ZVAL_DOUBLE(op, Z_DVAL(dst));
 				} else {
 					ZVAL_DOUBLE(op, 1.0);
 				}
@@ -505,8 +504,8 @@ try_again:
 				convert_object_to_type(op, &dst, _IS_BOOL, convert_to_boolean);
 				zval_dtor(op);
 
-				if (Z_TYPE(dst) == IS_FALSE || Z_TYPE(dst) == IS_TRUE) {
-					ZVAL_COPY_VALUE(op, &dst);
+				if (Z_TYPE_INFO(dst) == IS_FALSE || Z_TYPE_INFO(dst) == IS_TRUE) {
+					Z_TYPE_INFO_P(op) = Z_TYPE_INFO(dst);
 				} else {
 					ZVAL_TRUE(op);
 				}
@@ -596,12 +595,9 @@ try_again:
 
 static void convert_scalar_to_array(zval *op) /* {{{ */
 {
-	zval entry;
-
-	ZVAL_COPY_VALUE(&entry, op);
-
-	array_init_size(op, 1);
-	zend_hash_index_add_new(Z_ARRVAL_P(op), 0, &entry);
+	HashTable *ht = zend_new_array(1);
+	zend_hash_index_add_new(ht, 0, op);
+	ZVAL_ARR(op, ht);
 }
 /* }}} */
 
@@ -619,19 +615,13 @@ try_again:
 				if (Z_OBJ_HT_P(op)->get_properties) {
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op);
 					if (obj_ht) {
-						zend_array *arr;
-
 						/* fast copy */
-						if (!Z_OBJCE_P(op)->default_properties_count &&
-							obj_ht == Z_OBJ_P(op)->properties &&
-							!GC_IS_RECURSIVE(obj_ht) &&
-							EXPECTED(Z_OBJ_P(op)->handlers == &std_object_handlers)) {
-							arr = zend_proptable_to_symtable(obj_ht, 0);
-						} else {
-							arr = zend_proptable_to_symtable(obj_ht, 1);
-						}
+						obj_ht = zend_proptable_to_symtable(obj_ht,
+							(Z_OBJCE_P(op)->default_properties_count ||
+							 Z_OBJ_P(op)->handlers != &std_object_handlers ||
+							 GC_IS_RECURSIVE(obj_ht)));
 						zval_dtor(op);
-						ZVAL_ARR(op, arr);
+						ZVAL_ARR(op, obj_ht);
 						return;
 					}
 				} else {
@@ -670,14 +660,20 @@ try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			{
-				HashTable *ht = Z_ARR_P(op);
-				ht = zend_symtable_to_proptable(ht);
+				HashTable *ht = zend_symtable_to_proptable(Z_ARR_P(op));
+				zend_object *obj;
+
 				if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
 					/* TODO: try not to duplicate immutable arrays as well ??? */
 					ht = zend_array_dup(ht);
+				} else if (ht != Z_ARR_P(op)) {
+					zval_dtor(op);
+				} else {
+					GC_DELREF(ht);
 				}
-				zval_dtor(op);
-				object_and_properties_init(op, zend_standard_class_def, ht);
+				obj = zend_objects_new(zend_standard_class_def);
+				obj->properties = ht;
+				ZVAL_OBJ(op, obj);
 				break;
 			}
 		case IS_OBJECT:
