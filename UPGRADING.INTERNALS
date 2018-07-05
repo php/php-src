@@ -95,7 +95,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
      zend_register_persistent_resource_ex() should beused to register
      persistent resources, instead of manual insertion into EG(persistent_list).
 
-  i. The RANGE_RANGE() macro has been removed. php_mt_rand_range() should be
+  i. The RAND_RANGE() macro has been removed. php_mt_rand_range() should be
      used instead.
 
   j. The cast_object() object handler now also accepts the _IS_NUMBER type. The
