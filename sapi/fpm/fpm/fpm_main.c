@@ -1545,8 +1545,21 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
+/* {{{ proto array fpm_get_status
+ * Returns the status of the fastcgi process manager */
+PHP_FUNCTION(fpm_get_status) /* {{{ */
+{
+	int error = fpm_status_export_to_zval(return_value);
+	if(error){
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
 	PHP_FE(fastcgi_finish_request,              NULL)
+	PHP_FE(fpm_get_status,                  NULL)
 	PHP_FE_END
 };
 
