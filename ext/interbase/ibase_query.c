@@ -1628,7 +1628,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 					}
 					break;
 				_php_ibase_fetch_error:
-					zval_dtor(&result);
+					zval_ptr_dtor_nogc(&result);
 					RETURN_FALSE;
 			} /* switch */
 

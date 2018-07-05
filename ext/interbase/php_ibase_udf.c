@@ -298,7 +298,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 				case dtype_sql_date:
 				case dtype_sql_time:
 				case dtype_timestamp:
-					zval_dtor(&args[i]);
+					zval_ptr_dtor_nogc(&args[i]);
 			}
 		}
 

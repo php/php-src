@@ -1811,7 +1811,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 	*/
 	mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQL);
 	if (Z_TYPE(row) != IS_ARRAY) {
-		zval_dtor(&row);
+		zval_ptr_dtor_nogc(&row);
 		RETVAL_NULL();
 		DBG_VOID_RETURN;
 	}
@@ -1824,7 +1824,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 	entry = zend_hash_get_current_data(Z_ARRVAL(row));
 
 	ZVAL_COPY(return_value, entry);
-	zval_dtor(&row);
+	zval_ptr_dtor_nogc(&row);
 
 	DBG_VOID_RETURN;
 }
