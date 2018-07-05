@@ -215,6 +215,9 @@ phpdbg:
   . The unused constants PHPDBG_FILE, PHPDBG_METHOD, PHPDBG_LINENO and
     PHPDBG_FUNC have been removed.
 
+FPM:
+  . The getallheaders function is now also available.
+
 ========================================
 4. Deprecated Functionality
 ========================================
