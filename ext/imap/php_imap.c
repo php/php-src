@@ -3339,7 +3339,7 @@ PHP_FUNCTION(imap_bodystruct)
 
 	body=mail_body(imap_le_struct->imap_stream, msg, (unsigned char*)ZSTR_VAL(section));
 	if (body == NULL) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 	if (body->type <= TYPEMAX) {

@@ -1054,7 +1054,7 @@ ZEND_FUNCTION(gmp_init)
 
 	INIT_GMP_RETVAL(gmpnumber);
 	if (convert_to_gmp(gmpnumber, number_arg, base) == FAILURE) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -1770,7 +1770,7 @@ ZEND_FUNCTION(gmp_invert)
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 	if (!res) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 }

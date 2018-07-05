@@ -4672,12 +4672,12 @@ ZEND_METHOD(reflection_class, newInstance)
 
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &params, &num_args) == FAILURE) {
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 
@@ -4704,7 +4704,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		}
 		if (ret == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Invocation of %s's constructor failed", ZSTR_VAL(ce->name));
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 	} else if (ZEND_NUM_ARGS()) {
@@ -4769,7 +4769,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 
@@ -4805,7 +4805,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		if (ret == FAILURE) {
 			zval_ptr_dtor(&retval);
 			php_error_docref(NULL, E_WARNING, "Invocation of %s's constructor failed", ZSTR_VAL(ce->name));
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 	} else if (argc) {

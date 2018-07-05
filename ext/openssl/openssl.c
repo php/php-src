@@ -2437,7 +2437,7 @@ PHP_FUNCTION(openssl_x509_parse)
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
 			} else {
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				BIO_free(bio_out);
 				if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 					X509_free(cert);

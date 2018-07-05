@@ -3897,7 +3897,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 	tzobj = Z_PHPTIMEZONE_P(return_value);
 	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
 		zend_throw_error(NULL, "Timezone initialization failed");
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 	}
 }
 /* }}} */
