@@ -147,7 +147,7 @@ information output by ``gen_verify_stub``.
 
 6. Send **separate** emails (see example here http://news.php.net/php.pear.qa/5201) **To**
 ``php-qa@lists.php.net`` and ``primary-qa-tester@lists.php.net``.
-This emails are to notify the selected projects about a new release so that they
+These emails are to notify the selected projects about a new release so that they
 can make sure their projects keep working. Make sure that you have been setup
 as a moderator for ``primary-qa-tester@lists.php.net`` by having someone (Hannes, Dan,
 Derick) run the following commands for you:
