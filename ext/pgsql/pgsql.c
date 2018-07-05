@@ -5759,7 +5759,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 
 	re = pcre2_compile((PCRE2_SPTR)regex, regex_len, options, &errnumber, &err_offset, php_pcre_cctx());
 	if (NULL == re) {
-		PCRE2_UCHAR err_msg[256];
+		PCRE2_UCHAR err_msg[128];
 		pcre2_get_error_message(errnumber, err_msg, sizeof(err_msg));
 		php_error_docref(NULL, E_WARNING, "Cannot compile regex: '%s'", err_msg);
 		return FAILURE;

@@ -534,7 +534,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	pcre2_code			*re = NULL;
 	uint32_t			 coptions = 0;
 	uint32_t			 extra_coptions = PHP_PCRE_DEFAULT_EXTRA_COPTIONS;
-	PCRE2_UCHAR	         error[256];
+	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
 	char				 delimiter;

@@ -1051,7 +1051,7 @@ static void *_php_mb_compile_regex(const char *pattern)
 
 	if (!(retval = pcre2_compile((PCRE2_SPTR)pattern, PCRE2_ZERO_TERMINATED,
 			PCRE2_CASELESS, &errnum, &err_offset, php_pcre_cctx()))) {
-		PCRE2_UCHAR err_str[256];
+		PCRE2_UCHAR err_str[128];
 		pcre2_get_error_message(errnum, err_str, sizeof(err_str));
 		php_error_docref(NULL, E_WARNING, "%s (offset=%zu): %s", pattern, err_offset, err_str);
 	}
