@@ -615,6 +615,8 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 
 		if ((option = zend_hash_str_find(HASH_OF(filter_args), "options", sizeof("options") - 1)) != NULL) {
 			if (filter != FILTER_CALLBACK) {
+				/* equivalent to array, avoid a reference type */
+				convert_to_array(option);
 				if (Z_TYPE_P(option) == IS_ARRAY) {
 					options = option;
 				}
