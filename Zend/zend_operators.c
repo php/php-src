@@ -371,7 +371,7 @@ try_again:
 				zval dst;
 
 				convert_object_to_type(op, &dst, IS_LONG, convert_to_long);
-				zval_dtor(op);
+				zval_ptr_dtor(op);
 
 				if (Z_TYPE(dst) == IS_LONG) {
 					ZVAL_LONG(op, Z_LVAL(dst));
@@ -430,7 +430,7 @@ try_again:
 				zval dst;
 
 				convert_object_to_type(op, &dst, IS_DOUBLE, convert_to_double);
-				zval_dtor(op);
+				zval_ptr_dtor(op);
 
 				if (Z_TYPE(dst) == IS_DOUBLE) {
 					ZVAL_DOUBLE(op, Z_DVAL(dst));
@@ -502,7 +502,7 @@ try_again:
 				zval dst;
 
 				convert_object_to_type(op, &dst, _IS_BOOL, convert_to_boolean);
-				zval_dtor(op);
+				zval_ptr_dtor(op);
 
 				if (Z_TYPE_INFO(dst) == IS_FALSE || Z_TYPE_INFO(dst) == IS_TRUE) {
 					Z_TYPE_INFO_P(op) = Z_TYPE_INFO(dst);
@@ -576,7 +576,7 @@ try_again:
 			zval dst;
 
 			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
-			zval_dtor(op);
+			zval_ptr_dtor(op);
 
 			if (Z_TYPE(dst) == IS_STRING) {
 				ZVAL_COPY_VALUE(op, &dst);
@@ -620,7 +620,7 @@ try_again:
 							(Z_OBJCE_P(op)->default_properties_count ||
 							 Z_OBJ_P(op)->handlers != &std_object_handlers ||
 							 GC_IS_RECURSIVE(obj_ht)));
-						zval_dtor(op);
+						zval_ptr_dtor(op);
 						ZVAL_ARR(op, obj_ht);
 						return;
 					}
@@ -629,13 +629,13 @@ try_again:
 					convert_object_to_type(op, &dst, IS_ARRAY, convert_to_array);
 
 					if (Z_TYPE(dst) == IS_ARRAY) {
-						zval_dtor(op);
+						zval_ptr_dtor(op);
 						ZVAL_COPY_VALUE(op, &dst);
 						return;
 					}
 				}
 
-				zval_dtor(op);
+				zval_ptr_dtor(op);
 				/*ZVAL_EMPTY_ARRAY(op);*/
 				array_init(op);
 			}
@@ -667,7 +667,7 @@ try_again:
 					/* TODO: try not to duplicate immutable arrays as well ??? */
 					ht = zend_array_dup(ht);
 				} else if (ht != Z_ARR_P(op)) {
-					zval_dtor(op);
+					zval_ptr_dtor(op);
 				} else {
 					GC_DELREF(ht);
 				}
