@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.21
 
+- Filter:
+  . Fixed bug #76366 (References in sub-array for filtering breaks the filter).
+    (ZiHang Gao)
+
 - PDO_Firebird:
   . Fixed bug #76488 (Memory leak when fetching a BLOB field). (Simonov Denis)
 
