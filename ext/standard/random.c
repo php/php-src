@@ -36,7 +36,7 @@
 #if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
 # if __FreeBSD__ && __FreeBSD_version > 1200000
-    #include <sys/random.h>
+#  include <sys/random.h>
 # endif
 #endif
 
@@ -83,7 +83,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 }
 /* }}} */
 
-/* {{{ */
+/* {{{ php_random_bytes */
 PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 {
 #ifdef PHP_WIN32
