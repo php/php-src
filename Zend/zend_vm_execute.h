@@ -2773,7 +2773,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_
 		if (IS_CONST & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func(Z_COUNTED_P(free_op1));
+				ref_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -17780,7 +17780,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HA
 		if (IS_TMP_VAR & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func(Z_COUNTED_P(free_op1));
+				ref_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -20592,7 +20592,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HA
 		if (IS_VAR & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func(Z_COUNTED_P(free_op1));
+				ref_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -36744,7 +36744,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HAN
 		if (IS_CV & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func(Z_COUNTED_P(free_op1));
+				ref_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -41623,7 +41623,7 @@ check_indirect:
 		if (EXPECTED(variable_ptr != value)) {
 			if (refcnt == 0) {
 				SAVE_OPLINE();
-				zval_dtor_func(ref);
+				ref_dtor_func(ref);
 				if (UNEXPECTED(EG(exception))) {
 					ZVAL_NULL(variable_ptr);
 					HANDLE_EXCEPTION();
@@ -46762,7 +46762,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_CV_SPEC_CV_UNUSED_HANDLE
 		ZVAL_UNDEF(var);
 		SAVE_OPLINE();
 		if (!GC_DELREF(garbage)) {
-			zval_dtor_func(garbage);
+			ref_dtor_func(garbage);
 		} else {
 			gc_check_possible_root(garbage);
 		}
@@ -55095,7 +55095,7 @@ zend_leave_helper_SPEC_LABEL:
 		if (IS_CONST & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func(Z_COUNTED_P(free_op1));
+				ref_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -56761,7 +56761,7 @@ zend_leave_helper_SPEC_LABEL:
 		if (IS_TMP_VAR & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func(Z_COUNTED_P(free_op1));
+				ref_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -57051,7 +57051,7 @@ zend_leave_helper_SPEC_LABEL:
 		if (IS_VAR & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func(Z_COUNTED_P(free_op1));
+				ref_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -58697,7 +58697,7 @@ zend_leave_helper_SPEC_LABEL:
 		if (IS_CV & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func(Z_COUNTED_P(free_op1));
+				ref_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
