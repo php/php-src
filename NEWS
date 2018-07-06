@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.2.9
 
+- PDO_Firebird:
+  . Fixed bug #76488 (Memory leak when fetching a BLOB field). (Simonov Denis)
 
 19 Jul 2018, PHP 7.2.8
 
