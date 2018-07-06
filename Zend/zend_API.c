@@ -531,12 +531,13 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 			zval rv;
 			zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv);
 
-			Z_ADDREF_P(z);
 			if (Z_TYPE_P(z) != IS_OBJECT) {
-				zval_dtor(arg);
-				ZVAL_NULL(arg);
-				if (!zend_make_printable_zval(z, arg)) {
+				zval_ptr_dtor(arg);
+				if (Z_TYPE_P(z) == IS_STRING) {
 					ZVAL_COPY_VALUE(arg, z);
+				} else {
+					ZVAL_STR(arg, zval_get_string_func(z));
+					zval_ptr_dtor(z);
 				}
 				*dest = Z_STR_P(arg);
 				return 1;
