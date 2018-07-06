@@ -33,6 +33,8 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(pdo_sqlite)
 
+static PHP_GINIT_FUNCTION(pdo_sqlite);
+
 /* {{{ pdo_sqlite_functions[] */
 const zend_function_entry pdo_sqlite_functions[] = {
 	PHP_FE_END
@@ -60,6 +62,10 @@ zend_module_entry pdo_sqlite_module_entry = {
 	NULL,
 	PHP_MINFO(pdo_sqlite),
 	PHP_PDO_SQLITE_VERSION,
+	PHP_MODULE_GLOBALS(pdo_sqlite),
+	PHP_GINIT(pdo_sqlite),
+	NULL,
+	NULL,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -78,6 +84,8 @@ PHP_INI_END()
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_sqlite)
 {
+	REGISTER_INI_ENTRIES();
+
 #ifdef SQLITE_DETERMINISTIC
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_DETERMINISTIC", (zend_long)SQLITE_DETERMINISTIC);
 #endif
@@ -90,6 +98,7 @@ PHP_MINIT_FUNCTION(pdo_sqlite)
 PHP_MSHUTDOWN_FUNCTION(pdo_sqlite)
 {
 	php_pdo_unregister_driver(&pdo_sqlite_driver);
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 /* }}} */
@@ -104,6 +113,17 @@ PHP_MINFO_FUNCTION(pdo_sqlite)
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
+}
+/* }}} */
+
+/* {{{ PHP_GINIT_FUNCTION
+*/
+static PHP_GINIT_FUNCTION(pdo_sqlite)
+{
+#if defined(COMPILE_DL_PDO_SQLITE) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+	memset(pdo_sqlite_globals, 0, sizeof(*pdo_sqlite_globals));
 }
 /* }}} */
 

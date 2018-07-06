@@ -31,7 +31,10 @@
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(pdo_sqlite)
+#include "main/SAPI.h"
+#include "SAPI.h"
+
+//ZEND_DECLARE_MODULE_GLOBALS(pdo_sqlite)
 
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
 {

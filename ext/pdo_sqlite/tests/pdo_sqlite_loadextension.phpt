@@ -16,14 +16,15 @@ $directory = __DIR__;
 
 touch($directory . '/myext.txt');
 
-var_dump($db->sqliteLoadExtension('myext.txt'));
-var_dump($db->close());
+try {
+  $db->sqliteLoadExtension('myext.txt');
+} catch (Extension $ex) {
+  var_dump($ex->getMessage());
+}
 unlink($directory . '/myext.txt');
 
 echo "Done\n";
 ?>
 --EXPECTF--
 Warning: PDO::sqliteLoadExtension(): Unable to load extension at '.%emyext.txt' in %s on line %d
-bool(false)
-bool(true)
 Done

@@ -4,7 +4,7 @@ PDO_sqlite: Testing sqliteLoadExtension() with empty extension test
 Jelle Lampaert
 #Belgian Testfest 2009
 --INI--
-sqlite3.extension_dir=/tmp
+pdo_sqlite.extension_dir=/tmp
 --SKIPIF--
 <?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
 --FILE--
