@@ -66,7 +66,7 @@ zend_module_entry pdo_sqlite_module_entry = {
 	PHP_GINIT(pdo_sqlite),
 	NULL,
 	NULL,
-	STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
