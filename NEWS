@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018 PHP 7.0.31
 
-
+- filter:
+  . Fix bug #76366 (references in sub-array for filtering breaks the filter).
+   (ZiHang Gao)
 
 26 Apr 2018 PHP 7.0.30
 
