@@ -28,16 +28,16 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API void ZEND_FASTCALL _ref_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC);
+ZEND_API void ZEND_FASTCALL _rc_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC);
 ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
-#define ref_dtor_func(ref)         _ref_dtor_func(ref ZEND_FILE_LINE_CC)
-#define zval_copy_ctor_func(zv)    _zval_copy_ctor_func(zv ZEND_FILE_LINE_CC)
+#define rc_dtor_func(ref)         _rc_dtor_func(ref ZEND_FILE_LINE_CC)
+#define zval_copy_ctor_func(zv)   _zval_copy_ctor_func(zv ZEND_FILE_LINE_CC)
 
 static zend_always_inline void _zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE_DC)
 {
 	if (Z_REFCOUNTED_P(zval_ptr) && !Z_DELREF_P(zval_ptr)) {
-		_ref_dtor_func(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
+		_rc_dtor_func(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
 	}
 }
 
@@ -46,7 +46,7 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);
 		if (!GC_DELREF(ref)) {
-			_ref_dtor_func(ref ZEND_FILE_LINE_RELAY_CC);
+			_rc_dtor_func(ref ZEND_FILE_LINE_RELAY_CC);
 		} else {
 			gc_check_possible_root(ref);
 		}
