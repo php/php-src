@@ -92,7 +92,7 @@ ZEND_API void _zval_internal_ptr_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 /* Kept for compatibility */
 #define zval_dtor(zvalue) zval_ptr_dtor_nogc(zvalue)
 #define zval_internal_dtor(zvalue) _zval_internal_ptr_dtor((zvalue) ZEND_FILE_LINE_CC)
-#define zval_dtor_func _ref_dtor_func
+#define zval_dtor_func _rc_dtor_func
 
 #if ZEND_DEBUG
 ZEND_API void _zval_ptr_dtor_wrapper(zval *zval_ptr);
