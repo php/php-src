@@ -99,6 +99,12 @@ BCMath:
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
 
+MBString:
+  . Due to added support for named captures, mb_ereg_*() patterns using named
+    captures will behave differently. In particular named captures will be part
+    of matches and mb_ereg_replace() will interpret additional syntax. See
+    "New Features" section for more information.
+
 mysqli:
   . Prepared statements now properly report the fractional seconds for DATETIME/
     TIME/TIMESTAMP columns with decimals specifier (e.g. TIMESTAMP(6) when using
@@ -192,6 +198,21 @@ MBString:
   . Mbstring now correctly supports strings larger than 2GB.
   . Performance of the mbstring extension has been significantly improved
     across the board. The largest improvements are in case conversion functions.
+  . mb_ereg_*() functions now support named captures. Matching functions like
+    mb_ereg() will now return named captures both using their group number and
+    their name, similar to PCRE:
+
+        mb_ereg('(?<word>\w+)', '国', $matches);
+        // => [0 => "国", 1 => "国", "word" => "国"];
+
+    Additionally, mb_ereg_replace() now supports the \k<> and \k'' notations
+    to reference named captures in the replacement string:
+
+        mb_ereg_replace('\s*(?<word>\w+)\s*', "_\k<word>_\k'word'_", ' foo ');
+        // => "_foo_foo_"
+
+    \k<> and \k'' can also be used for numbered references, which also works
+    with group numbers greater than 9.
 
 readline:
   . Support for the completion_append_character and completion_suppress_append

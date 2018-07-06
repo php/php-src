@@ -655,7 +655,7 @@ _php_mb_regex_init_options(const char *parg, size_t narg, OnigOptionType *option
 typedef struct mb_regex_groups_iter_args {
 	zval		*groups;
 	char		*search_str;
-	int			search_len;
+	size_t		search_len;
 	OnigRegion	*region;
 } mb_regex_groups_iter_args;
 /* }}} */
@@ -665,25 +665,19 @@ static int
 mb_regex_groups_iter(const OnigUChar* name, const OnigUChar* name_end, int ngroup_num, int* group_nums, regex_t* reg, void* parg)
 {
 	mb_regex_groups_iter_args *args = (mb_regex_groups_iter_args *) parg;
-	int i, gn, ref, beg, end;
+	int gn, beg, end;
 
-	for (i = 0; i < ngroup_num; i++) {
-		gn = group_nums[i];
-		ref = onig_name_to_backref_number(reg, name, name_end, args->region);
-		if (ref != gn) {
-			/*
-			 * In case of duplicate groups, keep only the last suceeding one
-			 * to be consistent with preg_match with the PCRE_DUPNAMES option.
-			 */
-			continue;
-		}
-		beg = args->region->beg[gn];
-		end = args->region->end[gn];
-		if (beg >= 0 && beg < end && end <= args->search_len) {
-			add_assoc_stringl_ex(args->groups, (char *)name, name_end - name, &args->search_str[beg], end - beg);
-		} else {
-			add_assoc_bool_ex(args->groups, (char *)name, name_end - name, 0);
-		}
+	/*
+	 * In case of duplicate groups, keep only the last suceeding one
+	 * to be consistent with preg_match with the PCRE_DUPNAMES option.
+	 */
+	gn = onig_name_to_backref_number(reg, name, name_end, args->region);
+	beg = args->region->beg[gn];
+	end = args->region->end[gn];
+	if (beg >= 0 && beg < end && end <= args->search_len) {
+		add_assoc_stringl_ex(args->groups, (char *)name, name_end - name, &args->search_str[beg], end - beg);
+	} else {
+		add_assoc_bool_ex(args->groups, (char *)name, name_end - name, 0);
 	}
 
 	return 0;
