@@ -146,7 +146,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 			if (EXPECTED(Z_TYPE_P(__zv) == IS_INDIRECT)) {					\
 				ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));						\
 			}																\
-			ref_dtor_func(__ref);											\
+			zval_dtor_func(__ref);											\
 		}																	\
 	}																		\
 } while (0)
@@ -604,7 +604,7 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 
 		if (GC_DELREF(garbage) == 0) {
 			ZVAL_REF(variable_ptr, ref);
-			ref_dtor_func(garbage);
+			zval_dtor_func(garbage);
 			return;
 		} else {
 			gc_check_possible_root(garbage);
@@ -2366,7 +2366,7 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 			zend_refcounted *r = Z_COUNTED_P(cv);
 			if (!GC_DELREF(r)) {
 				ZVAL_NULL(cv);
-				ref_dtor_func(r);
+				zval_dtor_func(r);
 			} else {
 				gc_check_possible_root(r);
 			}

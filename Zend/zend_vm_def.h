@@ -3813,7 +3813,7 @@ ZEND_VM_HOT_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				ref_dtor_func(Z_COUNTED_P(free_op1));
+				zval_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -5441,7 +5441,7 @@ ZEND_VM_HANDLER(196, ZEND_UNSET_CV, CV, UNUSED)
 		ZVAL_UNDEF(var);
 		SAVE_OPLINE();
 		if (!GC_DELREF(garbage)) {
-			ref_dtor_func(garbage);
+			zval_dtor_func(garbage);
 		} else {
 			gc_check_possible_root(garbage);
 		}
@@ -7489,7 +7489,7 @@ ZEND_VM_C_LABEL(check_indirect):
 		if (EXPECTED(variable_ptr != value)) {
 			if (refcnt == 0) {
 				SAVE_OPLINE();
-				ref_dtor_func(ref);
+				zval_dtor_func(ref);
 				if (UNEXPECTED(EG(exception))) {
 					ZVAL_NULL(variable_ptr);
 					HANDLE_EXCEPTION();
