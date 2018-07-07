@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #76392 (Error relocating sapi/cli/php: unsupported relocation
     type 37). (Peter Kokot)
 
+- Filter:
+  . Fixed bug #76366 (References in sub-array for filtering breaks the filter).
+    (ZiHang Gao)
+
 - FPM:
   . Fixed bug #62596 (getallheaders() missing with PHP-FPM). (Remi)
 
