@@ -1543,10 +1543,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
-ZEND_END_ARG_INFO()
-
-PHP_FUNCTION(apache_request_headers) /* {{{ */
+PHP_FUNCTION(fpm_get_request_headers) /* {{{ */
 {
 	fcgi_request *request;
 
@@ -1571,11 +1568,15 @@ PHP_FUNCTION(fpm_get_status) /* {{{ */
 }
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
-	PHP_FE(fastcgi_finish_request,                    cgi_fcgi_sapi_no_arginfo)
-	PHP_FE(fpm_get_status,                            NULL)
-	PHP_FE(apache_request_headers,                    cgi_fcgi_sapi_no_arginfo)
-	PHP_FALIAS(getallheaders, apache_request_headers, cgi_fcgi_sapi_no_arginfo)
+	PHP_FE(fastcgi_finish_request,                              cgi_fcgi_sapi_no_arginfo)
+	PHP_FE(fpm_get_status,                                      cgi_fcgi_sapi_no_arginfo)
+	PHP_FE(fpm_get_request_headers,                             cgi_fcgi_sapi_no_arginfo)
+	PHP_FALIAS(apache_request_headers, fpm_get_request_headers, cgi_fcgi_sapi_no_arginfo)
+	PHP_FALIAS(getallheaders, fpm_get_request_headers,          cgi_fcgi_sapi_no_arginfo)
 	PHP_FE_END
 };
 

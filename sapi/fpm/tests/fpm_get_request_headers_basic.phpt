@@ -1,5 +1,5 @@
 --TEST--
-FPM: Function getallheaders basic test
+FPM: Function fpm_get_request_headers basic test
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
@@ -22,7 +22,9 @@ EOT;
 $code = <<<EOT
 <?php
 echo "Test Start\n";
-var_dump(getallheaders());
+var_dump(fpm_get_request_headers());
+var_dump(fpm_get_request_headers() === getallheaders());
+var_dump(fpm_get_request_headers() === apache_request_headers());
 echo "Test End\n";
 EOT;
 
@@ -49,6 +51,8 @@ $tester->request(
 			'  ["Content-Type"]=>',
 			'  string(0) ""',
 			'}',
+			'bool(true)',
+            'bool(true)',
 			'Test End',
 		]
 	);
