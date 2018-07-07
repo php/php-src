@@ -1,21 +1,17 @@
 --TEST--
-FPM: Test fpm_get_status function
+FPM: Function fpm_get_status basic test
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
 <?php
 
-include "include.inc";
-
-$logfile = __DIR__.'/php-fpm.log.tmp';
-$srcfile = __DIR__.'/php-fpm.tmp.php';
-$port = 9000+PHP_INT_SIZE;
+require_once "tester.inc";
 
 $cfg = <<<EOT
 [global]
-error_log = $logfile
+error_log = {{FILE:LOG}}
 [unconfined]
-listen = 127.0.0.1:$port
+listen = {{ADDR}}
 pm = dynamic
 pm.max_children = 5
 pm.start_servers = 1
@@ -29,29 +25,19 @@ echo "Test Start\n";
 var_dump(fpm_get_status());
 echo "Test End\n";
 EOT;
-file_put_contents($srcfile, $code);
 
-$fpm = run_fpm($cfg, $tail);
-if (is_resource($fpm)) {
-    fpm_display_log($tail, 2);
-    try {
-		$req = run_request('127.0.0.1', $port, $srcfile);
-		echo strstr($req, "Test Start");
-		echo "Request ok\n";
-	} catch (Exception $e) {
-		echo "Request error\n";
-	}
-    proc_terminate($fpm);
-    fpm_display_log($tail, -1);
-    fclose($tail);
-    proc_close($fpm);
-}
+$headers = [];
+$tester = new FPM\Tester($cfg, $code);
+$tester->start();
+$tester->expectLogStartNotices();
+$tester->request()->printBody();
+$tester->terminate();
+$tester->expectLogTerminatingNotices();
+$tester->close();
 
 ?>
 Done
 --EXPECTF--
-[%s] NOTICE: fpm is running, pid %d
-[%s] NOTICE: ready to handle connections
 Test Start
 array(15) {
   ["pool"]=>
@@ -118,15 +104,9 @@ array(15) {
   }
 }
 Test End
-
-Request ok
-[%s] NOTICE: Terminating ...
-[%s] NOTICE: exiting, bye-bye!
 Done
 --CLEAN--
 <?php
-	$logfile = __DIR__.'/php-fpm.log.tmp';
-	$srcfile = __DIR__.'/php-fpm.tmp.php';
-    @unlink($logfile);
-    @unlink($srcfile);
+require_once "tester.inc";
+FPM\Tester::clean();
 ?>
