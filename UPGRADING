@@ -304,6 +304,9 @@ Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
     DateTimeImmutable::createFromMutable().
 
+FPM:
+  . Added fpm_get_status() function which returns FPM status info array.
+
 GMP:
   . Added gmp_binomial(n, k) for calculating binomial coefficients.
   . Added gmp_lcm(a, b) for calculating the least common multiple.
