@@ -1559,7 +1559,7 @@ ZEND_API int zend_std_equals(zval *result, zval *op1, zval *op2) /* {{{ */
 		if (ce->__equals) {
 			zend_call_method_with_1_params(op1, ce, &ce->__equals, ZEND_EQUALS_FUNC_NAME, result, op2);
 			
-			if (Z_TYPE_P(result) != IS_UNDEF) {
+			if (!Z_ISUNDEF_P(result)) {
 				return SUCCESS;
 			}
 		}
@@ -1576,7 +1576,7 @@ ZEND_API int zend_std_compare(zval *result, zval *op1, zval *op2) /* {{{ */
 		if (ce->__compareTo) {
 			zend_call_method_with_1_params(op1, ce, &ce->__compareTo, ZEND_COMPARETO_FUNC_NAME, result, op2);
 			
-			if (Z_TYPE_P(result) != IS_UNDEF) {
+			if (!Z_ISUNDEF_P(result)) {
 				return SUCCESS;
 			}
 		}
