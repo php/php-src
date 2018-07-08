@@ -1,3 +1,6 @@
+git:
+  quiet: true
+
 dist: trusty
 language: c
 sudo: required
