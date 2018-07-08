@@ -1502,7 +1502,7 @@ PHP_INI_BEGIN()
 
 	STD_PHP_INI_BOOLEAN("mbstring.strict_detection", "0",
 		PHP_INI_ALL,
-		OnUpdateLong,
+		OnUpdateBool,
 		strict_detection, zend_mbstring_globals, mbstring_globals)
 PHP_INI_END()
 /* }}} */
