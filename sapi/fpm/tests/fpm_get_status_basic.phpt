@@ -55,7 +55,7 @@ array(15) {
   ["max-listen-queue"]=>
   int(0)
   ["listen-queue-len"]=>
-  int(128)
+  int(%d)
   ["idle-processes"]=>
   int(0)
   ["active-processes"]=>
