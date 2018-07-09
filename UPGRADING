@@ -374,6 +374,9 @@ JSON:
   . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
     defines the set of allowed thousand separator chars.  The default (`"',."`)
     is fully backward compatible with former PHP versions.
+  . FILTER_SANITIZE_ADD_SLASHES has been added as an alias of the 'magic_quotes' 
+    filter (FILTER_SANITIZE_MAGIC_QUOTES). The 'magic_quotes' filter is subject 
+	to removal in future versions of PHP.
 
  FTP:
   . Set default transfer mode to binary

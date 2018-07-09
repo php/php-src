@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     type 37). (Peter Kokot)
 
 - Filter:
+  . Added the 'add_slashes' sanitization mode (FILTER_SANITIZE_ADD_SLASHES). 
+	(Kalle)
   . Fixed bug #76366 (References in sub-array for filtering breaks the filter).
     (ZiHang Gao)
 
