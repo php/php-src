@@ -200,7 +200,9 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	ZVAL_UNDEF(&filter_globals->cookie_array);
 	ZVAL_UNDEF(&filter_globals->env_array);
 	ZVAL_UNDEF(&filter_globals->server_array);
+#if 0
 	ZVAL_UNDEF(&filter_globals->session_array);
+#endif
 	filter_globals->default_filter = FILTER_DEFAULT;
 }
 /* }}} */
@@ -319,7 +321,9 @@ PHP_RSHUTDOWN_FUNCTION(filter)
 	VAR_ARRAY_COPY_DTOR(cookie_array)
 	VAR_ARRAY_COPY_DTOR(server_array)
 	VAR_ARRAY_COPY_DTOR(env_array)
+#if 0
 	VAR_ARRAY_COPY_DTOR(session_array)
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -363,7 +367,9 @@ static unsigned int php_sapi_filter_init(void)
 	ZVAL_UNDEF(&IF_G(cookie_array));
 	ZVAL_UNDEF(&IF_G(server_array));
 	ZVAL_UNDEF(&IF_G(env_array));
+#if 0
 	ZVAL_UNDEF(&IF_G(session_array));
+#endif
 	return SUCCESS;
 }
 
