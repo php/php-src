@@ -1273,13 +1273,12 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 				fbc = NULL;
 			}
 		}
-	} else {
+	} else if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PROTECTED)) {
 		/* Ensure that we haven't overridden a private function and end up calling
 		 * the overriding public function...
 		 */
-		if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PROTECTED)) {
-			scope = zend_get_executed_scope();
-		}
+	
+		scope = zend_get_executed_scope();
 		if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
 			if (scope && is_derived_class(fbc->common.scope, scope)) {
 				if ((func = zend_hash_find(&scope->function_table, lc_method_name)) != NULL) {
@@ -1290,8 +1289,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 					}
 				}
 			}
-		}
-		if (fbc->common.fn_flags & ZEND_ACC_PROTECTED) {
+		} else {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 * If we're not and __call() handler exists, invoke it, otherwise error out.
 			 */
