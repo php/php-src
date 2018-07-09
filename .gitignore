@@ -274,6 +274,7 @@ sapi/fpm/fpm/php-cgi
 sapi/phpdbg/phpdbg_parser.c
 sapi/phpdbg/phpdbg_parser.h
 sapi/phpdbg/phpdbg
+sapi/phpdbg/phpdbg.1
 scripts/php-config
 scripts/phpize
 scripts/man1/*.1
