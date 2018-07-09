@@ -89,7 +89,7 @@ if (ob_get_level()) echo "Not all buffers were deleted.\n";
 
 error_reporting(E_ALL);
 
-$environment = isset($_ENV) ? $_ENV : array();
+$environment = $_ENV ?? array();
 // Note: php.ini-development sets variables_order="GPCS" not "EGPCS", in which case $_ENV is NOT populated.
 //       detect and handle this case, or die or warn
 if (empty($environment)) {
@@ -1028,7 +1028,7 @@ function mail_qa_team($data, $status = false)
 {
 	$url_bits = parse_url(QA_SUBMISSION_PAGE);
 
-	if (($proxy = getenv('http_proxy'))) {
+	if ($proxy = getenv('http_proxy')) {
 		$proxy = parse_url($proxy);
 		$path = $url_bits['host'].$url_bits['path'];
 		$host = $proxy['host'];
@@ -1148,7 +1148,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 		unset($pipes[0]);
 	}
 
-	$timeout = $valgrind ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
+	$timeout = $valgrind ? 300 : ($env['TEST_TIMEOUT'] ?? 60);
 
 	while (true) {
 		/* hide errors from interrupted syscalls */
@@ -1934,7 +1934,7 @@ COMMAND $cmd
 	$hrtime = hrtime();
 	$startTime = $hrtime[0]*1000000000 + $hrtime[1];
 
-	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdIn, $captureStdOut, $captureStdErr);
+	$out = system_with_timeout($cmd, $env, $section_text['STDIN'] ?? null, $captureStdIn, $captureStdOut, $captureStdErr);
 
 	junit_finish_timer($shortname);
 	$hrtime = hrtime();
@@ -2215,7 +2215,7 @@ $output
 			error_report($file, $log_filename, $tested);
 		}
 	}
-	
+
 	if ($valgrind && $leaked && $cfg["show"]["mem"]) {
 		show_file_block('mem', file_get_contents($memcheck_filename));
 	}
@@ -2823,7 +2823,7 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 
 	junit_suite_record($suite, 'test_total');
 
-	$time = null !== $time ? $time : junit_get_timer($file_name);
+	$time = $time ?? junit_get_timer($file_name);
 	junit_suite_record($suite, 'execution_time', $time);
 
 	$escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
