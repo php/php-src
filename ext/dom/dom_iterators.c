@@ -42,7 +42,11 @@ struct _notationIterator {
 	xmlNotation *notation;
 };
 
-static void itemHashScanner (void *payload, void *data, xmlChar *name) /* {{{ */
+#if LIBXML_VERSION >= 20908
+static void itemHashScanner (void *payload, void *data, const xmlChar *name) /* {{{ */
+#else
+static void itemHashScanner (void *payload, void *data, xmlChar *name)
+#endif
 {
 	nodeIterator *priv = (nodeIterator *)data;
 
