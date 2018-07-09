@@ -3350,8 +3350,7 @@ ZEND_METHOD(reflection_function, getShortName)
 	{
 		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
 	}
-	ZVAL_DEREF(name);
-	ZVAL_COPY(return_value, name);
+	ZVAL_COPY_DEREF(return_value, name);
 }
 /* }}} */
 
@@ -3848,8 +3847,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 		}
 		return;
 	} else {
-		ZVAL_DEREF(prop);
-		ZVAL_COPY(return_value, prop);
+		ZVAL_COPY_DEREF(return_value, prop);
 	}
 }
 /* }}} */
@@ -5195,8 +5193,7 @@ ZEND_METHOD(reflection_class, getShortName)
 	{
 		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
 	}
-	ZVAL_DEREF(name);
-	ZVAL_COPY(return_value, name);
+	ZVAL_COPY_DEREF(return_value, name);
 }
 /* }}} */
 
@@ -5443,8 +5440,7 @@ ZEND_METHOD(reflection_property, getValue)
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
 		member_p = zend_read_static_property_ex(ref->ce, ref->unmangled_name, 0);
 		if (member_p) {
-			ZVAL_DEREF(member_p);
-			ZVAL_COPY(return_value, member_p);
+			ZVAL_COPY_DEREF(return_value, member_p);
 		}
 	} else {
 		zval rv;
@@ -5460,8 +5456,7 @@ ZEND_METHOD(reflection_property, getValue)
 
 		member_p = zend_read_property_ex(ref->ce, object, ref->unmangled_name, 0, &rv);
 		if (member_p != &rv) {
-			ZVAL_DEREF(member_p);
-			ZVAL_COPY(return_value, member_p);
+			ZVAL_COPY_DEREF(return_value, member_p);
 		} else {
 			if (Z_ISREF_P(member_p)) {
 				zend_unwrap_reference(member_p);

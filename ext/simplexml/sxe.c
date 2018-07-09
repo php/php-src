@@ -82,8 +82,7 @@ PHP_METHOD(ce_SimpleXMLIterator, current)
 	}
 
 	data = &sxe->iter.data;
-	ZVAL_DEREF(data);
-	ZVAL_COPY(return_value, data);
+	ZVAL_COPY_DEREF(return_value, data);
 }
 /* }}} */
 
@@ -172,8 +171,7 @@ PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 	}
 
 	data = &sxe->iter.data;
-	ZVAL_DEREF(data);
-	ZVAL_COPY(return_value, data);
+	ZVAL_COPY_DEREF(return_value, data);
 }
 
 /* {{{ arginfo */

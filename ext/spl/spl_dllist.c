@@ -653,8 +653,7 @@ SPL_METHOD(SplDoublyLinkedList, top)
 		return;
 	}
 
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 }
 /* }}} */
 
@@ -677,8 +676,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 		return;
 	}
 
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 }
 /* }}} */
 
@@ -798,8 +796,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	if (element != NULL) {
 		zval *value = &element->data;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
 	}
@@ -1121,8 +1118,7 @@ SPL_METHOD(SplDoublyLinkedList, current)
 	} else {
 		zval *value = &element->data;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
 /* }}} */

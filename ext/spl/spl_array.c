@@ -739,8 +739,7 @@ SPL_METHOD(Array, offsetGet)
 	}
 	value = spl_array_read_dimension_ex(0, getThis(), index, BP_VAR_R, return_value);
 	if (value != return_value) {
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 } /* }}} */
 
@@ -1578,8 +1577,7 @@ SPL_METHOD(Array, current)
 			return;
 		}
 	}
-	ZVAL_DEREF(entry);
-	ZVAL_COPY(return_value, entry);
+	ZVAL_COPY_DEREF(return_value, entry);
 }
 /* }}} */
 

@@ -848,8 +848,7 @@ ZEND_API zval *zend_std_read_dimension(zval *object, zval *offset, int type, zva
 			/* [] construct */
 			ZVAL_NULL(&tmp_offset);
 		} else {
-			ZVAL_DEREF(offset);
-			ZVAL_COPY(&tmp_offset, offset);
+			ZVAL_COPY_DEREF(&tmp_offset, offset);
 		}
 
 		ZVAL_COPY(&tmp_object, object);
@@ -897,8 +896,7 @@ ZEND_API void zend_std_write_dimension(zval *object, zval *offset, zval *value) 
 		if (!offset) {
 			ZVAL_NULL(&tmp_offset);
 		} else {
-			ZVAL_DEREF(offset);
-			ZVAL_COPY(&tmp_offset, offset);
+			ZVAL_COPY_DEREF(&tmp_offset, offset);
 		}
 		ZVAL_COPY(&tmp_object, object);
 		zend_call_method_with_2_params(&tmp_object, ce, NULL, "offsetset", NULL, &tmp_offset, value);
@@ -1084,8 +1082,7 @@ ZEND_API void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 	zval tmp_offset, tmp_object;
 
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1)) {
-		ZVAL_DEREF(offset);
-		ZVAL_COPY(&tmp_offset, offset);
+		ZVAL_COPY_DEREF(&tmp_offset, offset);
 		ZVAL_COPY(&tmp_object, object);
 		zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetunset", NULL, &tmp_offset);
 		zval_ptr_dtor(&tmp_object);
