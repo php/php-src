@@ -1,5 +1,7 @@
 --TEST--
 Bug #69803: gmp_random_range() modifies second parameter if GMP number
+--SKIPIF--
+<?php if (!extension_loaded('gmp')) die('skip gmp extension not loaded'); ?>
 --FILE--
 <?php
 

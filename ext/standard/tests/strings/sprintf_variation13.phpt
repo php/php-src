@@ -53,7 +53,7 @@ foreach($string_values as $string_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : float formats with strings ***
 
 -- Iteration 1 --

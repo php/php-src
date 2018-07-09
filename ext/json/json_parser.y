@@ -74,8 +74,8 @@ int json_yydebug = 1;
 %type <value> members member elements element
 %type <pair> pair
 
-%destructor { zval_dtor(&$$); } <value>
-%destructor { zend_string_release($$.key); zval_dtor(&$$.val); } <pair>
+%destructor { zval_ptr_dtor_nogc(&$$); } <value>
+%destructor { zend_string_release_ex($$.key, 0); zval_ptr_dtor_nogc(&$$.val); } <pair>
 
 %code {
 static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
@@ -248,7 +248,8 @@ errlex:
 
 static int php_json_parser_array_create(php_json_parser *parser, zval *array)
 {
-	return array_init(array);
+	array_init(array);
+	return SUCCESS;
 }
 
 static int php_json_parser_array_append(php_json_parser *parser, zval *array, zval *zvalue)
@@ -260,7 +261,8 @@ static int php_json_parser_array_append(php_json_parser *parser, zval *array, zv
 static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 {
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
-		return array_init(object);
+		array_init(object);
+		return SUCCESS;
 	} else {
 		return object_init(object);
 	}
@@ -275,19 +277,16 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		zval zkey;
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
-			zend_string_release(key);
-			zval_dtor(zvalue);
-			zval_dtor(object);
+			zend_string_release_ex(key, 0);
+			zval_ptr_dtor_nogc(zvalue);
+			zval_ptr_dtor_nogc(object);
 			return FAILURE;
 		}
 		ZVAL_NEW_STR(&zkey, key);
 		zend_std_write_property(object, &zkey, zvalue, NULL);
-
-		if (Z_REFCOUNTED_P(zvalue)) {
-			Z_DELREF_P(zvalue);
-		}
+		Z_TRY_DELREF_P(zvalue);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 
 	return SUCCESS;
 }

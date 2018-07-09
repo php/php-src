@@ -41,7 +41,9 @@ const mbfl_encoding mbfl_encoding_byte4be = {
 	NULL,
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_byte4be_wchar,
+	&vtbl_wchar_byte4be
 };
 
 const mbfl_encoding mbfl_encoding_byte4le = {
@@ -50,7 +52,9 @@ const mbfl_encoding mbfl_encoding_byte4le = {
 	NULL,
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_byte4le_wchar,
+	&vtbl_wchar_byte4le
 };
 
 const struct mbfl_convert_vtbl vtbl_byte4be_wchar = {

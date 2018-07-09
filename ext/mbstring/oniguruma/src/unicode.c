@@ -2,7 +2,7 @@
   unicode.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2017  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,11 @@
  */
 
 #include "regint.h"
+
+struct PoolPropertyNameCtype {
+  short int name;
+  short int ctype;
+};
 
 #define ONIGENC_IS_UNICODE_ISO_8859_1_CTYPE(code,ctype) \
   ((EncUNICODE_ISO_8859_1_CtypeTable[code] & CTYPE_TO_BIT(ctype)) != 0)
@@ -67,180 +72,9 @@ static const unsigned short EncUNICODE_ISO_8859_1_CtypeTable[256] = {
   0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2
 };
 
-#ifdef USE_UNICODE_PROPERTIES
-#include "unicode_property_data.c"
-#else
-#include "unicode_property_data_posix.c"
-#endif
-
 #include "st.h"
 
-#define USER_DEFINED_PROPERTY_MAX_NUM  20
-
-typedef struct {
-  int ctype;
-  OnigCodePoint* ranges;
-} UserDefinedPropertyValue;
-
-static int UserDefinedPropertyNum;
-static UserDefinedPropertyValue
-UserDefinedPropertyRanges[USER_DEFINED_PROPERTY_MAX_NUM];
-static st_table* UserDefinedPropertyTable;
-
-extern int
-onig_unicode_define_user_property(const char* name, OnigCodePoint* ranges)
-{
-  UserDefinedPropertyValue* e;
-  int i;
-  int n;
-  int len;
-  int c;
-  char* s;
-
-  if (UserDefinedPropertyNum >= USER_DEFINED_PROPERTY_MAX_NUM)
-    return ONIGERR_TOO_MANY_USER_DEFINED_OBJECTS;
-
-  len = strlen(name);
-  if (len >= PROPERTY_NAME_MAX_SIZE)
-    return ONIGERR_TOO_LONG_PROPERTY_NAME;
-
-  s = (char* )xmalloc(len + 1);
-  if (s == 0)
-    return ONIGERR_MEMORY;
-
-  n = 0;
-  for (i = 0; i < len; i++) {
-    c = name[i];
-    if (c <= 0 || c >= 0x80) {
-      xfree(s);
-      return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
-    }
-
-    if (c != ' ' && c != '-' && c != '_') {
-      s[n] = c;
-      n++;
-    }
-  }
-  s[n] = '\0';
-
-  if (UserDefinedPropertyTable == 0) {
-    UserDefinedPropertyTable = onig_st_init_strend_table_with_size(10);
-  }
-
-  e = UserDefinedPropertyRanges + UserDefinedPropertyNum;
-  e->ctype = CODE_RANGES_NUM + UserDefinedPropertyNum;
-  e->ranges = ranges;
-  onig_st_insert_strend(UserDefinedPropertyTable,
-                        (const UChar* )s, (const UChar* )s + n,
-                        (hash_data_type )((void* )e));
-
-  UserDefinedPropertyNum++;
-  return 0;
-}
-
-extern int
-onigenc_unicode_is_code_ctype(OnigCodePoint code, unsigned int ctype)
-{
-  if (
-#ifdef USE_UNICODE_PROPERTIES
-      ctype <= ONIGENC_MAX_STD_CTYPE &&
-#endif
-      code < 256) {
-    return ONIGENC_IS_UNICODE_ISO_8859_1_CTYPE(code, ctype);
-  }
-
-  if (ctype >= CODE_RANGES_NUM) {
-    int index = ctype - CODE_RANGES_NUM;
-    if (index < UserDefinedPropertyNum)
-      return onig_is_in_code_range((UChar* )UserDefinedPropertyRanges[index].ranges, code);
-    else
-      return ONIGERR_TYPE_BUG;
-  }
-
-  return onig_is_in_code_range((UChar* )CodeRanges[ctype], code);
-}
-
-
-extern int
-onigenc_unicode_ctype_code_range(int ctype, const OnigCodePoint* ranges[])
-{
-  if (ctype >= CODE_RANGES_NUM) {
-    int index = ctype - CODE_RANGES_NUM;
-    if (index < UserDefinedPropertyNum) {
-      *ranges = UserDefinedPropertyRanges[index].ranges;
-      return 0;
-    }
-    else
-      return ONIGERR_TYPE_BUG;
-  }
-
-  *ranges = CodeRanges[ctype];
-  return 0;
-}
-
-extern int
-onigenc_utf16_32_get_ctype_code_range(OnigCtype ctype, OnigCodePoint* sb_out,
-                                      const OnigCodePoint* ranges[])
-{
-  *sb_out = 0x00;
-  return onigenc_unicode_ctype_code_range(ctype, ranges);
-}
-
-extern int
-onigenc_unicode_property_name_to_ctype(OnigEncoding enc, UChar* name, UChar* end)
-{
-  int len;
-  UChar *p;
-  OnigCodePoint code;
-  const struct PropertyNameCtype* pc;
-  char buf[PROPERTY_NAME_MAX_SIZE];
-
-  p = name;
-  len = 0;
-  while (p < end) {
-    code = ONIGENC_MBC_TO_CODE(enc, p, end);
-    if (code >= 0x80)
-      return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
-
-    if (code != ' ' && code != '-' && code != '_') {
-      buf[len++] = (char )code;
-      if (len >= PROPERTY_NAME_MAX_SIZE)
-        return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
-    }
-
-    p += enclen(enc, p);
-  }
-
-  buf[len] = 0;
-
-  if (UserDefinedPropertyTable != 0) {
-    UserDefinedPropertyValue* e;
-    e = (UserDefinedPropertyValue* )NULL;
-    onig_st_lookup_strend(UserDefinedPropertyTable,
-			  (const UChar* )buf, (const UChar* )buf + len,
-			  (hash_data_type* )((void* )(&e)));
-    if (e != 0) {
-      return e->ctype;
-    }
-  }
-
-  pc = unicode_lookup_property_name(buf, len);
-  if (pc != 0) {
-    /* fprintf(stderr, "LOOKUP: %s: %d\n", buf, pc->ctype); */
-#ifndef USE_UNICODE_PROPERTIES
-    if (pc->ctype > ONIGENC_MAX_STD_CTYPE)
-      return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
-#endif
-
-    return pc->ctype;
-  }
-
-  return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
-}
-
-/* for use macros in unicode_fold_data.c */
 #include "unicode_fold_data.c"
-
 
 extern int
 onigenc_unicode_mbc_case_fold(OnigEncoding enc,
@@ -387,7 +221,7 @@ apply_case_fold3(int from, int to, OnigApplyAllCaseFoldFunc f, void* arg)
 
 extern int
 onigenc_unicode_apply_all_case_fold(OnigCaseFoldType flag,
-				    OnigApplyAllCaseFoldFunc f, void* arg)
+                                    OnigApplyAllCaseFoldFunc f, void* arg)
 {
   int r;
 
@@ -501,7 +335,7 @@ onigenc_unicode_get_case_fold_codes_by_str(OnigEncoding enc,
           n++;
         }
       }
-      code = items[0].code[0]; // for multi-code to unfold search.
+      code = items[0].code[0]; /* for multi-code to unfold search. */
     }
     else if ((flag & INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR) != 0) {
       OnigCodePoint cs[3][4];
@@ -661,4 +495,391 @@ onigenc_unicode_get_case_fold_codes_by_str(OnigEncoding enc,
   }
 
   return n;
+}
+
+
+#ifdef USE_UNICODE_EXTENDED_GRAPHEME_CLUSTER
+
+enum EGCB_BREAK_TYPE {
+  EGCB_NOT_BREAK = 0,
+  EGCB_BREAK     = 1,
+  EGCB_BREAK_UNDEF_E_MODIFIER = 2,
+  EGCB_BREAK_UNDEF_RI_RI = 3
+};
+
+enum EGCB_TYPE {
+  EGCB_Other   = 0,
+  EGCB_CR      = 1,
+  EGCB_LF      = 2,
+  EGCB_Control = 3,
+  EGCB_Extend  = 4,
+  EGCB_Prepend = 5,
+  EGCB_Regional_Indicator = 6,
+  EGCB_SpacingMark = 7,
+  EGCB_ZWJ         = 8,
+  EGCB_E_Base         = 9,
+  EGCB_E_Base_GAZ     = 10,
+  EGCB_E_Modifier     = 11,
+  EGCB_Glue_After_Zwj = 12,
+  EGCB_L   = 13,
+  EGCB_LV  = 14,
+  EGCB_LVT = 15,
+  EGCB_T   = 16,
+  EGCB_V   = 17
+};
+
+typedef struct {
+  OnigCodePoint  start;
+  OnigCodePoint  end;
+  enum EGCB_TYPE type;
+} EGCB_RANGE_TYPE;
+
+#include "unicode_egcb_data.c"
+
+static enum EGCB_TYPE
+egcb_get_type(OnigCodePoint code)
+{
+  OnigCodePoint low, high, x;
+  enum EGCB_TYPE type;
+
+  for (low = 0, high = (OnigCodePoint )EGCB_RANGE_NUM; low < high; ) {
+    x = (low + high) >> 1;
+    if (code > EGCB_RANGES[x].end)
+      low = x + 1;
+    else
+      high = x;
+  }
+
+  type = (low < (OnigCodePoint )EGCB_RANGE_NUM &&
+          code >= EGCB_RANGES[low].start) ?
+    EGCB_RANGES[low].type : EGCB_Other;
+
+  return type;
+}
+
+#define IS_CONTROL_CR_LF(code)   ((code) <= EGCB_Control && (code) >= EGCB_CR)
+#define IS_HANGUL(code)          ((code) >= EGCB_L)
+
+/* GB1 and GB2 are outside of this function. */
+static enum EGCB_BREAK_TYPE
+unicode_egcb_is_break_2code(OnigCodePoint from_code, OnigCodePoint to_code)
+{
+  enum EGCB_TYPE from;
+  enum EGCB_TYPE to;
+
+  from = egcb_get_type(from_code);
+  to   = egcb_get_type(to_code);
+
+  /* short cut */
+  if (from == 0 && to == 0) goto GB999;
+
+  /* GB3 */
+  if (from == EGCB_CR && to == EGCB_LF) return EGCB_NOT_BREAK;
+  /* GB4 */
+  if (IS_CONTROL_CR_LF(from)) return EGCB_BREAK;
+  /* GB5 */
+  if (IS_CONTROL_CR_LF(to)) return EGCB_BREAK;
+
+  if (IS_HANGUL(from) && IS_HANGUL(to)) {
+    /* GB6 */
+    if (from == EGCB_L && to != EGCB_T) return EGCB_NOT_BREAK;
+    /* GB7 */
+    if ((from == EGCB_LV || from == EGCB_V)
+        && (to == EGCB_V || to == EGCB_T)) return EGCB_NOT_BREAK;
+
+    /* GB8 */
+    if ((from == EGCB_LVT || from == EGCB_T) && (to == EGCB_T))
+      return EGCB_NOT_BREAK;
+
+    goto GB999;
+  }
+
+  /* GB9 */
+  if (to == EGCB_Extend || to == EGCB_ZWJ) return EGCB_NOT_BREAK;
+
+  /* GB9a */
+  if (to == EGCB_SpacingMark) return EGCB_NOT_BREAK;
+  /* GB9b */
+  if (from == EGCB_Prepend) return EGCB_NOT_BREAK;
+
+  /* GB10 */
+  if (to == EGCB_E_Modifier) {
+    if (from == EGCB_E_Base || from == EGCB_E_Base_GAZ) return EGCB_NOT_BREAK;
+    if (from == EGCB_Extend) return EGCB_BREAK_UNDEF_E_MODIFIER;
+    goto GB999;
+  }
+
+  /* GB11 */
+  if (from == EGCB_ZWJ) {
+    if (to == EGCB_Glue_After_Zwj || to == EGCB_E_Base_GAZ) return EGCB_NOT_BREAK;
+    goto GB999;
+  }
+
+  /* GB12, GB13 */
+  if (from == EGCB_Regional_Indicator && to == EGCB_Regional_Indicator) {
+    return EGCB_BREAK_UNDEF_RI_RI;
+  }
+
+ GB999:
+  return EGCB_BREAK;
+}
+
+#endif /* USE_UNICODE_EXTENDED_GRAPHEME_CLUSTER */
+
+extern int
+onigenc_egcb_is_break_position(OnigEncoding enc, UChar* p, UChar* prev,
+                               const UChar* start, const UChar* end)
+{
+  OnigCodePoint from;
+  OnigCodePoint to;
+#ifdef USE_UNICODE_EXTENDED_GRAPHEME_CLUSTER
+  enum EGCB_BREAK_TYPE btype;
+  enum EGCB_TYPE type;
+#endif
+
+  /* GB1 and GB2 */
+  if (p == start) return 1;
+  if (p == end)   return 1;
+
+  if (IS_NULL(prev)) {
+    prev = onigenc_get_prev_char_head(enc, start, p);
+    if (IS_NULL(prev)) return 1;
+  }
+
+  from = ONIGENC_MBC_TO_CODE(enc, prev, end);
+  to   = ONIGENC_MBC_TO_CODE(enc, p, end);
+
+#ifdef USE_UNICODE_EXTENDED_GRAPHEME_CLUSTER
+  if (! ONIGENC_IS_UNICODE_ENCODING(enc)) {
+    if (from == 0x000d && to == 0x000a) return 0;
+    else return 1;
+  }
+
+  btype = unicode_egcb_is_break_2code(from, to);
+  switch (btype) {
+  case EGCB_NOT_BREAK:
+    return 0;
+    break;
+  case EGCB_BREAK:
+    return 1;
+    break;
+
+  case EGCB_BREAK_UNDEF_E_MODIFIER:
+    while ((prev = onigenc_get_prev_char_head(enc, start, prev)) != NULL) {
+      from = ONIGENC_MBC_TO_CODE(enc, prev, end);
+      type = egcb_get_type(from);
+      if (type == EGCB_E_Base || type == EGCB_E_Base_GAZ)
+        return 0;
+      if (type != EGCB_Extend)
+        break;
+    }
+    break;
+
+  case EGCB_BREAK_UNDEF_RI_RI:
+    {
+      int n = 0;
+      while ((prev = onigenc_get_prev_char_head(enc, start, prev)) != NULL) {
+        from = ONIGENC_MBC_TO_CODE(enc, prev, end);
+        type = egcb_get_type(from);
+        if (type != EGCB_Regional_Indicator)
+          break;
+
+        n++;
+      }
+      if ((n % 2) == 0) return 0;
+    }
+    break;
+  }
+
+  return 1;
+
+#else
+  if (from == 0x000d && to == 0x000a) return 0;
+  else return 1;
+#endif /* USE_UNICODE_EXTENDED_GRAPHEME_CLUSTER */
+}
+
+
+/*
+ Undefine __GNUC__ for Escape warnings in Clang.
+
+./unicode_property_data.c:26730:44: warning: static variable
+      'unicode_prop_name_pool_contents' is used in an inline function with
+      external linkage [-Wstatic-in-inline]
+              register const char *s = o + unicode_prop_name_pool;
+*/
+
+#ifdef __clang__
+#undef __GNUC__
+#endif
+
+#ifdef USE_UNICODE_PROPERTIES
+#include "unicode_property_data.c"
+#else
+#include "unicode_property_data_posix.c"
+#endif
+
+#define USER_DEFINED_PROPERTY_MAX_NUM  20
+
+typedef struct {
+  int ctype;
+  OnigCodePoint* ranges;
+} UserDefinedPropertyValue;
+
+static int UserDefinedPropertyNum;
+static UserDefinedPropertyValue
+UserDefinedPropertyRanges[USER_DEFINED_PROPERTY_MAX_NUM];
+static st_table* UserDefinedPropertyTable;
+
+extern int
+onig_unicode_define_user_property(const char* name, OnigCodePoint* ranges)
+{
+  UserDefinedPropertyValue* e;
+  int r;
+  int i;
+  int n;
+  int len;
+  int c;
+  char* s;
+
+  if (UserDefinedPropertyNum >= USER_DEFINED_PROPERTY_MAX_NUM)
+    return ONIGERR_TOO_MANY_USER_DEFINED_OBJECTS;
+
+  len = (int )strlen(name);
+  if (len >= PROPERTY_NAME_MAX_SIZE)
+    return ONIGERR_TOO_LONG_PROPERTY_NAME;
+
+  s = (char* )xmalloc(len + 1);
+  if (s == 0)
+    return ONIGERR_MEMORY;
+
+  n = 0;
+  for (i = 0; i < len; i++) {
+    c = name[i];
+    if (c <= 0 || c >= 0x80) {
+      xfree(s);
+      return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
+    }
+
+    if (c != ' ' && c != '-' && c != '_') {
+      s[n] = c;
+      n++;
+    }
+  }
+  s[n] = '\0';
+
+  if (UserDefinedPropertyTable == 0) {
+    UserDefinedPropertyTable = onig_st_init_strend_table_with_size(10);
+  }
+
+  e = UserDefinedPropertyRanges + UserDefinedPropertyNum;
+  e->ctype = CODE_RANGES_NUM + UserDefinedPropertyNum;
+  e->ranges = ranges;
+  r = onig_st_insert_strend(UserDefinedPropertyTable,
+                            (const UChar* )s, (const UChar* )s + n,
+                            (hash_data_type )((void* )e));
+  if (r < 0) return r;
+
+  UserDefinedPropertyNum++;
+  return 0;
+}
+
+extern int
+onigenc_unicode_is_code_ctype(OnigCodePoint code, unsigned int ctype)
+{
+  if (
+#ifdef USE_UNICODE_PROPERTIES
+      ctype <= ONIGENC_MAX_STD_CTYPE &&
+#endif
+      code < 256) {
+    return ONIGENC_IS_UNICODE_ISO_8859_1_CTYPE(code, ctype);
+  }
+
+  if (ctype >= CODE_RANGES_NUM) {
+    int index = ctype - CODE_RANGES_NUM;
+    if (index < UserDefinedPropertyNum)
+      return onig_is_in_code_range((UChar* )UserDefinedPropertyRanges[index].ranges, code);
+    else
+      return ONIGERR_TYPE_BUG;
+  }
+
+  return onig_is_in_code_range((UChar* )CodeRanges[ctype], code);
+}
+
+
+extern int
+onigenc_unicode_ctype_code_range(OnigCtype ctype, const OnigCodePoint* ranges[])
+{
+  if (ctype >= CODE_RANGES_NUM) {
+    int index = ctype - CODE_RANGES_NUM;
+    if (index < UserDefinedPropertyNum) {
+      *ranges = UserDefinedPropertyRanges[index].ranges;
+      return 0;
+    }
+    else
+      return ONIGERR_TYPE_BUG;
+  }
+
+  *ranges = CodeRanges[ctype];
+  return 0;
+}
+
+extern int
+onigenc_utf16_32_get_ctype_code_range(OnigCtype ctype, OnigCodePoint* sb_out,
+                                      const OnigCodePoint* ranges[])
+{
+  *sb_out = 0x00;
+  return onigenc_unicode_ctype_code_range(ctype, ranges);
+}
+
+extern int
+onigenc_unicode_property_name_to_ctype(OnigEncoding enc, UChar* name, UChar* end)
+{
+  int len;
+  UChar *p;
+  OnigCodePoint code;
+  const struct PoolPropertyNameCtype* pc;
+  char buf[PROPERTY_NAME_MAX_SIZE];
+
+  p = name;
+  len = 0;
+  while (p < end) {
+    code = ONIGENC_MBC_TO_CODE(enc, p, end);
+    if (code >= 0x80)
+      return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
+
+    if (code != ' ' && code != '-' && code != '_') {
+      buf[len++] = (char )code;
+      if (len >= PROPERTY_NAME_MAX_SIZE)
+        return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
+    }
+
+    p += enclen(enc, p);
+  }
+
+  buf[len] = 0;
+
+  if (UserDefinedPropertyTable != 0) {
+    UserDefinedPropertyValue* e;
+    e = (UserDefinedPropertyValue* )NULL;
+    onig_st_lookup_strend(UserDefinedPropertyTable,
+                          (const UChar* )buf, (const UChar* )buf + len,
+                          (hash_data_type* )((void* )(&e)));
+    if (e != 0) {
+      return e->ctype;
+    }
+  }
+
+  pc = unicode_lookup_property_name(buf, len);
+  if (pc != 0) {
+    /* fprintf(stderr, "LOOKUP: %s: %d\n", buf, pc->ctype); */
+#ifndef USE_UNICODE_PROPERTIES
+    if (pc->ctype > ONIGENC_MAX_STD_CTYPE)
+      return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
+#endif
+
+    return (int )pc->ctype;
+  }
+
+  return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
 }

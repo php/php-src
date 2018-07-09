@@ -20,7 +20,7 @@ gzclose($h);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 When you're taught through feelings
 Destiny flying high above
 all I know is that you can realize it

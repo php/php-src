@@ -88,7 +88,7 @@ foreach($heredoc_strings as $str) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing crc32() : with different heredoc strings ***
 
 -- Iteration 1 --

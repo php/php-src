@@ -25,7 +25,7 @@ class C10 implements ArrayAccess
 $c10 = new C10;
 
 var_dump($c10[] += 5);
---EXPECTF--
+--EXPECT--
 Inside C10::offsetGet
 NULL
 

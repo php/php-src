@@ -28,7 +28,7 @@ var_export($b);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 -- Var export on a simple  object --
 stdClass::__set_state(array(
    'a' => 1,

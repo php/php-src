@@ -17,6 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
+#include <math.h>
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
@@ -241,7 +242,21 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
 	}
 
-	length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+    if (field->decimals > 0 && field->decimals < 7) {
+        length = mnd_sprintf(
+            &value,
+            0,
+            "%s%02u:%02u:%02u.%0*u",
+            (t.neg ? "-" : ""),
+            t.hour,
+            t.minute,
+            t.second,
+            field->decimals,
+           (uint32_t) (t.second_part / pow(10, 6 - field->decimals))
+        );
+    } else {
+        length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+    }
 
 	DBG_INF_FMT("%s", value);
 	ZVAL_STRINGL(zv, value, length);
@@ -322,7 +337,23 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
 	}
 
-	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
+    if (field->decimals > 0 && field->decimals < 7) {
+    	length = mnd_sprintf(
+            &value,
+            0,
+            "%04u-%02u-%02u %02u:%02u:%02u.%0*u",
+            t.year,
+            t.month,
+            t.day,
+            t.hour,
+            t.minute,
+            t.second,
+            field->decimals,
+            (uint32_t) (t.second_part / pow(10, 6 - field->decimals))
+        );
+    } else {
+    	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
+    }
 
 	DBG_INF_FMT("%s", value);
 	ZVAL_STRINGL(zv, value, length);
@@ -600,23 +631,19 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 				  to losing precision we need second variable. Conversion to double is to see if
 				  value is too big for a long. As said, precision could be lost.
 				*/
-				zval tmp_data_copy;
-				ZVAL_COPY(&tmp_data_copy, tmp_data);
-				convert_to_double_ex(&tmp_data_copy);
+				double d = zval_get_double(tmp_data);
 
 				/*
 				  if it doesn't fit in a long send it as a string.
 				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 				  We do transformation here, which will be used later when sending types. The code later relies on this.
 				*/
-				if (Z_DVAL(tmp_data_copy) > ZEND_LONG_MAX || Z_DVAL(tmp_data_copy) < ZEND_LONG_MIN) {
+				if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 					stmt->send_types_to_server = *resend_types_next_time = 1;
 					convert_to_string_ex(tmp_data);
 				} else {
-					convert_to_long_ex(tmp_data);
+					convert_to_long(tmp_data);
 				}
-
-				zval_ptr_dtor(&tmp_data_copy);
 			}
 		}
 	}

@@ -100,7 +100,7 @@ foreach($arrays as $arr2) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : Passing different types of arrays to $arr2 argument ***
 -- Iteration 1 --
 array(1) {

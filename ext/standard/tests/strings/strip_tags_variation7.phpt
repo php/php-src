@@ -43,7 +43,7 @@ foreach($strings as $string_value)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(43) "<abc>hello</abc> 		world... strip_tags_test"

@@ -25,10 +25,18 @@
 struct _zend_property_info;
 
 #define ZEND_WRONG_PROPERTY_INFO \
-	((struct _zend_property_info*)((zend_intptr_t)-1))
+	((struct _zend_property_info*)((intptr_t)-1))
 
-#define ZEND_DYNAMIC_PROPERTY_OFFSET ((uint32_t)(-1))
-#define ZEND_WRONG_PROPERTY_OFFSET   ((uint32_t)(-2))
+#define ZEND_DYNAMIC_PROPERTY_OFFSET               ((uintptr_t)(intptr_t)(-1))
+
+#define IS_VALID_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) > 0)
+#define IS_WRONG_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) == 0)
+#define IS_DYNAMIC_PROPERTY_OFFSET(offset)         ((intptr_t)(offset) < 0)
+
+#define IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(offset) (offset == ZEND_DYNAMIC_PROPERTY_OFFSET)
+#define ZEND_DECODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-(intptr_t)(offset) - 2))
+#define ZEND_ENCODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-((intptr_t)(offset) + 2)))
+
 
 /* The following rule applies to read_property() and read_dimension() implementations:
    If you return a zval which is not otherwise referenced by the extension or the engine's
@@ -92,8 +100,8 @@ typedef HashTable *(*zend_object_get_debug_info_t)(zval *object, int *is_temp);
 /* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback for this.
  */
 typedef int (*zend_object_call_method_t)(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS);
-typedef union _zend_function *(*zend_object_get_method_t)(zend_object **object, zend_string *method, const zval *key);
-typedef union _zend_function *(*zend_object_get_constructor_t)(zend_object *object);
+typedef zend_function *(*zend_object_get_method_t)(zend_object **object, zend_string *method, const zval *key);
+typedef zend_function *(*zend_object_get_constructor_t)(zend_object *object);
 
 /* Object maintenance/destruction */
 typedef void (*zend_object_dtor_obj_t)(zend_object *object);
@@ -107,7 +115,8 @@ typedef zend_string *(*zend_object_get_class_name_t)(const zend_object *object);
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2);
 typedef int (*zend_object_compare_zvals_t)(zval *resul, zval *op1, zval *op2);
 
-/* Cast an object to some other type
+/* Cast an object to some other type.
+ * readobj and retval must point to distinct zvals.
  */
 typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type);
 
@@ -115,7 +124,7 @@ typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type);
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
 typedef int (*zend_object_count_elements_t)(zval *object, zend_long *count);
 
-typedef int (*zend_object_get_closure_t)(zval *obj, zend_class_entry **ce_ptr, union _zend_function **fptr_ptr, zend_object **obj_ptr);
+typedef int (*zend_object_get_closure_t)(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr);
 
 typedef HashTable *(*zend_object_get_gc_t)(zval *object, zval **table, int *n);
 
@@ -156,23 +165,39 @@ struct _zend_object_handlers {
 };
 
 BEGIN_EXTERN_C()
-extern ZEND_API zend_object_handlers std_object_handlers;
+extern const ZEND_API zend_object_handlers std_object_handlers;
+
+#define zend_get_std_object_handlers() \
+	(&std_object_handlers)
 
 #define zend_get_function_root_class(fbc) \
 	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
 
-ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
+ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent);
 ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
-ZEND_API union _zend_function *zend_std_get_constructor(zend_object *object);
+ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zval *object);
+ZEND_API HashTable *zend_std_get_gc(zval *object, zval **table, int *n);
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type);
+ZEND_API zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot);
+ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
 ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot);
+ZEND_API int zend_std_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot);
+ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_slot);
+ZEND_API zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv);
+ZEND_API void zend_std_write_dimension(zval *object, zval *offset, zval *value);
+ZEND_API int zend_std_has_dimension(zval *object, zval *offset, int check_empty);
+ZEND_API void zend_std_unset_dimension(zval *object, zval *offset);
+ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key);
+ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj);
+ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
+ZEND_API int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
-ZEND_API int zend_check_private(union _zend_function *fbc, zend_class_entry *ce, zend_string *function_name);
+ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, zend_string *function_name);
 
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
 

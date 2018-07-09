@@ -21,6 +21,6 @@ $iv = '';
 var_dump(strlen($data));
 var_dump(openssl_seal($data, $sealed_data, $env_keys, $key, 'AES256', $iv));
 ?>
---EXPECTF--
+--EXPECT--
 int(64)
 int(80)

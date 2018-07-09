@@ -30,7 +30,7 @@ foreach($input_arrays as $key =>$value) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
 
 --decimal indexed--

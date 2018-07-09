@@ -43,7 +43,7 @@ for($count = 0; $count < count($values); $count++) {
 }
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing str_split() : single quoted strings for 'str' ***
 -- Iteration 1 --
 array(1) {

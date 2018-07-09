@@ -17,7 +17,7 @@ setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","d
 */
 
 echo "*** Testing var_export() with integer values ***\n";
-// different integer vlaues 
+// different integer values 
 $valid_ints = array(
                 '0',
                 '1',
@@ -53,7 +53,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid boolean values ***\n";
-// different valid  boolean vlaues 
+// different valid  boolean values 
 $valid_bool = array(
 		    1,
 		    TRUE,
@@ -77,7 +77,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid float values ***\n";
-// different valid  float vlaues 
+// different valid  float values 
 $valid_floats = array(
   (float)-2147483649, // float value
   (float)2147483648,  // float value
@@ -276,7 +276,7 @@ $counter++;
 }
                  
 echo "*** Testing var_export() with valid null values ***\n";
-// different valid  null vlaues 
+// different valid  null values 
 $unset_var = array();
 unset ($unset_var); // now a null
 $null_var = NULL;

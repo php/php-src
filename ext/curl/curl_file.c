@@ -52,7 +52,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-/* {{{ proto void CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
+/* {{{ proto CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
    Create the CURLFile object */
 ZEND_METHOD(CURLFile, __construct)
 {
@@ -78,8 +78,7 @@ static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION
 		return;
 	}
 	res = zend_read_property(curl_CURLFile_class, getThis(), name, name_len, 1, &rv);
-	ZVAL_DEREF(res);
-	ZVAL_COPY(return_value, res);
+	ZVAL_COPY_DEREF(return_value, res);
 }
 
 static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
@@ -133,7 +132,7 @@ ZEND_METHOD(CURLFile, setPostFilename)
 }
 /* }}} */
 
-/* {{{ proto void CURLFile::__wakeup()
+/* {{{ proto CURLFile::__wakeup()
    Unserialization handler */
 ZEND_METHOD(CURLFile, __wakeup)
 {

@@ -21,8 +21,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: cgi_main.c 291497 2009-11-30 14:43:22Z dmitry $ */
-
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -568,15 +566,15 @@ void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
 		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
 	) {
-		zval_dtor(array_ptr);
-		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
+		zend_array_destroy(Z_ARR_P(array_ptr));
+		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]));
 		return;
 	} else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
 		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
 	) {
-		zval_dtor(array_ptr);
-		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_SERVER]);
+		zend_array_destroy(Z_ARR_P(array_ptr));
+		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]));
 		return;
 	}
 
@@ -639,21 +637,15 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
-	/* ensure we want:
-	 * - to log (fastcgi.logging in php.ini)
+	/* message is written to FCGI_STDERR if following conditions are met:
+	 * - logging is enabled (fastcgi.logging in php.ini)
 	 * - we are currently dealing with a request
 	 * - the message is not empty
+	 * - the fcgi_write did not fail
 	 */
-	if (CGIG(fcgi_logging) && request && message && len > 0) {
-		ssize_t ret;
-		char *buf = malloc(len + 2);
-		memcpy(buf, message, len);
-		memcpy(buf + len, "\n", sizeof("\n"));
-		ret = fcgi_write(request, FCGI_STDERR, buf, len + 1);
-		free(buf);
-		if (ret < 0) {
-			php_handle_aborted_connection();
-		}
+	if (CGIG(fcgi_logging) && request && message && len > 0
+			&& fcgi_write(request, FCGI_STDERR, message, len) < 0) {
+		php_handle_aborted_connection();
 	}
 }
 /* }}} */
@@ -662,7 +654,7 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
  */
 static void sapi_cgi_log_message(char *message, int syslog_type_int)
 {
-	zlog(ZLOG_NOTICE, "PHP message: %s", message);
+	zlog_msg(ZLOG_NOTICE, "PHP message: ", message);
 }
 /* }}} */
 
@@ -1047,7 +1039,7 @@ static void init_request_info(void)
 	/* script_path_translated being set is a good indication that
 	 * we are running in a cgi environment, since it is always
 	 * null otherwise.  otherwise, the filename
-	 * of the script will be retreived later via argc/argv */
+	 * of the script will be retrieved later via argc/argv */
 	if (script_path_translated) {
 		const char *auth;
 		char *content_length = FCGI_GETENV(request, "CONTENT_LENGTH");
@@ -1533,6 +1525,10 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (!fcgi_is_closed(request)) {
 		php_output_end_all();
 		php_header();
@@ -1547,8 +1543,39 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
+ZEND_END_ARG_INFO()
+
+PHP_FUNCTION(apache_request_headers) /* {{{ */
+{
+	fcgi_request *request;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	if ((request = (fcgi_request*) SG(server_context))) {
+		fcgi_loadenv(request, sapi_add_request_header, return_value);
+	}
+} /* }}} */
+
+/* {{{ proto array fpm_get_status
+ * Returns the status of the fastcgi process manager */
+PHP_FUNCTION(fpm_get_status) /* {{{ */
+{
+	int error = fpm_status_export_to_zval(return_value);
+	if(error){
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
-	PHP_FE(fastcgi_finish_request,              NULL)
+	PHP_FE(fastcgi_finish_request,                    cgi_fcgi_sapi_no_arginfo)
+	PHP_FE(fpm_get_status,                            NULL)
+	PHP_FE(apache_request_headers,                    cgi_fcgi_sapi_no_arginfo)
+	PHP_FALIAS(getallheaders, apache_request_headers, cgi_fcgi_sapi_no_arginfo)
 	PHP_FE_END
 };
 
@@ -1583,7 +1610,7 @@ int main(int argc, char *argv[])
 	void ***tsrm_ls;
 #endif
 
-	int max_requests = 500;
+	int max_requests = 0;
 	int requests = 0;
 	int fcgi_fd = 0;
 	fcgi_request *request;
@@ -1595,6 +1622,10 @@ int main(int argc, char *argv[])
 	int force_stderr = 0;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
+	int ret;
+#if ZEND_RC_DEBUG
+	zend_bool old_rc_debug;
+#endif
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -1858,7 +1889,18 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr)) {
+#if ZEND_RC_DEBUG
+	old_rc_debug = zend_rc_debug;
+	zend_rc_debug = 0;
+#endif
+
+	ret = fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr);
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = old_rc_debug;
+#endif
+
+	if (ret < 0) {
 
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;

@@ -18,45 +18,41 @@
 
 #include <zend.h>
 #include "zend_smart_str.h"
+#include "zend_smart_string.h"
 
-#define SMART_STR_OVERHEAD (ZEND_MM_OVERHEAD + _ZSTR_HEADER_SIZE)
+#define SMART_STR_OVERHEAD   (ZEND_MM_OVERHEAD + _ZSTR_HEADER_SIZE + 1)
+#define SMART_STR_START_SIZE 256
+#define SMART_STR_START_LEN  (SMART_STR_START_SIZE - SMART_STR_OVERHEAD)
+#define SMART_STR_PAGE       4096
 
-#ifndef SMART_STR_PAGE
-# define SMART_STR_PAGE 4096
-#endif
-
-#ifndef SMART_STR_START_SIZE
-# define SMART_STR_START_SIZE (256 - SMART_STR_OVERHEAD - 1)
-#endif
-
-#define SMART_STR_NEW_SIZE(len) \
-	(((len + SMART_STR_OVERHEAD + SMART_STR_PAGE) & ~(SMART_STR_PAGE - 1)) - SMART_STR_OVERHEAD - 1)
+#define SMART_STR_NEW_LEN(len) \
+	(ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STR_OVERHEAD, SMART_STR_PAGE) - SMART_STR_OVERHEAD)
 
 ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len)
 {
 	if (UNEXPECTED(!str->s)) {
-		str->a = len < SMART_STR_START_SIZE
-				? SMART_STR_START_SIZE
-				: SMART_STR_NEW_SIZE(len);
+		str->a = len <= SMART_STR_START_LEN
+				? SMART_STR_START_LEN
+				: SMART_STR_NEW_LEN(len);
 		str->s = zend_string_alloc(str->a, 0);
 		ZSTR_LEN(str->s) = 0;
 	} else {
-		str->a = SMART_STR_NEW_SIZE(len);
-		str->s = (zend_string *) erealloc2(str->s, _ZSTR_HEADER_SIZE + str->a + 1, _ZSTR_HEADER_SIZE + ZSTR_LEN(str->s) + 1);
+		str->a = SMART_STR_NEW_LEN(len);
+		str->s = (zend_string *) erealloc2(str->s, str->a + _ZSTR_HEADER_SIZE + 1, _ZSTR_HEADER_SIZE + ZSTR_LEN(str->s));
 	}
 }
 
 ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len)
 {
 	if (UNEXPECTED(!str->s)) {
-		str->a = len < SMART_STR_START_SIZE
-				? SMART_STR_START_SIZE
-				: SMART_STR_NEW_SIZE(len);
+		str->a = len <= SMART_STR_START_SIZE
+				? SMART_STR_START_LEN
+				: SMART_STR_NEW_LEN(len);
 		str->s = zend_string_alloc(str->a, 1);
 		ZSTR_LEN(str->s) = 0;
 	} else {
-		str->a = SMART_STR_NEW_SIZE(len);
-		str->s = (zend_string *) realloc(str->s, _ZSTR_HEADER_SIZE + str->a + 1);
+		str->a = SMART_STR_NEW_LEN(len);
+		str->s = (zend_string *) perealloc(str->s, str->a + _ZSTR_HEADER_SIZE + 1, 1);
 	}
 }
 
@@ -118,11 +114,57 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char 
 	}
 }
 
-ZEND_API void ZEND_FASTCALL smart_str_append_printf(smart_str *dest, const char *format, ...) {
+ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...) {
 	va_list arg;
 	va_start(arg, format);
 	zend_printf_to_smart_str(dest, format, arg);
 	va_end(arg);
+}
+
+#define SMART_STRING_OVERHEAD   (ZEND_MM_OVERHEAD + 1)
+#define SMART_STRING_START_SIZE 256
+#define SMART_STRING_START_LEN  (SMART_STRING_START_SIZE - SMART_STRING_OVERHEAD)
+#define SMART_STRING_PAGE       4096
+
+ZEND_API void ZEND_FASTCALL _smart_string_alloc_persistent(smart_string *str, size_t len)
+{
+	if (!str->c) {
+		str->len = 0;
+		if (len <= SMART_STRING_START_LEN) {
+			str->a = SMART_STRING_START_LEN;
+		} else {
+			str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
+		}
+		str->c = pemalloc(str->a + 1, 1);
+	} else {
+		if (UNEXPECTED((size_t) len > SIZE_MAX - str->len)) {
+			zend_error(E_ERROR, "String size overflow");
+		}
+		len += str->len;
+		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
+		str->c = perealloc(str->c, str->a + 1, 1);
+	}
+}
+
+ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len)
+{
+	if (!str->c) {
+		str->len = 0;
+		if (len <= SMART_STRING_START_LEN) {
+			str->a = SMART_STRING_START_LEN;
+			str->c = emalloc(SMART_STRING_START_LEN + 1);
+		} else {
+			str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
+			str->c = emalloc_large(str->a + 1);
+		}
+	} else {
+		if (UNEXPECTED((size_t) len > SIZE_MAX - str->len)) {
+			zend_error(E_ERROR, "String size overflow");
+		}
+		len += str->len;
+		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
+		str->c = erealloc2(str->c, str->a + 1, str->len);
+	}
 }
 
 /*

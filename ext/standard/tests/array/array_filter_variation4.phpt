@@ -58,7 +58,7 @@ var_dump( array_filter($input, "callback4") );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variation - different 'callback' functions***
 -- Callback function without parameter and with return --
 array(8) {

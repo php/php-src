@@ -39,5 +39,5 @@ $doc->setRelaxNGSchema('http://docs.oasis-open.org/docbook/rng/5.0/docbook.rng')
 while (@$doc->read() !== false);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

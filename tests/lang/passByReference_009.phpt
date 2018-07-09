@@ -20,5 +20,5 @@ Assignement as argument
     foo2($x, $x, $x = 1);
     echo $x; // 2
 ?>
---EXPECTF--
+--EXPECT--
 1012

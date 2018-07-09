@@ -27,7 +27,7 @@ static zend_class_entry zend_iterator_class_entry;
 static void iter_wrapper_free(zend_object *object);
 static void iter_wrapper_dtor(zend_object *object);
 
-static zend_object_handlers iterator_object_handlers = {
+static const zend_object_handlers iterator_object_handlers = {
 	0,
 	iter_wrapper_free,
 	iter_wrapper_dtor,
@@ -81,7 +81,7 @@ ZEND_API void zend_iterator_init(zend_object_iterator *iter)
 
 ZEND_API void zend_iterator_dtor(zend_object_iterator *iter)
 {
-	if (--GC_REFCOUNT(&iter->std) > 0) {
+	if (GC_DELREF(&iter->std) > 0) {
 		return;
 	}
 

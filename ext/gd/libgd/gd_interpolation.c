@@ -945,7 +945,6 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
 	int windows_size;
 	unsigned int u;
 	LineContribType *res;
-	int overflow_error = 0;
 
 	if (scale_d < 1.0) {
 		width_d = filter_width_d / scale_d;
@@ -1053,7 +1052,6 @@ static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImag
 		const int iLeft = contrib->ContribRow[y].Left;
 		const int iRight = contrib->ContribRow[y].Right;
 		int i;
-		int *row = pRes->tpixels[y];
 
 		/* Accumulate each channel */
 		for (i = iLeft; i <= iRight; i++) {
@@ -1796,7 +1794,6 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = ((float) (-degrees / 180.0f) * (float)M_PI);
-	const int angle_rounded = (int)floor(degrees * 100);
 	const int src_w  = gdImageSX(src);
 	const int src_h = gdImageSY(src);
 	const gdFixed f_0_5 = gd_ftofx(0.5f);
@@ -1847,7 +1844,6 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 			if ((n <= 0) || (m <= 0) || (m >= src_h) || (n >= src_w)) {
 				dst->tpixels[dst_offset_y][dst_offset_x++] = bgColor;
 			} else if ((n <= 1) || (m <= 1) || (m >= src_h - 1) || (n >= src_w - 1)) {
-				gdFixed f_127 = gd_itofx(127);
 				register int c = getPixelInterpolated(src, n, m, bgColor);
 				c = c | (( gdTrueColorGetAlpha(c) + ((int)(127* gd_fxtof(f_slop)))) << 24);
 
@@ -2244,11 +2240,11 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor)
 {
-	/* round to two decimals and keep the 100x multiplication to use it in the common square angles 
+	/* round to two decimals and keep the 100x multiplication to use it in the common square angles
 	   case later. Keep the two decimal precisions so smaller rotation steps can be done, useful for
 	   slow animations, f.e. */
 	const int angle_rounded = fmod((int) floorf(angle * 100), 360 * 100);
-	   
+
 	if (bgcolor < 0) {
 		return NULL;
 	}

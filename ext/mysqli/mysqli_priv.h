@@ -14,8 +14,6 @@
   +----------------------------------------------------------------------+
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
-
-  $Id: php_mysqli_structs.h 302179 2010-08-13 09:57:04Z andrey $
 */
 
 #ifndef MYSQLI_PRIV_H
@@ -33,7 +31,7 @@
 #define HAVE_MYSQLI_GET_CHARSET
 #endif
 
-#if defined(MYSQLND_VERSION_ID) || (MYSQL_VERSION_ID > 40112 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID > 50005
+#if defined(MYSQLND_VERSION_ID) || MYSQL_VERSION_ID > 50005
 #define HAVE_MYSQLI_SET_CHARSET
 #endif
 

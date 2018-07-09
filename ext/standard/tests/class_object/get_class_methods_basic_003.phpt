@@ -40,7 +40,7 @@ var_dump(get_class_methods("C"));
 C::testFromC();
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Accessing I from global scope:
 array(1) {
   [0]=>

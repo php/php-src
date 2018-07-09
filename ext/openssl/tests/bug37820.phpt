@@ -30,5 +30,5 @@ if ($ok == 1) {
 
 
 ?>
---EXPECTF--
+--EXPECT--
 Ok

@@ -34,7 +34,7 @@ for( $x = 20; $x < $count; $x++) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing get_browser() : variation functionality: extra browser names ***
 array(35) {
   ["browser_name_regex"]=>

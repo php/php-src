@@ -14,7 +14,7 @@ var_dump($r['signatureTypeSN']);
 var_dump($r['signatureTypeLN']);
 var_dump($r['signatureTypeNID']);
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "RSA-SHA1"
 string(21) "sha1WithRSAEncryption"
 int(65)

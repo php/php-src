@@ -27,15 +27,14 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
+ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
-	GC_REFCOUNT(object) = 1;
+	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 	object->ce = ce;
 	object->properties = NULL;
 	zend_objects_store_put(object);
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
-		GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
 		ZVAL_UNDEF(object->properties_table + object->ce->default_properties_count);
 	}
 }
@@ -46,7 +45,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 
 	if (object->properties) {
 		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
-			if (EXPECTED(--GC_REFCOUNT(object->properties) == 0)) {
+			if (EXPECTED(GC_DELREF(object->properties) == 0)) {
 				zend_array_destroy(object->properties);
 			}
 		}
@@ -59,13 +58,12 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 			p++;
 		} while (p != end);
 	}
-	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_HAS_GUARDS)) {
+	if (UNEXPECTED(object->ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		if (EXPECTED(Z_TYPE_P(p) == IS_STRING)) {
-			zend_string_release(Z_STR_P(p));
-		} else {
+			zval_ptr_dtor_str(p);
+		} else if (Z_TYPE_P(p) == IS_ARRAY) {
 			HashTable *guards;
 
-			ZEND_ASSERT(Z_TYPE_P(p) == IS_ARRAY);
 			guards = Z_ARRVAL_P(p);
 			ZEND_ASSERT(guards != NULL);
 			zend_hash_destroy(guards);
@@ -80,8 +78,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 	if (destructor) {
 		zend_object *old_exception;
-		zval obj;
 		zend_class_entry *orig_fake_scope;
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcic;
+		zval ret;
 
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -125,8 +125,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			}
 		}
 
-		GC_REFCOUNT(object)++;
-		ZVAL_OBJ(&obj, object);
+		GC_ADDREF(object);
 
 		/* Make sure that destructors are protected from previously thrown exceptions.
 		 * For example, if an exception was thrown in a function and when the function's
@@ -143,7 +142,24 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		}
 		orig_fake_scope = EG(fake_scope);
 		EG(fake_scope) = NULL;
-		zend_call_method_with_0_params(&obj, object->ce, &destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
+
+		ZVAL_UNDEF(&ret);
+
+		fci.size = sizeof(fci);
+		fci.object = object;
+		fci.retval = &ret;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+		ZVAL_UNDEF(&fci.function_name); /* Unused */
+
+		fcic.function_handler = destructor;
+		fcic.called_scope = object->ce;
+		fcic.object = object;
+
+		zend_call_function(&fci, &fcic);
+		zval_ptr_dtor(&ret);
+
 		if (old_exception) {
 			if (EG(exception)) {
 				zend_exception_set_previous(EG(exception), old_exception);
@@ -151,12 +167,12 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				EG(exception) = old_exception;
 			}
 		}
-		zval_ptr_dtor(&obj);
+		OBJ_RELEASE(object);
 		EG(fake_scope) = orig_fake_scope;
 	}
 }
 
-ZEND_API zend_object *zend_objects_new(zend_class_entry *ce)
+ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 {
 	zend_object *object = emalloc(sizeof(zend_object) + zend_object_properties_size(ce));
 
@@ -165,7 +181,7 @@ ZEND_API zend_object *zend_objects_new(zend_class_entry *ce)
 	return object;
 }
 
-ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
+ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
 {
 	if (old_object->ce->default_properties_count) {
 		zval *src = old_object->properties_table;
@@ -183,7 +199,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 		/* fast copy */
 		if (EXPECTED(old_object->handlers == &std_object_handlers)) {
 			if (EXPECTED(!(GC_FLAGS(old_object->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(old_object->properties)++;
+				GC_ADDREF(old_object->properties);
 			}
 			new_object->properties = old_object->properties;
 			return;
@@ -197,15 +213,14 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 		zend_string *key;
 
 		if (!new_object->properties) {
-			ALLOC_HASHTABLE(new_object->properties);
-			zend_hash_init(new_object->properties, zend_hash_num_elements(old_object->properties), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_real_init(new_object->properties, 0);
+			new_object->properties = zend_new_array(zend_hash_num_elements(old_object->properties));
+			zend_hash_real_init_mixed(new_object->properties);
 		} else {
 			zend_hash_extend(new_object->properties, new_object->properties->nNumUsed + zend_hash_num_elements(old_object->properties), 0);
 		}
 
-		new_object->properties->u.v.flags |=
-			old_object->properties->u.v.flags & HASH_FLAG_HAS_EMPTY_IND;
+		HT_FLAGS(new_object->properties) |=
+			HT_FLAGS(old_object->properties) & HASH_FLAG_HAS_EMPTY_IND;
 
 		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
 			if (Z_TYPE_P(prop) == IS_INDIRECT) {
@@ -223,12 +238,29 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 	}
 
 	if (old_object->ce->clone) {
-		zval new_obj;
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcic;
+		zval ret;
 
-		ZVAL_OBJ(&new_obj, new_object);
-		Z_ADDREF(new_obj);
-		zend_call_method_with_0_params(&new_obj, old_object->ce, &old_object->ce->clone, ZEND_CLONE_FUNC_NAME, NULL);
-		zval_ptr_dtor(&new_obj);
+		GC_ADDREF(new_object);
+
+		ZVAL_UNDEF(&ret);
+
+		fci.size = sizeof(fci);
+		fci.object = new_object;
+		fci.retval = &ret;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+		ZVAL_UNDEF(&fci.function_name); /* Unused */
+
+		fcic.function_handler = new_object->ce->clone;
+		fcic.called_scope = new_object->ce;
+		fcic.object = new_object;
+
+		zend_call_function(&fci, &fcic);
+		zval_ptr_dtor(&ret);
+		OBJ_RELEASE(new_object);
 	}
 }
 

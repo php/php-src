@@ -43,7 +43,6 @@ var_dump( file_exists(false) );  // confirm file doesnt exist
 
 var_dump( unlink($filename, '') );  // $context as empty string
 var_dump( unlink($filename, false) );  // $context as boolean false
-var_dump( unlink($filename, NULL) );  // $context as NULL
 
 
 echo "\n-- Testing unlink() on non-existent file --\n";
@@ -92,10 +91,7 @@ bool(false)
 Warning: unlink() expects parameter 2 to be resource, string given in %s on line %d
 bool(false)
 
-Warning: unlink() expects parameter 2 to be resource, boolean given in %s on line %d
-bool(false)
-
-Warning: unlink() expects parameter 2 to be resource, null given in %s on line %d
+Warning: unlink() expects parameter 2 to be resource, bool given in %s on line %d
 bool(false)
 
 -- Testing unlink() on non-existent file --
@@ -105,6 +101,6 @@ bool(false)
 
 -- Testing unlink() on directory --
 
-Warning: unlink(%s/unlink_error): Permission denied in %s on line %d
+Warning: unlink(%s/unlink_error): Is a directory in %s on line %d
 bool(false)
 Done

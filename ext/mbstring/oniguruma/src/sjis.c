@@ -2,7 +2,7 @@
   sjis.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -156,7 +156,7 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
   if (enclen(ONIG_ENCODING_SJIS, buf) != (p - buf))
     return REGERR_INVALID_CODE_POINT_VALUE;
 #endif
-  return p - buf;
+  return (int )(p - buf);
 }
 
 static int
@@ -262,7 +262,7 @@ static int
 property_name_to_ctype(OnigEncoding enc, UChar* p, UChar* end)
 {
   struct PropertyNameCtype* pc;
-  int len = end - p;
+  int len = (int )(end - p);
   char q[32];
 
   if (len < sizeof(q) - 1) {
@@ -321,8 +321,8 @@ get_ctype_code_range(OnigCtype ctype, OnigCodePoint* sb_out,
 OnigEncodingType OnigEncodingSJIS = {
   mbc_enc_len,
   "Shift_JIS",   /* name */
-  2,             /* max byte length */
-  1,             /* min byte length */
+  2,             /* max enc length */
+  1,             /* min enc length */
   onigenc_is_mbc_newline_0x0a,
   mbc_to_code,
   code_to_mbclen,
@@ -337,5 +337,7 @@ OnigEncodingType OnigEncodingSJIS = {
   is_allowed_reverse_match,
   NULL, /* init */
   NULL, /* is_initialized */
-  is_valid_mbc_string
+  is_valid_mbc_string,
+  ENC_FLAG_ASCII_COMPATIBLE,
+  0, 0
 };

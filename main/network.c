@@ -271,22 +271,19 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 #define O_NONBLOCK O_NDELAY
 #endif
 
-#if !defined(__BEOS__)
-# define HAVE_NON_BLOCKING_CONNECT 1
-# ifdef PHP_WIN32
+#ifdef PHP_WIN32
 typedef u_long php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
      save = TRUE; ioctlsocket(sock, FIONBIO, &save)
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
 	 ioctlsocket(sock, FIONBIO, &save)
-# else
+#else
 typedef int php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
 	 save = fcntl(sock, F_GETFL, 0); \
 	 fcntl(sock, F_SETFL, save | O_NONBLOCK)
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
 	 fcntl(sock, F_SETFL, save)
-# endif
 #endif
 
 /* Connect to a socket using an interruptible connect with optional timeout.
@@ -302,7 +299,6 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		zend_string **error_string,
 		int *error_code)
 {
-#if HAVE_NON_BLOCKING_CONNECT
 	php_non_blocking_flags_t orig_flags;
 	int n;
 	int error = 0;
@@ -380,12 +376,6 @@ ok:
 		}
 	}
 	return ret;
-#else
-	if (asynchronous) {
-		php_error_docref(NULL, E_WARNING, "Asynchronous connect() not supported on this platform");
-	}
-	return (connect(sockfd, addr, addrlen) == 0) ? 0 : -1;
-#endif
 }
 /* }}} */
 
@@ -568,7 +558,7 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 	if (n == 0) {
 		if (errstr) {
 			php_error_docref(NULL, E_WARNING, "Failed to resolve `%s': %s", tmp, ZSTR_VAL(errstr));
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		goto out;
 	}
@@ -636,7 +626,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 			case AF_INET6:
 				buf = (char*)inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, (char *)&abuf, sizeof(abuf));
 				if (buf) {
-					*textaddr = strpprintf(0, "%s:%d",
+					*textaddr = strpprintf(0, "[%s]:%d",
 						buf, ntohs(((struct sockaddr_in6*)sa)->sin6_port));
 				}
 
@@ -890,7 +880,7 @@ skip_bind:
 			}
 			/* free error string received during previous iteration (if any) */
 			if (error_string && *error_string) {
-				zend_string_release(*error_string);
+				zend_string_release_ex(*error_string, 0);
 				*error_string = NULL;
 			}
 
@@ -1275,11 +1265,11 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	int herr,res;
 
 	if (*hstbuflen == 0) {
-		*hstbuflen = 1024; 
+		*hstbuflen = 1024;
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	}
 
-	while (( res = 
+	while (( res =
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
@@ -1290,7 +1280,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	if (res != SUCCESS) {
 		return NULL;
 	}
-		
+
 	return hp;
 }
 #endif
@@ -1305,7 +1295,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	}
 
-	while ((NULL == ( hp = 
+	while ((NULL == ( hp =
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */

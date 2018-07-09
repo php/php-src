@@ -1533,7 +1533,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 	sdlBindingPtr *bindings;
 	sdlTypePtr *types;
 	encodePtr *encoders;
-	encodePtr enc;
+	const encode *enc;
 
 	int f;
 	struct stat st;
@@ -1614,7 +1614,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 	i = num_encoders;
 	enc = defaultEncoding;
 	while (enc->details.type != END_KNOWN_TYPES) {
-		encoders[++i] = enc++;
+		encoders[++i] = (encodePtr)enc++;
 	}
 
 	i = 1;
@@ -2103,7 +2103,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	int type_num = 1;
 	int encoder_num = 1;
 	int f;
-	encodePtr enc;
+	const encode *enc;
 	HashTable tmp_types;
 	HashTable tmp_encoders;
 	HashTable tmp_bindings;
@@ -3250,16 +3250,13 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	    Z_TYPE_P(proxy_host) == IS_STRING &&
 	    (proxy_port = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1)) != NULL &&
 	    Z_TYPE_P(proxy_port) == IS_LONG) {
-	    	zval str_port, str_proxy;
+	        zval str_proxy;
 	    	smart_str proxy = {0};
-		ZVAL_DUP(&str_port, proxy_port);
-		convert_to_string(&str_port);
 		smart_str_appends(&proxy,"tcp://");
 		smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
 		smart_str_appends(&proxy,":");
-		smart_str_appends(&proxy,Z_STRVAL(str_port));
+		smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
 		smart_str_0(&proxy);
-		zval_dtor(&str_port);
 		ZVAL_NEW_STR(&str_proxy, proxy.s);
 
 		if (!context) {
@@ -3363,18 +3360,12 @@ cache_in_memory:
 			p.time = t;
 			p.sdl = psdl;
 
-			if (NULL != zend_hash_str_update_mem(SOAP_GLOBAL(mem_cache), uri,
-											uri_len, &p, sizeof(sdl_cache_bucket))) {
-				/* remove non-persitent sdl structure */
-				delete_sdl_impl(sdl);
-				/* and replace it with persistent one */
-				sdl = psdl;
-			} else {
-				php_error_docref(NULL, E_WARNING, "Failed to register persistent entry");
-				/* clean up persistent sdl */
-				delete_psdl_int(&p);
-				/* keep non-persistent sdl and return it */
-			}
+			zend_hash_str_update_mem(SOAP_GLOBAL(mem_cache), uri,
+											uri_len, &p, sizeof(sdl_cache_bucket));
+			/* remove non-persitent sdl structure */
+			delete_sdl_impl(sdl);
+			/* and replace it with persistent one */
+			sdl = psdl;
 		}
 	}
 

@@ -27,6 +27,7 @@
 #define CONST_CS				(1<<0)				/* Case Sensitive */
 #define CONST_PERSISTENT		(1<<1)				/* Persistent */
 #define CONST_CT_SUBST			(1<<2)				/* Allow compile-time substitution */
+#define CONST_NO_FILE_CACHE		(1<<3)				/* Can't be saved in file cache */
 
 #define	PHP_USER_CONSTANT INT_MAX	/* a constant defined in user space */
 
@@ -75,7 +76,9 @@ ZEND_API void zend_register_double_constant(const char *name, size_t name_len, d
 ZEND_API void zend_register_string_constant(const char *name, size_t name_len, char *strval, int flags, int module_number);
 ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, char *strval, size_t strlen, int flags, int module_number);
 ZEND_API int zend_register_constant(zend_constant *c);
+#ifdef ZTS
 void zend_copy_constants(HashTable *target, HashTable *sourc);
+#endif
 ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, uint32_t flags);
 END_EXTERN_C()
 

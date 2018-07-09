@@ -57,7 +57,7 @@ void _php_ibase_free_event(ibase_event *event) /* {{{ */
 	}
 
 	if (Z_TYPE(event->callback) != IS_UNDEF) {
-		zval_dtor(&event->callback);
+		zval_ptr_dtor(&event->callback);
 		ZVAL_UNDEF(&event->callback);
 
 		_php_ibase_event_free(event->event_buffer,event->result_buffer);
@@ -320,7 +320,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	if (!zend_is_callable(cb_arg, 0, NULL)) {
 		zend_string *cb_name = zend_get_callable_name(cb_arg);
 		_php_ibase_module_error("Callback argument %s is not a callable function", ZSTR_VAL(cb_name));
-		zend_string_release(cb_name);
+		zend_string_release_ex(cb_name, 0);
 		RETURN_FALSE;
 	}
 
@@ -328,7 +328,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);
 	TSRMLS_SET_CTX(event->thread_ctx);
 	event->link_res = link_res;
-	GC_REFCOUNT(link_res)++;
+	GC_ADDREF(link_res);
 	event->link = ib_link;
 	event->event_count = 0;
 	event->state = NEW;

@@ -36,7 +36,7 @@ var_dump($stack_last);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_shift() : usage variations ***
 
 -- Before shift: --

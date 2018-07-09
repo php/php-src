@@ -79,14 +79,12 @@ MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * 
 {
 	enum_func_status return_value = PASS;
 	php_stream * net_stream = vio->data->m.get_stream(vio);
-	size_t old_chunk_size = net_stream->chunk_size;
 	size_t to_read = count, ret;
 	zend_uchar * p = buffer;
 
 	DBG_ENTER("mysqlnd_vio::network_read");
 	DBG_INF_FMT("count="MYSQLND_SZ_T_SPEC, count);
 
-	net_stream->chunk_size = MIN(to_read, vio->data->options.net_read_buffer_size);
 	while (to_read) {
 		if (!(ret = php_stream_read(net_stream, (char *) p, to_read))) {
 			DBG_ERR_FMT("Error while reading header from socket");
@@ -97,7 +95,6 @@ MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * 
 		to_read -= ret;
 	}
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE(stats, STAT_BYTES_RECEIVED, count - to_read);
-	net_stream->chunk_size = old_chunk_size;
 	DBG_RETURN(return_value);
 }
 /* }}} */
@@ -196,7 +193,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 						 UNKNOWN_SQLSTATE,
 						 errstr? ZSTR_VAL(errstr):"Unknown error while connecting");
 		if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		DBG_RETURN(NULL);
 	}
@@ -265,6 +262,8 @@ MYSQLND_METHOD(mysqlnd_vio, post_connect_set_opt)(MYSQLND_VIO * const vio, const
 			/* TCP -> Set SO_KEEPALIVE */
 			mysqlnd_set_sock_keepalive(net_stream);
 		}
+
+		net_stream->chunk_size = vio->data->options.net_read_buffer_size;
 	}
 
 	DBG_VOID_RETURN;
@@ -693,7 +692,6 @@ MYSQLND_METHOD(mysqlnd_vio, dtor)(MYSQLND_VIO * const vio, MYSQLND_STATS * const
 		vio->data->m.free_contents(vio);
 		vio->data->m.close_stream(vio, stats, error_info);
 
-		mnd_pefree(vio->data, vio->data->persistent);
 		mnd_pefree(vio, vio->persistent);
 	}
 	DBG_VOID_RETURN;

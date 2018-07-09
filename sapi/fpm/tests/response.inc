@@ -124,7 +124,7 @@ class Response
      */
     public function printBody()
     {
-        echo $this->getBody();
+        echo $this->getBody() . "\n";
     }
 
     /**

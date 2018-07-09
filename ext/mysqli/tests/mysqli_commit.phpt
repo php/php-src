@@ -64,8 +64,8 @@ if (!have_innodb($link))
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = @mysqli_commit($link)))
-		printf("[014] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @mysqli_commit($link)))
+		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
@@ -73,5 +73,5 @@ if (!have_innodb($link))
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

@@ -37,29 +37,26 @@ BEGIN_EXTERN_C()
 #define TS_HASH(table) (&(table->hash))
 
 /* startup/shutdown */
-ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
-ZEND_API void _zend_ts_hash_init_ex(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
+ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent);
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht);
 ZEND_API void zend_ts_hash_clean(TsHashTable *ht);
 
 #define zend_ts_hash_init(ht, nSize, pHashFunction, pDestructor, persistent)	\
-	_zend_ts_hash_init(ht, nSize, pDestructor, persistent ZEND_FILE_LINE_CC)
+	_zend_ts_hash_init(ht, nSize, pDestructor, persistent)
 #define zend_ts_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)	\
-	_zend_ts_hash_init_ex(ht, nSize, pDestructor, persistent, bApplyProtection ZEND_FILE_LINE_CC)
+	_zend_ts_hash_init(ht, nSize, pDestructor, persistent)
 
 
 /* additions/updates/changes */
-ZEND_API zval *_zend_ts_hash_add_or_update(TsHashTable *ht, zend_string *key, zval *pData, int flag ZEND_FILE_LINE_DC);
 #define zend_ts_hash_update(ht, key, pData) \
-		_zend_ts_hash_add_or_update(ht, key, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
+		_zend_ts_hash_update(ht, key, pData ZEND_FILE_LINE_CC)
 #define zend_ts_hash_add(ht, key, pData) \
-		_zend_ts_hash_add_or_update(ht, key, pData, HASH_ADD ZEND_FILE_LINE_CC)
+		_zend_ts_hash_add(ht, key, pData ZEND_FILE_LINE_CC)
 
-ZEND_API zval *_zend_ts_hash_index_add_or_update(TsHashTable *ht, zend_ulong h, zval *pData, int flag ZEND_FILE_LINE_DC);
 #define zend_ts_hash_index_update(ht, h, pData) \
-		_zend_ts_hash_index_add_or_update(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
+		_zend_ts_hash_index_update(ht, h, pData ZEND_FILE_LINE_CC)
 #define zend_ts_hash_next_index_insert(ht, pData) \
-		_zend_ts_hash_index_add_or_update(ht, ht->nNextFreeElement, pData, HASH_ADD ZEND_FILE_LINE_CC)
+		_zend_ts_hash_next_index_insert(ht, ht->nNextFreeElement, pData ZEND_FILE_LINE_CC)
 
 ZEND_API zval* zend_ts_hash_add_empty_element(TsHashTable *ht, zend_string *key);
 

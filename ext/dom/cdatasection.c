@@ -37,7 +37,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMCdataSection extends DOMText
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-667469212
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-667469212
 * Since:
 */
 
@@ -46,7 +46,7 @@ const zend_function_entry php_dom_cdatasection_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMCdataSection::__construct(string value); */
+/* {{{ proto DOMCdataSection::__construct(string value); */
 PHP_METHOD(domcdatasection, __construct)
 {
 

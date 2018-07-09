@@ -80,7 +80,7 @@ static void _breakiterator_rewind(zend_object_iterator *iter)
 	ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
 }
 
-static zend_object_iterator_funcs breakiterator_iterator_funcs = {
+static const zend_object_iterator_funcs breakiterator_iterator_funcs = {
 	zoi_with_current_dtor,
 	zoi_with_current_valid,
 	zoi_with_current_get_current_data,
@@ -171,9 +171,6 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 	size_t		slen = Z_STRLEN(bio->text);
 	zend_string	*res;
 
-	if (next == BreakIterator::DONE) {
-		next = (int32_t)slen;
-	}
 	assert(next <= slen && next >= cur);
 	res = zend_string_alloc(next - cur, 0);
 
@@ -197,7 +194,7 @@ static void _breakiterator_parts_rewind(zend_object_iterator *iter)
 	iter->funcs->move_forward(iter);
 }
 
-static zend_object_iterator_funcs breakiterator_parts_it_funcs = {
+static const zend_object_iterator_funcs breakiterator_parts_it_funcs = {
 	zoi_with_current_dtor,
 	zoi_with_current_valid,
 	zoi_with_current_get_current_data,
@@ -266,7 +263,7 @@ U_CFUNC zend_function *IntlPartsIterator_get_method(zend_object **object_ptr, ze
 		}
 	}
 
-	ret = std_object_handlers.get_method(object_ptr, method, key);
+	ret = zend_std_get_method(object_ptr, method, key);
 
 end:
 	if (key == NULL) {
@@ -289,8 +286,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 
 	zval *biter_zval = &ii->iterator->data;
-	ZVAL_DEREF(biter_zval);
-	ZVAL_COPY(return_value, biter_zval);
+	ZVAL_COPY_DEREF(return_value, biter_zval);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_parts_it_void, 0, 0, 0)

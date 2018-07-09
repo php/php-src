@@ -104,7 +104,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		str = zval_get_string(element);
 
 		if (ZSTR_LEN(str) == 0) {
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 			continue;
 		}
 
@@ -143,7 +143,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 			p += ZSTR_LEN(str) + 1;
 		}
-		zend_string_release(str);
+		zend_string_release_ex(str, 0);
 	} ZEND_HASH_FOREACH_END();
 
 	assert((uint32_t)(p - env.envp) <= sizeenv);
@@ -185,7 +185,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	/* Close all handles to avoid a deadlock */
 	for (i = 0; i < proc->npipes; i++) {
 		if (proc->pipes[i] != 0) {
-			GC_REFCOUNT(proc->pipes[i])--;
+			GC_DELREF(proc->pipes[i]);
 			zend_list_close(proc->pipes[i]);
 			proc->pipes[i] = 0;
 		}
@@ -239,7 +239,7 @@ PHP_MINIT_FUNCTION(proc_open)
 }
 /* }}} */
 
-/* {{{ proto bool proc_terminate(resource process [, long signal])
+/* {{{ proto bool proc_terminate(resource process [, int signal])
    kill a process opened by proc_open */
 PHP_FUNCTION(proc_terminate)
 {

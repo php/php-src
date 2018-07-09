@@ -79,7 +79,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fwrite() various  operations ***
 
 -- Testing fwrite() with file having content of type numeric --

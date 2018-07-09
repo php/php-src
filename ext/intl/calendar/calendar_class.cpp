@@ -34,6 +34,9 @@ extern "C" {
 #include <assert.h>
 }
 
+using icu::GregorianCalendar;
+using icu::Locale;
+
 /* {{{ Global variables */
 zend_class_entry *Calendar_ce_ptr;
 zend_class_entry *GregorianCalendar_ce_ptr;
@@ -154,8 +157,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(8);
 
 	co  = Z_INTL_CALENDAR_P(object);
 	cal = co->ucal;
@@ -456,13 +458,8 @@ void calendar_register_IntlCalendar_class(void)
 	INIT_CLASS_ENTRY(ce, "IntlCalendar", Calendar_class_functions);
 	ce.create_object = Calendar_object_create;
 	Calendar_ce_ptr = zend_register_internal_class(&ce);
-	if (!Calendar_ce_ptr) {
-		//can't happen now without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
-			"IntlCalendar: class registration has failed.");
-		return;
-	}
-	memcpy( &Calendar_handlers, zend_get_std_object_handlers(),
+
+	memcpy( &Calendar_handlers, &std_object_handlers,
 		sizeof Calendar_handlers);
 	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;
@@ -525,11 +522,5 @@ void calendar_register_IntlCalendar_class(void)
 	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", GregorianCalendar_class_functions);
 	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
 		Calendar_ce_ptr);
-	if (!GregorianCalendar_ce_ptr) {
-		//can't happen know without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
-			"IntlGregorianCalendar: class registration has failed.");
-		return;
-	}
 }
 /* }}} */

@@ -67,26 +67,21 @@ static char* convert(const char* src, int src_len, int *new_len, const char* fro
          size_t st;
          outbuf = (char*)emalloc(outlen + 1);
 
-         if(outbuf) {
-            out_ptr = (char*)outbuf;
-            while(inlenleft) {
-               st = iconv(ic, (char**)&src, &inlenleft, &out_ptr, &outlenleft);
-               if(st == -1) {
-                  if(errno == E2BIG) {
-                     int diff = out_ptr - outbuf;
-                     outlen += inlenleft;
-                     outlenleft += inlenleft;
-                     outbuf = (char*)erealloc(outbuf, outlen + 1);
-                     if(!outbuf) {
-                        break;
-                     }
-                     out_ptr = outbuf + diff;
-                  }
-                  else {
-                     efree(outbuf);
-                     outbuf = 0;
-                     break;
-                  }
+         out_ptr = (char*)outbuf;
+         while(inlenleft) {
+            st = iconv(ic, (char**)&src, &inlenleft, &out_ptr, &outlenleft);
+            if(st == -1) {
+               if(errno == E2BIG) {
+                  int diff = out_ptr - outbuf;
+                  outlen += inlenleft;
+                  outlenleft += inlenleft;
+                  outbuf = (char*)erealloc(outbuf, outlen + 1);
+                  out_ptr = outbuf + diff;
+               }
+               else {
+                  efree(outbuf);
+                  outbuf = 0;
+                  break;
                }
             }
          }

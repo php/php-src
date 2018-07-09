@@ -61,7 +61,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(5) {
   [0]=>
   string(0) ""

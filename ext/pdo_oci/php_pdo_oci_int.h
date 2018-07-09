@@ -85,7 +85,7 @@ typedef struct {
 } pdo_oci_bound_param;
 
 extern const ub4 PDO_OCI_INIT_MODE;
-extern pdo_driver_t pdo_oci_driver;
+extern const pdo_driver_t pdo_oci_driver;
 extern OCIEnv *pdo_oci_Env;
 
 ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, sword status, int isinit, const char *file, int line);
@@ -93,7 +93,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 #define oci_drv_error(w)	_oci_error(H->err, dbh, NULL, w, H->last_err, FALSE, __FILE__, __LINE__)
 #define oci_stmt_error(w)	_oci_error(S->err, stmt->dbh, stmt, w, S->last_err, FALSE, __FILE__, __LINE__)
 
-extern struct pdo_stmt_methods oci_stmt_methods;
+extern const struct pdo_stmt_methods oci_stmt_methods;
 
 /* Default prefetch size in number of rows */
 #define PDO_OCI_PREFETCH_DEFAULT 100

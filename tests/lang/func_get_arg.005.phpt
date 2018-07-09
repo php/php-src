@@ -14,6 +14,6 @@ $a = "original.a";
 $ref =& $a;
 refVal($a);
 ?>
---EXPECTF--
+--EXPECT--
 string(10) "original.a"
 string(10) "original.a"

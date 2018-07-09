@@ -77,7 +77,7 @@ if (MySQLPDOTest::isPDOMySQLnd())
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 [001] Expecting default value for 'PDO::MYSQL_ATTR_INIT_COMMAND' of ''/string, getAttribute() reports setting ''/boolean
 [026] Execting '1'/boolean got ''/boolean' for options 'PDO::MYSQL_ATTR_READ_DEFAULT_FILE'
 done!

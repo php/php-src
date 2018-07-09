@@ -117,27 +117,27 @@ int(0)
 
 -- Iteration with len value as "Array" --
 
-Warning: strspn() expects parameter 4 to be integer, array given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, array given in %s on line %d
 NULL
 
 -- Iteration with len value as "Array" --
 
-Warning: strspn() expects parameter 4 to be integer, array given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, array given in %s on line %d
 NULL
 
 -- Iteration with len value as "Array" --
 
-Warning: strspn() expects parameter 4 to be integer, array given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, array given in %s on line %d
 NULL
 
 -- Iteration with len value as "Array" --
 
-Warning: strspn() expects parameter 4 to be integer, array given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, array given in %s on line %d
 NULL
 
 -- Iteration with len value as "Array" --
 
-Warning: strspn() expects parameter 4 to be integer, array given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, array given in %s on line %d
 NULL
 
 -- Iteration with len value as "" --
@@ -160,27 +160,27 @@ int(0)
 
 -- Iteration with len value as "" --
 
-Warning: strspn() expects parameter 4 to be integer, string given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, string given in %s on line %d
 NULL
 
 -- Iteration with len value as "" --
 
-Warning: strspn() expects parameter 4 to be integer, string given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, string given in %s on line %d
 NULL
 
 -- Iteration with len value as "string" --
 
-Warning: strspn() expects parameter 4 to be integer, string given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, string given in %s on line %d
 NULL
 
 -- Iteration with len value as "string" --
 
-Warning: strspn() expects parameter 4 to be integer, string given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, string given in %s on line %d
 NULL
 
 -- Iteration with len value as "object" --
 
-Warning: strspn() expects parameter 4 to be integer, object given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, object given in %s on line %d
 NULL
 
 -- Iteration with len value as "" --
@@ -191,6 +191,6 @@ int(0)
 
 -- Iteration with len value as "Resource id #%d" --
 
-Warning: strspn() expects parameter 4 to be integer, resource given in %s on line %d
+Warning: strspn() expects parameter 4 to be int, resource given in %s on line %d
 NULL
 Done

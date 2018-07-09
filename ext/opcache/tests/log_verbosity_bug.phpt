@@ -16,5 +16,5 @@ opcache.log_verbosity_level=-1
 <?php
 var_dump("Script should fail");
 ?>
---EXPECTF--
+--EXPECT--
 

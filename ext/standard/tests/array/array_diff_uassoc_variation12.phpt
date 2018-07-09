@@ -31,7 +31,7 @@ foreach($input_arrays as $key =>$value) {
     
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
 --null indexed--

@@ -42,7 +42,7 @@ unlink($dirname . '__tmp_oo_addglob.zip');
 unlink($dirname . 'foo.txt');
 unlink($dirname . 'bar.baz');
 ?>
---EXPECTF--
+--EXPECT--
 0 bar
 1 foobar/
 2 foobar/baz

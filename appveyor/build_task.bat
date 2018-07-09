@@ -36,9 +36,10 @@ if %errorlevel% neq 0 exit /b 3
 cmd /c buildconf.bat --force
 if %errorlevel% neq 0 exit /b 3
 
-if "%THREAD_SAFE%" equ "0" set ADD_CONF=--disable-zts
+if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
+if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 
-set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_odbc,odbc,pdo_firebird,interbase,ldap,imap,ftp
+set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_firebird,interbase,ldap,imap,ftp
 if "%OPCACHE%" equ "0" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
 
 cmd /c configure.bat ^

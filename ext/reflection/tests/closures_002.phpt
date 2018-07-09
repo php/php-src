@@ -20,7 +20,7 @@ var_dump($rp->isOptional());
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 string(8) "__invoke"
 int(2)
 int(1)

@@ -2,7 +2,7 @@
   utf16_be.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,53 @@
  * SUCH DAMAGE.
  */
 
-#include "regenc.h"
+#include "regint.h"  /* for USE_CALLOUT */
+
+
+static int
+init(void)
+{
+#ifdef USE_CALLOUT
+
+    int id;
+    OnigEncoding enc;
+    char* name;
+    unsigned int args[4];
+    OnigValue opts[4];
+
+    enc = ONIG_ENCODING_UTF16_BE;
+
+    name = "\000F\000A\000I\000L\000\000";            BC0_P(name, fail);
+    name = "\000M\000I\000S\000M\000A\000T\000C\000H\000\000"; BC0_P(name, mismatch);
+
+    name = "\000M\000A\000X\000\000";
+    args[0] = ONIG_TYPE_TAG | ONIG_TYPE_LONG;
+    args[1] = ONIG_TYPE_CHAR;
+    opts[0].c = 'X';
+    BC_B_O(name, max, 2, args, 1, opts);
+
+    name = "\000E\000R\000R\000O\000R\000\000";
+    args[0] = ONIG_TYPE_LONG; opts[0].l = ONIG_ABORT;
+    BC_P_O(name, error, 1, args, 1, opts);
+
+    name = "\000C\000O\000U\000N\000T\000\000";
+    args[0] = ONIG_TYPE_CHAR; opts[0].c = '>';
+    BC_B_O(name, count, 1, args, 1, opts);
+
+    name = "\000T\000O\000T\000A\000L\000_\000C\000O\000U\000N\000T\000\000";
+    args[0] = ONIG_TYPE_CHAR; opts[0].c = '>';
+    BC_B_O(name, total_count, 1, args, 1, opts);
+
+    name = "\000C\000M\000P\000\000";
+    args[0] = ONIG_TYPE_TAG | ONIG_TYPE_LONG;
+    args[1] = ONIG_TYPE_STRING;
+    args[2] = ONIG_TYPE_TAG | ONIG_TYPE_LONG;
+    BC_P(name, cmp, 3, args);
+
+#endif /* USE_CALLOUT */
+
+  return ONIG_NORMAL;
+}
 
 static const int EncLen_UTF16[] = {
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -215,8 +261,8 @@ utf16be_get_case_fold_codes_by_str(OnigCaseFoldType flag,
 OnigEncodingType OnigEncodingUTF16_BE = {
   utf16be_mbc_enc_len,
   "UTF-16BE",   /* name */
-  4,            /* max byte length */
-  2,            /* min byte length */
+  4,            /* max enc length */
+  2,            /* min enc length */
   utf16be_is_mbc_newline,
   utf16be_mbc_to_code,
   utf16be_code_to_mbclen,
@@ -229,7 +275,9 @@ OnigEncodingType OnigEncodingUTF16_BE = {
   onigenc_utf16_32_get_ctype_code_range,
   utf16be_left_adjust_char_head,
   onigenc_always_false_is_allowed_reverse_match,
-  NULL, /* init */
-  NULL, /* is_initialized */
-  is_valid_mbc_string
+  init,
+  0, /* is_initialized */
+  is_valid_mbc_string,
+  ENC_FLAG_UNICODE,
+  0, 0
 };

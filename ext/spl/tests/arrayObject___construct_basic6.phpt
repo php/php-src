@@ -21,7 +21,7 @@ var_dump($ao);
 $ao = new MyArrayObject(array(1,2,3), ArrayObject::STD_PROP_LIST);
 var_dump($ao);
 ?>
---EXPECTF--
+--EXPECT--
 object(ArrayObject)#1 (2) {
   ["p"]=>
   int(1)

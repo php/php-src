@@ -112,22 +112,22 @@ fclose( $file_handle );
 
 -- int 0 --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, int given in %s on line %d
 bool(false)
 
 -- int 1 --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, int given in %s on line %d
 bool(false)
 
 -- int 12345 --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, int given in %s on line %d
 bool(false)
 
 -- int -12345 --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, int given in %s on line %d
 bool(false)
 
 -- float 10.5 --
@@ -177,22 +177,22 @@ bool(false)
 
 -- lowercase true --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, bool given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, bool given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, bool given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, bool given in %s on line %d
 bool(false)
 
 -- empty string DQ --

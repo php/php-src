@@ -51,5 +51,5 @@ for($i = 0; $i < $max; $i++) {
 $pdo->rollBack();
 echo "done\n"
 ?>
---EXPECTF--
+--EXPECT--
 done

@@ -18,6 +18,9 @@
 #include "config.h"
 #endif
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "../intl_cppshims.h"
 
 #include <unicode/locid.h>
@@ -39,6 +42,8 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 #include "../common/common_enum.h"
+
+using icu::Locale;
 
 U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 {
@@ -88,7 +93,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 class BugStringCharEnumeration : public StringEnumeration
 {
 public:
-	BugStringCharEnumeration(UEnumeration* _uenum) : uenum(_uenum) {}
+	explicit BugStringCharEnumeration(UEnumeration* _uenum) : uenum(_uenum) {}
 
 	~BugStringCharEnumeration()
 	{
@@ -1136,7 +1141,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	if (!(Z_TYPE_P(zv_arg) == IS_OBJECT && instanceof_function(
 			Z_OBJCE_P(zv_arg), php_date_get_date_ce()))) {
 		object_init_ex(&zv_tmp, php_date_get_date_ce());
-		zend_call_method_with_1_params(&zv_tmp, NULL, NULL, "__construct", NULL, zv_arg);
+		zend_call_method_with_1_params(&zv_tmp, NULL, &Z_OBJCE(zv_tmp)->constructor, "__construct", NULL, zv_arg);
 		zv_datetime = &zv_tmp;
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(Z_OBJ(zv_tmp));
@@ -1236,7 +1241,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	ZVAL_UNDEF(&retval);
 	ts = (int64_t)date;
 
-	ts_str_len = slprintf(ts_str, sizeof(ts_str), "@%I64d", ts);
+	ts_str_len = slprintf(ts_str, sizeof(ts_str), "@%" PRIi64, ts);
 	ZVAL_STRINGL(&ts_zval, ts_str, ts_str_len);
 
 	/* Now get the time zone */
@@ -1252,7 +1257,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 
 	/* Finally, instantiate object and call constructor */
 	object_init_ex(return_value, php_date_get_date_ce());
-	zend_call_method_with_2_params(return_value, NULL, NULL, "__construct", NULL, &ts_zval, timezone_zval);
+	zend_call_method_with_2_params(return_value, NULL, &Z_OBJCE_P(return_value)->constructor, "__construct", NULL, &ts_zval, timezone_zval);
 	if (EG(exception)) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_to_date_time: DateTime constructor has thrown exception",

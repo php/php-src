@@ -238,7 +238,7 @@ static void function_dtor(zval *zv)
 {
 	zend_internal_function *f = (zend_internal_function*)Z_PTR_P(zv);
 
-	zend_string_release(f->function_name);
+	zend_string_release_ex(f->function_name, 0);
 	if (f->arg_info) {
 		efree(f->arg_info);
 	}
@@ -484,6 +484,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type)
 
 	switch(type) {
 		case IS_LONG:
+		case _IS_NUMBER:
 			vt = VT_INT;
 			break;
 		case IS_DOUBLE:

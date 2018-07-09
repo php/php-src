@@ -525,7 +525,7 @@ static int saproxy_iter_move_forwards(zend_object_iterator *iter)
 	return SUCCESS;
 }
 
-static zend_object_iterator_funcs saproxy_iter_funcs = {
+static const zend_object_iterator_funcs saproxy_iter_funcs = {
 	saproxy_iter_dtor,
 	saproxy_iter_valid,
 	saproxy_iter_get_data,
@@ -542,7 +542,8 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 	int i;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 
 	I = ecalloc(1, sizeof(*I));

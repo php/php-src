@@ -27,6 +27,7 @@
 
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
+static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
 static zend_object_handlers zend_test_class_handlers;
 
@@ -34,6 +35,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_array_return, IS_ARRAY, 0
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_nullable_array_return, IS_ARRAY, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_void_return, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_terminate_string, 0, 0, 1)
@@ -61,6 +65,11 @@ ZEND_FUNCTION(zend_test_nullable_array_return)
 	zval *arg1, *arg2;
 
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
+}
+
+ZEND_FUNCTION(zend_test_void_return)
+{
+	/* dummy */
 }
 
 /* Create a string without terminating null byte. Must be termined with
@@ -174,7 +183,7 @@ static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
 }
 /* }}} */
 
-static zend_function_entry zend_test_trait_methods[] = {
+static const zend_function_entry zend_test_trait_methods[] = {
     ZEND_ME(_ZendTestTrait, testMethod, NULL, ZEND_ACC_PUBLIC)
     ZEND_FE_END
 };
@@ -192,7 +201,12 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
 
-	memcpy(&zend_test_class_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	zend_declare_property_null(zend_test_class, "_StaticProp", sizeof("_StaticProp") - 1, ZEND_ACC_STATIC);
+
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestChildClass", NULL);
+	zend_test_child_class = zend_register_internal_class_ex(&class_entry, zend_test_class);
+
+	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
 	zend_test_class_handlers.call_method = zend_test_class_call_method;
 
@@ -230,9 +244,10 @@ PHP_MINFO_FUNCTION(zend_test)
 	php_info_print_table_end();
 }
 
-const zend_function_entry zend_test_functions[] = {
+static const zend_function_entry zend_test_functions[] = {
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
+	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
 	ZEND_FE(zend_create_unterminated_string, NULL)
 	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
 	ZEND_FE(zend_leak_bytes, NULL)
@@ -242,7 +257,7 @@ const zend_function_entry zend_test_functions[] = {
 
 zend_module_entry zend_test_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"test",
+	"zend-test",
 	zend_test_functions,
 	PHP_MINIT(zend_test),
 	PHP_MSHUTDOWN(zend_test),

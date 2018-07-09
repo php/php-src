@@ -43,21 +43,9 @@
 #include "mbstring.h"
 #include "php_unicode.h"
 #include "unicode_data.h"
+#include "libmbfl/mbfl/mbfilter_wchar.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
-
-/*
- * A simple array of 32-bit masks for lookup.
- */
-static unsigned long masks32[32] = {
-    0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0x00000020,
-    0x00000040, 0x00000080, 0x00000100, 0x00000200, 0x00000400, 0x00000800,
-    0x00001000, 0x00002000, 0x00004000, 0x00008000, 0x00010000, 0x00020000,
-    0x00040000, 0x00080000, 0x00100000, 0x00200000, 0x00400000, 0x00800000,
-    0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000,
-    0x40000000, 0x80000000
-};
-
 
 static int prop_lookup(unsigned long code, unsigned long n)
 {
@@ -98,241 +86,365 @@ static int prop_lookup(unsigned long code, unsigned long n)
 
 }
 
-MBSTRING_API int php_unicode_is_prop(unsigned long code, unsigned long mask1,
-		unsigned long mask2)
+MBSTRING_API int php_unicode_is_prop1(unsigned long code, int prop)
 {
-	unsigned long i;
-
-	if (mask1 == 0 && mask2 == 0)
-		return 0;
-
-	for (i = 0; mask1 && i < 32; i++) {
-		if ((mask1 & masks32[i]) && prop_lookup(code, i))
-			return 1;
-	}
-
-	for (i = 32; mask2 && i < _ucprop_size; i++) {
-		if ((mask2 & masks32[i & 31]) && prop_lookup(code, i))
-			return 1;
-	}
-
-	return 0;
+	return prop_lookup(code, prop);
 }
 
-static unsigned long case_lookup(unsigned long code, long l, long r, int field)
+MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
 {
-	long m;
-	const unsigned int *tmp;
+	int result = 0;
+	va_list va;
+	va_start(va, code);
 
-	/*
-	 * Do the binary search.
-	 */
-	while (l <= r) {
-		/*
-		 * Determine a "mid" point and adjust to make sure the mid point is at
-		 * the beginning of a case mapping triple.
-		 */
-		m = (l + r) >> 1;
-		tmp = &_uccase_map[m*3];
-		if (code > *tmp)
-			l = m + 1;
-		else if (code < *tmp)
-			r = m - 1;
-		else if (code == *tmp)
-			return tmp[field];
+	while (1) {
+		int prop = va_arg(va, int);
+		if (prop < 0) {
+			break;
+		}
+
+		if (prop_lookup(code, prop)) {
+			result = 1;
+			break;
+		}
 	}
 
+	va_end(va);
+	return result;
+}
+
+static inline unsigned mph_hash(unsigned d, unsigned x) {
+    x ^= d;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    return x;
+}
+
+#define CODE_NOT_FOUND ((unsigned) -1)
+
+static inline unsigned mph_lookup(
+		unsigned code,
+		const short *g_table, unsigned g_table_size,
+		const unsigned *table, unsigned table_size)
+{
+	short g = g_table[mph_hash(0, code) % g_table_size];
+
+	unsigned idx;
+	if (g <= 0) {
+		idx = -g;
+	} else {
+		idx = mph_hash(g, code) % table_size;
+	}
+
+	if (table[2*idx] == code) {
+		return table[2*idx + 1];
+	}
+	return CODE_NOT_FOUND;
+}
+
+#define CASE_LOOKUP(code, type) \
+	mph_lookup(code, _uccase_##type##_g, _uccase_##type##_g_size, \
+			_uccase_##type##_table, _uccase_##type##_table_size)
+
+static unsigned php_unicode_toupper_raw(unsigned code, enum mbfl_no_encoding enc)
+{
+	if (code < 0x80) {
+		/* Fast path for ASCII */
+		if (code >= 0x61 && code <= 0x7A) {
+			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x69)) {
+				return 0x130;
+			}
+			return code - 0x20;
+		}
+		return code;
+	} else {
+		unsigned new_code = CASE_LOOKUP(code, upper);
+		if (new_code != CODE_NOT_FOUND) {
+			return new_code;
+		}
+		return code;
+	}
+}
+
+static unsigned php_unicode_tolower_raw(unsigned code, enum mbfl_no_encoding enc)
+{
+	if (code < 0x80) {
+		/* Fast path for ASCII */
+		if (code >= 0x41 && code <= 0x5A) {
+			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x0049L)) {
+				return 0x0131L;
+			}
+			return code + 0x20;
+		}
+		return code;
+	} else {
+		unsigned new_code = CASE_LOOKUP(code, lower);
+		if (new_code != CODE_NOT_FOUND) {
+			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x130)) {
+				return 0x69;
+			}
+			return new_code;
+		}
+		return code;
+	}
+}
+
+static unsigned php_unicode_totitle_raw(unsigned code, enum mbfl_no_encoding enc)
+{
+	unsigned new_code = CASE_LOOKUP(code, title);
+	if (new_code != CODE_NOT_FOUND) {
+		return new_code;
+	}
+
+	/* No dedicated title-case variant, use to-upper instead */
+	return php_unicode_toupper_raw(code, enc);
+}
+
+unsigned php_unicode_tofold_raw(unsigned code, enum mbfl_no_encoding enc)
+{
+	if (code < 0x80) {
+		/* Fast path for ASCII */
+		if (code >= 0x41 && code <= 0x5A) {
+			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x49)) {
+				return 0x131;
+			}
+			return code + 0x20;
+		}
+		return code;
+	} else {
+		unsigned new_code = CASE_LOOKUP(code, fold);
+		if (new_code != CODE_NOT_FOUND) {
+			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x130)) {
+				return 0x69;
+			}
+			return new_code;
+		}
+		return code;
+	}
+}
+
+static inline unsigned php_unicode_tolower_simple(unsigned code, enum mbfl_no_encoding enc) {
+	code = php_unicode_tolower_raw(code, enc);
+	if (UNEXPECTED(code > 0xffffff)) {
+		return _uccase_extra_table[code & 0xffffff];
+	}
+	return code;
+}
+static inline unsigned php_unicode_toupper_simple(unsigned code, enum mbfl_no_encoding enc) {
+	code = php_unicode_toupper_raw(code, enc);
+	if (UNEXPECTED(code > 0xffffff)) {
+		return _uccase_extra_table[code & 0xffffff];
+	}
+	return code;
+}
+static inline unsigned php_unicode_totitle_simple(unsigned code, enum mbfl_no_encoding enc) {
+	code = php_unicode_totitle_raw(code, enc);
+	if (UNEXPECTED(code > 0xffffff)) {
+		return _uccase_extra_table[code & 0xffffff];
+	}
+	return code;
+}
+static inline unsigned php_unicode_tofold_simple(unsigned code, enum mbfl_no_encoding enc) {
+	code = php_unicode_tofold_raw(code, enc);
+	if (UNEXPECTED(code > 0xffffff)) {
+		return _uccase_extra_table[code & 0xffffff];
+	}
 	return code;
 }
 
-MBSTRING_API unsigned long php_turkish_toupper(unsigned long code, long l, long r, int field)
-{
-	if (code == 0x0069L) {
-		return 0x0130L;
+static inline unsigned php_unicode_tolower_full(
+		unsigned code, enum mbfl_no_encoding enc, unsigned *out) {
+	code = php_unicode_tolower_raw(code, enc);
+	if (UNEXPECTED(code > 0xffffff)) {
+		unsigned len = code >> 24;
+		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
+		memcpy(out, p + 1, len * sizeof(unsigned));
+		return len;
 	}
-	return case_lookup(code, l, r, field);
+	*out = code;
+	return 1;
+}
+static inline unsigned php_unicode_toupper_full(
+		unsigned code, enum mbfl_no_encoding enc, unsigned *out) {
+	code = php_unicode_toupper_raw(code, enc);
+	if (UNEXPECTED(code > 0xffffff)) {
+		unsigned len = code >> 24;
+		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
+		memcpy(out, p + 1, len * sizeof(unsigned));
+		return len;
+	}
+	*out = code;
+	return 1;
+}
+static inline unsigned php_unicode_totitle_full(
+		unsigned code, enum mbfl_no_encoding enc, unsigned *out) {
+	code = php_unicode_totitle_raw(code, enc);
+	if (UNEXPECTED(code > 0xffffff)) {
+		unsigned len = code >> 24;
+		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
+		memcpy(out, p + 1, len * sizeof(unsigned));
+		return len;
+	}
+	*out = code;
+	return 1;
+}
+static inline unsigned php_unicode_tofold_full(
+		unsigned code, enum mbfl_no_encoding enc, unsigned *out) {
+	code = php_unicode_tofold_raw(code, enc);
+	if (UNEXPECTED(code > 0xffffff)) {
+		unsigned len = code >> 24;
+		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
+		memcpy(out, p + 1, len * sizeof(unsigned));
+		return len;
+	}
+	*out = code;
+	return 1;
 }
 
-MBSTRING_API unsigned long php_turkish_tolower(unsigned long code, long l, long r, int field)
+struct convert_case_data {
+	mbfl_convert_filter *next_filter;
+	enum mbfl_no_encoding no_encoding;
+	int case_mode;
+	int title_mode;
+};
+
+static int convert_case_filter(int c, void *void_data)
 {
-	if (code == 0x0049L) {
-		return 0x0131L;
-	}
-	return case_lookup(code, l, r, field);
-}
+	struct convert_case_data *data = (struct convert_case_data *) void_data;
+	unsigned out[3];
+	unsigned len, i;
 
-MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_encoding enc)
-{
-	int field;
-	long l, r;
-
-	if (php_unicode_is_upper(code))
-		return code;
-
-	if (php_unicode_is_lower(code)) {
-		/*
-		 * The character is lower case.
-		 */
-		field = 1;
-		l = _uccase_len[0];
-		r = (l + _uccase_len[1]) - 1;
-
-		if (enc == mbfl_no_encoding_8859_9) {
-			return php_turkish_toupper(code, l, r, field);
-		}
-
-	} else {
-		/*
-		 * The character is title case.
-		 */
-		field = 1;
-		l = _uccase_len[0] + _uccase_len[1];
-		r = _uccase_size - 1;
-	}
-	return case_lookup(code, l, r, field);
-}
-
-MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_encoding enc)
-{
-	int field;
-	long l, r;
-
-	if (php_unicode_is_lower(code))
-		return code;
-
-	if (php_unicode_is_upper(code)) {
-		/*
-		 * The character is upper case.
-		 */
-		field = 1;
-		l = 0;
-		r = _uccase_len[0] - 1;
-
-		if (enc == mbfl_no_encoding_8859_9) {
-			return php_turkish_tolower(code, l, r, field);
-		}
-
-	} else {
-		/*
-		 * The character is title case.
-		 */
-		field = 2;
-		l = _uccase_len[0] + _uccase_len[1];
-		r = _uccase_size - 1;
-	}
-	return case_lookup(code, l, r, field);
-}
-
-MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_encoding enc)
-{
-	int field;
-	long l, r;
-
-	if (php_unicode_is_title(code))
-		return code;
-
-	/*
-	 * The offset will always be the same for converting to title case.
-	 */
-	field = 2;
-
-	if (php_unicode_is_upper(code)) {
-		/*
-		 * The character is upper case.
-		 */
-		l = 0;
-		r = _uccase_len[0] - 1;
-	} else {
-		/*
-		 * The character is lower case.
-		 */
-		l = _uccase_len[0];
-		r = (l + _uccase_len[1]) - 1;
-	}
-	return case_lookup(code, l, r, field);
-
-}
-
-
-#define BE_ARY_TO_UINT32(ptr) (\
-	((unsigned char*)(ptr))[0]<<24 |\
-	((unsigned char*)(ptr))[1]<<16 |\
-	((unsigned char*)(ptr))[2]<< 8 |\
-	((unsigned char*)(ptr))[3] )
-
-#define UINT32_TO_BE_ARY(ptr,val) { \
-	unsigned int v = val; \
-	((unsigned char*)(ptr))[0] = (v>>24) & 0xff,\
-	((unsigned char*)(ptr))[1] = (v>>16) & 0xff,\
-	((unsigned char*)(ptr))[2] = (v>> 8) & 0xff,\
-	((unsigned char*)(ptr))[3] = (v    ) & 0xff;\
-}
-
-MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
-		const char *src_encoding)
-{
-	char *unicode, *newstr;
-	size_t unicode_len;
-	unsigned char *unicode_ptr;
-	size_t i;
-	enum mbfl_no_encoding _src_encoding = mbfl_name2no_encoding(src_encoding);
-
-	if (_src_encoding == mbfl_no_encoding_invalid) {
-		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", src_encoding);
-		return NULL;
+	/* Handle invalid characters early, as we assign special meaning to
+	 * codepoints above 0xffffff. */
+	if (UNEXPECTED(c > 0xffffff)) {
+		(*data->next_filter->filter_function)(c, data->next_filter);
+		return 0;
 	}
 
-	unicode = php_mb_convert_encoding(srcstr, srclen, "UCS-4BE", src_encoding, &unicode_len);
-	if (unicode == NULL)
-		return NULL;
+	switch (data->case_mode) {
+		case PHP_UNICODE_CASE_UPPER_SIMPLE:
+			out[0] = php_unicode_toupper_simple(c, data->no_encoding);
+			len = 1;
+			break;
 
-	unicode_ptr = (unsigned char *)unicode;
-
-	switch(case_mode) {
 		case PHP_UNICODE_CASE_UPPER:
-			for (i = 0; i < unicode_len; i+=4) {
-				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
-			}
+			len = php_unicode_toupper_full(c, data->no_encoding, out);
+			break;
+
+		case PHP_UNICODE_CASE_LOWER_SIMPLE:
+			out[0] = php_unicode_tolower_simple(c, data->no_encoding);
+			len = 1;
 			break;
 
 		case PHP_UNICODE_CASE_LOWER:
-			for (i = 0; i < unicode_len; i+=4) {
-				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
-			}
+			len = php_unicode_tolower_full(c, data->no_encoding, out);
 			break;
 
-		case PHP_UNICODE_CASE_TITLE: {
-			int mode = 0;
+		case PHP_UNICODE_CASE_FOLD:
+			len = php_unicode_tofold_full(c, data->no_encoding, out);
+			break;
 
-			for (i = 0; i < unicode_len; i+=4) {
-				int res = php_unicode_is_prop(
-					BE_ARY_TO_UINT32(&unicode_ptr[i]),
-					UC_MN|UC_ME|UC_CF|UC_LM|UC_SK|UC_LU|UC_LL|UC_LT|UC_PO|UC_OS, 0);
-				if (mode) {
-					if (res) {
-						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
-					} else {
-						mode = 0;
-					}
+		case PHP_UNICODE_CASE_FOLD_SIMPLE:
+			out[0] = php_unicode_tofold_simple(c, data->no_encoding);
+			len = 1;
+			break;
+
+		case PHP_UNICODE_CASE_TITLE_SIMPLE:
+		case PHP_UNICODE_CASE_TITLE:
+		{
+			if (data->title_mode) {
+				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
+					out[0] = php_unicode_tolower_simple(c, data->no_encoding);
+					len = 1;
 				} else {
-					if (res) {
-						mode = 1;
-						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
-					}
+					len = php_unicode_tolower_full(c, data->no_encoding, out);
+				}
+			} else {
+				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
+					out[0] = php_unicode_totitle_simple(c, data->no_encoding);
+					len = 1;
+				} else {
+					len = php_unicode_totitle_full(c, data->no_encoding, out);
 				}
 			}
-		} break;
-
+			if (!php_unicode_is_case_ignorable(c)) {
+				data->title_mode = php_unicode_is_cased(c);
+			}
+			break;
+		}
+		default:
+			assert(0);
+			break;
 	}
 
-	newstr = php_mb_convert_encoding(unicode, unicode_len, src_encoding, "UCS-4BE", ret_len);
-	efree(unicode);
+	for (i = 0; i < len; i++) {
+		(*data->next_filter->filter_function)(out[i], data->next_filter);
+	}
+	return 0;
+}
 
-	return newstr;
+MBSTRING_API char *php_unicode_convert_case(
+		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
+		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar)
+{
+	struct convert_case_data data;
+	mbfl_convert_filter *from_wchar, *to_wchar;
+	mbfl_string result, *result_ptr;
+
+	mbfl_memory_device device;
+	mbfl_memory_device_init(&device, srclen + 1, 0);
+
+	/* encoding -> wchar filter */
+	to_wchar = mbfl_convert_filter_new(src_encoding,
+			&mbfl_encoding_wchar, convert_case_filter, NULL, &data);
+	if (to_wchar == NULL) {
+		mbfl_memory_device_clear(&device);
+		return NULL;
+	}
+
+	/* wchar -> encoding filter */
+	from_wchar = mbfl_convert_filter_new(
+			&mbfl_encoding_wchar, src_encoding,
+			mbfl_memory_device_output, NULL, &device);
+	if (from_wchar == NULL) {
+		mbfl_convert_filter_delete(to_wchar);
+		mbfl_memory_device_clear(&device);
+		return NULL;
+	}
+
+	to_wchar->illegal_mode = illegal_mode;
+	to_wchar->illegal_substchar = illegal_substchar;
+	from_wchar->illegal_mode = illegal_mode;
+	from_wchar->illegal_substchar = illegal_substchar;
+
+	data.next_filter = from_wchar;
+	data.no_encoding = src_encoding->no_encoding;
+	data.case_mode = case_mode;
+	data.title_mode = 0;
+
+	{
+		/* feed data */
+		const unsigned char *p = (const unsigned char *) srcstr;
+		size_t n = srclen;
+		while (n > 0) {
+			if ((*to_wchar->filter_function)(*p++, to_wchar) < 0) {
+				break;
+			}
+			n--;
+		}
+	}
+
+	mbfl_convert_filter_flush(to_wchar);
+	mbfl_convert_filter_flush(from_wchar);
+	result_ptr = mbfl_memory_device_result(&device, &result);
+	mbfl_convert_filter_delete(to_wchar);
+	mbfl_convert_filter_delete(from_wchar);
+
+	if (!result_ptr) {
+		return NULL;
+	}
+
+	*ret_len = result.len;
+	return (char *) result.val;
 }
 
 

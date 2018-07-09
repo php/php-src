@@ -90,13 +90,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_bccomp, 0, 0, 2)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_bcscale, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcscale, 0, 0, 0)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
 /* }}} */
 
-const zend_function_entry bcmath_functions[] = {
+static const zend_function_entry bcmath_functions[] = {
 	PHP_FE(bcadd,									arginfo_bcadd)
 	PHP_FE(bcsub,									arginfo_bcsub)
 	PHP_FE(bcmul,									arginfo_bcmul)
@@ -208,21 +208,6 @@ static void php_str2num(bc_num *num, char *str)
 }
 /* }}} */
 
-/* {{{ split_bc_num
-   Convert to bc_num detecting scale */
-static bc_num split_bc_num(bc_num num) {
-	bc_num newnum;
-	if (num->n_refs >= 1) {
-		return num;
-	}
-	newnum = _bc_new_num_ex(0, 0, 0);
-	*newnum = *num;
-	newnum->n_refs = 1;
-	num->n_refs--;
-	return newnum;
-}
-/* }}} */
-
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
    Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
@@ -250,12 +235,7 @@ PHP_FUNCTION(bcadd)
 	php_str2num(&second, ZSTR_VAL(right));
 	bc_add (first, second, &result, scale);
 
-	if (result->n_scale > scale) {
-		result = split_bc_num(result);
-		result->n_scale = scale;
-	}
-
-	RETVAL_STR(bc_num2str(result));
+	RETVAL_STR(bc_num2str_ex(result, scale));
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
@@ -290,12 +270,7 @@ PHP_FUNCTION(bcsub)
 	php_str2num(&second, ZSTR_VAL(right));
 	bc_sub (first, second, &result, scale);
 
-	if (result->n_scale > scale) {
-		result = split_bc_num(result);
-		result->n_scale = scale;
-	}
-
-	RETVAL_STR(bc_num2str(result));
+	RETVAL_STR(bc_num2str_ex(result, scale));
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
@@ -330,12 +305,7 @@ PHP_FUNCTION(bcmul)
 	php_str2num(&second, ZSTR_VAL(right));
 	bc_multiply (first, second, &result, scale);
 
-	if (result->n_scale > scale) {
-		result = split_bc_num(result);
-		result->n_scale = scale;
-	}
-
-	RETVAL_STR(bc_num2str(result));
+	RETVAL_STR(bc_num2str_ex(result, scale));
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
@@ -371,11 +341,7 @@ PHP_FUNCTION(bcdiv)
 
 	switch (bc_divide(first, second, &result, scale)) {
 		case 0: /* OK */
-			if (result->n_scale > scale) {
-				result = split_bc_num(result);
-				result->n_scale = scale;
-			}
-			RETVAL_STR(bc_num2str(result));
+			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1: /* division by zero */
 			php_error_docref(NULL, E_WARNING, "Division by zero");
@@ -417,11 +383,7 @@ PHP_FUNCTION(bcmod)
 
 	switch (bc_modulo(first, second, &result, scale)) {
 		case 0:
-			if (result->n_scale > scale) {
-				result = split_bc_num(result);
-				result->n_scale = scale;
-			}
-			RETVAL_STR(bc_num2str(result));
+			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1:
 			php_error_docref(NULL, E_WARNING, "Division by zero");
@@ -463,11 +425,7 @@ PHP_FUNCTION(bcpowmod)
 	scale_int = (int) ((int)scale < 0 ? 0 : scale);
 
 	if (bc_raisemod(first, second, mod, &result, scale_int) != -1) {
-		if (result->n_scale > scale_int) {
-			result = split_bc_num(result);
-			result->n_scale = scale_int;
-		}
-		RETVAL_STR(bc_num2str(result));
+		RETVAL_STR(bc_num2str_ex(result, scale_int));
 	} else {
 		RETVAL_FALSE;
 	}
@@ -507,12 +465,7 @@ PHP_FUNCTION(bcpow)
 	php_str2num(&second, ZSTR_VAL(right));
 	bc_raise (first, second, &result, scale);
 
-	if (result->n_scale > scale) {
-		result = split_bc_num(result);
-		result->n_scale = scale;
-	}
-
-	RETVAL_STR(bc_num2str(result));
+	RETVAL_STR(bc_num2str_ex(result, scale));
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
@@ -543,11 +496,7 @@ PHP_FUNCTION(bcsqrt)
 	php_str2num(&result, ZSTR_VAL(left));
 
 	if (bc_sqrt (&result, scale) != 0) {
-		if (result->n_scale > scale) {
-			result = split_bc_num(result);
-			result->n_scale = scale;
-		}
-		RETVAL_STR(bc_num2str(result));
+		RETVAL_STR(bc_num2str_ex(result, scale));
 	} else {
 		php_error_docref(NULL, E_WARNING, "Square root of negative number");
 	}
@@ -590,19 +539,24 @@ PHP_FUNCTION(bccomp)
 }
 /* }}} */
 
-/* {{{ proto bool bcscale(int scale)
+/* {{{ proto int bcscale([int scale])
    Sets default scale parameter for all bc math functions */
 PHP_FUNCTION(bcscale)
 {
-	zend_long new_scale;
+	zend_long old_scale, new_scale;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(new_scale)
 	ZEND_PARSE_PARAMETERS_END();
 
-	BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
+	old_scale = BCG(bc_precision);
 
-	RETURN_TRUE;
+	if (ZEND_NUM_ARGS() == 1) {
+		BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
+	}
+
+	RETURN_LONG(old_scale);
 }
 /* }}} */
 

@@ -1,5 +1,5 @@
 --TEST--
-input_get()
+filter_input()
 --INI--
 precision=14
 --SKIPIF--
@@ -28,7 +28,7 @@ var_dump(filter_var(0, 0, 0, 0, 0));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(4) "test"
 string(18) "http://example.com"
 string(27) "&#60;b&#62;test&#60;/b&#62;"
@@ -40,10 +40,10 @@ float(12345.7)
 string(29) "&#60;p&#62;string&#60;/p&#62;"
 bool(false)
 
-Warning: filter_var() expects parameter 2 to be integer, string given in %s011.php on line %d
+Warning: filter_var() expects parameter 2 to be int, string given in %s011.php on line %d
 NULL
 
-Warning: filter_input() expects parameter 3 to be integer, string given in %s011.php on line %d
+Warning: filter_input() expects parameter 3 to be int, string given in %s011.php on line %d
 NULL
 
 Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d

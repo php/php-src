@@ -80,7 +80,7 @@ mysqli autocommit/commit/rollback
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 Num_of_rows=1
 array(2) {
   [0]=>

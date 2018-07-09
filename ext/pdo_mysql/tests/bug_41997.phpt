@@ -38,7 +38,7 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 var_dump($stmt->errorInfo());
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {

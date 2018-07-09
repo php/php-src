@@ -161,7 +161,7 @@ typedef struct _php_stream_wrapper_ops {
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
-	php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
+	const php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
 	int is_url;						/* so that PG(allow_url_fopen) can be respected */
 };
@@ -188,7 +188,7 @@ struct _php_stream_wrapper	{
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
-	php_stream_ops *ops;
+	const php_stream_ops *ops;
 	void *abstract;			/* convenience pointer for abstraction */
 
 	php_stream_filter_chain readfilters, writefilters;
@@ -246,7 +246,7 @@ struct _php_stream  {
 
 /* allocate a new stream for a particular ops */
 BEGIN_EXTERN_C()
-PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
+PHPAPI php_stream *_php_stream_alloc(const php_stream_ops *ops, void *abstract,
 		const char *persistent_id, const char *mode STREAMS_DC);
 END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC)
@@ -413,7 +413,7 @@ END_EXTERN_C()
 /* whether or not locking is supported */
 #define PHP_STREAM_LOCK_SUPPORTED		1
 
-#define php_stream_supports_lock(stream)	_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED) == 0 ? 1 : 0
+#define php_stream_supports_lock(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED) == 0 ? 1 : 0)
 #define php_stream_lock(stream, mode)		_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, (mode), (void *) NULL)
 
 /* option code used by the php_stream_xport_XXX api */
@@ -561,10 +561,10 @@ void php_shutdown_stream_hashes(void);
 PHP_RSHUTDOWN_FUNCTION(streams);
 
 BEGIN_EXTERN_C()
-PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrapper *wrapper);
+PHPAPI int php_register_url_stream_wrapper(const char *protocol, const php_stream_wrapper *wrapper);
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol);
-PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_stream_wrapper *wrapper);
-PHPAPI int php_unregister_url_stream_wrapper_volatile(const char *protocol);
+PHPAPI int php_register_url_stream_wrapper_volatile(zend_string *protocol, php_stream_wrapper *wrapper);
+PHPAPI int php_unregister_url_stream_wrapper_volatile(zend_string *protocol);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options);
 PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
@@ -573,7 +573,7 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC)
 
 /* pushes an error message onto the stack for a wrapper instance */
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
 #define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
@@ -593,7 +593,7 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
 PHPAPI HashTable *_php_get_stream_filters_hash(void);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash()
 PHPAPI HashTable *php_get_stream_filters_hash_global(void);
-extern php_stream_wrapper_ops *php_stream_user_wrapper_ops;
+extern const php_stream_wrapper_ops *php_stream_user_wrapper_ops;
 END_EXTERN_C()
 #endif
 

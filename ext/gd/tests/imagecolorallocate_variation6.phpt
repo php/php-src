@@ -39,7 +39,7 @@ foreach($values as $key => $value) {
 };
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorallocate() : usage variations ***
 
 --Decimal 256--

@@ -48,7 +48,7 @@ foreach($array_types as $arr) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : integer formats with arrays ***
 
 -- Iteration 1 --

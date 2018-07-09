@@ -14,4 +14,7 @@ foreach ($recItIt as &$val) echo "$val\n";
 
 ?>
 --EXPECTF--
-Fatal error: An iterator cannot be used with foreach by reference in %s on line %d
+Fatal error: Uncaught RuntimeException: An iterator cannot be used with foreach by reference in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

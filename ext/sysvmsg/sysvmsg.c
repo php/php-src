@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -87,7 +85,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in sysvmsg_functions[].
  */
-const zend_function_entry sysvmsg_functions[] = {
+static const zend_function_entry sysvmsg_functions[] = {
 	PHP_FE(msg_get_queue,				arginfo_msg_get_queue)
 	PHP_FE(msg_send,					arginfo_msg_send)
 	PHP_FE(msg_receive,					arginfo_msg_receive)
@@ -145,7 +143,6 @@ PHP_MINFO_FUNCTION(sysvmsg)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "sysvmsg support", "enabled");
-	php_info_print_table_row(2, "Revision", "$Id$");
 	php_info_print_table_end();
 }
 /* }}} */
@@ -173,20 +170,16 @@ PHP_FUNCTION(msg_set_queue)
 
 		/* now pull out members of data and set them in the stat buffer */
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.uid", sizeof("msg_perm.uid") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_perm.uid = Z_LVAL_P(item);
+			stat.msg_perm.uid = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.gid", sizeof("msg_perm.gid") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_perm.gid = Z_LVAL_P(item);
+			stat.msg_perm.gid = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.mode", sizeof("msg_perm.mode") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_perm.mode = Z_LVAL_P(item);
+			stat.msg_perm.mode = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_qbytes", sizeof("msg_qbytes") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_qbytes = Z_LVAL_P(item);
+			stat.msg_qbytes = zval_get_long(item);
 		}
 		if (msgctl(mq->id, IPC_SET, &stat) == 0) {
 			RETVAL_TRUE;
@@ -350,14 +343,13 @@ PHP_FUNCTION(msg_receive)
 
 	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, realflags);
 
-	zval_dtor(out_msgtype);
-	zval_dtor(out_message);
+	zval_ptr_dtor(out_msgtype);
+	zval_ptr_dtor(out_message);
 	ZVAL_LONG(out_msgtype, 0);
 	ZVAL_FALSE(out_message);
 
 	if (zerrcode) {
-		ZVAL_DEREF(zerrcode);
-		zval_dtor(zerrcode);
+		zval_ptr_dtor(zerrcode);
 		ZVAL_LONG(zerrcode, 0);
 	}
 

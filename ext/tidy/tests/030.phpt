@@ -20,7 +20,7 @@ var_dump($c['indent']);
 var_dump($c['indent-attributes']);
 var_dump($c['indent-spaces']);
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 bool(true)
 int(3)

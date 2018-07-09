@@ -61,7 +61,7 @@ chmod(dirname(__FILE__)."/006_variation1", 0777);
 unlink(dirname(__FILE__)."/006_variation1.tmp");
 rmdir(dirname(__FILE__)."/006_variation1");
 ?>
---EXPECTF--	
+--EXPECT--	
 *** Testing fileperms() & chmod() : usage variations ***
 -- Testing all permission from octal 0000 to octal 0777 on file and dir --
 -- Iteration 1 --

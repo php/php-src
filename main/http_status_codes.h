@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: $ */
-
 #ifndef HTTP_STATUS_CODES_H
 #define HTTP_STATUS_CODES_H
 
@@ -26,7 +24,7 @@ typedef struct _http_response_status_code_pair {
 	const char *str;
 } http_response_status_code_pair;
 
-static http_response_status_code_pair http_status_map[] = {
+static const http_response_status_code_pair http_status_map[] = {
 	{ 100, "Continue" },
 	{ 101, "Switching Protocols" },
 	{ 200, "OK" },

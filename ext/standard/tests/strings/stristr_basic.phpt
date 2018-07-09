@@ -21,7 +21,7 @@ var_dump( stristr("Test String", "String", false) );
 var_dump( stristr("Test String", "String", true) );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing stristr() : basic functionality ***
 string(11) "Test string"
 string(6) "stRIng"

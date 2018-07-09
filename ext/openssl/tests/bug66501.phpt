@@ -20,5 +20,5 @@ $key = openssl_pkey_get_private($pkey);
 $res = openssl_sign($data ='alpha', $sign, $key, 'SHA1');
 var_dump($res);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

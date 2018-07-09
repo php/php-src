@@ -27,7 +27,7 @@ for ($i = 0; $i < 256; $i++) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_graph() : usage variations ***
 character code 33 is a printable character
 character code 34 is a printable character

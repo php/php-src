@@ -22,5 +22,5 @@ require_once('skipifconnectfailure.inc');
 
 	$mysql->close();
 ?>
---EXPECTF--
+--EXPECT--
 1064

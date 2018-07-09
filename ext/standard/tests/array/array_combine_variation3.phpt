@@ -84,7 +84,7 @@ foreach($arrays as $array) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_combine() : Passing different types of arrays to both $keys and $values argument ***
 -- Iteration 1 --
 array(2) {

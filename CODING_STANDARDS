@@ -4,10 +4,9 @@
 
 This file lists several standards that any programmer adding or changing
 code in PHP should follow.  Since this file was added at a very late
-stage of the development of PHP v3.0, the code base does not (yet) fully
-follow it, but it's going in that general direction.  Since we are now
-well into version 5 releases, many sections have been recoded to use
-these rules.
+stage of the development of PHP v3.0, the code base does not fully
+follow it, but new features are going in that general direction.  Many
+sections have been recoded to use these rules.
 
 Code Implementation
 -------------------
@@ -298,5 +297,6 @@ highlight_file and show_source), will be separately documented. The
 proto should still be included, describing which function is aliased.
 
 Backwards compatible functions and names should be maintained as long
-as the code can be reasonably be kept as part of the codebase. See
-/phpdoc/README for more information on documentation.
+as the code can be reasonably be kept as part of the codebase. See the
+README in the PHP documentation repository for more information on
+documentation.

@@ -29,7 +29,7 @@ Warning: intlcal_get_first_day_of_week() expects exactly 1 parameter, 2 given in
 Warning: intlcal_get_first_day_of_week(): intlcal_get_first_day_of_week: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_first_day_of_week() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_first_day_of_week() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_get_first_day_of_week(1)
 #1 {main}

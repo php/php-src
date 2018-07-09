@@ -34,7 +34,7 @@ foreach($inputs as $timezone => $value) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_sunset() : usage variation ***
 
 --Pacific/Samoa--

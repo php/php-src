@@ -26,7 +26,7 @@ var_dump(array_slice($input[2], 1, 2));
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_slice() : usage variations ***
 
 -- Slice a two-dimensional array --

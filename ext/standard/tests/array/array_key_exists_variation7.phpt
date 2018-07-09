@@ -25,7 +25,7 @@ echo key($input) . " => " . current ($input) . "\n";
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : usage variations ***
 
 -- Call array_key_exists() --

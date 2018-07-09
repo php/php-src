@@ -56,7 +56,7 @@ $haystacks =  array (
   TRUE,
   FALSE,
 
-  // null vlaues
+  // null values
   NULL,
   null,
 

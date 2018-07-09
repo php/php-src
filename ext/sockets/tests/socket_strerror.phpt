@@ -21,7 +21,7 @@ fa@php.net
 ?>
 --EXPECTF--
 
-Warning: socket_strerror() expects exactly 1 parameter, 0 given in %s on line %i
+Warning: socket_strerror() expects exactly 1 parameter, 0 given in %s on line %d
 string(7) "Success"
 string(23) "Operation not permitted"
 string(25) "No such file or directory"

@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: softmagic.c,v 1.248 2017/04/21 16:54:57 christos Exp $")
+FILE_RCSID("@(#)$File: softmagic.c,v 1.259 2018/03/11 01:23:52 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -48,20 +48,26 @@ FILE_RCSID("@(#)$File: softmagic.c,v 1.248 2017/04/21 16:54:57 christos Exp $")
 #endif
 
 private int match(struct magic_set *, struct magic *, uint32_t,
-    const unsigned char *, size_t, size_t, int, int, int, uint16_t *,
+    const struct buffer *, size_t, int, int, int, uint16_t *,
     uint16_t *, int *, int *, int *);
-private int mget(struct magic_set *, const unsigned char *,
-    struct magic *, size_t, size_t, unsigned int, int, int, int, uint16_t *,
+private int mget(struct magic_set *, struct magic *, const struct buffer *,
+    const unsigned char *, size_t, 
+    size_t, unsigned int, int, int, int, uint16_t *,
     uint16_t *, int *, int *, int *);
+private int msetoffset(struct magic_set *, struct magic *, struct buffer *,
+    const struct buffer *, size_t, unsigned int);
 private int magiccheck(struct magic_set *, struct magic *);
-private int32_t mprint(struct magic_set *, struct magic *);
-private int moffset(struct magic_set *, struct magic *, size_t, int32_t *);
+private int32_t mprint(struct magic_set *, struct magic *,
+    const struct buffer *);
+private int moffset(struct magic_set *, struct magic *, const struct buffer *,
+    int32_t *);
 private void mdebug(uint32_t, const char *, size_t);
 private int mcopy(struct magic_set *, union VALUETYPE *, int, int,
     const unsigned char *, uint32_t, size_t, struct magic *);
 private int mconvert(struct magic_set *, struct magic *, int);
 private int print_sep(struct magic_set *, int);
-private int handle_annotation(struct magic_set *, struct magic *, int);
+private int handle_annotation(struct magic_set *, struct magic *,
+    const struct buffer *, int);
 private int cvt_8(union VALUETYPE *, const struct magic *);
 private int cvt_16(union VALUETYPE *, const struct magic *);
 private int cvt_32(union VALUETYPE *, const struct magic *);
@@ -92,7 +98,7 @@ private int cvt_64(union VALUETYPE *, const struct magic *);
  */
 /*ARGSUSED1*/		/* nbytes passed for regularity, maybe need later */
 protected int
-file_softmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes,
+file_softmagic(struct magic_set *ms, const struct buffer *b,
     uint16_t *indir_count, uint16_t *name_count, int mode, int text)
 {
 	struct mlist *ml;
@@ -109,7 +115,7 @@ file_softmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes,
 	}
 
 	for (ml = ms->mlist[0]->next; ml != ms->mlist[0]; ml = ml->next)
-		if ((rv = match(ms, ml->magic, ml->nmagic, buf, nbytes, 0, mode,
+		if ((rv = match(ms, ml->magic, ml->nmagic, b, 0, mode,
 		    text, 0, indir_count, name_count,
 		    &printed_something, &need_separator, NULL)) != 0)
 			return rv;
@@ -122,20 +128,20 @@ file_softmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes,
 #define F(a, b, c) file_fmtcheck((a), (b), (c), __FILE__, __LINE__)
 
 private const char * __attribute__((__format_arg__(3)))
-file_fmtcheck(struct magic_set *ms, const struct magic *m, const char *def,
+file_fmtcheck(struct magic_set *ms, const char *desc, const char *def,
 	const char *file, size_t line)
 {
-	const char *ptr = fmtcheck(m->desc, def);
+	const char *ptr = fmtcheck(desc, def);
 	if (ptr == def)
 		file_magerror(ms,
 		    "%s, %" SIZE_T_FORMAT "u: format `%s' does not match"
-		    " with `%s'", file, line, m->desc, def);
+		    " with `%s'", file, line, desc, def);
 	return ptr;
 }
 #elif defined(HAVE_FMTCHECK)
-#define F(a, b, c) fmtcheck((b)->desc, (c))
+#define F(a, b, c) fmtcheck((b), (c))
 #else
-#define F(a, b, c) ((b)->desc)
+#define F(a, b, c) ((b))
 #endif
 
 /*
@@ -167,7 +173,7 @@ file_fmtcheck(struct magic_set *ms, const struct magic *m, const char *def,
  */
 private int
 match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
-    const unsigned char *s, size_t nbytes, size_t offset, int mode, int text,
+    const struct buffer *b, size_t offset, int mode, int text,
     int flip, uint16_t *indir_count, uint16_t *name_count,
     int *printed_something, int *need_separator, int *returnval)
 {
@@ -175,6 +181,7 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 	unsigned int cont_level = 0;
 	int returnvalv = 0, e; /* if a match is found it is set to 1*/
 	int firstline = 1; /* a flag to print X\n  X\n- X */
+	struct buffer bb;
 	int print = (ms->flags & MAGIC_NODESC) == 0;
 
 	if (returnval == NULL)
@@ -202,12 +209,13 @@ flush:
 			continue; /* Skip to next top-level test*/
 		}
 
-		ms->offset = m->offset;
+		if (msetoffset(ms, m, &bb, b, offset, cont_level) == -1)
+			goto flush;
 		ms->line = m->lineno;
 
 		/* if main entry matches, print it... */
-		switch (mget(ms, s, m, nbytes, offset, cont_level, mode, text,
-		    flip, indir_count, name_count,
+		switch (mget(ms, m, b, bb.fbuf, bb.flen, offset, cont_level,
+		    mode, text, flip, indir_count, name_count,
 		    printed_something, need_separator, returnval)) {
 		case -1:
 			return -1;
@@ -238,7 +246,7 @@ flush:
 			goto flush;
 		}
 
-		if ((e = handle_annotation(ms, m, firstline)) != 0) {
+		if ((e = handle_annotation(ms, m, b, firstline)) != 0) {
 			*need_separator = 1;
 			*printed_something = 1;
 			*returnval = 1;
@@ -256,11 +264,10 @@ flush:
 				return -1;
 		}
 
-
-		if (print && mprint(ms, m) == -1)
+		if (print && mprint(ms, m, b) == -1)
 			return -1;
 
-		switch (moffset(ms, m, nbytes, &ms->c.li[cont_level].off)) {
+		switch (moffset(ms, m, &bb, &ms->c.li[cont_level].off)) {
 		case -1:
 		case 0:
 			goto flush;
@@ -286,7 +293,8 @@ flush:
 				 */
 				cont_level = m->cont_level;
 			}
-			ms->offset = m->offset;
+			if (msetoffset(ms, m, &bb, b, offset, cont_level) == -1)
+				goto flush;
 			if (m->flag & OFFADD) {
 				ms->offset +=
 				    ms->c.li[cont_level - 1].off;
@@ -299,9 +307,10 @@ flush:
 					continue;
 			}
 #endif
-			switch (mget(ms, s, m, nbytes, offset, cont_level, mode,
-			    text, flip, indir_count, name_count,
-			    printed_something, need_separator, returnval)) {
+			switch (mget(ms, m, b, bb.fbuf, bb.flen, offset,
+			    cont_level, mode, text, flip, indir_count,
+			    name_count, printed_something, need_separator,
+			    returnval)) {
 			case -1:
 				return -1;
 			case 0:
@@ -336,7 +345,8 @@ flush:
 				} else
 					ms->c.li[cont_level].got_match = 1;
 
-				if ((e = handle_annotation(ms, m, firstline)) != 0) {
+				if ((e = handle_annotation(ms, m, b, firstline))
+				    != 0) {
 					*need_separator = 1;
 					*printed_something = 1;
 					*returnval = 1;
@@ -369,10 +379,10 @@ flush:
 						return -1;
 					*need_separator = 0;
 				}
-				if (print && mprint(ms, m) == -1)
+				if (print && mprint(ms, m, b) == -1)
 					return -1;
 
-				switch (moffset(ms, m, nbytes,
+				switch (moffset(ms, m, &bb,
 				    &ms->c.li[cont_level].off)) {
 				case -1:
 				case 0:
@@ -410,52 +420,117 @@ flush:
 }
 
 private int
-check_fmt(struct magic_set *ms, struct magic *m)
+check_fmt(struct magic_set *ms, const char *fmt)
 {
-	pcre *pce;
-	int re_options, rv = -1;
-	pcre_extra *re_extra;
+	pcre2_code *pce;
+	uint32_t re_options, capture_count;
+	int rv = -1;
 	zend_string *pattern;
 
-	if (strchr(m->desc, '%') == NULL)
+	if (strchr(fmt, '%') == NULL)
 		return 0;
 
 	(void)setlocale(LC_CTYPE, "C");
 	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
-	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options)) == NULL) {
+	if ((pce = pcre_get_compiled_regex(pattern, &capture_count, &re_options)) == NULL) {
 		rv = -1;
 	} else {
-	 	rv = !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
+		pcre2_match_data *match_data = php_pcre_create_match_data(capture_count, pce);
+		if (match_data) {
+			rv = pcre2_match(pce, (PCRE2_SPTR)fmt, strlen(fmt), 0, re_options, match_data, php_pcre_mctx()) > 0;
+			php_pcre_free_match_data(match_data);
+		}
 	}
-	zend_string_release(pattern);
+	zend_string_release_ex(pattern, 0);
 	(void)setlocale(LC_CTYPE, "");
 	return rv;
 }
 
+static int
+varexpand(char *buf, size_t len, const struct buffer *b, const char *str)
+{
+	const char *ptr, *sptr, *e, *t, *ee, *et;
+	size_t l;
+
+	for (sptr = str; (ptr = strstr(sptr, "${")) != NULL;) {
+		l = (size_t)(ptr - sptr);
+		if (l >= len)
+			return -1;
+		memcpy(buf, sptr, l);
+		buf += l;
+		len -= l;
+		ptr += 2;
+		if (!*ptr || ptr[1] != '?')
+			return -1;
+		for (et = t = ptr + 2; *et && *et != ':'; et++)
+			continue;
+		if (*et != ':')
+			return -1;
+		for (ee = e = et + 1; *ee && *ee != '}'; ee++)
+			continue;
+		if (*ee != '}')
+			return -1;
+		switch (*ptr) {
+		case 'x':
+			if (b->st.st_mode & 0111) {
+				ptr = t;
+				l = et - t;
+			} else {
+				ptr = e;
+				l = ee - e;
+			}
+			break;
+		default:
+			return -1;
+		}
+		if (l >= len)
+			return -1;
+		memcpy(buf, ptr, l);
+		buf += l;
+		len -= l;
+		sptr = ee + 1;
+	}
+
+	l = strlen(sptr);
+	if (l >= len)
+		return -1;
+
+	memcpy(buf, sptr, l);
+	buf[l] = '\0';
+	return 0;
+}
+
+
 private int32_t
-mprint(struct magic_set *ms, struct magic *m)
+mprint(struct magic_set *ms, struct magic *m, const struct buffer *b)
 {
 	uint64_t v;
 	float vf;
 	double vd;
 	int64_t t = 0;
- 	char buf[128], tbuf[26], sbuf[512];
+ 	char buf[128], tbuf[26], sbuf[512], ebuf[512];
+	const char *desc;
 	union VALUETYPE *p = &ms->ms_value;
+
+	if (varexpand(ebuf, sizeof(ebuf), b, m->desc) == -1)
+		desc = m->desc;
+	else
+		desc = ebuf;
 
   	switch (m->type) {
   	case FILE_BYTE:
 		v = file_signextend(ms, m, (uint64_t)p->b);
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%d",
 			    (unsigned char)v);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%d"),
+			if (file_printf(ms, F(ms, desc, "%d"),
 			    (unsigned char) v) == -1)
 				return -1;
 			break;
@@ -467,17 +542,17 @@ mprint(struct magic_set *ms, struct magic *m)
   	case FILE_BESHORT:
   	case FILE_LESHORT:
 		v = file_signextend(ms, m, (uint64_t)p->h);
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%u",
 			    (unsigned short)v);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%u"),
+			if (file_printf(ms, F(ms, desc, "%u"),
 			    (unsigned short) v) == -1)
 				return -1;
 			break;
@@ -490,16 +565,16 @@ mprint(struct magic_set *ms, struct magic *m)
   	case FILE_LELONG:
   	case FILE_MELONG:
 		v = file_signextend(ms, m, (uint64_t)p->l);
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%u", (uint32_t) v);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%u"), (uint32_t) v) == -1)
+			if (file_printf(ms, F(ms, desc, "%u"), (uint32_t) v) == -1)
 				return -1;
 			break;
 		}
@@ -510,17 +585,17 @@ mprint(struct magic_set *ms, struct magic *m)
   	case FILE_BEQUAD:
   	case FILE_LEQUAD:
 		v = file_signextend(ms, m, p->q);
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%" INT64_T_FORMAT "u",
 			    (unsigned long long)v);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%" INT64_T_FORMAT "u"),
+			if (file_printf(ms, F(ms, desc, "%" INT64_T_FORMAT "u"),
 			    (unsigned long long) v) == -1)
 				return -1;
 			break;
@@ -533,7 +608,7 @@ mprint(struct magic_set *ms, struct magic *m)
   	case FILE_BESTRING16:
   	case FILE_LESTRING16:
 		if (m->reln == '=' || m->reln == '!') {
-			if (file_printf(ms, F(ms, m, "%s"), 
+			if (file_printf(ms, F(ms, desc, "%s"), 
 			    file_printable(sbuf, sizeof(sbuf), m->value.s))
 			    == -1)
 				return -1;
@@ -561,7 +636,7 @@ mprint(struct magic_set *ms, struct magic *m)
 				*++last = '\0';
 			}
 
-			if (file_printf(ms, F(ms, m, "%s"),
+			if (file_printf(ms, F(ms, desc, "%s"),
 			    file_printable(sbuf, sizeof(sbuf), str)) == -1)
 				return -1;
 
@@ -574,7 +649,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_BEDATE:
 	case FILE_LEDATE:
 	case FILE_MEDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->l, 0, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint32_t);
@@ -584,7 +659,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_BELDATE:
 	case FILE_LELDATE:
 	case FILE_MELDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->l, FILE_T_LOCAL, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint32_t);
@@ -593,7 +668,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_QDATE:
 	case FILE_BEQDATE:
 	case FILE_LEQDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->q, 0, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint64_t);
@@ -602,7 +677,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_QLDATE:
 	case FILE_BEQLDATE:
 	case FILE_LEQLDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->q, FILE_T_LOCAL, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint64_t);
@@ -611,7 +686,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_QWDATE:
 	case FILE_BEQWDATE:
 	case FILE_LEQWDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->q, FILE_T_WINDOWS, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint64_t);
@@ -621,16 +696,16 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_BEFLOAT:
 	case FILE_LEFLOAT:
 		vf = p->f;
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%g", vf);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%g"), vf) == -1)
+			if (file_printf(ms, F(ms, desc, "%g"), vf) == -1)
 				return -1;
 			break;
 		}
@@ -641,32 +716,29 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_BEDOUBLE:
 	case FILE_LEDOUBLE:
 		vd = p->d;
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%g", vd);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%g"), vd) == -1)
+			if (file_printf(ms, F(ms, desc, "%g"), vd) == -1)
 				return -1;
 			break;
 		}
 		t = ms->offset + sizeof(double);
   		break;
 
+	case FILE_SEARCH:
 	case FILE_REGEX: {
 		char *cp;
 		int rval;
 
 		cp = estrndup((const char *)ms->search.s, ms->search.rm_len);
-		if (cp == NULL) {
-			file_oomem(ms, ms->search.rm_len);
-			return -1;
-		}
-		rval = file_printf(ms, F(ms, m, "%s"),
+		rval = file_printf(ms, F(ms, desc, "%s"),
 		    file_printable(sbuf, sizeof(sbuf), cp));
 		efree(cp);
 
@@ -679,15 +751,6 @@ mprint(struct magic_set *ms, struct magic *m)
 			t = ms->search.offset + ms->search.rm_len;
 		break;
 	}
-
-	case FILE_SEARCH:
-		if (file_printf(ms, F(ms, m, "%s"), m->value.s) == -1)
-			return -1;
-		if ((m->str_flags & REGEX_OFFSET_START))
-			t = ms->search.offset;
-		else
-			t = ms->search.offset + m->vallen;
-		break;
 
 	case FILE_DEFAULT:
 	case FILE_CLEAR:
@@ -702,7 +765,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		t = ms->offset;
 		break;
 	case FILE_DER:
-		if (file_printf(ms, F(ms, m, "%s"), 
+		if (file_printf(ms, F(ms, desc, "%s"), 
 		    file_printable(sbuf, sizeof(sbuf), ms->ms_value.s)) == -1)
 			return -1;
 		t = ms->offset;
@@ -715,8 +778,10 @@ mprint(struct magic_set *ms, struct magic *m)
 }
 
 private int
-moffset(struct magic_set *ms, struct magic *m, size_t nbytes, int32_t *op)
+moffset(struct magic_set *ms, struct magic *m, const struct buffer *b,
+    int32_t *op)
 {
+	size_t nbytes = b->flen;
 	int32_t o;
 
   	switch (m->type) {
@@ -1060,7 +1125,7 @@ mconvert(struct magic_set *ms, struct magic *m, int flip)
 			 * string by p->s, so we need to deduct sz.
 			 * Because we can use one of the bytes of the length
 			 * after we shifted as NUL termination.
-			 */ 
+			 */
 			len = sz;
 		}
 		while (len--)
@@ -1134,7 +1199,7 @@ mconvert(struct magic_set *ms, struct magic *m, int flip)
 			goto out;
 		return 1;
 	case FILE_BEDOUBLE:
-		p->q = BE64(p); 
+		p->q = BE64(p);
 		if (cvt_double(p, m) == -1)
 			goto out;
 		return 1;
@@ -1197,7 +1262,7 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 			const char *end;
 			size_t lines, linecnt, bytecnt;
 
-			if (s == NULL) {
+			if (s == NULL || nbytes < offset) {
 				ms->search.s_len = 0;
 				ms->search.s = NULL;
 				return 0;
@@ -1342,12 +1407,58 @@ do_ops(struct magic *m, intmax_t lhs, intmax_t off)
 }
 
 private int
-mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
-    size_t nbytes, size_t o, unsigned int cont_level, int mode, int text,
-    int flip, uint16_t *indir_count, uint16_t *name_count,
+msetoffset(struct magic_set *ms, struct magic *m, struct buffer *bb,
+    const struct buffer *b, size_t o, unsigned int cont_level)
+{
+	if (m->offset < 0) {
+		if (cont_level > 0) {
+			if (m->flag & (OFFADD|INDIROFFADD))
+				goto normal;
+#if 0
+			file_error(ms, 0, "negative offset %d at continuation"
+			    "level %u", m->offset, cont_level);
+			return -1;
+#endif
+		}
+		if (buffer_fill(b) == -1)
+			return -1;
+		if (o != 0) {
+			// Not yet!
+			file_magerror(ms, "non zero offset %zu at"
+			    " level %u", o, cont_level);
+			return -1;
+		}
+		if ((size_t)-m->offset > b->elen)
+			return -1;
+		buffer_init(bb, -1, b->ebuf, b->elen);
+		ms->eoffset = ms->offset = b->elen + m->offset;
+	} else {
+		if (cont_level == 0) {
+normal:
+			// XXX: Pass real fd, then who frees bb?
+			buffer_init(bb, -1, b->fbuf, b->flen);
+			ms->offset = m->offset;
+			ms->eoffset = 0;
+		} else {
+			ms->offset = ms->eoffset + m->offset;
+		}
+	}
+	if ((ms->flags & MAGIC_DEBUG) != 0) {
+		fprintf(stderr, "bb=[%p,%zu], %d [b=%p,%zu], [o=%#x, c=%d]\n",
+		    bb->fbuf, bb->flen, ms->offset, b->fbuf, b->flen,
+		    m->offset, cont_level);
+	}
+	return 0;
+}
+
+private int
+mget(struct magic_set *ms, struct magic *m, const struct buffer *b,
+    const unsigned char *s, size_t nbytes, size_t o, unsigned int cont_level,
+    int mode, int text, int flip, uint16_t *indir_count, uint16_t *name_count,
     int *printed_something, int *need_separator, int *returnval)
 {
 	uint32_t offset = ms->offset;
+	struct buffer bb;
 	intmax_t lhs;
 	file_pushbuf_t *pb;
 	int rv, oneed_separator, in_type;
@@ -1558,7 +1669,10 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 			return -1;
 
 		(*indir_count)++;
-		rv = file_softmagic(ms, s + offset, nbytes - offset,
+		bb = *b;
+		bb.fbuf = s + offset;
+		bb.flen = nbytes - offset;
+		rv = file_softmagic(ms, &bb,
 		    indir_count, name_count, BINTEST, text);
 
 		if ((ms->flags & MAGIC_DEBUG) != 0)
@@ -1570,7 +1684,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 
 		if (rv == 1) {
 			if ((ms->flags & MAGIC_NODESC) == 0 &&
-			    file_printf(ms, F(ms, m, "%u"), offset) == -1) {
+			    file_printf(ms, F(ms, m->desc, "%u"), offset) == -1) {
 				if (rbuf) efree(rbuf);
 				return -1;
 			}
@@ -1598,12 +1712,12 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		oneed_separator = *need_separator;
 		if (m->flag & NOSPACE)
 			*need_separator = 0;
-		rv = match(ms, ml.magic, ml.nmagic, s, nbytes, offset + o,
+		rv = match(ms, ml.magic, ml.nmagic, b, offset + o,
 		    mode, text, flip, indir_count, name_count,
 		    printed_something, need_separator, returnval);
 		if (rv != 1)
 		    *need_separator = oneed_separator;
-		return 1;
+		return rv;
 
 	case FILE_NAME:
 		if (ms->flags & MAGIC_NODESC)
@@ -1703,7 +1817,7 @@ file_strncmp16(const char *a, const char *b, size_t len, uint32_t flags)
 }
 
 public void
-convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
+convert_libmagic_pattern(zval *pattern, char *val, size_t len, uint32_t options)
 {
 	int i, j=0;
 	zend_string *t;
@@ -1725,10 +1839,10 @@ convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 	}
 	ZSTR_VAL(t)[j++] = '~';
 
-	if (options & PCRE_CASELESS) 
+	if (options & PCRE2_CASELESS)
 		ZSTR_VAL(t)[j++] = 'i';
 
-	if (options & PCRE_MULTILINE)
+	if (options & PCRE2_MULTILINE)
 		ZSTR_VAL(t)[j++] = 'm';
 
 	ZSTR_VAL(t)[j]='\0';
@@ -1898,13 +2012,13 @@ magiccheck(struct magic_set *ms, struct magic *m)
 	}
 	case FILE_REGEX: {
 		zval pattern;
-		int options = 0;
+		uint32_t options = 0;
 		pcre_cache_entry *pce;
 
-		options |= PCRE_MULTILINE;
+		options |= PCRE2_MULTILINE;
 
 		if (m->str_flags & STRING_IGNORE_CASE) {
-			options |= PCRE_CASELESS;
+			options |= PCRE2_CASELESS;
 		}
 
 		convert_libmagic_pattern(&pattern, (char *)m->value.s, m->vallen, options);
@@ -2081,7 +2195,8 @@ error_out:
 }
 
 private int
-handle_annotation(struct magic_set *ms, struct magic *m, int firstline)
+handle_annotation(struct magic_set *ms, struct magic *m, const struct buffer *b,
+    int firstline)
 {
 	if ((ms->flags & MAGIC_APPLE) && m->apple[0]) {
 		if (!firstline && file_printf(ms, "\n- ") == -1)
@@ -2098,9 +2213,15 @@ handle_annotation(struct magic_set *ms, struct magic *m, int firstline)
 		return 1;
 	}
 	if ((ms->flags & MAGIC_MIME_TYPE) && m->mimetype[0]) {
+		char buf[1024];
+		const char *p;
 		if (!firstline && file_printf(ms, "\n- ") == -1)
 			return -1;
-		if (file_printf(ms, "%s", m->mimetype) == -1)
+		if (varexpand(buf, sizeof(buf), b, m->mimetype) == -1)
+			p = m->mimetype;
+		else
+			p = buf;
+		if (file_printf(ms, "%s", p) == -1)
 			return -1;
 		return 1;
 	}

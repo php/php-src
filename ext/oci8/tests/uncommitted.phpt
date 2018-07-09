@@ -12,5 +12,5 @@ oci_execute($stmt, OCI_DEFAULT);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 Done

@@ -1,5 +1,4 @@
 
-	/* $Id: fpm_php.c,v 1.22.2.4 2008/12/13 03:21:18 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -43,7 +42,7 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 			ini_entry->modifiable = mode;
 		}
 	} else {
-		zend_string_release(duplicate);
+		zend_string_release_ex(duplicate, 1);
 	}
 
 	return SUCCESS;

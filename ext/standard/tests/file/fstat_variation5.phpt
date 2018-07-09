@@ -17,15 +17,15 @@ foreach ( $variation_array as $var ) {
 ===DONE===
 --EXPECTF--
 
-Warning: fstat() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fstat() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 
-Warning: fstat() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fstat() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 
-Warning: fstat() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fstat() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 
-Warning: fstat() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fstat() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 ===DONE===

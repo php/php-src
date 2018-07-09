@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf.c,v 1.106 2017/04/30 17:05:02 christos Exp $")
+FILE_RCSID("@(#)$File: cdf.c,v 1.110 2017/12/19 00:21:21 christos Exp $")
 #endif
 
 #include <assert.h>
@@ -90,31 +90,9 @@ static union {
 			    CDF_TOLE8(CAST(uint64_t, x))))
 #define CDF_GETUINT32(x, y)	cdf_getuint32(x, y)
 
-#define CDF_MALLOC(n) cdf_malloc(__FILE__, __LINE__, (n))
-#define CDF_REALLOC(p, n) cdf_realloc(__FILE__, __LINE__, (p), (n))
-#define CDF_CALLOC(n, u) cdf_calloc(__FILE__, __LINE__, (n), (u))
-
-
-static void *
-cdf_malloc(const char *file, size_t line, size_t n)
-{
-	DPRINTF(("%s,%zu: %s %zu\n", file, line, __func__, n));
-	return malloc(n);
-}
-
-static void *
-cdf_realloc(const char *file, size_t line, void *p, size_t n)
-{
-	DPRINTF(("%s,%zu: %s %zu\n", file, line, __func__, n));
-	return realloc(p, n);
-}
-
-static void *
-cdf_calloc(const char *file, size_t line, size_t n, size_t u)
-{
-	DPRINTF(("%s,%zu: %s %zu %zu\n", file, line, __func__, n, u));
-	return calloc(n, u);
-}
+#define CDF_MALLOC(n) emalloc(n)
+#define CDF_REALLOC(p, n) erealloc(p, n)
+#define CDF_CALLOC(n, u) ecalloc(n, u)
 
 /*
  * swap a short
@@ -307,7 +285,7 @@ cdf_zero_stream(cdf_stream_t *scn)
 	scn->sst_len = 0;
 	scn->sst_dirlen = 0;
 	scn->sst_ss = 0;
-	free(scn->sst_tab);
+	efree(scn->sst_tab);
 	scn->sst_tab = NULL;
 	return -1;
 }
@@ -447,7 +425,7 @@ cdf_read_sat(const cdf_info_t *info, cdf_header_t *h, cdf_sat_t *sat)
 		if (h->h_master_sat[i] == CDF_SECID_FREE)
 			break;
 
-#define CDF_SEC_LIMIT (UINT32_MAX / (8 * ss))
+#define CDF_SEC_LIMIT (UINT32_MAX / (64 * ss))
 	if ((nsatpersec > 0 &&
 	    h->h_num_sectors_in_master_sat > CDF_SEC_LIMIT / nsatpersec) ||
 	    i > CDF_SEC_LIMIT) {
@@ -509,14 +487,14 @@ cdf_read_sat(const cdf_info_t *info, cdf_header_t *h, cdf_sat_t *sat)
 	}
 out:
 	sat->sat_len = i;
-	free(msa);
+	efree(msa);
 	return 0;
 out3:
 	errno = EFTYPE;
 out2:
-	free(msa);
+	efree(msa);
 out1:
-	free(sat->sat_tab);
+	efree(sat->sat_tab);
 	return -1;
 }
 
@@ -684,7 +662,7 @@ cdf_read_dir(const cdf_info_t *info, const cdf_header_t *h,
 		return -1;
 
 	if ((buf = CAST(char *, CDF_MALLOC(ss))) == NULL) {
-		free(dir->dir_tab);
+		efree(dir->dir_tab);
 		return -1;
 	}
 
@@ -706,11 +684,11 @@ cdf_read_dir(const cdf_info_t *info, const cdf_header_t *h,
 	if (NEED_SWAP)
 		for (i = 0; i < dir->dir_len; i++)
 			cdf_swap_dir(&dir->dir_tab[i]);
-	free(buf);
+	efree(buf);
 	return 0;
 out:
-	free(dir->dir_tab);
-	free(buf);
+	efree(dir->dir_tab);
+	efree(buf);
 	errno = EFTYPE;
 	return -1;
 }
@@ -755,7 +733,7 @@ cdf_read_ssat(const cdf_info_t *info, const cdf_header_t *h,
 out:
 	errno = EFTYPE;
 out1:
-	free(ssat->sat_tab);
+	efree(ssat->sat_tab);
 	return -1;
 }
 
@@ -857,8 +835,8 @@ cdf_find_stream(const cdf_dir_t *dir, const char *name, int type)
 	return 0;
 }
 
-#define CDF_SHLEN_LIMIT (UINT32_MAX / 8)
-#define CDF_PROP_LIMIT (UINT32_MAX / (8 * sizeof(cdf_property_info_t)))
+#define CDF_SHLEN_LIMIT (UINT32_MAX / 64)
+#define CDF_PROP_LIMIT (UINT32_MAX / (64 * sizeof(cdf_property_info_t)))
 
 static const void *
 cdf_offset(const void *p, size_t l)
@@ -867,7 +845,7 @@ cdf_offset(const void *p, size_t l)
 }
 
 static const uint8_t *
-cdf_get_property_info_pos(const cdf_stream_t *sst, const cdf_header_t *h, 
+cdf_get_property_info_pos(const cdf_stream_t *sst, const cdf_header_t *h,
     const uint8_t *p, const uint8_t *e, size_t i)
 {
 	size_t tail = (i << 1) + 1;
@@ -882,7 +860,7 @@ cdf_get_property_info_pos(const cdf_stream_t *sst, const cdf_header_t *h,
 	    __LINE__) == -1)
 		return NULL;
 	ofs = CDF_GETUINT32(p, tail);
-	q = CAST(const uint8_t *, cdf_offset(CAST(const void *, p), 
+	q = CAST(const uint8_t *, cdf_offset(CAST(const void *, p),
 	    ofs - 2 * sizeof(uint32_t)));
 
 	if (q < p) {
@@ -904,7 +882,7 @@ cdf_grow_info(cdf_property_info_t **info, size_t *maxcount, size_t incr)
 	size_t newcount = *maxcount + incr;
 
 	if (newcount > CDF_PROP_LIMIT) {
-		DPRINTF(("exceeded property limit %zu > %zu\n", 
+		DPRINTF(("exceeded property limit %zu > %zu\n",
 		    newcount, CDF_PROP_LIMIT));
 		goto out;
 	}
@@ -917,7 +895,7 @@ cdf_grow_info(cdf_property_info_t **info, size_t *maxcount, size_t incr)
 	*maxcount = newcount;
 	return inp;
 out:
-	free(*info);
+	efree(*info);
 	*maxcount = 0;
 	*info = NULL;
 	return NULL;
@@ -1100,7 +1078,7 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
 	}
 	return 0;
 out:
-	free(*info);
+	efree(*info);
 	*info = NULL;
 	*count = 0;
 	*maxcount = 0;
@@ -1433,7 +1411,7 @@ cdf_dump_dir(const cdf_info_t *info, const cdf_header_t *h,
 				break;
 			}
 			cdf_dump_stream(&scn);
-			free(scn.sst_tab);
+			efree(scn.sst_tab);
 			break;
 		default:
 			break;
@@ -1531,7 +1509,7 @@ cdf_dump_summary_info(const cdf_header_t *h, const cdf_stream_t *sst)
 	(void)fprintf(stderr, "Class %s\n", buf);
 	(void)fprintf(stderr, "Count %d\n", ssi.si_count);
 	cdf_dump_property_info(info, count);
-	free(info);
+	efree(info);
 }
 
 
@@ -1552,7 +1530,7 @@ cdf_dump_catalog(const cdf_header_t *h, const cdf_stream_t *sst)
 		    cdf_u16tos8(sbuf, ce[i].ce_namlen, ce[i].ce_name),
 		    cdf_ctime(&ts.tv_sec, tbuf));
 	}
-	free(cat);
+	efree(cat);
 }
 
 #endif
@@ -1568,7 +1546,10 @@ main(int argc, char *argv[])
 	cdf_dir_t dir;
 	cdf_info_t info;
 	const cdf_directory_t *root;
-
+#ifdef __linux__
+#define getprogname() __progname
+	extern char *__progname;
+#endif
 	if (argc < 2) {
 		(void)fprintf(stderr, "Usage: %s <filename>\n", getprogname());
 		return -1;
@@ -1578,32 +1559,32 @@ main(int argc, char *argv[])
 	info.i_len = 0;
 	for (i = 1; i < argc; i++) {
 		if ((info.i_fd = open(argv[1], O_RDONLY)) == -1)
-			err(1, "Cannot open `%s'", argv[1]);
+			err(EXIT_FAILURE, "Cannot open `%s'", argv[1]);
 
 		if (cdf_read_header(&info, &h) == -1)
-			err(1, "Cannot read header");
+			err(EXIT_FAILURE, "Cannot read header");
 #ifdef CDF_DEBUG
 		cdf_dump_header(&h);
 #endif
 
 		if (cdf_read_sat(&info, &h, &sat) == -1)
-			err(1, "Cannot read sat");
+			err(EXIT_FAILURE, "Cannot read sat");
 #ifdef CDF_DEBUG
 		cdf_dump_sat("SAT", &sat, CDF_SEC_SIZE(&h));
 #endif
 
 		if (cdf_read_ssat(&info, &h, &sat, &ssat) == -1)
-			err(1, "Cannot read ssat");
+			err(EXIT_FAILURE, "Cannot read ssat");
 #ifdef CDF_DEBUG
 		cdf_dump_sat("SSAT", &ssat, CDF_SHORT_SEC_SIZE(&h));
 #endif
 
 		if (cdf_read_dir(&info, &h, &sat, &dir) == -1)
-			err(1, "Cannot read dir");
+			err(EXIT_FAILURE, "Cannot read dir");
 
 		if (cdf_read_short_stream(&info, &h, &sat, &dir, &sst, &root)
 		    == -1)
-			err(1, "Cannot read short stream");
+			err(EXIT_FAILURE, "Cannot read short stream");
 #ifdef CDF_DEBUG
 		cdf_dump_stream(&sst);
 #endif

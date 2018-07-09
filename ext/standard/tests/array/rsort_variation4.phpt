@@ -35,7 +35,7 @@ var_dump( $temp_array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rsort() : variation ***
 
 -- 'flag' value is defualt --

@@ -22,7 +22,6 @@
 /* pass 1
  * - substitute persistent constants (true, false, null, etc)
  * - perform compile-time evaluation of constant binary and unary operations
- * - optimize series of ADD_STRING and/or ADD_CHAR
  * - convert CAST(IS_BOOL,x) into BOOL(x)
  * - pre-evaluate constant function calls
  */
@@ -34,8 +33,6 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
-
-#define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
 
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
@@ -131,79 +128,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			break;
 
-#if 0
-		case ZEND_ADD_STRING:
-		case ZEND_ADD_CHAR:
-			{
-				zend_op *next_op = opline + 1;
-				int requires_conversion = (opline->opcode == ZEND_ADD_CHAR? 1 : 0);
-				size_t final_length = 0;
-				zend_string *str;
-				char *ptr;
-				zend_op *last_op;
-
-				/* There is always a ZEND_RETURN at the end
-				if (next_op>=end) {
-					break;
-				}
-				*/
-				while (next_op->opcode == ZEND_ADD_STRING || next_op->opcode == ZEND_ADD_CHAR) {
-					if (opline->result.var != next_op->result.var) {
-						break;
-					}
-					if (next_op->opcode == ZEND_ADD_CHAR) {
-						final_length += 1;
-					} else { /* ZEND_ADD_STRING */
-						final_length += Z_STRLEN(ZEND_OP2_LITERAL(next_op));
-					}
-					next_op++;
-				}
-				if (final_length == 0) {
-					break;
-				}
-				last_op = next_op;
-				final_length += (requires_conversion? 1 : Z_STRLEN(ZEND_OP2_LITERAL(opline)));
-				str = zend_string_alloc(final_length, 0);
-				str->len = final_length;
-				ptr = str->val;
-				ptr[final_length] = '\0';
-				if (requires_conversion) { /* ZEND_ADD_CHAR */
-					char chval = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
-
-					ZVAL_NEW_STR(&ZEND_OP2_LITERAL(opline), str);
-					ptr[0] = chval;
-					opline->opcode = ZEND_ADD_STRING;
-					ptr++;
-				} else { /* ZEND_ADD_STRING */
-					memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
-					ptr += Z_STRLEN(ZEND_OP2_LITERAL(opline));
-					zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
-					ZVAL_NEW_STR(&ZEND_OP2_LITERAL(opline), str);
-				}
-				next_op = opline + 1;
-				while (next_op < last_op) {
-					if (next_op->opcode == ZEND_ADD_STRING) {
-						memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(next_op)), Z_STRLEN(ZEND_OP2_LITERAL(next_op)));
-						ptr += Z_STRLEN(ZEND_OP2_LITERAL(next_op));
-						literal_dtor(&ZEND_OP2_LITERAL(next_op));
-					} else { /* ZEND_ADD_CHAR */
-						*ptr = (char)Z_LVAL(ZEND_OP2_LITERAL(next_op));
-						ptr++;
-					}
-					MAKE_NOP(next_op);
-					next_op++;
-				}
-				if (!((ZEND_OPTIMIZER_PASS_5|ZEND_OPTIMIZER_PASS_10) & OPTIMIZATION_LEVEL)) {
-					/* NOP removal is disabled => insert JMP over NOPs */
-					if (last_op-opline >= 3) { /* If we have more than 2 NOPS then JMP over them */
-						(opline + 1)->opcode = ZEND_JMP;
-						(opline + 1)->op1.opline_num = last_op - op_array->opcodes; /* that's OK even for ZE2, since opline_num's are resolved in pass 2 later */
-					}
-				}
-			}
-			break;
-#endif
-
 		case ZEND_FETCH_CONSTANT:
 			if (opline->op2_type == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING &&
@@ -289,8 +213,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				} else if (op_array->scope &&
 					opline->op1_type == IS_VAR &&
 					(opline - 1)->opcode == ZEND_FETCH_CLASS &&
-					((opline - 1)->op1_type == IS_UNUSED &&
-					((opline - 1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
+					((opline - 1)->op2_type == IS_UNUSED &&
+					((opline - 1)->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
 					(opline - 1)->result.var == opline->op1.var) {
 					/* for self::B */
 					ce = op_array->scope;
@@ -305,16 +229,14 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						(Z_ACCESS_FLAGS(cc->value) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
 						c = &cc->value;
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
-							break;
-						}
-						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_P(c))) {
-							if (!zend_optimizer_get_persistent_constant(Z_STR_P(c), &t, 1) ||
-							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {
+							zend_ast *ast = Z_ASTVAL_P(c);
+							if (ast->kind != ZEND_AST_CONSTANT
+							 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &t, 1)
+							 || Z_TYPE(t) == IS_CONSTANT_AST) {
 								break;
 							}
 						} else {
-							ZVAL_COPY_VALUE(&t, c);
-							zval_copy_ctor(&t);
+							ZVAL_COPY_OR_DUP(&t, c);
 						}
 
 						if (opline->op1_type == IS_CONST) {
@@ -455,7 +377,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							zend_optimizer_update_op1_const(op_array, opline, &t);
 						}
 					}
-					zend_string_release(lc_name);
+					zend_string_release_ex(lc_name, 0);
 					break;
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("extension_loaded")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
@@ -467,7 +389,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zend_module_entry *m = zend_hash_find_ptr(&module_registry,
 							lc_name);
 
-					zend_string_release(lc_name);
+					zend_string_release_ex(lc_name, 0);
 					if (!m) {
 						if (PG(enable_dl)) {
 							break;
@@ -545,7 +467,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							zend_optimizer_update_op1_const(op_array, opline, &t);
 						}
 					} else {
-						zend_string_release(dirname);
+						zend_string_release_ex(dirname, 0);
 					}
 					break;
 				}

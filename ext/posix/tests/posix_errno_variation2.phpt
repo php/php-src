@@ -25,6 +25,6 @@ posix_kill($pid, SIGKILL);
 var_dump(posix_errno());
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Test by calling function with pid error ***
 int(3)

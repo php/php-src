@@ -197,7 +197,7 @@ bool(false)
 
 -- Iteration 21 --
 
-Warning: session_regenerate_id() expects parameter 1 to be boolean, object given in %s on line %d
+Warning: session_regenerate_id() expects parameter 1 to be bool, object given in %s on line %d
 NULL
 
 -- Iteration 22 --
@@ -212,7 +212,7 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: session_regenerate_id() expects parameter 1 to be boolean, resource given in %s on line %d
+Warning: session_regenerate_id() expects parameter 1 to be bool, resource given in %s on line %d
 NULL
 Done
 

@@ -298,7 +298,7 @@ typedef struct _php_pgsql_notice {
 	size_t len;
 } php_pgsql_notice;
 
-static php_stream_ops php_stream_pgsql_fd_ops = {
+static const php_stream_ops php_stream_pgsql_fd_ops = {
 	php_pgsql_fd_write,
 	php_pgsql_fd_read,
 	php_pgsql_fd_close,

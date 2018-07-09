@@ -7,7 +7,7 @@ Test is_null() function
  */
 
 echo "*** Testing is_null() with valid null values ***\n";
-// different valid  null vlaues 
+// different valid  null values 
 $unset_array = array();
 $unset_int = 10;
 $unset_float = 10.5;

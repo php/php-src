@@ -80,7 +80,7 @@ unlink($outPath);
 
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 bool(true)
 ==DONE==
 

@@ -103,7 +103,7 @@ Warning: array_slice() expects at most 4 parameters, 5 given in %s on line %d
 
 *** Output for scalar Argument ***
 
-Warning: array_slice() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_slice() expects parameter 1 to be array, int given in %s on line %d
 
 *** Output for string Argument ***
 

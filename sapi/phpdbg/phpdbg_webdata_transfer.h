@@ -22,6 +22,6 @@
 #include "zend.h"
 #include "phpdbg.h"
 
-PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len);
+PHPDBG_API void phpdbg_webdata_compress(char **msg, size_t *len);
 
 #endif /* PHPDBG_WEBDATA_TRANSFER_H */

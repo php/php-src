@@ -113,7 +113,7 @@ static void php_set_default_dir(zend_resource *res)
 	}
 
 	if (res) {
-		GC_REFCOUNT(res)++;
+		GC_ADDREF(res);
 	}
 
 	DIRG(default_dir) = res;
@@ -493,7 +493,9 @@ PHP_FUNCTION(glob)
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
+#ifdef GLOB_NOMATCH
 no_results:
+#endif
 #ifndef PHP_WIN32
 		/* Paths containing '*', '?' and some other chars are
 		illegal on Windows but legit on other platforms. For
@@ -511,7 +513,7 @@ no_results:
 	}
 
 	array_init(return_value);
-	for (n = 0; n < globbuf.gl_pathc; n++) {
+	for (n = 0; n < (size_t)globbuf.gl_pathc; n++) {
 		if (PG(open_basedir) && *PG(open_basedir)) {
 			if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0)) {
 				basedir_limit = 1;
@@ -543,7 +545,7 @@ no_results:
 	globfree(&globbuf);
 
 	if (basedir_limit && !zend_hash_num_elements(Z_ARRVAL_P(return_value))) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 }

@@ -95,7 +95,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	php_stream *stream;
 	int close_stream = 1;
 
-	/* The third (quality) parameter for Wbmp stands for the threshold when called from image2wbmp().
+	/* The third (quality) parameter for Wbmp stands for the foreground when called from image2wbmp().
 	 * The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
 	 * from imagey<type>().
 	 */
@@ -106,7 +106,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			}
 			break;
 		case PHP_GDIMG_TYPE_BMP:
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z/!b", &imgind, &to_zval, &compressed) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!b", &imgind, &to_zval, &compressed) == FAILURE) {
 				return;
 			}
 			break;
@@ -117,7 +117,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			 * PHP_GDIMG_TYPE_WBM
 			 * PHP_GDIMG_TYPE_WEBP
 			 * */
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z/!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
 				return;
 			}
 	}
@@ -164,12 +164,6 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		ctx->putC = _php_image_output_putc;
 		ctx->putBuf = _php_image_output_putbuf;
 		ctx->gd_free = _php_image_output_ctxfree;
-
-#if APACHE && defined(CHARSET_EBCDIC)
-		/* XXX this is unlikely to work any more thies@thieso.net */
-		/* This is a binary file already: avoid EBCDIC->ASCII conversion */
-		ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
-#endif
 	}
 
 	if (!ctx)	{

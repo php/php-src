@@ -35,8 +35,8 @@ zend_class_entry *ResourceBundle_ce_ptr = NULL;
 
 static zend_object_handlers ResourceBundle_object_handlers;
 
-/* {{{ ResourceBundle_object_dtor */
-static void ResourceBundle_object_destroy( zend_object *object )
+/* {{{ ResourceBundle_object_free */
+static void ResourceBundle_object_free( zend_object *object )
 {
 	ResourceBundle_object *rb = php_intl_resourcebundle_fetch_object(object);
 
@@ -49,6 +49,8 @@ static void ResourceBundle_object_destroy( zend_object *object )
 	if (rb->child) {
 		ures_close( rb->child );
 	}
+
+	zend_object_std_dtor( &rb->zend );
 }
 /* }}} */
 
@@ -57,7 +59,7 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 {
 	ResourceBundle_object *rb;
 
-	rb = ecalloc( 1, sizeof(ResourceBundle_object) + zend_object_properties_size(ce));
+	rb = zend_object_alloc(sizeof(ResourceBundle_object), ce);
 
 	zend_object_std_init( &rb->zend, ce );
 	object_properties_init( &rb->zend, ce);
@@ -103,7 +105,7 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constr
 
 	if (bundlename_len >= MAXPATHLEN) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"Bundle name too long", 0 );
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		ZVAL_NULL(return_value);
 		return FAILURE;
 	}
@@ -142,7 +144,7 @@ ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle___construct, 0, 0, 2 )
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* {{{ proto void ResourceBundle::__construct( string $locale [, string $bundlename [, bool $fallback = true ]] )
+/* {{{ proto ResourceBundle::__construct( string $locale [, string $bundlename [, bool $fallback = true ]] )
  * ResourceBundle object constructor
  */
 PHP_METHOD( ResourceBundle, __construct )
@@ -246,8 +248,8 @@ ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get, 0, 0, 1 )
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* {{{ proto mixed ResourceBundle::get( integer|string $resindex [, bool $fallback = true ] )
- * proto mixed resourcebundle_get( ResourceBundle $rb, integer|string $resindex [, bool $fallback = true ] )
+/* {{{ proto mixed ResourceBundle::get( int|string $resindex [, bool $fallback = true ] )
+ * proto mixed resourcebundle_get( ResourceBundle $rb, int|string $resindex [, bool $fallback = true ] )
  * Get resource identified by numerical index or key name.
  */
 PHP_FUNCTION( resourcebundle_get )
@@ -420,7 +422,7 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 /* {{{ ResourceBundle_class_functions
  * Every 'ResourceBundle' class method has an entry in this table
  */
-static zend_function_entry ResourceBundle_class_functions[] = {
+static const zend_function_entry ResourceBundle_class_functions[] = {
 	PHP_ME( ResourceBundle, __construct, arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_NAMED_ME( create, ZEND_FN( resourcebundle_create ), arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	ZEND_NAMED_ME( get, ZEND_FN(resourcebundle_get), arginfo_resourcebundle_get, ZEND_ACC_PUBLIC )
@@ -446,16 +448,10 @@ void resourcebundle_register_class( void )
 
 	ResourceBundle_ce_ptr = zend_register_internal_class( &ce );
 
-	if( !ResourceBundle_ce_ptr )
-	{
-		zend_error(E_ERROR, "Failed to register ResourceBundle class");
-		return;
-	}
-
 	ResourceBundle_object_handlers = std_object_handlers;
 	ResourceBundle_object_handlers.offset = XtOffsetOf(ResourceBundle_object, zend);
 	ResourceBundle_object_handlers.clone_obj	  = NULL; /* ICU ResourceBundle has no clone implementation */
-	ResourceBundle_object_handlers.dtor_obj = ResourceBundle_object_destroy;
+	ResourceBundle_object_handlers.free_obj = ResourceBundle_object_free;
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
 

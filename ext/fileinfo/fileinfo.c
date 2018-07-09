@@ -100,7 +100,7 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 {
 	finfo_object *intern;
 
-	intern = ecalloc(1, sizeof(finfo_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(finfo_object), class_type);
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
@@ -162,7 +162,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ finfo_class_functions
  */
-zend_function_entry finfo_class_functions[] = {
+static const zend_function_entry finfo_class_functions[] = {
 	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
@@ -196,7 +196,7 @@ void finfo_resource_destructor(zend_resource *rsrc) /* {{{ */
 
 /* {{{ fileinfo_functions[]
  */
-zend_function_entry fileinfo_functions[] = {
+static const zend_function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_open,		arginfo_finfo_open)
 	PHP_FE(finfo_close,		arginfo_finfo_close)
 	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)
@@ -217,7 +217,7 @@ PHP_MINIT_FUNCTION(finfo)
 	finfo_class_entry = zend_register_internal_class(&_finfo_class_entry);
 
 	/* copy the standard object handlers to you handler table */
-	memcpy(&finfo_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&finfo_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	finfo_object_handlers.offset = XtOffsetOf(finfo_object, zo);
 	finfo_object_handlers.free_obj = finfo_objects_free;
 
@@ -278,7 +278,6 @@ PHP_MINFO_FUNCTION(fileinfo)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "fileinfo support", "enabled");
-	php_info_print_table_row(2, "version", PHP_FILEINFO_VERSION);
 	php_info_print_table_row(2, "libmagic", magic_ver);
 	php_info_print_table_end();
 }

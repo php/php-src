@@ -38,7 +38,7 @@ foreach($allowed_tags_array as $tags)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : basic functionality ***
 -- Iteration 1 --
 string(33) "<html>helloworldOther text</html>"

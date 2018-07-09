@@ -221,7 +221,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 		stream = php_stream_fopen_from_fd_int_rel(fd, "r+b", NULL);
 		if (stream) {
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
-			stream->wrapper = &php_plain_files_wrapper;
+			stream->wrapper = (php_stream_wrapper*)&php_plain_files_wrapper;
 			stream->orig_path = estrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path));
 
 			self->temp_name = opened_path;
@@ -479,7 +479,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 			unlink(ZSTR_VAL(data->temp_name));
 #endif
 			/* temporary streams are never persistent */
-			zend_string_release(data->temp_name);
+			zend_string_release_ex(data->temp_name, 0);
 			data->temp_name = NULL;
 		}
 	} else {
@@ -854,7 +854,29 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 					if (new_size < 0) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
+#ifdef PHP_WIN32
+					HANDLE h = (HANDLE) _get_osfhandle(fd);
+					if (INVALID_HANDLE_VALUE == h) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
+					LARGE_INTEGER sz;
+#if defined(_WIN64)
+					sz.HighPart = (new_size >> 32);
+					sz.LowPart = (new_size & 0xffffffff);
+#else
+					sz.HighPart = 0;
+					sz.LowPart = new_size;
+#endif
+					if (INVALID_SET_FILE_POINTER == SetFilePointerEx(h, sz, NULL, FILE_BEGIN) && NO_ERROR != GetLastError()) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
+					if (0 == SetEndOfFile(h)) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
+					return PHP_STREAM_OPTION_RETURN_OK;
+#else
 					return ftruncate(fd, new_size) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+#endif
 				}
 			}
 
@@ -881,6 +903,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 	}
 }
 
+/* This should be "const", but phpdbg overwrite it */
 PHPAPI php_stream_ops	php_stream_stdio_ops = {
 	php_stdiop_write, php_stdiop_read,
 	php_stdiop_close, php_stdiop_flush,
@@ -923,7 +946,7 @@ static int php_plain_files_dirstream_rewind(php_stream *stream, zend_off_t offse
 	return 0;
 }
 
-static php_stream_ops	php_plain_files_dirstream_ops = {
+static const php_stream_ops	php_plain_files_dirstream_ops = {
 	NULL, php_plain_files_dirstream_read,
 	php_plain_files_dirstream_close, NULL,
 	"dir",
@@ -941,7 +964,7 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 
 #ifdef HAVE_GLOB
 	if (options & STREAM_USE_GLOB_DIR_OPEN) {
-		return php_glob_stream_wrapper.wops->dir_opener(&php_glob_stream_wrapper, path, mode, options, opened_path, context STREAMS_REL_CC);
+		return php_glob_stream_wrapper.wops->dir_opener((php_stream_wrapper*)&php_glob_stream_wrapper, path, mode, options, opened_path, context STREAMS_REL_CC);
 	}
 #endif
 
@@ -1044,7 +1067,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 				r = do_fstat(self, 0);
 				if ((r == 0 && !S_ISREG(self->sb.st_mode))) {
 					if (opened_path) {
-						zend_string_release(*opened_path);
+						zend_string_release_ex(*opened_path, 0);
 						*opened_path = NULL;
 					}
 					php_stream_close(ret);
@@ -1409,7 +1432,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 }
 
 
-static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
+static const php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_stream_opener,
 	NULL,
 	NULL,
@@ -1423,7 +1446,7 @@ static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_metadata
 };
 
-PHPAPI php_stream_wrapper php_plain_files_wrapper = {
+PHPAPI const php_stream_wrapper php_plain_files_wrapper = {
 	&php_plain_files_wrapper_ops,
 	NULL,
 	0

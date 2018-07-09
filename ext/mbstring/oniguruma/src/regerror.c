@@ -2,7 +2,7 @@
   regerror.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,19 +43,21 @@ onig_error_code_to_format(int code)
 {
   char *p;
 
-  if (code >= 0) return (UChar* )0;
-
   switch (code) {
   case ONIG_MISMATCH:
     p = "mismatch"; break;
   case ONIG_NO_SUPPORT_CONFIG:
     p = "no support in this configuration"; break;
+  case ONIG_ABORT:
+    p = "abort"; break;
   case ONIGERR_MEMORY:
     p = "fail to memory allocation"; break;
   case ONIGERR_MATCH_STACK_LIMIT_OVER:
     p = "match-stack limit over"; break;
   case ONIGERR_PARSE_DEPTH_LIMIT_OVER:
     p = "parse depth limit over"; break;
+  case ONIGERR_RETRY_LIMIT_IN_MATCH_OVER:
+    p = "retry-limit-in-match over"; break;
   case ONIGERR_TYPE_BUG:
     p = "undefined type (bug)"; break;
   case ONIGERR_PARSER_BUG:
@@ -135,11 +137,7 @@ onig_error_code_to_format(int code)
   case ONIGERR_TOO_BIG_BACKREF_NUMBER:
     p = "too big backref number"; break;
   case ONIGERR_INVALID_BACKREF:
-#ifdef USE_NAMED_GROUP
     p = "invalid backref number/name"; break;
-#else
-    p = "invalid backref number"; break;
-#endif
   case ONIGERR_NUMBERED_BACKREF_OR_CALL_NOT_ALLOWED:
     p = "numbered backref/call is not allowed. (use name)"; break;
   case ONIGERR_TOO_MANY_CAPTURES:
@@ -155,11 +153,7 @@ onig_error_code_to_format(int code)
   case ONIGERR_INVALID_GROUP_NAME:
     p = "invalid group name <%n>"; break;
   case ONIGERR_INVALID_CHAR_IN_GROUP_NAME:
-#ifdef USE_NAMED_GROUP
     p = "invalid char in group name <%n>"; break;
-#else
-    p = "invalid char in group number <%n>"; break;
-#endif
   case ONIGERR_UNDEFINED_NAME_REFERENCE:
     p = "undefined name <%n> reference"; break;
   case ONIGERR_UNDEFINED_GROUP_REFERENCE:
@@ -174,6 +168,24 @@ onig_error_code_to_format(int code)
     p = "group number is too big for capture history"; break;
   case ONIGERR_INVALID_CHAR_PROPERTY_NAME:
     p = "invalid character property name {%n}"; break;
+  case ONIGERR_INVALID_IF_ELSE_SYNTAX:
+    p = "invalid if-else syntax"; break;
+  case ONIGERR_INVALID_ABSENT_GROUP_PATTERN:
+    p = "invalid absent group pattern"; break;
+  case ONIGERR_INVALID_ABSENT_GROUP_GENERATOR_PATTERN:
+    p = "invalid absent group generator pattern"; break;
+  case ONIGERR_INVALID_CALLOUT_PATTERN:
+    p = "invalid callout pattern"; break;
+  case ONIGERR_INVALID_CALLOUT_NAME:
+    p = "invalid callout name"; break;
+  case ONIGERR_UNDEFINED_CALLOUT_NAME:
+    p = "undefined callout name"; break;
+  case ONIGERR_INVALID_CALLOUT_BODY:
+    p = "invalid callout body"; break;
+  case ONIGERR_INVALID_CALLOUT_TAG_NAME:
+    p = "invalid callout tag name"; break;
+  case ONIGERR_INVALID_CALLOUT_ARG:
+    p = "invalid callout arg"; break;
   case ONIGERR_NOT_SUPPORTED_ENCODING_COMBINATION:
     p = "not supported encoding combination"; break;
   case ONIGERR_INVALID_COMBINATION_OF_OPTIONS:
@@ -211,24 +223,24 @@ static int to_ascii(OnigEncoding enc, UChar *s, UChar *end,
     while (p < end) {
       code = ONIGENC_MBC_TO_CODE(enc, p, end);
       if (code >= 0x80) {
-	if (code > 0xffff && len + 10 <= buf_size) {
-	  sprint_byte_with_x((char*)(&(buf[len])), (unsigned int)(code >> 24));
-	  sprint_byte((char*)(&(buf[len+4])),      (unsigned int)(code >> 16));
-	  sprint_byte((char*)(&(buf[len+6])),      (unsigned int)(code >>  8));
-	  sprint_byte((char*)(&(buf[len+8])),      (unsigned int)code);
-	  len += 10;
-	}
-	else if (len + 6 <= buf_size) {
-	  sprint_byte_with_x((char*)(&(buf[len])), (unsigned int)(code >> 8));
-	  sprint_byte((char*)(&(buf[len+4])),      (unsigned int)code);
-	  len += 6;
-	}
-	else {
-	  break;
-	}
+        if (code > 0xffff && len + 10 <= buf_size) {
+          sprint_byte_with_x((char*)(&(buf[len])), (unsigned int)(code >> 24));
+          sprint_byte((char*)(&(buf[len+4])),      (unsigned int)(code >> 16));
+          sprint_byte((char*)(&(buf[len+6])),      (unsigned int)(code >>  8));
+          sprint_byte((char*)(&(buf[len+8])),      (unsigned int)code);
+          len += 10;
+        }
+        else if (len + 6 <= buf_size) {
+          sprint_byte_with_x((char*)(&(buf[len])), (unsigned int)(code >> 8));
+          sprint_byte((char*)(&(buf[len+4])),      (unsigned int)code);
+          len += 6;
+        }
+        else {
+          break;
+        }
       }
       else {
-	buf[len++] = (UChar )code;
+        buf[len++] = (UChar )code;
       }
 
       p += enclen(enc, p);
@@ -238,7 +250,7 @@ static int to_ascii(OnigEncoding enc, UChar *s, UChar *end,
     *is_over = ((p < end) ? 1 : 0);
   }
   else {
-    len = MIN((end - s), buf_size);
+    len = MIN((int )(end - s), buf_size);
     xmemcpy(buf, s, (size_t )len);
     *is_over = ((buf_size < (end - s)) ? 1 : 0);
   }
@@ -278,31 +290,31 @@ onig_error_code_to_str(s, code, va_alist)
   case ONIGERR_INVALID_CHAR_PROPERTY_NAME:
     einfo = va_arg(vargs, OnigErrorInfo*);
     len = to_ascii(einfo->enc, einfo->par, einfo->par_end,
-		   parbuf, MAX_ERROR_PAR_LEN - 3, &is_over);
+                   parbuf, MAX_ERROR_PAR_LEN - 3, &is_over);
     q = onig_error_code_to_format(code);
     p = s;
     while (*q != '\0') {
       if (*q == '%') {
-	q++;
-	if (*q == 'n') { /* '%n': name */
-	  xmemcpy(p, parbuf, len);
-	  p += len;
-	  if (is_over != 0) {
-	    xmemcpy(p, "...", 3);
-	    p += 3;
-	  }
-	  q++;
-	}
-	else
-	  goto normal_char;
+        q++;
+        if (*q == 'n') { /* '%n': name */
+          xmemcpy(p, parbuf, len);
+          p += len;
+          if (is_over != 0) {
+            xmemcpy(p, "...", 3);
+            p += 3;
+          }
+          q++;
+        }
+        else
+          goto normal_char;
       }
       else {
       normal_char:
-	*p++ = *q++;
+        *p++ = *q++;
       }
     }
     *p = '\0';
-    len = p - s;
+    len = (int )(p - s);
     break;
 
   default:
@@ -342,7 +354,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
   n = xvsnprintf((char* )buf, bufsize, (const char* )fmt, args);
   va_end(args);
 
-  need = (pat_end - pat) * 4 + 4;
+  need = (int )(pat_end - pat) * 4 + 4;
 
   if (n + need < bufsize) {
     xstrcat((char* )buf, ": /", bufsize);
@@ -359,7 +371,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
           int blen;
 
           while (len-- > 0) {
-	    sprint_byte_with_x((char* )bs, (unsigned int )(*p++));
+            sprint_byte_with_x((char* )bs, (unsigned int )(*p++));
             blen = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, bs);
             bp = bs;
             while (blen-- > 0) *s++ = *bp++;
@@ -367,23 +379,23 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
         }
       }
       else if (*p == '\\') {
-	*s++ = *p++;
-	len = enclen(enc, p);
-	while (len-- > 0) *s++ = *p++;
+        *s++ = *p++;
+        len = enclen(enc, p);
+        while (len-- > 0) *s++ = *p++;
       }
       else if (*p == '/') {
-	*s++ = (unsigned char )'\\';
-	*s++ = *p++;
+        *s++ = (unsigned char )'\\';
+        *s++ = *p++;
       }
       else if (!ONIGENC_IS_CODE_PRINT(enc, *p) &&
-	       !ONIGENC_IS_CODE_SPACE(enc, *p)) {
-	sprint_byte_with_x((char* )bs, (unsigned int )(*p++));
-	len = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, bs);
+               !ONIGENC_IS_CODE_SPACE(enc, *p)) {
+        sprint_byte_with_x((char* )bs, (unsigned int )(*p++));
+        len = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, bs);
         bp = bs;
-	while (len-- > 0) *s++ = *bp++;
+        while (len-- > 0) *s++ = *bp++;
       }
       else {
-	*s++ = *p++;
+        *s++ = *p++;
       }
     }
 

@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id:$ */
-
 #ifndef _ZEND_BITSET_H_
 #define _ZEND_BITSET_H_
 
@@ -86,7 +84,7 @@ static inline uint32_t zend_bitset_len(uint32_t n)
 
 static inline zend_bool zend_bitset_in(zend_bitset set, uint32_t n)
 {
-	return (set[ZEND_BITSET_ELM_NUM(n)] & (Z_UL(1) << ZEND_BITSET_BIT_NUM(n))) != Z_UL(0);
+	return ZEND_BIT_TEST(set, n);
 }
 
 static inline void zend_bitset_incl(zend_bitset set, uint32_t n)

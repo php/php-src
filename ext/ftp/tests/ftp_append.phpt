@@ -13,19 +13,29 @@ if (!$ftp) die("Couldn't connect to the server");
 
 var_dump(ftp_login($ftp, 'user', 'pass'));
 
-@unlink(__DIR__.'/ftp_append_foobar');
+$fooPath = __DIR__ . '/ftp_append_foo';
+file_put_contents($fooPath, 'foo');
+var_dump(ftp_append($ftp, 'ftp_append_foobar', $fooPath, FTP_BINARY));
 
-file_put_contents(__DIR__.'/ftp_append_foo', 'foo');
-var_dump(ftp_append($ftp, 'ftp_append_foobar', __DIR__.'/ftp_append_foo', FTP_BINARY));
+$barPath = __DIR__ . '/ftp_append_bar';
+file_put_contents($barPath, 'bar');
+var_dump(ftp_append($ftp, 'ftp_append_foobar', $barPath, FTP_BINARY));
 
-file_put_contents(__DIR__.'/ftp_append_bar', 'bar');
-var_dump(ftp_append($ftp, 'ftp_append_foobar', __DIR__.'/ftp_append_bar', FTP_BINARY));
-
-var_dump(file_get_contents(__DIR__.'/ftp_append_foobar'));
+$fooBarPath = __DIR__ . '/ftp_append_foobar';
+var_dump(file_get_contents($fooBarPath));
 
 ftp_close($ftp);
 ?>
---EXPECTF--
+--CLEAN--
+<?php
+$fooPath = __DIR__ . '/ftp_append_foo';
+unlink($fooPath);
+$barPath = __DIR__ . '/ftp_append_bar';
+unlink($barPath);
+$fooBarPath = __DIR__ . '/ftp_append_foobar';
+unlink($fooBarPath);
+?>
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

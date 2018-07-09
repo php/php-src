@@ -32,6 +32,8 @@ extern "C" {
 }
 
 using PHP::CodePointBreakIterator;
+using icu::BreakIterator;
+using icu::Locale;
 
 U_CFUNC PHP_METHOD(BreakIterator, __construct)
 {

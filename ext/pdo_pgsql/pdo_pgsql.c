@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -40,7 +38,7 @@
 #endif
 
 /* {{{ pdo_pgsql_functions[] */
-const zend_function_entry pdo_pgsql_functions[] = {
+static const zend_function_entry pdo_pgsql_functions[] = {
 	PHP_FE_END
 };
 /* }}} */
@@ -105,13 +103,10 @@ PHP_MSHUTDOWN_FUNCTION(pdo_pgsql)
 PHP_MINFO_FUNCTION(pdo_pgsql)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for PostgreSQL", "enabled");
+	php_info_print_table_row(2, "PDO Driver for PostgreSQL", "enabled");
 #ifdef HAVE_PG_CONFIG_H
 	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
 #endif
-	php_info_print_table_row(2, "Module version", pdo_pgsql_module_entry.version);
-	php_info_print_table_row(2, "Revision", " $Id$ ");
-
 	php_info_print_table_end();
 }
 /* }}} */

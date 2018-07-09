@@ -63,7 +63,7 @@ NULL
 
 Wrong type of arg:
 
-Warning: ReflectionProperty::getValue() expects parameter 1 to be object, boolean given in %s on line %d
+Warning: ReflectionProperty::getValue() expects parameter 1 to be object, bool given in %s on line %d
 NULL
 
 Instance without property:
@@ -75,7 +75,7 @@ Static property / wrong type of arg:
 string(15) "static property"
 
 Protected property:
-Cannot access non-public member TestClass::prot
+Cannot access non-public member TestClass::$prot
 
 Invalid instance:
 

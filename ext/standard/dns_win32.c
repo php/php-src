@@ -60,11 +60,11 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	zval_dtor(mx_list);
+	zval_ptr_dtor(mx_list);
 	array_init(mx_list);
 
 	if (weight_list) {
-		zval_dtor(weight_list);
+		zval_ptr_dtor(weight_list);
 		array_init(weight_list);
 	}
 
@@ -358,11 +358,11 @@ PHP_FUNCTION(dns_get_record)
 	}
 
 	if (authns) {
-		zval_dtor(authns);
+		zval_ptr_dtor(authns);
 		array_init(authns);
 	}
 	if (addtl) {
-		zval_dtor(addtl);
+		zval_ptr_dtor(addtl);
 		array_init(addtl);
 	}
 
@@ -457,7 +457,7 @@ PHP_FUNCTION(dns_get_record)
 					continue;
 				} else {
 					php_error_docref(NULL, E_WARNING, "DNS Query failed");
-					zval_dtor(return_value);
+					zend_array_destroy(Z_ARR_P(return_value));
 					RETURN_FALSE;
 				}
 			}

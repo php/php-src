@@ -304,7 +304,7 @@ static zend_string *php_gethostbyname(char *name)
 #endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
-#if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
+#if !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC
 
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
@@ -921,13 +921,13 @@ PHP_FUNCTION(dns_get_record)
 #if defined(HAVE_DNS_SEARCH)
 			handle = dns_open(NULL);
 			if (handle == NULL) {
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 #elif defined(HAVE_RES_NSEARCH)
 		    memset(&state, 0, sizeof(state));
 		    if (res_ninit(handle)) {
-		    	zval_dtor(return_value);
+		    	zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 #else
@@ -954,7 +954,7 @@ PHP_FUNCTION(dns_get_record)
 					default:
 						php_error_docref(NULL, E_WARNING, "DNS Query failed");
 				}
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 
@@ -971,7 +971,7 @@ PHP_FUNCTION(dns_get_record)
 				n = dn_skipname(cp, end);
 				if (n < 0) {
 					php_error_docref(NULL, E_WARNING, "Unable to parse DNS data received");
-					zval_dtor(return_value);
+					zend_array_destroy(Z_ARR_P(return_value));
 					php_dns_free_handle(handle);
 					RETURN_FALSE;
 				}
@@ -1117,7 +1117,7 @@ PHP_FUNCTION(dns_get_mx)
 }
 /* }}} */
 #endif /* HAVE_FULL_DNS_FUNCS */
-#endif /* !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
+#endif /* !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC */
 
 #if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
 PHP_MINIT_FUNCTION(dns) {

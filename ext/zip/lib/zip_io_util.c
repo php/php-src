@@ -1,10 +1,10 @@
 /*
  zip_io_util.c -- I/O helper functions
  Copyright (C) 1999-2015 Dieter Baron and Thomas Klausner
- 
+
  This file is part of libzip, a library to manipulate ZIP archives.
  The authors can be contacted at <libzip@nih.at>
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:
@@ -17,7 +17,7 @@
  3. The names of the authors may not be used to endorse or promote
  products derived from this software without specific prior
  written permission.
- 
+
  THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -64,7 +64,7 @@ zip_uint8_t *
 _zip_read_data(zip_buffer_t *buffer, zip_source_t *src, size_t length, bool nulp, zip_error_t *error)
 {
     zip_uint8_t *r;
-    
+
     if (length == 0 && !nulp) {
 	return NULL;
     }
@@ -77,7 +77,7 @@ _zip_read_data(zip_buffer_t *buffer, zip_source_t *src, size_t length, bool nulp
 
     if (buffer) {
         zip_uint8_t *data = _zip_buffer_get(buffer, length);
-        
+
         if (data == NULL) {
             zip_error_set(error, ZIP_ER_MEMORY, 0);
             free(r);
@@ -124,7 +124,7 @@ int
 _zip_write(zip_t *za, const void *data, zip_uint64_t length)
 {
     zip_int64_t n;
-    
+
     if ((n = zip_source_write(za->src, data, length)) < 0) {
         _zip_error_set_from_source(&za->error, za->src);
         return -1;
@@ -133,6 +133,6 @@ _zip_write(zip_t *za, const void *data, zip_uint64_t length)
         zip_error_set(&za->error, ZIP_ER_WRITE, EINTR);
         return -1;
     }
-    
+
     return 0;
 }

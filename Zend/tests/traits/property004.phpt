@@ -2,7 +2,6 @@
 Conflicting properties with different initial values are considered incompatible.
 --FILE--
 <?php
-error_reporting(E_ALL);
 
 trait THello1 {
   public $hello = "foo";

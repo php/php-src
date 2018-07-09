@@ -3,6 +3,9 @@
 // "Master" config file; think of it as a configure.ac
 // equivalent.
 
+ARG_WITH("verbosity", "Output verbosity, 0-2.", "1");
+setup_verbosity();
+
 ARG_WITH("toolset", "Toolset to use for the compilation, give: vs, clang, icc. " +
 		"The only recommended and supported toolset for production use " +
 		"is Visual Studio. Use others at your own risk.", "vs");
@@ -60,29 +63,32 @@ DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
 
 toolset_setup_common_cflags();
 
-ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
-var PHP_MP_DISABLED = true;
-if (VS_TOOLSET && PHP_MP != 'disable') {
-	if(PHP_DEBUG == 'yes') {
-		STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
-	} else {
-		// no from disable-all 
-		if(PHP_MP == 'auto' || PHP_MP == 'no') {
-			 ADD_FLAG('CFLAGS', ' /MP ');
-			PHP_MP_DISABLED = false;
+if (VS_TOOLSET) {
+	ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
+	var PHP_MP_DISABLED = true;
+
+	if (PHP_MP != 'disable') {
+		if(PHP_DEBUG == 'yes') {
+			STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
 		} else {
-			if(parseInt(PHP_MP) != 0) {
-				ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+			// no from disable-all 
+			if(PHP_MP == 'auto' || PHP_MP == 'no') {
+				ADD_FLAG('CFLAGS', ' /MP ');
 				PHP_MP_DISABLED = false;
 			} else {
-				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
+				if(parseInt(PHP_MP) != 0) {
+					ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+					PHP_MP_DISABLED = false;
+				} else {
+					STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
+				}
 			}
 		}
 	}
-}
 
-if (!PHP_MP_DISABLED) {
-	STDOUT.WriteLine('Enabling multi process build');
+	if (!PHP_MP_DISABLED) {
+		STDOUT.WriteLine('Enabling multi process build');
+	}
 }
 
 // General link flags
@@ -231,7 +237,7 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_object_handlers.c zend_objects_API.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c \
 	zend_float.c zend_string.c zend_generators.c zend_virtual_cwd.c zend_ast.c \
-	zend_inheritance.c zend_smart_str.c");
+	zend_inheritance.c zend_smart_str.c zend_cpuinfo.c");
 
 ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
@@ -241,7 +247,8 @@ ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
-	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c");
+	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c \
+	php_syslog.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 AC_DEFINE('HAVE_STRNLEN', 1);
@@ -321,7 +328,7 @@ if (CLANG_TOOLSET) {
 	}
 }
 
-ARG_WITH("codegen-arch", "Architecture for code generation: ia32, sse, sse2, avx, avx2", "no");
+ARG_WITH("codegen-arch", "Architecture for code generation: ia32. Use --enable-native-intrinsics to enable SIMD optimizations.", "no");
 toolset_setup_codegen_arch();
 
 ARG_WITH("all-shared", "Force all the non obligatory extensions to be shared", "no");
@@ -337,4 +344,12 @@ ARG_ENABLE("test-ini", "Enable automatic php.ini generation. The test.ini will b
 
 ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
 		be excluded from the test.ini", "no");
+
+ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations to enable. \
+	Available instruction set names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2. \
+	SSE and SSE2 are enabled by default. The best instruction set specified will \
+	automatically enable all the older instruction sets. Note, that the produced binary \
+	might not work properly, if the chosen instruction sets are not available on the target \
+	processor.", "no");
+toolset_setup_intrinsic_cflags();
 

@@ -8,7 +8,7 @@ sinclude(Zend/acinclude.m4)
 dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
-AC_PREREQ(2.59)
+AC_PREREQ([2.64])
 AC_INIT(README.GIT-RULES)
 ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
 
@@ -16,7 +16,7 @@ PHP_CONFIG_NICE(config.nice)
 
 PHP_CANONICAL_HOST_TARGET
 
-AC_CONFIG_HEADER(main/php_config.h)
+AC_CONFIG_HEADERS([main/php_config.h])
 AH_TOP([
 #ifndef PHP_CONFIG_H
 #define PHP_CONFIG_H
@@ -68,7 +68,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #include <math.h>
 
 #ifndef zend_isnan
-#if HAVE_DECL_ISNAN
+#if HAVE_DECL_ISNAN && (!defined(__cplusplus) || __cplusplus < 201103L)
 #define zend_isnan(a) isnan(a)
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
@@ -77,7 +77,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #endif
 #endif
 
-#if HAVE_DECL_ISINF
+#if HAVE_DECL_ISINF && (!defined(__cplusplus) || __cplusplus < 201103L)
 #define zend_isinf(a) isinf(a)
 #elif defined(INFINITY)
 /* Might not work, but is required by ISO C99 */
@@ -88,7 +88,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #define zend_isinf(a) 0
 #endif
 
-#if HAVE_DECL_ISFINITE
+#if HAVE_DECL_ISFINITE && (!defined(__cplusplus) || __cplusplus < 201103L)
 #define zend_finite(a) isfinite(a)
 #elif defined(HAVE_FINITE)
 #define zend_finite(a) finite(a)
@@ -106,8 +106,8 @@ int zend_sprintf(char *buffer, const char *format, ...);
 ])
 
 PHP_MAJOR_VERSION=7
-PHP_MINOR_VERSION=2
-PHP_RELEASE_VERSION=9
+PHP_MINOR_VERSION=3
+PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
@@ -143,23 +143,6 @@ else
   rm -f php_version.h.new
 fi
 
-
-dnl Catch common errors here to save a few seconds of our users' time
-dnl -------------------------------------------------------------------------
-
-if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
-  AC_MSG_ERROR([--with-shared-apache is not supported. Please refer to the documentation for using APXS])
-fi
-
-if test -n "$with_apache" && test -n "$with_apxs"; then
-  AC_MSG_ERROR([--with-apache and --with-apxs cannot be used together])
-fi
-
-if test -n "$with_apxs2filter" && test -n "$with_apxs2"; then
-  AC_MSG_ERROR([--with-apxs2filter and --with-apxs2 cannot be used together])
-fi
-
-  
 dnl Settings we want to make before the checks.
 dnl -------------------------------------------------------------------------
 
@@ -495,7 +478,10 @@ utime.h \
 sys/utsname.h \
 sys/ipc.h \
 dlfcn.h \
-assert.h
+assert.h \
+tmmintrin.h \
+nmmintrin.h \
+immintrin.h
 ],[],[],[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -565,6 +551,16 @@ dnl Check __builtin_ssubl_overflow
 PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
 dnl Check __builtin_ssubll_overflow
 PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
+dnl Check __builtin_cpu_init
+PHP_CHECK_BUILTIN_CPU_INIT
+dnl Check __builtin_cpu_supports
+PHP_CHECK_BUILTIN_CPU_SUPPORTS
+
+dnl Check instructions
+PHP_CHECK_CPU_SUPPORTS([ssse3])
+PHP_CHECK_CPU_SUPPORTS([sse4.2])
+PHP_CHECK_CPU_SUPPORTS([avx])
+PHP_CHECK_CPU_SUPPORTS([avx2])
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
@@ -585,6 +581,13 @@ AC_TYPE_UID_T
 dnl Checks for sockaddr_storage and sockaddr.sa_len
 PHP_SOCKADDR_CHECKS
 
+dnl Checks for GCC function attributes on all systems except ones without glibc
+dnl Fix for these systems is already included in GCC 7, but not on GCC 6
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*], [true], [
+  AX_GCC_FUNC_ATTRIBUTE([ifunc])
+  AX_GCC_FUNC_ATTRIBUTE([target])
+])
+
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 [AC_TRY_LINK([ #include <sys/types.h>
@@ -603,6 +606,7 @@ chroot \
 ctime_r \
 cuserid \
 crypt \
+explicit_memset \
 flock \
 ftok \
 funopen \
@@ -689,7 +693,7 @@ dnl Also check for working getaddrinfo
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
 [AC_TRY_LINK([#include <netdb.h>],
                 [struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);], 
-  AC_TRY_RUN([
+  [AC_TRY_RUN([
 #include <netdb.h>
 #include <sys/types.h>
 #ifndef AF_INET
@@ -725,7 +729,7 @@ int main(void) {
   freeaddrinfo(ai);
   exit(0);
 }
-  ],ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no, ac_cv_func_getaddrinfo=no),
+  ],ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no, ac_cv_func_getaddrinfo=no)],
 ac_cv_func_getaddrinfo=no)])
 if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
@@ -751,6 +755,34 @@ PHP_CHECK_IN_ADDR_T
 AC_CHECK_FUNCS(crypt_r, [ php_crypt_r="1" ], [ php_crypt_r="0" ])
 if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
+fi
+
+dnl Check for asm goto support
+AC_CACHE_CHECK([for asm goto], ac_cv__asm_goto,
+[AC_TRY_RUN([
+int main(void) {
+    __asm__ goto("jmp %l0\n" :::: end);
+end:
+    return 0;
+}
+  ],ac_cv__asm_goto=yes, ac_cv__asm_goto=no, ac_cv__asm_goto=no)])
+
+if test "$ac_cv__asm_goto" = yes; then
+  AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
+fi
+
+dnl Check for variable length array support
+AC_CACHE_CHECK([whether compiler supports VLA], ac_cv__compiler_c99_vla,
+[AC_TRY_RUN([
+ #include <stdlib.h>
+ int main(void) {
+         int i[rand()%10];
+	 return 0;
+ }
+ ],ac_cv__compiler_c99_vla=yes, ac_cv__compiler_c99_vla=no, ac_cv__compiler_c99_vla=no)])
+
+if test "$ac_cv__compiler_c99_vla" = yes; then
+	AC_DEFINE(HAVE_COMPILER_C99_VLA, 1, [Compiler supports VLA])
 fi
 
 dnl Check valgrind support
@@ -1388,12 +1420,7 @@ old_CC=$CC
 if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
   INLINE_CFLAGS="$INLINE_CFLAGS $ac_cv_pthreads_cflags"
-  cat >meta_ccld<<EOF
-#! /bin/sh
-exec $CC $ac_cv_pthreads_cflags \$@
-EOF
-  CC="$abs_builddir/meta_ccld"
-  chmod +x meta_ccld
+  CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
 fi
 
 dnl This will go away, if we have a facility to run per-extension code
@@ -1475,7 +1502,7 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c \
-       output.c getopt.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+       output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
 
@@ -1498,7 +1525,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
     zend_closures.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
-    zend_default_classes.c zend_inheritance.c zend_smart_str.c, \
+    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c, \
 	-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 dnl Selectively disable optimization due to high RAM usage during
@@ -1576,15 +1603,6 @@ dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
   cli_extensions="$EXT_CLI_STATIC"
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
 
-  if test "$UNAME" = "FreeBSD" && test "$PHP_SAPI" = "apache2filter" && test "$TSRM_PTH" != "pth-config" ; then
-    echo "+--------------------------------------------------------------------+"
-    echo "|                        *** WARNING ***                             |"
-    echo "|                                                                    |"
-    echo "| In order to build PHP as a Apache2 module on FreeBSD, you have to  |"
-    echo "| add  --with-tsrm-pth to your ./configure line. Therefore you need  |"
-    echo "| to install gnu-pth from /usr/ports/devel/pth.                      |"
-  fi
-
   if test -n "$PHP_APXS_BROKEN"; then
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."
@@ -1610,7 +1628,7 @@ cat <<X
 X
   fi
 
-    if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
+    if test "$PHP_SAPI" = "apache2handler"; then
       if test "$APACHE_VERSION" -ge 2004001; then
         if test -z "$APACHE_THREADED_MPM"; then
 cat <<X

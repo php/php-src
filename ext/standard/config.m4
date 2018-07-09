@@ -13,14 +13,14 @@ int main(int argc, char **argv)
 	char *filename = tmpnam(NULL);
 	char buffer[64];
 	int result = 0;
-	
+
 	FILE *fp = fopen(filename, "wb");
 	if (NULL == fp)
 		return 0;
 	fputs("line 1\n", fp);
 	fputs("line 2\n", fp);
 	fclose(fp);
-	
+
 	fp = fopen(filename, "rb+");
 	if (NULL == fp)
 		return 0;
@@ -58,7 +58,7 @@ if test "$ac_cv_func_crypt" = "no"; then
     AC_DEFINE(HAVE_CRYPT, 1, [ ])
   ])
 fi
-  
+
 AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
   AC_TRY_RUN([
 #if HAVE_UNISTD_H
@@ -124,7 +124,7 @@ int main() {
 	char salt[15], answer[40];
 	char *encrypted;
 
-	salt[0]='$'; salt[1]='1'; salt[2]='$'; 
+	salt[0]='$'; salt[1]='1'; salt[2]='$';
 	salt[3]='r'; salt[4]='a'; salt[5]='s';
 	salt[6]='m'; salt[7]='u'; salt[8]='s';
 	salt[9]='l'; salt[10]='e'; salt[11]='$';
@@ -267,7 +267,7 @@ else
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
 fi
 
-dnl 
+dnl
 dnl Check for __attribute__ ((__aligned__)) support in the compiler
 dnl
 AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
@@ -289,7 +289,7 @@ dnl
 dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
 dnl as soon as we support C99.
 AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass mempcpy strpncpy)
-AC_FUNC_FNMATCH	
+AC_FUNC_FNMATCH
 
 dnl
 dnl Check if there is a support means of creating a new process
@@ -413,7 +413,8 @@ dnl
 dnl Check for argon2
 dnl
 PHP_ARG_WITH(password-argon2, for Argon2 support,
-[  --with-password-argon2[=DIR]           Include Argon2 support in password_*. DIR is the Argon2 shared library path]])
+[  --with-password-argon2[=DIR]
+                          Include Argon2 support in password_*. DIR is the Argon2 shared library path]])
 
 if test "$PHP_PASSWORD_ARGON2" != "no"; then
   AC_MSG_CHECKING([for Argon2 library])
@@ -433,19 +434,40 @@ if test "$PHP_PASSWORD_ARGON2" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(argon2, $ARGON2_DIR/$PHP_LIBDIR)
   PHP_ADD_INCLUDE($ARGON2_DIR/include)
 
-  AC_CHECK_LIB(argon2, argon2_hash, [
+  AC_CHECK_LIB(argon2, argon2id_hash_raw, [
     LIBS="$LIBS -largon2"
     AC_DEFINE(HAVE_ARGON2LIB, 1, [ Define to 1 if you have the <argon2.h> header file ])
   ], [
-    AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libaries are installed])
+    AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libaries >= 20161029 are installed])
   ])
+fi
 
-  AC_CHECK_LIB(argon2, argon2id_hash_raw, [
-    LIBS="$LIBS -largon2"
-    AC_DEFINE(HAVE_ARGON2ID, 1, [ Define to 1 if Argon2 library has support for Argon2ID])
-  ], [
-    AC_MSG_RESULT([not found])
-  ])
+dnl
+dnl net_get_interfaces
+dnl
+AC_CHECK_HEADERS([net/if.h],[], [],
+[
+  #ifdef HAVE_SYS_SOCKET_H
+  #include <sys/socket.h>
+  #endif
+  #include <net/if.h>
+])
+AC_CHECK_HEADERS([netdb.h])
+AC_MSG_CHECKING([for usable getifaddrs])
+AC_TRY_LINK([
+  #include <sys/types.h>
+  #include <ifaddrs.h>
+],[
+  struct ifaddrs *interfaces;
+  if (!getifaddrs(&interfaces)) {
+      freeifaddrs(interfaces);
+  }
+], [ac_have_getifaddrs=yes], [ac_have_getifaddrs=no])
+if test "$ac_have_getifaddrs" = "yes" ; then
+  AC_DEFINE(HAVE_GETIFADDRS, 1, [whether getifaddrs is present and usable])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
 fi
 
 dnl
@@ -462,7 +484,7 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
                             filters.c proc_open.c streamsfuncs.c http.c password.c \
-                            random.c,,,
+                            random.c net.c hrtime.c,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_MAKEFILE_FRAGMENT

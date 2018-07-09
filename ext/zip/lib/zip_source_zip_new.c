@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -110,13 +110,13 @@ _zip_source_zip_new(zip_t *za, zip_t *srcza, zip_uint64_t srcidx, zip_flags_t fl
 
     if (start+len > 0 && enc_impl == NULL && comp_impl == NULL) {
 	struct zip_stat st2;
-	
+
 	st2.size = len ? len : st.size-start;
 	st2.comp_size = st2.size;
 	st2.comp_method = ZIP_CM_STORE;
 	st2.mtime = st.mtime;
 	st2.valid = ZIP_STAT_SIZE|ZIP_STAT_COMP_SIZE|ZIP_STAT_COMP_METHOD|ZIP_STAT_MTIME;
-	
+
 	if ((src = _zip_source_window_new(srcza->src, offset+start, st2.size, &st2, &za->error)) == NULL) {
 	    return NULL;
 	}
@@ -126,14 +126,14 @@ _zip_source_zip_new(zip_t *za, zip_t *srcza, zip_uint64_t srcidx, zip_flags_t fl
 	    return NULL;
 	}
     }
-	
+
     if (_zip_source_set_source_archive(src, srcza) < 0) {
 	zip_source_free(src);
 	return NULL;
     }
 
     /* creating a layered source calls zip_keep() on the lower layer, so we free it */
-	
+
     if (enc_impl) {
 	s2 = enc_impl(za, src, st.encryption_method, 0, password);
 	zip_source_free(src);

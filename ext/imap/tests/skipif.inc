@@ -1,6 +1,6 @@
 <?php
 extension_loaded('imap') or die('skip imap extension not available in this build');
- 
+
 // Change these to make tests run successfully
 $mailbox  = '{localhost/norsh}';
 $username = 'webmaster@something.com';

@@ -41,6 +41,7 @@
 #include <errno.h>
 
 #include "php_sysvsem.h"
+#include "ext/standard/info.h"
 
 #if !HAVE_SEMUN
 
@@ -80,7 +81,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ sysvsem_functions[]
  */
-const zend_function_entry sysvsem_functions[] = {
+static const zend_function_entry sysvsem_functions[] = {
 	PHP_FE(sem_get,			arginfo_sem_get)
 	PHP_FE(sem_acquire,		arginfo_sem_acquire)
 	PHP_FE(sem_release,		arginfo_sem_release)
@@ -99,7 +100,7 @@ zend_module_entry sysvsem_module_entry = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	PHP_MINFO(sysvsem),
 	PHP_SYSVSEM_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
@@ -175,6 +176,16 @@ PHP_MINIT_FUNCTION(sysvsem)
 {
 	php_sysvsem_module.le_sem = zend_register_list_destructors_ex(release_sysvsem_sem, NULL, "sysvsem", module_number);
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MINFO_FUNCTION
+ */
+PHP_MINFO_FUNCTION(sysvsem)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "sysvsem support", "enabled");
+	php_info_print_table_end();
 }
 /* }}} */
 

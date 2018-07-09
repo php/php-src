@@ -18,8 +18,6 @@
 
 /* $Id$ */
 
-/* Synced with php 3.0 revision 1.30 1999-06-16 [ssb] */
-
 #ifndef FILE_H
 #define FILE_H
 
@@ -62,7 +60,7 @@ PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
 PHP_FUNCTION(fd_set);
 PHP_FUNCTION(fd_isset);
-#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if HAVE_REALPATH || defined(ZTS)
 PHP_FUNCTION(realpath);
 #endif
 #ifdef HAVE_FNMATCH

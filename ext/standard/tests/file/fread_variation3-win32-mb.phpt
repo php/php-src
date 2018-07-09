@@ -109,7 +109,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo"Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fread() : usage variations ***
 
 -- Testing fread() with file having content of type numeric --

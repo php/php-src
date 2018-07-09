@@ -38,6 +38,7 @@ static PHP_FUNCTION(json_last_error);
 static PHP_FUNCTION(json_last_error_msg);
 
 PHP_JSON_API zend_class_entry *php_json_serializable_ce;
+PHP_JSON_API zend_class_entry *php_json_exception_ce;
 
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
@@ -95,6 +96,9 @@ static PHP_MINIT_FUNCTION(json)
 	INIT_CLASS_ENTRY(ce, "JsonSerializable", json_serializable_interface);
 	php_json_serializable_ce = zend_register_internal_interface(&ce);
 
+	INIT_CLASS_ENTRY(ce, "JsonException", NULL);
+	php_json_exception_ce = zend_register_internal_class_ex(&ce, zend_ce_exception);
+
 	/* options for json_encode */
 	PHP_JSON_REGISTER_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG);
 	PHP_JSON_REGISTER_CONSTANT("JSON_HEX_AMP",  PHP_JSON_HEX_AMP);
@@ -116,6 +120,7 @@ static PHP_MINIT_FUNCTION(json)
 	/* common options for json_decode and json_encode */
 	PHP_JSON_REGISTER_CONSTANT("JSON_INVALID_UTF8_IGNORE", PHP_JSON_INVALID_UTF8_IGNORE);
 	PHP_JSON_REGISTER_CONSTANT("JSON_INVALID_UTF8_SUBSTITUTE", PHP_JSON_INVALID_UTF8_SUBSTITUTE);
+	PHP_JSON_REGISTER_CONSTANT("JSON_THROW_ON_ERROR", PHP_JSON_THROW_ON_ERROR);
 
 	/* json error constants */
 	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE);
@@ -207,6 +212,37 @@ PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ 
 }
 /* }}} */
 
+static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{ */
+{
+	switch(error_code) {
+		case PHP_JSON_ERROR_NONE:
+			return "No error";
+		case PHP_JSON_ERROR_DEPTH:
+			return "Maximum stack depth exceeded";
+		case PHP_JSON_ERROR_STATE_MISMATCH:
+			return "State mismatch (invalid or malformed JSON)";
+		case PHP_JSON_ERROR_CTRL_CHAR:
+			return "Control character error, possibly incorrectly encoded";
+		case PHP_JSON_ERROR_SYNTAX:
+			return "Syntax error";
+		case PHP_JSON_ERROR_UTF8:
+			return "Malformed UTF-8 characters, possibly incorrectly encoded";
+		case PHP_JSON_ERROR_RECURSION:
+			return "Recursion detected";
+		case PHP_JSON_ERROR_INF_OR_NAN:
+			return "Inf and NaN cannot be JSON encoded";
+		case PHP_JSON_ERROR_UNSUPPORTED_TYPE:
+			return "Type is not supported";
+		case PHP_JSON_ERROR_INVALID_PROPERTY_NAME:
+			return "The decoded property name is invalid";
+		case PHP_JSON_ERROR_UTF16:
+			return "Single unpaired UTF-16 surrogate in unicode escape";
+		default:
+			return "Unknown error";
+	}
+}
+/* }}} */
+
 PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
@@ -214,7 +250,12 @@ PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_le
 	php_json_parser_init(&parser, return_value, str, str_len, (int)options, (int)depth);
 
 	if (php_json_yyparse(&parser)) {
-		JSON_G(error_code) = php_json_parser_error_code(&parser);
+		php_json_error_code error_code = php_json_parser_error_code(&parser);
+		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
+			JSON_G(error_code) = error_code;
+		} else {
+			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(error_code), error_code);
+		}
 		RETVAL_NULL();
 		return FAILURE;
 	}
@@ -243,11 +284,19 @@ static PHP_FUNCTION(json_encode)
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
-	JSON_G(error_code) = encoder.error_code;
 
-	if (encoder.error_code != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
-		smart_str_free(&buf);
-		RETURN_FALSE;
+	if (!(options & PHP_JSON_THROW_ON_ERROR) || (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+		JSON_G(error_code) = encoder.error_code;
+		if (encoder.error_code != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+			smart_str_free(&buf);
+			RETURN_FALSE;
+		}
+	} else {
+		if (encoder.error_code != PHP_JSON_ERROR_NONE) {
+			smart_str_free(&buf);
+			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(encoder.error_code), encoder.error_code);
+			RETURN_FALSE;
+		}
 	}
 
 	smart_str_0(&buf); /* copy? */
@@ -258,7 +307,7 @@ static PHP_FUNCTION(json_encode)
 }
 /* }}} */
 
-/* {{{ proto mixed json_decode(string json [, bool assoc [, long depth]])
+/* {{{ proto mixed json_decode(string json [, bool assoc [, int depth]])
    Decodes the JSON representation into a PHP value */
 static PHP_FUNCTION(json_decode)
 {
@@ -277,10 +326,16 @@ static PHP_FUNCTION(json_decode)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+	if (!(options & PHP_JSON_THROW_ON_ERROR)) {
+		JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+	}
 
 	if (!str_len) {
-		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
+		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
+			JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
+		} else {
+			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(PHP_JSON_ERROR_SYNTAX), PHP_JSON_ERROR_SYNTAX);
+		}
 		RETURN_NULL();
 	}
 
@@ -327,33 +382,7 @@ static PHP_FUNCTION(json_last_error_msg)
 		return;
 	}
 
-	switch(JSON_G(error_code)) {
-		case PHP_JSON_ERROR_NONE:
-			RETURN_STRING("No error");
-		case PHP_JSON_ERROR_DEPTH:
-			RETURN_STRING("Maximum stack depth exceeded");
-		case PHP_JSON_ERROR_STATE_MISMATCH:
-			RETURN_STRING("State mismatch (invalid or malformed JSON)");
-		case PHP_JSON_ERROR_CTRL_CHAR:
-			RETURN_STRING("Control character error, possibly incorrectly encoded");
-		case PHP_JSON_ERROR_SYNTAX:
-			RETURN_STRING("Syntax error");
-		case PHP_JSON_ERROR_UTF8:
-			RETURN_STRING("Malformed UTF-8 characters, possibly incorrectly encoded");
-		case PHP_JSON_ERROR_RECURSION:
-			RETURN_STRING("Recursion detected");
-		case PHP_JSON_ERROR_INF_OR_NAN:
-			RETURN_STRING("Inf and NaN cannot be JSON encoded");
-		case PHP_JSON_ERROR_UNSUPPORTED_TYPE:
-			RETURN_STRING("Type is not supported");
-		case PHP_JSON_ERROR_INVALID_PROPERTY_NAME:
-			RETURN_STRING("The decoded property name is invalid");
-		case PHP_JSON_ERROR_UTF16:
-			RETURN_STRING("Single unpaired UTF-16 surrogate in unicode escape");
-		default:
-			RETURN_STRING("Unknown error");
-	}
-
+	RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
 }
 /* }}} */
 

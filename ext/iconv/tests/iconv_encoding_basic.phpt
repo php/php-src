@@ -48,7 +48,7 @@ var_dump(iconv_get_encoding("all"));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing iconv_get_encoding()/iconv_set_encoding() : basic functionality ***
 --- Default get_encoding ---
 array(3) {

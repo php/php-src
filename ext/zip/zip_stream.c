@@ -161,7 +161,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		zend_string_release(file_basename);
+		zend_string_release_ex(file_basename, 0);
 		return -1;
 	}
 
@@ -170,7 +170,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		memset(ssb, 0, sizeof(php_stream_statbuf));
 		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &sb) != 0) {
 			zip_close(za);
-			zend_string_release(file_basename);
+			zend_string_release_ex(file_basename, 0);
 			return -1;
 		}
 		zip_close(za);
@@ -194,12 +194,12 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 #endif
 		ssb->sb.st_ino = -1;
 	}
-	zend_string_release(file_basename);
+	zend_string_release_ex(file_basename, 0);
 	return 0;
 }
 /* }}} */
 
-php_stream_ops php_stream_zipio_ops = {
+const php_stream_ops php_stream_zipio_ops = {
 	php_zip_ops_write, php_zip_ops_read,
 	php_zip_ops_close, php_zip_ops_flush,
 	"zip",
@@ -306,7 +306,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		zend_string_release(file_basename);
+		zend_string_release_ex(file_basename, 0);
 		return NULL;
 	}
 
@@ -338,7 +338,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 		}
 	}
 
-	zend_string_release(file_basename);
+	zend_string_release_ex(file_basename, 0);
 
 	if (!stream) {
 		return NULL;
@@ -348,7 +348,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 }
 /* }}} */
 
-static php_stream_wrapper_ops zip_stream_wops = {
+static const php_stream_wrapper_ops zip_stream_wops = {
 	php_stream_zip_opener,
 	NULL,	/* close */
 	NULL,	/* fstat */
@@ -362,7 +362,7 @@ static php_stream_wrapper_ops zip_stream_wops = {
 	NULL	/* metadata */
 };
 
-php_stream_wrapper php_stream_zip_wrapper = {
+const php_stream_wrapper php_stream_zip_wrapper = {
 	&zip_stream_wops,
 	NULL,
 	0 /* is_url */

@@ -59,7 +59,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in tokenizer_functions[].
  */
-const zend_function_entry tokenizer_functions[] = {
+static const zend_function_entry tokenizer_functions[] = {
 	PHP_FE(token_get_all,	arginfo_token_get_all)
 	PHP_FE(token_name,		arginfo_token_name)
 	PHP_FE_END
@@ -144,12 +144,11 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 	LANG_SCNG(yy_state) = yycINITIAL;
 	array_init(return_value);
 
-	ZVAL_UNDEF(&token);
-	while ((token_type = lex_scan(&token))) {
+	while ((token_type = lex_scan(&token, NULL))) {
 		add_token(return_value, token_type, zendtext, zendleng, token_line);
 
 		if (Z_TYPE(token) != IS_UNDEF) {
-			zval_dtor(&token);
+			zval_ptr_dtor_nogc(&token);
 			ZVAL_UNDEF(&token);
 		}
 
@@ -178,7 +177,7 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 		token_line = CG(zend_lineno);
 	}
 
-	zval_dtor(&source_zval);
+	zval_ptr_dtor_str(&source_zval);
 	zend_restore_lexical_state(&original_lex_state);
 
 	return 1;
@@ -192,8 +191,16 @@ void on_event(zend_php_scanner_event event, int token, int line, void *context)
 
 	switch (event) {
 		case ON_TOKEN:
-			if (token == END) break;
-			add_token(token_stream, token, LANG_SCNG(yy_text), LANG_SCNG(yy_leng), line);
+			{
+				if (token == END) break;
+				/* Special cases */
+				if (token == ';' && LANG_SCNG(yy_leng) > 1) { /* ?> or ?>\n or ?>\r\n */
+					token = T_CLOSE_TAG;
+				} else if (token == T_ECHO && LANG_SCNG(yy_leng) == sizeof("<?=") - 1) {
+					token = T_OPEN_TAG_WITH_ECHO;
+				}
+				add_token(token_stream, token, LANG_SCNG(yy_text), LANG_SCNG(yy_leng), line);
+			}
 			break;
 		case ON_FEEDBACK:
 			tokens_ht = Z_ARRVAL_P(token_stream);
@@ -248,7 +255,7 @@ static zend_bool tokenize_parse(zval *return_value, zend_string *source)
 	zend_restore_lexical_state(&original_lex_state);
 	CG(in_compilation) = original_in_compilation;
 
-	zval_dtor(&source_zval);
+	zval_ptr_dtor_str(&source_zval);
 
 	return success;
 }

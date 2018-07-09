@@ -314,7 +314,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 	phpdbg_writeln("frame", "id=\"%d\" symbol=\"{main}\" file=\"%s\" line=\"%d\"", "frame #%d: {main} at %s:%ld", i, Z_STRVAL_P(file), Z_LVAL_P(line));
 	phpdbg_xml("</backtrace>");
 
-	zval_dtor(&zbacktrace);
+	zval_ptr_dtor_nogc(&zbacktrace);
 	zend_string_release(Z_STR(startfile));
 
 	PHPDBG_OUTPUT_BACKUP_RESTORE();

@@ -62,8 +62,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = @mysqli_character_set_name($link)))
-		printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @mysqli_character_set_name($link)))
+		printf("[013] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	/* Make sure that the function alias exists */
 	if (!is_null($tmp = @mysqli_character_set_name()))
@@ -71,5 +71,5 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

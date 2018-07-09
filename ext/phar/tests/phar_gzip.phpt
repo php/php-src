@@ -3,7 +3,6 @@ Phar: gzipped phar
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("spl")) die("skip SPL not available");
 if (!extension_loaded("zlib")) die("skip zlib not available");
 ?>
 --INI--

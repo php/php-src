@@ -47,7 +47,7 @@ foreach ($input_arrays as $input_array){
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() by supplying various arrays --

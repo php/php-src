@@ -40,7 +40,7 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing asort() : usage variations ***
 
 -- Testing asort() by supplying hexadecimal value array, 'flag' value is defualt  --

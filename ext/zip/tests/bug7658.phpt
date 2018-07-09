@@ -50,6 +50,6 @@ var_dump($ar);
 unset($zip);
 unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }

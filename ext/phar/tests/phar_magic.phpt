@@ -24,7 +24,7 @@ include $fname;
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 __HALT_COMPILER();
 ?>
---EXPECTF--
+--EXPECT--
 in b
 <?php include "b/c.php";
 in d

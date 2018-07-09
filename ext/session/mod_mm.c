@@ -219,7 +219,7 @@ static int ps_mm_key_exists(ps_mm *data, const char *key)
 	return FAILURE;
 }
 
-ps_module ps_mod_mm = {
+const ps_module ps_mod_mm = {
 	PS_MOD_SID(mm)
 };
 
@@ -482,7 +482,7 @@ PS_CREATE_SID_FUNC(mm)
 		/* Check collision */
 		if (ps_mm_key_exists(data, sid->val) == SUCCESS) {
 			if (sid) {
-				zend_string_release(sid);
+				zend_string_release_ex(sid, 0);
 				sid = NULL;
 			}
 			if (!(maxfail--)) {

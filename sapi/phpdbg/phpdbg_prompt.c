@@ -196,7 +196,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 				zval_ptr_dtor(&fretval);
 			}
 
-			zval_dtor(&fci.function_name);
+			zval_ptr_dtor_str(&fci.function_name);
 			efree(lc_name);
 
 			return SUCCESS;
@@ -618,7 +618,7 @@ int phpdbg_compile(void) /* {{{ */
 			data->len += start_line_len;
 			for (i = 1; i <= data->lines; i++) {
 				data->line[i] += start_line_len;
-			}		
+			}
 			zend_hash_update_ptr(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename, data);
 		}
 
@@ -775,7 +775,7 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	EG(exception) = NULL;
 
 	ZVAL_OBJ(&zv, ex);
-	zend_call_method_with_0_params(&zv, ex->ce, NULL, "__tostring", &tmp);
+	zend_call_method_with_0_params(&zv, ex->ce, &ex->ce->__tostring, "__tostring", &tmp);
 	file = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("file"), 1, &rv));
 	line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
 
@@ -1692,7 +1692,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 			backup_opline = EG(current_execute_data)->opline; \
 		} \
 		before_ex = EG(opline_before_exception); \
-		++GC_REFCOUNT(exception); \
+		GC_ADDREF(exception); \
 		zend_clear_exception(); \
 	} \
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \

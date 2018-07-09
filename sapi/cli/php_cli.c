@@ -267,13 +267,9 @@ static inline int sapi_cli_select(php_socket_t fd)
 	return ret != -1;
 }
 
-PHP_CLI_API size_t sapi_cli_single_write(const char *str, size_t str_length) /* {{{ */
+PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /* {{{ */
 {
-#ifdef PHP_WRITE_STDOUT
-	zend_long ret;
-#else
-	size_t ret;
-#endif
+	ssize_t ret;
 
 	if (cli_shell_callbacks.cli_shell_write) {
 		cli_shell_callbacks.cli_shell_write(str, str_length);
@@ -283,16 +279,10 @@ PHP_CLI_API size_t sapi_cli_single_write(const char *str, size_t str_length) /* 
 	do {
 		ret = write(STDOUT_FILENO, str, str_length);
 	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO));
-
-	if (ret <= 0) {
-		return 0;
-	}
-
-	return ret;
 #else
 	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
-	return ret;
 #endif
+	return ret;
 }
 /* }}} */
 
@@ -300,7 +290,7 @@ static size_t sapi_cli_ub_write(const char *str, size_t str_length) /* {{{ */
 {
 	const char *ptr = str;
 	size_t remaining = str_length;
-	size_t ret;
+	ssize_t ret;
 
 	if (!str_length) {
 		return 0;
@@ -317,8 +307,9 @@ static size_t sapi_cli_ub_write(const char *str, size_t str_length) /* {{{ */
 	while (remaining > 0)
 	{
 		ret = sapi_cli_single_write(ptr, remaining);
-		if (!ret) {
+		if (ret < 0) {
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
+			EG(exit_status) = 255;
 			php_handle_aborted_connection();
 #endif
 			break;
@@ -593,17 +584,17 @@ static void cli_register_file_handles(void) /* {{{ */
 	php_stream_to_zval(s_err, &ec.value);
 
 	ic.flags = CONST_CS;
-	ic.name = zend_string_init("STDIN", sizeof("STDIN")-1, 1);
+	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
 	ic.module_number = 0;
 	zend_register_constant(&ic);
 
 	oc.flags = CONST_CS;
-	oc.name = zend_string_init("STDOUT", sizeof("STDOUT")-1, 1);
+	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
 	oc.module_number = 0;
 	zend_register_constant(&oc);
 
 	ec.flags = CONST_CS;
-	ec.name = zend_string_init("STDERR", sizeof("STDERR")-1, 1);
+	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
 	ec.module_number = 0;
 	zend_register_constant(&ec);
 }
@@ -917,7 +908,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 		if (!interactive) {
 		/* The -a option was not passed. If there is no file, it could
-		 	still make sense to run interactively. The presense of a file
+		 	still make sense to run interactively. The presence of a file
 			is essential to mitigate buggy console info. */
 			interactive = php_win32_console_is_own() &&
 				!(script_file ||

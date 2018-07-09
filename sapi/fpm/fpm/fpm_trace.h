@@ -1,5 +1,4 @@
 
-	/* $Id: fpm_trace.h,v 1.3 2008/07/20 22:43:39 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_TRACE_H

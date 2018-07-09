@@ -103,52 +103,47 @@ dnl  -threads          gcc (HP-UX)
 dnl
 AC_DEFUN([PTHREADS_CHECK],[
 
-if test "$beos_threads" = "1"; then
+save_CFLAGS=$CFLAGS
+save_LIBS=$LIBS
+PTHREADS_ASSIGN_VARS
+PTHREADS_CHECK_COMPILE
+LIBS=$save_LIBS
+CFLAGS=$save_CFLAGS
+
+AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
+ac_cv_pthreads_cflags=
+if test "$pthreads_working" != "yes"; then
+  for flag in -kthread -pthread -pthreads -mthreads -Kthread -threads -mt -qthreaded; do 
+    ac_save=$CFLAGS
+    CFLAGS="$CFLAGS $flag"
+    PTHREADS_CHECK_COMPILE
+    CFLAGS=$ac_save
+    if test "$pthreads_checked" = "yes"; then
+      ac_cv_pthreads_cflags=$flag
+      break
+    fi
+  done
+fi
+])
+
+AC_CACHE_CHECK(for pthreads_lib, ac_cv_pthreads_lib,[
+ac_cv_pthreads_lib=
+if test "$pthreads_working" != "yes"; then
+ for lib in pthread pthreads c_r; do
+    ac_save=$LIBS
+    LIBS="$LIBS -l$lib"
+    PTHREADS_CHECK_COMPILE
+    LIBS=$ac_save
+    if test "$pthreads_checked" = "yes"; then
+      ac_cv_pthreads_lib=$lib
+      break
+    fi
+  done
+fi
+])
+
+if test "x$ac_cv_pthreads_cflags" != "x" -o "x$ac_cv_pthreads_lib" != "x"; then
   pthreads_working="yes"
-  ac_cv_pthreads_cflags=""
-else
-  save_CFLAGS=$CFLAGS
-  save_LIBS=$LIBS
-  PTHREADS_ASSIGN_VARS
-  PTHREADS_CHECK_COMPILE
-  LIBS=$save_LIBS
-  CFLAGS=$save_CFLAGS
-
-  AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
-  ac_cv_pthreads_cflags=
-  if test "$pthreads_working" != "yes"; then
-    for flag in -kthread -pthread -pthreads -mthreads -Kthread -threads -mt -qthreaded; do 
-      ac_save=$CFLAGS
-      CFLAGS="$CFLAGS $flag"
-      PTHREADS_CHECK_COMPILE
-      CFLAGS=$ac_save
-      if test "$pthreads_checked" = "yes"; then
-        ac_cv_pthreads_cflags=$flag
-        break
-      fi
-    done
-  fi
-  ])
-
-  AC_CACHE_CHECK(for pthreads_lib, ac_cv_pthreads_lib,[
-  ac_cv_pthreads_lib=
-  if test "$pthreads_working" != "yes"; then
-   for lib in pthread pthreads c_r; do
-      ac_save=$LIBS
-      LIBS="$LIBS -l$lib"
-      PTHREADS_CHECK_COMPILE
-      LIBS=$ac_save
-      if test "$pthreads_checked" = "yes"; then
-        ac_cv_pthreads_lib=$lib
-        break
-      fi
-    done
-  fi
-  ])
-
-  if test "x$ac_cv_pthreads_cflags" != "x" -o "x$ac_cv_pthreads_lib" != "x"; then
-    pthreads_working="yes"
-  fi
 fi
 
 if test "$pthreads_working" = "yes"; then

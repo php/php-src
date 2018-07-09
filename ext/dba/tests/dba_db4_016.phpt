@@ -47,7 +47,7 @@ if (($db_file = dba_popen($db_filename, "c", $handler)) !== FALSE) {
 <?php 
 require(dirname(__FILE__) .'/clean.inc'); 
 ?>
---EXPECTF--
+--EXPECT--
 database handler: db4
 database file created
 bool(true)

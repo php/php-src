@@ -44,7 +44,7 @@ PHP_MINIT_FUNCTION(syslog)
 	REGISTER_LONG_CONSTANT("LOG_EMERG", LOG_EMERG, CONST_CS | CONST_PERSISTENT); /* system unusable */
 	REGISTER_LONG_CONSTANT("LOG_ALERT", LOG_ALERT, CONST_CS | CONST_PERSISTENT); /* immediate action required */
 	REGISTER_LONG_CONSTANT("LOG_CRIT", LOG_CRIT, CONST_CS | CONST_PERSISTENT); /* critical conditions */
-	REGISTER_LONG_CONSTANT("LOG_ERR", LOG_ERR, CONST_CS | CONST_PERSISTENT); 
+	REGISTER_LONG_CONSTANT("LOG_ERR", LOG_ERR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOG_WARNING", LOG_WARNING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOG_NOTICE", LOG_NOTICE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOG_INFO", LOG_INFO, CONST_CS | CONST_PERSISTENT);
@@ -125,6 +125,12 @@ PHP_MSHUTDOWN_FUNCTION(syslog)
 	return SUCCESS;
 }
 
+void php_openlog(const char *ident, int option, int facility)
+{
+	openlog(ident, option, facility);
+	PG(have_called_openlog) = 1;
+}
+
 /* {{{ proto bool openlog(string ident, int option, int facility)
    Open connection to system logger */
 /*
@@ -151,7 +157,7 @@ PHP_FUNCTION(openlog)
 	if(BG(syslog_device) == NULL) {
 		RETURN_FALSE;
 	}
-	openlog(BG(syslog_device), option, facility);
+	php_openlog(BG(syslog_device), option, facility);
 	RETURN_TRUE;
 }
 /* }}} */

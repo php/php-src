@@ -51,4 +51,4 @@ $proc->importStyleSheet($xsldoc);
 echo $proc->transformToDoc($xmldoc, 'string', 98, true);
 ?>
 --EXPECTF--
-Warning: XSLTProcessor::transformToDoc() expects at most 2 parameters, 4 given in %s on line %i
+Warning: XSLTProcessor::transformToDoc() expects at most 2 parameters, 4 given in %s on line %d

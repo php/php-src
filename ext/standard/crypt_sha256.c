@@ -16,11 +16,6 @@
 #  include <stddef.h>
 #  define __alignof__(type) offsetof (struct { char c; type member;}, member)
 # endif
-# if HAVE_ATTRIBUTE_ALIGNED
-#  define ALIGNED(size) __attribute__ ((__aligned__ (size)))
-# else
-#  define ALIGNED(size)
-# endif
 #endif
 
 #include <stdio.h>
@@ -334,18 +329,11 @@ static const char b64t[64] =
 char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int buflen)
 {
 #ifdef PHP_WIN32
-# if _MSC <= 1300
-#  pragma pack(push, 16)
-	unsigned char alt_result[32];
-	unsigned char temp_result[32];
-#  pragma pack(pop)
-# else
-	__declspec(align(32)) unsigned char alt_result[32];
-	__declspec(align(32)) unsigned char temp_result[32];
-# endif
+	ZEND_SET_ALIGNED(32, unsigned char alt_result[32]);
+	ZEND_SET_ALIGNED(32, unsigned char temp_result[32]);
 #else
-	unsigned char alt_result[32] ALIGNED(__alignof__ (uint32_t));
-	unsigned char temp_result[32] ALIGNED(__alignof__ (uint32_t));
+	ZEND_SET_ALIGNED(__alignof__ (uint32_t), unsigned char alt_result[32]);
+	ZEND_SET_ALIGNED(__alignof__ (uint32_t), unsigned char temp_result[32]);
 #endif
 
 	struct sha256_ctx ctx;

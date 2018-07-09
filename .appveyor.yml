@@ -33,11 +33,13 @@ environment:
                   OPCACHE: 0
                 - THREAD_SAFE: 1
                   OPCACHE: 1
+                  INTRINSICS: AVX
 
 services:
         # the setup scripts have to be touched, once some other db version is used
         - mysql
-        - postgresql96
+        - postgresql101
+        - mssql2017
 
 platform:
         - x64

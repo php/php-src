@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@php.net>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
-   |	      Kevin N. Shallow <kshallow@tampabay.rr.com> (Birdstep)      |
+   |	      Kevin N. Shallow <kshallow@tampabay.rr.com>                 |
    +----------------------------------------------------------------------+
 */
 
@@ -25,7 +25,7 @@
 
 #if HAVE_UODBC
 
-/* checking in the same order as in configure.in */
+/* checking in the same order as in configure.ac */
 
 #if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35) /* Solid Server */
 
@@ -39,9 +39,7 @@
 # include <cli0defs.h>
 # include <cli0env.h>
 #elif defined(HAVE_SOLID_35)
-# if !defined(PHP_WIN32)
-#  include <sqlunix.h>
-# endif		/* end: #if !defined(PHP_WIN32) */
+# include <sqlunix.h>
 # include <sqltypes.h>
 # include <sqlucode.h>
 # include <sqlext.h>
@@ -121,20 +119,6 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
 
-#elif defined(HAVE_ODBC_ROUTER) /* ODBCRouter.com */
-
-#ifdef CHAR
-#undef CHAR
-#endif
-
-#ifdef SQLCHAR
-#undef SQLCHAR
-#endif
-
-#define ODBC_TYPE "ODBCRouter"
-#include <odbcsdk.h>
-#undef HAVE_SQL_EXTENDED_FETCH
-
 #elif defined(HAVE_OPENLINK) /* OpenLink ODBC drivers */
 
 #define ODBC_TYPE "Openlink"
@@ -149,23 +133,6 @@ PHP_FUNCTION(solid_fetch_prev);
 #ifndef SQLUSMALLINT
 #define SQLUSMALLINT UWORD
 #endif
-
-#elif defined(HAVE_BIRDSTEP) /* Raima Birdstep */
-
-#define ODBC_TYPE "Birdstep"
-#define UNIX
-/*
- * Extended Fetch in the Birdstep ODBC API is incapable of returning zend_long varchar (memo) fields.
- * So the following line has been commented-out to accommodate. - KNS
- *
- * #define HAVE_SQL_EXTENDED_FETCH 1
- */
-#include <sql.h>
-#include <sqlext.h>
-#define SQLINTEGER SDWORD
-#define SQLSMALLINT SWORD
-#define SQLUSMALLINT UWORD
-
 
 #elif defined(HAVE_DBMAKER) /* DBMaker */
 

@@ -22,14 +22,12 @@ phpinfo(INFO_MODULES);
 Phar
 
 Phar: PHP Archive support => enabled
-Phar EXT version => %s
 Phar API version => 1.1.1
-SVN revision => %cId: %s $
 Phar-based phar archives => enabled
 Tar-based phar archives => enabled
 ZIP-based phar archives => enabled
 gzip compression => disabled (install ext/zlib)
-bzip2 compression => disabled (install pecl/bz2)
+bzip2 compression => disabled (install ext/bz2)
 OpenSSL support => disabled (install ext/openssl)
 
 

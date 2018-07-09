@@ -69,10 +69,10 @@ static int scan(Scanner *s)
 struct placeholder {
 	char *pos;
 	size_t len;
-	int bindno;
 	size_t qlen;		/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
+	int bindno;
 	struct placeholder *next;
 };
 
@@ -85,7 +85,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 {
 	Scanner s;
 	char *ptr, *newbuffer;
-	int t;
+	ptrdiff_t t;
 	uint32_t bindno = 0;
 	int ret = 0;
 	size_t newbuffer_len;
@@ -102,7 +102,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
 		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS) {
 			if (t == PDO_PARSER_BIND) {
-				int len = s.cur - s.tok;
+				ptrdiff_t len = s.cur - s.tok;
 				if ((inquery < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
 					continue;
 				}
@@ -226,12 +226,12 @@ safe:
 							ret = -1;
 							strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 							if (buf) {
-								zend_string_release(buf);
+								zend_string_release_ex(buf, 0);
 							}
 							goto clean_up;
 						}
 						if (buf) {
-							zend_string_release(buf);
+							zend_string_release_ex(buf, 0);
 						}
 					} else {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
@@ -278,7 +278,7 @@ safe:
 								ret = -1;
 								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 								if (buf) {
-									zend_string_release(buf);
+									zend_string_release_ex(buf, 0);
 								}
 								goto clean_up;
 							}
@@ -286,7 +286,7 @@ safe:
 					}
 
 					if (buf) {
-						zend_string_release(buf);
+						zend_string_release_ex(buf, 0);
 					}
 				}
 			} else {

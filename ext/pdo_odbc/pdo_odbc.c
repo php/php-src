@@ -31,7 +31,7 @@
 #include "php_pdo_odbc_int.h"
 
 /* {{{ pdo_odbc_functions[] */
-const zend_function_entry pdo_odbc_functions[] = {
+static const zend_function_entry pdo_odbc_functions[] = {
 	PHP_FE_END
 };
 /* }}} */

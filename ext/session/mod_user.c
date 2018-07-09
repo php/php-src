@@ -22,7 +22,7 @@
 #include "php_session.h"
 #include "mod_user.h"
 
-ps_module ps_mod_user = {
+const ps_module ps_mod_user = {
 	PS_MOD_UPDATE_TIMESTAMP(user)
 };
 

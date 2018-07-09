@@ -1,11 +1,5 @@
 --TEST--
 Test support for PCRE marks
---SKIPIF--
-<?php
-if (version_compare(PCRE_VERSION, '8.1', '<')) {
-    die('skip PCRE_VERSION >= 8.1 is required for MARK support');
-}
-?>
 --FILE--
 <?php
 
@@ -33,7 +27,7 @@ var_dump(preg_replace_callback($regex, function($matches) {
 }, '_a__b__c__d_'));
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 array(5) {
   [0]=>

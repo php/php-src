@@ -36,7 +36,7 @@ foreach($inputs as $input) {
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- $case = default --

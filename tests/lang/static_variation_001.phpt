@@ -45,7 +45,7 @@ eval(' function f3() { static $c = array(1,2,3); var_dump($c); }');
 f3();
 
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   int(1)

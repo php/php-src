@@ -37,6 +37,8 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 
+using icu::Calendar;
+
 /* {{{ Global variables */
 U_CDECL_BEGIN
 zend_class_entry *TimeZone_ce_ptr = NULL;
@@ -96,7 +98,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 			goto error;
 		}
 		ZVAL_STR(&arg, u8str);
-		zend_call_method_with_1_params(ret, NULL, NULL, "__construct", NULL, &arg);
+		zend_call_method_with_1_params(ret, NULL, &Z_OBJCE_P(ret)->constructor, "__construct", NULL, &arg);
 		if (EG(exception)) {
 			spprintf(&message, 0,
 				"%s: DateTimeZone constructor threw exception", func);
@@ -152,7 +154,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = to->utimezone->clone();
@@ -162,7 +164,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 	} else if (Z_TYPE_P(zv_timezone) == IS_OBJECT &&
@@ -170,7 +172,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 
 		php_timezone_obj *tzobj = Z_PHPTIMEZONE_P(zv_timezone);
 
-		zval_dtor(&local_zv_tz);
+		zval_ptr_dtor_str(&local_zv_tz);
 		return timezone_convert_datetimezone(tzobj->type, tzobj, 0,
 			outside_error, func);
 	} else {
@@ -186,7 +188,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, status, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = TimeZone::createTimeZone(id);
@@ -196,7 +198,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		if (timeZone->getID(gottenId) != id) {
@@ -206,13 +208,13 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			delete timeZone;
 			return NULL;
 		}
 	}
 
-	zval_dtor(&local_zv_tz);
+	zval_ptr_dtor_str(&local_zv_tz);
 
 	return timeZone;
 }
@@ -295,8 +297,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(8);
 
 	to = Z_INTL_TIMEZONE_P(object);
 	tz = to->utimezone;
@@ -455,7 +456,7 @@ ZEND_END_ARG_INFO()
 /* {{{ TimeZone_class_functions
  * Every 'IntlTimeZone' class method has an entry in this table
  */
-static zend_function_entry TimeZone_class_functions[] = {
+static const zend_function_entry TimeZone_class_functions[] = {
 	PHP_ME(IntlTimeZone,				__construct,					ainfo_tz_void,				ZEND_ACC_PRIVATE)
 	PHP_ME_MAPPING(createTimeZone,		intltz_create_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(fromDateTimeZone,	intltz_from_date_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
@@ -512,7 +513,7 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 		return;
 	}
 
-	memcpy(&TimeZone_handlers, zend_get_std_object_handlers(),
+	memcpy(&TimeZone_handlers, &std_object_handlers,
 		sizeof TimeZone_handlers);
 	TimeZone_handlers.offset = XtOffsetOf(TimeZone_object, zo);
 	TimeZone_handlers.clone_obj = TimeZone_clone_obj;

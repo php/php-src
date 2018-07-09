@@ -103,13 +103,6 @@ if test "$PHP_APXS2" != "no"; then
     SAPI_SHARED=libs/libphp7.so
     INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
     ;;
-  *beos*)
-    if test -f _APP_; then `rm _APP_`; fi
-    `ln -s $APXS_BINDIR/httpd _APP_`
-    EXTRA_LIBS="$EXTRA_LIBS _APP_"
-    PHP_SELECT_SAPI(apache2handler, shared, mod_php7.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
-    INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
-    ;;
   *)
     PHP_SELECT_SAPI(apache2handler, shared, mod_php7.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS) 
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"

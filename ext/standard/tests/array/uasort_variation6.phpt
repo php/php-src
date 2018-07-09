@@ -50,7 +50,7 @@ var_dump( uasort($temp_array, 'cmp_function') );  // expecting: bool(true)
 var_dump($temp_array);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : sorting array having different subarrays ***
 bool(true)
 array(8) {

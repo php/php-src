@@ -42,8 +42,8 @@ void php_clear_warnings(MYSQLI_WARNING *w)
 
 	while (w) {
 		n = w;
-		zval_dtor(&(w->reason));
-		zval_dtor(&(w->sqlstate));
+		zval_ptr_dtor_str(&(w->reason));
+		zval_ptr_dtor_str(&(w->sqlstate));
 		w = w->next;
 		efree(n);
 	}
@@ -144,8 +144,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 
 		/* 1. Here comes the error no */
 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
-		convert_to_long_ex(entry);
-		errno = Z_LVAL_P(entry);
+		errno = zval_get_long(entry);
 		zend_hash_move_forward(Z_ARRVAL(row));
 
 		/* 2. Here comes the reason */
@@ -257,10 +256,7 @@ PHP_METHOD(mysqli_warning, __construct)
 	MYSQLI_WARNING  *w;
 	MYSQLI_RESOURCE *mysqli_resource;
 
-	if (ZEND_NUM_ARGS() != 1) {
-		WRONG_PARAM_COUNT;
-	}
-	if (zend_parse_parameters(1, "o", &z)==FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &z) == FAILURE) {
 		return;
 	}
 	obj = Z_MYSQLI_P(z);

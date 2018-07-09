@@ -21,8 +21,8 @@
 
 /*
  * Note
- * 
- * RUSAGE_CHILDREN is not implemented, and the RUSAGE_THREAD will 
+ *
+ * RUSAGE_CHILDREN is not implemented, and the RUSAGE_THREAD will
  * therefore instead be used instead to emulate the behavior.
  */
 

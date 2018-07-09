@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -80,6 +80,6 @@ _zip_stat_merge(zip_stat_t *dst, const zip_stat_t *src, zip_error_t *error)
         dst->flags = src->flags;
     }
     dst->valid |= src->valid;
-    
+
     return 0;
 }

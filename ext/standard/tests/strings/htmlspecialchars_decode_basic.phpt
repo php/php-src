@@ -29,7 +29,7 @@ var_dump( htmlspecialchars_decode($double_quote_string, ENT_QUOTES) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing htmlspecialchars_decode() : basic functionality ***
 string(92) "Roy&#039;s height > Sam&#039;s height. 13 < 25. 1111 & 0000 = 0000. " double quoted string ""
 string(92) "Roy&#039;s height > Sam&#039;s height. 13 < 25. 1111 & 0000 = 0000. " double quoted string ""

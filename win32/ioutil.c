@@ -38,7 +38,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- */ 
+ */
 
 #include <assert.h>
 #include <stdlib.h>
@@ -57,6 +57,7 @@
 #include "win32/time.h"
 #include "win32/ioutil.h"
 #include "win32/codepage.h"
+#include "main/streams/php_stream_plain_wrapper.h"
 
 #include <pathcch.h>
 
@@ -111,10 +112,7 @@ PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_iout
 	* UNIX semantics. In particular, this ensures that the file can
 	* be deleted even whilst it's open.
 	*/
-	/* opts->share = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE; */
-	/* XXX No UINX behavior  Good to know it's doable. 
-	   Not being done as this means a behavior change. Should be evaluated properly. */
-	opts->share = FILE_SHARE_READ | FILE_SHARE_WRITE;
+	opts->share = PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE;
 
 	switch (flags & (_O_CREAT | _O_EXCL | _O_TRUNC)) {
 		case 0:
@@ -285,33 +283,20 @@ PW32IO int php_win32_ioutil_close(int fd)
 	return result;
 }/*}}}*/
 
-#if 0
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
-	int ret = 0;
-	DWORD err = 0;
+	size_t path_len;
+	const wchar_t *my_path;
+
+	if (!path) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return -1;
+	}
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
-	/* TODO extend with mode usage */
-	if (!CreateDirectoryW(path, NULL)) {
-		err = GetLastError();
-		ret = -1;
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
-
-	return ret;
-}/*}}}*/
-#endif
-
-PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
-{/*{{{*/
-	size_t pathw_len = 0;
-	wchar_t *pathw = php_win32_ioutil_conv_any_to_w(path, 0, &pathw_len);
-	int ret = 0;
-	DWORD err = 0;
-
-	if (pathw_len < _MAX_PATH && pathw_len > _MAX_PATH - 12) {
+	path_len = wcslen(path);
+	if (path_len < _MAX_PATH && path_len > _MAX_PATH - 12) {
 		/* Special case here. From the doc:
 
 		 "When using an API to create a directory, the specified path cannot be
@@ -321,68 +306,117 @@ PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 		 already needs to be a long path. The given path is already normalized
 		 and prepared, need only to prefix it.
 		 */
-		wchar_t *tmp = (wchar_t *) malloc((pathw_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
+		wchar_t *tmp = (wchar_t *) malloc((path_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
 		if (!tmp) {
-			free(pathw);
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
 			return -1;
 		}
 
 		memmove(tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-		memmove(tmp+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, pathw, pathw_len * sizeof(wchar_t));
-		pathw_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
-		tmp[pathw_len] = L'\0';
+		memmove(tmp+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, path, path_len * sizeof(wchar_t));
+		path_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+		tmp[path_len] = L'\0';
 
-		free(pathw);
-		pathw = tmp;
+		my_path = tmp;
+	} else {
+		my_path = path;
 	}
 
-	/* TODO extend with mode usage */
-	if (!pathw) {
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+	if (!CreateDirectoryW(my_path, NULL)) {
+		DWORD err = GetLastError();
+		if (my_path != path) {
+			free((void *)my_path);
+		}
+		SET_ERRNO_FROM_WIN32_CODE(err);
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
-
-	if (!CreateDirectoryW(pathw, NULL)) {
-		err = GetLastError();
-		ret = -1;
-	}
-	free(pathw);
-
-	if (0 > ret) {
-		SET_ERRNO_FROM_WIN32_CODE(err);
+	if (my_path != path) {
+		free((void *)my_path);
 	}
 
-	return ret;
+	return 0;
 }/*}}}*/
 
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 {/*{{{*/
-	int ret = 0;
 	DWORD err = 0;
+	HANDLE h;
+	BY_HANDLE_FILE_INFORMATION info;
+	FILE_DISPOSITION_INFO disposition;
+	BOOL status;
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
-	if (!DeleteFileW(path)) {
+	h = CreateFileW(path,
+					FILE_READ_ATTRIBUTES | FILE_WRITE_ATTRIBUTES | DELETE,
+					PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE,
+					NULL,
+					OPEN_EXISTING,
+					FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS,
+					NULL);
+
+	if (INVALID_HANDLE_VALUE == h) {
 		err = GetLastError();
-		ret = -1;
 		SET_ERRNO_FROM_WIN32_CODE(err);
+		return -1;
 	}
 
-	return ret;
+	if (!GetFileInformationByHandle(h, &info)) {
+		err = GetLastError();
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return -1;
+	}
+
+	if (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+		/* TODO Handle possible reparse point. */
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_DIRECTORY_NOT_SUPPORTED);
+		return -1;
+	}
+
+#if 0
+	/* XXX BC breach! */
+	if (info.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
+		/* Remove read-only attribute */
+		FILE_BASIC_INFO basic = { 0 };
+
+		basic.FileAttributes = info.dwFileAttributes & ~(FILE_ATTRIBUTE_READONLY);
+
+		status = SetFileInformationByHandle(h, FileBasicInfo, &basic, sizeof basic);
+		if (!status) {
+			err = GetLastError();
+			SET_ERRNO_FROM_WIN32_CODE(err);
+			CloseHandle(h);
+			return -1;
+		}
+	}
+#endif
+
+	/* Try to set the delete flag. */
+	disposition.DeleteFile = TRUE;
+	status = SetFileInformationByHandle(h, FileDispositionInfo, &disposition, sizeof disposition);
+	if (!status) {
+		err = GetLastError();
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return -1;
+	}
+
+	CloseHandle(h);
+
+	return 0;
 }/*}}}*/
 
 PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;
-	DWORD err = 0;
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	if (!RemoveDirectoryW(path)) {
-		err = GetLastError();
+		DWORD err = GetLastError();
 		ret = -1;
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
@@ -393,10 +427,9 @@ PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;
-	DWORD err = 0;
-	
+
 	if (!SetCurrentDirectoryW(path)) {
-		err = GetLastError();
+		DWORD err = GetLastError();
 		ret = -1;
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
@@ -407,14 +440,13 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname)
 {/*{{{*/
 	int ret = 0;
-	DWORD err = 0;
-	
+
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1, 0)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, -1, 0)
 
 
 	if (!MoveFileExW(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED)) {
-		err = GetLastError();
+		DWORD err = GetLastError();
 		ret = -1;
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
@@ -447,7 +479,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len)
 		}
 		buf = tmp_buf;
 	}
-	
+
 	if (!GetCurrentDirectoryW(tmp_len, buf)) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
@@ -468,7 +500,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	if (len == 0) {
 		return 0;
 	}
-	
+
 	start = path;
 
 	/* Don't really care about the path normalization, pure parsing here. */
@@ -600,43 +632,158 @@ BOOL php_win32_ioutil_init(void)
 	return TRUE;
 }/*}}}*/
 
-/* an extended version could be implemented, for now direct functions can be used. */
-#if 0
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
-{
-	return _waccess(path, mode);
-}
-#endif
+{/*{{{*/
+	DWORD attr;
 
-#if 0
-PW32IO HANDLE php_win32_ioutil_findfirstfile_w(char *path, WIN32_FIND_DATA *data)
-{
-	HANDLE ret = INVALID_HANDLE_VALUE;
-	DWORD err;
+	if ((mode & X_OK) == X_OK) {
+		DWORD type;
+		return GetBinaryTypeW(path, &type) ? 0 : -1;
+	}
 
-	if (!path) {
+	attr = GetFileAttributesW(path);
+	if (attr == INVALID_FILE_ATTRIBUTES) {
+		DWORD err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return -1;
+	}
+
+	if (F_OK == mode) {
+		return 0;
+	}
+
+	if ((mode &W_OK) == W_OK && (attr & FILE_ATTRIBUTE_READONLY) == FILE_ATTRIBUTE_READONLY) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED);
+		return -1;
+	}
+
+	return 0;
+}/*}}}*/
+
+PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode)
+{/*{{{*/
+	FILE *ret;
+	char modea[16] = {0};
+	int err = 0, fd, flags, i = 0;
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, NULL, 0)
+
+	/* Using the converter from streams, char only. */
+	while (i < sizeof(modea)-1 && mode[i]) {
+		modea[i] = (char)mode[i];
+		i++;
+	}
+	if (SUCCESS != php_stream_parse_fopen_modes(modea, &flags)) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-		return ret;
+		return NULL;
 	}
 
-	pathw = php_win32_ioutil_any_to_w(path);
-
-	if (!pathw) {
+	fd = php_win32_ioutil_open_w(path, flags, 0666);
+	if (0 > fd) {
 		err = GetLastError();
-		SET_ERRNO_FROM_WIN32_CODE(ret);
-		return ret;
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
 	}
 
-		ret = FindFirstFileW(pathw, data);
-	
-	if (INVALID_HANDLE_VALUE == ret && path) {
-		ret = FindFirstFileA(path, data);
+	ret = _wfdopen(fd, mode);
+	if (!ret) {
+		err = GetLastError();
+		php_win32_ioutil_close(fd);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
 	}
 
-	/* XXX set errno */
 	return ret;
-}
-#endif
+}/*}}}*/
+
+static size_t php_win32_ioutil_realpath_h(HANDLE *h, wchar_t **resolved)
+{/*{{{*/
+	wchar_t ret[PHP_WIN32_IOUTIL_MAXPATHLEN], *ret_real;
+	DWORD ret_len, ret_real_len;
+
+	ret_len = GetFinalPathNameByHandleW(h, ret, PHP_WIN32_IOUTIL_MAXPATHLEN-1, FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+	if (0 == ret_len) {
+		DWORD err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return (size_t)-1;
+	} else if (ret_len > PHP_WIN32_IOUTIL_MAXPATHLEN) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return (size_t)-1;
+	}
+
+	if (NULL == *resolved) {
+		/* ret is expected to be either NULL or a buffer of capable size. */
+		*resolved = (wchar_t *) malloc((ret_len + 1)*sizeof(wchar_t));
+		if (!*resolved) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+			return (size_t)-1;
+		}
+	}
+
+	ret_real = ret;
+	ret_real_len = ret_len;
+	if (0 == wcsncmp(ret, PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW, PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW)) {
+		ret_real += (PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW - 2);
+		ret_real[0] = L'\\';
+		ret_real_len -= (PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW - 2);
+	} else if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(ret, ret_len)) {
+		ret_real += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+		ret_real_len -= PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+	}
+	memmove(*resolved, ret_real, (ret_real_len+1)*sizeof(wchar_t));
+
+	return ret_real_len;
+}/*}}}*/
+
+PW32IO wchar_t *php_win32_ioutil_realpath_w(const wchar_t *path, wchar_t *resolved)
+{/*{{{*/
+	return php_win32_ioutil_realpath_w_ex0(path, resolved, NULL);
+}/*}}}*/
+
+PW32IO wchar_t *php_win32_ioutil_realpath_w_ex0(const wchar_t *path, wchar_t *resolved, PBY_HANDLE_FILE_INFORMATION info)
+{/*{{{*/
+	HANDLE h;
+	size_t ret_len;
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, NULL, 0)
+
+	h = CreateFileW(path,
+					0,
+					0,
+					NULL,
+					OPEN_EXISTING,
+					FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS,
+					NULL);
+	if (INVALID_HANDLE_VALUE == h) {
+		DWORD err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	ret_len = php_win32_ioutil_realpath_h(h, &resolved);
+	if ((size_t)-1 == ret_len) {
+		DWORD err = GetLastError();
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	if (NULL != info && !GetFileInformationByHandle(h, info)) {
+		DWORD err = GetLastError();
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	CloseHandle(h);
+
+	return resolved;
+}/*}}}*/
+
+PW32IO char *realpath(const char *path, char *resolved)
+{/*{{{*/
+	return php_win32_ioutil_realpath(path, resolved);
+}/*}}}*/
 
 /*
  * Local variables:

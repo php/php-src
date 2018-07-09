@@ -15,7 +15,7 @@ Testing boolval()
 	var_dump(boolval(new stdClass()));
 	var_dump(boolval(STDIN));
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

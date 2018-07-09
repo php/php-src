@@ -67,7 +67,7 @@ mysqlnd_minfo_dump_plugin_stats(zval *el, void * argument)
 		php_info_print_table_header(2, buf, "");
 		mysqlnd_minfo_print_hash(&values);
 		php_info_print_table_end();
-		zval_dtor(&values);
+		zend_array_destroy(Z_ARR(values));
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }

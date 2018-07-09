@@ -99,7 +99,7 @@ fclose($fp);
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_space() : usage variations ***
 
 -- Iteration 1 --

@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: ascmagic.c,v 1.97 2016/06/27 20:56:25 christos Exp $")
+FILE_RCSID("@(#)$File: ascmagic.c,v 1.98 2017/11/02 20:25:39 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -68,37 +68,41 @@ trim_nuls(const unsigned char *buf, size_t nbytes)
 }
 
 protected int
-file_ascmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes,
-	int text)
+file_ascmagic(struct magic_set *ms, const struct buffer *b, int text)
 {
 	unichar *ubuf = NULL;
 	size_t ulen = 0;
 	int rv = 1;
+	struct buffer bb;
 
 	const char *code = NULL;
 	const char *code_mime = NULL;
 	const char *type = NULL;
 
-	nbytes = trim_nuls(buf, nbytes);
+	bb = *b;
+	bb.flen = trim_nuls(b->fbuf, b->flen);
 
 	/* If file doesn't look like any sort of text, give up. */
-	if (file_encoding(ms, buf, nbytes, &ubuf, &ulen, &code, &code_mime,
+	if (file_encoding(ms, &bb, &ubuf, &ulen, &code, &code_mime,
 	    &type) == 0)
 		rv = 0;
         else
-		rv = file_ascmagic_with_encoding(ms, buf, nbytes, ubuf, ulen, code,
-						 type, text);
+		rv = file_ascmagic_with_encoding(ms, &bb,
+		    ubuf, ulen, code, type, text);
 
-	free(ubuf);
+	efree(ubuf);
 
 	return rv;
 }
 
 protected int
-file_ascmagic_with_encoding(struct magic_set *ms, const unsigned char *buf,
-    size_t nbytes, unichar *ubuf, size_t ulen, const char *code,
+file_ascmagic_with_encoding(struct magic_set *ms, 
+    const struct buffer *b, unichar *ubuf, size_t ulen, const char *code,
     const char *type, int text)
 {
+	struct buffer bb;
+	const unsigned char *buf = b->fbuf;
+	size_t nbytes = b->flen;
 	unsigned char *utf8_buf = NULL, *utf8_end;
 	size_t mlen, i;
 	int rv = -1;
@@ -140,10 +144,13 @@ file_ascmagic_with_encoding(struct magic_set *ms, const unsigned char *buf,
 		if ((utf8_end = encode_utf8(utf8_buf, mlen, ubuf, ulen))
 		    == NULL)
 			goto done;
-		if ((rv = file_softmagic(ms, utf8_buf,
-		    (size_t)(utf8_end - utf8_buf), NULL, NULL,
+		buffer_init(&bb, b->fd, utf8_buf,
+		    (size_t)(utf8_end - utf8_buf));
+
+		if ((rv = file_softmagic(ms, &bb, NULL, NULL,
 		    TEXTTEST, text)) == 0)
 			rv = -1;
+		buffer_fini(&bb);
 		if ((ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION))) {
 			rv = rv == -1 ? 0 : 1;
 			goto done;

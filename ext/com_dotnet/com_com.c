@@ -116,8 +116,7 @@ PHP_FUNCTION(com_create_instance)
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Flags", sizeof("Flags")-1))) {
-			convert_to_long_ex(tmp);
-			ctx = (CLSCTX)Z_LVAL_P(tmp);
+			ctx = (CLSCTX)zval_get_long(tmp);
 		}
 	}
 
@@ -565,7 +564,8 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 					zval *arg = &args[nargs - i - 1];
 
 					ZVAL_DEREF(arg);
-					SEPARATE_ZVAL_NOREF(arg);
+					zval_ptr_dtor(arg);
+					ZVAL_NULL(arg);
 
 					/* if the variant is pointing at the byref_vals, we need to map
 					 * the pointee value as a zval; otherwise, the value is pointing

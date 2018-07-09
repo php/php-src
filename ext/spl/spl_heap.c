@@ -97,9 +97,7 @@ static void spl_ptr_heap_zval_dtor(zval *elem) { /* {{{ */
 /* }}} */
 
 static void spl_ptr_heap_zval_ctor(zval *elem) { /* {{{ */
-	if (Z_REFCOUNTED_P(elem)) {
-		Z_ADDREF_P(elem);
-	}
+	Z_TRY_ADDREF_P(elem);
 }
 /* }}} */
 
@@ -365,7 +363,7 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 	zend_class_entry  *parent = class_type;
 	int                inherited = 0;
 
-	intern = ecalloc(1, sizeof(spl_heap_object) + zend_object_properties_size(parent));
+	intern = zend_object_alloc(sizeof(spl_heap_object), parent);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -490,19 +488,18 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 		rebuild_object_properties(&intern->std);
 	}
 
-	ALLOC_HASHTABLE(debug_info);
-	ZEND_INIT_SYMTABLE_EX(debug_info, zend_hash_num_elements(intern->std.properties) + 1, 0);
+	debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 1);
 	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
 	pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1);
 	ZVAL_LONG(&tmp, intern->flags);
 	zend_hash_update(debug_info, pnstr, &tmp);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1);
 	ZVAL_BOOL(&tmp, intern->heap->flags&SPL_HEAP_CORRUPTED);
 	zend_hash_update(debug_info, pnstr, &tmp);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	array_init(&heap_array);
 
@@ -515,7 +512,7 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 
 	pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1);
 	zend_hash_update(debug_info, pnstr, &heap_array);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	return debug_info;
 }
@@ -527,7 +524,7 @@ static HashTable *spl_heap_object_get_gc(zval *obj, zval **gc_data, int *gc_data
 	*gc_data = intern->heap->elements;
 	*gc_data_count = intern->heap->count;
 
-	return std_object_handlers.get_properties(obj);
+	return zend_std_get_properties(obj);
 }
 /* }}} */
 
@@ -591,7 +588,7 @@ SPL_METHOD(SplHeap, insert)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+	Z_TRY_ADDREF_P(value);
 	spl_ptr_heap_insert(intern->heap, value, getThis());
 
 	RETURN_TRUE;
@@ -642,8 +639,8 @@ SPL_METHOD(SplPriorityQueue, insert)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(data)) Z_ADDREF_P(data);
-	if (Z_REFCOUNTED_P(priority)) Z_ADDREF_P(priority);
+	Z_TRY_ADDREF_P(data);
+	Z_TRY_ADDREF_P(priority);
 
 	array_init(&elem);
 	add_assoc_zval_ex(&elem, "data", sizeof("data") - 1, data);
@@ -688,8 +685,7 @@ SPL_METHOD(SplPriorityQueue, extract)
 		return;
 	}
 
-	ZVAL_DEREF(value_out);
-	ZVAL_COPY(return_value, value_out);
+	ZVAL_COPY_DEREF(return_value, value_out);
 	zval_ptr_dtor(&value);
 }
 /* }}} */
@@ -726,8 +722,7 @@ SPL_METHOD(SplPriorityQueue, top)
 		return;
 	}
 
-	ZVAL_DEREF(value_out);
-	ZVAL_COPY(return_value, value_out);
+	ZVAL_COPY_DEREF(return_value, value_out);
 }
 /* }}} */
 
@@ -840,8 +835,7 @@ SPL_METHOD(SplHeap, top)
 		return;
 	}
 
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 }
 /* }}} */
 
@@ -1029,8 +1023,7 @@ SPL_METHOD(SplHeap, current)
 	if (!intern->heap->count || Z_ISUNDEF_P(element)) {
 		RETURN_NULL();
 	} else {
-		ZVAL_DEREF(element);
-		ZVAL_COPY(return_value, element);
+		ZVAL_COPY_DEREF(return_value, element);
 	}
 }
 /* }}} */
@@ -1056,14 +1049,13 @@ SPL_METHOD(SplPriorityQueue, current)
 			RETURN_NULL();
 		}
 
-		ZVAL_DEREF(data);
-		ZVAL_COPY(return_value, data);
+		ZVAL_COPY_DEREF(return_value, data);
 	}
 }
 /* }}} */
 
 /* iterator handler table */
-zend_object_iterator_funcs spl_heap_it_funcs = {
+static const zend_object_iterator_funcs spl_heap_it_funcs = {
 	spl_heap_it_dtor,
 	spl_heap_it_valid,
 	spl_heap_it_get_current_data,
@@ -1073,7 +1065,7 @@ zend_object_iterator_funcs spl_heap_it_funcs = {
 	NULL
 };
 
-zend_object_iterator_funcs spl_pqueue_it_funcs = {
+static const zend_object_iterator_funcs spl_pqueue_it_funcs = {
 	spl_heap_it_dtor,
 	spl_heap_it_valid,
 	spl_pqueue_it_get_current_data,
@@ -1202,7 +1194,7 @@ static const zend_function_entry spl_funcs_SplHeap[] = {
 PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 {
 	REGISTER_SPL_STD_CLASS_EX(SplHeap, spl_heap_object_new, spl_funcs_SplHeap);
-	memcpy(&spl_handler_SplHeap, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&spl_handler_SplHeap, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplHeap.offset         = XtOffsetOf(spl_heap_object, std);
 	spl_handler_SplHeap.clone_obj      = spl_heap_object_clone;
@@ -1224,7 +1216,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_ce_SplMinHeap->get_iterator = spl_heap_get_iterator;
 
 	REGISTER_SPL_STD_CLASS_EX(SplPriorityQueue, spl_heap_object_new, spl_funcs_SplPriorityQueue);
-	memcpy(&spl_handler_SplPriorityQueue, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&spl_handler_SplPriorityQueue, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplPriorityQueue.offset         = XtOffsetOf(spl_heap_object, std);
 	spl_handler_SplPriorityQueue.clone_obj      = spl_heap_object_clone;

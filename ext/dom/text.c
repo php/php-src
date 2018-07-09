@@ -48,7 +48,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMText extends DOMCharacterData
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1312295772
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1312295772
 * Since:
 */
 
@@ -61,7 +61,7 @@ const zend_function_entry php_dom_text_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMText::__construct([string value]); */
+/* {{{ proto DOMText::__construct([string value]); */
 PHP_METHOD(domtext, __construct)
 {
 
@@ -194,7 +194,7 @@ PHP_FUNCTION(dom_text_split_text)
 }
 /* }}} end dom_text_split_text */
 
-/* {{{ proto boolean dom_text_is_whitespace_in_element_content()
+/* {{{ proto bool dom_text_is_whitespace_in_element_content()
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */

@@ -58,5 +58,5 @@ mysqli_float_handling - ensure 4 byte float is handled correctly
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 OK

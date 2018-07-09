@@ -15,6 +15,6 @@ namespace Fiz\Biz\Buz {
     new B;
 }
 
---EXPECTF--
+--EXPECT--
 Foo\Bar\A::__construct
 Foo\Bar\Baz\B::__construct

@@ -9,7 +9,7 @@ if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU(INTL_SHARED_LIBADD)
   PHP_SUBST(INTL_SHARED_LIBADD)
   PHP_REQUIRE_CXX()
-  INTL_COMMON_FLAGS="$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  INTL_COMMON_FLAGS="$ICU_INCS $ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   if test "$icu_version" -ge "4002"; then
     icu_spoof_src=" spoofchecker/spoofchecker_class.c \
     spoofchecker/spoofchecker.c\

@@ -37,7 +37,7 @@ foreach($inputs as $key =>$value) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strftime() : usage variation ***
 
 --Newline character--

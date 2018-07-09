@@ -1,698 +1,698 @@
 Unicode Properties (from Unicode Version: 8.0.0)
 
-  1: Any
-  2: Assigned
-  3: C
-  4: Cc
-  5: Cf
-  6: Cn
-  7: Co
-  8: Cs
-  9: L
- 10: LC
- 11: Ll
- 12: Lm
- 13: Lo
- 14: Lt
- 15: Lu
- 16: M
- 17: Mc
- 18: Me
- 19: Mn
- 20: N
- 21: Nd
- 22: Nl
- 23: No
- 24: P
- 25: Pc
- 26: Pd
- 27: Pe
- 28: Pf
- 29: Pi
- 30: Po
- 31: Ps
- 32: S
- 33: Sc
- 34: Sk
- 35: Sm
- 36: So
- 37: Z
- 38: Zl
- 39: Zp
- 40: Zs
- 41: Math
- 42: Alphabetic
- 43: Lowercase
- 44: Uppercase
- 45: Cased
- 46: Case_Ignorable
+ 15: ASCII_Hex_Digit
+ 16: Ahom
+ 17: Alphabetic
+ 18: Anatolian_Hieroglyphs
+ 19: Any
+ 20: Arabic
+ 21: Armenian
+ 22: Assigned
+ 23: Avestan
+ 24: Balinese
+ 25: Bamum
+ 26: Bassa_Vah
+ 27: Batak
+ 28: Bengali
+ 29: Bidi_Control
+ 30: Bopomofo
+ 31: Brahmi
+ 32: Braille
+ 33: Buginese
+ 34: Buhid
+ 35: C
+ 36: Canadian_Aboriginal
+ 37: Carian
+ 38: Case_Ignorable
+ 39: Cased
+ 40: Caucasian_Albanian
+ 41: Cc
+ 42: Cf
+ 43: Chakma
+ 44: Cham
+ 45: Changes_When_Casefolded
+ 46: Changes_When_Casemapped
  47: Changes_When_Lowercased
- 48: Changes_When_Uppercased
- 49: Changes_When_Titlecased
- 50: Changes_When_Casefolded
- 51: Changes_When_Casemapped
- 52: ID_Start
- 53: ID_Continue
- 54: XID_Start
- 55: XID_Continue
- 56: Default_Ignorable_Code_Point
- 57: Grapheme_Extend
- 58: Grapheme_Base
- 59: Grapheme_Link
- 60: Common
- 61: Latin
- 62: Greek
- 63: Cyrillic
- 64: Armenian
- 65: Hebrew
- 66: Arabic
- 67: Syriac
- 68: Thaana
- 69: Devanagari
- 70: Bengali
- 71: Gurmukhi
- 72: Gujarati
- 73: Oriya
- 74: Tamil
- 75: Telugu
- 76: Kannada
- 77: Malayalam
- 78: Sinhala
- 79: Thai
- 80: Lao
- 81: Tibetan
- 82: Myanmar
- 83: Georgian
- 84: Hangul
- 85: Ethiopic
- 86: Cherokee
- 87: Canadian_Aboriginal
- 88: Ogham
- 89: Runic
- 90: Khmer
- 91: Mongolian
- 92: Hiragana
- 93: Katakana
- 94: Bopomofo
- 95: Han
- 96: Yi
- 97: Old_Italic
- 98: Gothic
- 99: Deseret
-100: Inherited
-101: Tagalog
-102: Hanunoo
-103: Buhid
-104: Tagbanwa
-105: Limbu
-106: Tai_Le
-107: Linear_B
-108: Ugaritic
-109: Shavian
-110: Osmanya
-111: Cypriot
-112: Braille
-113: Buginese
-114: Coptic
-115: New_Tai_Lue
-116: Glagolitic
-117: Tifinagh
-118: Syloti_Nagri
-119: Old_Persian
-120: Kharoshthi
-121: Balinese
-122: Cuneiform
-123: Phoenician
-124: Phags_Pa
-125: Nko
-126: Sundanese
-127: Lepcha
-128: Ol_Chiki
-129: Vai
-130: Saurashtra
-131: Kayah_Li
-132: Rejang
-133: Lycian
-134: Carian
-135: Lydian
-136: Cham
-137: Tai_Tham
-138: Tai_Viet
-139: Avestan
-140: Egyptian_Hieroglyphs
-141: Samaritan
-142: Lisu
-143: Bamum
-144: Javanese
-145: Meetei_Mayek
-146: Imperial_Aramaic
-147: Old_South_Arabian
-148: Inscriptional_Parthian
-149: Inscriptional_Pahlavi
-150: Old_Turkic
-151: Kaithi
-152: Batak
-153: Brahmi
-154: Mandaic
-155: Chakma
-156: Meroitic_Cursive
-157: Meroitic_Hieroglyphs
-158: Miao
-159: Sharada
-160: Sora_Sompeng
-161: Takri
-162: Caucasian_Albanian
-163: Bassa_Vah
-164: Duployan
-165: Elbasan
-166: Grantha
-167: Pahawh_Hmong
-168: Khojki
-169: Linear_A
-170: Mahajani
-171: Manichaean
-172: Mende_Kikakui
-173: Modi
-174: Mro
-175: Old_North_Arabian
-176: Nabataean
-177: Palmyrene
-178: Pau_Cin_Hau
-179: Old_Permic
-180: Psalter_Pahlavi
-181: Siddham
-182: Khudawadi
-183: Tirhuta
-184: Warang_Citi
-185: Ahom
-186: Anatolian_Hieroglyphs
-187: Hatran
-188: Multani
-189: Old_Hungarian
-190: SignWriting
-191: White_Space
-192: Bidi_Control
-193: Join_Control
-194: Dash
-195: Hyphen
-196: Quotation_Mark
-197: Terminal_Punctuation
-198: Other_Math
-199: Hex_Digit
-200: ASCII_Hex_Digit
-201: Other_Alphabetic
-202: Ideographic
-203: Diacritic
-204: Extender
-205: Other_Lowercase
-206: Other_Uppercase
-207: Noncharacter_Code_Point
-208: Other_Grapheme_Extend
-209: IDS_Binary_Operator
-210: IDS_Trinary_Operator
-211: Radical
-212: Unified_Ideograph
-213: Other_Default_Ignorable_Code_Point
-214: Deprecated
-215: Soft_Dotted
-216: Logical_Order_Exception
-217: Other_ID_Start
-218: Other_ID_Continue
-219: STerm
-220: Variation_Selector
-221: Pattern_White_Space
-222: Pattern_Syntax
-223: Unknown
-224: Aghb
-225: AHex
-226: Arab
-227: Armi
-228: Armn
-229: Avst
-230: Bali
-231: Bamu
-232: Bass
-233: Batk
-234: Beng
-235: Bidi_C
-236: Bopo
-237: Brah
-238: Brai
-239: Bugi
-240: Buhd
-241: Cakm
-242: Cans
-243: Cari
-244: Cased_Letter
-245: Cher
-246: CI
-247: Close_Punctuation
-248: Combining_Mark
-249: Connector_Punctuation
-250: Control
-251: Copt
-252: Cprt
-253: Currency_Symbol
-254: CWCF
-255: CWCM
-256: CWL
-257: CWT
-258: CWU
-259: Cyrl
-260: Dash_Punctuation
-261: Decimal_Number
-262: Dep
-263: Deva
-264: DI
-265: Dia
-266: Dsrt
-267: Dupl
-268: Egyp
-269: Elba
-270: Enclosing_Mark
-271: Ethi
-272: Ext
-273: Final_Punctuation
-274: Format
-275: Geor
-276: Glag
-277: Goth
-278: Gran
-279: Gr_Base
-280: Grek
-281: Gr_Ext
-282: Gr_Link
-283: Gujr
-284: Guru
-285: Hang
-286: Hani
-287: Hano
-288: Hatr
-289: Hebr
-290: Hex
-291: Hira
-292: Hluw
-293: Hmng
-294: Hung
-295: IDC
-296: Ideo
-297: IDS
-298: IDSB
-299: IDST
-300: Initial_Punctuation
-301: Ital
-302: Java
-303: Join_C
-304: Kali
-305: Kana
-306: Khar
-307: Khmr
-308: Khoj
-309: Knda
-310: Kthi
-311: Lana
-312: Laoo
-313: Latn
-314: Lepc
-315: Letter
-316: Letter_Number
-317: Limb
-318: Lina
-319: Linb
-320: Line_Separator
-321: LOE
-322: Lowercase_Letter
-323: Lyci
-324: Lydi
-325: Mahj
-326: Mand
-327: Mani
-328: Mark
-329: Math_Symbol
-330: Mend
-331: Merc
-332: Mero
-333: Mlym
-334: Modifier_Letter
-335: Modifier_Symbol
-336: Mong
-337: Mroo
-338: Mtei
-339: Mult
-340: Mymr
-341: Narb
-342: Nbat
-343: NChar
-344: Nkoo
-345: Nonspacing_Mark
-346: Number
-347: OAlpha
-348: ODI
-349: Ogam
-350: OGr_Ext
-351: OIDC
-352: OIDS
-353: Olck
-354: OLower
-355: OMath
-356: Open_Punctuation
-357: Orkh
-358: Orya
-359: Osma
-360: Other
-361: Other_Letter
-362: Other_Number
-363: Other_Punctuation
-364: Other_Symbol
-365: OUpper
-366: Palm
-367: Paragraph_Separator
-368: Pat_Syn
-369: Pat_WS
-370: Pauc
-371: Perm
-372: Phag
-373: Phli
-374: Phlp
-375: Phnx
-376: Plrd
-377: Private_Use
-378: Prti
-379: Punctuation
-380: Qaac
-381: Qaai
-382: QMark
-383: Rjng
-384: Runr
-385: Samr
-386: Sarb
-387: Saur
-388: SD
-389: Separator
-390: Sgnw
-391: Shaw
-392: Shrd
-393: Sidd
-394: Sind
-395: Sinh
-396: Sora
-397: Space_Separator
-398: Spacing_Mark
-399: Sund
-400: Surrogate
-401: Sylo
-402: Symbol
-403: Syrc
-404: Tagb
-405: Takr
-406: Tale
-407: Talu
-408: Taml
-409: Tavt
-410: Telu
-411: Term
-412: Tfng
-413: Tglg
-414: Thaa
-415: Tibt
-416: Tirh
-417: Titlecase_Letter
-418: Ugar
-419: UIdeo
-420: Unassigned
-421: Uppercase_Letter
-422: Vaii
-423: VS
-424: Wara
-425: WSpace
-426: XIDC
-427: XIDS
-428: Xpeo
-429: Xsux
-430: Yiii
-431: Zinh
-432: Zyyy
-433: Zzzz
-434: In_Basic_Latin
-435: In_Latin_1_Supplement
-436: In_Latin_Extended_A
-437: In_Latin_Extended_B
-438: In_IPA_Extensions
-439: In_Spacing_Modifier_Letters
-440: In_Combining_Diacritical_Marks
-441: In_Greek_and_Coptic
-442: In_Cyrillic
-443: In_Cyrillic_Supplement
-444: In_Armenian
-445: In_Hebrew
-446: In_Arabic
-447: In_Syriac
-448: In_Arabic_Supplement
-449: In_Thaana
-450: In_NKo
-451: In_Samaritan
-452: In_Mandaic
-453: In_Arabic_Extended_A
-454: In_Devanagari
-455: In_Bengali
-456: In_Gurmukhi
-457: In_Gujarati
-458: In_Oriya
-459: In_Tamil
-460: In_Telugu
-461: In_Kannada
-462: In_Malayalam
-463: In_Sinhala
-464: In_Thai
-465: In_Lao
-466: In_Tibetan
-467: In_Myanmar
-468: In_Georgian
-469: In_Hangul_Jamo
-470: In_Ethiopic
-471: In_Ethiopic_Supplement
-472: In_Cherokee
-473: In_Unified_Canadian_Aboriginal_Syllabics
-474: In_Ogham
-475: In_Runic
-476: In_Tagalog
-477: In_Hanunoo
-478: In_Buhid
-479: In_Tagbanwa
-480: In_Khmer
-481: In_Mongolian
-482: In_Unified_Canadian_Aboriginal_Syllabics_Extended
-483: In_Limbu
-484: In_Tai_Le
-485: In_New_Tai_Lue
-486: In_Khmer_Symbols
-487: In_Buginese
-488: In_Tai_Tham
-489: In_Combining_Diacritical_Marks_Extended
-490: In_Balinese
-491: In_Sundanese
-492: In_Batak
-493: In_Lepcha
-494: In_Ol_Chiki
-495: In_Sundanese_Supplement
-496: In_Vedic_Extensions
-497: In_Phonetic_Extensions
-498: In_Phonetic_Extensions_Supplement
-499: In_Combining_Diacritical_Marks_Supplement
-500: In_Latin_Extended_Additional
-501: In_Greek_Extended
-502: In_General_Punctuation
-503: In_Superscripts_and_Subscripts
-504: In_Currency_Symbols
-505: In_Combining_Diacritical_Marks_for_Symbols
-506: In_Letterlike_Symbols
-507: In_Number_Forms
-508: In_Arrows
-509: In_Mathematical_Operators
-510: In_Miscellaneous_Technical
-511: In_Control_Pictures
-512: In_Optical_Character_Recognition
-513: In_Enclosed_Alphanumerics
-514: In_Box_Drawing
-515: In_Block_Elements
-516: In_Geometric_Shapes
-517: In_Miscellaneous_Symbols
-518: In_Dingbats
-519: In_Miscellaneous_Mathematical_Symbols_A
-520: In_Supplemental_Arrows_A
-521: In_Braille_Patterns
-522: In_Supplemental_Arrows_B
-523: In_Miscellaneous_Mathematical_Symbols_B
-524: In_Supplemental_Mathematical_Operators
-525: In_Miscellaneous_Symbols_and_Arrows
-526: In_Glagolitic
-527: In_Latin_Extended_C
-528: In_Coptic
-529: In_Georgian_Supplement
-530: In_Tifinagh
-531: In_Ethiopic_Extended
-532: In_Cyrillic_Extended_A
-533: In_Supplemental_Punctuation
-534: In_CJK_Radicals_Supplement
-535: In_Kangxi_Radicals
-536: In_Ideographic_Description_Characters
-537: In_CJK_Symbols_and_Punctuation
-538: In_Hiragana
-539: In_Katakana
-540: In_Bopomofo
-541: In_Hangul_Compatibility_Jamo
-542: In_Kanbun
-543: In_Bopomofo_Extended
-544: In_CJK_Strokes
-545: In_Katakana_Phonetic_Extensions
-546: In_Enclosed_CJK_Letters_and_Months
-547: In_CJK_Compatibility
-548: In_CJK_Unified_Ideographs_Extension_A
-549: In_Yijing_Hexagram_Symbols
-550: In_CJK_Unified_Ideographs
-551: In_Yi_Syllables
-552: In_Yi_Radicals
-553: In_Lisu
-554: In_Vai
-555: In_Cyrillic_Extended_B
-556: In_Bamum
-557: In_Modifier_Tone_Letters
-558: In_Latin_Extended_D
-559: In_Syloti_Nagri
-560: In_Common_Indic_Number_Forms
-561: In_Phags_pa
-562: In_Saurashtra
-563: In_Devanagari_Extended
-564: In_Kayah_Li
-565: In_Rejang
-566: In_Hangul_Jamo_Extended_A
-567: In_Javanese
-568: In_Myanmar_Extended_B
-569: In_Cham
-570: In_Myanmar_Extended_A
-571: In_Tai_Viet
-572: In_Meetei_Mayek_Extensions
-573: In_Ethiopic_Extended_A
-574: In_Latin_Extended_E
-575: In_Cherokee_Supplement
-576: In_Meetei_Mayek
-577: In_Hangul_Syllables
-578: In_Hangul_Jamo_Extended_B
-579: In_High_Surrogates
-580: In_High_Private_Use_Surrogates
-581: In_Low_Surrogates
-582: In_Private_Use_Area
-583: In_CJK_Compatibility_Ideographs
-584: In_Alphabetic_Presentation_Forms
-585: In_Arabic_Presentation_Forms_A
-586: In_Variation_Selectors
-587: In_Vertical_Forms
-588: In_Combining_Half_Marks
-589: In_CJK_Compatibility_Forms
-590: In_Small_Form_Variants
-591: In_Arabic_Presentation_Forms_B
-592: In_Halfwidth_and_Fullwidth_Forms
-593: In_Specials
-594: In_Linear_B_Syllabary
-595: In_Linear_B_Ideograms
-596: In_Aegean_Numbers
-597: In_Ancient_Greek_Numbers
-598: In_Ancient_Symbols
-599: In_Phaistos_Disc
-600: In_Lycian
-601: In_Carian
-602: In_Coptic_Epact_Numbers
-603: In_Old_Italic
-604: In_Gothic
-605: In_Old_Permic
-606: In_Ugaritic
-607: In_Old_Persian
-608: In_Deseret
-609: In_Shavian
-610: In_Osmanya
-611: In_Elbasan
-612: In_Caucasian_Albanian
-613: In_Linear_A
-614: In_Cypriot_Syllabary
-615: In_Imperial_Aramaic
-616: In_Palmyrene
-617: In_Nabataean
-618: In_Hatran
-619: In_Phoenician
-620: In_Lydian
-621: In_Meroitic_Hieroglyphs
-622: In_Meroitic_Cursive
-623: In_Kharoshthi
-624: In_Old_South_Arabian
-625: In_Old_North_Arabian
-626: In_Manichaean
-627: In_Avestan
-628: In_Inscriptional_Parthian
-629: In_Inscriptional_Pahlavi
-630: In_Psalter_Pahlavi
-631: In_Old_Turkic
-632: In_Old_Hungarian
-633: In_Rumi_Numeral_Symbols
-634: In_Brahmi
-635: In_Kaithi
-636: In_Sora_Sompeng
-637: In_Chakma
-638: In_Mahajani
-639: In_Sharada
-640: In_Sinhala_Archaic_Numbers
-641: In_Khojki
-642: In_Multani
-643: In_Khudawadi
-644: In_Grantha
-645: In_Tirhuta
-646: In_Siddham
-647: In_Modi
-648: In_Takri
-649: In_Ahom
-650: In_Warang_Citi
-651: In_Pau_Cin_Hau
-652: In_Cuneiform
-653: In_Cuneiform_Numbers_and_Punctuation
-654: In_Early_Dynastic_Cuneiform
-655: In_Egyptian_Hieroglyphs
-656: In_Anatolian_Hieroglyphs
-657: In_Bamum_Supplement
-658: In_Mro
-659: In_Bassa_Vah
-660: In_Pahawh_Hmong
-661: In_Miao
-662: In_Kana_Supplement
-663: In_Duployan
-664: In_Shorthand_Format_Controls
-665: In_Byzantine_Musical_Symbols
-666: In_Musical_Symbols
-667: In_Ancient_Greek_Musical_Notation
-668: In_Tai_Xuan_Jing_Symbols
-669: In_Counting_Rod_Numerals
-670: In_Mathematical_Alphanumeric_Symbols
-671: In_Sutton_SignWriting
-672: In_Mende_Kikakui
-673: In_Arabic_Mathematical_Alphabetic_Symbols
-674: In_Mahjong_Tiles
-675: In_Domino_Tiles
-676: In_Playing_Cards
-677: In_Enclosed_Alphanumeric_Supplement
-678: In_Enclosed_Ideographic_Supplement
-679: In_Miscellaneous_Symbols_and_Pictographs
-680: In_Emoticons
-681: In_Ornamental_Dingbats
-682: In_Transport_and_Map_Symbols
-683: In_Alchemical_Symbols
-684: In_Geometric_Shapes_Extended
-685: In_Supplemental_Arrows_C
-686: In_Supplemental_Symbols_and_Pictographs
-687: In_CJK_Unified_Ideographs_Extension_B
-688: In_CJK_Unified_Ideographs_Extension_C
-689: In_CJK_Unified_Ideographs_Extension_D
-690: In_CJK_Unified_Ideographs_Extension_E
-691: In_CJK_Compatibility_Ideographs_Supplement
-692: In_Tags
-693: In_Variation_Selectors_Supplement
-694: In_Supplementary_Private_Use_Area_A
-695: In_Supplementary_Private_Use_Area_B
-696: In_No_Block
+ 48: Changes_When_Titlecased
+ 49: Changes_When_Uppercased
+ 50: Cherokee
+ 51: Cn
+ 52: Co
+ 53: Common
+ 54: Coptic
+ 55: Cs
+ 56: Cuneiform
+ 57: Cypriot
+ 58: Cyrillic
+ 59: Dash
+ 60: Default_Ignorable_Code_Point
+ 61: Deprecated
+ 62: Deseret
+ 63: Devanagari
+ 64: Diacritic
+ 65: Duployan
+ 66: Egyptian_Hieroglyphs
+ 67: Elbasan
+ 68: Ethiopic
+ 69: Extender
+ 70: Georgian
+ 71: Glagolitic
+ 72: Gothic
+ 73: Grantha
+ 74: Grapheme_Base
+ 75: Grapheme_Extend
+ 76: Grapheme_Link
+ 77: Greek
+ 78: Gujarati
+ 79: Gurmukhi
+ 80: Han
+ 81: Hangul
+ 82: Hanunoo
+ 83: Hatran
+ 84: Hebrew
+ 85: Hex_Digit
+ 86: Hiragana
+ 87: Hyphen
+ 88: IDS_Binary_Operator
+ 89: IDS_Trinary_Operator
+ 90: ID_Continue
+ 91: ID_Start
+ 92: Ideographic
+ 93: Imperial_Aramaic
+ 94: Inherited
+ 95: Inscriptional_Pahlavi
+ 96: Inscriptional_Parthian
+ 97: Javanese
+ 98: Join_Control
+ 99: Kaithi
+100: Kannada
+101: Katakana
+102: Kayah_Li
+103: Kharoshthi
+104: Khmer
+105: Khojki
+106: Khudawadi
+107: L
+108: LC
+109: Lao
+110: Latin
+111: Lepcha
+112: Limbu
+113: Linear_A
+114: Linear_B
+115: Lisu
+116: Ll
+117: Lm
+118: Lo
+119: Logical_Order_Exception
+120: Lowercase
+121: Lt
+122: Lu
+123: Lycian
+124: Lydian
+125: M
+126: Mahajani
+127: Malayalam
+128: Mandaic
+129: Manichaean
+130: Math
+131: Mc
+132: Me
+133: Meetei_Mayek
+134: Mende_Kikakui
+135: Meroitic_Cursive
+136: Meroitic_Hieroglyphs
+137: Miao
+138: Mn
+139: Modi
+140: Mongolian
+141: Mro
+142: Multani
+143: Myanmar
+144: N
+145: Nabataean
+146: Nd
+147: New_Tai_Lue
+148: Nko
+149: Nl
+150: No
+151: Noncharacter_Code_Point
+152: Ogham
+153: Ol_Chiki
+154: Old_Hungarian
+155: Old_Italic
+156: Old_North_Arabian
+157: Old_Permic
+158: Old_Persian
+159: Old_South_Arabian
+160: Old_Turkic
+161: Oriya
+162: Osmanya
+163: Other_Alphabetic
+164: Other_Default_Ignorable_Code_Point
+165: Other_Grapheme_Extend
+166: Other_ID_Continue
+167: Other_ID_Start
+168: Other_Lowercase
+169: Other_Math
+170: Other_Uppercase
+171: P
+172: Pahawh_Hmong
+173: Palmyrene
+174: Pattern_Syntax
+175: Pattern_White_Space
+176: Pau_Cin_Hau
+177: Pc
+178: Pd
+179: Pe
+180: Pf
+181: Phags_Pa
+182: Phoenician
+183: Pi
+184: Po
+185: Ps
+186: Psalter_Pahlavi
+187: Quotation_Mark
+188: Radical
+189: Rejang
+190: Runic
+191: S
+192: STerm
+193: Samaritan
+194: Saurashtra
+195: Sc
+196: Sharada
+197: Shavian
+198: Siddham
+199: SignWriting
+200: Sinhala
+201: Sk
+202: Sm
+203: So
+204: Soft_Dotted
+205: Sora_Sompeng
+206: Sundanese
+207: Syloti_Nagri
+208: Syriac
+209: Tagalog
+210: Tagbanwa
+211: Tai_Le
+212: Tai_Tham
+213: Tai_Viet
+214: Takri
+215: Tamil
+216: Telugu
+217: Terminal_Punctuation
+218: Thaana
+219: Thai
+220: Tibetan
+221: Tifinagh
+222: Tirhuta
+223: Ugaritic
+224: Unified_Ideograph
+225: Unknown
+226: Uppercase
+227: Vai
+228: Variation_Selector
+229: Warang_Citi
+230: White_Space
+231: XID_Continue
+232: XID_Start
+233: Yi
+234: Z
+235: Zl
+236: Zp
+237: Zs
+ 40: Aghb
+ 15: AHex
+ 20: Arab
+ 93: Armi
+ 21: Armn
+ 23: Avst
+ 24: Bali
+ 25: Bamu
+ 26: Bass
+ 27: Batk
+ 28: Beng
+ 29: Bidi_C
+ 30: Bopo
+ 31: Brah
+ 32: Brai
+ 33: Bugi
+ 34: Buhd
+ 43: Cakm
+ 36: Cans
+ 37: Cari
+108: Cased_Letter
+ 50: Cher
+ 38: CI
+179: Close_Punctuation
+125: Combining_Mark
+177: Connector_Punctuation
+ 41: Control
+ 54: Copt
+ 57: Cprt
+195: Currency_Symbol
+ 45: CWCF
+ 46: CWCM
+ 47: CWL
+ 48: CWT
+ 49: CWU
+ 58: Cyrl
+178: Dash_Punctuation
+146: Decimal_Number
+ 61: Dep
+ 63: Deva
+ 60: DI
+ 64: Dia
+ 62: Dsrt
+ 65: Dupl
+ 66: Egyp
+ 67: Elba
+132: Enclosing_Mark
+ 68: Ethi
+ 69: Ext
+180: Final_Punctuation
+ 42: Format
+ 70: Geor
+ 71: Glag
+ 72: Goth
+ 73: Gran
+ 74: Gr_Base
+ 77: Grek
+ 75: Gr_Ext
+ 76: Gr_Link
+ 78: Gujr
+ 79: Guru
+ 81: Hang
+ 80: Hani
+ 82: Hano
+ 83: Hatr
+ 84: Hebr
+ 85: Hex
+ 86: Hira
+ 18: Hluw
+172: Hmng
+154: Hung
+ 90: IDC
+ 92: Ideo
+ 91: IDS
+ 88: IDSB
+ 89: IDST
+183: Initial_Punctuation
+155: Ital
+ 97: Java
+ 98: Join_C
+102: Kali
+101: Kana
+103: Khar
+104: Khmr
+105: Khoj
+100: Knda
+ 99: Kthi
+212: Lana
+109: Laoo
+110: Latn
+111: Lepc
+107: Letter
+149: Letter_Number
+112: Limb
+113: Lina
+114: Linb
+235: Line_Separator
+119: LOE
+116: Lowercase_Letter
+123: Lyci
+124: Lydi
+126: Mahj
+128: Mand
+129: Mani
+125: Mark
+202: Math_Symbol
+134: Mend
+135: Merc
+136: Mero
+127: Mlym
+117: Modifier_Letter
+201: Modifier_Symbol
+140: Mong
+141: Mroo
+133: Mtei
+142: Mult
+143: Mymr
+156: Narb
+145: Nbat
+151: NChar
+148: Nkoo
+138: Nonspacing_Mark
+144: Number
+163: OAlpha
+164: ODI
+152: Ogam
+165: OGr_Ext
+166: OIDC
+167: OIDS
+153: Olck
+168: OLower
+169: OMath
+185: Open_Punctuation
+160: Orkh
+161: Orya
+162: Osma
+ 35: Other
+118: Other_Letter
+150: Other_Number
+184: Other_Punctuation
+203: Other_Symbol
+170: OUpper
+173: Palm
+236: Paragraph_Separator
+174: Pat_Syn
+175: Pat_WS
+176: Pauc
+157: Perm
+181: Phag
+ 95: Phli
+186: Phlp
+182: Phnx
+137: Plrd
+ 52: Private_Use
+ 96: Prti
+171: Punctuation
+ 54: Qaac
+ 94: Qaai
+187: QMark
+189: Rjng
+190: Runr
+193: Samr
+159: Sarb
+194: Saur
+204: SD
+234: Separator
+199: Sgnw
+197: Shaw
+196: Shrd
+198: Sidd
+106: Sind
+200: Sinh
+205: Sora
+237: Space_Separator
+131: Spacing_Mark
+206: Sund
+ 55: Surrogate
+207: Sylo
+191: Symbol
+208: Syrc
+210: Tagb
+214: Takr
+211: Tale
+147: Talu
+215: Taml
+213: Tavt
+216: Telu
+217: Term
+221: Tfng
+209: Tglg
+218: Thaa
+220: Tibt
+222: Tirh
+121: Titlecase_Letter
+223: Ugar
+224: UIdeo
+ 51: Unassigned
+122: Uppercase_Letter
+227: Vaii
+228: VS
+229: Wara
+230: WSpace
+231: XIDC
+232: XIDS
+158: Xpeo
+ 56: Xsux
+233: Yiii
+ 94: Zinh
+ 53: Zyyy
+225: Zzzz
+238: In_Basic_Latin
+239: In_Latin_1_Supplement
+240: In_Latin_Extended_A
+241: In_Latin_Extended_B
+242: In_IPA_Extensions
+243: In_Spacing_Modifier_Letters
+244: In_Combining_Diacritical_Marks
+245: In_Greek_and_Coptic
+246: In_Cyrillic
+247: In_Cyrillic_Supplement
+248: In_Armenian
+249: In_Hebrew
+250: In_Arabic
+251: In_Syriac
+252: In_Arabic_Supplement
+253: In_Thaana
+254: In_NKo
+255: In_Samaritan
+256: In_Mandaic
+257: In_Arabic_Extended_A
+258: In_Devanagari
+259: In_Bengali
+260: In_Gurmukhi
+261: In_Gujarati
+262: In_Oriya
+263: In_Tamil
+264: In_Telugu
+265: In_Kannada
+266: In_Malayalam
+267: In_Sinhala
+268: In_Thai
+269: In_Lao
+270: In_Tibetan
+271: In_Myanmar
+272: In_Georgian
+273: In_Hangul_Jamo
+274: In_Ethiopic
+275: In_Ethiopic_Supplement
+276: In_Cherokee
+277: In_Unified_Canadian_Aboriginal_Syllabics
+278: In_Ogham
+279: In_Runic
+280: In_Tagalog
+281: In_Hanunoo
+282: In_Buhid
+283: In_Tagbanwa
+284: In_Khmer
+285: In_Mongolian
+286: In_Unified_Canadian_Aboriginal_Syllabics_Extended
+287: In_Limbu
+288: In_Tai_Le
+289: In_New_Tai_Lue
+290: In_Khmer_Symbols
+291: In_Buginese
+292: In_Tai_Tham
+293: In_Combining_Diacritical_Marks_Extended
+294: In_Balinese
+295: In_Sundanese
+296: In_Batak
+297: In_Lepcha
+298: In_Ol_Chiki
+299: In_Sundanese_Supplement
+300: In_Vedic_Extensions
+301: In_Phonetic_Extensions
+302: In_Phonetic_Extensions_Supplement
+303: In_Combining_Diacritical_Marks_Supplement
+304: In_Latin_Extended_Additional
+305: In_Greek_Extended
+306: In_General_Punctuation
+307: In_Superscripts_and_Subscripts
+308: In_Currency_Symbols
+309: In_Combining_Diacritical_Marks_for_Symbols
+310: In_Letterlike_Symbols
+311: In_Number_Forms
+312: In_Arrows
+313: In_Mathematical_Operators
+314: In_Miscellaneous_Technical
+315: In_Control_Pictures
+316: In_Optical_Character_Recognition
+317: In_Enclosed_Alphanumerics
+318: In_Box_Drawing
+319: In_Block_Elements
+320: In_Geometric_Shapes
+321: In_Miscellaneous_Symbols
+322: In_Dingbats
+323: In_Miscellaneous_Mathematical_Symbols_A
+324: In_Supplemental_Arrows_A
+325: In_Braille_Patterns
+326: In_Supplemental_Arrows_B
+327: In_Miscellaneous_Mathematical_Symbols_B
+328: In_Supplemental_Mathematical_Operators
+329: In_Miscellaneous_Symbols_and_Arrows
+330: In_Glagolitic
+331: In_Latin_Extended_C
+332: In_Coptic
+333: In_Georgian_Supplement
+334: In_Tifinagh
+335: In_Ethiopic_Extended
+336: In_Cyrillic_Extended_A
+337: In_Supplemental_Punctuation
+338: In_CJK_Radicals_Supplement
+339: In_Kangxi_Radicals
+340: In_Ideographic_Description_Characters
+341: In_CJK_Symbols_and_Punctuation
+342: In_Hiragana
+343: In_Katakana
+344: In_Bopomofo
+345: In_Hangul_Compatibility_Jamo
+346: In_Kanbun
+347: In_Bopomofo_Extended
+348: In_CJK_Strokes
+349: In_Katakana_Phonetic_Extensions
+350: In_Enclosed_CJK_Letters_and_Months
+351: In_CJK_Compatibility
+352: In_CJK_Unified_Ideographs_Extension_A
+353: In_Yijing_Hexagram_Symbols
+354: In_CJK_Unified_Ideographs
+355: In_Yi_Syllables
+356: In_Yi_Radicals
+357: In_Lisu
+358: In_Vai
+359: In_Cyrillic_Extended_B
+360: In_Bamum
+361: In_Modifier_Tone_Letters
+362: In_Latin_Extended_D
+363: In_Syloti_Nagri
+364: In_Common_Indic_Number_Forms
+365: In_Phags_pa
+366: In_Saurashtra
+367: In_Devanagari_Extended
+368: In_Kayah_Li
+369: In_Rejang
+370: In_Hangul_Jamo_Extended_A
+371: In_Javanese
+372: In_Myanmar_Extended_B
+373: In_Cham
+374: In_Myanmar_Extended_A
+375: In_Tai_Viet
+376: In_Meetei_Mayek_Extensions
+377: In_Ethiopic_Extended_A
+378: In_Latin_Extended_E
+379: In_Cherokee_Supplement
+380: In_Meetei_Mayek
+381: In_Hangul_Syllables
+382: In_Hangul_Jamo_Extended_B
+383: In_High_Surrogates
+384: In_High_Private_Use_Surrogates
+385: In_Low_Surrogates
+386: In_Private_Use_Area
+387: In_CJK_Compatibility_Ideographs
+388: In_Alphabetic_Presentation_Forms
+389: In_Arabic_Presentation_Forms_A
+390: In_Variation_Selectors
+391: In_Vertical_Forms
+392: In_Combining_Half_Marks
+393: In_CJK_Compatibility_Forms
+394: In_Small_Form_Variants
+395: In_Arabic_Presentation_Forms_B
+396: In_Halfwidth_and_Fullwidth_Forms
+397: In_Specials
+398: In_Linear_B_Syllabary
+399: In_Linear_B_Ideograms
+400: In_Aegean_Numbers
+401: In_Ancient_Greek_Numbers
+402: In_Ancient_Symbols
+403: In_Phaistos_Disc
+404: In_Lycian
+405: In_Carian
+406: In_Coptic_Epact_Numbers
+407: In_Old_Italic
+408: In_Gothic
+409: In_Old_Permic
+410: In_Ugaritic
+411: In_Old_Persian
+412: In_Deseret
+413: In_Shavian
+414: In_Osmanya
+415: In_Elbasan
+416: In_Caucasian_Albanian
+417: In_Linear_A
+418: In_Cypriot_Syllabary
+419: In_Imperial_Aramaic
+420: In_Palmyrene
+421: In_Nabataean
+422: In_Hatran
+423: In_Phoenician
+424: In_Lydian
+425: In_Meroitic_Hieroglyphs
+426: In_Meroitic_Cursive
+427: In_Kharoshthi
+428: In_Old_South_Arabian
+429: In_Old_North_Arabian
+430: In_Manichaean
+431: In_Avestan
+432: In_Inscriptional_Parthian
+433: In_Inscriptional_Pahlavi
+434: In_Psalter_Pahlavi
+435: In_Old_Turkic
+436: In_Old_Hungarian
+437: In_Rumi_Numeral_Symbols
+438: In_Brahmi
+439: In_Kaithi
+440: In_Sora_Sompeng
+441: In_Chakma
+442: In_Mahajani
+443: In_Sharada
+444: In_Sinhala_Archaic_Numbers
+445: In_Khojki
+446: In_Multani
+447: In_Khudawadi
+448: In_Grantha
+449: In_Tirhuta
+450: In_Siddham
+451: In_Modi
+452: In_Takri
+453: In_Ahom
+454: In_Warang_Citi
+455: In_Pau_Cin_Hau
+456: In_Cuneiform
+457: In_Cuneiform_Numbers_and_Punctuation
+458: In_Early_Dynastic_Cuneiform
+459: In_Egyptian_Hieroglyphs
+460: In_Anatolian_Hieroglyphs
+461: In_Bamum_Supplement
+462: In_Mro
+463: In_Bassa_Vah
+464: In_Pahawh_Hmong
+465: In_Miao
+466: In_Kana_Supplement
+467: In_Duployan
+468: In_Shorthand_Format_Controls
+469: In_Byzantine_Musical_Symbols
+470: In_Musical_Symbols
+471: In_Ancient_Greek_Musical_Notation
+472: In_Tai_Xuan_Jing_Symbols
+473: In_Counting_Rod_Numerals
+474: In_Mathematical_Alphanumeric_Symbols
+475: In_Sutton_SignWriting
+476: In_Mende_Kikakui
+477: In_Arabic_Mathematical_Alphabetic_Symbols
+478: In_Mahjong_Tiles
+479: In_Domino_Tiles
+480: In_Playing_Cards
+481: In_Enclosed_Alphanumeric_Supplement
+482: In_Enclosed_Ideographic_Supplement
+483: In_Miscellaneous_Symbols_and_Pictographs
+484: In_Emoticons
+485: In_Ornamental_Dingbats
+486: In_Transport_and_Map_Symbols
+487: In_Alchemical_Symbols
+488: In_Geometric_Shapes_Extended
+489: In_Supplemental_Arrows_C
+490: In_Supplemental_Symbols_and_Pictographs
+491: In_CJK_Unified_Ideographs_Extension_B
+492: In_CJK_Unified_Ideographs_Extension_C
+493: In_CJK_Unified_Ideographs_Extension_D
+494: In_CJK_Unified_Ideographs_Extension_E
+495: In_CJK_Compatibility_Ideographs_Supplement
+496: In_Tags
+497: In_Variation_Selectors_Supplement
+498: In_Supplementary_Private_Use_Area_A
+499: In_Supplementary_Private_Use_Area_B
+500: In_No_Block

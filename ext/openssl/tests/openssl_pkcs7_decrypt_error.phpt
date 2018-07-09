@@ -25,7 +25,7 @@ var_dump(openssl_pkcs7_decrypt($a, $b, 0, 0));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(57) "Object of class stdClass could not be converted to string"
 string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"
 bool(false)

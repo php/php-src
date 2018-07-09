@@ -75,7 +75,7 @@ echo "\n-- Sorted array after usort() function call --\n";
 var_dump($array_arg);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing usort() : usage variation ***
 bool(true)
 

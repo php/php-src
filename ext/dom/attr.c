@@ -42,7 +42,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMAttr extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-637646024
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-637646024
 * Since:
 */
 
@@ -52,7 +52,7 @@ const zend_function_entry php_dom_attr_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMAttr::__construct(string name, [string value]) */
+/* {{{ proto DOMAttr::__construct(string name, [string value]) */
 PHP_METHOD(domattr, __construct)
 {
 	zval *id = getThis();
@@ -171,7 +171,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -220,7 +220,7 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto boolean dom_attr_is_id()
+/* {{{ proto bool dom_attr_is_id()
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */

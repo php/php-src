@@ -275,7 +275,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_object_to_string()" );
 
 	/* Cleanup zstr to hold utf16 string. */
-	zval_dtor( zstr );
+	zval_ptr_dtor_str( zstr );
 
 	/* Set string. */
 	ZVAL_STRINGL( zstr, (char*)ustr, UBYTES(ustr_len));
@@ -382,18 +382,17 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 zval* collator_make_printable_zval( zval* arg, zval *rv)
 {
 	zval arg_copy;
-	int use_copy = 0;
 	zval* str    = NULL;
 
 	if( Z_TYPE_P(arg) != IS_STRING )
 	{
 
-		use_copy = zend_make_printable_zval(arg, &arg_copy);
+		int use_copy = zend_make_printable_zval(arg, &arg_copy);
 
 		if( use_copy )
 		{
 			str = collator_convert_zstr_utf8_to_utf16( &arg_copy, rv );
-			zval_dtor( &arg_copy );
+			zval_ptr_dtor_str( &arg_copy );
 		}
 		else
 		{

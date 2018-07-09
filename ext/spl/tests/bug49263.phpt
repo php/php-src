@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplObjectStorage serialization references
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $o1 = new stdClass;

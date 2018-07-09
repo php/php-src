@@ -53,7 +53,7 @@ foreach($integer_values as $integer_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : octal formats with integer values ***
 
 -- Iteration 1 --

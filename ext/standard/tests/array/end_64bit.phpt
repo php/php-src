@@ -229,7 +229,7 @@ NULL
 Warning: end() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: end() expects parameter 1 to be array, integer given in %s on line %d
+Warning: end() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 Warning: end() expects parameter 1 to be array, string given in %s on line %d

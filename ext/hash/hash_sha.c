@@ -92,7 +92,6 @@ PHP_FUNCTION(sha1)
 	char *arg;
 	size_t arg_len;
 	zend_bool raw_output = 0;
-	char sha1str[41];
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 
@@ -100,15 +99,14 @@ PHP_FUNCTION(sha1)
 		return;
 	}
 
-	sha1str[0] = '\0';
 	PHP_SHA1Init(&context);
 	PHP_SHA1Update(&context, arg, arg_len);
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL(digest, 20);
 	} else {
-		make_sha1_digest(sha1str, digest);
-		RETVAL_STRING(sha1str);
+		RETVAL_NEW_STR(zend_string_alloc(40, 0));
+		make_sha1_digest(Z_STRVAL_P(return_value), digest);
 	}
 
 }
@@ -122,7 +120,6 @@ PHP_FUNCTION(sha1_file)
 	char          *arg;
 	size_t        arg_len;
 	zend_bool raw_output = 0;
-	char          sha1str[41];
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
@@ -155,8 +152,8 @@ PHP_FUNCTION(sha1_file)
 	if (raw_output) {
 		RETURN_STRINGL(digest, 20);
 	} else {
-		make_sha1_digest(sha1str, digest);
-		RETVAL_STRING(sha1str);
+		RETVAL_NEW_STR(zend_string_alloc(40, 0));
+		make_sha1_digest(Z_STRVAL_P(return_value), digest);
 	}
 }
 /* }}} */

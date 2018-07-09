@@ -42,19 +42,19 @@
 PHPAPI void php_url_free(php_url *theurl)
 {
 	if (theurl->scheme)
-		efree(theurl->scheme);
+		zend_string_release_ex(theurl->scheme, 0);
 	if (theurl->user)
-		efree(theurl->user);
+		zend_string_release_ex(theurl->user, 0);
 	if (theurl->pass)
-		efree(theurl->pass);
+		zend_string_release_ex(theurl->pass, 0);
 	if (theurl->host)
-		efree(theurl->host);
+		zend_string_release_ex(theurl->host, 0);
 	if (theurl->path)
-		efree(theurl->path);
+		zend_string_release_ex(theurl->path, 0);
 	if (theurl->query)
-		efree(theurl->query);
+		zend_string_release_ex(theurl->query, 0);
 	if (theurl->fragment)
-		efree(theurl->fragment);
+		zend_string_release_ex(theurl->fragment, 0);
 	efree(theurl);
 }
 /* }}} */
@@ -124,8 +124,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		}
 
 		if (e + 1 == ue) { /* only scheme is available */
-			ret->scheme = estrndup(s, (e - s));
-			php_replace_controlchars_ex(ret->scheme, (e - s));
+			ret->scheme = zend_string_init(s, (e - s), 0);
+			php_replace_controlchars_ex(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
 			return ret;
 		}
 
@@ -146,18 +146,18 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 				goto parse_port;
 			}
 
-			ret->scheme = estrndup(s, (e-s));
-			php_replace_controlchars_ex(ret->scheme, (e - s));
+			ret->scheme = zend_string_init(s, (e-s), 0);
+			php_replace_controlchars_ex(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
 
 			s = e + 1;
 			goto just_path;
 		} else {
-			ret->scheme = estrndup(s, (e-s));
-			php_replace_controlchars_ex(ret->scheme, (e - s));
+			ret->scheme = zend_string_init(s, (e-s), 0);
+			php_replace_controlchars_ex(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
 
 			if (e + 2 < ue && *(e + 2) == '/') {
 				s = e + 3;
-				if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
+				if (zend_string_equals_literal_ci(ret->scheme, "file")) {
 					if (e + 3 < ue && *(e + 3) == '/') {
 						/* support windows drive letters as in:
 						   file:///c:/somedir/file.txt
@@ -193,13 +193,11 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 				    s += 2;
 				}
 			} else {
-				if (ret->scheme) efree(ret->scheme);
-				efree(ret);
+				php_url_free(ret);
 				return NULL;
 			}
 		} else if (p == pp && pp == ue) {
-			if (ret->scheme) efree(ret->scheme);
-			efree(ret);
+			php_url_free(ret);
 			return NULL;
 		} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 			s += 2;
@@ -228,15 +226,15 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 	/* check for login and password */
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
 		if ((pp = memchr(s, ':', (p-s)))) {
-			ret->user = estrndup(s, (pp-s));
-			php_replace_controlchars_ex(ret->user, (pp - s));
+			ret->user = zend_string_init(s, (pp-s), 0);
+			php_replace_controlchars_ex(ZSTR_VAL(ret->user), ZSTR_LEN(ret->user));
 
 			pp++;
-			ret->pass = estrndup(pp, (p-pp));
-			php_replace_controlchars_ex(ret->pass, (p-pp));
+			ret->pass = zend_string_init(pp, (p-pp), 0);
+			php_replace_controlchars_ex(ZSTR_VAL(ret->pass), ZSTR_LEN(ret->pass));
 		} else {
-			ret->user = estrndup(s, (p-s));
-			php_replace_controlchars_ex(ret->user, (p-s));
+			ret->user = zend_string_init(s, (p-s), 0);
+			php_replace_controlchars_ex(ZSTR_VAL(ret->user), ZSTR_LEN(ret->user));
 		}
 
 		s = p + 1;
@@ -256,10 +254,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		if (!ret->port) {
 			p++;
 			if (e-p > 5) { /* port cannot be longer then 5 characters */
-				if (ret->scheme) efree(ret->scheme);
-				if (ret->user) efree(ret->user);
-				if (ret->pass) efree(ret->pass);
-				efree(ret);
+				php_url_free(ret);
 				return NULL;
 			} else if (e - p > 0) {
 				zend_long port;
@@ -269,10 +264,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 				if (port > 0 && port <= 65535) {
 					ret->port = (unsigned short)port;
 				} else {
-					if (ret->scheme) efree(ret->scheme);
-					if (ret->user) efree(ret->user);
-					if (ret->pass) efree(ret->pass);
-					efree(ret);
+					php_url_free(ret);
 					return NULL;
 				}
 			}
@@ -284,15 +276,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 
 	/* check if we have a valid host, if we don't reject the string as url */
 	if ((p-s) < 1) {
-		if (ret->scheme) efree(ret->scheme);
-		if (ret->user) efree(ret->user);
-		if (ret->pass) efree(ret->pass);
-		efree(ret);
+		php_url_free(ret);
 		return NULL;
 	}
 
-	ret->host = estrndup(s, (p-s));
-	php_replace_controlchars_ex(ret->host, (p - s));
+	ret->host = zend_string_init(s, (p-s), 0);
+	php_replace_controlchars_ex(ZSTR_VAL(ret->host), ZSTR_LEN(ret->host));
 
 	if (e == ue) {
 		return ret;
@@ -307,8 +296,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 	if (p) {
 		p++;
 		if (p < e) {
-			ret->fragment = estrndup(p, (e - p));
-			php_replace_controlchars_ex(ret->fragment, (e - p));
+			ret->fragment = zend_string_init(p, (e - p), 0);
+			php_replace_controlchars_ex(ZSTR_VAL(ret->fragment), ZSTR_LEN(ret->fragment));
 		}
 		e = p-1;
 	}
@@ -317,15 +306,15 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 	if (p) {
 		p++;
 		if (p < e) {
-			ret->query = estrndup(p, (e - p));
-			php_replace_controlchars_ex(ret->query, (e - p));
+			ret->query = zend_string_init(p, (e - p), 0);
+			php_replace_controlchars_ex(ZSTR_VAL(ret->query), ZSTR_LEN(ret->query));
 		}
 		e = p-1;
 	}
 
 	if (s < e || s == ue) {
-		ret->path = estrndup(s, (e - s));
-		php_replace_controlchars_ex(ret->path, (e - s));
+		ret->path = zend_string_init(s, (e - s), 0);
+		php_replace_controlchars_ex(ZSTR_VAL(ret->path), ZSTR_LEN(ret->path));
 	}
 
 	return ret;
@@ -357,28 +346,28 @@ PHP_FUNCTION(parse_url)
 	if (key > -1) {
 		switch (key) {
 			case PHP_URL_SCHEME:
-				if (resource->scheme != NULL) RETVAL_STRING(resource->scheme);
+				if (resource->scheme != NULL) RETVAL_STR_COPY(resource->scheme);
 				break;
 			case PHP_URL_HOST:
-				if (resource->host != NULL) RETVAL_STRING(resource->host);
+				if (resource->host != NULL) RETVAL_STR_COPY(resource->host);
 				break;
 			case PHP_URL_PORT:
 				if (resource->port != 0) RETVAL_LONG(resource->port);
 				break;
 			case PHP_URL_USER:
-				if (resource->user != NULL) RETVAL_STRING(resource->user);
+				if (resource->user != NULL) RETVAL_STR_COPY(resource->user);
 				break;
 			case PHP_URL_PASS:
-				if (resource->pass != NULL) RETVAL_STRING(resource->pass);
+				if (resource->pass != NULL) RETVAL_STR_COPY(resource->pass);
 				break;
 			case PHP_URL_PATH:
-				if (resource->path != NULL) RETVAL_STRING(resource->path);
+				if (resource->path != NULL) RETVAL_STR_COPY(resource->path);
 				break;
 			case PHP_URL_QUERY:
-				if (resource->query != NULL) RETVAL_STRING(resource->query);
+				if (resource->query != NULL) RETVAL_STR_COPY(resource->query);
 				break;
 			case PHP_URL_FRAGMENT:
-				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment);
+				if (resource->fragment != NULL) RETVAL_STR_COPY(resource->fragment);
 				break;
 			default:
 				php_error_docref(NULL, E_WARNING, "Invalid URL component identifier " ZEND_LONG_FMT, key);
@@ -392,11 +381,11 @@ PHP_FUNCTION(parse_url)
 
     /* add the various elements to the array */
 	if (resource->scheme != NULL) {
-		ZVAL_STRING(&tmp, resource->scheme);
+		ZVAL_STR_COPY(&tmp, resource->scheme);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_SCHEME), &tmp);
 	}
 	if (resource->host != NULL) {
-		ZVAL_STRING(&tmp, resource->host);
+		ZVAL_STR_COPY(&tmp, resource->host);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
 	}
 	if (resource->port != 0) {
@@ -404,23 +393,23 @@ PHP_FUNCTION(parse_url)
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_PORT), &tmp);
 	}
 	if (resource->user != NULL) {
-		ZVAL_STRING(&tmp, resource->user);
+		ZVAL_STR_COPY(&tmp, resource->user);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_USER), &tmp);
 	}
 	if (resource->pass != NULL) {
-		ZVAL_STRING(&tmp, resource->pass);
+		ZVAL_STR_COPY(&tmp, resource->pass);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_PASS), &tmp);
 	}
 	if (resource->path != NULL) {
-		ZVAL_STRING(&tmp, resource->path);
+		ZVAL_STR_COPY(&tmp, resource->path);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_PATH), &tmp);
 	}
 	if (resource->query != NULL) {
-		ZVAL_STRING(&tmp, resource->query);
+		ZVAL_STR_COPY(&tmp, resource->query);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_QUERY), &tmp);
 	}
 	if (resource->fragment != NULL) {
-		ZVAL_STRING(&tmp, resource->fragment);
+		ZVAL_STR_COPY(&tmp, resource->fragment);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &tmp);
 	}
 done:
@@ -580,27 +569,31 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
 	register size_t x, y;
 	zend_string *str;
+	char *ret;
 
 	str = zend_string_safe_alloc(3, len, 0, 0);
+	ret = ZSTR_VAL(str);
 	for (x = 0, y = 0; len--; x++, y++) {
-		ZSTR_VAL(str)[y] = (unsigned char) s[x];
+		char c = s[x];
+
+		ret[y] = c;
 #ifndef CHARSET_EBCDIC
-		if ((ZSTR_VAL(str)[y] < '0' && ZSTR_VAL(str)[y] != '-' && ZSTR_VAL(str)[y] != '.') ||
-			(ZSTR_VAL(str)[y] < 'A' && ZSTR_VAL(str)[y] > '9') ||
-			(ZSTR_VAL(str)[y] > 'Z' && ZSTR_VAL(str)[y] < 'a' && ZSTR_VAL(str)[y] != '_') ||
-			(ZSTR_VAL(str)[y] > 'z' && ZSTR_VAL(str)[y] != '~')) {
-			ZSTR_VAL(str)[y++] = '%';
-			ZSTR_VAL(str)[y++] = hexchars[(unsigned char) s[x] >> 4];
-			ZSTR_VAL(str)[y] = hexchars[(unsigned char) s[x] & 15];
+		if ((c < '0' && c != '-' &&  c != '.') ||
+			(c < 'A' && c > '9') ||
+			(c > 'Z' && c < 'a' && c != '_') ||
+			(c > 'z' && c != '~')) {
+			ret[y++] = '%';
+			ret[y++] = hexchars[(unsigned char) c >> 4];
+			ret[y] = hexchars[(unsigned char) c & 15];
 #else /*CHARSET_EBCDIC*/
-		if (!isalnum(ZSTR_VAL(str)[y]) && strchr("_-.~", ZSTR_VAL(str)[y]) != NULL) {
-			ZSTR_VAL(str)[y++] = '%';
-			ZSTR_VAL(str)[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
-			ZSTR_VAL(str)[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
+		if (!isalnum(c) && strchr("_-.~", c) != NULL) {
+			ret[y++] = '%';
+			ret[y++] = hexchars[os_toascii[(unsigned char) c] >> 4];
+			ret[y] = hexchars[os_toascii[(unsigned char) c] & 15];
 #endif /*CHARSET_EBCDIC*/
 		}
 	}
-	ZSTR_VAL(str)[y] = '\0';
+	ret[y] = '\0';
 	str = zend_string_truncate(str, y, 0);
 
 	return str;

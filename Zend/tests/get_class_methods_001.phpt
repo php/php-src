@@ -26,7 +26,7 @@ var_dump(get_class_methods('Y'));
 Y::test();
 
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(1) "a"

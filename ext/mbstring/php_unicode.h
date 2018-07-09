@@ -34,155 +34,149 @@
 #define PHP_UNICODE_H
 
 #if HAVE_MBSTRING
-/*
- * Values that can appear in the `mask1' parameter of the php_unicode_is_prop()
- * function.
- */
-#define UC_MN 0x00000001 /* Mark, Non-Spacing          */
-#define UC_MC 0x00000002 /* Mark, Spacing Combining    */
-#define UC_ME 0x00000004 /* Mark, Enclosing            */
-#define UC_ND 0x00000008 /* Number, Decimal Digit      */
-#define UC_NL 0x00000010 /* Number, Letter             */
-#define UC_NO 0x00000020 /* Number, Other              */
-#define UC_ZS 0x00000040 /* Separator, Space           */
-#define UC_ZL 0x00000080 /* Separator, Line            */
-#define UC_ZP 0x00000100 /* Separator, Paragraph       */
-#define UC_CC 0x00000200 /* Other, Control             */
-#define UC_CF 0x00000400 /* Other, Format              */
-#define UC_OS 0x00000800 /* Other, Surrogate           */
-#define UC_CO 0x00001000 /* Other, Private Use         */
-#define UC_CN 0x00002000 /* Other, Not Assigned        */
-#define UC_LU 0x00004000 /* Letter, Uppercase          */
-#define UC_LL 0x00008000 /* Letter, Lowercase          */
-#define UC_LT 0x00010000 /* Letter, Titlecase          */
-#define UC_LM 0x00020000 /* Letter, Modifier           */
-#define UC_LO 0x00040000 /* Letter, Other              */
-#define UC_PC 0x00080000 /* Punctuation, Connector     */
-#define UC_PD 0x00100000 /* Punctuation, Dash          */
-#define UC_PS 0x00200000 /* Punctuation, Open          */
-#define UC_PE 0x00400000 /* Punctuation, Close         */
-#define UC_PO 0x00800000 /* Punctuation, Other         */
-#define UC_SM 0x01000000 /* Symbol, Math               */
-#define UC_SC 0x02000000 /* Symbol, Currency           */
-#define UC_SK 0x04000000 /* Symbol, Modifier           */
-#define UC_SO 0x08000000 /* Symbol, Other              */
-#define UC_L  0x10000000 /* Left-To-Right              */
-#define UC_R  0x20000000 /* Right-To-Left              */
-#define UC_EN 0x40000000 /* European Number            */
-#define UC_ES 0x80000000 /* European Number Separator  */
 
-/*
- * Values that can appear in the `mask2' parameter of the php_unicode_is_prop()
- * function.
- */
-#define UC_ET 0x00000001 /* European Number Terminator */
-#define UC_AN 0x00000002 /* Arabic Number              */
-#define UC_CS 0x00000004 /* Common Number Separator    */
-#define UC_B  0x00000008 /* Block Separator            */
-#define UC_S  0x00000010 /* Segment Separator          */
-#define UC_WS 0x00000020 /* Whitespace                 */
-#define UC_ON 0x00000040 /* Other Neutrals             */
-/*
- * Implementation specific character properties.
- */
-#define UC_CM 0x00000080 /* Composite                  */
-#define UC_NB 0x00000100 /* Non-Breaking               */
-#define UC_SY 0x00000200 /* Symmetric                  */
-#define UC_HD 0x00000400 /* Hex Digit                  */
-#define UC_QM 0x00000800 /* Quote Mark                 */
-#define UC_MR 0x00001000 /* Mirroring                  */
-#define UC_SS 0x00002000 /* Space, other               */
+#define UC_MN  0 /* Mark, Non-Spacing          */
+#define UC_MC  1 /* Mark, Spacing Combining    */
+#define UC_ME  2 /* Mark, Enclosing            */
+#define UC_ND  3 /* Number, Decimal Digit      */
+#define UC_NL  4 /* Number, Letter             */
+#define UC_NO  5 /* Number, Other              */
+#define UC_ZS  6 /* Separator, Space           */
+#define UC_ZL  7 /* Separator, Line            */
+#define UC_ZP  8 /* Separator, Paragraph       */
+#define UC_CC  9 /* Other, Control             */
+#define UC_CF 10 /* Other, Format              */
+#define UC_OS 11 /* Other, Surrogate           */
+#define UC_CO 12 /* Other, Private Use         */
+#define UC_CN 13 /* Other, Not Assigned        */
+#define UC_LU 14 /* Letter, Uppercase          */
+#define UC_LL 15 /* Letter, Lowercase          */
+#define UC_LT 16 /* Letter, Titlecase          */
+#define UC_LM 17 /* Letter, Modifier           */
+#define UC_LO 18 /* Letter, Other              */
+#define UC_PC 19 /* Punctuation, Connector     */
+#define UC_PD 20 /* Punctuation, Dash          */
+#define UC_PS 21 /* Punctuation, Open          */
+#define UC_PE 22 /* Punctuation, Close         */
+#define UC_PO 23 /* Punctuation, Other         */
+#define UC_SM 24 /* Symbol, Math               */
+#define UC_SC 25 /* Symbol, Currency           */
+#define UC_SK 26 /* Symbol, Modifier           */
+#define UC_SO 27 /* Symbol, Other              */
+#define UC_L  28 /* Left-To-Right              */
+#define UC_R  29 /* Right-To-Left              */
+#define UC_EN 30 /* European Number            */
+#define UC_ES 31 /* European Number Separator  */
+#define UC_ET 32 /* European Number Terminator */
+#define UC_AN 33 /* Arabic Number              */
+#define UC_CS 34 /* Common Number Separator    */
+#define UC_B  35 /* Block Separator            */
+#define UC_S  36 /* Segment Separator          */
+#define UC_WS 37 /* Whitespace                 */
+#define UC_ON 38 /* Other Neutrals             */
+#define UC_PI 39 /* Punctuation, Initial       */
+#define UC_PF 40 /* Punctuation, Final         */
+#define UC_AL 41 /* Arabic Letter              */
 
-#define UC_CP 0x00004000 /* Defined                    */
+/* Derived properties from DerivedCoreProperties.txt */
+#define UC_CASED          42
+#define UC_CASE_IGNORABLE 43
 
-/*
- * Added for UnicodeData-2.1.3.
- */
-#define UC_PI 0x00008000 /* Punctuation, Initial       */
-#define UC_PF 0x00010000 /* Punctuation, Final         */
 
-MBSTRING_API int php_unicode_is_prop(unsigned long code, unsigned long mask1,
-		unsigned long mask2);
-MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen, size_t *retlen,
-		const char *src_encoding);
+MBSTRING_API int php_unicode_is_prop(unsigned long code, ...);
+MBSTRING_API int php_unicode_is_prop1(unsigned long code, int prop);
 
-#define PHP_UNICODE_CASE_UPPER	0
-#define PHP_UNICODE_CASE_LOWER	1
-#define PHP_UNICODE_CASE_TITLE	2
+MBSTRING_API char *php_unicode_convert_case(
+		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
+		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar);
 
-#define php_unicode_is_alpha(cc) php_unicode_is_prop(cc, UC_LU|UC_LL|UC_LM|UC_LO|UC_LT, 0)
-#define php_unicode_is_digit(cc) php_unicode_is_prop(cc, UC_ND, 0)
-#define php_unicode_is_alnum(cc) php_unicode_is_prop(cc, UC_LU|UC_LL|UC_LM|UC_LO|UC_LT|UC_ND, 0)
-#define php_unicode_is_cntrl(cc) php_unicode_is_prop(cc, UC_CC|UC_CF, 0)
-#define php_unicode_is_space(cc) php_unicode_is_prop(cc, UC_ZS|UC_SS, 0)
-#define php_unicode_is_blank(cc) php_unicode_is_prop(cc, UC_ZS, 0)
-#define php_unicode_is_punct(cc) php_unicode_is_prop(cc, UC_PD|UC_PS|UC_PE|UC_PO, UC_PI|UC_PF)
-#define php_unicode_is_graph(cc) php_unicode_is_prop(cc, UC_MN|UC_MC|UC_ME|UC_ND|UC_NL|UC_NO|\
-                               UC_LU|UC_LL|UC_LT|UC_LM|UC_LO|UC_PC|UC_PD|\
-                               UC_PS|UC_PE|UC_PO|UC_SM|UC_SM|UC_SC|UC_SK|\
-                               UC_SO, UC_PI|UC_PF)
-#define php_unicode_is_print(cc) php_unicode_is_prop(cc, UC_MN|UC_MC|UC_ME|UC_ND|UC_NL|UC_NO|\
-                               UC_LU|UC_LL|UC_LT|UC_LM|UC_LO|UC_PC|UC_PD|\
-                               UC_PS|UC_PE|UC_PO|UC_SM|UC_SM|UC_SC|UC_SK|\
-                               UC_SO|UC_ZS, UC_PI|UC_PF)
-#define php_unicode_is_upper(cc) php_unicode_is_prop(cc, UC_LU, 0)
-#define php_unicode_is_lower(cc) php_unicode_is_prop(cc, UC_LL, 0)
-#define php_unicode_is_title(cc) php_unicode_is_prop(cc, UC_LT, 0)
-#define php_unicode_is_xdigit(cc) php_unicode_is_prop(cc, 0, UC_HD)
+#define PHP_UNICODE_CASE_UPPER        0
+#define PHP_UNICODE_CASE_LOWER        1
+#define PHP_UNICODE_CASE_TITLE        2
+#define PHP_UNICODE_CASE_FOLD         3
+#define PHP_UNICODE_CASE_UPPER_SIMPLE 4
+#define PHP_UNICODE_CASE_LOWER_SIMPLE 5
+#define PHP_UNICODE_CASE_TITLE_SIMPLE 6
+#define PHP_UNICODE_CASE_FOLD_SIMPLE  7
+#define PHP_UNICODE_CASE_MODE_MAX     7
 
-#define php_unicode_is_isocntrl(cc) php_unicode_is_prop(cc, UC_CC, 0)
-#define php_unicode_is_fmtcntrl(cc) php_unicode_is_prop(cc, UC_CF, 0)
+/* Optimize the common ASCII case for lower/upper */
 
-#define php_unicode_is_symbol(cc) php_unicode_is_prop(cc, UC_SM|UC_SC|UC_SO|UC_SK, 0)
-#define php_unicode_is_number(cc) php_unicode_is_prop(cc, UC_ND|UC_NO|UC_NL, 0)
-#define php_unicode_is_nonspacing(cc) php_unicode_is_prop(cc, UC_MN, 0)
-#define php_unicode_is_openpunct(cc) php_unicode_is_prop(cc, UC_PS, 0)
-#define php_unicode_is_closepunct(cc) php_unicode_is_prop(cc, UC_PE, 0)
-#define php_unicode_is_initialpunct(cc) php_unicode_is_prop(cc, 0, UC_PI)
-#define php_unicode_is_finalpunct(cc) php_unicode_is_prop(cc, 0, UC_PF)
+static inline int php_unicode_is_lower(unsigned long code) {
+	if (code < 0x80) {
+		return code >= 0x61 && code <= 0x7A;
+	} else {
+		return php_unicode_is_prop1(code, UC_LL);
+	}
+}
 
-#define php_unicode_is_composite(cc) php_unicode_is_prop(cc, 0, UC_CM)
-#define php_unicode_is_hex(cc) php_unicode_is_prop(cc, 0, UC_HD)
-#define php_unicode_is_quote(cc) php_unicode_is_prop(cc, 0, UC_QM)
-#define php_unicode_is_symmetric(cc) php_unicode_is_prop(cc, 0, UC_SY)
-#define php_unicode_is_mirroring(cc) php_unicode_is_prop(cc, 0, UC_MR)
-#define php_unicode_is_nonbreaking(cc) php_unicode_is_prop(cc, 0, UC_NB)
+static inline int php_unicode_is_upper(unsigned long code) {
+	if (code < 0x80) {
+		return code >= 0x41 && code <= 0x5A;
+	} else {
+		return php_unicode_is_prop1(code, UC_LU);
+	}
+}
+
+#define php_unicode_is_alpha(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LM, UC_LO, UC_LT, -1)
+#define php_unicode_is_digit(cc) php_unicode_is_prop1(cc, UC_ND)
+#define php_unicode_is_alnum(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LM, UC_LO, UC_LT, UC_ND, -1)
+#define php_unicode_is_cntrl(cc) php_unicode_is_prop(cc, UC_CC, UC_CF, -1)
+#define php_unicode_is_blank(cc) php_unicode_is_prop1(cc, UC_ZS)
+#define php_unicode_is_punct(cc) php_unicode_is_prop(cc, UC_PD, UC_PS, UC_PE, UC_PO, UC_PI, UC_PF, -1)
+#define php_unicode_is_graph(cc) php_unicode_is_prop(cc, UC_MN, UC_MC, UC_ME, UC_ND, UC_NL, UC_NO, \
+                               UC_LU, UC_LL, UC_LT, UC_LM, UC_LO, UC_PC, UC_PD, \
+                               UC_PS, UC_PE, UC_PO, UC_SM, UC_SM, UC_SC, UC_SK, \
+                               UC_SO, UC_PI, UC_PF, -1)
+#define php_unicode_is_print(cc) php_unicode_is_prop(cc, UC_MN, UC_MC, UC_ME, UC_ND, UC_NL, UC_NO, \
+                               UC_LU, UC_LL, UC_LT, UC_LM, UC_LO, UC_PC, UC_PD, \
+                               UC_PS, UC_PE, UC_PO, UC_SM, UC_SM, UC_SC, UC_SK, \
+                               UC_SO, UC_ZS, UC_PI, UC_PF, -1)
+#define php_unicode_is_title(cc) php_unicode_is_prop1(cc, UC_LT)
+
+#define php_unicode_is_isocntrl(cc) php_unicode_is_prop1(cc, UC_CC)
+#define php_unicode_is_fmtcntrl(cc) php_unicode_is_prop1(cc, UC_CF)
+
+#define php_unicode_is_symbol(cc) php_unicode_is_prop(cc, UC_SM, UC_SC, UC_SO, UC_SK, -1)
+#define php_unicode_is_number(cc) php_unicode_is_prop(cc, UC_ND, UC_NO, UC_NL, -1)
+#define php_unicode_is_nonspacing(cc) php_unicode_is_prop1(cc, UC_MN)
+#define php_unicode_is_openpunct(cc) php_unicode_is_prop1(cc, UC_PS)
+#define php_unicode_is_closepunct(cc) php_unicode_is_prop1(cc, UC_PE)
+#define php_unicode_is_initialpunct(cc) php_unicode_is_prop1(cc, UC_PI)
+#define php_unicode_is_finalpunct(cc) php_unicode_is_prop1(cc, UC_PF)
 
 /*
  * Directionality macros.
  */
-#define php_unicode_is_rtl(cc) php_unicode_is_prop(cc, UC_R, 0)
-#define php_unicode_is_ltr(cc) php_unicode_is_prop(cc, UC_L, 0)
-#define php_unicode_is_strong(cc) php_unicode_is_prop(cc, UC_L|UC_R, 0)
-#define php_unicode_is_weak(cc) php_unicode_is_prop(cc, UC_EN|UC_ES, UC_ET|UC_AN|UC_CS)
-#define php_unicode_is_neutral(cc) php_unicode_is_prop(cc, 0, UC_B|UC_S|UC_WS|UC_ON)
-#define php_unicode_is_separator(cc) php_unicode_is_prop(cc, 0, UC_B|UC_S)
+#define php_unicode_is_rtl(cc) php_unicode_is_prop1(cc, UC_R)
+#define php_unicode_is_ltr(cc) php_unicode_is_prop1(cc, UC_L)
+#define php_unicode_is_strong(cc) php_unicode_is_prop(cc, UC_L, UC_R, -1)
+#define php_unicode_is_weak(cc) php_unicode_is_prop(cc, UC_EN, UC_ES, UC_ET, UC_AN, UC_CS, -1)
+#define php_unicode_is_neutral(cc) php_unicode_is_prop(cc, UC_B, UC_S, UC_WS, UC_ON, -1)
+#define php_unicode_is_separator(cc) php_unicode_is_prop(cc, UC_B, UC_S, -1)
 
 /*
  * Other macros inspired by John Cowan.
  */
-#define php_unicode_is_mark(cc) php_unicode_is_prop(cc, UC_MN|UC_MC|UC_ME, 0)
-#define php_unicode_is_modif(cc) php_unicode_is_prop(cc, UC_LM, 0)
-#define php_unicode_is_letnum(cc) php_unicode_is_prop(cc, UC_NL, 0)
-#define php_unicode_is_connect(cc) php_unicode_is_prop(cc, UC_PC, 0)
-#define php_unicode_is_dash(cc) php_unicode_is_prop(cc, UC_PD, 0)
-#define php_unicode_is_math(cc) php_unicode_is_prop(cc, UC_SM, 0)
-#define php_unicode_is_currency(cc) php_unicode_is_prop(cc, UC_SC, 0)
-#define php_unicode_is_modifsymbol(cc) php_unicode_is_prop(cc, UC_SK, 0)
-#define php_unicode_is_nsmark(cc) php_unicode_is_prop(cc, UC_MN, 0)
-#define php_unicode_is_spmark(cc) php_unicode_is_prop(cc, UC_MC, 0)
-#define php_unicode_is_enclosing(cc) php_unicode_is_prop(cc, UC_ME, 0)
-#define php_unicode_is_private(cc) php_unicode_is_prop(cc, UC_CO, 0)
-#define php_unicode_is_surrogate(cc) php_unicode_is_prop(cc, UC_OS, 0)
-#define php_unicode_is_lsep(cc) php_unicode_is_prop(cc, UC_ZL, 0)
-#define php_unicode_is_psep(cc) php_unicode_is_prop(cc, UC_ZP, 0)
+#define php_unicode_is_mark(cc) php_unicode_is_prop(cc, UC_MN, UC_MC, UC_ME, -1)
+#define php_unicode_is_modif(cc) php_unicode_is_prop1(cc, UC_LM)
+#define php_unicode_is_letnum(cc) php_unicode_is_prop1(cc, UC_NL)
+#define php_unicode_is_connect(cc) php_unicode_is_prop1(cc, UC_PC)
+#define php_unicode_is_dash(cc) php_unicode_is_prop1(cc, UC_PD)
+#define php_unicode_is_math(cc) php_unicode_is_prop1(cc, UC_SM)
+#define php_unicode_is_currency(cc) php_unicode_is_prop1(cc, UC_SC)
+#define php_unicode_is_modifsymbol(cc) php_unicode_is_prop1(cc, UC_SK)
+#define php_unicode_is_nsmark(cc) php_unicode_is_prop1(cc, UC_MN)
+#define php_unicode_is_spmark(cc) php_unicode_is_prop1(cc, UC_MC)
+#define php_unicode_is_enclosing(cc) php_unicode_is_prop1(cc, UC_ME)
+#define php_unicode_is_private(cc) php_unicode_is_prop1(cc, UC_CO)
+#define php_unicode_is_surrogate(cc) php_unicode_is_prop1(cc, UC_OS)
+#define php_unicode_is_lsep(cc) php_unicode_is_prop1(cc, UC_ZL)
+#define php_unicode_is_psep(cc) php_unicode_is_prop1(cc, UC_ZP)
 
-#define php_unicode_is_identstart(cc) php_unicode_is_prop(cc, UC_LU|UC_LL|UC_LT|UC_LO|UC_NL, 0)
-#define php_unicode_is_identpart(cc) php_unicode_is_prop(cc, UC_LU|UC_LL|UC_LT|UC_LO|UC_NL|\
-                                   UC_MN|UC_MC|UC_ND|UC_PC|UC_CF, 0)
-
-#define php_unicode_is_defined(cc) php_unicode_is_prop(cc, 0, UC_CP)
-#define php_unicode_is_undefined(cc) !php_unicode_is_prop(cc, 0, UC_CP)
+#define php_unicode_is_identstart(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LT, UC_LO, UC_NL, -1)
+#define php_unicode_is_identpart(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LT, UC_LO, UC_NL, \
+                                   UC_MN, UC_MC, UC_ND, UC_PC, UC_CF, -1)
 
 /*
  * Other miscellaneous character property macros.
@@ -190,6 +184,13 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 #define php_unicode_is_han(cc) (((cc) >= 0x4e00 && (cc) <= 0x9fff) ||\
                      ((cc) >= 0xf900 && (cc) <= 0xfaff))
 #define php_unicode_is_hangul(cc) ((cc) >= 0xac00 && (cc) <= 0xd7ff)
+
+/*
+ * Derived core properties.
+ */
+
+#define php_unicode_is_cased(cc) php_unicode_is_prop1(cc, UC_CASED)
+#define php_unicode_is_case_ignorable(cc) php_unicode_is_prop1(cc, UC_CASE_IGNORABLE)
 
 
 #endif

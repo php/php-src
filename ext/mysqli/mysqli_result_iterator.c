@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id: mysqli.c 299335 2010-05-13 11:05:09Z andrey $
 */
 
 #ifdef HAVE_CONFIG_H
@@ -33,7 +31,7 @@
 #include "zend_interfaces.h"
 
 
-extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
+extern const zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
 
 typedef struct {
 	zend_object_iterator  intern;
@@ -146,7 +144,7 @@ static void php_mysqli_result_iterator_current_key(zend_object_iterator *iter, z
 /* }}} */
 
 /* {{{ php_mysqli_result_iterator_funcs */
-zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
+const zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	php_mysqli_result_iterator_dtor,
 	php_mysqli_result_iterator_valid,
 	php_mysqli_result_iterator_current_data,

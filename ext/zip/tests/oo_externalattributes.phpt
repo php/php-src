@@ -44,7 +44,7 @@ $zip->close();
 $name = __DIR__ . '/withattr.zip';
 @unlink($name);
 ?>
---EXPECTF--
+--EXPECT--
 == Set
 bool(true)
 bool(true)

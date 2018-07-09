@@ -90,7 +90,7 @@ typedef struct _spl_SplObjectStorage { /* {{{ */
 	zend_object       std;
 } spl_SplObjectStorage; /* }}} */
 
-/* {{{ storage is an assoc aray of [zend_object*]=>[zval *obj, zval *inf] */
+/* {{{ storage is an assoc array of [zend_object*]=>[zval *obj, zval *inf] */
 typedef struct _spl_SplObjectStorageElement {
 	zval obj;
 	zval inf;
@@ -143,7 +143,7 @@ static int spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage 
 
 static void spl_object_storage_free_hash(spl_SplObjectStorage *intern, zend_hash_key *key) {
 	if (key->key) {
-		zend_string_release(key->key);
+		zend_string_release_ex(key->key, 0);
 	}
 }
 
@@ -234,7 +234,7 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zval
 
 	intern = emalloc(sizeof(spl_SplObjectStorage) + zend_object_properties_size(parent));
 	memset(intern, 0, sizeof(spl_SplObjectStorage) - sizeof(zval));
-	intern->pos = HT_INVALID_IDX;
+	intern->pos = 0;
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -295,8 +295,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp) /* {{{ 
 
 	props = Z_OBJPROP_P(obj);
 
-	ALLOC_HASHTABLE(debug_info);
-	ZEND_INIT_SYMTABLE_EX(debug_info, zend_hash_num_elements(props) + 1, 0);
+	debug_info = zend_new_array(zend_hash_num_elements(props) + 1);
 	zend_hash_copy(debug_info, props, (copy_ctor_func_t)zval_add_ref);
 
 	array_init(&storage);
@@ -310,12 +309,12 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp) /* {{{ 
 		add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &element->obj);
 		add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
 		zend_hash_update(Z_ARRVAL(storage), md5str, &tmp);
-		zend_string_release(md5str);
+		zend_string_release_ex(md5str, 0);
 	} ZEND_HASH_FOREACH_END();
 
 	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1);
 	zend_symtable_update(debug_info, zname, &storage);
-	zend_string_release(zname);
+	zend_string_release_ex(zname, 0);
 
 	return debug_info;
 }
@@ -341,7 +340,7 @@ static HashTable *spl_object_storage_get_gc(zval *obj, zval **table, int *n) /* 
 	*table = intern->gcdata;
 	*n = i;
 
-	return std_object_handlers.get_properties(obj);
+	return zend_std_get_properties(obj);
 }
 /* }}} */
 
@@ -465,8 +464,7 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	} else {
 		zval *value = &element->inf;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 } /* }}} */
 
@@ -570,12 +568,13 @@ SPL_METHOD(SplObjectStorage, count)
 	}
 
 	if (mode == COUNT_RECURSIVE) {
-		zend_long ret = zend_hash_num_elements(&intern->storage);
-		zval *element;
+		zend_long ret;
 
-		ZEND_HASH_FOREACH_VAL(&intern->storage, element) {
-			ret += php_count_recursive(element, mode);
-		} ZEND_HASH_FOREACH_END();
+		if (mode != COUNT_RECURSIVE) {
+			ret = zend_hash_num_elements(&intern->storage);
+		} else {
+			ret = php_count_recursive(&intern->storage);
+		}
 
 		RETURN_LONG(ret);
 		return;
@@ -713,7 +712,6 @@ SPL_METHOD(SplObjectStorage, serialize)
 	smart_str_appendl(&buf, "x:", 2);
 	ZVAL_LONG(&flags, zend_hash_num_elements(&intern->storage));
 	php_var_serialize(&buf, &flags, &var_hash);
-	zval_ptr_dtor(&flags);
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
 
@@ -939,7 +937,7 @@ typedef enum {
 #define SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT   1
 #define SPL_MULTIPLE_ITERATOR_GET_ALL_KEY       2
 
-/* {{{ proto void MultipleIterator::__construct([int flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC])
+/* {{{ proto MultipleIterator::__construct([int flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC])
    Iterator that iterates over several iterators one after the other */
 SPL_METHOD(MultipleIterator, __construct)
 {
@@ -1245,7 +1243,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_INTERFACE(SplSubject);
 
 	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, spl_funcs_SplObjectStorage);
-	memcpy(&spl_handler_SplObjectStorage, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
 	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;

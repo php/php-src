@@ -37,7 +37,7 @@ var_dump( strrchr("Hello, World", "ooo") );
 var_dump( strrchr("Hello, World", "Zzzz") ); //non-existent needle in haystack
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrchr() function: basic functionality ***
 string(12) "Hello, World"
 string(12) "Hello, World"

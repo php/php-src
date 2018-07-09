@@ -36,7 +36,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMEntityReference extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-11C98490
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-11C98490
 * Since:
 */
 
@@ -45,7 +45,7 @@ const zend_function_entry php_dom_entityreference_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMEntityReference::__construct(string name) */
+/* {{{ proto DOMEntityReference::__construct(string name) */
 PHP_METHOD(domentityreference, __construct)
 {
 	zval *id = getThis();
