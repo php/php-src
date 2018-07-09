@@ -609,7 +609,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			error_level = E_COMPILE_ERROR;
 			error_verb = "must";
 		} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
-                   (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+                   (!(child_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
 		            (ZEND_TYPE_ALLOW_NULL(child->common.arg_info[-1].type) && !ZEND_TYPE_ALLOW_NULL(parent->common.arg_info[-1].type)))) {
 			error_level = E_COMPILE_ERROR;
