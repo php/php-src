@@ -809,14 +809,14 @@ found:
 			}
 		}
 	} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
-		zval tmp;
-
 write_std_property:
 		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
 				/* if we assign referenced variable, we should separate it */
-				ZVAL_COPY(&tmp, Z_REFVAL_P(value));
-				value = &tmp;
+				value = Z_REFVAL_P(value);
+				if (Z_REFCOUNTED_P(value)) {
+					Z_ADDREF_P(value);
+				}
 			} else {
 				Z_ADDREF_P(value);
 			}
