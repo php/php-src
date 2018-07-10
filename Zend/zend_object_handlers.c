@@ -915,8 +915,7 @@ ZEND_API int zend_std_has_dimension(zval *object, zval *offset, int check_empty)
 	int result;
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
-		ZVAL_DEREF(offset);
-		ZVAL_COPY(&tmp_offset, offset);
+		ZVAL_COPY_DEREF(&tmp_offset, offset);
 		ZVAL_COPY(&tmp_object, object);
 		zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetexists", &retval, &tmp_offset);
 		if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
