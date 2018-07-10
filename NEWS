@@ -20,6 +20,7 @@ PHP                                                                        NEWS
     log_limit, log_buffering and decorate_workers_output. (Jakub Zelenka) 
 
 - mbstring:
+  . Fixed bug #76574 (use of undeclared identifiers INT_MAX and LONG_MAX). (cmb)
   . Fixed bug #76594 (Bus Error due to unaligned access in zend_ini.c
     OnUpdateLong). (cmb, Nikita)
 
