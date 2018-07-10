@@ -22,6 +22,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   s. zend_function.reserved[]
   t. zif_handler
   u. GC_G
+  v. php_add[c]slashes
 
 2. Build system changes
   a. Unix build system changes
@@ -141,6 +142,10 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
  u. The GC globals (GC_G) are now private. Use the new zend_gc_get_status() to
     retrieve status information of the GC.
+
+ v. The should_free argument of the php_add[c]slashes functions has been
+    removed.  It is now always the callers responsibility to free the passed
+    string.
 
 ========================
 2. Build system changes
