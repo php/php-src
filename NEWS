@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug #76136 (stream_socket_get_name should enclose IPv6 in brackets).
     (seliver)
 
+- Zip:
+  . Fixed bug #76524 (ZipArchive memory leak (OVERWRITE flag and empty archive)).
+    (Timur Ibragimov)
+
 05 Jul 2018, PHP 7.3.0alpha3
 
 - Core:
