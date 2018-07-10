@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - PDO_Firebird:
   . Fixed bug #76488 (Memory leak when fetching a BLOB field). (Simonov Denis)
 
+- Zip:
+  . Fixed bug #76524 (ZipArchive memory leak (OVERWRITE flag and empty archive)).
+    (Timur Ibragimov)
+
 07 Jul 2018, PHP 7.1.20
 
 - Core:
