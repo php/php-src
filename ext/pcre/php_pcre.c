@@ -388,7 +388,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	char *version;
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	if (!pcre2_init_ok) {
+	if (UNEXPECTED(!pcre2_init_ok)) {
 		/* Retry. */
 		php_pcre_init_pcre2(PCRE_G(jit));
 		if (!pcre2_init_ok) {
@@ -444,7 +444,7 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
-	if (!pcre2_init_ok) {
+	if (UNEXPECTED(!pcre2_init_ok)) {
 		/* Retry. */
 		php_pcre_mutex_lock();
 		php_pcre_init_pcre2(PCRE_G(jit));
