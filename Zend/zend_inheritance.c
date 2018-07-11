@@ -1257,22 +1257,24 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 }
 /* }}} */
 
-static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable **overriden, HashTable *exclude_table) /* {{{ */
+static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable **overriden, HashTable *exclude_table, zend_class_entry **aliases) /* {{{ */
 {
 	zend_trait_alias  *alias, **alias_ptr;
 	zend_string       *lcname;
 	zend_function      fn_copy;
+	int                i;
 
 	/* apply aliases which are qualified with a class name, there should not be any ambiguity */
 	if (ce->trait_aliases) {
 		alias_ptr = ce->trait_aliases;
 		alias = *alias_ptr;
+		i = 0;
 		while (alias) {
 			/* Scope unset or equal to the function we compare to, and the alias applies to fn */
 			if (alias->alias != NULL
-				&& (!alias->trait_method->ce || fn->common.scope == alias->trait_method->ce)
-				&& ZSTR_LEN(alias->trait_method->method_name) == ZSTR_LEN(fnname)
-				&& (zend_binary_strcasecmp(ZSTR_VAL(alias->trait_method->method_name), ZSTR_LEN(alias->trait_method->method_name), ZSTR_VAL(fnname), ZSTR_LEN(fnname)) == 0)) {
+				&& (!aliases[i] || fn->common.scope == aliases[i])
+				&& ZSTR_LEN(alias->trait_method.method_name) == ZSTR_LEN(fnname)
+				&& (zend_binary_strcasecmp(ZSTR_VAL(alias->trait_method.method_name), ZSTR_LEN(alias->trait_method.method_name), ZSTR_VAL(fnname), ZSTR_LEN(fnname)) == 0)) {
 				fn_copy = *fn;
 
 				/* if it is 0, no modifieres has been changed */
@@ -1285,12 +1287,17 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 				zend_string_release_ex(lcname, 0);
 
 				/* Record the trait from which this alias was resolved. */
-				if (!alias->trait_method->ce) {
-					alias->trait_method->ce = fn->common.scope;
+				if (!aliases[i]) {
+					aliases[i] = fn->common.scope;
+				}
+				if (!alias->trait_method.class_name) {
+					/* TODO: try to avoid this assignment (it's necessary only for reflection) */
+					alias->trait_method.class_name = zend_string_copy(fn->common.scope->name);
 				}
 			}
 			alias_ptr++;
 			alias = *alias_ptr;
+			i++;
 		}
 	}
 
@@ -1303,22 +1310,28 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 		if (ce->trait_aliases) {
 			alias_ptr = ce->trait_aliases;
 			alias = *alias_ptr;
+			i = 0;
 			while (alias) {
 				/* Scope unset or equal to the function we compare to, and the alias applies to fn */
 				if (alias->alias == NULL && alias->modifiers != 0
-					&& (!alias->trait_method->ce || fn->common.scope == alias->trait_method->ce)
-					&& (ZSTR_LEN(alias->trait_method->method_name) == ZSTR_LEN(fnname))
-					&& (zend_binary_strcasecmp(ZSTR_VAL(alias->trait_method->method_name), ZSTR_LEN(alias->trait_method->method_name), ZSTR_VAL(fnname), ZSTR_LEN(fnname)) == 0)) {
+					&& (!aliases[i] || fn->common.scope == aliases[i])
+					&& (ZSTR_LEN(alias->trait_method.method_name) == ZSTR_LEN(fnname))
+					&& (zend_binary_strcasecmp(ZSTR_VAL(alias->trait_method.method_name), ZSTR_LEN(alias->trait_method.method_name), ZSTR_VAL(fnname), ZSTR_LEN(fnname)) == 0)) {
 
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
 
 					/** Record the trait from which this alias was resolved. */
-					if (!alias->trait_method->ce) {
-						alias->trait_method->ce = fn->common.scope;
+					if (!aliases[i]) {
+						aliases[i] = fn->common.scope;
+					}
+					if (!alias->trait_method.class_name) {
+						/* TODO: try to avoid this assignment (it's necessary only for reflection) */
+						alias->trait_method.class_name = zend_string_copy(fn->common.scope->name);
 					}
 				}
 				alias_ptr++;
 				alias = *alias_ptr;
+				i++;
 			}
 		}
 
@@ -1329,24 +1342,26 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 }
 /* }}} */
 
-static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait) /* {{{ */
+static uint32_t zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait) /* {{{ */
 {
 	uint32_t i;
 
 	if (UNEXPECTED((trait->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", ZSTR_VAL(trait->name));
+		return 0;
 	}
 
 	for (i = 0; i < ce->num_traits; i++) {
 		if (ce->traits[i] == trait) {
-			return;
+			return i;
 		}
 	}
 	zend_error_noreturn(E_COMPILE_ERROR, "Required Trait %s wasn't added to %s", ZSTR_VAL(trait->name), ZSTR_VAL(ce->name));
+	return 0;
 }
 /* }}} */
 
-static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
+static void zend_traits_init_trait_structures(zend_class_entry *ce, HashTable ***exclude_tables_ptr, zend_class_entry ***aliases_ptr) /* {{{ */
 {
 	size_t i, j = 0;
 	zend_trait_precedence **precedences;
@@ -1354,64 +1369,72 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 	zend_trait_method_reference *cur_method_ref;
 	zend_string *lcname;
 	zend_bool method_exists;
+	HashTable **exclude_tables = NULL;
+	zend_class_entry **aliases = NULL;
+	zend_class_entry *trait;
 
 	/* resolve class references */
 	if (ce->trait_precedences) {
+		exclude_tables = ecalloc(ce->num_traits, sizeof(HashTable*));
 		i = 0;
 		precedences = ce->trait_precedences;
 		ce->trait_precedences = NULL;
 		while ((cur_precedence = precedences[i])) {
 			/** Resolve classes for all precedence operations. */
-			if (cur_precedence->exclude_from_classes) {
-				cur_method_ref = cur_precedence->trait_method;
-				if (!(cur_precedence->trait_method->ce = zend_fetch_class(cur_method_ref->class_name,
-								ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD))) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
-				}
-				zend_check_trait_usage(ce, cur_precedence->trait_method->ce);
+			cur_method_ref = &cur_precedence->trait_method;
+			trait = zend_fetch_class(cur_method_ref->class_name,
+							ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD);
+			if (!trait) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
+			}
+			zend_check_trait_usage(ce, trait);
 
-				/** Ensure that the preferred method is actually available. */
-				lcname = zend_string_tolower(cur_method_ref->method_name);
-				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
-												 lcname);
-				zend_string_release_ex(lcname, 0);
-				if (!method_exists) {
+			/** Ensure that the preferred method is actually available. */
+			lcname = zend_string_tolower(cur_method_ref->method_name);
+			method_exists = zend_hash_exists(&trait->function_table, lcname);
+			if (!method_exists) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+						   "A precedence rule was defined for %s::%s but this method does not exist",
+						   ZSTR_VAL(trait->name),
+						   ZSTR_VAL(cur_method_ref->method_name));
+			}
+
+			/** With the other traits, we are more permissive.
+				We do not give errors for those. This allows to be more
+				defensive in such definitions.
+				However, we want to make sure that the insteadof declaration
+				is consistent in itself.
+			 */
+
+			for (j = 0; j < cur_precedence->num_excludes; j++) {
+				zend_string* class_name = cur_precedence->exclude_class_names[j];
+				zend_class_entry *exclude_ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD);
+				uint32_t trait_num;
+
+				if (!exclude_ce) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(class_name));
+				}
+				trait_num = zend_check_trait_usage(ce, exclude_ce);
+				if (!exclude_tables[trait_num]) {
+					ALLOC_HASHTABLE(exclude_tables[trait_num]);
+					zend_hash_init(exclude_tables[trait_num], 0, NULL, NULL, 0);
+				}
+				if (zend_hash_add_empty_element(exclude_tables[trait_num], lcname) == NULL) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", ZSTR_VAL(precedences[i]->trait_method.method_name), ZSTR_VAL(exclude_ce->name));
+				}
+
+				/* make sure that the trait method is not from a class mentioned in
+				 exclude_from_classes, for consistency */
+				if (trait == exclude_ce) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-							   "A precedence rule was defined for %s::%s but this method does not exist",
-							   ZSTR_VAL(cur_method_ref->ce->name),
-							   ZSTR_VAL(cur_method_ref->method_name));
-				}
-
-				/** With the other traits, we are more permissive.
-					We do not give errors for those. This allows to be more
-					defensive in such definitions.
-					However, we want to make sure that the insteadof declaration
-					is consistent in itself.
-				 */
-				j = 0;
-				while (cur_precedence->exclude_from_classes[j].class_name) {
-					zend_string* class_name = cur_precedence->exclude_from_classes[j].class_name;
-
-					if (!(cur_precedence->exclude_from_classes[j].ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD))) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(class_name));
-					}
-					zend_check_trait_usage(ce, cur_precedence->exclude_from_classes[j].ce);
-
-					/* make sure that the trait method is not from a class mentioned in
-					 exclude_from_classes, for consistency */
-					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[j].ce) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-								   "Inconsistent insteadof definition. "
-								   "The method %s is to be used from %s, but %s is also on the exclude list",
-								   ZSTR_VAL(cur_method_ref->method_name),
-								   ZSTR_VAL(cur_precedence->trait_method->ce->name),
-								   ZSTR_VAL(cur_precedence->trait_method->ce->name));
-					}
-
-					zend_string_release_ex(class_name, 0);
-					j++;
+							   "Inconsistent insteadof definition. "
+							   "The method %s is to be used from %s, but %s is also on the exclude list",
+							   ZSTR_VAL(cur_method_ref->method_name),
+							   ZSTR_VAL(trait->name),
+							   ZSTR_VAL(trait->name));
 				}
 			}
+			zend_string_release_ex(lcname, 0);
 			i++;
 		}
 		ce->trait_precedences = precedences;
@@ -1420,87 +1443,63 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 	if (ce->trait_aliases) {
 		i = 0;
 		while (ce->trait_aliases[i]) {
+			i++;
+		}
+		aliases = ecalloc(i, sizeof(zend_class_entry*));
+		i = 0;
+		while (ce->trait_aliases[i]) {
 			/** For all aliases with an explicit class name, resolve the class now. */
-			if (ce->trait_aliases[i]->trait_method->class_name) {
-				cur_method_ref = ce->trait_aliases[i]->trait_method;
-				if (!(cur_method_ref->ce = zend_fetch_class(cur_method_ref->class_name, ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD))) {
+			if (ce->trait_aliases[i]->trait_method.class_name) {
+				cur_method_ref = &ce->trait_aliases[i]->trait_method;
+				trait = zend_fetch_class(cur_method_ref->class_name, ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD);
+				if (!trait) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
 				}
-				zend_check_trait_usage(ce, cur_method_ref->ce);
+				zend_check_trait_usage(ce, trait);
+				aliases[i] = trait;
 
 				/** And, ensure that the referenced method is resolvable, too. */
 				lcname = zend_string_tolower(cur_method_ref->method_name);
-				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
-						lcname);
+				method_exists = zend_hash_exists(&trait->function_table, lcname);
 				zend_string_release_ex(lcname, 0);
 
 				if (!method_exists) {
-					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", ZSTR_VAL(cur_method_ref->ce->name), ZSTR_VAL(cur_method_ref->method_name));
+					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", ZSTR_VAL(trait->name), ZSTR_VAL(cur_method_ref->method_name));
 				}
 			}
 			i++;
 		}
 	}
+
+	*exclude_tables_ptr = exclude_tables;
+	*aliases_ptr = aliases;
 }
 /* }}} */
 
-static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_trait_precedence **precedences, zend_class_entry *trait) /* {{{ */
-{
-	size_t i = 0, j;
-
-	if (!precedences) {
-		return;
-	}
-	while (precedences[i]) {
-		if (precedences[i]->exclude_from_classes) {
-			j = 0;
-			while (precedences[i]->exclude_from_classes[j].ce) {
-				if (precedences[i]->exclude_from_classes[j].ce == trait) {
-					zend_string *lcname =
-						zend_string_tolower(precedences[i]->trait_method->method_name);
-					if (zend_hash_add_empty_element(exclude_table, lcname) == NULL) {
-						zend_string_release_ex(lcname, 0);
-						zend_error_noreturn(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", ZSTR_VAL(precedences[i]->trait_method->method_name), ZSTR_VAL(trait->name));
-					}
-					zend_string_release_ex(lcname, 0);
-				}
-				++j;
-			}
-		}
-		++i;
-	}
-}
-/* }}} */
-
-static void zend_do_traits_method_binding(zend_class_entry *ce) /* {{{ */
+static void zend_do_traits_method_binding(zend_class_entry *ce, HashTable **exclude_tables, zend_class_entry **aliases) /* {{{ */
 {
 	uint32_t i;
 	HashTable *overriden = NULL;
 	zend_string *key;
 	zend_function *fn;
 
-	for (i = 0; i < ce->num_traits; i++) {
-		if (ce->trait_precedences) {
-			HashTable exclude_table;
-			zend_trait_precedence **precedences;
-
-			/* TODO: revisit this start size, may be its not optimal */
-			zend_hash_init_ex(&exclude_table, 8, NULL, NULL, 0, 0);
-
-			precedences = ce->trait_precedences;
-			ce->trait_precedences = NULL;
-			zend_traits_compile_exclude_table(&exclude_table, precedences, ce->traits[i]);
-
+	if (exclude_tables) {
+		for (i = 0; i < ce->num_traits; i++) {
 			/* copies functions, applies defined aliasing, and excludes unused trait methods */
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
-				zend_traits_copy_functions(key, fn, ce, &overriden, &exclude_table);
+				zend_traits_copy_functions(key, fn, ce, &overriden, exclude_tables[i], aliases);
 			} ZEND_HASH_FOREACH_END();
 
-			zend_hash_destroy(&exclude_table);
-			ce->trait_precedences = precedences;
-		} else {
+			if (exclude_tables[i]) {
+				zend_hash_destroy(exclude_tables[i]);
+				FREE_HASHTABLE(exclude_tables[i]);
+				exclude_tables[i] = NULL;
+			}
+		}
+	} else {
+		for (i = 0; i < ce->num_traits; i++) {
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
-				zend_traits_copy_functions(key, fn, ce, &overriden, NULL);
+				zend_traits_copy_functions(key, fn, ce, &overriden, NULL, aliases);
 			} ZEND_HASH_FOREACH_END();
 		}
 	}
@@ -1508,17 +1507,6 @@ static void zend_do_traits_method_binding(zend_class_entry *ce) /* {{{ */
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
 		zend_fixup_trait_method(fn, ce);
 	} ZEND_HASH_FOREACH_END();
-
-	if (ce->trait_precedences) {
-		i = 0;
-		while (ce->trait_precedences[i]) {
-			if (ce->trait_precedences[i]->exclude_from_classes) {
-				efree(ce->trait_precedences[i]->exclude_from_classes);
-				ce->trait_precedences[i]->exclude_from_classes = NULL;
-			}
-			i++;
-		}
-	}
 
 	if (overriden) {
 		zend_hash_destroy(overriden);
@@ -1661,7 +1649,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
-static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce) /* {{{ */
+static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce, zend_class_entry **aliases) /* {{{ */
 {
 	int i = 0;
 	zend_trait_alias* cur_alias;
@@ -1672,13 +1660,13 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce)
 			cur_alias = ce->trait_aliases[i];
 			/** The trait for this alias has not been resolved, this means, this
 				alias was not applied. Abort with an error. */
-			if (!cur_alias->trait_method->ce) {
+			if (!aliases[i]) {
 				if (cur_alias->alias) {
 					/** Plain old inconsistency/typo/bug */
 					zend_error_noreturn(E_COMPILE_ERROR,
 							   "An alias (%s) was defined for method %s(), but this method does not exist",
 							   ZSTR_VAL(cur_alias->alias),
-							   ZSTR_VAL(cur_alias->trait_method->method_name));
+							   ZSTR_VAL(cur_alias->trait_method.method_name));
 				} else {
 					/** Here are two possible cases:
 						1) this is an attempt to modifiy the visibility
@@ -1689,18 +1677,18 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce)
 						   as in the case where alias is set. */
 
 					lc_method_name = zend_string_tolower(
-						cur_alias->trait_method->method_name);
+						cur_alias->trait_method.method_name);
 					if (zend_hash_exists(&ce->function_table,
 										 lc_method_name)) {
 						zend_string_release_ex(lc_method_name, 0);
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "The modifiers for the trait alias %s() need to be changed in the same statement in which the alias is defined. Error",
-								   ZSTR_VAL(cur_alias->trait_method->method_name));
+								   ZSTR_VAL(cur_alias->trait_method.method_name));
 					} else {
 						zend_string_release_ex(lc_method_name, 0);
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "The modifiers of the trait method %s() are changed, but this method does not exist. Error",
-								   ZSTR_VAL(cur_alias->trait_method->method_name));
+								   ZSTR_VAL(cur_alias->trait_method.method_name));
 
 					}
 				}
@@ -1713,19 +1701,29 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce)
 
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 {
+	HashTable **exclude_tables;
+	zend_class_entry **aliases;
 
 	if (ce->num_traits == 0) {
 		return;
 	}
 
 	/* complete initialization of trait strutures in ce */
-	zend_traits_init_trait_structures(ce);
+	zend_traits_init_trait_structures(ce, &exclude_tables, &aliases);
 
 	/* first care about all methods to be flattened into the class */
-	zend_do_traits_method_binding(ce);
+	zend_do_traits_method_binding(ce, exclude_tables, aliases);
 
 	/* Aliases which have not been applied indicate typos/bugs. */
-	zend_do_check_for_inconsistent_traits_aliasing(ce);
+	zend_do_check_for_inconsistent_traits_aliasing(ce, aliases);
+
+	if (aliases) {
+		efree(aliases);
+	}
+
+	if (exclude_tables) {
+		efree(exclude_tables);
+	}
 
 	/* then flatten the properties into it, to, mostly to notfiy developer about problems */
 	zend_do_traits_property_binding(ce);

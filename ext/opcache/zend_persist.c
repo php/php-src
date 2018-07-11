@@ -775,16 +775,11 @@ static void zend_persist_class_entry(zval *zv)
 		if (ce->trait_aliases) {
 			int i = 0;
 			while (ce->trait_aliases[i]) {
-				if (ce->trait_aliases[i]->trait_method) {
-					if (ce->trait_aliases[i]->trait_method->method_name) {
-						zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method->method_name);
-					}
-					if (ce->trait_aliases[i]->trait_method->class_name) {
-						zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method->class_name);
-					}
-					ce->trait_aliases[i]->trait_method->ce = NULL;
-					zend_accel_store(ce->trait_aliases[i]->trait_method,
-						sizeof(zend_trait_method_reference));
+				if (ce->trait_aliases[i]->trait_method.method_name) {
+					zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method.method_name);
+				}
+				if (ce->trait_aliases[i]->trait_method.class_name) {
+					zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method.class_name);
 				}
 
 				if (ce->trait_aliases[i]->alias) {
@@ -800,26 +795,17 @@ static void zend_persist_class_entry(zval *zv)
 
 		if (ce->trait_precedences) {
 			int i = 0;
+			int j;
 
 			while (ce->trait_precedences[i]) {
-				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method->method_name);
-				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method->class_name);
-				ce->trait_precedences[i]->trait_method->ce = NULL;
-				zend_accel_store(ce->trait_precedences[i]->trait_method,
-					sizeof(zend_trait_method_reference));
+				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method.method_name);
+				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method.class_name);
 
-				if (ce->trait_precedences[i]->exclude_from_classes) {
-					int j = 0;
-
-					while (ce->trait_precedences[i]->exclude_from_classes[j].class_name) {
-						zend_accel_store_interned_string(ce->trait_precedences[i]->exclude_from_classes[j].class_name);
-						j++;
-					}
-					zend_accel_store(ce->trait_precedences[i]->exclude_from_classes,
-						sizeof(zend_class_entry*) * (j + 1));
+				for (j = 0; j < ce->trait_precedences[i]->num_excludes; j++) {
+					zend_accel_store_interned_string(ce->trait_precedences[i]->exclude_class_names[j]);
 				}
 
-				zend_accel_store(ce->trait_precedences[i], sizeof(zend_trait_precedence));
+				zend_accel_store(ce->trait_precedences[i], sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
 				i++;
 			}
 			zend_accel_store(

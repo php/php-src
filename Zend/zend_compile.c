@@ -6174,13 +6174,11 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static zend_trait_method_reference *zend_compile_method_ref(zend_ast *ast) /* {{{ */
+static void zend_compile_method_ref(zend_ast *ast, zend_trait_method_reference *method_ref) /* {{{ */
 {
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *method_ast = ast->child[1];
 
-	zend_trait_method_reference *method_ref = emalloc(sizeof(zend_trait_method_reference));
-	method_ref->ce = NULL;
 	method_ref->method_name = zend_string_copy(zend_ast_get_str(method_ast));
 
 	if (class_ast) {
@@ -6188,25 +6186,6 @@ static zend_trait_method_reference *zend_compile_method_ref(zend_ast *ast) /* {{
 	} else {
 		method_ref->class_name = NULL;
 	}
-
-	return method_ref;
-}
-/* }}} */
-
-static zend_string **zend_compile_name_list(zend_ast *ast) /* {{{ */
-{
-	zend_ast_list *list = zend_ast_get_list(ast);
-	zend_string **names = safe_emalloc(sizeof(zend_string *), list->children + 1, 0);
-	uint32_t i;
-
-	for (i = 0; i < list->children; ++i) {
-		zend_ast *name_ast = list->child[i];
-		names[i] = zend_resolve_class_name_ast(name_ast);
-	}
-
-	names[list->children] = NULL;
-
-	return names;
 }
 /* }}} */
 
@@ -6214,11 +6193,17 @@ static void zend_compile_trait_precedence(zend_ast *ast) /* {{{ */
 {
 	zend_ast *method_ref_ast = ast->child[0];
 	zend_ast *insteadof_ast = ast->child[1];
+	zend_ast_list *insteadof_list = zend_ast_get_list(insteadof_ast);
+	uint32_t i;
 
-	zend_trait_precedence *precedence = emalloc(sizeof(zend_trait_precedence));
-	precedence->trait_method = zend_compile_method_ref(method_ref_ast);
-	precedence->exclude_from_classes
-		= (void *) zend_compile_name_list(insteadof_ast);
+	zend_trait_precedence *precedence = emalloc(sizeof(zend_trait_precedence) + (insteadof_list->children - 1) * sizeof(zend_string*));
+	zend_compile_method_ref(method_ref_ast, &precedence->trait_method);
+	precedence->num_excludes = insteadof_list->children;
+
+	for (i = 0; i < insteadof_list->children; ++i) {
+		zend_ast *name_ast = insteadof_list->child[i];
+		precedence->exclude_class_names[i] = zend_resolve_class_name_ast(name_ast);
+	}
 
 	zend_add_to_list(&CG(active_class_entry)->trait_precedences, precedence);
 }
@@ -6241,7 +6226,7 @@ static void zend_compile_trait_alias(zend_ast *ast) /* {{{ */
 	}
 
 	alias = emalloc(sizeof(zend_trait_alias));
-	alias->trait_method = zend_compile_method_ref(method_ref_ast);
+	zend_compile_method_ref(method_ref_ast, &alias->trait_method);
 	alias->modifiers = modifiers;
 
 	if (alias_ast) {

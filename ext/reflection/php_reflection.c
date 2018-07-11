@@ -4939,12 +4939,12 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 		array_init(return_value);
 		while (ce->trait_aliases[i]) {
 			zend_string *mname;
-			zend_trait_method_reference *cur_ref = ce->trait_aliases[i]->trait_method;
+			zend_trait_method_reference *cur_ref = &ce->trait_aliases[i]->trait_method;
 
 			if (ce->trait_aliases[i]->alias) {
 
-				mname = zend_string_alloc(ZSTR_LEN(cur_ref->ce->name) + ZSTR_LEN(cur_ref->method_name) + 2, 0);
-				snprintf(ZSTR_VAL(mname), ZSTR_LEN(mname) + 1, "%s::%s", ZSTR_VAL(cur_ref->ce->name), ZSTR_VAL(cur_ref->method_name));
+				mname = zend_string_alloc(ZSTR_LEN(cur_ref->class_name) + ZSTR_LEN(cur_ref->method_name) + 2, 0);
+				snprintf(ZSTR_VAL(mname), ZSTR_LEN(mname) + 1, "%s::%s", ZSTR_VAL(cur_ref->class_name), ZSTR_VAL(cur_ref->method_name));
 				add_assoc_str_ex(return_value, ZSTR_VAL(ce->trait_aliases[i]->alias), ZSTR_LEN(ce->trait_aliases[i]->alias), mname);
 			}
 			i++;

@@ -648,19 +648,11 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 			q = *p;
 			UNSERIALIZE_PTR(q);
 
-			if (q->trait_method) {
-				zend_trait_method_reference *m;
-
-				SERIALIZE_PTR(q->trait_method);
-				m = q->trait_method;
-				UNSERIALIZE_PTR(m);
-
-				if (m->method_name) {
-					SERIALIZE_STR(m->method_name);
-				}
-				if (m->class_name) {
-					SERIALIZE_STR(m->class_name);
-				}
+			if (q->trait_method.method_name) {
+				SERIALIZE_STR(q->trait_method.method_name);
+			}
+			if (q->trait_method.class_name) {
+				SERIALIZE_STR(q->trait_method.class_name);
 			}
 
 			if (q->alias) {
@@ -672,6 +664,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 	if (ce->trait_precedences) {
 		zend_trait_precedence **p, *q;
+		int j;
 
 		SERIALIZE_PTR(ce->trait_precedences);
 		p = ce->trait_precedences;
@@ -682,32 +675,15 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 			q = *p;
 			UNSERIALIZE_PTR(q);
 
-			if (q->trait_method) {
-				zend_trait_method_reference *m;
-
-				SERIALIZE_PTR(q->trait_method);
-				m = q->trait_method;
-				UNSERIALIZE_PTR(m);
-
-				if (m->method_name) {
-					SERIALIZE_STR(m->method_name);
-				}
-				if (m->class_name) {
-					SERIALIZE_STR(m->class_name);
-				}
+			if (q->trait_method.method_name) {
+				SERIALIZE_STR(q->trait_method.method_name);
+			}
+			if (q->trait_method.class_name) {
+				SERIALIZE_STR(q->trait_method.class_name);
 			}
 
-			if (q->exclude_from_classes) {
-				zend_string **s;
-
-				SERIALIZE_PTR(q->exclude_from_classes);
-				s = (zend_string**)q->exclude_from_classes;
-				UNSERIALIZE_PTR(s);
-
-				while (*s) {
-					SERIALIZE_STR(*s);
-					s++;
-				}
+			for (j = 0; j < q->num_excludes; j++) {
+				SERIALIZE_STR(q->exclude_class_names[j]);
 			}
 			p++;
 		}
@@ -1278,18 +1254,11 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 			UNSERIALIZE_PTR(*p);
 			q = *p;
 
-			if (q->trait_method) {
-				zend_trait_method_reference *m;
-
-				UNSERIALIZE_PTR(q->trait_method);
-				m = q->trait_method;
-
-				if (m->method_name) {
-					UNSERIALIZE_STR(m->method_name);
-				}
-				if (m->class_name) {
-					UNSERIALIZE_STR(m->class_name);
-				}
+			if (q->trait_method.method_name) {
+				UNSERIALIZE_STR(q->trait_method.method_name);
+			}
+			if (q->trait_method.class_name) {
+				UNSERIALIZE_STR(q->trait_method.class_name);
 			}
 
 			if (q->alias) {
@@ -1301,6 +1270,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 
 	if (ce->trait_precedences) {
 		zend_trait_precedence **p, *q;
+		int j;
 
 		UNSERIALIZE_PTR(ce->trait_precedences);
 		p = ce->trait_precedences;
@@ -1309,30 +1279,15 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 			UNSERIALIZE_PTR(*p);
 			q = *p;
 
-			if (q->trait_method) {
-				zend_trait_method_reference *m;
-
-				UNSERIALIZE_PTR(q->trait_method);
-				m = q->trait_method;
-
-				if (m->method_name) {
-					UNSERIALIZE_STR(m->method_name);
-				}
-				if (m->class_name) {
-					UNSERIALIZE_STR(m->class_name);
-				}
+			if (q->trait_method.method_name) {
+				UNSERIALIZE_STR(q->trait_method.method_name);
+			}
+			if (q->trait_method.class_name) {
+				UNSERIALIZE_STR(q->trait_method.class_name);
 			}
 
-			if (q->exclude_from_classes) {
-				zend_string **s;
-
-				UNSERIALIZE_PTR(q->exclude_from_classes);
-				s = (zend_string**)q->exclude_from_classes;
-
-				while (*s) {
-					UNSERIALIZE_STR(*s);
-					s++;
-				}
+			for (j = 0; j < q->num_excludes; j++) {
+				UNSERIALIZE_STR(q->exclude_class_names[j]);
 			}
 			p++;
 		}

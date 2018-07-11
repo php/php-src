@@ -345,14 +345,11 @@ static void zend_persist_class_entry_calc(zval *zv)
 		if (ce->trait_aliases) {
 			int i = 0;
 			while (ce->trait_aliases[i]) {
-				if (ce->trait_aliases[i]->trait_method) {
-					if (ce->trait_aliases[i]->trait_method->method_name) {
-						ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method->method_name, 0);
-					}
-					if (ce->trait_aliases[i]->trait_method->class_name) {
-						ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method->class_name, 0);
-					}
-					ADD_SIZE(sizeof(zend_trait_method_reference));
+				if (ce->trait_aliases[i]->trait_method.method_name) {
+					ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.method_name, 0);
+				}
+				if (ce->trait_aliases[i]->trait_method.class_name) {
+					ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.class_name, 0);
 				}
 
 				if (ce->trait_aliases[i]->alias) {
@@ -366,22 +363,16 @@ static void zend_persist_class_entry_calc(zval *zv)
 
 		if (ce->trait_precedences) {
 			int i = 0;
+			int j;
 
 			while (ce->trait_precedences[i]) {
-				ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method->method_name, 0);
-				ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method->class_name, 0);
-				ADD_SIZE(sizeof(zend_trait_method_reference));
+				ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.method_name, 0);
+				ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.class_name, 0);
 
-				if (ce->trait_precedences[i]->exclude_from_classes) {
-					int j = 0;
-
-					while (ce->trait_precedences[i]->exclude_from_classes[j].class_name) {
-						ADD_INTERNED_STRING(ce->trait_precedences[i]->exclude_from_classes[j].class_name, 0);
-						j++;
-					}
-					ADD_SIZE(sizeof(zend_class_entry*) * (j + 1));
+				for (j = 0; j < ce->trait_precedences[i]->num_excludes; j++) {
+					ADD_INTERNED_STRING(ce->trait_precedences[i]->exclude_class_names[j], 0);
 				}
-				ADD_SIZE(sizeof(zend_trait_precedence));
+				ADD_SIZE(sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
 				i++;
 			}
 			ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
