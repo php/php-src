@@ -510,7 +510,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_GC_TYPE_INFO(zval)		GC_TYPE_INFO(Z_COUNTED(zval))
 #define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
 
-/* zval.value->gc.u.v.flags (common flags) */
+/* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
 #define GC_COLLECTABLE				(1<<4)
 #define GC_PROTECTED                (1<<5) /* used for recursion detection */
 #define GC_IMMUTABLE                (1<<6) /* can't be canged in place */
@@ -953,8 +953,8 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 extern ZEND_API zend_bool zend_rc_debug;
 # define ZEND_RC_MOD_CHECK(p) do { \
 		if (zend_rc_debug) { \
-			ZEND_ASSERT(!((p)->u.v.flags & GC_IMMUTABLE)); \
-			ZEND_ASSERT(((p)->u.v.flags & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \
+			ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \
+			ZEND_ASSERT((zval_gc_flags((p)->u.type_info) & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \
 		} \
 	} while (0)
 # define GC_MAKE_PERSISTENT_LOCAL(p) do { \
