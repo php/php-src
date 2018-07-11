@@ -229,8 +229,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				}
 
 				metadata = pzoption;
-				ZVAL_DEREF(metadata);
-				ZVAL_COPY(&idata->internal_file->metadata, metadata);
+				ZVAL_COPY_DEREF(&idata->internal_file->metadata, metadata);
 				idata->phar->is_modified = 1;
 			}
 		}

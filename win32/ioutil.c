@@ -296,7 +296,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	path_len = wcslen(path);
-	if (path_len < _MAX_PATH && path_len > _MAX_PATH - 12) {
+	if (path_len < _MAX_PATH && path_len >= _MAX_PATH - 12) {
 		/* Special case here. From the doc:
 
 		 "When using an API to create a directory, the specified path cannot be

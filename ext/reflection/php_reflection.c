@@ -1491,7 +1491,7 @@ ZEND_METHOD(reflection, export)
 	/* Invoke the __toString() method */
 	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);
 	result= call_user_function(NULL, object, &fname, &retval, 0, NULL);
-	zval_dtor(&fname);
+	zval_ptr_dtor_str(&fname);
 
 	if (result == FAILURE) {
 		_DO_THROW("Invocation of method __toString() failed");
@@ -3041,7 +3041,7 @@ ZEND_METHOD(reflection_method, __construct)
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Class %s does not exist", Z_STRVAL_P(classname));
 				if (classname == &ztmp) {
-					zval_dtor(&ztmp);
+					zval_ptr_dtor_str(&ztmp);
 				}
 				return;
 			}
@@ -3053,14 +3053,14 @@ ZEND_METHOD(reflection_method, __construct)
 
 		default:
 			if (classname == &ztmp) {
-				zval_dtor(&ztmp);
+				zval_ptr_dtor_str(&ztmp);
 			}
 			_DO_THROW("The parameter class is expected to be either a string or an object");
 			/* returns out of this function */
 	}
 
 	if (classname == &ztmp) {
-		zval_dtor(&ztmp);
+		zval_ptr_dtor_str(&ztmp);
 	}
 
 	lcname = zend_str_tolower_dup(name_str, name_len);
@@ -3415,8 +3415,7 @@ ZEND_METHOD(reflection_function, getShortName)
 	{
 		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
 	}
-	ZVAL_DEREF(name);
-	ZVAL_COPY(return_value, name);
+	ZVAL_COPY_DEREF(return_value, name);
 }
 /* }}} */
 
@@ -3914,8 +3913,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 		}
 		return;
 	} else {
-		ZVAL_DEREF(prop);
-		ZVAL_COPY(return_value, prop);
+		ZVAL_COPY_DEREF(return_value, prop);
 	}
 }
 /* }}} */
@@ -4210,7 +4208,7 @@ ZEND_METHOD(reflection_class, getMethod)
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value);
-		zval_dtor(&obj_tmp);
+		zval_ptr_dtor(&obj_tmp);
 		efree(lc_name);
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lc_name, name_len)) != NULL) {
 		reflection_method_factory(ce, mptr, NULL, return_value);
@@ -4654,7 +4652,7 @@ ZEND_METHOD(reflection_class, isCloneable)
 				return;
 			}
 			RETVAL_BOOL(Z_OBJ_HANDLER(obj, clone_obj) != NULL);
-			zval_dtor(&obj);
+			zval_ptr_dtor(&obj);
 		}
 	}
 }
@@ -4755,12 +4753,12 @@ ZEND_METHOD(reflection_class, newInstance)
 
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &params, &num_args) == FAILURE) {
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 
@@ -4787,7 +4785,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		}
 		if (ret == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Invocation of %s's constructor failed", ZSTR_VAL(ce->name));
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 	} else if (ZEND_NUM_ARGS()) {
@@ -4852,7 +4850,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 
@@ -4888,7 +4886,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		if (ret == FAILURE) {
 			zval_ptr_dtor(&retval);
 			php_error_docref(NULL, E_WARNING, "Invocation of %s's constructor failed", ZSTR_VAL(ce->name));
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 	} else if (argc) {
@@ -5024,12 +5022,12 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 		array_init(return_value);
 		while (ce->trait_aliases[i]) {
 			zend_string *mname;
-			zend_trait_method_reference *cur_ref = ce->trait_aliases[i]->trait_method;
+			zend_trait_method_reference *cur_ref = &ce->trait_aliases[i]->trait_method;
 
 			if (ce->trait_aliases[i]->alias) {
 
-				mname = zend_string_alloc(ZSTR_LEN(cur_ref->ce->name) + ZSTR_LEN(cur_ref->method_name) + 2, 0);
-				snprintf(ZSTR_VAL(mname), ZSTR_LEN(mname) + 1, "%s::%s", ZSTR_VAL(cur_ref->ce->name), ZSTR_VAL(cur_ref->method_name));
+				mname = zend_string_alloc(ZSTR_LEN(cur_ref->class_name) + ZSTR_LEN(cur_ref->method_name) + 2, 0);
+				snprintf(ZSTR_VAL(mname), ZSTR_LEN(mname) + 1, "%s::%s", ZSTR_VAL(cur_ref->class_name), ZSTR_VAL(cur_ref->method_name));
 				add_assoc_str_ex(return_value, ZSTR_VAL(ce->trait_aliases[i]->alias), ZSTR_LEN(ce->trait_aliases[i]->alias), mname);
 			}
 			i++;
@@ -5278,8 +5276,7 @@ ZEND_METHOD(reflection_class, getShortName)
 	{
 		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
 	}
-	ZVAL_DEREF(name);
-	ZVAL_COPY(return_value, name);
+	ZVAL_COPY_DEREF(return_value, name);
 }
 /* }}} */
 
@@ -5526,8 +5523,7 @@ ZEND_METHOD(reflection_property, getValue)
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
 		member_p = zend_read_static_property_ex(ref->ce, ref->unmangled_name, 0);
 		if (member_p) {
-			ZVAL_DEREF(member_p);
-			ZVAL_COPY(return_value, member_p);
+			ZVAL_COPY_DEREF(return_value, member_p);
 		}
 	} else {
 		zval rv;
@@ -5543,8 +5539,7 @@ ZEND_METHOD(reflection_property, getValue)
 
 		member_p = zend_read_property_ex(ref->ce, object, ref->unmangled_name, 0, &rv);
 		if (member_p != &rv) {
-			ZVAL_DEREF(member_p);
-			ZVAL_COPY(return_value, member_p);
+			ZVAL_COPY_DEREF(return_value, member_p);
 		} else {
 			if (Z_ISREF_P(member_p)) {
 				zend_unwrap_reference(member_p);

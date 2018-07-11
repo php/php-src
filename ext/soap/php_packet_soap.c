@@ -373,7 +373,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		if (param_count == 0) {
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			ZVAL_NULL(return_value);
 		} else if (param_count == 1) {
 			zval *tmp;
@@ -385,7 +385,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			} else {
 				zend_refcounted *garbage = Z_COUNTED_P(return_value);
 				ZVAL_COPY(return_value, tmp);
-				zval_dtor_func(garbage);
+				rc_dtor_func(garbage);
 			}
 		}
 	}

@@ -227,7 +227,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 		}
 	}
 	zend_string_release_ex(callable, 0);
-	zval_dtor(&fci.function_name);
+	zval_ptr_dtor_str(&fci.function_name);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
 			zval_ptr_dtor(&fci.params[i]);

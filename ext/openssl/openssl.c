@@ -2436,7 +2436,7 @@ PHP_FUNCTION(openssl_x509_parse)
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
 			} else {
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				BIO_free(bio_out);
 				if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 					X509_free(cert);
@@ -3731,7 +3731,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 
 #define TMP_CLEAN \
 	if (Z_TYPE(tmp) == IS_STRING) {\
-		zval_dtor(&tmp); \
+		zval_ptr_dtor_str(&tmp); \
 	} \
 	return NULL;
 
@@ -3797,7 +3797,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 				TMP_CLEAN;
 			} else {
 				if (Z_TYPE(tmp) == IS_STRING) {
-					zval_dtor(&tmp);
+					zval_ptr_dtor_str(&tmp);
 				}
 				/* got the key - return it */
 				return (EVP_PKEY*)what;
@@ -3886,7 +3886,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 		*resourceval = zend_register_resource(key, le_key);
 	}
 	if (Z_TYPE(tmp) == IS_STRING) {
-		zval_dtor(&tmp);
+		zval_ptr_dtor_str(&tmp);
 	}
 	return key;
 }

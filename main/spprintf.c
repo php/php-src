@@ -817,7 +817,7 @@ fmt_error:
 			}
 
 			if (free_zcopy) {
-				zval_dtor(&zcopy);
+				zval_ptr_dtor_str(&zcopy);
 			}
 		}
 skip_output:

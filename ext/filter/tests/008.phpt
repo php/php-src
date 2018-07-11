@@ -11,7 +11,7 @@ var_dump(filter_list(array()));
 echo "Done\n";
 ?>
 --EXPECTF--	
-array(21) {
+array(22) {
   [0]=>
   string(3) "int"
   [1]=>
@@ -53,6 +53,8 @@ array(21) {
   [19]=>
   string(12) "magic_quotes"
   [20]=>
+  string(11) "add_slashes"
+  [21]=>
   string(8) "callback"
 }
 

@@ -60,7 +60,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #include <math.h>
 
 #ifndef zend_isnan
-#if HAVE_DECL_ISNAN
+#if HAVE_DECL_ISNAN && (!defined(__cplusplus) || __cplusplus < 201103L)
 #define zend_isnan(a) isnan(a)
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
@@ -69,7 +69,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #endif
 #endif
 
-#if HAVE_DECL_ISINF
+#if HAVE_DECL_ISINF && (!defined(__cplusplus) || __cplusplus < 201103L)
 #define zend_isinf(a) isinf(a)
 #elif defined(INFINITY)
 /* Might not work, but is required by ISO C99 */
@@ -80,7 +80,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #define zend_isinf(a) 0
 #endif
 
-#if HAVE_DECL_ISFINITE
+#if HAVE_DECL_ISFINITE && (!defined(__cplusplus) || __cplusplus < 201103L)
 #define zend_finite(a) isfinite(a)
 #elif defined(HAVE_FINITE)
 #define zend_finite(a) finite(a)

@@ -623,6 +623,8 @@ PHP_MINFO_FUNCTION(curl)
 	}
 #endif
 	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 

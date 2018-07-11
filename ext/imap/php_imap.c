@@ -1436,7 +1436,7 @@ PHP_FUNCTION(imap_get_quota)
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	if (!imap_getquota(imap_le_struct->imap_stream, ZSTR_VAL(qroot))) {
 		php_error_docref(NULL, E_WARNING, "c-client imap_getquota failed");
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 }
@@ -1465,7 +1465,7 @@ PHP_FUNCTION(imap_get_quotaroot)
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	if (!imap_getquotaroot(imap_le_struct->imap_stream, ZSTR_VAL(mbox))) {
 		php_error_docref(NULL, E_WARNING, "c-client imap_getquotaroot failed");
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 }
@@ -1542,7 +1542,7 @@ PHP_FUNCTION(imap_getacl)
 	mail_parameters(NIL, SET_ACL, (void *) mail_getacl);
 	if (!imap_getacl(imap_le_struct->imap_stream, ZSTR_VAL(mailbox))) {
 		php_error(E_WARNING, "c-client imap_getacl failed");
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 
@@ -3339,7 +3339,7 @@ PHP_FUNCTION(imap_bodystruct)
 
 	body=mail_body(imap_le_struct->imap_stream, msg, (unsigned char*)ZSTR_VAL(section));
 	if (body == NULL) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 	if (body->type <= TYPEMAX) {
@@ -4290,7 +4290,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 					}
 					if (decode == NULL) {
 						efree(charset);
-						zval_dtor(return_value);
+						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
 					}
 					object_init(&myobject);

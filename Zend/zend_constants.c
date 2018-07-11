@@ -40,7 +40,7 @@ void free_zend_constant(zval *zv)
 	zend_constant *c = Z_PTR_P(zv);
 
 	if (!(c->flags & CONST_PERSISTENT)) {
-		zval_ptr_dtor(&c->value);
+		zval_ptr_dtor_nogc(&c->value);
 		if (c->name) {
 			zend_string_release_ex(c->name, 0);
 		}
@@ -514,7 +514,7 @@ ZEND_API int zend_register_constant(zend_constant *c)
 		zend_error(E_NOTICE,"Constant %s already defined", ZSTR_VAL(name));
 		zend_string_release(c->name);
 		if (!(c->flags & CONST_PERSISTENT)) {
-			zval_dtor(&c->value);
+			zval_ptr_dtor_nogc(&c->value);
 		}
 		ret = FAILURE;
 	}

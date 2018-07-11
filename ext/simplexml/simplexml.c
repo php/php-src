@@ -352,7 +352,7 @@ long_dim:
 	}
 
 	if (member == &tmp_zv) {
-		zval_dtor(&tmp_zv);
+		zval_ptr_dtor_str(&tmp_zv);
 	}
 
 	if (Z_ISUNDEF_P(rv)) {
@@ -383,7 +383,6 @@ static zval *sxe_dimension_read(zval *object, zval *offset, int type, zval *rv)
  */
 static void change_node_zval(xmlNodePtr node, zval *value)
 {
-	zval value_copy;
 	xmlChar *buffer;
 	int buffer_len;
 
@@ -407,9 +406,6 @@ static void change_node_zval(xmlNodePtr node, zval *value)
 			if (buffer) {
 				xmlNodeSetContentLen(node, buffer, buffer_len);
 				xmlFree(buffer);
-			}
-			if (value == &value_copy) {
-				zval_dtor(value);
 			}
 			break;
 		default:
@@ -469,7 +465,7 @@ long_dim:
 			if (!Z_STRLEN_P(member)) {
 				php_error_docref(NULL, E_WARNING, "Cannot write or create unnamed %s", attribs ? "attribute" : "element");
 				if (member == &tmp_zv) {
-					zval_dtor(&tmp_zv);
+					zval_ptr_dtor_str(&tmp_zv);
 				}
 				return &EG(error_zval);
 			}
@@ -530,7 +526,7 @@ long_dim:
 				/* break is missing intentionally */
 			default:
 				if (member == &tmp_zv) {
-					zval_dtor(&tmp_zv);
+					zval_ptr_dtor_str(&tmp_zv);
 				}
 				zend_error(E_WARNING, "It is not yet possible to assign complex types to %s", attribs ? "attributes" : "properties");
 				return &EG(error_zval);
@@ -640,7 +636,7 @@ next_iter:
 	}
 
 	if (member == &tmp_zv) {
-		zval_dtor(&tmp_zv);
+		zval_ptr_dtor_str(&tmp_zv);
 	}
 	if (pnewnode) {
 		*pnewnode = newnode;
@@ -800,7 +796,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 	}
 
 	if (member == &tmp_zv) {
-		zval_dtor(&tmp_zv);
+		zval_ptr_dtor_str(&tmp_zv);
 	}
 
 	return exists;
@@ -925,7 +921,7 @@ next_iter:
 	}
 
 	if (member == &tmp_zv) {
-		zval_dtor(&tmp_zv);
+		zval_ptr_dtor_str(&tmp_zv);
 	}
 }
 /* }}} */

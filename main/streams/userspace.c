@@ -317,7 +317,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 
 		if (zend_call_function(&fci, &fcc) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Could not execute %s::%s()", ZSTR_VAL(uwrap->ce->name), ZSTR_VAL(uwrap->ce->constructor->common.function_name));
-			zval_dtor(object);
+			zval_ptr_dtor(object);
 			ZVAL_UNDEF(object);
 		} else {
 			zval_ptr_dtor(&retval);

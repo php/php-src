@@ -196,7 +196,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 				zval_ptr_dtor(&fretval);
 			}
 
-			zval_dtor(&fci.function_name);
+			zval_ptr_dtor_str(&fci.function_name);
 			efree(lc_name);
 
 			return SUCCESS;

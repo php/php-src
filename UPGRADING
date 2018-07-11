@@ -44,6 +44,19 @@ Core:
     the following "FOO;" will cause a syntax error. This issue can always be
     resolved by choosing an ending label that does not occur within the contents
     of the string.
+  . "continue" statements targeting "switch" control flow structures will now
+    generate a warning. In PHP such "continue" statements are equivalent to
+    "break", while they behave as "continue 2" in other languages.
+
+        while ($foo) {
+            switch ($bar) {
+                case "baz":
+                    continue;
+                    // Warning: "continue" targeting switch is equivalent to
+                                "break". Did you mean to use "continue 2"?
+            }
+        }
+
   . Array accesses of type $obj["123"], where $obj implements ArrayAccess and
     "123" is an integral string literal will no longer result in an implicit
     conversion to integer, i.e., $obj->offsetGet("123") will be called instead
@@ -80,11 +93,30 @@ Core:
     note that reading and writing a value inside a single expression remains
     undefined behavior and may change again in the future.
 
+  . Argument unpacking stopped working with Traversables with non-integer keys.
+    The following code worked in PHP 7.0-7.2 by accident.
+
+        function foo(...$args) {
+            var_dump($args);
+        }
+        function gen() {
+            yield 1.23 => 123;
+        }
+        foo(...gen());
+
+    Now it generates an exception.
+
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
     Formerly some warnings have directly been written to stderr.
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
+
+MBString:
+  . Due to added support for named captures, mb_ereg_*() patterns using named
+    captures will behave differently. In particular named captures will be part
+    of matches and mb_ereg_replace() will interpret additional syntax. See
+    "New Features" section for more information.
 
 mysqli:
   . Prepared statements now properly report the fractional seconds for DATETIME/
@@ -120,8 +152,10 @@ SimpleXML:
 Standard:
   . Undefined variables passed to compact() will now be reported as a notice.
   . getimagesize() and related functions now report the mime type of BMP images
-	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
-		with the IANA (see RFC 7903).
+    as image/bmp instead of image/x-ms-bmp, since the former has been registered
+    with the IANA (see RFC 7903).
+  . stream_socket_get_name() will now return IPv6 addresses wrapped in brackets.
+    For example "[::1]:1337" will be returned instead of "::1:1337".
 
 ========================================
 2. New Features
@@ -179,6 +213,21 @@ MBString:
   . Mbstring now correctly supports strings larger than 2GB.
   . Performance of the mbstring extension has been significantly improved
     across the board. The largest improvements are in case conversion functions.
+  . mb_ereg_*() functions now support named captures. Matching functions like
+    mb_ereg() will now return named captures both using their group number and
+    their name, similar to PCRE:
+
+        mb_ereg('(?<word>\w+)', '国', $matches);
+        // => [0 => "国", 1 => "国", "word" => "国"];
+
+    Additionally, mb_ereg_replace() now supports the \k<> and \k'' notations
+    to reference named captures in the replacement string:
+
+        mb_ereg_replace('\s*(?<word>\w+)\s*', "_\k<word>_\k'word'_", ' foo ');
+        // => "_foo_foo_"
+
+    \k<> and \k'' can also be used for numbered references, which also works
+    with group numbers greater than 9.
 
 readline:
   . Support for the completion_append_character and completion_suppress_append
@@ -201,6 +250,9 @@ Standard:
 phpdbg:
   . The unused constants PHPDBG_FILE, PHPDBG_METHOD, PHPDBG_LINENO and
     PHPDBG_FUNC have been removed.
+
+FPM:
+  . The getallheaders function is now also available.
 
 ========================================
 4. Deprecated Functionality
@@ -251,6 +303,9 @@ Core:
 Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
     DateTimeImmutable::createFromMutable().
+
+FPM:
+  . Added fpm_get_status() function which returns FPM status info array.
 
 GMP:
   . Added gmp_binomial(n, k) for calculating binomial coefficients.
@@ -319,6 +374,9 @@ JSON:
   . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
     defines the set of allowed thousand separator chars.  The default (`"',."`)
     is fully backward compatible with former PHP versions.
+  . FILTER_SANITIZE_ADD_SLASHES has been added as an alias of the 'magic_quotes' 
+    filter (FILTER_SANITIZE_MAGIC_QUOTES). The 'magic_quotes' filter is subject 
+	to removal in future versions of PHP.
 
  FTP:
   . Set default transfer mode to binary

@@ -154,7 +154,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = to->utimezone->clone();
@@ -164,7 +164,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 	} else if (Z_TYPE_P(zv_timezone) == IS_OBJECT &&
@@ -172,7 +172,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 
 		php_timezone_obj *tzobj = Z_PHPTIMEZONE_P(zv_timezone);
 
-		zval_dtor(&local_zv_tz);
+		zval_ptr_dtor_str(&local_zv_tz);
 		return timezone_convert_datetimezone(tzobj->type, tzobj, 0,
 			outside_error, func);
 	} else {
@@ -188,7 +188,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, status, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = TimeZone::createTimeZone(id);
@@ -198,7 +198,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		if (timeZone->getID(gottenId) != id) {
@@ -208,13 +208,13 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			delete timeZone;
 			return NULL;
 		}
 	}
 
-	zval_dtor(&local_zv_tz);
+	zval_ptr_dtor_str(&local_zv_tz);
 
 	return timeZone;
 }

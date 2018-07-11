@@ -549,7 +549,7 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 	retval = gmp_do_operation_ex(opcode, result, op1, op2);
 
 	if (retval == SUCCESS && op1 == &op1_copy) {
-		zval_dtor(op1);
+		zval_ptr_dtor(op1);
 	}
 
 	return retval;
@@ -577,7 +577,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 
 	gmp_strval(&zv, gmpnum, 10);
 	php_var_serialize(&buf, &zv, &serialize_data);
-	zval_dtor(&zv);
+	zval_ptr_dtor_str(&zv);
 
 	ZVAL_ARR(&zv, zend_std_get_properties(object));
 	php_var_serialize(&buf, &zv, &serialize_data);
@@ -1054,7 +1054,7 @@ ZEND_FUNCTION(gmp_init)
 
 	INIT_GMP_RETVAL(gmpnumber);
 	if (convert_to_gmp(gmpnumber, number_arg, base) == FAILURE) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -1770,7 +1770,7 @@ ZEND_FUNCTION(gmp_invert)
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 	if (!res) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 }

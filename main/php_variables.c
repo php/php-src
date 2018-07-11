@@ -87,7 +87,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 
 	if (!symtable1) {
 		/* Nothing to do */
-		zval_dtor(val);
+		zval_ptr_dtor_nogc(val);
 		return;
 	}
 
@@ -118,7 +118,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	var_len = p - var;
 
 	if (var_len==0) { /* empty variable name, or variable name with a space in it */
-		zval_dtor(val);
+		zval_ptr_dtor_nogc(val);
 		free_alloca(var_orig, use_heap);
 		return;
 	}
@@ -132,7 +132,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 						&& ex->symbol_table == symtable1) {
 					if (memcmp(var, "this", sizeof("this")-1) == 0) {
 						zend_throw_error(NULL, "Cannot re-assign $this");
-						zval_dtor(val);
+						zval_ptr_dtor_nogc(val);
 						free_alloca(var_orig, use_heap);
 						return;
 					}
@@ -147,7 +147,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	if (symtable1 == &EG(symbol_table) &&
 		var_len == sizeof("GLOBALS")-1 &&
 		!memcmp(var, "GLOBALS", sizeof("GLOBALS")-1)) {
-		zval_dtor(val);
+		zval_ptr_dtor_nogc(val);
 		free_alloca(var_orig, use_heap);
 		return;
 	}
@@ -170,7 +170,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 					zend_symtable_str_del(ht, var, var_len);
 				}
 
-				zval_dtor(val);
+				zval_ptr_dtor_nogc(val);
 
 				/* do not output the error message to the screen,
 				 this helps us to to avoid "information disclosure" */
@@ -208,8 +208,8 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 			if (!index) {
 				array_init(&gpc_element);
 				if ((gpc_element_p = zend_hash_next_index_insert(symtable1, &gpc_element)) == NULL) {
-					zval_ptr_dtor(&gpc_element);
-					zval_dtor(val);
+					zend_array_destroy(Z_ARR(gpc_element));
+					zval_ptr_dtor_nogc(val);
 					free_alloca(var_orig, use_heap);
 					return;
 				}
@@ -224,7 +224,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 						gpc_element_p = Z_INDIRECT_P(gpc_element_p);
 					}
 					if (Z_TYPE_P(gpc_element_p) != IS_ARRAY) {
-						zval_ptr_dtor(gpc_element_p);
+						zval_ptr_dtor_nogc(gpc_element_p);
 						array_init(gpc_element_p);
 					}
 				}
@@ -246,7 +246,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 plain_var:
 		if (!index) {
 			if (zend_hash_next_index_insert(symtable1, val) == NULL) {
-				zval_ptr_dtor(val);
+				zval_ptr_dtor_nogc(val);
 			}
 		} else {
 			zend_ulong idx;
@@ -260,7 +260,7 @@ plain_var:
 			if (Z_TYPE(PG(http_globals)[TRACK_VARS_COOKIE]) != IS_UNDEF &&
 				symtable1 == Z_ARRVAL(PG(http_globals)[TRACK_VARS_COOKIE]) &&
 				zend_symtable_str_exists(symtable1, index, index_len)) {
-				zval_ptr_dtor(val);
+				zval_ptr_dtor_nogc(val);
 			} else if (ZEND_HANDLE_NUMERIC_STR(index, index_len, idx)) {
 				zend_hash_index_update(symtable1, idx, val);
 			} else {
@@ -418,15 +418,15 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			array_init(&array);
 			switch (arg) {
 				case PARSE_POST:
-					zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_POST]);
+					zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_POST]);
 					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_POST], &array);
 					break;
 				case PARSE_GET:
-					zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_GET]);
+					zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_GET]);
 					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_GET], &array);
 					break;
 				case PARSE_COOKIE:
-					zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_COOKIE]);
+					zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_COOKIE]);
 					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_COOKIE], &array);
 					break;
 			}
@@ -654,7 +654,7 @@ static inline void php_register_server_variables(void)
 	zval *arr = &PG(http_globals)[TRACK_VARS_SERVER];
 	HashTable *ht;
 
-	zval_ptr_dtor(arr);
+	zval_ptr_dtor_nogc(arr);
 	array_init(arr);
 
 	/* Server variables */
@@ -736,7 +736,7 @@ static zend_bool php_auto_globals_create_get(zend_string *name)
 	if (PG(variables_order) && (strchr(PG(variables_order),'G') || strchr(PG(variables_order),'g'))) {
 		sapi_module.treat_data(PARSE_GET, NULL, NULL);
 	} else {
-		zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_GET]);
+		zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_GET]);
 		array_init(&PG(http_globals)[TRACK_VARS_GET]);
 	}
 
@@ -755,7 +755,7 @@ static zend_bool php_auto_globals_create_post(zend_string *name)
 		!strcasecmp(SG(request_info).request_method, "POST")) {
 		sapi_module.treat_data(PARSE_POST, NULL, NULL);
 	} else {
-		zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_POST]);
+		zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_POST]);
 		array_init(&PG(http_globals)[TRACK_VARS_POST]);
 	}
 
@@ -770,7 +770,7 @@ static zend_bool php_auto_globals_create_cookie(zend_string *name)
 	if (PG(variables_order) && (strchr(PG(variables_order),'C') || strchr(PG(variables_order),'c'))) {
 		sapi_module.treat_data(PARSE_COOKIE, NULL, NULL);
 	} else {
-		zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_COOKIE]);
+		zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_COOKIE]);
 		array_init(&PG(http_globals)[TRACK_VARS_COOKIE]);
 	}
 
@@ -829,7 +829,7 @@ static zend_bool php_auto_globals_create_server(zend_string *name)
 		}
 
 	} else {
-		zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_SERVER]);
+		zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_SERVER]);
 		array_init(&PG(http_globals)[TRACK_VARS_SERVER]);
 	}
 
@@ -847,7 +847,7 @@ static zend_bool php_auto_globals_create_server(zend_string *name)
 
 static zend_bool php_auto_globals_create_env(zend_string *name)
 {
-	zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_ENV]);
+	zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_ENV]);
 	array_init(&PG(http_globals)[TRACK_VARS_ENV]);
 
 	if (PG(variables_order) && (strchr(PG(variables_order),'E') || strchr(PG(variables_order),'e'))) {

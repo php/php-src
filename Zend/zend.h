@@ -86,20 +86,17 @@ typedef struct _zend_unserialize_data zend_unserialize_data;
 
 typedef struct _zend_trait_method_reference {
 	zend_string *method_name;
-	zend_class_entry *ce;
 	zend_string *class_name;
 } zend_trait_method_reference;
 
 typedef struct _zend_trait_precedence {
-	zend_trait_method_reference *trait_method;
-	union {
-		zend_class_entry  *ce;
-		zend_string       *class_name;
-	} *exclude_from_classes;
+	zend_trait_method_reference trait_method;
+	uint32_t num_excludes;
+	zend_string *exclude_class_names[1];
 } zend_trait_precedence;
 
 typedef struct _zend_trait_alias {
-	zend_trait_method_reference *trait_method;
+	zend_trait_method_reference trait_method;
 
 	/**
 	* name for method to be added

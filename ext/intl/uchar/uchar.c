@@ -205,10 +205,10 @@ static UBool enumCharType_callback(enumCharType_data *context,
 	if (zend_call_function(&context->fci, &context->fci_cache) == FAILURE) {
 		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR);
 		intl_errors_set_custom_msg(NULL, "enumCharTypes callback failed", 0);
-		zval_dtor(&retval);
+		zval_ptr_dtor(&retval);
 		return 0;
 	}
-	zval_dtor(&retval);
+	zval_ptr_dtor(&retval);
 	return 1;
 }
 IC_METHOD(enumCharTypes) {
@@ -319,12 +319,12 @@ static UBool enumCharNames_callback(enumCharNames_data *context,
 	if (zend_call_function(&context->fci, &context->fci_cache) == FAILURE) {
 		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR);
 		intl_error_set_custom_msg(NULL, "enumCharNames callback failed", 0);
-		zval_dtor(&retval);
-		zval_dtor(&args[2]);
+		zval_ptr_dtor(&retval);
+		zval_ptr_dtor_str(&args[2]);
 		return 0;
 	}
-	zval_dtor(&retval);
-	zval_dtor(&args[2]);
+	zval_ptr_dtor(&retval);
+	zval_ptr_dtor_str(&args[2]);
 	return 1;
 }
 IC_METHOD(enumCharNames) {

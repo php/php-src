@@ -11,6 +11,9 @@ if (PHP_PDO_PGSQL != "no") {
 		if (CHECK_HEADER_ADD_INCLUDE("pg_config.h", "CFLAGS_PDO_PGSQL", PHP_PDO_PGSQL + ";" + PHP_PHP_BUILD + "\\include\\pgsql")) {
 			ADD_FLAG('CFLAGS_PDO_PGSQL', "/D HAVE_PG_CONFIG_H");
 		}
+		if (X64) {
+			ADD_FLAG('CFLAGS_PDO_PGSQL', "/D HAVE_PG_LO64=1");
+		}
 
 		AC_DEFINE('HAVE_PDO_PGSQL',		1, 'Have PostgreSQL library');
 

@@ -5053,7 +5053,7 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 				shutdown_function_entry->arg_count - 1,
 				shutdown_function_entry->arguments + 1) == SUCCESS)
 	{
-		zval_dtor(&retval);
+		zval_ptr_dtor(&retval);
 	}
 	return 0;
 }
@@ -5074,7 +5074,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 								tick_fe->arg_count - 1,
 								tick_fe->arguments + 1
 								) == SUCCESS) {
-			zval_dtor(&retval);
+			zval_ptr_dtor(&retval);
 
 		} else {
 			zval *obj, *method;
@@ -5529,7 +5529,7 @@ PHP_FUNCTION(ini_set)
 			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "java.library.path") ||
 			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "vpopmail.directory")) {
 			if (php_check_open_basedir(ZSTR_VAL(new_value))) {
-				zval_dtor(return_value);
+				zval_ptr_dtor_str(return_value);
 				RETURN_FALSE;
 			}
 		}
@@ -5537,7 +5537,7 @@ PHP_FUNCTION(ini_set)
 #undef _CHECK_PATH
 
 	if (zend_alter_ini_entry_ex(varname, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
-		zval_dtor(return_value);
+		zval_ptr_dtor_str(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -5580,7 +5580,7 @@ PHP_FUNCTION(set_include_path)
 	key = zend_string_init("include_path", sizeof("include_path") - 1, 0);
 	if (zend_alter_ini_entry_ex(key, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
 		zend_string_release_ex(key, 0);
-		zval_dtor(return_value);
+		zval_ptr_dtor_str(return_value);
 		RETURN_FALSE;
 	}
 	zend_string_release_ex(key, 0);
@@ -5997,7 +5997,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			if (Z_TYPE_P(find_hash) != IS_ARRAY) {
-				zval_dtor(find_hash);
+				zval_ptr_dtor_nogc(find_hash);
 				array_init(find_hash);
 			}
 
@@ -6075,7 +6075,7 @@ PHP_FUNCTION(parse_ini_file)
 
 	array_init(return_value);
 	if (zend_parse_ini_file(&fh, 0, (int)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 }
@@ -6117,7 +6117,7 @@ PHP_FUNCTION(parse_ini_string)
 
 	array_init(return_value);
 	if (zend_parse_ini_string(string, 0, (int)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	}
 	efree(string);

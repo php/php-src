@@ -325,7 +325,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -357,7 +357,7 @@ zval *mysqli_write_property(zval *object, zval *member, zval *value, void **cach
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return value;

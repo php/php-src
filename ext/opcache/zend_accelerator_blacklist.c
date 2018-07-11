@@ -73,7 +73,7 @@ static void blacklist_report_regexp_error(const char *pcre_error, int pcre_error
 
 static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 {
-	PCRE2_UCHAR pcre_error[256];
+	PCRE2_UCHAR pcre_error[128];
 	int i, errnumber;
 	PCRE2_SIZE pcre_error_offset;
 	zend_regexp_list **regexp_list_it, *it;

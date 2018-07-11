@@ -148,7 +148,7 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 		add_token(return_value, token_type, zendtext, zendleng, token_line);
 
 		if (Z_TYPE(token) != IS_UNDEF) {
-			zval_dtor(&token);
+			zval_ptr_dtor_nogc(&token);
 			ZVAL_UNDEF(&token);
 		}
 
@@ -177,7 +177,7 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 		token_line = CG(zend_lineno);
 	}
 
-	zval_dtor(&source_zval);
+	zval_ptr_dtor_str(&source_zval);
 	zend_restore_lexical_state(&original_lex_state);
 
 	return 1;
@@ -255,7 +255,7 @@ static zend_bool tokenize_parse(zval *return_value, zend_string *source)
 	zend_restore_lexical_state(&original_lex_state);
 	CG(in_compilation) = original_in_compilation;
 
-	zval_dtor(&source_zval);
+	zval_ptr_dtor_str(&source_zval);
 
 	return success;
 }

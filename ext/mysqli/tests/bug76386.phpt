@@ -5,6 +5,16 @@ Prepared Statement formatter truncates fractional seconds from date/time column 
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
+require_once("connect.inc");
+
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	die("skip Cannot connect to check required version");
+
+/* Fractional seconds are supported with servers >= 5.6.4. */
+if (mysqli_get_server_version($link) < 50604) {
+	die(sprintf("skip Server doesn't support fractional seconds in timestamp (%s)", mysqli_get_server_version($link)));
+}
+mysqli_close($link);
 ?>
 --FILE--
 <?php

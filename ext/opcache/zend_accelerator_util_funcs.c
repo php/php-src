@@ -437,8 +437,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		while (ce->trait_aliases[i]) {
 			trait_aliases[i] = emalloc(sizeof(zend_trait_alias));
 			memcpy(trait_aliases[i], ce->trait_aliases[i], sizeof(zend_trait_alias));
-			trait_aliases[i]->trait_method = emalloc(sizeof(zend_trait_method_reference));
-			memcpy(trait_aliases[i]->trait_method, ce->trait_aliases[i]->trait_method, sizeof(zend_trait_method_reference));
 			i++;
 		}
 		trait_aliases[i] = NULL;
@@ -455,28 +453,8 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		trait_precedences = emalloc(sizeof(zend_trait_precedence*) * (i + 1));
 		i = 0;
 		while (ce->trait_precedences[i]) {
-			trait_precedences[i] = emalloc(sizeof(zend_trait_precedence));
-			memcpy(trait_precedences[i], ce->trait_precedences[i], sizeof(zend_trait_precedence));
-			trait_precedences[i]->trait_method = emalloc(sizeof(zend_trait_method_reference));
-			memcpy(trait_precedences[i]->trait_method, ce->trait_precedences[i]->trait_method, sizeof(zend_trait_method_reference));
-
-			if (trait_precedences[i]->exclude_from_classes) {
-				zend_string **exclude_from_classes;
-				int j = 0;
-
-				while (trait_precedences[i]->exclude_from_classes[j].class_name) {
-					j++;
-				}
-				exclude_from_classes = emalloc(sizeof(zend_string*) * (j + 1));
-				j = 0;
-				while (trait_precedences[i]->exclude_from_classes[j].class_name) {
-					exclude_from_classes[j] =
-						trait_precedences[i]->exclude_from_classes[j].class_name;
-					j++;
-				}
-				exclude_from_classes[j] = NULL;
-				trait_precedences[i]->exclude_from_classes = (void*)exclude_from_classes;
-			}
+			trait_precedences[i] = emalloc(sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
+			memcpy(trait_precedences[i], ce->trait_precedences[i], sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
 			i++;
 		}
 		trait_precedences[i] = NULL;
@@ -581,7 +559,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
+		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {

@@ -672,8 +672,7 @@ SPL_METHOD(RecursiveIteratorIterator, current)
 
 	data = iterator->funcs->get_current_data(iterator);
 	if (data) {
-		ZVAL_DEREF(data);
-		ZVAL_COPY(return_value, data);
+		ZVAL_COPY_DEREF(return_value, data);
 	}
 } /* }}} */
 
@@ -725,8 +724,7 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 	}
 
 	value = &object->iterators[level].zobject;
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 } /* }}} */
 
 /* {{{ proto RecursiveIterator RecursiveIteratorIterator::getInnerIterator()
@@ -742,8 +740,7 @@ SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
 
 	SPL_FETCH_SUB_ELEMENT_ADDR(zobject, object, zobject);
 
-	ZVAL_DEREF(zobject);
-	ZVAL_COPY(return_value, zobject);
+	ZVAL_COPY_DEREF(return_value, zobject);
 } /* }}} */
 
 /* {{{ proto RecursiveIterator RecursiveIteratorIterator::beginIteration()
@@ -1225,8 +1222,7 @@ SPL_METHOD(RecursiveTreeIterator, current)
         SPL_FETCH_SUB_ITERATOR(iterator, object);
 		data = iterator->funcs->get_current_data(iterator);
 		if (data) {
-			ZVAL_DEREF(data);
-			ZVAL_COPY(return_value, data);
+			ZVAL_COPY_DEREF(return_value, data);
 			return;
 		} else {
 			RETURN_NULL();
@@ -1598,10 +1594,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 	}
 
 	if (inc_refcount) {
-		ZVAL_COPY(&intern->inner.zobject, zobject);
-	} else {
-		ZVAL_COPY_VALUE(&intern->inner.zobject, zobject);
+		Z_TRY_ADDREF_P(zobject);
 	}
+	ZVAL_COPY_VALUE(&intern->inner.zobject, zobject);
 
 	intern->inner.ce = dit_type == DIT_IteratorIterator ? ce : Z_OBJCE_P(zobject);
 	intern->inner.object = Z_OBJ_P(zobject);
@@ -1642,8 +1637,7 @@ SPL_METHOD(dual_it, getInnerIterator)
 	if (!Z_ISUNDEF(intern->inner.zobject)) {
 		zval *value = &intern->inner.zobject;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		RETURN_NULL();
 	}
@@ -1786,8 +1780,7 @@ SPL_METHOD(dual_it, key)
 	if (Z_TYPE(intern->current.key) != IS_UNDEF) {
 		zval *value = &intern->current.key;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		RETURN_NULL();
 	}
@@ -1813,8 +1806,7 @@ SPL_METHOD(dual_it, current)
 	if (Z_TYPE(intern->current.data) != IS_UNDEF) {
 		zval *value = &intern->current.data;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		RETURN_NULL();
 	}
@@ -2864,8 +2856,7 @@ SPL_METHOD(CachingIterator, offsetGet)
 		return;
 	}
 
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 }
 /* }}} */
 
@@ -3080,8 +3071,7 @@ SPL_METHOD(RecursiveCachingIterator, getChildren)
 	if (Z_TYPE(intern->u.caching.zchildren) != IS_UNDEF) {
 		zval *value = &intern->u.caching.zchildren;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		RETURN_NULL();
 	}
@@ -3185,8 +3175,7 @@ SPL_METHOD(NoRewindIterator, current)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 	data = intern->inner.iterator->funcs->get_current_data(intern->inner.iterator);
 	if (data) {
-		ZVAL_DEREF(data);
-		ZVAL_COPY(return_value, data);
+		ZVAL_COPY_DEREF(return_value, data);
 	}
 } /* }}} */
 
@@ -3411,8 +3400,7 @@ SPL_METHOD(AppendIterator, current)
 	if (Z_TYPE(intern->current.data) != IS_UNDEF) {
 		zval *value = &intern->current.data;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		RETURN_NULL();
 	}
@@ -3496,8 +3484,7 @@ SPL_METHOD(AppendIterator, getArrayIterator)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	value = &intern->u.append.zarrayit;
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 } /* }}} */
 
 ZEND_BEGIN_ARG_INFO(arginfo_append_it_append, 0)

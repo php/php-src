@@ -2,9 +2,40 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0beta1
 
-PDO_Firebird:
+- Core:
+  . Fixed bug #76392 (Error relocating sapi/cli/php: unsupported relocation
+    type 37). (Peter Kokot)
+
+- Filter:
+  . Added the 'add_slashes' sanitization mode (FILTER_SANITIZE_ADD_SLASHES). 
+	(Kalle)
+  . Fixed bug #76366 (References in sub-array for filtering breaks the filter).
+    (ZiHang Gao)
+
+- FPM:
+  . Fixed bug #62596 (getallheaders() missing with PHP-FPM). (Remi)
+  . Added fpm_get_status function. (Till Backhaus)
+  . Fixed bug #69031 (Long messages into stdout/stderr are truncated
+    incorrectly) - added new log related FPM configuration options:
+    log_limit, log_buffering and decorate_workers_output. (Jakub Zelenka) 
+
+- mbstring:
+  . Fixed bug #76574 (use of undeclared identifiers INT_MAX and LONG_MAX). (cmb)
+  . Fixed bug #76594 (Bus Error due to unaligned access in zend_ini.c
+    OnUpdateLong). (cmb, Nikita)
+
+- PDO_Firebird:
   . Fixed bug #74462 (PDO_Firebird returns only NULLs for results with boolean
     for FIREBIRD >= 3.0). (Dorin Marcoci)
+  . Fixed bug #76488 (Memory leak when fetching a BLOB field). (Simonov Denis)
+
+- Standard:
+  . Fixed bug #76136 (stream_socket_get_name should enclose IPv6 in brackets).
+    (seliver)
+
+- Zip:
+  . Fixed bug #76524 (ZipArchive memory leak (OVERWRITE flag and empty archive)).
+    (Timur Ibragimov)
 
 05 Jul 2018, PHP 7.3.0alpha3
 

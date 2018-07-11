@@ -637,21 +637,15 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
-	/* ensure we want:
-	 * - to log (fastcgi.logging in php.ini)
+	/* message is written to FCGI_STDERR if following conditions are met:
+	 * - logging is enabled (fastcgi.logging in php.ini)
 	 * - we are currently dealing with a request
 	 * - the message is not empty
+	 * - the fcgi_write did not fail
 	 */
-	if (CGIG(fcgi_logging) && request && message && len > 0) {
-		ssize_t ret;
-		char *buf = malloc(len + 2);
-		memcpy(buf, message, len);
-		memcpy(buf + len, "\n", sizeof("\n"));
-		ret = fcgi_write(request, FCGI_STDERR, buf, len + 1);
-		free(buf);
-		if (ret < 0) {
-			php_handle_aborted_connection();
-		}
+	if (CGIG(fcgi_logging) && request && message && len > 0
+			&& fcgi_write(request, FCGI_STDERR, message, len) < 0) {
+		php_handle_aborted_connection();
 	}
 }
 /* }}} */
@@ -660,7 +654,7 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
  */
 static void sapi_cgi_log_message(char *message, int syslog_type_int)
 {
-	zlog(ZLOG_NOTICE, "PHP message: %s", message);
+	zlog_msg(ZLOG_NOTICE, "PHP message: ", message);
 }
 /* }}} */
 
@@ -1531,6 +1525,10 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (!fcgi_is_closed(request)) {
 		php_output_end_all();
 		php_header();
@@ -1545,8 +1543,39 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
+ZEND_END_ARG_INFO()
+
+PHP_FUNCTION(apache_request_headers) /* {{{ */
+{
+	fcgi_request *request;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	if ((request = (fcgi_request*) SG(server_context))) {
+		fcgi_loadenv(request, sapi_add_request_header, return_value);
+	}
+} /* }}} */
+
+/* {{{ proto array fpm_get_status
+ * Returns the status of the fastcgi process manager */
+PHP_FUNCTION(fpm_get_status) /* {{{ */
+{
+	int error = fpm_status_export_to_zval(return_value);
+	if(error){
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
-	PHP_FE(fastcgi_finish_request,              NULL)
+	PHP_FE(fastcgi_finish_request,                    cgi_fcgi_sapi_no_arginfo)
+	PHP_FE(fpm_get_status,                            NULL)
+	PHP_FE(apache_request_headers,                    cgi_fcgi_sapi_no_arginfo)
+	PHP_FALIAS(getallheaders, apache_request_headers, cgi_fcgi_sapi_no_arginfo)
 	PHP_FE_END
 };
 

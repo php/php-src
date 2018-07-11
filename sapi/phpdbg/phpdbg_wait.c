@@ -26,7 +26,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 static void phpdbg_rebuild_http_globals_array(int type, const char *name) {
 	zval *zvp;
 	if (Z_TYPE(PG(http_globals)[type]) != IS_UNDEF) {
-		zval_dtor(&PG(http_globals)[type]);
+		zval_ptr_dtor_nogc(&PG(http_globals)[type]);
 	}
 	if ((zvp = zend_hash_str_find(&EG(symbol_table), name, strlen(name)))) {
 		Z_ADDREF_P(zvp);
@@ -327,7 +327,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	zval_dtor(&zv);
+	zval_ptr_dtor(&zv);
 	if (free_zv) {
 		/* separate freeing to not dtor the symtable too, just the container zval... */
 		efree(free_zv);

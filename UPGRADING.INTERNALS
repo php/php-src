@@ -21,6 +21,8 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   r. php_url
   s. zend_function.reserved[]
   t. zif_handler
+  u. GC_G
+  v. php_add[c]slashes
 
 2. Build system changes
   a. Unix build system changes
@@ -49,8 +51,8 @@ PHP 7.3 INTERNALS UPGRADE NOTES
      As result some related macros were removed (ZEND_EX_USE_LITERALS,
      EX_LOAD_LITERALS, EX_LITERALS, RT_CONSTANT_EX, EX_CONSTANT) or changed
      (RT_CONSTANT, ZEND_PASS_TWO_UPDATE_CONSTANT, ZEND_PASS_TWO_UNDO_CONSTANT).
-     This change way affect only some "system" extensions. EX_LITERALS,
-     RT_CONSTANT_EX, EX_CONSTANT should be substituted by RT_CONSTANT than now
+     This change may affect only some "system" extensions. EX_LITERALS,
+     RT_CONSTANT_EX, EX_CONSTANT should be substituted by RT_CONSTANT, and now
      use "opline" (instead of "op_array") as first argument.
 
   c. Protection from recursion during processing circular data structures was
@@ -94,7 +96,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
      zend_register_persistent_resource_ex() should beused to register
      persistent resources, instead of manual insertion into EG(persistent_list).
 
-  i. The RANGE_RANGE() macro has been removed. php_mt_rand_range() should be
+  i. The RAND_RANGE() macro has been removed. php_mt_rand_range() should be
      used instead.
 
   j. The cast_object() object handler now also accepts the _IS_NUMBER type. The
@@ -137,6 +139,13 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
  t. For internal functions the typedef zif_handler has been introduced.  It is
     recommended to use this from now on, instead of defining own handler types.
+
+ u. The GC globals (GC_G) are now private. Use the new zend_gc_get_status() to
+    retrieve status information of the GC.
+
+ v. The should_free argument of the php_add[c]slashes functions has been
+    removed.  It is now always the caller's responsibility to free the passed
+    string.
 
 ========================
 2. Build system changes

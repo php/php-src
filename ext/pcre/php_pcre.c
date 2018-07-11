@@ -388,7 +388,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	char *version;
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	if (!pcre2_init_ok) {
+	if (UNEXPECTED(!pcre2_init_ok)) {
 		/* Retry. */
 		php_pcre_init_pcre2(PCRE_G(jit));
 		if (!pcre2_init_ok) {
@@ -444,7 +444,7 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
-	if (!pcre2_init_ok) {
+	if (UNEXPECTED(!pcre2_init_ok)) {
 		/* Retry. */
 		php_pcre_mutex_lock();
 		php_pcre_init_pcre2(PCRE_G(jit));
@@ -534,7 +534,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	pcre2_code			*re = NULL;
 	uint32_t			 coptions = 0;
 	uint32_t			 extra_coptions = PHP_PCRE_DEFAULT_EXTRA_COPTIONS;
-	PCRE2_UCHAR	         error[256];
+	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
 	char				 delimiter;

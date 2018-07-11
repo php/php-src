@@ -531,12 +531,13 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 			zval rv;
 			zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv);
 
-			Z_ADDREF_P(z);
 			if (Z_TYPE_P(z) != IS_OBJECT) {
-				zval_dtor(arg);
-				ZVAL_NULL(arg);
-				if (!zend_make_printable_zval(z, arg)) {
+				zval_ptr_dtor(arg);
+				if (Z_TYPE_P(z) == IS_STRING) {
 					ZVAL_COPY_VALUE(arg, z);
+				} else {
+					ZVAL_STR(arg, zval_get_string_func(z));
+					zval_ptr_dtor(z);
 				}
 				*dest = Z_STR_P(arg);
 				return 1;
@@ -1368,9 +1369,10 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_L
 }
 /* }}} */
 
-ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API int object_init(zval *arg) /* {{{ */
 {
-	return _object_init_ex(arg, zend_standard_class_def ZEND_FILE_LINE_RELAY_CC);
+	ZVAL_OBJ(arg, zend_objects_new(zend_standard_class_def));
+	return SUCCESS;
 }
 /* }}} */
 
@@ -3488,7 +3490,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_nam
 
 	if (zend_is_callable_ex(callable, NULL, IS_CALLABLE_STRICT, callable_name, &fcc, NULL)) {
 		if (Z_TYPE_P(callable) == IS_STRING && fcc.calling_scope) {
-			zval_dtor(callable);
+			zval_ptr_dtor_str(callable);
 			array_init(callable);
 			add_next_index_str(callable, zend_string_copy(fcc.calling_scope->name));
 			add_next_index_str(callable, zend_string_copy(fcc.function_handler->common.function_name));

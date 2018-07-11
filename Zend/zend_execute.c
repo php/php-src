@@ -146,7 +146,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 			if (EXPECTED(Z_TYPE_P(__zv) == IS_INDIRECT)) {					\
 				ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));						\
 			}																\
-			zval_dtor_func(__ref);											\
+			rc_dtor_func(__ref);											\
 		}																	\
 	}																		\
 } while (0)
@@ -604,7 +604,7 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 
 		if (GC_DELREF(garbage) == 0) {
 			ZVAL_REF(variable_ptr, ref);
-			zval_dtor_func(garbage);
+			rc_dtor_func(garbage);
 			return;
 		} else {
 			gc_check_possible_root(garbage);
@@ -1713,12 +1713,8 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 			ZVAL_COPY_VALUE(z, value);
 		}
 
-		if (UNEXPECTED(Z_TYPE_P(z) == IS_REFERENCE)) {
-			ZVAL_COPY(EX_VAR(opline->result.var), Z_REFVAL_P(z));
-		} else {
-			ZVAL_COPY(EX_VAR(opline->result.var), z);
-		}
-		ZVAL_COPY(&z_copy, EX_VAR(opline->result.var));
+		ZVAL_COPY_DEREF(&z_copy, z);
+		ZVAL_COPY(EX_VAR(opline->result.var), &z_copy);
 		if (inc) {
 			increment_function(&z_copy);
 		} else {
@@ -1762,11 +1758,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		if (UNEXPECTED(Z_TYPE_P(z) == IS_REFERENCE)) {
-			ZVAL_COPY(&z_copy, Z_REFVAL_P(z));
-		} else {
-			ZVAL_COPY(&z_copy, z);
-		}
+		ZVAL_COPY_DEREF(&z_copy, z);
 		if (inc) {
 			increment_function(&z_copy);
 		} else {
@@ -3056,7 +3048,7 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 			zend_refcounted *r = Z_COUNTED_P(cv);
 			if (!GC_DELREF(r)) {
 				ZVAL_NULL(cv);
-				zval_dtor_func(r);
+				rc_dtor_func(r);
 			} else {
 				gc_check_possible_root(r);
 			}
@@ -3859,7 +3851,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 						zend_destroy_file_handle(&file_handle);
 						zend_string_release_ex(resolved_path, 0);
 						if (Z_TYPE(tmp_inc_filename) != IS_UNDEF) {
-							zend_string_release_ex(Z_STR(tmp_inc_filename), 0);
+							zval_ptr_dtor_str(&tmp_inc_filename);
 						}
 						return op_array;
 					} else {
@@ -3897,7 +3889,7 @@ already_compiled:
 	}
 
 	if (Z_TYPE(tmp_inc_filename) != IS_UNDEF) {
-		zend_string_release_ex(Z_STR(tmp_inc_filename), 0);
+		zval_ptr_dtor_str(&tmp_inc_filename);
 	}
 	return new_op_array;
 }

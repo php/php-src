@@ -850,7 +850,7 @@ PHP_FUNCTION(unpack)
 				break;
 #else
 				php_error_docref(NULL, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 #endif
 
@@ -870,14 +870,14 @@ PHP_FUNCTION(unpack)
 
 			default:
 				php_error_docref(NULL, E_WARNING, "Invalid format type %c", type);
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 				break;
 		}
 
 		if (size != 0 && size != -1 && size < 0) {
 			php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_FALSE;
 		}
 
@@ -896,7 +896,7 @@ PHP_FUNCTION(unpack)
 
 			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
 				php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 
@@ -1192,7 +1192,7 @@ PHP_FUNCTION(unpack)
 				break;
 			} else {
 				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have " ZEND_LONG_FMT, type, size, inputlen - inputpos);
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 		}

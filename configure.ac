@@ -8,7 +8,7 @@ sinclude(Zend/acinclude.m4)
 dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
-AC_PREREQ(2.59)
+AC_PREREQ([2.64])
 AC_INIT(README.GIT-RULES)
 ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
 
@@ -16,7 +16,7 @@ PHP_CONFIG_NICE(config.nice)
 
 PHP_CANONICAL_HOST_TARGET
 
-AC_CONFIG_HEADER(main/php_config.h)
+AC_CONFIG_HEADERS([main/php_config.h])
 AH_TOP([
 #ifndef PHP_CONFIG_H
 #define PHP_CONFIG_H
@@ -68,7 +68,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #include <math.h>
 
 #ifndef zend_isnan
-#if HAVE_DECL_ISNAN
+#if HAVE_DECL_ISNAN && (!defined(__cplusplus) || __cplusplus < 201103L)
 #define zend_isnan(a) isnan(a)
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
@@ -77,7 +77,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #endif
 #endif
 
-#if HAVE_DECL_ISINF
+#if HAVE_DECL_ISINF && (!defined(__cplusplus) || __cplusplus < 201103L)
 #define zend_isinf(a) isinf(a)
 #elif defined(INFINITY)
 /* Might not work, but is required by ISO C99 */
@@ -88,7 +88,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #define zend_isinf(a) 0
 #endif
 
-#if HAVE_DECL_ISFINITE
+#if HAVE_DECL_ISFINITE && (!defined(__cplusplus) || __cplusplus < 201103L)
 #define zend_finite(a) isfinite(a)
 #elif defined(HAVE_FINITE)
 #define zend_finite(a) finite(a)
@@ -581,8 +581,12 @@ AC_TYPE_UID_T
 dnl Checks for sockaddr_storage and sockaddr.sa_len
 PHP_SOCKADDR_CHECKS
 
-AX_GCC_FUNC_ATTRIBUTE([ifunc])
-AX_GCC_FUNC_ATTRIBUTE([target])
+dnl Checks for GCC function attributes on all systems except ones without glibc
+dnl Fix for these systems is already included in GCC 7, but not on GCC 6
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*], [true], [
+  AX_GCC_FUNC_ATTRIBUTE([ifunc])
+  AX_GCC_FUNC_ATTRIBUTE([target])
+])
 
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,

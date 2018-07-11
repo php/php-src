@@ -53,7 +53,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	{
 		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
 		intl_error_set_custom_msg( NULL, "String conversion of id to UTF-16 failed", 0 );
-		zval_dtor( object );
+		zval_ptr_dtor( object );
 		return FAILURE;
 	}
 
@@ -79,7 +79,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 			intl_error_set_custom_msg( NULL, buf, /* copy message */ 1 );
 			efree( buf );
 		}
-		zval_dtor( object );
+		zval_ptr_dtor( object );
 		return FAILURE;
 	}
 
@@ -90,7 +90,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
 		intl_error_set_custom_msg( NULL,
 			"transliterator_create: internal constructor call failed", 0 );
-		zval_dtor( object );
+		zval_ptr_dtor( object );
 		return FAILURE;
 	}
 
@@ -192,7 +192,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 			intl_errors_set_custom_msg( INTL_DATA_ERROR_P( to ), msg, 1 );
 			efree( msg );
 		}
-		zval_dtor( return_value );
+		zval_ptr_dtor( return_value );
 		RETURN_NULL();
     }
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
@@ -281,7 +281,7 @@ PHP_FUNCTION( transliterator_list_ids )
 	intl_error_set_code( NULL, status );
 	if( U_FAILURE( status ) )
 	{
-		zval_dtor( return_value );
+		zend_array_destroy( Z_ARR_P(return_value) );
 		RETVAL_FALSE;
 		intl_error_set_custom_msg( NULL, "transliterator_list_ids: "
 			"Failed to build array of registered transliterators", 0 );

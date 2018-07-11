@@ -96,7 +96,7 @@ int main() { return foo(10, "", 3.14); }
         ])
       ])
 
-      AC_CHECK_HEADERS([stdlib.h string.h strings.h unistd.h sys/time.h sys/times.h stdarg.h])
+      AC_CHECK_HEADERS([stdlib.h string.h strings.h unistd.h sys/time.h sys/times.h stdarg.h limits.h])
       AC_CHECK_SIZEOF(int, 4)
       AC_CHECK_SIZEOF(short, 2)
       AC_CHECK_SIZEOF(long, 4)

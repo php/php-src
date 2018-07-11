@@ -1637,14 +1637,14 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 					err = 1;
 					add_assoc_long_ex(&filterparams, "window", sizeof("window") - 1, MAX_WBITS);
 					filter = php_stream_filter_create("zlib.inflate", &filterparams, php_stream_is_persistent(fp));
-					zval_dtor(&filterparams);
+					zend_array_destroy(Z_ARR(filterparams));
 
 					if (!filter) {
 						php_stream_close(temp);
 						MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\", ext/zlib is buggy in PHP versions older than 5.2.6")
 					}
 				} else {
-					zval_dtor(&filterparams);
+					zend_array_destroy(Z_ARR(filterparams));
 				}
 
 				php_stream_filter_append(&temp->writefilters, filter);
@@ -3191,7 +3191,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			array_init(&filterparams);
 			add_assoc_long(&filterparams, "window", MAX_WBITS+16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp));
-			zval_dtor(&filterparams);
+			zend_array_destroy(Z_ARR(filterparams));
 
 			if (!filter) {
 				if (error) {

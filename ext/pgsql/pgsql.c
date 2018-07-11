@@ -1503,7 +1503,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 cleanup:
 	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
-		zval_dtor(&args[i]);
+		zval_ptr_dtor(&args[i]);
 	}
 	efree(args);
 	smart_str_free(&str);
@@ -1511,7 +1511,7 @@ cleanup:
 
 err:
 	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
-		zval_dtor(&args[i]);
+		zval_ptr_dtor(&args[i]);
 	}
 	efree(args);
 	smart_str_free(&str);
@@ -2911,7 +2911,7 @@ PHP_FUNCTION(pg_fetch_all)
 	pgsql_result = pg_result->result;
 	array_init(return_value);
 	if (php_pgsql_result2array(pgsql_result, return_value, result_type) == FAILURE) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 }
@@ -4278,12 +4278,12 @@ PHP_FUNCTION(pg_copy_from)
 					}
 					if (PQputCopyData(pgsql, query, (int)strlen(query)) != 1) {
 						efree(query);
-						zval_dtor(&tmp);
+						zval_ptr_dtor_str(&tmp);
 						PHP_PQ_ERROR("copy failed: %s", pgsql);
 						RETURN_FALSE;
 					}
 					efree(query);
-					zval_dtor(&tmp);
+					zval_ptr_dtor_str(&tmp);
 				} ZEND_HASH_FOREACH_END();
 
 				if (PQputCopyEnd(pgsql, NULL) != 1) {
@@ -4302,12 +4302,12 @@ PHP_FUNCTION(pg_copy_from)
 					}
 					if (PQputline(pgsql, query)==EOF) {
 						efree(query);
-						zval_dtor(&tmp);
+						zval_ptr_dtor_str(&tmp);
 						PHP_PQ_ERROR("copy failed: %s", pgsql);
 						RETURN_FALSE;
 					}
 					efree(query);
-					zval_dtor(&tmp);
+					zval_ptr_dtor_str(&tmp);
 				} ZEND_HASH_FOREACH_END();
 
 				if (PQputline(pgsql, "\\.\n") == EOF) {
@@ -5636,7 +5636,7 @@ PHP_FUNCTION(pg_meta_data)
 
 	array_init(return_value);
 	if (php_pgsql_meta_data(pgsql, table_name, return_value, extended) == FAILURE) {
-		zval_dtor(return_value); /* destroy array */
+		zend_array_destroy(Z_ARR_P(return_value)); /* destroy array */
 		RETURN_FALSE;
 	}
 }
@@ -5759,7 +5759,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 
 	re = pcre2_compile((PCRE2_SPTR)regex, regex_len, options, &errnumber, &err_offset, php_pcre_cctx());
 	if (NULL == re) {
-		PCRE2_UCHAR err_msg[256];
+		PCRE2_UCHAR err_msg[128];
 		pcre2_get_error_message(errnumber, err_msg, sizeof(err_msg));
 		php_error_docref(NULL, E_WARNING, "Cannot compile regex: '%s'", err_msg);
 		return FAILURE;
@@ -6520,7 +6520,7 @@ PHP_FUNCTION(pg_convert)
 	}
 	array_init(return_value);
 	if (php_pgsql_convert(pg_link, table_name, values, return_value, option) == FAILURE) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 }

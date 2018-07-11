@@ -1758,8 +1758,7 @@ PHP_FUNCTION(pathinfo)
 	} else {
 		zval *element;
 		if ((element = zend_hash_get_current_data(Z_ARRVAL(tmp))) != NULL) {
-			ZVAL_DEREF(element);
-			ZVAL_COPY(return_value, element);
+			ZVAL_COPY_DEREF(return_value, element);
 		} else {
 			ZVAL_EMPTY_STRING(return_value);
 		}

@@ -202,7 +202,7 @@ err:
 #define TRANSLITERATOR_PROPERTY_HANDLER_EPILOG	\
 	if( member == &tmp_member )					\
 	{											\
-		zval_dtor( &tmp_member );				\
+		zval_ptr_dtor_str( &tmp_member );		\
 	}
 
 /* {{{ get_property_ptr_ptr handler */

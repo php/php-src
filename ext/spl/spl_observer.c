@@ -464,8 +464,7 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	} else {
 		zval *value = &element->inf;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 } /* }}} */
 
