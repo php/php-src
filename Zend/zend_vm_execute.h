@@ -5343,7 +5343,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W EXECUTE_DATA_CC);
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W);
 
 	if ((opline+1)->op1_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		prop = &EG(uninitialized_zval);
@@ -8762,7 +8762,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W EXECUTE_DATA_CC);
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W);
 
 	if ((opline+1)->op1_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		prop = &EG(uninitialized_zval);
@@ -9636,7 +9636,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W EXECUTE_DATA_CC);
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W);
 
 	if ((opline+1)->op1_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		prop = &EG(uninitialized_zval);
@@ -15123,7 +15123,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W EXECUTE_DATA_CC);
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W);
 
 	if ((opline+1)->op1_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		prop = &EG(uninitialized_zval);
@@ -17483,7 +17483,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W EXECUTE_DATA_CC);
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W);
 
 	if ((opline+1)->op1_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		prop = &EG(uninitialized_zval);
@@ -18101,7 +18101,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W EXECUTE_DATA_CC);
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W);
 
 	if ((opline+1)->op1_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		prop = &EG(uninitialized_zval);
@@ -46379,7 +46379,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W EXECUTE_DATA_CC);
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W);
 
 	if ((opline+1)->op1_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		prop = &EG(uninitialized_zval);
@@ -51957,7 +51957,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W EXECUTE_DATA_CC);
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W);
 
 	if ((opline+1)->op1_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		prop = &EG(uninitialized_zval);
@@ -53523,7 +53523,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W EXECUTE_DATA_CC);
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, BP_VAR_W);
 
 	if ((opline+1)->op1_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		prop = &EG(uninitialized_zval);
