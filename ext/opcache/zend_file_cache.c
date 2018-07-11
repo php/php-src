@@ -828,7 +828,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	filename = zend_file_cache_get_bin_file_path(script->script.filename);
 
 	if (zend_file_cache_mkdir(filename, strlen(ZCG(accel_directives).file_cache)) != SUCCESS) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create directory for file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create directory for file '%s', %s\n", filename, strerror(errno));
 		efree(filename);
 		return FAILURE;
 	}
@@ -840,7 +840,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 #endif
 	if (fd < 0) {
 		if (errno != EEXIST) {
-			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create file '%s'\n", filename);
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create file '%s', %s\n", filename, strerror(errno));
 		}
 		efree(filename);
 		return FAILURE;
