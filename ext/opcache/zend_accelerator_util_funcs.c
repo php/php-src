@@ -581,7 +581,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
+		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
