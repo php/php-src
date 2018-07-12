@@ -1346,7 +1346,11 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	}
 	filename = zend_file_cache_get_bin_file_path(full_path);
 
+#ifndef ZEND_WIN32
 	fd = open(filename, O_RDONLY | O_BINARY);
+#else
+	fd = php_win32_ioutil_open(filename, O_RDONLY | O_BINARY);
+#endif
 	if (fd < 0) {
 		efree(filename);
 		return NULL;
