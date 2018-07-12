@@ -189,8 +189,9 @@ typedef struct _zend_fcall_info_cache {
 
 #define INIT_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions) \
 	{															\
+		memset(&class_container, 0, sizeof(zend_class_entry)); \
 		class_container.name = zend_string_init_interned(class_name, class_name_len, 1); \
-		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions) \
+		class_container.info.internal.builtin_functions = functions;	\
 	}
 
 #define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions) \
@@ -221,7 +222,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.trait_precedences = NULL;				\
 		class_container.interfaces = NULL;						\
 		class_container.get_iterator = NULL;					\
-		class_container.iterator_funcs.funcs = NULL;			\
+		class_container.iterator_funcs_ptr = NULL;				\
 		class_container.info.internal.module = NULL;			\
 		class_container.info.internal.builtin_functions = functions;	\
 	}

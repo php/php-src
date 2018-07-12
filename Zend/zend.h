@@ -139,7 +139,8 @@ struct _zend_class_entry {
 	union _zend_function *serialize_func;
 	union _zend_function *unserialize_func;
 
-	zend_class_iterator_funcs iterator_funcs;
+	/* allocated only if class implements Itetrator or IteratorAggregate interface */
+	zend_class_iterator_funcs *iterator_funcs_ptr;
 
 	/* handlers */
 	zend_object* (*create_object)(zend_class_entry *class_type);

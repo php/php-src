@@ -2186,7 +2186,6 @@ static void date_register_classes(void) /* {{{ */
 	ce_period.create_object = date_object_new_period;
 	date_ce_period = zend_register_internal_class_ex(&ce_period, NULL);
 	date_ce_period->get_iterator = date_object_period_get_iterator;
-	date_ce_period->iterator_funcs.funcs = &date_period_it_funcs;
 	zend_class_implements(date_ce_period, 1, zend_ce_traversable);
 	memcpy(&date_object_handlers_period, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_period.offset = XtOffsetOf(php_period_obj, std);

@@ -99,8 +99,23 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->get_iterator)) {
 		ce->get_iterator = ce->parent->get_iterator;
 	}
-	if (EXPECTED(!ce->iterator_funcs.funcs)) {
-		ce->iterator_funcs.funcs = ce->parent->iterator_funcs.funcs;
+	if (EXPECTED(!ce->iterator_funcs_ptr) && UNEXPECTED(ce->parent->iterator_funcs_ptr)) {
+		if (ce->type == ZEND_INTERNAL_CLASS) {
+			ce->iterator_funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
+			if (ce->parent->iterator_funcs_ptr->zf_new_iterator) {
+				ce->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&ce->function_table, "getiterator", sizeof("getiterator") - 1);
+			}
+			if (ce->parent->iterator_funcs_ptr->zf_current) {
+				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", sizeof("rewind") - 1);
+				ce->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&ce->function_table, "valid", sizeof("valid") - 1);
+				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", sizeof("key") - 1);
+				ce->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&ce->function_table, "current", sizeof("current") - 1);
+				ce->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&ce->function_table, "next", sizeof("next") - 1);
+			}
+		} else {
+			ce->iterator_funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+			memset(ce->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
+		}
 	}
 	if (EXPECTED(!ce->__get)) {
 		ce->__get = ce->parent->__get;

@@ -655,7 +655,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "num_rows",		sizeof("num_rows") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "type",			sizeof("type") - 1, ZEND_ACC_PUBLIC);
 	mysqli_result_class_entry->get_iterator = php_mysqli_result_get_iterator;
-	mysqli_result_class_entry->iterator_funcs.funcs = &php_mysqli_result_iterator_funcs;
 	zend_class_implements(mysqli_result_class_entry, 1, zend_ce_traversable);
 	zend_hash_add_ptr(&classes, ce->name, &mysqli_result_properties);
 

@@ -2477,6 +2477,12 @@ static void php_sxe_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
+PHP_SXE_API void php_sxe_rewind_iterator(php_sxe_object *sxe) /* {{{ */
+{
+	php_sxe_reset_iterator(sxe, 1);
+}
+/* }}} */
+
 static void php_sxe_iterator_rewind(zend_object_iterator *iter) /* {{{ */
 {
 	php_sxe_object	*sxe;
@@ -2680,7 +2686,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe);
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
-	sxe_class_entry->iterator_funcs.funcs = &php_sxe_iterator_funcs;
 	zend_class_implements(sxe_class_entry, 1, zend_ce_traversable);
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
