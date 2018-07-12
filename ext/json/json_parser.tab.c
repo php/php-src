@@ -82,6 +82,7 @@
 #include "php.h"
 #include "php_json.h"
 #include "php_json_parser.h"
+#include "zend_interfaces.h"
 
 #define YYDEBUG 0
 
@@ -1871,6 +1872,8 @@ static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
 		array_init(object);
 		return SUCCESS;
+	} else if (parser->scanner.options & PHP_JSON_AS_ARRAY_OBJECT) {
+		return object_init_ex(object, spl_ce_ArrayObject);
 	} else {
 		return object_init(object);
 	}
@@ -1881,6 +1884,11 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 	/* if JSON_OBJECT_AS_ARRAY is set */
 	if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_symtable_update(Z_ARRVAL_P(object), key, zvalue);
+	} else if (instanceof_function(Z_OBJCE_P(object), spl_ce_ArrayObject)) {
+		zval zkey;
+		ZVAL_STR_COPY(&zkey, key);
+		zend_call_method_with_2_params(object, spl_ce_ArrayObject, NULL, "offsetset", NULL, &zkey, zvalue);
+		zval_ptr_dtor(&zkey);
 	} else {
 		zval zkey;
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
