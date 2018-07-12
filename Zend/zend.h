@@ -143,9 +143,11 @@ struct _zend_class_entry {
 	zend_class_iterator_funcs *iterator_funcs_ptr;
 
 	/* handlers */
-	zend_object* (*create_object)(zend_class_entry *class_type);
+	union {
+		zend_object* (*create_object)(zend_class_entry *class_type);
+		int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */
+	};
 	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object, int by_ref);
-	int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */
 	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method);
 
 	/* serializer callbacks */

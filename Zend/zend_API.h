@@ -202,7 +202,6 @@ typedef struct _zend_fcall_info_cache {
 		class_container.serialize = NULL;						\
 		class_container.unserialize = NULL;						\
 		class_container.create_object = NULL;					\
-		class_container.interface_gets_implemented = NULL;		\
 		class_container.get_static_method = NULL;				\
 		class_container.__call = NULL;							\
 		class_container.__callstatic = NULL;					\
