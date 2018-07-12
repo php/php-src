@@ -357,9 +357,11 @@ static PHP_FUNCTION(phpdbg_break_next)
 		ex = ex->prev_execute_data;
 	}
 
-	if (zend_parse_parameters_none() == FAILURE || !ex) {
+	if (!ex) {
 		return;
 	}
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) ex->opline + 1);
 } /* }}} */
@@ -459,9 +461,7 @@ static PHP_FUNCTION(phpdbg_start_oplog)
 {
 	phpdbg_oplog_list *prev;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	prev = PHPDBG_G(oplog_list);
 

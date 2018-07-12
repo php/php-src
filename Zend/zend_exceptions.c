@@ -388,11 +388,6 @@ ZEND_METHOD(error_exception, __construct)
 }
 /* }}} */
 
-#define DEFAULT_0_PARAMS \
-	if (zend_parse_parameters_none() == FAILURE) { \
-		return; \
-	}
-
 #define GET_PROPERTY(object, id) \
 	zend_read_property_ex(i_get_exception_base(object), (object), ZSTR_KNOWN(id), 0, &rv)
 #define GET_PROPERTY_SILENT(object, id) \
@@ -404,7 +399,7 @@ ZEND_METHOD(exception, getFile)
 {
 	zval rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_FILE));
 }
@@ -416,7 +411,7 @@ ZEND_METHOD(exception, getLine)
 {
 	zval rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_LINE));
 }
@@ -428,7 +423,7 @@ ZEND_METHOD(exception, getMessage)
 {
 	zval rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_MESSAGE));
 }
@@ -440,7 +435,7 @@ ZEND_METHOD(exception, getCode)
 {
 	zval rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_CODE));
 }
@@ -452,7 +447,7 @@ ZEND_METHOD(exception, getTrace)
 {
 	zval rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_TRACE));
 }
@@ -464,7 +459,7 @@ ZEND_METHOD(error_exception, getSeverity)
 {
 	zval rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_SEVERITY));
 }
@@ -610,7 +605,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	smart_str str = {0};
 	uint32_t num = 0;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	object = getThis();
 	base_ce = i_get_exception_base(object);
@@ -643,7 +638,7 @@ ZEND_METHOD(exception, getPrevious)
 {
 	zval rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(getThis(), ZEND_STR_PREVIOUS));
 } /* }}} */
@@ -659,7 +654,7 @@ ZEND_METHOD(exception, __toString)
 	zval rv, tmp;
 	zend_string *fname;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	str = ZSTR_EMPTY_ALLOC();
 

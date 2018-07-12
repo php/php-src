@@ -864,9 +864,7 @@ PHP_FUNCTION(filter_list)
 {
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	for (i = 0; i < size; ++i) {

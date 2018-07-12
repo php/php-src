@@ -177,7 +177,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 				}
 
 				ret_idx += 8;
-				{ 
+				{
 					const __m128i hi = _mm_unpackhi_epi8(block, mask);
 					_mm_storeu_si128((__m128i *)ret_idx, hi);
 				}
@@ -615,9 +615,7 @@ PHP_FUNCTION(sapi_windows_cp_get)
  * Indicates whether the codepage is UTF-8 compatible. */
 PHP_FUNCTION(sapi_windows_cp_is_utf8)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(php_win32_cp_use_unicode());
 }

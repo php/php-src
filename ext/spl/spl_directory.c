@@ -764,9 +764,7 @@ SPL_METHOD(DirectoryIterator, rewind)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern->u.dir.index = 0;
 	if (intern->u.dir.dirp) {
@@ -782,9 +780,7 @@ SPL_METHOD(DirectoryIterator, key)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (intern->u.dir.dirp) {
 		RETURN_LONG(intern->u.dir.index);
@@ -798,9 +794,7 @@ SPL_METHOD(DirectoryIterator, key)
    Return this (needed for Iterator interface) */
 SPL_METHOD(DirectoryIterator, current)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 	ZVAL_OBJ(return_value, Z_OBJ_P(getThis()));
 	Z_ADDREF_P(return_value);
 }
@@ -813,9 +807,7 @@ SPL_METHOD(DirectoryIterator, next)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern->u.dir.index++;
 	do {
@@ -866,9 +858,7 @@ SPL_METHOD(DirectoryIterator, valid)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(intern->u.dir.entry.d_name[0] != '\0');
 }
@@ -882,9 +872,7 @@ SPL_METHOD(SplFileInfo, getPath)
 	char *path;
 	size_t path_len;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
   	path = spl_filesystem_object_get_path(intern, &path_len);
 	RETURN_STRINGL(path, path_len);
@@ -898,9 +886,7 @@ SPL_METHOD(SplFileInfo, getFilename)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	size_t path_len;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_filesystem_object_get_path(intern, &path_len);
 
@@ -918,9 +904,7 @@ SPL_METHOD(DirectoryIterator, getFilename)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_STRING(intern->u.dir.entry.d_name);
 }
@@ -938,9 +922,7 @@ SPL_METHOD(SplFileInfo, getExtension)
 	size_t idx;
 	zend_string *ret;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_filesystem_object_get_path(intern, &path_len);
 
@@ -976,9 +958,7 @@ SPL_METHOD(DirectoryIterator, getExtension)
 	size_t idx;
 	zend_string *fname;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	fname = php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), NULL, 0);
 
@@ -1048,9 +1028,8 @@ SPL_METHOD(SplFileInfo, getPathname)
 	char *path;
 	size_t path_len;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	path = spl_filesystem_object_get_pathname(intern, &path_len);
 	if (path != NULL) {
 		RETURN_STRINGL(path, path_len);
@@ -1066,9 +1045,7 @@ SPL_METHOD(FilesystemIterator, key)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (SPL_FILE_DIR_KEY(intern, SPL_FILE_DIR_KEY_AS_FILENAME)) {
 		RETURN_STRING(intern->u.dir.entry.d_name);
@@ -1085,9 +1062,7 @@ SPL_METHOD(FilesystemIterator, current)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (SPL_FILE_DIR_CURRENT(intern, SPL_FILE_DIR_CURRENT_AS_PATHNAME)) {
 		spl_filesystem_object_get_file_name(intern);
@@ -1109,9 +1084,7 @@ SPL_METHOD(DirectoryIterator, isDot)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 }
@@ -1146,9 +1119,7 @@ SPL_METHOD(SplFileInfo, func_name) \
 { \
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis()); \
 	zend_error_handling error_handling; \
-	if (zend_parse_parameters_none() == FAILURE) { \
-		return; \
-	} \
+	ZEND_PARSE_PARAMETERS_NONE(); \
  \
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);\
 	spl_filesystem_object_get_file_name(intern); \
@@ -1241,9 +1212,7 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 	char buff[MAXPATHLEN];
 	zend_error_handling error_handling;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 
@@ -1289,9 +1258,7 @@ SPL_METHOD(SplFileInfo, getRealPath)
 	char *filename;
 	zend_error_handling error_handling;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 
@@ -1435,9 +1402,7 @@ SPL_METHOD(FilesystemIterator, rewind)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern->u.dir.index = 0;
 	if (intern->u.dir.dirp) {
@@ -1455,9 +1420,7 @@ SPL_METHOD(FilesystemIterator, getFlags)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(intern->flags & (SPL_FILE_DIR_KEY_MODE_MASK | SPL_FILE_DIR_CURRENT_MODE_MASK | SPL_FILE_DIR_OTHERS_MASK));
 } /* }}} */
@@ -1511,9 +1474,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	spl_filesystem_object *subdir;
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_filesystem_object_get_file_name(intern);
 
@@ -1543,9 +1504,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (intern->u.dir.sub_path) {
 		RETURN_STRINGL(intern->u.dir.sub_path, intern->u.dir.sub_path_len);
@@ -1562,9 +1521,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (intern->u.dir.sub_path) {
 		RETURN_NEW_STR(strpprintf(0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name));
@@ -1597,9 +1554,7 @@ SPL_METHOD(GlobIterator, count)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (intern->u.dir.dirp && php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
 		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
@@ -2342,9 +2297,7 @@ SPL_METHOD(SplFileObject, rewind)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_filesystem_file_rewind(getThis(), intern);
 } /* }}} */
@@ -2355,9 +2308,7 @@ SPL_METHOD(SplFileObject, eof)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
@@ -2373,9 +2324,7 @@ SPL_METHOD(SplFileObject, valid)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
 		RETURN_BOOL(intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval));
@@ -2393,9 +2342,7 @@ SPL_METHOD(SplFileObject, fgets)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
@@ -2414,9 +2361,7 @@ SPL_METHOD(SplFileObject, current)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
@@ -2443,9 +2388,7 @@ SPL_METHOD(SplFileObject, key)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 /*	Do not read the next line to support correct counting with fgetc()
 	if (!intern->current_line) {
@@ -2460,9 +2403,7 @@ SPL_METHOD(SplFileObject, next)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_filesystem_file_free_line(intern);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
@@ -2488,9 +2429,7 @@ SPL_METHOD(SplFileObject, getFlags)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(intern->flags & SPL_FILE_OBJECT_MASK);
 } /* }}} */
@@ -2521,9 +2460,7 @@ SPL_METHOD(SplFileObject, getMaxLineLen)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG((zend_long)intern->u.file.max_line_len);
 } /* }}} */
@@ -2532,9 +2469,7 @@ SPL_METHOD(SplFileObject, getMaxLineLen)
    Return false */
 SPL_METHOD(SplFileObject, hasChildren)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_FALSE;
 } /* }}} */
@@ -2543,9 +2478,8 @@ SPL_METHOD(SplFileObject, hasChildren)
    Read NULL */
 SPL_METHOD(SplFileObject, getChildren)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	
 	/* return NULL */
 } /* }}} */
 

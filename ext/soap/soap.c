@@ -917,9 +917,7 @@ PHP_METHOD(SoapFault, __toString)
 	zend_string *faultcode_val, *faultstring_val, *file_val;
 	zend_long line_val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	this_ptr = getThis();
 	faultcode   = zend_read_property(soap_fault_class_entry, this_ptr, "faultcode", sizeof("faultcode")-1, 1, &rv1);
@@ -1340,9 +1338,7 @@ PHP_METHOD(SoapServer, getFunctions)
 
 	SOAP_SERVER_BEGIN_CODE();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	FETCH_THIS_SERVICE(service);
 
@@ -2908,9 +2904,7 @@ PHP_METHOD(SoapClient, __getFunctions)
 
 	FETCH_THIS_SDL(sdl);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (sdl) {
 		smart_str buf = {0};
@@ -2935,9 +2929,7 @@ PHP_METHOD(SoapClient, __getTypes)
 
 	FETCH_THIS_SDL(sdl);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (sdl) {
 		sdlTypePtr type;
@@ -2962,9 +2954,7 @@ PHP_METHOD(SoapClient, __getLastRequest)
 {
 	zval *tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()), "__last_request", sizeof("__last_request")-1)) != NULL &&
 	    Z_TYPE_P(tmp) == IS_STRING) {
@@ -2981,9 +2971,7 @@ PHP_METHOD(SoapClient, __getLastResponse)
 {
 	zval *tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()), "__last_response", sizeof("__last_response")-1)) != NULL &&
 	    Z_TYPE_P(tmp) == IS_STRING) {
@@ -3000,9 +2988,7 @@ PHP_METHOD(SoapClient, __getLastRequestHeaders)
 {
 	zval *tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()), "__last_request_headers", sizeof("__last_request_headers")-1)) != NULL &&
 	    Z_TYPE_P(tmp) == IS_STRING) {
@@ -3019,9 +3005,7 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 {
 	zval *tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()), "__last_response_headers", sizeof("__last_response_headers")-1)) != NULL &&
 	    Z_TYPE_P(tmp) == IS_STRING) {
@@ -3110,10 +3094,7 @@ PHP_METHOD(SoapClient, __getCookies)
 {
 	zval *cookies;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((cookies = zend_hash_str_find(Z_OBJPROP_P(getThis()), "_cookies", sizeof("_cookies")-1)) != NULL &&
 	    Z_TYPE_P(cookies) == IS_ARRAY) {

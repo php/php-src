@@ -4534,9 +4534,7 @@ PHP_FUNCTION(getopt)
    Flush the output buffer */
 PHP_FUNCTION(flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	sapi_flush();
 }
@@ -4671,9 +4669,7 @@ PHP_FUNCTION(time_sleep_until)
    Get the name of the owner of the current PHP script */
 PHP_FUNCTION(get_current_user)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_STRING(php_get_current_user());
 }
@@ -4733,9 +4729,8 @@ PHP_FUNCTION(get_cfg_var)
    Get the current active configuration setting of magic_quotes_runtime */
 PHP_FUNCTION(get_magic_quotes_runtime)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	
 	RETURN_FALSE;
 }
 /* }}} */
@@ -4744,9 +4739,8 @@ PHP_FUNCTION(get_magic_quotes_runtime)
    Get the current active configuration setting of magic_quotes_gpc */
 PHP_FUNCTION(get_magic_quotes_gpc)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	
 	RETURN_FALSE;
 }
 /* }}} */
@@ -4851,9 +4845,7 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, cha
    Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet. */
 PHP_FUNCTION(error_get_last)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PG(last_error_message)) {
 		array_init(return_value);
@@ -4869,9 +4861,7 @@ PHP_FUNCTION(error_get_last)
    Clear the last occurred error. */
 PHP_FUNCTION(error_clear_last)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PG(last_error_message)) {
 		PG(last_error_type) = 0;
@@ -5594,9 +5584,7 @@ PHP_FUNCTION(get_include_path)
 {
 	char *str;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	str = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
 
@@ -5614,9 +5602,8 @@ PHP_FUNCTION(restore_include_path)
 {
 	zend_string *key;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	
 	key = zend_string_init("include_path", sizeof("include_path")-1, 0);
 	zend_restore_ini_entry(key, PHP_INI_STAGE_RUNTIME);
 	zend_string_efree(key);
@@ -6145,9 +6132,7 @@ PHP_FUNCTION(sys_getloadavg)
 {
 	double load[3];
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (getloadavg(load, 3) == -1) {
 		RETURN_FALSE;

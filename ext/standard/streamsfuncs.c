@@ -574,9 +574,7 @@ PHP_FUNCTION(stream_get_transports)
 	HashTable *stream_xport_hash;
 	zend_string *stream_xport;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((stream_xport_hash = php_stream_xport_get_hash())) {
 		array_init(return_value);
@@ -596,9 +594,7 @@ PHP_FUNCTION(stream_get_wrappers)
 	HashTable *url_stream_wrappers_hash;
 	zend_string *stream_protocol;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
 		array_init(return_value);

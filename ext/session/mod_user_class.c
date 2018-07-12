@@ -171,9 +171,7 @@ PHP_METHOD(SessionHandler, create_sid)
 
 	PS_SANITY_CHECK;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-	    return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = PS(default_mod)->s_create_sid(&PS(mod_data));
 

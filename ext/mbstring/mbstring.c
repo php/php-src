@@ -3457,9 +3457,7 @@ PHP_FUNCTION(mb_list_encodings)
 	const mbfl_encoding *encoding;
 	int i;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	i = 0;

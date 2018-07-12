@@ -1982,9 +1982,7 @@ SXE_METHOD(count)
 	zend_long count = 0;
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_sxe_count_elements_helper(sxe, &count);
 

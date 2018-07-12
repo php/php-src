@@ -350,9 +350,7 @@ PHP_FUNCTION(enchant_broker_init)
 	enchant_broker *broker;
 	EnchantBroker *pbroker;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	pbroker = enchant_broker_init();
 

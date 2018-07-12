@@ -1269,9 +1269,7 @@ SPL_METHOD(Array, getIteratorClass)
 	zval *object = getThis();
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_string_addref(intern->ce_get_iterator->name);
 	RETURN_STR(intern->ce_get_iterator->name);
@@ -1285,9 +1283,7 @@ SPL_METHOD(Array, getFlags)
 	zval *object = getThis();
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(intern->ar_flags & ~SPL_ARRAY_INT_MASK);
 }
@@ -1338,9 +1334,7 @@ SPL_METHOD(Array, getIterator)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!aht) {
 		php_error_docref(NULL, E_NOTICE, "Array was modified outside object and is no longer an array");
@@ -1358,9 +1352,7 @@ SPL_METHOD(Array, rewind)
 	zval *object = getThis();
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_array_rewind(intern);
 }
@@ -1455,9 +1447,7 @@ SPL_METHOD(Array, count)
 	zend_long count;
 	spl_array_object *intern = Z_SPLARRAY_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_array_object_count_elements_helper(intern, &count);
 
@@ -1560,9 +1550,7 @@ SPL_METHOD(Array, current)
 	zval *entry;
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
 		return;
@@ -1585,9 +1573,7 @@ SPL_METHOD(Array, current)
    Return current array key */
 SPL_METHOD(Array, key)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_array_iterator_key(getThis(), return_value);
 } /* }}} */
@@ -1613,9 +1599,7 @@ SPL_METHOD(Array, next)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
 		return;
@@ -1633,9 +1617,7 @@ SPL_METHOD(Array, valid)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
 		RETURN_FALSE;
@@ -1653,9 +1635,7 @@ SPL_METHOD(Array, hasChildren)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
 		RETURN_FALSE;
@@ -1682,9 +1662,7 @@ SPL_METHOD(Array, getChildren)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
 		return;
@@ -1726,9 +1704,7 @@ SPL_METHOD(Array, serialize)
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!aht) {
 		php_error_docref(NULL, E_NOTICE, "Array was modified outside object and is no longer an array");

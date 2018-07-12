@@ -533,9 +533,7 @@ PHP_FUNCTION(stream_get_filters)
 	zend_string *filter_name;
 	HashTable *filters_hash;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 

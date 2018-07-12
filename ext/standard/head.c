@@ -314,9 +314,7 @@ static void php_head_apply_header_list_to_hash(void *data, void *arg)
    Return list of headers to be sent / already sent */
 PHP_FUNCTION(headers_list)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, php_head_apply_header_list_to_hash, return_value);

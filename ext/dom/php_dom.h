@@ -143,11 +143,6 @@ entry = zend_register_internal_class_ex(&ce, parent_ce);
   	} \
 }
 
-#define DOM_NO_ARGS() \
-	if (zend_parse_parameters_none() == FAILURE) { \
-		return; \
-	}
-
 #define DOM_NOT_IMPLEMENTED() \
 	php_error_docref(NULL, E_WARNING, "Not yet implemented"); \
 	return;

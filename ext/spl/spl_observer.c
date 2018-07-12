@@ -589,9 +589,7 @@ SPL_METHOD(SplObjectStorage, rewind)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	intern->index = 0;
@@ -603,9 +601,7 @@ SPL_METHOD(SplObjectStorage, valid)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(zend_hash_has_more_elements_ex(&intern->storage, &intern->pos) == SUCCESS);
 } /* }}} */
@@ -616,9 +612,7 @@ SPL_METHOD(SplObjectStorage, key)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(intern->index);
 } /* }}} */
@@ -630,9 +624,7 @@ SPL_METHOD(SplObjectStorage, current)
 	spl_SplObjectStorageElement *element;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
 		return;
@@ -647,9 +639,7 @@ SPL_METHOD(SplObjectStorage, getInfo)
 	spl_SplObjectStorageElement *element;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
 		return;
@@ -682,9 +672,7 @@ SPL_METHOD(SplObjectStorage, next)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_hash_move_forward_ex(&intern->storage, &intern->pos);
 	intern->index++;
@@ -702,9 +690,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
@@ -959,9 +945,8 @@ SPL_METHOD(MultipleIterator, getFlags)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	
 	RETURN_LONG(intern->flags);
 }
 /* }}} */
@@ -1024,9 +1009,7 @@ SPL_METHOD(MultipleIterator, rewind)
 
 	intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	while ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) != NULL && !EG(exception)) {
@@ -1047,9 +1030,7 @@ SPL_METHOD(MultipleIterator, next)
 
 	intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	while ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) != NULL && !EG(exception)) {
@@ -1071,9 +1052,7 @@ SPL_METHOD(MultipleIterator, valid)
 
 	intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!zend_hash_num_elements(&intern->storage)) {
 		RETURN_FALSE;
@@ -1179,9 +1158,7 @@ SPL_METHOD(MultipleIterator, current)
 	spl_SplObjectStorage        *intern;
 	intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_multiple_iterator_get_all(intern, SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT, return_value);
 }
@@ -1194,9 +1171,7 @@ SPL_METHOD(MultipleIterator, key)
 	spl_SplObjectStorage *intern;
 	intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_multiple_iterator_get_all(intern, SPL_MULTIPLE_ITERATOR_GET_ALL_KEY, return_value);
 }

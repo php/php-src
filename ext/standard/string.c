@@ -5484,9 +5484,7 @@ PHP_FUNCTION(localeconv)
 	int len, i;
 
 	/* We don't need no stinkin' parameters... */
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	array_init(&grouping);

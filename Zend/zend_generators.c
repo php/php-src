@@ -839,9 +839,7 @@ ZEND_METHOD(Generator, rewind)
 {
 	zend_generator *generator;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
@@ -855,9 +853,7 @@ ZEND_METHOD(Generator, valid)
 {
 	zend_generator *generator;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
@@ -875,9 +871,7 @@ ZEND_METHOD(Generator, current)
 {
 	zend_generator *generator, *root;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
@@ -898,9 +892,7 @@ ZEND_METHOD(Generator, key)
 {
 	zend_generator *generator, *root;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
@@ -921,9 +913,7 @@ ZEND_METHOD(Generator, next)
 {
 	zend_generator *generator;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
@@ -1014,9 +1004,7 @@ ZEND_METHOD(Generator, getReturn)
 {
 	zend_generator *generator;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
@@ -1044,9 +1032,7 @@ ZEND_METHOD(Generator, __wakeup)
 	 * because it is only invoked for C unserialization. For O the error has
 	 * to be thrown in __wakeup. */
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_throw_exception(NULL, "Unserialization of 'Generator' is not allowed", 0);
 }

@@ -98,9 +98,7 @@ PHP_FUNCTION(getmyuid)
 {
 	zend_long uid;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	uid = php_getuid();
 	if (uid < 0) {
@@ -117,9 +115,7 @@ PHP_FUNCTION(getmygid)
 {
 	zend_long gid;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	gid = php_getgid();
 	if (gid < 0) {
@@ -136,9 +132,7 @@ PHP_FUNCTION(getmypid)
 {
 	zend_long pid;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	pid = getpid();
 	if (pid < 0) {
@@ -153,9 +147,7 @@ PHP_FUNCTION(getmypid)
    Get the inode of the current script being parsed */
 PHP_FUNCTION(getmyinode)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_statpage();
 	if (BG(page_inode) < 0) {
@@ -178,9 +170,7 @@ PHP_FUNCTION(getlastmod)
 {
 	zend_long lm;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	lm = php_getlastmod();
 	if (lm < 0) {

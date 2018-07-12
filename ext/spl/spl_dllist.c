@@ -600,9 +600,7 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 {
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_pop(intern->llist, return_value);
@@ -620,9 +618,7 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 {
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_shift(intern->llist, return_value);
@@ -641,9 +637,7 @@ SPL_METHOD(SplDoublyLinkedList, top)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(getThis());
 	value = spl_ptr_llist_last(intern->llist);
@@ -664,9 +658,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(getThis());
 	value  = spl_ptr_llist_first(intern->llist);
@@ -687,9 +679,7 @@ SPL_METHOD(SplDoublyLinkedList, count)
 	zend_long count;
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	count = spl_ptr_llist_count(intern->llist);
 	RETURN_LONG(count);
@@ -702,9 +692,7 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 {
 	zend_long count;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_dllist_object_count_elements(getThis(), &count);
 	RETURN_BOOL(count == 0);
@@ -742,9 +730,7 @@ SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 {
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(getThis());
 
@@ -1038,9 +1024,7 @@ SPL_METHOD(SplDoublyLinkedList, key)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(intern->traverse_position);
 }
@@ -1052,9 +1036,7 @@ SPL_METHOD(SplDoublyLinkedList, prev)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags ^ SPL_DLLIST_IT_LIFO);
 }
@@ -1066,9 +1048,7 @@ SPL_METHOD(SplDoublyLinkedList, next)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
 }
@@ -1080,9 +1060,7 @@ SPL_METHOD(SplDoublyLinkedList, valid)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(intern->traverse_pointer != NULL);
 }
@@ -1094,9 +1072,7 @@ SPL_METHOD(SplDoublyLinkedList, rewind)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_dllist_it_helper_rewind(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
 }
@@ -1109,9 +1085,7 @@ SPL_METHOD(SplDoublyLinkedList, current)
 	spl_dllist_object     *intern  = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_element *element = intern->traverse_pointer;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (element == NULL || Z_ISUNDEF(element->data)) {
 		RETURN_NULL();
@@ -1133,9 +1107,7 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	zval                   flags;
 	php_serialize_data_t   var_hash;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
