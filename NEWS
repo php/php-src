@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0beta1
 
 - Core:
+  . Fixed bug #33502 (Some nullary functions don't check the number of
+    arguments). (cmb)
   . Fixed bug #76392 (Error relocating sapi/cli/php: unsupported relocation
     type 37). (Peter Kokot)
 

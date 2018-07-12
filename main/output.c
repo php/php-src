@@ -1543,6 +1543,10 @@ PHP_FUNCTION(ob_implicit_flush)
    Reset(clear) URL rewriter values */
 PHP_FUNCTION(output_reset_rewrite_vars)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (php_url_scanner_reset_vars() == SUCCESS) {
 		RETURN_TRUE;
 	} else {
