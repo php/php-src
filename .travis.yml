@@ -1,6 +1,6 @@
 dist: trusty
 language: c
-sudo: false
+sudo: required
 addons:
   apt:
     packages:
