@@ -1363,7 +1363,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	}
 
 	if (read(fd, &info, sizeof(info)) != sizeof(info)) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (info)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
 		unlink(filename);
@@ -1411,7 +1411,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 #endif
 
 	if (read(fd, mem, info.mem_size + info.str_size) != (ssize_t)(info.mem_size + info.str_size)) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (mem)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
 		unlink(filename);
