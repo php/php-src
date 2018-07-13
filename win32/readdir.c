@@ -37,14 +37,8 @@ DIR *opendir(const char *dir)
 		return NULL;
 	}
 
-	dp = (DIR *) calloc(1, sizeof(DIR) + (_MAX_FNAME*5+1)*sizeof(char));
-	if (dp == NULL) {
-		return NULL;
-	}
-
 	resolvedw = php_win32_ioutil_conv_any_to_w(resolved_path_buff, PHP_WIN32_CP_IGNORE_LEN, &resolvedw_len);
 	if (!resolvedw) {
-		free(dp);
 		return NULL;
 	}
 
@@ -56,7 +50,6 @@ DIR *opendir(const char *dir)
 	}
 	filespecw = (wchar_t *)malloc((filespecw_len + 1)*sizeof(wchar_t));
 	if (filespecw == NULL) {
-		free(dp);
 		free(resolvedw);
 		return NULL;
 	}
@@ -72,6 +65,12 @@ DIR *opendir(const char *dir)
 	if (index >= 0 && filespecw[index] == L'/' || index == 0 && filespecw[index] == L'\\')
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
+
+	dp = (DIR *) calloc(1, sizeof(DIR) + (_MAX_FNAME*5+1)*sizeof(char));
+	if (dp == NULL) {
+		free(resolvedw);
+		return NULL;
+	}
 
 	if ((handle = FindFirstFileExW(filespecw, FindExInfoBasic, &(dp->fileinfo), FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH)) == INVALID_HANDLE_VALUE) {
 		DWORD err = GetLastError();
