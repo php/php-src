@@ -27,6 +27,7 @@
 #include "zend_extensions.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
+#include "zend_interfaces.h"
 
 static ZEND_FUNCTION(zend_version);
 static ZEND_FUNCTION(func_num_args);
@@ -298,6 +299,95 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 };
 /* }}} */
 
+static void php_stdclass_iterator_dtor(zend_object_iterator *iter) /* {{{ */
+{
+	zval_ptr_dtor(&iter->data);
+}
+/* }}} */
+
+static int php_stdclass_iterator_valid(zend_object_iterator *iter) /* {{{ */
+{
+	zend_object *zobj = Z_OBJ_P(&iter->data);
+	HashTable *obj_ht = zobj->properties;
+
+	int pos = iter->index;
+	return zend_hash_has_more_elements_ex(obj_ht, &pos);
+}
+/* }}} */
+
+static zval *php_stdclass_iterator_current_data(zend_object_iterator *iter) /* {{{ */
+{
+	zend_object *zobj = Z_OBJ_P(&iter->data);
+	HashTable *obj_ht = zobj->properties;
+
+	int pos = iter->index;
+	zval *data = zend_hash_get_current_data_ex(obj_ht, &pos);
+	if (data && Z_TYPE_P(data) == IS_INDIRECT) {
+		data = Z_INDIRECT_P(data);
+	}
+
+	return data;
+}
+/* }}} */
+
+static void php_stdclass_iterator_current_key(zend_object_iterator *iter, zval *key) /* {{{ */
+{
+	zend_object *zobj = Z_OBJ_P(&iter->data);
+	HashTable *obj_ht = zobj->properties;
+
+	int pos = iter->index;
+	zend_hash_get_current_key_zval_ex(obj_ht, key, &pos);
+}
+/* }}} */
+
+static void php_stdclass_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
+{
+	zend_object *zobj = Z_OBJ_P(&iter->data);
+	HashTable *obj_ht = zobj->properties;
+
+	int pos = iter->index;
+	int result = zend_hash_move_forward_ex(obj_ht, &pos);
+}
+/* }}} */
+
+static void php_stdclass_iterator_rewind(zend_object_iterator *iter) /* {{{ */
+{
+	zend_object *zobj = Z_OBJ_P(&iter->data);
+	HashTable *obj_ht = zobj->properties;
+	HashPosition pos;
+
+	zend_hash_internal_pointer_reset_ex(obj_ht, &pos);
+	iter->index = pos;
+}
+/* }}} */
+
+static const zend_object_iterator_funcs php_stdclass_iterator_funcs = { /* {{{ */
+	php_stdclass_iterator_dtor,
+	php_stdclass_iterator_valid,
+	php_stdclass_iterator_current_data,
+	php_stdclass_iterator_current_key,
+	php_stdclass_iterator_move_forward,
+	php_stdclass_iterator_rewind,
+	NULL
+};
+/* }}} */
+
+zend_object_iterator *php_stdclass_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+{
+	zend_user_iterator *iterator;
+
+	iterator = emalloc(sizeof(zend_user_iterator));
+	zend_iterator_init(&iterator->it);
+
+	ZVAL_COPY(&iterator->it.data, object);
+	iterator->it.funcs = &php_stdclass_iterator_funcs;
+	iterator->ce = ce;
+	ZVAL_UNDEF(&iterator->value);
+
+	return &iterator->it;
+}
+/* }}} */
+
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_class_entry class_entry;
 
@@ -305,6 +395,9 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_standard_class_def = zend_register_internal_class(&class_entry);
 
 	zend_register_default_classes();
+
+	zend_standard_class_def->get_iterator = php_stdclass_get_iterator;
+	zend_class_implements(zend_standard_class_def, 1, zend_ce_traversable);
 
 	return SUCCESS;
 }

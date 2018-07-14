@@ -9,6 +9,9 @@ function foo(): iterable {
 function bar(): iterable {
 	return (function () { yield; })();
 }
+function stdClass(): iterable {
+	return (object) [];
+}
 
 function baz(): iterable {
     return 1;
@@ -16,6 +19,7 @@ function baz(): iterable {
 
 var_dump(foo());
 var_dump(bar());
+var_dump(stdClass());
 
 try {
     baz();
@@ -28,5 +32,7 @@ try {
 array(0) {
 }
 object(Generator)#2 (0) {
+}
+object(stdClass)#2 (0) {
 }
 Return value of baz() must be iterable, int returned

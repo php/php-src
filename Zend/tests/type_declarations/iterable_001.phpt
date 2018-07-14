@@ -16,6 +16,7 @@ function gen() {
 test([1, 2, 3]);
 test(gen());
 test(new ArrayIterator([1, 2, 3]));
+test((object) [1]);
 
 try {
     test(1);
@@ -43,5 +44,9 @@ object(ArrayIterator)#1 (1) {
     [2]=>
     int(3)
   }
+}
+object(stdClass)#1 (1) {
+  ["0"]=>
+  int(1)
 }
 Argument 1 passed to test() must be iterable, int given, called in %s on line %d
