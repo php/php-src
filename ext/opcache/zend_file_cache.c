@@ -1526,7 +1526,11 @@ void zend_file_cache_invalidate(zend_string *full_path)
 
 	filename = zend_file_cache_get_bin_file_path(full_path);
 
+#ifndef ZEND_WIN32
 	unlink(filename);
+#else
+	php_win32_ioutil_unlink(filename);
+#endif
 	efree(filename);
 }
 
