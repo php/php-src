@@ -60,6 +60,8 @@
 #include "main/streams/php_stream_plain_wrapper.h"
 
 #include <pathcch.h>
+#include <winioctl.h>
+#include <winnt.h>
 
 /*
 #undef NONLS
@@ -815,6 +817,169 @@ PW32IO int php_win32_ioutil_link_w(const wchar_t *target, const wchar_t *link)
 	}
 
 	return 0;
+}/*}}}*/
+
+#define FILETIME_TO_UINT(filetime)                                          \
+   (*((uint64_t*) &(filetime)) - 116444736000000000ULL)
+
+#define FILETIME_TO_TIME_T(filetime)                                        \
+   (time_t)(FILETIME_TO_UINT(filetime) / 10000000ULL)
+
+static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, const wchar_t *pathw, size_t pathw_len, PBY_HANDLE_FILE_INFORMATION dp)
+{/*{{{*/
+	BY_HANDLE_FILE_INFORMATION d;
+	PBY_HANDLE_FILE_INFORMATION data;
+	LARGE_INTEGER t;
+	wchar_t mypath[MAXPATHLEN];
+	uint8_t is_dir;
+
+	data = !dp ? &d : dp;
+
+	if (!pathw) {
+		pathw_len = GetFinalPathNameByHandleW(h, mypath, MAXPATHLEN, VOLUME_NAME_DOS);
+		if (pathw_len >= MAXPATHLEN || pathw_len == 0) {
+			pathw_len = 0;
+			pathw = NULL;
+		} else {
+			pathw = mypath;
+		}
+	}
+
+	if(!GetFileInformationByHandle(h, data)) {
+		if (INVALID_HANDLE_VALUE != h) {
+			/* Perhaps it's a fileless stream like stdio, reuse the normal stat info. */
+			struct __stat64 _buf;
+			if (_fstat64(_open_osfhandle((intptr_t)h, 0), &_buf)) {
+				return -1;
+			}
+			buf->st_dev = _buf.st_dev;
+			buf->st_ino = _buf.st_ino;
+			buf->st_mode = _buf.st_mode;
+			buf->st_nlink = _buf.st_nlink;
+			buf->st_uid = _buf.st_uid;
+			buf->st_gid = _buf.st_gid;
+			buf->st_rdev = _buf.st_rdev;
+			buf->st_size = _buf.st_size;
+			buf->st_atime = _buf.st_atime;
+			buf->st_mtime = _buf.st_mtime;
+			buf->st_ctime = _buf.st_ctime;
+			return 0;
+		} else if(h == INVALID_HANDLE_VALUE && pathw_len > 0) {
+			/* An abnormal situation it is. For example, the user is the file
+				owner, but the file has an empty DACL. In that case, it is
+				possible CreateFile would fail, but the attributes still can
+				be read. Some info is still going to be missing. */
+			WIN32_FILE_ATTRIBUTE_DATA _data;
+			if (!GetFileAttributesExW(pathw, GetFileExInfoStandard, &_data)) {
+				DWORD err = GetLastError();
+				SET_ERRNO_FROM_WIN32_CODE(err);
+				return -1;
+			}
+			data->dwFileAttributes = _data.dwFileAttributes;
+			data->ftCreationTime = _data.ftCreationTime;
+			data->ftLastAccessTime = _data.ftLastAccessTime;
+			data->ftLastWriteTime = _data.ftLastWriteTime;
+			data->nFileSizeHigh = _data.nFileSizeHigh;
+			data->nFileSizeLow = _data.nFileSizeLow;
+			data->dwVolumeSerialNumber = 0;
+			data->nNumberOfLinks = 1;
+			data->nFileIndexHigh = 0;
+			data->nFileIndexLow = 0;
+		} else {
+			DWORD err = GetLastError();
+			SET_ERRNO_FROM_WIN32_CODE(err);
+			return -1;
+		}
+	}
+
+	is_dir = (data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
+
+	buf->st_dev = data->dwVolumeSerialNumber;
+
+	buf->st_rdev = buf->st_uid = buf->st_gid = 0;
+
+	buf->st_ino = (((uint64_t)data->nFileIndexHigh) << 32) + data->nFileIndexLow;
+
+	buf->st_mode = 0;
+
+	if (!is_dir) {
+		DWORD type;
+		if (GetBinaryTypeW(pathw, &type)) {
+				buf->st_mode  |= (S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6));
+		}
+	}
+
+	if ((data->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
+		buf->st_mode |= is_dir ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
+		buf->st_mode |= (data->dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
+	}
+
+	buf->st_nlink = data->nNumberOfLinks;
+	t.HighPart = data->nFileSizeHigh;
+	t.LowPart = data->nFileSizeLow;
+	/* It's an overflow on 32 bit, however it won't fix as long
+	as zend_long is 32 bit. */
+	buf->st_size = (zend_long)t.QuadPart;
+	buf->st_atime = FILETIME_TO_TIME_T(data->ftLastAccessTime);
+	buf->st_ctime = FILETIME_TO_TIME_T(data->ftCreationTime);
+	buf->st_mtime = FILETIME_TO_TIME_T(data->ftLastWriteTime);
+
+	return 0;
+}/*}}}*/
+
+PW32IO int php_win32_ioutil_stat_ex_w(const wchar_t *path, size_t path_len, php_win32_ioutil_stat_t *buf, int lstat)
+{/*{{{*/
+	BY_HANDLE_FILE_INFORMATION data;
+	HANDLE hLink = NULL;
+	DWORD flags_and_attrs = lstat ? FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT : FILE_FLAG_BACKUP_SEMANTICS;
+	int ret;
+	ALLOCA_FLAG(use_heap_large)
+
+	hLink = CreateFileW(path,
+			FILE_READ_ATTRIBUTES,
+			PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE,
+			NULL,
+			OPEN_EXISTING,
+			flags_and_attrs,
+			NULL
+	);
+
+	ret = php_win32_ioutil_fstat_int(hLink, buf, path, path_len, &data);
+
+	if (lstat && data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+		/* File is a reparse point. Get the target */
+		PHP_WIN32_IOUTIL_REPARSE_DATA_BUFFER * pbuffer;
+		DWORD retlength = 0;
+
+		pbuffer = (PHP_WIN32_IOUTIL_REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
+		if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
+			free_alloca(pbuffer, use_heap_large);
+			CloseHandle(hLink);
+			return -1;
+		}
+
+		if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+			buf->st_mode = S_IFLNK;
+			buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
+		}
+
+#if 0 /* Not used yet */
+		else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
+			buf->st_mode |=;
+		}
+#endif
+		free_alloca(pbuffer, use_heap_large);
+	}
+
+	CloseHandle(hLink);
+
+	return ret;
+
+}/*}}}*/
+
+PW32IO int php_win32_ioutil_fstat(int fd, php_win32_ioutil_stat_t *buf)
+{/*{{{*/
+	return php_win32_ioutil_fstat_int((HANDLE)_get_osfhandle(fd), buf, NULL, 0, NULL);
 }/*}}}*/
 
 /*
