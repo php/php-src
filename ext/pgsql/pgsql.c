@@ -6710,7 +6710,7 @@ PHP_FUNCTION(pg_insert)
 	zval *pgsql_link, *values;
 	char *table;
 	size_t table_len;
-	zend_ulong option = PGSQL_DML_EXEC, return_sql;
+	zend_ulong option = PGSQL_DML_EXEC | PSQL_DML_ESCAPE, return_sql;
 	PGconn *pg_link;
 	PGresult *pg_result;
 	ExecStatusType status;
@@ -6924,7 +6924,7 @@ PHP_FUNCTION(pg_update)
 	zval *pgsql_link, *values, *ids;
 	char *table;
 	size_t table_len;
-	zend_ulong option =  PGSQL_DML_EXEC;
+	zend_ulong option =  PGSQL_DML_EXEC | PSQL_DML_ESCAPE;
 	PGconn *pg_link;
 	zend_string *sql = NULL;
 	int argc = ZEND_NUM_ARGS();
@@ -7016,7 +7016,7 @@ PHP_FUNCTION(pg_delete)
 	zval *pgsql_link, *ids;
 	char *table;
 	size_t table_len;
-	zend_ulong option = PGSQL_DML_EXEC;
+	zend_ulong option = PGSQL_DML_EXEC | PSQL_DML_ESCAPE;
 	PGconn *pg_link;
 	zend_string *sql;
 	int argc = ZEND_NUM_ARGS();
@@ -7156,7 +7156,7 @@ PHP_FUNCTION(pg_select)
 	zval *pgsql_link, *ids;
 	char *table;
 	size_t table_len;
-	zend_ulong option = PGSQL_DML_EXEC;
+	zend_ulong option = PGSQL_DML_EXEC | PSQL_DML_ESCAPE;
 	long result_type = PGSQL_ASSOC;
 	PGconn *pg_link;
 	zend_string *sql = NULL;
