@@ -32,6 +32,7 @@ PHP                                                                        NEWS
   . Fixed bug #76488 (Memory leak when fetching a BLOB field). (Simonov Denis)
 
 - Standard:
+  . Fixed bug #73817 (Incorrect entries in get_html_translation_table). (cmb)
   . Fixed bug #76136 (stream_socket_get_name should enclose IPv6 in brackets).
     (seliver)
 
