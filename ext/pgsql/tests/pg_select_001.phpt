@@ -20,16 +20,16 @@ pg_query('INSERT INTO phptests.bar VALUES (4,5)');
 pg_query('INSERT INTO phptests.bar VALUES (6,7)');
 
 /* Inexistent table */
-var_dump(pg_select($conn, 'foo', array('id' => 1)));
+var_dump(pg_select($conn, 'foo', array('id' => 1), PGSQL_DML_EXEC));
 
 /* Existent column */
-var_dump(pg_select($conn, 'phptests.foo', array('id' => 1)));
+var_dump(pg_select($conn, 'phptests.foo', array('id' => 1), PGSQL_DML_EXEC));
 
 /* Testing with inexistent column */
-var_dump(pg_select($conn, 'phptests.bar', array('id' => 1)));
+var_dump(pg_select($conn, 'phptests.bar', array('id' => 1), PGSQL_DML_EXEC));
 
 /* Existent column */
-var_dump(pg_select($conn, 'phptests.bar', array('id4' => 4)));
+var_dump(pg_select($conn, 'phptests.bar', array('id4' => 4), PGSQL_DML_EXEC));
 
 
 pg_query('DROP TABLE phptests.foo');

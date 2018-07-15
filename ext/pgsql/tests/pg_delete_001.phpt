@@ -36,7 +36,7 @@ var_dump(pg_fetch_all(pg_query('SELECT * FROM foo')));
 var_dump(pg_fetch_all(pg_query('SELECT * FROM phptests.foo')));
 
 /* Inexistent */
-pg_delete($conn, 'bar', array('id' => 1, 'id2' => 2));
+pg_delete($conn, 'bar', array('id' => 1, 'id2' => 2), PGSQL_DML_EXEC);
 var_dump(pg_delete($conn, 'bar', array('id' => 1, 'id2' => 2), PGSQL_DML_STRING));
 
 pg_query('DROP TABLE foo');

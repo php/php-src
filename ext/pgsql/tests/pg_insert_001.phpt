@@ -13,7 +13,7 @@ pg_query('CREATE SCHEMA phptests');
 pg_query('CREATE TABLE phptests.foo (id INT, id2 INT)');
 
 
-pg_insert($conn, 'foo', array('id' => 1, 'id2' => 1));
+pg_insert($conn, 'foo', array('id' => 1, 'id2' => 1), PGSQL_DML_EXEC);
 
 pg_insert($conn, 'phptests.foo', array('id' => 1, 'id2' => 2));
 
