@@ -1762,6 +1762,12 @@ int php_request_startup(void)
 		PG(connection_status) = PHP_CONNECTION_NORMAL;
 		PG(in_user_include) = 0;
 
+		/* Non-CLI mode, and the ini configuration is missing */
+		/* Output_buffering should be set to the default value */
+		if (strcmp(sapi_module.name, "cli") && PG(output_buffering) < 1) {
+			PG(output_buffering) = 4096;
+		}
+
 		zend_activate();
 		sapi_activate();
 
