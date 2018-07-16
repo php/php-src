@@ -676,6 +676,30 @@ zend_string* zend_resolve_property_type(zend_string *type, zend_class_entry *sco
 	return type;
 } /* }}} */
 
+zend_bool class_types_compatible(
+		zend_type parent_type, zend_class_entry *parent_ce,
+		zend_type child_type, zend_class_entry *child_ce
+) {
+	zend_string *parent_name = ZEND_TYPE_IS_CE(parent_type)
+		? ZEND_TYPE_CE(parent_type)->name
+		: zend_resolve_property_type(ZEND_TYPE_NAME(parent_type), parent_ce);
+	zend_string *child_name = ZEND_TYPE_IS_CE(child_type)
+		? ZEND_TYPE_CE(child_type)->name
+		: zend_resolve_property_type(ZEND_TYPE_NAME(child_type), child_ce);
+	if (zend_string_equals_ci(parent_name, child_name)) {
+		return 1;
+	} else {
+		/* Check for class aliases */
+		zend_class_entry *parent_type_ce = ZEND_TYPE_IS_CE(parent_type)
+			? ZEND_TYPE_CE(parent_type)
+			: zend_lookup_class(parent_name);
+		zend_class_entry *child_type_ce = ZEND_TYPE_IS_CE(child_type)
+			? ZEND_TYPE_CE(child_type)
+			: zend_lookup_class(child_name);
+		return parent_type_ce && child_type_ce && parent_type_ce == child_type_ce;
+	}
+}
+
 static void do_inherit_property(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
 	zval *child = zend_hash_find_ex(&ce->properties_info, key, 1);
@@ -714,10 +738,8 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			if (ZEND_TYPE_IS_CLASS(parent_info->type)) {
 				if (!ZEND_TYPE_IS_CLASS(child_info->type) ||
 				    ZEND_TYPE_ALLOW_NULL(child_info->type) != ZEND_TYPE_ALLOW_NULL(parent_info->type) ||
-				    !zend_string_equals_ci(
-					ZEND_TYPE_IS_CE(parent_info->type) ? ZEND_TYPE_CE(parent_info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(parent_info->type), parent_info->ce),
-					ZEND_TYPE_IS_CE(child_info->type) ? ZEND_TYPE_CE(child_info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(child_info->type), child_info->ce)
-				    )) {
+					!class_types_compatible(parent_info->type, parent_info->ce, child_info->type, child_info->ce)
+				) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 					"Type of %s::$%s must be %s%s (as in class %s)",
 						ZSTR_VAL(ce->name),
