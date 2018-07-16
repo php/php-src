@@ -539,6 +539,11 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	php_url *url;
 	size_t old_len = Z_STRLEN_P(value);
 
+	if (flags & (FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED)) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"explicit use of FILTER_FLAG_SCHEME_REQUIRED and FILTER_FLAG_HOST_REQUIRED is deprecated");
+	}
+
 	php_filter_url(value, flags, option_array, charset);
 
 	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRLEN_P(value)) {
