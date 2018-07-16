@@ -690,7 +690,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("display_errors",		"1",		PHP_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
 	STD_PHP_INI_BOOLEAN("display_startup_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("expose_php",			"0",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("hipsterize",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			hipsterize,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_root", 			"", 		PHP_INI_ALL,		OnUpdateString,			docref_root,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_ext",				"",			PHP_INI_ALL,		OnUpdateString,			docref_ext,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("html_errors",			"1",		PHP_INI_ALL,		OnUpdateBool,			html_errors,			php_core_globals,	core_globals)
@@ -1780,8 +1781,12 @@ int php_request_startup(void)
 			CWDG(realpath_cache_size_limit) = 0;
 		}
 
-		if (PG(expose_php)) {
+		if (PG(expose_php) && !PG(hipsterize)) {
 			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
+		}
+
+		if(PH(hipsterize)) {
+			sapi_add_header(SAPI_HIPSTERIZED_VERSION_HEADER, sizeof(SAPI_HIPSTERIZED_VERSION_HEADER)-1, 1);
 		}
 
 		if (PG(output_handler) && PG(output_handler)[0]) {
