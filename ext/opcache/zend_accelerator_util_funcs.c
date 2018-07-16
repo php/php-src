@@ -424,6 +424,10 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_update_inherited_handler(__callstatic);
 	zend_update_inherited_handler(__debugInfo);
 
+/* Comparison methods */
+	zend_update_inherited_handler(__compareTo);
+	zend_update_inherited_handler(__equals);
+
 /* 5.4 traits */
 	if (ce->trait_aliases) {
 		zend_trait_alias **trait_aliases;

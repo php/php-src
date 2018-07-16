@@ -67,6 +67,8 @@ ZEND_API int ZEND_FASTCALL is_not_identical_function(zval *result, zval *op1, zv
 ZEND_API int ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL is_greater_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL is_greater_or_equal_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API zend_bool ZEND_FASTCALL instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only);
 ZEND_API zend_bool ZEND_FASTCALL instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce);
@@ -759,8 +761,8 @@ static zend_always_inline int fast_equal_check_function(zval *op1, zval *op2)
 			return zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 		}
 	}
-	compare_function(&result, op1, op2);
-	return Z_LVAL(result) == 0;
+	is_equal_function(&result, op1, op2);
+	return Z_TYPE(result) == IS_TRUE;
 }
 
 static zend_always_inline int fast_equal_check_long(zval *op1, zval *op2)
@@ -769,8 +771,8 @@ static zend_always_inline int fast_equal_check_long(zval *op1, zval *op2)
 	if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 		return Z_LVAL_P(op1) == Z_LVAL_P(op2);
 	}
-	compare_function(&result, op1, op2);
-	return Z_LVAL(result) == 0;
+	is_equal_function(&result, op1, op2);
+	return Z_TYPE(result) == IS_TRUE;
 }
 
 static zend_always_inline int fast_equal_check_string(zval *op1, zval *op2)
@@ -779,8 +781,8 @@ static zend_always_inline int fast_equal_check_string(zval *op1, zval *op2)
 	if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
 		return zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 	}
-	compare_function(&result, op1, op2);
-	return Z_LVAL(result) == 0;
+	is_equal_function(&result, op1, op2);
+	return Z_TYPE(result) == IS_TRUE;
 }
 
 static zend_always_inline int fast_is_identical_function(zval *op1, zval *op2)

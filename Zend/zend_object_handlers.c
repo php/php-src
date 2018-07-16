@@ -1536,6 +1536,40 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
+ZEND_API int zend_std_equals(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	if (Z_TYPE_P(op1) == IS_OBJECT) {
+		zend_class_entry *ce = Z_OBJCE_P(op1);
+		
+		if (ce->__equals) {
+			zend_call_method_with_1_params(op1, ce, &ce->__equals, ZEND_EQUALS_FUNC_NAME, result, op2);
+			
+			if (!Z_ISUNDEF_P(result)) {
+				return SUCCESS;
+			}
+		}
+	}
+	return FAILURE;
+}
+/* }}} */
+
+ZEND_API int zend_std_compare(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	if (Z_TYPE_P(op1) == IS_OBJECT) {
+		zend_class_entry *ce = Z_OBJCE_P(op1);
+
+		if (ce->__compareTo) {
+			zend_call_method_with_1_params(op1, ce, &ce->__compareTo, ZEND_COMPARETO_FUNC_NAME, result, op2);
+			
+			if (!Z_ISUNDEF_P(result)) {
+				return SUCCESS;
+			}
+		}
+	}
+	return FAILURE;
+}
+/* }}} */
+
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
@@ -1847,7 +1881,8 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
 	NULL,									/* do_operation */
-	NULL,									/* compare */
+	zend_std_compare,						/* compare */
+	zend_std_equals,						/* equals */
 };
 
 /*

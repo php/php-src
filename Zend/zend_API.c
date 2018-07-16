@@ -2165,7 +2165,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
-	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL, *__debugInfo = NULL;
+	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL, *__debugInfo = NULL, *__compareTo = NULL, *__equals = NULL;
 	zend_string *lowercase_name;
 	size_t fname_len;
 	const char *lc_class_name = NULL;
@@ -2357,6 +2357,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				__callstatic = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_TOSTRING_FUNC_NAME)) {
 				__tostring = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_COMPARETO_FUNC_NAME)) {
+				__compareTo = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_EQUALS_FUNC_NAME)) {
+				__equals = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_GET_FUNC_NAME)) {
 				__get = reg_function;
 				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
@@ -2411,6 +2415,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		scope->__unset = __unset;
 		scope->__isset = __isset;
 		scope->__debugInfo = __debugInfo;
+		scope->__compareTo = __compareTo;
+		scope->__equals = __equals;
 		if (ctor) {
 			ctor->common.fn_flags |= ZEND_ACC_CTOR;
 			if (ctor->common.fn_flags & ZEND_ACC_STATIC) {
@@ -2478,7 +2484,16 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				zend_error(error_type, "Method %s::%s() cannot be static", ZSTR_VAL(scope->name), ZSTR_VAL(__debugInfo->common.function_name));
 			}
 		}
-
+		if (__compareTo) {
+			if (__compareTo->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Method %s::%s() cannot be static", ZSTR_VAL(scope->name), ZSTR_VAL(__compareTo->common.function_name));
+			}
+		}
+		if (__equals) {
+			if (__equals->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Method %s::%s() cannot be static", ZSTR_VAL(scope->name), ZSTR_VAL(__equals->common.function_name));
+			}
+		}
 		if (ctor && ctor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && ctor->common.fn_flags & ZEND_ACC_CTOR) {
 			zend_error_noreturn(E_CORE_ERROR, "Constructor %s::%s() cannot declare a return type", ZSTR_VAL(scope->name), ZSTR_VAL(ctor->common.function_name));
 		}

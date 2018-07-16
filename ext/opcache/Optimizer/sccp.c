@@ -688,8 +688,8 @@ static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *
 		res = 0;
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
-			compare_function(&result_tmp, op1, &key_tmp);
-			if (Z_LVAL(result_tmp) == 0) {
+			is_equal_function(&result_tmp, op1, &key_tmp);
+			if (Z_TYPE(result_tmp) == IS_TRUE) {
 				res = 1;
 				break;
 			}

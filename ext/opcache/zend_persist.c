@@ -870,6 +870,12 @@ static int zend_update_parent_ce(zval *zv)
 	if (ce->__debugInfo) {
 		ce->__debugInfo = zend_shared_alloc_get_xlat_entry(ce->__debugInfo);
 	}
+	if (ce->__compareTo) {
+		ce->__compareTo = zend_shared_alloc_get_xlat_entry(ce->__compareTo);
+	}
+	if (ce->__equals) {
+		ce->__equals = zend_shared_alloc_get_xlat_entry(ce->__equals);
+	}
 //	zend_hash_apply(&ce->properties_info, (apply_func_t) zend_update_property_info_ce);
 	return 0;
 }

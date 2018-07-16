@@ -112,8 +112,11 @@ typedef zend_object* (*zend_object_clone_obj_t)(zval *object);
  * Must be defined and must return a non-NULL value. */
 typedef zend_string *(*zend_object_get_class_name_t)(const zend_object *object);
 
+/* Comparison and equality
+ */
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2);
-typedef int (*zend_object_compare_zvals_t)(zval *resul, zval *op1, zval *op2);
+typedef int (*zend_object_compare_zvals_t)(zval *result, zval *op1, zval *op2);
+typedef int (*zend_object_equals_t)(zval *result, zval *op1, zval *op2);
 
 /* Cast an object to some other type.
  * readobj and retval must point to distinct zvals.
@@ -162,6 +165,7 @@ struct _zend_object_handlers {
 	zend_object_get_gc_t					get_gc;
 	zend_object_do_operation_t				do_operation;
 	zend_object_compare_zvals_t				compare;
+    zend_object_equals_t                    equals;
 };
 
 BEGIN_EXTERN_C()

@@ -153,6 +153,12 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->__debugInfo)) {
 		ce->__debugInfo = ce->parent->__debugInfo;
 	}
+	if (EXPECTED(!ce->__compareTo)) {
+		ce->__compareTo = ce->parent->__compareTo;
+	}
+	if (EXPECTED(!ce->__equals)) {
+		ce->__equals = ce->parent->__equals;
+	}
 
 	if (ce->constructor) {
 		if (ce->parent->constructor && UNEXPECTED(ce->parent->constructor->common.fn_flags & ZEND_ACC_FINAL)) {
@@ -1168,6 +1174,10 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->__tostring = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		ce->__debugInfo = fe;
+	} else if (zend_string_equals_literal(mname, ZEND_COMPARETO_FUNC_NAME)) {
+		ce->__compareTo = fe;
+	} else if (zend_string_equals_literal(mname, ZEND_EQUALS_FUNC_NAME)) {
+		ce->__equals = fe;
 	}
 }
 /* }}} */
