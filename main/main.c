@@ -1731,7 +1731,7 @@ static void sigchld_handler(int apar)
  */
 int php_request_startup(void)
 {
-	int retval = SUCCESS;
+	int retval = SUCCESS, sapi_cgi;
 
 	zend_interned_strings_activate();
 
@@ -1762,11 +1762,14 @@ int php_request_startup(void)
 		PG(connection_status) = PHP_CONNECTION_NORMAL;
 		PG(in_user_include) = 0;
 
-		/* Non-CLI mode, and the ini configuration is missing */
-		/* Output_buffering should be set to the default value */
-		if (strcmp(sapi_module.name, "cli") && PG(output_buffering) < 1) {
-			PG(output_buffering) = 4096;
-		}
+		/* In non-embedded, non-CLI mode. */
+		/* if the ini configuration file is missing, output_buffering should be the default value */
+		sapi_cgi = (
+			!strcmp(sapi_module.name, "apache2handler") ||
+			!strcmp(sapi_module.name, "fpm-fcgi")       ||
+			!strcmp(sapi_module.name, "cgi-fcgii")      ||
+			!strcmp(sapi_module.name, "litespeed")
+		);
 
 		zend_activate();
 		sapi_activate();
@@ -1796,7 +1799,13 @@ int php_request_startup(void)
 			ZVAL_STRING(&oh, PG(output_handler));
 			php_output_start_user(&oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
 			zval_ptr_dtor(&oh);
-		} else if (PG(output_buffering)) {
+		} else if (PG(output_buffering) || sapi_cgi) {
+			/* In non-embedded, non-CLI mode. */
+			/* if the ini configuration file is missing, output_buffering should be the default value */
+			if (PG(output_buffering) < 1) {
+				PG(output_buffering) = 4096;
+			}
+
 			php_output_start_user(NULL, PG(output_buffering) > 1 ? PG(output_buffering) : 0, PHP_OUTPUT_HANDLER_STDFLAGS);
 		} else if (PG(implicit_flush)) {
 			php_output_set_implicit_flush(1);
