@@ -1157,7 +1157,7 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 		}
 		zval_ptr_dtor(&res);
 	} else {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
+		zend_use_object_as_array();
 		if (retval) {
 			ZVAL_NULL(retval);
 		}
@@ -2111,7 +2111,7 @@ static zend_never_inline int ZEND_FASTCALL zend_isset_dim_slow(zval *container, 
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			return Z_OBJ_HT_P(container)->has_dimension(container, offset, 0);
 		} else {
-			zend_error(E_NOTICE, "Trying to check element of non-array");
+			zend_use_object_as_array();
 			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
@@ -2156,7 +2156,7 @@ static zend_never_inline int ZEND_FASTCALL zend_isempty_dim_slow(zval *container
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			return !Z_OBJ_HT_P(container)->has_dimension(container, offset, 1);
 		} else {
-			zend_error(E_NOTICE, "Trying to check element of non-array");
+			zend_use_object_as_array();
 			return 1;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
