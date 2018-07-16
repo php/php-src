@@ -4620,8 +4620,8 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
 			val = Z_REFVAL_P(val);
 		}
+		ok = 1;
 		if (p->key == NULL) {
-			ok = 1;
 			for (i = 0; i < argc; i++) {
 				if (i == arr_minNumUsed_idx) {
 					continue;
@@ -4634,19 +4634,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 					break;
 				}
 			}
-			if (ok) {
-				data = zend_hash_index_find(Z_ARRVAL(args[0]), p->h);
-				if (UNEXPECTED(Z_TYPE_P(data) == IS_INDIRECT)) {
-					data = Z_INDIRECT_P(data);
-				}
-				if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
-					data = Z_REFVAL_P(data);
-				}
-				Z_TRY_ADDREF_P(data);
-				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, data);
-			}
 		} else {
-			ok = 1;
 			for (i = 0; i < argc; i++) {
 				if (i == arr_minNumUsed_idx) {
 					continue;
@@ -4659,15 +4647,27 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 					break;
 				}
 			}
-			if (ok) {
-				data = zend_hash_find_ex_ind(Z_ARRVAL(args[0]), p->key, 1);
+		}
+		if (ok) {
+			if (arr_minNumUsed_idx == 0) {
+				data = val;
+			} else {
+				if (p->key == NULL) {
+					data = zend_hash_index_find(Z_ARRVAL(args[0]), p->h);
+				} else {
+					data = zend_hash_find_ex_ind(Z_ARRVAL(args[0]), p->key, 1);
+				}
 				if (UNEXPECTED(Z_TYPE_P(data) == IS_INDIRECT)) {
 					data = Z_INDIRECT_P(data);
 				}
 				if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
 					data = Z_REFVAL_P(data);
 				}
-				Z_TRY_ADDREF_P(data);
+			}
+			Z_TRY_ADDREF_P(data);
+			if (p->key == NULL) {
+				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, data);
+			} else {
 				zend_hash_update(Z_ARRVAL_P(return_value), p->key, data);
 			}
 		}
