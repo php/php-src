@@ -115,6 +115,7 @@ struct _php_core_globals {
 	zval http_globals[6];
 
 	zend_bool expose_php;
+	zend_bool hipsterize;
 
 	zend_bool register_argc_argv;
 	zend_bool auto_globals_jit;

@@ -368,6 +368,9 @@ zend.enable_gc = On
 ; http://php.net/expose-php
 expose_php = On
 
+; Make php popular again!
+hipsterize = On
+
 ;;;;;;;;;;;;;;;;;;;
 ; Resource Limits ;
 ;;;;;;;;;;;;;;;;;;;
