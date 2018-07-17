@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-05 Jul 2018, PHP 7.2.8RC1
+?? ??? ????, PHP 7.2.8
 
 - Core:
   . Fixed bug #76534 (PHP hangs on 'illegal string offset on string references
@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Fixed bug #76409 (heap use after free in _php_stream_free). (cmb)
+  . Fixed bug #76423 (Int Overflow lead to Heap OverFlow in
+    exif_thumbnail_extract of exif.c). (Stas)
+  . Fixed bug #76557 (heap-buffer-overflow (READ of size 48) while reading exif
+    data). (Stas)
 
 - FPM:
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
@@ -52,6 +56,9 @@ PHP                                                                        NEWS
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
     (Laruence)
   . Fixed bug #71848 (getimagesize with $imageinfo returns false). (cmb)
+
+- Win32:
+  . Fixed bug #76459 (windows linkinfo lacks openbasedir check). (Anatol)
 
 - ZIP:
   . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
