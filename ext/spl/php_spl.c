@@ -913,6 +913,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_iterator_apply, 0, 0, 2)
 	ZEND_ARG_ARRAY_INFO(0, args, 1)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_iterable_to_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, iterable)
+	ZEND_ARG_INFO(0, use_keys)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_parents, 0, 0, 1)
 	ZEND_ARG_INFO(0, instance)
 	ZEND_ARG_INFO(0, autoload)
@@ -986,6 +991,7 @@ static const zend_function_entry spl_functions[] = {
 	PHP_FE(iterator_to_array,       arginfo_iterator_to_array)
 	PHP_FE(iterator_count,          arginfo_iterator)
 	PHP_FE(iterator_apply,          arginfo_iterator_apply)
+	PHP_FE(iterable_to_array,       arginfo_iterable_to_array)
 #endif /* SPL_ITERATORS_H */
 	PHP_FE_END
 };

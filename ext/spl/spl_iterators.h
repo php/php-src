@@ -60,6 +60,7 @@ PHP_MINIT_FUNCTION(spl_iterators);
 PHP_FUNCTION(iterator_to_array);
 PHP_FUNCTION(iterator_count);
 PHP_FUNCTION(iterator_apply);
+PHP_FUNCTION(iterable_to_array);
 
 typedef enum {
 	DIT_Default = 0,
