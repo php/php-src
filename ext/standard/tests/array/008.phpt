@@ -297,12 +297,12 @@ array(11) {
 }
 array_intersect_assoc($a,$b);
 array(5) {
+  [7]=>
+  int(18)
   ["f"]=>
   int(5)
   ["gate"]=>
   string(3) "web"
-  [7]=>
-  int(18)
   [11]=>
   int(42)
   ["som3"]=>

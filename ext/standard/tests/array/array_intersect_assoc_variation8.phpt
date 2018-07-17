@@ -190,23 +190,23 @@ array(2) {
 }
 -- Iteration 11 --
 array(4) {
-  ["heredoc"]=>
-  string(11) "Hello world"
+  [222]=>
+  string(5) "fruit"
   ["resource"]=>
   resource(%d) of type (stream)
   ["int"]=>
   int(133)
-  [222]=>
-  string(5) "fruit"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 array(4) {
-  ["heredoc"]=>
-  string(11) "Hello world"
+  [222]=>
+  string(5) "fruit"
   ["resource"]=>
   resource(%d) of type (stream)
   ["int"]=>
   int(133)
-  [222]=>
-  string(5) "fruit"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 Done
