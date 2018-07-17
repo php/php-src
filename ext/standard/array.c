@@ -3963,6 +3963,39 @@ PHP_FUNCTION(array_keys)
 }
 /* }}} */
 
+/* {{{ proto mixed array_key_first(array stack)
+   Get the key of the first element of the array */
+PHP_FUNCTION(array_key_first)
+{
+	zval *stack;    /* Input stack */
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_EX(stack, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	HashTable *target_hash = HASH_OF(stack);
+	HashPosition pos = 0;
+	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
+}
+/* }}} */
+
+/* {{{ proto mixed array_key_last(array stack)
+   Get the key of the last element of the array */
+PHP_FUNCTION(array_key_last)
+{
+	zval *stack;    /* Input stack */
+	HashPosition pos;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_EX(stack, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	HashTable *target_hash = HASH_OF(stack);
+	zend_hash_internal_pointer_end_ex(target_hash, &pos);
+	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
+}
+/* }}} */
+
 /* {{{ proto array array_values(array input)
    Return just the values from the input array */
 PHP_FUNCTION(array_values)

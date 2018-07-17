@@ -363,6 +363,9 @@ Standard:
   . Added is_countable() function, to check whether a value may be passed to
     count().
     (RFC: https://wiki.php.net/rfc/is-countable)
+  . Added array_key_first() and array_key_last() which retrieve the first and
+    last key of an array, respectively.
+    (RFC: <https://wiki.php.net/rfc/array_key_first_last>)
 
 ========================================
 7. New Classes and Interfaces
