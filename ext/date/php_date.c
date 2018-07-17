@@ -2924,14 +2924,7 @@ PHP_METHOD(DateTimeImmutable, createFrom)
 	old_obj = Z_PHPDATE_P(datetime_object);
 	new_obj = Z_PHPDATE_P(return_value);
 
-	new_obj->time = timelib_time_ctor();
-	*new_obj->time = *old_obj->time;
-	if (old_obj->time->tz_abbr) {
-		new_obj->time->tz_abbr = timelib_strdup(old_obj->time->tz_abbr);
-	}
-	if (old_obj->time->tz_info) {
-		new_obj->time->tz_info = old_obj->time->tz_info;
-	}
+	new_obj->time = timelib_time_clone(old_obj->time);
 }
 /* }}} */
 
