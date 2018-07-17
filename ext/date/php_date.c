@@ -2916,9 +2916,9 @@ PHP_METHOD(DateTimeImmutable, createFrom)
 	php_date_obj *new_obj = NULL;
 	php_date_obj *old_obj = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &datetime_object, date_ce_interface) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(datetime_object, date_ce_interface)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_immutable, return_value);
 	old_obj = Z_PHPDATE_P(datetime_object);
