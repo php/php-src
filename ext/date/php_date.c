@@ -487,6 +487,7 @@ static const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,			__wakeup,			NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__set_state,		arginfo_date_set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(DateTime,			createFromImmutable,	arginfo_date_method_create_from_immutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTime,			createFrom,			arginfo_date_method_create_from, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createFromFormat, date_create_from_format,	arginfo_date_create_from_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getLastErrors, date_get_last_errors,	arginfo_date_get_last_errors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(format,		date_format,		arginfo_date_method_format, 0)
@@ -2900,6 +2901,26 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_immutable, return_value);
+	old_obj = Z_PHPDATE_P(datetime_object);
+	new_obj = Z_PHPDATE_P(return_value);
+
+	new_obj->time = timelib_time_clone(old_obj->time);
+}
+/* }}} */
+/* {{{ proto DateTime::createFrom(DateTimeInterface object)
+   Creates new DateTime object from an existing DateTimeInterface object.
+*/
+PHP_METHOD(DateTime, createFrom)
+{
+	zval *datetime_object = NULL;
+	php_date_obj *new_obj = NULL;
+	php_date_obj *old_obj = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(datetime_object, date_ce_interface)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_date_instantiate(date_ce_date, return_value);
 	old_obj = Z_PHPDATE_P(datetime_object);
 	new_obj = Z_PHPDATE_P(return_value);
 
