@@ -164,6 +164,10 @@ struct _zend_executor_globals {
 
 	int ticks_count;
 
+	uint32_t persisent_constants_count;
+	uint32_t persistent_functions_count;
+	uint32_t persistent_classes_count;
+
 	HashTable *in_autoload;
 	zend_function *autoload_func;
 	zend_bool full_tables_cleanup;

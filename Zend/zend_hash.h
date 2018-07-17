@@ -104,6 +104,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_real_init_mixed(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend_bool packed);
+ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed);
 
 /* additions/updates/changes */
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC);
