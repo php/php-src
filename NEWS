@@ -1,8 +1,19 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018 PHP 7.0.31
+?? ??? 2018 PHP 7.0.32
 
 
+
+19 Jul 2018 PHP 7.0.31
+
+- Exif:
+  . Fixed bug #76423 (Int Overflow lead to Heap OverFlow in
+    exif_thumbnail_extract of exif.c). (Stas)
+  . Fixed bug #76557 (heap-buffer-overflow (READ of size 48) while reading exif
+    data). (Stas)
+
+- Win32:
+  . Fixed bug #76459 (windows linkinfo lacks openbasedir check). (Anatol)
 
 26 Apr 2018 PHP 7.0.30
 
