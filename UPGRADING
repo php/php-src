@@ -265,6 +265,11 @@ Core:
     the declaration is also deprecated.
     (RFC: https://wiki.php.net/rfc/case_insensitive_constant_deprecation)
 
+Filter:
+  . The explicit usage of the constants FILTER_FLAG_SCHEME_REQUIRED and
+    FILTER_FLAG_HOST_REQUIRED is now deprecated; both are implied for
+    FILTER_VALIDATE_URL anyway.
+
 GD:
   . image2wbmp() has been deprecated.
 
