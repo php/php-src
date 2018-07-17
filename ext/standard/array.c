@@ -3476,16 +3476,9 @@ PHP_FUNCTION(array_splice)
    Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
 {
-	zval	 *input,		/* Input array */
-			 *z_length = NULL, /* How many elements to get */
-			 *entry;		/* An array entry */
-	zend_long	 offset,		/* Offset to get elements from */
-			 length = 0;
-	zend_bool preserve_keys = 0; /* Whether to preserve keys while copying to the new array or not */
-	int		 num_in,		/* Number of elements in the input array */
-			 pos;			/* Current position in the array */
-	zend_string *string_key;
-	zend_ulong num_key;
+	zval *input, *z_length = NULL;
+	zend_long offset, length;
+	zend_bool preserve_keys = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY(input)
@@ -3495,83 +3488,125 @@ PHP_FUNCTION(array_slice)
 		Z_PARAM_BOOL(preserve_keys)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Get number of entries in the input hash */
-	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
+	/* Normalize input */
+	{
+		uint32_t num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
 
-	/* We want all entries from offset to the end if length is not passed or is null */
-	if (ZEND_NUM_ARGS() < 3 || Z_TYPE_P(z_length) == IS_NULL) {
-		length = num_in;
-	} else {
-		length = zval_get_long(z_length);
-	}
+		/* Get entries from offset to the end if length is not passed or is null */
+		if (ZEND_NUM_ARGS() < 3 || Z_TYPE_P(z_length) == IS_NULL) {
+			length = num_in;
+		} else {
+			length = zval_get_long(z_length);
+		}
 
-	/* Clamp the offset.. */
-	if (offset > num_in) {
-		ZVAL_EMPTY_ARRAY(return_value);
-		return;
-	} else if (offset < 0 && (offset = (num_in + offset)) < 0) {
-		offset = 0;
-	}
+		/* Clamp the offset.. */
+		if (offset > num_in) {
+			ZVAL_EMPTY_ARRAY(return_value);
+			return;
+		} else if (offset < 0 && (offset += num_in) < 0) {
+			/* In this case the offset begins before the start of the array.
+			 * By setting the offset to zero this code introduced a bug:
+			 * it shifts the window to begin at 0 instead of ignoring the offsets
+			 * before 0. It's been there for a long time (probably since creation).
+			 * todo: fix out-of-bounds negative offsets for array_slice
+			 */
+			offset = 0;
+		}
 
-	/* ..and the length */
-	if (length < 0) {
-		length = num_in - offset + length;
-	} else if (((zend_ulong) offset + (zend_ulong) length) > (unsigned) num_in) {
-		length = num_in - offset;
-	}
+		/* ..and the length */
+		if (length < 0) {
+			length = num_in - offset + length;
+		} else if (((zend_ulong)offset + (zend_ulong)length) > num_in) {
+			length = num_in - offset;
+		}
 
-	if (length <= 0) {
-		ZVAL_EMPTY_ARRAY(return_value);
-		return;
+		if (length <= 0) {
+			ZVAL_EMPTY_ARRAY(return_value);
+			return;
+		}
 	}
 
 	/* Initialize returned array */
 	array_init_size(return_value, (uint32_t)length);
 
-	/* Start at the beginning and go until we hit offset */
-	pos = 0;
-	if (HT_IS_PACKED(Z_ARRVAL_P(input)) &&
-	    (!preserve_keys ||
-	     (offset == 0 && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(input))))) {
-		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
-				pos++;
-				if (pos <= offset) {
-					continue;
+	{
+		HashTable *input_ht = Z_ARRVAL_P(input);
+		HashTable *output_ht = Z_ARRVAL_P(return_value);
+
+		if (HT_IS_WITHOUT_HOLES(input_ht)
+		        && !(HT_FLAGS(input_ht) & HASH_FLAG_HAS_EMPTY_IND)) {
+			/* If the input HT lacks holes and lacks undef indirects then we can use
+			 * random access instead of iterating from the beginning. */
+			Bucket *p = input_ht->arData + offset;
+			Bucket *end = p + length;
+
+			if (preserve_keys) {
+				for (; p != end; ++p) {
+					zval *entry = &p->val;
+					if (p->key) {
+						entry = zend_hash_add_new(output_ht, p->key, entry);
+					} else {
+						entry = zend_hash_index_add_new(output_ht, p->h, entry);
+					}
+					zval_add_ref(entry);
 				}
-				if (pos > offset + length) {
-					break;
-				}
-				if (UNEXPECTED(Z_ISREF_P(entry)) &&
-					UNEXPECTED(Z_REFCOUNT_P(entry) == 1)) {
-					entry = Z_REFVAL_P(entry);
-				}
-				Z_TRY_ADDREF_P(entry);
-				ZEND_HASH_FILL_ADD(entry);
-			} ZEND_HASH_FOREACH_END();
-		} ZEND_HASH_FILL_END();
-	} else {
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
-			pos++;
-			if (pos <= offset) {
-				continue;
-			}
-			if (pos > offset + length) {
-				break;
+			} else {
+				zend_hash_real_init_packed(output_ht);
+				ZEND_HASH_FILL_PACKED(output_ht) {
+					for (; p != end; ++p) {
+						zval *entry = &p->val;
+						if (UNEXPECTED(Z_ISREF_P(entry)) &&
+						    UNEXPECTED(Z_REFCOUNT_P(entry) == 1)) {
+							entry = Z_REFVAL_P(entry);
+						}
+						Z_TRY_ADDREF_P(entry);
+						ZEND_HASH_FILL_ADD(entry);
+					}
+				} ZEND_HASH_FILL_END();
 			}
 
-			if (string_key) {
-				entry = zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, entry);
+		} else {
+			/* Sadly, in this case we must iterate from the beginning. */
+			HashPosition pos = 0;
+			zval *entry;
+			zend_string *string_key;
+			zend_ulong num_key;
+
+			if (preserve_keys) {
+				ZEND_HASH_FOREACH_KEY_VAL(input_ht, num_key, string_key, entry) {
+					pos++;
+					if (pos <= offset) {
+						continue;
+					}
+					if (pos > offset + length) {
+						break;
+					}
+
+					if (string_key) {
+						entry = zend_hash_add_new(output_ht, string_key, entry);
+					} else {
+						entry = zend_hash_index_add_new(output_ht, num_key, entry);
+					}
+					zval_add_ref(entry);
+				} ZEND_HASH_FOREACH_END();
+
 			} else {
-				if (preserve_keys) {
-					entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, entry);
-				} else {
-					entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
-				}
+				zend_hash_real_init_packed(output_ht);
+				ZEND_HASH_FILL_PACKED(output_ht) {
+					ZEND_HASH_FOREACH_VAL(input_ht, entry) {
+						pos++;
+						if (pos <= offset) {
+							continue;
+						}
+						if (pos > offset + length) {
+							break;
+						}
+						ZEND_HASH_FILL_ADD(entry);
+						zval_add_ref(entry);
+					} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FILL_END();
 			}
-			zval_add_ref(entry);
-		} ZEND_HASH_FOREACH_END();
+		}
 	}
 }
 /* }}} */
