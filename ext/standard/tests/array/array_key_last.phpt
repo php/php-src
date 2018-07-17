@@ -19,7 +19,9 @@ $mixed_array = array(
   array( 12, "name", 'age', '45' ),
   array( array("oNe", "tWo", 4), array(10, 20, 30, 40, 50), array() ),
   array( "one" => 1, "one" => 2, "three" => 3, 3, 4, 3 => 33, 4 => 44, 5, 6,
-          5.4 => 54, 5.7 => 57, "5.4" => 554, "5.7" => 557 )
+          5.4 => 54, 5.7 => 57, "5.4" => 554, "5.7" => 557 ),
+  array( "foo" ),
+  array( 1 => "42" )
 );
 
 /* Loop to test normal functionality with different arrays inputs */
@@ -210,5 +212,23 @@ Array
 
 Last key is :
 string(3) "5.7"
+
+-- Input Array for Iteration 12 is --
+Array
+(
+    [0] => foo
+)
+
+Last key is :
+int(0)
+
+-- Input Array for Iteration 13 is --
+Array
+(
+    [1] => 42
+)
+
+Last key is :
+int(1)
 
 Done
