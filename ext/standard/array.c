@@ -3970,10 +3970,10 @@ PHP_FUNCTION(array_key_first)
 	zval *stack;    /* Input stack */
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_EX(stack, 0, 1)
+		Z_PARAM_ARRAY(stack)
 	ZEND_PARSE_PARAMETERS_END();
 
-	HashTable *target_hash = HASH_OF(stack);
+	HashTable *target_hash = Z_ARRVAL_P (stack);
 	HashPosition pos = 0;
 	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
 }
@@ -3987,10 +3987,10 @@ PHP_FUNCTION(array_key_last)
 	HashPosition pos;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_EX(stack, 0, 1)
+		Z_PARAM_ARRAY(stack)
 	ZEND_PARSE_PARAMETERS_END();
 
-	HashTable *target_hash = HASH_OF(stack);
+	HashTable *target_hash = Z_ARRVAL_P (stack);
 	zend_hash_internal_pointer_end_ex(target_hash, &pos);
 	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
 }
