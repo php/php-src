@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0alpha4
+19 Jul 2018, PHP 7.3.0alpha4
 
 - Core:
   . Fixed bug #33502 (Some nullary functions don't check the number of
