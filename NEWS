@@ -1,9 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.1.20
-
-
-07 Jul 2018, PHP 7.1.20RC1
+19 Jul 2018, PHP 7.1.20
 
 - Core:
   . Fixed bug #76534 (PHP hangs on 'illegal string offset on string references
