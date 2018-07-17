@@ -478,56 +478,6 @@ failure:
 	return &c->value;
 }
 
-ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(
-		const zval *key, uint32_t flags, zend_bool *is_deprecated)
-{
-	zval *zv;
-	const zval *orig_key = key;
-	zend_constant *c = NULL;
-
-	zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
-	if (zv) {
-		c = (zend_constant*)Z_PTR_P(zv);
-	} else {
-		key++;
-		zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
-		if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
-			c = (zend_constant*)Z_PTR_P(zv);
-		} else {
-			if ((flags & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
-				key++;
-				zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
-				if (zv) {
-					c = (zend_constant*)Z_PTR_P(zv);
-				} else {
-				    key++;
-					zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
-					if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
-						c = (zend_constant*)Z_PTR_P(zv);
-					}
-				}
-			}
-		}
-	}
-
-	if (!c) {
-		return NULL;
-	}
-
-	if (is_deprecated) {
-		if (c->flags & (CONST_CS|CONST_CT_SUBST)) {
-			/* Constant is case-sensitive or true/false/null */
-			*is_deprecated = 0;
-		} else {
-			zend_bool ns_fallback = key >= orig_key + 2;
-			const zval *access_key = ns_fallback ? orig_key + 2 : orig_key - 1;
-			*is_deprecated = is_access_deprecated(c, Z_STRVAL_P(access_key));
-		}
-	}
-
-	return c;
-}
-
 static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_constant *c)
 {
 	void *ret;

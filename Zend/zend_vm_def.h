@@ -5045,47 +5045,16 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, UNUSED|CONST_FETCH, CONST, CACHE_SLOT)
 {
 	USE_OPLINE
 	zend_constant *c;
-	zend_bool is_deprecated;
 
 	c = CACHED_PTR(opline->extended_value);
 	if (EXPECTED(c != NULL) && EXPECTED(!IS_SPECIAL_CACHE_VAL(c))) {
-		/* pass */
-	} else if (UNEXPECTED((c = zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num, &is_deprecated)) == NULL)) {
-		SAVE_OPLINE();
-
-		if ((opline->op1.num & IS_CONSTANT_UNQUALIFIED) != 0) {
-			char *actual = (char *)zend_memrchr(Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)), '\\', Z_STRLEN_P(RT_CONSTANT(opline, opline->op2)));
-			if (!actual) {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_STR_P(RT_CONSTANT(opline, opline->op2)));
-			} else {
-				actual++;
-				ZVAL_STRINGL(EX_VAR(opline->result.var),
-						actual, Z_STRLEN_P(RT_CONSTANT(opline, opline->op2)) - (actual - Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))));
-			}
-			/* non-qualified constant - allow text substitution */
-			zend_error(E_WARNING, "Use of undefined constant %s - assumed '%s' (this will throw an Error in a future version of PHP)",
-					Z_STRVAL_P(EX_VAR(opline->result.var)), Z_STRVAL_P(EX_VAR(opline->result.var)));
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-		} else {
-			zend_throw_error(NULL, "Undefined constant '%s'", Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
-		}
-	} else if (is_deprecated) {
-		SAVE_OPLINE();
-		zend_error(E_DEPRECATED,
-			"Case-insensitive constants are deprecated. "
-			"The correct casing for this constant is \"%s\"",
-			ZSTR_VAL(c->name));
 		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	} else {
-		CACHE_PTR(opline->extended_value, c);
+		ZEND_VM_NEXT_OPCODE();
 	}
 
-	ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
-
-	ZEND_VM_NEXT_OPCODE();
+	SAVE_OPLINE();
+	zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num OPLINE_CC EXECUTE_DATA_CC);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CONST, CACHE_SLOT)
@@ -7620,11 +7589,10 @@ ZEND_VM_HANDLER(122, ZEND_DEFINED, CONST, ANY, CACHE_SLOT)
 				break;
 			}
 		}
-		if ((c = zend_quick_get_constant(RT_CONSTANT(opline, opline->op1), 0, NULL)) == NULL) {
+		if (zend_quick_check_constant(RT_CONSTANT(opline, opline->op1), ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK OPLINE_CC EXECUTE_DATA_CC) != SUCCESS) {
 			CACHE_PTR(opline->extended_value, ENCODE_SPECIAL_CACHE_NUM(zend_hash_num_elements(EG(zend_constants))));
 			result = 0;
 		} else {
-			CACHE_PTR(opline->extended_value, c);
 			result = 1;
 		}
 	} while (0);

@@ -3285,6 +3285,119 @@ static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *ar
 }
 /* }}} */
 
+static zend_always_inline int _zend_quick_get_constant(
+		const zval *key, uint32_t flags, int check_defined_only OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
+{
+	zval *zv;
+	const zval *orig_key = key;
+	zend_constant *c = NULL;
+
+	zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+	if (zv) {
+		c = (zend_constant*)Z_PTR_P(zv);
+	} else {
+		key++;
+		zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+		if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
+			c = (zend_constant*)Z_PTR_P(zv);
+		} else {
+			if ((flags & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
+				key++;
+				zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+				if (zv) {
+					c = (zend_constant*)Z_PTR_P(zv);
+				} else {
+				    key++;
+					zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+					if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
+						c = (zend_constant*)Z_PTR_P(zv);
+					}
+				}
+			}
+		}
+	}
+
+	if (!c) {
+		if (!check_defined_only) {
+			if ((opline->op1.num & IS_CONSTANT_UNQUALIFIED) != 0) {
+				char *actual = (char *)zend_memrchr(Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)), '\\', Z_STRLEN_P(RT_CONSTANT(opline, opline->op2)));
+				if (!actual) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+				} else {
+					actual++;
+					ZVAL_STRINGL(EX_VAR(opline->result.var),
+							actual, Z_STRLEN_P(RT_CONSTANT(opline, opline->op2)) - (actual - Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))));
+				}
+				/* non-qualified constant - allow text substitution */
+				zend_error(E_WARNING, "Use of undefined constant %s - assumed '%s' (this will throw an Error in a future version of PHP)",
+						Z_STRVAL_P(EX_VAR(opline->result.var)), Z_STRVAL_P(EX_VAR(opline->result.var)));
+			} else {
+				zend_throw_error(NULL, "Undefined constant '%s'", Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+			}
+		}
+		return FAILURE;
+	}
+
+	if (!check_defined_only) {
+		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
+		if (!(c->flags & (CONST_CS|CONST_CT_SUBST))) {
+			const char *ns_sep;
+			size_t shortname_offset;
+			size_t shortname_len;
+			zend_bool is_deprecated;
+
+			if (flags & IS_CONSTANT_UNQUALIFIED) {
+				const zval *access_key;
+
+				if (!(flags & IS_CONSTANT_IN_NAMESPACE)) {
+					access_key = orig_key - 1;
+				} else {
+					if (key < orig_key + 2) {
+						goto check_short_name;
+					} else {
+						access_key = orig_key + 2;
+					}
+				}
+				is_deprecated = !zend_string_equals(c->name, Z_STR_P(access_key));
+			} else {
+check_short_name:
+				ns_sep = zend_memrchr(ZSTR_VAL(c->name), '\\', ZSTR_LEN(c->name));
+				ZEND_ASSERT(ns_sep);
+				/* Namespaces are always case-insensitive. Only compare shortname. */
+				shortname_offset = ns_sep - ZSTR_VAL(c->name) + 1;
+				shortname_len = ZSTR_LEN(c->name) - shortname_offset;
+
+				is_deprecated = memcmp(ZSTR_VAL(c->name) + shortname_offset, Z_STRVAL_P(orig_key - 1) + shortname_offset, shortname_len) != 0;
+			}
+
+			if (is_deprecated) {
+				zend_error(E_DEPRECATED,
+					"Case-insensitive constants are deprecated. "
+					"The correct casing for this constant is \"%s\"",
+					ZSTR_VAL(c->name));
+				return SUCCESS;
+			}
+		}
+	}
+
+	CACHE_PTR(opline->extended_value, c);
+	return SUCCESS;
+}
+/* }}} */
+
+static zend_never_inline void ZEND_FASTCALL zend_quick_get_constant(
+		const zval *key, uint32_t flags OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
+{
+	_zend_quick_get_constant(key, flags, 0 OPLINE_CC EXECUTE_DATA_CC);
+}
+
+static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
+		const zval *key, uint32_t flags OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
+{
+	return _zend_quick_get_constant(key, flags, 1 OPLINE_CC EXECUTE_DATA_CC);
+}
+
 #ifdef ZEND_VM_TRACE_HANDLERS
 # include "zend_vm_trace_handlers.h"
 #elif defined(ZEND_VM_TRACE_MAP)
