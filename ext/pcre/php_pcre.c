@@ -715,6 +715,18 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		}
 	}
 
+	if (poptions & PREG_REPLACE_EVAL) {
+		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
+		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
+		efree(pattern);
+#if HAVE_SETLOCALE
+		if (key != regex) {
+			zend_string_release_ex(key, 0);
+		}
+#endif
+		return NULL;
+	}
+
 #if HAVE_SETLOCALE
 	if (key != regex) {
 		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(locale_string));
@@ -1517,11 +1529,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	zend_string		*result;			/* Result of replacement */
 	pcre2_match_data *match_data;
 
-	if (UNEXPECTED(pce->preg_options & PREG_REPLACE_EVAL)) {
-		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
-		return NULL;
-	}
-
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
 
@@ -1759,11 +1766,6 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	zend_string     *eval_result=NULL;  /* Result of custom function */
 	pcre2_match_data *match_data;
 	zend_bool old_mdata_used;
-
-	if (UNEXPECTED(pce->preg_options & PREG_REPLACE_EVAL)) {
-		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
-		return NULL;
-	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
