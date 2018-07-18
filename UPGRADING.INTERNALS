@@ -23,6 +23,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   t. zif_handler
   u. GC_G
   v. php_add[c]slashes
+  w. zend_class_entry.iterator_funcs
 
 2. Build system changes
   a. Unix build system changes
@@ -146,6 +147,10 @@ PHP 7.3 INTERNALS UPGRADE NOTES
  v. The should_free argument of the php_add[c]slashes functions has been
     removed.  It is now always the caller's responsibility to free the passed
     string.
+
+ w. zend_class_entry.iterator_funcs have been replaced by iterator_funcs_ptr.
+    You don't have to set its value, setting parent.funcs in the get_iterator
+    function is enough.
 
 ========================
 2. Build system changes
