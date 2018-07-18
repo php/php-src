@@ -974,12 +974,11 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 										   a global match */
 					*match_sets = NULL;	/* An array of sets of matches for each
 										   subpattern after a global match */
-	uint32_t		 no_utf_check = 0;  /* Execution options */
+	uint32_t		 options;			/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	int				 matched;			/* Has anything matched */
-	uint32_t		 g_notempty = 0;	/* If the match should not be empty */
 	char 		   **subpat_names;		/* Array for named subpatterns */
 	size_t			 i;
 	uint32_t		 subpats_order;		/* Order of subpattern matches */
@@ -1058,13 +1057,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	matched = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	if (!(pce->compile_options & PCRE2_UTF)) {
-		no_utf_check = PCRE2_NO_UTF_CHECK;
-	}
-
-#endif
 	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
@@ -1084,8 +1078,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	do {
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
-		 && no_utf_check && !g_notempty) {
+		if ((pce->preg_options & PREG_JIT) && options == PCRE2_NO_UTF_CHECK) {
 			if (PCRE2_UNSET == start_offset2 || start_offset2 > subject_len) {
 				pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
 				break;
@@ -1095,10 +1088,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 		} else
 #endif
 		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
-				no_utf_check|g_notempty, match_data, mctx);
+				options, match_data, mctx);
 
 		/* the string was already proved to be valid UTF-8 */
-		no_utf_check = PCRE2_NO_UTF_CHECK;
+		options |= PCRE2_NO_UTF_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -1307,18 +1300,21 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 			   This turns out to be rather cunning. First we set PCRE2_NOTEMPTY_ATSTART and try
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
-			g_notempty = (start_offset2 == offsets[0]) ? PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED : 0;
-
+			if (start_offset2 == offsets[0]) {
+				options |= (PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
+			} else {
+				options &= ~(PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
+			}
 		} else if (count == PCRE2_ERROR_NOMATCH) {
 			/* If we previously set PCRE2_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset2 < subject_len) {
+			if ((options & PCRE2_NOTEMPTY_ATSTART) && start_offset2 < subject_len) {
 				size_t unit_len = calculate_unit_length(pce, subject + start_offset2);
 
 				start_offset2 += unit_len;
-				g_notempty = 0;
+				options &= ~(PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
 			} else {
 				break;
 			}
@@ -1501,7 +1497,7 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 /* {{{ php_pcre_replace_impl() */
 PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count)
 {
-	uint32_t		 no_utf_check = 0;	/* Execution options */
+	uint32_t		 options;			/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	char 			**subpat_names;		/* Array for named subpatterns */
@@ -1511,7 +1507,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	size_t			 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
 	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
-	uint32_t		 g_notempty=0;		/* If the match should not be empty */
 	char			*walkbuf,			/* Location of current replacement in the result */
 					*walk,				/* Used to walk the replacement string */
 					*match,				/* The current match */
@@ -1551,12 +1546,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	result_len = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	if (!(pce->compile_options & PCRE2_UTF)) {
-		no_utf_check = PCRE2_NO_UTF_CHECK;
-	}
+	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
-#endif
 	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
@@ -1573,17 +1564,16 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	while (1) {
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
-		 && no_utf_check && !g_notempty) {
+		if ((pce->preg_options & PREG_JIT) && options == PCRE2_NO_UTF_CHECK) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
-				no_utf_check|g_notempty, match_data, mctx);
+				options, match_data, mctx);
 
 		/* the string was already proved to be valid UTF-8 */
-		no_utf_check = PCRE2_NO_UTF_CHECK;
+		options |= PCRE2_NO_UTF_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (UNEXPECTED(count == 0)) {
@@ -1690,20 +1680,24 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 			   This turns out to be rather cunning. First we set PCRE2_NOTEMPTY_ATSTART and try
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
-			g_notempty = (start_offset == offsets[0]) ? PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED : 0;
+			if (start_offset == offsets[0]) {
+				options |= (PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
+			} else {
+				options &= ~(PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
+			}
 
 		} else if (count == PCRE2_ERROR_NOMATCH || limit == 0) {
 			/* If we previously set PCRE2_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < subject_len) {
+			if ((options & PCRE2_NOTEMPTY_ATSTART) && start_offset < subject_len) {
 				size_t unit_len = calculate_unit_length(pce, piece);
 
 				start_offset += unit_len;
 				memcpy(ZSTR_VAL(result) + result_len, piece, unit_len);
 				result_len += unit_len;
-				g_notempty = 0;
+				options &= ~(PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
 			} else {
 				if (!result && subject_str) {
 					result = zend_string_copy(subject_str);
@@ -1749,7 +1743,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 /* {{{ php_pcre_replace_func_impl() */
 static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, size_t subject_len, zend_fcall_info *fci, zend_fcall_info_cache *fcc, size_t limit, size_t *replace_count)
 {
-	uint32_t		 no_utf_check = 0;	/* Execution options */
+	uint32_t		 options;			/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	char 			**subpat_names;		/* Array for named subpatterns */
@@ -1757,7 +1751,6 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	size_t			 new_len;			/* Length of needed storage */
 	size_t			 alloc_len;			/* Actual allocated length */
 	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
-	uint32_t		 g_notempty=0;		/* If the match should not be empty */
 	char			*match,				/* The current match */
 					*piece;				/* The current piece of subject */
 	size_t			result_len; 		/* Length of result */
@@ -1796,12 +1789,8 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	result_len = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	if (!(pce->compile_options & PCRE2_UTF)) {
-		no_utf_check = PCRE2_NO_UTF_CHECK;
-	}
+	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
-#endif
 	old_mdata_used = mdata_used;
 	if (!old_mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		mdata_used = 1;
@@ -1821,17 +1810,16 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	while (1) {
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
-		 && no_utf_check && !g_notempty) {
+		if ((pce->preg_options & PREG_JIT) && options == PCRE2_NO_UTF_CHECK) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
-				no_utf_check|g_notempty, match_data, mctx);
+				options, match_data, mctx);
 
 		/* the string was already proved to be valid UTF-8 */
-		no_utf_check = PCRE2_NO_UTF_CHECK;
+		options |= PCRE2_NO_UTF_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -1890,20 +1878,24 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 			   This turns out to be rather cunning. First we set PCRE2_NOTEMPTY_ATSTART and try
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
-			g_notempty = (start_offset == offsets[0]) ? PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED : 0;
+			if (start_offset == offsets[0]) {
+				options |= (PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
+			} else {
+				options &= ~(PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
+			}
 
 		} else if (count == PCRE2_ERROR_NOMATCH || limit == 0) {
 			/* If we previously set PCRE2_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < subject_len) {
+			if ((options & PCRE2_NOTEMPTY_ATSTART) && start_offset < subject_len) {
 				size_t unit_len = calculate_unit_length(pce, piece);
 
 				start_offset += unit_len;
 				memcpy(ZSTR_VAL(result) + result_len, piece, unit_len);
 				result_len += unit_len;
-				g_notempty = 0;
+				options &= ~(PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
 			} else {
 				if (!result && subject_str) {
 					result = zend_string_copy(subject_str);
@@ -2422,11 +2414,10 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	zend_long limit_val, zend_long flags)
 {
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
-	uint32_t		 no_utf_check = 0;	/* Execution options */
+	uint32_t		 options;			/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
 	PCRE2_SIZE		 next_offset;		/* End of the last delimiter match + 1 */
-	uint32_t		 g_notempty = 0;	/* If the match should not be empty */
 	char			*last_match;		/* Location of last match */
 	uint32_t		 no_empty;			/* If NO_EMPTY flag is set */
 	uint32_t		 delim_capture; 	/* If delimiters should be captured */
@@ -2455,12 +2446,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	last_match = ZSTR_VAL(subject_str);
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	if (!(pce->compile_options & PCRE2_UTF)) {
-		no_utf_check = PCRE2_NO_UTF_CHECK;
-	}
+	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
-#endif
 	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
@@ -2474,17 +2461,16 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
-		 && no_utf_check && !g_notempty) {
+		if ((pce->preg_options & PREG_JIT) && options == PCRE2_NO_UTF_CHECK) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
-				no_utf_check|g_notempty, match_data, mctx);
+				options, match_data, mctx);
 
 		/* the string was already proved to be valid UTF-8 */
-		no_utf_check = PCRE2_NO_UTF_CHECK;
+		options |= PCRE2_NO_UTF_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -2538,16 +2524,20 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 			   This turns out to be rather cunning. First we set PCRE2_NOTEMPTY_ATSTART and try
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
-			g_notempty = (start_offset == offsets[0])? PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED : 0;
+			if (start_offset == offsets[0]) {
+				options |= (PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
+			} else {
+				options &= ~(PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
+			}
 
 		} else if (count == PCRE2_ERROR_NOMATCH) {
 			/* If we previously set PCRE2_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < ZSTR_LEN(subject_str)) {
+			if ((options & PCRE2_NOTEMPTY_ATSTART) && start_offset < ZSTR_LEN(subject_str)) {
 				start_offset += calculate_unit_length(pce, ZSTR_VAL(subject_str) + start_offset);
-				g_notempty = 0;
+				options &= ~(PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED);
 			} else {
 				break;
 			}
@@ -2749,7 +2739,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	zval            *entry;             /* An entry in the input array */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	int				 count = 0;			/* Count of matched subpatterns */
-	uint32_t		 no_utf_check = 0;	/* Execution options */
+	uint32_t		 options;			/* Execution options */
 	zend_string		*string_key;
 	zend_ulong		 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
@@ -2775,9 +2765,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		}
 	}
 
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	no_utf_check = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
-#endif
+	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
 	/* Go through the input array */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
@@ -2785,14 +2773,13 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 		/* Perform the match */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
-		 && no_utf_check) {
+		if ((pce->preg_options & PREG_JIT) && options) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
-				no_utf_check, match_data, mctx);
+				options, match_data, mctx);
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
