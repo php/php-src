@@ -138,7 +138,7 @@ function process_args($argv, $argc) {
 				if (!isset($argv[$i + 1]) || ($argv[$i + 1]{0} == '-' && $argv[$i + 1]{1} == '-')) {
 					error('Argument "' . $val . '" expects a value, none passed');
 				} else if ($opt == 'dir' && empty($argv[$i + 1])) {
-					continue;
+					continue 2;
 				}
 
 				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) . DIRECTORY_SEPARATOR : $argv[$i + 1]);
