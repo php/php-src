@@ -1105,14 +1105,14 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 		/* the string was already proved to be valid UTF-8 */
 		options |= PCRE2_NO_UTF_CHECK;
 
-		/* Check for too many substrings condition. */
-		if (count == 0) {
-			php_error_docref(NULL, E_NOTICE, "Matched, but too many substrings");
-			count = num_subpats;
-		}
-
 		/* If something has matched */
-		if (count > 0) {
+		if (count >= 0) {
+			/* Check for too many substrings condition. */
+			if (UNEXPECTED(count == 0)) {
+				php_error_docref(NULL, E_NOTICE, "Matched, but too many substrings");
+				count = num_subpats;
+			}
+
 			matched++;
 
 			offsets = pcre2_get_ovector_pointer(match_data);
@@ -1582,18 +1582,27 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		/* the string was already proved to be valid UTF-8 */
 		options |= PCRE2_NO_UTF_CHECK;
 
-		/* Check for too many substrings condition. */
-		if (UNEXPECTED(count == 0)) {
-			php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
-			count = num_subpats;
-		}
-
 		piece = subject + start_offset;
 
-		offsets = pcre2_get_ovector_pointer(match_data);
-
-		if (count > 0 && (offsets[1] >= offsets[0]) && limit > 0) {
+		if (count >= 0 && limit > 0) {
 			zend_bool simple_string = 1;
+
+			/* Check for too many substrings condition. */
+			if (UNEXPECTED(count == 0)) {
+				php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
+				count = num_subpats;
+			}
+
+			offsets = pcre2_get_ovector_pointer(match_data);
+
+			if (UNEXPECTED(offsets[1] < offsets[0])) {
+				PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+				if (result) {
+					zend_string_release_ex(result, 0);
+					result = NULL;
+				}
+				break;
+			}
 
 			if (replace_count) {
 				++*replace_count;
@@ -1823,19 +1832,28 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 		/* the string was already proved to be valid UTF-8 */
 		options |= PCRE2_NO_UTF_CHECK;
 
-		/* Check for too many substrings condition. */
-		if (count == 0) {
-			php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
-			count = num_subpats;
-		}
-
 		piece = subject + start_offset;
 
-		offsets = pcre2_get_ovector_pointer(match_data);
 		mark = pcre2_get_mark(match_data);
 
-		/* if (EXPECTED(count > 0 && (limit == -1 || limit > 0))) */
-		if (count > 0 && (offsets[1] >= offsets[0]) && limit) {
+		if (count >= 0 && limit) {
+			/* Check for too many substrings condition. */
+			if (UNEXPECTED(count == 0)) {
+				php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
+				count = num_subpats;
+			}
+
+			offsets = pcre2_get_ovector_pointer(match_data);
+
+			if (UNEXPECTED(offsets[1] < offsets[0])) {
+				PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+				if (result) {
+					zend_string_release_ex(result, 0);
+					result = NULL;
+				}
+				break;
+			}
+
 			if (replace_count) {
 				++*replace_count;
 			}
@@ -2474,16 +2492,21 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		/* the string was already proved to be valid UTF-8 */
 		options |= PCRE2_NO_UTF_CHECK;
 
-		/* Check for too many substrings condition. */
-		if (count == 0) {
-			php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
-			count = num_subpats;
-		}
-
-		offsets = pcre2_get_ovector_pointer(match_data);
-
 		/* If something matched */
-		if (count > 0 && (offsets[1] >= offsets[0])) {
+		if (count >= 0) {
+			/* Check for too many substrings condition. */
+			if (UNEXPECTED(count == 0)) {
+				php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
+				count = num_subpats;
+			}
+
+			offsets = pcre2_get_ovector_pointer(match_data);
+
+			if (UNEXPECTED(offsets[1] < offsets[0])) {
+				PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+				break;
+			}
+
 			if (!no_empty || &ZSTR_VAL(subject_str)[offsets[0]] != last_match) {
 
 				if (offset_capture) {
@@ -2783,18 +2806,13 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
 				options, match_data, mctx);
 
-		/* Check for too many substrings condition. */
-		if (count == 0) {
-			php_error_docref(NULL, E_NOTICE, "Matched, but too many substrings");
-			count = num_subpats;
-		} else if (count < 0 && count != PCRE2_ERROR_NOMATCH) {
-			pcre_handle_exec_error(count);
-			zend_string_release_ex(subject_str, 0);
-			break;
-		}
-
 		/* If the entry fits our requirements */
-		if ((count > 0 && !invert) || (count == PCRE2_ERROR_NOMATCH && invert)) {
+		if ((count >= 0 && !invert) || (count == PCRE2_ERROR_NOMATCH && invert)) {
+			/* Check for too many substrings condition. */
+			if (UNEXPECTED(count == 0)) {
+				php_error_docref(NULL, E_NOTICE, "Matched, but too many substrings");
+				count = num_subpats;
+			}
 			Z_TRY_ADDREF_P(entry);
 
 			/* Add to return array */
@@ -2803,6 +2821,10 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 			} else {
 				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
 			}
+		} else if (count < 0 && count != PCRE2_ERROR_NOMATCH) {
+			pcre_handle_exec_error(count);
+			zend_string_release_ex(subject_str, 0);
+			break;
 		}
 
 		zend_string_release_ex(subject_str, 0);
