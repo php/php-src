@@ -628,11 +628,11 @@ PHP_FUNCTION(spl_autoload_functions)
 /* {{{ Return hash id for given object */
 PHP_FUNCTION(spl_object_hash)
 {
-	zval *obj;
+	zend_object *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_NEW_STR(php_spl_object_hash(obj));
 }
@@ -651,7 +651,7 @@ PHP_FUNCTION(spl_object_id)
 }
 /* }}} */
 
-PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
+PHPAPI zend_string *php_spl_object_hash(zend_object *obj) /* {{{*/
 {
 	intptr_t hash_handle, hash_handlers;
 
@@ -661,7 +661,7 @@ PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
 		SPL_G(hash_mask_init) = 1;
 	}
 
-	hash_handle   = SPL_G(hash_mask_handle)^(intptr_t)Z_OBJ_HANDLE_P(obj);
+	hash_handle   = SPL_G(hash_mask_handle)^(intptr_t)obj->handle;
 	hash_handlers = SPL_G(hash_mask_handlers);
 
 	return strpprintf(32, "%016zx%016zx", hash_handle, hash_handlers);
