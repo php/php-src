@@ -1666,21 +1666,31 @@ PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t
    * Userspace exported functions *
    ******************************** */
 
-/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly[, string samesite]]]]])
+/* {{{ proto bool session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly]]]])
+                  session_set_cookie_params(array options)
    Set session cookie parameters */
 static PHP_FUNCTION(session_set_cookie_params)
 {
-	zval *lifetime;
-	zend_string *path = NULL, *domain = NULL, *samesite = NULL;
-	int argc = ZEND_NUM_ARGS();
-	zend_bool secure = 0, httponly = 0;
+	zval *lifetime_or_options = NULL;
+	zend_string *lifetime = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
+	zend_bool secure = 0, secure_null = 1;
+	zend_bool httponly = 0, httponly_null = 1;
 	zend_string *ini_name;
+	int result;
+	int found = 0;
 
-	if (!PS(use_cookies) ||
-		zend_parse_parameters(argc, "z|SSbbS", &lifetime, &path, &domain, &secure, &httponly, &samesite) == FAILURE) {
+	if (!PS(use_cookies)) {
 		return;
 	}
 
+	ZEND_PARSE_PARAMETERS_START(1, 5)
+		Z_PARAM_ZVAL(lifetime_or_options)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(path)
+		Z_PARAM_STR(domain)
+		Z_PARAM_BOOL_EX(secure, secure_null, 1, 0)
+		Z_PARAM_BOOL_EX(httponly, httponly_null, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session cookie parameters when session is active");
@@ -1692,54 +1702,107 @@ static PHP_FUNCTION(session_set_cookie_params)
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(lifetime);
+	if (Z_TYPE_P(lifetime_or_options) == IS_ARRAY) {
+		zend_string *key;
+		zval *value;
 
-	ini_name = zend_string_init("session.cookie_lifetime", sizeof("session.cookie_lifetime") - 1, 0);
-	if (zend_alter_ini_entry(ini_name,  Z_STR_P(lifetime), PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
-		zend_string_release_ex(ini_name, 0);
-		RETURN_FALSE;
-	}
-	zend_string_release_ex(ini_name, 0);
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(lifetime_or_options), key, value) {
+			if (key) {
+				ZVAL_DEREF(value);
+				if(!strcasecmp("lifetime", ZSTR_VAL(key))) {
+					lifetime = zval_get_string(value);
+					found++;
+				} else if(!strcasecmp("path", ZSTR_VAL(key))) {
+					path = zval_get_string(value);
+					found++;
+				} else if(!strcasecmp("domain", ZSTR_VAL(key))) {
+					domain = zval_get_string(value);
+					found++;
+				} else if(!strcasecmp("secure", ZSTR_VAL(key))) {
+					secure = zval_is_true(value);
+					secure_null = 0;
+					found++;
+				} else if(!strcasecmp("httponly", ZSTR_VAL(key))) {
+					httponly = zval_is_true(value);
+					httponly_null = 0;
+					found++;
+				} else if(!strcasecmp("samesite", ZSTR_VAL(key))) {
+					samesite = zval_get_string(value);
+					found++;
+				} else {
+					php_error_docref(NULL, E_WARNING, "Unrecognized key '%s' found in the options array", ZSTR_VAL(key));
+				}
+			} else {
+				php_error_docref(NULL, E_WARNING, "Numeric key found in the options array");
+			}
+		} ZEND_HASH_FOREACH_END();
 
-	if (path) {
-		ini_name = zend_string_init("session.cookie_path", sizeof("session.cookie_path") - 1, 0);
-		if (zend_alter_ini_entry(ini_name, path, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
-			zend_string_release_ex(ini_name, 0);
+		if (found == 0) {
+			php_error_docref(NULL, E_WARNING, "No valid keys were found in the options array");
 			RETURN_FALSE;
 		}
+	} else {
+		lifetime = zval_get_string(lifetime_or_options);
+	}
+
+	if (lifetime) {
+		ini_name = zend_string_init("session.cookie_lifetime", sizeof("session.cookie_lifetime") - 1, 0);
+		result = zend_alter_ini_entry(ini_name, lifetime, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_string_release(lifetime);
 		zend_string_release_ex(ini_name, 0);
+		if (result == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+	if (path) {
+		ini_name = zend_string_init("session.cookie_path", sizeof("session.cookie_path") - 1, 0);
+		result = zend_alter_ini_entry(ini_name, path, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		if (found > 0) {
+			zend_string_release(path);
+		}
+		zend_string_release_ex(ini_name, 0);
+		if (result == FAILURE) {
+			RETURN_FALSE;
+		}
 	}
 	if (domain) {
 		ini_name = zend_string_init("session.cookie_domain", sizeof("session.cookie_domain") - 1, 0);
-		if (zend_alter_ini_entry(ini_name, domain, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
-			zend_string_release_ex(ini_name, 0);
-			RETURN_FALSE;
+		result = zend_alter_ini_entry(ini_name, domain, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		if (found > 0) {
+			zend_string_release(domain);
 		}
 		zend_string_release_ex(ini_name, 0);
+		if (result == FAILURE) {
+			RETURN_FALSE;
+		}
 	}
-
-	if (argc > 3) {
+	if (!secure_null) {
 		ini_name = zend_string_init("session.cookie_secure", sizeof("session.cookie_secure") - 1, 0);
-		if (zend_alter_ini_entry_chars(ini_name, secure ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
-			zend_string_release_ex(ini_name, 0);
+		result = zend_alter_ini_entry_chars(ini_name, secure ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_string_release_ex(ini_name, 0);
+		if (result == FAILURE) {
 			RETURN_FALSE;
 		}
-		zend_string_release_ex(ini_name, 0);
 	}
-	if (argc > 4) {
+	if (!httponly_null) {
 		ini_name = zend_string_init("session.cookie_httponly", sizeof("session.cookie_httponly") - 1, 0);
-		if (zend_alter_ini_entry_chars(ini_name, httponly ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
-			zend_string_release_ex(ini_name, 0);
+		result = zend_alter_ini_entry_chars(ini_name, httponly ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_string_release_ex(ini_name, 0);
+		if (result == FAILURE) {
 			RETURN_FALSE;
 		}
-		zend_string_release_ex(ini_name, 0);
 	}
-
-    if (argc > 5) {
-        ini_name = zend_string_init("session.cookie_samesite", sizeof("session.cookie_samesite") - 1, 0);
-        zend_alter_ini_entry(ini_name, samesite, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-        zend_string_release(ini_name);
-    }
+	if (samesite) {
+		ini_name = zend_string_init("session.cookie_samesite", sizeof("session.cookie_samesite") - 1, 0);
+		result = zend_alter_ini_entry(ini_name, samesite, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		if (found > 0) {
+			zend_string_release(samesite);
+		}
+		zend_string_release_ex(ini_name, 0);
+		if (result == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
 
 	RETURN_TRUE;
 }
@@ -2640,12 +2703,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_cache_expire, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_cookie_params, 0, 0, 1)
-	ZEND_ARG_INFO(0, lifetime)
+	ZEND_ARG_INFO(0, lifetime_or_options)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, domain)
 	ZEND_ARG_INFO(0, secure)
 	ZEND_ARG_INFO(0, httponly)
-	ZEND_ARG_INFO(0, samesite)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_session_class_open, 0)
