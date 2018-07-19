@@ -37,6 +37,6 @@ PHP_FUNCTION(headers_list);
 PHP_FUNCTION(http_response_code);
 
 PHPAPI int php_header(void);
-PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int url_encode, int httponly, zend_string *samesite);
+PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int httponly, zend_string *samesite, int url_encode);
 
 #endif

@@ -10,7 +10,7 @@ session.cookie_samesite=test
 ob_start();
 
 /*
- * Prototype : void session_set_cookie_params(int $lifetime [, string $path [, string $domain [, bool $secure [, bool $samesite[, string $samesite]]]]])
+ * Prototype : void session_set_cookie_params(array $options)
  * Description : Set the session cookie parameters
  * Source code : ext/session/session.c
  */
@@ -18,15 +18,15 @@ ob_start();
 echo "*** Testing session_set_cookie_params() : variation ***\n";
 
 var_dump(ini_get("session.cookie_samesite"));
-var_dump(session_set_cookie_params(3600, "/path", "blah", FALSE, FALSE, "nothing"));
+var_dump(session_set_cookie_params(["samesite" => "nothing"]));
 var_dump(ini_get("session.cookie_samesite"));
 var_dump(session_start());
 var_dump(ini_get("session.cookie_samesite"));
-var_dump(session_set_cookie_params(3600, "/path", "blah", FALSE, TRUE, "test"));
+var_dump(session_set_cookie_params(["samesite" => "test"]));
 var_dump(ini_get("session.cookie_samesite"));
 var_dump(session_destroy());
 var_dump(ini_get("session.cookie_samesite"));
-var_dump(session_set_cookie_params(3600, "/path", "blah", FALSE, FALSE, "other"));
+var_dump(session_set_cookie_params(["samesite" => "other"]));
 var_dump(ini_get("session.cookie_samesite"));
 
 echo "Done";
