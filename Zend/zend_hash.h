@@ -292,13 +292,27 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht);
 	: \
 		_zend_new_array((size)) \
 	)
+# define zend_new_array_assoc(size) \
+	(__builtin_constant_p(size) ? \
+		((((uint32_t)(size)) <= HT_MIN_SIZE_UNPACKED) ? \
+			_zend_new_array_assoc_0() \
+		: \
+			_zend_new_array_assoc((size)) \
+		) \
+	: \
+		_zend_new_array_assoc((size)) \
+	)
 #else
 # define zend_new_array(size) \
 	_zend_new_array(size)
+# define zend_new_array_assoc(size) \
+	_zend_new_array_assoc(size)
 #endif
 
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_0(void);
+ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_assoc_0(void);
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t size);
+ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_assoc(uint32_t size);
 ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(zval *val1, zval *val2);
 ZEND_API uint32_t zend_array_count(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source);

@@ -2165,7 +2165,7 @@ fetch_from_array:
 						return;
 					}
 				}
-				array_init(container);
+				array_init(container); /* TODO benchmark and check if array_init_assoc is faster */
 				goto fetch_from_array;
 			} else {
 				goto return_null;

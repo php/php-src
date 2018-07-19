@@ -5801,7 +5801,7 @@ ZEND_VM_COLD_CONST_HANDLER(51, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
 					}
 					Z_OBJ_P(result)->properties = ht;
 				} else if (Z_TYPE_P(expr) != IS_NULL) {
-					Z_OBJ_P(result)->properties = ht = zend_new_array(1);
+					Z_OBJ_P(result)->properties = ht = zend_new_array_assoc(1);
 					expr = zend_hash_add_new(ht, ZSTR_KNOWN(ZEND_STR_SCALAR), expr);
 					if (OP1_TYPE == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);

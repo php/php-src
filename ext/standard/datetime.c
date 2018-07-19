@@ -90,7 +90,7 @@ PHP_FUNCTION(strptime)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 9);
 	add_assoc_long(return_value, "tm_sec",   parsed_time.tm_sec);
 	add_assoc_long(return_value, "tm_min",   parsed_time.tm_min);
 	add_assoc_long(return_value, "tm_hour",  parsed_time.tm_hour);

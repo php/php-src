@@ -240,7 +240,7 @@ static int php_json_parser_array_append(php_json_parser *parser, zval *array, zv
 static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 {
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
-		array_init(object);
+		array_init_assoc(object);
 		return SUCCESS;
 	} else {
 		return object_init(object);

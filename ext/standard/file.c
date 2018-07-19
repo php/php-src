@@ -1531,7 +1531,7 @@ PHP_FUNCTION(fstat)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 26);
 
 	ZVAL_LONG(&stat_dev, stat_ssb.sb.st_dev);
 	ZVAL_LONG(&stat_ino, stat_ssb.sb.st_ino);

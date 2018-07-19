@@ -2633,9 +2633,9 @@ PHP_FUNCTION(compact)
 	   or multiple string names, rather than a combination of both.
 	   So quickly guess a minimum result size based on that */
 	if (num_args && Z_TYPE(args[0]) == IS_ARRAY) {
-		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL(args[0])));
+		array_init_assoc_size(return_value, zend_hash_num_elements(Z_ARRVAL(args[0])));
 	} else {
-		array_init_size(return_value, num_args);
+		array_init_assoc_size(return_value, num_args);
 	}
 
 	for (i = 0; i < num_args; i++) {
@@ -2726,7 +2726,7 @@ PHP_FUNCTION(array_fill_keys)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Initialize return array */
-	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(keys)));
+	array_init_assoc_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(keys)));
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(keys), entry) {
 		ZVAL_DEREF(entry);

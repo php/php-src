@@ -625,7 +625,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 		zval tmp;
 
 		/* allocate an array for return */
-		array_init(return_value);
+		array_init_size(return_value, totalVars);
 
 		for (i = 0; i < totalVars; i++) {
 			ZVAL_NULL(&tmp);

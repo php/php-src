@@ -1287,7 +1287,7 @@ PHP_FUNCTION(time_nanosleep)
 	if (!nanosleep(&php_req, &php_rem)) {
 		RETURN_TRUE;
 	} else if (errno == EINTR) {
-		array_init(return_value);
+		array_init_size(return_value, 2);
 		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, php_rem.tv_sec);
 		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
 		return;
@@ -1528,7 +1528,7 @@ PHP_FUNCTION(error_get_last)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PG(last_error_message)) {
-		array_init(return_value);
+		array_init_size(return_value, 4);
 		add_assoc_long_ex(return_value, "type", sizeof("type")-1, PG(last_error_type));
 		add_assoc_str_ex(return_value, "message", sizeof("message")-1,
 			zend_string_copy(PG(last_error_message)));

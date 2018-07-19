@@ -338,7 +338,7 @@ static void add_token(
 			}
 		}
 	} else if (token_type >= 256) {
-		array_init(&token);
+		array_init_size(&token, 3);
 		add_next_index_long(&token, token_type);
 		add_next_index_str(&token, make_str(text, leng, interned_strings));
 		add_next_index_long(&token, lineno);

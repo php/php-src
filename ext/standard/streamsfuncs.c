@@ -68,7 +68,7 @@ PHP_FUNCTION(stream_socket_pair)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 2);
 
 	s1 = php_stream_sock_open_from_socket(pair[0], 0);
 	s2 = php_stream_sock_open_from_socket(pair[1], 0);

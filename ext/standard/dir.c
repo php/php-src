@@ -572,7 +572,7 @@ PHP_FUNCTION(scandir)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, n);
 
 	for (i = 0; i < n; i++) {
 		add_next_index_str(return_value, namelist[i]);
