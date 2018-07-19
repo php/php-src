@@ -181,7 +181,7 @@ void init_executor(void) /* {{{ */
 
 	EG(each_deprecation_thrown) = 0;
 
-	EG(persisent_constants_count)  = EG(zend_constants)->nNumUsed;
+	EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
 	EG(persistent_functions_count) = EG(function_table)->nNumUsed;
 	EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
 
@@ -283,7 +283,7 @@ void shutdown_executor(void) /* {{{ */
 		 * Zend Memory Manager frees memory by its own. We don't have to free
 		 * each allocated block separately.
 		 */
-		zend_hash_discard(EG(zend_constants), EG(persisent_constants_count));
+		zend_hash_discard(EG(zend_constants), EG(persistent_constants_count));
 		zend_hash_discard(EG(function_table), EG(persistent_functions_count));
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
 		zend_cleanup_internal_classes();
