@@ -1535,7 +1535,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
-	char 			**subpat_names;		/* Array for named subpatterns */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	size_t			 new_len;			/* Length of needed storage */
 	size_t			 alloc_len;			/* Actual allocated length */
@@ -1554,19 +1553,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
-
-	/*
-	 * Build a mapping from subpattern numbers to their names. We will
-	 * allocate the table only if there are any named subpatterns.
-	 */
-	subpat_names = NULL;
-	if (UNEXPECTED(pce->name_count > 0)) {
-		subpat_names = make_subpats_table(num_subpats, pce);
-		if (!subpat_names) {
-			return NULL;
-		}
-	}
-
 	alloc_len = 0;
 	result = NULL;
 
@@ -1582,9 +1568,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-			if (subpat_names) {
-				efree(subpat_names);
-			}
 			return NULL;
 		}
 	}
@@ -1783,10 +1766,6 @@ error:
 	}
 	if (match_data != mdata) {
 		pcre2_match_data_free(match_data);
-	}
-
-	if (UNEXPECTED(subpat_names)) {
-		efree(subpat_names);
 	}
 
 	return result;
