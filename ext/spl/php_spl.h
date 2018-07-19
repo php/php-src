@@ -62,6 +62,6 @@ ZEND_END_MODULE_GLOBALS(spl)
 ZEND_EXTERN_MODULE_GLOBALS(spl)
 #define SPL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(spl, v)
 
-PHPAPI zend_string *php_spl_object_hash(zval *obj);
+PHPAPI zend_string *php_spl_object_hash(zend_object *obj);
 
 #endif /* PHP_SPL_H */
