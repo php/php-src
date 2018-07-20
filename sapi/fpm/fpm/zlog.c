@@ -644,7 +644,7 @@ ssize_t zlog_stream_set_msg_suffix(
 	}
 	if (suffix != NULL) {
 		stream->msg_suffix_len = len = strlen(suffix);
-		stream->msg_suffix = malloc(len);
+		stream->msg_suffix = malloc(len + 1);
 		if (stream->msg_suffix == NULL) {
 			return -1;
 		}
