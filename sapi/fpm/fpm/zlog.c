@@ -420,7 +420,7 @@ static inline ssize_t zlog_stream_unbuffered_write(
 			append = NULL;
 		} else {
 			append = "...";
-			append_len = sizeof(append) - 1;
+			append_len = sizeof("...") - 1;
 			len = zlog_limit - stream->len - append_len;
 		}
 	}
