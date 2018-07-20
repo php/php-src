@@ -162,7 +162,7 @@ PHP_FUNCTION(symlink)
 	/* For the source, an expanded path must be used (in ZTS an other thread could have changed the CWD).
 	 * For the target the exact string given by the user must be used, relative or not, existing or not.
 	 * The target is relative to the link itself, not to the CWD. */
-	ret = symlink(topath, source_p);
+	ret = php_sys_symlink(topath, source_p);
 
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
@@ -209,9 +209,9 @@ PHP_FUNCTION(link)
 	}
 
 #ifndef ZTS
-	ret = link(topath, frompath);
+	ret = php_sys_link(topath, frompath);
 #else
-	ret = link(dest_p, source_p);
+	ret = php_sys_link(dest_p, source_p);
 #endif
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));

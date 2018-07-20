@@ -241,6 +241,60 @@ CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_l
 }
 /* }}} */
 
+CWD_API int php_sys_symlink(const char *target, const char *link) /* {{{ */
+{
+	DWORD attr;
+	wchar_t *dstw, *srcw;
+	BOOLEAN ret;
+
+	dstw = php_win32_ioutil_any_to_w(target);
+	if (!dstw) {
+		return -1;
+	}
+	if ((attr = GetFileAttributesW(dstw)) == INVALID_FILE_ATTRIBUTES) {
+		free(dstw);
+		return -1;
+	}
+
+	srcw = php_win32_ioutil_any_to_w(link);
+	if (!srcw) {
+		free(dstw);
+		return -1;
+	}
+
+	ret = CreateSymbolicLinkW(srcw, dstw, (attr & FILE_ATTRIBUTE_DIRECTORY ? 1 : 0));
+
+	free(dstw);
+	free(srcw);
+
+	return ret ? 0 : -1;
+}
+/* }}} */
+
+CWD_API int php_sys_link(const char *target, const char *link) /* {{{ */
+{
+	wchar_t *dstw, *srcw;
+	BOOL ret;
+
+	dstw = php_win32_ioutil_any_to_w(target);
+	if (!dstw) {
+		return -1;
+	}
+	srcw = php_win32_ioutil_any_to_w(link);
+	if (!srcw) {
+		free(dstw);
+		return -1;
+	}
+
+	ret = CreateHardLinkW(dstw, srcw, NULL);
+
+	free(dstw);
+	free(srcw);
+
+	return ret ? 0 : -1;
+}
+/* }}} */
+
 CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;

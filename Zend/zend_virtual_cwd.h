@@ -122,11 +122,15 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
 # define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
 # define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
 CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_len);
+CWD_API int php_sys_symlink(const char *target, const char *link);
+CWD_API int php_sys_link(const char *target, const char *link);
 #else
 # define php_sys_stat stat
 # define php_sys_lstat lstat
 # ifdef HAVE_SYMLINK
 # define php_sys_readlink(link, target, target_len) readlink(link, target, target_len)
+# define php_sys_symlink(target, link) symlink(target, link)
+# define php_sys_link(target, link) link(target, link)
 # endif
 #endif
 

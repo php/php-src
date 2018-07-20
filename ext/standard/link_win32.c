@@ -44,7 +44,7 @@
 
 /*
 TODO:
-- Create php_readlink (done), php_link and php_symlink in win32/link.c
+- Create php_readlink (done), php_link (done) and php_symlink (done) in win32/link.c
 - Expose them (PHPAPI) so extensions developers can use them
 - define link/readlink/symlink to their php_ equivalent and use them in ext/standart/link.c
 - this file is then useless and we have a portable link API
@@ -123,13 +123,11 @@ PHP_FUNCTION(symlink)
 {
 	char *topath, *frompath;
 	size_t topath_len, frompath_len;
-	BOOLEAN ret;
+	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 	char dirname[MAXPATHLEN];
 	size_t len;
-	DWORD attr;
-	wchar_t *dstw, *srcw;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
@@ -163,31 +161,12 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-	dstw = php_win32_ioutil_any_to_w(topath);
-	if (!dstw) {
-		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
-		RETURN_FALSE;
-	}
-	if ((attr = GetFileAttributesW(dstw)) == INVALID_FILE_ATTRIBUTES) {
-		free(dstw);
-		php_error_docref(NULL, E_WARNING, "Could not fetch file information(error %d)", GetLastError());
-		RETURN_FALSE;
-	}
-
-	srcw = php_win32_ioutil_any_to_w(source_p);
-	if (!srcw) {
-		free(dstw);
-		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
-		RETURN_FALSE;
-	}
 	/* For the source, an expanded path must be used (in ZTS an other thread could have changed the CWD).
 	 * For the target the exact string given by the user must be used, relative or not, existing or not.
 	 * The target is relative to the link itself, not to the CWD. */
-	ret = CreateSymbolicLinkW(srcw, dstw, (attr & FILE_ATTRIBUTE_DIRECTORY ? 1 : 0));
+	ret = php_sys_symlink(topath, source_p);
 
-	if (!ret) {
-		free(dstw);
-		free(srcw);
+	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "Cannot create symlink, error code(%d)", GetLastError());
 		RETURN_FALSE;
 	}
@@ -237,37 +216,14 @@ PHP_FUNCTION(link)
 	}
 
 #ifndef ZTS
-# define _TO_PATH topath
-# define _FROM_PATH frompath
+	ret = php_sys_link(topath, frompath);
 #else
-# define _TO_PATH dest_p
-# define _FROM_PATH source_p
+	ret = php_sys_link(dest_p, source_p);
 #endif
-	dstw = php_win32_ioutil_any_to_w(_TO_PATH);
-	if (!dstw) {
-		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
+	if (ret == -1) {
+		php_error_docref(NULL, E_WARNING, "Cannot create link, error code(%d)", GetLastError());
 		RETURN_FALSE;
 	}
-	srcw = php_win32_ioutil_any_to_w(_FROM_PATH);
-	if (!srcw) {
-		free(dstw);
-		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
-		RETURN_FALSE;
-	}
-#undef _TO_PATH
-#undef _FROM_PATH
-
-	ret = CreateHardLinkW(dstw, srcw, NULL);
-
-	if (ret == 0) {
-		free(dstw);
-		free(srcw);
-		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-		RETURN_FALSE;
-	}
-
-	free(dstw);
-	free(srcw);
 
 	RETURN_TRUE;
 }
