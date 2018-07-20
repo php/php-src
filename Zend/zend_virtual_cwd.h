@@ -129,8 +129,8 @@ CWD_API int php_sys_link(const char *target, const char *link);
 # define php_sys_lstat lstat
 # ifdef HAVE_SYMLINK
 # define php_sys_readlink(link, target, target_len) readlink(link, target, target_len)
-# define php_sys_symlink(target, link) symlink(target, link)
-# define php_sys_link(target, link) link(target, link)
+# define php_sys_symlink symlink
+# define php_sys_link link
 # endif
 #endif
 

@@ -171,9 +171,6 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-	free(dstw);
-	free(srcw);
-
 	RETURN_TRUE;
 }
 /* }}} */
