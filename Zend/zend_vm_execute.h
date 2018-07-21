@@ -4584,7 +4584,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -4593,7 +4592,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -7222,7 +7220,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -7231,7 +7228,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -9153,7 +9149,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -9162,7 +9157,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -20597,7 +20591,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -20606,7 +20599,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -21163,7 +21155,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -21172,7 +21163,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -21862,7 +21852,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -21871,7 +21860,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -24616,7 +24604,6 @@ assign_op_object:
 					is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 					zptr = Z_REFVAL_P(zptr);
 				}
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				if (IS_CONST == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
@@ -24678,7 +24665,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -24687,7 +24673,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -24855,7 +24840,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 			zval old;
 			ZVAL_COPY_VALUE(&old, var_ptr);
 
-			zval_opt_copy_ctor(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 
 			if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
@@ -24865,7 +24849,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 				zval_ptr_dtor(&old);
 			}
 		} else {
-			SEPARATE_ZVAL_NOREF(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -27459,7 +27442,6 @@ assign_op_object:
 					is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 					zptr = Z_REFVAL_P(zptr);
 				}
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
@@ -27521,7 +27503,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -27530,7 +27511,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -27699,7 +27679,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 			zval old;
 			ZVAL_COPY_VALUE(&old, var_ptr);
 
-			zval_opt_copy_ctor(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 
 			if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
@@ -27709,7 +27688,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 				zval_ptr_dtor(&old);
 			}
 		} else {
-			SEPARATE_ZVAL_NOREF(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -30481,7 +30459,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -30490,7 +30467,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -31982,7 +31958,6 @@ assign_op_object:
 					is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 					zptr = Z_REFVAL_P(zptr);
 				}
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				if (IS_CV == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
@@ -32162,7 +32137,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 			zval old;
 			ZVAL_COPY_VALUE(&old, var_ptr);
 
-			zval_opt_copy_ctor(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 
 			if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
@@ -32172,7 +32146,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 				zval_ptr_dtor(&old);
 			}
 		} else {
-			SEPARATE_ZVAL_NOREF(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -34902,7 +34875,6 @@ assign_op_object:
 					is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 					zptr = Z_REFVAL_P(zptr);
 				}
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				if (IS_CONST == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
@@ -36948,7 +36920,6 @@ assign_op_object:
 					is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 					zptr = Z_REFVAL_P(zptr);
 				}
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
@@ -39626,7 +39597,6 @@ assign_op_object:
 					is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 					zptr = Z_REFVAL_P(zptr);
 				}
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				if (IS_CV == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
@@ -44006,7 +43976,6 @@ assign_op_object:
 					is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 					zptr = Z_REFVAL_P(zptr);
 				}
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				if (IS_CONST == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
@@ -44068,7 +44037,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -44077,7 +44045,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -44245,7 +44212,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 			zval old;
 			ZVAL_COPY_VALUE(&old, var_ptr);
 
-			zval_opt_copy_ctor(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 
 			if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
@@ -44255,7 +44221,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 				zval_ptr_dtor(&old);
 			}
 		} else {
-			SEPARATE_ZVAL_NOREF(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -48702,7 +48667,6 @@ assign_op_object:
 					is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 					zptr = Z_REFVAL_P(zptr);
 				}
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
@@ -48764,7 +48728,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -48773,7 +48736,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -48942,7 +48904,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 			zval old;
 			ZVAL_COPY_VALUE(&old, var_ptr);
 
-			zval_opt_copy_ctor(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 
 			if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
@@ -48952,7 +48913,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 				zval_ptr_dtor(&old);
 			}
 		} else {
-			SEPARATE_ZVAL_NOREF(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -52765,7 +52725,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 	}
 
 	ZVAL_DEREF(prop);
-	SEPARATE_ZVAL_NOREF(prop);
 
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data);
 
@@ -52774,7 +52733,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_static_prop_h
 		is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 		prop = Z_REFVAL_P(prop);
 	}
-	SEPARATE_ZVAL_NOREF(prop);
 
 	if (UNEXPECTED(prop_info->type || is_typed_ref)) {
 		/* special case for typed properties */
@@ -55559,7 +55517,6 @@ assign_op_object:
 					is_typed_ref = ZEND_REF_HAS_TYPE_SOURCES(ref);
 					zptr = Z_REFVAL_P(zptr);
 				}
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				if (IS_CV == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
@@ -55739,7 +55696,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 			zval old;
 			ZVAL_COPY_VALUE(&old, var_ptr);
 
-			zval_opt_copy_ctor(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 
 			if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
@@ -55749,7 +55705,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 				zval_ptr_dtor(&old);
 			}
 		} else {
-			SEPARATE_ZVAL_NOREF(var_ptr);
 			binary_op(var_ptr, var_ptr, value);
 		}
 

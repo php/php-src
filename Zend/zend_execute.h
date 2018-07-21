@@ -67,7 +67,7 @@ static zend_always_inline zend_type zend_get_prop_info_ref_type(zend_property_in
 		if (!EG(exception)) {
 			zend_throw_error(NULL, "Class %s must be loaded when used by reference for property type", ZSTR_VAL(ZEND_TYPE_NAME(prop_info->type)));
 		}
-		return 0x3FC;
+		return ZEND_TYPE_CODE(_IS_ERROR);
 	}
 
 	return prop_info->type;
