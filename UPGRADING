@@ -259,11 +259,15 @@ FPM:
 ========================================
 
 Core:
-  . The declaration of case-insensitive constants has been deprecate. Passing
+  . The declaration of case-insensitive constants has been deprecated. Passing
     true as the third argument to define() will now generate a deprecation
     warning. The use of case-insensitive constants with a case that differs from
     the declaration is also deprecated.
     (RFC: https://wiki.php.net/rfc/case_insensitive_constant_deprecation)
+  . Declaring a function called assert() inside a namespace is deprecated.
+    The assert() function is subject to special handling by the engine, which
+    may lead to inconsistent behavior when defining a namespaced function with
+    the same name.
 
 Filter:
   . The explicit usage of the constants FILTER_FLAG_SCHEME_REQUIRED and
@@ -274,7 +278,47 @@ GD:
   . image2wbmp() has been deprecated.
 
 Intl:
-  . Usage of the Normalizer::NONE form throws a deprecation warning, if PHP is linked with ICU >= 56.
+  . Usage of the Normalizer::NONE form throws a deprecation warning, if PHP is
+    linked with ICU >= 56.
+
+Mbstring:
+  . The following undocumented mbereg_*() aliases have been deprecated. Use the
+    corresponding mb_ereg_*() variants instead.
+     . mbregex_encoding()
+     . mbereg()
+     . mberegi()
+     . mbereg_replace()
+     . mberegi_replace()
+     . mbsplit()
+     . mbereg_match()
+     . mbereg_search()
+     . mbereg_search_pos()
+     . mbereg_search_regs()
+     . mbereg_search_init()
+     . mbereg_search_getregs()
+     . mbereg_search_getpos()
+     . mbereg_search_setpos()
+
+PDO ODBC:
+  . The pdo_odbc.db2_instance_name ini setting has been formally deprecated. It
+    has already been deprecated in the documentation since PHP 5.1.1.
+
+Standard:
+  . Passing a non-string needle to string search functions is deprecated. In the
+    future the needle will be interpreted as a string instead of an ASCII codepoint.
+    Depending on the intended behavior, you should either explicitly cast the
+    needle to string or perform an explicit call to ord(). The following functions
+    are affected:
+      . strpos()
+      . strrpos()
+      . stripos()
+      . strripos()
+      . strstr()
+      . strchr()
+      . strrchr()
+      . stristr()
+  . The fgetss() function and the string.strip_tags stream filter have been deprecated.
+    This also affects the SplFileObject::fgetss() method and gzgetss() function.
 
 ========================================
 5. Changed Functions
