@@ -580,12 +580,14 @@ __forceinline static int php_win32_ioutil_symlink(const char *target, const char
 
 	targetw = php_win32_ioutil_any_to_w(target);
 	if (!targetw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
 
 	linkw = php_win32_ioutil_any_to_w(link);
 	if (!linkw) {
 		free(targetw);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
 
@@ -604,11 +606,13 @@ __forceinline static int php_win32_ioutil_link(const char *target, const char *l
 
 	targetw = php_win32_ioutil_any_to_w(target);
 	if (!targetw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
 	linkw = php_win32_ioutil_any_to_w(link);
 	if (!linkw) {
 		free(targetw);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
 

@@ -167,7 +167,7 @@ PHP_FUNCTION(symlink)
 	ret = php_sys_symlink(topath, source_p);
 
 	if (ret == -1) {
-		php_error_docref(NULL, E_WARNING, "Cannot create symlink, error code(%d)", GetLastError());
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -217,7 +217,7 @@ PHP_FUNCTION(link)
 	ret = php_sys_link(dest_p, source_p);
 #endif
 	if (ret == -1) {
-		php_error_docref(NULL, E_WARNING, "Cannot create link, error code(%d)", GetLastError());
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 
