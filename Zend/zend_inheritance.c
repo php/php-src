@@ -22,6 +22,7 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_inheritance.h"
+#include "zend_interfaces.h"
 #include "zend_smart_str.h"
 #include "zend_operators.h"
 
@@ -177,72 +178,200 @@ static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_i
 }
 /* }}} */
 
-static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
+static
+zend_string *_resolve_parent_and_self(const zend_function *fe, zend_string *name)
 {
-	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_arg_info->type) && ZEND_TYPE_IS_SET(proto_arg_info->type));
+	zend_class_entry *ce = fe->common.scope;
+	/* if there isn't a class then we shouldn't be resolving parent and self */
+	ZEND_ASSERT(fe->common.scope);
 
-	if (ZEND_TYPE_IS_CLASS(fe_arg_info->type) && ZEND_TYPE_IS_CLASS(proto_arg_info->type)) {
-		zend_string *fe_class_name, *proto_class_name;
-		const char *class_name;
-		size_t class_name_len;
-
-		fe_class_name = ZEND_TYPE_NAME(fe_arg_info->type);
-		class_name = ZSTR_VAL(fe_class_name);
-		class_name_len = ZSTR_LEN(fe_class_name);
-		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && proto->common.scope) {
-			fe_class_name = zend_string_copy(proto->common.scope->name);
-		} else if (class_name_len == sizeof("self")-1 && !strcasecmp(class_name, "self") && fe->common.scope) {
-			fe_class_name = zend_string_copy(fe->common.scope->name);
-		} else {
-			zend_string_addref(fe_class_name);
-		}
-
-		proto_class_name = ZEND_TYPE_NAME(proto_arg_info->type);
-		class_name = ZSTR_VAL(proto_class_name);
-		class_name_len = ZSTR_LEN(proto_class_name);
-		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
-			proto_class_name = zend_string_copy(proto->common.scope->parent->name);
-		} else if (class_name_len == sizeof("self")-1 && !strcasecmp(class_name, "self") && proto->common.scope) {
-			proto_class_name = zend_string_copy(proto->common.scope->name);
-		} else {
-			zend_string_addref(proto_class_name);
-		}
-
-		if (fe_class_name != proto_class_name && strcasecmp(ZSTR_VAL(fe_class_name), ZSTR_VAL(proto_class_name)) != 0) {
-			if (fe->common.type != ZEND_USER_FUNCTION) {
-				zend_string_release(proto_class_name);
-				zend_string_release(fe_class_name);
-				return 0;
-			} else {
-				zend_class_entry *fe_ce, *proto_ce;
-
-				fe_ce = zend_lookup_class(fe_class_name);
-				proto_ce = zend_lookup_class(proto_class_name);
-
-				/* Check for class alias */
-				if (!fe_ce || !proto_ce ||
-						fe_ce->type == ZEND_INTERNAL_CLASS ||
-						proto_ce->type == ZEND_INTERNAL_CLASS ||
-						fe_ce != proto_ce) {
-					zend_string_release(proto_class_name);
-					zend_string_release(fe_class_name);
-					return 0;
+	switch (zend_get_class_fetch_type(name)) {
+		case ZEND_FETCH_CLASS_PARENT:
+			name = NULL;
+			if (ce->ce_flags & ZEND_ACC_LINKED) {
+				if (ce->parent && ce->parent->name) {
+					name = ce->parent->name;
 				}
+			} else if (ce->parent_name) {
+				name = ce->parent_name;
 			}
-		}
-		zend_string_release(proto_class_name);
-		zend_string_release(fe_class_name);
-	} else if (ZEND_TYPE_CODE(fe_arg_info->type) != ZEND_TYPE_CODE(proto_arg_info->type)) {
-		/* Incompatible built-in types */
+			if (name == NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use parent as type constraint in %s::%s() because %s does not have a parent type",
+					ZEND_FN_SCOPE_NAME(fe), ZSTR_VAL(fe->common.function_name),
+					ZEND_FN_SCOPE_NAME(fe));
+			}
+			break;
+
+		case ZEND_FETCH_CLASS_SELF:
+			name = fe->common.scope->name;
+			break;
+
+		case ZEND_FETCH_CLASS_DEFAULT:
+			/* already resolved */
+			break;
+
+		case ZEND_FETCH_CLASS_STATIC:
+			/* Note: this currently a syntax error */
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use static as a type constraint in %s::%s()",
+				ZEND_FN_SCOPE_NAME(fe), ZSTR_VAL(fe->common.function_name));
+
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+	return zend_string_copy(name);
+}
+
+typedef enum {
+	CONTRAVARIANT = -1,
+	INVARIANT = 0,
+	COVARIANT = +1,
+} _variance;
+
+static
+int _check_zce_variance(
+	const zend_class_entry *ce1, const zend_class_entry *ce2,
+	_variance variance) /* {{{ */
+{
+	if (ce1 == ce2) return 1;
+
+	switch (variance) {
+		case INVARIANT:
+			// todo: does ce1 == ce2 above catch all possible cases?
+			return 0;
+		case COVARIANT:
+			return instanceof_function(ce1, ce2);
+		case CONTRAVARIANT:
+			return instanceof_function(ce2, ce1);
+
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
+/* This int return is not a boolean, but will often be treated this way.
+ *   *  0 means there is definitely an error.
+ *   *  1 means there are definitely not any errors.
+ *   * -1 means there are no known errors but it is not known to be good
+ *     either (there is not enough information at the moment).
+ */
+static
+int _check_inherited_arg_info(
+	const zend_function *fe, zend_arg_info *fe_arg_info,
+	const zend_function *proto, zend_arg_info *proto_arg_info,
+	_variance variance) /* {{{ */
+{
+	zend_type fe_type = fe_arg_info->type;
+	zend_type proto_type = proto_arg_info->type;
+	zend_long fe_type_code = ZEND_TYPE_CODE(fe_type);
+	zend_long proto_type_code = ZEND_TYPE_CODE(proto_type);
+
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type));
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(proto_type));
+
+	if (variance == COVARIANT && ZEND_TYPE_ALLOW_NULL(fe_type) && !ZEND_TYPE_ALLOW_NULL(proto_type)) {
 		return 0;
 	}
 
-	return 1;
-}
-/* }}} */
+	/* This introduces BC break described at https://bugs.php.net/bug.php?id=72119 */
+	if (variance == CONTRAVARIANT && ZEND_TYPE_ALLOW_NULL(proto_type) && !ZEND_TYPE_ALLOW_NULL(fe_type)) {
+		return 0;
+	}
 
-static int zend_do_perform_arg_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
+	if (ZEND_TYPE_IS_CLASS(fe_type)) {
+		zend_string *fe_class_name =
+			_resolve_parent_and_self(fe, ZEND_TYPE_NAME(fe_type));
+		int code = 1;
+		if (ZEND_TYPE_IS_CLASS(proto_type)) {
+			zend_string *proto_class_name =
+				_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
+
+			if (!zend_string_equals_ci(fe_class_name, proto_class_name)) {
+				if (fe->common.type == ZEND_USER_FUNCTION) {
+					zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
+					zend_class_entry * proto_ce = zend_lookup_class(proto_class_name);
+
+					if (fe_ce && proto_ce) {
+						code = _check_zce_variance(fe_ce, proto_ce, variance);
+					} else {
+						/* The -1 will still be considered "truthy". It means there
+						 * is not enough information at the moment, but there are
+						 * not any known errors either. */
+						code = -1;
+					}
+				} else {
+					code = 0;
+				}
+			}
+			zend_string_release(proto_class_name);
+		} else if (variance == COVARIANT) {
+			if (proto_type_code == IS_ITERABLE) {
+				zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
+				code = fe_ce ? instanceof_function(fe_ce, zend_ce_traversable) : -1;
+			} else if (proto_type_code != IS_OBJECT) {
+				code = 0;
+			}
+		} else {
+			code = 0;
+		}
+
+		zend_string_release(fe_class_name);
+		return code;
+	} else if (ZEND_TYPE_IS_CLASS(proto_type)) {
+		if (variance == CONTRAVARIANT) {
+			if (fe_type_code == IS_ITERABLE) {
+				zend_string *proto_class_name =
+					_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
+				zend_class_entry *proto_ce = zend_lookup_class(proto_class_name);
+				zend_string_release(proto_class_name);
+				return proto_ce
+					? instanceof_function(proto_ce, zend_ce_traversable)
+					: -1;
+			} else if (fe_type_code == IS_OBJECT) {
+				return 1;
+			}
+		}
+	} else if (fe_type_code == IS_ITERABLE || proto_type_code == IS_ITERABLE) {
+		return (variance == COVARIANT && fe_type_code == IS_ARRAY)
+			|| (variance == CONTRAVARIANT && proto_type_code == IS_ARRAY);
+	} else if (fe_type_code == proto_type_code) {
+		return 1;
+	}
+
+	return 0;
+}
+ /* }}} */
+
+static
+int _check_inherited_return_type(
+	const zend_function *fe, zend_arg_info *fe_arg_info,
+	const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
+	/* Removing a return type is not valid. */
+	if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+		return 0;
+	}
+
+	return _check_inherited_arg_info(fe, fe_arg_info, proto, proto_arg_info, COVARIANT);
+}
+
+
+static zend_bool _missing_internal_arginfo(zend_function const *fn)
+{
+	return !fn->common.arg_info && fn->common.type == ZEND_INTERNAL_FUNCTION;
+}
+
+static
+int _check_inherited_parameter_type(
+	const zend_function *fe, zend_arg_info *fe_arg_info,
+	const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
+{
+
+	/* by-ref constraints on arguments are invariant */
+	if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
+		return 0;
+	}
+
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type)) {
 		/* Child with no type is always compatible */
 		return 1;
@@ -253,11 +382,11 @@ static int zend_do_perform_arg_type_hint_check(const zend_function *fe, zend_arg
 		return 0;
 	}
 
-	return zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info);
+	return _check_inherited_arg_info(fe, fe_arg_info, proto, proto_arg_info, CONTRAVARIANT);
 }
 /* }}} */
 
-static zend_bool zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto) /* {{{ */
+static int zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto) /* {{{ */
 {
 	uint32_t i, num_args;
 
@@ -265,7 +394,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
 	 * functions because extensions don't always define arg_info.
 	 */
-	if (!proto->common.arg_info && proto->common.type != ZEND_USER_FUNCTION) {
+	if (_missing_internal_arginfo(proto)) {
 		return 1;
 	}
 
@@ -307,7 +436,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	num_args = proto->common.num_args;
 	if (proto->common.fn_flags & ZEND_ACC_VARIADIC) {
 		num_args++;
-        if (fe->common.num_args >= proto->common.num_args) {
+		if (fe->common.num_args >= proto->common.num_args) {
 			num_args = fe->common.num_args;
 			if (fe->common.fn_flags & ZEND_ACC_VARIADIC) {
 				num_args++;
@@ -317,35 +446,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 	for (i = 0; i < num_args; i++) {
 		zend_arg_info *fe_arg_info = &fe->common.arg_info[i];
+		zend_arg_info *proto_arg_info = (i < proto->common.num_args)
+			? &proto->common.arg_info[i]
+			: &proto->common.arg_info[proto->common.num_args];
 
-		zend_arg_info *proto_arg_info;
-		if (i < proto->common.num_args) {
-			proto_arg_info = &proto->common.arg_info[i];
-		} else {
-			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
-		}
-
-		if (!zend_do_perform_arg_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
-			switch (ZEND_TYPE_CODE(fe_arg_info->type)) {
-				case IS_ITERABLE:
-					if (!zend_iterable_compatibility_check(proto_arg_info)) {
-						return 0;
-					}
-					break;
-
-				default:
-					return 0;
-			}
-		}
-
-		// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
-		if (ZEND_TYPE_IS_SET(proto_arg_info->type) && ZEND_TYPE_ALLOW_NULL(proto_arg_info->type) && !ZEND_TYPE_ALLOW_NULL(fe_arg_info->type)) {
-			/* incompatible nullability */
-			return 0;
-		}
-
-		/* by-ref constraints on arguments are invariant */
-		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
+		if (!_check_inherited_parameter_type(fe, fe_arg_info, proto, proto_arg_info)) {
 			return 0;
 		}
 	}
@@ -353,27 +458,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	/* Check return type compatibility, but only if the prototype already specifies
 	 * a return type. Adding a new return type is always valid. */
 	if (proto->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		/* Removing a return type is not valid. */
-		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
-			return 0;
-		}
-
-		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
-			switch (ZEND_TYPE_CODE(proto->common.arg_info[-1].type)) {
-				case IS_ITERABLE:
-					if (!zend_iterable_compatibility_check(fe->common.arg_info - 1)) {
-						return 0;
-					}
-					break;
-
-				default:
-					return 0;
-			}
-		}
-
-		if (ZEND_TYPE_ALLOW_NULL(fe->common.arg_info[-1].type) && !ZEND_TYPE_ALLOW_NULL(proto->common.arg_info[-1].type)) {
-			return 0;
-		}
+		return _check_inherited_return_type(
+			fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1);
 	}
 	return 1;
 }
@@ -624,9 +710,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 					error_level = E_COMPILE_ERROR;
 					error_verb = "must";
 				} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
-		                   (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
-				            (ZEND_TYPE_ALLOW_NULL(child->common.arg_info[-1].type) && !ZEND_TYPE_ALLOW_NULL(parent->common.arg_info[-1].type)))) {
+				           !_check_inherited_return_type(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1)) {
 					error_level = E_COMPILE_ERROR;
 					error_verb = "must";
 				} else {
@@ -2041,6 +2125,119 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent)
 	}
 
 	zend_build_properties_info_table(ce);
+}
+/* }}} */
+
+static void _inheritance_runtime_error_msg(zend_function *child, zend_function *parent)
+{
+	int level = E_WARNING;
+	const char *verb = "should";
+	ZEND_ASSERT(child && parent);
+	if ((parent->common.fn_flags & ZEND_ACC_ABSTRACT)
+	    || ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)))
+	{
+		level = E_ERROR;
+		verb = "must";
+	}
+	{
+		zend_string *method_prototype = zend_get_function_declaration(parent);
+		zend_string *child_prototype = zend_get_function_declaration(child);
+		zend_error(level, "Declaration of %s %s be compatible with %s",
+			ZSTR_VAL(child_prototype), verb, ZSTR_VAL(method_prototype));
+		zend_string_efree(child_prototype);
+		zend_string_efree(method_prototype);
+	}
+}
+
+ZEND_API void zend_verify_variance(zend_class_entry *ce)
+{ /* {{{ */
+	// todo: name? "verify" typically means something else
+	// todo: de-duplicate all this
+	zend_function *child;
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
+
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, child) {
+		zend_function *parent = child->common.prototype;
+		if (!parent) {
+			continue;
+		}
+
+		/* We are only willing to ignore this for internal functions because
+		 * extensions don't always define arg_info. */
+		if (_missing_internal_arginfo(parent)) {
+			continue;
+		}
+
+		/* If the parenttype method is private do not enforce a signature */
+		if (!(parent->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			uint32_t i, num_args;
+
+			/* Checks for constructors only if they are declared in an interface,
+			 * or explicitly marked as abstract
+			 */
+			if ((ce->constructor == child)
+			    && ((parent->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
+			    && (parent->common.fn_flags & ZEND_ACC_ABSTRACT) == 0))
+			{
+				continue;
+			}
+
+			/* Check return type compatibility, but only if the prototype already
+			 * specifies a return type. Adding a new return type is always valid. */
+			if (parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				if (child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+					int check = _check_inherited_return_type(
+						child, &child->common.arg_info[-1],
+						parent, &parent->common.arg_info[-1]);
+					if (check < 0) {
+						_inheritance_runtime_error_msg(child, parent);
+						// todo: what to do with errors, not warnings?
+						continue;
+					}
+				} else {
+						// This branch should already have been taken care of
+						continue;
+				}
+			}
+
+			if (parent->common.required_num_args < child->common.required_num_args
+			    || parent->common.num_args > child->common.num_args)
+			{
+				// This branch should already have been taken care of
+				continue;
+			}
+
+			num_args = parent->common.num_args;
+			if (parent->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+				if (child->common.num_args >= parent->common.num_args) {
+					num_args = child->common.num_args;
+					if (child->common.fn_flags & ZEND_ACC_VARIADIC) {
+						num_args++;
+					}
+				}
+			}
+
+			for (i = 0; i < num_args; i++) {
+				zend_arg_info *child_arg_info = &child->common.arg_info[i];
+				zend_arg_info *parent_arg_info = (i < parent->common.num_args)
+					? &parent->common.arg_info[i]
+					: &parent->common.arg_info[parent->common.num_args];
+
+				int check = _check_inherited_parameter_type(
+					child, child_arg_info,
+					parent, parent_arg_info);
+
+				if (check < 0) {
+					_inheritance_runtime_error_msg(child, parent);
+					// todo: what to do with errors, not warnings?
+					continue;
+				}
+			}
+
+		}
+	} ZEND_HASH_FOREACH_END();
+
 }
 /* }}} */
 

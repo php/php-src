@@ -6941,6 +6941,22 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_INHERITED_CLASS_DELAYED, CONST, CONST)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(146, ZEND_VERIFY_VARIANCE, CONST, UNUSED)
+{
+	USE_OPLINE
+	zend_class_entry *zce;
+
+	SAVE_OPLINE();
+	zce = zend_lookup_class(Z_STR_P(RT_CONSTANT(opline, opline->op1)));
+	if (zce) {
+		zend_verify_variance(zce);
+	} else {
+		ZEND_ASSERT(EG(exception));
+		HANDLE_EXCEPTION();
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HANDLER(171, ZEND_DECLARE_ANON_CLASS, ANY, ANY, JMP_ADDR)
 {
 	zval *zv;

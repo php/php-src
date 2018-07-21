@@ -3959,6 +3959,27 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
+
+static
+void _backup_unverified_variance_types(HashTable *unverified_types,
+                                       HashTable **prev_unverified_types)
+{
+	zend_hash_init(unverified_types, 0, NULL, NULL, 1);
+	*prev_unverified_types = CG(unverified_types);
+	CG(unverified_types) = unverified_types;
+}
+
+static void _compile_verify_variance(HashTable *unverified_types)
+{
+	zend_string *lcname;
+	ZEND_HASH_FOREACH_STR_KEY(unverified_types, lcname) {
+		zend_op *opline = get_next_op();
+		opline->op1_type = IS_CONST;
+		opline->opcode = ZEND_VERIFY_VARIANCE;
+		LITERAL_STR(opline->op1, zend_string_copy(lcname));
+	} ZEND_HASH_FOREACH_END();
+}
+
 void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
 
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
@@ -3970,16 +3991,29 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	zend_op *opline;
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
-		uint32_t dcl_opnum = get_next_op_number();
-		zend_compile_class_decl(class_ast, 0);
-		/* jump over anon class declaration */
-		opline = &CG(active_op_array)->opcodes[dcl_opnum];
-		if (opline->opcode == ZEND_FETCH_CLASS) {
-			opline++;
+		/* backup previous unverified variance list; anon classes are immediately verified */
+		HashTable unverified_types;
+		HashTable *prev_unverified_types;
+		_backup_unverified_variance_types(&unverified_types, &prev_unverified_types);
+
+		{
+			uint32_t dcl_opnum = get_next_op_number();
+			zend_compile_class_decl(class_ast, 0);
+			/* jump over anon class declaration */
+			opline = &CG(active_op_array)->opcodes[dcl_opnum];
+			if (opline->opcode == ZEND_FETCH_CLASS) {
+				opline++;
+			}
+			class_node.op_type = opline->result_type;
+			class_node.u.op.var = opline->result.var;
+			opline->extended_value = get_next_op_number();
 		}
-		class_node.op_type = opline->result_type;
-		class_node.u.op.var = opline->result.var;
-		opline->extended_value = get_next_op_number();
+
+		_compile_verify_variance(&unverified_types);
+
+		zend_hash_destroy(&unverified_types);
+		CG(unverified_types) = prev_unverified_types;
+
 	} else {
 		zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 	}
@@ -6290,6 +6324,14 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
+	if (extends_ast || implements_ast) {
+		if (CG(unverified_types)) {
+			zend_hash_add_empty_element(CG(unverified_types), lcname);
+		} else {
+			// todo: figure out why it's null; need a caller (somewhere) to initialize, emit, and destroy the unverified types
+		}
+	}
+
 	if (toplevel
 		/* We currently don't early-bind classes that implement interfaces or use traits */
 	 && !(ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
@@ -8088,6 +8130,35 @@ void zend_const_expr_to_zval(zval *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static zend_bool _is_type_decl(zend_ast *ast) {
+	return ast && ast->kind == ZEND_AST_CLASS;
+}
+
+static zend_bool _is_not_decl_stmt(zend_ast *ast) {
+	if (ast) {
+		/* todo: what else should be considered a decl stmt? */
+		switch (ast->kind) {
+		case ZEND_AST_FUNC_DECL:
+		case ZEND_AST_CLASS:
+			return 0;
+
+		default:
+			return 1;
+		}
+	}
+
+	/* todo: why are these sometimes null? */
+	return 0;
+}
+
+static zend_ast **_ast_find(zend_ast **begin, zend_ast **end,
+                            zend_bool (*pred)(zend_ast *)) {
+	for (; begin < end; ++begin)
+		if (pred(*begin))
+			return begin;
+	return begin;
+}
+
 /* Same as compile_stmt, but with early binding */
 void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 {
@@ -8097,9 +8168,37 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 
 	if (ast->kind == ZEND_AST_STMT_LIST) {
 		zend_ast_list *list = zend_ast_get_list(ast);
-		uint32_t i;
-		for (i = 0; i < list->children; ++i) {
-			zend_compile_top_stmt(list->child[i]);
+		zend_ast **begin = list->child;
+		zend_ast **end = begin + list->children;
+		zend_ast **first_decl = _ast_find(begin, end, &_is_type_decl);
+		zend_ast **last_decl = _ast_find(first_decl, end, &_is_not_decl_stmt);
+		zend_ast **p;
+
+		/* Compile opcodes before first type decl */
+		for (p = begin; p < first_decl; ++p) {
+			zend_compile_top_stmt(*p);
+		}
+
+		/* Compile decl stmts */
+		{
+			HashTable unverified_types;
+			HashTable *prev_unverified_types;
+			_backup_unverified_variance_types(&unverified_types, &prev_unverified_types);
+
+			for (p = first_decl; p < last_decl; ++p) {
+				zend_compile_top_stmt(*p);
+			}
+
+			_compile_verify_variance(&unverified_types);
+
+			zend_hash_destroy(&unverified_types);
+			CG(unverified_types) = prev_unverified_types;
+		}
+
+		/* Compile remainder */
+		/* todo: loop to catch any non-consecutive type declarations */
+		for (p = last_decl; p < end; ++p) {
+			zend_compile_top_stmt(*p);
 		}
 		return;
 	}
