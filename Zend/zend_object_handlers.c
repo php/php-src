@@ -1492,7 +1492,7 @@ static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{
 	}
 } /* }}} */
 
-ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type, zend_property_info **property_info_ptr) /* {{{ */
+ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, zend_property_info **property_info_ptr) /* {{{ */
 {
 	zval *ret;
 	zend_property_info *property_info = zend_hash_find_ptr(&ce->properties_info, property_name);
@@ -1548,6 +1548,12 @@ undeclared_property:
 	return ret;
 }
 /* }}} */
+
+ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type) /* {{{ */
+{
+	zend_property_info *prop_info;
+	return zend_std_get_static_property_with_info(ce, property_name, type, &prop_info);
+}
 
 ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name) /* {{{ */
 {

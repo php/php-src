@@ -1,5 +1,7 @@
 --TEST--
 Test typed properties overflowing
+--SKIPIF--
+<?php if (PHP_INT_SIZE == 4) die("SKIP: 64 bit test"); ?>
 --FILE--
 <?php
 

@@ -2619,7 +2619,7 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 		}
 	}
 
-	*retval = zend_std_get_static_property(ce, name, fetch_type, &property_info);
+	*retval = zend_std_get_static_property_with_info(ce, name, fetch_type, &property_info);
 
 	if (UNEXPECTED(op1_type != IS_CONST)) {
 		zend_tmp_string_release(tmp_name);
