@@ -785,6 +785,58 @@ PW32IO char *realpath(const char *path, char *resolved)
 	return php_win32_ioutil_realpath(path, resolved);
 }/*}}}*/
 
+PW32IO int php_win32_ioutil_symlink(const char *target, const char *link)
+{/*{{{*/
+	DWORD attr;
+	wchar_t *dstw, *srcw;
+	BOOLEAN ret;
+
+	dstw = php_win32_ioutil_any_to_w(target);
+	if (!dstw) {
+		return -1;
+	}
+	if ((attr = GetFileAttributesW(dstw)) == INVALID_FILE_ATTRIBUTES) {
+		free(dstw);
+		return -1;
+	}
+
+	srcw = php_win32_ioutil_any_to_w(link);
+	if (!srcw) {
+		free(dstw);
+		return -1;
+	}
+
+	ret = CreateSymbolicLinkW(srcw, dstw, (attr & FILE_ATTRIBUTE_DIRECTORY ? 1 : 0));
+
+	free(dstw);
+	free(srcw);
+
+	return ret ? 0 : -1;
+}/*}}}*/
+
+PW32IO int php_win32_ioutil_link(const char *target, const char *link)
+{/*{{{*/
+	wchar_t *dstw, *srcw;
+	BOOL ret;
+
+	dstw = php_win32_ioutil_any_to_w(target);
+	if (!dstw) {
+		return -1;
+	}
+	srcw = php_win32_ioutil_any_to_w(link);
+	if (!srcw) {
+		free(dstw);
+		return -1;
+	}
+
+	ret = CreateHardLinkW(dstw, srcw, NULL);
+
+	free(dstw);
+	free(srcw);
+
+	return ret ? 0 : -1;
+}/*}}}*/
+
 /*
  * Local variables:
  * tab-width: 4

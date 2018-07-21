@@ -261,6 +261,8 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode);
 PW32IO wchar_t *php_win32_ioutil_realpath_w(const wchar_t *path, wchar_t *resolved);
 PW32IO wchar_t *php_win32_ioutil_realpath_w_ex0(const wchar_t *path, wchar_t *resolved, PBY_HANDLE_FILE_INFORMATION info);
+PW32IO int php_win32_ioutil_symlink(const char *target, const char *link);
+PW32IO int php_win32_ioutil_link(const char *target, const char *link);
 
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
