@@ -786,19 +786,19 @@ ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, 
 		variable_ptr = OBJ_PROP(zobj, property_offset);
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(member), cache_slot);
-			zval tmp, *val;
+			zval tmp;
 
 			Z_TRY_ADDREF_P(value);
 
 			if (UNEXPECTED(prop_info)) {
-				val = zend_verify_property_type(prop_info, value, &tmp, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
-				if (UNEXPECTED(!val)) {
+				ZVAL_COPY_VALUE(&tmp, value);
+				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 					zend_verify_property_type_error(prop_info, value);
 					Z_TRY_DELREF_P(value);
 					value = &EG(error_zval);
 					goto exit;
 				}
-				value = val;
+				value = &tmp;
 			}
 
 found:
@@ -857,16 +857,16 @@ write_std_property:
 		}
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 			zend_property_info *prop_info;
-			zval tmp, *val;
+			zval tmp;
 
 			if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(member), cache_slot))) {
-				val = zend_verify_property_type(prop_info, value, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
-				if (UNEXPECTED(!val)) {
+				ZVAL_COPY_VALUE(&tmp, value);
+				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 					zend_verify_property_type_error(prop_info, value);
 					zval_ptr_dtor(value);
 					goto exit;
 				}
-				value = val;
+				value = &tmp;
 			}
 			ZVAL_COPY_VALUE(OBJ_PROP(zobj, property_offset), value);
 		} else {

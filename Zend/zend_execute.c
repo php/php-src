@@ -822,7 +822,7 @@ static int is_null_constant(zend_class_entry *scope, zval *default_value)
 	return 0;
 }
 
-static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *arg, zval *ret)
+static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *arg)
 {
 	switch (type_hint) {
 		case _IS_BOOL: {
@@ -832,7 +832,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 				return 0;
 			}
 			zval_ptr_dtor(arg);
-			ZVAL_BOOL(ret, dest);
+			ZVAL_BOOL(arg, dest);
 			return 1;
 		}
 		case IS_LONG: {
@@ -842,7 +842,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 				return 0;
 			}
 			zval_ptr_dtor(arg);
-			ZVAL_LONG(ret, dest);
+			ZVAL_LONG(arg, dest);
 			return 1;
 		}
 		case IS_DOUBLE: {
@@ -852,34 +852,21 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 				return 0;
 			}
 			zval_ptr_dtor(arg);
-			ZVAL_DOUBLE(ret, dest);
+			ZVAL_DOUBLE(arg, dest);
 			return 1;
 		}
 		case IS_STRING: {
 			zend_string *dest;
 
-			if (arg != ret) {
-				ZVAL_COPY(ret, arg);
-				/* on success "ret" is converted to IS_STRING */
-				if (!zend_parse_arg_str_weak(ret, &dest)) {
-					zval_ptr_dtor(ret);
-					return 0;
-				}
-				zval_ptr_dtor(arg);
-				return 1;
-			}
-			/* on success "ret" is converted to IS_STRING */
-			if (!zend_parse_arg_str_weak(ret, &dest)) {
-				return 0;
-			}
-			return 1;
+			/* on success "arg" is converted to IS_STRING */
+			return zend_parse_arg_str_weak(arg, &dest);
 		}
 		default:
 			return 0;
 	}
 }
 
-static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zval *ret, zend_bool strict)
+static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zend_bool strict)
 {
 	if (UNEXPECTED(strict)) {
 		/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
@@ -890,7 +877,7 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 		/* NULL may be accepted only by nullable hints (this is already checked) */
 		return 0;
 	}
-	return zend_verify_weak_scalar_type_hint(type_hint, arg, ret);
+	return zend_verify_weak_scalar_type_hint(type_hint, arg);
 }
 
 ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_info *info, zval *property)
@@ -946,52 +933,49 @@ ZEND_API zend_bool zend_load_property_class_type(zend_property_info *info) {
 	return 1;
 }
 
-static zend_always_inline zval* i_zend_verify_property_type(zend_property_info *info, zval *property, zval *tmp, zend_bool strict)
+static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
 {
 	if (ZEND_TYPE_IS_CLASS(info->type)) {
 		if (UNEXPECTED(Z_TYPE_P(property) != IS_OBJECT)) {
 			if (EXPECTED(Z_TYPE_P(property) == IS_NULL) && EXPECTED(ZEND_TYPE_ALLOW_NULL(info->type))) {
-				return property;
+				return 1;
 			}
-			return NULL;
+			return 0;
 		}
 
 		if (UNEXPECTED(!ZEND_TYPE_IS_CE(info->type)) && UNEXPECTED(!zend_load_property_class_type(info))) {
-			return NULL;
+			return 0;
 		}
 
 		if (EXPECTED(instanceof_function(Z_OBJCE_P(property), ZEND_TYPE_CE(info->type)))) {
-			return property;
+			return 1;
 		}
 
-		return NULL;
+		return 0;
 	}
 
 	if (EXPECTED(ZEND_TYPE_CODE(info->type) == Z_TYPE_P(property))) {
-		return property;
+		return 1;
 	} else if (EXPECTED(Z_TYPE_P(property) == IS_NULL)) {
-		return EXPECTED(ZEND_TYPE_ALLOW_NULL(info->type)) ? property : NULL;
+		return ZEND_TYPE_ALLOW_NULL(info->type);
 	} else if (EXPECTED(ZEND_TYPE_CODE(info->type) == IS_CALLABLE)) {
 		if (Z_TYPE_P(property) == IS_OBJECT) {
-			return instanceof_function(zend_ce_closure, Z_OBJCE_P(property)) ?
-				property : NULL;
+			return instanceof_function(zend_ce_closure, Z_OBJCE_P(property));
 		} else {
-			return zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL) ?
-				property : NULL;
+			return zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL);
 		}
 	} else if (ZEND_TYPE_CODE(info->type) == _IS_BOOL && EXPECTED(Z_TYPE_P(property) == IS_FALSE || Z_TYPE_P(property) == IS_TRUE)) {
-		return property;
+		return 1;
 	} else if (ZEND_TYPE_CODE(info->type) == IS_ITERABLE) {
-		return zend_is_iterable(property) ? property : NULL;
+		return zend_is_iterable(property);
 	} else {
-		return zend_verify_scalar_type_hint(ZEND_TYPE_CODE(info->type), property, tmp, strict) ?
-			tmp : NULL;
+		return zend_verify_scalar_type_hint(ZEND_TYPE_CODE(info->type), property, strict);
 	}
 }
 
-zval* zend_verify_property_type(zend_property_info *info, zval *property, zval *tmp, zend_bool strict)
+zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
 {
-	return i_zend_verify_property_type(info, property, tmp, strict);
+	return i_zend_verify_property_type(info, property, strict);
 }
 
 static zend_always_inline zend_bool zend_check_type(
@@ -1045,7 +1029,7 @@ static zend_always_inline zend_bool zend_check_type(
 	} else if (ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) {
 		return 0; /* we cannot have conversions for typed refs */
 	} else {
-		return zend_verify_scalar_type_hint(ZEND_TYPE_CODE(type), arg, arg,
+		return zend_verify_scalar_type_hint(ZEND_TYPE_CODE(type), arg,
 			is_return_type ? ZEND_RET_USES_STRICT_TYPES() : ZEND_ARG_USES_STRICT_TYPES());
 	}
 
@@ -1569,17 +1553,12 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)) {
-			zval tmp, *val;
-
-			val = zend_verify_property_type(prop_info, prop, &tmp, EX_USES_STRICT_TYPES());
-			if (UNEXPECTED(!val)) {
-				zend_verify_property_type_error(prop_info, prop);
-				if (inc) {
-					ZVAL_LONG(prop, ZEND_LONG_MAX);
-				} else {
-					ZVAL_LONG(prop, ZEND_LONG_MIN);
-				}
+		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info) && UNEXPECTED(!zend_verify_property_type(prop_info, prop, EX_USES_STRICT_TYPES()))) {
+			zend_verify_property_type_error(prop_info, prop);
+			if (inc) {
+				ZVAL_LONG(prop, ZEND_LONG_MAX);
+			} else {
+				ZVAL_LONG(prop, ZEND_LONG_MIN);
 			}
 		}
 	} else {
@@ -1601,7 +1580,7 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 			} else {
 				decrement_function(&z_copy);
 			}
-			if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, &z_copy, EX_USES_STRICT_TYPES()) != NULL)) {
+			if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 				zval_ptr_dtor(prop);
 				ZVAL_COPY_VALUE(prop, &z_copy);
 			} else {
@@ -1634,17 +1613,12 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 			fast_long_decrement_function(prop);
 		}
 		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG)) {
-			if (UNEXPECTED(prop_info)) {
-				zval tmp, *val;
-
-				val = zend_verify_property_type(prop_info, prop, &tmp, EX_USES_STRICT_TYPES());
-				if (UNEXPECTED(!val)) {
-					zend_verify_property_type_error(prop_info, prop);
-					if (inc) {
-						ZVAL_LONG(prop, ZEND_LONG_MAX);
-					} else {
-						ZVAL_LONG(prop, ZEND_LONG_MIN);
-					}
+			if (UNEXPECTED(prop_info) && UNEXPECTED(!zend_verify_property_type(prop_info, prop, EX_USES_STRICT_TYPES()))) {
+				zend_verify_property_type_error(prop_info, prop);
+				if (inc) {
+					ZVAL_LONG(prop, ZEND_LONG_MAX);
+				} else {
+					ZVAL_LONG(prop, ZEND_LONG_MIN);
 				}
 			}
 		}
@@ -1669,7 +1643,7 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 			} else {
 				decrement_function(&z_copy);
 			}
-			if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, &z_copy, EX_USES_STRICT_TYPES()) != NULL)) {
+			if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 				zval_ptr_dtor(prop);
 				ZVAL_COPY_VALUE(prop, &z_copy);
 			} else {
@@ -2849,7 +2823,7 @@ static zend_always_inline zend_bool i_zend_verify_ref_assignable_zval(zend_refer
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
 
-	if (UNEXPECTED(needs_coercion && !zend_verify_weak_scalar_type_hint(seen_type, zv, zv))) {
+	if (UNEXPECTED(needs_coercion && !zend_verify_weak_scalar_type_hint(seen_type, zv))) {
 		zend_throw_ref_type_error_zval(prop, zv);
 		return 0;
 	}
@@ -2881,13 +2855,13 @@ ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_i
 				zend_throw_ref_type_error_type(ref_prop, prop_info, val);
 				return 0;
 			}
-			if (zend_verify_weak_scalar_type_hint(ZEND_TYPE_CODE(prop_type), val, val)) {
+			if (zend_verify_weak_scalar_type_hint(ZEND_TYPE_CODE(prop_type), val)) {
 				return 1;
 			}
 		}
 	} else {
 		ZVAL_DEREF(val);
-		if (i_zend_verify_property_type(prop_info, val, val, strict)) {
+		if (i_zend_verify_property_type(prop_info, val, strict)) {
 			return 1;
 		}
 	}

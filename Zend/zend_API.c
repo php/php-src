@@ -1174,21 +1174,20 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 					ZVAL_DEREF(val);
 					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
 						if (prop_info->type) {
-							zval tmp, tmp2, *v;
+							zval tmp;
 
 							ZVAL_COPY(&tmp, val);
 							if (UNEXPECTED(zval_update_constant_ex(&tmp, ce) != SUCCESS)) {
 								return FAILURE;
 							}
-							v = zend_verify_property_type(prop_info, &tmp, &tmp2, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
-							if (UNEXPECTED(!v)) {
+							if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 								zend_verify_property_type_error(prop_info, &tmp);
 								class_type->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 								zval_ptr_dtor(&tmp);
 								return FAILURE;
 							}
 							zval_ptr_dtor(val);
-							ZVAL_COPY_VALUE(val, v);
+							ZVAL_COPY_VALUE(val, &tmp);
 						} else if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
 							return FAILURE;
 						}
@@ -1246,14 +1245,14 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 				zval *slot = OBJ_PROP(object, property_info->offset);
 
 				if (UNEXPECTED(property_info->type)) {
-					zval tmp, *val;
+					zval tmp;
 
-					val = zend_verify_property_type(property_info, prop, &tmp, 0);
-					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(property_info, prop);
+					ZVAL_COPY_VALUE(&tmp, prop);
+					if (UNEXPECTED(!zend_verify_property_type(property_info, &tmp, 0))) {
+						zend_verify_property_type_error(property_info, &tmp);
 						continue;
 					}
-					ZVAL_COPY_VALUE(slot, val);
+					ZVAL_COPY_VALUE(slot, &tmp);
 				} else {
 					ZVAL_COPY_VALUE(slot, prop);
 				}
@@ -4115,13 +4114,13 @@ ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string
 
 	Z_TRY_ADDREF_P(value);
 	if (prop_info->type) {
-		zval *val = zend_verify_property_type(prop_info, value, &tmp, /* strict */ 0);
-		if (UNEXPECTED(!val)) {
+		ZVAL_COPY_VALUE(&tmp, value);
+		if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, /* strict */ 0))) {
 			zend_verify_property_type_error(prop_info, value);
 			Z_TRY_DELREF_P(value);
 			return FAILURE;
 		}
-		value = val;
+		value = &tmp;
 	}
 
 	zend_assign_to_variable(property, value, IS_VAR, /* strict */ 0);

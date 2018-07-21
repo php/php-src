@@ -30,6 +30,7 @@ Foo::$i = ref();
 var_dump(Foo::$i);
 Foo::$s = ref();
 var_dump(Foo::$s);
+var_dump(ref());
 ?>
 --EXPECTF--
 string(1) "x"
@@ -41,3 +42,4 @@ string(1) "3"
 int(4)
 int(5)
 string(1) "5"
+int(5)

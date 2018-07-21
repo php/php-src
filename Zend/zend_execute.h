@@ -488,7 +488,7 @@ static zend_always_inline zend_property_info* zend_object_fetch_property_type_in
 	return NULL;
 }
 
-zval* zend_verify_property_type(zend_property_info *info, zval *property, zval *tmp, zend_bool strict);
+zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict);
 ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *property);
 
 #define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \

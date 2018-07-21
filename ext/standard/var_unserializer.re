@@ -550,11 +550,12 @@ string_key:
 		}
 
 		if (UNEXPECTED(info)) {
-			data = zend_verify_property_type(info, data, &tmp, 1);
-			if (UNEXPECTED(!data)) {
+			ZVAL_COPY_VALUE(&tmp, data);
+			if (UNEXPECTED(!zend_verify_property_type(info, &tmp, 1))) {
 				zval_dtor(&key);
 				return 0;
 			}
+			data = &tmp;
 			ZVAL_COPY(old_data, data);
 		}
 
