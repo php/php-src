@@ -6,7 +6,7 @@ SQLite3::prepare number of rows
 try {
 	$method = new ReflectionMethod('sqlite3result', 'numRows');
 } catch (ReflectionException $e) {
-	die("skip");
+	die("skip SQLite3Result::numRows method does not exist");
 }
 ?>
 --FILE--
