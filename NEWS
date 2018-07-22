@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     type 37). (Peter Kokot)
   . The declaration and use of case-insensitive constants has been deprecated.
     (Nikita)
+  . Added syslog.filter INI entry for syslog filtering. (Philip Prindeville)
 
 - Filter:
   . Added the 'add_slashes' sanitization mode (FILTER_SANITIZE_ADD_SLASHES). 

@@ -511,6 +511,11 @@ Standard:
   - New INI to set syslog facility which specifies what type of program is
     logging the message. It is used only when error_log is set to syslog.
 
+- syslog.filter
+  . New INI to set syslog filter type to filter the logged messages. There are
+    3 supported filter types - all, no-ctrl and ascii. It is used only when
+    error_log is set to syslog.
+
 - syslog.ident
   . New INI to set syslog ident string which is prepended to every message. It
     is used only when error_log is set syslog.
