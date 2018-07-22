@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.21
 
+- Calendar:
+  . Fixed bug #52974 (jewish.c: compile error under Windows with GBK charset).
+    (cmb)
+
 - Filter:
   . Fixed bug #76366 (References in sub-array for filtering breaks the filter).
     (ZiHang Gao)
