@@ -334,10 +334,10 @@ static PHP_INI_MH(OnChangeMemoryLimit)
  */
 static PHP_INI_MH(OnSetLogFilter)
 {
-	const char *filter  = ZSTR_VAL(new_value);
+	const char *filter = ZSTR_VAL(new_value);
 
-	if (!strcmp(filter, "none")) {
-		PG(syslog_filter) = PHP_SYSLOG_FILTER_NONE;
+	if (!strcmp(filter, "all")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_ALL;
 		return SUCCESS;
 	}
 	if (!strcmp(filter, "no-ctrl")) {

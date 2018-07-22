@@ -522,14 +522,6 @@ report_memleaks = On
 ; This setting is on by default.
 ;report_zend_debug = 0
 
-; Set this to disable filtering control characters (the default).
-; Some loggers only accept NVT-ASCII, others accept anything that's not
-; control characters.  If your logger accepts everything, then no filtering
-; is needed at all.
-; Values are: ascii (space-tilde), no_ctrl (all characters space and above),
-; and none (all characters)
-;syslog.filter = ascii
-
 ; Store the last error/warning message in $php_errormsg (boolean). Setting this value
 ; to On can assist in debugging and is appropriate for development servers. It should
 ; however be disabled on production servers.
@@ -600,6 +592,16 @@ html_errors = On
 ; The syslog facility is used to specify what type of program is logging 
 ; the message. Only used when error_log is set to syslog.
 ;syslog.facility = user
+
+; Set this to disable filtering control characters (the default).
+; Some loggers only accept NVT-ASCII, others accept anything that's not
+; control characters. If your logger accepts everything, then no filtering
+; is needed at all.
+; Allowed values are:
+;   ascii (only base ASCII characters)
+;   no_ctrl (all characters except control characters)
+;   all (all characters)
+;syslog.filter = ascii
 
 ;windows.show_crt_warning
 ; Default value: 0

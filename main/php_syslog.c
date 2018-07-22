@@ -94,7 +94,7 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 		else if (c == '\n') {
 			syslog(priority, "%.*s", (int)sbuf.len, sbuf.c);
 			smart_string_reset(&sbuf);
-		} else if ((c < 0x20) && (PG(syslog_filter) == PHP_SYSLOG_FILTER_NONE))
+		} else if ((c < 0x20) && (PG(syslog_filter) == PHP_SYSLOG_FILTER_ALL))
 			smart_string_appendc(&sbuf, c);
 		else {
 			const char xdigits[] = "0123456789abcdef";

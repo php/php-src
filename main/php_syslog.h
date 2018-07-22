@@ -33,7 +33,7 @@
 #endif
 
 /* Syslog filters */
-#define PHP_SYSLOG_FILTER_NONE		0
+#define PHP_SYSLOG_FILTER_ALL		0
 #define PHP_SYSLOG_FILTER_NO_CTRL	1
 #define PHP_SYSLOG_FILTER_ASCII		2
 
