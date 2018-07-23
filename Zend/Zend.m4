@@ -63,7 +63,6 @@ stdlib.h \
 dlfcn.h)
 
 AC_TYPE_SIZE_T
-AC_TYPE_SIGNAL
 
 AC_DEFUN([LIBZEND_LIBDL_CHECKS],[
 AC_CHECK_LIB(dl, dlopen, [LIBS="-ldl $LIBS"])
