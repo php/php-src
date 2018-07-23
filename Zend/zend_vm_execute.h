@@ -3883,7 +3883,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DEFINED_SPEC_CONST
 				break;
 			}
 		}
-		if (zend_quick_check_constant(RT_CONSTANT(opline, opline->op1), ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK OPLINE_CC EXECUTE_DATA_CC) != SUCCESS) {
+		if (zend_quick_check_constant(RT_CONSTANT(opline, opline->op1) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS) {
 			CACHE_PTR(opline->extended_value, ENCODE_SPECIAL_CACHE_NUM(zend_hash_num_elements(EG(zend_constants))));
 			result = 0;
 		} else {
