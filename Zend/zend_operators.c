@@ -519,7 +519,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op) /* {{{ */
 {
 	if (Z_TYPE_P(op) == IS_DOUBLE) {
 		zend_string *str;
@@ -528,12 +528,12 @@ ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {
 		str = zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), dval);
 		ZVAL_NEW_STR(op, str);
 	} else {
-		_convert_to_string(op ZEND_FILE_LINE_CC);
+		_convert_to_string(op);
 	}
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {

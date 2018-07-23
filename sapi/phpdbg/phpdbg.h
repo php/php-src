@@ -76,10 +76,10 @@
 #undef zend_hash_str_add
 #ifdef PHP_WIN32
 #define zend_hash_str_add(...) \
-	_zend_hash_str_add(__VA_ARGS__ ZEND_FILE_LINE_CC)
+	zend_hash_str_add(__VA_ARGS__)
 #else
 #define zend_hash_str_add_tmp(ht, key, len, pData) \
-	_zend_hash_str_add(ht, key, len, pData ZEND_FILE_LINE_CC)
+	zend_hash_str_add(ht, key, len, pData)
 #define zend_hash_str_add(...) zend_hash_str_add_tmp(__VA_ARGS__)
 #endif
 
