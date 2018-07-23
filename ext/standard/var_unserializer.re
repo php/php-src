@@ -513,7 +513,7 @@ string_key:
 		}
 
 		var_push_dtor(var_hash, data);
-		zval_ptr_dtor(&key);
+		zval_ptr_dtor_str(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
