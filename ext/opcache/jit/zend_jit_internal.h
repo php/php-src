@@ -46,6 +46,8 @@ void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(void);
 void ZEND_FASTCALL zend_jit_profile_helper(void);
 void ZEND_FASTCALL zend_jit_func_counter_helper(void);
 void ZEND_FASTCALL zend_jit_loop_counter_helper(void);
+void ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
+int  ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 
 #endif /* ZEND_JIT_INTERNAL_H */
 

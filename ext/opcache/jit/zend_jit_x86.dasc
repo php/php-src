@@ -1257,7 +1257,7 @@ static void* dasm_labels[zend_lb_MAX];
 |				push lineno
 |			.endif
 ||		}
-|		EXT_CALL _zval_dtor_func, r0
+|		EXT_CALL _rc_dtor_func, r0
 ||		if (ZEND_DEBUG) {
 |			.if not(X64)
 |				add r4, 12
@@ -4527,6 +4527,9 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			}
 		    if (opline->op2_type == IS_UNUSED) {
 				|	xor FCARG2a, FCARG2a
+			} else if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
+				ZEND_ASSERT(Z_MODE(op2_addr) == IS_CONST_ZVAL);
+				|	LOAD_ADDR FCARG2a, (Z_ZV(op2_addr) + 1)
 			} else {
 				|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
 			}
@@ -4816,6 +4819,9 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 			}
 		    if (opline->op2_type == IS_UNUSED) {
 				|	xor FCARG2a, FCARG2a
+			} else if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
+				ZEND_ASSERT(Z_MODE(op2_addr) == IS_CONST_ZVAL);
+				|	LOAD_ADDR FCARG2a, (Z_ZV(op2_addr) + 1)
 			} else {
 				|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
 			}
@@ -7914,17 +7920,14 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 	|.cold_code
 	|1:
 	|	LOAD_ADDR FCARG1a, zv
-	|	xor FCARG2d, FCARG2d
-	|	EXT_CALL zend_quick_get_constant, r0
+	|	EXT_CALL zend_jit_check_constant, r0
 	|	test r0, r0
 	if (smart_branch) {
 		if (undefined_label != (uint32_t)-1) {
-			|	jz =>undefined_label
+			|	jnz =>undefined_label
 		} else {
-			|	jz >3
+			|	jnz >3
 		}
-		|	mov r1,	EX->run_time_cache
-		|	mov aword [r1 + opline->extended_value], r0
 		if (defined_label != (uint32_t)-1) {
 			|	jmp =>defined_label
 		} else {
@@ -7932,9 +7935,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 		}
 	} else {
 		res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
-		|	jz >2
-		|	mov r1,	EX->run_time_cache
-		|	mov aword [r1 + opline->extended_value], r0
+		|	jnz >2
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 		|	jmp >3
 		|2:
@@ -8558,7 +8559,12 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 		    if (Z_REG(op1_addr) != ZREG_FCARG1a) {
 				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		    }
-			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+			if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
+				ZEND_ASSERT(Z_MODE(op2_addr) == IS_CONST_ZVAL);
+				|	LOAD_ADDR FCARG2a, (Z_ZV(op2_addr) + 1)
+			} else {
+				|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+			}
 			|.if X64
 				|   LOAD_ZVAL_ADDR CARG3, res_addr
 			|.else
@@ -8702,7 +8708,12 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 	    if (Z_REG(op1_addr) != ZREG_FCARG1a) {
 			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		}
-		|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+		if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
+			ZEND_ASSERT(Z_MODE(op2_addr) == IS_CONST_ZVAL);
+			|	LOAD_ADDR FCARG2a, (Z_ZV(op2_addr) + 1)
+		} else {
+			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+		}
 		|	EXT_CALL zend_jit_isset_dim_helper, r0
 		|	test r0, r0
 		|	jz >9
