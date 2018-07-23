@@ -3100,14 +3100,10 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 			p = in_hash->arData + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			pos2++;
-			if (p->key == NULL) {
-				zend_hash_del_bucket(in_hash, p);
+			if (p->key && in_hash == &EG(symbol_table)) {
+				zend_delete_global_variable(p->key);
 			} else {
-				if (in_hash == &EG(symbol_table)) {
-					zend_delete_global_variable(p->key);
-				} else {
-					zend_hash_del_bucket(in_hash, p);
-				}
+				zend_hash_del_bucket(in_hash, p);
 			}
 		}
 	}
@@ -3231,12 +3227,8 @@ PHP_FUNCTION(array_pop)
 	}
 
 	/* Delete the last value */
-	if (p->key) {
-		if (Z_ARRVAL_P(stack) == &EG(symbol_table)) {
-			zend_delete_global_variable(p->key);
-		} else {
-			zend_hash_del_bucket(Z_ARRVAL_P(stack), p);
-		}
+	if (p->key && Z_ARRVAL_P(stack) == &EG(symbol_table)) {
+		zend_delete_global_variable(p->key);
 	} else {
 		zend_hash_del_bucket(Z_ARRVAL_P(stack), p);
 	}
@@ -3281,12 +3273,8 @@ PHP_FUNCTION(array_shift)
 	ZVAL_COPY_DEREF(return_value, val);
 
 	/* Delete the first value */
-	if (p->key) {
-		if (Z_ARRVAL_P(stack) == &EG(symbol_table)) {
-			zend_delete_global_variable(p->key);
-		} else {
-			zend_hash_del_bucket(Z_ARRVAL_P(stack), p);
-		}
+	if (p->key && Z_ARRVAL_P(stack) == &EG(symbol_table)) {
+		zend_delete_global_variable(p->key);
 	} else {
 		zend_hash_del_bucket(Z_ARRVAL_P(stack), p);
 	}
