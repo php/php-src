@@ -4326,8 +4326,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov [r4], Ra(Z_REG(op1_addr)) // save
 		}
-		|	mov FCARG1d, 8
-		|	EXT_CALL _zend_new_array, r0
+		|	EXT_CALL _zend_new_array_0, r0
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 		}
@@ -4405,8 +4404,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov [r4], Ra(Z_REG(op1_addr)) // save
 			}
-			|	mov FCARG1d, 8
-			|	EXT_CALL _zend_new_array, r0
+			|	EXT_CALL _zend_new_array_0, r0
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 			}
@@ -4549,8 +4547,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov [r4], Ra(Z_REG(op1_addr)) // save
 		}
-		|	mov FCARG1d, 8
-		|	EXT_CALL _zend_new_array, r0
+		|	EXT_CALL _zend_new_array_0, r0
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 		}
@@ -4651,8 +4648,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov [r4], Ra(Z_REG(op1_addr)) // save
 			}
-			|	mov FCARG1d, 8
-			|	EXT_CALL _zend_new_array, r0
+			|	EXT_CALL _zend_new_array_0, r0
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 			}
