@@ -1725,7 +1725,7 @@ int main(int argc, char *argv[])
 ],
 [_cv_have_broken_glibc_fopen_append=no],
 [_cv_have_broken_glibc_fopen_append=yes ],
-AC_TRY_COMPILE([
+[AC_TRY_COMPILE([
 #include <features.h>
 ],[
 #if !__GLIBC_PREREQ(2,2)
@@ -1733,7 +1733,7 @@ choke me
 #endif
 ],
 [_cv_have_broken_glibc_fopen_append=yes],
-[_cv_have_broken_glibc_fopen_append=no ])
+[_cv_have_broken_glibc_fopen_append=no ])]
 )])
 
   if test "$_cv_have_broken_glibc_fopen_append" = "yes"; then

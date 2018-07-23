@@ -1814,7 +1814,7 @@ PHP_FUNCTION(ldap_get_entries)
 
 	ldap_result_entry = ldap_first_entry(ldap, ldap_result);
 	if (ldap_result_entry == NULL) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 
@@ -3066,7 +3066,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (!timeout) {
 				RETURN_FALSE;
 			}
-			zval_dtor(retval);
+			zval_ptr_dtor(retval);
 			ZVAL_LONG(retval, timeout->tv_sec);
 			ldap_memfree(timeout);
 		} break;
@@ -3335,7 +3335,7 @@ PHP_FUNCTION(ldap_parse_result)
 	char *lmatcheddn, *lerrmsg;
 	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrz/|z/z/z/z/", &link, &result, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(myargcount, "rrz/|z/z/z/z/", &link, &result, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
 		return;
 	}
 
@@ -3411,7 +3411,7 @@ PHP_FUNCTION(ldap_parse_exop)
 	struct berval *lretdata;
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|z/z/", &link, &result, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(myargcount, "rr|z/z/", &link, &result, &retdata, &retoid) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3435,7 +3435,7 @@ PHP_FUNCTION(ldap_parse_exop)
 	/* Reverse -> fall through */
 	switch (myargcount) {
 		case 4:
-			zval_dtor(retoid);
+			zval_ptr_dtor(retoid);
 			if (lretoid == NULL) {
 				ZVAL_EMPTY_STRING(retoid);
 			} else {
@@ -3444,7 +3444,7 @@ PHP_FUNCTION(ldap_parse_exop)
 			}
 		case 3:
 			/* use arg #3 as the data returned by the server */
-			zval_dtor(retdata);
+			zval_ptr_dtor(retdata);
 			if (lretdata == NULL) {
 				ZVAL_EMPTY_STRING(retdata);
 			} else {
@@ -3925,7 +3925,7 @@ PHP_FUNCTION(ldap_control_paged_result)
 	LDAPControl	ctrl, *ctrlsp[2];
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|bs", &link, &pagesize, &iscritical, &cookie, &cookie_len) != SUCCESS) {
+	if (zend_parse_parameters(myargcount, "rl|bs", &link, &pagesize, &iscritical, &cookie, &cookie_len) != SUCCESS) {
 		return;
 	}
 
@@ -4017,7 +4017,7 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 	ber_tag_t tag;
 	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|z/z/", &link, &result, &cookie, &estimated) != SUCCESS) {
+	if (zend_parse_parameters(myargcount, "rr|z/z/", &link, &result, &cookie, &estimated) != SUCCESS) {
 		return;
 	}
 
@@ -4084,7 +4084,7 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 	ldap_controls_free(lserverctrls);
 	if (myargcount == 4) {
-		zval_dtor(estimated);
+		zval_ptr_dtor(estimated);
 		ZVAL_LONG(estimated, lestimated);
 	}
 
@@ -4155,7 +4155,7 @@ PHP_FUNCTION(ldap_exop)
 		}
 
 		if (retoid) {
-			zval_dtor(retoid);
+			zval_ptr_dtor(retoid);
 			if (lretoid) {
 				ZVAL_STRING(retoid, lretoid);
 				ldap_memfree(lretoid);
@@ -4164,7 +4164,7 @@ PHP_FUNCTION(ldap_exop)
 			}
 		}
 
-		zval_dtor(retdata);
+		zval_ptr_dtor(retdata);
 		if (lretdata) {
 			ZVAL_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
 			ldap_memfree(lretdata->bv_val);
@@ -4221,7 +4221,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	int rc, myargcount = ZEND_NUM_ARGS(), msgid, err;
 	char* errmsg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|zzzz/", &link, &user, &oldpw, &newpw, &serverctrls) == FAILURE) {
+	if (zend_parse_parameters(myargcount, "r|zzzz/", &link, &user, &oldpw, &newpw, &serverctrls) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

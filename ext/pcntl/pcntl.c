@@ -674,7 +674,7 @@ PHP_FUNCTION(pcntl_waitpid)
 #ifdef HAVE_WAIT4
 	if (z_rusage) {
 		if (Z_TYPE_P(z_rusage) != IS_ARRAY) {
-			zval_dtor(z_rusage);
+			zval_ptr_dtor(z_rusage);
 			array_init(z_rusage);
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(z_rusage));
@@ -699,7 +699,7 @@ PHP_FUNCTION(pcntl_waitpid)
 	}
 #endif
 
-	zval_dtor(z_status);
+	zval_ptr_dtor(z_status);
 	ZVAL_LONG(z_status, status);
 
 	RETURN_LONG((zend_long) child_id);
@@ -726,7 +726,7 @@ PHP_FUNCTION(pcntl_wait)
 #ifdef HAVE_WAIT3
 	if (z_rusage) {
 		if (Z_TYPE_P(z_rusage) != IS_ARRAY) {
-			zval_dtor(z_rusage);
+			zval_ptr_dtor(z_rusage);
 			array_init(z_rusage);
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(z_rusage));
@@ -752,7 +752,7 @@ PHP_FUNCTION(pcntl_wait)
 	}
 #endif
 
-	zval_dtor(z_status);
+	zval_ptr_dtor(z_status);
 	ZVAL_LONG(z_status, status);
 
 	RETURN_LONG((zend_long) child_id);
@@ -1134,7 +1134,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 
 	if (user_oldset != NULL) {
 		if (Z_TYPE_P(user_oldset) != IS_ARRAY) {
-			zval_dtor(user_oldset);
+			zval_ptr_dtor(user_oldset);
 			array_init(user_oldset);
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(user_oldset));
@@ -1233,7 +1233,7 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 {
 	if (signo > 0 && user_siginfo) {
 		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
-			zval_dtor(user_siginfo);
+			zval_ptr_dtor(user_siginfo);
 			array_init(user_siginfo);
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(user_siginfo));

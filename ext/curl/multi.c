@@ -510,7 +510,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 	error = zend_call_function(&fci, &t->fci_cache);
 	zend_fcall_info_args_clear(&fci, 1);
-	zval_dtor(&headers);
+	zval_ptr_dtor_nogc(&headers);
 
 	if (error == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Cannot call the CURLMOPT_PUSHFUNCTION");

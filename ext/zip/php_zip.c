@@ -896,7 +896,7 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -932,7 +932,7 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, void **
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -977,7 +977,7 @@ static int php_zip_has_property(zval *object, zval *member, int type, void **cac
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -1029,10 +1029,13 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 	}
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
+#if LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR == 3 && LIBZIP_VERSION_MICRO == 1
+			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", "zip_close have failed");
+#else
 			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
-			return;
+			zip_discard(intern->za);
+#endif
 		}
-		intern->za = NULL;
 	}
 
 	if (intern->buffers_cnt>0) {
@@ -1743,7 +1746,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					if ((add_path_len + file_stripped_len) > MAXPATHLEN) {
 						php_error_docref(NULL, E_WARNING, "Entry name too long (max: %d, %zd given)",
 						MAXPATHLEN - 1, (add_path_len + file_stripped_len));
-						zval_ptr_dtor(return_value);
+						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
 					}
 					snprintf(entry_name_buf, MAXPATHLEN, "%s%s", add_path, file_stripped);
@@ -1760,7 +1763,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 
 				if (php_zip_add_file(intern, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
 					entry_name, entry_name_len, 0, 0) < 0) {
-					zval_dtor(return_value);
+					zend_array_destroy(Z_ARR_P(return_value));
 					RETURN_FALSE;
 				}
 			}
@@ -2260,9 +2263,9 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
-	zval_dtor(z_opsys);
+	zval_ptr_dtor(z_opsys);
 	ZVAL_LONG(z_opsys, opsys);
-	zval_dtor(z_attr);
+	zval_ptr_dtor(z_attr);
 	ZVAL_LONG(z_attr, attr);
 	RETURN_TRUE;
 }

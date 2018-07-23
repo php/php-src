@@ -27,7 +27,7 @@
 #include "mysqlnd_debug.h"
 
 #define BAIL_IF_NO_MORE_DATA \
-	if ((size_t)(p - begin) > packet->header.size) { \
+	if (UNEXPECTED((size_t)(p - begin) > packet->header.size)) { \
 		php_error_docref(NULL, E_WARNING, "Premature end of data (mysqlnd_wireprotocol.c:%u)", __LINE__); \
 		goto premature_end; \
 	} \
@@ -1148,21 +1148,20 @@ void php_mysqlnd_rset_header_free_mem(void * _packet)
 }
 /* }}} */
 
-static size_t rset_field_offsets[] =
-{
-	STRUCT_OFFSET(MYSQLND_FIELD, catalog),
-	STRUCT_OFFSET(MYSQLND_FIELD, catalog_length),
-	STRUCT_OFFSET(MYSQLND_FIELD, db),
-	STRUCT_OFFSET(MYSQLND_FIELD, db_length),
-	STRUCT_OFFSET(MYSQLND_FIELD, table),
-	STRUCT_OFFSET(MYSQLND_FIELD, table_length),
-	STRUCT_OFFSET(MYSQLND_FIELD, org_table),
-	STRUCT_OFFSET(MYSQLND_FIELD, org_table_length),
-	STRUCT_OFFSET(MYSQLND_FIELD, name),
-	STRUCT_OFFSET(MYSQLND_FIELD, name_length),
-	STRUCT_OFFSET(MYSQLND_FIELD, org_name),
-	STRUCT_OFFSET(MYSQLND_FIELD, org_name_length),
-};
+#define READ_RSET_FIELD(field_name) do { \
+		len = php_mysqlnd_net_field_length(&p); \
+		if (UNEXPECTED(len == MYSQLND_NULL_LENGTH)) { \
+			goto faulty_or_fake; \
+		} else if (len != 0) { \
+			meta->field_name = (const char *)p; \
+			meta->field_name ## _length = len; \
+			p += len; \
+			total_len += len + 1; \
+		} else { \
+			meta->field_name = mysqlnd_empty_string; \
+			meta->field_name ## _length = 0; \
+		} \
+	} while (0)
 
 
 /* {{{ php_mysqlnd_rset_field_read */
@@ -1183,7 +1182,6 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	char *root_ptr;
 	zend_ulong len;
 	MYSQLND_FIELD *meta;
-	unsigned int i, field_count = sizeof(rset_field_offsets)/sizeof(size_t);
 
 	DBG_ENTER("php_mysqlnd_rset_field_read");
 
@@ -1214,58 +1212,43 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	meta = packet->metadata;
 
-	for (i = 0; i < field_count; i += 2) {
-		len = php_mysqlnd_net_field_length(&p);
-		BAIL_IF_NO_MORE_DATA;
-		switch ((len)) {
-			case 0:
-				*(const char **)(((char*)meta) + rset_field_offsets[i]) = mysqlnd_empty_string;
-				*(unsigned int *)(((char*)meta) + rset_field_offsets[i+1]) = 0;
-				break;
-			case MYSQLND_NULL_LENGTH:
-				goto faulty_or_fake;
-			default:
-				*(const char **)(((char *)meta) + rset_field_offsets[i]) = (const char *)p;
-				*(unsigned int *)(((char*)meta) + rset_field_offsets[i+1]) = len;
-				p += len;
-				total_len += len + 1;
-				break;
-		}
-		BAIL_IF_NO_MORE_DATA;
-	}
+	READ_RSET_FIELD(catalog);
+	READ_RSET_FIELD(db);
+	READ_RSET_FIELD(table);
+	READ_RSET_FIELD(org_table);
+	READ_RSET_FIELD(name);
+	READ_RSET_FIELD(org_name);
 
 	/* 1 byte length */
-	if (12 != *p) {
+	if (UNEXPECTED(12 != *p)) {
 		DBG_ERR_FMT("Protocol error. Server sent false length. Expected 12 got %d", (int) *p);
 		php_error_docref(NULL, E_WARNING, "Protocol error. Server sent false length. Expected 12");
 	}
 
+	if ((size_t)((p - begin) + 12) > packet->header.size) {
+		php_error_docref(NULL, E_WARNING, "Premature end of data (mysqlnd_wireprotocol.c:%u)", __LINE__);
+		goto premature_end;
+	}
+
 	p++;
-	BAIL_IF_NO_MORE_DATA;
 
 	meta->charsetnr = uint2korr(p);
 	p += 2;
-	BAIL_IF_NO_MORE_DATA;
 
 	meta->length = uint4korr(p);
 	p += 4;
-	BAIL_IF_NO_MORE_DATA;
 
 	meta->type = uint1korr(p);
 	p += 1;
-	BAIL_IF_NO_MORE_DATA;
 
 	meta->flags = uint2korr(p);
 	p += 2;
-	BAIL_IF_NO_MORE_DATA;
 
 	meta->decimals = uint1korr(p);
 	p += 1;
-	BAIL_IF_NO_MORE_DATA;
 
 	/* 2 byte filler */
 	p +=2;
-	BAIL_IF_NO_MORE_DATA;
 
 	/* Should we set NUM_FLAG (libmysql does it) ? */
 	if (
@@ -1289,10 +1272,6 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		BAIL_IF_NO_MORE_DATA;
 		DBG_INF_FMT("Def found, length %lu", len);
 		meta->def = packet->memory_pool->get_chunk(packet->memory_pool, len + 1);
-		if (!meta->def) {
-			SET_OOM_ERROR(error_info);
-			DBG_RETURN(FAIL);
-		}
 		memcpy(meta->def, p, len);
 		meta->def[len] = '\0';
 		meta->def_length = len;
@@ -1300,51 +1279,45 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	}
 
 	root_ptr = meta->root = packet->memory_pool->get_chunk(packet->memory_pool, total_len);
-	if (!root_ptr) {
-		SET_OOM_ERROR(error_info);
-		DBG_RETURN(FAIL);
-	}
-
 	meta->root_len = total_len;
 
-	if (meta->name != mysqlnd_empty_string) {
+	if (EXPECTED(meta->name_length != 0)) {
 		meta->sname = zend_string_init_interned(meta->name, meta->name_length, 0);
+		meta->name = ZSTR_VAL(meta->sname);
 	} else {
 		meta->sname = ZSTR_EMPTY_ALLOC();
 	}
-	meta->name = ZSTR_VAL(meta->sname);
-	meta->name_length = ZSTR_LEN(meta->sname);
 
 	/* Now do allocs */
-	if (meta->catalog && meta->catalog != mysqlnd_empty_string) {
+	if (meta->catalog_length != 0) {
 		len = meta->catalog_length;
 		meta->catalog = memcpy(root_ptr, meta->catalog, len);
 		*(root_ptr +=len) = '\0';
 		root_ptr++;
 	}
 
-	if (meta->db && meta->db != mysqlnd_empty_string) {
+	if (meta->db_length != 0) {
 		len = meta->db_length;
 		meta->db = memcpy(root_ptr, meta->db, len);
 		*(root_ptr +=len) = '\0';
 		root_ptr++;
 	}
 
-	if (meta->table && meta->table != mysqlnd_empty_string) {
+	if (meta->table_length != 0) {
 		len = meta->table_length;
 		meta->table = memcpy(root_ptr, meta->table, len);
 		*(root_ptr +=len) = '\0';
 		root_ptr++;
 	}
 
-	if (meta->org_table && meta->org_table != mysqlnd_empty_string) {
+	if (meta->org_table_length != 0) {
 		len = meta->org_table_length;
 		meta->org_table = memcpy(root_ptr, meta->org_table, len);
 		*(root_ptr +=len) = '\0';
 		root_ptr++;
 	}
 
-	if (meta->org_name && meta->org_name != mysqlnd_empty_string) {
+	if (meta->org_name_length != 0) {
 		len = meta->org_name_length;
 		meta->org_name = memcpy(root_ptr, meta->org_name, len);
 		*(root_ptr +=len) = '\0';
@@ -1385,7 +1358,6 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_HEADER header;
 	zend_uchar * p = NULL;
-	zend_bool first_iteration = TRUE;
 	size_t prealloc_more_bytes;
 
 	DBG_ENTER("php_mysqlnd_read_row_ex");
@@ -1405,49 +1377,48 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	prealloc_more_bytes = 1;
 
 	*data_size = 0;
-	while (1) {
-		if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
-			ret = FAIL;
-			break;
-		}
-
+	if (UNEXPECTED(FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info))) {
+		ret = FAIL;
+	} else {
 		*data_size += header.size;
+		buffer->ptr = pool->get_chunk(pool, *data_size + prealloc_more_bytes);
+		p = buffer->ptr;
 
-		if (first_iteration) {
-			first_iteration = FALSE;
-			buffer->ptr = pool->get_chunk(pool, *data_size + prealloc_more_bytes);
-			if (!buffer->ptr) {
-				ret = FAIL;
-				break;
-			}
-			p = buffer->ptr;
-		} else if (!first_iteration) {
-			/* Empty packet after MYSQLND_MAX_PACKET_SIZE packet. That's ok, break */
-			if (!header.size) {
-				break;
-			}
-
-			/*
-			  We have to realloc the buffer.
-			*/
-			buffer->ptr = pool->resize_chunk(pool, buffer->ptr, *data_size - header.size, *data_size + prealloc_more_bytes);
-			if (!buffer->ptr) {
-				SET_OOM_ERROR(error_info);
-				ret = FAIL;
-				break;
-			}
-			/* The position could have changed, recalculate */
-			p = (zend_uchar *) buffer->ptr + (*data_size - header.size);
-		}
-
-		if (PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info))) {
+		if (UNEXPECTED(PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info)))) {
 			DBG_ERR("Empty row packet body");
 			php_error(E_WARNING, "Empty row packet body");
-			break;
-		}
+		} else {
+			while (header.size >= MYSQLND_MAX_PACKET_SIZE) {
+				if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
+					ret = FAIL;
+					break;
+				}
 
-		if (header.size < MYSQLND_MAX_PACKET_SIZE) {
-			break;
+				*data_size += header.size;
+
+				/* Empty packet after MYSQLND_MAX_PACKET_SIZE packet. That's ok, break */
+				if (!header.size) {
+					break;
+				}
+
+				/*
+				  We have to realloc the buffer.
+				*/
+				buffer->ptr = pool->resize_chunk(pool, buffer->ptr, *data_size - header.size, *data_size + prealloc_more_bytes);
+				if (!buffer->ptr) {
+					SET_OOM_ERROR(error_info);
+					ret = FAIL;
+					break;
+				}
+				/* The position could have changed, recalculate */
+				p = (zend_uchar *) buffer->ptr + (*data_size - header.size);
+
+				if (PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info))) {
+					DBG_ERR("Empty row packet body");
+					php_error(E_WARNING, "Empty row packet body");
+					break;
+				}
+			}
 		}
 	}
 	if (ret == FAIL && buffer->ptr) {

@@ -74,8 +74,8 @@ int json_yydebug = 1;
 %type <value> members member elements element
 %type <pair> pair
 
-%destructor { zval_dtor(&$$); } <value>
-%destructor { zend_string_release_ex($$.key, 0); zval_dtor(&$$.val); } <pair>
+%destructor { zval_ptr_dtor_nogc(&$$); } <value>
+%destructor { zend_string_release_ex($$.key, 0); zval_ptr_dtor_nogc(&$$.val); } <pair>
 
 %code {
 static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
@@ -278,8 +278,8 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
 			zend_string_release_ex(key, 0);
-			zval_dtor(zvalue);
-			zval_dtor(object);
+			zval_ptr_dtor_nogc(zvalue);
+			zval_ptr_dtor_nogc(object);
 			return FAILURE;
 		}
 		ZVAL_NEW_STR(&zkey, key);

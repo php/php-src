@@ -1705,6 +1705,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 										enum_mysqlnd_extension extension ZEND_FILE_LINE_DC)
 {
 	zend_bool fetched_anything;
+	unsigned int array_size;
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
 
@@ -1712,13 +1713,17 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 	  Hint Zend how many elements we will have in the hash. Thus it won't
 	  extend and rehash the hash constantly.
 	*/
-	array_init_size(return_value, mysqlnd_num_fields(result) * 2);
+	array_size = result->field_count;
+	if ((flags & (MYSQLND_FETCH_NUM|MYSQLND_FETCH_ASSOC)) == (MYSQLND_FETCH_NUM|MYSQLND_FETCH_ASSOC)) {
+		array_size *= 2;
+	}
+	array_init_size(return_value, array_size);
 	if (FAIL == result->m.fetch_row(result, (void *)return_value, flags, &fetched_anything)) {
 		php_error_docref(NULL, E_WARNING, "Error while reading a row");
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	} else if (fetched_anything == FALSE) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		switch (extension) {
 			case MYSQLND_MYSQLI:
 				RETVAL_NULL();
@@ -1811,7 +1816,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 	*/
 	mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQL);
 	if (Z_TYPE(row) != IS_ARRAY) {
-		zval_dtor(&row);
+		zval_ptr_dtor_nogc(&row);
 		RETVAL_NULL();
 		DBG_VOID_RETURN;
 	}
@@ -1824,7 +1829,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 	entry = zend_hash_get_current_data(Z_ARRVAL(row));
 
 	ZVAL_COPY(return_value, entry);
-	zval_dtor(&row);
+	zval_ptr_dtor_nogc(&row);
 
 	DBG_VOID_RETURN;
 }

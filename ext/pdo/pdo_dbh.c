@@ -549,7 +549,7 @@ static PHP_METHOD(PDO, prepare)
 	PDO_HANDLE_DBH_ERR();
 
 	/* kill the object handle for the stmt here */
-	zval_dtor(return_value);
+	zval_ptr_dtor(return_value);
 
 	RETURN_FALSE;
 }

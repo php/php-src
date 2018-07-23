@@ -53,6 +53,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_main.h"
+#include "php_syslog.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_string.h"
@@ -148,6 +149,143 @@ static char *get_safe_charset_hint(void) {
 
 /* {{{ PHP_INI_MH
  */
+static PHP_INI_MH(OnSetFacility)
+{
+	const char *facility = ZSTR_VAL(new_value);
+
+#ifdef LOG_AUTH
+	if (!strcmp(facility, "LOG_AUTH") || !strcmp(facility, "auth") || !strcmp(facility, "security")) {
+		PG(syslog_facility) = LOG_AUTH;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_AUTHPRIV
+	if (!strcmp(facility, "LOG_AUTHPRIV") || !strcmp(facility, "authpriv")) {
+		PG(syslog_facility) = LOG_AUTHPRIV;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_CRON
+	if (!strcmp(facility, "LOG_CRON") || !strcmp(facility, "cron")) {
+		PG(syslog_facility) = LOG_CRON;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_DAEMON
+	if (!strcmp(facility, "LOG_DAEMON") || !strcmp(facility, "daemon")) {
+		PG(syslog_facility) = LOG_DAEMON;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_FTP
+	if (!strcmp(facility, "LOG_FTP") || !strcmp(facility, "ftp")) {
+		PG(syslog_facility) = LOG_FTP;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_KERN
+	if (!strcmp(facility, "LOG_KERN") || !strcmp(facility, "kern")) {
+		PG(syslog_facility) = LOG_KERN;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LPR
+	if (!strcmp(facility, "LOG_LPR") || !strcmp(facility, "lpr")) {
+		PG(syslog_facility) = LOG_LPR;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_MAIL
+	if (!strcmp(facility, "LOG_MAIL") || !strcmp(facility, "mail")) {
+		PG(syslog_facility) = LOG_MAIL;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_INTERNAL_MARK
+	if (!strcmp(facility, "LOG_INTERNAL_MARK") || !strcmp(facility, "mark")) {
+		PG(syslog_facility) = LOG_INTERNAL_MARK;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_NEWS
+	if (!strcmp(facility, "LOG_NEWS") || !strcmp(facility, "news")) {
+		PG(syslog_facility) = LOG_NEWS;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_SYSLOG
+	if (!strcmp(facility, "LOG_SYSLOG") || !strcmp(facility, "syslog")) {
+		PG(syslog_facility) = LOG_SYSLOG;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_USER
+	if (!strcmp(facility, "LOG_USER") || !strcmp(facility, "user")) {
+		PG(syslog_facility) = LOG_USER;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_UUCP
+	if (!strcmp(facility, "LOG_UUCP") || !strcmp(facility, "uucp")) {
+		PG(syslog_facility) = LOG_UUCP;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL0
+	if (!strcmp(facility, "LOG_LOCAL0") || !strcmp(facility, "local0")) {
+		PG(syslog_facility) = LOG_LOCAL0;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL1
+	if (!strcmp(facility, "LOG_LOCAL1") || !strcmp(facility, "local1")) {
+		PG(syslog_facility) = LOG_LOCAL1;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL2
+	if (!strcmp(facility, "LOG_LOCAL2") || !strcmp(facility, "local2")) {
+		PG(syslog_facility) = LOG_LOCAL2;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL3
+	if (!strcmp(facility, "LOG_LOCAL3") || !strcmp(facility, "local3")) {
+		PG(syslog_facility) = LOG_LOCAL3;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL4
+	if (!strcmp(facility, "LOG_LOCAL4") || !strcmp(facility, "local4")) {
+		PG(syslog_facility) = LOG_LOCAL4;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL5
+	if (!strcmp(facility, "LOG_LOCAL5") || !strcmp(facility, "local5")) {
+		PG(syslog_facility) = LOG_LOCAL5;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL6
+	if (!strcmp(facility, "LOG_LOCAL6") || !strcmp(facility, "local6")) {
+		PG(syslog_facility) = LOG_LOCAL6;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL7
+	if (!strcmp(facility, "LOG_LOCAL7") || !strcmp(facility, "local7")) {
+		PG(syslog_facility) = LOG_LOCAL7;
+		return SUCCESS;
+	}
+#endif
+
+	return FAILURE;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnSetPrecision)
 {
 	zend_long i;
@@ -192,6 +330,28 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 }
 /* }}} */
 
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnSetLogFilter)
+{
+	const char *filter = ZSTR_VAL(new_value);
+
+	if (!strcmp(filter, "all")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_ALL;
+		return SUCCESS;
+	}
+	if (!strcmp(filter, "no-ctrl")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_NO_CTRL;
+		return SUCCESS;
+	}
+	if (!strcmp(filter, "ascii")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_ASCII;
+		return SUCCESS;
+	}
+
+	return FAILURE;
+}
+/* }}} */
 
 /* {{{ php_disable_functions
  */
@@ -636,6 +796,9 @@ PHP_INI_BEGIN()
 #ifdef PHP_WIN32
 	STD_PHP_INI_BOOLEAN("windows.show_crt_warning",		"0",		PHP_INI_ALL,		OnUpdateBool,			windows_show_crt_warning,			php_core_globals,	core_globals)
 #endif
+	STD_PHP_INI_ENTRY("syslog.facility",		"LOG_USER",		PHP_INI_SYSTEM,		OnSetFacility,		syslog_facility,	php_core_globals,		core_globals)
+	STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
+	STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -2134,6 +2297,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	if (PG(open_basedir) && *PG(open_basedir)) {
 		CWDG(realpath_cache_size_limit) = 0;
 	}
+
+	PG(have_called_openlog) = 0;
 
 	/* initialize stream wrappers registry
 	 * (this uses configuration parameters from php.ini)

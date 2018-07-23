@@ -6,5 +6,8 @@ Bug #55371 (get_magic_quotes_gpc() and get_magic_quotes_runtime() throw deprecat
 get_magic_quotes_gpc();
 get_magic_quotes_runtime();
 
+echo 'done';
+
 ?>
 --EXPECT--
+done

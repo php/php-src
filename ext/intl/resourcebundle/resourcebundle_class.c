@@ -105,7 +105,7 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constr
 
 	if (bundlename_len >= MAXPATHLEN) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"Bundle name too long", 0 );
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		ZVAL_NULL(return_value);
 		return FAILURE;
 	}

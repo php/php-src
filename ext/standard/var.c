@@ -392,7 +392,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 
 	} else { /* string key */
 		zend_string *tmp_str;
-		zend_string *ckey = php_addcslashes(key, 0, "'\\", 2);
+		zend_string *ckey = php_addcslashes(key, "'\\", 2);
 		tmp_str = php_str_to_str(ZSTR_VAL(ckey), ZSTR_LEN(ckey), "\0", 1, "' . \"\\0\" . '", 12);
 
 		buffer_append_spaces(buf, level + 1);
@@ -420,7 +420,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		zend_string *pname_esc;
 
 		zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len);
-		pname_esc = php_addcslashes(zend_string_init(prop_name, prop_name_len, 0), 1, "'\\", 2);
+		pname_esc = php_addcslashes_str(prop_name, prop_name_len, "'\\", 2);
 
 		smart_str_appendc(buf, '\'');
 		smart_str_append(buf, pname_esc);
@@ -473,7 +473,7 @@ again:
 			}
 			break;
 		case IS_STRING:
-			ztmp = php_addcslashes(Z_STR_P(struc), 0, "'\\", 2);
+			ztmp = php_addcslashes(Z_STR_P(struc), "'\\", 2);
 			ztmp2 = php_str_to_str(ZSTR_VAL(ztmp), ZSTR_LEN(ztmp), "\0", 1, "' . \"\\0\" . '", 12);
 
 			smart_str_appendc(buf, '\'');
@@ -527,8 +527,13 @@ again:
 				buffer_append_spaces(buf, level - 1);
 			}
 
-			smart_str_append(buf, Z_OBJCE_P(struc)->name);
-			smart_str_appendl(buf, "::__set_state(array(\n", 21);
+			/* stdClass has no __set_state method, but can be casted to */
+			if (Z_OBJCE_P(struc) == zend_standard_class_def) {
+				smart_str_appendl(buf, "(object) array(\n", 16);
+			} else {
+				smart_str_append(buf, Z_OBJCE_P(struc)->name);
+				smart_str_appendl(buf, "::__set_state(array(\n", 21);
+			}
 
 			if (myht) {
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
@@ -539,7 +544,11 @@ again:
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
 			}
-			smart_str_appendl(buf, "))", 2);
+			if (Z_OBJCE_P(struc) == zend_standard_class_def) {
+				smart_str_appendc(buf, ')');
+			} else {
+				smart_str_appendl(buf, "))", 2);
+			}
 
 			break;
 		case IS_REFERENCE:
@@ -680,7 +689,7 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 	BG(serialize_lock)++;
 	res = call_user_function(CG(function_table), struc, &fname, retval, 0, 0);
 	BG(serialize_lock)--;
-	zval_dtor(&fname);
+	zval_ptr_dtor_str(&fname);
 
 	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
 		zval_ptr_dtor(retval);

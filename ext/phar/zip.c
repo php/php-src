@@ -299,7 +299,7 @@ foundit:
 			zend_hash_destroy(&mydata->virtual_dirs); \
 			HT_FLAGS(&mydata->virtual_dirs) = 0; \
 			php_stream_close(fp); \
-			zval_dtor(&mydata->metadata); \
+			zval_ptr_dtor(&mydata->metadata); \
 			if (mydata->signature) { \
 				efree(mydata->signature); \
 			} \
@@ -321,7 +321,7 @@ foundit:
 			zend_hash_destroy(&mydata->virtual_dirs); \
 			HT_FLAGS(&mydata->virtual_dirs) = 0; \
 			php_stream_close(fp); \
-			zval_dtor(&mydata->metadata); \
+			zval_ptr_dtor(&mydata->metadata); \
 			if (mydata->signature) { \
 				efree(mydata->signature); \
 			} \

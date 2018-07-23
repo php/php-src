@@ -1320,7 +1320,7 @@ nostub:
 #endif
 			add_assoc_long(&filterparams, "window", MAX_WBITS + 16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp));
-			zval_dtor(&filterparams);
+			zend_array_destroy(Z_ARR(filterparams));
 
 			if (!filter) {
 				/* copy contents uncompressed rather than lose them */

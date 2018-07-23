@@ -2132,8 +2132,7 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 		if (return_value) {
 			zval_ptr_dtor(return_value);
 			value = &intern->u.file.current_zval;
-			ZVAL_DEREF(value);
-			ZVAL_COPY(return_value, value);
+			ZVAL_COPY_DEREF(return_value, value);
 		}
 	}
 	return ret;
@@ -2169,8 +2168,7 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 			} else {
 				zval *value = &retval;
 
-				ZVAL_DEREF(value);
-				ZVAL_COPY(&intern->u.file.current_zval, value);
+				ZVAL_COPY_DEREF(&intern->u.file.current_zval, value);
 			}
 			zval_ptr_dtor(&retval);
 			return SUCCESS;
@@ -2433,8 +2431,7 @@ SPL_METHOD(SplFileObject, current)
 	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
 		zval *value = &intern->u.file.current_zval;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 		return;
 	}
 	RETURN_FALSE;

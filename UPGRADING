@@ -44,6 +44,25 @@ Core:
     the following "FOO;" will cause a syntax error. This issue can always be
     resolved by choosing an ending label that does not occur within the contents
     of the string.
+  . "continue" statements targeting "switch" control flow structures will now
+    generate a warning. In PHP such "continue" statements are equivalent to
+    "break", while they behave as "continue 2" in other languages.
+
+        while ($foo) {
+            switch ($bar) {
+                case "baz":
+                    continue;
+                    // Warning: "continue" targeting switch is equivalent to
+                                "break". Did you mean to use "continue 2"?
+            }
+        }
+
+  . Array accesses of type $obj["123"], where $obj implements ArrayAccess and
+    "123" is an integral string literal will no longer result in an implicit
+    conversion to integer, i.e., $obj->offsetGet("123") will be called instead
+    of $obj->offsetGet(123). This matches existing behavior for non-literals.
+    The behavior of arrays is not affected in any way, they continue to
+    implicitly convert integeral string keys to integers.
   . In PHP, static properties are shared between inheriting classes, unless the
     static property is explicitly overridden in a child class. However, due to
     an implementation artifact it was possible to separate the static properties
@@ -74,11 +93,30 @@ Core:
     note that reading and writing a value inside a single expression remains
     undefined behavior and may change again in the future.
 
+  . Argument unpacking stopped working with Traversables with non-integer keys.
+    The following code worked in PHP 7.0-7.2 by accident.
+
+        function foo(...$args) {
+            var_dump($args);
+        }
+        function gen() {
+            yield 1.23 => 123;
+        }
+        foo(...gen());
+
+    Now it generates an exception.
+
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
     Formerly some warnings have directly been written to stderr.
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
+
+MBString:
+  . Due to added support for named captures, mb_ereg_*() patterns using named
+    captures will behave differently. In particular named captures will be part
+    of matches and mb_ereg_replace() will interpret additional syntax. See
+    "New Features" section for more information.
 
 mysqli:
   . Prepared statements now properly report the fractional seconds for DATETIME/
@@ -114,8 +152,10 @@ SimpleXML:
 Standard:
   . Undefined variables passed to compact() will now be reported as a notice.
   . getimagesize() and related functions now report the mime type of BMP images
-	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
-		with the IANA (see RFC 7903).
+    as image/bmp instead of image/x-ms-bmp, since the former has been registered
+    with the IANA (see RFC 7903).
+  . stream_socket_get_name() will now return IPv6 addresses wrapped in brackets.
+    For example "[::1]:1337" will be returned instead of "::1:1337".
 
 ========================================
 2. New Features
@@ -173,6 +213,21 @@ MBString:
   . Mbstring now correctly supports strings larger than 2GB.
   . Performance of the mbstring extension has been significantly improved
     across the board. The largest improvements are in case conversion functions.
+  . mb_ereg_*() functions now support named captures. Matching functions like
+    mb_ereg() will now return named captures both using their group number and
+    their name, similar to PCRE:
+
+        mb_ereg('(?<word>\w+)', '国', $matches);
+        // => [0 => "国", 1 => "国", "word" => "国"];
+
+    Additionally, mb_ereg_replace() now supports the \k<> and \k'' notations
+    to reference named captures in the replacement string:
+
+        mb_ereg_replace('\s*(?<word>\w+)\s*', "_\k<word>_\k'word'_", ' foo ');
+        // => "_foo_foo_"
+
+    \k<> and \k'' can also be used for numbered references, which also works
+    with group numbers greater than 9.
 
 readline:
   . Support for the completion_append_character and completion_suppress_append
@@ -196,15 +251,74 @@ phpdbg:
   . The unused constants PHPDBG_FILE, PHPDBG_METHOD, PHPDBG_LINENO and
     PHPDBG_FUNC have been removed.
 
+FPM:
+  . The getallheaders function is now also available.
+
 ========================================
 4. Deprecated Functionality
 ========================================
+
+Core:
+  . The declaration of case-insensitive constants has been deprecated. Passing
+    true as the third argument to define() will now generate a deprecation
+    warning. The use of case-insensitive constants with a case that differs from
+    the declaration is also deprecated.
+    (RFC: https://wiki.php.net/rfc/case_insensitive_constant_deprecation)
+  . Declaring a function called assert() inside a namespace is deprecated.
+    The assert() function is subject to special handling by the engine, which
+    may lead to inconsistent behavior when defining a namespaced function with
+    the same name.
+
+Filter:
+  . The explicit usage of the constants FILTER_FLAG_SCHEME_REQUIRED and
+    FILTER_FLAG_HOST_REQUIRED is now deprecated; both are implied for
+    FILTER_VALIDATE_URL anyway.
 
 GD:
   . image2wbmp() has been deprecated.
 
 Intl:
-  . Usage of the Normalizer::NONE form throws a deprecation warning, if PHP is linked with ICU >= 56.
+  . Usage of the Normalizer::NONE form throws a deprecation warning, if PHP is
+    linked with ICU >= 56.
+
+Mbstring:
+  . The following undocumented mbereg_*() aliases have been deprecated. Use the
+    corresponding mb_ereg_*() variants instead.
+     . mbregex_encoding()
+     . mbereg()
+     . mberegi()
+     . mbereg_replace()
+     . mberegi_replace()
+     . mbsplit()
+     . mbereg_match()
+     . mbereg_search()
+     . mbereg_search_pos()
+     . mbereg_search_regs()
+     . mbereg_search_init()
+     . mbereg_search_getregs()
+     . mbereg_search_getpos()
+     . mbereg_search_setpos()
+
+PDO ODBC:
+  . The pdo_odbc.db2_instance_name ini setting has been formally deprecated. It
+    has already been deprecated in the documentation since PHP 5.1.1.
+
+Standard:
+  . Passing a non-string needle to string search functions is deprecated. In the
+    future the needle will be interpreted as a string instead of an ASCII codepoint.
+    Depending on the intended behavior, you should either explicitly cast the
+    needle to string or perform an explicit call to ord(). The following functions
+    are affected:
+      . strpos()
+      . strrpos()
+      . stripos()
+      . strripos()
+      . strstr()
+      . strchr()
+      . strrchr()
+      . stristr()
+  . The fgetss() function and the string.strip_tags stream filter have been deprecated.
+    This also affects the SplFileObject::fgetss() method and gzgetss() function.
 
 ========================================
 5. Changed Functions
@@ -245,6 +359,9 @@ Core:
 Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
     DateTimeImmutable::createFromMutable().
+
+FPM:
+  . Added fpm_get_status() function which returns FPM status info array.
 
 GMP:
   . Added gmp_binomial(n, k) for calculating binomial coefficients.
@@ -290,6 +407,9 @@ Standard:
   . Added is_countable() function, to check whether a value may be passed to
     count().
     (RFC: https://wiki.php.net/rfc/is-countable)
+  . Added array_key_first() and array_key_last() which retrieve the first and
+    last key of an array, respectively.
+    (RFC: <https://wiki.php.net/rfc/array_key_first_last>)
 
 ========================================
 7. New Classes and Interfaces
@@ -313,6 +433,9 @@ JSON:
   . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
     defines the set of allowed thousand separator chars.  The default (`"',."`)
     is fully backward compatible with former PHP versions.
+  . FILTER_SANITIZE_ADD_SLASHES has been added as an alias of the 'magic_quotes' 
+    filter (FILTER_SANITIZE_MAGIC_QUOTES). The 'magic_quotes' filter is subject 
+	to removal in future versions of PHP.
 
  FTP:
   . Set default transfer mode to binary
@@ -329,6 +452,16 @@ JSON:
   . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
 
+PCRE:
+  . The PCRE extension has been upgraded to PCRE2, which may cause minor
+    behavioral changes, and augments the existing regular expression syntax.
+    See <https://wiki.php.net/rfc/pcre2-migration> for details.
+
+ Standard:
+  . var_export() now exports stdClass objects as an array casted to an object
+    (`(object) array( ... )`), rather than using the nonexistent method
+    stdClass::__setState().
+
  ZIP:
   . Bundled libzip has been dropped,
     system library is now required.
@@ -342,6 +475,13 @@ Curl:
 
 JSON:
   . JSON_THROW_ON_ERROR
+
+MBString:
+  . MB_CASE_FOLD
+  . MB_CASE_LOWER_SIMPLE
+  . MB_CASE_UPPER_SIMPLE
+  . MB_CASE_TITLE_SIMPLE
+  . MB_CASE_FOLD_SIMPLE
 
 PGSQL:
   . Requires Postgres 9.3
@@ -366,6 +506,19 @@ Standard:
 - opcache.inherited_hack
   . This INI directive has been removed. The value has already been ignored
     since PHP 5.3.0.
+
+- syslog.facility
+  - New INI to set syslog facility which specifies what type of program is
+    logging the message. It is used only when error_log is set to syslog.
+
+- syslog.filter
+  . New INI to set syslog filter type to filter the logged messages. There are
+    3 supported filter types - all, no-ctrl and ascii. It is used only when
+    error_log is set to syslog.
+
+- syslog.ident
+  . New INI to set syslog ident string which is prepended to every message. It
+    is used only when error_log is set syslog.
 
 ========================================
 12. Windows Support

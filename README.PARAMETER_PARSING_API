@@ -28,6 +28,13 @@ Both functions return SUCCESS or FAILURE depending on the result.
 The auto-conversions are performed as necessary. Arrays, objects, and
 resources cannot be auto-converted.
 
+PHP 5.3 includes a new function (actually implemented as macro):
+
+int zend_parse_parameters_none();
+
+This returns SUCCESS if no argument has been passed to the function,
+FAILURE otherwise.
+
 PHP 5.5 includes a new function:
 
 int zend_parse_parameter(int flags, int arg_num, zval **arg, const char *spec, ...);
@@ -220,4 +227,9 @@ if (zend_parse_parameters(ZEND_NUM_ARGS(), "a*l", &array, &varargs, &num_varargs
 
 for (i = 0; i < num_varargs; i++) {
     /* do something with varargs[i] */
+}
+
+/* Function that doesn't accept any arguments */
+if (zend_parse_parameters_none() == FAILURE) {
+    return;
 }

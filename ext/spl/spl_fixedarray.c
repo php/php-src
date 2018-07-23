@@ -240,27 +240,27 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 		php_error_docref(NULL, E_COMPILE_ERROR, "Internal compiler error, Class is not child of SplFixedArray");
 	}
 
-	if (!class_type->iterator_funcs.zf_current) {
-		class_type->iterator_funcs.zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
-		class_type->iterator_funcs.zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
-		class_type->iterator_funcs.zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
-		class_type->iterator_funcs.zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
-		class_type->iterator_funcs.zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
+	if (!class_type->iterator_funcs_ptr->zf_current) {
+		class_type->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
+		class_type->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
+		class_type->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
+		class_type->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
+		class_type->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
 	}
 	if (inherited) {
-		if (class_type->iterator_funcs.zf_rewind->common.scope  != parent) {
+		if (class_type->iterator_funcs_ptr->zf_rewind->common.scope  != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_REWIND;
 		}
-		if (class_type->iterator_funcs.zf_valid->common.scope   != parent) {
+		if (class_type->iterator_funcs_ptr->zf_valid->common.scope   != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_VALID;
 		}
-		if (class_type->iterator_funcs.zf_key->common.scope     != parent) {
+		if (class_type->iterator_funcs_ptr->zf_key->common.scope     != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_KEY;
 		}
-		if (class_type->iterator_funcs.zf_current->common.scope != parent) {
+		if (class_type->iterator_funcs_ptr->zf_current->common.scope != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_CURRENT;
 		}
-		if (class_type->iterator_funcs.zf_next->common.scope    != parent) {
+		if (class_type->iterator_funcs_ptr->zf_next->common.scope    != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_NEXT;
 		}
 
@@ -402,8 +402,7 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 		if (!Z_ISUNDEF(intern->array.elements[index])) {
 			zval_ptr_dtor(&(intern->array.elements[index]));
 		}
-		ZVAL_DEREF(value);
-		ZVAL_COPY(&intern->array.elements[index], value);
+		ZVAL_COPY_DEREF(&intern->array.elements[index], value);
 	}
 }
 /* }}} */
@@ -691,8 +690,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 		spl_fixedarray_init(&array, tmp);
 
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_index, str_index, element) {
-			ZVAL_DEREF(element);
-			ZVAL_COPY(&array.elements[num_index], element);
+			ZVAL_COPY_DEREF(&array.elements[num_index], element);
 		} ZEND_HASH_FOREACH_END();
 
 	} else if (num > 0 && !save_indexes) {
@@ -702,8 +700,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 		spl_fixedarray_init(&array, num);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), element) {
-			ZVAL_DEREF(element);
-			ZVAL_COPY(&array.elements[i], element);
+			ZVAL_COPY_DEREF(&array.elements[i], element);
 			i++;
 		} ZEND_HASH_FOREACH_END();
 	} else {
@@ -788,8 +785,7 @@ SPL_METHOD(SplFixedArray, offsetGet)
 	value = spl_fixedarray_object_read_dimension_helper(intern, zindex);
 
 	if (value) {
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		RETURN_NULL();
 	}
@@ -983,8 +979,7 @@ SPL_METHOD(SplFixedArray, current)
 	value = spl_fixedarray_object_read_dimension_helper(intern, &zindex);
 
 	if (value) {
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		RETURN_NULL();
 	}

@@ -1051,7 +1051,7 @@ static void *_php_mb_compile_regex(const char *pattern)
 
 	if (!(retval = pcre2_compile((PCRE2_SPTR)pattern, PCRE2_ZERO_TERMINATED,
 			PCRE2_CASELESS, &errnum, &err_offset, php_pcre_cctx()))) {
-		PCRE2_UCHAR err_str[256];
+		PCRE2_UCHAR err_str[128];
 		pcre2_get_error_message(errnum, err_str, sizeof(err_str));
 		php_error_docref(NULL, E_WARNING, "%s (offset=%zu): %s", pattern, err_offset, err_str);
 	}
@@ -1502,7 +1502,7 @@ PHP_INI_BEGIN()
 
 	STD_PHP_INI_BOOLEAN("mbstring.strict_detection", "0",
 		PHP_INI_ALL,
-		OnUpdateLong,
+		OnUpdateBool,
 		strict_detection, zend_mbstring_globals, mbstring_globals)
 PHP_INI_END()
 /* }}} */
@@ -2139,7 +2139,7 @@ PHP_FUNCTION(mb_parse_str)
 
 	if (track_vars_array != NULL) {
 		/* Clear out the array */
-		zval_dtor(track_vars_array);
+		zval_ptr_dtor(track_vars_array);
 		array_init(track_vars_array);
 	}
 

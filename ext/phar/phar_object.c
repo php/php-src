@@ -1439,7 +1439,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				}
 
 				if (Z_TYPE(key) != IS_STRING) {
-					zval_dtor(&key);
+					zval_ptr_dtor(&key);
 					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 					return ZEND_HASH_APPLY_STOP;
 				}
@@ -1448,7 +1448,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				str_key = estrndup(Z_STRVAL(key), str_key_len);
 
 				save = str_key;
-				zval_dtor(&key);
+				zval_ptr_dtor_str(&key);
 			} else {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
@@ -1567,7 +1567,7 @@ phar_spl_fileinfo:
 			}
 
 			if (Z_TYPE(key) != IS_STRING) {
-				zval_dtor(&key);
+				zval_ptr_dtor(&key);
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
 			}
@@ -1576,7 +1576,7 @@ phar_spl_fileinfo:
 			str_key = estrndup(Z_STRVAL(key), str_key_len);
 
 			save = str_key;
-			zval_dtor(&key);
+			zval_ptr_dtor_str(&key);
 		} else {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 			return ZEND_HASH_APPLY_STOP;
@@ -1767,7 +1767,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 		if (SUCCESS != object_init_ex(&regexiter, spl_ce_RegexIterator)) {
 			zval_ptr_dtor(&iteriter);
-			zval_dtor(&regexiter);
+			zval_ptr_dtor(&regexiter);
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate regex iterator for %s", phar_obj->archive->fname);
 			RETURN_FALSE;
 		}
@@ -2218,7 +2218,7 @@ its_ok:
 
 	ZVAL_NULL(&ret);
 	if (SUCCESS != object_init_ex(&ret, ce)) {
-		zval_dtor(&ret);
+		zval_ptr_dtor(&ret);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate phar object when converting archive \"%s\"", phar->fname);
 		return NULL;
 	}

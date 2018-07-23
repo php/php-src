@@ -436,6 +436,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 #if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				opline->op1.zv = (zval*)((char*)opline->op1.zv + ((char*)op_array->literals - (char*)orig_literals));
+				if (opline->opcode == ZEND_SEND_VAL
+				 || opline->opcode == ZEND_SEND_VAL_EX
+				 || opline->opcode == ZEND_QM_ASSIGN) {
+					/* Update handlers to eliminate REFCOUNTED check */
+					zend_vm_set_opcode_handler_ex(opline, 0, 0, 0);
+				}
 			}
 			if (opline->op2_type == IS_CONST) {
 				opline->op2.zv = (zval*)((char*)opline->op2.zv + ((char*)op_array->literals - (char*)orig_literals));
@@ -447,6 +453,11 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 						((zval*)((char*)(op_array->opcodes + (opline - new_opcodes)) +
 						(int32_t)opline->op1.constant) - orig_literals)) -
 					(char*)opline;
+				if (opline->opcode == ZEND_SEND_VAL
+				 || opline->opcode == ZEND_SEND_VAL_EX
+				 || opline->opcode == ZEND_QM_ASSIGN) {
+					zend_vm_set_opcode_handler_ex(opline, 0, 0, 0);
+				}
 			}
 			if (opline->op2_type == IS_CONST) {
 				opline->op2.constant =
@@ -776,16 +787,11 @@ static void zend_persist_class_entry(zval *zv)
 		if (ce->trait_aliases) {
 			int i = 0;
 			while (ce->trait_aliases[i]) {
-				if (ce->trait_aliases[i]->trait_method) {
-					if (ce->trait_aliases[i]->trait_method->method_name) {
-						zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method->method_name);
-					}
-					if (ce->trait_aliases[i]->trait_method->class_name) {
-						zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method->class_name);
-					}
-					ce->trait_aliases[i]->trait_method->ce = NULL;
-					zend_accel_store(ce->trait_aliases[i]->trait_method,
-						sizeof(zend_trait_method_reference));
+				if (ce->trait_aliases[i]->trait_method.method_name) {
+					zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method.method_name);
+				}
+				if (ce->trait_aliases[i]->trait_method.class_name) {
+					zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method.class_name);
 				}
 
 				if (ce->trait_aliases[i]->alias) {
@@ -801,26 +807,17 @@ static void zend_persist_class_entry(zval *zv)
 
 		if (ce->trait_precedences) {
 			int i = 0;
+			int j;
 
 			while (ce->trait_precedences[i]) {
-				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method->method_name);
-				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method->class_name);
-				ce->trait_precedences[i]->trait_method->ce = NULL;
-				zend_accel_store(ce->trait_precedences[i]->trait_method,
-					sizeof(zend_trait_method_reference));
+				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method.method_name);
+				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method.class_name);
 
-				if (ce->trait_precedences[i]->exclude_from_classes) {
-					int j = 0;
-
-					while (ce->trait_precedences[i]->exclude_from_classes[j].class_name) {
-						zend_accel_store_interned_string(ce->trait_precedences[i]->exclude_from_classes[j].class_name);
-						j++;
-					}
-					zend_accel_store(ce->trait_precedences[i]->exclude_from_classes,
-						sizeof(zend_class_entry*) * (j + 1));
+				for (j = 0; j < ce->trait_precedences[i]->num_excludes; j++) {
+					zend_accel_store_interned_string(ce->trait_precedences[i]->exclude_class_names[j]);
 				}
 
-				zend_accel_store(ce->trait_precedences[i], sizeof(zend_trait_precedence));
+				zend_accel_store(ce->trait_precedences[i], sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
 				i++;
 			}
 			zend_accel_store(

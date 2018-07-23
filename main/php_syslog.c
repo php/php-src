@@ -42,6 +42,15 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 {
 	va_list args;
 
+	/*
+	 * don't rely on openlog() being called by syslog() if it's
+	 * not already been done; call it ourselves and pass the
+	 * correct parameters!
+	 */
+	if (!PG(have_called_openlog)) {
+		php_openlog(PG(syslog_ident), 0, PG(syslog_facility));
+	}
+
 	va_start(args, format);
 	vsyslog(priority, format, args);
 	va_end(args);
@@ -56,6 +65,15 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 	smart_string sbuf = {0};
 	va_list args;
 
+	/*
+	 * don't rely on openlog() being called by syslog() if it's
+	 * not already been done; call it ourselves and pass the
+	 * correct parameters!
+	 */
+	if (!PG(have_called_openlog)) {
+		php_openlog(PG(syslog_ident), 0, PG(syslog_facility));
+	}
+
 	va_start(args, format);
 	zend_printf_to_smart_string(&fbuf, format, args);
 	smart_string_0(&fbuf);
@@ -68,11 +86,23 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 			break;
 		}
 
-		if (c != '\n')
+		/* check for NVT ASCII only unless test disabled */
+		if (((0x20 <= c) && (c <= 0x7e)))
 			smart_string_appendc(&sbuf, c);
-		else {
+		else if ((c >= 0x80) && (PG(syslog_filter) != PHP_SYSLOG_FILTER_ASCII))
+			smart_string_appendc(&sbuf, c);
+		else if (c == '\n') {
 			syslog(priority, "%.*s", (int)sbuf.len, sbuf.c);
 			smart_string_reset(&sbuf);
+		} else if ((c < 0x20) && (PG(syslog_filter) == PHP_SYSLOG_FILTER_ALL))
+			smart_string_appendc(&sbuf, c);
+		else {
+			const char xdigits[] = "0123456789abcdef";
+
+			smart_string_appendl(&sbuf, "\\x", 2);
+			smart_string_appendc(&sbuf, xdigits[(c / 0x10)]);
+			c &= 0x0f;
+			smart_string_appendc(&sbuf, xdigits[c]);
 		}
 	}
 

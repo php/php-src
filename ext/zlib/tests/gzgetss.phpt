@@ -16,5 +16,17 @@ while (!gzeof($handle)){
 }
 gzclose($handle);
 ?>
---EXPECT--
-<code>stringgzgetss(resource $zp, int $length [, string $allowable_tags ]);<code/>
+--EXPECTF--
+Deprecated: Function gzgetss() is deprecated in %s on line %d
+
+
+Deprecated: Function gzgetss() is deprecated in %s on line %d
+    
+
+Deprecated: Function gzgetss() is deprecated in %s on line %d
+      <code>stringgzgetss(resource $zp, int $length [, string $allowable_tags ]);<code/>
+
+Deprecated: Function gzgetss() is deprecated in %s on line %d
+    
+
+Deprecated: Function gzgetss() is deprecated in %s on line %d

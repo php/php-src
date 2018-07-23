@@ -2064,7 +2064,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	if (!obj->initialized) {
 		retval = zend_std_has_property(object, member, type, cache_slot);
 		if (member == &tmp_member) {
-			zval_dtor(member);
+			zval_ptr_dtor_str(&tmp_member);
 		}
 		return retval;
 	}
@@ -2084,7 +2084,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -2186,7 +2186,6 @@ static void date_register_classes(void) /* {{{ */
 	ce_period.create_object = date_object_new_period;
 	date_ce_period = zend_register_internal_class_ex(&ce_period, NULL);
 	date_ce_period->get_iterator = date_object_period_get_iterator;
-	date_ce_period->iterator_funcs.funcs = &date_period_it_funcs;
 	zend_class_implements(date_ce_period, 1, zend_ce_traversable);
 	memcpy(&date_object_handlers_period, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_period.offset = XtOffsetOf(php_period_obj, std);
@@ -3897,7 +3896,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 	tzobj = Z_PHPTIMEZONE_P(return_value);
 	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
 		zend_throw_error(NULL, "Timezone initialization failed");
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 	}
 }
 /* }}} */
@@ -4159,7 +4158,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 	if (!obj->initialized) {
 		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 		if (member == &tmp_member) {
-			zval_dtor(member);
+			zval_ptr_dtor_str(&tmp_member);
 		}
 		return retval;
 	}
@@ -4186,7 +4185,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 
 		if (member == &tmp_member) {
-			zval_dtor(member);
+			zval_ptr_dtor_str(&tmp_member);
 		}
 
 		return retval;
@@ -4203,7 +4202,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -4227,7 +4226,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 	if (!obj->initialized) {
 		zend_std_write_property(object, member, value, cache_slot);
 		if (member == &tmp_member) {
-			zval_dtor(member);
+			zval_ptr_dtor_str(&tmp_member);
 		}
 		return;
 	}
@@ -4255,7 +4254,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 	} while(0);
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 }
 /* }}} */
@@ -4287,7 +4286,7 @@ static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int 
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return ret;

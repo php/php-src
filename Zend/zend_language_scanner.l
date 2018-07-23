@@ -1109,69 +1109,90 @@ skip_escape_conversion:
 #define HEREDOC_USING_SPACES 1
 #define HEREDOC_USING_TABS 2
 
-static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline, int indentation, zend_bool using_spaces)
+static const char *next_newline(const char *str, const char *end, size_t *newline_len) {
+	for (; str < end; str++) {
+		if (*str == '\r') {
+			*newline_len = str + 1 < end && *(str + 1) == '\n' ? 2 : 1;
+		} else if (*str == '\n') {
+			*newline_len = 1;
+			return str;
+		}
+	}
+	*newline_len = 0;
+	return NULL;
+}
+
+static zend_bool strip_multiline_string_indentation(
+	zval *zendlval, int indentation, zend_bool using_spaces,
+	zend_bool newline_at_start, zend_bool newline_at_end)
 {
-	int len = Z_STRLEN_P(zendlval), new_len = len, i = 0, j = 0, skip, newline_count = 0;
+	const char *str = Z_STRVAL_P(zendlval), *end = str + Z_STRLEN_P(zendlval);
 	char *copy = Z_STRVAL_P(zendlval);
-	zend_bool trailing_newline = 0;
 
-	while (j < len) {
-		trailing_newline = 0;
+	int newline_count = 0;
+	size_t newline_len;
+	const char *nl;
 
-		for (skip = 0; skip < indentation; ++skip, ++j, --new_len) {
-			if (copy[j] == '\r' || copy[j] == '\n') {
-				goto skip;
+	if (!newline_at_start) {
+		nl = next_newline(str, end, &newline_len);
+		if (!nl) {
+			return 1;
+		}
+
+		str = nl + newline_len;
+		copy = (char *) nl + newline_len;
+		newline_count++;
+	} else {
+		nl = str;
+	}
+
+	/* <= intentional */
+	while (str <= end && nl) {
+		size_t skip;
+		nl = next_newline(str, end, &newline_len);
+		if (!nl && newline_at_end) {
+			nl = end;
+		}
+
+		/* Try to skip indentation */
+		for (skip = 0; skip < indentation; skip++, str++) {
+			if (str == nl) {
+				/* Don't require full indentation on whitespace-only lines */
+				break;
 			}
 
-			if (copy[j] != ' ' && copy[j] != '\t') {
+			if (str == end || (*str != ' ' && *str != '\t')) {
 				CG(zend_lineno) += newline_count;
-				zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
+				zend_throw_exception_ex(zend_ce_parse_error, 0,
+					"Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
 				goto error;
 			}
 
-			if ((!using_spaces && copy[j] == ' ') || (using_spaces && copy[j] == '\t')) {
+			if ((!using_spaces && *str == ' ') || (using_spaces && *str == '\t')) {
 				CG(zend_lineno) += newline_count;
-				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+				zend_throw_exception(zend_ce_parse_error,
+					"Invalid indentation - tabs and spaces cannot be mixed", 0);
 				goto error;
 			}
 		}
 
-		while (j < len && copy[j] != '\r' && copy[j] != '\n') {
-			copy[i++] = copy[j++];
-		}
-
-		if (j == len) {
+		if (str == end) {
 			break;
 		}
-skip:
-		if (copy[j] == '\r') {
-			copy[i++] = copy[j++];
-			trailing_newline = 1;
-		}
 
-		if (copy[j] == '\n') {
-			copy[i++] = copy[j++];
-			trailing_newline = 1;
-		}
-
-		if (trailing_newline) {
-			++newline_count;
-		}
+		size_t len = nl ? (nl - str + newline_len) : (end - str);
+		memmove(copy, str, len);
+		str += len;
+		copy += len;
+		newline_count++;
 	}
 
-	if (YYSTATE != STATE(ST_END_HEREDOC) && trailing_newline && indentation) {
-		CG(zend_lineno) += newline_count;
-		zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
-		goto error;
-	}
-
-	Z_STRVAL_P(zendlval)[new_len - newline] = '\0';
-	Z_STRLEN_P(zendlval) = new_len - newline;
-
+	*copy = '\0';
+	Z_STRLEN_P(zendlval) = copy - Z_STRVAL_P(zendlval);
 	return 1;
 
 error:
-	zval_dtor(zendlval);
+	zval_ptr_dtor_str(zendlval);
 	ZVAL_UNDEF(zendlval);
 
 	return 0;
@@ -2334,7 +2355,7 @@ skip_escape_conversion:
 
 			ZVAL_UNDEF(&zv);
 			retval = lex_scan(&zv, NULL);
-			zval_dtor(&zv);
+			zval_ptr_dtor_nogc(&zv);
 
 			if (EG(exception)) {
 				zend_clear_exception();
@@ -2610,12 +2631,15 @@ double_quotes_scan_done:
 heredoc_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	ZVAL_STRINGL(zendlval, yytext, yyleng - newline);
 
 	if (!SCNG(heredoc_scan_ahead) && !EG(exception) && PARSER_MODE()) {
+		zend_bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
 		zend_string *copy = Z_STR_P(zendlval);
 
-	    if (!strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
+		if (!strip_multiline_string_indentation(
+				zendlval, heredoc_label->indentation, heredoc_label->indentation_uses_spaces,
+				newline_at_start, newline != 0)) {
 			RETURN_TOKEN(T_ERROR);
 		}
 
@@ -2705,11 +2729,15 @@ heredoc_scan_done:
 
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	ZVAL_STRINGL(zendlval, yytext, yyleng - newline);
 
-	if (!EG(exception) && spacing != -1 && PARSER_MODE()
-	    && !strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES)) {
-		RETURN_TOKEN(T_ERROR);
+	if (!EG(exception) && spacing != -1 && PARSER_MODE()) {
+		zend_bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
+		if (!strip_multiline_string_indentation(
+				zendlval, indentation, spacing == HEREDOC_USING_SPACES,
+				newline_at_start, newline != 0)) {
+			RETURN_TOKEN(T_ERROR);
+		}
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng - newline);

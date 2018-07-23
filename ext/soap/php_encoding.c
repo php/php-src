@@ -971,7 +971,7 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNo
 	xmlAddChild(ret, text);
 	efree(str);
 	if (data == &tmp) {
-		zval_dtor(&tmp);
+		zval_ptr_dtor_str(&tmp);
 	}
 
 	if (style == SOAP_ENCODED) {
@@ -2266,7 +2266,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				}
 				array_set_zval_key(Z_ARRVAL(array_copy), &key, val);
 				zval_ptr_dtor(val);
-				zval_dtor(&key);
+				zval_ptr_dtor(&key);
 			} else {
 				add_next_index_zval(&array_copy, val);
 			}
@@ -3069,7 +3069,9 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 		}
 		smart_str_free(&list);
 		efree(str);
-		if (data == &tmp) {zval_dtor(&tmp);}
+		if (data == &tmp) {
+			zval_ptr_dtor_str(&tmp);
+		}
 	}
 	return ret;
 }

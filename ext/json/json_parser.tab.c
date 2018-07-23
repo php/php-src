@@ -1062,121 +1062,121 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, php_json_parser *p
     {
           case 3: /* PHP_JSON_T_NUL  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 4: /* PHP_JSON_T_TRUE  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 5: /* PHP_JSON_T_FALSE  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 6: /* PHP_JSON_T_INT  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 7: /* PHP_JSON_T_DOUBLE  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 8: /* PHP_JSON_T_STRING  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 9: /* PHP_JSON_T_ESTRING  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 10: /* PHP_JSON_T_EOI  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 11: /* PHP_JSON_T_ERROR  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 19: /* start  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 20: /* object  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 23: /* members  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 24: /* member  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 25: /* pair  */
 
-      { zend_string_release_ex(((*yyvaluep).pair).key, 0); zval_dtor(&((*yyvaluep).pair).val); }
+      { zend_string_release_ex(((*yyvaluep).pair).key, 0); zval_ptr_dtor_nogc(&((*yyvaluep).pair).val); }
 
         break;
 
     case 26: /* array  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 29: /* elements  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 30: /* element  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 31: /* key  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 32: /* value  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 33: /* errlex  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
@@ -1886,8 +1886,8 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
 			zend_string_release_ex(key, 0);
-			zval_dtor(zvalue);
-			zval_dtor(object);
+			zval_ptr_dtor_nogc(zvalue);
+			zval_ptr_dtor_nogc(object);
 			return FAILURE;
 		}
 		ZVAL_NEW_STR(&zkey, key);

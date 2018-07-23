@@ -1446,7 +1446,7 @@ PHPAPI int php_session_reset_id(void) /* {{{ */
 		smart_str_appends(&var, ZSTR_VAL(PS(id)));
 		smart_str_0(&var);
 		if (sid) {
-			zend_string_release_ex(Z_STR_P(sid), 0);
+			zval_ptr_dtor_str(sid);
 			ZVAL_NEW_STR(sid, var.s);
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", ZSTR_VAL(var.s), ZSTR_LEN(var.s), 0);
@@ -1454,7 +1454,7 @@ PHPAPI int php_session_reset_id(void) /* {{{ */
 		}
 	} else {
 		if (sid) {
-			zend_string_release_ex(Z_STR_P(sid), 0);
+			zval_ptr_dtor_str(sid);
 			ZVAL_EMPTY_STRING(sid);
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", "", 0, 0);
@@ -1814,7 +1814,7 @@ static PHP_FUNCTION(session_module_name)
 		if (!_php_find_ps_module(ZSTR_VAL(name))) {
 			php_error_docref(NULL, E_WARNING, "Cannot find named PHP session module (%s)", ZSTR_VAL(name));
 
-			zval_dtor(return_value);
+			zval_ptr_dtor_str(return_value);
 			RETURN_FALSE;
 		}
 		if (PS(mod_data) || PS(mod_user_implemented)) {
@@ -2019,7 +2019,7 @@ static PHP_FUNCTION(session_save_path)
 	if (name) {
 		if (memchr(ZSTR_VAL(name), '\0', ZSTR_LEN(name)) != NULL) {
 			php_error_docref(NULL, E_WARNING, "The save_path cannot contain NULL characters");
-			zval_dtor(return_value);
+			zval_ptr_dtor_str(return_value);
 			RETURN_FALSE;
 		}
 		ini_name = zend_string_init("session.save_path", sizeof("session.save_path") - 1, 0);
@@ -2981,9 +2981,8 @@ static zend_bool early_find_sid_in(zval *dest, int where, php_session_rfc1867_pr
 
 	if ((ppid = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[where]), PS(session_name), progress->sname_len))
 			&& Z_TYPE_P(ppid) == IS_STRING) {
-		zval_dtor(dest);
-		ZVAL_DEREF(ppid);
-		ZVAL_COPY(dest, ppid);
+		zval_ptr_dtor(dest);
+		ZVAL_COPY_DEREF(dest, ppid);
 		return 1;
 	}
 
@@ -3111,7 +3110,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				size_t name_len = strlen(data->name);
 
 				if (name_len == progress->sname_len && memcmp(data->name, PS(session_name), name_len) == 0) {
-					zval_dtor(&progress->sid);
+					zval_ptr_dtor(&progress->sid);
 					ZVAL_STRINGL(&progress->sid, (*data->value), value_len);
 				} else if (name_len == strlen(PS(rfc1867_name)) && memcmp(data->name, PS(rfc1867_name), name_len + 1) == 0) {
 					smart_str_free(&progress->key);

@@ -343,14 +343,13 @@ PHP_FUNCTION(msg_receive)
 
 	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, realflags);
 
-	zval_dtor(out_msgtype);
-	zval_dtor(out_message);
+	zval_ptr_dtor(out_msgtype);
+	zval_ptr_dtor(out_message);
 	ZVAL_LONG(out_msgtype, 0);
 	ZVAL_FALSE(out_message);
 
 	if (zerrcode) {
-		ZVAL_DEREF(zerrcode);
-		zval_dtor(zerrcode);
+		zval_ptr_dtor(zerrcode);
 		ZVAL_LONG(zerrcode, 0);
 	}
 

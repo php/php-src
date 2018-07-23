@@ -1141,8 +1141,7 @@ PHP_FUNCTION(end)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		ZVAL_DEREF(entry);
-		ZVAL_COPY(return_value, entry);
+		ZVAL_COPY_DEREF(return_value, entry);
 	}
 }
 /* }}} */
@@ -1169,8 +1168,7 @@ PHP_FUNCTION(prev)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		ZVAL_DEREF(entry);
-		ZVAL_COPY(return_value, entry);
+		ZVAL_COPY_DEREF(return_value, entry);
 	}
 }
 /* }}} */
@@ -1197,8 +1195,7 @@ PHP_FUNCTION(next)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		ZVAL_DEREF(entry);
-		ZVAL_COPY(return_value, entry);
+		ZVAL_COPY_DEREF(return_value, entry);
 	}
 }
 /* }}} */
@@ -1225,8 +1222,7 @@ PHP_FUNCTION(reset)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		ZVAL_DEREF(entry);
-		ZVAL_COPY(return_value, entry);
+		ZVAL_COPY_DEREF(return_value, entry);
 	}
 }
 /* }}} */
@@ -1250,8 +1246,7 @@ PHP_FUNCTION(current)
 		entry = Z_INDIRECT_P(entry);
 	}
 
-	ZVAL_DEREF(entry);
-	ZVAL_COPY(return_value, entry);
+	ZVAL_COPY_DEREF(return_value, entry);
 }
 /* }}} */
 
@@ -1289,8 +1284,7 @@ PHP_FUNCTION(min)
 			RETVAL_NULL();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 0)) != NULL) {
-				ZVAL_DEREF(result);
-				ZVAL_COPY(return_value, result);
+				ZVAL_COPY_DEREF(return_value, result);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1335,8 +1329,7 @@ PHP_FUNCTION(max)
 			RETVAL_NULL();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 1)) != NULL) {
-				ZVAL_DEREF(result);
-				ZVAL_COPY(return_value, result);
+				ZVAL_COPY_DEREF(return_value, result);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1730,7 +1723,6 @@ PHPAPI int php_prefix_varname(zval *result, const zval *prefix, const char *var_
 
 static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var;
@@ -1754,11 +1746,8 @@ static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_t
 				continue;
 			}
 			if (zend_string_equals_literal(var_name, "this")) {
-				if (!exception_thrown) {
-					exception_thrown = 1;
-					zend_throw_error(NULL, "Cannot re-assign $this");
-				}
-				continue;
+				zend_throw_error(NULL, "Cannot re-assign $this");
+				return -1;
 			}
 			if (Z_ISREF_P(entry)) {
 				Z_ADDREF_P(entry);
@@ -1777,7 +1766,6 @@ static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_t
 
 static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var;
@@ -1801,16 +1789,12 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 				continue;
 			}
 			if (zend_string_equals_literal(var_name, "this")) {
-				if (!exception_thrown) {
-					exception_thrown = 1;
-					zend_throw_error(NULL, "Cannot re-assign $this");
-				}
-				continue;
+				zend_throw_error(NULL, "Cannot re-assign $this");
+				return -1;
 			}
-			ZVAL_DEREF(entry);
 			ZVAL_DEREF(orig_var);
 			zval_ptr_dtor(orig_var);
-			ZVAL_COPY(orig_var, entry);
+			ZVAL_COPY_DEREF(orig_var, entry);
 			count++;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1821,7 +1805,6 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 
 static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var;
@@ -1834,11 +1817,8 @@ static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_t
 			continue;
 		}
 		if (zend_string_equals_literal(var_name, "this")) {
-			if (!exception_thrown) {
-				exception_thrown = 1;
-				zend_throw_error(NULL, "Cannot re-assign $this");
-			}
-			continue;
+			zend_throw_error(NULL, "Cannot re-assign $this");
+			return -1;
 		}
 		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
 		if (orig_var) {
@@ -1872,7 +1852,6 @@ static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_t
 
 static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var;
@@ -1885,11 +1864,8 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 			continue;
 		}
 		if (zend_string_equals_literal(var_name, "this")) {
-			if (!exception_thrown) {
-				exception_thrown = 1;
-				zend_throw_error(NULL, "Cannot re-assign $this");
-			}
-			continue;
+			zend_throw_error(NULL, "Cannot re-assign $this");
+			return -1;
 		}
 		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
 		if (orig_var) {
@@ -1899,10 +1875,9 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 			if (zend_string_equals_literal(var_name, "GLOBALS")) {
 				continue;
 			}
-			ZVAL_DEREF(entry);
 			ZVAL_DEREF(orig_var);
 			zval_ptr_dtor(orig_var);
-			ZVAL_COPY(orig_var, entry);
+			ZVAL_COPY_DEREF(orig_var, entry);
 		} else {
 			ZVAL_DEREF(entry);
 			Z_TRY_ADDREF_P(entry);
@@ -1917,7 +1892,6 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 
 static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var, final_name;
@@ -1944,10 +1918,8 @@ static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *s
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 				if (zend_string_equals_literal(Z_STR(final_name), "this")) {
-					if (!exception_thrown) {
-						exception_thrown = 1;
-						zend_throw_error(NULL, "Cannot re-assign $this");
-					}
+					zend_throw_error(NULL, "Cannot re-assign $this");
+					return -1;
 				} else {
 					if (Z_ISREF_P(entry)) {
 						Z_ADDREF_P(entry);
@@ -1966,7 +1938,7 @@ static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *s
 					count++;
 				}
 			}
-			zend_string_release_ex(Z_STR(final_name), 0);
+			zval_ptr_dtor_str(&final_name);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1976,7 +1948,6 @@ static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *s
 
 static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var, final_name;
@@ -1990,8 +1961,7 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
 				if (Z_TYPE_P(orig_var) == IS_UNDEF) {
-					ZVAL_DEREF(entry);
-					ZVAL_COPY(orig_var, entry);
+					ZVAL_COPY_DEREF(orig_var, entry);
 					count++;
 					continue;
 				}
@@ -1999,10 +1969,8 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 				if (zend_string_equals_literal(Z_STR(final_name), "this")) {
-					if (!exception_thrown) {
-						exception_thrown = 1;
-						zend_throw_error(NULL, "Cannot re-assign $this");
-					}
+					zend_throw_error(NULL, "Cannot re-assign $this");
+					return -1;
 				} else {
 					ZVAL_DEREF(entry);
 					if ((orig_var = zend_hash_find(symbol_table, Z_STR(final_name))) != NULL) {
@@ -2019,7 +1987,7 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 					count++;
 				}
 			}
-			zend_string_release_ex(Z_STR(final_name), 0);
+			zval_ptr_dtor_str(&final_name);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2029,7 +1997,6 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 
 static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var, final_name;
@@ -2059,10 +2026,8 @@ static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 				if (zend_string_equals_literal(Z_STR(final_name), "this")) {
-					if (!exception_thrown) {
-						exception_thrown = 1;
-						zend_throw_error(NULL, "Cannot re-assign $this");
-					}
+					zend_throw_error(NULL, "Cannot re-assign $this");
+					return -1;
 				} else {
 					if (Z_ISREF_P(entry)) {
 						Z_ADDREF_P(entry);
@@ -2081,17 +2046,14 @@ static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol
 					count++;
 				}
 			}
-			zend_string_release_ex(Z_STR(final_name), 0);
+			zval_ptr_dtor_str(&final_name);
 		} else {
 			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
 				continue;
 			}
 			if (zend_string_equals_literal(var_name, "this")) {
-				if (!exception_thrown) {
-					exception_thrown = 1;
-					zend_throw_error(NULL, "Cannot re-assign $this");
-				}
-				continue;
+				zend_throw_error(NULL, "Cannot re-assign $this");
+				return -1;
 			}
 			if (Z_ISREF_P(entry)) {
 				Z_ADDREF_P(entry);
@@ -2109,7 +2071,6 @@ static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol
 
 static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var, final_name;
@@ -2126,8 +2087,7 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
 				if (Z_TYPE_P(orig_var) == IS_UNDEF) {
-					ZVAL_DEREF(entry);
-					ZVAL_COPY(orig_var, entry);
+					ZVAL_COPY_DEREF(orig_var, entry);
 					count++;
 					continue;
 				}
@@ -2135,10 +2095,8 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 				if (zend_string_equals_literal(Z_STR(final_name), "this")) {
-					if (!exception_thrown) {
-						exception_thrown = 1;
-						zend_throw_error(NULL, "Cannot re-assign $this");
-					}
+					zend_throw_error(NULL, "Cannot re-assign $this");
+					return -1;
 				} else {
 					ZVAL_DEREF(entry);
 					if ((orig_var = zend_hash_find(symbol_table, Z_STR(final_name))) != NULL) {
@@ -2155,17 +2113,14 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 					count++;
 				}
 			}
-			zend_string_release_ex(Z_STR(final_name), 0);
+			zval_ptr_dtor_str(&final_name);
 		} else {
 			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
 				continue;
 			}
 			if (zend_string_equals_literal(var_name, "this")) {
-				if (!exception_thrown) {
-					exception_thrown = 1;
-					zend_throw_error(NULL, "Cannot re-assign $this");
-				}
-				continue;
+				zend_throw_error(NULL, "Cannot re-assign $this");
+				return -1;
 			}
 			ZVAL_DEREF(entry);
 			Z_TRY_ADDREF_P(entry);
@@ -2180,7 +2135,6 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 
 static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zend_ulong num_key;
@@ -2199,10 +2153,8 @@ static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_
 		}
 		if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 			if (zend_string_equals_literal(Z_STR(final_name), "this")) {
-				if (!exception_thrown) {
-					exception_thrown = 1;
-					zend_throw_error(NULL, "Cannot re-assign $this");
-				}
+				zend_throw_error(NULL, "Cannot re-assign $this");
+				return -1;
 			} else {
 				if (Z_ISREF_P(entry)) {
 					Z_ADDREF_P(entry);
@@ -2221,7 +2173,7 @@ static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_
 				count++;
 			}
 		}
-		zend_string_release_ex(Z_STR(final_name), 0);
+		zval_ptr_dtor_str(&final_name);
 	} ZEND_HASH_FOREACH_END();
 
 	return count;
@@ -2230,7 +2182,6 @@ static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_
 
 static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zend_ulong num_key;
@@ -2249,10 +2200,8 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 		}
 		if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 			if (zend_string_equals_literal(Z_STR(final_name), "this")) {
-				if (!exception_thrown) {
-					exception_thrown = 1;
-					zend_throw_error(NULL, "Cannot re-assign $this");
-				}
+				zend_throw_error(NULL, "Cannot re-assign $this");
+				return -1;
 			} else {
 				ZVAL_DEREF(entry);
 				if ((orig_var = zend_hash_find(symbol_table, Z_STR(final_name))) != NULL) {
@@ -2269,7 +2218,7 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 				count++;
 			}
 		}
-		zend_string_release_ex(Z_STR(final_name), 0);
+		zval_ptr_dtor_str(&final_name);
 	} ZEND_HASH_FOREACH_END();
 
 	return count;
@@ -2278,7 +2227,6 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 
 static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zend_ulong num_key;
@@ -2289,7 +2237,7 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
 				php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 				if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
-					zend_string_release_ex(Z_STR(final_name), 0);
+					zval_ptr_dtor_str(&final_name);
 					continue;
 				}
 			} else {
@@ -2300,15 +2248,13 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), 1);
 			zend_string_release_ex(str, 0);
 			if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
-				zend_string_release_ex(Z_STR(final_name), 0);
+				zval_ptr_dtor_str(&final_name);
 				continue;
 			}
 		}
 		if (zend_string_equals_literal(Z_STR(final_name), "this")) {
-			if (!exception_thrown) {
-				exception_thrown = 1;
-				zend_throw_error(NULL, "Cannot re-assign $this");
-			}
+			zend_throw_error(NULL, "Cannot re-assign $this");
+			return -1;
 		} else {
 			if (Z_ISREF_P(entry)) {
 				Z_ADDREF_P(entry);
@@ -2326,7 +2272,7 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 			}
 			count++;
 		}
-		zend_string_release_ex(Z_STR(final_name), 0);
+		zval_ptr_dtor_str(&final_name);
 	} ZEND_HASH_FOREACH_END();
 
 	return count;
@@ -2335,7 +2281,6 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 
 static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zend_ulong num_key;
@@ -2346,7 +2291,7 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
 				php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 				if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
-					zend_string_release_ex(Z_STR(final_name), 0);
+					zval_ptr_dtor_str(&final_name);
 					continue;
 				}
 			} else {
@@ -2357,15 +2302,13 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), 1);
 			zend_string_release_ex(str, 0);
 			if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
-				zend_string_release_ex(Z_STR(final_name), 0);
+				zval_ptr_dtor_str(&final_name);
 				continue;
 			}
 		}
 		if (zend_string_equals_literal(Z_STR(final_name), "this")) {
-			if (!exception_thrown) {
-				exception_thrown = 1;
-				zend_throw_error(NULL, "Cannot re-assign $this");
-			}
+			zend_throw_error(NULL, "Cannot re-assign $this");
+			return -1;
 		} else {
 			ZVAL_DEREF(entry);
 			if ((orig_var = zend_hash_find(symbol_table, Z_STR(final_name))) != NULL) {
@@ -2381,7 +2324,7 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 			}
 			count++;
 		}
-		zend_string_release_ex(Z_STR(final_name), 0);
+		zval_ptr_dtor_str(&final_name);
 	} ZEND_HASH_FOREACH_END();
 
 	return count;
@@ -2390,7 +2333,6 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 
 static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var;
@@ -2403,11 +2345,8 @@ static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table)
 			continue;
 		}
 		if (zend_string_equals_literal(var_name, "this")) {
-			if (!exception_thrown) {
-				exception_thrown = 1;
-				zend_throw_error(NULL, "Cannot re-assign $this");
-			}
-			continue;
+			zend_throw_error(NULL, "Cannot re-assign $this");
+			return -1;
 		}
 		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
 		if (orig_var) {
@@ -2440,7 +2379,6 @@ static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table)
 
 static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
-	int exception_thrown = 0;
 	zend_long count = 0;
 	zend_string *var_name;
 	zval *entry, *orig_var;
@@ -2453,19 +2391,15 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
 			continue;
 		}
 		if (zend_string_equals_literal(var_name, "this")) {
-			if (!exception_thrown) {
-				exception_thrown = 1;
-				zend_throw_error(NULL, "Cannot re-assign $this");
-			}
-			continue;
+			zend_throw_error(NULL, "Cannot re-assign $this");
+			return -1;
 		}
 		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
 				if (Z_TYPE_P(orig_var) == IS_UNDEF) {
-					ZVAL_DEREF(entry);
-					ZVAL_COPY(orig_var, entry);
+					ZVAL_COPY_DEREF(orig_var, entry);
 					count++;
 				}
 			}
@@ -2596,8 +2530,8 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if ((value_ptr = zend_hash_find_ind(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
 			ZVAL_DEREF(value_ptr);
-			ZVAL_COPY(&data, value_ptr);
-			zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
+			Z_TRY_ADDREF_P(value_ptr);
+			zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), value_ptr);
 		} else if (zend_string_equals_literal(Z_STR_P(entry), "this")) {
 			zend_object *object = zend_get_this_object(EG(current_execute_data));
 			if (object) {
@@ -3290,8 +3224,7 @@ PHP_FUNCTION(array_pop)
 			break;
 		}
 	}
-	ZVAL_DEREF(val);
-	ZVAL_COPY(return_value, val);
+	ZVAL_COPY_DEREF(return_value, val);
 
 	if (!p->key && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && p->h >= (zend_ulong)(Z_ARRVAL_P(stack)->nNextFreeElement - 1)) {
 		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
@@ -3345,8 +3278,7 @@ PHP_FUNCTION(array_shift)
 		}
 		idx++;
 	}
-	ZVAL_DEREF(val);
-	ZVAL_COPY(return_value, val);
+	ZVAL_COPY_DEREF(return_value, val);
 
 	/* Delete the first value */
 	if (p->key) {
@@ -4028,6 +3960,39 @@ PHP_FUNCTION(array_keys)
 			}
 		} ZEND_HASH_FILL_END();
 	}
+}
+/* }}} */
+
+/* {{{ proto mixed array_key_first(array stack)
+   Get the key of the first element of the array */
+PHP_FUNCTION(array_key_first)
+{
+	zval *stack;    /* Input stack */
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(stack)
+	ZEND_PARSE_PARAMETERS_END();
+
+	HashTable *target_hash = Z_ARRVAL_P (stack);
+	HashPosition pos = 0;
+	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
+}
+/* }}} */
+
+/* {{{ proto mixed array_key_last(array stack)
+   Get the key of the last element of the array */
+PHP_FUNCTION(array_key_last)
+{
+	zval *stack;    /* Input stack */
+	HashPosition pos;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(stack)
+	ZEND_PARSE_PARAMETERS_END();
+
+	HashTable *target_hash = Z_ARRVAL_P (stack);
+	zend_hash_internal_pointer_end_ex(target_hash, &pos);
+	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
 }
 /* }}} */
 

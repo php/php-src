@@ -887,8 +887,7 @@ ZEND_METHOD(Generator, current)
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->value) != IS_UNDEF)) {
 		zval *value = &root->value;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
 /* }}} */
@@ -911,8 +910,7 @@ ZEND_METHOD(Generator, key)
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->key) != IS_UNDEF)) {
 		zval *key = &root->key;
 
-		ZVAL_DEREF(key);
-		ZVAL_COPY(return_value, key);
+		ZVAL_COPY_DEREF(return_value, key);
 	}
 }
 /* }}} */
@@ -967,8 +965,7 @@ ZEND_METHOD(Generator, send)
 	if (EXPECTED(generator->execute_data)) {
 		zval *value = &root->value;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
 /* }}} */
@@ -1001,8 +998,7 @@ ZEND_METHOD(Generator, throw)
 		if (generator->execute_data) {
 			zval *value = &root->value;
 
-			ZVAL_DEREF(value);
-			ZVAL_COPY(return_value, value);
+			ZVAL_COPY_DEREF(return_value, value);
 		}
 	} else {
 		/* If the generator is already closed throw the exception in the
@@ -1101,8 +1097,7 @@ static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval
 	if (EXPECTED(Z_TYPE(root->key) != IS_UNDEF)) {
 		zval *zv = &root->key;
 
-		ZVAL_DEREF(zv);
-		ZVAL_COPY(key, zv);
+		ZVAL_COPY_DEREF(key, zv);
 	} else {
 		ZVAL_NULL(key);
 	}
@@ -1201,7 +1196,6 @@ void zend_register_generator_ce(void) /* {{{ */
 	/* get_iterator has to be assigned *after* implementing the inferface */
 	zend_class_implements(zend_ce_generator, 1, zend_ce_iterator);
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
-	zend_ce_generator->iterator_funcs.funcs = &zend_generator_iterator_functions;
 
 	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_generator_handlers.free_obj = zend_generator_free_storage;

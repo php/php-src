@@ -1,30 +1,121 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0alpha3
+?? ??? ????, PHP 7.3.0beta1
+
+19 Jul 2018, PHP 7.3.0alpha4
 
 - Core:
+  . Fixed bug #33502 (Some nullary functions don't check the number of
+    arguments). (cmb)
+  . Fixed bug #76392 (Error relocating sapi/cli/php: unsupported relocation
+    type 37). (Peter Kokot)
+  . The declaration and use of case-insensitive constants has been deprecated.
+    (Nikita)
+  . Added syslog.filter INI entry for syslog filtering. (Philip Prindeville)
+
+- Calendar:
+  . Fixed bug #52974 (jewish.c: compile error under Windows with GBK charset).
+    (cmb)
+
+- Filter:
+  . Added the 'add_slashes' sanitization mode (FILTER_SANITIZE_ADD_SLASHES). 
+	(Kalle)
+  . Fixed bug #76366 (References in sub-array for filtering breaks the filter).
+    (ZiHang Gao)
+
+- FPM:
+  . Fixed bug #62596 (getallheaders() missing with PHP-FPM). (Remi)
+  . Added fpm_get_status function. (Till Backhaus)
+  . Fixed bug #69031 (Long messages into stdout/stderr are truncated
+    incorrectly) - added new log related FPM configuration options:
+    log_limit, log_buffering and decorate_workers_output. (Jakub Zelenka) 
+
+- mbstring:
+  . Fixed bug #76574 (use of undeclared identifiers INT_MAX and LONG_MAX). (cmb)
+  . Fixed bug #76594 (Bus Error due to unaligned access in zend_ini.c
+    OnUpdateLong). (cmb, Nikita)
+
+- PDO_Firebird:
+  . Fixed bug #74462 (PDO_Firebird returns only NULLs for results with boolean
+    for FIREBIRD >= 3.0). (Dorin Marcoci)
+  . Fixed bug #76488 (Memory leak when fetching a BLOB field). (Simonov Denis)
+
+- Standard:
+  . Fixed bug #73817 (Incorrect entries in get_html_translation_table). (cmb)
+  . Fixed bug #76136 (stream_socket_get_name should enclose IPv6 in brackets).
+    (seliver)
+
+- Zip:
+  . Fixed bug #76524 (ZipArchive memory leak (OVERWRITE flag and empty archive)).
+    (Timur Ibragimov)
+
+05 Jul 2018, PHP 7.3.0alpha3
+
+- Core:
+  . Fixed bug #76534 (PHP hangs on 'illegal string offset on string references
+    with an error handler). (Laruence)
   . Fixed bug #76520 (Object creation leaks memory when executed over HTTP).
     (Nikita)
   . Fixed bug #76502 (Chain of mixed exceptions and errors does not serialize
     properly). (Nikita)
   . Fixed bug #76509 (Inherited static properties can be desynchronized from
     their parent by ref). (Nikita)
+  . Fixed bug #76439 (Changed behaviour in unclosed HereDoc). (Nikita, tpunt)
+  . Added syslog.facility and syslog.ident INI entries for customizing syslog
+    logging. (Philip Prindeville)
+  . Fixed bug #63217 (Constant numeric strings become integers when used as
+    ArrayAccess offset). (Rudi Theunissen, Dmitry)
+
+- DOM:
+  . Fixed bug #76285 (DOMDocument::formatOutput attribute sometimes ignored).
+    (Andrew Nester)
 
 - FPM:
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
+
+- GMP:
+  . Fixed bug #74670 (Integer Underflow when unserializing GMP and possible
+    other classes). (Nikita)
+
+- intl:
+  . Fixed bug #76556 (get_debug_info handler for BreakIterator shows wrong
+    type). (cmb)
+
+- mbstring:
+  . Fixed bug #76532 (Integer overflow and excessive memory usage
+    in mb_strimwidth). (MarcusSchwarz)
+
+- OpenSSL:
+  . Add min_proto_version and max_proto_version ssl stream options as well as
+    related constants for possible TLS protocol values. (Jakub Zelenka)
 
 - PCRE:
   . Fixed bug #76512 (\w no longer includes unicode characters). (cmb)
   . Fixed bug #76514 (Regression in preg_match makes it fail with
     PREG_JIT_STACKLIMIT_ERROR). (Anatol)
 
+- PGSQL:
+  . Fixed bug #76548 (pg_fetch_result did not fetch the next row). (Anatol)
+
 - phpdbg:
   . Fix arginfo wrt. optional/required parameters. (cmb)
+
+- Reflection:
+  . Fixed bug #76536 (PHP crashes with core dump when throwing exception in
+    error handler). (Laruence)
+  . Fixed bug #75231 (ReflectionProperty#getValue() incorrectly works with
+    inherited classes). (Nikita)
 
 - Standard:
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
     (Laruence)
+  . Fixed bug #71848 (getimagesize with $imageinfo returns false). (cmb)
+  . Fixed bug #48016 (stdClass::__setState is not defined although var_export() uses it). (Andrea)
+
+- Tokenizer:
+  . Fixed bug #76538 (token_get_all with TOKEN_PARSE flag fails to recognise
+    close tag with newline). (Nikita)
 
 21 Jun 2018, PHP 7.3.0alpha2
 

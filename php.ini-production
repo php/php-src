@@ -585,6 +585,24 @@ html_errors = On
 ; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
 
+; The syslog ident is a string which is prepended to every message logged
+; to syslog. Only used when error_log is set to syslog.
+;syslog.ident = php
+
+; The syslog facility is used to specify what type of program is logging 
+; the message. Only used when error_log is set to syslog.
+;syslog.facility = user
+
+; Set this to disable filtering control characters (the default).
+; Some loggers only accept NVT-ASCII, others accept anything that's not
+; control characters. If your logger accepts everything, then no filtering
+; is needed at all.
+; Allowed values are:
+;   ascii (only base ASCII characters)
+;   no_ctrl (all characters except control characters)
+;   all (all characters)
+;syslog.filter = ascii
+
 ;windows.show_crt_warning
 ; Default value: 0
 ; Development value: 0
@@ -919,6 +937,7 @@ default_socket_timeout = 60
 
 ;extension=soap
 ;extension=sockets
+;extension=sodium
 ;extension=sqlite3
 ;extension=tidy
 ;extension=xmlrpc

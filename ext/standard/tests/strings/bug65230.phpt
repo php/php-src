@@ -3,7 +3,7 @@ Bug #65230 setting locale randomly broken
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-    die('skip');
+    die('skip Windows only test');
 }
 ?>
 --INI--

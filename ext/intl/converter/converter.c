@@ -542,7 +542,8 @@ static void php_converter_resolve_callback(zval *zobj,
 	if (zend_fcall_info_init(&caller, 0, finfo, fcache, NULL, &errstr) == FAILURE) {
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Error setting converter callback: %s", errstr);
 	}
-	zval_dtor(&caller);
+	zend_array_destroy(Z_ARR(caller));
+	ZVAL_UNDEF(&finfo->function_name);
 	if (errstr) {
 		efree(errstr);
 	}
@@ -931,7 +932,7 @@ static PHP_METHOD(UConverter, getAliases) {
 		alias = ucnv_getAlias(name, i, &error);
 		if (U_FAILURE(error)) {
 			THROW_UFAILURE(NULL, "ucnv_getAlias", error);
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_NULL();
 		}
 		add_next_index_string(return_value, alias);
@@ -959,7 +960,7 @@ static PHP_METHOD(UConverter, getStandards) {
 		const char *name = ucnv_getStandard(i, &error);
 		if (U_FAILURE(error)) {
 			THROW_UFAILURE(NULL, "ucnv_getStandard", error);
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_NULL();
 		}
 		add_next_index_string(return_value, name);

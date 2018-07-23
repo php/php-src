@@ -15,7 +15,7 @@
 
 */
 
-define('file_not_found', 2, 1);
+const FILE_NOT_FOUND = 2;
 
 /*
  Function: bool create_file(string $filename, string $mode = "w");
@@ -432,7 +432,7 @@ function create_links($file_path,
  Description: delete a given file if exists
  Returns: true on success
           false on failure
-          file_not_found if file doesn't exist
+          FILE_NOT_FOUND if file doesn't exist
 */
 function delete_file($filename) {
   // check if file exists
@@ -442,7 +442,7 @@ function delete_file($filename) {
     else
       return false;
   }
-  return file_not_found;
+  return FILE_NOT_FOUND;
 }
 
 /*
@@ -475,7 +475,7 @@ function delete_files($file_path,
     $status = delete_file($filename);
     if($status == true) {
       $return_value['deleted']++;
-    } else if($status == file_not_found) {
+    } else if($status == FILE_NOT_FOUND) {
       $return_value['notfound']++;
     } else {
       $return_value['failed']++;

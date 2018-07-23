@@ -28,16 +28,16 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC);
+ZEND_API void ZEND_FASTCALL _rc_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC);
 ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
-#define zval_dtor_func(zv)         _zval_dtor_func(zv ZEND_FILE_LINE_CC)
-#define zval_copy_ctor_func(zv)    _zval_copy_ctor_func(zv ZEND_FILE_LINE_CC)
+#define rc_dtor_func(ref)         _rc_dtor_func(ref ZEND_FILE_LINE_CC)
+#define zval_copy_ctor_func(zv)   _zval_copy_ctor_func(zv ZEND_FILE_LINE_CC)
 
 static zend_always_inline void _zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE_DC)
 {
 	if (Z_REFCOUNTED_P(zval_ptr) && !Z_DELREF_P(zval_ptr)) {
-		_zval_dtor_func(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
+		_rc_dtor_func(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
 	}
 }
 
@@ -46,7 +46,7 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);
 		if (!GC_DELREF(ref)) {
-			_zval_dtor_func(ref ZEND_FILE_LINE_RELAY_CC);
+			_rc_dtor_func(ref ZEND_FILE_LINE_RELAY_CC);
 		} else {
 			gc_check_possible_root(ref);
 		}
@@ -71,42 +71,44 @@ static zend_always_inline void _zval_opt_copy_ctor(zval *zvalue ZEND_FILE_LINE_D
 	}
 }
 
-ZEND_API size_t zend_print_variable(zval *var);
+static zend_always_inline void zval_ptr_dtor_str(zval *zval_ptr)
+{
+	if (Z_REFCOUNTED_P(zval_ptr) && !Z_DELREF_P(zval_ptr)) {
+		ZEND_ASSERT(Z_TYPE_P(zval_ptr) == IS_STRING);
+		ZEND_ASSERT(!ZSTR_IS_INTERNED(Z_STR_P(zval_ptr)));
+		ZEND_ASSERT(!(GC_FLAGS(Z_STR_P(zval_ptr)) & IS_STR_PERSISTENT));
+		efree(Z_STR_P(zval_ptr));
+	}
+}
+
 ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC);
-ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC);
-ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_ptr_dtor(zval *zvalue ZEND_FILE_LINE_DC);
-ZEND_API void _zval_dtor_wrapper(zval *zvalue);
 #define zval_copy_ctor(zvalue) _zval_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_opt_copy_ctor(zvalue) _zval_opt_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
-#define zval_dtor(zvalue) zval_ptr_dtor_nogc(zvalue)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor_nogc(zval_ptr) _zval_ptr_dtor_nogc((zval_ptr) ZEND_FILE_LINE_CC)
-#define zval_internal_dtor(zvalue) _zval_internal_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_internal_ptr_dtor(zvalue) _zval_internal_ptr_dtor((zvalue) ZEND_FILE_LINE_CC)
-#define zval_dtor_wrapper _zval_dtor_wrapper
+
+/* Kept for compatibility */
+#define zval_dtor(zvalue) zval_ptr_dtor_nogc(zvalue)
+#define zval_internal_dtor(zvalue) _zval_internal_ptr_dtor((zvalue) ZEND_FILE_LINE_CC)
+#define zval_dtor_func _rc_dtor_func
 
 #if ZEND_DEBUG
 ZEND_API void _zval_ptr_dtor_wrapper(zval *zval_ptr);
-ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue);
 ZEND_API void _zval_internal_ptr_dtor_wrapper(zval *zvalue);
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor_wrapper
-#define zval_internal_dtor_wrapper _zval_internal_dtor_wrapper
 #define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor_wrapper
 #else
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor
-#define zval_internal_dtor_wrapper _zval_internal_dtor
 #define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor
 #endif
 
 ZEND_API void zval_add_ref(zval *p);
-ZEND_API void zval_add_ref_unref(zval *p);
 
 END_EXTERN_C()
 
-#define ZVAL_DESTRUCTOR zval_dtor_wrapper
 #define ZVAL_PTR_DTOR zval_ptr_dtor_wrapper
-#define ZVAL_INTERNAL_DTOR zval_internal_dtor_wrapper
 #define ZVAL_INTERNAL_PTR_DTOR zval_internal_ptr_dtor_wrapper
 
 #endif

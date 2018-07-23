@@ -90,7 +90,7 @@ class LogTool
             return $this->error("Unexpected truncated message: {$line}");
         }
 
-        if ($lineLen === $this->limit) {
+        if ($lineLen === $this->limit - strlen('NOTICE: ') - 1) {
             if (!isset($matches[2])) {
                 return $this->error("The truncated line is not ended with '...'");
             }
@@ -205,7 +205,7 @@ class LogTool
         if ($rem !== $outLen)  {
             return $this->error("Printed more than the message len");
         }
-        if ($finalSuffix === null || $finalSuffix === "") {
+        if ($finalSuffix === null) {
             return false;
         }
         if ($finalSuffix === false) {

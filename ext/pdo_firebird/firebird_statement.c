@@ -229,6 +229,11 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 #endif
 				col->param_type = PDO_PARAM_INT;
 				break;
+#ifdef SQL_BOOLEAN
+			case SQL_BOOLEAN:
+				col->param_type = PDO_PARAM_BOOL;
+				break;
+#endif
 			default:
 				col->param_type = PDO_PARAM_STR;
 				break;
@@ -294,7 +299,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 		unsigned short seg_len;
 		ISC_STATUS stat;
 
-		*ptr = S->fetch_buf[colno] = erealloc(*ptr, *len+1);
+		*ptr = S->fetch_buf[colno] = erealloc(S->fetch_buf[colno], *len+1);
 
 		for (cur_len = stat = 0; (!stat || stat == isc_segment) && cur_len < *len; cur_len += seg_len) {
 
@@ -416,6 +421,13 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 					*len = slprintf(*ptr, CHAR_BUF_LEN, "%F" , *(double*)var->sqldata);
 					break;
+#ifdef SQL_BOOLEAN
+				case SQL_BOOLEAN:
+					*len = sizeof(zend_bool);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_bool, 1, NULL);
+					*(zend_bool*)*ptr = *(FB_BOOLEAN*)var->sqldata;
+					break;
+#endif
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE*)var->sqldata, &t);
 					fmt = S->H->date_format ? S->H->date_format : PDO_FB_DEF_DATE_FMT;
@@ -475,7 +487,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 	}
 
 	if (Z_TYPE_P(param) != IS_STRING) {
-		zval_dtor(&data);
+		zval_ptr_dtor_str(&data);
 	}
 
 	if (isc_close_blob(H->isc_status, &h)) {

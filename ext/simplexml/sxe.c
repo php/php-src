@@ -41,14 +41,11 @@ PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
  Rewind to first element */
 PHP_METHOD(ce_SimpleXMLIterator, rewind)
 {
-	php_sxe_iterator iter;
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	iter.sxe = Z_SXEOBJ_P(getThis());
-	ce_SimpleXMLElement->iterator_funcs.funcs->rewind((zend_object_iterator*)&iter);
+	php_sxe_rewind_iterator(Z_SXEOBJ_P(getThis()));
 }
 /* }}} */
 
@@ -82,8 +79,7 @@ PHP_METHOD(ce_SimpleXMLIterator, current)
 	}
 
 	data = &sxe->iter.data;
-	ZVAL_DEREF(data);
-	ZVAL_COPY(return_value, data);
+	ZVAL_COPY_DEREF(return_value, data);
 }
 /* }}} */
 
@@ -117,14 +113,11 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
  Move to next element */
 PHP_METHOD(ce_SimpleXMLIterator, next)
 {
-	php_sxe_iterator iter;
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	iter.sxe = Z_SXEOBJ_P(getThis());
-	ce_SimpleXMLElement->iterator_funcs.funcs->move_forward((zend_object_iterator*)&iter);
+	php_sxe_move_forward_iterator(Z_SXEOBJ_P(getThis()));
 }
 /* }}} */
 
@@ -172,8 +165,7 @@ PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 	}
 
 	data = &sxe->iter.data;
-	ZVAL_DEREF(data);
-	ZVAL_COPY(return_value, data);
+	ZVAL_COPY_DEREF(return_value, data);
 }
 
 /* {{{ arginfo */

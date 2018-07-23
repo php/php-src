@@ -368,13 +368,15 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 }
 /* }}} */
 
-/* {{{ php_filter_magic_quotes */
-void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
+/* {{{ php_filter_add_slashes */
+void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL)
 {
+	/* This filter is used by both 'add_slashes' & 'magic_quotes' (legacy) */
+
 	zend_string *buf;
 
 	/* just call php_addslashes quotes */
-	buf = php_addslashes(Z_STR_P(value), 0);
+	buf = php_addslashes(Z_STR_P(value));
 
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, buf);

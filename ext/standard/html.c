@@ -1595,8 +1595,7 @@ static inline void write_s3row_data(
 			written_k2 = write_octet_sequence((unsigned char*)&key[written_k1], charset, spe_cp);
 			memcpy(&entity[1], mcpr[i].normal_entry.entity, l);
 			entity[l + 1] = ';';
-			entity[l + 1] = '\0';
-			add_assoc_stringl_ex(arr, key, written_k1 + written_k2, entity, l + 1);
+			add_assoc_stringl_ex(arr, key, written_k1 + written_k2, entity, l + 2);
 		}
 	}
 }

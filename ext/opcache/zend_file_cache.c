@@ -51,6 +51,14 @@
 # include <sys/file.h>
 #endif
 
+#ifndef ZEND_WIN32
+#define zend_file_cache_unlink unlink
+#define zend_file_cache_open open
+#else
+#define zend_file_cache_unlink php_win32_ioutil_unlink
+#define zend_file_cache_open php_win32_ioutil_open
+#endif
+
 #ifdef ZEND_WIN32
 # define LOCK_SH 0
 # define LOCK_EX 1
@@ -169,7 +177,11 @@ static int zend_file_cache_mkdir(char *filename, size_t start)
 		if (IS_SLASH(*s)) {
 			char old = *s;
 			*s = '\000';
+#ifndef ZEND_WIN32
 			if (mkdir(filename, S_IRWXU) < 0 && errno != EEXIST) {
+#else
+			if (php_win32_ioutil_mkdir(filename, 0700) < 0 && errno != EEXIST) {
+#endif
 				*s = old;
 				return FAILURE;
 			}
@@ -644,19 +656,11 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 			q = *p;
 			UNSERIALIZE_PTR(q);
 
-			if (q->trait_method) {
-				zend_trait_method_reference *m;
-
-				SERIALIZE_PTR(q->trait_method);
-				m = q->trait_method;
-				UNSERIALIZE_PTR(m);
-
-				if (m->method_name) {
-					SERIALIZE_STR(m->method_name);
-				}
-				if (m->class_name) {
-					SERIALIZE_STR(m->class_name);
-				}
+			if (q->trait_method.method_name) {
+				SERIALIZE_STR(q->trait_method.method_name);
+			}
+			if (q->trait_method.class_name) {
+				SERIALIZE_STR(q->trait_method.class_name);
 			}
 
 			if (q->alias) {
@@ -668,6 +672,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 	if (ce->trait_precedences) {
 		zend_trait_precedence **p, *q;
+		int j;
 
 		SERIALIZE_PTR(ce->trait_precedences);
 		p = ce->trait_precedences;
@@ -678,32 +683,15 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 			q = *p;
 			UNSERIALIZE_PTR(q);
 
-			if (q->trait_method) {
-				zend_trait_method_reference *m;
-
-				SERIALIZE_PTR(q->trait_method);
-				m = q->trait_method;
-				UNSERIALIZE_PTR(m);
-
-				if (m->method_name) {
-					SERIALIZE_STR(m->method_name);
-				}
-				if (m->class_name) {
-					SERIALIZE_STR(m->class_name);
-				}
+			if (q->trait_method.method_name) {
+				SERIALIZE_STR(q->trait_method.method_name);
+			}
+			if (q->trait_method.class_name) {
+				SERIALIZE_STR(q->trait_method.class_name);
 			}
 
-			if (q->exclude_from_classes) {
-				zend_string **s;
-
-				SERIALIZE_PTR(q->exclude_from_classes);
-				s = (zend_string**)q->exclude_from_classes;
-				UNSERIALIZE_PTR(s);
-
-				while (*s) {
-					SERIALIZE_STR(*s);
-					s++;
-				}
+			for (j = 0; j < q->num_excludes; j++) {
+				SERIALIZE_STR(q->exclude_class_names[j]);
 			}
 			p++;
 		}
@@ -829,19 +817,15 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	filename = zend_file_cache_get_bin_file_path(script->script.filename);
 
 	if (zend_file_cache_mkdir(filename, strlen(ZCG(accel_directives).file_cache)) != SUCCESS) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create directory for file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create directory for file '%s', %s\n", filename, strerror(errno));
 		efree(filename);
 		return FAILURE;
 	}
 
-#ifndef ZEND_WIN32
-	fd = open(filename, O_CREAT | O_EXCL | O_RDWR | O_BINARY, S_IRUSR | S_IWUSR);
-#else
-	fd = open(filename, O_CREAT | O_EXCL | O_RDWR | O_BINARY, _S_IREAD | _S_IWRITE);
-#endif
+	fd = zend_file_cache_open(filename, O_CREAT | O_EXCL | O_RDWR | O_BINARY, S_IRUSR | S_IWUSR);
 	if (fd < 0) {
 		if (errno != EEXIST) {
-			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create file '%s'\n", filename);
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create file '%s', %s\n", filename, strerror(errno));
 		}
 		efree(filename);
 		return FAILURE;
@@ -889,7 +873,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		zend_string_release_ex((zend_string*)ZCG(mem), 0);
 		close(fd);
 		efree(mem);
-		unlink(filename);
+		zend_file_cache_unlink(filename);
 		efree(filename);
 		return FAILURE;
 	}
@@ -903,7 +887,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		zend_string_release_ex((zend_string*)ZCG(mem), 0);
 		close(fd);
 		efree(mem);
-		unlink(filename);
+		zend_file_cache_unlink(filename);
 		efree(filename);
 		return FAILURE;
 	}
@@ -1279,18 +1263,11 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 			UNSERIALIZE_PTR(*p);
 			q = *p;
 
-			if (q->trait_method) {
-				zend_trait_method_reference *m;
-
-				UNSERIALIZE_PTR(q->trait_method);
-				m = q->trait_method;
-
-				if (m->method_name) {
-					UNSERIALIZE_STR(m->method_name);
-				}
-				if (m->class_name) {
-					UNSERIALIZE_STR(m->class_name);
-				}
+			if (q->trait_method.method_name) {
+				UNSERIALIZE_STR(q->trait_method.method_name);
+			}
+			if (q->trait_method.class_name) {
+				UNSERIALIZE_STR(q->trait_method.class_name);
 			}
 
 			if (q->alias) {
@@ -1302,6 +1279,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 
 	if (ce->trait_precedences) {
 		zend_trait_precedence **p, *q;
+		int j;
 
 		UNSERIALIZE_PTR(ce->trait_precedences);
 		p = ce->trait_precedences;
@@ -1310,30 +1288,15 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 			UNSERIALIZE_PTR(*p);
 			q = *p;
 
-			if (q->trait_method) {
-				zend_trait_method_reference *m;
-
-				UNSERIALIZE_PTR(q->trait_method);
-				m = q->trait_method;
-
-				if (m->method_name) {
-					UNSERIALIZE_STR(m->method_name);
-				}
-				if (m->class_name) {
-					UNSERIALIZE_STR(m->class_name);
-				}
+			if (q->trait_method.method_name) {
+				UNSERIALIZE_STR(q->trait_method.method_name);
+			}
+			if (q->trait_method.class_name) {
+				UNSERIALIZE_STR(q->trait_method.class_name);
 			}
 
-			if (q->exclude_from_classes) {
-				zend_string **s;
-
-				UNSERIALIZE_PTR(q->exclude_from_classes);
-				s = (zend_string**)q->exclude_from_classes;
-
-				while (*s) {
-					UNSERIALIZE_STR(*s);
-					s++;
-				}
+			for (j = 0; j < q->num_excludes; j++) {
+				UNSERIALIZE_STR(q->exclude_class_names[j]);
 			}
 			p++;
 		}
@@ -1392,7 +1355,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	}
 	filename = zend_file_cache_get_bin_file_path(full_path);
 
-	fd = open(filename, O_RDONLY | O_BINARY);
+	fd = zend_file_cache_open(filename, O_RDONLY | O_BINARY);
 	if (fd < 0) {
 		efree(filename);
 		return NULL;
@@ -1405,10 +1368,10 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	}
 
 	if (read(fd, &info, sizeof(info)) != sizeof(info)) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (info)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		unlink(filename);
+		zend_file_cache_unlink(filename);
 		efree(filename);
 		return NULL;
 	}
@@ -1418,7 +1381,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong header)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		unlink(filename);
+		zend_file_cache_unlink(filename);
 		efree(filename);
 		return NULL;
 	}
@@ -1426,7 +1389,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong \"system_id\")\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		unlink(filename);
+		zend_file_cache_unlink(filename);
 		efree(filename);
 		return NULL;
 	}
@@ -1438,7 +1401,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
 		}
 		close(fd);
-		unlink(filename);
+		zend_file_cache_unlink(filename);
 		efree(filename);
 		return NULL;
 	}
@@ -1453,10 +1416,10 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 #endif
 
 	if (read(fd, mem, info.mem_size + info.str_size) != (ssize_t)(info.mem_size + info.str_size)) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (mem)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		unlink(filename);
+		zend_file_cache_unlink(filename);
 		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
 		return NULL;
@@ -1470,7 +1433,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	if (ZCG(accel_directives).file_cache_consistency_checks &&
 	    zend_adler32(ADLER32_INIT, mem, info.mem_size + info.str_size) != info.checksum) {
 		zend_accel_error(ACCEL_LOG_WARNING, "corrupted file '%s'\n", filename);
-		unlink(filename);
+		zend_file_cache_unlink(filename);
 		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
 		return NULL;
@@ -1568,7 +1531,7 @@ void zend_file_cache_invalidate(zend_string *full_path)
 
 	filename = zend_file_cache_get_bin_file_path(full_path);
 
-	unlink(filename);
+	zend_file_cache_unlink(filename);
 	efree(filename);
 }
 

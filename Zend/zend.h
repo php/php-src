@@ -86,20 +86,17 @@ typedef struct _zend_unserialize_data zend_unserialize_data;
 
 typedef struct _zend_trait_method_reference {
 	zend_string *method_name;
-	zend_class_entry *ce;
 	zend_string *class_name;
 } zend_trait_method_reference;
 
 typedef struct _zend_trait_precedence {
-	zend_trait_method_reference *trait_method;
-	union {
-		zend_class_entry  *ce;
-		zend_string       *class_name;
-	} *exclude_from_classes;
+	zend_trait_method_reference trait_method;
+	uint32_t num_excludes;
+	zend_string *exclude_class_names[1];
 } zend_trait_precedence;
 
 typedef struct _zend_trait_alias {
-	zend_trait_method_reference *trait_method;
+	zend_trait_method_reference trait_method;
 
 	/**
 	* name for method to be added
@@ -142,12 +139,15 @@ struct _zend_class_entry {
 	union _zend_function *serialize_func;
 	union _zend_function *unserialize_func;
 
-	zend_class_iterator_funcs iterator_funcs;
+	/* allocated only if class implements Iterator or IteratorAggregate interface */
+	zend_class_iterator_funcs *iterator_funcs_ptr;
 
 	/* handlers */
-	zend_object* (*create_object)(zend_class_entry *class_type);
+	union {
+		zend_object* (*create_object)(zend_class_entry *class_type);
+		int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */
+	};
 	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object, int by_ref);
-	int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */
 	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method);
 
 	/* serializer callbacks */
@@ -243,6 +243,10 @@ ZEND_API size_t zend_print_zval(zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
 ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent);
 ZEND_API void zend_print_flat_zval_r(zval *expr);
+
+#define zend_print_variable(var) \
+	zend_print_zval((var), 0)
+
 ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 ZEND_API void zend_activate(void);

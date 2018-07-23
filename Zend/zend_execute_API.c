@@ -181,6 +181,10 @@ void init_executor(void) /* {{{ */
 
 	EG(each_deprecation_thrown) = 0;
 
+	EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
+	EG(persistent_functions_count) = EG(function_table)->nNumUsed;
+	EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
+
 	EG(active) = 1;
 }
 /* }}} */
@@ -279,25 +283,9 @@ void shutdown_executor(void) /* {{{ */
 		 * Zend Memory Manager frees memory by its own. We don't have to free
 		 * each allocated block separately.
 		 */
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(zend_constants), zv) {
-			zend_constant *c = Z_PTR_P(zv);
-			if (c->flags & CONST_PERSISTENT) {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END_DEL();
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
-			zend_function *func = Z_PTR_P(zv);
-			if (func->type == ZEND_INTERNAL_FUNCTION) {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END_DEL();
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-			zend_class_entry *ce = Z_PTR_P(zv);
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END_DEL();
-
+		zend_hash_discard(EG(zend_constants), EG(persistent_constants_count));
+		zend_hash_discard(EG(function_table), EG(persistent_functions_count));
+		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
 		zend_cleanup_internal_classes();
 	} else {
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
@@ -525,23 +513,6 @@ ZEND_API zend_class_entry *zend_get_executed_scope(void) /* {{{ */
 ZEND_API zend_bool zend_is_executing(void) /* {{{ */
 {
 	return EG(current_execute_data) != 0;
-}
-/* }}} */
-
-ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
-{
-	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_RELAY_CC);
-}
-/* }}} */
-
-ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
-{
-	if (Z_REFCOUNTED_P(zval_ptr)) {
-		Z_DELREF_P(zval_ptr);
-		if (Z_REFCOUNT_P(zval_ptr) == 0) {
-			_zval_internal_dtor_for_ptr(zval_ptr ZEND_FILE_LINE_CC);
-		}
-	}
 }
 /* }}} */
 
@@ -960,7 +931,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	zend_exception_restore();
 
 	zval_ptr_dtor(&args[0]);
-	zval_dtor(&fcall_info.function_name);
+	zval_ptr_dtor_str(&fcall_info.function_name);
 
 	zend_hash_del(EG(in_autoload), lc_name);
 
@@ -1072,7 +1043,7 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 	} else {
 		retval = FAILURE;
 	}
-	zval_dtor(&pv);
+	zval_ptr_dtor_str(&pv);
 	return retval;
 }
 /* }}} */

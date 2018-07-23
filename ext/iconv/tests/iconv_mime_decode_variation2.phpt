@@ -2,8 +2,8 @@
 Test iconv_mime_decode() function : usage variations - Pass different data types to mode arg
 --SKIPIF--
 <?php
-PHP_INT_SIZE == 4 or die('skip');
-extension_loaded('iconv') or die('skip');
+PHP_INT_SIZE == 4 or die('skip 32-bit only');
+extension_loaded('iconv') or die('skip iconv extension not loaded');
 function_exists('iconv_mime_decode') or die("skip iconv_mime_decode() is not available in this build");
 ?>
 --FILE--

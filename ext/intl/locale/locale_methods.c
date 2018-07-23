@@ -744,7 +744,7 @@ PHP_FUNCTION( locale_get_keywords )
 				if( kw_value_str){
 					zend_string_efree( kw_value_str );
 				}
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
         		RETURN_FALSE;
 			}
 

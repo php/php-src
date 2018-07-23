@@ -1097,7 +1097,7 @@ PHP_FUNCTION(posix_getgrnam)
 	array_init(return_value);
 
 	if (!php_posix_group_to_array(g, return_value)) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		php_error_docref(NULL, E_WARNING, "unable to convert posix group to array");
 		RETVAL_FALSE;
 	}
@@ -1150,7 +1150,7 @@ PHP_FUNCTION(posix_getgrgid)
 	array_init(return_value);
 
 	if (!php_posix_group_to_array(g, return_value)) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		php_error_docref(NULL, E_WARNING, "unable to convert posix group struct to array");
 		RETVAL_FALSE;
 	}
@@ -1217,7 +1217,7 @@ PHP_FUNCTION(posix_getpwnam)
 	array_init(return_value);
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		php_error_docref(NULL, E_WARNING, "unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
@@ -1268,7 +1268,7 @@ PHP_FUNCTION(posix_getpwuid)
 	array_init(return_value);
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		php_error_docref(NULL, E_WARNING, "unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
@@ -1387,7 +1387,7 @@ PHP_FUNCTION(posix_getrlimit)
 
 	for (l=limits; l->name; l++) {
 		if (posix_addlimit(l->limit, l->name, return_value) == FAILURE) {
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_FALSE;
 		}
 	}

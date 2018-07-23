@@ -25,7 +25,7 @@ $fakezval .= "\x01";
 $fakezval .= "\x00";
 $fakezval .= "\x00\x00";
 
-$inner = 'C:3:"obj":3:{ryat';
+$inner = 'C:3:"obj":3:{rya}';
 $exploit = 'a:4:{i:0;i:1;i:1;C:3:"obj":'.strlen($inner).':{'.$inner.'}i:2;s:'.strlen($fakezval).':"'.$fakezval.'";i:3;R:5;}';
 
 $data = unserialize($exploit);
@@ -47,8 +47,6 @@ function ptr2str($ptr)
 DONE
 --EXPECTF--
 Notice: unserialize(): Error at offset 0 of 3 bytes in %sbug70436.php on line %d
-
-Notice: unserialize(): Error at offset 16 of 17 bytes in %sbug70436.php on line %d
 
 Notice: unserialize(): Error at offset 93 of 94 bytes in %sbug70436.php on line %d
 bool(false)

@@ -60,7 +60,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	}
 	if (UNEXPECTED(object->ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		if (EXPECTED(Z_TYPE_P(p) == IS_STRING)) {
-			zend_string_release_ex(Z_STR_P(p), 0);
+			zval_ptr_dtor_str(p);
 		} else if (Z_TYPE_P(p) == IS_ARRAY) {
 			HashTable *guards;
 

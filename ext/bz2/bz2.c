@@ -516,13 +516,11 @@ static PHP_FUNCTION(bzcompress)
 	int               error,           /* Error Container */
 					  block_size  = 4, /* Block size for compression algorithm */
 					  work_factor = 0, /* Work factor for compression algorithm */
-					  argc;            /* Argument count */
+					  argc = ZEND_NUM_ARGS(); /* Argument count */
 	size_t               source_len;      /* Length of the source data */
 	unsigned int      dest_len;        /* Length of the destination buffer */
 
-	argc = ZEND_NUM_ARGS();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
+	if (zend_parse_parameters(argc, "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
 		return;
 	}
 
