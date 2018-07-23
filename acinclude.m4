@@ -1375,12 +1375,13 @@ main() {
     ],[
       ac_cv_what_readdir_r=POSIX
     ],[
-      AC_TRY_CPP([
+      AC_PREPROC_IFELSE([
+        AC_LANG_SOURCE([[
 #define _REENTRANT
 #include <sys/types.h>
 #include <dirent.h>
 int readdir_r(DIR *, struct dirent *);
-        ],[
+        ]])],[
           ac_cv_what_readdir_r=old-style
         ],[
           ac_cv_what_readdir_r=none
