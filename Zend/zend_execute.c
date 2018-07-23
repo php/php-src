@@ -3390,13 +3390,13 @@ static zend_never_inline void ZEND_FASTCALL zend_quick_get_constant(
 		const zval *key, uint32_t flags OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
 {
 	_zend_quick_get_constant(key, flags, 0 OPLINE_CC EXECUTE_DATA_CC);
-}
+} /* }}} */
 
 static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
-		const zval *key, uint32_t flags OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
+		const zval *key OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
 {
-	return _zend_quick_get_constant(key, flags, 1 OPLINE_CC EXECUTE_DATA_CC);
-}
+	return _zend_quick_get_constant(key, 0, 1 OPLINE_CC EXECUTE_DATA_CC);
+} /* }}} */
 
 #ifdef ZEND_VM_TRACE_HANDLERS
 # include "zend_vm_trace_handlers.h"
