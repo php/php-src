@@ -1172,29 +1172,6 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-// zval should be in FCARG1a
-|.macro ZVAL_COPY_CTOR_FUNC, filename, lineno // arg1 must be in FCARG1a
-||	if (ZEND_DEBUG) {
-||		if (filename) {
-|			LOAD_ADDR FCARG2a, ZSTR_VAL((zend_string*)filename)
-||		} else {
-|			xor FCARG2a, FCARG2a
-||		}
-|		.if X64
-|			mov CARG3d, lineno
-|		.else
-|			sub r4, 12
-|			push lineno
-|		.endif
-||	}
-|	EXT_CALL _zval_copy_ctor_func, r0
-||	if (ZEND_DEBUG) {
-|		.if not(X64)
-|			add r4, 12
-|		.endif
-||	}
-|.endmacro
-
 |.macro ZVAL_DEREF, reg, info
 ||	if (info & MAY_BE_REF) {
 |		IF_NOT_Z_TYPE, reg, IS_REFERENCE, >1
@@ -1213,7 +1190,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 // zval should be in FCARG1a
-|.macro ZVAL_DTOR_FUNC, var_info, filename, opline // arg1 must be in FCARG1a
+|.macro ZVAL_DTOR_FUNC, var_info, opline // arg1 must be in FCARG1a
 ||	do {
 ||		if (has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 ||			zend_uchar type = concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
@@ -1243,30 +1220,11 @@ static void* dasm_labels[zend_lb_MAX];
 ||		if (opline) {
 |			SAVE_VALID_OPLINE opline
 ||		}
-||		if (ZEND_DEBUG) {
-||			uint32_t lineno = opline ? ((zend_op*)opline)->lineno : 0;
-||			if (filename) {
-|				LOAD_ADDR FCARG2a, ZSTR_VAL((zend_string*)filename)
-||			} else {
-|				xor FCARG2a, FCARG2a
-||			}
-|			.if X64
-|				mov CARG3d, lineno
-|			.else
-|				sub r4, 12
-|				push lineno
-|			.endif
-||		}
-|		EXT_CALL _rc_dtor_func, r0
-||		if (ZEND_DEBUG) {
-|			.if not(X64)
-|				add r4, 12
-|			.endif
-||		}
+|		EXT_CALL rc_dtor_func, r0
 ||	} while(0);
 |.endmacro
 
-|.macro ZVAL_PTR_DTOR, addr, op_info, gc, cold, safe, filename, opline
+|.macro ZVAL_PTR_DTOR, addr, op_info, gc, cold, safe, opline
 ||	if ((op_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 ||		if ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 |			// if (Z_REFCOUNTED_P(cv)) {
@@ -1294,7 +1252,7 @@ static void* dasm_labels[zend_lb_MAX];
 |				SET_ZVAL_TYPE_INFO addr, IS_NULL
 ||			}
 |			// zval_dtor_func(r);
-|			ZVAL_DTOR_FUNC op_info, filename, opline
+|			ZVAL_DTOR_FUNC op_info, opline
 ||			if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
 |				jmp >4
 ||			}
@@ -1325,11 +1283,11 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro FREE_OP, op_type, op, op_info, cold, op_array, opline
 ||	if (op_type & (IS_VAR|IS_TMP_VAR)) {
-|		ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var), op_info, 0, cold, 0, op_array->filename, opline
+|		ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var), op_info, 0, cold, 0, opline
 ||	}
 |.endmacro
 
-|.macro SEPARATE_ZVAL_NOREF, addr, op_info, cold, filename, lineno
+|.macro SEPARATE_ZVAL_NOREF, addr, op_info, cold
 ||	if ((op_info & MAY_BE_ARRAY) && RC_MAY_BE_N(op_info)) {
 ||		if (cold) {
 |			IF_ZVAL_TYPE addr, IS_ARRAY, >1
@@ -1351,7 +1309,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		} else {
 |			LOAD_ZVAL_ADDR FCARG1a, addr
 ||		}
-|		ZVAL_COPY_CTOR_FUNC filename, lineno
+|		EXT_CALL zval_copy_ctor_func, r0
 ||		if (Z_REG(addr) == ZREG_FCARG1a) {
 |			mov FCARG1a, aword [r4] // restore
 ||		}
@@ -1363,7 +1321,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro SEPARATE_ARRAY, addr, op_info, cold, filename, lineno
+|.macro SEPARATE_ARRAY, addr, op_info, cold
 ||	if (RC_MAY_BE_N(op_info)) {
 ||		zend_reg tmp_reg;
 ||
@@ -1387,7 +1345,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		} else {
 |			LOAD_ZVAL_ADDR FCARG1a, addr
 ||		}
-|		ZVAL_COPY_CTOR_FUNC filename, lineno
+|		EXT_CALL zval_copy_ctor_func, r0
 ||		if (Z_REG(addr) == ZREG_FCARG1a) {
 |			mov FCARG1a, aword [r4] // restore
 ||		}
@@ -1724,7 +1682,7 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 		|	mov r0, OP:RX->op1.var
 	|.endif
 	|	add r0, FP
-	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, 0, NULL, NULL
+	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, 0, NULL
 	|9:
 	|	jmp ->exception_handler
 
@@ -3177,7 +3135,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 		|6:
 		|	SAVE_VALID_OPLINE opline
 		if (separate_op1) {
-			|	SEPARATE_ZVAL_NOREF op1_addr, op1_info, 0, op_array->filename, opline->lineno
+			|	SEPARATE_ZVAL_NOREF op1_addr, op1_info, 0
 		}
 		if (Z_MODE(res_addr) == IS_REG) {
 			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, res_var);
@@ -3514,7 +3472,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|6:
 		|	SAVE_VALID_OPLINE opline
 		if (separate_op1) {
-			|	SEPARATE_ZVAL_NOREF op1_addr, op1_info, 0, op_array->filename, opline->lineno
+			|	SEPARATE_ZVAL_NOREF op1_addr, op1_info, 0
 		}
 		if (Z_MODE(res_addr) == IS_REG) {
 			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, res_var);
@@ -3916,36 +3874,16 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 			case BP_VAR_W:
 				|2:
 				|	//retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
-				if (ZEND_DEBUG) {
-					const char *filename = op_array->filename ? op_array->filename->val : NULL;
-					|.if X64
-						|	LOAD_ADDR CARG4, filename
-						|	mov CARG5d, opline->lineno
-					|.else
-						|	sub r4, 4
-						|	push opline->lineno
-						|	push filename
-					|.endif
-				} else {
-					|.if not(X64)
-					|	sub r4, 12
-					|.endif
-				}
 				|.if X64
 					|	LOAD_ADDR CARG3, &EG(uninitialized_zval)
 				|.else
+					|	sub r4, 12
 					|	PUSH_ADDR &EG(uninitialized_zval), r0
 				|.endif
-				|	EXT_CALL _zend_hash_index_add_new, r0
-				if (ZEND_DEBUG) {
-					|.if not(X64)
-					|	add r4, 4
-					|.endif
-				} else {
-					|.if not(X64)
-					|	add r4, 12
-					|.endif
-				}
+				|	EXT_CALL zend_hash_index_add_new, r0
+				|.if not(X64)
+				|	add r4, 12
+				|.endif
 				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
 					|	jmp >8
 					|4:
@@ -4301,7 +4239,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				|	cmp dword [FCARG1a], 0
 				|	jnz >3
 			}
-			|	ZVAL_DTOR_FUNC var_info, op_array->filename, opline
+			|	ZVAL_DTOR_FUNC var_info, opline
 			|	jmp >3
 			|4:
 		}
@@ -4378,7 +4316,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY)) {
 			|	IF_NOT_ZVAL_TYPE op1_addr, IS_ARRAY, >7
 		}
-		|	SEPARATE_ARRAY op1_addr, op1_info, 1, op_array->filename, opline->lineno
+		|	SEPARATE_ARRAY op1_addr, op1_info, 1
 	} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
 			|	CMP_ZVAL_TYPE op1_addr, IS_FALSE
@@ -4388,23 +4326,8 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov [r4], Ra(Z_REG(op1_addr)) // save
 		}
-		if (ZEND_DEBUG) {
-			const char *filename = op_array->filename ? op_array->filename->val : NULL;
-			|.if X64
-				|	mov CARG3d, opline->lineno
-			|.else
-				|	sub r4, 12
-				|	push opline->lineno
-			|.endif
-			|	LOAD_ADDR FCARG2a, filename
-		}
 		|	mov FCARG1d, 8
 		|	EXT_CALL _zend_new_array, r0
-		if (ZEND_DEBUG) {
-			|.if not X64
-				|	add r4, 12
-			|.endif
-		}
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 		}
@@ -4418,17 +4341,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 		if (opline->op2_type == IS_UNUSED) {
 			|	// var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			|	LOAD_ADDR FCARG2a, &EG(uninitialized_zval)
-			if (ZEND_DEBUG) {
-				const char *filename = op_array->filename ? op_array->filename->val : NULL;
-				|.if X64
-					|	LOAD_ADDR CARG3, filename
-					|	mov CARG4d, opline->lineno
-				|.else
-					|	push opline->lineno
-					|	push filename
-				|.endif
-			}
-			|	EXT_CALL _zend_hash_next_index_insert, r0
+			|	EXT_CALL zend_hash_next_index_insert, r0
 			|	// if (UNEXPECTED(!var_ptr)) {
 			|	test r0, r0
 			|	jz >1
@@ -4492,23 +4405,8 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov [r4], Ra(Z_REG(op1_addr)) // save
 			}
-			if (ZEND_DEBUG) {
-				const char *filename = op_array->filename ? op_array->filename->val : NULL;
-				|.if X64
-					|	mov CARG3d, opline->lineno
-				|.else
-					|	sub r4, 12
-					|	push opline->lineno
-				|.endif
-				|	LOAD_ADDR FCARG2a, filename
-			}
 			|	mov FCARG1d, 8
 			|	EXT_CALL _zend_new_array, r0
-			if (ZEND_DEBUG) {
-				|.if not X64
-					|	add r4, 12
-				|.endif
-			}
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 			}
@@ -4632,7 +4530,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY)) {
 			|	IF_NOT_ZVAL_TYPE op1_addr, IS_ARRAY, >7
 		}
-		|	SEPARATE_ARRAY op1_addr, op1_info, 1, op_array->filename, opline->lineno
+		|	SEPARATE_ARRAY op1_addr, op1_info, 1
 	} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
 			|	CMP_ZVAL_TYPE op1_addr, IS_FALSE
@@ -4651,23 +4549,8 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov [r4], Ra(Z_REG(op1_addr)) // save
 		}
-		if (ZEND_DEBUG) {
-			const char *filename = op_array->filename ? op_array->filename->val : NULL;
-			|.if X64
-				|	mov CARG3d, opline->lineno
-			|.else
-				|	sub r4, 12
-				|	push opline->lineno
-			|.endif
-			|	LOAD_ADDR FCARG2a, filename
-		}
 		|	mov FCARG1d, 8
 		|	EXT_CALL _zend_new_array, r0
-		if (ZEND_DEBUG) {
-			|.if not X64
-				|	add r4, 12
-			|.endif
-		}
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 		}
@@ -4687,23 +4570,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 		if (opline->op2_type == IS_UNUSED) {
 			|	// var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			|	LOAD_ADDR FCARG2a, &EG(uninitialized_zval)
-			if (ZEND_DEBUG) {
-				const char *filename = op_array->filename ? op_array->filename->val : NULL;
-				|.if X64
-					|	LOAD_ADDR CARG3, filename
-					|	mov CARG4d, opline->lineno
-				|.else
-					|	add r4, 8
-					|	push opline->lineno
-					|	push filename
-				|.endif
-			}
-			|	EXT_CALL _zend_hash_next_index_insert, r0
-			||	if (ZEND_DEBUG) {
-			|	.if not(X64)
-			|		sub r4, 8
-			|	.endif
-			||	}
+			|	EXT_CALL zend_hash_next_index_insert, r0
 			|	// if (UNEXPECTED(!var_ptr)) {
 			|	test r0, r0
 			|	jz >1
@@ -4784,23 +4651,8 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov [r4], Ra(Z_REG(op1_addr)) // save
 			}
-			if (ZEND_DEBUG) {
-				const char *filename = op_array->filename ? op_array->filename->val : NULL;
-				|.if X64
-					|	mov CARG3d, opline->lineno
-				|.else
-					|	sub r4, 12
-					|	push opline->lineno
-				|.endif
-				|	LOAD_ADDR FCARG2a, filename
-			}
 			|	mov FCARG1d, 8
 			|	EXT_CALL _zend_new_array, r0
-			if (ZEND_DEBUG) {
-				|.if not X64
-					|	add r4, 12
-				|.endif
-			}
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 			}
@@ -6579,7 +6431,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 				|	GC_DELREF FCARG1a
 				|	jnz >3
 				|	mov aword [r4], r0 // save
-				|	ZVAL_DTOR_FUNC op1_info, op_array->filename, opline
+				|	ZVAL_DTOR_FUNC op1_info, opline
 				|	mov r0, aword [r4] // restore
 				|3:
 			}
@@ -7341,7 +7193,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		if (func) {
 			for (i = 0; i < call_info->num_args; i++ ) {
 				uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-				|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_RX, offset), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, op_array->filename, opline
+				|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_RX, offset), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, opline
 			}
 		} else {
 			|	mov FCARG1a, RX
@@ -7393,7 +7245,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				(MAY_BE_ANY|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN);
 
 			if (func_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-				|	ZVAL_PTR_DTOR res_addr, func_info, 1, 1, 0, op_array->filename, opline
+				|	ZVAL_PTR_DTOR res_addr, func_info, 1, 1, 0, opline
 			}
 			|	add r4, 16 /* revert alloca() */
 		}
@@ -8055,7 +7907,7 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 						}
 						|	mov byte [r4], al // save
 						|	// zval_dtor_func(r);
-						|	ZVAL_DTOR_FUNC op1_info, op_array->filename, opline
+						|	ZVAL_DTOR_FUNC op1_info, opline
 						|	mov cl, byte [r4] // restore
 						|jmp >2
 					}
@@ -8132,7 +7984,7 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 						}
 						|	mov byte [r4], al // save
 						|	// zval_dtor_func(r);
-						|	ZVAL_DTOR_FUNC op1_info, op_array->filename, opline
+						|	ZVAL_DTOR_FUNC op1_info, opline
 						|	mov cl, byte [r4] // restore
 						|jmp >2
 					}
@@ -8235,7 +8087,7 @@ static int zend_jit_free_compiled_variables(dasm_State **Dst, const zend_op *opl
 
 		if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 			uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-			| ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_FP, offset), info, 1, 1, 1, op_array->filename, opline
+			| ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_FP, offset), info, 1, 1, 1, opline
 		}
 	}
 	return 1;
@@ -8402,7 +8254,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 				}
 			}
 			|	//SAVE_OPLINE()
-			|	ZVAL_DTOR_FUNC op1_info, op_array->filename, opline
+			|	ZVAL_DTOR_FUNC op1_info, opline
 			|	//????mov r1, EX->return_value // reload ???
 		}
 		if (jit_return_label >= 0) {
@@ -8905,7 +8757,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 		|	jnz >3
 		}
 		|	mov aword [r4], r0 // save
-		|	ZVAL_DTOR_FUNC op1_info, op_array->filename, opline
+		|	ZVAL_DTOR_FUNC op1_info, opline
 		|	mov r0, aword [r4] // restore
 		|	jmp >5
 		if (op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
@@ -9168,7 +9020,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 	|.cold_code
 	if (has_slow & 1) {
 	|7:
-	|	ZVAL_PTR_DTOR res_addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 1, 0, 0, op_array->filename, opline
+	|	ZVAL_PTR_DTOR res_addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 1, 0, 0, opline
 	|	SET_ZVAL_TYPE_INFO res_addr, IS_UNDEF
 	if (zend_may_throw(opline, op_array, ssa)) {
 		if (!zend_jit_check_exception(Dst)) {
@@ -9513,7 +9365,7 @@ static int zend_jit_free(dasm_State **Dst, const zend_op *opline, zend_op_array 
 			|	EXT_CALL zend_hash_iterator_del, r0
 			|7:
 		}
-		|	ZVAL_PTR_DTOR op1_addr, op1_info, 0, 0, 0, op_array->filename, opline
+		|	ZVAL_PTR_DTOR op1_addr, op1_info, 0, 0, 0, opline
 		if (zend_may_throw(opline, op_array, ssa)) {
 			if (!zend_jit_check_exception(Dst)) {
 				return 0;
