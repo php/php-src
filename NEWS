@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #68553 (array_column: null values in $index_key become incrementing
     keys in result). (Laruence)
+  . Fixed bug #76643 (Segmentation fault when using `output_add_rewrite_var`).
+    (cmb)
 
 19 Jul 2018, PHP 7.3.0alpha4
 
