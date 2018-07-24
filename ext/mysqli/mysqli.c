@@ -385,7 +385,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 			case ZEND_PROPERTY_EXISTS:
 				ret = 1;
 				break;
-			case ZEND_PROPERTY_HAS: {
+			case ZEND_PROPERTY_NOT_EMPTY: {
 				zval rv;
 				zval *value = mysqli_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {

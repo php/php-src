@@ -1664,7 +1664,7 @@ found:
 					case ZEND_PROPERTY_EXISTS:
 						result = 1;
 						break;
-					case ZEND_PROPERTY_HAS:
+					case ZEND_PROPERTY_NOT_EMPTY:
 					default:
 						result = zend_is_true(value);
 						break;
@@ -1695,7 +1695,7 @@ found:
 			if (Z_TYPE(rv) != IS_UNDEF) {
 				result = zend_is_true(&rv);
 				zval_ptr_dtor(&rv);
-				if (has_set_exists == ZEND_PROPERTY_HAS && result) {
+				if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY && result) {
 					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
 						(*guard) |= IN_GET;
 						zend_std_call_getter(zobj, member, &rv);
