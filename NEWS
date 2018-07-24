@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug #76488 (Memory leak when fetching a BLOB field). (Simonov Denis)
 
 - Standard:
+  . Fixed bug #68553 (array_column: null values in $index_key become incrementing
+    keys in result). (Laruence)
   . Fixed bug #73817 (Incorrect entries in get_html_translation_table). (cmb)
 
 - Zip:
