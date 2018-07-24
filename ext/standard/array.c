@@ -4113,6 +4113,9 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 		if (Z_OBJ_HANDLER_P(data, has_property)(data, name, 2, NULL)
 				|| Z_OBJ_HANDLER_P(data, has_property)(data, name, 0, NULL)) {
 			prop = Z_OBJ_HANDLER_P(data, read_property)(data, name, BP_VAR_R, NULL, rv);
+			if (prop) {
+				ZVAL_DEREF(prop);
+			}
 		}
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
 		if (Z_TYPE_P(name) == IS_STRING) {
@@ -4120,11 +4123,12 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 		} else if (Z_TYPE_P(name) == IS_LONG) {
 			prop = zend_hash_index_find(Z_ARRVAL_P(data), Z_LVAL_P(name));
 		}
+		if (prop) {
+			ZVAL_DEREF(prop);
+			Z_TRY_ADDREF_P(prop);
+		}
 	}
 
-	if (prop) {
-		ZVAL_DEREF(prop);
-	}
 
 	return prop;
 }
@@ -4135,98 +4139,97 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)
 {
-	zval *zcolumn = NULL, *zkey = NULL, *data;
-	HashTable *arr_hash;
-	zval *zcolval = NULL, *zkeyval = NULL, rvc, rvk;
+	HashTable *input;
+	zval *colval, *data, rv;
+	zval *column = NULL, *index = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_ARRAY_HT(arr_hash)
-		Z_PARAM_ZVAL_EX(zcolumn, 1, 0)
+		Z_PARAM_ARRAY_HT(input)
+		Z_PARAM_ZVAL_EX(column, 1, 0)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_EX(zkey, 1, 0)
+		Z_PARAM_ZVAL_EX(index, 1, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ((zcolumn && !array_column_param_helper(zcolumn, "column")) ||
-	    (zkey && !array_column_param_helper(zkey, "index"))) {
+	if ((column && !array_column_param_helper(column, "column")) ||
+	    (index && !array_column_param_helper(index, "index"))) {
 		RETURN_FALSE;
 	}
 
-	array_init_size(return_value, zend_hash_num_elements(arr_hash));
-	if (!zkey) {
+	array_init_size(return_value, zend_hash_num_elements(input));
+	if (!index) {
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			ZEND_HASH_FOREACH_VAL(arr_hash, data) {
+			ZEND_HASH_FOREACH_VAL(input, data) {
 				ZVAL_DEREF(data);
-				if (!zcolumn) {
-					zcolval = data;
-					Z_TRY_ADDREF_P(zcolval);
-				} else if ((zcolval = array_column_fetch_prop(data, zcolumn, &rvc)) == NULL) {
+				if (!column) {
+					Z_TRY_ADDREF_P(data);
+					colval = data;
+				} else if ((colval = array_column_fetch_prop(data, column, &rv)) == NULL) {
 					continue;
-				} else if (zcolval != &rvc) {
-					Z_TRY_ADDREF_P(zcolval);
 				}
-				ZEND_HASH_FILL_ADD(zcolval);
+				ZEND_HASH_FILL_ADD(colval);
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
 	} else {
-		ZEND_HASH_FOREACH_VAL(arr_hash, data) {
+		ZEND_HASH_FOREACH_VAL(input, data) {
 			ZVAL_DEREF(data);
 
-			if (!zcolumn) {
-				zcolval = data;
-				Z_TRY_ADDREF_P(zcolval);
-			} else if ((zcolval = array_column_fetch_prop(data, zcolumn, &rvc)) == NULL) {
+			if (!column) {
+				Z_TRY_ADDREF_P(data);
+				colval = data;
+			} else if ((colval = array_column_fetch_prop(data, column, &rv)) == NULL) {
 				continue;
-			} else if (zcolval != &rvc) {
-				Z_TRY_ADDREF_P(zcolval);
 			}
 
-			/* Failure will leave zkeyval alone which will land us on the final else block below
+			/* Failure will leave keyval alone which will land us on the final else block below
 			 * which is to append the value as next_index
 			 */
-			if (zkey) {
-				zkeyval = array_column_fetch_prop(data, zkey, &rvk);
-			}
-			if (zkeyval) {
-				switch (Z_TYPE_P(zkeyval)) {
-					case IS_STRING:
-						zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
-						break;
-					case IS_LONG:
-						zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(zkeyval), zcolval);
-						break;
-					case IS_OBJECT:
-					{
-						zend_string *tmp_key;
-						zend_string *key = zval_get_tmp_string(zkeyval, &tmp_key);
-						zend_symtable_update(Z_ARRVAL_P(return_value), key, zcolval);
-						zend_tmp_string_release(tmp_key);
-						break;
+			if (index) {
+				zval rv;
+				zval *keyval = array_column_fetch_prop(data, index, &rv);
+
+				if (keyval) {
+					switch (Z_TYPE_P(keyval)) {
+						case IS_STRING:
+							zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(keyval), colval);
+							break;
+						case IS_LONG:
+							zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(keyval), colval);
+							break;
+						case IS_OBJECT:
+							{
+								zend_string *tmp_key;
+								zend_string *key = zval_get_tmp_string(keyval, &tmp_key);
+								zend_symtable_update(Z_ARRVAL_P(return_value), key, colval);
+								zend_tmp_string_release(tmp_key);
+								break;
+							}
+						case IS_NULL:
+							zend_hash_update(Z_ARRVAL_P(return_value), ZSTR_EMPTY_ALLOC(), colval);
+							break;
+						case IS_DOUBLE:
+							zend_hash_index_update(Z_ARRVAL_P(return_value),
+									zend_dval_to_lval(Z_DVAL_P(keyval)), colval);
+							break;
+						case IS_TRUE:
+							zend_hash_index_update(Z_ARRVAL_P(return_value), 1, colval);
+							break;
+						case IS_FALSE:
+							zend_hash_index_update(Z_ARRVAL_P(return_value), 0, colval);
+							break;
+						case IS_RESOURCE:
+							zend_hash_index_update(Z_ARRVAL_P(return_value), Z_RES_HANDLE_P(keyval), colval);
+							break;
+						default:
+							zend_hash_next_index_insert(Z_ARRVAL_P(return_value), colval);
+							break;
 					}
-					case IS_NULL:
-						zend_hash_update(Z_ARRVAL_P(return_value), ZSTR_EMPTY_ALLOC(), zcolval);
-						break;
-					case IS_DOUBLE:
-						zend_hash_index_update(Z_ARRVAL_P(return_value), zend_dval_to_lval(Z_DVAL_P(zkeyval)), zcolval);
-						break;
-					case IS_TRUE:
-						zend_hash_index_update(Z_ARRVAL_P(return_value), 1, zcolval);
-						break;
-					case IS_FALSE:
-						zend_hash_index_update(Z_ARRVAL_P(return_value), 0, zcolval);
-						break;
-					case IS_RESOURCE:
-						zend_hash_index_update(Z_ARRVAL_P(return_value), Z_RES_HANDLE_P(zkeyval), zcolval);
-						break;
-					default:
-						add_next_index_zval(return_value, zcolval);
-						break;
-				}
-				if (zkeyval == &rvk) {
-					zval_ptr_dtor(&rvk);
+					zval_ptr_dtor(keyval);
+				} else {
+					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), colval);
 				}
 			} else {
-				add_next_index_zval(return_value, zcolval);
+				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), colval);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
