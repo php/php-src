@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0beta1
 
+- Standard:
+  . Fixed bug #68553 (array_column: null values in $index_key become incrementing
+    keys in result). (Laruence)
+
 19 Jul 2018, PHP 7.3.0alpha4
 
 - Core:
