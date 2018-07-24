@@ -173,6 +173,10 @@ extern const ZEND_API zend_object_handlers std_object_handlers;
 #define zend_get_function_root_class(fbc) \
 	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
 
+#define ZEND_PROPERTY_ISSET		0x0	/* Property is exists and not NULL */
+#define ZEND_PROPERTY_HAS		0x1 /* Property is exists and is TRUE */
+#define ZEND_PROPERTY_EXISTS	0x2 /* Property is exists */
+
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent);
 ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);

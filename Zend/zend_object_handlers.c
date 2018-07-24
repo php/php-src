@@ -1657,15 +1657,16 @@ ZEND_API int zend_std_has_property(zval *object, zval *member, int has_set_exist
 				}
 found:
 				switch (has_set_exists) {
-					case 0:
+					case ZEND_PROPERTY_ISSET:
 						ZVAL_DEREF(value);
 						result = (Z_TYPE_P(value) != IS_NULL);
 						break;
+					case ZEND_PROPERTY_EXISTS:
+						result = 1;
+						break;
+					case ZEND_PROPERTY_HAS:
 					default:
 						result = zend_is_true(value);
-						break;
-					case 2:
-						result = 1;
 						break;
 				}
 				goto exit;
@@ -1677,7 +1678,7 @@ found:
 	}
 
 	result = 0;
-	if ((has_set_exists != 2) && zobj->ce->__isset) {
+	if ((has_set_exists != ZEND_PROPERTY_EXISTS) && zobj->ce->__isset) {
 		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 		if (!((*guard) & IN_ISSET)) {
@@ -1694,7 +1695,7 @@ found:
 			if (Z_TYPE(rv) != IS_UNDEF) {
 				result = zend_is_true(&rv);
 				zval_ptr_dtor(&rv);
-				if (has_set_exists && result) {
+				if (has_set_exists == ZEND_PROPERTY_HAS && result) {
 					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
 						(*guard) |= IN_GET;
 						zend_std_call_getter(zobj, member, &rv);

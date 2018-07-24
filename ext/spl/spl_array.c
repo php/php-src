@@ -872,7 +872,7 @@ static zval *spl_array_read_property(zval *object, zval *member, int type, void 
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !zend_std_has_property(object, member, 2, NULL)) {
+		&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		return spl_array_read_dimension(object, member, type, rv);
 	}
 	return zend_std_read_property(object, member, type, cache_slot, rv);
@@ -883,7 +883,7 @@ static void spl_array_write_property(zval *object, zval *member, zval *value, vo
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-	&& !zend_std_has_property(object, member, 2, NULL)) {
+	&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		spl_array_write_dimension(object, member, value);
 		return;
 	}
@@ -895,7 +895,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !zend_std_has_property(object, member, 2, NULL)) {
+		&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		/* If object has offsetGet() overridden, then fallback to read_property,
 		 * which will call offsetGet(). */
 		if (intern->fptr_offset_get) {
@@ -911,7 +911,7 @@ static int spl_array_has_property(zval *object, zval *member, int has_set_exists
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !zend_std_has_property(object, member, 2, NULL)) {
+		&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		return spl_array_has_dimension(object, member, has_set_exists);
 	}
 	return zend_std_has_property(object, member, has_set_exists, cache_slot);
@@ -922,7 +922,7 @@ static void spl_array_unset_property(zval *object, zval *member, void **cache_sl
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !zend_std_has_property(object, member, 2, NULL)) {
+		&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		spl_array_unset_dimension(object, member);
 		return;
 	}

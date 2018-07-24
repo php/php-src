@@ -4110,8 +4110,8 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 		/* The has_property check is first performed in "exists" mode (which returns true for
 		 * properties that are null but exist) and then in "has" mode to handle objects that
 		 * implement __isset (which is not called in "exists" mode). */
-		if (Z_OBJ_HANDLER_P(data, has_property)(data, name, 2, NULL)
-				|| Z_OBJ_HANDLER_P(data, has_property)(data, name, 0, NULL)) {
+		if (Z_OBJ_HANDLER_P(data, has_property)(data, name, ZEND_PROPERTY_EXISTS, NULL)
+				|| Z_OBJ_HANDLER_P(data, has_property)(data, name, ZEND_PROPERTY_ISSET, NULL)) {
 			prop = Z_OBJ_HANDLER_P(data, read_property)(data, name, BP_VAR_R, NULL, rv);
 			if (prop) {
 				ZVAL_DEREF(prop);
