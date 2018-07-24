@@ -29,12 +29,9 @@ typedef struct _zend_cpu_info {
 static zend_cpu_info cpuinfo = {0};
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+#include <cpuid.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
-	__asm__ __volatile__ (
-		"cpuid"
-		: "=a"(cpuinfo->eax), "=b"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
-		: "a"(func), "c"(subfunc)
-	);
+	__cpuid_count(func, subfunc, cpuinfo->eax, cpuinfo->ebx, cpuinfo->ecx, cpuinfo->edx);
 }
 #elif defined(ZEND_WIN32)
 # include <intrin.h>
