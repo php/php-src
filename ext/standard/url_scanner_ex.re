@@ -355,6 +355,7 @@ static int check_http_host(char *target)
 	char *colon;
 
 	if ((tmp  = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"))) &&
+		Z_TYPE_P(tmp) == IS_ARRAY &&
 		(host = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("HTTP_HOST"))) &&
 		Z_TYPE_P(host) == IS_STRING) {
 		host_tmp = zend_string_init(Z_STRVAL_P(host), Z_STRLEN_P(host), 0);
