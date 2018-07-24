@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #73817 (Incorrect entries in get_html_translation_table). (cmb)
+  . Fixed bug #68553 (array_column: null values in $index_key become incrementing
+    keys in result). (Laruence)
 
 - Zip:
   . Fixed bug #76524 (ZipArchive memory leak (OVERWRITE flag and empty archive)).
