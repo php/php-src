@@ -4228,16 +4228,38 @@ PHP_FUNCTION(array_column)
 				zkeyval = array_column_fetch_prop(data, zkey, &rvk);
 			}
 			if (zkeyval) {
-				if (Z_TYPE_P(zkeyval) == IS_STRING) {
-					zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
-				} else if (Z_TYPE_P(zkeyval) == IS_LONG) {
-					add_index_zval(return_value, Z_LVAL_P(zkeyval), zcolval);
-				} else if (Z_TYPE_P(zkeyval) == IS_OBJECT) {
-					zend_string *key = zval_get_string(zkeyval);
-					zend_symtable_update(Z_ARRVAL_P(return_value), key, zcolval);
-					zend_string_release(key);
-				} else {
-					add_next_index_zval(return_value, zcolval);
+				switch (Z_TYPE_P(zkeyval)) {
+					case IS_STRING:
+						zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
+						break;
+					case IS_LONG:
+						zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(zkeyval), zcolval);
+						break;
+					case IS_OBJECT:
+					{
+						zend_string *key = zval_get_string(zkeyval);
+						zend_symtable_update(Z_ARRVAL_P(return_value), key, zcolval);
+						zend_string_release(key);
+						break;
+					}
+					case IS_NULL:
+						zend_hash_update(Z_ARRVAL_P(return_value), ZSTR_EMPTY_ALLOC(), zcolval);
+						break;
+					case IS_DOUBLE:
+						zend_hash_index_update(Z_ARRVAL_P(return_value), zend_dval_to_lval(Z_DVAL_P(zkeyval)), zcolval);
+						break;
+					case IS_TRUE:
+						zend_hash_index_update(Z_ARRVAL_P(return_value), 1, zcolval);
+						break;
+					case IS_FALSE:
+						zend_hash_index_update(Z_ARRVAL_P(return_value), 0, zcolval);
+						break;
+					case IS_RESOURCE:
+						zend_hash_index_update(Z_ARRVAL_P(return_value), Z_RES_HANDLE_P(zkeyval), zcolval);
+						break;
+					default:
+						add_next_index_zval(return_value, zcolval);
+						break;
 				}
 				if (zkeyval == &rvk) {
 					zval_ptr_dtor(&rvk);
