@@ -352,6 +352,7 @@ static int check_http_host(char *target)
 	char *colon;
 
 	if ((tmp  = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"))) &&
+		Z_TYPE_P(tmp) == IS_ARRAY &&
 		(host = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("HTTP_HOST"))) &&
 		Z_TYPE_P(host) == IS_STRING) {
 		host_tmp = zend_string_init(Z_STRVAL_P(host), Z_STRLEN_P(host), 0);
@@ -519,7 +520,7 @@ state_plain_begin:
 state_plain:
 	start = YYCURSOR;
 
-#line 523 "ext/standard/url_scanner_ex.c"
+#line 524 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -569,22 +570,22 @@ yy2:
 	if (yybm[0+yych] & 128) {
 		goto yy2;
 	}
-#line 526 "ext/standard/url_scanner_ex.re"
+#line 527 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_plain; }
-#line 575 "ext/standard/url_scanner_ex.c"
+#line 576 "ext/standard/url_scanner_ex.c"
 yy5:
 	++YYCURSOR;
-#line 525 "ext/standard/url_scanner_ex.re"
+#line 526 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); STATE = STATE_TAG; goto state_tag; }
-#line 580 "ext/standard/url_scanner_ex.c"
+#line 581 "ext/standard/url_scanner_ex.c"
 }
-#line 527 "ext/standard/url_scanner_ex.re"
+#line 528 "ext/standard/url_scanner_ex.re"
 
 
 state_tag:
 	start = YYCURSOR;
 
-#line 588 "ext/standard/url_scanner_ex.c"
+#line 589 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -627,9 +628,9 @@ state_tag:
 		goto yy11;
 	}
 	++YYCURSOR;
-#line 533 "ext/standard/url_scanner_ex.re"
+#line 534 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_plain_begin; }
-#line 633 "ext/standard/url_scanner_ex.c"
+#line 634 "ext/standard/url_scanner_ex.c"
 yy11:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -637,11 +638,11 @@ yy11:
 	if (yybm[0+yych] & 128) {
 		goto yy11;
 	}
-#line 532 "ext/standard/url_scanner_ex.re"
+#line 533 "ext/standard/url_scanner_ex.re"
 	{ handle_tag(STD_ARGS); /* Sets STATE */; passthru(STD_ARGS); if (STATE == STATE_PLAIN) goto state_plain; else goto state_next_arg; }
-#line 643 "ext/standard/url_scanner_ex.c"
+#line 644 "ext/standard/url_scanner_ex.c"
 }
-#line 534 "ext/standard/url_scanner_ex.re"
+#line 535 "ext/standard/url_scanner_ex.re"
 
 
 state_next_arg_begin:
@@ -650,7 +651,7 @@ state_next_arg_begin:
 state_next_arg:
 	start = YYCURSOR;
 
-#line 654 "ext/standard/url_scanner_ex.c"
+#line 655 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -706,9 +707,9 @@ state_next_arg:
 yy16:
 	++YYCURSOR;
 yy17:
-#line 545 "ext/standard/url_scanner_ex.re"
+#line 546 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_plain_begin; }
-#line 712 "ext/standard/url_scanner_ex.c"
+#line 713 "ext/standard/url_scanner_ex.c"
 yy18:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -716,30 +717,30 @@ yy18:
 	if (yybm[0+yych] & 128) {
 		goto yy18;
 	}
-#line 543 "ext/standard/url_scanner_ex.re"
+#line 544 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_next_arg; }
-#line 722 "ext/standard/url_scanner_ex.c"
+#line 723 "ext/standard/url_scanner_ex.c"
 yy21:
 	yych = *++YYCURSOR;
 	if (yych != '>') goto yy17;
 yy22:
 	++YYCURSOR;
-#line 542 "ext/standard/url_scanner_ex.re"
+#line 543 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); handle_form(STD_ARGS); goto state_plain_begin; }
-#line 730 "ext/standard/url_scanner_ex.c"
+#line 731 "ext/standard/url_scanner_ex.c"
 yy24:
 	++YYCURSOR;
-#line 544 "ext/standard/url_scanner_ex.re"
+#line 545 "ext/standard/url_scanner_ex.re"
 	{ --YYCURSOR; STATE = STATE_ARG; goto state_arg; }
-#line 735 "ext/standard/url_scanner_ex.c"
+#line 736 "ext/standard/url_scanner_ex.c"
 }
-#line 546 "ext/standard/url_scanner_ex.re"
+#line 547 "ext/standard/url_scanner_ex.re"
 
 
 state_arg:
 	start = YYCURSOR;
 
-#line 743 "ext/standard/url_scanner_ex.c"
+#line 744 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -784,9 +785,9 @@ state_arg:
 	if (yych <= 'z') goto yy30;
 yy28:
 	++YYCURSOR;
-#line 552 "ext/standard/url_scanner_ex.re"
+#line 553 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); STATE = STATE_NEXT_ARG; goto state_next_arg; }
-#line 790 "ext/standard/url_scanner_ex.c"
+#line 791 "ext/standard/url_scanner_ex.c"
 yy30:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -794,17 +795,17 @@ yy30:
 	if (yybm[0+yych] & 128) {
 		goto yy30;
 	}
-#line 551 "ext/standard/url_scanner_ex.re"
+#line 552 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); handle_arg(STD_ARGS); STATE = STATE_BEFORE_VAL; goto state_before_val; }
-#line 800 "ext/standard/url_scanner_ex.c"
+#line 801 "ext/standard/url_scanner_ex.c"
 }
-#line 553 "ext/standard/url_scanner_ex.re"
+#line 554 "ext/standard/url_scanner_ex.re"
 
 
 state_before_val:
 	start = YYCURSOR;
 
-#line 808 "ext/standard/url_scanner_ex.c"
+#line 809 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -847,9 +848,9 @@ state_before_val:
 	if (yych == '=') goto yy38;
 	++YYCURSOR;
 yy36:
-#line 559 "ext/standard/url_scanner_ex.re"
+#line 560 "ext/standard/url_scanner_ex.re"
 	{ --YYCURSOR; goto state_next_arg_begin; }
-#line 853 "ext/standard/url_scanner_ex.c"
+#line 854 "ext/standard/url_scanner_ex.c"
 yy37:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych == ' ') goto yy41;
@@ -861,9 +862,9 @@ yy38:
 	if (yybm[0+yych] & 128) {
 		goto yy38;
 	}
-#line 558 "ext/standard/url_scanner_ex.re"
+#line 559 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); STATE = STATE_VAL; goto state_val; }
-#line 867 "ext/standard/url_scanner_ex.c"
+#line 868 "ext/standard/url_scanner_ex.c"
 yy41:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -873,14 +874,14 @@ yy41:
 	YYCURSOR = YYMARKER;
 	goto yy36;
 }
-#line 560 "ext/standard/url_scanner_ex.re"
+#line 561 "ext/standard/url_scanner_ex.re"
 
 
 
 state_val:
 	start = YYCURSOR;
 
-#line 884 "ext/standard/url_scanner_ex.c"
+#line 885 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -933,15 +934,15 @@ yy46:
 	if (yybm[0+yych] & 32) {
 		goto yy46;
 	}
-#line 568 "ext/standard/url_scanner_ex.re"
+#line 569 "ext/standard/url_scanner_ex.re"
 	{ handle_val(STD_ARGS, 0, ' '); goto state_next_arg_begin; }
-#line 939 "ext/standard/url_scanner_ex.c"
+#line 940 "ext/standard/url_scanner_ex.c"
 yy49:
 	++YYCURSOR;
 yy50:
-#line 569 "ext/standard/url_scanner_ex.re"
+#line 570 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_next_arg_begin; }
-#line 945 "ext/standard/url_scanner_ex.c"
+#line 946 "ext/standard/url_scanner_ex.c"
 yy51:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych == '>') goto yy50;
@@ -964,9 +965,9 @@ yy55:
 	goto yy50;
 yy56:
 	++YYCURSOR;
-#line 566 "ext/standard/url_scanner_ex.re"
+#line 567 "ext/standard/url_scanner_ex.re"
 	{ handle_val(STD_ARGS, 1, '"'); goto state_next_arg_begin; }
-#line 970 "ext/standard/url_scanner_ex.c"
+#line 971 "ext/standard/url_scanner_ex.c"
 yy58:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -977,11 +978,11 @@ yy59:
 	}
 	if (yych >= '(') goto yy55;
 	++YYCURSOR;
-#line 567 "ext/standard/url_scanner_ex.re"
+#line 568 "ext/standard/url_scanner_ex.re"
 	{ handle_val(STD_ARGS, 1, '\''); goto state_next_arg_begin; }
-#line 983 "ext/standard/url_scanner_ex.c"
+#line 984 "ext/standard/url_scanner_ex.c"
 }
-#line 570 "ext/standard/url_scanner_ex.re"
+#line 571 "ext/standard/url_scanner_ex.re"
 
 
 stop:
