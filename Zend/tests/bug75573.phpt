@@ -6,10 +6,6 @@ Bug #75573 (Segmentation fault in 7.1.12 and 7.0.26)
 class A
 {
 	var $_stdObject;
-	function initialize($properties = FALSE) {
-		$this->_stdObject = $properties ? (object) $properties : new stdClass();
-		parent::initialize();
-	}
 	function &__get($property)
 	{
 		if (isset($this->_stdObject->{$property})) {
@@ -31,10 +27,6 @@ class A
 
 class B extends A
 {
-	function initialize($properties = array())
-	{
-		parent::initialize($properties);
-	}
 	function &__get($property)
 	{
 		if (isset($this->settings) && isset($this->settings[$property])) {

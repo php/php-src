@@ -331,6 +331,7 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 	zend_stack_init(&CG(loop_var_stack), sizeof(zend_loop_var));
 	zend_stack_init(&CG(delayed_oplines_stack), sizeof(zend_op));
 	CG(active_class_entry) = NULL;
+	CG(active_class_entry_parent_name) = NULL;
 	CG(in_compilation) = 0;
 	CG(start_lineno) = 0;
 
@@ -1467,10 +1468,22 @@ static uint32_t zend_get_class_fetch_type_ast(zend_ast *name_ast) /* {{{ */
 
 static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 {
-	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && !CG(active_class_entry) && zend_is_scope_known()) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"%s\" when no class scope is active",
-			fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
-			fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
+	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && zend_is_scope_known()) {
+		if (!CG(active_class_entry)) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR,
+				"Cannot use \"%s\" when no class scope is active",
+				fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
+				fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static"
+			);
+		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT
+		           && !CG(active_class_entry_parent_name))
+		{
+			zend_error_noreturn(
+				E_DEPRECATED,
+				"Cannot use \"parent\" without a parent class"
+			);
+		}
 	}
 }
 /* }}} */
@@ -1493,23 +1506,39 @@ static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_a
 	}
 
 	fetch_type = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
-	zend_ensure_valid_class_fetch_type(fetch_type);
 
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
+			zend_ensure_valid_class_fetch_type(fetch_type);
 			if (constant || (CG(active_class_entry) && zend_is_scope_known())) {
 				ZVAL_STR_COPY(zv, CG(active_class_entry)->name);
 			} else {
 				ZVAL_NULL(zv);
 			}
 			return 1;
-		case ZEND_FETCH_CLASS_STATIC:
+
 		case ZEND_FETCH_CLASS_PARENT:
+			if (zend_is_scope_known()) {
+				if (CG(active_class_entry_parent_name)) {
+					ZVAL_STR_COPY(zv, CG(active_class_entry_parent_name));
+					return 1;
+				}
+				if (constant) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use \"parent\" without a parent class");
+				} else {
+					zend_error(E_DEPRECATED,
+						"Cannot use \"parent\" without a parent class");
+				}
+			}
+			ZVAL_NULL(zv);
+			return 1;
+
+		case ZEND_FETCH_CLASS_STATIC:
+			zend_ensure_valid_class_fetch_type(fetch_type);
 			if (constant) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"%s::class cannot be used for compile-time class name resolution",
-					fetch_type == ZEND_FETCH_CLASS_STATIC ? "static" : "parent"
-				);
+					"static::class cannot be used for compile-time class name resolution");
 			} else {
 				ZVAL_NULL(zv);
 			}
@@ -6307,6 +6336,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	int extends_const;
 
 	zend_class_entry *original_ce = CG(active_class_entry);
+	zend_string *original_ce_parent_name = CG(active_class_entry_parent_name);
 	znode original_implementing_class = FC(implementing_class);
 
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
@@ -6423,6 +6453,15 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	CG(active_class_entry) = ce;
+	if (extends_ast) {
+		zend_string *extends_name = zend_ast_get_str(extends_ast);
+		CG(active_class_entry_parent_name) = zend_resolve_class_name(
+			extends_name,
+			extends_ast->kind == ZEND_AST_ZVAL ? extends_ast->attr : ZEND_NAME_FQ
+		);
+	} else {
+		CG(active_class_entry_parent_name) = NULL;
+	}
 
 	zend_compile_stmt(stmt_ast);
 
@@ -6504,6 +6543,10 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	FC(implementing_class) = original_implementing_class;
 	CG(active_class_entry) = original_ce;
+	if (CG(active_class_entry_parent_name)) {
+		zend_string_release(CG(active_class_entry_parent_name));
+	}
+	CG(active_class_entry_parent_name) = original_ce_parent_name;
 }
 /* }}} */
 
