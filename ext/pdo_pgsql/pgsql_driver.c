@@ -1064,7 +1064,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
  		RETURN_FALSE;
 #if ZEND_ENABLE_ZVAL_LONG64
 	} else if (ms_timeout > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "timeout was shrinked to %d", INT_MAX);
+		php_error_docref(NULL, E_WARNING, "timeout was shrunk to %d", INT_MAX);
 		ms_timeout = INT_MAX;
 #endif
 	}

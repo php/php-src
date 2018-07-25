@@ -333,7 +333,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		memset(map, 0, op_array->last_literal * sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].flags) {
-				/* unsed literal */
+				/* unset literal */
 				zval_ptr_dtor_nogc(&op_array->literals[i]);
 				continue;
 			}
