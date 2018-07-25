@@ -758,7 +758,7 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 					return (blocks <= 8);
 				}
 			} else if ((str - 1) == s) {
-				/* dont allow leading : without another : following */
+				/* don't allow leading : without another : following */
 				return 0;
 			}
 		}

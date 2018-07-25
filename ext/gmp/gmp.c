@@ -604,7 +604,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	gmp_create(object, &gmpnum);
 
 	/* The "object" variable may be modified during the execution of this unserialize handler
-	 * (it may turn into a reference). Keep the original object around for futher operations. */
+	 * (it may turn into a reference). Keep the original object around for further operations. */
 	ZVAL_COPY_VALUE(&object_copy, object);
 
 	p = buf;

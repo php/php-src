@@ -978,7 +978,7 @@ PHP_MINFO_FUNCTION(mysqli)
 /* }}} */
 
 
-/* Dependancies */
+/* Dependencies */
 static const  zend_module_dep mysqli_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
 #if defined(MYSQLI_USE_MYSQLND)

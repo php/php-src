@@ -705,7 +705,7 @@ function opcode_name($name, $spec, $op1, $op2) {
 			} else if (isset($opcode["op2"]["ANY"])) {
 				$op2 = "ANY";
 			} else if ($spec) {
-				/* dispatch to unkonwn handler in unreachable code */
+				/* dispatch to unknown handler in unreachable code */
 				return "ZEND_NULL";
 			}
 		}
