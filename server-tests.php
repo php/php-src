@@ -413,7 +413,7 @@ class testHarness {
 		'm' => array('TEST_BASE_PATH'      ,'path'       ,NULL    ,'copy tests to this path before testing'),
 		'n' => array('NO_PHPTEST_SUMMARY'  ,''           ,0       ,'do not print test summary'),
 		'p' => array('TEST_PHP_EXECUTABLE' ,'path'       ,NULL    ,'php executable to be tested'),
-		'q' => array('NO_INTERACTION'      ,''           ,0       ,'no console interaction (ie dont contact QA)'),
+		'q' => array('NO_INTERACTION'      ,''           ,0       ,'no console interaction (ie don\'t contact QA)'),
 		'r' => array('REPORT_EXIT_STATUS'  ,''           ,0       ,'exit with status at end of execution'),
 		's' => array('TEST_PHP_SRCDIR'     ,'path'       ,NULL    ,'path to php source code'),
 		't' => array('TEST_PHP_DETAILED'   ,'number'     ,0       ,'level of detail output to dump'),

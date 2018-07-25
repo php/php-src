@@ -262,7 +262,7 @@ static ZEND_INI_MH(OnUpdateFileCache)
 #else
 				_access(ZSTR_VAL(new_value), 06) != 0) {
 #endif
-				zend_accel_error(ACCEL_LOG_WARNING, "opcache.file_cache must be a full path of accessable directory.\n");
+				zend_accel_error(ACCEL_LOG_WARNING, "opcache.file_cache must be a full path of accessible directory.\n");
 				new_value = NULL;
 			}
 		}
