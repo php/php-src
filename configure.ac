@@ -181,7 +181,7 @@ AC_PROG_CC_C_O
 dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
 dnl AC_PROG_CC_STDC
 AC_PROG_CPP
-AC_AIX
+AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
 
 dnl Support systems with system libraries in e.g. /usr/lib64
