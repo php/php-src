@@ -1544,7 +1544,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 				PS(define_sid) = 0;
 			}
 		}
-		/* Initilize session ID from non cookie values */
+		/* Initialize session ID from non cookie values */
 		if (!PS(use_only_cookies)) {
 			if (!PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_GET", sizeof("_GET") - 1))) {
 				ZVAL_DEREF(data);

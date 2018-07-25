@@ -61,7 +61,7 @@ function recurse($path)
 			die("$newfile is not available any more\n");
 		}
 
-		// maintain file mtimes so that cvs doesnt get crazy
+		// maintain file mtimes so that cvs doesn't get crazy
 		if (file_get_contents($newfile) !== file_get_contents($file)) {
 			copy($newfile, $file);
 		}

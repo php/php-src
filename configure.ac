@@ -1144,7 +1144,7 @@ PHP_ARG_WITH(pear, [whether to install PEAR],
 if test "$PHP_PEAR" != "no"; then
 
   dnl
-  dnl PEAR dependancies
+  dnl PEAR dependencies
   dnl
   if test "$PHP_XML" = "no"; then
     pear_error_msg="$pear_error_msg 

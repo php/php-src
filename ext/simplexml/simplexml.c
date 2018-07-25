@@ -2410,7 +2410,7 @@ static void php_sxe_iterator_dtor(zend_object_iterator *iter) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
-	/* cleanup handled in sxe_object_dtor as we dont always have an iterator wrapper */
+	/* cleanup handled in sxe_object_dtor as we don't always have an iterator wrapper */
 	if (!Z_ISUNDEF(iterator->intern.data)) {
 		zval_ptr_dtor(&iterator->intern.data);
 	}

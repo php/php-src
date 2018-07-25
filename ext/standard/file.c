@@ -1121,7 +1121,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 		len = (size_t) bytes;
 		buf = safe_emalloc(sizeof(char), (len + 1), 0);
-		/*needed because recv doesnt set null char at end*/
+		/*needed because recv doesn't set null char at end*/
 		memset(buf, 0, len + 1);
 	}
 
@@ -1816,7 +1816,7 @@ PHPAPI PHP_FUNCTION(fread)
 	ZVAL_NEW_STR(return_value, zend_string_alloc(len, 0));
 	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
 
-	/* needed because recv/read/gzread doesnt put a null at the end*/
+	/* needed because recv/read/gzread doesn't put a null at the end*/
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
 
 	if (Z_STRLEN_P(return_value) < len / 2) {
