@@ -24,6 +24,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   u. GC_G
   v. php_add[c]slashes
   w. zend_class_entry.iterator_funcs
+  x. Class declaration opcodes (DECLARE_INHERITED_CLASS ...)
 
 2. Build system changes
   a. Unix build system changes
@@ -151,6 +152,13 @@ PHP 7.3 INTERNALS UPGRADE NOTES
  w. zend_class_entry.iterator_funcs have been replaced by iterator_funcs_ptr.
     You don't have to set its value, setting parent.funcs in the get_iterator
     function is enough.
+
+ x. Class declaration opcode formats were changed
+  - DECLARE_INHERITED_CLASS and DECLARE_ANON_INHERITED_CLASS now encode parent
+    class name in second operand directly (as IS_CONST operand). Previously,
+    parent class was fetched but previous FETCH_CLASS opcode.
+  - ADD_INTERFACE and ADD_TRAIT don't use run-time cache to keep interface or
+    trait. These instructions are executed once, and caching is useless.
 
 ========================
 2. Build system changes

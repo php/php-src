@@ -261,9 +261,16 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_DECLARE_FUNCTION:
 				case ZEND_DECLARE_CLASS:
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
+					break;
 				case ZEND_DECLARE_INHERITED_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
 					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
+					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 2);
+					break;
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1);
+					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 2);
 					break;
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 				case ZEND_ASSIGN_DIM:
@@ -738,8 +745,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_FETCH_CLASS:
-				case ZEND_ADD_INTERFACE:
-				case ZEND_ADD_TRAIT:
 				case ZEND_INSTANCEOF:
 					if (opline->op2_type == IS_CONST) {
 						// op2 class

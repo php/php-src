@@ -6622,7 +6622,7 @@ ZEND_VM_COLD_HANDLER(103, ZEND_EXT_FCALL_END, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(139, ZEND_DECLARE_CLASS, ANY, ANY)
+ZEND_VM_HANDLER(139, ZEND_DECLARE_CLASS, CONST, ANY)
 {
 	USE_OPLINE
 
@@ -6631,25 +6631,41 @@ ZEND_VM_HANDLER(139, ZEND_DECLARE_CLASS, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(140, ZEND_DECLARE_INHERITED_CLASS, ANY, VAR)
+ZEND_VM_HANDLER(140, ZEND_DECLARE_INHERITED_CLASS, CONST, CONST)
 {
+	zend_class_entry *parent;
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	Z_CE_P(EX_VAR(opline->result.var)) = do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), Z_CE_P(EX_VAR(opline->op2.var)), 0);
+	parent = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)),
+	                                 RT_CONSTANT(opline, opline->op2) + 1,
+	                                 ZEND_FETCH_CLASS_EXCEPTION);
+	if (UNEXPECTED(parent == NULL)) {
+		ZEND_ASSERT(EG(exception));
+		HANDLE_EXCEPTION();
+	}
+	Z_CE_P(EX_VAR(opline->result.var)) = do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), parent, 0);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(145, ZEND_DECLARE_INHERITED_CLASS_DELAYED, ANY, VAR)
+ZEND_VM_HANDLER(145, ZEND_DECLARE_INHERITED_CLASS_DELAYED, CONST, CONST)
 {
 	USE_OPLINE
 	zval *zce, *orig_zce;
+	zend_class_entry *parent;
 
 	SAVE_OPLINE();
 	if ((zce = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1)) == NULL ||
 	    ((orig_zce = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)+1), 1)) != NULL &&
 	     Z_CE_P(zce) != Z_CE_P(orig_zce))) {
-		do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), Z_CE_P(EX_VAR(opline->op2.var)), 0);
+		parent = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)),
+	                                 RT_CONSTANT(opline, opline->op2) + 1,
+	                                 ZEND_FETCH_CLASS_EXCEPTION);
+		if (UNEXPECTED(parent == NULL)) {
+			ZEND_ASSERT(EG(exception));
+			HANDLE_EXCEPTION();
+		}
+		do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), parent, 0);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -6678,10 +6694,10 @@ ZEND_VM_HANDLER(171, ZEND_DECLARE_ANON_CLASS, ANY, ANY, JMP_ADDR)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(172, ZEND_DECLARE_ANON_INHERITED_CLASS, ANY, VAR, JMP_ADDR)
+ZEND_VM_HANDLER(172, ZEND_DECLARE_ANON_INHERITED_CLASS, CONST, CONST, JMP_ADDR)
 {
 	zval *zv;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *parent;
 	USE_OPLINE
 
 	SAVE_OPLINE();
@@ -6695,7 +6711,15 @@ ZEND_VM_HANDLER(172, ZEND_DECLARE_ANON_INHERITED_CLASS, ANY, VAR, JMP_ADDR)
 		ZEND_VM_CONTINUE();
 	}
 
-	zend_do_inheritance(ce, Z_CE_P(EX_VAR(opline->op2.var)));
+	parent = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)),
+	                                 RT_CONSTANT(opline, opline->op2) + 1,
+	                                 ZEND_FETCH_CLASS_EXCEPTION);
+	if (UNEXPECTED(parent == NULL)) {
+		ZEND_ASSERT(EG(exception));
+		HANDLE_EXCEPTION();
+	}
+
+	zend_do_inheritance(ce, parent);
 	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -6794,13 +6818,10 @@ ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, CONST, CACHE_SLOT)
 	zend_class_entry *iface;
 
 	SAVE_OPLINE();
-	iface = CACHED_PTR(opline->extended_value);
+	iface = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_INTERFACE);
 	if (UNEXPECTED(iface == NULL)) {
-		iface = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_INTERFACE);
-		if (UNEXPECTED(iface == NULL)) {
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-		}
-		CACHE_PTR(opline->extended_value, iface);
+		ZEND_ASSERT(EG(exception));
+		HANDLE_EXCEPTION();
 	}
 
 	if (UNEXPECTED((iface->ce_flags & ZEND_ACC_INTERFACE) == 0)) {
@@ -6818,18 +6839,15 @@ ZEND_VM_HANDLER(154, ZEND_ADD_TRAIT, ANY, ANY, CACHE_SLOT)
 	zend_class_entry *trait;
 
 	SAVE_OPLINE();
-	trait = CACHED_PTR(opline->extended_value);
+	trait = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)),
+	                                 RT_CONSTANT(opline, opline->op2) + 1,
+	                                 ZEND_FETCH_CLASS_TRAIT);
 	if (UNEXPECTED(trait == NULL)) {
-		trait = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)),
-		                                 RT_CONSTANT(opline, opline->op2) + 1,
-		                                 ZEND_FETCH_CLASS_TRAIT);
-		if (UNEXPECTED(trait == NULL)) {
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-		}
-		if (!(trait->ce_flags & ZEND_ACC_TRAIT)) {
-			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ZSTR_VAL(ce->name), ZSTR_VAL(trait->name));
-		}
-		CACHE_PTR(opline->extended_value, trait);
+		ZEND_ASSERT(EG(exception));
+		HANDLE_EXCEPTION();
+	}
+	if (!(trait->ce_flags & ZEND_ACC_TRAIT)) {
+		zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ZSTR_VAL(ce->name), ZSTR_VAL(trait->name));
 	}
 
 	zend_do_implement_trait(ce, trait);
