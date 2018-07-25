@@ -156,7 +156,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
  x. Class declaration opcode formats were changed
   - DECLARE_INHERITED_CLASS and DECLARE_ANON_INHERITED_CLASS now encode parent
     class name in second operand directly (as IS_CONST operand). Previously,
-    parent class was fetched but previous FETCH_CLASS opcode.
+    parent class was fetched by the prior FETCH_CLASS opcode.
   - ADD_INTERFACE and ADD_TRAIT don't use run-time cache to keep interface or
     trait. These instructions are executed once, and caching is useless.
 
