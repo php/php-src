@@ -803,6 +803,7 @@ if test "$PHP_VALGRIND" != "no"; then
   for i in $SEARCH_PATH ; do
     if test -r $i/$SEARCH_FOR; then
       VALGRIND_DIR=$i
+      INCLUDES="$INCLUDES -I$VALGRIND_DIR/include"
     fi
   done
 
