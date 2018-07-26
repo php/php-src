@@ -1898,7 +1898,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	int alphablending_bak;
 
 	/* stack of filled segments */
-	/* struct seg stack[FILL_MAX],*sp = stack;; */
+	/* struct seg stack[FILL_MAX],*sp = stack; */
 	struct seg *stack = NULL;
 	struct seg *sp;
 
@@ -3143,4 +3143,3 @@ clean_on_error:
 	gdFree(src->tpixels);
 	return 0;
 }
-

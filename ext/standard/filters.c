@@ -246,7 +246,7 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 {
 	php_strip_tags_filter *inst;
 	php_stream_filter *filter = NULL;
-	zend_string *allowed_tags = NULL;;
+	zend_string *allowed_tags = NULL;
 
 	php_error_docref(NULL, E_DEPRECATED, "The string.strip_tags filter is deprecated");
 
