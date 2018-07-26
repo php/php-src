@@ -9,5 +9,3 @@ is not in sync with the upstream at https://github.com/moriyoshi/libmbfl. As suc
 the libmbfl directory is directly modified in the php-src repository.
 
 See LICENSE and DISCLAIMER for licensing information.
-
-See INSTALL for building and installation instructions.
