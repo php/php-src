@@ -1366,7 +1366,7 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 static zend_constant *zend_lookup_reserved_const(const char *name, size_t len) /* {{{ */
 {
 	zend_constant *c = zend_hash_find_ptr_lc(EG(zend_constants), name, len);
-	if (c && !(c->flags & CONST_CS) && (c->flags & CONST_CT_SUBST)) {
+	if (c && !(ZEND_CONSTANT_FLAGS(c) & CONST_CS) && (ZEND_CONSTANT_FLAGS(c) & CONST_CT_SUBST)) {
 		return c;
 	}
 	return NULL;
@@ -1380,9 +1380,9 @@ static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool i
 	/* Substitute case-sensitive (or lowercase) constants */
 	c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c && (
-	      ((c->flags & CONST_PERSISTENT)
+	      ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
 	      && !(CG(compiler_options) & ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION)
-	      && (!(c->flags & CONST_NO_FILE_CACHE) || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE)))
+	      && (!(ZEND_CONSTANT_FLAGS(c) & CONST_NO_FILE_CACHE) || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE)))
 	   || (Z_TYPE(c->value) < IS_OBJECT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION))
 	)) {
 		ZVAL_COPY_OR_DUP(zv, &c->value);

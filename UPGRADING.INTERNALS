@@ -25,6 +25,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   v. php_add[c]slashes
   w. zend_class_entry.iterator_funcs
   x. Class declaration opcodes (DECLARE_INHERITED_CLASS ...)
+  y. zend_constant
 
 2. Build system changes
   a. Unix build system changes
@@ -159,6 +160,11 @@ PHP 7.3 INTERNALS UPGRADE NOTES
     parent class was fetched by the prior FETCH_CLASS opcode.
   - ADD_INTERFACE and ADD_TRAIT don't use run-time cache to keep interface or
     trait. These instructions are executed once, and caching is useless.
+
+ y. zend_constant.flags and zend_constant.module_number are packed into
+    reserved space inside zend_constant.value. They should be accessed using
+    ZEND_CONTANT_FLAGS(), ZEND_CONSTANTS_MODULE_NUMBER() and
+    ZEND_CONTANT_SET_FLAGS() macros.
 
 ========================
 2. Build system changes
