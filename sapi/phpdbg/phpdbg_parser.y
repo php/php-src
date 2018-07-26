@@ -3,8 +3,6 @@
 /*
  * phpdbg_parser.y
  * (from php-src root)
- * flex sapi/phpdbg/dev/phpdbg_lexer.l
- * bison sapi/phpdbg/dev/phpdbg_parser.y
  */
 
 #include "phpdbg.h"
