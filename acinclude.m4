@@ -2100,57 +2100,6 @@ AC_DEFUN([PHP_PROG_BISON], [
 ])
 
 dnl
-dnl PHP_PROG_LEX
-dnl
-dnl Search for (f)lex and check it's version
-dnl
-AC_DEFUN([PHP_PROG_LEX], [
-dnl we only support certain flex versions
-  flex_version_list="2.5.4"
-
-  AC_PROG_LEX
-  dnl ## Make flex scanners use const if they can, even if __STDC__ is not
-  dnl ## true, for compilers like Sun's that only set __STDC__ true in
-  dnl ## "limit-to-ANSI-standard" mode, not in "ANSI-compatible" mode
-  AC_C_CONST
-  if test "$ac_cv_c_const" = "yes" ; then
-    LEX_CFLAGS="-DYY_USE_CONST"
-  fi
-
-  if test "$LEX" = "flex"; then
-    AC_CACHE_CHECK([for flex version], php_cv_flex_version, [
-      flex_version=`$LEX -V -v --version 2>/dev/null | $SED -e 's/^.* //'`
-      php_cv_flex_version=invalid
-      for flex_check_version in $flex_version_list; do
-        if test "$flex_version" = "$flex_check_version"; then
-          php_cv_flex_version="$flex_check_version (ok)"
-        fi
-      done
-    ])
-  else
-    flex_version=none
-  fi
-
-  case $php_cv_flex_version in
-    ""|invalid[)]
-      if test -f "$abs_srcdir/Zend/zend_language_scanner.c" && test -f "$abs_srcdir/Zend/zend_ini_scanner.c"; then
-        AC_MSG_WARN([flex versions supported for regeneration of the Zend/PHP parsers: $flex_version_list  (found: $flex_version)])
-      else
-        flex_msg="Supported flex versions are: $flex_version_list"
-        if test "$flex_version" = "none"; then
-          flex_msg="flex not found. flex is required to generate the Zend/PHP parsers! $flex_msg"
-        else
-          flex_msg="Found invalid flex version: $flex_version. $flex_msg"
-        fi
-        AC_MSG_ERROR([$flex_msg])
-      fi
-      LEX="exit 0;"
-      ;;
-  esac
-  PHP_SUBST(LEX)
-])
-
-dnl
 dnl PHP_PROG_RE2C
 dnl
 dnl Search for the re2c binary and check the version
