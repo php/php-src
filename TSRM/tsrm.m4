@@ -1,4 +1,4 @@
-m4_include([TSRM/m4/gethostbyname.m4])
+m4_include([TSRM/m4/ax_func_which_gethostbyname_r.m4])
 
 dnl TSRM_CHECK_GCC_ARG(ARG, ACTION-IF-FOUND, ACTION-IF-NOT_FOUND)
 AC_DEFUN([TSRM_CHECK_GCC_ARG],[
