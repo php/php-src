@@ -58,7 +58,7 @@ static void copy_zend_constant(zval *zv)
 {
 	zend_constant *c = Z_PTR_P(zv);
 
-	ZEND_ASSERT(c->flags & CONST_PERSISTENT);
+	ZEND_ASSERT(ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 	Z_PTR_P(zv) = pemalloc(sizeof(zend_constant), 1);
 	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
 
