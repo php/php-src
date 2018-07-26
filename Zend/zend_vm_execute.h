@@ -21426,7 +21426,7 @@ fe_fetch_r_exit:
 			p++;
 		}
 		Z_FE_POS_P(array) = pos + 1;
-		if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
+		if (RETURN_VALUE_USED(opline)) {
 			if (!p->key) {
 				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
 			} else {
@@ -21466,7 +21466,7 @@ fe_fetch_r_exit:
 				pos++;
 				p++;
 			}
-			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
+			if (RETURN_VALUE_USED(opline)) {
 				if (UNEXPECTED(!p->key)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
 				} else if (ZSTR_VAL(p->key)[0]) {
@@ -21507,7 +21507,7 @@ fe_fetch_r_exit:
 				/* failure in get_current_data */
 				goto fe_fetch_r_exit;
 			}
-			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
+			if (RETURN_VALUE_USED(opline)) {
 				if (iter->funcs->get_current_key) {
 					iter->funcs->get_current_key(iter, EX_VAR(opline->result.var));
 					if (UNEXPECTED(EG(exception) != NULL)) {
@@ -21576,7 +21576,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 			pos++;
 			p++;
 		}
-		if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
+		if (RETURN_VALUE_USED(opline)) {
 			if (!p->key) {
 				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
 			} else {
@@ -21616,7 +21616,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 				pos++;
 				p++;
 			}
-			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
+			if (RETURN_VALUE_USED(opline)) {
 				if (UNEXPECTED(!p->key)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
 				} else if (ZSTR_VAL(p->key)[0]) {
@@ -21657,7 +21657,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 				/* failure in get_current_data */
 				goto fe_fetch_w_exit;
 			}
-			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
+			if (RETURN_VALUE_USED(opline)) {
 				if (iter->funcs->get_current_key) {
 					iter->funcs->get_current_key(iter, EX_VAR(opline->result.var));
 					if (UNEXPECTED(EG(exception) != NULL)) {
