@@ -1562,7 +1562,7 @@ PHP_METHOD(sqlite3stmt, execute)
 					break;
 
 				case SQLITE_FLOAT:
-					/* convert_to_double(parameter);*/
+					convert_to_double(parameter);
 					sqlite3_bind_double(stmt_obj->stmt, param->param_number, Z_DVAL_P(parameter));
 					break;
 
