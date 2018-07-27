@@ -1,18 +1,24 @@
 --TEST--
-sendmsg()/recvmsg(): test ability to receive multiple messages (WIN32)
+sendmsg()/recvmsg(): test ability to receive multiple messages
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets'))
 	die('skip sockets extension not available.');
+
+require 'ipv6_skipif.inc';
+
 if (!defined('IPPROTO_IPV6'))
 	die('skip IPv6 not available.');
-if (substr(PHP_OS, 0, 3) != 'WIN')
-	die('skip Only for Windows!');
+if (substr(PHP_OS, 0, 3) == 'WIN') 
+	die('skip Not for the Windows!');
 /* Windows supports IPV6_RECVTCLASS and is able to receive the tclass via
  * WSARecvMsg (though only the top 6 bits seem to reported), but WSASendMsg
- * does not accept IPV6_TCLASS messages. We still  test that sendmsg() works
- * corectly by sending an IPV6_PKTINFO message that will have no effect */
+ * does not accept IPV6_TCLASS messages */
 
+if (!defined('IPV6_RECVPKTINFO')) {
+    die('skip IPV6_RECVPKTINFO not available.');
+}
+?>
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";
@@ -39,11 +45,8 @@ $r = socket_sendmsg($sends1, [
 	"iov" => ["test ", "thing", "\n"],
 	"control" => [[
 		"level" => IPPROTO_IPV6,
-		"type" => IPV6_PKTINFO,
-		"data" => [
-			'addr' => '::1',
-            'ifindex' => 1 /* we're assuming loopback is 1. Is this a safe assumption? */
-		],
+		"type" => IPV6_TCLASS,
+		"data" => 40,
 	]]
 ], 0);
 var_dump($r);
@@ -60,10 +63,10 @@ print_r($data);
 
 --EXPECTF--
 creating send socket
-resource(%d) of type (Socket)
+resource(5) of type (Socket)
 bool(true)
 creating receive socket
-resource(%d) of type (Socket)
+resource(6) of type (Socket)
 bool(true)
 int(11)
 Array
@@ -95,7 +98,7 @@ Array
                 (
                     [level] => %d
                     [type] => %d
-                    [data] => 0
+                    [data] => 40
                 )
 
         )

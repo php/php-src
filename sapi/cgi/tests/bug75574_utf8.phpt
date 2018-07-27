@@ -2,10 +2,6 @@
 Bug #75574 putenv does not work properly if parameter contains non-ASCII unicode character, UTF-8
 --SKIPIF--
 <?php
-
-if (substr(PHP_OS, 0, 3) != 'WIN') {
-  die("skip Valid only on Windows");
-}
 include "skipif.inc";
 ?>
 --FILE--
@@ -29,7 +25,7 @@ unlink($fn);
 
 ?>
 ===DONE===
---EXPECT--	
+--EXPECT--
 bool(true)
 string(3) "啊"
 ===DONE===

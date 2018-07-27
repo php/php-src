@@ -1,11 +1,5 @@
 --TEST--
 Bug #72463 mail fails with invalid argument
---SKIPIF--
-<?php
-if(substr(PHP_OS, 0, 3) != "WIN") {
-	die('skip windows only');
-}
-?>
 --INI--
 SMTP=non.existent.smtp.server
 --FILE--
