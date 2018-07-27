@@ -6,18 +6,21 @@ opcache.enable_cli=1
 opcache.file_cache=/tmp
 --FILE--
 <?php
+if (PHP_VERSION_ID >= 70000) {
+    echo "Done";
+    return;
+}
 if (!is_callable('random_bytes')) {
     try {
     } catch (com_exception $e) {
     }
-
     function random_bytes($length)
     {
         throw new Exception(
             'There is no suitable CSPRNG installed on your system'
         );
+        return '';
     }
 }
-echo 'Done';
 --EXPECT--
 Done
