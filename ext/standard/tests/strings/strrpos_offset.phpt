@@ -1,7 +1,5 @@
 --TEST--
 strrpos() offset integer overflow
---SKIPIF--
-<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 

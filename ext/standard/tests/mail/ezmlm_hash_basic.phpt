@@ -1,9 +1,5 @@
 --TEST--
-Test ezmlm_hash() function : basic functionality 
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
+Test ezmlm_hash() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int ezmlm_hash  ( string $addr  )
