@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0beta1
 
+- Core:
+  . Fixed bug #76667 (Segfault with divide-assign op and __get + __set).
+    (Laruence)
+
 - SQLite3:
   . Fixed #76665 (SQLite3Stmt::bindValue() with SQLITE3_FLOAT doesn't juggle).
     (cmb)

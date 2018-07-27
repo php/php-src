@@ -631,7 +631,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_assign
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
+	zend_tmp_string_release(tmp_property_name);
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
@@ -659,7 +659,7 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *obje
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
 			}
-			zend_tmp_string_release(property_name);
+			zend_tmp_string_release(tmp_property_name);
 		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
@@ -693,7 +693,7 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object_rw(zval *o
 			zend_string *tmp_property_name;
 			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 			zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
-			zend_tmp_string_release(property_name);
+			zend_tmp_string_release(tmp_property_name);
 		}
 		return 0;
 	}
@@ -1332,7 +1332,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_read(z
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_NOTICE, "Trying to get property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
+	zend_tmp_string_release(tmp_property_name);
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_unset(zval *property)
@@ -1340,7 +1340,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_unset(
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_NOTICE, "Trying to unset property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
+	zend_tmp_string_release(tmp_property_name);
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_check(zval *property)
@@ -1348,7 +1348,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_check(
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_NOTICE, "Trying to check property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
+	zend_tmp_string_release(tmp_property_name);
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
