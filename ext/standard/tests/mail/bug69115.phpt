@@ -1,11 +1,5 @@
 --TEST--
 Bug #69115 crash in mail (plus indirect pcre test)
---SKIPIF--
-<?php
-if( substr(PHP_OS, 0, 3) != 'WIN' ) {
-   die('skip...Windows only test');
-}
-?>
 --INI--
 SMTP = 
 smtp_port =
