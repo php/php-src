@@ -71,8 +71,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 		cal_int_type = Z_LVAL_P(calendar_zv);
 
 	} else if (Z_TYPE_P(calendar_zv) == IS_OBJECT &&
-			instanceof_function_ex(Z_OBJCE_P(calendar_zv),
-			Calendar_ce_ptr, 0)) {
+			instanceof_function(Z_OBJCE_P(calendar_zv), Calendar_ce_ptr)) {
 
 		cal = calendar_fetch_native_calendar(calendar_zv);
 		if (cal == NULL) {

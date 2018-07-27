@@ -834,7 +834,7 @@ ZEND_API zval *zend_std_read_dimension(zval *object, zval *offset, int type, zva
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval tmp_offset, tmp_object;
 
-	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
+	if (EXPECTED(instanceof_function(ce, zend_ce_arrayaccess) != 0)) {
 		if (offset == NULL) {
 			/* [] construct */
 			ZVAL_NULL(&tmp_offset);
@@ -883,7 +883,7 @@ ZEND_API void zend_std_write_dimension(zval *object, zval *offset, zval *value) 
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval tmp_offset, tmp_object;
 
-	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
+	if (EXPECTED(instanceof_function(ce, zend_ce_arrayaccess) != 0)) {
 		if (!offset) {
 			ZVAL_NULL(&tmp_offset);
 		} else {
@@ -905,7 +905,7 @@ ZEND_API int zend_std_has_dimension(zval *object, zval *offset, int check_empty)
 	zval retval, tmp_offset, tmp_object;
 	int result;
 
-	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
+	if (EXPECTED(instanceof_function(ce, zend_ce_arrayaccess) != 0)) {
 		ZVAL_COPY_DEREF(&tmp_offset, offset);
 		ZVAL_COPY(&tmp_object, object);
 		zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetexists", &retval, &tmp_offset);
@@ -1067,7 +1067,7 @@ ZEND_API void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval tmp_offset, tmp_object;
 
-	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1)) {
+	if (instanceof_function(ce, zend_ce_arrayaccess)) {
 		ZVAL_COPY_DEREF(&tmp_offset, offset);
 		ZVAL_COPY(&tmp_object, object);
 		zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetunset", NULL, &tmp_offset);
