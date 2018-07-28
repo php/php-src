@@ -31,4 +31,5 @@ unistd.h \
 limits.h
 )
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
