@@ -199,4 +199,4 @@ touch .deps
 
 AC_CONFIG_HEADERS([config.h])
 
-AC_OUTPUT()
+AC_OUTPUT

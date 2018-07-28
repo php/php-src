@@ -94,7 +94,7 @@ dnl
 dnl PHP_SUBST_OLD(varname)
 dnl
 dnl Same as PHP_SUBST() but also substitutes all @VARNAME@
-dnl instances in every file passed to AC_OUTPUT()
+dnl instances in every file passed to AC_OUTPUT
 dnl
 AC_DEFUN([PHP_SUBST_OLD],[
   PHP_SUBST($1)

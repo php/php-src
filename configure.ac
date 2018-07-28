@@ -1567,7 +1567,8 @@ PHP_CHECK_CONFIGURE_OPTIONS
 dnl
 dnl Generate build files
 dnl
-AC_OUTPUT($ALL_OUTPUT_FILES, [], [
+AC_CONFIG_FILES([$ALL_OUTPUT_FILES])
+AC_CONFIG_COMMANDS([default],[],[
 
 if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
   REDO_ALL=yes
@@ -1698,6 +1699,7 @@ Check '[$]0 --help' for available options
 
 fi
 ])
+AC_OUTPUT
 
 dnl ## Local Variables:
 dnl ## tab-width: 4
