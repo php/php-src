@@ -563,7 +563,7 @@ PHP_CHECK_CPU_SUPPORTS([avx])
 PHP_CHECK_CPU_SUPPORTS([avx2])
 
 dnl Check for members of the stat structure
-AC_STRUCT_ST_BLKSIZE
+AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
 dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exists
 dnl The WARNING_LEVEL required because cc in QNX hates -w option without an argument
 if test "`uname -s 2>/dev/null`" != "QNX"; then
@@ -572,7 +572,6 @@ else
   AC_MSG_WARN([warnings level for cc set to 0])
   WARNING_LEVEL=0
 fi
-AC_STRUCT_ST_RDEV
 
 dnl Checks for types
 AC_TYPE_SIZE_T

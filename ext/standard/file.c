@@ -1590,7 +1590,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	ZVAL_LONG(&stat_nlink, stat_ssb.sb.st_nlink);
 	ZVAL_LONG(&stat_uid, stat_ssb.sb.st_uid);
 	ZVAL_LONG(&stat_gid, stat_ssb.sb.st_gid);
-#ifdef HAVE_ST_RDEV
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 # ifdef PHP_WIN32
 	/* It is unsigned, so if a negative came from userspace, it'll
 	   convert to UINT_MAX, but we wan't to keep the userspace value.
@@ -1611,7 +1611,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	ZVAL_LONG(&stat_atime, stat_ssb.sb.st_atime);
 	ZVAL_LONG(&stat_mtime, stat_ssb.sb.st_mtime);
 	ZVAL_LONG(&stat_ctime, stat_ssb.sb.st_ctime);
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 	ZVAL_LONG(&stat_blksize, stat_ssb.sb.st_blksize);
 #else
 	ZVAL_LONG(&stat_blksize,-1);
