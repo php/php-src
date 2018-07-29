@@ -1,6 +1,6 @@
 m4_include([TSRM/m4/gethostbyname.m4])
 
-dnl TSRM_CHECK_GCC_ARG(ARG, ACTION-IF-FOUND, ACTION-IF-NOT_FOUND)	
+dnl TSRM_CHECK_GCC_ARG(ARG, ACTION-IF-FOUND, ACTION-IF-NOT_FOUND)
 AC_DEFUN([TSRM_CHECK_GCC_ARG],[
   gcc_arg_name=[ac_cv_gcc_arg]translit($1,A-Z-,a-z_)
   AC_CACHE_CHECK([whether $CC supports $1], [ac_cv_gcc_arg]translit($1,A-Z-,a-z_), [
@@ -75,9 +75,9 @@ AC_DEFUN([TSRM_CHECK_ST],[
 sinclude(threads.m4)
 
 AC_DEFUN([TSRM_CHECK_PTHREADS],[
-		
+
 PTHREADS_CHECK
-	
+
 if test "$pthreads_working" != "yes"; then
   AC_MSG_ERROR(Your system seems to lack POSIX threads.)
 fi
