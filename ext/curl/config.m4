@@ -102,7 +102,7 @@ if test "$PHP_CURL" != "no"; then
 
     AC_PROG_CPP
     AC_MSG_CHECKING([for openssl support in libcurl])
-    AC_TRY_RUN([
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <strings.h>
 #include <curl/curl.h>
 
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
   }
   return 1;
 }
-    ],[
+    ]])],[
       AC_MSG_RESULT([yes])
       AC_CHECK_HEADERS([openssl/crypto.h], [
         AC_DEFINE([HAVE_CURL_OPENSSL], [1], [Have cURL with OpenSSL support])
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     ])
 
     AC_MSG_CHECKING([for gnutls support in libcurl])
-    AC_TRY_RUN([
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <strings.h>
 #include <curl/curl.h>
 
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
   }
   return 1;
 }
-], [
+]])], [
       AC_MSG_RESULT([yes])
       AC_CHECK_HEADER([gcrypt.h], [
         AC_DEFINE([HAVE_CURL_GNUTLS], [1], [Have cURL with GnuTLS support])

@@ -216,7 +216,7 @@ if test "$PHP_RE2C_CGOTO" = "no"; then
   RE2C_FLAGS=""
 else
   AC_MSG_CHECKING([whether re2c -g works])
-  AC_TRY_COMPILE([],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
 int main(int argc, const char **argv)
 {
   argc = argc;
@@ -227,7 +227,7 @@ label2:
   goto *adr[0];
   return 0;
 }
-  ],[
+  ]])],[
     RE2C_FLAGS=""
     AC_MSG_RESULT([no])
   ],[
@@ -589,9 +589,9 @@ AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*], [true], [
 
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
-[AC_TRY_LINK([ #include <sys/types.h>
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>], [struct sockaddr_in6 s; struct in6_addr t=in6addr_any; int i=AF_INET6; s; t.s6_addr[0] = 0;],
+#include <netinet/in.h>]], [[struct sockaddr_in6 s; struct in6_addr t=in6addr_any; int i=AF_INET6; s; t.s6_addr[0] = 0;]])],
   [ac_cv_ipv6_support=yes], [ac_cv_ipv6_support=no])])
 
 dnl Checks for library functions.
@@ -690,9 +690,8 @@ PHP_CHECK_FUNC_LIB(nanosleep, rt)
 dnl Check for getaddrinfo, should be a better way, but...
 dnl Also check for working getaddrinfo
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
-[AC_TRY_LINK([#include <netdb.h>],
-                [struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);],
-  [AC_TRY_RUN([
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <netdb.h>]],
+  [[struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);]])],[AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <netdb.h>
 #include <sys/types.h>
 #ifndef AF_INET
@@ -728,15 +727,15 @@ int main(void) {
   freeaddrinfo(ai);
   exit(0);
 }
-  ],ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no, ac_cv_func_getaddrinfo=no)],
-ac_cv_func_getaddrinfo=no)])
+  ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [ac_cv_func_getaddrinfo=no])],
+[ac_cv_func_getaddrinfo=no])])
 if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
 fi
 
 dnl Check for the __sync_fetch_and_add builtin
 AC_CACHE_CHECK([for __sync_fetch_and_add], ac_cv_func_sync_fetch_and_add,
-[AC_TRY_LINK([],[int x;__sync_fetch_and_add(&x,1);],ac_cv_func_sync_fetch_and_add=yes,ac_cv_func_sync_fetch_and_add=no)])
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[int x;__sync_fetch_and_add(&x,1);]])],[ac_cv_func_sync_fetch_and_add=yes],[ac_cv_func_sync_fetch_and_add=no])])
 if test "$ac_cv_func_sync_fetch_and_add" = yes; then
   AC_DEFINE(HAVE_SYNC_FETCH_AND_ADD,1,[Define if you have the __sync_fetch_and_add function])
 fi
@@ -758,13 +757,13 @@ fi
 
 dnl Check for asm goto support
 AC_CACHE_CHECK([for asm goto], ac_cv__asm_goto,
-[AC_TRY_RUN([
+[AC_RUN_IFELSE([AC_LANG_SOURCE([[
 int main(void) {
     __asm__ goto("jmp %l0\n" :::: end);
 end:
     return 0;
 }
-  ],ac_cv__asm_goto=yes, ac_cv__asm_goto=no, ac_cv__asm_goto=no)])
+  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no], [ac_cv__asm_goto=no])])
 
 if test "$ac_cv__asm_goto" = yes; then
   AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
@@ -772,13 +771,13 @@ fi
 
 dnl Check for variable length array support
 AC_CACHE_CHECK([whether compiler supports VLA], ac_cv__compiler_c99_vla,
-[AC_TRY_RUN([
+[AC_RUN_IFELSE([AC_LANG_SOURCE([[
  #include <stdlib.h>
  int main(void) {
          int i[rand()%10];
 	 return 0;
  }
- ],ac_cv__compiler_c99_vla=yes, ac_cv__compiler_c99_vla=no, ac_cv__compiler_c99_vla=no)])
+ ]])],[ac_cv__compiler_c99_vla=yes], [ac_cv__compiler_c99_vla=no], [ac_cv__compiler_c99_vla=no])])
 
 if test "$ac_cv__compiler_c99_vla" = yes; then
 	AC_DEFINE(HAVE_COMPILER_C99_VLA, 1, [Compiler supports VLA])
