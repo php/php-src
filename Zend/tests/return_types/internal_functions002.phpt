@@ -2,7 +2,7 @@
 Return type for internal functions 2
 --SKIPIF--
 <?php
-if (!function_exists('zend_test_nullable_array_return')) die('skip zend_test_nullable_array_return function does not exist');
+if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
 --FILE--
 <?php
 zend_test_nullable_array_return();
