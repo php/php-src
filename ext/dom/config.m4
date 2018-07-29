@@ -10,7 +10,7 @@ fi
 
 if test "$PHP_DOM" != "no"; then
 
-  if test "$PHP_LIBXML" = "no"; then   
+  if test "$PHP_LIBXML" = "no"; then
     AC_MSG_ERROR([DOM extension requires LIBXML extension, add --enable-libxml])
   fi
 
@@ -25,7 +25,7 @@ if test "$PHP_DOM" != "no"; then
                             nodelist.c text.c comment.c domconfiguration.c \
                             domimplementationsource.c entityreference.c \
                             notation.c xpath.c dom_iterators.c \
-                            typeinfo.c domerror.c domlocator.c namednodemap.c userdatahandler.c], 
+                            typeinfo.c domerror.c domlocator.c namednodemap.c userdatahandler.c],
                             $ext_shared)
     PHP_SUBST(DOM_SHARED_LIBADD)
     PHP_INSTALL_HEADERS([ext/dom/xml_common.h])

@@ -1,6 +1,6 @@
 dnl config.m4 for extension shmop
 
-PHP_ARG_ENABLE(shmop, whether to enable shmop support, 
+PHP_ARG_ENABLE(shmop, whether to enable shmop support,
 [  --enable-shmop          Enable shmop support])
 
 if test "$PHP_SHMOP" != "no"; then

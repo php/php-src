@@ -54,7 +54,7 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
     ],[
       $PCRE2_LIB
     ])
-    
+
     PHP_EVAL_INCLINE($PCRE2_INC)
     PHP_EVAL_LIBLINE($PCRE2_LIB)
     AC_DEFINE(HAVE_PCRE, 1, [ ])
