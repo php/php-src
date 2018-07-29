@@ -2,7 +2,7 @@
 crypt() SHA-512
 --SKIPIF--
 <?php
-if (!function_exists('crypt') || !defined("CRYPT_SHA512")) {
+if (!defined("CRYPT_SHA512")) {
 	die("SKIP crypt()-sha512 is not available");
 }
 ?> 

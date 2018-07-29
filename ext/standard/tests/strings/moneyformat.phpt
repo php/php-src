@@ -2,7 +2,7 @@
 money_format test
 --SKIPIF--
 <?php
-	if (!function_exists('money_format') || !function_exists('setlocale')) {
+	if (!function_exists('money_format')) {
 		die("SKIP money_format - not supported\n");
 	}
 

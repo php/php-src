@@ -2,7 +2,7 @@
 crypt() SHA-256 
 --SKIPIF--
 <?php
-if (!function_exists('crypt') || !defined("CRYPT_SHA256")) {
+if (!defined("CRYPT_SHA256")) {
 	die("SKIP crypt()-sha256 is not available");
 }
 ?> 

@@ -2,7 +2,7 @@
 Test Blowfish crypt() with invalid rounds
 --SKIPIF--
 <?php
-if (!function_exists('crypt') || !defined("CRYPT_BLOWFISH")) {
+if (!defined("CRYPT_BLOWFISH")) {
     die("SKIP crypt()-blowfish is not available");
 }
 ?>
