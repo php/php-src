@@ -78,7 +78,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
       fi
 
       AC_CACHE_CHECK(for variable length prototypes and stdarg.h, php_cv_mbstring_stdarg, [
-        AC_TRY_RUN([
+        AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdarg.h>
 int foo(int x, ...) {
   va_list va;
@@ -89,7 +89,7 @@ int foo(int x, ...) {
   return 0;
 }
 int main() { return foo(10, "", 3.14); }
-        ], [php_cv_mbstring_stdarg=yes], [php_cv_mbstring_stdarg=no], [
+        ]])], [php_cv_mbstring_stdarg=yes], [php_cv_mbstring_stdarg=no], [
           php_cv_mbstring_stdarg=no
         ])
       ])
@@ -188,11 +188,11 @@ int main() { return foo(10, "", 3.14); }
       save_old_LDFLAGS=$LDFLAGS
       PHP_EVAL_LIBLINE([$MBSTRING_SHARED_LIBADD], LDFLAGS)
       AC_MSG_CHECKING([if oniguruma has an invalid entry for KOI8 encoding])
-      AC_TRY_LINK([
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <oniguruma.h>
-      ], [
+      ]], [[
 return (int)(ONIG_ENCODING_KOI8 + 1);
-      ], [
+      ]])], [
         AC_MSG_RESULT([no])
       ], [
         AC_MSG_RESULT([yes])
