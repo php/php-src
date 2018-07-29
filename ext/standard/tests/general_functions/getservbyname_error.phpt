@@ -1,5 +1,7 @@
 --TEST--
 Test function getservbyname() by calling it more than or less than its expected arguments
+--SKIPIF--
+<?php if (!function_exists('getservbyname')) die('skip getservbyname function not available') ?>
 --CREDITS--
 Italian PHP TestFest 2009 Cesena 19-20-21 june
 Fabio Fabbrucci (fabbrucci@grupporetina.com)
@@ -8,7 +10,7 @@ Danilo Sanchi (sanchi@grupporetina.com)
 --FILE--
 <?php
 $service = "www";
-$protocol = "tcp"; 
+$protocol = "tcp";
 $extra_arg = 12;
 var_dump(getservbyname($service, $protocol, $extra_arg ) );
 var_dump(getservbyname($service));

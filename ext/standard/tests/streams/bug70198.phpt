@@ -2,12 +2,13 @@
 Bug #70198 Checking liveness does not work as expected
 --SKIPIF--
 <?php
+if (!function_exists('proc_open')) die ('skip proc_open function not available');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
 
-/* What is checked here is 
+/* What is checked here is
 	- start a server and listen
 	- as soon as client connects, close connection and exit
 	- on the client side - sleep(1) and check feof()
@@ -58,4 +59,3 @@ unlink($srv_fl);
 --EXPECT--
 int(0)
 ==DONE==
-

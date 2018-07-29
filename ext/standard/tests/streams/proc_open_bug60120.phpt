@@ -1,5 +1,7 @@
 --TEST--
 Bug #60120 proc_open hangs with stdin/out with 2048+ bytes
+--SKIPIF--
+<?php if (!function_exists('proc_open')) die ('skip proc_open function not available'); ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
@@ -68,4 +70,3 @@ string(2049) "%s"
 string(0) ""
 string(0) ""
 ===DONE===
-

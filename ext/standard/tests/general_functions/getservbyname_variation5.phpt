@@ -1,12 +1,14 @@
 --TEST--
 Test function getservbyname() by substituting argument 1 with int values.
+--SKIPIF--
+<?php if (!function_exists('getservbyname')) die('skip getservbyname function not available') ?>
 --FILE--
 <?php
 
 
 echo "*** Test substituting argument 1 with int values ***\n";
 
-$protocol = "tcp"; 
+$protocol = "tcp";
 
 
 $variation_array = array (

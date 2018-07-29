@@ -1,5 +1,7 @@
 --TEST--
 Test function getservbyname() by substituting argument 2 with float values.
+--SKIPIF--
+<?php if (!function_exists('getservbyname')) die('skip getservbyname function not available') ?>
 --FILE--
 <?php
 

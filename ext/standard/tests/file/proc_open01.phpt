@@ -1,13 +1,15 @@
 --TEST--
 proc_open() regression test 1 (proc_open() leak)
+--SKIPIF--
+<?php if (!function_exists('proc_open')) die ('skip proc_open function not available'); ?>
 --FILE--
 <?php
 $pipes = array(1, 2, 3);
 $orig_pipes = $pipes;
-$php = getenv('TEST_PHP_EXECUTABLE'); 
+$php = getenv('TEST_PHP_EXECUTABLE');
 if ($php === false) {
 	die("no php executable defined");
-} 
+}
 $proc = proc_open(
 	"$php -n",
 	array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')),
@@ -24,7 +26,7 @@ fflush($pipes[0]);
 fclose($pipes[0]);
 $cnt = '';
 $n=0;
-for ($left = strlen($test_string); $left > 0;) { 
+for ($left = strlen($test_string); $left > 0;) {
 	if (++$n >1000) {
 	  print "terminated after 1000 iterations\n";
 	  break;

@@ -1,5 +1,7 @@
 --TEST--
-proc_open() with no pipes 
+proc_open() with no pipes
+--SKIPIF--
+<?php if (!function_exists('proc_open')) die ('skip proc_open function not available'); ?>
 --FILE--
 <?php
 

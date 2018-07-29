@@ -1,5 +1,7 @@
 --TEST--
-Bug #64770 stream_select() fails with pipes from proc_open() 
+Bug #64770 stream_select() fails with pipes from proc_open()
+--SKIPIF--
+<?php if (!function_exists('proc_open')) die ('skip proc_open function not available'); ?>
 --FILE--
 <?php
 
@@ -17,7 +19,7 @@ $p = proc_open($cmd, $descs, $pipes, '.', NULL, $other_opts);
 if (is_resource($p)) {
 	$data = '';
 
-	while (1) {	
+	while (1) {
 		$w = $e = NULL;
 		$n = stream_select($pipes, $w, $e, 300);
 

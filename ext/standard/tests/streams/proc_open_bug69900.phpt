@@ -1,5 +1,7 @@
 --TEST--
 Bug #69900 Commandline input/output weird behaviour with STDIO
+--SKIPIF--
+<?php if (!function_exists('proc_open')) die ('skip proc_open function not available'); ?>
 --FILE--
 <?php
 
@@ -33,7 +35,7 @@ for($i = 0; $i < 10; $i++){
 	$s = fgets($pipes[1]);
 	$t1 = microtime(1);
 
-	echo $s;		
+	echo $s;
 	echo "fgets() took ", (($t1 - $t0)*1000 > $max_ms ? 'more' : 'less'), " than $max_ms ms\n";
 }
 
