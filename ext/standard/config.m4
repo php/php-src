@@ -377,12 +377,7 @@ dnl
 dnl Check for i18n capabilities
 dnl
 AC_CHECK_HEADERS([wchar.h])
-AC_CHECK_FUNCS([mblen])
-AC_CHECK_FUNCS([mbrlen mbsinit],,,[
-#ifdef HAVE_WCHAR_H
-# include <wchar.h>
-#endif
-])
+AC_CHECK_FUNCS([mblen mbrlen mbsinit])
 AC_CACHE_CHECK([for mbstate_t], [ac_cv_type_mbstate_t],[
 AC_TRY_COMPILE([
 #ifdef HAVE_WCHAR_H
