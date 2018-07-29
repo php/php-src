@@ -27,6 +27,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   x. Class declaration opcodes (DECLARE_INHERITED_CLASS ...)
   y. zend_constant
   z. HAVE_ST_BLKSIZE and HAVE_ST_RDEV
+  aa. RETSIGTYPE
 
 2. Build system changes
   a. Unix build system changes
@@ -169,6 +170,9 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
  z. HAVE_ST_BLKSIZE must be replaced with HAVE_STRUCT_STAT_ST_BLKSIZE and
     HAVE_ST_RDEV must be replaced with HAVE_STRUCT_STAT_ST_RDEV.
+
+ aa. RETSIGTYPE has been removed from the generated php_config.h and should be
+    replaced with void.
 
 ========================
 2. Build system changes
