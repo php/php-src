@@ -2,7 +2,7 @@
 Return type for internal functions
 --SKIPIF--
 <?php
-if (!function_exists('zend_test_array_return')) die('skip');
+if (!function_exists('zend_test_array_return')) die('skip zend_test_array_return function does not exist');
 // Internal function return types are only checked in debug builds
 if (!PHP_DEBUG) die('skip requires debug build');
 ?>
