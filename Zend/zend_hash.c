@@ -327,19 +327,21 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend
 
 ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed)
 {
-	uint32_t idx;
-	Bucket *p;
+	Bucket *p, *end, *arData;
 	uint32_t nIndex;
 
-	for (idx = ht->nNumUsed, p = ht->arData + idx; idx > nNumUsed; idx--) {
+	arData = ht->arData;
+	p = arData + ht->nNumUsed;
+	end = arData + nNumUsed;
+	ht->nNumUsed = nNumUsed;
+	while (p != end) {
 		p--;
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ht->nNumOfElements--;
 		/* Collision pointers always directed from higher to lower buckets */
 		nIndex = p->h | ht->nTableMask;
-		HT_HASH(ht, nIndex) = Z_NEXT(p->val);
+		HT_HASH_EX(arData, nIndex) = Z_NEXT(p->val);
 	}
-	ht->nNumUsed = idx;
 }
 
 static uint32_t zend_array_recalc_elements(HashTable *ht)
