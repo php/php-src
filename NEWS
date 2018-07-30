@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - PDO_Firebird:
   . Fixed bug #76488 (Memory leak when fetching a BLOB field). (Simonov Denis)
 
+- PDO_PgSQL:
+  . Fixed bug #75402 (Possible Memory Leak using PDO::CURSOR_SCROLL option).
+    (Anatol)
+
 - SQLite3:
   . Fixed #76665 (SQLite3Stmt::bindValue() with SQLITE3_FLOAT doesn't juggle).
     (cmb)
