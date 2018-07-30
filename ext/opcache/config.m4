@@ -356,7 +356,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	flock_type=linux
     AC_DEFINE([HAVE_FLOCK_LINUX], [], [Struct flock is Linux-type])
     AC_MSG_RESULT("yes")
-], [AC_MSG_RESULT("no")], [])
+], [AC_MSG_RESULT("no")], [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING("whether flock struct is BSD ordered")
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -372,7 +372,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	flock_type=bsd
     AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type])
     AC_MSG_RESULT("yes")
-], [AC_MSG_RESULT("no")], [])
+], [AC_MSG_RESULT("no")], [AC_MSG_RESULT([no])])
 
 if test "$flock_type" = "unknown"; then
 	AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])

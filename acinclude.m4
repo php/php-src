@@ -3243,7 +3243,7 @@ int main() {
       AC_MSG_RESULT([yes])
     ], [
       AC_MSG_RESULT([no])
-    ], [])
+    ], [AC_MSG_RESULT([no])])
   fi
   AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_$1_INSTRUCTIONS]),
    [$have_ext_instructions], [Whether the compiler supports $1 instructions])

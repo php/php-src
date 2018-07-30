@@ -91,7 +91,7 @@ AC_DEFUN([AC_FPM_CLOCK],
       AC_MSG_RESULT([yes])
     ], [
       AC_MSG_RESULT([no])
-    ], [])
+    ], [AC_MSG_RESULT([no (cross-compiling)])])
   fi
 
   if test "$have_clock_get_time" = "yes"; then
@@ -192,7 +192,7 @@ AC_DEFUN([AC_FPM_TRACE],
       have_broken_ptrace=yes
       AC_MSG_RESULT([no])
     ], [
-      AC_MSG_RESULT([skipped (cross compiling)])
+      AC_MSG_RESULT([skipped (cross-compiling)])
     ])
   fi
 
@@ -266,7 +266,7 @@ AC_DEFUN([AC_FPM_TRACE],
       proc_mem_file=""
       AC_MSG_RESULT([no])
     ], [
-      AC_MSG_RESULT([skipped (cross compiling)])
+      AC_MSG_RESULT([skipped (cross-compiling)])
     ])
   fi
 

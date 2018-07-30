@@ -60,7 +60,7 @@ int main() {
         AC_MSG_RESULT(no)
         LDFLAGS="$php_iconv_old_ld"
       ],[
-        AC_MSG_RESULT(no, cross-compiling)
+        AC_MSG_RESULT([no, cross-compiling])
         LDFLAGS="$php_iconv_old_ld"
       ])
     fi
