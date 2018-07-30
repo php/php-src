@@ -482,7 +482,7 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 {
 	if (class_type->parent
 		&& (class_type->parent->serialize || class_type->parent->unserialize)
-		&& !instanceof_function_ex(class_type->parent, zend_ce_serializable, 1)) {
+		&& !instanceof_function(class_type->parent, zend_ce_serializable)) {
 		return FAILURE;
 	}
 	if (!class_type->serialize) {

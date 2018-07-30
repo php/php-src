@@ -2274,69 +2274,55 @@ ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1,
 }
 /* }}} */
 
-static zend_bool ZEND_FASTCALL instanceof_interface_only(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
+ZEND_API zend_bool ZEND_FASTCALL instanceof_class(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
 {
-	uint32_t i;
-
-	for (i = 0; i < instance_ce->num_interfaces; i++) {
-		if (instanceof_interface_only(instance_ce->interfaces[i], ce)) {
-			return 1;
-		}
-	}
-	return 0;
-}
-/* }}} */
-
-static zend_always_inline zend_bool instanceof_class(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
-{
-	while (instance_ce) {
+	do {
 		if (instance_ce == ce) {
 			return 1;
 		}
-		instance_ce = instance_ce->parent;
-	}
+	} while (instance_ce = instance_ce->parent);
+
 	return 0;
 }
 /* }}} */
 
-static zend_bool ZEND_FASTCALL instanceof_interface(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
+ZEND_API zend_bool ZEND_FASTCALL instanceof_interface(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
 {
 	uint32_t i;
+
+	/* The simplest case, an exact match */
+	if (instance_ce == ce) {
+		return 1;
+	}
+
+	/* Normally a ce will be directly aware of all the interfaces it inherits */
+	for (i = 0; i < instance_ce->num_interfaces; i++) {
+		if (instance_ce->interfaces[i] == ce) {
+			return 1;
+		}
+	}
+
+	/* Manual manipulation of the hierarchy is sometimes done by , but the changes
+           won't be copied downwards, so check up the tree recursively. */
+	if (instance_ce->parent && instanceof_interface(instance_ce->parent, ce)) {
+		return 1;
+	}
 
 	for (i = 0; i < instance_ce->num_interfaces; i++) {
 		if (instanceof_interface(instance_ce->interfaces[i], ce)) {
 			return 1;
 		}
 	}
-	return instanceof_class(instance_ce, ce);
-}
-/* }}} */
 
-ZEND_API zend_bool ZEND_FASTCALL instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only) /* {{{ */
-{
-	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		if (!interfaces_only) {
-			if (instanceof_interface_only(instance_ce, ce)) {
-				return 1;
-			}
-		} else {
-			return instanceof_interface(instance_ce, ce);
-		}
-	}
-	if (!interfaces_only) {
-		return instanceof_class(instance_ce, ce);
-	}
 	return 0;
 }
 /* }}} */
 
 ZEND_API zend_bool ZEND_FASTCALL instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
 {
-	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		return instanceof_interface(instance_ce, ce);
-	} else {
-		return instanceof_class(instance_ce, ce);
-	}
+	return (ce->ce_flags & ZEND_ACC_INTERFACE)
+		? instanceof_interface(instance_ce, ce)
+		: instanceof_class(instance_ce, ce);
 }
 /* }}} */
 
