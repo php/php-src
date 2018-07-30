@@ -1622,7 +1622,7 @@ cat <<X
 | see the file debug.log for error messages.                         |
 |                                                                    |
 | If you are unable to fix this, send the file debug.log to the      |
-| php-install@lists.php.net mailing list and include appropriate      |
+| php-install@lists.php.net mailing list and include appropriate     |
 | information about your setup.                                      |
 X
   fi
