@@ -1,9 +1,7 @@
 --TEST--
 Test exif_tagname() function : usage variations  - different types for index argument
 --SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';
-if (PHP_INT_SIZE != 4) die('skip 32-bit only');
-?>
+<?php if (!extension_loaded('exif')) print 'skip exif extension not available'; ?>
 --FILE--
 <?php
 
