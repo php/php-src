@@ -2671,7 +2671,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
 		goto convert;
 	}
 
-	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+	ZEND_HASH_FOREACH_STR_KEY(ht, str_key) {
 		if (!str_key) {
 			goto convert;
 		}
@@ -2720,7 +2720,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend
 	zend_string *str_key;
 	zval *zv;
 
-	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+	ZEND_HASH_FOREACH_STR_KEY(ht, str_key) {
 		/* The `str_key &&` here might seem redundant: property tables should
 		 * only have string keys. Unfortunately, this isn't true, at the very
 		 * least because of ArrayObject, which stores a symtable where the
