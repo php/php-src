@@ -1,11 +1,5 @@
 --TEST--
 crypt() SHA-512
---SKIPIF--
-<?php
-if (!defined("CRYPT_SHA512")) {
-	die("SKIP crypt()-sha512 is not available");
-}
-?> 
 --FILE--
 <?php
 
