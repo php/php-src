@@ -165,6 +165,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 			pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 			return 0;
 		}
+		PQclear(S->result);
 
 		/* the cursor was declared correctly */
 		S->is_prepared = 1;
@@ -432,6 +433,11 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			case PDO_FETCH_ORI_REL:		spprintf(&ori_str, 0, "RELATIVE " ZEND_LONG_FMT, offset); break;
 			default:
 				return 0;
+		}
+
+		if(S->result) {
+			PQclear(S->result);
+			S->result = NULL;
 		}
 
 		spprintf(&q, 0, "FETCH %s FROM %s", ori_str, S->cursor_name);
