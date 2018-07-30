@@ -2835,7 +2835,7 @@ static void zend_compile_list_assign(
 		zend_verify_list_assign_target(var_ast, old_style);
 
 		opline = zend_emit_op(&fetch_result,
-			elem_ast->attr ? ZEND_FETCH_LIST_W : ZEND_FETCH_LIST_R, expr_node, &dim_node);
+			elem_ast->attr ? (expr_node->op_type == IS_CV ? ZEND_FETCH_DIM_W : ZEND_FETCH_LIST_W) : ZEND_FETCH_LIST_R, expr_node, &dim_node);
 
 		if (dim_node.op_type == IS_CONST) {
 			zend_handle_numeric_dim(opline, &dim_node);
