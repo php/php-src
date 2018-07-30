@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #76667 (Segfault with divide-assign op and __get + __set).
     (Laruence)
 
+- PDO_PgSQL:
+  . Fixed bug #75402 (Possible Memory Leak using PDO::CURSOR_SCROLL option).
+    (Anatol)
+
 - SQLite3:
   . Fixed #76665 (SQLite3Stmt::bindValue() with SQLITE3_FLOAT doesn't juggle).
     (cmb)
