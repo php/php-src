@@ -192,7 +192,6 @@ test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   CFLAGS="$CFLAGS -DZTS"
-  LIBZEND_CPLUSPLUS_CHECKS
 fi
 
 changequote({,})
@@ -385,10 +384,6 @@ fi
 
 AC_MSG_CHECKING(whether to enable zend signal handling)
 AC_MSG_RESULT($ZEND_SIGNALS)
-
-])
-
-AC_DEFUN([LIBZEND_CPLUSPLUS_CHECKS],[
 
 ])
 

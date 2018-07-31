@@ -1,27 +1,5 @@
 m4_include([TSRM/m4/ax_func_which_gethostbyname_r.m4])
 
-dnl TSRM_CHECK_GCC_ARG(ARG, ACTION-IF-FOUND, ACTION-IF-NOT_FOUND)
-AC_DEFUN([TSRM_CHECK_GCC_ARG],[
-  gcc_arg_name=[ac_cv_gcc_arg]translit($1,A-Z-,a-z_)
-  AC_CACHE_CHECK([whether $CC supports $1], [ac_cv_gcc_arg]translit($1,A-Z-,a-z_), [
-  echo 'void somefunc() { };' > conftest.c
-  cmd='$CC $1 -c conftest.c'
-  if eval $cmd 2>&1 | egrep -e $1 >/dev/null ; then
-    ac_result=no
-  else
-    ac_result=yes
-  fi
-  eval $gcc_arg_name=$ac_result
-  rm -f conftest.*
-  ])
-  if eval test "\$$gcc_arg_name" = "yes"; then
-    $2
-  else
-    :
-    $3
-  fi
-])
-
 AC_DEFUN([TSRM_BASIC_CHECKS],[
 
 AC_REQUIRE([AC_PROG_CC])dnl

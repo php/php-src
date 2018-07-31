@@ -179,7 +179,8 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 ========================
 
   a. Unix build system changes
-    - PHP_PROG_LEX macro has been removed.
+    - PHP_PROG_LEX, TSRM_CHECK_GCC_ARG, and LIBZEND_CPLUSPLUS_CHECKS Autoconf
+      macros have been removed.
 
   b. Windows build system changes
     - ZEND_WIN32_FORCE_INLINE doesn't affect C++ anymore. zend_always_inline is
