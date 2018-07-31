@@ -11,7 +11,7 @@ define([PDO_ODBC_HELP_TEXT],[[
 			    --with-pdo-odbc=unixODBC
 
 			  will check for unixODBC under /usr/local. You may attempt
-			  to use an otherwise unsupported driver using the \"generic\"
+			  to use an otherwise unsupported driver using the 'generic'
 			  flavour.  The syntax for generic ODBC support is:
 
 			    --with-pdo-odbc=generic,dir,libname,ldflags,cflags
