@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /*
  * Functions to parse & compse IPTC data.
  * PhotoShop >= 3.0 can read and write textual data to JPEG files.

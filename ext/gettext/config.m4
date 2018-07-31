@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension gettext
 
 PHP_ARG_WITH(gettext,for GNU gettext support,
 [  --with-gettext[=DIR]      Include GNU gettext support])
@@ -16,7 +14,7 @@ if test "$PHP_GETTEXT" != "no"; then
 
   GETTEXT_LIBDIR=$GETTEXT_DIR/$PHP_LIBDIR
   GETTEXT_INCDIR=$GETTEXT_DIR/include
-  
+
   O_LDFLAGS=$LDFLAGS
   LDFLAGS="$LDFLAGS -L$GETTEXT_LIBDIR"
   AC_CHECK_LIB(intl, bindtextdomain, [
@@ -46,5 +44,5 @@ if test "$PHP_GETTEXT" != "no"; then
   AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB, dcngettext,  [AC_DEFINE(HAVE_DCNGETTEXT, 1, [ ])])
   AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB, bind_textdomain_codeset,  [AC_DEFINE(HAVE_BIND_TEXTDOMAIN_CODESET, 1, [ ])])
   LDFLAGS=$O_LDFLAGS
-  
+
 fi

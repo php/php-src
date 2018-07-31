@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_gc.h"
@@ -911,9 +909,9 @@ register_constant:
 			"define(): Declaration of case-insensitive constants is deprecated");
 	}
 
-	c.flags = case_sensitive; /* non persistent */
+	/* non persistent */
+	ZEND_CONSTANT_SET_FLAGS(&c, case_sensitive, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
-	c.module_number = PHP_USER_CONSTANT;
 	if (zend_register_constant(&c) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
@@ -2147,13 +2145,13 @@ ZEND_FUNCTION(get_defined_constants)
 				continue;
 			}
 
-			if (val->module_number == PHP_USER_CONSTANT) {
+			if (ZEND_CONSTANT_MODULE_NUMBER(val) == PHP_USER_CONSTANT) {
 				module_number = i;
-			} else if (val->module_number > i || val->module_number < 0) {
+			} else if (ZEND_CONSTANT_MODULE_NUMBER(val) > i) {
 				/* should not happen */
 				continue;
 			} else {
-				module_number = val->module_number;
+				module_number = ZEND_CONSTANT_MODULE_NUMBER(val);
 			}
 
 			if (Z_TYPE(modules[module_number]) == IS_UNDEF) {

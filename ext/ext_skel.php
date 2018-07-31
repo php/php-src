@@ -324,7 +324,7 @@ if ($argc < 1) {
 $options = process_args($argv, $argc);
 
 if (!$options['dir'] || !is_dir($options['dir'])) {
-	error('The selected output directory does not exists');
+	error('The selected output directory does not exist');
 } else if (is_dir($options['dir'] . $options['ext'])) {
 	error('There is already a folder named "' . $options['ext'] . '" in the output directory');
 } else if (!mkdir($options['dir'] . $options['ext'])) {

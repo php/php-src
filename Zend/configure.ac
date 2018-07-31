@@ -1,4 +1,3 @@
-dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(zend.c)
@@ -126,7 +125,8 @@ LIBZEND_OTHER_CHECKS
 ZEND_EXTRA_LIBS="$LIBS"
 LIBS=""
 AC_SUBST(ZEND_EXTRA_LIBS)
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
 
 # Local Variables:
 # tab-width: 4

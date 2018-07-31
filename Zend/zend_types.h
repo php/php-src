@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
@@ -205,6 +203,7 @@ struct _zval_struct {
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
 		uint32_t     access_flags;         /* class constant access flags */
 		uint32_t     property_guard;       /* single property guard */
+		uint32_t     constant_flags;       /* constant flags */
 		uint32_t     extra;                /* not further specified */
 	} u2;
 };
@@ -450,6 +449,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_PROPERTY_GUARD(zval)		(zval).u2.property_guard
 #define Z_PROPERTY_GUARD_P(zval_p)	Z_PROPERTY_GUARD(*(zval_p))
+
+#define Z_CONSTANT_FLAGS(zval)		(zval).u2.constant_flags
+#define Z_CONSTANT_FLAGS_P(zval_p)	Z_CONSTANT_FLAGS(*(zval_p))
 
 #define Z_EXTRA(zval)				(zval).u2.extra
 #define Z_EXTRA_P(zval_p)			Z_EXTRA(*(zval_p))

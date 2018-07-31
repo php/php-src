@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* Infrastructure for working with persistent COM objects.
  * Implements: IStream* wrapper for PHP streams.
  * TODO: Magic __wakeup and __sleep handlers for serialization

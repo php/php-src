@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_OBJECT_HANDLERS_H
 #define ZEND_OBJECT_HANDLERS_H
 
@@ -172,6 +170,10 @@ extern const ZEND_API zend_object_handlers std_object_handlers;
 
 #define zend_get_function_root_class(fbc) \
 	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
+
+#define ZEND_PROPERTY_ISSET     0x0          /* Property exists and is not NULL */
+#define ZEND_PROPERTY_NOT_EMPTY ZEND_ISEMPTY /* Property is not empty */
+#define ZEND_PROPERTY_EXISTS    0x2          /* Property exists */
 
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent);

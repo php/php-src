@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 
 eval `grep '^PHP_EXTRA_VERSION=' configure.ac`
 case "$PHP_EXTRA_VERSION" in

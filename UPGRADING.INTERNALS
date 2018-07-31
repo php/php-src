@@ -24,6 +24,10 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   u. GC_G
   v. php_add[c]slashes
   w. zend_class_entry.iterator_funcs
+  x. Class declaration opcodes (DECLARE_INHERITED_CLASS ...)
+  y. zend_constant
+  z. HAVE_ST_BLKSIZE and HAVE_ST_RDEV
+  aa. RETSIGTYPE
 
 2. Build system changes
   a. Unix build system changes
@@ -152,11 +156,31 @@ PHP 7.3 INTERNALS UPGRADE NOTES
     You don't have to set its value, setting parent.funcs in the get_iterator
     function is enough.
 
+ x. Class declaration opcode formats were changed
+  - DECLARE_INHERITED_CLASS and DECLARE_ANON_INHERITED_CLASS now encode parent
+    class name in second operand directly (as IS_CONST operand). Previously,
+    parent class was fetched by the prior FETCH_CLASS opcode.
+  - ADD_INTERFACE and ADD_TRAIT don't use run-time cache to keep interface or
+    trait. These instructions are executed once, and caching is useless.
+
+ y. zend_constant.flags and zend_constant.module_number are packed into
+    reserved space inside zend_constant.value. They should be accessed using
+    ZEND_CONTANT_FLAGS(), ZEND_CONSTANTS_MODULE_NUMBER() and
+    ZEND_CONTANT_SET_FLAGS() macros.
+
+ z. HAVE_ST_BLKSIZE must be replaced with HAVE_STRUCT_STAT_ST_BLKSIZE and
+    HAVE_ST_RDEV must be replaced with HAVE_STRUCT_STAT_ST_RDEV.
+
+ aa. RETSIGTYPE has been removed from the generated php_config.h and should be
+    replaced with void.
+
 ========================
 2. Build system changes
 ========================
 
   a. Unix build system changes
+    - PHP_PROG_LEX, TSRM_CHECK_GCC_ARG, and LIBZEND_CPLUSPLUS_CHECKS Autoconf
+      macros have been removed.
 
   b. Windows build system changes
     - ZEND_WIN32_FORCE_INLINE doesn't affect C++ anymore. zend_always_inline is

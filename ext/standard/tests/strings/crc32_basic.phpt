@@ -1,11 +1,5 @@
 --TEST--
-Test crc32() function : basic functionality 
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) 
-  die("skip this test is for 32bit platform only");
-?>
-
+Test crc32() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string crc32(string $str)

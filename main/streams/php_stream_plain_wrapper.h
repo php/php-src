@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* definitions for the plain files wrapper */
 
 /* operations for a plain file; use the php_stream_fopen_XXX funcs below */

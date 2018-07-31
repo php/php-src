@@ -1,10 +1,10 @@
-dnl $Id$ -*- autoconf -*-
+dnl -*- autoconf -*-
 
 dnl
 dnl Check if flush should be called explicitly after buffered io
 dnl
 AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io], ac_cv_flush_io,[
-AC_TRY_RUN( [
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
 	exit(result);
 }
-],[
+]])],[
   ac_cv_flush_io=no
 ],[
   ac_cv_flush_io=yes
@@ -60,7 +60,7 @@ if test "$ac_cv_func_crypt" = "no"; then
 fi
 
 AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -76,7 +76,7 @@ int main() {
 #else
 	exit(1);
 #endif
-}],[
+}]])],[
   ac_cv_crypt_des=yes
 ],[
   ac_cv_crypt_des=no
@@ -85,7 +85,7 @@ int main() {
 ])])
 
 AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -101,7 +101,7 @@ int main() {
 #else
 	exit(1);
 #endif
-}],[
+}]])],[
   ac_cv_crypt_ext_des=yes
 ],[
   ac_cv_crypt_ext_des=no
@@ -110,7 +110,7 @@ int main() {
 ])])
 
 AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -136,7 +136,7 @@ int main() {
 #else
 	exit(1);
 #endif
-}],[
+}]])],[
   ac_cv_crypt_md5=yes
 ],[
   ac_cv_crypt_md5=no
@@ -145,7 +145,7 @@ int main() {
 ])])
 
 AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -168,7 +168,7 @@ int main() {
 #else
 	exit(1);
 #endif
-}],[
+}]])],[
   ac_cv_crypt_blowfish=yes
 ],[
   ac_cv_crypt_blowfish=no
@@ -177,7 +177,7 @@ int main() {
 ])])
 
 AC_CACHE_CHECK(for SHA512 crypt, ac_cv_crypt_sha512,[
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -199,7 +199,7 @@ int main() {
 #else
 	exit(1);
 #endif
-}],[
+}]])],[
   ac_cv_crypt_sha512=yes
 ],[
   ac_cv_crypt_sha512=no
@@ -208,7 +208,7 @@ int main() {
 ])])
 
 AC_CACHE_CHECK(for SHA256 crypt, ac_cv_crypt_sha256,[
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -230,7 +230,7 @@ int main() {
 #else
 	exit(1);
 #endif
-}],[
+}]])],[
   ac_cv_crypt_sha256=yes
 ],[
   ac_cv_crypt_sha256=no
@@ -248,10 +248,10 @@ if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test
   dnl Check for __alignof__ support in the compiler
   dnl
   AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
-  AC_TRY_COMPILE([
-  ],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+  ]],[[
     int align = __alignof__(int);
-  ],[
+  ]])],[
     ac_cv_alignof_exists=yes
   ],[
     ac_cv_alignof_exists=no
@@ -271,10 +271,10 @@ dnl
 dnl Check for __attribute__ ((__aligned__)) support in the compiler
 dnl
 AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
-AC_TRY_COMPILE([
-],[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+]],[[
   unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
-],[
+]])],[
   ac_cv_attribute_aligned=yes
 ],[
   ac_cv_attribute_aligned=no
@@ -355,16 +355,16 @@ dnl
 dnl Check for strptime()
 dnl
 AC_CACHE_CHECK(whether strptime() declaration fails, ac_cv_strptime_decl_fails,[
-AC_TRY_COMPILE([
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <time.h>
-],[
+]],[[
 #ifndef HAVE_STRPTIME
 #error no strptime() on this platform
 #else
 /* use invalid strptime() declaration to see if it fails to compile */
 int strptime(const char *s, const char *format, struct tm *tm);
 #endif
-],[
+]])],[
   ac_cv_strptime_decl_fails=no
 ],[
   ac_cv_strptime_decl_fails=yes
@@ -377,20 +377,15 @@ dnl
 dnl Check for i18n capabilities
 dnl
 AC_CHECK_HEADERS([wchar.h])
-AC_CHECK_FUNCS([mblen])
-AC_CHECK_FUNCS([mbrlen mbsinit],,,[
-#ifdef HAVE_WCHAR_H
-# include <wchar.h>
-#endif
-])
+AC_CHECK_FUNCS([mblen mbrlen mbsinit])
 AC_CACHE_CHECK([for mbstate_t], [ac_cv_type_mbstate_t],[
-AC_TRY_COMPILE([
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_WCHAR_H
 # include <wchar.h>
 #endif
-],[
+]],[[
 mbstate_t a;
-],[
+]])],[
   ac_cv_type_mbstate_t=yes
 ],[
   ac_cv_type_mbstate_t=no
@@ -414,7 +409,7 @@ dnl Check for argon2
 dnl
 PHP_ARG_WITH(password-argon2, for Argon2 support,
 [  --with-password-argon2[=DIR]
-                          Include Argon2 support in password_*. DIR is the Argon2 shared library path]])
+                          Include Argon2 support in password_*. DIR is the Argon2 shared library path])
 
 if test "$PHP_PASSWORD_ARGON2" != "no"; then
   AC_MSG_CHECKING([for Argon2 library])
@@ -454,15 +449,15 @@ AC_CHECK_HEADERS([net/if.h],[], [],
 ])
 AC_CHECK_HEADERS([netdb.h])
 AC_MSG_CHECKING([for usable getifaddrs])
-AC_TRY_LINK([
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
   #include <sys/types.h>
   #include <ifaddrs.h>
-],[
+]],[[
   struct ifaddrs *interfaces;
   if (!getifaddrs(&interfaces)) {
       freeifaddrs(interfaces);
   }
-], [ac_have_getifaddrs=yes], [ac_have_getifaddrs=no])
+]])], [ac_have_getifaddrs=yes], [ac_have_getifaddrs=no])
 if test "$ac_have_getifaddrs" = "yes" ; then
   AC_DEFINE(HAVE_GETIFADDRS, 1, [whether getifaddrs is present and usable])
   AC_MSG_RESULT(yes)

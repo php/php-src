@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*
  * zend_alloc is designed to be a modern CPU cache friendly memory manager
  * for PHP. Most ideas are taken from jemalloc and tcmalloc implementations.

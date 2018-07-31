@@ -16,7 +16,6 @@
    |         Xinchen Hui <laruence@php.net>                               |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include <string.h>
 
@@ -397,7 +396,7 @@ static __m128i php_base64_encode_ssse3_translate(__m128i in)
 	/* mask is 0xFF (-1) for range #[1..4] and 0x00 for range #0: */
 	mask = _mm_cmpgt_epi8(in, _mm_set1_epi8(25));
 
-	/* substract -1, so add 1 to indices for range #[1..4], All indices are now correct: */
+	/* subtract -1, so add 1 to indices for range #[1..4], All indices are now correct: */
 	indices = _mm_sub_epi8(indices, mask);
 
 	/* Add offsets to input values: */

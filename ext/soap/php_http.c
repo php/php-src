@@ -17,7 +17,6 @@
   |          Dmitry Stogov <dmitry@zend.com>                             |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #include "php_soap.h"
 #include "ext/standard/base64.h"
@@ -947,7 +946,7 @@ try_again:
 	/* Grab and send back every cookie */
 
 	/* Not going to worry about Path: because
-	   we shouldn't be changing urls so path dont
+	   we shouldn't be changing urls so path doesn't
 	   matter too much
 	*/
 	cookie_itt = strstr(ZSTR_VAL(http_headers), "Set-Cookie: ");

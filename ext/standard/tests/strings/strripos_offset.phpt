@@ -1,7 +1,5 @@
 --TEST--
 strripos() offset integer overflow
---SKIPIF--
-<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 
@@ -33,11 +31,15 @@ bool(false)
 Warning: strripos() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
+Deprecated: strripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+
 Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 
 Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)

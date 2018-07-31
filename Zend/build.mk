@@ -4,8 +4,6 @@
 #        make -f build.mk
 #
 # Written by Sascha Schumann
-#
-# $Id$ 
 
 
 LT_TARGETS = ltmain.sh ltconfig

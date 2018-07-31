@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_CONSTANTS_H
 #define ZEND_CONSTANTS_H
 
@@ -29,7 +27,7 @@
 #define CONST_CT_SUBST			(1<<2)				/* Allow compile-time substitution */
 #define CONST_NO_FILE_CACHE		(1<<3)				/* Can't be saved in file cache */
 
-#define	PHP_USER_CONSTANT INT_MAX	/* a constant defined in user space */
+#define	PHP_USER_CONSTANT   0x7fffff /* a constant defined in user space */
 
 /* Flag for zend_get_constant_ex(). Must not class with ZEND_FETCH_CLASS_* flags. */
 #define ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK 0x1000
@@ -37,9 +35,18 @@
 typedef struct _zend_constant {
 	zval value;
 	zend_string *name;
-	int flags;
-	int module_number;
 } zend_constant;
+
+#define ZEND_CONSTANT_FLAGS(c) \
+	(Z_CONSTANT_FLAGS((c)->value) & 0xff)
+
+#define ZEND_CONSTANT_MODULE_NUMBER(c) \
+	(Z_CONSTANT_FLAGS((c)->value) >> 8)
+
+#define ZEND_CONSTANT_SET_FLAGS(c, _flags, _module_number) do { \
+		Z_CONSTANT_FLAGS((c)->value) = \
+			((_flags) & 0xff) | ((_module_number) << 8); \
+	} while (0)
 
 #define REGISTER_NULL_CONSTANT(name, flags)  zend_register_null_constant((name), sizeof(name)-1, (flags), module_number)
 #define REGISTER_BOOL_CONSTANT(name, bval, flags)  zend_register_bool_constant((name), sizeof(name)-1, (bval), (flags), module_number)

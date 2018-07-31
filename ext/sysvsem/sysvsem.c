@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* Latest update build anc tested on Linux 2.2.14
  *
  * This has been built and tested on Solaris 2.6 and Linux 2.1.122.

@@ -13,7 +13,7 @@ if test "$PHP_GMP" != "no"; then
   if test -z "$GMP_DIR"; then
     AC_MSG_ERROR(Unable to locate gmp.h)
   fi
- 
+
   PHP_CHECK_LIBRARY(gmp, __gmpz_rootrem,
   [],[
     AC_MSG_ERROR([GNU MP Library version 4.2 or greater required.])

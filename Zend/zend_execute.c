@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #define ZEND_INTENSIVE_DEBUGGING 0
 
 #include <stdio.h>
@@ -633,7 +631,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_assign
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
+	zend_tmp_string_release(tmp_property_name);
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
@@ -661,7 +659,7 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *obje
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
 			}
-			zend_tmp_string_release(property_name);
+			zend_tmp_string_release(tmp_property_name);
 		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
@@ -695,7 +693,7 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object_rw(zval *o
 			zend_string *tmp_property_name;
 			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 			zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
-			zend_tmp_string_release(property_name);
+			zend_tmp_string_release(tmp_property_name);
 		}
 		return 0;
 	}
@@ -1334,7 +1332,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_read(z
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_NOTICE, "Trying to get property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
+	zend_tmp_string_release(tmp_property_name);
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_unset(zval *property)
@@ -1342,7 +1340,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_unset(
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_NOTICE, "Trying to unset property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
+	zend_tmp_string_release(tmp_property_name);
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_check(zval *property)
@@ -1350,7 +1348,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_check(
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_NOTICE, "Trying to check property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
+	zend_tmp_string_release(tmp_property_name);
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
@@ -2052,12 +2050,6 @@ static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_read_IS
 {
 	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0 EXECUTE_DATA_CC);
-}
-
-static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_w(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
-{
-	zval *result = EX_VAR(opline->result.var);
-	zend_fetch_dimension_address(result, container, dim, dim_type, BP_VAR_W EXECUTE_DATA_CC);
 }
 
 static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_r(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
@@ -3298,7 +3290,7 @@ static zend_always_inline int _zend_quick_get_constant(
 	} else {
 		key++;
 		zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
-		if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
+		if (zv && (ZEND_CONSTANT_FLAGS((zend_constant*)Z_PTR_P(zv)) & CONST_CS) == 0) {
 			c = (zend_constant*)Z_PTR_P(zv);
 		} else {
 			if ((flags & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
@@ -3309,7 +3301,7 @@ static zend_always_inline int _zend_quick_get_constant(
 				} else {
 				    key++;
 					zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
-					if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
+					if (zv && (ZEND_CONSTANT_FLAGS((zend_constant*)Z_PTR_P(zv)) & CONST_CS) == 0) {
 						c = (zend_constant*)Z_PTR_P(zv);
 					}
 				}
@@ -3341,7 +3333,7 @@ static zend_always_inline int _zend_quick_get_constant(
 
 	if (!check_defined_only) {
 		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
-		if (!(c->flags & (CONST_CS|CONST_CT_SUBST))) {
+		if (!(ZEND_CONSTANT_FLAGS(c) & (CONST_CS|CONST_CT_SUBST))) {
 			const char *ns_sep;
 			size_t shortname_offset;
 			size_t shortname_len;

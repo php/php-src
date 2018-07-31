@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -848,10 +846,8 @@ SPL_METHOD(DirectoryIterator, seek)
 	while (intern->u.dir.index < pos) {
 		int valid = 0;
 		zend_call_method_with_0_params(&EX(This), Z_OBJCE(EX(This)), &intern->u.dir.func_valid, "valid", &retval);
-		if (!Z_ISUNDEF(retval)) {
-			valid = zend_is_true(&retval);
-			zval_ptr_dtor(&retval);
-		}
+		valid = zend_is_true(&retval);
+		zval_ptr_dtor(&retval);
 		if (!valid) {
 			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", pos);
 			return;
@@ -2916,7 +2912,7 @@ SPL_METHOD(SplFileObject, fread)
 	ZVAL_NEW_STR(return_value, zend_string_alloc(length, 0));
 	Z_STRLEN_P(return_value) = php_stream_read(intern->u.file.stream, Z_STRVAL_P(return_value), length);
 
-	/* needed because recv/read/gzread doesnt put a null at the end*/
+	/* needed because recv/read/gzread doesn't put a null at the end*/
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
 }
 

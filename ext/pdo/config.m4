@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension pdo
 dnl vim:se ts=2 sw=2 et:
 
@@ -42,7 +41,7 @@ if test "$PHP_PDO" != "no"; then
   [
     PHP_ADD_EXTENSION_DEP(pdo, spl, true)
   ])
-  
+
   ifdef([PHP_INSTALL_HEADERS],
   [
     dnl Sadly, this is a complete NOP for pecl extensions

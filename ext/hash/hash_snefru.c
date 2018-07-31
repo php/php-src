@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php_hash.h"
 #include "php_hash_snefru.h"
 #include "php_hash_snefru_tables.h"

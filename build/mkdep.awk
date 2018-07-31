@@ -14,8 +14,6 @@
 #  | Author: Sascha Schumann <sascha@schumann.cx>                         |
 #  +----------------------------------------------------------------------+
 #
-# $Id$
-#
 # Usage:
 #
 # echo top_srcdir top_builddir srcdir CPP [CPP-ARGS] filenames | \

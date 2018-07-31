@@ -115,7 +115,6 @@ U_CFUNC PHP_FUNCTION(breakiter_create_title_instance)
 
 U_CFUNC PHP_FUNCTION(breakiter_create_code_point_instance)
 {
-	UErrorCode status = UErrorCode();
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {

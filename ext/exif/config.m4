@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension exif
 
 PHP_ARG_ENABLE(exif, whether to enable EXIF (metadata from images) support,
 [  --enable-exif           Enable EXIF (metadata from images) support])

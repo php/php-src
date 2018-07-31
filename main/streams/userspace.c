@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/file.h"
@@ -857,14 +855,14 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 	STAT_PROP_ENTRY(nlink);
 	STAT_PROP_ENTRY(uid);
 	STAT_PROP_ENTRY(gid);
-#if HAVE_ST_RDEV
+#if HAVE_STRUCT_STAT_ST_RDEV
 	STAT_PROP_ENTRY(rdev);
 #endif
 	STAT_PROP_ENTRY(size);
 	STAT_PROP_ENTRY(atime);
 	STAT_PROP_ENTRY(mtime);
 	STAT_PROP_ENTRY(ctime);
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 	STAT_PROP_ENTRY(blksize);
 #endif
 #ifdef HAVE_ST_BLOCKS
@@ -1069,7 +1067,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_SET_OPTION " is not implemented!",
 					us->wrapper->classname);
 			ret = PHP_STREAM_OPTION_RETURN_ERR;
-		} else if (Z_TYPE(retval) != IS_UNDEF && zend_is_true(&retval)) {
+		} else if (zend_is_true(&retval)) {
 			ret = PHP_STREAM_OPTION_RETURN_OK;
 		} else {
 			ret = PHP_STREAM_OPTION_RETURN_ERR;
@@ -1514,7 +1512,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 					us->wrapper->classname);
 			break;
 		}
-		if (Z_ISUNDEF(retval) || !zend_is_true(&retval)) {
+		if (!zend_is_true(&retval)) {
 			break;
 		}
 		php_stream_from_zval_no_verify(intstream, &retval);

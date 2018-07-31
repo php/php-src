@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_COMPILE_H
 #define ZEND_COMPILE_H
 
@@ -199,116 +197,142 @@ typedef struct _zend_oparray_context {
 	HashTable *labels;
 } zend_oparray_context;
 
-/*
- * Function and method flags
- *
- * Free flags:
- * 0x20
- * 0x2000000
- */
+/* Class, property and method flags                  class|meth.|prop.|const*/
+/*                                                        |     |     |     */
+/* Common flags                                           |     |     |     */
+/* ============                                           |     |     |     */
+/*                                                        |     |     |     */
+/* Staic method or property                               |     |     |     */
+#define ZEND_ACC_STATIC                  (1 <<  0) /*     |  X  |  X  |     */
+/*                                                        |     |     |     */
+/* Final class or method                                  |     |     |     */
+#define ZEND_ACC_FINAL                   (1 <<  2) /*  X  |  X  |     |     */
+/*                                                        |     |     |     */
+/* Visibility flags (public < protected < private)        |     |     |     */
+#define ZEND_ACC_PUBLIC                  (1 <<  8) /*     |  X  |  X  |  X  */
+#define ZEND_ACC_PROTECTED               (1 <<  9) /*     |  X  |  X  |  X  */
+#define ZEND_ACC_PRIVATE                 (1 << 10) /*     |  X  |  X  |  X  */
+/*                                                        |     |     |     */
+/* TODO: explain the name ???                             |     |     |     */
+#define ZEND_ACC_CHANGED                 (1 << 11) /*     |  X  |  X  |     */
+/*                                                        |     |     |     */
+/* TODO: used only by ext/reflection ???                  |     |     |     */
+#define ZEND_ACC_IMPLICIT_PUBLIC         (1 << 12) /*     |  ?  |  ?  |  ?  */
+/*                                                        |     |     |     */
+/* Shadow of parent's private method/property             |     |     |     */
+#define ZEND_ACC_SHADOW                  (1 << 17) /*     |  ?  |  X  |     */
+/*                                                        |     |     |     */
+/* Class Flags (unused: 0, 1, 3, 11-18, 21, 25...)        |     |     |     */
+/* ===========                                            |     |     |     */
+/*                                                        |     |     |     */
+/* class is abstarct, since it is set by any              |     |     |     */
+/* abstract method                                        |     |     |     */
+#define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS (1 <<  4) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class is explicitly defined as abstract by using       |     |     |     */
+/* the keyword.                                           |     |     |     */
+#define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS (1 <<  5) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Special class types                                    |     |     |     */
+#define ZEND_ACC_INTERFACE               (1 <<  6) /*  X  |     |     |     */
+#define ZEND_ACC_TRAIT                   (1 <<  7) /*  X  |     |     |     */
+#define ZEND_ACC_ANON_CLASS              (1 <<  8) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Bound anonymous class                                  |     |     |     */
+#define ZEND_ACC_ANON_BOUND              (1 <<  9) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class extends another class                            |     |     |     */
+#define ZEND_ACC_INHERITED               (1 << 10) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class implements interface(s)                          |     |     |     */
+#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 19) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class constants updated                                |     |     |     */
+#define ZEND_ACC_CONSTANTS_UPDATED       (1 << 20) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class uses trait(s)                                    |     |     |     */
+#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 22) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* User class has methods with static variables           |     |     |     */
+#define ZEND_HAS_STATIC_IN_METHODS       (1 << 23) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class has magic methods __get/__set/__unset/           |     |     |     */
+/* __isset that use guards                                |     |     |     */
+#define ZEND_ACC_USE_GUARDS              (1 << 24) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Function Flags (unused: 4, 5, 17?)                     |     |     |     */
+/* ==============                                         |     |     |     */
+/*                                                        |     |     |     */
+/* Abstarct method                                        |     |     |     */
+#define ZEND_ACC_ABSTRACT                (1 <<  1) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* TODO: used only during inheritance ???                 |     |     |     */
+#define ZEND_ACC_IMPLEMENTED_ABSTRACT    (1 <<  3) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+#define ZEND_ACC_FAKE_CLOSURE            (1 <<  6) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* method flag used by Closure::__invoke()                |     |     |     */
+#define ZEND_ACC_USER_ARG_INFO           (1 <<  7) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* method flags (special method detection)                |     |     |     */
+#define ZEND_ACC_CTOR                    (1 << 13) /*     |  X  |     |     */
+#define ZEND_ACC_DTOR                    (1 << 14) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* "main" op_array with                                   |     |     |     */
+/* ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes           |     |     |     */
+#define ZEND_ACC_EARLY_BINDING           (1 << 15) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* method flag (bc only), any method that has this        |     |     |     */
+/* flag can be used statically and non statically.        |     |     |     */
+#define ZEND_ACC_ALLOW_STATIC            (1 << 16) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* deprecation flag                                       |     |     |     */
+#define ZEND_ACC_DEPRECATED              (1 << 18) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+#define ZEND_ACC_NO_RT_ARENA             (1 << 19) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+#define ZEND_ACC_CLOSURE                 (1 << 20) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* call through user function trampoline. e.g.            |     |     |     */
+/* __call, __callstatic                                   |     |     |     */
+#define ZEND_ACC_CALL_VIA_TRAMPOLINE     (1 << 21) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* disable inline caching                                 |     |     |     */
+#define ZEND_ACC_NEVER_CACHE             (1 << 22) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+#define ZEND_ACC_GENERATOR               (1 << 23) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* Function with varable number of arguments              |     |     |     */
+#define ZEND_ACC_VARIADIC                (1 << 24) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* Immutable op_array (lazy loading)                      |     |     |     */
+#define ZEND_ACC_IMMUTABLE               (1 << 25) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* Function returning by reference                        |     |     |     */
+#define ZEND_ACC_RETURN_REFERENCE        (1 << 26) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+#define ZEND_ACC_DONE_PASS_TWO           (1 << 27) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* Function has typed arguments                           |     |     |     */
+#define ZEND_ACC_HAS_TYPE_HINTS          (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* op_array has finally blocks (user only)                |     |     |     */
+#define ZEND_ACC_HAS_FINALLY_BLOCK       (1 << 29) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* internal function is allocated at arena (int only)     |     |     |     */
+#define ZEND_ACC_ARENA_ALLOCATED         (1 << 29) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* Function has a return type                             |     |     |     */
+#define ZEND_ACC_HAS_RETURN_TYPE         (1 << 30) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* op_array uses strict mode types                        |     |     |     */
+#define ZEND_ACC_STRICT_TYPES            (1 << 31) /*     |  X  |     |     */
 
-/* method flags (types) */
-#define ZEND_ACC_STATIC			0x01
-#define ZEND_ACC_ABSTRACT		0x02
-#define ZEND_ACC_FINAL			0x04
-#define ZEND_ACC_IMPLEMENTED_ABSTRACT		0x08
 
-/* Immutable op_array (lazy loading) */
-#define ZEND_ACC_IMMUTABLE 0x10
-
-/* method flags (visibility) */
-/* The order of those must be kept - public < protected < private */
-#define ZEND_ACC_PUBLIC		0x100
-#define ZEND_ACC_PROTECTED	0x200
-#define ZEND_ACC_PRIVATE	0x400
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
-
-#define ZEND_ACC_CHANGED	0x800
-#define ZEND_ACC_IMPLICIT_PUBLIC	0x1000
-
-/* method flags (special method detection) */
-#define ZEND_ACC_CTOR		0x2000
-#define ZEND_ACC_DTOR		0x4000
-
-/* "main" op_array with ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes */
-#define ZEND_ACC_EARLY_BINDING 0x8000
-
-/* method flag used by Closure::__invoke() */
-#define ZEND_ACC_USER_ARG_INFO 0x80
-
-/* method flag (bc only), any method that has this flag can be used statically and non statically. */
-#define ZEND_ACC_ALLOW_STATIC	0x10000
-
-/* shadow of parent's private method/property */
-#define ZEND_ACC_SHADOW 0x20000
-
-/* deprecation flag */
-#define ZEND_ACC_DEPRECATED 0x40000
-
-#define ZEND_ACC_CLOSURE              0x100000
-#define ZEND_ACC_FAKE_CLOSURE         0x40
-#define ZEND_ACC_GENERATOR            0x800000
-
-#define ZEND_ACC_NO_RT_ARENA          0x80000
-
-/* call through user function trampoline. e.g. __call, __callstatic */
-#define ZEND_ACC_CALL_VIA_TRAMPOLINE  0x200000
 
 /* call through internal function handler. e.g. Closure::invoke() */
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
-
-/* disable inline caching */
-#define ZEND_ACC_NEVER_CACHE          0x400000
-
-#define ZEND_ACC_VARIADIC				0x1000000
-
-#define ZEND_ACC_RETURN_REFERENCE		0x4000000
-#define ZEND_ACC_DONE_PASS_TWO			0x8000000
-
-/* class has magic methods __get/__set/__unset/__isset that use guards */
-#define ZEND_ACC_USE_GUARDS				0x1000000
-
-/* function has typed arguments */
-#define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
-
-/* op_array has finally blocks */
-#define ZEND_ACC_HAS_FINALLY_BLOCK		0x20000000
-
-/* internal function is allocated at arena */
-#define ZEND_ACC_ARENA_ALLOCATED		0x20000000
-
-/* Function has a return type (or class has such non-private function) */
-#define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
-
-/* op_array uses strict mode types */
-#define ZEND_ACC_STRICT_TYPES			0x80000000
-
-/*
- * Class flags
- *
- * Classes also use the ZEND_ACC_FINAL (0x04) flag, otherwise there is no overlap.
- */
-
-/* class flags (types) */
-/* ZEND_ACC_IMPLICIT_ABSTRACT_CLASS is used for abstract classes (since it is set by any abstract method even interfaces MAY have it set, too). */
-/* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
-#define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
-#define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
-#define ZEND_ACC_INTERFACE		            0x40
-#define ZEND_ACC_TRAIT						0x80
-#define ZEND_ACC_ANON_CLASS                 0x100
-#define ZEND_ACC_ANON_BOUND                 0x200
-#define ZEND_ACC_INHERITED                  0x400
-
-/* class implement interface(s) flag */
-#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
-#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
-
-/* class constants updated */
-#define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
-
-/* user class has methods with static variables */
-#define ZEND_HAS_STATIC_IN_METHODS    0x800000
 
 char *zend_visibility_string(uint32_t fn_flags);
 

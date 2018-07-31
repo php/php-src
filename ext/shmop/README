@@ -26,7 +26,7 @@ int shmop_open(int key, string flags, int mode, int size)
 	mode		- acsess mode same as for a file (0644) for example
 	size		- size of the block in bytes
 	
-	returns an indentifier
+	returns an identifier
 	
 
 char shmop_read(int shmid, int start, int count)

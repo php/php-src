@@ -926,7 +926,7 @@ static int _extension_const_string(zval *el, int num_args, va_list args, zend_ha
 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
 	int *num_classes = va_arg(args, int*);
 
-	if (constant->module_number  == module->module_number) {
+	if (ZEND_CONSTANT_MODULE_NUMBER(constant)  == module->module_number) {
 		_const_string(str, ZSTR_VAL(constant->name), &constant->value, indent);
 		(*num_classes)++;
 	}
@@ -5696,7 +5696,7 @@ static int _addconstant(zval *el, int num_args, va_list args, zend_hash_key *has
 	zval *retval = va_arg(args, zval*);
 	int number = va_arg(args, int);
 
-	if (number == constant->module_number) {
+	if (number == ZEND_CONSTANT_MODULE_NUMBER(constant)) {
 		ZVAL_COPY_OR_DUP(&const_val, &constant->value);
 		zend_hash_update(Z_ARRVAL_P(retval), constant->name, &const_val);
 	}

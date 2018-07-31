@@ -1,11 +1,5 @@
 --TEST--
 GetImageSize() for xbm format
---SKIPIF--
-<?php
-	if (!defined("IMAGETYPE_XBM")) {
-		die("skip xbm file format is not available");
-	}
-?>
 --FILE--
 <?php
 /* Prototype  : proto array getimagesize(string imagefile [, array info])

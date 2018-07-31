@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension pdo_oci
 dnl vim:et:sw=2:ts=2:
 
@@ -57,7 +56,7 @@ AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
 
 PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
 [  --with-pdo-oci[=DIR]      PDO: Oracle OCI support. DIR defaults to [$]ORACLE_HOME.
-                          Use --with-pdo-oci=instantclient,/path/to/instant/client/lib 
+                          Use --with-pdo-oci=instantclient,/path/to/instant/client/lib
                           for an Oracle Instant Client installation.])
 
 if test "$PHP_PDO_OCI" != "no"; then
@@ -97,11 +96,11 @@ if test "$PHP_PDO_OCI" != "no"; then
 
     dnl Header directory for manual installation
     OCISDKMANINC=`echo "$PDO_OCI_LIB_DIR" | $PHP_PDO_OCI_SED -e 's!^\(.*\)/lib[/]*$!\1/include!'`
-    
+
     dnl Header directory for Instant Client SDK zip file install
     OCISDKZIPINC=$PDO_OCI_LIB_DIR/sdk/include
 
-    
+
     if test -f "$OCISDKRPMINC/oci.h" ; then
       PHP_ADD_INCLUDE($OCISDKRPMINC)
       AC_MSG_RESULT($OCISDKRPMINC)
@@ -170,7 +169,7 @@ if test "$PHP_PDO_OCI" != "no"; then
   ])
 
   dnl
-  dnl Check if we need to add -locijdbc8 
+  dnl Check if we need to add -locijdbc8
   dnl
   PHP_CHECK_LIBRARY(clntsh, OCILobIsTemporary,
   [

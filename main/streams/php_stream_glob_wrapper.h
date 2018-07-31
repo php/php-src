@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 PHPAPI extern const php_stream_wrapper php_glob_stream_wrapper;
 PHPAPI extern const php_stream_ops     php_glob_stream_ops;
 

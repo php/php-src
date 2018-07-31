@@ -8,7 +8,7 @@ if (!@pspell_new ("en", "", "", "", (PSPELL_FAST|PSPELL_RUN_TOGETHER))) {
 }
 ?>
 --FILE--
-<?php // $Id$
+<?php
 
 error_reporting(E_ALL);
 $string = "";

@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_constants.h"
 #include "zend_exceptions.h"
@@ -39,7 +37,7 @@ void free_zend_constant(zval *zv)
 {
 	zend_constant *c = Z_PTR_P(zv);
 
-	if (!(c->flags & CONST_PERSISTENT)) {
+	if (!(ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)) {
 		zval_ptr_dtor_nogc(&c->value);
 		if (c->name) {
 			zend_string_release_ex(c->name, 0);
@@ -60,7 +58,7 @@ static void copy_zend_constant(zval *zv)
 {
 	zend_constant *c = Z_PTR_P(zv);
 
-	ZEND_ASSERT(c->flags & CONST_PERSISTENT);
+	ZEND_ASSERT(ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 	Z_PTR_P(zv) = pemalloc(sizeof(zend_constant), 1);
 	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
 
@@ -84,7 +82,7 @@ static int clean_module_constant(zval *el, void *arg)
 	zend_constant *c = (zend_constant *)Z_PTR_P(el);
 	int module_number = *(int *)arg;
 
-	if (c->module_number == module_number) {
+	if (ZEND_CONSTANT_MODULE_NUMBER(c) == module_number) {
 		return 1;
 	} else {
 		return 0;
@@ -153,9 +151,8 @@ ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int
 	zend_constant c;
 
 	ZVAL_NULL(&c.value);
-	c.flags = flags;
+	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.module_number = module_number;
 	zend_register_constant(&c);
 }
 
@@ -164,9 +161,8 @@ ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zen
 	zend_constant c;
 
 	ZVAL_BOOL(&c.value, bval);
-	c.flags = flags;
+	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.module_number = module_number;
 	zend_register_constant(&c);
 }
 
@@ -175,9 +171,8 @@ ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zen
 	zend_constant c;
 
 	ZVAL_LONG(&c.value, lval);
-	c.flags = flags;
+	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.module_number = module_number;
 	zend_register_constant(&c);
 }
 
@@ -187,9 +182,8 @@ ZEND_API void zend_register_double_constant(const char *name, size_t name_len, d
 	zend_constant c;
 
 	ZVAL_DOUBLE(&c.value, dval);
-	c.flags = flags;
+	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.module_number = module_number;
 	zend_register_constant(&c);
 }
 
@@ -199,9 +193,8 @@ ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, 
 	zend_constant c;
 
 	ZVAL_STR(&c.value, zend_string_init_interned(strval, strlen, flags & CONST_PERSISTENT));
-	c.flags = flags;
+	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.module_number = module_number;
 	zend_register_constant(&c);
 }
 
@@ -259,7 +252,7 @@ static inline zend_constant *zend_get_constant_str_impl(const char *name, size_t
 		char *lcname = do_alloca(name_len + 1, use_heap);
 		zend_str_tolower_copy(lcname, name, name_len);
 		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, name_len)) != NULL) {
-			if (c->flags & CONST_CS) {
+			if (ZEND_CONSTANT_FLAGS(c) & CONST_CS) {
 				c = NULL;
 			}
 		} else {
@@ -290,7 +283,7 @@ static inline zend_constant *zend_get_constant_impl(zend_string *name)
 		zv = zend_hash_str_find(EG(zend_constants), lcname, ZSTR_LEN(name));
 		if (zv != NULL) {
 			c = Z_PTR_P(zv);
-			if (c->flags & CONST_CS) {
+			if (ZEND_CONSTANT_FLAGS(c) & CONST_CS) {
 				c = NULL;
 			}
 		} else {
@@ -438,7 +431,7 @@ failure:
 			/* try lowercase */
 			zend_str_tolower(lcname + prefix_len + 1, const_name_len);
 			if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, lcname_len)) != NULL) {
-				if ((c->flags & CONST_CS) != 0) {
+				if ((ZEND_CONSTANT_FLAGS(c) & CONST_CS) != 0) {
 					c = NULL;
 				}
 			}
@@ -467,7 +460,7 @@ failure:
 	}
 
 	if (!(flags & ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK)) {
-		if (!(c->flags & (CONST_CS|CONST_CT_SUBST)) && is_access_deprecated(c, name)) {
+		if (!(ZEND_CONSTANT_FLAGS(c) & (CONST_CS|CONST_CT_SUBST)) && is_access_deprecated(c, name)) {
 			zend_error(E_DEPRECATED,
 				"Case-insensitive constants are deprecated. "
 				"The correct casing for this constant is \"%s\"",
@@ -481,12 +474,12 @@ failure:
 static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_constant *c)
 {
 	void *ret;
-	zend_constant *copy = pemalloc(sizeof(zend_constant), c->flags & CONST_PERSISTENT);
+	zend_constant *copy = pemalloc(sizeof(zend_constant), ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 
 	memcpy(copy, c, sizeof(zend_constant));
 	ret = zend_hash_add_ptr(ht, key, copy);
 	if (!ret) {
-		pefree(copy, c->flags & CONST_PERSISTENT);
+		pefree(copy, ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 	}
 	return ret;
 }
@@ -501,14 +494,14 @@ ZEND_API int zend_register_constant(zend_constant *c)
 	printf("Registering constant for module %d\n", c->module_number);
 #endif
 
-	if (!(c->flags & CONST_CS)) {
-		lowercase_name = zend_string_tolower_ex(c->name, c->flags & CONST_PERSISTENT);
+	if (!(ZEND_CONSTANT_FLAGS(c) & CONST_CS)) {
+		lowercase_name = zend_string_tolower_ex(c->name, ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		name = lowercase_name;
 	} else {
 		char *slash = strrchr(ZSTR_VAL(c->name), '\\');
 		if (slash) {
-			lowercase_name = zend_string_init(ZSTR_VAL(c->name), ZSTR_LEN(c->name), c->flags & CONST_PERSISTENT);
+			lowercase_name = zend_string_init(ZSTR_VAL(c->name), ZSTR_LEN(c->name), ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 			zend_str_tolower(ZSTR_VAL(lowercase_name), slash - ZSTR_VAL(c->name));
 			lowercase_name = zend_new_interned_string(lowercase_name);
 			name = lowercase_name;
@@ -527,7 +520,7 @@ ZEND_API int zend_register_constant(zend_constant *c)
 		}
 		zend_error(E_NOTICE,"Constant %s already defined", ZSTR_VAL(name));
 		zend_string_release(c->name);
-		if (!(c->flags & CONST_PERSISTENT)) {
+		if (!(ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)) {
 			zval_ptr_dtor_nogc(&c->value);
 		}
 		ret = FAILURE;

@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <stdio.h>
 #include <signal.h>
 
@@ -103,7 +101,7 @@ static void zend_extension_deactivator(zend_extension *extension) /* {{{ */
 static int clean_non_persistent_constant_full(zval *zv) /* {{{ */
 {
 	zend_constant *c = Z_PTR_P(zv);
-	return (c->flags & CONST_PERSISTENT) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
+	return (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
@@ -321,7 +319,7 @@ void shutdown_executor(void) /* {{{ */
 		} else {
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
 				zend_constant *c = Z_PTR_P(zv);
-				if (c->flags & CONST_PERSISTENT) {
+				if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
 					break;
 				}
 				zval_ptr_dtor_nogc(&c->value);

@@ -7,7 +7,6 @@ if (!function_exists("xmlwriter_start_comment")) die("skip: libxml2 2.6.7+ requi
 ?>
 --FILE--
 <?php 
-/* $Id$ */
 /*
 Libxml 2.6.24 and up adds a new line after a processing instruction (PI)
 */

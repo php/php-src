@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "fopen_wrappers.h"
 #include "php_globals.h"
@@ -925,7 +923,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
 		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
 		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
-#ifdef HAVE_ST_RDEV
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 # ifdef PHP_WIN32
 	/* It is unsigned, so if a negative came from userspace, it'll
 	   convert to UINT_MAX, but we wan't to keep the userspace value.
@@ -945,7 +943,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
 		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
 		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
 		ZVAL_LONG(&stat_blksize,-1);

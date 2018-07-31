@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* Memory Mapping interface for streams.
  * The intention is to provide a uniform interface over the most common
  * operations that are used within PHP itself, rather than a complete

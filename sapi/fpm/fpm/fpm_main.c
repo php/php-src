@@ -35,12 +35,6 @@
 #include <stdio.h>
 #include "php.h"
 
-#ifdef PHP_WIN32
-# include "win32/time.h"
-# include "win32/signal.h"
-# include <process.h>
-#endif
-
 #if HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
@@ -77,12 +71,6 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 
-#ifdef PHP_WIN32
-# include <io.h>
-# include <fcntl.h>
-# include "win32/php_registry.h"
-#endif
-
 #ifdef __riscos__
 # include <unixlib/local.h>
 int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
@@ -107,21 +95,17 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fpm_log.h"
 #include "zlog.h"
 
-#ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
-#endif
 
 static void (*php_php_import_environment_variables)(zval *array_ptr);
 
-#ifndef PHP_WIN32
 /* these globals used for forking children on unix systems */
 
 /**
  * Set to non-zero if we are the parent process
  */
 static int parent = 1;
-#endif
 
 static int request_body_fd;
 static int fpm_is_running = 0;
@@ -202,19 +186,6 @@ static int php_cgi_globals_id;
 #else
 static php_cgi_globals_struct php_cgi_globals;
 #define CGIG(v) (php_cgi_globals.v)
-#endif
-
-#ifdef PHP_WIN32
-#define TRANSLATE_SLASHES(path) \
-	{ \
-		char *tmp = path; \
-		while (*tmp) { \
-			if (*tmp == '\\') *tmp = '/'; \
-			tmp++; \
-		} \
-	}
-#else
-#define TRANSLATE_SLASHES(path)
 #endif
 
 static int print_module_info(zval *zv) /* {{{ */
@@ -330,11 +301,7 @@ static void sapi_cgibin_flush(void *server_context) /* {{{ */
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {
 		fcgi_request *request = (fcgi_request*) server_context;
-		if (
-#ifndef PHP_WIN32
-	      !parent &&
-#endif
-	      request && !fcgi_flush(request, 0)) {
+		if (!parent && request && !fcgi_flush(request, 0)) {
 			php_handle_aborted_connection();
 		}
 		return;
@@ -709,11 +676,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		  if it is inside the docroot, we scan the tree up to the docroot
 			to find more user.ini, if not we only scan the current path.
 		  */
-#ifdef PHP_WIN32
-		if (strnicmp(s1, s2, s_len) == 0) {
-#else
 		if (strncmp(s1, s2, s_len) == 0) {
-#endif
 			ptr = s2 + start;  /* start is the point where doc_root ends! */
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 				*ptr = 0;
@@ -787,18 +750,11 @@ static int sapi_cgi_activate(void) /* {{{ */
 				if (doc_root_len > 0 && IS_SLASH(doc_root[doc_root_len - 1])) {
 					--doc_root_len;
 				}
-#ifdef PHP_WIN32
-				/* paths on windows should be case-insensitive */
-				doc_root = estrndup(doc_root, doc_root_len);
-				zend_str_tolower(doc_root, doc_root_len);
-#endif
+
 				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, doc_root_len - 1);
 			}
 		}
 
-#ifdef PHP_WIN32
-		efree(doc_root);
-#endif
 		efree(path);
 	}
 
@@ -813,11 +769,7 @@ static int sapi_cgi_deactivate(void) /* {{{ */
 		2. When the first call occurs and the request is not set up, flush fails on FastCGI.
 	*/
 	if (SG(sapi_started)) {
-		if (
-#ifndef PHP_WIN32
-		    !parent &&
-#endif
-		    !fcgi_finish_request((fcgi_request*)SG(server_context), 0)) {
+		if (!parent && !fcgi_finish_request((fcgi_request*)SG(server_context), 0)) {
 			php_handle_aborted_connection();
 		}
 	}
@@ -1129,8 +1081,6 @@ static void init_request_info(void)
 
 			if (!env_document_root && PG(doc_root)) {
 				env_document_root = FCGI_PUTENV(request, "DOCUMENT_ROOT", PG(doc_root));
-				/* fix docroot */
-				TRANSLATE_SLASHES(env_document_root);
 			}
 
 			if (!apache_was_here && env_path_translated != NULL && env_redirect_url != NULL &&
@@ -1163,9 +1113,6 @@ static void init_request_info(void)
 			if (script_path_translated &&
 				(script_path_translated_len = strlen(script_path_translated)) > 0 &&
 				(script_path_translated[script_path_translated_len-1] == '/' ||
-#ifdef PHP_WIN32
-				script_path_translated[script_path_translated_len-1] == '\\' ||
-#endif
 				(real_path = tsrm_realpath(script_path_translated, NULL)) == NULL)
 			) {
 				char *pt = estrndup(script_path_translated, script_path_translated_len);
@@ -1243,7 +1190,6 @@ static void init_request_info(void)
 								}
 								script_path_translated = FCGI_PUTENV(request, "SCRIPT_FILENAME", pt);
 							}
-							TRANSLATE_SLASHES(pt);
 
 							/* figure out docroot
 							 * SCRIPT_FILENAME minus SCRIPT_NAME
@@ -1655,13 +1601,6 @@ int main(int argc, char *argv[])
 
 	fcgi_init();
 
-#ifdef PHP_WIN32
-	_fmode = _O_BINARY; /* sets default for file streams to binary */
-	setmode(_fileno(stdin),  O_BINARY);	/* make the stdio mode be binary */
-	setmode(_fileno(stdout), O_BINARY);	/* make the stdio mode be binary */
-	setmode(_fileno(stderr), O_BINARY);	/* make the stdio mode be binary */
-#endif
-
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (c) {
 			case 'c':
@@ -2067,10 +2006,6 @@ out:
 
 #ifdef ZTS
 	tsrm_shutdown();
-#endif
-
-#if defined(PHP_WIN32) && ZEND_DEBUG && 0
-	_CrtDumpMemoryLeaks();
 #endif
 
 	return exit_status;

@@ -5,7 +5,7 @@ COM: General variant tests
 if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present";
 if (4 != PHP_INT_SIZE) print "skip x86 only"; ?>
 --FILE--
-<?php // $Id$
+<?php
 error_reporting(E_ALL);
 
 $v = new VARIANT();

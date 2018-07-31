@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifndef PHP_MYSQLI_H

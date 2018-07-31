@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_interfaces.h"
@@ -163,11 +161,9 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
 		int result;
 
 		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_valid, "valid", &more);
-		if (Z_TYPE(more) != IS_UNDEF) {
-			result = i_zend_is_true(&more);
-			zval_ptr_dtor(&more);
-			return result ? SUCCESS : FAILURE;
-		}
+		result = i_zend_is_true(&more);
+		zval_ptr_dtor(&more);
+		return result ? SUCCESS : FAILURE;
 	}
 	return FAILURE;
 }
