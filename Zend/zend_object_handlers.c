@@ -1055,11 +1055,34 @@ ZEND_API void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 }
 /* }}} */
 
+static zend_always_inline zend_function *zend_get_parent_private(zend_class_entry *scope, zend_class_entry *ce, zend_string *function_name) /* {{{ */
+{
+	zval *func;
+	zend_function *fbc;
+
+	ce = ce->parent;
+	while (ce) {
+		if (ce == scope) {
+			if ((func = zend_hash_find(&ce->function_table, function_name))) {
+				fbc = Z_FUNC_P(func);
+				if (fbc->common.fn_flags & ZEND_ACC_PRIVATE
+				 && fbc->common.scope == scope) {
+					return fbc;
+				}
+			}
+			break;
+		}
+		ce = ce->parent;
+	}
+	return NULL;
+}
+/* }}} */
+
 /* Ensures that we're allowed to call a private method.
  * Returns the function address that should be called, or NULL
  * if no such function exists.
  */
-static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, zend_string *function_name) /* {{{ */
+ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, zend_string *function_name) /* {{{ */
 {
     zval *func;
     zend_class_entry *scope;
@@ -1077,32 +1100,12 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 	scope = zend_get_executed_scope();
 	if (fbc->common.scope == ce && scope == ce) {
 		/* rule #1 checks out ok, allow the function call */
-		return fbc;
+		return 1;
 	}
 
 
 	/* Check rule #2 */
-	ce = ce->parent;
-	while (ce) {
-		if (ce == scope) {
-			if ((func = zend_hash_find(&ce->function_table, function_name))) {
-				fbc = Z_FUNC_P(func);
-				if (fbc->common.fn_flags & ZEND_ACC_PRIVATE
-					&& fbc->common.scope == scope) {
-					return fbc;
-				}
-			}
-			break;
-		}
-		ce = ce->parent;
-	}
-	return NULL;
-}
-/* }}} */
-
-ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, zend_string *function_name) /* {{{ */
-{
-	return zend_check_private_int(fbc, ce, function_name) != NULL;
+	return zend_get_parent_private(scope, ce, function_name) != NULL;
 }
 /* }}} */
 
@@ -1218,21 +1221,22 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 	fbc = Z_FUNC_P(func);
 	/* Check access level */
 	if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-		zend_function *updated_fbc;
-
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 * If we're not and __call() handler exists, invoke it, otherwise error out.
 		 */
-		updated_fbc = zend_check_private_int(fbc, zobj->ce, lc_method_name);
-		if (EXPECTED(updated_fbc != NULL)) {
-			fbc = updated_fbc;
-		} else {
-			if (zobj->ce->__call) {
-				fbc = zend_get_user_call_function(zobj->ce, method_name);
+		scope = zend_get_executed_scope();
+		if (fbc->common.scope != scope || zobj->ce != scope) {
+			zend_function *updated_fbc = zend_get_parent_private(scope, zobj->ce, lc_method_name);
+			if (EXPECTED(updated_fbc != NULL)) {
+				fbc = updated_fbc;
 			} else {
-				scope = zend_get_executed_scope();
-				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), scope ? ZSTR_VAL(scope->name) : "");
-				fbc = NULL;
+				if (zobj->ce->__call) {
+					fbc = zend_get_user_call_function(zobj->ce, method_name);
+				} else {
+					scope = zend_get_executed_scope();
+					zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), scope ? ZSTR_VAL(scope->name) : "");
+					fbc = NULL;
+				}
 			}
 		}
 	} else if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PROTECTED)) {
@@ -1242,14 +1246,9 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 
 		scope = zend_get_executed_scope();
 		if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
-			if (scope && is_derived_class(fbc->common.scope, scope)) {
-				if ((func = zend_hash_find(&scope->function_table, lc_method_name)) != NULL) {
-					zend_function *priv_fbc = Z_FUNC_P(func);
-					if (priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
-						&& priv_fbc->common.scope == scope) {
-						fbc = priv_fbc;
-					}
-				}
+			zend_function *priv_fbc = zend_get_parent_private(scope, fbc->common.scope, lc_method_name);
+			if (priv_fbc) {
+				fbc = priv_fbc;
 			}
 		} else {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
@@ -1339,15 +1338,10 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 		/* No further checks necessary, most common case */
 	} else if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-		zend_function *updated_fbc;
-
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 */
 		scope = zend_get_executed_scope();
-		updated_fbc = zend_check_private_int(fbc, scope, lc_function_name);
-		if (EXPECTED(updated_fbc != NULL)) {
-			fbc = updated_fbc;
-		} else {
+		if (UNEXPECTED(fbc->common.scope != scope)) {
 			if (ce->__callstatic) {
 				fbc = zend_get_user_callstatic_function(ce, function_name);
 			} else {
