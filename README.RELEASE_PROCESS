@@ -338,9 +338,10 @@ Forking a new release branch
       Example: http://news.php.net/php.internals/99864
 
 2. Just prior to cutting X.Y.0beta1, create the new branch locally.
-   Add a commit on master after the branch point clearing the NEWS file, and updating
-     main/php_versions.h and Zend/zend.h to update versions.
-     Example: https://github.com/php/php-src/commit/5230541ef59e0637d5522293a7d099bf18ce6af3
+   Add a commit on master after the branch point clearing the NEWS file, updating
+     the version in configure.ac (run ./configure to automatically update
+     main/php_versions.h, too) and Zend/zend.h.
+     Example: http://git.php.net/?p=php-src.git;a=commit;h=a63c99b
    Push the new branch and the commit just added to master.
 
 3. Immediately notify internals@ of the branch cut and advise the new merging order:
