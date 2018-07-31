@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0beta1
+02 Aug 2018, PHP 7.3.0beta1
 
 - Core:
   . Fixed bug #76667 (Segfault with divide-assign op and __get + __set).
