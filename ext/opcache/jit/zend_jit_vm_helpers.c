@@ -224,7 +224,7 @@ static zend_always_inline int _zend_quick_get_constant(
 	} else {
 		key++;
 		zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
-		if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
+		if (zv && (ZEND_CONSTANT_FLAGS((zend_constant*)Z_PTR_P(zv)) & CONST_CS) == 0) {
 			c = (zend_constant*)Z_PTR_P(zv);
 		} else {
 			if ((flags & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
@@ -235,7 +235,7 @@ static zend_always_inline int _zend_quick_get_constant(
 				} else {
 				    key++;
 					zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
-					if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
+					if (zv && (ZEND_CONSTANT_FLAGS((zend_constant*)Z_PTR_P(zv)) & CONST_CS) == 0) {
 						c = (zend_constant*)Z_PTR_P(zv);
 					}
 				}
@@ -267,7 +267,7 @@ static zend_always_inline int _zend_quick_get_constant(
 
 	if (!check_defined_only) {
 		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
-		if (!(c->flags & (CONST_CS|CONST_CT_SUBST))) {
+		if (!(ZEND_CONSTANT_FLAGS(c) & (CONST_CS|CONST_CT_SUBST))) {
 			const char *ns_sep;
 			size_t shortname_offset;
 			size_t shortname_len;
