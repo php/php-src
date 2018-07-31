@@ -846,10 +846,8 @@ SPL_METHOD(DirectoryIterator, seek)
 	while (intern->u.dir.index < pos) {
 		int valid = 0;
 		zend_call_method_with_0_params(&EX(This), Z_OBJCE(EX(This)), &intern->u.dir.func_valid, "valid", &retval);
-		if (!Z_ISUNDEF(retval)) {
-			valid = zend_is_true(&retval);
-			zval_ptr_dtor(&retval);
-		}
+		valid = zend_is_true(&retval);
+		zval_ptr_dtor(&retval);
 		if (!valid) {
 			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", pos);
 			return;

@@ -507,15 +507,14 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 
 	if (intern->fptr_offset_has) {
 		zval rv;
+		zend_bool result;
+
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
-		if (!Z_ISUNDEF(rv)) {
-			zend_bool result = zend_is_true(&rv);
-			zval_ptr_dtor(&rv);
-			return result;
-		}
-		return 0;
+		result = zend_is_true(&rv);
+		zval_ptr_dtor(&rv);
+		return result;
 	}
 
 	return spl_fixedarray_object_has_dimension_helper(intern, offset, check_empty);

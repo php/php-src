@@ -617,7 +617,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
 
-		if (!Z_ISUNDEF(rv) && zend_is_true(&rv)) {
+		if (zend_is_true(&rv)) {
 			zval_ptr_dtor(&rv);
 			if (check_empty != 1) {
 				return 1;

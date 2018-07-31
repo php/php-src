@@ -909,18 +909,12 @@ ZEND_API int zend_std_has_dimension(zval *object, zval *offset, int check_empty)
 		ZVAL_COPY_DEREF(&tmp_offset, offset);
 		ZVAL_COPY(&tmp_object, object);
 		zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetexists", &retval, &tmp_offset);
-		if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
+		result = i_zend_is_true(&retval);
+		zval_ptr_dtor(&retval);
+		if (check_empty && result && EXPECTED(!EG(exception))) {
+			zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetget", &retval, &tmp_offset);
 			result = i_zend_is_true(&retval);
 			zval_ptr_dtor(&retval);
-			if (check_empty && result && EXPECTED(!EG(exception))) {
-				zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetget", &retval, &tmp_offset);
-				if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
-					result = i_zend_is_true(&retval);
-					zval_ptr_dtor(&retval);
-				}
-			}
-		} else {
-			result = 0;
 		}
 		zval_ptr_dtor(&tmp_object);
 		zval_ptr_dtor(&tmp_offset);
@@ -1690,23 +1684,17 @@ found:
 			GC_ADDREF(zobj);
 			(*guard) |= IN_ISSET; /* prevent circular getting */
 			zend_std_call_issetter(zobj, member, &rv);
-			if (Z_TYPE(rv) != IS_UNDEF) {
-				result = zend_is_true(&rv);
-				zval_ptr_dtor(&rv);
-				if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY && result) {
-					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
-						(*guard) |= IN_GET;
-						zend_std_call_getter(zobj, member, &rv);
-						(*guard) &= ~IN_GET;
-						if (Z_TYPE(rv) != IS_UNDEF) {
-							result = i_zend_is_true(&rv);
-							zval_ptr_dtor(&rv);
-						} else {
-							result = 0;
-						}
-					} else {
-						result = 0;
-					}
+			result = zend_is_true(&rv);
+			zval_ptr_dtor(&rv);
+			if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY && result) {
+				if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
+					(*guard) |= IN_GET;
+					zend_std_call_getter(zobj, member, &rv);
+					(*guard) &= ~IN_GET;
+					result = i_zend_is_true(&rv);
+					zval_ptr_dtor(&rv);
+				} else {
+					result = 0;
 				}
 			}
 			(*guard) &= ~IN_ISSET;

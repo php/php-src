@@ -1067,7 +1067,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_SET_OPTION " is not implemented!",
 					us->wrapper->classname);
 			ret = PHP_STREAM_OPTION_RETURN_ERR;
-		} else if (Z_TYPE(retval) != IS_UNDEF && zend_is_true(&retval)) {
+		} else if (zend_is_true(&retval)) {
 			ret = PHP_STREAM_OPTION_RETURN_OK;
 		} else {
 			ret = PHP_STREAM_OPTION_RETURN_ERR;
@@ -1512,7 +1512,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 					us->wrapper->classname);
 			break;
 		}
-		if (Z_ISUNDEF(retval) || !zend_is_true(&retval)) {
+		if (!zend_is_true(&retval)) {
 			break;
 		}
 		php_stream_from_zval_no_verify(intstream, &retval);

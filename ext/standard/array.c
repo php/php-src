@@ -6056,18 +6056,15 @@ PHP_FUNCTION(array_filter)
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
+				int retval_true;
+
 				zval_ptr_dtor(&args[0]);
 				if (use_type == ARRAY_FILTER_USE_BOTH) {
 					zval_ptr_dtor(&args[1]);
 				}
-				if (!Z_ISUNDEF(retval)) {
-					int retval_true = zend_is_true(&retval);
-
-					zval_ptr_dtor(&retval);
-					if (!retval_true) {
-						continue;
-					}
-				} else {
+				retval_true = zend_is_true(&retval);
+				zval_ptr_dtor(&retval);
+				if (!retval_true) {
 					continue;
 				}
 			} else {
