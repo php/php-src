@@ -2542,9 +2542,10 @@ static zval *row_dim_read(zval *object, zval *member, int type, zval *rv)
 	return row_prop_read(object, member, type, NULL, rv);
 }
 
-static void row_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *row_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	php_error_docref(NULL, E_WARNING, "This PDORow is not from a writable result set");
+	return value;
 }
 
 static void row_dim_write(zval *object, zval *member, zval *value)
