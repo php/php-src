@@ -348,7 +348,7 @@ Standard:
   . setcookie() and setrawcookie() now also support the following signature:
     set(raw)cookie(string $name, [string $value, [array $options]])
     where $options is an associative array which may have any of the keys
-    "lifetime", "path", "domain", "secure", "httponly" and "samesite".
+    "expires", "path", "domain", "secure", "httponly" and "samesite".
 
 PCRE:
   . preg_quote() now also escapes the '#' character.
