@@ -46,6 +46,10 @@ Currently we have the following branches in use::
 
   master    The active development branch.
 
+  PHP-7.3   Is used to release the PHP 7.3.x series. This is a current
+            non stable version and is open for bugfixes and minor improvements
+            only.
+
   PHP-7.2   Is used to release the PHP 7.2.x series. This is a current
             stable version and is open for bugfixes only.
 
