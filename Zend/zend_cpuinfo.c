@@ -33,7 +33,7 @@ static zend_cpu_info cpuinfo = {0};
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	__cpuid_count(func, subfunc, cpuinfo->eax, cpuinfo->ebx, cpuinfo->ecx, cpuinfo->edx);
 }
-#elif defined(ZEND_WIN32)
+#elif defined(ZEND_WIN32) && !defined(__clang__)
 # include <intrin.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	int regs[4];
