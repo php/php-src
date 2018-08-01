@@ -211,6 +211,15 @@ static int php_head_parse_cookie_options_array(zval *options, zend_long *expires
 	zend_string *key;
 	zval *value;
 
+	if (*path) {
+		*path = NULL;
+		*domain = NULL;
+		*secure = 0;
+		*httponly = 0;
+		php_error_docref(NULL, E_WARNING, "Cannot pass arguments after the options array");
+		return 0;
+	}
+
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), key, value) {
 		if (key) {
 			ZVAL_DEREF(value);
@@ -243,7 +252,6 @@ static int php_head_parse_cookie_options_array(zval *options, zend_long *expires
 	/* Array is not empty but no valid keys were found */
 	if (found == 0 && zend_hash_num_elements(Z_ARRVAL_P(options)) > 0) {
 		php_error_docref(NULL, E_WARNING, "No valid options were found in the given array");
-		return 0;
 	}
 
 	return 1;

@@ -18,6 +18,8 @@ PHP                                                                        NEWS
     (Kevin Abel)
 
 - Standard:
+  . Fixed bug #76688 (Disallow excessive parameters after options array).
+    (pmmaga)
   . Fixed bug #76713 (Segmentation fault caused by property corruption).
     (Laruence)
 
