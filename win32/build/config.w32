@@ -313,9 +313,9 @@ if (PHP_SECURITY_FLAGS == "yes") {
 if (CLANG_TOOLSET) {
 	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
 	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
-		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces \
-		-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas \
-		-Wno-unused-command-line-argument");
+		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces " +
+		"-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas " +
+		"-Wno-unused-command-line-argument -Wno-unused-function -Wno-ignored-pragma-optimize");
 	}
 
 	ARG_ENABLE("sanitizer", "Enable address sanitizer extension", "no");
