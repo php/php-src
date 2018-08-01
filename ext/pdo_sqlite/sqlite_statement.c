@@ -350,6 +350,26 @@ static int pdo_sqlite_stmt_cursor_closer(pdo_stmt_t *stmt)
 	return 1;
 }
 
+static int pdo_sqlite_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val)
+{
+	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+
+	switch (attr) {
+		default:
+			return 0;
+		case PDO_SQLITE_ATTR_READONLY_STATEMENT:
+			ZVAL_BOOL(val, FALSE);
+
+			#if SQLITE_VERSION_NUMBER >= 3007004
+				if (sqlite3_stmt_readonly(S->stmt)) {
+					ZVAL_BOOL(val, TRUE);
+				}
+			#endif
+			break;
+	}
+	return 1;
+}
+
 const struct pdo_stmt_methods sqlite_stmt_methods = {
 	pdo_sqlite_stmt_dtor,
 	pdo_sqlite_stmt_execute,
@@ -358,7 +378,7 @@ const struct pdo_stmt_methods sqlite_stmt_methods = {
 	pdo_sqlite_stmt_get_col,
 	pdo_sqlite_stmt_param_hook,
 	NULL, /* set_attr */
-	NULL, /* get_attr */
+	pdo_sqlite_stmt_get_attribute, /* get_attr */
 	pdo_sqlite_stmt_col_meta,
 	NULL, /* next_rowset */
 	pdo_sqlite_stmt_cursor_closer
