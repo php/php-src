@@ -2155,7 +2155,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
     AC_MSG_RESULT([$icu_install_prefix])
 
     dnl Check ICU version
-    AC_MSG_CHECKING([for ICU 4.0 or greater])
+    AC_MSG_CHECKING([for ICU 4.6 or greater])
     icu_version_full=`$ICU_CONFIG --version`
     ac_IFS=$IFS
     IFS="."
@@ -2164,8 +2164,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
     icu_version=`expr [$]1 \* 1000 + [$]2`
     AC_MSG_RESULT([found $icu_version_full])
 
-    if test "$icu_version" -lt "4000"; then
-      AC_MSG_ERROR([ICU version 4.0 or later is required])
+    if test "$icu_version" -lt "4006"; then
+      AC_MSG_ERROR([ICU version 4.6 or later is required])
     fi
 
     ICU_VERSION=$icu_version

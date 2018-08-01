@@ -89,7 +89,6 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 	calendar_object_create(return_value, cal);
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 class BugStringCharEnumeration : public StringEnumeration
 {
 public:
@@ -185,7 +184,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 
 	IntlIterator_from_StringEnumeration(se, return_value);
 }
-#endif //ICU 4.2 only
 
 U_CFUNC PHP_FUNCTION(intlcal_get_now)
 {
@@ -596,7 +594,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_actual_minimum)
 		"intlcal_get_actual_minimum", INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 {
 	zend_long	dow;
@@ -624,7 +621,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 
 	RETURN_LONG((zend_long)result);
 }
-#endif
 
 U_CFUNC PHP_FUNCTION(intlcal_get_first_day_of_week)
 {
@@ -789,7 +785,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_type)
 	RETURN_STRING(co->ucal->getType());
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 {
 	zend_long	dow;
@@ -817,7 +812,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 
 	RETURN_LONG((zend_long)res);
 }
-#endif
 
 U_CFUNC PHP_FUNCTION(intlcal_in_daylight_time)
 {
@@ -904,7 +898,6 @@ U_CFUNC PHP_FUNCTION(intlcal_is_set)
 	RETURN_BOOL((int)co->ucal->isSet((UCalendarDateFields)field));
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 {
 	double date;
@@ -929,7 +922,6 @@ U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 		RETURN_BOOL((int)ret);
 	}
 }
-#endif
 
 
 U_CFUNC PHP_FUNCTION(intlcal_set_first_day_of_week)

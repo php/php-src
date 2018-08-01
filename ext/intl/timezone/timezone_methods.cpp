@@ -515,11 +515,9 @@ U_CFUNC PHP_FUNCTION(intltz_has_same_rules)
 
 static const TimeZone::EDisplayType display_types[] = {
 	TimeZone::SHORT,				TimeZone::LONG,
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	TimeZone::SHORT_GENERIC,		TimeZone::LONG_GENERIC,
 	TimeZone::SHORT_GMT,			TimeZone::LONG_GMT,
 	TimeZone::SHORT_COMMONLY_USED,	TimeZone::GENERIC_LOCATION
-#endif
 };
 
 U_CFUNC PHP_FUNCTION(intltz_get_display_name)

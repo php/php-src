@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.4') < 0)
-	die('skip for ICU 4.4+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

@@ -87,12 +87,10 @@
 #include "idn/idn.h"
 #include "uchar/uchar.h"
 
-#if U_ICU_VERSION_MAJOR_NUM * 1000 + U_ICU_VERSION_MINOR_NUM >= 4002
 # include "spoofchecker/spoofchecker_class.h"
 # include "spoofchecker/spoofchecker.h"
 # include "spoofchecker/spoofchecker_create.h"
 # include "spoofchecker/spoofchecker_main.h"
-#endif
 
 #include "msgformat/msgformat.h"
 #include "common/common_error.h"
@@ -788,9 +786,7 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( intltz_get_error_message, arginfo_tz_only_tz )
 
 	PHP_FE( intlcal_create_instance, ainfo_cal_create_instance )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 	PHP_FE( intlcal_get_keyword_values_for_locale, ainfo_cal_get_keyword_values_for_locale )
-#endif
 	PHP_FE( intlcal_get_now, ainfo_cal_void )
 	PHP_FE( intlcal_get_available_locales, ainfo_cal_void )
 	PHP_FE( intlcal_get, ainfo_cal_field )
@@ -806,9 +802,7 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( intlcal_field_difference, ainfo_cal_field_difference )
 	PHP_FE( intlcal_get_actual_maximum, ainfo_cal_field )
 	PHP_FE( intlcal_get_actual_minimum, ainfo_cal_field )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_FE( intlcal_get_day_of_week_type, ainfo_cal_dow )
-#endif
 	PHP_FE( intlcal_get_first_day_of_week, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_greatest_minimum, ainfo_cal_field )
 	PHP_FE( intlcal_get_least_maximum, ainfo_cal_field )
@@ -818,16 +812,12 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( intlcal_get_minimum, ainfo_cal_field )
 	PHP_FE( intlcal_get_time_zone, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_type, ainfo_cal_only_cal )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_FE( intlcal_get_weekend_transition, ainfo_cal_dow )
-#endif
 	PHP_FE( intlcal_in_daylight_time, ainfo_cal_only_cal )
 	PHP_FE( intlcal_is_equivalent_to, ainfo_cal_other_cal )
 	PHP_FE( intlcal_is_lenient, ainfo_cal_only_cal )
 	PHP_FE( intlcal_is_set, ainfo_cal_field )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_FE( intlcal_is_weekend, ainfo_cal_date_optional )
-#endif
 	PHP_FE( intlcal_set_first_day_of_week, ainfo_cal_dow )
 	PHP_FE( intlcal_set_lenient, ainfo_cal_set_lenient )
 	PHP_FE( intlcal_set_minimal_days_in_first_week, ainfo_cal_set_minimal_days_in_first_week )
@@ -972,13 +962,11 @@ PHP_MINIT_FUNCTION( intl )
 	/* Expose IDN constants to PHP scripts. */
 	idn_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
-#if U_ICU_VERSION_MAJOR_NUM * 1000 + U_ICU_VERSION_MINOR_NUM >= 4002
 	/* Register 'Spoofchecker' PHP class */
 	spoofchecker_register_Spoofchecker_class(  );
 
 	/* Expose Spoofchecker constants to PHP scripts */
 	spoofchecker_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-#endif
 
 	/* Register 'IntlException' PHP class */
 	intl_register_IntlException_class(  );
