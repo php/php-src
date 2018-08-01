@@ -10,9 +10,13 @@ ob_start();
 // Unrecognized key and no valid keys
 setcookie('name', 'value', ['unknown_key' => 'only']);
 // Numeric key and no valid keys
-setcookie('name', 'value', [0 => 'numeric_key']);
+setcookie('name2', 'value2', [0 => 'numeric_key']);
 // Unrecognized key
-setcookie('name', 'value', ['path' => '/path/', 'foo' => 'bar']);
+setcookie('name3', 'value3', ['path' => '/path/', 'foo' => 'bar']);
+
+var_dump(headers_list());
+
+--EXPECTHEADERS--
 
 --EXPECTF--
 Warning: setcookie(): Unrecognized key 'unknown_key' found in the options array in %s
@@ -24,3 +28,13 @@ Warning: setcookie(): Numeric key found in the options array in %s
 Warning: setcookie(): No valid options were found in the given array in %s
 
 Warning: setcookie(): Unrecognized key 'foo' found in the options array in %s
+array(4) {
+  [0]=>
+  string(%d) "X-Powered-By: PHP/%s"
+  [1]=>
+  string(22) "Set-Cookie: name=value"
+  [2]=>
+  string(24) "Set-Cookie: name2=value2"
+  [3]=>
+  string(37) "Set-Cookie: name3=value3; path=/path/"
+}
