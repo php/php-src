@@ -206,10 +206,19 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 	return result;
 }
 
-static void php_head_parse_cookie_options_array(zval *options, zend_long *expires, zend_string **path, zend_string **domain, zend_bool *secure, zend_bool *httponly, zend_string **samesite) {
+static int php_head_parse_cookie_options_array(zval *options, zend_long *expires, zend_string **path, zend_string **domain, zend_bool *secure, zend_bool *httponly, zend_string **samesite) {
 	int found = 0;
 	zend_string *key;
 	zval *value;
+
+	if (*path) {
+		*path = NULL;
+		*domain = NULL;
+		*secure = 0;
+		*httponly = 0;
+		php_error_docref(NULL, E_WARNING, "Cannot pass arguments after the options array");
+		return 0;
+	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), key, value) {
 		if (key) {
@@ -244,6 +253,8 @@ static void php_head_parse_cookie_options_array(zval *options, zend_long *expire
 	if (found == 0 && zend_hash_num_elements(Z_ARRVAL_P(options)) > 0) {
 		php_error_docref(NULL, E_WARNING, "No valid options were found in the given array");
 	}
+
+	return 1;
 }
 
 /* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
@@ -270,7 +281,10 @@ PHP_FUNCTION(setcookie)
 	if (expires_or_options) {
 		if (Z_TYPE_P(expires_or_options) == IS_ARRAY) {
 			options_array = 1;
-			php_head_parse_cookie_options_array(expires_or_options, &expires, &path, &domain, &secure, &httponly, &samesite);
+			if (!php_head_parse_cookie_options_array(expires_or_options, &expires, &path, &domain, &secure, &httponly, &samesite)) {
+				RETVAL_FALSE;
+				goto cleanup;
+			}
 		} else {
 			expires = Z_LVAL_P(expires_or_options);
 		}
@@ -282,6 +296,7 @@ PHP_FUNCTION(setcookie)
 		RETVAL_FALSE;
 	}
 
+cleanup:
 	if (options_array) {
 		if (path) {
 			zend_string_release(path);
@@ -320,7 +335,10 @@ PHP_FUNCTION(setrawcookie)
 	if (expires_or_options) {
 		if (Z_TYPE_P(expires_or_options) == IS_ARRAY) {
 			options_array = 1;
-			php_head_parse_cookie_options_array(expires_or_options, &expires, &path, &domain, &secure, &httponly, &samesite);
+			if (!php_head_parse_cookie_options_array(expires_or_options, &expires, &path, &domain, &secure, &httponly, &samesite)) {
+				RETVAL_FALSE;
+				goto cleanup;
+			}
 		} else {
 			expires = Z_LVAL_P(expires_or_options);
 		}
@@ -332,6 +350,7 @@ PHP_FUNCTION(setrawcookie)
 		RETVAL_FALSE;
 	}
 
+cleanup:
 	if (options_array) {
 		if (path) {
 			zend_string_release(path);
