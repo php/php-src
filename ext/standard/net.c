@@ -32,7 +32,9 @@
 #endif
 
 #ifdef PHP_WIN32
+# ifndef __clang__
 # include <intrin.h>
+# endif
 # include <winsock2.h>
 # include <ws2ipdef.h>
 # include <Ws2tcpip.h>
