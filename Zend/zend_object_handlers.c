@@ -1084,7 +1084,6 @@ static zend_always_inline zend_function *zend_get_parent_private(zend_class_entr
  */
 ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, zend_string *function_name) /* {{{ */
 {
-    zval *func;
     zend_class_entry *scope;
 
 	if (!ce) {
