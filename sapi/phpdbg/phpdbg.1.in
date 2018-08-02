@@ -112,16 +112,14 @@ The online manual can be found at
 .PD 0
 .P
 .B http://php.net/manual/book.phpdbg.php
-.P
-
+.PD 1
 .SH BUGS
 You can view the list of known bugs or report any new bug you
 found at
 .PD 0
 .P
 .B http://bugs.php.net/
-.P
-
+.PD 1
 .SH AUTHORS
 Written by Felipe Pena, Joe Watkins and Bob Weinand, formatted by Ondřej Surý for Debian project.
 .P
