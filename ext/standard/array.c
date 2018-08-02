@@ -6404,6 +6404,125 @@ PHP_FUNCTION(array_combine)
 }
 /* }}} */
 
+/* {{{ php_array_key_index_common
+	offset_type: 0: determine from parameters; 1 = first; -1 = last
+ */
+static void php_array_key_index_common(INTERNAL_FUNCTION_PARAMETERS, int offset_type)
+{
+	int argc;
+	zval *input, *outValue;
+	int key_offset;
+	int writeValue;
+	zval *arrValue;
+	HashPosition pos;
+	int key_type;
+	zend_string *string_key;
+	zend_ulong num_key;
+	zend_bool direction;
+	
+	argc = ZEND_NUM_ARGS();
+	
+	if(offset_type == 0) {
+		key_offset = 0;
+		
+		//array_key_index(array input, int offset, [mixed value])
+		if(zend_parse_parameters(argc TSRMLS_CC, "al|z/", &input, &key_offset, &outValue) == FAILURE) {
+			RETURN_NULL();
+		}
+		
+		writeValue = (argc >= 3);
+	} else {
+		if(offset_type == 1) {
+			key_offset = 0;
+		} else {
+			key_offset = offset_type;
+		}
+		
+		//array_key_(first|last)(array input, [mixed value])
+		if(zend_parse_parameters(argc TSRMLS_CC, "a|z/", &input, &outValue) == FAILURE) {
+			RETURN_NULL();
+		}
+		
+		writeValue = (argc >= 2);
+	}
+	
+	//true == forward; false == backwards
+	direction = (key_offset >= 0);
+	if(!direction) {
+		key_offset = abs(key_offset) - 1;
+	}
+	
+	if(key_offset >= zend_hash_num_elements(Z_ARRVAL_P(input))) {
+		RETURN_NULL();
+	}
+	
+	if(direction) {
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
+	} else {
+		zend_hash_internal_pointer_end_ex(Z_ARRVAL_P(input), &pos);
+	}
+	
+	if(key_offset >= 1) {
+		while(key_offset--) {
+			if(direction) {
+				zend_hash_move_forward_ex(Z_ARRVAL_P(input), &pos);
+			} else {
+				zend_hash_move_backwards_ex(Z_ARRVAL_P(input), &pos);
+			}
+		}
+	}
+	
+	key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &num_key, &pos);
+
+	switch(key_type) {
+		case HASH_KEY_IS_LONG:
+			RETVAL_LONG(num_key);
+			break;
+		
+		case HASH_KEY_IS_STRING:
+			RETVAL_STR_COPY(string_key);
+			break;
+		
+		case HASH_KEY_NON_EXISTENT:
+		default:
+			RETURN_NULL();
+			break;
+	}
+	
+	if(writeValue) {
+		zval_dtor(outValue);
+		
+		arrValue = zend_hash_get_current_data_ex(Z_ARRVAL_P(input), &pos);
+		
+		ZVAL_COPY_VALUE(outValue, arrValue);
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed array_key_index(array input, int index [, mixed value])
+   Return the array's index key (and optionally, value) */
+PHP_FUNCTION(array_key_index)
+{
+	php_array_key_index_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto mixed array_key_first(array input [, mixed value])
+   Return the array's first key (and optionally, value) */
+PHP_FUNCTION(array_key_first)
+{
+	php_array_key_index_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ proto mixed array_key_last(array input [, mixed value])
+   Return the array's last key (and optionally, value) */
+PHP_FUNCTION(array_key_last)
+{
+	php_array_key_index_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, -1);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

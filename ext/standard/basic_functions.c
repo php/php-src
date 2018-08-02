@@ -608,6 +608,19 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_combine, 0)
 	ZEND_ARG_INFO(0, keys)   /* ARRAY_INFO(0, keys, 0) */
 	ZEND_ARG_INFO(0, values) /* ARRAY_INFO(0, values, 0) */
 ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_array_key_index, 0)
+	ZEND_ARG_INFO(0, input)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(1, value)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_array_key_first, 0)
+	ZEND_ARG_INFO(0, input)
+	ZEND_ARG_INFO(1, value)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ basic_functions.c */
 ZEND_BEGIN_ARG_INFO(arginfo_get_magic_quotes_gpc, 0)
@@ -3404,6 +3417,9 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_chunk,														arginfo_array_chunk)
 	PHP_FE(array_combine,													arginfo_array_combine)
 	PHP_FE(array_key_exists,												arginfo_array_key_exists)
+	PHP_FE(array_key_index,												arginfo_array_key_index)
+	PHP_FE(array_key_first,															arginfo_array_key_first)
+	PHP_FE(array_key_last,															arginfo_array_key_first)
 
 	/* aliases from array.c */
 	PHP_FALIAS(pos,					current,								arginfo_current)
