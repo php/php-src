@@ -235,7 +235,7 @@ readline:
     if PHP is linked against libreadline (rather than libedit).
 
 Standard:
-  . The -–with-password-argon2[=dir] configure argument now provides support for 
+  . The --with-password-argon2[=dir] configure argument now provides support for 
     both Argon2i and Argon2id hashes in the password_hash(), password_verify(), 
     password_get_info(), and password_needs_rehash() functions. Passwords may be
     hashed and verified using the PASSWORD_ARGON2ID constant.
