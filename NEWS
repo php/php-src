@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018, PHP 7.2.9
+?? ??? 2018, PHP 7.2.10
+
+
+16 Aug 2018, PHP 7.2.9
 
 - Calendar:
   . Fixed bug #52974 (jewish.c: compile error under Windows with GBK charset).
