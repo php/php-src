@@ -261,6 +261,8 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode);
 PW32IO wchar_t *php_win32_ioutil_realpath_w(const wchar_t *path, wchar_t *resolved);
 PW32IO wchar_t *php_win32_ioutil_realpath_w_ex0(const wchar_t *path, wchar_t *resolved, PBY_HANDLE_FILE_INFORMATION info);
+PW32IO int php_win32_ioutil_symlink_w(const wchar_t *target, const wchar_t *link);
+PW32IO int php_win32_ioutil_link_w(const wchar_t *target, const wchar_t *link);
 
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
@@ -567,6 +569,57 @@ __forceinline static int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
+
+	return ret;
+}/*}}}*/
+
+__forceinline static int php_win32_ioutil_symlink(const char *target, const char *link)
+{/*{{{*/
+	wchar_t *targetw, *linkw;
+	int ret;
+
+	targetw = php_win32_ioutil_any_to_w(target);
+	if (!targetw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return -1;
+	}
+
+	linkw = php_win32_ioutil_any_to_w(link);
+	if (!linkw) {
+		free(targetw);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return -1;
+	}
+
+	ret = php_win32_ioutil_symlink_w(targetw, linkw);
+
+	free(targetw);
+	free(linkw);
+
+	return ret;
+}/*}}}*/
+
+__forceinline static int php_win32_ioutil_link(const char *target, const char *link)
+{/*{{{*/
+	wchar_t *targetw, *linkw;
+	int ret;
+
+	targetw = php_win32_ioutil_any_to_w(target);
+	if (!targetw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return -1;
+	}
+	linkw = php_win32_ioutil_any_to_w(link);
+	if (!linkw) {
+		free(targetw);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return -1;
+	}
+
+	ret = php_win32_ioutil_link_w(targetw, linkw);
+
+	free(targetw);
+	free(linkw);
 
 	return ret;
 }/*}}}*/
