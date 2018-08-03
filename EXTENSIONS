@@ -296,6 +296,7 @@ SINCE:               4.2
 -------------------------------------------------------------------------------
 EXTENSION:           fileinfo
 PRIMARY MAINTAINER:  Derick Rethans <derick@php.net> (2004 - 2008)
+                     Anatol Belski <ab@php.net> (2012 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -345,6 +346,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           intl
 PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2018)
+                     Anatol Belski <ab@php.net> (2017 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
