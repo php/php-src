@@ -1469,9 +1469,15 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			// Add compiler and link flags if PGO options are selected
 			if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
 				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG /GENPROFILE");
+				if (VCVERS >= 1914) {
+					ADD_FLAG('LDFLAGS_' + EXT, "/d2:-FuncCache1");
+				}
 			}
 			else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
 				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG /USEPROFILE");
+				if (VCVERS >= 1914) {
+					ADD_FLAG('LDFLAGS_' + EXT, "/d2:-FuncCache1");
+				}
 			}
 
 			ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
