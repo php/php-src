@@ -28,6 +28,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   y. zend_constant
   z. HAVE_ST_BLKSIZE and HAVE_ST_RDEV
   aa. RETSIGTYPE
+  bb. php_setcookie
 
 2. Build system changes
   a. Unix build system changes
@@ -173,6 +174,12 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
  aa. RETSIGTYPE has been removed from the generated php_config.h and should be
     replaced with void.
+
+ bb. php_setcookie() now expects an additional samesite argument, and the 
+    url_encode parameter has been moved to the end. The signature is now:
+    int php_setcookie(zend_string *name, zend_string *value, time_t expires,
+                      zend_string *path, zend_string *domain, int secure,
+                      int httponly, zend_string *samesite, int url_encode);
 
 ========================
 2. Build system changes
