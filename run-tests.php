@@ -205,7 +205,7 @@ function verify_config()
 		error('environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!');
 	}
 
-	if (function_exists('is_executable') && !is_executable($php)) {
+	if (!is_executable($php)) {
 		error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = $php");
 	}
 }
