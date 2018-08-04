@@ -1,7 +1,10 @@
 --TEST--
 Bug #72399 (Use-After-Free in MBString (search_re))
 --SKIPIF--
-<?php require 'skipif.inc'; ?>
+<?php
+require 'skipif.inc';
+if (!function_exists('mb_ereg')) die('skip mbregex support not available');
+?>
 --FILE--
 <?php
 $var5 = mb_ereg_search_init("","2");
