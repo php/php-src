@@ -27,17 +27,17 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   if test "$PHP_READLINE" != "no" -o  "$PHP_LIBEDIT" != "no"; then
   	PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
   fi
-  
+
   PHP_SUBST(PHP_PHPDBG_CFLAGS)
   PHP_SUBST(PHP_PHPDBG_FILES)
   PHP_SUBST(PHPDBG_EXTRA_LIBS)
-  
+
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag], [$abs_srcdir/sapi/phpdbg], [$abs_builddir/sapi/phpdbg])
   PHP_SELECT_SAPI(phpdbg, program, $PHP_PHPDBG_FILES, $PHP_PHPDBG_CFLAGS, [$(SAPI_PHPDBG_PATH)])
 
   BUILD_BINARY="sapi/phpdbg/phpdbg"
   BUILD_SHARED="sapi/phpdbg/libphpdbg.la"
-  
+
   BUILD_PHPDBG="\$(LIBTOOL) --mode=link \
         \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \
                 \$(PHP_GLOBAL_OBJS) \
@@ -63,6 +63,8 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   PHP_SUBST(BUILD_SHARED)
   PHP_SUBST(BUILD_PHPDBG)
   PHP_SUBST(BUILD_PHPDBG_SHARED)
+
+  PHP_OUTPUT(sapi/phpdbg/phpdbg.1)
 fi
 
 if test "$PHP_PHPDBG_WEBHELPER" != "no"; then
