@@ -1,7 +1,10 @@
 --TEST--
 Bug #43301 (mb_ereg*_replace() crashes when replacement string is invalid PHP expression and 'e' option is used)
 --SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+<?php
+extension_loaded('mbstring') or die('skip mbstring not available');
+if (!function_exists('mb_ereg')) die('skip mbregex support not available');
+?>
 --FILE--
 <?php
 

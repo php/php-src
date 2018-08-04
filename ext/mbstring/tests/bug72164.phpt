@@ -1,7 +1,10 @@
 --TEST--
 Bug #72164 (Null Pointer Dereference - mb_ereg_replace)
 --SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+<?php
+extension_loaded('mbstring') or die('skip mbstring not available');
+if (!function_exists('mb_ereg')) die('skip mbregex support not available');
+?>
 --FILE--
 <?php
 $var0 = "e";
