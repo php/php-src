@@ -681,7 +681,7 @@ static sapi_post_entry mbstr_post_entries[] = {
 /* }}} */
 
 /* {{{ static int php_mb_parse_encoding_list()
- *  Return 0 if input contains any illegal encoding, otherwise 1.
+ *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  *  Even if any illegal encoding is detected the result may contain a list
  *  of parsed encodings.
  */
@@ -762,7 +762,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 						*entry++ = encoding;
 						n++;
 					} else {
-						ret = 0;
+						ret = FAILURE;
 					}
 				}
 				p1 = p2 + 1;
@@ -778,7 +778,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 				if (return_list) {
 					*return_list = NULL;
 				}
-				ret = 0;
+				ret = FAILURE;
 			}
 			if (return_size) {
 				*return_size = n;
@@ -790,7 +790,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 			if (return_size) {
 				*return_size = 0;
 			}
-			ret = 0;
+			ret = FAILURE;
 		}
 		efree(tmpstr);
 	}
@@ -800,7 +800,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 /* }}} */
 
 /* {{{ static int php_mb_parse_encoding_array()
- *  Return 0 if input contains any illegal encoding, otherwise 1.
+ *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  *  Even if any illegal encoding is detected the result may contain a list
  *  of parsed encodings.
  */
