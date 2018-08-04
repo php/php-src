@@ -63,6 +63,8 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   PHP_SUBST(BUILD_SHARED)
   PHP_SUBST(BUILD_PHPDBG)
   PHP_SUBST(BUILD_PHPDBG_SHARED)
+
+  PHP_OUTPUT(sapi/phpdbg/phpdbg.1)
 fi
 
 if test "$PHP_PHPDBG_WEBHELPER" != "no"; then
