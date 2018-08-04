@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug #75402 (Possible Memory Leak using PDO::CURSOR_SCROLL option).
     (Anatol)
 
+- phpdbg:
+  . Fixed bug #76595 (phpdbg man page contains outdated information).
+    (Kevin Abel)
+
 - SQLite3:
   . Fixed #76665 (SQLite3Stmt::bindValue() with SQLITE3_FLOAT doesn't juggle).
     (cmb)
