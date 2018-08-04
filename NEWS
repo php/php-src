@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0beta2
 
+- mbstring:
+  . Fixed bug #76704 (mb_detect_order return value varies based on argument
+    type). (cmb)
+
 - phpdbg:
   . Fixed bug #76595 (phpdbg man page contains outdated information).
     (Kevin Abel)
