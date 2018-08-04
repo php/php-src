@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #76704 (mb_detect_order return value varies based on argument
     type). (cmb)
 
+- phpdbg:
+  . Fixed bug #76595 (phpdbg man page contains outdated information).
+    (Kevin Abel)
+
 16 Aug 2018, PHP 7.2.9
 
 - Calendar:
@@ -22,10 +26,6 @@ PHP                                                                        NEWS
 - PDO_PgSQL:
   . Fixed bug #75402 (Possible Memory Leak using PDO::CURSOR_SCROLL option).
     (Anatol)
-
-- phpdbg:
-  . Fixed bug #76595 (phpdbg man page contains outdated information).
-    (Kevin Abel)
 
 - SQLite3:
   . Fixed #76665 (SQLite3Stmt::bindValue() with SQLITE3_FLOAT doesn't juggle).
