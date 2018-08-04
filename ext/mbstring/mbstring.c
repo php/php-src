@@ -1068,7 +1068,7 @@ static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
 		php_error_docref(NULL, E_WARNING, "Cannot allocate match data");
 		return FAILURE;
 	}
-	res = pcre2_match(opaque, (PCRE2_SPTR)str, str_len, 0, 0, match_data, php_pcre_mctx());
+	res = pcre2_match(opaque, (PCRE2_SPTR)str, str_len, 0, 0, match_data, php_pcre_mctx()) >= 0;
 	php_pcre_free_match_data(match_data);
 
 	return res;

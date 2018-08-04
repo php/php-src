@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - mbstring:
   . Fixed bug #76704 (mb_detect_order return value varies based on argument
     type). (cmb)
+  . Fixed bug #76706 (mbstring.http_output_conv_mimetypes is ignored). (cmb)
 
 - phpdbg:
   . Fixed bug #76595 (phpdbg man page contains outdated information).
