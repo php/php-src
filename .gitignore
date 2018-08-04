@@ -114,6 +114,7 @@ sapi/fpm/www.conf
 sapi/phpdbg/phpdbg_parser.c
 sapi/phpdbg/phpdbg_parser.h
 sapi/phpdbg/phpdbg
+sapi/phpdbg/phpdbg.1
 sapi/phpdbg/build
 sapi/phpdbg/*.output
 scripts/php-config
