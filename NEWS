@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0beta1
+?? ??? ????, PHP 7.3.0beta2
+
+- phpdbg:
+  . Fixed bug #76595 (phpdbg man page contains outdated information).
+    (Kevin Abel)
+
+02 Aug 2018, PHP 7.3.0beta1
 
 - Core:
   . Fixed bug #76667 (Segfault with divide-assign op and __get + __set).
@@ -9,10 +15,6 @@ PHP                                                                        NEWS
 - PDO_PgSQL:
   . Fixed bug #75402 (Possible Memory Leak using PDO::CURSOR_SCROLL option).
     (Anatol)
-
-- phpdbg:
-  . Fixed bug #76595 (phpdbg man page contains outdated information).
-    (Kevin Abel)
 
 - SQLite3:
   . Fixed #76665 (SQLite3Stmt::bindValue() with SQLITE3_FLOAT doesn't juggle).
