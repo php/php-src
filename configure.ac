@@ -1149,13 +1149,6 @@ if test "$PHP_PEAR" != "no"; then
                     PEAR requires XML to be enabled.     Add --enable-xml to the configure line. (or --without-pear)"
   fi
 
-dnl
-dnl  if test "$PHP_XMLRPC" = "no"; then
-dnl    pear_error_msg="$pear_error_msg
-dnl                    PEAR requires XML-RPC to be enabled. Add --with-xmlrpc to the configure line. (or --without-pear)"
-dnl  fi
-dnl
-
   if test "$pear_error_msg"; then
     AC_MSG_ERROR([$pear_error_msg])
   fi
