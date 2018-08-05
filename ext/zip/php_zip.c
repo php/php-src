@@ -1030,7 +1030,7 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
 #if LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR == 3 && LIBZIP_VERSION_MICRO == 1
-			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", "zip_close have failed");
+			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: zip_close have failed");
 #else
 			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
 			zip_discard(intern->za);
@@ -1543,7 +1543,7 @@ static ZIPARCHIVE_METHOD(close)
 
 	if ((err = zip_close(intern))) {
 #if LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR == 3 && LIBZIP_VERSION_MICRO == 1
-		php_error_docref(NULL, E_WARNING, "%s", "zip_close have failed");
+		php_error_docref(NULL, E_WARNING, "zip_close have failed");
 #else
 		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
 		zip_discard(intern);
