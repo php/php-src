@@ -120,9 +120,9 @@ dnl [  --with-$extname             Include $extname support])
 
 dnl Otherwise use enable:
 
-dnl PHP_ARG_ENABLE($extname, whether to enable $extname support,
+PHP_ARG_ENABLE($extname, whether to enable $extname support,
 dnl Make sure that the comment is aligned:
-dnl [  --enable-$extname           Enable $extname support])
+[  --enable-$extname           Enable $extname support])
 
 if test "\$PHP_$EXTNAME" != "no"; then
   dnl Write more examples of tests here...
@@ -179,7 +179,7 @@ cat >config.w32 <<eof
 // ARG_WITH("$extname", "for $extname support", "no");
 
 // Otherwise, use ARG_ENABLE
-// ARG_ENABLE("$extname", "enable $extname support", "no");
+ARG_ENABLE("$extname", "enable $extname support", "no");
 
 if (PHP_$EXTNAME != "no") {
 	EXTENSION("$extname", "$extname.c", PHP_EXTNAME_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
