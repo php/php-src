@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.2.10
 
+- Core:
+  . Fixed bug #72443 (Generate enabled extension). (petk)
+
 - gettext:
   . Fixed bug #76517 (incorrect restoring of LDFLAGS). (sji)
 
