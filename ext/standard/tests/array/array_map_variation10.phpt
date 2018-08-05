@@ -85,6 +85,6 @@ array(3) {
 }
 -- passing NULL as 'arr1' --
 
-Warning: array_map(): Argument #2 should be an array in %s on line %d
+Warning: array_map(): Expected parameter 2 to be an array, null given in %s on line %d
 NULL
 Done
