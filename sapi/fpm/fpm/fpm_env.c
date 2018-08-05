@@ -119,7 +119,9 @@ static char * nvmatch(char *s1, char *s2) /* {{{ */
 
 void fpm_env_setproctitle(char *title) /* {{{ */
 {
-#ifdef HAVE_SETPROCTITLE
+#if defined(HAVE_SETPROCTITLE_FAST)
+	setproctitle_fast("%s", title);
+#elif defined(HAVE_SETPROCTITLE)
 	setproctitle("%s", title);
 #else
 #ifdef __linux__
