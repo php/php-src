@@ -633,6 +633,9 @@ zlog_bool zlog_stream_set_msg_suffix(
 		stream->msg_suffix_len = strlen(suffix);
 		stream->msg_final_suffix_len = strlen(final_suffix);
 		len = stream->msg_suffix_len + stream->msg_final_suffix_len + 2;
+		if (stream->msg_suffix != NULL) {
+			free(stream->msg_suffix);
+		}
 		stream->msg_suffix = malloc(len);
 		if (stream->msg_suffix == NULL) {
 			return ZLOG_FALSE;
@@ -646,6 +649,9 @@ zlog_bool zlog_stream_set_msg_suffix(
 		stream->msg_suffix_len = strlen(suffix);
 		len = stream->msg_suffix_len + 1;
 		stream->msg_suffix = malloc(len);
+		if (stream->msg_suffix != NULL) {
+			free(stream->msg_suffix);
+		}
 		if (stream->msg_suffix == NULL) {
 			return ZLOG_FALSE;
 		}
@@ -656,6 +662,9 @@ zlog_bool zlog_stream_set_msg_suffix(
 		stream->msg_final_suffix_len = strlen(final_suffix);
 		len = stream->msg_final_suffix_len + 1;
 		stream->msg_final_suffix = malloc(len);
+		if (stream->msg_final_suffix != NULL) {
+			free(stream->msg_suffix);
+		}
 		if (stream->msg_final_suffix == NULL) {
 			return ZLOG_FALSE;
 		}

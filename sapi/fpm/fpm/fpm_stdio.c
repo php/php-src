@@ -126,6 +126,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	struct fpm_event_s *event;
 	int fifo_in = 1, fifo_out = 1;
 	int in_buf = 0;
+	int read_fail = 0;
 	int res;
 	struct zlog_stream stream;
 
@@ -146,7 +147,6 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	zlog_stream_set_wrapping(&stream, ZLOG_TRUE);
 	zlog_stream_set_msg_prefix(&stream, "[pool %s] child %d said into %s: ",
 			child->wp->config->name, (int) child->pid, is_stdout ? "stdout" : "stderr");
-	zlog_stream_set_msg_suffix(&stream, NULL, ", pipe is closed");
 	zlog_stream_set_msg_quoting(&stream, ZLOG_TRUE);
 
 	while (fifo_in || fifo_out) {
@@ -154,23 +154,9 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 			res = read(fd, buf + in_buf, max_buf_size - 1 - in_buf);
 			if (res <= 0) { /* no data */
 				fifo_in = 0;
-				if (res < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-					/* just no more data ready */
-				} else { /* error or pipe is closed */
-
-					if (res < 0) { /* error */
-						zlog(ZLOG_SYSERROR, "unable to read what child say");
-					}
-
-					fpm_event_del(event);
-
-					if (is_stdout) {
-						close(child->fd_stdout);
-						child->fd_stdout = -1;
-					} else {
-						close(child->fd_stderr);
-						child->fd_stderr = -1;
-					}
+				if (res == 0 || (errno != EAGAIN && errno != EWOULDBLOCK)) {
+					/* pipe is closed or error */
+					read_fail = (res < 0) ? res : 1;
 				}
 			} else {
 				in_buf += res;
@@ -202,7 +188,26 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 			}
 		}
 	}
-	zlog_stream_close(&stream);
+
+	if (read_fail) {
+		zlog_stream_set_msg_suffix(&stream, NULL, ", pipe is closed");
+		zlog_stream_close(&stream);
+		if (read_fail < 0) {
+			zlog(ZLOG_SYSERROR, "unable to read what child say");
+		}
+
+		fpm_event_del(event);
+
+		if (is_stdout) {
+			close(child->fd_stdout);
+			child->fd_stdout = -1;
+		} else {
+			close(child->fd_stderr);
+			child->fd_stderr = -1;
+		}
+	} else {
+		zlog_stream_close(&stream);
+	}
 }
 /* }}} */
 
@@ -292,7 +297,7 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 
 #ifdef HAVE_SYSLOG_H
 	if (!strcasecmp(fpm_global_config.error_log, "syslog")) {
-		php_openlog(fpm_global_config.syslog_ident, LOG_PID | LOG_CONS, fpm_global_config.syslog_facility);
+		openlog(fpm_global_config.syslog_ident, LOG_PID | LOG_CONS, fpm_global_config.syslog_facility);
 		fpm_globals.error_log_fd = ZLOG_SYSLOG;
 		if (fpm_use_error_log()) {
 			zlog_set_fd(fpm_globals.error_log_fd);
