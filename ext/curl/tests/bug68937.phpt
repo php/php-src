@@ -2,7 +2,6 @@
 Bug # #68937 (Segfault in curl_multi_exec)
 --SKIPIF--
 <?php 
-if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
 include 'skipif.inc';
 ?>
 --FILE--

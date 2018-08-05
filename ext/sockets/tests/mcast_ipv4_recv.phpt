@@ -5,6 +5,7 @@ Multicast support: IPv4 receive options
 if (!extension_loaded('sockets')) {
     die('skip sockets extension not available.');
 }
+if (getenv('SKIP_ONLINE_TESTS')) die('skip online test');
 $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 $br = socket_bind($s, '0.0.0.0', 3000);
 $so = socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
