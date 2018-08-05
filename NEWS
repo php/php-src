@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #76755 (setcookie does not accept "double" type for expire time).
     (Laruence)
+  . Fixed bug #76674 (improve array_* failure messages exposing what was passed
+    instead of an array). (carusogabriel)
 
 16 Aug 2018, PHP 7.3.0beta2
 

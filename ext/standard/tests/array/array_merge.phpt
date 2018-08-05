@@ -749,14 +749,14 @@ array(7) {
 Warning: array_merge() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: array_merge(): Argument #1 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_merge(): Argument #3 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
 Notice: Undefined variable: arr4 in %s on line %d
 
-Warning: array_merge(): Argument #3 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 Done
