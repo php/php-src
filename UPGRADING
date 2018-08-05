@@ -177,6 +177,8 @@ Core:
     of generating a fatal error. Currently this only affects compilation errors
     that may be thrown by token_get_all() in TOKEN_PARSE mode, but more errors
     may be converted in the future.
+  . Trailing commas in function and method calls are now allowed.
+    (RFC: https://wiki.php.net/rfc/trailing-comma-function-calls)
 
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.
