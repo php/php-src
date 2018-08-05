@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.2.10
 
+- gettext:
+  . Fixed bug #76517 (incorrect restoring of LDFLAGS). (sji)
+
 - mbstring:
   . Fixed bug #76704 (mb_detect_order return value varies based on argument
     type). (cmb)
