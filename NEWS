@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - zlib:
   . Fixed bug #65988 (Zlib version check fails when an include/zlib/ style dir
     is passed to the --with-zlib configure option). (Jay Bonci)
+  . Fixed bug #76709 (Minimal required zlib library is 1.2.0.4). (petk)
 
 16 Aug 2018, PHP 7.2.9
 
