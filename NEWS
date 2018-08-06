@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #76595 (phpdbg man page contains outdated information).
     (Kevin Abel)
 
+- zlib:
+  . Fixed bug #65988 (Zlib version check fails when an include/zlib/ style dir
+    is passed to the --with-zlib configure option). (Jay Bonci)
+
 16 Aug 2018, PHP 7.1.21
 
 - Calendar:
