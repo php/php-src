@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(zlib,for ZLIB support,
-[  --with-zlib[=DIR]         Include ZLIB support (requires zlib >= 1.0.9)])
+[  --with-zlib[=DIR]         Include ZLIB support (requires zlib >= 1.2.0.4)])
 
 PHP_ARG_WITH(zlib-dir,if the location of ZLIB install directory is defined,
 [  --with-zlib-dir=<DIR>   Define the location of zlib install directory], no, no)
@@ -33,7 +33,7 @@ if test "$PHP_ZLIB" != "no" || test "$PHP_ZLIB_DIR" != "no"; then
   fi
   
   if test -z "$ZLIB_DIR"; then
-    AC_MSG_ERROR(Cannot find libz)
+    AC_MSG_ERROR(Cannot find zlib)
   fi
 
   case $ZLIB_DIR in
@@ -45,7 +45,7 @@ if test "$PHP_ZLIB" != "no" || test "$PHP_ZLIB_DIR" != "no"; then
   ZLIB_VERSION=`$EGREP "define ZLIB_VERSION" $ZLIB_INCDIR/zlib.h | $SED -e 's/[[^0-9\.]]//g'`
   AC_MSG_RESULT([$ZLIB_VERSION])
   if test `echo $ZLIB_VERSION | $SED -e 's/[[^0-9]]/ /g' | $AWK '{print $1*1000000 + $2*10000 + $3*100 + $4}'` -lt 1020004; then
-    AC_MSG_ERROR([libz version greater or equal to 1.2.0.4 required])
+    AC_MSG_ERROR([zlib version greater or equal to 1.2.0.4 required])
   fi
 
   PHP_CHECK_LIBRARY(z, gzgets, [
