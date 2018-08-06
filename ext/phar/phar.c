@@ -1850,27 +1850,24 @@ static int phar_analyze_path(const char *fname, const char *ext, size_t ext_len,
 /* check for ".phar" in extension */
 static int phar_check_str(const char *fname, const char *ext_str, size_t ext_len, int executable, int for_create) /* {{{ */
 {
-	char test[51];
 	const char *pos;
 
 	if (ext_len >= 50) {
 		return FAILURE;
 	}
-
 	if (executable == 1) {
-		/* copy "." as well */
-		strlcpy(test, ext_str, ext_len + 1);
-
 		/* executable phars must contain ".phar" as a valid extension (phar://.pharmy/oops is invalid) */
 		/* (phar://hi/there/.phar/oops is also invalid) */
-		pos = strstr(test, ".phar");
+		pos = strstr(ext_str, ".phar");
 
-		if (pos && (*(pos - 1) != '/')
-				&& (pos += 5) && (*pos == '\0' || *pos == '/' || *pos == '.')) {
-			return phar_analyze_path(fname, ext_str, ext_len, for_create);
-		} else {
+		if (!pos
+			|| pos != ext_str && (*(pos - 1) == '/')
+			|| (ext_len - (pos - ext_str)) < 5
+			|| !(pos += 5)
+			|| !(*pos == '\0' || *pos == '/' || *pos == '.')) {
 			return FAILURE;
 		}
+		return phar_analyze_path(fname, ext_str, ext_len, for_create);
 	}
 
 	/* data phars need only contain a single non-"." to be valid */
