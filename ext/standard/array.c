@@ -4113,6 +4113,9 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 			prop = Z_OBJ_HANDLER_P(data, read_property)(data, name, BP_VAR_R, NULL, rv);
 			if (prop) {
 				ZVAL_DEREF(prop);
+				if (prop != rv) {
+					Z_TRY_ADDREF_P(prop);
+				}
 			}
 		}
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
