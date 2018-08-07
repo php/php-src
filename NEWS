@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug #76747 (Opcache treats path containing "test.pharma.tld" as a phar
     file). (Laruence)
 
+- SimpleXML:
+  . Fixed bug #76712 (Assignment of empty string creates extraneous text node).
+    (cmb)
+
 - SPL:
   . Fixed bug #68825 (Exception in DirectoryIterator::getLinkTarget()). (cmb)
   . Fixed bug #68175 (RegexIterator pregFlags are NULL instead of 0). (Tim
