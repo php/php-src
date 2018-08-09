@@ -1013,6 +1013,7 @@ static const php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "ice", "x-conference/x-cooltalk" },
 	{ "map", "application/json" },
 	{ "jsm", "application/javascript" },
+	{ "wasm", "application/wasm" },
 	{ NULL, NULL }
 };
 
