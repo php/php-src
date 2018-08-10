@@ -1996,7 +1996,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCG(counted) = 1;
 	}
 
-	/* Revalidate acessibility of cached file */
+	/* Revalidate accessibility of cached file */
 	if (EXPECTED(persistent_script != NULL) &&
 	    UNEXPECTED(ZCG(accel_directives).validate_permission) &&
 	    file_handle->type == ZEND_HANDLE_FILENAME &&

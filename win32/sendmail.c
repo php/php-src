@@ -5,7 +5,7 @@
  *  has been removed (MIME and file attachments).  This code was
  *  modified from code based on code written by Jarle Aase.
  *
- *  This class is based on the original code by Jarle Aase, see bellow:
+ *  This class is based on the original code by Jarle Aase, see below:
  *  wSendmail.cpp  It has been striped of some functionality to match
  *  the requirements of phpfi.
  *
@@ -48,7 +48,7 @@
 
 /* '*error_message' has to be passed around from php_mail() */
 #define SMTP_ERROR_RESPONSE_SPEC	"SMTP server response: %s"
-/* Convinient way to handle error messages from the SMTP server.
+/* Convenient way to handle error messages from the SMTP server.
    response is ecalloc()d in Ack() itself and efree()d here
    because the content is in *error_message now */
 #define SMTP_ERROR_RESPONSE(response)	{ \

@@ -21,7 +21,7 @@
 
 /* The filter API works on the principle of "Bucket-Brigades".  This is
  * partially inspired by the Apache 2 method of doing things, although
- * it is intentially a light-weight implementation.
+ * it is intentionally a light-weight implementation.
  *
  * Each stream can have a chain of filters for reading and another for writing.
  *

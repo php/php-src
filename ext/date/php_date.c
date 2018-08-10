@@ -786,7 +786,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
  *  Wdy, DD Mon YY HH:MM:SS TIMEZONE
  *  There is no hope of having a complete list of timezones.  Universal
  *  Time (GMT), the North American timezones (PST, PDT, MST, MDT, CST,
- *  CDT, EST, EDT) and the +/-hhmm offset specifed in RFC-822 should be supported.
+ *  CDT, EST, EDT) and the +/-hhmm offset specified in RFC-822 should be supported.
  */
 #define DATE_FORMAT_RFC1036  "D, d M y H:i:s O"
 
@@ -3935,7 +3935,7 @@ PHP_FUNCTION(timezone_name_get)
 /* }}} */
 
 /* {{{ proto string timezone_name_from_abbr(string abbr[, int gmtOffset[, int isdst]])
-   Returns the timezone name from abbrevation
+   Returns the timezone name from abbreviation
 */
 PHP_FUNCTION(timezone_name_from_abbr)
 {

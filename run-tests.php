@@ -758,7 +758,7 @@ Options:
                 filenames to generate with <tdir>. If --html is being used and
                 <url> given then the generated links are relative and prefixed
                 with the given url. In general you want to make <sdir> the path
-                to your source files and <tdir> some pach in your web page
+                to your source files and <tdir> some patch in your web page
                 hierarchy with <url> pointing to <tdir>.
 
     --keep-[all|php|skip|clean]

@@ -2279,7 +2279,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #ifdef ZEND_WIN32
 	/* Until the current ini values was setup, the current cp is 65001.
-		If the actual ini vaues are different, some stuff needs to be updated.
+		If the actual ini values are different, some stuff needs to be updated.
 		It concerns at least main_cwd_state and there might be more. As we're
 		still in the startup phase, lets use the chance and reinit the relevant
 		item according to the current codepage. Still, if ini_set() is used

@@ -724,7 +724,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 
 	intern = Z_SPLFILESYSTEM_P(getThis());
 	if (intern->_path) {
-		/* object is alreay initialized */
+		/* object is already initialized */
 		zend_restore_error_handling(&error_handling);
 		php_error_docref(NULL, E_WARNING, "Directory object is already initialized");
 		return;

@@ -1424,7 +1424,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 		}
 	}
 
-	/* check if static properties were destoyed */
+	/* check if static properties were destroyed */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			zend_intenal_class_init_statics(ce);

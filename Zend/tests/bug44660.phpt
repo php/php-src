@@ -1,5 +1,5 @@
 --TEST--
-Bug #44660 (Indexed and reference assignment to propery of non-object don't trigger warning)
+Bug #44660 (Indexed and reference assignment to property of non-object don't trigger warning)
 --FILE--
 <?php
 $s = "hello";

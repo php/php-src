@@ -1917,7 +1917,7 @@ static ZIPARCHIVE_METHOD(statName)
 /* }}} */
 
 /* {{{ proto resource ZipArchive::statIndex(int index[, int flags])
-Returns the zip entry informations using its index */
+Returns the zip entry information using its index */
 static ZIPARCHIVE_METHOD(statIndex)
 {
 	struct zip *intern;
@@ -2713,7 +2713,7 @@ static ZIPARCHIVE_METHOD(unchangeArchive)
 /* {{{ proto bool ZipArchive::extractTo(string pathto[, mixed files])
 Extract one or more file from a zip archive */
 /* TODO:
- * - allow index or array of indeces
+ * - allow index or array of indices
  * - replace path
  * - patterns
  */

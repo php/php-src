@@ -192,7 +192,7 @@ void fpm_children_bury() /* {{{ */
 			snprintf(buf, sizeof(buf), "with code %d", WEXITSTATUS(status));
 
 			/* if it's been killed because of dynamic process management
-			 * don't restart it automaticaly
+			 * don't restart it automatically
 			 */
 			if (child && child->idle_kill) {
 				restart_child = 0;
@@ -213,7 +213,7 @@ void fpm_children_bury() /* {{{ */
 			snprintf(buf, sizeof(buf), "on signal %d (%s%s)", WTERMSIG(status), signame, have_core);
 
 			/* if it's been killed because of dynamic process management
-			 * don't restart it automaticaly
+			 * don't restart it automatically
 			 */
 			if (child && child->idle_kill && WTERMSIG(status) == SIGQUIT) {
 				restart_child = 0;
