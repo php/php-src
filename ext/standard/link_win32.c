@@ -45,7 +45,7 @@
 TODO:
 - Create php_readlink (done), php_link (done) and php_symlink (done) in win32/link.c
 - Expose them (PHPAPI) so extensions developers can use them
-- define link/readlink/symlink to their php_ equivalent and use them in ext/standart/link.c
+- define link/readlink/symlink to their php_ equivalent and use them in ext/standard/link.c
 - this file is then useless and we have a portable link API
 */
 

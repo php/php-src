@@ -27,7 +27,7 @@ class RecursiveCachingIterator extends CachingIterator implements RecursiveItera
 	 * @param it    Iterator to cache
 	 * @param flags Bitmask:
 	 *              - CALL_TOSTRING   (whether to call __toString() for every element)
-	 *              - CATCH_GET_CHILD (whether to catch exceptions when trying to get childs)
+	 *              - CATCH_GET_CHILD (whether to catch exceptions when trying to get children)
 	 */
 	function __construct(RecursiveIterator $it, $flags = self::CALL_TOSTRING)
 	{

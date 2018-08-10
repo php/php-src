@@ -364,7 +364,7 @@ php_stream_ops my_ops = {
     "Strange MySQL example"
 }
 
-Thats it!
+That's it!
 
 Take a look at the STDIO implementation in streams.c for more information
 about how these operations work.

@@ -218,7 +218,7 @@ function change_file_perms($file_path,
      If imporper $content type is specified, file is created as empty
    $size = size of the fill in terms of kilobyte, i.e size of the file.
            if $flag is specified as "byte", then then given size is taken in bytes
-   $flag = specifiy if size has to be treated as no of total bytes or
+   $flag = specify if size has to be treated as no of total bytes or
            multiple of KB.
      "kilobytes" = take size in terms of multiple of KB
      "byte" = take size in terms of bytes

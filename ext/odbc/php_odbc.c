@@ -2247,7 +2247,7 @@ PHP_FUNCTION(odbc_result)
 			efree(field);
 			RETURN_NULL();
 		}
-		/* chop the trailing \0 by outputing only 4095 bytes */
+		/* chop the trailing \0 by outputting only 4095 bytes */
 		PHPWRITE(field,(rc == SQL_SUCCESS_WITH_INFO) ? 4095 : result->values[field_ind].vallen);
 
 		if (rc == SQL_SUCCESS) { /* no more data avail */
@@ -3043,7 +3043,7 @@ PHP_FUNCTION(odbc_errormsg)
    persistent connections. I think that SetStmtOption is of little use, since most
    of those can only be specified before preparing/executing statements.
    On the other hand, they can be made connection wide default through SetConnectOption
-   - but will be overidden by calls to SetStmtOption() in odbc_prepare/odbc_do
+   - but will be overridden by calls to SetStmtOption() in odbc_prepare/odbc_do
 */
 PHP_FUNCTION(odbc_setoption)
 {
@@ -3580,7 +3580,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ proto resource odbc_procedures(resource connection_id [, string qualifier, string owner, string name])
-   Returns a result identifier containg the list of procedure names in a datasource */
+   Returns a result identifier containing the list of procedure names in a datasource */
 PHP_FUNCTION(odbc_procedures)
 {
 	zval *pv_conn;

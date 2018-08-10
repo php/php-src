@@ -1954,7 +1954,7 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 			           def->opcode == ZEND_JMPNZ_EX ||
 			           def->opcode == ZEND_BOOL ||
 			           def->opcode == ZEND_BOOL_NOT) {
-				/* result IS_BOOL, it does't have to be destroyed */
+				/* result IS_BOOL, it doesn't have to be destroyed */
 				break;
 			} else if (def->opcode == ZEND_DECLARE_CLASS ||
 			           def->opcode == ZEND_DECLARE_INHERITED_CLASS ||

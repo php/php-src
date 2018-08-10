@@ -302,7 +302,7 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 #define ZEND_ACC_GENERATOR               (1 << 23) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* Function with varable number of arguments              |     |     |     */
+/* Function with variable number of arguments             |     |     |     */
 #define ZEND_ACC_VARIADIC                (1 << 24) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Immutable op_array (lazy loading)                      |     |     |     */

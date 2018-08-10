@@ -25,7 +25,7 @@
 #include "zend_smart_str.h"
 #include "zend_operators.h"
 
-static void overriden_ptr_dtor(zval *zv) /* {{{ */
+static void overridden_ptr_dtor(zval *zv) /* {{{ */
 {
 	efree_size(Z_PTR_P(zv), sizeof(zend_function));
 }
@@ -1172,7 +1172,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 }
 /* }}} */
 
-static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_string *key, zend_function *fn, HashTable **overriden) /* {{{ */
+static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_string *key, zend_function *fn, HashTable **overridden) /* {{{ */
 {
 	zend_function *existing_fn = NULL;
 	zend_function *new_fn;
@@ -1187,9 +1187,9 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 
 		if (existing_fn->common.scope == ce) {
 			/* members from the current class override trait methods */
-			/* use temporary *overriden HashTable to detect hidden conflict */
-			if (*overriden) {
-				if ((existing_fn = zend_hash_find_ptr(*overriden, key)) != NULL) {
+			/* use temporary *overridden HashTable to detect hidden conflict */
+			if (*overridden) {
+				if ((existing_fn = zend_hash_find_ptr(*overridden, key)) != NULL) {
 					if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the trait method is compatible with previosly declared abstract method */
 						if (UNEXPECTED(!zend_traits_method_compatibility_check(fn, existing_fn))) {
@@ -1209,10 +1209,10 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 					}
 				}
 			} else {
-				ALLOC_HASHTABLE(*overriden);
-				zend_hash_init_ex(*overriden, 8, NULL, overriden_ptr_dtor, 0, 0);
+				ALLOC_HASHTABLE(*overridden);
+				zend_hash_init_ex(*overridden, 8, NULL, overridden_ptr_dtor, 0, 0);
 			}
-			zend_hash_update_mem(*overriden, key, fn, sizeof(zend_function));
+			zend_hash_update_mem(*overridden, key, fn, sizeof(zend_function));
 			return;
 		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT &&
 				(existing_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0) {
@@ -1274,7 +1274,7 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 }
 /* }}} */
 
-static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable **overriden, HashTable *exclude_table, zend_class_entry **aliases) /* {{{ */
+static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable **overridden, HashTable *exclude_table, zend_class_entry **aliases) /* {{{ */
 {
 	zend_trait_alias  *alias, **alias_ptr;
 	zend_string       *lcname;
@@ -1300,7 +1300,7 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 				}
 
 				lcname = zend_string_tolower(alias->alias);
-				zend_add_trait_method(ce, ZSTR_VAL(alias->alias), lcname, &fn_copy, overriden);
+				zend_add_trait_method(ce, ZSTR_VAL(alias->alias), lcname, &fn_copy, overridden);
 				zend_string_release_ex(lcname, 0);
 
 				/* Record the trait from which this alias was resolved. */
@@ -1352,7 +1352,7 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 			}
 		}
 
-		zend_add_trait_method(ce, ZSTR_VAL(fn->common.function_name), fnname, &fn_copy, overriden);
+		zend_add_trait_method(ce, ZSTR_VAL(fn->common.function_name), fnname, &fn_copy, overridden);
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
@@ -1496,7 +1496,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, HashTable **
 static void zend_do_traits_method_binding(zend_class_entry *ce, HashTable **exclude_tables, zend_class_entry **aliases) /* {{{ */
 {
 	uint32_t i;
-	HashTable *overriden = NULL;
+	HashTable *overridden = NULL;
 	zend_string *key;
 	zend_function *fn;
 
@@ -1504,7 +1504,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, HashTable **excl
 		for (i = 0; i < ce->num_traits; i++) {
 			/* copies functions, applies defined aliasing, and excludes unused trait methods */
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
-				zend_traits_copy_functions(key, fn, ce, &overriden, exclude_tables[i], aliases);
+				zend_traits_copy_functions(key, fn, ce, &overridden, exclude_tables[i], aliases);
 			} ZEND_HASH_FOREACH_END();
 
 			if (exclude_tables[i]) {
@@ -1516,7 +1516,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, HashTable **excl
 	} else {
 		for (i = 0; i < ce->num_traits; i++) {
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
-				zend_traits_copy_functions(key, fn, ce, &overriden, NULL, aliases);
+				zend_traits_copy_functions(key, fn, ce, &overridden, NULL, aliases);
 			} ZEND_HASH_FOREACH_END();
 		}
 	}
@@ -1525,9 +1525,9 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, HashTable **excl
 		zend_fixup_trait_method(fn, ce);
 	} ZEND_HASH_FOREACH_END();
 
-	if (overriden) {
-		zend_hash_destroy(overriden);
-		FREE_HASHTABLE(overriden);
+	if (overridden) {
+		zend_hash_destroy(overridden);
+		FREE_HASHTABLE(overridden);
 	}
 }
 /* }}} */

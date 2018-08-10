@@ -31,7 +31,7 @@
  * Watch elements are either simple, recursive or implicit (PHPDBG_WATCH_* flags)
  * Simple means that a particular watchpoint was explicitly defined
  * Recursive watch elements are created recursively (recursive root flag is to distinguish the root element easily from its children recursive elements)
- * Implicit  watch elements are implicitely created on all ancestors of simple or recursive watch elements
+ * Implicit  watch elements are implicitly created on all ancestors of simple or recursive watch elements
  * Recursive and (simple or implicit) watch elements are mutually exclusive
  * Array/Object to distinguish watch elements on arrays
  *

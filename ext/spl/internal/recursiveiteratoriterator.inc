@@ -42,7 +42,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	 * @param it     RecursiveIterator to iterate
 	 * @param mode   Operation mode (one of):
 	 *               - LEAVES_ONLY only show leaves
-	 *               - SELF_FIRST  show parents prior to their childs
+	 *               - SELF_FIRST  show parents prior to their children
 	 *               - CHILD_FIRST show all children prior to their parent
 	 * @param flags  Control flags, zero or any combination of the following
 	 *               (since PHP 5.1).

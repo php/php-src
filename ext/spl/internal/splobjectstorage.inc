@@ -146,7 +146,7 @@ class SplObjectStorage implements Iterator, Countable, ArrayAccess
 		$this->attach($obj, $inf);
 	}
 
-	/** @param $obj Exising object to look for
+	/** @param $obj Existing object to look for
 	 * @return associative information stored with object
 	 * @throw UnexpectedValueException if Object $obj is not contained in
 	 *                                 storage
@@ -167,7 +167,7 @@ class SplObjectStorage implements Iterator, Countable, ArrayAccess
 		throw new UnexpectedValueException('Object not found');
 	}
 
-	/** @param $obj Exising object to look for
+	/** @param $obj Existing object to look for
 	 * @return associative information stored with object
 	 * @since 5.3.0
 	 */

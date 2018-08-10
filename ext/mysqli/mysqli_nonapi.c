@@ -155,7 +155,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 
 			mysql->hash_key = hash_key;
 
-			/* check if we can reuse exisiting connection ... */
+			/* check if we can reuse existing connection ... */
 			if ((le = zend_hash_find_ptr(&EG(persistent_list), hash_key)) != NULL) {
 				if (le->type == php_le_pmysqli()) {
 					plist = (mysqli_plist_entry *) le->ptr;

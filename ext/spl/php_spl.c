@@ -387,7 +387,7 @@ static void autoload_func_info_dtor(zval *element)
 }
 
 /* {{{ proto void spl_autoload_call(string class_name)
- Try all registerd autoload function to load the requested class */
+ Try all registered autoload function to load the requested class */
 PHP_FUNCTION(spl_autoload_call)
 {
 	zval *class_name, retval;

@@ -4336,7 +4336,7 @@ static int _adddynproperty(zval *ptr, int num_args, va_list args, zend_hash_key 
 	zval *retval = va_arg(args, zval*);
 
 	/* under some circumstances, the properties hash table may contain numeric
-	 * properties (e.g. when casting from array). This is a WONT FIX bug, at
+	 * properties (e.g. when casting from array). This is a WON'T FIX bug, at
 	 * least for the moment. Ignore these */
 	if (hash_key->key == NULL) {
 		return 0;

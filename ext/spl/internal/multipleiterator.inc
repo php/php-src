@@ -33,7 +33,7 @@ class MultipleIterator implements Iterator
 	/** keys are created from sub iterators position */
 	const MIT_KEYS_NUMERIC  = 0;
 
-	/** keys are created from sub iterators associated infromation */
+	/** keys are created from sub iterators associated information */
 	const MIT_KEYS_ASSOC  = 2;
 
 	/** Construct a new empty MultipleIterator

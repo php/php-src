@@ -1055,7 +1055,7 @@ static int _php_pgsql_detect_identifier_escape(const char *identifier, size_t le
 	if (len <= 2) {
 		return FAILURE;
 	}
-	/* Detect double qoutes */
+	/* Detect double quotes */
 	if (identifier[0] == '"' && identifier[len-1] == '"') {
 		size_t i;
 

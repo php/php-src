@@ -8,7 +8,7 @@ function foo1() {
 		return true;
 	} finally {
 		try {
-			throw new Exception("catched");
+			throw new Exception("caught");
 		} catch (Exception $e) {
 		}
 	}
@@ -25,11 +25,11 @@ try {
 function foo2() {
 	try  {
 		try {
-			throw new Exception("catched");
+			throw new Exception("caught");
 			return true;
 		} finally {
 			try {
-				throw new Exception("catched");
+				throw new Exception("caught");
 			} catch (Exception $e) {
 			}
 		}
@@ -42,7 +42,7 @@ var_dump($foo);
 
 function foo3() {
 	try {
-		throw new Exception("not catched");
+		throw new Exception("not caught");
 		return true;
 	} finally {
 		try {
@@ -57,7 +57,7 @@ $bar = foo3();
 string(9) "not catch"
 NULL
 
-Fatal error: Uncaught Exception: not catched in %sbug65784.php:42
+Fatal error: Uncaught Exception: not caught in %sbug65784.php:42
 Stack trace:
 #0 %sbug65784.php(52): foo3()
 #1 {main}

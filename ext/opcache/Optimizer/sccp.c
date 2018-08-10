@@ -2045,7 +2045,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 		if (ssa_op->result_def == var_num) {
 			if (ssa_op->op1_def >= 0
 					|| ssa_op->op2_def >= 0) {
-				/* we cannot remove instruction that defines other varibales */
+				/* we cannot remove instruction that defines other variables */
 				return 0;
 			} else if (opline->opcode == ZEND_JMPZ_EX
 					|| opline->opcode == ZEND_JMPNZ_EX

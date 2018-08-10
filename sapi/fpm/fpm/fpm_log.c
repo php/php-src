@@ -219,7 +219,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 						}
 
 					} else {
-						zlog(ZLOG_WARNING, "only 'seconds', 'mili', 'miliseconds', 'micro' or 'microseconds' are allowed as a modifier for %%%c ('%s')", *s, format);
+						zlog(ZLOG_WARNING, "only 'seconds', 'mili', 'milliseconds', 'micro' or 'microseconds' are allowed as a modifier for %%%c ('%s')", *s, format);
 						return -1;
 					}
 					format[0] = '\0';

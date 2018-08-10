@@ -924,7 +924,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     Enable refcount display when hitting watchpoints" CR CR
 
 "     $P S b 4 off" CR
-"     Temporarily disable breakpoint 4.  This can be subsequently reenabled by a **S b 4 on**." CR
+"     Temporarily disable breakpoint 4.  This can be subsequently re-enabled by a **S b 4 on**." CR
 //*********** check oplog syntax
 },
 

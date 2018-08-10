@@ -17,7 +17,7 @@
  *
  * Passes the RecursiveIterator interface to the inner Iterator and provides
  * the same functionality as FilterIterator. This allows you to skip parents
- * and all their childs before loading them all. You need to care about
+ * and all their children before loading them all. You need to care about
  * function getChildren() because it may not always suit your needs. The
  * builtin behavior uses reflection to return a new instance of the exact same
  * class it is called from. That is you extend RecursiveFilterIterator and
@@ -25,7 +25,7 @@
  * this does not transport any state or control information of your accept()
  * implementation to the new instance. To overcome this problem you might
  * need to overwrite getChildren(), call this implementation and pass the
- * control vaules manually.
+ * control values manually.
  */
 abstract class RecursiveFilterIterator extends FilterIterator implements RecursiveIterator
 {
