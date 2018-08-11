@@ -1861,7 +1861,7 @@ static int phar_check_str(const char *fname, const char *ext_str, size_t ext_len
 		pos = strstr(ext_str, ".phar");
 
 		if (!pos
-			|| pos != ext_str && (*(pos - 1) == '/')
+			|| (pos != ext_str && (*(pos - 1) == '/'))
 			|| (ext_len - (pos - ext_str)) < 5
 			|| !(pos += 5)
 			|| !(*pos == '\0' || *pos == '/' || *pos == '.')) {
