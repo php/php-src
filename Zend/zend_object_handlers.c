@@ -1515,14 +1515,11 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		return 1; /* different classes */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
-		zval *p1, *p2, *end;
+		zend_property_info *info;
 
 		if (!zobj1->ce->default_properties_count) {
 			return 0;
 		}
-		p1 = zobj1->properties_table;
-		p2 = zobj2->properties_table;
-		end = p1 + zobj1->ce->default_properties_count;
 
 		/* It's enough to protect only one of the objects.
 		 * The second one may be referenced from the first and this may cause
@@ -1533,7 +1530,15 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
 		}
 		Z_PROTECT_RECURSION_P(o1);
-		do {
+
+		ZEND_HASH_FOREACH_PTR(&zobj1->ce->properties_info, info) {
+			zval *p1 = OBJ_PROP(zobj1, info->offset);
+			zval *p2 = OBJ_PROP(zobj2, info->offset);
+
+			if (info->flags & ZEND_ACC_STATIC) {
+				continue;
+			}
+
 			if (Z_TYPE_P(p1) != IS_UNDEF) {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
 					zval result;
@@ -1556,9 +1561,8 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 					return 1;
 				}
 			}
-			p1++;
-			p2++;
-		} while (p1 != end);
+		} ZEND_HASH_FOREACH_END();
+
 		Z_UNPROTECT_RECURSION_P(o1);
 		return 0;
 	} else {
