@@ -1488,6 +1488,11 @@ PHP_FUNCTION(strtotime)
 		RETURN_FALSE;
 	}
 
+	while (isspace(*times)) {
+		times++;
+		time_len--;
+	}
+
 	tzi = get_timezone_info();
 
 	now = timelib_time_ctor();
