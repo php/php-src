@@ -1704,6 +1704,15 @@ static PHP_FUNCTION(session_set_cookie_params)
 		zend_string *key;
 		zval *value;
 
+		if (path) {
+			path = NULL;
+			domain = NULL;
+			secure_null = 1;
+			httponly_null = 1;
+			php_error_docref(NULL, E_WARNING, "Cannot pass arguments after the options array");
+			RETURN_FALSE;
+		}
+
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(lifetime_or_options), key, value) {
 			if (key) {
 				ZVAL_DEREF(value);

@@ -36,6 +36,10 @@ var_dump(ini_get("session.cookie_lifetime"));
 var_dump(session_set_cookie_params(["lifetime" => 42]));
 var_dump(ini_get("session.cookie_lifetime"));
 
+var_dump(ini_get("session.cookie_path"));
+var_dump(session_set_cookie_params(["path" => "newpath/"], "arg after options array"));
+var_dump(ini_get("session.cookie_path"));
+
 echo "Done";
 ob_end_flush();
 ?>
@@ -57,4 +61,9 @@ string(6) "please"
 string(1) "0"
 bool(true)
 string(2) "42"
+string(1) "/"
+
+Warning: session_set_cookie_params(): Cannot pass arguments after the options array in %s
+bool(false)
+string(1) "/"
 Done
