@@ -96,8 +96,8 @@ static inline void zend_sort_2(void *a, void *b, compare_func_t cmp, swap_func_t
 /* }}} */
 
 static inline void zend_sort_3(void *a, void *b, void *c, compare_func_t cmp, swap_func_t swp) /* {{{ */ {
-	if (!(cmp(a, b) > 0)) {
-		if (!(cmp(b, c) > 0)) {
+	if (cmp(a, b) <= 0) {
+		if (cmp(b, c) <= 0) {
 			return;
 		}
 		swp(b, c);
@@ -106,7 +106,7 @@ static inline void zend_sort_3(void *a, void *b, void *c, compare_func_t cmp, sw
 		}
 		return;
 	}
-	if (!(cmp(c, b) > 0)) {
+	if (cmp(c, b) <= 0) {
 		swp(a, c);
 		return;
 	}
@@ -180,12 +180,12 @@ ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_fun
 				char *sentry = start + (6 * siz);
 				for (i = start + siz; i < sentry; i += siz) {
 					j = i - siz;
-					if (!(cmp(j, i) > 0)) {
+					if (cmp(j, i) <= 0) {
 						continue;
 					}
 					while (j != start) {
 						j -= siz;
-						if (!(cmp(j, i) > 0)) {
+						if (cmp(j, i) <= 0) {
 							j += siz;
 							break;
 						}
@@ -196,14 +196,14 @@ ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_fun
 				}
 				for (i = sentry; i < end; i += siz) {
 					j = i - siz;
-					if (!(cmp(j, i) > 0)) {
+					if (cmp(j, i) <= 0) {
 						continue;
 					}
 					do {
 						j -= siz2;
-						if (!(cmp(j, i) > 0)) {
+						if (cmp(j, i) <= 0) {
 							j += siz;
-							if (!(cmp(j, i) > 0)) {
+							if (cmp(j, i) <= 0) {
 								j += siz;
 							}
 							break;
