@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #76595 (phpdbg man page contains outdated information).
     (Kevin Abel)
 
+- Reflection:
+  . Fix arginfo for ReflectionClass::newInstance(), ReflectionFunction::invoke(), and ReflectionMethod::invoke()
+    (tandre)
+
 - Standard:
   . Fixed bug #76688 (Disallow excessive parameters after options array).
     (pmmaga)
