@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bug #76713 (Segmentation fault caused by property corruption).
     (Laruence)
 
+- Tidy:
+  . Fixed arginfo for tidy::__construct(). (Tyson Andre)
+
 - zlib:
   . Fixed bug #65988 (Zlib version check fails when an include/zlib/ style dir
     is passed to the --with-zlib configure option). (Jay Bonci)
