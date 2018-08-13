@@ -1238,38 +1238,38 @@ PHP_FUNCTION(image_type_to_extension)
 
 	switch (image_type) {
 		case IMAGE_FILETYPE_GIF:
-			RETURN_STRING(".gif" + !inc_dot);
+			RETURN_STRING(&".gif"[!inc_dot]);
 		case IMAGE_FILETYPE_JPEG:
-			RETURN_STRING(".jpeg" + !inc_dot);
+			RETURN_STRING(&".jpeg"[!inc_dot]);
 		case IMAGE_FILETYPE_PNG:
-			RETURN_STRING(".png" + !inc_dot);
+			RETURN_STRING(&".png"[!inc_dot]);
 		case IMAGE_FILETYPE_SWF:
 		case IMAGE_FILETYPE_SWC:
-			RETURN_STRING(".swf" + !inc_dot);
+			RETURN_STRING(&".swf"[!inc_dot]);
 		case IMAGE_FILETYPE_PSD:
-			RETURN_STRING(".psd" + !inc_dot);
+			RETURN_STRING(&".psd"[!inc_dot]);
 		case IMAGE_FILETYPE_BMP:
 		case IMAGE_FILETYPE_WBMP:
-			RETURN_STRING(".bmp" + !inc_dot);
+			RETURN_STRING(&".bmp"[!inc_dot]);
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
-			RETURN_STRING(".tiff" + !inc_dot);
+			RETURN_STRING(&".tiff"[!inc_dot]);
 		case IMAGE_FILETYPE_IFF:
-			RETURN_STRING(".iff" + !inc_dot);
+			RETURN_STRING(&".iff"[!inc_dot]);
 		case IMAGE_FILETYPE_JPC:
-			RETURN_STRING(".jpc" + !inc_dot);
+			RETURN_STRING(&".jpc"[!inc_dot]);
 		case IMAGE_FILETYPE_JP2:
-			RETURN_STRING(".jp2" + !inc_dot);
+			RETURN_STRING(&".jp2"[!inc_dot]);
 		case IMAGE_FILETYPE_JPX:
-			RETURN_STRING(".jpx" + !inc_dot);
+			RETURN_STRING(&".jpx"[!inc_dot]);
 		case IMAGE_FILETYPE_JB2:
-			RETURN_STRING(".jb2" + !inc_dot);
+			RETURN_STRING(&".jb2"[!inc_dot]);
 		case IMAGE_FILETYPE_XBM:
-			RETURN_STRING(".xbm" + !inc_dot);
+			RETURN_STRING(&".xbm"[!inc_dot]);
 		case IMAGE_FILETYPE_ICO:
-			RETURN_STRING(".ico" + !inc_dot);
+			RETURN_STRING(&".ico"[!inc_dot]);
 		case IMAGE_FILETYPE_WEBP:
-			RETURN_STRING(".webp" + !inc_dot);
+			RETURN_STRING(&".webp"[!inc_dot]);
 	}
 
 	RETURN_FALSE;
