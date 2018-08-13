@@ -73,7 +73,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_bzerror, 0)
 	ZEND_ARG_INFO(0, bz)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bzcompress, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bzcompress, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, blocksize)
 	ZEND_ARG_INFO(0, workfactor)

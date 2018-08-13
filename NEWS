@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #76030 (RE2C_FLAGS rarely honoured) (Cristian Rodríguez)
 
+- Bz2:
+  . Fixed arginfo for bzcompress. (Tyson Andre)
+
 - gettext:
   . Fixed bug #76517 (incorrect restoring of LDFLAGS). (sji)
 
