@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - Bz2:
   . Fixed arginfo for bzcompress. (Tyson Andre)
 
+- DOM:
+  . Reverted fix for bug #76285 (DOMDocument::formatOutput attribute sometimes
+    ignored). (cmb)
+
 - gettext:
   . Fixed bug #76517 (incorrect restoring of LDFLAGS). (sji)
 
