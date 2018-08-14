@@ -2193,11 +2193,7 @@ PHP_FUNCTION(dom_document_save_html)
 		}
 		if (!outBuf->error) {
 			xmlOutputBufferFlush(outBuf);
-#ifdef LIBXML2_NEW_BUFFER
 			mem = (xmlChar*) xmlBufferContent(buf);
-#else
-			mem = (xmlChar*) outBuf->buffer->content;
-#endif
 			if (!mem) {
 				RETVAL_FALSE;
 			} else {
