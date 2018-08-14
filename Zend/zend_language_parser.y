@@ -579,6 +579,14 @@ case_list:
 		/* empty */ { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
 	|	case_list T_CASE expr case_separator inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
+	|	case_list T_CASE T_IS_EQUAL expr case_separator inner_statement_list
+			{ zend_ast *case_ast = zend_ast_create(ZEND_AST_SWITCH_CASE, $4, $6);
+		      case_ast->attr = ZEND_IS_EQUAL;
+			  $$ = zend_ast_list_add($1, case_ast); }
+	|	case_list T_CASE T_IS_IDENTICAL expr case_separator inner_statement_list
+			{ zend_ast *case_ast = zend_ast_create(ZEND_AST_SWITCH_CASE, $4, $6);
+		      case_ast->attr = ZEND_IS_IDENTICAL;
+			  $$ = zend_ast_list_add($1, case_ast); }
 	|	case_list T_DEFAULT case_separator inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $4)); }
 ;
