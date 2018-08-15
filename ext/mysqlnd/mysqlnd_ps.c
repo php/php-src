@@ -854,10 +854,11 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 					  stmt->result_bind[i].zv has been already destructed
 					  in result->unbuf->m.free_last_data()
 					*/
-					if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
-						meta->fields[i].max_length = Z_STRLEN_P(data);
+					if (zend_try_assign_ex(resultzv, data, 0) == SUCCESS) {
+						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
+							meta->fields[i].max_length = Z_STRLEN_P(data);
+						}
 					}
-					zend_try_assign_ex(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
 					ZVAL_NULL(data);
 				}
@@ -1024,7 +1025,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 			/* If no result bind, do nothing. We consumed the data */
 			for (i = 0; i < field_count; i++) {
 				zval *resultzv = &stmt->result_bind[i].zv;
-				if (stmt->result_bind[i].bound == TRUE && Z_ISUNDEF_P(resultzv)) {
+				if (stmt->result_bind[i].bound == TRUE) {
 					zval *data = &result->unbuf->last_row_data[i];
 
 					/*
@@ -1035,11 +1036,11 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 								Z_TYPE_P(data), Z_REFCOUNTED(stmt->result_bind[i].zv)?
 							   	Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
 
-					if ((Z_TYPE_P(data) == IS_STRING) &&
-							(meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
-						meta->fields[i].max_length = Z_STRLEN_P(data);
+					if (zend_try_assign_ex(resultzv, data, 0) == SUCCESS) {
+						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
+							meta->fields[i].max_length = Z_STRLEN_P(data);
+						}
 					}
-					zend_try_assign_ex(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
 					ZVAL_NULL(data);
 				}
