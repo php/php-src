@@ -2465,7 +2465,9 @@ return_indirect:
 					if (prop_op_type == IS_CONST) {
 						prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 					} else {
-						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), Z_STR_P(prop_ptr), NULL);
+						zend_string *tmp_str, *prop_name = zval_get_tmp_string(prop_ptr, &tmp_str);
+						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), prop_name, NULL);
+						zend_tmp_string_release(tmp_str);
 					}
 					if (UNEXPECTED(prop_info)) {
 						if ((flags & ZEND_FETCH_DIM_WRITE) && (Z_TYPE_P(ptr) <= IS_FALSE || (Z_ISREF_P(ptr) && Z_TYPE_P(Z_REFVAL_P(ptr)) == IS_NULL))) {
