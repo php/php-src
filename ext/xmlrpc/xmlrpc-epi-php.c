@@ -1375,15 +1375,19 @@ PHP_FUNCTION(xmlrpc_set_type)
 	size_t type_len;
 	XMLRPC_VALUE_TYPE vtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/s", &arg, &type, &type_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &arg, &type, &type_len) == FAILURE) {
 		return;
 	}
 
 	vtype = xmlrpc_str_as_type(type);
 	if (vtype != xmlrpc_none) {
-		if (set_zval_xmlrpc_type(arg, vtype) == SUCCESS) {
+		zval tmp;
+		ZVAL_COPY(&tmp, Z_REFVAL_P(arg));
+		if (set_zval_xmlrpc_type(tmp, vtype) == SUCCESS) {
+			zend_try_assign(arg, &tmp);
 			RETURN_TRUE;
 		}
+		Z_TRY_DELREF(tmp);
 	} else {
 		zend_error(E_WARNING,"invalid type '%s' passed to xmlrpc_set_type()", type);
 	}
