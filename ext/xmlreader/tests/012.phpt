@@ -4,7 +4,6 @@ XMLReader: accessing empty and non existing attributes
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
 <?php 
-/* $Id$ */
 
 $xmlstring =<<<EOF
 <?xml version="1.0" encoding="UTF-8"?>

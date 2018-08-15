@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef PHP_OPENSSL_H
 #define PHP_OPENSSL_H
 /* HAVE_OPENSSL would include SSL MySQL stuff */

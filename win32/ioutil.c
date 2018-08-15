@@ -785,6 +785,38 @@ PW32IO char *realpath(const char *path, char *resolved)
 	return php_win32_ioutil_realpath(path, resolved);
 }/*}}}*/
 
+PW32IO int php_win32_ioutil_symlink_w(const wchar_t *target, const wchar_t *link)
+{/*{{{*/
+	DWORD attr;
+	BOOLEAN res;
+
+	if ((attr = GetFileAttributesW(target)) == INVALID_FILE_ATTRIBUTES) {
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+		return -1;
+	}
+
+	res = CreateSymbolicLinkW(link, target, (attr & FILE_ATTRIBUTE_DIRECTORY ? 1 : 0));
+	if (!res) {
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+		return -1;
+	}
+
+	return 0;
+}/*}}}*/
+
+PW32IO int php_win32_ioutil_link_w(const wchar_t *target, const wchar_t *link)
+{/*{{{*/
+	BOOL res;
+
+	res = CreateHardLinkW(target, link, NULL);
+	if (!res) {
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+		return -1;
+	}
+
+	return 0;
+}/*}}}*/
+
 /*
  * Local variables:
  * tab-width: 4

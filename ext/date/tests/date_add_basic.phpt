@@ -2,8 +2,6 @@
 Test date_add() function : basic functionality 
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
---SKIPIF--
-<?php if (!function_exists('date_add')) echo "skip: date_add() function not found!"; ?>
 --FILE--
 <?php
 date_default_timezone_set('UTC');

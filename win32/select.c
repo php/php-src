@@ -19,8 +19,6 @@
 #include "php.h"
 #include "php_network.h"
 
-/* $Id$ */
-
 /* Win32 select() will only work with sockets, so we roll our own implementation here.
  * - If you supply only sockets, this simply passes through to winsock select().
  * - If you supply file handles, there is no way to distinguish between

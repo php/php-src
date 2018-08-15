@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_interfaces.h"
@@ -1196,7 +1194,6 @@ void zend_register_generator_ce(void) /* {{{ */
 	/* get_iterator has to be assigned *after* implementing the inferface */
 	zend_class_implements(zend_ce_generator, 1, zend_ce_iterator);
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
-	zend_ce_generator->iterator_funcs.funcs = &zend_generator_iterator_functions;
 
 	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_generator_handlers.free_obj = zend_generator_free_storage;

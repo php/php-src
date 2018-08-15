@@ -10,7 +10,6 @@ if (LIBXML_VERSION < 20701) die("skip: libxml2 2.7.1+ required");
 ?>
 --FILE--
 <?php
-/* $Id$ */
 
 $xw = new XMLWriter();
 $xw->openMemory();

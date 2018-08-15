@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -384,10 +382,10 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 
 	if ((p = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member))) != NULL) {
 		switch (has_set_exists) {
-			case 2:
+			case ZEND_PROPERTY_EXISTS:
 				ret = 1;
 				break;
-			case 1: {
+			case ZEND_PROPERTY_NOT_EMPTY: {
 				zval rv;
 				zval *value = mysqli_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
@@ -396,7 +394,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				}
 				break;
 			}
-			case 0:{
+			case ZEND_PROPERTY_ISSET: {
 				zval rv;
 				zval *value = mysqli_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
@@ -657,7 +655,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "num_rows",		sizeof("num_rows") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "type",			sizeof("type") - 1, ZEND_ACC_PUBLIC);
 	mysqli_result_class_entry->get_iterator = php_mysqli_result_get_iterator;
-	mysqli_result_class_entry->iterator_funcs.funcs = &php_mysqli_result_iterator_funcs;
 	zend_class_implements(mysqli_result_class_entry, 1, zend_ce_traversable);
 	zend_hash_add_ptr(&classes, ce->name, &mysqli_result_properties);
 
@@ -983,7 +980,7 @@ PHP_MINFO_FUNCTION(mysqli)
 /* }}} */
 
 
-/* Dependancies */
+/* Dependencies */
 static const  zend_module_dep mysqli_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
 #if defined(MYSQLI_USE_MYSQLND)

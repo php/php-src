@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #if defined(MCAST_JOIN_GROUP) && !defined(__APPLE__)
 # define RFC3678_API 1
 /* has block/unblock and source membership, in this case for both IPv4 and IPv6 */

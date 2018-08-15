@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -2154,7 +2152,7 @@ PHP_FUNCTION(dom_document_save_html)
 	xmlBufferPtr buf;
 	dom_object *intern, *nodeobj;
 	xmlChar *mem = NULL;
-	int size = 0, format;
+	int format;
 	dom_doc_propsptr doc_props;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
@@ -2184,39 +2182,22 @@ PHP_FUNCTION(dom_document_save_html)
 		}
 
 		if (node->type == XML_DOCUMENT_FRAG_NODE) {
-			int one_size;
-
 			for (node = node->children; node; node = node->next) {
 				htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
-#ifdef LIBXML2_NEW_BUFFER
-				one_size = !outBuf->error ? xmlOutputBufferGetSize(outBuf) : -1;
-#else
-				one_size = !outBuf->error ? outBuf->buffer->use : -1;
-#endif
-				if (one_size >= 0) {
-					size = one_size;
-				} else {
-					size = -1;
+				if (outBuf->error) {
 					break;
 				}
 			}
 		} else {
 			htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
-#ifdef LIBXML2_NEW_BUFFER
-			size = !outBuf->error ? xmlOutputBufferGetSize(outBuf): -1;
-#else
-			size = !outBuf->error ? outBuf->buffer->use : -1;
-#endif
 		}
-		if (size >= 0) {
-#ifdef LIBXML2_NEW_BUFFER
-			mem = (xmlChar*) xmlOutputBufferGetContent(outBuf);
-#else
-			mem = (xmlChar*) outBuf->buffer->content;
-#endif
+		if (!outBuf->error) {
+			xmlOutputBufferFlush(outBuf);
+			mem = (xmlChar*) xmlBufferContent(buf);
 			if (!mem) {
 				RETVAL_FALSE;
 			} else {
+				int size = xmlBufferLength(buf);
 				RETVAL_STRINGL((const char*) mem, size);
 			}
 		} else {
@@ -2225,6 +2206,7 @@ PHP_FUNCTION(dom_document_save_html)
 		}
 		xmlOutputBufferClose(outBuf);
 	} else {
+		int size = 0;
 #if LIBXML_VERSION >= 20623
 		htmlDocDumpMemoryFormat(docp, &mem, &size, format);
 #else

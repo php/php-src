@@ -1,11 +1,5 @@
 --TEST--
 GetImageSize() for wbmp format
---SKIPIF--
-<?php
-	if (!defined("IMAGETYPE_WBMP")) {
-		die("skip wbmp file format is not available");
-	}
-?>
 --FILE--
 <?php
 /* Prototype  : proto array getimagesize(string imagefile [, array info])

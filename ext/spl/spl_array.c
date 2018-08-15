@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -245,19 +243,19 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 	/* Cache iterator functions if ArrayIterator or derived. Check current's */
 	/* cache since only current is always required */
 	if (intern->std.handlers == &spl_handler_ArrayIterator) {
-		if (!class_type->iterator_funcs.zf_current) {
-			class_type->iterator_funcs.zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
-			class_type->iterator_funcs.zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
-			class_type->iterator_funcs.zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
-			class_type->iterator_funcs.zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
-			class_type->iterator_funcs.zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
+		if (!class_type->iterator_funcs_ptr->zf_current) {
+			class_type->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
+			class_type->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
+			class_type->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
+			class_type->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
+			class_type->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
 		}
 		if (inherited) {
-			if (class_type->iterator_funcs.zf_rewind->common.scope  != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_REWIND;
-			if (class_type->iterator_funcs.zf_valid->common.scope   != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_VALID;
-			if (class_type->iterator_funcs.zf_key->common.scope     != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_KEY;
-			if (class_type->iterator_funcs.zf_current->common.scope != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_CURRENT;
-			if (class_type->iterator_funcs.zf_next->common.scope    != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_NEXT;
+			if (class_type->iterator_funcs_ptr->zf_rewind->common.scope  != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_REWIND;
+			if (class_type->iterator_funcs_ptr->zf_valid->common.scope   != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_VALID;
+			if (class_type->iterator_funcs_ptr->zf_key->common.scope     != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_KEY;
+			if (class_type->iterator_funcs_ptr->zf_current->common.scope != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_CURRENT;
+			if (class_type->iterator_funcs_ptr->zf_next->common.scope    != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_NEXT;
 		}
 	}
 
@@ -619,7 +617,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
 
-		if (!Z_ISUNDEF(rv) && zend_is_true(&rv)) {
+		if (zend_is_true(&rv)) {
 			zval_ptr_dtor(&rv);
 			if (check_empty != 1) {
 				return 1;
@@ -872,7 +870,7 @@ static zval *spl_array_read_property(zval *object, zval *member, int type, void 
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !zend_std_has_property(object, member, 2, NULL)) {
+		&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		return spl_array_read_dimension(object, member, type, rv);
 	}
 	return zend_std_read_property(object, member, type, cache_slot, rv);
@@ -883,7 +881,7 @@ static zval *spl_array_write_property(zval *object, zval *member, zval *value, v
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-	&& !zend_std_has_property(object, member, 2, NULL)) {
+	&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		spl_array_write_dimension(object, member, value);
 		return value;
 	}
@@ -895,7 +893,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !zend_std_has_property(object, member, 2, NULL)) {
+		&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		/* If object has offsetGet() overridden, then fallback to read_property,
 		 * which will call offsetGet(). */
 		if (intern->fptr_offset_get) {
@@ -911,7 +909,7 @@ static int spl_array_has_property(zval *object, zval *member, int has_set_exists
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !zend_std_has_property(object, member, 2, NULL)) {
+		&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		return spl_array_has_dimension(object, member, has_set_exists);
 	}
 	return zend_std_has_property(object, member, has_set_exists, cache_slot);
@@ -922,7 +920,7 @@ static void spl_array_unset_property(zval *object, zval *member, void **cache_sl
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !zend_std_has_property(object, member, 2, NULL)) {
+		&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		spl_array_unset_dimension(object, member);
 		return;
 	}

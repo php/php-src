@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* These iterators were designed to operate within the foreach()
  * structures provided by the engine, but could be extended for use
  * with other iterative engine opcodes.
@@ -62,7 +60,6 @@ struct _zend_object_iterator {
 };
 
 typedef struct _zend_class_iterator_funcs {
-	const zend_object_iterator_funcs  *funcs;
 	union _zend_function *zf_new_iterator;
 	union _zend_function *zf_valid;
 	union _zend_function *zf_current;

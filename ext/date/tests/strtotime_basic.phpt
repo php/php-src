@@ -1,7 +1,5 @@
 --TEST--
 strtotime() function - a test to show the difference in behaviour between 'first' and '1', "second" and "2"...
---SKIPIF--
-<?php if (!function_exists('strtotime')) echo "SKIP"; ?>
 --FILE--
 <?php
 date_default_timezone_set('UTC');

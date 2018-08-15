@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* This module implements a SafeArray proxy which is used internally
  * by the engine when resolving multi-dimensional array accesses on
  * SafeArray types.
@@ -514,15 +512,13 @@ static void saproxy_iter_get_key(zend_object_iterator *iter, zval *key)
 	}
 }
 
-static int saproxy_iter_move_forwards(zend_object_iterator *iter)
+static void saproxy_iter_move_forwards(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 
 	if (++I->key >= I->imax) {
 		I->key = -1;
-		return FAILURE;
 	}
-	return SUCCESS;
 }
 
 static const zend_object_iterator_funcs saproxy_iter_funcs = {

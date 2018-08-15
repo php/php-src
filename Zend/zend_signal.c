@@ -25,8 +25,6 @@
    All other licensing and usage conditions are those of the PHP Group.
 */
 
- /* $Id$ */
-
 #define _GNU_SOURCE
 #include <string.h>
 

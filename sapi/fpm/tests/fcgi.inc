@@ -428,7 +428,7 @@ class Client
     }
 
     /**
-     * Get Informations on the FastCGI application
+     * Get Information on the FastCGI application
      *
      * @param array $requestedInfo information to retrieve
      * @return array

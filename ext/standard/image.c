@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include <stdio.h>
 #if HAVE_FCNTL_H
@@ -982,7 +980,7 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 			return 0;
 		}
 		height = (height << 7) | (i & 0x7f);
-        /* maximum valid heigth for wbmp (although 127 may be a more accurate one) */
+        /* maximum valid height for wbmp (although 127 may be a more accurate one) */
         if (height > 2048) {
             return 0;
         }

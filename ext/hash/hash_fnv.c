@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*  Based on the public domain algorithm found at
 	http://www.isthe.com/chongo/tech/comp/fnv/index.html */
 

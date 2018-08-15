@@ -1123,7 +1123,7 @@ PHP_FUNCTION(ibase_drop_db)
 PHP_FUNCTION(ibase_trans)
 {
 	unsigned short i, link_cnt = 0, tpb_len = 0;
-	int argn;
+	int argn = ZEND_NUM_ARGS();
 	char last_tpb[TPB_MAX_SIZE];
 	ibase_db_link **ib_link = NULL;
 	ibase_trans *ib_trans;
@@ -1131,8 +1131,6 @@ PHP_FUNCTION(ibase_trans)
 	ISC_STATUS result;
 
 	RESET_ERRMSG;
-
-	argn = ZEND_NUM_ARGS();
 
 	/* (1+argn) is an upper bound for the number of links this trans connects to */
 	ib_link = (ibase_db_link **) safe_emalloc(sizeof(ibase_db_link *),1+argn,0);
@@ -1143,7 +1141,7 @@ PHP_FUNCTION(ibase_trans)
 		ISC_TEB *teb;
 		zval *args = NULL;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argn) == FAILURE) {
+		if (zend_parse_parameters(argn, "+", &args, &argn) == FAILURE) {
 			efree(ib_link);
 			RETURN_FALSE;
 		}

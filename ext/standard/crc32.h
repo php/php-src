@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*
  * This code implements the AUTODIN II polynomial
  * The variable corresponding to the macro argument "crc" should

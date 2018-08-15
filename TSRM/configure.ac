@@ -1,4 +1,3 @@
-dnl $Id$
 dnl
 dnl Minimalistic configure.ac for TSRM.
 dnl
@@ -12,10 +11,10 @@ AH_TOP([
 ])
 
 sinclude(tsrm.m4)
-	
+
 TSRM_BASIC_CHECKS
 TSRM_THREADS_CHECKS
-	
+
 AM_PROG_LIBTOOL
 if test "$enable_debug" != "yes"; then
   AM_SET_LIBTOOL_VARIABLE([--silent])
@@ -32,4 +31,5 @@ unistd.h \
 limits.h
 )
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT

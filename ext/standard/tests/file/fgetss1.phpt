@@ -2,6 +2,7 @@
 more fgetss() tests
 --FILE--
 <?php
+error_reporting(E_ALL & ~E_DEPRECATED);
 
 $filename = dirname(__FILE__)."/fgetss1.html";
 

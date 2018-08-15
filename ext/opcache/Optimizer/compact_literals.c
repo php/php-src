@@ -272,9 +272,16 @@ literals_handle_static_prop:
 					break;
 				case ZEND_DECLARE_FUNCTION:
 				case ZEND_DECLARE_CLASS:
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
+					break;
 				case ZEND_DECLARE_INHERITED_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
 					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
+					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 2);
+					break;
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1);
+					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 2);
 					break;
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 				case ZEND_ASSIGN_DIM:
@@ -337,7 +344,7 @@ literals_handle_static_prop:
 		memset(map, 0, op_array->last_literal * sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].flags) {
-				/* unsed literal */
+				/* unset literal */
 				zval_ptr_dtor_nogc(&op_array->literals[i]);
 				continue;
 			}
@@ -756,8 +763,6 @@ literals_handle_static_prop:
 					}
 					break;
 				case ZEND_FETCH_CLASS:
-				case ZEND_ADD_INTERFACE:
-				case ZEND_ADD_TRAIT:
 				case ZEND_INSTANCEOF:
 					if (opline->op2_type == IS_CONST) {
 						// op2 class

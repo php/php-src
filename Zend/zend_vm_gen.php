@@ -15,8 +15,6 @@
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
-
-	 $Id$
 */
 
 const HEADER_TEXT = <<< DATA
@@ -735,7 +733,7 @@ function opcode_name($name, $spec, $op1, $op2, $extra_spec) {
 			} else if (isset($opcode["op2"]["ANY"])) {
 				$op2 = "ANY";
 			} else if ($spec) {
-				/* dispatch to unkonwn handler in unreachable code */
+				/* dispatch to unknown handler in unreachable code */
 				return "ZEND_NULL";
 			}
 		}
@@ -1927,6 +1925,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 								out($f,"# endif\n");
 							} else {
 								out($f,"# define ZEND_VM_RETURN()        opline = NULL; return\n");
+								out($f,"# define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE\n");
 							}
 							out($f,"#else\n");
 							out($f,"# define ZEND_OPCODE_HANDLER_RET int\n");

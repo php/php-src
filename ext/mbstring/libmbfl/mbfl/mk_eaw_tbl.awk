@@ -1,7 +1,5 @@
 #!/usr/bin/awk -f
 #
-# $Id$
-#
 # Description: a script to generate east asian width table.
 #
 

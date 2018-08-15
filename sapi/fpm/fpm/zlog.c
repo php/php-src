@@ -420,7 +420,7 @@ static inline ssize_t zlog_stream_unbuffered_write(
 			append = NULL;
 		} else {
 			append = "...";
-			append_len = sizeof(append) - 1;
+			append_len = sizeof("...") - 1;
 			len = zlog_limit - stream->len - append_len;
 		}
 	}
@@ -595,14 +595,14 @@ void zlog_stream_set_msg_quoting(struct zlog_stream *stream, zlog_bool quote) /*
 }
 /* }}} */
 
-ssize_t zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt, ...) /* {{{ */
+zlog_bool zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt, ...) /* {{{ */
 {
 	char buf[MAX_WRAPPING_PREFIX_LENGTH];
 	size_t len;
 	va_list args;
 
 	if (!stream->decorate) {
-		return -1;
+		return ZLOG_TRUE;
 	}
 
 	va_start(args, fmt);
@@ -611,7 +611,7 @@ ssize_t zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt, 
 
 	stream->msg_prefix = malloc(len + 1);
 	if (stream->msg_prefix == NULL) {
-		return -1;
+		return ZLOG_FALSE;
 	}
 	memcpy(stream->msg_prefix, buf, len);
 	stream->msg_prefix[len] = 0;
@@ -621,47 +621,58 @@ ssize_t zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt, 
 }
 /* }}} */
 
-ssize_t zlog_stream_set_msg_suffix(
+zlog_bool zlog_stream_set_msg_suffix(
 		struct zlog_stream *stream, const char *suffix, const char *final_suffix)  /* {{{ */
 {
 	size_t len;
 	if (!stream->wrap || !stream->decorate) {
-		return -1;
+		return ZLOG_TRUE;
 	}
 
 	if (suffix != NULL && final_suffix != NULL) {
 		stream->msg_suffix_len = strlen(suffix);
 		stream->msg_final_suffix_len = strlen(final_suffix);
 		len = stream->msg_suffix_len + stream->msg_final_suffix_len + 2;
+		if (stream->msg_suffix != NULL) {
+			free(stream->msg_suffix);
+		}
 		stream->msg_suffix = malloc(len);
 		if (stream->msg_suffix == NULL) {
-			return -1;
+			return ZLOG_FALSE;
 		}
 		stream->msg_final_suffix = stream->msg_suffix + stream->msg_suffix_len + 1;
 		memcpy(stream->msg_suffix, suffix, stream->msg_suffix_len + 1);
 		memcpy(stream->msg_final_suffix, final_suffix, stream->msg_final_suffix_len + 1);
-		return len;
+		return ZLOG_TRUE;
 	}
 	if (suffix != NULL) {
-		stream->msg_suffix_len = len = strlen(suffix);
+		stream->msg_suffix_len = strlen(suffix);
+		len = stream->msg_suffix_len + 1;
 		stream->msg_suffix = malloc(len);
-		if (stream->msg_suffix == NULL) {
-			return -1;
+		if (stream->msg_suffix != NULL) {
+			free(stream->msg_suffix);
 		}
-		memcpy(stream->msg_suffix, suffix, stream->msg_suffix_len + 1);
-		return len;
+		if (stream->msg_suffix == NULL) {
+			return ZLOG_FALSE;
+		}
+		memcpy(stream->msg_suffix, suffix, len);
+		return ZLOG_TRUE;
 	}
 	if (final_suffix != NULL) {
-		stream->msg_final_suffix_len = len = strlen(final_suffix);
-		stream->msg_final_suffix = malloc(len + 1);
-		if (stream->msg_final_suffix == NULL) {
-			return -1;
+		stream->msg_final_suffix_len = strlen(final_suffix);
+		len = stream->msg_final_suffix_len + 1;
+		stream->msg_final_suffix = malloc(len);
+		if (stream->msg_final_suffix != NULL) {
+			free(stream->msg_suffix);
 		}
-		memcpy(stream->msg_final_suffix, final_suffix, stream->msg_final_suffix_len + 1);
-		return len;
+		if (stream->msg_final_suffix == NULL) {
+			return ZLOG_FALSE;
+		}
+		memcpy(stream->msg_final_suffix, final_suffix, len);
+		return ZLOG_TRUE;
 	}
 
-	return 0;
+	return ZLOG_TRUE;
 }
 /* }}} */
 

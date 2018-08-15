@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <stdio.h>
 
 #include "zend.h"
@@ -55,7 +53,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->refcount = (uint32_t *) emalloc(sizeof(uint32_t));
 	*op_array->refcount = 1;
 	op_array->last = 0;
-	op_array->opcodes = emalloc(initial_ops_size * sizeof(zend_op));;
+	op_array->opcodes = emalloc(initial_ops_size * sizeof(zend_op));
 
 	op_array->last_var = 0;
 	op_array->vars = NULL;
@@ -329,6 +327,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 					free(c);
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
+			}
+			if (ce->iterator_funcs_ptr) {
+				free(ce->iterator_funcs_ptr);
 			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);

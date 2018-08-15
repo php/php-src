@@ -16,9 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
-
 /* for user-space streams */
 PHPAPI extern const php_stream_ops php_stream_userspace_ops;
 PHPAPI extern const php_stream_ops php_stream_userspace_dir_ops;

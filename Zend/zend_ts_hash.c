@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_ts_hash.h"
 
@@ -89,45 +87,45 @@ ZEND_API void zend_ts_hash_clean(TsHashTable *ht)
 	end_write(ht);
 }
 
-ZEND_API zval *_zend_ts_hash_add(TsHashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_add(TsHashTable *ht, zend_string *key, zval *pData)
 {
 	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_add(TS_HASH(ht), key, pData ZEND_FILE_LINE_RELAY_CC);
+	retval = zend_hash_add(TS_HASH(ht), key, pData);
 	end_write(ht);
 
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_update(TsHashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_update(TsHashTable *ht, zend_string *key, zval *pData)
 {
 	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_update(TS_HASH(ht), key, pData ZEND_FILE_LINE_RELAY_CC);
+	retval = zend_hash_update(TS_HASH(ht), key, pData);
 	end_write(ht);
 
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_next_index_insert(TsHashTable *ht, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_next_index_insert(TsHashTable *ht, zval *pData)
 {
 	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_next_index_insert(TS_HASH(ht), pData ZEND_FILE_LINE_RELAY_CC);
+	retval = zend_hash_next_index_insert(TS_HASH(ht), pData);
 	end_write(ht);
 
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_index_update(TsHashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_index_update(TsHashTable *ht, zend_ulong h, zval *pData)
 {
 	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_index_update(TS_HASH(ht), h, pData ZEND_FILE_LINE_RELAY_CC);
+	retval = zend_hash_index_update(TS_HASH(ht), h, pData);
 	end_write(ht);
 
 	return retval;
@@ -356,7 +354,7 @@ ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, size_t le
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t len, zval *pData)
 {
 	zval *retval;
 
@@ -367,7 +365,7 @@ ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len, zval *pData)
 {
 	zval *retval;
 

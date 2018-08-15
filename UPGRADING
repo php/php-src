@@ -1,4 +1,4 @@
-PHP 7.3 UPGRADE NOTES
+PHP 7.4 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -19,345 +19,29 @@ PHP 7.3 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-Core:
-  . The ext_skel utility has been completely redesigned with new options and
-    some old options removed. This is now written in PHP and has no external
-	dependencies.
-  . Support for BeOS has been dropped.
-  . Exceptions thrown due to automatic conversion of warnings into exceptions
-    in EH_THROW mode (e.g. some DateTime exceptions) no longer populate
-    error_get_last() state. As such, they now work the same way as manually
-    thrown exceptions.
-  . TypeError now reports wrong types as `int` and `bool` instead of `integer`
-    and `boolean`.
-  . Due to the introduction of flexible heredoc/nowdoc syntax (see New Features
-    section), doc strings that contain the ending label inside their body may
-    cause syntax errors or change in interpretation. For example in
-
-        $str = <<<FOO
-        abcdefg
-            FOO
-        FOO;
-
-    the indented occurrence of "FOO" did not previously have any special
-    meaning. Now it will be interpreted as the end of the heredoc string and
-    the following "FOO;" will cause a syntax error. This issue can always be
-    resolved by choosing an ending label that does not occur within the contents
-    of the string.
-  . "continue" statements targeting "switch" control flow structures will now
-    generate a warning. In PHP such "continue" statements are equivalent to
-    "break", while they behave as "continue 2" in other languages.
-
-        while ($foo) {
-            switch ($bar) {
-                case "baz":
-                    continue;
-                    // Warning: "continue" targeting switch is equivalent to
-                                "break". Did you mean to use "continue 2"?
-            }
-        }
-
-  . Array accesses of type $obj["123"], where $obj implements ArrayAccess and
-    "123" is an integral string literal will no longer result in an implicit
-    conversion to integer, i.e., $obj->offsetGet("123") will be called instead
-    of $obj->offsetGet(123). This matches existing behavior for non-literals.
-    The behavior of arrays is not affected in any way, they continue to
-    implicitly convert integeral string keys to integers.
-  . In PHP, static properties are shared between inheriting classes, unless the
-    static property is explicitly overridden in a child class. However, due to
-    an implementation artifact it was possible to separate the static properties
-    by assigning a reference. This loophole has been fixed.
-
-        class Test {
-            public static $x = 0;
-        }
-        class Test2 extends Test { }
-
-        Test2::$x = &$x;
-        $x = 1;
-
-        var_dump(Test::$x, Test2::$x);
-        // Previously: int(0), int(1)
-        // Now:        int(1), int(1)
-
-  . References returned by array and property accesses are now unwrapped as
-    part of the access. This means that it is no longer possible to modify the
-    reference between the access and the use of the accessed value:
-
-        $arr = [1];
-        $ref =& $arr[0];
-        var_dump($arr[0] + ($arr[0] = 2));
-        // Previously: int(4), Now: int(3)
-
-    This makes the behavior of references and non-references consistent. Please
-    note that reading and writing a value inside a single expression remains
-    undefined behavior and may change again in the future.
-
-  . Argument unpacking stopped working with Traversables with non-integer keys.
-    The following code worked in PHP 7.0-7.2 by accident.
-
-        function foo(...$args) {
-            var_dump($args);
-        }
-        function gen() {
-            yield 1.23 => 123;
-        }
-        foo(...gen());
-
-    Now it generates an exception.
-
-BCMath:
-  . All warnings thrown by BCMath functions are now using PHP's error handling.
-    Formerly some warnings have directly been written to stderr.
-  . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
-    the returned numbers may have omitted trailing decimal zeroes.
-
-MBString:
-  . Due to added support for named captures, mb_ereg_*() patterns using named
-    captures will behave differently. In particular named captures will be part
-    of matches and mb_ereg_replace() will interpret additional syntax. See
-    "New Features" section for more information.
-
-mysqli:
-  . Prepared statements now properly report the fractional seconds for DATETIME/
-    TIME/TIMESTAMP columns with decimals specifier (e.g. TIMESTAMP(6) when using
-    microseconds). Formerly, the fractional seconds part was simply omitted from
-    the returned values.
-
-PDO/MySQL:
-  . Prepared statements now properly report the fractional seconds for DATETIME/
-    TIME/TIMESTAMP columns with decimals specifier (e.g. TIMESTAMP(6) when using
-    microseconds). Formerly, the fractional seconds part was simply omitted from
-    the returned values.
-    Please note that this only affects the usage of PDO_MYSQL with emulated
-    prepares turned off (e.g. using the native preparation functionality).
-    Statements using connections having PDO::ATTR_EMULATE_PREPARES=true (which
-    is the default) were not affected by the bug fixed and have already been
-    getting the proper fractional seconds values from the engine.
-
-Reflection:
-  . Reflection export to string now uses `int` and `bool` instead of `integer`
-    and `boolean`.
-
-SPL:
-  . If an SPL autoloader throws an exception, following autoloaders will not be
-    executed. Previously all autoloaders were executed and exceptions were
-    chained.
-
-SimpleXML:
-  . Mathematic operations involving SimpleXML objects will now treat the text as
-    an integer or float, whichever is more appropriate. Previously values were
-    treated as integers unconditionally.
-
-Standard:
-  . Undefined variables passed to compact() will now be reported as a notice.
-  . getimagesize() and related functions now report the mime type of BMP images
-    as image/bmp instead of image/x-ms-bmp, since the former has been registered
-    with the IANA (see RFC 7903).
-  . stream_socket_get_name() will now return IPv6 addresses wrapped in brackets.
-    For example "[::1]:1337" will be returned instead of "::1:1337".
-
 ========================================
 2. New Features
 ========================================
-
-Core:
-  . Implemented flexible heredoc and nowdoc syntax: The closing marker for doc
-    strings is no longer required to be followed by a semicolon or newline.
-    Additionally the closing marker may be indented, in which case the
-    indentation will be stripped from all lines in the doc string.
-    (RFC: https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes)
-  . Array destructuring now supports reference assignments using the syntax
-    [&$a, [$b, &$c]] = $d. The same is also supported for list().
-    (RFC: https://wiki.php.net/rfc/list_reference_assignment)
-  . instanceof now allows literals as the first operand,
-    in which case the result is always FALSE.
-  . A new CompileError exception has been added, from which ParseError inherits.
-    A small number of compilation errors will now throw a CompileError instead
-    of generating a fatal error. Currently this only affects compilation errors
-    that may be thrown by token_get_all() in TOKEN_PARSE mode, but more errors
-    may be converted in the future.
-
-BCMath:
-  . bcscale() can now also be used as getter to retrieve the current scale in use.
-
-MBString:
-  . Support for full case-mapping and case-folding has been added. Unlike simple
-    case-mapping, full case-mapping may change the length of the string. For
-    example:
-
-      mb_strtoupper("Straße")
-      // Produces STRAßE on PHP 7.2
-      // Produces STRASSE on PHP 7.3
-
-    The different casing mapping and folding modes are available through
-    mb_convert_case():
-
-      . MB_CASE_LOWER (used by mb_strtolower)
-      . MB_CASE_UPPER (used by mb_strtoupper)
-      . MB_CASE_TITLE
-      . MB_CASE_FOLD
-      . MB_CASE_LOWER_SIMPLE
-      . MB_CASE_UPPER_SIMPLE
-      . MB_CASE_TITLE_SIMPLE
-      . MB_CASE_FOLD_SIMPLE (used by case-insensitive operations)
-
-    Only unconditional, language agnostic full case-mapping is performed.
-  . Case-insensitive string operations now use case-folding instead of case-
-    mapping during comparisons. This means that more characters will be
-    considered (case insensitively) equal now.
-  . mb_convert_case() with MB_CASE_TITLE now performs title-case conversion
-    based on the Cased and CaseIgnorable derived Unicode properties. In
-    particular this also improves handling of quotes and apostophes.
-  . Data tables have been updated for Unicode 11.
-  . Mbstring now correctly supports strings larger than 2GB.
-  . Performance of the mbstring extension has been significantly improved
-    across the board. The largest improvements are in case conversion functions.
-  . mb_ereg_*() functions now support named captures. Matching functions like
-    mb_ereg() will now return named captures both using their group number and
-    their name, similar to PCRE:
-
-        mb_ereg('(?<word>\w+)', '国', $matches);
-        // => [0 => "国", 1 => "国", "word" => "国"];
-
-    Additionally, mb_ereg_replace() now supports the \k<> and \k'' notations
-    to reference named captures in the replacement string:
-
-        mb_ereg_replace('\s*(?<word>\w+)\s*', "_\k<word>_\k'word'_", ' foo ');
-        // => "_foo_foo_"
-
-    \k<> and \k'' can also be used for numbered references, which also works
-    with group numbers greater than 9.
-
-readline:
-  . Support for the completion_append_character and completion_suppress_append
-    options has been added to readline_info(). These options are only available
-    if PHP is linked against libreadline (rather than libedit).
-
-Standard:
-  . The -–with-password-argon2[=dir] configure argument now provides support for 
-    both Argon2i and Argon2id hashes in the password_hash(), password_verify(), 
-    password_get_info(), and password_needs_rehash() functions. Passwords may be
-    hashed and verified using the PASSWORD_ARGON2ID constant.
-    Support for both Argon2i and Argon2id in the password_* functions now requires
-    PHP be linked against libargon2 reference library >= 20161029.
-    (RFC: https://wiki.php.net/rfc/argon2_password_hash_enhancements). 
 
 ========================================
 3. Changes in SAPI modules
 ========================================
 
-phpdbg:
-  . The unused constants PHPDBG_FILE, PHPDBG_METHOD, PHPDBG_LINENO and
-    PHPDBG_FUNC have been removed.
-
-FPM:
-  . The getallheaders function is now also available.
-
 ========================================
 4. Deprecated Functionality
 ========================================
-
-GD:
-  . image2wbmp() has been deprecated.
-
-Intl:
-  . Usage of the Normalizer::NONE form throws a deprecation warning, if PHP is linked with ICU >= 56.
 
 ========================================
 5. Changed Functions
 ========================================
 
-JSON:
-  . A new flag has been added, JSON_THROW_ON_ERROR, which can be used with
-    json_decode() or json_encode() and causes these functions to throw a
-    JsonException upon an error, instead of setting the global error state that
-    is retrieved with json_last_error(). JSON_PARTIAL_OUTPUT_ON_ERROR takes
-    precedence over JSON_THROW_ON_ERROR.
-    (RFC: https://wiki.php.net/rfc/json_throw_on_error)
-
-Standard:
-  . debug_zval_dump() was changed to display recursive arrays and objects
-    in the same way as var_dump(). Now, it doesn't display them twice.
-  . array_push() and array_unshift() can now also be called with a single
-    argument, which is particularly convenient wrt. the spread operator.
-
-PCRE:
-  . preg_quote() now also escapes the '#' character.
-
 ========================================
 6. New Functions
 ========================================
 
-Core:
-  . Added monotonic timer function hrtime([bool get_as_num]). It returns an
-    array of the form [seconds, nanoseconds] with the timestamp starting at
-    an unspecified point in the past. If the optional argument is passed as
-    true, the return value is an integer on 64-bit systems or float on
-    32-bit systems, representing the nanoseconds. The timestamp is not
-    adjustable and is not related to wall clock or time of day. The timers
-    are available under Linux, FreeBSD, Windows, Mac, SunOS, AIX and their
-    derivatives. If no required timers are provided by a corresponding
-    platform, the function returns false.
-
-Date:
-  . Added the DateTime::createFromImmutable() method, which mirrors
-    DateTimeImmutable::createFromMutable().
-
-FPM:
-  . Added fpm_get_status() function which returns FPM status info array.
-
-GMP:
-  . Added gmp_binomial(n, k) for calculating binomial coefficients.
-  . Added gmp_lcm(a, b) for calculating the least common multiple.
-  . Added gmp_perfect_power(a) to check if number is a perfect power.
-  . Added gmp_kronecker(a, b) to compute the Kronecker symbol.
-
-Intl:
-  . Added void Spoofchecker::setRestrictionLevel(int $level) method, available
-    when linked with ICU >= 58.1. Levels are represented as class constants
-    - Spoofchecker::ASCII
-    - Spoofchecker::HIGHLY_RESTRICTIVE
-    - Spoofchecker::MODERATELY_RESTRICTIVE
-    - Spoofchecker::MINIMALLY_RESTRICTIVE
-    - Spoofchecker::UNRESTRICTIVE
-    - Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE
-    For the detailed documentation on the restriction levels, see
-    URestrictionLevel under
-    http://icu-project.org/apiref/icu4c/uspoof_8h.html
-  . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
-    to retrieve the Decomposition_Mapping property of a character.
-
-OpenSSL:
-  . Added openssl_pkey_derive that derives a shared secret for DH, ECDH and
-    possibly other future algorithms supported by EVP_PKEY_derive.
-
-Sockets:
-  . Added functions to import/export the WSAPROTOCOL_INFO info struct. This
-    implementation complements the already supported SCM_RIGHTS as in
-    man 3 cmsg and is Windows specific. For the import/export, the default
-    system securities apply for the SHM reading/writing. The socket becomes
-    invalid, when the last reference to it is closed.
-    - socket_wsaprotocol_info_export(resource $sock, int $pid) - exports the
-      WSAPROTOCOL_INFO structure into shared memory and returns an identifier
-      to be used for the import, or false on failure. The exported ID is
-      only valid for the dedicated PID.
-    - socket_wsaprotocol_info_import(string $id) - returns a duplicated
-      socket as per the passed identifier, or false on failure.
-    - socket_wsaprotocol_info_release(string $id) - releases the shared memory
-      corresponding to the passed identifier.
-
-Standard:
-  . Added is_countable() function, to check whether a value may be passed to
-    count().
-    (RFC: https://wiki.php.net/rfc/is-countable)
-
 ========================================
 7. New Classes and Interfaces
 ========================================
-
-JSON:
-  . JsonException
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -367,95 +51,18 @@ JSON:
 9. Other Changes to Extensions
 ========================================
 
- Curl:
-  . libcurl >= 7.15.5 is now required.
-
- Filter:
-  . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
-    defines the set of allowed thousand separator chars.  The default (`"',."`)
-    is fully backward compatible with former PHP versions.
-  . FILTER_SANITIZE_ADD_SLASHES has been added as an alias of the 'magic_quotes' 
-    filter (FILTER_SANITIZE_MAGIC_QUOTES). The 'magic_quotes' filter is subject 
-	to removal in future versions of PHP.
-
- FTP:
-  . Set default transfer mode to binary
-
- Intl:
-  . Normalizer::NONE is deprecated, when PHP is linked with ICU >= 56
-  . Introduced Normalizer::FORM_KC_CF as Normalizer::normalize() argument
-    for NFKC_Casefold normalization, available when linked with ICU >= 56
-
- MBString:
-  . The configuration option --with-libmbfl is no longer available.
-
- ODBC:
-  . Support for ODBCRouter has been removed.
-  . Support for Birdstep has been removed.
-
-PCRE:
-  . The PCRE extension has been upgraded to PCRE2, which may cause minor
-    behavioral changes, and augments the existing regular expression syntax.
-    See <https://wiki.php.net/rfc/pcre2-migration> for details.
-
- ZIP:
-  . Bundled libzip has been dropped,
-    system library is now required.
-
 ========================================
 10. New Global Constants
 ========================================
-
-Curl:
-  . CURLOPT_REQUEST_TARGET
-
-JSON:
-  . JSON_THROW_ON_ERROR
-
-PGSQL:
-  . Requires Postgres 9.3
-    - PGSQL_DIAG_SCHEMA_NAME
-	- PGSQL_DIAG_TABLE_NAME
-	- PGSQL_DIAG_COLUMN_NAME
-	- PGSQL_DIAG_DATATYPE_NAME
-	- PGSQL_DIAG_CONSTRAINT_NAME
-  . Requires Postgres 9.6
-    - PGSQL_DIAG_SEVERITY_NONLOCALIZED
-
-Standard:
-  . PASSWORD_ARGON2ID
 
 ========================================
 11. Changes to INI File Handling
 ========================================
 
-- birdstep.max_links
-  . This INI directive has been removed.
-
-- opcache.inherited_hack
-  . This INI directive has been removed. The value has already been ignored
-    since PHP 5.3.0.
-
-- syslog.facility
-  - New INI to set syslog facility which specifies what type of program is
-    logging the message. It is used only when error_log is set to syslog.
-
-- syslog.ident
-  . New INI to set syslog ident string which is prepended to every message. It
-    is used only when error_log is set syslog.
-
 ========================================
 12. Windows Support
 ========================================
 
-- Core
-  . File descriptors are opened in shared read/write/delete mode by default.
-    This effectively maps the UNIX semantics and allows to delete files with
-    handles in use. It is not 100% same, some platform differences still
-    persist. After the deletion, the filename entry is blocked, until all
-    the opened handles to it are closed.
-
 ========================================
 13. Other Changes
 ========================================
-

@@ -21,8 +21,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* {{{ includes */
 
 #include "php.h"
@@ -1122,7 +1120,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 		len = (size_t) bytes;
 		buf = safe_emalloc(sizeof(char), (len + 1), 0);
-		/*needed because recv doesnt set null char at end*/
+		/*needed because recv doesn't set null char at end*/
 		memset(buf, 0, len + 1);
 	}
 
@@ -1591,10 +1589,10 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	ZVAL_LONG(&stat_nlink, stat_ssb.sb.st_nlink);
 	ZVAL_LONG(&stat_uid, stat_ssb.sb.st_uid);
 	ZVAL_LONG(&stat_gid, stat_ssb.sb.st_gid);
-#ifdef HAVE_ST_RDEV
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 # ifdef PHP_WIN32
 	/* It is unsigned, so if a negative came from userspace, it'll
-	   convert to UINT_MAX, but we wan't to keep the userspace value.
+	   convert to UINT_MAX, but we want to keep the userspace value.
 	   Almost the same as in php_fstat. This is ugly, but otherwise
 	   we would have to maintain a fully compatible struct stat. */
 	if ((int)stat_ssb.sb.st_rdev < 0) {
@@ -1612,7 +1610,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	ZVAL_LONG(&stat_atime, stat_ssb.sb.st_atime);
 	ZVAL_LONG(&stat_mtime, stat_ssb.sb.st_mtime);
 	ZVAL_LONG(&stat_ctime, stat_ssb.sb.st_ctime);
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 	ZVAL_LONG(&stat_blksize, stat_ssb.sb.st_blksize);
 #else
 	ZVAL_LONG(&stat_blksize,-1);
@@ -1817,7 +1815,7 @@ PHPAPI PHP_FUNCTION(fread)
 	ZVAL_NEW_STR(return_value, zend_string_alloc(len, 0));
 	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
 
-	/* needed because recv/read/gzread doesnt put a null at the end*/
+	/* needed because recv/read/gzread doesn't put a null at the end*/
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
 
 	if (Z_STRLEN_P(return_value) < len / 2) {

@@ -16,9 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -668,7 +665,7 @@ mb_regex_groups_iter(const OnigUChar* name, const OnigUChar* name_end, int ngrou
 	int gn, beg, end;
 
 	/*
-	 * In case of duplicate groups, keep only the last suceeding one
+	 * In case of duplicate groups, keep only the last succeeding one
 	 * to be consistent with preg_match with the PCRE_DUPNAMES option.
 	 */
 	gn = onig_name_to_backref_number(reg, name, name_end, args->region);

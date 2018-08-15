@@ -18,7 +18,12 @@ fwrite($fp, "test <b>bold</b> <i>italic</i> test\n");
 fclose($fp);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: stream_filter_append(): The string.strip_tags filter is deprecated in %s on line %d
 test bold italic test
+
+Deprecated: stream_filter_append(): The string.strip_tags filter is deprecated in %s on line %d
 test <b>bold</b> italic test
+
+Deprecated: stream_filter_append(): The string.strip_tags filter is deprecated in %s on line %d
 test <b>bold</b> italic test

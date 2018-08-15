@@ -2,7 +2,6 @@
 zip_entry_close() function: simple and double call
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--

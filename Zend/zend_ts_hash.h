@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_TS_HASH_H
 #define ZEND_TS_HASH_H
 
@@ -48,16 +46,10 @@ ZEND_API void zend_ts_hash_clean(TsHashTable *ht);
 
 
 /* additions/updates/changes */
-#define zend_ts_hash_update(ht, key, pData) \
-		_zend_ts_hash_update(ht, key, pData ZEND_FILE_LINE_CC)
-#define zend_ts_hash_add(ht, key, pData) \
-		_zend_ts_hash_add(ht, key, pData ZEND_FILE_LINE_CC)
-
-#define zend_ts_hash_index_update(ht, h, pData) \
-		_zend_ts_hash_index_update(ht, h, pData ZEND_FILE_LINE_CC)
-#define zend_ts_hash_next_index_insert(ht, pData) \
-		_zend_ts_hash_next_index_insert(ht, ht->nNextFreeElement, pData ZEND_FILE_LINE_CC)
-
+ZEND_API zval *zend_ts_hash_update(TsHashTable *ht, zend_string *key, zval *pData);
+ZEND_API zval *zend_ts_hash_add(TsHashTable *ht, zend_string *key, zval *pData);
+ZEND_API zval *zend_ts_hash_index_update(TsHashTable *ht, zend_ulong h, zval *pData);
+ZEND_API zval *zend_ts_hash_next_index_insert(TsHashTable *ht, zval *pData);
 ZEND_API zval* zend_ts_hash_add_empty_element(TsHashTable *ht, zend_string *key);
 
 ZEND_API void zend_ts_hash_graceful_destroy(TsHashTable *ht);
@@ -100,13 +92,8 @@ void zend_ts_hash_display(TsHashTable *ht);
 #endif
 
 ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, size_t len);
-ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC);
-ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC);
-
-#define zend_ts_hash_str_update(ht, key, len, pData) \
-		_zend_ts_hash_str_update(ht, key, len, pData ZEND_FILE_LINE_CC)
-#define zend_ts_hash_str_add(ht, key, len, pData) \
-		_zend_ts_hash_str_add(ht, key, len, pData ZEND_FILE_LINE_CC)
+ZEND_API zval *zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t len, zval *pData);
+ZEND_API zval *zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len, zval *pData);
 
 static zend_always_inline void *zend_ts_hash_str_find_ptr(TsHashTable *ht, const char *str, size_t len)
 {

@@ -17,6 +17,9 @@ var_dump(fgetss($handle));
 <?php
 unlink(dirname(__FILE__) . '/foo.html');
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function fgetss() is deprecated in %s on line %d
 string(12) "text 0text 1"
+
+Deprecated: Function fgetss() is deprecated in %s on line %d
 string(12) "text 0text 1"

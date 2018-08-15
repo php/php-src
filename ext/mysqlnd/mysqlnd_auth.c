@@ -1049,7 +1049,7 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 
 	switch (result_packet.response_code) {
 		case 3:
-			DBG_INF("fast path suceeded");
+			DBG_INF("fast path succeeded");
 			DBG_VOID_RETURN;
 		case 4:
 			if (conn->vio->data->ssl || conn->unix_socket.s) {

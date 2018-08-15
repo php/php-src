@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_GLOBALS_H
 #define ZEND_GLOBALS_H
 
@@ -163,6 +161,10 @@ struct _zend_executor_globals {
 	zend_long precision;
 
 	int ticks_count;
+
+	uint32_t persistent_constants_count;
+	uint32_t persistent_functions_count;
+	uint32_t persistent_classes_count;
 
 	HashTable *in_autoload;
 	zend_function *autoload_func;

@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_builtin_functions.h"
@@ -763,7 +761,7 @@ static const zend_function_entry zend_funcs_throwable[] = {
  * such exceptions in that handler.
  * Also all getXY() methods are final because thy serve as read only access to
  * their corresponding properties, no more, no less. If after all you need to
- * override somthing then it is method __toString().
+ * override something then it is method __toString().
  * And never try to change the state of exceptions and never implement anything
  * that gives the user anything to accomplish this.
  */

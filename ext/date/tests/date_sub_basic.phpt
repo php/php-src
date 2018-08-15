@@ -2,8 +2,6 @@
 Test date_sub() function : basic functionality 
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
---SKIPIF--
-<?php if (!function_exists('date_sub')) echo "skip: date_sub() function not found!"; ?>
 --FILE--
 <?php
 date_default_timezone_set('UTC');

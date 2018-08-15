@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "basic_functions.h"
 #include "php_math.h"
 #include "php_string.h"

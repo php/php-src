@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend_extensions.h"
 
 ZEND_API zend_llist zend_extensions;

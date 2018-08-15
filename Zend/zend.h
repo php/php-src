@@ -17,12 +17,10 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "3.3.0-dev"
+#define ZEND_VERSION "3.4.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -139,12 +137,15 @@ struct _zend_class_entry {
 	union _zend_function *serialize_func;
 	union _zend_function *unserialize_func;
 
-	zend_class_iterator_funcs iterator_funcs;
+	/* allocated only if class implements Iterator or IteratorAggregate interface */
+	zend_class_iterator_funcs *iterator_funcs_ptr;
 
 	/* handlers */
-	zend_object* (*create_object)(zend_class_entry *class_type);
+	union {
+		zend_object* (*create_object)(zend_class_entry *class_type);
+		int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */
+	};
 	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object, int by_ref);
-	int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */
 	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method);
 
 	/* serializer callbacks */

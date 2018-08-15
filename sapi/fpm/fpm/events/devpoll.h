@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef FPM_EVENTS_DEVPOLL_H
 #define FPM_EVENTS_DEVPOLL_H
 

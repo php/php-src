@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend_ast.h"
 #include "zend_API.h"
 #include "zend_operators.h"
@@ -823,7 +821,7 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
 }
 
 /*
- * Operator Precendence
+ * Operator Precedence
  * ====================
  * priority  associativity  operators
  * ----------------------------------

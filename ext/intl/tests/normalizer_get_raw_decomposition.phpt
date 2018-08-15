@@ -1,8 +1,8 @@
 --TEST--
 normalizer_get_raw_decomposition()
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if( !function_exists( 'normalizer_get_raw_decomposition' ) ) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
+<?php if( !function_exists( 'normalizer_get_raw_decomposition' ) ) print 'skip normalizer_get_raw_decomposition function does not exist'; ?>
 --FILE--
 <?php
 

@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension sodium
 
 PHP_ARG_WITH(sodium, for sodium support,

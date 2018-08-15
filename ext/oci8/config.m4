@@ -66,8 +66,8 @@ AC_DEFUN([AC_OCI8_ORACLE_VERSION],[
     OCI8_ORACLE_VERSION=8.1
   elif test -f $OCI8_LCS_BASE.1.0; then
     OCI8_ORACLE_VERSION=8.0
-  elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.a; then 
-    if test -f $OCI8_DIR/$OCI8_LIB_DIR/libcore4.a; then 
+  elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.a; then
+    if test -f $OCI8_DIR/$OCI8_LIB_DIR/libcore4.a; then
       OCI8_ORACLE_VERSION=8.0
     else
       OCI8_ORACLE_VERSION=8.1
@@ -86,7 +86,7 @@ dnl support DTrace for extensions.  Creating OCI8_INIT_DTRACE
 dnl independently instead of using a refactored PHP_INIT_DTRACE allows
 dnl OCI8 to be DTraced on versions of PHP where core PHP DTrace support
 dnl isn't available.
-dnl 
+dnl
 AC_DEFUN([OCI8_INIT_DTRACE],[
   ac_srcdir=[]PHP_EXT_SRCDIR([oci8])/
   ac_bdir=[]PHP_EXT_BUILDDIR([oci8])/
@@ -173,7 +173,7 @@ PHP_ARG_WITH(oci8, for Oracle Database OCI8 support,
                           Use --with-oci8=instantclient,/path/to/instant/client/lib
                           to use an Oracle Instant Client installation])
 
-if test "$PHP_OCI8" != "no"; then 
+if test "$PHP_OCI8" != "no"; then
 
   if test -z "$PHP_OCI8"; then
     dnl --with-oci8=$ORACLE_HOME where ORACLE_HOME isn't set (or is mistyped) will match this case
@@ -211,12 +211,12 @@ if test "$PHP_OCI8" != "no"; then
   fi
 
   dnl Check whether --enable-dtrace was set.
-  dnl To use DTrace with a PECL install, extract the OCI8 archive, phpize it, and set 
+  dnl To use DTrace with a PECL install, extract the OCI8 archive, phpize it, and set
   dnl PHP_DTRACE=yes before running configure
   AC_MSG_CHECKING([OCI8 DTrace support])
   oci8_do_dtrace="`echo $PHP_OCI8 | cut -d, -f3`"
   if test "$PHP_DTRACE" = "yes" -o "$oci8_do_dtrace" = "dtrace" ; then
-    AC_MSG_RESULT([yes])    
+    AC_MSG_RESULT([yes])
     if test "$ext_shared" = "no"; then
       AC_MSG_ERROR([For DTrace support OCI8 must be configured as a shared extension])
     else
@@ -242,7 +242,7 @@ if test "$PHP_OCI8" != "no"; then
   AC_MSG_CHECKING([checking if we're on a 64-bit platform])
   if test "$ac_cv_sizeof_long_int" = "4"; then
     AC_MSG_RESULT([no])
-    PHP_OCI8_OH_LIBDIR=lib32 
+    PHP_OCI8_OH_LIBDIR=lib32
     PHP_OCI8_IC_LIBDIR_SUFFIX=""
   else
     AC_MSG_RESULT([yes])

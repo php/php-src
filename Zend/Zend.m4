@@ -1,29 +1,27 @@
 dnl
-dnl $Id$
-dnl
 dnl This file contains Zend specific autoconf functions.
 dnl
 
 AC_DEFUN([LIBZEND_CHECK_INT_TYPE],[
 AC_MSG_CHECKING(for $1)
-AC_TRY_COMPILE([
-#if HAVE_SYS_TYPES_H  
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#if HAVE_INTTYPES_H  
+#if HAVE_INTTYPES_H
 #include <inttypes.h>
 #elif HAVE_STDINT_H
 #include <stdint.h>
-#endif],
-[if (($1 *) 0)
+#endif]],
+[[if (($1 *) 0)
   return 0;
 if (sizeof ($1))
   return 0;
-],[
+]])],[
   AC_DEFINE_UNQUOTED([HAVE_]translit($1,a-z_-,A-Z__), 1,[Define if $1 type is present. ])
   AC_MSG_RESULT(yes)
-], AC_MSG_RESULT(no)
-)dnl
+], [AC_MSG_RESULT(no)
+])dnl
 ])
 
 AC_DEFUN([LIBZEND_BASIC_CHECKS],[
@@ -63,7 +61,6 @@ stdlib.h \
 dlfcn.h)
 
 AC_TYPE_SIZE_T
-AC_TYPE_SIGNAL
 
 AC_DEFUN([LIBZEND_LIBDL_CHECKS],[
 AC_CHECK_LIB(dl, dlopen, [LIBS="-ldl $LIBS"])
@@ -109,7 +106,7 @@ ZEND_CHECK_FLOAT_PRECISION
 dnl test whether double cast to long preserves least significant bits
 AC_MSG_CHECKING(whether double cast to long preserves least significant bits)
 
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <limits.h>
 
 int main()
@@ -129,7 +126,7 @@ int main()
 	}
 	exit(1);
 }
-], [
+]])], [
   AC_DEFINE([ZEND_DVAL_TO_LVAL_CAST_OK], 1, [Define if double cast to long preserves least significant bits])
   AC_MSG_RESULT(yes)
 ], [
@@ -137,7 +134,7 @@ int main()
 ], [
   AC_MSG_RESULT(no)
 ])
-	
+
 ])
 
 AC_DEFUN([LIBZEND_ENABLE_DEBUG],[
@@ -147,7 +144,7 @@ AC_ARG_ENABLE(debug,
   ZEND_DEBUG=$enableval
 ],[
   ZEND_DEBUG=no
-])  
+])
 
 ])
 
@@ -158,10 +155,10 @@ AC_ARG_ENABLE(maintainer-zts,
   ZEND_MAINTAINER_ZTS=$enableval
 ],[
   ZEND_MAINTAINER_ZTS=no
-])  
+])
 
 AC_ARG_ENABLE(inline-optimization,
-[  --disable-inline-optimization 
+[  --disable-inline-optimization
                           If building zend_execute.lo fails, try this switch],[
   ZEND_INLINE_OPTIMIZATION=$enableval
 ],[
@@ -195,8 +192,7 @@ test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   CFLAGS="$CFLAGS -DZTS"
-  LIBZEND_CPLUSPLUS_CHECKS
-fi  
+fi
 
 changequote({,})
 if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
@@ -222,7 +218,7 @@ dnl test and set the alignment define for ZEND_MM
 dnl this also does the logarithmic test for ZEND_MM.
 AC_MSG_CHECKING(for MM alignment and log values)
 
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 
 typedef union _mm_align_test {
@@ -249,16 +245,16 @@ int main()
   }
 
   fp = fopen("conftest.zend", "w");
-  fprintf(fp, "%d %d\n", ZEND_MM_ALIGNMENT, zeros);  
+  fprintf(fp, "%d %d\n", ZEND_MM_ALIGNMENT, zeros);
   fclose(fp);
 
   exit(0);
 }
-], [
+]])], [
   LIBZEND_MM_ALIGN=`cat conftest.zend | cut -d ' ' -f 1`
   LIBZEND_MM_ALIGN_LOG2=`cat conftest.zend | cut -d ' ' -f 2`
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, $LIBZEND_MM_ALIGN, [ ])
-  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ]) 
+  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ])
 ], [], [
   dnl cross-compile needs something here
   LIBZEND_MM_ALIGN=8
@@ -269,7 +265,7 @@ AC_MSG_RESULT(done)
 dnl test for memory allocation using mmap(MAP_ANON)
 AC_MSG_CHECKING(for memory allocation using mmap(MAP_ANON))
 
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -301,7 +297,7 @@ int main()
 	}
 	return 0;
 }
-], [
+]])], [
   AC_DEFINE([HAVE_MEM_MMAP_ANON], 1, [Define if the target system has support for memory allocation using mmap(MAP_ANON)])
   AC_MSG_RESULT(yes)
 ], [
@@ -314,7 +310,7 @@ int main()
 dnl test for memory allocation using mmap("/dev/zero")
 AC_MSG_CHECKING(for memory allocation using mmap("/dev/zero"))
 
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -356,7 +352,7 @@ int main()
 	}
 	return 0;
 }
-], [
+]])], [
   AC_DEFINE([HAVE_MEM_MMAP_ZERO], 1, [Define if the target system has support for memory allocation using mmap("/dev/zero")])
   AC_MSG_RESULT(yes)
 ], [
@@ -374,7 +370,7 @@ AC_ARG_ENABLE(zend-signals,
   ZEND_SIGNALS=$enableval
 ],[
   ZEND_SIGNALS=yes
-])  
+])
 
 AC_CHECK_FUNC(sigaction, [
 	AC_DEFINE(HAVE_SIGACTION, 1, [Whether sigaction() is available])
@@ -391,28 +387,24 @@ AC_MSG_RESULT($ZEND_SIGNALS)
 
 ])
 
-AC_DEFUN([LIBZEND_CPLUSPLUS_CHECKS],[
-
-])
-
-AC_MSG_CHECKING(whether /dev/urandom exists) 
-if test -r "/dev/urandom" && test -c "/dev/urandom"; then 
+AC_MSG_CHECKING(whether /dev/urandom exists)
+if test -r "/dev/urandom" && test -c "/dev/urandom"; then
   AC_DEFINE([HAVE_DEV_URANDOM], 1, [Define if the target system has /dev/urandom device])
-  AC_MSG_RESULT(yes) 
-else 
-  AC_MSG_RESULT(no) 
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
 fi
 
-AC_MSG_CHECKING(whether /dev/arandom exists) 
-if test -r "/dev/arandom" && test -c "/dev/arandom"; then 
+AC_MSG_CHECKING(whether /dev/arandom exists)
+if test -r "/dev/arandom" && test -c "/dev/arandom"; then
   AC_DEFINE([HAVE_DEV_ARANDOM], 1, [Define if the target system has /dev/arandom device])
-  AC_MSG_RESULT(yes) 
-else 
-  AC_MSG_RESULT(no) 
-fi 
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
 
 AC_ARG_ENABLE(gcc-global-regs,
-[  --disable-gcc-global-regs 
+[  --disable-gcc-global-regs
                           whether to enable GCC global register variables],[
   ZEND_GCC_GLOBAL_REGS=$enableval
 ],[
@@ -420,7 +412,7 @@ AC_ARG_ENABLE(gcc-global-regs,
 ])
 AC_MSG_CHECKING(for global register variables support)
 if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
-  AC_TRY_COMPILE([
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #if defined(__GNUC__)
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
 #else
@@ -453,8 +445,8 @@ int emu(const opcode_handler_t *ip, void *fp) {
 	FP = orig_fp;
 	IP = orig_ip;
 }
-  ], [
-  ], [
+  ]], [[
+  ]])], [
     ZEND_GCC_GLOBAL_REGS=yes
   ], [
     ZEND_GCC_GLOBAL_REGS=no
@@ -471,7 +463,7 @@ dnl
 dnl Check if atof() accepts NAN
 dnl
 AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
 #include <stdlib.h>
 
@@ -487,7 +479,7 @@ int main(int argc, char** argv)
 {
 	return zend_isnan(atof("NAN")) ? 0 : 1;
 }
-],[
+]])],[
   ac_cv_atof_accept_nan=yes
 ],[
   ac_cv_atof_accept_nan=no
@@ -502,7 +494,7 @@ dnl
 dnl Check if atof() accepts INF
 dnl
 AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
 #include <stdlib.h>
 
@@ -521,7 +513,7 @@ int main(int argc, char** argv)
 {
 	return zend_isinf(atof("INF")) && zend_isinf(atof("-INF")) ? 0 : 1;
 }
-],[
+]])],[
   ac_cv_atof_accept_inf=yes
 ],[
   ac_cv_atof_accept_inf=no
@@ -536,7 +528,7 @@ dnl
 dnl Check if HUGE_VAL == INF
 dnl
 AC_CACHE_CHECK(whether HUGE_VAL == INF, ac_cv_huge_val_inf,[
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
 #include <stdlib.h>
 
@@ -555,7 +547,7 @@ int main(int argc, char** argv)
 {
 	return zend_isinf(HUGE_VAL) ? 0 : 1;
 }
-],[
+]])],[
   ac_cv_huge_val_inf=yes
 ],[
   ac_cv_huge_val_inf=no
@@ -571,7 +563,7 @@ dnl
 dnl Check if HUGE_VAL + -HUGEVAL == NAN
 dnl
 AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
 #include <stdlib.h>
 
@@ -592,7 +584,7 @@ int main(int argc, char** argv)
 	return zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
 #endif
 }
-],[
+]])],[
   ac_cv_huge_val_nan=yes
 ],[
   ac_cv_huge_val_nan=no

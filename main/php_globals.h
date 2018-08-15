@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_GLOBALS_H
 #define PHP_GLOBALS_H
 
@@ -170,6 +168,7 @@ struct _php_core_globals {
 	zend_long syslog_facility;
 	char *syslog_ident;
 	zend_bool have_called_openlog;
+	zend_long syslog_filter;
 };
 
 

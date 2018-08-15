@@ -16,9 +16,6 @@
 // | Authors: Shane Caraveo <Shane@Caraveo.com>   Port to PEAR and more   |
 // | Authors: Dietrich Ayala <dietrich@ganx4.com> Original Author         |
 // +----------------------------------------------------------------------+
-//
-// $Id$
-//
 
 class SOAP_Interop_GroupB {
 

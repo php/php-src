@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 BEGIN_EXTERN_C()
 void phar_intercept_functions(void);
 void phar_release_functions(void);

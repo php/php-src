@@ -74,7 +74,7 @@ foreach ($needles as $needle) {
 }
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing strripos() function: with double quoted strings ***
 -- Iteration 1 --
 int(28)
@@ -132,24 +132,56 @@ int(8)
 bool(false)
 int(8)
 -- Iteration 12 --
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
 -- Iteration 13 --
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
 -- Iteration 14 --
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
 -- Iteration 15 --
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
 -- Iteration 16 --
 bool(false)

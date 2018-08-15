@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension libxml
 
 PHP_ARG_ENABLE(libxml, whether to enable LIBXML support,
 [  --disable-libxml        Disable LIBXML support], yes)

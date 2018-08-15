@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_closures.h"
@@ -413,7 +411,7 @@ static zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int t
 
 static int zend_closure_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
 {
-	if (has_set_exists != 2) {
+	if (has_set_exists != ZEND_PROPERTY_EXISTS) {
 		ZEND_CLOSURE_PROPERTY_ERROR();
 	}
 	return 0;

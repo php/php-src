@@ -10,7 +10,7 @@ Gettext basic test
 	}
 ?>
 --FILE--
-<?php // $Id$
+<?php
 
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'fi_FI');

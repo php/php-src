@@ -396,7 +396,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_body, 0, 0, 1)
 	ZEND_ARG_INFO(0, tidy)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_construct, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_construct, 0, 0, 0)
     ZEND_ARG_INFO(0, filename)
     ZEND_ARG_INFO(0, config_file)
     ZEND_ARG_INFO(0, encoding)

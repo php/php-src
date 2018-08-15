@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef PHP_SESSION_H
 #define PHP_SESSION_H
 
@@ -157,6 +155,7 @@ typedef struct _php_ps_globals {
 	char *cookie_domain;
 	zend_bool  cookie_secure;
 	zend_bool  cookie_httponly;
+	char *cookie_samesite;
 	const ps_module *mod;
 	const ps_module *default_mod;
 	void *mod_data;

@@ -586,6 +586,16 @@ html_errors = On
 ; the message. Only used when error_log is set to syslog.
 ;syslog.facility = user
 
+; Set this to disable filtering control characters (the default).
+; Some loggers only accept NVT-ASCII, others accept anything that's not
+; control characters. If your logger accepts everything, then no filtering
+; is needed at all.
+; Allowed values are:
+;   ascii (only base ASCII characters)
+;   no_ctrl (all characters except control characters)
+;   all (all characters)
+;syslog.filter = ascii
+
 ;windows.show_crt_warning
 ; Default value: 0
 ; Development value: 0
@@ -1379,6 +1389,11 @@ session.cookie_domain =
 ; inaccessible to browser scripting languages such as JavaScript.
 ; http://php.net/session.cookie-httponly
 session.cookie_httponly =
+
+; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
+; Current valid values are "Lax" or "Strict"
+; https://tools.ietf.org/html/draft-west-first-party-cookies-07
+session.cookie_samesite =
 
 ; Handler used to serialize data. php is the standard serializer of PHP.
 ; http://php.net/session.serialize-handler

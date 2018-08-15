@@ -1,8 +1,6 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension readline
 
-PHP_ARG_WITH(libedit,for libedit readline replacement, 
+PHP_ARG_WITH(libedit,for libedit readline replacement,
 [  --with-libedit[=DIR]      Include libedit readline replacement (CLI/CGI only)])
 
 if test "$PHP_LIBEDIT" = "no"; then
@@ -93,11 +91,11 @@ elif test "$PHP_LIBEDIT" != "no"; then
 
   PHP_CHECK_LIBRARY(edit, readline,
   [
-    PHP_ADD_LIBRARY_WITH_PATH(edit, $LIBEDIT_DIR/$PHP_LIBDIR, READLINE_SHARED_LIBADD)  
+    PHP_ADD_LIBRARY_WITH_PATH(edit, $LIBEDIT_DIR/$PHP_LIBDIR, READLINE_SHARED_LIBADD)
   ], [
     AC_MSG_ERROR(edit library required by readline not found)
   ], [
-    -L$READLINE_DIR/$PHP_LIBDIR 
+    -L$READLINE_DIR/$PHP_LIBDIR
   ])
 
   PHP_CHECK_LIBRARY(edit, rl_callback_read_char,

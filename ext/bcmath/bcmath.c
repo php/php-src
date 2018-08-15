@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -474,7 +472,7 @@ PHP_FUNCTION(bcpow)
 /* }}} */
 
 /* {{{ proto string bcsqrt(string operand [, int scale])
-   Returns the square root of an arbitray precision number */
+   Returns the square root of an arbitrary precision number */
 PHP_FUNCTION(bcsqrt)
 {
 	zend_string *left;

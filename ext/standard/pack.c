@@ -15,7 +15,6 @@
    | Author: Chris Schneider <cschneid@relog.ch>                          |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include "php.h"
 

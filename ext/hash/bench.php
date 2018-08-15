@@ -1,5 +1,4 @@
 <?php
-/* $Id$ */
 
 /*
  This gives rather interesting results :)

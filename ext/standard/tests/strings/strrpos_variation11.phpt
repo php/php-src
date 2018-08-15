@@ -91,31 +91,67 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing strrpos() function with unexpected values for haystack and needle ***
 -- Iteration 1 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 2 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 3 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 4 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 5 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 6 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 7 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 8 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 9 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 10 --
 
@@ -153,23 +189,43 @@ bool(false)
 Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 -- Iteration 15 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 16 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 17 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 18 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 19 --
 
 Notice: Object of class sample could not be converted to int in %s on line %d
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 
 Notice: Object of class sample could not be converted to int in %s on line %d
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 20 --
 bool(false)
@@ -178,10 +234,18 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 22 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 23 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 24 --
 
@@ -191,9 +255,17 @@ bool(false)
 Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 -- Iteration 25 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 26 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 *** Done ***

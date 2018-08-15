@@ -20,8 +20,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -583,19 +581,16 @@ static void cli_register_file_handles(void) /* {{{ */
 	php_stream_to_zval(s_out, &oc.value);
 	php_stream_to_zval(s_err, &ec.value);
 
-	ic.flags = CONST_CS;
+	ZEND_CONSTANT_SET_FLAGS(&ic, CONST_CS, 0);
 	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
-	ic.module_number = 0;
 	zend_register_constant(&ic);
 
-	oc.flags = CONST_CS;
+	ZEND_CONSTANT_SET_FLAGS(&oc, CONST_CS, 0);
 	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
-	oc.module_number = 0;
 	zend_register_constant(&oc);
 
-	ec.flags = CONST_CS;
+	ZEND_CONSTANT_SET_FLAGS(&ec, CONST_CS, 0);
 	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
-	ec.module_number = 0;
 	zend_register_constant(&ec);
 }
 /* }}} */

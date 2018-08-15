@@ -1,4 +1,4 @@
-<?php # $Id$
+<?php
 /* piece together a windows binary distro */
 
 $php_version = $argv[1];

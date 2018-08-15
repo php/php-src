@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension bz2
 
 PHP_ARG_WITH(bz2, for BZip2 support,
 [  --with-bz2[=DIR]          Include BZip2 support])
@@ -24,7 +22,7 @@ if test "$PHP_BZ2" != "no"; then
     AC_MSG_ERROR(Please reinstall the BZip2 distribution)
   fi
 
-  PHP_CHECK_LIBRARY(bz2, BZ2_bzerror, 
+  PHP_CHECK_LIBRARY(bz2, BZ2_bzerror,
   [
     PHP_ADD_INCLUDE($BZIP_DIR/include)
     PHP_ADD_LIBRARY_WITH_PATH(bz2, $BZIP_DIR/$PHP_LIBDIR, BZ2_SHARED_LIBADD)

@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension pdo_pgsql
 dnl vim:et:sw=2:ts=2:
 

@@ -96,9 +96,9 @@ void zlog_stream_init_ex(struct zlog_stream *stream, int flags, int fd);
 void zlog_stream_set_decorating(struct zlog_stream *stream, zlog_bool decorate);
 void zlog_stream_set_wrapping(struct zlog_stream *stream, zlog_bool wrap);
 void zlog_stream_set_msg_quoting(struct zlog_stream *stream, zlog_bool quote);
-ssize_t zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt, ...)
+zlog_bool zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt, ...)
 		__attribute__ ((format(printf,2,3)));
-ssize_t zlog_stream_set_msg_suffix(
+zlog_bool zlog_stream_set_msg_suffix(
 		struct zlog_stream *stream, const char *suffix, const char *final_suffix);
 #define zlog_stream_prefix(stream) \
 	zlog_stream_prefix_ex(stream, __func__, __LINE__)

@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension openssl
 
 PHP_ARG_WITH(openssl, for OpenSSL support,
 [  --with-openssl[=DIR]      Include OpenSSL support (requires OpenSSL >= 1.0.1)])
@@ -21,7 +19,7 @@ if test "$PHP_OPENSSL" != "no"; then
 
   AC_CHECK_FUNCS([RAND_egd])
 
-  PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD, 
+  PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD,
   [
     AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
   ], [

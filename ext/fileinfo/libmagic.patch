@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2018-04-28 19:01:28.526670400 +0200
-+++ libmagic/apprentice.c	2018-06-03 12:40:18.162037100 +0200
++++ libmagic/apprentice.c	2018-07-31 13:52:08.697363400 +0200
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -1244,7 +1244,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	switch (m->str_flags & PSTRING_LEN) {
 diff -u libmagic.orig/apptype.c libmagic/apptype.c
 --- libmagic.orig/apptype.c	2018-04-28 19:01:29.797354200 +0200
-+++ libmagic/apptype.c	2018-04-28 19:01:19.034090200 +0200
++++ libmagic/apptype.c	2018-07-31 13:25:38.362779700 +0200
 @@ -1,15 +1,15 @@
  /*
   * Adapted from: apptype.c, Written by Eberhard Mattes and put into the
@@ -1279,7 +1279,7 @@ diff -u libmagic.orig/apptype.c libmagic/apptype.c
  #include "file.h"
 diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
 --- libmagic.orig/ascmagic.c	2018-04-28 19:01:31.299488000 +0200
-+++ libmagic/ascmagic.c	2018-04-29 19:10:15.739206700 +0200
++++ libmagic/ascmagic.c	2018-07-31 13:37:20.127073500 +0200
 @@ -90,7 +90,7 @@
  		rv = file_ascmagic_with_encoding(ms, &bb,
  		    ubuf, ulen, code, type, text);
@@ -1310,7 +1310,7 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  }
 diff -u libmagic.orig/buffer.c libmagic/buffer.c
 --- libmagic.orig/buffer.c	2018-04-28 19:01:31.584710700 +0200
-+++ libmagic/buffer.c	2018-04-29 19:10:15.739206700 +0200
++++ libmagic/buffer.c	2018-07-31 13:37:20.128064500 +0200
 @@ -31,7 +31,11 @@
  #endif	/* lint */
  
@@ -1361,7 +1361,7 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2018-04-28 19:01:28.842744400 +0200
-+++ libmagic/cdf.c	2018-04-29 19:10:15.739206700 +0200
++++ libmagic/cdf.c	2018-07-31 13:37:20.131077200 +0200
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1619,7 +1619,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  #endif
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
 --- libmagic.orig/cdf.h	2018-04-28 19:01:29.881514500 +0200
-+++ libmagic/cdf.h	2018-04-30 12:08:45.188054100 +0200
++++ libmagic/cdf.h	2018-07-31 13:37:20.133071700 +0200
 @@ -35,10 +35,10 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1645,7 +1645,7 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
 --- libmagic.orig/cdf_time.c	2018-04-28 19:01:31.161773200 +0200
-+++ libmagic/cdf_time.c	2018-04-30 12:08:45.195656900 +0200
++++ libmagic/cdf_time.c	2018-07-31 13:37:20.135068400 +0200
 @@ -56,7 +56,7 @@
  
  	for (y = CDF_BASE_YEAR; y < year; y++)
@@ -1666,7 +1666,7 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  static int
 diff -u libmagic.orig/compress.c libmagic/compress.c
 --- libmagic.orig/compress.c	2018-04-28 19:01:30.382374500 +0200
-+++ libmagic/compress.c	2018-04-30 12:08:33.759250600 +0200
++++ libmagic/compress.c	2018-07-31 13:37:20.137073100 +0200
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -1967,7 +1967,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
 diff -u libmagic.orig/der.c libmagic/der.c
 --- libmagic.orig/der.c	2018-04-28 19:01:29.940846500 +0200
-+++ libmagic/der.c	2018-04-29 19:10:15.739206700 +0200
++++ libmagic/der.c	2018-07-31 13:37:20.138063600 +0200
 @@ -51,7 +51,9 @@
  #include "magic.h"
  #include "der.h"
@@ -2024,7 +2024,7 @@ diff -u libmagic.orig/der.c libmagic/der.c
  		    der_tag(buf, sizeof(buf), tag), len);
 diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
 --- libmagic.orig/elfclass.h	2018-04-28 19:01:30.914347800 +0200
-+++ libmagic/elfclass.h	2018-04-28 19:01:26.424724600 +0200
++++ libmagic/elfclass.h	2018-07-31 13:25:38.376774400 +0200
 @@ -1,7 +1,7 @@
  /*
   * Copyright (c) Christos Zoulas 2008.
@@ -2072,7 +2072,7 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    (int)elf_getu16(swap, elfhdr.e_shstrndx),
 diff -u libmagic.orig/encoding.c libmagic/encoding.c
 --- libmagic.orig/encoding.c	2018-04-28 19:01:27.879315100 +0200
-+++ libmagic/encoding.c	2018-04-29 19:10:15.754846100 +0200
++++ libmagic/encoding.c	2018-07-31 13:37:20.141064800 +0200
 @@ -88,12 +88,12 @@
  	*code_mime = "binary";
  
@@ -2102,7 +2102,7 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  }
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2018-04-28 19:01:31.045873100 +0200
-+++ libmagic/file.h	2018-04-29 19:10:15.754846100 +0200
++++ libmagic/file.h	2018-07-31 13:37:20.143069600 +0200
 @@ -27,21 +27,15 @@
   */
  /*
@@ -2388,7 +2388,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  #endif
 diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
 --- libmagic.orig/fsmagic.c	2018-04-28 19:01:27.680000600 +0200
-+++ libmagic/fsmagic.c	2018-06-03 12:40:06.509391200 +0200
++++ libmagic/fsmagic.c	2018-07-31 13:52:08.699355500 +0200
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -2749,7 +2749,7 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  	case S_IFSOCK:
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
 --- libmagic.orig/funcs.c	2018-04-28 19:01:31.500047500 +0200
-+++ libmagic/funcs.c	2018-05-28 17:17:42.848215600 +0200
++++ libmagic/funcs.c	2018-08-06 14:23:44.140913500 +0200
 @@ -31,7 +31,6 @@
  #endif	/* lint */
  
@@ -2917,17 +2917,26 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0) {
  		m = file_zmagic(ms, &b, inname);
  		if ((ms->flags & MAGIC_DEBUG) != 0)
-@@ -240,12 +240,14 @@
+@@ -239,13 +239,22 @@
+ 	}
  
  	/* Check if we have a CDF file */
- 	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
+-	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
 -		m = file_trycdf(ms, &b);
 -		if ((ms->flags & MAGIC_DEBUG) != 0)
 -			(void)fprintf(stderr, "[try cdf %d]\n", m);
 -		if (m) {
 -			if (checkdone(ms, &rv))
 -				goto done;
-+		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
++	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0 && stream) {
++#ifdef _WIN64
++		php_socket_t _fd = fd;
++		int _ret = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&_fd, 0);
++		fd = (int)_fd;
++#else
++		int _ret = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0);
++#endif
++		if (SUCCESS == _ret) {
 +			m = file_trycdf(ms, &b);
 +			if ((ms->flags & MAGIC_DEBUG) != 0)
 +				(void)fprintf(stderr, "[try cdf %d]\n", m);
@@ -2938,7 +2947,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		}
  	}
  
-@@ -315,7 +317,7 @@
+@@ -315,7 +324,7 @@
  		if (file_printf(ms, "%s", code_mime) == -1)
  			rv = -1;
  	}
@@ -2947,7 +2956,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
   done_encoding:
  #endif
  	buffer_fini(&b);
-@@ -324,7 +326,6 @@
+@@ -324,7 +333,6 @@
  
  	return m;
  }
@@ -2955,7 +2964,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
  protected int
  file_reset(struct magic_set *ms, int checkloaded)
-@@ -334,11 +335,11 @@
+@@ -334,11 +342,11 @@
  		return -1;
  	}
  	if (ms->o.buf) {
@@ -2969,7 +2978,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		ms->o.pbuf = NULL;
  	}
  	ms->event_flags &= ~EVENT_HAD_ERR;
-@@ -376,7 +377,7 @@
+@@ -376,7 +384,7 @@
  		return NULL;
  	}
  	psize = len * 4 + 1;
@@ -2978,7 +2987,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		file_oomem(ms, psize);
  		return NULL;
  	}
-@@ -440,8 +441,8 @@
+@@ -440,8 +448,8 @@
  	if (level >= ms->c.len) {
  		len = (ms->c.len = 20 + level) * sizeof(*ms->c.li);
  		ms->c.li = CAST(struct level_info *, (ms->c.li == NULL) ?
@@ -2989,7 +2998,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		if (ms->c.li == NULL) {
  			file_oomem(ms, len);
  			return -1;
-@@ -464,76 +465,41 @@
+@@ -464,76 +472,41 @@
  protected int
  file_replace(struct magic_set *ms, const char *pat, const char *rep)
  {
@@ -3049,7 +3058,12 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
 -	return rx->rc = regcomp(&rx->rx, pat, flags);
 -}
--
++	zend_string_release_ex(repl, 0);
++	if (NULL == res) {
++		rep_cnt = -1;
++		goto out;
++	}
+ 
 -protected int
 -file_regexec(file_regex_t *rx, const char *str, size_t nmatch,
 -    regmatch_t* pmatch, int eflags)
@@ -3059,11 +3073,8 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
 -	memset(pmatch, 0, nmatch * sizeof(*pmatch));
 -	return regexec(&rx->rx, str, nmatch, pmatch, eflags);
 -}
-+	zend_string_release_ex(repl, 0);
-+	if (NULL == res) {
-+		rep_cnt = -1;
-+		goto out;
-+	}
++	strncpy(ms->o.buf, ZSTR_VAL(res), ZSTR_LEN(res));
++	ms->o.buf[ZSTR_LEN(res)] = '\0';
  
 -protected void
 -file_regfree(file_regex_t *rx)
@@ -3077,15 +3088,13 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
 -	(void)setlocale(LC_CTYPE, rx->old_lc_ctype);
 -#endif
 -}
-+	strncpy(ms->o.buf, ZSTR_VAL(res), ZSTR_LEN(res));
-+	ms->o.buf[ZSTR_LEN(res)] = '\0';
++	zend_string_release_ex(res, 0);
  
 -protected void
 -file_regerror(file_regex_t *rx, int rc, struct magic_set *ms)
 -{
 -	char errmsg[512];
-+	zend_string_release_ex(res, 0);
- 
+-
 -	(void)regerror(rc, &rx->rx, errmsg, sizeof(errmsg));
 -	file_magerror(ms, "regex error %d for `%s', (%s)", rc, rx->pat,
 -	    errmsg);
@@ -3095,7 +3104,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  }
  
  protected file_pushbuf_t *
-@@ -544,7 +510,7 @@
+@@ -544,7 +517,7 @@
  	if (ms->event_flags & EVENT_HAD_ERR)
  		return NULL;
  
@@ -3104,7 +3113,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		return NULL;
  
  	pb->buf = ms->o.buf;
-@@ -562,8 +528,8 @@
+@@ -562,8 +535,8 @@
  	char *rbuf;
  
  	if (ms->event_flags & EVENT_HAD_ERR) {
@@ -3115,7 +3124,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		return NULL;
  	}
  
-@@ -572,7 +538,7 @@
+@@ -572,7 +545,7 @@
  	ms->o.buf = pb->buf;
  	ms->offset = pb->offset;
  
@@ -3126,7 +3135,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
 diff -u libmagic.orig/magic.c libmagic/magic.c
 --- libmagic.orig/magic.c	2018-04-28 19:01:31.399768500 +0200
-+++ libmagic/magic.c	2018-04-29 19:10:15.754846100 +0200
++++ libmagic/magic.c	2018-07-31 13:37:20.150066600 +0200
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -3603,7 +3612,7 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  magic_error(struct magic_set *ms)
 diff -u libmagic.orig/magic.h libmagic/magic.h
 --- libmagic.orig/magic.h	2018-04-28 19:01:30.582527300 +0200
-+++ libmagic/magic.h	2018-04-29 19:10:15.754846100 +0200
++++ libmagic/magic.h	2018-07-31 13:37:20.152073900 +0200
 @@ -122,6 +122,7 @@
  
  const char *magic_getpath(const char *, int);
@@ -3614,7 +3623,7 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	2018-04-28 19:01:29.327806300 +0200
-+++ libmagic/print.c	2018-04-30 12:08:45.204354800 +0200
++++ libmagic/print.c	2018-07-31 13:37:20.156070200 +0200
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -3735,7 +3744,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
  		goto out;
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
 --- libmagic.orig/readcdf.c	2018-04-28 19:01:28.626965700 +0200
-+++ libmagic/readcdf.c	2018-04-30 12:08:45.217349600 +0200
++++ libmagic/readcdf.c	2018-07-31 13:37:20.158068500 +0200
 @@ -31,7 +31,11 @@
  
  #include <assert.h>
@@ -3872,7 +3881,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  	    if (NOTMIME(ms)) {
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2018-04-28 19:01:28.742463600 +0200
-+++ libmagic/softmagic.c	2018-06-03 12:01:41.672485700 +0200
++++ libmagic/softmagic.c	2018-07-31 13:52:08.703362300 +0200
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"

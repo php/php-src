@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension soap
 
 PHP_ARG_ENABLE(soap, whether to enable SOAP support,
@@ -11,8 +10,8 @@ fi
 
 if test "$PHP_SOAP" != "no"; then
 
-  if test "$PHP_LIBXML" = "no"; then   
-    AC_MSG_ERROR([SOAP extension requires LIBXML extension, add --enable-libxml])                
+  if test "$PHP_LIBXML" = "no"; then
+    AC_MSG_ERROR([SOAP extension requires LIBXML extension, add --enable-libxml])
   fi
 
   PHP_SETUP_LIBXML(SOAP_SHARED_LIBADD, [
