@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #76704 (mb_detect_order return value varies based on argument
     type). (cmb)
 
+- Opcache:
+  . Fixed bug #76747 (Opcache treats path containing "test.pharma.tld" as a phar
+    file). (Laruence)
+
 - phpdbg:
   . Fixed bug #76595 (phpdbg man page contains outdated information).
     (Kevin Abel)
