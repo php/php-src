@@ -1348,6 +1348,13 @@ static void zend_accel_add_key(const char *key, unsigned int key_length, zend_ac
 	}
 }
 
+static zend_always_inline zend_bool is_phar_file(zend_string *filename)
+{
+	return filename && ZSTR_LEN(filename) >= sizeof(".phar") &&
+		!memcmp(ZSTR_VAL(filename) + ZSTR_LEN(filename) - (sizeof(".phar")-1), ".phar", sizeof(".phar")-1) &&
+		!strstr(ZSTR_VAL(filename), "://");
+}
+
 #ifdef HAVE_OPCACHE_FILE_CACHE
 static zend_persistent_script *store_script_in_file_cache(zend_persistent_script *new_persistent_script)
 {
@@ -1372,10 +1379,7 @@ static zend_persistent_script *store_script_in_file_cache(zend_persistent_script
 
 	zend_shared_alloc_destroy_xlat_table();
 
-	new_persistent_script->is_phar =
-		new_persistent_script->script.filename &&
-		strstr(ZSTR_VAL(new_persistent_script->script.filename), ".phar") &&
-		!strstr(ZSTR_VAL(new_persistent_script->script.filename), "://");
+	new_persistent_script->is_phar = is_phar_file(new_persistent_script->script.filename);
 
 	/* Consistency check */
 	if ((char*)new_persistent_script->mem + new_persistent_script->size != (char*)ZCG(mem)) {
@@ -1540,10 +1544,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 
 	zend_shared_alloc_destroy_xlat_table();
 
-	new_persistent_script->is_phar =
-		new_persistent_script->script.filename &&
-		strstr(ZSTR_VAL(new_persistent_script->script.filename), ".phar") &&
-		!strstr(ZSTR_VAL(new_persistent_script->script.filename), "://");
+	new_persistent_script->is_phar = is_phar_file(new_persistent_script->script.filename);
 
 	/* Consistency check */
 	if ((char*)new_persistent_script->mem + new_persistent_script->size != (char*)ZCG(mem)) {
