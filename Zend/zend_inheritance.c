@@ -795,6 +795,7 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
 {
+	uint32_t parent_constants_num;
 	zend_property_info *property_info;
 	zend_function *func;
 	zend_string *key;
@@ -959,16 +960,24 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (zend_hash_num_elements(&parent_ce->constants_table)) {
+	if ((parent_constants_num = zend_hash_num_elements(&parent_ce->constants_table))) {
 		zend_class_constant *c;
 
-		zend_hash_extend(&ce->constants_table,
-			zend_hash_num_elements(&ce->constants_table) +
-			zend_hash_num_elements(&parent_ce->constants_table), 0);
-
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->constants_table, key, c) {
-			do_inherit_class_constant(key, c, ce);
+			if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PRIVATE) {
+				parent_constants_num--;
+			}
 		} ZEND_HASH_FOREACH_END();
+
+		if (parent_constants_num) {
+			zend_hash_extend(&ce->constants_table,
+				zend_hash_num_elements(&ce->constants_table) +
+				parent_constants_num, 0);
+
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->constants_table, key, c) {
+				do_inherit_class_constant(key, c, ce);
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 
 	if (zend_hash_num_elements(&parent_ce->function_table)) {
