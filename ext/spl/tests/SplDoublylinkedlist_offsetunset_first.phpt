@@ -11,7 +11,7 @@ $list->push('thar');
 $list->offsetUnset(0);
 var_dump($list);
 ?>
---EXPECTF--
+--EXPECT--
 object(SplDoublyLinkedList)#1 (2) {
   ["flags":"SplDoublyLinkedList":private]=>
   int(0)

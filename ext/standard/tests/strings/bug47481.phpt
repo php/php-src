@@ -21,7 +21,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 -- Before sorting: --
 array(6) {
   [0]=>
