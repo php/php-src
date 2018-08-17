@@ -24,7 +24,7 @@ echo "*** Testing session_set_cookie_params() : array parameter variation ***\n"
 
 // Invalid cases
 var_dump(session_set_cookie_params([]));
-var_dump(session_set_cookie_params(["unknown_key" => true]));
+var_dump(session_set_cookie_params(["unknown_key" => true, "secure_invalid" => true]));
 
 var_dump(ini_get("session.cookie_secure"));
 var_dump(ini_get("session.cookie_samesite"));
@@ -50,6 +50,8 @@ Warning: session_set_cookie_params(): No valid keys were found in the options ar
 bool(false)
 
 Warning: session_set_cookie_params(): Unrecognized key 'unknown_key' found in the options array in %s
+
+Warning: session_set_cookie_params(): Unrecognized key 'secure_invalid' found in the options array in %s
 
 Warning: session_set_cookie_params(): No valid keys were found in the options array in %s
 bool(false)
