@@ -296,8 +296,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 						}
 					}
 				} ZEND_HASH_FOREACH_END();
-				zend_hash_destroy(&ce->constants_table);
 			}
+			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
