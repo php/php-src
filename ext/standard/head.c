@@ -213,32 +213,28 @@ static int php_head_parse_cookie_options_array(zval *options, zend_long *expires
 
 	if (*path) {
 		*path = NULL;
-		*domain = NULL;
-		*secure = 0;
-		*httponly = 0;
 		php_error_docref(NULL, E_WARNING, "Cannot pass arguments after the options array");
 		return 0;
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), key, value) {
 		if (key) {
-			ZVAL_DEREF(value);
-			if(!strcasecmp("expires", ZSTR_VAL(key))) {
+			if (zend_string_equals_literal_ci(key, "expires")) {
 				*expires = zval_get_long(value);
 				found++;
-			} else if(!strcasecmp("path", ZSTR_VAL(key))) {
+			} else if (zend_string_equals_literal_ci(key, "path")) {
 				*path = zval_get_string(value);
 				found++;
-			} else if(!strcasecmp("domain", ZSTR_VAL(key))) {
+			} else if (zend_string_equals_literal_ci(key, "domain")) {
 				*domain = zval_get_string(value);
 				found++;
-			} else if(!strcasecmp("secure", ZSTR_VAL(key))) {
+			} else if (zend_string_equals_literal_ci(key, "secure")) {
 				*secure = zval_is_true(value);
 				found++;
-			} else if(!strcasecmp("httponly", ZSTR_VAL(key))) {
+			} else if (zend_string_equals_literal_ci(key, "httponly")) {
 				*httponly = zval_is_true(value);
 				found++;
-			} else if(!strcasecmp("samesite", ZSTR_VAL(key))) {
+			} else if (zend_string_equals_literal_ci(key, "samesite")) {
 				*samesite = zval_get_string(value);
 				found++;
 			} else {
@@ -265,7 +261,7 @@ PHP_FUNCTION(setcookie)
 	zval *expires_or_options = NULL;
 	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	zend_long expires = 0;
-	zend_bool secure = 0, httponly = 0, options_array = 0;
+	zend_bool secure = 0, httponly = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 7)
 		Z_PARAM_STR(name)
@@ -280,7 +276,6 @@ PHP_FUNCTION(setcookie)
 
 	if (expires_or_options) {
 		if (Z_TYPE_P(expires_or_options) == IS_ARRAY) {
-			options_array = 1;
 			if (!php_head_parse_cookie_options_array(expires_or_options, &expires, &path, &domain, &secure, &httponly, &samesite)) {
 				RETVAL_FALSE;
 				goto cleanup;
@@ -297,7 +292,7 @@ PHP_FUNCTION(setcookie)
 	}
 
 cleanup:
-	if (options_array) {
+	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {
 		if (path) {
 			zend_string_release(path);
 		}
