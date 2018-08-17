@@ -3545,6 +3545,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CON
 	SAVE_OPLINE();
 	value = RT_CONSTANT(opline, opline->op1);
 
+	/* FETCH_OBJ_IS may return IS_REFERENCE in TMP_VAR */
 	if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
 		if (IS_CONST & IS_VAR) {
 			ref = value;
@@ -12791,6 +12792,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_TMPVAR_HANDLER(Z
 	SAVE_OPLINE();
 	value = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
+	/* FETCH_OBJ_IS may return IS_REFERENCE in TMP_VAR */
 	if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
 		if ((IS_TMP_VAR|IS_VAR) & IS_VAR) {
 			ref = value;
@@ -37925,6 +37927,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CV_HANDLER(ZEND_
 	SAVE_OPLINE();
 	value = _get_zval_ptr_cv_BP_VAR_IS(opline->op1.var EXECUTE_DATA_CC);
 
+	/* FETCH_OBJ_IS may return IS_REFERENCE in TMP_VAR */
 	if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
 		if (IS_CV & IS_VAR) {
 			ref = value;
