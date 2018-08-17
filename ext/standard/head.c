@@ -286,7 +286,7 @@ PHP_FUNCTION(setcookie)
 				goto cleanup;
 			}
 		} else {
-			expires = Z_LVAL_P(expires_or_options);
+			expires = zval_get_long(expires_or_options);
 		}
 	}
 
