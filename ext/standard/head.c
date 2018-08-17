@@ -327,7 +327,7 @@ PHP_FUNCTION(setrawcookie)
 			}
 			php_head_parse_cookie_options_array(expires_or_options, &expires, &path, &domain, &secure, &httponly, &samesite);
 		} else {
-			expires = Z_LVAL_P(expires_or_options);
+			expires = zval_get_long(expires_or_options);
 		}
 	}
 
