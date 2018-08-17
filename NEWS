@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2018, PHP 7.2.10
 
 - Core:
+  . Fixed bug #76754 (parent private constant in extends class memory leak).
+    (Laruence)
   . Fixed bug #72443 (Generate enabled extension). (petk)
 
 - Bz2:
