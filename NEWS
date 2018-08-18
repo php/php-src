@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #76747 (Opcache treats path containing "test.pharma.tld" as a phar
     file). (Laruence)
 
+- SPL:
+  . Fixed bug #68175 (RegexIterator pregFlags are NULL instead of 0). (Tim
+    Siebels)
+
 - Standard:
   . Fixed bug #76755 (setcookie does not accept "double" type for expire time).
     (Laruence)

@@ -2202,7 +2202,7 @@ SPL_METHOD(RegexIterator, getPregFlags)
 	if (intern->u.regex.use_flags) {
 		RETURN_LONG(intern->u.regex.preg_flags);
 	} else {
-		return;
+		RETURN_LONG(0);
 	}
 } /* }}} */
 
