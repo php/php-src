@@ -19,7 +19,7 @@ if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
 ) else (
 	set BRANCH=master
 )
-set STABILITY=staging
+set STABILITY=stable
 set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VC%-%PHP_SDK_ARCH%
 rem SDK is cached, deps info is cached as well
 echo Updating dependencies in %DEPS_DIR%
