@@ -869,7 +869,7 @@ int _php_ibase_attach_db(char **args, size_t *len, zend_long *largs, isc_db_hand
 		buf_len -= dpb_len;
 	}
 	if (largs[SYNC] && buf_len > 0) {
-		dpb_len = slprintf(dpb, buf_len, "%c\1%c", isc_dpb_force_write, largs[SYNC] == isc_spb_prp_wm_sync ? 1 : 0);
+		dpb_len = slprintf(dpb, buf_len, "%c\1%c", isc_dpb_force_write, largs[SYNC] == isc_spb_prp_wm_sync);
 		dpb += dpb_len;
 		buf_len -= dpb_len;
 	}
