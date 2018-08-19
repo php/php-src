@@ -49,6 +49,10 @@ PHP                                                                        NEWS
     type). (cmb)
   . Fixed bug #76706 (mbstring.http_output_conv_mimetypes is ignored). (cmb)
 
+- OpenSSL:
+  . Fixed bug #76705 (unusable ssl => peer_fingerprint in
+    stream_context_create()). (Jakub Zelenka)
+
 - phpdbg:
   . Fixed bug #76595 (phpdbg man page contains outdated information).
     (Kevin Abel)
