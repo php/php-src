@@ -72,7 +72,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
      HASH_FLAG_APPLY_PROTECTION flag and ZEND_HASH_APPLY_PROTECTION() macro
      are removed. All mutable arrays should use recursion protection.
      Corresponding checks should be replaced by Z_REFCOUNTED() or
-     !(GC_GLAGS(p) & GC_IMMUTABLE).
+     !(GC_FLAGS(p) & GC_IMMUTABLE).
 
   d. HASH_FLAG_PERSISTENT renamed into IS_ARRAY_PERSISTENT and moved into
      GC_FLAGS (to be consistent with IS_STR_PERSISTENT).
