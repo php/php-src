@@ -1229,6 +1229,9 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 
+	if (intern->file_name == NULL) {
+		spl_filesystem_object_get_file_name(intern);
+	}
 #if defined(PHP_WIN32) || HAVE_SYMLINK
 	if (intern->file_name == NULL) {
 		php_error_docref(NULL, E_WARNING, "Empty filename");
