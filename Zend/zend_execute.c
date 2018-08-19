@@ -845,10 +845,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 			zend_string *dest;
 
 			/* on success "arg" is converted to IS_STRING */
-			if (!zend_parse_arg_str_weak(arg, &dest)) {
-				return 0;
-			}
-			return 1;
+			return zend_parse_arg_str_weak(arg, &dest);
 		}
 		default:
 			return 0;

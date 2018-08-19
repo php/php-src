@@ -178,7 +178,7 @@ static int spl_ptr_heap_zval_max_cmp(zval *a, zval *b, zval *object) { /* {{{ */
 				/* exception or call failure */
 				return 0;
 			}
-			return lval > 0 ? 1 : (lval < 0 ? -1 : 0);
+			return ZEND_NORMALIZE_BOOL(lval);
 		}
 	}
 
@@ -202,7 +202,7 @@ static int spl_ptr_heap_zval_min_cmp(zval *a, zval *b, zval *object) { /* {{{ */
 				/* exception or call failure */
 				return 0;
 			}
-			return lval > 0 ? 1 : (lval < 0 ? -1 : 0);
+			return ZEND_NORMALIZE_BOOL(lval);
 		}
 	}
 
@@ -230,7 +230,7 @@ static int spl_ptr_pqueue_elem_cmp(zval *a_zv, zval *b_zv, zval *object) { /* {{
 				/* exception or call failure */
 				return 0;
 			}
-			return lval > 0 ? 1 : (lval < 0 ? -1 : 0);
+			return ZEND_NORMALIZE_BOOL(lval);
 		}
 	}
 

@@ -553,7 +553,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulon
 				break;
 
 			case PDO_PARAM_BOOL:
-				S->cols[colno].boolval = **ptr == 't' ? 1: 0;
+				S->cols[colno].boolval = **ptr == 't';
 				*ptr = (char *) &(S->cols[colno].boolval);
 				*len = sizeof(zend_bool);
 				break;

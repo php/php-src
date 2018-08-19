@@ -36,11 +36,8 @@ static int zend_remove_ini_entries(zval *el, void *arg) /* {{{ */
 {
 	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
 	int module_number = *(int *)arg;
-	if (ini_entry->module_number == module_number) {
-		return 1;
-	} else {
-		return 0;
-	}
+
+	return ini_entry->module_number == module_number;
 }
 /* }}} */
 
