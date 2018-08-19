@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fixed bug #76747 (Opcache treats path containing "test.pharma.tld" as a phar
     file). (Laruence)
 
+- OpenSSL:
+  . Fixed bug #76705 (unusable ssl => peer_fingerprint in
+    stream_context_create()). (Jakub Zelenka)
+
 - phpdbg:
   . Fixed bug #76595 (phpdbg man page contains outdated information).
     (Kevin Abel)

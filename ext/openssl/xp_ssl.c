@@ -481,6 +481,7 @@ static zend_bool php_openssl_matches_common_name(X509 *peer, const char *subject
 static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stream) /* {{{ */
 {
 	zval *val = NULL;
+	zval *peer_fingerprint;
 	char *peer_name = NULL;
 	int err,
 		must_verify_peer,
@@ -498,6 +499,7 @@ static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_
 		: sslsock->is_client;
 
 	must_verify_fingerprint = GET_VER_OPT("peer_fingerprint");
+	peer_fingerprint = val;
 
 	if ((must_verify_peer || must_verify_peer_name || must_verify_fingerprint) && peer == NULL) {
 		php_error_docref(NULL, E_WARNING, "Could not get peer certificate");
@@ -529,8 +531,8 @@ static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_
 
 	/* If a peer_fingerprint match is required this trumps peer and peer_name verification */
 	if (must_verify_fingerprint) {
-		if (Z_TYPE_P(val) == IS_STRING || Z_TYPE_P(val) == IS_ARRAY) {
-			if (!php_openssl_x509_fingerprint_match(peer, val)) {
+		if (Z_TYPE_P(peer_fingerprint) == IS_STRING || Z_TYPE_P(peer_fingerprint) == IS_ARRAY) {
+			if (!php_openssl_x509_fingerprint_match(peer, peer_fingerprint)) {
 				php_error_docref(NULL, E_WARNING,
 					"peer_fingerprint match failure"
 				);
