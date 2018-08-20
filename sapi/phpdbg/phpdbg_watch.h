@@ -47,7 +47,7 @@ typedef enum {
 	WATCH_ON_REFCOUNTED,
 	WATCH_ON_STR,
 	WATCH_ON_HASHDATA,
-	WATCH_ON_BUCKET,
+	WATCH_ON_BUCKET
 } phpdbg_watchtype;
 
 

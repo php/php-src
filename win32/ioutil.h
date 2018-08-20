@@ -90,7 +90,7 @@ typedef enum {
 typedef enum {
 	PHP_WIN32_IOUTIL_NORM_OK,
 	PHP_WIN32_IOUTIL_NORM_PARTIAL,
-	PHP_WIN32_IOUTIL_NORM_FAIL,
+	PHP_WIN32_IOUTIL_NORM_FAIL
 } php_win32_ioutil_normalization_result;
 
 #define PHP_WIN32_IOUTIL_FW_SLASHW L'/'
