@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0beta3
 
 - Core:
+  . Fixed #76767 (‘asm’ operand has impossible constraints in zend_operators.h).
+    (ondrej)
   . Fixed bug #76754 (parent private constant in extends class memory leak).
     (Laruence)
   . Fixed bug #76752 (Crash in ZEND_COALESCE_SPEC_TMP_HANDLER - assertion in
