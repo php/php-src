@@ -4247,7 +4247,7 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_bool by_ref) /* {{{ */
+static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, uint32_t by_ref) /* {{{ */
 {
 	znode var_node;
 	zend_op *opline;
@@ -4274,7 +4274,7 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 		}
 		CG(active_op_array)->static_variables = zend_array_dup(CG(active_op_array)->static_variables);
 	}
-	zend_hash_update(CG(active_op_array)->static_variables, var_name, value);
+	value = zend_hash_update(CG(active_op_array)->static_variables, var_name, value);
 
 	if (zend_string_equals_literal(var_name, "this")) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as static variable");
@@ -4283,7 +4283,7 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, &var_node);
 	opline->op1_type = IS_CV;
 	opline->op1.var = lookup_cv(CG(active_op_array), var_name);
-	opline->extended_value = by_ref;
+	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | by_ref;
 }
 /* }}} */
 
@@ -4299,7 +4299,7 @@ void zend_compile_static_var(zend_ast *ast) /* {{{ */
 		ZVAL_NULL(&value_zv);
 	}
 
-	zend_compile_static_var_common(var_ast, &value_zv, 1);
+	zend_compile_static_var_common(var_ast, &value_zv, ZEND_BIND_REF);
 }
 /* }}} */
 
@@ -5672,16 +5672,32 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_closure_binding(znode *closure, zend_ast *uses_ast) /* {{{ */
+static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array, zend_ast *uses_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(uses_ast);
 	uint32_t i;
 
+	if (!list->children) {
+		return;
+	}
+
+	if (!op_array->static_variables) {
+		op_array->static_variables = zend_new_array(8);
+	}
+
+	if (GC_REFCOUNT(op_array->static_variables) > 1) {
+		if (!(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+			GC_DELREF(op_array->static_variables);
+		}
+		op_array->static_variables = zend_array_dup(op_array->static_variables);
+	}
+
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *var_name_ast = list->child[i];
 		zend_string *var_name = zval_make_interned_string(zend_ast_get_zval(var_name_ast));
-		zend_bool by_ref = var_name_ast->attr;
+		uint32_t by_ref = var_name_ast->attr;
 		zend_op *opline;
+		zval *value;
 
 		if (zend_string_equals_literal(var_name, "this")) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
@@ -5691,10 +5707,16 @@ static void zend_compile_closure_binding(znode *closure, zend_ast *uses_ast) /* 
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use auto-global as lexical variable");
 		}
 
+		value = zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval));
+		if (!value) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use variable $%s twice", ZSTR_VAL(var_name));
+		}
+
 		opline = zend_emit_op(NULL, ZEND_BIND_LEXICAL, closure, NULL);
 		opline->op2_type = IS_CV;
 		opline->op2.var = lookup_cv(CG(active_op_array), var_name);
-		opline->extended_value = by_ref;
+		opline->extended_value = (uint32_t)((char*)value - (char*)op_array->static_variables->arData) | by_ref;
 	}
 }
 /* }}} */
@@ -5708,15 +5730,9 @@ void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *var_ast = list->child[i];
 		zend_string *var_name = zend_ast_get_str(var_ast);
-		zend_bool by_ref = var_ast->attr;
+		uint32_t by_ref = var_ast->attr;
 		zval zv;
 		ZVAL_NULL(&zv);
-
-		if (op_array->static_variables
-				&& zend_hash_exists(op_array->static_variables, var_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use variable $%s twice", ZSTR_VAL(var_name));
-		}
 
 		{
 			int i;
@@ -5996,7 +6012,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	} else {
 		zend_begin_func_decl(result, op_array, decl);
 		if (uses_ast) {
-			zend_compile_closure_binding(result, uses_ast);
+			zend_compile_closure_binding(result, op_array, uses_ast);
 		}
 	}
 

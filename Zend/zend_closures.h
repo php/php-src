@@ -28,6 +28,7 @@ BEGIN_EXTERN_C()
 
 void zend_register_closure_ce(void);
 void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var);
+void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val);
 
 extern ZEND_API zend_class_entry *zend_ce_closure;
 

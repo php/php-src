@@ -1021,7 +1021,7 @@ lexical_var_list:
 
 lexical_var:
 		T_VARIABLE		{ $$ = $1; }
-	|	'&' T_VARIABLE	{ $$ = $2; $$->attr = 1; }
+	|	'&' T_VARIABLE	{ $$ = $2; $$->attr = ZEND_BIND_REF; }
 ;
 
 function_call:

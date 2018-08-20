@@ -729,6 +729,16 @@ void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var) /
 }
 /* }}} */
 
+void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val) /* {{{ */
+{
+	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
+	HashTable *static_variables = closure->func.op_array.static_variables;
+	zval *var = (zval*)((char*)static_variables->arData + offset);
+	zval_ptr_dtor(var);
+	ZVAL_COPY_VALUE(var, val);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

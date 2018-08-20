@@ -747,7 +747,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 					}
 					break;
 				case ZEND_BIND_LEXICAL:
-					if (opline->extended_value || (build_flags & ZEND_SSA_RC_INFERENCE)) {
+					if ((opline->extended_value & ZEND_BIND_REF) || (build_flags & ZEND_SSA_RC_INFERENCE)) {
 						ssa_ops[k].op2_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
 						ssa_vars_count++;
