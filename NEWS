@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #76754 (parent private constant in extends class memory leak).
     (Laruence)
   . Fixed bug #72443 (Generate enabled extension). (petk)
+  . Fixed bug #75797 (Memory leak when using class_alias() in non-debug mode).
+    (Massimiliano Braglia)
 
 - Bz2:
   . Fixed arginfo for bzcompress. (Tyson Andre)
