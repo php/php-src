@@ -4249,17 +4249,8 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 
 static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, uint32_t by_ref) /* {{{ */
 {
-	znode var_node;
 	zend_op *opline;
-	zend_string *var_name;
-
-	if (var_ast->kind == ZEND_AST_ZVAL) {
-		var_name = zval_make_interned_string(zend_ast_get_zval(var_ast));
-		zend_compile_expr(&var_node, var_ast);
-	} else {
-		zend_compile_expr(&var_node, var_ast);
-		var_name = zval_make_interned_string(&var_node.u.constant);
-	}
+	zend_string *var_name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 
 	if (!CG(active_op_array)->static_variables) {
 		if (CG(active_op_array)->scope) {
@@ -4284,7 +4275,6 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, uint3
 	opline->op1_type = IS_CV;
 	opline->op1.var = lookup_cv(CG(active_op_array), var_name);
 	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | by_ref;
-	zend_string_release_ex(var_name, 0);
 }
 /* }}} */
 
