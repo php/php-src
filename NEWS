@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0beta3
 
 - Core:
+  . Fixed #76773 (Traits used on the parent are ignored for child classes).
+    (daverandom)
   . Fixed #76767 (‘asm’ operand has impossible constraints in zend_operators.h).
     (ondrej)
   . Fixed bug #76754 (parent private constant in extends class memory leak).
