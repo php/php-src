@@ -122,7 +122,11 @@ function get_depends($module)
 			}
 		}
 
-		$per_module_deps[basename($module)][] = $dep;
+		if (!isset($per_module_deps[basename($module)]) || !in_array($dep, $per_module_deps[basename($module)])) {
+			$per_module_deps[basename($module)][] = $dep;
+			//recursively check dll dependencies
+			get_depends($dep);
+		}
 	}
 	fclose($pipes[1]);
 	proc_close($proc);
@@ -335,10 +339,6 @@ Add ADD_DLLS to add extra DLLs like dynamic dependencies for standard
 deps. For example, libenchant.dll loads libenchant_myspell.dll or
 libenchant_ispell.dll
 */
-$ICU_DLLS = $php_build_dir . '/bin/icu*.dll';
-foreach (glob($ICU_DLLS) as $filename) {
-	copy($filename, "$dist_dir/" . basename($filename));
-}
 $ENCHANT_DLLS = array(
 	array('', 'glib-2.dll'),
 	array('', 'gmodule-2.dll'),
