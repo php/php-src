@@ -4280,10 +4280,11 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, uint3
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as static variable");
 	}
 
-	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, &var_node);
+	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, NULL);
 	opline->op1_type = IS_CV;
 	opline->op1.var = lookup_cv(CG(active_op_array), var_name);
 	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | by_ref;
+	zend_string_release_ex(var_name, 0);
 }
 /* }}} */
 
