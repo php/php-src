@@ -40,31 +40,6 @@
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
-static void zend_accel_destroy_zend_function(zval *zv)
-{
-	zend_function *function = Z_PTR_P(zv);
-
-	if (function->type == ZEND_USER_FUNCTION) {
-		if (function->op_array.static_variables) {
-			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				if (GC_DELREF(function->op_array.static_variables) == 0) {
-					FREE_HASHTABLE(function->op_array.static_variables);
-				}
-			}
-			function->op_array.static_variables = NULL;
-		}
-	}
-
-	zend_function_dtor(zv);
-}
-
-static void zend_accel_destroy_zend_class(zval *zv)
-{
-	zend_class_entry *ce = Z_PTR_P(zv);
-	ce->function_table.pDestructor = zend_accel_destroy_zend_function;
-	destroy_zend_class(zv);
-}
-
 zend_persistent_script* create_persistent_script(void)
 {
 	zend_persistent_script *persistent_script = (zend_persistent_script *) emalloc(sizeof(zend_persistent_script));
@@ -82,10 +57,7 @@ zend_persistent_script* create_persistent_script(void)
 
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
 {
-	if (destroy_elements) {
-		persistent_script->script.function_table.pDestructor = zend_accel_destroy_zend_function;
-		persistent_script->script.class_table.pDestructor = zend_accel_destroy_zend_class;
-	} else {
+	if (!destroy_elements) {
 		persistent_script->script.function_table.pDestructor = NULL;
 		persistent_script->script.class_table.pDestructor = NULL;
 	}
@@ -100,18 +72,21 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 	efree(persistent_script);
 }
 
-static int is_not_internal_function(zval *zv)
-{
-	zend_function *function = Z_PTR_P(zv);
-	return(function->type != ZEND_INTERNAL_FUNCTION);
-}
-
 void zend_accel_free_user_functions(HashTable *ht)
 {
+	Bucket *p;
 	dtor_func_t orig_dtor = ht->pDestructor;
 
 	ht->pDestructor = NULL;
-	zend_hash_apply(ht, (apply_func_t) is_not_internal_function);
+	ZEND_HASH_REVERSE_FOREACH_BUCKET(ht, p) {
+		zend_function *function = Z_PTR(p->val);
+
+		if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
+			zend_hash_del_bucket(ht, p);
+		} else {
+			break;
+		}
+	} ZEND_HASH_FOREACH_END();
 	ht->pDestructor = orig_dtor;
 }
 
