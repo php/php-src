@@ -432,7 +432,7 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
 
 	if (ptr == MAP_FAILED) {
-#if ZEND_MM_ERROR
+#if ZEND_MM_ERROR && !defined(MAP_FIXED_NOREPLACE) && !defined(MAP_EXCL)
 		fprintf(stderr, "\nmmap() failed: [%d] %s\n", errno, strerror(errno));
 #endif
 		return NULL;
