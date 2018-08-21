@@ -1229,6 +1229,7 @@ PHP_FUNCTION(image_type_to_extension)
 {
 	zend_long image_type;
 	zend_bool inc_dot=1;
+	const char *imgext = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_LONG(image_type)
@@ -1238,38 +1239,57 @@ PHP_FUNCTION(image_type_to_extension)
 
 	switch (image_type) {
 		case IMAGE_FILETYPE_GIF:
-			RETURN_STRING(".gif" + !inc_dot);
+			imgext = ".gif";
+			break;
 		case IMAGE_FILETYPE_JPEG:
-			RETURN_STRING(".jpeg" + !inc_dot);
+			imgext = ".jpeg";
+			break;
 		case IMAGE_FILETYPE_PNG:
-			RETURN_STRING(".png" + !inc_dot);
+			imgext = ".png";
+			break;
 		case IMAGE_FILETYPE_SWF:
 		case IMAGE_FILETYPE_SWC:
-			RETURN_STRING(".swf" + !inc_dot);
+			imgext = ".swf";
+			break;
 		case IMAGE_FILETYPE_PSD:
-			RETURN_STRING(".psd" + !inc_dot);
+			imgext = ".psd";
+			break;
 		case IMAGE_FILETYPE_BMP:
 		case IMAGE_FILETYPE_WBMP:
-			RETURN_STRING(".bmp" + !inc_dot);
+			imgext = ".bmp";
+			break;
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
-			RETURN_STRING(".tiff" + !inc_dot);
+			imgext = ".tiff";
+			break;
 		case IMAGE_FILETYPE_IFF:
-			RETURN_STRING(".iff" + !inc_dot);
+			imgext = ".iff";
+			break;
 		case IMAGE_FILETYPE_JPC:
-			RETURN_STRING(".jpc" + !inc_dot);
+			imgext = ".jpc";
+			break;
 		case IMAGE_FILETYPE_JP2:
-			RETURN_STRING(".jp2" + !inc_dot);
+			imgext = ".jp2";
+			break;
 		case IMAGE_FILETYPE_JPX:
-			RETURN_STRING(".jpx" + !inc_dot);
+			imgext = ".jpx";
+			break;
 		case IMAGE_FILETYPE_JB2:
-			RETURN_STRING(".jb2" + !inc_dot);
+			imgext = ".jb2";
+			break;
 		case IMAGE_FILETYPE_XBM:
-			RETURN_STRING(".xbm" + !inc_dot);
+			imgext = ".xbm";
+			break;
 		case IMAGE_FILETYPE_ICO:
-			RETURN_STRING(".ico" + !inc_dot);
+			imgext = ".ico";
+			break;
 		case IMAGE_FILETYPE_WEBP:
-			RETURN_STRING(".webp" + !inc_dot);
+			imgext = ".webp";
+			break;
+	}
+
+	if (imgext) {
+		RETURN_STRING(&imgext[!inc_dot]);
 	}
 
 	RETURN_FALSE;
