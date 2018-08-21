@@ -42009,7 +42009,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_CONST_HAND
 	USE_OPLINE
 
 	HashTable *ht;
-	zval *varname;
 	zval *value;
 	zval *variable_ptr;
 
@@ -42025,7 +42024,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_CONST_HAND
 		EX(func)->op_array.static_variables = ht = zend_array_dup(ht);
 	}
 
-	varname = RT_CONSTANT(opline, opline->op2);
 	value = (zval*)((char*)ht->arData + (opline->extended_value & ~ZEND_BIND_REF));
 
 	if (opline->extended_value & ZEND_BIND_REF) {

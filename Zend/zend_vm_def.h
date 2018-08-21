@@ -7857,9 +7857,8 @@ ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
 {
 	USE_OPLINE
-	zend_free_op free_op1, free_op2;
+	zend_free_op free_op1;
 	HashTable *ht;
-	zval *varname;
 	zval *value;
 	zval *variable_ptr;
 
@@ -7875,7 +7874,6 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
 		EX(func)->op_array.static_variables = ht = zend_array_dup(ht);
 	}
 
-	varname = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	value = (zval*)((char*)ht->arData + (opline->extended_value & ~ZEND_BIND_REF));
 
 	if (opline->extended_value & ZEND_BIND_REF) {
