@@ -610,7 +610,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	/* "prototype" may be undefined if "scope" isn't set */
 	if (op_array->scope && op_array->prototype) {
 		if ((persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->prototype))) {
-			op_array->prototype = (union _zend_function*)persist_ptr;
+			op_array->prototype = (zend_function*)persist_ptr;
 		}
 	} else {
 		op_array->prototype = NULL;

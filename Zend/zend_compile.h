@@ -466,7 +466,7 @@ union _zend_function {
 		uint32_t fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
-		union _zend_function *prototype;
+		zend_function *prototype;
 		uint32_t num_args;
 		uint32_t required_num_args;
 		zend_arg_info *arg_info;

@@ -1348,7 +1348,7 @@ ZEND_FUNCTION(method_exists)
 		zend_string_release_ex(lcname, 0);
 		RETURN_TRUE;
 	} else {
-		union _zend_function *func = NULL;
+		zend_function *func = NULL;
 
 		if (Z_TYPE_P(klass) == IS_OBJECT
 		&& Z_OBJ_HT_P(klass)->get_method != NULL

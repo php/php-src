@@ -643,7 +643,7 @@ PHP_MINIT_FUNCTION(soap)
 
 	/* Register SoapClient class */
 	/* BIG NOTE : THIS EMITS AN COMPILATION WARNING UNDER ZE2 - handle_function_call deprecated.
-		soap_call_function_handler should be of type struct _zend_function, not (*handle_function_call).
+		soap_call_function_handler should be of type zend_function, not (*handle_function_call).
 	*/
 	{
 		INIT_CLASS_ENTRY(ce, PHP_SOAP_CLIENT_CLASSNAME, soap_client_functions);
