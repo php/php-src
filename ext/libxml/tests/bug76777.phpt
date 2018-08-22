@@ -1,10 +1,12 @@
 --TEST--
 Bug #76777 (first parameter of libxml_set_external_entity_loader callback undefined)
 --SKIPIF--
-<?php if (!extension_loaded('libxml')) die('skip'); ?>
+<?php
+if (!extension_loaded('libxml')) die('skip');
+if (getenv("SKIP_ONLINE_TESTS")) die('skip online test');
+?>
 --FILE--
 <?php
-ini_set('error_reporting',PHP_INT_MAX-1);
 $xml=<<<EOF
 <?xml version="1.0"?>
 <test/>
@@ -14,17 +16,17 @@ $xsd=<<<EOF
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="nonexistent.xsd"/>
-    <xs:element name="test"/>
-    </xs:schema>
+  <xs:element name="test"/>
+</xs:schema>
 EOF;
 
 libxml_set_external_entity_loader(function($p,$s,$c) {
     var_dump($p,$s,$c);
-        die();
-	});
+    die();
+});
 
 $dom=new DOMDocument($xml);
-var_dump($dom->schemaValidateSource($xsd));
+$dom->schemaValidateSource($xsd);
 ?>
 --EXPECTF--
 NULL
