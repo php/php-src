@@ -43,6 +43,10 @@ PHP                                                                        NEWS
   . Fixed bug #68175 (RegexIterator pregFlags are NULL instead of 0). (Tim
     Siebels)
 
+- Standard:
+  . Fixed bug #76778 (array_reduce leaks memory if callback throws exception).
+    (cmb)
+
 - zlib:
   . Fixed bug #65988 (Zlib version check fails when an include/zlib/ style dir
     is passed to the --with-zlib configure option). (Jay Bonci)

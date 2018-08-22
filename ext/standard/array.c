@@ -5977,6 +5977,7 @@ PHP_FUNCTION(array_reduce)
 		} else {
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
+			zval_ptr_dtor(&result);
 			return;
 		}
 	} ZEND_HASH_FOREACH_END();
