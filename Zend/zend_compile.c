@@ -4259,12 +4259,6 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, uint3
 		CG(active_op_array)->static_variables = zend_new_array(8);
 	}
 
-	if (GC_REFCOUNT(CG(active_op_array)->static_variables) > 1) {
-		if (!(GC_FLAGS(CG(active_op_array)->static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_DELREF(CG(active_op_array)->static_variables);
-		}
-		CG(active_op_array)->static_variables = zend_array_dup(CG(active_op_array)->static_variables);
-	}
 	value = zend_hash_update(CG(active_op_array)->static_variables, var_name, value);
 
 	if (zend_string_equals_literal(var_name, "this")) {
@@ -5674,13 +5668,6 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 
 	if (!op_array->static_variables) {
 		op_array->static_variables = zend_new_array(8);
-	}
-
-	if (GC_REFCOUNT(op_array->static_variables) > 1) {
-		if (!(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_DELREF(op_array->static_variables);
-		}
-		op_array->static_variables = zend_array_dup(op_array->static_variables);
 	}
 
 	for (i = 0; i < list->children; ++i) {
