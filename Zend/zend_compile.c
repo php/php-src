@@ -3380,7 +3380,7 @@ void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_a
 }
 /* }}} */
 
-static zend_bool zend_args_contain_unpack(zend_ast_list *args) /* {{{ */
+static inline zend_bool zend_args_contain_unpack(zend_ast_list *args) /* {{{ */
 {
 	uint32_t i;
 	for (i = 0; i < args->children; ++i) {
@@ -3397,7 +3397,7 @@ int zend_compile_func_strlen(znode *result, zend_ast_list *args) /* {{{ */
 	znode arg_node;
 
 	if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)
-		|| args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK
+		|| args->children != 1
 	) {
 		return FAILURE;
 	}
@@ -3419,7 +3419,7 @@ int zend_compile_func_typecheck(znode *result, zend_ast_list *args, uint32_t typ
 	znode arg_node;
 	zend_op *opline;
 
-	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+	if (args->children != 1) {
 		return FAILURE;
 	}
 
@@ -3439,7 +3439,7 @@ int zend_compile_func_cast(znode *result, zend_ast_list *args, uint32_t type) /*
 	znode arg_node;
 	zend_op *opline;
 
-	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+	if (args->children != 1) {
 		return FAILURE;
 	}
 
@@ -3579,7 +3579,7 @@ int zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcna
 {
 	znode arg_node;
 
-	if (args->children != 2 || zend_args_contain_unpack(args)) {
+	if (args->children != 2) {
 		return FAILURE;
 	}
 
@@ -3628,7 +3628,7 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 {
 	uint32_t i;
 
-	if (args->children < 1 || zend_args_contain_unpack(args)) {
+	if (args->children < 1) {
 		return FAILURE;
 	}
 
@@ -3787,7 +3787,7 @@ int zend_compile_func_count(znode *result, zend_ast_list *args) /* {{{ */
 {
 	znode arg_node;
 
-	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+	if (args->children != 1) {
 		return FAILURE;
 	}
 
@@ -3804,7 +3804,7 @@ int zend_compile_func_get_class(znode *result, zend_ast_list *args) /* {{{ */
 	} else {
 		znode arg_node;
 
-		if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+		if (args->children != 1) {
 			return FAILURE;
 		}
 
@@ -3830,7 +3830,7 @@ int zend_compile_func_gettype(znode *result, zend_ast_list *args) /* {{{ */
 {
 	znode arg_node;
 
-	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+	if (args->children != 1) {
 		return FAILURE;
 	}
 
@@ -3906,6 +3906,10 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 	}
 
 	if (CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS) {
+		return FAILURE;
+	}
+
+	if (zend_args_contain_unpack(args)) {
 		return FAILURE;
 	}
 
