@@ -1178,10 +1178,11 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	zend_function *new_fn;
 
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
-		/* if it is the same function with the same visibility regardless of where it is coming from */
-		/* there is no conflict and we do not need to add it again */
+		/* if it is the same function with the same visibility and has not been assigned a class scope yet, regardless
+		 * of where it is coming from there is no conflict and we do not need to add it again */
 		if (existing_fn->op_array.opcodes == fn->op_array.opcodes &&
-			(existing_fn->common.fn_flags & ZEND_ACC_PPP_MASK) == (fn->common.fn_flags & ZEND_ACC_PPP_MASK)) {
+			(existing_fn->common.fn_flags & ZEND_ACC_PPP_MASK) == (fn->common.fn_flags & ZEND_ACC_PPP_MASK) &&
+			(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 			return;
 		}
 
