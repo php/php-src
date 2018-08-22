@@ -104,9 +104,13 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags)
 {
 	uint32_t num_traits;
+	zend_class_entry *trait;
 
 	for (num_traits = 0; num_traits < pce->num_traits; num_traits++) {
-		spl_add_class_name(list, pce->traits[num_traits], allow, ce_flags);
+		trait = zend_fetch_class_by_name(pce->trait_names[num_traits].name,
+			pce->trait_names[num_traits].lc_name, ZEND_FETCH_CLASS_TRAIT);
+		ZEND_ASSERT(trait);
+		spl_add_class_name(list, trait, allow, ce_flags);
 	}
 }
 /* }}} */

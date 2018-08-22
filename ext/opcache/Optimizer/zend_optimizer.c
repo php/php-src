@@ -391,7 +391,6 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				return 0;
 			}
 		case ZEND_ADD_INTERFACE:
-		case ZEND_ADD_TRAIT:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);

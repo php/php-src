@@ -158,14 +158,18 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 	}
 }
 
-void _destroy_zend_class_traits_info(zend_class_entry *ce)
+static void _destroy_zend_class_traits_info(zend_class_entry *ce)
 {
-	if (ce->num_traits > 0 && ce->traits) {
-		efree(ce->traits);
+	uint32_t i;
+
+	for (i = 0; i < ce->num_traits; i++) {
+		zend_string_release_ex(ce->trait_names[i].name, 0);
+		zend_string_release_ex(ce->trait_names[i].lc_name, 0);
 	}
+	efree(ce->trait_names);
 
 	if (ce->trait_aliases) {
-		size_t i = 0;
+		i = 0;
 		while (ce->trait_aliases[i]) {
 			if (ce->trait_aliases[i]->trait_method.method_name) {
 				zend_string_release_ex(ce->trait_aliases[i]->trait_method.method_name, 0);
@@ -186,9 +190,9 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	}
 
 	if (ce->trait_precedences) {
-		int i = 0;
 		int j;
 
+		i = 0;
 		while (ce->trait_precedences[i]) {
 			zend_string_release_ex(ce->trait_precedences[i]->trait_method.method_name, 0);
 			zend_string_release_ex(ce->trait_precedences[i]->trait_method.class_name, 0);
@@ -265,7 +269,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_string_release_ex(ce->info.user.doc_comment, 0);
 			}
 
-			_destroy_zend_class_traits_info(ce);
+			if (ce->num_traits > 0) {
+				_destroy_zend_class_traits_info(ce);
+			}
 
 			break;
 		case ZEND_INTERNAL_CLASS:

@@ -1031,19 +1031,12 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time) /* {{{ */
+static zend_always_inline int do_bind_function_ex(zval *lcname, HashTable *function_table, zend_bool compile_time) /* {{{ */
 {
 	zend_function *function, *new_function;
-	zval *lcname, *rtd_key, *zv;
+	zval *rtd_key, *zv;
 
-	if (compile_time) {
-		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
-		rtd_key = lcname + 1;
-	} else {
-		lcname = RT_CONSTANT(opline, opline->op1);
-		rtd_key = lcname + 1;
-	}
-
+	rtd_key = lcname + 1;
 	zv = zend_hash_find_ex(function_table, Z_STR_P(rtd_key), 1);
 	function = (zend_function*)Z_PTR_P(zv);
 	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
@@ -1077,21 +1070,33 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 }
 /* }}} */
 
-ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time) /* {{{ */
+ZEND_API int do_bind_function(zval *lcname) /* {{{ */
+{
+	return do_bind_function_ex(lcname, EG(function_table), 0);
+}
+/* }}} */
+
+static int do_early_bind_function(zval *lcname) /* {{{ */
+{
+	return do_bind_function_ex(lcname, CG(function_table), 1);
+}
+/* }}} */
+
+static zend_always_inline zend_class_entry *do_bind_class_ex(zval *lcname, HashTable *class_table, zend_bool compile_time) /* {{{ */
 {
 	zend_class_entry *ce;
-	zval *lcname, *rtd_key, *zv;
+	zval *rtd_key, *zv;
 
-	if (compile_time) {
-		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
-		rtd_key = lcname + 1;
-	} else {
-		lcname = RT_CONSTANT(opline, opline->op1);
-		rtd_key = lcname + 1;
-	}
+	rtd_key = lcname + 1;
 	zv = zend_hash_find_ex(class_table, Z_STR_P(rtd_key), 1);
 	ZEND_ASSERT(zv);
 	ce = (zend_class_entry*)Z_PTR_P(zv);
+
+	if (compile_time && (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
+		/* We currently don't early-bind classes that use traits */
+		return NULL;
+	}
+
 	ce->refcount++;
 	if (zend_hash_add_ptr(class_table, Z_STR_P(lcname), ce) == NULL) {
 		ce->refcount--;
@@ -1105,7 +1110,9 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		}
 		return NULL;
 	} else {
-		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
+		if (!compile_time && (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
+			zend_do_bind_traits(ce);
+		} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_IMPLEMENT_INTERFACES))) {
 			zend_verify_abstract_class(ce);
 		}
 		return ce;
@@ -1113,18 +1120,24 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 }
 /* }}} */
 
-ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time) /* {{{ */
+ZEND_API zend_class_entry *do_bind_class(zval *lcname) /* {{{ */
+{
+	return do_bind_class_ex(lcname, EG(class_table), 0);
+}
+/* }}} */
+
+static zend_class_entry *do_early_bind_class(zval *lcname) /* {{{ */
+{
+	return do_bind_class_ex(lcname, CG(class_table), 1);
+}
+/* }}} */
+
+static zend_always_inline zend_class_entry *do_bind_inherited_class_ex(zval *lcname, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time) /* {{{ */
 {
 	zend_class_entry *ce;
-	zval *lcname, *rtd_key, *zv;
+	zval *rtd_key, *zv;
 
-	if (compile_time) {
-		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
-		rtd_key = lcname + 1;
-	} else {
-		lcname = RT_CONSTANT(opline, opline->op1);
-		rtd_key = lcname + 1;
-	}
+	rtd_key = lcname + 1;
 
 	zv = zend_hash_find_ex(class_table, Z_STR_P(rtd_key), 1);
 
@@ -1135,12 +1148,17 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
 			 * approach to work.
 			 */
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare  %s, because the name is already in use", zend_get_object_type(Z_OBJCE_P(lcname)));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare  %s, because the name is already in use", Z_STRVAL_P(lcname));
 		}
 		return NULL;
 	}
 
 	ce = (zend_class_entry*)Z_PTR_P(zv);
+
+	if (compile_time && (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
+		/* We currently don't early-bind classes that use traits */
+		return NULL;
+	}
 
 	if (zend_hash_exists(class_table, Z_STR_P(lcname))) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
@@ -1154,7 +1172,24 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	if (zend_hash_add_ptr(class_table, Z_STR_P(lcname), ce) == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 	}
+
+	if (!compile_time && (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
+		zend_do_bind_traits(ce);
+	}
+
 	return ce;
+}
+/* }}} */
+
+ZEND_API zend_class_entry *do_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce) /* {{{ */
+{
+	return do_bind_inherited_class_ex(lcname, EG(class_table), parent_ce, 0);
+}
+/* }}} */
+
+static zend_class_entry *do_early_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce) /* {{{ */
+{
+	return do_bind_inherited_class_ex(lcname, CG(class_table), parent_ce, 1);
 }
 /* }}} */
 
@@ -1169,13 +1204,13 @@ void zend_do_early_binding(void) /* {{{ */
 
 	switch (opline->opcode) {
 		case ZEND_DECLARE_FUNCTION:
-			if (do_bind_function(CG(active_op_array), opline, CG(function_table), 1) == FAILURE) {
+			if (do_early_bind_function(CT_CONSTANT_EX(CG(active_op_array), opline->op1.constant)) == FAILURE) {
 				return;
 			}
 			table = CG(function_table);
 			break;
 		case ZEND_DECLARE_CLASS:
-			if (do_bind_class(CG(active_op_array), opline, CG(class_table), 1) == NULL) {
+			if (do_early_bind_class(CT_CONSTANT_EX(CG(active_op_array), opline->op1.constant)) == NULL) {
 				return;
 			}
 			table = CG(class_table);
@@ -1199,7 +1234,7 @@ void zend_do_early_binding(void) /* {{{ */
 					}
 					return;
 				}
-				if (do_bind_inherited_class(CG(active_op_array), opline, CG(class_table), ce, 1) == NULL) {
+				if (do_early_bind_inherited_class(CT_CONSTANT_EX(CG(active_op_array), opline->op1.constant), ce) == NULL) {
 					return;
 				}
 				zend_del_literal(CG(active_op_array), opline->op2.constant+1);
@@ -1210,10 +1245,7 @@ void zend_do_early_binding(void) /* {{{ */
 			}
 		case ZEND_VERIFY_ABSTRACT_CLASS:
 		case ZEND_ADD_INTERFACE:
-		case ZEND_ADD_TRAIT:
-		case ZEND_BIND_TRAITS:
 			/* We currently don't early-bind classes that implement interfaces */
-			/* Classes with traits are handled exactly the same, no early-bind here */
 			return;
 		default:
 			zend_error_noreturn(E_COMPILE_ERROR, "Invalid binding type");
@@ -1290,7 +1322,7 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint3
 			const zend_op *opline = &op_array->opcodes[opline_num];
 			zval *parent_name = RT_CONSTANT(opline, opline->op2);
 			if ((ce = zend_lookup_class_ex(Z_STR_P(parent_name), Z_STR_P(parent_name + 1), 0)) != NULL) {
-				do_bind_inherited_class(op_array, &op_array->opcodes[opline_num], EG(class_table), ce, 0);
+				do_bind_inherited_class(RT_CONSTANT(&op_array->opcodes[opline_num], op_array->opcodes[opline_num].op1), ce);
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
 		}
@@ -1754,7 +1786,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->num_interfaces = 0;
 		ce->interfaces = NULL;
 		ce->num_traits = 0;
-		ce->traits = NULL;
+		ce->trait_names = NULL;
 		ce->trait_aliases = NULL;
 		ce->trait_precedences = NULL;
 		ce->serialize = NULL;
@@ -2052,8 +2084,6 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 		           opline->opcode == ZEND_NEW ||
 		           opline->opcode == ZEND_FETCH_CLASS_CONSTANT ||
 		           opline->opcode == ZEND_ADD_INTERFACE ||
-		           opline->opcode == ZEND_ADD_TRAIT ||
-		           opline->opcode == ZEND_BIND_TRAITS ||
 		           opline->opcode == ZEND_VERIFY_ABSTRACT_CLASS) {
 			/* classes don't have to be destroyed */
 		} else if (opline->opcode == ZEND_FAST_RET) {
@@ -6207,8 +6237,10 @@ void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 	zend_ast_list *traits = zend_ast_get_list(ast->child[0]);
 	zend_ast_list *adaptations = ast->child[1] ? zend_ast_get_list(ast->child[1]) : NULL;
 	zend_class_entry *ce = CG(active_class_entry);
-	zend_op *opline;
 	uint32_t i;
+
+	ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
+	ce->trait_names = erealloc(ce->trait_names, sizeof(zend_class_name) * (ce->num_traits + traits->children));
 
 	for (i = 0; i < traits->children; ++i) {
 		zend_ast *trait_ast = traits->child[i];
@@ -6228,13 +6260,8 @@ void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 				break;
 		}
 
-		opline = get_next_op(CG(active_op_array));
-		opline->opcode = ZEND_ADD_TRAIT;
-		SET_NODE(opline->op1, &FC(implementing_class));
-		opline->op2_type = IS_CONST;
-		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
-			zend_resolve_class_name_ast(trait_ast));
-
+		ce->trait_names[ce->num_traits].name = zend_resolve_class_name_ast(trait_ast);
+		ce->trait_names[ce->num_traits].lc_name = zend_string_tolower(ce->trait_names[ce->num_traits].name);
 		ce->num_traits++;
 	}
 
@@ -6431,7 +6458,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	/* Reset lineno for final opcodes and errors */
 	CG(zend_lineno) = ast->lineno;
 
-	if (ce->num_traits == 0) {
+	if (!(ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
 		/* For traits this check is delayed until after trait binding */
 		zend_check_deprecated_constructor(ce);
 	}
@@ -6470,27 +6497,15 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		}
 	}
 
-	/* Check for traits and proceed like with interfaces.
-	 * The only difference will be a combined handling of them in the end.
-	 * Thus, we need another opcode here. */
-	if (ce->num_traits > 0) {
-		ce->traits = NULL;
-		ce->num_traits = 0;
-		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
-
-		zend_emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL);
-	}
-
 	if (implements_ast) {
 		zend_compile_implements(&declare_node, implements_ast);
-	}
-
-	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
-		&& (extends_ast || implements_ast)
-	) {
-		zend_verify_abstract_class(ce);
-		if (implements_ast) {
+		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
+			zend_verify_abstract_class(ce);
 			zend_emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL);
+		}
+	}  else if (extends_ast) {
+		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
+			zend_verify_abstract_class(ce);
 		}
 	}
 

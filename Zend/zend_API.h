@@ -213,7 +213,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.unserialize_func = NULL;				\
 		class_container.parent = NULL;							\
 		class_container.num_interfaces = 0;						\
-		class_container.traits = NULL;							\
+		class_container.trait_names = NULL;						\
 		class_container.num_traits = 0;							\
 		class_container.trait_aliases = NULL;					\
 		class_container.trait_precedences = NULL;				\

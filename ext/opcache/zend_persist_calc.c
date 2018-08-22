@@ -342,40 +342,50 @@ static void zend_persist_class_entry_calc(zval *zv)
 
 		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
 
-		if (ce->trait_aliases) {
-			int i = 0;
-			while (ce->trait_aliases[i]) {
-				if (ce->trait_aliases[i]->trait_method.method_name) {
-					ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.method_name, 0);
-				}
-				if (ce->trait_aliases[i]->trait_method.class_name) {
-					ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.class_name, 0);
-				}
+		if (ce->num_traits) {
+			uint32_t i;
 
-				if (ce->trait_aliases[i]->alias) {
-					ADD_INTERNED_STRING(ce->trait_aliases[i]->alias, 0);
-				}
-				ADD_SIZE(sizeof(zend_trait_alias));
-				i++;
+			for (i = 0; i < ce->num_traits; i++) {
+				ADD_INTERNED_STRING(ce->trait_names[i].name, 0);
+				ADD_INTERNED_STRING(ce->trait_names[i].lc_name, 0);
 			}
-			ADD_SIZE(sizeof(zend_trait_alias*) * (i + 1));
-		}
+			ADD_SIZE(sizeof(zend_class_name) * ce->num_traits);
 
-		if (ce->trait_precedences) {
-			int i = 0;
-			int j;
+			if (ce->trait_aliases) {
+				i = 0;
+				while (ce->trait_aliases[i]) {
+					if (ce->trait_aliases[i]->trait_method.method_name) {
+						ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.method_name, 0);
+					}
+					if (ce->trait_aliases[i]->trait_method.class_name) {
+						ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.class_name, 0);
+					}
 
-			while (ce->trait_precedences[i]) {
-				ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.method_name, 0);
-				ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.class_name, 0);
-
-				for (j = 0; j < ce->trait_precedences[i]->num_excludes; j++) {
-					ADD_INTERNED_STRING(ce->trait_precedences[i]->exclude_class_names[j], 0);
+					if (ce->trait_aliases[i]->alias) {
+						ADD_INTERNED_STRING(ce->trait_aliases[i]->alias, 0);
+					}
+					ADD_SIZE(sizeof(zend_trait_alias));
+					i++;
 				}
-				ADD_SIZE(sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
-				i++;
+				ADD_SIZE(sizeof(zend_trait_alias*) * (i + 1));
 			}
-			ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
+
+			if (ce->trait_precedences) {
+				int j;
+
+				i = 0;
+				while (ce->trait_precedences[i]) {
+					ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.method_name, 0);
+					ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.class_name, 0);
+
+					for (j = 0; j < ce->trait_precedences[i]->num_excludes; j++) {
+						ADD_INTERNED_STRING(ce->trait_precedences[i]->exclude_class_names[j], 0);
+					}
+					ADD_SIZE(sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
+					i++;
+				}
+				ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
+			}
 		}
 	}
 }

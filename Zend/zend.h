@@ -82,6 +82,11 @@ struct _zend_unserialize_data;
 typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
+typedef struct _zend_class_name {
+	zend_string *name;
+	zend_string *lc_name;
+} zend_class_name;
+
 typedef struct _zend_trait_method_reference {
 	zend_string *method_name;
 	zend_string *class_name;
@@ -156,7 +161,7 @@ struct _zend_class_entry {
 	uint32_t num_traits;
 	zend_class_entry **interfaces;
 
-	zend_class_entry **traits;
+	zend_class_name *trait_names;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 

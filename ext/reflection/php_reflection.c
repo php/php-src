@@ -4888,8 +4888,13 @@ ZEND_METHOD(reflection_class, getTraits)
 
 	for (i=0; i < ce->num_traits; i++) {
 		zval trait;
-		zend_reflection_class_factory(ce->traits[i], &trait);
-		zend_hash_update(Z_ARRVAL_P(return_value), ce->traits[i]->name, &trait);
+		zend_class_entry *trait_ce;
+
+		trait_ce = zend_fetch_class_by_name(ce->trait_names[i].name,
+			ce->trait_names[i].lc_name, ZEND_FETCH_CLASS_TRAIT);
+		ZEND_ASSERT(trait_ce);
+		zend_reflection_class_factory(trait_ce, &trait);
+		zend_hash_update(Z_ARRVAL_P(return_value), ce->trait_names[i].name, &trait);
 	}
 }
 /* }}} */
@@ -4915,7 +4920,7 @@ ZEND_METHOD(reflection_class, getTraitNames)
 	array_init(return_value);
 
 	for (i=0; i < ce->num_traits; i++) {
-		add_next_index_str(return_value, zend_string_copy(ce->traits[i]->name));
+		add_next_index_str(return_value, zend_string_copy(ce->trait_names[i].name));
 	}
 }
 /* }}} */

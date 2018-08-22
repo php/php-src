@@ -644,56 +644,70 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_STR(ce->info.user.doc_comment);
 	zend_file_cache_serialize_hash(&ce->properties_info, script, info, buf, zend_file_cache_serialize_prop_info);
 
-	if (ce->trait_aliases) {
-		zend_trait_alias **p, *q;
+	if (ce->num_traits) {
+		uint32_t i;
+		zend_class_name *trait_names;
 
-		SERIALIZE_PTR(ce->trait_aliases);
-		p = ce->trait_aliases;
-		UNSERIALIZE_PTR(p);
+		SERIALIZE_PTR(ce->trait_names);
+		trait_names = ce->trait_names;
+		UNSERIALIZE_PTR(trait_names);
 
-		while (*p) {
-			SERIALIZE_PTR(*p);
-			q = *p;
-			UNSERIALIZE_PTR(q);
-
-			if (q->trait_method.method_name) {
-				SERIALIZE_STR(q->trait_method.method_name);
-			}
-			if (q->trait_method.class_name) {
-				SERIALIZE_STR(q->trait_method.class_name);
-			}
-
-			if (q->alias) {
-				SERIALIZE_STR(q->alias);
-			}
-			p++;
+		for (i = 0; i < ce->num_traits; i++) {
+			SERIALIZE_STR(trait_names[i].name);
+			SERIALIZE_STR(trait_names[i].lc_name);
 		}
-	}
 
-	if (ce->trait_precedences) {
-		zend_trait_precedence **p, *q;
-		int j;
+		if (ce->trait_aliases) {
+			zend_trait_alias **p, *q;
 
-		SERIALIZE_PTR(ce->trait_precedences);
-		p = ce->trait_precedences;
-		UNSERIALIZE_PTR(p);
+			SERIALIZE_PTR(ce->trait_aliases);
+			p = ce->trait_aliases;
+			UNSERIALIZE_PTR(p);
 
-		while (*p) {
-			SERIALIZE_PTR(*p);
-			q = *p;
-			UNSERIALIZE_PTR(q);
+			while (*p) {
+				SERIALIZE_PTR(*p);
+				q = *p;
+				UNSERIALIZE_PTR(q);
 
-			if (q->trait_method.method_name) {
-				SERIALIZE_STR(q->trait_method.method_name);
+				if (q->trait_method.method_name) {
+					SERIALIZE_STR(q->trait_method.method_name);
+				}
+				if (q->trait_method.class_name) {
+					SERIALIZE_STR(q->trait_method.class_name);
+				}
+
+				if (q->alias) {
+					SERIALIZE_STR(q->alias);
+				}
+				p++;
 			}
-			if (q->trait_method.class_name) {
-				SERIALIZE_STR(q->trait_method.class_name);
-			}
+		}
 
-			for (j = 0; j < q->num_excludes; j++) {
-				SERIALIZE_STR(q->exclude_class_names[j]);
+		if (ce->trait_precedences) {
+			zend_trait_precedence **p, *q;
+			int j;
+
+			SERIALIZE_PTR(ce->trait_precedences);
+			p = ce->trait_precedences;
+			UNSERIALIZE_PTR(p);
+
+			while (*p) {
+				SERIALIZE_PTR(*p);
+				q = *p;
+				UNSERIALIZE_PTR(q);
+
+				if (q->trait_method.method_name) {
+					SERIALIZE_STR(q->trait_method.method_name);
+				}
+				if (q->trait_method.class_name) {
+					SERIALIZE_STR(q->trait_method.class_name);
+				}
+
+				for (j = 0; j < q->num_excludes; j++) {
+					SERIALIZE_STR(q->exclude_class_names[j]);
+				}
+				p++;
 			}
-			p++;
 		}
 	}
 
@@ -1247,6 +1261,17 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_STR(ce->info.user.doc_comment);
 	zend_file_cache_unserialize_hash(&ce->properties_info,
 			script, buf, zend_file_cache_unserialize_prop_info, NULL);
+
+	if (ce->num_traits) {
+		uint32_t i;
+
+		UNSERIALIZE_PTR(ce->trait_names);
+
+		for (i = 0; i < ce->num_traits; i++) {
+			UNSERIALIZE_STR(ce->trait_names[i].name);
+			UNSERIALIZE_STR(ce->trait_names[i].lc_name);
+		}
+	}
 
 	if (ce->trait_aliases) {
 		zend_trait_alias **p, *q;
