@@ -828,7 +828,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload) /* {{{ */
+ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, int use_autoload) /* {{{ */
 {
 	zend_class_entry *ce = NULL;
 	zval args[1], *zv;
@@ -838,7 +838,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	zend_fcall_info_cache fcall_cache;
 
 	if (key) {
-		lc_name = Z_STR_P(key);
+		lc_name = key;
 	} else {
 		if (name == NULL || !ZSTR_LEN(name)) {
 			return NULL;
@@ -1352,7 +1352,7 @@ check_fetch_type:
 }
 /* }}} */
 
-zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type) /* {{{ */
+zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *key, int fetch_type) /* {{{ */
 {
 	zend_class_entry *ce;
 

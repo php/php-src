@@ -2,6 +2,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
   a. php_sys_symlink() and php_sys_link()
+  b. zend_lookup_class_ex() and zend_fetch_class_by_name()
 
 2. Build system changes
   a. Unix build system changes
@@ -16,6 +17,10 @@ PHP 7.4 INTERNALS UPGRADE NOTES
  a. php_sys_symlink() and php_sys_link() portability macros have been
     added, which behave like POSIX's symlink() and link(), respectively, on
     POSIX compliant systems and on Windows.
+
+ b. zend_lookup_class_ex() and zend_fetch_class_by_name() prototypes were
+    changed to accept optional lower-case class name as zend_string*,
+    instead of zval*.
 
 ========================
 2. Build system changes

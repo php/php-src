@@ -1186,7 +1186,7 @@ void zend_do_early_binding(void) /* {{{ */
 				zend_class_entry *ce;
 
 				parent_name = CT_CONSTANT(opline->op2);
-				ce = zend_lookup_class_ex(Z_STR_P(parent_name), parent_name + 1, 0);
+				ce = zend_lookup_class_ex(Z_STR_P(parent_name), Z_STR_P(parent_name + 1), 0);
 				if (!ce
 				 || ((ce->type == ZEND_INTERNAL_CLASS) && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
 				 || ((ce->type == ZEND_USER_CLASS) && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && (ce->info.user.filename != CG(active_op_array)->filename))
@@ -1289,7 +1289,7 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint3
 		while (opline_num != (uint32_t)-1) {
 			const zend_op *opline = &op_array->opcodes[opline_num];
 			zval *parent_name = RT_CONSTANT(opline, opline->op2);
-			if ((ce = zend_lookup_class_ex(Z_STR_P(parent_name), parent_name + 1, 0)) != NULL) {
+			if ((ce = zend_lookup_class_ex(Z_STR_P(parent_name), Z_STR_P(parent_name + 1), 0)) != NULL) {
 				do_bind_inherited_class(op_array, &op_array->opcodes[opline_num], EG(class_table), ce, 0);
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
