@@ -1942,7 +1942,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 	call = execute_data;
 	execute_data = EG(current_execute_data) = EX(prev_execute_data);
 
-	call->func = fbc->op_array.reserved[0];
+	call->func = (fbc->op_array.fn_flags & ZEND_ACC_STATIC) ? fbc->op_array.scope->__callstatic : fbc->op_array.scope->__call;
 	ZEND_ASSERT(zend_vm_calc_used_stack(2, call->func) <= (size_t)(((char*)EG(vm_stack_end)) - (char*)call));
 	ZEND_CALL_NUM_ARGS(call) = 2;
 
