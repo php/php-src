@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #74484 (MessageFormatter::formatMessage memory corruption with
     11+ named placeholders). (Anatol)
 
+- libxml:
+  . Fixed bug #76777 ("public id" parameter of libxml_set_external_entity_loader
+    callback undefined). (Ville Hukkamäki)
+
 - mbstring:
   . Fixed bug #76704 (mb_detect_order return value varies based on argument
     type). (cmb)
