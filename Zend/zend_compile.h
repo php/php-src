@@ -1048,6 +1048,9 @@ END_EXTERN_C()
 /* result of compilation may be stored in file cache */
 #define ZEND_COMPILE_WITH_FILE_CACHE			(1<<11)
 
+/* ignore functions and classes declared in other files */
+#define ZEND_COMPILE_IGNORE_OTHER_FILES			(1<<12)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 

@@ -72,27 +72,11 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 	efree(persistent_script);
 }
 
-void zend_accel_free_user_functions(HashTable *ht)
+void zend_accel_move_user_functions(HashTable *src, zend_script *script)
 {
 	Bucket *p;
-	dtor_func_t orig_dtor = ht->pDestructor;
-
-	ht->pDestructor = NULL;
-	ZEND_HASH_REVERSE_FOREACH_BUCKET(ht, p) {
-		zend_function *function = Z_PTR(p->val);
-
-		if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
-			zend_hash_del_bucket(ht, p);
-		} else {
-			break;
-		}
-	} ZEND_HASH_FOREACH_END();
-	ht->pDestructor = orig_dtor;
-}
-
-void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
-{
-	Bucket *p;
+	HashTable *dst = &script->function_table;
+	zend_string *filename = script->main_op_array.filename;
 	dtor_func_t orig_dtor = src->pDestructor;
 
 	src->pDestructor = NULL;
@@ -100,7 +84,8 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
 	ZEND_HASH_REVERSE_FOREACH_BUCKET(src, p) {
 		zend_function *function = Z_PTR(p->val);
 
-		if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
+		if (EXPECTED(function->type == ZEND_USER_FUNCTION)
+		 && EXPECTED(function->op_array.filename == filename)) {
 			_zend_hash_append_ptr(dst, p->key, function);
 			zend_hash_del_bucket(src, p);
 		} else {
@@ -108,20 +93,6 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
 		}
 	} ZEND_HASH_FOREACH_END();
 	src->pDestructor = orig_dtor;
-}
-
-void zend_accel_copy_internal_functions(void)
-{
-	zend_string *key;
-	zval *val;
-
-	ZEND_HASH_FOREACH_STR_KEY_VAL(CG(function_table), key, val) {
-		zend_internal_function *function = Z_PTR_P(val);
-		if (function->type == ZEND_INTERNAL_FUNCTION) {
-			zend_hash_add_new_ptr(&ZCG(function_table), key, function);
-		}
-	} ZEND_HASH_FOREACH_END();
-	ZCG(internal_functions_count) = zend_hash_num_elements(&ZCG(function_table));
 }
 
 static inline void zend_clone_zval(zval *src)

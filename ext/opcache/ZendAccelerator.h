@@ -215,10 +215,6 @@ typedef struct _zend_accel_directives {
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
-    /* copy of CG(function_table) used for compilation scripts into cache */
-    /* initially it contains only internal functions */
-	HashTable               function_table;
-	int                     internal_functions_count;
 	int                     counted;   /* the process uses shared memory */
 	zend_bool               enabled;
 	zend_bool               locked;    /* thread obtained exclusive lock */

@@ -1186,9 +1186,11 @@ void zend_do_early_binding(void) /* {{{ */
 				zend_class_entry *ce;
 
 				parent_name = CT_CONSTANT(opline->op2);
-				if (((ce = zend_lookup_class_ex(Z_STR_P(parent_name), parent_name + 1, 0)) == NULL) ||
-				    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &&
-				     (ce->type == ZEND_INTERNAL_CLASS))) {
+				ce = zend_lookup_class_ex(Z_STR_P(parent_name), parent_name + 1, 0);
+				if (!ce
+				 || ((ce->type == ZEND_INTERNAL_CLASS) && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
+				 || ((ce->type == ZEND_USER_CLASS) && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && (ce->info.user.filename != CG(active_op_array)->filename))
+					) {
 					if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
 						CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
 						opline->opcode = ZEND_DECLARE_INHERITED_CLASS_DELAYED;
@@ -3540,6 +3542,7 @@ static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t
 	if (!fbc
 	 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
 	 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
+	 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
 	) {
 		zend_string_release_ex(lcname, 0);
 		return FAILURE;
@@ -4016,6 +4019,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		if (!fbc
 		 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
 		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
+		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
 		) {
 			zend_string_release_ex(lcname, 0);
 			zend_compile_dynamic_call(result, &name_node, args_ast);
