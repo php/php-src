@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #76285 (DOMDocument::formatOutput attribute sometimes ignored).
     (Andrew Nester, Laruence, Anatol)
 
+- libxml:
+  . Fixed bug #76777 ("public id" parameter of libxml_set_external_entity_loader
+    callback undefined). (Ville Hukkamäki)
+
 - Opcache:
   . Fixed bug #76747 (Opcache treats path containing "test.pharma.tld" as a phar
     file). (Laruence)
