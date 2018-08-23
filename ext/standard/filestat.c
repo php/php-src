@@ -948,7 +948,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 #else
 		ZVAL_LONG(&stat_blksize,-1);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
 #else
 		ZVAL_LONG(&stat_blocks,-1);
