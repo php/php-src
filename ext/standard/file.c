@@ -1616,7 +1616,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 #else
 	ZVAL_LONG(&stat_blksize,-1);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 	ZVAL_LONG(&stat_blocks, stat_ssb.sb.st_blocks);
 #else
 	ZVAL_LONG(&stat_blocks,-1);
