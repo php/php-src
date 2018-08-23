@@ -1680,11 +1680,7 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 
 					snprintf(memory_leak_buf, 512, "Last leak repeated %lu time%s\n", leak_count, (leak_count>1?"s":""));
 				}
-#	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
-#	else
 				fprintf(stderr, "%s", memory_leak_buf);
-#	endif
 			}
 #endif
 			break;
@@ -1694,11 +1690,7 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 				char memory_leak_buf[512];
 
 				snprintf(memory_leak_buf, 512, "=== Total %d memory leaks detected ===\n", *((uint32_t *) data));
-#	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
-#	else
 				fprintf(stderr, "%s", memory_leak_buf);
-#	endif
 			}
 #endif
 			break;
@@ -1717,11 +1709,7 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 				} else {
 					snprintf(memory_leak_buf, sizeof(memory_leak_buf), "[null]  Script:  '%s'\n", SAFE_FILENAME(SG(request_info).path_translated));
 				}
-#	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
-#	else
 				fprintf(stderr, "%s", memory_leak_buf);
-#	endif
 			}
 			break;
 	}
