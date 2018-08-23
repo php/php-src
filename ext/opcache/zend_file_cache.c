@@ -604,12 +604,19 @@ static void zend_file_cache_serialize_class(zval                     *zv,
                                             void                     *buf)
 {
 	zend_class_entry *ce;
+	zend_class_entry *parent = NULL;
 
 	SERIALIZE_PTR(Z_PTR_P(zv));
 	ce = Z_PTR_P(zv);
 	UNSERIALIZE_PTR(ce);
 
 	SERIALIZE_STR(ce->name);
+	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+		SERIALIZE_STR(ce->parent_name);
+	} else {
+		parent = ce->parent;
+		SERIALIZE_PTR(ce->parent);
+	}
 	zend_file_cache_serialize_hash(&ce->function_table, script, info, buf, zend_file_cache_serialize_func);
 	if (ce->default_properties_table) {
 		zval *p, *end;
@@ -632,7 +639,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 		/* Serialize only static properties in this class.
 		 * Static properties from parent classes will be handled in class_copy_ctor */
-		p = table + (ce->parent ? ce->parent->default_static_members_count : 0);
+		p = table + (parent ? parent->default_static_members_count : 0);
 		end = table + ce->default_static_members_count;
 		while (p < end) {
 			zend_file_cache_serialize_zval(p, script, info, buf);
@@ -727,7 +734,6 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		}
 	}
 
-	SERIALIZE_PTR(ce->parent);
 	SERIALIZE_PTR(ce->constructor);
 	SERIALIZE_PTR(ce->destructor);
 	SERIALIZE_PTR(ce->clone);
@@ -1238,12 +1244,18 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
                                               void                    *buf)
 {
 	zend_class_entry *ce;
+	zend_class_entry *parent = NULL;
 
 	UNSERIALIZE_PTR(Z_PTR_P(zv));
 	ce = Z_PTR_P(zv);
 
 	UNSERIALIZE_STR(ce->name);
-	UNSERIALIZE_PTR(ce->parent);
+	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+		UNSERIALIZE_STR(ce->parent_name);
+	} else {
+		UNSERIALIZE_PTR(ce->parent);
+		parent = ce->parent;
+	}
 	zend_file_cache_unserialize_hash(&ce->function_table,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	if (ce->default_properties_table) {
@@ -1264,7 +1276,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		 * Static properties from parent classes will be handled in class_copy_ctor */
 		UNSERIALIZE_PTR(ce->default_static_members_table);
 		table = ce->default_static_members_table;
-		p = table + (ce->parent ? ce->parent->default_static_members_count : 0);
+		p = table + (parent ? parent->default_static_members_count : 0);
 		end = table + ce->default_static_members_count;
 		while (p < end) {
 			zend_file_cache_unserialize_zval(p, script, buf);

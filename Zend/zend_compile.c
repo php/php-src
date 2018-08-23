@@ -6403,7 +6403,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	if (extends_ast) {
 		znode extends_node;
-		zend_string *extends_name;
+		zend_string *extends_name, *parent_name;
 
 		if (!zend_is_const_default_class_ref(extends_ast)) {
 			extends_name = zend_ast_get_str(extends_ast);
@@ -6416,11 +6416,12 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR, "Illegal class name");
 		}
 		extends_name = Z_STR(extends_node.u.constant);
-		extends_const = zend_add_class_name_literal(CG(active_op_array),
-				zend_resolve_class_name(extends_name,
-					extends_ast->kind == ZEND_AST_ZVAL ? extends_ast->attr : ZEND_NAME_FQ));
+		parent_name = zend_resolve_class_name(extends_name,
+					extends_ast->kind == ZEND_AST_ZVAL ? extends_ast->attr : ZEND_NAME_FQ);
+		extends_const = zend_add_class_name_literal(CG(active_op_array), parent_name);
+		ce->parent_name = zend_string_copy(parent_name);
 		zend_string_release_ex(extends_name, 0);
-		ce->ce_flags |= ZEND_ACC_INHERITED;
+		ce->ce_flags |= ZEND_ACC_INHERITED | ZEND_ACC_UNRESOLVED_PARENT;
 	}
 
 	opline = get_next_op(CG(active_op_array));

@@ -218,6 +218,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
+			if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+				zend_string_release_ex(ce->parent_name, 0);
+			}
 			if (ce->default_properties_table) {
 				zval *p = ce->default_properties_table;
 				zval *end = p + ce->default_properties_count;

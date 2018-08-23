@@ -292,7 +292,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;
 
-	if (ce->parent) {
+	if (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
 		ce->parent = ARENA_REALLOC(ce->parent);
 	}
 
@@ -312,7 +312,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	/* static members */
 	if (old_ce->default_static_members_table) {
 		int i, end;
-		zend_class_entry *parent = ce->parent;
+		zend_class_entry *parent = (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) ? NULL : ce->parent;
 
 		ce->default_static_members_table = emalloc(sizeof(zval) * old_ce->default_static_members_count);
 		i = ce->default_static_members_count - 1;

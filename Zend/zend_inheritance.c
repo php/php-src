@@ -816,6 +816,10 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	}
 
+	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+		zend_string_release_ex(ce->parent_name, 0);
+		ce->ce_flags &= ~ZEND_ACC_UNRESOLVED_PARENT;
+	}
 	ce->parent = parent_ce;
 
 	/* Inherit interfaces */

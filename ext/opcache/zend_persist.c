@@ -722,6 +722,9 @@ static void zend_persist_class_entry(zval *zv)
 		ce = Z_PTR_P(zv) = ZCG(arena_mem);
 		ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_class_entry)));
 		zend_accel_store_interned_string(ce->name);
+		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+			zend_accel_store_interned_string(ce->parent_name);
+		}
 		zend_hash_persist(&ce->function_table, zend_persist_class_method);
 		if (ce->default_properties_table) {
 		    int i;
@@ -737,7 +740,7 @@ static void zend_persist_class_entry(zval *zv)
 
 			/* Persist only static properties in this class.
 			 * Static properties from parent classes will be handled in class_copy_ctor */
-			i = ce->parent ? ce->parent->default_static_members_count : 0;
+			i = (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) ? ce->parent->default_static_members_count : 0;
 			for (; i < ce->default_static_members_count; i++) {
 				zend_persist_zval(&ce->default_static_members_table[i]);
 			}
@@ -838,7 +841,7 @@ static int zend_update_parent_ce(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
-	if (ce->parent) {
+	if (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
 		ce->parent = zend_shared_alloc_get_xlat_entry(ce->parent);
 	}
 

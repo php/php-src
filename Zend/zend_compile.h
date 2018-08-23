@@ -244,6 +244,9 @@ typedef struct _zend_oparray_context {
 /* Class extends another class                            |     |     |     */
 #define ZEND_ACC_INHERITED               (1 << 10) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Class extends another class                            |     |     |     */
+#define ZEND_ACC_UNRESOLVED_PARENT       (1 << 11) /*  X  |     |     |     */
+/*                                                        |     |     |     */
 /* Class implements interface(s)                          |     |     |     */
 #define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 19) /*  X  |     |     |     */
 /*                                                        |     |     |     */

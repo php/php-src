@@ -115,7 +115,10 @@ typedef struct _zend_trait_alias {
 struct _zend_class_entry {
 	char type;
 	zend_string *name;
-	zend_class_entry *parent;
+	union {
+		zend_class_entry *parent;
+		zend_string *parent_name;
+	};
 	int refcount;
 	uint32_t ce_flags;
 
