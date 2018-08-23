@@ -1555,6 +1555,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 			case 1: /* expecting a delimiter */
 				if (*p1 != '?') {
+					if (*p1 == '\r' || *p1 == '\n') {
+						p1--;
+					}
 					err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 					if (err != PHP_ICONV_ERR_SUCCESS) {
 						goto out;
