@@ -342,6 +342,17 @@ static void zend_persist_class_entry_calc(zval *zv)
 
 		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
 
+		if (ce->num_interfaces) {
+			uint32_t i;
+
+			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+			for (i = 0; i < ce->num_interfaces; i++) {
+				ADD_INTERNED_STRING(ce->interface_names[i].name, 0);
+				ADD_INTERNED_STRING(ce->interface_names[i].lc_name, 0);
+			}
+			ADD_SIZE(sizeof(zend_class_name) * ce->num_interfaces);
+		}
+
 		if (ce->num_traits) {
 			uint32_t i;
 

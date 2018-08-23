@@ -644,6 +644,22 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_STR(ce->info.user.doc_comment);
 	zend_file_cache_serialize_hash(&ce->properties_info, script, info, buf, zend_file_cache_serialize_prop_info);
 
+	if (ce->num_interfaces) {
+		uint32_t i;
+		zend_class_name *interface_names;
+
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+
+		SERIALIZE_PTR(ce->interface_names);
+		interface_names = ce->interface_names;
+		UNSERIALIZE_PTR(interface_names);
+
+		for (i = 0; i < ce->num_interfaces; i++) {
+			SERIALIZE_STR(interface_names[i].name);
+			SERIALIZE_STR(interface_names[i].lc_name);
+		}
+	}
+
 	if (ce->num_traits) {
 		uint32_t i;
 		zend_class_name *trait_names;
@@ -1262,6 +1278,18 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	zend_file_cache_unserialize_hash(&ce->properties_info,
 			script, buf, zend_file_cache_unserialize_prop_info, NULL);
 
+	if (ce->num_interfaces) {
+		uint32_t i;
+
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+		UNSERIALIZE_PTR(ce->interface_names);
+
+		for (i = 0; i < ce->num_interfaces; i++) {
+			UNSERIALIZE_STR(ce->interface_names[i].name);
+			UNSERIALIZE_STR(ce->interface_names[i].lc_name);
+		}
+	}
+
 	if (ce->num_traits) {
 		uint32_t i;
 
@@ -1271,54 +1299,54 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 			UNSERIALIZE_STR(ce->trait_names[i].name);
 			UNSERIALIZE_STR(ce->trait_names[i].lc_name);
 		}
-	}
 
-	if (ce->trait_aliases) {
-		zend_trait_alias **p, *q;
+		if (ce->trait_aliases) {
+			zend_trait_alias **p, *q;
 
-		UNSERIALIZE_PTR(ce->trait_aliases);
-		p = ce->trait_aliases;
+			UNSERIALIZE_PTR(ce->trait_aliases);
+			p = ce->trait_aliases;
 
-		while (*p) {
-			UNSERIALIZE_PTR(*p);
-			q = *p;
+			while (*p) {
+				UNSERIALIZE_PTR(*p);
+				q = *p;
 
-			if (q->trait_method.method_name) {
-				UNSERIALIZE_STR(q->trait_method.method_name);
+				if (q->trait_method.method_name) {
+					UNSERIALIZE_STR(q->trait_method.method_name);
+				}
+				if (q->trait_method.class_name) {
+					UNSERIALIZE_STR(q->trait_method.class_name);
+				}
+
+				if (q->alias) {
+					UNSERIALIZE_STR(q->alias);
+				}
+				p++;
 			}
-			if (q->trait_method.class_name) {
-				UNSERIALIZE_STR(q->trait_method.class_name);
-			}
-
-			if (q->alias) {
-				UNSERIALIZE_STR(q->alias);
-			}
-			p++;
 		}
-	}
 
-	if (ce->trait_precedences) {
-		zend_trait_precedence **p, *q;
-		int j;
+		if (ce->trait_precedences) {
+			zend_trait_precedence **p, *q;
+			int j;
 
-		UNSERIALIZE_PTR(ce->trait_precedences);
-		p = ce->trait_precedences;
+			UNSERIALIZE_PTR(ce->trait_precedences);
+			p = ce->trait_precedences;
 
-		while (*p) {
-			UNSERIALIZE_PTR(*p);
-			q = *p;
+			while (*p) {
+				UNSERIALIZE_PTR(*p);
+				q = *p;
 
-			if (q->trait_method.method_name) {
-				UNSERIALIZE_STR(q->trait_method.method_name);
+				if (q->trait_method.method_name) {
+					UNSERIALIZE_STR(q->trait_method.method_name);
+				}
+				if (q->trait_method.class_name) {
+					UNSERIALIZE_STR(q->trait_method.class_name);
+				}
+
+				for (j = 0; j < q->num_excludes; j++) {
+					UNSERIALIZE_STR(q->exclude_class_names[j]);
+				}
+				p++;
 			}
-			if (q->trait_method.class_name) {
-				UNSERIALIZE_STR(q->trait_method.class_name);
-			}
-
-			for (j = 0; j < q->num_excludes; j++) {
-				UNSERIALIZE_STR(q->exclude_class_names[j]);
-			}
-			p++;
 		}
 	}
 

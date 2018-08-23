@@ -344,12 +344,13 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	/* constants table */
 	zend_hash_clone_constants(&ce->constants_table, &old_ce->constants_table);
 
-	/* interfaces aren't really implemented, so we create a new table */
 	if (ce->num_interfaces) {
-		ce->interfaces = emalloc(sizeof(zend_class_entry *) * ce->num_interfaces);
-		memset(ce->interfaces, 0, sizeof(zend_class_entry *) * ce->num_interfaces);
-	} else {
-		ce->interfaces = NULL;
+		zend_class_name *interface_names;
+
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+		interface_names = emalloc(sizeof(zend_class_name) * ce->num_interfaces);
+		memcpy(interface_names, ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
+		ce->interface_names = interface_names;
 	}
 
 	zend_update_inherited_handler(constructor);

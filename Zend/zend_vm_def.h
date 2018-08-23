@@ -6709,7 +6709,10 @@ ZEND_VM_HANDLER(171, ZEND_DECLARE_ANON_CLASS, ANY, ANY, JMP_ADDR)
 	}
 	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
 		zend_do_bind_traits(ce);
-	} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_IMPLEMENT_INTERFACES))) {
+	}
+	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+		zend_do_implement_interfaces(ce);
+	} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 		zend_verify_abstract_class(ce);
 	}
 	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
@@ -6744,6 +6747,9 @@ ZEND_VM_HANDLER(172, ZEND_DECLARE_ANON_INHERITED_CLASS, CONST, CONST, JMP_ADDR)
 	zend_do_inheritance(ce, parent);
 	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
 		zend_do_bind_traits(ce);
+	}
+	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+		zend_do_implement_interfaces(ce);
 	}
 	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -6834,27 +6840,6 @@ ZEND_VM_HOT_HANDLER(0, ZEND_NOP, ANY, ANY)
 	USE_OPLINE
 
 	ZEND_VM_NEXT_OPCODE();
-}
-
-ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, CONST, CACHE_SLOT)
-{
-	USE_OPLINE
-	zend_class_entry *ce = Z_CE_P(EX_VAR(opline->op1.var));
-	zend_class_entry *iface;
-
-	SAVE_OPLINE();
-	iface = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1), ZEND_FETCH_CLASS_INTERFACE);
-	if (UNEXPECTED(iface == NULL)) {
-		ZEND_ASSERT(EG(exception));
-		HANDLE_EXCEPTION();
-	}
-
-	if (UNEXPECTED((iface->ce_flags & ZEND_ACC_INTERFACE) == 0)) {
-		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
-	}
-	zend_do_implement_interface(ce, iface);
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_catch_offset, uint32_t op_num)
@@ -6968,15 +6953,6 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	}
 
 	ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper, try_catch_offset, current_try_catch_offset, op_num, throw_op_num);
-}
-
-ZEND_VM_HANDLER(146, ZEND_VERIFY_ABSTRACT_CLASS, ANY, ANY)
-{
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	zend_verify_abstract_class(Z_CE_P(EX_VAR(opline->op1.var)));
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)

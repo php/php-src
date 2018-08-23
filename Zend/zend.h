@@ -159,7 +159,12 @@ struct _zend_class_entry {
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;
-	zend_class_entry **interfaces;
+
+	/* class_entry or string(s) depending on ZEND_ACC_UNRESOLVED_INTERFACES */
+	union {
+		zend_class_entry **interfaces;
+		zend_class_name *interface_names;
+	};
 
 	zend_class_name *trait_names;
 	zend_trait_alias **trait_aliases;

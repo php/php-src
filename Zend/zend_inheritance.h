@@ -24,10 +24,10 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface);
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface);
 
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce);
+ZEND_API void zend_do_implement_interfaces(zend_class_entry *ce);
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
 void zend_do_early_binding(void);

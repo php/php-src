@@ -390,12 +390,6 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				(opline + 1)->op2.var == opline->result.var) {
 				return 0;
 			}
-		case ZEND_ADD_INTERFACE:
-			REQUIRES_STRING(val);
-			drop_leading_backslash(val);
-			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
-			break;
 		case ZEND_INSTANCEOF:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);

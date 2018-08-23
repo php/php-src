@@ -262,7 +262,15 @@ ZEND_API void destroy_zend_class(zval *zv)
 				} ZEND_HASH_FOREACH_END();
 			}
 			zend_hash_destroy(&ce->constants_table);
-			if (ce->num_interfaces > 0 && ce->interfaces) {
+			if (ce->num_interfaces > 0) {
+				if (ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES) {
+					uint32_t i;
+
+					for (i = 0; i < ce->num_interfaces; i++) {
+						zend_string_release_ex(ce->interface_names[i].name, 0);
+						zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+					}
+				}
 				efree(ce->interfaces);
 			}
 			if (ce->info.user.doc_comment) {

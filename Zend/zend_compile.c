@@ -1092,8 +1092,8 @@ static zend_always_inline zend_class_entry *do_bind_class_ex(zval *lcname, HashT
 	ZEND_ASSERT(zv);
 	ce = (zend_class_entry*)Z_PTR_P(zv);
 
-	if (compile_time && (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
-		/* We currently don't early-bind classes that use traits */
+	if (compile_time && (ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
+		/* We currently don't early-bind classes that implement interfaces or use traits */
 		return NULL;
 	}
 
@@ -1110,9 +1110,16 @@ static zend_always_inline zend_class_entry *do_bind_class_ex(zval *lcname, HashT
 		}
 		return NULL;
 	} else {
-		if (!compile_time && (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
-			zend_do_bind_traits(ce);
-		} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_IMPLEMENT_INTERFACES))) {
+		if (!compile_time) {
+			if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+				zend_do_bind_traits(ce);
+			}
+			if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+				zend_do_implement_interfaces(ce);
+			} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
+				zend_verify_abstract_class(ce);
+			}
+		} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 			zend_verify_abstract_class(ce);
 		}
 		return ce;
@@ -1155,8 +1162,8 @@ static zend_always_inline zend_class_entry *do_bind_inherited_class_ex(zval *lcn
 
 	ce = (zend_class_entry*)Z_PTR_P(zv);
 
-	if (compile_time && (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
-		/* We currently don't early-bind classes that use traits */
+	if (compile_time && (ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
+		/* We currently don't early-bind classes that implement interfaces or use traits */
 		return NULL;
 	}
 
@@ -1173,8 +1180,13 @@ static zend_always_inline zend_class_entry *do_bind_inherited_class_ex(zval *lcn
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 	}
 
-	if (!compile_time && (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
-		zend_do_bind_traits(ce);
+	if (!compile_time) {
+		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+			zend_do_bind_traits(ce);
+		}
+		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+			zend_do_implement_interfaces(ce);
+		}
 	}
 
 	return ce;
@@ -1227,10 +1239,16 @@ void zend_do_early_binding(void) /* {{{ */
 				 || ((ce->type == ZEND_USER_CLASS) && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && (ce->info.user.filename != CG(active_op_array)->filename))
 					) {
 					if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
-						CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
-						opline->opcode = ZEND_DECLARE_INHERITED_CLASS_DELAYED;
-						opline->result_type = IS_UNUSED;
-						opline->result.opline_num = -1;
+						zval *rtd_key = CT_CONSTANT_EX(CG(active_op_array), opline->op1.constant) + 1;
+						zval *zv = zend_hash_find_ex(CG(class_table), Z_STR_P(rtd_key), 1);
+						zend_class_entry *ce = (zend_class_entry*)Z_PTR_P(zv);
+
+						if (!(ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
+							CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
+							opline->opcode = ZEND_DECLARE_INHERITED_CLASS_DELAYED;
+							opline->result_type = IS_UNUSED;
+							opline->result.opline_num = -1;
+						}
 					}
 					return;
 				}
@@ -1243,10 +1261,6 @@ void zend_do_early_binding(void) /* {{{ */
 				table = CG(class_table);
 				break;
 			}
-		case ZEND_VERIFY_ABSTRACT_CLASS:
-		case ZEND_ADD_INTERFACE:
-			/* We currently don't early-bind classes that implement interfaces */
-			return;
 		default:
 			zend_error_noreturn(E_COMPILE_ERROR, "Invalid binding type");
 			return;
@@ -2082,9 +2096,7 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 			}
 		} else if (opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
 		           opline->opcode == ZEND_NEW ||
-		           opline->opcode == ZEND_FETCH_CLASS_CONSTANT ||
-		           opline->opcode == ZEND_ADD_INTERFACE ||
-		           opline->opcode == ZEND_VERIFY_ABSTRACT_CLASS) {
+		           opline->opcode == ZEND_FETCH_CLASS_CONSTANT) {
 			/* classes don't have to be destroyed */
 		} else if (opline->opcode == ZEND_FAST_RET) {
 			/* fast_calls don't have to be destroyed */
@@ -6287,25 +6299,29 @@ void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
+	zend_class_entry *ce = CG(active_class_entry);
+	zend_class_name *interface_names;
 	uint32_t i;
+
+	interface_names = emalloc(sizeof(zend_class_name) * list->children);
+
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *class_ast = list->child[i];
 		zend_string *name = zend_ast_get_str(class_ast);
 
-		zend_op *opline;
-
 		if (!zend_is_const_default_class_ref(class_ast)) {
+			efree(interface_names);
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use '%s' as interface name as it is reserved", ZSTR_VAL(name));
 		}
 
-		opline = zend_emit_op(NULL, ZEND_ADD_INTERFACE, class_node, NULL);
-		opline->op2_type = IS_CONST;
-		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
-			zend_resolve_class_name_ast(class_ast));
-
-		CG(active_class_entry)->num_interfaces++;
+		interface_names[i].name = zend_resolve_class_name_ast(class_ast);
+		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
 	}
+
+	ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES | ZEND_ACC_UNRESOLVED_INTERFACES;
+	ce->num_interfaces = list->children;
+	ce->interface_names = interface_names;
 }
 /* }}} */
 
@@ -6501,22 +6517,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		zend_compile_implements(&declare_node, implements_ast);
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 			zend_verify_abstract_class(ce);
-			zend_emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL);
 		}
 	}  else if (extends_ast) {
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 			zend_verify_abstract_class(ce);
 		}
-	}
-
-	/* Inherit interfaces; reset number to zero, we need it for above check and
-	 * will restore it during actual implementation.
-	 * The ZEND_ACC_IMPLEMENT_INTERFACES flag disables double call to
-	 * zend_verify_abstract_class() */
-	if (ce->num_interfaces > 0) {
-		ce->interfaces = NULL;
-		ce->num_interfaces = 0;
-		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 
 	FC(implementing_class) = original_implementing_class;

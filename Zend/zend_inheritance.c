@@ -731,15 +731,13 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
-ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface) /* {{{ */
+static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface) /* {{{ */
 {
 	/* expects interface to be contained in ce's interface list already */
 	uint32_t i, ce_num, if_num = iface->num_interfaces;
 	zend_class_entry *entry;
 
-	if (if_num==0) {
-		return;
-	}
+	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
 	ce_num = ce->num_interfaces;
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -821,7 +819,17 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	ce->parent = parent_ce;
 
 	/* Inherit interfaces */
-	zend_do_inherit_interfaces(ce, parent_ce);
+	if (parent_ce->num_interfaces) {
+		if (!(ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES)) {
+			zend_do_inherit_interfaces(ce, parent_ce);
+		} else {
+			uint32_t i;
+
+			for (i = 0; i < parent_ce->num_interfaces; i++) {
+				do_implement_interface(ce, parent_ce->interfaces[i]);
+			}
+		}
+	}
 
 	/* Inherit properties */
 	if (parent_ce->default_properties_count) {
@@ -1039,6 +1047,8 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	zend_string *key;
 	zend_class_constant *c;
 
+	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+
 	for (i = 0; i < ce->num_interfaces; i++) {
 		if (ce->interfaces[i] == NULL) {
 			memmove(ce->interfaces + i, ce->interfaces + i + 1, sizeof(zend_class_entry*) * (--ce->num_interfaces - i));
@@ -1079,7 +1089,99 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		} ZEND_HASH_FOREACH_END();
 
 		do_implement_interface(ce, iface);
-		zend_do_inherit_interfaces(ce, iface);
+		if (iface->num_interfaces) {
+			zend_do_inherit_interfaces(ce, iface);
+		}
+	}
+}
+/* }}} */
+
+ZEND_API void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
+{
+	zend_class_entry **interfaces, *iface;
+	uint32_t num_interfaces = 0;
+	zend_function *func;
+	zend_string *key;
+	zend_class_constant *c;
+	uint32_t i, j;
+
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+
+	if (ce->parent && ce->parent->num_interfaces) {
+		interfaces = emalloc(sizeof(zend_class_entry*) * (ce->parent->num_interfaces + ce->num_interfaces));
+		memcpy(interfaces, ce->parent->interfaces, sizeof(zend_class_entry*) * ce->parent->num_interfaces);
+		num_interfaces = ce->parent->num_interfaces;
+	} else {
+		interfaces = emalloc(sizeof(zend_class_entry*) * ce->num_interfaces);
+	}
+
+	for (i = 0; i < ce->num_interfaces; i++) {
+		iface = zend_fetch_class_by_name(ce->interface_names[i].name,
+			ce->interface_names[i].lc_name, ZEND_FETCH_CLASS_INTERFACE);
+		if (UNEXPECTED(iface == NULL)) {
+			return;
+		}
+		if (UNEXPECTED(!(iface->ce_flags & ZEND_ACC_INTERFACE))) {
+			efree(interfaces);
+			zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+			return;
+		}
+		for (j = 0; j < num_interfaces; j++) {
+			if (interfaces[j] == iface) {
+				if (!ce->parent || j >= ce->parent->num_interfaces) {
+					efree(interfaces);
+					zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+					return;
+				}
+				/* skip duplications */
+				ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
+					do_inherit_constant_check(&iface->constants_table, c, key, iface);
+				} ZEND_HASH_FOREACH_END();
+
+				iface = NULL;
+				break;
+			}
+		}
+		if (iface) {
+			interfaces[num_interfaces] = iface;
+			num_interfaces++;
+		}
+	}
+
+	for (i = 0; i < ce->num_interfaces; i++) {
+		zend_string_release_ex(ce->interface_names[i].name, 0);
+		zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+	}
+	efree(ce->interface_names);
+
+	ce->num_interfaces = num_interfaces;
+	ce->interfaces = interfaces;
+	ce->ce_flags &= ~ZEND_ACC_UNRESOLVED_INTERFACES;
+
+	i = ce->parent ? ce->parent->num_interfaces : 0;
+	for (; i < ce->num_interfaces; i++) {
+		iface = ce->interfaces[i];
+
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
+			do_inherit_iface_constant(key, c, ce, iface);
+		} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
+			zend_function *new_func = do_inherit_method(key, func, ce);
+
+			if (new_func) {
+				zend_hash_add_new_ptr(&ce->function_table, key, new_func);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		do_implement_interface(ce, iface);
+		if (iface->num_interfaces) {
+			zend_do_inherit_interfaces(ce, iface);
+		}
+	}
+
+	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
+		zend_verify_abstract_class(ce);
 	}
 }
 /* }}} */
@@ -1703,9 +1805,7 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 	zend_class_entry **traits, *trait;
 	uint32_t i, j;
 
-	if (ce->num_traits == 0) {
-		return;
-	}
+	ZEND_ASSERT(ce->num_traits > 0);
 
 	traits = emalloc(sizeof(zend_class_entry*) * ce->num_traits);
 

@@ -764,7 +764,14 @@ static void zend_persist_class_entry(zval *zv)
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
 
 		if (ce->num_interfaces) {
-			ZEND_ASSERT(0);
+			uint32_t i = 0;
+
+			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+			for (i = 0; i < ce->num_interfaces; i++) {
+				zend_accel_store_interned_string(ce->interface_names[i].name);
+				zend_accel_store_interned_string(ce->interface_names[i].lc_name);
+			}
+			zend_accel_store(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 		}
 
 		if (ce->num_traits) {

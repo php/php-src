@@ -250,6 +250,9 @@ typedef struct _zend_oparray_context {
 /* Class constants updated                                |     |     |     */
 #define ZEND_ACC_CONSTANTS_UPDATED       (1 << 20) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Class implements interface(s)                          |     |     |     */
+#define ZEND_ACC_UNRESOLVED_INTERFACES   (1 << 21) /*  X  |     |     |     */
+/*                                                        |     |     |     */
 /* Class uses trait(s)                                    |     |     |     */
 #define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 22) /*  X  |     |     |     */
 /*                                                        |     |     |     */
