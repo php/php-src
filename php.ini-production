@@ -198,7 +198,7 @@ short_open_tag = Off
 
 ; The number of significant digits displayed in floating point numbers.
 ; http://php.net/precision
-precision = 14
+precision = -1
 
 ; Output buffering is a mechanism for controlling how much output data
 ; (excluding headers and cookies) PHP should keep internally before pushing that
