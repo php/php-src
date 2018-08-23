@@ -117,9 +117,11 @@ function get_depends($module)
 			}
 		}
 
-		$per_module_deps[basename($module)][] = $dep;
-		//recursively check dll dependencies
-		get_depends($dep);
+		if (!isset($per_module_deps[basename($module)]) || !in_array($dep, $per_module_deps[basename($module)])) {
+			$per_module_deps[basename($module)][] = $dep;
+			//recursively check dll dependencies
+			get_depends($dep);
+		}
 	}
 	fclose($pipes[1]);
 	proc_close($proc);
