@@ -391,6 +391,7 @@ if ($pid) {
 						fputs($fs, "This is line $i of the test data.\n");
 					}
 					fputs($s, "226 Closing data Connection.\r\n");
+					break;
 				case "/bug73457":
 					fputs($s, "150 File status okay; about to open data connection.\r\n");
 					break;
@@ -408,27 +409,27 @@ if ($pid) {
 			$host = "127.0.0.1";
 			$i=0;
 
-            if (empty($bug73457)) {
-                do {
-                    if (!empty($ssl)) {
-                        $soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
-                    } else {
-                        $soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port");
-                    }
-                    /* Could bind port, Try another port */
-                    if (!$soc) {
-                        $pasv_port = rand(50000, 65535);
-                    }
-                    $i++;
-                } while ($i<10 && !$soc);
+			if (empty($bug73457)) {
+				do {
+					if (!empty($ssl)) {
+						$soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+					} else {
+						$soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port");
+					}
+					/* Could bind port, Try another port */
+					if (!$soc) {
+						$pasv_port = rand(50000, 65535);
+					}
+					$i++;
+				} while ($i<10 && !$soc);
 
-                if (!$soc) {
-                    echo "$errstr ($errno)\n";
-                    die("could not bind passive port\n");
-                }
-            } else {
-                $pasv_port=1234;
-            }
+				if (!$soc) {
+					echo "$errstr ($errno)\n";
+					die("could not bind passive port\n");
+				}
+			} else {
+				$pasv_port=1234;
+			}
 
 			$p2 = $pasv_port % ((int) 1 << 8);
 			$p1 = ($pasv_port-$p2)/((int) 1 << 8);
