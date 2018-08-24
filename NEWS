@@ -3,7 +3,11 @@ PHP                                                                        NEWS
 ?? ??? 2018, PHP 7.1.23
 
 - POSIX:
-  Fixed bug #75696 (posix_getgrnam fails to print details of group). (cmb)
+  . Fixed bug #75696 (posix_getgrnam fails to print details of group). (cmb)
+
+- Standard:
+  . Fixed bug #73457 (Wrong error message when fopen FTP wrapped fails to open
+    data connection). (Ville Hukkamäki)
 
 13 Sep 2018, PHP 7.1.22
 
