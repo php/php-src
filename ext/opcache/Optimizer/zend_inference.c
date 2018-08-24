@@ -2960,8 +2960,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		}
-		case ZEND_DECLARE_CLASS:
-		case ZEND_DECLARE_INHERITED_CLASS:
 		case ZEND_DECLARE_ANON_CLASS:
 		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_ops[i].result_def);
