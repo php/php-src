@@ -1031,32 +1031,37 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline int do_bind_function_ex(zval *lcname, HashTable *function_table, zend_bool compile_time) /* {{{ */
+static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(zend_string *lcname, zend_op_array *op_array, zend_bool compile_time) /* {{{ */
+{
+	zval *zv = zend_hash_find_ex(compile_time ? CG(function_table) : EG(function_table), lcname, 1);
+	int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
+	zend_function *old_function;
+
+	ZEND_ASSERT(zv != NULL);
+	old_function = (zend_function*)Z_PTR_P(zv);
+	if (old_function->type == ZEND_USER_FUNCTION
+		&& old_function->op_array.last > 0) {
+		zend_error_noreturn(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
+					ZSTR_VAL(op_array->function_name),
+					ZSTR_VAL(old_function->op_array.filename),
+					old_function->op_array.opcodes[0].lineno);
+	} else {
+		zend_error_noreturn(error_level, "Cannot redeclare %s()", ZSTR_VAL(op_array->function_name));
+	}
+}
+
+ZEND_API int do_bind_function(zval *lcname) /* {{{ */
 {
 	zend_function *function, *new_function;
 	zval *rtd_key, *zv;
 
 	rtd_key = lcname + 1;
-	zv = zend_hash_find_ex(function_table, Z_STR_P(rtd_key), 1);
+	zv = zend_hash_find_ex(EG(function_table), Z_STR_P(rtd_key), 1);
 	function = (zend_function*)Z_PTR_P(zv);
 	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_function, function, sizeof(zend_op_array));
-	if (zend_hash_add_ptr(function_table, Z_STR_P(lcname), new_function) == NULL) {
-		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
-		zend_function *old_function;
-
-		zv = zend_hash_find_ex(function_table, Z_STR_P(lcname), 1);
-		ZEND_ASSERT(zv != NULL);
-		old_function = (zend_function*)Z_PTR_P(zv);
-		if (old_function->type == ZEND_USER_FUNCTION
-			&& old_function->op_array.last > 0) {
-			zend_error_noreturn(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
-						ZSTR_VAL(function->common.function_name),
-						ZSTR_VAL(old_function->op_array.filename),
-						old_function->op_array.opcodes[0].lineno);
-		} else {
-			zend_error_noreturn(error_level, "Cannot redeclare %s()", ZSTR_VAL(function->common.function_name));
-		}
+	if (zend_hash_add_ptr(EG(function_table), Z_STR_P(lcname), new_function) == NULL) {
+		do_bind_function_error(Z_STR_P(lcname), &new_function->op_array, 0);
 		return FAILURE;
 	} else {
 		if (function->op_array.refcount) {
@@ -1070,55 +1075,31 @@ static zend_always_inline int do_bind_function_ex(zval *lcname, HashTable *funct
 }
 /* }}} */
 
-ZEND_API int do_bind_function(zval *lcname) /* {{{ */
-{
-	return do_bind_function_ex(lcname, EG(function_table), 0);
-}
-/* }}} */
-
-static int do_early_bind_function(zval *lcname) /* {{{ */
-{
-	return do_bind_function_ex(lcname, CG(function_table), 1);
-}
-/* }}} */
-
-static zend_always_inline zend_class_entry *do_bind_class_ex(zval *lcname, HashTable *class_table, zend_bool compile_time) /* {{{ */
+ZEND_API zend_class_entry *do_bind_class(zval *lcname) /* {{{ */
 {
 	zend_class_entry *ce;
 	zval *rtd_key, *zv;
 
 	rtd_key = lcname + 1;
-	zv = zend_hash_find_ex(class_table, Z_STR_P(rtd_key), 1);
+	zv = zend_hash_find_ex(EG(class_table), Z_STR_P(rtd_key), 1);
 	ZEND_ASSERT(zv);
 	ce = (zend_class_entry*)Z_PTR_P(zv);
 
-	if (compile_time && (ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
-		/* We currently don't early-bind classes that implement interfaces or use traits */
-		return NULL;
-	}
-
-	ce->refcount++;
-	if (zend_hash_add_ptr(class_table, Z_STR_P(lcname), ce) == NULL) {
-		ce->refcount--;
-		if (!compile_time) {
-			/* If we're in compile time, in practice, it's quite possible
-			 * that we'll never reach this class declaration at runtime,
-			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
-			 * approach to work.
-			 */
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
-		}
+	if (UNEXPECTED(zend_hash_add_ptr(EG(class_table), Z_STR_P(lcname), ce) == NULL)) {
+		/* If we're in compile time, in practice, it's quite possible
+		 * that we'll never reach this class declaration at runtime,
+		 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
+		 * approach to work.
+		 */
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 		return NULL;
 	} else {
-		if (!compile_time) {
-			if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
-				zend_do_bind_traits(ce);
-			}
-			if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
-				zend_do_implement_interfaces(ce);
-			} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-				zend_verify_abstract_class(ce);
-			}
+		ce->refcount++;
+		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+			zend_do_bind_traits(ce);
+		}
+		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+			zend_do_implement_interfaces(ce);
 		} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 			zend_verify_abstract_class(ce);
 		}
@@ -1127,47 +1108,28 @@ static zend_always_inline zend_class_entry *do_bind_class_ex(zval *lcname, HashT
 }
 /* }}} */
 
-ZEND_API zend_class_entry *do_bind_class(zval *lcname) /* {{{ */
-{
-	return do_bind_class_ex(lcname, EG(class_table), 0);
-}
-/* }}} */
-
-static zend_class_entry *do_early_bind_class(zval *lcname) /* {{{ */
-{
-	return do_bind_class_ex(lcname, CG(class_table), 1);
-}
-/* }}} */
-
-static zend_always_inline zend_class_entry *do_bind_inherited_class_ex(zval *lcname, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time) /* {{{ */
+ZEND_API zend_class_entry *do_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce) /* {{{ */
 {
 	zend_class_entry *ce;
 	zval *rtd_key, *zv;
 
 	rtd_key = lcname + 1;
 
-	zv = zend_hash_find_ex(class_table, Z_STR_P(rtd_key), 1);
+	zv = zend_hash_find_ex(EG(class_table), Z_STR_P(rtd_key), 1);
 
 	if (!zv) {
-		if (!compile_time) {
-			/* If we're in compile time, in practice, it's quite possible
-			 * that we'll never reach this class declaration at runtime,
-			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
-			 * approach to work.
-			 */
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare  %s, because the name is already in use", Z_STRVAL_P(lcname));
-		}
+		/* If we're in compile time, in practice, it's quite possible
+		 * that we'll never reach this class declaration at runtime,
+		 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
+		 * approach to work.
+		 */
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare  %s, because the name is already in use", Z_STRVAL_P(lcname));
 		return NULL;
 	}
 
 	ce = (zend_class_entry*)Z_PTR_P(zv);
 
-	if (compile_time && (ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
-		/* We currently don't early-bind classes that implement interfaces or use traits */
-		return NULL;
-	}
-
-	if (zend_hash_exists(class_table, Z_STR_P(lcname))) {
+	if (zend_hash_exists(EG(class_table), Z_STR_P(lcname))) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 	}
 
@@ -1176,100 +1138,18 @@ static zend_always_inline zend_class_entry *do_bind_inherited_class_ex(zval *lcn
 	ce->refcount++;
 
 	/* Register the derived class */
-	if (zend_hash_add_ptr(class_table, Z_STR_P(lcname), ce) == NULL) {
+	if (zend_hash_add_ptr(EG(class_table), Z_STR_P(lcname), ce) == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 	}
 
-	if (!compile_time) {
-		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
-			zend_do_bind_traits(ce);
-		}
-		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
-			zend_do_implement_interfaces(ce);
-		}
+	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+		zend_do_bind_traits(ce);
+	}
+	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+		zend_do_implement_interfaces(ce);
 	}
 
 	return ce;
-}
-/* }}} */
-
-ZEND_API zend_class_entry *do_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce) /* {{{ */
-{
-	return do_bind_inherited_class_ex(lcname, EG(class_table), parent_ce, 0);
-}
-/* }}} */
-
-static zend_class_entry *do_early_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce) /* {{{ */
-{
-	return do_bind_inherited_class_ex(lcname, CG(class_table), parent_ce, 1);
-}
-/* }}} */
-
-void zend_do_early_binding(void) /* {{{ */
-{
-	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
-	HashTable *table;
-
-	while (opline->opcode == ZEND_TICKS && opline > CG(active_op_array)->opcodes) {
-		opline--;
-	}
-
-	switch (opline->opcode) {
-		case ZEND_DECLARE_FUNCTION:
-			if (do_early_bind_function(CT_CONSTANT_EX(CG(active_op_array), opline->op1.constant)) == FAILURE) {
-				return;
-			}
-			table = CG(function_table);
-			break;
-		case ZEND_DECLARE_CLASS:
-			if (do_early_bind_class(CT_CONSTANT_EX(CG(active_op_array), opline->op1.constant)) == NULL) {
-				return;
-			}
-			table = CG(class_table);
-			break;
-		case ZEND_DECLARE_INHERITED_CLASS:
-			{
-				zval *parent_name;
-				zend_class_entry *ce;
-
-				parent_name = CT_CONSTANT(opline->op2);
-				ce = zend_lookup_class_ex(Z_STR_P(parent_name), Z_STR_P(parent_name + 1), 0);
-				if (!ce
-				 || ((ce->type == ZEND_INTERNAL_CLASS) && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
-				 || ((ce->type == ZEND_USER_CLASS) && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && (ce->info.user.filename != CG(active_op_array)->filename))
-					) {
-					if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
-						zval *rtd_key = CT_CONSTANT_EX(CG(active_op_array), opline->op1.constant) + 1;
-						zval *zv = zend_hash_find_ex(CG(class_table), Z_STR_P(rtd_key), 1);
-						zend_class_entry *ce = (zend_class_entry*)Z_PTR_P(zv);
-
-						if (!(ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
-							CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
-							opline->opcode = ZEND_DECLARE_INHERITED_CLASS_DELAYED;
-							opline->result_type = IS_UNUSED;
-							opline->result.opline_num = -1;
-						}
-					}
-					return;
-				}
-				if (do_early_bind_inherited_class(CT_CONSTANT_EX(CG(active_op_array), opline->op1.constant), ce) == NULL) {
-					return;
-				}
-				zend_del_literal(CG(active_op_array), opline->op2.constant+1);
-				zend_del_literal(CG(active_op_array), opline->op2.constant);
-
-				table = CG(class_table);
-				break;
-			}
-		default:
-			zend_error_noreturn(E_COMPILE_ERROR, "Invalid binding type");
-			return;
-	}
-
-	zend_hash_del(table, Z_STR_P(CT_CONSTANT(opline->op1)+1));
-	zend_del_literal(CG(active_op_array), opline->op1.constant+1);
-	zend_del_literal(CG(active_op_array), opline->op1.constant);
-	MAKE_NOP(opline);
 }
 /* }}} */
 
@@ -3582,6 +3462,7 @@ static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t
 
 	fbc = zend_hash_find_ptr(CG(function_table), lcname);
 	if (!fbc
+	 || (fbc == CG(active_op_array))
 	 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
 	 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
 	 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
@@ -3704,7 +3585,7 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 
 		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
 
-		if (fbc) {
+		if (fbc && fbc != CG(active_op_array)) {
 			name_node.op_type = IS_CONST;
 			ZVAL_STR_COPY(&name_node.u.constant, name);
 
@@ -4059,6 +3940,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 
 		fbc = zend_hash_find_ptr(CG(function_table), lcname);
 		if (!fbc
+		 || (fbc == CG(active_op_array))
 		 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
 		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
 		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
@@ -4209,7 +4091,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast);
+void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
 
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
@@ -4221,7 +4103,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
 		uint32_t dcl_opnum = get_next_op_number(CG(active_op_array));
-		zend_compile_class_decl(class_ast);
+		zend_compile_class_decl(class_ast, 0);
 		/* jump over anon class declaration */
 		opline = &CG(active_op_array)->opcodes[dcl_opnum];
 		if (opline->opcode == ZEND_FETCH_CLASS) {
@@ -5953,7 +5835,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 }
 /* }}} */
 
-static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl) /* {{{ */
+static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, zend_bool toplevel) /* {{{ */
 {
 	zend_ast *params_ast = decl->child[0];
 	zend_string *unqualified_name, *name, *lcname, *key;
@@ -5987,9 +5869,17 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 			"as the function has special semantics");
 	}
 
+	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
+	if (toplevel) {
+		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
+			do_bind_function_error(lcname, op_array, 1);
+		}
+		zend_string_release_ex(lcname, 0);
+		return;
+	}
+
 	key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
 	zend_hash_update_ptr(CG(function_table), key, op_array);
-	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
 
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
@@ -6003,12 +5893,11 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		/* RTD key is placed after lcname literal in op1 */
 		zend_add_literal_string(CG(active_op_array), &key);
 	}
-
 	zend_string_release_ex(lcname, 0);
 }
 /* }}} */
 
-void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
+void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *params_ast = decl->child[0];
@@ -6038,7 +5927,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 		zend_bool has_body = stmt_ast != NULL;
 		zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
-		zend_begin_func_decl(result, op_array, decl);
+		zend_begin_func_decl(result, op_array, decl, toplevel);
 		if (uses_ast) {
 			zend_compile_closure_binding(result, op_array, uses_ast);
 		}
@@ -6339,7 +6228,7 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast) /* {{{ */
+void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -6349,10 +6238,8 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node;
-	int extends_const;
 
 	zend_class_entry *original_ce = CG(active_class_entry);
-	znode original_implementing_class = FC(implementing_class);
 
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
 		zend_string *unqualified_name = decl->name;
@@ -6403,7 +6290,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	if (extends_ast) {
 		znode extends_node;
-		zend_string *extends_name, *parent_name;
+		zend_string *extends_name;
 
 		if (!zend_is_const_default_class_ref(extends_ast)) {
 			extends_name = zend_ast_get_str(extends_ast);
@@ -6416,56 +6303,10 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR, "Illegal class name");
 		}
 		extends_name = Z_STR(extends_node.u.constant);
-		parent_name = zend_resolve_class_name(extends_name,
+		ce->parent_name = zend_resolve_class_name(extends_name,
 					extends_ast->kind == ZEND_AST_ZVAL ? extends_ast->attr : ZEND_NAME_FQ);
-		extends_const = zend_add_class_name_literal(CG(active_op_array), parent_name);
-		ce->parent_name = zend_string_copy(parent_name);
 		zend_string_release_ex(extends_name, 0);
 		ce->ce_flags |= ZEND_ACC_INHERITED | ZEND_ACC_UNRESOLVED_PARENT;
-	}
-
-	opline = get_next_op(CG(active_op_array));
-	zend_make_var_result(&declare_node, opline);
-
-	GET_NODE(&FC(implementing_class), opline->result);
-
-	opline->op1_type = IS_CONST;
-	LITERAL_STR(opline->op1, lcname);
-
-	if (decl->flags & ZEND_ACC_ANON_CLASS) {
-		if (extends_ast) {
-			opline->opcode = ZEND_DECLARE_ANON_INHERITED_CLASS;
-			opline->op2_type = IS_CONST;
-			opline->op2.constant = extends_const;
-		} else {
-			opline->opcode = ZEND_DECLARE_ANON_CLASS;
-		}
-
-		if (!zend_hash_exists(CG(class_table), lcname)) {
-			zend_hash_add_ptr(CG(class_table), lcname, ce);
-		} else {
-			/* this anonymous class has been included */
-			zval zv;
-			ZVAL_PTR(&zv, ce);
-			destroy_zend_class(&zv);
-			return;
-		}
-	} else {
-		zend_string *key;
-
-		if (extends_ast) {
-			opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
-			opline->op2_type = IS_CONST;
-			opline->op2.constant = extends_const;
-		} else {
-			opline->opcode = ZEND_DECLARE_CLASS;
-		}
-
-		key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
-		/* RTD key is placed after lcname literal in op1 */
-		zend_add_literal_string(CG(active_op_array), &key);
-
-		zend_hash_update_ptr(CG(class_table), key, ce);
 	}
 
 	CG(active_class_entry) = ce;
@@ -6525,8 +6366,88 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		}
 	}
 
-	FC(implementing_class) = original_implementing_class;
 	CG(active_class_entry) = original_ce;
+
+	if (toplevel
+		/* We currently don't early-bind classes that implement interfaces or use traits */
+	 && !(ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
+		if (extends_ast) {
+			zend_class_entry *parent_ce = zend_lookup_class_ex(ce->parent_name, NULL, 0);
+
+			if (parent_ce
+			 && ((parent_ce->type != ZEND_INTERNAL_CLASS) || (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
+			 && ((parent_ce->type != ZEND_USER_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) || (parent_ce->info.user.filename == ce->info.user.filename))
+				) {
+				if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
+					CG(zend_lineno) = decl->end_lineno;
+					zend_do_inheritance(ce, parent_ce);
+					CG(zend_lineno) = ast->lineno;
+					zend_string_release(lcname);
+					return;
+				}
+			}
+		} else {
+			if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
+				CG(zend_lineno) = decl->end_lineno;
+				zend_verify_abstract_class(ce);
+				CG(zend_lineno) = ast->lineno;
+			}
+			if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
+				zend_string_release(lcname);
+				return;
+			}
+		}
+	}
+
+	opline = get_next_op(CG(active_op_array));
+	zend_make_var_result(&declare_node, opline);
+
+	opline->op1_type = IS_CONST;
+	LITERAL_STR(opline->op1, lcname);
+
+	if (decl->flags & ZEND_ACC_ANON_CLASS) {
+		if (extends_ast) {
+			opline->opcode = ZEND_DECLARE_ANON_INHERITED_CLASS;
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), zend_string_copy(ce->parent_name));
+		} else {
+			opline->opcode = ZEND_DECLARE_ANON_CLASS;
+		}
+
+		if (!zend_hash_exists(CG(class_table), lcname)) {
+			zend_hash_add_ptr(CG(class_table), lcname, ce);
+		} else {
+			/* this anonymous class has been included */
+			zval zv;
+			ZVAL_PTR(&zv, ce);
+			destroy_zend_class(&zv);
+			return;
+		}
+	} else {
+		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
+
+		/* RTD key is placed after lcname literal in op1 */
+		zend_add_literal_string(CG(active_op_array), &key);
+		zend_hash_update_ptr(CG(class_table), key, ce);
+
+		if (extends_ast) {
+			if (toplevel
+			 && (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING)
+				/* We currently don't early-bind classes that implement interfaces or use traits */
+			 && !(ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
+				CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
+				opline->opcode = ZEND_DECLARE_INHERITED_CLASS_DELAYED;
+				opline->result_type = IS_UNUSED;
+				opline->result.opline_num = -1;
+			} else {
+				opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
+			}
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), zend_string_copy(ce->parent_name));
+		} else {
+			opline->opcode = ZEND_DECLARE_CLASS;
+		}
+	}
 }
 /* }}} */
 
@@ -8146,14 +8067,19 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	zend_compile_stmt(ast);
-
+	if (ast->kind == ZEND_AST_FUNC_DECL) {
+		CG(zend_lineno) = ast->lineno;
+		zend_compile_func_decl(NULL, ast, 1);
+		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
+	} else if (ast->kind == ZEND_AST_CLASS) {
+		CG(zend_lineno) = ast->lineno;
+		zend_compile_class_decl(ast, 1);
+		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
+	} else {
+		zend_compile_stmt(ast);
+	}
 	if (ast->kind != ZEND_AST_NAMESPACE && ast->kind != ZEND_AST_HALT_COMPILER) {
 		zend_verify_namespace();
-	}
-	if (ast->kind == ZEND_AST_FUNC_DECL || ast->kind == ZEND_AST_CLASS) {
-		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
-		zend_do_early_binding();
 	}
 }
 /* }}} */
@@ -8228,7 +8154,7 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_METHOD:
-			zend_compile_func_decl(NULL, ast);
+			zend_compile_func_decl(NULL, ast, 0);
 			break;
 		case ZEND_AST_PROP_DECL:
 			zend_compile_prop_decl(ast);
@@ -8240,7 +8166,7 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			zend_compile_use_trait(ast);
 			break;
 		case ZEND_AST_CLASS:
-			zend_compile_class_decl(ast);
+			zend_compile_class_decl(ast, 0);
 			break;
 		case ZEND_AST_GROUP_USE:
 			zend_compile_group_use(ast);
@@ -8387,7 +8313,7 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_magic_const(result, ast);
 			return;
 		case ZEND_AST_CLOSURE:
-			zend_compile_func_decl(result, ast);
+			zend_compile_func_decl(result, ast, 0);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

@@ -109,7 +109,6 @@ typedef struct _zend_declarables {
 /* Compilation context that is different for each file, but shared between op arrays. */
 typedef struct _zend_file_context {
 	zend_declarables declarables;
-	znode implementing_class;
 
 	zend_string *current_namespace;
 	zend_bool in_namespace;
