@@ -16,6 +16,8 @@ PHP                                                                        NEWS
   . Fixed bug #76517 (incorrect restoring of LDFLAGS). (sji)
 
 - iconv:
+  . Fixed bug #63839 (iconv_mime_decode_headers function is skipping headers).
+    (cmb)
   . Fixed bug #55146 (iconv_mime_decode_headers() skips some headers). (cmb)
 
 - intl:

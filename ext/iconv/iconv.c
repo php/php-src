@@ -1574,6 +1574,23 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 					case '*': /* new style delimiter: locale id follows */
 						scan_stat = 10;
 						break;
+
+					case '\r': case '\n': /* not an encoded-word */
+						--p1;
+						_php_iconv_appendc(pretval, '=', cd_pl);
+						_php_iconv_appendc(pretval, '?', cd_pl);
+						err = _php_iconv_appendl(pretval, csname, (size_t)((p1 + 1) - csname), cd_pl);
+						if (err != PHP_ICONV_ERR_SUCCESS) {
+							goto out;
+						}
+						csname = NULL;
+						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+							scan_stat = 12;
+						}
+						else {
+							scan_stat = 0;
+						}
+						continue;
 				}
 				if (scan_stat != 2) {
 					char tmpbuf[80];
