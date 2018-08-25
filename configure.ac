@@ -1207,6 +1207,8 @@ EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $LIBS"
 unset LIBS LDFLAGS
 
+AC_ARG_PROGRAM
+
 test "$prefix" = "NONE" && prefix=/usr/local
 test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
 test "$program_prefix" = "NONE" && program_prefix=

@@ -27,6 +27,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 ========================
 
   a. Unix build system changes
+    - configure --help now also outputs --program-suffix and --program-prefix
+      information by using the Autoconf AC_ARG_PROGRAM macro.
 
   b. Windows build system changes
 
