@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - iconv:
   . Fixed bug #63839 (iconv_mime_decode_headers function is skipping headers).
     (cmb)
+  . Fixed bug #60494 (iconv_mime_decode does ignore special characters). (cmb)
   . Fixed bug #55146 (iconv_mime_decode_headers() skips some headers). (cmb)
   . Fixed bug #53891 (iconv_mime_encode() fails to Q-encode UTF-8 string). (cmb)
 
