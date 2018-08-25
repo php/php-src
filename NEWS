@@ -17,6 +17,7 @@ PHP                                                                        NEWS
     (Andrew Nester, Laruence, Anatol)
 
 - iconv:
+  . Fixed bug #55146 (iconv_mime_decode_headers() skips some headers). (cmb)
   . Fixed bug #53891 (iconv_mime_encode() fails to Q-encode UTF-8 string). (cmb)
 
 - libxml:
