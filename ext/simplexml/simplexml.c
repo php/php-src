@@ -384,7 +384,6 @@ static zval *sxe_dimension_read(zval *object, zval *offset, int type, zval *rv)
 static void change_node_zval(xmlNodePtr node, zval *value)
 {
 	xmlChar *buffer;
-	int buffer_len;
 
 	if (!value)
 	{
@@ -401,10 +400,9 @@ static void change_node_zval(xmlNodePtr node, zval *value)
 			/* break missing intentionally */
 		case IS_STRING:
 			buffer = xmlEncodeEntitiesReentrant(node->doc, (xmlChar *)Z_STRVAL_P(value));
-			buffer_len = xmlStrlen(buffer);
 			/* check for NULL buffer in case of memory error in xmlEncodeEntitiesReentrant */
 			if (buffer) {
-				xmlNodeSetContentLen(node, buffer, buffer_len);
+				xmlNodeSetContent(node, buffer);
 				xmlFree(buffer);
 			}
 			break;
