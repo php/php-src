@@ -507,7 +507,6 @@ PHP_BROKEN_GLIBC_FOPEN_APPEND
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl -------------------------------------------------------------------------
 
-AC_STRUCT_TM
 AC_STRUCT_TIMEZONE
 
 PHP_MISSING_TIME_R_DECL

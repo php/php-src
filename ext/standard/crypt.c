@@ -37,11 +37,7 @@
 #  include <crypt.h>
 # endif
 #endif
-#if TM_IN_SYS_TIME
-#include <sys/time.h>
-#else
 #include <time.h>
-#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else
