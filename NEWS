@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     (Andrew Nester, Laruence, Anatol)
 
 - iconv:
+  . Fixed bug #68180 (iconv_mime_decode can return extra characters in a 
+    header). (cmb)
   . Fixed bug #63839 (iconv_mime_decode_headers function is skipping headers).
     (cmb)
   . Fixed bug #60494 (iconv_mime_decode does ignore special characters). (cmb)
