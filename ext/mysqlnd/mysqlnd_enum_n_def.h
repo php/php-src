@@ -207,7 +207,7 @@ typedef enum mysqlnd_parse_exec_response_type
 	MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT = 0,
 	MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT_NEXT_RESULT,
 	MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT_OUT_VARIABLES,
-	MYSQLND_PARSE_EXEC_RESPONSE_EXPLICIT,
+	MYSQLND_PARSE_EXEC_RESPONSE_EXPLICIT
 } enum_mysqlnd_parse_exec_response_type;
 
 typedef enum mysqlnd_client_option
@@ -666,7 +666,7 @@ enum php_mysqlnd_server_command
 	/* Here follow own, non-protocol, commands */
 	COM_REAP_RESULT=240,	/* own command */
 	COM_ENABLE_SSL,			/* own command */
-	COM_HANDSHAKE,			/* own command */
+	COM_HANDSHAKE			/* own command */
 };
 
 

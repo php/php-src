@@ -144,7 +144,7 @@ enum _zend_ast_kind {
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
-	ZEND_AST_FOREACH,
+	ZEND_AST_FOREACH
 };
 
 typedef uint16_t zend_ast_kind;

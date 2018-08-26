@@ -135,7 +135,7 @@ typedef enum {
 	comment_block,
 	heredoc_start,
 	heredoc,
-	outside,
+	outside
 } php_code_type;
 
 static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */

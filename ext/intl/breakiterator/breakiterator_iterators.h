@@ -26,7 +26,7 @@ U_CDECL_END
 typedef enum {
 	PARTS_ITERATOR_KEY_SEQUENTIAL,
 	PARTS_ITERATOR_KEY_LEFT,
-	PARTS_ITERATOR_KEY_RIGHT,
+	PARTS_ITERATOR_KEY_RIGHT
 } parts_iter_key_type;
 
 #ifdef __cplusplus
