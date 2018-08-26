@@ -430,7 +430,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	int8_t read_write = 0;
 	char *transport;
 	int transport_len;
-	zend_string *error_message;
+	zend_string *error_message = NULL;
 
 	tmp_line[0] = '\0';
 
@@ -609,7 +609,7 @@ errexit:
 	if (error_message) {
 		php_stream_wrapper_log_error(wrapper, options, "Failed to set up data channel: %s", ZSTR_VAL(error_message));
 		zend_string_release(error_message);
-		}
+	}
 	return NULL;
 }
 /* }}} */
