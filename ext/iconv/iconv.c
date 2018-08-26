@@ -460,7 +460,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 
 	if (in_p != NULL) {
 		while (in_left > 0) {
-			out_left = buf_growth - out_left;
+			out_left = buf_growth;
 			smart_str_alloc(d, out_left, 0);
 
 			out_p = ZSTR_VAL((d)->s) + ZSTR_LEN((d)->s);
@@ -494,7 +494,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 		}
 	} else {
 		for (;;) {
-			out_left = buf_growth - out_left;
+			out_left = buf_growth;
 			smart_str_alloc(d, out_left, 0);
 
 			out_p = ZSTR_VAL((d)->s) + ZSTR_LEN((d)->s);
