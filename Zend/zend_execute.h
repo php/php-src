@@ -304,7 +304,6 @@ ZEND_API void zend_unset_timeout(void);
 ZEND_API ZEND_NORETURN void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type);
 ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *lcname, int fetch_type);
-void zend_verify_abstract_class(zend_class_entry *ce);
 
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name);
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len);
