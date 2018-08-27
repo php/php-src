@@ -1057,21 +1057,21 @@ ZEND_API int do_bind_function(zval *lcname) /* {{{ */
 
 	rtd_key = lcname + 1;
 	zv = zend_hash_find_ex(EG(function_table), Z_STR_P(rtd_key), 1);
-	function = (zend_function*)Z_PTR_P(zv);
-	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-	memcpy(new_function, function, sizeof(zend_op_array));
-	if (zend_hash_add_ptr(EG(function_table), Z_STR_P(lcname), new_function) == NULL) {
-		do_bind_function_error(Z_STR_P(lcname), &new_function->op_array, 0);
-		return FAILURE;
-	} else {
+	new_function = function = (zend_function*)Z_PTR_P(zv);
+	if (function->op_array.static_variables
+	 && !(function->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
+		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+		memcpy(new_function, function, sizeof(zend_op_array));
+		function->op_array.static_variables = NULL; /* NULL out the unbound function */
 		if (function->op_array.refcount) {
 			(*function->op_array.refcount)++;
 		}
-		if (!(function->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
-			function->op_array.static_variables = NULL; /* NULL out the unbound function */
-		}
-		return SUCCESS;
 	}
+	if (UNEXPECTED(zend_hash_add_ptr(EG(function_table), Z_STR_P(lcname), new_function) == NULL)) {
+		do_bind_function_error(Z_STR_P(lcname), &new_function->op_array, 0);
+		return FAILURE;
+	}
+	return SUCCESS;
 }
 /* }}} */
 
