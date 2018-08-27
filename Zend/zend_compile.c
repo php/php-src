@@ -1095,14 +1095,7 @@ ZEND_API int do_bind_class(zval *lcname) /* {{{ */
 		return FAILURE;
 	} else {
 		ce->refcount++;
-		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
-			zend_do_bind_traits(ce);
-		}
-		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
-			zend_do_implement_interfaces(ce);
-		} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-			zend_verify_abstract_class(ce);
-		}
+		zend_do_link_class(ce, NULL);
 		return SUCCESS;
 	}
 }
@@ -1129,12 +1122,6 @@ ZEND_API int do_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce) 
 
 	ce = (zend_class_entry*)Z_PTR_P(zv);
 
-	if (zend_hash_exists(EG(class_table), Z_STR_P(lcname))) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
-	}
-
-	zend_do_inheritance(ce, parent_ce);
-
 	ce->refcount++;
 
 	/* Register the derived class */
@@ -1142,12 +1129,7 @@ ZEND_API int do_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce) 
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 	}
 
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
-		zend_do_bind_traits(ce);
-	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
-		zend_do_implement_interfaces(ce);
-	}
+	zend_do_link_class(ce, parent_ce);
 
 	return SUCCESS;
 }
@@ -6356,13 +6338,10 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 	if (implements_ast) {
 		zend_compile_implements(implements_ast);
-		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-			zend_verify_abstract_class(ce);
-		}
-	}  else if (extends_ast) {
-		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-			zend_verify_abstract_class(ce);
-		}
+	}
+
+	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
+		zend_verify_abstract_class(ce);
 	}
 
 	CG(active_class_entry) = original_ce;
@@ -6380,17 +6359,15 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 					CG(zend_lineno) = decl->end_lineno;
 					zend_do_inheritance(ce, parent_ce);
+					if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
+						zend_verify_abstract_class(ce);
+					}
 					CG(zend_lineno) = ast->lineno;
 					zend_string_release(lcname);
 					return;
 				}
 			}
 		} else {
-			if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-				CG(zend_lineno) = decl->end_lineno;
-				zend_verify_abstract_class(ce);
-				CG(zend_lineno) = ast->lineno;
-			}
 			if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 				zend_string_release(lcname);
 				return;

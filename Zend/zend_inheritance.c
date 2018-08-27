@@ -999,11 +999,10 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	do_inherit_parent_constructor(ce);
 
-	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS && ce->type == ZEND_INTERNAL_CLASS) {
-		ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
-	} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
-		/* The verification will be done in runtime by ZEND_VERIFY_ABSTRACT_CLASS */
-		zend_verify_abstract_class(ce);
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
+			ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
+		}
 	}
 	ce->ce_flags |= parent_ce->ce_flags & (ZEND_HAS_STATIC_IN_METHODS | ZEND_ACC_USE_GUARDS);
 }
@@ -1100,7 +1099,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
-ZEND_API void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
+static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 {
 	zend_class_entry **interfaces, *iface;
 	uint32_t num_interfaces = 0;
@@ -1182,10 +1181,6 @@ ZEND_API void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 		if (iface->num_interfaces) {
 			zend_do_inherit_interfaces(ce, iface);
 		}
-	}
-
-	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-		zend_verify_abstract_class(ce);
 	}
 }
 /* }}} */
@@ -1802,7 +1797,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce,
 }
 /* }}} */
 
-ZEND_API void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
+static void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 {
 	HashTable **exclude_tables;
 	zend_class_entry **aliases;
@@ -1855,16 +1850,8 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 
 	efree(traits);
 
-	/* verify that all abstract methods from traits have been implemented */
-	zend_verify_abstract_class(ce);
-
 	/* Emit E_DEPRECATED for PHP 4 constructors */
 	zend_check_deprecated_constructor(ce);
-
-	/* now everything should be fine and an added ZEND_ACC_IMPLICIT_ABSTRACT_CLASS should be removed */
-	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
-		ce->ce_flags -= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
-	}
 }
 /* }}} */
 
@@ -1930,22 +1917,41 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	zend_function *func;
 	zend_abstract_info ai;
 
-	if ((ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) && !(ce->ce_flags & (ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-		memset(&ai, 0, sizeof(ai));
+	ZEND_ASSERT((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
+	memset(&ai, 0, sizeof(ai));
 
-		ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
-			zend_verify_abstract_class_function(func, &ai);
-		} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
+		zend_verify_abstract_class_function(func, &ai);
+	} ZEND_HASH_FOREACH_END();
 
-		if (ai.cnt) {
-			zend_error_noreturn(E_ERROR, "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
-				ZSTR_VAL(ce->name), ai.cnt,
-				ai.cnt > 1 ? "s" : "",
-				DISPLAY_ABSTRACT_FN(0),
-				DISPLAY_ABSTRACT_FN(1),
-				DISPLAY_ABSTRACT_FN(2)
-				);
-		}
+	if (ai.cnt) {
+		zend_error_noreturn(E_ERROR, "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+			ZSTR_VAL(ce->name), ai.cnt,
+			ai.cnt > 1 ? "s" : "",
+			DISPLAY_ABSTRACT_FN(0),
+			DISPLAY_ABSTRACT_FN(1),
+			DISPLAY_ABSTRACT_FN(2)
+			);
+	} else {
+		/* now everything should be fine and an added ZEND_ACC_IMPLICIT_ABSTRACT_CLASS should be removed */
+		ce->ce_flags &= ~ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+	}
+}
+/* }}} */
+
+ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent) /* {{{ */
+{
+	if (parent) {
+		zend_do_inheritance(ce, parent);
+	}
+	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+		zend_do_bind_traits(ce);
+	}
+	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+		zend_do_implement_interfaces(ce);
+	}
+	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
+		zend_verify_abstract_class(ce);
 	}
 }
 /* }}} */

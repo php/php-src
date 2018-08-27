@@ -1600,14 +1600,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_CLASS_SPEC_HANDLE
 		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE();
 	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
-		zend_do_bind_traits(ce);
-	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
-		zend_do_implement_interfaces(ce);
-	} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-		zend_verify_abstract_class(ce);
-	}
+	zend_do_link_class(ce, NULL);
 	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -5832,13 +5825,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_INHERITED_CLASS_S
 		HANDLE_EXCEPTION();
 	}
 
-	zend_do_inheritance(ce, parent);
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
-		zend_do_bind_traits(ce);
-	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
-		zend_do_implement_interfaces(ce);
-	}
+	zend_do_link_class(ce, parent);
 	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
