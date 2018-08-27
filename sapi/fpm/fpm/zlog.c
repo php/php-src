@@ -29,7 +29,6 @@ static int zlog_fd = -1;
 static int zlog_level = ZLOG_NOTICE;
 static int zlog_limit = ZLOG_DEFAULT_LIMIT;
 static zlog_bool zlog_buffering = ZLOG_DEFAULT_BUFFERING;
-static struct zlog_stream_buffer zlog_buffer = {NULL, 0};
 static int launched = 0;
 static void (*external_logger)(int, char *, size_t) = NULL;
 
@@ -125,16 +124,6 @@ int zlog_set_buffering(zlog_bool buffering) /* {{{ */
 
 	zlog_buffering = buffering;
 	return old_value;
-}
-/* }}} */
-
-void zlog_cleanup() /* {{{ */
-{
-	if (zlog_buffer.data) {
-		free(zlog_buffer.data);
-		zlog_buffer.data = NULL;
-		zlog_buffer.size = 0;
-	}
 }
 /* }}} */
 
@@ -304,16 +293,7 @@ static zlog_bool zlog_stream_buf_alloc_ex(struct zlog_stream *stream, size_t nee
 		buf = realloc(stream->buf.data, size);
 	} else {
 		size = MIN(zlog_limit, MAX(size, needed));
-		if (stream->shared_buffer && zlog_buffer.data) {
-			if (zlog_buffer.size < size) {
-				buf = realloc(stream->buf.data, size);
-			} else {
-				buf = zlog_buffer.data;
-				size = zlog_buffer.size;
-			}
-		} else {
-			buf = malloc(size);
-		}
+		buf = malloc(size);
 	}
 
 	if (buf == NULL) {
@@ -322,10 +302,6 @@ static zlog_bool zlog_stream_buf_alloc_ex(struct zlog_stream *stream, size_t nee
 
 	stream->buf.data = buf;
 	stream->buf.size = size;
-	if (stream->shared_buffer) {
-		zlog_buffer.data = buf;
-		zlog_buffer.size = size;
-	}
 
 	return 1;
 }
@@ -554,7 +530,6 @@ static inline void zlog_stream_init_internal(
 	stream->prefix_buffer = (flags & ZLOG_LEVEL_MASK) >= zlog_level &&
 			(stream->use_fd || stream->use_stderr || stream->use_syslog);
 	stream->fd = fd > -1 ? fd : STDERR_FILENO;
-	stream->shared_buffer = external_logger == NULL;
 }
 /* }}} */
 
@@ -858,7 +833,7 @@ zlog_bool zlog_stream_finish(struct zlog_stream *stream) /* {{{ */
 
 void zlog_stream_destroy(struct zlog_stream *stream) /* {{{ */
 {
-	if (!stream->shared_buffer && stream->buf.data != NULL) {
+	if (stream->buf.data != NULL) {
 		free(stream->buf.data);
 	}
 	if (stream->msg_prefix != NULL) {
