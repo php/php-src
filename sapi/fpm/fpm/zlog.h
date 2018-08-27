@@ -24,7 +24,6 @@ int zlog_set_limit(int new_value);
 int zlog_set_buffering(zlog_bool buffering);
 const char *zlog_get_level_name(int log_level);
 void zlog_set_launched(void);
-void zlog_cleanup();
 
 size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len);
 
@@ -75,7 +74,6 @@ struct zlog_stream {
 	unsigned int wrap:1;
 	unsigned int msg_quote:1;
 	unsigned int decorate:1;
-	unsigned int shared_buffer:1;
 	int fd;
 	int line;
 	const char *function;
