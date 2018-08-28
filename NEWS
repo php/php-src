@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #73457 (Wrong error message when fopen FTP wrapped fails to open
     data connection). (Ville Hukkamäki)
+  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
+    stream_socket_client). (Ville Hukkamäki)
 
 13 Sep 2018, PHP 7.1.22
 
