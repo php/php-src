@@ -505,11 +505,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 		efree(op_array->opcodes);
 		op_array->opcodes = new_opcodes;
-
-		if (op_array->run_time_cache) {
-			efree(op_array->run_time_cache);
-			op_array->run_time_cache = NULL;
-		}
+		op_array->run_time_cache = NULL;
 	}
 
 	if (op_array->function_name && !IS_ACCEL_INTERNED(op_array->function_name)) {
