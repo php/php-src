@@ -73,6 +73,10 @@ PHP 7.4 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- General:
+  . Keys without values can now omit the equals sign, in which case they are
+    parsed as NULL instead of an empty string.
+
 ========================================
 12. Windows Support
 ========================================
