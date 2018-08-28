@@ -342,7 +342,24 @@ statement:
 			zval_ini_dtor(&$2);
 			zval_ini_dtor(&$5);
 		}
-	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG); zend_string_release(Z_STR($1)); }
+	|	TC_OFFSET option_offset ']' {
+			zval arg2;
+
+#if DEBUG_CFG_PARSER
+			printf("OFFSET: '%s'[%s] = NULL\n", Z_STRVAL($1), Z_STRVAL($2));
+#endif
+			ZVAL_NULL(&arg2);
+			ZEND_INI_PARSER_CB(&$1, &arg2, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG);
+			zend_string_release(Z_STR($1));
+			zval_ini_dtor(&$2);
+		}
+	|	TC_LABEL {
+			zval arg2;
+
+			ZVAL_NULL(&arg2);
+			ZEND_INI_PARSER_CB(&$1, &arg2, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG);
+			zend_string_release(Z_STR($1)); 
+		}
 	|	END_OF_LINE
 ;
 
