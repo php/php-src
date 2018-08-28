@@ -1659,7 +1659,6 @@ static void zend_accel_init_auto_globals(void)
 static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handle, int type, const char *key, zend_op_array **op_array_p)
 {
 	zend_persistent_script *new_persistent_script;
-	zend_op_array *orig_active_op_array;
 	HashTable *orig_class_table;
 	zval orig_user_error_handler;
 	zend_op_array *op_array;
@@ -1723,7 +1722,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	new_persistent_script = create_persistent_script();
 
 	/* Save the original values for the op_array, function table and class table */
-	orig_active_op_array = CG(active_op_array);
 	orig_class_table = CG(class_table);
 	ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
 
@@ -1752,7 +1750,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	} zend_end_try();
 
 	/* Restore originals */
-	CG(active_op_array) = orig_active_op_array;
 	EG(class_table) = CG(class_table) = orig_class_table;
 	EG(user_error_handler) = orig_user_error_handler;
 
