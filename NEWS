@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0beta3
+30 Aug 2018, PHP 7.3.0beta3
 
 - Core:
   . Fixed #76773 (Traits used on the parent are ignored for child classes).
