@@ -1042,33 +1042,30 @@ static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(zen
 	if (old_function->type == ZEND_USER_FUNCTION
 		&& old_function->op_array.last > 0) {
 		zend_error_noreturn(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
-					ZSTR_VAL(op_array->function_name),
+					op_array ? ZSTR_VAL(op_array->function_name) : ZSTR_VAL(old_function->common.function_name),
 					ZSTR_VAL(old_function->op_array.filename),
 					old_function->op_array.opcodes[0].lineno);
 	} else {
-		zend_error_noreturn(error_level, "Cannot redeclare %s()", ZSTR_VAL(op_array->function_name));
+		zend_error_noreturn(error_level, "Cannot redeclare %s()",
+			op_array ? ZSTR_VAL(op_array->function_name) : ZSTR_VAL(old_function->common.function_name));
 	}
 }
 
 ZEND_API int do_bind_function(zval *lcname) /* {{{ */
 {
-	zend_function *function, *new_function;
+	zend_function *function;
 	zval *rtd_key, *zv;
 
 	rtd_key = lcname + 1;
 	zv = zend_hash_find_ex(EG(function_table), Z_STR_P(rtd_key), 1);
-	new_function = function = (zend_function*)Z_PTR_P(zv);
-	if (function->op_array.static_variables
-	 && !(function->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
-		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-		memcpy(new_function, function, sizeof(zend_op_array));
-		function->op_array.static_variables = NULL; /* NULL out the unbound function */
-		if (function->op_array.refcount) {
-			(*function->op_array.refcount)++;
-		}
+	if (UNEXPECTED(!zv)) {
+		do_bind_function_error(Z_STR_P(lcname), NULL, 0);
+		return FAILURE;
 	}
-	if (UNEXPECTED(zend_hash_add_ptr(EG(function_table), Z_STR_P(lcname), new_function) == NULL)) {
-		do_bind_function_error(Z_STR_P(lcname), &new_function->op_array, 0);
+	function = (zend_function*)Z_PTR_P(zv);
+	zv = zend_hash_set_bucket_key(EG(function_table), (Bucket*)zv, Z_STR_P(lcname));
+	if (UNEXPECTED(!zv)) {
+		do_bind_function_error(Z_STR_P(lcname), &function->op_array, 0);
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -1082,22 +1079,20 @@ ZEND_API int do_bind_class(zval *lcname) /* {{{ */
 
 	rtd_key = lcname + 1;
 	zv = zend_hash_find_ex(EG(class_table), Z_STR_P(rtd_key), 1);
-	ZEND_ASSERT(zv);
-	ce = (zend_class_entry*)Z_PTR_P(zv);
+	if (UNEXPECTED(!zv)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare  %s, because the name is already in use", Z_STRVAL_P(lcname));
+		return FAILURE;
+	}
 
-	if (UNEXPECTED(zend_hash_add_ptr(EG(class_table), Z_STR_P(lcname), ce) == NULL)) {
-		/* If we're in compile time, in practice, it's quite possible
-		 * that we'll never reach this class declaration at runtime,
-		 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
-		 * approach to work.
-		 */
+	ce = (zend_class_entry*)Z_PTR_P(zv);
+	zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
+	if (UNEXPECTED(!zv)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 		return FAILURE;
-	} else {
-		ce->refcount++;
-		zend_do_link_class(ce, NULL);
-		return SUCCESS;
 	}
+
+	zend_do_link_class(ce, NULL);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1110,7 +1105,7 @@ ZEND_API int do_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce) 
 
 	zv = zend_hash_find_ex(EG(class_table), Z_STR_P(rtd_key), 1);
 
-	if (!zv) {
+	if (UNEXPECTED(!zv)) {
 		/* If we're in compile time, in practice, it's quite possible
 		 * that we'll never reach this class declaration at runtime,
 		 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
@@ -1120,17 +1115,15 @@ ZEND_API int do_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce) 
 		return FAILURE;
 	}
 
-	ce = (zend_class_entry*)Z_PTR_P(zv);
-
-	ce->refcount++;
-
 	/* Register the derived class */
-	if (zend_hash_add_ptr(EG(class_table), Z_STR_P(lcname), ce) == NULL) {
+	ce = (zend_class_entry*)Z_PTR_P(zv);
+	zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
+	if (UNEXPECTED(!zv)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		return FAILURE;
 	}
 
 	zend_do_link_class(ce, parent_ce);
-
 	return SUCCESS;
 }
 /* }}} */
