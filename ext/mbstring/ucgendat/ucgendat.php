@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php error_reporting(E_ALL);
 
 /* This is based on the ucgendat.c file from the OpenLDAP project, licensed
