@@ -597,7 +597,6 @@ AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 dnl Checks for library functions.
 dnl -------------------------------------------------------------------------
 
-AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(
 alphasort \
 asctime_r \
