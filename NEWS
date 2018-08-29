@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.1.22
+?? ??? 2018, PHP 7.1.23
+
+
+13 Sep 2018, PHP 7.1.22
 
 - Core:
   . Fixed bug #76754 (parent private constant in extends class memory leak).
