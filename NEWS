@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0RC1
 
+- Standard:
+  . Fixed bug #76803 (ftruncate changes file pointer). (Anatol)
+
 30 Aug 2018, PHP 7.3.0beta3
 
 - Core:
