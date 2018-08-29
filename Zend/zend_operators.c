@@ -3101,7 +3101,7 @@ ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d)
 	if (dmod < 0) {
 		/* we're going to make this number positive; call ceil()
 		 * to simulate rounding towards 0 of the negative number */
-		dmod = ceil(dmod);// + two_pow_32;
+		dmod = ceil(dmod) + two_pow_32;
 	}
 	return (zend_long)(zend_ulong)dmod;
 }
