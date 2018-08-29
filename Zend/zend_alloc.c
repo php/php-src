@@ -423,13 +423,8 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 #ifdef _WIN32
 	return VirtualAlloc(addr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #else
-	int flags = MAP_PRIVATE | MAP_ANON;
-#ifdef MAP_FIXED_NOREPLACE
-	flags |= MAP_FIXED_NOREPLACE;
-#elif defined MAP_EXCL
-	flags |= MAP_FIXED | MAP_EXCL;
-#endif
-	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
+	/* MAP_FIXED leads to discarding of the old mapping, so it can't be used. */
+	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
 
 	if (ptr == MAP_FAILED) {
 #if ZEND_MM_ERROR
