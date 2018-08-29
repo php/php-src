@@ -91,7 +91,6 @@ LIBZEND_CHECK_INT_TYPE(int32_t)
 LIBZEND_CHECK_INT_TYPE(uint32_t)
 
 dnl Checks for library functions.
-AC_FUNC_VPRINTF
 AC_FUNC_MEMCMP
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol finite fpclass sigsetjmp)
