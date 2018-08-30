@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #76803 (ftruncate changes file pointer). (Anatol)
+  . Fixed bug #76818 (Memory corruption and segfault). (Remi)
 
 30 Aug 2018, PHP 7.3.0beta3
 
