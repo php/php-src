@@ -786,6 +786,11 @@ HELP;
 					exit(1);
 			}
 		}
+		
+		// check for internet connection if `--offline` option wasn't set up
+		if (!isset($environment['SKIP_ONLINE_TESTS']) && !@fsockopen('www.php.net', 80)) {
+			$environment['SKIP_ONLINE_TESTS'] = 1;
+		}
 
 		if (!$is_switch) {
 			$testfile = realpath($argv[$i]);
