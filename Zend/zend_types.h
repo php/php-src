@@ -590,7 +590,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_REFCOUNTED_P(zval_p)		Z_REFCOUNTED(*(zval_p))
 
 /* deprecated: (COPYABLE is the same as IS_ARRAY) */
-#define Z_COPYABLE(zval)			((Z_TYPE(zval) == IS_ARRAY)
+#define Z_COPYABLE(zval)			(Z_TYPE(zval) == IS_ARRAY)
 #define Z_COPYABLE_P(zval_p)		Z_COPYABLE(*(zval_p))
 
 /* deprecated: (IMMUTABLE is the same as IS_ARRAY && !REFCOUNTED) */
@@ -610,7 +610,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_OPT_REFCOUNTED_P(zval_p)	Z_OPT_REFCOUNTED(*(zval_p))
 
 /* deprecated: (COPYABLE is the same as IS_ARRAY) */
-#define Z_OPT_COPYABLE(zval)		((Z_OPT_TYPE(zval) == IS_ARRAY)
+#define Z_OPT_COPYABLE(zval)		(Z_OPT_TYPE(zval) == IS_ARRAY)
 #define Z_OPT_COPYABLE_P(zval_p)	Z_OPT_COPYABLE(*(zval_p))
 
 #define Z_OPT_ISREF(zval)			(Z_OPT_TYPE(zval) == IS_REFERENCE)
