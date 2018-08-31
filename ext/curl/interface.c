@@ -2658,7 +2658,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 
                             postval = Z_STR_P(prop);
 
-                            prop = zend_read_property(curl_CURLFile_class, current, "mime", sizeof("mime")-1, 0, &rv);
+                            prop = zend_read_property(curl_CURLBufferFile_class, current, "mime", sizeof("mime")-1, 0, &rv);
                             if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
                                 type = Z_STRVAL_P(prop);
                             }
