@@ -12,4 +12,3 @@ mail('user@example.com', 'My Subject', $message, "From: me@me.me");
 ===DONE===
 --EXPECTREGEX--
 .*
-===DONE===
