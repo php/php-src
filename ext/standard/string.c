@@ -6331,6 +6331,38 @@ PHP_FUNCTION(utf8_decode)
 }
 /* }}} */
 
+/* {{{ proto bool str_truncate(string& str, int new_len)
+   Truncates the string to the new length. */
+PHP_FUNCTION(str_truncate)
+{
+	/*
+	 * Note that the proto specifies the str as a string reference, however,
+	 * internally speaking, it isn't. It's specified as a reference just to
+	 * reflect the fact the string would be changed upon calling this
+	 * function.
+	 *
+	 * This function is provided as a far more sufficient alternative of
+	 * truncating a large string to a still-very-large string.
+	 *
+	 * For example,
+	 * str_truncate($str, 1024 * 1024) vs $str = substr($str, 0, 1024 * 1024)
+	 * Obviously the former works far more sufficiently than the latter.
+	 */
+
+	zend_string *str;
+	zend_long new_len;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_LONG(new_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (new_len < ZSTR_LEN(str) && new_len >= 0) {
+		ZSTR_LEN(str) = new_len;
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

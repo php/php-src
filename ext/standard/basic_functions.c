@@ -2499,6 +2499,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_str_truncate, 0, 0, 2)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, new_len)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ syslog.c */
 #ifdef HAVE_SYSLOG_H
@@ -2804,6 +2809,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(substr_compare,													arginfo_substr_compare)
 	PHP_FE(utf8_encode, 													arginfo_utf8_encode)
 	PHP_FE(utf8_decode, 													arginfo_utf8_decode)
+    PHP_FE(str_truncate, 													arginfo_str_truncate)
 
 #ifdef HAVE_STRCOLL
 	PHP_FE(strcoll,															arginfo_strcoll)

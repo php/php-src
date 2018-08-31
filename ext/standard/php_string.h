@@ -91,6 +91,7 @@ PHP_FUNCTION(strpbrk);
 PHP_FUNCTION(substr_compare);
 PHP_FUNCTION(utf8_encode);
 PHP_FUNCTION(utf8_decode);
+PHP_FUNCTION(str_truncate);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif
