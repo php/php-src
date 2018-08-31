@@ -31,6 +31,11 @@
           echo $_FILES['file']['name'] . '|' . $_FILES['file']['type'];
       }
       break;
+    case 'bufferfile':
+      if (isset($_FILES['file'])) {
+          echo $_FILES['file']['name'] . '|' . $_FILES['file']['type'] . '|' . md5_file($_FILES['file']['tmp_name']);
+      }
+      break;
     case 'method':
       echo $_SERVER['REQUEST_METHOD'];
       break;

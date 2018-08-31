@@ -115,7 +115,7 @@ PHP_FUNCTION(curl_pause);
 #endif
 
 PHP_FUNCTION(curl_file_create);
-
+PHP_FUNCTION(curl_buffer_file_create);
 
 void _php_curl_multi_close(zend_resource *);
 void _php_curl_share_close(zend_resource *);
@@ -212,6 +212,9 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
 
 void curlfile_register_class(void);
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
+
+void curlbufferfile_register_class(void);
+PHP_CURL_API extern zend_class_entry *curl_CURLBufferFile_class;
 
 #else
 #define curl_module_ptr NULL

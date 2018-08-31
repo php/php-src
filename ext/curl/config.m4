@@ -186,6 +186,6 @@ int main(int argc, char *argv[])
     $CURL_LIBS
   ])
 
-  PHP_NEW_EXTENSION(curl, interface.c multi.c share.c curl_file.c, $ext_shared)
+  PHP_NEW_EXTENSION(curl, interface.c multi.c share.c curl_file.c curl_buffer_file.c, $ext_shared)
   PHP_SUBST(CURL_SHARED_LIBADD)
 fi
