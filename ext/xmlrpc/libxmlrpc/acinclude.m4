@@ -17,7 +17,6 @@ AC_CHECK_HEADERS(xmlparse.h xmltok.h stdlib.h strings.h string.h)
 
 AC_DEFUN([XMLRPC_TYPE_CHECKS],[
 
-AC_REQUIRE([AC_C_CONST])
 AC_REQUIRE([AC_C_INLINE])
 AC_CHECK_SIZEOF(char, 1)
 
