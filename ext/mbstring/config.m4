@@ -98,7 +98,6 @@ int main() { return foo(10, "", 3.14); }
       AC_CHECK_SIZEOF(int, 4)
       AC_CHECK_SIZEOF(short, 2)
       AC_CHECK_SIZEOF(long, 4)
-      AC_HEADER_TIME
       AC_FUNC_ALLOCA
       AC_FUNC_MEMCMP
       AC_CHECK_HEADER([stdarg.h], [
