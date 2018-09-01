@@ -640,11 +640,7 @@ PHP_FUNCTION(touch)
 
 	switch (argc) {
 		case 1:
-#ifdef HAVE_UTIME_NULL
 			newtime = NULL;
-#else
-			newtime->modtime = newtime->actime = time(NULL);
-#endif
 			break;
 		case 2:
 			newtime->modtime = newtime->actime = filetime;

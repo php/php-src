@@ -739,7 +739,6 @@ if test "$ac_cv_func_sync_fetch_and_add" = yes; then
 fi
 
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
-AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl PHP_AC_BROKEN_SPRINTF
 dnl PHP_AC_BROKEN_SNPRINTF

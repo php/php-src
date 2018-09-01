@@ -29,8 +29,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   a. Unix build system changes
     - configure --help now also outputs --program-suffix and --program-prefix
       information by using the Autoconf AC_ARG_PROGRAM macro.
-    - Obsolescent macro AC_FUNC_VPRINTF has been removed and the HAVE_VPRINTF
-      symbol is no longer defined since it is not needed on current systems.
+    - Obsolescent macros AC_FUNC_VPRINTF and AC_FUNC_UTIME_NULL have been
+      removed. Symbols HAVE_VPRINTF and HAVE_UTIME_NULL are no longer defined
+      since they are not needed on the current systems.
 
   b. Windows build system changes
 
