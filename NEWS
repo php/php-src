@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #76820 (Z_COPYABLE invalid definition). (mvdwerve, cmb)
 
+- intl:
+  . Fixed bug #76829 (Incorrect validation of domain on idn_to_utf8()
+    function). (Anatol)
+
 - Standard:
   . Fixed bug #76803 (ftruncate changes file pointer). (Anatol)
   . Fixed bug #76818 (Memory corruption and segfault). (Remi)
