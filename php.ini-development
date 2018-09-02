@@ -509,7 +509,7 @@ ignore_repeated_errors = Off
 ignore_repeated_source = Off
 
 ; If this parameter is set to Off, then memory leaks will not be shown (on
-; stdout or in the log). This has only effect in a debug compile, and if
+; stdout or in the log). This is only effective in a debug compile, and if
 ; error reporting includes E_WARNING in the allowed list
 ; http://php.net/report-memleaks
 report_memleaks = On
@@ -663,7 +663,7 @@ register_argc_argv = Off
 ; first used (Just In Time) instead of when the script starts. If these
 ; variables are not used within a script, having this directive on will result
 ; in a performance gain. The PHP directive register_argc_argv must be disabled
-; for this directive to have any affect.
+; for this directive to have any effect.
 ; http://php.net/auto-globals-jit
 auto_globals_jit = On
 
