@@ -5,6 +5,7 @@ security_level setting to prohibit cert
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (OPENSSL_VERSION_NUMBER < 0x10100000) die("skip OpenSSL >= v1.1.0 required");
 if (!function_exists("proc_open")) die("skip no proc_open");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -24,7 +25,7 @@ $clientCode = <<<'CODE'
 	$serverUri = "ssl://127.0.0.1:64322";
 	$clientFlags = STREAM_CLIENT_CONNECT;
 	$clientCtx = stream_context_create(['ssl' => [
-		'security_level' => 3,
+		'security_level' => 2,
 		'verify_peer' => true,
 		'cafile' => __DIR__ . '/bug54992-ca.pem',
 		'verify_peer_name' => false
@@ -38,6 +39,7 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECTF--
 Warning: stream_socket_client(): SSL operation failed with code 1. OpenSSL Error messages:
 error:1416F086:SSL routines:tls_process_server_certificate:certificate verify failed in %s : eval()'d code on line %d
