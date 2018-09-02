@@ -444,7 +444,7 @@ AC_DEFUN([PHP_ADD_LIBPATH],[
   case "$1" in
   "/usr/$PHP_LIBDIR"|"/usr/lib"[)] ;;
   /Library/Developer/CommandLineTools/SDKs/*/usr/lib[)] ;;
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/*/usr/lib[)] ;;
+  /Applications/Xcode*.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/*/usr/lib[)] ;;
   *[)]
     PHP_EXPAND_PATH($1, ai_p)
     ifelse([$2],,[
