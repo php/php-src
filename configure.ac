@@ -420,7 +420,6 @@ dnl -------------------------------------------------------------------------
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_HEADER_DIRENT
 
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS([ \
