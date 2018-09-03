@@ -339,6 +339,11 @@ ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed)
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ht->nNumOfElements--;
 		/* Collision pointers always directed from higher to lower buckets */
+#if 0
+		if (!(Z_NEXT(p->val) == HT_INVALID_IDX || HT_HASH_TO_BUCKET_EX(arData, Z_NEXT(p->val)) < p)) {
+			abort();
+		}
+#endif
 		nIndex = p->h | ht->nTableMask;
 		HT_HASH_EX(arData, nIndex) = Z_NEXT(p->val);
 	}
@@ -1069,9 +1074,20 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *b, 
 	b->key = key;
 	b->h = ZSTR_H(key);
 	nIndex = b->h | ht->nTableMask;
-	Z_NEXT(b->val) = HT_HASH_EX(arData, nIndex);
-	HT_HASH_EX(arData, nIndex) = HT_IDX_TO_HASH(idx);
-
+	idx = HT_IDX_TO_HASH(idx);
+	i = HT_HASH_EX(arData, nIndex);
+	if (i == HT_INVALID_IDX || i < idx) {
+		Z_NEXT(b->val) = i;
+		HT_HASH_EX(arData, nIndex) = idx;
+	} else {
+		p = HT_HASH_TO_BUCKET_EX(arData, i);
+		while (Z_NEXT(p->val) != HT_INVALID_IDX && Z_NEXT(p->val) > idx) {
+			i = Z_NEXT(p->val);
+			p = HT_HASH_TO_BUCKET_EX(arData, i);
+		}
+		Z_NEXT(b->val) = Z_NEXT(p->val);
+		Z_NEXT(p->val) = idx;
+	}
 	return &b->val;
 }
 
