@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #78609 (mb_check_encoding() no longer supports stringable
     objects). (cmb)
 
+- MySQLi:
+  . Fixed bug #76809 (SSL settings aren't respected when persistent connections 
+    are used). (fabiomsouto)
+
 - Standard:
   . Fixed bug #76342 (file_get_contents waits twice specified timeout).
     (Thomas Calvet)
