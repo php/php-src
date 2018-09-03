@@ -80,7 +80,6 @@ enum php_http_method
   , PHP_HTTP_PUT
   , PHP_HTTP_PATCH
   /* pathological */
-  , PHP_HTTP_CONNECT
   , PHP_HTTP_OPTIONS
   , PHP_HTTP_TRACE
   /* webdav */

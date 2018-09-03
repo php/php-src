@@ -82,7 +82,6 @@ static const char *method_strings[] =
   , "POST"
   , "PUT"
   , "PATCH"
-  , "CONNECT"
   , "OPTIONS"
   , "TRACE"
   , "COPY"
@@ -512,7 +511,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
         parser->method = (enum php_http_method) 0;
         index = 1;
         switch (ch) {
-          case 'C': parser->method = PHP_HTTP_CONNECT; /* or COPY, CHECKOUT */ break;
+          case 'C': parser->method = PHP_HTTP_CHECKOUT; /* or COPY */ break;
           case 'D': parser->method = PHP_HTTP_DELETE; break;
           case 'G': parser->method = PHP_HTTP_GET; break;
           case 'H': parser->method = PHP_HTTP_HEAD; break;
@@ -544,10 +543,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
           state = s_req_spaces_before_url;
         } else if (parser->method == PHP_HTTP_NOT_IMPLEMENTED || ch == matcher[index]) {
           ; /* nada */
-        } else if (parser->method == PHP_HTTP_CONNECT) {
-          if (index == 1 && ch == 'H') {
-            parser->method = PHP_HTTP_CHECKOUT;
-          } else if (index == 2  && ch == 'P') {
+        } else if (parser->method == PHP_HTTP_CHECKOUT) {
+          if (index == 1 && ch == 'O') {
             parser->method = PHP_HTTP_COPY;
           } else {
             parser->method = PHP_HTTP_NOT_IMPLEMENTED;
@@ -1315,7 +1312,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
 
         nread = 0;
 
-        if (parser->flags & F_UPGRADE || parser->method == PHP_HTTP_CONNECT) {
+        if (parser->flags & F_UPGRADE) {
           parser->upgrade = 1;
         }
 
