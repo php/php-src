@@ -213,8 +213,6 @@ static OpInfoType OpInfo[] = {
   { OP_MEMORY_END_PUSH_REC, "mem-end-push-rec",     ARG_MEMNUM  },
   { OP_MEMORY_END,          "mem-end",              ARG_MEMNUM  },
   { OP_MEMORY_END_REC,      "mem-end-rec",          ARG_MEMNUM  },
-  { OP_SET_OPTION_PUSH,     "set-option-push",      ARG_OPTION  },
-  { OP_SET_OPTION,          "set-option",           ARG_OPTION  },
   { OP_FAIL,                "fail",                 ARG_NON },
   { OP_JUMP,                "jump",                 ARG_RELADDR },
   { OP_PUSH,                "push",                 ARG_RELADDR },
@@ -3481,22 +3479,6 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         SOP_OUT;
         continue;
       }
-      break;
-#endif
-
-#if 0   /* no need: IS_DYNAMIC_OPTION() == 0 */
-    case OP_SET_OPTION_PUSH:  SOP_IN(OP_SET_OPTION_PUSH);
-      GET_OPTION_INC(option, p);
-      STACK_PUSH_ALT(p, s, sprev);
-      p += SIZE_OP_SET_OPTION + SIZE_OP_FAIL;
-      SOP_OUT;
-      continue;
-      break;
-
-    case OP_SET_OPTION:  SOP_IN(OP_SET_OPTION);
-      GET_OPTION_INC(option, p);
-      SOP_OUT;
-      continue;
       break;
 #endif
 
