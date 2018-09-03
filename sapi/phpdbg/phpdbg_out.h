@@ -46,7 +46,17 @@ PHPDBG_API int phpdbg_xml_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUT
 PHPDBG_API int phpdbg_log_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 2, 3);
-
+#if defined ( __hppa)
+/* Compiler of HP-UX on PA-RISC platform,  does not support "variable arguments". */
+#define phpdbg_error(tag, xmlfmt, strfmt, ...)              phpdbg_print(P_ERROR  , PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt)
+#define phpdbg_notice(tag, xmlfmt, strfmt, ...)             phpdbg_print(P_NOTICE , PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt)
+#define phpdbg_writeln(tag, xmlfmt, strfmt, ...)            phpdbg_print(P_WRITELN, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt)
+#define phpdbg_write(tag, xmlfmt, strfmt, ...)              phpdbg_print(P_WRITE  , PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt)
+#define phpdbg_script(type, fmt, ...)                       phpdbg_print(type     , PHPDBG_G(io)[PHPDBG_STDOUT].fd, NULL, NULL,   fmt)
+#define phpdbg_log(fmt, ...) phpdbg_log_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt)
+#define phpdbg_xml(fmt, ...) phpdbg_xml_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt)
+#define phpdbg_out(fmt, ...) phpdbg_out_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt)
+#else
 #define phpdbg_error(tag, xmlfmt, strfmt, ...)              phpdbg_print(P_ERROR  , PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
 #define phpdbg_notice(tag, xmlfmt, strfmt, ...)             phpdbg_print(P_NOTICE , PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
 #define phpdbg_writeln(tag, xmlfmt, strfmt, ...)            phpdbg_print(P_WRITELN, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
@@ -55,6 +65,7 @@ PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBU
 #define phpdbg_log(fmt, ...) phpdbg_log_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
 #define phpdbg_xml(fmt, ...) phpdbg_xml_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
 #define phpdbg_out(fmt, ...) phpdbg_out_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
+#endif
 
 #define phpdbg_error_ex(out, tag, xmlfmt, strfmt, ...)      phpdbg_print(P_ERROR  , out, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
 #define phpdbg_notice_ex(out, tag, xmlfmt, strfmt, ...)     phpdbg_print(P_NOTICE , out, tag,  xmlfmt, strfmt, ##__VA_ARGS__)

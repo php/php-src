@@ -291,7 +291,12 @@ typedef int php_non_blocking_flags_t;
 /* {{{ php_network_connect_socket */
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		const struct sockaddr *addr,
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+		int	 addrlen,
+#else
 		socklen_t addrlen,
+#endif
 		int asynchronous,
 		struct timeval *timeout,
 		zend_string **error_string,
@@ -300,7 +305,12 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	php_non_blocking_flags_t orig_flags;
 	int n;
 	int error = 0;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int	  len;
+#else
 	socklen_t len;
+#endif
 	int ret = 0;
 
 	SET_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
@@ -404,7 +414,12 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 	int num_addrs, n, err = 0;
 	php_socket_t sock;
 	struct sockaddr **sal, **psal, *sa;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int	  socklen;
+#else
 	socklen_t socklen;
+#endif
 	int sockoptval = 1;
 
 	num_addrs = php_network_getaddresses(host, socktype, &psal, error_string);
@@ -500,7 +515,12 @@ bound:
 }
 /* }}} */
 
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_long addrlen, struct sockaddr *sa, int *sl)
+#else
 PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_long addrlen, struct sockaddr *sa, socklen_t *sl)
+#endif
 {
 	char *colon;
 	char *tmp;
@@ -589,12 +609,22 @@ out:
 
 PHPAPI void php_network_populate_name_from_sockaddr(
 		/* input address */
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+		struct sockaddr *sa, int sl,
+#else
 		struct sockaddr *sa, socklen_t sl,
+#endif
 		/* output readable address */
 		zend_string **textaddr,
 		/* output address */
 		struct sockaddr **addr,
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+		int *addrlen
+#else
 		socklen_t *addrlen
+#endif
 		)
 {
 	if (addr) {
@@ -655,11 +685,21 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 PHPAPI int php_network_get_peer_name(php_socket_t sock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+		int 	  *addrlen
+#else
 		socklen_t *addrlen
+#endif
 		)
 {
 	php_sockaddr_storage sa;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int sl = sizeof(sa);
+#else
 	socklen_t sl = sizeof(sa);
+#endif
 	memset(&sa, 0, sizeof(sa));
 
 	if (getpeername(sock, (struct sockaddr*)&sa, &sl) == 0) {
@@ -675,11 +715,21 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 PHPAPI int php_network_get_sock_name(php_socket_t sock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+		int 	  *addrlen
+#else
 		socklen_t *addrlen
+#endif
 		)
 {
 	php_sockaddr_storage sa;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int sl = sizeof(sa);
+#else
 	socklen_t sl = sizeof(sa);
+#endif
 	memset(&sa, 0, sizeof(sa));
 
 	if (getsockname(sock, (struct sockaddr*)&sa, &sl) == 0) {
@@ -706,7 +756,12 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+		int	  *addrlen,
+#else
 		socklen_t *addrlen,
+#endif
 		struct timeval *timeout,
 		zend_string **error_string,
 		int *error_code,
@@ -716,7 +771,12 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 	php_socket_t clisock = -1;
 	int error = 0, n;
 	php_sockaddr_storage sa;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int 	  sl;
+#else
 	socklen_t sl;
+#endif
 
 	n = php_pollfd_for(srvsock, PHP_POLLREADABLE, timeout);
 
@@ -772,7 +832,12 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 	php_socket_t sock;
 	struct sockaddr **sal, **psal, *sa;
 	struct timeval working_timeout;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int  socklen;
+#else
 	socklen_t socklen;
+#endif
 #if HAVE_GETTIMEOFDAY
 	struct timeval limit_time, time_now;
 #endif
