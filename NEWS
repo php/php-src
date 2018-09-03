@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #76829 (Incorrect validation of domain on idn_to_utf8()
     function). (Anatol)
 
+- MBString:
+  . Updated to Oniguruma 6.9.0. (cmb)
+
 - POSIX:
   Fixed bug #75696 (posix_getgrnam fails to print details of group). (cmb)
 
