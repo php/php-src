@@ -99,7 +99,6 @@ int main() { return foo(10, "", 3.14); }
       AC_CHECK_SIZEOF(short, 2)
       AC_CHECK_SIZEOF(long, 4)
       AC_FUNC_ALLOCA
-      AC_FUNC_MEMCMP
       AC_CHECK_HEADER([stdarg.h], [
         AC_DEFINE([HAVE_STDARG_PROTOTYPES], [1], [Define to 1 if you have the <stdarg.h> header file.])
       ], [])
