@@ -22,6 +22,7 @@
 #include "ZendAccelerator.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_util_funcs.h"
+#include "tsrm_win32.h"
 #include <winbase.h>
 #include <process.h>
 #include <LMCONS.H>
@@ -159,6 +160,12 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		return ALLOC_FAILURE;
 	}
 	fclose(fp);
+
+	if (0 > win32_utime(mmap_base_file, NULL)) {
+		err = GetLastError();
+		zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
+	}
+
 	/* Check if the requested address space is free */
 	if (VirtualQuery(wanted_mapping_base, &info, sizeof(info)) == 0 ||
 	    info.State != MEM_FREE ||
