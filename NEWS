@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0RC1
 
 - Core:
+  . Fixed bug #76825 (Undefined symbols ___cpuid_count). (Laruence)
   . Fixed bug #76820 (Z_COPYABLE invalid definition). (mvdwerve, cmb)
 
 - intl:
