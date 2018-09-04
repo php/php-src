@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.1.23
 
+- Opcache:
+  . Fixed bug #76832 (ZendOPcache.MemoryBase periodically deleted by the OS).
+    (Anatol)
+
 - POSIX:
   . Fixed bug #75696 (posix_getgrnam fails to print details of group). (cmb)
 
