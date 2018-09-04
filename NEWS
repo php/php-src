@@ -2,5 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0alpha1
 
+- Standard:
+  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
+    stream_socket_client). (Ville Hukkamäki)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
