@@ -563,6 +563,10 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	CG(context).literals_size = op_array->last_literal;
 #endif
 
+	/* Needs to be set directly after the opcode/literal reallocation, to ensure destruction
+	 * happens correctly if any of the following fixups generate a fatal error. */
+	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -691,7 +695,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		}
 	}
 
-	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 	return 0;
 }
 
