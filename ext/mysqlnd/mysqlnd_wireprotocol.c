@@ -2269,85 +2269,7 @@ php_mysqlnd_sha256_pk_request_response_free_mem(void * _packet, zend_bool stack_
 }
 /* }}} */
 
-static
-size_t php_mysqlnd_cached_sha2_result_write(void * _packet)
-{
-	MYSQLND_PACKET_CACHED_SHA2_RESULT * packet= (MYSQLND_PACKET_CACHED_SHA2_RESULT *) _packet;
-	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
-	MYSQLND_PFC * pfc = packet->header.protocol_frame_codec;
-	MYSQLND_VIO * vio = packet->header.vio;
-	MYSQLND_STATS * stats = packet->header.stats;
-#ifndef _MSC_VER
-	zend_uchar buffer[MYSQLND_HEADER_SIZE + packet->password_len + 1];
-#else
-	ALLOCA_FLAG(use_heap)
-	zend_uchar *buffer = do_alloca(MYSQLND_HEADER_SIZE + packet->password_len + 1, use_heap);
-#endif
-	size_t sent;
 
-	DBG_ENTER("php_mysqlnd_cached_sha2_result_write");
-
-	if (packet->request == 1) {
-		int1store(buffer + MYSQLND_HEADER_SIZE, '\2');
-		sent = pfc->data->m.send(pfc, vio, buffer, 1, stats, error_info);
-	} else {
-		memcpy(buffer + MYSQLND_HEADER_SIZE, packet->password, packet->password_len);
-		sent = pfc->data->m.send(pfc, vio, buffer, packet->password_len, stats, error_info);
-	}
-
-#ifdef _MSC_VER
-	free_alloca(buffer, use_heap);
-#endif
-
-	DBG_RETURN(sent);
-}
-
-static enum_func_status
-php_mysqlnd_cached_sha2_result_read(void * _packet)
-{
-	MYSQLND_PACKET_CACHED_SHA2_RESULT * packet= (MYSQLND_PACKET_CACHED_SHA2_RESULT *) _packet;
-	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
-	MYSQLND_PFC * pfc = packet->header.protocol_frame_codec;
-	MYSQLND_VIO * vio = packet->header.vio;
-	MYSQLND_STATS * stats = packet->header.stats;
-	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
-	zend_uchar buf[SHA256_PK_REQUEST_RESP_BUFFER_SIZE];
-	zend_uchar *p = buf;
-	const zend_uchar * const begin = buf;
-
-	DBG_ENTER("php_mysqlnd_cached_sha2_result_read");
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, sizeof(buf), "PROT_CACHED_SHA2_RESULT_PACKET", PROT_CACHED_SHA2_RESULT_PACKET)) {
-		DBG_RETURN(FAIL);
-	}
-	BAIL_IF_NO_MORE_DATA;
-
-	p++;
-	packet->response_code = uint1korr(p);
-	BAIL_IF_NO_MORE_DATA;
-
-	p++;
-	packet->result = uint1korr(p);
-	BAIL_IF_NO_MORE_DATA;
-
-	DBG_RETURN(PASS);
-
-premature_end:
-	DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
-					 p - begin - packet->header.size);
-	DBG_RETURN(FAIL);
-}
-
-static void
-php_mysqlnd_cached_sha2_result_free_mem(void * _packet, zend_bool stack_allocation)
-{
-	MYSQLND_PACKET_CACHED_SHA2_RESULT * p = (MYSQLND_PACKET_CACHED_SHA2_RESULT *) _packet;
-
-	if (!stack_allocation) {
-		mnd_pefree(p, p->header.persistent);
-	}
-}
-/* }}} */
 /* {{{ packet_methods */
 static
 mysqlnd_packet_methods packet_methods[PROT_LAST] =
@@ -2441,15 +2363,9 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 		php_mysqlnd_sha256_pk_request_response_read,
 		NULL, /* write */
 		php_mysqlnd_sha256_pk_request_response_free_mem,
-	}, /* PROT_SHA256_PK_REQUEST_RESPONSE_PACKET */
-	{
-		sizeof(MYSQLND_PACKET_CACHED_SHA2_RESULT),
-		php_mysqlnd_cached_sha2_result_read,
-		php_mysqlnd_cached_sha2_result_write,
-		php_mysqlnd_cached_sha2_result_free_mem
-	} /* PROT_CACHED_SHA2_RESULT_PACKET */
+	} /* PROT_SHA256_PK_REQUEST_RESPONSE_PACKET */
 };
-/* }}} */     
+/* }}} */
 
 
 /* {{{ mysqlnd_protocol::get_greet_packet */
@@ -2798,30 +2714,6 @@ MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_
 }
 /* }}} */
 
-/* {{{ mysqlnd_protocol::init_cached_sha2_result_packet */
-static struct st_mysqlnd_packet_cached_sha2_result *
-MYSQLND_METHOD(mysqlnd_protocol, get_cached_sha2_result_packet)
-(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
-{
-	struct st_mysqlnd_packet_cached_sha2_result * packet = mnd_pecalloc(1, packet_methods[PROT_CACHED_SHA2_RESULT_PACKET].struct_size, persistent);
-	DBG_ENTER("mysqlnd_protocol::init_cached_sha2_result_packet");
-	if (packet) {
-		memset(packet, 0, sizeof(*packet));
-		packet->header.m = &packet_methods[PROT_CACHED_SHA2_RESULT_PACKET];
-		packet->header.factory = factory;
-
-		packet->header.protocol_frame_codec = factory->conn->protocol_frame_codec;
-		packet->header.vio = factory->conn->vio;
-		packet->header.stats = factory->conn->stats;
-		packet->header.error_info = factory->conn->error_info;
-		packet->header.connection_state = &factory->conn->state;
-
-		packet->header.persistent = persistent;
-	}
-	DBG_RETURN(packet);
-}
-/* }}} */
-
 
 /* {{{ mysqlnd_protocol::send_command */
 static enum_func_status
@@ -3052,7 +2944,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_payload_decoder_factory)
 	MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet),
-	MYSQLND_METHOD(mysqlnd_protocol, get_cached_sha2_result_packet),
 
 	MYSQLND_METHOD(mysqlnd_protocol, send_command),
 	MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response),
