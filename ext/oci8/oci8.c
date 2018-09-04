@@ -2351,7 +2351,6 @@ int php_oci_connection_release(php_oci_connection *connection)
 		connection->svc = NULL;
 		connection->server = NULL;
 		connection->session = NULL;
-		connection->id = NULL;
 
 		connection->is_attached = connection->is_open = connection->rb_on_disconnect = connection->used_this_request = 0;
 		connection->is_stub = 1;
@@ -2367,6 +2366,9 @@ int php_oci_connection_release(php_oci_connection *connection)
 		}
 #endif /* HAVE_OCI8_DTRACE */
 	}
+
+	/* Always set id to null, so next time a new resource is being registered. */
+	connection->id = NULL;
 
 	OCI_G(in_call) = in_call_save;
 	return result;
