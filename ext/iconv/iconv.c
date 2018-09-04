@@ -1224,7 +1224,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 	do {
 		size_t prev_in_left;
 		size_t out_size;
-		size_t encoded_word_min_len = sizeof("=??X??=")-1 + out_charset_len + (enc_scheme == PHP_ICONV_ENC_SCHEME_BASE64 ? 4 : 3);
+		size_t encoded_word_min_len = sizeof("=\?\?X\?\?=")-1 + out_charset_len + (enc_scheme == PHP_ICONV_ENC_SCHEME_BASE64 ? 4 : 3);
 
 		if (char_cnt < encoded_word_min_len + lfchars_len + 1) {
 			/* lfchars must be encoded in ASCII here*/
