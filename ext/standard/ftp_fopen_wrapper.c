@@ -428,6 +428,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	int8_t read_write = 0;
 	char *transport;
 	int transport_len;
+	zend_string *error_message = NULL;
 
 	tmp_line[0] = '\0';
 
@@ -555,9 +556,10 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		hoststart = resource->host;
 	}
 	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
-	datastream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
+	datastream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, &error_message, NULL);
 	efree(transport);
 	if (datastream == NULL) {
+		tmp_line[0]='\0';
 		goto errexit;
 	}
 
@@ -581,6 +583,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		php_stream_wrapper_log_error(wrapper, options, "Unable to activate SSL mode");
 		php_stream_close(datastream);
 		datastream = NULL;
+		tmp_line[0]='\0';
 		goto errexit;
 	}
 
@@ -600,6 +603,11 @@ errexit:
 	}
 	if (tmp_line[0] != '\0')
 		php_stream_wrapper_log_error(wrapper, options, "FTP server reports %s", tmp_line);
+
+	if (error_message) {
+		php_stream_wrapper_log_error(wrapper, options, "Failed to set up data channel: %s", ZSTR_VAL(error_message));
+		zend_string_release(error_message);
+	}
 	return NULL;
 }
 /* }}} */
