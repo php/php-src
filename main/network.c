@@ -839,6 +839,9 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 				int local_address_len = 0;
 
 				if (sa->sa_family == AF_INET) {
+					if (strchr(bindto,':')) {
+						goto skip_bind;
+					}
 					struct sockaddr_in *in4 = emalloc(sizeof(struct sockaddr_in));
 
 					local_address = (struct sockaddr*)in4;

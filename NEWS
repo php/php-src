@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed bug #76818 (Memory corruption and segfault). (Remi)
   . Fixed bug #73457 (Wrong error message when fopen FTP wrapped fails to open
     data connection). (Ville Hukkamäki)
+  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
+    stream_socket_client). (Ville Hukkamäki)
 
 30 Aug 2018, PHP 7.3.0beta3
 
