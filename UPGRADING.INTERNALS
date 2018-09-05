@@ -24,8 +24,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     instead of zval*.
 
  c. Function flags changes
-    - ZEND_ACC_CTOR and ZEND_ACC_DTOR are removed. It's pissible to check if
-      method is a constructor/destructor using the following condintion
+    - ZEND_ACC_CTOR and ZEND_ACC_DTOR are removed. It's possible to check if
+      method is a constructor/destructor using the following condition
       (func->commpon.scope->constructor == func).
     - ZEND_ACC_IMPLEMENTED_ABSTRACT is removed (it was used only internally
       during inheritance).
