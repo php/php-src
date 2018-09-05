@@ -166,8 +166,8 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
  y. zend_constant.flags and zend_constant.module_number are packed into
     reserved space inside zend_constant.value. They should be accessed using
-    ZEND_CONTANT_FLAGS(), ZEND_CONSTANTS_MODULE_NUMBER() and
-    ZEND_CONTANT_SET_FLAGS() macros.
+    ZEND_CONSTANT_FLAGS(), ZEND_CONSTANT_MODULE_NUMBER() and
+    ZEND_CONSTANT_SET_FLAGS() macros.
 
  z. HAVE_ST_BLKSIZE must be replaced with HAVE_STRUCT_STAT_ST_BLKSIZE and
     HAVE_ST_RDEV must be replaced with HAVE_STRUCT_STAT_ST_RDEV.
