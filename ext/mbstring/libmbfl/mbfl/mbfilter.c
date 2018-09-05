@@ -94,10 +94,6 @@
 #include <strings.h>
 #endif
 
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
-#endif
-
 #include "mbfilter.h"
 #include "mbfl_filter_output.h"
 #include "mbfilter_8bit.h"
