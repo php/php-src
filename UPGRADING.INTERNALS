@@ -122,7 +122,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
   n. IS_TYPE_COPYABLE flag is removed. IS_STRING zvals didn't need to be
      duplication by zval_copy_ctor(), ZVAL_DUP() and SEPARATE_ZVAL*() macros.
-     Interned strings didn't set IS_TYPE_COPYALE, so they aren't affected at
+     Interned strings didn't set IS_TYPE_COPYABLE, so they aren't affected at
      all. Now instead of checking for IS_TYPE_COPYABLE, engine checks for
      IS_ARRAY type (it may be IS_TYPE_REFCOUNTED or not). All the related
      macros: Z_COPYABLE..., Z_IMMUTABLE... are kept for compatibility.
