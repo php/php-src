@@ -90,12 +90,6 @@ void register_string_constants(INIT_FUNC_ARGS)
 
 #ifdef HAVE_LOCALECONV
 	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */
-
-/* This is bad, but since we are going to be hardcoding in the POSIX stuff anyway... */
-# ifndef HAVE_LIMITS_H
-# define CHAR_MAX 127
-# endif
-
 	REGISTER_LONG_CONSTANT("CHAR_MAX", CHAR_MAX, CONST_CS | CONST_PERSISTENT);
 #endif
 

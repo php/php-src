@@ -22,9 +22,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -48,7 +48,6 @@ fi
 AC_CHECK_HEADERS(
 inttypes.h \
 stdint.h \
-limits.h \
 malloc.h \
 string.h \
 unistd.h \
