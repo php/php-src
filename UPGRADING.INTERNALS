@@ -122,7 +122,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
   n. IS_TYPE_COPYABLE flag is removed. IS_STRING zvals didn't need to be
      duplication by zval_copy_ctor(), ZVAL_DUP() and SEPARATE_ZVAL*() macros.
-     Interned strings didn't set IS_TYPE_COPYALE, so they aren't affected at
+     Interned strings didn't set IS_TYPE_COPYABLE, so they aren't affected at
      all. Now instead of checking for IS_TYPE_COPYABLE, engine checks for
      IS_ARRAY type (it may be IS_TYPE_REFCOUNTED or not). All the related
      macros: Z_COPYABLE..., Z_IMMUTABLE... are kept for compatibility.
@@ -166,8 +166,8 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
  y. zend_constant.flags and zend_constant.module_number are packed into
     reserved space inside zend_constant.value. They should be accessed using
-    ZEND_CONTANT_FLAGS(), ZEND_CONSTANTS_MODULE_NUMBER() and
-    ZEND_CONTANT_SET_FLAGS() macros.
+    ZEND_CONSTANT_FLAGS(), ZEND_CONSTANT_MODULE_NUMBER() and
+    ZEND_CONSTANT_SET_FLAGS() macros.
 
  z. HAVE_ST_BLKSIZE must be replaced with HAVE_STRUCT_STAT_ST_BLKSIZE and
     HAVE_ST_RDEV must be replaced with HAVE_STRUCT_STAT_ST_RDEV.
