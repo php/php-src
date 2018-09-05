@@ -158,7 +158,7 @@ ZEND_END_ARG_INFO()
  * Every 'IntlDateFormatter' class method has an entry in this table
  */
 static const zend_function_entry IntlDateFormatter_class_functions[] = {
-	PHP_ME( IntlDateFormatter, __construct, arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
+	PHP_ME( IntlDateFormatter, __construct, arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC )
 	ZEND_FENTRY(  create, ZEND_FN( datefmt_create ), arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( getDateType, ZEND_FN( datefmt_get_datetype ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( getTimeType, ZEND_FN( datefmt_get_timetype ), arginfo_intldateformatter_getdatetype )

@@ -271,17 +271,10 @@ typedef struct _zend_oparray_context {
 /* Abstarct method                                        |     |     |     */
 #define ZEND_ACC_ABSTRACT                (1 <<  1) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* TODO: used only during inheritance ???                 |     |     |     */
-#define ZEND_ACC_IMPLEMENTED_ABSTRACT    (1 <<  3) /*     |  X  |     |     */
-/*                                                        |     |     |     */
 #define ZEND_ACC_FAKE_CLOSURE            (1 <<  6) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* method flag used by Closure::__invoke()                |     |     |     */
 #define ZEND_ACC_USER_ARG_INFO           (1 <<  7) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* method flags (special method detection)                |     |     |     */
-#define ZEND_ACC_CTOR                    (1 << 13) /*     |  X  |     |     */
-#define ZEND_ACC_DTOR                    (1 << 14) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* "main" op_array with                                   |     |     |     */
 /* ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes           |     |     |     */

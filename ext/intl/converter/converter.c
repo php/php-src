@@ -969,7 +969,7 @@ static PHP_METHOD(UConverter, getStandards) {
 /* }}} */
 
 static const zend_function_entry php_converter_methods[] = {
-	PHP_ME(UConverter, __construct,            php_converter_arginfo,                   ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+	PHP_ME(UConverter, __construct,            php_converter_arginfo,                   ZEND_ACC_PUBLIC)
 
 	/* Encoding selection */
 	PHP_ME(UConverter, setSourceEncoding,      php_converter_set_encoding_arginfo,      ZEND_ACC_PUBLIC)

@@ -3,6 +3,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 1. Internal API changes
   a. php_sys_symlink() and php_sys_link()
   b. zend_lookup_class_ex() and zend_fetch_class_by_name()
+  c. Function flags
 
 2. Build system changes
   a. Unix build system changes
@@ -21,6 +22,13 @@ PHP 7.4 INTERNALS UPGRADE NOTES
  b. zend_lookup_class_ex() and zend_fetch_class_by_name() prototypes were
     changed to accept optional lower-case class name as zend_string*,
     instead of zval*.
+
+ c. Function flags changes
+    - ZEND_ACC_CTOR and ZEND_ACC_DTOR are removed. It's pissible to check if
+      method is a constructor/destructor using the following condintion
+      (func->commpon.scope->constructor == func).
+    - ZEND_ACC_IMPLEMENTED_ABSTRACT is removed (it was used only internally
+      during inheritance).
 
 ========================
 2. Build system changes

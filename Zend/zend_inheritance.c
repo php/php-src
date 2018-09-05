@@ -90,22 +90,24 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 
 static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 {
-	ZEND_ASSERT(ce->parent != NULL);
+	zend_class_entry *parent = ce->parent;
+
+	ZEND_ASSERT(parent != NULL);
 
 	/* You cannot change create_object */
-	ce->create_object = ce->parent->create_object;
+	ce->create_object = parent->create_object;
 
 	/* Inherit special functions if needed */
 	if (EXPECTED(!ce->get_iterator)) {
-		ce->get_iterator = ce->parent->get_iterator;
+		ce->get_iterator = parent->get_iterator;
 	}
-	if (EXPECTED(!ce->iterator_funcs_ptr) && UNEXPECTED(ce->parent->iterator_funcs_ptr)) {
+	if (EXPECTED(!ce->iterator_funcs_ptr) && UNEXPECTED(parent->iterator_funcs_ptr)) {
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			ce->iterator_funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
-			if (ce->parent->iterator_funcs_ptr->zf_new_iterator) {
+			if (parent->iterator_funcs_ptr->zf_new_iterator) {
 				ce->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&ce->function_table, "getiterator", sizeof("getiterator") - 1);
 			}
-			if (ce->parent->iterator_funcs_ptr->zf_current) {
+			if (parent->iterator_funcs_ptr->zf_current) {
 				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", sizeof("rewind") - 1);
 				ce->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&ce->function_table, "valid", sizeof("valid") - 1);
 				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", sizeof("key") - 1);
@@ -118,52 +120,52 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 		}
 	}
 	if (EXPECTED(!ce->__get)) {
-		ce->__get = ce->parent->__get;
+		ce->__get = parent->__get;
 	}
 	if (EXPECTED(!ce->__set)) {
-		ce->__set = ce->parent->__set;
+		ce->__set = parent->__set;
 	}
 	if (EXPECTED(!ce->__unset)) {
-		ce->__unset = ce->parent->__unset;
+		ce->__unset = parent->__unset;
 	}
 	if (EXPECTED(!ce->__isset)) {
-		ce->__isset = ce->parent->__isset;
+		ce->__isset = parent->__isset;
 	}
 	if (EXPECTED(!ce->__call)) {
-		ce->__call = ce->parent->__call;
+		ce->__call = parent->__call;
 	}
 	if (EXPECTED(!ce->__callstatic)) {
-		ce->__callstatic = ce->parent->__callstatic;
+		ce->__callstatic = parent->__callstatic;
 	}
 	if (EXPECTED(!ce->__tostring)) {
-		ce->__tostring = ce->parent->__tostring;
+		ce->__tostring = parent->__tostring;
 	}
 	if (EXPECTED(!ce->clone)) {
-		ce->clone = ce->parent->clone;
+		ce->clone = parent->clone;
 	}
 	if (EXPECTED(!ce->serialize)) {
-		ce->serialize = ce->parent->serialize;
+		ce->serialize = parent->serialize;
 	}
 	if (EXPECTED(!ce->unserialize)) {
-		ce->unserialize = ce->parent->unserialize;
+		ce->unserialize = parent->unserialize;
 	}
 	if (!ce->destructor) {
-		ce->destructor = ce->parent->destructor;
+		ce->destructor = parent->destructor;
 	}
 	if (EXPECTED(!ce->__debugInfo)) {
-		ce->__debugInfo = ce->parent->__debugInfo;
+		ce->__debugInfo = parent->__debugInfo;
 	}
 
 	if (ce->constructor) {
-		if (ce->parent->constructor && UNEXPECTED(ce->parent->constructor->common.fn_flags & ZEND_ACC_FINAL)) {
+		if (parent->constructor && UNEXPECTED(parent->constructor->common.fn_flags & ZEND_ACC_FINAL)) {
 			zend_error_noreturn(E_ERROR, "Cannot override final %s::%s() with %s::%s()",
-				ZSTR_VAL(ce->parent->name), ZSTR_VAL(ce->parent->constructor->common.function_name),
+				ZSTR_VAL(parent->name), ZSTR_VAL(parent->constructor->common.function_name),
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
 		}
 		return;
 	}
 
-	ce->constructor = ce->parent->constructor;
+	ce->constructor = parent->constructor;
 }
 /* }}} */
 
@@ -284,14 +286,14 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
 	 * functions because extensions don't always define arg_info.
 	 */
-	if (!proto || (!proto->common.arg_info && proto->common.type != ZEND_USER_FUNCTION)) {
+	if (!proto->common.arg_info && proto->common.type != ZEND_USER_FUNCTION) {
 		return 1;
 	}
 
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
 	 */
-	if ((fe->common.fn_flags & ZEND_ACC_CTOR)
+	if ((fe->common.scope->constructor == fe)
 		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
 			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
 		return 1;
@@ -584,55 +586,64 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 	}
 
-	/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
-	if (UNEXPECTED((!(child_flags & ZEND_ACC_CTOR) || (parent_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_IMPLEMENTED_ABSTRACT))) &&
-		(child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK))) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
-	}
-
 	if ((child_flags & ZEND_ACC_PRIVATE) < (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))) {
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
 	}
 
-	if (parent_flags & ZEND_ACC_PRIVATE) {
-		child->common.prototype = NULL;
-	} else if (parent_flags & ZEND_ACC_ABSTRACT) {
-		child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
-		child->common.prototype = parent;
-	} else if (!(parent->common.fn_flags & ZEND_ACC_CTOR)) {
-		child->common.prototype = parent->common.prototype ? parent->common.prototype : parent;
-	} else if (parent->common.prototype && (parent->common.prototype->common.scope->ce_flags & ZEND_ACC_INTERFACE)) {
-		/* ctors only have a prototype if it comes from an interface */
-		child->common.prototype = parent->common.prototype ? parent->common.prototype : parent;
-		/* and if that is the case, we want to check inheritance against it */
-		parent = child->common.prototype;
-	}
+	do {
+		if (!(parent_flags & ZEND_ACC_PRIVATE)) {
+			if (parent_flags & ZEND_ACC_ABSTRACT) {
+				child->common.prototype = parent;
+			} else {
+				zend_function *proto = parent->common.prototype;
 
-	if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
-		int error_level;
-		const char *error_verb;
-		zend_string *method_prototype = zend_get_function_declaration(parent);
-		zend_string *child_prototype = zend_get_function_declaration(child);
+				if (parent->common.scope->constructor != parent) {
+					child->common.prototype = proto ? proto : parent;
+				} else if (proto) {
+					if (proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) {
+						/* ctors only have a prototype if it comes from an interface */
+						child->common.prototype = proto;
+						/* and if that is the case, we want to check inheritance against it */
+						parent = proto;
+					} else if (!(proto->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+						break;
+					}
+				} else {
+					break;
+				}
+			}
+			/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
+			if ((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			}
 
-		if (child->common.prototype && (
-			child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
-		)) {
-			error_level = E_COMPILE_ERROR;
-			error_verb = "must";
-		} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
-                   (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
-		            (ZEND_TYPE_ALLOW_NULL(child->common.arg_info[-1].type) && !ZEND_TYPE_ALLOW_NULL(parent->common.arg_info[-1].type)))) {
-			error_level = E_COMPILE_ERROR;
-			error_verb = "must";
-		} else {
-			error_level = E_WARNING;
-			error_verb = "should";
+			if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
+				int error_level;
+				const char *error_verb;
+				zend_string *method_prototype = zend_get_function_declaration(parent);
+				zend_string *child_prototype = zend_get_function_declaration(child);
+
+				if (child->common.prototype && (
+					child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
+				)) {
+					error_level = E_COMPILE_ERROR;
+					error_verb = "must";
+				} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
+		                   (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+				            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
+				            (ZEND_TYPE_ALLOW_NULL(child->common.arg_info[-1].type) && !ZEND_TYPE_ALLOW_NULL(parent->common.arg_info[-1].type)))) {
+					error_level = E_COMPILE_ERROR;
+					error_verb = "must";
+				} else {
+					error_level = E_WARNING;
+					error_verb = "should";
+				}
+				zend_error(error_level, "Declaration of %s %s be compatible with %s", ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
+				zend_string_efree(child_prototype);
+				zend_string_efree(method_prototype);
+			}
 		}
-		zend_error(error_level, "Declaration of %s %s be compatible with %s", ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
-		zend_string_efree(child_prototype);
-		zend_string_efree(method_prototype);
-	}
+	} while (0);
 }
 /* }}} */
 
@@ -1202,11 +1213,10 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		zend_string *lowercase_name = zend_string_tolower(ce->name);
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		if (!memcmp(ZSTR_VAL(mname), ZSTR_VAL(lowercase_name), ZSTR_LEN(mname))) {
-			if (ce->constructor  && (!ce->parent || ce->constructor != ce->parent->constructor)) {
+			if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
 			}
 			ce->constructor = fe;
-			fe->common.fn_flags |= ZEND_ACC_CTOR;
 		}
 		zend_string_release_ex(lowercase_name, 0);
 	} else if (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_') {
@@ -1217,9 +1227,9 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
 		}
-		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
+		ce->constructor = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_DESTRUCTOR_FUNC_NAME)) {
-		ce->destructor = fe; fe->common.fn_flags |= ZEND_ACC_DTOR;
+		ce->destructor = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_GET_FUNC_NAME)) {
 		ce->__get = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
@@ -1903,7 +1913,7 @@ static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract
 		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 			ai->afn[ai->cnt] = fn;
 		}
-		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
+		if (fn->common.scope->constructor == fn) {
 			if (!ai->ctor) {
 				ai->cnt++;
 				ai->ctor = 1;
