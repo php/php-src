@@ -3130,8 +3130,10 @@ ZEND_METHOD(reflection_method, __construct)
 	switch (Z_TYPE_P(classname)) {
 		case IS_STRING:
 			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Class %s does not exist", Z_STRVAL_P(classname));
+				if (!EG(exception)) {
+					zend_throw_exception_ex(reflection_exception_ptr, 0,
+							"Class %s does not exist", Z_STRVAL_P(classname));
+				}
 				if (classname == &ztmp) {
 					zval_dtor(&ztmp);
 				}

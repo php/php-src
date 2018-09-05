@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - POSIX:
   . Fixed bug #75696 (posix_getgrnam fails to print details of group). (cmb)
 
+- Reflection:
+  . Fixed bug #74454 (Wrong exception being thrown when using ReflectionMethod).
+    (cmb)
+
 - Standard:
   . Fixed bug #73457 (Wrong error message when fopen FTP wrapped fails to open
     data connection). (Ville Hukkamäki)
