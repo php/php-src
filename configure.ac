@@ -441,7 +441,6 @@ fcntl.h \
 grp.h \
 ieeefp.h \
 langinfo.h \
-limits.h \
 locale.h \
 monetary.h \
 netdb.h \
