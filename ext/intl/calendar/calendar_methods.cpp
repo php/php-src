@@ -1022,8 +1022,6 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 	RETURN_BOOL((int)result);
 }
 
-#if U_ICU_VERSION_MAJOR_NUM >= 49
-
 U_CFUNC PHP_FUNCTION(intlcal_get_repeated_wall_time_option)
 {
 	CALENDAR_METHOD_INIT_VARS;
@@ -1106,8 +1104,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 
 	RETURN_TRUE;
 }
-
-#endif
 
 U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 {

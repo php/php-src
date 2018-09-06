@@ -2,7 +2,6 @@
 Cloning datefmt icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip ICU 4.8+ only'; ?>
 --FILE--
 <?php
 include_once( 'ut_common.inc' );

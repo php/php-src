@@ -761,18 +761,12 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( intltz_create_default, arginfo_tz_void )
 	PHP_FE( intltz_get_id, arginfo_tz_only_tz )
 	PHP_FE( intltz_get_gmt, arginfo_tz_void )
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 	PHP_FE( intltz_get_unknown, arginfo_tz_void )
-#endif
 	PHP_FE( intltz_create_enumeration, arginfo_tz_create_enumeration )
 	PHP_FE( intltz_count_equivalent_ids, arginfo_tz_idarg_static )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	PHP_FE( intltz_create_time_zone_id_enumeration, arginfo_tz_create_time_zone_id_enumeration )
-#endif
 	PHP_FE( intltz_get_canonical_id, arginfo_tz_get_canonical_id )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	PHP_FE( intltz_get_region, arginfo_tz_idarg_static )
-#endif
 	PHP_FE( intltz_get_tz_data_version, arginfo_tz_void )
 	PHP_FE( intltz_get_equivalent_id, arginfo_tz_get_equivalent_id )
 	PHP_FE( intltz_use_daylight_time, arginfo_tz_only_tz )
@@ -824,12 +818,10 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( intlcal_equals, ainfo_cal_other_cal )
 	PHP_FE( intlcal_from_date_time, ainfo_cal_from_date_time )
 	PHP_FE( intlcal_to_date_time, ainfo_cal_only_cal )
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 	PHP_FE( intlcal_get_repeated_wall_time_option, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_skipped_wall_time_option, ainfo_cal_only_cal )
 	PHP_FE( intlcal_set_repeated_wall_time_option, ainfo_cal_wall_time_option )
 	PHP_FE( intlcal_set_skipped_wall_time_option, ainfo_cal_wall_time_option )
-#endif
 	PHP_FE( intlcal_get_error_code, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_error_message, ainfo_cal_only_cal )
 
