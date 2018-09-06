@@ -2191,7 +2191,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
     AC_MSG_RESULT([$icu_install_prefix])
 
     dnl Check ICU version
-    AC_MSG_CHECKING([for ICU 4.0 or greater])
+    AC_MSG_CHECKING([for ICU 50.1 or greater])
     icu_version_full=`$ICU_CONFIG --version`
     ac_IFS=$IFS
     IFS="."
@@ -2200,8 +2200,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
     icu_version=`expr [$]1 \* 1000 + [$]2`
     AC_MSG_RESULT([found $icu_version_full])
 
-    if test "$icu_version" -lt "4000"; then
-      AC_MSG_ERROR([ICU version 4.0 or later is required])
+    if test "$icu_version" -lt "50001"; then
+      AC_MSG_ERROR([ICU version 50.1 or later is required])
     fi
 
     ICU_VERSION=$icu_version
@@ -2211,10 +2211,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
     PHP_EVAL_LIBLINE($ICU_LIBS, $1)
 
     ICU_CXXFLAGS=`$ICU_CONFIG --cxxflags`
-    if test "$icu_version" -ge "49000"; then
-      ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
-      ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
-    fi
+    ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
+    ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
     if test "$icu_version" -ge "60000"; then
       ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
     fi

@@ -4,8 +4,6 @@ IntlCalendar::get/setRepeatedWallTimeOption(): basic test
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '49') < 0)
-	die('skip for ICU 49+');
 --FILE--
 
 <?php

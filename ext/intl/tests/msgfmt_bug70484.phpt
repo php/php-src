@@ -4,8 +4,6 @@ Bug #70484 selectordinal doesn't work with named parameters
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '5.0') < 0)
-	die('skip for ICU 5.0+');
 --FILE--
 <?php
 
