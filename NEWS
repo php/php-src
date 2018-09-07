@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #76832 (ZendOPcache.MemoryBase periodically deleted by the OS).
     (Anatol)
+  . Fixed bug #76796 (Compile-time evaluation of disabled function in opcache
+    causes segfault). (Nikita)
 
 - POSIX:
   . Fixed bug #75696 (posix_getgrnam fails to print details of group). (cmb)
