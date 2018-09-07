@@ -1097,13 +1097,11 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 	zend_string *key;
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
-		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
-		     prop_info->ce != scope) ||
-		    ((prop_info->flags & ZEND_ACC_PROTECTED) &&
+		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
 		     !zend_check_protected(prop_info->ce, scope)) ||
 		    ((prop_info->flags & ZEND_ACC_PRIVATE) &&
-		      ce != scope &&
-			  prop_info->ce != scope)) {
+		      prop_info->ce != scope &&
+		      (ce != scope || prop_info->ce != ce))) {
 			continue;
 		}
 		prop = NULL;
@@ -1403,8 +1401,10 @@ ZEND_FUNCTION(property_exists)
 		RETURN_NULL();
 	}
 
-	if ((property_info = zend_hash_find_ptr(&ce->properties_info, property)) != NULL
-		&& (property_info->flags & ZEND_ACC_SHADOW) == 0) {
+	property_info = zend_hash_find_ptr(&ce->properties_info, property);
+	if (property_info != NULL
+	 && (!(property_info->flags & ZEND_ACC_PRIVATE)
+	  || property_info->ce == ce)) {
 		RETURN_TRUE;
 	}
 

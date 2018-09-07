@@ -171,16 +171,14 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 
 char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 {
-	if (fn_flags & ZEND_ACC_PRIVATE) {
-		return "private";
-	}
-	if (fn_flags & ZEND_ACC_PROTECTED) {
-		return "protected";
-	}
 	if (fn_flags & ZEND_ACC_PUBLIC) {
 		return "public";
+	} else if (fn_flags & ZEND_ACC_PRIVATE) {
+		return "private";
+	} else {
+		ZEND_ASSERT(fn_flags & ZEND_ACC_PROTECTED);
+		return "protected";
 	}
-	return "";
 }
 /* }}} */
 
@@ -684,7 +682,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		child_info = Z_PTR_P(child);
-		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
+		if (UNEXPECTED(parent_info->flags & ZEND_ACC_PRIVATE)) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		} else {
 			if (UNEXPECTED((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC))) {
@@ -711,20 +709,10 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		if (UNEXPECTED(parent_info->flags & ZEND_ACC_PRIVATE)) {
-			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
-				child_info = zend_duplicate_property_info_internal(parent_info);
-			} else {
-				child_info = zend_duplicate_property_info(parent_info);
-			}
-			child_info->flags &= ~ZEND_ACC_PRIVATE; /* it's not private anymore */
-			child_info->flags |= ZEND_ACC_SHADOW; /* but it's a shadow of private */
+		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
+			child_info = zend_duplicate_property_info_internal(parent_info);
 		} else {
-			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
-				child_info = zend_duplicate_property_info_internal(parent_info);
-			} else {
-				child_info = parent_info;
-			}
+			child_info = parent_info;
 		}
 		_zend_hash_append_ptr(&ce->properties_info, key, child_info);
 	}
@@ -1681,11 +1669,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 			/* next: check for conflicts with current class */
 			if ((coliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
-				if (coliding_prop->flags & ZEND_ACC_SHADOW) {
-					zend_string_release_ex(coliding_prop->name, 0);
-					if (coliding_prop->doc_comment) {
-						zend_string_release_ex(coliding_prop->doc_comment, 0);
-                    }
+				if ((coliding_prop->flags & ZEND_ACC_PRIVATE) && coliding_prop->ce != ce) {
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {

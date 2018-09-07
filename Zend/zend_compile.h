@@ -218,9 +218,6 @@ typedef struct _zend_oparray_context {
 /* TODO: used only by ext/reflection ???                  |     |     |     */
 #define ZEND_ACC_IMPLICIT_PUBLIC         (1 << 12) /*     |  ?  |  ?  |  ?  */
 /*                                                        |     |     |     */
-/* Shadow of parent's private method/property             |     |     |     */
-#define ZEND_ACC_SHADOW                  (1 << 17) /*     |  ?  |  X  |     */
-/*                                                        |     |     |     */
 /* Class Flags (unused: 0, 1, 3, 11-18, 21, 25...)        |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
