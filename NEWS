@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug #73457 (Wrong error message when fopen FTP wrapped fails to open
     data connection). (Ville Hukkamäki)
 
+- Zlib:
+  . Fixed bug #75273 (php_zlib_inflate_filter() may not update bytes_consumed).
+    (Martin Burke, cmb)
+
 30 Aug 2018, PHP 7.3.0beta3
 
 - Core:
