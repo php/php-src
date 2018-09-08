@@ -95,7 +95,6 @@
 #define HAVE_TEMPNAM 1
 #define HAVE_UTIME 1
 #undef HAVE_DIRENT_H
-#define HAVE_ASSERT_H 1
 #define HAVE_FCNTL_H 1
 #define HAVE_GRP_H 0
 #undef HAVE_PWD_H
