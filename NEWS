@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
     stream_socket_client). (Ville Hukkamäki)
 
+- Zlib:
+  . Fixed bug #75273 (php_zlib_inflate_filter() may not update bytes_consumed).
+    (Martin Burke, cmb)
+
 13 Sep 2018, PHP 7.1.22
 
 - Core:
