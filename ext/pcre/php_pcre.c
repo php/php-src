@@ -729,6 +729,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	if (key != regex) {
 		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(locale_string));
 		if (!tables) {
+			zend_string *_k;
 			tables = pcre2_maketables(gctx);
 			if (UNEXPECTED(!tables)) {
 				php_error_docref(NULL,E_WARNING, "Failed to generate locale character tables");
@@ -737,7 +738,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 				efree(pattern);
 				return NULL;
 			}
-			zend_hash_add_ptr(&char_tables, BG(locale_string), (void *)tables);
+			_k = zend_string_dup(BG(locale_string), 1);
+			zend_hash_add_ptr(&char_tables, _k, (void *)tables);
+			zend_string_release(_k);
 		}
 		pcre2_set_character_tables(cctx, tables);
 	}
