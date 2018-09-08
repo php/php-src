@@ -6482,14 +6482,14 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			}
 			break;
 		case T_METHOD_C:
-			if ((op_array && !op_array->scope && op_array->function_name) || (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
+			if ((op_array && !ce && op_array->function_name) || (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
 				ZVAL_STR_COPY(zv, op_array->function_name);
 			} else if (ce) {
-				if (op_array && op_array->function_name) {
+				if (op_array && op_array->scope && op_array->function_name) {
 					ZVAL_NEW_STR(zv, zend_concat3(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), "::", 2,
 						ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name)));
 				} else {
-					ZVAL_STR_COPY(zv, ce->name);
+					ZVAL_EMPTY_STRING(zv);
 				}
 			} else if (op_array && op_array->function_name) {
 				ZVAL_STR_COPY(zv, op_array->function_name);
