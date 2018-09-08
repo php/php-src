@@ -78,12 +78,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 
-		while (bin < (unsigned int) bucket->buflen) {
-
-			if (data->finished) {
-				consumed += bucket->buflen;
-				break;
-			}
+		while (bin < (unsigned int) bucket->buflen && !data->finished) {
 
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
@@ -96,6 +91,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			if (status == Z_STREAM_END) {
 				inflateEnd(&(data->strm));
 				data->finished = '\1';
+				exit_status = PSFS_PASS_ON;
 			} else if (status != Z_OK) {
 				/* Something bad happened */
 				php_stream_bucket_delref(bucket);
@@ -118,10 +114,6 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
-			} else if (status == Z_STREAM_END && data->strm.avail_out >= data->outbuf_len) {
-				/* no more data to decompress, and nothing was spat out */
-				php_stream_bucket_delref(bucket);
-				return PSFS_PASS_ON;
 			}
 
 		}
