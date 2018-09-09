@@ -190,6 +190,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 }
 /* }}} */
 
+#if LIBCURL_VERSION_NUM < 0x071c00 /* Available since 7.28.0 */
 static void _make_timeval_struct(struct timeval *to, double timeout) /* {{{ */
 {
 	unsigned long conv;
@@ -199,6 +200,7 @@ static void _make_timeval_struct(struct timeval *to, double timeout) /* {{{ */
 	to->tv_usec = conv % 1000000;
 }
 /* }}} */
+#endif
 
 /* {{{ proto int curl_multi_select(resource mh[, double timeout])
    Get all the sockets associated with the cURL extension, which can then be "selected" */
