@@ -549,6 +549,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	pcre_cache_entry	 new_entry;
 	int					 rc;
 	zend_string 		*key;
+	pcre_cache_entry *ret;
 
 #if HAVE_SETLOCALE
 	if (BG(locale_string) &&
@@ -843,15 +844,19 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		zend_string *str = zend_string_init(ZSTR_VAL(key), ZSTR_LEN(key), 1);
 
 		GC_MAKE_PERSISTENT_LOCAL(str);
+
 #if HAVE_SETLOCALE
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
 #endif
-		key = str;
+		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), str, &new_entry, sizeof(pcre_cache_entry));
+		zend_string_release(str);
+	} else {
+		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
 	}
 
-	return zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
+	return ret;
 }
 /* }}} */
 
