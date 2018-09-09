@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 5.6.38
 
+- Apache2
+  . Fixed bug #76582 (XSS due to the header Transfer-Encoding: chunked). (Stas)
+
 19 Jul 2018, PHP 5.6.37
 
 - Exif:
