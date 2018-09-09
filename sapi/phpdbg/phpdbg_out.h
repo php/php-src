@@ -68,7 +68,7 @@ PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBU
 #define phpdbg_rlog(fd, fmt, ...) phpdbg_rlog_internal(fd, fmt, ##__VA_ARGS__)
 
 #define phpdbg_xml_asprintf(buf, ...) _phpdbg_xml_asprintf(buf, ##__VA_ARGS__)
-PHPDBG_API int _phpdbg_xml_asprintf(char **buf, const char *format, zend_bool escape_xml, ...);
+PHPDBG_API int _phpdbg_xml_asprintf(char **buf, const char *format, unsigned int escape_xml, ...);
 
 #define phpdbg_asprintf(buf, ...) _phpdbg_asprintf(buf, ##__VA_ARGS__)
 PHPDBG_API int _phpdbg_asprintf(char **buf, const char *format, ...);
