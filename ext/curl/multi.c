@@ -190,7 +190,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 }
 /* }}} */
 
-#if LIBCURL_VERSION_NUM < 0x071c00 /* Available since 7.28.0 */
+#if LIBCURL_VERSION_NUM < 0x071c00
 static void _make_timeval_struct(struct timeval *to, double timeout) /* {{{ */
 {
 	unsigned long conv;
