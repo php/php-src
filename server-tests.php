@@ -1171,7 +1171,7 @@ class testHarness {
 			$this->showstatus($section_text['TEST'], 'SKIPPED', 'CGI Test needs CGI Binary');
 			return "SKIPPED";
 		}
-		// if we're doing web testing, then we wont be able to set
+		// if we're doing web testing, then we won't be able to set
 		// ini setting on the command line.  be sure the executables
 		// ini settings are compatible with the test, or skip
 		if (($docgi || $this->conf['TEST_WEB']) &&

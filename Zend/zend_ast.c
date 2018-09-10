@@ -821,7 +821,7 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
 }
 
 /*
- * Operator Precendence
+ * Operator Precedence
  * ====================
  * priority  associativity  operators
  * ----------------------------------

@@ -509,11 +509,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 		efree(op_array->opcodes);
 		op_array->opcodes = new_opcodes;
-
-		if (op_array->run_time_cache) {
-			efree(op_array->run_time_cache);
-			op_array->run_time_cache = NULL;
-		}
+		op_array->run_time_cache = NULL;
 	}
 
 	if (op_array->function_name && !IS_ACCEL_INTERNED(op_array->function_name)) {
@@ -614,7 +610,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	/* "prototype" may be undefined if "scope" isn't set */
 	if (op_array->scope && op_array->prototype) {
 		if ((persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->prototype))) {
-			op_array->prototype = (union _zend_function*)persist_ptr;
+			op_array->prototype = (zend_function*)persist_ptr;
 		}
 	} else {
 		op_array->prototype = NULL;
@@ -734,6 +730,9 @@ static void zend_persist_class_entry(zval *zv)
 		ce = Z_PTR_P(zv) = ZCG(arena_mem);
 		ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_class_entry)));
 		zend_accel_store_interned_string(ce->name);
+		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+			zend_accel_store_interned_string(ce->parent_name);
+		}
 		zend_hash_persist(&ce->function_table, zend_persist_class_method);
 		if (ce->default_properties_table) {
 		    int i;
@@ -749,7 +748,7 @@ static void zend_persist_class_entry(zval *zv)
 
 			/* Persist only static properties in this class.
 			 * Static properties from parent classes will be handled in class_copy_ctor */
-			i = ce->parent ? ce->parent->default_static_members_count : 0;
+			i = (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) ? ce->parent->default_static_members_count : 0;
 			for (; i < ce->default_static_members_count; i++) {
 				zend_persist_zval(&ce->default_static_members_table[i]);
 			}
@@ -774,54 +773,66 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
-		if (ce->num_interfaces && ce->interfaces) {
-			efree(ce->interfaces);
+
+		if (ce->num_interfaces) {
+			uint32_t i = 0;
+
+			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+			for (i = 0; i < ce->num_interfaces; i++) {
+				zend_accel_store_interned_string(ce->interface_names[i].name);
+				zend_accel_store_interned_string(ce->interface_names[i].lc_name);
+			}
+			zend_accel_store(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 		}
-		ce->interfaces = NULL; /* will be filled in on fetch */
 
-		if (ce->num_traits && ce->traits) {
-			efree(ce->traits);
-		}
-		ce->traits = NULL;
+		if (ce->num_traits) {
+			uint32_t i = 0;
 
-		if (ce->trait_aliases) {
-			int i = 0;
-			while (ce->trait_aliases[i]) {
-				if (ce->trait_aliases[i]->trait_method.method_name) {
-					zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method.method_name);
+			for (i = 0; i < ce->num_traits; i++) {
+				zend_accel_store_interned_string(ce->trait_names[i].name);
+				zend_accel_store_interned_string(ce->trait_names[i].lc_name);
+			}
+			zend_accel_store(ce->trait_names, sizeof(zend_class_name) * ce->num_traits);
+
+			i = 0;
+			if (ce->trait_aliases) {
+				while (ce->trait_aliases[i]) {
+					if (ce->trait_aliases[i]->trait_method.method_name) {
+						zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method.method_name);
+					}
+					if (ce->trait_aliases[i]->trait_method.class_name) {
+						zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method.class_name);
+					}
+
+					if (ce->trait_aliases[i]->alias) {
+						zend_accel_store_interned_string(ce->trait_aliases[i]->alias);
+					}
+
+					zend_accel_store(ce->trait_aliases[i], sizeof(zend_trait_alias));
+					i++;
 				}
-				if (ce->trait_aliases[i]->trait_method.class_name) {
-					zend_accel_store_interned_string(ce->trait_aliases[i]->trait_method.class_name);
-				}
 
-				if (ce->trait_aliases[i]->alias) {
-					zend_accel_store_interned_string(ce->trait_aliases[i]->alias);
-				}
-
-				zend_accel_store(ce->trait_aliases[i], sizeof(zend_trait_alias));
-				i++;
+				zend_accel_store(ce->trait_aliases, sizeof(zend_trait_alias*) * (i + 1));
 			}
 
-			zend_accel_store(ce->trait_aliases, sizeof(zend_trait_alias*) * (i + 1));
-		}
+			if (ce->trait_precedences) {
+				int j;
 
-		if (ce->trait_precedences) {
-			int i = 0;
-			int j;
+				i = 0;
+				while (ce->trait_precedences[i]) {
+					zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method.method_name);
+					zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method.class_name);
 
-			while (ce->trait_precedences[i]) {
-				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method.method_name);
-				zend_accel_store_interned_string(ce->trait_precedences[i]->trait_method.class_name);
+					for (j = 0; j < ce->trait_precedences[i]->num_excludes; j++) {
+						zend_accel_store_interned_string(ce->trait_precedences[i]->exclude_class_names[j]);
+					}
 
-				for (j = 0; j < ce->trait_precedences[i]->num_excludes; j++) {
-					zend_accel_store_interned_string(ce->trait_precedences[i]->exclude_class_names[j]);
+					zend_accel_store(ce->trait_precedences[i], sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
+					i++;
 				}
-
-				zend_accel_store(ce->trait_precedences[i], sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
-				i++;
+				zend_accel_store(
+					ce->trait_precedences, sizeof(zend_trait_precedence*) * (i + 1));
 			}
-			zend_accel_store(
-				ce->trait_precedences, sizeof(zend_trait_precedence*) * (i + 1));
 		}
 	}
 }
@@ -838,7 +849,7 @@ static int zend_update_parent_ce(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
-	if (ce->parent) {
+	if (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
 		ce->parent = zend_shared_alloc_get_xlat_entry(ce->parent);
 	}
 

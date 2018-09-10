@@ -549,6 +549,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	pcre_cache_entry	 new_entry;
 	int					 rc;
 	zend_string 		*key;
+	pcre_cache_entry *ret;
 
 #if HAVE_SETLOCALE
 	if (BG(locale_string) &&
@@ -729,6 +730,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	if (key != regex) {
 		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(locale_string));
 		if (!tables) {
+			zend_string *_k;
 			tables = pcre2_maketables(gctx);
 			if (UNEXPECTED(!tables)) {
 				php_error_docref(NULL,E_WARNING, "Failed to generate locale character tables");
@@ -737,7 +739,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 				efree(pattern);
 				return NULL;
 			}
-			zend_hash_add_ptr(&char_tables, BG(locale_string), (void *)tables);
+			_k = zend_string_init(ZSTR_VAL(BG(locale_string)), ZSTR_LEN(BG(locale_string)), 1);
+			zend_hash_add_ptr(&char_tables, _k, (void *)tables);
+			zend_string_release(_k);
 		}
 		pcre2_set_character_tables(cctx, tables);
 	}
@@ -840,15 +844,19 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		zend_string *str = zend_string_init(ZSTR_VAL(key), ZSTR_LEN(key), 1);
 
 		GC_MAKE_PERSISTENT_LOCAL(str);
+
 #if HAVE_SETLOCALE
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
 #endif
-		key = str;
+		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), str, &new_entry, sizeof(pcre_cache_entry));
+		zend_string_release(str);
+	} else {
+		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
 	}
 
-	return zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
+	return ret;
 }
 /* }}} */
 

@@ -40,31 +40,6 @@
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
-static void zend_accel_destroy_zend_function(zval *zv)
-{
-	zend_function *function = Z_PTR_P(zv);
-
-	if (function->type == ZEND_USER_FUNCTION) {
-		if (function->op_array.static_variables) {
-			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				if (GC_DELREF(function->op_array.static_variables) == 0) {
-					FREE_HASHTABLE(function->op_array.static_variables);
-				}
-			}
-			function->op_array.static_variables = NULL;
-		}
-	}
-
-	zend_function_dtor(zv);
-}
-
-static void zend_accel_destroy_zend_class(zval *zv)
-{
-	zend_class_entry *ce = Z_PTR_P(zv);
-	ce->function_table.pDestructor = zend_accel_destroy_zend_function;
-	destroy_zend_class(zv);
-}
-
 zend_persistent_script* create_persistent_script(void)
 {
 	zend_persistent_script *persistent_script = (zend_persistent_script *) emalloc(sizeof(zend_persistent_script));
@@ -82,10 +57,7 @@ zend_persistent_script* create_persistent_script(void)
 
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
 {
-	if (destroy_elements) {
-		persistent_script->script.function_table.pDestructor = zend_accel_destroy_zend_function;
-		persistent_script->script.class_table.pDestructor = zend_accel_destroy_zend_class;
-	} else {
+	if (!destroy_elements) {
 		persistent_script->script.function_table.pDestructor = NULL;
 		persistent_script->script.class_table.pDestructor = NULL;
 	}
@@ -100,24 +72,11 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 	efree(persistent_script);
 }
 
-static int is_not_internal_function(zval *zv)
-{
-	zend_function *function = Z_PTR_P(zv);
-	return(function->type != ZEND_INTERNAL_FUNCTION);
-}
-
-void zend_accel_free_user_functions(HashTable *ht)
-{
-	dtor_func_t orig_dtor = ht->pDestructor;
-
-	ht->pDestructor = NULL;
-	zend_hash_apply(ht, (apply_func_t) is_not_internal_function);
-	ht->pDestructor = orig_dtor;
-}
-
-void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
+void zend_accel_move_user_functions(HashTable *src, zend_script *script)
 {
 	Bucket *p;
+	HashTable *dst = &script->function_table;
+	zend_string *filename = script->main_op_array.filename;
 	dtor_func_t orig_dtor = src->pDestructor;
 
 	src->pDestructor = NULL;
@@ -125,7 +84,8 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
 	ZEND_HASH_REVERSE_FOREACH_BUCKET(src, p) {
 		zend_function *function = Z_PTR(p->val);
 
-		if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
+		if (EXPECTED(function->type == ZEND_USER_FUNCTION)
+		 && EXPECTED(function->op_array.filename == filename)) {
 			_zend_hash_append_ptr(dst, p->key, function);
 			zend_hash_del_bucket(src, p);
 		} else {
@@ -133,20 +93,6 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
 		}
 	} ZEND_HASH_FOREACH_END();
 	src->pDestructor = orig_dtor;
-}
-
-void zend_accel_copy_internal_functions(void)
-{
-	zend_string *key;
-	zval *val;
-
-	ZEND_HASH_FOREACH_STR_KEY_VAL(CG(function_table), key, val) {
-		zend_internal_function *function = Z_PTR_P(val);
-		if (function->type == ZEND_INTERNAL_FUNCTION) {
-			zend_hash_add_new_ptr(&ZCG(function_table), key, function);
-		}
-	} ZEND_HASH_FOREACH_END();
-	ZCG(internal_functions_count) = zend_hash_num_elements(&ZCG(function_table));
 }
 
 static inline void zend_clone_zval(zval *src)
@@ -346,7 +292,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;
 
-	if (ce->parent) {
+	if (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
 		ce->parent = ARENA_REALLOC(ce->parent);
 	}
 
@@ -366,7 +312,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	/* static members */
 	if (old_ce->default_static_members_table) {
 		int i, end;
-		zend_class_entry *parent = ce->parent;
+		zend_class_entry *parent = (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) ? NULL : ce->parent;
 
 		ce->default_static_members_table = emalloc(sizeof(zval) * old_ce->default_static_members_count);
 		i = ce->default_static_members_count - 1;
@@ -398,12 +344,13 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	/* constants table */
 	zend_hash_clone_constants(&ce->constants_table, &old_ce->constants_table);
 
-	/* interfaces aren't really implemented, so we create a new table */
 	if (ce->num_interfaces) {
-		ce->interfaces = emalloc(sizeof(zend_class_entry *) * ce->num_interfaces);
-		memset(ce->interfaces, 0, sizeof(zend_class_entry *) * ce->num_interfaces);
-	} else {
-		ce->interfaces = NULL;
+		zend_class_name *interface_names;
+
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+		interface_names = emalloc(sizeof(zend_class_name) * ce->num_interfaces);
+		memcpy(interface_names, ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
+		ce->interface_names = interface_names;
 	}
 
 	zend_update_inherited_handler(constructor);
@@ -425,40 +372,47 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_update_inherited_handler(__debugInfo);
 
 /* 5.4 traits */
-	if (ce->trait_aliases) {
-		zend_trait_alias **trait_aliases;
-		int i = 0;
+	if (ce->num_traits) {
+		zend_class_name *trait_names = emalloc(sizeof(zend_class_name) * ce->num_traits);
 
-		while (ce->trait_aliases[i]) {
-			i++;
-		}
-		trait_aliases = emalloc(sizeof(zend_trait_alias*) * (i + 1));
-		i = 0;
-		while (ce->trait_aliases[i]) {
-			trait_aliases[i] = emalloc(sizeof(zend_trait_alias));
-			memcpy(trait_aliases[i], ce->trait_aliases[i], sizeof(zend_trait_alias));
-			i++;
-		}
-		trait_aliases[i] = NULL;
-		ce->trait_aliases = trait_aliases;
-	}
+		memcpy(trait_names, ce->trait_names, sizeof(zend_class_name) * ce->num_traits);
+		ce->trait_names = trait_names;
 
-	if (ce->trait_precedences) {
-		zend_trait_precedence **trait_precedences;
-		int i = 0;
+		if (ce->trait_aliases) {
+			zend_trait_alias **trait_aliases;
+			int i = 0;
 
-		while (ce->trait_precedences[i]) {
-			i++;
+			while (ce->trait_aliases[i]) {
+				i++;
+			}
+			trait_aliases = emalloc(sizeof(zend_trait_alias*) * (i + 1));
+			i = 0;
+			while (ce->trait_aliases[i]) {
+				trait_aliases[i] = emalloc(sizeof(zend_trait_alias));
+				memcpy(trait_aliases[i], ce->trait_aliases[i], sizeof(zend_trait_alias));
+				i++;
+			}
+			trait_aliases[i] = NULL;
+			ce->trait_aliases = trait_aliases;
 		}
-		trait_precedences = emalloc(sizeof(zend_trait_precedence*) * (i + 1));
-		i = 0;
-		while (ce->trait_precedences[i]) {
-			trait_precedences[i] = emalloc(sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
-			memcpy(trait_precedences[i], ce->trait_precedences[i], sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
-			i++;
+
+		if (ce->trait_precedences) {
+			zend_trait_precedence **trait_precedences;
+			int i = 0;
+
+			while (ce->trait_precedences[i]) {
+				i++;
+			}
+			trait_precedences = emalloc(sizeof(zend_trait_precedence*) * (i + 1));
+			i = 0;
+			while (ce->trait_precedences[i]) {
+				trait_precedences[i] = emalloc(sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
+				memcpy(trait_precedences[i], ce->trait_precedences[i], sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
+				i++;
+			}
+			trait_precedences[i] = NULL;
+			ce->trait_precedences = trait_precedences;
 		}
-		trait_precedences[i] = NULL;
-		ce->trait_precedences = trait_precedences;
 	}
 }
 

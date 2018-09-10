@@ -109,7 +109,6 @@ typedef struct _zend_declarables {
 /* Compilation context that is different for each file, but shared between op arrays. */
 typedef struct _zend_file_context {
 	zend_declarables declarables;
-	znode implementing_class;
 
 	zend_string *current_namespace;
 	zend_bool in_namespace;
@@ -244,11 +243,17 @@ typedef struct _zend_oparray_context {
 /* Class extends another class                            |     |     |     */
 #define ZEND_ACC_INHERITED               (1 << 10) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Class extends another class                            |     |     |     */
+#define ZEND_ACC_UNRESOLVED_PARENT       (1 << 11) /*  X  |     |     |     */
+/*                                                        |     |     |     */
 /* Class implements interface(s)                          |     |     |     */
 #define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 19) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class constants updated                                |     |     |     */
 #define ZEND_ACC_CONSTANTS_UPDATED       (1 << 20) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class implements interface(s)                          |     |     |     */
+#define ZEND_ACC_UNRESOLVED_INTERFACES   (1 << 21) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class uses trait(s)                                    |     |     |     */
 #define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 22) /*  X  |     |     |     */
@@ -266,17 +271,10 @@ typedef struct _zend_oparray_context {
 /* Abstarct method                                        |     |     |     */
 #define ZEND_ACC_ABSTRACT                (1 <<  1) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* TODO: used only during inheritance ???                 |     |     |     */
-#define ZEND_ACC_IMPLEMENTED_ABSTRACT    (1 <<  3) /*     |  X  |     |     */
-/*                                                        |     |     |     */
 #define ZEND_ACC_FAKE_CLOSURE            (1 <<  6) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* method flag used by Closure::__invoke()                |     |     |     */
 #define ZEND_ACC_USER_ARG_INFO           (1 <<  7) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* method flags (special method detection)                |     |     |     */
-#define ZEND_ACC_CTOR                    (1 << 13) /*     |  X  |     |     */
-#define ZEND_ACC_DTOR                    (1 << 14) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* "main" op_array with                                   |     |     |     */
 /* ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes           |     |     |     */
@@ -302,7 +300,7 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 #define ZEND_ACC_GENERATOR               (1 << 23) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* Function with varable number of arguments              |     |     |     */
+/* Function with variable number of arguments             |     |     |     */
 #define ZEND_ACC_VARIADIC                (1 << 24) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Immutable op_array (lazy loading)                      |     |     |     */
@@ -466,7 +464,7 @@ union _zend_function {
 		uint32_t fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
-		union _zend_function *prototype;
+		zend_function *prototype;
 		uint32_t num_args;
 		uint32_t required_num_args;
 		zend_arg_info *arg_info;
@@ -757,9 +755,9 @@ zend_bool zend_handle_encoding_declaration(zend_ast *ast);
 /* parser-driven code generators */
 void zend_do_free(znode *op1);
 
-ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time);
-ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time);
-ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time);
+ZEND_API int do_bind_function(zval *lcname);
+ZEND_API int do_bind_class(zval *lcname);
+ZEND_API int do_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce);
 ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint32_t first_early_binding_opline);
 
@@ -970,6 +968,8 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1
 
+#define ZEND_BIND_VAL 0
+#define ZEND_BIND_REF 1
 
 #define ZEND_RETURNS_FUNCTION (1<<0)
 #define ZEND_RETURNS_VALUE    (1<<1)
@@ -1045,6 +1045,9 @@ END_EXTERN_C()
 
 /* result of compilation may be stored in file cache */
 #define ZEND_COMPILE_WITH_FILE_CACHE			(1<<11)
+
+/* ignore functions and classes declared in other files */
+#define ZEND_COMPILE_IGNORE_OTHER_FILES			(1<<12)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

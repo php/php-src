@@ -2278,9 +2278,12 @@ static zend_bool ZEND_FASTCALL instanceof_interface_only(const zend_class_entry 
 {
 	uint32_t i;
 
-	for (i = 0; i < instance_ce->num_interfaces; i++) {
-		if (instanceof_interface_only(instance_ce->interfaces[i], ce)) {
-			return 1;
+	if (instance_ce->num_interfaces) {
+		ZEND_ASSERT(!(instance_ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+		for (i = 0; i < instance_ce->num_interfaces; i++) {
+			if (instanceof_interface_only(instance_ce->interfaces[i], ce)) {
+				return 1;
+			}
 		}
 	}
 	return 0;
@@ -2303,9 +2306,12 @@ static zend_bool ZEND_FASTCALL instanceof_interface(const zend_class_entry *inst
 {
 	uint32_t i;
 
-	for (i = 0; i < instance_ce->num_interfaces; i++) {
-		if (instanceof_interface(instance_ce->interfaces[i], ce)) {
-			return 1;
+	if (instance_ce->num_interfaces) {
+		ZEND_ASSERT(!(instance_ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+		for (i = 0; i < instance_ce->num_interfaces; i++) {
+			if (instanceof_interface(instance_ce->interfaces[i], ce)) {
+				return 1;
+			}
 		}
 	}
 	return instanceof_class(instance_ce, ce);
@@ -3234,7 +3240,7 @@ ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d)
 	if (dmod < 0) {
 		/* we're going to make this number positive; call ceil()
 		 * to simulate rounding towards 0 of the negative number */
-		dmod = ceil(dmod);// + two_pow_32;
+		dmod = ceil(dmod) + two_pow_32;
 	}
 	return (zend_long)(zend_ulong)dmod;
 }

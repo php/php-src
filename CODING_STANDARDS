@@ -150,19 +150,39 @@ User Functions/Methods Naming Conventions
     'buildsomewidget'
     'getI()'
 
-7.  Classes should be given descriptive names. Avoid using abbreviations where
+7.  Class names should be descriptive nouns in PascalCase and as short as
     possible. Each word in the class name should start with a capital letter,
-    without underscore delimiters (CamelCaps starting with a capital letter).
-    The class name should be prefixed with the name of the 'parent set' (e.g.
-    the name of the extension)::
+    without underscore delimiters. The class name should be prefixed with the
+    name of the "parent set" (e.g. the name of the extension) if no namespaces
+    are used. Abbreviations and acronyms as well as initialisms should be
+    avoided wherever possible, unless they are much more widely used than the
+    long form (e.g. HTTP or URL). Abbreviations start with a capital letter
+    followed by lowercase letters, whereas acronyms and initialisms are written
+    according to their standard notation. Usage of acronyms and initialisms is
+    not allowed if they are not widely adopted and recognized as such.
 
     Good:
     'Curl'
-    'FooBar'
+    'CurlResponse'
+    'HTTPStatusCode'
+    'URL'
+    'BTreeMap' (B-tree Map)
+    'Id' (Identifier)
+    'ID' (Identity Document)
+    'Char' (Character)
+    'Intl' (Internationalization)
+    'Radar' (Radio Detecting and Ranging)
 
     Bad:
-    'foobar'
-    'foo_bar'
+    'curl'
+    'curl_response'
+    'HttpStatusCode'
+    'Url'
+    'BtreeMap'
+    'ID' (Identifier)
+    'CHAR'
+    'INTL'
+    'RADAR' (Radio Detecting and Ranging)
 
 Internal Function Naming Conventions
 ----------------------

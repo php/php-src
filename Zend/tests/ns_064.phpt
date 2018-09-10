@@ -1,5 +1,5 @@
 --TEST--
-Magic methods in overrided stdClass inside namespace
+Magic methods in overridden stdClass inside namespace
 --FILE--
 <?php
 

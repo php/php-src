@@ -70,7 +70,7 @@
 # include <alloca.h>
 #endif
 
-#if defined(ZEND_WIN32)
+#if defined(ZEND_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
 

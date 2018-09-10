@@ -196,7 +196,7 @@ int zend_mm_use_huge_pages = 0;
 #endif
 
 /*
- * Memory is retrived from OS by chunks of fixed size 2MB.
+ * Memory is retrieved from OS by chunks of fixed size 2MB.
  * Inside chunk it's managed by pages of fixed size 4096B.
  * So each chunk consists from 512 pages.
  * The first page of each chunk is reseved for chunk header.
@@ -254,7 +254,7 @@ struct _zend_mm_heap {
 
 	zend_mm_chunk     *main_chunk;
 	zend_mm_chunk     *cached_chunks;			/* list of unused chunks */
-	int                chunks_count;			/* number of alocated chunks */
+	int                chunks_count;			/* number of allocated chunks */
 	int                peak_chunks_count;		/* peak number of allocated chunks for current request */
 	int                cached_chunks_count;		/* number of cached chunks */
 	double             avg_chunks_count;		/* average number of chunks allocated per request */
@@ -423,11 +423,15 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 #ifdef _WIN32
 	return VirtualAlloc(addr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #else
+	int flags = MAP_PRIVATE | MAP_ANON;
+#if defined(MAP_EXCL)
+	flags |= MAP_FIXED | MAP_EXCL;
+#endif
 	/* MAP_FIXED leads to discarding of the old mapping, so it can't be used. */
-	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
+	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
 
 	if (ptr == MAP_FAILED) {
-#if ZEND_MM_ERROR
+#if ZEND_MM_ERROR && !defined(MAP_EXCL)
 		fprintf(stderr, "\nmmap() failed: [%d] %s\n", errno, strerror(errno));
 #endif
 		return NULL;

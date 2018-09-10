@@ -41,7 +41,7 @@ class corrupt_zipmaker
 	var $offset = 0;
 
 	/**
-	* @var string Optionnal comment to add to the zip
+	* @var string Optional comment to add to the zip
 	* @access private
 	*/
 	var $comment = "";
@@ -65,7 +65,7 @@ class corrupt_zipmaker
 
 	/**
 	* @param int $time Unix timestamp of the date to convert
-	* @return the date formated as a ZIP date
+	* @return the date formatted as a ZIP date
 	*/
 	function getMTime($time)
 	{

@@ -1,5 +1,5 @@
 --TEST--
-010: Accesing internal namespace class
+010: Accessing internal namespace class
 --FILE--
 <?php
 namespace X;

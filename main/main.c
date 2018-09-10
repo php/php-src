@@ -1681,7 +1681,11 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 					snprintf(memory_leak_buf, 512, "Last leak repeated %lu time%s\n", leak_count, (leak_count>1?"s":""));
 				}
 #	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
+				if (IsDebuggerPresent()) {
+					OutputDebugString(memory_leak_buf);
+				} else {
+					fprintf(stderr, "%s", memory_leak_buf);
+				}
 #	else
 				fprintf(stderr, "%s", memory_leak_buf);
 #	endif
@@ -1695,7 +1699,11 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 
 				snprintf(memory_leak_buf, 512, "=== Total %d memory leaks detected ===\n", *((uint32_t *) data));
 #	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
+				if (IsDebuggerPresent()) {
+					OutputDebugString(memory_leak_buf);
+				} else {
+					fprintf(stderr, "%s", memory_leak_buf);
+				}
 #	else
 				fprintf(stderr, "%s", memory_leak_buf);
 #	endif
@@ -1718,7 +1726,11 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 					snprintf(memory_leak_buf, sizeof(memory_leak_buf), "[null]  Script:  '%s'\n", SAFE_FILENAME(SG(request_info).path_translated));
 				}
 #	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
+				if (IsDebuggerPresent()) {
+					OutputDebugString(memory_leak_buf);
+				} else {
+					fprintf(stderr, "%s", memory_leak_buf);
+				}
 #	else
 				fprintf(stderr, "%s", memory_leak_buf);
 #	endif
@@ -2279,7 +2291,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #ifdef ZEND_WIN32
 	/* Until the current ini values was setup, the current cp is 65001.
-		If the actual ini vaues are different, some stuff needs to be updated.
+		If the actual ini values are different, some stuff needs to be updated.
 		It concerns at least main_cwd_state and there might be more. As we're
 		still in the startup phase, lets use the chance and reinit the relevant
 		item according to the current codepage. Still, if ini_set() is used

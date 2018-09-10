@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "3.3.0-dev"
+#define ZEND_VERSION "3.4.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -82,6 +82,11 @@ struct _zend_unserialize_data;
 typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
+typedef struct _zend_class_name {
+	zend_string *name;
+	zend_string *lc_name;
+} zend_class_name;
+
 typedef struct _zend_trait_method_reference {
 	zend_string *method_name;
 	zend_string *class_name;
@@ -110,7 +115,10 @@ typedef struct _zend_trait_alias {
 struct _zend_class_entry {
 	char type;
 	zend_string *name;
-	struct _zend_class_entry *parent;
+	union {
+		zend_class_entry *parent;
+		zend_string *parent_name;
+	};
 	int refcount;
 	uint32_t ce_flags;
 
@@ -123,19 +131,19 @@ struct _zend_class_entry {
 	HashTable properties_info;
 	HashTable constants_table;
 
-	union _zend_function *constructor;
-	union _zend_function *destructor;
-	union _zend_function *clone;
-	union _zend_function *__get;
-	union _zend_function *__set;
-	union _zend_function *__unset;
-	union _zend_function *__isset;
-	union _zend_function *__call;
-	union _zend_function *__callstatic;
-	union _zend_function *__tostring;
-	union _zend_function *__debugInfo;
-	union _zend_function *serialize_func;
-	union _zend_function *unserialize_func;
+	zend_function *constructor;
+	zend_function *destructor;
+	zend_function *clone;
+	zend_function *__get;
+	zend_function *__set;
+	zend_function *__unset;
+	zend_function *__isset;
+	zend_function *__call;
+	zend_function *__callstatic;
+	zend_function *__tostring;
+	zend_function *__debugInfo;
+	zend_function *serialize_func;
+	zend_function *unserialize_func;
 
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
 	zend_class_iterator_funcs *iterator_funcs_ptr;
@@ -146,7 +154,7 @@ struct _zend_class_entry {
 		int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */
 	};
 	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object, int by_ref);
-	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method);
+	zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method);
 
 	/* serializer callbacks */
 	int (*serialize)(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
@@ -154,9 +162,14 @@ struct _zend_class_entry {
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;
-	zend_class_entry **interfaces;
 
-	zend_class_entry **traits;
+	/* class_entry or string(s) depending on ZEND_ACC_UNRESOLVED_INTERFACES */
+	union {
+		zend_class_entry **interfaces;
+		zend_class_name *interface_names;
+	};
+
+	zend_class_name *trait_names;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 

@@ -6,12 +6,12 @@ PHP_ARG_ENABLE(fpm,,
 dnl configure checks {{{
 AC_DEFUN([AC_FPM_STDLIBS],
 [
-  AC_CHECK_FUNCS(setenv clearenv setproctitle)
+  AC_CHECK_FUNCS(setenv clearenv setproctitle setproctitle_fast)
 
   AC_SEARCH_LIBS(socket, socket)
   AC_SEARCH_LIBS(inet_addr, nsl)
 
-  AC_CHECK_HEADERS([errno.h fcntl.h stdio.h stdlib.h unistd.h sys/uio.h])
+  AC_CHECK_HEADERS([fcntl.h stdio.h stdlib.h unistd.h sys/uio.h])
   AC_CHECK_HEADERS([sys/select.h sys/socket.h sys/time.h])
   AC_CHECK_HEADERS([arpa/inet.h netinet/in.h])
   AC_CHECK_HEADERS([sysexits.h])

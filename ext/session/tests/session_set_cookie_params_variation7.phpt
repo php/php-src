@@ -24,7 +24,7 @@ echo "*** Testing session_set_cookie_params() : array parameter variation ***\n"
 
 // Invalid cases
 var_dump(session_set_cookie_params([]));
-var_dump(session_set_cookie_params(["unknown_key" => true]));
+var_dump(session_set_cookie_params(["unknown_key" => true, "secure_invalid" => true]));
 
 var_dump(ini_get("session.cookie_secure"));
 var_dump(ini_get("session.cookie_samesite"));
@@ -35,6 +35,10 @@ var_dump(ini_get("session.cookie_samesite"));
 var_dump(ini_get("session.cookie_lifetime"));
 var_dump(session_set_cookie_params(["lifetime" => 42]));
 var_dump(ini_get("session.cookie_lifetime"));
+
+var_dump(ini_get("session.cookie_path"));
+var_dump(session_set_cookie_params(["path" => "newpath/"], "arg after options array"));
+var_dump(ini_get("session.cookie_path"));
 
 echo "Done";
 ob_end_flush();
@@ -47,6 +51,8 @@ bool(false)
 
 Warning: session_set_cookie_params(): Unrecognized key 'unknown_key' found in the options array in %s
 
+Warning: session_set_cookie_params(): Unrecognized key 'secure_invalid' found in the options array in %s
+
 Warning: session_set_cookie_params(): No valid keys were found in the options array in %s
 bool(false)
 string(1) "0"
@@ -57,4 +63,9 @@ string(6) "please"
 string(1) "0"
 bool(true)
 string(2) "42"
+string(1) "/"
+
+Warning: session_set_cookie_params(): Cannot pass arguments after the options array in %s
+bool(false)
+string(1) "/"
 Done

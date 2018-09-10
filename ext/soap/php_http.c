@@ -1447,7 +1447,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 						ch = php_stream_getc(stream);
 					}
 					if (ch != '\n') {
-						/* Somthing wrong in chunked encoding */
+						/* Something wrong in chunked encoding */
 						if (http_buf) {
 							zend_string_release_ex(http_buf, 0);
 						}
@@ -1455,7 +1455,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 					}
  				}
 			} else {
-				/* Somthing wrong in chunked encoding */
+				/* Something wrong in chunked encoding */
 				if (http_buf) {
 					zend_string_release_ex(http_buf, 0);
 				}

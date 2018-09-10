@@ -604,7 +604,7 @@ PHP_FUNCTION(finfo_file)
 /* }}} */
 
 /* {{{ proto string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
-   Return infromation about a string buffer. */
+   Return information about a string buffer. */
 PHP_FUNCTION(finfo_buffer)
 {
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, FILEINFO_MODE_BUFFER, 0);

@@ -339,6 +339,11 @@ ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed)
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ht->nNumOfElements--;
 		/* Collision pointers always directed from higher to lower buckets */
+#if 0
+		if (!(Z_NEXT(p->val) == HT_INVALID_IDX || HT_HASH_TO_BUCKET_EX(arData, Z_NEXT(p->val)) < p)) {
+			abort();
+		}
+#endif
 		nIndex = p->h | ht->nTableMask;
 		HT_HASH_EX(arData, nIndex) = Z_NEXT(p->val);
 	}
@@ -1024,6 +1029,66 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_insert(HashTable *ht, zval *pD
 ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_insert_new(HashTable *ht, zval *pData)
 {
 	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW | HASH_ADD_NEXT);
+}
+
+ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *b, zend_string *key)
+{
+	uint32_t nIndex;
+	uint32_t idx, i;
+	Bucket *p, *arData;
+
+	IS_CONSISTENT(ht);
+	HT_ASSERT_RC1(ht);
+	ZEND_ASSERT(!(HT_FLAGS(ht) & HASH_FLAG_PACKED));
+
+	p = zend_hash_find_bucket(ht, key, 0);
+	if (UNEXPECTED(p)) {
+		return (p == b) ? &p->val : NULL;
+	}
+
+	if (!ZSTR_IS_INTERNED(key)) {
+		zend_string_addref(key);
+		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
+	}
+
+	arData = ht->arData;
+
+	/* del from hash */
+	idx = HT_IDX_TO_HASH(b - arData);
+	nIndex = b->h | ht->nTableMask;
+	i = HT_HASH_EX(arData, nIndex);
+	if (i == idx) {
+		HT_HASH_EX(arData, nIndex) = Z_NEXT(b->val);
+	} else {
+		p = HT_HASH_TO_BUCKET_EX(arData, i);
+		while (Z_NEXT(p->val) != idx) {
+			i = Z_NEXT(p->val);
+			p = HT_HASH_TO_BUCKET_EX(arData, i);
+		}
+		Z_NEXT(p->val) = Z_NEXT(b->val);
+	}
+	zend_string_release(b->key);
+
+	/* add to hash */
+	idx = b - arData;
+	b->key = key;
+	b->h = ZSTR_H(key);
+	nIndex = b->h | ht->nTableMask;
+	idx = HT_IDX_TO_HASH(idx);
+	i = HT_HASH_EX(arData, nIndex);
+	if (i == HT_INVALID_IDX || i < idx) {
+		Z_NEXT(b->val) = i;
+		HT_HASH_EX(arData, nIndex) = idx;
+	} else {
+		p = HT_HASH_TO_BUCKET_EX(arData, i);
+		while (Z_NEXT(p->val) != HT_INVALID_IDX && Z_NEXT(p->val) > idx) {
+			i = Z_NEXT(p->val);
+			p = HT_HASH_TO_BUCKET_EX(arData, i);
+		}
+		Z_NEXT(b->val) = Z_NEXT(p->val);
+		Z_NEXT(p->val) = idx;
+	}
+	return &b->val;
 }
 
 static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)

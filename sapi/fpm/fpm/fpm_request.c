@@ -17,6 +17,7 @@
 #include "fpm_children.h"
 #include "fpm_scoreboard.h"
 #include "fpm_status.h"
+#include "fpm_stdio.h"
 #include "fpm_request.h"
 #include "fpm_log.h"
 
@@ -25,7 +26,7 @@
 static const char *requests_stages[] = {
 	[FPM_REQUEST_ACCEPTING]       = "Idle",
 	[FPM_REQUEST_READING_HEADERS] = "Reading headers",
-	[FPM_REQUEST_INFO]            = "Getting request informations",
+	[FPM_REQUEST_INFO]            = "Getting request information",
 	[FPM_REQUEST_EXECUTING]       = "Running",
 	[FPM_REQUEST_END]             = "Ending",
 	[FPM_REQUEST_FINISHED]        = "Finishing",
@@ -200,6 +201,7 @@ void fpm_request_end(void) /* {{{ */
 #endif
 	proc->memory = memory;
 	fpm_scoreboard_proc_release(proc);
+	fpm_stdio_flush_child();
 }
 /* }}} */
 

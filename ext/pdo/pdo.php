@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 dl('pdo.so');
 dl('pdo_sqlite.so');

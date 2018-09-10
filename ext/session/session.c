@@ -1704,6 +1704,15 @@ static PHP_FUNCTION(session_set_cookie_params)
 		zend_string *key;
 		zval *value;
 
+		if (path) {
+			path = NULL;
+			domain = NULL;
+			secure_null = 1;
+			httponly_null = 1;
+			php_error_docref(NULL, E_WARNING, "Cannot pass arguments after the options array");
+			RETURN_FALSE;
+		}
+
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(lifetime_or_options), key, value) {
 			if (key) {
 				ZVAL_DEREF(value);
@@ -1931,7 +1940,7 @@ static PHP_FUNCTION(session_set_save_handler)
 			RETURN_FALSE;
 		}
 
-		/* For compatibility reason, implemeted interface is not checked */
+		/* For compatibility reason, implemented interface is not checked */
 		/* Find implemented methods - SessionHandlerInterface */
 		i = 0;
 		ZEND_HASH_FOREACH_STR_KEY(&php_session_iface_entry->function_table, func_name) {

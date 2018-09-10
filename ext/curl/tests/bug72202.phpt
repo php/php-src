@@ -5,9 +5,6 @@ Bug #72202 (curl_close doesn't close cURL handle)
 if (!extension_loaded("curl")) {
 	exit("skip curl extension not loaded");
 }
-if (getenv("SKIP_ONLINE_TESTS")) {
-	die("skip online test");
-}
 ?>
 --FILE--
 <?php

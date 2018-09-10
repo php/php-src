@@ -314,7 +314,7 @@ static HashTable *saproxy_properties_get(zval *object)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zend_object **object, zend_string *name, const zval *key)
+static zend_function *saproxy_method_get(zend_object **object, zend_string *name, const zval *key)
 {
 	/* no methods */
 	return NULL;
@@ -325,7 +325,7 @@ static int saproxy_call_method(zend_string *method, zend_object *object, INTERNA
 	return FAILURE;
 }
 
-static union _zend_function *saproxy_constructor_get(zend_object *object)
+static zend_function *saproxy_constructor_get(zend_object *object)
 {
 	/* user cannot instantiate */
 	return NULL;
@@ -512,15 +512,13 @@ static void saproxy_iter_get_key(zend_object_iterator *iter, zval *key)
 	}
 }
 
-static int saproxy_iter_move_forwards(zend_object_iterator *iter)
+static void saproxy_iter_move_forwards(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 
 	if (++I->key >= I->imax) {
 		I->key = -1;
-		return FAILURE;
 	}
-	return SUCCESS;
 }
 
 static const zend_object_iterator_funcs saproxy_iter_funcs = {

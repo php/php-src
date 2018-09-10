@@ -11,11 +11,11 @@ try {
 	}
 	echo "?\n";
 } catch(Exception $e) { 
-  echo "This Exception should be catched\n";
+  echo "This Exception should be caught\n";
 }
 function errorHandler($errno, $errstr, $errfile, $errline, $vars) {
 	throw new Exception('Some Exception');
 }
 ?>
 --EXPECT--
-This Exception should be catched
+This Exception should be caught

@@ -589,12 +589,12 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 	if (ID != NULL) {
 		ZVAL_STRING(&params[0], ID);
 	} else {
-		ZVAL_UNDEF(&params[0]);
+		ZVAL_NULL(&params[0]);
 	}
 	if (URL != NULL) {
 		ZVAL_STRING(&params[1], URL);
 	} else {
-		ZVAL_UNDEF(&params[1]);
+		ZVAL_NULL(&params[1]);
 	}
 	ctxzv = &params[2];
 	array_init_size(ctxzv, 4);

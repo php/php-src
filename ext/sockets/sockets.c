@@ -2810,7 +2810,6 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 	zval *zsocket;
 	php_socket *socket;
 	zend_long target_pid;
-	zend_off_t offset = 0;
 	zend_string *seg_name;
 	HANDLE map;
 

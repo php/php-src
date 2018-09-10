@@ -128,6 +128,8 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_index_add_empty_element(HashTable *ht, ze
 ZEND_API zval* ZEND_FASTCALL zend_hash_add_empty_element(HashTable *ht, zend_string *key);
 ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_empty_element(HashTable *ht, const char *key, size_t len);
 
+ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *p, zend_string *key);
+
 #define ZEND_HASH_APPLY_KEEP				0
 #define ZEND_HASH_APPLY_REMOVE				1<<0
 #define ZEND_HASH_APPLY_STOP				1<<1

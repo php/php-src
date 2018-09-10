@@ -424,13 +424,6 @@ typedef unsigned int  MemStatusType;
    ((ctype) == ONIGENC_CTYPE_DIGIT && IS_DIGIT_ASCII(options)) ||\
    ((ctype) == ONIGENC_CTYPE_SPACE && IS_SPACE_ASCII(options))))
 
-/* OP_SET_OPTION is required for these options.
-#define IS_DYNAMIC_OPTION(option) \
-  (((option) & (ONIG_OPTION_MULTILINE | ONIG_OPTION_IGNORECASE)) != 0)
-*/
-/* ignore-case and multibyte status are included in compiled code. */
-#define IS_DYNAMIC_OPTION(option)  0
-
 #define DISABLE_CASE_FOLD_MULTI_CHAR(case_fold_flag) \
   ((case_fold_flag) & ~INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR)
 
@@ -685,10 +678,6 @@ enum OpCode {
   OP_CALLOUT_CONTENTS,      /* (?{...}) (?{{...}}) */
   OP_CALLOUT_NAME,          /* (*name) (*name[tag](args...)) */
 #endif
-
-  /* no need: IS_DYNAMIC_OPTION() == 0 */
-  OP_SET_OPTION_PUSH,    /* set option and push recover option */
-  OP_SET_OPTION          /* set option */
 };
 
 enum SaveType {
@@ -763,8 +752,6 @@ typedef int ModeType;
 #define SIZE_OP_PREC_READ_NOT_START    (SIZE_OPCODE + SIZE_RELADDR)
 #define SIZE_OP_PREC_READ_END           SIZE_OPCODE
 #define SIZE_OP_PREC_READ_NOT_END       SIZE_OPCODE
-#define SIZE_OP_SET_OPTION             (SIZE_OPCODE + SIZE_OPTION)
-#define SIZE_OP_SET_OPTION_PUSH        (SIZE_OPCODE + SIZE_OPTION)
 #define SIZE_OP_FAIL                    SIZE_OPCODE
 #define SIZE_OP_MEMORY_START           (SIZE_OPCODE + SIZE_MEMNUM)
 #define SIZE_OP_MEMORY_START_PUSH      (SIZE_OPCODE + SIZE_MEMNUM)

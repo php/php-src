@@ -1,11 +1,5 @@
 --TEST--
-Test gmstrftime() function : usage variation - Checking Preferred date and time representation on Windows. 
---SKIPIF--
-<?php
-if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
-    die("skip Test is valid for Windows");
-}
-?>
+Test gmstrftime() function : usage variation - Checking Preferred date and time representation on Windows.
 --FILE--
 <?php
 /* Prototype  : string gmstrftime(string format [, int timestamp])

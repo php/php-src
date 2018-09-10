@@ -324,6 +324,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 	if (ce->num_interfaces) {
 		uint32_t i;
 
+		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 			smart_str_append_printf(str, " extends %s", ZSTR_VAL(ce->interfaces[0]->name));
 		} else {
@@ -471,7 +472,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 				size_t len = ZSTR_LEN(mptr->common.function_name);
 
 				/* Do not display old-style inherited constructors */
-				if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
+				if (mptr->common.scope->constructor != mptr
 					|| mptr->common.scope == ce
 					|| !key
 					|| zend_binary_strcasecmp(ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(mptr->common.function_name), len) == 0)
@@ -743,10 +744,10 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	if (fptr->common.prototype && fptr->common.prototype->common.scope) {
 		smart_str_append_printf(str, ", prototype %s", ZSTR_VAL(fptr->common.prototype->common.scope->name));
 	}
-	if (fptr->common.fn_flags & ZEND_ACC_CTOR) {
+	if (fptr->common.scope && fptr->common.scope->constructor == fptr) {
 		smart_str_appends(str, ", ctor");
 	}
-	if (fptr->common.fn_flags & ZEND_ACC_DTOR) {
+	if (fptr->common.scope && fptr->common.scope->destructor == fptr) {
 		smart_str_appends(str, ", dtor");
 	}
 	smart_str_appends(str, "> ");
@@ -2973,8 +2974,10 @@ ZEND_METHOD(reflection_method, __construct)
 	switch (Z_TYPE_P(classname)) {
 		case IS_STRING:
 			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Class %s does not exist", Z_STRVAL_P(classname));
+				if (!EG(exception)) {
+					zend_throw_exception_ex(reflection_exception_ptr, 0,
+							"Class %s does not exist", Z_STRVAL_P(classname));
+				}
 				if (classname == &ztmp) {
 					zval_ptr_dtor_str(&ztmp);
 				}
@@ -3406,7 +3409,7 @@ ZEND_METHOD(reflection_method, isConstructor)
 	/* we need to check if the ctor is the ctor of the class level we we
 	 * looking at since we might be looking at an inherited old style ctor
 	 * defined in base class. */
-	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_CTOR && intern->ce->constructor && intern->ce->constructor->common.scope == mptr->common.scope);
+	RETURN_BOOL(intern->ce->constructor == mptr);
 }
 /* }}} */
 
@@ -3421,7 +3424,7 @@ ZEND_METHOD(reflection_method, isDestructor)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
-	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_DTOR);
+	RETURN_BOOL(intern->ce->destructor == mptr);
 }
 /* }}} */
 
@@ -4336,7 +4339,7 @@ static int _adddynproperty(zval *ptr, int num_args, va_list args, zend_hash_key 
 	zval *retval = va_arg(args, zval*);
 
 	/* under some circumstances, the properties hash table may contain numeric
-	 * properties (e.g. when casting from array). This is a WONT FIX bug, at
+	 * properties (e.g. when casting from array). This is a WON'T FIX bug, at
 	 * least for the moment. Ignore these */
 	if (hash_key->key == NULL) {
 		return 0;
@@ -4827,6 +4830,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 	if (ce->num_interfaces) {
 		uint32_t i;
 
+		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
 		array_init(return_value);
 		for (i=0; i < ce->num_interfaces; i++) {
 			zval interface;
@@ -4858,6 +4862,7 @@ ZEND_METHOD(reflection_class, getInterfaceNames)
 		return;
 	}
 
+	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
 	array_init(return_value);
 
 	for (i=0; i < ce->num_interfaces; i++) {
@@ -4888,8 +4893,13 @@ ZEND_METHOD(reflection_class, getTraits)
 
 	for (i=0; i < ce->num_traits; i++) {
 		zval trait;
-		zend_reflection_class_factory(ce->traits[i], &trait);
-		zend_hash_update(Z_ARRVAL_P(return_value), ce->traits[i]->name, &trait);
+		zend_class_entry *trait_ce;
+
+		trait_ce = zend_fetch_class_by_name(ce->trait_names[i].name,
+			ce->trait_names[i].lc_name, ZEND_FETCH_CLASS_TRAIT);
+		ZEND_ASSERT(trait_ce);
+		zend_reflection_class_factory(trait_ce, &trait);
+		zend_hash_update(Z_ARRVAL_P(return_value), ce->trait_names[i].name, &trait);
 	}
 }
 /* }}} */
@@ -4915,7 +4925,7 @@ ZEND_METHOD(reflection_class, getTraitNames)
 	array_init(return_value);
 
 	for (i=0; i < ce->num_traits; i++) {
-		add_next_index_str(return_value, zend_string_copy(ce->traits[i]->name));
+		add_next_index_str(return_value, zend_string_copy(ce->trait_names[i].name));
 	}
 }
 /* }}} */

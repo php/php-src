@@ -1084,7 +1084,6 @@ static zend_always_inline zend_function *zend_get_parent_private(zend_class_entr
  */
 ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, zend_string *function_name) /* {{{ */
 {
-    zval *func;
     zend_class_entry *scope;
 
 	if (!ce) {
@@ -1162,7 +1161,6 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	}
 	func->opcodes = &EG(call_trampoline_op);
 	func->run_time_cache = (void*)(intptr_t)-1;
-	func->reserved[0] = fbc;
 	func->scope = fbc->common.scope;
 	/* reserve space for arguments, local and temorary variables */
 	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
@@ -1425,7 +1423,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 		}
 	}
 
-	/* check if static properties were destoyed */
+	/* check if static properties were destroyed */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			zend_intenal_class_init_statics(ce);

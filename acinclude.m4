@@ -1402,7 +1402,7 @@ dnl
 AC_DEFUN([PHP_TM_GMTOFF],[
 AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
 [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <$ac_cv_struct_tm>]], [[struct tm tm; tm.tm_gmtoff;]])],
+#include <time.h>]], [[struct tm tm; tm.tm_gmtoff;]])],
   [ac_cv_struct_tm_gmtoff=yes], [ac_cv_struct_tm_gmtoff=no])])
 
 if test "$ac_cv_struct_tm_gmtoff" = yes; then

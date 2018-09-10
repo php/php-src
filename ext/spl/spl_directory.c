@@ -724,7 +724,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 
 	intern = Z_SPLFILESYSTEM_P(getThis());
 	if (intern->_path) {
-		/* object is alreay initialized */
+		/* object is already initialized */
 		zend_restore_error_handling(&error_handling);
 		php_error_docref(NULL, E_WARNING, "Directory object is already initialized");
 		return;
@@ -1243,6 +1243,9 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 
+	if (intern->file_name == NULL) {
+		spl_filesystem_object_get_file_name(intern);
+	}
 #if defined(PHP_WIN32) || HAVE_SYMLINK
 	if (intern->file_name == NULL) {
 		php_error_docref(NULL, E_WARNING, "Empty filename");

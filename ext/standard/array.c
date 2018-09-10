@@ -3752,7 +3752,7 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 			zval *arg = args + i;
 
 			if (Z_TYPE_P(arg) != IS_ARRAY) {
-				php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+				php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(arg));
 				RETURN_NULL();
 			}
 		}
@@ -3781,7 +3781,7 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 			zval *arg = args + i;
 
 			if (Z_TYPE_P(arg) != IS_ARRAY) {
-				php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+				php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(arg));
 				RETURN_NULL();
 			}
 			count += zend_hash_num_elements(Z_ARRVAL_P(arg));
@@ -4113,6 +4113,9 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 			prop = Z_OBJ_HANDLER_P(data, read_property)(data, name, BP_VAR_R, NULL, rv);
 			if (prop) {
 				ZVAL_DEREF(prop);
+				if (prop != rv) {
+					Z_TRY_ADDREF_P(prop);
+				}
 			}
 		}
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
@@ -4636,7 +4639,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+			php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
 			RETURN_NULL();
 		}
 	}
@@ -4807,7 +4810,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 
 	for (i = 0; i < arr_argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+			php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
 			arr_argc = i; /* only free up to i - 1 */
 			goto out;
 		}
@@ -5047,7 +5050,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+			php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
 			RETURN_NULL();
 		}
 	}
@@ -5218,7 +5221,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 
 	for (i = 0; i < arr_argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+			php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
 			arr_argc = i; /* only free up to i - 1 */
 			goto out;
 		}
@@ -5395,7 +5398,7 @@ PHP_FUNCTION(array_diff)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE(args[0]) != IS_ARRAY) {
-		php_error_docref(NULL, E_WARNING, "Argument #1 is not an array");
+		php_error_docref(NULL, E_WARNING, "Expected parameter 1 to be an array, %s given", zend_zval_type_name(&args[0]));
 		RETURN_NULL();
 	}
 
@@ -5403,7 +5406,7 @@ PHP_FUNCTION(array_diff)
 	if (num == 0) {
 		for (i = 1; i < argc; i++) {
 			if (Z_TYPE(args[i]) != IS_ARRAY) {
-				php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+				php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
 				RETURN_NULL();
 			}
 		}
@@ -5421,7 +5424,7 @@ PHP_FUNCTION(array_diff)
 		if (!value) {
 			for (i = 1; i < argc; i++) {
 				if (Z_TYPE(args[i]) != IS_ARRAY) {
-					php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+					php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
 					RETURN_NULL();
 				}
 			}
@@ -5433,7 +5436,7 @@ PHP_FUNCTION(array_diff)
 
 		for (i = 1; i < argc; i++) {
 			if (Z_TYPE(args[i]) != IS_ARRAY) {
-				php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+				php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
 				RETURN_NULL();
 			}
 			if (!found) {
@@ -5463,7 +5466,7 @@ PHP_FUNCTION(array_diff)
 	num = 0;
 	for (i = 1; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+			php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
 			RETURN_NULL();
 		}
 		num += zend_hash_num_elements(Z_ARRVAL(args[i]));
@@ -5991,6 +5994,7 @@ PHP_FUNCTION(array_reduce)
 		} else {
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
+			zval_ptr_dtor(&result);
 			return;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -6114,7 +6118,7 @@ PHP_FUNCTION(array_map)
 		int ret;
 
 		if (Z_TYPE(arrays[0]) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Argument #%d should be an array", 2);
+			php_error_docref(NULL, E_WARNING, "Expected parameter 2 to be an array, %s given", zend_zval_type_name(&arrays[0]));
 			return;
 		}
 		maxlen = zend_hash_num_elements(Z_ARRVAL(arrays[0]));
@@ -6152,7 +6156,7 @@ PHP_FUNCTION(array_map)
 
 		for (i = 0; i < n_arrays; i++) {
 			if (Z_TYPE(arrays[i]) != IS_ARRAY) {
-				php_error_docref(NULL, E_WARNING, "Argument #%d should be an array", i + 2);
+				php_error_docref(NULL, E_WARNING, "Expected parameter %d to be an array, %s given", i + 2, zend_zval_type_name(&arrays[0]));
 				efree(array_pos);
 				return;
 			}
