@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-30 Aug 2018, PHP 7.2.10RC1
+?? ??? ????, PHP 7.2.10
 
 - Core:
   . Fixed bug #76754 (parent private constant in extends class memory leak).
@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #72443 (Generate enabled extension). (petk)
   . Fixed bug #75797 (Memory leak when using class_alias() in non-debug mode).
     (Massimiliano Braglia)
+
+- Apache2:
+  . Fixed bug #76582 (Apache bucket brigade sometimes becomes invalid). (stas)
 
 - Bz2:
   . Fixed arginfo for bzcompress. (Tyson Andre)
