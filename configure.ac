@@ -434,7 +434,6 @@ netinet/in.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
-assert.h \
 crypt.h \
 dns.h \
 fcntl.h \
@@ -477,7 +476,6 @@ utime.h \
 sys/utsname.h \
 sys/ipc.h \
 dlfcn.h \
-assert.h \
 tmmintrin.h \
 nmmintrin.h \
 immintrin.h
