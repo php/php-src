@@ -23,7 +23,7 @@ object(DateTime)#%d (%d) {
   ["date"]=>
   string(26) "2016-10-03 13:19:59.176312"
   ["timezone_type"]=>
-  int(3)
+  int(1)
   ["timezone"]=>
-  string(3) "UTC"
+  string(6) "+00:00"
 }

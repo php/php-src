@@ -2086,7 +2086,13 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 			case 'U': /* epoch seconds */
 				TIMELIB_CHECK_SIGNED_NUMBER;
 				tmp = timelib_get_unsigned_nr((char **) &ptr, 24);
+
 				s->time->sse = tmp;
+                s->time->is_localtime = 1;
+                s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
+                s->time->z = 0;
+                s->time->dst = 0;
+
 				timelib_update_from_sse(s->time);
 
 				break;
