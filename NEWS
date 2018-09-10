@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018 PHP 7.0.32
 
-
+- Apache2
+  . Fixed bug #76582 (XSS due to the header Transfer-Encoding: chunked). (Stas)
 
 19 Jul 2018 PHP 7.0.31
 
