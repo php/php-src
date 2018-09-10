@@ -1,11 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-30 Aug 2018, PHP 7.1.22RC1
+30 Aug 2018, PHP 7.1.22
 
 - Core:
   . Fixed bug #76754 (parent private constant in extends class memory leak).
     (Laruence)
   . Fixed bug #72443 (Generate enabled extension). (petk)
+
+- Apache2:
+  . Fixed bug #76582 (Apache bucket brigade sometimes becomes invalid). (stas)
 
 - Bz2:
   . Fixed arginfo for bzcompress. (Tyson Andre)
