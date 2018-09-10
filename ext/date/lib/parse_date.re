@@ -2085,17 +2085,10 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 				break;
 			case 'U': /* epoch seconds */
 				TIMELIB_CHECK_SIGNED_NUMBER;
-				TIMELIB_HAVE_RELATIVE();
 				tmp = timelib_get_unsigned_nr((char **) &ptr, 24);
-				s->time->y = 1970;
-				s->time->m = 1;
-				s->time->d = 1;
-				s->time->h = s->time->i = s->time->s = 0;
-				s->time->relative.s += tmp;
-				s->time->is_localtime = 1;
-				s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
-				s->time->z = 0;
-				s->time->dst = 0;
+				s->time->sse = tmp;
+				timelib_update_from_sse(s->time);
+
 				break;
 
 			case 'e': /* timezone */
