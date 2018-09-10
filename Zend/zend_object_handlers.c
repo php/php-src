@@ -623,7 +623,9 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 		}
 	} else {
 		property_info = zend_get_property_info(zobj->ce, prop_info_name, 1);
-		if (property_info == NULL || property_info == ZEND_WRONG_PROPERTY_INFO) {
+		if (property_info == NULL) {
+			return SUCCESS;
+		} else if (property_info == ZEND_WRONG_PROPERTY_INFO) {
 			return FAILURE;
 		}
 		ZEND_ASSERT(property_info->flags & ZEND_ACC_PUBLIC);
