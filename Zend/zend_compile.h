@@ -212,7 +212,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED               (1 <<  9) /*     |  X  |  X  |  X  */
 #define ZEND_ACC_PRIVATE                 (1 << 10) /*     |  X  |  X  |  X  */
 /*                                                        |     |     |     */
-/* TODO: explain the name ???                             |     |     |     */
+/* Property or method overrides private one               |     |     |     */
 #define ZEND_ACC_CHANGED                 (1 << 11) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
 /* TODO: used only by ext/reflection ???                  |     |     |     */

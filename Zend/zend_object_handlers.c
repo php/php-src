@@ -383,7 +383,7 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 
 		if (flags & ZEND_ACC_PUBLIC) {
 check_changed:
-			if (UNEXPECTED(!(flags & ZEND_ACC_CHANGED))) {
+			if (!(flags & ZEND_ACC_CHANGED)) {
 no_changed:
 				if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
 					if (!silent) {
@@ -491,7 +491,7 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 
 		if (flags & ZEND_ACC_PUBLIC) {
 check_changed:
-			if (UNEXPECTED(!(flags & ZEND_ACC_CHANGED))) {
+			if (!(flags & ZEND_ACC_CHANGED)) {
 no_changed:
 				if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
 					if (!silent) {
