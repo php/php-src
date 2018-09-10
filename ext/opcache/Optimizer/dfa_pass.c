@@ -704,8 +704,7 @@ optimize_jmpnz:
 							take_successor_1(ssa, block_num, block);
 							goto optimize_nop;
 						}
-					} else {
-						ZEND_ASSERT(block->successors_count == 2);
+					} else if (block->successors_count == 2) {
 						if (block->successors[0] == next_block_num) {
 							take_successor_0(ssa, block_num, block);
 							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
@@ -737,8 +736,7 @@ optimize_jmpnz:
 						opline->extended_value = 0;
 						opline->opcode = ZEND_JMP;
 						goto optimize_jmp;
-					} else {
-						ZEND_ASSERT(block->successors_count == 2);
+					} else if (block->successors_count == 2) {
 						if (block->successors[0] == block->successors[1]) {
 							take_successor_0(ssa, block_num, block);
 							if (block->successors[0] == next_block_num) {
