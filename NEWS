@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0RC1
+?? ??? ????, PHP 7.3.0RC2
+
+13 Sep 2018, PHP 7.3.0RC1
 
 - Core:
   . Fixed bug #76825 (Undefined symbols ___cpuid_count). (Laruence)
