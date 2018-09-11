@@ -562,7 +562,6 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	const char *prop_name;
 	zend_string *member;
 	size_t prop_name_len;
-	zend_class_entry *scope;
 
 	if (ZSTR_VAL(prop_info_name)[0] == 0) {
 		zend_unmangle_property_name_ex(prop_info_name, &class_name, &prop_name, &prop_name_len);
