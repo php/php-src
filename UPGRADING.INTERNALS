@@ -29,6 +29,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       (func->commpon.scope->constructor == func).
     - ZEND_ACC_IMPLEMENTED_ABSTRACT is removed (it was used only internally
       during inheritance).
+    - ZEND_ACC_IMPLICIT_PUBLIC is removed (it was used only for reflection)
     - ZEND_ACC_SHADOW property flag is removed. Instead of creating shadow
       clone, now we use the same private property_info, and should also
       check property_info->ce (in the same way as with methods).

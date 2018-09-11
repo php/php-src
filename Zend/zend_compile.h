@@ -215,9 +215,6 @@ typedef struct _zend_oparray_context {
 /* Property or method overrides private one               |     |     |     */
 #define ZEND_ACC_CHANGED                 (1 << 11) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
-/* TODO: used only by ext/reflection ???                  |     |     |     */
-#define ZEND_ACC_IMPLICIT_PUBLIC         (1 << 12) /*     |  ?  |  ?  |  ?  */
-/*                                                        |     |     |     */
 /* Class Flags (unused: 0, 1, 3, 11-18, 21, 25...)        |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
