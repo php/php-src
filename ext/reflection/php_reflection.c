@@ -366,7 +366,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		zend_property_info *prop;
 
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			if(prop->flags & ZEND_ACC_SHADOW) {
+			if ((prop->flags & ZEND_ACC_PRIVATE) && prop->ce != ce) {
 				count_shadow_props++;
 			} else if (prop->flags & ZEND_ACC_STATIC) {
 				count_static_props++;
@@ -380,7 +380,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		zend_property_info *prop;
 
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			if ((prop->flags & ZEND_ACC_STATIC) && !(prop->flags & ZEND_ACC_SHADOW)) {
+			if ((prop->flags & ZEND_ACC_STATIC) && (!(prop->flags & ZEND_ACC_PRIVATE) || prop->ce == ce)) {
 				_property_string(str, prop, NULL, ZSTR_VAL(sub_indent));
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -427,7 +427,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		zend_property_info *prop;
 
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			if (!(prop->flags & (ZEND_ACC_STATIC|ZEND_ACC_SHADOW))) {
+			if (!(prop->flags & ZEND_ACC_STATIC)
+			 && (!(prop->flags & ZEND_ACC_PRIVATE) || prop->ce == ce)) {
 				_property_string(str, prop, NULL, ZSTR_VAL(sub_indent));
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1242,7 +1243,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_string *name,
 			tmp_ce = tmp_ce->parent;
 		}
 
-		if (tmp_info && !(tmp_info->flags & ZEND_ACC_SHADOW)) { /* found something and it's not a parent's private */
+		if (tmp_info && (!(tmp_info->flags & ZEND_ACC_PRIVATE) || tmp_info->ce == tmp_ce)) { /* found something and it's not a parent's private */
 			prop = tmp_info;
 		} else { /* not found, use initial value */
 			ce = store_ce;
@@ -3764,9 +3765,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 	zend_string *key;
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
-		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
-		     prop_info->ce != ce) ||
-		    ((prop_info->flags & ZEND_ACC_PROTECTED) &&
+		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
 		     !zend_check_protected(prop_info->ce, ce)) ||
 		    ((prop_info->flags & ZEND_ACC_PRIVATE) &&
 		     prop_info->ce != ce)) {
@@ -4220,7 +4219,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if ((property_info = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
-		if (property_info->flags & ZEND_ACC_SHADOW) {
+		if ((property_info->flags & ZEND_ACC_PRIVATE) && property_info->ce != ce) {
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
@@ -4255,7 +4254,7 @@ ZEND_METHOD(reflection_class, getProperty)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if ((property_info = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
-		if ((property_info->flags & ZEND_ACC_SHADOW) == 0) {
+		if (!(property_info->flags & ZEND_ACC_PRIVATE) || property_info->ce == ce) {
 			reflection_property_factory(ce, name, property_info, return_value);
 			return;
 		}
@@ -4297,7 +4296,10 @@ ZEND_METHOD(reflection_class, getProperty)
 		}
 		ce = ce2;
 
-		if ((property_info = zend_hash_str_find_ptr(&ce->properties_info, str_name, str_name_len)) != NULL && (property_info->flags & ZEND_ACC_SHADOW) == 0) {
+		property_info = zend_hash_str_find_ptr(&ce->properties_info, str_name, str_name_len);
+		if (property_info != NULL
+		 && (!(property_info->flags & ZEND_ACC_PRIVATE)
+		  || property_info->ce == ce)) {
 			reflection_property_factory_str(ce, str_name, str_name_len, property_info, return_value);
 			return;
 		}
@@ -4316,7 +4318,7 @@ static int _addproperty(zval *el, int num_args, va_list args, zend_hash_key *has
 	zval *retval = va_arg(args, zval*);
 	long filter = va_arg(args, long);
 
-	if (pptr->flags	& ZEND_ACC_SHADOW) {
+	if ((pptr->flags & ZEND_ACC_PRIVATE) && pptr->ce != ce) {
 		return 0;
 	}
 
@@ -5278,7 +5280,10 @@ ZEND_METHOD(reflection_property, __construct)
 			/* returns out of this function */
 	}
 
-	if ((property_info = zend_hash_find_ptr(&ce->properties_info, name)) == NULL || (property_info->flags & ZEND_ACC_SHADOW)) {
+	property_info = zend_hash_find_ptr(&ce->properties_info, name);
+	if (property_info == NULL
+	 || ((property_info->flags & ZEND_ACC_PRIVATE)
+	  && property_info->ce != ce)) {
 		/* Check for dynamic properties */
 		if (property_info == NULL && Z_TYPE_P(classname) == IS_OBJECT && Z_OBJ_HT_P(classname)->get_properties) {
 			if (zend_hash_exists(Z_OBJ_HT_P(classname)->get_properties(classname), name)) {
@@ -5530,7 +5535,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 
 	ce = tmp_ce = ref->ce;
 	while (tmp_ce && (tmp_info = zend_hash_find_ptr(&tmp_ce->properties_info, ref->unmangled_name)) != NULL) {
-		if (tmp_info->flags & ZEND_ACC_PRIVATE || tmp_info->flags & ZEND_ACC_SHADOW) {
+		if (tmp_info->flags & ZEND_ACC_PRIVATE) {
 			/* it's a private property, so it can't be inherited */
 			break;
 		}
