@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #76825 (Undefined symbols ___cpuid_count). (Laruence)
   . Fixed bug #76820 (Z_COPYABLE invalid definition). (mvdwerve, cmb)
+  . Fixed bug #76510 (file_exists() stopped working for phar://). (cmb)
 
 - intl:
   . Fixed bug #76829 (Incorrect validation of domain on idn_to_utf8()
