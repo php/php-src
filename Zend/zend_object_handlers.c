@@ -378,7 +378,7 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 		if (flags & ZEND_ACC_PUBLIC) {
 			if (!(flags & ZEND_ACC_CHANGED)) {
 no_changed:
-				if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
+				if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0)) {
 					if (!silent) {
 						zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
 					}
@@ -431,9 +431,7 @@ check_scope:
 		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE
 		&& ((zend_property_info*)Z_PTR_P(zv))->ce == scope) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
-		if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0)) {
-			return ZEND_DYNAMIC_PROPERTY_OFFSET;
-		}
+		goto no_changed;
 	} else if (UNEXPECTED(property_info == NULL)) {
 exit_dynamic:
 		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
@@ -481,7 +479,7 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 		if (flags & ZEND_ACC_PUBLIC) {
 			if (!(flags & ZEND_ACC_CHANGED)) {
 no_changed:
-				if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
+				if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0)) {
 					if (!silent) {
 						zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
 					}
@@ -533,6 +531,7 @@ check_scope:
 		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE
 		&& ((zend_property_info*)Z_PTR_P(zv))->ce == scope) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
+		goto no_changed;
 	} else if (UNEXPECTED(property_info == NULL)) {
 exit_dynamic:
 		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
