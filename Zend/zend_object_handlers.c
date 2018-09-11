@@ -325,25 +325,19 @@ static zend_always_inline int zend_verify_property_access(zend_property_info *pr
 
 	if (property_info->flags & ZEND_ACC_PUBLIC) {
 		return 1;
-	} else if (property_info->flags & ZEND_ACC_PRIVATE) {
-		if (property_info->ce == ce) {
-			if (EG(fake_scope)) {
-				scope = EG(fake_scope);
-			} else {
-				scope = zend_get_executed_scope();
-			}
-			return ce == scope;
-		}
 	} else {
-		ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
 		if (EG(fake_scope)) {
 			scope = EG(fake_scope);
 		} else {
 			scope = zend_get_executed_scope();
 		}
-		return zend_check_protected(property_info->ce, scope);
+		if (property_info->flags & ZEND_ACC_PRIVATE) {
+			return property_info->ce == scope;
+		} else {
+			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
+			return zend_check_protected(property_info->ce, scope);
+		}
 	}
-	return 0;
 }
 /* }}} */
 
@@ -382,7 +376,6 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 		flags = property_info->flags;
 
 		if (flags & ZEND_ACC_PUBLIC) {
-check_changed:
 			if (!(flags & ZEND_ACC_CHANGED)) {
 no_changed:
 				if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
@@ -394,36 +387,32 @@ no_changed:
 				goto exit;
 			}
 			goto check_scope;
-		} else if (flags & ZEND_ACC_PRIVATE) {
-			if (property_info->ce != ce) {
-				/* if it's a shadow - go to access it's private */
-				property_info = NULL;
-				goto check_scope;
-			} else {
-				if (EG(fake_scope)) {
-					scope = EG(fake_scope);
-				} else {
-					scope = zend_get_executed_scope();
-				}
-				if (ce == scope) {
-					goto no_changed;
-				} else {
-					/* Try to look in the scope instead */
-					property_info = ZEND_WRONG_PROPERTY_INFO;
-				}
-			}
 		} else {
-			ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
 			if (EG(fake_scope)) {
 				scope = EG(fake_scope);
 			} else {
 				scope = zend_get_executed_scope();
 			}
-			if (zend_check_protected(property_info->ce, scope)) {
-				goto check_changed;
+			if (flags & ZEND_ACC_PRIVATE) {
+				if (property_info->ce == scope) {
+					goto no_changed;
+				} else if (property_info->ce != ce) {
+					/* if it's a shadow - go to access it's private */
+					property_info = NULL;
+				} else {
+					/* Try to look in the scope instead */
+					property_info = ZEND_WRONG_PROPERTY_INFO;
+				}
 			} else {
-				/* Try to look in the scope instead */
-				property_info = ZEND_WRONG_PROPERTY_INFO;
+				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
+				if (zend_check_protected(property_info->ce, scope)) {
+					if (!(flags & ZEND_ACC_CHANGED)) {
+						goto no_changed;
+					}
+				} else {
+					/* Try to look in the scope instead */
+					property_info = ZEND_WRONG_PROPERTY_INFO;
+				}
 			}
 		}
 	} else {
@@ -490,7 +479,6 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 		flags = property_info->flags;
 
 		if (flags & ZEND_ACC_PUBLIC) {
-check_changed:
 			if (!(flags & ZEND_ACC_CHANGED)) {
 no_changed:
 				if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
@@ -501,36 +489,32 @@ no_changed:
 				goto exit;
 			}
 			goto check_scope;
-		} else if (flags & ZEND_ACC_PRIVATE) {
-			if (property_info->ce != ce) {
-				/* if it's a shadow - go to access it's private */
-				property_info = NULL;
-				goto check_scope;
-			} else {
-				if (EG(fake_scope)) {
-					scope = EG(fake_scope);
-				} else {
-					scope = zend_get_executed_scope();
-				}
-				if (ce == scope) {
-					goto no_changed;
-				} else {
-					/* Try to look in the scope instead */
-					property_info = ZEND_WRONG_PROPERTY_INFO;
-				}
-			}
 		} else {
-			ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
 			if (EG(fake_scope)) {
 				scope = EG(fake_scope);
 			} else {
 				scope = zend_get_executed_scope();
 			}
-			if (zend_check_protected(property_info->ce, scope)) {
-				goto check_changed;
+			if (flags & ZEND_ACC_PRIVATE) {
+				if (property_info->ce == scope) {
+					goto no_changed;
+				} else if (property_info->ce != ce) {
+					/* if it's a shadow - go to access it's private */
+					property_info = NULL;
+				} else {
+					/* Try to look in the scope instead */
+					property_info = ZEND_WRONG_PROPERTY_INFO;
+				}
 			} else {
-				/* Try to look in the scope instead */
-				property_info = ZEND_WRONG_PROPERTY_INFO;
+				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
+				if (zend_check_protected(property_info->ce, scope)) {
+					if (!(flags & ZEND_ACC_CHANGED)) {
+						goto no_changed;
+					}
+				} else {
+					/* Try to look in the scope instead */
+					property_info = ZEND_WRONG_PROPERTY_INFO;
+				}
 			}
 		}
 	} else {
@@ -1540,41 +1524,38 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 	if (constructor) {
 		if (constructor->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 			/* No further checks necessary */
-		} else if (constructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-			/* Ensure that if we're calling a private function, we're allowed to do so.
-			 */
-			if (EG(fake_scope)) {
-				scope = EG(fake_scope);
-			} else {
-				scope = zend_get_executed_scope();
-			}
-			if (UNEXPECTED(constructor->common.scope != scope)) {
-				if (scope) {
-					zend_throw_error(NULL, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
-					constructor = NULL;
-				} else {
-					zend_throw_error(NULL, "Call to private %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
-					constructor = NULL;
-				}
-			}
 		} else {
-			ZEND_ASSERT(constructor->common.fn_flags & ZEND_ACC_PROTECTED);
-			/* Ensure that if we're calling a protected function, we're allowed to do so.
-			 * Constructors only have prototype if they are defined by an interface but
-			 * it is the compilers responsibility to take care of the prototype.
-			 */
 			if (EG(fake_scope)) {
 				scope = EG(fake_scope);
 			} else {
 				scope = zend_get_executed_scope();
 			}
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
-				if (scope) {
-					zend_throw_error(NULL, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
-					constructor = NULL;
-				} else {
-					zend_throw_error(NULL, "Call to protected %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
-					constructor = NULL;
+			if (constructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+				/* Ensure that if we're calling a private function, we're allowed to do so.
+				 */
+				if (UNEXPECTED(constructor->common.scope != scope)) {
+					if (scope) {
+						zend_throw_error(NULL, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
+						constructor = NULL;
+					} else {
+						zend_throw_error(NULL, "Call to private %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
+						constructor = NULL;
+					}
+				}
+			} else {
+				ZEND_ASSERT(constructor->common.fn_flags & ZEND_ACC_PROTECTED);
+				/* Ensure that if we're calling a protected function, we're allowed to do so.
+				 * Constructors only have prototype if they are defined by an interface but
+				 * it is the compilers responsibility to take care of the prototype.
+				 */
+				if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
+					if (scope) {
+						zend_throw_error(NULL, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
+						constructor = NULL;
+					} else {
+						zend_throw_error(NULL, "Call to protected %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
+						constructor = NULL;
+					}
 				}
 			}
 		}
