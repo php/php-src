@@ -500,6 +500,9 @@ immintrin.h
 PHP_FOPENCOOKIE
 PHP_BROKEN_GETCWD
 PHP_BROKEN_GLIBC_FOPEN_APPEND
+if test "$GCC" = "yes"; then
+  PHP_BROKEN_GCC_STRLEN_OPT
+fi
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl -------------------------------------------------------------------------
