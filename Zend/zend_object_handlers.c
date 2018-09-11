@@ -586,24 +586,8 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 				/* we we're looking for a private prop but found a private one of the same name but another class */
 				return FAILURE;
 			}
-			if (EG(fake_scope)) {
-				scope = EG(fake_scope);
-			} else {
-				scope = zend_get_executed_scope();
-			}
-			if (property_info->ce == scope) {
-				return SUCCESS;
-			} else {
-				return FAILURE;
-			}
 		} else {
 			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
-			if (EG(fake_scope)) {
-				scope = EG(fake_scope);
-			} else {
-				scope = zend_get_executed_scope();
-			}
-			return zend_check_protected(property_info->ce, scope) ? SUCCESS : FAILURE;
 		}
 	} else {
 		property_info = zend_get_property_info(zobj->ce, prop_info_name, 1);
@@ -613,8 +597,8 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 			return FAILURE;
 		}
 		ZEND_ASSERT(property_info->flags & ZEND_ACC_PUBLIC);
-		return SUCCESS;
 	}
+	return SUCCESS;
 }
 /* }}} */
 
