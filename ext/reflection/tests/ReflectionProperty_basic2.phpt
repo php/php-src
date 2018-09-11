@@ -43,7 +43,7 @@ Reflecting on property TestClass::pub
 isDefault():
 bool(true)
 getModifiers():
-int(256)
+int(1)
 getDeclaringClass():
 object(ReflectionClass)#%d (1) {
   ["name"]=>
@@ -59,7 +59,7 @@ Reflecting on property TestClass::stat
 isDefault():
 bool(true)
 getModifiers():
-int(257)
+int(17)
 getDeclaringClass():
 object(ReflectionClass)#%d (1) {
   ["name"]=>
@@ -75,7 +75,7 @@ Reflecting on property TestClass::prot
 isDefault():
 bool(true)
 getModifiers():
-int(512)
+int(2)
 getDeclaringClass():
 object(ReflectionClass)#%d (1) {
   ["name"]=>
@@ -93,7 +93,7 @@ Reflecting on property TestClass::priv
 isDefault():
 bool(true)
 getModifiers():
-int(1024)
+int(4)
 getDeclaringClass():
 object(ReflectionClass)#%d (1) {
   ["name"]=>
