@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018, PHP 5.6.38
+?? ??? 2018, PHP 5.6.39
+
+13 Sep 2018, PHP 5.6.38
 
 - Apache2
   . Fixed bug #76582 (XSS due to the header Transfer-Encoding: chunked). (Stas)
