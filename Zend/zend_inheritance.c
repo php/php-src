@@ -1170,17 +1170,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
-static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_function *other_fn) /* {{{ */
-{
-	uint32_t    fn_flags = fn->common.scope->ce_flags;
-	uint32_t other_flags = other_fn->common.scope->ce_flags;
-
-	return zend_do_perform_implementation_check(fn, other_fn)
-		&& ((fn_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC)) ==
-		    (other_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC))); /* equal final and static qualifier */
-}
-/* }}} */
-
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
 	if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {
@@ -1249,7 +1238,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 				if ((existing_fn = zend_hash_find_ptr(*overridden, key)) != NULL) {
 					if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the trait method is compatible with previosly declared abstract method */
-						if (UNEXPECTED(!zend_traits_method_compatibility_check(fn, existing_fn))) {
+						if (UNEXPECTED(!zend_do_perform_implementation_check(fn, existing_fn))) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								ZSTR_VAL(zend_get_function_declaration(fn)),
 								ZSTR_VAL(zend_get_function_declaration(existing_fn)));
@@ -1257,7 +1246,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 					}
 					if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
-						if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
+						if (UNEXPECTED(!zend_do_perform_implementation_check(existing_fn, fn))) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								ZSTR_VAL(zend_get_function_declaration(existing_fn)),
 								ZSTR_VAL(zend_get_function_declaration(fn)));
@@ -1274,14 +1263,14 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT &&
 				(existing_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0) {
 			/* Make sure the trait method is compatible with previosly declared abstract method */
-			if (UNEXPECTED(!zend_traits_method_compatibility_check(fn, existing_fn))) {
+			if (UNEXPECTED(!zend_do_perform_implementation_check(fn, existing_fn))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					ZSTR_VAL(zend_get_function_declaration(fn)),
 					ZSTR_VAL(zend_get_function_declaration(existing_fn)));
 			}
 		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
-			if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
+			if (UNEXPECTED(!zend_do_perform_implementation_check(existing_fn, fn))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					ZSTR_VAL(zend_get_function_declaration(existing_fn)),
 					ZSTR_VAL(zend_get_function_declaration(fn)));
