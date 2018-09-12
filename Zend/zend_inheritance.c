@@ -570,7 +570,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 	}
 
-	if ((child_flags & ZEND_ACC_PRIVATE) < (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))) {
+	if (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED)) {
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
 	}
 
@@ -668,17 +668,14 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		child_info = Z_PTR_P(child);
-		if (UNEXPECTED(parent_info->flags & ZEND_ACC_PRIVATE)) {
+		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED)) {
 			child_info->flags |= ZEND_ACC_CHANGED;
-		} else {
+		}
+		if (!(parent_info->flags & ZEND_ACC_PRIVATE)) {
 			if (UNEXPECTED((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s%s::$%s as %s%s::$%s",
 					(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(ce->parent->name), ZSTR_VAL(key),
 					(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(ce->name), ZSTR_VAL(key));
-			}
-
-			if (parent_info->flags & ZEND_ACC_CHANGED) {
-				child_info->flags |= ZEND_ACC_CHANGED;
 			}
 
 			if (UNEXPECTED((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK))) {
