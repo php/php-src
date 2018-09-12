@@ -7,13 +7,16 @@ openssl_error_string() tests
 // helper function to check openssl errors
 function expect_openssl_errors($name, $expected_error_codes) {
     $expected_errors = array_fill_keys($expected_error_codes, false);
+    $unexpected_errors = array();
     while (($error_string = openssl_error_string()) !== false) {
 	if (preg_match(",.+:([0-9A-F]+):.+,", $error_string, $m) > 0) {
             $error_code = $m[1];
             if (isset($expected_errors[$error_code])) {
                 $expected_errors[$error_code] = true;
             }
-        }
+        } else {
+		$unexpected_errors[] = $error_string;
+	}
     }
 
     $fail = false;
@@ -26,6 +29,11 @@ function expect_openssl_errors($name, $expected_error_codes) {
 
     if (!$fail) {
         echo "$name: ok\n";
+    } else {
+	echo "$name: unexpected errors\n";
+	foreach ($unexpected_errors as $e) {
+		echo "'$e'\n";
+	}
     }
 }
 
