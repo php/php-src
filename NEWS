@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0RC2
+- Core:
+  . Fixed bug #76869 (Incorrect bypassing protected method accessibilty check).
+    (Dmitry)
 
 13 Sep 2018, PHP 7.3.0RC1
 
