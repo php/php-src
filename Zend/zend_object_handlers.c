@@ -366,12 +366,8 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 		return (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 	}
 
-	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)) {
-		goto exit_dynamic;
-	}
-
-	zv = zend_hash_find(&ce->properties_info, member);
-	if (EXPECTED(zv != NULL)) {
+	if (EXPECTED(zend_hash_num_elements(&ce->properties_info) != 0)
+	 && EXPECTED((zv = zend_hash_find(&ce->properties_info, member)) != NULL)) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
 		flags = property_info->flags;
 
@@ -386,7 +382,11 @@ no_changed:
 				}
 				goto exit;
 			}
-			goto check_scope;
+			if (EG(fake_scope)) {
+				scope = EG(fake_scope);
+			} else {
+				scope = zend_get_executed_scope();
+			}
 		} else {
 			if (EG(fake_scope)) {
 				scope = EG(fake_scope);
@@ -415,31 +415,25 @@ no_changed:
 				}
 			}
 		}
-	} else {
-check_scope:
-		if (EG(fake_scope)) {
-			scope = EG(fake_scope);
-		} else {
-			scope = zend_get_executed_scope();
+		if (scope != ce
+			&& scope
+			&& is_derived_class(ce, scope)
+			&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
+			&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE
+			&& ((zend_property_info*)Z_PTR_P(zv))->ce == scope) {
+			property_info = (zend_property_info*)Z_PTR_P(zv);
+			goto no_changed;
 		}
-	}
-
-	if (scope != ce
-		&& scope
-		&& is_derived_class(ce, scope)
-		&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
-		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE
-		&& ((zend_property_info*)Z_PTR_P(zv))->ce == scope) {
-		property_info = (zend_property_info*)Z_PTR_P(zv);
-		goto no_changed;
-	} else if (UNEXPECTED(property_info == NULL)) {
-exit_dynamic:
+	} else {
 		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
 			if (!silent) {
 				zend_throw_error(NULL, "Cannot access property started with '\\0'");
 			}
 			return ZEND_WRONG_PROPERTY_OFFSET;
 		}
+	}
+
+	if (UNEXPECTED(property_info == NULL)) {
 		if (cache_slot) {
 			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 		}
@@ -467,12 +461,8 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 	uint32_t flags;
 	zend_class_entry *scope;
 
-	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)) {
-		goto exit_dynamic;
-	}
-
-	zv = zend_hash_find(&ce->properties_info, member);
-	if (EXPECTED(zv != NULL)) {
+	if (EXPECTED(zend_hash_num_elements(&ce->properties_info) != 0)
+	 && EXPECTED((zv = zend_hash_find(&ce->properties_info, member)) != NULL)) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
 		flags = property_info->flags;
 
@@ -486,7 +476,11 @@ no_changed:
 				}
 				goto exit;
 			}
-			goto check_scope;
+			if (EG(fake_scope)) {
+				scope = EG(fake_scope);
+			} else {
+				scope = zend_get_executed_scope();
+			}
 		} else {
 			if (EG(fake_scope)) {
 				scope = EG(fake_scope);
@@ -515,33 +509,25 @@ no_changed:
 				}
 			}
 		}
-	} else {
-check_scope:
-		if (EG(fake_scope)) {
-			scope = EG(fake_scope);
-		} else {
-			scope = zend_get_executed_scope();
+		if (scope != ce
+			&& scope
+			&& is_derived_class(ce, scope)
+			&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
+			&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE
+			&& ((zend_property_info*)Z_PTR_P(zv))->ce == scope) {
+			property_info = (zend_property_info*)Z_PTR_P(zv);
+			goto no_changed;
 		}
-	}
-
-	if (scope != ce
-		&& scope
-		&& is_derived_class(ce, scope)
-		&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
-		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE
-		&& ((zend_property_info*)Z_PTR_P(zv))->ce == scope) {
-		property_info = (zend_property_info*)Z_PTR_P(zv);
-		goto no_changed;
-	} else if (UNEXPECTED(property_info == NULL)) {
-exit_dynamic:
+	} else {
 		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
 			if (!silent) {
 				zend_throw_error(NULL, "Cannot access property started with '\\0'");
 			}
 			return ZEND_WRONG_PROPERTY_INFO;
 		}
-		return NULL;
-	} else if (UNEXPECTED(property_info == ZEND_WRONG_PROPERTY_INFO)) {
+	}
+
+	if (UNEXPECTED(property_info == ZEND_WRONG_PROPERTY_INFO)) {
 		/* Information was available, but we were denied access.  Error out. */
 		if (!silent) {
 			zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
