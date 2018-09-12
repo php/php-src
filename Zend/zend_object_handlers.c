@@ -322,27 +322,6 @@ static void zend_std_call_issetter(zend_object *zobj, zend_string *prop_name, zv
 }
 /* }}} */
 
-static zend_always_inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce) /* {{{ */
-{
-	zend_class_entry *scope;
-
-	if (property_info->flags & ZEND_ACC_PUBLIC) {
-		return 1;
-	} else {
-		if (EG(fake_scope)) {
-			scope = EG(fake_scope);
-		} else {
-			scope = zend_get_executed_scope();
-		}
-		if (property_info->flags & ZEND_ACC_PRIVATE) {
-			return property_info->ce == scope;
-		} else {
-			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
-			return zend_check_protected(property_info->ce, scope);
-		}
-	}
-}
-/* }}} */
 
 static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_class, zend_class_entry *parent_class) /* {{{ */
 {
@@ -355,6 +334,37 @@ static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_cla
 	}
 
 	return 0;
+}
+/* }}} */
+
+static zend_never_inline int is_protected_comaptible_scope(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
+{
+	return scope &&
+		(is_derived_class(ce, scope) || is_derived_class(scope, ce));
+}
+/* }}} */
+
+static zend_always_inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce) /* {{{ */
+{
+	zend_class_entry *scope;
+
+	if (property_info->flags & ZEND_ACC_PUBLIC) {
+		return 1;
+	} else {
+		if (UNEXPECTED(EG(fake_scope))) {
+			scope = EG(fake_scope);
+		} else {
+			scope = zend_get_executed_scope();
+		}
+		if (property_info->ce == scope) {
+			return 1;
+		} else if (property_info->flags & ZEND_ACC_PRIVATE) {
+			return 0;
+		} else {
+			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
+			return is_protected_comaptible_scope(property_info->ce, scope);
+		}
+	}
 }
 /* }}} */
 
@@ -406,7 +416,7 @@ dynamic:
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-		if (EG(fake_scope)) {
+		if (UNEXPECTED(EG(fake_scope))) {
 			scope = EG(fake_scope);
 		} else {
 			scope = zend_get_executed_scope();
@@ -423,8 +433,8 @@ dynamic:
 			}
 		}
 
-		if (flags & ZEND_ACC_PRIVATE) {
-			if (property_info->ce != scope) {
+		if (property_info->ce != scope) {
+			if (flags & ZEND_ACC_PRIVATE) {
 				if (property_info->ce != ce) {
 					goto dynamic;
 				} else {
@@ -435,11 +445,11 @@ wrong:
 					}
 					return ZEND_WRONG_PROPERTY_OFFSET;
 				}
-			}
-		} else {
-			ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-			if (UNEXPECTED(!zend_check_protected(property_info->ce, scope))) {
-				goto wrong;
+			} else {
+				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
+				if (UNEXPECTED(!is_protected_comaptible_scope(property_info->ce, scope))) {
+					goto wrong;
+				}
 			}
 		}
 	}
@@ -481,7 +491,7 @@ dynamic:
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-		if (EG(fake_scope)) {
+		if (UNEXPECTED(EG(fake_scope))) {
 			scope = EG(fake_scope);
 		} else {
 			scope = zend_get_executed_scope();
@@ -498,8 +508,8 @@ dynamic:
 			}
 		}
 
-		if (flags & ZEND_ACC_PRIVATE) {
-			if (property_info->ce != scope) {
+		if (property_info->ce != scope) {
+			if (flags & ZEND_ACC_PRIVATE) {
 				if (property_info->ce != ce) {
 					goto dynamic;
 				} else {
@@ -510,11 +520,11 @@ wrong:
 					}
 					return ZEND_WRONG_PROPERTY_INFO;
 				}
-			}
-		} else {
-			ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-			if (UNEXPECTED(!zend_check_protected(property_info->ce, scope))) {
-				goto wrong;
+			} else {
+				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
+				if (UNEXPECTED(!is_protected_comaptible_scope(property_info->ce, scope))) {
+					goto wrong;
+				}
 			}
 		}
 	}
@@ -1344,30 +1354,26 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		zend_error_noreturn(E_ERROR, "Cannot call non static method %s::%s() without object", ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(fbc->common.function_name));
 	}
 #endif
-	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
-		/* No further checks necessary, most common case */
-	} else if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-		/* Ensure that if we're calling a private function, we're allowed to do so.
-		 */
+	if (!(fbc->op_array.fn_flags & ZEND_ACC_PUBLIC)) {
 		scope = zend_get_executed_scope();
-		if (UNEXPECTED(fbc->common.scope != scope)) {
-			if (ce->__callstatic) {
-				fbc = zend_get_user_callstatic_function(ce, function_name);
-			} else {
-				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), scope ? ZSTR_VAL(scope->name) : "");
-				fbc = NULL;
+		if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+			/* Ensure that if we're calling a private function, we're allowed to do so.
+			 */
+			if (UNEXPECTED(fbc->common.scope != scope)) {
+incompatible:
+				if (ce->__callstatic) {
+					fbc = zend_get_user_callstatic_function(ce, function_name);
+				} else {
+					zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), scope ? ZSTR_VAL(scope->name) : "");
+					fbc = NULL;
+				}
 			}
-		}
-	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
-		/* Ensure that if we're calling a protected function, we're allowed to do so.
-		 */
-		scope = zend_get_executed_scope();
-		if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
-			if (ce->__callstatic) {
-				fbc = zend_get_user_callstatic_function(ce, function_name);
-			} else {
-				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), scope ? ZSTR_VAL(scope->name) : "");
-				fbc = NULL;
+		} else {
+			ZEND_ASSERT(fbc->common.fn_flags & ZEND_ACC_PROTECTED);
+			/* Ensure that if we're calling a protected function, we're allowed to do so.
+			 */
+			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
+				goto incompatible;
 			}
 		}
 	}
@@ -1460,16 +1466,24 @@ ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce
 }
 /* }}} */
 
+static ZEND_COLD zend_never_inline void zend_incompatibe_constructor(zend_function *constructor, zend_class_entry *scope) /* {{{ */
+{
+	if (scope) {
+		zend_throw_error(NULL, "Call to %s %s::%s() from context '%s'", zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
+	} else {
+		zend_throw_error(NULL, "Call to %s %s::%s() from invalid context", zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
+	}
+}
+/* }}} */
+
 ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 {
 	zend_function *constructor = zobj->ce->constructor;
 	zend_class_entry *scope;
 
 	if (constructor) {
-		if (constructor->op_array.fn_flags & ZEND_ACC_PUBLIC) {
-			/* No further checks necessary */
-		} else {
-			if (EG(fake_scope)) {
+		if (UNEXPECTED(!(constructor->op_array.fn_flags & ZEND_ACC_PUBLIC))) {
+			if (UNEXPECTED(EG(fake_scope))) {
 				scope = EG(fake_scope);
 			} else {
 				scope = zend_get_executed_scope();
@@ -1478,13 +1492,9 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 				/* Ensure that if we're calling a private function, we're allowed to do so.
 				 */
 				if (UNEXPECTED(constructor->common.scope != scope)) {
-					if (scope) {
-						zend_throw_error(NULL, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
-						constructor = NULL;
-					} else {
-						zend_throw_error(NULL, "Call to private %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
-						constructor = NULL;
-					}
+incompatible:
+					zend_incompatibe_constructor(constructor, scope);
+					constructor = NULL;
 				}
 			} else {
 				ZEND_ASSERT(constructor->common.fn_flags & ZEND_ACC_PROTECTED);
@@ -1493,13 +1503,7 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 				 * it is the compilers responsibility to take care of the prototype.
 				 */
 				if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
-					if (scope) {
-						zend_throw_error(NULL, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
-						constructor = NULL;
-					} else {
-						zend_throw_error(NULL, "Call to protected %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
-						constructor = NULL;
-					}
+					goto incompatible;
 				}
 			}
 		}
