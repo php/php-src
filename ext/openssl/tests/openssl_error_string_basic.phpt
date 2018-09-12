@@ -8,8 +8,8 @@ openssl_error_string() tests
 function expect_openssl_errors($name, $expected_error_codes) {
     $expected_errors = array_fill_keys($expected_error_codes, false);
     while (($error_string = openssl_error_string()) !== false) {
-        if (strlen($error_string) > 14) {
-            $error_code = substr($error_string, 6, 8);
+	if (preg_match(",.+:([0-9A-F]+):.+,", $error_string, $m) > 0) {
+            $error_code = $m[1];
             if (isset($expected_errors[$error_code])) {
                 $expected_errors[$error_code] = true;
             }
