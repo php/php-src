@@ -236,10 +236,6 @@ static zend_bool can_replace_op1(
 		case ZEND_FE_RESET_RW:
 			return 0;
 		/* Do not accept CONST */
-		case ZEND_VERIFY_ABSTRACT_CLASS:
-		case ZEND_ADD_INTERFACE:
-		case ZEND_ADD_TRAIT:
-		case ZEND_BIND_TRAITS:
 		case ZEND_ROPE_ADD:
 		case ZEND_ROPE_END:
 		case ZEND_BIND_STATIC:
@@ -957,7 +953,8 @@ static inline int ct_eval_func_call(
 	}
 
 	func = zend_hash_find_ptr(CG(function_table), name);
-	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
+	if (!func || func->type != ZEND_INTERNAL_FUNCTION
+			|| func->internal_function.handler == ZEND_FN(display_disabled_function)) {
 		return FAILURE;
 	}
 

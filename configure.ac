@@ -420,7 +420,6 @@ dnl -------------------------------------------------------------------------
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_HEADER_DIRENT
 
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS([ \
@@ -435,7 +434,6 @@ netinet/in.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
-assert.h \
 crypt.h \
 dns.h \
 fcntl.h \
@@ -478,7 +476,6 @@ utime.h \
 sys/utsname.h \
 sys/ipc.h \
 dlfcn.h \
-assert.h \
 tmmintrin.h \
 nmmintrin.h \
 immintrin.h
@@ -503,11 +500,13 @@ immintrin.h
 PHP_FOPENCOOKIE
 PHP_BROKEN_GETCWD
 PHP_BROKEN_GLIBC_FOPEN_APPEND
+if test "$GCC" = "yes"; then
+  PHP_BROKEN_GCC_STRLEN_OPT
+fi
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl -------------------------------------------------------------------------
 
-AC_STRUCT_TM
 AC_STRUCT_TIMEZONE
 
 PHP_MISSING_TIME_R_DECL
@@ -597,7 +596,6 @@ AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 dnl Checks for library functions.
 dnl -------------------------------------------------------------------------
 
-AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(
 alphasort \
 asctime_r \
@@ -741,7 +739,6 @@ if test "$ac_cv_func_sync_fetch_and_add" = yes; then
 fi
 
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
-AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl PHP_AC_BROKEN_SPRINTF
 dnl PHP_AC_BROKEN_SNPRINTF
@@ -1206,6 +1203,8 @@ EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $LIBS"
 unset LIBS LDFLAGS
+
+AC_ARG_PROGRAM
 
 test "$prefix" = "NONE" && prefix=/usr/local
 test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'

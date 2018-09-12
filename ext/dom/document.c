@@ -2175,9 +2175,14 @@ PHP_FUNCTION(dom_document_save_html)
 		}
 
 		buf = xmlBufferCreate();
-		outBuf = xmlOutputBufferCreateBuffer(buf, NULL);
-		if (!outBuf || !buf) {
+		if (!buf) {
 			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
+			RETURN_FALSE;
+		}
+		outBuf = xmlOutputBufferCreateBuffer(buf, NULL);
+		if (!outBuf) {
+			xmlBufferFree(buf);
+			php_error_docref(NULL, E_WARNING, "Could not fetch output buffer");
 			RETURN_FALSE;
 		}
 
@@ -2205,6 +2210,7 @@ PHP_FUNCTION(dom_document_save_html)
 			RETVAL_FALSE;
 		}
 		xmlOutputBufferClose(outBuf);
+		xmlBufferFree(buf);
 	} else {
 		int size = 0;
 #if LIBXML_VERSION >= 20623

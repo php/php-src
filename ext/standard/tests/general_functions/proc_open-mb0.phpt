@@ -1,8 +1,7 @@
 --TEST--
-proc_open without bypass_shell subprocess parameter passing
+proc_open with bypass_shell subprocess parameter passing
 --SKIPIF--
 <?php # vim:syn=php
-if (substr(PHP_OS, 0, 3) != 'WIN') die("skip Valid only on Windows");
 if (php_sapi_name() != "cli") die('skip CLI only test');
 if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 ?>
@@ -11,7 +10,7 @@ if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 
 $php = PHP_BINARY;
 
-$f = dirname(__FILE__) . DIRECTORY_SEPARATOR . "proc_only_mb1.php";
+$f = dirname(__FILE__) . DIRECTORY_SEPARATOR . "proc_only_mb0.php";
 file_put_contents($f,'<?php var_dump($argv); ?>');
 
 $ds = array(
@@ -23,7 +22,10 @@ $ds = array(
 $p = proc_open(
 		"$php -n $f テストマルチバイト・パス füße карамба",
 		$ds,
-		$pipes
+		$pipes,
+		NULL,
+		NULL,
+		array("bypass_shell" => true)
 		);
 
 $out = "";
@@ -41,7 +43,7 @@ echo $out;
 --EXPECTF--
 array(4) {
   [0]=>
-  string(%d) "%sproc_only_mb1.php"
+  string(%d) "%sproc_only_mb0.php"
   [1]=>
   string(36) "テストマルチバイト・パス"
   [2]=>

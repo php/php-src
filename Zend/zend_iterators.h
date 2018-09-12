@@ -60,12 +60,12 @@ struct _zend_object_iterator {
 };
 
 typedef struct _zend_class_iterator_funcs {
-	union _zend_function *zf_new_iterator;
-	union _zend_function *zf_valid;
-	union _zend_function *zf_current;
-	union _zend_function *zf_key;
-	union _zend_function *zf_next;
-	union _zend_function *zf_rewind;
+	zend_function *zf_new_iterator;
+	zend_function *zf_valid;
+	zend_function *zf_current;
+	zend_function *zf_key;
+	zend_function *zf_next;
+	zend_function *zf_rewind;
 } zend_class_iterator_funcs;
 
 BEGIN_EXTERN_C()

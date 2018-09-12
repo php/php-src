@@ -314,7 +314,7 @@ static HashTable *saproxy_properties_get(zval *object)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zend_object **object, zend_string *name, const zval *key)
+static zend_function *saproxy_method_get(zend_object **object, zend_string *name, const zval *key)
 {
 	/* no methods */
 	return NULL;
@@ -325,7 +325,7 @@ static int saproxy_call_method(zend_string *method, zend_object *object, INTERNA
 	return FAILURE;
 }
 
-static union _zend_function *saproxy_constructor_get(zend_object *object)
+static zend_function *saproxy_constructor_get(zend_object *object)
 {
 	/* user cannot instantiate */
 	return NULL;

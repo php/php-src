@@ -410,13 +410,6 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				(opline + 1)->op2.var == opline->result.var) {
 				return 0;
 			}
-		case ZEND_ADD_INTERFACE:
-		case ZEND_ADD_TRAIT:
-			REQUIRES_STRING(val);
-			drop_leading_backslash(val);
-			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
-			break;
 		case ZEND_INSTANCEOF:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
@@ -1568,7 +1561,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 
 		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
-				if (op_array->scope != ce) {
+				if (op_array->scope != ce && op_array->type == ZEND_USER_FUNCTION) {
 					zend_op_array *orig_op_array;
 					if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, name)) != NULL) {
 						HashTable *ht = op_array->static_variables;

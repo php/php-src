@@ -1,9 +1,7 @@
 --TEST--
 mysqli_rollback()
 --SKIPIF--
-<?php  ?>
-<?php  ?>
-<?PHP
+<?php
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');

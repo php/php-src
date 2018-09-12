@@ -2076,20 +2076,6 @@ cons_node_free_alone(Node* node)
   onig_node_free(node);
 }
 
-extern void
-list_node_free_not_car(Node* node)
-{
-  Node* next_node;
-
- start:
-  if (IS_NULL(node)) return;
-
-  next_node = NODE_CDR(node);
-  xfree(node);
-  node = next_node;
-  goto start;
-}
-
 static Node*
 node_new(void)
 {
@@ -2154,7 +2140,7 @@ node_new_anychar_with_fixed_option(OnigOptionType option)
   node = node_new_anychar();
   ct = CTYPE_(node);
   ct->options = option;
-  NODE_STATUS_ADD(node, NST_FIXED_OPTION);
+  NODE_STATUS_ADD(node, FIXED_OPTION);
   return node;
 }
 
@@ -2303,11 +2289,11 @@ node_new_backref(int back_num, int* backrefs, int by_name,
   BACKREF_(node)->back_num = back_num;
   BACKREF_(node)->back_dynamic = (int* )NULL;
   if (by_name != 0)
-    NODE_STATUS_ADD(node, NST_BY_NAME);
+    NODE_STATUS_ADD(node, BY_NAME);
 
 #ifdef USE_BACKREF_WITH_LEVEL
   if (exist_level != 0) {
-    NODE_STATUS_ADD(node, NST_NEST_LEVEL);
+    NODE_STATUS_ADD(node, NEST_LEVEL);
     BACKREF_(node)->nest_level  = nest_level;
   }
 #endif
@@ -2315,7 +2301,7 @@ node_new_backref(int back_num, int* backrefs, int by_name,
   for (i = 0; i < back_num; i++) {
     if (backrefs[i] <= env->num_mem &&
         IS_NULL(SCANENV_MEMENV(env)[backrefs[i]].node)) {
-      NODE_STATUS_ADD(node, NST_RECURSION);   /* /...(\1).../ */
+      NODE_STATUS_ADD(node, RECURSION);   /* /...(\1).../ */
       break;
     }
   }
@@ -2353,7 +2339,7 @@ node_new_backref_checker(int back_num, int* backrefs, int by_name,
                           env);
   CHECK_NULL_RETURN(node);
 
-  NODE_STATUS_ADD(node, NST_CHECKER);
+  NODE_STATUS_ADD(node, CHECKER);
   return node;
 }
 
@@ -2389,7 +2375,7 @@ node_new_quantifier(int lower, int upper, int by_number)
   QUANT_(node)->next_head_exact = NULL_NODE;
   QUANT_(node)->is_refered      = 0;
   if (by_number != 0)
-    NODE_STATUS_ADD(node, NST_BY_NUMBER);
+    NODE_STATUS_ADD(node, BY_NUMBER);
 
   return node;
 }
@@ -2453,7 +2439,7 @@ node_new_memory(int is_named)
   Node* node = node_new_enclosure(ENCLOSURE_MEMORY);
   CHECK_NULL_RETURN(node);
   if (is_named != 0)
-    NODE_STATUS_ADD(node, NST_NAMED_GROUP);
+    NODE_STATUS_ADD(node, NAMED_GROUP);
 
   return node;
 }
@@ -2758,7 +2744,7 @@ make_absent_engine(Node** node, int pre_save_right_id, Node* absent,
   if (IS_NULL(x)) goto err0;
 
   if (is_range_cutter != 0)
-    NODE_STATUS_ADD(x, NST_SUPER);
+    NODE_STATUS_ADD(x, SUPER);
 
   *node = x;
   return ONIG_NORMAL;
@@ -2853,7 +2839,7 @@ make_range_clear(Node** node, ScanEnv* env)
   x = make_alt(2, ns);
   if (IS_NULL(x)) goto err0;
 
-  NODE_STATUS_ADD(x, NST_SUPER);
+  NODE_STATUS_ADD(x, SUPER);
 
   ns[0] = save;
   ns[1] = x;
@@ -3207,27 +3193,31 @@ node_new_str_raw_char(UChar c)
 }
 
 static Node*
-str_node_split_last_char(StrNode* sn, OnigEncoding enc)
+str_node_split_last_char(Node* node, OnigEncoding enc)
 {
   const UChar *p;
-  Node* n = NULL_NODE;
+  Node* rn;
+  StrNode* sn;
 
+  sn = STR_(node);
+  rn = NULL_NODE;
   if (sn->end > sn->s) {
     p = onigenc_get_prev_char_head(enc, sn->s, sn->end);
     if (p && p > sn->s) { /* can be split. */
-      n = node_new_str(p, sn->end);
-      if ((sn->flag & STRING_RAW) != 0)
-        NODE_STRING_SET_RAW(n);
+      rn = node_new_str(p, sn->end);
+      if (NODE_STRING_IS_RAW(node))
+        NODE_STRING_SET_RAW(rn);
 
       sn->end = (UChar* )p;
     }
   }
-  return n;
+  return rn;
 }
 
 static int
-str_node_can_be_split(StrNode* sn, OnigEncoding enc)
+str_node_can_be_split(Node* node, OnigEncoding enc)
 {
+  StrNode* sn = STR_(node);
   if (sn->end > sn->s) {
     return ((enclen(enc, sn->s) < sn->end - sn->s)  ?  1 : 0);
   }
@@ -7529,9 +7519,8 @@ set_quantifier(Node* qnode, Node* target, int group, ScanEnv* env)
   switch (NODE_TYPE(target)) {
   case NODE_STRING:
     if (! group) {
-      StrNode* sn = STR_(target);
-      if (str_node_can_be_split(sn, env->enc)) {
-        Node* n = str_node_split_last_char(sn, env->enc);
+      if (str_node_can_be_split(target, env->enc)) {
+        Node* n = str_node_split_last_char(target, env->enc);
         if (IS_NOT_NULL(n)) {
           NODE_BODY(qnode) = n;
           return 2;

@@ -5,9 +5,6 @@ Bug #63000: Multicast on OSX
 if (!extension_loaded('sockets')) {
     die('skip sockets extension not available.');
 }
-if (PHP_OS !== 'Darwin') {
-    die('skip Is not OSX.');
-}
 --FILE--
 <?php
 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);

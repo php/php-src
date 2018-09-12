@@ -1402,7 +1402,7 @@ dnl
 AC_DEFUN([PHP_TM_GMTOFF],[
 AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
 [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <$ac_cv_struct_tm>]], [[struct tm tm; tm.tm_gmtoff;]])],
+#include <time.h>]], [[struct tm tm; tm.tm_gmtoff;]])],
   [ac_cv_struct_tm_gmtoff=yes], [ac_cv_struct_tm_gmtoff=no])])
 
 if test "$ac_cv_struct_tm_gmtoff" = yes; then
@@ -1736,6 +1736,42 @@ choke me
     AC_DEFINE(HAVE_BROKEN_GLIBC_FOPEN_APPEND,1, [Define if your glibc borks on fopen with mode a+])
   else
     AC_MSG_RESULT(no)
+  fi
+])
+
+dnl
+dnl PHP_BROKEN_GCC_STRLEN_OPT
+dnl
+dnl Early releases of GCC 8 shipped with a strlen() optimization bug, so they
+dnl didn't properly handle the `char val[1]` struct hack. See bug #76510.
+dnl
+AC_DEFUN([PHP_BROKEN_GCC_STRLEN_OPT], [
+  AC_CACHE_CHECK([for broken gcc optimize-strlen],ac_cv_have_broken_gcc_strlen_opt,[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+struct s
+{
+  int i;
+  char c[1];
+};
+int main()
+{
+  struct s *s = malloc(sizeof(struct s) + 3);
+  s->i = 3;
+  strcpy(s->c, "foo");
+  return strlen(s->c+1) == 2;
+}
+]])],[
+  ac_cv_have_broken_gcc_strlen_opt=yes
+],[
+  ac_cv_have_broken_gcc_strlen_opt=no
+],[
+  ac_cv_have_broken_gcc_strlen_opt=no
+])])
+  if test "$ac_cv_have_broken_gcc_strlen_opt" = "yes"; then
+    CFLAGS="$CFLAGS -fno-optimize-strlen"
   fi
 ])
 

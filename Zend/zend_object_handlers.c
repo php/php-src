@@ -325,22 +325,19 @@ static zend_always_inline int zend_verify_property_access(zend_property_info *pr
 
 	if (property_info->flags & ZEND_ACC_PUBLIC) {
 		return 1;
-	} else if (property_info->flags & ZEND_ACC_PRIVATE) {
+	} else {
 		if (EG(fake_scope)) {
 			scope = EG(fake_scope);
 		} else {
 			scope = zend_get_executed_scope();
 		}
-		return (ce == scope || property_info->ce == scope);
-	} else if (property_info->flags & ZEND_ACC_PROTECTED) {
-		if (EG(fake_scope)) {
-			scope = EG(fake_scope);
+		if (property_info->flags & ZEND_ACC_PRIVATE) {
+			return property_info->ce == scope;
 		} else {
-			scope = zend_get_executed_scope();
+			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
+			return zend_check_protected(property_info->ce, scope);
 		}
-		return zend_check_protected(property_info->ce, scope);
 	}
-	return 0;
 }
 /* }}} */
 
@@ -377,43 +374,64 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 	if (EXPECTED(zv != NULL)) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
 		flags = property_info->flags;
-		if (UNEXPECTED((flags & ZEND_ACC_SHADOW) != 0)) {
-			/* if it's a shadow - go to access it's private */
-			property_info = NULL;
-		} else {
-			if (EXPECTED(zend_verify_property_access(property_info, ce) != 0)) {
-				if (UNEXPECTED(!(flags & ZEND_ACC_CHANGED))
-					|| UNEXPECTED((flags & ZEND_ACC_PRIVATE))) {
-					if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
-						if (!silent) {
-							zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
-						}
-						return ZEND_DYNAMIC_PROPERTY_OFFSET;
+
+		if (flags & ZEND_ACC_PUBLIC) {
+			if (!(flags & ZEND_ACC_CHANGED)) {
+no_changed:
+				if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0)) {
+					if (!silent) {
+						zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
 					}
-					goto exit;
+					return ZEND_DYNAMIC_PROPERTY_OFFSET;
+				}
+				goto exit;
+			}
+			goto check_scope;
+		} else {
+			if (EG(fake_scope)) {
+				scope = EG(fake_scope);
+			} else {
+				scope = zend_get_executed_scope();
+			}
+			if (flags & ZEND_ACC_PRIVATE) {
+				if (property_info->ce == scope) {
+					goto no_changed;
+				} else if (property_info->ce != ce) {
+					/* if it's a shadow - go to access it's private */
+					property_info = NULL;
+				} else {
+					/* Try to look in the scope instead */
+					property_info = ZEND_WRONG_PROPERTY_INFO;
 				}
 			} else {
-				/* Try to look in the scope instead */
-				property_info = ZEND_WRONG_PROPERTY_INFO;
+				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
+				if (zend_check_protected(property_info->ce, scope)) {
+					if (!(flags & ZEND_ACC_CHANGED)) {
+						goto no_changed;
+					}
+				} else {
+					/* Try to look in the scope instead */
+					property_info = ZEND_WRONG_PROPERTY_INFO;
+				}
 			}
 		}
-	}
-
-	if (EG(fake_scope)) {
-		scope = EG(fake_scope);
 	} else {
-		scope = zend_get_executed_scope();
+check_scope:
+		if (EG(fake_scope)) {
+			scope = EG(fake_scope);
+		} else {
+			scope = zend_get_executed_scope();
+		}
 	}
 
 	if (scope != ce
 		&& scope
 		&& is_derived_class(ce, scope)
 		&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
-		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE) {
+		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE
+		&& ((zend_property_info*)Z_PTR_P(zv))->ce == scope) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
-		if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0)) {
-			return ZEND_DYNAMIC_PROPERTY_OFFSET;
-		}
+		goto no_changed;
 	} else if (UNEXPECTED(property_info == NULL)) {
 exit_dynamic:
 		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
@@ -461,39 +479,63 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 	if (EXPECTED(zv != NULL)) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
 		flags = property_info->flags;
-		if (UNEXPECTED((flags & ZEND_ACC_SHADOW) != 0)) {
-			/* if it's a shadow - go to access it's private */
-			property_info = NULL;
-		} else {
-			if (EXPECTED(zend_verify_property_access(property_info, ce) != 0)) {
-				if (UNEXPECTED(!(flags & ZEND_ACC_CHANGED))
-					|| UNEXPECTED((flags & ZEND_ACC_PRIVATE))) {
-					if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
-						if (!silent) {
-							zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
-						}
+
+		if (flags & ZEND_ACC_PUBLIC) {
+			if (!(flags & ZEND_ACC_CHANGED)) {
+no_changed:
+				if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0)) {
+					if (!silent) {
+						zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
 					}
-					goto exit;
+				}
+				goto exit;
+			}
+			goto check_scope;
+		} else {
+			if (EG(fake_scope)) {
+				scope = EG(fake_scope);
+			} else {
+				scope = zend_get_executed_scope();
+			}
+			if (flags & ZEND_ACC_PRIVATE) {
+				if (property_info->ce == scope) {
+					goto no_changed;
+				} else if (property_info->ce != ce) {
+					/* if it's a shadow - go to access it's private */
+					property_info = NULL;
+				} else {
+					/* Try to look in the scope instead */
+					property_info = ZEND_WRONG_PROPERTY_INFO;
 				}
 			} else {
-				/* Try to look in the scope instead */
-				property_info = ZEND_WRONG_PROPERTY_INFO;
+				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
+				if (zend_check_protected(property_info->ce, scope)) {
+					if (!(flags & ZEND_ACC_CHANGED)) {
+						goto no_changed;
+					}
+				} else {
+					/* Try to look in the scope instead */
+					property_info = ZEND_WRONG_PROPERTY_INFO;
+				}
 			}
 		}
-	}
-
-	if (EG(fake_scope)) {
-		scope = EG(fake_scope);
 	} else {
-		scope = zend_get_executed_scope();
+check_scope:
+		if (EG(fake_scope)) {
+			scope = EG(fake_scope);
+		} else {
+			scope = zend_get_executed_scope();
+		}
 	}
 
 	if (scope != ce
 		&& scope
 		&& is_derived_class(ce, scope)
 		&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
-		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE) {
+		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE
+		&& ((zend_property_info*)Z_PTR_P(zv))->ce == scope) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
+		goto no_changed;
 	} else if (UNEXPECTED(property_info == NULL)) {
 exit_dynamic:
 		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
@@ -527,31 +569,38 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	if (ZSTR_VAL(prop_info_name)[0] == 0) {
 		zend_unmangle_property_name_ex(prop_info_name, &class_name, &prop_name, &prop_name_len);
 		member = zend_string_init(prop_name, prop_name_len, 0);
+		property_info = zend_get_property_info(zobj->ce, member, 1);
+		zend_string_release_ex(member, 0);
+		if (property_info == NULL) {
+			if (class_name[0] != '*') {
+				/* we we're looking for a private prop */
+				return FAILURE;
+			}
+			return SUCCESS;
+		} else if (property_info == ZEND_WRONG_PROPERTY_INFO) {
+			return FAILURE;
+		}
+		if (class_name[0] != '*') {
+			if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
+				/* we we're looking for a private prop but found a non private one of the same name */
+				return FAILURE;
+			} else if (strcmp(ZSTR_VAL(prop_info_name)+1, ZSTR_VAL(property_info->name)+1)) {
+				/* we we're looking for a private prop but found a private one of the same name but another class */
+				return FAILURE;
+			}
+		} else {
+			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
+		}
 	} else {
-		member = zend_string_copy(prop_info_name);
-	}
-	property_info = zend_get_property_info(zobj->ce, member, 1);
-	zend_string_release_ex(member, 0);
-	if (property_info == NULL) {
-		/* undefined public property */
-		if (class_name && class_name[0] != '*') {
-			/* we we're looking for a private prop */
+		property_info = zend_get_property_info(zobj->ce, prop_info_name, 1);
+		if (property_info == NULL) {
+			return SUCCESS;
+		} else if (property_info == ZEND_WRONG_PROPERTY_INFO) {
 			return FAILURE;
 		}
-		return SUCCESS;
-	} else if (property_info == ZEND_WRONG_PROPERTY_INFO) {
-		return FAILURE;
+		ZEND_ASSERT(property_info->flags & ZEND_ACC_PUBLIC);
 	}
-	if (class_name && class_name[0] != '*') {
-		if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
-			/* we we're looking for a private prop but found a non private one of the same name */
-			return FAILURE;
-		} else if (strcmp(ZSTR_VAL(prop_info_name)+1, ZSTR_VAL(property_info->name)+1)) {
-			/* we we're looking for a private prop but found a private one of the same name but another class */
-			return FAILURE;
-		}
-	}
-	return zend_verify_property_access(property_info, zobj->ce) ? SUCCESS : FAILURE;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1219,7 +1268,6 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	}
 	func->opcodes = &EG(call_trampoline_op);
 	func->run_time_cache = (void*)(intptr_t)-1;
-	func->reserved[0] = fbc;
 	func->scope = fbc->common.scope;
 	/* reserve space for arguments, local and temorary variables */
 	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
@@ -1534,40 +1582,38 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 	if (constructor) {
 		if (constructor->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 			/* No further checks necessary */
-		} else if (constructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-			/* Ensure that if we're calling a private function, we're allowed to do so.
-			 */
+		} else {
 			if (EG(fake_scope)) {
 				scope = EG(fake_scope);
 			} else {
 				scope = zend_get_executed_scope();
 			}
-			if (UNEXPECTED(constructor->common.scope != scope)) {
-				if (scope) {
-					zend_throw_error(NULL, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
-					constructor = NULL;
-				} else {
-					zend_throw_error(NULL, "Call to private %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
-					constructor = NULL;
+			if (constructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+				/* Ensure that if we're calling a private function, we're allowed to do so.
+				 */
+				if (UNEXPECTED(constructor->common.scope != scope)) {
+					if (scope) {
+						zend_throw_error(NULL, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
+						constructor = NULL;
+					} else {
+						zend_throw_error(NULL, "Call to private %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
+						constructor = NULL;
+					}
 				}
-			}
-		} else if ((constructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
-			/* Ensure that if we're calling a protected function, we're allowed to do so.
-			 * Constructors only have prototype if they are defined by an interface but
-			 * it is the compilers responsibility to take care of the prototype.
-			 */
-			if (EG(fake_scope)) {
-				scope = EG(fake_scope);
 			} else {
-				scope = zend_get_executed_scope();
-			}
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
-				if (scope) {
-					zend_throw_error(NULL, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
-					constructor = NULL;
-				} else {
-					zend_throw_error(NULL, "Call to protected %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
-					constructor = NULL;
+				ZEND_ASSERT(constructor->common.fn_flags & ZEND_ACC_PROTECTED);
+				/* Ensure that if we're calling a protected function, we're allowed to do so.
+				 * Constructors only have prototype if they are defined by an interface but
+				 * it is the compilers responsibility to take care of the prototype.
+				 */
+				if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
+					if (scope) {
+						zend_throw_error(NULL, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
+						constructor = NULL;
+					} else {
+						zend_throw_error(NULL, "Call to protected %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
+						constructor = NULL;
+					}
 				}
 			}
 		}
@@ -1591,14 +1637,11 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		return 1; /* different classes */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
-		zval *p1, *p2, *end;
+		zend_property_info *info;
 
 		if (!zobj1->ce->default_properties_count) {
 			return 0;
 		}
-		p1 = zobj1->properties_table;
-		p2 = zobj2->properties_table;
-		end = p1 + zobj1->ce->default_properties_count;
 
 		/* It's enough to protect only one of the objects.
 		 * The second one may be referenced from the first and this may cause
@@ -1609,7 +1652,15 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
 		}
 		Z_PROTECT_RECURSION_P(o1);
-		do {
+
+		ZEND_HASH_FOREACH_PTR(&zobj1->ce->properties_info, info) {
+			zval *p1 = OBJ_PROP(zobj1, info->offset);
+			zval *p2 = OBJ_PROP(zobj2, info->offset);
+
+			if (info->flags & ZEND_ACC_STATIC) {
+				continue;
+			}
+
 			if (Z_TYPE_P(p1) != IS_UNDEF) {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
 					zval result;
@@ -1632,9 +1683,8 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 					return 1;
 				}
 			}
-			p1++;
-			p2++;
-		} while (p1 != end);
+		} ZEND_HASH_FOREACH_END();
+
 		Z_UNPROTECT_RECURSION_P(o1);
 		return 0;
 	} else {

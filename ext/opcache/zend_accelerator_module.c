@@ -805,11 +805,6 @@ static ZEND_FUNCTION(opcache_compile_file)
 		return;
 	}
 
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
-		zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " seems to be disabled, can't compile file");
-		RETURN_FALSE;
-	}
-
 	handle.filename = script_name;
 	handle.free_filename = 0;
 	handle.opened_path = NULL;

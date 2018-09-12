@@ -40,27 +40,27 @@ reflectProperty("TestClass", "priv");
 Reflecting on property TestClass::pub
 
 getModifiers():
-int(256)
+int(1)
 
 **********************************
 **********************************
 Reflecting on property TestClass::stat
 
 getModifiers():
-int(257)
+int(17)
 
 **********************************
 **********************************
 Reflecting on property TestClass::prot
 
 getModifiers():
-int(512)
+int(2)
 
 **********************************
 **********************************
 Reflecting on property TestClass::priv
 
 getModifiers():
-int(1024)
+int(4)
 
 **********************************

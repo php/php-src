@@ -1,10 +1,5 @@
 --TEST--
-Test syslog() function : basic functionality 
---SKIPIF--
-<?php
-if(substr(PHP_OS, 0, 3) != "WIN")
-  die("skip Only run on Windows");
-?>
+Test syslog() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool syslog(int priority, string message)

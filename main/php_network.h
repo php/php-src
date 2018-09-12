@@ -89,9 +89,7 @@ END_EXTERN_C()
 #include <sys/time.h>
 #endif
 
-#ifdef HAVE_STDDEF_H
 #include <stddef.h>
-#endif
 
 #ifdef PHP_WIN32
 typedef SOCKET php_socket_t;

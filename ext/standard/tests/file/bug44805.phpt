@@ -1,11 +1,5 @@
 --TEST--
 Bug#44806 (rename() function is not portable to Windows)
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) != 'WIN') {
-    die('skip.. only for Windows');
-}
-?>
 --FILE--
 <?php
 $dirname = dirname(__FILE__);

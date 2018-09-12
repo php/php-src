@@ -171,9 +171,6 @@ ext/phar/phar.phar
 ext/phar/phar.1
 ext/phar/phar.phar.1
 ext/phar/phar.php
-ext/reflection/xml
-ext/reflection/html
-ext/reflection/spl.chm
 ext/spl/examples/.htaccess
 ext/spl/examples/*.phps
 ext/sqlite3/tests/phpsql*
@@ -208,5 +205,4 @@ ext/sqlite3/tests/phpsql*
 # Special cases to invert previous ignore rules
 !ext/fileinfo/libmagic.patch
 !ext/mbstring/oniguruma.patch
-!scripts/dev/generate-phpt/tests/*.php
 !ext/pcre/pcre2lib/config.h

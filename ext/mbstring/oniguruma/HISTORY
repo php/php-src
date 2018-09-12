@@ -1,5 +1,15 @@
 History
 
+2018/09/03: Version 6.9.0
+
+2018/08/24: add Unicode Emoji properties
+2018/08/24: update Unicode version 11.0.0
+2018/08/21: support gperf 3.1 instead of 3.0.4
+2018/08/07: add ENABLE_POSIX_API switch into src/Makefile.windows
+2018/08/02: add make_win.bat and src/config.h.windows.in
+2018/06/25: add ENABLE_POSIX_API option into CMakeLists.txt
+2018/06/04: add .travis.yml (for TravisCI)
+
 2018/04/17: Version 6.8.2
 
 2018/04/13: add doc/CALLOUTS.API.ja
@@ -2027,7 +2037,7 @@ History
 2003/01/31: [impl] rename TTRANS() to TOLOWER().
 2003/01/30: [bug]  .c.o --> .c.obj in win32\Makefile.
 2003/01/30: [impl] add -DNOT_RUBY to Makefile.in.
-                   NOT_RUBY is refered in regint.h for escape double
+                   NOT_RUBY is referred in regint.h for escape double
                    including config.h.
 2003/01/30: [impl] when string hasn't case ambiguity, don't compile
                    to ignore case opcode.

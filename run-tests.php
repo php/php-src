@@ -2924,7 +2924,7 @@ function junit_path_to_classname($file_name) {
 			array_shift($_tmp);
 		}
 		foreach ($_tmp as $p) {
-			$ret = $ret . "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
+			$ret .= "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
 		}
 		return $ret;
 	}

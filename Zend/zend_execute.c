@@ -2546,7 +2546,7 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 		ZEND_ASSERT(op1_type != IS_CONST || CACHED_PTR(cache_slot) == NULL);
 
 		if (EXPECTED((ce = CACHED_PTR(cache_slot)) == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(class_name), class_name + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(class_name), Z_STR_P(class_name + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				FREE_UNFETCHED_OP(op1_type, opline->op1.var);
 				return FAILURE;
