@@ -1273,12 +1273,17 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 		 */
 
 		scope = zend_get_executed_scope();
-		if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
-			zend_function *priv_fbc = zend_get_parent_private(scope, fbc->common.scope, lc_method_name);
-			if (priv_fbc) {
-				fbc = priv_fbc;
+		do {
+			if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
+				zend_function *priv_fbc = zend_get_parent_private(scope, fbc->common.scope, lc_method_name);
+				if (priv_fbc) {
+					fbc = priv_fbc;
+					break;
+				} else if (!(fbc->op_array.fn_flags & ZEND_ACC_PROTECTED)) {
+					break;
+				}
 			}
-		} else {
+
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 * If we're not and __call() handler exists, invoke it, otherwise error out.
 			 */
@@ -1290,7 +1295,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 					fbc = NULL;
 				}
 			}
-		}
+		} while (0);
 	}
 
 	if (UNEXPECTED(!key)) {
