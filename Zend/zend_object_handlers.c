@@ -1109,19 +1109,15 @@ static zend_always_inline zend_function *zend_get_parent_private(zend_class_entr
 	zval *func;
 	zend_function *fbc;
 
-	ce = ce->parent;
-	while (ce) {
-		if (ce == scope) {
-			if ((func = zend_hash_find(&ce->function_table, function_name))) {
-				fbc = Z_FUNC_P(func);
-				if (fbc->common.fn_flags & ZEND_ACC_PRIVATE
-				 && fbc->common.scope == scope) {
-					return fbc;
-				}
+	if (scope != ce && scope && is_derived_class(ce, scope)) {
+		func = zend_hash_find(&scope->function_table, function_name);
+		if (func != NULL) {
+			fbc = Z_FUNC_P(func);
+			if (fbc->common.fn_flags & ZEND_ACC_PRIVATE
+			 && fbc->common.scope == scope) {
+				return fbc;
 			}
-			break;
 		}
-		ce = ce->parent;
 	}
 	return NULL;
 }
@@ -1146,7 +1142,7 @@ ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, zend_s
 	 *     a private function with the same name that has the same scope.
 	 */
 	scope = zend_get_executed_scope();
-	if (fbc->common.scope == ce && scope == ce) {
+	if (fbc->common.scope == scope) {
 		/* rule #1 checks out ok, allow the function call */
 		return 1;
 	}
@@ -1272,7 +1268,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 		 * If we're not and __call() handler exists, invoke it, otherwise error out.
 		 */
 		scope = zend_get_executed_scope();
-		if (fbc->common.scope != scope || zobj->ce != scope) {
+		if (fbc->common.scope != scope) {
 			zend_function *updated_fbc = zend_get_parent_private(scope, zobj->ce, lc_method_name);
 			if (EXPECTED(updated_fbc != NULL)) {
 				fbc = updated_fbc;
@@ -1280,7 +1276,6 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 				if (zobj->ce->__call) {
 					fbc = zend_get_user_call_function(zobj->ce, method_name);
 				} else {
-					scope = zend_get_executed_scope();
 					zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), scope ? ZSTR_VAL(scope->name) : "");
 					fbc = NULL;
 				}
