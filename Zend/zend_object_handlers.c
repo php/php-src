@@ -63,13 +63,14 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 	if (!zobj->properties) {
 		zend_property_info *prop_info;
 		zend_class_entry *ce = zobj->ce;
+		uint32_t flags = 0;
 
 		zobj->properties = zend_new_array(ce->default_properties_count);
 		if (ce->default_properties_count) {
 			zend_hash_real_init_mixed(zobj->properties);
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (/*prop_info->ce == ce &&*/
-				    (prop_info->flags & ZEND_ACC_STATIC) == 0) {
+				if (!(prop_info->flags & ZEND_ACC_STATIC)) {
+					flags |= prop_info->flags;
 
 					if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
 						HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
@@ -79,22 +80,24 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 						OBJ_PROP(zobj, prop_info->offset));
 				}
 			} ZEND_HASH_FOREACH_END();
-			while (ce->parent && ce->parent->default_properties_count) {
-				ce = ce->parent;
-				ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-					if (prop_info->ce == ce &&
-					    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
-					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0) {
-						zval zv;
+			if (flags & ZEND_ACC_CHANGED) {
+				while (ce->parent && ce->parent->default_properties_count) {
+					ce = ce->parent;
+					ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+						if (prop_info->ce == ce &&
+						    !(prop_info->flags & ZEND_ACC_STATIC) &&
+						    (prop_info->flags & ZEND_ACC_PRIVATE)) {
+							zval zv;
 
-						if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
-							HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
+							if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
+								HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
+							}
+
+							ZVAL_INDIRECT(&zv, OBJ_PROP(zobj, prop_info->offset));
+							zend_hash_add(zobj->properties, prop_info->name, &zv);
 						}
-
-						ZVAL_INDIRECT(&zv, OBJ_PROP(zobj, prop_info->offset));
-						zend_hash_add(zobj->properties, prop_info->name, &zv);
-					}
-				} ZEND_HASH_FOREACH_END();
+					} ZEND_HASH_FOREACH_END();
+				}
 			}
 		}
 	}
