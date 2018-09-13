@@ -9,7 +9,7 @@
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define SIZEOF_LONG 4
-#define SIZEOF_LONG_LONG 0
+#define SIZEOF_LONG_LONG 8
 #define SIZEOF___INT64 8
 #define SIZEOF_OFF_T 4
 #define SIZEOF_VOIDP 8
@@ -36,10 +36,7 @@
 #define HAVE_MEMORY_H 1
 #define uid_t int
 #define gid_t int
-#define HAVE_STRUCT_STAT_ST_RDEV 1
-#define HAVE_ST_RDEV 1
 #define GETGROUPS_T int
-#define RETSIGTYPE void
 #define HAVE_ALLOCA 1
 #define HAVE_DUP2 1
 #define HAVE_MEMCMP 1

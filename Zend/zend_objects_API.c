@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
@@ -150,10 +148,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 	EG(objects_store).object_buckets[handle] = object;
 }
 
-#define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle)															\
-            SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle], EG(objects_store).free_list_head);	\
-			EG(objects_store).free_list_head = handle;
-
 ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ */
 {
 	/*	Make sure we hold a reference count during the destructor call
@@ -196,11 +190,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 	}
 }
 /* }}} */
-
-ZEND_API const zend_object_handlers* ZEND_FASTCALL zend_get_std_object_handlers(void)
-{
-	return &std_object_handlers;
-}
 
 /*
  * Local variables:

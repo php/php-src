@@ -23,6 +23,7 @@
 #include <unicode/locid.h>
 #include <unicode/timezone.h>
 #include <unicode/ustring.h>
+#include <unicode/calendar.h>
 #include "intl_convertcpp.h"
 
 #include "../common/common_date.h"
@@ -36,6 +37,9 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 #include "common/common_enum.h"
+
+using icu::Locale;
+using icu::Calendar;
 
 U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
 {
@@ -310,7 +314,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 
 	if (is_systemid) { /* by-ref argument passed */
 		ZVAL_DEREF(is_systemid);
-		zval_dtor(is_systemid);
+		zval_ptr_dtor(is_systemid);
 		ZVAL_BOOL(is_systemid, isSystemID);
 	}
 }
@@ -461,11 +465,9 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_offset: error obtaining offset");
 
-	ZVAL_DEREF(rawOffsetArg);
-	zval_dtor(rawOffsetArg);
+	zval_ptr_dtor(rawOffsetArg);
 	ZVAL_LONG(rawOffsetArg, rawOffset);
-	ZVAL_DEREF(dstOffsetArg);
-	zval_dtor(dstOffsetArg);
+	zval_ptr_dtor(dstOffsetArg);
 	ZVAL_LONG(dstOffsetArg, dstOffset);
 
 	RETURN_TRUE;

@@ -18,14 +18,12 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_ODBC_INCLUDES_H
 #define PHP_ODBC_INCLUDES_H
 
 #if HAVE_UODBC
 
-/* checking in the same order as in configure.in */
+/* checking in the same order as in configure.ac */
 
 #if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35) /* Solid Server */
 

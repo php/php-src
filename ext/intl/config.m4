@@ -9,6 +9,7 @@ if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU(INTL_SHARED_LIBADD)
   PHP_SUBST(INTL_SHARED_LIBADD)
   PHP_REQUIRE_CXX()
+  INTL_COMMON_FLAGS="$ICU_INCS $ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   if test "$icu_version" -ge "4002"; then
     icu_spoof_src=" spoofchecker/spoofchecker_class.c \
     spoofchecker/spoofchecker.c\
@@ -20,7 +21,6 @@ if test "$PHP_INTL" != "no"; then
   PHP_NEW_EXTENSION(intl, php_intl.c \
     intl_error.c \
     intl_convert.c \
-	intl_convertcpp.cpp \
     collator/collator.c \
     collator/collator_class.c \
     collator/collator_sort.c \
@@ -32,8 +32,6 @@ if test "$PHP_INTL" != "no"; then
     collator/collator_is_numeric.c \
     collator/collator_error.c \
     common/common_error.c \
-	common/common_enum.cpp \
-	common/common_date.cpp \
     converter/converter.c \
     formatter/formatter.c \
     formatter/formatter_main.c \
@@ -53,17 +51,12 @@ if test "$PHP_INTL" != "no"; then
     dateformat/dateformat_attr.c \
     dateformat/dateformat_data.c \
     dateformat/dateformat_format.c \
-    dateformat/dateformat_format_object.cpp \
     dateformat/dateformat_parse.c \
-    dateformat/dateformat_create.cpp \
-    dateformat/dateformat_attrcpp.cpp \
-    dateformat/dateformat_helpers.cpp \
     msgformat/msgformat.c \
     msgformat/msgformat_attr.c \
     msgformat/msgformat_class.c \
     msgformat/msgformat_data.c  \
     msgformat/msgformat_format.c \
-    msgformat/msgformat_helpers.cpp \
     msgformat/msgformat_parse.c \
     grapheme/grapheme_string.c \
     grapheme/grapheme_util.c \
@@ -73,6 +66,18 @@ if test "$PHP_INTL" != "no"; then
     transliterator/transliterator.c \
     transliterator/transliterator_class.c \
     transliterator/transliterator_methods.c \
+    uchar/uchar.c \
+    idn/idn.c \
+    $icu_spoof_src, $ext_shared,,$INTL_COMMON_FLAGS,cxx)
+
+  PHP_INTL_CXX_SOURCES="intl_convertcpp.cpp \
+    common/common_enum.cpp \
+    common/common_date.cpp \
+    dateformat/dateformat_format_object.cpp \
+    dateformat/dateformat_create.cpp \
+    dateformat/dateformat_attrcpp.cpp \
+    dateformat/dateformat_helpers.cpp \
+    msgformat/msgformat_helpers.cpp \
     timezone/timezone_class.cpp \
     timezone/timezone_methods.cpp \
     calendar/calendar_class.cpp \
@@ -83,10 +88,14 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/breakiterator_methods.cpp \
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
-    breakiterator/codepointiterator_methods.cpp \
-    uchar/uchar.c \
-    idn/idn.c \
-    $icu_spoof_src, $ext_shared,,$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,cxx)
+    breakiterator/codepointiterator_methods.cpp"
+  PHP_INTL_CXX_FLAGS="$INTL_COMMON_FLAGS $ICU_CXXFLAGS"
+  if test "$ext_shared" = "no"; then
+    PHP_ADD_SOURCES(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS)
+  else
+    PHP_ADD_SOURCES_X(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS, shared_objects_intl, yes)
+  fi
+
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
   PHP_ADD_BUILD_DIR($ext_builddir/converter)
   PHP_ADD_BUILD_DIR($ext_builddir/common)

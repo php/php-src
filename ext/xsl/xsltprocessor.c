@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -83,7 +81,7 @@ ZEND_END_ARG_INFO();
 /*
 * class xsl_xsltprocessor
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 * Since:
 */
 
@@ -364,7 +362,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			zval_ptr_dtor(&retval);
 		}
 	}
-	zend_string_release(callable);
+	zend_string_release_ex(callable, 0);
 	zval_ptr_dtor(&handler);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
@@ -399,7 +397,6 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xsl_object *intern;
 	int prevSubstValue, prevExtDtdValue, clone_docu = 0;
 	xmlNode *nodep = NULL;
-	const zend_object_handlers *std_hnd;
 	zval *cloneDocu, member, rv;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo", &id, xsl_xsltprocessor_class_entry, &docp) == FAILURE) {
@@ -435,9 +432,8 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 
 	intern = Z_XSL_P(id);
 
-	std_hnd = zend_get_std_object_handlers();
 	ZVAL_STRING(&member, "cloneDocument");
-	cloneDocu = std_hnd->read_property(id, &member, BP_VAR_IS, NULL, &rv);
+	cloneDocu = zend_std_read_property(id, &member, BP_VAR_IS, NULL, &rv);
 	if (Z_TYPE_P(cloneDocu) != IS_NULL) {
 		convert_to_long(cloneDocu);
 		clone_docu = Z_LVAL_P(cloneDocu);
@@ -483,7 +479,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	char **params = NULL;
 	int clone;
 	zval *doXInclude, member, rv;
-	const zend_object_handlers *std_hnd;
 	FILE *f;
 	int secPrefsError = 0;
 	int secPrefsValue;
@@ -533,10 +528,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	ctxt = xsltNewTransformContext(style, doc);
 	ctxt->_private = (void *) intern;
 
-	std_hnd = zend_get_std_object_handlers();
-
 	ZVAL_STRING(&member, "doXInclude");
-	doXInclude = std_hnd->read_property(id, &member, BP_VAR_IS, NULL, &rv);
+	doXInclude = zend_std_read_property(id, &member, BP_VAR_IS, NULL, &rv);
 	if (Z_TYPE_P(doXInclude) != IS_NULL) {
 		convert_to_long(doXInclude);
 		ctxt->xinclude = Z_LVAL_P(doXInclude);

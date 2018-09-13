@@ -30,4 +30,5 @@ url                 PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  12
 number_int               1                                     1234      123  123                                                    
 number_float             1                                     1234      123  123                                                    
 magic_quotes        PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O\'Henry       하퍼    aa:bb:cc:dd:ee:ff
+add_slashes         PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O\'Henry       하퍼    aa:bb:cc:dd:ee:ff
 callback            PHP  1  FOO@BAR.COM    HTTP://A.B.C        1.2.3.4   123  123ABC<>()          O'HENRY        하퍼    AA:BB:CC:DD:EE:FF

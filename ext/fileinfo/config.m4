@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension fileinfo
 
 PHP_ARG_ENABLE(fileinfo, for fileinfo support,
@@ -11,10 +10,11 @@ if test "$PHP_FILEINFO" != "no"; then
     libmagic/cdf.c libmagic/cdf_time.c libmagic/compress.c \
     libmagic/encoding.c libmagic/fsmagic.c libmagic/funcs.c \
     libmagic/is_tar.c libmagic/magic.c libmagic/print.c \
-    libmagic/readcdf.c libmagic/softmagic.c libmagic/der.c"
+    libmagic/readcdf.c libmagic/softmagic.c libmagic/der.c \
+    libmagic/buffer.c"
 
   AC_MSG_CHECKING([for strcasestr])
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <string.h>
 #include <strings.h>
 #include <stdlib.h>
@@ -39,14 +39,14 @@ int main(void)
 
         return !(NULL != ret);
 }
-  ],[
+  ]])],[
     dnl using the platform implementation
     AC_MSG_RESULT(yes)
   ],[
     AC_MSG_RESULT(no)
     AC_MSG_NOTICE(using libmagic strcasestr implementation)
     libmagic_sources="$libmagic_sources libmagic/strcasestr.c"
-  ])
+  ],[AC_MSG_RESULT([skipped, cross-compiling])])
 
   PHP_NEW_EXTENSION(fileinfo, fileinfo.c $libmagic_sources, $ext_shared,,-I@ext_srcdir@/libmagic)
   PHP_ADD_BUILD_DIR($ext_builddir/libmagic)

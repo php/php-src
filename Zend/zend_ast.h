@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_AST_H
 #define ZEND_AST_H
 
@@ -204,27 +202,12 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_long lval)
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, zend_ast_attr attr);
 
 #if ZEND_AST_SPEC
-# ifdef ZEND_WIN32
-#  define ZEND_AST_EXPAND_VA(a) a
-# endif
-
-# ifdef ZEND_WIN32
-#  define ZEND_AST_SPEC_CALL(name, ...) \
-	ZEND_AST_EXPAND_VA(ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
-# else
-#  define ZEND_AST_SPEC_CALL(name, ...) \
-	ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__)
-# endif
+# define ZEND_AST_SPEC_CALL(name, ...) \
+	ZEND_EXPAND_VA(ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
 # define ZEND_AST_SPEC_CALL_(name, _, _4, _3, _2, _1, suffix, ...) \
 	name ## suffix
-
-# ifdef ZEND_WIN32
-#  define ZEND_AST_SPEC_CALL_EX(name, ...) \
-	ZEND_AST_EXPAND_VA(ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
-# else
-#  define ZEND_AST_SPEC_CALL_EX(name, ...) \
-	ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__)
-# endif
+# define ZEND_AST_SPEC_CALL_EX(name, ...) \
+	ZEND_EXPAND_VA(ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
 # define ZEND_AST_SPEC_CALL_EX_(name, _, _5, _4, _3, _2, _1, suffix, ...) \
 	name ## suffix
 

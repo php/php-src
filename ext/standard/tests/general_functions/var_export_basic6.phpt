@@ -108,12 +108,12 @@ foreach($valid_objects as $key => $obj) {
 *** Output for objects ***
 
 -- Iteration: new stdclass --
-stdClass::__set_state(array(
-))
-stdClass::__set_state(array(
-))
-string(31) "stdClass::__set_state(array(
-))"
+(object) array(
+)
+(object) array(
+)
+string(17) "(object) array(
+)"
 
 
 -- Iteration: new foo --

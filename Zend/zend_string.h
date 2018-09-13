@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: $ */
-
 #ifndef ZEND_STRING_H
 #define ZEND_STRING_H
 
@@ -26,18 +24,20 @@
 BEGIN_EXTERN_C()
 
 typedef void (*zend_string_copy_storage_func_t)(void);
-typedef zend_string *(*zend_new_interned_string_func_t)(zend_string *str);
-typedef zend_string *(*zend_string_init_interned_func_t)(const char *str, size_t size, int permanent);
+typedef zend_string *(ZEND_FASTCALL *zend_new_interned_string_func_t)(zend_string *str);
+typedef zend_string *(ZEND_FASTCALL *zend_string_init_interned_func_t)(const char *str, size_t size, int permanent);
 
 ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API extern zend_string_init_interned_func_t zend_string_init_interned;
 
-ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
+ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str);
+ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
+ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
+
 ZEND_API void zend_interned_strings_init(void);
 ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
-ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str);
 ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler);
 ZEND_API void zend_interned_strings_set_permanent_storage_copy_handlers(zend_string_copy_storage_func_t copy_handler, zend_string_copy_storage_func_t restore_handler);
 ZEND_API void zend_interned_strings_switch_storage(zend_bool request);
@@ -96,10 +96,7 @@ END_EXTERN_C()
 
 static zend_always_inline zend_ulong zend_string_hash_val(zend_string *s)
 {
-	if (!ZSTR_H(s)) {
-		ZSTR_H(s) = zend_hash_func(ZSTR_VAL(s), ZSTR_LEN(s));
-	}
-	return ZSTR_H(s);
+	return ZSTR_H(s) ? ZSTR_H(s) : zend_string_hash_func(s);
 }
 
 static zend_always_inline void zend_string_forget_hash_val(zend_string *s)
@@ -265,11 +262,34 @@ static zend_always_inline void zend_string_free(zend_string *s)
 	}
 }
 
+static zend_always_inline void zend_string_efree(zend_string *s)
+{
+	ZEND_ASSERT(!ZSTR_IS_INTERNED(s));
+	ZEND_ASSERT(GC_REFCOUNT(s) <= 1);
+	ZEND_ASSERT(!(GC_FLAGS(s) & IS_STR_PERSISTENT));
+	efree(s);
+}
+
 static zend_always_inline void zend_string_release(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (GC_DELREF(s) == 0) {
 			pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
+		}
+	}
+}
+
+static zend_always_inline void zend_string_release_ex(zend_string *s, int persistent)
+{
+	if (!ZSTR_IS_INTERNED(s)) {
+		if (GC_DELREF(s) == 0) {
+			if (persistent) {
+				ZEND_ASSERT(GC_FLAGS(s) & IS_STR_PERSISTENT);
+				free(s);
+			} else {
+				ZEND_ASSERT(!(GC_FLAGS(s) & IS_STR_PERSISTENT));
+				efree(s);
+			}
 		}
 	}
 }

@@ -151,7 +151,7 @@ ZEND_END_ARG_INFO()
  * Every 'NumberFormatter' class method has an entry in this table
  */
 static const zend_function_entry NumberFormatter_class_functions[] = {
-	PHP_ME( NumberFormatter, __construct, arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
+	PHP_ME( NumberFormatter, __construct, arginfo_numberformatter___construct, ZEND_ACC_PUBLIC )
 	ZEND_FENTRY( create, ZEND_FN( numfmt_create ), arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( format, ZEND_FN( numfmt_format ), arginfo_numberformatter_format )
 	PHP_NAMED_FE( parse, ZEND_FN( numfmt_parse ), number_parse_arginfo )
@@ -184,7 +184,7 @@ void formatter_register_class( void )
 	ce.create_object = NumberFormatter_object_create;
 	NumberFormatter_ce_ptr = zend_register_internal_class( &ce );
 
-	memcpy(&NumberFormatter_handlers, zend_get_std_object_handlers(),
+	memcpy(&NumberFormatter_handlers, &std_object_handlers,
 		sizeof(NumberFormatter_handlers));
 	NumberFormatter_handlers.offset = XtOffsetOf(NumberFormatter_object, zo);
 	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;

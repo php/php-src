@@ -1,30 +1,15 @@
+[![Build Status](https://travis-ci.org/kkos/oniguruma.svg?branch=master)](https://travis-ci.org/kkos/oniguruma)
+
 Oniguruma
 =========
 
 https://github.com/kkos/oniguruma
 
-FIXED Security Issues:
---------------------------
-  **CVE-2017-9224, CVE-2017-9225, CVE-2017-9226**
-  **CVE-2017-9227, CVE-2017-9228, CVE-2017-9229**
-
 Oniguruma is a modern and flexible regular expressions library. It
 encompasses features from different regular expression implementations
-that traditionally exist in different languages. It comes close to
-being a complete superset of all regular expression features found
-in other regular expression implementations.
+that traditionally exist in different languages.
 
-Its features include:
-* Character encoding can be specified per regular expression object.
-* Several regular expression types are supported:
-  * Oniguruma (native)
-  * POSIX
-  * Grep
-  * GNU Regex
-  * Perl
-  * Java
-  * Ruby
-  * Emacs
+Character encoding can be specified per regular expression object.
 
 Supported character encodings:
 
@@ -39,6 +24,21 @@ Supported character encodings:
 * CP1251:  contributed by Byte
 
 
+New feature of version 6.9.0
+--------------------------
+
+* Update Unicode version 11.0.0
+* NEW: add Emoji properties
+
+
+New feature of version 6.8.2
+--------------------------
+
+* Fix: #80 UChar in header causes issue
+* NEW API: onig_set_callout_user_data_of_match_param()  (* omission in 6.8.0)
+* add doc/CALLOUTS.API and doc/CALLOUTS.API.ja
+
+
 New feature of version 6.8.1
 --------------------------
 
@@ -51,11 +51,10 @@ New feature of version 6.8.0
 * Retry-limit-in-match function enabled by default
 * NEW: configure option --enable-posix-api=no  (* enabled by default)
 * NEW API: onig_search_with_param(), onig_match_with_param()
-* NEW: Callouts of contents  (?{...contents...}) (?{...}\[X<>]) (?{{....}})
+* NEW: Callouts of contents  (?{...contents...}) (?{...}\[tag]\[X<>]) (?{{...}})
 * NEW: Callouts of name      (*name) (*name\[tag]{args...})
 * NEW: Builtin callouts  (*FAIL) (*MISMATCH) (*ERROR{n}) (*COUNT) (*MAX{n}) etc..
-
-(* Callout function API is experimental level and isn't fixed definitely yet. Undocumented now)
+* Examples of Callouts program: [callout.c](sample/callout.c), [count.c](sample/count.c), [echo.c](sample/echo.c)
 
 
 New feature of version 6.7.1
@@ -107,6 +106,12 @@ New feature of version 6.3.0
 --------------------------
 
 * NEW: octal codepoint \o{.....}
+* Fixed CVE-2017-9224
+* Fixed CVE-2017-9225
+* Fixed CVE-2017-9226
+* Fixed CVE-2017-9227
+* Fixed CVE-2017-9228
+* Fixed CVE-2017-9229
 
 
 New feature of version 6.1.2
@@ -160,7 +165,7 @@ Install
 
 ### Case 2: Windows 64/32bit platform (Visual Studio)
 
-   execute make_win64 or make_win32
+   Execute make_win.bat
 
       onig_s.lib:  static link library
       onig.dll:    dynamic link library
@@ -289,5 +294,4 @@ Source Files
 |utf32_le.c         |UTF-32LE encoding                                       |
 |unicode.c          |common codes of Unicode encoding                        |
 |unicode_fold_data.c|Unicode folding data                                    |
-|win32/Makefile     |Makefile for Win32 (VC++)                               |
-|win32/config.h     |config.h for Win32                                      |
+|windows/testc.c    |Test program for Windowns (VC++)                        |

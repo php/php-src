@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -208,15 +206,15 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 }
 /* }}} */
 
-static int cli_is_valid_code(char *code, int len, zend_string **prompt) /* {{{ */
+static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{{ */
 {
 	int valid_end = 1, last_valid_end;
 	int brackets_count = 0;
 	int brace_count = 0;
-	int i;
+	size_t i;
 	php_code_type code_type = body;
 	char *heredoc_tag;
-	int heredoc_len;
+	size_t heredoc_len;
 
 	for (i = 0; i < len; ++i) {
 		switch(code_type) {
@@ -403,7 +401,7 @@ static int cli_is_valid_code(char *code, int len, zend_string **prompt) /* {{{ *
 }
 /* }}} */
 
-static char *cli_completion_generator_ht(const char *text, int textlen, int *state, HashTable *ht, void **pData) /* {{{ */
+static char *cli_completion_generator_ht(const char *text, size_t textlen, int *state, HashTable *ht, void **pData) /* {{{ */
 {
 	zend_string *name;
 	zend_ulong number;
@@ -429,7 +427,7 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 	return NULL;
 } /* }}} */
 
-static char *cli_completion_generator_var(const char *text, int textlen, int *state) /* {{{ */
+static char *cli_completion_generator_var(const char *text, size_t textlen, int *state) /* {{{ */
 {
 	char *retval, *tmp;
 	zend_array *symbol_table = &EG(symbol_table);
@@ -444,7 +442,7 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 	return retval;
 } /* }}} */
 
-static char *cli_completion_generator_ini(const char *text, int textlen, int *state) /* {{{ */
+static char *cli_completion_generator_ini(const char *text, size_t textlen, int *state) /* {{{ */
 {
 	char *retval, *tmp;
 
@@ -458,7 +456,7 @@ static char *cli_completion_generator_ini(const char *text, int textlen, int *st
 	return retval;
 } /* }}} */
 
-static char *cli_completion_generator_func(const char *text, int textlen, int *state, HashTable *ht) /* {{{ */
+static char *cli_completion_generator_func(const char *text, size_t textlen, int *state, HashTable *ht) /* {{{ */
 {
 	zend_function *func;
 	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func);
@@ -470,7 +468,7 @@ static char *cli_completion_generator_func(const char *text, int textlen, int *s
 	return retval;
 } /* }}} */
 
-static char *cli_completion_generator_class(const char *text, int textlen, int *state) /* {{{ */
+static char *cli_completion_generator_class(const char *text, size_t textlen, int *state) /* {{{ */
 {
 	zend_class_entry *ce;
 	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&ce);
@@ -482,7 +480,7 @@ static char *cli_completion_generator_class(const char *text, int textlen, int *
 	return retval;
 } /* }}} */
 
-static char *cli_completion_generator_define(const char *text, int textlen, int *state, HashTable *ht) /* {{{ */
+static char *cli_completion_generator_define(const char *text, size_t textlen, int *state, HashTable *ht) /* {{{ */
 {
 	zend_class_entry **pce;
 	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&pce);
@@ -508,7 +506,7 @@ TODO:
 - future: respect scope ("php > function foo() { $[tab]" should only expand to local variables...)
 */
 	char *retval = NULL;
-	int textlen = strlen(text);
+	size_t textlen = strlen(text);
 
 	if (!index) {
 		cli_completion_state = 0;
@@ -519,7 +517,7 @@ TODO:
 		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
 	} else {
 		char *lc_text, *class_name_end;
-		int class_name_len;
+		size_t class_name_len;
 		zend_string *class_name;
 		zend_class_entry *ce = NULL;
 
@@ -529,7 +527,7 @@ TODO:
 			class_name = zend_string_alloc(class_name_len, 0);
 			zend_str_tolower_copy(ZSTR_VAL(class_name), text, class_name_len);
 			if ((ce = zend_lookup_class(class_name)) == NULL) {
-				zend_string_release(class_name);
+				zend_string_release_ex(class_name, 0);
 				return NULL;
 			}
 			lc_text = zend_str_tolower_dup(class_name_end + 2, textlen - 2 - class_name_len);
@@ -560,10 +558,10 @@ TODO:
 		}
 		efree(lc_text);
 		if (class_name_end) {
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 		}
 		if (ce && retval) {
-			int len = class_name_len + 2 + strlen(retval) + 1;
+			size_t len = class_name_len + 2 + strlen(retval) + 1;
 			char *tmp = malloc(len);
 
 			snprintf(tmp, len, "%s::%s", ZSTR_VAL(ce->name), retval);
@@ -637,10 +635,10 @@ static int readline_shell_run(void) /* {{{ */
 				cmd = zend_string_init(&line[1], param - &line[1] - 1, 0);
 
 				zend_alter_ini_entry_chars_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
-				zend_string_release(cmd);
+				zend_string_release_ex(cmd, 0);
 				add_history(line);
 
-				zend_string_release(prompt);
+				zend_string_release_ex(prompt, 0);
 				/* TODO: This might be wrong! */
 				prompt = cli_get_prompt("php", '>');
 				continue;
@@ -662,7 +660,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		free(line);
-		zend_string_release(prompt);
+		zend_string_release_ex(prompt, 0);
 
 		if (!cli_is_valid_code(code, pos, &prompt)) {
 			continue;
@@ -704,7 +702,7 @@ static int readline_shell_run(void) /* {{{ */
 	free(history_file);
 #endif
 	efree(code);
-	zend_string_release(prompt);
+	zend_string_release_ex(prompt, 0);
 	return EG(exit_status);
 }
 /* }}} */

@@ -262,7 +262,7 @@ static ZEND_INI_MH(OnUpdateFileCache)
 #else
 				_access(ZSTR_VAL(new_value), 06) != 0) {
 #endif
-				zend_accel_error(ACCEL_LOG_WARNING, "opcache.file_cache must be a full path of accessable directory.\n");
+				zend_accel_error(ACCEL_LOG_WARNING, "opcache.file_cache must be a full path of accessible directory.\n");
 				new_value = NULL;
 			}
 		}
@@ -803,11 +803,6 @@ static ZEND_FUNCTION(opcache_compile_file)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
 		return;
-	}
-
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
-		zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " seems to be disabled, can't compile file");
-		RETURN_FALSE;
 	}
 
 	handle.filename = script_name;

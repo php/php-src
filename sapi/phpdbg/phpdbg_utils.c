@@ -765,7 +765,7 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 				zend_class_entry *ce;
 
 				if (!(ce = CACHED_PTR(cur->extended_value & ~ZEND_LAST_CATCH))) {
-					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), RT_CONSTANT(cur, cur->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), Z_STR_P(RT_CONSTANT(cur, cur->op1) + 1), ZEND_FETCH_CLASS_NO_AUTOLOAD);
 					CACHE_PTR(cur->extended_value & ~ZEND_LAST_CATCH, ce);
 				}
 
@@ -824,7 +824,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			break;
 		case IS_STRING: {
 			int i;
-			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"\n\t\0", 5);
+			zend_string *str = php_addcslashes(Z_STR_P(zv), "\\\"\n\t\0", 5);
 			for (i = 0; i < ZSTR_LEN(str); i++) {
 				if (ZSTR_VAL(str)[i] < 32) {
 					ZSTR_VAL(str)[i] = ' ';

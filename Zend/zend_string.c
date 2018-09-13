@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: $ */
-
 #include "zend.h"
 #include "zend_globals.h"
 
@@ -25,13 +23,13 @@
 # include "valgrind/callgrind.h"
 #endif
 
-ZEND_API zend_string *(*zend_new_interned_string)(zend_string *str);
-ZEND_API zend_string *(*zend_string_init_interned)(const char *str, size_t size, int permanent);
+ZEND_API zend_new_interned_string_func_t zend_new_interned_string;
+ZEND_API zend_string_init_interned_func_t zend_string_init_interned;
 
-static zend_string *zend_new_interned_string_permanent(zend_string *str);
-static zend_string *zend_new_interned_string_request(zend_string *str);
-static zend_string *zend_string_init_interned_permanent(const char *str, size_t size, int permanent);
-static zend_string *zend_string_init_interned_request(const char *str, size_t size, int permanent);
+static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str);
+static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *str);
+static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, int permanent);
+static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, int permanent);
 
 /* Any strings interned in the startup phase. Common to all the threads,
    won't be free'd until process exit. If we want an ability to
@@ -48,7 +46,12 @@ ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
 ZEND_API zend_string **zend_known_strings = NULL;
 
-ZEND_API zend_ulong zend_hash_func(const char *str, size_t len)
+ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str)
+{
+	return ZSTR_H(str) = zend_hash_func(ZSTR_VAL(str), ZSTR_LEN(str));
+}
+
+ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len)
 {
 	return zend_inline_hash_func(str, len);
 }
@@ -175,13 +178,13 @@ static zend_always_inline zend_string *zend_add_interned_string(zend_string *str
 	return str;
 }
 
-ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str)
+ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str)
 {
 	zend_string_hash_val(str);
 	return zend_interned_string_ht_lookup(str, &interned_strings_permanent);
 }
 
-static zend_string *zend_new_interned_string_permanent(zend_string *str)
+static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str)
 {
 	zend_string *ret;
 
@@ -207,7 +210,7 @@ static zend_string *zend_new_interned_string_permanent(zend_string *str)
 	return zend_add_interned_string(str, &interned_strings_permanent, IS_STR_PERMANENT);
 }
 
-static zend_string *zend_new_interned_string_request(zend_string *str)
+static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *str)
 {
 	zend_string *ret;
 
@@ -244,7 +247,7 @@ static zend_string *zend_new_interned_string_request(zend_string *str)
 	return ret;
 }
 
-static zend_string *zend_string_init_interned_permanent(const char *str, size_t size, int permanent)
+static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, int permanent)
 {
 	zend_string *ret;
 	zend_ulong h = zend_inline_hash_func(str, size);
@@ -259,7 +262,7 @@ static zend_string *zend_string_init_interned_permanent(const char *str, size_t 
 	return zend_add_interned_string(ret, &interned_strings_permanent, IS_STR_PERMANENT);
 }
 
-static zend_string *zend_string_init_interned_request(const char *str, size_t size, int permanent)
+static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, int permanent)
 {
 	zend_string *ret;
 	zend_ulong h = zend_inline_hash_func(str, size);

@@ -21,8 +21,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1907,7 +1905,7 @@ void php_snmp_add_property(HashTable *h, const char *name, size_t name_length, p
 	p.write_func = (write_func) ? write_func : NULL;
 	str = zend_string_init_interned(name, name_length, 1);
 	zend_hash_add_mem(h, str, &p, sizeof(php_snmp_prop_handler));
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 }
 /* }}} */
 
@@ -1938,8 +1936,7 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		const zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 	}
 
 	if (member == &tmp_member) {
@@ -1976,8 +1973,7 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, void **cac
 		}
 		*/
 	} else {
-		const zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value, cache_slot);
+		zend_std_write_property(object, member, value, cache_slot);
 	}
 
 	if (member == &tmp_member) {
@@ -1996,10 +1992,10 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 
 	if ((hnd = zend_hash_find_ptr(&php_snmp_properties, Z_STR_P(member))) != NULL) {
 		switch (has_set_exists) {
-			case 2:
+			case ZEND_PROPERTY_EXISTS:
 				ret = 1;
 				break;
-			case 0: {
+			case ZEND_PROPERTY_ISSET: {
 				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					ret = Z_TYPE_P(value) != IS_NULL? 1 : 0;
@@ -2017,8 +2013,7 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 			}
 		}
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		ret = std_hnd->has_property(object, member, has_set_exists, cache_slot);
+		ret = zend_std_has_property(object, member, has_set_exists, cache_slot);
 	}
 	return ret;
 }
@@ -2279,7 +2274,7 @@ PHP_MINIT_FUNCTION(snmp)
 		logh->pri_max = LOG_ERR;
 	}
 
-	memcpy(&php_snmp_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&php_snmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_snmp_object_handlers.read_property = php_snmp_read_property;
 	php_snmp_object_handlers.write_property = php_snmp_write_property;
 	php_snmp_object_handlers.has_property = php_snmp_has_property;
@@ -2363,7 +2358,6 @@ PHP_MINFO_FUNCTION(snmp)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "NET-SNMP Support", "enabled");
 	php_info_print_table_row(2, "NET-SNMP Version", netsnmp_get_version());
-	php_info_print_table_row(2, "PHP SNMP Version", PHP_SNMP_VERSION);
 	php_info_print_table_end();
 }
 /* }}} */

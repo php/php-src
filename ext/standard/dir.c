@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* {{{ includes/startup/misc */
 
 #include "php.h"
@@ -27,10 +25,6 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
-
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -545,7 +539,7 @@ no_results:
 	globfree(&globbuf);
 
 	if (basedir_limit && !zend_hash_num_elements(Z_ARRVAL_P(return_value))) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 }

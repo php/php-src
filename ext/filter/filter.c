@@ -19,8 +19,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -60,7 +58,8 @@ static const filter_list_entry filter_list[] = {
 	{ "url",             FILTER_SANITIZE_URL,           php_filter_url             },
 	{ "number_int",      FILTER_SANITIZE_NUMBER_INT,    php_filter_number_int      },
 	{ "number_float",    FILTER_SANITIZE_NUMBER_FLOAT,  php_filter_number_float    },
-	{ "magic_quotes",    FILTER_SANITIZE_MAGIC_QUOTES,  php_filter_magic_quotes    },
+	{ "magic_quotes",    FILTER_SANITIZE_MAGIC_QUOTES,  php_filter_add_slashes     },
+	{ "add_slashes",     FILTER_SANITIZE_ADD_SLASHES,   php_filter_add_slashes     },
 
 	{ "callback",        FILTER_CALLBACK,               php_filter_callback        },
 };
@@ -201,7 +200,9 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	ZVAL_UNDEF(&filter_globals->cookie_array);
 	ZVAL_UNDEF(&filter_globals->env_array);
 	ZVAL_UNDEF(&filter_globals->server_array);
+#if 0
 	ZVAL_UNDEF(&filter_globals->session_array);
+#endif
 	filter_globals->default_filter = FILTER_DEFAULT;
 }
 /* }}} */
@@ -255,6 +256,7 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_INT", FILTER_SANITIZE_NUMBER_INT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_FLOAT", FILTER_SANITIZE_NUMBER_FLOAT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_MAGIC_QUOTES", FILTER_SANITIZE_MAGIC_QUOTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_ADD_SLASHES", FILTER_SANITIZE_ADD_SLASHES, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_CALLBACK", FILTER_CALLBACK, CONST_CS | CONST_PERSISTENT);
 
@@ -319,7 +321,9 @@ PHP_RSHUTDOWN_FUNCTION(filter)
 	VAR_ARRAY_COPY_DTOR(cookie_array)
 	VAR_ARRAY_COPY_DTOR(server_array)
 	VAR_ARRAY_COPY_DTOR(env_array)
+#if 0
 	VAR_ARRAY_COPY_DTOR(session_array)
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -330,7 +334,6 @@ PHP_MINFO_FUNCTION(filter)
 {
 	php_info_print_table_start();
 	php_info_print_table_row( 2, "Input Validation and Filtering", "enabled" );
-	php_info_print_table_row( 2, "Revision", "$Id$");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -364,7 +367,9 @@ static unsigned int php_sapi_filter_init(void)
 	ZVAL_UNDEF(&IF_G(cookie_array));
 	ZVAL_UNDEF(&IF_G(server_array));
 	ZVAL_UNDEF(&IF_G(env_array));
+#if 0
 	ZVAL_UNDEF(&IF_G(session_array));
+#endif
 	return SUCCESS;
 }
 
@@ -617,6 +622,9 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 		}
 
 		if ((option = zend_hash_str_find(HASH_OF(filter_args), "options", sizeof("options") - 1)) != NULL) {
+			/* avoid reference type */
+			ZVAL_DEREF(option);
+
 			if (filter != FILTER_CALLBACK) {
 				if (Z_TYPE_P(option) == IS_ARRAY) {
 					options = option;
@@ -770,7 +778,7 @@ PHP_FUNCTION(filter_var)
 	zend_long filter = FILTER_DEFAULT;
 	zval *filter_args = NULL, *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|lz", &data, &filter, &filter_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lz", &data, &filter, &filter_args) == FAILURE) {
 		return;
 	}
 

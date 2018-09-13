@@ -1,9 +1,5 @@
 --TEST--
 Bug #21478 (Zend/zend_alloc.c :: shutdown_memory_manager produces segfault) 
---SKIPIF--
-<?php 
-	if (!function_exists('stream_filter_register')) die('skip stream_filter_register() not available');
-?>
 --FILE--
 <?php
 class debugfilter extends php_user_filter {

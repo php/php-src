@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -689,7 +687,7 @@ PHP_FUNCTION(ftp_alloc)
 
 	ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
 	if (response) {
-		zval_dtor(zresponse);
+		zval_ptr_dtor(zresponse);
 		ZVAL_STR(zresponse, response);
 	}
 

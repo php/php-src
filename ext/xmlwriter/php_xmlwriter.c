@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1842,7 +1840,7 @@ static PHP_MINIT_FUNCTION(xmlwriter)
 	zend_class_entry ce;
 	le_xmlwriter = zend_register_list_destructors_ex(xmlwriter_dtor, NULL, "xmlwriter", module_number);
 
-	memcpy(&xmlwriter_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&xmlwriter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xmlwriter_object_handlers.offset = XtOffsetOf(ze_xmlwriter_object, std);
 	xmlwriter_object_handlers.free_obj = xmlwriter_object_free_storage;
 	xmlwriter_object_handlers.clone_obj = NULL;

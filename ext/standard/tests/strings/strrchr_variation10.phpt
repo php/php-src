@@ -132,22 +132,40 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing strrchr() function with unexpected inputs for needle ***
 -- Iteration 1 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 2 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 3 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 4 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 5 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 6 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 7 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 8 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 9 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 10 --
 
@@ -170,20 +188,34 @@ bool(false)
 Warning: strrchr(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 15 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 16 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 17 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 18 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 19 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 20 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 21 --
 
 Notice: Object of class sample could not be converted to int in %s on line %d
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 22 --
 bool(false)
@@ -194,7 +226,11 @@ bool(false)
 Warning: strrchr(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 25 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 26 --
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 *** Done ***

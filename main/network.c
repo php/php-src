@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /*#define DEBUG_MAIN_NETWORK 1*/
 
 #include "php.h"
@@ -558,7 +556,7 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 	if (n == 0) {
 		if (errstr) {
 			php_error_docref(NULL, E_WARNING, "Failed to resolve `%s': %s", tmp, ZSTR_VAL(errstr));
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		goto out;
 	}
@@ -626,7 +624,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 			case AF_INET6:
 				buf = (char*)inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, (char *)&abuf, sizeof(abuf));
 				if (buf) {
-					*textaddr = strpprintf(0, "%s:%d",
+					*textaddr = strpprintf(0, "[%s]:%d",
 						buf, ntohs(((struct sockaddr_in6*)sa)->sin6_port));
 				}
 
@@ -841,6 +839,9 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 				int local_address_len = 0;
 
 				if (sa->sa_family == AF_INET) {
+					if (strchr(bindto,':')) {
+						goto skip_bind;
+					}
 					struct sockaddr_in *in4 = emalloc(sizeof(struct sockaddr_in));
 
 					local_address = (struct sockaddr*)in4;
@@ -880,7 +881,7 @@ skip_bind:
 			}
 			/* free error string received during previous iteration (if any) */
 			if (error_string && *error_string) {
-				zend_string_release(*error_string);
+				zend_string_release_ex(*error_string, 0);
 				*error_string = NULL;
 			}
 

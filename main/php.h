@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef PHP_H
 #define PHP_H
 
@@ -26,7 +24,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20180123
+#define PHP_API_VERSION 20180731
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -125,7 +123,6 @@ typedef int pid_t;
 # endif
 #endif
 
-#if HAVE_ASSERT_H
 #if PHP_DEBUG
 #undef NDEBUG
 #else
@@ -134,9 +131,6 @@ typedef int pid_t;
 #endif
 #endif
 #include <assert.h>
-#else /* HAVE_ASSERT_H */
-#define assert(expr) ((void) (0))
-#endif /* HAVE_ASSERT_H */
 
 #define APACHE 0
 

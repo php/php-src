@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_PDO_SQLITE_INT_H
 #define PHP_PDO_SQLITE_INT_H
 
@@ -78,6 +76,7 @@ extern const struct pdo_stmt_methods sqlite_stmt_methods;
 
 enum {
 	PDO_SQLITE_ATTR_OPEN_FLAGS = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_SQLITE_ATTR_READONLY_STATEMENT
 };
 
 #endif

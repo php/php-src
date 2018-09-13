@@ -17,7 +17,6 @@
   |          Dmitry Stogov <dmitry@zend.com>                             |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #ifndef PHP_SCHEMA_H
 #define PHP_SCHEMA_H

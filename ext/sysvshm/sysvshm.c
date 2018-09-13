@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* This has been built and tested on Linux 2.2.14
  *
  * This has been built and tested on Solaris 2.6.
@@ -35,6 +33,7 @@
 #include <errno.h>
 
 #include "php_sysvshm.h"
+#include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "php_ini.h"
@@ -100,7 +99,7 @@ zend_module_entry sysvshm_module_entry = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	PHP_MINFO(sysvshm),
 	PHP_SYSVSHM_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
@@ -144,6 +143,16 @@ PHP_MINIT_FUNCTION(sysvshm)
 		php_sysvshm.init_mem=10000;
 	}
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MINFO_FUNCTION
+ */
+PHP_MINFO_FUNCTION(sysvshm)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "sysvshm support", "enabled");
+	php_info_print_table_end();
 }
 /* }}} */
 

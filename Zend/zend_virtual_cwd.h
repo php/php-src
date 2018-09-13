@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef VIRTUAL_CWD_H
 #define VIRTUAL_CWD_H
 
@@ -118,15 +116,21 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef ZEND_WIN32
-CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
-# define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
-# define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
+# define php_sys_stat_ex php_win32_ioutil_stat_ex
+# define php_sys_stat php_win32_ioutil_stat
+# define php_sys_lstat php_win32_ioutil_lstat
+# define php_sys_fstat php_win32_ioutil_fstat
 CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_len);
+# define php_sys_symlink php_win32_ioutil_symlink
+# define php_sys_link php_win32_ioutil_link
 #else
 # define php_sys_stat stat
 # define php_sys_lstat lstat
+# define php_sys_fstat fstat
 # ifdef HAVE_SYMLINK
 # define php_sys_readlink(link, target, target_len) readlink(link, target, target_len)
+# define php_sys_symlink symlink
+# define php_sys_link link
 # endif
 #endif
 
@@ -172,7 +176,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 /* One of the following constants must be used as the last argument
    in virtual_file_ex() call. */
 
-#define CWD_EXPAND   0 /* expand "." and ".." but dont resolve symlinks      */
+#define CWD_EXPAND   0 /* expand "." and ".." but don't resolve symlinks     */
 #define CWD_FILEPATH 1 /* resolve symlinks if file is exist otherwise expand */
 #define CWD_REALPATH 2 /* call realpath(), resolve symlinks. File must exist */
 

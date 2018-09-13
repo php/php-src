@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension sqlite3
 dnl vim:et:ts=2:sw=2
 

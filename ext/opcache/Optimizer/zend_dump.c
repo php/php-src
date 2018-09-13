@@ -568,7 +568,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			}
 		}
 		if (ZEND_VM_EXT_ISSET & flags) {
-			if (opline->extended_value & ZEND_ISSET) {
+			if (!(opline->extended_value & ZEND_ISEMPTY)) {
 				fprintf(stderr, " (isset)");
 			} else {
 				fprintf(stderr, " (empty)");

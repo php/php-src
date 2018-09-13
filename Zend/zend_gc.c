@@ -17,9 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
-
 /**
  * zend_gc_collect_cycles
  * ======================
@@ -512,7 +509,7 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 		GC_ADDREF(ref);
 		gc_adjust_threshold(gc_collect_cycles());
 		if (UNEXPECTED(GC_DELREF(ref)) == 0) {
-			zval_dtor_func(ref);
+			rc_dtor_func(ref);
 			return;
 		} else if (UNEXPECTED(GC_INFO(ref))) {
 			return;
@@ -582,8 +579,8 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 
 static zend_never_inline void ZEND_FASTCALL gc_remove_compressed(zend_refcounted *ref, uint32_t idx)
 {
-       gc_root_buffer *root = gc_decompress(ref, idx);
-       gc_remove_from_roots(root);
+	gc_root_buffer *root = gc_decompress(ref, idx);
+	gc_remove_from_roots(root);
 }
 
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
@@ -847,8 +844,6 @@ static void gc_compact(void)
 					if (scan <= end) {
 						break;
 					}
-				} else {
-					break;
 				}
 			}
 		}
@@ -1403,8 +1398,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 							GC_DELREF(obj);
 						}
 					}
-					SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[obj->handle], EG(objects_store).free_list_head);
-					EG(objects_store).free_list_head = obj->handle;
+
+					ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(obj->handle);
 					current->ref = GC_MAKE_GARBAGE(((char*)obj) - obj->handlers->offset);
 				} else if (GC_TYPE(p) == IS_ARRAY) {
 					zend_array *arr = (zend_array*)p;
@@ -1442,6 +1437,14 @@ ZEND_API int zend_gc_collect_cycles(void)
 	gc_compact();
 
 	return count;
+}
+
+ZEND_API void zend_gc_get_status(zend_gc_status *status)
+{
+	status->runs = GC_G(gc_runs);
+	status->collected = GC_G(collected);
+	status->threshold = GC_G(gc_threshold);
+	status->num_roots = GC_G(num_roots);
 }
 
 /*

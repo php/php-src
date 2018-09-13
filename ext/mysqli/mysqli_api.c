@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -544,7 +542,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 
 	if (rc) {
-		/* dont close the statement or subsequent usage (for example ->execute()) will lead to crash */
+		/* don't close the statement or subsequent usage (for example ->execute()) will lead to crash */
 		for (i=0; i < var_cnt ; i++) {
 			if (stmt->result.buf[i].val) {
 				efree(stmt->result.buf[i].val);

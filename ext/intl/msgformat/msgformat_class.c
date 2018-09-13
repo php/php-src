@@ -125,7 +125,7 @@ ZEND_END_ARG_INFO()
  * Every 'MessageFormatter' class method has an entry in this table
  */
 static const zend_function_entry MessageFormatter_class_functions[] = {
-	PHP_ME( MessageFormatter, __construct, arginfo_messageformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
+	PHP_ME( MessageFormatter, __construct, arginfo_messageformatter___construct, ZEND_ACC_PUBLIC )
 	ZEND_FENTRY(  create, ZEND_FN( msgfmt_create ), arginfo_messageformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( format, ZEND_FN( msgfmt_format ), arginfo_messageformatter_format )
 	ZEND_FENTRY(  formatMessage, ZEND_FN( msgfmt_format_message ), arginfo_messageformatter_formatmessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
@@ -152,7 +152,7 @@ void msgformat_register_class( void )
 	ce.create_object = MessageFormatter_object_create;
 	MessageFormatter_ce_ptr = zend_register_internal_class( &ce );
 
-	memcpy(&MessageFormatter_handlers, zend_get_std_object_handlers(),
+	memcpy(&MessageFormatter_handlers, &std_object_handlers,
 		sizeof MessageFormatter_handlers);
 	MessageFormatter_handlers.offset = XtOffsetOf(MessageFormatter_object, zo);
 	MessageFormatter_handlers.clone_obj = MessageFormatter_object_clone;

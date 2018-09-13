@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/flock_compat.h"
@@ -148,10 +146,10 @@ PHP_FUNCTION(stream_socket_client)
 
 	if (stream == NULL) {
 		/* host might contain binary characters */
-		zend_string *quoted_host = php_addslashes(host, 0);
+		zend_string *quoted_host = php_addslashes(host);
 
 		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", ZSTR_VAL(quoted_host), errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
-		zend_string_release(quoted_host);
+		zend_string_release_ex(quoted_host, 0);
 	}
 
 	if (hashkey) {
@@ -167,13 +165,13 @@ PHP_FUNCTION(stream_socket_client)
 			zval_ptr_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		zend_string_release_ex(errstr, 0);
 	}
 
 	php_stream_to_zval(stream, return_value);
@@ -237,13 +235,13 @@ PHP_FUNCTION(stream_socket_server)
 			zval_ptr_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		zend_string_release_ex(errstr, 0);
 	}
 
 	php_stream_to_zval(stream, return_value);
@@ -302,7 +300,7 @@ PHP_FUNCTION(stream_socket_accept)
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		zend_string_release_ex(errstr, 0);
 	}
 }
 /* }}} */
@@ -331,7 +329,7 @@ PHP_FUNCTION(stream_socket_get_name)
 	}
 
 	if ((ZSTR_LEN(name) == 0) || (ZSTR_VAL(name)[0] == 0)) {
-		zend_string_release(name);
+		zend_string_release_ex(name, 0);
 		RETURN_FALSE;
 	}
 
@@ -339,7 +337,7 @@ PHP_FUNCTION(stream_socket_get_name)
 }
 /* }}} */
 
-/* {{{ proto int stream_socket_sendto(resouce stream, string data [, int flags [, string target_addr]])
+/* {{{ proto int stream_socket_sendto(resource stream, string data [, int flags [, string target_addr]])
    Send data to a socket stream.  If target_addr is specified it must be in dotted quad (or [ipv6]) format */
 PHP_FUNCTION(stream_socket_sendto)
 {
@@ -419,7 +417,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		RETURN_NEW_STR(read_buf);
 	}
 
-	zend_string_free(read_buf);
+	zend_string_efree(read_buf);
 	RETURN_FALSE;
 }
 /* }}} */
@@ -689,9 +687,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 					dest_elem = zend_hash_update(ht, key, elem);
 				}
 
-				if (dest_elem) {
-					zval_add_ref(dest_elem);
-				}
+				zval_add_ref(dest_elem);
 				ret++;
 				continue;
 			}

@@ -22,10 +22,15 @@
 #endif
 
 #include <unicode/calendar.h>
+#include <unicode/datefmt.h>
 
 extern "C" {
 #include "../php_intl.h"
 }
+
+using icu::Locale;
+using icu::Calendar;
+using icu::DateFormat;
 
 int datefmt_process_calendar_arg(zval* calendar_zv,
 								 Locale const& locale,

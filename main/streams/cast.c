@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #define _GNU_SOURCE
 #include "php.h"
 #include "php_globals.h"
@@ -356,7 +354,7 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO|PHP_STREAM_CAST_TRY_HARD|PHP_STREAM_CAST_RELEASE, (void**)&fp, REPORT_ERRORS) == FAILURE) {
 		php_stream_close(stream);
 		if (opened_path && *opened_path) {
-			zend_string_release(*opened_path);
+			zend_string_release_ex(*opened_path, 0);
 		}
 		return NULL;
 	}

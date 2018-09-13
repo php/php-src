@@ -1,5 +1,5 @@
+#!/usr/bin/env php
 <?php
-/* $Id$ */
 
 /*
  This gives rather interesting results :)

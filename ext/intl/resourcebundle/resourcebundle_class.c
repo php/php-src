@@ -105,7 +105,7 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constr
 
 	if (bundlename_len >= MAXPATHLEN) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"Bundle name too long", 0 );
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		ZVAL_NULL(return_value);
 		return FAILURE;
 	}
@@ -423,7 +423,7 @@ PHP_FUNCTION( resourcebundle_get_error_message )
  * Every 'ResourceBundle' class method has an entry in this table
  */
 static const zend_function_entry ResourceBundle_class_functions[] = {
-	PHP_ME( ResourceBundle, __construct, arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
+	PHP_ME( ResourceBundle, __construct, arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC )
 	ZEND_NAMED_ME( create, ZEND_FN( resourcebundle_create ), arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	ZEND_NAMED_ME( get, ZEND_FN(resourcebundle_get), arginfo_resourcebundle_get, ZEND_ACC_PUBLIC )
 	ZEND_NAMED_ME( count, ZEND_FN(resourcebundle_count), arginfo_resourcebundle_count, ZEND_ACC_PUBLIC )

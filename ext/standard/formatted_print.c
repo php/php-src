@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include <math.h>				/* modf() */
 #include "php.h"
 #include "ext/standard/head.h"

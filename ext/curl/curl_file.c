@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -78,8 +76,7 @@ static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION
 		return;
 	}
 	res = zend_read_property(curl_CURLFile_class, getThis(), name, name_len, 1, &rv);
-	ZVAL_DEREF(res);
-	ZVAL_COPY(return_value, res);
+	ZVAL_COPY_DEREF(return_value, res);
 }
 
 static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
@@ -155,7 +152,7 @@ ZEND_END_ARG_INFO()
 
 
 static const zend_function_entry curlfile_funcs[] = {
-	PHP_ME(CURLFile,			__construct,        arginfo_curlfile_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			__construct,        arginfo_curlfile_create, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			getFilename,        NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			getMimeType,        NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			setMimeType,        arginfo_curlfile_name, ZEND_ACC_PUBLIC)

@@ -24,5 +24,5 @@ catch (Exception $e)
 ?>
 ===DONE===
 --EXPECT--
-Caught: Cannot access non-public member TestClass::p
+Caught: Cannot access non-public member TestClass::$p
 ===DONE===

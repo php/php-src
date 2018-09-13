@@ -174,12 +174,13 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 				while (i < end) {
 					shiftlist[i] = i - target;
 					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
-					   /*keep NOP to support ZEND_VM_SMART_BRANCH */
-					   (i > 0 &&
+					   /* Keep NOP to support ZEND_VM_SMART_BRANCH. Using "target-1" instead of
+					    * "i-1" here to check the last non-NOP instruction. */
+					   (target > 0 &&
 					    i + 1 < op_array->last &&
 					    (op_array->opcodes[i+1].opcode == ZEND_JMPZ ||
 					     op_array->opcodes[i+1].opcode == ZEND_JMPNZ) &&
-					    zend_is_smart_branch(op_array->opcodes + i - 1))) {
+					    zend_is_smart_branch(op_array->opcodes + target - 1))) {
 						if (i != target) {
 							op_array->opcodes[target] = op_array->opcodes[i];
 							ssa->ops[target] = ssa->ops[i];
@@ -703,8 +704,7 @@ optimize_jmpnz:
 							take_successor_1(ssa, block_num, block);
 							goto optimize_nop;
 						}
-					} else {
-						ZEND_ASSERT(block->successors_count == 2);
+					} else if (block->successors_count == 2) {
 						if (block->successors[0] == next_block_num) {
 							take_successor_0(ssa, block_num, block);
 							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
@@ -736,8 +736,7 @@ optimize_jmpnz:
 						opline->extended_value = 0;
 						opline->opcode = ZEND_JMP;
 						goto optimize_jmp;
-					} else {
-						ZEND_ASSERT(block->successors_count == 2);
+					} else if (block->successors_count == 2) {
 						if (block->successors[0] == block->successors[1]) {
 							take_successor_0(ssa, block_num, block);
 							if (block->successors[0] == next_block_num) {

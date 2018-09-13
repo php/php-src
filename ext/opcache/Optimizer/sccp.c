@@ -235,10 +235,6 @@ static zend_bool can_replace_op1(
 		case ZEND_FE_RESET_RW:
 			return 0;
 		/* Do not accept CONST */
-		case ZEND_VERIFY_ABSTRACT_CLASS:
-		case ZEND_ADD_INTERFACE:
-		case ZEND_ADD_TRAIT:
-		case ZEND_BIND_TRAITS:
 		case ZEND_ROPE_ADD:
 		case ZEND_ROPE_END:
 		case ZEND_BIND_STATIC:
@@ -428,7 +424,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		if (IS_PARTIAL_ARRAY(op1) && (!value || IS_BOT(value))) {
 			return FAILURE;
 		}
-		if (extended_value & ZEND_ISSET) {
+		if (!(extended_value & ZEND_ISEMPTY)) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
@@ -438,7 +434,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		// TODO
 		return FAILURE;
 	} else {
-		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
+		ZVAL_BOOL(result, (extended_value & ZEND_ISEMPTY));
 		return SUCCESS;
 	}
 }
@@ -547,7 +543,7 @@ static inline int ct_eval_assign_dim(zval *result, zval *value, zval *key) {
 			value_str = zval_get_string(value);
 			ZVAL_STR(result, new_str);
 			Z_STRVAL_P(result)[index] = ZSTR_VAL(value_str)[0];
-			zend_string_release(value_str);
+			zend_string_release_ex(value_str, 0);
 #endif
 			return FAILURE;
 		default:
@@ -585,14 +581,14 @@ static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval 
 		if (!value || IS_BOT(value)) {
 			return FAILURE;
 		}
-		if (extended_value & ZEND_ISSET) {
+		if (!(extended_value & ZEND_ISEMPTY)) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
 		}
 		return SUCCESS;
 	} else {
-		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
+		ZVAL_BOOL(result, (extended_value & ZEND_ISEMPTY));
 		return SUCCESS;
 	}
 }
@@ -651,7 +647,7 @@ static inline int ct_eval_incdec(zval *result, zend_uchar opcode, zval *op1) {
 }
 
 static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, zval *op1) {
-	if (extended_value & ZEND_ISSET) {
+	if (!(extended_value & ZEND_ISEMPTY)) {
 		ZVAL_BOOL(result, Z_TYPE_P(op1) != IS_NULL);
 	} else {
 		ZVAL_BOOL(result, !zend_is_true(op1));
@@ -660,7 +656,7 @@ static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, z
 }
 
 static inline void ct_eval_type_check(zval *result, uint32_t type_mask, zval *op1) {
-	ZVAL_BOOL(result, (1 << Z_TYPE_P(op1)) & type_mask);
+	ZVAL_BOOL(result, (type_mask >> Z_TYPE_P(op1)) & 1);
 }
 
 static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
@@ -953,7 +949,8 @@ static inline int ct_eval_func_call(
 	}
 
 	func = zend_hash_find_ptr(CG(function_table), name);
-	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
+	if (!func || func->type != ZEND_INTERNAL_FUNCTION
+			|| func->internal_function.handler == ZEND_FN(display_disabled_function)) {
 		return FAILURE;
 	}
 
@@ -1230,6 +1227,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			 * ADD_ARRAY_ELEMENT chain. We do this by only keeping the array on the last opcode
 			 * and use a NULL value everywhere else. */
 			if (Z_TYPE(ctx->values[ssa_op->result_def]) == IS_NULL) {
+				SET_RESULT_BOT(result);
 				return;
 			}
 
@@ -2044,7 +2042,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 		if (ssa_op->result_def == var_num) {
 			if (ssa_op->op1_def >= 0
 					|| ssa_op->op2_def >= 0) {
-				/* we cannot remove instruction that defines other varibales */
+				/* we cannot remove instruction that defines other variables */
 				return 0;
 			} else if (opline->opcode == ZEND_JMPZ_EX
 					|| opline->opcode == ZEND_JMPNZ_EX

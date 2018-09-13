@@ -103,7 +103,6 @@
 #include <ext/standard/info.h>
 
 #include "php_ini.h"
-#define INTL_MODULE_VERSION PHP_INTL_VERSION
 
 /*
  * locale_get_default has a conflict since ICU also has
@@ -206,9 +205,11 @@ ZEND_BEGIN_ARG_INFO_EX(normalizer_args, 0, 0, 1)
 	ZEND_ARG_INFO(0, form)
 ZEND_END_ARG_INFO()
 
+#if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_BEGIN_ARG_INFO_EX(decomposition_args, 0, 0, 1)
 	ZEND_ARG_INFO(0, input)
 ZEND_END_ARG_INFO();
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(grapheme_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
@@ -666,7 +667,9 @@ static const zend_function_entry intl_functions[] = {
 	/* normalizer functions */
 	PHP_FE( normalizer_normalize, normalizer_args )
 	PHP_FE( normalizer_is_normalized, normalizer_args )
+#if U_ICU_VERSION_MAJOR_NUM >= 56
 	PHP_FE( normalizer_get_raw_decomposition, decomposition_args )
+#endif
 
 	/* Locale functions */
 	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, locale_0_args )
@@ -875,7 +878,7 @@ zend_module_entry intl_module_entry = {
 	PHP_RINIT( intl ),
 	PHP_RSHUTDOWN( intl ),
 	PHP_MINFO( intl ),
-	INTL_MODULE_VERSION,
+	PHP_INTL_VERSION,
 	PHP_MODULE_GLOBALS(intl),   /* globals descriptor */
 	PHP_GINIT(intl),            /* globals ctor */
 	NULL,                       /* globals dtor */
@@ -1057,7 +1060,6 @@ PHP_MINFO_FUNCTION( intl )
 
 	php_info_print_table_start();
 	php_info_print_table_header( 2, "Internationalization support", "enabled" );
-	php_info_print_table_row( 2, "version", INTL_MODULE_VERSION );
 	php_info_print_table_row( 2, "ICU version", U_ICU_VERSION );
 #ifdef U_ICU_DATA_VERSION
 	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );

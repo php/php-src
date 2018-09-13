@@ -219,9 +219,9 @@ function ut_norm_is_normalized( $str, $form )
 {
     return $GLOBALS['oo-mode'] ? Normalizer::isNormalized( $str, $form ) : normalizer_is_normalized( $str, $form );
 }
-function ut_norm_get_raw_decomposition( $str )
+function ut_norm_get_raw_decomposition( $str, $form )
 {
-    return $GLOBALS['oo-mode'] ? Normalizer::getRawDecomposition( $str ) : normalizer_get_raw_decomposition( $str );
+    return $GLOBALS['oo-mode'] ? Normalizer::getRawDecomposition( $str, $form ) : normalizer_get_raw_decomposition( $str, $form );
 }
 
 /*

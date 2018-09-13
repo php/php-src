@@ -1,11 +1,5 @@
 --TEST--
 Test getimagesize() function : usage variations  - unexpected type for arg 2
---SKIPIF--
-<?php
-	if (!defined("IMAGETYPE_JPEG")) {
-		die("skip jpeg format is not available");
-	}
-?>
 --FILE--
 <?php
 /* Prototype  : proto array getimagesize(string imagefile [, array info])

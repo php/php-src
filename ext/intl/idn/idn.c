@@ -16,7 +16,6 @@
    |         Gustavo Lopes  <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 /* {{{ includes */
 #ifdef HAVE_CONFIG_H
@@ -139,28 +138,36 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	UErrorCode	  status = U_ZERO_ERROR;
 	UIDNA		  *uts46;
 	int32_t		  len;
-	int32_t		  buffer_capac = 255; /* no domain name may exceed this */
-	zend_string	  *buffer = zend_string_alloc(buffer_capac, 0);
+	zend_string	  *buffer;
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
 	int			  buffer_used = 0;
 
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance") == FAILURE) {
-		zend_string_free(buffer);
+		zend_string_efree(buffer);
 		RETURN_FALSE;
 	}
 
 	if (mode == INTL_IDN_TO_ASCII) {
+		const int32_t buffer_capac = 255;
+		buffer = zend_string_alloc(buffer_capac, 0);
 		len = uidna_nameToASCII_UTF8(uts46, ZSTR_VAL(domain), ZSTR_LEN(domain),
 				ZSTR_VAL(buffer), buffer_capac, &info, &status);
+		if (len >= buffer_capac || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
+			uidna_close(uts46);
+			zend_string_efree(buffer);
+			RETURN_FALSE;
+		}
 	} else {
+		const int32_t buffer_capac = 252*4;
+		buffer = zend_string_alloc(buffer_capac, 0);
 		len = uidna_nameToUnicodeUTF8(uts46, ZSTR_VAL(domain), ZSTR_LEN(domain),
 				ZSTR_VAL(buffer), buffer_capac, &info, &status);
-	}
-	if (len >= 255 || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
-		uidna_close(uts46);
-		zend_string_free(buffer);
-		RETURN_FALSE;
+		if (len >= buffer_capac || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
+			uidna_close(uts46);
+			zend_string_efree(buffer);
+			RETURN_FALSE;
+		}
 	}
 
 	ZSTR_VAL(buffer)[len] = '\0';
@@ -189,7 +196,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	if (!buffer_used) {
-		zend_string_free(buffer);
+		zend_string_efree(buffer);
 	}
 
 	uidna_close(uts46);
@@ -218,16 +225,34 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 		}
 		RETURN_FALSE;
 	} else {
-		UParseError parse_error;
 		UChar       converted[MAXPATHLEN];
 		int32_t     converted_ret_len;
 
 		status = U_ZERO_ERROR;
+
+#if U_ICU_VERSION_MAJOR_NUM >= 55
+		UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+		UIDNA *idna = uidna_openUTS46((int32_t)option, &status);
+
+		if (U_FAILURE(status)) {
+			intl_error_set( NULL, status, "idn_to_ascii: failed to create an UIDNA instance", 0 );
+			RETURN_FALSE;
+		}
+
+		if (mode == INTL_IDN_TO_ASCII) {
+			converted_ret_len = uidna_nameToASCII(idna, ustring, ustring_len, converted, MAXPATHLEN, &info, &status);
+		} else {
+			converted_ret_len = uidna_nameToUnicode(idna, ustring, ustring_len, converted, MAXPATHLEN, &info, &status);
+		}
+		uidna_close(idna);
+#else
+		UParseError parse_error;
 		if (mode == INTL_IDN_TO_ASCII) {
 			converted_ret_len = uidna_IDNToASCII(ustring, ustring_len, converted, MAXPATHLEN, (int32_t)option, &parse_error, &status);
 		} else {
 			converted_ret_len = uidna_IDNToUnicode(ustring, ustring_len, converted, MAXPATHLEN, (int32_t)option, &parse_error, &status);
 		}
+#endif
 		efree(ustring);
 
 		if (U_FAILURE(status)) {
@@ -301,7 +326,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 				"4 arguments were provided, but INTL_IDNA_VARIANT_2003 only "
 				"takes 3 - extra argument ignored");
 		} else {
-			zval_dtor(idna_info);
+			zval_ptr_dtor(idna_info);
 			array_init(idna_info);
 		}
 	}

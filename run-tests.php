@@ -9,7 +9,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                  |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -89,7 +89,7 @@ if (ob_get_level()) echo "Not all buffers were deleted.\n";
 
 error_reporting(E_ALL);
 
-$environment = isset($_ENV) ? $_ENV : array();
+$environment = $_ENV ?? array();
 // Note: php.ini-development sets variables_order="GPCS" not "EGPCS", in which case $_ENV is NOT populated.
 //       detect and handle this case, or die or warn
 if (empty($environment)) {
@@ -183,6 +183,20 @@ if (getenv('TEST_PHPDBG_EXECUTABLE')) {
 	$environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
 }
 
+if (!function_exists("hrtime")) {
+	function hrtime(bool $as_num = false)
+	{
+		$t = microtime(true);
+
+		if ($as_num) {
+			return $t*1000000000;
+		}
+
+		$s = floor($t);
+		return array(0 => $s, 1 => ($t - $s)*1000000000);
+	}
+}
+
 function verify_config()
 {
 	global $php;
@@ -191,7 +205,7 @@ function verify_config()
 		error('environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!');
 	}
 
-	if (function_exists('is_executable') && !is_executable($php)) {
+	if (!is_executable($php)) {
 		error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = $php");
 	}
 }
@@ -744,7 +758,7 @@ Options:
                 filenames to generate with <tdir>. If --html is being used and
                 <url> given then the generated links are relative and prefixed
                 with the given url. In general you want to make <sdir> the path
-                to your source files and <tdir> some pach in your web page
+                to your source files and <tdir> some patch in your web page
                 hierarchy with <url> pointing to <tdir>.
 
     --keep-[all|php|skip|clean]
@@ -894,11 +908,11 @@ foreach ($exts_to_test as $key => $val) {
 }
 
 foreach ($test_dirs as $dir) {
-	find_files(TEST_PHP_SRCDIR."/{$dir}", ($dir == 'ext'));
+	find_files(TEST_PHP_SRCDIR."/{$dir}", $dir == 'ext');
 }
 
 foreach ($user_tests as $dir) {
-	find_files($dir, ($dir == 'ext'));
+	find_files($dir, $dir == 'ext');
 }
 
 function find_files($dir, $is_ext_dir = false, $ignore = false)
@@ -1014,7 +1028,7 @@ function mail_qa_team($data, $status = false)
 {
 	$url_bits = parse_url(QA_SUBMISSION_PAGE);
 
-	if (($proxy = getenv('http_proxy'))) {
+	if ($proxy = getenv('http_proxy')) {
 		$proxy = parse_url($proxy);
 		$path = $url_bits['host'].$url_bits['path'];
 		$host = $proxy['host'];
@@ -1120,7 +1134,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 	if ($captureStdErr) {
 		$descriptorspec[2] = array('pipe', 'w');
 	}
-	$proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
+	$proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, array('suppress_errors' => true));
 
 	if (!$proc) {
 		return false;
@@ -1134,7 +1148,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 		unset($pipes[0]);
 	}
 
-	$timeout = $valgrind ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
+	$timeout = $valgrind ? 300 : ($env['TEST_TIMEOUT'] ?? 60);
 
 	while (true) {
 		/* hide errors from interrupted syscalls */
@@ -1412,20 +1426,15 @@ TEST $file
 	/* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
 	if (array_key_exists('CGI', $section_text) || !empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
 		if (isset($php_cgi)) {
-			$old_php = $php;
 			$php = $php_cgi . ' -C ';
 		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/php-cgi.exe")) {
-			$old_php = $php;
 			$php = realpath(dirname($php) . "/php-cgi.exe") . ' -C ';
 		} else {
 			if (file_exists(dirname($php) . "/../../sapi/cgi/php-cgi")) {
-				$old_php = $php;
 				$php = realpath(dirname($php) . "/../../sapi/cgi/php-cgi") . ' -C ';
 			} else if (file_exists("./sapi/cgi/php-cgi")) {
-				$old_php = $php;
 				$php = realpath("./sapi/cgi/php-cgi") . ' -C ';
 			} else if (file_exists(dirname($php) . "/php-cgi")) {
-				$old_php = $php;
 				$php = realpath(dirname($php) . "/php-cgi") . ' -C ';
 			} else {
 				show_result('SKIP', $tested, $tested_file, "reason: CGI not available");
@@ -1445,7 +1454,6 @@ TEST $file
 		}
 
 		if (isset($phpdbg)) {
-			$old_php = $php;
 			$php = $phpdbg . ' -qIb';
 		} else {
 			show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
@@ -1923,19 +1931,21 @@ COMMAND $cmd
 ";
 
 	junit_start_timer($shortname);
-	$startTime = microtime(true);
+	$hrtime = hrtime();
+	$startTime = $hrtime[0]*1000000000 + $hrtime[1];
 
-	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdIn, $captureStdOut, $captureStdErr);
+	$out = system_with_timeout($cmd, $env, $section_text['STDIN'] ?? null, $captureStdIn, $captureStdOut, $captureStdErr);
 
 	junit_finish_timer($shortname);
-	$time = microtime(true) - $startTime;
-	if ($time * 1000 >= $slow_min_ms) {
+	$hrtime = hrtime();
+	$time = $hrtime[0]*1000000000 + $hrtime[1] - $startTime;
+	if ($time >= $slow_min_ms * 1000000) {
 		$PHP_FAILED_TESTS['SLOW'][] = array(
 			'name'      => $file,
 			'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
 			'output'    => '',
 			'diff'      => '',
-			'info'      => $time,
+			'info'      => $time / 1000000000,
 		);
 	}
 
@@ -2059,10 +2069,10 @@ COMMAND $cmd
 					$start = $end = $length;
 				}
 				// quote a non re portion of the string
-				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
+				$temp .= preg_quote(substr($wanted_re, $startOffset, $start - $startOffset),  '/');
 				// add the re unquoted.
 				if ($end > $start) {
-					$temp = $temp . '(' . substr($wanted_re, $start+2, ($end - $start-2)). ')';
+					$temp .= '(' . substr($wanted_re, $start+2, $end - $start-2). ')';
 				}
 				$startOffset = $end + 2;
 			}
@@ -2205,7 +2215,7 @@ $output
 			error_report($file, $log_filename, $tested);
 		}
 	}
-	
+
 	if ($valgrind && $leaked && $cfg["show"]["mem"]) {
 		show_file_block('mem', file_get_contents($memcheck_filename));
 	}
@@ -2813,7 +2823,7 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 
 	junit_suite_record($suite, 'test_total');
 
-	$time = null !== $time ? $time : junit_get_timer($file_name);
+	$time = $time ?? junit_get_timer($file_name);
 	junit_suite_record($suite, 'execution_time', $time);
 
 	$escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
@@ -2914,7 +2924,7 @@ function junit_path_to_classname($file_name) {
 			array_shift($_tmp);
 		}
 		foreach ($_tmp as $p) {
-			$ret = $ret . "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
+			$ret .= "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
 		}
 		return $ret;
 	}
@@ -2964,7 +2974,7 @@ class RuntestsValgrind {
 	protected $version = '';
 	protected $header = '';
 	protected $version_3_3_0 = false;
-	protected $verison_3_8_0 = false;
+	protected $version_3_8_0 = false;
 
 	public function getVersion() {
 		return $this->version;

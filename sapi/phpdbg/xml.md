@@ -633,7 +633,7 @@ Other tags
 - &lt;watchhit variable="" />: when ever a watched variable is changed, followed by a &lt;watchdata> container
 - &lt;watchdata> may contain
  - for watchpoints on variables:
-  - each of these &lt;watch*> tags conatins a type attribute whose value is either "old" or "new")
+  - each of these &lt;watch*> tags contains a type attribute whose value is either "old" or "new")
   - &lt;watchvalue type="" inaccessible="inaccessible" />: old value is inaccessible
   - &lt;watchvalue type=""> may contain a &lt;stream> element which indicates the old/new (type attribute) value of the variable
   - &lt;watchrefcount type="" refcount="" isref="" />: old/new (type attribute) refcount and isref, both numbers

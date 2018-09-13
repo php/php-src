@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #ifdef HAVE_CONFIG_H
@@ -623,6 +621,8 @@ PHP_MINFO_FUNCTION(curl)
 	}
 #endif
 	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 
@@ -1553,10 +1553,6 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 				}
 			}
 			zval_ptr_dtor(&argv[0]);
-			zval_ptr_dtor(&argv[1]);
-			zval_ptr_dtor(&argv[2]);
-			zval_ptr_dtor(&argv[3]);
-			zval_ptr_dtor(&argv[4]);
 			break;
 		}
 	}
@@ -1619,7 +1615,6 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 
 			zval_ptr_dtor(&argv[0]);
 			zval_ptr_dtor(&argv[1]);
-			zval_ptr_dtor(&argv[2]);
 			break;
 		}
 	}
@@ -1698,7 +1693,7 @@ static int curl_debug(CURL *cp, curl_infotype type, char *buf, size_t buf_len, v
 
 	if (type == CURLINFO_HEADER_OUT) {
 		if (ch->header.str) {
-			zend_string_release(ch->header.str);
+			zend_string_release_ex(ch->header.str, 0);
 		}
 		if (buf_len > 0) {
 			ch->header.str = zend_string_init(buf, buf_len, 0);
@@ -2201,7 +2196,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			}
 #endif
 # if defined(ZTS)
-			if (option == CURLOPT_DNS_USE_GLOBAL_CACHE) {
+			if (option == CURLOPT_DNS_USE_GLOBAL_CACHE && lval) {
 				php_error_docref(NULL, E_WARNING, "CURLOPT_DNS_USE_GLOBAL_CACHE cannot be activated when thread safety is enabled");
 				return 1;
 			}
@@ -2628,7 +2623,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 							}
 						}
 
-						zend_string_release(string_key);
+						zend_string_release_ex(string_key, 0);
 						continue;
 					}
 
@@ -2649,7 +2644,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						error = (CURLcode)form_error;
 					}
 					zend_tmp_string_release(tmp_postval);
-					zend_string_release(string_key);
+					zend_string_release_ex(string_key, 0);
 				} ZEND_HASH_FOREACH_END();
 
 				SAVE_CURL_ERROR(ch, error);
@@ -2889,7 +2884,7 @@ void _php_curl_cleanup_handle(php_curl *ch)
 {
 	smart_str_free(&ch->handlers->write->buf);
 	if (ch->header.str) {
-		zend_string_release(ch->header.str);
+		zend_string_release_ex(ch->header.str, 0);
 		ch->header.str = NULL;
 	}
 
@@ -3274,7 +3269,7 @@ static void _php_curl_close_ex(php_curl *ch)
 	zval_ptr_dtor(&ch->handlers->write_header->func_name);
 	zval_ptr_dtor(&ch->handlers->std_err);
 	if (ch->header.str) {
-		zend_string_release(ch->header.str);
+		zend_string_release_ex(ch->header.str, 0);
 	}
 
 	zval_ptr_dtor(&ch->handlers->write_header->stream);

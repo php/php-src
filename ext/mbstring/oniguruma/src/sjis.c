@@ -268,7 +268,7 @@ property_name_to_ctype(OnigEncoding enc, UChar* p, UChar* end)
   if (len < sizeof(q) - 1) {
     xmemcpy(q, p, (size_t )len);
     q[len] = '\0';
-    pc = euc_jp_lookup_property_name(q, len);
+    pc = onigenc_sjis_lookup_property_name(q, len);
     if (pc != 0)
       return pc->ctype;
   }
@@ -337,5 +337,7 @@ OnigEncodingType OnigEncodingSJIS = {
   is_allowed_reverse_match,
   NULL, /* init */
   NULL, /* is_initialized */
-  is_valid_mbc_string
+  is_valid_mbc_string,
+  ENC_FLAG_ASCII_COMPATIBLE,
+  0, 0
 };

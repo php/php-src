@@ -1,4 +1,4 @@
-CALLOUTS.BUILTIN.ja               2018/03/19
+CALLOUTS.BUILTIN.ja               2018/03/26
 
 
 * FAIL    (前進)
@@ -27,12 +27,17 @@ CALLOUTS.BUILTIN.ja               2018/03/19
 
 * MAX    (前進/後退)
 
-  (*MAX{n::LONG})
+  (*MAX{n::LONG/TAG, c::CHAR})
 
-  成功回数を制限する
+  成功(デフォルト)、前進または後退回数を制限する
+  'n'がTAGのときは、そのTAGのcalloutのslot 0の値が使用される
+  'c'引数の値によって、slot 0の値が変化する
+  'c'はオプション引数で、デフォルト値は'X'
+
+  例:  "(?:(*COUNT[T]{X})a)*(?:(*MAX{T})c)*"
 
   [callout data]
-  slot 0: 現在の成功回数
+  slot 0: '>': 前進回数, '<': 後退回数, 'X': 成功回数(デフォルト)
 
 
 * COUNT    (前進/後退)
@@ -44,7 +49,7 @@ CALLOUTS.BUILTIN.ja               2018/03/19
   'c'はオプション引数で、デフォルト値は'>'
 
   [callout data]
-  slot 0: '>': 前進回数, '<': 後退回数, 'X': 成功回数
+  slot 0: '>': 前進回数(デフォルト), '<': 後退回数, 'X': 成功回数
   slot 1: 前進回数
   slot 2: 後退回数
 
@@ -63,7 +68,7 @@ CALLOUTS.BUILTIN.ja               2018/03/19
   'c'はオプション引数で、デフォルト値は'>'
 
   [callout data]
-  slot 0: '>': 前進回数, '<': 後退回数, 'X': 成功回数
+  slot 0: '>': 前進回数(デフォルト), '<': 後退回数, 'X': 成功回数
   slot 1: 前進回数
   slot 2: 後退回数
 

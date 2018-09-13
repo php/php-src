@@ -15,7 +15,6 @@
    | Author: Pierre A. Joye <pierre@php.net>                              |
    +----------------------------------------------------------------------+
  */
-/* $Id$ s*/
 
 #ifndef IDN_IDN_H
 #define IDN_IDN_H

@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 static inline zend_string* phar_get_stub(const char *index_php, const char *web, const int name_len, const int web_len)
 {
 	static const char newstub0[] = "<?php\n\n$web = '";

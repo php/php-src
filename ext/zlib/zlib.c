@@ -20,8 +20,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -362,7 +360,7 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 			ZSTR_VAL(out)[ZSTR_LEN(out)] = '\0';
 			return out;
 		} else {
-			zend_string_free(out);
+			zend_string_efree(out);
 		}
 	}
 
@@ -811,7 +809,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 						memcpy(dictptr, ZSTR_VAL(*ptr), ZSTR_LEN(*ptr));
 						dictptr += ZSTR_LEN(*ptr);
 						*dictptr++ = 0;
-						zend_string_release(*ptr);
+						zend_string_release_ex(*ptr, 0);
 					} while (++ptr != end);
 					efree(strings);
 				}
@@ -995,7 +993,7 @@ PHP_FUNCTION(inflate_add)
 						case Z_DATA_ERROR:
 							php_error_docref(NULL, E_WARNING, "dictionary does not match expected dictionary (incorrect adler32 hash)");
 							efree(php_ctx->inflateDict);
-							zend_string_release(out);
+							zend_string_release_ex(out, 0);
 							php_ctx->inflateDict = NULL;
 							RETURN_FALSE;
 						EMPTY_SWITCH_DEFAULT_CASE()
@@ -1006,7 +1004,7 @@ PHP_FUNCTION(inflate_add)
 					RETURN_FALSE;
 				}
 			default:
-				zend_string_release(out);
+				zend_string_release_ex(out, 0);
 				php_error_docref(NULL, E_WARNING, "%s", zError(status));
 				RETURN_FALSE;
 		}
@@ -1238,7 +1236,7 @@ PHP_FUNCTION(deflate_add)
 			RETURN_STR(out);
 			break;
 		default:
-			zend_string_release(out);
+			zend_string_release_ex(out, 0);
 			php_error_docref(NULL, E_WARNING, "zlib error (%s)", zError(status));
 			RETURN_FALSE;
 	}
@@ -1393,7 +1391,7 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FALIAS(gzeof,		feof,			arginfo_gzpassthru)
 	PHP_FALIAS(gzgetc,		fgetc,			arginfo_gzpassthru)
 	PHP_FALIAS(gzgets,		fgets,			arginfo_gzgets)
-	PHP_FALIAS(gzgetss,		fgetss,			arginfo_gzgetss)
+	PHP_DEP_FALIAS(gzgetss,	fgetss,			arginfo_gzgetss)
 	PHP_FALIAS(gzread,		fread,			arginfo_gzread)
 	PHP_FE(gzopen,							arginfo_gzopen)
 	PHP_FALIAS(gzpassthru,	fpassthru,		arginfo_gzpassthru)

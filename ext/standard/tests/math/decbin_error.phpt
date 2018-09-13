@@ -2,10 +2,6 @@
 Test expm1() - Error conditions
 --INI--
 precision=14
---SKIPIF--
-<?php
-	function_exists('expm1') or die('skip expm1() is not supported in this build.');
-?>
 --FILE--
 <?php
 /* Prototype  : float expm1  ( float $arg  )

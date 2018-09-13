@@ -15,7 +15,6 @@
    | Author: Edin Kadribasic <edink@php.net>                              |
    +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #ifndef _PHP_EMBED_H_
 #define _PHP_EMBED_H_

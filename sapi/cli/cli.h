@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef CLI_H
 #define CLI_H
 
@@ -30,7 +28,7 @@
 #endif
 
 
-extern PHP_CLI_API size_t sapi_cli_single_write(const char *str, size_t str_length);
+extern PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length);
 
 typedef struct  {
 	size_t (*cli_shell_write)(const char *str, size_t str_length);

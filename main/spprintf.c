@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* This is the spprintf implementation.
  * It has emerged from apache snprintf. See original header:
  */
@@ -817,7 +815,7 @@ fmt_error:
 			}
 
 			if (free_zcopy) {
-				zval_dtor(&zcopy);
+				zval_ptr_dtor_str(&zcopy);
 			}
 		}
 skip_output:

@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* {{{ includes */
 #include "php.h"
 #include "php_network.h"
@@ -921,13 +919,13 @@ PHP_FUNCTION(dns_get_record)
 #if defined(HAVE_DNS_SEARCH)
 			handle = dns_open(NULL);
 			if (handle == NULL) {
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 #elif defined(HAVE_RES_NSEARCH)
 		    memset(&state, 0, sizeof(state));
 		    if (res_ninit(handle)) {
-		    	zval_dtor(return_value);
+		    	zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 #else
@@ -954,7 +952,7 @@ PHP_FUNCTION(dns_get_record)
 					default:
 						php_error_docref(NULL, E_WARNING, "DNS Query failed");
 				}
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 
@@ -971,7 +969,7 @@ PHP_FUNCTION(dns_get_record)
 				n = dn_skipname(cp, end);
 				if (n < 0) {
 					php_error_docref(NULL, E_WARNING, "Unable to parse DNS data received");
-					zval_dtor(return_value);
+					zend_array_destroy(Z_ARR_P(return_value));
 					php_dns_free_handle(handle);
 					RETURN_FALSE;
 				}

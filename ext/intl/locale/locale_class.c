@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <unicode/uloc.h>
 #include "php_intl.h"
 #include "intl_error.h"

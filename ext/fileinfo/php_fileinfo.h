@@ -16,15 +16,13 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_FILEINFO_H
 #define PHP_FILEINFO_H
 
 extern zend_module_entry fileinfo_module_entry;
 #define phpext_fileinfo_ptr &fileinfo_module_entry
 
-#define PHP_FILEINFO_VERSION "1.0.5"
+#define PHP_FILEINFO_VERSION PHP_VERSION
 
 #ifdef PHP_WIN32
 #define PHP_FILEINFO_API __declspec(dllexport)

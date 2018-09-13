@@ -149,7 +149,7 @@ foreach ($array_variables as $array_var) {
   var_dump( empty($array_var) ); // expected: bool(true)
 }
 
-echo "\n*** Testing unset(), emtpy() & isset() with resource variables ***\n";
+echo "\n*** Testing unset(), empty() & isset() with resource variables ***\n";
 $fp = fopen(__FILE__, "r");
 $dfp = opendir( dirname(__FILE__) );
 $resources = array (
@@ -1184,7 +1184,7 @@ bool(false)
 bool(false)
 bool(true)
 
-*** Testing unset(), emtpy() & isset() with resource variables ***
+*** Testing unset(), empty() & isset() with resource variables ***
 -- Iteration 1 --
 resource(%d) of type (stream)
 bool(true)

@@ -145,7 +145,8 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)  /* {
 	zval dummy;
 
 	ZVAL_NULL(&dummy);
-	return (zend_hash_str_update(ht, arKey, nKeyLength, &dummy) != NULL) ? SUCCESS : FAILURE;
+	zend_hash_str_update(ht, arKey, nKeyLength, &dummy);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -183,7 +184,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 	size_t dirlen = strlen(dir);
 	char *entry, *found, *save;
 	zend_string *str_key;
-	uint32_t keylen;
+	size_t keylen;
 	zend_ulong unused;
 
 	ALLOC_HASHTABLE(data);
@@ -204,8 +205,8 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 		}
 
 		keylen = ZSTR_LEN(str_key);
-		if (keylen <= (uint32_t)dirlen) {
-			if (keylen == 0 || keylen < (uint32_t)dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
+		if (keylen <= dirlen) {
+			if (keylen == 0 || keylen < dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
@@ -378,14 +379,14 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		php_url_free(resource);
 		return phar_make_dirstream(internal_file, &phar->manifest);
 	} else {
-		int i_len = strlen(internal_file);
+		size_t i_len = strlen(internal_file);
 
 		/* search for directory */
 		zend_hash_internal_pointer_reset(&phar->manifest);
 		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
 			if (HASH_KEY_NON_EXISTENT !=
 					zend_hash_get_current_key(&phar->manifest, &str_key, &unused)) {
-				if (ZSTR_LEN(str_key) > (uint32_t)i_len && 0 == memcmp(ZSTR_VAL(str_key), internal_file, i_len)) {
+				if (ZSTR_LEN(str_key) > i_len && 0 == memcmp(ZSTR_VAL(str_key), internal_file, i_len)) {
 					/* directory found */
 					internal_file = estrndup(internal_file,
 							i_len);
@@ -413,7 +414,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	phar_entry_info entry, *e;
 	phar_archive_data *phar = NULL;
 	char *error, *arch, *entry2;
-	int arch_len, entry_len;
+	size_t arch_len, entry_len;
 	php_url *resource = NULL;
 	uint32_t host_len;
 
@@ -545,7 +546,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	phar_entry_info *entry;
 	phar_archive_data *phar = NULL;
 	char *error, *arch, *entry2;
-	int arch_len, entry_len;
+	size_t arch_len, entry_len;
 	php_url *resource = NULL;
 	uint32_t host_len;
 	zend_string *str_key;

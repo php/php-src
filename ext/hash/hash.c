@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -172,7 +170,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
-		zend_string_release(digest);
+		zend_string_release_ex(digest, 0);
 		RETURN_NEW_STR(hex_digest);
 	}
 }
@@ -307,7 +305,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
-		zend_string_release(digest);
+		zend_string_release_ex(digest, 0);
 		RETURN_NEW_STR(hex_digest);
 	}
 }
@@ -340,27 +338,27 @@ static void php_hashcontext_ctor(INTERNAL_FUNCTION_PARAMETERS, zval *objval) {
 	php_hashcontext_object *hash = php_hashcontext_from_object(Z_OBJ_P(objval));
 
 	if (zend_parse_parameters(argc, "S|lS", &algo, &options, &key) == FAILURE) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 
 	if (options & PHP_HASH_HMAC) {
 		if (!ops->is_crypto) {
 			php_error_docref(NULL, E_WARNING, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
 			php_error_docref(NULL, E_WARNING, "HMAC requested without a key");
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 	}
@@ -561,7 +559,7 @@ PHP_FUNCTION(hash_final)
 
 		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), digest_len);
 		ZSTR_VAL(hex_digest)[2 * digest_len] = 0;
-		zend_string_release(digest);
+		zend_string_release_ex(digest, 0);
 		RETURN_NEW_STR(hex_digest);
 	}
 }
@@ -580,7 +578,7 @@ PHP_FUNCTION(hash_copy)
 	RETVAL_OBJ(Z_OBJ_HANDLER_P(zhash, clone_obj)(zhash));
 
 	if (php_hashcontext_from_object(Z_OBJ_P(return_value))->context == NULL) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -890,7 +888,7 @@ static PHP_METHOD(HashContext, __construct) {
 /* }}} */
 
 static const zend_function_entry php_hashcontext_methods[] = {
-	PHP_ME(HashContext, __construct, NULL, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)
+	PHP_ME(HashContext, __construct, NULL, ZEND_ACC_PRIVATE)
 	PHP_FE_END
 };
 
@@ -1241,7 +1239,7 @@ PHP_MINIT_FUNCTION(hash)
 	php_hashcontext_ce->serialize = zend_class_serialize_deny;
 	php_hashcontext_ce->unserialize = zend_class_unserialize_deny;
 
-	memcpy(&php_hashcontext_handlers, zend_get_std_object_handlers(),
+	memcpy(&php_hashcontext_handlers, &std_object_handlers,
 	       sizeof(zend_object_handlers));
 	php_hashcontext_handlers.offset = XtOffsetOf(php_hashcontext_object, std);
 	php_hashcontext_handlers.dtor_obj = php_hashcontext_dtor;

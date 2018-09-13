@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension ctype
 
 PHP_ARG_ENABLE(ctype, whether to enable ctype functions,
 [  --disable-ctype         Disable ctype functions], yes)

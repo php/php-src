@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension xmlrpc
 
 sinclude(ext/xmlrpc/libxmlrpc/acinclude.m4)
 sinclude(ext/xmlrpc/libxmlrpc/xmlrpc.m4)
@@ -67,11 +65,11 @@ if test "$PHP_XMLRPC" != "no"; then
     if test "$PHP_ICONV_DIR" != "no"; then
       PHP_ICONV=$PHP_ICONV_DIR
     fi
-  
+
     if test -z "$PHP_ICONV" || test "$PHP_ICONV" = "no"; then
       PHP_ICONV=yes
     fi
-  
+
     PHP_SETUP_ICONV(XMLRPC_SHARED_LIBADD, [], [
       AC_MSG_ERROR([iconv not found, in order to build xmlrpc you need the iconv library])
     ])

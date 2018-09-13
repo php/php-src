@@ -15,7 +15,6 @@
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #if 0 && (defined(__linux__) || defined(sun) || defined(__IRIX__))
 # define _BSD_SOURCE 		/* linux wants this when XOPEN mode is on */
@@ -104,7 +103,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		str = zval_get_string(element);
 
 		if (ZSTR_LEN(str) == 0) {
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 			continue;
 		}
 
@@ -143,7 +142,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 			p += ZSTR_LEN(str) + 1;
 		}
-		zend_string_release(str);
+		zend_string_release_ex(str, 0);
 	} ZEND_HASH_FOREACH_END();
 
 	assert((uint32_t)(p - env.envp) <= sizeenv);

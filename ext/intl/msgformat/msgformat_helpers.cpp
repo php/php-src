@@ -27,6 +27,7 @@
 #include <unicode/timezone.h>
 #include <unicode/datefmt.h>
 #include <unicode/calendar.h>
+#include <unicode/strenum.h>
 
 #include <vector>
 
@@ -76,6 +77,16 @@ MessageFormatAdapter::getMessagePattern(MessageFormat* m) {
 #endif
 U_NAMESPACE_END
 
+using icu::Formattable;
+using icu::Format;
+using icu::DateFormat;
+using icu::MessageFormat;
+#ifdef HAS_MESSAGE_PATTERN
+using icu::MessagePattern;
+#endif
+using icu::MessageFormatAdapter;
+using icu::FieldPosition;
+
 U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
 {
 	int32_t fmt_count = 0;
@@ -112,11 +123,7 @@ static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
 
 	for (int i = 0; i < parts_count; i++) {
 		const Formattable::Type t = types[i];
-		if (zend_hash_index_update_mem(ret, (zend_ulong)i, (void*)&t, sizeof(t)) == NULL) {
-			intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
-				"Write to argument types hash table failed", 0);
-			break;
-		}
+		zend_hash_index_update_mem(ret, (zend_ulong)i, (void*)&t, sizeof(t));
 	}
 
 	if (U_FAILURE(err.code)) {
@@ -186,12 +193,8 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 			if ((storedType = (Formattable::Type*)zend_hash_str_find_ptr(ret, (char*)argName.getBuffer(), argName.length())) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if ((storedType = (Formattable::Type*)zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length(),
-						(void*)&bogusType, sizeof(bogusType))) == NULL) {
-					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
-						"Write to argument types hash table failed", 0);
-					continue;
-				}
+				storedType = (Formattable::Type*)zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length(),
+						(void*)&bogusType, sizeof(bogusType));
 			}
 		} else if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NUMBER) {
 			int32_t argNumber = name_part.getValue();
@@ -203,11 +206,7 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 			if ((storedType = (Formattable::Type*)zend_hash_index_find_ptr(ret, (zend_ulong)argNumber)) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if ((storedType = (Formattable::Type*)zend_hash_index_update_mem(ret, (zend_ulong)argNumber, (void*)&bogusType, sizeof(bogusType))) == NULL) {
-					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
-						"Write to argument types hash table failed", 0);
-					continue;
-				}
+				storedType = (Formattable::Type*)zend_hash_index_update_mem(ret, (zend_ulong)argNumber, (void*)&bogusType, sizeof(bogusType));
 			}
 		} else {
 			intl_errors_set(&err, U_INVALID_FORMAT_ERROR, "Invalid part type encountered", 0);
@@ -227,15 +226,16 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 					UnicodeString typeString = mp.getSubstring(type_part);
 					/* This is all based on the rules in the docs for MessageFormat
 					 * @see http://icu-project.org/apiref/icu4c/classMessageFormat.html */
-					if (typeString == "number") {
+#define ASCII_LITERAL(s) UNICODE_STRING(s, sizeof(s)-1)
+					if (typeString == ASCII_LITERAL("number")) {
 						MessagePattern::Part style_part = mp.getPart(i + 1); /* Not advancing i */
 						if (style_part.getType() == UMSGPAT_PART_TYPE_ARG_STYLE) {
 							UnicodeString styleString = mp.getSubstring(style_part);
-							if (styleString == "integer") {
+							if (styleString == ASCII_LITERAL("integer")) {
 								type = Formattable::kInt64;
-							} else if (styleString == "currency") {
+							} else if (styleString == ASCII_LITERAL("currency")) {
 								type = Formattable::kDouble;
-							} else if (styleString == "percent") {
+							} else if (styleString == ASCII_LITERAL("percent")) {
 								type = Formattable::kDouble;
 							} else { /* some style invalid/unknown to us */
 								type = Formattable::kDouble;
@@ -243,12 +243,13 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 						} else { // if missing style, part, make it a double
 							type = Formattable::kDouble;
 						}
-					} else if ((typeString == "date") || (typeString == "time")) {
+					} else if ((typeString == ASCII_LITERAL("date")) || (typeString == ASCII_LITERAL("time"))) {
 						type = Formattable::kDate;
-					} else if ((typeString == "spellout") || (typeString == "ordinal")
-							|| (typeString == "duration")) {
+					} else if ((typeString == ASCII_LITERAL("spellout")) || (typeString == ASCII_LITERAL("ordinal"))
+							|| (typeString == ASCII_LITERAL("duration"))) {
 						type = Formattable::kDouble;
 					}
+#undef ASCII_LITERAL
 				} else {
 					/* If there's no UMSGPAT_PART_TYPE_ARG_TYPE right after a
 					 * UMSGPAT_ARG_TYPE_SIMPLE argument, then the pattern
@@ -331,6 +332,24 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 
 	if (mfo->mf_data.tz_set) {
 		return; /* already done */
+	}
+
+	/* There is a bug in ICU which prevents MessageFormatter::getFormats()
+	   to handle more than 10 formats correctly. The enumerator could be
+	   used to walk through the present formatters using getFormat(), which
+	   however seems to provide just a readonly access. This workaround
+	   prevents crash when there are > 10 formats but doesn't set any error.
+	   As a result, only DateFormatters with > 10 subformats are affected.
+	   This workaround should be ifdef'd out, when the bug has been fixed
+	   in ICU. */
+	icu::StringEnumeration* fnames = mf->getFormatNames(err.code);
+	if (!fnames || U_FAILURE(err.code)) {
+		return;
+	}
+	count = fnames->count(err.code);
+	delete fnames;
+	if (count > 10) {
+		return;
 	}
 
 	formats = mf->getFormats(count);
@@ -536,7 +555,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 							spprintf(&message, 0, "The argument for key '%s' "
 								"cannot be used as a date or time", ZSTR_VAL(u8key));
 							intl_errors_set(&err, err.code, message, 1);
-							zend_string_release(u8key);
+							zend_string_release_ex(u8key, 0);
 							efree(message);
 						}
 						continue;
@@ -582,7 +601,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 							"is available", ZSTR_VAL(u8key));
 						intl_errors_set(&err,
 							U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-						zend_string_release(u8key);
+						zend_string_release_ex(u8key, 0);
 						efree(message);
 					}
 				}

@@ -16,16 +16,14 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_HASH_H
 #define PHP_HASH_H
 
 #include "php.h"
 
 #define PHP_HASH_EXTNAME	"hash"
-#define PHP_HASH_VERSION	"1.0"
-#define PHP_MHASH_VERSION	"1.0"
+#define PHP_HASH_VERSION	PHP_VERSION
+#define PHP_MHASH_VERSION	PHP_VERSION
 
 #define PHP_HASH_HMAC		0x0001
 

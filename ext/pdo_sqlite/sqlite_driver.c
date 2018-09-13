@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -537,7 +535,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	if (!zend_is_callable(callback, 0, NULL)) {
 		zend_string *cbname = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release(cbname);
+		zend_string_release_ex(cbname, 0);
 		RETURN_FALSE;
 	}
 
@@ -609,14 +607,14 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	if (!zend_is_callable(step_callback, 0, NULL)) {
 		zend_string *cbname = zend_get_callable_name(step_callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release(cbname);
+		zend_string_release_ex(cbname, 0);
 		RETURN_FALSE;
 	}
 
 	if (!zend_is_callable(fini_callback, 0, NULL)) {
 		zend_string *cbname = zend_get_callable_name(fini_callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release(cbname);
+		zend_string_release_ex(cbname, 0);
 		RETURN_FALSE;
 	}
 
@@ -669,7 +667,7 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	if (!zend_is_callable(callback, 0, NULL)) {
 		zend_string *cbname = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release(cbname);
+		zend_string_release_ex(cbname, 0);
 		RETURN_FALSE;
 	}
 

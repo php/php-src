@@ -15,9 +15,7 @@
 // +----------------------------------------------------------------------+
 // | Authors: Shane Caraveo <Shane@Caraveo.com>                           |
 // +----------------------------------------------------------------------+
-//
-// $Id$
-//
+
 require_once 'DB.php'; // PEAR/DB
 require_once 'client_round2_params.php';
 require_once 'test.utility.php';

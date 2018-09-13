@@ -514,7 +514,7 @@ ignore_repeated_errors = Off
 ignore_repeated_source = Off
 
 ; If this parameter is set to Off, then memory leaks will not be shown (on
-; stdout or in the log). This has only effect in a debug compile, and if
+; stdout or in the log). This is only effective in a debug compile, and if
 ; error reporting includes E_WARNING in the allowed list
 ; http://php.net/report-memleaks
 report_memleaks = On
@@ -585,6 +585,24 @@ html_errors = On
 ; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
 
+; The syslog ident is a string which is prepended to every message logged
+; to syslog. Only used when error_log is set to syslog.
+;syslog.ident = php
+
+; The syslog facility is used to specify what type of program is logging 
+; the message. Only used when error_log is set to syslog.
+;syslog.facility = user
+
+; Set this to disable filtering control characters (the default).
+; Some loggers only accept NVT-ASCII, others accept anything that's not
+; control characters. If your logger accepts everything, then no filtering
+; is needed at all.
+; Allowed values are:
+;   ascii (only base ASCII characters)
+;   no_ctrl (all characters except control characters)
+;   all (all characters)
+;syslog.filter = ascii
+
 ;windows.show_crt_warning
 ; Default value: 0
 ; Development value: 0
@@ -652,7 +670,7 @@ register_argc_argv = Off
 ; first used (Just In Time) instead of when the script starts. If these
 ; variables are not used within a script, having this directive on will result
 ; in a performance gain. The PHP directive register_argc_argv must be disabled
-; for this directive to have any affect.
+; for this directive to have any effect.
 ; http://php.net/auto-globals-jit
 auto_globals_jit = On
 
@@ -919,6 +937,7 @@ default_socket_timeout = 60
 
 ;extension=soap
 ;extension=sockets
+;extension=sodium
 ;extension=sqlite3
 ;extension=tidy
 ;extension=xmlrpc
@@ -1377,6 +1396,11 @@ session.cookie_domain =
 ; inaccessible to browser scripting languages such as JavaScript.
 ; http://php.net/session.cookie-httponly
 session.cookie_httponly =
+
+; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
+; Current valid values are "Lax" or "Strict"
+; https://tools.ietf.org/html/draft-west-first-party-cookies-07
+session.cookie_samesite =
 
 ; Handler used to serialize data. php is the standard serializer of PHP.
 ; http://php.net/session.serialize-handler
@@ -1866,6 +1890,10 @@ ldap.max_links = -1
 
 ; Prevent name collisions in chroot'ed environment.
 ;opcache.validate_root=0
+
+; If specified, it produces opcode dumps for debugging different stages of
+; optimizations.
+;opcache.opt_debug_level=0
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

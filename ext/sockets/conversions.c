@@ -336,12 +336,12 @@ double_case:
 
 		switch (is_numeric_string(Z_STRVAL(lzval), Z_STRLEN(lzval), &lval, &dval, 0)) {
 		case IS_DOUBLE:
-			zval_dtor(&lzval);
+			zval_ptr_dtor_str(&lzval);
 			ZVAL_DOUBLE(&lzval, dval);
 			goto double_case;
 
 		case IS_LONG:
-			zval_dtor(&lzval);
+			zval_ptr_dtor_str(&lzval);
 			ZVAL_LONG(&lzval, lval);
 			goto long_case;
 		}
@@ -358,7 +358,7 @@ double_case:
 		break;
 	}
 
-	zval_dtor(&lzval);
+	zval_ptr_dtor(&lzval);
 
 	return ret;
 }

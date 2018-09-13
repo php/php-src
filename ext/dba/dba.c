@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -901,7 +899,7 @@ restart:
 			} else {
 				if (opened_path) {
 					info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
-					zend_string_release(opened_path);
+					zend_string_release_ex(opened_path, 0);
 				}
 			}
 		}
@@ -915,7 +913,7 @@ restart:
 				}
 				/* now store the name of the lock */
 				info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
-				zend_string_release(opened_path);
+				zend_string_release_ex(opened_path, 0);
 			}
 		}
 		if (!lock_dbf) {

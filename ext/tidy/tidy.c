@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -101,7 +99,7 @@
 		ce.create_object = tidy_object_new_ ## name; \
 		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent); \
 		tidy_ce_ ## name->ce_flags |= __flags;  \
-		memcpy(&tidy_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
+		memcpy(&tidy_object_handlers_ ## name, &std_object_handlers, sizeof(zend_object_handlers)); \
 		tidy_object_handlers_ ## name.clone_obj = NULL; \
 	}
 
@@ -398,7 +396,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_body, 0, 0, 1)
 	ZEND_ARG_INFO(0, tidy)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_construct, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_construct, 0, 0, 0)
     ZEND_ARG_INFO(0, filename)
     ZEND_ARG_INFO(0, config_file)
     ZEND_ARG_INFO(0, encoding)
@@ -653,7 +651,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 
 	if (is_file) {
-		zend_string_release(data);
+		zend_string_release_ex(data, 0);
 	}
 
 	tidyBufFree(errbuf);
@@ -1098,7 +1096,7 @@ static PHP_MSHUTDOWN_FUNCTION(tidy)
 static PHP_MINFO_FUNCTION(tidy)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Tidy support", "enabled");
+	php_info_print_table_row(2, "Tidy support", "enabled");
 #if HAVE_TIDYBUFFIO_H
 	php_info_print_table_row(2, "libTidy Version", (char *)tidyLibraryVersion());
 #elif HAVE_TIDYP_H
@@ -1107,7 +1105,6 @@ static PHP_MINFO_FUNCTION(tidy)
 #if HAVE_TIDYRELEASEDATE
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
 #endif
-	php_info_print_table_row(2, "Extension Version", PHP_TIDY_VERSION " ($Id$)");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -1316,7 +1313,7 @@ static PHP_FUNCTION(tidy_parse_file)
 		RETVAL_FALSE;
 	}
 
-	zend_string_release(contents);
+	zend_string_release_ex(contents, 0);
 }
 /* }}} */
 
@@ -1635,7 +1632,7 @@ static TIDY_DOC_METHOD(__construct)
 
 		php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc);
 
-		zend_string_release(contents);
+		zend_string_release_ex(contents, 0);
 	}
 }
 
@@ -1675,7 +1672,7 @@ static TIDY_DOC_METHOD(parseFile)
 		RETVAL_TRUE;
 	}
 
-	zend_string_release(contents);
+	zend_string_release_ex(contents, 0);
 }
 
 static TIDY_DOC_METHOD(parseString)

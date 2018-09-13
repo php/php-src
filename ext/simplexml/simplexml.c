@@ -18,8 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -354,7 +352,7 @@ long_dim:
 	}
 
 	if (member == &tmp_zv) {
-		zval_dtor(&tmp_zv);
+		zval_ptr_dtor_str(&tmp_zv);
 	}
 
 	if (Z_ISUNDEF_P(rv)) {
@@ -385,9 +383,7 @@ static zval *sxe_dimension_read(zval *object, zval *offset, int type, zval *rv)
  */
 static void change_node_zval(xmlNodePtr node, zval *value)
 {
-	zval value_copy;
 	xmlChar *buffer;
-	int buffer_len;
 
 	if (!value)
 	{
@@ -404,14 +400,10 @@ static void change_node_zval(xmlNodePtr node, zval *value)
 			/* break missing intentionally */
 		case IS_STRING:
 			buffer = xmlEncodeEntitiesReentrant(node->doc, (xmlChar *)Z_STRVAL_P(value));
-			buffer_len = xmlStrlen(buffer);
 			/* check for NULL buffer in case of memory error in xmlEncodeEntitiesReentrant */
 			if (buffer) {
-				xmlNodeSetContentLen(node, buffer, buffer_len);
+				xmlNodeSetContent(node, buffer);
 				xmlFree(buffer);
-			}
-			if (value == &value_copy) {
-				zval_dtor(value);
 			}
 			break;
 		default:
@@ -465,14 +457,14 @@ long_dim:
 			if (Z_TYPE_P(member) != IS_STRING) {
 				trim_str = zval_get_string_func(member);
 				ZVAL_STR(&tmp_zv, php_trim(trim_str, NULL, 0, 3));
-				zend_string_release(trim_str);
+				zend_string_release_ex(trim_str, 0);
 				member = &tmp_zv;
 			}
 
 			if (!Z_STRLEN_P(member)) {
 				php_error_docref(NULL, E_WARNING, "Cannot write or create unnamed %s", attribs ? "attribute" : "element");
 				if (member == &tmp_zv) {
-					zval_dtor(&tmp_zv);
+					zval_ptr_dtor_str(&tmp_zv);
 				}
 				return FAILURE;
 			}
@@ -533,7 +525,7 @@ long_dim:
 				/* break is missing intentionally */
 			default:
 				if (member == &tmp_zv) {
-					zval_dtor(&tmp_zv);
+					zval_ptr_dtor_str(&tmp_zv);
 				}
 				zend_error(E_WARNING, "It is not yet possible to assign complex types to %s", attribs ? "attributes" : "properties");
 				return FAILURE;
@@ -645,7 +637,7 @@ next_iter:
 	}
 
 	if (member == &tmp_zv) {
-		zval_dtor(&tmp_zv);
+		zval_ptr_dtor_str(&tmp_zv);
 	}
 	if (pnewnode) {
 		*pnewnode = newnode;
@@ -803,7 +795,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 	}
 
 	if (member == &tmp_zv) {
-		zval_dtor(&tmp_zv);
+		zval_ptr_dtor_str(&tmp_zv);
 	}
 
 	return exists;
@@ -928,7 +920,7 @@ next_iter:
 	}
 
 	if (member == &tmp_zv) {
-		zval_dtor(&tmp_zv);
+		zval_ptr_dtor_str(&tmp_zv);
 	}
 }
 /* }}} */
@@ -1013,7 +1005,7 @@ static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *val
 	} else {
 		zend_hash_add_new(rv, key, value);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 }
 /* }}} */
 
@@ -1506,7 +1498,7 @@ static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{
 		ZVAL_STRING(&zv, (char*)ns->href);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &zv);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 }
 /* }}} */
 
@@ -2416,7 +2408,7 @@ static void php_sxe_iterator_dtor(zend_object_iterator *iter) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
-	/* cleanup handled in sxe_object_dtor as we dont always have an iterator wrapper */
+	/* cleanup handled in sxe_object_dtor as we don't always have an iterator wrapper */
 	if (!Z_ISUNDEF(iterator->intern.data)) {
 		zval_ptr_dtor(&iterator->intern.data);
 	}
@@ -2480,6 +2472,12 @@ static void php_sxe_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 	php_sxe_move_forward_iterator(iterator->sxe);
+}
+/* }}} */
+
+PHP_SXE_API void php_sxe_rewind_iterator(php_sxe_object *sxe) /* {{{ */
+{
+	php_sxe_reset_iterator(sxe, 1);
 }
 /* }}} */
 
@@ -2686,10 +2684,9 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe);
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
-	sxe_class_entry->iterator_funcs.funcs = &php_sxe_iterator_funcs;
 	zend_class_implements(sxe_class_entry, 1, zend_ce_traversable);
 
-	memcpy(&sxe_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
 	sxe_object_handlers.dtor_obj = sxe_object_dtor;
 	sxe_object_handlers.free_obj = sxe_object_free_storage;
@@ -2711,7 +2708,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_debug_info = sxe_get_debug_info;
 	sxe_object_handlers.get_closure = NULL;
 	sxe_object_handlers.get_gc = sxe_get_gc;
-	
+
 	sxe_class_entry->serialize = zend_class_serialize_deny;
 	sxe_class_entry->unserialize = zend_class_unserialize_deny;
 
@@ -2737,8 +2734,7 @@ PHP_MSHUTDOWN_FUNCTION(simplexml)
 PHP_MINFO_FUNCTION(simplexml)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Simplexml support", "enabled");
-	php_info_print_table_row(2, "Revision", "$Id$");
+	php_info_print_table_row(2, "SimpleXML support", "enabled");
 	php_info_print_table_row(2, "Schema support",
 #ifdef LIBXML_SCHEMAS_ENABLED
 		"enabled");

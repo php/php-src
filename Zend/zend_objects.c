@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
@@ -60,7 +58,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	}
 	if (UNEXPECTED(object->ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		if (EXPECTED(Z_TYPE_P(p) == IS_STRING)) {
-			zend_string_release(Z_STR_P(p));
+			zval_ptr_dtor_str(p);
 		} else if (Z_TYPE_P(p) == IS_ARRAY) {
 			HashTable *guards;
 
@@ -78,8 +76,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 	if (destructor) {
 		zend_object *old_exception;
-		zval obj;
 		zend_class_entry *orig_fake_scope;
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcic;
+		zval ret;
 
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -124,7 +124,6 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		}
 
 		GC_ADDREF(object);
-		ZVAL_OBJ(&obj, object);
 
 		/* Make sure that destructors are protected from previously thrown exceptions.
 		 * For example, if an exception was thrown in a function and when the function's
@@ -141,7 +140,24 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		}
 		orig_fake_scope = EG(fake_scope);
 		EG(fake_scope) = NULL;
-		zend_call_method_with_0_params(&obj, object->ce, &destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
+
+		ZVAL_UNDEF(&ret);
+
+		fci.size = sizeof(fci);
+		fci.object = object;
+		fci.retval = &ret;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+		ZVAL_UNDEF(&fci.function_name); /* Unused */
+
+		fcic.function_handler = destructor;
+		fcic.called_scope = object->ce;
+		fcic.object = object;
+
+		zend_call_function(&fci, &fcic);
+		zval_ptr_dtor(&ret);
+
 		if (old_exception) {
 			if (EG(exception)) {
 				zend_exception_set_previous(EG(exception), old_exception);
@@ -149,7 +165,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				EG(exception) = old_exception;
 			}
 		}
-		zval_ptr_dtor(&obj);
+		OBJ_RELEASE(object);
 		EG(fake_scope) = orig_fake_scope;
 	}
 }
@@ -220,12 +236,29 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 	}
 
 	if (old_object->ce->clone) {
-		zval new_obj;
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcic;
+		zval ret;
 
-		ZVAL_OBJ(&new_obj, new_object);
-		Z_ADDREF(new_obj);
-		zend_call_method_with_0_params(&new_obj, old_object->ce, &old_object->ce->clone, ZEND_CLONE_FUNC_NAME, NULL);
-		zval_ptr_dtor(&new_obj);
+		GC_ADDREF(new_object);
+
+		ZVAL_UNDEF(&ret);
+
+		fci.size = sizeof(fci);
+		fci.object = new_object;
+		fci.retval = &ret;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+		ZVAL_UNDEF(&fci.function_name); /* Unused */
+
+		fcic.function_handler = new_object->ce->clone;
+		fcic.called_scope = new_object->ce;
+		fcic.object = new_object;
+
+		zend_call_function(&fci, &fcic);
+		zval_ptr_dtor(&ret);
+		OBJ_RELEASE(new_object);
 	}
 }
 

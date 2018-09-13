@@ -1,4 +1,4 @@
-PHP 7.3 UPGRADE NOTES
+PHP 7.4 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -19,55 +19,9 @@ PHP 7.3 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-Core:
-  . The ext_skel utility has been completely redesigned with new options and 
-    some old options removed. This is now written in PHP and has no external 
-	dependencies.
-  . Support for BeOS has been dropped.
-  . Exceptions thrown due to automatic conversion of warnings into exceptions
-    in EH_THROW mode (e.g. some DateTime exceptions) no longer populate
-    error_get_last() state. As such, they now work the same way as manually
-    thrown exceptions.
-
-BCMath:
-  . All warnings thrown by BCMath functions are now using PHP's error handling.
-    Formerly some warnings have directly been written to stderr.
-  . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
-    the returned numbers may have omitted trailing decimal zeroes.
-
-SPL:
-  . If an SPL autoloader throws an exception, following autoloaders will not be
-    executed. Previously all autoloaders were executed and exceptions were
-    chained.
-
-SimpleXML:
-  . Mathematic operations involving SimpleXML objects will now treat the text as
-    an integer or float, whichever is more appropriate. Previously values were
-    treated as integers unconditionally.
-
-Standard:
-  . getimagesize() and related functions now report the mime type of BMP images
-	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
-		with the IANA (see RFC 7903).
-
 ========================================
 2. New Features
 ========================================
-
-Core:
-  . Array destructuring now supports reference assignments using the syntax
-    [&$a, [$b, &$c]] = $d. The same is also supported for list().
-    (RFC: https://wiki.php.net/rfc/list_reference_assignment)
-  . instanceof now allows literals as the first operand,
-    in which case the result is always FALSE.
-
-BCMath:
-  . bcscale() can now also be used as getter to retrieve the current scale in use.
-
-readline:
-  . Support for the completion_append_character and completion_suppress_append
-    options has been added to readline_info(). These options are only available
-    if PHP is linked against libreadline (rather than libedit).
 
 ========================================
 3. Changes in SAPI modules
@@ -81,74 +35,13 @@ readline:
 5. Changed Functions
 ========================================
 
-JSON:
-  . A new flag has been added, JSON_THROW_ON_ERROR, which can be used with
-    json_decode() or json_encode() and causes these functions to throw a
-    JsonException upon an error, instead of setting the global error state that
-    is retrieved with json_last_error(). JSON_PARTIAL_OUTPUT_ON_ERROR takes
-    precedence over JSON_THROW_ON_ERROR.
-    (RFC: https://wiki.php.net/rfc/json_throw_on_error)
-
-Standard:
-  . debug_zval_dump() was changed to display recursive arrays and objects
-    in the same way as var_dump(). Now, it doesn't display them twice.
-  . array_push() and array_unshift() can now also be called with a single
-    argument, which is particularly convenient wrt. the spread operator.
-
-PCRE:
-  . preg_quote() now also escapes the '#' character.
-
 ========================================
 6. New Functions
 ========================================
 
-Core:
-  . Added monotonic timer function hrtime([bool get_as_num]). It returns an
-    array of the form [seconds, nanoseconds] with the timestamp starting at
-    an unspecified point in the past. If the optional argument is passed as
-    true, the return value is an integer on 64-bit systems or float on
-    32-bit systems, representing the nanoseconds. The timestamp is not
-    adjustable and is not related to wall clock or time of day. The timers
-    are available under Linux, FreeBSD, Windows, Mac, SunOS, AIX and their
-    derivatives. If no required timers are provided by a corresponding
-    platform, the function returns false.
-
-Date:
-  . Added the DateTime::createFromImmutable() method, which mirrors
-    DateTimeImmutable::createFromMutable().
-
-GMP:
-  . Added gmp_binomial(n, k) for calculating binomial coefficients.
-  . Added gmp_lcm(a, b) for calculating the least common multiple.
-  . Added gmp_perfect_power(a) to check if number is a perfect power.
-  . Added gmp_kronecker(a, b) to compute the Kronecker symbol.
-
-Intl:
-  . Added void Spoofchecker::setRestrictionLevel(int $level) method, available
-    when linked with ICU >= 58.1. Levels are represented as class constants
-    - Spoofchecker::ASCII
-    - Spoofchecker::HIGHLY_RESTRICTIVE
-    - Spoofchecker::MODERATELY_RESTRICTIVE
-    - Spoofchecker::MINIMALLY_RESTRICTIVE
-    - Spoofchecker::UNRESTRICTIVE
-    - Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE
-    For the detailed documentation on the restriction levels, see
-    URestrictionLevel under
-    http://icu-project.org/apiref/icu4c/uspoof_8h.html
-  . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
-    to retrieve the Decomposition_Mapping property of a character.
-
-Standard:
-  . Added is_countable() function, to check whether a value may be passed to
-    count().
-    (RFC: https://wiki.php.net/rfc/is-countable)
-
 ========================================
 7. New Classes and Interfaces
 ========================================
-
-JSON:
-  . JsonException
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -158,68 +51,25 @@ JSON:
 9. Other Changes to Extensions
 ========================================
 
- Curl:
-  . libcurl >= 7.15.5 is now required.
-
- Filter:
-  . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
-    defines the set of allowed thousand separator chars.  The default (`"',."`)
-    is fully backward compatible with former PHP versions.
-
- FTP:
-  . Set default transfer mode to binary
-
- ODBC: 
-  . Support for ODBCRouter has been removed.
-  . Support for Birdstep has been removed.
-
- ZIP:
-  . Bundled libzip has been dropped,
-    system library is now required.
+- Reflection:
+  . Numeric value of class, property, function and constant modifiers was
+    changed. Don't filter methods and properties through
+    ReflectionClass::getMethods() and ReflectionClass::getProperties(), or test
+    results of Reflection...::getModifiers(), using hard-coded numeric values.
+    Use corresponding constants instead (e.g. ReflectionMethod::IS_PUBLIC).
 
 ========================================
 10. New Global Constants
 ========================================
 
-Curl:
-  . CURLOPT_REQUEST_TARGET
-
-JSON:
-  . JSON_THROW_ON_ERROR
-
-PGSQL:
-  . Requires Postgres 9.3
-    - PGSQL_DIAG_SCHEMA_NAME
-	- PGSQL_DIAG_TABLE_NAME
-	- PGSQL_DIAG_COLUMN_NAME
-	- PGSQL_DIAG_DATATYPE_NAME
-	- PGSQL_DIAG_CONSTRAINT_NAME
-  . Requires Postgres 9.6
-    - PGSQL_DIAG_SEVERITY_NONLOCALIZED
-
 ========================================
 11. Changes to INI File Handling
 ========================================
-
-- birdstep.max_links
-  . This INI directive has been removed.
-
-- opcache.inherited_hack
-  . This INI directive has been removed. The value has already been ignored
-    since PHP 5.3.0.
 
 ========================================
 12. Windows Support
 ========================================
 
-- Core
-  . File descriptors are opened in shared read/write/delete mode by default.
-    This effectively maps the UNIX semantics and allows to delete files with
-    handles in use. It is not 100% same, some platform differences still
-    persist. After the deletion, the filename entry is blocked, until all
-    the opened handles to it are closed.
-
 ========================================
 13. Other Changes
 ========================================
-

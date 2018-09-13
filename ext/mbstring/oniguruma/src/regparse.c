@@ -525,7 +525,7 @@ onig_st_insert_strend(hash_table_type* table, const UChar* str_key,
 
 typedef struct {
   OnigEncoding enc;
-  int    type; // callout type: single or not
+  int    type; /* callout type: single or not */
   UChar* s;
   UChar* end;
 } st_callout_name_key;
@@ -1583,7 +1583,7 @@ onig_set_callout_of_name(OnigEncoding enc, OnigCalloutType callout_type,
     }
   }
 
-  r = id; // return id
+  r = id;
   return r;
 }
 
@@ -1637,24 +1637,36 @@ onig_get_callout_tag_end(regex_t* reg, int callout_num)
 extern OnigCalloutType
 onig_get_callout_type_by_name_id(int name_id)
 {
+  if (name_id < 0 || name_id >= GlobalCalloutNameList->n)
+    return 0;
+
   return GlobalCalloutNameList->v[name_id].type;
 }
 
 extern OnigCalloutFunc
 onig_get_callout_start_func_by_name_id(int name_id)
 {
+  if (name_id < 0 || name_id >= GlobalCalloutNameList->n)
+    return 0;
+
   return GlobalCalloutNameList->v[name_id].start_func;
 }
 
 extern OnigCalloutFunc
 onig_get_callout_end_func_by_name_id(int name_id)
 {
+  if (name_id < 0 || name_id >= GlobalCalloutNameList->n)
+    return 0;
+
   return GlobalCalloutNameList->v[name_id].end_func;
 }
 
 extern int
 onig_get_callout_in_by_name_id(int name_id)
 {
+  if (name_id < 0 || name_id >= GlobalCalloutNameList->n)
+    return 0;
+
   return GlobalCalloutNameList->v[name_id].in;
 }
 
@@ -1685,6 +1697,9 @@ get_callout_opt_default_by_name_id(int name_id, int index)
 extern UChar*
 onig_get_callout_name_by_name_id(int name_id)
 {
+  if (name_id < 0 || name_id >= GlobalCalloutNameList->n)
+    return 0;
+
   return GlobalCalloutNameList->v[name_id].name;
 }
 
@@ -2061,20 +2076,6 @@ cons_node_free_alone(Node* node)
   onig_node_free(node);
 }
 
-extern void
-list_node_free_not_car(Node* node)
-{
-  Node* next_node;
-
- start:
-  if (IS_NULL(node)) return;
-
-  next_node = NODE_CDR(node);
-  xfree(node);
-  node = next_node;
-  goto start;
-}
-
 static Node*
 node_new(void)
 {
@@ -2139,7 +2140,7 @@ node_new_anychar_with_fixed_option(OnigOptionType option)
   node = node_new_anychar();
   ct = CTYPE_(node);
   ct->options = option;
-  NODE_STATUS_ADD(node, NST_FIXED_OPTION);
+  NODE_STATUS_ADD(node, FIXED_OPTION);
   return node;
 }
 
@@ -2288,11 +2289,11 @@ node_new_backref(int back_num, int* backrefs, int by_name,
   BACKREF_(node)->back_num = back_num;
   BACKREF_(node)->back_dynamic = (int* )NULL;
   if (by_name != 0)
-    NODE_STATUS_ADD(node, NST_BY_NAME);
+    NODE_STATUS_ADD(node, BY_NAME);
 
 #ifdef USE_BACKREF_WITH_LEVEL
   if (exist_level != 0) {
-    NODE_STATUS_ADD(node, NST_NEST_LEVEL);
+    NODE_STATUS_ADD(node, NEST_LEVEL);
     BACKREF_(node)->nest_level  = nest_level;
   }
 #endif
@@ -2300,7 +2301,7 @@ node_new_backref(int back_num, int* backrefs, int by_name,
   for (i = 0; i < back_num; i++) {
     if (backrefs[i] <= env->num_mem &&
         IS_NULL(SCANENV_MEMENV(env)[backrefs[i]].node)) {
-      NODE_STATUS_ADD(node, NST_RECURSION);   /* /...(\1).../ */
+      NODE_STATUS_ADD(node, RECURSION);   /* /...(\1).../ */
       break;
     }
   }
@@ -2338,7 +2339,7 @@ node_new_backref_checker(int back_num, int* backrefs, int by_name,
                           env);
   CHECK_NULL_RETURN(node);
 
-  NODE_STATUS_ADD(node, NST_CHECKER);
+  NODE_STATUS_ADD(node, CHECKER);
   return node;
 }
 
@@ -2374,7 +2375,7 @@ node_new_quantifier(int lower, int upper, int by_number)
   QUANT_(node)->next_head_exact = NULL_NODE;
   QUANT_(node)->is_refered      = 0;
   if (by_number != 0)
-    NODE_STATUS_ADD(node, NST_BY_NUMBER);
+    NODE_STATUS_ADD(node, BY_NUMBER);
 
   return node;
 }
@@ -2438,7 +2439,7 @@ node_new_memory(int is_named)
   Node* node = node_new_enclosure(ENCLOSURE_MEMORY);
   CHECK_NULL_RETURN(node);
   if (is_named != 0)
-    NODE_STATUS_ADD(node, NST_NAMED_GROUP);
+    NODE_STATUS_ADD(node, NAMED_GROUP);
 
   return node;
 }
@@ -2689,7 +2690,7 @@ make_absent_engine(Node** node, int pre_save_right_id, Node* absent,
   for (i = 0; i < 4; i++) ns[i] = NULL_NODE;
 
   ns[1] = absent;
-  ns[3] = step_one; // for err
+  ns[3] = step_one; /* for err */
   r = node_new_save_gimmick(&ns[0], SAVE_S, env);
   if (r != 0) goto err;
 
@@ -2743,7 +2744,7 @@ make_absent_engine(Node** node, int pre_save_right_id, Node* absent,
   if (IS_NULL(x)) goto err0;
 
   if (is_range_cutter != 0)
-    NODE_STATUS_ADD(x, NST_SUPER);
+    NODE_STATUS_ADD(x, SUPER);
 
   *node = x;
   return ONIG_NORMAL;
@@ -2838,7 +2839,7 @@ make_range_clear(Node** node, ScanEnv* env)
   x = make_alt(2, ns);
   if (IS_NULL(x)) goto err0;
 
-  NODE_STATUS_ADD(x, NST_SUPER);
+  NODE_STATUS_ADD(x, SUPER);
 
   ns[0] = save;
   ns[1] = x;
@@ -3192,27 +3193,31 @@ node_new_str_raw_char(UChar c)
 }
 
 static Node*
-str_node_split_last_char(StrNode* sn, OnigEncoding enc)
+str_node_split_last_char(Node* node, OnigEncoding enc)
 {
   const UChar *p;
-  Node* n = NULL_NODE;
+  Node* rn;
+  StrNode* sn;
 
+  sn = STR_(node);
+  rn = NULL_NODE;
   if (sn->end > sn->s) {
     p = onigenc_get_prev_char_head(enc, sn->s, sn->end);
     if (p && p > sn->s) { /* can be split. */
-      n = node_new_str(p, sn->end);
-      if ((sn->flag & STRING_RAW) != 0)
-        NODE_STRING_SET_RAW(n);
+      rn = node_new_str(p, sn->end);
+      if (NODE_STRING_IS_RAW(node))
+        NODE_STRING_SET_RAW(rn);
 
       sn->end = (UChar* )p;
     }
   }
-  return n;
+  return rn;
 }
 
 static int
-str_node_can_be_split(StrNode* sn, OnigEncoding enc)
+str_node_can_be_split(Node* node, OnigEncoding enc)
 {
+  StrNode* sn = STR_(node);
   if (sn->end > sn->s) {
     return ((enclen(enc, sn->s) < sn->end - sn->s)  ?  1 : 0);
   }
@@ -5341,8 +5346,11 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
           if (num_type != IS_NOT_NUM) {
             if (num_type == IS_REL_NUM) {
               gnum = backref_rel_to_abs(gnum, env);
-              if (gnum < 0)
+              if (gnum < 0) {
+                onig_scan_env_set_error_string(env, ONIGERR_UNDEFINED_NAME_REFERENCE,
+                                               prev, name_end);
                 return ONIGERR_UNDEFINED_GROUP_REFERENCE;
+              }
             }
             tok->u.call.by_number = 1;
             tok->u.call.gnum      = gnum;
@@ -5563,8 +5571,11 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
                 else {
                   if (num_type == IS_REL_NUM) {
                     gnum = backref_rel_to_abs(gnum, env);
-                    if (gnum < 0)
+                    if (gnum < 0) {
+                      onig_scan_env_set_error_string(env,
+                             ONIGERR_UNDEFINED_NAME_REFERENCE, name, name_end);
                       return ONIGERR_UNDEFINED_GROUP_REFERENCE;
+                    }
                   }
                   tok->u.call.by_number = 1;
                   tok->u.call.gnum      = gnum;
@@ -6583,7 +6594,6 @@ parse_callout_of_contents(Node** np, int cterm, UChar** src, UChar* end, ScanEnv
     PFETCH_S(c);
   }
   else if (c == '>') { /* no needs (default) */
-    //in = ONIG_CALLOUT_IN_PROGRESS;
     if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
     PFETCH_S(c);
   }
@@ -6823,7 +6833,7 @@ parse_callout_of_name(Node** np, int cterm, UChar** src, UChar* end, ScanEnv* en
   OnigEncoding enc = env->enc;
   UChar* p = *src;
 
-  //PFETCH_READY;
+  /* PFETCH_READY; */
   if (PEND) return ONIGERR_INVALID_CALLOUT_PATTERN;
 
   node = 0;
@@ -7053,12 +7063,12 @@ parse_enclosure(Node** np, OnigToken* tok, int term, UChar** src, UChar* end,
 
         if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
 
-        if (PPEEK_IS('|')) { // (?~|generator|absent)
+        if (PPEEK_IS('|')) { /* (?~|generator|absent) */
           PINC;
           if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
 
           head_bar = 1;
-          if (PPEEK_IS(')')) { // (?~|)  : range clear
+          if (PPEEK_IS(')')) { /* (?~|)  : range clear */
             PINC;
             r = make_range_clear(np, env);
             if (r != 0) return r;
@@ -7083,7 +7093,7 @@ parse_enclosure(Node** np, OnigToken* tok, int term, UChar** src, UChar* end,
           if (NODE_TYPE(top) != NODE_ALT || IS_NULL(NODE_CDR(top))) {
             expr = NULL_NODE;
             is_range_cutter = 1;
-            //return ONIGERR_INVALID_ABSENT_GROUP_GENERATOR_PATTERN;
+            /* return ONIGERR_INVALID_ABSENT_GROUP_GENERATOR_PATTERN; */
           }
           else {
             absent = NODE_CAR(top);
@@ -7509,9 +7519,8 @@ set_quantifier(Node* qnode, Node* target, int group, ScanEnv* env)
   switch (NODE_TYPE(target)) {
   case NODE_STRING:
     if (! group) {
-      StrNode* sn = STR_(target);
-      if (str_node_can_be_split(sn, env->enc)) {
-        Node* n = str_node_split_last_char(sn, env->enc);
+      if (str_node_can_be_split(target, env->enc)) {
+        Node* n = str_node_split_last_char(target, env->enc);
         if (IS_NOT_NULL(n)) {
           NODE_BODY(qnode) = n;
           return 2;
@@ -7778,7 +7787,7 @@ parse_exp(Node** np, OnigToken* tok, int term, UChar** src, UChar* end,
       len = 1;
       while (1) {
         if (len >= ONIGENC_MBC_MINLEN(env->enc)) {
-          if (len == enclen(env->enc, STR_(*np)->s)) {//should not enclen_end()
+          if (len == enclen(env->enc, STR_(*np)->s)) {/* should not enclen_end() */
             r = fetch_token(tok, src, end, env);
             NODE_STRING_CLEAR_RAW(*np);
             goto string_end;

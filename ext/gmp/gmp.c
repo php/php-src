@@ -549,7 +549,7 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 	retval = gmp_do_operation_ex(opcode, result, op1, op2);
 
 	if (retval == SUCCESS && op1 == &op1_copy) {
-		zval_dtor(op1);
+		zval_ptr_dtor(op1);
 	}
 
 	return retval;
@@ -577,7 +577,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 
 	gmp_strval(&zv, gmpnum, 10);
 	php_var_serialize(&buf, &zv, &serialize_data);
-	zval_dtor(&zv);
+	zval_ptr_dtor_str(&zv);
 
 	ZVAL_ARR(&zv, zend_std_get_properties(object));
 	php_var_serialize(&buf, &zv, &serialize_data);
@@ -585,7 +585,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	PHP_VAR_SERIALIZE_DESTROY(serialize_data);
 	*buffer = (unsigned char *) estrndup(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 	*buf_len = ZSTR_LEN(buf.s);
-	zend_string_release(buf.s);
+	zend_string_release_ex(buf.s, 0);
 
 	return SUCCESS;
 }
@@ -604,7 +604,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	gmp_create(object, &gmpnum);
 
 	/* The "object" variable may be modified during the execution of this unserialize handler
-	 * (it may turn into a reference). Keep the original object around for futher operations. */
+	 * (it may turn into a reference). Keep the original object around for further operations. */
 	ZVAL_COPY_VALUE(&object_copy, object);
 
 	p = buf;
@@ -663,7 +663,7 @@ ZEND_MINIT_FUNCTION(gmp)
 	gmp_ce->serialize = gmp_serialize;
 	gmp_ce->unserialize = gmp_unserialize;
 
-	memcpy(&gmp_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&gmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	gmp_object_handlers.offset = XtOffsetOf(gmp_object, std);
 	gmp_object_handlers.free_obj = gmp_free_object_storage;
 	gmp_object_handlers.cast_object = gmp_cast_object;
@@ -1054,7 +1054,7 @@ ZEND_FUNCTION(gmp_init)
 
 	INIT_GMP_RETVAL(gmpnumber);
 	if (convert_to_gmp(gmpnumber, number_arg, base) == FAILURE) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -1770,7 +1770,7 @@ ZEND_FUNCTION(gmp_invert)
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 	if (!res) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 }

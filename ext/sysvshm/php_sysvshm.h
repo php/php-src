@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_SYSVSHM_H
 #define PHP_SYSVSHM_H
 
@@ -71,6 +69,7 @@ typedef struct {
 } sysvshm_shm;
 
 PHP_MINIT_FUNCTION(sysvshm);
+PHP_MINFO_FUNCTION(sysvshm);
 PHP_FUNCTION(shm_attach);
 PHP_FUNCTION(shm_detach);
 PHP_FUNCTION(shm_remove);

@@ -42,8 +42,8 @@ void php_clear_warnings(MYSQLI_WARNING *w)
 
 	while (w) {
 		n = w;
-		zval_dtor(&(w->reason));
-		zval_dtor(&(w->sqlstate));
+		zval_ptr_dtor_str(&(w->reason));
+		zval_ptr_dtor_str(&(w->sqlstate));
 		w = w->next;
 		efree(n);
 	}

@@ -18,6 +18,10 @@
 #include "zend_exceptions.h"
 
 #include <unicode/utypes.h>
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#include <unicode/utf16.h>
+#endif
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 
@@ -538,7 +542,8 @@ static void php_converter_resolve_callback(zval *zobj,
 	if (zend_fcall_info_init(&caller, 0, finfo, fcache, NULL, &errstr) == FAILURE) {
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Error setting converter callback: %s", errstr);
 	}
-	zval_dtor(&caller);
+	zend_array_destroy(Z_ARR(caller));
+	ZVAL_UNDEF(&finfo->function_name);
 	if (errstr) {
 		efree(errstr);
 	}
@@ -701,7 +706,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	efree(temp);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, "ucnv_fromUChars", error);
-		zend_string_free(ret);
+		zend_string_efree(ret);
 		return NULL;
 	}
 
@@ -927,7 +932,7 @@ static PHP_METHOD(UConverter, getAliases) {
 		alias = ucnv_getAlias(name, i, &error);
 		if (U_FAILURE(error)) {
 			THROW_UFAILURE(NULL, "ucnv_getAlias", error);
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_NULL();
 		}
 		add_next_index_string(return_value, alias);
@@ -955,7 +960,7 @@ static PHP_METHOD(UConverter, getStandards) {
 		const char *name = ucnv_getStandard(i, &error);
 		if (U_FAILURE(error)) {
 			THROW_UFAILURE(NULL, "ucnv_getStandard", error);
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_NULL();
 		}
 		add_next_index_string(return_value, name);
@@ -964,7 +969,7 @@ static PHP_METHOD(UConverter, getStandards) {
 /* }}} */
 
 static const zend_function_entry php_converter_methods[] = {
-	PHP_ME(UConverter, __construct,            php_converter_arginfo,                   ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+	PHP_ME(UConverter, __construct,            php_converter_arginfo,                   ZEND_ACC_PUBLIC)
 
 	/* Encoding selection */
 	PHP_ME(UConverter, setSourceEncoding,      php_converter_set_encoding_arginfo,      ZEND_ACC_PUBLIC)
@@ -1057,7 +1062,7 @@ static zend_object *php_converter_clone_object(zval *object) {
 
 		err_msg = intl_error_get_message(&oldobj->error);
 		zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
-		zend_string_release(err_msg);
+		zend_string_release_ex(err_msg, 0);
 
 		return retval;
 	}
@@ -1084,7 +1089,7 @@ int php_converter_minit(INIT_FUNC_ARGS) {
 	INIT_CLASS_ENTRY(ce, "UConverter", php_converter_methods);
 	php_converter_ce = zend_register_internal_class(&ce);
 	php_converter_ce->create_object = php_converter_create_object;
-	memcpy(&php_converter_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
 	php_converter_object_handlers.dtor_obj = php_converter_dtor_object;

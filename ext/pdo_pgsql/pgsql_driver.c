@@ -18,8 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -66,9 +64,7 @@ static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 static zend_string* _pdo_pgsql_escape_credentials(char *str)
 {
 	if (str) {
-		zend_string *tmp = zend_string_init(str, strlen(str), 0);
-
-		return php_addcslashes(tmp, 1, "\\'", sizeof("\\'"));
+		return php_addcslashes_str(str, strlen(str), "\\'", sizeof("\\'"));
 	}
 
 	return NULL;
@@ -1068,7 +1064,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
  		RETURN_FALSE;
 #if ZEND_ENABLE_ZVAL_LONG64
 	} else if (ms_timeout > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "timeout was shrinked to %d", INT_MAX);
+		php_error_docref(NULL, E_WARNING, "timeout was shrunk to %d", INT_MAX);
 		ms_timeout = INT_MAX;
 #endif
 	}
@@ -1229,10 +1225,10 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	H->server = PQconnectdb(conn_str);
 
 	if (tmp_user) {
-		zend_string_release(tmp_user);
+		zend_string_release_ex(tmp_user, 0);
 	}
 	if (tmp_pass) {
-		zend_string_release(tmp_pass);
+		zend_string_release_ex(tmp_pass, 0);
 	}
 
 	efree(conn_str);

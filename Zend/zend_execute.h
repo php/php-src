@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_EXECUTE_H
 #define ZEND_EXECUTE_H
 
@@ -43,7 +41,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload);
+ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, int use_autoload);
 ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex);
 ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name);
@@ -107,7 +105,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 						Z_ADDREF_P(variable_ptr);
 					}
 				}
-				zval_dtor_func(garbage);
+				rc_dtor_func(garbage);
 				return variable_ptr;
 			} else { /* we need to split */
 				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
@@ -226,18 +224,18 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 {
 	if (UNEXPECTED(call_info & ZEND_CALL_FREE_EXTRA_ARGS)) {
 		uint32_t count = ZEND_CALL_NUM_ARGS(call) - call->func->op_array.num_args;
-		zval *p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T + count);
+		zval *p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 		do {
-			p--;
 			if (Z_REFCOUNTED_P(p)) {
 				zend_refcounted *r = Z_COUNTED_P(p);
 				if (!GC_DELREF(r)) {
 					ZVAL_NULL(p);
-					zval_dtor_func(r);
+					rc_dtor_func(r);
 				} else {
 					gc_check_possible_root(r);
 				}
 			}
+			p++;
 		} while (--count);
  	}
 }
@@ -252,19 +250,18 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call)
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 
 	if (EXPECTED(num_args > 0)) {
-		zval *end = ZEND_CALL_ARG(call, 1);
-		zval *p = end + num_args;
+		zval *p = ZEND_CALL_ARG(call, 1);
 
 		do {
-			p--;
 			if (Z_REFCOUNTED_P(p)) {
 				zend_refcounted *r = Z_COUNTED_P(p);
 				if (!GC_DELREF(r)) {
 					ZVAL_NULL(p);
-					zval_dtor_func(r);
+					rc_dtor_func(r);
 				}
 			}
-		} while (p != end);
+			p++;
+		} while (--num_args);
 	}
 }
 
@@ -306,8 +303,10 @@ ZEND_API void zend_set_timeout(zend_long seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(void);
 ZEND_API ZEND_NORETURN void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type);
-ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type);
-void zend_verify_abstract_class(zend_class_entry *ce);
+ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *lcname, int fetch_type);
+
+ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name);
+ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len);
 
 ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type);
 
@@ -370,6 +369,23 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 		(slot)[0] = (ce); \
 		(slot)[1] = (ptr); \
 	} while (0)
+
+#define CACHE_SPECIAL (1<<0)
+
+#define IS_SPECIAL_CACHE_VAL(ptr) \
+	(((uintptr_t)(ptr)) & CACHE_SPECIAL)
+
+#define ENCODE_SPECIAL_CACHE_NUM(num) \
+	((void*)((((uintptr_t)(num)) << 1) | CACHE_SPECIAL))
+
+#define DECODE_SPECIAL_CACHE_NUM(ptr) \
+	(((uintptr_t)(ptr)) >> 1)
+
+#define ENCODE_SPECIAL_CACHE_PTR(ptr) \
+	((void*)(((uintptr_t)(ptr)) | CACHE_SPECIAL))
+
+#define DECODE_SPECIAL_CACHE_PTR(ptr) \
+	((void*)(((uintptr_t)(ptr)) & ~CACHE_SPECIAL))
 
 #define SKIP_EXT_OPLINE(opline) do { \
 		while (UNEXPECTED((opline)->opcode >= ZEND_EXT_STMT \

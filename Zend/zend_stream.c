@@ -19,9 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
-
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_stream.h"
@@ -313,7 +310,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 			break;
 	}
 	if (fh->opened_path) {
-		zend_string_release(fh->opened_path);
+		zend_string_release_ex(fh->opened_path, 0);
 		fh->opened_path = NULL;
 	}
 	if (fh->free_filename && fh->filename) {

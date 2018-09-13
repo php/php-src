@@ -20,8 +20,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1302,12 +1300,10 @@ PHP_FUNCTION(odbc_execute)
 	unsigned char otype;
 	SQLSMALLINT ctype;
    	odbc_result *result;
-	int numArgs, i, ne;
+	int numArgs = ZEND_NUM_ARGS(), i, ne;
 	RETCODE rc;
 
-	numArgs = ZEND_NUM_ARGS();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|a", &pv_res, &pv_param_arr) == FAILURE) {
+	if (zend_parse_parameters(numArgs, "r|a", &pv_res, &pv_param_arr) == FAILURE) {
 		return;
 	}
 
@@ -1630,7 +1626,6 @@ PHP_FUNCTION(odbc_exec)
 {
 	zval *pv_conn;
 	zend_long pv_flags;
-	int numArgs;
 	char *query;
 	size_t query_len;
 	odbc_result *result = NULL;
@@ -1639,8 +1634,6 @@ PHP_FUNCTION(odbc_exec)
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLUINTEGER      scrollopts;
 #endif
-
-	numArgs = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &pv_conn, &query, &query_len, &pv_flags) == FAILURE) {
 		return;
@@ -2196,15 +2189,15 @@ PHP_FUNCTION(odbc_result)
 
 			if (rc == SQL_ERROR) {
 				odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
-				zend_string_free(field_str);
+				zend_string_efree(field_str);
 				RETURN_FALSE;
 			}
 
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
-				zend_string_free(field_str);
+				zend_string_efree(field_str);
 				RETURN_NULL();
 			} else if (rc == SQL_NO_DATA_FOUND) {
-				zend_string_free(field_str);
+				zend_string_efree(field_str);
 				RETURN_FALSE;
 			}
 			/* Reduce fieldlen by 1 if we have char data. One day we might
@@ -2254,7 +2247,7 @@ PHP_FUNCTION(odbc_result)
 			efree(field);
 			RETURN_NULL();
 		}
-		/* chop the trailing \0 by outputing only 4095 bytes */
+		/* chop the trailing \0 by outputting only 4095 bytes */
 		PHPWRITE(field,(rc == SQL_SUCCESS_WITH_INFO) ? 4095 : result->values[field_ind].vallen);
 
 		if (rc == SQL_SUCCESS) { /* no more data avail */
@@ -2680,12 +2673,8 @@ try_and_get_another_connection:
 		new_index_ptr.ptr = (void *)(zend_uintptr_t)Z_RES_HANDLE_P(return_value);
 		new_index_ptr.type = le_index_ptr;
 
-		if (zend_hash_str_update_mem(&EG(regular_list), hashed_details, hashed_len, (void *) &new_index_ptr,
-				   sizeof(zend_resource)) == NULL) {
-			efree(hashed_details);
-			RETURN_FALSE;
-			/* XXX Free Connection */
-		}
+		zend_hash_str_update_mem(&EG(regular_list), hashed_details, hashed_len, (void *) &new_index_ptr,
+				   sizeof(zend_resource));
 		ODBCG(num_links)++;
 	}
 	efree(hashed_details);
@@ -3054,7 +3043,7 @@ PHP_FUNCTION(odbc_errormsg)
    persistent connections. I think that SetStmtOption is of little use, since most
    of those can only be specified before preparing/executing statements.
    On the other hand, they can be made connection wide default through SetConnectOption
-   - but will be overidden by calls to SetStmtOption() in odbc_prepare/odbc_do
+   - but will be overridden by calls to SetStmtOption() in odbc_prepare/odbc_do
 */
 PHP_FUNCTION(odbc_setoption)
 {
@@ -3591,7 +3580,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ proto resource odbc_procedures(resource connection_id [, string qualifier, string owner, string name])
-   Returns a result identifier containg the list of procedure names in a datasource */
+   Returns a result identifier containing the list of procedure names in a datasource */
 PHP_FUNCTION(odbc_procedures)
 {
 	zval *pv_conn;

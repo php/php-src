@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: php_cli.c 306938 2011-01-01 02:17:06Z felipe $ */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -360,7 +358,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 		smart_str_appendl_ex(buffer, "Date: ", 6, persistent);
 		smart_str_appends_ex(buffer, dt->val, persistent);
 		smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
-		zend_string_release(dt);
+		zend_string_release_ex(dt, 0);
 	}
 
 	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
@@ -1580,8 +1578,8 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
 	zend_hash_add_ptr(&client->request.headers, lc_header_name, client->current_header_value);
 	zend_hash_add_ptr(&client->request.headers_original_case, orig_header_name, client->current_header_value);
-	zend_string_release(lc_header_name);
-	zend_string_release(orig_header_name);
+	zend_string_release_ex(lc_header_name, 1);
+	zend_string_release_ex(orig_header_name, 1);
 
 	if (client->current_header_name_allocated) {
 		pefree(client->current_header_name, 1);
@@ -1835,7 +1833,7 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 		php_network_populate_name_from_sockaddr(addr, addr_len, &addr_str, NULL, 0);
 		client->addr_str = pestrndup(ZSTR_VAL(addr_str), ZSTR_LEN(addr_str), 1);
 		client->addr_str_len = ZSTR_LEN(addr_str);
-		zend_string_release(addr_str);
+		zend_string_release_ex(addr_str, 0);
 	}
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = 0;
@@ -1951,7 +1949,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 
 		chunk = php_cli_server_chunk_heap_new(buffer.s, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
 		if (!chunk) {
-			smart_str_free(&buffer);
+			smart_str_free_ex(&buffer, 1);
 			goto fail;
 		}
 		php_cli_server_buffer_prepend(&client->content_sender.buffer, chunk);
@@ -2016,9 +2014,11 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		 ' ' == client->request.path_translated[client->request.path_translated_len-1])) {
 		return php_cli_server_send_error_page(server, client, 500);
 	}
-#endif
 
+	fd = client->request.path_translated ? php_win32_ioutil_open(client->request.path_translated, O_RDONLY): -1;
+#else
 	fd = client->request.path_translated ? open(client->request.path_translated, O_RDONLY): -1;
+#endif
 	if (fd < 0) {
 		return php_cli_server_send_error_page(server, client, 404);
 	}
@@ -2031,9 +2031,6 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		php_cli_server_chunk *chunk;
 		smart_str buffer = { 0 };
 		const char *mime_type = get_mime_type(server, client->request.ext, client->request.ext_len);
-		if (!mime_type) {
-			mime_type = "application/octet-stream";
-		}
 
 		append_http_status_line(&buffer, client->request.protocol_version, status, 1);
 		if (!buffer.s) {
@@ -2042,19 +2039,21 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 			return FAILURE;
 		}
 		append_essential_headers(&buffer, client, 1);
-		smart_str_appendl_ex(&buffer, "Content-Type: ", sizeof("Content-Type: ") - 1, 1);
-		smart_str_appends_ex(&buffer, mime_type, 1);
-		if (strncmp(mime_type, "text/", 5) == 0) {
-			smart_str_appends_ex(&buffer, "; charset=UTF-8", 1);
+		if (mime_type) {
+			smart_str_appendl_ex(&buffer, "Content-Type: ", sizeof("Content-Type: ") - 1, 1);
+			smart_str_appends_ex(&buffer, mime_type, 1);
+			if (strncmp(mime_type, "text/", 5) == 0) {
+				smart_str_appends_ex(&buffer, "; charset=UTF-8", 1);
+			}
+			smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		}
-		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appends_ex(&buffer, "Content-Length: ", 1);
 		smart_str_append_unsigned_ex(&buffer, client->request.sb.st_size, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		chunk = php_cli_server_chunk_heap_new(buffer.s, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
 		if (!chunk) {
-			smart_str_free(&buffer);
+			smart_str_free_ex(&buffer, 1);
 			php_cli_server_log_response(client, 500, NULL);
 			return FAILURE;
 		}
@@ -2290,7 +2289,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 	if (server_sock == SOCK_ERR) {
 		php_cli_server_logf("Failed to listen on %s:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
 		if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		retval = FAILURE;
 		goto out;

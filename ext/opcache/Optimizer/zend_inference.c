@@ -2035,7 +2035,12 @@ uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 	uint32_t tmp = 0;
 
 	if (t1 & MAY_BE_OBJECT) {
-		tmp |= MAY_BE_ANY | MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+	    if (!write) {
+			/* can't be REF  because of ZVAL_COPY_DEREF() usage */
+			tmp |= MAY_BE_ANY | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+		} else {
+			tmp |= MAY_BE_ANY | MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+	    }
 	}
 	if (t1 & MAY_BE_ARRAY) {
 		if (insert) {
@@ -2046,7 +2051,12 @@ uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 				tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 			}
 			if (t1 & MAY_BE_ARRAY_OF_REF) {
-				tmp |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN;
+				if (!write) {
+					/* can't be REF  because of ZVAL_COPY_DEREF() usage */
+					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+				} else {
+					tmp |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN;
+				}
 			} else if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 			}
@@ -2237,7 +2247,7 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 		zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
 		tmp |= MAY_BE_OBJECT;
 		*pce = get_class_entry(script, lcname);
-		zend_string_release(lcname);
+		zend_string_release_ex(lcname, 0);
 	} else if (ZEND_TYPE_IS_CODE(arg_info->type)) {
 		zend_uchar type_hint = ZEND_TYPE_CODE(arg_info->type);
 
@@ -2406,7 +2416,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				if (t1 & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					tmp |= ((t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT) | MAY_BE_ARRAY_KEY_LONG;
+					tmp |= ((t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT) | ((t1 & MAY_BE_ANY)? MAY_BE_ARRAY_KEY_LONG : 0);
 				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
@@ -2486,7 +2496,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 
 			if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				if (opline->op1_type == IS_CV) {
-					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op1_type);
+					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op2_type);
 					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
 					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 				}
@@ -2814,7 +2824,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			break;
 		case ZEND_BIND_STATIC:
 			tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
-				| (opline->extended_value ? MAY_BE_REF : (MAY_BE_RC1 | MAY_BE_RCN));
+				| ((opline->extended_value & ZEND_BIND_REF) ? MAY_BE_REF : (MAY_BE_RC1 | MAY_BE_RCN));
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			break;
 		case ZEND_SEND_VAR:
@@ -2829,7 +2839,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			break;
 		case ZEND_BIND_LEXICAL:
 			if (ssa_ops[i].op2_def >= 0) {
-				if (opline->extended_value) {
+				if (opline->extended_value & ZEND_BIND_REF) {
 					tmp = t2 | MAY_BE_REF;
 				} else {
 					tmp = t2 & ~(MAY_BE_RC1|MAY_BE_RCN);
@@ -2950,8 +2960,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		}
-		case ZEND_DECLARE_CLASS:
-		case ZEND_DECLARE_INHERITED_CLASS:
 		case ZEND_DECLARE_ANON_CLASS:
 		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_ops[i].result_def);
@@ -2971,7 +2979,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						}
 						break;
 					case ZEND_FETCH_CLASS_PARENT:
-						if (op_array->scope && op_array->scope->parent) {
+						if (op_array->scope && op_array->scope->parent && !(op_array->scope->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
 							UPDATE_SSA_OBJ_TYPE(op_array->scope->parent, 0, ssa_ops[i].result_def);
 						} else {
 							UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].result_def);
@@ -3280,8 +3288,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			/* FETCH_LIST on a string behaves like FETCH_R on null */
 			tmp = zend_array_element_type(
 				opline->opcode != ZEND_FETCH_LIST_R ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
-				opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS
-					&& opline->opcode != ZEND_FETCH_LIST_R,
+				opline->result_type == IS_VAR,
 				opline->op2_type == IS_UNUSED);
 			if (opline->opcode == ZEND_FETCH_DIM_W ||
 			    opline->opcode == ZEND_FETCH_DIM_RW ||
@@ -3326,13 +3333,11 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			if (ssa_ops[i].result_def >= 0) {
 				tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-				if (opline->opcode != ZEND_FETCH_OBJ_R && opline->opcode != ZEND_FETCH_OBJ_IS) {
-					tmp |= MAY_BE_ERROR;
-				}
 				if (opline->result_type == IS_TMP_VAR) {
+					/* can't be REF  because of ZVAL_COPY_DEREF() usage */
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				} else {
-					tmp |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN;
+					tmp |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ERROR;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
@@ -3457,9 +3462,11 @@ unknown_opcode:
 
 static uint32_t get_class_entry_rank(zend_class_entry *ce) {
 	uint32_t rank = 0;
-	while (ce->parent) {
-		rank++;
-		ce = ce->parent;
+	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
+		while (ce->parent) {
+			rank++;
+			ce = ce->parent;
+		}
 	}
 	return rank;
 }
@@ -3480,17 +3487,17 @@ static zend_class_entry *join_class_entries(
 
 	while (rank1 != rank2) {
 		if (rank1 > rank2) {
-			ce1 = ce1->parent;
+			ce1 = (ce1->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) ? NULL : ce1->parent;
 			rank1--;
 		} else {
-			ce2 = ce2->parent;
+			ce2 = (ce2->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) ? NULL : ce2->parent;
 			rank2--;
 		}
 	}
 
 	while (ce1 != ce2) {
-		ce1 = ce1->parent;
-		ce2 = ce2->parent;
+		ce1 = (ce1->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) ? NULL : ce1->parent;
+		ce2 = (ce2->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) ? NULL : ce2->parent;
 	}
 
 	if (ce1) {

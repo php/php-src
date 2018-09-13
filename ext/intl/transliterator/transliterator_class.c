@@ -202,7 +202,7 @@ err:
 #define TRANSLITERATOR_PROPERTY_HANDLER_EPILOG	\
 	if( member == &tmp_member )					\
 	{											\
-		zval_dtor( &tmp_member );				\
+		zval_ptr_dtor_str( &tmp_member );		\
 	}
 
 /* {{{ get_property_ptr_ptr handler */
@@ -219,7 +219,7 @@ static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, in
 	}
 	else
 	{
-		retval = std_object_handlers.get_property_ptr_ptr( object, member, type, cache_slot );
+		retval = zend_std_get_property_ptr_ptr( object, member, type, cache_slot );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -244,7 +244,7 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 	}
 	else
 	{
-		retval = std_object_handlers.read_property( object, member, type, cache_slot, rv );
+		retval = zend_std_read_property( object, member, type, cache_slot, rv );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -274,7 +274,7 @@ static void Transliterator_write_property( zval *object, zval *member, zval *val
 	}
 	else
 	{
-		std_object_handlers.write_property( object, member, value, cache_slot );
+		zend_std_write_property( object, member, value, cache_slot );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -311,7 +311,7 @@ ZEND_END_ARG_INFO()
  * Every 'Transliterator' class method has an entry in this table
  */
 static const zend_function_entry Transliterator_class_functions[] = {
-	PHP_ME( Transliterator,			__construct,						ainfo_trans_void,				ZEND_ACC_PRIVATE | ZEND_ACC_CTOR | ZEND_ACC_FINAL )
+	PHP_ME( Transliterator,			__construct,						ainfo_trans_void,				ZEND_ACC_PRIVATE | ZEND_ACC_FINAL )
 	PHP_ME_MAPPING( create,			transliterator_create,				ainfo_trans_create,				ZEND_ACC_STATIC |ZEND_ACC_PUBLIC )
 	PHP_ME_MAPPING( createFromRules,transliterator_create_from_rules,	ainfo_trans_create_from_rules,	ZEND_ACC_STATIC | ZEND_ACC_PUBLIC )
 	PHP_ME_MAPPING( createInverse,	transliterator_create_inverse,		ainfo_trans_void,				ZEND_ACC_PUBLIC )
@@ -334,7 +334,7 @@ void transliterator_register_Transliterator_class( void )
 	INIT_CLASS_ENTRY( ce, "Transliterator", Transliterator_class_functions );
 	ce.create_object = Transliterator_object_create;
 	Transliterator_ce_ptr = zend_register_internal_class( &ce );
-	memcpy( &Transliterator_handlers, zend_get_std_object_handlers(),
+	memcpy( &Transliterator_handlers, &std_object_handlers,
 		sizeof Transliterator_handlers );
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
 	Transliterator_handlers.free_obj = Transliterator_objects_free;

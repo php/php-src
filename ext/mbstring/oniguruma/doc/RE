@@ -1,4 +1,4 @@
-Oniguruma Regular Expressions Version 6.8.0    2018/03/08
+Oniguruma Regular Expressions Version 6.8.0    2018/07/26
 
 syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
@@ -221,7 +221,8 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
   (?#...)            comment
 
-  (?imxWDSP-imxWDSP)         option on/off
+  (?imxWDSP-imxWDSP:subexp)  option on/off for subexp
+
                                i: ignore case
                                m: multi-line (dot (.) also matches newline)
                                x: extended form
@@ -233,7 +234,11 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
                                   (alnum, alpha, blank, cntrl, digit, graph,
                                    lower, print, punct, space, upper, xdigit, word)
 
-  (?imxWDSP-imxWDSP:subexp)  option on/off for subexp
+  (?imxWDSP-imxWDSP)  isolated option
+
+                      * It makes a group to the next ')' or end of the pattern.
+                        /ab(?i)c|def|gh/ == /ab(?i:c|def|gh)/
+
 
   (?:subexp)         non-capturing group
   (subexp)           capturing group
@@ -266,18 +271,31 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
   <Callouts>
 
   * Callouts of contents
-  (?{...contents...})         callouts in progress
-  (?{...contents...}D)        D is a direction flag char. ('X' or '<' or '>')
-                              D = 'X': progress and retraction, '<': retraction only
-                              '>': progress only (default)
+  (?{...contents...})         callout in progress
+  (?{...contents...}D)        D is a direction flag char
+                              D = 'X': in progress and retraction
+                                  '<': in retraction only
+                                  '>': in progress only
   (?{...contents...}[tag])    tag assigned
   (?{...contents...}[tag]D)
+
+                              * Escape characters have no effects in contents.
+                              * contents is not allowed to start with '{'.
+
+  (?{{{...contents...}}})     n times continuations '}' in contents is allowed in
+                              (n+1) times continuations {{{...}}}.
+
+    Allowed tag string characters: _ A-Z a-z 0-9 (* first character: _ A-Z a-z)
+
 
   * Callouts of name
   (*name)
   (*name{args...})            with args
   (*name[tag])                tag assigned
   (*name[tag]{args...})
+
+    Allowed name string characters: _ A-Z a-z 0-9 (* first character: _ A-Z a-z)
+    Allowed tag  string characters: _ A-Z a-z 0-9 (* first character: _ A-Z a-z)
 
 
   <Absent functions>
@@ -462,7 +480,6 @@ A-3. Missing features compared with perl 5.8.0
 
    + \N{name}
    + \l,\u,\L,\U,\C
-   + (?{code})
    + (??{code})
 
    * \Q...\E

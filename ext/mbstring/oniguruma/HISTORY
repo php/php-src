@@ -1,5 +1,26 @@
 History
 
+2018/09/03: Version 6.9.0
+
+2018/08/24: add Unicode Emoji properties
+2018/08/24: update Unicode version 11.0.0
+2018/08/21: support gperf 3.1 instead of 3.0.4
+2018/08/07: add ENABLE_POSIX_API switch into src/Makefile.windows
+2018/08/02: add make_win.bat and src/config.h.windows.in
+2018/06/25: add ENABLE_POSIX_API option into CMakeLists.txt
+2018/06/04: add .travis.yml (for TravisCI)
+
+2018/04/17: Version 6.8.2
+
+2018/04/13: add doc/CALLOUTS.API.ja
+2018/04/10: add doc/CALLOUTS.API
+2018/04/10: fix #87: Read unknown address in onig_error_code_to_str()
+2018/04/06: fix #86: typedef StateCheckNumType is unused
+2018/04/02: update automake 1.16.1
+2018/03/30: fix #84: stack-buffer-overflow in mbc_enc_len
+2018/03/28: PR #83: Improve CMake build
+2018/03/21: switch uses of UChar to OnigUChar in oniguruma.h (#80)
+
 2018/03/19: Version 6.8.1
 
 2018/03/19: update LTVERSION from 4:0:0 to 5:0:0
@@ -2016,7 +2037,7 @@ History
 2003/01/31: [impl] rename TTRANS() to TOLOWER().
 2003/01/30: [bug]  .c.o --> .c.obj in win32\Makefile.
 2003/01/30: [impl] add -DNOT_RUBY to Makefile.in.
-                   NOT_RUBY is refered in regint.h for escape double
+                   NOT_RUBY is referred in regint.h for escape double
                    including config.h.
 2003/01/30: [impl] when string hasn't case ambiguity, don't compile
                    to ignore case opcode.

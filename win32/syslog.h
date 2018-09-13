@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef SYSLOG_H
 #define	SYSLOG_H
 #define WIN32_LEAN_AND_MEAN

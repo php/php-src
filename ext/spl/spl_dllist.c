@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -512,7 +510,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1);
 	ZVAL_LONG(&tmp, intern->flags);
 	zend_hash_add(debug_info, pnstr, &tmp);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	array_init(&dllist_array);
 
@@ -530,7 +528,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1);
 	zend_hash_add(debug_info, pnstr, &dllist_array);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	return debug_info;
 }
@@ -653,8 +651,7 @@ SPL_METHOD(SplDoublyLinkedList, top)
 		return;
 	}
 
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 }
 /* }}} */
 
@@ -677,8 +674,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 		return;
 	}
 
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 }
 /* }}} */
 
@@ -798,8 +794,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	if (element != NULL) {
 		zval *value = &element->data;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
 	}
@@ -1121,8 +1116,7 @@ SPL_METHOD(SplDoublyLinkedList, current)
 	} else {
 		zval *value = &element->data;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
 /* }}} */
@@ -1146,7 +1140,6 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	/* flags */
 	ZVAL_LONG(&flags, intern->flags);
 	php_var_serialize(&buf, &flags, &var_hash);
-	zval_ptr_dtor(&flags);
 
 	/* elements */
 	while (current) {
@@ -1388,7 +1381,7 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 {
 	REGISTER_SPL_STD_CLASS_EX(SplDoublyLinkedList, spl_dllist_object_new, spl_funcs_SplDoublyLinkedList);
-	memcpy(&spl_handler_SplDoublyLinkedList, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&spl_handler_SplDoublyLinkedList, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplDoublyLinkedList.offset = XtOffsetOf(spl_dllist_object, std);
 	spl_handler_SplDoublyLinkedList.clone_obj = spl_dllist_object_clone;

@@ -20,7 +20,7 @@
 #ifndef PHP_JSON_H
 #define PHP_JSON_H
 
-#define PHP_JSON_VERSION "1.6.0"
+#define PHP_JSON_VERSION "1.7.0"
 #include "zend_smart_str_public.h"
 
 extern zend_module_entry json_module_entry;

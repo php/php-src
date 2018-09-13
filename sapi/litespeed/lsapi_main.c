@@ -37,18 +37,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef PHP_WIN32
-
-#include <io.h>
-#include <fcntl.h>
-#include "win32/php_registry.h"
-
-#else
-
 #include <sys/wait.h>
-
-#endif
-
 #include <sys/stat.h>
 
 #if HAVE_SYS_TYPES_H
@@ -76,7 +65,7 @@
 /* Key for each cache entry is dirname(PATH_TRANSLATED).
  *
  * NOTE: Each cache entry config_hash contains the combination from all user ini files found in
- *       the path starting from doc_root throught to dirname(PATH_TRANSLATED).  There is no point
+ *       the path starting from doc_root through to dirname(PATH_TRANSLATED).  There is no point
  *       storing per-file entries as it would not be possible to detect added / deleted entries
  *       between separate files.
  */
@@ -247,14 +236,14 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
         Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
         zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
     ) {
-        zval_dtor(array_ptr);
+        zval_ptr_dtor_nogc(array_ptr);
         ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
         return;
     } else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
         Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
         zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
     ) {
-        zval_dtor(array_ptr);
+        zval_ptr_dtor_nogc(array_ptr);
         ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_SERVER]);
         return;
     }
@@ -412,8 +401,8 @@ static int lsapi_activate_user_ini();
 
 static int sapi_lsapi_activate()
 {
-    char *path, *doc_root, *server_name;
-    size_t path_len, doc_root_len, server_name_len;
+    char *path, *server_name;
+    size_t path_len, server_name_len;
 
     /* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
     if (!SG(request_info).path_translated) {
@@ -464,7 +453,7 @@ static int sapi_lsapi_activate()
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.0",
+    "LiteSpeed V7.1",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -500,7 +489,7 @@ static void init_request_info( void )
 {
     char * pContentType = LSAPI_GetHeader( H_CONTENT_TYPE );
     char * pAuth;
-    
+
     SG(request_info).content_type = pContentType ? pContentType : "";
     SG(request_info).request_method = LSAPI_GetRequestMethod();
     SG(request_info).query_string = LSAPI_GetQueryString();
@@ -510,7 +499,7 @@ static void init_request_info( void )
 
     /* It is not reset by zend engine, set it to 200. */
     SG(sapi_headers).http_response_code = 200;
-    
+
     pAuth = LSAPI_GetHeader( H_AUTHORIZATION );
     php_handle_auth_data(pAuth);
 }
@@ -574,6 +563,7 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
         ++pKey;
         if ( *pKey == 4 ) {
             type = ZEND_INI_SYSTEM;
+            stage = PHP_INI_STAGE_ACTIVATE;
         }
         else
         {
@@ -593,7 +583,7 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
             zend_alter_ini_entry_chars(psKey,
                              (char *)pValue, valLen,
                              type, stage);
-            zend_string_release(psKey);
+            zend_string_release_ex(psKey, 1);
         }
     }
     return 1;
@@ -767,7 +757,7 @@ static int lsapi_activate_user_ini_mk_user_config(_lsapi_activate_user_ini_ctx *
     /* Find cached config entry: If not found, create one */
     ctx->entry = zend_hash_str_find_ptr(&user_config_cache, ctx->path, ctx->path_len);
 
-    if (!ctx->entry) 
+    if (!ctx->entry)
     {
         ctx->entry = pemalloc(sizeof(user_config_cache_entry), 1);
         ctx->entry->expires = 0;
@@ -837,7 +827,7 @@ static int lsapi_activate_user_ini_finally(_lsapi_activate_user_ini_ctx *ctx,
     int rc = SUCCESS;
     fn_activate_user_ini_chain_t *fn_next = next;
 
-    php_ini_activate_config(&ctx->entry->user_config, PHP_INI_PERDIR, 
+    php_ini_activate_config(&ctx->entry->user_config, PHP_INI_PERDIR,
                             PHP_INI_STAGE_HTACCESS);
 
     if (*fn_next) {
@@ -1011,13 +1001,6 @@ static int cli_main( int argc, char * argv[] )
     zend_string *psKey;
     lsapi_mode = 0;        /* enter CLI mode */
 
-#ifdef PHP_WIN32
-    _fmode = _O_BINARY;            /*sets default for file streams to binary */
-    setmode(_fileno(stdin), O_BINARY);    /* make the stdio mode be binary */
-    setmode(_fileno(stdout), O_BINARY);   /* make the stdio mode be binary */
-    setmode(_fileno(stderr), O_BINARY);   /* make the stdio mode be binary */
-#endif
-
     zend_first_try     {
         SG(server_context) = (void *) 1;
 
@@ -1033,7 +1016,7 @@ static int cli_main( int argc, char * argv[] )
             zend_alter_ini_entry_chars(psKey,
                                 (char *)*(ini+1), strlen( *(ini+1) ),
                                 PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-            zend_string_release(psKey);
+            zend_string_release_ex(psKey, 1);
         }
 
         while (( p < argend )&&(**p == '-' )) {
@@ -1256,11 +1239,11 @@ int main( int argc, char * argv[] )
 #endif
 
 #if PHP_MAJOR_VERSION >= 7
-#if defined(ZEND_SIGNALS) || PHP_MINOR_VERSION > 0  
+#if defined(ZEND_SIGNALS) || PHP_MINOR_VERSION > 0
     zend_signal_startup();
 #endif
 #endif
-    
+
     if (argc > 1 ) {
         if ( parse_opt( argc, argv, &climode,
                 &php_ini_path, &php_bind ) == -1 ) {
@@ -1331,7 +1314,7 @@ int main( int argc, char * argv[] )
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
     int is_criu = LSCRIU_Init(); // Must be called before the regular init as it unsets the parameters.
 #endif
-    
+
     LSAPI_Init_Env_Parameters( NULL );
     lsapi_mode = 1;
 
@@ -1343,9 +1326,8 @@ int main( int argc, char * argv[] )
         php_bind = NULL;
     }
 
-    int iRequestsProcessed = 0;
     int result;
-    
+
     while( ( result = LSAPI_Prefork_Accept_r( &g_req )) >= 0 ) {
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
         if (is_criu && !result) {
@@ -1540,5 +1522,3 @@ PHP_FUNCTION(apache_get_modules)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-
-

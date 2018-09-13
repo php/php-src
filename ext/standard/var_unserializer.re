@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "php_incomplete_class.h"
@@ -219,7 +217,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 					}
 
 					BG(serialize_lock)++;
-					if (call_user_function_ex(CG(function_table), zv, &wakeup_name, &retval, 0, 0, 1, NULL) == FAILURE || Z_ISUNDEF(retval)) {
+					if (call_user_function(CG(function_table), zv, &wakeup_name, &retval, 0, 0) == FAILURE || Z_ISUNDEF(retval)) {
 						wakeup_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
@@ -250,13 +248,13 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 	unsigned char *end = *(unsigned char **)p+maxlen;
 
 	if (end < *p) {
-		zend_string_free(str);
+		zend_string_efree(str);
 		return NULL;
 	}
 
 	for (i = 0; i < len; i++) {
 		if (*p >= end) {
-			zend_string_free(str);
+			zend_string_efree(str);
 			return NULL;
 		}
 		if (**p != '\\') {
@@ -273,7 +271,7 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 				} else if (**p >= 'A' && **p <= 'F') {
 					ch = (ch << 4) + (**p -'A'+10);
 				} else {
-					zend_string_free(str);
+					zend_string_efree(str);
 					return NULL;
 				}
 			}
@@ -457,12 +455,13 @@ string_key:
 					unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
 
 					existing_propinfo = zend_hash_find_ptr(&Z_OBJCE_P(rval)->properties_info, unmangled);
-					if ((existing_propinfo != NULL)
+                    if ((unmangled_class == NULL || !strcmp(unmangled_class, "*") || !strcasecmp(unmangled_class, ZSTR_VAL(Z_OBJCE_P(rval)->name)))
+                            && (existing_propinfo != NULL)
 							&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
 						if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
 							new_key = zend_mangle_property_name(
 								"*", 1, ZSTR_VAL(unmangled), ZSTR_LEN(unmangled), 0);
-							zend_string_release(unmangled);
+							zend_string_release_ex(unmangled, 0);
 						} else if (existing_propinfo->flags & ZEND_ACC_PRIVATE) {
 							if (unmangled_class != NULL && strcmp(unmangled_class, "*") != 0) {
 								new_key = zend_mangle_property_name(
@@ -475,15 +474,15 @@ string_key:
 									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
 									0);
 							}
-							zend_string_release(unmangled);
+							zend_string_release_ex(unmangled, 0);
 						} else {
 							ZEND_ASSERT(existing_propinfo->flags & ZEND_ACC_PUBLIC);
 							new_key = unmangled;
 						}
-						zend_string_release(Z_STR(key));
+						zval_ptr_dtor_str(&key);
 						ZVAL_STR(&key, new_key);
 					} else {
-						zend_string_release(unmangled);
+						zend_string_release_ex(unmangled, 0);
 					}
 				}
 
@@ -512,7 +511,7 @@ string_key:
 		}
 
 		var_push_dtor(var_hash, data);
-		zval_ptr_dtor(&key);
+		zval_ptr_dtor_str(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
@@ -546,6 +545,13 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		return 0;
 	}
 
+	/* Check that '}' is present before calling ce->unserialize() to mitigate issues
+	 * with unserialize reading past the end of the passed buffer if the string is not
+	 * appropriately terminated (usually NUL terminated, but '}' is also sufficient.) */
+	if ((*p)[datalen] != '}') {
+		return 0;
+	}
+
 	if (ce->unserialize == NULL) {
 		zend_error(E_WARNING, "Class %s has no unserializer", ZSTR_VAL(ce->name));
 		object_init_ex(rval, ce);
@@ -553,9 +559,8 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		return 0;
 	}
 
-	(*p) += datalen;
-
-	return finish_nested_data(UNSERIALIZE_PASSTHRU);
+	(*p) += datalen + 1; /* +1 for '}' */
+	return 1;
 }
 
 static inline zend_long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
@@ -848,7 +853,7 @@ use_double:
 	}
 
 	if (*(YYCURSOR) != '"') {
-		zend_string_free(str);
+		zend_string_efree(str);
 		*p = YYCURSOR;
 		return 0;
 	}
@@ -971,7 +976,7 @@ object ":" uiv ":" ["]	{
 		if (ce) {
 			BG(serialize_lock)--;
 			if (EG(exception)) {
-				zend_string_release(class_name);
+				zend_string_release_ex(class_name, 0);
 				return 0;
 			}
 			break;
@@ -979,7 +984,7 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock)--;
 
 		if (EG(exception)) {
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 			return 0;
 		}
 
@@ -998,7 +1003,7 @@ object ":" uiv ":" ["]	{
 		if (call_user_function_ex(CG(function_table), NULL, &user_func, &retval, 1, args, 0, NULL) != SUCCESS) {
 			BG(serialize_lock)--;
 			if (EG(exception)) {
-				zend_string_release(class_name);
+				zend_string_release_ex(class_name, 0);
 				zval_ptr_dtor(&user_func);
 				zval_ptr_dtor(&args[0]);
 				return 0;
@@ -1013,7 +1018,7 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock)--;
 		zval_ptr_dtor(&retval);
 		if (EG(exception)) {
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 			zval_ptr_dtor(&user_func);
 			zval_ptr_dtor(&args[0]);
 			return 0;
@@ -1043,21 +1048,21 @@ object ":" uiv ":" ["]	{
 		if (ret && incomplete_class) {
 			php_store_class_name(rval, ZSTR_VAL(class_name), len2);
 		}
-		zend_string_release(class_name);
+		zend_string_release_ex(class_name, 0);
 		return ret;
 	}
 
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
 
 	if (elements < 0) {
-	   zend_string_release(class_name);
+	   zend_string_release_ex(class_name, 0);
 	   return 0;
 	}
 
 	if (incomplete_class) {
 		php_store_class_name(rval, ZSTR_VAL(class_name), len2);
 	}
-	zend_string_release(class_name);
+	zend_string_release_ex(class_name, 0);
 
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
 }

@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension snmp
 
 PHP_ARG_WITH(snmp,for SNMP support,
 [  --with-snmp[=DIR]         Include SNMP support])
@@ -37,7 +35,7 @@ if test "$PHP_SNMP" != "no"; then
     else
       AC_MSG_ERROR([Net-SNMP version 5.3 or greater reqired (detected $snmp_full_version).])
     fi
-  else 
+  else
     AC_MSG_ERROR([Could not find net-snmp-config binary. Please check your net-snmp installation.])
   fi
 

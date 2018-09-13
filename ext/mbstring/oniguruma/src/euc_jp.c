@@ -236,7 +236,7 @@ property_name_to_ctype(OnigEncoding enc, UChar* p, UChar* end)
   if (len < sizeof(q) - 1) {
     xmemcpy(q, p, (size_t )len);
     q[len] = '\0';
-    pc = euc_jp_lookup_property_name(q, len);
+    pc = onigenc_euc_jp_lookup_property_name(q, len);
     if (pc != 0)
       return pc->ctype;
   }
@@ -307,5 +307,6 @@ OnigEncodingType OnigEncodingEUC_JP = {
   NULL, /* init */
   NULL, /* is_initialized */
   is_valid_mbc_string,
-  0, 0, 0
+  ENC_FLAG_ASCII_COMPATIBLE,
+  0, 0
 };

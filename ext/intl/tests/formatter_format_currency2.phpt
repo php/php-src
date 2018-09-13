@@ -1,8 +1,8 @@
 --TEST--
 numfmt_format_currency() icu >= 4.8
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip for ICU >= 4.8'; ?>
 --FILE--
 <?php
 
@@ -42,9 +42,9 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTF--
 en_UK: '£1,234,567.89'
 en_US: '$1,234,567.89'
 ru: '1 234 567,89 р.'
 uk: '1 234 567,89 ₴'
-en: 'UAH1,234,567.89'
+en: 'UAH%A1,234,567.89'

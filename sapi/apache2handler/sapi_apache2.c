@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
@@ -712,6 +710,7 @@ zend_first_try {
 	if (!parent_req) {
 		php_apache_request_dtor(r);
 		ctx->request_processed = 1;
+		apr_brigade_cleanup(brigade);
 		bucket = apr_bucket_eos_create(r->connection->bucket_alloc);
 		APR_BRIGADE_INSERT_TAIL(brigade, bucket);
 

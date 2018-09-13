@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
@@ -42,7 +40,7 @@ static void incomplete_class_message(zval *object, int error_type)
 
 	if (class_name) {
 		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, ZSTR_VAL(class_name));
-		zend_string_release(class_name);
+		zend_string_release_ex(class_name, 0);
 	} else {
 		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, "unknown");
 	}
@@ -88,7 +86,7 @@ static int incomplete_class_has_property(zval *object, zval *member, int check_e
 }
 /* }}} */
 
-static union _zend_function *incomplete_class_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
+static zend_function *incomplete_class_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
 {
 	zval zobject;
 

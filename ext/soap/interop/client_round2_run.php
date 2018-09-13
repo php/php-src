@@ -14,9 +14,6 @@
 // +----------------------------------------------------------------------+
 // | Authors: Shane Caraveo <Shane@Caraveo.com>                           |
 // +----------------------------------------------------------------------+
-//
-// $Id$
-//
 
 set_time_limit(0);
 require_once 'client_round2_interop.php';
@@ -24,7 +21,7 @@ require_once 'client_round2_interop.php';
 $iop = new Interop_Client();
 $iop->html = 0;
 
-// force a fetch of endpoints, this happens irregardless if no endpoints in database
+// force a fetch of endpoints, this happens regardless if no endpoints in database
 $iop->fetchEndpoints();
 
 // set some options

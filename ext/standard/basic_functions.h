@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef BASIC_FUNCTIONS_H
 #define BASIC_FUNCTIONS_H
 
@@ -34,7 +32,7 @@
 
 #include "url_scanner_ex.h"
 
-#if defined(_WIN32) && defined(__clang__)
+#if defined(_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
 

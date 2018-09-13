@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_OPERATORS_H
 #define ZEND_OPERATORS_H
 
@@ -247,8 +245,8 @@ ZEND_API int ZEND_FASTCALL increment_function(zval *op1);
 ZEND_API int ZEND_FASTCALL decrement_function(zval *op2);
 
 ZEND_API void ZEND_FASTCALL convert_scalar_to_number(zval *op);
-ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op ZEND_FILE_LINE_DC);
-ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op ZEND_FILE_LINE_DC);
+ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op);
+ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_long(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_double(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_long_base(zval *op, int base);
@@ -284,7 +282,7 @@ static zend_always_inline zend_string *zval_get_tmp_string(zval *op, zend_string
 }
 static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
 	if (UNEXPECTED(tmp)) {
-		zend_string_release(tmp);
+		zend_string_release_ex(tmp, 0);
 	}
 }
 
@@ -296,8 +294,8 @@ static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
 #define _zval_get_double_func(op) zval_get_double_func(op)
 #define _zval_get_string_func(op) zval_get_string_func(op)
 
-#define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
-#define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
+#define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op)); }
+#define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op)); }
 
 
 ZEND_API int ZEND_FASTCALL zend_is_true(zval *op);
@@ -437,7 +435,13 @@ ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_D
 		convert_to_explicit_type(pzv, str_type);	\
 	}
 
-#define convert_to_boolean_ex(pzv)	convert_to_ex_master(pzv, boolean, _IS_BOOL)
+#define convert_to_boolean_ex(pzv)	do { \
+		if (Z_TYPE_INFO_P(pzv) > IS_TRUE) { \
+			convert_to_boolean(pzv); \
+		} else if (Z_TYPE_INFO_P(pzv) < IS_FALSE) { \
+			ZVAL_FALSE(pzv); \
+		} \
+	} while (0)
 #define convert_to_long_ex(pzv)		convert_to_ex_master(pzv, long, IS_LONG)
 #define convert_to_double_ex(pzv)	convert_to_ex_master(pzv, double, IS_DOUBLE)
 #define convert_to_string_ex(pzv)	convert_to_ex_master(pzv, string, IS_STRING)
@@ -467,9 +471,9 @@ ZEND_API void zend_update_current_locale(void);
 
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {
-#if defined(HAVE_ASM_GOTO) && defined(__i386__)
+#if defined(HAVE_ASM_GOTO) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
-		"incl (%0)\n\t"
+		"addl $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -480,7 +484,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
 #elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
 	__asm__ goto(
-		"incq (%0)\n\t"
+		"addq $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -517,9 +521,9 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 
 static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
-#if defined(HAVE_ASM_GOTO) && defined(__i386__)
+#if defined(HAVE_ASM_GOTO) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
-		"decl (%0)\n\t"
+		"subl $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -530,7 +534,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
 #elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
 	__asm__ goto(
-		"decq (%0)\n\t"
+		"subq $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -567,7 +571,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 
 static zend_always_inline void fast_long_add_function(zval *result, zval *op1, zval *op2)
 {
-#if defined(HAVE_ASM_GOTO) && defined(__i386__)
+#if defined(HAVE_ASM_GOTO) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
 		"movl	(%1), %%eax\n\t"
 		"addl   (%2), %%eax\n\t"
@@ -657,7 +661,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, zval *op2)
 {
-#if defined(HAVE_ASM_GOTO) && defined(__i386__)
+#if defined(HAVE_ASM_GOTO) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
 		"movl	(%1), %%eax\n\t"
 		"subl   (%2), %%eax\n\t"

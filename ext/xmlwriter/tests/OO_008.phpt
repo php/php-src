@@ -6,7 +6,6 @@ if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
 <?php 
-/* $Id$ */
 
 $xw = new XMLWriter();
 $xw->openMemory();

@@ -171,5 +171,5 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, size_t *len) {
 		*len = ZSTR_LEN(buf.s);
 	}
 
-	zval_dtor(&array);
+	zend_array_destroy(Z_ARR(array));
 }

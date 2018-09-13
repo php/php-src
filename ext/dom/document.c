@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -190,7 +188,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMDocument extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-i-Document
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-i-Document
 * Since:
 */
 
@@ -353,7 +351,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 		php_error_docref(NULL, E_WARNING, "Invalid Document Encoding");
     }
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -441,7 +439,7 @@ int dom_document_version_write(dom_object *obj, zval *newval)
 
 	docp->version = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -669,7 +667,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval)
 
 	docp->URL = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -2150,10 +2148,11 @@ PHP_FUNCTION(dom_document_save_html)
 	zval *id, *nodep = NULL;
 	xmlDoc *docp;
 	xmlNode *node;
+	xmlOutputBufferPtr outBuf;
 	xmlBufferPtr buf;
 	dom_object *intern, *nodeobj;
 	xmlChar *mem = NULL;
-	int size = 0, format;
+	int format;
 	dom_doc_propsptr doc_props;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
@@ -2180,36 +2179,40 @@ PHP_FUNCTION(dom_document_save_html)
 			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
+		outBuf = xmlOutputBufferCreateBuffer(buf, NULL);
+		if (!outBuf) {
+			xmlBufferFree(buf);
+			php_error_docref(NULL, E_WARNING, "Could not fetch output buffer");
+			RETURN_FALSE;
+		}
 
 		if (node->type == XML_DOCUMENT_FRAG_NODE) {
-			int one_size;
-
 			for (node = node->children; node; node = node->next) {
-				one_size = htmlNodeDump(buf, docp, node);
-
-				if (one_size >= 0) {
-					size += one_size;
-				} else {
-					size = -1;
+				htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
+				if (outBuf->error) {
 					break;
 				}
 			}
 		} else {
-			size = htmlNodeDump(buf, docp, node);
+			htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
 		}
-		if (size >= 0) {
+		if (!outBuf->error) {
+			xmlOutputBufferFlush(outBuf);
 			mem = (xmlChar*) xmlBufferContent(buf);
 			if (!mem) {
 				RETVAL_FALSE;
 			} else {
+				int size = xmlBufferLength(buf);
 				RETVAL_STRINGL((const char*) mem, size);
 			}
 		} else {
 			php_error_docref(NULL, E_WARNING, "Error dumping HTML node");
 			RETVAL_FALSE;
 		}
+		xmlOutputBufferClose(outBuf);
 		xmlBufferFree(buf);
 	} else {
+		int size = 0;
 #if LIBXML_VERSION >= 20623
 		htmlDocDumpMemoryFormat(docp, &mem, &size, format);
 #else

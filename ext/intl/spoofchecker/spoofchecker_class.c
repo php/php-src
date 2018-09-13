@@ -96,7 +96,7 @@ ZEND_END_ARG_INFO()
  */
 
 static const zend_function_entry Spoofchecker_class_functions[] = {
-	PHP_ME(Spoofchecker, __construct, spoofchecker_0_args, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
+	PHP_ME(Spoofchecker, __construct, spoofchecker_0_args, ZEND_ACC_PUBLIC)
 	PHP_ME(Spoofchecker, isSuspicious, spoofchecker_is_suspicous, ZEND_ACC_PUBLIC)
 	PHP_ME(Spoofchecker, areConfusable, spoofchecker_are_confusable, ZEND_ACC_PUBLIC)
 	PHP_ME(Spoofchecker, setAllowedLocales, spoofchecker_set_allowed_locales, ZEND_ACC_PUBLIC)
@@ -144,7 +144,7 @@ void spoofchecker_register_Spoofchecker_class(void)
 	ce.create_object = Spoofchecker_object_create;
 	Spoofchecker_ce_ptr = zend_register_internal_class(&ce);
 
-	memcpy(&Spoofchecker_handlers, zend_get_std_object_handlers(),
+	memcpy(&Spoofchecker_handlers, &std_object_handlers,
 		sizeof Spoofchecker_handlers);
 	Spoofchecker_handlers.offset = XtOffsetOf(Spoofchecker_object, zo);
 	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;

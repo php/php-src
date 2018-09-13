@@ -212,5 +212,6 @@ OnigEncodingType OnigEncodingKOI8_R = {
   NULL, /* init */
   NULL, /* is_initialized */
   onigenc_always_true_is_valid_mbc_string,
-  0, 0, 0
+  ENC_FLAG_ASCII_COMPATIBLE,
+  0, 0
 };

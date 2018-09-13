@@ -1338,7 +1338,6 @@ void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color
 		} else {
 			wid = 1;
 		}
-		wid = (int)(thick * sin(atan2(dy, dx)));
 		vert = 1;
 
 		d = 2 * dy - dx;
@@ -1899,7 +1898,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	int alphablending_bak;
 
 	/* stack of filled segments */
-	/* struct seg stack[FILL_MAX],*sp = stack;; */
+	/* struct seg stack[FILL_MAX],*sp = stack; */
 	struct seg *stack = NULL;
 	struct seg *sp;
 
@@ -3144,4 +3143,3 @@ clean_on_error:
 	gdFree(src->tpixels);
 	return 0;
 }
-

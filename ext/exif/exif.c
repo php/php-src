@@ -1,4 +1,4 @@
-﻿/*
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -16,8 +16,6 @@
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -113,7 +111,6 @@ PHP_MINFO_FUNCTION(exif)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "EXIF Support", "enabled");
-	php_info_print_table_row(2, "EXIF Version", PHP_EXIF_VERSION);
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
 	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF");
 
@@ -2090,7 +2087,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 		case TAG_FMT_UNDEFINED:
 			if (value) {
 				if (tag == TAG_MAKER_NOTE) {
-					length = MIN(length, (int) strlen(value));
+					length = (int) php_strnlen(value, length);
 				}
 
 				/* do not recompute length here */
@@ -2922,7 +2919,10 @@ static void exif_thumbnail_extract(image_info_type *ImageInfo, char *offset, siz
 		return;
 	}
 	/* Check to make sure we are not going to go past the ExifLength */
-	if ((ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) > length) {
+	if (ImageInfo->Thumbnail.size > length
+		|| (ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) > length
+		|| ImageInfo->Thumbnail.offset > length - ImageInfo->Thumbnail.size
+	) {
 		EXIF_ERRLOG_THUMBEOF(ImageInfo)
 		return;
 	}
@@ -3104,6 +3104,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 #endif
 	const maker_note_type *maker_note;
 	char *dir_start;
+	int data_len;
 
 	for (i=0; i<=sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
 		if (i==sizeof(maker_note_array)/sizeof(maker_note_type)) {
@@ -3156,6 +3157,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	switch (maker_note->offset_mode) {
 		case MN_OFFSET_MAKER:
 			offset_base = value_ptr;
+			data_len = value_len;
 			break;
 #ifdef KALLE_0
 		case MN_OFFSET_GUESS:
@@ -3173,6 +3175,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 				return FALSE;
 			}
 			offset_base = value_ptr + offset_diff;
+			data_len = value_len - offset_diff;
 			break;
 #endif
 		default:
@@ -3187,7 +3190,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 
 	for (de=0;de<NumDirEntries;de++) {
 		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,
-								  offset_base, IFDlength, displacement, section_index, 0, maker_note->tag_table)) {
+								  offset_base, data_len, displacement, section_index, 0, maker_note->tag_table)) {
 			return FALSE;
 		}
 	}
@@ -3365,7 +3368,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						ImageInfo->CopyrightPhotographer  = estrdup(value_ptr);
 						ImageInfo->CopyrightEditor        = estrndup(value_ptr+length+1, byte_count-length-1);
 						spprintf(&ImageInfo->Copyright, 0, "%s, %s", ImageInfo->CopyrightPhotographer, ImageInfo->CopyrightEditor);
-						/* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
+						/* format = TAG_FMT_UNDEFINED; this mustn't be ASCII         */
 						/* but we are not supposed to change this                   */
 						/* keep in mind that image_info does not store editor value */
 					} else {
@@ -4300,7 +4303,7 @@ static int exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, i
 			zend_string *base;
 			if ((st.st_mode & S_IFMT) != S_IFREG) {
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Not a file");
-				php_stream_close(ImageInfo->infile);
+				ImageInfo->infile = NULL;
 				return FALSE;
 			}
 
@@ -4308,7 +4311,7 @@ static int exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, i
 			base = php_basename(stream->orig_path, strlen(stream->orig_path), NULL, 0);
 			ImageInfo->FileName = estrndup(ZSTR_VAL(base), ZSTR_LEN(base));
 
-			zend_string_release(base);
+			zend_string_release_ex(base, 0);
 
 			/* Store file date/time. */
 			ImageInfo->FileDateTime = st.st_mtime;
@@ -4433,13 +4436,11 @@ PHP_FUNCTION(exif_read_data)
 #ifdef EXIF_DEBUG
 		sections_str = exif_get_sectionlist(sections_needed);
 		if (!sections_str) {
-			zend_string_release(z_sections_needed);
 			RETURN_FALSE;
 		}
 		exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Sections needed: %s", sections_str[0] ? sections_str : "None");
 		EFREE_IF(sections_str);
 #endif
-		zend_string_release(z_sections_needed);
 	}
 
 	if (Z_TYPE_P(stream) == IS_RESOURCE) {
@@ -4652,13 +4653,13 @@ PHP_FUNCTION(exif_thumbnail)
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo);
 		}
-		zval_dtor(z_width);
-		zval_dtor(z_height);
+		zval_ptr_dtor(z_width);
+		zval_ptr_dtor(z_height);
 		ZVAL_LONG(z_width,  ImageInfo.Thumbnail.width);
 		ZVAL_LONG(z_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
-		zval_dtor(z_imagetype);
+		zval_ptr_dtor(z_imagetype);
 		ZVAL_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 

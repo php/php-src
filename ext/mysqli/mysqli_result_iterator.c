@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id: mysqli.c 299335 2010-05-13 11:05:09Z andrey $
 */
 
 #ifdef HAVE_CONFIG_H
@@ -68,7 +66,7 @@ static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*)iter;
 
-	/* cleanup handled in sxe_object_dtor as we dont always have an iterator wrapper */
+	/* cleanup handled in sxe_object_dtor as we don't always have an iterator wrapper */
 	zval_ptr_dtor(&iterator->intern.data);
 	zval_ptr_dtor(&iterator->current_row);
 }

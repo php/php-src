@@ -13,9 +13,6 @@
 #  +----------------------------------------------------------------------+
 #  | Author: Sascha Schumann <sascha@schumann.cx>                         |
 #  +----------------------------------------------------------------------+
-#
-# $Id$ 
-#
 
 include generated_lists
 
@@ -30,12 +27,12 @@ targets = $(TOUCH_FILES) configure $(config_h_in)
 PHP_AUTOCONF ?= 'autoconf'
 PHP_AUTOHEADER ?= 'autoheader'
 
-SUPPRESS_WARNINGS ?= 2>&1 | (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_DECL_YYTEXT is expanded from...|the top level)'||true)
+SUPPRESS_WARNINGS ?= 2>&1 | (egrep -v '(AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used)'||true)
 
 all: $(targets)
 
 $(config_h_in): configure
-# explicitly remove target since autoheader does not seem to work 
+# explicitly remove target since autoheader does not seem to work
 # correctly otherwise (timestamps are not updated)
 	@echo rebuilding $@
 	@rm -f $@

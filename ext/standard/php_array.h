@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_ARRAY_H
 #define PHP_ARRAY_H
 
@@ -69,6 +67,8 @@ PHP_FUNCTION(array_merge_recursive);
 PHP_FUNCTION(array_replace);
 PHP_FUNCTION(array_replace_recursive);
 PHP_FUNCTION(array_keys);
+PHP_FUNCTION(array_key_first);
+PHP_FUNCTION(array_key_last);
 PHP_FUNCTION(array_values);
 PHP_FUNCTION(array_count_values);
 PHP_FUNCTION(array_column);

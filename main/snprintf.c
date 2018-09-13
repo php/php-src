@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #define _GNU_SOURCE
 #include "php.h"
 
@@ -1214,7 +1212,7 @@ fmt_error:
 			if (adjust_width && adjust == LEFT && (size_t)min_width > s_len)
 				PAD((size_t)min_width, s_len, pad_char);
 			if (free_zcopy) {
-				zval_dtor(&zcopy);
+				zval_ptr_dtor_str(&zcopy);
 			}
 		}
 skip_output:

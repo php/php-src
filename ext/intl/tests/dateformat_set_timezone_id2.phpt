@@ -3,8 +3,8 @@ datefmt_set_timezone_id_code() icu >= 4.8
 --INI--
 date.timezone=Atlantic/Azores
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip for ICU >= 4.8'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php

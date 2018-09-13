@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.33 2009-05-29 07:43:07 kalle Exp $
-
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
 var WshShell = WScript.CreateObject("WScript.Shell");
@@ -41,6 +39,9 @@ var COMPILER_NAME = "unknown";
 var PHP_OBJECT_OUT_DIR = "";
 var PHP_CONFIG_PROFILE = "no";
 var PHP_SANITIZER = "no";
+var VERBOSITY = 0;
+var CMD_MOD1 = "@";
+var CMD_MOD2 = "@";
 
 var PHP_TEST_INI_PATH = "";
 var PHP_TEST_INI = "";
@@ -77,6 +78,7 @@ VC_VERSIONS[1911] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1912] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1913] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1914] = 'MSVC15 (Visual C++ 2017)';
+VC_VERSIONS[1915] = 'MSVC15 (Visual C++ 2017)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1700] = 'VC11';
@@ -87,6 +89,7 @@ VC_VERSIONS_SHORT[1911] = 'VC15';
 VC_VERSIONS_SHORT[1912] = 'VC15';
 VC_VERSIONS_SHORT[1913] = 'VC15';
 VC_VERSIONS_SHORT[1914] = 'VC15';
+VC_VERSIONS_SHORT[1915] = 'VC15';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1061,10 +1064,10 @@ function generate_version_info_manifest(makefiletarget)
 
 	if (MODE_PHPIZE) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": " + PHP_DIR + "\\build\\default.manifest");
-		MFO.WriteLine("\t@copy " + PHP_DIR + "\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest >nul");
+		MFO.WriteLine("\t" + CMD_MOD2 + "copy " + PHP_DIR + "\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest >nul");
 	} else {
 		MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": win32\\build\\default.manifest");
-		MFO.WriteLine("\t@copy $(PHP_SRC_DIR)\\win32\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest >nul");
+		MFO.WriteLine("\t" + CMD_MOD2 + "copy $(PHP_SRC_DIR)\\win32\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest >nul");
 	}
 
 	return manifest_name;
@@ -1143,7 +1146,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	 */
 	if (FSO.FileExists(creditspath + '\\template.rc')) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": " + creditspath + "\\template.rc");
-		MFO.WriteLine("\t$(RC) /nologo $(BASE_INCLUDES) /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		MFO.WriteLine("\t" + CMD_MOD1 + "$(RC) /nologo $(BASE_INCLUDES) /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"' +
 			makefiletarget + '\\"" /d PRODUCT_NAME="\\"' + res_prod_name +
 			versioning + '\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" ' +
@@ -1152,14 +1155,14 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	}
 	if (MODE_PHPIZE) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": $(PHP_DIR)\\build\\template.rc");
-		MFO.WriteLine("\t$(RC) /nologo  $(BASE_INCLUDES) /I $(PHP_DIR)/include /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		MFO.WriteLine("\t" + CMD_MOD1 + "$(RC) /nologo  $(BASE_INCLUDES) /I $(PHP_DIR)/include /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
 			+ makefiletarget + '\\"" /d URL="\\"' + project_url + 
 			'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning + 
 			'\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" $(PHP_DIR)\\build\\template.rc');
 	} else {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": win32\\build\\template.rc");
-		MFO.WriteLine("\t$(RC) /nologo  $(BASE_INCLUDES) /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		MFO.WriteLine("\t" + CMD_MOD1 + "$(RC) /nologo  $(BASE_INCLUDES) /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
 			+ makefiletarget + '\\"" /d URL="\\"' + project_url + 
 			'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning + 
@@ -1224,7 +1227,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	manifest_name = generate_version_info_manifest(makefiletarget);
 	
 	MFO.WriteLine(makefiletarget + ": $(BUILD_DIR)\\" + makefiletarget);
-	MFO.WriteLine("\t@echo SAPI " + sapiname_for_printing + " build complete");
+	MFO.WriteLine("\t" + CMD_MOD2 + "echo SAPI " + sapiname_for_printing + " build complete");
 	if (MODE_PHPIZE) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 	} else {
@@ -1234,13 +1237,13 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	var is_lib = makefiletarget.match(new RegExp("\\.lib$"));
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
 		ldflags = "/dll $(LDFLAGS)";
-		manifest = "-@$(_VC_MANIFEST_EMBED_DLL)";
+		manifest = "-" + CMD_MOD2 + "$(_VC_MANIFEST_EMBED_DLL)";
 	} else if (is_lib) {
 		ldflags = "$(ARFLAGS)";
-		ld = "@$(MAKE_LIB)";
+		ld = CMD_MOD1 + "$(MAKE_LIB)";
 	} else {
 		ldflags = "$(LDFLAGS)";
-		manifest = "-@$(_VC_MANIFEST_EMBED_EXE)";
+		manifest = "-" + CMD_MOD2 + "$(_VC_MANIFEST_EMBED_EXE)";
 	}
 	
 	if (PHP_SANITIZER == "yes") {
@@ -1254,10 +1257,16 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
 			ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
 			ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG /GENPROFILE");
+			if (VCVERS >= 1914) {
+				ADD_FLAG('LDFLAGS_' + SAPI, "/d2:-FuncCache1");
+			}
 		}
 		else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
 			ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
 			ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG /USEPROFILE");
+			if (VCVERS >= 1914) {
+				ADD_FLAG('LDFLAGS_' + SAPI, "/d2:-FuncCache1");
+			}
 		}
 
 		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
@@ -1267,14 +1276,14 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		if (ld) {
 			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(ARFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 		} else {
-			ld = '@"$(LINK)"';
+			ld = CMD_MOD1 + '"$(LINK)"';
 			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
 		}
 	} else {
 		if (ld) {
 			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(ARFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 		} else {
-			ld = '@"$(LINK)"';
+			ld = CMD_MOD1 + '"$(LINK)"';
 			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
 		}
 	}
@@ -1452,7 +1461,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		var libname = dllname.substring(0, dllname.length-4) + ".lib";
 
 		var resname = generate_version_info_resource(dllname, extname, configure_module_dirname, false);
-		var ld = '@"$(LINK)"';
+		var ld = CMD_MOD1 + '"$(LINK)"';
 		var manifest_name = generate_version_info_manifest(dllname);
 
 		ldflags = "";
@@ -1460,9 +1469,15 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			// Add compiler and link flags if PGO options are selected
 			if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
 				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG /GENPROFILE");
+				if (VCVERS >= 1914) {
+					ADD_FLAG('LDFLAGS_' + EXT, "/d2:-FuncCache1");
+				}
 			}
 			else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
 				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG /USEPROFILE");
+				if (VCVERS >= 1914) {
+					ADD_FLAG('LDFLAGS_' + EXT, "/d2:-FuncCache1");
+				}
 			}
 
 			ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
@@ -1479,7 +1494,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + ldflags + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		}
-		MFO.WriteLine("\t-@$(_VC_MANIFEST_EMBED_DLL)");
+		MFO.WriteLine("\t-" + CMD_MOD2 + "$(_VC_MANIFEST_EMBED_DLL)");
 		MFO.WriteBlankLines(1);
 
 		if (configure_module_dirname.match("pecl")) {
@@ -1488,7 +1503,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			ADD_FLAG("EXT_TARGETS", dllname);
 		}
 		MFO.WriteLine(dllname + ": $(BUILD_DIR)\\" + dllname);
-		MFO.WriteLine("\t@echo EXT " + extname + " build complete");
+		MFO.WriteLine("\t" + CMD_MOD2 + "echo EXT " + extname + " build complete");
 		MFO.WriteBlankLines(1);
 		
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_' + EXT + ')');
@@ -1532,7 +1547,11 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
 	}
-	if (MODE_PHPIZE && FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
+	if (MODE_PHPIZE) {
+		if (!FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
+			var _tmp = FSO.CreateTextFile(PHP_DIR + "/include/main/config.pickle.h", true);
+			_tmp.Close();
+		}
 		cflags = "/FI main/config.pickle.h " + cflags;
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
@@ -1725,14 +1744,14 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 				var filename = _tmp.pop();
 				obj = filename.replace(re, ".obj");
 
-				MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
+				MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
 				if ("clang" == PHP_ANALYZER) {
-					MFO.WriteLine("\t@\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src); 
+					MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src); 
 				} else if ("cppcheck" == PHP_ANALYZER) {
-					MFO.WriteLine("\t\"@$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src); 
+					MFO.WriteLine("\t\"" + CMD_MOD1 + "$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src); 
 				}else if (PHP_ANALYZER == "pvs") {
-					MFO.WriteLine("\t@\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
+					MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
 						+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
 				}
 			}
@@ -1743,7 +1762,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 				src_line += dir + "\\" + file_list[srcs_by_dir[k][j]] + " ";
 			}
 
-			MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
+			MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
 
 			if ("clang" == PHP_ANALYZER) {
 				MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + src_line);
@@ -2015,11 +2034,6 @@ function generate_tmp_php_ini()
 		}
 		
 		var directive = (extensions_enabled[i][2] ? 'zend_extension' : 'extension');
-
-		// FIXME: Remove this once ZEND_EXTENSION() is merged to XDEBUG
-		if ("xdebug" == extensions_enabled[i][0]) {
-			directive = "zend_extension";
-		}
 
 		var ext_name = extensions_enabled[i][0];
 		if ("gd" == ext_name) {
@@ -2534,38 +2548,38 @@ function generate_makefile()
 	MF.Write(TF.ReadAll());
 
 	MF.WriteLine("build-headers:");
-	MF.WriteLine("	@if not exist $(BUILD_DIR_DEV)\\include mkdir $(BUILD_DIR_DEV)\\include >nul");
-	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @if not exist $(BUILD_DIR_DEV)\\include\\%D mkdir $(BUILD_DIR_DEV)\\include\\%D >nul");
+	MF.WriteLine("	" + CMD_MOD2 + "if not exist $(BUILD_DIR_DEV)\\include mkdir $(BUILD_DIR_DEV)\\include >nul");
+	MF.WriteLine("	" + CMD_MOD2 + "for %D in ($(INSTALL_HEADERS_DIR)) do " + CMD_MOD2 + "if not exist $(BUILD_DIR_DEV)\\include\\%D mkdir $(BUILD_DIR_DEV)\\include\\%D >nul");
 	for (i in headers_install) {
 		if (headers_install[i][2] != "") {
-				MF.WriteLine("	@if not exist $(BUILD_DIR_DEV)\\include\\" + headers_install[i][2] + " mkdir $(BUILD_DIR_DEV)\\include\\" + 
+				MF.WriteLine("	" + CMD_MOD2 + "if not exist $(BUILD_DIR_DEV)\\include\\" + headers_install[i][2] + " mkdir $(BUILD_DIR_DEV)\\include\\" + 
 												headers_install[i][2] + ">nul");
-				MF.WriteLine("	@copy " + headers_install[i][0] + " " + "$(BUILD_DIR_DEV)\\include\\" + headers_install[i][2] + " /y >nul");
+				MF.WriteLine("	" + CMD_MOD2 + "copy " + headers_install[i][0] + " " + "$(BUILD_DIR_DEV)\\include\\" + headers_install[i][2] + " /y >nul");
 		}
 	}
-	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @copy %D*.h $(BUILD_DIR_DEV)\\include\\%D /y >nul");
+	MF.WriteLine("	" + CMD_MOD2 + "for %D in ($(INSTALL_HEADERS_DIR)) do " + CMD_MOD2 + "copy %D*.h $(BUILD_DIR_DEV)\\include\\%D /y >nul");
 	if (MODE_PHPIZE) {
 		MF.WriteBlankLines(1);
 		MF.WriteLine("build-bins:");
 		for (var i in extensions_enabled) {
 			var lib = "php_" + extensions_enabled[i][0] + ".lib";
 			var dll = "php_" + extensions_enabled[i][0] + ".dll";
-			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
-			MF.WriteLine("  @if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX) >nul");
-			MF.WriteLine("  @if not exist $(PHP_PREFIX)\\ext mkdir $(PHP_PREFIX)\\ext >nul");
-			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)\\ext");
+			MF.WriteLine("	" + CMD_MOD2 + "copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+			MF.WriteLine("  " + CMD_MOD2 + "if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX) >nul");
+			MF.WriteLine("  " + CMD_MOD2 + "if not exist $(PHP_PREFIX)\\ext mkdir $(PHP_PREFIX)\\ext >nul");
+			MF.WriteLine("	" + CMD_MOD2 + "copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)\\ext");
 		}
 	} else {
 		MF.WriteBlankLines(1);
 		MF.WriteLine("build-ext-libs:");
-		MF.WriteLine("	@if not exist $(BUILD_DIR_DEV)\\lib mkdir $(BUILD_DIR_DEV)\\lib >nul");
+		MF.WriteLine("	" + CMD_MOD2 + "if not exist $(BUILD_DIR_DEV)\\lib mkdir $(BUILD_DIR_DEV)\\lib >nul");
 		for (var i in extensions_enabled) {
 			var lib;
 
 			lib = "php_" + extensions_enabled[i][0] + "*.lib";
 
 			if ('shared' == extensions_enabled[i][1]) {
-				MF.WriteLine("	@if exist $(BUILD_DIR)\\" + lib + " copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+				MF.WriteLine("	" + CMD_MOD2 + "if exist $(BUILD_DIR)\\" + lib + " copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
 			}
 		}
 	}
@@ -2589,12 +2603,12 @@ function generate_makefile()
 		}
 	}
 	MF.WriteLine("set-tmp-env:");
-	MF.WriteLine("	@set PATH=" + extra_path + ";$(PATH)");
+	MF.WriteLine("	" + CMD_MOD2 + "set PATH=" + extra_path + ";$(PATH)");
 
 	MF.WriteBlankLines(2);
 
 	MF.WriteLine("dump-tmp-env: set-tmp-env");
-	MF.WriteLine("	@set");
+	MF.WriteLine("	" + CMD_MOD2 + "set");
 
 	MF.WriteBlankLines(2);
 
@@ -3155,7 +3169,7 @@ function toolset_setup_codegen_arch()
 function toolset_setup_linker()
 {
 	if (VS_TOOLSET) {
-		return PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
+		return PATH_PROG('link', null);
 	} else if (CLANG_TOOLSET) {
 		//return PATH_PROG('lld', WshShell.Environment("Process").Item("PATH"), "LINK");
 		return PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
@@ -3224,6 +3238,14 @@ function toolset_setup_common_cflags()
 			}
 		}
 
+		if (VCVERS >= 1914) {
+			/* This is only in effect for CXX sources, __cplusplus is not defined in C sources. */
+			ADD_FLAG("CFLAGS", "/Zc:__cplusplus");
+		}
+
+		if (VCVERS >= 1914) {
+			ADD_FLAG("CFLAGS", "/d2FuncCache1");
+		}
 	} else if (CLANG_TOOLSET) {
 		if (X64) {
 			ADD_FLAG('CFLAGS', '-m64');
@@ -3624,9 +3646,6 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 	if (!!cflags_name) {
 		ADD_FLAG(cflags_name, "-fsanitize=address");
 		ADD_FLAG(cflags_name, "-fsanitize-address-use-after-scope");
-		ADD_FLAG(cflags_name, "-fsanitize-cfi-cross-dso");
-		ADD_FLAG(cflags_name, "-fsanitize-memory-track-origins");
-		ADD_FLAG(cflags_name, "-fsanitize-memory-use-after-dtor");
 	}
 	if (!!libs_name) {
 		if (X64) {
@@ -3638,6 +3657,36 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 
 	if (!!ldflags_name) {
 		ADD_FLAG(ldflags_name, "/libpath:\"" + get_clang_lib_dir() + "\\windows\"");
+	}
+}
+
+function setup_verbosity()
+{
+	if ("no" != PHP_VERBOSITY) {
+		if ("yes" == PHP_VERBOSITY) {
+			VERBOSITY = 1;
+			if (1 == VERBOSITY) {
+				CMD_MOD1 = "";
+			}
+		} else {
+			var _tmp = parseInt(PHP_VERBOSITY);
+			if (0 != _tmp && 1 != _tmp && 2 != _tmp) {
+				ERROR("Unsupported verbosity level '" + PHP_VERBOSITY + "'");
+			}
+			VERBOSITY = _tmp;
+
+			if (1 == VERBOSITY) {
+				CMD_MOD1 = "";
+			}
+			if (2 == VERBOSITY) {
+				CMD_MOD1 = "";
+				CMD_MOD2 = "";
+			}
+		}
+	} else {
+		VERBOSITY = 0;
+		CMD_MOD1 = "@";
+		CMD_MOD2 = "@";
 	}
 }
 

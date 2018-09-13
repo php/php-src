@@ -16,7 +16,6 @@
    |         Xinchen Hui <laruence@php.net>                               |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include <string.h>
 
@@ -397,7 +396,7 @@ static __m128i php_base64_encode_ssse3_translate(__m128i in)
 	/* mask is 0xFF (-1) for range #[1..4] and 0x00 for range #0: */
 	mask = _mm_cmpgt_epi8(in, _mm_set1_epi8(25));
 
-	/* substract -1, so add 1 to indices for range #[1..4], All indices are now correct: */
+	/* subtract -1, so add 1 to indices for range #[1..4], All indices are now correct: */
 	indices = _mm_sub_epi8(indices, mask);
 
 	/* Add offsets to input values: */
@@ -699,7 +698,7 @@ zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length,
 # endif
 
 	if (!php_base64_decode_impl(c, length, (unsigned char*)ZSTR_VAL(result), &outl, strict)) {
-		zend_string_free(result);
+		zend_string_efree(result);
 		return NULL;
 	}
 
@@ -722,7 +721,7 @@ zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length,
 	PHP_BASE64_DECODE_SSSE3_LOOP;
 
 	if (!php_base64_decode_impl(c, length, (unsigned char*)ZSTR_VAL(result), &outl, strict)) {
-		zend_string_free(result);
+		zend_string_efree(result);
 		return NULL;
 	}
 
@@ -767,7 +766,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	result = zend_string_alloc(length, 0);
 
 	if (!php_base64_decode_impl(str, length, (unsigned char*)ZSTR_VAL(result), &outl, strict)) {
-		zend_string_free(result);
+		zend_string_efree(result);
 		return NULL;
 	}
 

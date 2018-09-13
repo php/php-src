@@ -3,7 +3,6 @@ Bug #39815 (to_zval_double() in ext/soap/php_encoding.c is not locale-independen
 --SKIPIF--
 <?php 
 require_once('skipif.inc'); 
-if (!function_exists('setlocale')) die('skip setlocale() not available'); 
 if (!@setlocale(LC_ALL, 'sv_SE', 'sv_SE.ISO8859-1')) die('skip sv_SE locale not available');
 if (!@setlocale(LC_ALL, 'en_US', 'en_US.ISO8859-1')) die('skip en_US locale not available');
 ?>

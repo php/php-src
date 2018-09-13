@@ -645,7 +645,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 			}
 
 			/* ", " separated matches */
-			phpdbg_error("command", "type=\"ambiguous\" command=\"%s\" matches=\"%lu\" matched=\"%s\"", "The command \"%s\" is ambigious, matching %lu commands (%s)", name->str, matches, list);
+			phpdbg_error("command", "type=\"ambiguous\" command=\"%s\" matches=\"%lu\" matched=\"%s\"", "The command \"%s\" is ambiguous, matching %lu commands (%s)", name->str, matches, list);
 			efree(list);
 
 			return NULL;

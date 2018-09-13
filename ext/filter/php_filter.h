@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_FILTER_H
 #define PHP_FILTER_H
 
@@ -60,7 +58,9 @@ ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zval cookie_array;
 	zval env_array;
 	zval server_array;
+#if 0
 	zval session_array;
+#endif
 	zend_long default_filter;
 	zend_long default_filter_flags;
 ZEND_END_MODULE_GLOBALS(filter)
@@ -91,7 +91,7 @@ void php_filter_email(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL);
+void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL);
 
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL);
 

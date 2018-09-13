@@ -263,7 +263,7 @@ U_CFUNC zend_function *IntlPartsIterator_get_method(zend_object **object_ptr, ze
 		}
 	}
 
-	ret = std_object_handlers.get_method(object_ptr, method, key);
+	ret = zend_std_get_method(object_ptr, method, key);
 
 end:
 	if (key == NULL) {
@@ -286,8 +286,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 
 	zval *biter_zval = &ii->iterator->data;
-	ZVAL_DEREF(biter_zval);
-	ZVAL_COPY(return_value, biter_zval);
+	ZVAL_COPY_DEREF(return_value, biter_zval);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_parts_it_void, 0, 0, 0)

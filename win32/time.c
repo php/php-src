@@ -10,8 +10,6 @@
  *
  *****************************************************************************/
 
-/* $Id$ */
-
 /* Include stuff ************************************************************ */
 
 #include <config.w32.h>
@@ -38,9 +36,6 @@ static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
 	if (hMod) {
 		/* Max possible resolution <1us, win8/server2012 */
 		timefunc = (MyGetSystemTimeAsFileTime)GetProcAddress(hMod, "GetSystemTimePreciseAsFileTime");
-
-		/* Lower the refcount */
-		FreeLibrary(hMod);
 	}
 
 	if(!timefunc) {

@@ -15,7 +15,6 @@
    | Author: Jim Winstead <jimw@php.net>                                  |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #ifndef URL_H
 #define URL_H

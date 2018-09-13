@@ -28,7 +28,6 @@
 #include <fcntl.h>
 #ifndef ZEND_WIN32
 # include <sys/types.h>
-# include <dirent.h>
 # include <signal.h>
 # include <sys/stat.h>
 # include <stdio.h>

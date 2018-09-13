@@ -1,7 +1,5 @@
 #!/usr/bin/awk -f
 #
-# $Id$
-#
 # Description: a script that generates a single byte code set to Unicode
 # mapping table.
 #
