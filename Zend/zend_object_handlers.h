@@ -199,8 +199,6 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
 ZEND_API int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
-ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, zend_string *function_name);
-
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
 
 ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name);

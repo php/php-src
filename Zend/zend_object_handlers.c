@@ -1102,36 +1102,6 @@ static zend_never_inline zend_function *zend_get_parent_private_method(zend_clas
 }
 /* }}} */
 
-/* Ensures that we're allowed to call a private method.
- * Returns the function address that should be called, or NULL
- * if no such function exists.
- */
-ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, zend_string *function_name) /* {{{ */
-{
-    zend_class_entry *scope;
-
-	if (!ce) {
-		return 0;
-	}
-
-	/* We may call a private function if:
-	 * 1.  The class of our object is the same as the scope, and the private
-	 *     function (EX(fbc)) has the same scope.
-	 * 2.  One of our parent classes are the same as the scope, and it contains
-	 *     a private function with the same name that has the same scope.
-	 */
-	scope = zend_get_executed_scope();
-	if (fbc->common.scope == scope) {
-		/* rule #1 checks out ok, allow the function call */
-		return 1;
-	}
-
-
-	/* Check rule #2 */
-	return zend_get_parent_private_method(scope, ce, function_name) != NULL;
-}
-/* }}} */
-
 /* Ensures that we're allowed to call a protected method.
  */
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
