@@ -361,6 +361,19 @@ static zend_never_inline zend_property_info *zend_get_parent_private_property(ze
 	}
 	return NULL;
 }
+/* }}} */
+
+static ZEND_COLD zend_never_inline void zend_bad_property_access(zend_property_info *property_info, zend_class_entry *ce, zend_string *member) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+}
+/* }}} */
+
+static ZEND_COLD zend_never_inline void zend_bad_property_name(void) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot access property started with '\\0'");
+}
+/* }}} */
 
 static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot) /* {{{ */
 {
@@ -375,9 +388,9 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 
 	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)
 	 || UNEXPECTED((zv = zend_hash_find(&ce->properties_info, member)) == NULL)) {
-		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
+		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0') && ZSTR_LEN(member) != 0) {
 			if (!silent) {
-				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+				zend_bad_property_name();
 			}
 			return ZEND_WRONG_PROPERTY_OFFSET;
 		}
@@ -417,7 +430,7 @@ dynamic:
 wrong:
 					/* Information was available, but we were denied access.  Error out. */
 					if (!silent) {
-						zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+						zend_bad_property_access(property_info, ce, member);
 					}
 					return ZEND_WRONG_PROPERTY_OFFSET;
 				}
@@ -453,9 +466,9 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 
 	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)
 	 || EXPECTED((zv = zend_hash_find(&ce->properties_info, member)) == NULL)) {
-		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
+		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0') && ZSTR_LEN(member) != 0) {
 			if (!silent) {
-				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+				zend_bad_property_name();
 			}
 			return ZEND_WRONG_PROPERTY_INFO;
 		}
@@ -491,7 +504,7 @@ dynamic:
 wrong:
 					/* Information was available, but we were denied access.  Error out. */
 					if (!silent) {
-						zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+						zend_bad_property_access(property_info, ce, member);
 					}
 					return ZEND_WRONG_PROPERTY_INFO;
 				}
@@ -728,8 +741,8 @@ call_getter:
 			}
 			OBJ_RELEASE(zobj);
 			goto exit;
-		} else if (ZSTR_VAL(name)[0] == '\0' && ZSTR_LEN(name) != 0) {
-			zend_throw_error(NULL, "Cannot access property started with '\\0'");
+		} else if (UNEXPECTED(ZSTR_VAL(name)[0] == '\0') && ZSTR_LEN(name) != 0) {
+			zend_bad_property_name();
 			retval = &EG(uninitialized_zval);
 			goto exit;
 		}
@@ -795,8 +808,8 @@ found:
 		} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
 			goto write_std_property;
 		} else {
-			if (ZSTR_VAL(name)[0] == '\0' && ZSTR_LEN(name) != 0) {
-				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+			if (UNEXPECTED(ZSTR_VAL(name)[0] == '\0') && ZSTR_LEN(name) != 0) {
+				zend_bad_property_name();
 				goto exit;
 			}
 		}
@@ -825,6 +838,12 @@ write_std_property:
 
 exit:
 	zend_tmp_string_release(tmp_name);
+}
+/* }}} */
+
+static ZEND_COLD zend_never_inline void zend_bad_array_access(zend_class_entry *ce) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 }
 /* }}} */
 
@@ -871,7 +890,7 @@ ZEND_API zval *zend_std_read_dimension(zval *object, zval *offset, int type, zva
 		}
 		return rv;
 	} else {
-		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
+	    zend_bad_array_access(ce);
 		return NULL;
 	}
 }
@@ -893,7 +912,7 @@ ZEND_API void zend_std_write_dimension(zval *object, zval *offset, zval *value) 
 		zval_ptr_dtor(&tmp_object);
 		zval_ptr_dtor(&tmp_offset);
 	} else {
-		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
+	    zend_bad_array_access(ce);
 	}
 }
 /* }}} */
@@ -918,7 +937,7 @@ ZEND_API int zend_std_has_dimension(zval *object, zval *offset, int check_empty)
 		zval_ptr_dtor(&tmp_object);
 		zval_ptr_dtor(&tmp_offset);
 	} else {
-		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
+	    zend_bad_array_access(ce);
 		return 0;
 	}
 	return result;
@@ -1035,8 +1054,8 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 			zend_std_call_unsetter(zobj, name);
 			(*guard) &= ~IN_UNSET;
 		} else {
-			if (ZSTR_VAL(name)[0] == '\0' && ZSTR_LEN(name) != 0) {
-				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+			if (UNEXPECTED(ZSTR_VAL(name)[0] == '\0') && ZSTR_LEN(name) != 0) {
+				zend_bad_property_name();
 				goto exit;
 			}
 		}
@@ -1059,7 +1078,7 @@ ZEND_API void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 		zval_ptr_dtor(&tmp_object);
 		zval_ptr_dtor(&tmp_offset);
 	} else {
-		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
+	    zend_bad_array_access(ce);
 	}
 }
 /* }}} */
@@ -1191,6 +1210,12 @@ static zend_always_inline zend_function *zend_get_user_call_function(zend_class_
 }
 /* }}} */
 
+static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope) /* {{{ */
+{
+	zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), scope ? ZSTR_VAL(scope->name) : "");
+}
+/* }}} */
+
 ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key) /* {{{ */
 {
 	zend_object *zobj = *obj_ptr;
@@ -1243,7 +1268,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 				if (zobj->ce->__call) {
 					fbc = zend_get_user_call_function(zobj->ce, method_name);
 				} else {
-					zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), scope ? ZSTR_VAL(scope->name) : "");
+					zend_bad_method_call(fbc, method_name, scope);
 					fbc = NULL;
 				}
 			}
@@ -1329,7 +1354,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				if (ce->__callstatic) {
 					fbc = zend_get_user_callstatic_function(ce, function_name);
 				} else {
-					zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), scope ? ZSTR_VAL(scope->name) : "");
+					zend_bad_method_call(fbc, function_name, scope);
 					fbc = NULL;
 				}
 			}
@@ -1392,7 +1417,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 			if (UNEXPECTED(property_info->flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
 				if (!silent) {
-					zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+					zend_bad_property_access(property_info, ce, property_name);
 				}
 				return NULL;
 			}
@@ -1435,7 +1460,7 @@ ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_incompatible_constructor(zend_function *constructor, zend_class_entry *scope) /* {{{ */
+static ZEND_COLD zend_never_inline void zend_bad_constructor_call(zend_function *constructor, zend_class_entry *scope) /* {{{ */
 {
 	if (scope) {
 		zend_throw_error(NULL, "Call to %s %s::%s() from context '%s'", zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
@@ -1460,7 +1485,7 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 			if (UNEXPECTED(constructor->common.scope != scope)) {
 				if (UNEXPECTED(constructor->op_array.fn_flags & ZEND_ACC_PRIVATE)
 				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
-					zend_incompatible_constructor(constructor, scope);
+					zend_bad_constructor_call(constructor, scope);
 					constructor = NULL;
 				}
 			}
