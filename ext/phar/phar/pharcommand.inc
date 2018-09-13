@@ -648,7 +648,7 @@ class PharCommand extends CLICommand
 					self::phar_add_file($phar, $level, $dir->getSubPathName(), $file, $compress, $noloader);
 				}
 			}
-		} catch(Excpetion $e) {
+		} catch(Exception $e) {
 			self::error("Unable to complete operation on file '$file'\n" . $e->getMessage() . "\n");
 		}
 	}

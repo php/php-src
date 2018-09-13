@@ -3048,23 +3048,12 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_
 		HANDLE_EXCEPTION();
 	}
 
-	if (clone) {
-		if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-			/* Ensure that if we're calling a private function, we're allowed to do so.
-			 */
-			scope = EX(func)->op_array.scope;
-			if (!zend_check_private(clone, scope, clone->common.function_name)) {
-				zend_throw_error(NULL, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
-
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
-			/* Ensure that if we're calling a protected function, we're allowed to do so.
-			 */
-			scope = EX(func)->op_array.scope;
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_throw_error(NULL, "Call to protected %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
+	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		scope = EX(func)->op_array.scope;
+		if (clone->common.scope != scope) {
+			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
+			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
+				zend_wrong_clone_call(clone, scope);
 
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -13803,23 +13792,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 		HANDLE_EXCEPTION();
 	}
 
-	if (clone) {
-		if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-			/* Ensure that if we're calling a private function, we're allowed to do so.
-			 */
-			scope = EX(func)->op_array.scope;
-			if (!zend_check_private(clone, scope, clone->common.function_name)) {
-				zend_throw_error(NULL, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
-				zval_ptr_dtor_nogc(free_op1);
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
-			/* Ensure that if we're calling a protected function, we're allowed to do so.
-			 */
-			scope = EX(func)->op_array.scope;
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_throw_error(NULL, "Call to protected %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
+	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		scope = EX(func)->op_array.scope;
+		if (clone->common.scope != scope) {
+			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
+			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
+				zend_wrong_clone_call(clone, scope);
 				zval_ptr_dtor_nogc(free_op1);
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -34978,23 +34956,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 		HANDLE_EXCEPTION();
 	}
 
-	if (clone) {
-		if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-			/* Ensure that if we're calling a private function, we're allowed to do so.
-			 */
-			scope = EX(func)->op_array.scope;
-			if (!zend_check_private(clone, scope, clone->common.function_name)) {
-				zend_throw_error(NULL, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
-
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
-			/* Ensure that if we're calling a protected function, we're allowed to do so.
-			 */
-			scope = EX(func)->op_array.scope;
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_throw_error(NULL, "Call to protected %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
+	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		scope = EX(func)->op_array.scope;
+		if (clone->common.scope != scope) {
+			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
+			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
+				zend_wrong_clone_call(clone, scope);
 
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -42780,23 +42747,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 		HANDLE_EXCEPTION();
 	}
 
-	if (clone) {
-		if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-			/* Ensure that if we're calling a private function, we're allowed to do so.
-			 */
-			scope = EX(func)->op_array.scope;
-			if (!zend_check_private(clone, scope, clone->common.function_name)) {
-				zend_throw_error(NULL, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
-
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
-			/* Ensure that if we're calling a protected function, we're allowed to do so.
-			 */
-			scope = EX(func)->op_array.scope;
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_throw_error(NULL, "Call to protected %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
+	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		scope = EX(func)->op_array.scope;
+		if (clone->common.scope != scope) {
+			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
+			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
+				zend_wrong_clone_call(clone, scope);
 
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();

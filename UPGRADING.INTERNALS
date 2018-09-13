@@ -4,6 +4,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   a. php_sys_symlink() and php_sys_link()
   b. zend_lookup_class_ex() and zend_fetch_class_by_name()
   c. Function/property/class flags
+  d. Removed zend_check_private()
 
 2. Build system changes
   a. Unix build system changes
@@ -34,6 +35,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       clone, now we use the same private property_info, and should also
       check property_info->ce (in the same way as with methods).
     - ZEND_ACC_... flags are re-numbered.
+
+  d. zend_check_private() is removed. Use (func->common.scope == scope) instead.
 
 ========================
 2. Build system changes
