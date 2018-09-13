@@ -10,6 +10,18 @@ if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\msys64 >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
+if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win32 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win64 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win32 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win64 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if "%APPVEYOR%" equ "True" del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if "%APPVEYOR%" equ "True" del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
 
 cd /D %APPVEYOR_BUILD_FOLDER%
 if %errorlevel% neq 0 exit /b 3
