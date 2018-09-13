@@ -337,7 +337,7 @@ static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_cla
 }
 /* }}} */
 
-static zend_never_inline int is_protected_comaptible_scope(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
+static zend_never_inline int is_protected_compatible_scope(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
 {
 	return scope &&
 		(is_derived_class(ce, scope) || is_derived_class(scope, ce));
@@ -362,7 +362,7 @@ static zend_always_inline int zend_verify_property_access(zend_property_info *pr
 			return 0;
 		} else {
 			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
-			return is_protected_comaptible_scope(property_info->ce, scope);
+			return is_protected_compatible_scope(property_info->ce, scope);
 		}
 	}
 }
@@ -447,7 +447,7 @@ wrong:
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_comaptible_scope(property_info->ce, scope))) {
+				if (UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
 					goto wrong;
 				}
 			}
@@ -522,7 +522,7 @@ wrong:
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_comaptible_scope(property_info->ce, scope))) {
+				if (UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
 					goto wrong;
 				}
 			}
@@ -1466,7 +1466,7 @@ ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_incompatibe_constructor(zend_function *constructor, zend_class_entry *scope) /* {{{ */
+static ZEND_COLD zend_never_inline void zend_incompatible_constructor(zend_function *constructor, zend_class_entry *scope) /* {{{ */
 {
 	if (scope) {
 		zend_throw_error(NULL, "Call to %s %s::%s() from context '%s'", zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
@@ -1493,7 +1493,7 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 				 */
 				if (UNEXPECTED(constructor->common.scope != scope)) {
 incompatible:
-					zend_incompatibe_constructor(constructor, scope);
+					zend_incompatible_constructor(constructor, scope);
 					constructor = NULL;
 				}
 			} else {
