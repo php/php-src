@@ -21,7 +21,7 @@ if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
-if %errorlevel%
+if %errorlevel% neq 0 exit /b 3
 
 cd /D %APPVEYOR_BUILD_FOLDER%
 if %errorlevel% neq 0 exit /b 3
