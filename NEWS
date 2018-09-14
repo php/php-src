@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #76869 (Incorrect bypassing protected method accessibilty check).
     (Dmitry)
+  . Fixed bug #76800 (foreach inconsistent if array modified during loop).
+    (Dmitry)
 
 13 Sep 2018, PHP 7.3.0RC1
 

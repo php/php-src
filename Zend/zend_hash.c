@@ -1114,9 +1114,11 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 							if (UNEXPECTED(ht->nInternalPointer == i)) {
 								ht->nInternalPointer = j;
 							}
-							if (UNEXPECTED(i == iter_pos)) {
-								zend_hash_iterators_update(ht, i, j);
-								iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
+							if (UNEXPECTED(i >= iter_pos)) {
+								do {
+									zend_hash_iterators_update(ht, iter_pos, j);
+									iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
+								} while (iter_pos < i);
 							}
 							q++;
 							j++;
