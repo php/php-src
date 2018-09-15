@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Intl:
   . Lifted requirements to ICU ≥ 50.1. (cmb)
+  . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
+    (cmb)
 
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 

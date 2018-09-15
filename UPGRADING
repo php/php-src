@@ -19,6 +19,10 @@ PHP 7.4 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Intl:
+  . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
+    INTL_IDNA_VARIANT_UTS46 instead of the deprecated INTL_IDNA_VARIANT_2003.
+
 ========================================
 2. New Features
 ========================================

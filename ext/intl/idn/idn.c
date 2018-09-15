@@ -268,7 +268,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zend_string *domain;
 	zend_long option = 0,
-		 variant = INTL_IDN_VARIANT_2003;
+		 variant = INTL_IDN_VARIANT_UTS46;
 	zval *idna_info = NULL;
 
 	intl_error_reset(NULL);
