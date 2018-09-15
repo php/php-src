@@ -3341,4 +3341,3 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 
 	return ret;
 }
-

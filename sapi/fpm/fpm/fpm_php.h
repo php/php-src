@@ -47,4 +47,3 @@ int fpm_php_limit_extensions(char *path);
 char* fpm_php_get_string_from_table(zend_string *table, char *key);
 
 #endif
-

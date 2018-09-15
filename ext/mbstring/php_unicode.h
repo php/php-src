@@ -196,6 +196,3 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 
 
 #endif /* PHP_UNICODE_H */
-
-
-

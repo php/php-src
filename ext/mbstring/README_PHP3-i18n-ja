@@ -771,4 +771,3 @@ have i18n_http_output("pass") before calling ImageGif, ImagePng, ImageJpeg!
 o 2000-12-09, Rui Hirokawa <hirokawa@php.net>
 
 Fixed mail() which was causing segmentation fault when header was null.
-

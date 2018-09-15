@@ -1540,5 +1540,3 @@ PHP_FUNCTION(apache_get_modules)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-
-

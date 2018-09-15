@@ -240,4 +240,3 @@ ZEND_API void zend_strip(void)
  * indent-tabs-mode: t
  * End:
  */
-

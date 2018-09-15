@@ -739,4 +739,3 @@ int LSCRIU_Init(void)
     }
     return s_initial_start_reqs > 0;
 }
-

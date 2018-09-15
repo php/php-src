@@ -16,4 +16,3 @@ ARG_WITH("pcre-jit", "Enable PCRE JIT support", "yes");
 if (PHP_PCRE_JIT != "no") {
 	AC_DEFINE('HAVE_PCRE_JIT_SUPPORT', 1, 'PCRE library');
 }
-

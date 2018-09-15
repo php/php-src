@@ -333,4 +333,3 @@ PHP_MINIT_FUNCTION(mt_rand)
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
-

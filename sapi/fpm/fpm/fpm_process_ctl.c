@@ -536,4 +536,3 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 	zlog(ZLOG_DEBUG, "[pool %s] got accept without idle child available .... I forked", wp->config->name);
 }
 /* }}} */
-

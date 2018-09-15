@@ -66,4 +66,3 @@ bc_is_near_zero (num, scale)
   else
     return TRUE;
 }
-

@@ -133,5 +133,3 @@ int mbfl_filt_conv_wchar_byte2le(int c, mbfl_convert_filter *filter)
 	CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
 	return c;
 }
-
-

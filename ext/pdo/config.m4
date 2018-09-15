@@ -66,4 +66,3 @@ for more detail on this issue.
   dnl so we always include the known-good working hack.
   PHP_ADD_MAKEFILE_FRAGMENT
 fi
-

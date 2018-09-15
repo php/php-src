@@ -389,4 +389,3 @@ PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-

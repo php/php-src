@@ -1291,6 +1291,3 @@ retry:
 
 	return c;
 }
-
-
-

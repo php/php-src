@@ -311,4 +311,3 @@ imaxdiv_t __cdecl imaxdiv(intmax_t numer, intmax_t denom)
 #else
 #include <inttypes.h>
 #endif
-

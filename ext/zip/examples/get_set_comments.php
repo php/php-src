@@ -35,4 +35,3 @@ echo $z->getCommentName('foobar/', ZIPARCHIVE::FL_UNCHANGED) . "\n";
 
 echo "Archive comment: " . $z->getArchiveComment() . "\n";
 echo "Archive comment (original): " . $z->getArchiveComment(ZIPARCHIVE::FL_UNCHANGED) . "\n";
-

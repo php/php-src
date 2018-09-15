@@ -132,6 +132,3 @@ regular expect sections.  For example:
 
   --EXPECTHEADERS--
   Status: 404
-
-
-

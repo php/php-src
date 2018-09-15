@@ -59,4 +59,3 @@ ftok(const char *pathname, int proj_id)
 
 	return ret;
 }
-
