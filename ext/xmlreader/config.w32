@@ -15,4 +15,3 @@ if (PHP_XMLREADER == "yes" &&
 	ADD_EXTENSION_DEP('xmlreader', 'libxml');
 	ADD_EXTENSION_DEP('xmlreader', 'dom');
 }
-

@@ -81,4 +81,3 @@ bc_int2num (num, val)
   while (ix-- > 0)
     *vptr++ = *--bptr;
 }
-

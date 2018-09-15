@@ -11,6 +11,3 @@ php_build is a directory at the same level as php7.
 
 Start Visual Studio, load php_modules.dsw, select the ZLIB projects, and build
 it.
-
-
-  

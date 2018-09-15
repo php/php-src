@@ -22,6 +22,3 @@
 PHP_FUNCTION(convert_cyr_string);
 
 #endif /* CYR_CONVERT_H */
-
-
-

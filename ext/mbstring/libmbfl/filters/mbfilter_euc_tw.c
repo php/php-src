@@ -326,4 +326,3 @@ static int mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-

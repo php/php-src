@@ -3962,5 +3962,3 @@ int LSAPI_Inc_Req_Processed(int cnt)
 {
     return __sync_add_and_fetch(s_global_counter, cnt);
 }
-
-

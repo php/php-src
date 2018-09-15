@@ -26,4 +26,3 @@ if (PHP_TIDY != "no") {
 		WARNING("tidy not enabled; libraries and headers not found");
 	}
 }
-

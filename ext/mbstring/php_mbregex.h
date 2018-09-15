@@ -104,4 +104,3 @@ PHP_FUNCTION(mb_regex_set_options);
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
-

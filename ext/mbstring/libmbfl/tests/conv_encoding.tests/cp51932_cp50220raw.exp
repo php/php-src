@@ -30,4 +30,3 @@ send "­Î"
 expect {
     "%1b%24%42%2d%42%1b%28%42 (8)\r\n" { pass $test }
 }
-

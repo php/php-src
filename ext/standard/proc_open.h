@@ -46,4 +46,3 @@ struct php_process_handle {
 	int is_persistent;
 	php_process_env_t env;
 };
-
