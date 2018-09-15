@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #76800 (foreach inconsistent if array modified during loop).
     (Dmitry)
 
+- XMLRPC:
+  . Fixed bug #76886 (Can't build xmlrpc with expat). (Thomas Petazzoni, cmb)
+
 13 Sep 2018, PHP 7.3.0RC1
 
 - Core:
