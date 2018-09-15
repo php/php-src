@@ -38,4 +38,3 @@ PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port);
 PHPDBG_API void phpdbg_close_socket(int sock);
 
 #endif /* PHPDBG_IO_H */
-

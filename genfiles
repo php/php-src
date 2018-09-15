@@ -26,4 +26,3 @@ for f in $CLEANUP_FILES; do
   cp $f $f.orig
   grep -v '#line ' $f.orig > $f
 done
-

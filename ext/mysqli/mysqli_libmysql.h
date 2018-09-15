@@ -127,4 +127,3 @@
 #endif
 
 #endif /* MYSQLI_LIBMYSQL_H */
-

@@ -7,4 +7,3 @@ if (!MODE_PHPIZE && sapi_enabled.length < 1) {
 }
 
 generate_files();
-

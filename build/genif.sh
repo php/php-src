@@ -37,5 +37,3 @@ cat $infile | \
 	-e "s'@EXT_MODULE_PTRS@'$module_ptrs'" \
 	-e 's/@NEWLINE@/\
 /g'
-
-

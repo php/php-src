@@ -50,5 +50,3 @@ responsibility to call commit() when you are done making changes and
 autocommit is turned off.
 
 vim:tw=78:et
-
-
