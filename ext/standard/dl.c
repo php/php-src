@@ -29,11 +29,7 @@
 #if defined(HAVE_LIBDL)
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 #ifdef PHP_WIN32
 #include "win32/param.h"
 #include "win32/winutil.h"

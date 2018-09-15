@@ -85,14 +85,7 @@
 #endif
 
 #include <stddef.h>
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
 
 #include "mbfilter.h"
 #include "mbfl_filter_output.h"

@@ -98,7 +98,6 @@
 #define HAVE_FCNTL_H 1
 #define HAVE_GRP_H 0
 #undef HAVE_PWD_H
-#define HAVE_STRING_H 1
 #undef HAVE_SYS_FILE_H
 #undef HAVE_SYS_SOCKET_H
 #undef HAVE_SYS_WAIT_H
