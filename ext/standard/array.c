@@ -28,11 +28,7 @@
 #include <math.h>
 #include <time.h>
 #include <stdio.h>
-#if HAVE_STRING_H
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 #ifdef PHP_WIN32
 #include "win32/unistd.h"
 #endif

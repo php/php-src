@@ -12,7 +12,7 @@ AC_CHECK_FUNCS( \
 
 AC_DEFUN([XMLRPC_HEADER_CHECKS],[
 AC_HEADER_STDC
-AC_CHECK_HEADERS(xmlparse.h xmltok.h strings.h string.h)
+AC_CHECK_HEADERS(xmlparse.h xmltok.h strings.h)
 ])
 
 AC_DEFUN([XMLRPC_TYPE_CHECKS],[

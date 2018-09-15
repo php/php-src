@@ -75,11 +75,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 # include <unistd.h>
 #endif
 
-#if HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #if HAVE_LOCALE_H
 # include <locale.h>

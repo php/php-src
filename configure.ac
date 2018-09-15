@@ -51,11 +51,7 @@ AH_BOTTOM([
 # include <ieeefp.h>
 #endif
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #if ZEND_BROKEN_SPRINTF
 int zend_sprintf(char *buffer, const char *format, ...);
@@ -447,7 +443,6 @@ pwd.h \
 resolv.h \
 signal.h \
 stdarg.h \
-string.h \
 syslog.h \
 sysexits.h \
 sys/ioctl.h \

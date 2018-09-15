@@ -50,7 +50,6 @@ inttypes.h \
 stdint.h \
 limits.h \
 malloc.h \
-string.h \
 unistd.h \
 stdarg.h \
 sys/types.h \
