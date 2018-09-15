@@ -5976,6 +5976,10 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 	switch (callback_type) {
 
 		case ZEND_INI_PARSER_ENTRY:
+			if (!arg2) {
+				/* bare string - nothing to do */
+				break;
+			}
 			Z_TRY_ADDREF_P(arg2);
 			zend_symtable_update(Z_ARRVAL_P(arr), Z_STR_P(arg1), arg2);
 			break;
@@ -5983,6 +5987,11 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 		case ZEND_INI_PARSER_POP_ENTRY:
 		{
 			zval hash, *find_hash;
+
+			if (!arg2) {
+				/* bare string - nothing to do */
+				break;
+			}
 
 			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
 				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
@@ -6024,7 +6033,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, 
 	if (callback_type == ZEND_INI_PARSER_SECTION) {
 		array_init(&BG(active_ini_file_section));
 		zend_symtable_update(Z_ARRVAL_P(arr), Z_STR_P(arg1), &BG(active_ini_file_section));
-	} else {
+	} else if (arg2) {
 		zval *active_arr;
 
 		if (Z_TYPE(BG(active_ini_file_section)) != IS_UNDEF) {

@@ -388,7 +388,7 @@ NEWLINE	("\r"|"\n"|"\r\n")
 TABS_AND_SPACES [ \t]
 WHITESPACE [ \t]+
 CONSTANT [a-zA-Z_][a-zA-Z0-9_]*
-LABEL [^=\n\r\t;&|^$~(){}!"\[\000]+
+LABEL [^=\n\r\t;&|^$~(){}!"\[]+
 TOKENS [:,.\[\]"'()&|^+-/*=%$!~<>?@{}]
 OPERATORS [&|^~()!]
 DOLLAR_CURLY "${"
