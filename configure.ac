@@ -37,9 +37,7 @@ AH_TOP([
 AH_BOTTOM([
 #ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
+#include <stdlib.h>
 
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -449,7 +447,6 @@ pwd.h \
 resolv.h \
 signal.h \
 stdarg.h \
-stdlib.h \
 string.h \
 syslog.h \
 sysexits.h \

@@ -32,9 +32,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #ifdef HAVE_MEMORY_H
 #include <memory.h>

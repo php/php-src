@@ -57,7 +57,6 @@ sys/types.h \
 sys/time.h \
 signal.h \
 unix.h \
-stdlib.h \
 cpuid.h \
 dlfcn.h)
 
