@@ -10,6 +10,11 @@ dnl -------------------------------------------------------------------------
 
 AC_PREREQ([2.64])
 AC_INIT(README.GIT-RULES)
+
+dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
+dnl SEE https://www.mail-archive.com/automake-patches@gnu.org/msg07705.html
+AC_SUBST(AR_FLAGS, [cr])
+
 ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
 
 PHP_CONFIG_NICE(config.nice)
