@@ -106,7 +106,7 @@ class SOAP_Test {
             		$res = $fault->faultcode;
                 $pos = strpos($res,':');
                 if ($pos !== false) {
-                	$res = substr($res,$pos+1);                	
+                	$res = substr($res,$pos+1);
                 }
                 if ($html) {
                     print "<font color=\"#ff0000\">FAILED: [$res] {$fault->faultstring}</font>\n";

@@ -380,7 +380,7 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 		intl_error_set_custom_msg(NULL, "Code point out of range", 0);
 		return;
 	}
-	
+
 	decomposition_length = unorm2_getRawDecomposition(norm, codepoint, decomposition, 32, &status);
 	if (decomposition_length == -1) {
 		RETURN_NULL();

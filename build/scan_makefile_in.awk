@@ -2,7 +2,7 @@ BEGIN {
 	mode=0
 	sources=""
 }
-	
+
 mode == 0 && /^LTLIBRARY_SOURCES.*\\$/ {
 	if (match($0, "[^=]*$")) {
 	sources=substr($0, RSTART, RLENGTH-1)

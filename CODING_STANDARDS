@@ -112,7 +112,7 @@ User Functions/Methods Naming Conventions
     of ``parent_*``::
 
     A family of 'foo' functions, for example:
-    
+
     Good:
     'foo_select_bar'
     'foo_insert_baz'

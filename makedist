@@ -12,9 +12,9 @@
 #  php-X.Y.Z[sub]
 #
 # The distribution ends up in a .tar.gz file that contains the distribution
-# in a directory called php-<version>.  
+# in a directory called php-<version>.
 # A .tar.bz2 file is also created.
-# 
+#
 # Written by Stig Bakken <ssb@guardian.no> 1997-05-28.
 # Adapted to git by Stanislav Malyshev <stas@php.net>
 
@@ -115,7 +115,7 @@ sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Z
 sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
 sed -i 's,^#ifndef YYTOKENTYPE,#include "zend.h"\n#ifndef YYTOKENTYPE,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
 
-# download pear 
+# download pear
 $ECHO_N "makedist: Attempting to download PEAR's phar archive"
 if test ! -x wget; then
 	wget https://pear.php.net/install-pear-nozlib.phar -nd -P pear/

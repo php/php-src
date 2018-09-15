@@ -198,7 +198,7 @@ class Interop_Client
         } else
         if (!$all) $sql .= "where status=1";
         $sql .= " order by endpointName";
-        
+
 
         $db_ep = $this->dbc->getAll($sql,NULL, DB_FETCHMODE_ASSOC );
         if (DB::isError($db_ep)) {
@@ -261,7 +261,7 @@ class Interop_Client
             $success = $result['fault']->faultcode;
             $pos = strpos($success,':');
             if ($pos !== false) {
-              $success = substr($success,$pos+1);                 
+              $success = substr($success,$pos+1);
             }
             $error = $result['fault']->faultstring;
             if (!$wire) $wire= $result['fault']->detail;
@@ -450,7 +450,7 @@ try {
             // compare header results
             $headers_ok = TRUE;
             if ($soap_test->headers || $soap_test->headers_expect) {
-              $headers_ok = $this->compareResult($soap_test->headers_expect, $result_headers);              
+              $headers_ok = $this->compareResult($soap_test->headers_expect, $result_headers);
             }
 
             # we need to decode what we sent so we can compare!
@@ -512,7 +512,7 @@ try {
                 $res =$fault->faultcode;
                 $pos = strpos($res,':');
                 if ($pos !== false) {
-                  $res = substr($res,$pos+1);                 
+                  $res = substr($res,$pos+1);
                 }
             }
             // save the wire

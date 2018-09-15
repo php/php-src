@@ -28,7 +28,7 @@ void intl_error_set(intl_error* err, UErrorCode code, char* msg, int copyMsg);
 and by passing NULL as the first parameter. The last function is a combination
 of the first two. If the message is not a static buffer, copyMsg should be 1.
 This makes the message string be copied and freed when no longer needed. There's
-no way to pass ownership of the string without it being copied. 
+no way to pass ownership of the string without it being copied.
 
 
 :: The last is ALSO stored in the object whose method call triggered the error,

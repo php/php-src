@@ -128,7 +128,7 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 		}
 	}
 	op1_len = (int)Z_STRLEN_P(op1);
-	
+
 	if (Z_TYPE_P(op2) != IS_STRING) {
 		convert_to_string(op2);
 	}
