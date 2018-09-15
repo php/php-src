@@ -13,23 +13,23 @@
      * Usage: php cleanhtml5.php [filename]
      *
      */
-    
+
     if(!isset($_SERVER['argv'][1])) {
       $data = file_get_contents("php://stdin");
       $tidy = tidy_parse_string($data);
     } else {
       $tidy = tidy_parse_file($_SERVER['argv'][1]);
     }
-    
+
     $tidy->cleanRepair();
-    
+
     if(!empty($tidy->errorBuffer)) {
-        
+
         echo "\n\nThe following errors or warnings occurred:\n";
         echo "{$tidy->errorBuffer}\n";
-        
+
     }
-    
+
     echo $tidy;
-    
+
 ?>

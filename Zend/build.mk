@@ -5,7 +5,7 @@
 #
 # Written by Sascha Schumann
 #
-# $Id$ 
+# $Id$
 
 
 LT_TARGETS = ltmain.sh ltconfig
@@ -34,7 +34,7 @@ aclocal.m4: configure.in acinclude.m4
 	aclocal
 
 $(config_h_in): configure.in
-# explicitly remove target since autoheader does not seem to work 
+# explicitly remove target since autoheader does not seem to work
 # correctly otherwise (timestamps are not updated)
 	@rm -f $@
 	autoheader

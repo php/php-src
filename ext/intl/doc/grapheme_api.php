@@ -30,14 +30,14 @@
 	 * Find position (in grapheme units) of first occurrence of a string
 	 * @param string	$haystack	The string to look in
 	 * @param string	$needle		The string to look for
-	 * @param [int]		$offset		The optional offset parameter allows you to specify 
-						which character in haystack  to start searching. The position 
+	 * @param [int]		$offset		The optional offset parameter allows you to specify
+						which character in haystack  to start searching. The position
 						returned is still relative to the beginning of haystack.
 	 * @return int		Returns the position as an integer. If needle is not found, strpos() will return boolean FALSE.
 	*/
 	function grapheme_strpos($haystack, $needle, $offset = 0) {}
 
-	
+
 	/**
          * Find position (in grapheme units) of first occurrence of a case-insensitive string
          * @param string        $haystack       The string to look in
@@ -48,7 +48,7 @@
          * @return int          Returns the position as an integer. If needle is not found, grapheme_stripos() will return boolean FALSE.
         */
         function grapheme_stripos($haystack, $needle, $offset = 0) {}
- 
+
 
 	/**
          * Find position (in grapheme units) of last occurrence of a string
@@ -77,12 +77,12 @@
 	/**
 	 * Return part of a string
 	 * @param string	$string		The input string.
-	 * @param int		$start		If start  is non-negative, the returned string will start at the 
+	 * @param int		$start		If start  is non-negative, the returned string will start at the
 						start'th position in string, counting from zero. If start is negative,
-						the returned string will start at the start'th character from the 
+						the returned string will start at the start'th character from the
 						end of string.
 	 * @param [int]		$length		If length  is given and is positive, the string returned will contain
-						at most length characters beginning from start (depending on the 
+						at most length characters beginning from start (depending on the
 						length of string). If string is less than or equal to start characters
 						long, FALSE  will be returned. If length is given and is negative, then
 						that many characters will be omitted from the end of string (after the
@@ -122,7 +122,7 @@
 	 * @param [int]		$extract_type	one of GRAPHEME_EXTR_COUNT (default), GRAPHEME_EXTR_MAXBYTES, or GRAPHEME_EXTR_MAXCHARS
 	 * @param [int]		$start		starting position in $haystack in bytes
 	 * @param [&int]	$next		set to next starting position in bytes
-	 * @return string	A string starting at offset $start containing no more than $size grapheme clusters 
+	 * @return string	A string starting at offset $start containing no more than $size grapheme clusters
 				and ending on a default grapheme cluster boundary.
 	*/
 	function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_COUNT, $start = 0, &$next) {}

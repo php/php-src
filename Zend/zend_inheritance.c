@@ -172,11 +172,11 @@ static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_i
 	if (arg_info->type_hint == IS_ARRAY) {
 		return 1;
 	}
-	
+
 	if (arg_info->class_name && zend_string_equals_literal_ci(arg_info->class_name, "Traversable")) {
 		return 1;
 	}
-	
+
 	return 0;
 }
 /* }}} */
@@ -328,7 +328,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		} else {
 			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
-		
+
 		if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
 			switch (fe_arg_info->type_hint) {
 				case IS_ITERABLE:
@@ -336,7 +336,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 						return 0;
 					}
 					break;
-					
+
 				default:
 					return 0;
 			}
@@ -361,7 +361,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			return 0;
 		}
-		
+
 		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
 			switch (proto->common.arg_info[-1].type_hint) {
 				case IS_ITERABLE:
@@ -369,7 +369,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 						return 0;
 					}
 					break;
-					
+
 				default:
 					return 0;
 			}

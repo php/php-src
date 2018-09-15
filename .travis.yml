@@ -20,7 +20,7 @@ addons:
       - libt1-dev
 
 notifications:
-    email: 
+    email:
        on_failure: change
     irc:
       template:
@@ -30,7 +30,7 @@ notifications:
       on_success: change
       on_failure: always
 
-cache: 
+cache:
     - apt
 
 env:
@@ -51,13 +51,13 @@ before_script:
     - sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
     # Compile PHP
     - ./travis/compile.sh
-    # Setup Extensions 
+    # Setup Extensions
     - . ./travis/ext/mysql/setup.sh
     - . ./travis/ext/mysqli/setup.sh
     - . ./travis/ext/pdo_mysql/setup.sh
     - . ./travis/ext/pgsql/setup.sh
     - . ./travis/ext/pdo_pgsql/setup.sh
 
-# Run PHPs run-tests.php 
+# Run PHPs run-tests.php
 script:
     - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --set-timeout 120

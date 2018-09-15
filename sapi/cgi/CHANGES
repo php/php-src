@@ -15,7 +15,7 @@ In PHP5.3 all additional configure options (except --enable-cgi) are removed:
                             CGI: Enable the security check for internal server
                             redirects.  You should use this if you are
                             running the CGI version with Apache
-  							
+
                             Now it is enabled by default, but can be disabled
                             with ini directive "cgi.force_redirect=0"
 

@@ -756,7 +756,7 @@ finish:
 
 	while (!php_stream_eof(stream)) {
 		size_t http_header_line_length;
-		
+
 		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
 			char *http_header_value;

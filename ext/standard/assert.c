@@ -275,7 +275,7 @@ PHP_FUNCTION(assert)
 	if (ASSERTG(bail)) {
 		zend_bailout();
 	}
-	
+
 	RETURN_FALSE;
 }
 /* }}} */

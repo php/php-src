@@ -12,7 +12,7 @@
   </maintainer>
  </maintainers>
  <description>
-For arbitrary precision mathematics PHP offers the Binary Calculator 
+For arbitrary precision mathematics PHP offers the Binary Calculator
 which supports numbers of any size and precision, represented as strings.
  </description>
  <license>PHP</license>

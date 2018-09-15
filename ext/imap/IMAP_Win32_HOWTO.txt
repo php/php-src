@@ -29,4 +29,3 @@ Start Visual Studio, load php_modules.dsw, select the IMAP projects, and build
 it.
 
 
-  

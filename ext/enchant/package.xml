@@ -7,7 +7,7 @@
 API for many spell libraries:
 - aspell/pspell (intended to replace ispell)
 - hspell (hebrew)
-- ispell 
+- ispell
 - myspell/hunspell (OpenOffice project, mozilla)
 - uspell (primarily Yiddish, Hebrew, and Eastern European languages)
 A plugin system allows to add custom spell support.

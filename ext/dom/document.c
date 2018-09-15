@@ -2038,7 +2038,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	
+
 	ctxt->vctxt.error = php_libxml_ctx_error;
 	ctxt->vctxt.warning = php_libxml_ctx_warning;
 	if (ctxt->sax != NULL) {
@@ -2247,7 +2247,7 @@ PHP_METHOD(domdocument, registerNodeClass)
 		dom_set_doc_classmap(intern->document, basece, ce);
 		RETURN_TRUE;
 	}
-	
+
 	zend_throw_error(NULL, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
 	RETURN_FALSE;
 }

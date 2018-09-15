@@ -36,7 +36,7 @@ standard it is based on is the Julian Day Count. The Julian Day Count
 is a count of days starting from January 1st, 4713 B.C. To convert
 between calendar systems, you must first convert to Julian Day Count,
 then to the calendar system of your choice. Julian Day Count is very
-different from the Julian Calendar! 
+different from the Julian Calendar!
  </description>
  <license>PHP</license>
  <release>

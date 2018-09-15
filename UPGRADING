@@ -82,12 +82,12 @@ PHP 7.1 UPGRADE NOTES
     anymore, and throws a fatal error instead of silently converting to array.
   . Array elements or object properties that are automatically created during
     by-reference assignments will now result in a different order. For example
-  
+
         $array = [];
         $array["a"] =& $array["b"];
         $array["b"] = 1;
         var_dump($array);
-  
+
     now results in the array ["b" => 1, "a" => 1], while for PHP 7.0 the result
     was ["a" => 1, "b" => 1].
   . The allowed_classes element of the $options parameter of unserialize() is
@@ -323,7 +323,7 @@ PHP 7.1 UPGRADE NOTES
 - IMAP:
   . An email address longer than 16385 bytes will throw an instance of Error
     instead of resulting in a fatal error.
-    
+
 - Intl:
   . Failure to call the parent constructor in a class extending Collator
     before invoking the parent methods will throw an instance of Error
@@ -360,7 +360,7 @@ PHP 7.1 UPGRADE NOTES
     will now throw an instance of Error instead of resulting in a fatal error.
 
 - Session:
-  . Custom session handlers that do not return strings for session IDs will 
+  . Custom session handlers that do not return strings for session IDs will
     now throw an instance of Error instead of resulting in a fatal error
     when a function is called that must generate a session ID.
   . Only CSPRNG is used to generate session ID.
@@ -508,7 +508,7 @@ PHP 7.1 UPGRADE NOTES
 - FCGI
   . PHP_FCGI_CHILDREN is respected. If this environment variable is defined,
     the first php-fcgi.exe process will exec the specified number of children.
-    Those will share the same TCP socket. 
+    Those will share the same TCP socket.
 
 - readline:
   . The readline extension is supported through the WinEditLine library

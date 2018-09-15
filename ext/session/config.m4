@@ -27,7 +27,7 @@ if test "$PHP_MM" != "no"; then
   if test -z "$MM_DIR" ; then
     AC_MSG_ERROR(cannot find mm library)
   fi
-  
+
   PHP_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/$PHP_LIBDIR, SESSION_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MM_DIR/include)
   PHP_INSTALL_HEADERS([ext/session/mod_mm.h])

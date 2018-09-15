@@ -18,7 +18,7 @@
  </maintainers>
  <description>
   Portable Shared Memory access
- </description> 
+ </description>
  <license>PHP</license>
  <release>
   <state>stable</state>

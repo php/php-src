@@ -152,7 +152,7 @@ if test "\$PHP_$EXTNAME" != "no"; then
 
   dnl # --with-$extname -> check for lib and symbol presence
   dnl LIBNAME=$extname # you may want to change this
-  dnl LIBSYMBOL=$extname # you most likely want to change this 
+  dnl LIBSYMBOL=$extname # you most likely want to change this
 
   dnl PHP_CHECK_LIBRARY(\$LIBNAME,\$LIBSYMBOL,
   dnl [

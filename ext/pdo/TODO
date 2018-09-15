@@ -48,17 +48,17 @@ Core, version 1.1:
    settable at dbh and stmt levels independently.  If set at the dbh level,
    the stmt will inherit its value.  If not set explicitly in code, the
    defaults for the dbh will come from the INI settings.
-   
+
    ATTR_TRACE_FILE will accept a string or a stream.
 
    The INI options are useful for administrative tracing/debugging.
-   Trace mode will output very verbose info. 
+   Trace mode will output very verbose info.
 
 
 General DB API Roundup:
 =========
   Consider how the following can be implemented in PDO:
-  
+
   mysqli_change_user(); alters auth credentials on a live connection
   mysqli_info(); info about rows affected by last query
   mysqli_master_query(); force query to run on master
@@ -68,13 +68,13 @@ General DB API Roundup:
   oci_password_change()
 
   Also consider master/slave and/or failover server configuration.
-  
+
 
 Postgres:
 =========
 
  - Real large object support.
- - Someone with more pgsql experience can suggest more features 
+ - Someone with more pgsql experience can suggest more features
 
 Oracle:
 =======

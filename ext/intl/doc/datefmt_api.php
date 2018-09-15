@@ -4,9 +4,9 @@
  * Date Formatter class - locale-dependent formatting/parsing of dates using pattern strings and/or canned patterns.
  *
  * This class represents the ICU date formatting functionality. It allows users to
- * display dates in a localized format or to parse strings 
+ * display dates in a localized format or to parse strings
  * into PHP date values using pattern strings and/or canned patterns.
- * 
+ *
  * Example:
  * <code>
  * $datefmt = new DateFormatter("de-DE", LONG, SHORT, date_default_timezone_get());
@@ -38,19 +38,19 @@ class DateFormatter {
     const SHORT = 3;
 
     /**
-     * The following int constants are used to specify the calendar. 
-     * These calendars are all based directly on the Gregorian calendar 
-     * Non-Gregorian calendars need to be specified in locale. 
+     * The following int constants are used to specify the calendar.
+     * These calendars are all based directly on the Gregorian calendar
+     * Non-Gregorian calendars need to be specified in locale.
      * Examples might include locale="hi@calendar=BUDDHIST"
      */
     const TRADITIONAL = 0; // non-Gregorian calendar that is locale-defined, required by ICU
     const GREGORIAN = 1 ;// Gregorian calendar
-	
+
 #############################################################################
 # Object-oriented API
 #############################################################################
 	/**
-	 * Create a date formatter 
+	 * Create a date formatter
 	 *
 	 * @param string  $locale     Locale to use when formatting or parsing
 	 * @param integer $datetype   Date type to use (none, short, medium, long, full)
@@ -66,7 +66,7 @@ class DateFormatter {
 	public function __construct($locale, $datetype, $timetype, $timezone = null, $calendar= null , $pattern= null) {}
 
 	/**
-	 * Create a date formatter 
+	 * Create a date formatter
 	 *
 	 * @param string  $locale     Locale to use when formatting or parsing
 	 * @param integer $datetype   Date type to use (none, short, medium, long, full)
@@ -86,7 +86,7 @@ class DateFormatter {
 	 * @param mixed $value - value to format
          *     integer: a unix timestamp value (seconds since epoch, UTC)
          *     array: a localtime array  - uses 24 hour clock in tm_hour field
-         * @return string  a formatted string or, if an error occurred, 'null'. 
+         * @return string  a formatted string or, if an error occurred, 'null'.
 	 */
         public function format($value) {}
 
@@ -96,7 +96,7 @@ class DateFormatter {
 	 * $parse_pos and consuming as much of the input value as possible
 	 * If no error occurs before $value is consumed, $parse_pos will contain -1
 	 * otherwise it will contain the position at which parsing ended (and the error
-	 * occurred). 
+	 * occurred).
 	 * @param string  $value      string to convert to a time
 	 * @param integer $parse_pos  position at which to start the parsing in $value (zero-based)
 	 *                            This variable will contain the end position if the parse fails
@@ -105,13 +105,13 @@ class DateFormatter {
 	 */
 	 public function parse($value, $parse_pos=0) {}
 
-	 
+
         /**
          * converts string $value to a field-based time value, starting at
 	 * $parse_pos and consuming as much of the input value as possible
 	 * If no error occurs before $value is consumed, $parse_pos will contain -1
 	 * otherwise it will contain the position at which parsing ended (and the error
-	 * occurred). 
+	 * occurred).
 	 * @param string  $value      string to convert to a time
 	 * @param integer $parse_pos  position at which to start the parsing in $value (zero-based)
 	 *                            This variable will contain the end position if the parse fails
@@ -122,21 +122,21 @@ class DateFormatter {
 
 
 	 /**
-	  * Gets the datetype in use 
+	  * Gets the datetype in use
 	  * @return integer the current 'datetype' value of the formatter
 	  */
          public function getDateType() {}
 
 
 	 /**
-	  * Gets the timetype in use 
+	  * Gets the timetype in use
 	  * @return integer the current 'timetype' value of the formatter
 	  */
          public function getTimeType() {}
 
 
 	 /**
-	  * Gets the leniency in use 
+	  * Gets the leniency in use
 	  * @return boolean   'true' if parser is lenient, 'false' if parser is strict
 	  *                   default value for parser is 'false'.
 	  */
@@ -144,22 +144,22 @@ class DateFormatter {
 
 
 	 /**
-	  * Sets the leniency to use 
+	  * Sets the leniency to use
 	  * @param boolean $lenient  sets whether the parser is lenient or not, default is 'false'
-          *                          'true' sets the parser to accept otherwise flawed date or 
+          *                          'true' sets the parser to accept otherwise flawed date or
 	  *                          time patterns, parsing as much as possible to obtain a value.
-          *                          'false' sets the parser to strictly parse strings into dates. 
-	  *                          Extra space, unrecognized tokens, or invalid values 
+          *                          'false' sets the parser to strictly parse strings into dates.
+	  *                          Extra space, unrecognized tokens, or invalid values
 	  *                          ("February 30th") are not accepted.
 	  *
-          * @return boolean          'true' if successful; 'false' if an error occurred. 
+          * @return boolean          'true' if successful; 'false' if an error occurred.
 	  */
 	 public function setLenient($lenient) {}
 
 
 	 /**
-	  * Gets the locale in use 
-	  * @param  [integer]  which locale should be returned? 
+	  * Gets the locale in use
+	  * @param  [integer]  which locale should be returned?
 	  *                    values may include ULOC_ACTUAL_LOCALE,
 	  *                    ULOC_VALID_LOCALE. By default the actual
 	  *                    locale is returned.
@@ -187,33 +187,33 @@ class DateFormatter {
 
 
         /**
-         * Sets the calendar used to the appropriate calendar, which must be 
+         * Sets the calendar used to the appropriate calendar, which must be
 	 * one of the constants defined above. Some examples include:
          *   - Gregorian calendar
          *   - Traditional
          * Default value is GREGORIAN
 	 * @param integer $which the calendar (an enumerated constant) to use.
-         * @return boolean 'true' if successful, 'false' if an error occurred or if the calendar was not recognized 
+         * @return boolean 'true' if successful, 'false' if an error occurred or if the calendar was not recognized
 	 */
          public function setCalendar($which) {}
 
 
         /**
-	 * Gets the Calendar in use 
+	 * Gets the Calendar in use
 	 * @return integer the calendar being used by the formatter
 	 */
          public function getCalendar() {}
 
 
         /**
-	 * Gets the pattern in use 
-    	 * @return string the pattern string being used to format/parse 
+	 * Gets the pattern in use
+    	 * @return string the pattern string being used to format/parse
 	 */
 	public function getPattern() {}
 
 
         /**
-	 * Sets the pattern to  use 
+	 * Sets the pattern to  use
          * @param  string $pattern new pattern string to use
          * @return boolean 'true' if successful, 'false' if an error occurred. Bad format
          *                 strings are usually the cause of the latter.
@@ -247,7 +247,7 @@ class DateFormatter {
 
 
 	/**
-	 * Create a date formatter 
+	 * Create a date formatter
 	 *
 	 * @param string  $locale     Locale to use when formatting or parsing
 	 * @param integer $datetype   Date type to use (none, short, medium, long, full)
@@ -268,7 +268,7 @@ class DateFormatter {
 	 * @param mixed $value - value to format
          *     integer: a unix timestamp value (seconds since epoch, UTC)
          *     array: a localtime array   - uses 24 hour clock in tm_hour field
-         * @return string  a formatted string or, if an error occurred, 'null'. 
+         * @return string  a formatted string or, if an error occurred, 'null'.
 	 */
         function datefmt_format($fmt , $value) {}
 
@@ -278,7 +278,7 @@ class DateFormatter {
 	 * $parse_pos and consuming as much of the input value as possible
 	 * If no error occurs before $value is consumed, $parse_pos will contain -1
 	 * otherwise it will contain the position at which parsing ended (and the error
-	 * occurred). 
+	 * occurred).
          * @param DateFormatter $fmt The date formatter resource
 	 * @param string  $value      string to convert to a time
 	 * @param integer $parse_pos  position at which to start the parsing in $value (zero-based)
@@ -288,13 +288,13 @@ class DateFormatter {
 	 */
 	 function datefmt_parse($fmt , $value, $parse_pos=0) {}
 
-	 
+
         /**
          * converts string $value to a field-based time value, starting at
 	 * $parse_pos and consuming as much of the input value as possible
 	 * If no error occurs before $value is consumed, $parse_pos will contain -1
 	 * otherwise it will contain the position at which parsing ended (and the error
-	 * occurred). 
+	 * occurred).
          * @param DateFormatter $fmt The date formatter resource
 	 * @param string  $value      string to convert to a time
 	 * @param integer $parse_pos  position at which to start the parsing in $value (zero-based)
@@ -322,7 +322,7 @@ class DateFormatter {
 
 
 	 /**
-	  * Gets the leniency of the formatter 
+	  * Gets the leniency of the formatter
           * @param DateFormatter $fmt The date formatter resource
 	  * @return boolean   'true' if parser is lenient, 'false' if parser is strict
 	  *                   default value for parser is 'false'.
@@ -331,16 +331,16 @@ class DateFormatter {
 
 
 	 /**
-	  * Sets the leniency of the formatter 
+	  * Sets the leniency of the formatter
           * @param DateFormatter $fmt The date formatter resource
 	  * @param boolean $lenient  sets whether the parser is lenient or not, default is 'false'
-          *                          'true' sets the parser to accept otherwise flawed date or 
+          *                          'true' sets the parser to accept otherwise flawed date or
 	  *                          time patterns, parsing as much as possible to obtain a value.
-          *                          'false' sets the parser to strictly parse strings into dates. 
-	  *                          Extra space, unrecognized tokens, or invalid values 
+          *                          'false' sets the parser to strictly parse strings into dates.
+	  *                          Extra space, unrecognized tokens, or invalid values
 	  *                          ("February 30th") are not accepted.
 	  *
-          * @return boolean          'true' if successful; 'false' if an error occurred. 
+          * @return boolean          'true' if successful; 'false' if an error occurred.
 	  */
 	 function datefmt_set_lenient($fmt , $lenient) {}
 
@@ -348,7 +348,7 @@ class DateFormatter {
 	 /**
 	  * Gets the locale in  use
           * @param DateFormatter $fmt The date formatter resource
-	  * @param  [integer]  which locale should be returned? 
+	  * @param  [integer]  which locale should be returned?
 	  *                    values may include ULOC_ACTUAL_LOCALE,
 	  *                    ULOC_VALID_LOCALE. By default the actual
 	  *                    locale is returned.
@@ -366,14 +366,14 @@ class DateFormatter {
 
 
         /**
-         * Sets the calendar used to the appropriate calendar, which must be 
+         * Sets the calendar used to the appropriate calendar, which must be
 	 * one of the constants defined above. Some examples include:
          *   - Gregorian calendar
          *   - Traditional
          * Default value is GREGORIAN
          * @param DateFormatter $fmt The date formatter resource
 	 * @param integer $which the calendar (an enumerated constant) to use.
-         * @return boolean 'true' if successful, 'false' if an error occurred or if the calendar was not recognized 
+         * @return boolean 'true' if successful, 'false' if an error occurred or if the calendar was not recognized
 	 */
          function datefmt_set_calendar($fmt , $which) {}
 

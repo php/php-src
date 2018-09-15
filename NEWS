@@ -16,7 +16,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #73457 (Wrong error message when fopen FTP wrapped fails to open
     data connection). (Ville Hukkamäki)
-  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
+  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with
     stream_socket_client). (Ville Hukkamäki)
 
 - Zlib:
@@ -37,7 +37,7 @@ PHP                                                                        NEWS
   . Fixed bug #76517 (incorrect restoring of LDFLAGS). (sji)
 
 - iconv:
-  . Fixed bug #68180 (iconv_mime_decode can return extra characters in a 
+  . Fixed bug #68180 (iconv_mime_decode can return extra characters in a
     header). (cmb)
   . Fixed bug #63839 (iconv_mime_decode_headers function is skipping headers).
     (cmb)
@@ -61,7 +61,7 @@ PHP                                                                        NEWS
     file). (Laruence)
 
 - OpenSSL:
-  . Fixed bug #76705 (unusable ssl => peer_fingerprint in 
+  . Fixed bug #76705 (unusable ssl => peer_fingerprint in
     stream_context_create()). (Jakub Zelenka)
 
 - phpdbg:
@@ -226,7 +226,7 @@ PHP                                                                        NEWS
   . Fixed bug #76143 (Memory corruption: arbitrary NUL overwrite). (Laruence)
 
 - SPL:
-  . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
+  . Fixed bug #76131 (mismatch arginfo for splarray constructor).
     (carusogabriel)
 
 - standard:
@@ -321,7 +321,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #75961 (Strange references behavior). (Laruence)
-  . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
+  . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike,
     Philip Sharp)
   . Fixed some arginfos. (carusogabriel)
   . Fixed bug #75981 (stack-buffer-overflow while parsing HTTP response). (Stas)
@@ -428,7 +428,7 @@ PHP                                                                        NEWS
     (Remi)
   . Fixed bug #75535 (Inappropriately parsing HTTP response leads to PHP
     segment fault). (Nikita)
-  . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
+  . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator
     that getrandom() is missing). (sarciszewski)
   . Fixed bug #73124 (php_ini_scanned_files() not reporting correctly).
     (John Stevenson)
@@ -464,7 +464,7 @@ PHP                                                                        NEWS
   . Fixed bug #75437 (Wrong reflection on imagewebp). (Fabien Villepinte)
 
 - intl:
-  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
+  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead
     of destination). (andrewnester)
 
 - interbase:
@@ -502,7 +502,7 @@ PHP                                                                        NEWS
   . Fixed bug #75236 (infinite loop when printing an error-message). (Andrea)
   . Fixed bug #75252 (Incorrect token formatting on two parse errors in one
     request). (Nikita)
-  . Fixed bug #75220 (Segfault when calling is_callable on parent). 
+  . Fixed bug #75220 (Segfault when calling is_callable on parent).
     (andrewnester)
   . Fixed bug #75290 (debug info of Closures of internal functions contain
     garbage argument names). (Andrea)
@@ -522,7 +522,7 @@ PHP                                                                        NEWS
     optional). (cmb)
 
 - litespeed:
-  . Fixed bug #75248 (Binary directory doesn't get created when building 
+  . Fixed bug #75248 (Binary directory doesn't get created when building
     only litespeed SAPI). (petk)
   . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
@@ -649,7 +649,7 @@ PHP                                                                        NEWS
   . Fixed bug #75049 (spl_autoload_unregister can't handle
     spl_autoload_functions results). (Laruence)
   . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
-  . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
+  . Fixed bug #74977 (Appending AppendIterator leads to segfault).
     (Andrew Nester)
   . Fixed bug #75015 (Crash in recursive iterator destructors). (Julien)
 
@@ -670,9 +670,9 @@ PHP                                                                        NEWS
 03 Aug 2017, PHP 7.1.8
 
 - Core:
-  . Fixed bug #74832 (Loading PHP extension with already registered function 
+  . Fixed bug #74832 (Loading PHP extension with already registered function
     name leads to a crash). (jpauli)
-  . Fixed bug #74780 (parse_url() broken when query string contains colon). 
+  . Fixed bug #74780 (parse_url() broken when query string contains colon).
     (jhdxr)
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
   . Fixed bug #73900 (Use After Free in unserialize() SplFixedArray). (nikic)
@@ -681,7 +681,7 @@ PHP                                                                        NEWS
   . Fixed bug #74906 (fixed incorrect errno.h include). (petk)
 
 - Date:
-  . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
+  . Fixed bug #74852 (property_exists returns true on unknown DateInterval
     property). (jhdxr)
 
 - OCI8:
@@ -892,7 +892,7 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
 
 - phar:
-  . Fixed bug #74383 (phar method parameters reflection correction). 
+  . Fixed bug #74383 (phar method parameters reflection correction).
     (mhagstrand)
 
 - Readline:
@@ -1064,7 +1064,7 @@ PHP                                                                        NEWS
   . Fixed bug #72898 (PHP_FCGI_CHILDREN is not included in phpinfo()). (Anatol)
 
 - FPM:
-  . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
+  . Fixed bug #69865 (php-fpm does not close stderr when using syslog).
     (m6w6)
 
 - GD:
@@ -1072,7 +1072,7 @@ PHP                                                                        NEWS
 
 - GMP:
   . Fixed bug #69993 (test for gmp.h needs to test machine includes).
-    (Jordan Gigov) 
+    (Jordan Gigov)
 
 - Hash:
   . Added hash_hkdf() function. (Andrey Andreev)
@@ -1106,7 +1106,7 @@ PHP                                                                        NEWS
   . Implemented FR #72583 (All data are fetched as strings). (Dorin Marcoci)
 
 - PDO_PgSQL:
-  . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
+  . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong
     sequence name). (andrewnester)
 
 - Phar:
@@ -1170,7 +1170,7 @@ PHP                                                                        NEWS
 - Mysqlnd:
   . Optimized handling of BIT fields - less memory copies and lower memory
     usage. (Andrey)
-  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
+  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE).
 	(vanviegen)
 
 - Opcache:
@@ -1676,7 +1676,7 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #73483 (Segmentation fault on pcre_replace_callback). (Laruence)
   . Fixed bug #73612 (preg_*() may leak memory). (cmb)
-  . Fixed bug #73392 (A use-after-free in zend allocator management). 
+  . Fixed bug #73392 (A use-after-free in zend allocator management).
     (Laruence)
   . Fixed bug #73121 (Bundled PCRE doesn't compile because JIT isn't supported
     on s390). (Anatol)
@@ -1772,7 +1772,7 @@ PHP                                                                        NEWS
   . Implemented RFC: Session ID without hashing. (Yasuo)
     https://wiki.php.net/rfc/session-id-without-hashing
   . Fixed bug #72531 (ps_files_cleanup_dir Buffer overflow). (Laruence)
-  . Custom session handlers that do not return strings for session IDs will 
+  . Custom session handlers that do not return strings for session IDs will
     now throw an instance of Error instead of resulting in a fatal error
     when a function is called that must generate a session ID.
     (Aaron Piotrowski)
@@ -1808,7 +1808,7 @@ PHP                                                                        NEWS
     unserialize()). (Stas)
 
 - Soap:
-  . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP 
+  . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP
     headers). (duncan3dc)
   . Fixed bug #73452 (Segfault (Regression for #69152)). (Dmitry)
   . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
@@ -1816,7 +1816,7 @@ PHP                                                                        NEWS
     (Keith Smiley)
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
     (Keith Smiley)
-  . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita) 
+  . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita)
   . Fixed bug #71996 (Using references in arrays doesn't work like expected).
     (Nikita)
 
@@ -2540,7 +2540,7 @@ PHP                                                                        NEWS
 23 Jun 2016 PHP 7.0.8
 
 - Core:
-  . Fixed bug #72218 (If host name cannot be resolved then PHP 7 crashes). 
+  . Fixed bug #72218 (If host name cannot be resolved then PHP 7 crashes).
     (Esminis at esminis dot lt)
   . Fixed bug #72221 (segfault, past-the-end access). (Lauri Kenttä)
   . Fixed bug #72268 (Integer Overflow in nl2br()). (Stas)
@@ -2562,7 +2562,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #72298 (pass2_no_dither out-of-bounds access). (Stas)
   . Fixed bug #72337 (invalid dimensions can lead to crash). (Pierre)
-  . Fixed bug #72339 (Integer Overflow in _gd2GetHeader() resulting in heap 
+  . Fixed bug #72339 (Integer Overflow in _gd2GetHeader() resulting in heap
     overflow). (CVE-2016-5766) (Pierre)
   . Fixed bug #72407 (NULL Pointer Dereference at _gdScaleVert). (Stas)
   . Fixed bug #72446 (Integer Overflow in gdImagePaletteToTrueColor() resulting
@@ -2950,7 +2950,7 @@ PHP                                                                        NEWS
   . Fixed bug #71529 (Variable references on array elements don't work when
     using count). (Nikita)
   . Fixed bug #71601 (finally block not executed after yield from). (Bob)
-  . Fixed bug #71637 (Multiple Heap Overflow due to integer overflows in 
+  . Fixed bug #71637 (Multiple Heap Overflow due to integer overflows in
     xml/filter_url/addcslashes). (CVE-2016-4344, CVE-2016-4345, CVE-2016-4346)
     (Stas)
 
@@ -3018,7 +3018,7 @@ PHP                                                                        NEWS
   . Fixed bug #71297 (Memory leak with consecutive yield from). (Bob)
   . Fixed bug #71300 (Segfault in zend_fetch_string_offset). (Laruence)
   . Fixed bug #71314 (var_export(INF) prints INF.0). (Andrea)
-  . Fixed bug #71323 (Output of stream_get_meta_data can be falsified by its 
+  . Fixed bug #71323 (Output of stream_get_meta_data can be falsified by its
     input). (Leo Gaspard)
   . Fixed bug #71336 (Wrong is_ref on properties as exposed via
     get_object_vars()). (Laruence)
@@ -3065,7 +3065,7 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #70979 (crash with bad soap request). (Anatol)
-  
+
 - SPL:
   . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
     (Laruence)
@@ -3079,7 +3079,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #71287 (Error message contains hexadecimal instead of decimal
     number). (Laruence)
-  . Fixed bug #71264 (file_put_contents() returns unexpected value when 
+  . Fixed bug #71264 (file_put_contents() returns unexpected value when
     filesystem runs full). (Laruence)
   . Fixed bug #71245 (file_get_contents() ignores "header" context option if
     it's a reference). (Laruence)
@@ -3273,7 +3273,7 @@ PHP                                                                        NEWS
   . Fixed bug #70947 (INI parser segfault with INI_SCANNER_TYPED). (Laruence)
   . Fixed bug #70914 (zend_throw_or_error() format string vulnerability).
     (Taoguang Chen)
-  . Fixed bug #70912 (Null ptr dereference instantiating class with invalid 
+  . Fixed bug #70912 (Null ptr dereference instantiating class with invalid
     array property). (Laruence)
   . Fixed bug #70895, #70898 (null ptr deref and segfault with crafted calable).
     (Anatol, Laruence)
@@ -3432,13 +3432,13 @@ PHP                                                                        NEWS
   . Fixed bug #68475 (Add support for $callable() sytnax with 'Class::method').
     (Julien, Aaron Piotrowski)
   . Fixed bug #69485 (Double free on zend_list_dtor). (Laruence)
-  . Fixed bug #69427 (Segfault on magic method __call of private method in 
+  . Fixed bug #69427 (Segfault on magic method __call of private method in
     superclass). (Laruence)
   . Improved __call() and __callStatic() magic method handling. Now they are
     called in a stackless way using ZEND_CALL_TRAMPOLINE opcode, without
     additional stack frame. (Laruence, Dmitry)
   . Optimized strings concatenation. (Dmitry, Laruence)
-  . Fixed weird operators behavior. Division by zero now emits warning and 
+  . Fixed weird operators behavior. Division by zero now emits warning and
     returns +/-INF, modulo by zero and intdid() throws an exception, shifts
     by negative offset throw exceptions. Compile-time evaluation of division
     by zero is disabled. (Dmitry, Andrea, Nikita)
@@ -3462,7 +3462,7 @@ PHP                                                                        NEWS
     classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
   . Fixed bug #63734 (Garbage collector can free zvals that are still
     referenced). (Dmitry)
-  . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
+  . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class
     modifier. (Guilherme Blanco)
   . is_long() & is_integer() is now an alias of is_int(). (Kalle)
   . Implemented FR #55467 (phpinfo: PHP Variables with $ and single quotes). (Kalle)
@@ -3488,7 +3488,7 @@ PHP                                                                        NEWS
   . Added error_clear_last() function. (Reeze Xia)
   . Fixed bug #68797 (Number 2.2250738585072012e-308 converted incorrectly).
     (Anatol)
-  . Improved zend_qsort(using hybrid sorting algo) for better performance, 
+  . Improved zend_qsort(using hybrid sorting algo) for better performance,
     and also renamed zend_qsort to zend_sort. (Laruence)
   . Added stable sorting algo zend_insert_sort. (Laruence)
   . Improved zend_memnchr(using sunday algo) for better performance. (Laruence)
@@ -3540,7 +3540,7 @@ PHP                                                                        NEWS
   . Removed $is_dst parameter from mktime() and gmmktime(). (Nikita)
   . Removed date.timezone warning
     (https://wiki.php.net/rfc/date.timezone_warning_removal). (Bob)
-  . Added "v" DateTime format modifier to get the 3-digit version of fraction 
+  . Added "v" DateTime format modifier to get the 3-digit version of fraction
     of seconds. (Mariano Iglesias)
   . Implemented FR #69089 (Added DateTime::RFC3339_EXTENDED to output in
     RFC3339 Extended format which includes fraction of seconds). (Mariano
@@ -3551,8 +3551,8 @@ PHP                                                                        NEWS
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
 - DOM:
-  . Fixed bug #70558 ("Couldn't fetch" error in 
-    DOMDocument::registerNodeClass()). (Laruence) 
+  . Fixed bug #70558 ("Couldn't fetch" error in
+    DOMDocument::registerNodeClass()). (Laruence)
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
   . Fixed bug #69846 (Segmenation fault (access violation) when iterating over
@@ -3581,7 +3581,7 @@ PHP                                                                        NEWS
   . Implemented FR #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
 - FTP:
-  . Fixed bug #69082 (FTPS support on Windows). (Anatol) 
+  . Fixed bug #69082 (FTPS support on Windows). (Anatol)
 
 - GD:
   . Fixed bug #53156 (imagerectangle problem with point ordering). (cmb)
@@ -3776,7 +3776,7 @@ PHP                                                                        NEWS
   . FIxed bug #70433 (Uninitialized pointer in phar_make_dirstream when zip
     entry filename is "/"). (Stas)
   . Improved fix for bug #69441. (Anatol Belski)
-  . Fixed bug #70019 (Files extracted from archive may be placed outside of 
+  . Fixed bug #70019 (Files extracted from archive may be placed outside of
     destination directory). (Anatol Belski)
 
 - Phpdbg:
@@ -3848,7 +3848,7 @@ PHP                                                                        NEWS
     SplObjectStorage). (taoguangchen at icloud dot com)
   . Fixed bug #70169 (Use After Free Vulnerability in unserialize() with
     SplDoublyLinkedList). (taoguangchen at icloud dot com)
-  . Fixed bug #70053 (MutlitpleIterator array-keys incompatible change in 
+  . Fixed bug #70053 (MutlitpleIterator array-keys incompatible change in
     PHP 7). (Tjerk)
   . Fixed bug #69970 (Use-after-free vulnerability in
     spl_recursive_it_move_forward_ex()). (Laruence)
@@ -3866,7 +3866,7 @@ PHP                                                                        NEWS
   . Fixed bug #70571 (Memory leak in sqlite3_do_callback). (Adam)
   . Fixed bug #69972 (Use-after-free vulnerability in
     sqlite3SafetyCheckSickOrOk()). (Laruence)
-  . Fixed bug #69897 (segfault when manually constructing SQLite3Result). 
+  . Fixed bug #69897 (segfault when manually constructing SQLite3Result).
     (Kalle)
   . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong
     required_num_args). (Julien)

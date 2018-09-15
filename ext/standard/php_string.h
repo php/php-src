@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -138,8 +138,8 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, const cha
 PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value);
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
 
-PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end); 
-PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end); 
+PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end);
+PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end);
 
 PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive);
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);

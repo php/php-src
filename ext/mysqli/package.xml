@@ -30,7 +30,7 @@ package.xml added to support installation using pear installer
   </notes>
   <configureoptions>
     <configureoption name="with-mysqli" default="autodetect" prompt="path to mysql_config tool?"/>
-    <configureoption name="enable-embedded-mysqli" default="no" prompt="embedd mysql server into PHP?"/> 
+    <configureoption name="enable-embedded-mysqli" default="no" prompt="embedd mysql server into PHP?"/>
   </configureoptions>
   <filelist>
    <file role="src" name="config.m4"/>
@@ -104,7 +104,7 @@ package.xml added to support installation using pear installer
    <file role="test" name="tests/058.phpt"/>
    <file role="test" name="tests/059.phpt"/>
    <file role="test" name="tests/060.phpt"/>
-   <file role="test" name="tests/connect.inc"/> 
+   <file role="test" name="tests/connect.inc"/>
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5" />

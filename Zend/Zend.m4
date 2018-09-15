@@ -7,10 +7,10 @@ dnl
 AC_DEFUN([LIBZEND_CHECK_INT_TYPE],[
 AC_MSG_CHECKING(for $1)
 AC_TRY_COMPILE([
-#if HAVE_SYS_TYPES_H  
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#if HAVE_INTTYPES_H  
+#if HAVE_INTTYPES_H
 #include <inttypes.h>
 #elif HAVE_STDINT_H
 #include <stdint.h>
@@ -137,7 +137,7 @@ int main()
 ], [
   AC_MSG_RESULT(no)
 ])
-	
+
 ])
 
 AC_DEFUN([LIBZEND_ENABLE_DEBUG],[
@@ -147,7 +147,7 @@ AC_ARG_ENABLE(debug,
   ZEND_DEBUG=$enableval
 ],[
   ZEND_DEBUG=no
-])  
+])
 
 ])
 
@@ -158,10 +158,10 @@ AC_ARG_ENABLE(maintainer-zts,
   ZEND_MAINTAINER_ZTS=$enableval
 ],[
   ZEND_MAINTAINER_ZTS=no
-])  
+])
 
 AC_ARG_ENABLE(inline-optimization,
-[  --disable-inline-optimization 
+[  --disable-inline-optimization
                           If building zend_execute.lo fails, try this switch],[
   ZEND_INLINE_OPTIMIZATION=$enableval
 ],[
@@ -196,7 +196,7 @@ if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   CFLAGS="$CFLAGS -DZTS"
   LIBZEND_CPLUSPLUS_CHECKS
-fi  
+fi
 
 changequote({,})
 if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
@@ -249,7 +249,7 @@ int main()
   }
 
   fp = fopen("conftest.zend", "w");
-  fprintf(fp, "%d %d\n", ZEND_MM_ALIGNMENT, zeros);  
+  fprintf(fp, "%d %d\n", ZEND_MM_ALIGNMENT, zeros);
   fclose(fp);
 
   exit(0);
@@ -258,7 +258,7 @@ int main()
   LIBZEND_MM_ALIGN=`cat conftest.zend | cut -d ' ' -f 1`
   LIBZEND_MM_ALIGN_LOG2=`cat conftest.zend | cut -d ' ' -f 2`
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, $LIBZEND_MM_ALIGN, [ ])
-  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ]) 
+  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ])
 ], [], [
   dnl cross-compile needs something here
   LIBZEND_MM_ALIGN=8
@@ -374,7 +374,7 @@ AC_ARG_ENABLE(zend-signals,
   ZEND_SIGNALS=$enableval
 ],[
   ZEND_SIGNALS=yes
-])  
+])
 
 AC_CHECK_FUNC(sigaction, [
 	AC_DEFINE(HAVE_SIGACTION, 1, [Whether sigaction() is available])
@@ -395,24 +395,24 @@ AC_DEFUN([LIBZEND_CPLUSPLUS_CHECKS],[
 
 ])
 
-AC_MSG_CHECKING(whether /dev/urandom exists) 
-if test -r "/dev/urandom" && test -c "/dev/urandom"; then 
+AC_MSG_CHECKING(whether /dev/urandom exists)
+if test -r "/dev/urandom" && test -c "/dev/urandom"; then
   AC_DEFINE([HAVE_DEV_URANDOM], 1, [Define if the target system has /dev/urandom device])
-  AC_MSG_RESULT(yes) 
-else 
-  AC_MSG_RESULT(no) 
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
 fi
 
-AC_MSG_CHECKING(whether /dev/arandom exists) 
-if test -r "/dev/arandom" && test -c "/dev/arandom"; then 
+AC_MSG_CHECKING(whether /dev/arandom exists)
+if test -r "/dev/arandom" && test -c "/dev/arandom"; then
   AC_DEFINE([HAVE_DEV_ARANDOM], 1, [Define if the target system has /dev/arandom device])
-  AC_MSG_RESULT(yes) 
-else 
-  AC_MSG_RESULT(no) 
-fi 
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
 
 AC_ARG_ENABLE(gcc-global-regs,
-[  --disable-gcc-global-regs 
+[  --disable-gcc-global-regs
                           whether to enable GCC global register variables],[
   ZEND_GCC_GLOBAL_REGS=$enableval
 ],[

@@ -1336,7 +1336,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 {
 	va_list va;
 	char *message = NULL;
-	
+
 	if (exception_ce) {
 		if (!instanceof_function(exception_ce, zend_ce_error)) {
 			zend_error(E_NOTICE, "Error exceptions must be derived from Error");

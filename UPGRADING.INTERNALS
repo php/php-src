@@ -25,7 +25,7 @@ changes. See: https://wiki.php.net/phpng-upgrading
 ========================
 
   e. Codepage handling on Windows
-     
+
     A set of new APIs was introduced, which allows to handle codepage
     conversions. The corresponding prototypes and macros are contained
     in win32/codepage.h.
@@ -53,7 +53,7 @@ changes. See: https://wiki.php.net/phpng-upgrading
 
     Functions with php_win32_ioutil_* signatures provide POSIX I/O analogues.
     These functions are integrated in various places across the code base to
-    support Unicode filenames. While accepting char * arguments, internally 
+    support Unicode filenames. While accepting char * arguments, internally
     the conversion to wchar_t * happens. Internally almost no ANSI APIs are
     used, but directly their wide equivalents. The string conversion rules
     correspond to those already present in the core and depend on the current

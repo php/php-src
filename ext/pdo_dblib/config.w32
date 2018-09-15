@@ -40,7 +40,7 @@ if (PHP_PDO_MSSQL != "no") {
 		/* smells like FreeTDS (or maybe native sybase dblib) */
 		PDO_DBLIB_FLAVOUR = "freetds";
 	} else {
-		
+
 		for (i = 0; i < pdo_mssql_locations.length; i++) {
 			if (CHECK_LIB("ntwdblib.lib", "pdo_mssql",
 					pdo_mssql_locations[i] + "\\DevTools\\Lib") &&
