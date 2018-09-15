@@ -310,6 +310,12 @@ struct sqlite3_api_routines {
   int (*str_errcode)(sqlite3_str*);
   int (*str_length)(sqlite3_str*);
   char *(*str_value)(sqlite3_str*);
+  int (*create_window_function)(sqlite3*,const char*,int,int,void*,
+                            void (*xStep)(sqlite3_context*,int,sqlite3_value**),
+                            void (*xFinal)(sqlite3_context*),
+                            void (*xValue)(sqlite3_context*),
+                            void (*xInv)(sqlite3_context*,int,sqlite3_value**),
+                            void(*xDestroy)(void*));
 };
 
 /*
@@ -595,6 +601,8 @@ typedef int (*sqlite3_loadext_entry)(
 #define sqlite3_str_errcode            sqlite3_api->str_errcode
 #define sqlite3_str_length             sqlite3_api->str_length
 #define sqlite3_str_value              sqlite3_api->str_value
+/* Version 3.25.0 and later */
+#define sqlite3_create_window_function sqlite3_api->create_window_function
 #endif /* !defined(SQLITE_CORE) && !defined(SQLITE_OMIT_LOAD_EXTENSION) */
 
 #if !defined(SQLITE_CORE) && !defined(SQLITE_OMIT_LOAD_EXTENSION)
