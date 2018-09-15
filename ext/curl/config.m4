@@ -1,5 +1,5 @@
 dnl
-dnl $Id$ 
+dnl $Id$
 dnl
 
 PHP_ARG_WITH(curl, for cURL support,
@@ -91,17 +91,17 @@ if test "$PHP_CURL" != "no"; then
 
   PHP_EVAL_LIBLINE($CURL_LIBS, CURL_SHARED_LIBADD)
   PHP_EVAL_INCLINE($CURL_INCL, CURL_SHARED_LIBADD)
-  
+
   AC_MSG_CHECKING([for SSL support in libcurl])
   if test -n "$CURL_SSL"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE([HAVE_CURL_SSL], [1], [Have cURL with  SSL support])
-   
+
     save_CFLAGS="$CFLAGS"
     CFLAGS=$CURL_INCL
     save_LDFLAGS="$LDFLAGS"
     LDFLAGS=$CURL_LIBS
-   
+
     AC_PROG_CPP
     AC_MSG_CHECKING([for openssl support in libcurl])
     AC_TRY_RUN([
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     ], [
       AC_MSG_RESULT([no])
     ])
-   
+
     AC_MSG_CHECKING([for gnutls support in libcurl])
     AC_TRY_RUN([
 #include <strings.h>
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
   curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
-  
+
   if (data && data->ssl_version && *data->ssl_version) {
     const char *ptr = data->ssl_version;
 
@@ -158,15 +158,15 @@ int main(int argc, char *argv[])
     ], [
       AC_MSG_RESULT([no])
     ])
-   
+
     CFLAGS="$save_CFLAGS"
     LDFLAGS="$save_LDFLAGS"
   else
     AC_MSG_RESULT([no])
   fi
 
-  PHP_CHECK_LIBRARY(curl,curl_easy_perform, 
-  [ 
+  PHP_CHECK_LIBRARY(curl,curl_easy_perform,
+  [
     AC_DEFINE(HAVE_CURL,1,[ ])
   ],[
     AC_MSG_ERROR(There is something wrong. Please check config.log for more information.)

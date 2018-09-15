@@ -48,7 +48,7 @@ Version 1.2.0
  X add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
  X add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
  X fix Phar::CanWrite() [Marcus]
- X add preliminary phar command (phar.php) [Marcus] 
+ X add preliminary phar command (phar.php) [Marcus]
  X add phar command (phar.phar) [Marcus]
  X list all available compression methods using
    Phar::getSupportedCompression() [Marcus]

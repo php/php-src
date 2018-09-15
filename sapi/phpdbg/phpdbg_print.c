@@ -370,7 +370,7 @@ void phpdbg_print_opcodes_class(const char *class) {
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
-		
+
 		return;
 	}
 

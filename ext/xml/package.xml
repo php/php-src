@@ -24,8 +24,8 @@
   </maintainer>
  </maintainers>
  <description>
-This extension lets you create XML parsers  and then define 
-handlers for different XML events. Each XML parser also has 
+This extension lets you create XML parsers  and then define
+handlers for different XML events. Each XML parser also has
 a few parameters you can adjust.
  </description>
  <license>PHP</license>

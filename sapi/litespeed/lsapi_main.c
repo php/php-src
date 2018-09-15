@@ -500,7 +500,7 @@ static void init_request_info( void )
 {
     char * pContentType = LSAPI_GetHeader( H_CONTENT_TYPE );
     char * pAuth;
-    
+
     SG(request_info).content_type = pContentType ? pContentType : "";
     SG(request_info).request_method = LSAPI_GetRequestMethod();
     SG(request_info).query_string = LSAPI_GetQueryString();
@@ -510,7 +510,7 @@ static void init_request_info( void )
 
     /* It is not reset by zend engine, set it to 200. */
     SG(sapi_headers).http_response_code = 200;
-    
+
     pAuth = LSAPI_GetHeader( H_AUTHORIZATION );
     php_handle_auth_data(pAuth);
 }
@@ -546,7 +546,7 @@ static int lsapi_module_main(int show_source)
     if (php_request_startup() == FAILURE ) {
         return -1;
     }
-    
+
     if (show_source) {
         zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -768,7 +768,7 @@ static int lsapi_activate_user_ini_mk_user_config(_lsapi_activate_user_ini_ctx *
     /* Find cached config entry: If not found, create one */
     ctx->entry = zend_hash_str_find_ptr(&user_config_cache, ctx->path, ctx->path_len);
 
-    if (!ctx->entry) 
+    if (!ctx->entry)
     {
         ctx->entry = pemalloc(sizeof(user_config_cache_entry), 1);
         ctx->entry->expires = 0;
@@ -815,7 +815,7 @@ static int lsapi_activate_user_ini_walk_down_the_path(_lsapi_activate_user_ini_c
                 strncmp(ctx->path, ctx->doc_root, docroot_len) != 0;
 
         if (is_outside_of_docroot) {
-            php_parse_user_ini_file(ctx->path, PG(user_ini_filename), 
+            php_parse_user_ini_file(ctx->path, PG(user_ini_filename),
                                     &ctx->entry->user_config);
         } else {
             walk_down_the_path(ctx->doc_root, ctx->path,
@@ -838,7 +838,7 @@ static int lsapi_activate_user_ini_finally(_lsapi_activate_user_ini_ctx *ctx,
     int rc = SUCCESS;
     fn_activate_user_ini_chain_t *fn_next = next;
 
-    php_ini_activate_config(&ctx->entry->user_config, PHP_INI_PERDIR, 
+    php_ini_activate_config(&ctx->entry->user_config, PHP_INI_PERDIR,
                             PHP_INI_STAGE_HTACCESS);
 
     if (*fn_next) {
@@ -869,7 +869,7 @@ static int lsapi_activate_user_ini( void )
         &lsapi_activate_user_ini_finally,
         NULL
     };
-    
+
     return fn_chain[0](&ctx, (fn_activate_user_ini_chain_t*)(fn_chain + 1));
 }
 
@@ -1025,7 +1025,7 @@ static int cli_main( int argc, char * argv[] )
         zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
         CG(in_compilation) = 0; /* not initialized but needed for several options */
         SG(options) |= SAPI_OPTION_NO_CHDIR;
-        
+
         for( ini = ini_defaults; *ini; ini+=2 ) {
             psKey = zend_string_init(*ini, strlen( *ini ), 1);
             zend_alter_ini_entry_chars(psKey,
@@ -1254,11 +1254,11 @@ int main( int argc, char * argv[] )
 #endif
 
 #if PHP_MAJOR_VERSION >= 7
-#if defined(ZEND_SIGNALS) || PHP_MINOR_VERSION > 0  
+#if defined(ZEND_SIGNALS) || PHP_MINOR_VERSION > 0
     zend_signal_startup();
 #endif
 #endif
-    
+
     if (argc > 1 ) {
         if ( parse_opt( argc, argv, &climode,
                 &php_ini_path, &php_bind ) == -1 ) {
@@ -1289,7 +1289,7 @@ int main( int argc, char * argv[] )
      * options: the latter override the former.
      */
     init_sapi_from_env(&lsapi_sapi_module);
-    
+
     if ( ignore_php_ini )
         lsapi_sapi_module.php_ini_ignore = 1;
 
@@ -1329,7 +1329,7 @@ int main( int argc, char * argv[] )
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
     int is_criu = LSCRIU_Init(); // Must be called before the regular init as it unsets the parameters.
 #endif
-    
+
     LSAPI_Init_Env_Parameters( NULL );
     lsapi_mode = 1;
 
@@ -1343,7 +1343,7 @@ int main( int argc, char * argv[] )
 
     int iRequestsProcessed = 0;
     int result;
-    
+
     while( ( result = LSAPI_Prefork_Accept_r( &g_req )) >= 0 ) {
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
         if (is_criu && !result) {

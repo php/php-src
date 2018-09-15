@@ -53,7 +53,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       fi
     fi
   fi
-  
+
   if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     dnl enables build of mysqnd library
     PHP_MYSQLND_ENABLED=yes
@@ -113,8 +113,8 @@ if test "$PHP_PDO_MYSQL" != "no"; then
         PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_commit, [], [
           AC_MSG_ERROR([PDO_MYSQL configure failed, MySQL 4.1 needed. Please check config.log for more information.])
         ], [
-          -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$PDO_MYSQL_LIB_DIR 
-        ])  
+          -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$PDO_MYSQL_LIB_DIR
+        ])
         PDO_MYSQL_LIBS="$PDO_MYSQL_LIBS -L$PHP_ZLIB_DIR/$PHP_LIBDIR -lz"
       else
         PHP_ADD_LIBRARY(z,, PDO_MYSQL_SHARED_LIBADD)
@@ -122,7 +122,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
           AC_MSG_ERROR([Try adding --with-zlib-dir=<DIR>. Please check config.log for more information.])
         ], [
           -L$PDO_MYSQL_LIB_DIR
-        ])   
+        ])
         PDO_MYSQL_LIBS="$PDO_MYSQL_LIBS -lz"
       fi
 

@@ -180,7 +180,7 @@ PHP 8.0.
   . The each() function has been deprecated, use a foreach loop instead.
   . The $errcontext error handler argument has been deprecated. However, using
     it does not trigger a deprecation warning for technical reasons.
-  
+
 - EXIF:
   . The read_exif_data() alias has been deprecated, use exif_read_data() instead.
 
@@ -210,14 +210,14 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 ========================================
 
 - Standard:
-  . password_hash() can generate Argon2i hashes when the algorithm is set to PASSWORD_ARGON2I. 
-    When using PASSWORD_ARGON2I, the following cost factors may be set: 'memory_cost', 'time_cost', 
-    and 'threads'. These cost factors will default to 'PASSWORD_ARGON2_DEFAULT_MEMORY_COST', 
+  . password_hash() can generate Argon2i hashes when the algorithm is set to PASSWORD_ARGON2I.
+    When using PASSWORD_ARGON2I, the following cost factors may be set: 'memory_cost', 'time_cost',
+    and 'threads'. These cost factors will default to 'PASSWORD_ARGON2_DEFAULT_MEMORY_COST',
     'PASSWORD_ARGON2_DEFAULT_TIME_COST', and 'PASSWORD_ARGON2_DEFAULT_THREADS' respectively if not set.
   . password_verify() can verify Argon2i hashes.
   . password_get_info() and password_needs_rehash() can accept Argon2i hashes.
   . mail()/mb_send_mail() accept array $extra_header. Array parameter is checked against RFC 2822.
-    Array format is 
+    Array format is
     $extra_headers = [
       'Header-Name' => 'Header value',
       'Multiple' => ['One header', 'Another header'],
@@ -290,10 +290,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 ========================================
 
 - EXIF:
-   . Added extended exif tag support for the following formats: 
-     Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, 
+   . Added extended exif tag support for the following formats:
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon,
 	 AGFA, Kyocera, Ricoh & Epson.
-   . exif_read_data() and exif_thumbnail() now supports a passed streams as their 
+   . exif_read_data() and exif_thumbnail() now supports a passed streams as their
      first parameter.
 
 - GD:

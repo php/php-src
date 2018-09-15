@@ -14,7 +14,7 @@
 #  | Author: Sascha Schumann <sascha@schumann.cx>                         |
 #  +----------------------------------------------------------------------+
 #
-# $Id$ 
+# $Id$
 #
 
 include generated_lists
@@ -35,7 +35,7 @@ SUPPRESS_WARNINGS ?= 2>&1 | (egrep -v '(AC_TRY_RUN called without default to all
 all: $(targets)
 
 $(config_h_in): configure
-# explicitly remove target since autoheader does not seem to work 
+# explicitly remove target since autoheader does not seem to work
 # correctly otherwise (timestamps are not updated)
 	@echo rebuilding $@
 	@rm -f $@

@@ -26,7 +26,7 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
     for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/$PHP_LIBDIR; do
       test -f $j/libpcre.a || test -f $j/libpcre.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
     done
-    
+
     if test -z "$PCRE_LIBDIR" ; then
       AC_MSG_ERROR([Could not find libpcre.(a|$SHLIB_SUFFIX_NAME) in $PHP_PCRE_REGEX])
     fi
@@ -53,7 +53,7 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
       -L$PCRE_LIBDIR
     ])
     PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR)
-    
+
     AC_DEFINE(HAVE_PCRE, 1, [ ])
     PHP_ADD_INCLUDE($PCRE_INCDIR)
     PHP_NEW_EXTENSION(pcre, php_pcre.c, no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)

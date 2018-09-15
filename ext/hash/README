@@ -15,5 +15,5 @@ $context = hash_init($algoname);
 hash_update($context, $message);
 $digest = hash_final($context);
 
-hash(), hash_file(), and hash_final() each support an optional boolean parameter $raw_output which behaves in the same 
+hash(), hash_file(), and hash_final() each support an optional boolean parameter $raw_output which behaves in the same
 manner as sha1()'s optional parameter.

@@ -20,7 +20,7 @@ if (PHP_ZIP != "no") {
 		ADD_FLAG("CFLAGS_ZIP", "/D _WIN32 /D HAVE_ENCRYPTION");
 	} else if (CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS_ZIP", "..\\zlib;" + PHP_ZIP) &&
 		CHECK_HEADER_ADD_INCLUDE("zipconf.h", "CFLAGS_ZIP", configure_module_dirname + "\\lib;" + PHP_ZIP) &&
-		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib", "zip", PHP_ZIP) ||  CHECK_LIB("zlib.lib", "zip", PHP_ZIP))) || 
+		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib", "zip", PHP_ZIP) ||  CHECK_LIB("zlib.lib", "zip", PHP_ZIP))) ||
 			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "zip", PHP_ZIP)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
 		) {
 		EXTENSION('zip', 'php_zip.c zip_stream.c');

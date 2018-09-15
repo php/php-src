@@ -102,7 +102,7 @@ if (empty($environment)) {
 }
 if (empty($environment['TEMP'])) {
 	$environment['TEMP'] = sys_get_temp_dir();
-	
+
 	if (empty($environment['TEMP'])) {
 		// for example, OpCache on Windows will fail in this case because child processes (for tests) will not get
 		// a TEMP variable, so GetTempPath() will fallback to c:\windows, while GetTempPath() will return %TEMP% for parent
@@ -110,7 +110,7 @@ if (empty($environment['TEMP'])) {
 		// the OpCache because it will be using the wrong path.
 		die("TEMP environment is NOT set");
 	} else if (count($environment)==1) {
-		// not having other environment variables, only having TEMP, is probably ok, but strange and may make a 
+		// not having other environment variables, only having TEMP, is probably ok, but strange and may make a
 		// difference in the test pass rate, so warn the user.
 		echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)".PHP_EOL;
 	}

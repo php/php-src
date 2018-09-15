@@ -24,9 +24,9 @@ class DualIterator implements Iterator
 	const KEY_LHS   = 0x10;
 	const KEY_RHS   = 0x20;
 	const KEY_0     = 0x00;
-	
+
 	const DEFAULT_FLAGS = 0x13;
-	
+
 	private $lhs;
 	private $rhs;
 	private $flags;
@@ -37,7 +37,7 @@ class DualIterator implements Iterator
 	 * @param rhs   Right Hand Side Iterator
 	 * @param flags iteration flags
 	 */
-	function __construct(Iterator $lhs, Iterator $rhs, 
+	function __construct(Iterator $lhs, Iterator $rhs,
 					$flags = 0x13 /*DualIterator::DEFAULT_FLAGS*/)
 	{
 		$this->lhs   = $lhs;
@@ -74,22 +74,22 @@ class DualIterator implements Iterator
 	}
 
 	/** rewind both inner iterators
-	 */	
+	 */
 	function rewind()
 	{
 		$this->lhs->rewind();
-		$this->rhs->rewind();	
+		$this->rhs->rewind();
 	}
 
 	/** @return whether both inner iterators are valid
-	 */	
+	 */
 	function valid()
 	{
-		return $this->lhs->valid() && $this->rhs->valid();	
+		return $this->lhs->valid() && $this->rhs->valid();
 	}
 
 	/** @return current value depending on CURRENT_* flags
-	 */	
+	 */
 	function current()
 	{
 		switch($this->flags & 0x0F)
@@ -107,7 +107,7 @@ class DualIterator implements Iterator
 	}
 
 	/** @return key value depending on KEY_* flags
-	 */	
+	 */
 	function key()
 	{
 		switch($this->flags & 0xF0)
@@ -123,14 +123,14 @@ class DualIterator implements Iterator
 	}
 
 	/** move both inner iterators forward
-	 */	
+	 */
 	function next()
 	{
 		$this->lhs->next();
 		$this->rhs->next();
 	}
 
-	/** @return whether both inner iterators are valid and have identical 
+	/** @return whether both inner iterators are valid and have identical
 	 * current and key values or both are non valid.
 	 */
 	function areIdentical()
@@ -141,7 +141,7 @@ class DualIterator implements Iterator
 			 : $this->lhs->valid()   ==  $this->rhs->valid();
 	}
 
-	/** @return whether both inner iterators are valid and have equal current 
+	/** @return whether both inner iterators are valid and have equal current
 	 * and key values or both are non valid.
 	 */
 	function areEqual()
@@ -162,14 +162,14 @@ class DualIterator implements Iterator
 	 * @note If one implements RecursiveIterator the other must do as well.
 	 *       And if both do then a recursive comparison is being used.
 	 */
-	static function compareIterators(Iterator $lhs, Iterator $rhs, 
+	static function compareIterators(Iterator $lhs, Iterator $rhs,
 	                                 $identical = false)
 	{
 		if ($lhs instanceof RecursiveIterator)
 		{
 			if ($rhs instanceof RecursiveIterator)
 			{
-				$it = new RecursiveDualIterator($lhs, $rhs, 
+				$it = new RecursiveDualIterator($lhs, $rhs,
 								self::CURRENT_0 | self::KEY_0);
 				$it = new RecursiveCompareDualIterator($it);
 			}

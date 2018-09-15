@@ -521,7 +521,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			Z_FUNC(p->val)->common.function_name = new_interned_string(Z_FUNC(p->val)->common.function_name);
 		}
 		if (Z_FUNC(p->val)->common.arg_info &&
-		    (Z_FUNC(p->val)->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+		    (Z_FUNC(p->val)->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			uint32_t i;
 			uint32_t num_args = Z_FUNC(p->val)->common.num_args + 1;
 			zend_arg_info *arg_info = Z_FUNC(p->val)->common.arg_info - 1;
@@ -2066,7 +2066,7 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 			zend_string *resolved_path;
 			int key_length;
 			char *key = NULL;
-			
+
 			if (!ZCG(accel_directives).revalidate_path) {
 				/* lookup by "not-real" path */
 				key = accel_make_persistent_key(filename, filename_len, &key_length);

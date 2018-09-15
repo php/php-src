@@ -37,7 +37,7 @@ if test "$PHP_SNMP" != "no"; then
     else
       AC_MSG_ERROR([Net-SNMP version 5.3 or greater reqired (detected $snmp_full_version).])
     fi
-  else 
+  else
     AC_MSG_ERROR([Could not find net-snmp-config binary. Please check your net-snmp installation.])
   fi
 

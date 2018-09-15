@@ -158,7 +158,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 					shiftlist[i] = i - target;
 					i++;
 				}
-				
+
 				if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
 					/* Only keep the FREE for the loop var */
 					ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE

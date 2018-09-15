@@ -66,7 +66,7 @@ if (VS_TOOLSET && PHP_MP != 'disable') {
 	if(PHP_DEBUG == 'yes') {
 		STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
 	} else {
-		// no from disable-all 
+		// no from disable-all
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
 			PHP_MP_DISABLED = false;

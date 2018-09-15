@@ -40,7 +40,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     else
       AC_MSG_ERROR(Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory)
     fi
-  fi  
+  fi
 
   if test "x$PHP_LIBDIR" = "x" ; then
     PHP_LIBDIR=lib

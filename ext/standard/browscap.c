@@ -147,7 +147,7 @@ static size_t browscap_compute_regex_len(zend_string *pattern) {
 				break;
 		}
 	}
-	
+
 	return len + sizeof("~^$~")-1;
 }
 
@@ -365,7 +365,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					"Skipping excessively long pattern of length %zd", ZSTR_LEN(pattern));
 				break;
 			}
-			
+
 			entry = ctx->current_entry
 				= pemalloc(sizeof(browscap_entry), persistent);
 			zend_hash_update_ptr(bdata->htab, pattern, entry);
@@ -411,7 +411,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 	fh.type = ZEND_HANDLE_FP;
 
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
-	zend_hash_init_ex(browdata->htab, 0, NULL, 
+	zend_hash_init_ex(browdata->htab, 0, NULL,
 		persistent ? browscap_entry_dtor_persistent : browscap_entry_dtor, persistent, 0);
 
 	browdata->kv_size = 16 * 1024;

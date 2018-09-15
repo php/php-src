@@ -26,7 +26,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>package.xml added to support installation using pear installer
-  
+
  </notes>
  <contents>
   <dir name="/">

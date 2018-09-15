@@ -12,8 +12,8 @@
   </maintainer>
  </maintainers>
  <description>
-The functions provided by this extension check whether a 
-character or string falls into a certain character class 
+The functions provided by this extension check whether a
+character or string falls into a certain character class
 according to the current locale.
 	</description>
  <license>PHP</license>

@@ -9,7 +9,7 @@
     current locale.
    </para>
    <para>
-    When called with an integer argument these functions 
+    When called with an integer argument these functions
     behave exactly like their C counterparts.
    </para>
    <para>
@@ -19,7 +19,7 @@
     requested criteria.
    </para>
    <para>
-    Passing anything else but a string or integer will 
+    Passing anything else but a string or integer will
     return false immediately.
    </para>
   </partintro>

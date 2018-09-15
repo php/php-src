@@ -97,7 +97,7 @@ http://pecl4win.php.net
 You should uninstall and re-install your individual database drivers whenever
 you upgrade the base PDO package, otherwise you will see an error about PDO API
 numbers when you run your PHP scripts.
-  
+
  </notes>
  <contents>
   <dir name="/">
