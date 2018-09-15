@@ -42,4 +42,3 @@ if (PHP_MBREGEX != "no") {
 }
 ADD_MAKEFILE_FRAGMENT();
 PHP_INSTALL_HEADERS("", "ext/standard");
-

@@ -115,4 +115,3 @@ char* utf8_decode(const char *s, int len, int *newlen, const char* encoding)
 {
    return convert(s, len, newlen, "UTF-8", encoding);
 }
-

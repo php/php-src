@@ -241,4 +241,3 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 
 	return rv;
 }
-

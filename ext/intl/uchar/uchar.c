@@ -778,4 +778,3 @@ int php_uchar_minit(INIT_FUNC_ARGS) {
 
 	return SUCCESS;
 }
-

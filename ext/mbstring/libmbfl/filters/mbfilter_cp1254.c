@@ -153,5 +153,3 @@ static int mbfl_filt_ident_cp1254(int c, mbfl_identify_filter *filter)
 		filter->flag = 1; /* not it */
 	return c;
 }
-
-

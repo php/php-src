@@ -2122,4 +2122,4 @@ zigrarr 021DD
 zopf 1D56B 
 zscr 1D4CF 
 zwj 0200D 
-zwnj 0200C 
+zwnj 0200C

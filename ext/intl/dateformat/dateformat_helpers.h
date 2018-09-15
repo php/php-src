@@ -36,4 +36,3 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 								 bool& calendar_owned);
 
 #endif	/* DATEFORMAT_HELPERS_H */
-

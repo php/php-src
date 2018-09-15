@@ -418,10 +418,3 @@ void LSAPI_Log(int flag, const char * fmt, ...)
 
 
 #endif
-
-
-
-
-
-
-

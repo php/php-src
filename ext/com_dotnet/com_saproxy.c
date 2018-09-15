@@ -563,4 +563,3 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 
 	return &I->iter;
 }
-

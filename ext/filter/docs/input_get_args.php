@@ -38,4 +38,3 @@ $myinputs = input_get_args($args, INPUT_POST);
 $myinputs = input_get_args($args, INPUT_DATA, $data);
 
 var_dump($myinputs);
-

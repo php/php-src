@@ -1458,4 +1458,3 @@ PHP_FUNCTION(xmlrpc_is_fault)
  * c-basic-offset: 4
  * End:
  */
-

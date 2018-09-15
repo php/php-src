@@ -697,4 +697,3 @@ mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter)
 
 	return 0;
 }
-

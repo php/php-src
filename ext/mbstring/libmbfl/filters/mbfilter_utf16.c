@@ -311,6 +311,3 @@ int mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter)
 
 	return c;
 }
-
-
-

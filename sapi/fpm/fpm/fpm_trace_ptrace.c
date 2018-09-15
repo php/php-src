@@ -79,4 +79,3 @@ int fpm_trace_get_long(long addr, long *data) /* {{{ */
 	return 0;
 }
 /* }}} */
-

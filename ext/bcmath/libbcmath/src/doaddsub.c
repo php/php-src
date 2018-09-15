@@ -229,4 +229,3 @@ _bc_do_sub (n1, n2, scale_min)
   _bc_rm_leading_zeros (diff);
   return diff;
 }
-

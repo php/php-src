@@ -155,5 +155,3 @@ int mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter)
 	CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
 	return c;
 }
-
-

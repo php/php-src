@@ -1564,5 +1564,3 @@ php_stream_ops php_stream_userspace_dir_ops = {
 	NULL, /* stat */
 	NULL  /* set_option */
 };
-
-
