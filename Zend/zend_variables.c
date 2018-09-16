@@ -76,7 +76,7 @@ static void ZEND_FASTCALL zend_string_destroy(zend_string *str)
 
 static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref)
 {
-	i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_CC);
+	i_zval_ptr_dtor(&ref->val);
 	efree_size(ref, sizeof(zend_reference));
 }
 
@@ -108,7 +108,7 @@ static void ZEND_FASTCALL zend_ast_ref_destroy_wrapper(zend_ast_ref *ast)
 
 ZEND_API void zval_ptr_dtor(zval *zval_ptr) /* {{{ */
 {
-	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_CC);
+	i_zval_ptr_dtor(zval_ptr);
 }
 /* }}} */
 

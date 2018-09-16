@@ -132,7 +132,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 };
 
 #undef zval_ptr_dtor
-#define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC)
+#define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv)
 
 #define FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op, result) do {	\
 	zval *__container_to_free = (free_op);									\
