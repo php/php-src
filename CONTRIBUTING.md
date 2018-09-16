@@ -163,7 +163,9 @@ locations.
        ├─ lib/                      # Bundled https://libzip.org/
        └─ ...
     └─ ...
- ├─ main/                           # Main macros and definitions
+ └─ main/                           # Binding that ties extensions, SAPIs, and engine together
+    ├─ streams/                     # Stream layer subsystem
+    └─ ...
  ├─ pear/                           # PEAR installation
  └─ sapi/                           # PHP SAPI modules
     └─ cli/
