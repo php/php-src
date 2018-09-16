@@ -466,7 +466,6 @@ sys/statfs.h \
 sys/statvfs.h \
 sys/vfs.h \
 sys/sysexits.h \
-sys/varargs.h \
 sys/wait.h \
 sys/loadavg.h \
 termios.h \
