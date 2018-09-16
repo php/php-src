@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 /* This is a generated file, do not modify */
 /* Usage: php create_data_file.php /path/to/magic.mgc > data_file.c */
 <?php
