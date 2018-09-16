@@ -14,11 +14,11 @@ class Foo {
 		}
 
 		foo();
-		
+
 		var_dump(__FUNCTION__);
 		var_dump(__METHOD__);
 		var_dump(__CLASS__);
-		
+
 		return function() {var_dump(__FUNCTION__); var_dump(__METHOD__); var_dump(__CLASS__); };
 	}
 }

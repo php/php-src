@@ -16,7 +16,7 @@ var_dump(
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(2) {
   [0]=>
   int(2)

@@ -34,7 +34,7 @@ $values = array(0,
 				true,
 				false,
 				null, 
-				);	
+				);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = ceil($values[$i]);

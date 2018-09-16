@@ -2,16 +2,16 @@
 Test posix_getpgid() function : basic functionality 
 --SKIPIF--
 <?php 
-	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
+	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 ?>
 --FILE--
 <?php 
-  echo "Basic test of posix_getpgid function\n"; 
+  echo "Basic test of posix_getpgid function\n";
   
-  $pid = posix_getpid();	
+  $pid = posix_getpid();
   $pgid = posix_getpgid($pid);
   
-  var_dump($pgid); 
+  var_dump($pgid);
   
 ?>
 ===DONE====

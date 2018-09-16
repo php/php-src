@@ -47,7 +47,7 @@ function check_read($file_handle, $read_size, $expect_size) {
 
   return $data_from_file;
 }
- 
+
 echo "*** Testing fread() : usage variations ***\n";
 
 $file_modes = array("a+","a+b","a+t",
@@ -65,7 +65,7 @@ foreach($file_content_types as $file_content_type) {
        /* create files with $file_content_type */
        create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "fread_variation");
     }
-    
+
     $filename = dirname(__FILE__)."/fread_variation1.tmp"; // this is name of the file created by create_files()
     echo "-- File opened in mode ".$file_mode." --\n";
     $file_handle = fopen($filename, $file_mode);

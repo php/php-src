@@ -3,7 +3,7 @@ XMLReader: libxml2 XML Reader, moveToElement
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1"></book><test /></books>';

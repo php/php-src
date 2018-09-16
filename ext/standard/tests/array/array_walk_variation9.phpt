@@ -46,7 +46,7 @@ function callback_no_parameter()
 var_dump( array_walk($input, 'callback_no_parameter'));
 
 echo "-- passing one more parameter to function with two parameters --\n";
-var_dump( array_walk($input, 'callback_two_parameter', 10)); 
+var_dump( array_walk($input, 'callback_two_parameter', 10));
 
 echo "Done"
 ?>

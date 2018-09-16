@@ -5,7 +5,7 @@ Test timezone_name_from_abbr() function : usage variation - Passing unexpected v
 /* Prototype  : string timezone_name_from_abbr  ( string $abbr  [, int $gmtOffset= -1  [, int $isdst= -1  ]] )
  * Description: Returns the timezone name from abbrevation
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing timezone_name_from_abbr() : usage variation -  unexpected values to third argument \$isdst***\n";
@@ -89,7 +89,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource 
       'resource' => $file_handle
 );

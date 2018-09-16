@@ -2,14 +2,14 @@
 Test posix_uname() function : basic functionality 
 --SKIPIF--
 <?php 
-	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
+	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 ?>
 --FILE--
 <?php 
-  echo "Basic test of POSIX uname function\n"; 
+  echo "Basic test of POSIX uname function\n";
   	
-  $uname = posix_uname();  
-  unset($uname['domainname']);  
+  $uname = posix_uname();
+  unset($uname['domainname']);
   print_r($uname);
   
 ?>

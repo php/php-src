@@ -21,7 +21,7 @@ set_error_handler(function()
 {
 	$e = new Exception;
 	$e->_trace = debug_backtrace();
-	
+
 	throw $e;
 });
 

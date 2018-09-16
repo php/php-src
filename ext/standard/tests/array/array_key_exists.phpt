@@ -8,7 +8,7 @@ Test array_key_exists() function
  *  Returns TRUE if the given key is set in the array. 
  *  key can be any value possible for an array index. 
  *  Also also works on objects.
- */ 
+ */
 
 echo "*** Testing basic functionalities ***\n";
 /* Arrays with regular values */
@@ -24,7 +24,7 @@ $search_arrays = array(
           );
 /* keys to search in $search_arrays. $keys[0] 
    is the key to be searched in $search_arrays[0] and so on */
-$keys = array( 1, 'a', 2, 4, "Name", "Red", 0, 3 ); 
+$keys = array( 1, 'a', 2, 4, "Name", "Red", 0, 3 );
 
 $key_counter = 0;
 foreach ($search_arrays as $search_array) {
@@ -74,21 +74,21 @@ var_dump( array_key_exists() );
 // first args as array 
 var_dump( array_key_exists(array(), array()) );
 // second args as string
-var_dump( array_key_exists("", "") ); 
+var_dump( array_key_exists("", "") );
 // second args a integer
-var_dump( array_key_exists(1, 1) ); 
+var_dump( array_key_exists(1, 1) );
 // second args as NULL
-var_dump( array_key_exists(1, NULL) ); 
+var_dump( array_key_exists(1, NULL) );
 // second args as boolean
-var_dump( array_key_exists(1, true) ); 
+var_dump( array_key_exists(1, true) );
 // first args as boolean
-var_dump( array_key_exists(false, true) ); 
+var_dump( array_key_exists(false, true) );
 // second args as float 
-var_dump( array_key_exists(false, 17.5) ); 
+var_dump( array_key_exists(false, 17.5) );
 // args more than expected 
-var_dump( array_key_exists(1, array(), array()) ); 
+var_dump( array_key_exists(1, array(), array()) );
 // first argument as floating point value
-var_dump( array_key_exists(17.5, array(1,23) ) ) ; 
+var_dump( array_key_exists(17.5, array(1,23) ) ) ;
 
 echo "\n*** Testing operation on objects ***\n";
 class key_check
@@ -118,7 +118,7 @@ var_dump(array_key_exists("var", $key_check_obj->arr)); //found,  key is in memb
 var_dump( array_key_exists($key_check_obj, $key_check_obj) );
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing basic functionalities ***
 -- Iteration 1 --
 bool(true)

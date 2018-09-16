@@ -18,7 +18,7 @@ if (PHP_INT_SIZE != 4) {
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different unsigned int format types with different integer values ***\n"; 
+echo "*** Test fscanf(): different unsigned int format types with different integer values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation39.tmp";

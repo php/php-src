@@ -7,7 +7,7 @@ Test finfo_set_flags() function : basic functionality
 /* Prototype  : bool finfo_set_flags(resource finfo, int options)
  * Description: Set libmagic configuration options. 
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic私はガラスを食べられます';

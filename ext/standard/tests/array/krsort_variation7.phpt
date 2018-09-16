@@ -38,8 +38,8 @@ echo "\n-- Testing krsort() by supplying various arrays containing sub arrays --
 
 // loop through to test krsort() with different arrays
 foreach ($various_arrays as $array) {
- 
-  echo "\n-- Iteration $count --\n"; 
+
+  echo "\n-- Iteration $count --\n";
   echo "- With defualt sort flag -\n";
   $temp_array = $array;
   var_dump( krsort($temp_array) );

@@ -21,7 +21,7 @@ if (PHP_INT_SIZE != 4) {
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): tracking file pointer along with reading data from file ***\n"; 
+echo "*** Test fscanf(): tracking file pointer along with reading data from file ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation55.tmp";
@@ -32,13 +32,13 @@ if($file_handle == false)
 // different valid data
 $valid_data = array(
   12345,            // integer value
-  -12345,           
+  -12345,
   123.45,	    // float value
   -123.45,	   
   0x123B,           // hexadecimal value
   0x12ab,
   0123,             // octal value
-  -0123,            
+  -0123,
   "abcde",          // string
   'abcde',
   10e3,             // exponential value
@@ -72,14 +72,14 @@ foreach($modes as $mode) {
   // reading different data from file using different formats
   foreach($int_formats as $int_format) {
     // current file pointer position
-    var_dump( ftell($file_handle) ); 
+    var_dump( ftell($file_handle) );
     // rewind the file so that for every foreach iteration the file pointer starts from bof
     rewind($file_handle);
     // current file pointer position after rewind operation
-    var_dump( ftell($file_handle) ); 
+    var_dump( ftell($file_handle) );
     echo "\n-- iteration $counter --\n";
     while( !feof($file_handle) ) {
-      var_dump( ftell($file_handle) ); 
+      var_dump( ftell($file_handle) );
       var_dump( fscanf($file_handle,$int_format) );
     }
     $counter++;

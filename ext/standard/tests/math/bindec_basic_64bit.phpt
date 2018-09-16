@@ -26,7 +26,7 @@ $values = array(111000111,
 				011237,				
 				true,
 				false,
-				null);	
+				null);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = bindec($values[$i]);

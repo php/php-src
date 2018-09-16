@@ -45,7 +45,7 @@ for ($i = -60; $i <= 60; $i += 10) {
 	} else {
 		echo "Difference in length of ASCII string and multibyte string\n";
 	}
-	
+
 }
 
 echo "Done";

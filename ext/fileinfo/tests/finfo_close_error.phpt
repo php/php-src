@@ -7,7 +7,7 @@ Test finfo_close() function : error conditions
 /* Prototype  : resource finfo_close(resource finfo)
  * Description: Close fileinfo resource. 
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing finfo_close() : error conditions ***\n";

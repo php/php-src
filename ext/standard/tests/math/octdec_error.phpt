@@ -14,7 +14,7 @@ class classA
 {
 }
 
-echo "\n-- Incorrect number of arguments --\n"; 
+echo "\n-- Incorrect number of arguments --\n";
 octdec();
 octdec('0123567',true);
 

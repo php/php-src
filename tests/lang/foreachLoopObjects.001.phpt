@@ -9,7 +9,7 @@ class C {
 	public $c = "Original c";
 	protected $d = "Original d";
 	private $e = "Original e";
-	
+
 }
 
 echo "\n\nSimple loop.\n";

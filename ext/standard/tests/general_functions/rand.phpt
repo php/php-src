@@ -29,7 +29,7 @@ var_dump(mt_getrandmax(1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(%d)
 
 Warning: mt_rand() expects exactly 2 parameters, 1 given in %s on line %d

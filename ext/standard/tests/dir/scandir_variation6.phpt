@@ -29,7 +29,7 @@ mkdir($sub_dir_path);
 
 // with different wildcard characters
 
-echo "\n-- Wildcard = '*' --\n"; 
+echo "\n-- Wildcard = '*' --\n";
 var_dump( scandir($file_path . "/scandir_var*") );
 var_dump( scandir($file_path . "/*") );
 

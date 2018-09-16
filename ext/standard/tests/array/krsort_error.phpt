@@ -28,7 +28,7 @@ foreach($flags as $key => $flag){
   echo "\n- Sort flag = $key -\n";
   $temp_array = $array_arg;
   var_dump( krsort($temp_array,$flag, $extra_arg) );
-  var_dump($temp_array); 
+  var_dump($temp_array);
 }
 
 echo "Done";

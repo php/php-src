@@ -12,6 +12,6 @@ $oldhandler = set_error_handler("my_errorhandler");
 $my_var = str_repeat("A",64);
 $data = call_user_func_array("substr_replace",array(&$my_var, new StdClass(),1));
 echo "OK!";
---EXPECT--	
+--EXPECT--
 Object of class stdClass could not be converted to string
 OK!

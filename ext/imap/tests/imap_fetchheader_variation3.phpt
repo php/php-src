@@ -26,8 +26,8 @@ $stream_id = setup_test_mailbox('', 1); // set up temporary mailbox with one sim
 $msg_no = 1;
 $msg_uid = imap_uid($stream_id, $msg_no);
 
-$options = array ('1', true, 
-                  1.000000000000001, 0.00001e5, 
+$options = array ('1', true,
+                  1.000000000000001, 0.00001e5,
                   PHP_INT_MAX, -PHP_INT_MAX);
 
 // iterate over each element of $options array to test whether FT_UID is set

@@ -34,7 +34,7 @@ class concreteClass extends abstractClass
 // interface class 
 interface IValue
 {
-   public function setVal ($name, $val); 
+   public function setVal ($name, $val);
    public function dumpVal ();
 }
 
@@ -42,11 +42,11 @@ interface IValue
 class Value implements IValue
 {
   private $vars = array ();
-  
+
   public function setVal ( $name, $val ) {
     $this->vars[$name] = $val;
   }
-  
+
   public function dumpVal () {
     var_dump ( $vars );
   }
@@ -67,7 +67,7 @@ class myClass
     $this->public_var1 = new foo();
     $this->private_var = new foo();
     $this->proected_var = new foo();
-  }  
+  }
 }
 
 // create a object of each class defined above
@@ -88,8 +88,8 @@ $valid_objects = array(
   $foo_object,
   $Value_object,
   $concreteClass_object
-); 
-                  
+);
+
 /* loop to check that is_object() recognizes different 
    objects, expected output: bool(true) */
 $loop_counter = 1;
@@ -144,7 +144,7 @@ var_dump( is_object() );
 
 //arguments more than expected 
 var_dump( is_object($myClass_object, $myClass_object) );
- 
+
 echo "Done\n";
 
 // close the resources used

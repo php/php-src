@@ -10,7 +10,7 @@ Test array_diff_ukey() function : usage variation - Passing integer indexed arra
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(-07 => '-07', 0xA => '0xA'); 
+$input_array = array(-07 => '-07', 0xA => '0xA');
 
 $input_arrays = array(
       'decimal indexed' => array(10 => '10', '-17' => '-17'),

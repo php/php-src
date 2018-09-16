@@ -12,11 +12,11 @@ Test disk_free_space and its alias diskfreespace() functions : Usage Variations
 $file_path = dirname(__FILE__);
 
 echo "*** Testing with a directory ***\n";
-var_dump( disk_free_space($file_path."/..") ); 
-var_dump( diskfreespace($file_path."/..") ); 
+var_dump( disk_free_space($file_path."/..") );
+var_dump( diskfreespace($file_path."/..") );
 
 echo "\nTesting for the return type ***\n";
-$return_value = disk_free_space($file_path); 
+$return_value = disk_free_space($file_path);
 var_dump( is_float($return_value) );
 
 echo "\n*** Testing with different directory combinations ***";

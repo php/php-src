@@ -22,7 +22,7 @@ echo "\n-- Get all 60s transitions --\n";
 $tran = timezone_transitions_get($tz, -306972000, -37241999);
 var_dump( gettype($tran) );
 
-echo "\n-- Total number of transitions: " . count($tran). " --\n"; 
+echo "\n-- Total number of transitions: " . count($tran). " --\n";
 
 echo "\n-- Format a sample entry pfor Spring 1963 --\n";
 var_dump( $tran[6] );

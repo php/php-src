@@ -42,20 +42,20 @@ $count = 1;
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With Defualt sort flag -\n"; 
-  $temp_array = $array; 
+  echo "- With Defualt sort flag -\n";
+  $temp_array = $array;
   var_dump(rsort($temp_array) );
   var_dump($temp_array);
 
   // loop through $flag_value array and setting all possible flag values
   foreach($flag_value as $key => $flag){
     echo "- Sort flag = $key -\n";
-    $temp_array = $array; 
+    $temp_array = $array;
     var_dump(rsort($temp_array, $flag) );
     var_dump($temp_array);
-  }  
+  }
   $count++;
-} 
+}
 
 echo "Done";
 ?>

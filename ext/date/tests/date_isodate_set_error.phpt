@@ -8,7 +8,7 @@ Test date_isodate_set() function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::setISODate
  */
- 
+
  //Set the default time zone 
 date_default_timezone_set("Europe/London");
 
@@ -23,18 +23,18 @@ var_dump( date_isodate_set($datetime) );
 
 echo "\n-- Testing date_isodate_set() function with more than expected no. of arguments --\n";
 $year = 2009;
-$week = 30; 
+$week = 30;
 $day = 7;
 $extra_arg = 30;
 var_dump( date_isodate_set($datetime, $year, $week, $day, $extra_arg) );
 
 echo "\n-- Testing date_isodate_set() function with an invalid values for \$object argument --\n";
 $invalid_obj = new stdClass();
-var_dump( date_isodate_set($invalid_obj, $year, $week, $day) );  
+var_dump( date_isodate_set($invalid_obj, $year, $week, $day) );
 $invalid_obj = 10;
 var_dump( date_isodate_set($invalid_obj, $year, $week, $day) );
 $invalid_obj = null;
-var_dump( date_isodate_set($invalid_obj, $year, $week, $day) );  
+var_dump( date_isodate_set($invalid_obj, $year, $week, $day) );
 ?>
 ===DONE===
 --EXPECTF--

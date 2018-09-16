@@ -25,7 +25,7 @@ $input_arrays = array (
 
   // array with one element
   "array2" => array(1),
-  
+
   // associative array with duplicate keys
   "array3" => array("a" => 1, "b" => 2, "c" => 3, "a" => 4, "d" => 5)
 

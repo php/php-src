@@ -16,13 +16,13 @@ $values =  array (
   1,
   12345,
   -12345,
-  
+
   //Octal values
   02,
   010,
   030071,
   -030071,
-  
+
   //Hexadecimal values
   0x0,
   0x1,

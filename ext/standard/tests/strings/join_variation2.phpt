@@ -72,7 +72,7 @@ $values =  array (
 
   // resource variable
   $fp,
- 
+
   // undefined variable
   @$undefined_var,
 

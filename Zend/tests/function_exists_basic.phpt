@@ -2,10 +2,10 @@
 function_exists function : basic functionality 
 --FILE--
 <?php
-/* 
+/*
  * proto bool function_exists(string function_name)
  * Function is implemented in Zend/zend_builtin_functions.c
-*/ 
+*/
 
 echo "*** Testing function_exists() : basic functionality ***\n";
 

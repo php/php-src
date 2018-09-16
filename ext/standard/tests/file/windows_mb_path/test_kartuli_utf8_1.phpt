@@ -37,7 +37,7 @@ remove_data("dir_kartuli");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)

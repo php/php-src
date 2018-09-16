@@ -7,7 +7,7 @@ Test DateTime::format() function : usage variation - Passing unexpected values t
  * Source code: ext/date/php_date.c
  * Alias to functions: date_format
  */
- 
+
 echo "*** Testing DateTime::format() : usage variation -  unexpected values to first argument \$format***\n";
 
 //Set the default time zone 
@@ -90,7 +90,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource 
       'resource' => $file_handle
 );

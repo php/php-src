@@ -11,7 +11,7 @@ class C {
     }
     public static function getException() {
         return new Exception();
-         
+
     }
 }
 class A {

@@ -88,7 +88,7 @@ for($index = 0; $index < count($values); $index ++)
   $num = $values[$index];
 
   var_dump( array_fill($start_key,$num,$val) );
- 
+
   $counter ++;
 }
 

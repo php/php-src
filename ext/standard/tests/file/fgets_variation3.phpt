@@ -12,7 +12,7 @@ include ("file.inc");
 
 $file_modes = array("w+", "w+b", "w+t",
                     "a+", "a+b", "a+t",
-                    "x+", "x+b", "x+t"); 
+                    "x+", "x+b", "x+t");
 
 $file_content_types = array("numeric", "text", "text_with_new_line", "alphanumeric");
 
@@ -29,7 +29,7 @@ foreach($file_modes as $file_mode) {
     /* create files with $file_content_type */
     $file_handle = fopen($filename, $file_mode);
     $data = fill_file($file_handle, $file_content_type, 50);
- 
+
     if ( !$file_handle ) {
       echo "Error: failed to open file $filename!";
       exit();

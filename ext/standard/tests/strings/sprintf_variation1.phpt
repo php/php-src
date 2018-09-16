@@ -87,7 +87,7 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  
+
   // with default argument
   var_dump( sprintf($value) );
 

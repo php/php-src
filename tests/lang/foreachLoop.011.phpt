@@ -1,4 +1,4 @@
---TEST-- 
+--TEST--
 Changing from an interable type to a non iterable type during the iteration 
 --FILE--
 <?php
@@ -17,7 +17,7 @@ $a->b=2;
 $b=&$a;
 foreach ($a as $v) {
 	var_dump($v);
-	$b='x';	
+	$b='x';
 }
 
 ?>

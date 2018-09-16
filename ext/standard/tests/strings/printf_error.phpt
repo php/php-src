@@ -21,7 +21,7 @@ $arg1 = 'one';
 $arg2 = 'two';
 
 echo "\n-- Call printf with one argument less than expected --\n";
-var_dump( printf($format1) );  
+var_dump( printf($format1) );
 var_dump( printf($format2,$arg1) );
 var_dump( printf($format3,$arg1,$arg2) );
 

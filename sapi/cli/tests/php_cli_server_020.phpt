@@ -2,7 +2,7 @@
 Use SEARCH as a HTTP verb
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -30,7 +30,7 @@ HEADER
 }
 
 ?>
---EXPECTF--	
+--EXPECTF--
 HTTP/1.1 200 OK
 Host: %s
 Date: %s

@@ -21,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource
@@ -35,36 +35,36 @@ $pad_lengths =  array (
 		  1,
 		  -2,
 		  255,
-		
+
 		  // float values
 /*5*/	  10.5,
 		  -20.5,
 		  10.12345e2,
-		
+
 		  // array values
 /*8*/	  array(),
 		  array(0),
 		  array(1, 2),
-		
+
 		  // boolean values
 /*11*/	  true,
 		  false,
 		  TRUE,
 		  FALSE,
-		
+
 		  // null values
 /*15*/	  NULL,
 		  null,
-		
+
 		  // objects
 /*17*/	  new sample(),
-		
+
 		  // resource
 /*18*/	  $file_handle,
-		
+
 		  // undefined variable
 /*19*/	  @$undefined_var,
-		
+
 		  // unset variable
 /*20*/	  @$unset_var
 );

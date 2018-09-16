@@ -5,7 +5,7 @@ Test rawurldecode() function : usage variations  - unexpected type for arg 1.
 /* Prototype  : proto string rawurldecode(string str)
  * Description: Decodes URL-encodes string 
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // NB: basic functionality tested in tests/strings/001.phpt

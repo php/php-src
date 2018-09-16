@@ -27,7 +27,7 @@ foreach ($values as $value) {
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(5) "a@b.c"
 string(17) "abuse@example.com"
 bool(false)

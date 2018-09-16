@@ -19,7 +19,7 @@ unlink($filename);
 /* Prototype  : bool lchown (string filename, mixed user)
  * Description: Change file owner of a symlink
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing lchown() : error functionality ***\n";

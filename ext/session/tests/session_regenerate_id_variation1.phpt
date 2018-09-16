@@ -7,7 +7,7 @@ Test session_regenerate_id() function : variation
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_regenerate_id([bool $delete_old_session])
  * Description : Update the current session id with a newly generated one 
  * Source code : ext/session/session.c 

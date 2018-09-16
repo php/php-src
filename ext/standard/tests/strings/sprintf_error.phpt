@@ -21,7 +21,7 @@ $arg1 = 'one';
 $arg2 = 'two';
 
 // with one argument less than expected
-var_dump( sprintf($format1) );  
+var_dump( sprintf($format1) );
 var_dump( sprintf($format2,$arg1) );
 var_dump( sprintf($format3,$arg1,$arg2) );
 

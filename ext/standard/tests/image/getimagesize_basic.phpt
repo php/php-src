@@ -16,13 +16,13 @@ $imagetype_filenames = array(
 
       //PNG file
       "PNG image file" => "200x100.png",
-    
+
       //SWF file
       "SWF image file" => "200x100.swf",
-      
+
       //BMP file
       "BMP image file" => "200x100.bmp",
-      
+
       //TIFF intel byte order
       "TIFF intel byte order image file" => "200x100.tif",
 

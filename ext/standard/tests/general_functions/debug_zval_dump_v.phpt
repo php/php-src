@@ -49,7 +49,7 @@ debug_zval_dump($ref_first_var);
 echo "\n-- Value of \$first_var --\n";
 debug_zval_dump($first_var);
 
-unset($ref_first_var); 
+unset($ref_first_var);
 
 /* dump value and reference count of $first_var, $ref_first_var
    here $ref_first_var is unset */
@@ -71,7 +71,7 @@ debug_zval_dump($var_3);
 
 /* unsetting $var_3 */
 unset($var_3);
-echo "\n-- Value of \$var_3: (after unsetting var_3) --\n"; 
+echo "\n-- Value of \$var_3: (after unsetting var_3) --\n";
 debug_zval_dump($var_3);
 echo "\n-- Value of \$var_2: --\n";
 debug_zval_dump($var_2);
@@ -94,7 +94,7 @@ $misc_values = array (
   /* nulls */
   NULL,
   null,
-  
+
   /* unset variable */
   @$unset_var,
 

@@ -15,7 +15,7 @@ $values = array(23,
 				"2.345e1",				
 				null,
 				true,
-				false);	
+				false);
 
 echo "\n LOG tests...no base\n";
 for ($i = 0; $i < count($values); $i++) {

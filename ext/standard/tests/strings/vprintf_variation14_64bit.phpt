@@ -75,7 +75,7 @@ foreach($args_array as $args) {
   echo "\n-- Iteration $counter --\n";
   $result = vprintf($formats, $args);
   echo "\n";
-  var_dump($result); 
+  var_dump($result);
   $counter++;
 }
 

@@ -34,16 +34,16 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 */
 function stat_fn( $filename ) {
   echo "\n-- File '$filename' --\n";
-  echo "-- File access time is => "; 
+  echo "-- File access time is => ";
   echo fileatime($filename)."\n";
   clearstatcache();
-  echo "-- File modification time is => "; 
+  echo "-- File modification time is => ";
   echo filemtime($filename)."\n";
   clearstatcache();
-  echo "-- inode change time is => "; 
+  echo "-- inode change time is => ";
   echo filectime($filename)."\n";
   clearstatcache();
-  
+
 
 }
 

@@ -18,7 +18,7 @@ class Student
 	{
 		return $this->id . ', ' . $this->name;
 	}
-	
+
 	public function getId()
 	{
 		return $this->id;
@@ -34,7 +34,7 @@ class StudentIdFilter extends FilterIterator
 		FilterIterator::__construct($students->getIterator());
 		$this->id = $other->getId();
 	}
-	
+
 	public function accept()
 	{
 		echo "ACCEPT ".$this->current()->getId()." == ".$this->id."\n";
@@ -45,19 +45,19 @@ class StudentIdFilter extends FilterIterator
 class StudentList implements IteratorAggregate
 {
 	private $students;
-	
+
 	public function __construct()
 	{
 		$this->students = new ArrayObject(array());
 	}
-	
+
 	public function add(Student $student)
 	{
 		if (!$this->contains($student)) {
 			$this->students[] = $student;
 		}
 	}
-	
+
 	public function contains(Student $student)
 	{
 		foreach ($this->students as $s)
@@ -68,7 +68,7 @@ class StudentList implements IteratorAggregate
 		}
 		return false;
 	}
-	
+
 	public function getIterator() {
 		return $this->students->getIterator();
 	}

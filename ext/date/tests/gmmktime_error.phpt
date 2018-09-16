@@ -5,7 +5,7 @@ Test gmmktime() function : error conditions
 /* Prototype  : int gmmktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
  * Description: Get UNIX timestamp for a GMT date 
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gmmktime() : error conditions ***\n";

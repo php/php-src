@@ -2,10 +2,10 @@
 Test variations in usage of max()
 --FILE--
 <?php
-/* 
+/*
  * proto mixed max(mixed arg1 [, mixed arg2 [, mixed ...]])
  * Function is implemented in ext/standard/array.c
-*/ 
+*/
 
 echo "\n*** Testing boundary conditions ***\n";
 var_dump(max(2147483645, 2147483646) );

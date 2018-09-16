@@ -71,7 +71,7 @@ $source_values = array(
 
        // object data
 /*23*/ new MyClass(),
- 
+
        // resource data
        $fp,
 

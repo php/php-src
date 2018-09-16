@@ -4,7 +4,7 @@ Test str_replace() function - test search values
 precision=14
 --FILE--
 <?php
-/* 
+/*
   Prototype: mixed str_replace(mixed $search, mixed $replace, 
                                mixed $subject [, int &$count]);
   Description: Replace all occurrences of the search string with 
@@ -21,14 +21,14 @@ $i = 0;
 foreach( $search_arr as $value ) {
   echo "\n-- Iteration $i --\n";
   /* replace the string in array */
-  var_dump( str_replace($value, "FOUND", $search_arr, $count) ); 
+  var_dump( str_replace($value, "FOUND", $search_arr, $count) );
   var_dump( $count );
   $i++;
 }
 
 ?>
 ===DONE===
---EXPECT--	
+--EXPECT--
 *** Testing str_replace() with various search values ***
 -- Iteration 0 --
 array(12) {

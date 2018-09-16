@@ -89,15 +89,15 @@ $arr2 = array(1, array("hello", 'world'));
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "\n-- Iteration $iterator --";
-  
+
   // with default argument
   echo "\n-- With default argument --";
   var_dump( array_merge_recursive($arr1) );
- 
+
   // with more arguments
   echo "-- With more arguments --";
   var_dump( array_merge_recursive($arr1, $arr2) );
- 
+
   $iterator++;
 }
 

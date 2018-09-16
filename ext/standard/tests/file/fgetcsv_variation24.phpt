@@ -2,7 +2,7 @@
 Test fgetcsv() : usage variations - two chars as enclosure & delimiter (various write modes)
 --FILE--
 <?php
-/* 
+/*
  Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
  Description: Gets line from file pointer and parse for CSV fields
 */
@@ -67,8 +67,8 @@ foreach ($csv_lists as $csv_list) {
       // rewind the file pointer to bof
       rewind($file_handle);
     }
-      
-    echo "\n-- Testing fgetcsv() with file opened using $file_modes[$mode_counter] mode --\n"; 
+
+    echo "\n-- Testing fgetcsv() with file opened using $file_modes[$mode_counter] mode --\n";
 
     // call fgetcsv() to parse csv fields
 
@@ -80,7 +80,7 @@ foreach ($csv_lists as $csv_list) {
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
-    
+
     // close the file
     fclose($file_handle);
     //delete file

@@ -10,7 +10,7 @@ Redeclare inherited private static property as private.
           echo self::$p . "\n";
       }
   }
-  
+
   class B extends A
   {
       private $p = "B::p";
@@ -19,10 +19,10 @@ Redeclare inherited private static property as private.
           echo $this->p . "\n";
       }
   }
-  
-  
+
+
   A::showA();
-  
+
   $b = new B;
   $b->showA();
   $b->showB();

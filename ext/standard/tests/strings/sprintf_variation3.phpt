@@ -37,11 +37,11 @@ $int_formats = array(
   "\t%d", "\n%d", "%4d",
   "%30d", "%[0-9]", "%*d"
 );
- 
+
 $count = 1;
 foreach($valid_ints as $int_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($int_formats as $format) {
     var_dump( sprintf($format, $int_value) );
   }

@@ -15,7 +15,7 @@ Test array_unique() function : usage variations - two dimensional arrays
 echo "*** Testing array_unique() : two dimensional array for \$input argument ***\n";
 
 // initialize the 2-d array
-$input = array( 
+$input = array(
   array(1, 2, 3, 1),
   array("hello", "world", "str1" => "hello", "str2" => 'world'),
   array(1 => "one", 2 => "two", "one", 'two'),

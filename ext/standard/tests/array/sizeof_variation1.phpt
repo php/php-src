@@ -27,7 +27,7 @@ $values = array (
             12.3456789000e10,
             12.3456789000E-10,
   /* 7  */  .5,
-            
+
             // NULL values
   /* 8  */  NULL,
             null,
@@ -40,7 +40,7 @@ $values = array (
 
             // string data 
   /* 14 */  "",
-            '',  
+            '',
             "string",
   /* 17 */  'string',
 
@@ -56,8 +56,8 @@ $counter = 1;
 for($i = 0; $i < count($values); $i++)
 {
   echo "-- Iteration $counter --\n";
- 
-  $var = $values[$i]; 
+
+  $var = $values[$i];
 
   echo "Default Mode: ";
   var_dump( sizeof($var) );

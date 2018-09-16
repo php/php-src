@@ -89,7 +89,7 @@ catch (Exception $e)
 
 ?>
 ===DONE===
---EXPECT--	
+--EXPECT--
 ===1===
 int(1)
 string(1) "1"

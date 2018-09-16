@@ -30,7 +30,7 @@ $linefeed = "\r\n";
 for ($i = 0; $i < 100; $i++) {
   echo "\n-- Iteration $i --\n";
   var_dump( mb_encode_mimeheader($str, $charset, "B", $linefeed, $i));
-  var_dump( mb_encode_mimeheader($str, $charset, "Q", $linefeed, $i));  
+  var_dump( mb_encode_mimeheader($str, $charset, "Q", $linefeed, $i));
 };
 echo "Done";
 ?>

@@ -7,7 +7,7 @@ Test number_format() - basic function test number_format()
  * Description: Format a number with grouped thousands
  * Source code: ext/standard/string.c
  */
- 
+
 echo "*** Testing number_format() : basic functionality ***\n";
 
 $values = array(1234.5678,
@@ -21,7 +21,7 @@ $values = array(1234.5678,
 				"12.3456789e1",				
 				null,
 				true,
-				false);	
+				false);
 
 echo "\n-- number_format tests.....default --\n";
 for ($i = 0; $i < count($values); $i++) {

@@ -5,7 +5,7 @@ Test array_product() function : usage variation
 /* Prototype  : mixed array_product(array input)
  * Description: Returns the product of the array entries 
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_product() : usage variation ***\n";

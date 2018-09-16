@@ -11,7 +11,7 @@ date.timezone=Europe/Berlin
 --FILE--
 <?php
 
-function test($locale, $value) 
+function test($locale, $value)
 {
 	$newlocale = setlocale(LC_ALL, $locale);
 	$conv      = localeconv();

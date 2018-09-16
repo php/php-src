@@ -57,7 +57,7 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 // looping to test vprintf() with different int formats from the above $format array
@@ -67,7 +67,7 @@ foreach($args_array as $args) {
   echo "\n-- Iteration $counter --\n";
   $result = vprintf($formats, $args);
   echo "\n";
-  var_dump($result); 
+  var_dump($result);
   $counter++;
 }
 

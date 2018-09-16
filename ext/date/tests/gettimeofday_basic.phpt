@@ -5,7 +5,7 @@ Test gettimeofday() function : basic functionality
 /* Prototype  : array gettimeofday([bool get_as_float])
  * Description: Returns the current time as array 
  * Source code: ext/standard/microtime.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gettimeofday() : basic functionality ***\n";

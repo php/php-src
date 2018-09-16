@@ -5,7 +5,7 @@ Test imagecolorallocate() function : error conditions
 if(!extension_loaded('gd')) {
     die('skip gd extension is not loaded');
 }
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)

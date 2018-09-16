@@ -29,10 +29,10 @@ echo "*** Testing array_walk_recursive() : 'input' array with different values**
 
 // different arrays as input
 $input_values = array(
-  
+
        // integer values
 /*1*/  array(array(1, 0, -10), array(023, -041), array(0x5A, 0X1F, -0x6E)),
-  
+
        // float value 
        array(array(3.4, 0.8, -2.9), array(6.25e2, 8.20E-3)),
 
@@ -58,7 +58,7 @@ $input_values = array(
 for($count = 0; $count < count($input_values); $count++) {
   echo "\n-- Iteration ".($count + 1)." --\n";
   var_dump( array_walk_recursive($input_values[$count], "print_value", $count+1));
-}  
+}
 echo "Done"
 ?>
 --EXPECT--

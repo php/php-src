@@ -19,7 +19,7 @@ Test krsort() function : basic functionality
 echo "*** Testing krsort() : basic functionality ***\n";
 
 // an array containing unsorted string values with indices  
-$unsorted_strings =   array( "lemon" => "l", "orange" => "o", "banana" => "b" ); 
+$unsorted_strings =   array( "lemon" => "l", "orange" => "o", "banana" => "b" );
 $unsorted_strings = array(
 	"l" => "lemon", "o" => "orange",
 	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",

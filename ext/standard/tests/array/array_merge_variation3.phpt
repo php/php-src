@@ -70,13 +70,13 @@ $inputs = array(
        TRUE,
        FALSE,
        ),
-       
+
        // empty data
 /*5*/ 'empty string' => array(
        "",
        '',
        ),
-       
+
 /*6*/ 'empty array' => array(
        ),
 
@@ -86,7 +86,7 @@ $inputs = array(
        'string',
        $heredoc,
        ),
-       
+
        // object data
 /*8*/ 'object' => array(
        new classA(),

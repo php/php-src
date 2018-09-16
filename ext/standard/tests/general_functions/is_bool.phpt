@@ -18,7 +18,7 @@ $valid_bools = array(
    bool values, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($valid_bools as $bool_val ) {
-  echo "-- Iteration $loop_counter --\n"; $loop_counter++; 
+  echo "-- Iteration $loop_counter --\n"; $loop_counter++;
   var_dump( is_bool($bool_val) );
 }
 
@@ -98,7 +98,7 @@ $not_bool_types = array (
   /* nulls */
   null,
   NULL,
-  
+
   /* arrays */
   array(),
   array(0),
@@ -114,8 +114,8 @@ $not_bool_types = array (
   array(1 => "One", "two" => 2),
 
   /* unset bool vars and undefined var */
-  @$unset_bool1, 
-  @$unset_bool2, 
+  @$unset_bool1,
+  @$unset_bool2,
   @$unset_var, 
   @$undefined_var
 );
@@ -123,7 +123,7 @@ $not_bool_types = array (
    is_bool() on non bull types, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_bool_types as $type ) {
-  echo "-- Iteration $loop_counter --\n"; $loop_counter++; 
+  echo "-- Iteration $loop_counter --\n"; $loop_counter++;
   var_dump( is_bool($type) );
 }
 
@@ -133,7 +133,7 @@ var_dump( is_bool() );
 
 //arguments more than expected 
 var_dump( is_bool(TRUE, FALSE) );
- 
+
 echo "Done\n";
 
 // close resources

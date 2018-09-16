@@ -15,13 +15,13 @@ if (strlen($start) > 260 || strlen($start) > 248) {
 --FILE--
 <?php
 
-$p = ""; 
+$p = "";
 $s = str_repeat('a', 50);
 $how_many = 32;
 
 for ($i = 0; $i < $how_many; $i++) {
 	$p .= "$s\\";
-} 
+}
 
 $start = realpath(dirname(__FILE__));
 if (strlen($start) <= 248) {

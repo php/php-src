@@ -23,7 +23,7 @@ $arg3 = array(1000,2000,3000);
 $data_file = dirname(__FILE__) . '/vfprintf_basic6.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 vfprintf($fp, $format1,$arg1);
 fprintf($fp, "\n");
 

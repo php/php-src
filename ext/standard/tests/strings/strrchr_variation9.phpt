@@ -21,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
@@ -108,7 +108,7 @@ $needles =  array (
   //empty string
   "",
   '',
- 
+
   //resource variable in string form
   "\$file_handle",
 

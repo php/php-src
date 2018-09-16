@@ -7,13 +7,13 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
  * Description: Write/Create a file with contents data and return the number of bytes written 
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
 require_once('fopen_include_path.inc');
 
-$thisTestDir = basename(__FILE__, ".php") . ".dir"; 
+$thisTestDir = basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
 

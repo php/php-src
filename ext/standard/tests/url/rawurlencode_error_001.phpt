@@ -5,7 +5,7 @@ Test rawurlencode() function : error conditions
 /* Prototype  : proto string rawurlencode(string str)
  * Description: URL-encodes string 
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // NB: basic functionality tested in tests/strings/001.phpt

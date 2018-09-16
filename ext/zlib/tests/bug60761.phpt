@@ -28,8 +28,8 @@ for ( $i=0 ; $i < 100 ; $i++ ) {
 	$len = strlen($html);
 
 	$lens[$len] = $len;
-} 
- 
+}
+
 $lens = array_values($lens);
 
 echo "Compressed Lengths\n";
@@ -42,7 +42,7 @@ echo "Compressed Lengths\n";
 // just check that there is only one length
 // 
 var_dump($lens); // show lengths to help triage in case of failure
- 
+
 // expected headers since its CGI
 
 ?>

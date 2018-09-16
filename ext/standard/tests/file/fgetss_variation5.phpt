@@ -36,7 +36,7 @@ this text contains some html tags <body> body </body> <br> br </br>
 this is the line with \n character. 
 EOT;
 
-$filename = dirname(__FILE__)."/fgetss_variation5.tmp"; 
+$filename = dirname(__FILE__)."/fgetss_variation5.tmp";
 
 /* try reading the file opened in different modes of reading */
 $file_modes = array("w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t");
@@ -69,10 +69,10 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   var_dump( ftell($file_handle) );  // find out file position
   var_dump( feof($file_handle) );   // ensure that file pointer is at eof
 
- 
+
   // close the file 
   fclose($file_handle);
-   
+
   // delete the file 
   unlink($filename);
 } // end of for - mode_counter

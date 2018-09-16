@@ -20,7 +20,7 @@ class SectionClass {
  	}
 }
 function out($code) { return; }
-$site = new SiteClass(); 
+$site = new SiteClass();
 $site->page->Display();
 echo "OK\n";
 ?>

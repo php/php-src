@@ -44,13 +44,13 @@ $files_arr = array(
   "$file_path/is_readable_variation1//bar.tmp",
   "$file_path//is_readable_variation1//bar.tmp",
   "$file_path/is_readable_variation1/*.tmp",
-  "$file_path/is_readable_variation1/b*.tmp", 
+  "$file_path/is_readable_variation1/b*.tmp",
 
   /* Testing Binary safe */
   "$file_path/is_readable_variation1".chr(0)."bar.tmp",
   "$file_path".chr(0)."is_readable_variation1/bar.tmp",
   "$file_path".chr(0)."is_readable_variation1/bar.tmp",
-  
+
   /* Testing directories */
   ".",  // current directory, exp: bool(true)
   "$file_path/is_readable_variation1"  // temp directory, exp: bool(true)

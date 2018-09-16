@@ -4,7 +4,7 @@ Test str_replace() function
 precision=14
 --FILE--
 <?php
-/* 
+/*
   Prototype: mixed str_replace(mixed $search, mixed $replace, 
                                mixed $subject [, int &$count]);
   Description: Replace all occurrences of the search string with 
@@ -95,7 +95,7 @@ var_dump($count);
 echo "\n-- Testing Resources --\n";
 $resource1 = fopen( __FILE__, "r" );
 $resource2 = opendir( "." );
-var_dump(str_replace("stream", "FOUND", $resource1, $count)); 
+var_dump(str_replace("stream", "FOUND", $resource1, $count));
 var_dump($count);
 var_dump(str_replace("stream", "FOUND", $resource2, $count));
 var_dump($count);
@@ -142,7 +142,7 @@ closedir($resource2);
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 *** Testing Miscelleneous input data ***
 string(3) "qqq"
 int(5)

@@ -26,7 +26,7 @@ print_r($foo->getArrayCopy());
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Array
 (
     [0] => one

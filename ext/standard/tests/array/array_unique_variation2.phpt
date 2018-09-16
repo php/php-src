@@ -77,7 +77,7 @@ foreach($inputs as $input) {
   var_dump( array_unique($input, SORT_STRING) );
   $iterator++;
 }
-  
+
 echo "Done";
 ?>
 --EXPECT--

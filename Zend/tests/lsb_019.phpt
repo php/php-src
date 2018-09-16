@@ -8,7 +8,7 @@ class TestClass {
 	protected static function staticFunction() {
 		return 'TestClassFunction';
 	}
-	
+
 	public static function testStaticVar() {
 		TestClass::$staticVar = 'TestClassStatic';
 		ChildClass1::$staticVar = 'ChildClassStatic';

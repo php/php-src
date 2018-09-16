@@ -7,7 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 /* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
  * Description: Output a file or a URL 
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing readfile() : usage variation ***\n";
@@ -107,7 +107,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // file resource
       'file resource' => $fileRes,
 );

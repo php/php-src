@@ -30,12 +30,12 @@ $values = array(0,
 				true,
 				false,
 				null, 
-				);	
-				
+				);
+
 foreach($values as $value) {
 	echo "\n-- floor $value --\n";
 	var_dump(floor($value));
-};				
+};
 
 ?>
 ===Done===

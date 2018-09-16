@@ -8,7 +8,7 @@ class foo {
 	public $a3;
 	public $o1;
 	public $o2;
-	
+
 	public function f1() {
 		return $this->a1;
 	}

@@ -7,7 +7,7 @@ Test finfo_file() function : basic functionality
 /* Prototype  : string finfo_file(resource finfo, char *file_name [, int options [, resource context]])
  * Description: Return information about a file. 
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';

@@ -5,7 +5,7 @@ Test base64_encode() function : basic functionality - check algorithm round trip
 /* Prototype  : proto string base64_encode(string str)
  * Description: Encodes string using MIME base64 algorithm 
  * Source code: ext/standard/base64.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -27,7 +27,7 @@ echo "\n--- Testing base64_encode() with binary string input ---\n";
 $counter = 1;
 foreach($values as $str) {
   	echo "-- Iteration $counter --\n";
-  	
+
   	$enc = base64_encode($str);
 	$dec = base64_decode($enc);
 
@@ -35,7 +35,7 @@ foreach($values as $str) {
 		echo "TEST FAILED\n";
 	} else {
 		echo "TEST PASSED\n";
-	}	
+	}
 
   	$counter ++;
 }

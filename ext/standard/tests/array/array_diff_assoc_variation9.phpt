@@ -24,7 +24,7 @@ $array2 = array('sub_arraya' => array (1, 3, 5),
 echo "-- Compare two 2-D arrays --\n";
 var_dump(array_diff_assoc($array1, $array2));
 var_dump(array_diff_assoc($array2, $array1));
-     
+
 echo "\n-- Compare subarrays from two 2-D arrays --\n";
 var_dump(array_diff_assoc($array1['sub_array1'], $array2['sub_arraya']));
 var_dump(array_diff_assoc($array2['sub_arraya'], $array1['sub_array1']));

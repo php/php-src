@@ -1,9 +1,9 @@
 --TEST--
 Bug #26614 (CDATA sections skipped on line count)
 --SKIPIF--
-<?php 
+<?php
 require_once("skipif.inc");
-if (defined("LIBXML_VERSION")) die('skip expat test'); 
+if (defined("LIBXML_VERSION")) die('skip expat test');
 ?>
 --FILE--
 <?php
@@ -76,7 +76,7 @@ foreach ($xmls as $desc => $xml) {
 	$xml_parser = xml_parser_create();
 	xml_set_element_handler($xml_parser, "startElement", "endElement");
 	xml_set_character_data_handler($xml_parser, "characterData");
-	if (!xml_parse($xml_parser, $xml, true)) 
+	if (!xml_parse($xml_parser, $xml, true))
 		echo "Error: ".xml_error_string(xml_get_error_code($xml_parser))."\n";
 	xml_parser_free($xml_parser);
 }

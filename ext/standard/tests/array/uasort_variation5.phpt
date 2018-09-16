@@ -64,7 +64,7 @@ var_dump($single_quoted_values);
 
 // Double quoted strings
 $double_quoted_values = array(
-  0 => " ", 1 => "test", 3 => "Hello", 4 => "HELLO", 
+  0 => " ", 1 => "test", 3 => "Hello", 4 => "HELLO",
   5 => "", 6 => "\t", 7 => "0", 8 => "123Hello", 9 => "\"", 10 => "@#$%"
 );
 echo "-- Sorting Double Quoted String values --\n";

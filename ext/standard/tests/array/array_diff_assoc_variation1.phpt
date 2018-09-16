@@ -11,7 +11,7 @@ Test array_diff_assoc() function : usage variations  - unexpected values for 'ar
 /*
  * Pass array_diff_assoc arguments that are not arrays in place of $arr1
  */
- 
+
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array = array(1, 2, 3);
@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -70,11 +70,11 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // binary data
 /*21*/ b"binary",
 	   (binary)"binary",
-	   
+
        // object data
 /*23*/ new classA(),
 

@@ -2,7 +2,7 @@
 Test fputcsv() : usage variations - with default enclosure & delimiter of two chars 
 --FILE--
 <?php
-/* 
+/*
  Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
  Description: Format line as CSV and write to the file pointer 
 */
@@ -34,13 +34,13 @@ $filename = "$file_path/fputcsv_variation13.tmp";
 $file_modes = array ("r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+                     "x+", "x+b", "x+t");
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {
   for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
-    
-    echo "\n-- file opened in $file_modes[$mode_counter] --\n";  
+
+    echo "\n-- file opened in $file_modes[$mode_counter] --\n";
     // create the file and add the content with has csv fields
     if ( strstr($file_modes[$mode_counter], "r") ) {
       $file_handle = fopen($filename, "w");
@@ -54,7 +54,7 @@ foreach ($csv_lists as $csv_list) {
     $delimiter = $csv_list[0];
     $enclosure = $csv_list[1];
     $csv_field = $csv_list[2];
-    
+
     // write to a file in csv format
     var_dump( fputcsv($file_handle, $csv_field, '++') );
     // check the file pointer position and eof
@@ -62,7 +62,7 @@ foreach ($csv_lists as $csv_list) {
     var_dump( feof($file_handle) );
     //close the file
     fclose($file_handle);
-    
+
     // print the file contents 
     var_dump( file_get_contents($filename) );
 

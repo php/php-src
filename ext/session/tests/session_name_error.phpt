@@ -10,7 +10,7 @@ session.name=PHPSESSID
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_name([string $name])
  * Description : Get and/or set the current session name
  * Source code : ext/session/session.c 
@@ -60,7 +60,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -69,7 +69,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 

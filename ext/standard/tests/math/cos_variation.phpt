@@ -4,10 +4,10 @@ Test variations in usage of cos()
 precision = 10
 --FILE--
 <?php
-/* 
+/*
  * proto float cos(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 
 //Test cos with a different input values
@@ -26,7 +26,7 @@ $values = array(23,
 		"1000ABC",
 		null,
 		true,
-		false);	
+		false);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = cos($values[$i]);

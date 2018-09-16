@@ -29,7 +29,7 @@ function test($class)
 	{
 		echo "Exception: " . $e->getMessage() . "\n";
 	}
-	
+
 	echo "====>newInstance(25)\n";
 	try
 	{
@@ -49,7 +49,7 @@ function test($class)
 	{
 		var_dump($e->getMessage());
 	}
-	
+
 	echo "\n";
 }
 

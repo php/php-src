@@ -43,9 +43,9 @@ foreach($dest_files as $dest_file) {
 
   echo "\n-- Iteration $count --\n";
   $dest_file_name = $dest_file;
-  
+
   echo "Copy operation => ";
-  var_dump( copy($src_file_name, $dest_file_name) );  
+  var_dump( copy($src_file_name, $dest_file_name) );
 
   echo "Existence of destination file => ";
   var_dump( file_exists($dest_file_name) );

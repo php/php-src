@@ -32,7 +32,7 @@ closedir($dir_handle);
 <?php
 $path = dirname(__FILE__) . "/readdir_error";
 rmdir($path);
-?> 
+?>
 --EXPECTF--
 *** Testing readdir() : error conditions ***
 

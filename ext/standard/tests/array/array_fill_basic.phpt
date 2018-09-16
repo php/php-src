@@ -18,7 +18,7 @@ HERE_DOC;
 
 // array of possible valid values for 'val' argument
 $values = array (
-  
+
   /* 1  */  NULL,
             0,
             1,
@@ -38,7 +38,7 @@ for($i = 0; $i < count($values); $i ++)
   var_dump( array_fill($start_key,$num,$val) );
 
   $counter++;
-}  
+}
 
 echo "Done";
 ?>

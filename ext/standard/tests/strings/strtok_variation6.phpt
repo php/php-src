@@ -20,7 +20,7 @@ $string_array = array(
  		       "/khello\k world/k",
  		       "/hellok/ world"
  		     );
-$token_array = array( 
+$token_array = array(
 		       "k",
 		       "/ ",
 		       "/k",
@@ -34,16 +34,16 @@ $token_array = array(
 $counter =1;
 foreach( $string_array as $string )  {
   echo "\n--- Iteration $counter ---\n";
-  foreach( $token_array as $token )  { 
-    var_dump( strtok($string, $token) ); 
+  foreach( $token_array as $token )  {
+    var_dump( strtok($string, $token) );
     for( $count = 1; $count <=3; $count++ )  {
       var_dump( strtok($token) );
     }
     echo "\n";
   }
   $counter++;
-}		      
-		      
+}
+
 
 echo "Done\n";
 ?>

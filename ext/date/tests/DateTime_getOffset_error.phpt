@@ -8,7 +8,7 @@ Test DateTime::getOffset() function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions:  date_offset_get
  */
- 
+
  //Set the default time zone 
 date_default_timezone_set("Europe/London");
 

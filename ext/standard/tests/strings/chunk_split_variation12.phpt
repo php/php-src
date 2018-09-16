@@ -9,7 +9,7 @@ Test chunk_split() function : usage variations - different heredoc strings for '
 */
 
 /*
-* passing different heredoc strings as 'ending' argument to chunk_split() 
+* passing different heredoc strings as 'ending' argument to chunk_split()
 * 'chunklen' argument is set to 10
 */
 
@@ -80,7 +80,7 @@ foreach($heredoc_arr as $value) {
   var_dump( chunk_split( $str, $chunklen, $value) );
   $count++;
 };
- 
+
 echo "Done"
 ?>
 --EXPECT--

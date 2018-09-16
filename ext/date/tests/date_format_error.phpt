@@ -7,7 +7,7 @@ Test date_format() function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::format
  */
- 
+
 //Set the default time zone 
 date_default_timezone_set("Europe/London");
 
@@ -28,11 +28,11 @@ var_dump( date_format($date, $format, $extra_arg) );
 
 echo "\n-- Testing date_create() function with an invalid values for \$object argument --\n";
 $invalid_obj = new stdClass();
-var_dump( date_format($invalid_obj, $format) );  
+var_dump( date_format($invalid_obj, $format) );
 $invalid_obj = 10;
 var_dump( date_format($invalid_obj, $format) );
 $invalid_obj = null;
-var_dump( date_format($invalid_obj, $format) );    
+var_dump( date_format($invalid_obj, $format) );
 
 ?>
 ===DONE===

@@ -8,7 +8,7 @@ Test DateTime::setISODate () function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions: date_isodate_set
  */
- 
+
  //Set the default time zone 
 date_default_timezone_set("Europe/London");
 
@@ -24,7 +24,7 @@ echo "\n-- Testing DateTime::setISODate() function with less than expected no. o
 var_dump( $datetime->setISODate($year) );
 
 echo "\n-- Testing date_isodate_set() function with more than expected no. of arguments --\n";
-$week = 30; 
+$week = 30;
 $day = 7;
 $extra_arg = 30;
 var_dump(  $datetime->setISODate($year, $week, $day, $extra_arg) );

@@ -5,7 +5,7 @@ Test parse_url() function: Parse a load of URLs without specifying PHP_URL_SCHEM
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
  * Description: Parse a URL and return its components 
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*

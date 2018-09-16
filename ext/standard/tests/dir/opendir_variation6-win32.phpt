@@ -28,7 +28,7 @@ mkdir($sub_dir_path);
 
 // with different wildcard characters
 
-echo "\n-- Wildcard = '*' --\n"; 
+echo "\n-- Wildcard = '*' --\n";
 var_dump( opendir($file_path . "/opendir_var*") );
 var_dump( opendir($file_path . "/*") );
 

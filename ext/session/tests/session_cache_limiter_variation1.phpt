@@ -9,7 +9,7 @@ session.cache_limiter=nocache
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_cache_limiter([string $cache_limiter])
  * Description : Get and/or set the current cache limiter
  * Source code : ext/session/session.c 

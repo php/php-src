@@ -6,7 +6,7 @@ $reader = new XMLReader();
 if (!method_exists($reader, 'readInnerXml')) print "skip";
 ?>
 --FILE--
-<?php 
+<?php
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book>test</book></books>';

@@ -1,9 +1,9 @@
 --TEST--
 Test gzopen() function : usage variation 
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - zlib extension not loaded"; 
+	print "skip - zlib extension not loaded";
 }
 if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
@@ -12,7 +12,7 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 /* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
  * Description: Open a .gz-file and return a .gz-file pointer 
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gzopen() : usage variation ***\n";
@@ -103,7 +103,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource variable
       'resource' => $fp      
 );

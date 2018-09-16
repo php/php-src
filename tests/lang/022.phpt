@@ -1,7 +1,7 @@
 --TEST--
 Switch test 3
 --FILE--
-<?php 
+<?php
 
 function switchtest ($i, $j)
 {

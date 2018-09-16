@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : int pclose(resource fp)
- * Description: Close a file pointer opened by popen() 
+ * Description: Close a file pointer opened by popen()
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing pclose() : usage variation ***\n";

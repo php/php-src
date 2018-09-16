@@ -48,10 +48,10 @@ $args_array = array(
 // and with octal values from the above $args_array array
 $counter = 1;
 foreach($formats as $format) {
-  echo "\n-- Iteration $counter --\n";   
+  echo "\n-- Iteration $counter --\n";
   $result = vprintf($format, $args_array[$counter-1]);
   echo "\n";
-  var_dump($result); 
+  var_dump($result);
   $counter++;
 }
 

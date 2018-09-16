@@ -82,7 +82,7 @@ $values =  array (
   '0x123',
   "0xFF12",
   "-0xFF12",
-  
+
   // undefined variable
   @$undefined_var,
 

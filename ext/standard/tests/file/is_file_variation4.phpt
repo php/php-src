@@ -27,7 +27,7 @@ $files_arr = array(
   "/is_file_variation4//is_file_variation4.tmp",
   "//is_file_variation4//is_file_variation4.tmp",
   "/is_file_variation4/*.tmp",
-  "is_file_variation4/is_file*.tmp", 
+  "is_file_variation4/is_file*.tmp",
 
   /* Testing Binary safe */
   "/is_file_variation4/is_file_variation4.tmp".chr(0),

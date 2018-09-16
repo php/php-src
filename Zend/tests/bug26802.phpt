@@ -14,7 +14,7 @@ $function();
 class foo
 {
 	static $method = 'global_func';
-	
+
 	static public function foo_func()
 	{
 		echo __METHOD__ . "\n";

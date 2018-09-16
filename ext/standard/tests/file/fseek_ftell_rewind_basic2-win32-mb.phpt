@@ -24,7 +24,7 @@ include ("file.inc");
 /* Testing fseek(),ftell(),rewind() functions on all write and create with write modes */
 
 echo "*** Testing fseek(), ftell(), rewind() : basic operations ***\n";
-$file_modes = array( "w","wb","wt","w+","w+b","w+t", 
+$file_modes = array( "w","wb","wt","w+","w+b","w+t",
                      "x","xb","xt","x+","x+b","x+t");
 
 $file_content_types = array("text_with_new_line","alphanumeric");

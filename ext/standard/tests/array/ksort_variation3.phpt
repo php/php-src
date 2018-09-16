@@ -26,7 +26,7 @@ $various_arrays = array(
   array(1.0 => 10.5, 0.2 => -10.5, 3.1 => 10.5e2, 4 => 10.6E-2, .5 => .5, 6 => .0001, -7 => -.1), 
 
   // mixed value array with different types of keys
-  array(1 => .0001, 2 => .0021, -3 => -.01, 4 => -1, 5 => 0, 6 => .09, 7 => 2, -8 => -.9, 
+  array(1 => .0001, 2 => .0021, -3 => -.01, 4 => -1, 5 => 0, 6 => .09, 7 => 2, -8 => -.9,
         9 => 10.6E-2, -10 => -10.6E-2, 11 => 33)
 );
 
@@ -40,20 +40,20 @@ echo "\n-- Testing ksort() by supplying various integer/float arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With defualt sort flag -\n"; 
-  $temp_array = $array; 
+  echo "- With defualt sort flag -\n";
+  $temp_array = $array;
   var_dump(ksort($temp_array) );
   var_dump($temp_array);
 
   // loop through $flags array and call ksort() with all possible sort flag values
   foreach($flags as $key => $flag){
     echo "- Sort flag = $key -\n";
-    $temp_array = $array; 
+    $temp_array = $array;
     var_dump(ksort($temp_array, $flag) );
     var_dump($temp_array);
-  }  
+  }
   $count++;
-} 
+}
 
 echo "Done\n";
 ?>

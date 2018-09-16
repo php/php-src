@@ -10,8 +10,8 @@ Test strrchr() function : basic functionality
 echo "*** Testing strrchr() function: basic functionality ***\n";
 var_dump( strrchr("Hello, World", "H") ); //needle as single char
 var_dump( strrchr("Hello, World", "Hello") ); //needle as a first word of haystack
-var_dump( strrchr('Hello, World', 'H') ); 
-var_dump( strrchr('Hello, World', 'Hello') ); 
+var_dump( strrchr('Hello, World', 'H') );
+var_dump( strrchr('Hello, World', 'Hello') );
 
 //considering case
 var_dump( strrchr("Hello, World", "h") );

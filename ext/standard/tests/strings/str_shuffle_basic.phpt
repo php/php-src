@@ -27,17 +27,17 @@ $len_ip = strlen($ip);
 
 for ($i = 0; $i < $trys; $i++) {
     $op = str_shuffle($ip);
-    
+
     if (!is_string($op) || strlen($op) != $len_ip) {
-    	echo "TEST FAILED\n"; 
-    }	 
-    
+    	echo "TEST FAILED\n";
+    }
+
     // Combination already hit ?
     if (empty($a[$op])) {
     	// No first time init 
      	$a[$op] = 0;
     }
-     	
+
     // Increment count for this combination
     $a[$op]++;
 }

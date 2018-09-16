@@ -39,7 +39,7 @@ var_dump(filter_var('test._example.com', FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOS
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(11) "example.com"
 string(71) "www.thelongestdomainnameintheworldandthensomeandthensomemoreandmore.com"
 bool(false)

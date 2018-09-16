@@ -15,15 +15,15 @@ Test array_diff() function : usage variations - binary safe checking
 echo "*** Testing array_diff() : usage variations ***\n";
 
 
-$array1 = array( b"1", 
-                 b"hello", 
-                 "world", 
-                 "str1" => "hello", 
+$array1 = array( b"1",
+                 b"hello",
+                 "world",
+                 "str1" => "hello",
                  "str2" => "world");
 
 $array2 = array( b"1" => 'hello',
                  b"world",
-                 "hello", 
+                 "hello",
                  'test');
 
 var_dump(array_diff($array1, $array2));

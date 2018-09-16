@@ -23,7 +23,7 @@ $values = array(0x123abc,
 				'011237', 			
 				true,
 				false,
-				null);	
+				null);
 for ($i = 0; $i < count($values); $i++) {
 	$res = hexdec($values[$i]);
 	var_dump($res);

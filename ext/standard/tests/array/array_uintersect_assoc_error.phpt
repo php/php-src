@@ -5,7 +5,7 @@ Test array_uintersect_assoc() function : error conditions
 /* Prototype  : array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func)
  * Description: U
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_uintersect_assoc() : error conditions ***\n";

@@ -12,7 +12,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 /* Prototype  : bool rmdir(string dirname[, resource context])
  * Description: Remove a directory 
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing rmdir() : usage variation ***\n";
@@ -71,7 +71,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // other
       // php outputs Permission Denied, p8 outputs no suck file or dir
       'single space' => ' ',

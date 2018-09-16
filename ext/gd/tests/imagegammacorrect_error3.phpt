@@ -4,7 +4,7 @@ Testing error with non-double first paramenter of imagegammacorrect() of GD libr
 Rafael Dohms <rdohms [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--

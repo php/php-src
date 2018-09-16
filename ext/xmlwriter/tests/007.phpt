@@ -1,11 +1,11 @@
 --TEST--
-XMLWriter: libxml2 XML Writer, Elements & Attributes 
+XMLWriter: libxml2 XML Writer, Elements & Attributes
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
-<?php 
+<?php
 
 $xw = xmlwriter_open_memory();
 xmlwriter_set_indent($xw, TRUE);

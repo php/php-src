@@ -8,7 +8,7 @@ Test hash_file() function : basic functionality
 /* Prototype  : string hash_file ( string algo, string filename [, bool raw_output] )
  * Description: Generate a hash value using the contents of a given file
  * Source code: ext/hash/hash.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 echo "*** Testing hash_file() : basic functionality ***\n";
@@ -18,9 +18,9 @@ $file = dirname(__FILE__) . "hash_file.txt";
 if (($fp = fopen( $file, "w+")) == FALSE) {
 	echo "Cannot create file ($file)";
     exit;
-}	
+}
 
-/* Writing into file */ 
+/* Writing into file */
 $content = "This is a sample string used to test the hash_file function with various hashing algorithms";
 if (is_writable($file)) {
   if (fwrite($fp, $content) === FALSE) {

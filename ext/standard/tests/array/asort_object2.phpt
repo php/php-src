@@ -21,7 +21,7 @@ class for_integer_asort
 {
   public $public_class_value;
   private $private_class_value;
-  protected $protected_class_value; 
+  protected $protected_class_value;
   // initializing object member value
   function __construct($value1, $value2,$value3){
     $this->public_class_value = $value1;
@@ -36,7 +36,7 @@ class for_string_asort
 {
   public $public_class_value;
   private $private_class_value;
-  protected $protected_class_value; 
+  protected $protected_class_value;
   // initializing object member value
   function __construct($value1, $value2,$value3){
     $this->public_class_value = $value1;
@@ -51,13 +51,13 @@ class for_string_asort
 }
 
 // array of integer objects
-$unsorted_int_obj = array ( 
+$unsorted_int_obj = array (
   1 => new for_integer_asort(11, 33,2), 2 =>  new for_integer_asort(44, 66,3),
   3 => new for_integer_asort(23, 32,6), 4 => new for_integer_asort(-88, -5,-4),
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   "a" => new for_string_asort("axx","AXX","d"), "b" => new for_string_asort("T", "t","q"),
   "c" => new for_string_asort("w", "W","c"), "d" => new for_string_asort("PY", "py","s"),
 );

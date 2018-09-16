@@ -25,7 +25,7 @@ if (!is_resource($imap_stream)) {
 }
 
 $check = imap_check($imap_stream);
-echo "Msg Count in new mailbox: ". $check->Nmsgs . "\n";    
+echo "Msg Count in new mailbox: ". $check->Nmsgs . "\n";
 
 var_dump(imap_mail_move($imap_stream, '1', 'INBOX.'.$mailbox_prefix));
 
@@ -33,7 +33,7 @@ imap_close($imap_stream);
 ?>
 ===Done===
 --CLEAN--
-<?php 
+<?php
 require_once('clean.inc');
 ?>
 --EXPECTF--

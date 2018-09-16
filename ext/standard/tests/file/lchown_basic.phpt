@@ -10,7 +10,7 @@ if (!function_exists("posix_getuid")) die("skip no posix_getuid()");
 /* Prototype  : bool lchown (string filename, mixed user)
  * Description: Change file owner of a symlink
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing lchown() : basic functionality ***\n";

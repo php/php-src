@@ -1,7 +1,7 @@
 --TEST--
 Check xsltprocessor::registerPHPFunctions
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }

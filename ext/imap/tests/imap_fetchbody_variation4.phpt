@@ -27,8 +27,8 @@ $msg_uid = imap_uid($stream_id, $msg_no);
 $section = 1;
 
 //Note: the first four values are valid as they will all be cast to 1L.
-$options = array ('1', true, 
-                  1.000000000000001, 0.00001e5, 
+$options = array ('1', true,
+                  1.000000000000001, 0.00001e5,
                   PHP_INT_MAX, -PHP_INT_MAX);
 
 // iterate over each element of $options array to test whether FT_UID is set

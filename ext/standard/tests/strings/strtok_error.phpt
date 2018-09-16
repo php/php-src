@@ -29,7 +29,7 @@ var_dump( $str );
 // Less than expected number of arguments 
 echo "\n-- Testing strtok() with less than expected no. of arguments --\n";
 $str = 'string val';
- 
+
 var_dump( strtok($str));
 var_dump( $str );
 

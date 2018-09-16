@@ -12,7 +12,7 @@ Test ctype_punct() function : basic functionality
 
 echo "*** Testing ctype_punct() : basic functionality ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 $c1 = '@!$*';
 $c2 = 'hello, world!';
@@ -20,7 +20,7 @@ $c2 = 'hello, world!';
 var_dump(ctype_punct($c1));
 var_dump(ctype_punct($c2));
 
-setlocale(LC_CTYPE, $orig); 
+setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
 --EXPECT--

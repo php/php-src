@@ -29,11 +29,11 @@ var_dump( date_modify($datetime, $modify, $extra_arg) );
 
 echo "\n-- Testing date_modify() function with an invalid values for \$object argument --\n";
 $invalid_obj = new stdClass();
-var_dump( date_modify($invalid_obj, $modify) );  
+var_dump( date_modify($invalid_obj, $modify) );
 $invalid_obj = 10;
 var_dump( date_modify($invalid_obj, $modify) );
 $invalid_obj = null;
-var_dump( date_modify($invalid_obj, $modify) );  
+var_dump( date_modify($invalid_obj, $modify) );
 
 ?>
 ===DONE===

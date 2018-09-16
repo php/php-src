@@ -16,7 +16,7 @@ echo "*** Testing array_rand() : with associative array ***\n";
 
 // Initialise the 'input' and 'num_req' variables
 $input = array(
-  'one' => 1, 'two' => 2, 'three' => 3, 
+  'one' => 1, 'two' => 2, 'three' => 3,
   'FoUr' => 'four', '#5' => 5, 'SIX' => 'six',
   "seven" => 7, "#8" => "eight", "nine" => "NINE"
 );

@@ -11,7 +11,7 @@ var_dump( substr_count() );
 
 /* more than expected no. of args */
 var_dump( substr_count($str, "t", 0, 15, 30) );
-	
+
 /* offset before start */
 var_dump(substr_count($str, "t", -20));
 

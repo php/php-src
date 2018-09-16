@@ -62,7 +62,7 @@ $file_path_variations = array (
   /* path with spaces */
   array(" "),
   array(' '),
-  
+
   /* empty paths */
   array(""),
   array(''),
@@ -76,8 +76,8 @@ function check_basename( $path_arrays ) {
      if( 1 == count($path) ) { // no suffix provided
        var_dump( basename($path[0]) );
      } else { // path as well as suffix provided,
-       var_dump( basename($path[0], $path[1]) );    
-     } 
+       var_dump( basename($path[0], $path[1]) );
+     }
    }
 }
 

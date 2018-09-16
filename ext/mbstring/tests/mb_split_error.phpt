@@ -10,7 +10,7 @@ function_exists('mb_split') or die("skip mb_split() is not available in this bui
 /* Prototype  : proto array mb_split(string pattern, string string [, int limit])
  * Description: split multibyte string into array by regular expression 
  * Source code: ext/mbstring/php_mbregex.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*

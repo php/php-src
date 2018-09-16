@@ -89,7 +89,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource 
       'resource' => $file_handle
 );

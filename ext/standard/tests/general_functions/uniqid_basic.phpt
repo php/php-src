@@ -26,16 +26,16 @@ $prefix = array (
 				false				
 				);
 
-for ($i = 0; $i < count($prefix); $i++) {				
+for ($i = 0; $i < count($prefix); $i++) {
 	var_dump(uniqid($prefix[$i]));
 	var_dump(uniqid($prefix[$i], true));
 	var_dump(uniqid($prefix[$i], false));
 	echo "\n";
-}	
+}
 
 ?>
 ===DONE===
---EXPECTF-- 
+--EXPECTF--
 *** Testing uniqid() : basic functionality ***
 
 uniqid() without a prefix

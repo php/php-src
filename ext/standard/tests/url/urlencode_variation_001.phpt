@@ -5,7 +5,7 @@ Test urlencode() function : usage variations  - <type here specifics of this var
 /* Prototype  : proto string urlencode(string str)
  * Description: URL-encodes string 
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // NB: basic functionality tested in tests/strings/001.phpt

@@ -19,7 +19,7 @@ $unsorted_strings = array(
 	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
 	"b" => "banana",
 );
- 
+
 // array with default keys containing unsorted numeric values
 $unsorted_numerics =  array( 100, 33, 555, 22 );
 

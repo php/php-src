@@ -66,7 +66,7 @@ function ok1(&$bar) {
 
 function ok2(&$bar) {
 	print __FUNCTION__."\n";
-	@$a = $a; 
+	@$a = $a;
 	$bar->run2();
 }
 

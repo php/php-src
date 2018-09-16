@@ -5,7 +5,7 @@ Test compact() function : error conditions
 /* Prototype  : proto array compact(mixed var_names [, mixed ...])
  * Description: Creates a hash containing variables and their values 
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*

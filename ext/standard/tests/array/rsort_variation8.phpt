@@ -33,14 +33,14 @@ $count = 1;
 
 // loop through to test rsort() with different arrays
 foreach ($various_arrays as $array) {
- 
-  echo "\n-- Iteration $count --\n"; 
-  
+
+  echo "\n-- Iteration $count --\n";
+
   echo "\n-- 'flag' value is default --\n";
   $temp_array = $array;
   var_dump(rsort($temp_array) );
   var_dump($temp_array);
-  
+
   echo "\n-- 'flag' value is SORT_REGULAR --\n";
   $temp_array = $array;
   var_dump(rsort($temp_array, SORT_REGULAR) );

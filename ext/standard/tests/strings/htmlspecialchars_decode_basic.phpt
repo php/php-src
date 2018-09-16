@@ -21,7 +21,7 @@ var_dump( htmlspecialchars_decode($double_quote_string) );
 
 // Calling htmlspecialchars_decode() with optional 'quote_style' argument
 var_dump( htmlspecialchars_decode($single_quote_string, ENT_COMPAT) );
-var_dump( htmlspecialchars_decode($double_quote_string, ENT_COMPAT) );   
+var_dump( htmlspecialchars_decode($double_quote_string, ENT_COMPAT) );
 var_dump( htmlspecialchars_decode($single_quote_string, ENT_NOQUOTES) );
 var_dump( htmlspecialchars_decode($double_quote_string, ENT_NOQUOTES) );
 var_dump( htmlspecialchars_decode($single_quote_string, ENT_QUOTES) );

@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -70,11 +70,11 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // binary data
 /*21*/ b"binary",
 	   (binary)"binary",
-	   
+
        // object data
 /*23*/ new classA(),
 

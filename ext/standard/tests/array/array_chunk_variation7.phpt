@@ -21,7 +21,7 @@ echo "\n-- Testing array_chunk(), input array containing references \n";
 
 $numbers=array(1, 2, 3, 4);
 // reference array
-$input_array = array ( 
+$input_array = array (
   "one" => &$numbers[0], 
   "two" => &$numbers[1], 
   "three" => &$numbers[2],

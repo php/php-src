@@ -22,9 +22,9 @@ function check_vardump( $variables ) {
     $counter++;
   }
 }
-  
+
 echo "\n*** Testing var_dump() on integer variables ***\n";
-$integers = array ( 
+$integers = array (
   0,  // zero as argument
   000000123,  //octal value of 83
   123000000,
@@ -40,7 +40,7 @@ $integers = array (
   -0x80000000,  // min range of hexadecimal integer
   017777777777,  // max posotive octal integer
   -020000000000  // min range of octal integer
-);		    
+);
 /* calling check_vardump() to display contents of integer variables 
    using var_dump() */
 check_vardump($integers);
@@ -111,7 +111,7 @@ $booleans = array (
   FALSE,
   true,
   false
-);	  
+);
 /* calling check_vardump() to display boolean variables
    using var_dump() */
 check_vardump($booleans);
@@ -226,7 +226,7 @@ var_dump($recursion_obj2);
 
 echo "\n*** Testing var_dump() on resources ***\n";
 /* file type resource */
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 /* directory type resource */
 $dir_handle = opendir( dirname(__FILE__) );
@@ -254,7 +254,7 @@ $variations = array (
   array( new no_member_class, array(), false, 0 ),
   array( -0.00, "Where am I?", array(7,8,9), TRUE, 'A', 987654321 ),
   array( @$unset_var, 2.E+10, 100-20.9, 000004.599998 ),  //unusual data
-  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7') 
+  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7')
 );
 /* calling check_vardump() to display combinations of scalar and
    non-scalar variables using var_dump() */
@@ -287,7 +287,7 @@ echo "\n*** Testing error conditions ***\n";
 var_dump();
 
 /* closing resource handle used */
-closedir($dir_handle); 
+closedir($dir_handle);
 
 echo "Done\n";
 ?>

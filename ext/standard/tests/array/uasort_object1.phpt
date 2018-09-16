@@ -49,7 +49,7 @@ function multiple_cmp($value1, $value2)
 class SimpleClass1
 {
   private $int_value;
-  
+
   public function __construct($value) {
     $this->int_value = $value;
   }
@@ -68,7 +68,7 @@ class SimpleClass2
   }
   public function getValue() {
     return $this->int_value;
-  }  
+  }
 }
 
 // array of SimpleClass objects with only one member

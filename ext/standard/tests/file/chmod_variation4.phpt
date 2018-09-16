@@ -7,7 +7,7 @@ Test chmod() function : second parameter variation
 /* Prototype  : bool chmod(string filename, int mode)
  * Description: Change file mode 
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing chmod() : usage variation ***\n";

@@ -22,7 +22,7 @@ if (!is_array($tran)) {
 	echo "TEST FAILED: Expected an array\n";
 }
 
-echo "\n-- Total number of transitions: " . count($tran). " --\n"; 
+echo "\n-- Total number of transitions: " . count($tran). " --\n";
 
 echo "\n-- Format a sample entry for Spring 1963 --\n";
 var_dump( $tran[6] );

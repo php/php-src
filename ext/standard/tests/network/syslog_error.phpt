@@ -5,7 +5,7 @@ Test syslog() function : error conditions
 /* Prototype  : bool syslog(int priority, string message)
  * Description: Generate a system log message 
  * Source code: ext/standard/syslog.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing syslog() : error conditions ***\n";

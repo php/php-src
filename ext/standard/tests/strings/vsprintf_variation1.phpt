@@ -78,7 +78,7 @@ $values = array(
 
   // unset data
   @$unset_var,
- 
+
   // resource data
   $file_handle
 );
@@ -90,7 +90,7 @@ foreach($values as $value) {
   echo "\n -- Iteration $counter --\n";
   var_dump( vsprintf($value,$args) );
   $counter++;
-    
+
 };
 
 // closing the resource

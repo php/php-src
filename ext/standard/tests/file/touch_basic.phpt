@@ -14,7 +14,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 /* Prototype  : proto bool touch(string filename [, int time [, int atime]])
  * Description: Set modification time of file 
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing touch() : basic functionality ***\n";

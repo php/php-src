@@ -5,7 +5,7 @@ Test parse_url() function : error conditions - wrong number of args
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
  * Description: Parse a URL and return its components 
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing parse_url() : error conditions ***\n";

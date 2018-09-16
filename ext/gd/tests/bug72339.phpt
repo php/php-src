@@ -31,7 +31,7 @@ if ($im) {
 unlink($fname);
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: imagecreatefromgd2(): product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %sbug72339.php on line %d
 

@@ -1,7 +1,7 @@
 --TEST--
 image_type_to_extension()
 --SKIPIF--
-<?php 
+<?php
     require_once('skipif_imagetype.inc');
 ?>
 --FILE--

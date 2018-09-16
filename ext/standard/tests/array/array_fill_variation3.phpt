@@ -55,9 +55,9 @@ for($index = 0; $index < count($values); $index ++)
 {
   echo "-- Iteration $counter --\n";
   $val = $values[$index];
-  
+
   var_dump( array_fill($start_key , $num , $val) );
- 
+
   $counter++;
 }
 

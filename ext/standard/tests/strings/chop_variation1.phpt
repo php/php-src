@@ -72,10 +72,10 @@ $values =  array (
 
   // unset variable
   $unset_var,
- 
+
   // object
   $sample_obj,
-  
+
   // resource
   $file_handle
 );

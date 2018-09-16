@@ -4,13 +4,13 @@ Test long2ip() function : usage variation
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip don't run on Windows");
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : string long2ip(int proper_address)
  * Description: Converts an (IPv4) Internet network address into a string in Internet standard dotted format 
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing long2ip() : usage variation ***\n";
@@ -97,7 +97,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource
       'resource' => $res,      
 );

@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp_read_mib
 --CREDITS--
 Olivier Doucet Olivier Doucet Boris Lytochkin

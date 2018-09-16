@@ -3,7 +3,7 @@ XMLReader: libxml2 XML Reader, attributes test
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 $filename = dirname(__FILE__) . '/私はガラスを食べられます_003.xml';
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>

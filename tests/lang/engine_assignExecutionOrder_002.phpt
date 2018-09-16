@@ -28,7 +28,7 @@ $g3 = array(30,30);
 $g = array($g1,$g2,$g3);
 list($e[$f++],$e[$f++]) = $g[2];
 // expect 30,30
-var_dump($e); 
+var_dump($e);
 
 
 $i1 = array(1,2);

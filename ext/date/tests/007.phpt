@@ -14,7 +14,7 @@ var_dump(localtime($t, false));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: localtime() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
 array(9) {

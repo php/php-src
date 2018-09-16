@@ -11,7 +11,7 @@ Test fread() function : error conditions
 */
 
 echo "*** Testing error conditions ***\n";
-$filename = __FILE__; 
+$filename = __FILE__;
 $file_handle = fopen($filename, "r");
 
 // zero argument
@@ -24,7 +24,7 @@ var_dump( fread($file_handle, 10, $file_handle) );
 
 // invalid length argument 
 echo "-- Testing fread() with invalid length arguments --\n";
-$len = 0; 
+$len = 0;
 var_dump( fread($file_handle, $len) );
 $len = -10;
 var_dump( fread($file_handle, $len) );

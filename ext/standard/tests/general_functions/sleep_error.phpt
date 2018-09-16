@@ -7,7 +7,7 @@ Test sleep() function : error conditions
  * Source code: ext/standard/basic_functions.c
  */
  set_time_limit(20);
- 
+
 echo "*** Testing sleep() : error conditions ***\n";
 
 echo "\n-- Testing sleep() function with zero arguments --\n";

@@ -32,12 +32,12 @@ $iterator = 1;
 foreach($vars as $var) {
   echo "-- Iteration $iterator --\n";
   $temp_array = $array;  // assign $array to another temporary $temp_array
-  
+
   /* with default argument */
   // returns element count in the resulting array after arguments are pushed to
   // beginning of the given array
   var_dump( array_unshift($temp_array, $var) );
-  
+
   // dump the resulting array
   var_dump($temp_array);
 

@@ -32,7 +32,7 @@ $c,
  $c, $c, $c, $c, $c, $c, $c, $c, $c, $c, $c, $c, $c, $c, $c, $c, $c,
 $c,
  $c, $c, $c, $c, $c, $c, $c, $c, $c, $c, $c, $c);
-function foo2($d) {}      
+function foo2($d) {}
 echo "ok\n";
 ?>
 --EXPECT--

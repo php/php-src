@@ -17,51 +17,51 @@ Test array_diff_assoc() function : usage variations - strict string comparison c
 
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array = array ('zero', 
-                1 => 1, 
+$array = array ('zero',
+                1 => 1,
                 'two' => 2.00000000000001);
-                
+
 $inputs = array (
 
 //default keys => string values
 /*1*/	array('2.00000000000001', '1', 'zero', 'a'),
-	
+
 //numeric keys => string values
-/*2*/	array(2 => '2.00000000000001', 
-	          1 => '1', 
-	          0 => 'zero', 
+/*2*/	array(2 => '2.00000000000001',
+	          1 => '1',
+	          0 => 'zero',
 	          3 => 'a'),
 
 //string keys => string values
-/*3*/	array('2' => '2.00000000000001', 
-	          '1' => '1', 
-	          '0' => 'zero', 
+/*3*/	array('2' => '2.00000000000001',
+	          '1' => '1',
+	          '0' => 'zero',
 	          '3' => 'a') ,
-	
+
 //default keys => numeric values
 /*4*/	array(2, 1, 0),
-	
+
 //numeric keys => numeric values
 /*5*/	array(2 => 2,
 	          1 => 1,
 	          0 => 0),
-	       
+
 //string keys => numeric values
-/*6*/	array('two' => 2, 
-	          '1' => 1, 
+/*6*/	array('two' => 2,
+	          '1' => 1,
 	          '0' => 0),
-	          
+
 //defualt keys => float values
 /*7*/	array(2.00000000000001, 1.00, 0.01E-9),
-	          
+
 //numeric keys => float values
 /*8*/	array(2 => 2.00000000000001,
 	          1 =>  1.00,
 	          0 => 0.01E-9),
-	          
+
 //string keys => float values
-/*9*/	array ('two' => 2.00000000000001, 
-	           '1' => 1.00, 
+/*9*/	array ('two' => 2.00000000000001,
+	           '1' => 1.00,
 	           '0' =>0.01E-9)
 );
 

@@ -19,7 +19,7 @@ $arg1 = TRUE;
 $arg2 = FALSE;
 $arg3 = true;
 
-echo "\n-- Calling printf() with no arguments --\n"; 
+echo "\n-- Calling printf() with no arguments --\n";
 $result = printf($format);
 echo "\n";
 var_dump($result);

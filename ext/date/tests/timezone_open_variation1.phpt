@@ -88,7 +88,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource 
       'resource' => $file_handle
 );
@@ -96,7 +96,7 @@ $inputs = array(
 foreach($inputs as $variation =>$timezone) {
     echo "\n-- $variation --\n";
 	var_dump( timezone_open($timezone) );
-      
+
 };
 
 // closing the resource

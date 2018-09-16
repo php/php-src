@@ -5,7 +5,7 @@ Test urldecode() function : usage variations  - <type here specifics of this var
 /* Prototype  : proto string urldecode(string str)
  * Description: Decodes URL-encoded string 
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // NB: basic functionality tested in tests/strings/001.phpt

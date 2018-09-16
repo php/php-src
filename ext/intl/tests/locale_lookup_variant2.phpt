@@ -20,7 +20,7 @@ function ut_main()
 		'jbo',
 		'art-lojban'
 	);
-	
+
 	$lang_tags = array(
 		'de-DEVA',
 		'de-DE-1996',

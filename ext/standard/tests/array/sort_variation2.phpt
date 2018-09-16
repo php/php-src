@@ -79,8 +79,8 @@ for($index = 0; $index < count($unexpected_values); $index ++) {
   // sort the array, retain a temp. copy of input array for next iteration
   $value = $unexpected_values [$index];
   $temp_array = $unsorted_values;
-  var_dump( sort($temp_array, $value) ); 
-  
+  var_dump( sort($temp_array, $value) );
+
   //dump the sorted array
   var_dump($temp_array);
   $counter++;

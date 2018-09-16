@@ -33,7 +33,7 @@ unset ($unset_var);
 // get a class
 class classA
 {
-	public function __toString() 
+	public function __toString()
 	{
 		return "Class A object";
 	}
@@ -72,7 +72,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -82,7 +82,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 

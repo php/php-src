@@ -4,7 +4,7 @@ POST Method test and arrays - 5
 a[]=1&a[a]=1&a[b]=3
 --FILE--
 <?php
-var_dump($_POST['a']); 
+var_dump($_POST['a']);
 ?>
 --EXPECT--
 array(3) {

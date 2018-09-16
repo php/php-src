@@ -19,7 +19,7 @@ $filename = dirname(__FILE__)."/fwrite_error.tmp";
 
 echo "-- Testing fwrite() with less than expected number of arguments --\n";
 // zero argument
-var_dump( fwrite() ); 
+var_dump( fwrite() );
 // less than expected, 1 arg
 $file_handle  = fopen ( $filename, "w");
 var_dump( fwrite($file_handle) );

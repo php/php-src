@@ -32,11 +32,11 @@ echo "\n*** Testing is_callable() on objects ***\n";
 class object_class
 {
   public $value = 100;
-  
+
   /* static method */
   static public function foo() {
   }
-  
+
   public function foo1() {
   }
   /* function name with mixed string and integer */
@@ -47,7 +47,7 @@ class object_class
   }
   /* function name having boolean value */
   public function TRUE() {
-  }  
+  }
 
   protected function foo2() {
   }

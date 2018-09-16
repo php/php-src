@@ -32,7 +32,7 @@ $values = array (
             array(false => 'red', true => 'pen' ),
             array('color' => "red", "item" => 'pen', 1 => "Hi", "" => "Hello" ),
   /* 14 */  array($fp, "resource1" => $fp, 'resource2' => $fp, array( $fp, 'type' => $fp) )
-);   
+);
 
 // loop through each element of the values array for 'var' argument 
 // check the working of sizeof()
@@ -42,10 +42,10 @@ for($i = 0; $i < count($values); $i++)
   echo "-- Iteration $counter --\n";
   $var = $values[$i];
 
-  echo "Default Mode: "; 
+  echo "Default Mode: ";
   var_dump( sizeof($var) );
   echo "\n";
-  
+
   echo "COUNT_NORMAL Mode: ";
   var_dump( sizeof($var, COUNT_NORMAL) );
   echo "\n";
@@ -56,7 +56,7 @@ for($i = 0; $i < count($values); $i++)
 
   $counter++;
 }
-         
+
 echo "Done";
 ?>
 --EXPECT--

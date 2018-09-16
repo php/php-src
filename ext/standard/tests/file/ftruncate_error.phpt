@@ -64,7 +64,7 @@ var_dump( ftruncate(@$fp,10));
 var_dump( filesize($filename) );
 
 echo "Done\n";
-?> 
+?>
 --CLEAN--
 <?php
 $filename = dirname(__FILE__)."/ftruncate_error.tmp";

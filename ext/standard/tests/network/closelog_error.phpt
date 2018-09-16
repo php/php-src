@@ -5,7 +5,7 @@ Test closelog() function : error conditions
 /* Prototype  : bool closelog(void)
  * Description: Close connection to system logger 
  * Source code: ext/standard/syslog.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing closelog() : error conditions ***\n";

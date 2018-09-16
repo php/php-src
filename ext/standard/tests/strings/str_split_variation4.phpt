@@ -28,7 +28,7 @@ $values = array(
   'simple string',  //regular string
   'It\'s string with quote',  //string containing single quote
   'string\tcontains\rwhite space\nchars',
-  'containing @ # $ % ^ & chars', 
+  'containing @ # $ % ^ & chars',
   'with 1234 numbers',
   'with \0 and ".chr(0)."null chars',  //for binary safe
   'with    multiple     space char',

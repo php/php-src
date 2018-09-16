@@ -1,15 +1,15 @@
 --TEST--
 Testing direct assigning for property of object returned by function
 --FILE--
-<?php 
+<?php
 
 class foo {
 	static $bar = array();
-	
+
 	public function __set($a, $b) {
 		self::$bar[] = $b;
 	}
-	
+
 	public function __get($a) {
 		/* last */
 		return self::$bar[count(self::$bar)-1];

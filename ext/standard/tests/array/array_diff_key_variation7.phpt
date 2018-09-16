@@ -10,7 +10,7 @@ Test array_diff_key() function : usage variation - Passing null,unset and undefi
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(10 => '10', "" => 'empty'); 
+$input_array = array(10 => '10', "" => 'empty');
 
 //get an unset variable
 $unset_var = 10;
@@ -27,7 +27,7 @@ foreach($input_arrays as $key =>$value) {
       // loop through each element of the array for arr1
       var_dump( array_diff_key($input_array, $value) );
       var_dump( array_diff_key($value, $input_array) );
-}      
+}
 ?>
 ===DONE===
 --EXPECT--

@@ -12,12 +12,12 @@ class test implements IteratorAggregate
 	public    $pub = "public";
 	protected $pro = "protected";
 	private   $pri = "private";
-	
+
 	function __construct()
 	{
 		$this->imp = "implicit";
 	}
-	
+
 	function getIterator()
 	{
 		$it = new ArrayObject($this);

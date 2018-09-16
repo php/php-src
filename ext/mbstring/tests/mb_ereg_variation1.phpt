@@ -65,7 +65,7 @@ $inputs = array(
 /*12*/ "string",
        'string',
        $heredoc,
- 
+
 // object data
 /*15*/ new classA(),
 

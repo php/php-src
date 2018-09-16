@@ -29,17 +29,17 @@ $array_values = array(
 );
 
 // array of scientific formats
-$scientific_formats = array( 
+$scientific_formats = array(
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
-  "\t%e", "\n%e", "%4e", 
+  "\t%e", "\n%e", "%4e",
   "%30e", "%[0-1]", "%*e"
 );
 
 $count = 1;
 foreach($array_values as $array_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($scientific_formats as $format) {
     var_dump( sprintf($format, $array_value) );
   }

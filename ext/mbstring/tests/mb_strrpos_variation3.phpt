@@ -65,7 +65,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // object data
 /*16*/ new classA(),
 

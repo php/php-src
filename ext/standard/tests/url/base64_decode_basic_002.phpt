@@ -5,7 +5,7 @@ Test base64_decode() function : basic functionality - strict vs non-strict with 
 /* Prototype  : proto string base64_decode(string str[, bool strict])
  * Description: Decodes string using MIME base64 algorithm 
  * Source code: ext/standard/base64.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "Decode 'hello world!':\n";

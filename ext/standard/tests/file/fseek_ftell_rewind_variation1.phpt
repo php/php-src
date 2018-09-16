@@ -44,7 +44,7 @@ foreach($file_content_types as $file_content_type){
     }
     echo "-- Testing fseek() without using argument whence --\n";
     foreach($offset as $count){
-      var_dump( fseek($file_handle, $count) ); 
+      var_dump( fseek($file_handle, $count) );
       var_dump( ftell($file_handle) ); // confirm the file pointer position
       var_dump( feof($file_handle) ); //ensure that file pointer is not at end
     } //end of offset loop

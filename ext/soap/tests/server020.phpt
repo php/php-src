@@ -1,9 +1,9 @@
 --TEST--
 SOAP Server 20: compressed request (deflate)
 --SKIPIF--
-<?php 
+<?php
 	if (php_sapi_name()=='cli') echo 'skip';
-	require_once('skipif.inc'); 
+	require_once('skipif.inc');
 	if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
 --INI--

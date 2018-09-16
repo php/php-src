@@ -30,7 +30,7 @@ unlink($filename);
 
 echo "*** Testing scandir() : usage variations ***\n";
 
-/* 
+/*
  * create the temporary directory :
  * scandir_variation5  ( parent )
  *  |-> sub_dir     ( sub parent )

@@ -55,7 +55,7 @@ $float_formats = array(
 $count = 1;
 foreach($float_values as $float_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($float_formats as $format) {
     var_dump( sprintf($format, $float_value) );
   }

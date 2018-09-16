@@ -2,7 +2,7 @@
 Test DateTime::setTime() function : usage variation - Passing unexpected values to second argument $minute.
 --FILE--
 <?php
-/* Prototype  : public DateTime DateTime::setTime  ( int $hour  , int $minute  [, int $second  ] )   
+/* Prototype  : public DateTime DateTime::setTime  ( int $hour  , int $minute  [, int $second  ] )
  * Description: Resets the current time of the DateTime object to a different time. 
  * Source code: ext/date/php_date.c
  * Alias to functions: date_time_set
@@ -90,7 +90,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource 
       'resource' => $file_handle
 );

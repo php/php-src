@@ -21,7 +21,7 @@ function key_compare_func($key1, $key2)
     if ($key1 == $key2)
         return 0;
     else
-        return ($key1 > $key2)? 1:-1; 
+        return ($key1 > $key2)? 1:-1;
 }
 
 echo "\n-- Result of strings containing integers intersection --\n";

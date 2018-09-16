@@ -16,7 +16,7 @@ $valuesy = array(23,
 				null,
 				true,
 				false);
-					
+
 $valuesx = array(23,
 				-23,
 				2.345e1,
@@ -28,14 +28,14 @@ $valuesx = array(23,
 				"2.345e1",				
 				null,
 				true,
-				false);					
+				false);
 
 for ($i = 0; $i < count($valuesy); $i++) {
-	for ($j = 0; $j < count($valuesx); $j++) {	
+	for ($j = 0; $j < count($valuesx); $j++) {
 		$res = atan2($valuesy[$i], $valuesx[$j]);
 		echo "Y:$valuesy[$i] X:$valuesx[$j] ";
 		var_dump($res);
-	}	
+	}
 }
 ?>
 --EXPECT--

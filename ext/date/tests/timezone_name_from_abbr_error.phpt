@@ -5,7 +5,7 @@ Test timezone_name_from_abbr() function : error conditions
 /* Prototype  : string timezone_name_from_abbr  ( string $abbr  [, int $gmtOffset= -1  [, int $isdst= -1  ]] )
  * Description: Returns the timezone name from abbrevation
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 //Set the default time zone 

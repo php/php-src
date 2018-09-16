@@ -28,17 +28,17 @@ $array_values = array(
 );
 
 // array of unsigned formats
-$unsigned_formats = array( 
+$unsigned_formats = array(
   "%u", "%hu", "%lu",
-  "%Lu", " %u", "%u ",   
-  "\t%u", "\n%u", "%4u", 
+  "%Lu", " %u", "%u ",
+  "\t%u", "\n%u", "%4u",
    "%30u", "%[0-9]", "%*u"
 );
 
 $count = 1;
 foreach($array_values as $array_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($unsigned_formats as $format) {
     var_dump( sprintf($format, $array_value) );
   }

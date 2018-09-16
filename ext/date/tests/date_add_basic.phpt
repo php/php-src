@@ -8,7 +8,7 @@ date_default_timezone_set('UTC');
 /* Prototype  : void date_add(DateTime object, DateInterval interval)
  * Description: Adds an interval to the current date in object.
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing date_add() : basic functionality ***\n";

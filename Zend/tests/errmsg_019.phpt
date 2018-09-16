@@ -10,5 +10,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Destructor test::__destruct() cannot take arguments in %s on line %d

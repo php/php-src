@@ -56,7 +56,7 @@ var_dump( touch(__FILE__, 10, 100, 123) );
 
 echo "\nDone";
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing error conditions ***
 
 -- Testing with  Non-existing files --

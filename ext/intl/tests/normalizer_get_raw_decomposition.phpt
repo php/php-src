@@ -22,15 +22,15 @@ function ut_main()
         "aa",
         "\xF5",
 	];
-    
+
     foreach ($strings as $string) {
         $decomposition = ut_norm_get_raw_decomposition($string, Normalizer::FORM_KC);
         $error_code = intl_get_error_code();
         $error_message = intl_get_error_message();
-        
+
         $string_hex = bin2hex($string);
         $result .= "---------------------\n";
-        
+
         if ($decomposition === null) {
             $result .= "'$string_hex' has no decomposition mapping\n" ;
         } else {

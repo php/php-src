@@ -7,7 +7,7 @@ Test date_format() function : basic functionality
  * Source code: ext/date/php_date.c
  * Alias to functions: date_format
  */
- 
+
 //Set the default time zone 
 date_default_timezone_set("Europe/London");
 

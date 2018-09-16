@@ -22,7 +22,7 @@ $values = array(01234567,
 				31.1013e5,				
 				true,
 				false,
-				null);	
+				null);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = octdec($values[$i]);

@@ -25,7 +25,7 @@ var_dump(parse_ini_file($file));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(3) {
   ["2454.33"]=>
   array(1) {

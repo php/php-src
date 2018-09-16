@@ -13,7 +13,7 @@ Test fread() function : basic functionality
 // include the file.inc for common functions for test
 include ("file.inc");
 
-/* Function : function check_size(string $data, int $expect_size) 
+/* Function : function check_size(string $data, int $expect_size)
    Description : Check the length of the data, and compare the size with $expect_size
      $data : Text data.
      $expect_size : Expected data length 
@@ -29,7 +29,7 @@ function check_size($data, $expect_size) {
 
 
 echo "*** Testing fread() basic operations ***\n";
-/* 
+/*
  test fread with file opened in "r" and "rb" mode only
  Content with numeric and strings with it 
 */
@@ -38,27 +38,27 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
 
  foreach($file_content_types as $file_content_type) {
    echo "\n-- Testing fread) with file having data of type ". $file_content_type ." --\n";
-   /* create files with $file_content_type */ 
+   /* create files with $file_content_type */
    create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "fread_basic");
    $filename = dirname(__FILE__)."/fread_basic1.tmp"; // this is name of the file created by create_files()
-  
+
   /* open the file using $files_modes and perform fread() on it */
-   for($inner_loop_counter = 0; 
-       $inner_loop_counter < count($file_modes); 
+   for($inner_loop_counter = 0;
+       $inner_loop_counter < count($file_modes);
        $inner_loop_counter++) {
-    
+
     echo "-- File opened in mode ".$file_modes[$inner_loop_counter]." --\n";
     $file_handle = fopen($filename, $file_modes[$inner_loop_counter]);
     if (!$file_handle) {
        echo "Error: failed to fopen() file: $filename!";
        exit();
     }
- 
+
     /* read file by giving the acutal length, check the length and content by calculating the 
       hash using md5() function 
     */
     /* Reading 1024 bytes from file, expecting 1024 bytes */ ;
-    
+
     var_dump(ftell($file_handle));
     var_dump( feof($file_handle) );
     echo "Reading 1024 bytes from file, expecting 1024 bytes ... ";
@@ -68,7 +68,7 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
     var_dump( feof($file_handle) );
     var_dump( md5($data_from_file) ); // calculate the hash and dump it
 
-    /* read file by giving size more than its size */   
+    /* read file by giving size more than its size */
     var_dump(rewind($file_handle));
     var_dump(ftell($file_handle));
     var_dump( feof($file_handle) );

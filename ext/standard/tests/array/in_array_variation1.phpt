@@ -20,7 +20,7 @@ $arrays = array (
   array(TRUE, FALSE),
   array("", array()),
   array("abcd\x00abcd\x00abcd"),
-  array("abcd\tabcd\nabcd\rabcd\0abcdefghij") 
+  array("abcd\tabcd\nabcd\rabcd\0abcdefghij")
 );
 
 $array_compare = array (
@@ -50,15 +50,15 @@ foreach($arrays as $array) {
   foreach($array_compare as $compare) {
     echo "-- Iteration $counter --\n";
     //strict option OFF
-    var_dump(in_array($compare,$array));  
+    var_dump(in_array($compare,$array));
     //strict option ON
-    var_dump(in_array($compare,$array,TRUE));  
+    var_dump(in_array($compare,$array,TRUE));
     //strict option OFF
-    var_dump(in_array($compare,$array,FALSE));  
+    var_dump(in_array($compare,$array,FALSE));
     $counter++;
  }
 }
-		
+
 echo "Done\n";
 ?>
 --EXPECT--

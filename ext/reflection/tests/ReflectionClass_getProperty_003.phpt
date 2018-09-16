@@ -9,10 +9,10 @@ class A {
 	static public $pubC = "pubC in A";
 	static protected $protC = "protC in A";
 	static private $privC = "privC in A";
-	
+
 	static public $pubA = "pubA in A";
 	static protected $protA = "protA in A";
-	static private $privA = "privA in A";		
+	static private $privA = "privA in A";
 }
 
 class B extends A {
@@ -22,7 +22,7 @@ class B extends A {
 
 	static public $pubB = "pubB in B";
 	static protected $protB = "protB in B";
-	static private $privB = "privB in B";	
+	static private $privB = "privB in B";
 }
 
 class C extends B {
@@ -34,7 +34,7 @@ class C extends B {
 class X {
 	static public $pubC = "pubC in X";
 	static protected $protC = "protC in X";
-	static private $privC = "privC in X";	
+	static private $privC = "privC in X";
 }
 
 $myC = new C;
@@ -52,10 +52,10 @@ function showInfo($name) {
 	try {
 		var_dump($rp);
 		var_dump($rp->getValue($myC));
-	} catch (Exception $e) {		
+	} catch (Exception $e) {
 		echo $e->getMessage() . "\n";
 		return;
-	}		
+	}
 }
 
 

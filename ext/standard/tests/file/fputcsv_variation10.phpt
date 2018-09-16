@@ -2,7 +2,7 @@
 Test fputcsv() : usage variations - with line without any csv fields 
 --FILE--
 <?php
-/* 
+/*
  Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
  Description: Format line as CSV and write to the file pointer 
 */
@@ -28,13 +28,13 @@ $filename = "$file_path/fputcsv_variation10.tmp";
 $file_modes = array ("r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+                     "x+", "x+b", "x+t");
 
 $loop_counter = 1;
 foreach ($fields as $field) {
   for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
-    
-    echo "\n-- file opened in $file_modes[$mode_counter] --\n";  
+
+    echo "\n-- file opened in $file_modes[$mode_counter] --\n";
     // create the file and add the content with has csv fields
     if ( strstr($file_modes[$mode_counter], "r") ) {
       $file_handle = fopen($filename, "w");
@@ -46,16 +46,16 @@ foreach ($fields as $field) {
       exit();
     }
     $csv_field = $field;
-    
+
     // write to a file in csv format
     var_dump( fputcsv($file_handle, $csv_field) );
-    
+
     // check the file pointer position and eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
     //close the file
     fclose($file_handle);
-    
+
     // print the file contents 
     var_dump( file_get_contents($filename) );
 

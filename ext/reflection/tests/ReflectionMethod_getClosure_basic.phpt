@@ -5,7 +5,7 @@ Test ReflectionMethod::getClosure() function : basic functionality
 /* Prototype  : public mixed ReflectionFunction::getClosure()
  * Description: Returns a dynamically created closure for the method 
  * Source code: ext/reflection/php_reflection.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ReflectionMethod::getClosure() : basic functionality ***\n";

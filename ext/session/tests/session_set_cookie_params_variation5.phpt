@@ -9,7 +9,7 @@ session.cookie_httponly=TRUE
 
 ob_start();
 
-/* 
+/*
  * Prototype : void session_set_cookie_params(int $lifetime [, string $path [, string $domain [, bool $secure [, bool $httponly]]]])
  * Description : Set the session cookie parameters
  * Source code : ext/session/session.c 

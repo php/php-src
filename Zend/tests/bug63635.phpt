@@ -5,17 +5,17 @@ Bug #63635 (Segfault in gc_collect_cycles)
 class Node {
 	public $parent = NULL;
 	public $children = array();
-	
+
 	function __construct(Node $parent=NULL) {
 		if ($parent) {
 			$parent->children[] = $this;
 		}
 		$this->children[] = $this;
 	}
-	
+
 	function __destruct() {
 		$this->children = NULL;
-	}	
+	}
 }
 
 define("MAX", 16);

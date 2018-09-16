@@ -2,7 +2,7 @@
 Test fgetcsv() : usage variations - with only file handle as argument, file pointer pointing at end of file
 --FILE--
 <?php
-/* 
+/*
  Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
  Description: Gets line from file pointer and parse for CSV fields
 */
@@ -31,7 +31,7 @@ $filename = dirname(__FILE__) . '/fgetcsv_variation29.tmp';
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+                     "x+", "x+b", "x+t");
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {
@@ -61,9 +61,9 @@ foreach ($csv_lists as $csv_list) {
     if ( strstr($file_modes[$mode_counter], "r" ) ) {
       fclose($file_handle);
       $file_handle = fopen($filename, $file_modes[$mode_counter]);
-    } 
-      
-    echo "\n-- Testing fgetcsv() with file opened using $file_modes[$mode_counter] mode --\n"; 
+    }
+
+    echo "\n-- Testing fgetcsv() with file opened using $file_modes[$mode_counter] mode --\n";
 
     // set the file pointer to EOF
     var_dump( fseek($file_handle, 0, SEEK_END) );
@@ -72,7 +72,7 @@ foreach ($csv_lists as $csv_list) {
 
     // now file pointer should point to end of the file, try reading again 
     var_dump( feof($file_handle) );
-    var_dump( fgetcsv($file_handle) );  
+    var_dump( fgetcsv($file_handle) );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

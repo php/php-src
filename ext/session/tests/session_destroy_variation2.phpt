@@ -7,7 +7,7 @@ Test session_destroy() function : variation
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_destroy(void)
  * Description : Destroys all data registered to a session
  * Source code : ext/session/session.c 

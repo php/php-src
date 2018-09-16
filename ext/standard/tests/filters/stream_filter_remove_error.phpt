@@ -10,7 +10,7 @@ if(! in_array( "string.rot13", $filters )) die( "skip rot13 filter not available
 /* Prototype  : bool stream_filter_remove(resource stream_filter)
  * Description: Flushes any data in the filter's internal buffer, removes it from the chain, and frees the resource 
  * Source code: ext/standard/streamsfuncs.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $file = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';

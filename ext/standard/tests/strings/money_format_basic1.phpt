@@ -45,12 +45,12 @@ echo gettype(money_format('%=*14#8.2n', $value))."\n";
 echo gettype(money_format('%=*14#8.2n', $negative_value))."\n";
 
 // Same again but disable grouping character
-echo "Format again but disable grouping character\n"; 
+echo "Format again but disable grouping character\n";
 echo gettype(money_format('%=*^14#8.2n', $value))."\n";
 echo gettype(money_format('%=*^14#8.2n', $negative_value))."\n";
 
 // Same again but suppress currency symbol
-echo "Format again suppress currency symbol\n"; 
+echo "Format again suppress currency symbol\n";
 echo gettype(money_format('%=*!14#8.2n', $value))."\n";
 echo gettype(money_format('%=*!14#8.2n', $negative_value))."\n";
 

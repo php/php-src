@@ -5,7 +5,7 @@ Test gethostbynamel() function : error conditions
 /* Prototype  : proto array gethostbynamel(string hostname)
  * Description: Return a list of IP addresses that a given hostname resolves to. 
  * Source code: ext/standard/dns.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gethostbynamel() : error conditions ***\n";

@@ -17,8 +17,8 @@ Test ksort() function : usage variations - sort octal values
 echo "*** Testing ksort() : usage variations ***\n";
 
 // an array containing unsorted octal values
-$unsorted_oct_array = array ( 
-  01235 => 01, 0321 => 02, 0345 => 03, 066 => 04, 0772 => 05, 
+$unsorted_oct_array = array (
+  01235 => 01, 0321 => 02, 0345 => 03, 066 => 04, 0772 => 05,
   077 => 06, -066 => -01, -0345 => -02, 0 => 0
 );
 

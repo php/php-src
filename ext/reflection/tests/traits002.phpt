@@ -7,7 +7,7 @@ abstract class foo {
 }
 
 trait bar {
-	
+
 }
 
 reflectionclass::export('foo');

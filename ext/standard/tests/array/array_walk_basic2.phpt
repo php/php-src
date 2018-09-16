@@ -18,7 +18,7 @@ $fruits = array("d" => "lemon", "a" => "orange", "b" => "banana", "c" => "apple"
  *               key - key in key/value pair
  *               prefix - string to be added 
  *  Description : alters the array values by appending prefix string
- */ 
+ */
 function test_alter(&$item, $key, $prefix)
 {
   // dump the arguments to check that they are passed

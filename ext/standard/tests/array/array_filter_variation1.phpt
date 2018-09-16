@@ -76,7 +76,7 @@ $input_values = array(
 
         // object data
 /*20*/  new MyClass(),
- 
+
         // resource data
         $fp,
 

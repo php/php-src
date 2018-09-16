@@ -50,7 +50,7 @@ echo "\n-- Iteration 9 --\n";
 print $foo;          // foobar
 
 echo "\n-- Iteration 10 --\n";
-$variable = "VARIABLE"; 
+$variable = "VARIABLE";
 print <<<END
 This uses the "here document" syntax to output
 multiple lines with $variable interpolation. Note

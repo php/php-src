@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 if (!file_exists("/dev/null")) {
     die('skip /dev/null not available');
-}    
+}
 ?>
 --FILE--
 <?php

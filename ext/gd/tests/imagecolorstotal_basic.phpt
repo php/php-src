@@ -9,7 +9,7 @@ if(!extension_loaded('gd')) {
 if(!function_exists('imagecolorstotal') || !function_exists('imagecreatefromgif')) {
     die('skip imagecolorstotal and imagecreatefromgif functions not available in this build');
 }
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : int imagecolorstotal  ( resource $image  )

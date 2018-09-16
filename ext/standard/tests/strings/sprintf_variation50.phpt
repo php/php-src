@@ -44,7 +44,7 @@ $scientific_formats = array(
 $count = 1;
 foreach($string_values as $string_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($scientific_formats as $format) {
     var_dump( sprintf($format, $string_value) );
   }

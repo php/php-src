@@ -2,7 +2,7 @@
 Test nl_langinfo() function : error conditions  
 --SKIPIF--
 <?php
-if( substr(PHP_OS, 0, 3) == 'WIN'){  
+if( substr(PHP_OS, 0, 3) == 'WIN'){
   die('skip Not for Windows');
 }
 ?>

@@ -34,7 +34,7 @@ var_dump(gzinflate($data2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gzdeflate() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

@@ -16,7 +16,7 @@ Test ctype_xdigit() function : usage variations - Different strings
 
 echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 $values = array(
 /*1*/  "This string contains just letters and spaces", // Simple string
@@ -54,7 +54,7 @@ foreach($values as $value) {
       $iterator++;
 };
 
-setlocale(LC_CTYPE, $orig); 
+setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
 --EXPECT--

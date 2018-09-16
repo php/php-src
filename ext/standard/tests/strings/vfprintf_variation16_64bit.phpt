@@ -57,9 +57,9 @@ $args_array = array(
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
- 
+
 /* creating dumping file */
 $data_file = dirname(__FILE__) . '/vfprintf_variation16_64bit.txt';
 if (!($fp = fopen($data_file, 'wt')))
@@ -78,7 +78,7 @@ fclose($fp);
 print_r(file_get_contents($data_file));
 echo "\n";
 
-unlink($data_file);  
+unlink($data_file);
 
 ?>
 ===DONE===

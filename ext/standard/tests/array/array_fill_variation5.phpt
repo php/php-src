@@ -20,7 +20,7 @@ $num = 2;
 
 //array of different types of array values for 'val' argument  
 $values = array(
-           
+
   /* 1  */  array(),
             array(1 , 2 , 3 , 4),
             array(1 => "Hi" , 2 => "Hello"),
@@ -44,7 +44,7 @@ for($i = 0; $i < count($values); $i++)
 {
   echo "-- Iteration $counter --\n";
   $val = $values[$i];
-  
+
   var_dump( array_fill($start_key , $num , $val) );
 
   $counter++;

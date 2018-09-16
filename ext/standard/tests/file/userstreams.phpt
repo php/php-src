@@ -102,7 +102,7 @@ class mystream
 			$this->position = strlen($GLOBALS[$this->varname]);
 		else
 			$this->position = 0;
-		
+
 		return true;
 	}
 
@@ -266,7 +266,7 @@ foreach($line_lengths as $line_length) {
 			var_dump($dat);
 			break;
 		}
-		
+
 		$j++;
 	}
 	if ($fail_count)

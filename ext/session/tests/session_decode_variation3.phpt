@@ -9,7 +9,7 @@ session.serialize_handler=blah
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_decode(void)
  * Description : Decodes session data from a string
  * Source code : ext/session/session.c 

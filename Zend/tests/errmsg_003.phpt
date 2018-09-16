@@ -15,5 +15,5 @@ $t->foo();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot re-assign $this in %s on line %d

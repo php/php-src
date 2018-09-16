@@ -39,8 +39,8 @@ echo "\n-- Testing arsort() by supplying various arrays containing sub arrays --
 
 // loop through to test arsort() with different arrays
 foreach ($various_arrays as $array) {
- 
-  echo "\n-- Iteration $count --\n"; 
+
+  echo "\n-- Iteration $count --\n";
   // testing arsort() function by supplying different arrays, flag value is default
   echo "- With default sort_flag -\n";
   $temp_array = $array;

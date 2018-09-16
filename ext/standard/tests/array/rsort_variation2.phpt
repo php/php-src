@@ -64,7 +64,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -73,7 +73,7 @@ $inputs = array(
 /*18*/ "SORT_NUMERIC",
        'SORT_NUMERIC',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -91,14 +91,14 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  
+
   //create temporary array in case rsort() works
   $temp = $array_arg;
-  
+
   var_dump( rsort($temp, $input) );
   var_dump($temp);
   $iterator++;
-  
+
   $temp = null;
 };
 
