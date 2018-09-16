@@ -3,7 +3,7 @@ Check for mktime with out-of-range parameters
 --INI--
 error_reporting=E_ALL
 --FILE--
-<?php 
+<?php
 
 date_default_timezone_set("Europe/Amsterdam");
 # MacOS/X libc implementation doesn't treat out-of-range values

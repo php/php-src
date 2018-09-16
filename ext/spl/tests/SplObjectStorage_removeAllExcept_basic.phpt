@@ -5,9 +5,9 @@ Matthew Turland (me@matthewturland.com)
 --FILE--
 <?php
 
-    $a = (object) 'a'; 
-    $b = (object) 'b'; 
-    $c = (object) 'c'; 
+    $a = (object) 'a';
+    $b = (object) 'b';
+    $c = (object) 'c';
 
    $foo = new SplObjectStorage;
     $foo->attach($a);

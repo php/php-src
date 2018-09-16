@@ -24,7 +24,7 @@ class MyClass
 
 //resource variable
 $fp = fopen(__FILE__,'r');
-    
+
 //array of values for 'input' argument
 $values = array(
           // int data

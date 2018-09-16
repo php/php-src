@@ -5,7 +5,7 @@ SPL: Test class_implements() function : basic
 /* Prototype  : array class_implements(mixed what [, bool autoload ])
  * Description: Return all classes and interfaces implemented by SPL 
  * Source code: ext/spl/php_spl.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing class_implements() : basic ***\n";

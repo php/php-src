@@ -5,7 +5,7 @@ method_exists() on userspace classes; static & non-static methods with various v
 /* Prototype  : proto bool is_subclass_of(object object, string class_name)
  * Description: Returns true if the object has this class as one of its parents 
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 Class B {
@@ -14,7 +14,7 @@ Class B {
 	private function inherit_priv() {}
 	static public function inherit_static_pub() {}
 	static protected function inherit_static_prot() {}
-	static private function inherit_static_priv() {}	
+	static private function inherit_static_priv() {}
 }
 
 Class C extends B {

@@ -10,7 +10,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 /* Prototype  : bool curl_exec(resource ch)
  * Description: Perform a cURL session 
  * Source code: ext/curl/interface.c
- * Alias to functions: 
+ * Alias to functions:
  */
   include 'server.inc';
   $host = curl_cli_server_start();

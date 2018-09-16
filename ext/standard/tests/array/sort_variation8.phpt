@@ -37,8 +37,8 @@ echo "\n-- Testing sort() by supplying various arrays containing sub arrays --\n
 
 // loop through to test sort() with different arrays
 foreach ($various_arrays as $array) {
- 
-  echo "\n-- Iteration $count --\n"; 
+
+  echo "\n-- Iteration $count --\n";
   // testing sort() function by supplying different arrays, flag value is defualt
   echo "- With Defualt sort flag -\n";
   $temp_array = $array;

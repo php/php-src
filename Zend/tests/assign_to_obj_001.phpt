@@ -20,5 +20,5 @@ $a->test();
 $a->test();
 echo "okey";
 ?>
---EXPECT--	
+--EXPECT--
 okey

@@ -15,8 +15,8 @@ function b() {
 var_dump(b()[0]); // Notice: Undefined offset: 0 
 
 class foo {
-	public $y = 1; 
-	
+	public $y = 1;
+
 	public function test() {
 		return array(array(array('foobar')));
 	}

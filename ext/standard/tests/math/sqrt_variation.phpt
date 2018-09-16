@@ -4,10 +4,10 @@ Test variations in usage of sqrt()
 precision = 14
 --FILE--
 <?php
-/* 
+/*
  * proto float sqrt(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 
 //Test sqrt with a different input values
@@ -27,7 +27,7 @@ $values = array(23,
 		"1000ABC",
 		null,
 		true,
-		false);	
+		false);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = sqrt($values[$i]);

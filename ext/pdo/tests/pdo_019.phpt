@@ -15,10 +15,10 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
-$db->exec('INSERT INTO test VALUES(0, \'String0\')'); 
-$db->exec('INSERT INTO test VALUES(1, \'String1\')'); 
-$db->exec('INSERT INTO test VALUES(2, \'String2\')'); 
-$db->exec('INSERT INTO test VALUES(3, \'String3\')'); 
+$db->exec('INSERT INTO test VALUES(0, \'String0\')');
+$db->exec('INSERT INTO test VALUES(1, \'String1\')');
+$db->exec('INSERT INTO test VALUES(2, \'String2\')');
+$db->exec('INSERT INTO test VALUES(3, \'String3\')');
 
 
 var_dump($db->query('SELECT COUNT(*) FROM test')->fetchColumn());

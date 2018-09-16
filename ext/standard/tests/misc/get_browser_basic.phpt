@@ -20,7 +20,7 @@ browscap={PWD}/browscap.ini
  * Returns an object by default; if return_array is true, returns an array. 
  *
  * Source code: ext/standard/browscap.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $browsers = include dirname(__FILE__) . DIRECTORY_SEPARATOR . 'browsernames.inc';

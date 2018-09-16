@@ -10,7 +10,7 @@ assert.quiet_eval = 0
 --FILE--
 <?php
 function a($file,$line,$myev)
-{ 
+{
 	echo "assertion failed $line,\"$myev\"\n";
 }
 

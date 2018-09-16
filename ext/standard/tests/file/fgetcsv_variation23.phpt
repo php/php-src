@@ -2,7 +2,7 @@
 Test fgetcsv() : usage variations - empty file
 --FILE--
 <?php
-/* 
+/*
  Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
  Description: Gets line from file pointer and parse for CSV fields
 */

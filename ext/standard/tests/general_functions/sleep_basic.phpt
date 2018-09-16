@@ -15,7 +15,7 @@ echo "*** Testing sleep() : basic functionality ***\n";
 
 $sleeptime = 1; // sleep for 1 seconds
 
-set_time_limit(20); 
+set_time_limit(20);
 
 $time_start = microtime(true);
 

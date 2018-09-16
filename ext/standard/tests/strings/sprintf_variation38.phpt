@@ -32,8 +32,8 @@ $string_values = array(
 );
 
 // array of hexa formats
-$hexa_formats = array(  
-  "%x", "%xx", "%lx", 
+$hexa_formats = array(
+  "%x", "%xx", "%lx",
   "%Lx", " %x", "%x ",
   "\t%x", "\n%x", "%4x",
   "%30x", "%[0-9A-Fa-f]", "%*x"
@@ -42,7 +42,7 @@ $hexa_formats = array(
 $count = 1;
 foreach($string_values as $string_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($hexa_formats as $format) {
     var_dump( sprintf($format, $string_value) );
   }

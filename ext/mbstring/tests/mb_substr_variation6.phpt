@@ -41,7 +41,7 @@ for ($i = -60; $i <= 60; $i += 10) {
 	}
 	else {
 	   var_dump($a);
-	}		
+	}
 	echo "--Multibyte String --\n";
 	$b = mb_substr($string_mb, $i, 4, 'UTF-8');
 	if (strlen($a) == mb_strlen($b, 'UTF-8')) { // should return same length
@@ -49,7 +49,7 @@ for ($i = -60; $i <= 60; $i += 10) {
 	} else {
 		echo "Difference in length of ASCII string and multibyte string\n";
 	}
-	
+
 }
 
 echo "Done";

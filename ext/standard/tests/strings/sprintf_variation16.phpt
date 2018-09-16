@@ -29,9 +29,9 @@ $float_values = array(
 );
 
 // array of string formats
-$string_formats = array( 
-  "%s", "%hs", "%ls", 
-  "%Ls"," %s", "%s ", 
+$string_formats = array(
+  "%s", "%hs", "%ls",
+  "%Ls"," %s", "%s ",
   "\t%s", "\n%s", "%4s",
   "%30s", "%[a-zA-Z0-9]", "%*s"
 );
@@ -39,7 +39,7 @@ $string_formats = array(
 $count = 1;
 foreach($float_values as $float_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($string_formats as $format) {
     var_dump( sprintf($format, $float_value) );
   }

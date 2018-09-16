@@ -11,7 +11,7 @@ Test str_split() function : usage variations - different heredoc strings as 'str
 */
 
 /*
-* Passing different heredoc strings as 'str' argument to the str_split() 
+* Passing different heredoc strings as 'str' argument to the str_split()
 * with 'split_length' 10 
 */
 
@@ -83,7 +83,7 @@ foreach($heredoc_array as $str) {
   var_dump( str_split($str, $split_length) );
   $count++;
 };
- 
+
 echo "Done"
 ?>
 --EXPECT--

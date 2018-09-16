@@ -3,7 +3,7 @@ Testing __unset with private visibility
 --FILE--
 <?php
 
-class foo {	
+class foo {
 	private function __unset($a) {
 		print "unset\n";
 	}

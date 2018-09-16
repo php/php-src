@@ -7,7 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 /* Prototype  : array pathinfo(string path[, int options])
  * Description: Returns information about a certain string 
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing pathinfo() : usage variation ***\n";

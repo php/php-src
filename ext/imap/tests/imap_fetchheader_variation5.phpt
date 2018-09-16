@@ -24,7 +24,7 @@ $stream_id = setup_test_mailbox('', 3, $mailbox, 'notSimple'); // set up temp ma
 
 $sequences = array (0,     4, // out of range
                     '1,3', '1:3', // message sequences instead of numbers
-                    ); 
+                    );
 
 foreach($sequences as $msg_no) {
 	echo "\n-- \$msg_no is $msg_no --\n";

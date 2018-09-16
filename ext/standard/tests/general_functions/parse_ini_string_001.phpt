@@ -69,7 +69,7 @@ Non_alpha12 = \
 ;Non_alpha17 = ~
 ;Non_alpha18 = !
 ;Non_alpha19 = $
-;Non_alpha20 = () 
+;Non_alpha20 = ()
 
 Non_alpha1_quotes = ";"
 Non_alpha2_quotes = "+"

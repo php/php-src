@@ -7,7 +7,7 @@ Test timezone_offset_get() function : usage variation - Passing unexpected value
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTimeZone::getOffset()
  */
- 
+
 echo "*** Testing timezone_offset_get() : usage variation -  unexpected values to second argument \$datetime***\n";
 
 //Set the default time zone 
@@ -98,7 +98,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource 
       'resource' => $file_handle
 );

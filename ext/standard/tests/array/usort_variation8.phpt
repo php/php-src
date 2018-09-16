@@ -16,7 +16,7 @@ Test usort() function : usage variations - use built in functions as $cmp_functi
 echo "*** Testing usort() : usage variation ***\n";
 
 // Initializing variables
-$array_arg = array("b" => "Banana", "m" => "Mango", "a" => "apple", 
+$array_arg = array("b" => "Banana", "m" => "Mango", "a" => "apple",
                    "p" => "Pineapple", "o" => "orange");
 
 // Testing library functions as comparison function 

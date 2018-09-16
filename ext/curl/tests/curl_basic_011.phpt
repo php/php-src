@@ -23,9 +23,9 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
 
   ob_start(); // start output buffering
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_COOKIE, 'foo=bar');    
+  curl_setopt($ch, CURLOPT_COOKIE, 'foo=bar');
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $curl_content = curl_exec($ch);
   curl_close($ch);
 

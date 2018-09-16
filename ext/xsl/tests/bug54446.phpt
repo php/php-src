@@ -6,7 +6,7 @@ if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
 ?>
 --FILE--
 <?php
-include("prepare.inc"); 
+include("prepare.inc");
 
 $outputfile = dirname(__FILE__)."/bug54446test.txt";
 if (file_exists($outputfile)) {
@@ -31,10 +31,10 @@ EOT;
 $xsl->loadXML( $sXsl );
 
 # START XSLT 
-$proc->importStylesheet( $xsl ); 
+$proc->importStylesheet( $xsl );
 
 # TRASNFORM & PRINT 
-print $proc->transformToXML( $dom ); 
+print $proc->transformToXML( $dom );
 
 
 if (file_exists($outputfile)) {
@@ -47,7 +47,7 @@ if (file_exists($outputfile)) {
 $proc->setSecurityPrefs(XSL_SECPREF_NONE);
 
 # TRASNFORM & PRINT 
-print $proc->transformToXML( $dom ); 
+print $proc->transformToXML( $dom );
 
 
 if (file_exists($outputfile)) {
@@ -62,7 +62,7 @@ unlink($outputfile);
 $proc->setSecurityPrefs( XSL_SECPREF_WRITE_FILE |  XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY);
 
 # TRASNFORM & PRINT 
-print $proc->transformToXML( $dom ); 
+print $proc->transformToXML( $dom );
 
 if (file_exists($outputfile)) {
     print "$outputfile exists, but shouldn't!\n";

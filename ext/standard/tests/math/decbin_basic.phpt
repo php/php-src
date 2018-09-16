@@ -15,7 +15,7 @@ $values = array(10,
 				true,
 				false,
 				null, 
-				);	
+				);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = decbin($values[$i]);

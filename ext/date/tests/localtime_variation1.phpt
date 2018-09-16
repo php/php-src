@@ -6,7 +6,7 @@ Test localtime() function : usage variation - Passing unexpected values to first
  * Description: Returns the results of the C system call localtime as an associative array 
  * if the associative_array argument is set to 1 other wise it is a regular array 
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing localtime() : usage variation ***\n";

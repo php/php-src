@@ -13,13 +13,13 @@ echo "*** Testing strrpos() function: with single quoted strings ***\n";
 $haystack = 'Hello,\t\n\0\n  $&!#%()*<=>?@hello123456he \x234 \101 ';
 $needle = array(
   //regular strings
-  'l',  
+  'l',
   'L',
   'HELLO',
   'hEllo',
 
   //escape characters
-  '\t',  
+  '\t',
   '\T',
   '     ',
   '\n',
@@ -28,7 +28,7 @@ $needle = array(
 ',  //new line
 
   //nulls
-  '\0',  
+  '\0',
   NULL,
   null,
 
@@ -40,13 +40,13 @@ $needle = array(
   '',
 
   //special chars
-  ' ',  
+  ' ',
   '$',
   ' $',
   '&',
   '!#',
   '()',
-  '<=>',  
+  '<=>',
   '>',
   '=>',
   '?',

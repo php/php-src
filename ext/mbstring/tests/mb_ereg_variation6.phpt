@@ -24,13 +24,13 @@ if(mb_regex_encoding('utf-8') == true) {
 	echo "Could not set regex encoding to utf-8\n";
 }
 
-$regex_char = array ('\w+' => '\w+', 
-                     '\W+' => '\W+', 
-                     '\s+' => '\s+', 
-                     '\S+' => '\S+', 
-                     '\d+' => '\d+', 
-                     '\D+' => '\D+', 
-                     '\b' =>  '\b', 
+$regex_char = array ('\w+' => '\w+',
+                     '\W+' => '\W+',
+                     '\s+' => '\s+',
+                     '\S+' => '\S+',
+                     '\d+' => '\d+',
+                     '\D+' => '\D+',
+                     '\b' =>  '\b',
                      '\B' =>  '\B');
 
 $string_ascii = 'This is an English string. 0123456789.';

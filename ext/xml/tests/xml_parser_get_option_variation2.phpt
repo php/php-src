@@ -3,15 +3,15 @@ Test xml_parser_get_option() function : usage variations
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_parser_get_option(resource parser, int option)
  * Description: Get options from an XML parser 
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_parser_get_option() : usage variations ***\n";

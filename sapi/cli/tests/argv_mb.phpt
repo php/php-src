@@ -18,7 +18,7 @@ var_dump(`$php -n $argv_fl 多字节字符串 マルチバイト文字列 мно
 
 ?>
 ==DONE==
---EXPECTF--	
+--EXPECTF--
 string(%d) "array(%d) {
   [0]=>
   string(%d) "%sargv_test.php"

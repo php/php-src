@@ -7,7 +7,7 @@ Test DateTime::setDate() function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions: date_date_set()
  */
- 
+
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing DateTime::setDate() : error conditions ***\n";

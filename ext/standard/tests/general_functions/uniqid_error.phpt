@@ -17,7 +17,7 @@ var_dump(uniqid($prefix, $more_entropy, $extra_arg));
 echo "\n-- Testing uniqid() function with invalid values for \$prefix --\n";
 class class1{}
 $obj = new class1();
-$res = fopen(__FILE__, "r"); 
+$res = fopen(__FILE__, "r");
 $array = array(1,2,3);
 
 uniqid($array, false);
@@ -28,7 +28,7 @@ fclose($res);
 
 ?>
 ===DONE===
---EXPECTF-- 
+--EXPECTF--
 *** Testing uniqid() : error conditions ***
 
 -- Testing uniqid() function with more than expected no. of arguments --

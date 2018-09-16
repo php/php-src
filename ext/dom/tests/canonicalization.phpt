@@ -40,7 +40,7 @@ echo $doc->c14N(TRUE, FALSE, array('query'=>'(//. | //@* | //namespace::*)'))."\
    using xpath query with registered namespace.
    test namespace prefix is also included. */
 echo $doc->c14N(TRUE, FALSE, 
-                array('query'=>'(//a:contain | //a:bar | .//namespace::*)', 
+                array('query'=>'(//a:contain | //a:bar | .//namespace::*)',
                       'namespaces'=>array('a'=>'http://www.example.com/ns/foo')), 
                 array('test'))."\n\n";
 

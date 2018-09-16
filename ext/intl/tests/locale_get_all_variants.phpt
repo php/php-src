@@ -24,7 +24,7 @@ function ut_main()
 		'sgn-BE-nl',
 		'sgn-CH-de',
 		'sl_IT_rozaj@currency=EUR'
-	);	
+	);
     $res_str = '';
 	foreach($locales as $locale){
 		$variants_arr = ut_loc_locale_get_all_variants( $locale);

@@ -20,7 +20,7 @@ var_dump($bar);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 object(Bar)#%d (2) {
   ["foo":"Bar":private]=>
   array(3) {

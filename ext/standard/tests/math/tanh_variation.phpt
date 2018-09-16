@@ -4,10 +4,10 @@ Test variations in usage of tanh()
 precision = 10
 --FILE--
 <?php
-/* 
+/*
  * proto float tanh(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 
 //Test tanh with a different input values
@@ -26,7 +26,7 @@ $values = array(23,
 		"1000ABC",
 		null,
 		true,
-		false);	
+		false);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = tanh($values[$i]);

@@ -55,13 +55,13 @@ $input = array(
 );
 
 // With default callback function
-var_dump( array_filter($input) );  
+var_dump( array_filter($input) );
 
 // With callback function which returns always true
-var_dump( array_filter($input, 'always_true') ); 
+var_dump( array_filter($input, 'always_true') );
 
 // With callback function which returns always false
-var_dump( array_filter($input, 'always_false') );  
+var_dump( array_filter($input, 'always_false') );
 
 echo "Done"
 ?>

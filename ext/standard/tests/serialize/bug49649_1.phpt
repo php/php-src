@@ -7,11 +7,11 @@ Bug #49649 (unserialize() doesn't handle changes in property visibility) - to pr
  *class Foo
  *{
  *	private $private = 1;
- *	
+ *
  *	protected $protected = 2;
- *	
+ *
  *	public $public = 3;
- *	
+ *
  *	public $notThere = 'old';
  * }
  *

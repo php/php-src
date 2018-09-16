@@ -43,11 +43,11 @@ function cmp_function($value1, $value2)
 class SimpleClass
 {
   private $int_value;
-  
+
   public function __construct($value) {
     $this->int_value = $value;
   }
-  
+
 }
 
 // Class without any member

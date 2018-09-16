@@ -1,17 +1,17 @@
 --TEST--
 Test xml_get_current_column_number() function : error conditions 
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_get_current_column_number(resource parser)
  * Description: Get current column number for an XML parser 
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_get_current_column_number() : error conditions ***\n";

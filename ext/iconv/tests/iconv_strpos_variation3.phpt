@@ -71,7 +71,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
        "",
        '',
@@ -80,7 +80,7 @@ $inputs = array(
        "string",
        'string',
        $heredoc,
-       
+
        // object data
        new classA(),
 

@@ -66,7 +66,7 @@ var_dump(filter_var("http://www.example.com/index.php?a=b&c=d", FILTER_VALIDATE_
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(29) "http://example.com/index.html"
 string(32) "http://www.example.com/index.php"
 string(31) "http://www.example/img/test.png"

@@ -5,7 +5,7 @@ Test checkdate() function : error conditions
 /* Prototype  : bool checkdate  ( int $month  , int $day  , int $year  )
  * Description: Validate a Gregorian date
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing checkdate() : error conditions ***\n";

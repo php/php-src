@@ -15,7 +15,7 @@ echo "--- Testing sizeof() for all kinds of unset variables in default, Normal a
 
 // class declaration
 class test
-{  
+{
   public $member1;
 }
 
@@ -60,7 +60,7 @@ $counter = 1;
 foreach($values as $value)
 {
   echo "-- Iteration $counter --\n";
- 
+
   // unset the variable 
   unset($value);
 
@@ -68,7 +68,7 @@ foreach($values as $value)
   echo "Default Mode: ";
   var_dump( sizeof($value) );
   echo "\n";
- 
+
   echo "COUNT_NORMAL Mode: ";
   var_dump( sizeof($value, COUNT_NORMAL) );
   echo "\n";

@@ -18,7 +18,7 @@ echo "*** Testing array_intersect_assoc() : passing two dimensional array to bot
 
 // two dimensional arrays for $arr1 and $arr2 argument
 $arr1 = array (
-  
+
   // arrays with default keys
   array(1, 2, "hello", 'world'),
   array(1, 2, 3, 4),
@@ -26,7 +26,7 @@ $arr1 = array (
   // arrays with explicit keys
   array(1 => "one", 2 => "two", 3 => "three"),
   array("ten" => 10, "twenty" => 20.00, "thirty" => 30)
-);  
+);
 
 $arr2 = array (
   array(1, 2, 3, 4),

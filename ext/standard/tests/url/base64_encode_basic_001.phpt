@@ -5,7 +5,7 @@ Test base64_encode() function : basic functionality
 /* Prototype  : proto string base64_encode(string str)
  * Description: Encodes string using MIME base64 algorithm 
  * Source code: ext/standard/base64.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*

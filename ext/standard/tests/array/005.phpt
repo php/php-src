@@ -52,13 +52,13 @@ var_dump( array_shift($empty_array) );
 echo "\n*** Testing with various array inputs ***\n";
 
 $counter = 1;
-foreach( $mixed_array as $sub_array ) { 
+foreach( $mixed_array as $sub_array ) {
   echo "\n-- Input Array for Iteration $counter is -- \n";
   print_r( $sub_array );
   echo "\nOutput after shift is :\n";
   var_dump( array_shift($sub_array) );
   $counter++;
-} 
+}
 
 /*Checking for internal array pointer beint reset when shift is called */
 

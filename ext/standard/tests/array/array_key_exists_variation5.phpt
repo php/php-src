@@ -14,8 +14,8 @@ Test array_key_exists() function : usage variations - multidimensional arrays
 
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
-$multi_array = array ('zero' => 'val1', 
-                      'one' => 'val2', 
+$multi_array = array ('zero' => 'val1',
+                      'one' => 'val2',
                       'sub1' => array (1, 2, 3));
 
 echo "\n-- Attempt to match key in sub-array --\n";

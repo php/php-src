@@ -10,7 +10,7 @@ date_default_timezone_set('UTC');
 
 /*
  * This is parsed as the "first following Monday OR the current day if it is a Monday"
- */ 
+ */
 var_dump(date('Y-m-d', strtotime('1 Monday December 2008')));
 /*
  * This is parsed as the "second following Monday OR the first following 
@@ -24,15 +24,15 @@ var_dump(date('Y-m-d', strtotime('2 Monday December 2008')));
 var_dump(date('Y-m-d', strtotime('3 Monday December 2008')));
 /*
  * This is parsed as the "first following Monday after the first Monday in December"
- */ 
+ */
 var_dump(date('Y-m-d', strtotime('first Monday December 2008')));
 /*
  * This is parsed as the "second following Monday after the first Monday in December"
- */ 
+ */
 var_dump(date('Y-m-d', strtotime('second Monday December 2008')));
 /*
  * This is parsed as the "third following Monday after the first Monday in December"
- */ 
+ */
 var_dump(date('Y-m-d', strtotime('third Monday December 2008')));
 ?>
 --EXPECT--

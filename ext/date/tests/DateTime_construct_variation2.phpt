@@ -90,7 +90,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource 
       'resource' => $file_handle
 );
@@ -99,14 +99,14 @@ $time = "2005-07-14 22:30:41";
 
 foreach($inputs as $variation =>$timezone) {
       echo "\n-- $variation --\n";
-      
+
       try {
 			var_dump( new DateTime($time, $timezone) );
       } catch (Throwable $e) {
 			$msg = $e->getMessage();
 			echo "FAILED: " . $msg . "\n";
-      }	
-      
+      }
+
 };
 
 // closing the resource

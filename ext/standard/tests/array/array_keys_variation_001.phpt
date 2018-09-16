@@ -23,7 +23,7 @@ $i = 0;
 /* loop through to test array_keys() with different arrays */
 foreach ($arrays as $array) {
   echo "\n-- Iteration $i --\n";
-  var_dump(array_keys($array)); 
+  var_dump(array_keys($array));
   $i++;
 }
 

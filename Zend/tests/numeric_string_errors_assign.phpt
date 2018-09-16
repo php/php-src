@@ -25,7 +25,7 @@ echo "---", PHP_EOL;
 $a = foxcache("11 sed");
 $a *= "13 do";
 var_dump($a);
-$a = foxcache("eiusmod"); 
+$a = foxcache("eiusmod");
 $a *= "tempor";
 var_dump($a);
 echo "---", PHP_EOL;

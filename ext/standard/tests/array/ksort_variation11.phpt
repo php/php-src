@@ -32,7 +32,7 @@ Test this!!!
 EOT;
 
 $array = array (
-  $simple_heredoc1 => "Heredoc", 
+  $simple_heredoc1 => "Heredoc",
   $simple_heredoc2 => "HEREDOC",
   $multiline_heredoc => "heredoc string\twith!@# and 123\nTest this!!!"
 );

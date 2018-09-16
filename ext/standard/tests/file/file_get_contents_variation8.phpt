@@ -13,13 +13,13 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 /* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
  * Description: Read the entire file into a string 
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file_get_contents() : variation ***\n";
-/* An array of filenames */ 
+/* An array of filenames */
 $names_arr = array(
-  /* Invalid args */ 
+  /* Invalid args */
   -1,
   TRUE,
   FALSE,
@@ -30,7 +30,7 @@ $names_arr = array(
   array(),
 
   /* prefix with path separator of a non existing directory*/
-  "/no/such/file/dir", 
+  "/no/such/file/dir",
   "php/php"
 
 );

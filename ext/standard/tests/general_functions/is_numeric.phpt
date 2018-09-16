@@ -58,15 +58,15 @@ $numerics = array(
   //0x1111111111111111111111,
   -0x1111111,
   +0x6698319,
-  01000000000000000000000, 
+  01000000000000000000000,
   0123,
   0345,
-  -0200001,  
-  -0200001.7,  
-  0200001.7,  
-  +0200001,  
-  +0200001.7,  
-  +0200001.7,  
+  -0200001,
+  -0200001.7,
+  0200001.7,
+  +0200001,
+  +0200001.7,
+  +0200001.7,
   2.00000000000000000000001, // a float value with more precision points
   "1",	// numeric in the form of string
   "-1",
@@ -108,10 +108,10 @@ unset ($unset_var);
 // other types in a array 
 $not_numerics = array(
   "0x80001",
-  "-0x80001", 
-  "+0x80001", 
+  "-0x80001",
+  "+0x80001",
   "-0x80001.5",
-  "0x80001.5", 
+  "0x80001.5",
   new stdclass, // object
   $fp,  // resource
   $dfp,
@@ -126,7 +126,7 @@ $not_numerics = array(
   "20 test",
   "3.6test",
   "1,000",
-  "NULL", 
+  "NULL",
   "true",
   true,
   NULL,
@@ -151,7 +151,7 @@ var_dump( is_numeric() );
 
 //arguments more than expected 
 var_dump( is_numeric("10", "20") );
- 
+
 echo "Done\n";
 
 // close the resources used

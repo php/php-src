@@ -12,7 +12,7 @@ class test
 	public    $pub = "public";
 	protected $pro = "protected";
 	private   $pri = "private";
-	
+
 	function __construct()
 	{
 		$this->imp = "implicit";

@@ -37,7 +37,7 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
-       -2345,       
+       -2345,
 
        // float data
 /*5*/  10.5,
@@ -55,7 +55,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -65,14 +65,14 @@ $inputs = array(
 /*19*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // array data
        array(),
        array(1,2,4),
-       
+
        // object data
 /*24*/ new classA(),       
-       
+
        // undefined data
 /*25*/ @$undefined_var,
 

@@ -2,7 +2,7 @@
 Bug #60180 ($_SERVER["PHP_SELF"] incorrect)
 --SKIPIF--
 <?php
-if(!file_exists(dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc")) 
+if(!file_exists(dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc"))
 	die("skip could not found cli server script");
 $res = @include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc";
 if(!$res) {

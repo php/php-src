@@ -8,7 +8,7 @@ class C {
 $c = new C;
 
 echo "\n--> Access non-visible static prop like instance prop:\n";
-$c->y =& $ref; 
+$c->y =& $ref;
 ?>
 ==Done==
 --EXPECTF--

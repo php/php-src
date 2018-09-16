@@ -102,7 +102,7 @@ var_dump( doubleval() );
 //arguments more than expected 
 var_dump( floatval(TRUE, FALSE) );
 var_dump( doubleval(TRUE, FALSE) );
- 
+
 echo "\nDone\n";
 
 

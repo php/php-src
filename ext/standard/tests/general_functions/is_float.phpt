@@ -8,7 +8,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 <?php
 /* Prototype: bool is_float ( mixed $var );
  * Description: Finds whether the given variable is a float 
- */ 
+ */
 
 echo "*** Testing is_float(), is_double() and is_real() with float values***\n";
 // different valid  float values 
@@ -90,7 +90,7 @@ $not_floats = array (
   TRUE,
   false,
   FALSE,
-  
+
   "",  // strings
   '',
   "0",
@@ -103,7 +103,7 @@ $not_floats = array (
   '1e5',
   '1.5e6_string',
   "1.5e6_string",
- 
+
   1,  // integers, hex and octal
   -1,
   0,
@@ -112,7 +112,7 @@ $not_floats = array (
   -0x673,
   0123,
   -0123,
-   
+
   @$unset_var,  // unset variable
   @$undefined_var
 );
@@ -137,7 +137,7 @@ var_dump( is_real() );
 var_dump( is_float( $floats[0], $floats[1]) );
 var_dump( is_double( $floats[0], $floats[1]) );
 var_dump( is_real( $floats[0], $floats[1]) );
- 
+
 echo "Done\n";
 
 // close the resources used 

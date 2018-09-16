@@ -5,7 +5,7 @@ Test whether a node has child nodes: hasChildNodes()
 include('skipif.inc');
 ?>
 --FILE--
-<?php 
+<?php
 
 /* Create an XML document
  * with strcuture

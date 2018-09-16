@@ -19,16 +19,16 @@ $basic_arrays = array (
   array('d' => 'drink', 'p' => 'port', 's' => 'set'),   // another associative array
   array(1 => 'One', 2 => 'two', 3 => "three")           // associative array with key as integers
 );
-            
+
 $varient_arrays = array (
    array(),    // empty array
    array(""),  // array with null string
    array(NULL),// array with NULL 
    array(null),// array with null
    array(NULL, true, null, "", 1), // mixed array
-   array(-1.5 => "test", -2 => "rest", 2.5 => "two", 
+   array(-1.5 => "test", -2 => "rest", 2.5 => "two",
          "" => "string", 0 => "zero", "" => "" ) // mixed array
-);  
+);
 
 echo "*** Testing basic operations ***\n";
 $loop_count = 1;
@@ -69,7 +69,7 @@ foreach ($varient_arrays as $sub_array )  {
   echo "\n";
 }
 
-/*test these functions on array which is already unset */ 
+/*test these functions on array which is already unset */
 echo "\n-- Testing variation: when array is unset --\n";
 $unset_array = array (1);
 unset($unset_array);
@@ -116,7 +116,7 @@ var_dump( reset($string) );
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing basic operations ***
 -- Iteration 1 --
 int(0)

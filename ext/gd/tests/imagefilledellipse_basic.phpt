@@ -1,7 +1,7 @@
 --TEST--
 Testing imagefilledellipse() of GD library
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--

@@ -74,7 +74,7 @@ foreach($arrays as $arr1) {
 
 // close the file resource used
 fclose($fp);
-  
+
 echo "Done";
 ?>
 --EXPECTF--

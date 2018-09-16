@@ -38,7 +38,7 @@ $input = array(
   'bool_value2' => false,
   'bool_value3' => TRUE,
   'bool_value4' => FALSE,
-  
+
   // null values
   'null_value1' => null,
 
@@ -51,7 +51,7 @@ $input = array(
   // resource value
   'resource_value' => $fp,
 );
-  
+
 var_dump( array_flip($input) );
 
 // closing resource

@@ -65,7 +65,7 @@ $string_array = array(
 
 // looping to check the behaviour of the function for each string in the array
 
-$count = 1; 
+$count = 1;
 foreach($string_array as $str) {
   echo "\n-- Iteration $count --\n";
   var_dump( crc32($str) );

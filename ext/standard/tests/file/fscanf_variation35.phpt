@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - hexa formats with resource
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different hexa format types with resource ***\n"; 
+echo "*** Test fscanf(): different hexa format types with resource ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation35.tmp";
@@ -24,7 +24,7 @@ if($file_handle == false)
 // resource type variable
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
-  
+
 // array of resource types
 $resource_types = array (
   $fp,

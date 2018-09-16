@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - integer formats with boolean
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different integer format types with boolean data ***\n"; 
+echo "*** Test fscanf(): different integer format types with boolean data ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation7.tmp";

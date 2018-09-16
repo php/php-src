@@ -41,7 +41,7 @@ foreach ($various_arrays as $array) {
 	// loop through $flags array and setting all possible flag values
 	foreach($flags as $key => $flag){
 		echo "- Sort flag = $key -\n";
-		
+
 		$temp_array = $array;
 		var_dump(rsort($temp_array, $flag) );
 		var_dump($temp_array);

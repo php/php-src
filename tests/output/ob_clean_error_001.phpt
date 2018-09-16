@@ -5,7 +5,7 @@ Test ob_clean() function : error conditions
 /* Prototype  : proto bool ob_clean(void)
  * Description: Clean (delete) the current output buffer 
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ob_clean() : error conditions ***\n";

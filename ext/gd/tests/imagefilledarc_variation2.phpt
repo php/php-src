@@ -4,7 +4,7 @@ Testing passing negative start angle to imagefilledarc() of GD library
 Edgar Ferreira da Silva <contato [at] edgarfs [dot] com [dot] br>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("gd")) die("skip GD not present");
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
 	die("skip test requires GD 2.2.2 or higher");

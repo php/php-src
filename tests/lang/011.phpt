@@ -1,7 +1,7 @@
 --TEST--
 Testing nested functions
 --FILE--
-<?php 
+<?php
 function F()
 {
 	$a = "Hello ";
@@ -11,7 +11,7 @@ function F()
 function G()
 {
   static $myvar = 4;
-  
+
   echo "$myvar ";
   echo F();
   echo "$myvar";

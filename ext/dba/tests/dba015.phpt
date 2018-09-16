@@ -1,7 +1,7 @@
 --TEST--
 DBA with persistent connections
 --SKIPIF--
-<?php 
+<?php
 $handler = "flatfile";
 require_once(dirname(__FILE__) .'/skipif.inc');
 die("info $HND handler used");
@@ -50,8 +50,8 @@ echo dba_fetch("key2", $db_file1), "\n";
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile

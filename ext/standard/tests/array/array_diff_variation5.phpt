@@ -18,7 +18,7 @@ echo "*** Testing array_diff() : usage variations ***\n";
 $arr_int = array(1, 2, 3);
 $arr_float = array(1.00, 2.00, 3.00);
 $arr_int_str = array('1', '2', '3');
-$arr_float_str = array('1.00', '2.00', '3.00');	
+$arr_float_str = array('1.00', '2.00', '3.00');
 
 print "-- Compare integers and floats: --\n";
 var_dump(array_diff($arr_int, $arr_float));

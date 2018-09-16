@@ -33,7 +33,7 @@ $scalar_variables = array(
   " ",
   ' ',
   "string",
-  'string', 
+  'string',
   "0",  // numeric as string  
   "40",
   "50.696",
@@ -94,7 +94,7 @@ $variation_array = array(
   @$resource,
 
   @$undefined_var  // undefined variable
-);  
+);
 
 /* loop through each element of $variation_array to see the 
    working of is_scalar on non-scalar values, expected output: bool(false)
@@ -113,7 +113,7 @@ var_dump( is_scalar() );
 var_dump( is_scalar( $scalar_variables[2], $scalar_variables[2]) );
 var_dump( is_scalar( new stdclass, new stdclass) );
 
-echo "Done\n";  
+echo "Done\n";
 
 // close the resources used
 fclose($fp);

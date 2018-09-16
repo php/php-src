@@ -38,7 +38,7 @@ closedir($dir_handle);
 <?php
 $path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_error";
 rmdir($path);
-?> 
+?>
 --EXPECTF--
 *** Testing readdir() : error conditions ***
 

@@ -68,7 +68,7 @@ foreach ($permission_values as $perm) {
 	var_dump( chmod($dir_path, $perm) );
 
 	var_dump($dh = opendir($dir_path));
-	
+
 	if (is_resource($dh)) {
 		closedir($dh);
 	}

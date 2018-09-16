@@ -1,7 +1,7 @@
 --TEST--
 Test imap_errors() function : basic functionality 
 --SKIPIF--
-<?php 
+<?php
 require_once(dirname(__FILE__).'/skipif.inc');
 ?>
 --FILE--
@@ -19,13 +19,13 @@ echo "Issue open with invalid password with normal default number of retries, i.
 $mbox = imap_open($default_mailbox, $username, $password, OP_READONLY, 3);
 
 echo "List any errors\n";
-var_dump(imap_errors()); 
+var_dump(imap_errors());
 
 echo "\n\nIssue open with invalid password with retries == 1\n";
 $mbox = imap_open($default_mailbox, $username, $password, OP_READONLY, 1);
 
 echo "List any errors\n";
-var_dump(imap_errors()); 
+var_dump(imap_errors());
 ?>
 ===Done===
 --EXPECTF--

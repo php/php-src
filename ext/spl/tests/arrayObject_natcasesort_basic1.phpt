@@ -6,7 +6,7 @@ SPL: Test ArrayObject::natcasesort() function : basic functionality
  * Description: proto int ArrayIterator::natcasesort()
  Sort the entries by values using case insensitive "natural order" algorithm. 
  * Source code: ext/spl/spl_array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ArrayObject::natcasesort() : basic functionality ***\n";

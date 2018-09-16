@@ -27,7 +27,7 @@ class MyCachingIterator extends CachingIterator
 			$this->offsetSet($k, $v);
 		}
 	}
-	
+
 	function testUnset($ar)
 	{
 		echo __METHOD__ . "()\n";
@@ -37,7 +37,7 @@ class MyCachingIterator extends CachingIterator
 			$this->offsetUnset($v);
 		}
 	}
-	
+
 	function fill()
 	{
 		echo __METHOD__ . "()\n";

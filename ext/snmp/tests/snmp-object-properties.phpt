@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 OO API: SNMP object properties
 --CREDITS--
 Boris Lytochkin

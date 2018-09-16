@@ -55,7 +55,7 @@ $i = 0;
 $errors = 0;
 foreach ($ips as $ip) {
 	$data = array("id" => ++$i, "remote_addr" => $ip);
-	$r = @pg_insert($db, 'tmp_statistics', $data);   
+	$r = @pg_insert($db, 'tmp_statistics', $data);
 
 	if (!$r && in_array($ip, $bad)) {
 		$errors++;

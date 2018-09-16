@@ -7,7 +7,7 @@ Test session_cache_limiter() function : error functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_cache_limiter([string $cache_limiter])
  * Description : Get and/or set the current cache limiter
  * Source code : ext/session/session.c 
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -66,7 +66,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 

@@ -2,7 +2,7 @@
 Test crc32() function : usage variations - unexpected values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) 
+if (PHP_INT_SIZE != 4)
   die("skip this test is for 32bit platform only");
 ?>
 

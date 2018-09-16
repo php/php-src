@@ -11,7 +11,7 @@ Test array_diff_assoc() function : variation - array containing different data t
 /*
  * Test how array_diff_assoc() compares indexed arrays containing different data types
  */
- 
+
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array = array(1, 2, 3);
@@ -38,7 +38,7 @@ $inputs = array(
 
        // int data
 /*1*/
-'int' => array(       
+'int' => array(
 	   0,
        1,
        12345,
@@ -46,7 +46,7 @@ $inputs = array(
 
        // float data
 /*2*/
-'float' => array(       
+'float' => array(
        10.5,
        -10.5,
        12.3456789000e10,
@@ -66,7 +66,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE),
-       
+
        // empty data
 /*5*/
 'empty' => array(
@@ -79,13 +79,13 @@ $inputs = array(
        "string",
        'string',
        $heredoc),
-       
+
        // binary data
 /*7*/
 'binary' => array(
        b"binary",
 	   (binary)"binary"),
-	   
+
        // object data
 /*8*/
 'object' => array(

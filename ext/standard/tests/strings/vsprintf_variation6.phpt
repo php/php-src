@@ -53,9 +53,9 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
- 
+
 // looping to test vsprintf() with different float formats from the above $format array
 // and with non-float values from the above $args_array array
 $counter = 1;

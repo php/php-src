@@ -6,15 +6,15 @@ class C {
 	function returnConstantByValue() {
 		return 100;
 	}
-	
+
 	function &returnConstantByRef() {
 		return 100;
 	}
-	
+
 	function &returnVariableByRef() {
 		return $GLOBALS['a'];
 	}
-	
+
 	function &returnFunctionCallByRef($functionToCall) {
 		return $this->$functionToCall();
 	}

@@ -38,10 +38,10 @@ class MyClass
     $this->pub_value = $setVal;
     $this->pro_value = $setVal;
   }
-};    
+};
 
 // object for 'input' argument
-$input = new MyClass(10); 
+$input = new MyClass(10);
 
 var_dump( array_walk_recursive($input, "callback", 1));
 

@@ -5,7 +5,7 @@ Test ob_get_level() function : basic functionality
 /* Prototype  : proto int ob_get_level(void)
  * Description: Return the nesting level of the output buffer 
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ob_get_level() : basic functionality ***\n";

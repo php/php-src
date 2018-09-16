@@ -6,7 +6,7 @@ SPL: Test ArrayObject::asort() function : basic functionality with array based s
  * Description: proto int ArrayIterator::asort()
  * Sort the entries by values. 
  * Source code: ext/spl/spl_array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ArrayObject::asort() : basic functionality ***\n";

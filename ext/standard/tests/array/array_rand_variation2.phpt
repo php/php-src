@@ -82,7 +82,7 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  var_dump( array_rand($input,$value) );  
+  var_dump( array_rand($input,$value) );
   $count++;
 };
 

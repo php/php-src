@@ -7,7 +7,7 @@ Test finfo_buffer() function : basic functionality
 /* Prototype  : string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
  * Description: Return infromation about a string buffer. 
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';

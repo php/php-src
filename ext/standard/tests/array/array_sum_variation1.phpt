@@ -8,7 +8,7 @@ Test array_sum() function : usage variations - unexpected values for 'input' arg
 */
 
 /*
-* Passing different scalar/nonscalar values as 'input' argument to array_sum() 
+* Passing different scalar/nonscalar values as 'input' argument to array_sum()
 */
 
 echo "*** Testing array_sum() : unexpected values for 'input' ***\n";

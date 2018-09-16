@@ -41,11 +41,11 @@ $int_formats = array(
   "\t%d", "\n%d", "%4d",
   "%30d", "%[0-9]", "%*d"
 );
- 
+
 $count = 1;
 foreach($string_values as $string_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($int_formats as $format) {
     var_dump( sprintf($format, $string_value) );
   }

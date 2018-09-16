@@ -20,8 +20,8 @@ $resource_values = array (
 );
 
 // array of char formats
-$char_formats = array( 
-  "%c", "%hc", "%lc", 
+$char_formats = array(
+  "%c", "%hc", "%lc",
   "%Lc", " %c", "%c ",
   "\t%c", "\n%c", "%4c",
   "%30c", "%[a-bA-B@#$&]", "%*c"
@@ -30,7 +30,7 @@ $char_formats = array(
 $count = 1;
 foreach($resource_values as $resource_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($char_formats as $format) {
     var_dump( sprintf($format, $resource_value) );
   }

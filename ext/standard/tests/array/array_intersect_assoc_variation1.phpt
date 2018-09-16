@@ -20,7 +20,7 @@ echo "*** Testing array_intersect_assoc() : Passing non-array values to \$arr1 a
 $arr2 = array(1, 2);
 
 // additional array to be passed for intersection
-$arr3 = array(1, 2, "one" => 1, "two" => 2); 
+$arr3 = array(1, 2, "one" => 1, "two" => 2);
 
 // get an unset variable
 $unset_var = 10;
@@ -71,7 +71,7 @@ $arrays = array(
        // empty data
 /*16*/ "",
        '',
- 
+
        // string data
 /*18*/ "string",
        'string',
@@ -94,7 +94,7 @@ $arrays = array(
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
   echo "\n-- Iteration $iterator --";
-  
+
   // Calling array_intersect_assoc() with default arguments
   var_dump( array_intersect_assoc($unexpected_value, $arr2) );
 

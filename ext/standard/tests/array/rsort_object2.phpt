@@ -51,7 +51,7 @@ class for_string_rsort
 
 // array of integer objects
 
-$unsorted_int_obj = array( 
+$unsorted_int_obj = array(
   new for_integer_rsort(11,33,30),
   new for_integer_rsort(66,44,4),
   new for_integer_rsort(-88,-5,5),
@@ -59,7 +59,7 @@ $unsorted_int_obj = array(
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   new for_string_rsort("axx","AXX","ass"), 
   new for_string_rsort("t","eee","abb"),
   new for_string_rsort("w","W", "c"),

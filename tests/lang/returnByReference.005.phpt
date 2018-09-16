@@ -6,11 +6,11 @@ Class C {
 	function returnConstantByValue() {
 		return 100;
 	}
-	
+
 	function &returnConstantByRef() {
 		return 100;
 	}
-	
+
 	static function &returnVariableByRef() {
 		return $GLOBALS['a'];
 	}

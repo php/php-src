@@ -32,7 +32,7 @@ var_dump( settype( $var, "unknown" ) );
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 **** Testing gettype() and settype() functions ****
 
 *** Testing gettype(): error conditions ***

@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - scientific formats with integer value
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different scientific format types with different integer values ***\n"; 
+echo "*** Test fscanf(): different scientific format types with different integer values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation45.tmp";

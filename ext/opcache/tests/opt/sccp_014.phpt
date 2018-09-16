@@ -17,7 +17,7 @@ function loadEntities($entity_information) {
 	var_dump((bool)($entity_types->a));
 }
 
-loadEntities(array("first", "second")); 
+loadEntities(array("first", "second"));
 ?>
 --EXPECT--
 bool(false)

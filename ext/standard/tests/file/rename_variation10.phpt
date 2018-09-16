@@ -7,7 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 /* Prototype  : bool rename(string old_name, string new_name[, resource context])
  * Description: Rename a file 
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing rename() : usage variation ***\n";
@@ -104,7 +104,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // file resource
       'file resource' => $fileRes,
 );

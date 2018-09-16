@@ -23,7 +23,7 @@ $values = array(10,
 				true,
 				false,
 				null, 
-				);	
+				);
 
 // loop through each element of $values to check the behaviour of expm1()
 $iterator = 1;

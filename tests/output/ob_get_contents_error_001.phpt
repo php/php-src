@@ -7,7 +7,7 @@ Iain Lewis <ilewis@php.net>
 /* Prototype  : proto string ob_get_contents(void)
  * Description: Return the contents of the output buffer 
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 

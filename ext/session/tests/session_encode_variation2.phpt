@@ -9,7 +9,7 @@ session.auto_start=1
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_encode(void)
  * Description : Encodes the current session data as a string
  * Source code : ext/session/session.c 

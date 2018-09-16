@@ -7,7 +7,7 @@ Test session_get_cookie_params() function : error functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : array session_get_cookie_params(void)
  * Description : Get the session cookie parameters
  * Source code : ext/session/session.c 
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -66,7 +66,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 

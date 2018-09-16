@@ -65,7 +65,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -74,7 +74,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

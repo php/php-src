@@ -46,7 +46,7 @@ unset($unset_array);
 // other types in a array 
 $varient_arrays = array (
   /* integers */
-  543915, 
+  543915,
   -5322,
   0x55F,
   -0xCCF,
@@ -54,7 +54,7 @@ $varient_arrays = array (
   -0654,
 
   /* strings */
-  "",  
+  "",
   '',
   "0",
   '0',
@@ -68,10 +68,10 @@ $varient_arrays = array (
   .5E+8,
   -.5e+90,
   1e5,
-  
+
   /* objects */
   new stdclass, 
-  
+
   /* resources */
   $fp, 
   $dfp, 
@@ -81,7 +81,7 @@ $varient_arrays = array (
   NULL,
 
   /* boolean */
-  true, 
+  true,
   TRUE,
   FALSE,
   false,
@@ -104,7 +104,7 @@ var_dump( is_array() );
 
 //arguments more than expected 
 var_dump( is_array ($fp, $fp) );
- 
+
 echo "Done\n";
 /* close resources */
 fclose($fp);

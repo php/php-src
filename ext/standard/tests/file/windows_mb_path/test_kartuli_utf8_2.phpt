@@ -38,7 +38,7 @@ remove_data("dir_kartuli");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 int(25)
 bool(true)

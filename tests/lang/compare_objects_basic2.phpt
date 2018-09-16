@@ -2,7 +2,7 @@
 Test object compare when object handler different 
 --FILE--
 
-<?php 
+<?php
 
 //Set the default time zone 
 date_default_timezone_set("Europe/London");

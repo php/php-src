@@ -12,7 +12,7 @@ session.name=PHPSESSID
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_save_path([string $path])
  * Description : Get and/or set the current session save path
  * Source code : ext/session/session.c 

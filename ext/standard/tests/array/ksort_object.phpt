@@ -42,14 +42,14 @@ class StringObject
 }
 
 // array of integer objects
-$unsorted_int_obj = array ( 
+$unsorted_int_obj = array (
   11 => new IntegerObject(11), 66 =>  new IntegerObject(66),
   23 => new IntegerObject(23), -5 => new IntegerObject(-5),
   1 => new IntegerObject(0.001), 0 => new IntegerObject(0)
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   "axx" => new StringObject("axx"), "t" => new StringObject("t"),
   "w" => new StringObject("w"), "py" => new StringObject("py"),
   "apple" => new StringObject("apple"), "Orange" => new StringObject("Orange"),

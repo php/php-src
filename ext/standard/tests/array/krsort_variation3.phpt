@@ -40,20 +40,20 @@ echo "\n-- Testing krsort() by supplying various integer/float arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With defualt sort flag -\n"; 
-  $temp_array = $array; 
+  echo "- With defualt sort flag -\n";
+  $temp_array = $array;
   var_dump(krsort($temp_array) );
   var_dump($temp_array);
 
   // loop through $flags array and call krsort() with all possible sort flag values
   foreach($flags as $key => $flag){
     echo "- Sort flag = $key -\n";
-    $temp_array = $array; 
+    $temp_array = $array;
     var_dump(krsort($temp_array, $flag) );
     var_dump($temp_array);
-  }  
+  }
   $count++;
-} 
+}
 
 echo "Done\n";
 ?>

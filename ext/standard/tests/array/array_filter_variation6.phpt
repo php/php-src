@@ -29,7 +29,7 @@ function callback($input)
     return false;
   }
 }
-  
+
 // initializing variables
 $value1 = array(1, 2, 8);
 $value2 = array(5, 6, 4);
@@ -39,7 +39,7 @@ $input = array(&$value1, 10, &$value2, 'value');
 var_dump( array_filter($input, 'callback') );
 
 // with default 'callback' argument
-var_dump( array_filter($input) ); 
+var_dump( array_filter($input) );
 
 echo "Done"
 ?>

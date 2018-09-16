@@ -64,9 +64,9 @@ foreach($file_content_types as $file_content_type) {
     fseek($file_handle, SEEK_SET, (1024 + 400)/2 );
     var_dump( ftell($file_handle));  // expected: (1024 + 400)/2
     var_dump( fwrite($file_handle, $data_to_be_written, 200) );
-    var_dump( ftell($file_handle) ); 
+    var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );  //Expecting bool(false)
-       
+
     /* check the filesize and display file content */
     // close the file, get the size and content of the file.
     var_dump( fclose($file_handle) );

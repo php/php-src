@@ -24,7 +24,7 @@ var_dump($test3);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(5) "text1"

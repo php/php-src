@@ -34,7 +34,7 @@ $args_array = array(
         2.1234567e10, +2.7654321e10, -2.7654321e10,
         12345.780, 12.000000011111, -12.00000111111, -123456.234,
         3.33, +4.44, 1.11,-2.22 ),
-  
+
  // array of int values
  array(2, -2, +2,
        123456, 123456234, -12346789, +12346789,
@@ -56,7 +56,7 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 /* creating dumping file */
@@ -78,7 +78,7 @@ print_r(file_get_contents($data_file));
 echo "\n";
 
 unlink($data_file);
- 
+
 ?>
 ===DONE===
 --EXPECT--

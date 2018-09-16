@@ -5,7 +5,7 @@ Test gmdate() function : usage variation - Passing unexpected values to timestam
 /* Prototype  : string gmdate(string format [, long timestamp])
  * Description: Format a GMT date/time 
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gmdate() : usage variation ***\n";

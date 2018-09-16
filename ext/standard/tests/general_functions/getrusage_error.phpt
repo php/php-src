@@ -7,7 +7,7 @@ Test getrusage() function : error conditions - incorrect number of args
 /* Prototype  :  array getrusage  ([ int $who  ] )
  * Description: Gets the current resource usages
  * Source code: ext/standard/microtime.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*

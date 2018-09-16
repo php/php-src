@@ -7,7 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 /* Prototype  : bool unlink(string filename[, context context])
  * Description: Delete a file 
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing unlink() : variation: contexts and relative files ***\n";
@@ -30,7 +30,7 @@ function f_exists($file) {
    else {
       echo "$file doesn't exist\n";
    }
-} 
+}
 ?>
 ===DONE===
 --EXPECT--

@@ -7,7 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
  * Description: Write/Create a file with contents data and return the number of bytes written 
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file_put_contents() : usage variation ***\n";
@@ -106,10 +106,10 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       //non context resource
       'file resource' => $fileRes,
-      
+
       //valid stream context
       'stream context' => $strContext,
 );

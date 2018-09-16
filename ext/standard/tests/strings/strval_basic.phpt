@@ -21,19 +21,19 @@ $values = array(
 			// Simple strings
 /*1*/		"Hello World",
 			'Hello World',
-			
+
 			// String with control chars
 /*3*/		"String\nwith\ncontrol\ncharacters\r\n",
-			
+
 			// String with quotes
 /*4*/		"String with \"quotes\"",
-			
+
 			//Numeric String
 /*5*/		"123456",
-			
+
 			// Hexadecimal string
 /*6*/		"0xABC",
-			
+
 			//Heredoc String
 /*7*/		$simple_heredoc
 );

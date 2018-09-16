@@ -51,7 +51,7 @@ echo "\n-- Passing limit values 0 and 1 to explode() --\n";
 var_dump( explode(":", "Name:Phone:Address:City:State", 0) );
 var_dump( explode(":", "Name:Phone:Address:City:State", 1) );
 
-/* to check the maximum limit of string that can be given with limit<=0, 
+/* to check the maximum limit of string that can be given with limit<=0,
    default size is 50 but increases dynamically */
 echo "\n*** Testing explode() for maximum limit of string with Limit = -1 ***\n";
 var_dump( explode(":", "1:2:3:4:5:6:7:7:5:6:7:3:4:5:2:8:9:0:5:5:5:5:5:5:5:5:5:5:5:5:55:5:5:5%:%:%:%:5:5:5:%:%:5:5:5:5:5%:%:%:55:1:1", -1) );

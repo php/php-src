@@ -47,7 +47,7 @@ $integers = array (
   -0x80000000,  // min range of hexadecimal integer
   017777777777,  // max posotive octal integer
   -020000000000  // min range of octal integer
-);		    
+);
 /* calling check_printr() to display contents of integer variables
    using print_r() */
 check_printr($integers);
@@ -117,7 +117,7 @@ $booleans = array (
   FALSE,
   true,
   false
-);	  
+);
 /* calling check_printr() to display boolean variables using print_r() */
 check_printr($booleans);
 var_dump( reset($booleans) );
@@ -232,7 +232,7 @@ print_r($recursion_obj2);
 
 echo "\n*** Testing print_r() on resources ***\n";
 /* file type resource */
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 /* directory type resource */
 $dir_handle = opendir( dirname(__FILE__) );

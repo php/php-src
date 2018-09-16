@@ -6,7 +6,7 @@ SPL: Test ArrayObject::natsort() function : basic functionality
  * Description: proto int ArrayIterator::natsort()
  Sort the entries by values using "natural order" algorithm. 
  * Source code: ext/spl/spl_array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ArrayObject::natsort() : basic functionality ***\n";

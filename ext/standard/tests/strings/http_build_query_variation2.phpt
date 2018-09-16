@@ -10,21 +10,21 @@ Adam Gegotek <adam [dot] gegotek [at] gmail [dot] com>
 */
 
 $mDimensional = array(
-  20, 
-  5 => 13, 
+  20,
+  5 => 13,
   "9" => array(
-    1 => "val1", 
-    3 => "val2", 
+    1 => "val1",
+    3 => "val2",
     "string" => "string"
   ),
-  "name" => "homepage", 
+  "name" => "homepage",
   "page" => 10,
   "sort" => array(
-    "desc", 
+    "desc",
     "admin" => array(
-      "admin1", 
+      "admin1",
       "admin2" => array(
-        "who" => "admin2", 
+        "who" => "admin2",
         2 => "test"
       )
     )

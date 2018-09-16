@@ -1,7 +1,7 @@
 --TEST--
 readline_info(): Basic test
 --SKIPIF--
-<?php if (!extension_loaded("readline")) die("skip"); 
+<?php if (!extension_loaded("readline")) die("skip");
 if (READLINE_LIB != "libedit") die("skip libedit only");
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 	die('skip not for windows');

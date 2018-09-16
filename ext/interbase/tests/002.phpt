@@ -6,7 +6,7 @@ InterBase: connect, close and pconnect
 <?php
 
 	require("interbase.inc");
-    
+
 	ibase_connect($test_base);
 	out_table("test1");
 	ibase_close();

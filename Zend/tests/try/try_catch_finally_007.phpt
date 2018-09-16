@@ -16,7 +16,7 @@ function foo($ret = FALSE) {
         } finally {
             var_dump("finally1");
             throw new Exception("exception");
-        } 
+        }
     } catch (Exception $e) {
         goto local;
 local: 

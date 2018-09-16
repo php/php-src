@@ -27,7 +27,7 @@ fclose($file_handle);
 $dest_files = array(
 
   /* Checking case sensitiveness */
-  "COPY.tmp", 
+  "COPY.tmp",
   "COPY.TMP",
   "CopY.TMP"
 );

@@ -7,13 +7,13 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not for Windows');
 }
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : bool unlink(string filename[, context context])
  * Description: Delete a file 
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing unlink() : variation ***\n";
@@ -31,11 +31,11 @@ $files = array(
              $workDir.'/'.$tmpFile,
              './'.$workDir.'/'.$tmpFile,
              $workDir.'/../'.$workDir.'/'.$tmpFile,
-             
+
              // relative bad path
              $workDir.'/../BADDIR/'.$tmpFile,
              'BADDIR/'.$tmpFile,
-             
+
              //absolute
              $cwd.'/'.$workDir.'/'.$tmpFile,
              $cwd.'/./'.$workDir.'/'.$tmpFile,
@@ -43,17 +43,17 @@ $files = array(
 
              //absolute bad path             
              $cwd.'/BADDIR/'.$tmpFile,
-             
+
              //trailing separators
              $workDir.'/'.$tmpFile.'/',
              $cwd.'/'.$workDir.'/'.$tmpFile.'/',
-             
+
              // multiple separators
              $workDir.'//'.$tmpFile,
              $cwd.'//'.$workDir.'//'.$tmpFile,
-             
+
              );
-             
+
 
 foreach($files as $fileToUnlink) {
    test_realfile($workDir.'/'.$tmpFile, $fileToUnlink);
@@ -66,7 +66,7 @@ rmdir($workDir);
 
 function test_realfile($file, $tounlink) {
    touch($file);
-   echo "-- removing $tounlink --\n";           
+   echo "-- removing $tounlink --\n";
    $res = unlink($tounlink);
    if ($res === true) {
       if (file_exists($tounlink) === false) {
@@ -88,9 +88,9 @@ function test_link($linkedfile, $toLinkTo, $tounlink, $softlink) {
    }
    else {
    	  link($toLinkTo, $linkedfile);
-   	  $msg = "hard link";   	  
-   }   
-   echo "-- unlinking $msg $tounlink --\n";           
+   	  $msg = "hard link";
+   }
+   echo "-- unlinking $msg $tounlink --\n";
    $res = unlink($tounlink);
    if ($res === true) {
       if (file_exists($tounlink) === false) {

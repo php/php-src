@@ -8,15 +8,15 @@ assert.bail = 0
 assert.quiet_eval = 0
 --FILE--
 <?php
-function f1() 
+function f1()
 {
 	echo "f1 called\n";
 }
-function f2() 
+function f2()
 {
 	echo "f2 called\n";
 }
-function f3() 
+function f3()
 {
 	echo "f3 called\n";
 }

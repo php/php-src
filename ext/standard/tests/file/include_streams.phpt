@@ -20,7 +20,7 @@ class mystream
 	function url_stat($path, $flags) {
 		return array();
 	}
-	
+
 	function stream_stat() {
 		return array();
 	}
@@ -43,7 +43,7 @@ class mystream
 			$this->position = strlen($GLOBALS[$this->varname]);
 		else
 			$this->position = 0;
-		
+
 		return true;
 	}
 

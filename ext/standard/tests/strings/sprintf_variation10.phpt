@@ -42,7 +42,7 @@ $float_formats = array(
 $count = 1;
 foreach($integer_values as $int_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($float_formats as $format) {
     // with two arguments
     var_dump( sprintf($format, $int_value) );

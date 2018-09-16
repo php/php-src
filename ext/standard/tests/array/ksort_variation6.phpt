@@ -18,7 +18,7 @@ echo "*** Testing ksort() : usage variations ***\n";
 
 // an array containng unsorted hexadecimal values with keys  
 // There are multiple keys which are duplicate and the later should be picked
-$unsorted_hex_array = array ( 
+$unsorted_hex_array = array (
   0x1AB => 0x1AB, 0xFFF => 0xFFF, 0xF => 0xF, 0xFF => 0xFF, 0x2AA => 0x2AA, 0xBB => 0xBB,
   0x1ab => 0x1ab, 0xff => 0xff, -0xff => -0xFF, 0 => 0, -0x2aa => -0x2aa
 );

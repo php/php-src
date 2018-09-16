@@ -31,7 +31,7 @@ function check_read($file_handle, $read_size, $expect_size) {
   // print file pointer position before read
   var_dump( ftell($file_handle) );
   var_dump( feof($file_handle) );
-  
+
   // read the data of size $read_size
   echo "Reading $read_size bytes from file, expecting $expect_size bytes ... ";
   $data_from_file = fread($file_handle, $read_size);
@@ -49,7 +49,7 @@ function check_read($file_handle, $read_size, $expect_size) {
 
   return $data_from_file;
 }
- 
+
 echo "*** Testing fread() : usage variations ***\n";
 
 $file_modes = array("a+","a+b","a+t",
@@ -67,7 +67,7 @@ foreach($file_content_types as $file_content_type) {
        /* create files with $file_content_type */
        create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "私はガラスを食べられますfread_variation", 3);
     }
-    
+
     $filename = dirname(__FILE__)."/私はガラスを食べられますfread_variation3.tmp"; // this is name of the file created by create_files()
     echo "-- File opened in mode ".$file_mode." --\n";
     $file_handle = fopen($filename, $file_mode);

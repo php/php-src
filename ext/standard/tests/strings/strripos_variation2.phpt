@@ -13,46 +13,46 @@ echo "*** Testing strripos() function: with single quoted strings ***\n";
 $haystack = 'Hello,\t\n\0\n  $&!#%()*<=>?@hello123456he \x234 \101 ';
 $needles = array(
 		  //regular strings
-/*1*/	  'l',  
+/*1*/	  'l',
 		  'L',
 		  'HELLO',
 		  'hEllo',
-		
+
 		  //escape characters
-/*5*/	  '\t',  
+/*5*/	  '\t',
 		  '\T',
 		  '     ',
 		  '\n',
 		  '\N',
 		  '
 		',  //new line
-		
+
 		  //nulls
-/*11*/	  '\0',  
+/*11*/	  '\0',
 		  NULL,
 		  null,
-		
+
 		  //boolean false
 /*14*/	  FALSE,  
 		  false,
-		
+
 		  //empty string
 /*16*/	  '',
-		
+
 		  //special chars
-/*17*/	  ' ',  
+/*17*/	  ' ',
 		  '$',
 		  ' $',
 		  '&',
 		  '!#',
 		  '()',
-		  '<=>',  
+		  '<=>',
 		  '>',
 		  '=>',
 		  '?',
 		  '@',
 		  '@hEllo',
-		
+
 /*29*/	  '12345', 	//decimal numeric string  
 		  '\x23',	//hexadecimal numeric string
 		  '#',  	//respective ASCII char of \x23

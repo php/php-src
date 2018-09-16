@@ -8,7 +8,7 @@ require_once "open_basedir.inc";
 $initdir = getcwd();
 
 test_open_basedir_before("dir");
-test_open_basedir_error("dir");     
+test_open_basedir_error("dir");
 
 var_dump(dir($initdir."/test/ok/"));
 var_dump(dir($initdir."/test/ok"));

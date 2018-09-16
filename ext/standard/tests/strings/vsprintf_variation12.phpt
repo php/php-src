@@ -64,9 +64,9 @@ $args_array = array(
          true, false, TRUE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
- 
+
 // looping to test vsprintf() with different octal formats from the above $format array
 // and with non-octal values from the above $args_array array
 $counter = 1;
@@ -84,35 +84,35 @@ echo "Done";
 -- Iteration 1 --
 string(116) "2 0 12 
    361100 o 37777775456 2322
-                          
+
    30071 14 37777777764 37777416700
    12 361100 2 0"
 
 -- Iteration 2 --
 string(146) "2 37777777776 2 
    361100 o 37720715133 57062645
-                          
+
    57060664 4475347 37721631371 37720717336
    2 361100 2 37777777776"
 
 -- Iteration 3 --
 string(88) "0 0 0 
    173 o 37777777605 173 
-                          
+
    2322 0 $0 _0
    0 173 0 0"
 
 -- Iteration 4 --
 string(75) "1 1 1 
    1 o    1 1   
-                          
+
    #1 1 $1 _1
    1 1 1 1"
 
 -- Iteration 5 --
 string(75) "1 1 0 
    1 o    0 1   
-                          
+
    #0 1 $1 _0
    0 1 1 1"
 Done

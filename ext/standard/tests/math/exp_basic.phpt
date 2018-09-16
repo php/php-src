@@ -16,7 +16,7 @@ $values = array(10,
 				true,
 				false,
 				null, 
-				);	
+				);
 
 $iterator = 1;
 foreach($values as $value) {

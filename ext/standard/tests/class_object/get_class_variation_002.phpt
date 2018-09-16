@@ -5,7 +5,7 @@ Test get_class() function : usage variations  - ensure class name case is preser
 /* Prototype  : proto string get_class([object object])
  * Description: Retrieves the class name 
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 class caseSensitivityTest {}

@@ -25,7 +25,7 @@ var_dump( join($glue, $pieces, $extra_arg) );
 // Less than expected number of arguments 
 echo "\n-- Testing join() with less than expected no. of arguments --\n";
 $glue = 'string_val';
- 
+
 var_dump( join($glue));
 
 echo "Done\n";

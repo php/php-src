@@ -16,7 +16,7 @@ class ObserverImpl implements SplObserver
 	{
 		echo $this->name . '->' . __METHOD__ . '(' . $subject->getName() . ");\n";
 	}
-	
+
 	function getName()
 	{
 		return $this->name;

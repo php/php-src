@@ -27,7 +27,7 @@ class Foo
             //
             /** doc comment */
             #
-        catch /* comment */ 
+        catch /* comment */
             // comment
             # comment
         insteadof TraitB;

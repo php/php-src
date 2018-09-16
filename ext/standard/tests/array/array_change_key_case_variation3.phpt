@@ -40,7 +40,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
        'extreme floats' => array(
        12.3456789000e6 => 'large',
        12.3456789000E-10 => 'small',
@@ -63,7 +63,7 @@ $inputs = array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*5*/ 'empty double quotes' => array(
        "" => 'emptyd',

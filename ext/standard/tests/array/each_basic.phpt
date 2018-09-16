@@ -9,7 +9,7 @@ Test each() function : basic functionality
  */
 
 /*
- * Test basic functionality of each() 
+ * Test basic functionality of each()
  */
 
 echo "*** Testing each() : basic functionality ***\n";

@@ -5,7 +5,7 @@ Test idate() function : usage variation - Checking return of year(1 or 2 digits)
 /* Prototype  : int idate(string format [, int timestamp])
  * Description: Format a local time/date as integer 
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing idate() : usage variation ***\n";

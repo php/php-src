@@ -28,8 +28,8 @@ $string_array = array (
   "<html><!-- COMMENT --></html>",
   '<html><!-- COMMENT --></html>'
 );
-  
-  		
+
+
 // Calling strip_tags() with default arguments
 // loop through the $string_array to test strip_tags on various inputs
 $iteration = 1;

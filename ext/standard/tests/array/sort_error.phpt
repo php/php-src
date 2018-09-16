@@ -27,7 +27,7 @@ $extra_arg = 10;
 foreach($flag_value as $key => $flag){
   echo "\nSort flag = $key\n";
   var_dump( sort($array_arg,$flag, $extra_arg) );
-   
+
   // dump the input array to ensure that it wasn't changed
   var_dump($array_arg);
 }

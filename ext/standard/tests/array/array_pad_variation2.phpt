@@ -71,7 +71,7 @@ $pad_sizes = array(
 
        // object data
 /*21*/ new classA(),
- 
+
        // undefined data
 /*22*/ @$undefined_var,
 

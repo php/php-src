@@ -5,7 +5,7 @@ Test is_a() function : error conditions - wrong number of args
 /* Prototype  : proto bool is_a(object object, string class_name, bool allow_string)
  * Description: Returns true if the object is of this class or has this class as one of its parents 
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing is_a() : error conditions ***\n";

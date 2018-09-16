@@ -21,7 +21,7 @@ EOD;
 /* null heredoc string */
 $heredoc_empty_string = <<<EOD
 EOD;
-/* heredoc string with NULL */ 
+/* heredoc string with NULL */
 $heredoc_NULL_string = <<<EOD
 NULL
 EOD;
@@ -33,15 +33,15 @@ $scalars = array(
   1,
   -1,
   -2147483648, // max negative integer value
-  -2147483647, 
+  -2147483647,
   2147483647,  // max positive integer value
   2147483640,
   0x123B,      // integer as hexadecimal
   0x12ab,
   0Xfff,
   0XFA,
- 
-  /* floats */ 
+
+  /* floats */
   -0x80000000, // max negative integer as hexadecimal
   0x7fffffff,  // max positive integer as hexadecimal
   0x7FFFFFFF,  // max positive integer as hexadecimal
@@ -66,12 +66,12 @@ $scalars = array(
   .0034E-30,
 
   /* booleans */
-  true,  
+  true,
   TRUE,
   FALSE,
-  false,  
+  false,
 
-  /* strings */  
+  /* strings */
   "",
   '',
   " ",
@@ -147,7 +147,7 @@ var_dump( strval() );
 
 //arguments more than expected 
 var_dump( strval( $scalars[0], $scalars[1]) );
- 
+
 echo "Done\n";
 
 // close the resources used

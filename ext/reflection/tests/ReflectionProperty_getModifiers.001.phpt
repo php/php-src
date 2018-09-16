@@ -8,13 +8,13 @@ Steve Seear <stevseea@php.net>
 
 function reflectProperty($class, $property) {
 	$propInfo = new ReflectionProperty($class, $property);
-	
+
 	echo "**********************************\n";
 	echo "Reflecting on property $class::$property\n\n";
-	
+
 	echo "getModifiers():\n";
 	var_dump($propInfo->getModifiers());
-	
+
 	echo "\n**********************************\n";
 }
 

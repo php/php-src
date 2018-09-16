@@ -9,7 +9,7 @@ session.auto_start=1
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_write_close(void)
  * Description : Write session data and end session
  * Source code : ext/session/session.c 

@@ -2,7 +2,7 @@
 Test fgetcsv() : usage variations - with default enclosure & delimiter of two chars
 --FILE--
 <?php
-/* 
+/*
  Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
  Description: Gets line from file pointer and parse for CSV fields
 */
@@ -31,7 +31,7 @@ $filename = dirname(__FILE__) . '/fgetcsv_variation19.tmp';
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+                     "x+", "x+b", "x+t");
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {
@@ -64,11 +64,11 @@ foreach ($csv_lists as $csv_list) {
       // rewind the file pointer to bof
       rewind($file_handle);
     }
-      
-    echo "\n-- Testing fgetcsv() with file opened using $file_modes[$mode_counter] mode --\n"; 
+
+    echo "\n-- Testing fgetcsv() with file opened using $file_modes[$mode_counter] mode --\n";
 
     // call fgetcsv() to parse csv fields
-      
+
     // use delimiter & enclosure char of two chars 
     fseek($file_handle, 0, SEEK_SET);
     $del = "++";
@@ -76,7 +76,7 @@ foreach ($csv_lists as $csv_list) {
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
-     
+
     // close the file
     fclose($file_handle);
     //delete file

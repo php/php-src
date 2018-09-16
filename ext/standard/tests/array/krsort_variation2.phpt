@@ -77,7 +77,7 @@ for($index = 0; $index < count($unexpected_values); $index ++) {
   echo "-- Iteration $counter --\n";
   $value = $unexpected_values [$index];
   $temp_array = $unsorted_values;
-  var_dump( krsort($temp_array, $value) ); 
+  var_dump( krsort($temp_array, $value) );
   var_dump($temp_array);
   $counter++;
 }

@@ -7,7 +7,7 @@ Test session_unset() function : error functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : void session_unset(void)
  * Description : Free all session variables
  * Source code : ext/session/session.c 
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -66,7 +66,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 

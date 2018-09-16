@@ -27,13 +27,13 @@ $toCompare = array(
   $float1, $valid_float1, $invalid_float1,
   $float2, $valid_float2, $invalid_float2
 );
-  
+
 $failed = false;
 for ($i = 0; $i < count($toCompare); $i +=3) {
    $typeToTest = $toCompare[$i];
    $valid_compares = $toCompare[$i + 1];
    $invalid_compares = $toCompare[$i + 2];
-   
+
    foreach($valid_compares as $compareVal) {
       if ($typeToTest <= $compareVal) {
          // do nothing
@@ -43,7 +43,7 @@ for ($i = 0; $i < count($toCompare); $i +=3) {
          $failed = true;
       }
    }
-   
+
    if ($invalid_compares != NULL) {
 	   foreach($invalid_compares as $compareVal) {
 	      if ($typeToTest <= $compareVal) {
@@ -52,7 +52,7 @@ for ($i = 0; $i < count($toCompare); $i +=3) {
 	      }
 	   }
    }
-   
+
 }
 if ($failed == false) {
    echo "Test Passed\n";

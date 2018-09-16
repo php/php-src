@@ -5,7 +5,7 @@ Test chunk_split() function : basic functionality
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line 
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 /*
@@ -22,7 +22,7 @@ $chunklen = 2;
 $ending = '##';
 
 // Calling chunk_split() with all possible arguments
-echo "-- Testing chunk_split() with all possible arguments --\n"; 
+echo "-- Testing chunk_split() with all possible arguments --\n";
 var_dump( chunk_split($str, $chunklen, $ending) );
 
 
@@ -34,7 +34,7 @@ var_dump( chunk_split($str, $chunklen) );
 //Calling chunk_split() with default chunklen and ending string
 echo "-- Testing chunk_split() with default chunklen and ending string --\n";
 var_dump( chunk_split($str) );
-	
+
 echo "Done"   
 ?>
 --EXPECT--

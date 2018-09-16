@@ -11,7 +11,7 @@ Test array_diff_uassoc() function : usage variation - Passing null,unset and und
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(10 => '10', "" => ''); 
+$input_array = array(10 => '10', "" => '');
 
 //get an unset variable
 $unset_var = 10;
@@ -27,8 +27,8 @@ foreach($input_arrays as $key =>$value) {
       echo "\n--$key--\n";
       var_dump( array_diff_uassoc($input_array, $value, "strcasecmp") );
       var_dump( array_diff_uassoc($value, $input_array, "strcasecmp") );
-}      
-    
+}
+
 ?>
 ===DONE===
 --EXPECT--

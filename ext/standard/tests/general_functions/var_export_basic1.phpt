@@ -5,7 +5,7 @@ Test var_export() function with integer values
 /* Prototype  : mixed var_export(mixed var [, bool return])
  * Description: Outputs or returns a string representation of a variable 
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing var_export() with integer values ***\n";
@@ -15,7 +15,7 @@ $valid_ints = array(
                 '1' => '1',
                 '-1' => '-1',
                 '-2147483648' => '-2147483648', // max negative integer value
-                '-2147483647' => '-2147483647', 
+                '-2147483647' => '-2147483647',
                 '2147483647' => 2147483647,  // max positive integer value
                 '2147483640' => 2147483640,
                 '0x123B' => 0x123B,      // integer as hexadecimal

@@ -1,7 +1,7 @@
 --TEST--
 tlsv1.2 stream wrapper
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
@@ -32,10 +32,10 @@ $clientCode = <<<'CODE'
 
     $client = stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
-    
+
     $client = @stream_socket_client("sslv3://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
-    
+
     $client = @stream_socket_client("tlsv1.1://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 CODE;

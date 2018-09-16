@@ -7,7 +7,7 @@ Test log1p() - Error conditions
  *				when the value of number is close to zero
  * Source code: ext/standard/math.c
  */
- 
+
 echo "*** Testing log1p() : error conditions ***\n";
 
 echo "\n-- Testing log1p() function with less than expected no. of arguments --\n";

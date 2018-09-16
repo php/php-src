@@ -15,7 +15,7 @@ echo "\n-- Testing htmlentities() function with less than expected no. of argume
 parse_str();
 echo "\n-- Testing htmlentities() function with more than expected no. of arguments --\n";
 $s1 = "first=val1&second=val2&third=val3";
-parse_str($s1, $res_array, true); 
+parse_str($s1, $res_array, true);
 
 ?>
 ===DONE===

@@ -50,7 +50,7 @@ $values = array(
        .5),
 
 /*4*/
-"null" => array(      
+"null" => array(
       // null data
       NULL,
       null),
@@ -64,7 +64,7 @@ $values = array(
       FALSE),
 
 /*6*/
-"empty" => array(      
+"empty" => array(
       // empty data
       "",
       ''),
@@ -75,20 +75,20 @@ $values = array(
       "string",
       'string',
       $heredoc),
-      
-/*8*/      
+
+/*8*/
 "binary" => array(
        // binary data
        b"binary",
 	   (binary)"binary"),
-	   
-/*9*/	   
+
+/*9*/
 "undefined" => array(
       // undefined data
       @$undefined_var),
 
 /*10*/
-"unset" => array(      
+"unset" => array(
       // unset data
       @$unset_var)
 );

@@ -94,7 +94,7 @@ function wow_static() {
 $oop_global = 0;
 class oop_class {
 	var $oop_name;
-	
+
 	function __construct() {
 		global $oop_global;
 		echo "oop_class()\n";
@@ -104,11 +104,11 @@ class oop_class {
 
 class oop_test {
 	static $oop_value;
-	
+
 	function __construct() {
 		echo "oop_test()\n";
 	}
-	
+
 	function oop_static() {
 		echo "oop_static()\n";
 		if (!isset(self::$oop_value)) {

@@ -24,7 +24,7 @@ class sample
 {
   public function __toString() {
     return "Object";
-  } 
+  }
 }
 
 // creating a file resource
@@ -89,14 +89,14 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  
+
   // with two arguments
   var_dump( sprintf($format, $value) );
 
   // with three arguments
   var_dump( sprintf($format, $value, $arg2) );
-  
-  $count++;   
+
+  $count++;
 };
 
 // closing the resource

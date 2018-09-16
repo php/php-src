@@ -10,7 +10,7 @@ var_dump(touch(1, 2, 3, 4));
 var_dump(touch("/no/such/file/or/directory"));
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: touch() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

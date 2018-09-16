@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - string formats with boolean
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different string format types with boolean data ***\n"; 
+echo "*** Test fscanf(): different string format types with boolean data ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation19.tmp";

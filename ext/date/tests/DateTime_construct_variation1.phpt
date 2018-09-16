@@ -90,7 +90,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource 
       'resource' => $file_handle
 );
@@ -99,20 +99,20 @@ $timezone = new DateTimeZone("Europe/London");
 
 foreach($inputs as $variation =>$time) {
       echo "\n-- $variation --\n";
-      
+
       try {
       	var_dump( new DateTime($time) );
       } catch (Throwable $e) {
       	  $msg = $e->getMessage();
       	  echo "FAILED: " . $msg . "\n";
-      }	
-      
+      }
+
       try {
       	var_dump( new DateTime($time, $timezone) );
       } catch (Throwable $e) {
       	 $msg = $e->getMessage();
       	 echo "FAILED: " . $msg . "\n";
-      }	
+      }
 };
 
 // closing the resource

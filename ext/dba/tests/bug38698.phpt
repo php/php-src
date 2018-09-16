@@ -1,7 +1,7 @@
 --TEST--
 Bug #38698 (Bug #38698 for some keys cdbmake creates corrupted db and cdb can't read valid db)
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'cdb_make';
 	require_once(dirname(__FILE__) .'/skipif.inc');
 ?>

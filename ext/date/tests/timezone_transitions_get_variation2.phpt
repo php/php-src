@@ -7,7 +7,7 @@ Test timezone_transitions_get() function : usage variation - Passing unexpected 
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTimeZone::getTransitions()
  */
- 
+
 echo "*** Testing timezone_transitions_get() : usage variation -  unexpected values to first argument \$timestamp_begin ***\n";
 
 //Set the default time zone 
@@ -90,7 +90,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource 
       'resource' => $file_handle
 );

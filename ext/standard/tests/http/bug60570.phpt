@@ -26,7 +26,7 @@ function do_test() {
 		$context = stream_context_create(array('http'=>array('timeout'=>1)));
 		file_get_contents('http://127.0.0.1:12342/', 0, $context);
 		unset($context);
-		
+
 		$b = $a;
 		$a = count(get_resources());
 	}

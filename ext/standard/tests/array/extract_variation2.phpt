@@ -1,5 +1,5 @@
 --TEST--
-Test extract() function (variation 2) 
+Test extract() function (variation 2)
 --FILE--
 <?php
 

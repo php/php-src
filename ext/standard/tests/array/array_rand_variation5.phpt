@@ -22,7 +22,7 @@ $input = array(
   0xabc => 2748, 0x12f => '303', 0xff => "255",
   0123 => 83, 012 => 10, 010 => "8"
 );
-       
+
 // Testing array_rand() function with various invalid 'req_num' values
 // with valid num_req values  
 echo"\n-- With default num_req value --\n";
@@ -39,7 +39,7 @@ echo"\n-- With num_req = -2 --\n";
 var_dump( array_rand($input, -2) );  // with $num_req=-2
 echo"\n-- With num_req more than number of members in 'input' array --\n";
 var_dump( array_rand($input, 13) );  // with $num_req=13
- 
+
 
 echo "Done";
 ?>

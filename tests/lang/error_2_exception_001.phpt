@@ -12,7 +12,7 @@ class MyException extends Exception {
 	function getErrno() {
 		return $this->errno;
 	}
-    
+
 	function getErrmsg() {
 		return $this->errmsg;
 	}

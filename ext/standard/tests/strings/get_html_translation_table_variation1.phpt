@@ -81,7 +81,7 @@ for($index = 0; $index < count($values); $index ++) {
    } else {
     var_dump($v);
    }
-   
+
   $v = get_html_translation_table($table, $quote_style, "UTF-8");
   if (is_array($v) && count($v) > 100)
     var_dump(count($v));

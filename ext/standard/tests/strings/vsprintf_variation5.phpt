@@ -45,7 +45,7 @@ $args_array = array(
 // and with float values from the above $args_array array
 $counter = 1;
 foreach($formats as $format) {
-  echo "\n-- Iteration $counter --\n";   
+  echo "\n-- Iteration $counter --\n";
   var_dump( vsprintf($format, $args_array[$counter-1]) );
   $counter++;
 }

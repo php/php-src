@@ -1,7 +1,7 @@
 --TEST--
 Test imap_createmailbox() function : basic functionality 
 --SKIPIF--
-<?php 
+<?php
 require_once(dirname(__FILE__).'/skipif.inc');
 ?>
 --FILE--
@@ -25,8 +25,8 @@ echo "Newname will be '$newname'\n";
 $newbox = imap_utf7_encode($server.$newname);
 if (imap_createmailbox($imap_stream, $newbox)) {
 
-	echo "Add a couple of msgs to '$newname' mailbox\n"; 
-	populate_mailbox($imap_stream, $newbox, 2);	
+	echo "Add a couple of msgs to '$newname' mailbox\n";
+	populate_mailbox($imap_stream, $newbox, 2);
 
     $status = imap_status($imap_stream, $newbox, SA_ALL);
     if ($status) {
@@ -36,7 +36,7 @@ if (imap_createmailbox($imap_stream, $newbox)) {
         echo "Unseen:      " . $status->unseen      . "\n";
         echo "UIDnext:     " . $status->uidnext     . "\n";
         echo "UIDvalidity: " . $status->uidvalidity . "\n";
-       
+
     } else {
         echo "imap_status on new mailbox failed: " . imap_last_error() . "\n";
     }

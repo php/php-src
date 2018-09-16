@@ -3,7 +3,7 @@ Testing imagecreatetruecolor(): error on wrong parameter count
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gd")) die("skip GD not present");
 	if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
 ?>

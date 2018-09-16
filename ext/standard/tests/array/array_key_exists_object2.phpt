@@ -18,7 +18,7 @@ class myClass {
 	public $var1;
 	protected $var2;
 	private $var3;
-	
+
 	function __construct($a, $b, $c = null) {
 		$this->var1 = $a;
 		$this->var2 = $b;

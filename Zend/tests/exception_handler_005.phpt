@@ -19,5 +19,5 @@ throw new excEption();
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(25) "foo1(): Exception thrown!"

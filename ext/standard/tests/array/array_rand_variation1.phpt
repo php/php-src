@@ -28,7 +28,7 @@ $fp = fopen(__FILE__, "r");
 class test
 {
   var $t = 10;
-  function __toString() 
+  function __toString()
   {
     return "object";
   }
@@ -48,8 +48,8 @@ $values = array(
         -10.5,
         12.3456789000e10,
         12.3456789000E-10,
-        .5,   
-      
+        .5,
+
         // null data
 /*10*/  NULL,
         null,
@@ -88,7 +88,7 @@ $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
   var_dump( array_rand($value,$num_req) );
-  $count++; 
+  $count++;
 };
 
 // closing the resource

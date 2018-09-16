@@ -7,7 +7,7 @@ Test getdate() function : usage variation - Passing high positive and negative f
 /* Prototype  : array getdate([int timestamp])
  * Description: Get date/time information 
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing getdate() : usage variation ***\n";

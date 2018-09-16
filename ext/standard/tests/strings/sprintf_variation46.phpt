@@ -42,7 +42,7 @@ $scientific_formats = array(
 $count = 1;
 foreach($integer_values as $integer_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($scientific_formats as $format) {
     var_dump( sprintf($format, $integer_value) );
   }

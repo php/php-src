@@ -10,7 +10,7 @@ Test array_diff_key() function : usage variation - Passing boolean indexed array
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(0 => '0', 1 => '1', -10 => '-10', 'true' => 1, 'false' => 0); 
+$input_array = array(0 => '0', 1 => '1', -10 => '-10', 'true' => 1, 'false' => 0);
 $boolean_indx_array = array(true => 'boolt', false => 'boolf', TRUE => 'boolT', FALSE => 'boolF');
 
 echo "\n-- Testing array_diff_key() function with boolean indexed array --\n";

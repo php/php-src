@@ -68,7 +68,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -77,7 +77,7 @@ $inputs = array(
 /*18*/ "hello, world",
        'hello, world',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

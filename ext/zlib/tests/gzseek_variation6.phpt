@@ -1,9 +1,9 @@
 --TEST--
 Test function gzseek() by calling it with SEEK_END when reading
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--

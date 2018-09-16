@@ -15,7 +15,7 @@ Test array_merge_recursive() function : usage variations - two dimensional array
 echo "*** Testing array_merge_recursive() : two dimensional array for \$arr1 argument ***\n";
 
 // initialize the 2-d array
-$arr1 = array( 
+$arr1 = array(
   array(1, 2, 3, 1),
   "array" => array("hello", "world", "str1" => "hello", "str2" => 'world'),
   array(1 => "one", 2 => "two", "one", 'two'),

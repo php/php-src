@@ -5,7 +5,7 @@ Test interface_exists() function : usage variation
 /* Prototype  : bool interface_exists(string classname [, bool autoload])
  * Description: Checks if the class exists 
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing interface_exists() : usage variation ***\n";

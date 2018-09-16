@@ -18,13 +18,13 @@ $alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 echo "\n-- Trim string with all white space characters --\n";
 var_dump(ltrim($text));
 
-echo "\n-- Trim non-whitespace from a string --\n"; 
+echo "\n-- Trim non-whitespace from a string --\n";
 var_dump(ltrim($hello, "=!"));
 
-echo "\n-- Trim some non-white space characters from a string --\n"; 
+echo "\n-- Trim some non-white space characters from a string --\n";
 var_dump(ltrim($hello, "!oleH="));
 
-echo "\n-- Trim some non-white space characters from a string suing a character range --\n"; 
+echo "\n-- Trim some non-white space characters from a string suing a character range --\n";
 var_dump(ltrim($alpha, "A..Z"));
 
 

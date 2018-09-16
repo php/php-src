@@ -7,9 +7,9 @@ $filename = 'test.toto';
 $csv = base64_decode('6Q==');
 $adata = str_getcsv($csv,";");
 $b2 = basename($filename);
-if ($filename != $b2) 
+if ($filename != $b2)
 	print "BUG";
 else 
 	print "OKEY";
---EXPECT--	
+--EXPECT--
 OKEY

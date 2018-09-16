@@ -1,17 +1,17 @@
 --TEST--
 Test xml_get_current_byte_index() function : usage variations  - <type here specifics of this variation>
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_get_current_byte_index(resource parser)
  * Description: Get current byte index for an XML parser 
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_get_current_byte_index() : usage variations ***\n";
@@ -73,7 +73,7 @@ $values = array(
 
       // object data
       new aClass(),
-      
+
       // resource data
       $fp, 
 

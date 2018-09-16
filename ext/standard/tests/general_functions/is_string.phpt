@@ -146,7 +146,7 @@ var_dump( is_string() );
 
 //arguments more than expected 
 var_dump( is_string("string", "test") );
- 
+
 echo "Done\n";
 
 // close the resources used

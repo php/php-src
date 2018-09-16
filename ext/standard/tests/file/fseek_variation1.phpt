@@ -62,7 +62,7 @@ $values = array(
       // string data
       "string",
       'string',
-      
+
       // object data
       new testClass(),      
 

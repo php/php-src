@@ -5,7 +5,7 @@ Test ob_end_flush() function : basic functionality
 /* Prototype  : proto bool ob_end_flush(void)
  * Description: Flush (send) the output buffer, and delete current output buffer 
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ob_end_flush() : basic functionality ***\n";

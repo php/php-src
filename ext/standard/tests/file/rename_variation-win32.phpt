@@ -45,12 +45,12 @@ foreach($src_filenames as $src_filename) {
   var_dump( file_exists($src_filename) );  // expecting false
   var_dump( file_exists($dest_filename) );  // expecting true
   $counter++;
- 
+
   // unlink the file  
   unlink($dest_filename);
 }
 
-rmdir("$file_path/rename_variation"); 
+rmdir("$file_path/rename_variation");
 
 echo "Done\n";
 ?>

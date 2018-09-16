@@ -1,5 +1,5 @@
 --TEST--
-Test 9: Stream Wrapper XPath-Document() 
+Test 9: Stream Wrapper XPath-Document()
 --SKIPIF--
 <?php
 	require_once dirname(__FILE__) .'/skipif.inc';

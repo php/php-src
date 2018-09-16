@@ -39,7 +39,7 @@ var_dump(strlen($phar->getStub()));
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.bz2');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');

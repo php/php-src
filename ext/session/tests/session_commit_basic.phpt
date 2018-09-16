@@ -7,7 +7,7 @@ Test session_commit() function : basic functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_commit(void)
  * Description : Write session data and end session
  * Source code : ext/session/session.c 

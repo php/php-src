@@ -41,7 +41,7 @@ $values = array(
        "abc123\n",
 /*20*/ 'abc 123',
        '',
-       ' ', 
+       ' ',
        base64_decode("w4DDoMOHw6fDiMOo"), // non-ascii characters
        "!$%@\n",
 /*25*/ "\"?!\"",

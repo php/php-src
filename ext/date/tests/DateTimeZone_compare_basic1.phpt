@@ -1,7 +1,7 @@
 --TEST--
 Test of compare object handler for DateTime objects
 --FILE--
-<?php 
+<?php
 
 // NB: DateTimeZone class does not define a customized compare class handler so standard object handler will be used  
 

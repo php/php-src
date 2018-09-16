@@ -16,7 +16,7 @@ $z = imap_headerinfo($stream_id, 1);
 
 $fields = array ('toaddress','to','fromaddress','from',
 'reply_toaddress','reply_to',
-	'senderaddress', 'sender', 
+	'senderaddress', 'sender',
 'subject','Subject',
 	'MailDate','Size','udate');
 
@@ -84,7 +84,7 @@ imap_close($stream_id);
 
 ?>
 --CLEAN--
-<?php 
+<?php
 require_once('clean.inc');
 ?>
 --EXPECTF--

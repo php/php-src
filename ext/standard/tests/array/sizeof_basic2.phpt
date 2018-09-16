@@ -13,7 +13,7 @@ Test sizeof() function : basic functionality - for non-scalar type(array)
  * in default, COUNT_NORMAL and COUNT_RECURSIVE modes.
  * Sizeof() has been tested for simple integer, string,
  * indexed and mixed arrays.
- */ 
+ */
 
 echo "*** Testing sizeof() : basic functionality ***\n";
 

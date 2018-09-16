@@ -10,7 +10,7 @@ Test array_flip() function : basic functionality
 echo "*** Testing array_flip() : basic functionality ***\n";
 
 // array with default keys - numeric values
-$input = array(1, 2);   
+$input = array(1, 2);
 var_dump( array_flip($input) );
 
 // array with default keys - string values
@@ -18,7 +18,7 @@ $input = array('value1', "value2");
 var_dump( array_flip($input) );
 
 // associative arrays - key as string
-$input = array('key1' => 1, "key2" => 2); 
+$input = array('key1' => 1, "key2" => 2);
 var_dump( array_flip($input) );
 
 // associative arrays - key as numeric

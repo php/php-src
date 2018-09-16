@@ -85,7 +85,7 @@ class Test3
   public static $test3_static = 0;
   protected $member1;
   var $var1 = 30;
-  var $var2; 
+  var $var2;
 
   function __construct($value1 , $value2)
   {
@@ -127,7 +127,7 @@ class Test4
 class Child_test4 extends Test4
 {
   var $var1;
-  
+
   function __construct($value1 , $value2 , $value3 , $value4)
   {
     parent::__construct($value1 , $value2 , $value3);
@@ -142,7 +142,7 @@ abstract class AbstractClass
   private $member2;
   protected $member3;
   var $var1 = 30;
-  
+
   abstract protected function display();
 }
 
@@ -173,7 +173,7 @@ class Template1 implements iTemplate
 
 //array of object values for 'val' argument
 $objects = array(
-  
+
   /* 1  */  new Test(),
             new Test1(100 , 101),
             new Child_test1(100 , 101 , 102),

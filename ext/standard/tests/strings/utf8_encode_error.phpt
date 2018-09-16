@@ -5,7 +5,7 @@ Test utf8_encode() function : error conditions
 /* Prototype  : proto string utf8_encode(string data)
  * Description: Encodes an ISO-8859-1 string to UTF-8 
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing utf8_encode() : error conditions ***\n";

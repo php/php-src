@@ -27,9 +27,9 @@ $array_values = array(
 );
 
 // array of octal formats
-$octal_formats = array( 
-  "%o", "%ho", "%lo", 
-  "%Lo", " %o", "%o ",                        
+$octal_formats = array(
+  "%o", "%ho", "%lo",
+  "%Lo", " %o", "%o ",
   "\t%o", "\n%o", "%4o",
   "%30o", "%[0-7]", "%*o"
 );
@@ -37,7 +37,7 @@ $octal_formats = array(
 $count = 1;
 foreach($array_values as $array_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($octal_formats as $format) {
     var_dump( sprintf($format, $array_value) );
   }

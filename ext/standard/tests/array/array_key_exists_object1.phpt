@@ -18,7 +18,7 @@ class myClass {
 	var $var1;
 	var $var2;
 	var $var3;
-	
+
 	function __construct($a, $b, $c = null) {
 		$this->var1 = $a;
 		$this->var2 = $b;

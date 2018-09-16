@@ -9,7 +9,7 @@ session.auto_start=1
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_start(void)
  * Description : Initialize session data
  * Source code : ext/session/session.c 

@@ -9,7 +9,7 @@ session.name=blah
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_name([string $name])
  * Description : Get and/or set the current session name
  * Source code : ext/session/session.c 

@@ -1,8 +1,8 @@
 --TEST--
 microtime() function
 --SKIPIF--
-<?php 
-	if (!function_exists('microtime'))  die('skip microtime() not available'); 
+<?php
+	if (!function_exists('microtime'))  die('skip microtime() not available');
 ?>
 --FILE--
 <?php

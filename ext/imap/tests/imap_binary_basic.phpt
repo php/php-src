@@ -18,7 +18,7 @@ $str = 'This is an example string to be base 64 encoded';
 $base64 = imap_binary($str);
 var_dump(bin2hex($base64));
 
-echo "Encode a string which results in more than 60 charters of output\n"; 
+echo "Encode a string which results in more than 60 charters of output\n";
 $str = 'This is a long string with results in more than 60 characters of output';
 $base64 = imap_binary($str);
 var_dump(bin2hex($base64));

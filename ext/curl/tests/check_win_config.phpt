@@ -1,9 +1,9 @@
 --TEST--
 Check libcurl config on windows
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("curl")) {
-	die('skip - curl extension not available in this build'); 
+	die('skip - curl extension not available in this build');
 }
 if(substr(PHP_OS, 0, 3) != 'WIN' )
   die("skip for windows only");

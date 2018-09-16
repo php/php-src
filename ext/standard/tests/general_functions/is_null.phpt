@@ -15,7 +15,7 @@ $unset_bool = true;
 $unset_object = new stdclass;
 $unset_resource = fopen(__FILE__, "r");
 // unset them to make it null.
-unset ($unset_array, $unset_int, $unset_float, $unset_bool, $unset_object, $unset_resource); 
+unset ($unset_array, $unset_int, $unset_float, $unset_bool, $unset_object, $unset_resource);
 $null_var1 = NULL;
 $null_var2 = null;
 
@@ -133,7 +133,7 @@ var_dump( is_null() );
 
 //arguments more than expected 
 var_dump( is_null(NULL, null) );
- 
+
 echo "Done\n";
 
 // close the resources used

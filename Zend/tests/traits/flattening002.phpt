@@ -9,7 +9,7 @@ class Base {
      echo 'Hello ';
    }
 }
- 
+
 trait SayWorld {
    public function sayHello() {
      parent::sayHello();
@@ -24,5 +24,5 @@ class MyHelloWorld extends Base {
 $o = new MyHelloWorld();
 $o->sayHello();
 ?>
---EXPECT--	
+--EXPECT--
 Hello World!

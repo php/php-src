@@ -9,7 +9,7 @@ function foo($a)
 	var_dump($b);
 	$b++;
 	var_dump(func_get_arg(1));
-	
+
 }
 foo(2, 3);
 echo "\n";

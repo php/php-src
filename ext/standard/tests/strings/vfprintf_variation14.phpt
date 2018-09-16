@@ -64,7 +64,7 @@ $args_array = array(
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 /* creating dumping file */
@@ -95,31 +95,31 @@ unlink($data_file);
 -- Iteration 1 --
 2 0 a 
    1e240 x fffffb2e 4d2 
-                          
+
    3039 c fffffff4 fffe1dc0
    a 1e240 2 0
 -- Iteration 2 --
 2 fffffffe 2 
    1e240 x ff439a5b bc65a5
-                          
+
    bc61b4 127ae7 ff4732f9 ff439ede
    2 1e240 2 fffffffe
 -- Iteration 3 --
 0 0 0 
    7b x ffffff85 7b  
-                          
+
    4d2 0 $0 _0
    0 7b 0 0
 -- Iteration 4 --
 1 1 1 
    1 x    1 1   
-                          
+
    #1 1 $1 _1
    1 1 1 1
 -- Iteration 5 --
 1 1 0 
    1 x    0 1   
-                          
+
    #0 1 $1 _0
    0 1 1 1
 ===DONE===

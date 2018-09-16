@@ -44,7 +44,7 @@ $vars = array(
        1,
        12345,
        -2345,
- 
+
        // float data
 /*5*/  10.5,
        -10.5,
@@ -58,7 +58,7 @@ $vars = array(
        array(1),
        array(1, 2),
        array('color' => 'red', 'item' => 'pen'),
- 
+
        // null data
 /*15*/ NULL,
        null,
@@ -68,7 +68,7 @@ $vars = array(
        false,
        TRUE,
        FALSE,
- 
+
        // empty data
 /*21*/ "",
        '',
@@ -86,7 +86,7 @@ $vars = array(
 
        // unset data
        @$unset_var,
- 
+
        // resource variable
 /*29*/ $fp
 );
@@ -103,7 +103,7 @@ foreach($vars as $var) {
   var_dump( array_unshift($temp_array, $var) );
 
   // dump the resulting array
-  var_dump($temp_array);  
+  var_dump($temp_array);
 
   /* with optional arguments */
   // returns element count in the resulting array after arguments are pushed to

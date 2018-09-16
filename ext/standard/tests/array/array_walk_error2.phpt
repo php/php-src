@@ -35,12 +35,12 @@ try {
 
 // expected: Warning is suppressed
 try {
-	var_dump( @array_walk($input, "callback1") );  
+	var_dump( @array_walk($input, "callback1") );
 } catch (Throwable $e) {
 	echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	var_dump( @array_walk($input, "callback2", 4) );  
+	var_dump( @array_walk($input, "callback2", 4) );
 } catch (Throwable $e) {
 	echo "Exception: " . $e->getMessage() . "\n";
 }

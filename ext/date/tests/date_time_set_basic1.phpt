@@ -7,7 +7,7 @@ Test date_time_set() function : basic functionality
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::setTime
  */
- 
+
  //Set the default time zone 
 date_default_timezone_set("Europe/London");
 

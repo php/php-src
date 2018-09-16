@@ -15,7 +15,7 @@ $dfp = opendir ( dirname(__FILE__) );
 
 $fp_copy = $fp;
 $dfp_copy = $dfp;
-  
+
 // array of resource types
 $resource_types = array (
   $fp_copy,
@@ -28,11 +28,11 @@ $int_formats = array(
   "\t%d", "\n%d", "%4d",
   "%[0-9]", "%*d"
 );
- 
+
 $count = 1;
 foreach($resource_types as $res) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($int_formats as $format) {
     var_dump( sprintf($format, $res) );
   }

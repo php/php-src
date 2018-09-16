@@ -26,7 +26,7 @@ $float_input = array( 1.2E2, 23.4E3, -4.1E2, 0.2E2, 2.1E-2, .5E3);
 var_dump( array_sum($float_input) );
 
 // Mixed float array
-$float_input = array( 
+$float_input = array(
   1.2,
   0.5
   -5.8,
@@ -39,7 +39,7 @@ $float_input = array(
 );
 echo "-- Mixed float array --\n";
 var_dump( array_sum($float_input) );
-                     
+
 echo "Done"
 ?>
 --EXPECT--

@@ -27,7 +27,7 @@ function cmp_function($value1, $value2)
 }
 
 // different variables which are used as elements of $array_arg
-$value1 = -5; 
+$value1 = -5;
 $value2 = 100;
 $value3 = 0;
 $value4 = &$value1;

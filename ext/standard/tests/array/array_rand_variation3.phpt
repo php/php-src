@@ -21,7 +21,7 @@ $input = array(
 
        // array with float values
        array(1.23, -1.23, 0.34, -0.34, 0e2, 2e-3, -2e2, -40e-2),             
-               
+
        // array with single quoted strings 
 /*3*/  array('one', '123numbers', 'hello\tworld', 'hello world\0', '12.34floatnum'),
 
@@ -33,7 +33,7 @@ $input = array(
 
        // array with hexa values
        array(0x123, -0x123, 0xabc, 0xABC, 0xab),
- 
+
        // array with null values
 /*7*/  array(null, NULL, "\0", Null, NuLl)
 

@@ -23,7 +23,7 @@ $valid_ints = array(
                 '1',
                 '-1',
                 '-2147483648', // max negative integer value
-                '-2147483647', 
+                '-2147483647',
                 2147483647,  // max positive integer value
                 2147483640,
                 0x123B,      // integer as hexadecimal
@@ -57,7 +57,7 @@ echo "*** Testing var_export() with valid boolean values ***\n";
 $valid_bool = array(
 		    1,
 		    TRUE,
-                true, 
+                true,
                 0,
 		    FALSE,
 		    false
@@ -207,18 +207,18 @@ class concreteClass extends abstractClass
 // interface class 
 interface iValue
 {
-   public function setVal ($name, $val); 
+   public function setVal ($name, $val);
    public function dumpVal ();
 }
 // implement the interface
 class Value implements iValue
 {
   private $vars = array ();
-  
+
   public function setVal ( $name, $val ) {
     $this->vars[$name] = $val;
   }
-  
+
   public function dumpVal () {
     var_export ( $vars );
   }
@@ -239,7 +239,7 @@ class myClass
     $this->public_var1 = new foo();
     $this->private_var = new foo();
     $this->proected_var = new foo();
-  }  
+  }
 }
 
 // create a object of each class defined above
@@ -260,7 +260,7 @@ $valid_objects = array(
                   $foo_object,
                   $Value_object,
                   $concreteClass_object
-                 ); 
+                 );
  $counter = 1;
 /* Loop to check for above objects with var_export() */
 echo "\n*** Output for objects ***\n";
@@ -274,7 +274,7 @@ var_dump( var_export( $obj, TRUE) );
 echo "\n";
 $counter++;
 }
-                 
+
 echo "*** Testing var_export() with valid null values ***\n";
 // different valid  null values 
 $unset_var = array();
@@ -306,7 +306,7 @@ var_export( var_export() );
 
 //arguments more than expected 
 var_export( var_export(TRUE, FALSE, TRUE) );
- 
+
 echo "\n\nDone";
 
 

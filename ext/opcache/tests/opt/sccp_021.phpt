@@ -21,7 +21,7 @@ class A {
 			$queries[$i] .= $query_token;
 		}
 
-		return; 
+		return;
 	}
 }
 ?>

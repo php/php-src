@@ -28,8 +28,8 @@ $msg_uid = imap_uid($stream_id, $msg_no);
 
 $options = array ('1',
                   true,
-                  1.000000000000001, 
-                  0.00001e5, 
+                  1.000000000000001,
+                  0.00001e5,
                   PHP_INT_MAX, 
                   -PHP_INT_MAX
                  );

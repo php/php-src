@@ -44,11 +44,11 @@ foreach($file_content_types as $file_content_type){
     }
     rewind($file_handle);
     foreach($offset as $count){
-      var_dump( fseek($file_handle,$count,SEEK_END) ); 
+      var_dump( fseek($file_handle,$count,SEEK_END) );
       var_dump( ftell($file_handle) ); // confirm the file pointer position
       var_dump( feof($file_handle) ); //ensure that file pointer is not at end
     } //end of offset loop
-    
+
     //close the file and check the size, the size will have increased
     // by 10 bytes because of holes
     fclose($file_handle);

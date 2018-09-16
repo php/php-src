@@ -8,7 +8,7 @@ class foo {
 		var_dump($x,$y);
 		return 1;
 	}
-	
+
 	public function teste() {
 		return foo::x(function &($a=1,$b) { });
 	}

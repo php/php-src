@@ -19,7 +19,7 @@ var_dump( gettype($abbr) );
 var_dump( count($abbr) );
 
 echo "\n-- Format a sample entry --\n";
-var_dump( $abbr["acst"] );	
+var_dump( $abbr["acst"] );
 
 ?>
 ===DONE===

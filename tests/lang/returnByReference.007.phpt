@@ -6,15 +6,15 @@ class C {
 	static function returnConstantByValue() {
 		return 100;
 	}
-	
+
 	static function &returnConstantByRef() {
 		return 100;
 	}
-	
+
 	static function &returnVariableByRef() {
 		return $GLOBALS['a'];
 	}
-	
+
 	static function &returnFunctionCallByRef($functionToCall) {
 		return C::$functionToCall();
 	}

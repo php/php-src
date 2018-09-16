@@ -9,7 +9,7 @@ Bug #74408 (Endless loop bypassing execution time limit)
 	  $bla = new NonExistingClass2();
   }
 
-  public function exception_handler(Error $e) { 
+  public function exception_handler(Error $e) {
 	  echo "Caught, exception: " . $e->getMessage();
   }
  }

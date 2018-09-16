@@ -10,8 +10,8 @@ Test array_diff_key() function : usage variation - Passing float indexed array
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(0 => '0', 10 => '10', -10 => '-10', 20 =>'20', -20 => '-20'); 
-$float_indx_array = array(0.0 => '0.0', 10.5 => '10.5', -10.5 => '-10.5', 0.5 => '0.5'); 
+$input_array = array(0 => '0', 10 => '10', -10 => '-10', 20 =>'20', -20 => '-20');
+$float_indx_array = array(0.0 => '0.0', 10.5 => '10.5', -10.5 => '-10.5', 0.5 => '0.5');
 
 echo "\n-- Testing array_diff_key() function with float indexed array --\n";
 // loop through each element of the array for arr1

@@ -26,7 +26,7 @@ include ("file.inc");
 */
 
 echo "*** Testing fseek(), ftell(), rewind() : default whence & all w and x modes ***\n";
-$file_modes = array( "w","wb","wt","w+","w+b","w+t", 
+$file_modes = array( "w","wb","wt","w+","w+b","w+t",
                      "x","xb","xt","x+","x+b","x+t");
 $file_content_types = array( "text_with_new_line","alphanumeric");
 
@@ -53,7 +53,7 @@ foreach($file_content_types as $file_content_type){
 
     echo "-- Testing fseek() without using argument whence --\n";
     foreach($offset as $count){
-      var_dump( fseek($file_handle,$count) ); 
+      var_dump( fseek($file_handle,$count) );
       var_dump( ftell($file_handle) ); // confirm the file pointer position
       var_dump( feof($file_handle) ); //ensure that file pointer is not at end
     } //end of offset loop

@@ -7,7 +7,7 @@ Test DateTime::format() function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions: date_format
  */
- 
+
 //Set the default time zone 
 date_default_timezone_set("Europe/London");
 
@@ -22,7 +22,7 @@ var_dump( $date->format() );
 echo "\n-- Testing date_date_formatcreate() function with more than expected no. of arguments --\n";
 $format = "F j, Y, g:i a";
 $extra_arg = 10;
-var_dump( $date->format($format, $extra_arg) );   
+var_dump( $date->format($format, $extra_arg) );
 
 ?>
 ===DONE===

@@ -34,11 +34,11 @@ CODE;
 
 $clientCode = <<<'CODE'
     $context = stream_context_create(['ssl' => ['verify_peer' => false, 'peer_name' => 'bug54992.local']]);
-    
+
     phpt_wait();
     $fp = stream_socket_client("ssl://127.0.0.1:10011", $errornum, $errorstr, 3000, STREAM_CLIENT_CONNECT, $context);
     stream_set_blocking($fp, false);
-    
+
     function blocking_fwrite($fp, $buf) {
         $write = [$fp];
         $total = 0;

@@ -1,6 +1,6 @@
 --TEST--
 ReflectionClass::getFileName(), ReflectionClass::getStartLine(), ReflectionClass::getEndLine()
---FILE-- 
+--FILE--
 <?php
 //New instance of class C - defined below
 $rc = new ReflectionClass("C");

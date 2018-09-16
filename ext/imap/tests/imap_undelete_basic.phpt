@@ -20,7 +20,7 @@ imap_close($stream_id);
 
 ?>
 --CLEAN--
-<?php 
+<?php
 require_once('clean.inc');
 ?>
 --EXPECTF--

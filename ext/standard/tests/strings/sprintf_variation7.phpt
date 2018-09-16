@@ -21,14 +21,14 @@ $boolean_values = array (
 $int_formats = array(
   "%d", "%hd", "%ld",
   "%Ld", " %d", "%d ",
-  "\t%d", "\n%d", "%4d", 
+  "\t%d", "\n%d", "%4d",
   "%30d", "%[0-9]", "%*d"
 );
- 
+
 $count = 1;
 foreach($boolean_values as $boolean_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($int_formats as $format) {
     var_dump( sprintf($format, $boolean_value) );
   }

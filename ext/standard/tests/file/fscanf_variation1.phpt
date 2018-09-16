@@ -36,7 +36,7 @@ echo "\n*** Done ***";
 <?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation1.tmp";
-unlink($filename); 
+unlink($filename);
 ?>
 --EXPECT--
 *** Testing fscanf(): for its return type without third argument ***

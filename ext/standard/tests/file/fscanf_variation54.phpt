@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - objects
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): to read objects from a file ***\n"; 
+echo "*** Test fscanf(): to read objects from a file ***\n";
 
 // declare a class
 class foo

@@ -42,7 +42,7 @@ abstract class AbstractClass
 class ChildClass extends AbstractClass
 {
   private $var3;
-  public function emptyMethod() { 
+  public function emptyMethod() {
     echo "defined in child";
   }
 }
@@ -51,7 +51,7 @@ class ChildClass extends AbstractClass
 class FinalClass
 {
   private $var4;
-  final function finalMethod() { 
+  final function finalMethod() {
     echo 'This can not be overloaded';
   }
 }

@@ -20,8 +20,8 @@ $unset = 10;
 unset($unset);
 $array = array ('null' => null, 
                 'NULL' => NULL, 
-                'empty single quoted string' => '', 
-                "empty double quoted string" => "", 
+                'empty single quoted string' => '',
+                "empty double quoted string" => "",
                 'undefined variable' => @$undefined,
                 'unset variable' => @$unset);
 
@@ -30,7 +30,7 @@ foreach($array as $name => $input) {
 	$iterator = 1;
 	echo "\n-- Key in \$search array is : $name --\n";
 	$search[$input] = 'test';
-	
+
 	//iterate through array again to see which values are considered equal
 	foreach($array as $key) {
 		echo "Iteration $iterator:  ";

@@ -7,7 +7,7 @@ Test session_unset() function : variation
 
 ob_start();
 
-/* 
+/*
  * Prototype : void session_unset(void)
  * Description : Free all session variables
  * Source code : ext/session/session.c 

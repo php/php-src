@@ -5,7 +5,7 @@ Test var_export() function : error conditions - recursive object
 /* Prototype  : mixed var_export(mixed var [, bool return])
  * Description: Outputs or returns a string representation of a variable 
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 @$obj->p =& $obj;

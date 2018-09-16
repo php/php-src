@@ -14,7 +14,7 @@ trait TLegacy {
 
 class ReportCollision {
     use TLegacy;
-	
+
 	public function __construct() {
 	    echo "ReportCollision executed\n";
 	}

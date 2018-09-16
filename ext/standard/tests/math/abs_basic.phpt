@@ -24,7 +24,7 @@ $values = array(23,
 				"-2.345e1",			
 				null,
 				true,
-				false);	
+				false);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = abs($values[$i]);

@@ -60,7 +60,7 @@ $input_values = array(
        // null data
 /*10*/ NULL,
        null,
-      
+
        // boolean data
 /*12*/ true,
        false,
@@ -80,7 +80,7 @@ $input_values = array(
 
        // undefined data
        @$undefined_var,
- 
+
        // unset data
 /*22*/ @$unset_var,
 );

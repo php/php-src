@@ -11,7 +11,7 @@ foreach ($arr as $key => $val) {
 var_dump($arr);
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(2) {
   ["a"]=>
   int(1)

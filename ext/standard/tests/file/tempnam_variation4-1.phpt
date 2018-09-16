@@ -44,9 +44,9 @@ for($mode = 0351; $mode <= 0777; $mode++) {
 
       if (realpath(dirname($file_name)) != realpath(sys_get_temp_dir())) {
          echo " created in unexpected dir\n";
-      }   
+      }
     }
-    unlink($file_name);    
+    unlink($file_name);
   }
   else {
     print("FAILED: File is not created\n");

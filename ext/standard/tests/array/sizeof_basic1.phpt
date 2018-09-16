@@ -11,7 +11,7 @@ Test sizeof() function : basic functionality - for scalar types
 
 /* Testing the sizeof() for some of the scalar types(integer, float) values 
  * in default, COUNT_NORMAL and COUNT_RECURSIVE modes.
- */ 
+ */
 
 echo "*** Testing sizeof() : basic functionality ***\n";
 
