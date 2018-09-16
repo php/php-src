@@ -79,7 +79,7 @@ documentation writers can be found on #php.doc.
 
 ## PHP source code directory structure
 
-PHP source code includes also several files generated during development and
+PHP source code also includes several files generated during development and
 several parts where maintenance is happening upstream in their respective
 locations.
 
