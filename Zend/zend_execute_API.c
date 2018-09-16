@@ -265,6 +265,16 @@ void shutdown_executor(void) /* {{{ */
 		zend_close_rsrc_list(&EG(regular_list));
 	} zend_end_try();
 
+	if (!fast_shutdown) {
+		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
+
+#if ZEND_DEBUG
+		if (gc_enabled() && !CG(unclean_shutdown)) {
+			gc_collect_cycles();
+		}
+#endif
+	}
+
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
 
 	/* All resources and objects are destroyed. */
@@ -286,14 +296,6 @@ void shutdown_executor(void) /* {{{ */
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
 		zend_cleanup_internal_classes();
 	} else {
-		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
-
-#if ZEND_DEBUG
-		if (gc_enabled() && !CG(unclean_shutdown)) {
-			gc_collect_cycles();
-		}
-#endif
-
 		/* remove error handlers before destroying classes and functions,
 		 * so that if handler used some class, crash would not happen */
 		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
