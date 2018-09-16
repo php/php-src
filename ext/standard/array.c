@@ -170,7 +170,7 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 			}
 		}
 	}
-	return l1 > l2 ? 1 : (l1 < l2 ? -1 : 0);
+	return ZEND_NORMALIZE_BOOL(l1 > l2);
 }
 /* }}} */
 
@@ -978,7 +978,7 @@ static int php_array_user_compare(const void *a, const void *b) /* {{{ */
 		zval_ptr_dtor(&retval);
 		zval_ptr_dtor(&args[1]);
 		zval_ptr_dtor(&args[0]);
-		return ret < 0 ? -1 : ret > 0;
+		return ZEND_NORMALIZE_BOOL(ret);
 	} else {
 		zval_ptr_dtor(&args[1]);
 		zval_ptr_dtor(&args[0]);
@@ -1101,7 +1101,7 @@ static int php_array_user_key_compare(const void *a, const void *b) /* {{{ */
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&args[1]);
 
-	return result < 0 ? -1 : result > 0;
+	return ZEND_NORMALIZE_BOOL(result);
 }
 /* }}} */
 
@@ -4587,7 +4587,7 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		zend_long ret = zval_get_long(&retval);
 		zval_ptr_dtor(&retval);
-		return ret < 0 ? -1 : ret > 0;
+		return ZEND_NORMALIZE_BOOL(ret);
 	} else {
 		return 0;
 	}
