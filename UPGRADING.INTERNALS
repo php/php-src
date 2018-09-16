@@ -11,6 +11,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   b. Windows build system changes
 
 3. Module changes
+  a. ext/xml
 
 ========================
 1. Internal API changes
@@ -54,3 +55,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+  a. ext/xml
+    - The public (internal) API of the ext/xml extension has been removed. All
+      functions and structures are private to the extension now.
