@@ -189,6 +189,13 @@ PHP 8.0 UPGRADE NOTES
   . The quotemeta() function will now return an empty string if an empty string
     was passed. Previously false was returned.
 
+- XML:
+  . xml_parser_create(_ns) will now return an XmlParser object rather than a
+    resource. Return value checks using is_resource() should be replaced with
+    checks for `false`. The xml_parser_free() function no longer has an effect,
+    instead the XmlParser instance is automatically destroyed if it is no longer
+    referenced.
+
 - Zlib:
   . gzgetss() has been removed.
 

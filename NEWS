@@ -31,4 +31,7 @@ PHP                                                                        NEWS
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
+- XML:
+  . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
