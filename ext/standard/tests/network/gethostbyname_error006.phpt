@@ -6,5 +6,5 @@ gethostbyname() function - basic invalid parameter test
 <?php
 	var_dump(gethostbyname(".toto.toto.toto"));
 ?>
---EXPECTF--
+--EXPECT--
 string(15) ".toto.toto.toto"
