@@ -210,19 +210,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-#if LIBXML_VERSION < 20627
-/* Implement logic from libxml xmlTextConcat to add support for comments and PI */
-    if ((nodep->content == (xmlChar *) &(nodep->properties)) ||
-        ((nodep->doc != NULL) && (nodep->doc->dict != NULL) &&
-		xmlDictOwns(nodep->doc->dict, nodep->content))) {
-	nodep->content = xmlStrncatNew(nodep->content, arg, arg_len);
-    } else {
-        nodep->content = xmlStrncat(nodep->content, arg, arg_len);
-    }
-    nodep->properties = NULL;
-#else
 	xmlTextConcat(nodep, (xmlChar *) arg, arg_len);
-#endif
 	RETURN_TRUE;
 }
 /* }}} end dom_characterdata_append_data */

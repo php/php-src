@@ -1061,9 +1061,7 @@ PHP_METHOD(xmlreader, XML)
 		reader = xmlNewTextReader(inputbfr, uri);
 
 		if (reader != NULL) {
-#if LIBXML_VERSION >= 20628
 			ret = xmlTextReaderSetup(reader, NULL, uri, encoding, options);
-#endif
 			if (ret == 0) {
 				if (id == NULL) {
 					object_init_ex(return_value, xmlreader_class_entry);
