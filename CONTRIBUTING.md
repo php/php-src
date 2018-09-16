@@ -163,7 +163,7 @@ locations.
        ├─ lib/                      # Bundled https://libzip.org/
        └─ ...
     └─ ...
- ├─ main/                           # Language core features
+ ├─ main/                           # Main macros and definitions
  ├─ pear/                           # PEAR installation
  └─ sapi/                           # PHP SAPI modules
     └─ cli/
