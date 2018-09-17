@@ -1,4 +1,3 @@
-#define HAVE_STDIO_H 1
 #define HAVE_MEMORY_H 1
 /* #undef HAVE_STRINGS_H */
 #define HAVE_STRING_H 1
