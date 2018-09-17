@@ -1078,7 +1078,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	if (!path_length || path_length >= MAXPATHLEN-1) {
 #ifdef ZEND_WIN32
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_PATH_NOT_FOUND);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 #else
 		errno = EINVAL;
 #endif
