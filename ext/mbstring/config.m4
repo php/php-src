@@ -77,24 +77,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
         AC_DEFINE([USE_COMBINATION_EXPLOSION_CHECK],1,[whether to check multibyte regex backtrack])
       fi
 
-      AC_CACHE_CHECK(for variable length prototypes and stdarg.h, php_cv_mbstring_stdarg, [
-        AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdarg.h>
-int foo(int x, ...) {
-  va_list va;
-  va_start(va, x);
-  va_arg(va, int);
-  va_arg(va, char *);
-  va_arg(va, double);
-  return 0;
-}
-int main() { return foo(10, "", 3.14); }
-        ]])], [php_cv_mbstring_stdarg=yes], [php_cv_mbstring_stdarg=no], [
-          php_cv_mbstring_stdarg=no
-        ])
-      ])
-
-      AC_CHECK_HEADERS([strings.h unistd.h sys/time.h sys/times.h stdarg.h limits.h])
+      AC_CHECK_HEADERS([strings.h unistd.h sys/time.h sys/times.h limits.h])
       AC_CHECK_SIZEOF(int, 4)
       AC_CHECK_SIZEOF(short, 2)
       AC_CHECK_SIZEOF(long, 4)

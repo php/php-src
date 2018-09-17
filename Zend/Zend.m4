@@ -51,7 +51,6 @@ stdint.h \
 limits.h \
 malloc.h \
 unistd.h \
-stdarg.h \
 sys/types.h \
 sys/time.h \
 signal.h \

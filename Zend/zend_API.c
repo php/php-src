@@ -30,9 +30,7 @@
 #include "zend_closures.h"
 #include "zend_inheritance.h"
 
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 /* these variables are true statics/globals, and have to be mutex'ed on every access */
 ZEND_API HashTable module_registry;

@@ -23,9 +23,7 @@
 #include "zend.h"
 #include "zend_ast.h"
 
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
+#include <stdarg.h>
 
 #include "zend_llist.h"
 
