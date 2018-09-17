@@ -340,7 +340,6 @@ void shutdown_executor(void) /* {{{ */
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END_DEL();
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
-				zend_class_entry *ce = Z_PTR_P(zv);
 				if (_idx == EG(persistent_classes_count)) {
 					break;
 				}
