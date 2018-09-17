@@ -24,10 +24,7 @@
 #include <errno.h>
 #include <math.h>
 #include <assert.h>
-
-#ifdef __GNUC__
 #include <stddef.h>
-#endif
 
 #ifdef HAVE_IEEEFP_H
 #include <ieeefp.h>
