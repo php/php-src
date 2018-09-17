@@ -54,9 +54,7 @@
 # include <unix.h>
 #endif
 
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
+#include <stdarg.h>
 
 #ifdef HAVE_DLFCN_H
 # include <dlfcn.h>

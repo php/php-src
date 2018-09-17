@@ -104,7 +104,6 @@
 #define HAVE_SYSLOG_H 1
 #undef HAVE_UNISTD_H
 #define HAVE_SYS_TYPES_H 1
-#define HAVE_STDARG_H 1
 #undef HAVE_ALLOCA_H
 #undef HAVE_KILL
 #define HAVE_GETPID 1

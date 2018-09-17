@@ -442,7 +442,6 @@ poll.h \
 pwd.h \
 resolv.h \
 signal.h \
-stdarg.h \
 syslog.h \
 sysexits.h \
 sys/ioctl.h \
