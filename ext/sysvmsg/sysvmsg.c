@@ -27,11 +27,6 @@
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 
-#ifndef __USE_GNU
-/* we want to use mtype instead of __mtype */
-#define __USE_GNU
-#endif
-
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>

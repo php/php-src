@@ -88,9 +88,6 @@
 #  ifndef _GNU_SOURCE
 #   define _GNU_SOURCE
 #  endif
-#  ifndef __USE_GNU
-#   define __USE_GNU
-#  endif
 # endif
 # include <sys/mman.h>
 # ifndef MAP_ANON
