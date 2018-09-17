@@ -321,7 +321,7 @@ void shutdown_executor(void) /* {{{ */
 		} else {
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
 				zend_constant *c = Z_PTR_P(zv);
-				if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
+				if (_idx == EG(persistent_constants_count)) {
 					break;
 				}
 				zval_ptr_dtor_nogc(&c->value);
@@ -333,7 +333,7 @@ void shutdown_executor(void) /* {{{ */
 			} ZEND_HASH_FOREACH_END_DEL();
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(function_table), key, zv) {
 				zend_function *func = Z_PTR_P(zv);
-				if (func->type == ZEND_INTERNAL_FUNCTION) {
+				if (_idx == EG(persistent_functions_count)) {
 					break;
 				}
 				destroy_op_array(&func->op_array);
@@ -341,7 +341,7 @@ void shutdown_executor(void) /* {{{ */
 			} ZEND_HASH_FOREACH_END_DEL();
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
 				zend_class_entry *ce = Z_PTR_P(zv);
-				if (ce->type == ZEND_INTERNAL_CLASS) {
+				if (_idx == EG(persistent_classes_count)) {
 					break;
 				}
 				destroy_zend_class(zv);
