@@ -65,6 +65,10 @@ PHP 7.4 UPGRADE NOTES
     results of Reflection...::getModifiers(), using hard-coded numeric values.
     Use corresponding constants instead (e.g. ReflectionMethod::IS_PUBLIC).
 
+- Zip:
+  . The bundled libzip library has been removed. A system libzip >= 0.11 is now
+    necessary to build the extension.
+
 ========================================
 10. New Global Constants
 ========================================
