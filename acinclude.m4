@@ -1688,58 +1688,6 @@ AC_DEFUN([PHP_BROKEN_GETCWD],[
 ])
 
 dnl
-dnl PHP_BROKEN_GLIBC_FOPEN_APPEND
-dnl
-AC_DEFUN([PHP_BROKEN_GLIBC_FOPEN_APPEND], [
-  AC_MSG_CHECKING([for broken libc stdio])
-  AC_CACHE_VAL(_cv_have_broken_glibc_fopen_append,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdio.h>
-int main(int argc, char *argv[])
-{
-  FILE *fp;
-  long position;
-  char *filename = tmpnam(NULL);
-
-  fp = fopen(filename, "w");
-  if (fp == NULL) {
-    perror("fopen");
-    exit(2);
-  }
-  fputs("foobar", fp);
-  fclose(fp);
-
-  fp = fopen(filename, "a+");
-  position = ftell(fp);
-  fclose(fp);
-  unlink(filename);
-  if (position == 0)
-  return 1;
-  return 0;
-}
-]])],
-[_cv_have_broken_glibc_fopen_append=no],
-[_cv_have_broken_glibc_fopen_append=yes],
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <features.h>
-]], [[
-#if !__GLIBC_PREREQ(2,2)
-choke me
-#endif
-]])],
-[_cv_have_broken_glibc_fopen_append=yes],
-[_cv_have_broken_glibc_fopen_append=no])
-])])
-
-  if test "$_cv_have_broken_glibc_fopen_append" = "yes"; then
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(HAVE_BROKEN_GLIBC_FOPEN_APPEND,1, [Define if your glibc borks on fopen with mode a+])
-  else
-    AC_MSG_RESULT(no)
-  fi
-])
-
-dnl
 dnl PHP_BROKEN_GCC_STRLEN_OPT
 dnl
 dnl Early releases of GCC 8 shipped with a strlen() optimization bug, so they
