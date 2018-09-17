@@ -18,6 +18,10 @@ addons:
       - libxpm-dev
       - libzip-dev
 
+
+services:
+  - mysql
+
 notifications:
     email: 
        on_failure: change
