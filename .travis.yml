@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 language: c
 sudo: required
 addons:
@@ -17,6 +17,11 @@ addons:
       - libsasl2-dev
       - libxpm-dev
       - libzip-dev
+
+
+services:
+  - mysql
+  - postgresql
 
 notifications:
     email: 
