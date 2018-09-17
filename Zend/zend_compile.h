@@ -882,9 +882,6 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_REQUIRE			(1<<3)
 #define ZEND_REQUIRE_ONCE		(1<<4)
 
-#define ZEND_CT	(1<<0)
-#define ZEND_RT (1<<1)
-
 /* global/local fetches */
 #define ZEND_FETCH_GLOBAL		(1<<1)
 #define ZEND_FETCH_LOCAL		(1<<2)
