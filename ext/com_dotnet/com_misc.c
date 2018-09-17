@@ -40,7 +40,7 @@ void php_com_throw_exception(HRESULT code, char *message)
 	zend_throw_exception(php_com_exception_class_entry, message, (zend_long)code);
 #endif
 	if (free_msg) {
-		LocalFree(message);
+		php_win32_error_msg_free(message);
 	}
 }
 

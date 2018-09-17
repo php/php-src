@@ -63,7 +63,7 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, size_t str
 		php_error_docref(NULL, E_WARNING,
 			"Could not convert string to unicode: `%s'", msg);
 
-		LocalFree(msg);
+		php_win32_error_msg_free(msg);
 	}
 
 	return olestring;
@@ -94,7 +94,7 @@ PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, size_t 
 		php_error_docref(NULL, E_WARNING,
 			"Could not convert string from unicode: `%s'", msg);
 
-		LocalFree(msg);
+		php_win32_error_msg_free(msg);
 	}
 
 	if (string_len) {

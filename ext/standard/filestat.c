@@ -114,7 +114,9 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
@@ -208,7 +210,9 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
