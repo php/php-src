@@ -21,6 +21,7 @@ addons:
 
 services:
   - mysql
+  - postgresql
 
 notifications:
     email: 
