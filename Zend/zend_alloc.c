@@ -2748,10 +2748,14 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
 
-	_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-	_heap->custom_heap.std._malloc = _malloc;
-	_heap->custom_heap.std._free = _free;
-	_heap->custom_heap.std._realloc = _realloc;
+	if (!_malloc && !_free && !_realloc) {
+		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_NONE;
+	} else {
+		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
+		_heap->custom_heap.std._malloc = _malloc;
+		_heap->custom_heap.std._free = _free;
+		_heap->custom_heap.std._realloc = _realloc;
+	}
 #endif
 }
 
