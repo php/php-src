@@ -2279,7 +2279,7 @@ static zend_bool ZEND_FASTCALL instanceof_interface_only(const zend_class_entry 
 	uint32_t i;
 
 	if (instance_ce->num_interfaces) {
-		ZEND_ASSERT(!(instance_ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+		ZEND_ASSERT(instance_ce->ce_flags & ZEND_ACC_LINKED);
 		for (i = 0; i < instance_ce->num_interfaces; i++) {
 			if (instanceof_interface_only(instance_ce->interfaces[i], ce)) {
 				return 1;
@@ -2307,7 +2307,7 @@ static zend_bool ZEND_FASTCALL instanceof_interface(const zend_class_entry *inst
 	uint32_t i;
 
 	if (instance_ce->num_interfaces) {
-		ZEND_ASSERT(!(instance_ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+		ZEND_ASSERT(instance_ce->ce_flags & ZEND_ACC_LINKED);
 		for (i = 0; i < instance_ce->num_interfaces; i++) {
 			if (instanceof_interface(instance_ce->interfaces[i], ce)) {
 				return 1;

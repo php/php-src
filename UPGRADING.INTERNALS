@@ -35,6 +35,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - ZEND_ACC_SHADOW property flag is removed. Instead of creating shadow
       clone, now we use the same private property_info, and should also
       check property_info->ce (in the same way as with methods).
+    - ZEND_ACC_ANON_BOUND is replaced with ZEND_ACC_LINKED. This flag is set
+      not only during anonymous classes declaration, but also during any
+      run-time or compile-time class declaration.
     - ZEND_ACC_... flags are re-numbered.
 
   d. zend_check_private() is removed. Use (func->common.scope == scope) instead.

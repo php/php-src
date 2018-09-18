@@ -218,7 +218,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
-			if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 				zend_string_release_ex(ce->parent_name, 0);
 			}
 			if (ce->default_properties_table) {
@@ -266,7 +266,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
-				if (ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES) {
+				if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 					uint32_t i;
 
 					for (i = 0; i < ce->num_interfaces; i++) {

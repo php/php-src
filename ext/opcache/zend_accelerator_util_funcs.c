@@ -292,7 +292,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;
 
-	if (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
+	if (ce->parent && (ce->ce_flags & ZEND_ACC_LINKED)) {
 		ce->parent = ARENA_REALLOC(ce->parent);
 	}
 
@@ -312,7 +312,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	/* static members */
 	if (old_ce->default_static_members_table) {
 		int i, end;
-		zend_class_entry *parent = (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) ? NULL : ce->parent;
+		zend_class_entry *parent = !(ce->ce_flags & ZEND_ACC_LINKED) ? NULL : ce->parent;
 
 		ce->default_static_members_table = emalloc(sizeof(zval) * old_ce->default_static_members_count);
 		i = ce->default_static_members_count - 1;
@@ -347,7 +347,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	if (ce->num_interfaces) {
 		zend_class_name *interface_names;
 
-		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 		interface_names = emalloc(sizeof(zend_class_name) * ce->num_interfaces);
 		memcpy(interface_names, ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 		ce->interface_names = interface_names;
