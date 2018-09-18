@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.1.23
 
+- CURL:
+  . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
+    (Pierrick)
+
 - Opcache:
   . Fixed bug #76832 (ZendOPcache.MemoryBase periodically deleted by the OS).
     (Anatol)
