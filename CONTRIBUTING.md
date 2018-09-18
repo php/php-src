@@ -152,7 +152,7 @@ locations.
     └─ skeleton/                    # Skeleton for developing new extensions with `ext/ext_skel.php`
        └─ ...
     └─ sqlite3/
-       ├─ libsqlite/                # https://www.sqlite.org/src/dir Mirror: https://github.com/mackyle/sqlite
+       ├─ libsqlite/                # https://www.sqlite.org mirror: https://github.com/mackyle/sqlite
        └─ ...
     └─ standard/
        └─ html_tables/
