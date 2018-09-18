@@ -6349,13 +6349,13 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				) {
 				if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 					CG(zend_lineno) = decl->end_lineno;
+					ce->ce_flags |= ZEND_ACC_LINKED;
 					zend_do_inheritance(ce, parent_ce);
 					if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 						zend_verify_abstract_class(ce);
 					}
 					CG(zend_lineno) = ast->lineno;
 					zend_string_release(lcname);
-					ce->ce_flags |= ZEND_ACC_LINKED;
 					return;
 				}
 			}
