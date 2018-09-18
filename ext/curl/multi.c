@@ -187,6 +187,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 }
 /* }}} */
 
+#if LIBCURL_VERSION_NUM < 0x071c00
 static void _make_timeval_struct(struct timeval *to, double timeout) /* {{{ */
 {
 	unsigned long conv;
@@ -196,6 +197,7 @@ static void _make_timeval_struct(struct timeval *to, double timeout) /* {{{ */
 	to->tv_usec = conv % 1000000;
 }
 /* }}} */
+#endif
 
 /* {{{ proto int curl_multi_select(resource mh[, double timeout])
    Get all the sockets associated with the cURL extension, which can then be "selected" */
@@ -203,12 +205,16 @@ PHP_FUNCTION(curl_multi_select)
 {
 	zval           *z_mh;
 	php_curlm      *mh;
+	double          timeout = 1.0;
+#if LIBCURL_VERSION_NUM >= 0x071c00 /* Available since 7.28.0 */
+	int             numfds = 0;
+#else
 	fd_set          readfds;
 	fd_set          writefds;
 	fd_set          exceptfds;
 	int             maxfd;
-	double          timeout = 1.0;
 	struct timeval  to;
+#endif
 	CURLMcode error = CURLM_OK;
 
 	ZEND_PARSE_PARAMETERS_START(1,2)
@@ -221,6 +227,15 @@ PHP_FUNCTION(curl_multi_select)
 		RETURN_FALSE;
 	}
 
+#if LIBCURL_VERSION_NUM >= 0x071c00 /* Available since 7.28.0 */
+	error = curl_multi_wait(mh->multi, NULL, 0, (unsigned long) timeout * 1000.0, &numfds);
+	if (CURLM_OK != error) {
+		SAVE_CURLM_ERROR(mh, error);
+		RETURN_LONG(-1);
+	}
+
+	RETURN_LONG(numfds);
+#else
 	_make_timeval_struct(&to, timeout);
 
 	FD_ZERO(&readfds);
@@ -234,6 +249,7 @@ PHP_FUNCTION(curl_multi_select)
 		RETURN_LONG(-1);
 	}
 	RETURN_LONG(select(maxfd + 1, &readfds, &writefds, &exceptfds, &to));
+#endif
 }
 /* }}} */
 
