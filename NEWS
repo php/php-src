@@ -28,6 +28,8 @@ PHP                                                                        NEWS
     data connection). (Ville Hukkamäki)
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
     stream_socket_client). (Ville Hukkamäki)
+  . Fixed bug #75533 (array_reduce is slow when $carry is large array).
+    (Manabu Matsui)
 
 - XMLRPC:
   . Fixed bug #76886 (Can't build xmlrpc with expat). (Thomas Petazzoni, cmb)
