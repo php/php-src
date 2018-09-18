@@ -5982,6 +5982,8 @@ PHP_FUNCTION(array_reduce)
 		ZVAL_COPY(&args[1], operand);
 		fci.params = args;
 
+		zval_ptr_dtor(&result);
+
 		if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
