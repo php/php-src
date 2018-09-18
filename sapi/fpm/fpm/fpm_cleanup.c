@@ -48,4 +48,3 @@ void fpm_cleanups_run(int type) /* {{{ */
 	fpm_array_free(&cleanups);
 }
 /* }}} */
-

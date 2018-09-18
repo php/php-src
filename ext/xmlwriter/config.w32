@@ -14,4 +14,3 @@ if (PHP_XMLWRITER == "yes" && PHP_LIBXML == "yes") {
 		WARNING('Could not find xmlwriter.h');
 	}
 }
-

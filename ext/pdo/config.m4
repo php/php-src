@@ -51,4 +51,3 @@ if test "$PHP_PDO" != "no"; then
   dnl so we always include the known-good working hack.
   PHP_ADD_MAKEFILE_FRAGMENT
 fi
-

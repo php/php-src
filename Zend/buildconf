@@ -30,4 +30,3 @@ if cmp configure.old configure > /dev/null 2>&1; then
 else
     echo "buildconf: created or modified ${1}configure"
 fi
-
