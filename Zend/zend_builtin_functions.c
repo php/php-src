@@ -1115,7 +1115,6 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 		}
 
 		/* copy: enforce read only access */
-		ZVAL_DEREF(prop);
 		ZVAL_COPY_OR_DUP(&prop_copy, prop);
 		prop = &prop_copy;
 

@@ -1172,7 +1172,6 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 					} else {
 						val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
 					}
-					ZVAL_DEREF(val);
 					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
 						if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
 							return FAILURE;

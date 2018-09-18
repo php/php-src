@@ -95,25 +95,6 @@ void zend_accel_move_user_functions(HashTable *src, zend_script *script)
 	src->pDestructor = orig_dtor;
 }
 
-static inline void zend_clone_zval(zval *src)
-{
-	void *ptr;
-
-	if (Z_TYPE_P(src) == IS_REFERENCE) {
-		ptr = accel_xlat_get(Z_REF_P(src));
-		if (ptr != NULL) {
-			Z_REF_P(src) = ptr;
-			return;
-		} else {
-			zend_reference *old = Z_REF_P(src);
-			ZVAL_NEW_REF(src, &old->val);
-			Z_REF_P(src)->gc = old->gc;
-			accel_xlat_set(old, Z_REF_P(src));
-			src = Z_REFVAL_P(src);
-		}
-	}
-}
-
 static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 {
 	Bucket *p, *q, *end;
@@ -157,7 +138,6 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 		c = ARENA_REALLOC(Z_PTR(p->val));
 		ZVAL_PTR(&q->val, c);
 
-		zend_clone_zval(&c->value);
 		if ((void*)c->ce >= ZCG(current_persistent_script)->arena_mem &&
 		    (void*)c->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
 			c->ce = ARENA_REALLOC(c->ce);
@@ -303,7 +283,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		dst = ce->default_properties_table;
 		for (; src != end; src++, dst++) {
 			ZVAL_COPY_VALUE(dst, src);
-			zend_clone_zval(dst);
 		}
 	}
 
@@ -322,7 +301,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		for (; i >= end; i--) {
 			zval *p = &ce->default_static_members_table[i];
 			ZVAL_COPY_VALUE(p, &old_ce->default_static_members_table[i]);
-			zend_clone_zval(p);
 		}
 
 		/* Create indirections to static properties from parent classes */
