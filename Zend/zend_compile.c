@@ -6183,7 +6183,7 @@ void zend_compile_implements(zend_ast *ast) /* {{{ */
 		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
 	}
 
-	ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES | ZEND_ACC_UNRESOLVED_INTERFACES;
+	ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	ce->num_interfaces = list->children;
 	ce->interface_names = interface_names;
 }
@@ -6280,7 +6280,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		ce->parent_name = zend_resolve_class_name(extends_name,
 					extends_ast->kind == ZEND_AST_ZVAL ? extends_ast->attr : ZEND_NAME_FQ);
 		zend_string_release_ex(extends_name, 0);
-		ce->ce_flags |= ZEND_ACC_INHERITED | ZEND_ACC_UNRESOLVED_PARENT;
+		ce->ce_flags |= ZEND_ACC_INHERITED;
 	}
 
 	CG(active_class_entry) = ce;
@@ -6355,12 +6355,14 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 					}
 					CG(zend_lineno) = ast->lineno;
 					zend_string_release(lcname);
+					ce->ce_flags |= ZEND_ACC_LINKED;
 					return;
 				}
 			}
 		} else {
 			if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 				zend_string_release(lcname);
+				ce->ce_flags |= ZEND_ACC_LINKED;
 				return;
 			}
 		}

@@ -217,7 +217,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_ABSTRACT                (1 <<  6) /*  X  |  X  |     |     */
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS (1 <<  6) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 15...)                            |     |     |     */
+/* Class Flags (unused: 13...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -225,8 +225,8 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_TRAIT                   (1 <<  1) /*  X  |     |     |     */
 #define ZEND_ACC_ANON_CLASS              (1 <<  2) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Bound anonymous class                                  |     |     |     */
-#define ZEND_ACC_ANON_BOUND              (1 <<  3) /*  X  |     |     |     */
+/* Class linked with parent, interfacs and traits         |     |     |     */
+#define ZEND_ACC_LINKED                  (1 <<  3) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* class is abstarct, since it is set by any              |     |     |     */
 /* abstract method                                        |     |     |     */
@@ -242,20 +242,14 @@ typedef struct _zend_oparray_context {
 /* Class extends another class                            |     |     |     */
 #define ZEND_ACC_INHERITED               (1 <<  9) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Class extends another class                            |     |     |     */
-#define ZEND_ACC_UNRESOLVED_PARENT       (1 << 10) /*  X  |     |     |     */
-/*                                                        |     |     |     */
 /* Class implements interface(s)                          |     |     |     */
-#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 11) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Class implements interface(s)                          |     |     |     */
-#define ZEND_ACC_UNRESOLVED_INTERFACES   (1 << 12) /*  X  |     |     |     */
+#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 10) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class uses trait(s)                                    |     |     |     */
-#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 13) /*  X  |     |     |     */
+#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 11) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
-#define ZEND_HAS_STATIC_IN_METHODS       (1 << 14) /*  X  |     |     |     */
+#define ZEND_HAS_STATIC_IN_METHODS       (1 << 12) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 25...30)                       |     |     |     */
 /* ==============                                         |     |     |     */

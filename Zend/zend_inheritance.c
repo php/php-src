@@ -719,7 +719,6 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 	uint32_t i, ce_num, if_num = iface->num_interfaces;
 	zend_class_entry *entry;
 
-	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
 	ce_num = ce->num_interfaces;
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -798,9 +797,8 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	}
 
-	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+	if (ce->parent_name) {
 		zend_string_release_ex(ce->parent_name, 0);
-		ce->ce_flags &= ~ZEND_ACC_UNRESOLVED_PARENT;
 	}
 	ce->parent = parent_ce;
 
@@ -1032,7 +1030,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	zend_string *key;
 	zend_class_constant *c;
 
-	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
 
 	for (i = 0; i < ce->num_interfaces; i++) {
 		if (ce->interfaces[i] == NULL) {
@@ -1090,8 +1088,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 	zend_class_constant *c;
 	uint32_t i, j;
 
-	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
-
 	if (ce->parent && ce->parent->num_interfaces) {
 		interfaces = emalloc(sizeof(zend_class_entry*) * (ce->parent->num_interfaces + ce->num_interfaces));
 		memcpy(interfaces, ce->parent->interfaces, sizeof(zend_class_entry*) * ce->parent->num_interfaces);
@@ -1141,7 +1137,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 
 	ce->num_interfaces = num_interfaces;
 	ce->interfaces = interfaces;
-	ce->ce_flags &= ~ZEND_ACC_UNRESOLVED_INTERFACES;
 
 	i = ce->parent ? ce->parent->num_interfaces : 0;
 	for (; i < ce->num_interfaces; i++) {
@@ -1912,6 +1907,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 
 ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent) /* {{{ */
 {
+	ce->ce_flags |= ZEND_ACC_LINKED;
 	if (parent) {
 		zend_do_inheritance(ce, parent);
 	}

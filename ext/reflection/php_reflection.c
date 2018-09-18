@@ -325,7 +325,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 	if (ce->num_interfaces) {
 		uint32_t i;
 
-		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 			smart_str_append_printf(str, " extends %s", ZSTR_VAL(ce->interfaces[0]->name));
 		} else {
@@ -4831,7 +4831,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 	if (ce->num_interfaces) {
 		uint32_t i;
 
-		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
 		array_init(return_value);
 		for (i=0; i < ce->num_interfaces; i++) {
 			zval interface;
@@ -4863,7 +4863,7 @@ ZEND_METHOD(reflection_class, getInterfaceNames)
 		return;
 	}
 
-	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
 	array_init(return_value);
 
 	for (i=0; i < ce->num_interfaces; i++) {
