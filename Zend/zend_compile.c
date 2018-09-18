@@ -5829,7 +5829,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 
 		if (type_ast) {
 			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
-
+		 	zend_bool is_arg_explicitly_nullable = (type_ast->attr & ZEND_TYPE_NULLABLE) == ZEND_TYPE_NULLABLE;
+		 	
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->type = zend_compile_typename(
 				type_ast, default_type == IS_NULL, /* use_arena */ 0);
@@ -5837,6 +5838,12 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
 			}
+
+
+			if (default_type == IS_NULL && !is_arg_explicitly_nullable) {
+				zend_error(E_DEPRECATED, "Implicit nullable types are deprecated, mark the type as explicitly nullable with the '?' sign");
+			}
+
 
 			if (default_type > IS_NULL && default_type != IS_CONSTANT_AST
 					&& !zend_is_valid_default_value(arg_info->type, &default_node.u.constant)) {
