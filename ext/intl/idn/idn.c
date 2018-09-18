@@ -144,7 +144,6 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance") == FAILURE) {
-		zend_string_efree(buffer);
 		RETURN_FALSE;
 	}
 
