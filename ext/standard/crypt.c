@@ -38,11 +38,7 @@
 # endif
 #endif
 #include <time.h>
-#if HAVE_STRING_H
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 
 #ifdef PHP_WIN32
 #include <process.h>

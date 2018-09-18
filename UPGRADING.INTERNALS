@@ -3,13 +3,15 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 1. Internal API changes
   a. php_sys_symlink() and php_sys_link()
   b. zend_lookup_class_ex() and zend_fetch_class_by_name()
-  c. Function flags
+  c. Function/property/class flags
+  d. Removed zend_check_private()
 
 2. Build system changes
   a. Unix build system changes
   b. Windows build system changes
 
 3. Module changes
+  a. ext/xml
 
 ========================
 1. Internal API changes
@@ -23,12 +25,19 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     changed to accept optional lower-case class name as zend_string*,
     instead of zval*.
 
- c. Function flags changes
+ c. Function/property/class flags changes
     - ZEND_ACC_CTOR and ZEND_ACC_DTOR are removed. It's possible to check if
       method is a constructor/destructor using the following condition
       (func->commpon.scope->constructor == func).
     - ZEND_ACC_IMPLEMENTED_ABSTRACT is removed (it was used only internally
       during inheritance).
+    - ZEND_ACC_IMPLICIT_PUBLIC is removed (it was used only for reflection)
+    - ZEND_ACC_SHADOW property flag is removed. Instead of creating shadow
+      clone, now we use the same private property_info, and should also
+      check property_info->ce (in the same way as with methods).
+    - ZEND_ACC_... flags are re-numbered.
+
+  d. zend_check_private() is removed. Use (func->common.scope == scope) instead.
 
 ========================
 2. Build system changes
@@ -46,3 +55,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+  a. ext/xml
+    - The public (internal) API of the ext/xml extension has been removed. All
+      functions and structures are private to the extension now.

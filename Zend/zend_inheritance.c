@@ -31,20 +31,6 @@ static void overridden_ptr_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static zend_property_info *zend_duplicate_property_info(zend_property_info *property_info) /* {{{ */
-{
-	zend_property_info* new_property_info;
-
-	new_property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
-	memcpy(new_property_info, property_info, sizeof(zend_property_info));
-	zend_string_addref(new_property_info->name);
-	if (new_property_info->doc_comment) {
-		zend_string_addref(new_property_info->doc_comment);
-	}
-	return new_property_info;
-}
-/* }}} */
-
 static zend_property_info *zend_duplicate_property_info_internal(zend_property_info *property_info) /* {{{ */
 {
 	zend_property_info* new_property_info = pemalloc(sizeof(zend_property_info), 1);
@@ -171,16 +157,14 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 
 char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 {
-	if (fn_flags & ZEND_ACC_PRIVATE) {
-		return "private";
-	}
-	if (fn_flags & ZEND_ACC_PROTECTED) {
-		return "protected";
-	}
 	if (fn_flags & ZEND_ACC_PUBLIC) {
 		return "public";
+	} else if (fn_flags & ZEND_ACC_PRIVATE) {
+		return "private";
+	} else {
+		ZEND_ASSERT(fn_flags & ZEND_ACC_PROTECTED);
+		return "protected";
 	}
-	return "";
 }
 /* }}} */
 
@@ -586,7 +570,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 	}
 
-	if ((child_flags & ZEND_ACC_PRIVATE) < (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))) {
+	if (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED)) {
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
 	}
 
@@ -684,17 +668,14 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		child_info = Z_PTR_P(child);
-		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
+		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED)) {
 			child_info->flags |= ZEND_ACC_CHANGED;
-		} else {
+		}
+		if (!(parent_info->flags & ZEND_ACC_PRIVATE)) {
 			if (UNEXPECTED((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s%s::$%s as %s%s::$%s",
 					(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(ce->parent->name), ZSTR_VAL(key),
 					(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(ce->name), ZSTR_VAL(key));
-			}
-
-			if (parent_info->flags & ZEND_ACC_CHANGED) {
-				child_info->flags |= ZEND_ACC_CHANGED;
 			}
 
 			if (UNEXPECTED((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK))) {
@@ -711,20 +692,10 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		if (UNEXPECTED(parent_info->flags & ZEND_ACC_PRIVATE)) {
-			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
-				child_info = zend_duplicate_property_info_internal(parent_info);
-			} else {
-				child_info = zend_duplicate_property_info(parent_info);
-			}
-			child_info->flags &= ~ZEND_ACC_PRIVATE; /* it's not private anymore */
-			child_info->flags |= ZEND_ACC_SHADOW; /* but it's a shadow of private */
+		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
+			child_info = zend_duplicate_property_info_internal(parent_info);
 		} else {
-			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
-				child_info = zend_duplicate_property_info_internal(parent_info);
-			} else {
-				child_info = parent_info;
-			}
+			child_info = parent_info;
 		}
 		_zend_hash_append_ptr(&ce->properties_info, key, child_info);
 	}
@@ -1196,17 +1167,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
-static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_function *other_fn) /* {{{ */
-{
-	uint32_t    fn_flags = fn->common.scope->ce_flags;
-	uint32_t other_flags = other_fn->common.scope->ce_flags;
-
-	return zend_do_perform_implementation_check(fn, other_fn)
-		&& ((fn_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC)) ==
-		    (other_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC))); /* equal final and static qualifier */
-}
-/* }}} */
-
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
 	if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {
@@ -1275,7 +1235,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 				if ((existing_fn = zend_hash_find_ptr(*overridden, key)) != NULL) {
 					if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the trait method is compatible with previosly declared abstract method */
-						if (UNEXPECTED(!zend_traits_method_compatibility_check(fn, existing_fn))) {
+						if (UNEXPECTED(!zend_do_perform_implementation_check(fn, existing_fn))) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								ZSTR_VAL(zend_get_function_declaration(fn)),
 								ZSTR_VAL(zend_get_function_declaration(existing_fn)));
@@ -1283,7 +1243,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 					}
 					if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
-						if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
+						if (UNEXPECTED(!zend_do_perform_implementation_check(existing_fn, fn))) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								ZSTR_VAL(zend_get_function_declaration(existing_fn)),
 								ZSTR_VAL(zend_get_function_declaration(fn)));
@@ -1300,14 +1260,14 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT &&
 				(existing_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0) {
 			/* Make sure the trait method is compatible with previosly declared abstract method */
-			if (UNEXPECTED(!zend_traits_method_compatibility_check(fn, existing_fn))) {
+			if (UNEXPECTED(!zend_do_perform_implementation_check(fn, existing_fn))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					ZSTR_VAL(zend_get_function_declaration(fn)),
 					ZSTR_VAL(zend_get_function_declaration(existing_fn)));
 			}
 		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
-			if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
+			if (UNEXPECTED(!zend_do_perform_implementation_check(existing_fn, fn))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					ZSTR_VAL(zend_get_function_declaration(existing_fn)),
 					ZSTR_VAL(zend_get_function_declaration(fn)));
@@ -1681,11 +1641,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 			/* next: check for conflicts with current class */
 			if ((coliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
-				if (coliding_prop->flags & ZEND_ACC_SHADOW) {
-					zend_string_release_ex(coliding_prop->name, 0);
-					if (coliding_prop->doc_comment) {
-						zend_string_release_ex(coliding_prop->doc_comment, 0);
-                    }
+				if ((coliding_prop->flags & ZEND_ACC_PRIVATE) && coliding_prop->ce != ce) {
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {

@@ -151,7 +151,7 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 		ce->static_members_table = NULL;
 #endif
 		while (p != end) {
-			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(p);
 			p++;
 		}
 		efree(static_members);
@@ -226,7 +226,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zval *end = p + ce->default_properties_count;
 
 				while (p != end) {
-					i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+					i_zval_ptr_dtor(p);
 					p++;
 				}
 				efree(ce->default_properties_table);
@@ -236,13 +236,13 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zval *end = p + ce->default_static_members_count;
 
 				while (p != end) {
-					i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+					i_zval_ptr_dtor(p);
 					p++;
 				}
 				efree(ce->default_static_members_table);
 			}
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (prop_info->ce == ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
+				if (prop_info->ce == ce) {
 					zend_string_release_ex(prop_info->name, 0);
 					if (prop_info->doc_comment) {
 						zend_string_release_ex(prop_info->doc_comment, 0);

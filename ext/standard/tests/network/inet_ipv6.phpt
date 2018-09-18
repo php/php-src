@@ -33,7 +33,7 @@ foreach ($a as $address) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(3) "::1"
 string(3) "::2"
 string(4) "::35"

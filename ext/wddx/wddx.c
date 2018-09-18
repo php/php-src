@@ -28,7 +28,6 @@
 #include "php_wddx.h"
 #include "php_wddx_api.h"
 
-#define PHP_XML_INTERNAL
 #include "ext/xml/php_xml.h"
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/base64.h"

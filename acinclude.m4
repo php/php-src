@@ -1688,54 +1688,38 @@ AC_DEFUN([PHP_BROKEN_GETCWD],[
 ])
 
 dnl
-dnl PHP_BROKEN_GLIBC_FOPEN_APPEND
+dnl PHP_BROKEN_GCC_STRLEN_OPT
 dnl
-AC_DEFUN([PHP_BROKEN_GLIBC_FOPEN_APPEND], [
-  AC_MSG_CHECKING([for broken libc stdio])
-  AC_CACHE_VAL(_cv_have_broken_glibc_fopen_append,[
+dnl Early releases of GCC 8 shipped with a strlen() optimization bug, so they
+dnl didn't properly handle the `char val[1]` struct hack. See bug #76510.
+dnl
+AC_DEFUN([PHP_BROKEN_GCC_STRLEN_OPT], [
+  AC_CACHE_CHECK([for broken gcc optimize-strlen],ac_cv_have_broken_gcc_strlen_opt,[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
-int main(int argc, char *argv[])
+struct s
 {
-  FILE *fp;
-  long position;
-  char *filename = tmpnam(NULL);
-
-  fp = fopen(filename, "w");
-  if (fp == NULL) {
-    perror("fopen");
-    exit(2);
-  }
-  fputs("foobar", fp);
-  fclose(fp);
-
-  fp = fopen(filename, "a+");
-  position = ftell(fp);
-  fclose(fp);
-  unlink(filename);
-  if (position == 0)
-  return 1;
-  return 0;
+  int i;
+  char c[1];
+};
+int main()
+{
+  struct s *s = malloc(sizeof(struct s) + 3);
+  s->i = 3;
+  strcpy(s->c, "foo");
+  return strlen(s->c+1) == 2;
 }
-]])],
-[_cv_have_broken_glibc_fopen_append=no],
-[_cv_have_broken_glibc_fopen_append=yes],
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <features.h>
-]], [[
-#if !__GLIBC_PREREQ(2,2)
-choke me
-#endif
-]])],
-[_cv_have_broken_glibc_fopen_append=yes],
-[_cv_have_broken_glibc_fopen_append=no])
+]])],[
+  ac_cv_have_broken_gcc_strlen_opt=yes
+],[
+  ac_cv_have_broken_gcc_strlen_opt=no
+],[
+  ac_cv_have_broken_gcc_strlen_opt=no
 ])])
-
-  if test "$_cv_have_broken_glibc_fopen_append" = "yes"; then
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(HAVE_BROKEN_GLIBC_FOPEN_APPEND,1, [Define if your glibc borks on fopen with mode a+])
-  else
-    AC_MSG_RESULT(no)
+  if test "$ac_cv_have_broken_gcc_strlen_opt" = "yes"; then
+    CFLAGS="$CFLAGS -fno-optimize-strlen"
   fi
 ])
 
@@ -2155,7 +2139,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
     AC_MSG_RESULT([$icu_install_prefix])
 
     dnl Check ICU version
-    AC_MSG_CHECKING([for ICU 4.0 or greater])
+    AC_MSG_CHECKING([for ICU 50.1 or greater])
     icu_version_full=`$ICU_CONFIG --version`
     ac_IFS=$IFS
     IFS="."
@@ -2164,8 +2148,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
     icu_version=`expr [$]1 \* 1000 + [$]2`
     AC_MSG_RESULT([found $icu_version_full])
 
-    if test "$icu_version" -lt "4000"; then
-      AC_MSG_ERROR([ICU version 4.0 or later is required])
+    if test "$icu_version" -lt "50001"; then
+      AC_MSG_ERROR([ICU version 50.1 or later is required])
     fi
 
     ICU_VERSION=$icu_version
@@ -2175,10 +2159,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
     PHP_EVAL_LIBLINE($ICU_LIBS, $1)
 
     ICU_CXXFLAGS=`$ICU_CONFIG --cxxflags`
-    if test "$icu_version" -ge "49000"; then
-      ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
-      ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
-    fi
+    ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
+    ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
     if test "$icu_version" -ge "60000"; then
       ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
     fi

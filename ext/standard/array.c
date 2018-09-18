@@ -28,11 +28,7 @@
 #include <math.h>
 #include <time.h>
 #include <stdio.h>
-#if HAVE_STRING_H
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 #ifdef PHP_WIN32
 #include "win32/unistd.h"
 #endif
@@ -6140,7 +6136,7 @@ PHP_FUNCTION(array_map)
 
 			ZVAL_COPY(&arg, zv);
 			ret = zend_call_function(&fci, &fci_cache);
-			i_zval_ptr_dtor(&arg ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(&arg);
 			if (ret != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
 				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_NULL();

@@ -28,9 +28,7 @@
 #include "normalizer_class.h"
 #include "normalizer_normalize.h"
 #include "intl_convert.h"
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 #include <unicode/utf8.h>
-#endif
 
 
 #if U_ICU_VERSION_MAJOR_NUM >= 56

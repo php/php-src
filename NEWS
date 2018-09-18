@@ -2,6 +2,18 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0alpha1
 
+- CURL:
+  . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
+    (Pierrick)
+
+- Intl:
+  . Lifted requirements to ICU ≥ 50.1. (cmb)
+  . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
+    (cmb)
+
+- SQLite3:
+  . Updated to SQLite 3.25.0. (cmb)
+
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
     stream_socket_client). (Ville Hukkamäki)

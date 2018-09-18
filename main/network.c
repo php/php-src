@@ -28,6 +28,7 @@
 #ifdef PHP_WIN32
 # include <Ws2tcpip.h>
 # include "win32/inet.h"
+# include "win32/winutil.h"
 # define O_RDONLY _O_RDONLY
 # include "win32/param.h"
 #else
@@ -1020,20 +1021,8 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 	}
 	return buf;
 #else
-	char *sysbuf;
-	int free_it = 1;
-
-	if (!FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM |
-				FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL,
-				err,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				(LPTSTR)&sysbuf,
-				0,
-				NULL)) {
-		free_it = 0;
+	char *sysbuf = php_win32_error_to_msg(err);
+	if (!sysbuf[0]) {
 		sysbuf = "Unknown Error";
 	}
 
@@ -1044,9 +1033,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 		buf[bufsize?(bufsize-1):0] = 0;
 	}
 
-	if (free_it) {
-		LocalFree(sysbuf);
-	}
+	php_win32_error_msg_free(sysbuf);
 
 	return buf;
 #endif
@@ -1063,28 +1050,15 @@ PHPAPI zend_string *php_socket_error_str(long err)
 	return zend_string_init(errstr, strlen(errstr), 0);
 #else
 	zend_string *ret;
-	char *sysbuf;
-	int free_it = 1;
 
-	if (!FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM |
-				FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL,
-				err,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				(LPTSTR)&sysbuf,
-				0,
-				NULL)) {
-		free_it = 0;
+	char *sysbuf = php_win32_error_to_msg(err);
+	if (!sysbuf[0]) {
 		sysbuf = "Unknown Error";
 	}
 
 	ret = zend_string_init(sysbuf, strlen(sysbuf), 0);
 
-	if (free_it) {
-		LocalFree(sysbuf);
-	}
+	php_win32_error_msg_free(sysbuf);
 
 	return ret;
 #endif

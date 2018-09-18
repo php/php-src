@@ -36,7 +36,7 @@ $prop->setAccessible(true);
 var_dump($prop->getValue(new b2));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

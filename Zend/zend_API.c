@@ -30,9 +30,7 @@
 #include "zend_closures.h"
 #include "zend_inheritance.h"
 
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 /* these variables are true statics/globals, and have to be mutex'ed on every access */
 ZEND_API HashTable module_registry;
@@ -3097,24 +3095,17 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 				}
 			}
 		}
-		if ((check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0 &&
+		if (!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC) &&
+		    !(check_flags & IS_CALLABLE_CHECK_NO_ACCESS) &&
 		    (fcc->calling_scope &&
 		     ((fcc->object && fcc->calling_scope->__call) ||
 		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
-			if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-				scope = zend_get_executed_scope();
-				if (!zend_check_private(fcc->function_handler, fcc->object ? fcc->object->ce : scope, lmname)) {
-					retval = 0;
-					fcc->function_handler = NULL;
-					goto get_function_via_handler;
-				}
-			} else if (fcc->function_handler->common.fn_flags & ZEND_ACC_PROTECTED) {
-				scope = zend_get_executed_scope();
-				if (!zend_check_protected(fcc->function_handler->common.scope, scope)) {
-					retval = 0;
-					fcc->function_handler = NULL;
-					goto get_function_via_handler;
-				}
+			scope = zend_get_executed_scope();
+			if (fcc->function_handler->common.scope != scope
+			 || !zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope)) {
+				retval = 0;
+				fcc->function_handler = NULL;
+				goto get_function_via_handler;
 			}
 		}
 	} else {
@@ -3200,26 +3191,18 @@ get_function_via_handler:
 					}
 				}
 			}
-			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
-				if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-					scope = zend_get_executed_scope();
-					if (!zend_check_private(fcc->function_handler, fcc->object ? fcc->object->ce : scope, lmname)) {
+			if (retval
+			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)
+			 && !(check_flags & IS_CALLABLE_CHECK_NO_ACCESS)) {
+				scope = zend_get_executed_scope();
+				if (fcc->function_handler->common.scope != scope) {
+					if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
+					 || (!zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope))) {
 						if (error) {
 							if (*error) {
 								efree(*error);
 							}
-							zend_spprintf(error, 0, "cannot access private method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
-						}
-						retval = 0;
-					}
-				} else if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PROTECTED)) {
-					scope = zend_get_executed_scope();
-					if (!zend_check_protected(fcc->function_handler->common.scope, scope)) {
-						if (error) {
-							if (*error) {
-								efree(*error);
-							}
-							zend_spprintf(error, 0, "cannot access protected method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
+							zend_spprintf(error, 0, "cannot access %s method %s::%s()", zend_visibility_string(fcc->function_handler->common.fn_flags), ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 						}
 						retval = 0;
 					}
@@ -3508,7 +3491,7 @@ ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* 
 		zval *end = p + fci->param_count;
 
 		while (p != end) {
-			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(p);
 			p++;
 		}
 		if (free_mem) {

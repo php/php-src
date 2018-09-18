@@ -1179,9 +1179,11 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 							if (UNEXPECTED(ht->nInternalPointer == i)) {
 								ht->nInternalPointer = j;
 							}
-							if (UNEXPECTED(i == iter_pos)) {
-								zend_hash_iterators_update(ht, i, j);
-								iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
+							if (UNEXPECTED(i >= iter_pos)) {
+								do {
+									zend_hash_iterators_update(ht, iter_pos, j);
+									iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
+								} while (iter_pos < i);
 							}
 							q++;
 							j++;
@@ -1547,11 +1549,11 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 
 		if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
 			do {
-				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
+				i_zval_ptr_dtor(&p->val);
 			} while (++p != end);
 		} else if (HT_IS_WITHOUT_HOLES(ht)) {
 			do {
-				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
+				i_zval_ptr_dtor(&p->val);
 				if (EXPECTED(p->key)) {
 					zend_string_release_ex(p->key, 0);
 				}
@@ -1559,7 +1561,7 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 		} else {
 			do {
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
+					i_zval_ptr_dtor(&p->val);
 					if (EXPECTED(p->key)) {
 						zend_string_release_ex(p->key, 0);
 					}
@@ -1657,11 +1659,11 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 		end = p + ht->nNumUsed;
 		if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
 			do {
-				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
+				i_zval_ptr_dtor(&p->val);
 			} while (++p != end);
 		} else if (HT_IS_WITHOUT_HOLES(ht)) {
 			do {
-				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
+				i_zval_ptr_dtor(&p->val);
 				if (EXPECTED(p->key)) {
 					zend_string_release(p->key);
 				}
@@ -1669,7 +1671,7 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 		} else {
 			do {
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
+					i_zval_ptr_dtor(&p->val);
 					if (EXPECTED(p->key)) {
 						zend_string_release(p->key);
 					}
