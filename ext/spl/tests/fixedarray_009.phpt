@@ -9,5 +9,5 @@ try {
 	echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 ?>
---EXPECTF--
-Ok - SplFixedArray::__construct() expects parameter 1 to be integer, string given
+--EXPECT--
+Ok - SplFixedArray::__construct() expects parameter 1 to be int, string given

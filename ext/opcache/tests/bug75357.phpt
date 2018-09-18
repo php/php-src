@@ -26,9 +26,6 @@ function wp_slash( $value ) {
 }
 
 function addslashes_gpc($gpc) {
-	if ( get_magic_quotes_gpc() )
-		$gpc = stripslashes($gpc);
-
 	return wp_slash($gpc);
 }
 

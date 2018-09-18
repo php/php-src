@@ -1,5 +1,4 @@
 
-	/* $Id: fpm_php_trace.c,v 1.27.2.1 2008/11/15 00:57:24 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -117,7 +116,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 		} else {
 			memcpy(buf, "???", sizeof("???"));
 		}
-		
+
 		fprintf(slowlog, "[0x%" PTR_FMT "lx] ", execute_data);
 
 		fprintf(slowlog, "%s()", buf);
@@ -144,7 +143,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 			}
 
 			type = (zend_uchar *)&l;
-			if (0 > fpm_trace_get_long(function + offsetof(zend_function, type), &l)) { 
+			if (0 > fpm_trace_get_long(function + offsetof(zend_function, type), &l)) {
 				return -1;
 			}
 
@@ -174,7 +173,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					lineno = *lu;
 				}
 				break;
-			} 
+			}
 
 			if (0 > fpm_trace_get_long(prev + offsetof(zend_execute_data, prev_execute_data), &l)) {
 				return -1;

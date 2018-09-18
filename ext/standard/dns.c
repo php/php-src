@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /* {{{ includes */
 #include "php.h"
@@ -546,7 +544,10 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			CHECKCP(n);
 			add_assoc_stringl(subarray, "tag", (char*)cp, n);
 			cp += n;
-			add_assoc_string(subarray, "value", (char*)cp);
+			n = dlen - n - 2;
+			CHECKCP(n);
+			add_assoc_stringl(subarray, "value", (char*)cp, n);
+			cp += n;
 			break;
 		case DNS_T_TXT:
 			{
@@ -918,13 +919,13 @@ PHP_FUNCTION(dns_get_record)
 #if defined(HAVE_DNS_SEARCH)
 			handle = dns_open(NULL);
 			if (handle == NULL) {
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 #elif defined(HAVE_RES_NSEARCH)
 		    memset(&state, 0, sizeof(state));
 		    if (res_ninit(handle)) {
-		    	zval_dtor(return_value);
+		    	zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 #else
@@ -951,7 +952,7 @@ PHP_FUNCTION(dns_get_record)
 					default:
 						php_error_docref(NULL, E_WARNING, "DNS Query failed");
 				}
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 
@@ -968,7 +969,7 @@ PHP_FUNCTION(dns_get_record)
 				n = dn_skipname(cp, end);
 				if (n < 0) {
 					php_error_docref(NULL, E_WARNING, "Unable to parse DNS data received");
-					zval_dtor(return_value);
+					zend_array_destroy(Z_ARR_P(return_value));
 					php_dns_free_handle(handle);
 					RETURN_FALSE;
 				}

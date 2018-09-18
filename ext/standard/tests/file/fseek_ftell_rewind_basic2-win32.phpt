@@ -71,7 +71,7 @@ foreach($file_content_types as $file_content_type){
 } //end of File content type loop
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fseek(), ftell(), rewind() : basic operations ***
 
 -- File having data of type text_with_new_line --

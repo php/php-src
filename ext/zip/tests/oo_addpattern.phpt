@@ -6,7 +6,6 @@ w/Kenzo over the shoulder
 #phptek Chicago 2014
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -42,7 +41,7 @@ unlink($dirname . '__tmp_oo_addpattern.zip');
 unlink($dirname . 'foo.txt');
 unlink($dirname . 'bar.txt');
 ?>
---EXPECTF--
+--EXPECT--
 0 bar
 1 foobar/
 2 foobar/baz

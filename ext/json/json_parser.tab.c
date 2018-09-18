@@ -65,7 +65,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -139,8 +139,8 @@ int json_yydebug = 1;
 
 /* In a future release of Bison, this section will be replaced
    by #include "json_parser.tab.h".  */
-#ifndef YY_PHP_JSON_YY_HOME_HUIXINCHEN_OPENSOURCE_TRUNK_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
-# define YY_PHP_JSON_YY_HOME_HUIXINCHEN_OPENSOURCE_TRUNK_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+#ifndef YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+# define YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -201,7 +201,7 @@ typedef union YYSTYPE YYSTYPE;
 
 int php_json_yyparse (php_json_parser *parser);
 
-#endif /* !YY_PHP_JSON_YY_HOME_HUIXINCHEN_OPENSOURCE_TRUNK_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */
+#endif /* !YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
@@ -1062,121 +1062,121 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, php_json_parser *p
     {
           case 3: /* PHP_JSON_T_NUL  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 4: /* PHP_JSON_T_TRUE  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 5: /* PHP_JSON_T_FALSE  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 6: /* PHP_JSON_T_INT  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 7: /* PHP_JSON_T_DOUBLE  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 8: /* PHP_JSON_T_STRING  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 9: /* PHP_JSON_T_ESTRING  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 10: /* PHP_JSON_T_EOI  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 11: /* PHP_JSON_T_ERROR  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 19: /* start  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 20: /* object  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 23: /* members  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 24: /* member  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 25: /* pair  */
 
-      { zend_string_release(((*yyvaluep).pair).key); zval_dtor(&((*yyvaluep).pair).val); }
+      { zend_string_release_ex(((*yyvaluep).pair).key, 0); zval_ptr_dtor_nogc(&((*yyvaluep).pair).val); }
 
         break;
 
     case 26: /* array  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 29: /* elements  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 30: /* element  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 31: /* key  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 32: /* value  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
     case 33: /* errlex  */
 
-      { zval_dtor(&((*yyvaluep).value)); }
+      { zval_ptr_dtor_nogc(&((*yyvaluep).value)); }
 
         break;
 
@@ -1885,16 +1885,16 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		zval zkey;
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
-			zend_string_release(key);
-			zval_dtor(zvalue);
-			zval_dtor(object);
+			zend_string_release_ex(key, 0);
+			zval_ptr_dtor_nogc(zvalue);
+			zval_ptr_dtor_nogc(object);
 			return FAILURE;
 		}
 		ZVAL_NEW_STR(&zkey, key);
 		zend_std_write_property(object, &zkey, zvalue, NULL);
 		Z_TRY_DELREF_P(zvalue);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 
 	return SUCCESS;
 }

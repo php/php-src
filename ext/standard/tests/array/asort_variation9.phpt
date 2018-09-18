@@ -49,7 +49,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing asort() : usage variations ***
 
 -- Testing asort() by supplying various arrays with key values --

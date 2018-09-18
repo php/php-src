@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Zeev Suraski <zeev@zend.com>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_GLOBALS_H
 #define PHP_GLOBALS_H
@@ -106,7 +104,7 @@ struct _php_core_globals {
 	HashTable rfc1867_protected_variables;
 
 	short connection_status;
-	short ignore_user_abort;
+	zend_bool ignore_user_abort;
 
 	unsigned char header_is_being_sent;
 
@@ -166,6 +164,11 @@ struct _php_core_globals {
 #ifdef PHP_WIN32
 	zend_bool windows_show_crt_warning;
 #endif
+
+	zend_long syslog_facility;
+	char *syslog_ident;
+	zend_bool have_called_openlog;
+	zend_long syslog_filter;
 };
 
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Ilia Alshanetsky <ilia@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /*
  * Portions of this code are based on Berkeley's uuencode/uudecode
@@ -192,7 +190,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	return dest;
 
 err:
-	zend_string_free(dest);
+	zend_string_efree(dest);
 
 	return NULL;
 }

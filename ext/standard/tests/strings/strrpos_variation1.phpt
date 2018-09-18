@@ -108,16 +108,32 @@ int(9)
 int(8)
 bool(false)
 -- Iteration 12 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 13 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 14 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 15 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 16 --
 bool(false)

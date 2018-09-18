@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -57,9 +57,9 @@ mysqlnd_reverse_api_get_api_list(void)
 
 /* {{{ mysqlnd_reverse_api_register_api */
 PHPAPI void
-mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext)
+mysqlnd_reverse_api_register_api(const MYSQLND_REVERSE_API * apiext)
 {
-	zend_hash_str_add_ptr(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name), apiext);
+	zend_hash_str_add_ptr(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name), (void*)apiext);
 }
 /* }}} */
 

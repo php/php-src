@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,7 +52,7 @@ ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len)
 		ZSTR_LEN(str->s) = 0;
 	} else {
 		str->a = SMART_STR_NEW_LEN(len);
-		str->s = (zend_string *) realloc(str->s, str->a + _ZSTR_HEADER_SIZE + 1);
+		str->s = (zend_string *) perealloc(str->s, str->a + _ZSTR_HEADER_SIZE + 1, 1);
 	}
 }
 
@@ -114,7 +114,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char 
 	}
 }
 
-ZEND_API void ZEND_FASTCALL smart_str_append_printf(smart_str *dest, const char *format, ...) {
+ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...) {
 	va_list arg;
 	va_start(arg, format);
 	zend_printf_to_smart_str(dest, format, arg);
@@ -135,14 +135,14 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc_persistent(smart_string *str, si
 		} else {
 			str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
 		}
-		str->c = malloc(str->a + 1);
+		str->c = pemalloc(str->a + 1, 1);
 	} else {
 		if (UNEXPECTED((size_t) len > SIZE_MAX - str->len)) {
 			zend_error(E_ERROR, "String size overflow");
 		}
 		len += str->len;
 		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
-		str->c = realloc(str->c, str->a + 1);
+		str->c = perealloc(str->c, str->a + 1, 1);
 	}
 }
 

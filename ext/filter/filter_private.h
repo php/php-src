@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Authors: Derick Rethans <derick@php.net>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef FILTER_PRIVATE_H
 #define FILTER_PRIVATE_H
@@ -85,7 +83,8 @@
 #define FILTER_SANITIZE_NUMBER_FLOAT  0x0208
 #define FILTER_SANITIZE_MAGIC_QUOTES  0x0209
 #define FILTER_SANITIZE_FULL_SPECIAL_CHARS 0x020a
-#define FILTER_SANITIZE_LAST          0x020a
+#define FILTER_SANITIZE_ADD_SLASHES   0x020b
+#define FILTER_SANITIZE_LAST          0x020b
 
 #define FILTER_SANITIZE_ALL           0x0200
 
@@ -97,7 +96,7 @@
 || id == FILTER_CALLBACK)
 
 #define RETURN_VALIDATION_FAILED	\
-	zval_dtor(value);	\
+	zval_ptr_dtor(value);	\
 	if (flags & FILTER_NULL_ON_FAILURE) {	\
 		ZVAL_NULL(value);	\
 	} else {	\

@@ -7,6 +7,8 @@ if (false !== getenv('PDO_PGSQL_TEST_DSN')) {
 	}
 } else {
 	$config['ENV']['PDOTEST_DSN'] = 'pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres';
+	$config['ENV']['PDOTEST_USER'] = 'postgres';
+	$config['ENV']['PDOTEST_PASS'] = 'postgres';
 }
 
 foreach ($config['ENV'] as $k => $v) {

@@ -2,7 +2,6 @@
 ziparchive::count()
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -19,7 +18,7 @@ if (!$zip->open($file)) {
 var_dump($zip->numFiles, count($zip), $zip->numFiles == count($zip));
 ?>
 Done
---EXPECTF--
+--EXPECT--
 int(4)
 int(4)
 bool(true)

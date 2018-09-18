@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension xmlwriter
 
 PHP_ARG_ENABLE(xmlwriter, whether to enable XMLWriter support,
 [  --disable-xmlwriter     Disable XMLWriter support], yes)
@@ -21,6 +19,6 @@ if test "$PHP_XMLWRITER" != "no"; then
     PHP_NEW_EXTENSION(xmlwriter, php_xmlwriter.c, $ext_shared)
     PHP_SUBST(XMLWRITER_SHARED_LIBADD)
   ], [
-    AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
+    AC_MSG_ERROR([libxml2 not found. Please check your libxml2 installation.])
   ])
 fi

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,23 +17,38 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "winutil.h"
+#include "codepage.h"
 #include <bcrypt.h>
 #include <lmcons.h>
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 {/*{{{*/
-	char *buf = NULL;
+	wchar_t *bufw = NULL;
+	char *buf;
 
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	(LPTSTR)&buf, 0, NULL
+	DWORD ret = FormatMessageW(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	(LPWSTR)&bufw, 0, NULL
 	);
 
-	return (buf ? (char *) buf : "");
+	if (!ret || !bufw) {
+		return "";
+	}
+
+	buf = php_win32_cp_conv_w_to_any(bufw, ret, PHP_WIN32_CP_IGNORE_LEN_P);
+
+	LocalFree(bufw);
+
+	return (buf ? buf : "");
+}/*}}}*/
+
+PHP_WINUTIL_API void php_win32_error_msg_free(char *msg)
+{/*{{{*/
+	if (msg && msg[0]) {
+		free(msg);
+	}
 }/*}}}*/
 
 int php_win32_check_trailing_space(const char * path, const size_t path_len)
@@ -123,7 +138,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         int             eerrno;
     };
 
-    static const struct code_to_errno_map errmap[] = 
+    static const struct code_to_errno_map errmap[] =
     {
         /*   1 */       {   ERROR_INVALID_FUNCTION          ,   EINVAL          }
         /*   2 */   ,   {   ERROR_FILE_NOT_FOUND            ,   ENOENT          }
@@ -371,6 +386,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
 		/* 258 */   ,   { WAIT_TIMEOUT, ETIME}
 
         /* 267 */   ,   {   ERROR_DIRECTORY                 ,   ENOTDIR         }
+		/* 336 */   ,   {   ERROR_DIRECTORY_NOT_SUPPORTED   ,   EISDIR          }
 
         /* 996 */   ,   {   ERROR_IO_INCOMPLETE             ,   EAGAIN          }
         /* 997 */   ,   {   ERROR_IO_PENDING                ,   EAGAIN          }
@@ -379,6 +395,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 1113 */   ,  {   ERROR_NO_UNICODE_TRANSLATION    ,   EINVAL          }
         /* 1168 */   ,  {   ERROR_NOT_FOUND                 ,   ENOENT          }
         /* 1224 */   ,  {   ERROR_USER_MAPPED_FILE          ,   EACCES          }
+        /* 1314 */   ,  {   ERROR_PRIVILEGE_NOT_HELD        ,   EACCES          }
         /* 1816 */  ,   {   ERROR_NOT_ENOUGH_QUOTA          ,   ENOMEM          }
 					,   {   ERROR_ABANDONED_WAIT_0          ,   EIO }
     };

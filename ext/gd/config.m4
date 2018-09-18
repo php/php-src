@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension gd
 
 dnl
 dnl Configure options
@@ -11,7 +9,7 @@ PHP_ARG_WITH(gd, for GD support,
                           install directory [BUNDLED]])
 if test -z "$PHP_WEBP_DIR"; then
   PHP_ARG_WITH(webp-dir, for the location of libwebp,
-  [  --with-webp-dir[=DIR]      GD: Set the path to libwebp install prefix], no, no)
+  [  --with-webp-dir[=DIR]     GD: Set the path to libwebp install prefix], no, no)
 fi
 
 if test -z "$PHP_JPEG_DIR"; then
@@ -347,7 +345,7 @@ dnl
 if test "$PHP_GD" != "no"; then
   PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GDLIB_CFLAGS))
 
-  if test "$GD_MODULE_TYPE" = "builtin"; then 
+  if test "$GD_MODULE_TYPE" = "builtin"; then
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
     GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"

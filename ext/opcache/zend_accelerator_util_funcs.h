@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,13 +25,10 @@
 #include "zend.h"
 #include "ZendAccelerator.h"
 
-void zend_accel_copy_internal_functions(void);
-
 zend_persistent_script* create_persistent_script(void);
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements);
 
-void zend_accel_free_user_functions(HashTable *ht);
-void zend_accel_move_user_functions(HashTable *str, HashTable *dst);
+void zend_accel_move_user_functions(HashTable *str, zend_script *script);
 
 zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory);
 

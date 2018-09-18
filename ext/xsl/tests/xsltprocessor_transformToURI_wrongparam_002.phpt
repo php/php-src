@@ -54,4 +54,4 @@ $uri = 'php://output';
 echo $proc->transformToURI($wrong_parameter, $uri);
 ?>
 --EXPECTF--
-Warning: XSLTProcessor::transformToUri() expects parameter 1 to be object, string given in %s on line %i
+Warning: XSLTProcessor::transformToUri() expects parameter 1 to be object, string given in %s on line %d

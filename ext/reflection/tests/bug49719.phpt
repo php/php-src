@@ -36,9 +36,9 @@ $prop->setAccessible(true);
 var_dump($prop->getValue(new b2));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)
-%string|unicode%(25) "Property a does not exist"
+string(25) "Property a does not exist"
 int(2)

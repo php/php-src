@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -131,7 +129,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ dba_functions[]
  */
-const zend_function_entry dba_functions[] = {
+static const zend_function_entry dba_functions[] = {
 	PHP_FE(dba_open, arginfo_dba_open)
 	PHP_FE(dba_popen, arginfo_dba_popen)
 	PHP_FE(dba_close, arginfo_dba_close)
@@ -901,7 +899,7 @@ restart:
 			} else {
 				if (opened_path) {
 					info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
-					zend_string_release(opened_path);
+					zend_string_release_ex(opened_path, 0);
 				}
 			}
 		}
@@ -915,7 +913,7 @@ restart:
 				}
 				/* now store the name of the lock */
 				info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
-				zend_string_release(opened_path);
+				zend_string_release_ex(opened_path, 0);
 			}
 		}
 		if (!lock_dbf) {

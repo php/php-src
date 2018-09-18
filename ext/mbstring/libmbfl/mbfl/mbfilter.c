@@ -94,10 +94,6 @@
 #include <strings.h>
 #endif
 
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
-#endif
-
 #include "mbfilter.h"
 #include "mbfl_filter_output.h"
 #include "mbfilter_8bit.h"
@@ -1687,7 +1683,7 @@ mbfl_strimwidth(
 	mbfl_string_init(result);
 	result->no_language = string->no_language;
 	result->encoding = string->encoding;
-	mbfl_memory_device_init(&pc.device, width, 0);
+	mbfl_memory_device_init(&pc.device, MIN(string->len, width), 0);
 
 	/* output code filter */
 	pc.decoder = mbfl_convert_filter_new(

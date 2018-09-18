@@ -33,7 +33,7 @@ include 'skipif.inc';
   var_dump( $curl_content );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl sending through GET an POST ***
 string(203) "array(2) {
   ["test"]=>

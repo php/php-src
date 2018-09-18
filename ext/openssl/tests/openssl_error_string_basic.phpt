@@ -6,35 +6,46 @@ openssl_error_string() tests
 <?php
 // helper function to check openssl errors
 function expect_openssl_errors($name, $expected_error_codes) {
-	$expected_errors = array_fill_keys($expected_error_codes, false);
-	while (($error_string = openssl_error_string()) !== false) {
-		if (strlen($error_string) > 14) {
-			$error_code = substr($error_string, 6, 8);
-			if (isset($expected_errors[$error_code])) {
-				$expected_errors[$error_code] = true;
-			}
+    $expected_errors = array_fill_keys($expected_error_codes, false);
+    $all_errors = array();
+    while (($error_string = openssl_error_string()) !== false) {
+	if (preg_match(",.+:([0-9A-F]+):.+,", $error_string, $m) > 0) {
+            $error_code = $m[1];
+            if (isset($expected_errors[$error_code])) {
+                $expected_errors[$error_code] = true;
+            }
+	    $all_errors[$error_code] = $error_string;
+        } else {
+		$all_errors[] = $error_string;
+	}
+    }
+
+    $fail = false;
+    foreach ($expected_errors as $error_code => $error_code_found) {
+        if (!$error_code_found) {
+            $fail = true;
+            echo "$name: no error code $error_code\n";
+        }
+    }
+
+    if (!$fail) {
+        echo "$name: ok\n";
+    } else {
+	echo "$name: uncaught errors\n";
+	foreach ($all_errors as $code => $str) {
+		if (!isset($expected_errors[$code]) || !$expected_errors[$code]) {
+			echo "\t", $code, ": ", $str, "\n";
 		}
 	}
-
-	$fail = false;
-	foreach ($expected_errors as $error_code => $error_code_found) {
-		if (!$error_code_found) {
-			$fail = true;
-			echo "$name: no error code $error_code\n";
-		}
-	}
-
-	if (!$fail) {
-		echo "$name: ok\n";
-	}
+    }
 }
 
 // helper for debugging errors
 function dump_openssl_errors($name) {
-	echo "\n$name\n";
-	while (($error_string = openssl_error_string()) !== false) {
-		var_dump($error_string);
-	}
+    echo "\n$name\n";
+    while (($error_string = openssl_error_string()) !== false) {
+        var_dump($error_string);
+    }
 }
 
 // common output file
@@ -71,13 +82,16 @@ for ($i = 0; $i < 20; $i++) {
 }
 $error_queue_size = 0;
 while (($enc_error_new = openssl_error_string()) !== false) {
-	if ($enc_error_new !== $enc_error) {
-		echo "The new encoding error doesn't match the expected one\n";
-	}
-	++$error_queue_size;
+    if ($enc_error_new !== $enc_error) {
+        echo "The new encoding error doesn't match the expected one\n";
+    }
+    ++$error_queue_size;
 }
 var_dump($error_queue_size);
 echo "\n";
+
+$is_111 = OPENSSL_VERSION_NUMBER >= 0x10101000;
+$err_pem_no_start_line = $is_111 ? '0909006C': '0906D06C';
 
 // PKEY
 echo "PKEY errors\n";
@@ -86,16 +100,16 @@ echo "PKEY errors\n";
 expect_openssl_errors('openssl_pkey_export_to_file opening', ['02001002', '2006D080']);
 // file or private pkey is not correct PEM - failing PEM_read_bio_PrivateKey
 @openssl_pkey_export_to_file($csr_file, $output_file);
-expect_openssl_errors('openssl_pkey_export_to_file pem', ['0906D06C']);
+expect_openssl_errors('openssl_pkey_export_to_file pem', [$err_pem_no_start_line]);
 // file to export cannot be written
 @openssl_pkey_export_to_file($private_key_file, $invalid_file_for_write);
 expect_openssl_errors('openssl_pkey_export_to_file write', ['2006D002']);
-// succesful export
+// successful export
 @openssl_pkey_export($private_key_file_with_pass, $out, 'wrong pwd');
 expect_openssl_errors('openssl_pkey_export', ['06065064', '0906A065']);
 // invalid x509 for getting public key
 @openssl_pkey_get_public($private_key_file);
-expect_openssl_errors('openssl_pkey_get_public', ['0906D06C']);
+expect_openssl_errors('openssl_pkey_get_public', [$err_pem_no_start_line]);
 // private encrypt with unknown padding
 @openssl_private_encrypt("data", $crypted, $private_key_file, 1000);
 expect_openssl_errors('openssl_private_encrypt', ['04066076']);
@@ -105,7 +119,7 @@ expect_openssl_errors('openssl_private_decrypt', ['04065072']);
 // public encrypt and decrypt with failed padding check and padding
 @openssl_public_encrypt("data", $crypted, $public_key_file, 1000);
 @openssl_public_decrypt("data", $crypted, $public_key_file);
-expect_openssl_errors('openssl_private_(en|de)crypt padding', ['0906D06C', '04068076', '04067072']);
+expect_openssl_errors('openssl_private_(en|de)crypt padding', [$err_pem_no_start_line, '04068076', '04067072']);
 
 // X509
 echo "X509 errors\n";
@@ -114,7 +128,7 @@ echo "X509 errors\n";
 expect_openssl_errors('openssl_x509_export_to_file open', ['02001002']);
 // file or str cert is not correct PEM - failing PEM_read_bio_X509 or PEM_ASN1_read_bio
 @openssl_x509_export_to_file($csr_file, $output_file);
-expect_openssl_errors('openssl_x509_export_to_file pem', ['0906D06C']);
+expect_openssl_errors('openssl_x509_export_to_file pem', [$err_pem_no_start_line]);
 // file to export cannot be written
 @openssl_x509_export_to_file($crt_file, $invalid_file_for_write);
 expect_openssl_errors('openssl_x509_export_to_file write', ['2006D002']);
@@ -129,7 +143,7 @@ echo "CSR errors\n";
 expect_openssl_errors('openssl_csr_get_subject open', ['02001002', '2006D080']);
 // file or str csr is not correct PEM - failing PEM_read_bio_X509_REQ
 @openssl_csr_get_subject($crt_file);
-expect_openssl_errors('openssl_csr_get_subjec pem', ['0906D06C']);
+expect_openssl_errors('openssl_csr_get_subjec pem', [$err_pem_no_start_line]);
 
 // other possible cuases that are difficult to catch:
 // - ASN1_STRING_to_UTF8 fails in add_assoc_name_entry

@@ -2,7 +2,6 @@
 getNameIndex
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -40,7 +39,7 @@ var_dump($zip->getNameIndex(3));
 $zip->close();
 
 ?>
---EXPECTF--
+--EXPECT--
 string(10) "entry1.txt"
 string(10) "entry2.txt"
 string(15) "dir/entry2d.txt"

@@ -11,7 +11,7 @@ Bug #55610: ResourceBundle does not implement Traversable
 	var_dump($r instanceof Traversable);
 	var_dump(iterator_to_array($r->get('testarray')));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 array(3) {
   [0]=>

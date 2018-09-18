@@ -39,23 +39,23 @@ var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $ze
 
 -- Testing date_sunrise() function by passing float 12.3456789000e10 value to time --
 
-Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
 -- Testing date_sunrise() function by passing float -12.3456789000e10 value to time --
 
-Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 ===DONE===

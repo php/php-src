@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension pdo_mysql
 dnl vim: se ts=2 sw=2 et:
 
@@ -53,7 +52,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       fi
     fi
   fi
-  
+
   if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     dnl enables build of mysqnd library
     PHP_MYSQLND_ENABLED=yes
@@ -113,8 +112,8 @@ if test "$PHP_PDO_MYSQL" != "no"; then
         PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_commit, [], [
           AC_MSG_ERROR([PDO_MYSQL configure failed, MySQL 4.1 needed. Please check config.log for more information.])
         ], [
-          -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$PDO_MYSQL_LIB_DIR 
-        ])  
+          -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$PDO_MYSQL_LIB_DIR
+        ])
         PDO_MYSQL_LIBS="$PDO_MYSQL_LIBS -L$PHP_ZLIB_DIR/$PHP_LIBDIR -lz"
       else
         PHP_ADD_LIBRARY(z,, PDO_MYSQL_SHARED_LIBADD)
@@ -122,7 +121,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
           AC_MSG_ERROR([Try adding --with-zlib-dir=<DIR>. Please check config.log for more information.])
         ], [
           -L$PDO_MYSQL_LIB_DIR
-        ])   
+        ])
         PDO_MYSQL_LIBS="$PDO_MYSQL_LIBS -lz"
       fi
 
@@ -156,7 +155,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   fi
 
   dnl fix after renaming to pdo_mysql
-  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_cv_inc_path -I -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_cv_inc_path -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   ifdef([PHP_ADD_EXTENSION_DEP],
   [
     PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)

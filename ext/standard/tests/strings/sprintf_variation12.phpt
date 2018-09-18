@@ -48,7 +48,7 @@ foreach($array_values as $array_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : float formats with arrays ***
 
 -- Iteration 1 --

@@ -27,6 +27,8 @@ var_dump( range(1) );  // No.of args < expected
 var_dump( range(1,2,3,4) );  // No.of args > expected
 var_dump( range(-1, -2, 2) );  
 var_dump( range("a", "j", "z") );
+var_dump( range(0, 1, "140962482048819216326.24") );
+var_dump( range(0, 1, "140962482048819216326.24.") );
 
 echo "\n-- Testing Invalid steps --";
 $step_arr = array( "string", NULL, FALSE, "", "\0" );
@@ -78,11 +80,17 @@ bool(false)
 Warning: range(): step exceeds the specified range in %s on line %d
 bool(false)
 
+Warning: range(): Invalid range string - must be numeric in %s on line %d
+bool(false)
+
 Warning: range(): step exceeds the specified range in %s on line %d
+bool(false)
+
+Warning: range(): Invalid range string - must be numeric in %s on line %d
 bool(false)
 
 -- Testing Invalid steps --
-Warning: range(): step exceeds the specified range in %s on line %d
+Warning: range(): Invalid range string - must be numeric in %s on line %d
 bool(false)
 
 Warning: range(): step exceeds the specified range in %s on line %d
@@ -91,9 +99,9 @@ bool(false)
 Warning: range(): step exceeds the specified range in %s on line %d
 bool(false)
 
-Warning: range(): step exceeds the specified range in %s on line %d
+Warning: range(): Invalid range string - must be numeric in %s on line %d
 bool(false)
 
-Warning: range(): step exceeds the specified range in %s on line %d
+Warning: range(): Invalid range string - must be numeric in %s on line %d
 bool(false)
 Done

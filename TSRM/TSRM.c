@@ -94,7 +94,12 @@ static FILE *tsrm_error_file;
 	}
 #endif
 
-#if defined(PTHREADS)
+#if defined(GNUPTH)
+static pth_key_t tls_key;
+# define tsrm_tls_set(what)		pth_key_setdata(tls_key, (void*)(what))
+# define tsrm_tls_get()			pth_key_getdata(tls_key)
+
+#elif defined(PTHREADS)
 /* Thread local storage */
 static pthread_key_t tls_key;
 # define tsrm_tls_set(what)		pthread_setspecific(tls_key, (void*)(what))
@@ -123,6 +128,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 {/*{{{*/
 #if defined(GNUPTH)
 	pth_init();
+	pth_key_create(&tls_key, 0);
 #elif defined(PTHREADS)
 	pthread_key_create( &tls_key, 0 );
 #elif defined(TSRM_ST)
@@ -773,6 +779,21 @@ TSRM_API void *tsrm_get_ls_cache(void)
 TSRM_API uint8_t tsrm_is_main_thread(void)
 {/*{{{*/
 	return in_main_thread;
+}/*}}}*/
+
+TSRM_API const char *tsrm_api_name(void)
+{/*{{{*/
+#if defined(GNUPTH)
+	return "GNU Pth";
+#elif defined(PTHREADS)
+	return "POSIX Threads";
+#elif defined(TSRM_ST)
+	return "State Threads";
+#elif defined(TSRM_WIN32)
+	return "Windows Threads";
+#else
+	return "Unknown";
+#endif
 }/*}}}*/
 
 #endif /* ZTS */

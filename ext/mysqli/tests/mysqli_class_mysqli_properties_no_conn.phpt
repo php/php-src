@@ -144,67 +144,67 @@ require_once('skipifconnectfailure.inc');
 Without RS
 
 Class variables:
-affected_rows = 'NULL'
-client_info = 'NULL'
+affected_rows = 'false'
+client_info = 'false'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = ''%s'
-errno = 'NULL'
-error = 'NULL'
-error_list = 'NULL'
-field_count = 'NULL'
-host_info = 'NULL'
-info = 'NULL'
-insert_id = 'NULL'
-protocol_version = 'NULL'
-server_info = 'NULL'
-server_version = 'NULL'
-sqlstate = 'NULL'
-stat = 'NULL'
-thread_id = 'NULL'
-warning_count = 'NULL'
+errno = 'false'
+error = 'false'
+error_list = 'false'
+field_count = 'false'
+host_info = 'false'
+info = 'false'
+insert_id = 'false'
+protocol_version = 'false'
+server_info = 'false'
+server_version = 'false'
+sqlstate = 'false'
+stat = 'false'
+thread_id = 'false'
+warning_count = 'false'
 
 Object variables:
-affected_rows = 'NULL'
-client_info = 'NULL'
+affected_rows = 'false'
+client_info = 'false'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = '%s'
-errno = 'NULL'
-error = 'NULL'
-error_list = 'NULL'
-field_count = 'NULL'
-host_info = 'NULL'
-info = 'NULL'
-insert_id = 'NULL'
-server_info = 'NULL'
-server_version = 'NULL'
-stat = 'NULL'
-sqlstate = 'NULL'
-protocol_version = 'NULL'
-thread_id = 'NULL'
-warning_count = 'NULL'
+errno = 'false'
+error = 'false'
+error_list = 'false'
+field_count = 'false'
+host_info = 'false'
+info = 'false'
+insert_id = 'false'
+server_info = 'false'
+server_version = 'false'
+stat = 'false'
+sqlstate = 'false'
+protocol_version = 'false'
+thread_id = 'false'
+warning_count = 'false'
 
 Magic, magic properties:
-mysqli->affected_rows = ''/NULL (''/NULL)
+mysqli->affected_rows = ''/boolean (''/boolean)
 
 Warning: assert(): assert(@mysqli_get_client_info() === @$mysqli->client_info) failed in %s on line %d
-mysqli->client_info = ''/NULL ('%s'/%s)
+mysqli->client_info = ''/boolean ('%s'/%s)
 mysqli->client_version =  '%s'/integer ('%s'/integer)
-mysqli->errno = ''/NULL (''/NULL)
-mysqli->error = ''/NULL (''/NULL)
-mysqli->field_count = ''/NULL (''/NULL)
-mysqli->insert_id = ''/NULL (''/NULL)
-mysqli->sqlstate = ''/NULL (''/NULL)
-mysqli->host_info = ''/NULL (''/NULL)
-mysqli->info = ''/NULL (''/NULL)
+mysqli->errno = ''/boolean (''/boolean)
+mysqli->error = ''/boolean (''/boolean)
+mysqli->field_count = ''/boolean (''/boolean)
+mysqli->insert_id = ''/boolean (''/boolean)
+mysqli->sqlstate = ''/boolean (''/boolean)
+mysqli->host_info = ''/boolean (''/boolean)
+mysqli->info = ''/boolean (''/boolean)
 
 Warning: assert(): assert(@mysqli_thread_id($mysqli) > @$mysqli->thread_id) failed in %s on line %d
-mysqli->thread_id = ''/NULL (''/NULL)
-mysqli->protocol_version = ''/NULL (''/NULL)
-mysqli->server_info = ''/NULL (''/NULL)
-mysqli->server_version = ''/NULL (''/NULL)
-mysqli->warning_count = ''/NULL (''/NULL)
+mysqli->thread_id = ''/boolean (''/boolean)
+mysqli->protocol_version = ''/boolean (''/boolean)
+mysqli->server_info = ''/boolean (''/boolean)
+mysqli->server_version = ''/boolean (''/boolean)
+mysqli->warning_count = ''/boolean (''/boolean)
 
 Access to undefined properties:
 mysqli->unknown = ''
@@ -217,67 +217,67 @@ mysqli->connect_errno = '%s'/integer ('%s'/integer)
 With RS
 
 Class variables:
-affected_rows = 'NULL'
-client_info = 'NULL'
+affected_rows = 'false'
+client_info = 'false'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = '%s'
-errno = 'NULL'
-error = 'NULL'
-error_list = 'NULL'
-field_count = 'NULL'
-host_info = 'NULL'
-info = 'NULL'
-insert_id = 'NULL'
-protocol_version = 'NULL'
-server_info = 'NULL'
-server_version = 'NULL'
-sqlstate = 'NULL'
-stat = 'NULL'
-thread_id = 'NULL'
-warning_count = 'NULL'
+errno = 'false'
+error = 'false'
+error_list = 'false'
+field_count = 'false'
+host_info = 'false'
+info = 'false'
+insert_id = 'false'
+protocol_version = 'false'
+server_info = 'false'
+server_version = 'false'
+sqlstate = 'false'
+stat = 'false'
+thread_id = 'false'
+warning_count = 'false'
 
 Object variables:
-affected_rows = 'NULL'
-client_info = 'NULL'
+affected_rows = 'false'
+client_info = 'false'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = '%s'
-errno = 'NULL'
-error = 'NULL'
-error_list = 'NULL'
-field_count = 'NULL'
-host_info = 'NULL'
-info = 'NULL'
-insert_id = 'NULL'
-server_info = 'NULL'
-server_version = 'NULL'
-stat = 'NULL'
-sqlstate = 'NULL'
-protocol_version = 'NULL'
-thread_id = 'NULL'
-warning_count = 'NULL'
+errno = 'false'
+error = 'false'
+error_list = 'false'
+field_count = 'false'
+host_info = 'false'
+info = 'false'
+insert_id = 'false'
+server_info = 'false'
+server_version = 'false'
+stat = 'false'
+sqlstate = 'false'
+protocol_version = 'false'
+thread_id = 'false'
+warning_count = 'false'
 
 Magic, magic properties:
-mysqli->affected_rows = ''/NULL (''/NULL)
+mysqli->affected_rows = ''/boolean (''/boolean)
 
 Warning: assert(): assert(@mysqli_get_client_info() === @$mysqli->client_info) failed in %s on line %d
-mysqli->client_info = ''/NULL ('%s'/%s)
+mysqli->client_info = ''/boolean ('%s'/%s)
 mysqli->client_version =  '%s'/integer ('%s'/integer)
-mysqli->errno = ''/NULL (''/NULL)
-mysqli->error = ''/NULL (''/NULL)
-mysqli->field_count = ''/NULL (''/NULL)
-mysqli->insert_id = ''/NULL (''/NULL)
-mysqli->sqlstate = ''/NULL (''/NULL)
-mysqli->host_info = ''/NULL (''/NULL)
-mysqli->info = ''/NULL (''/NULL)
+mysqli->errno = ''/boolean (''/boolean)
+mysqli->error = ''/boolean (''/boolean)
+mysqli->field_count = ''/boolean (''/boolean)
+mysqli->insert_id = ''/boolean (''/boolean)
+mysqli->sqlstate = ''/boolean (''/boolean)
+mysqli->host_info = ''/boolean (''/boolean)
+mysqli->info = ''/boolean (''/boolean)
 
 Warning: assert(): assert(@mysqli_thread_id($mysqli) > @$mysqli->thread_id) failed in %s on line %d
-mysqli->thread_id = ''/NULL (''/NULL)
-mysqli->protocol_version = ''/NULL (''/NULL)
-mysqli->server_info = ''/NULL (''/NULL)
-mysqli->server_version = ''/NULL (''/NULL)
-mysqli->warning_count = ''/NULL (''/NULL)
+mysqli->thread_id = ''/boolean (''/boolean)
+mysqli->protocol_version = ''/boolean (''/boolean)
+mysqli->server_info = ''/boolean (''/boolean)
+mysqli->server_version = ''/boolean (''/boolean)
+mysqli->warning_count = ''/boolean (''/boolean)
 
 Access to undefined properties:
 mysqli->unknown = ''

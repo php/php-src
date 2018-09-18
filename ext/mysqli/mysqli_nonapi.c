@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -34,11 +32,6 @@
 #include "mysqli_priv.h"
 
 #define SAFE_STR(a) ((a)?a:"")
-
-#ifndef zend_parse_parameters_none
-#define zend_parse_parameters_none()	\
-        zend_parse_parameters(ZEND_NUM_ARGS(), "")
-#endif
 
 /* {{{ php_mysqli_set_error
  */
@@ -162,7 +155,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 
 			mysql->hash_key = hash_key;
 
-			/* check if we can reuse exisiting connection ... */
+			/* check if we can reuse existing connection ... */
 			if ((le = zend_hash_find_ptr(&EG(persistent_list), hash_key)) != NULL) {
 				if (le->type == php_le_pmysqli()) {
 					plist = (mysqli_plist_entry *) le->ptr;
@@ -185,7 +178,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 								MyG(num_active_persistent)++;
 
 								/* clear error */
-								php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql));								
+								php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql));
 
 								goto end;
 							} else {
@@ -295,7 +288,7 @@ end:
 
 err:
 	if (mysql->hash_key) {
-		zend_string_release(mysql->hash_key);
+		zend_string_release_ex(mysql->hash_key, 0);
 		mysql->hash_key = NULL;
 		mysql->persistent = FALSE;
 	}
@@ -341,7 +334,7 @@ PHP_FUNCTION(mysqli_connect_error)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_array (object result [,int resulttype])
+/* {{{ proto mixed mysqli_fetch_array(object result [,int resulttype])
    Fetch a result row as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_array)
 {
@@ -349,7 +342,7 @@ PHP_FUNCTION(mysqli_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_assoc (object result)
+/* {{{ proto mixed mysqli_fetch_assoc(object result)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysqli_fetch_assoc)
 {
@@ -357,7 +350,7 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_all (object result [,int resulttype])
+/* {{{ proto mixed mysqli_fetch_all(object result [,int resulttype])
    Fetches all result rows as an associative array, a numeric array, or both */
 #if defined(MYSQLI_USE_MYSQLND)
 PHP_FUNCTION(mysqli_fetch_all)
@@ -410,7 +403,7 @@ PHP_FUNCTION(mysqli_get_connection_stats)
 #endif
 /* }}} */
 
-/* {{{ proto mixed mysqli_error_list (object connection)
+/* {{{ proto mixed mysqli_error_list(object connection)
    Fetches all client errors */
 PHP_FUNCTION(mysqli_error_list)
 {
@@ -502,7 +495,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_object (object result [, string class_name [, NULL|array ctor_params]])
+/* {{{ proto mixed mysqli_fetch_object(object result [, string class_name [, NULL|array ctor_params]])
    Fetch a result row as an object */
 PHP_FUNCTION(mysqli_fetch_object)
 {
@@ -762,7 +755,7 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 }
 /* }}} */
 
-/* {{{ proto int mysqli_poll(array read, array write, array error, long sec [, long usec]) U
+/* {{{ proto int mysqli_poll(array read, array write, array error, int sec [, int usec]) U
    Poll connections */
 PHP_FUNCTION(mysqli_poll)
 {

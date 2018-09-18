@@ -26,7 +26,7 @@ echo key($input) . " => " . current ($input) . "\n";
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- Call array_change_key_case() --

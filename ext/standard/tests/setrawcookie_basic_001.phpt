@@ -1,6 +1,6 @@
 --TEST--
 Test setrawcookie basic functionality
---CREDIT--
+--CREDITS--
 PHP TestFEst 2017 - PHPDublin, PHPSP - Joao P V Martins <jp.joao@gmail.com>
 --FILE--
 <?php

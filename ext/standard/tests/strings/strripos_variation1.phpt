@@ -132,24 +132,56 @@ int(8)
 bool(false)
 int(8)
 -- Iteration 12 --
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
 -- Iteration 13 --
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
 -- Iteration 14 --
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
 -- Iteration 15 --
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 int(8)
 -- Iteration 16 --
 bool(false)

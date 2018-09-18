@@ -20,5 +20,5 @@ ImageDestroy( $im );
 
 print "OK";
 ?>
---EXPECTF--
+--EXPECT--
 OK

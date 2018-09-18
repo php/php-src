@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.4') < 0)
-	die('skip for ICU 4.4+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -41,7 +39,7 @@ Warning: intlcal_get_weekend_transition() expects exactly 2 parameters, 1 given 
 Warning: intlcal_get_weekend_transition(): intlcal_get_weekend_transition: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_weekend_transition() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_weekend_transition() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_get_weekend_transition(1, 1)
 #1 {main}

@@ -17,8 +17,8 @@ imagesetthickness($image, $image);
 
 ?>
 --EXPECTF--
-Warning: imagesetthickness() expects parameter 2 to be integer, string given in %s on line %d
+Warning: imagesetthickness() expects parameter 2 to be int, string given in %s on line %d
 
-Warning: imagesetthickness() expects parameter 2 to be integer, array given in %s on line %d
+Warning: imagesetthickness() expects parameter 2 to be int, array given in %s on line %d
 
-Warning: imagesetthickness() expects parameter 2 to be integer, resource given in %s on line %d
+Warning: imagesetthickness() expects parameter 2 to be int, resource given in %s on line %d

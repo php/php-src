@@ -17,6 +17,6 @@ echo "*** Test by calling method or function with its expected arguments ***\n";
 var_dump(posix_errno());
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Test by calling method or function with its expected arguments ***
 int(0)

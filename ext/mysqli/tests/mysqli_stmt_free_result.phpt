@@ -30,8 +30,8 @@ require_once('skipifconnectfailure.inc');
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (NULL !== ($tmp = mysqli_stmt_free_result($stmt)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_stmt_free_result($stmt)))
+		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -67,8 +67,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_stmt_close($stmt);
 
-	if (NULL !== ($tmp = mysqli_stmt_free_result($stmt)))
-		printf("[015] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_stmt_free_result($stmt)))
+		printf("[015] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 

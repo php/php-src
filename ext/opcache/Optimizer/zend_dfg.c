@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, DFG - Data Flow Graph                                   |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -95,6 +95,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_BIND_GLOBAL:
 					case ZEND_BIND_STATIC:
 					case ZEND_SEND_VAR_EX:
+					case ZEND_SEND_FUNC_ARG:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
@@ -127,6 +128,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FETCH_OBJ_RW:
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 					case ZEND_FETCH_OBJ_UNSET:
+					case ZEND_FETCH_LIST_W:
 					case ZEND_VERIFY_RETURN_TYPE:
 					case ZEND_PRE_INC_OBJ:
 					case ZEND_PRE_DEC_OBJ:
@@ -162,7 +164,7 @@ op1_use:
 							}
 							goto op2_use;
 						case ZEND_BIND_LEXICAL:
-							if ((build_flags & ZEND_SSA_RC_INFERENCE) || opline->extended_value) {
+							if ((build_flags & ZEND_SSA_RC_INFERENCE) || (opline->extended_value & ZEND_BIND_REF)) {
 								goto op2_def;
 							}
 							goto op2_use;

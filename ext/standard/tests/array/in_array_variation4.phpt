@@ -9,7 +9,7 @@ Test in_array() function : usage variations - haystack as resource/multi dimensi
  * Source Code: ext/standard/array.c
 */
 
-/* Test in_array() with haystack as resouce and multidimentional arrays */
+/* Test in_array() with haystack as resouce and multidimensional arrays */
 
 /* checking for Resources */
 echo "*** Testing resource type with in_array() ***\n";
@@ -58,7 +58,7 @@ var_dump( in_array('123abc', array(123), TRUE) ); // false in strict mode
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing resource type with in_array() ***
 bool(true)
 bool(false)

@@ -11,7 +11,7 @@ var_dump(bin2hex(hex2bin('123abc')) == '123abc');
 var_dump(bin2hex(hex2bin('FFFFFF')) == 'ffffff');
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

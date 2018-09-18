@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Rob Richards <rrichards@php.net>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -190,7 +188,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMDocument extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-i-Document
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-i-Document
 * Since:
 */
 
@@ -353,7 +351,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 		php_error_docref(NULL, E_WARNING, "Invalid Document Encoding");
     }
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -441,7 +439,7 @@ int dom_document_version_write(dom_object *obj, zval *newval)
 
 	docp->version = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -669,7 +667,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval)
 
 	docp->URL = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -967,7 +965,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 }
 /* }}} end dom_document_get_elements_by_tag_name */
 
-/* {{{ proto DOMNode dom_document_import_node(DOMNode importedNode, boolean deep)
+/* {{{ proto DOMNode dom_document_import_node(DOMNode importedNode, bool deep)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Core-Document-importNode
 Since: DOM Level 2
 */
@@ -1250,7 +1248,7 @@ PHP_FUNCTION(dom_document_rename_node)
 }
 /* }}} end dom_document_rename_node */
 
-/* {{{ proto void DOMDocument::__construct([string version], [string encoding]); */
+/* {{{ proto DOMDocument::__construct([string version], [string encoding]); */
 PHP_METHOD(domdocument, __construct)
 {
 
@@ -1758,7 +1756,7 @@ PHP_FUNCTION(dom_document_xinclude)
 }
 /* }}} */
 
-/* {{{ proto boolean dom_document_validate()
+/* {{{ proto bool dom_document_validate()
 Since: DOM extended
 */
 PHP_FUNCTION(dom_document_validate)
@@ -1880,14 +1878,14 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 }
 /* }}} */
 
-/* {{{ proto boolean dom_document_schema_validate_file(string filename, int flags); */
+/* {{{ proto bool dom_document_schema_validate_file(string filename, int flags); */
 PHP_FUNCTION(dom_document_schema_validate_file)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_schema_validate_file */
 
-/* {{{ proto boolean dom_document_schema_validate(string source, int flags); */
+/* {{{ proto bool dom_document_schema_validate(string source, int flags); */
 PHP_FUNCTION(dom_document_schema_validate_xml)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
@@ -1973,14 +1971,14 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 }
 /* }}} */
 
-/* {{{ proto boolean dom_document_relaxNG_validate_file(string filename); */
+/* {{{ proto bool dom_document_relaxNG_validate_file(string filename); */
 PHP_FUNCTION(dom_document_relaxNG_validate_file)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_relaxNG_validate_file */
 
-/* {{{ proto boolean dom_document_relaxNG_validate_xml(string source); */
+/* {{{ proto bool dom_document_relaxNG_validate_xml(string source); */
 PHP_FUNCTION(dom_document_relaxNG_validate_xml)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
@@ -2038,7 +2036,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	
+
 	ctxt->vctxt.error = php_libxml_ctx_error;
 	ctxt->vctxt.warning = php_libxml_ctx_warning;
 	if (ctxt->sax != NULL) {
@@ -2150,10 +2148,11 @@ PHP_FUNCTION(dom_document_save_html)
 	zval *id, *nodep = NULL;
 	xmlDoc *docp;
 	xmlNode *node;
+	xmlOutputBufferPtr outBuf;
 	xmlBufferPtr buf;
 	dom_object *intern, *nodeobj;
 	xmlChar *mem = NULL;
-	int size = 0, format;
+	int format;
 	dom_doc_propsptr doc_props;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
@@ -2180,36 +2179,40 @@ PHP_FUNCTION(dom_document_save_html)
 			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
+		outBuf = xmlOutputBufferCreateBuffer(buf, NULL);
+		if (!outBuf) {
+			xmlBufferFree(buf);
+			php_error_docref(NULL, E_WARNING, "Could not fetch output buffer");
+			RETURN_FALSE;
+		}
 
 		if (node->type == XML_DOCUMENT_FRAG_NODE) {
-			int one_size;
-
 			for (node = node->children; node; node = node->next) {
-				one_size = htmlNodeDump(buf, docp, node);
-
-				if (one_size >= 0) {
-					size += one_size;
-				} else {
-					size = -1;
+				htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
+				if (outBuf->error) {
 					break;
 				}
 			}
 		} else {
-			size = htmlNodeDump(buf, docp, node);
+			htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
 		}
-		if (size >= 0) {
+		if (!outBuf->error) {
+			xmlOutputBufferFlush(outBuf);
 			mem = (xmlChar*) xmlBufferContent(buf);
 			if (!mem) {
 				RETVAL_FALSE;
 			} else {
+				int size = xmlBufferLength(buf);
 				RETVAL_STRINGL((const char*) mem, size);
 			}
 		} else {
 			php_error_docref(NULL, E_WARNING, "Error dumping HTML node");
 			RETVAL_FALSE;
 		}
+		xmlOutputBufferClose(outBuf);
 		xmlBufferFree(buf);
 	} else {
+		int size = 0;
 #if LIBXML_VERSION >= 20623
 		htmlDocDumpMemoryFormat(docp, &mem, &size, format);
 #else
@@ -2229,7 +2232,7 @@ PHP_FUNCTION(dom_document_save_html)
 
 #endif  /* defined(LIBXML_HTML_ENABLED) */
 
-/* {{{ proto boolean DOMDocument::registerNodeClass(string baseclass, string extendedclass)
+/* {{{ proto bool DOMDocument::registerNodeClass(string baseclass, string extendedclass)
    Register extended class used to create base node type */
 PHP_METHOD(domdocument, registerNodeClass)
 {
@@ -2247,7 +2250,7 @@ PHP_METHOD(domdocument, registerNodeClass)
 		dom_set_doc_classmap(intern->document, basece, ce);
 		RETURN_TRUE;
 	}
-	
+
 	zend_throw_error(NULL, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
 	RETURN_FALSE;
 }

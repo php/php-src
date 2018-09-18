@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -108,7 +108,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 
 		for (i = 0; i < result->row_count; i++) {
 			/* (i / 8) & the_bit_for_i*/
-			if (initialized[i >> 3] & (1 << (i & 7))) {
+			if (ZEND_BIT_TEST(initialized, i)) {
 				continue;
 			}
 
@@ -1151,7 +1151,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 		if (rc != PASS) {
 			DBG_RETURN(FAIL);
 		}
-		if (!(set->initialized[set->current_row >> 3] & (1 << (set->current_row & 7)))) {
+		if (!ZEND_BIT_TEST(set->initialized, set->current_row)) {
 			set->initialized[set->current_row >> 3] |= (1 << (set->current_row & 7)); /* mark initialized */
 
 			++set->initialized_rows;
@@ -1271,7 +1271,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	while (FAIL != (ret = PACKET_READ(conn, &row_packet)) && !row_packet.eof) {
 		if (!free_rows) {
 			MYSQLND_ROW_BUFFER * new_row_buffers;
-			total_allocated_rows += set->row_count;
 
 			if (total_allocated_rows < 1024) {
 				if (total_allocated_rows == 0) {
@@ -1706,6 +1705,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 										enum_mysqlnd_extension extension ZEND_FILE_LINE_DC)
 {
 	zend_bool fetched_anything;
+	unsigned int array_size;
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
 
@@ -1713,13 +1713,17 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 	  Hint Zend how many elements we will have in the hash. Thus it won't
 	  extend and rehash the hash constantly.
 	*/
-	array_init_size(return_value, mysqlnd_num_fields(result) * 2);
+	array_size = result->field_count;
+	if ((flags & (MYSQLND_FETCH_NUM|MYSQLND_FETCH_ASSOC)) == (MYSQLND_FETCH_NUM|MYSQLND_FETCH_ASSOC)) {
+		array_size *= 2;
+	}
+	array_init_size(return_value, array_size);
 	if (FAIL == result->m.fetch_row(result, (void *)return_value, flags, &fetched_anything)) {
 		php_error_docref(NULL, E_WARNING, "Error while reading a row");
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	} else if (fetched_anything == FALSE) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		switch (extension) {
 			case MYSQLND_MYSQLI:
 				RETVAL_NULL();
@@ -1812,7 +1816,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 	*/
 	mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQL);
 	if (Z_TYPE(row) != IS_ARRAY) {
-		zval_dtor(&row);
+		zval_ptr_dtor_nogc(&row);
 		RETVAL_NULL();
 		DBG_VOID_RETURN;
 	}
@@ -1825,7 +1829,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 	entry = zend_hash_get_current_data(Z_ARRVAL(row));
 
 	ZVAL_COPY(return_value, entry);
-	zval_dtor(&row);
+	zval_ptr_dtor_nogc(&row);
 
 	DBG_VOID_RETURN;
 }

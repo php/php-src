@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Daniel Beulshausen <daniel@php4win.de>                      |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef TSRM_WIN32_H
 #define TSRM_WIN32_H
@@ -110,8 +108,6 @@ TSRM_API int shmget(key_t key, size_t size, int flags);
 TSRM_API void *shmat(int key, const void *shmaddr, int flags);
 TSRM_API int shmdt(const void *shmaddr);
 TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf);
-
-TSRM_API char *realpath(char *orig_path, char *buffer);
 #endif
 
 /*

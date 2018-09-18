@@ -8,9 +8,9 @@ if (!extension_loaded("openssl")) die("skip");
 <?php
 $cert = false;
 class test {
-	function __toString() {
-		return "test object";
-	}
+    function __toString() {
+        return "test object";
+    }
 }
 $t = new test;
 

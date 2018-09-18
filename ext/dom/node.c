@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Rob Richards <rrichards@php.net>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -128,7 +126,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1950641247
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1950641247
 * Since:
 */
 
@@ -347,7 +345,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 			{
 				zend_string *str = zval_get_string(newval);
 				xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 				break;
 			}
 		default:
@@ -748,14 +746,14 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 				}
 
 				if (ns == NULL) {
-					zend_string_release(str);
+					zend_string_release_ex(str, 0);
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
 					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
 			}
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 			break;
 		default:
 			break;
@@ -868,7 +866,7 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
 	xmlNodeSetContent(nodep, (xmlChar *) "");
 	xmlNodeAddContent(nodep, (xmlChar *) ZSTR_VAL(str));
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 
 	return SUCCESS;
 }
@@ -1321,7 +1319,7 @@ PHP_FUNCTION(dom_node_append_child)
 }
 /* }}} end dom_node_append_child */
 
-/* {{{ proto boolean dom_node_has_child_nodes();
+/* {{{ proto bool dom_node_has_child_nodes();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
 Since:
 */
@@ -1349,7 +1347,7 @@ PHP_FUNCTION(dom_node_has_child_nodes)
 }
 /* }}} end dom_node_has_child_nodes */
 
-/* {{{ proto DomNode dom_node_clone_node(boolean deep);
+/* {{{ proto DomNode dom_node_clone_node(bool deep);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3A0ED0A4
 Since:
 */
@@ -1374,7 +1372,7 @@ PHP_FUNCTION(dom_node_clone_node)
 	}
 
 	/* When deep is false Element nodes still require the attributes
-	Following taken from libxml as xmlDocCopyNode doesnt do this */
+	Following taken from libxml as xmlDocCopyNode doesn't do this */
 	if (n->type == XML_ELEMENT_NODE && recursive == 0) {
 		if (n->nsDef != NULL) {
 			node->nsDef = xmlCopyNamespaceList(n->nsDef);
@@ -1431,7 +1429,7 @@ PHP_FUNCTION(dom_node_normalize)
 }
 /* }}} end dom_node_normalize */
 
-/* {{{ proto boolean dom_node_is_supported(string feature, string version);
+/* {{{ proto bool dom_node_is_supported(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Level-2-Core-Node-supports
 Since: DOM Level 2
 */
@@ -1453,7 +1451,7 @@ PHP_FUNCTION(dom_node_is_supported)
 }
 /* }}} end dom_node_is_supported */
 
-/* {{{ proto boolean dom_node_has_attributes();
+/* {{{ proto bool dom_node_has_attributes();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeHasAttrs
 Since: DOM Level 2
 */
@@ -1490,7 +1488,7 @@ PHP_FUNCTION(dom_node_compare_document_position)
 }
 /* }}} end dom_node_compare_document_position */
 
-/* {{{ proto boolean dom_node_is_same_node(DomNode other);
+/* {{{ proto bool dom_node_is_same_node(DomNode other);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode
 Since: DOM Level 3
 */
@@ -1567,7 +1565,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 }
 /* }}} end dom_node_lookup_prefix */
 
-/* {{{ proto boolean dom_node_is_default_namespace(string namespaceURI);
+/* {{{ proto bool dom_node_is_default_namespace(string namespaceURI);
 URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
 Since: DOM Level 3
 */
@@ -1634,7 +1632,7 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
-/* {{{ proto boolean dom_node_is_equal_node(DomNode arg);
+/* {{{ proto bool dom_node_is_equal_node(DomNode arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isEqualNode
 Since: DOM Level 3
 */

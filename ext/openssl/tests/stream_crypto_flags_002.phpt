@@ -4,7 +4,7 @@ TLSv1.1 and TLSv1.2 bitwise stream crypto flag assignment
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSLv1.0.1 required");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -49,6 +49,7 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECTF--
 resource(%d) of type (stream)
 resource(%d) of type (stream)

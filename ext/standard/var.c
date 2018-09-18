@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* {{{ includes
 */
@@ -150,7 +148,7 @@ again:
 			myht = Z_OBJDEBUG_P(struc, is_temp);
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 
 			if (myht) {
 				zend_ulong num;
@@ -321,7 +319,7 @@ again:
 		}
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
-		zend_string_release(class_name);
+		zend_string_release_ex(class_name, 0);
 		if (myht) {
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 				zval_object_property_dump(val, index, key, level);
@@ -392,7 +390,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 
 	} else { /* string key */
 		zend_string *tmp_str;
-		zend_string *ckey = php_addcslashes(key, 0, "'\\", 2);
+		zend_string *ckey = php_addcslashes(key, "'\\", 2);
 		tmp_str = php_str_to_str(ZSTR_VAL(ckey), ZSTR_LEN(ckey), "\0", 1, "' . \"\\0\" . '", 12);
 
 		buffer_append_spaces(buf, level + 1);
@@ -420,12 +418,12 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		zend_string *pname_esc;
 
 		zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len);
-		pname_esc = php_addcslashes(zend_string_init(prop_name, prop_name_len, 0), 1, "'\\", 2);
+		pname_esc = php_addcslashes_str(prop_name, prop_name_len, "'\\", 2);
 
 		smart_str_appendc(buf, '\'');
 		smart_str_append(buf, pname_esc);
 		smart_str_appendc(buf, '\'');
-		zend_string_release(pname_esc);
+		zend_string_release_ex(pname_esc, 0);
 	} else {
 		smart_str_append_long(buf, (zend_long) index);
 	}
@@ -473,7 +471,7 @@ again:
 			}
 			break;
 		case IS_STRING:
-			ztmp = php_addcslashes(Z_STR_P(struc), 0, "'\\", 2);
+			ztmp = php_addcslashes(Z_STR_P(struc), "'\\", 2);
 			ztmp2 = php_str_to_str(ZSTR_VAL(ztmp), ZSTR_LEN(ztmp), "\0", 1, "' . \"\\0\" . '", 12);
 
 			smart_str_appendc(buf, '\'');
@@ -527,8 +525,13 @@ again:
 				buffer_append_spaces(buf, level - 1);
 			}
 
-			smart_str_append(buf, Z_OBJCE_P(struc)->name);
-			smart_str_appendl(buf, "::__set_state(array(\n", 21);
+			/* stdClass has no __set_state method, but can be casted to */
+			if (Z_OBJCE_P(struc) == zend_standard_class_def) {
+				smart_str_appendl(buf, "(object) array(\n", 16);
+			} else {
+				smart_str_append(buf, Z_OBJCE_P(struc)->name);
+				smart_str_appendl(buf, "::__set_state(array(\n", 21);
+			}
 
 			if (myht) {
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
@@ -539,7 +542,11 @@ again:
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
 			}
-			smart_str_appendl(buf, "))", 2);
+			if (Z_OBJCE_P(struc) == zend_standard_class_def) {
+				smart_str_appendc(buf, ')');
+			} else {
+				smart_str_appendl(buf, "))", 2);
+			}
 
 			break;
 		case IS_REFERENCE:
@@ -678,9 +685,9 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 
 	ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
 	BG(serialize_lock)++;
-	res = call_user_function_ex(CG(function_table), struc, &fname, retval, 0, 0, 1, NULL);
+	res = call_user_function(CG(function_table), struc, &fname, retval, 0, 0);
 	BG(serialize_lock)--;
-	zval_dtor(&fname);
+	zval_ptr_dtor_str(&fname);
 
 	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
 		zval_ptr_dtor(retval);
@@ -741,7 +748,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	ZEND_HASH_FOREACH_STR_KEY(&names, name) {
 		zend_string *prot_name, *priv_name;
 
-		zval *val = zend_hash_find(propers, name);
+		zval *val = zend_hash_find_ex(propers, name, 1);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
 				val = Z_INDIRECT_P(val);
@@ -1094,7 +1101,7 @@ PHP_FUNCTION(unserialize)
 				convert_to_string_ex(entry);
 				lcname = zend_string_tolower(Z_STR_P(entry));
 				zend_hash_add_empty_element(class_hash, lcname);
-		        zend_string_release(lcname);
+		        zend_string_release_ex(lcname, 0);
 			} ZEND_HASH_FOREACH_END();
 		}
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);

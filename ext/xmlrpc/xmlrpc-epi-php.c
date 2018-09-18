@@ -37,7 +37,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,8 +50,6 @@
    | Author: Dan Libby                                                    |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /**********************************************************************
 * BUGS:                                                               *
@@ -141,7 +139,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_register_introspection_callback, 0,
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const zend_function_entry xmlrpc_functions[] = {
+static const zend_function_entry xmlrpc_functions[] = {
 	PHP_FE(xmlrpc_encode,									arginfo_xmlrpc_encode)
 	PHP_FE(xmlrpc_decode,									arginfo_xmlrpc_decode)
 	PHP_FE(xmlrpc_decode_request,							arginfo_xmlrpc_decode_request)
@@ -298,7 +296,6 @@ PHP_MINFO_FUNCTION(xmlrpc)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "core library version", XMLRPC_GetVersionString());
-	php_info_print_table_row(2, "php extension version", PHP_XMLRPC_VERSION);
 	php_info_print_table_row(2, "author", "Dan Libby");
 	php_info_print_table_row(2, "homepage", "http://xmlrpc-epi.sourceforge.net");
 	php_info_print_table_row(2, "open sourced by", "Epinions.com");
@@ -516,11 +513,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						XMLRPC_SetValueID(xReturn, key, 0);
 					} else {
 						if (Z_TYPE(val) != IS_STRING) {
-							zval newvalue;
-							ZVAL_DUP(&newvalue, &val);
-							convert_to_string(&newvalue);
-							xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL(newvalue), Z_STRLEN(newvalue));
-							zval_dtor(&newvalue);
+							zend_string *str = zval_get_string_func(&val);
+							xReturn = XMLRPC_CreateValueBase64(key, ZSTR_VAL(str), ZSTR_LEN(str));
+							zend_string_release_ex(str, 0);
 						} else {
 							xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL(val), Z_STRLEN(val));
 						}
@@ -950,7 +945,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 		} else {
 			php_error_docref(NULL, E_WARNING, "Invalid callback '%s' passed", ZSTR_VAL(php_function_name));
 		}
-		zend_string_release(php_function_name);
+		zend_string_release_ex(php_function_name, 0);
 	} ZEND_HASH_FOREACH_END();
 
 	/* so we don't call the same callbacks ever again */
@@ -1029,7 +1024,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	php_output_options out;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
+	if (zend_parse_parameters(argc, "rsz|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
 		return;
 	}
 	/* user output options */
@@ -1287,9 +1282,8 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 						ZVAL_LONG(&ztimestamp, timestamp);
 
 						convert_to_object(value);
-						if (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type)) {
-							bSuccess = (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_VALUE_TS_ATTR, sizeof(OBJECT_VALUE_TS_ATTR) - 1, &ztimestamp) != NULL)? SUCCESS : FAILURE;
-						}
+						zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type);
+						bSuccess = (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_VALUE_TS_ATTR, sizeof(OBJECT_VALUE_TS_ATTR) - 1, &ztimestamp) != NULL)? SUCCESS : FAILURE;
 					} else {
 						zval_ptr_dtor(&type);
 					}
@@ -1299,7 +1293,8 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 				}
 			} else {
 				convert_to_object(value);
-				bSuccess = (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type) != NULL)? SUCCESS : FAILURE;
+				zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type);
+				bSuccess = SUCCESS;
 			}
 		}
 	}
@@ -1450,4 +1445,3 @@ PHP_FUNCTION(xmlrpc_is_fault)
  * c-basic-offset: 4
  * End:
  */
-

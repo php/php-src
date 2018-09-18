@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Zeev Suraski <zeev@zend.com>                                 |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_browscap.h"
@@ -72,9 +70,9 @@ ZEND_DECLARE_MODULE_GLOBALS(browscap)
 static void browscap_entry_dtor(zval *zvalue)
 {
 	browscap_entry *entry = Z_PTR_P(zvalue);
-	zend_string_release(entry->pattern);
+	zend_string_release_ex(entry->pattern, 0);
 	if (entry->parent) {
-		zend_string_release(entry->parent);
+		zend_string_release_ex(entry->parent, 0);
 	}
 	efree(entry);
 }
@@ -82,9 +80,9 @@ static void browscap_entry_dtor(zval *zvalue)
 static void browscap_entry_dtor_persistent(zval *zvalue)
 {
 	browscap_entry *entry = Z_PTR_P(zvalue);
-	zend_string_release(entry->pattern);
+	zend_string_release_ex(entry->pattern, 1);
 	if (entry->parent) {
-		zend_string_release(entry->parent);
+		zend_string_release_ex(entry->parent, 1);
 	}
 	pefree(entry, 1);
 }
@@ -147,7 +145,7 @@ static size_t browscap_compute_regex_len(zend_string *pattern) {
 				break;
 		}
 	}
-	
+
 	return len + sizeof("~^$~")-1;
 }
 
@@ -330,7 +328,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 						new_value = zend_new_interned_string(zend_string_copy(new_value));
 						if (ZSTR_IS_INTERNED(new_value)) {
 							if (new_value == Z_STR_P(arg2)) {
-								Z_TYPE_FLAGS_P(arg2) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+								Z_TYPE_FLAGS_P(arg2) = 0;
 							}
 						} else {
 							zend_string_release(new_value);
@@ -361,7 +359,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 						new_key = zend_new_interned_string(zend_string_copy(new_key));
 						if (ZSTR_IS_INTERNED(new_key)) {
 							if (new_key == Z_STR_P(arg1)) {
-								Z_TYPE_FLAGS_P(arg1) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+								Z_TYPE_FLAGS_P(arg1) = 0;
 							}
 						} else {
 							zend_string_release(new_key);
@@ -389,7 +387,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 			if (persistent) {
 				pattern = zend_new_interned_string(zend_string_copy(pattern));
 				if (ZSTR_IS_INTERNED(pattern)) {
-					Z_TYPE_FLAGS_P(arg1) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+					Z_TYPE_FLAGS_P(arg1) = 0;
 				} else {
 					zend_string_release(pattern);
 				}
@@ -440,7 +438,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 	fh.type = ZEND_HANDLE_FP;
 
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
-	zend_hash_init_ex(browdata->htab, 0, NULL, 
+	zend_hash_init_ex(browdata->htab, 0, NULL,
 		persistent ? browscap_entry_dtor_persistent : browscap_entry_dtor, persistent, 0);
 
 	browdata->kv_size = 16 * 1024;
@@ -688,7 +686,17 @@ static int browser_reg_compare(
 
 static void browscap_zval_copy_ctor(zval *p) /* {{{ */
 {
-	zval_copy_ctor(p);
+	if (Z_REFCOUNTED_P(p)) {
+		zend_string *str;
+
+		ZEND_ASSERT(Z_TYPE_P(p) == IS_STRING);
+		str = Z_STR_P(p);
+		if (!(GC_FLAGS(str) & GC_PERSISTENT)) {
+			GC_ADDREF(str);
+		} else {
+			ZVAL_NEW_STR(p, zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0));
+		}
+	}
 }
 /* }}} */
 
@@ -778,7 +786,7 @@ PHP_FUNCTION(get_browser)
 		efree(agent_ht);
 	}
 
-	zend_string_release(lookup_browser_name);
+	zend_string_release_ex(lookup_browser_name, 0);
 }
 /* }}} */
 

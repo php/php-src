@@ -110,22 +110,22 @@ fclose( $file_handle );
 
 -- int 0 --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, int given in %s on line %d
 bool(false)
 
 -- int 1 --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, int given in %s on line %d
 bool(false)
 
 -- int 12345 --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, int given in %s on line %d
 bool(false)
 
 -- int -12345 --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, int given in %s on line %d
 bool(false)
 
 -- float 10.5 --
@@ -175,22 +175,22 @@ bool(false)
 
 -- lowercase true --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- empty string DQ --

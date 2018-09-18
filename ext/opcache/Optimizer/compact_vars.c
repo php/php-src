@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Removing unused variables                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -112,14 +112,14 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 				if (vars_map[i] != (uint32_t) -1) {
 					names[vars_map[i]] = op_array->vars[i];
 				} else {
-					zend_string_release(op_array->vars[i]);
+					zend_string_release_ex(op_array->vars[i], 0);
 				}
 			}
 			efree(op_array->vars);
 			op_array->vars = names;
 		} else {
 			for (i = 0; i < op_array->last_var; i++) {
-				zend_string_release(op_array->vars[i]);
+				zend_string_release_ex(op_array->vars[i], 0);
 			}
 			efree(op_array->vars);
 			op_array->vars = NULL;

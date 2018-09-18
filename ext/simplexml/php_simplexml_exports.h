@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
   |         Rob Richards <rrichards@php.net>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_SIMPLEXML_EXPORTS_H
 #define PHP_SIMPLEXML_EXPORTS_H
@@ -52,6 +50,9 @@ typedef struct {
 	zend_object_iterator  intern;
 	php_sxe_object        *sxe;
 } php_sxe_iterator;
+
+PHP_SXE_API void php_sxe_rewind_iterator(php_sxe_object *sxe);
+PHP_SXE_API void php_sxe_move_forward_iterator(php_sxe_object *sxe);
 
 #endif /* PHP_SIMPLEXML_EXPORTS_H */
 

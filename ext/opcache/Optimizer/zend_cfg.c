@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, CFG - Control Flow Graph                                |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -385,8 +385,8 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(i + 1);
 				break;
 			case ZEND_CATCH:
-				if (!opline->result.num) {
-					BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
+				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+					BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				}
 				BB_START(i + 1);
 				break;
@@ -416,10 +416,9 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			}
 			case ZEND_UNSET_VAR:
 			case ZEND_ISSET_ISEMPTY_VAR:
-				if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) {
+				if (opline->extended_value & ZEND_FETCH_LOCAL) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-				} else if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL ||
-				            (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL_LOCK) &&
+				} else if ((opline->extended_value & (ZEND_FETCH_GLOBAL | ZEND_FETCH_GLOBAL_LOCK)) &&
 				           !op_array->function_name) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
@@ -430,10 +429,9 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_FETCH_FUNC_ARG:
 			case ZEND_FETCH_IS:
 			case ZEND_FETCH_UNSET:
-				if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) {
+				if (opline->extended_value & ZEND_FETCH_LOCAL) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-				} else if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL ||
-				            (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL_LOCK) &&
+				} else if ((opline->extended_value & (ZEND_FETCH_GLOBAL | ZEND_FETCH_GLOBAL_LOCK)) &&
 				           !op_array->function_name) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
@@ -548,9 +546,9 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				block->successors[1] = j + 1;
 				break;
 			case ZEND_CATCH:
-				if (!opline->result.num) {
+				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
 					block->successors_count = 2;
-					block->successors[0] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
+					block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
 					block->successors[1] = j + 1;
 				} else {
 					block->successors_count = 1;

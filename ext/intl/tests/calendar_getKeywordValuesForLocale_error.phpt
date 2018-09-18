@@ -4,8 +4,6 @@ IntlCalendar::getKeywordValuesForLocale(): bad arguments
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.2') < 0)
-	die('skip for ICU 4.2+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -20,7 +18,7 @@ Warning: intlcal_get_keyword_values_for_locale() expects exactly 3 parameters, 2
 Warning: intlcal_get_keyword_values_for_locale(): intlcal_get_keyword_values_for_locale: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::getKeywordValuesForLocale() expects parameter 3 to be boolean, array given in %s on line %d
+Warning: IntlCalendar::getKeywordValuesForLocale() expects parameter 3 to be bool, array given in %s on line %d
 
 Warning: IntlCalendar::getKeywordValuesForLocale(): intlcal_get_keyword_values_for_locale: bad arguments in %s on line %d
 bool(false)

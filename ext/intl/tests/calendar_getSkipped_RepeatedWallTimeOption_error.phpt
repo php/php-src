@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '49') < 0)
-	die('skip for ICU 49+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -44,7 +42,7 @@ Warning: intlcal_get_repeated_wall_time_option() expects exactly 1 parameter, 2 
 Warning: intlcal_get_repeated_wall_time_option(): intlcal_get_repeated_wall_time_option: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_skipped_wall_time_option() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_skipped_wall_time_option() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_get_skipped_wall_time_option(1)
 #1 {main}

@@ -23,6 +23,7 @@
 #include <unicode/locid.h>
 #include <unicode/timezone.h>
 #include <unicode/ustring.h>
+#include <unicode/calendar.h>
 #include "intl_convertcpp.h"
 
 #include "../common/common_date.h"
@@ -36,6 +37,9 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 #include "common/common_enum.h"
+
+using icu::Locale;
+using icu::Calendar;
 
 U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
 {
@@ -127,7 +131,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_gmt)
 	timezone_object_construct(TimeZone::getGMT(), return_value, 0);
 }
 
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 U_CFUNC PHP_FUNCTION(intltz_get_unknown)
 {
 	intl_error_reset(NULL);
@@ -140,7 +143,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_unknown)
 
 	timezone_object_construct(&TimeZone::getUnknown(), return_value, 0);
 }
-#endif
 
 U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 {
@@ -178,13 +180,11 @@ double_offset:
 		convert_to_string_ex(arg);
 		switch (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, 0)) {
 		case IS_DOUBLE:
-			SEPARATE_ZVAL(arg);
-			zval_dtor(arg);
+			zval_ptr_dtor(arg);
 			ZVAL_DOUBLE(arg, dval);
 			goto double_offset;
 		case IS_LONG:
-			SEPARATE_ZVAL(arg);
-			zval_dtor(arg);
+			zval_ptr_dtor(arg);
 			ZVAL_LONG(arg, lval);
 			goto int_offset;
 		}
@@ -230,7 +230,6 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 	RETURN_LONG((zend_long)result);
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 {
 	zend_long zoneType,
@@ -276,7 +275,6 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	IntlIterator_from_StringEnumeration(se, return_value);
 }
-#endif
 
 U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 {
@@ -312,12 +310,11 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 
 	if (is_systemid) { /* by-ref argument passed */
 		ZVAL_DEREF(is_systemid);
-		zval_dtor(is_systemid);
+		zval_ptr_dtor(is_systemid);
 		ZVAL_BOOL(is_systemid, isSystemID);
 	}
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 U_CFUNC PHP_FUNCTION(intltz_get_region)
 {
 	char	*str_id;
@@ -345,7 +342,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_region)
 
 	RETURN_STRINGL(outbuf, region_len);
 }
-#endif
 
 U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 {
@@ -463,11 +459,9 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_offset: error obtaining offset");
 
-	ZVAL_DEREF(rawOffsetArg);
-	zval_dtor(rawOffsetArg);
+	zval_ptr_dtor(rawOffsetArg);
 	ZVAL_LONG(rawOffsetArg, rawOffset);
-	ZVAL_DEREF(dstOffsetArg);
-	zval_dtor(dstOffsetArg);
+	zval_ptr_dtor(dstOffsetArg);
 	ZVAL_LONG(dstOffsetArg, dstOffset);
 
 	RETURN_TRUE;
@@ -515,11 +509,9 @@ U_CFUNC PHP_FUNCTION(intltz_has_same_rules)
 
 static const TimeZone::EDisplayType display_types[] = {
 	TimeZone::SHORT,				TimeZone::LONG,
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	TimeZone::SHORT_GENERIC,		TimeZone::LONG_GENERIC,
 	TimeZone::SHORT_GMT,			TimeZone::LONG_GMT,
 	TimeZone::SHORT_COMMONLY_USED,	TimeZone::GENERIC_LOCATION
-#endif
 };
 
 U_CFUNC PHP_FUNCTION(intltz_get_display_name)

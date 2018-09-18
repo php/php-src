@@ -177,7 +177,7 @@
 function spl_autoload(string $class_name, string $file_extensions = NULL) {/**/};
 
 /** @ingroup SPL
- * @brief Manual invocation of all registerd autoload functions
+ * @brief Manual invocation of all registered autoload functions
  * @since PHP 5.1
  *
  * @param class_name        name of class to load
@@ -371,7 +371,7 @@ class BadMethodCallException extends BadFunctionCallException
  * @brief Exception that denotes a value not in the valid domain was used.
  * @since PHP 5.1
  *
- * This kind of exception should be used to inform about domain erors in
+ * This kind of exception should be used to inform about domain errors in
  * mathematical sense.
  *
  * @see RangeException
@@ -731,7 +731,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
  * over Arrays and Objects.
  *
  * When you want to iterate over the same array multiple times you need to
- * instanciate ArrayObject and let it create ArrayIterator instances that
+ * instantiate ArrayObject and let it create ArrayIterator instances that
  * refer to it either by using foreach or by calling its getIterator()
  * method manually.
  */

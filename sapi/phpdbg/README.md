@@ -78,4 +78,4 @@ Getting Started
 
 See the website for tutorials/documentation
 
-http://phpdbg.com
+https://phpdbg.room11.org

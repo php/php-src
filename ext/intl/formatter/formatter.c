@@ -26,10 +26,6 @@
 #include "formatter_class.h"
 #include "formatter_format.h"
 
-#if U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM <= 4
-#define UNUM_MONETARY_GROUPING_SEPARATOR_SYMBOL 17
-#endif
-
 /* {{{ formatter_register_constants
  * Register constants common for the both (OO and procedural)
  * APIs.
@@ -57,11 +53,6 @@ void formatter_register_constants( INIT_FUNC_ARGS )
 	FORMATTER_EXPOSE_CLASS_CONST( IGNORE );
 
 	FORMATTER_EXPOSE_CUSTOM_CLASS_CONST( "DEFAULT_STYLE",  UNUM_DEFAULT );
-
-/* workaround for ICU bug */
-#if U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM < 8
-#define UNUM_ROUND_HALFEVEN UNUM_FOUND_HALFEVEN
-#endif
 
 	/* UNumberFormatRoundingMode */
 	FORMATTER_EXPOSE_CLASS_CONST( ROUND_CEILING );

@@ -2,7 +2,7 @@
 Testing xpath() with invalid XML
 --SKIPIF--
 <?php
-if (PHP_MAJOR_VERSION < 7) die("skip this test is for PHP 7+ only");
+if (!extension_loaded('simplexml')) die('skip simplexml extension not loaded');
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 ?>
 --FILE--

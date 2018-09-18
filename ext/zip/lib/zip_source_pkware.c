@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -136,7 +136,7 @@ decrypt_header(zip_source_t *src, struct trad_pkware *ctx)
         _zip_error_set_from_source(&ctx->error, src);
 	return -1;
     }
-    
+
     if (n != HEADERLEN) {
         zip_error_set(&ctx->error, ZIP_ER_EOF, 0);
 	return -1;
@@ -198,10 +198,10 @@ pkware_decrypt(zip_source_t *src, void *ud, void *data,
 	    /* TODO: deduce HEADERLEN from size for uncompressed */
 	    if (st->valid & ZIP_STAT_COMP_SIZE)
 		st->comp_size -= HEADERLEN;
-	
+
             return 0;
         }
-            
+
         case ZIP_SOURCE_SUPPORTS:
             return zip_source_make_command_bitmap(ZIP_SOURCE_OPEN, ZIP_SOURCE_READ, ZIP_SOURCE_CLOSE, ZIP_SOURCE_STAT, ZIP_SOURCE_ERROR, ZIP_SOURCE_FREE, -1);
 

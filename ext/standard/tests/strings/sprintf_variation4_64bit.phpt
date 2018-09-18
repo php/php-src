@@ -48,7 +48,7 @@ foreach($float_values as $float_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : integer formats with float values ***
 
 -- Iteration 1 --

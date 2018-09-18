@@ -9,14 +9,14 @@ $array = SplFixedArray::fromArray(array(1 => 1,
 										3 => false));
 var_dump($array);
 ?>
---EXPECTF--
+--EXPECT--
 object(SplFixedArray)#1 (4) {
   [0]=>
   NULL
   [1]=>
   int(1)
   [2]=>
-  %string|unicode%(1) "2"
+  string(1) "2"
   [3]=>
   bool(false)
 }

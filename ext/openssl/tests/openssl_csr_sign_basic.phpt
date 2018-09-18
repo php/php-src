@@ -12,20 +12,20 @@ $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
 $config_arg = array('config' => $config);
 
 $dn = array(
-	"countryName" => "BR",
-	"stateOrProvinceName" => "Rio Grande do Sul",
-	"localityName" => "Porto Alegre",
-	"commonName" => "Henrique do N. Angelo",
-	"emailAddress" => "hnangelo@php.net"
-	);
+    "countryName" => "BR",
+    "stateOrProvinceName" => "Rio Grande do Sul",
+    "localityName" => "Porto Alegre",
+    "commonName" => "Henrique do N. Angelo",
+    "emailAddress" => "hnangelo@php.net"
+);
 
 $args = array(
-	"digest_alg" => "sha1",
-	"private_key_bits" => 2048,
-	"private_key_type" => OPENSSL_KEYTYPE_DSA,
-	"encrypt_key" => true,
-	"config" => $config
-	);
+    "digest_alg" => "sha1",
+    "private_key_bits" => 2048,
+    "private_key_type" => OPENSSL_KEYTYPE_DSA,
+    "encrypt_key" => true,
+    "config" => $config
+);
 
 $privkey = openssl_pkey_new($config_arg);
 $csr = openssl_csr_new($dn, $privkey, $args);
@@ -56,7 +56,7 @@ bool(false)
 Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign() expects parameter 4 to be integer, string given in %s on line %d
+Warning: openssl_csr_sign() expects parameter 4 to be int, string given in %s on line %d
 NULL
 
 Warning: openssl_csr_sign() expects parameter 5 to be array, string given in %s on line %d
@@ -76,7 +76,7 @@ Warning: openssl_csr_sign(): key array must be of the form array(0 => key, 1 => 
 Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign() expects parameter 4 to be integer, array given in %s on line %d
+Warning: openssl_csr_sign() expects parameter 4 to be int, array given in %s on line %d
 NULL
 resource(%d) of type (OpenSSL X.509)
 

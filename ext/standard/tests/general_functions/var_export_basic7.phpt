@@ -10,7 +10,7 @@ Test var_export() function with valid null values
 
 echo "*** Testing var_export() with valid null values ***\n";
 
-// different valid  null vlaues 
+// different valid  null values 
 $unset_var = array();
 unset ($unset_var); // now a null
 $null_var = NULL;

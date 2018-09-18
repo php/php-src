@@ -99,7 +99,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[001] [%d] %s\n", $link->error, $link->errno);
 	}
 ?>
---EXPECTF--
+--EXPECT--
 string(4) "pre:"
 NULL
 NULL

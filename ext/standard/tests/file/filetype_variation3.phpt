@@ -23,7 +23,7 @@ echo "-- Checking for block --\n";
 print( filetype("/dev/ram0") )."\n";
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 -- Checking for block --
 block
 ===DONE===

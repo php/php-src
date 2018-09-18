@@ -2,6 +2,8 @@
 Test fgetss() function : usage variations - read modes
 --FILE--
 <?php
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 /*
  Prototype: string fgetss ( resource $handle [, int $length [, string $allowable_tags]] );
  Description: Gets line from file pointer and strip HTML tags
@@ -69,7 +71,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgetss() : usage variations  ***
 
 -- Testing fgetss() with file opened using r mode --

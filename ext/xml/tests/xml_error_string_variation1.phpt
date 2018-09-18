@@ -103,27 +103,27 @@ string(8) "No error"
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, array given in %s on line %d
 NULL
 
 Arg value  
@@ -146,27 +146,27 @@ string(8) "No error"
 
 Arg value  
 
-Warning: xml_error_string() expects parameter 1 to be integer, string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, string given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_error_string() expects parameter 1 to be integer, string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_error_string() expects parameter 1 to be integer, string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_error_string() expects parameter 1 to be integer, string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, string given in %s on line %d
 NULL
 
 Arg value Some Ascii Data 
 
-Warning: xml_error_string() expects parameter 1 to be integer, object given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be int, object given in %s on line %d
 NULL
 
 Arg value  

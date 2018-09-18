@@ -1,9 +1,9 @@
 --TEST--
 new mysqli()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -59,7 +59,7 @@ require_once('skipifconnectfailure.inc');
 			// We had long discussions on this and found that the ext/mysqli API as
 			// such is broken. As we can't fix it, we document how it has behaved from
 			// the first day on. And that's: no connection.
-			if (NULL !== ($tmp = @$mysqli->query('SELECT 1'))) {
+			if (false !== ($tmp = @$mysqli->query('SELECT 1'))) {
 				printf("[013] There shall be no connection!\n");
 				$mysqli->close();
 			}
@@ -75,7 +75,7 @@ require_once('skipifconnectfailure.inc');
 			// We had long discussions on this and found that the ext/mysqli API as
 			// such is broken. As we can't fix it, we document how it has behaved from
 			// the first day on. And that's: no connection.
-			if (NULL !== ($tmp = @$mysqli->query('SELECT 1'))) {
+			if (false !== ($tmp = @$mysqli->query('SELECT 1'))) {
 				printf("[011] There shall be no connection!\n");
 				$mysqli->close();
 			}

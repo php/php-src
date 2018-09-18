@@ -28,7 +28,7 @@ var_dump( strripos($special_chars_str, "(speCIal)") );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strripos() function: with heredoc strings ***
 -- With heredoc string containing special chars --
 int(0)

@@ -13,6 +13,6 @@ var_dump(class_exists('casesensitivitytest'));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 Done

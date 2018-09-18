@@ -2,8 +2,8 @@
 Test iconv_mime_encode() function : usage variations - Pass different data types to charset arg
 --SKIPIF--
 <?php
-PHP_INT_SIZE == 4 or die('skip');
-extension_loaded('iconv') or die('skip');
+PHP_INT_SIZE == 4 or die('skip 32-bit only');
+extension_loaded('iconv') or die('skip iconv extension not loaded');
 function_exists('iconv_mime_decode_headers') or die("skip iconv_mime_decode_headers() is not available in this build");
 ?>
 --FILE--
@@ -239,7 +239,7 @@ array(5) {
 
 -- Iteration 7 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, float given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, float given in %s on line %d
 bool(false)
 
 -- Iteration 8 --
@@ -396,32 +396,32 @@ array(5) {
 
 -- Iteration 16 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, object given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 
 -- Iteration 22 --
@@ -464,6 +464,6 @@ array(5) {
 
 -- Iteration 24 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, resource given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, resource given in %s on line %d
 bool(false)
 Done

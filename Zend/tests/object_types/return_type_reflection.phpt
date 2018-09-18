@@ -22,7 +22,7 @@ var_dump($returnTypeTwo->isBuiltin(), (string)$returnTypeTwo);
 $returnTypea = (new ReflectionFunction('a'))->getReturnType();
 var_dump($returnTypea->isBuiltin(), (string)$returnTypea);
 
---EXPECTF--
+--EXPECT--
 bool(true)
 string(6) "object"
 bool(true)

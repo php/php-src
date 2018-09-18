@@ -20,7 +20,7 @@ assert(0 && ($a = function () {
 	yield from $x;
 }));
 
-assert(0 && ($a = function &(array &$a, X $b = null) use ($c,&$d) : X {
+assert(0 && ($a = function &(array &$a, ?X $b = null) use ($c,&$d) : ?X {
 	abstract class A extends B implements C, D {
 		const X = 12;
 		const Y = self::X, Z = "aaa";
@@ -161,7 +161,7 @@ Warning: assert(): assert(0 && ($a = function () {
     yield from $x;
 })) failed in %sexpect_015.php on line %d
 
-Warning: assert(): assert(0 && ($a = function &(array &$a, X $b = null) use($c, &$d): X {
+Warning: assert(): assert(0 && ($a = function &(array &$a, ?X $b = null) use($c, &$d): ?X {
     abstract class A extends B implements C, D {
         const X = 12;
         const Y = self::X, Z = 'aaa';

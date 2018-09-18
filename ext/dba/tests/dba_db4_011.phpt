@@ -27,7 +27,7 @@ if (($db_file=dba_open($db_filename, "c", $handler))!==FALSE) {
 <?php 
 require(dirname(__FILE__) .'/clean.inc'); 
 ?>
---EXPECTF--
+--EXPECT--
 database handler: db4
 bool(true)
 bool(true)

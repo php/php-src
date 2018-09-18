@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,10 +17,6 @@
    |          Wez Furlong                                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
-/* Synced with php 3.0 revision 1.24 1999-06-18 [ssb] */
 
 #ifndef FSOCK_H
 #define FSOCK_H

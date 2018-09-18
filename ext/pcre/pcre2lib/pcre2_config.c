@@ -84,11 +84,13 @@ if (where == NULL)  /* Requests a length */
     return PCRE2_ERROR_BADOPTION;
 
     case PCRE2_CONFIG_BSR:
+    case PCRE2_CONFIG_COMPILED_WIDTHS:
+    case PCRE2_CONFIG_DEPTHLIMIT:
     case PCRE2_CONFIG_HEAPLIMIT:
     case PCRE2_CONFIG_JIT:
     case PCRE2_CONFIG_LINKSIZE:
     case PCRE2_CONFIG_MATCHLIMIT:
-    case PCRE2_CONFIG_DEPTHLIMIT:
+    case PCRE2_CONFIG_NEVER_BACKSLASH_C:
     case PCRE2_CONFIG_NEWLINE:
     case PCRE2_CONFIG_PARENSLIMIT:
     case PCRE2_CONFIG_STACKRECURSE:    /* Obsolete */
@@ -115,6 +117,24 @@ switch (what)
 #else
   *((uint32_t *)where) = PCRE2_BSR_UNICODE;
 #endif
+  break;
+
+  case PCRE2_CONFIG_COMPILED_WIDTHS:
+  *((uint32_t *)where) = 0
+#ifdef SUPPORT_PCRE2_8
+  + 1
+#endif
+#ifdef SUPPORT_PCRE2_16
+  + 2
+#endif
+#ifdef SUPPORT_PCRE2_32
+  + 4
+#endif
+  ;
+  break;
+
+  case PCRE2_CONFIG_DEPTHLIMIT:
+  *((uint32_t *)where) = MATCH_LIMIT_DEPTH;
   break;
 
   case PCRE2_CONFIG_HEAPLIMIT:
@@ -148,12 +168,16 @@ switch (what)
   *((uint32_t *)where) = MATCH_LIMIT;
   break;
 
-  case PCRE2_CONFIG_DEPTHLIMIT:
-  *((uint32_t *)where) = MATCH_LIMIT_DEPTH;
-  break;
-
   case PCRE2_CONFIG_NEWLINE:
   *((uint32_t *)where) = NEWLINE_DEFAULT;
+  break;
+
+  case PCRE2_CONFIG_NEVER_BACKSLASH_C:
+#ifdef NEVER_BACKSLASH_C
+  *((uint32_t *)where) = 1;
+#else
+  *((uint32_t *)where) = 0;
+#endif
   break;
 
   case PCRE2_CONFIG_PARENSLIMIT:

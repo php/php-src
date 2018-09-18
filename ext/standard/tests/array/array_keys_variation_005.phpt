@@ -20,7 +20,7 @@ fclose( $resource1 );
 closedir( $resource2 );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_keys() with resource type ***
 array(1) {
   [0]=>

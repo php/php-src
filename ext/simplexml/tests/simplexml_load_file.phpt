@@ -9,7 +9,7 @@ simplexml_load_file()
 	var_dump($simple);
 	echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 object(SimpleXMLElement)#1 (1) {
   ["book"]=>
   array(2) {

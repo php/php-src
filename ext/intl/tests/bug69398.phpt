@@ -14,7 +14,7 @@ echo IntlDateFormatter::formatObject ($date, array(IntlDateFormatter::SHORT, Int
 ?>
 ==DONE==
 
---EXPECTF--
+--EXPECT--
 04/04/2015
 15. 4. 4.
 ==DONE==

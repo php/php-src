@@ -75,7 +75,7 @@ echo "\n-- From a child's static context --\n";
 Child::testStatic();
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing get_class_vars() : testing visibility
 
 -- From global context --

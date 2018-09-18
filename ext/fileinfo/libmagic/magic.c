@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.100 2016/07/18 11:43:05 christos Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.102 2017/08/28 13:39:18 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -141,6 +141,13 @@ magic_compile(struct magic_set *ms, const char *magicfile)
 	return file_apprentice(ms, magicfile, FILE_COMPILE);
 }
 
+public int
+magic_check(struct magic_set *ms, const char *magicfile)
+{
+	if (ms == NULL)
+		return -1;
+	return file_apprentice(ms, magicfile, FILE_CHECK);
+}
 
 public int
 magic_list(struct magic_set *ms, const char *magicfile)
@@ -154,6 +161,9 @@ private void
 close_and_restore(const struct magic_set *ms, const char *name, int fd,
     const zend_stat_t *sb)
 {
+	if (fd == STDIN_FILENO || name == NULL)
+		return;
+	(void) close(fd);
 
 	if ((ms->flags & MAGIC_PRESERVE_ATIME) != 0) {
 		/*
@@ -220,7 +230,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
 	int no_in_stream = 0;
 
-	if (file_reset(ms) == -1)
+	if (file_reset(ms, 1) == -1)
 		goto out;
 
 	if (!inname && !stream) {
@@ -291,11 +301,11 @@ magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 {
 	if (ms == NULL)
 		return NULL;
-	if (file_reset(ms) == -1)
+	if (file_reset(ms, 1) == -1)
 		return NULL;
 	/*
 	 * The main work is done here!
-	 * We have the file name and/or the data buffer to be identified. 
+	 * We have the file name and/or the data buffer to be identified.
 	 */
 	if (file_buffer(ms, NULL, NULL, buf, nb) == -1) {
 		return NULL;
@@ -317,6 +327,15 @@ magic_errno(struct magic_set *ms)
 	if (ms == NULL)
 		return EINVAL;
 	return (ms->event_flags & EVENT_HAD_ERR) ? ms->error : 0;
+}
+
+public int
+magic_getflags(struct magic_set *ms)
+{
+	if (ms == NULL)
+		return -1;
+
+	return ms->flags;
 }
 
 public int

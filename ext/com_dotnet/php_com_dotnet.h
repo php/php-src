@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef PHP_COM_DOTNET_H
 #define PHP_COM_DOTNET_H
 
@@ -28,13 +26,7 @@ extern zend_module_entry com_dotnet_module_entry;
 #include "TSRM.h"
 #endif
 
-#ifdef PHP_WIN32
-# define PHP_COM_DOTNET_API __declspec(dllexport)
-#elif defined(__GNUC__) && __GNUC__ >= 4
-# define PHP_COM_DOTNET_API __attribute__ ((visibility("default")))
-#else
-# define PHP_COM_DOTNET_API
-#endif
+#define PHP_COM_DOTNET_API __declspec(dllexport)
 
 #include "php_version.h"
 #define PHP_COM_DOTNET_VERSION PHP_VERSION

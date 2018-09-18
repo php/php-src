@@ -1,5 +1,5 @@
 --TEST--
-ZE2 An abstract class cannot be instanciated
+ZE2 An abstract class cannot be instantiated
 --FILE--
 <?php
 

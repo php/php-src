@@ -2,7 +2,6 @@
 Rename entries
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -48,7 +47,7 @@ $zip->close();
 
 @unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 0 entry1.txt
 1 entry2.txt
 2 dir/entry2.txt

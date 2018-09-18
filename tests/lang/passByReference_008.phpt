@@ -25,7 +25,7 @@ $b = 'original.b';
 refVal($b, $b);
 var_dump($b);
 ?>
---EXPECTF--
+--EXPECT--
 
 
 -- Val, Ref --

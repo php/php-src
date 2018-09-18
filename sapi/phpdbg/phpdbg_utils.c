@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -760,21 +760,25 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 				return 1;
 			}
 
-			do {
+			cur = &op_array->opcodes[catch];
+			while (1) {
 				zend_class_entry *ce;
-				cur = &op_array->opcodes[catch];
 
-				if (!(ce = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(cur, cur->op1))))) {
-					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), RT_CONSTANT(cur, cur->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-					CACHE_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(cur, cur->op1)), ce);
+				if (!(ce = CACHED_PTR(cur->extended_value & ~ZEND_LAST_CATCH))) {
+					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), Z_STR_P(RT_CONSTANT(cur, cur->op1) + 1), ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					CACHE_PTR(cur->extended_value & ~ZEND_LAST_CATCH, ce);
 				}
 
 				if (ce == exception->ce || (ce && instanceof_function(exception->ce, ce))) {
 					return 1;
 				}
 
-				catch += cur->extended_value / sizeof(zend_op);
-			} while (!cur->result.num);
+				if (cur->extended_value & ZEND_LAST_CATCH) {
+					return 0;
+				}
+
+				cur = OP_JMP_ADDR(cur, cur->op2);
+			}
 
 			return 0;
 		}
@@ -820,7 +824,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			break;
 		case IS_STRING: {
 			int i;
-			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"\n\t\0", 5);
+			zend_string *str = php_addcslashes(Z_STR_P(zv), "\\\"\n\t\0", 5);
 			for (i = 0; i < ZSTR_LEN(str); i++) {
 				if (ZSTR_VAL(str)[i] < 32) {
 					ZSTR_VAL(str)[i] = ' ';

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Pierre-Alain Joye <paj@pearfr.org>                           |
   |         Ilia Alshanetsky <ilia@prohost.org>                          |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -122,7 +120,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in enchant_functions[].
  */
-zend_function_entry enchant_functions[] = {
+static const zend_function_entry enchant_functions[] = {
 	PHP_FE(enchant_broker_init, 			arginfo_enchant_broker_init)
 	PHP_FE(enchant_broker_free, 			arginfo_enchant_broker_free)
 	PHP_FE(enchant_broker_get_error, 		arginfo_enchant_broker_free)
@@ -316,8 +314,7 @@ PHP_MINFO_FUNCTION(enchant)
 
 	pbroker = enchant_broker_init();
 	php_info_print_table_start();
-	php_info_print_table_header(2, "enchant support", "enabled");
-	php_info_print_table_row(2, "Version", PHP_ENCHANT_VERSION);
+	php_info_print_table_row(2, "enchant support", "enabled");
 #ifdef ENCHANT_VERSION_STRING
 	php_info_print_table_row(2, "Libenchant Version", ENCHANT_VERSION_STRING);
 #elif defined(HAVE_ENCHANT_BROKER_SET_PARAM)
@@ -335,14 +332,14 @@ PHP_MINFO_FUNCTION(enchant)
 #define PHP_ENCHANT_GET_BROKER	\
 	pbroker = (enchant_broker *)zend_fetch_resource(Z_RES_P(broker), "enchant_broker", le_enchant_broker); \
 	if (!pbroker || !pbroker->pbroker) {	\
-		php_error_docref(NULL, E_WARNING, "%s", "Resource broker invalid");	\
+		php_error_docref(NULL, E_WARNING, "Resource broker invalid");	\
 		RETURN_FALSE;	\
 	}
 
 #define PHP_ENCHANT_GET_DICT	\
 	pdict = (enchant_dict *)zend_fetch_resource(Z_RES_P(dict), "enchant_dict", le_enchant_dict); \
 	if (!pdict || !pdict->pdict) {	\
-		php_error_docref(NULL, E_WARNING, "%s", "Invalid dictionary resource.");	\
+		php_error_docref(NULL, E_WARNING, "Invalid dictionary resource.");	\
 		RETURN_FALSE;	\
 	}
 
@@ -372,7 +369,7 @@ PHP_FUNCTION(enchant_broker_init)
 }
 /* }}} */
 
-/* {{{ proto boolean enchant_broker_free(resource broker)
+/* {{{ proto bool enchant_broker_free(resource broker)
    Destroys the broker object and its dictionnaries */
 PHP_FUNCTION(enchant_broker_free)
 {
@@ -719,7 +716,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	}
 
 	if (sugg) {
-		zval_dtor(sugg);
+		zval_ptr_dtor(sugg);
 		array_init(sugg);
 	}
 

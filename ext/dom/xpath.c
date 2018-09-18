@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Rob Richards <rrichards@php.net>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -221,13 +219,13 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 			} else {
 				zend_string *str = zval_get_string(&retval);
 				valuePush(ctxt, xmlXPathNewString((xmlChar *) ZSTR_VAL(str)));
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			zval_ptr_dtor(&retval);
 		}
 	}
-	zend_string_release(callable);
-	zval_dtor(&fci.function_name);
+	zend_string_release_ex(callable, 0);
+	zval_ptr_dtor_str(&fci.function_name);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
 			zval_ptr_dtor(&fci.params[i]);
@@ -249,7 +247,7 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 }
 /* }}} */
 
-/* {{{ proto void DOMXPath::__construct(DOMDocument doc) U */
+/* {{{ proto DOMXPath::__construct(DOMDocument doc) U */
 PHP_METHOD(domxpath, __construct)
 {
 	zval *id = getThis(), *doc;
@@ -308,7 +306,7 @@ int dom_xpath_document_read(dom_object *obj, zval *retval)
 }
 /* }}} */
 
-/* {{{ proto boolean dom_xpath_register_ns(string prefix, string uri) */
+/* {{{ proto bool dom_xpath_register_ns(string prefix, string uri) */
 PHP_FUNCTION(dom_xpath_register_ns)
 {
 	zval *id;
@@ -490,14 +488,14 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context [, boolean registerNodeNS]]) */
+/* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context [, bool registerNodeNS]]) */
 PHP_FUNCTION(dom_xpath_query)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
 }
 /* }}} end dom_xpath_query */
 
-/* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context [, boolean registerNodeNS]]) */
+/* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context [, bool registerNodeNS]]) */
 PHP_FUNCTION(dom_xpath_evaluate)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);
@@ -520,7 +518,7 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 			zend_string *str = zval_get_string(entry);
 			ZVAL_LONG(&new_string,1);
 			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 		} ZEND_HASH_FOREACH_END();
 		intern->registerPhpFunctions = 2;
 		RETURN_TRUE;

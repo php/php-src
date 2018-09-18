@@ -22,10 +22,10 @@ foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
 $db->query('DROP TABLE foobar');
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["testing(name)"]=>
-  %string|unicode%(2) "12"
+  string(2) "12"
   [0]=>
-  %string|unicode%(2) "12"
+  string(2) "12"
 }

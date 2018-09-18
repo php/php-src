@@ -55,16 +55,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define DUMMY_BUFFER_SIZE 100
 
-/* Some pcre2_compile() error numbers are used herein. */
-
-/* Note: ERROR_NO_SLASH_Z is not an error code. */
-#define ERROR_NO_SLASH_Z 100
-#define ERROR_END_BACKSLASH 101
-#define ERROR_MISSING_SQUARE_BRACKET 106
-#define ERROR_MISSING_CLOSING_PARENTHESIS 114
-#define ERROR_UNKNOWN_POSIX_CLASS 130
-#define ERROR_NO_UNICODE 132
-
 /* Generated pattern fragments */
 
 #define STR_BACKSLASH_A STR_BACKSLASH STR_A
@@ -105,7 +95,7 @@ static const char *pcre2_escaped_literals =
 
 static const char *posix_meta_escapes =
   STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS
-  STR_LEFT_CURLY_BRACKET STR_RIGHT_CURLY_BRACKET 
+  STR_LEFT_CURLY_BRACKET STR_RIGHT_CURLY_BRACKET
   STR_1 STR_2 STR_3 STR_4 STR_5 STR_6 STR_7 STR_8 STR_9;
 
 
@@ -260,7 +250,7 @@ while (plength > 0)
         continue;  /* With next character */
         }
       }
-#endif       
+#endif
 
     /* Handle start of "normal" character classes */
 
@@ -286,9 +276,9 @@ while (plength > 0)
     break;
 
     case CHAR_BACKSLASH:
-    if (plength <= 0) return ERROR_END_BACKSLASH;
+    if (plength <= 0) return PCRE2_ERROR_END_BACKSLASH;
     if (extended) nextisliteral = TRUE; else
-      { 
+      {
       if (*posix < 127 && strchr(posix_meta_escapes, *posix) != NULL)
         {
         if (isdigit(*posix)) PUTCHARS(STR_BACKSLASH);
@@ -296,7 +286,7 @@ while (plength > 0)
         lastspecial = *p++ = *posix++;
         plength--;
         }
-      else nextisliteral = TRUE;  
+      else nextisliteral = TRUE;
       }
     break;
 
@@ -362,7 +352,7 @@ while (plength > 0)
   }
 
 if (posix_state >= POSIX_CLASS_NOT_STARTED)
-  return ERROR_MISSING_SQUARE_BRACKET;
+  return PCRE2_ERROR_MISSING_SQUARE_BRACKET;
 convlength += p - pp;        /* Final segment */
 *bufflenptr = convlength;
 *p++ = 0;
@@ -601,7 +591,7 @@ int len, class_index;
 if (pattern >= pattern_end)
   {
   *from = pattern;
-  return ERROR_MISSING_SQUARE_BRACKET;
+  return PCRE2_ERROR_MISSING_SQUARE_BRACKET;
   }
 
 if (*pattern == CHAR_EXCLAMATION_MARK
@@ -612,7 +602,7 @@ if (*pattern == CHAR_EXCLAMATION_MARK
   if (pattern >= pattern_end)
     {
     *from = pattern;
-    return ERROR_MISSING_SQUARE_BRACKET;
+    return PCRE2_ERROR_MISSING_SQUARE_BRACKET;
     }
 
   is_negative = TRUE;
@@ -750,7 +740,7 @@ while (pattern < pattern_end)
   }
 
 *from = pattern;
-return ERROR_MISSING_SQUARE_BRACKET;
+return PCRE2_ERROR_MISSING_SQUARE_BRACKET;
 }
 
 
@@ -808,8 +798,9 @@ BOOL no_wildsep = (options & PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR) != 0;
 BOOL no_starstar = (options & PCRE2_CONVERT_GLOB_NO_STARSTAR) != 0;
 BOOL in_atomic = FALSE;
 BOOL after_starstar = FALSE;
+BOOL no_slash_z = FALSE;
 BOOL with_escape, is_start, after_separator;
-int result;
+int result = 0;
 
 (void)utf; /* Avoid compiler warning. */
 
@@ -853,8 +844,6 @@ if (is_start)
   convert_glob_write_str(&out, 2);
   }
 
-result = 0;
-
 while (pattern < pattern_end)
   {
   c = *pattern++;
@@ -878,7 +867,7 @@ while (pattern < pattern_end)
 
       if (pattern >= pattern_end)
         {
-        result = ERROR_NO_SLASH_Z;
+        no_slash_z = TRUE;
         break;
         }
 
@@ -948,7 +937,7 @@ while (pattern < pattern_end)
       {
       if (pattern >= pattern_end)
         {
-        result = ERROR_NO_SLASH_Z;
+        no_slash_z = TRUE;
         break;
         }
 
@@ -1016,9 +1005,9 @@ while (pattern < pattern_end)
   convert_glob_write(&out, c);
   }
 
-if (result == 0 || result == ERROR_NO_SLASH_Z)
+if (result == 0)
   {
-  if (result == 0)
+  if (!no_slash_z)
     {
     out.out_str[0] = CHAR_BACKSLASH;
     out.out_str[1] = CHAR_z;
@@ -1029,7 +1018,6 @@ if (result == 0 || result == ERROR_NO_SLASH_Z)
     convert_glob_write(&out, CHAR_RIGHT_PARENTHESIS);
 
   convert_glob_write(&out, CHAR_NUL);
-  result = 0;
 
   if (!dummyrun && out.output_size != (PCRE2_SIZE) (out.output - use_buffer))
     result = PCRE2_ERROR_NOMEMORY;
@@ -1093,7 +1081,7 @@ if (ccontext == NULL) ccontext =
 /* Check UTF if required. */
 
 #ifndef SUPPORT_UNICODE
-if (utf) return ERROR_NO_UNICODE;
+if (utf) return PCRE2_ERROR_UNICODE_NOT_SUPPORTED;
 #else
 if (utf && (options & PCRE2_CONVERT_NO_UTF_CHECK) == 0)
   {

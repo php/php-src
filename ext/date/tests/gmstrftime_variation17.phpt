@@ -1,11 +1,5 @@
 --TEST--
 Test gmstrftime() function : usage variation - Checking day related formats which was not supported on Windows before vc14. 
---SKIPIF--
-<?php
-if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
-    die("skip Test is valid for Windows");
-}
-?>
 --FILE--
 <?php
 /* Prototype  : string gmstrftime(string format [, int timestamp])

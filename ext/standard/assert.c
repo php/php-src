@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Thies C. Arntzen <thies@thieso.net>                          |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* {{{ includes */
 #include "php.h"
@@ -188,7 +186,7 @@ PHP_FUNCTION(assert)
 			} else {
 				zend_string *str = zval_get_string(description);
 				zend_throw_error(NULL, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, ZSTR_VAL(str), myeval);
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			if (ASSERTG(bail)) {
 				zend_bailout();
@@ -216,9 +214,8 @@ PHP_FUNCTION(assert)
 	}
 
 	if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
-		zval *args = safe_emalloc(!description ? 3 : 4, sizeof(zval), 0);
+		zval args[4];
 		zval retval;
-		int i;
 		uint32_t lineno = zend_get_executed_lineno();
 		const char *filename = zend_get_executed_filename();
 
@@ -231,18 +228,16 @@ PHP_FUNCTION(assert)
 		/* XXX do we want to check for error here? */
 		if (!description) {
 			call_user_function(CG(function_table), NULL, &ASSERTG(callback), &retval, 3, args);
-			for (i = 0; i <= 2; i++) {
-				zval_ptr_dtor(&(args[i]));
-			}
+			zval_ptr_dtor(&(args[2]));
+			zval_ptr_dtor(&(args[0]));
 		} else {
 			ZVAL_STR(&args[3], zval_get_string(description));
 			call_user_function(CG(function_table), NULL, &ASSERTG(callback), &retval, 4, args);
-			for (i = 0; i <= 3; i++) {
-				zval_ptr_dtor(&(args[i]));
-			}
+			zval_ptr_dtor(&(args[3]));
+			zval_ptr_dtor(&(args[2]));
+			zval_ptr_dtor(&(args[0]));
 		}
 
-		efree(args);
 		zval_ptr_dtor(&retval);
 	}
 
@@ -256,7 +251,7 @@ PHP_FUNCTION(assert)
 		} else {
 			zend_string *str = zval_get_string(description);
 			zend_throw_exception(assertion_error_ce, ZSTR_VAL(str), E_ERROR);
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 		}
 	} else if (ASSERTG(warning)) {
 		if (!description) {
@@ -272,14 +267,14 @@ PHP_FUNCTION(assert)
 			} else {
 				php_error_docref(NULL, E_WARNING, "%s failed", ZSTR_VAL(str));
 			}
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 		}
 	}
 
 	if (ASSERTG(bail)) {
 		zend_bailout();
 	}
-	
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -307,8 +302,8 @@ PHP_FUNCTION(assert_options)
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.active", sizeof("assert.active")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
-			zend_string_release(key);
-			zend_string_release(value_str);
+			zend_string_release_ex(key, 0);
+			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -319,8 +314,8 @@ PHP_FUNCTION(assert_options)
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.bail", sizeof("assert.bail")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
-			zend_string_release(key);
-			zend_string_release(value_str);
+			zend_string_release_ex(key, 0);
+			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -331,8 +326,8 @@ PHP_FUNCTION(assert_options)
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.quiet_eval", sizeof("assert.quiet_eval")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
-			zend_string_release(key);
-			zend_string_release(value_str);
+			zend_string_release_ex(key, 0);
+			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -343,8 +338,8 @@ PHP_FUNCTION(assert_options)
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.warning", sizeof("assert.warning")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
-			zend_string_release(key);
-			zend_string_release(value_str);
+			zend_string_release_ex(key, 0);
+			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -369,8 +364,8 @@ PHP_FUNCTION(assert_options)
 			zend_string *key = zend_string_init("assert.exception", sizeof("assert.exception")-1, 0);
 			zend_string *val = zval_get_string(value);
 			zend_alter_ini_entry_ex(key, val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
-			zend_string_release(val);
-			zend_string_release(key);
+			zend_string_release_ex(val, 0);
+			zend_string_release_ex(key, 0);
 		}
 		RETURN_LONG(oldint);
 		break;

@@ -1,5 +1,5 @@
 --TEST--
-Test variable occuring on both LHS and RHS of list()
+Test variable occurring on both LHS and RHS of list()
 --FILE--
 <?php
 

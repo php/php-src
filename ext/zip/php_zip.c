@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -191,7 +191,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 
 		if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
-			zend_string_release(file_basename);
+			zend_string_release_ex(file_basename, 0);
 			CWD_STATE_FREE(new_state.cwd);
 			return 0;
 		}
@@ -203,7 +203,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 		if (!ret) {
 			efree(file_dirname_fullpath);
 			if (!is_dir_only) {
-				zend_string_release(file_basename);
+				zend_string_release_ex(file_basename, 0);
 				CWD_STATE_FREE(new_state.cwd);
 			}
 			return 0;
@@ -220,13 +220,13 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 	len = spprintf(&fullpath, 0, "%s/%s", file_dirname_fullpath, ZSTR_VAL(file_basename));
 	if (!len) {
 		efree(file_dirname_fullpath);
-		zend_string_release(file_basename);
+		zend_string_release_ex(file_basename, 0);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	} else if (len > MAXPATHLEN) {
 		php_error_docref(NULL, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
 		efree(file_dirname_fullpath);
-		zend_string_release(file_basename);
+		zend_string_release_ex(file_basename, 0);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
@@ -238,7 +238,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 	if (ZIP_OPENBASEDIR_CHECKPATH(fullpath)) {
 		efree(fullpath);
 		efree(file_dirname_fullpath);
-		zend_string_release(file_basename);
+		zend_string_release_ex(file_basename, 0);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
@@ -268,7 +268,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 
 done:
 	efree(fullpath);
-	zend_string_release(file_basename);
+	zend_string_release_ex(file_basename, 0);
 	efree(file_dirname_fullpath);
 	CWD_STATE_FREE(new_state.cwd);
 
@@ -673,14 +673,14 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 
 			if ((namelist_len == 1 && ZSTR_VAL(namelist[i])[0] == '.') ||
 				(namelist_len == 2 && ZSTR_VAL(namelist[i])[0] == '.' && ZSTR_VAL(namelist[i])[1] == '.')) {
-				zend_string_release(namelist[i]);
+				zend_string_release_ex(namelist[i], 0);
 				continue;
 			}
 
 			if ((path_len + namelist_len + 1) >= MAXPATHLEN) {
 				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %u, %zu given)",
 						MAXPATHLEN - 1, (path_len + namelist_len + 1));
-				zend_string_release(namelist[i]);
+				zend_string_release_ex(namelist[i], 0);
 				break;
 			}
 
@@ -688,31 +688,31 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 
 			if (0 != VCWD_STAT(fullpath, &s)) {
 				php_error_docref(NULL, E_WARNING, "Cannot read <%s>", fullpath);
-				zend_string_release(namelist[i]);
+				zend_string_release_ex(namelist[i], 0);
 				continue;
 			}
 
 			if (S_IFDIR == (s.st_mode & S_IFMT)) {
-				zend_string_release(namelist[i]);
+				zend_string_release_ex(namelist[i], 0);
 				continue;
 			}
 
 			match_data = php_pcre_create_match_data(capture_count, re);
 			if (!match_data) {
 				/* Allocation failed, but can proceed to the next pattern. */
-				zend_string_release(namelist[i]);
+				zend_string_release_ex(namelist[i], 0);
 				continue;
 			}
 			rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, preg_options, match_data, mctx);
 			php_pcre_free_match_data(match_data);
 			/* 0 means that the vector is too small to hold all the captured substring offsets */
 			if (rc < 0) {
-				zend_string_release(namelist[i]);
+				zend_string_release_ex(namelist[i], 0);
 				continue;
 			}
 
 			add_next_index_string(return_value, fullpath);
-			zend_string_release(namelist[i]);
+			zend_string_release_ex(namelist[i], 0);
 		}
 		efree(namelist);
 	}
@@ -820,7 +820,7 @@ static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, z
 	/* Register for reflection */
 	ZVAL_NULL(&tmp);
 	zend_declare_property_ex(zip_class_entry, str, &tmp, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 }
 /* }}} */
 
@@ -878,11 +878,9 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 	zval tmp_member;
 	zval *retval = NULL;
 	zip_prop_handler *hnd = NULL;
-	zend_object_handlers *std_hnd;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -894,12 +892,11 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 	}
 
 	if (hnd == NULL) {
-		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot);
+		retval = zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -912,11 +909,9 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, void **
 	zval tmp_member;
 	zval *retval = NULL;
 	zip_prop_handler *hnd = NULL;
-	zend_object_handlers *std_hnd;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -933,12 +928,11 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, void **
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -950,12 +944,10 @@ static int php_zip_has_property(zval *object, zval *member, int type, void **cac
 	ze_zip_object *obj;
 	zval tmp_member;
 	zip_prop_handler *hnd = NULL;
-	zend_object_handlers *std_hnd;
 	int retval = 0;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -981,12 +973,11 @@ static int php_zip_has_property(zval *object, zval *member, int type, void **cac
 
 		zval_ptr_dtor(&tmp);
 	} else {
-		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->has_property(object, member, type, cache_slot);
+		retval = zend_std_has_property(object, member, type, cache_slot);
 	}
 
 	if (member == &tmp_member) {
-		zval_dtor(member);
+		zval_ptr_dtor_str(&tmp_member);
 	}
 
 	return retval;
@@ -1038,10 +1029,13 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 	}
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
+#if LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR == 3 && LIBZIP_VERSION_MICRO == 1
+			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: zip_close have failed");
+#else
 			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
-			return;
+			zip_discard(intern->za);
+#endif
 		}
-		intern->za = NULL;
 	}
 
 	if (intern->buffers_cnt>0) {
@@ -1064,7 +1058,7 @@ static zend_object *php_zip_object_new(zend_class_entry *class_type) /* {{{ */
 {
 	ze_zip_object *intern;
 
-	intern = ecalloc(1, sizeof(ze_zip_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(ze_zip_object), class_type);
 	intern->prop_handler = &zip_prop_handlers;
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
@@ -1331,7 +1325,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 			ZSTR_LEN(buffer) = n;
 			RETURN_NEW_STR(buffer);
 		} else {
-			zend_string_free(buffer);
+			zend_string_efree(buffer);
 			RETURN_EMPTY_STRING()
 		}
 	} else {
@@ -1549,7 +1543,7 @@ static ZIPARCHIVE_METHOD(close)
 
 	if ((err = zip_close(intern))) {
 #if LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR == 3 && LIBZIP_VERSION_MICRO == 1
-		php_error_docref(NULL, E_WARNING, "%s", "zip_close have failed");
+		php_error_docref(NULL, E_WARNING, "zip_close have failed");
 #else
 		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
 		zip_discard(intern);
@@ -1752,7 +1746,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					if ((add_path_len + file_stripped_len) > MAXPATHLEN) {
 						php_error_docref(NULL, E_WARNING, "Entry name too long (max: %d, %zd given)",
 						MAXPATHLEN - 1, (add_path_len + file_stripped_len));
-						zval_ptr_dtor(return_value);
+						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
 					}
 					snprintf(entry_name_buf, MAXPATHLEN, "%s%s", add_path, file_stripped);
@@ -1763,13 +1757,13 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				entry_name = entry_name_buf;
 				entry_name_len = strlen(entry_name);
 				if (basename) {
-					zend_string_release(basename);
+					zend_string_release_ex(basename, 0);
 					basename = NULL;
 				}
 
 				if (php_zip_add_file(intern, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
 					entry_name, entry_name_len, 0, 0) < 0) {
-					zval_dtor(return_value);
+					zend_array_destroy(Z_ARR_P(return_value));
 					RETURN_FALSE;
 				}
 			}
@@ -1923,7 +1917,7 @@ static ZIPARCHIVE_METHOD(statName)
 /* }}} */
 
 /* {{{ proto resource ZipArchive::statIndex(int index[, int flags])
-Returns the zip entry informations using its index */
+Returns the zip entry information using its index */
 static ZIPARCHIVE_METHOD(statIndex)
 {
 	struct zip *intern;
@@ -2269,9 +2263,9 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
-	zval_dtor(z_opsys);
+	zval_ptr_dtor(z_opsys);
 	ZVAL_LONG(z_opsys, opsys);
-	zval_dtor(z_attr);
+	zval_ptr_dtor(z_attr);
 	ZVAL_LONG(z_attr, attr);
 	RETURN_TRUE;
 }
@@ -2719,7 +2713,7 @@ static ZIPARCHIVE_METHOD(unchangeArchive)
 /* {{{ proto bool ZipArchive::extractTo(string pathto[, mixed files])
 Extract one or more file from a zip archive */
 /* TODO:
- * - allow index or array of indeces
+ * - allow index or array of indices
  * - replace path
  * - patterns
  */
@@ -2863,7 +2857,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	buffer = zend_string_safe_alloc(1, len, 0, 0);
 	n = zip_fread(zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
 	if (n < 1) {
-		zend_string_free(buffer);
+		zend_string_efree(buffer);
 		RETURN_EMPTY_STRING();
 	}
 
@@ -3159,7 +3153,7 @@ static PHP_MINIT_FUNCTION(zip)
 {
 	zend_class_entry ce;
 
-	memcpy(&zip_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&zip_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zip_object_handlers.offset = XtOffsetOf(ze_zip_object, zo);
 	zip_object_handlers.free_obj = php_zip_object_free_storage;
 	zip_object_handlers.clone_obj = NULL;
@@ -3267,7 +3261,8 @@ static PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_OS_2",				ZIP_OPSYS_OS_2);
 	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_MACINTOSH",		ZIP_OPSYS_MACINTOSH);
 	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_Z_SYSTEM",			ZIP_OPSYS_Z_SYSTEM);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_Z_CPM",			ZIP_OPSYS_CPM);
+	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_Z_CPM",			ZIP_OPSYS_CPM);  // typo kept for BC
+	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_CPM",				ZIP_OPSYS_CPM);
 	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_WINDOWS_NTFS",		ZIP_OPSYS_WINDOWS_NTFS);
 	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_MVS",				ZIP_OPSYS_MVS);
 	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_VSE",				ZIP_OPSYS_VSE);
@@ -3316,7 +3311,12 @@ static PHP_MINFO_FUNCTION(zip)
 
 	php_info_print_table_row(2, "Zip", "enabled");
 	php_info_print_table_row(2, "Zip version", PHP_ZIP_VERSION);
+#if HAVE_LIBZIP_VERSION
+	php_info_print_table_row(2, "Libzip headers version", LIBZIP_VERSION);
+	php_info_print_table_row(2, "Libzip library version", zip_libzip_version());
+#else
 	php_info_print_table_row(2, "Libzip version", LIBZIP_VERSION);
+#endif
 
 	php_info_print_table_end();
 }

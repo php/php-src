@@ -22,7 +22,7 @@ var_dump(ctype_lower($c2));
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_lower() : basic functionality ***
 bool(true)
 bool(false)

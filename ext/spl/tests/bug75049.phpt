@@ -12,5 +12,5 @@ foreach (spl_autoload_functions() as $loader) {
 	echo (int)spl_autoload_unregister($loader);
 }
 echo (int)count(spl_autoload_functions());
---EXPECTF--
+--EXPECT--
 11110

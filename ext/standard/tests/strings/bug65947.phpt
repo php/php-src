@@ -1,7 +1,5 @@
 --TEST--
 Bug #65947 (basename is no more working after fgetcsv in certain situation)
---SKIPIF--
-<?php if (!PHP_ZTS) { print "skip only for zts build"; }
 --FILE--
 <?php
 $filename = 'test.toto';
@@ -13,5 +11,5 @@ if ($filename != $b2)
 	print "BUG";
 else 
 	print "OKEY";
---EXPECTF--	
+--EXPECT--	
 OKEY

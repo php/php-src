@@ -31,7 +31,7 @@ var_dump( array_intersect_key($array1, $array2) );
 var_dump( array_intersect_key($array2,$array1 ) ); 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 array(2) {
   ["first"]=>

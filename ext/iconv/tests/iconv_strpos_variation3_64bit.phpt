@@ -166,33 +166,33 @@ int(8)
 --
 string(0) ""
 
-Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 --
 string(0) ""
 
-Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 --
 string(6) "string"
 
-Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 --
 string(6) "string"
 
-Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 --
 string(11) "hello world"
 
-Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 --
 object(classA)#%d (%d) {
 }
 
-Warning: iconv_strpos() expects parameter 3 to be integer, object given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be int, object given in %s on line %d
 bool(false)
 --
 NULL
@@ -203,6 +203,6 @@ int(8)
 --
 resource(%d) of type (stream)
 
-Warning: iconv_strpos() expects parameter 3 to be integer, resource given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be int, resource given in %s on line %d
 bool(false)
 Done

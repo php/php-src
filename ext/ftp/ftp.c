@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Stefan Esser <sesser@php.net> (resume functions)            |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -70,8 +68,8 @@
  */
 static int		ftp_putcmd(	ftpbuf_t *ftp,
 					const char *cmd,
-					const size_t cmd_len, 
-					const char *args, 
+					const size_t cmd_len,
+					const char *args,
 					const size_t args_len);
 
 /* wrapper around send/recv to handle timeouts */
@@ -1803,7 +1801,7 @@ data_accepted:
 	if (ftp->use_ssl && ftp->use_ssl_for_data) {
 		ctx = SSL_get_SSL_CTX(ftp->ssl_handle);
 		if (ctx == NULL) {
-			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL context");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL context");
 			return 0;
 		}
 
@@ -1822,7 +1820,7 @@ data_accepted:
 		/* get the session from the control connection so we can re-use it */
 		session = SSL_get_session(ftp->ssl_handle);
 		if (session == NULL) {
-			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL session");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL session");
 			SSL_free(data->ssl_handle);
 			return 0;
 		}

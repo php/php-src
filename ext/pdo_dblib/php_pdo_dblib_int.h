@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
   |         Frank M. Kromann <frank@kromann.info>                        |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_PDO_DBLIB_INT_H
 #define PHP_PDO_DBLIB_INT_H
@@ -104,8 +102,8 @@ int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line);
 
-extern pdo_driver_t pdo_dblib_driver;
-extern struct pdo_stmt_methods dblib_stmt_methods;
+extern const pdo_driver_t pdo_dblib_driver;
+extern const struct pdo_stmt_methods dblib_stmt_methods;
 
 typedef struct {
 	int severity;

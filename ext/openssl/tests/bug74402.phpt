@@ -2,12 +2,8 @@
 Bug #74402 (segfault on random_bytes, bin3hex, openssl_seal)
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) {
-	print "skip";
-}
-if (!in_array('AES256', openssl_get_cipher_methods(true))) {
-	print "skip";
-}
+if (!extension_loaded("openssl")) print "skip";
+if (!in_array('AES256', openssl_get_cipher_methods(true))) print "skip";
 ?>
 --FILE--
 <?php
@@ -25,6 +21,6 @@ $iv = '';
 var_dump(strlen($data));
 var_dump(openssl_seal($data, $sealed_data, $env_keys, $key, 'AES256', $iv));
 ?>
---EXPECTF--
+--EXPECT--
 int(64)
 int(80)

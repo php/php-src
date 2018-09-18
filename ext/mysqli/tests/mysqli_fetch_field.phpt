@@ -58,8 +58,8 @@ require_once('skipifconnectfailure.inc');
 	mysqli_free_result($res);
 
 	// Read http://bugs.php.net/bug.php?id=42344 on defaults!
-	if (NULL !== ($tmp = mysqli_fetch_field($res)))
-		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_fetch_field($res)))
+		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

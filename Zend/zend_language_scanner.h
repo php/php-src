@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_SCANNER_H
 #define ZEND_SCANNER_H
@@ -61,6 +59,8 @@ typedef struct _zend_lex_state {
 typedef struct _zend_heredoc_label {
 	char *label;
 	int length;
+	int indentation;
+	zend_bool indentation_uses_spaces;
 } zend_heredoc_label;
 
 BEGIN_EXTERN_C()

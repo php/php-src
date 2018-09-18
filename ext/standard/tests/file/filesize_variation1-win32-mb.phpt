@@ -29,7 +29,7 @@ for($size = 1; $size <10000; $size = $size+1000)
 
 echo "*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing filesize(): usage variations ***
 *** Checking filesize() with different size of files ***
 int(1024)

@@ -83,7 +83,7 @@ foreach($heredoc_arr as $value) {
  
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : different heredoc strings for 'ending' argument ***
 -- Iteration 1 --
 string(102) "This is str to check with heredoc ending.This	contains,

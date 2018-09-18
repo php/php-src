@@ -4,8 +4,6 @@ IntlTimeZone::createTimeZoneIDEnumeration(): errors
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.8') < 0)
-	die('skip for ICU 4.8+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -23,7 +21,7 @@ Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects at least 1 paramete
 Warning: IntlTimeZone::createTimeZoneIDEnumeration(): intltz_create_time_zone_id_enumeration: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects parameter 1 to be integer, array given in %s on line %d
+Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects parameter 1 to be int, array given in %s on line %d
 
 Warning: IntlTimeZone::createTimeZoneIDEnumeration(): intltz_create_time_zone_id_enumeration: bad arguments in %s on line %d
 bool(false)
@@ -36,7 +34,7 @@ Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects parameter 2 to be s
 Warning: IntlTimeZone::createTimeZoneIDEnumeration(): intltz_create_time_zone_id_enumeration: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects parameter 3 to be integer, string given in %s on line %d
+Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects parameter 3 to be int, string given in %s on line %d
 
 Warning: IntlTimeZone::createTimeZoneIDEnumeration(): intltz_create_time_zone_id_enumeration: bad arguments in %s on line %d
 bool(false)

@@ -4,7 +4,7 @@ Bug #48182: ssl handshake fails during asynchronous socket connection
 <?php 
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (OPENSSL_VERSION_NUMBER < 0x009070af) die("skip openssl version too low");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -44,7 +44,8 @@ echo "Running bug48182\n";
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
---EXPECTF--
+?>
+--EXPECT--
 Running bug48182
 Sending bug48182
 Sending data over to SSL server in async mode with contents like Hello World

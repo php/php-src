@@ -10,12 +10,17 @@ $class = new ReflectionClass('DateTime');
 var_dump($class);
 
 echo "..and get names of all its methods\n";
-$methods = $class->getMethods(); 
+$methods = $class->getMethods();
 var_dump($methods);
 
-echo "..and get names of all its class constants\n"; 
+echo "..and get names of all its class constants\n";
 $constants = $class->getConstants();
 var_dump($constants);
+
+echo "..and get __set_state arguments\n";
+$method = new ReflectionMethod('DateTime', '__set_state');
+var_dump($method->getParameters());
+var_dump($method->getParameters()[0]->isOptional());
 
 ?>
 ===DONE===
@@ -191,4 +196,13 @@ array(13) {
   ["W3C"]=>
   string(13) "Y-m-d\TH:i:sP"
 }
+..and get __set_state arguments
+array(1) {
+  [0]=>
+  object(ReflectionParameter)#%d (1) {
+    ["name"]=>
+    string(5) "array"
+  }
+}
+bool(false)
 ===DONE===

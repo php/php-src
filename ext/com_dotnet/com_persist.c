@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /* Infrastructure for working with persistent COM objects.
  * Implements: IStream* wrapper for PHP streams.
@@ -645,7 +643,7 @@ CPH_METHOD(SaveToStream)
 }
 /* }}} */
 
-/* {{{ proto int COMPersistHelper::__construct([object com_object])
+/* {{{ proto COMPersistHelper::__construct([object com_object])
    Creates a persistence helper object, usually associated with a com_object */
 CPH_METHOD(__construct)
 {
@@ -753,7 +751,7 @@ int php_com_persist_minit(INIT_FUNC_ARGS)
 {
 	zend_class_entry ce;
 
-	memcpy(&helper_handlers, zend_get_std_object_handlers(), sizeof(helper_handlers));
+	memcpy(&helper_handlers, &std_object_handlers, sizeof(helper_handlers));
 	helper_handlers.free_obj = helper_free_storage;
 	helper_handlers.clone_obj = helper_clone;
 

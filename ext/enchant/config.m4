@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension enchant
 
 PHP_ARG_WITH(enchant,for ENCHANT support,
 [  --with-enchant[=DIR]      Include enchant support.

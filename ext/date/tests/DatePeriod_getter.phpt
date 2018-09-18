@@ -17,7 +17,7 @@ var_dump($period->getEndDate()->getTimeZone()->getName());
 
 var_dump($period->getDateInterval()->format('%R%y-%m-%d-%h-%i-%s'));
 ?>
---EXPECTF--
+--EXPECT--
 string(19) "2000-01-01 00:00:00"
 string(13) "Europe/Berlin"
 string(19) "2000-01-31 00:00:00"

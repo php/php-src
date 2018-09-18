@@ -7,7 +7,6 @@ if (!function_exists("xmlwriter_start_comment")) die("skip: libxml2 2.6.7+ requi
 ?>
 --FILE--
 <?php 
-/* $Id$ */
 
 $doc_dest = '001.xml';
 $xw = new XMLWriter();

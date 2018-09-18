@@ -28,7 +28,7 @@ for ($c = 1; $c < 256; $c++) {
 setlocale(LC_CTYPE, $orig); 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_punct() : usage variations ***
 character code 33 is punctuation
 character code 34 is punctuation

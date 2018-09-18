@@ -29,7 +29,7 @@ var_dump($new_input);
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- $input argument is a reference to array --

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Moriyoshi Koizumi <moriyoshi@php.net>                        |
    +----------------------------------------------------------------------+
 */
-
-/* $Id: php_cli.c 306938 2011-01-01 02:17:06Z felipe $ */
 
 #ifndef PHP_CLI_SERVER_H
 #define PHP_CLI_SERVER_H

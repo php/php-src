@@ -1,7 +1,9 @@
 --TEST--
 Bug #73127 (gost-crypto hash incorrect if input data contains long 0xFF sequence)
+--SKIPIF--
+<?php if(!extension_loaded('hash')) die('skip hash extension not loaded'); ?>
 --FILE--
-<?php // $Id$
+<?php
 
 $test1 = str_repeat("\xFF", 40);
 $test2 = str_repeat("\x00", 40);

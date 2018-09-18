@@ -54,7 +54,7 @@ foreach($hex_values2 as $c) {
 setlocale(LC_CTYPE, $orig); 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_xdigit() : usage variations ***
 
 -- Octal values --

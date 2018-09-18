@@ -52,6 +52,6 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS mbind"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "foobar"
 done!

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -799,7 +799,7 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, const unsign
 					ZVAL_DEREF(result);
 					/* Clean what we copied last time */
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					zval_dtor(result);
+					zval_ptr_dtor(result);
 #endif
 					/* copy the type */
 					if (stmt->result_bind[i].bound == TRUE) {
@@ -909,7 +909,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 					  in result->unbuf->m.free_last_data()
 					*/
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					zval_dtor(result);
+					zval_ptr_dtor(result);
 #endif
 					if (!Z_ISNULL_P(data)) {
 						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
@@ -1051,7 +1051,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 
 		ret = conn->run_command(COM_STMT_FETCH, conn, payload);
 		if (ret == FAIL) {
-			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);	
+			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			DBG_RETURN(FAIL);
 		}
 
@@ -1094,7 +1094,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 					  in result->unbuf->m.free_last_data()
 					*/
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					zval_dtor(result);
+					zval_ptr_dtor(result);
 #endif
 					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, &stmt->result_bind[i].zv,
 								Z_TYPE_P(data), Z_REFCOUNTED(stmt->result_bind[i].zv)?
@@ -1203,7 +1203,7 @@ MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, zend_bool * const fe
 			if (stmt->result_bind[i].bound == TRUE) {
 				zval *result = &stmt->result_bind[i].zv;
 				ZVAL_DEREF(result);
-				zval_dtor(result);
+				zval_ptr_dtor(result);
 				ZVAL_NULL(result);
 			}
 		}

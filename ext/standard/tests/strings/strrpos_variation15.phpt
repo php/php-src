@@ -63,7 +63,7 @@ $values =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -91,32 +91,48 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing strrpos() function: with unexpected values for haystack, needle & offset ***
 -- Iteration 1 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 2 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 3 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 4 --
 
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 5 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 6 --
 
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 7 --
 
-Warning: strrpos() expects parameter 3 to be integer, float given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, float given in %s on line %d
 bool(false)
 -- Iteration 8 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 9 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 10 --
 
@@ -139,35 +155,51 @@ bool(false)
 Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 -- Iteration 15 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 16 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 17 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 18 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 19 --
 
-Warning: strrpos() expects parameter 3 to be integer, object given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, object given in %s on line %d
 bool(false)
 -- Iteration 20 --
 
-Warning: strrpos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 -- Iteration 21 --
 
-Warning: strrpos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 -- Iteration 22 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 23 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 24 --
 
 Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 -- Iteration 25 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 26 --
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 *** Done ***

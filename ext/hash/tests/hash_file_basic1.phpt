@@ -59,7 +59,7 @@ unlink($file);
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_file() : basic functionality ***
 adler32: ff87222e
 crc32: 61664d33

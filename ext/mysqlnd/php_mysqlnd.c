@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@ mysqlnd_minfo_dump_plugin_stats(zval *el, void * argument)
 		php_info_print_table_header(2, buf, "");
 		mysqlnd_minfo_print_hash(&values);
 		php_info_print_table_end();
-		zval_dtor(&values);
+		zend_array_destroy(Z_ARR(values));
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }

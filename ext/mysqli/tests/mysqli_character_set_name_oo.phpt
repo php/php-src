@@ -57,14 +57,14 @@ mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 
 	$mysqli->close();
 
-	if (NULL !== ($tmp = @$mysqli->character_set_name()))
-		printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->character_set_name()))
+		printf("[013] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	/* Make sure that the function alias exists */
-	if (!is_null($tmp = @$mysqli->character_set_name()))
-		printf("[014] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->character_set_name()))
+		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

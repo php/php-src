@@ -3,7 +3,7 @@ BZ2 with files
 --SKIPIF--
 <?php if (!extension_loaded("bz2")) print "skip"; ?>
 --FILE--
-<?php // $Id$
+<?php
 
 error_reporting(E_ALL);
 

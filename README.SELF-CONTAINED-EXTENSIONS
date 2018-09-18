@@ -1,6 +1,3 @@
-$Id$
-=============================================================================
-
 HOW TO CREATE A SELF-CONTAINED PHP EXTENSION
 
   A self-contained extension can be distributed independently of

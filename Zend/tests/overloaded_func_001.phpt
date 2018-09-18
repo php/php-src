@@ -2,7 +2,7 @@
 Overloaded function 001
 --SKIPIF--
 <?php
-if (!class_exists('_ZendTestClass')) die("skip needs class with overloaded function");
+if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
 ?>
 --FILE--
 <?php

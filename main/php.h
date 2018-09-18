@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef PHP_H
 #define PHP_H
 
@@ -26,7 +24,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20170718
+#define PHP_API_VERSION 20180731
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -41,7 +39,7 @@
 #undef sprintf
 #define sprintf php_sprintf
 
-/* Operating system family defintion */
+/* Operating system family definition */
 #ifdef PHP_WIN32
 # define PHP_OS_FAMILY			"Windows"
 #elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
@@ -125,7 +123,6 @@ typedef int pid_t;
 # endif
 #endif
 
-#if HAVE_ASSERT_H
 #if PHP_DEBUG
 #undef NDEBUG
 #else
@@ -134,9 +131,6 @@ typedef int pid_t;
 #endif
 #endif
 #include <assert.h>
-#else /* HAVE_ASSERT_H */
-#define assert(expr) ((void) (0))
-#endif /* HAVE_ASSERT_H */
 
 #define APACHE 0
 
@@ -230,13 +224,8 @@ typedef unsigned int socklen_t;
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_STDARG_H
+
 #include <stdarg.h>
-#else
-# if HAVE_SYS_VARARGS_H
-# include <sys/varargs.h>
-# endif
-#endif
 
 #include "php_stdint.h"
 

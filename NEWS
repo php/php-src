@@ -1,141 +1,17 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0alpha1
+?? ??? ????, PHP 7.4.0alpha1
 
-- Core:
-  . Redesigned the old ext_skel program written in PHP, run: 
-    'php ext_skel.php' for all options. This means there is no dependencies 
-    thrus making it work on Windows out of the box. (Kalle)
-  . Removed support for BeOS. (Kalle)
-  . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
-  . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
-    error_log set to "syslog"). (Philip Prindeville)
-  . Fixed bug #75220 (Segfault when calling is_callable on parent). 
-    (andrewnester)
-  . Fixed bug #69954 (broken links and unused config items in distributed ini
-    files). (petk)
-  . Fixed bug #74922 (Composed class has fatal error with duplicate, equal const
-    properties). (pmmaga)
-
-- BCMath:
-  . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
-	. Implemented request #67855 (No way to get current scale in use). (Chris
-	  Wright, cmb)
-  . Fixed bug #75164 (split_bc_num() is pointless). (cmb)
-  . Fixed bug #75169 (BCMath errors/warnings bypass PHP's error handling). (cmb)
-
-- Date:
-  . Implemented FR #74668: Add DateTime::createFromImmutable() method.
-    (majkl578, Rican7)
-  . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
-
-- DBA:
-  . Fixed bug #75264 (compiler warnings emitted). (petk)
-
-- cURL:
-  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
-    (cebe)
-
-- GD:
-  . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
-
-- GMP:
-  . Export internal structures and accessor helpers for GMP object. (Sara)
-
-- intl:
-  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
-    of destination). (andrewnester)
-
-- interbase:
-  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
-
-- JSON:
-  . Added JSON_THROW_ON_ERROR flag. (Andrea)
-
-- LDAP:
-  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
-    (Come)
-  . Added full support for sending and parsing ldap controls (Come)
-
-- litespeed:
-  . Fixed bug #75248 (Binary directory doesn't get created when building 
-    only litespeed SAPI). (petk)
-  . Fixed bug #75251 (Missing program prefix and suffix). (petk)
-
-- Mbstring:
-  . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
-    capitalized). (Nikita)
-  . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote.
-    (Nikita)
-  . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
-  . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
-    on Windows). (Nikita)
-
-- ODBC:
-  . Removed support for ODBCRouter. (Kalle)
-  . Removed support for Birdstep. (Kalle)
-
-- OpenSSL:
-  . Fixed bug #75307 (Wrong reflection for openssl_open function). (villfa)
-
-- PCRE:
-  . Implemented https://wiki.php.net/rfc/pcre2-migration (Anatol, Dmitry)
-
-- PDO_DBlib:
-  . Implemented request #69592 (allow 0-column rowsets to be skipped
-    automatically). (fandrieu)
-  . Fixed bug #74243 (allow locales.conf to drive datetime format). (fandrieu)
-  . Expose TDS version as \PDO::DBLIB_ATTR_TDS_VERSION attribute on \PDO
-    instance. (fandrieu)
-  . Treat DATETIME2 columns like DATETIME. (fandrieu)
-
-- PDO_OCI:
-  . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
-    before PHP-FPM sets it up). (Ingmar Runge)
-
-- PDO SQLite
-  . Add support for additional open flags
-
-- phar:
-  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
-    (bwbroersma)
-
-- pgsql:
-  . Added new error constants for pg_result_error(): (Kalle)
-    - Requires Postgres 9.3
-      - PGSQL_DIAG_SCHEMA_NAME
-	  - PGSQL_DIAG_TABLE_NAME
-	  - PGSQL_DIAG_COLUMN_NAME
-	  - PGSQL_DIAG_DATATYPE_NAME
-	  - PGSQL_DIAG_CONSTRAINT_NAME
-	- Requires Postgres 9.6
-	  - PGSQL_DIAG_SEVERITY_NONLOCALIZED
-
-- Session:
-  . Fixed bug #74941 (session fails to start after having headers sent). 
-    (morozov)
-
-- SOAP:
-  . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)
-
-- SPL:
-  . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
-    (Andrew Nester)
-  . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach loop).
-    (jhdxr)
-
-- SQLite3:
-  . Updated bundled libsqlite to 3.21.0. (cmb)
-
-- Standard:
-  . Fixed unzserialize(), to disable creation of unsupported data structures
-    through manually crafted strings. (Dmitry)
-
-- Testing:
-  . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
+- Intl:
+  . Lifted requirements to ICU ≥ 50.1. (cmb)
+  . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
     (cmb)
 
-- Zlib:
-  . Added zlib/level context option for compress.zlib wrapper. (Sara)
+- SQLite3:
+  . Updated to SQLite 3.25.0. (cmb)
+
+- Standard:
+  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
+    stream_socket_client). (Ville Hukkamäki)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

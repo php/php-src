@@ -9,4 +9,4 @@ $start = microtime(true);
 $a = mktime(1, 1, 1, 1, 1, 11111111111);
 ?>
 --EXPECTF--
-Warning: mktime() expects parameter 6 to be integer, float given in %s on line %d
+Warning: mktime() expects parameter 6 to be int, float given in %s on line %d

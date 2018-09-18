@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Zeev Suraski <zeev@zend.com>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "zend.h"
 #include "zend_sort.h"
@@ -88,12 +86,12 @@ static void free_ini_entry(zval *zv) /* {{{ */
 {
 	zend_ini_entry *entry = (zend_ini_entry*)Z_PTR_P(zv);
 
-	zend_string_release(entry->name);
+	zend_string_release_ex(entry->name, 1);
 	if (entry->value) {
 		zend_string_release(entry->value);
 	}
 	if (entry->orig_value) {
-		zend_string_release(entry->orig_value);
+		zend_string_release_ex(entry->orig_value, 1);
 	}
 	free(entry);
 }
@@ -252,7 +250,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 
 		if (zend_hash_add_ptr(directives, p->name, (void*)p) == NULL) {
 			if (p->name) {
-				zend_string_release(p->name);
+				zend_string_release_ex(p->name, 1);
 			}
 			zend_unregister_ini_entries(module_number);
 			return FAILURE;
@@ -496,6 +494,30 @@ ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig) /* {{{ 
 }
 /* }}} */
 
+ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
+{
+	zend_ini_entry *ini_entry;
+
+	ini_entry = zend_hash_find_ptr(EG(ini_directives), name);
+	if (ini_entry) {
+		return ini_entry->value ? ini_entry->value : ZSTR_EMPTY_ALLOC();
+	} else {
+		return NULL;
+	}
+}
+/* }}} */
+
+ZEND_API zend_bool zend_ini_parse_bool(zend_string *str)
+{
+	if ((ZSTR_LEN(str) == 4 && strcasecmp(ZSTR_VAL(str), "true") == 0)
+	  || (ZSTR_LEN(str) == 3 && strcasecmp(ZSTR_VAL(str), "yes") == 0)
+	  || (ZSTR_LEN(str) == 2 && strcasecmp(ZSTR_VAL(str), "on") == 0)) {
+		return 1;
+	} else {
+		return atoi(ZSTR_VAL(str)) != 0;
+	}
+}
+
 #if TONY_20070307
 static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 {
@@ -550,15 +572,7 @@ ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 	}
 
 	if (tmp_value) {
-		if (ZSTR_LEN(tmp_value) == 4 && strcasecmp(ZSTR_VAL(tmp_value), "true") == 0) {
-			value = 1;
-		} else if (ZSTR_LEN(tmp_value) == 3 && strcasecmp(ZSTR_VAL(tmp_value), "yes") == 0) {
-			value = 1;
-		} else if (ZSTR_LEN(tmp_value) == 2 && strcasecmp(ZSTR_VAL(tmp_value), "on") == 0) {
-			value = 1;
-		} else {
-			value = atoi(ZSTR_VAL(tmp_value));
-		}
+		value = zend_ini_parse_bool(tmp_value);
 	} else {
 		value = 0;
 	}
@@ -634,18 +648,7 @@ ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 
 	p = (zend_bool *) (base+(size_t) mh_arg1);
 
-	if (ZSTR_LEN(new_value) == 2 && strcasecmp("on", ZSTR_VAL(new_value)) == 0) {
-		*p = (zend_bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 3 && strcasecmp("yes", ZSTR_VAL(new_value)) == 0) {
-		*p = (zend_bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 4 && strcasecmp("true", ZSTR_VAL(new_value)) == 0) {
-		*p = (zend_bool) 1;
-	}
-	else {
-		*p = (zend_bool) atoi(ZSTR_VAL(new_value));
-	}
+	*p = zend_ini_parse_bool(new_value);
 	return SUCCESS;
 }
 /* }}} */

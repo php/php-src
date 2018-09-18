@@ -231,27 +231,27 @@ TypeError: Argument 1 passed to loadedInterface() must implement interface RealI
 Stack trace:
 #0 %s(26): loadedInterface(Object(stdClass))
 #1 {main}
-TypeError: Argument 1 passed to unloadedClass() must be an instance of I\Dont\Exist or null, integer given, called in %s on line 32 and defined in %s:5
+TypeError: Argument 1 passed to unloadedClass() must be an instance of I\Dont\Exist or null, int given, called in %s on line 32 and defined in %s:5
 Stack trace:
 #0 %s(32): unloadedClass(1)
 #1 {main}
-TypeError: Argument 1 passed to loadedClass() must be an instance of RealClass or null, integer given, called in %s on line 38 and defined in %s:16
+TypeError: Argument 1 passed to loadedClass() must be an instance of RealClass or null, int given, called in %s on line 38 and defined in %s:16
 Stack trace:
 #0 %s(38): loadedClass(1)
 #1 {main}
-TypeError: Argument 1 passed to loadedInterface() must implement interface RealInterface or be null, integer given, called in %s on line 44 and defined in %s:17
+TypeError: Argument 1 passed to loadedInterface() must implement interface RealInterface or be null, int given, called in %s on line 44 and defined in %s:17
 Stack trace:
 #0 %s(44): loadedInterface(1)
 #1 {main}
-TypeError: Argument 1 passed to callableF() must be callable or null, integer given, called in %s on line 52 and defined in %s:49
+TypeError: Argument 1 passed to callableF() must be callable or null, int given, called in %s on line 52 and defined in %s:49
 Stack trace:
 #0 %s(52): callableF(1)
 #1 {main}
-TypeError: Argument 1 passed to iterableF() must be iterable or null, integer given, called in %s on line 60 and defined in %s:57
+TypeError: Argument 1 passed to iterableF() must be iterable or null, int given, called in %s on line 60 and defined in %s:57
 Stack trace:
 #0 %s(60): iterableF(1)
 #1 {main}
-TypeError: Argument 1 passed to intF() must be of the type integer or null, object given, called in %s on line 68 and defined in %s:65
+TypeError: Argument 1 passed to intF() must be of the type int or null, object given, called in %s on line 68 and defined in %s:65
 Stack trace:
 #0 %s(68): intF(Object(stdClass))
 #1 {main}
@@ -267,27 +267,27 @@ TypeError: Return value of returnLoadedInterface() must implement interface Real
 Stack trace:
 #0 %s(98): returnLoadedInterface()
 #1 {main}
-TypeError: Return value of returnUnloadedClassScalar() must be an instance of I\Dont\Exist or null, integer returned in %s:104
+TypeError: Return value of returnUnloadedClassScalar() must be an instance of I\Dont\Exist or null, int returned in %s:104
 Stack trace:
 #0 %s(108): returnUnloadedClassScalar()
 #1 {main}
-TypeError: Return value of returnLoadedClassScalar() must be an instance of RealClass or null, integer returned in %s:114
+TypeError: Return value of returnLoadedClassScalar() must be an instance of RealClass or null, int returned in %s:114
 Stack trace:
 #0 %s(118): returnLoadedClassScalar()
 #1 {main}
-TypeError: Return value of returnLoadedInterfaceScalar() must implement interface RealInterface or be null, integer returned in %s:124
+TypeError: Return value of returnLoadedInterfaceScalar() must implement interface RealInterface or be null, int returned in %s:124
 Stack trace:
 #0 %s(128): returnLoadedInterfaceScalar()
 #1 {main}
-TypeError: Return value of returnCallable() must be callable or null, integer returned in %s:134
+TypeError: Return value of returnCallable() must be callable or null, int returned in %s:134
 Stack trace:
 #0 %s(138): returnCallable()
 #1 {main}
-TypeError: Return value of returnIterable() must be iterable or null, integer returned in %s:144
+TypeError: Return value of returnIterable() must be iterable or null, int returned in %s:144
 Stack trace:
 #0 %s(148): returnIterable()
 #1 {main}
-TypeError: Return value of returnInt() must be of the type integer or null, object returned in %s:154
+TypeError: Return value of returnInt() must be of the type int or null, object returned in %s:154
 Stack trace:
 #0 %s(158): returnInt()
 #1 {main}
@@ -311,7 +311,7 @@ TypeError: Return value of returnMissingIterable() must be iterable or null, non
 Stack trace:
 #0 %s(203): returnMissingIterable()
 #1 {main}
-TypeError: Return value of returnMissingInt() must be of the type integer or null, none returned in %s:209
+TypeError: Return value of returnMissingInt() must be of the type int or null, none returned in %s:209
 Stack trace:
 #0 %s(212): returnMissingInt()
 #1 {main}

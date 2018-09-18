@@ -21,7 +21,7 @@ var_dump(readline_info('attempted_completion_over',1));
 var_dump(readline_info('attempted_completion_over'));
 
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   ["line_buffer"]=>
   string(0) ""

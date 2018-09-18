@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_ALLOC_H
 #define ZEND_ALLOC_H
@@ -64,7 +62,7 @@ typedef struct _zend_mm_debug_info {
 } zend_mm_debug_info;
 
 # define ZEND_MM_OVERHEAD ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info))
-#else 
+#else
 # define ZEND_MM_OVERHEAD 0
 #endif
 
@@ -195,7 +193,14 @@ ZEND_API void * __zend_realloc(void *p, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(2)
 #define pemalloc(size, persistent) ((persistent)?__zend_malloc(size):emalloc(size))
 #define safe_pemalloc(nmemb, size, offset, persistent)	((persistent)?_safe_malloc(nmemb, size, offset):safe_emalloc(nmemb, size, offset))
 #define pefree(ptr, persistent)  ((persistent)?free(ptr):efree(ptr))
-#define pefree_size(ptr, size, persistent)  ((persistent)?free(ptr):efree_size(ptr, size))
+#define pefree_size(ptr, size, persistent)  do { \
+		if (persistent) { \
+			free(ptr); \
+		} else { \
+			efree_size(ptr, size);\
+		} \
+	} while (0)
+
 #define pecalloc(nmemb, size, persistent) ((persistent)?__zend_calloc((nmemb), (size)):ecalloc((nmemb), (size)))
 #define perealloc(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc((ptr), (size)))
 #define perealloc2(ptr, size, copy_size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc2((ptr), (size), (copy_size)))
@@ -376,7 +381,7 @@ static void apc_init_heap(void)
 
 	// Preallocate properly aligned SHM chunks (64MB)
 	tmp_data.mem = shm_memalign(ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE * 32);
-	
+
 	// Initialize temporary storage data
 	tmp_data.free_pages = 0;
 
@@ -389,7 +394,7 @@ static void apc_init_heap(void)
 	zend_hash_init(apc_ht, 64, NULL, ZVAL_PTR_DTOR, 0);
 	zend_mm_set_heap(old_heap);
 }
- 
+
 */
 
 END_EXTERN_C()

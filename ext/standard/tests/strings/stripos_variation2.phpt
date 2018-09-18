@@ -119,16 +119,32 @@ bool(false)
 int(10)
 int(10)
 -- Iteration 12 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 13 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 14 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 15 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 16 --
 bool(false)
@@ -218,7 +234,11 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 45 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 int(26)
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 46 --
 int(0)

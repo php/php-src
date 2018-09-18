@@ -1,7 +1,5 @@
 --TEST--
 056: type-hint compatibility in namespaces
---SKIPIF--
-<?php if (!extension_loaded("spl")) die("skip SPL is no available"); ?>
 --FILE--
 <?php
 namespace test\ns1;

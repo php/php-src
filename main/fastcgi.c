@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_network.h"
@@ -1739,7 +1737,7 @@ void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, s
 	GC_MAKE_PERSISTENT_LOCAL(key);
 	GC_MAKE_PERSISTENT_LOCAL(Z_STR(zvalue));
 	zend_hash_add(&fcgi_mgmt_vars, key, &zvalue);
-	zend_string_release(key);
+	zend_string_release_ex(key, 1);
 }
 
 void fcgi_free_mgmt_var_cb(zval *zv)

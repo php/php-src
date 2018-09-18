@@ -63,7 +63,7 @@ $values =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -91,8 +91,12 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing stripos() function with unexpected values for haystack, needle & offset ***
 -- Iteration 1 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 2 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 3 --
 
@@ -115,8 +119,12 @@ bool(false)
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 8 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 9 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 10 --
 
@@ -139,24 +147,28 @@ NULL
 Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 16 --
 bool(false)
 -- Iteration 17 --
+
+Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 18 --
 bool(false)
 -- Iteration 19 --
 
-Warning: stripos() expects parameter 3 to be integer, object given in %s on line %d
+Warning: stripos() expects parameter 3 to be int, object given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: stripos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: stripos() expects parameter 3 to be int, string given in %s on line %d
 NULL
 -- Iteration 21 --
 
-Warning: stripos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: stripos() expects parameter 3 to be int, string given in %s on line %d
 NULL
 -- Iteration 22 --
 bool(false)

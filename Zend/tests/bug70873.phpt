@@ -27,7 +27,7 @@ $b = new C;
 $b->bar();
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot access  property B::$x in %sbug70873.php:%d
+Fatal error: Uncaught Error: Cannot access private property B::$x in %sbug70873.php:%d
 Stack trace:
 #0 %sbug70873.php(%d): B->bar()
 #1 {main}

@@ -13,7 +13,7 @@ for ($i = 0; $i < 8; $i++) {
 	$h =& f();
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "foo"
 'foo'
 string(3) "foo"

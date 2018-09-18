@@ -1,4 +1,4 @@
-PHP 7.3 UPGRADE NOTES
+PHP 7.4 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -19,29 +19,13 @@ PHP 7.3 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-Core:
-  . The ext_skel utility has been completely redesigned with new options and 
-    some old options removed. This is now written in PHP and has no external 
-	dependencies.
-  . Support for BeOS has been dropped.
-
-BCMath:
-  . All warnings thrown by BCMath functions are now using PHP's error handling.
-	  Formerly some warnings have directly been written to stderr.
-  . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
-    the returned numbers may have omitted trailing decimal zeroes.
-
-Standard:
-  . getimagesize() and related functions now report the mime type of BMP images
-	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
-		with the IANA (see RFC 7903).
+- Intl:
+  . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
+    INTL_IDNA_VARIANT_UTS46 instead of the deprecated INTL_IDNA_VARIANT_2003.
 
 ========================================
 2. New Features
 ========================================
-
-BCMath:
-  . bcscale() can now also be used as getter to retrieve the current scale in use.
 
 ========================================
 3. Changes in SAPI modules
@@ -55,48 +39,13 @@ BCMath:
 5. Changed Functions
 ========================================
 
-JSON:
-  . A new flag has been added, JSON_THROW_ON_ERROR, which can be used with
-    json_decode() or json_encode() and causes these functions to throw a
-    JsonException upon an error, instead of setting the global error state that
-    is retrieved with json_last_error(). JSON_PARTIAL_OUTPUT_ON_ERROR takes
-    precedence over JSON_THROW_ON_ERROR.
-    (RFC: https://wiki.php.net/rfc/json_throw_on_error)
-
-Standard:
-  . debug_zval_dump() was changed to display recursive arrays and objects
-    in the same way as var_dump(). Now, it doesn't display them twice.
-
 ========================================
 6. New Functions
 ========================================
 
-Date:
-  . Added the DateTime::createFromImmutable() method, which mirrors
-    DateTimeImmutable::createFromMutable().
-
-Intl:
-  . Added void Spoofchecker::setRestrictionLevel(int $level) method, available
-    when linked with ICU >= 58.1. Levels are represented as class constants
-    - Spoofchecker::ASCII
-    - Spoofchecker::HIGHLY_RESTRICTIVE
-    - Spoofchecker::MODERATELY_RESTRICTIVE
-    - Spoofchecker::MINIMALLY_RESTRICTIVE
-    - Spoofchecker::UNRESTRICTIVE
-    - Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE
-    For the detailed documentation on the restriction levels, see
-    URestrictionLevel under
-    http://icu-project.org/apiref/icu4c/uspoof_8h.html
-
-SPL:
-  . Added spl_object_id().
-
 ========================================
 7. New Classes and Interfaces
 ========================================
-
-JSON:
-  . JsonException
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -106,40 +55,23 @@ JSON:
 9. Other Changes to Extensions
 ========================================
 
- FTP:
-  . Set default transfer mode to binary
+- Intl:
+  . The Intl extension now requires at least ICU 50.1.
 
- ODBC: 
-  . Support for ODBCRouter has been removed.
-  . Support for Birdstep has been removed.
-
- ZIP:
-  . Bunled libzip has been dropped,
-    system library is now required.
+- Reflection:
+  . Numeric value of class, property, function and constant modifiers was
+    changed. Don't filter methods and properties through
+    ReflectionClass::getMethods() and ReflectionClass::getProperties(), or test
+    results of Reflection...::getModifiers(), using hard-coded numeric values.
+    Use corresponding constants instead (e.g. ReflectionMethod::IS_PUBLIC).
 
 ========================================
 10. New Global Constants
 ========================================
 
-JSON:
-  . JSON_THROW_ON_ERROR
-
-PGSQL:
-  . Requires Postgres 9.3
-    - PGSQL_DIAG_SCHEMA_NAME
-	- PGSQL_DIAG_TABLE_NAME
-	- PGSQL_DIAG_COLUMN_NAME
-	- PGSQL_DIAG_DATATYPE_NAME
-	- PGSQL_DIAG_CONSTRAINT_NAME
-  . Requires Postgres 9.6
-    - PGSQL_DIAG_SEVERITY_NONLOCALIZED
-
 ========================================
 11. Changes to INI File Handling
 ========================================
-
-- birdstep.max_links
-  . This INI directive has been removed.
 
 ========================================
 12. Windows Support
@@ -148,4 +80,3 @@ PGSQL:
 ========================================
 13. Other Changes
 ========================================
-

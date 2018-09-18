@@ -68,7 +68,7 @@ echo "Test case 7 (SHA-1 with zero-length info, salt not provided): ",
 	)), "\n";
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_hkdf(): RFC 5869 test vectors ***
 Test case 1 (SHA-256): 3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865
 Test case 2 (SHA-256 with longer inputs/outputs): b11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c59045a99cac7827271cb41c65e590e09da3275600c2f09b8367793a9aca3db71cc30c58179ec3e87c14c01d5c1f3434f1d87

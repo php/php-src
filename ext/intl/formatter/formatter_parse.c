@@ -69,8 +69,7 @@ PHP_FUNCTION( numfmt_parse )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
-		position = (int32_t)Z_LVAL_P( zposition );
+		position = (int32_t)zval_get_long( zposition );
 		position_p = &position;
 	}
 
@@ -107,7 +106,7 @@ PHP_FUNCTION( numfmt_parse )
 	efree(oldlocale);
 #endif
 	if(zposition) {
-		zval_dtor(zposition);
+		zval_ptr_dtor(zposition);
 		ZVAL_LONG(zposition, position);
 	}
 
@@ -119,9 +118,9 @@ PHP_FUNCTION( numfmt_parse )
 }
 /* }}} */
 
-/* {{{ proto double NumberFormatter::parseCurrency( string $str, string $&currency[, int $&position] )
+/* {{{ proto float NumberFormatter::parseCurrency( string $str, string &$currency[, int &$position] )
  * Parse a number as currency. }}} */
-/* {{{ proto double numfmt_parse_currency( NumberFormatter $nf, string $str, string $&currency[, int $&position] )
+/* {{{ proto float numfmt_parse_currency( NumberFormatter $nf, string $str, string &$currency[, int &$position] )
  * Parse a number as currency.
  */
 PHP_FUNCTION( numfmt_parse_currency )
@@ -157,14 +156,13 @@ PHP_FUNCTION( numfmt_parse_currency )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
-		position = (int32_t)Z_LVAL_P( zposition );
+		position = (int32_t)zval_get_long( zposition );
 		position_p = &position;
 	}
 
 	number = unum_parseDoubleCurrency(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, currency, &INTL_DATA_ERROR_CODE(nfo));
 	if(zposition) {
-		zval_dtor(zposition);
+		zval_ptr_dtor(zposition);
 		ZVAL_LONG(zposition, position);
 	}
 	if (sstr) {
@@ -175,7 +173,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */
 	u8str = intl_convert_utf16_to_utf8(currency, u_strlen(currency), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-8 failed" );
-	zval_dtor( zcurrency );
+	zval_ptr_dtor( zcurrency );
 	ZVAL_NEW_STR(zcurrency, u8str);
 
 	RETVAL_DOUBLE( number );

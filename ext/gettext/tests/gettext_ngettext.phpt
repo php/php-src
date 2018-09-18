@@ -10,7 +10,7 @@ Test ngettext() functionality
 	}
 ?>
 --FILE--
-<?php // $Id$
+<?php
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('dngettextTest', './locale');

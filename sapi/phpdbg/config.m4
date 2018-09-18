@@ -1,15 +1,14 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for sapi phpdbg
 
 PHP_ARG_ENABLE(phpdbg, for phpdbg support,
-[  --enable-phpdbg            Build phpdbg], yes, yes)
+[  --enable-phpdbg         Build phpdbg], yes, yes)
 
 PHP_ARG_ENABLE(phpdbg-webhelper, for phpdbg web SAPI support,
-[  --enable-phpdbg-webhelper  Build phpdbg web SAPI support], no)
+[  --enable-phpdbg-webhelper
+                          Build phpdbg web SAPI support], no)
 
 PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
-[  --enable-phpdbg-debug      Build phpdbg in debug mode], no, no)
+[  --enable-phpdbg-debug   Build phpdbg in debug mode], no, no)
 
 if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   AC_HEADER_TIOCGWINSZ
@@ -27,17 +26,17 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   if test "$PHP_READLINE" != "no" -o  "$PHP_LIBEDIT" != "no"; then
   	PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
   fi
-  
+
   PHP_SUBST(PHP_PHPDBG_CFLAGS)
   PHP_SUBST(PHP_PHPDBG_FILES)
   PHP_SUBST(PHPDBG_EXTRA_LIBS)
-  
+
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag], [$abs_srcdir/sapi/phpdbg], [$abs_builddir/sapi/phpdbg])
   PHP_SELECT_SAPI(phpdbg, program, $PHP_PHPDBG_FILES, $PHP_PHPDBG_CFLAGS, [$(SAPI_PHPDBG_PATH)])
 
   BUILD_BINARY="sapi/phpdbg/phpdbg"
   BUILD_SHARED="sapi/phpdbg/libphpdbg.la"
-  
+
   BUILD_PHPDBG="\$(LIBTOOL) --mode=link \
         \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \
                 \$(PHP_GLOBAL_OBJS) \
@@ -46,6 +45,7 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
                 \$(EXTRA_LIBS) \
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
+                \$(PHP_FRAMEWORKS) \
          -o \$(BUILD_BINARY)"
 
   BUILD_PHPDBG_SHARED="\$(LIBTOOL) --mode=link \
@@ -63,6 +63,8 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   PHP_SUBST(BUILD_SHARED)
   PHP_SUBST(BUILD_PHPDBG)
   PHP_SUBST(BUILD_PHPDBG_SHARED)
+
+  PHP_OUTPUT(sapi/phpdbg/phpdbg.1)
 fi
 
 if test "$PHP_PHPDBG_WEBHELPER" != "no"; then

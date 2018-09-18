@@ -21,15 +21,15 @@ require_once('skipifconnectfailure.inc');
 
 	require('table.inc');
 
-	if (!is_null($tmp = @mysqli_stmt_store_result(new mysqli_stmt())))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @mysqli_stmt_store_result(new mysqli_stmt())))
+		printf("[003] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (NULL !== ($tmp = @mysqli_stmt_store_result($stmt)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @mysqli_stmt_store_result($stmt)))
+		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (100, 'z')") ||
 		!mysqli_stmt_execute($stmt))
@@ -75,8 +75,8 @@ require_once('skipifconnectfailure.inc');
 	mysqli_stmt_close($stmt);
 	mysqli_stmt_close($stmt_buf);
 
-	if (NULL !== ($tmp = @mysqli_stmt_store_result($stmt)))
-		printf("[017] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @mysqli_stmt_store_result($stmt)))
+		printf("[017] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 	mysqli_close($link_buf);
@@ -86,5 +86,5 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

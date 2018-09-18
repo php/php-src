@@ -65,7 +65,7 @@ var_dump( array_filter($input, 'always_false') );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - different false elements in 'input' ***
 array(0) {
 }

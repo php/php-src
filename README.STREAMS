@@ -1,6 +1,5 @@
 An Overview of the PHP Streams abstraction
 ==========================================
-$Id$
 
 WARNING: some prototypes in this file are out of date.
 The information contained here is being integrated into
@@ -365,7 +364,7 @@ php_stream_ops my_ops = {
     "Strange MySQL example"
 }
 
-Thats it!
+That's it!
 
 Take a look at the STDIO implementation in streams.c for more information
 about how these operations work.

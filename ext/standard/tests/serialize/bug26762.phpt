@@ -22,5 +22,5 @@ catch (Exception $e) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "FOO"

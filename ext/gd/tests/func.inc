@@ -18,44 +18,44 @@ function get_php_info()
 function get_freetype_version()
 {
 	$version = 0;
-	
+
 	if (preg_match(',FreeType Version => (\d+\.\d+\.\d+),s', get_php_info(), $match)) {
 		$version = $match[1];
 	}
-	
+
 	return $version;
 }
 
 function get_libjpeg_version()
 {
 	$version = 0;
-	
+
 	if (preg_match(',libJPEG Version => ([a-z0-9]+),s', get_php_info(), $match)) {
 		$version = $match[1];
 	}
-	
+
 	return $version;
 }
 
 function get_libpng_version()
 {
 	$version = 0;
-	
+
 	if (preg_match(',libPNG Version => (\d+\.\d+\.\d+),s', get_php_info(), $match)) {
 		$version = $match[1];
 	}
-	
+
 	return $version;
 }
 
 function get_libxpm_version()
 {
 	$version = 0;
-	
+
 	if (preg_match(',libXpm Version => (\d+),s', get_php_info(), $match)) {
 		$version = $match[1];
 	}
-	
+
 	return $version;
 }
 
@@ -66,7 +66,7 @@ function get_libxpm_version()
  * The textual result is printed, so the EXPECT section should contain the line
  * "The images are equal."
  *
- * If the PNG file does not exists, or the images are not equal, a diagnostic
+ * If the PNG file does not exist, or the images are not equal, a diagnostic
  * message is printed, and the actual file is stored right beside the temporary
  * .php test file with the extension .out.png, to be able to manually inspect
  * the result.

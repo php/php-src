@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,10 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
-#define IS_EXT_MODULE
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -28,7 +24,6 @@
 #include "php.h"
 #include "SAPI.h"
 
-#define PHP_XML_INTERNAL
 #include "zend_variables.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
@@ -591,12 +586,12 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 	if (ID != NULL) {
 		ZVAL_STRING(&params[0], ID);
 	} else {
-		ZVAL_UNDEF(&params[0]);
+		ZVAL_NULL(&params[0]);
 	}
 	if (URL != NULL) {
 		ZVAL_STRING(&params[1], URL);
 	} else {
-		ZVAL_UNDEF(&params[1]);
+		ZVAL_NULL(&params[1]);
 	}
 	ctxzv = &params[2];
 	array_init_size(ctxzv, 4);
@@ -848,7 +843,6 @@ static PHP_MINIT_FUNCTION(libxml)
 	if (sapi_module.name) {
 		static const char * const supported_sapis[] = {
 			"cgi-fcgi",
-			"fpm-fcgi",
 			"litespeed",
 			NULL
 		};

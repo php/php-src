@@ -46,7 +46,7 @@ foreach ($tests as $name => $testparams) {
 }
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Test for Array
 Test for String
 Done

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Bytecode Visualisation                                  |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -118,10 +118,6 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 		if (op.num != (uint32_t)-1) {
 			fprintf(stderr, " try-catch(%u)", op.num);
 		}
-	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
-		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-			fprintf(stderr, " live-range(%u)", op.num);
-		}
 	} else if (ZEND_VM_OP_THIS == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " THIS");
 	} else if (ZEND_VM_OP_NEXT == (flags & ZEND_VM_OP_MASK)) {
@@ -130,6 +126,13 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 		zend_dump_class_fetch_type(op.num);
 	} else if (ZEND_VM_OP_CONSTRUCTOR == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " CONSTRUCTOR");
+	} else if (ZEND_VM_OP_CONST_FETCH == (flags & ZEND_VM_EXT_MASK)) {
+		if (op.num & IS_CONSTANT_UNQUALIFIED) {
+			fprintf(stderr, " (unqualified)");
+		}
+		if (op.num & IS_CONSTANT_IN_NAMESPACE) {
+			fprintf(stderr, " (in-namespace)");
+		}
 	}
 }
 
@@ -449,15 +452,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 			fprintf(stderr, " (obj)");
 		}
-	} else if (ZEND_VM_EXT_CLASS_FETCH == (flags & ZEND_VM_EXT_MASK)) {
-		zend_dump_class_fetch_type(opline->extended_value);
-	} else if (ZEND_VM_EXT_CONST_FETCH == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->extended_value & IS_CONSTANT_UNQUALIFIED) {
-				fprintf(stderr, " (unqualified)");
-		}
-		if (opline->extended_value & IS_CONSTANT_IN_NAMESPACE) {
-				fprintf(stderr, " (in-namespace)");
-		}
 	} else if (ZEND_VM_EXT_TYPE == (flags & ZEND_VM_EXT_MASK)) {
 		switch (opline->extended_value) {
 			case IS_NULL:
@@ -500,6 +494,42 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " (\?\?\?)");
 				break;
 		}
+	} else if (ZEND_VM_EXT_TYPE_MASK == (flags & ZEND_VM_EXT_MASK)) {
+		switch (opline->extended_value) {
+			case (1<<IS_NULL):
+				fprintf(stderr, " (null)");
+				break;
+			case (1<<IS_FALSE):
+				fprintf(stderr, " (false)");
+				break;
+			case (1<<IS_TRUE):
+				fprintf(stderr, " (true)");
+				break;
+			case (1<<IS_LONG):
+				fprintf(stderr, " (long)");
+				break;
+			case (1<<IS_DOUBLE):
+				fprintf(stderr, " (double)");
+				break;
+			case (1<<IS_STRING):
+				fprintf(stderr, " (string)");
+				break;
+			case (1<<IS_ARRAY):
+				fprintf(stderr, " (array)");
+				break;
+			case (1<<IS_OBJECT):
+				fprintf(stderr, " (object)");
+				break;
+			case (1<<IS_RESOURCE):
+				fprintf(stderr, " (resource)");
+				break;
+			case ((1<<IS_FALSE)|(1<<IS_TRUE)):
+				fprintf(stderr, " (bool)");
+				break;
+			default:
+				fprintf(stderr, " (\?\?\?)");
+				break;
+		}
 	} else if (ZEND_VM_EXT_EVAL == (flags & ZEND_VM_EXT_MASK)) {
 		switch (opline->extended_value) {
 			case ZEND_EVAL:
@@ -529,27 +559,20 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		}
 	} else {
 		if (ZEND_VM_EXT_VAR_FETCH & flags) {
-			switch (opline->extended_value & ZEND_FETCH_TYPE_MASK) {
-				case ZEND_FETCH_GLOBAL:
-					fprintf(stderr, " (global)");
-					break;
-				case ZEND_FETCH_LOCAL:
-					fprintf(stderr, " (local)");
-					break;
-				case ZEND_FETCH_GLOBAL_LOCK:
-					fprintf(stderr, " (global+lock)");
-					break;
+			if (opline->extended_value & ZEND_FETCH_GLOBAL) {
+				fprintf(stderr, " (global)");
+			} else if (opline->extended_value & ZEND_FETCH_LOCAL) {
+				fprintf(stderr, " (local)");
+			} else if (opline->extended_value & ZEND_FETCH_GLOBAL_LOCK) {
+				fprintf(stderr, " (global+lock)");
 			}
 		}
 		if (ZEND_VM_EXT_ISSET & flags) {
-			if (opline->extended_value & ZEND_ISSET) {
+			if (!(opline->extended_value & ZEND_ISEMPTY)) {
 				fprintf(stderr, " (isset)");
-			} else if (opline->extended_value & ZEND_ISEMPTY) {
+			} else {
 				fprintf(stderr, " (empty)");
 			}
-		}
-		if (ZEND_VM_EXT_ARG_NUM & flags) {
-			fprintf(stderr, " %u", opline->extended_value & ZEND_FETCH_ARG_MASK);
 		}
 		if (ZEND_VM_EXT_ARRAY_INIT & flags) {
 			fprintf(stderr, " %u", opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT);
@@ -647,10 +670,12 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	} else {
 		uint32_t op2_flags = ZEND_VM_OP2_FLAGS(flags);
 		if (ZEND_VM_OP_JMP_ADDR == (op2_flags & ZEND_VM_OP_MASK)) {
-			if (b) {
-				fprintf(stderr, " BB%d", b->successors[n++]);
-			} else {
-				fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
+			if (opline->opcode != ZEND_CATCH || !(opline->extended_value & ZEND_LAST_CATCH)) {
+				if (b) {
+					fprintf(stderr, " BB%d", b->successors[n++]);
+				} else {
+					fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
+				}
 			}
 		} else {
 			zend_dump_unused_op(opline, opline->op2, op2_flags);
@@ -658,12 +683,10 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 
 	if (ZEND_VM_EXT_JMP_ADDR == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->opcode != ZEND_CATCH || !opline->result.num) {
-			if (b) {
-				fprintf(stderr, " BB%d", b->successors[n++]);
-			} else {
-				fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-			}
+		if (b) {
+			fprintf(stderr, " BB%d", b->successors[n++]);
+		} else {
+			fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 		}
 	}
 	if (opline->result_type == IS_CONST) {

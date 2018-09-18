@@ -27,6 +27,10 @@ echo "*** Done ***";
 -- With empty heredoc string --
 bool(false)
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 *** Done ***

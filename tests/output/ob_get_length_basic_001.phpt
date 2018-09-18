@@ -25,7 +25,7 @@ ob_end_flush();
 echo "No output buffers\n";
 var_dump(ob_get_length());
 ?>
---EXPECTF--
+--EXPECT--
 No output buffers
 bool(false)
 int(0)

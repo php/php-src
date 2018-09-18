@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Stanislav Malyshev <stas@php.net>                            |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -52,7 +50,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-/* {{{ proto void CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
+/* {{{ proto CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
    Create the CURLFile object */
 ZEND_METHOD(CURLFile, __construct)
 {
@@ -78,8 +76,7 @@ static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION
 		return;
 	}
 	res = zend_read_property(curl_CURLFile_class, getThis(), name, name_len, 1, &rv);
-	ZVAL_DEREF(res);
-	ZVAL_COPY(return_value, res);
+	ZVAL_COPY_DEREF(return_value, res);
 }
 
 static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
@@ -133,7 +130,7 @@ ZEND_METHOD(CURLFile, setPostFilename)
 }
 /* }}} */
 
-/* {{{ proto void CURLFile::__wakeup()
+/* {{{ proto CURLFile::__wakeup()
    Unserialization handler */
 ZEND_METHOD(CURLFile, __wakeup)
 {
@@ -155,7 +152,7 @@ ZEND_END_ARG_INFO()
 
 
 static const zend_function_entry curlfile_funcs[] = {
-	PHP_ME(CURLFile,			__construct,        arginfo_curlfile_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			__construct,        arginfo_curlfile_create, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			getFilename,        NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			getMimeType,        NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			setMimeType,        arginfo_curlfile_name, ZEND_ACC_PUBLIC)

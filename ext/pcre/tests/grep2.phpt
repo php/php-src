@@ -24,7 +24,7 @@ var_dump(preg_last_error() == PREG_RECURSION_LIMIT_ERROR);
 Warning: preg_grep() expects at most 3 parameters, 4 given in %sgrep2.php on line 3
 NULL
 
-Warning: preg_grep() expects parameter 2 to be array, integer given in %sgrep2.php on line 4
+Warning: preg_grep() expects parameter 2 to be array, int given in %sgrep2.php on line 4
 NULL
 
 Warning: preg_grep(): Compilation failed: quantifier does not follow a repeatable item at offset 0 in %sgrep2.php on line 5

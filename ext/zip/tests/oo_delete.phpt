@@ -2,7 +2,6 @@
 Delete entries
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -71,7 +70,7 @@ if (file_exists($file)) {
 	unlink($file);
 }
 ?>
---EXPECTF--
+--EXPECT--
 ok
 ok
 ok

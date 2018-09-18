@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <unicode/uloc.h>
 #include "php_intl.h"
 #include "intl_error.h"
@@ -74,7 +72,7 @@ ZEND_END_ARG_INFO()
  * Every 'Locale' class method has an entry in this table
  */
 
-zend_function_entry Locale_class_functions[] = {
+static const zend_function_entry Locale_class_functions[] = {
 	ZEND_FENTRY( getDefault, zif_locale_get_default , locale_0_args , ZEND_ACC_PUBLIC|ZEND_ACC_STATIC  )
 	ZEND_FENTRY( setDefault, zif_locale_set_default , locale_arg_locale , ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	ZEND_FENTRY( getPrimaryLanguage, ZEND_FN( locale_get_primary_language ), locale_arg_locale , ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )

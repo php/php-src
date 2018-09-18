@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,6 @@
   |          Dmitry Stogov <dmitry@zend.com>                             |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #include <time.h>
 
@@ -140,7 +139,7 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 	} \
 }
 
-encode defaultEncoding[] = {
+const encode defaultEncoding[] = {
 	{{UNKNOWN_TYPE, NULL, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert},
 
 	{{IS_NULL, "nil", XSI_NAMESPACE, NULL, NULL}, to_zval_null, to_xml_null},
@@ -848,7 +847,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 		zend_string *tmp = zval_get_string_func(data);
 		str = estrndup(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 		new_len = ZSTR_LEN(tmp);
-		zend_string_release(tmp);
+		zend_string_release_ex(tmp, 0);
 	}
 
 	if (SOAP_GLOBAL(encoding) != NULL) {
@@ -930,12 +929,12 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 	} else {
 		zend_string *tmp = zval_get_string_func(data);
 		str = php_base64_encode((unsigned char*) ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-		zend_string_release(tmp);
+		zend_string_release_ex(tmp, 0);
 	}
 
 	text = xmlNewTextLen(BAD_CAST(ZSTR_VAL(str)), ZSTR_LEN(str));
 	xmlAddChild(ret, text);
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 
 	if (style == SOAP_ENCODED) {
 		set_ns_and_type(ret, type);
@@ -971,7 +970,7 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNo
 	xmlAddChild(ret, text);
 	efree(str);
 	if (data == &tmp) {
-		zval_dtor(&tmp);
+		zval_ptr_dtor_str(&tmp);
 	}
 
 	if (style == SOAP_ENCODED) {
@@ -1066,7 +1065,7 @@ static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNode
 	} else {
 		zend_string *str = zend_long_to_str(zval_get_long(data));
 		xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(str)), ZSTR_LEN(str));
-		zend_string_release(str);
+		zend_string_release_ex(str, 0);
 	}
 
 	if (style == SOAP_ENCODED) {
@@ -1175,31 +1174,10 @@ static void set_zval_property(zval* object, char* name, zval* val)
 static zval* get_zval_property(zval* object, char* name, zval *rv)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zval member;
-		zval *data;
-		zend_class_entry *old_scope;
-
-		ZVAL_STRING(&member, name);
-		old_scope = EG(fake_scope);
-		EG(fake_scope) = Z_OBJCE_P(object);
-		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, NULL, rv);
+		zval *data = zend_read_property(Z_OBJCE_P(object), object, name, strlen(name), 1, rv);
 		if (data == &EG(uninitialized_zval)) {
-			/* Hack for bug #32455 */
-			zend_property_info *property_info;
-
-			property_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR(member), 1);
-			EG(fake_scope) = old_scope;
-			if (property_info != ZEND_WRONG_PROPERTY_INFO && property_info &&
-			    zend_hash_exists(Z_OBJPROP_P(object), property_info->name)) {
-				zval_ptr_dtor(&member);
-				ZVAL_DEREF(data);
-				return data;
-			}
-			zval_ptr_dtor(&member);
 			return NULL;
 		}
-		zval_ptr_dtor(&member);
-		EG(fake_scope) = old_scope;
 		ZVAL_DEREF(data);
 		return data;
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
@@ -1211,15 +1189,7 @@ static zval* get_zval_property(zval* object, char* name, zval *rv)
 static void unset_zval_property(zval* object, char* name)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zval member;
-		zend_class_entry *old_scope;
-
-		ZVAL_STRING(&member, name);
-		old_scope = EG(fake_scope);
-		EG(fake_scope) = Z_OBJCE_P(object);
-		Z_OBJ_HT_P(object)->unset_property(object, &member, NULL);
-		EG(fake_scope) = old_scope;
-		zval_ptr_dtor(&member);
+		zend_unset_property(Z_OBJCE_P(object), object, name, strlen(name));
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_hash_str_del(Z_ARRVAL_P(object), name, strlen(name));
 	}
@@ -1343,6 +1313,7 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 						array_init(&array);
 						add_next_index_zval(&array, &val);
 						do {
+							ZVAL_NULL(&val);
 							if (node && node->children && node->children->content) {
 								if (model->u.element->fixed && strcmp(model->u.element->fixed, (char*)node->children->content) != 0) {
 									soap_error3(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, node->children->content);
@@ -2265,7 +2236,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				}
 				array_set_zval_key(Z_ARRVAL(array_copy), &key, val);
 				zval_ptr_dtor(val);
-				zval_dtor(&key);
+				zval_ptr_dtor(&key);
 			} else {
 				add_next_index_zval(&array_copy, val);
 			}
@@ -3068,7 +3039,9 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 		}
 		smart_str_free(&list);
 		efree(str);
-		if (data == &tmp) {zval_dtor(&tmp);}
+		if (data == &tmp) {
+			zval_ptr_dtor_str(&tmp);
+		}
 	}
 	return ret;
 }
@@ -3141,7 +3114,7 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 	} else {
 		zend_string *tmp = zval_get_string_func(data);
 		ret = xmlNewTextLen(BAD_CAST(ZSTR_VAL(tmp)), ZSTR_LEN(tmp));
-		zend_string_release(tmp);
+		zend_string_release_ex(tmp, 0);
 	}
 
 	ret->name = xmlStringTextNoenc;

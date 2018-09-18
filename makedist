@@ -40,7 +40,7 @@ if test "${2}" -lt "13" -o "${2}" -eq "13" -a "${3}" -lt "5"; then
 fi
 IFS="$old_IFS"
 
-if test "x$PHPROOT" == "x"; then
+if test "x$PHPROOT" = "x"; then
     PHPROOT=git@git.php.net:php-src.git;
 fi
 
@@ -85,7 +85,7 @@ for i in $LT_TARGETS; do
   fi
 done
 
-# generate some files so people don't need bison, flex and autoconf
+# generate some files so people don't need bison, re2c and autoconf
 # to install
 set -x
 ./buildconf --copy --force

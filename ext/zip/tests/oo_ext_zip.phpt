@@ -2,7 +2,6 @@
 Extending Zip class and array property
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -20,7 +19,7 @@ class myZip extends ZipArchive {
 
 $z = new myZip;
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   int(1)

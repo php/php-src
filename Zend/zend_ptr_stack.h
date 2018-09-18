@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_PTR_STACK_H
 #define ZEND_PTR_STACK_H
@@ -39,6 +37,7 @@ ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...);
 ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...);
 ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack);
 ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *));
+ZEND_API void zend_ptr_stack_reverse_apply(zend_ptr_stack *stack, void (*func)(void *));
 ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements);
 ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack);
 END_EXTERN_C()

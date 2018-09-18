@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension tidy
 
 PHP_ARG_WITH(tidy,for TIDY support,
 [  --with-tidy[=DIR]         Include TIDY support])
@@ -14,13 +12,19 @@ if test "$PHP_TIDY" != "no"; then
   fi
 
   for i in $TIDY_SEARCH_DIRS; do
-    if test -f $i/include/tidy/tidy.h; then
-      TIDY_DIR=$i
-      TIDY_INCDIR=$i/include/tidy
-    elif test -f $i/include/tidy.h; then
-      TIDY_DIR=$i
-      TIDY_INCDIR=$i/include
-    fi
+    for j in tidy tidyp; do
+        if test -f $i/include/$j/$j.h; then
+            TIDY_DIR=$i
+            TIDY_INCDIR=$i/include/$j
+            TIDY_LIB_NAME=$j
+        break
+        elif test -f $i/include/$j.h; then
+            TIDY_DIR=$i
+            TIDY_INCDIR=$i/include
+            TIDY_LIB_NAME=$j
+        break
+        fi
+    done
   done
 
   if test -z "$TIDY_DIR"; then
@@ -36,9 +40,14 @@ if test "$PHP_TIDY" != "no"; then
   fi
 
   TIDY_LIBDIR=$TIDY_DIR/$PHP_LIBDIR
+  if test "$TIDY_LIB_NAME" == 'tidyp'; then
+    AC_DEFINE(HAVE_TIDYP_H,1,[defined if tidyp.h exists])
+  else
+    AC_DEFINE(HAVE_TIDY_H,1,[defined if tidy.h exists])
+  fi
 
-  TIDY_LIB_NAME=tidy
-  PHP_CHECK_LIBRARY(tidy,tidyOptGetDoc,
+
+  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,tidyOptGetDoc,
   [
     AC_DEFINE(HAVE_TIDYOPTGETDOC,1,[ ])
   ],[
@@ -48,6 +57,11 @@ if test "$PHP_TIDY" != "no"; then
       AC_DEFINE(HAVE_TIDYOPTGETDOC,1,[ ])
     ], [], [])
   ],[])
+
+  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,tidyReleaseDate,
+  [
+    AC_DEFINE(HAVE_TIDYRELEASEDATE,1,[ ])
+  ], [], [])
 
   PHP_ADD_LIBRARY_WITH_PATH($TIDY_LIB_NAME, $TIDY_LIBDIR, TIDY_SHARED_LIBADD)
   PHP_ADD_INCLUDE($TIDY_INCDIR)

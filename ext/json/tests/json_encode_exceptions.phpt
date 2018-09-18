@@ -1,5 +1,7 @@
 --TEST--
 Test json_encode() function : JSON_THROW_ON_ERROR flag
+--SKIPIF--
+<?php if(!extension_loaded('json')) die('skip json extension not loaded') ?>
 --FILE--
 <?php
 

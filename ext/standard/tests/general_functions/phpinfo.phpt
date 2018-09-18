@@ -33,7 +33,7 @@ Zend Extension => %d
 Zend Extension Build => API%s
 PHP Extension Build => API%s
 Debug Build => %s
-Thread Safety => %s
+Thread Safety => %s%A
 Zend Signal Handling => %s
 Zend Memory Manager => %s
 Zend Multibyte Support => %s
@@ -63,7 +63,7 @@ PHP License
 bool(true)
 --
 
-Warning: phpinfo() expects parameter 1 to be integer, array given in %sphpinfo.php on line 5
+Warning: phpinfo() expects parameter 1 to be int, array given in %sphpinfo.php on line 5
 NULL
 --
 phpinfo()

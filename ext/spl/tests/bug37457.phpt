@@ -69,7 +69,7 @@ catch (Exception $e)
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Collection::__construct
 Collection::rewind
 Collection::valid

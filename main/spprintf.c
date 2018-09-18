@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* This is the spprintf implementation.
  * It has emerged from apache snprintf. See original header:
@@ -817,7 +815,7 @@ fmt_error:
 			}
 
 			if (free_zcopy) {
-				zval_dtor(&zcopy);
+				zval_ptr_dtor_str(&zcopy);
 			}
 		}
 skip_output:

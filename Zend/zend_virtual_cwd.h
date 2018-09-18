@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    |          Pierre Joye <pierre@php.net>                                |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef VIRTUAL_CWD_H
 #define VIRTUAL_CWD_H
@@ -118,15 +116,21 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef ZEND_WIN32
-CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
-# define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
-# define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
+# define php_sys_stat_ex php_win32_ioutil_stat_ex
+# define php_sys_stat php_win32_ioutil_stat
+# define php_sys_lstat php_win32_ioutil_lstat
+# define php_sys_fstat php_win32_ioutil_fstat
 CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_len);
+# define php_sys_symlink php_win32_ioutil_symlink
+# define php_sys_link php_win32_ioutil_link
 #else
 # define php_sys_stat stat
 # define php_sys_lstat lstat
+# define php_sys_fstat fstat
 # ifdef HAVE_SYMLINK
 # define php_sys_readlink(link, target, target_len) readlink(link, target, target_len)
+# define php_sys_symlink symlink
+# define php_sys_link link
 # endif
 #endif
 
@@ -160,21 +164,6 @@ CWD_API int virtual_rmdir(const char *pathname);
 CWD_API DIR *virtual_opendir(const char *pathname);
 CWD_API FILE *virtual_popen(const char *command, const char *type);
 CWD_API int virtual_access(const char *pathname, int mode);
-#if defined(ZEND_WIN32)
-/* these are not defined in win32 headers */
-#ifndef W_OK
-#define W_OK 0x02
-#endif
-#ifndef R_OK
-#define R_OK 0x04
-#endif
-#ifndef X_OK
-#define X_OK 0x01
-#endif
-#ifndef F_OK
-#define F_OK 0x00
-#endif
-#endif
 
 #if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
@@ -187,7 +176,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 /* One of the following constants must be used as the last argument
    in virtual_file_ex() call. */
 
-#define CWD_EXPAND   0 /* expand "." and ".." but dont resolve symlinks      */
+#define CWD_EXPAND   0 /* expand "." and ".." but don't resolve symlinks     */
 #define CWD_FILEPATH 1 /* resolve symlinks if file is exist otherwise expand */
 #define CWD_REALPATH 2 /* call realpath(), resolve symlinks. File must exist */
 

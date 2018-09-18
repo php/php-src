@@ -19,7 +19,7 @@ echo $method->getName ()."\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 __invoke
 __invoke
 ===DONE===

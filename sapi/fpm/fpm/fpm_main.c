@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,8 +21,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: cgi_main.c 291497 2009-11-30 14:43:22Z dmitry $ */
-
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -36,12 +34,6 @@
 
 #include <stdio.h>
 #include "php.h"
-
-#ifdef PHP_WIN32
-# include "win32/time.h"
-# include "win32/signal.h"
-# include <process.h>
-#endif
 
 #if HAVE_SYS_TIME_H
 # include <sys/time.h>
@@ -79,12 +71,6 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 
-#ifdef PHP_WIN32
-# include <io.h>
-# include <fcntl.h>
-# include "win32/php_registry.h"
-#endif
-
 #ifdef __riscos__
 # include <unixlib/local.h>
 int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
@@ -109,21 +95,17 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fpm_log.h"
 #include "zlog.h"
 
-#ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
-#endif
 
 static void (*php_php_import_environment_variables)(zval *array_ptr);
 
-#ifndef PHP_WIN32
 /* these globals used for forking children on unix systems */
 
 /**
  * Set to non-zero if we are the parent process
  */
 static int parent = 1;
-#endif
 
 static int request_body_fd;
 static int fpm_is_running = 0;
@@ -180,7 +162,7 @@ typedef struct _php_cgi_globals_struct {
  * Key for each cache entry is dirname(PATH_TRANSLATED).
  *
  * NOTE: Each cache entry config_hash contains the combination from all user ini files found in
- *       the path starting from doc_root throught to dirname(PATH_TRANSLATED).  There is no point
+ *       the path starting from doc_root through to dirname(PATH_TRANSLATED).  There is no point
  *       storing per-file entries as it would not be possible to detect added / deleted entries
  *       between separate files.
  */
@@ -204,19 +186,6 @@ static int php_cgi_globals_id;
 #else
 static php_cgi_globals_struct php_cgi_globals;
 #define CGIG(v) (php_cgi_globals.v)
-#endif
-
-#ifdef PHP_WIN32
-#define TRANSLATE_SLASHES(path) \
-	{ \
-		char *tmp = path; \
-		while (*tmp) { \
-			if (*tmp == '\\') *tmp = '/'; \
-			tmp++; \
-		} \
-	}
-#else
-#define TRANSLATE_SLASHES(path)
 #endif
 
 static int print_module_info(zval *zv) /* {{{ */
@@ -332,11 +301,7 @@ static void sapi_cgibin_flush(void *server_context) /* {{{ */
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {
 		fcgi_request *request = (fcgi_request*) server_context;
-		if (
-#ifndef PHP_WIN32
-	      !parent &&
-#endif
-	      request && !fcgi_flush(request, 0)) {
+		if (!parent && request && !fcgi_flush(request, 0)) {
 			php_handle_aborted_connection();
 		}
 		return;
@@ -568,15 +533,15 @@ void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
 		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
 	) {
-		zval_dtor(array_ptr);
-		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
+		zend_array_destroy(Z_ARR_P(array_ptr));
+		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]));
 		return;
 	} else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
 		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
 	) {
-		zval_dtor(array_ptr);
-		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_SERVER]);
+		zend_array_destroy(Z_ARR_P(array_ptr));
+		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]));
 		return;
 	}
 
@@ -639,21 +604,15 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
-	/* ensure we want:
-	 * - to log (fastcgi.logging in php.ini)
+	/* message is written to FCGI_STDERR if following conditions are met:
+	 * - logging is enabled (fastcgi.logging in php.ini)
 	 * - we are currently dealing with a request
 	 * - the message is not empty
+	 * - the fcgi_write did not fail
 	 */
-	if (CGIG(fcgi_logging) && request && message && len > 0) {
-		ssize_t ret;
-		char *buf = malloc(len + 2);
-		memcpy(buf, message, len);
-		memcpy(buf + len, "\n", sizeof("\n"));
-		ret = fcgi_write(request, FCGI_STDERR, buf, len + 1);
-		free(buf);
-		if (ret < 0) {
-			php_handle_aborted_connection();
-		}
+	if (CGIG(fcgi_logging) && request && message && len > 0
+			&& fcgi_write(request, FCGI_STDERR, message, len) < 0) {
+		php_handle_aborted_connection();
 	}
 }
 /* }}} */
@@ -662,7 +621,7 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
  */
 static void sapi_cgi_log_message(char *message, int syslog_type_int)
 {
-	zlog(ZLOG_NOTICE, "PHP message: %s", message);
+	zlog_msg(ZLOG_NOTICE, "PHP message: ", message);
 }
 /* }}} */
 
@@ -717,11 +676,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		  if it is inside the docroot, we scan the tree up to the docroot
 			to find more user.ini, if not we only scan the current path.
 		  */
-#ifdef PHP_WIN32
-		if (strnicmp(s1, s2, s_len) == 0) {
-#else
 		if (strncmp(s1, s2, s_len) == 0) {
-#endif
 			ptr = s2 + start;  /* start is the point where doc_root ends! */
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 				*ptr = 0;
@@ -795,18 +750,11 @@ static int sapi_cgi_activate(void) /* {{{ */
 				if (doc_root_len > 0 && IS_SLASH(doc_root[doc_root_len - 1])) {
 					--doc_root_len;
 				}
-#ifdef PHP_WIN32
-				/* paths on windows should be case-insensitive */
-				doc_root = estrndup(doc_root, doc_root_len);
-				zend_str_tolower(doc_root, doc_root_len);
-#endif
+
 				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, doc_root_len - 1);
 			}
 		}
 
-#ifdef PHP_WIN32
-		efree(doc_root);
-#endif
 		efree(path);
 	}
 
@@ -821,11 +769,7 @@ static int sapi_cgi_deactivate(void) /* {{{ */
 		2. When the first call occurs and the request is not set up, flush fails on FastCGI.
 	*/
 	if (SG(sapi_started)) {
-		if (
-#ifndef PHP_WIN32
-		    !parent &&
-#endif
-		    !fcgi_finish_request((fcgi_request*)SG(server_context), 0)) {
+		if (!parent && !fcgi_finish_request((fcgi_request*)SG(server_context), 0)) {
 			php_handle_aborted_connection();
 		}
 	}
@@ -1047,7 +991,7 @@ static void init_request_info(void)
 	/* script_path_translated being set is a good indication that
 	 * we are running in a cgi environment, since it is always
 	 * null otherwise.  otherwise, the filename
-	 * of the script will be retreived later via argc/argv */
+	 * of the script will be retrieved later via argc/argv */
 	if (script_path_translated) {
 		const char *auth;
 		char *content_length = FCGI_GETENV(request, "CONTENT_LENGTH");
@@ -1137,8 +1081,6 @@ static void init_request_info(void)
 
 			if (!env_document_root && PG(doc_root)) {
 				env_document_root = FCGI_PUTENV(request, "DOCUMENT_ROOT", PG(doc_root));
-				/* fix docroot */
-				TRANSLATE_SLASHES(env_document_root);
 			}
 
 			if (!apache_was_here && env_path_translated != NULL && env_redirect_url != NULL &&
@@ -1171,9 +1113,6 @@ static void init_request_info(void)
 			if (script_path_translated &&
 				(script_path_translated_len = strlen(script_path_translated)) > 0 &&
 				(script_path_translated[script_path_translated_len-1] == '/' ||
-#ifdef PHP_WIN32
-				script_path_translated[script_path_translated_len-1] == '\\' ||
-#endif
 				(real_path = tsrm_realpath(script_path_translated, NULL)) == NULL)
 			) {
 				char *pt = estrndup(script_path_translated, script_path_translated_len);
@@ -1251,7 +1190,6 @@ static void init_request_info(void)
 								}
 								script_path_translated = FCGI_PUTENV(request, "SCRIPT_FILENAME", pt);
 							}
-							TRANSLATE_SLASHES(pt);
 
 							/* figure out docroot
 							 * SCRIPT_FILENAME minus SCRIPT_NAME
@@ -1533,6 +1471,10 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (!fcgi_is_closed(request)) {
 		php_output_end_all();
 		php_header();
@@ -1547,8 +1489,39 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
+ZEND_END_ARG_INFO()
+
+PHP_FUNCTION(apache_request_headers) /* {{{ */
+{
+	fcgi_request *request;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	if ((request = (fcgi_request*) SG(server_context))) {
+		fcgi_loadenv(request, sapi_add_request_header, return_value);
+	}
+} /* }}} */
+
+/* {{{ proto array fpm_get_status
+ * Returns the status of the fastcgi process manager */
+PHP_FUNCTION(fpm_get_status) /* {{{ */
+{
+	int error = fpm_status_export_to_zval(return_value);
+	if(error){
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
-	PHP_FE(fastcgi_finish_request,              NULL)
+	PHP_FE(fastcgi_finish_request,                    cgi_fcgi_sapi_no_arginfo)
+	PHP_FE(fpm_get_status,                            NULL)
+	PHP_FE(apache_request_headers,                    cgi_fcgi_sapi_no_arginfo)
+	PHP_FALIAS(getallheaders, apache_request_headers, cgi_fcgi_sapi_no_arginfo)
 	PHP_FE_END
 };
 
@@ -1583,7 +1556,7 @@ int main(int argc, char *argv[])
 	void ***tsrm_ls;
 #endif
 
-	int max_requests = 500;
+	int max_requests = 0;
 	int requests = 0;
 	int fcgi_fd = 0;
 	fcgi_request *request;
@@ -1627,13 +1600,6 @@ int main(int argc, char *argv[])
 #endif
 
 	fcgi_init();
-
-#ifdef PHP_WIN32
-	_fmode = _O_BINARY; /* sets default for file streams to binary */
-	setmode(_fileno(stdin),  O_BINARY);	/* make the stdio mode be binary */
-	setmode(_fileno(stdout), O_BINARY);	/* make the stdio mode be binary */
-	setmode(_fileno(stderr), O_BINARY);	/* make the stdio mode be binary */
-#endif
 
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (c) {
@@ -1759,9 +1725,9 @@ int main(int argc, char *argv[])
 				SG(request_info).no_headers = 1;
 
 #if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2018 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
 #else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2018 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
@@ -2040,10 +2006,6 @@ out:
 
 #ifdef ZTS
 	tsrm_shutdown();
-#endif
-
-#if defined(PHP_WIN32) && ZEND_DEBUG && 0
-	_CrtDumpMemoryLeaks();
 #endif
 
 	return exit_status;

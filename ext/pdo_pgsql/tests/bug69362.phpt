@@ -37,6 +37,7 @@ $db->exec("DROP USER $user");
 ?>
 --FILE--
 <?php
+require dirname(__FILE__) . '/config.inc';
 require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 $pdo = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
@@ -49,7 +50,7 @@ $testQuery = 'SELECT 1 as verification';
 // Create temp user with leading single quote
 $sql = sprintf($template, "''mypassword");
 $pdo->query($sql);
-$testConn = new PDO($conf['ENV']['PDOTEST_DSN'], $user, "'mypassword");
+$testConn = new PDO($config['ENV']['PDOTEST_DSN'], $user, "'mypassword");
 $result = $testConn->query($testQuery)->fetch();
 $check = $result[0];
 var_dump($check);

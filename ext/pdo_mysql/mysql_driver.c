@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
   |         Johannes Schlueter <johannes@mysql.com>                      |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -512,7 +510,7 @@ static int pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 /* }}} */
 
 /* {{{ mysql_methods */
-static struct pdo_dbh_methods mysql_methods = {
+static const struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
 	mysql_handle_preparer,
 	mysql_handle_doer,
@@ -662,31 +660,31 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		init_cmd = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_INIT_COMMAND, NULL);
 		if (init_cmd) {
 			if (mysql_options(H->server, MYSQL_INIT_COMMAND, (const char *)ZSTR_VAL(init_cmd))) {
-				zend_string_release(init_cmd);
+				zend_string_release_ex(init_cmd, 0);
 				pdo_mysql_error(dbh);
 				goto cleanup;
 			}
-			zend_string_release(init_cmd);
+			zend_string_release_ex(init_cmd, 0);
 		}
 #ifndef PDO_USE_MYSQLND
 		default_file = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_READ_DEFAULT_FILE, NULL);
 		if (default_file) {
 			if (mysql_options(H->server, MYSQL_READ_DEFAULT_FILE, (const char *)ZSTR_VAL(default_file))) {
-				zend_string_release(default_file);
+				zend_string_release_ex(default_file, 0);
 				pdo_mysql_error(dbh);
 				goto cleanup;
 			}
-			zend_string_release(default_file);
+			zend_string_release_ex(default_file, 0);
 		}
 
 		default_group = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_READ_DEFAULT_GROUP, NULL);
 		if (default_group) {
 			if (mysql_options(H->server, MYSQL_READ_DEFAULT_GROUP, (const char *)ZSTR_VAL(default_group))) {
-				zend_string_release(default_group);
+				zend_string_release_ex(default_group, 0);
 				pdo_mysql_error(dbh);
 				goto cleanup;
 			}
-			zend_string_release(default_group);
+			zend_string_release_ex(default_group, 0);
 		}
 #endif
 		compress = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_COMPRESS, 0);
@@ -711,19 +709,19 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 					ssl_capath? ZSTR_VAL(ssl_capath) : NULL,
 					ssl_cipher? ZSTR_VAL(ssl_cipher) : NULL);
 			if (ssl_key) {
-				zend_string_release(ssl_key);
+				zend_string_release_ex(ssl_key, 0);
 			}
 			if (ssl_cert) {
-				zend_string_release(ssl_cert);
+				zend_string_release_ex(ssl_cert, 0);
 			}
 			if (ssl_ca) {
-				zend_string_release(ssl_ca);
+				zend_string_release_ex(ssl_ca, 0);
 			}
 			if (ssl_capath) {
-				zend_string_release(ssl_capath);
+				zend_string_release_ex(ssl_capath, 0);
 			}
 			if (ssl_cipher) {
-				zend_string_release(ssl_cipher);
+				zend_string_release_ex(ssl_cipher, 0);
 			}
 		}
 
@@ -733,10 +731,10 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			if (public_key) {
 				if (mysql_options(H->server, MYSQL_SERVER_PUBLIC_KEY, ZSTR_VAL(public_key))) {
 					pdo_mysql_error(dbh);
-					zend_string_release(public_key);
+					zend_string_release_ex(public_key, 0);
 					goto cleanup;
 				}
-				zend_string_release(public_key);
+				zend_string_release_ex(public_key, 0);
 			}
 		}
 #endif
@@ -819,7 +817,7 @@ cleanup:
 }
 /* }}} */
 
-pdo_driver_t pdo_mysql_driver = {
+const pdo_driver_t pdo_mysql_driver = {
 	PDO_DRIVER_HEADER(mysql),
 	pdo_mysql_handle_factory
 };

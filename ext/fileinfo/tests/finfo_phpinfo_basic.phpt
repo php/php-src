@@ -15,7 +15,7 @@ var_dump(preg_match("/fileinfo support => enabled/", $output));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing finfo extension : loading info phpinfo() ***
 int(1)
 ===DONE===

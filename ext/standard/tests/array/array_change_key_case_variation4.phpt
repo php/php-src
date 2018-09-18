@@ -23,7 +23,7 @@ for ($i = -5; $i <=5; $i += 1){
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- $sort argument is -5 --

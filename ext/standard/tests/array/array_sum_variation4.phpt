@@ -25,7 +25,7 @@ var_dump( array_sum($float_input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : array with duplicate values ***
 -- With integer array --
 int(117)

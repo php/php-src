@@ -184,22 +184,22 @@ object(DateTime)#%d (3) {
 
 -- empty array --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, array given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, array given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, array given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, array given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
@@ -264,42 +264,42 @@ object(DateTime)#%d (3) {
 
 -- empty string DQ --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, object given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, object given in %s on line %d
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, object given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, object given in %s on line %d
 bool(false)
 
 -- undefined var --
@@ -324,6 +324,6 @@ object(DateTime)#%d (3) {
 
 -- resource --
 
-Warning: DateTime::setTime() expects parameter 3 to be integer, resource given in %s on line %d
+Warning: DateTime::setTime() expects parameter 3 to be int, resource given in %s on line %d
 bool(false)
 ===DONE===

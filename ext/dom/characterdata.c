@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Rob Richards <rrichards@php.net>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -58,7 +56,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMCharacterData extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-FF21A306
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-FF21A306
 * Since:
 */
 
@@ -110,7 +108,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval)
 
 	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -213,7 +211,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 #if LIBXML_VERSION < 20627
-/* Implement logic from libxml xmlTextConcat to add suport for comments and PI */
+/* Implement logic from libxml xmlTextConcat to add support for comments and PI */
     if ((nodep->content == (xmlChar *) &(nodep->properties)) ||
         ((nodep->doc != NULL) && (nodep->doc->dict != NULL) &&
 		xmlDictOwns(nodep->doc->dict, nodep->content))) {

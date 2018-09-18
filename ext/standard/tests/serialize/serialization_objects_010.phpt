@@ -1,7 +1,5 @@
 --TEST--
 Serialize() must return a string or NULL
---SKIPIF--
-<?php if (!interface_exists('Serializable')) die('skip Interface Serialzable not defined'); ?>
 --FILE--
 <?php
 /* Prototype  : proto string serialize(mixed variable)
@@ -32,6 +30,6 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 C::serialize() must return a string or NULL
 Done

@@ -18,7 +18,7 @@ echo $dll->current()."\n";
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 1
 3
 ===DONE===

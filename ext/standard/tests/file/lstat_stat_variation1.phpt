@@ -51,7 +51,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation1a.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() for files after being renamed ***
 bool(true)
 bool(true)

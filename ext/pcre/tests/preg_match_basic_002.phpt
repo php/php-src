@@ -13,7 +13,7 @@ preg_match("/M(.*)/", $string, $matches);
 var_dump($matches);
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(2) "My"

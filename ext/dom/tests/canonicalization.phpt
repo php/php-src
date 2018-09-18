@@ -48,7 +48,7 @@ echo $doc->c14N(TRUE, FALSE,
    test namespace prefix is also included */
 echo $doc->C14N(TRUE, FALSE, NULL, array('test'));
 ?>
---EXPECTF--
+--EXPECT--
 
 <contain xmlns="http://www.example.com/ns/foo" xmlns:fubar="http://www.example.com/ns/fubar" xmlns:test="urn::test">
   <bar><test1></test1></bar>

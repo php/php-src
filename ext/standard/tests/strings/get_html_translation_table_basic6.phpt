@@ -81,7 +81,7 @@ Array
     [^] => &Hat;
     [_] => &lowbar;
     [`] => &grave;
-    [fj] => &fjlig
+    [fj] => &fjlig;
     [{] => &lbrace;
     [|] => &vert;
     [}] => &rcub;

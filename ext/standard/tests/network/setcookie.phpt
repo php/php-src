@@ -1,6 +1,5 @@
 --TEST--
 setcookie() tests
---DESCRIPTION--
 --INI--
 date.timezone=UTC
 --FILE--
@@ -18,6 +17,8 @@ setcookie('name', 'value', 0, '', 'domain.tld');
 setcookie('name', 'value', 0, '', '', TRUE);
 setcookie('name', 'value', 0, '', '', FALSE, TRUE);
 
+setcookie('name', 'value', ['expires' => $tsp]);
+setcookie('name', 'value', ['expires' => $tsn, 'path' => '/path/', 'domain' => 'domain.tld', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
 
 $expected = array(
 	'Set-Cookie: name=deleted; expires='.date('D, d-M-Y H:i:s', 1).' GMT; Max-Age=0',
@@ -31,7 +32,9 @@ $expected = array(
 	'Set-Cookie: name=value; path=/path/',
 	'Set-Cookie: name=value; domain=domain.tld',
 	'Set-Cookie: name=value; secure',
-	'Set-Cookie: name=value; HttpOnly'
+	'Set-Cookie: name=value; HttpOnly',
+	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsp).' GMT; Max-Age=5',
+	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsn).' GMT; Max-Age=0; path=/path/; domain=domain.tld; secure; HttpOnly; SameSite=Strict'
 );
 
 $headers = headers_list();

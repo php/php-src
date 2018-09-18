@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -263,7 +261,7 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 	}
 
 	convert_to_string(parameter);
-	zval_dtor(parameter);
+	zval_ptr_dtor_str(parameter);
 
 	Z_STR_P(parameter) = zend_string_alloc(param->max_value_len, 1);
 	P->used_for_output = 1;
@@ -381,7 +379,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 							/* OCI likes to stick non-terminated strings in things */
 							*Z_STRVAL_P(parameter) = '\0';
 						}
-						zval_dtor(parameter);
+						zval_ptr_dtor_str(parameter);
 						ZVAL_UNDEF(parameter);
 					} else if (Z_TYPE_P(parameter) == IS_STRING) {
 						Z_STR_P(parameter) = zend_string_init(Z_STRVAL_P(parameter), P->actual_len, 1);
@@ -719,7 +717,7 @@ static int oci_blob_seek(php_stream *stream, zend_off_t offset, int whence, zend
 	}
 }
 
-static php_stream_ops oci_blob_stream_ops = {
+static const php_stream_ops oci_blob_stream_ops = {
 	oci_blob_write,
 	oci_blob_read,
 	oci_blob_close,
@@ -795,7 +793,7 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len
 	}
 } /* }}} */
 
-struct pdo_stmt_methods oci_stmt_methods = {
+const struct pdo_stmt_methods oci_stmt_methods = {
 	oci_stmt_dtor,
 	oci_stmt_execute,
 	oci_stmt_fetch,

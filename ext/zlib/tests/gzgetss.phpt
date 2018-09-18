@@ -4,8 +4,6 @@ gzgetss — Get line from gz-file pointer and strip HTML tags - function
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
 <?php
-
-<?php
 if(!extension_loaded("zlib")){die("skip - ZLIB extension not loaded");}
 ?>
 --FILE--
@@ -18,5 +16,17 @@ while (!gzeof($handle)){
 }
 gzclose($handle);
 ?>
---EXPECT--
-<code>stringgzgetss(resource $zp, int $length [, string $allowable_tags ]);<code/>
+--EXPECTF--
+Deprecated: Function gzgetss() is deprecated in %s on line %d
+
+
+Deprecated: Function gzgetss() is deprecated in %s on line %d
+    
+
+Deprecated: Function gzgetss() is deprecated in %s on line %d
+      <code>stringgzgetss(resource $zp, int $length [, string $allowable_tags ]);<code/>
+
+Deprecated: Function gzgetss() is deprecated in %s on line %d
+    
+
+Deprecated: Function gzgetss() is deprecated in %s on line %d

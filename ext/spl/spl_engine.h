@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef SPL_ENGINE_H
 #define SPL_ENGINE_H
@@ -69,9 +67,7 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 	fci.params = argv;
 	fci.no_separation = 1;
 
-	fcc.initialized = 1;
 	fcc.function_handler = func;
-	fcc.calling_scope = zend_get_executed_scope();
 	fcc.called_scope = pce;
 	fcc.object = Z_OBJ_P(retval);
 

@@ -8,9 +8,6 @@ if ( substr(PHP_OS, 0, 3) == 'WIN' ) {
 if ( substr(PHP_OS, 0, 3) == 'MAC' ) {
     die('skip Not valid for MacOS');
 }
-if (PHP_INT_SIZE != 4) {
-  die("skip this test is for 32bit platform only");
-}
 
 // Skip if being run by root (files are always readable, writeable and executable)
 $filename = dirname(__FILE__)."/symlink_link_linkinfo_is_link6_check_root.tmp";

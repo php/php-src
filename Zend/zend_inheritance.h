@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,15 +24,12 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface);
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface);
-
-ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait);
-ZEND_API void zend_do_bind_traits(zend_class_entry *ce);
-
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
-void zend_do_early_binding(void);
 
+ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent_ce);
+
+void zend_verify_abstract_class(zend_class_entry *ce);
 void zend_check_deprecated_constructor(const zend_class_entry *ce);
 
 END_EXTERN_C()

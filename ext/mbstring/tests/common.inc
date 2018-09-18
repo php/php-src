@@ -6,7 +6,7 @@
 // Custom Error Hanlder for testing
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 	global $debug;
-	
+
 	$err_type = array (
 				1	=> "Error",			// E_ERROR
 				2	=> "Warning",			// E_WARINING
@@ -23,7 +23,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 				4096=> "Recoverable fatal error",      // E_RECOVERABLE_ERROR
 				8192=> "Deprecated",      // E_DEPRECATED
 				);
-	
+
 	if (!empty($debug)) {
 		printf("%s: %s (%d)\n", $err_type[$err_no], $err_msg, $linenum);
 	}
@@ -46,7 +46,7 @@ class tc
 	public $s1 = '日本語EUC-JPの文字列';
 	public $s2 = 'English Text';
 
-	function __construct() 
+	function __construct()
 	{
 	}
 }

@@ -397,27 +397,27 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : 20001230 05:04 PM
 ------------
-Date is: stdClass::__set_state(array(
-))
+Date is: (object) array(
+)
 ------------
 Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
-Date is: stdClass::__set_state(array(
-))
+Date is: (object) array(
+)
 ------------
 Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
-Date is: stdClass::__set_state(array(
-))
+Date is: (object) array(
+)
 ------------
 Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
-Date is: stdClass::__set_state(array(
-))
+Date is: (object) array(
+)
 ------------
 Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
-Date is: stdClass::__set_state(array(
-))
+Date is: (object) array(
+)
 ------------
 Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'

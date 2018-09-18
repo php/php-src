@@ -37,7 +37,7 @@ delete_files($directory, 3);
 $directory = dirname(__FILE__) . '/scandir_basic';
 rmdir($directory);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing scandir() : basic functionality ***
 
 -- scandir() with mandatory arguments --

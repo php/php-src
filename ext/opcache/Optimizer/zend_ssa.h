@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA - Static Single Assignment Form                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -113,7 +113,7 @@ typedef struct _zend_ssa_var {
 	zend_ssa_phi          *definition_phi; /* phi that defines this value */
 	int                    use_chain;      /* uses of this value, linked through opN_use_chain */
 	zend_ssa_phi          *phi_use_chain;  /* uses of this value in Phi, linked through use_chain */
-	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constaints */
+	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constraints */
 	unsigned int           no_val : 1;     /* value doesn't mater (used as op1 in ZEND_ASSIGN) */
 	unsigned int           scc_entry : 1;
 	unsigned int           alias : 2;  /* value may be changed indirectly */

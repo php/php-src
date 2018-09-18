@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension wddx
 
 PHP_ARG_ENABLE(wddx,whether to enable WDDX support,
 [  --enable-wddx           Enable WDDX support])
@@ -29,7 +27,7 @@ if test "$PHP_WDDX" != "no"; then
         PHP_ADD_BUILD_DIR(ext/xml)
       fi
     ], [
-      AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
+      AC_MSG_ERROR([libxml2 not found. Use --with-libxml-dir=<DIR>])
     ])
   fi
 

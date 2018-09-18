@@ -1,9 +1,7 @@
 --TEST--
 Bug #74798 pkcs7_en/decrypt does not work if \x0a is used in content
 --SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+<?php if (!extension_loaded("openssl")) die("skip"); ?>
 --FILE--
 <?php
 
@@ -85,7 +83,7 @@ unlink($tmpFileOut2);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 int(40)

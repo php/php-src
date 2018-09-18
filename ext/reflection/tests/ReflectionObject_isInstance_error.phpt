@@ -22,13 +22,13 @@ NULL
 Warning: ReflectionClass::isInstance() expects exactly 1 parameter, 2 given in %s on line 7
 NULL
 
-Warning: ReflectionClass::isInstance() expects parameter 1 to be object, integer given in %s on line 8
+Warning: ReflectionClass::isInstance() expects parameter 1 to be object, int given in %s on line 8
 NULL
 
 Warning: ReflectionClass::isInstance() expects parameter 1 to be object, float given in %s on line 9
 NULL
 
-Warning: ReflectionClass::isInstance() expects parameter 1 to be object, boolean given in %s on line 10
+Warning: ReflectionClass::isInstance() expects parameter 1 to be object, bool given in %s on line 10
 NULL
 
 Warning: ReflectionClass::isInstance() expects parameter 1 to be object, string given in %s on line 11

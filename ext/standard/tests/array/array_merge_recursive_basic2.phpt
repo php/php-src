@@ -25,7 +25,7 @@ var_dump( array_merge_recursive($arr1,$arr2,$arr3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : associative arrays ***
 -- With default argument --
 array(2) {

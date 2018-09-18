@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author:                                                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #define _GNU_SOURCE
 #include "php.h"
@@ -487,9 +485,9 @@ PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char f
 {
 	register int mask = (1 << nbits) - 1;
 	register char *p = buf_end;
-	static char low_digits[] = "0123456789abcdef";
-	static char upper_digits[] = "0123456789ABCDEF";
-	register char *digits = (format == 'X') ? upper_digits : low_digits;
+	static const char low_digits[] = "0123456789abcdef";
+	static const char upper_digits[] = "0123456789ABCDEF";
+	register const char *digits = (format == 'X') ? upper_digits : low_digits;
 
 	do {
 		*--p = digits[num & mask];
@@ -1214,7 +1212,7 @@ fmt_error:
 			if (adjust_width && adjust == LEFT && (size_t)min_width > s_len)
 				PAD((size_t)min_width, s_len, pad_char);
 			if (free_zcopy) {
-				zval_dtor(&zcopy);
+				zval_ptr_dtor_str(&zcopy);
 			}
 		}
 skip_output:

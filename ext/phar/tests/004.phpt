@@ -10,5 +10,5 @@ Phar::mapPhar('hio');
 echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 __HALT_COMPILER(); must be declared in a phar

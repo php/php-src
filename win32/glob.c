@@ -34,8 +34,6 @@
  * SUCH DAMAGE.
  */
 
-/* $Id$ */
-
 /*
  * glob(3) -- a superset of the one defined in POSIX 1003.2.
  *
@@ -622,7 +620,6 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
 	register struct dirent *dp;
 	DIR *dirp;
 	int err;
-	char buf[MAXPATHLEN];
 
 	/*
 	 * The readdirfunc declaration can't be prototyped, because it is
@@ -640,6 +637,7 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
 	if ((dirp = g_opendir(pathbuf, pglob)) == NULL) {
 		/* TODO: don't call for ENOENT or ENOTDIR? */
 		if (pglob->gl_errfunc) {
+			char buf[MAXPATHLEN];
 			if (g_Ctoc(pathbuf, buf, sizeof(buf)))
 				return(GLOB_ABORTED);
 			if (pglob->gl_errfunc(buf, errno) ||
@@ -712,7 +710,6 @@ globextend(path, pglob, limitp)
 	size_t *limitp;
 {
 	register char **pathv;
-	register int i;
 	u_int newsize, len;
 	char *copy;
 	const Char *p;
@@ -729,6 +726,7 @@ globextend(path, pglob, limitp)
 	}
 
 	if (pglob->gl_pathv == NULL && pglob->gl_offs > 0) {
+		register int i;
 		/* first time around -- clear initial gl_offs items */
 		pathv += pglob->gl_offs;
 		for (i = pglob->gl_offs; --i >= 0; )
@@ -837,7 +835,7 @@ g_opendir(str, pglob)
 	char buf[MAXPATHLEN];
 
 	if (!*str)
-		strlcpy(buf, ".", sizeof buf);
+		strlcpy(buf, ".", sizeof(buf));
 	else {
 		if (g_Ctoc(str, buf, sizeof(buf)))
 			return(NULL);

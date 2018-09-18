@@ -1,11 +1,5 @@
 --TEST--
 Test strftime() function : usage variation - Checking newline and tab formats which was not supported on Windows before VC14.
---SKIPIF--
-<?php
-if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
-    die("skip Test is valid for Windows");
-}
-?>
 --FILE--
 <?php
 /* Prototype  : string strftime(string format [, int timestamp])
@@ -37,7 +31,7 @@ foreach($inputs as $key =>$value) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strftime() : usage variation ***
 
 --Newline character--

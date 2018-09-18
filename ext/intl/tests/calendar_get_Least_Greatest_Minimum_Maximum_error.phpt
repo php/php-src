@@ -98,11 +98,11 @@ bool(false)
 
 Warning: intlcal_get_minimum(): intlcal_get_minimum: invalid field in %s on line %d
 bool(false)
-error: 0, Argument 1 passed to intlcal_get_least_maximum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_least_maximum() must be an instance of IntlCalendar, int given
 
-error: 0, Argument 1 passed to intlcal_get_maximum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_maximum() must be an instance of IntlCalendar, int given
 
-error: 0, Argument 1 passed to intlcal_get_greatest_minimum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_greatest_minimum() must be an instance of IntlCalendar, int given
 
-error: 0, Argument 1 passed to intlcal_get_minimum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_minimum() must be an instance of IntlCalendar, int given
 

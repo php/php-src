@@ -42,9 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE2_MAJOR          10
-#define PCRE2_MINOR          30
+#define PCRE2_MINOR          31
 #define PCRE2_PRERELEASE     
-#define PCRE2_DATE           2017-08-14
+#define PCRE2_DATE           2018-02-12
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
@@ -208,7 +208,104 @@ greater than zero. */
 #define PCRE2_BSR_UNICODE         1
 #define PCRE2_BSR_ANYCRLF         2
 
-/* Error codes: no match and partial match are "expected" errors. */
+/* Error codes for pcre2_compile(). Some of these are also used by
+pcre2_pattern_convert(). */
+
+#define PCRE2_ERROR_END_BACKSLASH                  101
+#define PCRE2_ERROR_END_BACKSLASH_C                102
+#define PCRE2_ERROR_UNKNOWN_ESCAPE                 103
+#define PCRE2_ERROR_QUANTIFIER_OUT_OF_ORDER        104
+#define PCRE2_ERROR_QUANTIFIER_TOO_BIG             105
+#define PCRE2_ERROR_MISSING_SQUARE_BRACKET         106
+#define PCRE2_ERROR_ESCAPE_INVALID_IN_CLASS        107
+#define PCRE2_ERROR_CLASS_RANGE_ORDER              108
+#define PCRE2_ERROR_QUANTIFIER_INVALID             109
+#define PCRE2_ERROR_INTERNAL_UNEXPECTED_REPEAT     110
+#define PCRE2_ERROR_INVALID_AFTER_PARENS_QUERY     111
+#define PCRE2_ERROR_POSIX_CLASS_NOT_IN_CLASS       112
+#define PCRE2_ERROR_POSIX_NO_SUPPORT_COLLATING     113
+#define PCRE2_ERROR_MISSING_CLOSING_PARENTHESIS    114
+#define PCRE2_ERROR_BAD_SUBPATTERN_REFERENCE       115
+#define PCRE2_ERROR_NULL_PATTERN                   116
+#define PCRE2_ERROR_BAD_OPTIONS                    117
+#define PCRE2_ERROR_MISSING_COMMENT_CLOSING        118
+#define PCRE2_ERROR_PARENTHESES_NEST_TOO_DEEP      119
+#define PCRE2_ERROR_PATTERN_TOO_LARGE              120
+#define PCRE2_ERROR_HEAP_FAILED                    121
+#define PCRE2_ERROR_UNMATCHED_CLOSING_PARENTHESIS  122
+#define PCRE2_ERROR_INTERNAL_CODE_OVERFLOW         123
+#define PCRE2_ERROR_MISSING_CONDITION_CLOSING      124
+#define PCRE2_ERROR_LOOKBEHIND_NOT_FIXED_LENGTH    125
+#define PCRE2_ERROR_ZERO_RELATIVE_REFERENCE        126
+#define PCRE2_ERROR_TOO_MANY_CONDITION_BRANCHES    127
+#define PCRE2_ERROR_CONDITION_ASSERTION_EXPECTED   128
+#define PCRE2_ERROR_BAD_RELATIVE_REFERENCE         129
+#define PCRE2_ERROR_UNKNOWN_POSIX_CLASS            130
+#define PCRE2_ERROR_INTERNAL_STUDY_ERROR           131
+#define PCRE2_ERROR_UNICODE_NOT_SUPPORTED          132
+#define PCRE2_ERROR_PARENTHESES_STACK_CHECK        133
+#define PCRE2_ERROR_CODE_POINT_TOO_BIG             134
+#define PCRE2_ERROR_LOOKBEHIND_TOO_COMPLICATED     135
+#define PCRE2_ERROR_LOOKBEHIND_INVALID_BACKSLASH_C 136
+#define PCRE2_ERROR_UNSUPPORTED_ESCAPE_SEQUENCE    137
+#define PCRE2_ERROR_CALLOUT_NUMBER_TOO_BIG         138
+#define PCRE2_ERROR_MISSING_CALLOUT_CLOSING        139
+#define PCRE2_ERROR_ESCAPE_INVALID_IN_VERB         140
+#define PCRE2_ERROR_UNRECOGNIZED_AFTER_QUERY_P     141
+#define PCRE2_ERROR_MISSING_NAME_TERMINATOR        142
+#define PCRE2_ERROR_DUPLICATE_SUBPATTERN_NAME      143
+#define PCRE2_ERROR_INVALID_SUBPATTERN_NAME        144
+#define PCRE2_ERROR_UNICODE_PROPERTIES_UNAVAILABLE 145
+#define PCRE2_ERROR_MALFORMED_UNICODE_PROPERTY     146
+#define PCRE2_ERROR_UNKNOWN_UNICODE_PROPERTY       147
+#define PCRE2_ERROR_SUBPATTERN_NAME_TOO_LONG       148
+#define PCRE2_ERROR_TOO_MANY_NAMED_SUBPATTERNS     149
+#define PCRE2_ERROR_CLASS_INVALID_RANGE            150
+#define PCRE2_ERROR_OCTAL_BYTE_TOO_BIG             151
+#define PCRE2_ERROR_INTERNAL_OVERRAN_WORKSPACE     152
+#define PCRE2_ERROR_INTERNAL_MISSING_SUBPATTERN    153
+#define PCRE2_ERROR_DEFINE_TOO_MANY_BRANCHES       154
+#define PCRE2_ERROR_BACKSLASH_O_MISSING_BRACE      155
+#define PCRE2_ERROR_INTERNAL_UNKNOWN_NEWLINE       156
+#define PCRE2_ERROR_BACKSLASH_G_SYNTAX             157
+#define PCRE2_ERROR_PARENS_QUERY_R_MISSING_CLOSING 158
+#define PCRE2_ERROR_VERB_ARGUMENT_NOT_ALLOWED      159
+#define PCRE2_ERROR_VERB_UNKNOWN                   160
+#define PCRE2_ERROR_SUBPATTERN_NUMBER_TOO_BIG      161
+#define PCRE2_ERROR_SUBPATTERN_NAME_EXPECTED       162
+#define PCRE2_ERROR_INTERNAL_PARSED_OVERFLOW       163
+#define PCRE2_ERROR_INVALID_OCTAL                  164
+#define PCRE2_ERROR_SUBPATTERN_NAMES_MISMATCH      165
+#define PCRE2_ERROR_MARK_MISSING_ARGUMENT          166
+#define PCRE2_ERROR_INVALID_HEXADECIMAL            167
+#define PCRE2_ERROR_BACKSLASH_C_SYNTAX             168
+#define PCRE2_ERROR_BACKSLASH_K_SYNTAX             169
+#define PCRE2_ERROR_INTERNAL_BAD_CODE_LOOKBEHINDS  170
+#define PCRE2_ERROR_BACKSLASH_N_IN_CLASS           171
+#define PCRE2_ERROR_CALLOUT_STRING_TOO_LONG        172
+#define PCRE2_ERROR_UNICODE_DISALLOWED_CODE_POINT  173
+#define PCRE2_ERROR_UTF_IS_DISABLED                174
+#define PCRE2_ERROR_UCP_IS_DISABLED                175
+#define PCRE2_ERROR_VERB_NAME_TOO_LONG             176
+#define PCRE2_ERROR_BACKSLASH_U_CODE_POINT_TOO_BIG 177
+#define PCRE2_ERROR_MISSING_OCTAL_OR_HEX_DIGITS    178
+#define PCRE2_ERROR_VERSION_CONDITION_SYNTAX       179
+#define PCRE2_ERROR_INTERNAL_BAD_CODE_AUTO_POSSESS 180
+#define PCRE2_ERROR_CALLOUT_NO_STRING_DELIMITER    181
+#define PCRE2_ERROR_CALLOUT_BAD_STRING_DELIMITER   182
+#define PCRE2_ERROR_BACKSLASH_C_CALLER_DISABLED    183
+#define PCRE2_ERROR_QUERY_BARJX_NEST_TOO_DEEP      184
+#define PCRE2_ERROR_BACKSLASH_C_LIBRARY_DISABLED   185
+#define PCRE2_ERROR_PATTERN_TOO_COMPLICATED        186
+#define PCRE2_ERROR_LOOKBEHIND_TOO_LONG            187
+#define PCRE2_ERROR_PATTERN_STRING_TOO_LONG        188
+#define PCRE2_ERROR_INTERNAL_BAD_CODE              189
+#define PCRE2_ERROR_INTERNAL_BAD_CODE_IN_SKIP      190
+#define PCRE2_ERROR_NO_SURROGATES_IN_UTF16         191
+#define PCRE2_ERROR_BAD_LITERAL_OPTIONS            192
+
+
+/* "Expected" matching error codes: no match and partial match. */
 
 #define PCRE2_ERROR_NOMATCH          (-1)
 #define PCRE2_ERROR_PARTIAL          (-2)
@@ -248,10 +345,10 @@ greater than zero. */
 #define PCRE2_ERROR_UTF32_ERR1      (-27)
 #define PCRE2_ERROR_UTF32_ERR2      (-28)
 
-/* Error codes for pcre2[_dfa]_match(), substring extraction functions, context
-functions, and serializing functions. They are in numerical order. Originally
-they were in alphabetical order too, but now that PCRE2 is released, the
-numbers must not be changed. */
+/* Miscellaneous error codes for pcre2[_dfa]_match(), substring extraction
+functions, context functions, and serializing functions. They are in numerical
+order. Originally they were in alphabetical order too, but now that PCRE2 is
+released, the numbers must not be changed. */
 
 #define PCRE2_ERROR_BADDATA           (-29)
 #define PCRE2_ERROR_MIXEDTABLES       (-30)  /* Name was changed */
@@ -321,6 +418,7 @@ numbers must not be changed. */
 #define PCRE2_INFO_HASBACKSLASHC        23
 #define PCRE2_INFO_FRAMESIZE            24
 #define PCRE2_INFO_HEAPLIMIT            25
+#define PCRE2_INFO_EXTRAOPTIONS         26
 
 /* Request types for pcre2_config(). */
 
@@ -338,6 +436,9 @@ numbers must not be changed. */
 #define PCRE2_CONFIG_UNICODE_VERSION        10
 #define PCRE2_CONFIG_VERSION                11
 #define PCRE2_CONFIG_HEAPLIMIT              12
+#define PCRE2_CONFIG_NEVER_BACKSLASH_C      13
+#define PCRE2_CONFIG_COMPILED_WIDTHS        14
+
 
 /* Types for code units in patterns and subject strings. */
 
@@ -393,6 +494,11 @@ without changing the API of the function, thereby allowing old clients to work
 without modification. Define the generic version in a macro; the width-specific
 versions are generated from this macro below. */
 
+/* Flags for the callout_flags field. These are cleared after a callout. */
+
+#define PCRE2_CALLOUT_STARTMATCH    0x00000001u  /* Set for each bumpalong */
+#define PCRE2_CALLOUT_BACKTRACK     0x00000002u  /* Set after a backtrack */
+
 #define PCRE2_STRUCTURE_LIST \
 typedef struct pcre2_callout_block { \
   uint32_t      version;           /* Identifies version of block */ \
@@ -412,6 +518,8 @@ typedef struct pcre2_callout_block { \
   PCRE2_SIZE    callout_string_offset; /* Offset to string within pattern */ \
   PCRE2_SIZE    callout_string_length; /* Length of string compiled into pattern */ \
   PCRE2_SPTR    callout_string;    /* String compiled into pattern */ \
+  /* ------------------- Added for Version 2 -------------------------- */ \
+  uint32_t      callout_flags;     /* See above for list */ \
   /* ------------------------------------------------------------------ */ \
 } pcre2_callout_block; \
 \

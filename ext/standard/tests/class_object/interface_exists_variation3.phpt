@@ -23,7 +23,7 @@ var_dump(interface_exists("AutoInterface", true));
 echo "\nDONE\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing interface_exists() : autoloaded interface ***
 
 -- no autoloading --

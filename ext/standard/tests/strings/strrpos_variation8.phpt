@@ -24,7 +24,7 @@ for($offset = -1; $offset <= strlen($haystack); $offset++ ) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: strings repetitive chars ***
 -- Iteration 1 --
 int(4)

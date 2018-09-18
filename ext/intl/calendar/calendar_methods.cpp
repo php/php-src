@@ -18,6 +18,9 @@
 #include "config.h"
 #endif
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "../intl_cppshims.h"
 
 #include <unicode/locid.h>
@@ -39,6 +42,8 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 #include "../common/common_enum.h"
+
+using icu::Locale;
 
 U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 {
@@ -84,11 +89,10 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 	calendar_object_create(return_value, cal);
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 class BugStringCharEnumeration : public StringEnumeration
 {
 public:
-	BugStringCharEnumeration(UEnumeration* _uenum) : uenum(_uenum) {}
+	explicit BugStringCharEnumeration(UEnumeration* _uenum) : uenum(_uenum) {}
 
 	~BugStringCharEnumeration()
 	{
@@ -180,7 +184,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 
 	IntlIterator_from_StringEnumeration(se, return_value);
 }
-#endif //ICU 4.2 only
 
 U_CFUNC PHP_FUNCTION(intlcal_get_now)
 {
@@ -591,7 +594,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_actual_minimum)
 		"intlcal_get_actual_minimum", INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 {
 	zend_long	dow;
@@ -619,7 +621,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 
 	RETURN_LONG((zend_long)result);
 }
-#endif
 
 U_CFUNC PHP_FUNCTION(intlcal_get_first_day_of_week)
 {
@@ -784,7 +785,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_type)
 	RETURN_STRING(co->ucal->getType());
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 {
 	zend_long	dow;
@@ -812,7 +812,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 
 	RETURN_LONG((zend_long)res);
 }
-#endif
 
 U_CFUNC PHP_FUNCTION(intlcal_in_daylight_time)
 {
@@ -899,7 +898,6 @@ U_CFUNC PHP_FUNCTION(intlcal_is_set)
 	RETURN_BOOL((int)co->ucal->isSet((UCalendarDateFields)field));
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 {
 	double date;
@@ -924,7 +922,6 @@ U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 		RETURN_BOOL((int)ret);
 	}
 }
-#endif
 
 
 U_CFUNC PHP_FUNCTION(intlcal_set_first_day_of_week)
@@ -1025,8 +1022,6 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 	RETURN_BOOL((int)result);
 }
 
-#if U_ICU_VERSION_MAJOR_NUM >= 49
-
 U_CFUNC PHP_FUNCTION(intlcal_get_repeated_wall_time_option)
 {
 	CALENDAR_METHOD_INIT_VARS;
@@ -1110,8 +1105,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 	RETURN_TRUE;
 }
 
-#endif
-
 U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 {
 	zval			*zv_arg,
@@ -1136,7 +1129,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	if (!(Z_TYPE_P(zv_arg) == IS_OBJECT && instanceof_function(
 			Z_OBJCE_P(zv_arg), php_date_get_date_ce()))) {
 		object_init_ex(&zv_tmp, php_date_get_date_ce());
-		zend_call_method_with_1_params(&zv_tmp, NULL, NULL, "__construct", NULL, zv_arg);
+		zend_call_method_with_1_params(&zv_tmp, NULL, &Z_OBJCE(zv_tmp)->constructor, "__construct", NULL, zv_arg);
 		zv_datetime = &zv_tmp;
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(Z_OBJ(zv_tmp));
@@ -1252,7 +1245,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 
 	/* Finally, instantiate object and call constructor */
 	object_init_ex(return_value, php_date_get_date_ce());
-	zend_call_method_with_2_params(return_value, NULL, NULL, "__construct", NULL, &ts_zval, timezone_zval);
+	zend_call_method_with_2_params(return_value, NULL, &Z_OBJCE_P(return_value)->constructor, "__construct", NULL, &ts_zval, timezone_zval);
 	if (EG(exception)) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_to_date_time: DateTime constructor has thrown exception",

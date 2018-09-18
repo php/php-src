@@ -49,7 +49,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation13.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Checking stat() on a file opened using read/write mode ***
 bool(true)
 bool(true)

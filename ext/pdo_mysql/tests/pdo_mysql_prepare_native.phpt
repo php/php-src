@@ -341,7 +341,7 @@ require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {

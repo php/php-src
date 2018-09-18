@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: $ */
-
 #ifndef ZEND_STRING_H
 #define ZEND_STRING_H
 
@@ -26,18 +24,20 @@
 BEGIN_EXTERN_C()
 
 typedef void (*zend_string_copy_storage_func_t)(void);
-typedef zend_string *(*zend_new_interned_string_func_t)(zend_string *str);
-typedef zend_string *(*zend_string_init_interned_func_t)(const char *str, size_t size, int permanent);
+typedef zend_string *(ZEND_FASTCALL *zend_new_interned_string_func_t)(zend_string *str);
+typedef zend_string *(ZEND_FASTCALL *zend_string_init_interned_func_t)(const char *str, size_t size, int permanent);
 
 ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API extern zend_string_init_interned_func_t zend_string_init_interned;
 
-ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
+ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str);
+ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
+ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
+
 ZEND_API void zend_interned_strings_init(void);
 ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
-ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str);
 ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler);
 ZEND_API void zend_interned_strings_set_permanent_storage_copy_handlers(zend_string_copy_storage_func_t copy_handler, zend_string_copy_storage_func_t restore_handler);
 ZEND_API void zend_interned_strings_switch_storage(zend_bool request);
@@ -96,10 +96,7 @@ END_EXTERN_C()
 
 static zend_always_inline zend_ulong zend_string_hash_val(zend_string *s)
 {
-	if (!ZSTR_H(s)) {
-		ZSTR_H(s) = zend_hash_func(ZSTR_VAL(s), ZSTR_LEN(s));
-	}
-	return ZSTR_H(s);
+	return ZSTR_H(s) ? ZSTR_H(s) : zend_string_hash_func(s);
 }
 
 static zend_always_inline void zend_string_forget_hash_val(zend_string *s)
@@ -136,14 +133,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);
 
 	GC_SET_REFCOUNT(ret, 1);
-#if 1
-	/* optimized single assignment */
-	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << 8);
-#else
-	GC_TYPE(ret) = IS_STRING;
-	GC_FLAGS(ret) = (persistent ? IS_STR_PERSISTENT : 0);
-	GC_INFO(ret) = 0;
-#endif
+	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
 	zend_string_forget_hash_val(ret);
 	ZSTR_LEN(ret) = len;
 	return ret;
@@ -154,14 +144,7 @@ static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m
 	zend_string *ret = (zend_string *)safe_pemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent);
 
 	GC_SET_REFCOUNT(ret, 1);
-#if 1
-	/* optimized single assignment */
-	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << 8);
-#else
-	GC_TYPE(ret) = IS_STRING;
-	GC_FLAGS(ret) = (persistent ? IS_STR_PERSISTENT : 0);
-	GC_INFO(ret) = 0;
-#endif
+	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
 	zend_string_forget_hash_val(ret);
 	ZSTR_LEN(ret) = (n * m) + l;
 	return ret;
@@ -279,6 +262,14 @@ static zend_always_inline void zend_string_free(zend_string *s)
 	}
 }
 
+static zend_always_inline void zend_string_efree(zend_string *s)
+{
+	ZEND_ASSERT(!ZSTR_IS_INTERNED(s));
+	ZEND_ASSERT(GC_REFCOUNT(s) <= 1);
+	ZEND_ASSERT(!(GC_FLAGS(s) & IS_STR_PERSISTENT));
+	efree(s);
+}
+
 static zend_always_inline void zend_string_release(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
@@ -288,10 +279,38 @@ static zend_always_inline void zend_string_release(zend_string *s)
 	}
 }
 
+static zend_always_inline void zend_string_release_ex(zend_string *s, int persistent)
+{
+	if (!ZSTR_IS_INTERNED(s)) {
+		if (GC_DELREF(s) == 0) {
+			if (persistent) {
+				ZEND_ASSERT(GC_FLAGS(s) & IS_STR_PERSISTENT);
+				free(s);
+			} else {
+				ZEND_ASSERT(!(GC_FLAGS(s) & IS_STR_PERSISTENT));
+				efree(s);
+			}
+		}
+	}
+}
+
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+#else
+static zend_always_inline zend_bool zend_string_equal_val(zend_string *s1, zend_string *s2)
+{
+	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
+}
+#endif
+
+static zend_always_inline zend_bool zend_string_equal_content(zend_string *s1, zend_string *s2)
+{
+	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
+}
 
 static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_string *s2)
 {
-	return s1 == s2 || (ZSTR_LEN(s1) == ZSTR_LEN(s2) && !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1)));
+	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
 
 #define zend_string_equals_ci(s1, s2) \
@@ -419,6 +438,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_RESOURCE,               "resource") \
 	_(ZEND_STR_CLOSED_RESOURCE,        "resource (closed)") \
 	_(ZEND_STR_NAME,                   "name") \
+	_(ZEND_STR_ARGV,                   "argv") \
+	_(ZEND_STR_ARGC,                   "argc") \
 
 
 typedef enum _zend_known_string_id {

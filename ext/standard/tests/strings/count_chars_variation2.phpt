@@ -117,11 +117,11 @@ Warning: count_chars(): Unknown mode in %s on line %d
 bool(false)
 -- Iteration 11 --
 
-Warning: count_chars() expects parameter 2 to be integer, array given in %s on line %d
+Warning: count_chars() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: count_chars() expects parameter 2 to be integer, array given in %s on line %d
+Warning: count_chars() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 -- Iteration 13 --
 bool(true)
@@ -137,11 +137,11 @@ bool(true)
 bool(true)
 -- Iteration 19 --
 
-Warning: count_chars() expects parameter 2 to be integer, string given in %s on line %d
+Warning: count_chars() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 -- Iteration 20 --
 
-Warning: count_chars() expects parameter 2 to be integer, string given in %s on line %d
+Warning: count_chars() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 -- Iteration 21 --
 
@@ -155,7 +155,7 @@ Warning: count_chars(): Unknown mode in %s on line %d
 bool(false)
 -- Iteration 23 --
 
-Warning: count_chars() expects parameter 2 to be integer, object given in %s on line %d
+Warning: count_chars() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 -- Iteration 24 --
 bool(true)

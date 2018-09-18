@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
   |          Kévin Dunglas <dunglas@gmail.com>                           |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php_filter.h"
 #include "filter_private.h"
@@ -330,7 +328,10 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int decimal_set;
 	size_t decimal_len;
 	char dec_sep = '.';
-	char tsd_sep[3] = "',.";
+	char *thousand;
+	int thousand_set;
+	size_t thousand_len;
+	char *tsd_sep;
 
 	zend_long lval;
 	double dval;
@@ -352,6 +353,19 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		} else {
 			dec_sep = *decimal;
 		}
+	}
+
+	FETCH_STRING_OPTION(thousand, "thousand");
+
+	if (thousand_set) {
+		if (thousand_len < 1) {
+			php_error_docref(NULL, E_WARNING, "thousand separator must be at least one char");
+			RETURN_VALIDATION_FAILED
+		} else {
+			tsd_sep = thousand;
+		}
+	} else {
+		tsd_sep = "',.";
 	}
 
 	num = p = emalloc(len+1);
@@ -387,7 +401,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			}
 			break;
 		}
-		if ((flags & FILTER_FLAG_ALLOW_THOUSAND) && (*str == tsd_sep[0] || *str == tsd_sep[1] || *str == tsd_sep[2])) {
+		if ((flags & FILTER_FLAG_ALLOW_THOUSAND) && strchr(tsd_sep, *str)) {
 			if (first?(n < 1 || n > 3):(n != 3)) {
 				goto error;
 			}
@@ -523,6 +537,11 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	php_url *url;
 	size_t old_len = Z_STRLEN_P(value);
 
+	if (flags & (FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED)) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"explicit use of FILTER_FLAG_SCHEME_REQUIRED and FILTER_FLAG_HOST_REQUIRED is deprecated");
+	}
+
 	php_filter_url(value, flags, option_array, charset);
 
 	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRLEN_P(value)) {
@@ -628,11 +647,10 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	sregexp = zend_string_init(regexp, regexp_len, 0);
 	re = pcre_get_compiled_regex(sregexp, &capture_count, &preg_options);
+	zend_string_release_ex(sregexp, 0);
 	if (!re) {
-		zend_string_release(sregexp);
 		RETURN_VALIDATION_FAILED
 	}
-	zend_string_release(sregexp);
 	match_data = php_pcre_create_match_data(capture_count, re);
 	if (!match_data) {
 		RETURN_VALIDATION_FAILED
@@ -740,7 +758,7 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 					return (blocks <= 8);
 				}
 			} else if ((str - 1) == s) {
-				/* dont allow leading : without another : following */
+				/* don't allow leading : without another : following */
 				return 0;
 			}
 		}

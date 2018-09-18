@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@
 # define accel_xlat_set(old, new)	zend_hash_index_add_new_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old), (new))
 # define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old))
 #else
-# define accel_xlat_set(old, new)	zend_hash_str_add_new_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (old))
+# define accel_xlat_set(old, new)	zend_hash_str_add_new_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (new))
 # define accel_xlat_get(old)	    zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*))
 #endif
 
@@ -39,31 +39,6 @@
 
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
-
-static void zend_accel_destroy_zend_function(zval *zv)
-{
-	zend_function *function = Z_PTR_P(zv);
-
-	if (function->type == ZEND_USER_FUNCTION) {
-		if (function->op_array.static_variables) {
-			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				if (GC_DELREF(function->op_array.static_variables) == 0) {
-					FREE_HASHTABLE(function->op_array.static_variables);
-				}
-			}
-			function->op_array.static_variables = NULL;
-		}
-	}
-
-	destroy_zend_function(function);
-}
-
-static void zend_accel_destroy_zend_class(zval *zv)
-{
-	zend_class_entry *ce = Z_PTR_P(zv);
-	ce->function_table.pDestructor = zend_accel_destroy_zend_function;
-	destroy_zend_class(zv);
-}
 
 zend_persistent_script* create_persistent_script(void)
 {
@@ -82,10 +57,7 @@ zend_persistent_script* create_persistent_script(void)
 
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
 {
-	if (destroy_elements) {
-		persistent_script->script.function_table.pDestructor = zend_accel_destroy_zend_function;
-		persistent_script->script.class_table.pDestructor = zend_accel_destroy_zend_class;
-	} else {
+	if (!destroy_elements) {
 		persistent_script->script.function_table.pDestructor = NULL;
 		persistent_script->script.class_table.pDestructor = NULL;
 	}
@@ -94,30 +66,17 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 	zend_hash_destroy(&persistent_script->script.class_table);
 
 	if (persistent_script->script.filename) {
-		zend_string_release(persistent_script->script.filename);
+		zend_string_release_ex(persistent_script->script.filename, 0);
 	}
 
 	efree(persistent_script);
 }
 
-static int is_not_internal_function(zval *zv)
-{
-	zend_function *function = Z_PTR_P(zv);
-	return(function->type != ZEND_INTERNAL_FUNCTION);
-}
-
-void zend_accel_free_user_functions(HashTable *ht)
-{
-	dtor_func_t orig_dtor = ht->pDestructor;
-
-	ht->pDestructor = NULL;
-	zend_hash_apply(ht, (apply_func_t) is_not_internal_function);
-	ht->pDestructor = orig_dtor;
-}
-
-void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
+void zend_accel_move_user_functions(HashTable *src, zend_script *script)
 {
 	Bucket *p;
+	HashTable *dst = &script->function_table;
+	zend_string *filename = script->main_op_array.filename;
 	dtor_func_t orig_dtor = src->pDestructor;
 
 	src->pDestructor = NULL;
@@ -125,7 +84,8 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
 	ZEND_HASH_REVERSE_FOREACH_BUCKET(src, p) {
 		zend_function *function = Z_PTR(p->val);
 
-		if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
+		if (EXPECTED(function->type == ZEND_USER_FUNCTION)
+		 && EXPECTED(function->op_array.filename == filename)) {
 			_zend_hash_append_ptr(dst, p->key, function);
 			zend_hash_del_bucket(src, p);
 		} else {
@@ -133,21 +93,6 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
 		}
 	} ZEND_HASH_FOREACH_END();
 	src->pDestructor = orig_dtor;
-}
-
-static int copy_internal_function(zval *zv, HashTable *function_table)
-{
-	zend_internal_function *function = Z_PTR_P(zv);
-	if (function->type == ZEND_INTERNAL_FUNCTION) {
-		zend_hash_update_mem(function_table, function->function_name, function, sizeof(zend_internal_function));
-	}
-	return 0;
-}
-
-void zend_accel_copy_internal_functions(void)
-{
-	zend_hash_apply_with_argument(CG(function_table), (apply_func_arg_t)copy_internal_function, &ZCG(function_table));
-	ZCG(internal_functions_count) = zend_hash_num_elements(&ZCG(function_table));
 }
 
 static inline void zend_clone_zval(zval *src)
@@ -180,23 +125,23 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
-	ht->pDestructor = ZVAL_PTR_DTOR;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
-	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->pDestructor = NULL;
+	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
+	ht->nInternalPointer = 0;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		ht->arData = source->arData;
 		return;
 	}
 
-	ZEND_ASSERT((source->u.flags & HASH_FLAG_PACKED) == 0);
+	ZEND_ASSERT((HT_FLAGS(source) & HASH_FLAG_PACKED) == 0);
 	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
 	HT_HASH_RESET(ht);
 
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		nIndex = p->h | ht->nTableMask;
 
 		/* Insert into hash collision list */
@@ -232,22 +177,22 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
-	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
+	ht->nInternalPointer = 0;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		ht->arData = source->arData;
 		return;
 	}
 
-	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
+	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
 	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
 	HT_HASH_RESET(ht);
 
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 
 		nIndex = p->h | ht->nTableMask;
 
@@ -290,22 +235,22 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
-	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
+	ht->nInternalPointer = 0;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		ht->arData = source->arData;
 		return;
 	}
 
-	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
+	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
 	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
 	HT_HASH_RESET(ht);
 
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 
 		nIndex = p->h | ht->nTableMask;
 
@@ -347,6 +292,10 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;
 
+	if (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
+		ce->parent = ARENA_REALLOC(ce->parent);
+	}
+
 	if (old_ce->default_properties_table) {
 		ce->default_properties_table = emalloc(sizeof(zval) * old_ce->default_properties_count);
 		src = old_ce->default_properties_table;
@@ -362,13 +311,29 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 
 	/* static members */
 	if (old_ce->default_static_members_table) {
+		int i, end;
+		zend_class_entry *parent = (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) ? NULL : ce->parent;
+
 		ce->default_static_members_table = emalloc(sizeof(zval) * old_ce->default_static_members_count);
-		src = old_ce->default_static_members_table;
-		end = src + old_ce->default_static_members_count;
-		dst = ce->default_static_members_table;
-		for (; src != end; src++, dst++) {
-			ZVAL_COPY_VALUE(dst, src);
-			zend_clone_zval(dst);
+		i = ce->default_static_members_count - 1;
+
+		/* Copy static properties in this class */
+		end = parent ? parent->default_static_members_count : 0;
+		for (; i >= end; i--) {
+			zval *p = &ce->default_static_members_table[i];
+			ZVAL_COPY_VALUE(p, &old_ce->default_static_members_table[i]);
+			zend_clone_zval(p);
+		}
+
+		/* Create indirections to static properties from parent classes */
+		while (parent && parent->default_static_members_table) {
+			end = parent->parent ? parent->parent->default_static_members_count : 0;
+			for (; i >= end; i--) {
+				zval *p = &ce->default_static_members_table[i];
+				ZVAL_INDIRECT(p, &parent->default_static_members_table[i]);
+			}
+
+			parent = parent->parent;
 		}
 	}
 	ce->static_members_table = ce->default_static_members_table;
@@ -379,16 +344,13 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	/* constants table */
 	zend_hash_clone_constants(&ce->constants_table, &old_ce->constants_table);
 
-	/* interfaces aren't really implemented, so we create a new table */
 	if (ce->num_interfaces) {
-		ce->interfaces = emalloc(sizeof(zend_class_entry *) * ce->num_interfaces);
-		memset(ce->interfaces, 0, sizeof(zend_class_entry *) * ce->num_interfaces);
-	} else {
-		ce->interfaces = NULL;
-	}
+		zend_class_name *interface_names;
 
-	if (ce->parent) {
-		ce->parent = ARENA_REALLOC(ce->parent);
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+		interface_names = emalloc(sizeof(zend_class_name) * ce->num_interfaces);
+		memcpy(interface_names, ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
+		ce->interface_names = interface_names;
 	}
 
 	zend_update_inherited_handler(constructor);
@@ -410,62 +372,47 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_update_inherited_handler(__debugInfo);
 
 /* 5.4 traits */
-	if (ce->trait_aliases) {
-		zend_trait_alias **trait_aliases;
-		int i = 0;
+	if (ce->num_traits) {
+		zend_class_name *trait_names = emalloc(sizeof(zend_class_name) * ce->num_traits);
 
-		while (ce->trait_aliases[i]) {
-			i++;
-		}
-		trait_aliases = emalloc(sizeof(zend_trait_alias*) * (i + 1));
-		i = 0;
-		while (ce->trait_aliases[i]) {
-			trait_aliases[i] = emalloc(sizeof(zend_trait_alias));
-			memcpy(trait_aliases[i], ce->trait_aliases[i], sizeof(zend_trait_alias));
-			trait_aliases[i]->trait_method = emalloc(sizeof(zend_trait_method_reference));
-			memcpy(trait_aliases[i]->trait_method, ce->trait_aliases[i]->trait_method, sizeof(zend_trait_method_reference));
-			i++;
-		}
-		trait_aliases[i] = NULL;
-		ce->trait_aliases = trait_aliases;
-	}
+		memcpy(trait_names, ce->trait_names, sizeof(zend_class_name) * ce->num_traits);
+		ce->trait_names = trait_names;
 
-	if (ce->trait_precedences) {
-		zend_trait_precedence **trait_precedences;
-		int i = 0;
+		if (ce->trait_aliases) {
+			zend_trait_alias **trait_aliases;
+			int i = 0;
 
-		while (ce->trait_precedences[i]) {
-			i++;
-		}
-		trait_precedences = emalloc(sizeof(zend_trait_precedence*) * (i + 1));
-		i = 0;
-		while (ce->trait_precedences[i]) {
-			trait_precedences[i] = emalloc(sizeof(zend_trait_precedence));
-			memcpy(trait_precedences[i], ce->trait_precedences[i], sizeof(zend_trait_precedence));
-			trait_precedences[i]->trait_method = emalloc(sizeof(zend_trait_method_reference));
-			memcpy(trait_precedences[i]->trait_method, ce->trait_precedences[i]->trait_method, sizeof(zend_trait_method_reference));
-
-			if (trait_precedences[i]->exclude_from_classes) {
-				zend_string **exclude_from_classes;
-				int j = 0;
-
-				while (trait_precedences[i]->exclude_from_classes[j].class_name) {
-					j++;
-				}
-				exclude_from_classes = emalloc(sizeof(zend_string*) * (j + 1));
-				j = 0;
-				while (trait_precedences[i]->exclude_from_classes[j].class_name) {
-					exclude_from_classes[j] =
-						trait_precedences[i]->exclude_from_classes[j].class_name;
-					j++;
-				}
-				exclude_from_classes[j] = NULL;
-				trait_precedences[i]->exclude_from_classes = (void*)exclude_from_classes;
+			while (ce->trait_aliases[i]) {
+				i++;
 			}
-			i++;
+			trait_aliases = emalloc(sizeof(zend_trait_alias*) * (i + 1));
+			i = 0;
+			while (ce->trait_aliases[i]) {
+				trait_aliases[i] = emalloc(sizeof(zend_trait_alias));
+				memcpy(trait_aliases[i], ce->trait_aliases[i], sizeof(zend_trait_alias));
+				i++;
+			}
+			trait_aliases[i] = NULL;
+			ce->trait_aliases = trait_aliases;
 		}
-		trait_precedences[i] = NULL;
-		ce->trait_precedences = trait_precedences;
+
+		if (ce->trait_precedences) {
+			zend_trait_precedence **trait_precedences;
+			int i = 0;
+
+			while (ce->trait_precedences[i]) {
+				i++;
+			}
+			trait_precedences = emalloc(sizeof(zend_trait_precedence*) * (i + 1));
+			i = 0;
+			while (ce->trait_precedences[i]) {
+				trait_precedences[i] = emalloc(sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
+				memcpy(trait_precedences[i], ce->trait_precedences[i], sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
+				i++;
+			}
+			trait_precedences[i] = NULL;
+			ce->trait_precedences = trait_precedences;
+		}
 	}
 }
 
@@ -479,9 +426,9 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find(target, p->key);
+		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key */
@@ -493,7 +440,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 			_zend_hash_append_ptr(target, p->key, Z_PTR(p->val));
 		}
 	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
+	target->nInternalPointer = 0;
 	return;
 
 failure:
@@ -523,21 +470,21 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find(target, p->key);
+		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key */
-				zend_hash_update_ptr(target, p->key, ARENA_REALLOC(Z_PTR(p->val)));
+				zend_hash_update_ptr(target, p->key, Z_PTR(p->val));
 			} else {
 				goto failure;
 			}
 		} else {
-			_zend_hash_append_ptr(target, p->key, ARENA_REALLOC(Z_PTR(p->val)));
+			_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
 		}
 	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
+	target->nInternalPointer = 0;
 	return;
 
 failure:
@@ -557,7 +504,7 @@ failure:
 	}
 }
 
-static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor)
+static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 {
 	Bucket *p, *end;
 	zval *t;
@@ -568,7 +515,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 	for (; p != end; p++) {
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find(target, p->key);
+		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key - ignore and wait for runtime */
@@ -588,19 +535,170 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 			}
 		} else {
 			t = _zend_hash_append_ptr(target, p->key, Z_PTR(p->val));
-			if (pCopyConstructor) {
-				pCopyConstructor(&Z_PTR_P(t));
-			}
 		}
 	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
+	target->nInternalPointer = 0;
 	return;
 }
 
-#ifdef __SSE2__
-#include <mmintrin.h>
-#include <emmintrin.h>
+static void zend_accel_class_hash_copy_from_shm(HashTable *target, HashTable *source)
+{
+	Bucket *p, *end;
+	zval *t;
 
+	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
+	p = source->arData;
+	end = p + source->nNumUsed;
+	for (; p != end; p++) {
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
+		ZEND_ASSERT(p->key);
+		t = zend_hash_find_ex(target, p->key, 1);
+		if (UNEXPECTED(t != NULL)) {
+			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
+				/* Mangled key - ignore and wait for runtime */
+				continue;
+			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
+				zend_class_entry *ce1 = Z_PTR(p->val);
+				if (!(ce1->ce_flags & ZEND_ACC_ANON_CLASS)) {
+					CG(in_compilation) = 1;
+					zend_set_compiled_filename(ce1->info.user.filename);
+					CG(zend_lineno) = ce1->info.user.line_start;
+					zend_error(E_ERROR,
+							"Cannot declare %s %s, because the name is already in use",
+							zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
+					return;
+				}
+				continue;
+			}
+		} else {
+			t = _zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+			zend_class_copy_ctor((zend_class_entry**)&Z_PTR_P(t));
+		}
+	}
+	target->nInternalPointer = 0;
+	return;
+}
+
+#if defined(__AVX__)
+# include <nmmintrin.h>
+# if defined(__GNUC__) && defined(__i386__)
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	size_t delta = (char*)dest - (char*)src;
+
+	__asm__ volatile (
+		".align 16\n\t"
+		".LL0%=:\n\t"
+		"prefetchnta 0x40(%1)\n\t"
+		"vmovaps (%1), %%ymm0\n\t"
+		"vmovaps 0x20(%1), %%ymm1\n\t"
+		"vmovaps %%ymm0, (%1,%2)\n\t"
+		"vmovaps %%ymm1, 0x20(%1,%2)\n\t"
+		"addl $0x40, %1\n\t"
+		"subl $0x40, %0\n\t"
+		"ja .LL0%="
+		: "+r"(size),
+		"+r"(src)
+		: "r"(delta)
+		: "cc", "memory", "%ymm0", "%ymm1");
+}
+# elif defined(__GNUC__) && defined(__x86_64__)
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	size_t delta = (char*)dest - (char*)src;
+
+	__asm__ volatile (
+		".align 16\n\t"
+		".LL0%=:\n\t"
+		"prefetchnta 0x40(%1)\n\t"
+		"vmovaps (%1), %%ymm0\n\t"
+		"vmovaps 0x20(%1), %%ymm1\n\t"
+		"vmovaps %%ymm0, (%1,%2)\n\t"
+		"vmovaps %%ymm1, 0x20(%1,%2)\n\t"
+		"addq $0x40, %1\n\t"
+		"subq $0x40, %0\n\t"
+		"ja .LL0%="
+		: "+r"(size),
+		"+r"(src)
+		: "r"(delta)
+		: "cc", "memory", "%ymm0", "%ymm1");
+}
+# else
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	__m256 *dqdest = (__m256*)dest;
+	const __m256 *dqsrc  = (const __m256*)src;
+	const __m256 *end  = (const __m256*)((const char*)src + size);
+
+	do {
+#ifdef PHP_WIN32
+		_mm_prefetch((const char *)(dqsrc + 2), _MM_HINT_NTA);
+#else
+		_mm_prefetch(dqsrc + 2, _MM_HINT_NTA);
+#endif
+
+		__m256 ymm0 = _mm256_load_ps((const float *)(dqsrc + 0));
+		__m256 ymm1 = _mm256_load_ps((const float *)(dqsrc + 1));
+		dqsrc  += 2;
+		_mm256_store_ps((float *)(dqdest + 0), ymm0);
+		_mm256_store_ps((float *)(dqdest + 1), ymm1);
+		dqdest += 2;
+	} while (dqsrc != end);
+}
+# endif
+#elif defined(__SSE2__)
+# include <emmintrin.h>
+# if defined(__GNUC__) && defined(__i386__)
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	size_t delta = (char*)dest - (char*)src;
+
+	__asm__ volatile (
+		".align 16\n\t"
+		".LL0%=:\n\t"
+		"prefetchnta 0x40(%1)\n\t"
+		"movdqa (%1), %%xmm0\n\t"
+		"movdqa 0x10(%1), %%xmm1\n\t"
+		"movdqa 0x20(%1), %%xmm2\n\t"
+		"movdqa 0x30(%1), %%xmm3\n\t"
+		"movdqa %%xmm0, (%1,%2)\n\t"
+		"movdqa %%xmm1, 0x10(%1,%2)\n\t"
+		"movdqa %%xmm2, 0x20(%1,%2)\n\t"
+		"movdqa %%xmm3, 0x30(%1,%2)\n\t"
+		"addl $0x40, %1\n\t"
+		"subl $0x40, %0\n\t"
+		"ja .LL0%="
+		: "+r"(size),
+		  "+r"(src)
+		: "r"(delta)
+		: "cc", "memory", "%xmm0", "%xmm1", "%xmm1", "%xmm2");
+}
+# elif defined(__GNUC__) && defined(__x86_64__)
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	size_t delta = (char*)dest - (char*)src;
+
+	__asm__ volatile (
+		".align 16\n\t"
+		".LL0%=:\n\t"
+		"prefetchnta 0x40(%1)\n\t"
+		"movdqa (%1), %%xmm0\n\t"
+		"movdqa 0x10(%1), %%xmm1\n\t"
+		"movdqa 0x20(%1), %%xmm2\n\t"
+		"movdqa 0x30(%1), %%xmm3\n\t"
+		"movdqa %%xmm0, (%1,%2)\n\t"
+		"movdqa %%xmm1, 0x10(%1,%2)\n\t"
+		"movdqa %%xmm2, 0x20(%1,%2)\n\t"
+		"movdqa %%xmm3, 0x30(%1,%2)\n\t"
+		"addq $0x40, %1\n\t"
+		"subq $0x40, %0\n\t"
+		"ja .LL0%="
+		: "+r"(size),
+		  "+r"(src)
+		: "r"(delta)
+		: "cc", "memory", "%xmm0", "%xmm1", "%xmm1", "%xmm2");
+}
+# else
 static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
 {
 	__m128i *dqdest = (__m128i*)dest;
@@ -608,8 +706,11 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 	const __m128i *end  = (const __m128i*)((const char*)src + size);
 
 	do {
+#ifdef PHP_WIN32
+		_mm_prefetch((const char *)(dqsrc + 4), _MM_HINT_NTA);
+#else
 		_mm_prefetch(dqsrc + 4, _MM_HINT_NTA);
-		_mm_prefetch(dqdest + 4, _MM_HINT_T0);
+#endif
 
 		__m128i xmm0 = _mm_load_si128(dqsrc + 0);
 		__m128i xmm1 = _mm_load_si128(dqsrc + 1);
@@ -623,6 +724,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 		dqdest += 4;
 	} while (dqsrc != end);
 }
+# endif
 #endif
 
 zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory)
@@ -638,8 +740,9 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		ZCG(current_persistent_script) = persistent_script;
 		ZCG(arena_mem) = NULL;
 		if (EXPECTED(persistent_script->arena_size)) {
-#ifdef __SSE2__
+#if defined(__AVX__) || defined(__SSE2__)
 			/* Target address must be aligned to 64-byte boundary */
+			_mm_prefetch(persistent_script->arena_mem, _MM_HINT_NTA);
 			ZCG(arena_mem) = zend_arena_alloc(&CG(arena), persistent_script->arena_size + 64);
 			ZCG(arena_mem) = (void*)(((zend_uintptr_t)ZCG(arena_mem) + 63L) & ~63L);
 			fast_memcpy(ZCG(arena_mem), persistent_script->arena_mem, persistent_script->arena_size);
@@ -651,7 +754,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 		/* Copy all the necessary stuff from shared memory to regular memory, and protect the shared script */
 		if (zend_hash_num_elements(&persistent_script->script.class_table) > 0) {
-			zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table, (unique_copy_ctor_func_t) zend_class_copy_ctor);
+			zend_accel_class_hash_copy_from_shm(CG(class_table), &persistent_script->script.class_table);
 		}
 		/* we must first to copy all classes and then prepare functions, since functions may try to bind
 		   classes - which depend on pre-bind class entries existent in the class table */
@@ -663,13 +766,13 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		if (persistent_script->compiler_halt_offset != 0 &&
 		    persistent_script->script.filename) {
 			zend_string *name;
-			char haltoff[] = "__COMPILER_HALT_OFFSET__";
+			static const char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
 			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename), 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {
 				zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), persistent_script->compiler_halt_offset, CONST_CS, 0);
 			}
-			zend_string_release(name);
+			zend_string_release_ex(name, 0);
 		}
 
 		zend_hash_destroy(&ZCG(bind_hash));
@@ -679,14 +782,14 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			zend_accel_function_hash_copy(CG(function_table), &persistent_script->script.function_table);
 		}
 		if (zend_hash_num_elements(&persistent_script->script.class_table) > 0) {
-			zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table, NULL);
+			zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table);
 		}
 	}
 
-	if (op_array->early_binding != (uint32_t)-1) {
+	if (persistent_script->script.first_early_binding_opline != (uint32_t)-1) {
 		zend_string *orig_compiled_filename = CG(compiled_filename);
 		CG(compiled_filename) = persistent_script->script.filename;
-		zend_do_delayed_early_binding(op_array);
+		zend_do_delayed_early_binding(op_array, persistent_script->script.first_early_binding_opline);
 		CG(compiled_filename) = orig_compiled_filename;
 	}
 

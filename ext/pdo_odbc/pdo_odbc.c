@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -31,7 +29,7 @@
 #include "php_pdo_odbc_int.h"
 
 /* {{{ pdo_odbc_functions[] */
-const zend_function_entry pdo_odbc_functions[] = {
+static const zend_function_entry pdo_odbc_functions[] = {
 	PHP_FE_END
 };
 /* }}} */
@@ -92,6 +90,9 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 		char *instance = INI_STR("pdo_odbc.db2_instance_name");
 		if (instance) {
 			char *env = malloc(sizeof("DB2INSTANCE=") + strlen(instance));
+
+			php_error_docref(NULL, E_DEPRECATED, "The pdo_odbc.db2_instance_name ini directive is deprecated and will be removed in the future");
+
 			if (!env) {
 				return FAILURE;
 			}

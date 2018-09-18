@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Andi Gutmans <andi@zend.com>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -96,7 +94,7 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
-const zend_function_entry bcmath_functions[] = {
+static const zend_function_entry bcmath_functions[] = {
 	PHP_FE(bcadd,									arginfo_bcadd)
 	PHP_FE(bcsub,									arginfo_bcsub)
 	PHP_FE(bcmul,									arginfo_bcmul)
@@ -474,7 +472,7 @@ PHP_FUNCTION(bcpow)
 /* }}} */
 
 /* {{{ proto string bcsqrt(string operand [, int scale])
-   Returns the square root of an arbitray precision number */
+   Returns the square root of an arbitrary precision number */
 PHP_FUNCTION(bcsqrt)
 {
 	zend_string *left;

@@ -186,7 +186,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["id"]=>
   string(1) "1"

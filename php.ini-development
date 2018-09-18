@@ -15,7 +15,7 @@
 ; 5. The web server's directory (for SAPI modules), or directory of PHP
 ; (otherwise in Windows)
 ; 6. The directory from the --with-config-file-path compile time option, or the
-; Windows directory (C:\windows or C:\winnt)
+; Windows directory (usually C:\windows)
 ; See the PHP docs for more specific information.
 ; http://php.net/configuration.file
 
@@ -58,9 +58,9 @@
 ; An empty string can be denoted by simply not writing anything after the equal
 ; sign, or by using the None keyword:
 
-;  foo =         ; sets foo to an empty string
-;  foo = None    ; sets foo to an empty string
-;  foo = "None"  ; sets foo to the string 'None'
+; foo =         ; sets foo to an empty string
+; foo = None    ; sets foo to an empty string
+; foo = "None"  ; sets foo to the string 'None'
 
 ; If you use constants in your value, and these constants belong to a
 ; dynamically loaded extension (either a PHP extension or a Zend extension),
@@ -83,7 +83,7 @@
 ; development version only in development environments, as errors shown to
 ; application users can inadvertently leak otherwise secure information.
 
-; This is php.ini-development INI file.
+; This is the php.ini-development INI file.
 
 ;;;;;;;;;;;;;;;;;;;
 ; Quick Reference ;
@@ -164,7 +164,7 @@
 ; Name for user-defined php.ini (.htaccess) files. Default is ".user.ini"
 ;user_ini.filename = ".user.ini"
 
-; To disable this feature set this option to empty value
+; To disable this feature set this option to an empty value
 ;user_ini.filename =
 
 ; TTL for user-defined php.ini files (time-to-live) in seconds. Default is 300 seconds (5 minutes)
@@ -243,7 +243,7 @@ output_buffering = 4096
 ; Production Value: "form="
 ;url_rewriter.tags
 
-; URL rewriter will not rewrites absolute URL nor form by default. To enable
+; URL rewriter will not rewrite absolute URL nor form by default. To enable
 ; absolute URL rewrite, allowed hosts must be defined at RUNTIME.
 ; Refer to session.trans_sid_hosts for more details.
 ; Default Value: ""
@@ -392,7 +392,7 @@ max_input_time = 60
 ;max_input_nesting_level = 64
 
 ; How many GET/POST/COOKIE input variables may be accepted
-; max_input_vars = 1000
+;max_input_vars = 1000
 
 ; Maximum amount of memory a script may consume (128MB)
 ; http://php.net/memory-limit
@@ -509,7 +509,7 @@ ignore_repeated_errors = Off
 ignore_repeated_source = Off
 
 ; If this parameter is set to Off, then memory leaks will not be shown (on
-; stdout or in the log). This has only effect in a debug compile, and if
+; stdout or in the log). This is only effective in a debug compile, and if
 ; error reporting includes E_WARNING in the allowed list
 ; http://php.net/report-memleaks
 report_memleaks = On
@@ -578,6 +578,24 @@ html_errors = On
 ; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
 
+; The syslog ident is a string which is prepended to every message logged
+; to syslog. Only used when error_log is set to syslog.
+;syslog.ident = php
+
+; The syslog facility is used to specify what type of program is logging 
+; the message. Only used when error_log is set to syslog.
+;syslog.facility = user
+
+; Set this to disable filtering control characters (the default).
+; Some loggers only accept NVT-ASCII, others accept anything that's not
+; control characters. If your logger accepts everything, then no filtering
+; is needed at all.
+; Allowed values are:
+;   ascii (only base ASCII characters)
+;   no_ctrl (all characters except control characters)
+;   all (all characters)
+;syslog.filter = ascii
+
 ;windows.show_crt_warning
 ; Default value: 0
 ; Development value: 0
@@ -645,7 +663,7 @@ register_argc_argv = Off
 ; first used (Just In Time) instead of when the script starts. If these
 ; variables are not used within a script, having this directive on will result
 ; in a performance gain. The PHP directive register_argc_argv must be disabled
-; for this directive to have any affect.
+; for this directive to have any effect.
 ; http://php.net/auto-globals-jit
 auto_globals_jit = On
 
@@ -727,13 +745,13 @@ user_dir =
 
 ; Directory in which the loadable extensions (modules) reside.
 ; http://php.net/extension-dir
-; extension_dir = "./"
+;extension_dir = "./"
 ; On windows:
-; extension_dir = "ext"
+;extension_dir = "ext"
 
 ; Directory where the temporary files should be placed.
 ; Defaults to the system default (see sys_get_temp_dir)
-; sys_temp_dir = "/tmp"
+;sys_temp_dir = "/tmp"
 
 ; Whether or not to enable the dl() function.  The dl() function does NOT work
 ; properly in multithreaded servers, such as IIS or Zeus, and is automatically
@@ -772,7 +790,7 @@ enable_dl = Off
 ; of the web tree and people will not be able to circumvent .htaccess security.
 ;cgi.discard_path=1
 
-; FastCGI under IIS (on WINNT based OS) supports the ability to impersonate
+; FastCGI under IIS supports the ability to impersonate
 ; security tokens of the calling client.  This allows IIS to define the
 ; security context that the request runs under.  mod_fastcgi under Apache
 ; does not currently support this feature (03/17/2002)
@@ -877,7 +895,6 @@ default_socket_timeout = 60
 ;
 ; Notes for Windows environments :
 ;
-; - ODBC support is built in, so no dll is needed for it.
 ; - Many DLL files are located in the extensions/ (PHP 4) or ext/ (PHP 5+)
 ;   extension folders as well as the separate PECL DLL download (PHP 5+).
 ;   Be sure to appropriately set the extension_dir directive.
@@ -896,6 +913,7 @@ default_socket_timeout = 60
 ;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
 ;extension=oci8_12c  ; Use with Oracle Database 12c Instant Client
+;extension=odbc
 ;extension=openssl
 ;extension=pdo_firebird
 ;extension=pdo_mysql
@@ -912,6 +930,7 @@ default_socket_timeout = 60
 
 ;extension=soap
 ;extension=sockets
+;extension=sodium
 ;extension=sqlite3
 ;extension=tidy
 ;extension=xmlrpc
@@ -952,7 +971,7 @@ cli_server.color = On
 [iconv]
 ; Use of this INI entry is deprecated, use global input_encoding instead.
 ; If empty, default_charset or input_encoding or iconv.input_encoding is used.
-; The precedence is: default_charset < intput_encoding < iconv.input_encoding
+; The precedence is: default_charset < input_encoding < iconv.input_encoding
 ;iconv.input_encoding =
 
 ; Use of this INI entry is deprecated, use global internal_encoding instead.
@@ -979,19 +998,19 @@ cli_server.color = On
 ;sqlite3.extension_dir =
 
 [Pcre]
-;PCRE library backtracking limit.
+; PCRE library backtracking limit.
 ; http://php.net/pcre.backtrack-limit
 ;pcre.backtrack_limit=100000
 
-;PCRE library recursion limit.
-;Please note that if you set this value to a high number you may consume all
-;the available process stack and eventually crash PHP (due to reaching the
-;stack size limit imposed by the Operating System).
+; PCRE library recursion limit.
+; Please note that if you set this value to a high number you may consume all
+; the available process stack and eventually crash PHP (due to reaching the
+; stack size limit imposed by the Operating System).
 ; http://php.net/pcre.recursion-limit
 ;pcre.recursion_limit=100000
 
-;Enables or disables JIT compilation of patterns. This requires the PCRE
-;library to be compiled with JIT support.
+; Enables or disables JIT compilation of patterns. This requires the PCRE
+; library to be compiled with JIT support.
 ;pcre.jit=1
 
 [Pdo]
@@ -1036,7 +1055,7 @@ smtp_port = 25
 ;mail.force_extra_parameters =
 
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
-mail.add_x_header = On
+mail.add_x_header = Off
 
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
@@ -1324,10 +1343,11 @@ session.save_handler = files
 ;session.save_path = "/tmp"
 
 ; Whether to use strict session mode.
-; Strict session mode does not accept uninitialized session ID and regenerate
-; session ID if browser sends uninitialized session ID. Strict mode protects
-; applications from session fixation via session adoption vulnerability. It is
-; disabled by default for maximum compatibility, but enabling it is encouraged.
+; Strict session mode does not accept an uninitialized session ID, and
+; regenerates the session ID if the browser sends an uninitialized session ID.
+; Strict mode protects applications from session fixation via a session adoption
+; vulnerability. It is disabled by default for maximum compatibility, but
+; enabling it is encouraged.
 ; https://wiki.php.net/rfc/strict_sessions
 session.use_strict_mode = 0
 
@@ -1365,11 +1385,17 @@ session.cookie_path = /
 ; http://php.net/session.cookie-domain
 session.cookie_domain =
 
-; Whether or not to add the httpOnly flag to the cookie, which makes it inaccessible to browser scripting languages such as JavaScript.
+; Whether or not to add the httpOnly flag to the cookie, which makes it
+; inaccessible to browser scripting languages such as JavaScript.
 ; http://php.net/session.cookie-httponly
 session.cookie_httponly =
 
-; Handler used to serialize data.  php is the standard serializer of PHP.
+; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
+; Current valid values are "Lax" or "Strict"
+; https://tools.ietf.org/html/draft-west-first-party-cookies-07
+session.cookie_samesite =
+
+; Handler used to serialize data. php is the standard serializer of PHP.
 ; http://php.net/session.serialize-handler
 session.serialize_handler = php
 
@@ -1378,7 +1404,7 @@ session.serialize_handler = php
 ; gc_probability/gc_divisor. Where session.gc_probability is the numerator
 ; and gc_divisor is the denominator in the equation. Setting this value to 1
 ; when the session.gc_divisor value is 100 will give you approximately a 1% chance
-; the gc will run on any give request.
+; the gc will run on any given request.
 ; Default Value: 1
 ; Development Value: 1
 ; Production Value: 1
@@ -1388,10 +1414,10 @@ session.gc_probability = 1
 ; Defines the probability that the 'garbage collection' process is started on every
 ; session initialization. The probability is calculated by using the following equation:
 ; gc_probability/gc_divisor. Where session.gc_probability is the numerator and
-; session.gc_divisor is the denominator in the equation. Setting this value to 1
-; when the session.gc_divisor value is 100 will give you approximately a 1% chance
-; the gc will run on any give request. Increasing this value to 1000 will give you
-; a 0.1% chance the gc will run on any give request. For high volume production servers,
+; session.gc_divisor is the denominator in the equation. Setting this value to 100
+; when the session.gc_probability value is 1 will give you approximately a 1% chance
+; the gc will run on any given request. Increasing this value to 1000 will give you
+; a 0.1% chance the gc will run on any given request. For high volume production servers,
 ; this is a more efficient approach.
 ; Default Value: 100
 ; Development Value: 1000
@@ -1461,7 +1487,7 @@ session.sid_length = 26
 session.trans_sid_tags = "a=href,area=href,frame=src,form="
 
 ; URL rewriter does not rewrite absolute URLs by default.
-; To enable rewrites for absolute pathes, target hosts must be specified
+; To enable rewrites for absolute paths, target hosts must be specified
 ; at RUNTIME. i.e. use ini_set()
 ; <form> tags is special. PHP will check action attribute's URL regardless
 ; of session.trans_sid_tags setting.
@@ -1550,7 +1576,7 @@ zend.assertions = 1
 ; http://php.net/assert.active
 ;assert.active = On
 
-; Throw an AssertationException on failed assertions
+; Throw an AssertionError on failed assertions
 ; http://php.net/assert.exception
 ;assert.exception = On
 
@@ -1580,7 +1606,7 @@ zend.assertions = 1
 ; http://php.net/com.allow-dcom
 ;com.allow_dcom = true
 
-; autoregister constants of a components typlib on com_load()
+; autoregister constants of a component's typlib on com_load()
 ; http://php.net/com.autoregister-typelib
 ;com.autoregister_typelib = true
 
@@ -1611,9 +1637,9 @@ zend.assertions = 1
 
 ; Use of this INI entry is deprecated, use global input_encoding instead.
 ; http input encoding.
-; mbstring.encoding_traslation = On is needed to use this setting.
+; mbstring.encoding_translation = On is needed to use this setting.
 ; If empty, default_charset or input_encoding or mbstring.input is used.
-; The precedence is: default_charset < intput_encoding < mbsting.http_input
+; The precedence is: default_charset < input_encoding < mbsting.http_input
 ; http://php.net/mbstring.http-input
 ;mbstring.http_input =
 
@@ -1777,18 +1803,13 @@ ldap.max_links = -1
 ; size of the optimized code.
 ;opcache.save_comments=1
 
-; If enabled, a fast shutdown sequence is used for the accelerated code
-; Depending on the used Memory Manager this may cause some incompatibilities.
-;opcache.fast_shutdown=0
-
 ; Allow file existence override (file_exists, etc.) performance feature.
 ;opcache.enable_file_override=0
 
 ; A bitmask, where each bit enables or disables the appropriate OPcache
 ; passes
-;opcache.optimization_level=0xffffffff
+;opcache.optimization_level=0x7FFFBFFF
 
-;opcache.inherited_hack=1
 ;opcache.dups_fix=0
 
 ; The location of the OPcache blacklist file (wildcards allowed).
@@ -1862,6 +1883,10 @@ ldap.max_links = -1
 
 ; Prevent name collisions in chroot'ed environment.
 ;opcache.validate_root=0
+
+; If specified, it produces opcode dumps for debugging different stages of
+; optimizations.
+;opcache.opt_debug_level=0
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

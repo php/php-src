@@ -28,6 +28,6 @@ try {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 UnexpectedValueException thrown
 ===DONE===

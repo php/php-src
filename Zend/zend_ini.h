@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Zeev Suraski <zeev@zend.com>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_INI_H
 #define ZEND_INI_H
@@ -87,6 +85,8 @@ ZEND_API zend_long zend_ini_long(char *name, size_t name_length, int orig);
 ZEND_API double zend_ini_double(char *name, size_t name_length, int orig);
 ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig);
 ZEND_API char *zend_ini_string_ex(char *name, size_t name_length, int orig, zend_bool *exists);
+ZEND_API zend_string *zend_ini_get_value(zend_string *name);
+ZEND_API zend_bool zend_ini_parse_bool(zend_string *str);
 
 ZEND_API int zend_ini_register_displayer(char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 

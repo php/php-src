@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +18,6 @@
    |          Pierre Joye <pierre@php.net>                                |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include <stdlib.h>
 
@@ -39,11 +37,7 @@
 #  include <crypt.h>
 # endif
 #endif
-#if TM_IN_SYS_TIME
-#include <sys/time.h>
-#else
 #include <time.h>
-#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else

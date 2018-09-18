@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -89,13 +89,13 @@ crc_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_source
         case ZIP_SOURCE_OPEN:
             ctx->position = 0;
             return 0;
-            
+
         case ZIP_SOURCE_READ:
             if ((n = zip_source_read(src, data, len)) < 0) {
                 _zip_error_set_from_source(&ctx->error, src);
                 return -1;
             }
-            
+
             if (n == 0) {
                 if (ctx->crc_position == ctx->position) {
                     ctx->crc_complete = 1;
@@ -103,12 +103,12 @@ crc_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_source
 
                     if (ctx->validate) {
                         struct zip_stat st;
-                    
+
                         if (zip_source_stat(src, &st) < 0) {
                             _zip_error_set_from_source(&ctx->error, src);
                             return -1;
                         }
-                    
+
                         if ((st.valid & ZIP_STAT_CRC) && st.crc != ctx->crc) {
                             zip_error_set(&ctx->error, ZIP_ER_CRC, 0);
                             return -1;
@@ -150,18 +150,18 @@ crc_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_source
 		st->comp_size = ctx->size;
 		st->comp_method = ZIP_CM_STORE;
 		st->encryption_method = ZIP_EM_NONE;
-		st->valid |= ZIP_STAT_SIZE|ZIP_STAT_CRC|ZIP_STAT_COMP_SIZE|ZIP_STAT_COMP_METHOD|ZIP_STAT_ENCRYPTION_METHOD;;
+		st->valid |= ZIP_STAT_SIZE|ZIP_STAT_CRC|ZIP_STAT_COMP_SIZE|ZIP_STAT_COMP_METHOD|ZIP_STAT_ENCRYPTION_METHOD;
 	    }
             return 0;
         }
-            
+
         case ZIP_SOURCE_ERROR:
             return zip_error_to_data(&ctx->error, data, len);
 
         case ZIP_SOURCE_FREE:
             free(ctx);
             return 0;
-            
+
         case ZIP_SOURCE_SUPPORTS:
         {
             zip_int64_t mask = zip_source_supports(src);
@@ -194,7 +194,7 @@ crc_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_source
 
         case ZIP_SOURCE_TELL:
             return (zip_int64_t)ctx->position;
-            
+
         default:
             zip_error_set(&ctx->error, ZIP_ER_OPNOTSUPP, 0);
             return -1;

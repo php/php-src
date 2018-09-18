@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,8 +26,10 @@
 #endif
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error);
+PHP_WINUTIL_API void php_win32_error_msg_free(char *msg);
 
 #define php_win_err()	php_win32_error_to_msg(GetLastError())
+#define php_win_err_free(err) php_win32_error_msg_free(err)
 int php_win32_check_trailing_space(const char * path, const size_t path_len);
 PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size);
 #ifdef PHP_EXPORTS

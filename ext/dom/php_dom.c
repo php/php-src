@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    |          Marcus Borger <helly@php.net>                               |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -308,7 +306,7 @@ static void dom_register_prop_handler(HashTable *prop_handler, char *name, size_
 	hnd.write_func = write_func ? write_func : dom_write_na;
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(dom_prop_handler));
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 }
 /* }}} */
 
@@ -319,11 +317,10 @@ static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, void
 	zval *retval = NULL;
 
 	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, member_str)) {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot);
+		retval = zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
 	}
 
-	zend_string_release(member_str);
+	zend_string_release_ex(member_str, 0);
 	return retval;
 }
 /* }}} */
@@ -350,11 +347,10 @@ zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot,
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 	}
 
-	zend_string_release(member_str);
+	zend_string_release_ex(member_str, 0);
 	return retval;
 }
 /* }}} */
@@ -372,11 +368,10 @@ void dom_write_property(zval *object, zval *member, zval *value, void **cache_sl
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value, cache_slot);
+		zend_std_write_property(object, member, value, cache_slot);
 	}
 
-	zend_string_release(member_str);
+	zend_string_release_ex(member_str, 0);
 }
 /* }}} */
 
@@ -402,14 +397,13 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, void
 			} else if (check_empty == 0) {
 				retval = (Z_TYPE(tmp) != IS_NULL);
 			}
-			zval_dtor(&tmp);
+			zval_ptr_dtor(&tmp);
 		}
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->has_property(object, member, check_empty, cache_slot);
+		retval = zend_std_has_property(object, member, check_empty, cache_slot);
 	}
 
-	zend_string_release(member_str);
+	zend_string_release_ex(member_str, 0);
 	return retval;
 }
 /* }}} */
@@ -443,7 +437,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 		}
 
 		if (Z_TYPE(value) == IS_OBJECT) {
-			zval_dtor(&value);
+			zval_ptr_dtor(&value);
 			ZVAL_NEW_STR(&value, object_str);
 			zend_string_addref(object_str);
 		}
@@ -451,7 +445,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 		zend_hash_add(debug_info, string_key, &value);
 	} ZEND_HASH_FOREACH_END();
 
-	zend_string_release(object_str);
+	zend_string_release_ex(object_str, 0);
 
 	return debug_info;
 }
@@ -502,12 +496,12 @@ PHP_FUNCTION(dom_import_simplexml)
 }
 /* }}} */
 
-static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool hash_copy);
+static dom_object* dom_objects_set_class(zend_class_entry *class_type);
 
 static zend_object *dom_objects_store_clone_obj(zval *zobject) /* {{{ */
 {
 	dom_object *intern = Z_DOMOBJ_P(zobject);
-	dom_object *clone = dom_objects_set_class(intern->std.ce, 0);
+	dom_object *clone = dom_objects_set_class(intern->std.ce);
 
 	clone->std.handlers = dom_get_obj_handlers();
 
@@ -598,10 +592,9 @@ PHP_MINIT_FUNCTION(dom)
 {
 	zend_class_entry ce;
 
-	memcpy(&dom_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&dom_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	dom_object_handlers.offset = XtOffsetOf(dom_object, std);
 	dom_object_handlers.free_obj = dom_objects_free_storage;
-	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
@@ -1073,9 +1066,9 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 }
 /* }}} */
 
-static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool hash_copy) /* {{{ */
+static dom_object* dom_objects_set_class(zend_class_entry *class_type) /* {{{ */
 {
-	dom_object *intern = ecalloc(1, sizeof(dom_object) + zend_object_properties_size(class_type));
+	dom_object *intern = zend_object_alloc(sizeof(dom_object), class_type);
 
 	zend_class_entry *base_class = class_type;
 	while ((base_class->type != ZEND_INTERNAL_CLASS || base_class->info.internal.module->module_number != dom_module_entry.module_number) && base_class->parent != NULL) {
@@ -1085,9 +1078,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 	intern->prop_handler = zend_hash_find_ptr(&classes, base_class->name);
 
 	zend_object_std_init(&intern->std, class_type);
-	if (hash_copy) {
-		object_properties_init(&intern->std, class_type);
-	}
+	object_properties_init(&intern->std, class_type);
 
 	return intern;
 }
@@ -1096,7 +1087,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 /* {{{ dom_objects_new */
 zend_object *dom_objects_new(zend_class_entry *class_type)
 {
-	dom_object *intern = dom_objects_set_class(class_type, 1);
+	dom_object *intern = dom_objects_set_class(class_type);
 	intern->std.handlers = dom_get_obj_handlers();
 	return &intern->std;
 }
@@ -1106,7 +1097,7 @@ zend_object *dom_objects_new(zend_class_entry *class_type)
 /* {{{ zend_object dom_xpath_objects_new(zend_class_entry *class_type) */
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 {
-	dom_xpath_object *intern = ecalloc(1, sizeof(dom_xpath_object) + zend_object_properties_size(class_type));
+	dom_xpath_object *intern = zend_object_alloc(sizeof(dom_xpath_object), class_type);
 
 	intern->registered_phpfunctions = zend_new_array(0);
 
@@ -1160,7 +1151,7 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type) /* {{{ */
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
 
-	intern = dom_objects_set_class(class_type, 1);
+	intern = dom_objects_set_class(class_type);
 	intern->ptr = emalloc(sizeof(dom_nnodemap_object));
 	objmap = (dom_nnodemap_object *)intern->ptr;
 	ZVAL_UNDEF(&objmap->baseobj_zv);

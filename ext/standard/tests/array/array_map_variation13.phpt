@@ -54,7 +54,7 @@ var_dump( array_map('callback_without_ret', $array1));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : callback with diff return value ***
 -- with integer return value --
 array(3) {

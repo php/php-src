@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension recode
 
 PHP_ARG_WITH(recode,for recode support,
 [  --with-recode[=DIR]       Include recode support])
@@ -39,12 +37,11 @@ if test "$PHP_RECODE" != "no"; then
     old_LIBS=$LIBS
     LDFLAGS="$LDFLAGS -L$RECODE_DIR/$RECODE_LIB"
     LIBS="$LIBS -lrecode"
-    AC_TRY_LINK(
-    [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 char *program_name;
-    ],[
+    ]],[[
 recode_format_table();
-    ],[
+    ]])],[
       PHP_ADD_LIBRARY_DEFER_WITH_PATH(recode, $RECODE_DIR/$RECODE_LIB, RECODE_SHARED_LIBADD)
       AC_DEFINE(HAVE_BROKEN_RECODE, 1, [Whether we have librecode 3.5])
     ],[

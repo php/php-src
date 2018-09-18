@@ -6,7 +6,6 @@ if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
 <?php 
-/* $Id$ */
 /*
 Libxml 2.6.24 and up adds a new line after a processing instruction (PI)
 */

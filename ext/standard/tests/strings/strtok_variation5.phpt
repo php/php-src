@@ -57,7 +57,7 @@ foreach( $string_array as $string )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : with miscellaneous inputs ***
 
 --- Iteration 1 ---

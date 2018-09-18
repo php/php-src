@@ -38,6 +38,7 @@ extern "C" {
 }
 
 using PHP::CodePointBreakIterator;
+using icu::RuleBasedBreakIterator;
 
 /* {{{ Global variables */
 zend_class_entry *BreakIterator_ce_ptr;
@@ -166,7 +167,7 @@ static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp)
 	}
 
 	ZVAL_STRING(&val, const_cast<char*>(typeid(*biter).name()));
-	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &bio->text);
+	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &val);
 
 	return debug_info;
 }
@@ -289,9 +290,7 @@ static const zend_function_entry RuleBasedBreakIterator_class_functions[] = {
 	PHP_ME_MAPPING(getRules,				rbbi_get_rules,							ainfo_biter_void,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getRuleStatus,			rbbi_get_rule_status,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getRuleStatusVec,		rbbi_get_rule_status_vec,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	PHP_ME_MAPPING(getBinaryRules,			rbbi_get_binary_rules,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
-#endif
 	PHP_FE_END
 };
 /* }}} */
@@ -318,7 +317,7 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	ce.get_iterator = _breakiterator_get_iterator;
 	BreakIterator_ce_ptr = zend_register_internal_class(&ce);
 
-	memcpy(&BreakIterator_handlers, zend_get_std_object_handlers(),
+	memcpy(&BreakIterator_handlers, &std_object_handlers,
 		sizeof BreakIterator_handlers);
 	BreakIterator_handlers.offset = XtOffsetOf(BreakIterator_object, zo);
 	BreakIterator_handlers.compare_objects = BreakIterator_compare_objects;

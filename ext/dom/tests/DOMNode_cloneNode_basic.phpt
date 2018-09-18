@@ -72,7 +72,7 @@ for ($index = 0; $index < $children->length; $index++) {
 	dumpcourse($children->item($index));
 }
 
---EXPECTF--
+--EXPECT--
 Start cloneNode test
 node 0
 Course: new title3:DOMElement

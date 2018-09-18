@@ -1,4 +1,4 @@
-<?php /* $Id$ */
+<?php
 
 $user = 'SYSDBA';
 $password = 'masterkey';
@@ -25,7 +25,7 @@ function init_db()
 function cleanup_db()
 {
 	global $test_base;
-    
+
 	$r = ibase_connect($test_base);
 	ibase_drop_db($r);
 }

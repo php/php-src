@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, DCE - Dead Code Elimination                             |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,7 +39,7 @@
  *    postdominator tree and of postdominance frontiers, which does not seem worthwhile at this
  *    point.
  *  * We separate intrinsic side-effects from potential side-effects in the form of notices thrown
- *    by the instruction (in case we want to make this configurable). See may_have_side_effect() and
+ *    by the instruction (in case we want to make this configurable). See may_have_side_effects() and
  *    zend_may_throw().
  *  * We often cannot DCE assignments and unsets while guaranteeing that dtors run in the same
  *    order. There is an optimization option to allow reordering of dtor effects.
@@ -109,7 +109,6 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_CAST:
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
-		case ZEND_ROPE_END:
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
 		case ZEND_SPACESHIP:
@@ -127,6 +126,9 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_FUNC_GET_ARGS:
 			/* No side effects */
 			return 0;
+		case ZEND_ROPE_END:
+			/* TODO: Rope dce optimization, see #76446 */
+			return 1;
 		case ZEND_JMP:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
@@ -341,9 +343,7 @@ static zend_bool try_remove_var_def(context *ctx, int free_var, int use_chain, z
 				case ZEND_ASSIGN_BW_XOR:
 				case ZEND_ASSIGN_POW:
 				case ZEND_PRE_INC:
-				case ZEND_POST_INC:
 				case ZEND_PRE_DEC:
-				case ZEND_POST_DEC:
 				case ZEND_PRE_INC_OBJ:
 				case ZEND_POST_INC_OBJ:
 				case ZEND_PRE_DEC_OBJ:
@@ -388,7 +388,8 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))&& !is_var_dead(ctx, ssa_op->op1_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op1_use, ssa_op->op1_use_chain, opline)) {
-			if (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+			if (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)
+				&& opline->opcode != ZEND_CASE) {
 				free_var = ssa_op->op1_use;
 				free_var_type = opline->op1_type;
 			}

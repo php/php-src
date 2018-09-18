@@ -1,5 +1,7 @@
 --TEST--
 JSON_THROW_ON_ERROR: global error flag untouched
+--SKIPIF--
+<?php if(!extension_loaded('json')) die('skip json extension not loaded') ?>
 --FILE--
 <?php
 

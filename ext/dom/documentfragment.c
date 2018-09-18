@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Rob Richards <rrichards@php.net>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,7 +37,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMDocumentFragment extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-B63ED1A3
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-B63ED1A3
 * Since:
 */
 
@@ -49,7 +47,7 @@ const zend_function_entry php_dom_documentfragment_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMDocumentFragment::__construct() */
+/* {{{ proto DOMDocumentFragment::__construct() */
 PHP_METHOD(domdocumentfragment, __construct)
 {
 
@@ -57,7 +55,7 @@ PHP_METHOD(domdocumentfragment, __construct)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "") == FAILURE) {
+	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 

@@ -25,5 +25,5 @@ if ($IS_MYSQLND) {
 mysqli_close($link);
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

@@ -1,5 +1,4 @@
 
-	/* $Id: fpm_trace_ptrace.c,v 1.7 2008/09/18 23:34:11 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
