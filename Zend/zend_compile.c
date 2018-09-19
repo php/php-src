@@ -6384,9 +6384,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			opline->opcode = ZEND_DECLARE_ANON_CLASS;
 		}
 
-		if (!zend_hash_exists(CG(class_table), lcname)) {
-			zend_hash_add_ptr(CG(class_table), lcname, ce);
-		} else {
+		if (!zend_hash_add_ptr(CG(class_table), lcname, ce)) {
 			/* this anonymous class has been included */
 			zval zv;
 			ZVAL_PTR(&zv, ce);
