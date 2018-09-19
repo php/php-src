@@ -199,9 +199,20 @@ static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_stri
 
 
 /* Misc */
-ZEND_API zend_bool ZEND_FASTCALL zend_hash_exists(const HashTable *ht, zend_string *key);
-ZEND_API zend_bool ZEND_FASTCALL zend_hash_str_exists(const HashTable *ht, const char *str, size_t len);
-ZEND_API zend_bool ZEND_FASTCALL zend_hash_index_exists(const HashTable *ht, zend_ulong h);
+static zend_always_inline zend_bool zend_hash_exists(const HashTable *ht, zend_string *key)
+{
+	return zend_hash_find(ht, key) != NULL;
+}
+
+static zend_always_inline zend_bool zend_hash_str_exists(const HashTable *ht, const char *str, size_t len)
+{
+	return zend_hash_str_find(ht, str, len) != NULL;
+}
+
+static zend_always_inline zend_bool zend_hash_index_exists(const HashTable *ht, zend_ulong h)
+{
+	return zend_hash_index_find(ht, h) != NULL;
+}
 
 /* traversing */
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *ht);
