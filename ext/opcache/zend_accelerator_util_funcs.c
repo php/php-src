@@ -34,6 +34,10 @@
 # define accel_xlat_get(old)	    zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*))
 #endif
 
+#define IN_ARENA(ptr) \
+	((void*)(ptr) >= ZCG(current_persistent_script)->arena_mem && \
+	 (void*)(ptr) < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size))
+
 #define ARENA_REALLOC(ptr) \
 	(void*)(((char*)(ptr)) + ((char*)ZCG(arena_mem) - (char*)ZCG(current_persistent_script)->arena_mem))
 
@@ -125,8 +129,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 		c = ARENA_REALLOC(Z_PTR(p->val));
 		Z_PTR(p->val) = c;
 
-		if ((void*)c->ce >= ZCG(current_persistent_script)->arena_mem &&
-		    (void*)c->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
+		if (IN_ARENA(c->ce)) {
 			c->ce = ARENA_REALLOC(c->ce);
 		}
 	}
@@ -162,9 +165,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		new_entry = ARENA_REALLOC(Z_PTR(p->val));
 		Z_PTR(p->val) = new_entry;
 
-		if ((void*)new_entry->scope >= ZCG(current_persistent_script)->arena_mem &&
-		    (void*)new_entry->scope < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
-
+		if (IN_ARENA(new_entry->scope)) {
 			new_entry->scope = ARENA_REALLOC(new_entry->scope);
 
 			/* update prototype */
@@ -205,8 +206,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		prop_info = ARENA_REALLOC(Z_PTR(p->val));
 		Z_PTR(p->val) = prop_info;
 
-		if ((void*)prop_info->ce >= ZCG(current_persistent_script)->arena_mem &&
-		    (void*)prop_info->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
+		if (IN_ARENA(prop_info->ce)) {
 			prop_info->ce = ARENA_REALLOC(prop_info->ce);
 		}
 	}
