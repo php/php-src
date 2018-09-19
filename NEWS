@@ -12,7 +12,7 @@ PHP                                                                        NEWS
     (cmb)
 
 - SQLite3:
-  . Updated to SQLite 3.25.0. (cmb)
+  . Updated to SQLite 3.25.1. (cmb)
 
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
