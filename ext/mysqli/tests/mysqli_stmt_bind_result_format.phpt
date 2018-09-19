@@ -208,11 +208,11 @@ memory_limit=83886080
 	if (mysqli_query($link, "CREATE TABLE `test` (
   `targetport` int(11) NOT NULL default '0',
   `sources` double(17,4) default NULL,
-  `current_sources` double(17,0) default NULL,
+  `current_sources` double(17,4) default NULL,
   `reports` double(17,4) default NULL,
-  `current_reports` double(17,0) default NULL,
+  `current_reports` double(17,4) default NULL,
   `targets` double(17,4) default NULL,
-  `current_targets` double(17,0) default NULL,
+  `current_targets` double(17,4) default NULL,
   `maxsources` int(11) default NULL,
   `maxtargets` int(11) default NULL,
   `maxreports` int(11) default NULL,
@@ -237,7 +237,7 @@ memory_limit=83886080
 					printf("[301] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 					break 2;
 				}
-				if ($current_targets > 0 && $trend != 'NULL')
+				if ($current_targets > 0 && $trend !== 'NULL')
 					$values[$trend] = $i;
 			}
 			krsort($values);
