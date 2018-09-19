@@ -2178,28 +2178,6 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char 
 	return p ? &p->val : NULL;
 }
 
-ZEND_API zend_bool ZEND_FASTCALL zend_hash_exists(const HashTable *ht, zend_string *key)
-{
-	Bucket *p;
-
-	IS_CONSISTENT(ht);
-
-	p = zend_hash_find_bucket(ht, key, 0);
-	return p ? 1 : 0;
-}
-
-ZEND_API zend_bool ZEND_FASTCALL zend_hash_str_exists(const HashTable *ht, const char *str, size_t len)
-{
-	zend_ulong h;
-	Bucket *p;
-
-	IS_CONSISTENT(ht);
-
-	h = zend_inline_hash_func(str, len);
-	p = zend_hash_str_find_bucket(ht, str, len, h);
-	return p ? 1 : 0;
-}
-
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulong h)
 {
 	Bucket *p;
@@ -2229,26 +2207,6 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulo
 	p = zend_hash_index_find_bucket(ht, h);
 	return p ? &p->val : NULL;
 }
-
-ZEND_API zend_bool ZEND_FASTCALL zend_hash_index_exists(const HashTable *ht, zend_ulong h)
-{
-	Bucket *p;
-
-	IS_CONSISTENT(ht);
-
-	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
-		if (h < ht->nNumUsed) {
-			if (Z_TYPE(ht->arData[h].val) != IS_UNDEF) {
-				return 1;
-			}
-		}
-		return 0;
-	}
-
-	p = zend_hash_index_find_bucket(ht, h);
-	return p ? 1 : 0;
-}
-
 
 ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos)
 {

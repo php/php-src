@@ -3222,6 +3222,11 @@ function toolset_setup_common_cflags()
 						/* Undocumented. */
 						ADD_FLAG('CFLAGS', "/d2guardspecload");
 					}
+				} else if (1900 == VCVERS) {
+					var subver1900 = probe_binary(PHP_CL).substr(6);
+					if (subver1900 >= 24241) {
+						ADD_FLAG('CFLAGS', "/Qspectre");
+					}
 				}
 			}
 			if (VCVERS >= 1900) {

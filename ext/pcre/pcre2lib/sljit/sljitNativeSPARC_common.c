@@ -1457,7 +1457,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 	CHECK(check_sljit_emit_cmov(compiler, type, dst_reg, src, srcw));
 
 #if (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
-	return sljit_emit_cmov_generic(compiler, type, dst_reg, src, srcw);
+	return sljit_emit_cmov_generic(compiler, type, dst_reg, src, srcw);;
 #else
 #error "Implementation required"
 #endif

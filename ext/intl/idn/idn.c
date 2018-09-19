@@ -128,11 +128,9 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	int32_t		  len;
 	zend_string	  *buffer;
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
-	int			  buffer_used = 0;
 
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance") == FAILURE) {
-		zend_string_efree(buffer);
 		RETURN_FALSE;
 	}
 
@@ -162,31 +160,19 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	ZSTR_LEN(buffer) = len;
 
 	if (info.errors == 0) {
-		RETVAL_STR(buffer);
-		buffer_used = 1;
+		RETVAL_STR_COPY(buffer);
 	} else {
 		RETVAL_FALSE;
 	}
 
 	if (idna_info) {
-		if (buffer_used) { /* used in return_value then */
-			zval_addref_p(return_value);
-			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, return_value);
-		} else {
-			zval zv;
-			ZVAL_NEW_STR(&zv, buffer);
-			buffer_used = 1;
-			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, &zv);
-		}
+		add_assoc_str_ex(idna_info, "result", sizeof("result")-1, zend_string_copy(buffer));
 		add_assoc_bool_ex(idna_info, "isTransitionalDifferent",
 				sizeof("isTransitionalDifferent")-1, info.isTransitionalDifferent);
 		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (zend_long)info.errors);
 	}
 
-	if (!buffer_used) {
-		zend_string_efree(buffer);
-	}
-
+	zend_string_release(buffer);
 	uidna_close(uts46);
 }
 

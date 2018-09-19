@@ -1428,7 +1428,6 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
 	zend_string *lcname;
-	zend_bool method_exists;
 	HashTable **exclude_tables = NULL;
 	zend_class_entry **aliases = NULL;
 	zend_class_entry *trait;
@@ -1451,8 +1450,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 
 			/** Ensure that the preferred method is actually available. */
 			lcname = zend_string_tolower(cur_method_ref->method_name);
-			method_exists = zend_hash_exists(&trait->function_table, lcname);
-			if (!method_exists) {
+			if (!zend_hash_exists(&trait->function_table, lcname)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 						   "A precedence rule was defined for %s::%s but this method does not exist",
 						   ZSTR_VAL(trait->name),
@@ -1520,12 +1518,10 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 
 				/** And, ensure that the referenced method is resolvable, too. */
 				lcname = zend_string_tolower(cur_method_ref->method_name);
-				method_exists = zend_hash_exists(&trait->function_table, lcname);
-				zend_string_release_ex(lcname, 0);
-
-				if (!method_exists) {
+				if (!zend_hash_exists(&trait->function_table, lcname)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", ZSTR_VAL(trait->name), ZSTR_VAL(cur_method_ref->method_name));
 				}
+				zend_string_release_ex(lcname, 0);
 			}
 			i++;
 		}
