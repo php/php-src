@@ -97,17 +97,16 @@ void zend_accel_move_user_functions(HashTable *src, zend_script *script)
 
 static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 {
-	Bucket *p, *q, *end;
-	zend_ulong nIndex;
+	Bucket *p, *end;
 	zend_class_constant *c;
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
-	ht->nNumUsed = 0;
+	ht->nNumUsed = source->nNumUsed;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
-	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
+	HT_FLAGS(ht) = HT_FLAGS(source);
 	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
@@ -115,28 +114,16 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 		return;
 	}
 
-	ZEND_ASSERT((HT_FLAGS(source) & HASH_FLAG_PACKED) == 0);
-	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
-	HT_HASH_RESET(ht);
+	p = emalloc(HT_SIZE(ht));
+	memcpy(p, HT_GET_DATA_ADDR(source), HT_USED_SIZE(ht));
+	HT_SET_DATA_ADDR(ht, p);
 
-	p = source->arData;
-	end = p + source->nNumUsed;
+	p = ht->arData;
+	end = p + ht->nNumUsed;
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
-		nIndex = p->h | ht->nTableMask;
-
-		/* Insert into hash collision list */
-		q = ht->arData + ht->nNumUsed;
-		Z_NEXT(q->val) = HT_HASH(ht, nIndex);
-		HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(ht->nNumUsed++);
-
-		/* Initialize key */
-		q->h = p->h;
-		q->key = p->key;
-
-		/* Copy data */
 		c = ARENA_REALLOC(Z_PTR(p->val));
-		ZVAL_PTR(&q->val, c);
+		Z_PTR(p->val) = c;
 
 		if ((void*)c->ce >= ZCG(current_persistent_script)->arena_mem &&
 		    (void*)c->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
@@ -147,17 +134,16 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 
 static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce)
 {
-	Bucket *p, *q, *end;
-	zend_ulong nIndex;
+	Bucket *p, *end;
 	zend_op_array *new_entry;
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
-	ht->nNumUsed = 0;
+	ht->nNumUsed = source->nNumUsed;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
+	HT_FLAGS(ht) = HT_FLAGS(source);
 	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
@@ -165,30 +151,16 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		return;
 	}
 
-	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
-	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
-	HT_HASH_RESET(ht);
+	p = emalloc(HT_SIZE(ht));
+	memcpy(p, HT_GET_DATA_ADDR(source), HT_USED_SIZE(ht));
+	HT_SET_DATA_ADDR(ht, p);
 
-	p = source->arData;
-	end = p + source->nNumUsed;
+	p = ht->arData;
+	end = p + ht->nNumUsed;
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
-
-		nIndex = p->h | ht->nTableMask;
-
-		/* Insert into hash collision list */
-		q = ht->arData + ht->nNumUsed;
-		Z_NEXT(q->val) = HT_HASH(ht, nIndex);
-		HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(ht->nNumUsed++);
-
-		/* Initialize key */
-		q->h = p->h;
-		ZEND_ASSERT(p->key != NULL);
-		q->key = p->key;
-
-		/* Copy data */
-		ZVAL_PTR(&q->val, ARENA_REALLOC(Z_PTR(p->val)));
-		new_entry = (zend_op_array*)Z_PTR(q->val);
+		new_entry = ARENA_REALLOC(Z_PTR(p->val));
+		Z_PTR(p->val) = new_entry;
 
 		if ((void*)new_entry->scope >= ZCG(current_persistent_script)->arena_mem &&
 		    (void*)new_entry->scope < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
@@ -205,17 +177,16 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 
 static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_class_entry *old_ce)
 {
-	Bucket *p, *q, *end;
-	zend_ulong nIndex;
+	Bucket *p, *end;
 	zend_property_info *prop_info;
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
-	ht->nNumUsed = 0;
+	ht->nNumUsed = source->nNumUsed;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
-	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
+	HT_FLAGS(ht) = HT_FLAGS(source);
 	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
@@ -223,30 +194,16 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		return;
 	}
 
-	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
-	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
-	HT_HASH_RESET(ht);
+	p = emalloc(HT_SIZE(ht));
+	memcpy(p, HT_GET_DATA_ADDR(source), HT_USED_SIZE(ht));
+	HT_SET_DATA_ADDR(ht, p);
 
-	p = source->arData;
-	end = p + source->nNumUsed;
+	p = ht->arData;
+	end = p + ht->nNumUsed;
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
-
-		nIndex = p->h | ht->nTableMask;
-
-		/* Insert into hash collision list */
-		q = ht->arData + ht->nNumUsed;
-		Z_NEXT(q->val) = HT_HASH(ht, nIndex);
-		HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(ht->nNumUsed++);
-
-		/* Initialize key */
-		q->h = p->h;
-		ZEND_ASSERT(p->key != NULL);
-		q->key = p->key;
-
-		/* Copy data */
 		prop_info = ARENA_REALLOC(Z_PTR(p->val));
-		ZVAL_PTR(&q->val, prop_info);
+		Z_PTR(p->val) = prop_info;
 
 		if ((void*)prop_info->ce >= ZCG(current_persistent_script)->arena_mem &&
 		    (void*)prop_info->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {

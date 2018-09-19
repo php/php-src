@@ -722,6 +722,7 @@ static void zend_persist_class_entry(zval *zv)
 			zend_accel_store_interned_string(ce->parent_name);
 		}
 		zend_hash_persist(&ce->function_table, zend_persist_class_method);
+		HT_FLAGS(&ce->function_table) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
 		if (ce->default_properties_table) {
 		    int i;
 
@@ -744,6 +745,7 @@ static void zend_persist_class_entry(zval *zv)
 		ce->static_members_table = NULL;
 
 		zend_hash_persist(&ce->constants_table, zend_persist_class_constant);
+		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
 
 		if (ce->info.user.filename) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */
@@ -761,6 +763,7 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
+		HT_FLAGS(&ce->properties_info) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
 
 		if (ce->num_interfaces) {
 			uint32_t i = 0;
