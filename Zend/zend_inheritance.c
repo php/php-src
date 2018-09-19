@@ -1428,7 +1428,6 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
 	zend_string *lcname;
-	zend_bool method_exists;
 	HashTable **exclude_tables = NULL;
 	zend_class_entry **aliases = NULL;
 	zend_class_entry *trait;
