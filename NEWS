@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (Dmitry)
   . Fixed bug #76800 (foreach inconsistent if array modified during loop).
     (Dmitry)
+  . Fixed bug #76901 (method_exists on SPL iterator passthrough method corrupts
+    memory). (Nikita)
 
 - Standard:
   . Fixed bug #75533 (array_reduce is slow when $carry is large array).
