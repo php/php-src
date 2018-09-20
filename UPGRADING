@@ -254,7 +254,7 @@ phpdbg:
     PHPDBG_FUNC have been removed.
 
 FPM:
-  . The getallheaders function is now also available.
+  . The getallheaders() function is now also available.
 
 ========================================
 4. Deprecated Functionality
