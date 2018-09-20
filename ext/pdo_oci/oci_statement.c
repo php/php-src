@@ -793,14 +793,197 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len
 	}
 } /* }}} */
 
+
+static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
+{
+	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
+	pdo_oci_column *C = &S->cols[colno];
+
+	OCIParam *param = NULL;
+	OraText *colname;
+	OraText * schema;
+	ub2 dtype, data_size, precis = 0;
+	ub4 namelen, schemalen, typelen, objlen;
+	char *str;
+	zval flags;
+	ub1 isnull;
+	if (!S->stmt) {
+		return FAILURE;
+	}
+	if (colno >= stmt->column_count) {
+		/* error invalid column */
+		return FAILURE;
+	}
+
+	array_init(return_value);
+	array_init(&flags);
+
+	/* describe the column */
+	STMT_CALL(OCIParamGet, (S->stmt, OCI_HTYPE_STMT, S->err, (dvoid*)&param, colno+1));
+
+	/* column data type */
+	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_DATA_TYPE",
+			(param, OCI_DTYPE_PARAM, &dtype, 0, OCI_ATTR_DATA_TYPE, S->err));
+
+	/* column length */
+	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_DATA_SIZE",
+			(param, OCI_DTYPE_PARAM, &data_size, 0, OCI_ATTR_DATA_SIZE, S->err));
+	/* column precision */
+	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_PRECISION",
+			(param, OCI_DTYPE_PARAM, &precis, 0, OCI_ATTR_PRECISION, S->err));
+
+
+	if (dtype) {
+	// if there is a declared type
+		switch (dtype) {
+#ifdef SQLT_TIMESTAMP
+		case SQLT_TIMESTAMP:
+			add_assoc_string(return_value, "oci:decl_type", "TIMESTAMP");
+			add_assoc_string(return_value, "native_type", "TIMESTAMP");
+			break;
+#endif
+#ifdef SQLT_TIMESTAMP_TZ
+		case SQLT_TIMESTAMP_TZ:
+			add_assoc_string(return_value, "oci:decl_type", "TIMESTAMP WITH TIMEZONE");
+			add_assoc_string(return_value, "native_type", "TIMESTAMP WITH TIMEZONE");
+			break;
+#endif
+#ifdef SQLT_TIMESTAMP_LTZ
+		case SQLT_TIMESTAMP_LTZ:
+			add_assoc_string(return_value, "oci:decl_type", "TIMESTAMP WITH LOCAL TIMEZONE");
+			add_assoc_string(return_value, "native_type", "TIMESTAMP WITH LOCAL TIMEZONE");
+			break;
+#endif
+#ifdef SQLT_INTERVAL_YM
+		case SQLT_INTERVAL_YM:
+			add_assoc_string(return_value, "oci:decl_type", "INTERVAL YEAR TO MONTH");
+			add_assoc_string(return_value, "native_type", "INTERVAL YEAR TO MONTH");
+			break;
+#endif
+#ifdef SQLT_INTERVAL_DS
+		case SQLT_INTERVAL_DS:
+			add_assoc_string(return_value, "oci:decl_type", "INTERVAL DAY TO SECOND");
+			add_assoc_string(return_value, "native_type", "INTERVAL DAY TO SECOND");
+			break;
+#endif
+		case SQLT_DAT:
+			add_assoc_string(return_value, "oci:decl_type", "DATE");
+			add_assoc_string(return_value, "native_type", "DATE");
+			break;
+		case SQLT_NUM:
+			add_assoc_string(return_value, "oci:decl_type", "NUMBER");
+			add_assoc_string(return_value, "native_type", "NUMBER");
+			break;
+		case SQLT_LNG:
+			add_assoc_string(return_value, "oci:decl_type", "LONG");
+			add_assoc_string(return_value, "native_type", "LONG");
+			break;
+		case SQLT_BIN:
+			add_assoc_string(return_value, "oci:decl_type", "RAW");
+			add_assoc_string(return_value, "native_type", "RAW");
+			break;
+		case SQLT_LBI:
+			add_assoc_string(return_value, "oci:decl_type", "LONG RAW");
+			add_assoc_string(return_value, "native_type", "LONG RAW");
+			break;
+		case SQLT_CHR:
+			add_assoc_string(return_value, "oci:decl_type", "VARCHAR2");
+			add_assoc_string(return_value, "native_type", "VARCHAR2");
+			break;
+		case SQLT_AFC:
+			add_assoc_string(return_value, "oci:decl_type", "CHAR");
+			add_assoc_string(return_value, "native_type", "CHAR");
+			break;
+		case SQLT_BLOB:
+			add_assoc_string(return_value, "oci:decl_type", "BLOB");
+			add_next_index_string(&flags, "blob");
+			add_assoc_string(return_value, "native_type", "BLOB");
+			break;
+		case SQLT_CLOB:
+			add_assoc_string(return_value, "oci:decl_type", "CLOB");
+			add_next_index_string(&flags, "blob");
+			add_assoc_string(return_value, "native_type", "CLOB");
+			break;
+		case SQLT_BFILE:
+			add_assoc_string(return_value, "oci:decl_type", "BFILE");
+			add_next_index_string(&flags, "blob");
+			add_assoc_string(return_value, "native_type", "BFILE");
+			break;
+		case SQLT_RDD:
+			add_assoc_string(return_value, "oci:decl_type", "ROWID");
+			add_assoc_string(return_value, "native_type", "ROWID");
+			break;
+		case SQLT_FLT :
+		case SQLT_BFLOAT:
+		case SQLT_IBFLOAT:
+			add_assoc_string(return_value, "oci:decl_type", "FLOAT");
+			add_assoc_string(return_value, "native_type", "FLOAT");
+			break;
+		case SQLT_BDOUBLE:
+		case SQLT_IBDOUBLE:
+			add_assoc_string(return_value, "oci:decl_type", "DOUBLE");
+			add_assoc_string(return_value, "native_type", "DOUBLE");
+			break;
+		default:
+			add_assoc_long(return_value, "oci:decl_type", dtype);
+			add_assoc_string(return_value, "native_type", "UNKNOWN");
+		}
+	} else if (data_size) {
+		// if the column is the result of a function
+		add_assoc_string(return_value, "native_type", "UNKNOWN");
+	} else {
+		// if the column is NULL
+		add_assoc_long(return_value, "oci:decl_type", 0);
+		add_assoc_string(return_value, "native_type", "NULL");
+	}
+
+	/* column can be null */
+	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_IS_NULL",
+			(param, OCI_DTYPE_PARAM, &isnull, 0, OCI_ATTR_IS_NULL, S->err));
+
+	/* column name */
+	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_NAME",
+			(param, OCI_DTYPE_PARAM, &colname, (ub4 *) &namelen, OCI_ATTR_NAME, S->err));
+
+	add_assoc_long(return_value, "precision", precis);
+	add_assoc_long(return_value, "len", data_size);
+	add_assoc_string(return_value, "name", (char *) colname);
+
+	if (isnull) {
+		add_next_index_string(&flags, "nullable");
+	} else {
+		add_next_index_string(&flags, "not_null");
+	}
+
+	/* PDO type */
+	switch (dtype) {
+		case SQLT_BFILE:
+		case SQLT_BLOB:
+		case SQLT_CLOB:
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_LOB);
+			break;
+		case SQLT_BIN:
+		default:
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
+	}
+
+	add_assoc_zval(return_value, "flags", &flags);
+	OCIDescriptorFree(param, OCI_DTYPE_PARAM);
+	return SUCCESS;
+} /* }}} */
+
 const struct pdo_stmt_methods oci_stmt_methods = {
 	oci_stmt_dtor,
 	oci_stmt_execute,
 	oci_stmt_fetch,
 	oci_stmt_describe,
 	oci_stmt_get_col,
-	oci_stmt_param_hook
+	oci_stmt_param_hook,
+	NULL, /* set_attr */
+	NULL, /* get_attr */
+	oci_stmt_col_meta
 };
+
 
 /*
  * Local variables:
