@@ -962,7 +962,6 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 		case SQLT_CLOB:
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_LOB);
 			break;
-		case SQLT_BIN:
 		default:
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 	}
