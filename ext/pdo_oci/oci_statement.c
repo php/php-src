@@ -834,7 +834,7 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 
 
 	if (dtype) {
-	// if there is a declared type
+	/* if there is a declared type */
 		switch (dtype) {
 #ifdef SQLT_TIMESTAMP
 		case SQLT_TIMESTAMP:
@@ -929,10 +929,10 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			add_assoc_string(return_value, "native_type", "UNKNOWN");
 		}
 	} else if (data_size) {
-		// if the column is the result of a function
+		/* if the column is the result of a function */
 		add_assoc_string(return_value, "native_type", "UNKNOWN");
 	} else {
-		// if the column is NULL
+		/* if the column is NULL */
 		add_assoc_long(return_value, "oci:decl_type", 0);
 		add_assoc_string(return_value, "native_type", "NULL");
 	}
