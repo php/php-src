@@ -58,7 +58,7 @@ Core:
         }
 
   . Array accesses of type $obj["123"], where $obj implements ArrayAccess and
-    "123" is an integral string literal will no longer result in an implicit
+    "123" is an integer string literal will no longer result in an implicit
     conversion to integer, i.e., $obj->offsetGet("123") will be called instead
     of $obj->offsetGet(123). This matches existing behavior for non-literals.
     The behavior of arrays is not affected in any way, they continue to
