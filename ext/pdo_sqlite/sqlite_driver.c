@@ -692,10 +692,220 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 }
 /* }}} */
 
+typedef struct {
+	sqlite3_blob *blob;
+	size_t		 position;
+	size_t       size;
+	int          flags;
+} php_stream_sqlite3_data;
+
+static size_t php_sqlite3_stream_write(php_stream *stream, const char *buf, size_t count)
+{
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+
+	if (sqlite3_stream->flags & SQLITE_OPEN_READONLY) {
+		php_error_docref(NULL, E_WARNING, "Can't write to blob stream: is open as read only");
+		return 0;
+	}
+
+	if (sqlite3_stream->position + count > sqlite3_stream->size) {
+		php_error_docref(NULL, E_WARNING, "It is not possible to increase the size of a BLOB");
+		return 0;
+	}
+
+	if (sqlite3_blob_write(sqlite3_stream->blob, buf, count, sqlite3_stream->position) != SQLITE_OK) {
+		return 0;
+	}
+
+	if (sqlite3_stream->position + count >= sqlite3_stream->size) {
+		stream->eof = 1;
+		sqlite3_stream->position = sqlite3_stream->size;
+	}
+	else {
+		sqlite3_stream->position += count;
+	}
+
+	return count;
+}
+
+static size_t php_sqlite3_stream_read(php_stream *stream, char *buf, size_t count)
+{
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+
+	if (sqlite3_stream->position + count >= sqlite3_stream->size) {
+		count = sqlite3_stream->size - sqlite3_stream->position;
+		stream->eof = 1;
+	}
+	if (count) {
+		if (sqlite3_blob_read(sqlite3_stream->blob, buf, count, sqlite3_stream->position) != SQLITE_OK) {
+			return 0;
+		}
+		sqlite3_stream->position += count;
+	}
+	return count;
+}
+
+static int php_sqlite3_stream_close(php_stream *stream, int close_handle)
+{
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+
+	if (sqlite3_blob_close(sqlite3_stream->blob) != SQLITE_OK) {
+		/* Error occurred, but it still closed */
+	}
+
+	efree(sqlite3_stream);
+
+	return 0;
+}
+
+static int php_sqlite3_stream_flush(php_stream *stream)
+{
+	/* do nothing */
+	return 0;
+}
+
+/* {{{ */
+static int php_sqlite3_stream_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs)
+{
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+
+	switch(whence) {
+		case SEEK_CUR:
+			if (offset < 0) {
+				if (sqlite3_stream->position < (size_t)(-offset)) {
+					sqlite3_stream->position = 0;
+					*newoffs = -1;
+					return -1;
+				} else {
+					sqlite3_stream->position = sqlite3_stream->position + offset;
+					*newoffs = sqlite3_stream->position;
+					stream->eof = 0;
+					return 0;
+				}
+			} else {
+				if (sqlite3_stream->position + (size_t)(offset) > sqlite3_stream->size) {
+					sqlite3_stream->position = sqlite3_stream->size;
+					*newoffs = -1;
+					return -1;
+				} else {
+					sqlite3_stream->position = sqlite3_stream->position + offset;
+					*newoffs = sqlite3_stream->position;
+					stream->eof = 0;
+					return 0;
+				}
+			}
+		case SEEK_SET:
+			if (sqlite3_stream->size < (size_t)(offset)) {
+				sqlite3_stream->position = sqlite3_stream->size;
+				*newoffs = -1;
+				return -1;
+			} else {
+				sqlite3_stream->position = offset;
+				*newoffs = sqlite3_stream->position;
+				stream->eof = 0;
+				return 0;
+			}
+		case SEEK_END:
+			if (offset > 0) {
+				sqlite3_stream->position = sqlite3_stream->size;
+				*newoffs = -1;
+				return -1;
+			} else if (sqlite3_stream->size < (size_t)(-offset)) {
+				sqlite3_stream->position = 0;
+				*newoffs = -1;
+				return -1;
+			} else {
+				sqlite3_stream->position = sqlite3_stream->size + offset;
+				*newoffs = sqlite3_stream->position;
+				stream->eof = 0;
+				return 0;
+			}
+		default:
+			*newoffs = sqlite3_stream->position;
+			return -1;
+	}
+}
+/* }}} */
+
+
+static int php_sqlite3_stream_cast(php_stream *stream, int castas, void **ret)
+{
+	return FAILURE;
+}
+
+static int php_sqlite3_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
+{
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+	ssb->sb.st_size = sqlite3_stream->size;
+	return 0;
+}
+
+static php_stream_ops php_stream_sqlite3_ops = {
+	php_sqlite3_stream_write,
+	php_sqlite3_stream_read,
+	php_sqlite3_stream_close,
+	php_sqlite3_stream_flush,
+	"PDO_SQLite3",
+	php_sqlite3_stream_seek,
+	php_sqlite3_stream_cast,
+	php_sqlite3_stream_stat,
+	NULL
+};
+
+/* {{{ resource SQLite::sqliteOpenBlob(string table, string column, int rowid [, string dbname [, int flags]])
+   Open a blob as a stream which we can read / write to.  */
+static PHP_METHOD(SQLite, sqliteOpenBlob)
+{
+	pdo_dbh_t *dbh;
+	pdo_sqlite_db_handle *H;
+	char *table, *column, *dbname = "main", *mode = "rb";
+	size_t table_len, column_len, dbname_len;
+	zend_long rowid, flags = SQLITE_OPEN_READONLY, sqlite_flags = 0;
+	sqlite3_blob *blob = NULL;
+	php_stream_sqlite3_data *sqlite3_stream;
+	php_stream *stream;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssl|sl", &table, &table_len, &column, &column_len, &rowid, &dbname, &dbname_len, &flags) == FAILURE) {
+		return;
+	}
+
+	dbh = Z_PDO_DBH_P(getThis());
+	PDO_CONSTRUCT_CHECK;
+
+	H = (pdo_sqlite_db_handle *)dbh->driver_data;
+
+	sqlite_flags = (flags & SQLITE_OPEN_READWRITE) ? 1 : 0;
+
+	if (sqlite3_blob_open(H->db, dbname, table, column, rowid, sqlite_flags, &blob) != SQLITE_OK) {
+		php_error_docref(NULL, E_WARNING, "Unable to open blob: %s", sqlite3_errmsg(H->db));
+		RETURN_FALSE;
+	}
+
+	sqlite3_stream = emalloc(sizeof(php_stream_sqlite3_data));
+	sqlite3_stream->blob = blob;
+	sqlite3_stream->flags = flags;
+	sqlite3_stream->position = 0;
+	sqlite3_stream->size = sqlite3_blob_bytes(blob);
+
+	if (sqlite_flags != 0) {
+		mode = "r+b";
+	}
+
+	stream = php_stream_alloc(&php_stream_sqlite3_ops, sqlite3_stream, 0, mode);
+
+	if (stream) {
+		php_stream_to_zval(stream, return_value);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 static const zend_function_entry dbh_methods[] = {
 	PHP_ME(SQLite, sqliteCreateFunction, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(SQLite, sqliteCreateAggregate, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(SQLite, sqliteCreateCollation, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(SQLite, sqliteOpenBlob, NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
