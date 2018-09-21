@@ -42,6 +42,10 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
   d. zend_check_private() is removed. Use (func->common.scope == scope) instead.
 
+  e. Pointers returned by php_win32_error_to_msg() have to be freed using
+     php_win32_error_msg_free(). Same regarding php_win_err() vs.
+     php_win_err_free().
+
 ========================
 2. Build system changes
 ========================
