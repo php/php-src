@@ -840,7 +840,7 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			(param, OCI_DTYPE_PARAM, &scale, 0, OCI_ATTR_SCALE, S->err));
 
 	/* string column charset form */
-	if(dtype == SQLT_CHR || dtype == SQLT_VCS || dtype == SQLT_AFC || dtype == SQLT_CLOB){
+	if (dtype == SQLT_CHR || dtype == SQLT_VCS || dtype == SQLT_AFC || dtype == SQLT_CLOB) {
 		STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_CHARSET_FORM",
 			(param, OCI_DTYPE_PARAM, &charset_form, 0, OCI_ATTR_CHARSET_FORM, S->err));
 	}
@@ -886,10 +886,10 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 		case SQLT_FLT :
 		case SQLT_NUM:
 			/* if the precision is nonzero and scale is -127 then it is a FLOAT */
-			if(scale == -127 && precis != 0){
+			if (scale == -127 && precis != 0) {
 				add_assoc_string(return_value, "oci:decl_type", "FLOAT");
 				add_assoc_string(return_value, "native_type", "FLOAT");
-			}else{
+			} else {
 				add_assoc_string(return_value, "oci:decl_type", "NUMBER");
 				add_assoc_string(return_value, "native_type", "NUMBER");
 			}
@@ -908,19 +908,19 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			break;
 		case SQLT_CHR:
 		case SQLT_VCS:
-			if(charset_form == SQLCS_NCHAR){
+			if (charset_form == SQLCS_NCHAR) {
 				add_assoc_string(return_value, "oci:decl_type", "NVARCHAR2");
 				add_assoc_string(return_value, "native_type", "NVARCHAR2");
-			}else{
+			} else {
 				add_assoc_string(return_value, "oci:decl_type", "VARCHAR2");
 				add_assoc_string(return_value, "native_type", "VARCHAR2");
 			}
 			break;
 		case SQLT_AFC:
-			if(charset_form == SQLCS_NCHAR){
+			if (charset_form == SQLCS_NCHAR) {
 				add_assoc_string(return_value, "oci:decl_type", "NCHAR");
 				add_assoc_string(return_value, "native_type", "NCHAR");
-			}else{
+			} else {
 				add_assoc_string(return_value, "oci:decl_type", "CHAR");
 				add_assoc_string(return_value, "native_type", "CHAR");
 			}
@@ -931,10 +931,10 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			add_assoc_string(return_value, "native_type", "BLOB");
 			break;
 		case SQLT_CLOB:
-			if(charset_form == SQLCS_NCHAR){
+			if (charset_form == SQLCS_NCHAR) {
 				add_assoc_string(return_value, "oci:decl_type", "NCLOB");
 				add_assoc_string(return_value, "native_type", "NCLOB");
-			}else{
+			} else {
 				add_assoc_string(return_value, "oci:decl_type", "CLOB");
 				add_assoc_string(return_value, "native_type", "CLOB");
 			}
