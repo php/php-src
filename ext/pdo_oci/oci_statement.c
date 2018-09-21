@@ -553,7 +553,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_NAME",
 			(param, OCI_DTYPE_PARAM, &colname, &namelen, OCI_ATTR_NAME, S->err));
 
-	col->precision = scale;
+	col->precision = precis;
 	col->maxlen = data_size;
 	col->name = zend_string_init((char *)colname, namelen, 0);
 
@@ -598,7 +598,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 				S->cols[colno].datalen = 1024;
 #endif
 			} else if (dtype == SQLT_BIN) {
-				S->cols[colno].datalen = (ub4) col->maxlen * 2; // raw characters to hex digits
+				S->cols[colno].datalen = (ub4) col->maxlen * 2; /* raw characters to hex digits */
 			} else {
 				S->cols[colno].datalen = (ub4) (col->maxlen * S->H->max_char_width);
 			}
@@ -797,16 +797,17 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len
 static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
-	pdo_oci_column *C = &S->cols[colno];
-
+	pdo_oci_column *C;
 	OCIParam *param = NULL;
 	OraText *colname;
 	OraText * schema;
-	ub2 dtype, data_size, precis = 0;
+	ub2 dtype, data_size;
+	ub2 precis = 0;
 	ub4 namelen, schemalen, typelen, objlen;
+	sb1 scale;
 	char *str;
 	zval flags;
-	ub1 isnull;
+	ub1 isnull, charset_form;
 	if (!S->stmt) {
 		return FAILURE;
 	}
@@ -814,6 +815,8 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 		/* error invalid column */
 		return FAILURE;
 	}
+
+	C = &S->cols[colno];
 
 	array_init(return_value);
 	array_init(&flags);
@@ -832,9 +835,19 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_PRECISION",
 			(param, OCI_DTYPE_PARAM, &precis, 0, OCI_ATTR_PRECISION, S->err));
 
+	/* column scale */
+	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_SCALE",
+			(param, OCI_DTYPE_PARAM, &scale, 0, OCI_ATTR_SCALE, S->err));
+
+	/* string column charset form */
+	if(dtype == SQLT_CHR || dtype == SQLT_VCS || dtype == SQLT_AFC || dtype == SQLT_CLOB){
+		STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_CHARSET_FORM",
+			(param, OCI_DTYPE_PARAM, &charset_form, 0, OCI_ATTR_CHARSET_FORM, S->err));
+	}
+
 
 	if (dtype) {
-	// if there is a declared type
+	/* if there is a declared type */
 		switch (dtype) {
 #ifdef SQLT_TIMESTAMP
 		case SQLT_TIMESTAMP:
@@ -870,9 +883,16 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			add_assoc_string(return_value, "oci:decl_type", "DATE");
 			add_assoc_string(return_value, "native_type", "DATE");
 			break;
+		case SQLT_FLT :
 		case SQLT_NUM:
-			add_assoc_string(return_value, "oci:decl_type", "NUMBER");
-			add_assoc_string(return_value, "native_type", "NUMBER");
+			/* if the precision is nonzero and scale is -127 then it is a FLOAT */
+			if(scale == -127 && precis != 0){
+				add_assoc_string(return_value, "oci:decl_type", "FLOAT");
+				add_assoc_string(return_value, "native_type", "FLOAT");
+			}else{
+				add_assoc_string(return_value, "oci:decl_type", "NUMBER");
+				add_assoc_string(return_value, "native_type", "NUMBER");
+			}
 			break;
 		case SQLT_LNG:
 			add_assoc_string(return_value, "oci:decl_type", "LONG");
@@ -887,12 +907,23 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			add_assoc_string(return_value, "native_type", "LONG RAW");
 			break;
 		case SQLT_CHR:
-			add_assoc_string(return_value, "oci:decl_type", "VARCHAR2");
-			add_assoc_string(return_value, "native_type", "VARCHAR2");
+		case SQLT_VCS:
+			if(charset_form == SQLCS_NCHAR){
+				add_assoc_string(return_value, "oci:decl_type", "NVARCHAR2");
+				add_assoc_string(return_value, "native_type", "NVARCHAR2");
+			}else{
+				add_assoc_string(return_value, "oci:decl_type", "VARCHAR2");
+				add_assoc_string(return_value, "native_type", "VARCHAR2");
+			}
 			break;
 		case SQLT_AFC:
-			add_assoc_string(return_value, "oci:decl_type", "CHAR");
-			add_assoc_string(return_value, "native_type", "CHAR");
+			if(charset_form == SQLCS_NCHAR){
+				add_assoc_string(return_value, "oci:decl_type", "NCHAR");
+				add_assoc_string(return_value, "native_type", "NCHAR");
+			}else{
+				add_assoc_string(return_value, "oci:decl_type", "CHAR");
+				add_assoc_string(return_value, "native_type", "CHAR");
+			}
 			break;
 		case SQLT_BLOB:
 			add_assoc_string(return_value, "oci:decl_type", "BLOB");
@@ -900,9 +931,14 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			add_assoc_string(return_value, "native_type", "BLOB");
 			break;
 		case SQLT_CLOB:
-			add_assoc_string(return_value, "oci:decl_type", "CLOB");
+			if(charset_form == SQLCS_NCHAR){
+				add_assoc_string(return_value, "oci:decl_type", "NCLOB");
+				add_assoc_string(return_value, "native_type", "NCLOB");
+			}else{
+				add_assoc_string(return_value, "oci:decl_type", "CLOB");
+				add_assoc_string(return_value, "native_type", "CLOB");
+			}
 			add_next_index_string(&flags, "blob");
-			add_assoc_string(return_value, "native_type", "CLOB");
 			break;
 		case SQLT_BFILE:
 			add_assoc_string(return_value, "oci:decl_type", "BFILE");
@@ -913,26 +949,25 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			add_assoc_string(return_value, "oci:decl_type", "ROWID");
 			add_assoc_string(return_value, "native_type", "ROWID");
 			break;
-		case SQLT_FLT :
 		case SQLT_BFLOAT:
 		case SQLT_IBFLOAT:
-			add_assoc_string(return_value, "oci:decl_type", "FLOAT");
-			add_assoc_string(return_value, "native_type", "FLOAT");
+			add_assoc_string(return_value, "oci:decl_type", "BINARY_FLOAT");
+			add_assoc_string(return_value, "native_type", "BINARY_FLOAT");
 			break;
 		case SQLT_BDOUBLE:
 		case SQLT_IBDOUBLE:
-			add_assoc_string(return_value, "oci:decl_type", "DOUBLE");
-			add_assoc_string(return_value, "native_type", "DOUBLE");
+			add_assoc_string(return_value, "oci:decl_type", "BINARY_DOUBLE");
+			add_assoc_string(return_value, "native_type", "BINARY_DOUBLE");
 			break;
 		default:
 			add_assoc_long(return_value, "oci:decl_type", dtype);
 			add_assoc_string(return_value, "native_type", "UNKNOWN");
 		}
 	} else if (data_size) {
-		// if the column is the result of a function
+		/* if the column is the result of a function */
 		add_assoc_string(return_value, "native_type", "UNKNOWN");
 	} else {
-		// if the column is NULL
+		/* if the column is NULL */
 		add_assoc_long(return_value, "oci:decl_type", 0);
 		add_assoc_string(return_value, "native_type", "NULL");
 	}
@@ -940,14 +975,6 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 	/* column can be null */
 	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_IS_NULL",
 			(param, OCI_DTYPE_PARAM, &isnull, 0, OCI_ATTR_IS_NULL, S->err));
-
-	/* column name */
-	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_NAME",
-			(param, OCI_DTYPE_PARAM, &colname, (ub4 *) &namelen, OCI_ATTR_NAME, S->err));
-
-	add_assoc_long(return_value, "precision", precis);
-	add_assoc_long(return_value, "len", data_size);
-	add_assoc_string(return_value, "name", (char *) colname);
 
 	if (isnull) {
 		add_next_index_string(&flags, "nullable");
@@ -962,12 +989,12 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 		case SQLT_CLOB:
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_LOB);
 			break;
-		case SQLT_BIN:
 		default:
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 	}
 
 	add_assoc_zval(return_value, "flags", &flags);
+
 	OCIDescriptorFree(param, OCI_DTYPE_PARAM);
 	return SUCCESS;
 } /* }}} */
