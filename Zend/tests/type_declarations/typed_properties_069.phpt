@@ -21,7 +21,7 @@ try {
 var_dump(nonNumericStringRef());
 
 ?>
---EXPECTF--
+--EXPECT--
 Typed property Foo::$i must be int, string used
 Typed static property Foo::$i must not be accessed before initialization
 string(1) "x"
