@@ -13,5 +13,5 @@ $cb = function(int &$bar) {
 $foo = new Foo();
 $cb($foo->bar);
 ?>
---EXPECTF--
+--EXPECT--
 int(1)

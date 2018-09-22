@@ -18,6 +18,6 @@ unset($foo->bar);
 
 var_dump($foo->bar);
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "bar"
 int(0)

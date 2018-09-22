@@ -36,7 +36,7 @@ try {
 
 var_dump($foo);
 ?>
---EXPECTF--
+--EXPECT--
 int(42)
 Typed property class@anonymous::$baz must be int, null used
 int(1)

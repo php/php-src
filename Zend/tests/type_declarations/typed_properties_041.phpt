@@ -12,12 +12,5 @@ $foo->bar = "10";
 
 var_dump($foo->bar);
 ?>
---EXPECTF--
+--EXPECT--
 int(10)
-
-
-
-
-
-
-

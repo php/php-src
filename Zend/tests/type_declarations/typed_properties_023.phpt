@@ -32,7 +32,7 @@ Foo::$s = ref();
 var_dump(Foo::$s);
 var_dump(ref());
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "x"
 int(1)
 int(1)

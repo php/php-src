@@ -11,7 +11,7 @@ $foo = new Foo();
 $array = [&$foo->bar];
 var_dump($array);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   &int(1)

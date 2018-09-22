@@ -42,7 +42,7 @@ try {
 var_dump(Foo::$bar);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(48) "Typed property Foo::$bar must be int, float used"
 int(9223372036854775807)
 string(48) "Typed property Foo::$bar must be int, float used"

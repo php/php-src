@@ -13,10 +13,5 @@ $prop = $reflector->getProperty("qux");
 
 var_dump((string) $prop->getType());
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "int"
-
-
-
-
-

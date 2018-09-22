@@ -10,6 +10,6 @@ foreach ($foo as $key => $bar) {
 	var_dump($key, $bar);
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "bar"
 int(10)
