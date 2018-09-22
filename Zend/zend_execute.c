@@ -2817,7 +2817,7 @@ static zend_always_inline zend_bool i_zend_verify_ref_assignable_zval(zend_refer
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
 
 	if (UNEXPECTED(needs_coercion && !zend_verify_weak_scalar_type_hint(seen_type, zv))) {
-		zend_throw_ref_type_error_zval(prop, zv);
+		zend_throw_ref_type_error_zval(seen_prop, zv);
 		return 0;
 	}
 
