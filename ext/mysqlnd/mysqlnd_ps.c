@@ -850,15 +850,11 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 				if (stmt->result_bind[i].bound == TRUE && !Z_ISUNDEF_P(resultzv)) {
 					zval *data = &result->unbuf->last_row_data[i];
 
-					/*
-					  stmt->result_bind[i].zv has been already destructed
-					  in result->unbuf->m.free_last_data()
-					*/
-					if (zend_try_assign_ex(resultzv, data, 0) == SUCCESS) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
-							meta->fields[i].max_length = Z_STRLEN_P(data);
-						}
+					if (Z_TYPE_P(data) == IS_STRING && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
+						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
+
+					zend_try_assign_ex(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
 					ZVAL_NULL(data);
 				}
@@ -1028,19 +1024,16 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 				if (stmt->result_bind[i].bound == TRUE) {
 					zval *data = &result->unbuf->last_row_data[i];
 
-					/*
-					  stmt->result_bind[i].zv has been already destructed
-					  in result->unbuf->m.free_last_data()
-					*/
 					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, &stmt->result_bind[i].zv,
 								Z_TYPE_P(data), Z_REFCOUNTED(stmt->result_bind[i].zv)?
 							   	Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
 
-					if (zend_try_assign_ex(resultzv, data, 0) == SUCCESS) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
-							meta->fields[i].max_length = Z_STRLEN_P(data);
-						}
+					if (Z_TYPE_P(data) == IS_STRING &&
+							(meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
+						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
+
+					zend_try_assign_ex(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
 					ZVAL_NULL(data);
 				}
