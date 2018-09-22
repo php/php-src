@@ -18,7 +18,7 @@ PHPNW Testfest 2009 - Paul Court ( g@rgoyle.com )
 	var_dump($fixedArray);
 	
 ?>
---EXPECTF--
+--EXPECT--
 object(SplFixedArray)#1 (5) {
   [0]=>
   string(14) "PHPNW Testfest"

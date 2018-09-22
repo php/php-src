@@ -37,6 +37,7 @@
 # include <Ws2tcpip.h>
 # include "php_sockets.h"
 # include <win32/sockets.h>
+# include <win32/winutil.h>
 #else
 # include <sys/types.h>
 # include <sys/socket.h>
@@ -649,12 +650,10 @@ char *sockets_strerror(int error) /* {{{ */
 	}
 #else
 	{
-		LPTSTR tmp = NULL;
+		char *tmp = php_win32_error_to_msg(error);
 		buf = NULL;
 
-		if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &tmp, 0, NULL)
-		) {
+		if (tmp[0]) {
 			if (SOCKETS_G(strerror_buf)) {
 				efree(SOCKETS_G(strerror_buf));
 			}
@@ -2801,21 +2800,15 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 
 	if (SOCKET_ERROR == WSADuplicateSocket(socket->bsd_socket, (DWORD)target_pid, &wi)) {
 		DWORD err = WSAGetLastError();
-		LPSTR buf = NULL;
+		char *buf = php_win32_error_to_msg(err);
 
-		if (!FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM |
-				FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL,
-				err,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				(LPSTR)&buf,
-			0, NULL)) {
+		if (!buf[0]) {
 			php_error_docref(NULL, E_WARNING, "Unable to export WSA protocol info [0x%08lx]", err);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Unable to export WSA protocol info [0x%08lx]: %s", err, buf);
 		}
+
+		php_win32_error_msg_free(buf);
 
 		RETURN_FALSE;
 	}
@@ -2879,21 +2872,15 @@ PHP_FUNCTION(socket_wsaprotocol_info_import)
 	sock = WSASocket(FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO, &wi, 0, 0);
 	if (INVALID_SOCKET == sock) {
 		DWORD err = WSAGetLastError();
-		LPSTR buf = NULL;
+		char *buf = php_win32_error_to_msg(err);
 
-		if (!FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM |
-				FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL,
-				err,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				(LPSTR)&buf,
-			0, NULL)) {
+		if (!buf[0]) {
 			php_error_docref(NULL, E_WARNING, "Unable to import WSA protocol info [0x%08lx]", err);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Unable to import WSA protocol info [0x%08lx]: %s", err, buf);
 		}
+
+		php_win32_error_msg_free(buf);
 
 		RETURN_FALSE;
 	}

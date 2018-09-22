@@ -68,10 +68,6 @@ ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h);
 ZEND_API zval *zend_ts_hash_find(TsHashTable *ht, zend_string *key);
 ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong);
 
-/* Misc */
-ZEND_API int zend_ts_hash_exists(TsHashTable *ht, zend_string *key);
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h);
-
 /* Copying, merging and sorting */
 ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor);
 ZEND_API void zend_ts_hash_copy_to_hash(HashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor);
@@ -119,6 +115,16 @@ static zend_always_inline void *zend_ts_hash_str_add_ptr(TsHashTable *ht, const 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_ts_hash_str_add(ht, str, len, &tmp);
 	return zv ? Z_PTR_P(zv) : NULL;
+}
+
+static zend_always_inline int zend_ts_hash_exists(TsHashTable *ht, zend_string *key)
+{
+	return zend_ts_hash_find(ht, key) != NULL;
+}
+
+static zend_always_inline int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h)
+{
+	return zend_ts_hash_index_find(ht, h) != NULL;
 }
 
 END_EXTERN_C()

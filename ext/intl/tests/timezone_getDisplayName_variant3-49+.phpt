@@ -2,7 +2,6 @@
 IntlTimeZone::getDisplayName(): locale parameter
 --SKIPIF--
 <?php if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '49') < 0) die('skip for ICU >= 49'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '55.1') >= 0) die('skip for ICU < 55.1'); ?>
 --FILE--
 <?php

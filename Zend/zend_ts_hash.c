@@ -230,28 +230,6 @@ ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong h)
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_exists(TsHashTable *ht, zend_string *key)
-{
-	int retval;
-
-	begin_read(ht);
-	retval = zend_hash_exists(TS_HASH(ht), key);
-	end_read(ht);
-
-	return retval;
-}
-
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h)
-{
-	int retval;
-
-	begin_read(ht);
-	retval = zend_hash_index_exists(TS_HASH(ht), h);
-	end_read(ht);
-
-	return retval;
-}
-
 ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor)
 {
 	begin_read(source);

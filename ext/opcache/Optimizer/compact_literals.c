@@ -387,6 +387,7 @@ literals_handle_static_prop:
 						} else {
 							map[i] = j;
 							ZVAL_LONG(&zv, j);
+							Z_EXTRA(op_array->literals[i]) = 0; /* allow merging with FETCH_DIM_... */
 							zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
 							if (i != j) {
 								op_array->literals[j] = op_array->literals[i];

@@ -30,9 +30,7 @@
 #include "zend_closures.h"
 #include "zend_inheritance.h"
 
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 /* these variables are true statics/globals, and have to be mutex'ed on every access */
 ZEND_API HashTable module_registry;
@@ -1169,7 +1167,6 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 					} else {
 						val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
 					}
-					ZVAL_DEREF(val);
 					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
 						if (prop_info->type) {
 							zval tmp;
@@ -2740,7 +2737,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
 	zend_initialize_class_data(class_entry, 0);
-	class_entry->ce_flags = ce_flags | ZEND_ACC_CONSTANTS_UPDATED;
+	class_entry->ce_flags = ce_flags | ZEND_ACC_CONSTANTS_UPDATED | ZEND_ACC_LINKED;
 	class_entry->info.internal.module = EG(current_module);
 
 	if (class_entry->info.internal.builtin_functions) {
@@ -3515,7 +3512,7 @@ ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* 
 		zval *end = p + fci->param_count;
 
 		while (p != end) {
-			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(p);
 			p++;
 		}
 		if (free_mem) {

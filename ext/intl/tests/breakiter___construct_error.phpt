@@ -2,7 +2,6 @@
 IntlRuleBasedBreakIterator::__construct(): arg errors
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip ICU >= 4.8 only'; ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

@@ -637,7 +637,9 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		OPENSSL_free(der_buf);
 
 		if (cert_ctx == NULL) {
-			php_error_docref(NULL, E_WARNING, "Error creating certificate context: %s", php_win_err());
+			char *err = php_win_err();
+			php_error_docref(NULL, E_WARNING, "Error creating certificate context: %s", err);
+			php_win_err_free(err);
 			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 		}
 	}
@@ -659,7 +661,9 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		chain_flags = CERT_CHAIN_CACHE_END_CERT | CERT_CHAIN_REVOCATION_CHECK_CHAIN_EXCLUDE_ROOT;
 
 		if (!CertGetCertificateChain(NULL, cert_ctx, NULL, NULL, &chain_params, chain_flags, NULL, &cert_chain_ctx)) {
-			php_error_docref(NULL, E_WARNING, "Error getting certificate chain: %s", php_win_err());
+			char *err = php_win_err();
+			php_error_docref(NULL, E_WARNING, "Error getting certificate chain: %s", err);
+			php_win_err_free(err);
 			CertFreeCertificateContext(cert_ctx);
 			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 		}
@@ -743,7 +747,9 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		CertFreeCertificateContext(cert_ctx);
 
 		if (!verify_result) {
-			php_error_docref(NULL, E_WARNING, "Error verifying certificate chain policy: %s", php_win_err());
+			char *err = php_win_err();
+			php_error_docref(NULL, E_WARNING, "Error verifying certificate chain policy: %s", err);
+			php_win_err_free(err);
 			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 		}
 

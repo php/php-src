@@ -37,9 +37,7 @@ AH_TOP([
 AH_BOTTOM([
 #ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
+#include <stdlib.h>
 
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -53,11 +51,7 @@ AH_BOTTOM([
 # include <ieeefp.h>
 #endif
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #if ZEND_BROKEN_SPRINTF
 int zend_sprintf(char *buffer, const char *format, ...);
@@ -448,9 +442,6 @@ poll.h \
 pwd.h \
 resolv.h \
 signal.h \
-stdarg.h \
-stdlib.h \
-string.h \
 syslog.h \
 sysexits.h \
 sys/ioctl.h \
@@ -466,7 +457,6 @@ sys/statfs.h \
 sys/statvfs.h \
 sys/vfs.h \
 sys/sysexits.h \
-sys/varargs.h \
 sys/wait.h \
 sys/loadavg.h \
 termios.h \
@@ -499,7 +489,6 @@ immintrin.h
 
 PHP_FOPENCOOKIE
 PHP_BROKEN_GETCWD
-PHP_BROKEN_GLIBC_FOPEN_APPEND
 if test "$GCC" = "yes"; then
   PHP_BROKEN_GCC_STRLEN_OPT
 fi
@@ -1438,6 +1427,10 @@ case $host_alias in
   ac_cv_exeext=
   ;;
 esac
+
+dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
+dnl SEE https://www.mail-archive.com/automake-patches@gnu.org/msg07705.html
+AC_SUBST(AR_FLAGS, [cr])
 
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by PHP_REQUIRE_CXX).
 dnl Otherwise AC_PROG_LIBTOOL fails if there is no working C++ compiler.

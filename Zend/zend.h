@@ -115,6 +115,7 @@ typedef struct _zend_trait_alias {
 struct _zend_class_entry {
 	char type;
 	zend_string *name;
+	/* class_entry or string depending on ZEND_ACC_LINKED */
 	union {
 		zend_class_entry *parent;
 		zend_string *parent_name;
@@ -163,7 +164,7 @@ struct _zend_class_entry {
 	uint32_t num_interfaces;
 	uint32_t num_traits;
 
-	/* class_entry or string(s) depending on ZEND_ACC_UNRESOLVED_INTERFACES */
+	/* class_entry or string(s) depending on ZEND_ACC_LINKED */
 	union {
 		zend_class_entry **interfaces;
 		zend_class_name *interface_names;

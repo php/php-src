@@ -200,7 +200,9 @@ static void mysqli_objects_free_storage(zend_object	*object)
 	mysqli_object 	*intern = php_mysqli_fetch_object(object);
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
-	my_efree(my_res);
+	if (my_res) {
+		efree(my_res);
+	}
 	zend_object_std_dtor(&intern->zo);
 }
 /* }}} */

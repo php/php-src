@@ -224,13 +224,8 @@ typedef unsigned int socklen_t;
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_STDARG_H
+
 #include <stdarg.h>
-#else
-# if HAVE_SYS_VARARGS_H
-# include <sys/varargs.h>
-# endif
-#endif
 
 #include "php_stdint.h"
 

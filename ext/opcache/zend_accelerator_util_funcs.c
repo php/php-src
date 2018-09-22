@@ -34,6 +34,10 @@
 # define accel_xlat_get(old)	    zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*))
 #endif
 
+#define IN_ARENA(ptr) \
+	((void*)(ptr) >= ZCG(current_persistent_script)->arena_mem && \
+	 (void*)(ptr) < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size))
+
 #define ARENA_REALLOC(ptr) \
 	(void*)(((char*)(ptr)) + ((char*)ZCG(arena_mem) - (char*)ZCG(current_persistent_script)->arena_mem))
 
@@ -95,38 +99,18 @@ void zend_accel_move_user_functions(HashTable *src, zend_script *script)
 	src->pDestructor = orig_dtor;
 }
 
-static inline void zend_clone_zval(zval *src)
-{
-	void *ptr;
-
-	if (Z_TYPE_P(src) == IS_REFERENCE) {
-		ptr = accel_xlat_get(Z_REF_P(src));
-		if (ptr != NULL) {
-			Z_REF_P(src) = ptr;
-			return;
-		} else {
-			zend_reference *old = Z_REF_P(src);
-			ZVAL_NEW_REF(src, &old->val);
-			Z_REF_P(src)->gc = old->gc;
-			accel_xlat_set(old, Z_REF_P(src));
-			src = Z_REFVAL_P(src);
-		}
-	}
-}
-
 static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 {
-	Bucket *p, *q, *end;
-	zend_ulong nIndex;
+	Bucket *p, *end;
 	zend_class_constant *c;
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
-	ht->nNumUsed = 0;
+	ht->nNumUsed = source->nNumUsed;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
-	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
+	HT_FLAGS(ht) = HT_FLAGS(source);
 	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
@@ -134,32 +118,18 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 		return;
 	}
 
-	ZEND_ASSERT((HT_FLAGS(source) & HASH_FLAG_PACKED) == 0);
-	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
-	HT_HASH_RESET(ht);
+	p = emalloc(HT_SIZE(ht));
+	memcpy(p, HT_GET_DATA_ADDR(source), HT_USED_SIZE(ht));
+	HT_SET_DATA_ADDR(ht, p);
 
-	p = source->arData;
-	end = p + source->nNumUsed;
+	p = ht->arData;
+	end = p + ht->nNumUsed;
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
-		nIndex = p->h | ht->nTableMask;
-
-		/* Insert into hash collision list */
-		q = ht->arData + ht->nNumUsed;
-		Z_NEXT(q->val) = HT_HASH(ht, nIndex);
-		HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(ht->nNumUsed++);
-
-		/* Initialize key */
-		q->h = p->h;
-		q->key = p->key;
-
-		/* Copy data */
 		c = ARENA_REALLOC(Z_PTR(p->val));
-		ZVAL_PTR(&q->val, c);
+		Z_PTR(p->val) = c;
 
-		zend_clone_zval(&c->value);
-		if ((void*)c->ce >= ZCG(current_persistent_script)->arena_mem &&
-		    (void*)c->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
+		if (IN_ARENA(c->ce)) {
 			c->ce = ARENA_REALLOC(c->ce);
 		}
 	}
@@ -167,17 +137,16 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 
 static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce)
 {
-	Bucket *p, *q, *end;
-	zend_ulong nIndex;
+	Bucket *p, *end;
 	zend_op_array *new_entry;
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
-	ht->nNumUsed = 0;
+	ht->nNumUsed = source->nNumUsed;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
+	HT_FLAGS(ht) = HT_FLAGS(source);
 	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
@@ -185,34 +154,18 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		return;
 	}
 
-	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
-	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
-	HT_HASH_RESET(ht);
+	p = emalloc(HT_SIZE(ht));
+	memcpy(p, HT_GET_DATA_ADDR(source), HT_USED_SIZE(ht));
+	HT_SET_DATA_ADDR(ht, p);
 
-	p = source->arData;
-	end = p + source->nNumUsed;
+	p = ht->arData;
+	end = p + ht->nNumUsed;
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
+		new_entry = ARENA_REALLOC(Z_PTR(p->val));
+		Z_PTR(p->val) = new_entry;
 
-		nIndex = p->h | ht->nTableMask;
-
-		/* Insert into hash collision list */
-		q = ht->arData + ht->nNumUsed;
-		Z_NEXT(q->val) = HT_HASH(ht, nIndex);
-		HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(ht->nNumUsed++);
-
-		/* Initialize key */
-		q->h = p->h;
-		ZEND_ASSERT(p->key != NULL);
-		q->key = p->key;
-
-		/* Copy data */
-		ZVAL_PTR(&q->val, ARENA_REALLOC(Z_PTR(p->val)));
-		new_entry = (zend_op_array*)Z_PTR(q->val);
-
-		if ((void*)new_entry->scope >= ZCG(current_persistent_script)->arena_mem &&
-		    (void*)new_entry->scope < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
-
+		if (IN_ARENA(new_entry->scope)) {
 			new_entry->scope = ARENA_REALLOC(new_entry->scope);
 
 			/* update prototype */
@@ -225,17 +178,16 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 
 static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_class_entry *old_ce)
 {
-	Bucket *p, *q, *end;
-	zend_ulong nIndex;
+	Bucket *p, *end;
 	zend_property_info *prop_info;
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
-	ht->nNumUsed = 0;
+	ht->nNumUsed = source->nNumUsed;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
-	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
+	HT_FLAGS(ht) = HT_FLAGS(source);
 	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
@@ -243,33 +195,18 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		return;
 	}
 
-	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
-	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
-	HT_HASH_RESET(ht);
+	p = emalloc(HT_SIZE(ht));
+	memcpy(p, HT_GET_DATA_ADDR(source), HT_USED_SIZE(ht));
+	HT_SET_DATA_ADDR(ht, p);
 
-	p = source->arData;
-	end = p + source->nNumUsed;
+	p = ht->arData;
+	end = p + ht->nNumUsed;
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
-
-		nIndex = p->h | ht->nTableMask;
-
-		/* Insert into hash collision list */
-		q = ht->arData + ht->nNumUsed;
-		Z_NEXT(q->val) = HT_HASH(ht, nIndex);
-		HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(ht->nNumUsed++);
-
-		/* Initialize key */
-		q->h = p->h;
-		ZEND_ASSERT(p->key != NULL);
-		q->key = p->key;
-
-		/* Copy data */
 		prop_info = ARENA_REALLOC(Z_PTR(p->val));
-		ZVAL_PTR(&q->val, prop_info);
+		Z_PTR(p->val) = prop_info;
 
-		if ((void*)prop_info->ce >= ZCG(current_persistent_script)->arena_mem &&
-		    (void*)prop_info->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
+		if (IN_ARENA(prop_info->ce)) {
 			prop_info->ce = ARENA_REALLOC(prop_info->ce);
 		}
 	}
@@ -292,7 +229,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;
 
-	if (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
+	if (ce->parent && (ce->ce_flags & ZEND_ACC_LINKED)) {
 		ce->parent = ARENA_REALLOC(ce->parent);
 	}
 
@@ -303,7 +240,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		dst = ce->default_properties_table;
 		for (; src != end; src++, dst++) {
 			ZVAL_COPY_VALUE(dst, src);
-			zend_clone_zval(dst);
 		}
 	}
 
@@ -312,7 +248,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	/* static members */
 	if (old_ce->default_static_members_table) {
 		int i, end;
-		zend_class_entry *parent = (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) ? NULL : ce->parent;
+		zend_class_entry *parent = !(ce->ce_flags & ZEND_ACC_LINKED) ? NULL : ce->parent;
 
 		ce->default_static_members_table = emalloc(sizeof(zval) * old_ce->default_static_members_count);
 		i = ce->default_static_members_count - 1;
@@ -322,7 +258,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		for (; i >= end; i--) {
 			zval *p = &ce->default_static_members_table[i];
 			ZVAL_COPY_VALUE(p, &old_ce->default_static_members_table[i]);
-			zend_clone_zval(p);
 		}
 
 		/* Create indirections to static properties from parent classes */
@@ -347,7 +282,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	if (ce->num_interfaces) {
 		zend_class_name *interface_names;
 
-		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 		interface_names = emalloc(sizeof(zend_class_name) * ce->num_interfaces);
 		memcpy(interface_names, ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 		ce->interface_names = interface_names;

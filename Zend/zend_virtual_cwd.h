@@ -32,9 +32,7 @@
 #include <utime.h>
 #endif
 
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 #ifdef ZTS
 #define VIRTUAL_DIR

@@ -611,11 +611,13 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	UNSERIALIZE_PTR(ce);
 
 	SERIALIZE_STR(ce->name);
-	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
-		SERIALIZE_STR(ce->parent_name);
-	} else {
-		parent = ce->parent;
-		SERIALIZE_PTR(ce->parent);
+	if (ce->parent) {
+		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+			SERIALIZE_STR(ce->parent_name);
+		} else {
+			parent = ce->parent;
+			SERIALIZE_PTR(ce->parent);
+		}
 	}
 	zend_file_cache_serialize_hash(&ce->function_table, script, info, buf, zend_file_cache_serialize_func);
 	if (ce->default_properties_table) {
@@ -655,7 +657,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		uint32_t i;
 		zend_class_name *interface_names;
 
-		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 
 		SERIALIZE_PTR(ce->interface_names);
 		interface_names = ce->interface_names;
@@ -1250,11 +1252,13 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	ce = Z_PTR_P(zv);
 
 	UNSERIALIZE_STR(ce->name);
-	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
-		UNSERIALIZE_STR(ce->parent_name);
-	} else {
-		UNSERIALIZE_PTR(ce->parent);
-		parent = ce->parent;
+	if (ce->parent) {
+		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+			UNSERIALIZE_STR(ce->parent_name);
+		} else {
+			UNSERIALIZE_PTR(ce->parent);
+			parent = ce->parent;
+		}
 	}
 	zend_file_cache_unserialize_hash(&ce->function_table,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
@@ -1293,7 +1297,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	if (ce->num_interfaces) {
 		uint32_t i;
 
-		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 		UNSERIALIZE_PTR(ce->interface_names);
 
 		for (i = 0; i < ce->num_interfaces; i++) {

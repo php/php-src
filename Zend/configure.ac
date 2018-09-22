@@ -28,9 +28,7 @@ AH_TOP([
 AH_BOTTOM([
 #ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
+#include <stdlib.h>
 
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -44,11 +42,7 @@ AH_BOTTOM([
 # include <ieeefp.h>
 #endif
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #if ZEND_BROKEN_SPRINTF
 int zend_sprintf(char *buffer, const char *format, ...);

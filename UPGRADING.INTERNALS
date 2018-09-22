@@ -11,6 +11,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   b. Windows build system changes
 
 3. Module changes
+  a. ext/xml
 
 ========================
 1. Internal API changes
@@ -34,9 +35,16 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - ZEND_ACC_SHADOW property flag is removed. Instead of creating shadow
       clone, now we use the same private property_info, and should also
       check property_info->ce (in the same way as with methods).
+    - ZEND_ACC_ANON_BOUND is replaced with ZEND_ACC_LINKED. This flag is set
+      not only during anonymous classes declaration, but also during any
+      run-time or compile-time class declaration.
     - ZEND_ACC_... flags are re-numbered.
 
   d. zend_check_private() is removed. Use (func->common.scope == scope) instead.
+
+  e. Pointers returned by php_win32_error_to_msg() have to be freed using
+     php_win32_error_msg_free(). Same regarding php_win_err() vs.
+     php_win_err_free().
 
 ========================
 2. Build system changes
@@ -54,3 +62,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+  a. ext/xml
+    - The public (internal) API of the ext/xml extension has been removed. All
+      functions and structures are private to the extension now.

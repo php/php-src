@@ -729,10 +729,11 @@ static void zend_persist_class_entry(zval *zv)
 		ce = Z_PTR_P(zv) = ZCG(arena_mem);
 		ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_class_entry)));
 		zend_accel_store_interned_string(ce->name);
-		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 			zend_accel_store_interned_string(ce->parent_name);
 		}
 		zend_hash_persist(&ce->function_table, zend_persist_class_method);
+		HT_FLAGS(&ce->function_table) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
 		if (ce->default_properties_table) {
 		    int i;
 
@@ -747,7 +748,7 @@ static void zend_persist_class_entry(zval *zv)
 
 			/* Persist only static properties in this class.
 			 * Static properties from parent classes will be handled in class_copy_ctor */
-			i = (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) ? ce->parent->default_static_members_count : 0;
+			i = (ce->parent && (ce->ce_flags & ZEND_ACC_LINKED)) ? ce->parent->default_static_members_count : 0;
 			for (; i < ce->default_static_members_count; i++) {
 				zend_persist_zval(&ce->default_static_members_table[i]);
 			}
@@ -755,6 +756,7 @@ static void zend_persist_class_entry(zval *zv)
 		ce->static_members_table = NULL;
 
 		zend_hash_persist(&ce->constants_table, zend_persist_class_constant);
+		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
 
 		if (ce->info.user.filename) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */
@@ -772,11 +774,12 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
+		HT_FLAGS(&ce->properties_info) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
 
 		if (ce->num_interfaces) {
 			uint32_t i = 0;
 
-			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+			ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 			for (i = 0; i < ce->num_interfaces; i++) {
 				zend_accel_store_interned_string(ce->interface_names[i].name);
 				zend_accel_store_interned_string(ce->interface_names[i].lc_name);
@@ -848,7 +851,7 @@ static int zend_update_parent_ce(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
-	if (ce->parent && !(ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT)) {
+	if (ce->parent && (ce->ce_flags & ZEND_ACC_LINKED)) {
 		ce->parent = zend_shared_alloc_get_xlat_entry(ce->parent);
 	}
 

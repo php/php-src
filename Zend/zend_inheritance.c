@@ -800,7 +800,6 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 	uint32_t i, ce_num, if_num = iface->num_interfaces;
 	zend_class_entry *entry;
 
-	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
 	ce_num = ce->num_interfaces;
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -879,9 +878,8 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	}
 
-	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+	if (ce->parent_name) {
 		zend_string_release_ex(ce->parent_name, 0);
-		ce->ce_flags &= ~ZEND_ACC_UNRESOLVED_PARENT;
 	}
 	ce->parent = parent_ce;
 
@@ -1113,7 +1111,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	zend_string *key;
 	zend_class_constant *c;
 
-	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES));
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
 
 	for (i = 0; i < ce->num_interfaces; i++) {
 		if (ce->interfaces[i] == NULL) {
@@ -1171,8 +1169,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 	zend_class_constant *c;
 	uint32_t i, j;
 
-	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
-
 	if (ce->parent && ce->parent->num_interfaces) {
 		interfaces = emalloc(sizeof(zend_class_entry*) * (ce->parent->num_interfaces + ce->num_interfaces));
 		memcpy(interfaces, ce->parent->interfaces, sizeof(zend_class_entry*) * ce->parent->num_interfaces);
@@ -1222,7 +1218,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 
 	ce->num_interfaces = num_interfaces;
 	ce->interfaces = interfaces;
-	ce->ce_flags &= ~ZEND_ACC_UNRESOLVED_INTERFACES;
 
 	i = ce->parent ? ce->parent->num_interfaces : 0;
 	for (; i < ce->num_interfaces; i++) {
@@ -1514,7 +1509,6 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
 	zend_string *lcname;
-	zend_bool method_exists;
 	HashTable **exclude_tables = NULL;
 	zend_class_entry **aliases = NULL;
 	zend_class_entry *trait;
@@ -1537,8 +1531,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 
 			/** Ensure that the preferred method is actually available. */
 			lcname = zend_string_tolower(cur_method_ref->method_name);
-			method_exists = zend_hash_exists(&trait->function_table, lcname);
-			if (!method_exists) {
+			if (!zend_hash_exists(&trait->function_table, lcname)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 						   "A precedence rule was defined for %s::%s but this method does not exist",
 						   ZSTR_VAL(trait->name),
@@ -1606,12 +1599,10 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 
 				/** And, ensure that the referenced method is resolvable, too. */
 				lcname = zend_string_tolower(cur_method_ref->method_name);
-				method_exists = zend_hash_exists(&trait->function_table, lcname);
-				zend_string_release_ex(lcname, 0);
-
-				if (!method_exists) {
+				if (!zend_hash_exists(&trait->function_table, lcname)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", ZSTR_VAL(trait->name), ZSTR_VAL(cur_method_ref->method_name));
 				}
+				zend_string_release_ex(lcname, 0);
 			}
 			i++;
 		}
@@ -2000,6 +1991,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 
 ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent) /* {{{ */
 {
+	ce->ce_flags |= ZEND_ACC_LINKED;
 	if (parent) {
 		zend_do_inheritance(ce, parent);
 	}

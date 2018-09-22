@@ -322,7 +322,7 @@ static void zend_persist_class_entry_calc(zval *zv)
 	if (ce->type == ZEND_USER_CLASS) {
 		ADD_ARENA_SIZE(sizeof(zend_class_entry));
 		ADD_INTERNED_STRING(ce->name, 0);
-		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 			ADD_INTERNED_STRING(ce->parent_name, 0);
 		}
 		zend_hash_persist_calc(&ce->function_table, zend_persist_class_method_calc);
@@ -358,7 +358,7 @@ static void zend_persist_class_entry_calc(zval *zv)
 		if (ce->num_interfaces) {
 			uint32_t i;
 
-			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES);
+			ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 			for (i = 0; i < ce->num_interfaces; i++) {
 				ADD_INTERNED_STRING(ce->interface_names[i].name, 0);
 				ADD_INTERNED_STRING(ce->interface_names[i].lc_name, 0);

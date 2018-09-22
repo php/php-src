@@ -68,6 +68,7 @@
 #ifdef ZEND_WIN32
 # include <wincrypt.h>
 # include <process.h>
+# include "win32/winutil.h"
 #endif
 
 #include <stdio.h>
@@ -87,18 +88,12 @@
 #  ifndef _GNU_SOURCE
 #   define _GNU_SOURCE
 #  endif
-#  ifndef __USE_GNU
-#   define __USE_GNU
-#  endif
 # endif
 # include <sys/mman.h>
 # ifndef MAP_ANON
 #  ifdef MAP_ANONYMOUS
 #   define MAP_ANON MAP_ANONYMOUS
 #  endif
-# endif
-# ifndef MREMAP_MAYMOVE
-#  define MREMAP_MAYMOVE 0
 # endif
 # ifndef MAP_FAILED
 #  define MAP_FAILED ((void*)-1)
@@ -394,23 +389,17 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 void
 stderr_last_error(char *msg)
 {
-	LPSTR buf = NULL;
 	DWORD err = GetLastError();
+	char *buf = php_win32_error_to_msg(err);
 
-	if (!FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			FORMAT_MESSAGE_FROM_SYSTEM |
-			FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,
-			err,
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPSTR)&buf,
-		0, NULL)) {
+	if (!buf[0]) {
 		fprintf(stderr, "\n%s: [0x%08lx]\n", msg, err);
 	}
 	else {
 		fprintf(stderr, "\n%s: [0x%08lx] %s\n", msg, err, buf);
 	}
+
+	php_win32_error_msg_free(buf);
 }
 #endif
 
@@ -2748,10 +2737,14 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
 
-	_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-	_heap->custom_heap.std._malloc = _malloc;
-	_heap->custom_heap.std._free = _free;
-	_heap->custom_heap.std._realloc = _realloc;
+	if (!_malloc && !_free && !_realloc) {
+		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_NONE;
+	} else {
+		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
+		_heap->custom_heap.std._malloc = _malloc;
+		_heap->custom_heap.std._free = _free;
+		_heap->custom_heap.std._realloc = _realloc;
+	}
 #endif
 }
 

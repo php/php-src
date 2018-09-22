@@ -45,7 +45,6 @@ $TS \
 --with-png-dir=/usr \
 --enable-exif \
 --enable-zip \
---without-libzip \
 --with-zlib \
 --with-zlib-dir=/usr \
 --enable-soap \

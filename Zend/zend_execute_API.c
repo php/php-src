@@ -205,7 +205,7 @@ static void zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
 	if (Z_TYPE_P(zv) == IS_INDIRECT) {
 		zv = Z_INDIRECT_P(zv);
 	}
-	i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC);
+	i_zval_ptr_dtor(zv);
 }
 /* }}} */
 
@@ -265,6 +265,16 @@ void shutdown_executor(void) /* {{{ */
 		zend_close_rsrc_list(&EG(regular_list));
 	} zend_end_try();
 
+	if (!fast_shutdown) {
+		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
+
+#if ZEND_DEBUG
+		if (gc_enabled() && !CG(unclean_shutdown)) {
+			gc_collect_cycles();
+		}
+#endif
+	}
+
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
 
 	/* All resources and objects are destroyed. */
@@ -286,14 +296,6 @@ void shutdown_executor(void) /* {{{ */
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
 		zend_cleanup_internal_classes();
 	} else {
-		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
-
-#if ZEND_DEBUG
-		if (gc_enabled() && !CG(unclean_shutdown)) {
-			gc_collect_cycles();
-		}
-#endif
-
 		/* remove error handlers before destroying classes and functions,
 		 * so that if handler used some class, crash would not happen */
 		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
@@ -319,7 +321,7 @@ void shutdown_executor(void) /* {{{ */
 		} else {
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
 				zend_constant *c = Z_PTR_P(zv);
-				if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
+				if (_idx == EG(persistent_constants_count)) {
 					break;
 				}
 				zval_ptr_dtor_nogc(&c->value);
@@ -331,15 +333,14 @@ void shutdown_executor(void) /* {{{ */
 			} ZEND_HASH_FOREACH_END_DEL();
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(function_table), key, zv) {
 				zend_function *func = Z_PTR_P(zv);
-				if (func->type == ZEND_INTERNAL_FUNCTION) {
+				if (_idx == EG(persistent_functions_count)) {
 					break;
 				}
 				destroy_op_array(&func->op_array);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END_DEL();
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
-				zend_class_entry *ce = Z_PTR_P(zv);
-				if (ce->type == ZEND_INTERNAL_CLASS) {
+				if (_idx == EG(persistent_classes_count)) {
 					break;
 				}
 				destroy_zend_class(zv);

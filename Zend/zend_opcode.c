@@ -151,7 +151,7 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 		ce->static_members_table = NULL;
 #endif
 		while (p != end) {
-			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(p);
 			p++;
 		}
 		efree(static_members);
@@ -218,7 +218,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
-			if (ce->ce_flags & ZEND_ACC_UNRESOLVED_PARENT) {
+			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 				zend_string_release_ex(ce->parent_name, 0);
 			}
 			if (ce->default_properties_table) {
@@ -226,7 +226,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zval *end = p + ce->default_properties_count;
 
 				while (p != end) {
-					i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+					i_zval_ptr_dtor(p);
 					p++;
 				}
 				efree(ce->default_properties_table);
@@ -245,7 +245,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 							}
 						} ZEND_REF_FOREACH_TYPE_SOURCES_END();
 					}
-					i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+					i_zval_ptr_dtor(p);
 					p++;
 				}
 				efree(ce->default_static_members_table);
@@ -278,7 +278,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
-				if (ce->ce_flags & ZEND_ACC_UNRESOLVED_INTERFACES) {
+				if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 					uint32_t i;
 
 					for (i = 0; i < ce->num_interfaces; i++) {

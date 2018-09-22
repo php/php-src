@@ -2149,6 +2149,7 @@ consult the installation file that came with this distribution, or visit \n\
 				char *err_text = php_win32_error_to_msg(err);
 
 				fprintf(stderr, "unable to get current command line: [0x%08lx]: %s\n", err, err_text);
+				php_win32_error_msg_free(err_text);
 
 				goto parent_out;
 			}
@@ -2167,6 +2168,8 @@ consult the installation file that came with this distribution, or visit \n\
 
 				fprintf(stderr, "unable to create job object: [0x%08lx]: %s\n", err, err_text);
 
+				php_win32_error_msg_free(err_text);
+
 				goto parent_out;
 			}
 
@@ -2176,6 +2179,7 @@ consult the installation file that came with this distribution, or visit \n\
 				char *err_text = php_win32_error_to_msg(err);
 
 				fprintf(stderr, "unable to configure job object: [0x%08lx]: %s\n", err, err_text);
+				php_win32_error_msg_free(err_text);
 			}
 
 			while (parent) {
@@ -2216,6 +2220,7 @@ consult the installation file that came with this distribution, or visit \n\
 							char *err_text = php_win32_error_to_msg(err);
 
 							fprintf(stderr, "unable to assign child process to job object: [0x%08lx]: %s\n", err, err_text);
+							php_win32_error_msg_free(err_text);
 						}
 						CloseHandle(pi.hThread);
 					} else {
@@ -2225,6 +2230,7 @@ consult the installation file that came with this distribution, or visit \n\
 						kid_cgi_ps[i] = NULL;
 
 						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
+						php_win32_error_msg_free(err_text);
 					}
 				}
 

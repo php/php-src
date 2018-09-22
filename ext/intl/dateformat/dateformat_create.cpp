@@ -36,10 +36,6 @@ extern "C" {
 #include "dateformat_helpers.h"
 #include "zend_exceptions.h"
 
-#if U_ICU_VERSION_MAJOR_NUM < 50
-#define UDAT_PATTERN 0
-#endif
-
 #define INTL_UDATE_FMT_OK(i) \
 	(UDAT_FULL == (i) || UDAT_LONG == (i) ||    \
 	 UDAT_MEDIUM == (i) || UDAT_SHORT == (i) || \

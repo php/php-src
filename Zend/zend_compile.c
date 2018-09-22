@@ -6323,7 +6323,7 @@ void zend_compile_implements(zend_ast *ast) /* {{{ */
 		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
 	}
 
-	ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES | ZEND_ACC_UNRESOLVED_INTERFACES;
+	ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	ce->num_interfaces = list->children;
 	ce->interface_names = interface_names;
 }
@@ -6420,7 +6420,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		ce->parent_name = zend_resolve_class_name(extends_name,
 					extends_ast->kind == ZEND_AST_ZVAL ? extends_ast->attr : ZEND_NAME_FQ);
 		zend_string_release_ex(extends_name, 0);
-		ce->ce_flags |= ZEND_ACC_INHERITED | ZEND_ACC_UNRESOLVED_PARENT;
+		ce->ce_flags |= ZEND_ACC_INHERITED;
 	}
 
 	CG(active_class_entry) = ce;
@@ -6489,6 +6489,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				) {
 				if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 					CG(zend_lineno) = decl->end_lineno;
+					ce->ce_flags |= ZEND_ACC_LINKED;
 					zend_do_inheritance(ce, parent_ce);
 					if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 						zend_verify_abstract_class(ce);
@@ -6501,6 +6502,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		} else {
 			if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 				zend_string_release(lcname);
+				ce->ce_flags |= ZEND_ACC_LINKED;
 				return;
 			}
 		}
@@ -6522,9 +6524,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			opline->opcode = ZEND_DECLARE_ANON_CLASS;
 		}
 
-		if (!zend_hash_exists(CG(class_table), lcname)) {
-			zend_hash_add_ptr(CG(class_table), lcname, ce);
-		} else {
+		if (!zend_hash_add_ptr(CG(class_table), lcname, ce)) {
 			/* this anonymous class has been included */
 			zval zv;
 			ZVAL_PTR(&zv, ce);

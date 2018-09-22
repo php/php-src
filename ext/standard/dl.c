@@ -29,11 +29,7 @@
 #if defined(HAVE_LIBDL)
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 #ifdef PHP_WIN32
 #include "win32/param.h"
 #include "win32/winutil.h"
@@ -88,7 +84,7 @@ PHPAPI void *php_load_shlib(char *path, char **errp)
 		if (err && (*err)) {
 			size_t i = strlen(err);
 			(*errp)=estrdup(err);
-			LocalFree(err);
+			php_win32_error_msg_free(err);
 			while (i > 0 && isspace((*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
 		} else {
 			(*errp) = estrdup("<No message>");

@@ -79,6 +79,7 @@ VC_VERSIONS[1912] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1913] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1914] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1915] = 'MSVC15 (Visual C++ 2017)';
+VC_VERSIONS[1916] = 'MSVC15 (Visual C++ 2017)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1700] = 'VC11';
@@ -90,6 +91,7 @@ VC_VERSIONS_SHORT[1912] = 'VC15';
 VC_VERSIONS_SHORT[1913] = 'VC15';
 VC_VERSIONS_SHORT[1914] = 'VC15';
 VC_VERSIONS_SHORT[1915] = 'VC15';
+VC_VERSIONS_SHORT[1916] = 'VC15';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -3219,6 +3221,11 @@ function toolset_setup_common_cflags()
 					} else {
 						/* Undocumented. */
 						ADD_FLAG('CFLAGS', "/d2guardspecload");
+					}
+				} else if (1900 == VCVERS) {
+					var subver1900 = probe_binary(PHP_CL).substr(6);
+					if (subver1900 >= 24241) {
+						ADD_FLAG('CFLAGS', "/Qspectre");
 					}
 				}
 			}

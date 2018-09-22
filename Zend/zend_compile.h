@@ -23,9 +23,7 @@
 #include "zend.h"
 #include "zend_ast.h"
 
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
+#include <stdarg.h>
 
 #include "zend_llist.h"
 
@@ -230,8 +228,8 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_TRAIT                   (1 <<  1) /*  X  |     |     |     */
 #define ZEND_ACC_ANON_CLASS              (1 <<  2) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Bound anonymous class                                  |     |     |     */
-#define ZEND_ACC_ANON_BOUND              (1 <<  3) /*  X  |     |     |     */
+/* Class linked with parent, interfacs and traits         |     |     |     */
+#define ZEND_ACC_LINKED                  (1 <<  3) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* class is abstarct, since it is set by any              |     |     |     */
 /* abstract method                                        |     |     |     */
@@ -243,20 +241,14 @@ typedef struct _zend_oparray_context {
 /* Class extends another class                            |     |     |     */
 #define ZEND_ACC_INHERITED               (1 <<  9) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Class extends another class                            |     |     |     */
-#define ZEND_ACC_UNRESOLVED_PARENT       (1 << 10) /*  X  |     |     |     */
-/*                                                        |     |     |     */
 /* Class implements interface(s)                          |     |     |     */
-#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 11) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Class implements interface(s)                          |     |     |     */
-#define ZEND_ACC_UNRESOLVED_INTERFACES   (1 << 12) /*  X  |     |     |     */
+#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 10) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class uses trait(s)                                    |     |     |     */
-#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 13) /*  X  |     |     |     */
+#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 11) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
-#define ZEND_HAS_STATIC_IN_METHODS       (1 << 14) /*  X  |     |     |     */
+#define ZEND_HAS_STATIC_IN_METHODS       (1 << 12) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class has magic methods __get/__set/__unset/           |     |     |     */
 /* __isset that use guards                                |     |     |     */
@@ -882,9 +874,6 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_INCLUDE_ONCE		(1<<2)
 #define ZEND_REQUIRE			(1<<3)
 #define ZEND_REQUIRE_ONCE		(1<<4)
-
-#define ZEND_CT	(1<<0)
-#define ZEND_RT (1<<1)
 
 /* global/local fetches */
 #define ZEND_FETCH_GLOBAL		(1<<1)

@@ -19,9 +19,18 @@ PHP 7.4 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Intl:
+  . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
+    INTL_IDNA_VARIANT_UTS46 instead of the deprecated INTL_IDNA_VARIANT_2003.
+
 ========================================
 2. New Features
 ========================================
+
+- PDO_SQLite:
+  . PDOStatement::getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT) allows to
+    check whether this statement is read-only, i.e. whether it doesn't modify
+    the database.
 
 ========================================
 3. Changes in SAPI modules
@@ -51,12 +60,19 @@ PHP 7.4 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Intl:
+  . The Intl extension now requires at least ICU 50.1.
+
 - Reflection:
   . Numeric value of class, property, function and constant modifiers was
     changed. Don't filter methods and properties through
     ReflectionClass::getMethods() and ReflectionClass::getProperties(), or test
     results of Reflection...::getModifiers(), using hard-coded numeric values.
     Use corresponding constants instead (e.g. ReflectionMethod::IS_PUBLIC).
+
+- Zip:
+  . The bundled libzip library has been removed. A system libzip >= 0.11 is now
+    necessary to build the extension.
 
 ========================================
 10. New Global Constants
