@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
     (Pierrick)
 
+- iconv:
+  . Fixed bug #66828 (iconv_mime_encode Q-encoding longer than it should be).
+    (cmb)
+
 - Opcache:
   . Fixed bug #76832 (ZendOPcache.MemoryBase periodically deleted by the OS).
     (Anatol)
