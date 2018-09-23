@@ -33,10 +33,8 @@ static PHP_FUNCTION(xmlwriter_set_indent_string);
 static PHP_FUNCTION(xmlwriter_start_attribute);
 static PHP_FUNCTION(xmlwriter_end_attribute);
 static PHP_FUNCTION(xmlwriter_write_attribute);
-#if LIBXML_VERSION > 20617
 static PHP_FUNCTION(xmlwriter_start_attribute_ns);
 static PHP_FUNCTION(xmlwriter_write_attribute_ns);
-#endif
 static PHP_FUNCTION(xmlwriter_start_element);
 static PHP_FUNCTION(xmlwriter_end_element);
 static PHP_FUNCTION(xmlwriter_full_end_element);
@@ -463,10 +461,8 @@ static const zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_start_attribute,	arginfo_xmlwriter_start_attribute)
 	PHP_FE(xmlwriter_end_attribute,		arginfo_xmlwriter_resource)
 	PHP_FE(xmlwriter_write_attribute,	arginfo_xmlwriter_write_attribute)
-#if LIBXML_VERSION > 20617
 	PHP_FE(xmlwriter_start_attribute_ns,arginfo_xmlwriter_start_attribute_ns)
 	PHP_FE(xmlwriter_write_attribute_ns,arginfo_xmlwriter_write_attribute_ns)
-#endif
 	PHP_FE(xmlwriter_start_element,		arginfo_xmlwriter_start_element)
 	PHP_FE(xmlwriter_end_element,		arginfo_xmlwriter_resource)
 	PHP_FE(xmlwriter_full_end_element,	arginfo_xmlwriter_resource)
@@ -513,10 +509,8 @@ static const zend_function_entry xmlwriter_class_functions[] = {
 	PHP_ME_MAPPING(startAttribute,	xmlwriter_start_attribute,	arginfo_xmlwriter_method_start_attribute, 0)
 	PHP_ME_MAPPING(endAttribute,	xmlwriter_end_attribute,	arginfo_xmlwriter_void, 0)
 	PHP_ME_MAPPING(writeAttribute,	xmlwriter_write_attribute,	arginfo_xmlwriter_method_write_attribute, 0)
-#if LIBXML_VERSION > 20617
 	PHP_ME_MAPPING(startAttributeNs,	xmlwriter_start_attribute_ns,arginfo_xmlwriter_method_start_attribute_ns, 0)
 	PHP_ME_MAPPING(writeAttributeNs,	xmlwriter_write_attribute_ns,arginfo_xmlwriter_method_write_attribute_ns, 0)
-#endif
 	PHP_ME_MAPPING(startElement,	xmlwriter_start_element,	arginfo_xmlwriter_method_start_element, 0)
 	PHP_ME_MAPPING(endElement,		xmlwriter_end_element,		arginfo_xmlwriter_void, 0)
 	PHP_ME_MAPPING(fullEndElement,	xmlwriter_full_end_element,	arginfo_xmlwriter_void, 0)
@@ -808,7 +802,6 @@ static PHP_FUNCTION(xmlwriter_end_attribute)
 }
 /* }}} */
 
-#if LIBXML_VERSION > 20617
 /* {{{ proto bool xmlwriter_start_attribute_ns(resource xmlwriter, string prefix, string name, string uri)
 Create start namespaced attribute - returns FALSE on error */
 static PHP_FUNCTION(xmlwriter_start_attribute_ns)
@@ -851,7 +844,6 @@ static PHP_FUNCTION(xmlwriter_start_attribute_ns)
 	RETURN_FALSE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto bool xmlwriter_write_attribute(resource xmlwriter, string name, string content)
 Write full attribute - returns FALSE on error */
@@ -896,7 +888,6 @@ static PHP_FUNCTION(xmlwriter_write_attribute)
 }
 /* }}} */
 
-#if LIBXML_VERSION > 20617
 /* {{{ proto bool xmlwriter_write_attribute_ns(resource xmlwriter, string prefix, string name, string uri, string content)
 Write full namespaced attribute - returns FALSE on error */
 static PHP_FUNCTION(xmlwriter_write_attribute_ns)
@@ -940,7 +931,6 @@ static PHP_FUNCTION(xmlwriter_write_attribute_ns)
 	RETURN_FALSE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto bool xmlwriter_start_element(resource xmlwriter, string name)
 Create start element tag - returns FALSE on error */

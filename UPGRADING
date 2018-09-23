@@ -63,6 +63,9 @@ PHP 7.4 UPGRADE NOTES
 - Intl:
   . The Intl extension now requires at least ICU 50.1.
 
+- libxml:
+  . The libxml extension now requires at least libxml 2.7.6.
+
 - Reflection:
   . Numeric value of class, property, function and constant modifiers was
     changed. Don't filter methods and properties through
