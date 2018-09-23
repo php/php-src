@@ -8,7 +8,7 @@ $a = new class implements ArrayAccess {
 
 	function offsetExists($o) { return 1; }
 	function &offsetGet($o) { return $this->foo; }
-	function offsetSet($o, $v) { print "offsetSet() must not be called"; }
+	function offsetSet($o, $v) { print "offsetSet($v)\n"; }
 	function offsetUnset($o) { print "offsetUnset() ?!?"; }
 };
 
@@ -18,9 +18,7 @@ var_dump($a->foo);
 $a[0] .= "1";
 var_dump($a->foo);
 
-try {
-	$a[0] .= "e50";
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
+$a[0] .= "e50";
 var_dump($a->foo);
 
 $a[0]--;
@@ -43,12 +41,14 @@ echo gettype($a->foo),"\n";
 
 ?>
 --EXPECT--
-int(2)
-int(21)
-Cannot assign string to reference held by property class@anonymous->foo of type int
-int(21)
-int(20)
-int(19)
+offsetSet(2)
+int(1)
+offsetSet(11)
+int(1)
+offsetSet(1e50)
+int(1)
+int(0)
+int(-1)
 Cannot assign float to reference held by property class@anonymous->foo of type int
 integer
 Cannot assign float to reference held by property class@anonymous->foo of type int

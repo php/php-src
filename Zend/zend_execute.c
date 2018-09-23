@@ -1248,31 +1248,15 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		if (UNEXPECTED(Z_ISREF_P(z))) {
-			zend_reference *ref = Z_REF_P(z);
-			zval *refval = Z_REFVAL_P(z);
-			binary_op(&res, refval, value);
-			if (ZEND_REF_HAS_TYPE_SOURCES(ref) && !zend_verify_ref_assignable_zval(ref, &res, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
-				zval_ptr_dtor(&res);
-				if (z == &rv) {
-					zval_ptr_dtor(&rv);
-				}
-				return;
-			}
-			zval_ptr_dtor(refval);
-			ZVAL_COPY(refval, &res);
-		} else {
-			binary_op(&res, z, value);
-			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
-		}
+		binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+		Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
 		if (z == &rv) {
 			zval_ptr_dtor(&rv);
 		}
 		if (retval) {
-			ZVAL_COPY_VALUE(retval, &res);
-		} else {
-			zval_ptr_dtor(&res);
+			ZVAL_COPY(retval, &res);
 		}
+		zval_ptr_dtor(&res);
 	} else {
 		zend_use_object_as_array();
 		if (retval) {
