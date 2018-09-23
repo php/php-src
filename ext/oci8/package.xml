@@ -508,7 +508,7 @@ Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
   </notes>
 </release>
 
-<release>   
+<release>
  <version>
    <release>2.1.5</release>
    <api>2.1.5</api>
@@ -520,9 +520,9 @@ Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Added TAF callback support (PR #2459, KoenigsKind) 
+Added TAF callback support (PR #2459, KoenigsKind)
   </notes>
-</release>   
+</release>
 
 <release>
   <version>
@@ -555,7 +555,7 @@ This version is for PHP 7 only.
 Fixed bug #71148 (Bind reference overwritten on PHP 7)
   </notes>
 </release>
-   
+
 <release>
   <version>
    <release>2.1.2</release>
@@ -588,7 +588,7 @@ This version is for PHP 7 only.
 Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
   </notes>
 </release>
-   
+
 <release>
   <version>
    <release>2.1.0</release>
@@ -601,7 +601,7 @@ Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Updated driver name format.    
+Updated driver name format.
   </notes>
 </release>
 
@@ -661,7 +661,7 @@ Enhancement - Improve performance of multi-row OCI_RETURN_LOB queries (Bug #6687
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Added oci_bind_by_name() support for PL/SQL BOOLEAN type    
+Added oci_bind_by_name() support for PL/SQL BOOLEAN type
 Build change: Fix source variable definition for C89 compatibility
   </notes>
 </release>
@@ -763,7 +763,7 @@ Add the connection handle to several DTrace probes.
    <api>devel</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
-  <notes> 
+  <notes>
 Fixed --enable-maintainer-zts mode.
 Allow Implicit Result Set statement resources to inherit the parent's current prefetch count.
 Allow OCI8 to be DTrace-enabled independently from core PHP.
@@ -781,7 +781,7 @@ Require OCI8 to be configured 'shared' when enabling DTrace support.
    <api>devel</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
-  <notes> 
+  <notes>
 - NEW FUNCTIONALITY:
 
   - Added Implicit Result Set support for Oracle Database 12c.
@@ -844,7 +844,7 @@ Require OCI8 to be configured 'shared' when enabling DTrace support.
   - Regularized code prototypes and fixed some in-line documentation
     prototypes.
 
-  - Fixed code folding. 
+  - Fixed code folding.
   </notes>
 </release>
 
