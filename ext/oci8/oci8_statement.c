@@ -1260,7 +1260,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		zend_string_release(zvtmp);
 	}
 
-	/* Make sure the minimum of value_sz is 1 to avoid ORA-3149 
+	/* Make sure the minimum of value_sz is 1 to avoid ORA-3149
 	 * when both in/out parameters are bound with empty strings
 	 */
 	if (value_sz == 0)

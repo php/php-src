@@ -56,7 +56,7 @@ PHP_FUNCTION(oci_register_taf_callback)
 	}
 
 	if (callback) {
-#if PHP_MAJOR_VERSION > 7 || (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION >= 2)    
+#if PHP_MAJOR_VERSION > 7 || (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION >= 2)
 		if (!zend_is_callable(callback, 0, 0)) {
 			callback_name = zend_get_callable_name(callback);
 			php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(callback_name));
