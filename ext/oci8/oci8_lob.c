@@ -203,7 +203,7 @@ sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece
 }
 /* }}} */
 
-/* {{{ php_oci_lob_calculate_buffer() 
+/* {{{ php_oci_lob_calculate_buffer()
    Work out the size for LOB buffering */
 static inline int php_oci_lob_calculate_buffer(php_oci_descriptor *descriptor, zend_long read_length)
 {
