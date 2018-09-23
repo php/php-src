@@ -6069,7 +6069,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 
 			if (optional_type == IS_VOID || optional_type == IS_CALLABLE) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Typed property %s::$%s cannot have type %s",
+					"Property %s::$%s cannot have type %s",
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(name),
 					zend_get_type_by_const(optional_type));
