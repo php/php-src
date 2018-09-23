@@ -17,6 +17,7 @@ addons:
       - libsasl2-dev
       - libxpm-dev
       - libzip-dev
+      - libsqlite3-dev
 
 
 services:
