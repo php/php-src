@@ -20,7 +20,6 @@ var_dump(Foo::$i);
 Foo::$s = Foo::$i++;
 var_dump(Foo::$s, Foo::$i);
 $a = 3;
-$b = "3";
 Foo::$s = $a;
 var_dump(Foo::$s);
 Foo::$i = "4";

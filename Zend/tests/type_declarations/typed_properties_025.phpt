@@ -3,8 +3,8 @@ Test typed properties type must preceed first declaration in group
 --FILE--
 <?php
 class Foo {
-	public $bar,
-			int	$qux;
+    public $bar,
+           int $qux;
 }
 ?>
 --EXPECTF--

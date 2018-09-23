@@ -1,9 +1,5 @@
 --TEST--
 Proper source duplication on assignment to typed property
---INI--
-opcache.enable=1
-opcache.enable_cli=1
-opcache.protect_memory=1
 --FILE--
 <?php
 class Foo {

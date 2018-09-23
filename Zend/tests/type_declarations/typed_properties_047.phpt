@@ -5,38 +5,18 @@ Nullable typed property
 class Foo {
 	public ?int $foo = null;
 }
+
 $x = new Foo();
 var_dump($x);
-try {
-	var_dump($x->foo);
-} catch (Throwable $e) {
-	echo $e->getMessage()."\n";
-}
-try {
-	$x->foo = 5;
-} catch (Throwable $e) {
-	echo $e->getMessage()."\n";
-}
-try {
-	var_dump($x->foo);
-} catch (Throwable $e) {
-	echo $e->getMessage()."\n";
-}
-try {
-	$x->foo = null;
-} catch (Throwable $e) {
-	echo $e->getMessage()."\n";
-}
-try {
-	var_dump($x->foo);
-} catch (Throwable $e) {
-	echo $e->getMessage()."\n";
-}
-try {
-	unset($x->foo);
-} catch (Throwable $e) {
-	echo $e->getMessage()."\n";
-}
+var_dump($x->foo);
+
+$x->foo = 5;
+var_dump($x->foo);
+
+$x->foo = null;
+var_dump($x->foo);
+
+unset($x->foo);
 try {
 	var_dump($x->foo);
 } catch (Throwable $e) {

@@ -14,12 +14,8 @@ class B {
 	public string $foo = FOO;
 }
 
-try {
-	$o = new A();
-	var_dump($o->foo);
-} catch (Throwable $e) {
-	echo $e->getMessage() . "\n";
-}
+$o = new A();
+var_dump($o->foo);
 
 for ($i = 0; $i < 2; $i++) {
 	try {
