@@ -795,6 +795,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				zend_parse_arg_zval_deref(real_arg, p, check_null);
 			}
 			break;
+
+		case 'Z':
+			/* 'Z' iz not supported anymore and should be replaced with 'z' */
+			ZEND_ASSERT(c != 'Z');
+		default:
+			return "unknown";
 	}
 
 	*spec = spec_walk;
@@ -878,12 +884,12 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case 's': case 'b':
 			case 'r': case 'a':
 			case 'o': case 'O':
+			case 'z': case 'Z':
 			case 'C': case 'h':
 			case 'f': case 'A':
 			case 'H': case 'p':
 			case 'S': case 'P':
-			case 'L': case 't':
-			case 'z':
+			case 'L':
 				max_num_args++;
 				break;
 
@@ -1144,7 +1150,6 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 
 		if (class_type->parent) {
 			if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
-				class_type->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 				return FAILURE;
 			}
 		}
