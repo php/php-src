@@ -1788,11 +1788,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	timestamp = time(NULL);
 
 	smart_str_append_unsigned_ex(&hashed_details, session_mode, 0);
-	smart_str_0(&hashed_details);
-
 	if (persistent) {
 		smart_str_appendl_ex(&hashed_details, "pc", sizeof("pc") - 1, 0);
 	}
+
+	smart_str_0(&hashed_details);
 
 	/* make it lowercase */
 	php_strtolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
