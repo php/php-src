@@ -3692,11 +3692,11 @@ static inline zend_string *zval_make_interned_string(zval *zv) /* {{{ */
 	return Z_STR_P(zv);
 }
 
-ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_uchar optional_type, zend_string *optional_type_name, zend_bool allow_null) /* {{{ */
+ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
 {
 	zend_property_info *property_info, *property_info_ptr;
 
-	if (optional_type && (access_type & ZEND_ACC_STATIC) == 0) {
+	if (ZEND_TYPE_IS_SET(type) && (access_type & ZEND_ACC_STATIC) == 0) {
 		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 	}
 
@@ -3771,13 +3771,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	property_info->flags = access_type;
 	property_info->doc_comment = doc_comment;
 	property_info->ce = ce;
-	if (optional_type_name) {
-		property_info->type = ZEND_TYPE_ENCODE_CLASS(zend_new_interned_string(optional_type_name), allow_null);
-	} else if (optional_type) {
-		property_info->type = ZEND_TYPE_ENCODE(optional_type, allow_null);
-	} else {
-		property_info->type = 0;
-	}
+	property_info->type = type;
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);
 
@@ -3787,7 +3781,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
 {
-	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, 0, NULL, 0);
+	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, 0);
 }
 /* }}} */
 

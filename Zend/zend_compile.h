@@ -220,7 +220,7 @@ typedef struct _zend_oparray_context {
 /* Function has typed arguments / class has typed props   |     |     |     */
 #define ZEND_ACC_HAS_TYPE_HINTS          (1 <<  7) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 16...)                            |     |     |     */
+/* Class Flags (unused: 14...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -252,7 +252,7 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class has magic methods __get/__set/__unset/           |     |     |     */
 /* __isset that use guards                                |     |     |     */
-#define ZEND_ACC_USE_GUARDS              (1 << 15) /*  X  |     |     |     */
+#define ZEND_ACC_USE_GUARDS              (1 << 13) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 25...30)                       |     |     |     */
 /* ==============                                         |     |     |     */

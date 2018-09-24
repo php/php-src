@@ -2604,7 +2604,7 @@ static zend_op *zend_compile_prop(znode *result, zend_ast *ast, uint32_t type, i
 {
 	uint32_t offset = zend_delayed_compile_begin();
 	zend_op *opline = zend_delayed_compile_prop(result, ast, type);
-	if (by_ref && (type == BP_VAR_W || type == BP_VAR_FUNC_ARG)) { /* shared with cache_slot */
+	if (by_ref) { /* shared with cache_slot */
 		opline->extended_value |= ZEND_FETCH_REF;
 	}
 	return zend_delayed_compile_end(offset);
@@ -2967,7 +2967,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *target_ast = ast->child[0];
 	zend_ast *source_ast = ast->child[1];
 
-	znode target_node, source_node;
+	znode source_node;
 	zend_op *opline;
 	uint32_t offset;
 
@@ -2977,7 +2977,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	zend_ensure_writable_variable(target_ast);
 
 	offset = zend_delayed_compile_begin();
-	zend_delayed_compile_var(&target_node, target_ast, BP_VAR_W, 1);
+	zend_delayed_compile_var(result, target_ast, BP_VAR_W, 1);
 	zend_compile_var(&source_node, source_ast, BP_VAR_W, 1);
 
 	if ((target_ast->kind != ZEND_AST_VAR
@@ -2992,23 +2992,20 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 		zend_emit_op(&source_node, ZEND_MAKE_REF, &source_node, NULL);
 	}
 
-	zend_delayed_compile_end(offset);
+	opline = zend_delayed_compile_end(offset);
 
 	if (source_node.op_type != IS_VAR && zend_is_call(source_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use result of built-in function in write context");
 	}
 
-	opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last - 1];
-	if (target_node.op_type == IS_VAR && opline->opcode == ZEND_FETCH_OBJ_W) {
+	if (opline && opline->opcode == ZEND_FETCH_OBJ_W) {
 		opline->opcode = ZEND_ASSIGN_OBJ_REF;
-		zend_make_var_result(result, opline);
 		zend_emit_op_data(&source_node);
-	} else if (target_node.op_type == IS_VAR && opline->opcode == ZEND_FETCH_STATIC_PROP_W) {
+	} else if (opline && opline->opcode == ZEND_FETCH_STATIC_PROP_W) {
 		opline->opcode = ZEND_ASSIGN_STATIC_PROP_REF;
-		zend_make_var_result(result, opline);
 		zend_emit_op_data(&source_node);
 	} else {
-		opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node);
+		opline = zend_emit_op(result, ZEND_ASSIGN_REF, result, &source_node);
 		opline->extended_value = 0;
 	}
 
@@ -6027,9 +6024,8 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = NULL;
 		zval value_zv;
-		zend_uchar optional_type = 0;
 		zend_bool allow_null = 0;
-		zend_string *optional_type_name = NULL;
+		zend_type type = 0;
 
 		if (type_ast) {
 			if (type_ast->attr & ZEND_TYPE_NULLABLE) {
@@ -6038,19 +6034,19 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 			}
 
 			if (type_ast->kind == ZEND_AST_TYPE) {
-				optional_type = type_ast->attr;
+				type = ZEND_TYPE_ENCODE(type_ast->attr, allow_null);
 			} else {
 				zend_string *class_name = zend_ast_get_str(type_ast);
-				zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
+				zend_uchar typeinfo = zend_lookup_builtin_type_by_name(class_name);
 
-				if (type != 0) {
+				if (typeinfo != 0) {
 					if (type_ast->attr != ZEND_NAME_NOT_FQ) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 							"Scalar type declaration '%s' must be unqualified",
 							ZSTR_VAL(zend_string_tolower(class_name)));
 					}
 
-					optional_type = type;
+					type = ZEND_TYPE_ENCODE(typeinfo, allow_null);
 				} else {
 					uint32_t fetch_type = zend_get_class_fetch_type_ast(type_ast);
 
@@ -6062,17 +6058,16 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 						zend_string_addref(class_name);
 					}
 
-					optional_type = IS_OBJECT;
-					optional_type_name = class_name;
+					type = ZEND_TYPE_ENCODE_CLASS(zend_new_interned_string(class_name), allow_null);
 				}
 			}
 
-			if (optional_type == IS_VOID || optional_type == IS_CALLABLE) {
+			if (ZEND_TYPE_CODE(type) == IS_VOID || ZEND_TYPE_CODE(type) == IS_CALLABLE) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Property %s::$%s cannot have type %s",
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(name),
-					zend_get_type_by_const(optional_type));
+					zend_get_type_by_const(ZEND_TYPE_CODE(type)));
 			}
 		}
 
@@ -6095,46 +6090,44 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 		if (value_ast) {
 			zend_const_expr_to_zval(&value_zv, value_ast);
 
-			if (optional_type && !Z_CONSTANT(value_zv)) {
+			if (ZEND_TYPE_IS_SET(type) && !Z_CONSTANT(value_zv)) {
 				if (Z_TYPE(value_zv) == IS_NULL) {
-					if (!allow_null) {
-						const char *name = optional_type_name
-							? ZSTR_VAL(optional_type_name) : zend_get_type_by_const(optional_type);
+					if (!ZEND_TYPE_ALLOW_NULL(type)) {
+						const char *name = ZEND_TYPE_IS_CLASS(type)
+							? ZSTR_VAL(ZEND_TYPE_NAME(type)) : zend_get_type_by_const(ZEND_TYPE_CODE(type));
 						zend_error_noreturn(E_COMPILE_ERROR,
 								"Default value for property of type %s may not be null. "
 								"Use the nullable type ?%s to allow null default value",
 								name, name);
 					}
-				} else if (optional_type_name || optional_type == IS_OBJECT) {
-					const char *name = optional_type_name
-						? ZSTR_VAL(optional_type_name) : zend_get_type_by_const(optional_type);
+				} else if (ZEND_TYPE_IS_CLASS(type)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-							"Property of type %s may not have default value", name);
-				} else if (optional_type == IS_ARRAY || optional_type == IS_ITERABLE) {
+							"Property of type %s may not have default value", ZSTR_VAL(ZEND_TYPE_NAME(type)));
+				} else if (ZEND_TYPE_CODE(type) == IS_ARRAY || ZEND_TYPE_CODE(type) == IS_ITERABLE) {
 					if (Z_TYPE(value_zv) != IS_ARRAY) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 								"Default value for property of type %s can only be an array",
-								zend_get_type_by_const(optional_type));
+								zend_get_type_by_const(ZEND_TYPE_CODE(type)));
 					}
-				} else if (optional_type == IS_DOUBLE) {
+				} else if (ZEND_TYPE_CODE(type) == IS_DOUBLE) {
 					if (Z_TYPE(value_zv) != IS_DOUBLE && Z_TYPE(value_zv) != IS_LONG) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 								"Default value for property of type float can only be float or int");
 					}
-				} else if (!ZEND_SAME_FAKE_TYPE(optional_type, Z_TYPE(value_zv))) {
+				} else if (!ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(type), Z_TYPE(value_zv))) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 							"Default value for property of type %s can only be %s",
-							zend_get_type_by_const(optional_type),
-							zend_get_type_by_const(optional_type));
+							zend_get_type_by_const(ZEND_TYPE_CODE(type)),
+							zend_get_type_by_const(ZEND_TYPE_CODE(type)));
 				}
 			}
-		} else if (!optional_type) {
+		} else if (!ZEND_TYPE_IS_SET(type)) {
 			ZVAL_NULL(&value_zv);
 		} else {
 			ZVAL_UNDEF(&value_zv);
 		}
 
-		zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, optional_type, optional_type_name, allow_null);
+		zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
 	}
 }
 /* }}} */
