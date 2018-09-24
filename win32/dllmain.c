@@ -68,8 +68,8 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 	}
 
 #ifdef HAVE_LIBXML
-	/* This imply that only LIBXML_STATIC_FOR_DLL is supported ATM. 
-		If that changes, this place will need some rework. 
+	/* This imply that only LIBXML_STATIC_FOR_DLL is supported ATM.
+		If that changes, this place will need some rework.
 	   TODO Also this should be revisited as no initialization
 		might be needed for TS build (libxml build with TLS
 		support. */

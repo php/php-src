@@ -11,7 +11,7 @@ mpz_si_kronecker
 mpz_kronecker_si
 mpz_remove
 mpz_bin_ui
-mpz_fib_ui 
+mpz_fib_ui
 mpz_cmpabs
 mpz_xor
 mpz_tstbit

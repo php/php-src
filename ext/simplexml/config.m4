@@ -11,8 +11,8 @@ fi
 
 if test "$PHP_SIMPLEXML" != "no"; then
 
-  if test "$PHP_LIBXML" = "no"; then   
-    AC_MSG_ERROR([SimpleXML extension requires LIBXML extension, add --enable-libxml])                
+  if test "$PHP_LIBXML" = "no"; then
+    AC_MSG_ERROR([SimpleXML extension requires LIBXML extension, add --enable-libxml])
   fi
 
   PHP_SETUP_LIBXML(SIMPLEXML_SHARED_LIBADD, [

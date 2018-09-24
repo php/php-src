@@ -2,7 +2,7 @@
 For UNIX compatible system,
 
 ./buildconf
-./configure 
+./configure
 make
 make install
 

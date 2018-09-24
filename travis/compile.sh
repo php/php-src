@@ -59,6 +59,6 @@ $TS \
 --with-freetype-dir=/usr \
 --with-xpm-dir=/usr \
 --with-kerberos \
---enable-sysvmsg 
+--enable-sysvmsg
 make -j2 --quiet
 make install

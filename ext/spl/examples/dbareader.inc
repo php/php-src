@@ -32,7 +32,7 @@ class DbaReader implements Iterator
 		    throw new exception('Could not open file ' . $file);
 		}
 	}
-	
+
 	/**
 	 * Close database.
 	 */
@@ -60,7 +60,7 @@ class DbaReader implements Iterator
 
     /**
      * Fetches the current data if $key is valid
-     */	
+     */
 	private function fetch_data() {
 		if ($this->key !== false) {
 			$this->val = dba_fetch($this->key, $this->db);

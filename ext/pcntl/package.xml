@@ -12,13 +12,13 @@
   </maintainer>
  </maintainers>
  <description>
-This module contains an interface to those functions defined 
-in the IEEE 1003.1 (POSIX.1) standards document which are not 
-accessible through other means. POSIX.1 for example defined the 
-open(), read(), write() and close() functions, too, which 
-traditionally have been part of PHP for a long time. Some more 
-system specific functions have not been available before, though, 
-and this module tries to remedy this by providing easy access 
+This module contains an interface to those functions defined
+in the IEEE 1003.1 (POSIX.1) standards document which are not
+accessible through other means. POSIX.1 for example defined the
+open(), read(), write() and close() functions, too, which
+traditionally have been part of PHP for a long time. Some more
+system specific functions have not been available before, though,
+and this module tries to remedy this by providing easy access
 to these functions.
  </description>
  <license>PHP</license>

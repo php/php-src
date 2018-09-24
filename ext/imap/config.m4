@@ -7,8 +7,8 @@ AC_DEFUN([IMAP_INC_CHK],[if test -r "$i$1/c-client.h"; then
     IMAP_DIR=$i
     IMAP_INC_DIR=$i$1
     break
-  elif test -r "$i$1/rfc822.h"; then 
-    IMAP_DIR=$i; 
+  elif test -r "$i$1/rfc822.h"; then
+    IMAP_DIR=$i;
     IMAP_INC_DIR=$i$1
 	break
 ])
@@ -54,14 +54,14 @@ AC_DEFUN([PHP_IMAP_KRB_CHK], [
     [
       AC_DEFINE(HAVE_IMAP_KRB,1,[ ])
     ], [
-      AC_MSG_ERROR([Kerberos libraries not found. 
-      
+      AC_MSG_ERROR([Kerberos libraries not found.
+
       Check the path given to --with-kerberos (if no path is given, searches in /usr/kerberos, /usr/local and /usr )
       ])
     ])
   else
     AC_EGREP_HEADER(auth_gss, $IMAP_INC_DIR/linkage.h, [
-      AC_MSG_ERROR([This c-client library is built with Kerberos support. 
+      AC_MSG_ERROR([This c-client library is built with Kerberos support.
 
       Add --with-kerberos to your configure line. Check config.log for details.
       ])
@@ -78,14 +78,14 @@ AC_DEFUN([PHP_IMAP_SSL_CHK], [
     [
       AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
     ], [
-      AC_MSG_ERROR([OpenSSL libraries not found. 
-      
+      AC_MSG_ERROR([OpenSSL libraries not found.
+
       Check the path given to --with-openssl-dir and output in config.log)
       ])
     ])
   elif test -f "$IMAP_INC_DIR/linkage.c"; then
     AC_EGREP_HEADER(ssl_onceonlyinit, $IMAP_INC_DIR/linkage.c, [
-      AC_MSG_ERROR([This c-client library is built with SSL support. 
+      AC_MSG_ERROR([This c-client library is built with SSL support.
 
       Add --with-imap-ssl to your configure line. Check config.log for details.
       ])
@@ -104,7 +104,7 @@ PHP_ARG_WITH(imap-ssl,for IMAP SSL support,
 [  --with-imap-ssl[=DIR]     IMAP: Include SSL support. DIR is the OpenSSL install prefix], no, no)
 
 
-if test "$PHP_IMAP" != "no"; then  
+if test "$PHP_IMAP" != "no"; then
     PHP_SUBST(IMAP_SHARED_LIBADD)
     PHP_NEW_EXTENSION(imap, php_imap.c, $ext_shared)
     AC_DEFINE(HAVE_IMAP,1,[ ])
@@ -180,18 +180,18 @@ if test "$PHP_IMAP" != "no"; then
     ],[])
     CPPFLAGS=$old_CPPFLAGS
 
-    PHP_CHECK_LIBRARY(pam, pam_start, 
+    PHP_CHECK_LIBRARY(pam, pam_start,
     [
       PHP_ADD_LIBRARY(pam,, IMAP_SHARED_LIBADD)
       AC_DEFINE(HAVE_LIBPAM,1,[ ])
     ])
 
-    PHP_CHECK_LIBRARY(crypt, crypt, 
+    PHP_CHECK_LIBRARY(crypt, crypt,
     [
       PHP_ADD_LIBRARY(crypt,, IMAP_SHARED_LIBADD)
       AC_DEFINE(HAVE_LIBCRYPT,1,[ ])
     ])
-	    
+
     PHP_EXPAND_PATH($IMAP_DIR, IMAP_DIR)
 
     if test -z "$IMAP_DIR"; then

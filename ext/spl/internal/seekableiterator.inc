@@ -25,8 +25,8 @@ interface SeekableIterator extends Iterator
 	 * \param $index position to seek to
 	 * \return void
 	 *
-	 * The method should throw an exception if it is not possible to seek to 
-	 * the given position. Typically this exception should be of type 
+	 * The method should throw an exception if it is not possible to seek to
+	 * the given position. Typically this exception should be of type
 	 * OutOfBoundsException.
 	 \code
 	function seek($index);

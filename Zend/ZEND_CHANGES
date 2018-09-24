@@ -891,22 +891,22 @@ Changes in the Zend Engine 2.0
       and IteratorAggregate respectively.
 
     * Array overloading
-    
-      Objects can be used with Array notation when they implement the 
+
+      Objects can be used with Array notation when they implement the
       interface ArrayAccess. You cannot use such objects in standard
       array functions, however you have full control over the array
       notation. This allows lazy initialization or read only array.
-      
+
       Note that setting [] results in a call to offsetSet() with
-      index being NULL. That means that as with standard arrays you 
+      index being NULL. That means that as with standard arrays you
       cannot store NULL keys.
-      
+
       Example:
-      
+
         <?php
 	        class ArrayClass implements ArrayAccess {
 				public $a = array();
-			
+
 				function offsetExists($index) {
 					return array_key_exists($index, $this->a);
 				}
@@ -920,16 +920,16 @@ Changes in the Zend Engine 2.0
 					unset($this->a[$index]);
 				}
 			}
-			
+
 			$obj = new ArrayClass;
-			
+
 			$obj[0] = 'bla';     // calls offsetSet(0,'bla')
 			$obj[] = 42;         // calls offsetSet(NULL, 42)
 			$x = $obj[0];        // calls offsetGet(0)
 			$b = isset($obj[0]); // calls offsetExists(0)
 			unset($obj[0]);      // calls offsetUnset(0)
 		?>
- 
+
 
     * __METHOD__
 
@@ -970,11 +970,11 @@ Changes in the Zend Engine 2.0
             }
 
             $obj = new Foo;
-            
+
             $str = (string) $obj; // call __toString()
-            
+
             echo $obj; // call __toString()
-            
+
             $ar = array();
             $ar[(string)$obj]; // this works
             $ar[$obj];         // this is not allowed

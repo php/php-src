@@ -1290,11 +1290,11 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	int herr,res;
 
 	if (*hstbuflen == 0) {
-		*hstbuflen = 1024; 
+		*hstbuflen = 1024;
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	}
 
-	while (( res = 
+	while (( res =
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
@@ -1305,7 +1305,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	if (res != SUCCESS) {
 		return NULL;
 	}
-		
+
 	return hp;
 }
 #endif
@@ -1320,7 +1320,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	}
 
-	while ((NULL == ( hp = 
+	while ((NULL == ( hp =
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */

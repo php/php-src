@@ -28,15 +28,15 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	private $flags    = 0;
 	private $delimiter= ',';
 	private $enclosure= '"';
-	
+
 	/**
 	 * Constructs a new file object
-	 * 
+	 *
 	 * @param $file_name         The name of the stream to open
 	 * @param $open_mode         The file open mode
 	 * @param $use_include_path  Whether to search in include paths
 	 * @param $context           A stream context
-	 * @throw RuntimeException   If file cannot be opened (e.g. insufficient 
+	 * @throw RuntimeException   If file cannot be opened (e.g. insufficient
 	 *                           access rights).
 	 */
 	function __construct($file_name, $open_mode = 'r', $use_include_path = false, $context = NULL)
@@ -48,7 +48,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 		}
 		$this->fname = $file_name;
 	}
-	
+
 	/**
 	 * @return whether the end of the stream is reached
 	 */
@@ -65,13 +65,13 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 		$this->freeLine();
 		$this->lnum++;
 		$buf = fgets($this->fp, $this->max_len);
-		
+
 		return $buf;
 	}
 
 	/**
 	 * @param delimiter  character used as field separator
-	 * @param enclosure  end of 
+	 * @param enclosure  end of
 	 * @return array containing read data
 	 */
 	function fgetcsv($delimiter = NULL, $enclosure = NULL)
@@ -88,7 +88,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 			case 2:
 				break;
 		}
-		return fgetcsv($this->fp, $this->max_len, $delimiter, $enclosure); 
+		return fgetcsv($this->fp, $this->max_len, $delimiter, $enclosure);
 	}
 
 	/**
@@ -140,7 +140,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	/**
 	 * @param pos new file position
 	 * @param whence seek method (SEEK_SET, SEEK_CUR, SEEK_END)
-	 * @return Upon success, returns 0; otherwise, returns -1. Note that 
+	 * @return Upon success, returns 0; otherwise, returns -1. Note that
 	 *         seeking past EOF is not considered an error.
 	 */
 	function fseek($pos, $whence = SEEK_SET)
@@ -179,7 +179,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 
 	/** Scan the next line
 	 * @param $format string specifying format to parse
-	 */	
+	 */
 	function fscanf($format /* , ... */)
 	{
 		$this->freeLine();
@@ -276,11 +276,11 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	{
 		return !$this->eof();
 	}
-	
+
 	/**
 	 * @note Fill current line buffer if not done yet.
-	 * @return line buffer 
-	 */	
+	 * @return line buffer
+	 */
 	function current()
 	{
 		if (is_null($this->line))
@@ -291,20 +291,20 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	}
 
 	/**
-	 * @return line number 
+	 * @return line number
 	 * @note fgetc() will increase the line number when reaing a new line char.
 	 *       This has the effect key() called on a read a new line will already
 	 *       return the increased line number.
 	 * @note Line counting works as long as you only read the file and do not
 	 *       use fseek().
-	 */	
+	 */
 	function key()
 	{
 		return $this->lnum;
 	}
 
 	/** Invalidate current line buffer.
-	 */	
+	 */
 	function next()
 	{
 		$this->freeLine();
@@ -342,7 +342,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	 * @note If you DO overload this function key() and current() will increment
 	 *       $this->lnum automatically. If not then function reaLine() will do
 	 *       that for you.
-	 */ 
+	 */
 	function getCurrentLine()
 	{
 		$this->freeLine();
@@ -363,7 +363,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 
 	/**
 	 * @param $line_pos Seek to this line
-	 */	
+	 */
 	function seek($line_pos)
 	{
 		$this->rewind();

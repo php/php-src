@@ -12,7 +12,7 @@ dnl
 dnl PHP_HELP_SEPARATOR(title)
 dnl
 dnl Adds separator title into the configure --help display.
-dnl 
+dnl
 AC_DEFUN([PHP_HELP_SEPARATOR],[
 AC_ARG_ENABLE([],[
 $1
@@ -148,7 +148,7 @@ $EGREP $pattern'.*include/php' $srcdir/configure|$SED 's/.*>//'|xargs touch 2>/d
 
 dnl
 dnl PHP_GEN_GLOBAL_MAKEFILE
-dnl 
+dnl
 dnl Generates the global makefile.
 dnl
 AC_DEFUN([PHP_GEN_GLOBAL_MAKEFILE],[
@@ -183,10 +183,10 @@ AC_DEFUN([PHP_ADD_MAKEFILE_FRAGMENT],[
 dnl
 dnl PHP_ADD_SOURCES(source-path, sources [, special-flags [, type]])
 dnl
-dnl Adds sources which are located relative to source-path to the 
-dnl array of type type.  Sources are processed with optional 
+dnl Adds sources which are located relative to source-path to the
+dnl array of type type.  Sources are processed with optional
 dnl special-flags which are passed to the compiler.  Sources
-dnl can be either written in C or C++ (filenames shall end in .c 
+dnl can be either written in C or C++ (filenames shall end in .c
 dnl or .cpp, respectively).
 dnl
 dnl Note: If source-path begins with a "/", the "/" is removed and
@@ -227,7 +227,7 @@ dnl name of the array target-var directly, as well as whether
 dnl shared objects will be built from the sources.
 dnl
 dnl Should not be used directly.
-dnl 
+dnl
 AC_DEFUN([PHP_ADD_SOURCES_X],[
 dnl relative to source- or build-directory?
 dnl ac_srcdir/ac_bdir include trailing slash
@@ -236,20 +236,20 @@ dnl ac_srcdir/ac_bdir include trailing slash
   /*[)] ac_srcdir=`echo "$1"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
   *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$1/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
-  
+
 dnl how to build .. shared or static?
   ifelse($5,yes,_PHP_ASSIGN_BUILD_VARS(shared),_PHP_ASSIGN_BUILD_VARS(php))
 
 dnl iterate over the sources
   old_IFS=[$]IFS
   for ac_src in $2; do
-  
+
 dnl remove the suffix
       IFS=.
       set $ac_src
       ac_obj=[$]1
       IFS=$old_IFS
-      
+
 dnl append to the array which has been dynamically chosen at m4 time
       $4="[$]$4 [$]ac_bdir[$]ac_obj.lo"
 
@@ -364,7 +364,7 @@ AC_DEFUN([PHP_LIBGCC_LIBPATH],[
 ])
 
 dnl -------------------------------------------------------------------------
-dnl Macros to modify LIBS, INCLUDES, etc. variables 
+dnl Macros to modify LIBS, INCLUDES, etc. variables
 dnl -------------------------------------------------------------------------
 
 dnl
@@ -486,7 +486,7 @@ dnl cc-specific
 dnl
 dnl PHP_ADD_INCLUDE(path [,before])
 dnl
-dnl add an include path. 
+dnl add an include path.
 dnl if before is 1, add in the beginning of INCLUDES.
 dnl
 AC_DEFUN([PHP_ADD_INCLUDE],[
@@ -774,7 +774,7 @@ AC_DEFUN([PHP_BUILD_SHARED],[
   PHP_BUILD_PROGRAM
   OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
   php_sapi_module=shared
-  
+
   php_c_pre=$shared_c_pre
   php_c_meta=$shared_c_meta
   php_c_post=$shared_c_post
@@ -889,7 +889,7 @@ AC_DEFUN([PHP_SELECT_SAPI],[
 ])
   else
     PHP_SAPI=$1
-  fi  
+  fi
 
   PHP_ADD_BUILD_DIR([sapi/$1])
 
@@ -946,7 +946,7 @@ dnl to build the extension.
 dnl "shared" can be set to "shared" or "yes" to build the extension as
 dnl a dynamically loadable library. Optional parameter "sapi_class" can
 dnl be set to "cli" to mark extension build only with CLI or CGI sapi's.
-dnl "extra-cflags" are passed to the compiler, with 
+dnl "extra-cflags" are passed to the compiler, with
 dnl @ext_srcdir@ and @ext_builddir@ being substituted.
 dnl "cxx" can be used to indicate that a C++ shared module is desired.
 dnl "zend_ext" indicates a zend extension.
@@ -999,7 +999,7 @@ dnl ---------------------------------------------- CLI static module
   PHP_ADD_BUILD_DIR($ext_builddir)
 
 dnl Set for phpize builds only
-dnl --------------------------- 
+dnl ---------------------------
   if test "$ext_builddir" = "."; then
     PHP_PECL_EXTENSION=$1
     PHP_SUBST(PHP_PECL_EXTENSION)
@@ -1029,7 +1029,7 @@ dnl $3 = optional: if true, it's ok for $2 to have not been configured
 dnl default is false and should halt the build.
 dnl To be effective, this macro must be invoked *after* PHP_NEW_EXTENSION.
 dnl The extension on which it depends must also have been configured.
-dnl See ADD_EXTENSION_DEP in win32 build 
+dnl See ADD_EXTENSION_DEP in win32 build
 dnl
 AC_DEFUN([PHP_ADD_EXTENSION_DEP], [
   am_i_shared=$[PHP_]translit($1,a-z_-,A-Z__)[_SHARED]
@@ -1191,7 +1191,7 @@ main() {
   struct tm t, *s;
   time_t old = 0;
   char buf[27], *p;
-  
+
   s = gmtime_r(&old, &t);
   p = asctime_r(&t, buf, 26);
   if (p == buf && s == &t) return (0);
@@ -1256,7 +1256,7 @@ AC_DEFUN([PHP_DOES_PREAD_WORK],[
 #include <errno.h>
 $1
     main() {
-    char buf[3]; 
+    char buf[3];
     int fd = open("conftest_in", O_RDONLY);
     if (fd < 0) exit(1);
     if (pread(fd, buf, 2, 0) != 2) exit(1);
@@ -1293,7 +1293,7 @@ AC_DEFUN([PHP_PWRITE_TEST],[
     if test "$ac_cv_pwrite" = "64"; then
       AC_DEFINE(PHP_PWRITE_64, 1, [whether pwrite64 is default])
     fi
-  fi  
+  fi
 ])
 
 dnl
@@ -1315,7 +1315,7 @@ AC_DEFUN([PHP_PREAD_TEST],[
     if test "$ac_cv_pread" = "64"; then
       AC_DEFINE(PHP_PREAD_64, 1, [whether pread64 is default])
     fi
-  fi  
+  fi
 ])
 
 dnl
@@ -1353,7 +1353,7 @@ AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
 
 dnl
 dnl PHP_READDIR_R_TYPE
-dnl 
+dnl
 AC_DEFUN([PHP_READDIR_R_TYPE],[
   dnl HAVE_READDIR_R is also defined by libmysql
   AC_CHECK_FUNC(readdir_r,ac_cv_func_readdir_r=yes,ac_cv_func_readdir=no)
@@ -1374,7 +1374,7 @@ main() {
   struct dirent *pentry = (struct dirent *) &entry;
 
   dir = opendir("/");
-  if (!dir) 
+  if (!dir)
     exit(1);
   if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0) {
     close(dir);
@@ -1411,7 +1411,7 @@ int readdir_r(DIR *, struct dirent *);
 
 dnl
 dnl PHP_TM_GMTOFF
-dnl 
+dnl
 AC_DEFUN([PHP_TM_GMTOFF],[
 AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
 [AC_TRY_COMPILE([#include <sys/types.h>
@@ -1514,7 +1514,7 @@ AC_DEFUN([PHP_AC_BROKEN_SNPRINTF],[
 main() {
   char buf[20];
   int res = 0;
-  res = res || (snprintf(buf, 2, "marcus") != 6); 
+  res = res || (snprintf(buf, 2, "marcus") != 6);
   res = res || (buf[1] != '\0');
   /* Implementations may consider this as an encoding error */
   snprintf(buf, 0, "boerger");
@@ -1522,7 +1522,7 @@ main() {
   res = res || (buf[0] != 'm');
   res = res || (snprintf(NULL, 0, "boerger") != 7);
   res = res || (snprintf(buf, sizeof(buf), "%f", 0.12345678) != 8);
-  exit(res); 
+  exit(res);
 }
     ],[
       ac_cv_broken_snprintf=no
@@ -1629,7 +1629,7 @@ AC_DEFUN([PHP_SOCKADDR_CHECKS], [
   if test "$ac_cv_sockaddr_storage" = "yes"; then
     AC_DEFINE(HAVE_SOCKADDR_STORAGE, 1, [Whether you have struct sockaddr_storage])
   fi
-  dnl Check if field sa_len exists in struct sockaddr 
+  dnl Check if field sa_len exists in struct sockaddr
   AC_CACHE_CHECK([for field sa_len in struct sockaddr],ac_cv_sockaddr_sa_len,[
     AC_TRY_COMPILE([#include <sys/types.h>
 #include <sys/socket.h>],
@@ -1670,9 +1670,9 @@ dnl
 AC_DEFUN([PHP_EBCDIC], [
   AC_CACHE_CHECK([whether system uses EBCDIC],ac_cv_ebcdic,[
   AC_TRY_RUN( [
-int main(void) { 
-  return (unsigned char)'A' != (unsigned char)0xC1; 
-} 
+int main(void) {
+  return (unsigned char)'A' != (unsigned char)0xC1;
+}
 ],[
   ac_cv_ebcdic=yes
 ],[
@@ -1716,7 +1716,7 @@ int main(int argc, char *argv[])
   FILE *fp;
   long position;
   char *filename = tmpnam(NULL);
-  
+
   fp = fopen(filename, "w");
   if (fp == NULL) {
     perror("fopen");
@@ -1810,7 +1810,7 @@ main() {
 ], [
   cookie_io_functions_use_off64_t=no
 ])
-    
+
     else
 
 dnl older glibc versions (up to 2.1.2 ?)
@@ -1847,7 +1847,7 @@ dnl
 AC_DEFUN([PHP_CHECK_LIBRARY], [
   save_old_LDFLAGS=$LDFLAGS
   ac_stuff="$5"
-  
+
   save_ext_shared=$ext_shared
   ext_shared=yes
   PHP_EVAL_LIBLINE([$]ac_stuff, LDFLAGS)
@@ -1937,11 +1937,11 @@ AC_DEFUN([PHP_CHECK_FUNC],[
   unset ac_cv_func_$1
   unset ac_cv_func___$1
   unset found
-  
+
   AC_CHECK_FUNC($1, [found=yes],[ AC_CHECK_FUNC(__$1,[found=yes],[found=no]) ])
 
   case $found in
-  yes[)] 
+  yes[)]
     PHP_DEF_HAVE($1)
     ac_cv_func_$1=yes
   ;;
@@ -2012,7 +2012,7 @@ dnl
 dnl PHP_CHECK_64BIT([do if 32], [do if 64])
 dnl
 dnl This macro is used to detect if we're at 64-bit platform or not.
-dnl It could be useful for those external libs, that have different precompiled 
+dnl It could be useful for those external libs, that have different precompiled
 dnl versions in different directories.
 dnl
 AC_DEFUN([PHP_CHECK_64BIT],[
@@ -2082,9 +2082,9 @@ AC_DEFUN([PHP_PROG_AWK], [
     *mawk)
       AC_MSG_WARN([mawk is known to have problems on some systems. You should install GNU awk])
       ;;
-    *gawk)  
+    *gawk)
       ;;
-    bork)   
+    bork)
       AC_MSG_ERROR([Could not find awk; Install GNU awk])
       ;;
     *)
@@ -2119,7 +2119,7 @@ dnl
 AC_DEFUN([PHP_PROG_LEX], [
 dnl we only support certain flex versions
   flex_version_list="2.5.4"
-   
+
   AC_PROG_LEX
   if test "$LEX" = "flex"; then
 dnl AC_DECL_YYTEXT is obsolete since autoconf 2.50 and merged into AC_PROG_LEX
@@ -2149,7 +2149,7 @@ dnl it should be removed once we drop support of autoconf 2.13 (if ever)
   else
     flex_version=none
   fi
-  
+
   case $php_cv_flex_version in
     ""|invalid[)]
       if test -f "$abs_srcdir/Zend/zend_language_scanner.c" && test -f "$abs_srcdir/Zend/zend_ini_scanner.c"; then
@@ -2183,7 +2183,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
         php_cv_re2c_version=invalid
       else
         php_cv_re2c_version="`$RE2C --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
-      fi 
+      fi
     ])
   fi
   case $php_cv_re2c_version in
@@ -2312,7 +2312,7 @@ ifelse([$3],[],,[else $3])
   fi
 ])
 
-dnl 
+dnl
 dnl PHP_SETUP_OPENSSL(shared-add [, action-found [, action-not-found]])
 dnl
 dnl Common setup macro for openssl
@@ -2359,7 +2359,7 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
 
   dnl If pkg-config fails for some reason, revert to the old method
   if test "$found_openssl" = "no"; then
-  
+
     if test "$PHP_OPENSSL_DIR" = "yes"; then
       PHP_OPENSSL_DIR="/usr/local/ssl /usr/local /usr /usr/local/openssl"
     fi
@@ -2398,7 +2398,7 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     CPPFLAGS=$old_CPPFLAGS
 
     PHP_ADD_INCLUDE($OPENSSL_INCDIR)
-  
+
     PHP_CHECK_LIBRARY(crypto, CRYPTO_free, [
       PHP_ADD_LIBRARY(crypto,,$1)
     ],[
@@ -2433,7 +2433,7 @@ ifelse([$3],[],,[else $3])
   fi
 ])
 
-dnl 
+dnl
 dnl PHP_SETUP_ICONV(shared-add [, action-found [, action-not-found]])
 dnl
 dnl Common setup macro for iconv
@@ -2497,7 +2497,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     if test -z "$ICONV_DIR"; then
       AC_MSG_ERROR([Please specify the install prefix of iconv with --with-iconv=<DIR>])
     fi
-  
+
     if test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.a ||
        test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.$SHLIB_SUFFIX_NAME
     then
@@ -2531,7 +2531,7 @@ ifelse([$3],[],,[else $3])
   fi
 ])
 
-dnl 
+dnl
 dnl PHP_SETUP_LIBXML(shared-add [, action-found [, action-not-found]])
 dnl
 dnl Common setup macro for libxml
@@ -2613,7 +2613,7 @@ dnl -------------------------------------------------------------------------
 dnl Misc. macros
 dnl -------------------------------------------------------------------------
 
-dnl 
+dnl
 dnl PHP_INSTALL_HEADERS(path [, file ...])
 dnl
 dnl PHP header files to be installed
@@ -2624,7 +2624,7 @@ AC_DEFUN([PHP_INSTALL_HEADERS],[
       PHP_RUN_ONCE(INSTALLHEADERS, $header_file, [
         INSTALL_HEADERS="$INSTALL_HEADERS $header_file"
       ])
-    done 
+    done
   ], [
     header_path=$1
     for header_file in $2; do
@@ -2632,7 +2632,7 @@ AC_DEFUN([PHP_INSTALL_HEADERS],[
       PHP_RUN_ONCE(INSTALLHEADERS, $hp_hf, [
         INSTALL_HEADERS="$INSTALL_HEADERS $hp_hf"
       ])
-    done 
+    done
   ])
 ])
 
@@ -2655,7 +2655,7 @@ IFS="- /.
 
 dnl
 dnl PHP_DEBUG_MACRO(filename)
-dnl 
+dnl
 AC_DEFUN([PHP_DEBUG_MACRO],[
   DEBUG_LOG=$1
   cat >$1 <<X
@@ -2717,7 +2717,7 @@ EOF
   echo "'[$]0' \\" >> $1
   if test `expr " [$]0" : " '.*"` = 0; then
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND '[$]0'"
-  else 
+  else
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND [$]0"
   fi
   CONFIGURE_ARGS="$clean_configure_args"
@@ -2785,7 +2785,7 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
         if test "$PHP_MAJOR_VERSION" -lt "6"; then
           case $arg_name in
             enable-zend-multibyte[)] continue;;
-          esac 
+          esac
         fi
 
         is_arg_set=php_[]`echo [$]arg_name | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-' 'abcdefghijklmnopqrstuvwxyz_'`
@@ -2867,7 +2867,7 @@ AC_DEFUN([PHP_CRYPT_R_STYLE],
 ],[
 CRYPTD buffer;
 crypt_r("passwd", "hash", &buffer);
-], 
+],
 php_cv_crypt_r_style=cryptd)
 
     if test "$php_cv_crypt_r_style" = "none"; then
@@ -2877,7 +2877,7 @@ php_cv_crypt_r_style=cryptd)
 ],[
 struct crypt_data buffer;
 crypt_r("passwd", "hash", &buffer);
-], 
+],
 php_cv_crypt_r_style=struct_crypt_data)
     fi
 
@@ -2889,7 +2889,7 @@ php_cv_crypt_r_style=struct_crypt_data)
 ],[
 struct crypt_data buffer;
 crypt_r("passwd", "hash", &buffer);
-], 
+],
 php_cv_crypt_r_style=struct_crypt_data_gnu_source)
     fi
     ])

@@ -29,7 +29,7 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
   <date>2003-11-13</date>
   <notes>
     Major API changes for PHP 5.0, including the re-introduction of resources, output buffering support,
-    dual-nature syntax (tidy_clean_repair($tidy_res) or $tidy->clean_repair()) and more. 
+    dual-nature syntax (tidy_clean_repair($tidy_res) or $tidy->clean_repair()) and more.
   </notes>
   <configureoptions>
     <configureoption name="with-tidy" default="autodetect" prompt="Tidy library installation dir?"/>
@@ -38,14 +38,14 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
    <file role="src" name="config.m4"/>
    <file role="src" name="tidy.c"/>
    <file role="src" name="php_tidy.h"/>
-   
+
    <file role="doc" name="CREDITS"/>
    <file role="doc" name="TODO"/>
    <file role="doc" name="examples/cleanhtml.php"/>
    <file role="doc" name="examples/dumpit.php"/>
    <file role="doc" name="examples/urlgrab.php"/>
    <file role="doc" name="libtidy.txt"/>
-   
+
    <file role="test" name="tests/001.phpt"/>
    <file role="test" name="tests/002.phpt"/>
    <file role="test" name="tests/003.phpt"/>

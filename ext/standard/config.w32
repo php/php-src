@@ -24,6 +24,6 @@ EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 	'/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 	PHP_INSTALL_HEADERS("", "ext/standard");
 if (PHP_MBREGEX != "no") {
-	CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_STANDARD", PHP_MBREGEX + ";ext\\mbstring\\oniguruma")   
+	CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_STANDARD", PHP_MBREGEX + ";ext\\mbstring\\oniguruma")
 }
 PHP_INSTALL_HEADERS("", "ext/standard");
