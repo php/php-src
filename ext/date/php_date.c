@@ -4232,7 +4232,6 @@ zval *date_interval_write_property(zval *object, zval *member, zval *value, void
 #define SET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \
 		obj->diff->n = zval_get_long(value); \
-		ZVAL_LONG(value, obj->diff->n); \
 		break; \
 	}
 
@@ -4245,7 +4244,6 @@ zval *date_interval_write_property(zval *object, zval *member, zval *value, void
 		SET_VALUE_FROM_STRUCT(s, "s");
 		if (strcmp(Z_STRVAL_P(member), "f") == 0) {
 			obj->diff->us = zval_get_double(value) * 1000000;
-			ZVAL_LONG(value, obj->diff->us);
 			break;
 		}
 		SET_VALUE_FROM_STRUCT(invert, "invert");
