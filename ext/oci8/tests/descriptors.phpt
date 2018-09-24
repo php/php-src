@@ -41,7 +41,7 @@ require dirname(__FILE__).'/drop_table.inc';
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(1) {
   ["BLOB"]=>
   object(OCI-Lob)#%d (1) {

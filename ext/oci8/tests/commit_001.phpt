@@ -74,7 +74,7 @@ var_dump($all);
 
 
 require(dirname(__FILE__).'/drop_table.inc');
-	
+
 echo "Done\n";
 ?>
 --EXPECT--

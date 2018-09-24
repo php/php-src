@@ -60,7 +60,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(5) {
   [0]=>
   int(5)

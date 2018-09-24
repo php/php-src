@@ -33,7 +33,7 @@ $s1 = oci_parse($c, "drop table test_nclob");
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(1) {
   ["NC"]=>
   object(OCI-Lob)#%d (1) {

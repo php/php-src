@@ -89,7 +89,7 @@ $statement = oci_parse($c, "DROP TABLE BIND_TEST");
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Test 1
 array(5) {
   [0]=>

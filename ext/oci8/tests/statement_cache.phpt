@@ -24,7 +24,7 @@ var_dump(oci_fetch_array($stmt));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(2) {
   [0]=>
   string(1) "4"

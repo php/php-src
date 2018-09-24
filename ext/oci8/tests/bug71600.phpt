@@ -9,7 +9,7 @@ require(dirname(__FILE__).'/skipif.inc');
 <?php
 
 require(dirname(__FILE__).'/connect.inc');
-		
+
 // Initialize
 
 $stmtarray = array(
@@ -23,7 +23,7 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 // Run test
-	
+
 $sql = "select col1,col2,col3,col4,col5,col6,col7,col8,col9 from bug71600_tab";
 
 echo "Test 1\n";
@@ -80,7 +80,7 @@ oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECT--	
+--EXPECT--
 Test 1
 Executing SELECT statament...
 Fetching data by columns...
