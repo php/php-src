@@ -2967,7 +2967,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *target_ast = ast->child[0];
 	zend_ast *source_ast = ast->child[1];
 
-	znode source_node;
+	znode target_node, source_node;
 	zend_op *opline;
 	uint32_t offset;
 
@@ -2977,7 +2977,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	zend_ensure_writable_variable(target_ast);
 
 	offset = zend_delayed_compile_begin();
-	zend_delayed_compile_var(result, target_ast, BP_VAR_W, 1);
+	zend_delayed_compile_var(&target_node, target_ast, BP_VAR_W, 1);
 	zend_compile_var(&source_node, source_ast, BP_VAR_W, 1);
 
 	if ((target_ast->kind != ZEND_AST_VAR
@@ -3001,11 +3001,17 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	if (opline && opline->opcode == ZEND_FETCH_OBJ_W) {
 		opline->opcode = ZEND_ASSIGN_OBJ_REF;
 		zend_emit_op_data(&source_node);
+		if (result != NULL) {
+			*result = target_node;
+		}
 	} else if (opline && opline->opcode == ZEND_FETCH_STATIC_PROP_W) {
 		opline->opcode = ZEND_ASSIGN_STATIC_PROP_REF;
 		zend_emit_op_data(&source_node);
+		if (result != NULL) {
+			*result = target_node;
+		}
 	} else {
-		opline = zend_emit_op(result, ZEND_ASSIGN_REF, result, &source_node);
+		opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node);
 		opline->extended_value = 0;
 	}
 
