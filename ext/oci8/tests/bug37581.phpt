@@ -44,7 +44,7 @@ var_dump($strings);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(5) {
   [0]=>
   string(1) "A"

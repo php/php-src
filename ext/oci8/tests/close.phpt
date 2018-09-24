@@ -13,5 +13,5 @@ oci_connect($user, $password, $dbase);
 	
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 Done

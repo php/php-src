@@ -270,7 +270,7 @@ oci_close($c);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 TEST86 insert all ORATYPE values
 
 TEST87 SELECT all values using DEFINEs

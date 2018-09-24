@@ -49,7 +49,7 @@ dq($c, 'select dbop_name from v$sql_monitor where dbop_name like \'db_op2%\' ord
 <?php exit(0); ?>
 --XFAIL--
 Fails due to Oracle Bug 16695981
---EXPECTF--
+--EXPECT--
 Test 1
 array(1) {
   ["DUMMY"]=>

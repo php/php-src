@@ -59,7 +59,7 @@ oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1 - truncate on insert
 int(72)
 bool(true)

@@ -105,7 +105,7 @@ oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1 - No commit in procedure, OCI_COMMIT_ON_SUCCESS mode
 111
 array(1) {

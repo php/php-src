@@ -25,7 +25,7 @@ var_dump($blob->close());
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 string(4) "test"
 bool(true)
