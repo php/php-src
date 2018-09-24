@@ -1,7 +1,7 @@
 --TEST--
 Bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory)
 --SKIPIF--
-<?php 
+<?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');

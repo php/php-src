@@ -14,7 +14,7 @@ $stmtarray = array(
     as
     begin
       msg_out := upper(msg_in);
-    end;"    
+    end;"
 
 );
 
@@ -23,7 +23,7 @@ oci8_test_sql_execute($c, $stmtarray);
 // Run Test
 
 echo "Test 1 - PL/SQL IN and OUT variables\n";
- 
+
 $stmt = oci_parse($c, "BEGIN bind_sqltchr_proc(:a, :b); END;");
 $msg_in = "Cat got your keyboard?";
 oci_bind_by_name($stmt, ":a", $msg_in, -1, SQLT_CHR);

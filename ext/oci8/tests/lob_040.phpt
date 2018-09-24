@@ -4,7 +4,7 @@ Bug #37706 (Test LOB locator reuse. Extends simple test of lob_037.phpt)
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -23,7 +23,7 @@ echo "Test 1: CLOB as locator\n";
 $s = oci_parse($c, "select clob from ".$schema.$table_name." order by id");
 oci_execute($s);
 
-$row = array(); 
+$row = array();
 for ($i = 0; $i < NUMLOBS; $i++) {
 	$row[$i] = oci_fetch_array($s, OCI_NUM);
 }
@@ -35,7 +35,7 @@ for ($i = 0; $i < NUMLOBS; $i++) {
 	echo "Pos 2: " . $row[$i][0]->tell() . "\n";
 	echo "Data:  " . $row[$i][0]->read(12) . "\n";
 }
- 
+
 echo "Done\n";
 
 ?>

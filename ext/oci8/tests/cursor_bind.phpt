@@ -4,7 +4,7 @@ bind and fetch cursor from a statement
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -56,7 +56,7 @@ oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECT--  
+--EXPECT--
 array(2) {
   [0]=>
   string(1) "1"
