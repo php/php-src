@@ -24,5 +24,5 @@ var_dump($test->x);
 ?>
 --EXPECT--
 int(42)
-Cannot assign array to reference held by property Test->x of type int
+Cannot assign array to reference held by property Test::$x of type int
 int(42)
