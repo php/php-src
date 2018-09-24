@@ -4,7 +4,7 @@ Bug #46994 (CLOB size does not update when using CLOB IN OUT param in stored pro
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 

@@ -16,7 +16,7 @@ require(dirname(__FILE__).'/connect.inc');
 $stmtarray = array(
 	"drop table lob_043_tab",
 	"create table lob_043_tab(id number, c1 clob)",
-	"begin 
+	"begin
        for i in 1..50000 loop
          insert into lob_043_tab (id, c1) values (i, i || ' abcdefghijklmnopq');
       end loop;

@@ -10,7 +10,7 @@ if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to 
 if ($test_drcp) die("skip output might vary with DRCP");
 
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && 
+if (!(isset($matches[0]) &&
       (($matches[1] == 11 && $matches[2] >= 2) ||
        ($matches[1] >= 12)
        ))) {
@@ -22,7 +22,7 @@ if (!(isset($matches[0]) &&
 <?php
 
 $testuser     = 'testuser_attr_4';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
 require(dirname(__FILE__)."/conn_attr.inc");
 

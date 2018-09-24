@@ -5,7 +5,7 @@ Unsupported type: oci_bind_array_by_name() and SQLT_BDOUBLE
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 if (!defined('SQLT_BDOUBLE')) die('skip SQLT_BDOUBLE type not available on older Oracle clients');
-?> 
+?>
 --FILE--
 <?php
 

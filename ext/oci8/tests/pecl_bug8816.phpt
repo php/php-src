@@ -4,7 +4,7 @@ PECL Bug #8816 (issue in php_oci_statement_fetch with more than one piecewise co
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -47,8 +47,8 @@ SELECT
   t1.l1, t2.l2
 FROM
 t1, t2
-WHERE 
-t1.id = t2.id 
+WHERE
+t1.id = t2.id
 ORDER BY t1.id ASC
 ";
 
