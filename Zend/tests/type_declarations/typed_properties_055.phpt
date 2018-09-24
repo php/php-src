@@ -1,5 +1,5 @@
 --TEST--
-Default values of callable properties
+Test assign to typed property taken by reference
 --FILE--
 <?php
 class A {
@@ -22,7 +22,7 @@ $f($o->a->bar);
 int(1)
 int(2)
 
-Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A->bar of type int in %s:%d
+Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$bar of type int in %s:%d
 Stack trace:
 #0 %s(%d): {closure}(2)
 #1 {main}

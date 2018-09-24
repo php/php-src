@@ -2,25 +2,10 @@
 Test typed static property by ref
 --FILE--
 <?php
-function &intRef() {
-	static $a = 5;
-	$b = $a;
-	$a = &$b;
-	return $a;
-}
-
-function &stringRef() {
-	static $a = "0";
-	$b = $a;
-	$a = &$b;
-	return $a;
-}
-
-function &nonNumericStringRef() {
-	static $a = "x";
-	$b = $a;
-	$a = &$b;
-	return $a;
+function &ref($a = null) {
+	static $f;
+	if ($a !== null) $f = function &() use (&$a) { return $a; };
+	return $f();
 }
 
 class Foo {
@@ -28,7 +13,7 @@ class Foo {
 	public static string $s = "x";
 }
 
-Foo::$i = &intRef();
+Foo::$i = &ref(5);
 var_dump(Foo::$i);
 
 $i = &Foo::$i;
@@ -51,16 +36,16 @@ try {
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
 var_dump($i, Foo::$i);
 
-Foo::$s = &intRef();
-var_dump(Foo::$s, intRef());
+Foo::$s = &ref(5);
+var_dump(Foo::$s, ref());
 
-Foo::$i = &stringRef();
-var_dump(Foo::$i, stringRef());
+Foo::$i = &ref("0");
+var_dump(Foo::$i, ref());
 
 try {
-	Foo::$i = &nonNumericStringRef();
+	Foo::$i = &ref("x");
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
-var_dump(Foo::$i, nonNumericStringRef());
+var_dump(Foo::$i, ref());
 
 try {
 	Foo::$i = &Foo::$s;
@@ -88,9 +73,9 @@ Typed property Foo::$i must be int, null used
 int(4)
 int(4)
 string(1) "5"
-int(5)
+string(1) "5"
 int(0)
-string(1) "0"
+int(0)
 Typed property Foo::$i must be int, string used
 int(0)
 string(1) "x"

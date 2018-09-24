@@ -43,7 +43,7 @@ int(0)
 int(-2)
 int(-1)
 int(-1)
-Cannot assign float to reference held by property class@anonymous->bar of type ?int
-Cannot assign float to reference held by property class@anonymous->bar of type ?int
+Cannot assign float to reference held by property class@anonymous::$bar of type ?int
+Cannot assign float to reference held by property class@anonymous::$bar of type ?int
 int(-9223372036854775808)
 int(-9223372036854775808)

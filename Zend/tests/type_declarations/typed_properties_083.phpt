@@ -54,19 +54,19 @@ array(1) {
   [0]=>
   int(1)
 }
-string(71) "Cannot write an array to a null property which does not allow for array"
+string(79) "Cannot write an array to a null property Foo::$p which does not allow for array"
 string(65) "Typed property Foo::$p must not be accessed before initialization"
 array(1) {
   ["bar"]=>
   int(2)
 }
-string(71) "Cannot write an array to a null property which does not allow for array"
+string(79) "Cannot write an array to a null property Foo::$s which does not allow for array"
 string(72) "Typed static property Foo::$s must not be accessed before initialization"
 array(1) {
   [0]=>
   int(3)
 }
-string(81) "Cannot write an array to a null or false reference which does not allow for array"
+string(97) "Cannot write an array to a null or false reference held by Foo::$p which does not allow for array"
 NULL
-string(81) "Cannot write an array to a null or false reference which does not allow for array"
+string(97) "Cannot write an array to a null or false reference held by Foo::$p which does not allow for array"
 NULL

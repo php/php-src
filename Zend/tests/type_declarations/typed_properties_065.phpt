@@ -49,7 +49,7 @@ offsetSet(1e50)
 int(1)
 int(0)
 int(-1)
-Cannot assign float to reference held by property class@anonymous->foo of type int
+Cannot assign float to reference held by property class@anonymous::$foo of type int
 integer
-Cannot assign float to reference held by property class@anonymous->foo of type int
+Cannot assign float to reference held by property class@anonymous::$foo of type int
 integer

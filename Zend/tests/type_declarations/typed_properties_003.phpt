@@ -9,7 +9,7 @@ $thing = new class() {
 $var = &$thing->int;
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot access uninitialized non-nullable property by reference in %s:%d
+Fatal error: Uncaught Error: Cannot access uninitialized non-nullable property class@anonymous::$int by reference in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

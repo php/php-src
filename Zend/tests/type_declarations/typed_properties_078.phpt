@@ -52,8 +52,8 @@ array(1) {
   [0]=>
   int(1)
 }
-string(91) "Cannot assign ArrayIterator to reference held by property class@anonymous->a of type ?array"
+string(92) "Cannot assign ArrayIterator to reference held by property class@anonymous::$a of type ?array"
 bool(false)
-string(89) "Cannot assign array to reference held by property class@anonymous->t of type ?Traversable"
+string(90) "Cannot assign array to reference held by property class@anonymous::$t of type ?Traversable"
 bool(false)
 bool(true)
