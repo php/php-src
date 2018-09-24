@@ -208,7 +208,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		stmt->persistent = persistent;
 
 		if (FAIL == mysqlnd_error_info_init(&stmt->error_info_impl, persistent)) {
-			break;		
+			break;
 		}
 		stmt->error_info = &stmt->error_info_impl;
 

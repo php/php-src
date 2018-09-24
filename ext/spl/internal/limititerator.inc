@@ -47,7 +47,7 @@ class LimitIterator implements OuterIterator
 		$this->count  = $count;
 		$this->pos    = 0;
 	}
-	
+
 	/** Seek to specified position
 	 * @param position offset to seek to (relative to beginning not offset
 	 *                 specified in constructor).
@@ -78,14 +78,14 @@ class LimitIterator implements OuterIterator
 		$this->pos = 0;
 		$this->seek($this->offset);
 	}
-	
+
 	/** @return whether iterator is valid
 	 */
 	function valid() {
 		return ($this->count == -1 || $this->pos < $this->offset + $this->count)
 			 && $this->it->valid();
 	}
-	
+
 	/** @return current key
 	 */
 	function key() {
@@ -105,7 +105,7 @@ class LimitIterator implements OuterIterator
 		$this->pos++;
 	}
 
-	/** @return current position relative to zero (not to offset specified in 
+	/** @return current position relative to zero (not to offset specified in
 	 *          constructor).
 	 */
 	function getPosition() {
@@ -114,7 +114,7 @@ class LimitIterator implements OuterIterator
 
 	/**
 	 * @return The inner iterator
-	 */	
+	 */
 	function getInnerIterator()
 	{
 		return $this->it;

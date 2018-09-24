@@ -8,7 +8,7 @@ IF _%1_==_AUTO_ (
 IF _%2_==__ (
 	ECHO Usage %0 ^<basedir^> ^<depth^> ^[^hash_bits^]
 	ECHO.
-	ECHO Where ^<basedir^>   is the session directory 
+	ECHO Where ^<basedir^>   is the session directory
 	ECHO       ^<depth^>     is the number of levels defined in session.save_path
 	ECHO       ^[hash_bits^] is the number of bits defined in session.hash_bits_per_character
 	EXIT /B 1

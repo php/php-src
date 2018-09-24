@@ -6,7 +6,7 @@ function gobble(s, x)
 	match(line, "^" "(" s ")")
 	x = substr(line, 1, RLENGTH)
 	line = substr(line, RLENGTH+1)
-	return x 
+	return x
 }
 
 function convert(i, j, t)
@@ -64,7 +64,7 @@ BEGIN {
 	} else {
 		xmldoc = extname "/" extname ".xml"
 	}
-			
+
 
 	xmlhead = "<?xml version='1.0' encoding='iso-8859-1'?>\n" \
     "<!-- $Id$ -->\n" \

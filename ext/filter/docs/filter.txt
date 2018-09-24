@@ -6,7 +6,7 @@ Introduction
 We all know that you should always check input variables, but PHP does not
 offer really good functionality for doing this in a safe way. The Input Filter
 extension is meant to address this issue by implementing a set of filters and
-mechanisms that users can use to safely access their input data. 
+mechanisms that users can use to safely access their input data.
 
 
 Change Log
@@ -51,7 +51,7 @@ General Considerations
 * All flags mentioned here should be prepended with `FILTER_FLAG_` when used
   with PHP.
 
-  
+
 API
 ===
 mixed *input_get* (int *source*, string *name*, [, int *filter* [, mixed *filter_options*, [ string *characterset* ] ]);
@@ -62,7 +62,7 @@ mixed *input_get* (int *source*, string *name*, [, int *filter* [, mixed *filter
 mixed *input_get_args* (array *definitions*, int *source*, [, array *data*]);
     Returns an array with all filtered variables defined in 'definition'.
     The keys are used as the name of the argument. The value can be either
-    an integer (flags) or an array of options. This array can contain 
+    an integer (flags) or an array of options. This array can contain
     the 'filter' type, the 'flags', the 'otptions' or the 'charset'
 
 bool *input_has_variable (int *source*, string *name*);
@@ -110,7 +110,7 @@ application by returning false.
 The constants should be prepended by `FILTER_VALIDATE_` when used with php.
 
 ================ ========== =========== ==================================================
-Name             Constant   Return Type Description      
+Name             Constant   Return Type Description
 ================ ========== =========== ==================================================
 int              INT        integer     Returns the input variable as an integer
 
@@ -122,7 +122,7 @@ int              INT        integer     Returns the input variable as an integer
                                         * max_range: Maximum number that is allowed
                                           (inclusive)
                                         * flags: A bitmask supporting the following flags:
-                          
+
                                           - ALLOW_OCTAL: allow octal numbers with the format
                                             0nn as input too.
                                           - ALLOW_HEX: allow hexadecimal numbers with the
@@ -144,7 +144,7 @@ validate_url     URL        string      Validates an URL's format.
 
                                         $filter_options - an bitmask that supports the
                                         following flags:
-           
+
                                         * SCHEME_REQUIRED: The 'schema' part of the URL
                                           needs to in the passed URL.
                                         * HOST_REQUIRED: The 'host' part of the URL
@@ -180,9 +180,9 @@ set rules for this specific filter. Instead of taking an *options* array, they
 use this parameter for flags for the specific filter.
 
 The constants should be prepended by `FILTER_SANITIZE_` when used with php.
-                         
+
 ============= ================ =========== =====================================================
-Name          Constant         Return Type Description      
+Name          Constant         Return Type Description
 ============= ================ =========== =====================================================
 string        STRING           string      Returns the input variable as a string after it has
                                            been stripped of XML/HTML tags and other evil things
@@ -190,7 +190,7 @@ string        STRING           string      Returns the input variable as a strin
 
                                            $filter_options - an bitmask that supports the
                                            following flags:
-                 
+
                                            * NO_ENCODE_QUOTES: Prevents single and double
                                              quotes from being encoded as numerical HTML
                                              entities.
@@ -228,10 +228,10 @@ encoded       ENCODED          string      Encodes all characters outside the ra
 
 special_chars SPECIAL_CHARS    string      Encodes the 'special' characters ' " < > &, \0 and
                                            everything below 0x20 as numerical HTML entities.
-                 
+
                                            $filter_options - an bitmask that supports the
                                            following flags:
-                 
+
                                            * STRIP_LOW: excludes all characters < 0x20 from the
                                              allowed character list. If this is not set, then
                                              those characters are encoded as numerical HTML
@@ -243,10 +243,10 @@ special_chars SPECIAL_CHARS    string      Encodes the 'special' characters ' " 
 
 unsafe_raw    UNSAFE_RAW       string      Returns the input variable as a string without
                                            XML/HTML being stripped from the input value.
-                 
+
                                            $filter_options - an bitmask that supports the
                                            following flags:
-                 
+
                                            * STRIP_LOW: excludes all characters < 0x20 from the
                                              allowed character list
                                            * STRIP_HIGH: excludes all characters >= 0x80 from
@@ -256,7 +256,7 @@ unsafe_raw    UNSAFE_RAW       string      Returns the input variable as a strin
                                            * ENCODE_HIGH: allows characters >= 0x80 but encodes
                                              them as numerical HTML entities
                                            * ENCODE_AMP: encodes & as &amp;
-                 
+
                                            The flags STRIP_LOW and ENCODE_LOW are mutual
                                            exclusive, and so are STRIP_HIGH and ENCODE_HIGH. In
                                            the case they clash, the characters will be
@@ -269,20 +269,20 @@ email         EMAIL            string      Removes all characters that can not b
                                            filter does `not` validate if the e-mail address has
                                            the correct format, use the validate_email filter
                                            for that.
-                 
+
 url           URL              string      Removes all characters that can not be part of a
                                            correctly formed URI. (a-z A-Z 0-9 $ - _ . + ! * ' (
                                            ) , { } | \ ^ ~ [ ] ` < > # % " ; / ? : @ & =) This
                                            filter does `not` validate if a URI has the correct
                                            format, use the validate_url filter for that.
-                 
+
 number_int    NUMBER_INT       int         Removes all characters that are [^0-9+-].
 
 number_float  NUMBER_FLOAT     float       Removes all characters that are [^0-9+-].
 
                                            $filter_options - an bitmask that supports the
                                            following flags:
-                 
+
                                            * ALLOW_FRACTION: adds "." to the characters that
                                              are not stripped.
                                            * ALLOW_THOUSAND: adds "," to the characters that
@@ -308,7 +308,7 @@ supported:
 The constants should be prepended by `FILTER_` when used with php.
 
 ============= =========== =========== =====================================================
-Name          Constant    Return Type Description      
+Name          Constant    Return Type Description
 ============= =========== =========== =====================================================
 callback      CALLBACK    mixed       Calls the callback function/method with the input
                                       variable's value by reference which can do filtering

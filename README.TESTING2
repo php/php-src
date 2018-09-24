@@ -1,13 +1,13 @@
 [IMPORTANT NOTICE]
 ------------------
-This is an addendum to README.TESTING with additional information 
+This is an addendum to README.TESTING with additional information
 specific to server-tests.php.
 
 server-tests.php is backward compatible with tests developed for
 the original run-tests.php script.  server-tests is *not* used by
 'make test'.  server-tests was developed to provide support for
 testing PHP under it's primary environment, HTTP, and can run the
-PHP tests under any of the SAPI modules that are direct executables, 
+PHP tests under any of the SAPI modules that are direct executables,
 or are accessible via HTTP.
 
 [New features]
@@ -25,7 +25,7 @@ or are accessible via HTTP.
   can be configured to run test scripts through an HTTP server running
   on localhost.  localhost is required since either the web server must
   alias a directory to the php source directory, or the test scripts
-  must be copied to a directory under the web server 
+  must be copied to a directory under the web server
   (see config options TEST_WEB_BASE_URL, TEST_BASE_PATH, and TEST_WEB_EXT)
 * New sections supported for test files (see below)
 
@@ -49,7 +49,7 @@ Some (but not all!) examples of usage:
 
 4. run tests over http, php sources have been aliased in web server
     php server-tests.php -w -u http://localhost/test
-    
+
 5. run tests using configuration file
     php server-tests.php -c /path/to/server-tests-config.php
 
@@ -59,10 +59,10 @@ Some (but not all!) examples of usage:
 
 NOTE: configuration as described in README.TESTING still works.
 
-[New Test Sections] 
+[New Test Sections]
 ----------------
-In addition to the traditional test sections 
-(see http://qa.php.net/write-test.php), several new sections are available 
+In addition to the traditional test sections
+(see http://qa.php.net/write-test.php), several new sections are available
 under server-tests.
 
 --POST--
@@ -78,7 +78,7 @@ in the test file.
 Not used for anything, just a section for documenting the test
 
 --ENV--
-This section get's eval()'d to help build an environment for the 
+This section get's eval()'d to help build an environment for the
 execution of the test.  This can be used to change environment
 vars that are used for CGI emulation, or simply to set env vars
 for cli testing.  A full example looks like:

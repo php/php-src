@@ -44,7 +44,7 @@ Having said that, here are the organizational rules::
 
 Currently we have the following branches in use::
 
-  master    The active development branch. 
+  master    The active development branch.
 
   PHP-7.1   Is used to release the PHP 7.1.x series. This is a prerelease
             version.
@@ -110,7 +110,7 @@ The format of the commit messages is pretty simple.
 An Example from the git project (commit 2b34e486bc):
 
 pack-objects: Fix compilation with NO_PTHREDS
-  
+
 It looks like commit 99fb6e04 (pack-objects: convert to use
 parse_options(), 2012-02-01) moved the #ifdef NO_PTHREDS around but
 hasn't noticed that the 'arg' variable no longer is available.

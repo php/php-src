@@ -38,7 +38,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- */ 
+ */
 
 #include <assert.h>
 #include <stdlib.h>
@@ -112,7 +112,7 @@ PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_iout
 	* be deleted even whilst it's open.
 	*/
 	/* opts->share = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE; */
-	/* XXX No UINX behavior  Good to know it's doable. 
+	/* XXX No UINX behavior  Good to know it's doable.
 	   Not being done as this means a behavior change. Should be evaluated properly. */
 	opts->share = FILE_SHARE_READ | FILE_SHARE_WRITE;
 
@@ -394,7 +394,7 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
-	
+
 	if (!SetCurrentDirectoryW(path)) {
 		err = GetLastError();
 		ret = -1;
@@ -408,7 +408,7 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 {/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
-	
+
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1, 0)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, -1, 0)
 
@@ -447,7 +447,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len)
 		}
 		buf = tmp_buf;
 	}
-	
+
 	if (!GetCurrentDirectoryW(tmp_len, buf)) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
@@ -468,7 +468,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	if (len == 0) {
 		return 0;
 	}
-	
+
 	start = path;
 
 	/* Don't really care about the path normalization, pure parsing here. */
@@ -628,7 +628,7 @@ PW32IO HANDLE php_win32_ioutil_findfirstfile_w(char *path, WIN32_FIND_DATA *data
 	}
 
 		ret = FindFirstFileW(pathw, data);
-	
+
 	if (INVALID_HANDLE_VALUE == ret && path) {
 		ret = FindFirstFileA(path, data);
 	}

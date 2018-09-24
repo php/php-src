@@ -112,7 +112,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 		zend_string_release(function->common.function_name);
 
 		if (function->common.arg_info &&
-		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			uint32_t i;
 			uint32_t num_args = function->common.num_args + 1;
 			zend_arg_info *arg_info = function->common.arg_info - 1;

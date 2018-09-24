@@ -11,7 +11,7 @@ file called a "phar" (PHP Archive) for easy distribution and installation.
 .P
 With the \fBphar\fP command you can create, update or extract PHP archives.
 .P
-Commands: 
+Commands:
 add compress delete extract help help-list info list meta-del
 meta-get meta-set pack sign stub-get stub-set tree version
 
@@ -39,7 +39,7 @@ Provide an \fIalias\fP name for the phar file.
 .TP
 .PD
 .B \-c \fIalgo\fP
-Compression algorithm (see 
+Compression algorithm (see
 .SM
 .B COMPRESSION
 )
@@ -63,7 +63,7 @@ Required arguments:
 .TP 15
 .PD
 .B \-c \fIalgo\fP
-Compression algorithm (see 
+Compression algorithm (see
 .SM
 .B COMPRESSION
 )
@@ -280,14 +280,14 @@ The hash mark itself '#!' and the newline character are optional.
 .TP
 .PD
 .B \-c \fIalgo\fP
-Compression algorithm (see 
+Compression algorithm (see
 .SM
 .B COMPRESSION
 )
 .TP
 .PD
 .B \-h \fIhash\fP
-Selects the \fIhash\fP algorithm (see 
+Selects the \fIhash\fP algorithm (see
 .SM
 .B HASH
 )
@@ -336,7 +336,7 @@ Specifies the phar \fIfile\fP to work on.
 .TP
 .PD
 .B \-h \fIhash\fP
-Selects the \fIhash\fP algorithm (see 
+Selects the \fIhash\fP algorithm (see
 .SM
 .B HASH
 )
@@ -502,7 +502,7 @@ A List of active developers can be found here:
 .B http://www.php.net/credits.php
 .PD 1
 .P
-And last but not least PHP was developed with the help of a huge amount of 
+And last but not least PHP was developed with the help of a huge amount of
 contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphar\fP, version @PHP_VERSION@.

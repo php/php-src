@@ -2292,15 +2292,15 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		tmp = 0;
 		if (ssa_ops[i].result_def >= 0) {
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-		} 
-		if (ssa_ops[i].op1_def >= 0) { 
+		}
+		if (ssa_ops[i].op1_def >= 0) {
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
-		} 
-		if (ssa_ops[i].op2_def >= 0) { 
+		}
+		if (ssa_ops[i].op2_def >= 0) {
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op2_def);
-		} 
+		}
 		return 1;
-	} 
+	}
 
 	switch (opline->opcode) {
 		case ZEND_ADD:

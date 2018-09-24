@@ -13,14 +13,14 @@ int main(int argc, char **argv)
 	char *filename = tmpnam(NULL);
 	char buffer[64];
 	int result = 0;
-	
+
 	FILE *fp = fopen(filename, "wb");
 	if (NULL == fp)
 		return 0;
 	fputs("line 1\n", fp);
 	fputs("line 2\n", fp);
 	fclose(fp);
-	
+
 	fp = fopen(filename, "rb+");
 	if (NULL == fp)
 		return 0;
@@ -58,7 +58,7 @@ if test "$ac_cv_func_crypt" = "no"; then
     AC_DEFINE(HAVE_CRYPT, 1, [ ])
   ])
 fi
-  
+
 AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
   AC_TRY_RUN([
 #if HAVE_UNISTD_H
@@ -124,7 +124,7 @@ int main() {
 	char salt[15], answer[40];
 	char *encrypted;
 
-	salt[0]='$'; salt[1]='1'; salt[2]='$'; 
+	salt[0]='$'; salt[1]='1'; salt[2]='$';
 	salt[3]='r'; salt[4]='a'; salt[5]='s';
 	salt[6]='m'; salt[7]='u'; salt[8]='s';
 	salt[9]='l'; salt[10]='e'; salt[11]='$';
@@ -267,7 +267,7 @@ else
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
 fi
 
-dnl 
+dnl
 dnl Check for __attribute__ ((__aligned__)) support in the compiler
 dnl
 AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
@@ -289,7 +289,7 @@ dnl
 dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
 dnl as soon as we support C99.
 AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass mempcpy strpncpy)
-AC_FUNC_FNMATCH	
+AC_FUNC_FNMATCH
 
 dnl
 dnl Check if there is a support means of creating a new process

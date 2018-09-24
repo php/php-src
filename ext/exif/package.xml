@@ -18,8 +18,8 @@
   </maintainer>
  </maintainers>
  <description>
-The EXIF functions provide access to information stored in headers 
-of JPEG and TIFF images. This way you can read meta data generated 
+The EXIF functions provide access to information stored in headers
+of JPEG and TIFF images. This way you can read meta data generated
 by digital cameras and certain image processing applications.
  </description>
  <license>PHP</license>

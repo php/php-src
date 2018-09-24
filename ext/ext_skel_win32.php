@@ -7,12 +7,12 @@ if (php_sapi_name() != "cli") {
 }
 /*
 	This script can be used on Win32 systems
-	
+
 	1) Make sure you have CygWin installed
 	2) Adjust the $cygwin_path to match your installation
 	3) Change the environment cariable PATHEXT to include .PHP
 	4) run ext_skel --extname=...
-		the first time you run this script you will be asked to 
+		the first time you run this script you will be asked to
 		associate it with a program. chooses the CLI version of php.
 */
 
@@ -39,7 +39,7 @@ $fp = fopen("$extname/$extname.php", "rb");
 if ($fp) {
 	$php_file = fread($fp, filesize("$extname/$extname.php"));
 	fclose($fp);
-	
+
 	$php_file = str_replace("dl('", "dl('php_", $php_file);
 	$fp = fopen("$extname/$extname.php", "wb");
 	if ($fp) {

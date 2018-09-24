@@ -4,8 +4,8 @@
  <name>xmlreader</name>
  <summary>Provides fast, non-cached, forward-only access to XML data under PHP 5.</summary>
  <description>
-  This extension wraps the libxml xmlReader API. The reader acts as a cursor 
-  going forward on the document stream and stopping at each node in the way. 
+  This extension wraps the libxml xmlReader API. The reader acts as a cursor
+  going forward on the document stream and stopping at each node in the way.
   xmlReader is similar to SAX though uses a much simpler API.
  </description>
  <license>PHP License</license>
@@ -52,7 +52,7 @@
   <file role="src" name="config.w32"/>
   <file role="src" name="php_xmlreader.c"/>
   <file role="src" name="php_xmlreader.h"/>
-  
+
   <file role="doc" name="CREDITS"/>
   <file role="doc" name="TODO"/>
   <file role="doc" name="README"/>

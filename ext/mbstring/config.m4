@@ -37,7 +37,7 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
   for dir in $PHP_MBSTRING_EXTRA_BUILD_DIRS; do
     PHP_ADD_BUILD_DIR([$ext_builddir/$dir], 1)
   done
-  
+
   for dir in $PHP_MBSTRING_EXTRA_INCLUDES; do
     PHP_ADD_INCLUDE([$ext_srcdir/$dir])
     PHP_ADD_INCLUDE([$ext_builddir/$dir])
@@ -54,8 +54,8 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
       out="php_config.h"
     fi
   fi
-  
-  if test "$PHP_MBSTRING_BUNDLED_ONIG" = "1"; then 
+
+  if test "$PHP_MBSTRING_BUNDLED_ONIG" = "1"; then
     cp $ext_srcdir/oniguruma/src/oniguruma.h $ext_srcdir/oniguruma/oniguruma.h
   fi
 
@@ -101,14 +101,14 @@ int main() { return foo(10, "", 3.14); }
       AC_CHECK_SIZEOF(short, 2)
       AC_CHECK_SIZEOF(long, 4)
       AC_C_CONST
-      AC_HEADER_TIME 
+      AC_HEADER_TIME
       AC_FUNC_ALLOCA
       AC_FUNC_MEMCMP
       AC_CHECK_HEADER([stdarg.h], [
         AC_DEFINE([HAVE_STDARG_PROTOTYPES], [1], [Define to 1 if you have the <stdarg.h> header file.])
       ], [])
       AC_DEFINE([PHP_ONIG_BUNDLED], [1], [Define to 1 if the bundled oniguruma is used])
-      AC_DEFINE([HAVE_ONIG], [1], [Define to 1 if the oniguruma library is available]) 
+      AC_DEFINE([HAVE_ONIG], [1], [Define to 1 if the oniguruma library is available])
       PHP_MBSTRING_ADD_CFLAG([-DNOT_RUBY])
       PHP_MBSTRING_ADD_BUILD_DIR([oniguruma])
       PHP_MBSTRING_ADD_BUILD_DIR([oniguruma/src])
@@ -180,7 +180,7 @@ int main() { return foo(10, "", 3.14); }
 
       PHP_CHECK_LIBRARY(onig, onig_init, [
         PHP_ADD_LIBRARY_WITH_PATH(onig, $PHP_ONIG/$PHP_LIBDIR, MBSTRING_SHARED_LIBADD)
-        AC_DEFINE([HAVE_ONIG], [1], [Define to 1 if the oniguruma library is available]) 
+        AC_DEFINE([HAVE_ONIG], [1], [Define to 1 if the oniguruma library is available])
       ],[
         AC_MSG_ERROR([Problem with oniguruma. Please check config.log for more information.])
       ], [
@@ -321,7 +321,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
   else
     dnl
     dnl External libmfl
-    dnl  
+    dnl
     for inc in include include/mbfl-1.0 include/mbfl; do
       if test -f "$PHP_LIBMBFL/$inc/mbfilter.h"; then
         PHP_LIBMBFL_INCLUDE="$inc"
@@ -331,7 +331,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
 
     if test -z "$PHP_LIBMBFL_INCLUDE"; then
       AC_MSG_ERROR([mbfilter.h not found. Please reinstall libmbfl library.])
-    else 
+    else
       PHP_ADD_INCLUDE([$PHP_LIBMBFL_INCLUDE])
     fi
 
@@ -367,7 +367,7 @@ PHP_ARG_WITH(onig, [for external oniguruma],
 [  --with-onig[=DIR]         MBSTRING: Use external oniguruma. DIR is the oniguruma install prefix.
                           If DIR is not set, the bundled oniguruma will be used], no, no)
 
-if test "$PHP_MBSTRING" != "no"; then  
+if test "$PHP_MBSTRING" != "no"; then
   AC_DEFINE([HAVE_MBSTRING],1,[whether to have multibyte string support])
 
   PHP_MBSTRING_ADD_BASE_SOURCES([mbstring.c php_unicode.c mb_gpc.c])
@@ -375,7 +375,7 @@ if test "$PHP_MBSTRING" != "no"; then
   if test "$PHP_MBREGEX" != "no"; then
     PHP_MBSTRING_SETUP_MBREGEX
   fi
-  
+
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION

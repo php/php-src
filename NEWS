@@ -32,7 +32,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #73457 (Wrong error message when fopen FTP wrapped fails to open
     data connection). (Ville Hukkamäki)
-  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
+  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with
     stream_socket_client). (Ville Hukkamäki)
   . Fixed bug #75533 (array_reduce is slow when $carry is large array).
     (Manabu Matsui)
@@ -63,7 +63,7 @@ PHP                                                                        NEWS
   . Fixed bug #76517 (incorrect restoring of LDFLAGS). (sji)
 
 - iconv:
-  . Fixed bug #68180 (iconv_mime_decode can return extra characters in a 
+  . Fixed bug #68180 (iconv_mime_decode can return extra characters in a
     header). (cmb)
   . Fixed bug #63839 (iconv_mime_decode_headers function is skipping headers).
     (cmb)
@@ -307,7 +307,7 @@ PHP                                                                        NEWS
   . Fixed bug #76143 (Memory corruption: arbitrary NUL overwrite). (Laruence)
 
 - SPL:
-  . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
+  . Fixed bug #76131 (mismatch arginfo for splarray constructor).
     (carusogabriel)
 
 - standard:
@@ -389,7 +389,7 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #54289 (Phar::extractTo() does not accept specific directories to
     be extracted). (bishop)
-  . Fixed bug #65414 (deal with leading slash while adding files correctly). 
+  . Fixed bug #65414 (deal with leading slash while adding files correctly).
     (bishopb)
   . Fixed bug #65414 (deal with leading slash when adding files correctly).
     (bishopb)
@@ -465,7 +465,7 @@ PHP                                                                        NEWS
   . Fixed bug #75502 (Segmentation fault in zend_string_release). (Nikita)
 
 - SPL:
-  . Fixed bug #75717 (RecursiveArrayIterator does not traverse arrays by 
+  . Fixed bug #75717 (RecursiveArrayIterator does not traverse arrays by
     reference). (Nikita)
   . Fixed bug #75242 (RecursiveArrayIterator doesn't have constants from parent
     class). (Nikita)
@@ -529,7 +529,7 @@ PHP                                                                        NEWS
     (Remi)
   . Fixed bug #75535 (Inappropriately parsing HTTP response leads to PHP
     segment fault). (Nikita)
-  . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
+  . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator
     that getrandom() is missing). (sarciszewski)
   . Fixed bug #73124 (php_ini_scanned_files() not reporting correctly).
     (John Stevenson)
@@ -584,7 +584,7 @@ PHP                                                                        NEWS
     (Anatol)
   . Implemented minor optimization in array_keys/array_values(). (Sara)
   . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
-  . Fixed bug #73987 (Method compatibility check looks to original 
+  . Fixed bug #73987 (Method compatibility check looks to original
     definition and not parent). (pmmaga)
   . Fixed bug #73991 (JSON_OBJECT_AS_ARRAY not respected). (Sara)
   . Fixed bug #74053 (Corrupted class entries on shutdown when a destructor
@@ -614,7 +614,7 @@ PHP                                                                        NEWS
   . Added new VM instuctions ISSET_ISEMPTY_CV and UNSET_CV. Previously they
     were implemented as ISSET_ISEMPTY_VAR and UNSET_VAR variants with
     ZEND_QUICK_SET flag. (Nikita, Dmitry)
-  . Fixed bug #49649 (unserialize() doesn't handle changes in property 
+  . Fixed bug #49649 (unserialize() doesn't handle changes in property
     visibility). (pmmaga)
   . Fixed #74866 (extension_dir = "./ext" now use current directory for base).
     (Francois Laupretre)
@@ -647,7 +647,7 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
-    Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, AGFA, 
+    Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, AGFA,
 	Kyocera, Ricoh & Epson. (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some
     images). (Kalle)
@@ -659,15 +659,15 @@ PHP                                                                        NEWS
     reached for some cameras). (Kalle)
   . Fixed Redhat bug #1362571 (PHP not returning full results for
     exif_read_data function). (Kalle)
-  . Implemented #65187 (exif_read_data/thumbnail: add support for stream 
+  . Implemented #65187 (exif_read_data/thumbnail: add support for stream
     resource). (Kalle)
   . Deprecated the read_exif_data() alias. (Kalle)
-  . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
+  . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with
     correct exif format). (bradpiccho at gmail dot com, Kalle)
   . Fixed bug #72819 (EXIF thumbnails not read anymore). (Kalle)
-  . Fixed bug #62523 (php crashes with segfault when exif_read_data called). 
+  . Fixed bug #62523 (php crashes with segfault when exif_read_data called).
     (Kalle)
-  . Fixed bug #50660 (exif_read_data(): Illegal IFD offset (works fine with 
+  . Fixed bug #50660 (exif_read_data(): Illegal IFD offset (works fine with
     other exif readers). (skinny dot bravo at gmail dot com, Kalle)
 
 - Fileinfo:
@@ -697,7 +697,7 @@ PHP                                                                        NEWS
   . Fixed Bug #75284 (sha3 is not supported on bigendian machine). (Remi)
 
 - IMAP:
-  . Fixed bug #72324 (imap_mailboxmsginfo() return wrong size). 
+  . Fixed bug #72324 (imap_mailboxmsginfo() return wrong size).
     (ronaldpoon at udomain dot com dot hk, Kalle)
 
 - Intl:
@@ -802,7 +802,7 @@ PHP                                                                        NEWS
     read-only/getter mode). (Yasuo)
   . Fixed bug #74936 (session_cache_expire/cache_limiter/save_path() trigger a
     warning in read mode). (morozov)
-  . Fixed bug #74941 (session fails to start after having headers sent). 
+  . Fixed bug #74941 (session fails to start after having headers sent).
     (morozov)
 
 - Sodium:
@@ -885,7 +885,7 @@ PHP                                                                        NEWS
   . Fixed bug #75437 (Wrong reflection on imagewebp). (Fabien Villepinte)
 
 - intl:
-  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
+  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead
     of destination). (andrewnester)
 
 - interbase:
@@ -923,7 +923,7 @@ PHP                                                                        NEWS
   . Fixed bug #75236 (infinite loop when printing an error-message). (Andrea)
   . Fixed bug #75252 (Incorrect token formatting on two parse errors in one
     request). (Nikita)
-  . Fixed bug #75220 (Segfault when calling is_callable on parent). 
+  . Fixed bug #75220 (Segfault when calling is_callable on parent).
     (andrewnester)
   . Fixed bug #75290 (debug info of Closures of internal functions contain
     garbage argument names). (Andrea)
@@ -943,7 +943,7 @@ PHP                                                                        NEWS
     optional). (cmb)
 
 - litespeed:
-  . Fixed bug #75248 (Binary directory doesn't get created when building 
+  . Fixed bug #75248 (Binary directory doesn't get created when building
     only litespeed SAPI). (petk)
   . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
@@ -1070,7 +1070,7 @@ PHP                                                                        NEWS
   . Fixed bug #75049 (spl_autoload_unregister can't handle
     spl_autoload_functions results). (Laruence)
   . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
-  . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
+  . Fixed bug #74977 (Appending AppendIterator leads to segfault).
     (Andrew Nester)
   . Fixed bug #75015 (Crash in recursive iterator destructors). (Julien)
 
@@ -1091,9 +1091,9 @@ PHP                                                                        NEWS
 03 Aug 2017, PHP 7.1.8
 
 - Core:
-  . Fixed bug #74832 (Loading PHP extension with already registered function 
+  . Fixed bug #74832 (Loading PHP extension with already registered function
     name leads to a crash). (jpauli)
-  . Fixed bug #74780 (parse_url() broken when query string contains colon). 
+  . Fixed bug #74780 (parse_url() broken when query string contains colon).
     (jhdxr)
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
   . Fixed bug #73900 (Use After Free in unserialize() SplFixedArray). (nikic)
@@ -1102,7 +1102,7 @@ PHP                                                                        NEWS
   . Fixed bug #74906 (fixed incorrect errno.h include). (petk)
 
 - Date:
-  . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
+  . Fixed bug #74852 (property_exists returns true on unknown DateInterval
     property). (jhdxr)
 
 - OCI8:
@@ -1313,7 +1313,7 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
 
 - phar:
-  . Fixed bug #74383 (phar method parameters reflection correction). 
+  . Fixed bug #74383 (phar method parameters reflection correction).
     (mhagstrand)
 
 - Readline:
@@ -1485,7 +1485,7 @@ PHP                                                                        NEWS
   . Fixed bug #72898 (PHP_FCGI_CHILDREN is not included in phpinfo()). (Anatol)
 
 - FPM:
-  . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
+  . Fixed bug #69865 (php-fpm does not close stderr when using syslog).
     (m6w6)
 
 - GD:
@@ -1493,7 +1493,7 @@ PHP                                                                        NEWS
 
 - GMP:
   . Fixed bug #69993 (test for gmp.h needs to test machine includes).
-    (Jordan Gigov) 
+    (Jordan Gigov)
 
 - Hash:
   . Added hash_hkdf() function. (Andrey Andreev)
@@ -1527,7 +1527,7 @@ PHP                                                                        NEWS
   . Implemented FR #72583 (All data are fetched as strings). (Dorin Marcoci)
 
 - PDO_PgSQL:
-  . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
+  . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong
     sequence name). (andrewnester)
 
 - Phar:
@@ -1591,7 +1591,7 @@ PHP                                                                        NEWS
 - Mysqlnd:
   . Optimized handling of BIT fields - less memory copies and lower memory
     usage. (Andrey)
-  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
+  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE).
 	(vanviegen)
 
 - Opcache:
@@ -2097,7 +2097,7 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #73483 (Segmentation fault on pcre_replace_callback). (Laruence)
   . Fixed bug #73612 (preg_*() may leak memory). (cmb)
-  . Fixed bug #73392 (A use-after-free in zend allocator management). 
+  . Fixed bug #73392 (A use-after-free in zend allocator management).
     (Laruence)
   . Fixed bug #73121 (Bundled PCRE doesn't compile because JIT isn't supported
     on s390). (Anatol)
@@ -2193,7 +2193,7 @@ PHP                                                                        NEWS
   . Implemented RFC: Session ID without hashing. (Yasuo)
     https://wiki.php.net/rfc/session-id-without-hashing
   . Fixed bug #72531 (ps_files_cleanup_dir Buffer overflow). (Laruence)
-  . Custom session handlers that do not return strings for session IDs will 
+  . Custom session handlers that do not return strings for session IDs will
     now throw an instance of Error instead of resulting in a fatal error
     when a function is called that must generate a session ID.
     (Aaron Piotrowski)
@@ -2229,7 +2229,7 @@ PHP                                                                        NEWS
     unserialize()). (Stas)
 
 - Soap:
-  . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP 
+  . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP
     headers). (duncan3dc)
   . Fixed bug #73452 (Segfault (Regression for #69152)). (Dmitry)
   . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
@@ -2237,7 +2237,7 @@ PHP                                                                        NEWS
     (Keith Smiley)
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
     (Keith Smiley)
-  . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita) 
+  . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita)
   . Fixed bug #71996 (Using references in arrays doesn't work like expected).
     (Nikita)
 

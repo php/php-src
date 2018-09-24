@@ -865,7 +865,7 @@ default_socket_timeout = 60
 ; For example:
 ;
 ;   extension=mysqli
-; 
+;
 ; When the extension library to load is not located in the default extension
 ; directory, You may specify an absolute path to the library file:
 ;

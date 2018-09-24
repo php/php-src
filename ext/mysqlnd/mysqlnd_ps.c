@@ -734,7 +734,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, const enum_my
 		if (command) {
 			ret = command->run(command);
 			command->free_command(command);
-		}	
+		}
 	} else {
 		SET_CLIENT_ERROR(stmt->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Couldn't generate the request. Possibly OOM.");
 	}
@@ -1069,7 +1069,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 			ret = command->run(command);
 			command->free_command(command);
 			if (ret == FAIL) {
-				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);	
+				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			}
 		}
 		if (FAIL == ret) {

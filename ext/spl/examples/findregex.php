@@ -1,5 +1,5 @@
 <?php
-	
+
 /** @file   findregex.php
  * @brief   Program Find a specific file by name.
  * @ingroup Examples
@@ -33,4 +33,4 @@ foreach(new RegexFindFile($argv[1], $argv[2]) as $file)
 	echo $file->getPathname()."\n";
 }
 
-?>	
+?>

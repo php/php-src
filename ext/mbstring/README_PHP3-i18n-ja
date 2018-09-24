@@ -13,13 +13,13 @@ Location:       http://www.happysize.co.jp/techie/php-ja-jp/
 
 Currently, this I18N version of PHP only adds Japanese support to base
 PHP.  It allows you to use Japanese in scripts, as well as conversion
-between various Japanese encodings.  It will work perfectly fine with 
-ASCII with i18n option enabled.  (note: executable is bit larger due 
-to UNICODE table).  The basic design aproach is to allow for other 
+between various Japanese encodings.  It will work perfectly fine with
+ASCII with i18n option enabled.  (note: executable is bit larger due
+to UNICODE table).  The basic design aproach is to allow for other
 languages to be added in the future.  Developers are encourage to join
 us!
 
-For more information on Japanese encodings, please refer to the 
+For more information on Japanese encodings, please refer to the
 section "Additional Notes."
 
 
@@ -27,7 +27,7 @@ o What is this package?
 
 This package allows you to handle multiple Japanese encodings (SJIS, EUC,
 UTF-8, JIS) in PHP.  If you find any bugs in this package, please report
-them to the appropriate mailing list.  For now, the PHP-jp mailing list 
+them to the appropriate mailing list.  For now, the PHP-jp mailing list
 is the best place for this.
 
 PHP-jp ML       mailto:PHP-jp@sidecar.ics.es.osaka-u.ac.jp
@@ -115,7 +115,7 @@ Previous jp-patch developers
   Advantages of using I18N package
 ==========================================
 
-- allows you to use various character encodings for script files and 
+- allows you to use various character encodings for script files and
   http output
 - distinguish character encoding in POST/GET/COOKIE
 - proper mail output using JIS as body and MIME/Base64/JIS subject
@@ -248,7 +248,7 @@ in the server log or regular http output in CGI mode.
 o About Japanese encodings
 
 Due to historical reason, there are multiple character encodings used
-for Japanese.  The most common encodings are: SJIS, EUC, JIS, and UTF-8.  
+for Japanese.  The most common encodings are: SJIS, EUC, JIS, and UTF-8.
 Here are (very) brief description of them:
 
 EUC
@@ -273,8 +273,8 @@ UTF-8
   see http://www.unicode.org/ for more detail
 
 Because of having all these character encodings, PHP needs to translate
-between these encodings on the fly.  Also, the addition of the mb regex 
-library allows you to handle mb strings without fear of getting mb char 
+between these encodings on the fly.  Also, the addition of the mb regex
+library allows you to handle mb strings without fear of getting mb char
 chopped in half.
 
 Since Japanese is not the only language with multiple encodings, we
@@ -300,7 +300,7 @@ o Encoding naming
 
     - UTF-8
          standard: UTF-8
-         alias: N/A 
+         alias: N/A
          mime: UTF-8
 
     - ASCII
@@ -320,7 +320,7 @@ o Encoding naming
 
     - JIS
          standard: JIS
-         alias: N/A 
+         alias: N/A
          mime: ISO-2022-JP
 
     - Quoted-Printable
@@ -365,13 +365,13 @@ o i18n.internal_encoding - internal encoding
         SJIS: SJIS
         UTF-8: UTF-8
 
-    The default is EUC-JP.  
+    The default is EUC-JP.
 
     PHP parser is designed based on using ISO-8859-1.  For other
     encodings, following conditions have to be satisfied in order
     to use them:
        - per byte encoding
-       - single byte character in range of 00h-7fh which is compatible 
+       - single byte character in range of 00h-7fh which is compatible
          with ASCII
        - multibyte without 00h-7fh
     In case of Japanese, EUC-JP and UTF-8 are the only encoding that
@@ -510,7 +510,7 @@ o string = i18n_convert(string, encoding)
   string = i18n_convert(string, encoding, pre-conversion-encoding)
 
     Returns converted string in desired encoding.  If
-    pre-conversion-encoding is not defined, the given 
+    pre-conversion-encoding is not defined, the given
     string is assumed to be in internal encoding.
 
     encoding
@@ -701,9 +701,9 @@ ex: <a href="hoge.php?data=<? echo urlencode($data) ?>">Link</a>
 
 o When passing data via GET/POST/COOKIE, \ character sneaks in
 
-When using SJIS as internal encoding, or passed-on data includes '"\, 
+When using SJIS as internal encoding, or passed-on data includes '"\,
 PHP automatically inserts escaping character, \.  Set magic_quotes_gpc
-in php3.ini from On to Off.  An alternative work around to this problem 
+in php3.ini from On to Off.  An alternative work around to this problem
 is to use StripSlashes().
 
 If $quote_str is in SJIS and you would like to extract Japanese text,
@@ -719,7 +719,7 @@ o Sometimes, encoding detection fails
 
 If i18n_http_input() returns 'pass', it's likely that PHP failed to
 detect whether it's SJIS or EUC.  In such case, use <input type=hidden
-value="some Japanese text"> to properly detect the incoming text's 
+value="some Japanese text"> to properly detect the incoming text's
 encoding.
 
 
@@ -740,7 +740,7 @@ Starting 3.0.18-i18n-ja, we have removed doc-jp from tarball package.
 
 o 2000-10-28, Rui Hirokawa <hirokawa@php.net>
 
-This patch is derived from php-3.0.15-i18n-ja as well as php-3.0.16 by 
+This patch is derived from php-3.0.15-i18n-ja as well as php-3.0.16 by
 Kuwamura applied to original php-3.0.18.  It also includes following fixes:
 
 1) allows you to set charset in mail().
@@ -765,7 +765,7 @@ gd-1.7.3-1k1, gd-devel-1.7.3-1k1, freetype-1.3.1-5, freetype-devel-1.3.1-5
 For any gd libraries before 1.6.2, you need to use i18n_convert.  For
 gd-1.5.2/3, upgrade to anything above 1.7 to use ImageTTFText without
 using i18n_convert.  As long as you have internal_encoding set to EUC or
-SJIS, ImageTTFText should work without mojibake.  Again, make sure you 
+SJIS, ImageTTFText should work without mojibake.  Again, make sure you
 have i18n_http_output("pass") before calling ImageGif, ImagePng, ImageJpeg!
 
 o 2000-12-09, Rui Hirokawa <hirokawa@php.net>

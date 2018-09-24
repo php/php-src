@@ -476,7 +476,7 @@ PHP_FUNCTION(password_hash)
 			{
 				zval *option_buffer;
 				zend_string *salt, *out, *encoded;
-				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
+				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 				size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 				size_t threads = PHP_PASSWORD_ARGON2_THREADS;
 				argon2_type type = Argon2_i;

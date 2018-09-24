@@ -324,7 +324,7 @@ function collator_sort_with_sort_keys( $coll, $arr ) {}
  * Get the locale name of the collator.
  *
  * @param Collator $coll Collator object.
- * @param int      $type You can choose between valid and 
+ * @param int      $type You can choose between valid and
  *                       actual locale
  *                       (ULOC_VALID_LOCALE, ULOC_ACTUAL_LOCALE
  *                       respectively).

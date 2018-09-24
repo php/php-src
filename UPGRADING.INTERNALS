@@ -31,7 +31,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
     The internal randomness source on Windows switched to use CNG API.
 
   c. nice() now have a Windows alternative that is implemented in win32/nice.c, using
-	   SetPriorityClass(). See the implementation for more in-depth details. This also 
+	   SetPriorityClass(). See the implementation for more in-depth details. This also
 	   defines HAVE_NICE.
 
   d. ZEND_ACC_CLONE is removed, but was not used in previous versions

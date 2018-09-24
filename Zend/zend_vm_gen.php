@@ -1221,7 +1221,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 						$label++;
 						return;
 					}
-					
+
 					// Emit pointer to specialized handler
 					$spec_name = $dsc["op"]."_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec);
 					switch ($kind) {
@@ -1884,7 +1884,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 								"# endif\n" .
 								$m[1]."return;\n" .
 								"#else\n" .
-								$m[1]."if (EXPECTED(ret > 0)) {\n" . 
+								$m[1]."if (EXPECTED(ret > 0)) {\n" .
 						        $m[1]."\texecute_data = EG(current_execute_data);\n".
 								$m[1]."\tZEND_VM_LOOP_INTERRUPT_CHECK();\n".
 						        $m[1]."} else {\n" .
@@ -2291,7 +2291,7 @@ function gen_vm($def, $skel) {
 	fputs($f, "ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);\n");
 	fputs($f, "ZEND_API uint32_t zend_get_opcode_flags(zend_uchar opcode);\n\n");
 	fputs($f, "END_EXTERN_C()\n\n");
-	
+
 	foreach ($opcodes as $code => $dsc) {
 		$code = str_pad((string)$code,$code_len," ",STR_PAD_LEFT);
 		$op = str_pad($dsc["op"],$max_opcode_len);
@@ -2315,13 +2315,13 @@ function gen_vm($def, $skel) {
 	out($f, HEADER_TEXT);
 	fputs($f,"#include <stdio.h>\n");
 	fputs($f,"#include <zend.h>\n\n");
-	
+
 	fputs($f,"static const char *zend_vm_opcodes_names[".($max_opcode + 1)."] = {\n");
 	for ($i = 0; $i <= $max_opcode; $i++) {
 		fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
 	}
 	fputs($f, "};\n\n");
-	
+
 	fputs($f,"static uint32_t zend_vm_opcodes_flags[".($max_opcode + 1)."] = {\n");
 	for ($i = 0; $i <= $max_opcode; $i++) {
 		fprintf($f, "\t0x%08x,\n", isset($opcodes[$i]["flags"]) ? $opcodes[$i]["flags"] : 0);
@@ -2335,7 +2335,7 @@ function gen_vm($def, $skel) {
 	fputs($f, "ZEND_API uint32_t zend_get_opcode_flags(zend_uchar opcode) {\n");
 	fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
 	fputs($f, "}\n");
-    
+
 	fclose($f);
 	echo "zend_vm_opcodes.c generated successfully.\n";
 
@@ -2366,7 +2366,7 @@ function gen_vm($def, $skel) {
 		out($f, "# pragma warning(once : 6326)\n");
 	}
 	out($f, "#endif\n");
-	
+
 	// Support for ZEND_USER_OPCODE
 	out($f, "static user_opcode_handler_t zend_user_opcode_handlers[256] = {\n");
 	for ($i = 0; $i < 255; ++$i) {

@@ -18,13 +18,13 @@
   </maintainer>
  </maintainers>
  <description>
-The functions in this extension implement client access to file 
-servers speaking the File Transfer Protocol (FTP) as defined in 
-http://www.faqs.org/rfcs/rfc959. This extension is meant for 
-detailed access to an FTP server providing a wide range of 
-control to the executing script. If you only wish to read from 
-or write to a file on an FTP server, consider using the ftp:// 
-wrapper  with the filesystem functions  which provide a simpler 
+The functions in this extension implement client access to file
+servers speaking the File Transfer Protocol (FTP) as defined in
+http://www.faqs.org/rfcs/rfc959. This extension is meant for
+detailed access to an FTP server providing a wide range of
+control to the executing script. If you only wish to read from
+or write to a file on an FTP server, consider using the ftp://
+wrapper  with the filesystem functions  which provide a simpler
 and more intuitive interface.
  </description>
  <license>PHP</license>

@@ -34,7 +34,7 @@
 #endif
 
 /* TODO check to undef this option, this might
-	make more perf. destroy_freelist() 
+	make more perf. destroy_freelist()
 	should be adapted then. */
 #define Omit_Private_Memory 1
 
@@ -140,7 +140,7 @@ typedef unsigned long int uint32_t;
 	} else if (1 == x) { \
 		tsrm_mutex_unlock(pow5mult_mutex); \
 	}
-	
+
 
 #endif
 

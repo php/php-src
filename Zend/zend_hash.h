@@ -312,7 +312,7 @@ static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_str
 	zval *zv;
 
 	zv = zend_hash_find(ht, key);
-	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? 
+	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ?
 		((Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF) ? Z_INDIRECT_P(zv) : NULL) : zv;
 }
 
@@ -332,7 +332,7 @@ static zend_always_inline zval *zend_hash_str_find_ind(const HashTable *ht, cons
 	zval *zv;
 
 	zv = zend_hash_str_find(ht, str, len);
-	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? 
+	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ?
 		((Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF) ? Z_INDIRECT_P(zv) : NULL) : zv;
 }
 
@@ -1024,7 +1024,7 @@ static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *ke
 	if (!ZSTR_IS_INTERNED(key)) {
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
-		zend_string_hash_val(key);		
+		zend_string_hash_val(key);
 	}
 	p->key = key;
 	p->h = ZSTR_H(key);
@@ -1046,7 +1046,7 @@ static zend_always_inline zval *_zend_hash_append_ptr(HashTable *ht, zend_string
 	if (!ZSTR_IS_INTERNED(key)) {
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
-		zend_string_hash_val(key);		
+		zend_string_hash_val(key);
 	}
 	p->key = key;
 	p->h = ZSTR_H(key);
@@ -1068,7 +1068,7 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
 	if (!ZSTR_IS_INTERNED(key)) {
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
-		zend_string_hash_val(key);		
+		zend_string_hash_val(key);
 	}
 	p->key = key;
 	p->h = ZSTR_H(key);

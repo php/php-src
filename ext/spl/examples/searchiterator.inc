@@ -38,7 +38,7 @@ abstract class SearchIterator extends FilterIterator
 	{
 		return !$this->done && parent::valid();
 	}
-	
+
 	/** Do not move forward but instead mark as finished.
 	 * @return void
 	 */
@@ -48,7 +48,7 @@ abstract class SearchIterator extends FilterIterator
 	}
 
 	/** Aggregates the inner iterator
-	 */	
+	 */
 	function __call($func, $params)
 	{
 		return call_user_func_array(array($this->getInnerIterator(), $func), $params);

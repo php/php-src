@@ -2,7 +2,7 @@
 /*
  * File: mysql_users.php
  * Author: Yasuo Ohgaki <yohgaki@php.net>
- * 
+ *
  * This file contains example user defined functions that does
  * similar to MySQL functions. They can be implemented as module
  * functions, but there won't be many users need them.
@@ -12,11 +12,11 @@
 
 /*
  * mysql_list_dbs()
- * 
- * This function should be needed, since PostgreSQL connection 
+ *
+ * This function should be needed, since PostgreSQL connection
  * binds database.
  */
-function pg_list_dbs($db) 
+function pg_list_dbs($db)
 {
         assert(is_resource($db));
         $query = '
@@ -24,7 +24,7 @@ SELECT
  d.datname as "Name",
  u.usename as "Owner",
  pg_encoding_to_char(d.encoding) as "Encoding"
-FROM 
+FROM
  pg_database d LEFT JOIN pg_user u ON d.datdba = u.usesysid
 ORDER BY 1;
 ';
@@ -35,7 +35,7 @@ ORDER BY 1;
 /*
  * mysql_list_tables()
  */
-function pg_list_tables($db) 
+function pg_list_tables($db)
 {
         assert(is_resource($db));
         $query = "
@@ -58,7 +58,7 @@ ORDER BY 1;
  *
  * See also pg_meta_data(). It returns field definition as array.
  */
-function pg_list_fields($db, $table) 
+function pg_list_fields($db, $table)
 {
         assert(is_resource($db));
         $query = "

@@ -58,7 +58,7 @@ will cause subsequent prepares to use emulation.
 - Fixed PECL Bug #5645; added mysql client library version information to phpinfo() output.
 
 Windows binaries can be found at http://pecl4win.php.net/ext.php/php_pdo_mysql.dll
-  
+
  </notes>
  <contents>
   <dir name="/">

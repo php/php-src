@@ -29,7 +29,7 @@
  *    PS_READ_FUNC()  - Read data from storage.
  *    PS_GC_FUNC()    - Perform GC. Called by probability
  *                                (session.gc_probability/session.gc_divisor).
- *    PS_WRITE_FUNC() or PS_UPDATE_TIMESTAMP() 
+ *    PS_WRITE_FUNC() or PS_UPDATE_TIMESTAMP()
  *                    - Write session data or update session data timestamp.
  *                      It depends on session data change.
  *    PS_CLOSE_FUNC() - Clean up module data created by PS_OPEN_FUNC().

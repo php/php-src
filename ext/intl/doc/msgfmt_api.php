@@ -14,7 +14,7 @@ class MessageFormatter {
 
 	/**
 	 * Constructs a new Message Formatter
-	 * 
+	 *
 	 * @param  string   $locale  the locale to use when formatting arguments
 	 * @param  string   $pattern the pattern string to stick arguments into
 	 */
@@ -22,7 +22,7 @@ class MessageFormatter {
 
 	/**
 	 * Constructs a new Message Formatter
-	 * 
+	 *
 	 * @param  string   $locale  the locale to use when formatting arguments
 	 * @param  string   $pattern the pattern string to stick arguments into
 	 */
@@ -113,7 +113,7 @@ class MessageFormatter {
 
 	/**
 	 * Constructs a new Message Formatter
-	 * 
+	 *
 	 * @param  string   $locale  the locale to use when formatting arguments
 	 * @param  string   $pattern the pattern string to stick arguments into
 	 * @return MessageFormatter formatter object
@@ -122,7 +122,7 @@ class MessageFormatter {
 
 	/**
 	 * Format the message
-	 * @param MessageFormatter $fmt The message formatter 
+	 * @param MessageFormatter $fmt The message formatter
 	 * @param   array   $args   arguments to insert into the pattern string
 	 * @return  string  the formatted string, or false if an error occurred
 	 */
@@ -134,7 +134,7 @@ class MessageFormatter {
 	 * $error will contain any error code. If an error occurs, $parse_pos contains
 	 * the position of the error.
 	 *
-	 * @param MessageFormatter $fmt The message formatter 
+	 * @param MessageFormatter $fmt The message formatter
 	 * @param  string  $value      string to parse for items
 	 * @return array               array containing items extracted
 	 *
@@ -168,7 +168,7 @@ class MessageFormatter {
 	/**
 	 * Get the pattern used by the formatter
 	 *
-	 * @param MessageFormatter $fmt The message formatter 
+	 * @param MessageFormatter $fmt The message formatter
 	 * @return  string  the pattern string for this message formatter
 	 */
 	function msgfmt_get_pattern($fmt) {}
@@ -176,7 +176,7 @@ class MessageFormatter {
 	/**
 	 * Set the pattern used by the formatter
 	 *
-	 * @param MessageFormatter $fmt The message formatter 
+	 * @param MessageFormatter $fmt The message formatter
 	 * @param  string  $pattern  the pattern string to use in this message formatter
 	 * @return boolean 'true' if successful, 'false' if an error
 	 */
@@ -187,14 +187,14 @@ class MessageFormatter {
 	 *
 	 * Returns error code from the last number formatting operation.
 	 *
-	 * @param MessageFormatter $fmt The message formatter 
+	 * @param MessageFormatter $fmt The message formatter
 	 * @return integer the error code, one of UErrorCode values. Initial value is U_ZERO_ERROR.
 	 */
 	function msgfmt_get_error_code($fmt) {}
 	/**
 	 * Get the error text from the last operation.
 	 *
-	 * @param MessageFormatter $fmt The message formatter 
+	 * @param MessageFormatter $fmt The message formatter
 	 * @return string Description of the last error.
 	 */
 	function msgfmt_get_error_message($fmt) {}
