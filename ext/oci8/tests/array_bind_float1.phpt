@@ -61,7 +61,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(5) {
   [0]=>
   float(5.9999)

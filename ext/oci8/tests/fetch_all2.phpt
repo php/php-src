@@ -50,7 +50,7 @@ var_dump(oci_fetch_all($s, $all, 0, 1, OCI_BOTH));
 var_dump($all);
 
 require dirname(__FILE__).'/drop_table.inc';
-	
+
 echo "Done\n";
 ?>
 --EXPECT--

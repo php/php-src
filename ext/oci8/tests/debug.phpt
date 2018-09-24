@@ -15,7 +15,7 @@ if (!empty($dbase)) {
 else {
 	oci_connect($user, $password);
 }
-	
+
 oci_internal_debug(false);
 
 ?>

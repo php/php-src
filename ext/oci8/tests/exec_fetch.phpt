@@ -15,7 +15,7 @@ var_dump(oci_fetch_array($stmt));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_execute(): ORA-00942: %s in %s on line %d
 bool(false)
 

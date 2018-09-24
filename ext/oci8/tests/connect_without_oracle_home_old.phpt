@@ -24,7 +24,7 @@ if (!empty($dbase)) {
 else {
 	var_dump(ocilogon($user, $password));
 }
-	
+
 ?>
 ===DONE===
 <?php exit(0); ?>

@@ -61,7 +61,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(5) {
   [0]=>
   string(9) "05-NOV-05"

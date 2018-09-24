@@ -39,9 +39,9 @@ var_dump($blob->import("does_not_exist"));
 var_dump($blob->saveFile("does_not_exist"));
 
 require(dirname(__FILE__).'/drop_table.inc');
-						
+
 echo "Done\n";
-						
+
 ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {

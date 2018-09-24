@@ -61,7 +61,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_execute(): ORA-06550: line %d, column %d:
 PLS-00418: %s
 ORA-06550: %s
