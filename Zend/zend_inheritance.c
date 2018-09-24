@@ -743,34 +743,26 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				ZVAL_UNDEF(&ce->default_properties_table[child_num]);
 				child_info->offset = parent_info->offset;
 			}
-		}
 
-		if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_info->type) && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
-			if (ZEND_TYPE_IS_CLASS(parent_info->type)) {
-				if (!property_types_compatible(parent_info, child_info)) {
+			if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_info->type))) {
+				if (ZEND_TYPE_IS_CLASS(parent_info->type) ? !property_types_compatible(parent_info, child_info) : parent_info->type != child_info->type) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 					"Type of %s::$%s must be %s%s (as in class %s)",
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(key),
 						ZEND_TYPE_ALLOW_NULL(parent_info->type) ? "?" : "",
-						ZSTR_VAL(ZEND_TYPE_IS_CE(parent_info->type) ? ZEND_TYPE_CE(parent_info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(parent_info->type), parent_info->ce)),
+						ZEND_TYPE_IS_CLASS(parent_info->type)
+							? ZSTR_VAL(ZEND_TYPE_IS_CE(parent_info->type) ? ZEND_TYPE_CE(parent_info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(parent_info->type), parent_info->ce))
+							: zend_get_type_by_const(ZEND_TYPE_CODE(parent_info->type)),
 						ZSTR_VAL(ce->parent->name));
 				}
-			} else if (parent_info->type != child_info->type) {
+			} else if (UNEXPECTED(ZEND_TYPE_IS_SET(child_info->type) && !ZEND_TYPE_IS_SET(parent_info->type))) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type of %s::$%s must be %s%s (as in class %s)",
-					ZSTR_VAL(ce->name),
-					ZSTR_VAL(key),
-					ZEND_TYPE_ALLOW_NULL(parent_info->type) ? "?" : "",
-					zend_get_type_by_const(ZEND_TYPE_CODE(parent_info->type)),
-					ZSTR_VAL(ce->parent->name));
+						"Type of %s::$%s must not be defined (as in class %s)",
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(key),
+						ZSTR_VAL(ce->parent->name));
 			}
-		} else if (UNEXPECTED(ZEND_TYPE_IS_SET(child_info->type) && !ZEND_TYPE_IS_SET(parent_info->type))) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-					"Type of %s::$%s must not be defined (as in class %s)",
-					ZSTR_VAL(ce->name),
-					ZSTR_VAL(key),
-					ZSTR_VAL(ce->parent->name));
 		}
 	} else {
 		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
