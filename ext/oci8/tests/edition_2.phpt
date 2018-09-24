@@ -92,7 +92,7 @@ foreach ($values_array as $val ) {
 	if ($c1) {
 		get_edit_attr($c1);
 		oci_close($c1);
-	}	
+	}
 }
 
 echo "\n\n**Test 1.5 - Negative case with an invalid string value. *********\n";

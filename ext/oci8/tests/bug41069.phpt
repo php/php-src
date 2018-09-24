@@ -51,7 +51,7 @@ $stmtarray = array(
 	"insert into bug41069_tab (c1, c2, c3, c4, c5, c6, c7, c9, c10, c12, c15)	values
 	(113, 'aaaaaaa', 'bbbbbbbbbb', 'cccccc', 'e', 'f', 'dddd', '12/04/2006', '12/04/2006', 2224, 'zzzzzzz')"
 );
-						
+
 oci8_test_sql_execute($c, $stmtarray);
 
 

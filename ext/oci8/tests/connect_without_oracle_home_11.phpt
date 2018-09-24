@@ -31,7 +31,7 @@ if (!empty($dbase)) {
 else {
 	var_dump(oci_connect($user, $password));
 }
-	
+
 ?>
 ===DONE===
 <?php exit(0); ?>

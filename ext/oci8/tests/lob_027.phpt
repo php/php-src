@@ -7,7 +7,7 @@ require(dirname(__FILE__).'/skipif.inc');
 ?>
 --FILE--
 <?php
-	
+
 require dirname(__FILE__).'/connect.inc';
 require dirname(__FILE__).'/create_table.inc';
 
@@ -46,7 +46,7 @@ for ($i = 5; $i >= 0; $i--) {
 	$row = oci_fetch_array($s);
 	var_dump($row['BLOB']->load());
 	var_dump($row['BLOB']->truncate(($i-1)*10));
-	
+
 	oci_commit($c);
 }
 

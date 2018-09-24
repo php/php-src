@@ -18,7 +18,7 @@ $statement = OCIParse($c,$ora_sql);
 @OCIExecute($statement);
 
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF VARCHAR(10)";
-			
+
 $statement = OCIParse($c,$ora_sql);
 OCIExecute($statement);
 

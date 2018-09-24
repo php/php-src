@@ -19,7 +19,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_bind_array_by_name(): Invalid max length value (-10) in %s on line %d
 array(0) {
 }
