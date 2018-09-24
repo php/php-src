@@ -4,7 +4,7 @@ Bug #71600 (oci_fetch_all result in segfault when select more than 8 columns)
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -13,8 +13,8 @@ require(dirname(__FILE__).'/connect.inc');
 // Initialize
 
 $stmtarray = array(
-         "create table bug71600_tab (col1 number, col2 number, col3 number, 
-                                     col4 number, col5 number, col6 number, 
+         "create table bug71600_tab (col1 number, col2 number, col3 number,
+                                     col4 number, col5 number, col6 number,
                                      col7 number, col8 number, col9 number)",
          "insert into bug71600_tab values(1, 2, 3, 4, 5, 6, 7, 8, 9)",
          "insert into bug71600_tab values(11, 12, 13, 14, 15, 16, 17, 18, 19)"

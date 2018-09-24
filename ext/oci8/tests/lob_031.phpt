@@ -4,7 +4,7 @@ Test LOB->read(), LOB->seek() and LOB->tell() with nul bytes in data
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 	

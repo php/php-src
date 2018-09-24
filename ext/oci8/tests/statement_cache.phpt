@@ -1,7 +1,7 @@
 --TEST--
 statement cache
 --SKIPIF--
-<?php 
+<?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 ?>
