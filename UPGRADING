@@ -202,6 +202,11 @@ PHP 7.4 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- Reflection:
+  . A new ReflectionReference class has been added, which allows detecting
+    references and comparing them for identity. For more details see the RFC:
+    https://wiki.php.net/rfc/reference_reflection
+
 ========================================
 8. Removed Extensions and SAPIs
 ========================================
