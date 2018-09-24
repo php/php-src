@@ -31,9 +31,9 @@ oci_close($conn2);
 // Compare the resource numbers
 
 if ($rn1 === $rn2)
-	echo "Both connections share a resource : NOT OK \n";
+	echo "Both connections share a resource : NOT OK\n";
 else
-	echo "Both connections are different : OK \n";
+	echo "Both connections are different : OK\n";
 
 echo "Done\n";
 
@@ -42,5 +42,5 @@ echo "Done\n";
 This is with a OCI_PCONNECT
 resource(%d) of type (oci8 persistent connection)
 resource(%d) of type (oci8 persistent connection)
-Both connections are different : OK 
+Both connections are different : OK
 Done

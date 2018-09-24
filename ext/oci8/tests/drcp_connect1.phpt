@@ -4,7 +4,7 @@ DRCP: oci_connect()
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs (Calling PL/SQL from SQL is not supported in TimesTen)
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --INI--
 oci8.connection_class=test
 oci8.old_oci_close_semantics=0
@@ -24,7 +24,7 @@ var_dump($conn1 = oci_connect($user,$password,$dbase));
 // Create the package
 drcp_create_package($conn1);
 
-echo "Test 1b\n";     
+echo "Test 1b\n";
 // OCI_CONNECT
 echo " This is with OCI_CONNECT.....\n";
 drcp_select_packagevar($conn1); // Returns 0
@@ -35,7 +35,7 @@ echo " Connection conn1  closed....\n";
 echo "Test 2\n";
 // Second connection should return 0 for the package variable.
 var_dump($conn2 = oci_connect($user,$password,$dbase));
-echo " Select with connection 2 \n";
+echo " Select with connection 2\n";
 drcp_select_packagevar($conn2); // Returns 0
 drcp_set_packagevar($conn2,100);
 
@@ -43,7 +43,7 @@ echo "Test 3\n";
 // Third connection. There is no oci_close() for conn2 hence this should
 // return the value set by conn2.
 var_dump($conn3 = oci_connect($user,$password,$dbase));
-echo " Select with connection 3 \n";
+echo " Select with connection 3\n";
 drcp_select_packagevar($conn3); // Returns 100
 
 // Close all the connections
@@ -63,7 +63,7 @@ echo " Connection pconn1  closed....\n";
 
 echo "Test 5\n";
 var_dump($pconn2 = oci_pconnect($user,$password,$dbase));
-echo " Select with persistent connection 2 \n";
+echo " Select with persistent connection 2\n";
 drcp_select_packagevar($pconn2); // Returns 1000
 oci_close($pconn2);
 
@@ -80,12 +80,12 @@ Test 1b
  Connection conn1  closed....
 Test 2
 resource(%d) of type (oci8 connection)
- Select with connection 2 
+ Select with connection 2
  The value of the package variable is 0
  Package variable value set to 100
 Test 3
 resource(%d) of type (oci8 connection)
- Select with connection 3 
+ Select with connection 3
  The value of the package variable is 100
 Test 4
  This is with oci_pconnect().....
@@ -94,7 +94,7 @@ resource(%d) of type (oci8 persistent connection)
  Connection pconn1  closed....
 Test 5
 resource(%d) of type (oci8 persistent connection)
- Select with persistent connection 2 
+ Select with persistent connection 2
  The value of the package variable is 1000
 Done
 

@@ -5,7 +5,7 @@ Prefetch with REF cursor. Test different values for prefetch with oci_set_prefet
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && 
+if (!(isset($matches[0]) &&
       ($matches[1] >= 10))) {
        	die("skip expected output only valid when using Oracle 10g or greater database server");
 }
@@ -21,7 +21,7 @@ if (!(isset($matches[0]) &&
 <?php
 require(dirname(__FILE__)."/connect.inc");
 
-// Creates the necessary package and tables. 
+// Creates the necessary package and tables.
 $stmtarray = array(
 	   "DROP TABLE refcurtest",
 	   "CREATE TABLE refcurtest (c1 NUMBER, c2 VARCHAR(20))",
@@ -86,7 +86,7 @@ function fetch_frm_php($c,$cur1,$value) {
     echo "Fetch Row from PHP\n";
     var_dump(oci_fetch_row($cur1));
 }
- 
+
 // This function calls the fetch_ref_cur procedure to get the values from the REF cur.
 
 function fetch_frm_plsql($c,$cur1) {
