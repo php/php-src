@@ -763,7 +763,7 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, const unsign
 				for (i = 0; i < result->field_count; i++) {
 					/* copy the type */
 					zval *resultzv = &stmt->result_bind[i].zv;
-					if (stmt->result_bind[i].bound == TRUE && !Z_ISUNDEF_P(resultzv)) {
+					if (stmt->result_bind[i].bound == TRUE) {
 						DBG_INF_FMT("i=%u type=%u", i, Z_TYPE(current_row[i]));
 						Z_TRY_ADDREF(current_row[i]);
 						zend_try_assign_ex(resultzv, &current_row[i], 0);
@@ -847,7 +847,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 
 			for (i = 0; i < field_count; i++) {
 				zval *resultzv = &stmt->result_bind[i].zv;
-				if (stmt->result_bind[i].bound == TRUE && !Z_ISUNDEF_P(resultzv)) {
+				if (stmt->result_bind[i].bound == TRUE) {
 					zval *data = &result->unbuf->last_row_data[i];
 
 					if (Z_TYPE_P(data) == IS_STRING && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
