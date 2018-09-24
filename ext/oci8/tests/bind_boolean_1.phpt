@@ -102,7 +102,7 @@ var_dump($b1, $b2);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 bool(true)
 bool(false)

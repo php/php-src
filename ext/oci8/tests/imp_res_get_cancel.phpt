@@ -48,7 +48,7 @@ while (($s1 = oci_get_implicit_resultset($s))) {
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
   1
   3

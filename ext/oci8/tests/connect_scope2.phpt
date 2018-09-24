@@ -68,7 +68,7 @@ oci8_test_sql_execute($c1, $stmtarray);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1 - oci_pconnect
 array(1) {
   ["C1"]=>

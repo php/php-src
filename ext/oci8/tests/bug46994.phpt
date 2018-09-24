@@ -71,7 +71,7 @@ oci_close($c);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 string(26) "This should be the output."
 Test 2

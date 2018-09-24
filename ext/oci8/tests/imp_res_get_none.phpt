@@ -40,7 +40,7 @@ var_dump($s1);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 bool(false)
 ===DONE===

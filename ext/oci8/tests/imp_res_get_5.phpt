@@ -95,7 +95,7 @@ oci_free_statement($s);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
   3
   4

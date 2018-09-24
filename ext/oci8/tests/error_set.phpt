@@ -53,7 +53,7 @@ var_dump($r);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 bool(false)
 24960

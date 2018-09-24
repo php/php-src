@@ -50,6 +50,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 2
 Done

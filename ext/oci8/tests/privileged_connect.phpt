@@ -14,7 +14,7 @@ oci_connect("", "", "", false, "qwe");
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_connect(): Privileged connect is disabled. Enable oci8.privileged_connect to be able to connect as SYSOPER or SYSDBA in %s on line %d
 
 Warning: oci_connect(): Privileged connect is disabled. Enable oci8.privileged_connect to be able to connect as SYSOPER or SYSDBA in %s on line %d

@@ -77,7 +77,7 @@ require(dirname(__FILE__).'/drop_table.inc');
 	
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 int(0)
 array(5) {
