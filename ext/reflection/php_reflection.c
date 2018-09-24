@@ -28,6 +28,8 @@
 #include "php_ini.h"
 #include "php_reflection.h"
 #include "ext/standard/info.h"
+#include "ext/standard/sha1.h"
+#include "ext/standard/php_random.h"
 
 #include "zend.h"
 #include "zend_API.h"
@@ -41,6 +43,16 @@
 #include "zend_extensions.h"
 #include "zend_builtin_functions.h"
 #include "zend_smart_str.h"
+
+/* Key used to avoid leaking addresses in ReflectionProperty::getId() */
+#define REFLECTION_KEY_LEN 16
+ZEND_BEGIN_MODULE_GLOBALS(reflection)
+	zend_bool key_initialized;
+	unsigned char key[REFLECTION_KEY_LEN];
+ZEND_END_MODULE_GLOBALS(reflection)
+ZEND_DECLARE_MODULE_GLOBALS(reflection)
+
+#define REFLECTION_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(reflection, v)
 
 #define reflection_update_property(object, name, value) do { \
 		zend_std_write_property(Z_OBJ_P(object), name, value, NULL); \
@@ -70,6 +82,7 @@ PHPAPI zend_class_entry *reflection_property_ptr;
 PHPAPI zend_class_entry *reflection_class_constant_ptr;
 PHPAPI zend_class_entry *reflection_extension_ptr;
 PHPAPI zend_class_entry *reflection_zend_extension_ptr;
+PHPAPI zend_class_entry *reflection_reference_ptr;
 
 /* Exception throwing macro */
 #define _DO_THROW(msg) \
@@ -6145,6 +6158,89 @@ ZEND_METHOD(reflection_zend_extension, getCopyright)
 }
 /* }}} */
 
+/* {{{ proto public ReflectionReference::__construct()
+ *     Dummy constructor -- always throws ReflectionExceptions. */
+ZEND_METHOD(reflection_reference, __construct)
+{
+	_DO_THROW(
+		"Cannot directly instantiate ReflectionReference. "
+		"Use ReflectionReference::fromArrayElement() instead"
+	);
+}
+/* }}} */
+
+/* {{{ proto public ReflectionReference|null ReflectionReference::fromArrayElement(array array, mixed key)
+ *     Create ReflectionReference for array item. Returns null if not a reference. */
+ZEND_METHOD(reflection_reference, fromArrayElement)
+{
+	HashTable *ht;
+	zval *key, *item;
+	reflection_object *intern;
+
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "hz", &ht, &key) == FAILURE) {
+		return;
+	}
+
+	if (Z_TYPE_P(key) == IS_LONG) {
+		item = zend_hash_index_find(ht, Z_LVAL_P(key));
+	} else if (Z_TYPE_P(key) == IS_STRING) {
+		item = zend_symtable_find(ht, Z_STR_P(key));
+	} else {
+		zend_type_error("Key must be array or string");
+		return;
+	}
+
+	if (!item) {
+		_DO_THROW("Array key not found");
+	}
+
+	if (Z_TYPE_P(item) != IS_REFERENCE) {
+		RETURN_NULL();
+	}
+
+	object_init_ex(return_value, reflection_reference_ptr);
+	intern = Z_REFLECTION_P(return_value);
+	ZVAL_COPY(&intern->obj, item);
+	intern->ref_type = REF_TYPE_OTHER;
+}
+/* }}} */
+
+/* {{{ proto public int|string ReflectionReference::getId()
+ *     Returns a unique identifier for the reference.
+ *     The format of the return value is unspecified and may change. */
+ZEND_METHOD(reflection_reference, getId)
+{
+	reflection_object *intern;
+	unsigned char digest[20];
+	PHP_SHA1_CTX context;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = Z_REFLECTION_P(getThis());
+	if (Z_TYPE(intern->obj) != IS_REFERENCE) {
+		_DO_THROW("Corrupted ReflectionReference object");
+	}
+
+	if (!REFLECTION_G(key_initialized)) {
+		if (php_random_bytes_throw(&REFLECTION_G(key_initialized), 16) == FAILURE) {
+			return;
+		}
+
+		REFLECTION_G(key_initialized) = 1;
+	}
+
+	/* SHA1(ref || key) to avoid directly exposing memory addresses. */
+	PHP_SHA1Init(&context);
+	PHP_SHA1Update(&context, (unsigned char *) &Z_REF(intern->obj), sizeof(zend_reference *));
+	PHP_SHA1Update(&context, REFLECTION_G(key), REFLECTION_KEY_LEN);
+	PHP_SHA1Final(digest, &context);
+
+	RETURN_STRINGL((char *) digest, sizeof(digest));
+}
+/* }}} */
+
 /* {{{ method tables */
 static const zend_function_entry reflection_exception_functions[] = {
 	PHP_FE_END
@@ -6628,6 +6724,21 @@ static const zend_function_entry reflection_zend_extension_functions[] = {
 	ZEND_ME(reflection_zend_extension, getCopyright, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_reference_fromArrayElement, 0, 0, 2)
+	ZEND_ARG_INFO(0, array)
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+
+static const zend_function_entry reflection_reference_functions[] = {
+	ZEND_ME(reflection_reference, fromArrayElement, arginfo_reflection_reference_fromArrayElement, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(reflection_reference, getId, arginfo_reflection__void, ZEND_ACC_PUBLIC)
+
+	/* Always throwing dummy methods */
+	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE)
+	ZEND_ME(reflection_reference, __construct, arginfo_reflection__void, ZEND_ACC_PRIVATE)
+	PHP_FE_END
+};
 /* }}} */
 
 static const zend_function_entry reflection_ext_functions[] = { /* {{{ */
@@ -6767,6 +6878,13 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	zend_class_implements(reflection_zend_extension_ptr, 1, reflector_ptr);
 	zend_declare_property_string(reflection_zend_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionReference", reflection_reference_functions);
+	reflection_init_class_handlers(&_reflection_entry);
+	_reflection_entry.ce_flags |= ZEND_ACC_FINAL;
+	reflection_reference_ptr = zend_register_internal_class(&_reflection_entry);
+
+	REFLECTION_G(key_initialized) = 0;
+
 	return SUCCESS;
 } /* }}} */
 
@@ -6787,5 +6905,9 @@ zend_module_entry reflection_module_entry = { /* {{{ */
 	NULL,
 	PHP_MINFO(reflection),
 	PHP_REFLECTION_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	ZEND_MODULE_GLOBALS(reflection),
+	NULL,
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 }; /* }}} */
