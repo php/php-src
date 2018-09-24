@@ -62,7 +62,7 @@ foreach($values_array as $val ) {
 	oci_set_module_name($c1,$val);
 	oci_set_client_identifier($c1,$val);
 	oci_set_client_info($c1,$val);
-	$r = oci_set_action($c1,$val);	
+	$r = oci_set_action($c1,$val);
 	if ($r) {
 		echo "Values set successfully to $val\n";
 		foreach($attr_array as $attr) {

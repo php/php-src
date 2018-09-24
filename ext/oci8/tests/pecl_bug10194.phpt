@@ -13,7 +13,7 @@ if (getenv("USE_ZEND_ALLOC") === "0") {
 memory_limit=10M
 --FILE--
 <?php
-	
+
 require dirname(__FILE__).'/connect.inc';
 require dirname(__FILE__).'/create_table.inc';
 
@@ -50,5 +50,5 @@ require dirname(__FILE__).'/drop_table.inc';
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Allowed memory size of 10485760 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d

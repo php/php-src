@@ -14,7 +14,7 @@ $stmtarray = array(
 	"drop table phptestrawtable",
 	"create table phptestrawtable( id number(10), fileimage raw(1000))"
 );
-						
+
 oci8_test_sql_execute($c, $stmtarray);
 
 $stmt = oci_parse ($c, "insert into phptestrawtable (id, fileimage) values (:id, :fileimage)");

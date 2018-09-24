@@ -7,7 +7,7 @@ require(dirname(__FILE__).'/skipif.inc');
 ?>
 --FILE--
 <?php
-	
+
 require dirname(__FILE__).'/connect.inc';
 
 $c = oci_pconnect($user, $password, $dbase);
