@@ -1362,7 +1362,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_file, 0, 0, 2)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, stream_context)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_final, 0, 0, 1)
