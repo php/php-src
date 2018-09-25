@@ -6385,7 +6385,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 	ce->name = name;
 	zend_initialize_class_data(ce, 1);
 
-	ce->ce_flags |= decl->flags | (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES);
+	ce->ce_flags |= decl->flags;
 	ce->info.user.filename = zend_get_compiled_filename();
 	ce->info.user.line_start = decl->start_lineno;
 	ce->info.user.line_end = decl->end_lineno;

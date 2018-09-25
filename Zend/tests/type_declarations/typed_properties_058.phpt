@@ -8,7 +8,6 @@ define("FOO", 5);
 
 class A {
 	public int $foo = FOO;
-	public float $float = FOO;
 }
 
 class B {
@@ -16,7 +15,7 @@ class B {
 }
 
 $o = new A();
-var_dump($o->foo, $o->float);
+var_dump($o->foo);
 
 for ($i = 0; $i < 2; $i++) {
 	try {
@@ -29,7 +28,6 @@ for ($i = 0; $i < 2; $i++) {
 ?>
 --EXPECT--
 int(5)
-float(5)
 Typed property B::$foo must be string, int used
 Typed property B::$foo must be string, int used
 

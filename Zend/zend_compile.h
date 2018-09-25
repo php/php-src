@@ -220,11 +220,7 @@ typedef struct _zend_oparray_context {
 /* Function has typed arguments / class has typed props   |     |     |     */
 #define ZEND_ACC_HAS_TYPE_HINTS          (1 <<  7) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* op_array uses strict mode types                        |     |     |     */
-/*                                                        |     |     |     */
-#define ZEND_ACC_STRICT_TYPES            (1 << 31) /*  X  |  X  |     |     */
-/*                                                        |     |     |     */
-/* Class Flags (unused: 14..30)                           |     |     |     */
+/* Class Flags (unused: 14...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -308,6 +304,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* internal function is allocated at arena (int only)     |     |     |     */
 #define ZEND_ACC_ARENA_ALLOCATED         (1 << 24) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* op_array uses strict mode types                        |     |     |     */
+#define ZEND_ACC_STRICT_TYPES            (1 << 31) /*     |  X  |     |     */
 
 
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
