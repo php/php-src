@@ -1180,9 +1180,8 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 							if (UNEXPECTED(zval_update_constant_ex(&tmp, ce) != SUCCESS)) {
 								return FAILURE;
 							}
-							if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+							if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, (ce->ce_flags & ZEND_ACC_STRICT_TYPES) != 0))) {
 								zend_verify_property_type_error(prop_info, &tmp);
-								class_type->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 								zval_ptr_dtor(&tmp);
 								return FAILURE;
 							}

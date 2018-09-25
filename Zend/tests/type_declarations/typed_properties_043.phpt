@@ -1,18 +1,17 @@
 --TEST--
-Constants in default values of properties
+Constants in default values of properties with weak types
 --FILE--
 <?php
-declare(strict_types=1);
 
-define("FOO", 5);
+define("FOO", 5e20);
 
 class A {
-	public int $foo = FOO;
+	public string $foo = FOO;
 	public float $float = FOO;
 }
 
 class B {
-	public string $foo = FOO;
+	public int $foo = FOO;
 }
 
 $o = new A();
@@ -28,8 +27,7 @@ for ($i = 0; $i < 2; $i++) {
 }
 ?>
 --EXPECT--
-int(5)
-float(5)
-Typed property B::$foo must be string, int used
-Typed property B::$foo must be string, int used
-
+string(7) "5.0E+20"
+float(5.0E+20)
+Typed property B::$foo must be int, float used
+Typed property B::$foo must be int, float used
