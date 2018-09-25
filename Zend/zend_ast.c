@@ -1419,8 +1419,6 @@ simple_list:
 			zend_ast *type_ast = ast->child[0];
 			zend_ast *prop_ast = ast->child[1];
 
-			ast = prop_ast;
-
 			if (ast->attr & ZEND_ACC_PUBLIC) {
 				smart_str_appends(str, "public ");
 			} else if (ast->attr & ZEND_ACC_PROTECTED) {
@@ -1441,6 +1439,7 @@ simple_list:
 				smart_str_appendc(str, ' ');
 			}
 
+			ast = prop_ast;
 			goto simple_list;
 		}
 

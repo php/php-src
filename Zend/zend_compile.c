@@ -6007,10 +6007,9 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 }
 /* }}} */
 
-void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
+void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t flags = list->attr;
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
 
@@ -6143,7 +6142,7 @@ void zend_compile_prop_group(zend_ast *list) /* {{{ */
 	zend_ast *type_ast = list->child[0];
 	zend_ast *prop_ast = list->child[1];
 
-	zend_compile_prop_decl(prop_ast, type_ast);
+	zend_compile_prop_decl(prop_ast, type_ast, list->attr);
 } /* }}} */
 
 void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
