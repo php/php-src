@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0RC2
+2? Sep 2018, PHP 7.3.0RC2
 
 - CURL:
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
