@@ -27,6 +27,11 @@ PHP 7.4 UPGRADE NOTES
 2. New Features
 ========================================
 
+- PDO_SQLite:
+  . PDOStatement::getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT) allows to
+    check whether this statement is read-only, i.e. whether it doesn't modify
+    the database.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -57,6 +62,9 @@ PHP 7.4 UPGRADE NOTES
 
 - Intl:
   . The Intl extension now requires at least ICU 50.1.
+
+- Libxml:
+  . All libxml based extensions now require libxml 2.7.6 or newer.
 
 - Reflection:
   . Numeric value of class, property, function and constant modifiers was

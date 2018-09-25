@@ -11,8 +11,11 @@ PHP                                                                        NEWS
   . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
     (cmb)
 
+- PDO_SQLite:
+  . Implemented sqlite_stmt_readonly in PDO_SQLite. (BohwaZ)
+
 - SQLite3:
-  . Updated to SQLite 3.25.0. (cmb)
+  . Updated to SQLite 3.25.1. (cmb)
 
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 

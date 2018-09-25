@@ -17,6 +17,5 @@ var_dump(iconv_mime_encode('subject', "d obeybiubrsfqllpdtpge…", $preferences)
 ?>
 ===DONE===
 --EXPECT--
-string(81) "subject: =?utf-8?Q?d=20obeybiubrsfqllp?==?utf-8?Q?dtpge?=
- =?utf-8?Q?=E2=80=A6?="
+string(54) "subject: =?utf-8?Q?d=20obeybiubrsfqllpdtpge=E2=80=A6?="
 ===DONE===

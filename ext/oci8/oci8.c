@@ -1454,8 +1454,13 @@ void php_oci_column_hash_dtor(zval *data)
 	if (column->descid) {
 		if (GC_REFCOUNT(column->descid) == 1)
 			zend_list_close(column->descid);
-		else
+		else {
+#if PHP_VERSION_ID < 70300
+			GC_REFCOUNT(column->descid)--;
+#else
 			GC_DELREF(column->descid);
+#endif
+		}
 	}
 
 	if (column->data) {
@@ -1783,11 +1788,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	timestamp = time(NULL);
 
 	smart_str_append_unsigned_ex(&hashed_details, session_mode, 0);
-	smart_str_0(&hashed_details);
-
 	if (persistent) {
 		smart_str_appendl_ex(&hashed_details, "pc", sizeof("pc") - 1, 0);
 	}
+
+	smart_str_0(&hashed_details);
 
 	/* make it lowercase */
 	php_strtolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
@@ -1877,7 +1882,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 									(memcmp(ZSTR_VAL(tmp->hash_key), ZSTR_VAL(hashed_details.s),
 									 ZSTR_LEN(tmp->hash_key)) == 0)) {
 									connection = tmp;
+#if PHP_VERSION_ID < 70300
+									++GC_REFCOUNT(connection->id);
+#else
 									GC_ADDREF(connection->id);
+#endif
 								}
 							} else {
 								PHP_OCI_REGISTER_RESOURCE(connection, le_pconnection);
@@ -1887,7 +1896,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 								 * decremented in the persistent helper
 								 */
 								if (OCI_G(old_oci_close_semantics)) {
+#if PHP_VERSION_ID < 70300
+									++GC_REFCOUNT(connection->id);
+#else
 									GC_ADDREF(connection->id);
+#endif
 								}
 							}
 							smart_str_free(&hashed_details);
@@ -1898,7 +1911,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				} else {
 					/* we do not ping non-persistent connections */
 					smart_str_free(&hashed_details);
+#if PHP_VERSION_ID < 70300
+					++GC_REFCOUNT(connection->id);
+#else
 					GC_ADDREF(connection->id);
+#endif
 					return connection;
 				}
 			} /* is_open is true? */
@@ -2052,7 +2069,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		 * refcount is decremented in the persistent helper
 		 */
 		if (OCI_G(old_oci_close_semantics)) {
+#if PHP_VERSION_ID < 70300
+			++GC_REFCOUNT(connection->id);
+#else
 			GC_ADDREF(connection->id);
+#endif
 		}
 #if PHP_VERSION_ID < 70300
 		zend_hash_update_mem(&EG(persistent_list), connection->hash_key, (void *)&new_le, sizeof(zend_resource));
@@ -2453,7 +2474,11 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 
 	if (column->is_cursor) { /* REFCURSOR -> simply return the statement id */
 		ZVAL_RES(value, column->stmtid);
+#if PHP_VERSION_ID < 70300
+		++GC_REFCOUNT(column->stmtid);
+#else
 		GC_ADDREF(column->stmtid);
+#endif
 	} else if (column->is_descr) {
 
 		if (column->data_type != SQLT_RDD) {
@@ -2497,7 +2522,11 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 			/* return the locator */
 			object_init_ex(value, oci_lob_class_entry_ptr);
 			add_property_resource(value, "descriptor", column->descid);
+#if PHP_VERSION_ID < 70300
+			++GC_REFCOUNT(column->descid);
+#else
 			GC_ADDREF(column->descid);
+#endif
 		}
 	} else {
 		switch (column->retcode) {

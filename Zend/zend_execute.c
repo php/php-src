@@ -1144,8 +1144,9 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
-		Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+		if (binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value) == SUCCESS) {
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+		}
 		if (z == &rv) {
 			zval_ptr_dtor(&rv);
 		}
@@ -1538,8 +1539,9 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		binary_op(&res, z, value);
-		Z_OBJ_HT(obj)->write_property(&obj, property, &res, cache_slot);
+		if (binary_op(&res, z, value) == SUCCESS) {
+			Z_OBJ_HT(obj)->write_property(&obj, property, &res, cache_slot);
+		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), &res);
 		}

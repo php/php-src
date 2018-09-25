@@ -4,7 +4,7 @@ oci_define_by_name tests with REF CURSORs
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -22,7 +22,7 @@ oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
-$sql = 
+$sql =
 "DECLARE
   TYPE curtype IS REF CURSOR;
   cursor_var curtype;
