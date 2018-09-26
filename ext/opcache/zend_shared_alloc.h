@@ -125,7 +125,13 @@ void zend_shared_alloc_shutdown(void);
 void *zend_shared_alloc(size_t size);
 
 /* copy into shared memory */
-void *_zend_shared_memdup(void *p, size_t size, zend_bool free_source);
+void *zend_shared_memdup_get_put_free(void *source, size_t size);
+void *zend_shared_memdup_put_free(void *source, size_t size);
+void *zend_shared_memdup_free(void *source, size_t size);
+void *zend_shared_memdup_get_put(void *source, size_t size);
+void *zend_shared_memdup_put(void *source, size_t size);
+void *zend_shared_memdup(void *source, size_t size);
+
 int  zend_shared_memdup_size(void *p, size_t size);
 
 int zend_accel_in_shm(void *ptr);
