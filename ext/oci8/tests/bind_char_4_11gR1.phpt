@@ -24,7 +24,7 @@ require(dirname(__FILE__).'/connect.inc');
 $stmtarray = array(
 	"create or replace function bind_char_3_fn(p1 varchar2) return varchar2 as begin return p1; end;",
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test

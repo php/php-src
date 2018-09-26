@@ -102,7 +102,6 @@ if test "$PHP_PDO_SQLITE" != "no"; then
       PHP_ADD_INCLUDE($abs_srcdir/ext/sqlite3/libsqlite)
 
       AC_CHECK_FUNCS(usleep nanosleep)
-      AC_CHECK_HEADERS(time.h)
   fi
 
   dnl Solaris fix

@@ -5856,9 +5856,6 @@ int i, j, k, len, c;
 if (!sljit_has_cpu_feature(SLJIT_HAS_CMOV))
   return FALSE;
 
-if (invert)
-  nclass = !nclass;
-
 len = 0;
 
 for (i = 0; i < 32; i++)
@@ -5939,6 +5936,9 @@ if (j != 0)
       CMOV(SLJIT_ZERO, TMP2, TMP1, 0);
       }
   }
+
+if (invert)
+  nclass = !nclass;
 
 type = nclass ? SLJIT_NOT_EQUAL : SLJIT_EQUAL;
 add_jump(compiler, backtracks, CMP(type, TMP2, 0, SLJIT_IMM, 0));

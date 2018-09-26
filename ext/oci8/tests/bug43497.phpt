@@ -1,7 +1,7 @@
 --TEST--
 Bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory)
 --SKIPIF--
-<?php 
+<?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
@@ -102,27 +102,27 @@ function dropxmltab($c)  // delete table
 function fillxmltab($c)
 {
 	for ($id = 1; $id <= 100; $id++) {
-		
-		// create an XML element string with random data		
+
+		// create an XML element string with random data
 		$s = "<data>";
 		for ($j = 0; $j < 128; $j++) {
-			$s .= rand();		
+			$s .= rand();
 		}
-		$s .= "</data>\n";		
+		$s .= "</data>\n";
 		for ($j = 0; $j < 4; $j++) {
 			$s .= $s;
-		}		
+		}
 		$data = "<?xml version=\"1.0\"?><records>" . $s . "</records>";
-		
+
 		// insert XML data into database
-		
+
 		$stmt = oci_parse($c, "insert into bug43497_tab(id, xml) values (:id, sys.xmltype.createxml(:xml))");
 		oci_bind_by_name($stmt, ":id", $id);
 		$clob = oci_new_descriptor($c, OCI_D_LOB);
 		oci_bind_by_name($stmt, ":xml", $clob, -1, OCI_B_CLOB);
 		$clob->writetemporary($data);
 		oci_execute($stmt);
-		
+
 		$clob->close();
 		$clob->free();
 	}

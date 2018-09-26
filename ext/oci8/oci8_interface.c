@@ -60,16 +60,28 @@ PHP_FUNCTION(oci_register_taf_callback)
 		if (!zend_is_callable(callback, 0, 0)) {
 			callback_name = zend_get_callable_name(callback);
 			php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(callback_name));
+#if PHP_VERSION_ID < 70300
+			zend_string_release(callback_name);
+#else
 			zend_string_release_ex(callback_name, 0);
+#endif
 			RETURN_FALSE;
 		}
 #else
 		if (!zend_is_callable(callback, 0, &callback_name)) {
 			php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(callback_name));
+#if PHP_VERSION_ID < 70300
+			zend_string_release(callback_name);
+#else
 			zend_string_release_ex(callback_name, 0);
+#endif
 			RETURN_FALSE;
 		}
+#if PHP_VERSION_ID < 70300
+		zend_string_release(callback_name);
+#else
 		zend_string_release_ex(callback_name, 0);
+#endif
 #endif
 	}
 
@@ -141,10 +153,18 @@ PHP_FUNCTION(oci_define_by_name)
 	/* if (zend_hash_add(statement->defines, name, name_len, define, sizeof(php_oci_define), (void **)&tmp_define) == SUCCESS) { */
 	zvtmp = zend_string_init(name, name_len, 0);
 	if ((define = zend_hash_add_new_ptr(statement->defines, zvtmp, define)) != NULL) {
+#if PHP_VERSION_ID < 70300
+		zend_string_release(zvtmp);
+#else
 		zend_string_release_ex(zvtmp, 0);
+#endif
 	} else {
 		efree(define);
+#if PHP_VERSION_ID < 70300
+		zend_string_release(zvtmp);
+#else
 		zend_string_release_ex(zvtmp, 0);
+#endif
 		RETURN_FALSE;
 	}
 
@@ -1472,7 +1492,11 @@ PHP_FUNCTION(oci_fetch_all)
 					zend_string *zvtmp;
 					zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 					zend_symtable_update(Z_ARRVAL(row), zvtmp, &element);
+#if PHP_VERSION_ID < 70300
+					zend_string_release(zvtmp);
+#else
 					zend_string_release_ex(zvtmp, 0);
+#endif
 				}
 			}
 
@@ -1507,7 +1531,11 @@ PHP_FUNCTION(oci_fetch_all)
 				array_init(&tmp);
 				zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zvtmp, &tmp);
+#if PHP_VERSION_ID < 70300
+				zend_string_release(zvtmp);
+#else
 				zend_string_release_ex(zvtmp, 0);
+#endif
 			}
 		}
 

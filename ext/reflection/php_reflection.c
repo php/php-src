@@ -75,29 +75,28 @@ PHPAPI zend_class_entry *reflection_extension_ptr;
 PHPAPI zend_class_entry *reflection_zend_extension_ptr;
 
 /* Exception throwing macro */
-#define _DO_THROW(msg)                                                                                      \
-	zend_throw_exception(reflection_exception_ptr, msg, 0);                                       \
-	return;                                                                                                 \
+#define _DO_THROW(msg) \
+	zend_throw_exception(reflection_exception_ptr, msg, 0); \
+	return;
 
-#define RETURN_ON_EXCEPTION                                                                                 \
-	if (EG(exception) && EG(exception)->ce == reflection_exception_ptr) {                            \
-		return;                                                                                             \
-	}
+#define GET_REFLECTION_OBJECT() do { \
+	intern = Z_REFLECTION_P(getThis()); \
+	if (intern->ptr == NULL) { \
+		if (EG(exception) && EG(exception)->ce == reflection_exception_ptr) { \
+			return; \
+		} \
+		zend_throw_error(NULL, "Internal error: Failed to retrieve the reflection object"); \
+		return; \
+	} \
+} while (0)
 
-#define GET_REFLECTION_OBJECT()	                                                                   			\
-	intern = Z_REFLECTION_P(getThis());                                                      				\
-	if (intern->ptr == NULL) {                                                            \
-		RETURN_ON_EXCEPTION                                                                                 \
-		zend_throw_error(NULL, "Internal error: Failed to retrieve the reflection object");        \
-		return;                                                                                             \
-	}                                                                                                       \
-
-#define GET_REFLECTION_OBJECT_PTR(target)                                                                   \
-	GET_REFLECTION_OBJECT()																					\
-	target = intern->ptr;                                                                                   \
+#define GET_REFLECTION_OBJECT_PTR(target) do { \
+	GET_REFLECTION_OBJECT(); \
+	target = intern->ptr; \
+} while (0)
 
 /* Class constants */
-#define REGISTER_REFLECTION_CLASS_CONST_LONG(class_name, const_name, value)                                        \
+#define REGISTER_REFLECTION_CLASS_CONST_LONG(class_name, const_name, value) \
 	zend_declare_class_constant_long(reflection_ ## class_name ## _ptr, const_name, sizeof(const_name)-1, (zend_long)value);
 
 /* {{{ Object structure */
@@ -136,7 +135,6 @@ typedef enum {
 
 /* Struct for reflection objects */
 typedef struct {
-	zval dummy; /* holder for the second property */
 	zval obj;
 	void *ptr;
 	zend_class_entry *ce;

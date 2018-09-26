@@ -1858,11 +1858,9 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 		RETURN_FALSE;
 	}
 
-#if LIBXML_VERSION >= 20614
 	if (flags & XML_SCHEMA_VAL_VC_I_CREATE) {
 		valid_opts |= XML_SCHEMA_VAL_VC_I_CREATE;
 	}
-#endif
 
 	xmlSchemaSetValidOptions(vptr, valid_opts);
 	xmlSchemaSetValidErrors(vptr, php_libxml_error_handler, php_libxml_error_handler, vptr);
@@ -2213,11 +2211,7 @@ PHP_FUNCTION(dom_document_save_html)
 		xmlBufferFree(buf);
 	} else {
 		int size = 0;
-#if LIBXML_VERSION >= 20623
 		htmlDocDumpMemoryFormat(docp, &mem, &size, format);
-#else
-		htmlDocDumpMemory(docp, &mem, &size);
-#endif
 		if (!size || !mem) {
 			RETVAL_FALSE;
 		} else {
