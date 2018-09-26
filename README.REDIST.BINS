@@ -10,12 +10,12 @@
 10. ext/standard/strnatcmp.c
 11. ext/standard/uuencode
 12. libxmlrpc ext/xmlrpc
-13. libzip ext/zip
-14. main/snprintf.c
-15. main/strlcat
-16. main/strlcpy
-17. libgd see ext/gd/libgd/COPYING
-18. ext/phar portions of tar implementations
+13. main/snprintf.c
+14. main/strlcat
+15. main/strlcpy
+16. libgd see ext/gd/libgd/COPYING
+17. ext/phar portions of tar implementations
+18. ext/phar/zip.c portion extracted from libzip
 19. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/COPYING.LIB
 
 
@@ -205,6 +205,7 @@ a legal notice, here is a blessing:
 
 
 8. ext/standard/rand
+
 The following php_mt_...() functions are based on a C++ class MTRand by
 Richard J. Wagner. For more information see the web page at
 http://www-personal.engin.umich.edu/~wagnerr/MersenneTwister.html
@@ -258,6 +259,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 9. ext/standard/scanf
+
 scanf.c --
 
 This file contains the base code which implements sscanf and by extension
@@ -303,6 +305,7 @@ authors grant the U.S. Government and others acting in its behalf
 permission to use and distribute the software in accordance with the
 terms specified in this license.
 
+
 10. ext/standard/strnatcmp.c
 
 strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
@@ -324,7 +327,9 @@ freely, subject to the following restrictions:
 	 misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 
+
 11. ext/standard/uuencode
+
 Portions of this code are based on Berkeley's uuencode/uudecode
 implementation.
 
@@ -384,39 +389,9 @@ OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
 NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
 DAMAGES.
 
-13. libzip ext/zip
-zip.h -- exported declarations.
-Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
 
-This file is part of libzip, a library to manipulate ZIP archives.
-The authors can be contacted at <libzip@nih.at>
+13. main/snprintf.c
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-1. Redistributions of source code must retain the above copyright
-	 notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-	 notice, this list of conditions and the following disclaimer in
-	 the documentation and/or other materials provided with the
-	 distribution.
-3. The names of the authors may not be used to endorse or promote
-	 products derived from this software without specific prior
-	 written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-14. main/snprintf.c
 Copyright (c) 2002, 2006 Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
@@ -489,8 +464,10 @@ This code is based on, and used with the permission of, the
 SIO stdio-replacement strx_* functions by Panos Tsirigotis
 <panos@alumni.cs.colorado.edu> for xinetd.
 
-15. main/strlcat
-16. main/strlcpy
+
+14. main/strlcat
+15. main/strlcpy
+
 Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
 All rights reserved.
 
@@ -516,7 +493,8 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-18. ext/phar portions of tar implementations
+
+17. ext/phar portions of tar implementations
 
 portions of tar implementations in ext/phar - phar_tar_octal() are based on an
 implementation by Tim Kientzle from libarchive, licensed with this license:
@@ -543,3 +521,37 @@ implementation by Tim Kientzle from libarchive, licensed with this license:
  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+18. ext/phar/zip.c portion extracted from libzip
+
+zip_dirent.c -- read directory entry (local or central), clean dirent
+Copyright (C) 1999, 2003, 2004, 2005 Dieter Baron and Thomas Klausner
+
+This function is part of libzip, a library to manipulate ZIP archives.
+The authors can be contacted at <nih@giga.or.at>
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+	notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+	notice, this list of conditions and the following disclaimer in
+	the documentation and/or other materials provided with the
+	distribution.
+3. The names of the authors may not be used to endorse or promote
+	products derived from this software without specific prior
+	written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
