@@ -525,7 +525,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	OCIParam *param = NULL;
 	text *colname;
-	ub2 dtype, data_size, scale, precis;
+	ub2 dtype, data_size, precis;
 	ub4 namelen;
 	struct pdo_column_data *col = &stmt->columns[colno];
 	zend_bool dyn = FALSE;
@@ -540,10 +540,6 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	/* how big ? */
 	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_DATA_SIZE",
 			(param, OCI_DTYPE_PARAM, &data_size, 0, OCI_ATTR_DATA_SIZE, S->err));
-
-	/* scale ? */
-	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_SCALE",
-			(param, OCI_DTYPE_PARAM, &scale, 0, OCI_ATTR_SCALE, S->err));
 
 	/* precision ? */
 	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_PRECISION",
@@ -799,13 +795,8 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	pdo_oci_column *C;
 	OCIParam *param = NULL;
-	OraText *colname;
-	OraText * schema;
-	ub2 dtype, data_size;
-	ub2 precis = 0;
-	ub4 namelen, schemalen, typelen, objlen;
+	ub2 dtype, precis;
 	sb1 scale;
-	char *str;
 	zval flags;
 	ub1 isnull, charset_form;
 	if (!S->stmt) {
@@ -828,9 +819,6 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_DATA_TYPE",
 			(param, OCI_DTYPE_PARAM, &dtype, 0, OCI_ATTR_DATA_TYPE, S->err));
 
-	/* column length */
-	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_DATA_SIZE",
-			(param, OCI_DTYPE_PARAM, &data_size, 0, OCI_ATTR_DATA_SIZE, S->err));
 	/* column precision */
 	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_PRECISION",
 			(param, OCI_DTYPE_PARAM, &precis, 0, OCI_ATTR_PRECISION, S->err));
@@ -963,9 +951,6 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			add_assoc_long(return_value, "oci:decl_type", dtype);
 			add_assoc_string(return_value, "native_type", "UNKNOWN");
 		}
-	} else if (data_size) {
-		/* if the column is the result of a function */
-		add_assoc_string(return_value, "native_type", "UNKNOWN");
 	} else {
 		/* if the column is NULL */
 		add_assoc_long(return_value, "oci:decl_type", 0);
@@ -993,6 +978,7 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 	}
 
+	add_assoc_long(return_value, "scale", scale);
 	add_assoc_zval(return_value, "flags", &flags);
 
 	OCIDescriptorFree(param, OCI_DTYPE_PARAM);

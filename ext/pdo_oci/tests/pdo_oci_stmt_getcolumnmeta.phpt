@@ -70,41 +70,14 @@ SQL
 			var_export($native, true), var_export($emulated, true));
 	}
 
-	function test_meta(&$db, $offset, $sql_type, $value, $native_type, $pdo_type) {
 
-		$db->exec(<<<SQL
-BEGIN
-   EXECUTE IMMEDIATE 'DROP TABLE test';
-EXCEPTION
-   WHEN OTHERS THEN
-      IF SQLCODE != -942 THEN
-         RAISE;
-      END IF;
-END;
-SQL
-);
-
-		$sql = sprintf('CREATE TABLE test(id INT, label %s)', $sql_type);
-		$stmt = $db->prepare($sql);
-		$stmt->execute();
-
-		if (!$db->exec(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $value))) {
-			printf("[%03d] + 1] Insert failed, %d - %s\n", $offset,
-				$db->errorCode(), var_export($db->errorInfo(), true));
-			return false;
-		}
-
-		$stmt = $db->prepare('SELECT id, label FROM test');
-		$stmt->execute();
-		$meta = $stmt->getColumnMeta(1);
-		$row = $stmt->fetch(PDO::FETCH_ASSOC);
-
+	function test_return($meta, $offset, $native_type, $pdo_type){
 		if (empty($meta)) {
 			printf("[%03d + 2] getColumnMeta() failed, %d - %s\n", $offset,
 				$stmt->errorCode(), var_export($stmt->errorInfo(), true));
 			return false;
 		}
-		$elements = array('flags', 'name', 'len', 'precision', 'pdo_type');
+		$elements = array('flags', 'scale', 'name', 'len', 'precision', 'pdo_type');
 		foreach ($elements as $k => $element)
 			if (!isset($meta[$element])) {
 				printf("[%03d + 3] Element %s missing, %s\n", $offset,
@@ -146,6 +119,37 @@ SQL
 		return true;
 	}
 
+
+	function test_meta(&$db, $offset, $sql_type, $value, $native_type, $pdo_type) {
+
+		$db->exec(<<<SQL
+BEGIN
+   EXECUTE IMMEDIATE 'DROP TABLE test';
+EXCEPTION
+   WHEN OTHERS THEN
+      IF SQLCODE != -942 THEN
+         RAISE;
+      END IF;
+END;
+SQL
+);
+
+		$sql = sprintf('CREATE TABLE test(id INT, label %s)', $sql_type);
+		$stmt = $db->prepare($sql);
+		$stmt->execute();
+
+		if (!$db->exec(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $value))) {
+			printf("[%03d] + 1] Insert failed, %d - %s\n", $offset,
+				$db->errorCode(), var_export($db->errorInfo(), true));
+			return false;
+		}
+
+		$stmt = $db->prepare('SELECT id, label FROM test');
+		$stmt->execute();
+		$meta = $stmt->getColumnMeta(1);
+		return test_return($meta, $offset, $native_type, $pdo_type);
+	}
+
 	echo "Test 2.2 testing numeric columns\n";
 
 	test_meta($db, 20, 'NUMBER'         , 0                    , 'NUMBER', PDO::PARAM_STR);
@@ -167,6 +171,7 @@ SQL
 
 	echo "Test 2.3 testing temporal columns\n";
 
+	$db->exec("alter session set nls_date_format='YYYY-MM-DD'");
 	test_meta($db, 160, 'DATE'           , '2008-04-23'        , 'DATE', PDO::PARAM_STR);
 
 	echo "Test 2.4 testing string columns\n";
@@ -198,6 +203,7 @@ SQL
 	test_meta($db, 360, 'LONG RAW'      , str_repeat('b', 256) , 'LONG RAW', PDO::PARAM_STR);
 	test_meta($db, 370, 'RAW(256)'      , str_repeat('b', 256) , 'RAW'     , PDO::PARAM_STR);
 
+
 	$db->exec(<<<SQL
 BEGIN
    EXECUTE IMMEDIATE 'DROP TABLE test';
@@ -209,7 +215,20 @@ EXCEPTION
 END;
 SQL
 );
-	echo "Test 2.6 testing flags returned\n";
+	echo "Test 2.6 testing function return\n";
+
+	$stmt = $db->query('SELECT count(*) FROM dual');
+	$meta = $stmt->getColumnMeta(0);
+	test_return($meta, 380, 'NUMBER', PDO::PARAM_STR);
+	$stmt = $db->query("SELECT TO_DATE('2008-04-23') FROM dual");
+	$meta = $stmt->getColumnMeta(0);
+	test_return($meta, 390, 'DATE', PDO::PARAM_STR);
+	$stmt = $db->query("SELECT TO_CHAR(542) FROM dual");
+	$meta = $stmt->getColumnMeta(0);
+	test_return($meta, 400, 'VARCHAR2', PDO::PARAM_STR);
+
+
+	echo "Test 2.7 testing flags returned\n";
 
 	$sql = sprintf('CREATE TABLE test(id INT NOT NULL, label INT NULL)');
 	$stmt = $db->prepare($sql);
@@ -277,5 +296,6 @@ Test 2.2 testing numeric columns
 Test 2.3 testing temporal columns
 Test 2.4 testing string columns
 Test 2.5 testing lobs columns
-Test 2.6 testing flags returned
+Test 2.6 testing function return
+Test 2.7 testing flags returned
 done!
