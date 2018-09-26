@@ -127,7 +127,7 @@ static inline zend_bool may_have_side_effects(
 			/* No side effects */
 			return 0;
 		case ZEND_ROPE_END:
-			/* TODO: Rope dce optmization, see #76446 */
+			/* TODO: Rope dce optimization, see #76446 */
 			return 1;
 		case ZEND_JMP:
 		case ZEND_JMPZ:

@@ -571,8 +571,6 @@ PS_WRITE_FUNC(files)
 PS_UPDATE_TIMESTAMP_FUNC(files)
 {
 	char buf[MAXPATHLEN];
-	struct utimbuf newtimebuf;
-	struct utimbuf *newtime = &newtimebuf;
 	int ret;
 	PS_FILES_DATA;
 
@@ -581,12 +579,7 @@ PS_UPDATE_TIMESTAMP_FUNC(files)
 	}
 
 	/* Update mtime */
-#ifdef HAVE_UTIME_NULL
-	newtime = NULL;
-#else
-	newtime->modtime = newtime->actime = time(NULL);
-#endif
-	ret = VCWD_UTIME(buf, newtime);
+	ret = VCWD_UTIME(buf, NULL);
 	if (ret == -1) {
 		/* New session ID, create data file */
 		return ps_files_write(data, key, val);

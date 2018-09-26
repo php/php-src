@@ -213,7 +213,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.unserialize_func = NULL;				\
 		class_container.parent = NULL;							\
 		class_container.num_interfaces = 0;						\
-		class_container.traits = NULL;							\
+		class_container.trait_names = NULL;						\
 		class_container.num_traits = 0;							\
 		class_container.trait_aliases = NULL;					\
 		class_container.trait_precedences = NULL;				\
@@ -405,12 +405,6 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval 
 #define add_assoc_stringl(__arg, __key, __str, __length) add_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key), __value)
 
-/* unset() functions are only supported for legacy modules and null() functions should be used */
-#define add_assoc_unset(__arg, __key) add_assoc_null_ex(__arg, __key, strlen(__key))
-#define add_index_unset(__arg, __key) add_index_null(__arg, __key)
-#define add_next_index_unset(__arg) add_next_index_null(__arg)
-#define add_property_unset(__arg, __key) add_property_null(__arg, __key)
-
 ZEND_API int add_index_long(zval *arg, zend_ulong idx, zend_long n);
 ZEND_API int add_index_null(zval *arg, zend_ulong idx);
 ZEND_API int add_index_bool(zval *arg, zend_ulong idx, int b);
@@ -551,8 +545,6 @@ ZEND_API const char *zend_get_object_type(const zend_class_entry *ce);
 ZEND_API zend_bool zend_is_iterable(zval *iterable);
 
 ZEND_API zend_bool zend_is_countable(zval *countable);
-
-#define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 
 ZEND_API ZEND_FUNCTION(display_disabled_function);
 ZEND_API ZEND_FUNCTION(display_disabled_class);

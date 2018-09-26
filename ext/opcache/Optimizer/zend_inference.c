@@ -2960,8 +2960,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		}
-		case ZEND_DECLARE_CLASS:
-		case ZEND_DECLARE_INHERITED_CLASS:
 		case ZEND_DECLARE_ANON_CLASS:
 		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_ops[i].result_def);
@@ -2981,7 +2979,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						}
 						break;
 					case ZEND_FETCH_CLASS_PARENT:
-						if (op_array->scope && op_array->scope->parent) {
+						if (op_array->scope && op_array->scope->parent && (op_array->scope->ce_flags & ZEND_ACC_LINKED)) {
 							UPDATE_SSA_OBJ_TYPE(op_array->scope->parent, 0, ssa_ops[i].result_def);
 						} else {
 							UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].result_def);
@@ -3464,9 +3462,11 @@ unknown_opcode:
 
 static uint32_t get_class_entry_rank(zend_class_entry *ce) {
 	uint32_t rank = 0;
-	while (ce->parent) {
-		rank++;
-		ce = ce->parent;
+	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		while (ce->parent) {
+			rank++;
+			ce = ce->parent;
+		}
 	}
 	return rank;
 }
@@ -3487,17 +3487,17 @@ static zend_class_entry *join_class_entries(
 
 	while (rank1 != rank2) {
 		if (rank1 > rank2) {
-			ce1 = ce1->parent;
+			ce1 = !(ce1->ce_flags & ZEND_ACC_LINKED) ? NULL : ce1->parent;
 			rank1--;
 		} else {
-			ce2 = ce2->parent;
+			ce2 = !(ce2->ce_flags & ZEND_ACC_LINKED) ? NULL : ce2->parent;
 			rank2--;
 		}
 	}
 
 	while (ce1 != ce2) {
-		ce1 = ce1->parent;
-		ce2 = ce2->parent;
+		ce1 = !(ce1->ce_flags & ZEND_ACC_LINKED) ? NULL : ce1->parent;
+		ce2 = !(ce2->ce_flags & ZEND_ACC_LINKED) ? NULL : ce2->parent;
 	}
 
 	if (ce1) {

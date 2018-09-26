@@ -183,7 +183,7 @@ typedef struct _php_cgi_globals_struct {
  * Key for each cache entry is dirname(PATH_TRANSLATED).
  *
  * NOTE: Each cache entry config_hash contains the combination from all user ini files found in
- *       the path starting from doc_root throught to dirname(PATH_TRANSLATED).  There is no point
+ *       the path starting from doc_root through to dirname(PATH_TRANSLATED).  There is no point
  *       storing per-file entries as it would not be possible to detect added / deleted entries
  *       between separate files.
  */
@@ -2149,6 +2149,7 @@ consult the installation file that came with this distribution, or visit \n\
 				char *err_text = php_win32_error_to_msg(err);
 
 				fprintf(stderr, "unable to get current command line: [0x%08lx]: %s\n", err, err_text);
+				php_win32_error_msg_free(err_text);
 
 				goto parent_out;
 			}
@@ -2167,6 +2168,8 @@ consult the installation file that came with this distribution, or visit \n\
 
 				fprintf(stderr, "unable to create job object: [0x%08lx]: %s\n", err, err_text);
 
+				php_win32_error_msg_free(err_text);
+
 				goto parent_out;
 			}
 
@@ -2176,6 +2179,7 @@ consult the installation file that came with this distribution, or visit \n\
 				char *err_text = php_win32_error_to_msg(err);
 
 				fprintf(stderr, "unable to configure job object: [0x%08lx]: %s\n", err, err_text);
+				php_win32_error_msg_free(err_text);
 			}
 
 			while (parent) {
@@ -2216,6 +2220,7 @@ consult the installation file that came with this distribution, or visit \n\
 							char *err_text = php_win32_error_to_msg(err);
 
 							fprintf(stderr, "unable to assign child process to job object: [0x%08lx]: %s\n", err, err_text);
+							php_win32_error_msg_free(err_text);
 						}
 						CloseHandle(pi.hThread);
 					} else {
@@ -2225,6 +2230,7 @@ consult the installation file that came with this distribution, or visit \n\
 						kid_cgi_ps[i] = NULL;
 
 						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
+						php_win32_error_msg_free(err_text);
 					}
 				}
 

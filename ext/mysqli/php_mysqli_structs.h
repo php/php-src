@@ -342,9 +342,6 @@ ZEND_END_MODULE_GLOBALS(mysqli)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
-#define my_estrdup(x) (x) ? estrdup(x) : NULL
-#define my_efree(x) if (x) efree(x)
-
 ZEND_EXTERN_MODULE_GLOBALS(mysqli)
 
 #endif	/* PHP_MYSQLI_STRUCTS.H */

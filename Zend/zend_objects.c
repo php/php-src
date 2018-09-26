@@ -52,7 +52,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	if (EXPECTED(object->ce->default_properties_count)) {
 		end = p + object->ce->default_properties_count;
 		do {
-			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(p);
 			p++;
 		} while (p != end);
 	}
@@ -187,7 +187,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		zval *end = src + old_object->ce->default_properties_count;
 
 		do {
-			i_zval_ptr_dtor(dst ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(dst);
 			ZVAL_COPY_VALUE(dst, src);
 			zval_add_ref(dst);
 			src++;

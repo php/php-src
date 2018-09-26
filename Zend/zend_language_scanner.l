@@ -75,9 +75,7 @@
 # error ZEND_MMAP_AHEAD should be greater than or equal to YYMAXFILL
 #endif
 
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
+#include <stdarg.h>
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>

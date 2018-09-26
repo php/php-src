@@ -2213,7 +2213,7 @@ static void dbstmt_prop_delete(zval *object, zval *member, void **cache_slot)
 	}
 }
 
-static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_string *method_name, const zval *key)
+static zend_function *dbstmt_method_get(zend_object **object_pp, zend_string *method_name, const zval *key)
 {
 	zend_function *fbc = NULL;
 	zend_string *lc_method_name;
@@ -2625,7 +2625,7 @@ static HashTable *row_get_properties(zval *object)
 	return stmt->std.properties;
 }
 
-static union _zend_function *row_method_get(
+static zend_function *row_method_get(
 	zend_object **object_pp,
 	zend_string *method_name, const zval *key)
 {
@@ -2649,7 +2649,7 @@ static int row_call_method(zend_string *method, zend_object *object, INTERNAL_FU
 	return FAILURE;
 }
 
-static union _zend_function *row_get_ctor(zend_object *object)
+static zend_function *row_get_ctor(zend_object *object)
 {
 	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
 	return NULL;

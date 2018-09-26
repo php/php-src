@@ -1174,31 +1174,10 @@ static void set_zval_property(zval* object, char* name, zval* val)
 static zval* get_zval_property(zval* object, char* name, zval *rv)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zval member;
-		zval *data;
-		zend_class_entry *old_scope;
-
-		ZVAL_STRING(&member, name);
-		old_scope = EG(fake_scope);
-		EG(fake_scope) = Z_OBJCE_P(object);
-		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, NULL, rv);
+		zval *data = zend_read_property(Z_OBJCE_P(object), object, name, strlen(name), 1, rv);
 		if (data == &EG(uninitialized_zval)) {
-			/* Hack for bug #32455 */
-			zend_property_info *property_info;
-
-			property_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR(member), 1);
-			EG(fake_scope) = old_scope;
-			if (property_info != ZEND_WRONG_PROPERTY_INFO && property_info &&
-			    zend_hash_exists(Z_OBJPROP_P(object), property_info->name)) {
-				zval_ptr_dtor(&member);
-				ZVAL_DEREF(data);
-				return data;
-			}
-			zval_ptr_dtor(&member);
 			return NULL;
 		}
-		zval_ptr_dtor(&member);
-		EG(fake_scope) = old_scope;
 		ZVAL_DEREF(data);
 		return data;
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
@@ -1210,15 +1189,7 @@ static zval* get_zval_property(zval* object, char* name, zval *rv)
 static void unset_zval_property(zval* object, char* name)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zval member;
-		zend_class_entry *old_scope;
-
-		ZVAL_STRING(&member, name);
-		old_scope = EG(fake_scope);
-		EG(fake_scope) = Z_OBJCE_P(object);
-		Z_OBJ_HT_P(object)->unset_property(object, &member, NULL);
-		EG(fake_scope) = old_scope;
-		zval_ptr_dtor(&member);
+		zend_unset_property(Z_OBJCE_P(object), object, name, strlen(name));
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_hash_str_del(Z_ARRVAL_P(object), name, strlen(name));
 	}
@@ -2185,16 +2156,6 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
  			}
 		}
  	}
-}
-
-static inline int array_num_elements(HashTable* ht)
-{
-	if (ht->nNumUsed &&
-	    Z_TYPE(ht->arData[ht->nNumUsed-1].val) != IS_UNDEF &&
-	    ht->arData[ht->nNumUsed-1].key == NULL) {
-	    return ht->arData[ht->nNumUsed-1].h - 1;
-	}
-	return 0;
 }
 
 static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)

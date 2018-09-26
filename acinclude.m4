@@ -1402,7 +1402,7 @@ dnl
 AC_DEFUN([PHP_TM_GMTOFF],[
 AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
 [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <$ac_cv_struct_tm>]], [[struct tm tm; tm.tm_gmtoff;]])],
+#include <time.h>]], [[struct tm tm; tm.tm_gmtoff;]])],
   [ac_cv_struct_tm_gmtoff=yes], [ac_cv_struct_tm_gmtoff=no])])
 
 if test "$ac_cv_struct_tm_gmtoff" = yes; then
@@ -1685,58 +1685,6 @@ AC_DEFUN([PHP_BROKEN_GETCWD],[
     *[)]
       AC_MSG_RESULT([no]);;
   esac
-])
-
-dnl
-dnl PHP_BROKEN_GLIBC_FOPEN_APPEND
-dnl
-AC_DEFUN([PHP_BROKEN_GLIBC_FOPEN_APPEND], [
-  AC_MSG_CHECKING([for broken libc stdio])
-  AC_CACHE_VAL(_cv_have_broken_glibc_fopen_append,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdio.h>
-int main(int argc, char *argv[])
-{
-  FILE *fp;
-  long position;
-  char *filename = tmpnam(NULL);
-
-  fp = fopen(filename, "w");
-  if (fp == NULL) {
-    perror("fopen");
-    exit(2);
-  }
-  fputs("foobar", fp);
-  fclose(fp);
-
-  fp = fopen(filename, "a+");
-  position = ftell(fp);
-  fclose(fp);
-  unlink(filename);
-  if (position == 0)
-  return 1;
-  return 0;
-}
-]])],
-[_cv_have_broken_glibc_fopen_append=no],
-[_cv_have_broken_glibc_fopen_append=yes],
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <features.h>
-]], [[
-#if !__GLIBC_PREREQ(2,2)
-choke me
-#endif
-]])],
-[_cv_have_broken_glibc_fopen_append=yes],
-[_cv_have_broken_glibc_fopen_append=no])
-])])
-
-  if test "$_cv_have_broken_glibc_fopen_append" = "yes"; then
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(HAVE_BROKEN_GLIBC_FOPEN_APPEND,1, [Define if your glibc borks on fopen with mode a+])
-  else
-    AC_MSG_RESULT(no)
-  fi
 ])
 
 dnl
@@ -2191,7 +2139,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
     AC_MSG_RESULT([$icu_install_prefix])
 
     dnl Check ICU version
-    AC_MSG_CHECKING([for ICU 4.0 or greater])
+    AC_MSG_CHECKING([for ICU 50.1 or greater])
     icu_version_full=`$ICU_CONFIG --version`
     ac_IFS=$IFS
     IFS="."
@@ -2200,8 +2148,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
     icu_version=`expr [$]1 \* 1000 + [$]2`
     AC_MSG_RESULT([found $icu_version_full])
 
-    if test "$icu_version" -lt "4000"; then
-      AC_MSG_ERROR([ICU version 4.0 or later is required])
+    if test "$icu_version" -lt "50001"; then
+      AC_MSG_ERROR([ICU version 50.1 or later is required])
     fi
 
     ICU_VERSION=$icu_version
@@ -2211,10 +2159,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
     PHP_EVAL_LIBLINE($ICU_LIBS, $1)
 
     ICU_CXXFLAGS=`$ICU_CONFIG --cxxflags`
-    if test "$icu_version" -ge "49000"; then
-      ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
-      ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
-    fi
+    ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
+    ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
     if test "$icu_version" -ge "60000"; then
       ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
     fi
@@ -2525,12 +2471,12 @@ AC_DEFUN([PHP_SETUP_LIBXML], [
     set $libxml_full_version
     IFS=$ac_IFS
     LIBXML_VERSION=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
-    if test "$LIBXML_VERSION" -ge "2006011"; then
+    if test "$LIBXML_VERSION" -ge "2007006"; then
       found_libxml=yes
       LIBXML_LIBS=`$XML2_CONFIG --libs`
       LIBXML_INCS=`$XML2_CONFIG --cflags`
     else
-      AC_MSG_ERROR([libxml2 version 2.6.11 or greater required.])
+      AC_MSG_ERROR([libxml2 version 2.7.6 or greater required.])
     fi
   fi
 

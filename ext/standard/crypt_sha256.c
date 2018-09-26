@@ -26,11 +26,7 @@
 #else
 # include <sys/param.h>
 # include <sys/types.h>
-# if HAVE_STRING_H
-#  include <string.h>
-# else
-#  include <strings.h>
-# endif
+# include <string.h>
 #endif
 
 char * __php_stpncpy(char *dst, const char *src, size_t len)

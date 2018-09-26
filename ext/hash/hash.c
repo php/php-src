@@ -888,7 +888,7 @@ static PHP_METHOD(HashContext, __construct) {
 /* }}} */
 
 static const zend_function_entry php_hashcontext_methods[] = {
-	PHP_ME(HashContext, __construct, NULL, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)
+	PHP_ME(HashContext, __construct, NULL, ZEND_ACC_PRIVATE)
 	PHP_FE_END
 };
 

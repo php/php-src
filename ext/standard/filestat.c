@@ -114,7 +114,9 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
@@ -208,7 +210,9 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
@@ -640,11 +644,7 @@ PHP_FUNCTION(touch)
 
 	switch (argc) {
 		case 1:
-#ifdef HAVE_UTIME_NULL
 			newtime = NULL;
-#else
-			newtime->modtime = newtime->actime = time(NULL);
-#endif
 			break;
 		case 2:
 			newtime->modtime = newtime->actime = filetime;
@@ -924,18 +924,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
 		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
 #ifdef HAVE_STRUCT_STAT_ST_RDEV
-# ifdef PHP_WIN32
-	/* It is unsigned, so if a negative came from userspace, it'll
-	   convert to UINT_MAX, but we wan't to keep the userspace value.
-	   Almost the same as in php_if_fstat. */
-	if ((int)stat_sb->st_rdev < 0) {
-		ZVAL_LONG(&stat_rdev, (int)stat_sb->st_rdev);
-	} else {
 		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
-	}
-# else
-	ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
-# endif
 #else
 		ZVAL_LONG(&stat_rdev, -1);
 #endif
@@ -948,7 +937,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 #else
 		ZVAL_LONG(&stat_blksize,-1);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
 #else
 		ZVAL_LONG(&stat_blocks,-1);

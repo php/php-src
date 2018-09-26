@@ -4,7 +4,6 @@ array curl_multi_info_read ( resource $mh [, int &$msgs_in_queue = NULL ] );
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 --SKIPIF--
 <?php
-if (getenv("SKIP_ONLINE_TESTS")) { die('skip: online test'); }
 if (!extension_loaded('curl')) { print("skip"); }
 ?>
 --FILE--

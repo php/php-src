@@ -23,11 +23,7 @@
 #include "SAPI.h"
 #include "php_main.h"
 #include "head.h"
-#ifdef TM_IN_SYS_TIME
-#include <sys/time.h>
-#else
 #include <time.h>
-#endif
 
 #include "php_globals.h"
 

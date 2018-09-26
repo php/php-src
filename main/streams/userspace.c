@@ -865,7 +865,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 #ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 	STAT_PROP_ENTRY(blksize);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 	STAT_PROP_ENTRY(blocks);
 #endif
 

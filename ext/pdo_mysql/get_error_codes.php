@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 	$codes = array();
 	$maxlen = 0;

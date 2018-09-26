@@ -3,13 +3,12 @@ Bug #68912 (Segmentation fault at openssl_spki_new)
 --SKIPIF--
 <?php 
 if (!extension_loaded("openssl")) die("skip");
-if (!extension_loaded("xml")) die("skip xml extension not loaded");
 if (!@openssl_pkey_new()) die("skip cannot create private key");
 ?>
 --FILE--
 <?php
 
-$var1=xml_parser_create_ns();
+$var1=fopen(__FILE__, 'r');
 $var2=2; 
 $var3=3; 
 

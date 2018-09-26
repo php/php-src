@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 // script to upgrade PCRE. just drop the pcre-x.x.tar.xx here and run the script

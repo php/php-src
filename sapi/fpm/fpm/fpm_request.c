@@ -26,7 +26,7 @@
 static const char *requests_stages[] = {
 	[FPM_REQUEST_ACCEPTING]       = "Idle",
 	[FPM_REQUEST_READING_HEADERS] = "Reading headers",
-	[FPM_REQUEST_INFO]            = "Getting request informations",
+	[FPM_REQUEST_INFO]            = "Getting request information",
 	[FPM_REQUEST_EXECUTING]       = "Running",
 	[FPM_REQUEST_END]             = "Ending",
 	[FPM_REQUEST_FINISHED]        = "Finishing",

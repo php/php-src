@@ -32,10 +32,6 @@
 #include "intl_convert.h"
 /* }}} */
 
-#ifdef UIDNA_INFO_INITIALIZER
-#define HAVE_46_API 1 /* has UTS#46 API (introduced in ICU 4.6) */
-#endif
-
 enum {
 	INTL_IDN_VARIANT_2003 = 0,
 	INTL_IDN_VARIANT_UTS46
@@ -58,8 +54,6 @@ void idn_register_constants( INIT_FUNC_ARGS )
 	/* Option to check if input conforms to STD-3 ASCII rules */
 	REGISTER_LONG_CONSTANT("IDNA_USE_STD3_RULES", UIDNA_USE_STD3_RULES, CONST_CS | CONST_PERSISTENT);
 
-#ifdef HAVE_46_API
-
 	/* Option to check for whether the input conforms to the BiDi rules.
 	 * Ignored by the IDNA2003 implementation. (IDNA2003 always performs a BiDi check.) */
 	REGISTER_LONG_CONSTANT("IDNA_CHECK_BIDI", UIDNA_CHECK_BIDI, CONST_CS | CONST_PERSISTENT);
@@ -77,15 +71,11 @@ void idn_register_constants( INIT_FUNC_ARGS )
 	 * By default, ToUnicode() uses transitional processing.
 	 * Ignored by the IDNA2003 implementation. */
 	REGISTER_LONG_CONSTANT("IDNA_NONTRANSITIONAL_TO_UNICODE", UIDNA_NONTRANSITIONAL_TO_UNICODE, CONST_CS | CONST_PERSISTENT);
-#endif
 
 	/* VARIANTS */
 	REGISTER_LONG_CONSTANT("INTL_IDNA_VARIANT_2003", INTL_IDN_VARIANT_2003, CONST_CS | CONST_PERSISTENT);
-#ifdef HAVE_46_API
 	REGISTER_LONG_CONSTANT("INTL_IDNA_VARIANT_UTS46", INTL_IDN_VARIANT_UTS46, CONST_CS | CONST_PERSISTENT);
-#endif
 
-#ifdef HAVE_46_API
 	/* PINFO ERROR CODES */
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_EMPTY_LABEL", UIDNA_ERROR_EMPTY_LABEL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_LABEL_TOO_LONG", UIDNA_ERROR_LABEL_TOO_LONG, CONST_CS | CONST_PERSISTENT);
@@ -100,7 +90,6 @@ void idn_register_constants( INIT_FUNC_ARGS )
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_INVALID_ACE_LABEL", UIDNA_ERROR_INVALID_ACE_LABEL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_BIDI", UIDNA_ERROR_BIDI, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_CONTEXTJ", UIDNA_ERROR_CONTEXTJ, CONST_CS | CONST_PERSISTENT);
-#endif
 }
 /* }}} */
 
@@ -131,7 +120,6 @@ static inline void php_intl_bad_args(const char *msg)
 	php_intl_idn_check_status(U_ILLEGAL_ARGUMENT_ERROR, msg);
 }
 
-#ifdef HAVE_46_API
 static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		const zend_string *domain, uint32_t option, int mode, zval *idna_info)
 {
@@ -140,7 +128,6 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	int32_t		  len;
 	zend_string	  *buffer;
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
-	int			  buffer_used = 0;
 
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance") == FAILURE) {
@@ -173,34 +160,21 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	ZSTR_LEN(buffer) = len;
 
 	if (info.errors == 0) {
-		RETVAL_STR(buffer);
-		buffer_used = 1;
+		RETVAL_STR_COPY(buffer);
 	} else {
 		RETVAL_FALSE;
 	}
 
 	if (idna_info) {
-		if (buffer_used) { /* used in return_value then */
-			zval_addref_p(return_value);
-			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, return_value);
-		} else {
-			zval zv;
-			ZVAL_NEW_STR(&zv, buffer);
-			buffer_used = 1;
-			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, &zv);
-		}
+		add_assoc_str_ex(idna_info, "result", sizeof("result")-1, zend_string_copy(buffer));
 		add_assoc_bool_ex(idna_info, "isTransitionalDifferent",
 				sizeof("isTransitionalDifferent")-1, info.isTransitionalDifferent);
 		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (zend_long)info.errors);
 	}
 
-	if (!buffer_used) {
-		zend_string_efree(buffer);
-	}
-
+	zend_string_release(buffer);
 	uidna_close(uts46);
 }
-#endif
 
 static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 		const zend_string *domain, uint32_t option, int mode)
@@ -280,7 +254,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zend_string *domain;
 	zend_long option = 0,
-		 variant = INTL_IDN_VARIANT_2003;
+		 variant = INTL_IDN_VARIANT_UTS46;
 	zval *idna_info = NULL;
 
 	intl_error_reset(NULL);
@@ -291,19 +265,11 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */
 	}
 
-#ifdef HAVE_46_API
 	if (variant != INTL_IDN_VARIANT_2003 && variant != INTL_IDN_VARIANT_UTS46) {
 		php_intl_bad_args("invalid variant, must be one of {"
 			"INTL_IDNA_VARIANT_2003, INTL_IDNA_VARIANT_UTS46}");
 		RETURN_FALSE;
 	}
-#else
-	if (variant != INTL_IDN_VARIANT_2003) {
-		php_intl_bad_args("invalid variant, PHP was compiled against "
-			"an old version of ICU and only supports INTL_IDN_VARIANT_2003");
-		RETURN_FALSE;
-	}
-#endif
 
 	if (ZSTR_LEN(domain) < 1) {
 		php_intl_bad_args("empty domain name");
@@ -333,11 +299,9 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (variant == INTL_IDN_VARIANT_2003) {
 		php_intl_idn_to(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (uint32_t)option, mode);
 	}
-#ifdef HAVE_46_API
 	else {
 		php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (uint32_t)option, mode, idna_info);
 	}
-#endif
 }
 
 /* {{{ proto string idn_to_ascii(string domain[, int options[, int variant[, array &idna_info]]])

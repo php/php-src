@@ -433,7 +433,7 @@ if test "$PHP_PASSWORD_ARGON2" != "no"; then
     LIBS="$LIBS -largon2"
     AC_DEFINE(HAVE_ARGON2LIB, 1, [ Define to 1 if you have the <argon2.h> header file ])
   ], [
-    AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libaries >= 20161029 are installed])
+    AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libraries >= 20161029 are installed])
   ])
 fi
 

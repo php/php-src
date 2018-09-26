@@ -132,7 +132,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 };
 
 #undef zval_ptr_dtor
-#define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC)
+#define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv)
 
 #define FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op, result) do {	\
 	zval *__container_to_free = (free_op);									\
@@ -187,7 +187,6 @@ ZEND_API void zend_vm_stack_init(void)
 {
 	EG(vm_stack_page_size) = ZEND_VM_STACK_PAGE_SIZE;
 	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, NULL);
-	EG(vm_stack)->top++;
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
 }
@@ -1145,8 +1144,9 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
-		Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+		if (binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value) == SUCCESS) {
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+		}
 		if (z == &rv) {
 			zval_ptr_dtor(&rv);
 		}
@@ -1539,8 +1539,9 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		binary_op(&res, z, value);
-		Z_OBJ_HT(obj)->write_property(&obj, property, &res, cache_slot);
+		if (binary_op(&res, z, value) == SUCCESS) {
+			Z_OBJ_HT(obj)->write_property(&obj, property, &res, cache_slot);
+		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), &res);
 		}
@@ -2288,6 +2289,10 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 	}
 }
 
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_clone_call(zend_function *clone, zend_class_entry *scope)
+{
+	zend_throw_error(NULL, "Call to %s %s::__clone() from context '%s'", zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
+}
 
 #if ZEND_INTENSIVE_DEBUGGING
 
@@ -3450,29 +3455,29 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 	OPLINE = opline; \
 	ZEND_VM_CONTINUE()
 # define ZEND_VM_SMART_BRANCH(_result, _check) do { \
-		int __result; \
-		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
-			__result = (_result); \
-		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
-			__result = !(_result); \
-		} else { \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
 			break; \
 		} \
-		if ((_check) && UNEXPECTED(EG(exception))) { \
-			ZVAL_UNDEF(EX_VAR(opline->result.var)); \
-			HANDLE_EXCEPTION(); \
-		} \
-		if (__result) { \
-			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
+			if (_result) { \
+				ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+			} else { \
+				ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+			} \
+		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
+			if (!(_result)) { \
+				ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+			} else { \
+				ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+			} \
 		} else { \
-			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+			break; \
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
 # define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check) do { \
 		if ((_check) && UNEXPECTED(EG(exception))) { \
-			ZVAL_UNDEF(EX_VAR(opline->result.var)); \
-			HANDLE_EXCEPTION(); \
+			break; \
 		} \
 		if (_result) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
@@ -3483,8 +3488,7 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 	} while (0)
 # define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check) do { \
 		if ((_check) && UNEXPECTED(EG(exception))) { \
-			ZVAL_UNDEF(EX_VAR(opline->result.var)); \
-			HANDLE_EXCEPTION(); \
+			break; \
 		} \
 		if (!(_result)) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \

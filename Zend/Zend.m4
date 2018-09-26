@@ -50,14 +50,11 @@ inttypes.h \
 stdint.h \
 limits.h \
 malloc.h \
-string.h \
 unistd.h \
-stdarg.h \
 sys/types.h \
 sys/time.h \
 signal.h \
 unix.h \
-stdlib.h \
 cpuid.h \
 dlfcn.h)
 
@@ -92,8 +89,6 @@ LIBZEND_CHECK_INT_TYPE(int32_t)
 LIBZEND_CHECK_INT_TYPE(uint32_t)
 
 dnl Checks for library functions.
-AC_FUNC_VPRINTF
-AC_FUNC_MEMCMP
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol finite fpclass sigsetjmp)
 AC_ZEND_BROKEN_SPRINTF
@@ -262,106 +257,6 @@ int main()
 ])
 
 AC_MSG_RESULT(done)
-
-dnl test for memory allocation using mmap(MAP_ANON)
-AC_MSG_CHECKING(for memory allocation using mmap(MAP_ANON))
-
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef MAP_ANON
-# ifdef MAP_ANONYMOUS
-#  define MAP_ANON MAP_ANONYMOUS
-# endif
-#endif
-#ifndef MREMAP_MAYMOVE
-# define MREMAP_MAYMOVE 0
-#endif
-#ifndef MAP_FAILED
-# define MAP_FAILED ((void*)-1)
-#endif
-
-#define SEG_SIZE (256*1024)
-
-int main()
-{
-	void *seg = mmap(NULL, SEG_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
-	if (seg == MAP_FAILED) {
-		return 1;
-	}
-	if (munmap(seg, SEG_SIZE) != 0) {
-		return 2;
-	}
-	return 0;
-}
-]])], [
-  AC_DEFINE([HAVE_MEM_MMAP_ANON], 1, [Define if the target system has support for memory allocation using mmap(MAP_ANON)])
-  AC_MSG_RESULT(yes)
-], [
-  AC_MSG_RESULT(no)
-], [
-  dnl cross-compile needs something here
-  AC_MSG_RESULT(no)
-])
-
-dnl test for memory allocation using mmap("/dev/zero")
-AC_MSG_CHECKING(for memory allocation using mmap("/dev/zero"))
-
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef MAP_ANON
-# ifdef MAP_ANONYMOUS
-#  define MAP_ANON MAP_ANONYMOUS
-# endif
-#endif
-#ifndef MREMAP_MAYMOVE
-# define MREMAP_MAYMOVE 0
-#endif
-#ifndef MAP_FAILED
-# define MAP_FAILED ((void*)-1)
-#endif
-
-#define SEG_SIZE (256*1024)
-
-int main()
-{
-	int fd;
-	void *seg;
-
-	fd = open("/dev/zero", O_RDWR, S_IRUSR | S_IWUSR);
-	if (fd < 0) {
-		return 1;
-	}
-	seg = mmap(NULL, SEG_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-	if (seg == MAP_FAILED) {
-		return 2;
-	}
-	if (munmap(seg, SEG_SIZE) != 0) {
-		return 3;
-	}
-	if (close(fd) != 0) {
-		return 4;
-	}
-	return 0;
-}
-]])], [
-  AC_DEFINE([HAVE_MEM_MMAP_ZERO], 1, [Define if the target system has support for memory allocation using mmap("/dev/zero")])
-  AC_MSG_RESULT(yes)
-], [
-  AC_MSG_RESULT(no)
-], [
-  dnl cross-compile needs something here
-  AC_MSG_RESULT(no)
-])
 
 AC_CHECK_FUNCS(mremap)
 

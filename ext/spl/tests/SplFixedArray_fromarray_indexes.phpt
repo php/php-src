@@ -9,7 +9,7 @@ $array = SplFixedArray::fromArray(array(1 => 1,
 										3 => false));
 var_dump($array);
 ?>
---EXPECTF--
+--EXPECT--
 object(SplFixedArray)#1 (4) {
   [0]=>
   NULL

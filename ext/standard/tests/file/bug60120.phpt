@@ -2,9 +2,6 @@
 Bug #60120 (proc_open hangs when data in stdin/out/err is getting larger or equal to 2048)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) != 'WIN') {
-    die('skip only for Windows');
-}
 $php = getenv('TEST_PHP_EXECUTABLE');
 if (!$php) {
 	die("skip No php executable defined\n");

@@ -205,7 +205,7 @@ function verify_config()
 		error('environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!');
 	}
 
-	if (function_exists('is_executable') && !is_executable($php)) {
+	if (!is_executable($php)) {
 		error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = $php");
 	}
 }
@@ -758,7 +758,7 @@ Options:
                 filenames to generate with <tdir>. If --html is being used and
                 <url> given then the generated links are relative and prefixed
                 with the given url. In general you want to make <sdir> the path
-                to your source files and <tdir> some pach in your web page
+                to your source files and <tdir> some patch in your web page
                 hierarchy with <url> pointing to <tdir>.
 
     --keep-[all|php|skip|clean]
@@ -2924,7 +2924,7 @@ function junit_path_to_classname($file_name) {
 			array_shift($_tmp);
 		}
 		foreach ($_tmp as $p) {
-			$ret = $ret . "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
+			$ret .= "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
 		}
 		return $ret;
 	}

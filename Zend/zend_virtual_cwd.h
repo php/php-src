@@ -32,9 +32,7 @@
 #include <utime.h>
 #endif
 
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 #ifdef ZTS
 #define VIRTUAL_DIR
@@ -116,15 +114,21 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef ZEND_WIN32
-CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
-# define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
-# define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
+# define php_sys_stat_ex php_win32_ioutil_stat_ex
+# define php_sys_stat php_win32_ioutil_stat
+# define php_sys_lstat php_win32_ioutil_lstat
+# define php_sys_fstat php_win32_ioutil_fstat
 CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_len);
+# define php_sys_symlink php_win32_ioutil_symlink
+# define php_sys_link php_win32_ioutil_link
 #else
 # define php_sys_stat stat
 # define php_sys_lstat lstat
+# define php_sys_fstat fstat
 # ifdef HAVE_SYMLINK
 # define php_sys_readlink(link, target, target_len) readlink(link, target, target_len)
+# define php_sys_symlink symlink
+# define php_sys_link link
 # endif
 #endif
 

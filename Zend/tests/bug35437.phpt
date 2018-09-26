@@ -20,8 +20,8 @@ class TestClass
 try {
 	TestClass::testMethod();
 } catch (Exception $e) {
-	echo "Catched: ".$e->getMessage()."\n";
+	echo "Caught: ".$e->getMessage()."\n";
 }
 ?>
 --EXPECT--
-Catched: Error occuried: Non-static method TestClass::testMethod() should not be called statically
+Caught: Error occuried: Non-static method TestClass::testMethod() should not be called statically

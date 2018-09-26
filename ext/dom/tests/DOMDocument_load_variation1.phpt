@@ -17,5 +17,5 @@ XML_FILE=/book_with_dtd.xml
 LOAD_OPTIONS=LIBXML_DTDLOAD
 EXPECTED_RESULT=1
 --FILE_EXTERNAL--
-domdocumentload_test_method.php
+domdocumentload_test_method.inc
 --EXPECT--

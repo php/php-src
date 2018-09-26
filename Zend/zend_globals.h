@@ -57,10 +57,6 @@ END_EXTERN_C()
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
 
-#define ZEND_EARLY_BINDING_COMPILE_TIME 0
-#define ZEND_EARLY_BINDING_DELAYED      1
-#define ZEND_EARLY_BINDING_DELAYED_ALL  2
-
 typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
 

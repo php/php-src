@@ -37,9 +37,7 @@ AH_TOP([
 AH_BOTTOM([
 #ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
+#include <stdlib.h>
 
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -53,11 +51,7 @@ AH_BOTTOM([
 # include <ieeefp.h>
 #endif
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #if ZEND_BROKEN_SPRINTF
 int zend_sprintf(char *buffer, const char *format, ...);
@@ -106,7 +100,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 ])
 
 PHP_MAJOR_VERSION=7
-PHP_MINOR_VERSION=3
+PHP_MINOR_VERSION=4
 PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
@@ -420,7 +414,6 @@ dnl -------------------------------------------------------------------------
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_HEADER_DIRENT
 
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS([ \
@@ -435,7 +428,6 @@ netinet/in.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
-assert.h \
 crypt.h \
 dns.h \
 fcntl.h \
@@ -450,9 +442,6 @@ poll.h \
 pwd.h \
 resolv.h \
 signal.h \
-stdarg.h \
-stdlib.h \
-string.h \
 syslog.h \
 sysexits.h \
 sys/ioctl.h \
@@ -468,7 +457,6 @@ sys/statfs.h \
 sys/statvfs.h \
 sys/vfs.h \
 sys/sysexits.h \
-sys/varargs.h \
 sys/wait.h \
 sys/loadavg.h \
 termios.h \
@@ -478,7 +466,6 @@ utime.h \
 sys/utsname.h \
 sys/ipc.h \
 dlfcn.h \
-assert.h \
 tmmintrin.h \
 nmmintrin.h \
 immintrin.h
@@ -502,7 +489,6 @@ immintrin.h
 
 PHP_FOPENCOOKIE
 PHP_BROKEN_GETCWD
-PHP_BROKEN_GLIBC_FOPEN_APPEND
 if test "$GCC" = "yes"; then
   PHP_BROKEN_GCC_STRLEN_OPT
 fi
@@ -510,7 +496,6 @@ fi
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl -------------------------------------------------------------------------
 
-AC_STRUCT_TM
 AC_STRUCT_TIMEZONE
 
 PHP_MISSING_TIME_R_DECL
@@ -600,7 +585,6 @@ AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 dnl Checks for library functions.
 dnl -------------------------------------------------------------------------
 
-AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(
 alphasort \
 asctime_r \
@@ -744,7 +728,6 @@ if test "$ac_cv_func_sync_fetch_and_add" = yes; then
 fi
 
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
-AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl PHP_AC_BROKEN_SPRINTF
 dnl PHP_AC_BROKEN_SNPRINTF
@@ -1210,6 +1193,8 @@ EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $LIBS"
 unset LIBS LDFLAGS
 
+AC_ARG_PROGRAM
+
 test "$prefix" = "NONE" && prefix=/usr/local
 test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
 test "$program_prefix" = "NONE" && program_prefix=
@@ -1442,6 +1427,10 @@ case $host_alias in
   ac_cv_exeext=
   ;;
 esac
+
+dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
+dnl SEE https://www.mail-archive.com/automake-patches@gnu.org/msg07705.html
+AC_SUBST(AR_FLAGS, [cr])
 
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by PHP_REQUIRE_CXX).
 dnl Otherwise AC_PROG_LIBTOOL fails if there is no working C++ compiler.

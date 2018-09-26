@@ -1,8 +1,8 @@
 --TEST--
 normalize() NFKC_Casefold
 --SKIPIF--
-<?php if (!extension_loaded('intl')) print 'skip'; ?>
-<?php if (!defined('Normalizer::FORM_KC_CF')) print 'skip'; ?>
+<?php if (!extension_loaded('intl')) print 'skip intl extension not loaded'; ?>
+<?php if (!defined('Normalizer::FORM_KC_CF')) print 'skip Normalizer::FORM_KC_CF constant not defined'; ?>
 --FILE--
 <?php
 
