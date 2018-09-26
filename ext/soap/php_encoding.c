@@ -2158,16 +2158,6 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
  	}
 }
 
-static inline int array_num_elements(HashTable* ht)
-{
-	if (ht->nNumUsed &&
-	    Z_TYPE(ht->arData[ht->nNumUsed-1].val) != IS_UNDEF &&
-	    ht->arData[ht->nNumUsed-1].key == NULL) {
-	    return ht->arData[ht->nNumUsed-1].h - 1;
-	}
-	return 0;
-}
-
 static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	sdlTypePtr sdl_type = type->sdl_type;
