@@ -26,6 +26,7 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 2. New Features
 ========================================
+  . Added cache_key() streams operation.
 
 - PDO_SQLite:
   . PDOStatement::getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT) allows to
