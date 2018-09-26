@@ -793,7 +793,6 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len
 static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
-	pdo_oci_column *C;
 	OCIParam *param = NULL;
 	ub2 dtype, precis;
 	sb1 scale;
@@ -806,8 +805,6 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 		/* error invalid column */
 		return FAILURE;
 	}
-
-	C = &S->cols[colno];
 
 	array_init(return_value);
 	array_init(&flags);
