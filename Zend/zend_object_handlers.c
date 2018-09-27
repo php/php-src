@@ -807,7 +807,7 @@ ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, 
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 					zend_verify_property_type_error(prop_info, value);
 					Z_TRY_DELREF_P(value);
-					value = &EG(error_zval);
+					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
 				value = &tmp;
@@ -831,7 +831,7 @@ found:
 			}
 		}
 	} else if (UNEXPECTED(EG(exception))) {
-		value = &EG(error_zval);
+		variable_ptr = &EG(error_zval);
 		goto exit;
 	}
 
@@ -845,13 +845,14 @@ found:
 			zend_std_call_setter(zobj, name, value);
 			(*guard) &= ~IN_SET;
 			OBJ_RELEASE(zobj);
+			variable_ptr = value;
 		} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
 			goto write_std_property;
 		} else {
 			/* Trigger the correct error */
 			zend_get_property_offset(zobj->ce, name, 0, NULL);
 			ZEND_ASSERT(EG(exception));
-			value = &EG(error_zval);
+			variable_ptr = &EG(error_zval);
 			goto exit;
 		}
 	} else {
@@ -881,18 +882,19 @@ write_std_property:
 				}
 				value = &tmp;
 			}
-			ZVAL_COPY_VALUE(OBJ_PROP(zobj, property_offset), value);
+			variable_ptr = OBJ_PROP(zobj, property_offset);
+			ZVAL_COPY_VALUE(variable_ptr, value);
 		} else {
 			if (!zobj->properties) {
 				rebuild_object_properties(zobj);
 			}
-			zend_hash_add_new(zobj->properties, name, value);
+			variable_ptr = zend_hash_add_new(zobj->properties, name, value);
 		}
 	}
 
 exit:
 	zend_tmp_string_release(tmp_name);
-	return value;
+	return variable_ptr;
 }
 /* }}} */
 
