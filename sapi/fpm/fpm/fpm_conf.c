@@ -1334,17 +1334,33 @@ static void fpm_conf_ini_parser_section(zval *section, void *arg) /* {{{ */
 	struct fpm_worker_pool_s *wp;
 	struct fpm_worker_pool_config_s *config;
 	int *error = (int *)arg;
+	const char *name = NULL;
 
-	/* switch to global conf */
 	if (!strcasecmp(Z_STRVAL_P(section), "global")) {
+		/* switch to global conf */
 		current_wp = NULL;
 		return;
+	} else if (!strncasecmp(Z_STRVAL_P(section), "pool:", sizeof("pool:") - 1)) {
+		name = Z_STRVAL_P(section) + sizeof("pool:") - 1;
+	} else if (strchr(Z_STRVAL_P(section), ':')) {
+		zlog(ZLOG_ERROR, "[%s:%d] Invalid section name prefix in '%s'", ini_filename, ini_lineno, Z_STRVAL_P(section));
+		*error = 1;
+		return;
+	} else {
+#if 1
+		/* backward compatibility, this can be gone one day to enforce the style "pool:name" */
+		name = Z_STRVAL_P(section);
+#else
+		zlog(ZLOG_ERROR, "[%s:%d] Unknown section name '%s'", ini_filename, ini_lineno, Z_STRVAL_P(section));
+		*error = 1;
+		return;
+#endif
 	}
 
+	/* check for previously defined pools with the same name */
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
-		if (!wp->config) continue;
-		if (!wp->config->name) continue;
-		if (!strcasecmp(wp->config->name, Z_STRVAL_P(section))) {
+		if (!wp->config || !wp->config->name) continue;
+		if (!strcasecmp(wp->config->name, name)) {
 			/* Found a wp with the same name. Bring it back */
 			current_wp = wp;
 			return;
@@ -1354,13 +1370,13 @@ static void fpm_conf_ini_parser_section(zval *section, void *arg) /* {{{ */
 	/* it's a new pool */
 	config = (struct fpm_worker_pool_config_s *)fpm_worker_pool_config_alloc();
 	if (!current_wp || !config) {
-		zlog(ZLOG_ERROR, "[%s:%d] Unable to alloc a new WorkerPool for worker '%s'", ini_filename, ini_lineno, Z_STRVAL_P(section));
+		zlog(ZLOG_ERROR, "[%s:%d] Unable to alloc a new WorkerPool for worker '%s'", ini_filename, ini_lineno, name);
 		*error = 1;
 		return;
 	}
-	config->name = strdup(Z_STRVAL_P(section));
+	config->name = strdup(name);
 	if (!config->name) {
-		zlog(ZLOG_ERROR, "[%s:%d] Unable to alloc memory for configuration name for worker '%s'", ini_filename, ini_lineno, Z_STRVAL_P(section));
+		zlog(ZLOG_ERROR, "[%s:%d] Unable to alloc memory for configuration name for worker '%s'", ini_filename, ini_lineno, name);
 		*error = 1;
 		return;
 	}
@@ -1628,7 +1644,7 @@ static void fpm_conf_dump() /* {{{ */
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		struct key_value_s *kv;
 		if (!wp->config) continue;
-		zlog(ZLOG_NOTICE, "[%s]",                              STR2STR(wp->config->name));
+		zlog(ZLOG_NOTICE, "[pool:%s]",                         STR2STR(wp->config->name));
 		zlog(ZLOG_NOTICE, "\tprefix = %s",                     STR2STR(wp->config->prefix));
 		zlog(ZLOG_NOTICE, "\tuser = %s",                       STR2STR(wp->config->user));
 		zlog(ZLOG_NOTICE, "\tgroup = %s",                      STR2STR(wp->config->group));
