@@ -343,28 +343,67 @@ int zend_shared_memdup_size(void *source, size_t size)
 		/* we already duplicated this pointer */
 		return 0;
 	}
-	zend_shared_alloc_register_xlat_entry(source, source);
+	zend_hash_index_add_new_ptr(&ZCG(xlat_table), key, source);
 	return ZEND_ALIGNED_SIZE(size);
 }
 
-void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source)
+static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, zend_bool get_xlat, zend_bool set_xlat, zend_bool free_source)
 {
 	void *old_p, *retval;
-	zend_ulong key = (zend_ulong)source;
+	zend_ulong key;
 
-	key = (key >> 3) | (key << ((sizeof(key) * 8) - 3)); /* key  = _rotr(key, 3);*/
-	if ((old_p = zend_hash_index_find_ptr(&ZCG(xlat_table), key)) != NULL) {
-		/* we already duplicated this pointer */
-		return old_p;
+	if (get_xlat) {
+		key = (zend_ulong)source;
+		key = (key >> 3) | (key << ((sizeof(key) * 8) - 3)); /* key  = _rotr(key, 3);*/
+		if ((old_p = zend_hash_index_find_ptr(&ZCG(xlat_table), key)) != NULL) {
+			/* we already duplicated this pointer */
+			return old_p;
+		}
 	}
 	retval = ZCG(mem);
 	ZCG(mem) = (void*)(((char*)ZCG(mem)) + ZEND_ALIGNED_SIZE(size));
 	memcpy(retval, source, size);
-	zend_shared_alloc_register_xlat_entry(source, retval);
+	if (set_xlat) {
+		if (!get_xlat) {
+			key = (zend_ulong)source;
+			key = (key >> 3) | (key << ((sizeof(key) * 8) - 3)); /* key  = _rotr(key, 3);*/
+		}
+		zend_hash_index_add_new_ptr(&ZCG(xlat_table), key, retval);
+	}
 	if (free_source) {
 		efree(source);
 	}
 	return retval;
+}
+
+void *zend_shared_memdup_get_put_free(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 1, 1, 1);
+}
+
+void *zend_shared_memdup_put_free(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 1, 1);
+}
+
+void *zend_shared_memdup_free(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 0, 1);
+}
+
+void *zend_shared_memdup_get_put(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 1, 1, 0);
+}
+
+void *zend_shared_memdup_put(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 1, 0);
+}
+
+void *zend_shared_memdup(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 0, 0);
 }
 
 void zend_shared_alloc_safe_unlock(void)

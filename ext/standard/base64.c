@@ -790,11 +790,7 @@ PHP_FUNCTION(base64_encode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = php_base64_encode((unsigned char*)str, str_len);
-	if (result != NULL) {
-		RETURN_STR(result);
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_STR(result);
 }
 /* }}} */
 

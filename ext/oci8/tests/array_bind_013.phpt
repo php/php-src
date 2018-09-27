@@ -22,7 +22,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_bind_array_by_name() expects at most 6 parameters, 7 given in %s on line %d
 NULL
 

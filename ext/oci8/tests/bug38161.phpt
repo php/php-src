@@ -24,7 +24,7 @@ var_dump($bv);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 NULL
 int(0)
 Done

@@ -4,7 +4,7 @@ Bug #44008 (Incorrect usage of OCI-Lob->close crashes PHP)
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 

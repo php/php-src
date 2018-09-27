@@ -4,12 +4,12 @@ Bug #32325 (Cannot retrieve collection using OCI8)
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
 require(dirname(__FILE__).'/connect.inc');
-		
+
 // Initialize
 
 $stmtarray = array(
@@ -19,7 +19,7 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 // Run test
-	
+
 $collection = oci_new_collection($c, "BUG32325_T");
 
 $sql = "begin
@@ -45,7 +45,7 @@ oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 int(4)
 float(2)
 float(3)

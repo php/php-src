@@ -1,8 +1,8 @@
 --TEST--
 Bind with various unsupported 10g+ bind types
 --SKIPIF--
-<?php 
-if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
+<?php
+if (!extension_loaded('oci8')) die("skip no oci8 extension");
 ?>
 --FILE--
 <?php
@@ -20,7 +20,7 @@ foreach ($types as $t => $v) {
 
     $s = oci_parse($c, "select * from dual where dummy = :c1");
     $c1 = "Doug";
-    oci_bind_by_name($s, ":c1", $c1, -1, $v);    
+    oci_bind_by_name($s, ":c1", $c1, -1, $v);
 }
 
 ?>

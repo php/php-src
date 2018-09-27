@@ -152,11 +152,9 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 {
 	if (op_array->static_variables) {
 		if (!zend_shared_alloc_get_xlat_entry(op_array->static_variables)) {
-			HashTable *old = op_array->static_variables;
-
-			ADD_DUP_SIZE(op_array->static_variables, sizeof(HashTable));
+			zend_shared_alloc_register_xlat_entry(op_array->static_variables, op_array->static_variables);
+			ADD_SIZE(sizeof(HashTable));
 			zend_hash_persist_calc(op_array->static_variables, zend_persist_zval_calc);
-			zend_shared_alloc_register_xlat_entry(old, op_array->static_variables);
 		}
 	}
 
@@ -168,20 +166,22 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 				op_array->function_name = new_name;
 			}
 		}
+		ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
 		return;
 	}
 
 	if (op_array->literals) {
 		zval *p = op_array->literals;
 		zval *end = p + op_array->last_literal;
-		ADD_DUP_SIZE(op_array->literals, sizeof(zval) * op_array->last_literal);
+		ADD_SIZE(sizeof(zval) * op_array->last_literal);
 		while (p < end) {
 			zend_persist_zval_calc(p);
 			p++;
 		}
 	}
 
-	ADD_DUP_SIZE(op_array->opcodes, sizeof(zend_op) * op_array->last);
+	zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array->opcodes);
+	ADD_SIZE(sizeof(zend_op) * op_array->last);
 
 	if (op_array->function_name) {
 		zend_string *old_name = op_array->function_name;
@@ -212,7 +212,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			arg_info--;
 			num_args++;
 		}
-		ADD_DUP_SIZE(arg_info, sizeof(zend_arg_info) * num_args);
+		ADD_SIZE(sizeof(zend_arg_info) * num_args);
 		for (i = 0; i < num_args; i++) {
 			if (arg_info[i].name) {
 				ADD_INTERNED_STRING(arg_info[i].name, 1);
@@ -228,7 +228,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	}
 
 	if (op_array->live_range) {
-		ADD_DUP_SIZE(op_array->live_range, sizeof(zend_live_range) * op_array->last_live_range);
+		ADD_SIZE(sizeof(zend_live_range) * op_array->last_live_range);
 	}
 
 	if (ZCG(accel_directives).save_comments && op_array->doc_comment) {
@@ -236,13 +236,13 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	}
 
 	if (op_array->try_catch_array) {
-		ADD_DUP_SIZE(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
+		ADD_SIZE(sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
 
 	if (op_array->vars) {
 		int i;
 
-		ADD_DUP_SIZE(op_array->vars, sizeof(zend_string*) * op_array->last_var);
+		ADD_SIZE(sizeof(zend_string*) * op_array->last_var);
 		for (i = 0; i < op_array->last_var; i++) {
 			ADD_INTERNED_STRING(op_array->vars[i], 0);
 		}
@@ -433,9 +433,10 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 		new_persistent_script->corrupted = 1;
 	}
 
-	ADD_DUP_SIZE(new_persistent_script, sizeof(zend_persistent_script));
+	ADD_SIZE(sizeof(zend_persistent_script));
 	if (key) {
-		ADD_DUP_SIZE(key, key_length + 1);
+		ADD_SIZE(key_length + 1);
+		zend_shared_alloc_register_xlat_entry(key, key);
 	}
 	ADD_STRING(new_persistent_script->script.filename);
 

@@ -4,7 +4,7 @@ Test oci_define_by_name() LOB descriptor
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -14,7 +14,7 @@ $stmtarray = array(
 	"drop table phpdefblobtable",
 	"create table phpdefblobtable (id number(10), fileimage blob)"
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 // Load data
@@ -78,7 +78,7 @@ while (oci_fetch($stmt)) {
 $stmtarray = array(
 	"drop table phpdefblobtable"
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";

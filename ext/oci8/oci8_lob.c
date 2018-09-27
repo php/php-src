@@ -67,7 +67,11 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 	descriptor = ecalloc(1, sizeof(php_oci_descriptor));
 	descriptor->type = (ub4) type;
 	descriptor->connection = connection;
+#if PHP_VERSION_ID < 70300
+	++GC_REFCOUNT(descriptor->connection->id);
+#else
 	GC_ADDREF(descriptor->connection->id);
+#endif
 
 	PHP_OCI_CALL_RETURN(errstatus, OCIDescriptorAlloc, (connection->env, (dvoid*)&(descriptor->descriptor), descriptor->type, (size_t) 0, (dvoid **) 0));
 

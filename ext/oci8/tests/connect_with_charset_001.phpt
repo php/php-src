@@ -21,7 +21,7 @@ var_dump($c5 == $c6);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 connection)
 
