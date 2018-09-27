@@ -3000,12 +3000,14 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 	if (opline && opline->opcode == ZEND_FETCH_OBJ_W) {
 		opline->opcode = ZEND_ASSIGN_OBJ_REF;
+		opline->extended_value &= ~ZEND_FETCH_REF;
 		zend_emit_op_data(&source_node);
 		if (result != NULL) {
 			*result = target_node;
 		}
 	} else if (opline && opline->opcode == ZEND_FETCH_STATIC_PROP_W) {
 		opline->opcode = ZEND_ASSIGN_STATIC_PROP_REF;
+		opline->extended_value &= ~ZEND_FETCH_REF;
 		zend_emit_op_data(&source_node);
 		if (result != NULL) {
 			*result = target_node;
