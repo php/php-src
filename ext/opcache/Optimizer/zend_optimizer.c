@@ -335,6 +335,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 				break;
 			}
 		case ZEND_ASSIGN_STATIC_PROP:
+		case ZEND_ASSIGN_STATIC_PROP_REF:
 		case ZEND_FETCH_STATIC_PROP_R:
 		case ZEND_FETCH_STATIC_PROP_W:
 		case ZEND_FETCH_STATIC_PROP_RW:
