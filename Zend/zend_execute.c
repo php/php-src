@@ -2114,6 +2114,7 @@ fetch_from_array:
 						"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 						ZSTR_VAL(error_prop->ce->name),
 						ZSTR_VAL(error_prop->name));
+					ZVAL_ERROR(result);
 				} else {
 					array_init(container);
 					goto fetch_from_array;
