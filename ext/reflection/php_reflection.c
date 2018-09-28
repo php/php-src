@@ -2875,8 +2875,10 @@ ZEND_METHOD(reflection_type, isBuiltin)
 
 /* {{{ reflection_type_name */
 static zend_string *reflection_type_name(type_reference *param) {
-	if (ZEND_TYPE_IS_CLASS(param->type)) {
+	if (ZEND_TYPE_IS_NAME(param->type)) {
 		return zend_string_copy(ZEND_TYPE_NAME(param->type));
+	} else if (ZEND_TYPE_IS_CE(param->type)) {
+		return zend_string_copy(ZEND_TYPE_CE(param->type)->name);
 	} else {
 		char *name = zend_get_type_by_const(ZEND_TYPE_CODE(param->type));
 		return zend_string_init(name, strlen(name), 0);

@@ -95,7 +95,11 @@ foreach ($reflector->getProperties() as $name => $property) {
 	} else printf("public $%s;\n", $property->getName());
 }
 
-echo "** property types\n";
+echo "*** resolved property types\n";
+$obj = new PropTypeTest;
+$obj->std = new stdClass;
+$r = (new ReflectionProperty($obj, 'std'))->getType();
+var_dump($r->getName());
 ?>
 --EXPECT--
 *** functions
@@ -216,4 +220,5 @@ public iterable $iterable;
 public stdClass $std;
 public OtherThing $other;
 public $mixed;
-** property types
+*** resolved property types
+string(8) "stdClass"
