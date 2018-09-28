@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.2.12
 
+- Core:
+  . Fixed bug #76846 (Segfault in shutdown function after memory limit error).
+    (Nikita)
+  . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
 
 11 Oct 2018, PHP 7.2.11
 
@@ -10,8 +14,6 @@ PHP                                                                        NEWS
     (Dmitry)
   . Fixed bug #76901 (method_exists on SPL iterator passthrough method corrupts
     memory). (Nikita)
-  . Fixed bug #76846 (Segfault in shutdown function after memory limit error).
-    (Nikita)
 
 - CURL:
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
