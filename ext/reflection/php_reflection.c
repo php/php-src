@@ -117,11 +117,6 @@ typedef struct _parameter_reference {
 	zend_function *fptr;
 } parameter_reference;
 
-typedef enum {
-	REF_INFO_ARG,
-	REF_INFO_PROP
-} reflection_info_type_t;
-
 /* Struct for type hints */
 typedef struct _type_reference {
 	zend_type type;
