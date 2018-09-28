@@ -103,7 +103,6 @@ PHPAPI zend_class_entry *reflection_zend_extension_ptr;
 
 /* Struct for properties */
 typedef struct _property_reference {
-	zend_class_entry *ce;
 	zend_property_info prop;
 	zend_string *unmangled_name;
 	zend_bool dynamic;
@@ -1245,7 +1244,6 @@ static void reflection_property_factory(zend_class_entry *ce, zend_string *name,
 	reflection_instantiate(reflection_property_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
-	reference->ce = ce;
 	reference->prop = *prop;
 	reference->unmangled_name = zend_string_copy(name);
 	reference->dynamic = dynamic;
@@ -5316,7 +5314,6 @@ ZEND_METHOD(reflection_property, __construct)
 		reference->prop = *property_info;
 		reference->dynamic = 0;
 	}
-	reference->ce = ce;
 	reference->unmangled_name = zend_string_copy(name);
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
@@ -5449,7 +5446,7 @@ ZEND_METHOD(reflection_property, getValue)
 	}
 
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
-		member_p = zend_read_static_property_ex(ref->ce, ref->unmangled_name, 0);
+		member_p = zend_read_static_property_ex(intern->ce, ref->unmangled_name, 0);
 		if (member_p) {
 			ZVAL_COPY_DEREF(return_value, member_p);
 		}
@@ -5465,7 +5462,7 @@ ZEND_METHOD(reflection_property, getValue)
 			/* Returns from this function */
 		}
 
-		member_p = zend_read_property_ex(ref->ce, object, ref->unmangled_name, 0, &rv);
+		member_p = zend_read_property_ex(intern->ce, object, ref->unmangled_name, 0, &rv);
 		if (member_p != &rv) {
 			ZVAL_COPY_DEREF(return_value, member_p);
 		} else {
@@ -5504,13 +5501,13 @@ ZEND_METHOD(reflection_property, setValue)
 			}
 		}
 
-		zend_update_static_property_ex(ref->ce, ref->unmangled_name, value);
+		zend_update_static_property_ex(intern->ce, ref->unmangled_name, value);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
 			return;
 		}
 
-		zend_update_property_ex(ref->ce, object, ref->unmangled_name, value);
+		zend_update_property_ex(intern->ce, object, ref->unmangled_name, value);
 	}
 }
 /* }}} */
@@ -5529,7 +5526,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	ce = tmp_ce = ref->ce;
+	ce = tmp_ce = intern->ce;
 	while (tmp_ce && (tmp_info = zend_hash_find_ptr(&tmp_ce->properties_info, ref->unmangled_name)) != NULL) {
 		if (tmp_info->flags & ZEND_ACC_PRIVATE) {
 			/* it's a private property, so it can't be inherited */
