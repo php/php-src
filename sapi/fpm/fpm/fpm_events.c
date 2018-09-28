@@ -537,4 +537,3 @@ int fpm_event_del(struct fpm_event_s *ev) /* {{{ */
 	return 0;
 }
 /* }}} */
-

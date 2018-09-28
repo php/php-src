@@ -410,4 +410,3 @@ xml_element* XMLRPC_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
    }
    return wrapper;
 }
-

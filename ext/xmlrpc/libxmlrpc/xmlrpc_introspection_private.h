@@ -100,7 +100,3 @@ void xi_register_system_methods(XMLRPC_SERVER server);
 
 
 #endif /* __XI_INTROSPECTION_PRIVATE_H */
-
-
-
-

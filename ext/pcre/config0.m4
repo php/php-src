@@ -77,4 +77,3 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality]
       AC_MSG_RESULT([no])
     fi
   fi
-

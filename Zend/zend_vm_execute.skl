@@ -82,4 +82,3 @@ ZEND_API void zend_deserialize_opcode_handler(zend_op *op)
 {
 	op->handler = zend_opcode_handlers[(zend_uintptr_t)op->handler];
 }
-

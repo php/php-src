@@ -55,4 +55,3 @@ void php_win32_core_globals_dtor(void *vg);
 PHP_RSHUTDOWN_FUNCTION(win32_core_globals);
 
 #endif
-

@@ -338,4 +338,3 @@ int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 
 	return c;
 }
-

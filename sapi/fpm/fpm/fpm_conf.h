@@ -118,4 +118,3 @@ int fpm_conf_write_pid();
 int fpm_conf_unlink_pid();
 
 #endif
-

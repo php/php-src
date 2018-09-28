@@ -164,5 +164,3 @@ retry:
 
 	return c;
 }
-
-

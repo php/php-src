@@ -185,4 +185,3 @@ PHP_FUNCTION(module_name_drawtext)
     php_error(E_WARNING, "module_name_drawtext: not yet implemented");
 }
 /* }}} */
-

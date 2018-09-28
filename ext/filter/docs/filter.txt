@@ -328,4 +328,3 @@ boolean callback(&$value, $characterset);
 
 Version: $Id$
 .. vim: et syn=rst tw=78
-

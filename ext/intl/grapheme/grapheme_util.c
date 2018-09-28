@@ -407,4 +407,3 @@ UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *stat
  * vim600: fdm=marker
  * vim: noet sw=4 ts=4
  */
-

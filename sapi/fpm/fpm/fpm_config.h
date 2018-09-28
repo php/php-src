@@ -76,4 +76,3 @@
 #else
 # define HAVE_FPM_LQ 0
 #endif
-

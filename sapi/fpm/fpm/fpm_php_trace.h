@@ -10,4 +10,3 @@ struct fpm_child_s;
 void fpm_php_trace(struct fpm_child_s *);
 
 #endif
-

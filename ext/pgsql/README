@@ -232,4 +232,3 @@ bool pg_ping(resource db)
 
 Again, experimental functions are subject to be changed without 
 notice.
-

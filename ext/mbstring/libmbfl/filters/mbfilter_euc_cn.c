@@ -240,5 +240,3 @@ static int mbfl_filt_ident_euccn(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-

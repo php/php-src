@@ -139,4 +139,3 @@ PHP_FUNCTION(mysqli_driver_construct);
 PHP_METHOD(mysqli_warning,__construct);
 
 #endif /* MYSQLI_FE_H */
-

@@ -145,4 +145,3 @@ typedef unsigned long int uint32_t;
 #endif
 
 #endif /* ZEND_STRTOD_INT_H */
-
