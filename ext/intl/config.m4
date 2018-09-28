@@ -8,7 +8,6 @@ PHP_ARG_ENABLE(intl, whether to enable internationalization support,
 if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU(INTL_SHARED_LIBADD)
   PHP_SUBST(INTL_SHARED_LIBADD)
-  PHP_REQUIRE_CXX()
   INTL_COMMON_FLAGS="$ICU_INCS $ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   PHP_NEW_EXTENSION(intl, php_intl.c \
     intl_error.c \
@@ -84,7 +83,10 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
     breakiterator/codepointiterator_methods.cpp"
-  PHP_INTL_CXX_FLAGS="$INTL_COMMON_FLAGS $ICU_CXXFLAGS"
+
+  PHP_REQUIRE_CXX()
+  PHP_CXX_COMPILE_STDCXX(11, mandatory, PHP_INTL_STDCXX)
+  PHP_INTL_CXX_FLAGS="$INTL_COMMON_FLAGS $PHP_INTL_STDCXX $ICU_CXXFLAGS"
   if test "$ext_shared" = "no"; then
     PHP_ADD_SOURCES(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS)
   else
