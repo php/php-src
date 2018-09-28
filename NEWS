@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018, PHP 7.1.23
+28 Sep 2018, PHP 7.1.23RC1
 
 - Core:
   . Fixed bug #76901 (method_exists on SPL iterator passthrough method corrupts
