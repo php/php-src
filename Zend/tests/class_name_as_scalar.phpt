@@ -8,8 +8,11 @@ namespace Foo\Bar {
         // compile time constants
         const A = self::class;
         const B = Two::class;
+
     }
     class Two extends One {
+        const A = parent::class;
+
         public static function run() {
             var_dump(self::class); // self compile time lookup
             var_dump(static::class); // runtime lookup
@@ -18,6 +21,8 @@ namespace Foo\Bar {
         }
     }
     class Three extends Two {
+        const B = parent::class;
+
         // compile time static lookups
         public static function checkCompileTime(
             $one = self::class,

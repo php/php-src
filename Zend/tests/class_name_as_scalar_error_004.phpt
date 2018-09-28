@@ -10,4 +10,6 @@ namespace Foo\Bar {
 }
 ?>
 --EXPECTF--
-Fatal error: parent::class cannot be used for compile-time class name resolution in %s on line %d
+Deprecated: Cannot use "parent" without a parent class in %s on line %d
+
+Fatal error: Cannot use "parent" without a parent class in %s on line %d
