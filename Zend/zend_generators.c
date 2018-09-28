@@ -276,6 +276,25 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 		size += Z_TYPE(execute_data->This) == IS_OBJECT; /* $this */
 		size += (EX_CALL_INFO() & ZEND_CALL_CLOSURE) != 0; /* Closure object */
 
+		/* Live vars */
+		if (execute_data->opline != op_array->opcodes) {
+			/* -1 required because we want the last run opcode, not the next to-be-run one. */
+			uint32_t i, op_num = execute_data->opline - op_array->opcodes - 1;
+			for (i = 0; i < op_array->last_live_range; i++) {
+				const zend_live_range *range = &op_array->live_range[i];
+				if (range->start > op_num) {
+					/* Further ranges will not be relevant... */
+					break;
+				} else if (op_num < range->end) {
+					/* LIVE_ROPE and LIVE_SILENCE not relevant for GC */
+					uint32_t kind = range->var & ZEND_LIVE_MASK;
+					if (kind == ZEND_LIVE_TMPVAR || kind == ZEND_LIVE_LOOP) {
+						size++;
+					}
+				}
+			}
+		}
+
 		/* Yield from root references */
 		if (generator->node.children == 0) {
 			zend_generator *root = generator->node.ptr.root;
@@ -340,6 +359,23 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 	}
 	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
 		ZVAL_OBJ(gc_buffer++, ZEND_CLOSURE_OBJECT(EX(func)));
+	}
+
+	if (execute_data->opline != op_array->opcodes) {
+		uint32_t i, op_num = execute_data->opline - op_array->opcodes - 1;
+		for (i = 0; i < op_array->last_live_range; i++) {
+			const zend_live_range *range = &op_array->live_range[i];
+			if (range->start > op_num) {
+				break;
+			} else if (op_num < range->end) {
+				uint32_t kind = range->var & ZEND_LIVE_MASK;
+				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
+				zval *var = EX_VAR(var_num);
+				if (kind == ZEND_LIVE_TMPVAR || kind == ZEND_LIVE_LOOP) {
+					ZVAL_COPY_VALUE(gc_buffer++, var);
+				}
+			}
+		}
 	}
 
 	if (generator->node.children == 0) {
