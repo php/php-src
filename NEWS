@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #76846 (Segfault in shutdown function after memory limit error).
     (Nikita)
+  . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
 
 27 Sep 2018, PHP 7.3.0RC2
 
