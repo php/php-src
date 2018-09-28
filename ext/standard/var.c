@@ -175,10 +175,9 @@ again:
 
 					if (Z_TYPE_P(val) == IS_INDIRECT) {
 						val = Z_INDIRECT_P(val);
-					}
-
-					if (key) {
-						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(struc), key, NULL);
+						if (key) {
+							prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(struc), key, NULL);
+						}
 					}
 
 					if (!Z_ISUNDEF_P(val) || prop_info) {
@@ -367,10 +366,9 @@ again:
 
 				if (Z_TYPE_P(val) == IS_INDIRECT) {
 					val = Z_INDIRECT_P(val);
-				}
-
-				if (key) {
-					prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(struc), key, NULL);
+					if (key) {
+						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(struc), key, NULL);
+					}
 				}
 
 				if (!Z_ISUNDEF_P(val) || prop_info) {
