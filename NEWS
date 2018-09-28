@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     (Dmitry)
   . Fixed bug #76901 (method_exists on SPL iterator passthrough method corrupts
     memory). (Nikita)
+  . Fixed bug #76846 (Segfault in shutdown function after memory limit error).
+    (Nikita)
 
 - CURL:
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
