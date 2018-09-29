@@ -909,6 +909,11 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 
 ZEND_API zend_bool zend_load_property_class_type(zend_property_info *info) {
 	if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(info->type), "self")) {
+		if (UNEXPECTED((info->ce->ce_flags & ZEND_ACC_TRAIT) != 0)) {
+			zend_throw_error(NULL, "Cannot write a%s value to a 'self' typed static property of a trait", ZEND_TYPE_ALLOW_NULL(info->type) ? " non-null" : "");
+			return 0;
+		}
+
 		zend_string_release(ZEND_TYPE_NAME(info->type));
 		info->type = ZEND_TYPE_ENCODE_CE(info->ce, ZEND_TYPE_ALLOW_NULL(info->type));
 	} else if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(info->type), "parent")) {
