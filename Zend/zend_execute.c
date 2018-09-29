@@ -2647,11 +2647,14 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 		}
 		if ((flags & ZEND_FETCH_REF) && Z_TYPE_P(*retval) != IS_REFERENCE) {
 			zval *ref = *retval;
-			if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(*retval) <= IS_NULL)) {
+			if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(ref) <= IS_NULL)) {
 				zend_throw_error(NULL, "Cannot access uninitialized property %s::$%s by reference",
 					ZSTR_VAL(property_info->ce->name),
 					ZSTR_VAL(property_info->name));
 				return FAILURE;
+			}
+			if (UNEXPECTED(Z_ISUNDEF_P(ref))) {
+				ZVAL_NULL(ref);
 			}
 			ZVAL_NEW_REF(ref, ref);
 			if (property_info->type) {
