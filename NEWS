@@ -21,4 +21,8 @@ PHP                                                                        NEWS
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
     stream_socket_client). (Ville Hukkamäki)
 
+- Reflection:
+  . Fixed bug #76737 (Unserialized reflection objects are broken, they
+    shouldn't be serializable). (Nikita)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
