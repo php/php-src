@@ -23,6 +23,12 @@ PHP 7.4 UPGRADE NOTES
   . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
     INTL_IDNA_VARIANT_UTS46 instead of the deprecated INTL_IDNA_VARIANT_2003.
 
+- Reflection:
+  . Reflection objects will now generate an exception if an attempt is made
+    to serialize them. Serialization for reflection objects was never
+    supported and resulted in corrupted reflection objects. It has been
+    explicitly prohibited now.
+
 ========================================
 2. New Features
 ========================================
