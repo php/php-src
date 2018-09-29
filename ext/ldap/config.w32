@@ -31,4 +31,3 @@ if (PHP_LDAP != "no") {
 		WARNING("ldap not enabled; libraries and headers not found");
 	}
 }
-

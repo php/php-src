@@ -2389,4 +2389,3 @@ PHP                                                                        NEWS
     php_stream_zip_opener). (Stas)
   . ZipArchive::addGlob() will throw an instance of Error instead of resulting
     in a fatal error if glob support is not available. (Aaron Piotrowski)
-

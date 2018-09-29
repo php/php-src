@@ -5064,4 +5064,3 @@ static const unsigned short *uni2jis_tbl[] = {
 static const int uni2jis_tbl_len = sizeof(uni2jis_tbl_range)/(sizeof(int)*2);
 
 #endif /* UNICODE_TABLE_JIS2004_H */
-

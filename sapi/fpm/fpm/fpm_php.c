@@ -286,4 +286,3 @@ char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 	return NULL;
 }
 /* }}} */
-

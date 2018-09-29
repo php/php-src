@@ -79,4 +79,3 @@ PHP_FUNCTION(enchant_dict_quick_check);
  * indent-tabs-mode: t
  * End:
  */
-

@@ -596,6 +596,3 @@ int XMLRPC_ServerRegisterIntrospectionCallback(XMLRPC_SERVER server, XMLRPC_Intr
 /*-**********************
 * End Introspection API *
 ************************/
-
-
-

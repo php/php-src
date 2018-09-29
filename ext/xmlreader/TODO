@@ -4,5 +4,3 @@
   use new api for creating the xmlTextReaderPtr
 
 - Add Custom Error Handling
-
-

@@ -165,4 +165,3 @@ static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */
 #define fpm_unlock(lock) lock = 0
 
 #endif
-

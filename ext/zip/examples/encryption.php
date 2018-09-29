@@ -46,4 +46,3 @@ $ctx = stream_context_create(array(
 ));
 $text = file_get_contents("zip://$name#$file", false, $ctx);
 printf("Size = %d\n", strlen($text));
-

@@ -3487,4 +3487,3 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 		ADD_FLAG(ldflags_name, "/libpath:\"" + get_clang_lib_dir() + "\\windows\"");
 	}
 }
-

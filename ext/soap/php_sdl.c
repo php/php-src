@@ -3670,4 +3670,3 @@ static void delete_document(zval *zv)
 	xmlDocPtr doc = Z_PTR_P(zv);
 	xmlFreeDoc(doc);
 }
-

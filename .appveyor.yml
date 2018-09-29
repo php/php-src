@@ -48,4 +48,3 @@ build_script:
 
 test_script:
         - appveyor\test.bat
-

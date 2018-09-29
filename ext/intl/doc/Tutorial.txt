@@ -236,4 +236,3 @@ length and string comparison string comparison performance.
 
 NUMERIC_COLLATION - When turned on, this attribute generates a collation key for the
 numeric value of substrings of digits. This is a way to get '100' to sort AFTER '2'.
-

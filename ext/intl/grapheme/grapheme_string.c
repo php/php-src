@@ -907,4 +907,3 @@ PHP_FUNCTION(grapheme_extract)
  * vim600: fdm=marker
  * vim: noet sw=4 ts=4
  */
-

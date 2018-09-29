@@ -46,4 +46,3 @@ bc_is_neg (num)
 {
   return num->n_sign == MINUS;
 }
-

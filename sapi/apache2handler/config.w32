@@ -55,4 +55,3 @@ if (PHP_APACHE2_4HANDLER != "no") {
 		WARNING("Could not find apache 2.4 libraries/headers");
 	}
 }
-

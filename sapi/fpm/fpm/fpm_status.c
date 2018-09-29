@@ -479,4 +479,3 @@ int fpm_status_handle_request(void) /* {{{ */
 	return 0;
 }
 /* }}} */
-

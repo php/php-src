@@ -15,4 +15,3 @@ AC_TYPE_SIZE_T
 AC_CHECK_TYPE(ptrdiff_t, size_t)
 
 AC_OUTPUT(Makefile src/Makefile doc/Makefile)
-

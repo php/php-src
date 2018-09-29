@@ -86,4 +86,3 @@ cd "%APPVEYOR_BUILD_FOLDER%"
 nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
 
 exit /b %errorlevel%
-
