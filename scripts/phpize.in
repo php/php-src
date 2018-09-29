@@ -31,7 +31,7 @@ phpize_no_configm4()
 
   echo "Cannot find config.m4. "
   echo "Make sure that you run '$0$clean' in the top level source directory of the module"
-  echo 
+  echo
 }
 
 phpize_clean()
@@ -107,8 +107,8 @@ phpize_check_shtool()
 
   if test ! -x "$builddir/build/shtool"; then
     cat <<EOF
-shtool at '$builddir/build/shtool' does not exist or is not executable. 
-Make sure that the file exists and is executable and then rerun this script. 
+shtool at '$builddir/build/shtool' does not exist or is not executable.
+Make sure that the file exists and is executable and then rerun this script.
 
 EOF
     exit 1
@@ -121,7 +121,7 @@ phpize_check_autotools()
 {
   test -z "$PHP_AUTOCONF" && PHP_AUTOCONF=autoconf
   test -z "$PHP_AUTOHEADER" && PHP_AUTOHEADER=autoheader
-  
+
   if test ! -x "$PHP_AUTOCONF" && test ! -x "`$php_shtool path $PHP_AUTOCONF`"; then
     cat <<EOF
 Cannot find autoconf. Please check your autoconf installation and the
@@ -143,7 +143,7 @@ EOF
 phpize_copy_files()
 {
   test -d build || mkdir build
- 
+
   (cd "$phpdir" && cp $FILES_BUILD "$builddir"/build)
   (cd "$phpdir" && cp $FILES "$builddir")
   (cd "$builddir" && cat acinclude.m4 ./build/libtool.m4 > aclocal.m4)
@@ -164,7 +164,7 @@ phpize_autotools()
 
 # Main script
 
-case "$1" in 
+case "$1" in
   # Cleanup
   --clean)
     phpize_check_configm4 1

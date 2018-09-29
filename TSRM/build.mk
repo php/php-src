@@ -31,7 +31,7 @@ aclocal.m4: configure.ac acinclude.m4
 	aclocal
 
 $(config_h_in): configure.ac
-# explicitly remove target since autoheader does not seem to work 
+# explicitly remove target since autoheader does not seem to work
 # correctly otherwise (timestamps are not updated)
 	@rm -f $@
 	autoheader

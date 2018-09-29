@@ -589,7 +589,7 @@ html_errors = On
 ; to syslog. Only used when error_log is set to syslog.
 ;syslog.ident = php
 
-; The syslog facility is used to specify what type of program is logging 
+; The syslog facility is used to specify what type of program is logging
 ; the message. Only used when error_log is set to syslog.
 ;syslog.facility = user
 
@@ -889,7 +889,7 @@ default_socket_timeout = 60
 ; For example:
 ;
 ;   extension=mysqli
-; 
+;
 ; When the extension library to load is not located in the default extension
 ; directory, You may specify an absolute path to the library file:
 ;
