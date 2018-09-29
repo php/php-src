@@ -5327,10 +5327,16 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info, zend_bool allow_null) /* {{{ */
+static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null) /* {{{ */
 {
+	zend_bool allow_null = force_allow_null;
+	if (ast->attr & ZEND_TYPE_NULLABLE) {
+		allow_null = 1;
+		ast->attr &= ~ZEND_TYPE_NULLABLE;
+	}
+
 	if (ast->kind == ZEND_AST_TYPE) {
-		arg_info->type = ZEND_TYPE_ENCODE(ast->attr, allow_null);
+		return ZEND_TYPE_ENCODE(ast->attr, allow_null);
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
 		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
@@ -5341,7 +5347,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info, zend_b
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
-			arg_info->type = ZEND_TYPE_ENCODE(type, allow_null);
+			return ZEND_TYPE_ENCODE(type, allow_null);
 		} else {
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
@@ -5352,7 +5358,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info, zend_b
 				zend_string_addref(class_name);
 			}
 
-			arg_info->type = ZEND_TYPE_ENCODE_CLASS(class_name, allow_null);
+			return ZEND_TYPE_ENCODE_CLASS(class_name, allow_null);
 		}
 	}
 }
@@ -5366,21 +5372,12 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 	zend_arg_info *arg_infos;
 
 	if (return_type_ast) {
-		zend_bool allow_null = 0;
-
 		/* Use op_array->arg_info[-1] for return type */
 		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
 		arg_infos->name = NULL;
 		arg_infos->pass_by_reference = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 		arg_infos->is_variadic = 0;
-		arg_infos->type = 0;
-
-		if (return_type_ast->attr & ZEND_TYPE_NULLABLE) {
-			allow_null = 1;
-			return_type_ast->attr &= ~ZEND_TYPE_NULLABLE;
-		}
-
-		zend_compile_typename(return_type_ast, arg_infos, allow_null);
+		arg_infos->type = zend_compile_typename(return_type_ast, 0);
 
 		if (ZEND_TYPE_CODE(arg_infos->type) == IS_VOID && ZEND_TYPE_ALLOW_NULL(arg_infos->type)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
@@ -5463,19 +5460,14 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_info->type = ZEND_TYPE_ENCODE(0, 1);
 
 		if (type_ast) {
-			zend_bool allow_null;
 			zend_bool has_null_default = default_ast
 				&& (Z_TYPE(default_node.u.constant) == IS_NULL
 					|| (Z_TYPE(default_node.u.constant) == IS_CONSTANT_AST
 						&& Z_ASTVAL(default_node.u.constant)->kind == ZEND_AST_CONSTANT
 						&& strcasecmp(ZSTR_VAL(zend_ast_get_constant_name(Z_ASTVAL(default_node.u.constant))), "NULL") == 0));
-			zend_bool is_explicitly_nullable = (type_ast->attr & ZEND_TYPE_NULLABLE) == ZEND_TYPE_NULLABLE;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-			allow_null = has_null_default || is_explicitly_nullable;
-
-			type_ast->attr &= ~ZEND_TYPE_NULLABLE;
-			zend_compile_typename(type_ast, arg_info, allow_null);
+			arg_info->type = zend_compile_typename(type_ast, has_null_default);
 
 			if (ZEND_TYPE_CODE(arg_info->type) == IS_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
