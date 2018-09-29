@@ -5550,7 +5550,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 	}
 
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
-		member_p = zend_read_static_property_ex(ref->ce, ref->unmangled_name, 1);
+		member_p = zend_read_static_property_ex(intern->ce, ref->unmangled_name, 1);
 		if (member_p) {
 			RETURN_BOOL(!Z_ISUNDEF_P(member_p))
 		}
@@ -5567,7 +5567,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 			/* Returns from this function */
 		}
 
-		member_p = zend_read_property_ex(ref->ce, object, ref->unmangled_name, 1, &rv);
+		member_p = zend_read_property_ex(intern->ce, object, ref->unmangled_name, 1, &rv);
 		RETVAL_BOOL(member_p != &EG(uninitialized_zval));
 		if (member_p == &rv) {
 			zval_ptr_dtor(member_p);
