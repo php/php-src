@@ -181,4 +181,3 @@
 #ifdef __clang__
 #define HAVE_FUNC_ATTRIBUTE_TARGET 1
 #endif
-

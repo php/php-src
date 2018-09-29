@@ -33,4 +33,4 @@ foreach(new RegexFindFile($argv[1], $argv[2]) as $file)
 	echo $file->getPathname()."\n";
 }
 
-?>	
+?>

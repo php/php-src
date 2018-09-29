@@ -450,6 +450,3 @@ const char*  XMLRPC_GetVersionString(void);
 #endif
 
 #endif /* not XMLRPC_ALREADY_INCLUDED */
-
-
-

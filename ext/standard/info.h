@@ -83,4 +83,3 @@ void register_phpinfo_constants(INIT_FUNC_ARGS);
 END_EXTERN_C()
 
 #endif /* INFO_H */
-

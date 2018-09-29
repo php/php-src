@@ -85,4 +85,3 @@ bc_add (n1, n2, result, scale_min)
   bc_free_num (result);
   *result = sum;
 }
-

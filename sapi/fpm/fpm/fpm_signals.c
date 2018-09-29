@@ -251,4 +251,3 @@ int fpm_signals_get_fd() /* {{{ */
 	return sp[0];
 }
 /* }}} */
-

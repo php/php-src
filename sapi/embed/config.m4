@@ -28,4 +28,3 @@ if test "$PHP_EMBED" != "no"; then
 else
   AC_MSG_RESULT(no)
 fi
-

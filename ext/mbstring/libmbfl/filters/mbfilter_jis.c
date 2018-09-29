@@ -663,5 +663,3 @@ retry:
 
 	return c;
 }
-
-

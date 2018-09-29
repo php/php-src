@@ -67,4 +67,3 @@ bc_num2long (num)
   else
     return (-val);
 }
-

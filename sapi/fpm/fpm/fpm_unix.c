@@ -578,4 +578,3 @@ int fpm_unix_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

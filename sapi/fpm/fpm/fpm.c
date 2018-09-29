@@ -121,4 +121,3 @@ run_child: /* only workers reach this point */
 	return fpm_globals.listening_socket;
 }
 /* }}} */
-
