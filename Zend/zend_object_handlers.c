@@ -871,6 +871,8 @@ write_std_property:
 			zend_property_info *prop_info;
 			zval tmp;
 
+			variable_ptr = OBJ_PROP(zobj, property_offset);
+
 			if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot))) {
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
@@ -878,9 +880,10 @@ write_std_property:
 					zval_ptr_dtor(value);
 					goto exit;
 				}
+				zval_ptr_dtor(variable_ptr); /* might have been updated via e.g. __toString() */
 				value = &tmp;
 			}
-			variable_ptr = OBJ_PROP(zobj, property_offset);
+
 			ZVAL_COPY_VALUE(variable_ptr, value);
 		} else {
 			if (!zobj->properties) {
