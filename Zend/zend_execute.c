@@ -1532,6 +1532,33 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	}
 }
 
+static zend_property_info *zend_ref_accepts_double(zend_reference *ref)
+{
+	zend_property_info *prop;
+	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
+		if (ZEND_TYPE_CODE(prop->type) != IS_DOUBLE) {
+			return prop;
+		}
+	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+	return NULL;
+}
+
+static ZEND_COLD zend_bool zend_ref_verify_assign_incdec_double(zend_reference *ref, int inc)
+{
+	zend_property_info *error_prop;
+	if ((error_prop = zend_ref_accepts_double(ref))) {
+		zend_throw_exception_ex(zend_ce_type_error, 0,
+			"Cannot %screment a reference held by property %s::$%s of type %sint past its %simal value",
+			inc ? "in" : "de",
+			ZSTR_VAL(error_prop->ce->name),
+			ZSTR_VAL(error_prop->name),
+			ZEND_TYPE_ALLOW_NULL(error_prop->type) ? "?" : "",
+			inc ? "max" : "min");
+		return 0;
+	}
+	return 1;
+}
+
 static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_info, int inc OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
@@ -1567,7 +1594,22 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 			} else {
 				decrement_function(&z_copy);
 			}
-			if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
+			if (UNEXPECTED(Z_TYPE(z_copy) == IS_DOUBLE) && Z_TYPE_P(prop) == IS_LONG) {
+				if (ref) {
+					if (zend_ref_verify_assign_incdec_double(ref, inc)) {
+						ZVAL_COPY_VALUE(&ref->val, &z_copy);
+					}
+				} else {
+					ZEND_ASSERT(ZEND_TYPE_CODE(prop_info->type) == IS_LONG);
+					zend_throw_exception_ex(zend_ce_type_error, 0,
+						"Cannot %screment a property %s::$%s of type %sint past its %simal value",
+						inc ? "in" : "de",
+						ZSTR_VAL(prop_info->ce->name),
+						ZSTR_VAL(prop_info->name),
+						ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
+						inc ? "max" : "min");
+				}
+			} else if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 				zval_ptr_dtor(prop);
 				ZVAL_COPY_VALUE(prop, &z_copy);
 			} else {
@@ -1630,7 +1672,22 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 			} else {
 				decrement_function(&z_copy);
 			}
-			if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
+			if (UNEXPECTED(Z_TYPE(z_copy) == IS_DOUBLE) && Z_TYPE_P(prop) == IS_LONG) {
+				if (ref) {
+					if (zend_ref_verify_assign_incdec_double(ref, inc)) {
+						ZVAL_COPY_VALUE(&ref->val, &z_copy);
+					}
+				} else {
+					ZEND_ASSERT(ZEND_TYPE_CODE(prop_info->type) == IS_LONG);
+					zend_throw_exception_ex(zend_ce_type_error, 0,
+						"Cannot %screment a property %s::$%s of type %sint past its %simal value",
+						inc ? "in" : "de",
+						ZSTR_VAL(prop_info->ce->name),
+						ZSTR_VAL(prop_info->name),
+						ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
+						inc ? "max" : "min");
+				}
+			} else if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 				zval_ptr_dtor(prop);
 				ZVAL_COPY_VALUE(prop, &z_copy);
 			} else {

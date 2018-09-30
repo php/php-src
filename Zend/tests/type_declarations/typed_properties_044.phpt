@@ -31,11 +31,20 @@ try {
 	echo $e->getMessage() . "\n";
 }
 
-/* (1 << 63) - 1 overflows to float, which is exactly convertible back to (1 << 63) */
 $bar = PHP_INT_MIN;
 
-var_dump($bar--);
-var_dump(--$bar);
+
+try {
+	var_dump($bar--);
+} catch (Throwable $e) {
+	echo $e->getMessage() . "\n";
+}
+
+try {
+	var_dump(--$bar);
+} catch (Throwable $e) {
+	echo $e->getMessage() . "\n";
+}
 
 ?>
 --EXPECT--
@@ -43,7 +52,7 @@ int(0)
 int(-2)
 int(-1)
 int(-1)
-Cannot assign float to reference held by property class@anonymous::$bar of type ?int
-Cannot assign float to reference held by property class@anonymous::$bar of type ?int
-int(-9223372036854775808)
-int(-9223372036854775808)
+Cannot increment a reference held by property class@anonymous::$bar of type ?int past its maximal value
+Cannot increment a reference held by property class@anonymous::$bar of type ?int past its maximal value
+Cannot decrement a reference held by property class@anonymous::$bar of type ?int past its minimal value
+Cannot decrement a reference held by property class@anonymous::$bar of type ?int past its minimal value

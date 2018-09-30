@@ -18,7 +18,7 @@ $foo = new class {
 
 try {
 	foreach ($foo->fetch() as &$prop) {
-		$prop++;
+		$prop += 1;
 	}
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
 

@@ -27,6 +27,18 @@ var_dump($a->foo);
 --$a[0];
 var_dump($a->foo);
 
+$a->foo = PHP_INT_MIN;
+
+try {
+        $a[0]--;
+} catch (Error $e) { echo $e->getMessage(), "\n"; }
+echo gettype($a->foo),"\n";
+
+try {
+	--$a[0];
+} catch (Error $e) { echo $e->getMessage(), "\n"; }
+echo gettype($a->foo),"\n";
+
 $a->foo = PHP_INT_MAX;
 
 try {
@@ -49,7 +61,12 @@ offsetSet(1e50)
 int(1)
 int(0)
 int(-1)
-Cannot assign float to reference held by property class@anonymous::$foo of type int
+Cannot decrement a reference held by property class@anonymous::$foo of type int past its minimal value
 integer
-Cannot assign float to reference held by property class@anonymous::$foo of type int
+Cannot decrement a reference held by property class@anonymous::$foo of type int past its minimal value
 integer
+Cannot increment a reference held by property class@anonymous::$foo of type int past its maximal value
+integer
+Cannot increment a reference held by property class@anonymous::$foo of type int past its maximal value
+integer
+
