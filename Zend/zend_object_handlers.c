@@ -453,9 +453,7 @@ found:
 	}
 	if (cache_slot) {
 		CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)(uintptr_t)property_info->offset);
-		if (property_info->type) {
-			CACHE_PTR_EX(cache_slot + 2, property_info);
-		}
+		CACHE_PTR_EX(cache_slot + 2, property_info->type ? property_info : NULL);
 	}
 	return property_info->offset;
 }
