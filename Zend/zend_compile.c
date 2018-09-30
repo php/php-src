@@ -6023,43 +6023,10 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = NULL;
 		zval value_zv;
-		zend_bool allow_null = 0;
 		zend_type type = 0;
 
 		if (type_ast) {
-			if (type_ast->attr & ZEND_TYPE_NULLABLE) {
-				allow_null = 1;
-				type_ast->attr &= ~ZEND_TYPE_NULLABLE;
-			}
-
-			if (type_ast->kind == ZEND_AST_TYPE) {
-				type = ZEND_TYPE_ENCODE(type_ast->attr, allow_null);
-			} else {
-				zend_string *class_name = zend_ast_get_str(type_ast);
-				zend_uchar typeinfo = zend_lookup_builtin_type_by_name(class_name);
-
-				if (typeinfo != 0) {
-					if (type_ast->attr != ZEND_NAME_NOT_FQ) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"Scalar type declaration '%s' must be unqualified",
-							ZSTR_VAL(zend_string_tolower(class_name)));
-					}
-
-					type = ZEND_TYPE_ENCODE(typeinfo, allow_null);
-				} else {
-					uint32_t fetch_type = zend_get_class_fetch_type_ast(type_ast);
-
-					if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
-						class_name = zend_resolve_class_name_ast(type_ast);
-						zend_assert_valid_class_name(class_name);
-					} else {
-						zend_ensure_valid_class_fetch_type(fetch_type);
-						zend_string_addref(class_name);
-					}
-
-					type = ZEND_TYPE_ENCODE_CLASS(zend_new_interned_string(class_name), allow_null);
-				}
-			}
+			type = zend_compile_typename(type_ast, 0);
 
 			if (ZEND_TYPE_CODE(type) == IS_VOID || ZEND_TYPE_CODE(type) == IS_CALLABLE) {
 				zend_error_noreturn(E_COMPILE_ERROR,
