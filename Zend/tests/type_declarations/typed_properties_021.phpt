@@ -9,10 +9,7 @@ class Foo {
 $foo = new Foo();
 ?>
 --EXPECTF--
-Fatal error: Class 'BAR' not found in %s on line 6
-
-
-
-
-
-
+Fatal error: Uncaught Error: Class 'BAR' not found in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d
