@@ -46,6 +46,12 @@ PHP 7.4 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Unbinding $this of a non-static method through a combination of
+    ReflectionMethod::getClosure() and closure rebinding is deprecated. Doing
+    so is equivalent to calling a non-static method statically, which has been
+    deprecated since PHP 7.0.
+
 ========================================
 5. Changed Functions
 ========================================
