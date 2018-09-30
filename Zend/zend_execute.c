@@ -885,25 +885,23 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	}
 
 	if (ZEND_TYPE_IS_CLASS(info->type)) {
-		zend_throw_exception_ex(zend_ce_type_error, info->type,
-					"Typed property %s::$%s must be an instance of %s%s, %s used",
-						ZSTR_VAL(info->ce->name),
-						ZSTR_VAL(info->name),
-						ZSTR_VAL(ZEND_TYPE_IS_CE(info->type) ? ZEND_TYPE_CE(info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(info->type), info->ce)),
-						ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
-						Z_TYPE_P(property) == IS_OBJECT ?
-							ZSTR_VAL(Z_OBJCE_P(property)->name) :
-							zend_get_type_by_const(Z_TYPE_P(property)));
+		zend_type_error("Typed property %s::$%s must be an instance of %s%s, %s used",
+			ZSTR_VAL(info->ce->name),
+			ZSTR_VAL(info->name),
+			ZSTR_VAL(ZEND_TYPE_IS_CE(info->type) ? ZEND_TYPE_CE(info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(info->type), info->ce)),
+			ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
+			Z_TYPE_P(property) == IS_OBJECT ?
+			ZSTR_VAL(Z_OBJCE_P(property)->name) :
+			zend_get_type_by_const(Z_TYPE_P(property)));
 	} else {
-		zend_throw_exception_ex(zend_ce_type_error, info->type,
-					"Typed property %s::$%s must be %s%s, %s used",
-						ZSTR_VAL(info->ce->name),
-						ZSTR_VAL(info->name),
-						zend_get_type_by_const(ZEND_TYPE_CODE(info->type)),
-						ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
-						Z_TYPE_P(property) == IS_OBJECT ?
-							ZSTR_VAL(Z_OBJCE_P(property)->name) :
-							zend_get_type_by_const(Z_TYPE_P(property)));
+		zend_type_error("Typed property %s::$%s must be %s%s, %s used",
+			ZSTR_VAL(info->ce->name),
+			ZSTR_VAL(info->name),
+			zend_get_type_by_const(ZEND_TYPE_CODE(info->type)),
+			ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
+			Z_TYPE_P(property) == IS_OBJECT ?
+			ZSTR_VAL(Z_OBJCE_P(property)->name) :
+			zend_get_type_by_const(Z_TYPE_P(property)));
 	}
 }
 
@@ -1547,8 +1545,7 @@ static ZEND_COLD zend_bool zend_ref_verify_assign_incdec_double(zend_reference *
 {
 	zend_property_info *error_prop;
 	if ((error_prop = zend_ref_accepts_double(ref))) {
-		zend_throw_exception_ex(zend_ce_type_error, 0,
-			"Cannot %screment a reference held by property %s::$%s of type %sint past its %simal value",
+		zend_type_error("Cannot %screment a reference held by property %s::$%s of type %sint past its %simal value",
 			inc ? "in" : "de",
 			ZSTR_VAL(error_prop->ce->name),
 			ZSTR_VAL(error_prop->name),
@@ -1601,8 +1598,7 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 					}
 				} else {
 					ZEND_ASSERT(ZEND_TYPE_CODE(prop_info->type) == IS_LONG);
-					zend_throw_exception_ex(zend_ce_type_error, 0,
-						"Cannot %screment a property %s::$%s of type %sint past its %simal value",
+					zend_type_error("Cannot %screment a property %s::$%s of type %sint past its %simal value",
 						inc ? "in" : "de",
 						ZSTR_VAL(prop_info->ce->name),
 						ZSTR_VAL(prop_info->name),
@@ -1679,8 +1675,7 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 					}
 				} else {
 					ZEND_ASSERT(ZEND_TYPE_CODE(prop_info->type) == IS_LONG);
-					zend_throw_exception_ex(zend_ce_type_error, 0,
-						"Cannot %screment a property %s::$%s of type %sint past its %simal value",
+					zend_type_error("Cannot %screment a property %s::$%s of type %sint past its %simal value",
 						inc ? "in" : "de",
 						ZSTR_VAL(prop_info->ce->name),
 						ZSTR_VAL(prop_info->name),
@@ -2172,8 +2167,7 @@ fetch_from_array:
 			if (type != BP_VAR_UNSET) {
 				zend_property_info *error_prop;
 				if (UNEXPECTED(orig_container != container) && Z_ISREF_P(orig_container) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_container))) != NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-						"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+					zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 						ZSTR_VAL(error_prop->ce->name),
 						ZSTR_VAL(error_prop->name));
 					ZVAL_ERROR(result);
@@ -2522,8 +2516,7 @@ return_indirect:
 					if (UNEXPECTED(prop_info)) {
 						if ((flags & ZEND_FETCH_DIM_WRITE) && (Z_TYPE_P(ptr) <= IS_FALSE || (Z_ISREF_P(ptr) && Z_TYPE_P(Z_REFVAL_P(ptr)) == IS_NULL))) {
 							if (!zend_verify_type_assignable(prop_info->type, IS_ARRAY)) {
-								zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(prop_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(prop_info->type),
-									"Cannot write an array to a null property %s::$%s which does not allow for array",
+								zend_type_error("Cannot write an array to a null property %s::$%s which does not allow for array",
 									ZSTR_VAL(prop_info->ce->name),
 									ZSTR_VAL(prop_info->name));
 								ZVAL_UNDEF(ptr);
@@ -2678,9 +2671,7 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 				&& UNEXPECTED(Z_TYPE_P(*retval) == IS_UNDEF) && UNEXPECTED(property_info->type != 0)) {
 			const char *class_name, *prop_name;
 			zend_unmangle_property_name_ex(property_info->name, &class_name, &prop_name, NULL);
-			zend_throw_exception_ex(zend_ce_type_error,
-				ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
-				"Typed static property %s::$%s must not be accessed before initialization",
+			zend_type_error("Typed static property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(property_info->ce->name),
 				prop_name);
 			return FAILURE;
@@ -2696,8 +2687,7 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 		if ((flags & ZEND_FETCH_DIM_WRITE)
 		    && (Z_TYPE_P(*retval) <= IS_FALSE || (Z_ISREF_P(*retval) && Z_TYPE_P(Z_REFVAL_P(*retval)) == IS_NULL))
 		    && !zend_verify_type_assignable(property_info->type, IS_ARRAY)) {
-			zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
-				"Cannot write an array to a null property %s::$%s which does not allow for array",
+			zend_type_error("Cannot write an array to a null property %s::$%s which does not allow for array",
 				ZSTR_VAL(property_info->ce->name),
 				ZSTR_VAL(property_info->name));
 			return FAILURE;
@@ -2751,9 +2741,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 	const char *class_name1, *class_name2, *prop_name1, *prop_name2;
 	zend_unmangle_property_name_ex(prop1->name, &class_name1, &prop_name1, NULL);
 	zend_unmangle_property_name_ex(prop2->name, &class_name2, &prop_name2, NULL);
-	zend_throw_exception_ex(
-		zend_ce_type_error, 0,
-		"Reference with value of type %s held by property %s::$%s of type %s%s is not compatible with property %s::$%s of type %s%s",
+	zend_type_error("Reference with value of type %s held by property %s::$%s of type %s%s is not compatible with property %s::$%s of type %s%s",
 		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_get_type_by_const(Z_TYPE_P(zv)),
 		ZSTR_VAL(prop1->ce->name),
 		prop_name1,
@@ -2767,9 +2755,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 }
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv) {
-	zend_throw_exception_ex(
-		zend_ce_type_error, 0,
-		"Cannot assign %s to reference held by property %s::$%s of type %s%s",
+	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s%s",
 		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_get_type_by_const(Z_TYPE_P(zv)),
 		ZSTR_VAL(prop->ce->name),
 		ZSTR_VAL(prop->name),
@@ -2778,11 +2764,8 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop,
 	);
 }
 
-ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(
-		zend_property_info *prop1, zend_property_info *prop2, zval *zv) {
-	zend_throw_exception_ex(
-		zend_ce_type_error, 0,
-		"Cannot assign %s to reference held by property %s::$%s of type %s%s and property %s::$%s of type %s%s, as this would result in an inconsistent type conversion",
+ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info *prop1, zend_property_info *prop2, zval *zv) {
+	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s%s and property %s::$%s of type %s%s, as this would result in an inconsistent type conversion",
 		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_get_type_by_const(Z_TYPE_P(zv)),
 		ZSTR_VAL(prop1->ce->name),
 		ZSTR_VAL(prop1->name),

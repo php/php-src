@@ -26119,8 +26119,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -26242,8 +26241,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -26365,8 +26363,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -26487,8 +26484,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -29060,8 +29056,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -29183,8 +29178,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -29306,8 +29300,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -29428,8 +29421,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -31048,8 +31040,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -31171,8 +31162,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -31294,8 +31284,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -31416,8 +31405,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -33606,8 +33594,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -33729,8 +33716,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -33852,8 +33838,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -33974,8 +33959,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -46500,8 +46484,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -46623,8 +46606,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -46746,8 +46728,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -46868,8 +46849,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -50838,8 +50818,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -50961,8 +50940,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -51084,8 +51062,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -51206,8 +51183,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -54117,8 +54093,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -54240,8 +54215,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -54363,8 +54337,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -54485,8 +54458,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -57743,8 +57715,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -57866,8 +57837,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -57989,8 +57959,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 
@@ -58111,8 +58080,7 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(error_prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(error_prop->type),
-					"Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
 					ZSTR_VAL(error_prop->name));
 

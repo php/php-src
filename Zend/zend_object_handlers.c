@@ -761,12 +761,9 @@ call_getter:
 
 	if ((type != BP_VAR_IS)) {
 		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot))) {
-			if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(prop_info->type) || Z_TYPE_P(retval) == IS_UNDEF)) {
-				zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(prop_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(prop_info->type),
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					ZSTR_VAL(name));
-			}
+			zend_type_error("Typed property %s::$%s must not be accessed before initialization",
+				ZSTR_VAL(prop_info->ce->name),
+				ZSTR_VAL(name));
 		} else {
 			zend_error(E_NOTICE,"Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 		}
@@ -784,7 +781,7 @@ ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, 
 {
 	zend_object *zobj;
 	zend_string *name, *tmp_name;
-	zval *variable_ptr;
+	zval *variable_ptr, tmp;
 	uintptr_t property_offset;
 
 	zobj = Z_OBJ_P(object);
@@ -796,7 +793,6 @@ ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, 
 		variable_ptr = OBJ_PROP(zobj, property_offset);
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot);
-			zval tmp;
 
 			Z_TRY_ADDREF_P(value);
 
@@ -869,7 +865,6 @@ write_std_property:
 		}
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 			zend_property_info *prop_info;
-			zval tmp;
 
 			variable_ptr = OBJ_PROP(zobj, property_offset);
 
@@ -880,8 +875,8 @@ write_std_property:
 					zval_ptr_dtor(value);
 					goto exit;
 				}
-				zval_ptr_dtor(variable_ptr); /* might have been updated via e.g. __toString() */
 				value = &tmp;
+				goto found; /* might have been updated via e.g. __toString() */
 			}
 
 			ZVAL_COPY_VALUE(variable_ptr, value);
@@ -1489,9 +1484,7 @@ undeclared_property:
 
 	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_RW)
 				&& Z_TYPE_P(ret) == IS_UNDEF && property_info->type != 0)) {
-		zend_throw_exception_ex(zend_ce_type_error,
-			ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
-			"Typed static property %s::$%s must not be accessed before initialization",
+		zend_type_error("Typed static property %s::$%s must not be accessed before initialization",
 			ZSTR_VAL(property_info->ce->name),
 			ZSTR_VAL(property_name));
 		return NULL;
