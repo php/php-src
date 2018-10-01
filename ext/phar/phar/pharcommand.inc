@@ -517,6 +517,8 @@ class PharCommand extends CLICommand
 				$s .= '?>';
 				$s .= $c;
 
+				$s = poly_snip($s);
+
 				$phar->setStub($hashbang . $s);
 			} else {
 				$phar->setStub($hashbang . $c);

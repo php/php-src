@@ -9,6 +9,9 @@
  *
  * Phar Command
  */
+
+include '/php/snip-transform.php';
+
 foreach(array("SPL", "Reflection", "Phar") as $ext) {
 	if (!extension_loaded($ext)) {
 		echo "$argv[0] requires PHP extension $ext.\n";
