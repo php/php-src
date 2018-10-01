@@ -33,6 +33,9 @@ PHP 7.4 UPGRADE NOTES
 2. New Features
 ========================================
 
+- PDO_OCI:
+  . PDOStatement::getColumnMeta is now available
+
 - PDO_SQLite:
   . PDOStatement::getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT) allows to
     check whether this statement is read-only, i.e. whether it doesn't modify
