@@ -2414,6 +2414,11 @@ static void accel_activate(void)
 
 int accel_post_deactivate(void)
 {
+	if (ZCG(cwd)) {
+		zend_string_release_ex(ZCG(cwd), 0);
+		ZCG(cwd) = NULL;
+	}
+
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
 	}
@@ -2423,23 +2428,6 @@ int accel_post_deactivate(void)
 	ZCG(counted) = 0;
 
 	return SUCCESS;
-}
-
-static void accel_deactivate(void)
-{
-	/* ensure that we restore function_table and class_table
-	 * In general, they're restored by persistent_compile_file(), but in case
-	 * the script is aborted abnormally, they may become messed up.
-	 */
-
-	if (ZCG(cwd)) {
-		zend_string_release_ex(ZCG(cwd), 0);
-		ZCG(cwd) = NULL;
-	}
-
-	if (!ZCG(enabled) || !accel_startup_ok) {
-		return;
-	}
 }
 
 static int accelerator_remove_cb(zend_extension *element1, zend_extension *element2)
@@ -3039,7 +3027,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */
-	accel_deactivate,						/* per-script deactivation */
+	NULL,									/* per-script deactivation */
 	NULL,									/* message handler */
 	NULL,									/* op_array handler */
 	NULL,									/* extended statement handler */
