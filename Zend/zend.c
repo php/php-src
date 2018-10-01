@@ -41,6 +41,7 @@ static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
 static HashTable *global_persistent_list = NULL;
+static zend_uintptr_t global_last_static_member = 0;
 ZEND_TSRMLS_CACHE_DEFINE()
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
@@ -630,9 +631,9 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	zend_hash_init_ex(compiler_globals->auto_globals, 8, NULL, auto_global_dtor, 1, 0);
 	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, auto_global_copy_ctor);
 
-	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
+	compiler_globals->last_static_member = global_last_static_member;
 	if (compiler_globals->last_static_member) {
-		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member, sizeof(zval*));
+		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member + 1, sizeof(zval*));
 	} else {
 		compiler_globals->static_members_table = NULL;
 	}
@@ -935,6 +936,7 @@ int zend_post_startup(void) /* {{{ */
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
+	global_last_static_member = compiler_globals->last_static_member;
 
 	short_tags_default = CG(short_tags);
 	compiler_options_default = CG(compiler_options);
@@ -1082,6 +1084,14 @@ ZEND_API void zend_activate(void) /* {{{ */
 	startup_scanner();
 }
 /* }}} */
+
+#ifdef ZTS
+void zend_reset_internal_classes(void) /* {{{ */
+{
+	CG(last_static_member) = global_last_static_member;
+}
+/* }}} */
+#endif
 
 void zend_call_destructors(void) /* {{{ */
 {
