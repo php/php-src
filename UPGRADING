@@ -23,9 +23,18 @@ PHP 7.4 UPGRADE NOTES
   . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
     INTL_IDNA_VARIANT_UTS46 instead of the deprecated INTL_IDNA_VARIANT_2003.
 
+- Reflection:
+  . Reflection objects will now generate an exception if an attempt is made
+    to serialize them. Serialization for reflection objects was never
+    supported and resulted in corrupted reflection objects. It has been
+    explicitly prohibited now.
+
 ========================================
 2. New Features
 ========================================
+
+- PDO_OCI:
+  . PDOStatement::getColumnMeta is now available
 
 - PDO_SQLite:
   . PDOStatement::getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT) allows to
@@ -39,6 +48,12 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 4. Deprecated Functionality
 ========================================
+
+- Core:
+  . Unbinding $this of a non-static method through a combination of
+    ReflectionMethod::getClosure() and closure rebinding is deprecated. Doing
+    so is equivalent to calling a non-static method statically, which has been
+    deprecated since PHP 7.0.
 
 ========================================
 5. Changed Functions
