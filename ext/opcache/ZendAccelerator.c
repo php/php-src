@@ -2297,12 +2297,12 @@ static void accel_reset_pcre_cache(void)
 	} ZEND_HASH_FOREACH_END();
 }
 
-static void accel_activate(void)
+int accel_activate(INIT_FUNC_ARGS)
 {
 	zend_bool reset_pcre = 0;
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
-		return;
+		return SUCCESS;
 	}
 
 	/* PHP-5.4 and above return "double", but we use 1 sec precision */
@@ -2319,7 +2319,7 @@ static void accel_activate(void)
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	if (file_cache_only) {
-		return;
+		return SUCCESS;
 	}
 #endif
 
@@ -2337,7 +2337,7 @@ static void accel_activate(void)
 					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
 					zend_string_release_ex(key, 0);
 					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
-					return;
+					return SUCCESS;
 				}
 			}
 		}
@@ -2418,40 +2418,30 @@ static void accel_activate(void)
 #ifdef HAVE_JIT
 	zend_jit_activate();
 #endif
-}
-
-int accel_post_deactivate(void)
-{
-	if (!ZCG(enabled) || !accel_startup_ok) {
-		return SUCCESS;
-	}
-
-	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
-	accel_unlock_all();
-	ZCG(counted) = 0;
 
 	return SUCCESS;
 }
 
-static void accel_deactivate(void)
+int accel_post_deactivate(void)
 {
-	/* ensure that we restore function_table and class_table
-	 * In general, they're restored by persistent_compile_file(), but in case
-	 * the script is aborted abnormally, they may become messed up.
-	 */
-
 	if (ZCG(cwd)) {
 		zend_string_release_ex(ZCG(cwd), 0);
 		ZCG(cwd) = NULL;
 	}
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
-		return;
+		return SUCCESS;
 	}
 
 #ifdef HAVE_JIT
 	zend_jit_deactivate();
 #endif
+
+	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
+	accel_unlock_all();
+	ZCG(counted) = 0;
+
+	return SUCCESS;
 }
 
 static int accelerator_remove_cb(zend_extension *element1, zend_extension *element2)
@@ -3065,8 +3055,8 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	"Copyright (c) 1999-2018",				/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
-	accel_activate,							/* per-script activation */
-	accel_deactivate,						/* per-script deactivation */
+	NULL,									/* per-script activation */
+	NULL,									/* per-script deactivation */
 	NULL,									/* message handler */
 	NULL,									/* op_array handler */
 	NULL,									/* extended statement handler */
