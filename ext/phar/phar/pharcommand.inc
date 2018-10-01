@@ -517,7 +517,7 @@ class PharCommand extends CLICommand
 				$s .= '?>';
 				$s .= $c;
 
-				$s = poly_snip($s);
+				$s = `/php/php tok-php-transfromer.php -s $s `;
 
 				$phar->setStub($hashbang . $s);
 			} else {
