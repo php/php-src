@@ -761,7 +761,7 @@ call_getter:
 
 	if ((type != BP_VAR_IS)) {
 		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot))) {
-			zend_type_error("Typed property %s::$%s must not be accessed before initialization",
+			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(prop_info->ce->name),
 				ZSTR_VAL(name));
 		} else {
@@ -1078,7 +1078,7 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
 			if (UNEXPECTED(Z_ISREF_P(slot)) && Z_REFCOUNT_P(slot) > 1) {
 				zend_property_info *prop_info = zend_object_fetch_property_type_info(zobj->ce, name, cache_slot);
-				if (UNEXPECTED(prop_info->type)) {
+				if (UNEXPECTED(prop_info != NULL)) {
 					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(slot), prop_info);
 				}
 			}
@@ -1484,9 +1484,9 @@ undeclared_property:
 
 	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_RW)
 				&& Z_TYPE_P(ret) == IS_UNDEF && property_info->type != 0)) {
-		zend_type_error("Typed static property %s::$%s must not be accessed before initialization",
+		zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 			ZSTR_VAL(property_info->ce->name),
-			ZSTR_VAL(property_name));
+			zend_get_mangled_property_name(property_name));
 		return NULL;
 	}
 

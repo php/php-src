@@ -20,7 +20,7 @@ try {
 } catch (TypeError $e) { var_dump($e->getMessage()); }
 try { // must be uninit
 	var_dump($a->p);
-} catch (TypeError $e) { var_dump($e->getMessage()); }
+} catch (Error $e) { var_dump($e->getMessage()); }
 
 Foo::$a["bar"] = 2;
 var_dump(Foo::$a);
@@ -30,7 +30,7 @@ try {
 } catch (TypeError $e) { var_dump($e->getMessage()); }
 try { // must be uninit
 	var_dump(Foo::$s);
-} catch (TypeError $e) { var_dump($e->getMessage()); }
+} catch (Error $e) { var_dump($e->getMessage()); }
 
 Foo::$a = null;
 $ref = &Foo::$a;

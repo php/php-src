@@ -11,17 +11,17 @@ class Test {
     static function run() {
         try {
             self::$a;
-        } catch (TypeError $e) {
+        } catch (Error $e) {
             echo $e->getMessage(), "\n";
         }
         try {
             self::$b;
-        } catch (TypeError $e) {
+        } catch (Error $e) {
             echo $e->getMessage(), "\n";
         }
         try {
             self::$c;
-        } catch (TypeError $e) {
+        } catch (Error $e) {
             echo $e->getMessage(), "\n";
         }
     }

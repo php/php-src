@@ -2594,7 +2594,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
 				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
 					ZSTR_VAL(error_prop->ce->name),
-					ZSTR_VAL(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name));
 				FREE_UNFETCHED_OP2();
 				FREE_UNFETCHED_OP_DATA();
 				FREE_OP1_VAR_PTR();

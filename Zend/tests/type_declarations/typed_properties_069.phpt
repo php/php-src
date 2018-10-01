@@ -17,7 +17,7 @@ try {
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
 try {
 	var_dump(Foo::$i);
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (Error $e) { print $e->getMessage()."\n"; }
 var_dump(nonNumericStringRef());
 
 ?>
