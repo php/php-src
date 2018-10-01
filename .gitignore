@@ -119,7 +119,8 @@ scripts/php-config
 scripts/phpize
 scripts/man1/*.1
 TSRM/tsrm_config.h
-win32/build/deplister.*
+win32/build/deplister.exe
+win32/build/deplister.obj
 win32/*.suo
 win32/*.aps
 win32/*.positions
