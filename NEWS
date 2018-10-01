@@ -12,8 +12,7 @@ PHP                                                                        NEWS
     (cmb)
 
 - PDO_OCI:
-
-  . Fixed bug #76908 (PDO_OCI getColumnMeta() not implemented).
+  . Implemented FR #76908 (PDO_OCI getColumnMeta() not implemented).
     (Valentin Collet, Chris Jones, Remi)
 
 - PDO_SQLite:
