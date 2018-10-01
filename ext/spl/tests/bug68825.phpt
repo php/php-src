@@ -3,12 +3,16 @@ Bug #68825 (Exception in DirectoryIterator::getLinkTarget())
 --FILE--
 <?php
 $dir = __DIR__ . '/bug68825';
-mkdir($dir);
-symlink(__FILE__, "$dir/foo");
+
+if (!mkdir($dir)) {
+    die('Failed to create temporary directory for testing');
+} else if (!symlink(__FILE__, $dir . '/bug')) {
+    die('Failed to create symbolic link');
+}
 
 $di = new \DirectoryIterator($dir);
 foreach ($di as $entry) {
-    if ('foo' === $entry->getFilename()) {
+    if ('bug' === $entry->getFilename()) {
         var_dump($entry->getLinkTarget());
     }
 }
@@ -20,6 +24,6 @@ string(%d) "%s%eext%espl%etests%ebug68825.php"
 --CLEAN--
 <?php
 $dir = __DIR__ . '/bug68825';
-unlink("$dir/foo");
+unlink($dir . '/bug');
 rmdir($dir);
 ?>

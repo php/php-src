@@ -741,8 +741,10 @@ call_getter:
 			}
 			OBJ_RELEASE(zobj);
 			goto exit;
-		} else if (UNEXPECTED(ZSTR_VAL(name)[0] == '\0') && ZSTR_LEN(name) != 0) {
-			zend_bad_property_name();
+		} else if (UNEXPECTED(IS_WRONG_PROPERTY_OFFSET(property_offset))) {
+			/* Trigger the correct error */
+			zend_get_property_offset(zobj->ce, name, 0, NULL);
+			ZEND_ASSERT(EG(exception));
 			retval = &EG(uninitialized_zval);
 			goto exit;
 		}
@@ -808,12 +810,13 @@ found:
 		} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
 			goto write_std_property;
 		} else {
-			if (UNEXPECTED(ZSTR_VAL(name)[0] == '\0') && ZSTR_LEN(name) != 0) {
-				zend_bad_property_name();
-				goto exit;
-			}
+			/* Trigger the correct error */
+			zend_get_property_offset(zobj->ce, name, 0, NULL);
+			ZEND_ASSERT(EG(exception));
+			goto exit;
 		}
-	} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
+	} else {
+		ZEND_ASSERT(!IS_WRONG_PROPERTY_OFFSET(property_offset));
 write_std_property:
 		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
@@ -1053,11 +1056,13 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 			(*guard) |= IN_UNSET; /* prevent circular unsetting */
 			zend_std_call_unsetter(zobj, name);
 			(*guard) &= ~IN_UNSET;
+		} else if (UNEXPECTED(IS_WRONG_PROPERTY_OFFSET(property_offset))) {
+			/* Trigger the correct error */
+			zend_get_property_offset(zobj->ce, name, 0, NULL);
+			ZEND_ASSERT(EG(exception));
+			goto exit;
 		} else {
-			if (UNEXPECTED(ZSTR_VAL(name)[0] == '\0') && ZSTR_LEN(name) != 0) {
-				zend_bad_property_name();
-				goto exit;
-			}
+			/* Nothing to do: The property already does not exist. */
 		}
 	}
 
