@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
 
+- Reflection:
+  . Fixed bug #76936 (Objects cannot access their private attributes while
+    handling reflection errors). (Nikita)
+
 11 Oct 2018, PHP 7.2.11
 
 - Core:
