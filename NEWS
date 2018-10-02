@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #76936 (Objects cannot access their private attributes while
     handling reflection errors). (Nikita)
+  . Fixed bug #66430 (ReflectionFunction::invoke does not invoke closure with
+    object scope). (Nikita)
 
 11 Oct 2018, PHP 7.2.11
 
