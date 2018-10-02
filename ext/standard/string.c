@@ -5123,6 +5123,7 @@ state_1:
 			break;
 		case '<':
 			if (in_q) {
+				goto reg_char_1;
 				break;
 			}
 			if (isspace(*(p + 1)) && !allow_tag_spaces) {
@@ -5136,6 +5137,7 @@ state_1:
 				break;
 			}
 			if (in_q) {
+				goto reg_char_1;
 				break;
 			}
 
