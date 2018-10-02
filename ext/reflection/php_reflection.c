@@ -150,6 +150,11 @@ static inline reflection_object *reflection_object_from_obj(zend_object *obj) {
 
 static zend_object_handlers reflection_object_handlers;
 
+static inline zend_bool is_closure_invoke(zend_class_entry *ce, zend_string *lcname) {
+	return ce == zend_ce_closure
+		&& zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME);
+}
+
 static zval *_default_load_name(zval *object) /* {{{ */
 {
 	return zend_hash_find_ex_ind(Z_OBJPROP_P(object), ZSTR_KNOWN(ZEND_STR_NAME), 1);
@@ -474,8 +479,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 				{
 					zend_function *closure;
 					/* see if this is a closure */
-					if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-						&& memcmp(ZSTR_VAL(mptr->common.function_name), ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+					if (obj && is_closure_invoke(ce, mptr->common.function_name)
 						&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
 					{
 						mptr = closure;
@@ -2268,30 +2272,26 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 	/* First, find the function */
 	switch (Z_TYPE_P(reference)) {
-		case IS_STRING: {
-				size_t lcname_len;
-				char *lcname;
-
-				lcname_len = Z_STRLEN_P(reference);
-				lcname = zend_str_tolower_dup(Z_STRVAL_P(reference), lcname_len);
-				if ((fptr = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len)) == NULL) {
-					efree(lcname);
+		case IS_STRING:
+			{
+				zend_string *lcname = zend_string_tolower(Z_STR_P(reference));
+				fptr = zend_hash_find_ptr(EG(function_table), lcname);
+				zend_string_release(lcname);
+				if (!fptr) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Function %s() does not exist", Z_STRVAL_P(reference));
 					return;
 				}
-				efree(lcname);
+				ce = fptr->common.scope;
 			}
-			ce = fptr->common.scope;
 			break;
 
 		case IS_ARRAY: {
 				zval *classref;
 				zval *method;
-				size_t lcname_len;
-				char *lcname;
+				zend_string *lcname;
 
-				if (((classref =zend_hash_index_find(Z_ARRVAL_P(reference), 0)) == NULL)
+				if (((classref = zend_hash_index_find(Z_ARRVAL_P(reference), 0)) == NULL)
 					|| ((method = zend_hash_index_find(Z_ARRVAL_P(reference), 1)) == NULL))
 				{
 					_DO_THROW("Expected array($object, $method) or array($classname, $method)");
@@ -2310,22 +2310,19 @@ ZEND_METHOD(reflection_parameter, __construct)
 				}
 
 				convert_to_string_ex(method);
-				lcname_len = Z_STRLEN_P(method);
-				lcname = zend_str_tolower_dup(Z_STRVAL_P(method), lcname_len);
-				if (ce == zend_ce_closure && Z_TYPE_P(classref) == IS_OBJECT
-					&& (lcname_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-					&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+				lcname = zend_string_tolower(Z_STR_P(method));
+				if (Z_TYPE_P(classref) == IS_OBJECT && is_closure_invoke(ce, lcname)
 					&& (fptr = zend_get_closure_invoke_method(Z_OBJ_P(classref))) != NULL)
 				{
 					/* nothing to do. don't set is_closure since is the invoke handler,
 					   not the closure itself */
-				} else if ((fptr = zend_hash_str_find_ptr(&ce->function_table, lcname, lcname_len)) == NULL) {
-					efree(lcname);
+				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, lcname)) == NULL) {
+					zend_string_release(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), Z_STRVAL_P(method));
 					return;
 				}
-				efree(lcname);
+				zend_string_release(lcname);
 			}
 			break;
 
@@ -2336,7 +2333,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 					fptr = (zend_function *)zend_get_closure_method_def(reference);
 					Z_ADDREF_P(reference);
 					is_closure = 1;
-				} else if ((fptr = zend_hash_str_find_ptr(&ce->function_table, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME))) == NULL) {
+				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) == NULL) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZEND_INVOKE_FUNC_NAME);
 					return;
@@ -4070,24 +4067,16 @@ ZEND_METHOD(reflection_class, hasMethod)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	char *name, *lc_name;
-	size_t name_len;
+	zend_string *name, *lc_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	lc_name = zend_str_tolower_dup(name, name_len);
-	if ((ce == zend_ce_closure && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0)
-		|| zend_hash_str_exists(&ce->function_table, lc_name, name_len)) {
-		efree(lc_name);
-		RETURN_TRUE;
-	} else {
-		efree(lc_name);
-		RETURN_FALSE;
-	}
+	lc_name = zend_string_tolower(name);
+	RETVAL_BOOL(zend_hash_exists(&ce->function_table, lc_name) || is_closure_invoke(ce, lc_name));
+	zend_string_release(lc_name);
 }
 /* }}} */
 
@@ -4099,40 +4088,33 @@ ZEND_METHOD(reflection_class, getMethod)
 	zend_class_entry *ce;
 	zend_function *mptr;
 	zval obj_tmp;
-	char *name, *lc_name;
-	size_t name_len;
+	zend_string *name, *lc_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	lc_name = zend_str_tolower_dup(name, name_len);
-	if (ce == zend_ce_closure && !Z_ISUNDEF(intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+	lc_name = zend_string_tolower(name);
+	if (!Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, lc_name)
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj))) != NULL)
 	{
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value);
-		efree(lc_name);
-	} else if (ce == zend_ce_closure && Z_ISUNDEF(intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+	} else if (Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, lc_name)
 		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(Z_OBJ(obj_tmp))) != NULL) {
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value);
 		zval_ptr_dtor(&obj_tmp);
-		efree(lc_name);
-	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lc_name, name_len)) != NULL) {
+	} else if ((mptr = zend_hash_find_ptr(&ce->function_table, lc_name)) != NULL) {
 		reflection_method_factory(ce, mptr, NULL, return_value);
-		efree(lc_name);
 	} else {
-		efree(lc_name);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Method %s does not exist", name);
-		return;
+				"Method %s does not exist", ZSTR_VAL(name));
 	}
+	zend_string_release(lc_name);
 }
 /* }}} */
 
@@ -4140,11 +4122,9 @@ ZEND_METHOD(reflection_class, getMethod)
 static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter, zval *obj)
 {
 	zval method;
-	size_t len = ZSTR_LEN(mptr->common.function_name);
 	zend_function *closure;
 	if (mptr->common.fn_flags & filter) {
-		if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-			&& memcmp(ZSTR_VAL(mptr->common.function_name), ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+		if (obj && is_closure_invoke(ce, mptr->common.function_name)
 			&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
 		{
 			mptr = closure;
