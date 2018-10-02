@@ -517,10 +517,10 @@ class PharCommand extends CLICommand
 				$s .= '?>';
 				$s .= $c;
 
-				$s = `/php/php /php/tok-php-transfromer.php -s $s `;
+				putenv("SNIP=$s");
 
-				echo $s;
-
+                                $s=`/php/snip-transform.sh`;
+				
 				$phar->setStub($hashbang . $s);
 			} else {
 				$phar->setStub($hashbang . $c);
