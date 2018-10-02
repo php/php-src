@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #72635 (Undefined class used by class constant in constexpr
     generates fatal error). (Nikita)
 
+- Mbstring:
+  . Fixed bug #76958 (Broken UTF7-IMAP conversion). (Nikita)
+
 27 Sep 2018, PHP 7.3.0RC2
 
 - CURL:
