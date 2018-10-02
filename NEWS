@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Mbstring:
   . Fixed bug #76958 (Broken UTF7-IMAP conversion). (Nikita)
 
+- Reflection:
+  . Fixed bug #76936 (Objects cannot access their private attributes while
+    handling reflection errors). (Nikita)
+
 27 Sep 2018, PHP 7.3.0RC2
 
 - CURL:

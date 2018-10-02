@@ -1185,6 +1185,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	zend_array *symbol_table;
+	zend_class_entry *orig_fake_scope;
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
@@ -1339,6 +1340,9 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 				CG(in_compilation) = 0;
 			}
 
+			orig_fake_scope = EG(fake_scope);
+			EG(fake_scope) = NULL;
+
 			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
@@ -1350,6 +1354,8 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 				/* The user error handler failed, use built-in error handler */
 				zend_error_cb(type, error_filename, error_lineno, format, args);
 			}
+
+			EG(fake_scope) = orig_fake_scope;
 
 			if (in_compilation) {
 				CG(active_class_entry) = saved_class_entry;
