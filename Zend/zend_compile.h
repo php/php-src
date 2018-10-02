@@ -217,10 +217,14 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_ABSTRACT                (1 <<  6) /*  X  |  X  |     |     */
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS (1 <<  6) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function has typed arguments / class has typed props   |     |     |     */
-#define ZEND_ACC_HAS_TYPE_HINTS          (1 <<  7) /*  X  |  X  |     |     */
+/* Immutable op_array and class_entrues                   |     |     |     */
+/* (implemented only for lazy loading of op_arrays)       |     |     |     */
+#define ZEND_ACC_IMMUTABLE               (1 <<  7) /*  ?  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 14...)                            |     |     |     */
+/* Function has typed arguments / class has typed props   |     |     |     */
+#define ZEND_ACC_HAS_TYPE_HINTS          (1 <<  8) /*  X  |  X  |     |     */
+/*                                                        |     |     |     */
+/* Class Flags (unused: 15...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -235,36 +239,33 @@ typedef struct _zend_oparray_context {
 /* abstract method                                        |     |     |     */
 #define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS (1 <<  4) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Class constants updated                                |     |     |     */
-#define ZEND_ACC_CONSTANTS_UPDATED       (1 <<  8) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Class extends another class                            |     |     |     */
-#define ZEND_ACC_INHERITED               (1 <<  9) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Class implements interface(s)                          |     |     |     */
-#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 10) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Class uses trait(s)                                    |     |     |     */
-#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 11) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* User class has methods with static variables           |     |     |     */
-#define ZEND_HAS_STATIC_IN_METHODS       (1 << 12) /*  X  |     |     |     */
-/*                                                        |     |     |     */
 /* Class has magic methods __get/__set/__unset/           |     |     |     */
 /* __isset that use guards                                |     |     |     */
-#define ZEND_ACC_USE_GUARDS              (1 << 13) /*  X  |     |     |     */
+#define ZEND_ACC_USE_GUARDS              (1 <<  9) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class constants updated                                |     |     |     */
+#define ZEND_ACC_CONSTANTS_UPDATED       (1 << 10) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class extends another class                            |     |     |     */
+#define ZEND_ACC_INHERITED               (1 << 11) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class implements interface(s)                          |     |     |     */
+#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 12) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class uses trait(s)                                    |     |     |     */
+#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 13) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* User class has methods with static variables           |     |     |     */
+#define ZEND_HAS_STATIC_IN_METHODS       (1 << 14) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 25...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
-#define ZEND_ACC_DEPRECATED              (1 <<  8) /*     |  X  |     |     */
+#define ZEND_ACC_DEPRECATED              (1 <<  9) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Function returning by reference                        |     |     |     */
-#define ZEND_ACC_RETURN_REFERENCE        (1 <<  9) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* Immutable op_array (lazy loading)                      |     |     |     */
-#define ZEND_ACC_IMMUTABLE               (1 << 10) /*     |  X  |     |     */
+#define ZEND_ACC_RETURN_REFERENCE        (1 << 10) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Function has a return type                             |     |     |     */
 #define ZEND_ACC_HAS_RETURN_TYPE         (1 << 11) /*     |  X  |     |     */
