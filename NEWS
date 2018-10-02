@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - FCGI:
   . Fixed bug #76948 (Failed shutdown/reboot or end session in Windows).
     (Anatol)
+  . Fixed bug #76954 (apache_response_headers removes last character from header
+    name). (stodorovic)
 
 - FTP:
   . Fixed bug #76972 (Data truncation due to forceful ssl socket shutdown).

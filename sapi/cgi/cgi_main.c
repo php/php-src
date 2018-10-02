@@ -1735,9 +1735,9 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 			len = p - h->header;
 		}
 		if (len > 0) {
-			do {
+			while (len != 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t')) {
 				len--;
-			} while (len != 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t'));
+			}
 			if (len) {
 				s = do_alloca(len + 1, use_heap);
 				memcpy(s, h->header, len);
