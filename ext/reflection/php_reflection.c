@@ -1849,6 +1849,11 @@ ZEND_METHOD(reflection_function, invoke)
 	fcc.called_scope = NULL;
 	fcc.object = NULL;
 
+	if (!Z_ISUNDEF(intern->obj)) {
+		Z_OBJ_HT(intern->obj)->get_closure(
+			&intern->obj, &fcc.called_scope, &fcc.function_handler, &fcc.object);
+	}
+
 	result = zend_call_function(&fci, &fcc);
 
 	if (result == FAILURE) {
@@ -1906,6 +1911,11 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fcc.function_handler = fptr;
 	fcc.called_scope = NULL;
 	fcc.object = NULL;
+
+	if (!Z_ISUNDEF(intern->obj)) {
+		Z_OBJ_HT(intern->obj)->get_closure(
+			&intern->obj, &fcc.called_scope, &fcc.function_handler, &fcc.object);
+	}
 
 	result = zend_call_function(&fci, &fcc);
 
