@@ -148,8 +148,11 @@ ZEND_METHOD(Closure, call)
 		fci_cache.function_handler = &my_function;
 
 		/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
-		if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
+		if (ZEND_USER_CODE(my_function.type)
+		 && (closure->func.common.scope != Z_OBJCE_P(newthis)
+		  || (closure->func.common.fn_flags & ZEND_ACC_HEAP_RT_CACHE))) {
 			my_function.op_array.run_time_cache = emalloc(my_function.op_array.cache_size);
+			my_function.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 			memset(my_function.op_array.run_time_cache, 0, my_function.op_array.cache_size);
 		}
 	}
@@ -172,7 +175,7 @@ ZEND_METHOD(Closure, call)
 	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
 		/* copied upon generator creation */
 		GC_DELREF(&closure->std);
-	} else if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
+	} else if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE) {
 		efree(my_function.op_array.run_time_cache);
 	}
 }
@@ -435,10 +438,6 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 	zend_object_std_dtor(&closure->std);
 
 	if (closure->func.type == ZEND_USER_FUNCTION) {
-		if (closure->func.op_array.fn_flags & ZEND_ACC_NO_RT_ARENA) {
-			efree(closure->func.op_array.run_time_cache);
-			closure->func.op_array.run_time_cache = NULL;
-		}
 		destroy_op_array(&closure->func.op_array);
 	}
 
@@ -663,7 +662,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
 		if (!closure->func.op_array.run_time_cache
 			|| func->common.scope != scope
-			|| (func->common.fn_flags & ZEND_ACC_NO_RT_ARENA)
+			|| (func->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE)
 		) {
 			if (!func->op_array.run_time_cache && (func->common.fn_flags & ZEND_ACC_CLOSURE)) {
 				/* If a real closure is used for the first time, we create a shared runtime cache
@@ -674,7 +673,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			} else {
 				/* Otherwise, we use a non-shared runtime cache */
 				closure->func.op_array.run_time_cache = emalloc(func->op_array.cache_size);
-				closure->func.op_array.fn_flags |= ZEND_ACC_NO_RT_ARENA;
+				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 			}
 			memset(closure->func.op_array.run_time_cache, 0, func->op_array.cache_size);
 		}

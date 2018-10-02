@@ -362,7 +362,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		}
 	}
 
-	if (op_array->run_time_cache && !op_array->function_name) {
+	if (op_array->run_time_cache
+	 && (op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE)) {
 		efree(op_array->run_time_cache);
 		op_array->run_time_cache = NULL;
 	}

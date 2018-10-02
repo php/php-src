@@ -38,6 +38,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - ZEND_ACC_ANON_BOUND is replaced with ZEND_ACC_LINKED. This flag is set
       not only during anonymous classes declaration, but also during any
       run-time or compile-time class declaration.
+    - ZEND_ACC_NO_RT_ARENA renamed into ZEND_ACC_HEAP_RT_CACHE. Now it's used
+      not only for closures, but also for pseudo-main op_arrays.
     - ZEND_ACC_... flags are re-numbered.
 
   d. zend_check_private() is removed. Use (func->common.scope == scope) instead.

@@ -293,7 +293,9 @@ typedef struct _zend_oparray_context {
 /* Closure related                                        |     |     |     */
 #define ZEND_ACC_CLOSURE                 (1 << 18) /*     |  X  |     |     */
 #define ZEND_ACC_FAKE_CLOSURE            (1 << 19) /*     |  X  |     |     */
-#define ZEND_ACC_NO_RT_ARENA             (1 << 20) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* run_time_cache allocated on heap (user only)           |     |     |     */
+#define ZEND_ACC_HEAP_RT_CACHE           (1 << 20) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* method flag used by Closure::__invoke()                |     |     |     */
 #define ZEND_ACC_USER_ARG_INFO           (1 << 21) /*     |  X  |     |     */
