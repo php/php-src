@@ -11,7 +11,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR ."apache_response_headers.test.php";
+$test_file = dirname(__FILE__) . DIRECTORY_SEPARATOR ."apache_response_headers.test.php";
 
 $code  = '<?php';
 $code .= '
@@ -21,22 +21,28 @@ header( "Bad-header" );
 header( " : " );
 header( ":" );
 flush();
-foreach ( apache_response_headers() as $hdr_key => $hdr_val ) {
-        echo "$hdr_key => $hdr_val\n";
-}
+
+var_dump( apache_response_headers() );
 ?>
 ';
 
-file_put_contents($filename, $code);
+file_put_contents( $test_file, $code );
 
-passthru("$php -n -q $filename");
-
-@unlink($filename);
+passthru( "$php -n -q " . escapeshellarg( $test_file ) );
 
 ?>
 ===DONE===
+--CLEAN--
+<?php
+@unlink( dirname(__FILE__) . DIRECTORY_SEPARATOR ."apache_response_headers.test.php" );
+?>
 --EXPECTF--
-X-Powered-By => PHP/%s
-X-Robots-Tag => noindex,nofollow,noarchive
-Content-type => text/html; charset=UTF-8
+array(3) {
+  ["X-Powered-By"]=>
+  string(%d) "PHP/%s"
+  ["X-Robots-Tag"]=>
+  string(26) "noindex,nofollow,noarchive"
+  ["Content-type"]=>
+  string(24) "text/html; charset=UTF-8"
+}
 ===DONE===
