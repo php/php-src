@@ -217,7 +217,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_ABSTRACT                (1 <<  6) /*  X  |  X  |     |     */
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS (1 <<  6) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Immutable op_array and class_entrues                   |     |     |     */
+/* Immutable op_array and class_entries                   |     |     |     */
 /* (implemented only for lazy loading of op_arrays)       |     |     |     */
 #define ZEND_ACC_IMMUTABLE               (1 <<  7) /*  ?  |  X  |     |     */
 /*                                                        |     |     |     */
