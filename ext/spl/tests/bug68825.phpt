@@ -6,7 +6,7 @@ $dir = __DIR__ . '/bug68825';
 
 if (!mkdir($dir)) {
     die('Failed to create temporary directory for testing');
-} else if (!symlink(__FILE__, $dir . '/bug.phpt')) {
+} else if (!symlink(__FILE__, $dir . '/bug')) {
     die('Failed to create symbolic link');
 }
 
@@ -24,6 +24,6 @@ string(%d) "%s%eext%espl%etests%ebug68825.php"
 --CLEAN--
 <?php
 $dir = __DIR__ . '/bug68825';
-unlink($dir . '/bug.phpt');
+unlink($dir . '/bug');
 rmdir($dir);
 ?>

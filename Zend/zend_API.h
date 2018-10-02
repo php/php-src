@@ -229,7 +229,7 @@ typedef struct _zend_fcall_info_cache {
 	INIT_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions)
 
 #ifdef ZTS
-#	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members_table:CG(static_members_table)[(zend_intptr_t)(ce)->static_members_table])
+#	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members_table:CG(static_members_table)[(ce)->static_members_table_idx])
 #else
 #	define CE_STATIC_MEMBERS(ce) ((ce)->static_members_table)
 #endif

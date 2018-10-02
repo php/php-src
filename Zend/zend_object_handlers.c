@@ -1411,7 +1411,7 @@ static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{
 		}
 
 #if ZTS
-		CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval) * class_type->default_static_members_count);
+		CG(static_members_table)[class_type->static_members_table_idx] = emalloc(sizeof(zval) * class_type->default_static_members_count);
 #else
 		class_type->static_members_table = emalloc(sizeof(zval) * class_type->default_static_members_count);
 #endif

@@ -119,7 +119,7 @@ struct _zend_compiler_globals {
 
 #ifdef ZTS
 	zval **static_members_table;
-	int last_static_member;
+	zend_uintptr_t last_static_member;
 #endif
 };
 

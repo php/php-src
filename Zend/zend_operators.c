@@ -2129,14 +2129,14 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 					}
 				}
 				if (!converted) {
-					if (Z_TYPE_P(op1) == IS_NULL || Z_TYPE_P(op1) == IS_FALSE) {
+					if (Z_TYPE_P(op1) < IS_TRUE) {
 						ZVAL_LONG(result, zval_is_true(op2) ? -1 : 0);
-						return SUCCESS;
-					} else if (Z_TYPE_P(op2) == IS_NULL || Z_TYPE_P(op2) == IS_FALSE) {
-						ZVAL_LONG(result, zval_is_true(op1) ? 1 : 0);
 						return SUCCESS;
 					} else if (Z_TYPE_P(op1) == IS_TRUE) {
 						ZVAL_LONG(result, zval_is_true(op2) ? 0 : 1);
+						return SUCCESS;
+					} else if (Z_TYPE_P(op2) < IS_TRUE) {
+						ZVAL_LONG(result, zval_is_true(op1) ? 1 : 0);
 						return SUCCESS;
 					} else if (Z_TYPE_P(op2) == IS_TRUE) {
 						ZVAL_LONG(result, zval_is_true(op1) ? 0 : -1);
@@ -2158,14 +2158,12 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				} else if (Z_TYPE_P(op2)==IS_ARRAY) {
 					ZVAL_LONG(result, -1);
 					return SUCCESS;
-				} else if (Z_TYPE_P(op1)==IS_OBJECT) {
-					ZVAL_LONG(result, 1);
-					return SUCCESS;
-				} else if (Z_TYPE_P(op2)==IS_OBJECT) {
-					ZVAL_LONG(result, -1);
-					return SUCCESS;
 				} else {
-					ZVAL_LONG(result, 0);
+					ZEND_ASSERT(0);
+					zend_throw_error(NULL, "Unsupported operand types");
+					if (result != op1) {
+						ZVAL_UNDEF(result);
+					}
 					return FAILURE;
 				}
 		}
