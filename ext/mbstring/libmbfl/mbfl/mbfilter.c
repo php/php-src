@@ -147,7 +147,7 @@ mbfl_buffer_converter_new(
 
 	/* create convert filter */
 	convd->filter1 = NULL;
-convd->filter2 = NULL;
+	convd->filter2 = NULL;
 	if (mbfl_convert_filter_get_vtbl(convd->from, convd->to) != NULL) {
 		convd->filter1 = mbfl_convert_filter_new(convd->from, convd->to, mbfl_memory_device_output, NULL, &convd->device);
 	} else {
@@ -164,6 +164,7 @@ convd->filter2 = NULL;
 		}
 	}
 	if (convd->filter1 == NULL) {
+		mbfl_free(convd);
 		return NULL;
 	}
 
@@ -2399,7 +2400,7 @@ mime_header_decoder_new(const mbfl_encoding *outcode)
 	mbfl_memory_device_init(&pd->tmpdev, 0, 0);
 	pd->cspos = 0;
 	pd->status = 0;
-	pd->encoding = &mbfl_encoding_pass;
+	pd->encoding = &mbfl_encoding_8bit;
 	pd->incode = &mbfl_encoding_ascii;
 	pd->outcode = outcode;
 	/* charset convert filter */

@@ -171,9 +171,8 @@ mbfl_convert_filter_new(
 	const struct mbfl_convert_vtbl *vtbl;
 
 	vtbl = mbfl_convert_filter_get_vtbl(from, to);
-
 	if (vtbl == NULL) {
-		vtbl = &vtbl_pass;
+		return NULL;
 	}
 
 	/* allocate */
@@ -452,6 +451,10 @@ const struct mbfl_convert_vtbl * mbfl_convert_filter_get_vtbl(
 			   from->no_encoding == mbfl_no_encoding_qprint ||
 			   from->no_encoding == mbfl_no_encoding_uuencode) {
 		to = &mbfl_encoding_8bit;
+	}
+
+	if (to == from && (to == &mbfl_encoding_wchar || to == &mbfl_encoding_8bit)) {
+		return &vtbl_pass;
 	}
 
 	if (to->no_encoding == mbfl_no_encoding_wchar) {
