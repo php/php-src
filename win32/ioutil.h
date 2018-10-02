@@ -481,11 +481,6 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, size_t len)
 	size_t tmp_bufa_len;
 	DWORD err = 0;
 
-	if (len > PHP_WIN32_IOUTIL_MAXPATHLEN) {
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_LENGTH);
-		return NULL;
-	}
-
 	if (php_win32_ioutil_getcwd_w(tmp_bufw, len ? len : PHP_WIN32_IOUTIL_MAXPATHLEN) == NULL) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
