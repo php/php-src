@@ -3,11 +3,7 @@ QUERY_STRING Security Bug
 --DESCRIPTION--
 This bug was present in PHP 4.3.0 only.
 A failure should print HELLO.
---REQUEST--
-return <<<END
-SCRIPT_NAME=/nothing.php
-QUERY_STRING=$filename
-END;
+--CGI--
 --ENV--
 return <<<END
 REDIRECT_URL=$scriptname

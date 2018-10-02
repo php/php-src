@@ -1,11 +1,9 @@
 --TEST--
 Multipart Form POST Data, incorrect content length
---HEADERS--
-return <<<END
-Content-Type=multipart/form-data; boundary=---------------------------240723202011929
-Content-Length=100
-END;
---POST--
+--POST_RAW--
+Content-Type: multipart/form-data; boundary=---------------------------240723202011929
+Content-Length: 100
+
 -----------------------------240723202011929
 Content-Disposition: form-data; name="entry"
 

@@ -1,16 +1,9 @@
 --TEST--
 Multipart Form POST Data
---HEADERS--
-return <<<END
-Content-Type=multipart/form-data; boundary=---------------------------240723202011929
-Content-Length=862
-END;
---ENV--
-return <<<END
-CONTENT_TYPE=multipart/form-data; boundary=---------------------------240723202011929
-CONTENT_LENGTH=862
-END;
---POST--
+--POST_RAW--
+Content-Type: multipart/form-data; boundary=---------------------------240723202011929
+Content-Length: 862
+
 -----------------------------240723202011929
 Content-Disposition: form-data; name="entry"
 

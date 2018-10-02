@@ -6,10 +6,7 @@ if you use ScriptAlias configurations, and the proper
 path is in PATH_TRANSLATED.  SCRIPT_NAME in this is faked,
 but that is ok, Apache sets SCRIPT_NAME to the ScriptAlias
 of the executable.
---REQUEST--
-return <<<END
-PATH_INFO=/path/info
-END;
+--CGI--
 --ENV--
 return <<<END
 REDIRECT_URL=/path
