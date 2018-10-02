@@ -495,7 +495,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				SET_EMPTY_MESSAGE(conn->last_message.s, conn->last_message.l, persistent);
 
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_RSET_QUERY);
-				UPSERT_STATUS_RESET(conn->upsert_status);
+				
 				/* restore after zeroing */
 				UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
@@ -1367,7 +1367,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	/* Finally clean */
 	if (row_packet->eof) {
-		UPSERT_STATUS_RESET(conn->upsert_status);
 		UPSERT_STATUS_SET_WARNINGS(conn->upsert_status, row_packet->warning_count);
 		UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, row_packet->server_status);
 	}
