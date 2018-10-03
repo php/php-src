@@ -639,6 +639,11 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 		zend_function *func = (zend_function*)Z_PTR_P(child);
 		zend_function *orig_prototype = func->common.prototype;
 
+		if (UNEXPECTED(func == parent)) {
+			/* The same method in interface may be inhereted few times */
+			return NULL;
+		}
+
 		do_inheritance_check_on_method(func, parent);
 		if (func->common.prototype != orig_prototype &&
 		    func->type == ZEND_USER_FUNCTION &&
