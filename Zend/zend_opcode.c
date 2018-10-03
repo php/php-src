@@ -284,6 +284,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 				_destroy_zend_class_traits_info(ce);
 			}
 
+			if (ce->properties_info_table) {
+				efree(ce->properties_info_table);
+			}
+
 			break;
 		case ZEND_INTERNAL_CLASS:
 			if (ce->default_properties_table) {
@@ -338,6 +342,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
+			}
+			if (ce->properties_info_table) {
+				free(ce->properties_info_table);
 			}
 			free(ce);
 			break;

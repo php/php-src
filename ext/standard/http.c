@@ -53,25 +53,29 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 	arg_sep_len = strlen(arg_sep);
 
-	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, idx, key, zdata) {
-		/* handling for private & protected object properties */
+	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
 		if (key) {
-			if (ZSTR_VAL(key)[0] == '\0' && type != NULL) {
-				const char *tmp;
+			prop_name = ZSTR_VAL(key);
+			prop_len = ZSTR_LEN(key);
+		} else {
+			prop_name = NULL;
+			prop_len = 0;
+		}
 
-				zend_object *zobj = Z_OBJ_P(type);
-				if (zend_check_property_access(zobj, key) != SUCCESS) {
+		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
+			zdata = Z_INDIRECT_P(zdata);
+			if (Z_ISUNDEF_P(zdata)) {
+				continue;
+			}
+
+			if (type) {
+				const char *tmp;
+				if (zend_check_property_slot_access(Z_OBJ_P(type), zdata) != SUCCESS) {
 					/* private or protected property access outside of the class */
 					continue;
 				}
 				zend_unmangle_property_name_ex(key, &tmp, &prop_name, &prop_len);
-			} else {
-				prop_name = ZSTR_VAL(key);
-				prop_len = ZSTR_LEN(key);
 			}
-		} else {
-			prop_name = NULL;
-			prop_len = 0;
 		}
 
 		ZVAL_DEREF(zdata);

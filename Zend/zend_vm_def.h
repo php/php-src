@@ -5876,7 +5876,7 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 						value = Z_INDIRECT_P(value);
 						value_type = Z_TYPE_INFO_P(value);
 						if (EXPECTED(value_type != IS_UNDEF)
-						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS)) {
+						 && EXPECTED(zend_check_property_slot_access(Z_OBJ_P(array), value) == SUCCESS)) {
 							break;
 						}
 					} else {
@@ -6026,7 +6026,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 						value = Z_INDIRECT_P(value);
 						value_type = Z_TYPE_INFO_P(value);
 						if (EXPECTED(value_type != IS_UNDEF)
-						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS)) {
+						 && EXPECTED(zend_check_property_slot_access(Z_OBJ_P(array), value) == SUCCESS)) {
 							break;
 						}
 					} else {

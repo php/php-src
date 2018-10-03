@@ -1198,8 +1198,7 @@ ZEND_FUNCTION(get_object_vars)
 					continue;
 				}
 
-				ZEND_ASSERT(key);
-				if (zend_check_property_access(zobj, key) == FAILURE) {
+				if (zend_check_property_slot_access(zobj, value) == FAILURE) {
 					continue;
 				}
 				unmangle = 1;

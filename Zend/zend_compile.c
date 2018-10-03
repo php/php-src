@@ -1622,6 +1622,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->default_properties_count = 0;
 	ce->default_static_members_count = 0;
+	ce->properties_info_table = NULL;
 
 	if (nullify_handlers) {
 		ce->constructor = NULL;

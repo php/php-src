@@ -58,6 +58,39 @@
   called, we cal __call handler.
 */
 
+ZEND_API zend_property_info **zend_build_properties_info_table(zend_class_entry *ce)
+{
+	zend_property_info *prop;
+	zend_property_info **table = pemalloc(
+		sizeof(zend_property_info *) * ce->default_properties_count,
+		ce->type == ZEND_INTERNAL_CLASS
+	);
+
+	ZEND_ASSERT(ce->properties_info_table == NULL);
+	ZEND_ASSERT(ce->default_properties_count != 0);
+	ce->properties_info_table = table;
+
+	if (ce->parent && ce->parent->default_properties_count != 0) {
+		zend_property_info **parent_table = zend_get_properties_info_table(ce->parent);
+		memcpy(
+			table, parent_table,
+			sizeof(zend_property_info *) * ce->parent->default_properties_count
+		);
+
+		/* Child did not add any new properties, we are done */
+		if (ce->default_properties_count == ce->parent->default_properties_count) {
+			return table;
+		}
+	}
+
+	ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+		if (prop->ce == ce && (prop->flags & ZEND_ACC_STATIC) == 0) {
+			table[OBJ_PROP_TO_NUM(prop->offset)] = prop;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return table;
+}
+
 ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 {
 	if (!zobj->properties) {
@@ -568,6 +601,32 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 		ZEND_ASSERT(property_info->flags & ZEND_ACC_PUBLIC);
 	}
 	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_check_property_info_access(zend_property_info *prop_info) /* {{{ */
+{
+	zend_class_entry *scope;
+	if (prop_info->flags & ZEND_ACC_PUBLIC) {
+		return SUCCESS;
+	}
+
+	if (UNEXPECTED(EG(fake_scope))) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_executed_scope();
+	}
+
+	if (prop_info->ce == scope) {
+		return SUCCESS;
+	}
+	
+	if ((prop_info->flags & ZEND_ACC_PROTECTED)
+			&& is_protected_compatible_scope(prop_info->ce, scope)) {
+		return SUCCESS;
+	}
+
+	return FAILURE;
 }
 /* }}} */
 
