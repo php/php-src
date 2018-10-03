@@ -108,6 +108,15 @@ PHP 7.4 UPGRADE NOTES
 12. Windows Support
 ========================================
 
+- stat:
+  . The stat implementation has been refactored.
+    - An inode number is delivered and is based on the NTFS file index.
+    - The device number is now based on the volume serial number.
+
+  Note, that both values derived from the system and provided as is on 64-bit
+  systems. On 32-bit system, these values might overflow the 32-bit integer in
+  PHP, so they're a fake.
+
 ========================================
 13. Other Changes
 ========================================
