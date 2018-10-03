@@ -36,7 +36,8 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           cli
-MAINTENANCE:         Marcus Börger <helly@php.net>, Edin Kadribasic <edink@php.net>
+PRIMARY MAINTAINER:  Marcus Börger <helly@php.net>, Edin Kadribasic <edink@php.net>
+MAINTENANCE:         Unknown
 STATUS:              Working
 SINCE:               4.3.0
 -------------------------------------------------------------------------------
@@ -58,7 +59,8 @@ STATUS:              Working
 SINCE:               5.3
 -------------------------------------------------------------------------------
 EXTENSION:           phpdbg
-MAINTENANCE:         Joe Watkins <krakjoe@php.net>, Bob Weinand <bwoebi@php.net>
+PRIMARY MAINTAINER:  Joe Watkins <krakjoe@php.net>, Bob Weinand <bwoebi@php.net>
+MAINTENANCE:         Unkown
 STATUS:              5.6
 -------------------------------------------------------------------------------
 
@@ -244,7 +246,8 @@ SINCE:               5.0
 
 -------------------------------------------------------------------------------
 EXTENSION:           bcmath
-MAINTENANCE:         Andi Gutmans <andi@zend.com> (2000 - 2004)
+PRIMARY MAINTAINER:  Andi Gutmans <andi@zend.com> (2000 - 2004)
+MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           bz2
@@ -321,6 +324,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gettext
+PRIMARY MAINTAINER:  Unknown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -422,6 +426,7 @@ STATUS:              Working
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           readline
+PRIMARY MAINTAINER:  Unkown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -475,14 +480,17 @@ STATUS:              Working
 SINCE:               5.0.0
 -------------------------------------------------------------------------------
 EXTENSION:           sysvmsg
+PRIMARY MAINTAINER:  Unkown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sysvsem
+PRIMARY MAINTAINER:  Unkown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sysvshm
+PRIMARY MAINTAINER:  Unkown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
