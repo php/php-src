@@ -1,7 +1,5 @@
 --TEST--
-ripemd320 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: ripemd320 algorithm
 --FILE--
 <?php
 echo hash('ripemd320', '') . "\n";

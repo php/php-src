@@ -1,7 +1,5 @@
 --TEST--
-Test hash_file() function : basic functionality 
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_file() function : basic functionality 
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--

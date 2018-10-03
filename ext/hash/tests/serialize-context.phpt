@@ -1,7 +1,5 @@
 --TEST--
-Serialize a context
---SKIPIF--
-<?php if (!extension_loaded('hash')) echo 'skip';
+Hash: Context serialization
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
-Test hash_pbkdf2() function : basic functionality
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_pbkdf2() function : basic functionality
 --FILE--
 <?php
 

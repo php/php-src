@@ -1,7 +1,5 @@
 --TEST--
-CRC32
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: CRC32 algorithm
 --FILE--
 <?php
 echo hash('crc32', ''), "\n";

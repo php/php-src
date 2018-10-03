@@ -1,7 +1,5 @@
 --TEST--
-hash_copy() basic tests
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: hash_copy() basic tests
 --FILE--
 <?php
 
