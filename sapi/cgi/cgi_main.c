@@ -228,9 +228,10 @@ static php_cgi_globals_struct php_cgi_globals;
 #ifdef PHP_WIN32
 #define WIN32_MAX_SPAWN_CHILDREN 64
 HANDLE kid_cgi_ps[WIN32_MAX_SPAWN_CHILDREN];
-int kids;
+int kids, cleaning_up = 0;
 HANDLE job = NULL;
 JOBOBJECT_EXTENDED_LIMIT_INFORMATION job_info = { 0 };
+CRITICAL_SECTION cleanup_lock;
 #endif
 
 #ifndef HAVE_ATTRIBUTE_WEAK
@@ -1493,6 +1494,10 @@ BOOL WINAPI fastcgi_cleanup(DWORD sig)
 {
 	int i = kids;
 
+	EnterCriticalSection(&cleanup_lock);
+	cleaning_up = 1;
+	LeaveCriticalSection(&cleanup_lock);
+
 	while (0 < i--) {
 		if (NULL == kid_cgi_ps[i]) {
 				continue;
@@ -2129,8 +2134,9 @@ consult the installation file that came with this distribution, or visit \n\
 			int i;
 
 			ZeroMemory(&kid_cgi_ps, sizeof(kid_cgi_ps));
-			kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN;
-
+			kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN; 
+			
+			InitializeCriticalSection(&cleanup_lock);
 			SetConsoleCtrlHandler(fastcgi_cleanup, TRUE);
 
 			/* kids will inherit the env, don't let them spawn */
@@ -2183,6 +2189,13 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 
 			while (parent) {
+				EnterCriticalSection(&cleanup_lock);
+				if (cleaning_up) {
+					DeleteCriticalSection(&cleanup_lock);
+					goto parent_out;
+				}
+				LeaveCriticalSection(&cleanup_lock);
+
 				i = kids;
 				while (0 < i--) {
 					DWORD status;
@@ -2239,6 +2252,8 @@ consult the installation file that came with this distribution, or visit \n\
 
 			/* restore my env */
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf);
+
+			DeleteCriticalSection(&cleanup_lock);
 
 			goto parent_out;
 		} else {
