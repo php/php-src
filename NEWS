@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
   . Fixed bug #72635 (Undefined class used by class constant in constexpr
     generates fatal error). (Nikita)
+  . Fixed bug #76947 (file_put_contents() blocks the directory of the file
+    (__DIR__)). (Anatol)
 
 - FCGI:
   . Fixed #76948 (Failed shutdown/reboot or end session in Windows). (Anatol)
