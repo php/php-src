@@ -982,6 +982,138 @@ PW32IO int php_win32_ioutil_fstat(int fd, php_win32_ioutil_stat_t *buf)
 	return php_win32_ioutil_fstat_int((HANDLE)_get_osfhandle(fd), buf, NULL, 0, NULL);
 }/*}}}*/
 
+static ssize_t php_win32_ioutil_readlink_int(HANDLE h, wchar_t *buf, size_t buf_len)
+{/*{{{*/
+	char buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+	PHP_WIN32_IOUTIL_REPARSE_DATA_BUFFER *reparse_data = (PHP_WIN32_IOUTIL_REPARSE_DATA_BUFFER*) buffer;
+	wchar_t* reparse_target;
+	DWORD reparse_target_len;
+	DWORD bytes;
+
+	if (!DeviceIoControl(h,
+		FSCTL_GET_REPARSE_POINT,
+		NULL,
+		0,
+		buffer,
+		sizeof buffer,
+		&bytes,
+		NULL)) {
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+		return -1;
+	}
+
+	if (reparse_data->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+		/* Real symlink */
+		reparse_target = reparse_data->SymbolicLinkReparseBuffer.ReparseTarget +
+			(reparse_data->SymbolicLinkReparseBuffer.SubstituteNameOffset /
+			sizeof(wchar_t));
+		reparse_target_len =
+			reparse_data->SymbolicLinkReparseBuffer.SubstituteNameLength /
+			sizeof(wchar_t);
+
+		/* Real symlinks can contain pretty much everything, but the only thing we
+		* really care about is undoing the implicit conversion to an NT namespaced
+		* path that CreateSymbolicLink will perform on absolute paths. If the path
+		* is win32-namespaced then the user must have explicitly made it so, and
+		* we better just return the unmodified reparse data. */
+		if (reparse_target_len >= 4 &&
+		reparse_target[0] == L'\\' &&
+		reparse_target[1] == L'?' &&
+		reparse_target[2] == L'?' &&
+		reparse_target[3] == L'\\') {
+			/* Starts with \??\ */
+			if (reparse_target_len >= 6 &&
+				((reparse_target[4] >= L'A' && reparse_target[4] <= L'Z') ||
+				(reparse_target[4] >= L'a' && reparse_target[4] <= L'z')) &&
+				reparse_target[5] == L':' &&
+				(reparse_target_len == 6 || reparse_target[6] == L'\\')) {
+				/* \??\<drive>:\ */
+				reparse_target += 4;
+				reparse_target_len -= 4;
+
+			} else if (reparse_target_len >= 8 &&
+				(reparse_target[4] == L'U' || reparse_target[4] == L'u') &&
+				(reparse_target[5] == L'N' || reparse_target[5] == L'n') &&
+				(reparse_target[6] == L'C' || reparse_target[6] == L'c') &&
+				reparse_target[7] == L'\\') {
+				/* \??\UNC\<server>\<share>\ - make sure the final path looks like
+				* \\<server>\<share>\ */
+				reparse_target += 6;
+				reparse_target[0] = L'\\';
+				reparse_target_len -= 6;
+			}
+		}
+
+	} else if (reparse_data->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
+		/* Junction. */
+		reparse_target = reparse_data->MountPointReparseBuffer.ReparseTarget +
+			(reparse_data->MountPointReparseBuffer.SubstituteNameOffset /
+			sizeof(wchar_t));
+		reparse_target_len = reparse_data->MountPointReparseBuffer.SubstituteNameLength / sizeof(wchar_t);
+
+		/* Only treat junctions that look like \??\<drive>:\ as symlink. Junctions
+		* can also be used as mount points, like \??\Volume{<guid>}, but that's
+		* confusing for programs since they wouldn't be able to actually
+		* understand such a path when returned by uv_readlink(). UNC paths are
+		* never valid for junctions so we don't care about them. */
+		if (!(reparse_target_len >= 6 &&
+			reparse_target[0] == L'\\' &&
+			reparse_target[1] == L'?' &&
+			reparse_target[2] == L'?' &&
+			reparse_target[3] == L'\\' &&
+			((reparse_target[4] >= L'A' && reparse_target[4] <= L'Z') ||
+			(reparse_target[4] >= L'a' && reparse_target[4] <= L'z')) &&
+			reparse_target[5] == L':' &&
+			(reparse_target_len == 6 || reparse_target[6] == L'\\'))) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_SYMLINK_NOT_SUPPORTED);
+			return -1;
+		}
+
+		/* Remove leading \??\ */
+		reparse_target += 4;
+		reparse_target_len -= 4;
+
+	} else {
+		/* Reparse tag does not indicate a symlink. */
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_SYMLINK_NOT_SUPPORTED);
+		return -1;
+	}
+
+	if (reparse_target_len >= buf_len) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+		return -1;
+	}
+
+	memcpy(buf, reparse_target, (reparse_target_len + 1)*sizeof(wchar_t));
+
+	return reparse_target_len;
+}/*}}}*/
+
+PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, size_t buf_len)
+{/*{{{*/
+	HANDLE h;
+	ssize_t ret;
+
+	h = CreateFileW(path,
+					0,
+					0,
+					NULL,
+					OPEN_EXISTING,
+					FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS,
+					NULL);
+
+	if (h == INVALID_HANDLE_VALUE) {
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+		return -1;
+	}
+
+	ret = php_win32_ioutil_readlink_int(h, buf, buf_len);
+
+	CloseHandle(h);
+
+	return ret;
+}/*}}}*/
+
 /*
  * Local variables:
  * tab-width: 4

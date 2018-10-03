@@ -751,6 +751,42 @@ __forceinline static int php_win32_ioutil_stat_ex(const char *path, php_win32_io
 #define php_win32_ioutil_stat(path, buf) php_win32_ioutil_stat_ex(path, buf, 0)
 #define php_win32_ioutil_lstat(path, buf) php_win32_ioutil_stat_ex(path, buf, 1)
 
+PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, size_t buf_len);
+
+__forceinline static ssize_t php_win32_ioutil_readlink(const char *path, char *buf, size_t buf_len)
+{/*{{{*/
+	size_t pathw_len, ret_buf_len;
+	wchar_t *pathw = php_win32_ioutil_conv_any_to_w(path, PHP_WIN32_CP_IGNORE_LEN, &pathw_len);
+	wchar_t retw[PHP_WIN32_IOUTIL_MAXPATHLEN];
+	char *ret_buf;
+	ssize_t ret;
+
+	if (!pathw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return -1;
+	}
+
+	ret = php_win32_ioutil_readlink_w(pathw, retw, sizeof(retw)-1);
+	if (ret < 0) {
+		DWORD _err = GetLastError();
+		free(pathw);
+		SET_ERRNO_FROM_WIN32_CODE(_err);
+		return ret;
+	}
+
+	ret_buf = php_win32_ioutil_conv_w_to_any(retw, PHP_WIN32_CP_IGNORE_LEN, &ret_buf_len);
+	if (!ret_buf || ret_buf_len >= buf_len || ret_buf_len >= MAXPATHLEN) {
+		free(pathw);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_PATHNAME);
+		return -1;
+	}
+	memcpy(buf, ret_buf, ret_buf_len + 1);
+
+	free(pathw);
+
+	return ret;
+}/*}}}*/
+
 #ifdef __cplusplus
 }
 #endif
