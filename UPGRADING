@@ -75,6 +75,10 @@ PHP 7.4 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Hash:
+  . The hash extension cannot be disabled anymore and is always an integral 
+    part of any PHP build, similar to the date extension.
+
 - Intl:
   . The Intl extension now requires at least ICU 50.1.
 

@@ -7,11 +7,13 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   d. Removed zend_check_private()
 
 2. Build system changes
-  a. Unix build system changes
-  b. Windows build system changes
+  a. Abstract
+  b. Unix build system changes
+  c. Windows build system changes
 
 3. Module changes
   a. ext/xml
+  b. ext/hash
 
 ========================
 1. Internal API changes
@@ -52,14 +54,18 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
-  a. Unix build system changes
+  a. Abstract
+    - The hash extension is now always available, meaning the --enable-hash 
+	  configure argument has been removed.
+
+  b. Unix build system changes
     - configure --help now also outputs --program-suffix and --program-prefix
       information by using the Autoconf AC_ARG_PROGRAM macro.
     - Obsolescent macros AC_FUNC_VPRINTF and AC_FUNC_UTIME_NULL have been
       removed. Symbols HAVE_VPRINTF and HAVE_UTIME_NULL are no longer defined
       since they are not needed on the current systems.
 
-  b. Windows build system changes
+  c. Windows build system changes
 
 ========================
 3. Module changes
@@ -68,3 +74,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   a. ext/xml
     - The public (internal) API of the ext/xml extension has been removed. All
       functions and structures are private to the extension now.
+
+  b. ext/hash
+    - The hash extension is now always available, allowing extensions to rely 
+	  on its functionality to be available without compile time checks.
