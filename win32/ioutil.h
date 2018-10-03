@@ -774,7 +774,7 @@ __forceinline static ssize_t php_win32_ioutil_readlink(const char *path, char *b
 		return ret;
 	}
 
-	ret_buf = php_win32_ioutil_conv_w_to_any(retw, PHP_WIN32_CP_IGNORE_LEN, &ret_buf_len);
+	ret_buf = php_win32_ioutil_conv_w_to_any(retw, ret, &ret_buf_len);
 	if (!ret_buf || ret_buf_len >= buf_len || ret_buf_len >= MAXPATHLEN) {
 		free(pathw);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_PATHNAME);
@@ -784,7 +784,7 @@ __forceinline static ssize_t php_win32_ioutil_readlink(const char *path, char *b
 
 	free(pathw);
 
-	return ret;
+	return ret_buf_len;
 }/*}}}*/
 
 #ifdef __cplusplus
