@@ -25,7 +25,7 @@ typedef struct {
 	uint64_t passed;
 	unsigned char buffer[64];
 	unsigned int passes:1;
-	unsigned int length:7;
+	size_t length;
 } PHP_TIGER_CTX;
 
 PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context);

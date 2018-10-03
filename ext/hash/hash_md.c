@@ -280,7 +280,7 @@ PHP_HASH_API void PHP_MD5Init(PHP_MD5_CTX * context)
    context.
  */
 PHP_HASH_API void PHP_MD5Update(PHP_MD5_CTX * context, const unsigned char *input,
-			   unsigned int inputLen)
+			   size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -539,7 +539,7 @@ PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX * context)
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -652,7 +652,7 @@ static void MD2_Transform(PHP_MD2_CTX *context, const unsigned char *block)
 	}
 }
 
-PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *buf, unsigned int len)
+PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *buf, size_t len)
 {
 	const unsigned char *p = buf, *e = buf + len;
 
@@ -660,7 +660,7 @@ PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *buf, 
 		if (context->in_buffer + len < 16) {
 			/* Not enough for block, just pass into buffer */
 			memcpy(context->buffer + context->in_buffer, p, len);
-			context->in_buffer += len;
+			context->in_buffer += (char) len;
 			return;
 		}
 		/* Put buffered data together with inbound for a single block */
@@ -679,7 +679,7 @@ PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *buf, 
 	/* Copy remaining data to buffer */
 	if (p < e) {
 		memcpy(context->buffer, p, e - p);
-		context->in_buffer = (char)(e - p);
+		context->in_buffer = (char) (e - p);
 	}
 }
 

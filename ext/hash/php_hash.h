@@ -30,7 +30,7 @@
 #define L64 INT64_C
 
 typedef void (*php_hash_init_func_t)(void *context);
-typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
+typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, size_t count);
 typedef void (*php_hash_final_func_t)(unsigned char *digest, void *context);
 typedef int  (*php_hash_copy_func_t)(const void *ops, void *orig_context, void *dest_context);
 
@@ -126,10 +126,6 @@ extern zend_module_entry hash_module_entry;
 #	define PHP_HASH_API __attribute__ ((visibility("default")))
 #else
 #	define PHP_HASH_API
-#endif
-
-#ifdef ZTS
-#include "TSRM.h"
 #endif
 
 PHP_FUNCTION(hash);

@@ -151,11 +151,11 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 		size_t n;
 
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-			ops->hash_update(context, (unsigned char *) buf, (unsigned int) n);
+			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
 	} else {
-		ops->hash_update(context, (unsigned char *) data, (unsigned int) data_len);
+		ops->hash_update(context, (unsigned char *) data, data_len);
 	}
 
 	digest = zend_string_alloc(ops->digest_size, 0);
@@ -213,7 +213,7 @@ static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *
 	if (key_len > (size_t)ops->block_size) {
 		/* Reduce the key first */
 		ops->hash_init(context);
-		ops->hash_update(context, key, (unsigned int) key_len);
+		ops->hash_update(context, key, key_len);
 		ops->hash_final(K, context);
 	} else {
 		memcpy(K, key, key_len);
@@ -225,7 +225,7 @@ static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *
 static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops *ops, void *context, const unsigned char *key, const unsigned char *data, const zend_long data_size) {
 	ops->hash_init(context);
 	ops->hash_update(context, key, ops->block_size);
-	ops->hash_update(context, data, (unsigned int) data_size);
+	ops->hash_update(context, data, data_size);
 	ops->hash_final(final, context);
 }
 
@@ -280,7 +280,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 		ops->hash_init(context);
 		ops->hash_update(context, K, ops->block_size);
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-			ops->hash_update(context, (unsigned char *) buf, (unsigned int) n);
+			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
 		ops->hash_final((unsigned char *) ZSTR_VAL(digest), context);
@@ -379,7 +379,7 @@ static void php_hashcontext_ctor(INTERNAL_FUNCTION_PARAMETERS, zval *objval) {
 
 		if (ZSTR_LEN(key) > (size_t)ops->block_size) {
 			/* Reduce the key first */
-			ops->hash_update(context, (unsigned char *) ZSTR_VAL(key), (unsigned int) ZSTR_LEN(key));
+			ops->hash_update(context, (unsigned char *) ZSTR_VAL(key), ZSTR_LEN(key));
 			ops->hash_final((unsigned char *) K, context);
 			/* Make the context ready to start over */
 			ops->hash_init(context);
@@ -427,7 +427,7 @@ PHP_FUNCTION(hash_update)
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
 	PHP_HASHCONTEXT_VERIFY("hash_update", hash);
-	hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(data), (unsigned int) ZSTR_LEN(data));
+	hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(data), ZSTR_LEN(data));
 
 	RETURN_TRUE;
 }
@@ -462,7 +462,7 @@ PHP_FUNCTION(hash_update_stream)
 			/* Nada mas */
 			RETURN_LONG(didread);
 		}
-		hash->ops->hash_update(hash->context, (unsigned char *) buf, (unsigned int) n);
+		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
 		length -= n;
 		didread += n;
 	}
@@ -498,7 +498,7 @@ PHP_FUNCTION(hash_update_file)
 	}
 
 	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-		hash->ops->hash_update(hash->context, (unsigned char *) buf, (unsigned int) n);
+		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
 	}
 	php_stream_close(stream);
 
@@ -671,7 +671,7 @@ PHP_FUNCTION(hash_hkdf)
 	// Expand
 	returnval = zend_string_alloc(length, 0);
 	digest = emalloc(ops->digest_size);
-	for (i = 1, rounds = (int)(length - 1) / ops->digest_size + 1; i <= rounds; i++) {
+	for (i = 1, rounds = (int) (length - 1) / ops->digest_size + 1; i <= rounds; i++) {
 		// chr(i)
 		unsigned char c[1];
 		c[0] = (i & 0xFF);
@@ -685,7 +685,7 @@ PHP_FUNCTION(hash_hkdf)
 		}
 
 		if (info != NULL && ZSTR_LEN(info) > 0) {
-			ops->hash_update(context, (unsigned char *) ZSTR_VAL(info), (unsigned int) ZSTR_LEN(info));
+			ops->hash_update(context, (unsigned char *) ZSTR_VAL(info), ZSTR_LEN(info));
 		}
 
 		ops->hash_update(context, c, 1);
@@ -831,7 +831,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	if (raw_output) {
 		memcpy(ZSTR_VAL(returnval), result, length);
 	} else {
-		php_hash_bin2hex(ZSTR_VAL(returnval), result, (unsigned int) digest_length);
+		php_hash_bin2hex(ZSTR_VAL(returnval), result, (int) digest_length);
 	}
 	ZSTR_VAL(returnval)[length] = 0;
 	efree(result);
@@ -1083,8 +1083,8 @@ PHP_FUNCTION(mhash_keygen_s2k)
 					for (j=0;j<i;j++) {
 						ops->hash_update(context, &null, 1);
 					}
-					ops->hash_update(context, (unsigned char *)padded_salt, (unsigned int) salt_len);
-					ops->hash_update(context, (unsigned char *)password, (unsigned int) password_len);
+					ops->hash_update(context, (unsigned char *)padded_salt, salt_len);
+					ops->hash_update(context, (unsigned char *)password, password_len);
 					ops->hash_final((unsigned char *)digest, context);
 					memcpy( &key[i*block_size], digest, block_size);
 				}

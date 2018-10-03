@@ -975,7 +975,7 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 
 		ZEND_HASH_FOREACH_PTR(EG(zend_constants), constant) {
 			if (ZEND_CONSTANT_MODULE_NUMBER(constant) == module->module_number) {
-				_const_string(str, ZSTR_VAL(constant->name), &constant->value, indent);
+				_const_string(&str_constants, ZSTR_VAL(constant->name), &constant->value, indent);
 				num_constants++;
 			}
 		} ZEND_HASH_FOREACH_END();
