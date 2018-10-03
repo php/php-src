@@ -46,7 +46,7 @@ EXT_HASH_HEADERS="php_hash.h php_hash_md.h php_hash_sha.h php_hash_ripemd.h \
   php_hash_whirlpool.h php_hash_adler32.h php_hash_crc32.h \
   php_hash_fnv.h php_hash_joaat.h php_hash_sha3.h"
 
-PHP_NEW_EXTENSION(hash, $EXT_HASH_SOURCES, $ext_shared,,$PHP_HASH_CFLAGS)
+PHP_NEW_EXTENSION(hash, $EXT_HASH_SOURCES, 0,,$PHP_HASH_CFLAGS)
 ifdef([PHP_INSTALL_HEADERS], [
 	PHP_INSTALL_HEADERS(ext/hash, $EXT_HASH_HEADERS)
 ])
