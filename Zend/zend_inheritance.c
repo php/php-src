@@ -640,7 +640,7 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 		zend_function *orig_prototype = func->common.prototype;
 
 		if (UNEXPECTED(func == parent)) {
-			/* The same method in interface may be inhereted few times */
+			/* The same method in interface may be inherited few times */
 			return NULL;
 		}
 
