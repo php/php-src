@@ -276,7 +276,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	if (isfilename) {
 		char buf[1024];
-		int n;
+		size_t n;
 		ops->hash_init(context);
 		ops->hash_update(context, K, ops->block_size);
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
@@ -671,7 +671,7 @@ PHP_FUNCTION(hash_hkdf)
 	// Expand
 	returnval = zend_string_alloc(length, 0);
 	digest = emalloc(ops->digest_size);
-	for (i = 1, rounds = (length - 1) / ops->digest_size + 1; i <= rounds; i++) {
+	for (i = 1, rounds = (int) (length - 1) / ops->digest_size + 1; i <= rounds; i++) {
 		// chr(i)
 		unsigned char c[1];
 		c[0] = (i & 0xFF);
@@ -831,7 +831,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	if (raw_output) {
 		memcpy(ZSTR_VAL(returnval), result, length);
 	} else {
-		php_hash_bin2hex(ZSTR_VAL(returnval), result, digest_length);
+		php_hash_bin2hex(ZSTR_VAL(returnval), result, (int) digest_length);
 	}
 	ZSTR_VAL(returnval)[length] = 0;
 	efree(result);

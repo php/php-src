@@ -39,7 +39,7 @@ PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context)
 	context->state = 0;
 }
 
-PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, size_t inputLen)
 {
 	context->state = joaat_buf((void *)input, inputLen, context->state);
 }
