@@ -679,7 +679,7 @@ PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *buf, 
 	/* Copy remaining data to buffer */
 	if (p < e) {
 		memcpy(context->buffer, p, e - p);
-		context->in_buffer = (char)(e - p);
+		context->in_buffer = e - p;
 	}
 }
 
