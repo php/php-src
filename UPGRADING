@@ -476,10 +476,6 @@ PCRE:
     (`(object) array( ... )`), rather than using the nonexistent method
     stdClass::__setState().
 
- ZIP:
-  . Bundled libzip has been dropped,
-    system library is now required.
-
 ========================================
 10. New Global Constants
 ========================================
