@@ -22,168 +22,155 @@
 function help(): void
 {
     $help = <<<HELP
-  <yellow>NAME</yellow>
+  *NAME*
+    tidy.php - tidy whitespace and end of lines
 
-    tidy.php - tidy trailing whitespace and end of lines
-
-  <yellow>SYNOPSIS</yellow>
-
+  *SYNOPSIS*
     php tidy.php [OPTION...] input-path
 
-  <yellow>DESCRIPTION</yellow>
+  *DESCRIPTION*
+    Those with a keen eye will notice a recurring whitespace issue in text
+    files. For example, redundant trailing whitespace, different end of line
+    (EOL) style, missing final end of line, and similar. Some text editors sort
+    this out automatically when saving files, some use .editorconfig and some
+    leave files intact. This script tidies whitespace and end of lines for
+    consistency and homogeneity, which brings less unrelated whitespace diffs in
+    Git commits and a better development experience in text editors.
 
-    This script fixes common file issues. It can trim trailing spaces and tabs
-    from each line, trim multiple final newlines into a single newline, insert
-    missing final newline or convert end of line (EOL) characters to a preferred
-    style.
+    POSIX defines a line as a sequence of zero or more *non-'<newline>'*
+    characters plus a terminating *'<newline>'* character.
 
-    When input-path is a directory, known binary files (images...) are ignored.
+    C89 and later standards also mention a final newline: "A source file that is
+    not empty shall end in a new-line character, which shall not be immediately
+    preceded by a backslash character."
 
-    When input-path is a Git repository, files in .gitignore are ignored.
+    All text files should normally have at least one final EOL character:
+    - *LF (\\n)* (\*nix and Mac, default)
+    - *CRLF (\\r\\n)* (Windows)
+    - *CR (\\r)* (old Mac, obsolete)
 
-    When input-path is the php-src root directory, it additionally ignores
-    certain generated files, bundled libraries, test data files, and works only
-    on the predefined whitelist.
+    Git stores files in index with LF line endings unless a CRLF is tracked
+    specifically. To see EOLs in the repository index and current working tree:
+    `git ls-files --eol`
 
-    By default, original files are backed up (file.ext~).
-
-    According to POSIX, a line is a sequence of zero or more non-' <newline>'
-    characters plus a terminating '<newline>' character. Normal text files
-    should usually have at least one final newline character. Newline (EOL)
-    characters:
-    - <yellow>LF (\\n)</yellow> (*nix and Mac, default)
-    - <yellow>CRLF (\\r\\n)</yellow> (Windows)
-    - <yellow>CR (\\r)</yellow> (old Mac, obsolete)
-
-    This is a recurring issue in text files and beside the multiple preferred
-    coding styles, also certain text editors behave differently. Some fix these
-    automatically when saving files, some utilize .editorconfig file and some
-    leave files intact.
-
-    Unless tracked specifically, Git stores files in index with LF line endings.
-    To see EOLs in the Git repository's index and current working tree:
-    <green>git ls-files --eol</green>
-
-    Git provides several configuration options (global or per repository) to
-    deal with these issues:
-    - <yellow>core.autocrlf = false</yellow> or unspecified
-      This is Git default behavior. The <yellow>core.eol</yellow> is the EOL
-      character for files in the working tree if there is text attribute set in
-      the .gitattributes. Default core.eol is native. When of no attribute text
-      is unspecified, text files checked out from the repository keep the
-      original EOL in the working tree. Text files with LF or CRLF committed
-      back to the repository don't get normalized to LF and are tracked as are.
-    - <yellow>core.autocrlf = input</yellow>
-      It overwrites core.eol. Text files checked out from the repository keep
-      original EOL in the working tree. Text files with CRLF are normalized to
-      LF when committed to repository.
-    - <yellow>core.autocrlf = true</yellow>
+    Git provides several configuration options:
+    - *core.autocrlf = false* or unspecified
+      This is Git default behavior. The *core.eol* is the EOL character for
+      files in the working tree if there is *text* attribute set in the
+      .gitattributes. Default *core.eol* is native. When the *text*
+      attribute is unspecified, text files checked out from the repository keep
+      the original EOL in the working tree. Text files with LF or CRLF committed
+      back to the repository aren't normalized to LF and are tracked as are.
+    - *core.autocrlf = input*
+      This overwrites *core.eol*. Text files checked out from the repository
+      keep original EOL in the working tree. Text files with CRLF are normalized
+      to LF when committed to the repository.
+    - *core.autocrlf = true*
       Text files checked out from the repository are converted to CRLF in
-      working tree. When committed back to the repository, CRLF gets normalized
-      to LF.
+      working tree. When committed back to the repository, CRLF is normalized to
+      LF.
 
-    The .gitattributes relating to EOL:
-    - <yellow>eol=lf|crlf</yellow>
-    - <yellow>text=auto|set|unset|unspecified</yellow>
+    The .gitattributes relating to EOL and normalization:
+    - *eol=lf|crlf*
+    - *text=auto|set|unset|unspecified*
 
-    This script uses some of these Git settings to determine the default EOL,
-    otherwise EOL can be manually overridden. By default, the LF (\\n) is used.
-
-    Git configuration cheat sheet:
-
+    +------------------+----------------+----------+------+----------+---------+
     | core.autocrlf    | core.eol       | text     | eol  | Worktree | Index   |
-    |------------------|----------------|----------|------|----------|---------|
+    +------------------+----------------+----------+------+----------+---------+
     | false,input      | native         |          |      | LF       | LF      |
     | true             | native,lf,crlf |          |      | CRLF     | LF      |
     | true,false,input | native,lf,crlf |          | lf   | LF       | LF      |
     | true,false,input | native,lf,crlf |          | crlf | CRLF     | LF/CRLF |
+    | false            | lf             |          |      | LF       | LF      |
     | false            | crlf           |          |      | CRLF     | CRLF    |
     | false            | native         | set,auto |      | native   | LF      |
     | true             | native         | set,auto |      | CRLF     | LF      |
+    +------------------+----------------+----------+------+----------+---------+
 
-    To fix Git repository files and commit EOL changes in the index,
+    To fix files in Git repository and commit EOL changes to index, the
     core.autocrlf=false and core.eol=native need to be set.
 
-    For platform agnostic projects one of the solutions is to commit files with
-    LF to index and specify the eol attribute in the .gitattributes for files
-    that require a specific and same line endings on all systems (either LF or
-    CRLF).
+    For platform agnostic projects a good way is to commit LF to repository for
+    all files that don't require a specific EOL. Files that require a specific
+    and same EOL on all systems (either LF or CRLF) the *eol* attribute should
+    be specified (CRLF files should be committed to repository in this case with
+    CRLF). Files with mixed EOL (for example test data), the *-text* attribute
+    might be a good option to avoid Git normalization at checkouts on systems
+    with core.autocrlf=true.
 
-  <yellow>OPTIONS</yellow>
+    +------------------+-------+----------------+
+    | File in worktree | Index | .gitattributes |
+    +------------------+-------+----------------|
+    | native           | LF    |                |
+    | LF               | LF    | eol=lf         |
+    | CRLF             | CRLF  | eol=crlf       |
+    | mixed            | mixed | -text          |
+    +------------------+-------+----------------+
 
-    <green>-h, --help</green>
-            Display this help.
+    This script uses some of these Git settings to determine the default EOL,
+    otherwise EOL can be manually overridden. By default, the LF (\\n) is used.
 
-    <green>-w, --trim-trailing-whitespace</green>
-            Trim trailing whitespace (spaces and tabs).
+    Known binary files such as images are ignored. When working in a Git
+    repository, files in .gitignore are excluded.
 
-    <green>-N, --trim-final-newlines [<max>]</green>
-            Trim redundant final newlines. If <max> is set, allow maximum of
-            <max> trailing final newlines. Default <yellow><max>=1</yellow>
+    In the php-src root directory it additionally ignores generated files,
+    bundled libraries, test data files, and works only on the predefined
+    whitelist.
 
-    <green>-n, --insert-final-newline</green>
-            Insert a final newline (EOL character) if one is missing at the end
-            of the file. Default newline character is LF. If the file has
-            multiple different EOL characters (LF, CRLF, or CR), the prevailing
-            EOL is used as a final newline. Redundant final newlines or final
-            spaces are not trimmed by using only this option.
+    By default, original files are also backed up (file.ext~).
 
-    <green>-e, --end-of-line [<newline>]</green>
-            Fix EOL sequence. *nix and Mac use LF, Windows uses CRLF. The default
-            EOL character is determined using Git. If it can't be determined
-            the default LF (\\n) is used. It can be manually overridden with the
-            <yellow><newline></yellow> value. Can be either <yellow>LF</yellow>
-            or <yellow>CRLF</yellow>.
+  *OPTIONS*
+    `-h, --help`
+          Display this help.
+    `-w, --trim-trailing-whitespace`
+          Trim all trailing whitespace (spaces and tabs).
+    `-N, --trim-final-newlines [max]`
+          Trim redundant final newlines. The *max* value is maximum allowed
+          trailing final newlines. Default *max=1*
+    `-n, --insert-final-newline`
+          Insert a final newline at the end of the file if missing. Default
+          EOL character is LF. If file has multiple different EOL characters
+          (LF, CRLF, or CR), the prevailing EOL is used.
+    `-e, --eol [newline]`
+          Convert the EOL sequence. The default EOL character is determined by
+          Git, otherwise falls back to LF. It can be manually set with the
+          *newline* value of LF or CRLF.
+    `-b, --trim-beginning-whitespace`
+          Trim whitespace (spaces and tabs) from beginning of the file.
+    `-B, --trim-beginning-newlines`
+          Trim all newlines at the beginning of the file.
+    `-s, --clean-space-before-tab`
+          Clean all spaces before tabs in the initial indent part of the lines.
+    `-a, --all`
+          Enable all fixing rules.
+    `-o, --no-backup`
+          Disable backed up files.
+    `-f, --fix`
+          Edit and save files in place.
+    `-q, --quiet`
+          No output messages. Enables also non-interactive mode.
+    `-y, --yes`
+          Non-interactive mode, auto yes used for all prompts.
+    `-v, --verbose`
+          Increase the number of output information.
+    `    --no-colors`
+          Disable colors in the output.
+    `-p, --php-tests`
+          Enable specific *\*.phpt* PHP test files with different tidying rules
+          for each --SECTION-NAME-- unlike other text files.
+    `-P, --force-php-tests`
+          Same as -p and treat *\*.phpt* files as regular text files with
+          special cleaning rules for them.
 
-    <green>    --no-colors</green>
-            Disable colors in the script output.
-
-    <green>    --no-backup</green>
-            Disable backed up files. Use with caution to not overwrite something
-            by accident.
-
-    <green>-f, --fix</green>
-            Edit and save files in place.
-
-    <green>-q, --quiet</green>
-            Do not output any message. This also sets non-interactive mode and
-            no questions are asked.
-
-    <green>-y, --yes</green>
-            Script won't ask any question and will use an automatic yes to all
-            prompts. Used for non-interactive mode.
-
-    <green>-v, --verbose</green>
-            Increase the number of output information.
-
-  <yellow>EXAMPLES</yellow>
-
-    Check php-src with all rules enabled:
-      <green>scripts/dev/tidy.php .</green>
-
-    Fix php-src with all rules enabled in non-interactive mode without backups:
-      <green>scripts/dev/tidy.php -f -y --no-backup .</green>
-
-    Fix custom path or file with all rules enabled:
-      <green>./tidy.php --fix input-path</green>
-
-    Trim only trailing whitespace:
-      <green>./tidy.php -w --fix input-path</green>
-
-    Trim trailing whitespace, trim and insert missing final newlines:
-      <green>./tidy.php -w -n -N -f input-path</green>
-
-    Trim final newlines and allow up to two or less final newlines:
-      <green>./tidy.php -N 2 --fix input-path</green>
-
-    Convert newlines to LF style:
-      <green>php tidy.php -e LF -f ./input-path</green>
-
-    Convert newlines to CRLF style:
-      <green>php tidy.php -e CRLF -f ./input-path</green>
-
-    Check and list of all files script will work on:
-      <green>php tidy.php -v ./input-path</green>
+  *EXAMPLES*
+    './tidy.php `-f -a path`'          Tidy path with all rules enabled
+    './scripts/dev/tidy.php `.`'       Check basic rules in the php-src repo
+    './scripts/dev/tidy.php `-f -o .`' Tidy basic rules in php-src, no backups
+    './tidy.php `-w -f path`'          Trim trailing whitespace
+    './tidy.php `-w -n -N -f path`'    Tidy trailing whitespace and final EOLs
+    './tidy.php `-N 2 -f path`'        Trim final EOL, allow up to 2 final EOL
+    './tidy.php `-e LF -f path`'       Convert newlines to LF style
+    './tidy.php `-v path`'             Check and list all files
 HELP;
 
     output($help, false);
@@ -198,12 +185,14 @@ function getBlacklist(): array
 {
     return [
         // Version control files
-        '/^\.git\/.+$/',
+        '/(^|\/)\.git\/.+$/',
+        '/(^|\/)\.svn\/.+$/',
 
         // Known binary files based on extension
-        '/^.+\.(a|bmp|bz2|data|exe|gd|gd2|gif|gz|ico|iff|jp2|jpc|jpeg|jpg)$/',
-        '/^.+\.(la|lo|mo|mov|mp3|o|obj|odt|otf)$/',
-        '/^.+\.(patch|pdf|phar|phar\.php|png|ppt|psd)$/',
+        '/^.+\.(7z|a|ai|bmp|bz2|data|dll|eot|exe|gd|gd2|gif|gz|ico|iff)$/',
+        '/^.+\.(jar|jp2|jpc|jpeg|jpg)$/',
+        '/^.+\.(la|lo|mo|mov|mp3|mp4|msi|o|obj|odt|ole|otf)$/',
+        '/^.+\.(patch|pdf|phar|phar\.php|png|ppt|psd|rtf)$/',
         '/^.+\.(so|svg|swf|tar|tar\.gz|tgz|tif|tiff|ttf)$/',
         '/^.+\.(wbmp|webp|woff|woff2)$/',
         '/^.+\.(zip)$/',
@@ -275,7 +264,6 @@ function getPhpBlacklist(): array
         '/^win32\/php7ts\_cli\.rc$/',
 
         // Known file types to exclude
-        '/^.+\.(phpt)$/',
         '/^.*tests\/.*\.txt$/',
         '/^.*tests\/.*\.res$/',
         '/^.*tests\/.*\.xsl$/',
@@ -296,7 +284,7 @@ function getPhpWhitelist(): array
     return [
         // Known file types based on extension
         '/^.+\.(ac|awk|bat|c|cpp|def|frag|gcov|global|h|html|in|inc|ini)$/',
-        '/^.+\.(js|l|m4|macros|md|mk|php|pl|po|re|rss|sh|txt)$/',
+        '/^.+\.(js|l|m4|macros|md|mk|php|phpt|pl|po|re|rss|sh|txt)$/',
         '/^.+\.(w32|xml|y|yml)$/',
 
         // All files in the root directory
@@ -342,22 +330,27 @@ function options(array $argv = []): array
 {
     // Default configuration options
     static $opt = [
-        'fix'                      => false,
-        'trim_trailing_whitespace' => false,
-        'insert_final_newline'     => false,
-        'trim_final_newlines'      => false,
-        'end_of_line'              => false,
-        'default_end_of_line'      => null,
-        'max_newlines'             => 1,
-        'colors'                   => true,
-        'backup'                   => true,
-        'quiet'                    => false,
-        'path'                     => null,
-        'help'                     => false,
-        'invalid'                  => false,
-        'has_git'                  => false,
-        'yes'                      => false,
-        'verbose'                  => false,
+        'fix'                       => false,
+        'trim_trailing_whitespace'  => false,
+        'trim_final_newlines'       => false,
+        'max_newlines'              => 1,
+        'insert_final_newline'      => false,
+        'eol'                       => false,
+        'default_eol'               => null,
+        'trim_beginning_whitespace' => false,
+        'trim_beginning_newlines'   => false,
+        'clean_space_before_tab'    => false,
+        'colors'                    => true,
+        'backup'                    => true,
+        'quiet'                     => false,
+        'path'                      => null,
+        'help'                      => false,
+        'invalid'                   => false,
+        'has_git'                   => false,
+        'yes'                       => false,
+        'verbose'                   => false,
+        'php_tests'                 => false,
+        'force_php_tests'           => false,
     ];
 
     if (empty($argv)) {
@@ -387,15 +380,27 @@ function options(array $argv = []): array
                 $opt['insert_final_newline'] = true;
             break;
             case '-e':
-            case '--end-of-line':
+            case '--eol':
                 if (isset($argv[$i+1])
                     && in_array(strtolower($argv[$i+1]), ['lf', 'crlf'])
                 ) {
                     $default = ['lf' => "\n", 'crlf' => "\r\n"];
-                    $opt['default_end_of_line'] = $default[strtolower($argv[$i+1])];
+                    $opt['default_eol'] = $default[strtolower($argv[$i+1])];
                     array_splice($argv, $i, 1);
                 }
-                $opt['end_of_line'] = true;
+                $opt['eol'] = true;
+            break;
+            case '-b':
+            case '--trim-beginning-whitespace':
+                $opt['trim_beginning_whitespace'] = true;
+            break;
+            case '-B':
+            case '--trim-beginning-newlines':
+                $opt['trim_beginning_newlines'] = true;
+            break;
+            case '-s':
+            case '--clean-space-before-tab':
+                $opt['clean_space_before_tab'] = true;
             break;
             case '-f':
             case '--fix':
@@ -404,6 +409,7 @@ function options(array $argv = []): array
             case '--no-colors':
                 $opt['colors'] = false;
             break;
+            case '-o':
             case '--no-backup':
                 $opt['backup'] = false;
             break;
@@ -419,6 +425,24 @@ function options(array $argv = []): array
             case '-v':
             case '--verbose':
                 $opt['verbose'] = true;
+            break;
+            case '-p':
+            case '--php-tests':
+                $opt['php_tests'] = true;
+            break;
+            case '-P':
+            case '--force-php-tests':
+                $opt['force_php_tests'] = true;
+            break;
+            case '-a':
+            case '-all':
+                $opt['trim_trailing_whitespace'] = true;
+                $opt['insert_final_newline'] = true;
+                $opt['trim_final_newlines'] = true;
+                $opt['eol'] = true;
+                $opt['trim_beginning_whitespace'] = true;
+                $opt['trim_beginning_newlines'] = true;
+                $opt['clean_space_before_tab'] = true;
             break;
             default:
                 if (count($argv) < 2) {
@@ -436,17 +460,20 @@ function options(array $argv = []): array
         }
     }
 
-    // By default enable all fixing rules if none were specified
+    // By default enable basic fixing rules if none were specified
     if (
         !$opt['trim_trailing_whitespace']
         && !$opt['insert_final_newline']
         && !$opt['trim_final_newlines']
-        && !$opt['end_of_line']
+        && !$opt['eol']
+        && !$opt['trim_beginning_whitespace']
+        && !$opt['trim_beginning_newlines']
+        && !$opt['clean_space_before_tab']
     ) {
         $opt['trim_trailing_whitespace'] = true;
         $opt['insert_final_newline'] = true;
         $opt['trim_final_newlines'] = true;
-        $opt['end_of_line'] = true;
+        $opt['eol'] = true;
     }
 
     // Simplify edge case '--trim-trailing-newlines 0 --insert-final-newline'
@@ -512,9 +539,12 @@ function isThisPhpSrc(string $path): bool
 }
 
 /**
- * Output message based on given options.
+ * Output message based on given options. For colors, Markdown based code can be
+ * replaced. Double asterisk ** starts and ends red color, grave accent `
+ * starts and ends green color, single asterisk not preceded by backslash *
+ * starts and ends yellow color.
  */
-function output(?string $message = null, ?bool $quiet = null, ?bool $colors = null): void
+function output(?string $message = null, ?bool $quiet = null): void
 {
     $opt = options();
 
@@ -522,18 +552,34 @@ function output(?string $message = null, ?bool $quiet = null, ?bool $colors = nu
         return;
     }
 
-    $colors = $colors ?? $opt['colors'];
-    $red = ($colors) ? "\e[41m" : '';
-    $green = ($colors) ? "\e[32m" : '';
-    $yellow = ($colors) ? "\e[33m" : '';
-    $default = ($colors) ? "\e[0m" : '';
+    $red = ($opt['colors']) ? "\e[31m" : '';
+    $green = ($opt['colors']) ? "\e[32m" : '';
+    $yellow = ($opt['colors']) ? "\e[33m" : '';
+    $default = ($opt['colors']) ? "\e[0m" : '';
 
-    $starts = ['<red>', '<green>', '<yellow>'];
-    $replacements = [$red, $green, $yellow];
-    $message = str_replace($starts, $replacements, $message);
+    // Replace ` characters with green color code
+    $cur = $default;
+    foreach (str_split($message) as $char) {
+        $cur = ($cur === $default) ? $green : $default;
+        $message = preg_replace('/\`/m', $cur, $message, 1);
+    }
 
-    $ends = ['</red>', '</green>', '</yellow>'];
-    $message = str_replace($ends, $default, $message);
+    // Replace ** characters with red color code
+    $cur = $default;
+    foreach (str_split($message) as $char) {
+        $cur = ($cur === $default) ? $red : $default;
+        $message = preg_replace('/\*\*/m', $cur, $message, 1);
+    }
+
+    // Replace single asterisk * characters with yellow color code
+    $cur = $default;
+    foreach (str_split($message) as $char) {
+        $cur = ($cur === $default) ? $yellow : $default;
+        $message = preg_replace('/(?<!\\\\)\*/m', $cur, $message, 1);
+    }
+
+    // Replace escaped characters
+    $message = preg_replace('/\\\\\*/m', '*', $message);
 
     echo $message."\n";
 }
@@ -543,8 +589,8 @@ function output(?string $message = null, ?bool $quiet = null, ?bool $colors = nu
  */
 function invalid(string $error = 'INVALID USAGE'): void
 {
-    output("tidy.php: <red>$error</red>", false);
-    output("Try '<yellow>php tidy.php --help</yellow>' for more info.", false);
+    output('tidy.php: **'.$error.'**', false);
+    output("Try '*php tidy.php --help*' for more info.", false);
 
     exit(1);
 }
@@ -556,19 +602,15 @@ function prompt(): void
 {
     $opt = options();
 
-    output('This will fix all <yellow>'.$opt['path'].'</yellow> files');
-
-    if ($opt['backup']) {
-        output("Backed up copies will be created.\n");
-    }
-
-    output('Do you want to continue <green>[yes|no]</green>?');
+    output('This will overwrite'.(is_dir($opt['path'])?' all files in':'').' *'.$opt['path'].'*');
+    output('Backup copies '.($opt['backup'] ? 'will' : "**won't**")." be created.\n");
+    output('Do you want to continue `[yes|no]`?');
 
     $handle = fopen('php://stdin', 'r');
     $line = fgets($handle);
 
     if (!in_array(trim((strtolower($line))), ['yes', 'y', '1'])) {
-        output('<red>ABORTING</red>');
+        output('**ABORTING**');
 
         exit;
     }
@@ -583,8 +625,28 @@ function trimTrailingWhitespace(string $content): string
 }
 
 /**
- * If there is missing a final newline at the end of the string, append one
- * prevailing EOL from the given content - LF (\n), CRLF (\r\n) or CR (\r).
+ * Trim spaces and tabs from the beginning of the file.
+ */
+function trimBeginningWhitespace(string $content): string
+{
+    if (preg_match('/^[ \t\n\r]+/', $content, $matches)) {
+        return preg_replace('/[ \t]+/', '', $matches[0]).ltrim($content);
+    }
+
+    return $content;
+}
+
+/**
+ * Trim all newlines from the beginning of the file.
+ */
+function trimBeginningNewlines(string $content): string
+{
+    return ltrim($content, "\r\n");
+}
+
+/**
+ * Insert one missing final newline at the end of the string, using a prevailing
+ * EOL from the given string - LF (\n), CRLF (\r\n) or CR (\r).
  */
 function insertFinalNewline(string $content): string
 {
@@ -695,78 +757,7 @@ function getEols(string $content): array
 }
 
 /**
- * Get the default EOL character by checking a manually provided command line
- * option -e|--end-of-line <newline>, otherwise use Git configuration. If input
- * path is not Git repository or Git is not present the default LF (\n) is used.
- */
-function getDefaultEol(?string $file = null): string
-{
-    static $eol;
-
-    if (!empty($eol) && $file === null) {
-        return $eol;
-    }
-
-    $opt = options();
-
-    if (!empty($opt['default_end_of_line'])) {
-        $eol = $opt['default_end_of_line'];
-
-        return $eol;
-    }
-
-    // Default EOL is *nix style LF (\n) character
-    $eol = "\n";
-
-    if (!$opt['has_git']) {
-        return $eol;
-    }
-
-    if (!empty($file)) {
-        $entries = getListOfCrlfFiles();
-
-        foreach ($entries as $entry) {
-            $items = preg_split('/\s+/', $entry);
-            $eolInIndex = $items[0];
-            $eolAttribute = $items[2];
-            $fileName = $items[3];
-
-            if ($eolInIndex === 'i/crlf' && preg_match('/^attr\/.*eol=crlf.*$/', $eolAttribute)) {
-                return "\r\n";
-            }
-        }
-    }
-
-    return $eol;
-}
-
-/**
- * Files with eol=crlf attribute set should have CRLF line endings. All others
- * are converted to LF.
- */
-function getListOfCrlfFiles(): array
-{
-    static $entries = [];
-
-    if (!empty($entries)) {
-        return $entries;
-    }
-
-    $opt = options();
-
-    $entries = shell_exec(sprintf('cd %s && git ls-files -z --eol 2>&1', escapeshellarg($opt['path'])));
-    $entries = explode("\0", trim($entries));
-
-    $entries = array_filter($entries, function ($item) {
-        return preg_match('/^i\/crlf.*$/', $item);
-    });
-
-    return $entries;
-}
-
-/**
- * Convert all mismatched EOL characters to default LF (\n). If working in a Git
- * repository path and Git is available, Git determines the EOL.
+ * Convert all EOL characters to default EOL.
  */
 function convertEol(string $content, $file): string
 {
@@ -774,41 +765,103 @@ function convertEol(string $content, $file): string
 }
 
 /**
- * Get filtered files from a given path. Files in .gitignore are omitted.
+ * Get the default EOL character by checking a value of command line option --eol,
+ * otherwise use Git configuration. When Git is not used, the default EOL is LF.
  */
-function getFiles(string $path): array
+function getDefaultEol(?string $file = null): string
 {
-    if (is_file($path)) {
-        return [$path];
+    $opt = options();
+
+    if (!empty($opt['default_eol'])) {
+        return $opt['default_eol'];
     }
 
-    if (file_exists($path.'/.git') && options()['has_git']) {
-        $files = shell_exec(sprintf('cd %s && git ls-tree -r -z HEAD --name-only', escapeshellarg($path)));
-        $files = explode("\0", trim($files));
-        $files = preg_filter('/^/', $path.'/', $files);
-    } else {
-        $innerIterator = new \RecursiveDirectoryIterator(
-            $path,
-            \RecursiveDirectoryIterator::SKIP_DOTS
-        );
-        $iterator = new RecursiveIteratorIterator($innerIterator);
+    // Default EOL is *nix style LF (\n) character
+    $eol = "\n";
 
-        $files = iterator_to_array($iterator);
+    if ($file === null || !$opt['has_git']) {
+        return $eol;
+    }
+
+    if (in_array(relative($file), getCrlfFiles($opt['path']))) {
+        return "\r\n";
+    }
+
+    return $eol;
+}
+
+/**
+ * Files with eol=crlf Git attribute should have CRLF line endings, others LF.
+ */
+function getCrlfFiles(string $path): array
+{
+    static $files;
+
+    if (isset($files)) {
+        return $files;
+    }
+
+    $files = shell_exec(sprintf('cd %s && git ls-files -z --eol 2>&1', escapeshellarg($path)));
+    $files = explode("\0", trim($files));
+    $files = array_filter($files, function ($item) {
+        return preg_match('/^i\/crlf.*[ ]+w\/.*attr\/.*eol=crlf.*$/', $item);
+    });
+    $files = preg_filter('/^i\/.*w\/.*attr\/.*[ \t]+/', '', $files);
+
+    return $files;
+}
+
+/**
+ * Clean all spaces in front of the tabs in the initial indent part of the lines.
+ */
+function cleanSpaceBeforeTab(string $content): string
+{
+    return preg_replace('/^(\t*)([ ]+)(\t+)/m', '$1$3', $content);
+}
+
+/**
+ * Get filtered files from a given path. Files in .gitignore are omitted.
+ */
+function getFiles(): array
+{
+    $opt = options();
+
+    if (is_file($opt['path'])) {
+        return [$opt['path']];
+    }
+
+    if (file_exists($opt['path'].'/.git') && options()['has_git']) {
+        $files = shell_exec(sprintf('cd %s && git ls-tree -r -z HEAD --name-only', escapeshellarg($opt['path'])));
+        $files = explode("\0", trim($files));
+        $files = preg_filter('/^/', $opt['path'].'/', $files);
+    } else {
+        $iterator = new \RecursiveDirectoryIterator($opt['path'], \RecursiveDirectoryIterator::SKIP_DOTS);
+        $files = iterator_to_array(new \RecursiveIteratorIterator($iterator));
     }
 
     $blacklist = getBlacklist();
     $whitelist = getWhitelist();
 
-    if (isThisPhpSrc($path)) {
+    if (isThisPhpSrc($opt['path'])) {
         $blacklist = array_merge($blacklist, getPhpBlacklist());
         $whitelist = getPhpWhitelist();
     }
 
+    // Remove *.phpt files
+    if (!$opt['php_tests'] && !$opt['force_php_tests']) {
+        $blacklist = array_merge($blacklist, ['/^.+\.(phpt)$/']);
+    }
+
     // Remove blacklist matches
     foreach ($blacklist as $regex) {
-        $data = array_filter($files, function ($item) use ($regex, $path) {
-            $pathnameWithoutBase = str_replace($path.'/', '', $item);
-            return preg_match($regex, $pathnameWithoutBase);
+        $data = array_filter($files, function ($item) use ($regex, $opt) {
+            $blacklisted = preg_match($regex, relative($item));
+
+            if ($blacklisted && $opt['verbose']) {
+                output('*SKIP* '.relative($item).': *ignored*');
+            }
+
+            return $blacklisted;
         });
 
         $files = array_diff($files, $data);
@@ -817,9 +870,8 @@ function getFiles(string $path): array
     // Filter files to match the whitelist
     $filtered = [];
     foreach ($whitelist as $regex) {
-        $data = array_filter($files, function ($item) use ($regex, $path) {
-            $pathnameWithoutBase = str_replace($path.'/', '', $item);
-            return preg_match($regex, $pathnameWithoutBase);
+        $data = array_filter($files, function ($item) use ($regex) {
+            return preg_match($regex, relative($item));
         });
 
         $filtered = array_merge($filtered, array_diff($data, $filtered));
@@ -829,27 +881,137 @@ function getFiles(string $path): array
 }
 
 /**
+ * Get file name relative to the given input path root project directory.
+ */
+function relative(string $file): string
+{
+    $opt = options();
+
+    return str_replace($opt['path'].'/', '', $file);
+}
+
+/**
  * Overwrite file and save a backup copy.
  */
 function save(string $file, string $content): bool
 {
-    if (file_put_contents($file, $content) === false) {
-        output($file.': <red>Error: file could not be saved</red>');
-
-        return false;
-    }
+    $opt = options();
 
     // Backup file
-    if (options()['backup'] && file_put_contents($file.'~', $content) !== false) {
-        output($file.'~: <yellow>backup copy saved</yellow>');
+    if ($opt['backup'] && file_put_contents($file.'~', $content) !== false) {
+        output('`COPY`  '.relative($file).'~: *backup copy saved*');
+    }
+
+    if (file_put_contents($file, $content) === false) {
+        output('**FAIL**  '.relative($file).': **file could not be saved**');
+
+        return false;
     }
 
     return true;
 }
 
 /**
- * Tidies given file according to the provided rules.
+ * Explode PHP test file sections to array.
  */
+function getTestSections(string $file): array
+{
+    $fp = fopen($file, 'rb') or error("Cannot open test file: $file");
+
+    $sections = [];
+    $section = '';
+
+    while (!feof($fp)) {
+        $line = fgets($fp);
+
+        if ($line === false) {
+            break;
+        }
+
+        if (preg_match('/^--[_A-Z]+--.*/', $line, $matches)) {
+            $section = $line;
+            $sections[$section] = '';
+        } elseif ($section !== '') {
+            $sections[$section] .= $line;
+        }
+    }
+
+    return $sections;
+}
+
+/**
+ * Merge given PHP test sections back to file contents.
+ */
+function mergeTestSections(array $sections): string
+{
+    $content = '';
+
+    foreach ($sections as $name => $section) {
+        $content .= $name.$section;
+    }
+
+    return $content;
+}
+
+/**
+ * PHP test files are a special case and need special tidying approach for each
+ * section.
+ */
+function tidyPhpTestFile(string $file): string
+{
+    $opt = options();
+    $logs = [];
+    $buffer = [];
+    $sections = getTestSections($file);
+
+    if (!preg_match('/^\-\-TEST\-\-/', key($sections))) {
+        output('**FAIL**  '.relative($file).': **not a PHP test**');
+
+        return false;
+    }
+
+    // Trim trailing whitespace
+    if ($opt['trim_trailing_whitespace']) {
+        foreach ($sections as $name => $section) {
+            $cleanedSection = $section;
+
+            // Trim trailing whitespace after section names
+            $cleanedName = trimTrailingWhitespace($name);
+
+            // Trim trailing whitespace for known sections
+            if (in_array(trim($cleanedName), [
+                '--TEST--',
+                '--DESCRIPTION--',
+                '--SKIPIF--',
+                '--INI--',
+                '--ENV--',
+                '--EXTENSIONS--',
+                '--CREDITS--',
+                '--FILE_EXTERNAL--',
+                ])
+            ) {
+                $cleanedSection = trimTrailingWhitespace($cleanedSection);
+            }
+
+            // Trim trailing whitespace in certain PHP code lines
+            if (in_array(trim($cleanedName), ['--FILE--'])) {
+                $cleanedSection = preg_replace(
+                    '/(*BSR_ANYCRLF)(\<\?php|\?\>|\)[ ]?\{|\)\;)[\t ]+(\R|$)/m',
+                    '$1$2',
+                    $cleanedSection);
+            }
+
+            if ($cleanedName !== $name || $cleanedSection !== $section) {
+                $logs[] = trim($cleanedName).' trailing ws';
+            }
+
+            $buffer[$cleanedName] = $cleanedSection;
+        }
+    }
+
+    return processFile($file, mergeTestSections($sections), mergeTestSections($buffer), $logs);
+}
+
 function tidyFile(string $file): bool
 {
     $opt = options();
@@ -885,39 +1047,70 @@ function tidyFile(string $file): bool
         $cleaned = $buffer;
     }
 
-    if ($opt['end_of_line']) {
+    if ($opt['eol']) {
         $buffer = convertEol($buffer, $file);
     }
 
     if ($buffer !== $cleaned) {
         $eols = getEols($cleaned);
-
         $message = ($eols['lf'] > 0) ? 'LF ' : '';
         $message .= ($eols['crlf'] > 0) ? 'CRLF ' : '';
         $message .= ($eols['cr'] > 0) ? 'CR ' : '';
-
-        if ($message !== '') {
-            $logs[] = $message.'line terminators';
-        }
-
+        $logs[] = $message.'line terminators';
         $cleaned = $buffer;
     }
 
-    // Output message and fix file
+    if($opt['trim_beginning_whitespace']) {
+        $buffer = trimBeginningWhitespace($buffer);
+    }
+
+    if ($buffer !== $cleaned) {
+        $logs[] = 'beginning whitespace';
+        $cleaned = $buffer;
+    }
+
+    if($opt['trim_beginning_newlines']) {
+        $buffer = trimBeginningNewlines($buffer);
+    }
+
+    if ($buffer !== $cleaned) {
+        $logs[] = 'beginning newlines';
+        $cleaned = $buffer;
+    }
+
+    if($opt['clean_space_before_tab']) {
+        $buffer = cleanSpaceBeforeTab($buffer);
+    }
+
+    if ($buffer !== $cleaned) {
+        $logs[] = 'space before tab';
+        $cleaned = $buffer;
+    }
+
+    return processFile($file, $original, $cleaned, $logs);
+}
+
+/**
+ * Output log messages and/or save file.
+ */
+function processFile(string $file, string $original, string $cleaned, array $logs): bool
+{
+    $opt = options();
+
     if ($cleaned !== $original) {
         if ($opt['fix']) {
-            output($file.': <green>'.implode(', ', $logs).'</green>');
+            output('`FIXED` '.relative($file).': `'.implode(', ', $logs).'`');
 
-            return save($file, $cleaned, $opt);
+            return save($file, $cleaned);
         }
 
-        output($file.': <red>'.implode(', ', $logs).'</red>');
+        output('**FAIL**  '.relative($file).': **'.implode(', ', $logs).'**');
 
         return false;
     }
 
     if ($opt['verbose']) {
-        output($file.': <green>OK</green>');
+        output('`PASS`  '.relative($file));
     }
 
     return true;
@@ -925,17 +1118,28 @@ function tidyFile(string $file): bool
 
 function init(array $argv): int
 {
+    $timeStart = microtime(true);
+
     $opt = options($argv);
     check($opt);
 
-    output("Executing <green>tidy.php</green>\n");
+    output("Executing `tidy.php`\n");
+    output('Working tree: '.$opt['path']."\n");
 
     $exitCode = 0;
-    foreach (getFiles($opt['path']) as $file) {
-        $exitCode = (tidyFile($file) && $exitCode === 0) ? 0 : 1;
+    foreach (getFiles() as $file) {
+        if (!$opt['force_php_tests'] && preg_match('/^.+\.phpt$/', $file)) {
+            $return = tidyPhpTestFile($file);
+        } else {
+            $return = tidyFile($file);
+        }
+
+        $exitCode = ($return && $exitCode === 0) ? 0 : 1;
     }
 
-    output('<yellow>All done!</yellow>');
+    $time = round((microtime(true) - $timeStart), 3);
+
+    output('*'.($opt['fix'] ? 'Fixed' : 'Checked').'* all files in '.$time.' sec');
 
     return $exitCode;
 }
