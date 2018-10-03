@@ -1109,6 +1109,34 @@ PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, si
 
 	ret = php_win32_ioutil_readlink_int(h, buf, buf_len);
 
+	if (ret < 0) {
+		/* BC */
+		wchar_t target[PHP_WIN32_IOUTIL_MAXPATHLEN];
+		size_t offset = 0,
+			   target_len = GetFinalPathNameByHandleW(h, target, PHP_WIN32_IOUTIL_MAXPATHLEN, VOLUME_NAME_DOS);
+
+		if(target_len >= buf_len || target_len >= PHP_WIN32_IOUTIL_MAXPATHLEN || target_len == 0) {
+			CloseHandle(h);
+			return -1;
+		}
+
+		if(target_len > 4) {
+			/* Skip first 4 characters if they are "\\?\" */
+			if(target[0] == L'\\' && target[1] == L'\\' && target[2] == L'?' && target[3] ==  L'\\') {
+				offset = 4;
+
+				/* \\?\UNC\ */
+				if (target_len > 7 && target[4] == L'U' && target[5] == L'N' && target[6] == L'C') {
+					offset += 2;
+					target[offset] = L'\\';
+				}
+			}
+		}
+
+		ret = target_len - offset;
+		memcpy(buf, target + offset, (ret + 1)*sizeof(wchar_t));
+	}
+
 	CloseHandle(h);
 
 	return ret;
