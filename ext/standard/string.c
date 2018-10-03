@@ -5124,7 +5124,6 @@ state_1:
 		case '<':
 			if (in_q) {
 				goto reg_char_1;
-				break;
 			}
 			if (isspace(*(p + 1)) && !allow_tag_spaces) {
 				goto reg_char_1;
@@ -5138,7 +5137,6 @@ state_1:
 			}
 			if (in_q) {
 				goto reg_char_1;
-				break;
 			}
 
 			lc = '>';
