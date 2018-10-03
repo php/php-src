@@ -2187,8 +2187,7 @@ consult the installation file that came with this distribution, or visit \n\
 			while (parent) {
 				EnterCriticalSection(&cleanup_lock);
 				if (cleaning_up) {
-					DeleteCriticalSection(&cleanup_lock);
-					goto parent_out;
+					goto parent_loop_end;
 				}
 				LeaveCriticalSection(&cleanup_lock);
 
@@ -2243,7 +2242,8 @@ consult the installation file that came with this distribution, or visit \n\
 
 				WaitForMultipleObjects(kids, kid_cgi_ps, FALSE, INFINITE);
 			}
-
+			
+parent_loop_end:
 			/* restore my env */
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf);
 
