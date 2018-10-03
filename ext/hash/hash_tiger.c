@@ -197,7 +197,7 @@ PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *i
 {
 	if (context->length + len < 64) {
 		memcpy(&context->buffer[context->length], input, len);
-		context->length += len;
+		context->length += (unsigned int) len;
 	} else {
 		size_t i = 0, r = (context->length + len) % 64;
 
@@ -216,7 +216,7 @@ PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *i
 		}
 		ZEND_SECURE_ZERO(&context->buffer[r], 64-r);
 		memcpy(context->buffer, &input[i], r);
-		context->length = r;
+		context->length = (unsigned int) r;
 	}
 }
 

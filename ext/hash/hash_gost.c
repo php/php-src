@@ -256,9 +256,9 @@ PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *inp
 	if ((MAX32 - context->count[0]) < (len * 8)) {
 		context->count[1]++;
 		context->count[0] = MAX32 - context->count[0];
-		context->count[0] = (len * 8) - context->count[0];
+		context->count[0] = (uint32_t)(len * 8) - context->count[0];
 	} else {
-		context->count[0] += len * 8;
+		context->count[0] += (uint32_t) (len * 8);
 	}
 
 	if (context->length + len < 32) {
