@@ -607,9 +607,6 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 							zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 							memcpy(new_function, child, sizeof(zend_op_array));
 							Z_PTR_P(child_zv) = child = new_function;
-							if (child->op_array.refcount) {
-								(*child->op_array.refcount)++;
-							}
 						}
 					}
 					child->common.prototype = proto;
