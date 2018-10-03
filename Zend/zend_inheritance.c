@@ -545,7 +545,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 }
 /* }}} */
 
-static void do_inheritance_check_on_method(zend_function *child, zend_function *parent) /* {{{ */
+static void do_inheritance_check_on_method(zend_function *child, zend_function *parent, zend_class_entry *ce, zval *child_zv) /* {{{ */
 {
 	uint32_t child_flags;
 	uint32_t parent_flags = parent->common.fn_flags;
@@ -576,25 +576,44 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 	do {
 		if (!(parent_flags & ZEND_ACC_PRIVATE)) {
-			if (parent_flags & ZEND_ACC_ABSTRACT) {
-				child->common.prototype = parent;
-			} else {
-				zend_function *proto = parent->common.prototype;
+			zend_function *proto = parent->common.prototype ?
+				parent->common.prototype : parent;
 
-				if (parent->common.scope->constructor != parent) {
-					child->common.prototype = proto ? proto : parent;
-				} else if (proto) {
-					if (proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) {
-						/* ctors only have a prototype if it comes from an interface */
-						child->common.prototype = proto;
-						/* and if that is the case, we want to check inheritance against it */
-						parent = proto;
-					} else if (!(proto->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-						break;
-					}
-				} else {
+			if (parent->common.scope->constructor != parent) {
+				if (!proto) {
+					proto = parent;
+				}
+			} else if (proto) {
+				if (proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) {
+					/* ctors only have a prototype if it comes from an interface */
+					/* and if that is the case, we want to check inheritance against it */
+					parent = proto;
+				} else if (!(proto->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 					break;
 				}
+			} else {
+				break;
+			}
+			if (child_zv && child->common.prototype != proto) {
+				do {
+					if (child->common.scope != ce
+					 && child->type == ZEND_USER_FUNCTION
+					 && !child->op_array.static_variables) {
+						if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+							/* Few parent interfaces contain the same method */
+							break;
+						} else {
+							/* op_array wasn't duplicated yet */
+							zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+							memcpy(new_function, child, sizeof(zend_op_array));
+							Z_PTR_P(child_zv) = child = new_function;
+							if (child->op_array.refcount) {
+								(*child->op_array.refcount)++;
+							}
+						}
+					}
+					child->common.prototype = proto;
+				} while (0);
 			}
 			/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
 			if ((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
@@ -637,24 +656,13 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 
 	if (child) {
 		zend_function *func = (zend_function*)Z_PTR_P(child);
-		zend_function *orig_prototype = func->common.prototype;
 
 		if (UNEXPECTED(func == parent)) {
 			/* The same method in interface may be inherited few times */
 			return NULL;
 		}
 
-		do_inheritance_check_on_method(func, parent);
-		if (func->common.prototype != orig_prototype &&
-		    func->type == ZEND_USER_FUNCTION &&
-		    func->common.scope != ce &&
-		    !func->op_array.static_variables) {
-			/* Lazy duplication */
-			zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-			memcpy(new_function, func, sizeof(zend_op_array));
-			Z_PTR_P(child) = new_function;
-			func->common.prototype = orig_prototype;
-		}
+		do_inheritance_check_on_method(func, parent, ce, child);
 		return NULL;
 	}
 
@@ -1297,7 +1305,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		} else {
 			/* inherited members are overridden by members inserted by traits */
 			/* check whether the trait method fulfills the inheritance requirements */
-			do_inheritance_check_on_method(fn, existing_fn);
+			do_inheritance_check_on_method(fn, existing_fn, ce, NULL);
 			fn->common.prototype = NULL;
 		}
 	}
