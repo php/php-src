@@ -40,9 +40,9 @@ typedef struct _php_hash_ops {
 	php_hash_final_func_t hash_final;
 	php_hash_copy_func_t hash_copy;
 
-	int digest_size;
-	int block_size;
-	int context_size;
+	size_t digest_size;
+	size_t block_size;
+	size_t context_size;
 	unsigned is_crypto: 1;
 } php_hash_ops;
 
@@ -147,7 +147,7 @@ PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t alg
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
 
-static inline void php_hash_bin2hex(char *out, const unsigned char *in, int in_len)
+static inline void php_hash_bin2hex(char *out, const unsigned char *in, size_t in_len)
 {
 	static const char hexits[17] = "0123456789abcdef";
 	int i;

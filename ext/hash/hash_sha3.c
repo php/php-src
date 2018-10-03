@@ -159,12 +159,18 @@ static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
                             size_t count,
                             size_t block_size) {
 	while (count > 0) {
-		unsigned int len = block_size - ctx->pos;
-		if (len > count) len = count;
+		size_t len = block_size - ctx->pos;
+
+		if (len > count) {
+			len = count;
+		}
+
 		count -= len;
+
 		while (len-- > 0) {
 			ctx->state[ctx->pos++] ^= *(buf++);
 		}
+
 		if (ctx->pos >= block_size) {
 			permute(ctx);
 			ctx->pos = 0;
@@ -174,9 +180,9 @@ static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
 
 static void PHP_SHA3_Final(unsigned char* digest,
                            PHP_SHA3_CTX* ctx,
-                           int block_size,
-                           int digest_size) {
-	int len = digest_size;
+                           size_t block_size,
+                           size_t digest_size) {
+	size_t len = digest_size;
 
 	// Pad state to finalize
 	ctx->state[ctx->pos++] ^= 0x06;
