@@ -6,7 +6,12 @@ PHP                                                                        NEWS
   . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
 
 - FCGI:
-  . Fixed #76948 (Failed shutdown/reboot or end session in Windows). (Anatol)
+  . Fixed bug #76948 (Failed shutdown/reboot or end session in Windows).
+    (Anatol)
+
+- FTP:
+  . Fixed bug #76972 (Data truncation due to forceful ssl socket shutdown).
+    (Manuel Mausz)
 
 11 Oct 2018, PHP 7.1.23
 
