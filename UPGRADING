@@ -29,6 +29,20 @@ PHP 7.4 UPGRADE NOTES
     supported and resulted in corrupted reflection objects. It has been
     explicitly prohibited now.
 
+- SPL:
+  . Calling get_object_vars() on an ArrayObject instance will now always return
+    the properties of the ArrayObject itself (or a subclass). Previously it
+    returned the values of the wrapped array/object unless the STD_PROP_LIST
+    flag was specified. Other affected operations are:
+     * ReflectionObject::getProperties()
+     * array_key_exists(). Use isset() or offsetExists() instead.
+     * reset(), current(), etc. Use Iterator methods instead.
+     * Potentially others working on object properties as a list.
+
+    (array) casts are *not* affected. They will continue to return either the
+    wrapped array, or the ArrayObject properties, depending on whether the
+    STD_PROP_LIST flag is used.
+
 ========================================
 2. New Features
 ========================================
