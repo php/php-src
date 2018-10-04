@@ -1989,7 +1989,6 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	GC_SET_REFCOUNT(target, 1);
 	GC_TYPE_INFO(target) = IS_ARRAY | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 
-	target->nTableSize = source->nTableSize;
 	target->pDestructor = ZVAL_PTR_DTOR;
 
 	if (source->nNumOfElements == 0) {
@@ -1999,6 +1998,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nNumOfElements = 0;
 		target->nNextFreeElement = 0;
 		target->nInternalPointer = 0;
+		target->nTableSize = HT_MIN_SIZE;
 		HT_SET_DATA_ADDR(target, &uninitialized_bucket);
 	} else if (GC_FLAGS(source) & IS_ARRAY_IMMUTABLE) {
 		HT_FLAGS(target) = HT_FLAGS(source);
@@ -2006,6 +2006,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
 		target->nNextFreeElement = source->nNextFreeElement;
+		target->nTableSize = source->nTableSize;
 		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
 		target->nInternalPointer = source->nInternalPointer;
 		memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
@@ -2015,6 +2016,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
 		target->nNextFreeElement = source->nNextFreeElement;
+		target->nTableSize = source->nTableSize;
 		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE_EX(target->nTableSize, HT_MIN_MASK)));
 		target->nInternalPointer =
 			(source->nInternalPointer < source->nNumUsed) ?
@@ -2035,6 +2037,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 			(source->nInternalPointer < source->nNumUsed) ?
 				source->nInternalPointer : 0;
 
+		target->nTableSize = source->nTableSize;
 		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
 		HT_HASH_RESET(target);
 
