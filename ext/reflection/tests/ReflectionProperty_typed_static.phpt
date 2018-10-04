@@ -15,7 +15,7 @@ var_dump($rp->getValue());
 $rp = new ReflectionProperty('Test', 'y');
 try {
     var_dump($rp->getValue());
-} catch (TypeError $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 

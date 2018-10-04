@@ -744,7 +744,7 @@ call_getter:
 			}
 
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) &&
-				(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot)))) {
+				(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, IS_VALID_PROPERTY_OFFSET(property_offset) ? cache_slot : NULL)))) {
 				zend_verify_prop_assignable_by_ref(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
 			}
 
