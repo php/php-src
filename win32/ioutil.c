@@ -1084,7 +1084,8 @@ static ssize_t php_win32_ioutil_readlink_int(HANDLE h, wchar_t *buf, size_t buf_
 		return -1;
 	}
 
-	memcpy(buf, reparse_target, (reparse_target_len + 1)*sizeof(wchar_t));
+	memcpy(buf, reparse_target, reparse_target_len*sizeof(wchar_t));
+	buf[reparse_target_len] = L'\0';
 
 	return reparse_target_len;
 }/*}}}*/
