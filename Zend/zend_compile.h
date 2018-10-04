@@ -185,7 +185,6 @@ typedef struct _zend_oparray_context {
 	uint32_t   opcodes_size;
 	int        vars_size;
 	int        literals_size;
-	int        backpatch_count;
 	uint32_t   fast_call_var;
 	uint32_t   try_catch_offset;
 	int        current_brk_cont;

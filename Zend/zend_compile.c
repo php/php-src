@@ -247,7 +247,6 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;
 	CG(context).vars_size = 0;
 	CG(context).literals_size = 0;
-	CG(context).backpatch_count = 0;
 	CG(context).fast_call_var = -1;
 	CG(context).try_catch_offset = -1;
 	CG(context).current_brk_cont = -1;
