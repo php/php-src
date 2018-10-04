@@ -651,7 +651,7 @@ PHP_FUNCTION(hash_hkdf)
 	} else if (length == 0) {
 		length = ops->digest_size;
 	} else if (length > (zend_long) (ops->digest_size * 255)) {
-		php_error_docref(NULL, E_WARNING, "Length must be less than or equal to %d: " ZEND_LONG_FMT, ops->digest_size * 255, length);
+		php_error_docref(NULL, E_WARNING, "Length must be less than or equal to %zd: " ZEND_LONG_FMT, ops->digest_size * 255, length);
 		RETURN_FALSE;
 	}
 
