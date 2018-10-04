@@ -1865,6 +1865,10 @@ static int sxe_object_cast_ex(zval *readobj, zval *writeobj, int type)
 
 	sxe = Z_SXEOBJ_P(readobj);
 
+	if (type == IS_ARRAY) {
+		return zend_std_cast_object_tostring(readobj, writeobj, type);
+	}
+
 	if (type == _IS_BOOL) {
 		node = php_sxe_get_first_node(sxe, NULL);
 		if (node) {

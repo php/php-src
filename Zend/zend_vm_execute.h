@@ -3121,22 +3121,25 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_H
 					} else {
 						ZVAL_EMPTY_ARRAY(result);
 					}
-				} else if (Z_OBJ_HT_P(expr)->get_properties) {
-					HashTable *obj_ht = Z_OBJ_HT_P(expr)->get_properties(expr);
-					if (obj_ht) {
-						/* fast copy */
-						obj_ht = zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(expr)->default_properties_count ||
-							 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht)));
-						ZVAL_ARR(result, obj_ht);
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					Z_ADDREF_P(result);
-					convert_to_array(result);
+					ZVAL_UNDEF(result);
+					if (Z_OBJ_HT_P(expr)->cast_object) {
+						if (Z_OBJ_HT_P(expr)->cast_object(expr, result, IS_ARRAY) == FAILURE) {
+							zend_error(E_RECOVERABLE_ERROR,
+								"Object of class %s could not be converted to array",
+								ZSTR_VAL(Z_OBJCE_P(expr)->name));
+						}
+					} else if (Z_OBJ_HT_P(expr)->get) {
+						zval *newop = Z_OBJ_HT_P(expr)->get(expr, result);
+						if (Z_TYPE_P(newop) != IS_OBJECT) {
+							/* for safety - avoid loop */
+							ZVAL_COPY_VALUE(result, newop);
+							convert_to_array(result);
+						}
+					}
+					if (UNEXPECTED(Z_TYPE_P(result) != IS_ARRAY)) {
+						array_init(result);
+					}
 				}
 			} else {
 				ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
@@ -18092,22 +18095,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 					} else {
 						ZVAL_EMPTY_ARRAY(result);
 					}
-				} else if (Z_OBJ_HT_P(expr)->get_properties) {
-					HashTable *obj_ht = Z_OBJ_HT_P(expr)->get_properties(expr);
-					if (obj_ht) {
-						/* fast copy */
-						obj_ht = zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(expr)->default_properties_count ||
-							 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht)));
-						ZVAL_ARR(result, obj_ht);
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					Z_ADDREF_P(result);
-					convert_to_array(result);
+					ZVAL_UNDEF(result);
+					if (Z_OBJ_HT_P(expr)->cast_object) {
+						if (Z_OBJ_HT_P(expr)->cast_object(expr, result, IS_ARRAY) == FAILURE) {
+							zend_error(E_RECOVERABLE_ERROR,
+								"Object of class %s could not be converted to array",
+								ZSTR_VAL(Z_OBJCE_P(expr)->name));
+						}
+					} else if (Z_OBJ_HT_P(expr)->get) {
+						zval *newop = Z_OBJ_HT_P(expr)->get(expr, result);
+						if (Z_TYPE_P(newop) != IS_OBJECT) {
+							/* for safety - avoid loop */
+							ZVAL_COPY_VALUE(result, newop);
+							convert_to_array(result);
+						}
+					}
+					if (UNEXPECTED(Z_TYPE_P(result) != IS_ARRAY)) {
+						array_init(result);
+					}
 				}
 			} else {
 				ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
@@ -21100,22 +21106,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 					} else {
 						ZVAL_EMPTY_ARRAY(result);
 					}
-				} else if (Z_OBJ_HT_P(expr)->get_properties) {
-					HashTable *obj_ht = Z_OBJ_HT_P(expr)->get_properties(expr);
-					if (obj_ht) {
-						/* fast copy */
-						obj_ht = zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(expr)->default_properties_count ||
-							 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht)));
-						ZVAL_ARR(result, obj_ht);
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					Z_ADDREF_P(result);
-					convert_to_array(result);
+					ZVAL_UNDEF(result);
+					if (Z_OBJ_HT_P(expr)->cast_object) {
+						if (Z_OBJ_HT_P(expr)->cast_object(expr, result, IS_ARRAY) == FAILURE) {
+							zend_error(E_RECOVERABLE_ERROR,
+								"Object of class %s could not be converted to array",
+								ZSTR_VAL(Z_OBJCE_P(expr)->name));
+						}
+					} else if (Z_OBJ_HT_P(expr)->get) {
+						zval *newop = Z_OBJ_HT_P(expr)->get(expr, result);
+						if (Z_TYPE_P(newop) != IS_OBJECT) {
+							/* for safety - avoid loop */
+							ZVAL_COPY_VALUE(result, newop);
+							convert_to_array(result);
+						}
+					}
+					if (UNEXPECTED(Z_TYPE_P(result) != IS_ARRAY)) {
+						array_init(result);
+					}
 				}
 			} else {
 				ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
@@ -37467,22 +37476,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 					} else {
 						ZVAL_EMPTY_ARRAY(result);
 					}
-				} else if (Z_OBJ_HT_P(expr)->get_properties) {
-					HashTable *obj_ht = Z_OBJ_HT_P(expr)->get_properties(expr);
-					if (obj_ht) {
-						/* fast copy */
-						obj_ht = zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(expr)->default_properties_count ||
-							 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht)));
-						ZVAL_ARR(result, obj_ht);
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					Z_ADDREF_P(result);
-					convert_to_array(result);
+					ZVAL_UNDEF(result);
+					if (Z_OBJ_HT_P(expr)->cast_object) {
+						if (Z_OBJ_HT_P(expr)->cast_object(expr, result, IS_ARRAY) == FAILURE) {
+							zend_error(E_RECOVERABLE_ERROR,
+								"Object of class %s could not be converted to array",
+								ZSTR_VAL(Z_OBJCE_P(expr)->name));
+						}
+					} else if (Z_OBJ_HT_P(expr)->get) {
+						zval *newop = Z_OBJ_HT_P(expr)->get(expr, result);
+						if (Z_TYPE_P(newop) != IS_OBJECT) {
+							/* for safety - avoid loop */
+							ZVAL_COPY_VALUE(result, newop);
+							convert_to_array(result);
+						}
+					}
+					if (UNEXPECTED(Z_TYPE_P(result) != IS_ARRAY)) {
+						array_init(result);
+					}
 				}
 			} else {
 				ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));

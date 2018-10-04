@@ -610,27 +610,13 @@ try_again:
 			if (Z_OBJCE_P(op) == zend_ce_closure) {
 				convert_scalar_to_array(op);
 			} else {
-				if (Z_OBJ_HT_P(op)->get_properties) {
-					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op);
-					if (obj_ht) {
-						/* fast copy */
-						obj_ht = zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(op)->default_properties_count ||
-							 Z_OBJ_P(op)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht)));
-						zval_ptr_dtor(op);
-						ZVAL_ARR(op, obj_ht);
-						return;
-					}
-				} else {
-					zval dst;
-					convert_object_to_type(op, &dst, IS_ARRAY, convert_to_array);
+				zval dst;
+				convert_object_to_type(op, &dst, IS_ARRAY, convert_to_array);
 
-					if (Z_TYPE(dst) == IS_ARRAY) {
-						zval_ptr_dtor(op);
-						ZVAL_COPY_VALUE(op, &dst);
-						return;
-					}
+				if (Z_TYPE(dst) == IS_ARRAY) {
+					zval_ptr_dtor(op);
+					ZVAL_COPY_VALUE(op, &dst);
+					return;
 				}
 
 				zval_ptr_dtor(op);
@@ -2094,6 +2080,10 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 						ret = compare_function(result, op_free, op2);
 						zend_free_obj_get_result(op_free);
 						return ret;
+					} else if (Z_TYPE_P(op2) == IS_ARRAY) {
+						/* Treat array like null */
+						ZVAL_LONG(result, 1);
+						return SUCCESS;
 					} else if (Z_TYPE_P(op2) != IS_OBJECT && Z_OBJ_HT_P(op1)->cast_object) {
 						ZVAL_UNDEF(&tmp_free);
 						if (Z_OBJ_HT_P(op1)->cast_object(op1, &tmp_free, ((Z_TYPE_P(op2) == IS_FALSE || Z_TYPE_P(op2) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(op2))) == FAILURE) {
@@ -2113,6 +2103,10 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 						ret = compare_function(result, op1, op_free);
 						zend_free_obj_get_result(op_free);
 						return ret;
+					} else if (Z_TYPE_P(op1) == IS_ARRAY) {
+						/* Treat array like null */
+						ZVAL_LONG(result, -1);
+						return SUCCESS;
 					} else if (Z_TYPE_P(op1) != IS_OBJECT && Z_OBJ_HT_P(op2)->cast_object) {
 						ZVAL_UNDEF(&tmp_free);
 						if (Z_OBJ_HT_P(op2)->cast_object(op2, &tmp_free, ((Z_TYPE_P(op1) == IS_FALSE || Z_TYPE_P(op1) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(op1))) == FAILURE) {
