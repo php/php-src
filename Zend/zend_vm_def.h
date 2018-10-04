@@ -5307,22 +5307,18 @@ ZEND_VM_COLD_CONST_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
 					} else {
 						ZVAL_EMPTY_ARRAY(result);
 					}
-				} else if (Z_OBJ_HT_P(expr)->get_properties) {
-					HashTable *obj_ht = Z_OBJ_HT_P(expr)->get_properties(expr);
+				} else {
+					HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);
 					if (obj_ht) {
 						/* fast copy */
-						obj_ht = zend_proptable_to_symtable(obj_ht,
+						ZVAL_ARR(result, zend_proptable_to_symtable(obj_ht,
 							(Z_OBJCE_P(expr)->default_properties_count ||
 							 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht)));
-						ZVAL_ARR(result, obj_ht);
+							 GC_IS_RECURSIVE(obj_ht))));
+						zend_release_properties(obj_ht);
 					} else {
 						ZVAL_EMPTY_ARRAY(result);
 					}
-				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					Z_ADDREF_P(result);
-					convert_to_array(result);
 				}
 			} else {
 				ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));

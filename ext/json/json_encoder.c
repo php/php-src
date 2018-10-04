@@ -130,19 +130,21 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 static int php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
 	int i, r, need_comma = 0;
-	HashTable *myht;
+	HashTable *myht, *prop_ht;
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		myht = Z_ARRVAL_P(val);
+		prop_ht = NULL;
 		r = (options & PHP_JSON_FORCE_OBJECT) ? PHP_JSON_OUTPUT_OBJECT : php_json_determine_array_type(val);
 	} else {
-		myht = Z_OBJPROP_P(val);
+		prop_ht = myht = zend_get_properties_for(val, ZEND_PROP_PURPOSE_JSON);
 		r = PHP_JSON_OUTPUT_OBJECT;
 	}
 
 	if (myht && GC_IS_RECURSIVE(myht)) {
 		encoder->error_code = PHP_JSON_ERROR_RECURSION;
 		smart_str_appendl(buf, "null", 4);
+		zend_release_properties(prop_ht);
 		return FAILURE;
 	}
 
@@ -218,6 +220,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 			if (php_json_encode_zval(buf, data, options, encoder) == FAILURE &&
 					!(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 				PHP_JSON_HASH_UNPROTECT_RECURSION(myht);
+				zend_release_properties(prop_ht);
 				return FAILURE;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -228,6 +231,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 	if (encoder->depth > encoder->max_depth) {
 		encoder->error_code = PHP_JSON_ERROR_DEPTH;
 		if (!(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+			zend_release_properties(prop_ht);
 			return FAILURE;
 		}
 	}
@@ -245,6 +249,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 		smart_str_appendc(buf, '}');
 	}
 
+	zend_release_properties(prop_ht);
 	return SUCCESS;
 }
 /* }}} */
