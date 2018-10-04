@@ -389,7 +389,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			break;
 		case IS_OBJECT:
 		{
-			HashTable *properties = NULL;
+			HashTable *properties;
 			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 			zend_printf("%s Object (", ZSTR_VAL(class_name));
 			zend_string_release_ex(class_name, 0);
@@ -399,9 +399,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 				return;
 			}
 
-			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
-				properties = Z_OBJPROP_P(expr);
-			}
+			properties = Z_OBJPROP_P(expr);
 			if (properties) {
 				Z_PROTECT_RECURSION_P(expr);
 				print_flat_hash(properties);

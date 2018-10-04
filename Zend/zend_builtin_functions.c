@@ -1174,12 +1174,7 @@ ZEND_FUNCTION(get_object_vars)
 		Z_PARAM_OBJECT(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_OBJ_HT_P(obj)->get_properties == NULL) {
-		RETURN_FALSE;
-	}
-
 	properties = Z_OBJ_HT_P(obj)->get_properties(obj);
-
 	if (properties == NULL) {
 		RETURN_FALSE;
 	}

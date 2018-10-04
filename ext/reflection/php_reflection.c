@@ -434,7 +434,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 	}
 	smart_str_append_printf(str, "%s  }\n", indent);
 
-	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_properties) {
+	if (obj && Z_TYPE_P(obj) == IS_OBJECT) {
 		HashTable    *properties = Z_OBJ_HT_P(obj)->get_properties(obj);
 		zend_string  *prop_name;
 		smart_str prop_str = {0};
@@ -4322,7 +4322,7 @@ ZEND_METHOD(reflection_class, getProperties)
 		_addproperty(prop_info, key, ce, return_value, filter);
 	} ZEND_HASH_FOREACH_END();
 
-	if (Z_TYPE(intern->obj) != IS_UNDEF && (filter & ZEND_ACC_PUBLIC) != 0 && Z_OBJ_HT(intern->obj)->get_properties) {
+	if (Z_TYPE(intern->obj) != IS_UNDEF && (filter & ZEND_ACC_PUBLIC) != 0) {
 		HashTable *properties = Z_OBJ_HT(intern->obj)->get_properties(&intern->obj);
 		zval *prop;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
@@ -5227,7 +5227,7 @@ ZEND_METHOD(reflection_property, __construct)
 	 || ((property_info->flags & ZEND_ACC_PRIVATE)
 	  && property_info->ce != ce)) {
 		/* Check for dynamic properties */
-		if (property_info == NULL && Z_TYPE_P(classname) == IS_OBJECT && Z_OBJ_HT_P(classname)->get_properties) {
+		if (property_info == NULL && Z_TYPE_P(classname) == IS_OBJECT) {
 			if (zend_hash_exists(Z_OBJ_HT_P(classname)->get_properties(classname), name)) {
 				dynam_prop = 1;
 			}

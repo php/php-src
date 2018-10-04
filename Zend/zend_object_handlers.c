@@ -145,9 +145,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 
 	if (!ce->__debugInfo) {
 		*is_temp = 0;
-		return Z_OBJ_HANDLER_P(object, get_properties)
-			? Z_OBJ_HANDLER_P(object, get_properties)(object)
-			: NULL;
+		return Z_OBJ_HANDLER_P(object, get_properties)(object);
 	}
 
 	zend_call_method_with_0_params(object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
