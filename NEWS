@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - FCGI:
   . Fixed #76948 (Failed shutdown/reboot or end session in Windows). (Anatol)
 
+- FTP:
+  . Fixed bug #76972 (Data truncation due to forceful ssl socket shutdown).
+    (Manuel Mausz)
+
 - Mbstring:
   . Fixed bug #76958 (Broken UTF7-IMAP conversion). (Nikita)
 
