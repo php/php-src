@@ -4,6 +4,8 @@ Bug #74484 MessageFormatter::formatMessage memory corruption with 11+ named plac
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
+if (version_compare(INTL_ICU_VERSION, '4.8') < 0)
+	die('skip for ICU 4.8+');
 ?>
 --FILE--
 <?php
