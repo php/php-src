@@ -32,6 +32,8 @@ Notice: Undefined index: epic_magic in %sbug62978.php on line %d
 NULL
 
 Notice: Undefined variable: c in %sbug62978.php on line %d
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
 
 Notice: Undefined index: epic_magic in %sbug62978.php on line %d

@@ -24,14 +24,31 @@ var_dump($long[$arr]);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECTF--	
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
 Done

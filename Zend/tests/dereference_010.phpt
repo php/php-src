@@ -21,7 +21,10 @@ var_dump(b()[1]);
 
 ?>
 --EXPECTF--
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
 
 Fatal error: Uncaught Error: Cannot use object of type stdClass as array in %s:%d

@@ -75,12 +75,24 @@ person: Boe
 ---22---
 person: Joe
   child: Ann
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
   child: 
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 person: 
 
 Notice: Trying to get property 'child' of non-object in %s017.php on line %d
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
   child: 
 
 Notice: Trying to get property 'child' of non-object in %s017.php on line %d
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
   child: 
 ===DONE===

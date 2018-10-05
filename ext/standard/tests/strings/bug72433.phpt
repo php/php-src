@@ -20,4 +20,6 @@ var_dump($free_me);
 ?>
 --EXPECTF--
 Notice: unserialize(): Error at offset %d of %d bytes in %sbug72433.php on line 8
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 bool(false)

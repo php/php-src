@@ -69,6 +69,8 @@ array(2) {
   int(5)
 }
 int(1)
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
 
 Notice: Undefined offset: 4 in %s on line %d

@@ -4,16 +4,19 @@ list() with non-array
 <?php
 
 list($a) = NULL;
+var_dump($a);
 
 list($b) = 1;
+var_dump($b);
 
 list($c) = 1.;
+var_dump($c);
 
 list($d) = 'foo';
+var_dump($d);
 
 list($e) = print '';
-
-var_dump($a, $b, $c, $d, $e);
+var_dump($e);
 
 ?>
 --EXPECT--

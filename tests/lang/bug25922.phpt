@@ -20,4 +20,5 @@ test();
 ?>
 --EXPECT--
 Undefined variable: data
+Cannot get offset of a non-array variable
 Undefined index here: ''
