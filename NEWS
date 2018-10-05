@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #76972 (Data truncation due to forceful ssl socket shutdown).
     (Manuel Mausz)
 
+- intl:
+  . Fixed bug #76942 (U_ARGUMENT_TYPE_MISMATCH). (anthrax at unixuser dot org)
+
 11 Oct 2018, PHP 7.1.23
 
 - Core:
