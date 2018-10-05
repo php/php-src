@@ -794,7 +794,7 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 					}
 				}
 			} else if (Z_TYPE_P(val) != IS_STRING && Z_TYPE_P(val) != IS_RESOURCE) {
-				zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
+				zend_error(E_WARNING, "Constants may only evaluate to scalar values, arrays or resources");
 				ret = 0;
 				break;
 			}
@@ -895,7 +895,7 @@ repeat:
 			}
 			/* no break */
 		default:
-			zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
+			zend_error(E_WARNING, "Constants may only evaluate to scalar values, arrays or resources");
 			zval_ptr_dtor(&val_free);
 			RETURN_FALSE;
 	}
