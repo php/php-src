@@ -2025,8 +2025,11 @@ try_string_offset:
 			}
 		}
 	} else {
-		if (type != BP_VAR_IS && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zval_undefined_cv(EX(opline)->op1.var EXECUTE_DATA_CC);
+		if (type != BP_VAR_IS) {
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+				zval_undefined_cv(EX(opline)->op1.var EXECUTE_DATA_CC);
+			}
+			zend_error(E_NOTICE, "Cannot get offset of a non-array variable");
 		}
 		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
