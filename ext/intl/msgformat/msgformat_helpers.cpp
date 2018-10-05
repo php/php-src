@@ -46,6 +46,7 @@ extern "C" {
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 #define HAS_MESSAGE_PATTERN 1
+#define HAS_MISALLOCATE_MEMORY_BUG 1
 #endif
 
 U_NAMESPACE_BEGIN
@@ -334,6 +335,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		return; /* already done */
 	}
 
+#ifdef HAS_MISALLOCATE_MEMORY_BUG
 	/* There is a bug in ICU which prevents MessageFormatter::getFormats()
 	   to handle more than 10 formats correctly. The enumerator could be
 	   used to walk through the present formatters using getFormat(), which
@@ -351,6 +353,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 	if (count > 10) {
 		return;
 	}
+#endif
 
 	formats = mf->getFormats(count);
 
