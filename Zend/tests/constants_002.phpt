@@ -11,7 +11,7 @@ var_dump(foo);
 
 ?>
 --EXPECTF--
-Warning: Constants may only evaluate to scalar values or arrays in %s on line %d
+Warning: Constants may only evaluate to scalar values, arrays or resources in %s on line %d
 
 Warning: Use of undefined constant foo - assumed 'foo' (this will throw an Error in a future version of PHP) in %s on line %d
 string(%d) "foo"

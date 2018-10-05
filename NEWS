@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     generates fatal error). (Nikita)
   . Fixed bug #76947 (file_put_contents() blocks the directory of the file
     (__DIR__)). (Anatol)
+  . Fixed bug #76979 (define() error message does not mention resources as
+    valid values). (Michael Moravec)
 
 - FCGI:
   . Fixed #76948 (Failed shutdown/reboot or end session in Windows). (Anatol)
