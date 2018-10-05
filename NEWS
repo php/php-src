@@ -10,6 +10,10 @@ PHP                                                                        NEWS
 - FCGI:
   . Fixed #76948 (Failed shutdown/reboot or end session in Windows). (Anatol)
 
+- FTP:
+  . Fixed bug #76972 (Data truncation due to forceful ssl socket shutdown).
+    (Manuel Mausz)
+
 - Reflection:
   . Fixed bug #76936 (Objects cannot access their private attributes while
     handling reflection errors). (Nikita)
