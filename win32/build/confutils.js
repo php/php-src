@@ -3586,6 +3586,15 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 	return ret;
 }
 
+function SETUP_SQLITE3(target, path_to_check, shared) {
+	var cflags_var = "CFLAGS_" + target.toUpperCase();
+	var libs = (shared ? "libsqlite3.lib;libsqlite3_a.lib" : "libsqlite3_a.lib;libsqlite3.lib");
+
+	return CHECK_LIB(libs, target, path_to_check) &&
+		CHECK_HEADER_ADD_INCLUDE("sqlite3.h", cflags_var) &&
+		CHECK_HEADER_ADD_INCLUDE("sqlite3ext.h", cflags_var);
+}
+
 function check_binary_tools_sdk()
 {
 	var BIN_TOOLS_SDK_VER_MAJOR = 0;
