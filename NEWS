@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - intl:
   . Fixed bug #76942 (U_ARGUMENT_TYPE_MISMATCH). (anthrax at unixuser dot org)
 
+- Standard:
+  . Fixed bug #76965 (INI_SCANNER_RAW doesn't strip trailing whitespace).
+    (Pierrick)
+
 11 Oct 2018, PHP 7.1.23
 
 - Core:
