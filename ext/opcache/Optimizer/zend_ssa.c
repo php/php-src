@@ -687,6 +687,9 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 						//NEW_SSA_VAR(opline+->op1.var)
 					}
 					break;
+				case ZEND_ADD_ARRAY_UNPACK:
+					ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
+					break;
 				case ZEND_SEND_VAR:
 				case ZEND_CAST:
 				case ZEND_QM_ASSIGN:

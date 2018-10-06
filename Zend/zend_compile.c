@@ -2535,6 +2535,11 @@ static void zend_compile_list_assign(
 				continue;
 			}
 		}
+		
+		if (elem_ast->kind == ZEND_AST_UNPACK) {
+			zend_error(E_COMPILE_ERROR,
+					"Spread operator is not supported in assignments");
+		}
 
 		var_ast = elem_ast->child[0];
 		key_ast = elem_ast->child[1];
@@ -6958,13 +6963,21 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 			zend_error(E_COMPILE_ERROR, "Cannot use empty array elements in arrays");
 		}
 
-		zend_eval_const_expr(&elem_ast->child[0]);
-		zend_eval_const_expr(&elem_ast->child[1]);
-
-		if (elem_ast->attr /* by_ref */ || elem_ast->child[0]->kind != ZEND_AST_ZVAL
-			|| (elem_ast->child[1] && elem_ast->child[1]->kind != ZEND_AST_ZVAL)
-		) {
-			is_constant = 0;
+		if (elem_ast->kind != ZEND_AST_UNPACK) {
+			zend_eval_const_expr(&elem_ast->child[0]);
+			zend_eval_const_expr(&elem_ast->child[1]);
+			
+			if (elem_ast->attr /* by_ref */ || elem_ast->child[0]->kind != ZEND_AST_ZVAL
+				|| (elem_ast->child[1] && elem_ast->child[1]->kind != ZEND_AST_ZVAL)
+			) {
+				is_constant = 0;
+			}
+		} else {
+			zend_eval_const_expr(&elem_ast->child[0]);
+			
+			if (elem_ast->child[0]->kind != ZEND_AST_ZVAL) {
+				is_constant = 0;
+			}
 		}
 
 		last_elem_ast = elem_ast;
@@ -6986,6 +6999,29 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		zend_ast *key_ast = elem_ast->child[1];
 
 		zval *value = zend_ast_get_zval(value_ast);
+		if (elem_ast->kind == ZEND_AST_UNPACK) {
+			if (Z_TYPE_P(value) == IS_ARRAY) {
+				HashTable *ht = Z_ARRVAL_P(value);
+				zval *val;
+				zend_string *key;
+
+				ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+					if (key) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Cannot unpack array with string keys");
+					}
+					if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
+						zval_ptr_dtor(result);
+						return 0;
+					}
+					Z_TRY_ADDREF_P(val);
+				} ZEND_HASH_FOREACH_END();
+		
+				continue;
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR, "Only arrays and Traversables can be unpacked");
+			}
+		} 
+		
 		Z_TRY_ADDREF_P(value);
 
 		if (key_ast) {
@@ -7744,6 +7780,16 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		key_ast = elem_ast->child[1];
 		by_ref = elem_ast->attr;
 
+		if (elem_ast->kind == ZEND_AST_UNPACK) {
+			zend_compile_expr(&value_node, value_ast);
+			if (i == 0) {
+				opline = zend_emit_op_tmp(result, ZEND_INIT_ARRAY, NULL, NULL);
+			}
+			opline = zend_emit_op(NULL, ZEND_ADD_ARRAY_UNPACK, &value_node, NULL);
+			SET_NODE(opline->result, result);
+			continue;
+		}
+
 		if (key_ast) {
 			zend_compile_expr(&key_node, key_ast);
 			zend_handle_numeric_op(&key_node);
@@ -8070,6 +8116,7 @@ zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_UNARY_PLUS || kind == ZEND_AST_UNARY_MINUS
 		|| kind == ZEND_AST_CONDITIONAL || kind == ZEND_AST_DIM
 		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM
+		|| kind == ZEND_AST_UNPACK
 		|| kind == ZEND_AST_CONST || kind == ZEND_AST_CLASS_CONST
 		|| kind == ZEND_AST_CLASS_NAME
 		|| kind == ZEND_AST_MAGIC_CONST || kind == ZEND_AST_COALESCE;

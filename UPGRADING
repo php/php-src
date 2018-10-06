@@ -166,6 +166,14 @@ PHP 7.4 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/null_coalesce_equal_operator
 
+  . Added support for unpacking inside arrays. For example:
+
+        $arr1 = [3, 4];
+        $arr2 = [1, 2, ...$arr1, 5];
+        // $arr2 == [1, 2, 3, 4, 5]
+
+    RFC: https://wiki.php.net/rfc/spread_operator_for_array
+
   . Support for WeakReferences has been added.
     RFC: https://wiki.php.net/rfc/weakrefs
 

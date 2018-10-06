@@ -5554,7 +5554,114 @@ ZEND_VM_C_LABEL(num_index):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV, ARRAY_INIT|REF)
+ZEND_VM_HANDLER(208, ZEND_ADD_ARRAY_UNPACK, ANY, ANY)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1;
+	
+	SAVE_OPLINE();
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	
+ZEND_VM_C_LABEL(add_again):
+	if (EXPECTED(Z_TYPE_P(op1) == IS_ARRAY)) {
+		HashTable *ht = Z_ARRVAL_P(op1);
+		zval *val;
+		zend_string *key;
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+			if (key) {
+				zend_throw_error(NULL, "Cannot unpack array with string keys");
+				FREE_OP1();
+				HANDLE_EXCEPTION();
+			} else {
+				if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
+					val = Z_REFVAL_P(val);
+				}
+				Z_TRY_ADDREF_P(val);
+				if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), val)) {
+					zend_cannot_add_element();
+					zval_ptr_dtor_nogc(val);
+					break;
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
+		zend_class_entry *ce = Z_OBJCE_P(op1);
+		zend_object_iterator *iter;
+
+		if (!ce || !ce->get_iterator) {
+			zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
+		} else {
+			iter = ce->get_iterator(ce, op1, 0);
+			if (UNEXPECTED(!iter)) {
+				FREE_OP1();
+				if (!EG(exception)) {
+					zend_throw_exception_ex(
+						NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name)
+					);
+				}
+				HANDLE_EXCEPTION();
+			}
+			
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter);
+			}
+			
+			for (; iter->funcs->valid(iter) == SUCCESS; ) {
+				zval *val;
+
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					break;
+				}
+
+				val = iter->funcs->get_current_data(iter);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					break;
+				}
+
+				if (iter->funcs->get_current_key) {
+					zval key;
+					iter->funcs->get_current_key(iter, &key);
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						break;
+					}
+
+					if (UNEXPECTED(Z_TYPE(key) != IS_LONG)) {
+						zend_throw_error(NULL,
+							(Z_TYPE(key) == IS_STRING) ?
+								"Cannot unpack Traversable with string keys" :
+								"Cannot unpack Traversable with non-integer keys");
+						zval_ptr_dtor(&key);
+						break;
+					}
+				}
+
+				ZVAL_DEREF(val);
+				Z_TRY_ADDREF_P(val);
+
+				if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), val)) {
+					zend_cannot_add_element();
+					zval_ptr_dtor_nogc(val);
+				}
+
+				iter->funcs->move_forward(iter);
+			}
+
+			zend_iterator_dtor(iter);
+		}
+	} else if (EXPECTED(Z_ISREF_P(op1))) {
+		op1 = Z_REFVAL_P(op1);
+		ZEND_VM_C_GOTO(add_again);
+	} else {
+		zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
+	}
+	
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|CV|UNUSED, CONST|TMPVAR|UNUSED|NEXT|CV, ARRAY_INIT|REF)
 {
 	zval *array;
 	uint32_t size;
@@ -5570,7 +5677,7 @@ ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSED|NEXT|
 		}
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ADD_ARRAY_ELEMENT);
 	} else {
-		ZVAL_EMPTY_ARRAY(array);
+		ZVAL_ARR(array, zend_new_array(0));
 		ZEND_VM_NEXT_OPCODE();
 	}
 }
@@ -7234,6 +7341,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	if (throw_op->result_type & (IS_VAR | IS_TMP_VAR)) {
 		switch (throw_op->opcode) {
 			case ZEND_ADD_ARRAY_ELEMENT:
+			case ZEND_ADD_ARRAY_UNPACK:
 			case ZEND_ROPE_INIT:
 			case ZEND_ROPE_ADD:
 				break; /* exception while building structures, live range handling will free those */
