@@ -645,6 +645,10 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 		}
 	}
 
+	if (argc - 1 > argnum) {
+  	php_error_docref(NULL, E_WARNING, "Expected %d argument%s, %d given", argnum, argnum == 1 ? "" : "s", argc - 1);
+	}
+
 	if (newargs) {
 		efree(newargs);
 	}
