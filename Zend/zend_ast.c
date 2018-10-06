@@ -446,6 +446,31 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 	return SUCCESS;
 }
 
+static int zend_ast_add_unpacked_element(zval *result, zval *expr) {
+	if (EXPECTED(Z_TYPE_P(expr) == IS_ARRAY)) {
+		HashTable *ht = Z_ARRVAL_P(expr);
+		zval *val;
+		zend_string *key;
+		
+		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+			if (key) {
+				zend_throw_error(NULL, "Cannot unpack array with string keys");
+				return FAILURE;
+			} else {
+				Z_TRY_ADDREF_P(val);
+				if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
+					zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+					zval_ptr_dtor_nogc(val);
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else { //objects or refernces cannot occur in a constant expression
+		zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
 {
 	zval op1, op2;
@@ -642,6 +667,18 @@ ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_c
 				array_init(result);
 				for (i = 0; i < list->children; i++) {
 					zend_ast *elem = list->child[i];
+					if (elem->kind == ZEND_AST_UNPACK) {
+						if (UNEXPECTED(zend_ast_evaluate(&op1, elem->child[0], scope) != SUCCESS)) {
+							zval_ptr_dtor_nogc(result);
+							return FAILURE;
+						}
+						if (UNEXPECTED(zend_ast_add_unpacked_element(result, &op1) != SUCCESS)) {
+							zval_ptr_dtor_nogc(&op1);
+							zval_ptr_dtor_nogc(result);
+							return FAILURE;
+						}
+						continue;
+					}
 					if (elem->child[1]) {
 						if (UNEXPECTED(zend_ast_evaluate(&op1, elem->child[1], scope) != SUCCESS)) {
 							zval_ptr_dtor_nogc(result);
