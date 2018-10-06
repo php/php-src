@@ -293,7 +293,6 @@ function getBlacklist(): array
         '/^ext\/gd\/libgd/',
         '/^ext\/mbstring\/oniguruma/',
         '/^ext\/pcre\/pcre2lib/',
-        '/^ext\/sqlite3\/libsqlite/',
 
         // Data
         '/^ext\/standard\/html\_tables\/mappings/',
