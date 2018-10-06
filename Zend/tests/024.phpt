@@ -16,9 +16,13 @@ var_dump($a->$b->{$c[1]});
 ?>
 --EXPECTF--
 Notice: Undefined variable: a in %s on line %d
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
 
 Notice: Undefined variable: %s in %s on line %d
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 
 Notice: Undefined variable: %s in %s on line %d
 NULL
@@ -44,6 +48,8 @@ Notice: Trying to get property '1' of non-object in %s on line %d
 NULL
 
 Notice: Undefined variable: c in %s on line %d
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 
 Notice: Trying to get property '1' of non-object in %s on line %d
 

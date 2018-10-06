@@ -9,6 +9,8 @@ var_dump($test, $test3['mmmmm']);
 ?>
 --EXPECTF--
 Notice: Undefined variable: test3 in %s%earray_026.php on line %d
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(1) {

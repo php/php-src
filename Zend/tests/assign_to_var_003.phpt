@@ -12,7 +12,8 @@ var_dump($var1);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECTF--	
+Notice: Cannot get offset of a non-array variable in %s on line %d
 NULL
 NULL
 Done

@@ -28,6 +28,8 @@ Passing undefined by value
 
 Notice: Undefined variable: undef1 in %s on line 13
 
+Notice: Cannot get offset of a non-array variable in %s on line %d
+
 Inside passbyVal call:
 NULL
 

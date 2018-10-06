@@ -18,7 +18,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 
 if (function_exists("opcache_get_status")) {
 	$status = opcache_get_status();
-	if ($status["opcache_enabled"]) {
+	if ($status !== false && $status["opcache_enabled"]) {
 		ini_set("opcache.revalidate_freq", "0");
 		sleep(2);
 	}

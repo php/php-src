@@ -589,8 +589,11 @@ class Client
         // but still not get the response requested
         $startTime = microtime(true);
 
-        do {
+        while (true) {
             $resp = $this->readPacket();
+            if (!$resp) {
+                break;
+            }
 
             if ($resp['type'] == self::STDOUT || $resp['type'] == self::STDERR) {
                 if ($resp['type'] == self::STDERR) {
@@ -612,7 +615,7 @@ class Client
                 $this->set_ms_timeout($this->_readWriteTimeout);
                 throw new \Exception('Timed out');
             }
-        } while ($resp);
+        }
 
         if (!is_array($resp)) {
             $info = stream_get_meta_data($this->_sock);

@@ -27,8 +27,12 @@ var_dump($h);
 
 ?>
 --EXPECTF--
+Notice: Cannot get offset of a non-array variable in %s on line %d
+
 Notice: Trying to get property 'a' of non-object in %s on line %d
 NULL
+
+Notice: Cannot get offset of a non-array variable in %s on line %d
 
 Notice: Trying to get property 'b' of non-object in %s on line %d
 NULL
