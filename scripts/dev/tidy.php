@@ -642,7 +642,7 @@ function check(array $opt): void
     }
 
     // The mbstring extension is used for reporting the file encodings
-    if (!extension_loaded('tokenizer')) {
+    if (!extension_loaded('mbstring')) {
         output('**WARN**: Enable mbstring extension for reporting file encodings.');
     }
 
