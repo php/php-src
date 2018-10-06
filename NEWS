@@ -23,7 +23,7 @@ PHP                                                                        NEWS
   . Implemented sqlite_stmt_readonly in PDO_SQLite. (BohwaZ)
 
 - SQLite3:
-  . Updated to SQLite 3.25.1. (cmb)
+  . Unbundled libsqlite. (cmb)
 
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
