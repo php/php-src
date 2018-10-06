@@ -518,6 +518,9 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 		}
 	}
 end_raw_value_chars:
+	if (sc) {
+		YYCURSOR = sc;
+	}
 	yyleng = YYCURSOR - SCNG(yy_text);
 
 	/* Eat trailing semicolons */
@@ -525,13 +528,12 @@ end_raw_value_chars:
 		yyleng--;
 	}
 
+	EAT_TRAILING_WHITESPACE();
+
 	/* Eat leading and trailing double quotes */
 	if (yyleng > 1 && yytext[0] == '"' && yytext[yyleng - 1] == '"') {
 		SCNG(yy_text)++;
 		yyleng = yyleng - 2;
-	} else if (sc) {
-		YYCURSOR = sc;
-		yyleng = YYCURSOR - SCNG(yy_text);
 	}
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
