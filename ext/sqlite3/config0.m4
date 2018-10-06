@@ -19,46 +19,46 @@ if test $PHP_SQLITE3 != "no"; then
     fi
   fi
 
-    AC_MSG_CHECKING([for sqlite3 files in default path])
-    for i in $PHP_SQLITE3 /usr/local /usr; do
-      if test -r $i/include/sqlite3.h; then
-        SQLITE3_DIR=$i
-        AC_MSG_RESULT(found in $i)
-        break
-      fi
-    done
-
-    if test -z "$SQLITE3_DIR"; then
-      AC_MSG_RESULT([not found])
-      AC_MSG_ERROR([Please reinstall the sqlite distribution from http://www.sqlite.org])
+  AC_MSG_CHECKING([for sqlite3 files in default path])
+  for i in $PHP_SQLITE3 /usr/local /usr; do
+    if test -r $i/include/sqlite3.h; then
+      SQLITE3_DIR=$i
+      AC_MSG_RESULT(found in $i)
+      break
     fi
+  done
 
-    AC_MSG_CHECKING([for SQLite 3.5.0+])
-    PHP_CHECK_LIBRARY(sqlite3, sqlite3_open_v2, [
-      AC_MSG_RESULT(found)
-      PHP_ADD_LIBRARY_WITH_PATH(sqlite3, $SQLITE3_DIR/$PHP_LIBDIR, SQLITE3_SHARED_LIBADD)
-      PHP_ADD_INCLUDE($SQLITE3_DIR/include)
-    ],[
-      AC_MSG_RESULT([not found])
-      AC_MSG_ERROR([Please install SQLite 3.5.0 first or check libsqlite3 is present])
-    ],[
-      -L$SQLITE3_DIR/$PHP_LIBDIR -lm
-    ])
+  if test -z "$SQLITE3_DIR"; then
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([Please reinstall the sqlite distribution from http://www.sqlite.org])
+  fi
 
-    PHP_CHECK_LIBRARY(sqlite3,sqlite3_key,[
-      AC_DEFINE(HAVE_SQLITE3_KEY, 1, [have commercial sqlite3 with crypto support])
-    ])
-    PHP_CHECK_LIBRARY(sqlite3,sqlite3_column_table_name,[
-      AC_DEFINE(SQLITE_ENABLE_COLUMN_METADATA, 1, [have sqlite3 with column metadata enabled])
-    ])
-    PHP_CHECK_LIBRARY(sqlite3,sqlite3_errstr,[
-      AC_DEFINE(HAVE_SQLITE3_ERRSTR, 1, [have sqlite3_errstr function])
-    ])
+  AC_MSG_CHECKING([for SQLite 3.5.0+])
+  PHP_CHECK_LIBRARY(sqlite3, sqlite3_open_v2, [
+    AC_MSG_RESULT(found)
+    PHP_ADD_LIBRARY_WITH_PATH(sqlite3, $SQLITE3_DIR/$PHP_LIBDIR, SQLITE3_SHARED_LIBADD)
+    PHP_ADD_INCLUDE($SQLITE3_DIR/include)
+  ],[
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([Please install SQLite 3.5.0 first or check libsqlite3 is present])
+  ],[
+    -L$SQLITE3_DIR/$PHP_LIBDIR -lm
+  ])
 
-    PHP_CHECK_LIBRARY(sqlite3,sqlite3_load_extension,
-    [],
-    [AC_DEFINE(SQLITE_OMIT_LOAD_EXTENSION, 1, [have sqlite3 with extension support])
-    ])
+  PHP_CHECK_LIBRARY(sqlite3,sqlite3_key,[
+    AC_DEFINE(HAVE_SQLITE3_KEY, 1, [have commercial sqlite3 with crypto support])
+  ])
+  PHP_CHECK_LIBRARY(sqlite3,sqlite3_column_table_name,[
+    AC_DEFINE(SQLITE_ENABLE_COLUMN_METADATA, 1, [have sqlite3 with column metadata enabled])
+  ])
+  PHP_CHECK_LIBRARY(sqlite3,sqlite3_errstr,[
+    AC_DEFINE(HAVE_SQLITE3_ERRSTR, 1, [have sqlite3_errstr function])
+  ])
+
+  PHP_CHECK_LIBRARY(sqlite3,sqlite3_load_extension,
+  [],
+  [AC_DEFINE(SQLITE_OMIT_LOAD_EXTENSION, 1, [have sqlite3 with extension support])
+  ])
 
   AC_DEFINE(HAVE_SQLITE3,1,[ ])
 
