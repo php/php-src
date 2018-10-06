@@ -1737,7 +1737,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		n++;
 	}
 
-	if ((*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || (n == 4 && !memcmp("data:", path, 5)))) {
+	if ((*p == ':') && (n >= 1) && (!strncmp("//", p+1, 2) || (n == 4 && !memcmp("data:", path, 5)))) {
 		protocol = path;
 	}
 
