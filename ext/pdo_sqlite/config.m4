@@ -52,14 +52,14 @@ if test "$PHP_PDO_SQLITE" != "no"; then
   PHP_ADD_INCLUDE($PDO_SQLITE_DIR/include)
 
   LIBNAME=sqlite3
-  LIBSYMBOL=sqlite3_open
+  LIBSYMBOL=sqlite3_open_v2
 
   PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
   [
     PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $PDO_SQLITE_DIR/$PHP_LIBDIR, PDO_SQLITE_SHARED_LIBADD)
     AC_DEFINE(HAVE_PDO_SQLITELIB,1,[ ])
   ],[
-    AC_MSG_ERROR([wrong sqlite lib version or lib not found])
+    AC_MSG_ERROR([wrong sqlite lib version (< 3.5.0) or lib not found])
   ],[
     -L$PDO_SQLITE_DIR/$PHP_LIBDIR -lm
   ])
