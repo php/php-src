@@ -37,3 +37,10 @@ Guidelines for contributors
 - [README.GIT-RULES](/README.GIT-RULES)
 - [README.MAILINGLIST_RULES](/README.MAILINGLIST_RULES)
 - [README.RELEASE_PROCESS](/README.RELEASE_PROCESS)
+
+## Testing
+
+To run tests the `make test` is used after successful compilation of the sources.
+
+See [Creating new test files](https://qa.php.net/write-test.php) chapter for more
+information about testing.
