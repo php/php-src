@@ -1,5 +1,5 @@
 #!/usr/bin/env php
-<?php
+<?php declare(strict_types=1);
 
 /*
   +----------------------------------------------------------------------+
@@ -381,10 +381,9 @@ function getWhitelist(): array
 /**
  * Get options from the command line arguments.
  */
-function options(): array
+function options(array $argv = []): array
 {
     static $opt;
-    global $argv;
 
     if (isset($opt)) {
         return $opt;
@@ -447,7 +446,9 @@ function options(): array
             case 'N':
             case 'trim-final-newlines':
                 $opt['trim_final_newlines'] = true;
-                $opt['max_newlines'] = (preg_match('/^[0-9]+$/', $value)) ? $value : 1;
+                if ($value !== false && preg_match('/^[0-9]+$/', $value)) {
+                    $opt['max_newlines'] = (int)$value;
+                }
             break;
             case 'n':
             case 'insert-final-newline':
@@ -455,7 +456,7 @@ function options(): array
             break;
             case 'e':
             case 'eol':
-                if (in_array(strtolower($value), ['lf', 'crlf'])) {
+                if (is_string($value) && in_array(strtolower($value), ['lf', 'crlf'])) {
                     $default = ['lf' => "\n", 'crlf' => "\r\n"];
                     $opt['default_eol'] = $default[strtolower($value)];
                 }
@@ -519,7 +520,7 @@ function options(): array
     $opt['invalid'] = getInvalidOptions($shortOptions, $longOptions, $argv);
 
     foreach (array_slice($argv, $optionsIndex) as $file) {
-        if (file_exists(realpath($file)) && $file !== $argv[0]) {
+        if (file_exists($file) && $file !== $argv[0]) {
             $opt['path'] = realpath($file);
 
             break;
@@ -983,18 +984,14 @@ function hasGit(?string $path = null): bool
 
     exec('git --version 2>&1', $output, $exitCode);
     if (0 !== $exitCode) {
-        $hasGit = false;
-
-        return false;
+        return $hasGit = false;
     }
 
     if (is_dir($path) && file_exists($path.'/.git')) {
-        $hasGit = true;
-
-        return true;
+        return $hasGit = true;
     }
 
-    return false;
+    return $hasGit = false;
 }
 
 /**
@@ -1014,7 +1011,7 @@ function getFiles(): array
         $files = preg_filter('/^/', $opt['path'].'/', $files);
     } else {
         $iterator = new \RecursiveDirectoryIterator($opt['path'], \RecursiveDirectoryIterator::SKIP_DOTS);
-        $files = iterator_to_array(new \RecursiveIteratorIterator($iterator));
+        $files = array_keys(iterator_to_array(new \RecursiveIteratorIterator($iterator)));
     }
 
     // Remove blacklist matches
@@ -1357,6 +1354,7 @@ function cleanPhpCode(string $source): string
         return $buffer;
     }
 
+    // @ suppresses warning: octal escape sequence overflow \542 is greater than \377
     $tokens = @token_get_all($source);
 
     $content = '';
@@ -1451,10 +1449,10 @@ function countFixed(): int
     return $counter++;
 }
 
-function init(): int
+function init(array $argv): int
 {
     $time = microtime(true);
-    $opt = options();
+    $opt = options($argv);
 
     output("Executing `tidy.php`\n");
     output('Working tree: '.$opt['path']."\n");
@@ -1475,4 +1473,4 @@ function init(): int
     return $exitCode;
 }
 
-exit(init());
+exit(init($argv));
