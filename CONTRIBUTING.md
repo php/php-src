@@ -52,9 +52,6 @@ We love getting new tests! PHP is a huge project and improving code coverage is
 a huge win for every PHP user.
 
 [Our QA site includes a page detailing how to write test cases.](http://qa.php.net/write-test.php)
-Please note that the section on submitting pull requests is outdated: in
-addition to the process listed there, you can also
-[submit pull requests](#pull-requests).
 
 ## Writing documentation
 

@@ -250,8 +250,7 @@ Syntax and indentation
 Testing
 -------
 
-1.  Extensions should be well tested using *.phpt tests. Read about that
-    in README.TESTING.
+1.  Extensions should be well tested using *.phpt tests.
 
 Documentation and Folding Hooks
 -------------------------------
