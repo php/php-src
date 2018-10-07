@@ -242,22 +242,11 @@ ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose
 	} \
 } while (0)
 
-ZEND_API struct _zend_property_info **zend_build_properties_info_table(zend_class_entry *ce);
 ZEND_API int zend_check_property_info_access(struct _zend_property_info *prop_info);
-
-static inline struct _zend_property_info **zend_get_properties_info_table(zend_class_entry *ce)
-{
-	ZEND_ASSERT(ce->default_properties_count != 0);
-	if (ce->properties_info_table) {
-		return ce->properties_info_table;
-	}
-
-	return zend_build_properties_info_table(ce);
-}
 
 static inline struct _zend_property_info *zend_get_property_info_for_slot(zend_object *obj, zval *slot)
 {
-	struct _zend_property_info **table = zend_get_properties_info_table(obj->ce);
+	struct _zend_property_info **table = obj->ce->properties_info_table;
 	intptr_t prop_num = slot - obj->properties_table;
 	ZEND_ASSERT(prop_num >= 0 && prop_num < obj->ce->default_properties_count);
 	return table[prop_num];

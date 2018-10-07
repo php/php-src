@@ -284,10 +284,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 				_destroy_zend_class_traits_info(ce);
 			}
 
-			if (ce->properties_info_table) {
-				efree(ce->properties_info_table);
-			}
-
 			break;
 		case ZEND_INTERNAL_CLASS:
 			if (ce->default_properties_table) {
