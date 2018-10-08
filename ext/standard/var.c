@@ -959,9 +959,9 @@ again:
 					/* we should still add element even if it's not OK,
 					 * since we already wrote the length of the array before */
 					if (Z_TYPE_P(data) == IS_ARRAY) {
-						if (Z_TYPE_P(data) == IS_ARRAY
-						 && (UNEXPECTED(Z_IS_RECURSIVE_P(data))
-						  || UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc)))) {
+						if (UNEXPECTED(Z_IS_RECURSIVE_P(data))
+							|| UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))) {
+							php_add_var_hash(var_hash, struc);
 							smart_str_appendl(buf, "N;", 2);
 						} else {
 							if (Z_REFCOUNTED_P(data)) {
