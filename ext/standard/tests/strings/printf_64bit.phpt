@@ -690,6 +690,8 @@ C
 
 
 *** Output for excess of mixed type arguments  ***
+
+Warning: printf(): Expected 1 argument, 3 given in %s on line %d
 abcdefghjklmnpqrstuvwxyz
 
 *** Output for string format parameter and integer type argument ***
