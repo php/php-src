@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #76979 (define() error message does not mention resources as
     valid values). (Michael Moravec)
 
+- Date:
+  . Fixed bug #75851 (Year component overflow with date formats "c", "o", "r"
+    and "y"). (Adam Saponara)
+
 - FCGI:
   . Fixed #76948 (Failed shutdown/reboot or end session in Windows). (Anatol)
 
