@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
 
+- Date:
+  . Fixed bug #75851 (Year component overflow with date formats "c", "o", "r"
+    and "y"). (Adam Saponara)
+
 - FCGI:
   . Fixed #76948 (Failed shutdown/reboot or end session in Windows). (Anatol)
 
