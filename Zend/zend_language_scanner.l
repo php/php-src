@@ -590,6 +590,9 @@ static zend_op_array *zend_compile(int type)
 		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
 		CG(active_op_array) = op_array;
 
+		/* Use heap to not waste arena memory */
+		op_array->fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
+
 		if (zend_ast_process) {
 			zend_ast_process(CG(ast));
 		}

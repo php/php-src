@@ -2581,6 +2581,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	zend_attach_symbol_table(execute_data);
 
 	if (!op_array->run_time_cache) {
+		ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE);
 		op_array->run_time_cache = emalloc(op_array->cache_size);
 		memset(op_array->run_time_cache, 0, op_array->cache_size);
 	}
@@ -2618,6 +2619,7 @@ ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_
 {
 	EX(prev_execute_data) = EG(current_execute_data);
 	if (!op_array->run_time_cache) {
+		ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE);
 		op_array->run_time_cache = emalloc(op_array->cache_size);
 		memset(op_array->run_time_cache, 0, op_array->cache_size);
 	}

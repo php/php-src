@@ -1,7 +1,5 @@
 --TEST--
-md5 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: md5 algorithm
 --FILE--
 <?php
 echo hash('md5', '') . "\n";

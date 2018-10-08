@@ -145,9 +145,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 
 	if (!ce->__debugInfo) {
 		*is_temp = 0;
-		return Z_OBJ_HANDLER_P(object, get_properties)
-			? Z_OBJ_HANDLER_P(object, get_properties)(object)
-			: NULL;
+		return Z_OBJ_HANDLER_P(object, get_properties)(object);
 	}
 
 	zend_call_method_with_0_params(object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
@@ -1355,7 +1353,7 @@ static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{
 		}
 
 #if ZTS
-		CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval) * class_type->default_static_members_count);
+		CG(static_members_table)[class_type->static_members_table_idx] = emalloc(sizeof(zval) * class_type->default_static_members_count);
 #else
 		class_type->static_members_table = emalloc(sizeof(zval) * class_type->default_static_members_count);
 #endif

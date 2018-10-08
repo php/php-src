@@ -1,7 +1,5 @@
 --TEST--
-sha3 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: sha3 algorithm
 --FILE--
 <?php
 

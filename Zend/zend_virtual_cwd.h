@@ -118,7 +118,7 @@ typedef unsigned short mode_t;
 # define php_sys_stat php_win32_ioutil_stat
 # define php_sys_lstat php_win32_ioutil_lstat
 # define php_sys_fstat php_win32_ioutil_fstat
-CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_len);
+# define php_sys_readlink php_win32_ioutil_readlink
 # define php_sys_symlink php_win32_ioutil_symlink
 # define php_sys_link php_win32_ioutil_link
 #else

@@ -7,9 +7,7 @@ Boris Lytochkin
 require_once(dirname(__FILE__).'/skipif.inc');
 ?>
 --ENV--
-return <<<END
 MIBS=
-END;
 --FILE--
 <?php
 require_once(dirname(__FILE__).'/snmp_include.inc');

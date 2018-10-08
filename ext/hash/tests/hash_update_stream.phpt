@@ -1,11 +1,7 @@
 --TEST--
-int hash_update_stream ( resource $context , resource $handle [, int $length = -1 ] );
+Hash: hash_update_stream() test
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
---SKIPIF--
-<?php
-if (!extension_loaded('hash')) die('skip hash extension not available');
-?>
 --FILE--
 <?php
 $fp = tmpfile();

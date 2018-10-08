@@ -247,7 +247,6 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;
 	CG(context).vars_size = 0;
 	CG(context).literals_size = 0;
-	CG(context).backpatch_count = 0;
 	CG(context).fast_call_var = -1;
 	CG(context).try_catch_offset = -1;
 	CG(context).current_brk_cont = -1;
@@ -1615,19 +1614,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
-#ifdef ZTS
-		int n = zend_hash_num_elements(CG(class_table));
-
-		if (CG(static_members_table) && n >= CG(last_static_member)) {
-			/* Support for run-time declaration: dl() */
-			CG(last_static_member) = n+1;
-			CG(static_members_table) = realloc(CG(static_members_table), (n+1)*sizeof(zval*));
-			CG(static_members_table)[n] = NULL;
-		}
-		ce->static_members_table = (zval*)(zend_intptr_t)n;
-#else
 		ce->static_members_table = NULL;
-#endif
 	} else {
 		ce->static_members_table = ce->default_static_members_table;
 		ce->info.user.doc_comment = NULL;
@@ -1652,6 +1639,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->iterator_funcs_ptr = NULL;
 		ce->get_static_method = NULL;
 		ce->parent = NULL;
+		ce->parent_name = NULL;
 		ce->num_interfaces = 0;
 		ce->interfaces = NULL;
 		ce->num_traits = 0;

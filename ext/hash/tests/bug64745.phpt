@@ -1,7 +1,5 @@
 --TEST--
-Bug #64745 hash_pbkdf2() truncates data when using default length and hex output
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Bug #64745 (hash_pbkdf2() truncates data when using default length and hex output)
 --FILE--
 <?php
 $hash = hash_pbkdf2('sha1', 'password', 'salt', 1, 0);

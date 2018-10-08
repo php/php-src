@@ -154,9 +154,6 @@ locations.
        └─ ...
     └─ skeleton/                    # Skeleton for developing new extensions with `ext/ext_skel.php`
        └─ ...
-    └─ sqlite3/
-       ├─ libsqlite/                # https://www.sqlite.org mirror: https://github.com/mackyle/sqlite
-       └─ ...
     └─ standard/
        └─ html_tables/
           ├─ mappings/              # https://www.unicode.org/Public/MAPPINGS/

@@ -1,7 +1,5 @@
 --TEST--
-haval algorithm (multi-vector, multi-pass, multi-width)
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: haval algorithm (multi-vector, multi-pass, multi-width)
 --FILE--
 <?php
 echo "Empty String\n";

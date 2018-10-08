@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
     (Pierrick)
 
+- Hash:
+  . The hash extension is now an integral part of PHP and cannot be disabled
+    as per RFC: https://wiki.php.net/rfc/permanent_hash_ext. (Kalle)
+
 - Intl:
   . Lifted requirements to ICU ≥ 50.1. (cmb)
   . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
@@ -19,7 +23,7 @@ PHP                                                                        NEWS
   . Implemented sqlite_stmt_readonly in PDO_SQLite. (BohwaZ)
 
 - SQLite3:
-  . Updated to SQLite 3.25.1. (cmb)
+  . Unbundled libsqlite. (cmb)
 
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 

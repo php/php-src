@@ -1,7 +1,5 @@
 --TEST--
-sha256 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: sha256 algorithm
 --FILE--
 <?php
 echo hash('sha256', '') . "\n";

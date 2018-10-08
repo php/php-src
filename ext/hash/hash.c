@@ -194,14 +194,14 @@ PHP_FUNCTION(hash_file)
 }
 /* }}} */
 
-static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const int length) {
+static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const size_t length) {
 	int i;
 	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with;
 	}
 }
 
-static inline void php_hash_string_xor(unsigned char *out, const unsigned char *in, const unsigned char *xor_with, const int length) {
+static inline void php_hash_string_xor(unsigned char *out, const unsigned char *in, const unsigned char *xor_with, const size_t length) {
 	int i;
 	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with[i];
@@ -210,7 +210,7 @@ static inline void php_hash_string_xor(unsigned char *out, const unsigned char *
 
 static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *ops, void *context, const unsigned char *key, const size_t key_len) {
 	memset(K, 0, ops->block_size);
-	if (key_len > (size_t)ops->block_size) {
+	if (key_len > ops->block_size) {
 		/* Reduce the key first */
 		ops->hash_init(context);
 		ops->hash_update(context, key, key_len);
@@ -276,7 +276,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	if (isfilename) {
 		char buf[1024];
-		int n;
+		size_t n;
 		ops->hash_init(context);
 		ops->hash_update(context, K, ops->block_size);
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
@@ -373,11 +373,11 @@ static void php_hashcontext_ctor(INTERNAL_FUNCTION_PARAMETERS, zval *objval) {
 
 	if (options & PHP_HASH_HMAC) {
 		char *K = emalloc(ops->block_size);
-		int i, block_size;
+		size_t i, block_size;
 
 		memset(K, 0, ops->block_size);
 
-		if (ZSTR_LEN(key) > (size_t)ops->block_size) {
+		if (ZSTR_LEN(key) > ops->block_size) {
 			/* Reduce the key first */
 			ops->hash_update(context, (unsigned char *) ZSTR_VAL(key), ZSTR_LEN(key));
 			ops->hash_final((unsigned char *) K, context);
@@ -389,7 +389,7 @@ static void php_hashcontext_ctor(INTERNAL_FUNCTION_PARAMETERS, zval *objval) {
 
 		/* XOR ipad */
 		block_size = ops->block_size;
-		for(i=0; i < block_size; i++) {
+		for(i = 0; i < block_size; i++) {
 			K[i] ^= 0x36;
 		}
 		ops->hash_update(context, (unsigned char *) K, ops->block_size);
@@ -514,7 +514,7 @@ PHP_FUNCTION(hash_final)
 	php_hashcontext_object *hash;
 	zend_bool raw_output = 0;
 	zend_string *digest;
-	int digest_len;
+	size_t digest_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &zhash, php_hashcontext_ce, &raw_output) == FAILURE) {
 		return;
@@ -527,11 +527,11 @@ PHP_FUNCTION(hash_final)
 	digest = zend_string_alloc(digest_len, 0);
 	hash->ops->hash_final((unsigned char *) ZSTR_VAL(digest), hash->context);
 	if (hash->options & PHP_HASH_HMAC) {
-		int i, block_size;
+		size_t i, block_size;
 
 		/* Convert K to opad -- 0x6A = 0x36 ^ 0x5C */
 		block_size = hash->ops->block_size;
-		for(i=0; i < block_size; i++) {
+		for(i = 0; i < block_size; i++) {
 			hash->key[i] ^= 0x6A;
 		}
 
@@ -620,7 +620,8 @@ PHP_FUNCTION(hash_hkdf)
 	zend_string *returnval, *ikm, *algo, *info = NULL, *salt = NULL;
 	zend_long length = 0;
 	unsigned char *prk, *digest, *K;
-	int i, rounds;
+	int i;
+	size_t rounds;
 	const php_hash_ops *ops;
 	void *context;
 
@@ -649,8 +650,8 @@ PHP_FUNCTION(hash_hkdf)
 		RETURN_FALSE;
 	} else if (length == 0) {
 		length = ops->digest_size;
-	} else if (length > ops->digest_size * 255) {
-		php_error_docref(NULL, E_WARNING, "Length must be less than or equal to %d: " ZEND_LONG_FMT, ops->digest_size * 255, length);
+	} else if (length > (zend_long) (ops->digest_size * 255)) {
+		php_error_docref(NULL, E_WARNING, "Length must be less than or equal to %zd: " ZEND_LONG_FMT, ops->digest_size * 255, length);
 		RETURN_FALSE;
 	}
 
@@ -1067,9 +1068,12 @@ PHP_FUNCTION(mhash_keygen_s2k)
 				void *context;
 				char *key, *digest;
 				int i = 0, j = 0;
-				int block_size = ops->digest_size;
-				int times = bytes / block_size;
-				if (bytes % block_size  != 0) times++;
+				size_t block_size = ops->digest_size;
+				size_t times = bytes / block_size;
+
+				if ((bytes % block_size) != 0) {
+					times++;
+				}
 
 				context = emalloc(ops->context_size);
 				ops->hash_init(context);

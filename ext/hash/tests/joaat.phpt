@@ -1,7 +1,5 @@
 --TEST--
-Jenkins's one-at-a-time
---SKIPIF--
-<?php extension_loaded('hash') or die ('Skip - hash extension not available'); ?>
+Hash: Jenkins's one-at-a-time
 --FILE--
 <?php
 $tests = array(

@@ -75,6 +75,10 @@ PHP 7.4 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Hash:
+  . The hash extension cannot be disabled anymore and is always an integral 
+    part of any PHP build, similar to the date extension.
+
 - Intl:
   . The Intl extension now requires at least ICU 50.1.
 
@@ -87,6 +91,10 @@ PHP 7.4 UPGRADE NOTES
     ReflectionClass::getMethods() and ReflectionClass::getProperties(), or test
     results of Reflection...::getModifiers(), using hard-coded numeric values.
     Use corresponding constants instead (e.g. ReflectionMethod::IS_PUBLIC).
+
+- SQLite3:
+  . The bundled libsqlite has been removed.  To build the SQLite3 and/or 
+    PDO_SQLite extensions a system libsqlite3 ≥ 3.3.9 is now required.
 
 - Zip:
   . The bundled libzip library has been removed. A system libzip >= 0.11 is now
@@ -103,6 +111,15 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- stat:
+  . The stat implementation has been refactored.
+    - An inode number is delivered and is based on the NTFS file index.
+    - The device number is now based on the volume serial number.
+
+  Note, that both values derived from the system and provided as is on 64-bit
+  systems. On 32-bit system, these values might overflow the 32-bit integer in
+  PHP, so they're a fake.
 
 ========================================
 13. Other Changes

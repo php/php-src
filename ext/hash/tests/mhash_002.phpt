@@ -1,9 +1,7 @@
 --TEST--
-mhash_get_block_size() & mhash_get_hash_name() test
+MHash: mhash_get_block_size() & mhash_get_hash_name() test
 --SKIPIF--
-<?php
-	include "skip_mhash.inc";
-?>
+<?php if(!function_exists('mhash')) { die('skip mhash compatibility layer not available'); } ?>
 --FILE--
 <?php
 $supported_hash_al = array(
