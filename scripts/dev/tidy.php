@@ -188,10 +188,7 @@ function help(): void
           Convert the EOL sequence. The default EOL character is determined by
           Git, otherwise falls back to LF. It can be manually set with the
           *newline* value of LF or CRLF.
-    `-l, --trim-leading-whitespace`
-          Trim whitespace (spaces and tabs) at the beginning of the file until
-          the first line with non-whitespace characters.
-    `-L, --trim-leading-newlines`
+    `-l, --trim-leading-newlines`
           Trim all redundant newlines at the beginning of the file.
     `-s, --clean-space-before-tab`
           Clean all spaces before tabs in the initial indent part of the lines.
@@ -215,14 +212,14 @@ function help(): void
           Disable colors in the output.
 
   *EXAMPLES*
-    'php tidy.php `-fa path`'           Tidy path with all rules enabled
-    'php scripts/dev/tidy.php `.`'      Check the php-src repo
-    'php scripts/dev/tidy.php `-fo .`'  Tidy php-src, no backups
-    'php tidy.php `-wf path`'           Trim trailing whitespace
-    'php tidy.php `-wnfN path`'         Tidy trailing whitespace and final EOLs
-    'php tidy.php `-N 2 -f path`'       Trim final EOL, allow up to 2 final EOL
-    'php tidy.php `-e LF -f path`'      Convert newlines to LF style
-    'php tidy.php `-vv path`'           Check and list more info about files
+    `php tidy.php -fa path`             Tidy path with all rules enabled
+    `php scripts/dev/tidy.php .`        Check the php-src repo
+    `php scripts/dev/tidy.php -fo .`    Tidy php-src, no backups
+    `php tidy.php -wf path`             Trim trailing whitespace
+    `php tidy.php -wnfN path`           Tidy trailing whitespace and final EOLs
+    `php tidy.php -N=2 -f path`         Trim final EOL, allow up to 2 final EOL
+    `php tidy.php -e=LF -f path`        Convert newlines to LF style
+    `php tidy.php -vv path`             Check and list more info about files
 
   Latest version <https://git.php.net/?p=php-src.git;a=blob;f=scripts/dev/tidy.php>
   Report bugs to <https://bugs.php.net>
@@ -389,7 +386,7 @@ function options(array $argv = []): array
         return $opt;
     }
 
-    $shortOptions = 'hwnN::e::lLsfoqyva';
+    $shortOptions = 'hwnN::e::lsfoqyva';
 
     $longOptions = [
         'help',
@@ -397,7 +394,6 @@ function options(array $argv = []): array
         'trim-final-newlines::',
         'insert-final-newline',
         'eol::',
-        'trim-leading-whitespace',
         'trim-leading-newlines',
         'clean-space-before-tab',
         'no-colors',
@@ -420,7 +416,6 @@ function options(array $argv = []): array
         'insert_final_newline' => false,
         'eol' => false,
         'default_eol' => null,
-        'trim_leading_whitespace' => false,
         'trim_leading_newlines' => false,
         'clean_space_before_tab' => false,
         'colors' => true,
@@ -446,7 +441,7 @@ function options(array $argv = []): array
             case 'N':
             case 'trim-final-newlines':
                 $opt['trim_final_newlines'] = true;
-                if ($value !== false && preg_match('/^[0-9]+$/', $value)) {
+                if (is_string($value) && preg_match('/^[0-9]+$/', $value)) {
                     $opt['max_newlines'] = (int)$value;
                 }
             break;
@@ -456,17 +451,13 @@ function options(array $argv = []): array
             break;
             case 'e':
             case 'eol':
-                if (is_string($value) && in_array(strtolower($value), ['lf', 'crlf'])) {
+                if (is_string($value) && in_array(strtolower($value), ['lf', 'crlf'], true)) {
                     $default = ['lf' => "\n", 'crlf' => "\r\n"];
                     $opt['default_eol'] = $default[strtolower($value)];
                 }
                 $opt['eol'] = true;
             break;
             case 'l':
-            case 'trim-leading-whitespace':
-                $opt['trim_leading_whitespace'] = true;
-            break;
-            case 'L':
             case 'trim-leading-newlines':
                 $opt['trim_leading_newlines'] = true;
             break;
@@ -506,7 +497,6 @@ function options(array $argv = []): array
                 $opt['insert_final_newline'] = true;
                 $opt['trim_final_newlines'] = true;
                 $opt['eol'] = true;
-                $opt['trim_leading_whitespace'] = true;
                 $opt['trim_leading_newlines'] = true;
                 $opt['clean_space_before_tab'] = true;
             break;
@@ -533,7 +523,6 @@ function options(array $argv = []): array
         && !$opt['insert_final_newline']
         && !$opt['trim_final_newlines']
         && !$opt['eol']
-        && !$opt['trim_leading_whitespace']
         && !$opt['trim_leading_newlines']
         && !$opt['clean_space_before_tab']
     ) {
@@ -541,7 +530,6 @@ function options(array $argv = []): array
         $opt['insert_final_newline'] = true;
         $opt['trim_final_newlines'] = true;
         $opt['eol'] = true;
-        $opt['trim_leading_whitespace'] = true;
         $opt['trim_leading_newlines'] = true;
     }
 
@@ -592,7 +580,7 @@ function getInvalidOptions(string $shortOptions, array $longOptions, array $argv
     foreach ($argv as $i => $argument) {
         // Discover possible unknown long passed options
         if (preg_match('/^\-\-([a-z\-]+)\=?.*/i', $argument, $matches)) {
-            if (!in_array($matches[1], str_replace(':', '', $longOptions))) {
+            if (!in_array($matches[1], str_replace(':', '', $longOptions), true)) {
                 $unknown[] = $argument;
             }
         }
@@ -736,7 +724,7 @@ function prompt(): void
     $handle = fopen('php://stdin', 'r');
     $line = fgets($handle);
 
-    if (!in_array(trim((strtolower($line))), ['yes', 'y', '1'])) {
+    if (!in_array(trim((strtolower($line))), ['yes', 'y', '1'], true)) {
         output('**ABORTING**');
 
         exit;
@@ -757,23 +745,6 @@ function trimTrailingWhitespace(string $content, bool $withFinalLine = true): st
 }
 
 /**
- * Trim spaces and tabs from the beginning of the file until the first line with
- * non-whitespace characters.
- */
-function trimLeadingWhitespace(string $content): string
-{
-    $regex = '/(*BSR_ANYCRLF)^(?>\s+\R+)?(?!=^[ \t])/m';
-
-    if (preg_match($regex, $content, $matches)) {
-        $leadingLines = preg_replace('/[ \t]+/m', '', $matches[0]);
-
-        return $leadingLines.preg_replace($regex, '', $content, 1);
-    }
-
-    return $content;
-}
-
-/**
  * Trim all newlines from the beginning of the file.
  */
 function trimLeadingNewlines(string $content): string
@@ -787,7 +758,7 @@ function trimLeadingNewlines(string $content): string
  */
 function insertFinalNewline(string $content): string
 {
-    if (!in_array(substr($content, -1), ["\n", "\r"])) {
+    if (!in_array(substr($content, -1), ["\n", "\r"], true)) {
         $content .= getPrevailingEol($content);
     }
 
@@ -928,7 +899,7 @@ function getDefaultEol(?string $file = null): string
         return $eol;
     }
 
-    if (in_array(relative($file), getCrlfFiles($opt['path']))) {
+    if (in_array(relative($file), getCrlfFiles($opt['path'], true))) {
         return "\r\n";
     }
 
@@ -947,7 +918,7 @@ function getCrlfFiles(string $path): array
     }
 
     $files = shell_exec(sprintf('cd %s && git ls-files -z --eol 2>&1', escapeshellarg($path)));
-    $files = explode("\0", trim($files));
+    $files = explode("\0", trim($files ?? ''));
     $files = array_filter($files, function ($item) {
         return preg_match('/^i\/crlf.*[ ]+w\/.*attr\/.*eol=crlf.*$/', $item);
     });
@@ -1010,8 +981,18 @@ function getFiles(): array
         $files = explode("\0", trim($files));
         $files = preg_filter('/^/', $opt['path'].'/', $files);
     } else {
-        $iterator = new \RecursiveDirectoryIterator($opt['path'], \RecursiveDirectoryIterator::SKIP_DOTS);
-        $files = array_keys(iterator_to_array(new \RecursiveIteratorIterator($iterator)));
+        $innerIterator = new \RecursiveDirectoryIterator($opt['path'], \RecursiveDirectoryIterator::SKIP_DOTS);
+        $iterator = new \RecursiveIteratorIterator($innerIterator);
+
+        $files = [];
+
+        foreach ($iterator as $file) {
+            if ($file->isDir()){
+                continue;
+            }
+
+            $files[] = $file->getPathname();
+        }
     }
 
     // Remove blacklist matches
@@ -1096,15 +1077,6 @@ function tidyContent(string $content, string $file, array $rules = []): array
 
     if ($buffer !== $content) {
         $logs[] = getEols($content).'line terminators';
-        $content = $buffer;
-    }
-
-    if ($opt['trim_leading_whitespace']) {
-        $buffer = trimLeadingWhitespace($buffer);
-    }
-
-    if ($buffer !== $content) {
-        $logs[] = 'leading whitespace';
         $content = $buffer;
     }
 
@@ -1215,7 +1187,7 @@ function tidyPhpTestFile(string $file): array
             $nameBuffer = trimTrailingWhitespace($nameBuffer);
 
             // Trim trailing whitespace in sections
-            if (in_array($sectionRealName, ['--FILE--', '--FILEEOF--', '--CLEAN--'])) {
+            if (in_array($sectionRealName, ['--FILE--', '--FILEEOF--', '--CLEAN--'], true)) {
                 $buffer = cleanPhpCode($buffer);
             } elseif (!in_array($sectionRealName, [
                 '--REQUEST--',
@@ -1228,7 +1200,7 @@ function tidyPhpTestFile(string $file): array
                 '--POSTRAW--',
                 '--GZIP_POST--',
                 '--DEFLATE_POST--',
-                ])
+                ], true)
             ) {
                 $buffer = trimTrailingWhitespace($buffer);
             }
@@ -1301,7 +1273,7 @@ function tidyFile(string $file): bool
     // Report file encoding
     if ($opt['verbose'] >= 2) {
         $encoding = getFileEncoding($cleaned, $file);
-        if (!in_array($encoding, ['ascii', 'us-ascii', 'utf-8'])) {
+        if (!in_array($encoding, ['ascii', 'us-ascii', 'utf-8'], true)) {
             output('*WARN*  '.relative($file).': *encoding '.$encoding.'*');
         }
     }
@@ -1417,7 +1389,7 @@ function getFileEncoding(string $content, string $file): ?string
         $encoding = mb_detect_encoding($content, mb_list_encodings(), true);
 
         // UTF-8 or normal ASCII text file
-        if (in_array($encoding, ['UTF-8', 'ASCII'])) {
+        if (in_array($encoding, ['UTF-8', 'ASCII'], true)) {
             return strtolower($encoding);
         }
 
@@ -1466,7 +1438,8 @@ function init(array $argv): int
     $time = round((microtime(true) - $time), 3);
 
     $output = "\nAll done. `".countFixed().'` file(s) '.($opt['fix'] ? 'fixed' : 'should be fixed');
-    $output .= '. Checked *'.count($files).'* file(s) in '.$time.' sec.';
+    $output .= '. Checked *'.count($files).'* file(s) in '.$time.' sec';
+    $output .= ' and consumed '.(round(memory_get_peak_usage()/1024/1024, 3)).' MB memory';
 
     output($output);
 
