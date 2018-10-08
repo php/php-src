@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0RC3
 
 - CURL:
-  . Expose curl constants from curl 7.50 to 7.55. (Pierrick)
+  . Expose curl constants from curl 7.50 to 7.61. (Pierrick)
 
 - Core:
   . Fixed bug #76846 (Segfault in shutdown function after memory limit error).

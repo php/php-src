@@ -572,6 +572,12 @@ PHP_MINFO_FUNCTION(curl)
 #if LIBCURL_VERSION_NUM >= 0x073400 /* 7.52.0 */
 			{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+			{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073900 /* 7.57.0 */
+			{"BROTLI", CURL_VERSION_BROTLI},
+#endif
 			{NULL, 0}
 		};
 
@@ -889,10 +895,19 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURL_TIMECOND_NONE);
 
 	/* Curl version constants */
+	REGISTER_CURL_CONSTANT(CURL_VERSION_ASYNCHDNS);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_CONV);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_DEBUG);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_GSSNEGOTIATE);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_IDN);
 	REGISTER_CURL_CONSTANT(CURL_VERSION_IPV6);
 	REGISTER_CURL_CONSTANT(CURL_VERSION_KERBEROS4);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_LARGEFILE);
 	REGISTER_CURL_CONSTANT(CURL_VERSION_LIBZ);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_NTLM);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_SPNEGO);
 	REGISTER_CURL_CONSTANT(CURL_VERSION_SSL);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_SSPI);
 
 	/* Available since 7.10.6 */
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTPAUTH);
@@ -1183,6 +1198,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_TLSAUTH_TYPE);
 	REGISTER_CURL_CONSTANT(CURLOPT_TLSAUTH_USERNAME);
 	REGISTER_CURL_CONSTANT(CURL_TLSAUTH_SRP);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_TLSAUTH_SRP);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071506 /* Available since 7.21.6 */
@@ -1195,6 +1211,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLGSSAPI_DELEGATION_FLAG);
 	REGISTER_CURL_CONSTANT(CURLGSSAPI_DELEGATION_POLICY_FLAG);
 	REGISTER_CURL_CONSTANT(CURLOPT_GSSAPI_DELEGATION);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_NTLM_WB);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071800 /* Available since 7.24.0 */
@@ -1264,6 +1281,7 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM >= 0x072600 /* Available since 7.38.0 */
 	REGISTER_CURL_CONSTANT(CURLAUTH_NEGOTIATE);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_GSSAPI);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x072700 /* Available since 7.39.0 */
@@ -1272,9 +1290,10 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM >= 0x072800 /* Available since 7.40.0 */
 	REGISTER_CURL_CONSTANT(CURLOPT_UNIX_SOCKET_PATH);
-
 	REGISTER_CURL_CONSTANT(CURLPROTO_SMB);
 	REGISTER_CURL_CONSTANT(CURLPROTO_SMBS);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_KERBEROS5);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_UNIX_SOCKETS);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x072900 /* Available since 7.41.0 */
@@ -1391,6 +1410,46 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_SPEED_UPLOAD_T);
 	REGISTER_CURL_CONSTANT(CURLOPT_REQUEST_TARGET);
 	REGISTER_CURL_CONSTANT(CURLOPT_SOCKS5_AUTH);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073800 /* Available since 7.56.0 */
+	REGISTER_CURL_CONSTANT(CURLOPT_SSH_COMPRESSION);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_MULTI_SSL);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0 */
+	REGISTER_CURL_CONSTANT(CURL_VERSION_BROTLI);
+	REGISTER_CURL_CONSTANT(CURL_LOCK_DATA_CONNECT);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073a00 /* Available since 7.58.0 */
+	REGISTER_CURL_CONSTANT(CURLSSH_AUTH_GSSAPI);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
+	REGISTER_CURL_CONSTANT(CURLINFO_FILETIME_T);
+	REGISTER_CURL_CONSTANT(CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS);
+	REGISTER_CURL_CONSTANT(CURLOPT_TIMEVALUE_LARGE);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073c00 /* Available since 7.60.0 */
+	REGISTER_CURL_CONSTANT(CURLOPT_DNS_SHUFFLE_ADDRESSES);
+	REGISTER_CURL_CONSTANT(CURLOPT_HAPROXYPROTOCOL);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
+	REGISTER_CURL_CONSTANT(CURL_LOCK_DATA_PSL);
+	REGISTER_CURL_CONSTANT(CURLAUTH_BEARER);
+	REGISTER_CURL_CONSTANT(CURLINFO_APPCONNECT_TIME_T);
+	REGISTER_CURL_CONSTANT(CURLINFO_CONNECT_TIME_T);
+	REGISTER_CURL_CONSTANT(CURLINFO_NAMELOOKUP_TIME_T);
+	REGISTER_CURL_CONSTANT(CURLINFO_PRETRANSFER_TIME_T);
+	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_TIME_T);
+	REGISTER_CURL_CONSTANT(CURLINFO_STARTTRANSFER_TIME_T);
+	REGISTER_CURL_CONSTANT(CURLINFO_TOTAL_TIME_T);
+	REGISTER_CURL_CONSTANT(CURLOPT_DISALLOW_USERNAME_IN_URL);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_TLS13_CIPHERS);
+	REGISTER_CURL_CONSTANT(CURLOPT_TLS13_CIPHERS);
 #endif
 
 	REGISTER_CURL_CONSTANT(CURLOPT_SAFE_UPLOAD);
@@ -1833,6 +1892,25 @@ PHP_FUNCTION(curl_version)
 		}
 		CAAZ("protocols", &protocol_list);
 	}
+	if (d->age >= 1) {
+		CAAS("ares", d->ares);
+		CAAL("ares_num", d->ares_num);
+	}
+	if (d->age >= 2) {
+		CAAS("libidn", d->libidn);
+	}
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
+	if (d->age >= 3) {
+		CAAL("iconv_ver_num", d->iconv_ver_num);
+		CAAS("libssh_version", d->libssh_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0 */
+	if (d->age >= 4) {
+		CAAL("brotli_ver_num", d->brotli_ver_num);
+		CAAS("brotli_version", d->brotli_version);
+	}
+#endif
 }
 /* }}} */
 
@@ -2267,7 +2345,19 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 #if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
 		case CURLOPT_SOCKS5_AUTH:
 #endif
-
+#if LIBCURL_VERSION_NUM >= 0x073800 /* Available since 7.56.0 */
+		case CURLOPT_SSH_COMPRESSION:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
+		case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073c00 /* Available since 7.60.0 */
+		case CURLOPT_DNS_SHUFFLE_ADDRESSES:
+		case CURLOPT_HAPROXYPROTOCOL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
+		case CURLOPT_DISALLOW_USERNAME_IN_URL:
+#endif
 			lval = zval_get_long(zvalue);
 #if LIBCURL_VERSION_NUM >= 0x071304
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
@@ -2379,6 +2469,10 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
 		case CURLOPT_REQUEST_TARGET:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
+		case CURLOPT_PROXY_TLS13_CIPHERS:
+		case CURLOPT_TLS13_CIPHERS:
 #endif
 		{
 			zend_string *tmp_str;
@@ -2819,8 +2913,12 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			ch->handlers->write->method = PHP_CURL_USER;
 			break;
 
+		/* Curl off_t options */
 		case CURLOPT_MAX_RECV_SPEED_LARGE:
 		case CURLOPT_MAX_SEND_SPEED_LARGE:
+#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
+		case CURLOPT_TIMEVALUE_LARGE:
+#endif
 			lval = zval_get_long(zvalue);
 			error = curl_easy_setopt(ch->cp, option, (curl_off_t)lval);
 			break;
@@ -3214,6 +3312,34 @@ PHP_FUNCTION(curl_getinfo)
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_SPEED_UPLOAD_T, &co) == CURLE_OK) {
 			CAAL("speed_upload", co);
+		}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_FILETIME_T, &co) == CURLE_OK) {
+			CAAL("filetime", co);
+		}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_APPCONNECT_TIME_T, &co) == CURLE_OK) {
+			CAAL("appconnect_time", co);
+		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_CONNECT_TIME_T, &co) == CURLE_OK) {
+			CAAL("connect_time", co);
+		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_NAMELOOKUP_TIME_T, &co) == CURLE_OK) {
+			CAAL("namelookup_time", co);
+		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_PRETRANSFER_TIME_T, &co) == CURLE_OK) {
+			CAAL("pretransfer_time", co);
+		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_REDIRECT_TIME_T, &co) == CURLE_OK) {
+			CAAL("redirect_time", co);
+		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_STARTTRANSFER_TIME_T, &co) == CURLE_OK) {
+			CAAL("starttransfer_time", co);
+		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_TOTAL_TIME_T, &co) == CURLE_OK) {
+			CAAL("total_time", co);
 		}
 #endif
 		if (ch->header.str) {
