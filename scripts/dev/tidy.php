@@ -132,44 +132,44 @@ function help(): void
     - `PHP`       - PHP specific tidying rules
     - `crlf<->lf` - \\n and \\r\\n get normalized, obsolete \\r is not converted
 
-    +--------------------------+-----+-------+-----------+-------+-----+
-    | PHP TEST SECTION         | -w  | -n -N | -e        | -l -L | -s  |
-    +--------------------------+-----+-------+-----------+-------+-----+
-    | --TEST--                 | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --DESCRIPTION--          | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --CREDITS--              | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --SKIPIF--               | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --INI--                  | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --ENV--                  | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --EXTENSIONS--           | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --COOKIE--               | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --HEADERS--              | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --ARGS--                 | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --REQUEST--              | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --REDIRECTTEST--         | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --CAPTURE_STDIO--        | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --STDIN--                | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --CGI--                  | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --PHPDBG--               | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --XFAIL--                | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --CLEAN--                | PHP |  yes  | crlf<->lf |  yes  | yes |
-    | --POST--                 | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --POST_RAW--             | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --GZIP_POST--            | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --DEFLATE_POST--         | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --PUT--                  | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --GET--                  | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --FILE--                 | PHP |  yes  | crlf<->lf |  yes  | yes |
-    | --FILEEOF--              | PHP |  yes  | crlf<->lf |  yes  | yes |
-    | --FILE_EXTERNAL--        | y   |  yes  | crlf<->lf |  yes  | yes |
-    | --EXPECT--               | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --EXPECTF--              | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --EXPECTREGEX--          | no  |  yes  | crlf<->lf |  yes  | yes |
-    | --EXPECT_EXTERNAL--      | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --EXPECTF_EXTERNAL--     | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --EXPECTREGEX_EXTERNAL-- | yes |  yes  | crlf<->lf |  yes  | yes |
-    | --EXPECTHEADERS--        | no  |  yes  | crlf<->lf |  yes  | yes |
-    +--------------------------+-----+-------+-----------+-------+-----+
+    +--------------------------+-----+-------+-----------+-----+----+
+    | PHP TEST SECTION         | -w  | -n -N | -e        | -l  | -s |
+    +--------------------------+-----+-------+-----------+-----+----+
+    | --TEST--                 | yes |  yes  | crlf<->lf | yes | no |
+    | --DESCRIPTION--          | yes |  yes  | crlf<->lf | yes | no |
+    | --CREDITS--              | yes |  yes  | crlf<->lf | yes | no |
+    | --SKIPIF--               | yes |  yes  | crlf<->lf | yes | no |
+    | --INI--                  | yes |  yes  | crlf<->lf | yes | no |
+    | --ENV--                  | yes |  yes  | crlf<->lf | yes | no |
+    | --EXTENSIONS--           | yes |  yes  | crlf<->lf | yes | no |
+    | --COOKIE--               | yes |  yes  | crlf<->lf | yes | no |
+    | --HEADERS--              | yes |  yes  | crlf<->lf | yes | no |
+    | --ARGS--                 | yes |  yes  | crlf<->lf | yes | no |
+    | --REQUEST--              | no  |  yes  | crlf<->lf | yes | no |
+    | --REDIRECTTEST--         | no  |  yes  | crlf<->lf | yes | no |
+    | --CAPTURE_STDIO--        | yes |  yes  | crlf<->lf | yes | no |
+    | --STDIN--                | no  |  yes  | crlf<->lf | yes | no |
+    | --CGI--                  | yes |  yes  | crlf<->lf | yes | no |
+    | --PHPDBG--               | yes |  yes  | crlf<->lf | yes | no |
+    | --XFAIL--                | yes |  yes  | crlf<->lf | yes | no |
+    | --CLEAN--                | PHP |  yes  | crlf<->lf | yes | no |
+    | --POST--                 | no  |  yes  | crlf<->lf | yes | no |
+    | --POST_RAW--             | no  |  yes  | crlf<->lf | yes | no |
+    | --GZIP_POST--            | no  |  yes  | crlf<->lf | yes | no |
+    | --DEFLATE_POST--         | no  |  yes  | crlf<->lf | yes | no |
+    | --PUT--                  | yes |  yes  | crlf<->lf | yes | no |
+    | --GET--                  | yes |  yes  | crlf<->lf | yes | no |
+    | --FILE--                 | PHP |  yes  | crlf<->lf | yes | no |
+    | --FILEEOF--              | PHP |  yes  | crlf<->lf | yes | no |
+    | --FILE_EXTERNAL--        | y   |  yes  | crlf<->lf | yes | no |
+    | --EXPECT--               | no  |  yes  | crlf<->lf | yes | no |
+    | --EXPECTF--              | no  |  yes  | crlf<->lf | yes | no |
+    | --EXPECTREGEX--          | no  |  yes  | crlf<->lf | yes | no |
+    | --EXPECT_EXTERNAL--      | yes |  yes  | crlf<->lf | yes | no |
+    | --EXPECTF_EXTERNAL--     | yes |  yes  | crlf<->lf | yes | no |
+    | --EXPECTREGEX_EXTERNAL-- | yes |  yes  | crlf<->lf | yes | no |
+    | --EXPECTHEADERS--        | no  |  yes  | crlf<->lf | yes | no |
+    +--------------------------+-----+-------+-----------+-----+----+
 
   *OPTIONS*
     `-h, --help`
@@ -442,7 +442,7 @@ function options(array $argv = []): array
             case 'trim-final-newlines':
                 $opt['trim_final_newlines'] = true;
                 if (is_string($value) && preg_match('/^[0-9]+$/', $value)) {
-                    $opt['max_newlines'] = (int)$value;
+                    $opt['max_newlines'] = (int) $value;
                 }
             break;
             case 'n':
@@ -987,7 +987,7 @@ function getFiles(): array
         $files = [];
 
         foreach ($iterator as $file) {
-            if ($file->isDir()){
+            if ($file->isDir()) {
                 continue;
             }
 
@@ -1213,7 +1213,8 @@ function tidyPhpTestFile(string $file): array
         // Override tidy rules for all test sections
         $rules = [
             'trim_trailing_whitespace' => false,
-             'eol' => false,
+            'clean_space_before_tab' => false,
+            'eol' => false,
         ];
 
         list($buffer, $bufferLogs) = tidyContent($buffer, $file, $rules);
@@ -1234,16 +1235,22 @@ function tidyPhpTestFile(string $file): array
         // Disable converting CR since it might be part of a test
         $buffer = convertEol($buffer, $file, false);
 
-        if ($opt['verbose'] >= 1) {
-            if ($buffer !== convertEol($buffer, $file, true)) {
-                output('*WARN*  '.relative($file).': *'.getEols($content).'line terminators*');
-            }
+        if ($opt['verbose'] >= 1 && $buffer !== convertEol($buffer, $file, true)) {
+            output('*WARN*  '.relative($file).': *'.getEols($content).'line terminators*');
         }
     }
 
     if ($buffer !== $content) {
         $logs[] = getEols($content).'line terminators';
         $content = $buffer;
+    }
+
+    // Make space before tab issue a warning only
+    if ($opt['clean_space_before_tab']
+        && cleanSpaceBeforeTab($buffer) !== $content
+        && $opt['verbose'] >= 1
+    ) {
+        output('*WARN*  '.relative($file).': *space before tab*');
     }
 
     return [$content, $logs];
@@ -1439,7 +1446,7 @@ function init(array $argv): int
 
     $output = "\nAll done. `".countFixed().'` file(s) '.($opt['fix'] ? 'fixed' : 'should be fixed');
     $output .= '. Checked *'.count($files).'* file(s) in '.$time.' sec';
-    $output .= ' and consumed '.(round(memory_get_peak_usage()/1024/1024, 3)).' MB memory';
+    $output .= ' and consumed '.(round(memory_get_peak_usage() / 1024 / 1024, 3)).' MB memory';
 
     output($output);
 
