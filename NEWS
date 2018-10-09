@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #75577 (DateTime::createFromFormat does not accept 'v' format
     specifier, by updating timelib to 2018.01alpha2). (Derick)
 
+- XML:
+  . Fixed bug #30875 (xml_parse_into_struct() does not resolve entities). (cmb)
+
 11 Oct 2018, PHP 7.3.0RC3
 
 - CURL:
