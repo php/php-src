@@ -610,32 +610,20 @@ try_again:
 			if (Z_OBJCE_P(op) == zend_ce_closure) {
 				convert_scalar_to_array(op);
 			} else {
-				if (Z_OBJ_HT_P(op)->get_properties) {
-					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op);
-					if (obj_ht) {
-						/* fast copy */
-						obj_ht = zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(op)->default_properties_count ||
-							 Z_OBJ_P(op)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht)));
-						zval_ptr_dtor(op);
-						ZVAL_ARR(op, obj_ht);
-						return;
-					}
+				HashTable *obj_ht = zend_get_properties_for(op, ZEND_PROP_PURPOSE_ARRAY_CAST);
+				if (obj_ht) {
+					HashTable *new_obj_ht = zend_proptable_to_symtable(obj_ht,
+						(Z_OBJCE_P(op)->default_properties_count ||
+						 Z_OBJ_P(op)->handlers != &std_object_handlers ||
+						 GC_IS_RECURSIVE(obj_ht)));
+					zval_ptr_dtor(op);
+					ZVAL_ARR(op, new_obj_ht);
+					zend_release_properties(obj_ht);
 				} else {
-					zval dst;
-					convert_object_to_type(op, &dst, IS_ARRAY, convert_to_array);
-
-					if (Z_TYPE(dst) == IS_ARRAY) {
-						zval_ptr_dtor(op);
-						ZVAL_COPY_VALUE(op, &dst);
-						return;
-					}
+					zval_ptr_dtor(op);
+					/*ZVAL_EMPTY_ARRAY(op);*/
+					array_init(op);
 				}
-
-				zval_ptr_dtor(op);
-				/*ZVAL_EMPTY_ARRAY(op);*/
-				array_init(op);
 			}
 			break;
 		case IS_NULL:

@@ -807,18 +807,40 @@ SPL_METHOD(Array, getArrayCopy)
 	RETURN_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
 } /* }}} */
 
-static HashTable *spl_array_get_properties(zval *object) /* {{{ */
+static HashTable *spl_array_get_properties_for(zval *object, zend_prop_purpose purpose) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
+	HashTable *ht;
+	zend_bool dup;
 
 	if (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) {
-		if (!intern->std.properties) {
-			rebuild_object_properties(&intern->std);
-		}
-		return intern->std.properties;
+		return zend_std_get_properties_for(object, purpose);
 	}
 
-	return spl_array_get_hash_table(intern);
+	/* We are supposed to be the only owner of the internal hashtable.
+	 * The "dup" flag decides whether this is a "long-term" use where
+	 * we need to duplicate, or a "temporary" one, where we can expect
+	 * that no operations on the ArrayObject will be performed in the
+	 * meantime. */
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+			dup = 1;
+			break;
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+			dup = 0;
+			break;
+		default:
+			return zend_std_get_properties_for(object, purpose);
+	}
+
+	ht = spl_array_get_hash_table(intern);
+	if (dup) {
+		ht = zend_array_dup(ht);
+	} else {
+		GC_ADDREF(ht);
+	}
+	return ht;
 } /* }}} */
 
 static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
@@ -2013,7 +2035,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.has_dimension = spl_array_has_dimension;
 	spl_handler_ArrayObject.count_elements = spl_array_object_count_elements;
 
-	spl_handler_ArrayObject.get_properties = spl_array_get_properties;
+	spl_handler_ArrayObject.get_properties_for = spl_array_get_properties_for;
 	spl_handler_ArrayObject.get_debug_info = spl_array_get_debug_info;
 	spl_handler_ArrayObject.get_gc = spl_array_get_gc;
 	spl_handler_ArrayObject.read_property = spl_array_read_property;
