@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-27 Sep 2018, PHP 7.2.11RC1
+11 Oct 2018, PHP 7.2.11
 
 - Core:
   . Fixed bug #76800 (foreach inconsistent if array modified during loop).
