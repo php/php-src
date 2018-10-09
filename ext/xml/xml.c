@@ -1447,7 +1447,6 @@ PHP_FUNCTION(xml_parse_into_struct)
 	parser->level = 0;
 	parser->ltags = safe_emalloc(XML_MAXLEVEL, sizeof(char *), 0);
 
-	XML_SetDefaultHandler(parser->parser, _xml_defaultHandler);
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 

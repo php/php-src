@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #76965 (INI_SCANNER_RAW doesn't strip trailing whitespace).
     (Pierrick)
 
+- XML:
+  . Fixed bug #30875 (xml_parse_into_struct() does not resolve entities). (cmb)
+
 11 Oct 2018, PHP 7.1.23
 
 - Core:
