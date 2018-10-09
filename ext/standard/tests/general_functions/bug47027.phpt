@@ -7,6 +7,4 @@ var_export ($ao);
 ?>
 --EXPECT--
 ArrayObject::__set_state(array(
-   2 => 'foo',
-   'bar' => 'baz',
 ))

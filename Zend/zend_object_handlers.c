@@ -1687,6 +1687,21 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 				}
 			}
 			return FAILURE;
+		case IS_ARRAY:
+		{
+			HashTable *obj_ht = Z_OBJ_HT_P(readobj)->get_properties(readobj);
+			if (obj_ht) {
+				/* fast copy */
+				obj_ht = zend_proptable_to_symtable(obj_ht,
+					(Z_OBJCE_P(readobj)->default_properties_count ||
+					 Z_OBJ_P(readobj)->handlers != &std_object_handlers ||
+					 GC_IS_RECURSIVE(obj_ht)));
+				ZVAL_ARR(writeobj, obj_ht);
+			} else {
+				array_init(writeobj);
+			}
+			return SUCCESS;
+		}
 		case _IS_BOOL:
 			ZVAL_TRUE(writeobj);
 			return SUCCESS;

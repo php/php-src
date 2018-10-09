@@ -807,20 +807,6 @@ SPL_METHOD(Array, getArrayCopy)
 	RETURN_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
 } /* }}} */
 
-static HashTable *spl_array_get_properties(zval *object) /* {{{ */
-{
-	spl_array_object *intern = Z_SPLARRAY_P(object);
-
-	if (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) {
-		if (!intern->std.properties) {
-			rebuild_object_properties(&intern->std);
-		}
-		return intern->std.properties;
-	}
-
-	return spl_array_get_hash_table(intern);
-} /* }}} */
-
 static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 {
 	zval *storage;
@@ -947,6 +933,18 @@ static int spl_array_compare_objects(zval *o1, zval *o2) /* {{{ */
 		result = zend_std_compare_objects(o1, o2);
 	}
 	return result;
+} /* }}} */
+
+static int spl_array_cast_object(zval *obj, zval *result, int type) /* {{{ */
+{
+	spl_array_object *intern = Z_SPLARRAY_P(obj);
+
+	if (type != IS_ARRAY || (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST)) {
+		return zend_std_cast_object_tostring(obj, result, type);
+	}
+
+	ZVAL_ARR(result, zend_array_dup(spl_array_get_hash_table(intern)));
+	return SUCCESS;
 } /* }}} */
 
 static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /* {{{ */
@@ -2013,7 +2011,6 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.has_dimension = spl_array_has_dimension;
 	spl_handler_ArrayObject.count_elements = spl_array_object_count_elements;
 
-	spl_handler_ArrayObject.get_properties = spl_array_get_properties;
 	spl_handler_ArrayObject.get_debug_info = spl_array_get_debug_info;
 	spl_handler_ArrayObject.get_gc = spl_array_get_gc;
 	spl_handler_ArrayObject.read_property = spl_array_read_property;
@@ -2023,6 +2020,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.unset_property = spl_array_unset_property;
 
 	spl_handler_ArrayObject.compare_objects = spl_array_compare_objects;
+	spl_handler_ArrayObject.cast_object = spl_array_cast_object;
 	spl_handler_ArrayObject.dtor_obj = zend_objects_destroy_object;
 	spl_handler_ArrayObject.free_obj = spl_array_object_free_storage;
 
