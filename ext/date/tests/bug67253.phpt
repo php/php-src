@@ -21,7 +21,7 @@ array(12) {
   ["second"]=>
   int(0)
   ["fraction"]=>
-  bool(false)
+  float(0)
   ["warning_count"]=>
   int(0)
   ["warnings"]=>

@@ -267,9 +267,7 @@ static void zend_persist_class_method_calc(zval *zv)
 
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
 	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
-	if (old_op_array) {
-		Z_PTR_P(zv) = old_op_array;
-	} else {
+	if (!old_op_array) {
 		ADD_ARENA_SIZE(sizeof(zend_op_array));
 		zend_persist_op_array_calc_ex(Z_PTR_P(zv));
 		zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));

@@ -39,7 +39,7 @@ static void do_range_limit_fraction(timelib_sll *fraction, timelib_sll *seconds)
 		*fraction += 1000000;
 		*seconds -= 1;
 	}
-	if (*fraction > 1000000) {
+	if (*fraction >= 1000000) {
 		*fraction -= 1000000;
 		*seconds += 1;
 	}
