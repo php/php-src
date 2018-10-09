@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug #66430 (ReflectionFunction::invoke does not invoke closure with
     object scope). (Nikita)
 
+- Standard:
+  . Fixed bug #76965 (INI_SCANNER_RAW doesn't strip trailing whitespace).
+    (Pierrick)
+
 11 Oct 2018, PHP 7.2.11
 
 - Core:
