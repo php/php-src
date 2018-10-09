@@ -585,7 +585,7 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 		return &(tz->type[tz->trans_idx[j]]);
 	}
 
-	/* In all other cases we loop through the available transtion times to find
+	/* In all other cases we loop through the available transition times to find
 	 * the correct entry */
 	for (i = 0; i < tz->bit32.timecnt; i++) {
 		if (ts < tz->trans[i]) {
