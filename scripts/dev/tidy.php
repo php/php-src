@@ -958,7 +958,7 @@ function hasGit(?string $path = null): bool
         return $hasGit = false;
     }
 
-    if (is_dir($path) && file_exists($path.'/.git')) {
+    if ($path !== null && is_dir($path) && file_exists($path.'/.git')) {
         return $hasGit = true;
     }
 
