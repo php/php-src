@@ -3020,14 +3020,30 @@ static void zval_from_error_container(zval *z, timelib_error_container *error) /
 	add_assoc_long(z, "warning_count", error->warning_count);
 	array_init(&element);
 	for (i = 0; i < error->warning_count; i++) {
-		add_index_string(&element, error->warning_messages[i].position, error->warning_messages[i].message);
+		zval *tmp;
+		if ((tmp = zend_hash_index_find(Z_ARRVAL(element), error->warning_messages[i].position)) == NULL) {
+			zval messages;
+			array_init(&messages);
+			add_next_index_string(&element, error->warning_messages[i].message);
+			add_index_string(&element, error->warning_messages[i].position, &messages);
+		} else {
+			add_next_index_string(tmp, error->warning_messages[i].message);
+		}
 	}
 	add_assoc_zval(z, "warnings", &element);
 
 	add_assoc_long(z, "error_count", error->error_count);
 	array_init(&element);
 	for (i = 0; i < error->error_count; i++) {
-		add_index_string(&element, error->error_messages[i].position, error->error_messages[i].message);
+		zval *tmp;
+		if ((tmp = zend_hash_index_find(Z_ARRVAL(element), error->error_messages[i].position)) == NULL) {
+			zval messages;
+			array_init(&messages);
+			add_next_index_string(&element, error->error_messages[i].message);
+			add_index_string(&element, error->error_messages[i].position, &messages);
+		} else {
+			add_next_index_string(tmp, error->error_messages[i].message);
+		}
 	}
 	add_assoc_zval(z, "errors", &element);
 } /* }}} */
