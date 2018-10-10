@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
     (Pierrick)
 
+- Date:
+  . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
+
 - Hash:
   . The hash extension is now an integral part of PHP and cannot be disabled
     as per RFC: https://wiki.php.net/rfc/permanent_hash_ext. (Kalle)
