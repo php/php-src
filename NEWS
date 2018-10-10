@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #75577 (DateTime::createFromFormat does not accept 'v' format
     specifier, by updating timelib to 2018.01alpha2). (Derick)
 
+- Tokenizer:
+  . Fixed bug #76991 (Incorrect tokenization of multiple invalid flexible
+    heredoc strings). (Nikita)
+
 - XML:
   . Fixed bug #30875 (xml_parse_into_struct() does not resolve entities). (cmb)
 
