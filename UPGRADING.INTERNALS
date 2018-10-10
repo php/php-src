@@ -5,6 +5,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   b. zend_lookup_class_ex() and zend_fetch_class_by_name()
   c. Function/property/class flags
   d. Removed zend_check_private()
+  e. php_win32_error_to_msg() memory management
+  f. get_properties_for() handler / Z_OBJDEBUG_P
 
 2. Build system changes
   a. Abstract
@@ -49,6 +51,52 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   e. Pointers returned by php_win32_error_to_msg() have to be freed using
      php_win32_error_msg_free(). Same regarding php_win_err() vs.
      php_win_err_free().
+
+  f. A new, optional object handler with the signature
+
+         HashTable *get_properties_for(zval *obj, zend_prop_purpose purpose)
+
+     has been introduced, where zend_prop_purpose (currently) takes one of:
+
+         ZEND_PROP_PURPOSE_DEBUG       // var_dump etc.
+         ZEND_PROP_PURPOSE_ARRAY_CAST  // (array) $obj
+         ZEND_PROP_PURPOSE_SERIALIZE   // "O"-format serialization (__wakeup)
+         ZEND_PROP_PURPOSE_VAR_EXPORT  // var_export (__set_state)
+         ZEND_PROP_PURPOSE_JSON        // json_encode
+
+     The handler returns a non-null HashTable with increased refcounted, and
+     the return value must be released using zend_release_properties().
+     
+     This handler serves the same general function as get_properties(), but
+     provides more control over different property uses, while also making
+     it possible to return a temporary property table.
+     
+     get_properties() is still used in cases where none of the above purposes
+     apply, but overloading get_properties() is generally discouraged. If you
+     want to provide purposes for general usage rather than just debugging or
+     serialization, please prefer using properly declared properties.
+
+     get_debug_info() is superseded by get_properties_for() with the
+     ZEND_PROP_PURPOSE_DEBUG purpose, but remains available for backwards-
+     compatibility reasons. However, while it is fine to define this handler,
+     it should never be directly called by consuming code.
+
+     The Z_OBJDEBUG_P macro has been removed. It should be replaced by calls to
+     zend_get_properties_for() with the ZEND_PROP_PURPOSE_DEBUG purpose:
+
+         // OLD
+         int is_temp;
+         HashTable *ht = Z_OBJDEBUG_P(obj, is_temp);
+         // ...
+         if (is_temp) {
+            zend_hash_destroy(ht);
+            FREE_HASHTABLE(ht);
+         }
+
+         // NEW
+         HashTable *ht = zend_get_properties_for(obj, ZEND_PROP_PURPOSE_DEBUG);
+         // ...
+         zend_release_properties(ht);
 
 ========================
 2. Build system changes

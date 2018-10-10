@@ -438,7 +438,6 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 		case IS_OBJECT:
 			{
 				HashTable *properties;
-				int is_temp;
 
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 				smart_str_appends(buf, ZSTR_VAL(class_name));
@@ -449,7 +448,8 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					smart_str_appends(buf, " *RECURSION*");
 					return;
 				}
-				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
+
+				if ((properties = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_DEBUG)) == NULL) {
 					break;
 				}
 
@@ -457,10 +457,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				print_hash(buf, properties, indent, 1);
 				Z_UNPROTECT_RECURSION_P(expr);
 
-				if (is_temp) {
-					zend_hash_destroy(properties);
-					FREE_HASHTABLE(properties);
-				}
+				zend_release_properties(properties);
 				break;
 			}
 		case IS_LONG:

@@ -1737,6 +1737,42 @@ ZEND_API int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_fun
 }
 /* }}} */
 
+ZEND_API HashTable *zend_std_get_properties_for(zval *obj, zend_prop_purpose purpose) {
+	HashTable *ht;
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_DEBUG:
+			if (Z_OBJ_HT_P(obj)->get_debug_info) {
+				int is_temp;
+				ht = Z_OBJ_HT_P(obj)->get_debug_info(obj, &is_temp);
+				if (ht && !is_temp && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				return ht;
+			}
+			/* break missing intentionally */
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+		case ZEND_PROP_PURPOSE_SERIALIZE:
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+			ht = Z_OBJ_HT_P(obj)->get_properties(obj);
+			if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+				GC_ADDREF(ht);
+			}
+			return ht;
+		default:
+			ZEND_ASSERT(0);
+			return NULL;
+	}
+}
+
+ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose) {
+	if (Z_OBJ_HT_P(obj)->get_properties_for) {
+		return Z_OBJ_HT_P(obj)->get_properties_for(obj, purpose);
+	}
+
+	return zend_std_get_properties_for(obj, purpose);
+}
+
 ZEND_API const zend_object_handlers std_object_handlers = {
 	0,										/* offset */
 
@@ -1768,6 +1804,7 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_get_gc,						/* get_gc */
 	NULL,									/* do_operation */
 	NULL,									/* compare */
+	NULL,									/* get_properties_for */
 };
 
 /*
