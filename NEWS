@@ -3,8 +3,11 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0RC4
 
 - Date:
-  . Fixed bug #75577 (DateTime::createFromFormat does not accept 'v' format
-    specifier, by updating timelib to 2018.01alpha2). (Derick)
+  . Updated timelib to 2018.01alpha2 to address several bugs: (Derick)
+    . Fixed bug #75577 (DateTime::createFromFormat does not accept 'v' format
+      specifier). (Derick)
+    . Fixed bug #75642 (Wrap around behaviour for microseconds is not working).
+      (Derick)
 
 - Tokenizer:
   . Fixed bug #76991 (Incorrect tokenization of multiple invalid flexible
