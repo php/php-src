@@ -3149,7 +3149,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 				ZVAL_COPY(&entry_tmp, entry);
 				break;
 			case IS_ARRAY:
-				chash = php_mb_convert_encoding_recursive(HASH_OF(entry), _to_encoding, _from_encodings);
+				chash = php_mb_convert_encoding_recursive(Z_ARRVAL_P(entry), _to_encoding, _from_encodings);
 				if (chash) {
 					ZVAL_ARR(&entry_tmp, chash);
 				} else {
@@ -3248,7 +3248,7 @@ PHP_FUNCTION(mb_convert_encoding)
 		}
 	} else {
 		HashTable *tmp;
-		tmp = php_mb_convert_encoding_recursive(HASH_OF(input), arg_new, _from_encodings);
+		tmp = php_mb_convert_encoding_recursive(Z_ARRVAL_P(input), arg_new, _from_encodings);
 		RETURN_ARR(tmp);
 	}
 
@@ -4755,7 +4755,7 @@ MBSTRING_API int php_mb_check_encoding_recursive(HashTable *vars, const zend_str
 				}
 				break;
 			case IS_ARRAY:
-				if (!php_mb_check_encoding_recursive(HASH_OF(entry), enc)) {
+				if (!php_mb_check_encoding_recursive(Z_ARRVAL_P(entry), enc)) {
 					valid = 0;
 					break;
 				}
@@ -4811,7 +4811,7 @@ PHP_FUNCTION(mb_check_encoding)
 			}
 			break;
 		case IS_ARRAY:
-			if (!php_mb_check_encoding_recursive(HASH_OF(input), enc)) {
+			if (!php_mb_check_encoding_recursive(Z_ARRVAL_P(input), enc)) {
 				RETURN_FALSE;
 			}
 			break;
