@@ -215,11 +215,12 @@ Getting the stable release announced
 1. Update phpweb/include/releases.inc with the old release info
   (updates the download archives)
 
- a. You can run ``php bin/bumpRelease 5`` if you are making a release for the
-    highest branch, otherwise you have to do this manually, see point 1.b
+ a. You can run ``php bin/bumpRelease 7 2`` where the first number is
+    the major version, and the second number is the minor version
+    (7.2 in this example).
 
- b. In case multiple PHP minor versions are in active development you have
-    to manually copy the old information to include/releases.inc
+ b. If that fails for any non-trivially fixable reason, you can
+    manually copy the old information to include/releases.inc
 
 2. Edit ``phpweb/include/version.inc`` and change (X=major release number):
 
