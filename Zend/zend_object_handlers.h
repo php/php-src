@@ -106,6 +106,8 @@ typedef enum _zend_prop_purpose {
 	ZEND_PROP_PURPOSE_VAR_EXPORT,
 	/* Used for json_encode(). */
 	ZEND_PROP_PURPOSE_JSON,
+	/* array_key_exists(). Not intended for general use! */
+	_ZEND_PROP_PURPOSE_ARRAY_KEY_EXISTS,
 	/* Dummy member to ensure that "default" is specified. */
 	_ZEND_PROP_PURPOSE_NON_EXHAUSTIVE_ENUM
 } zend_prop_purpose;

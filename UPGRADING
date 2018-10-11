@@ -40,7 +40,6 @@ PHP 7.4 UPGRADE NOTES
     flag was specified. Other affected operations are:
 
      * ReflectionObject::getProperties()
-     * array_key_exists(). Use isset() or offsetExists() instead.
      * reset(), current(), etc. Use Iterator methods instead.
      * Potentially others working on object properties as a list.
 

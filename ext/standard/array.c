@@ -6247,34 +6247,38 @@ PHP_FUNCTION(array_map)
    Checks if the given key or index exists in the array */
 PHP_FUNCTION(array_key_exists)
 {
-	zval *key;					/* key to check for */
-	HashTable *array;			/* array to check in */
+	zval *key;
+	zval *array;
+	HashTable *ht;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(key)
-		Z_PARAM_ARRAY_OR_OBJECT_HT(array)
+		Z_PARAM_ARRAY_OR_OBJECT(array)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (EXPECTED(Z_TYPE_P(array) == IS_ARRAY)) {
+		ht = Z_ARRVAL_P(array);
+	} else {
+		ht = zend_get_properties_for(array, ZEND_PROP_PURPOSE_ARRAY_CAST);
+	}
 
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
-			if (zend_symtable_exists_ind(array, Z_STR_P(key))) {
-				RETURN_TRUE;
-			}
-			RETURN_FALSE;
+			RETVAL_BOOL(zend_symtable_exists_ind(ht, Z_STR_P(key)));
+			break;
 		case IS_LONG:
-			if (zend_hash_index_exists(array, Z_LVAL_P(key))) {
-				RETURN_TRUE;
-			}
-			RETURN_FALSE;
+			RETVAL_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
+			break;
 		case IS_NULL:
-			if (zend_hash_exists_ind(array, ZSTR_EMPTY_ALLOC())) {
-				RETURN_TRUE;
-			}
-			RETURN_FALSE;
-
+			RETVAL_BOOL(zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC()));
+			break;
 		default:
 			php_error_docref(NULL, E_WARNING, "The first argument should be either a string or an integer");
-			RETURN_FALSE;
+			RETVAL_FALSE;
+	}
+
+	if (Z_TYPE_P(array) != IS_ARRAY) {
+		zend_release_properties(ht);
 	}
 }
 /* }}} */
