@@ -1368,26 +1368,24 @@ SPL_METHOD(Array, seek)
 	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", opos);
 } /* }}} */
 
-static int spl_array_object_count_elements_helper(spl_array_object *intern, zend_long *count) /* {{{ */
+static zend_long spl_array_object_count_elements_helper(spl_array_object *intern) /* {{{ */
 {
 	HashTable *aht = spl_array_get_hash_table(intern);
-	HashPosition pos, *pos_ptr;
-
 	if (spl_array_is_object(intern)) {
-		/* We need to store the 'pos' since we'll modify it in the functions
-		 * we're going to call and which do not support 'pos' as parameter. */
-		pos_ptr = spl_array_get_pos_ptr(aht, intern);
-		pos = *pos_ptr;
-		*count = 0;
-		spl_array_rewind(intern);
-		while (*pos_ptr < aht->nNumUsed && spl_array_next(intern) == SUCCESS) {
-			(*count)++;
-		}
-		*pos_ptr = pos;
-		return SUCCESS;
+		zend_long count = 0;
+		zend_string *key;
+		zval *val;
+		/* Count public/dynamic properties */
+		ZEND_HASH_FOREACH_STR_KEY_VAL(aht, key, val) {
+			if (Z_TYPE_P(val) == IS_INDIRECT) {
+				if (Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF) continue;
+				if (key && ZSTR_VAL(key)[0] == '\0') continue;
+			}
+			count++;
+		} ZEND_HASH_FOREACH_END();
+		return count;
 	} else {
-		*count = zend_hash_num_elements(aht);
-		return SUCCESS;
+		return zend_hash_num_elements(aht);
 	}
 } /* }}} */
 
@@ -1406,7 +1404,8 @@ int spl_array_object_count_elements(zval *object, zend_long *count) /* {{{ */
 		*count = 0;
 		return FAILURE;
 	}
-	return spl_array_object_count_elements_helper(intern, count);
+	*count = spl_array_object_count_elements_helper(intern);
+	return SUCCESS;
 } /* }}} */
 
 /* {{{ proto int ArrayObject::count()
@@ -1414,16 +1413,13 @@ int spl_array_object_count_elements(zval *object, zend_long *count) /* {{{ */
    Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {
-	zend_long count;
 	spl_array_object *intern = Z_SPLARRAY_P(getThis());
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	spl_array_object_count_elements_helper(intern, &count);
-
-	RETURN_LONG(count);
+	RETURN_LONG(spl_array_object_count_elements_helper(intern));
 } /* }}} */
 
 static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg) /* {{{ */
