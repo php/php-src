@@ -10,7 +10,7 @@ dnl -------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
 AC_INIT(README.GIT-RULES)
-ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
+AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
 
