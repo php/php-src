@@ -1023,7 +1023,7 @@ int php_oci_bind_post_exec(zval *data)
 		HashTable *hash;
 
 		SEPARATE_ARRAY(zv);
-		hash = HASH_OF(zv);
+		hash = Z_ARRVAL_P(zv);
 		zend_hash_internal_pointer_reset(hash);
 
 		switch (bind->array.type) {
@@ -1769,7 +1769,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 	zval *entry;
 
 	SEPARATE_ARRAY(var); /* TODO: may be use new HashTable iteration and prevent inplace modification */
-	hash = HASH_OF(var);
+	hash = Z_ARRVAL_P(var);
 
 	if (maxlength == -1) {
 		zend_hash_internal_pointer_reset(hash);
@@ -1843,7 +1843,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_le
 	zval *entry;
 
 	SEPARATE_ARRAY(var); /* TODO: may be use new HashTable iteration and prevent inplace modification */
-	hash = HASH_OF(var);
+	hash = Z_ARRVAL_P(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
 	ZVAL_UNDEF(&bind->val);
@@ -1884,7 +1884,7 @@ php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_le
 	zval *entry;
 
 	SEPARATE_ARRAY(var); /* TODO: may be use new HashTable iteration and prevent inplace modification */
-	hash = HASH_OF(var);
+	hash = Z_ARRVAL_P(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
 	ZVAL_UNDEF(&bind->val);
@@ -1926,7 +1926,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_leng
 	sword errstatus;
 
 	SEPARATE_ARRAY(var); /* TODO: may be use new HashTable iteration and prevent inplace modification */
-	hash = HASH_OF(var);
+	hash = Z_ARRVAL_P(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
 	ZVAL_UNDEF(&bind->val);
