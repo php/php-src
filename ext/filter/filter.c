@@ -561,6 +561,11 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			break;
 	}
 
+	if (array_ptr && Z_TYPE_P(array_ptr) != IS_ARRAY) {
+		/* Storage not initialized */
+		return NULL;
+	}
+
 	return array_ptr;
 }
 /* }}} */
@@ -580,7 +585,7 @@ PHP_FUNCTION(filter_has_var)
 
 	array_ptr = php_filter_get_storage(arg);
 
-	if (array_ptr && HASH_OF(array_ptr) && zend_hash_exists(HASH_OF(array_ptr), var)) {
+	if (array_ptr && zend_hash_exists(Z_ARRVAL_P(array_ptr), var)) {
 		RETURN_TRUE;
 	}
 
@@ -733,7 +738,7 @@ PHP_FUNCTION(filter_input)
 
 	input = php_filter_get_storage(fetch_from);
 
-	if (!input || !HASH_OF(input) || (tmp = zend_hash_find(HASH_OF(input), var)) == NULL) {
+	if (!input || (tmp = zend_hash_find(Z_ARRVAL_P(input), var)) == NULL) {
 		zend_long filter_flags = 0;
 		zval *option, *opt, *def;
 		if (filter_args) {
@@ -810,7 +815,7 @@ PHP_FUNCTION(filter_input_array)
 
 	array_input = php_filter_get_storage(fetch_from);
 
-	if (!array_input || !HASH_OF(array_input)) {
+	if (!array_input) {
 		zend_long filter_flags = 0;
 		zval *option;
 		if (op) {
