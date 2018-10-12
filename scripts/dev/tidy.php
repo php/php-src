@@ -441,7 +441,7 @@ function options(array $argv = []): array
             case 'N':
             case 'trim-final-newlines':
                 $opt['trim_final_newlines'] = true;
-                if (is_string($value) && preg_match('/^[0-9]+$/', $value)) {
+                if (false !== $value && preg_match('/^[0-9]+$/', $value)) {
                     $opt['max_newlines'] = (int) $value;
                 }
             break;
@@ -533,11 +533,6 @@ function options(array $argv = []): array
         $opt['trim_leading_newlines'] = true;
     }
 
-    // Edge case '--trim-trailing-newlines 0 --insert-final-newline'
-    if ($opt['insert_final_newline'] && 0 === $opt['max_newlines']) {
-        $opt['max_newlines'] = 1;
-    }
-
     // Disable colors when redirecting output to file ./tidy.php > file
     if (\function_exists('stream_isatty')) {
         $opt['colors'] = (stream_isatty(STDOUT)) ? $opt['colors'] : false;
@@ -579,10 +574,10 @@ function getInvalidOptions(string $shortOptions, array $longOptions, array $argv
 
     foreach ($argv as $i => $argument) {
         // Discover possible unknown long passed options
-        if (preg_match('/^\-\-([a-z\-]+)\=?.*/i', $argument, $matches)) {
-            if (!in_array($matches[1], str_replace(':', '', $longOptions), true)) {
-                $unknown[] = $argument;
-            }
+        if (preg_match('/^\-\-([a-z\-]+)\=?.*/i', $argument, $matches)
+            && !in_array($matches[1], str_replace(':', '', $longOptions), true)
+        ) {
+            $unknown[] = $argument;
         }
 
         // Discover possible unknown short passed options
@@ -592,7 +587,7 @@ function getInvalidOptions(string $shortOptions, array $longOptions, array $argv
     }
 
     if (!empty($unknown)) {
-        return "invalid option(s) '".implode($unknown, ',')."'";
+        return "invalid option(s) '".implode($unknown, ', ')."'";
     }
 
     return null;
@@ -633,8 +628,6 @@ function check(array $opt): void
     if (!extension_loaded('mbstring')) {
         output('**WARN**: Enable mbstring extension for reporting file encodings.');
     }
-
-    return;
 }
 
 /**
@@ -875,9 +868,9 @@ function convertEol(string $content, $file, bool $enableCr = false): string
 {
     if ($enableCr) {
         return preg_replace('/(*BSR_ANYCRLF)\R/m', getDefaultEol($file), $content);
-    } else {
-        return preg_replace('/(?>\r\n|\n)/m', getDefaultEol($file), $content);
     }
+
+    return preg_replace('/(?>\r\n|\n)/m', getDefaultEol($file), $content);
 }
 
 /**
@@ -958,7 +951,7 @@ function hasGit(?string $path = null): bool
         return $hasGit = false;
     }
 
-    if ($path !== null && is_dir($path) && file_exists($path.'/.git')) {
+    if (null !== $path && is_dir($path) && file_exists($path.'/.git')) {
         return $hasGit = true;
     }
 
@@ -1186,20 +1179,35 @@ function tidyPhpTestFile(string $file): array
             // Trim trailing whitespace after section names
             $nameBuffer = trimTrailingWhitespace($nameBuffer);
 
-            // Trim trailing whitespace in sections
-            if (in_array($sectionRealName, ['--FILE--', '--FILEEOF--', '--CLEAN--'], true)) {
+            // Trim trailing whitespace in only known sections
+            if (in_array($sectionRealName, [
+                '--FILE--',
+                '--FILEEOF--',
+                '--CLEAN--',
+                ], true)) {
                 $buffer = cleanPhpCode($buffer);
-            } elseif (!in_array($sectionRealName, [
-                '--REQUEST--',
-                '--REDIRECTTEST--',
-                '--STDIN--',
-                '--EXPECT--',
-                '--EXPECTF--',
-                '--EXPECTREGEX--',
-                '--POST--',
-                '--POSTRAW--',
-                '--GZIP_POST--',
-                '--DEFLATE_POST--',
+            } elseif (in_array($sectionRealName, [
+                '--TEST--',
+                '--DESCRIPTION--',
+                '--CREDITS--',
+                '--SKIPIF--',
+                '--INI--',
+                '--ENV--',
+                '--EXTENSIONS--',
+                '--COOKIE--',
+                '--HEADERS--',
+                '--ARGS--',
+                '--CAPTURE_STDIO--',
+                '--CGI--',
+                '--PHPDBG--',
+                '--XFAIL--',
+                '--PUT--',
+                '--GET--',
+                '--FILE_EXTERNAL--',
+                '--EXPECT_EXTERNAL--',
+                '--EXPECTF_EXTERNAL--',
+                '--EXPECTREGEX_EXTERNAL--',
+                '--EXPECTHEADERS--',
                 ], true)
             ) {
                 $buffer = trimTrailingWhitespace($buffer);
@@ -1216,6 +1224,11 @@ function tidyPhpTestFile(string $file): array
             'clean_space_before_tab' => false,
             'eol' => false,
         ];
+
+        // Each test section need to have at least one final newline
+        if (0 === $opt['max_newlines']) {
+            $rules['max_newlines'] = 1;
+        }
 
         list($buffer, $bufferLogs) = tidyContent($buffer, $file, $rules);
 
