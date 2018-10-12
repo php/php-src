@@ -3,10 +3,12 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0RC4
 
 - Date:
-  . Updated timelib to 2018.01alpha2 to address several bugs: (Derick)
+  . Updated timelib to 2018.01RC1 to address several bugs: (Derick)
     . Fixed bug #75577 (DateTime::createFromFormat does not accept 'v' format
       specifier). (Derick)
     . Fixed bug #75642 (Wrap around behaviour for microseconds is not working).
+      (Derick)
+    . Fixed bug #77007 (fractions in `diff()` are not correctly normalized).
       (Derick)
 
 - Tokenizer:
