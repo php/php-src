@@ -1,7 +1,4 @@
 dnl
-dnl $Id$
-dnl
-dnl
 dnl TL_DEF_HAVE(what [, why])
 dnl
 dnl Generates 'AC_DEFINE(HAVE_WHAT, 1, [WHY])'
