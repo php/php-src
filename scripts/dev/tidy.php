@@ -19,9 +19,9 @@
   +----------------------------------------------------------------------+
 */
 
-function help(): void
+function help(): string
 {
-    $help = <<<HELP
+    return <<<HELP
   *NAME*
     tidy.php - tidy whitespace and end of lines
 
@@ -132,44 +132,42 @@ function help(): void
     - `PHP`       - PHP specific tidying rules
     - `crlf<->lf` - \\n and \\r\\n get normalized, obsolete \\r is not converted
 
-    +--------------------------+-----+-------+-----------+-----+----+
-    | PHP TEST SECTION         | -w  | -n -N | -e        | -l  | -s |
-    +--------------------------+-----+-------+-----------+-----+----+
-    | --TEST--                 | yes |  yes  | crlf<->lf | yes | no |
-    | --DESCRIPTION--          | yes |  yes  | crlf<->lf | yes | no |
-    | --CREDITS--              | yes |  yes  | crlf<->lf | yes | no |
-    | --SKIPIF--               | yes |  yes  | crlf<->lf | yes | no |
-    | --INI--                  | yes |  yes  | crlf<->lf | yes | no |
-    | --ENV--                  | yes |  yes  | crlf<->lf | yes | no |
-    | --EXTENSIONS--           | yes |  yes  | crlf<->lf | yes | no |
-    | --COOKIE--               | yes |  yes  | crlf<->lf | yes | no |
-    | --HEADERS--              | yes |  yes  | crlf<->lf | yes | no |
-    | --ARGS--                 | yes |  yes  | crlf<->lf | yes | no |
-    | --REQUEST--              | no  |  yes  | crlf<->lf | yes | no |
-    | --REDIRECTTEST--         | no  |  yes  | crlf<->lf | yes | no |
-    | --CAPTURE_STDIO--        | yes |  yes  | crlf<->lf | yes | no |
-    | --STDIN--                | no  |  yes  | crlf<->lf | yes | no |
-    | --CGI--                  | yes |  yes  | crlf<->lf | yes | no |
-    | --PHPDBG--               | yes |  yes  | crlf<->lf | yes | no |
-    | --XFAIL--                | yes |  yes  | crlf<->lf | yes | no |
-    | --CLEAN--                | PHP |  yes  | crlf<->lf | yes | no |
-    | --POST--                 | no  |  yes  | crlf<->lf | yes | no |
-    | --POST_RAW--             | no  |  yes  | crlf<->lf | yes | no |
-    | --GZIP_POST--            | no  |  yes  | crlf<->lf | yes | no |
-    | --DEFLATE_POST--         | no  |  yes  | crlf<->lf | yes | no |
-    | --PUT--                  | yes |  yes  | crlf<->lf | yes | no |
-    | --GET--                  | yes |  yes  | crlf<->lf | yes | no |
-    | --FILE--                 | PHP |  yes  | crlf<->lf | yes | no |
-    | --FILEEOF--              | PHP |  yes  | crlf<->lf | yes | no |
-    | --FILE_EXTERNAL--        | y   |  yes  | crlf<->lf | yes | no |
-    | --EXPECT--               | no  |  yes  | crlf<->lf | yes | no |
-    | --EXPECTF--              | no  |  yes  | crlf<->lf | yes | no |
-    | --EXPECTREGEX--          | no  |  yes  | crlf<->lf | yes | no |
-    | --EXPECT_EXTERNAL--      | yes |  yes  | crlf<->lf | yes | no |
-    | --EXPECTF_EXTERNAL--     | yes |  yes  | crlf<->lf | yes | no |
-    | --EXPECTREGEX_EXTERNAL-- | yes |  yes  | crlf<->lf | yes | no |
-    | --EXPECTHEADERS--        | no  |  yes  | crlf<->lf | yes | no |
-    +--------------------------+-----+-------+-----------+-----+----+
+    +--------------------------+-----+-------+-----------+-----+-----+
+    | PHP TEST SECTION         | -w  | -n -N | -e        | -l  | -s  |
+    +--------------------------+-----+-------+-----------+-----+-----+
+    | --TEST--                 | yes |  yes  | crlf<->lf | yes | yes |
+    | --DESCRIPTION--          | yes |  yes  | crlf<->lf | yes | yes |
+    | --CREDITS--              | yes |  yes  | crlf<->lf | yes | yes |
+    | --SKIPIF--               | yes |  yes  | crlf<->lf | yes | yes |
+    | --INI--                  | yes |  yes  | crlf<->lf | yes | yes |
+    | --ENV--                  | yes |  yes  | crlf<->lf | yes | yes |
+    | --EXTENSIONS--           | yes |  yes  | crlf<->lf | yes | yes |
+    | --COOKIE--               | yes |  yes  | crlf<->lf | yes | yes |
+    | --ARGS--                 | yes |  yes  | crlf<->lf | yes | yes |
+    | --REDIRECTTEST--         | no  |  yes  | crlf<->lf | yes | no  |
+    | --CAPTURE_STDIO--        | yes |  yes  | crlf<->lf | yes | yes |
+    | --STDIN--                | no  |  yes  | crlf<->lf | yes | no  |
+    | --CGI--                  | yes |  yes  | crlf<->lf | yes | yes |
+    | --PHPDBG--               | yes |  yes  | crlf<->lf | yes | yes |
+    | --XFAIL--                | yes |  yes  | crlf<->lf | yes | yes |
+    | --CLEAN--                | PHP |  yes  | crlf<->lf | yes | PHP |
+    | --POST--                 | no  |  yes  | crlf<->lf | yes | no  |
+    | --POST_RAW--             | no  |  yes  | crlf<->lf | yes | no  |
+    | --GZIP_POST--            | no  |  yes  | crlf<->lf | yes | no  |
+    | --DEFLATE_POST--         | no  |  yes  | crlf<->lf | yes | no  |
+    | --PUT--                  | yes |  yes  | crlf<->lf | yes | yes |
+    | --GET--                  | yes |  yes  | crlf<->lf | yes | yes |
+    | --FILE--                 | PHP |  yes  | crlf<->lf | yes | PHP |
+    | --FILEEOF--              | PHP |  yes  | crlf<->lf | yes | PHP |
+    | --FILE_EXTERNAL--        | yes |  yes  | crlf<->lf | yes | yes |
+    | --EXPECT--               | no  |  yes  | crlf<->lf | yes | no  |
+    | --EXPECTF--              | no  |  yes  | crlf<->lf | yes | no  |
+    | --EXPECTREGEX--          | no  |  yes  | crlf<->lf | yes | no  |
+    | --EXPECT_EXTERNAL--      | yes |  yes  | crlf<->lf | yes | yes |
+    | --EXPECTF_EXTERNAL--     | yes |  yes  | crlf<->lf | yes | yes |
+    | --EXPECTREGEX_EXTERNAL-- | yes |  yes  | crlf<->lf | yes | yes |
+    | --EXPECTHEADERS--        | no  |  yes  | crlf<->lf | yes | no  |
+    +--------------------------+-----+-------+-----------+-----+-----+
 
   *OPTIONS*
     `-h, --help`
@@ -193,8 +191,6 @@ function help(): void
     `-s, --clean-space-before-tab`
           Clean all spaces before tabs in the initial indent part of the lines.
 
-    `-a, --all`
-          Enable all tidying rules.
     `-o, --no-backup`
           Disable backed up files.
     `-f, --fix`
@@ -212,7 +208,7 @@ function help(): void
           Disable colors in the output.
 
   *EXAMPLES*
-    `php tidy.php -fa path`             Tidy path with all rules enabled
+    `php tidy.php -f path`              Tidy path with all rules enabled
     `php scripts/dev/tidy.php .`        Check the php-src repo
     `php scripts/dev/tidy.php -fo .`    Tidy php-src, no backups
     `php tidy.php -wf path`             Trim trailing whitespace
@@ -224,10 +220,6 @@ function help(): void
   Latest version <https://git.php.net/?p=php-src.git;a=blob;f=scripts/dev/tidy.php>
   Report bugs to <https://bugs.php.net>
 HELP;
-
-    output($help, false);
-
-    exit;
 }
 
 /**
@@ -319,6 +311,9 @@ function getBlacklist(): array
         '/^Release.*/',
         '/^Debug.*/',
         '/^x64.*/',
+
+        // PHP 7.1 specific
+        '/^stub\.c$/',
     ]);
 }
 
@@ -386,7 +381,7 @@ function options(array $argv = []): array
         return $opt;
     }
 
-    $shortOptions = 'hwnN::e::lsfoqyva';
+    $shortOptions = 'hwnN::e::lsfoqyv';
 
     $longOptions = [
         'help',
@@ -402,7 +397,6 @@ function options(array $argv = []): array
         'quiet',
         'yes',
         'verbose',
-        'all',
     ];
 
     $optionsIndex = null;
@@ -491,15 +485,6 @@ function options(array $argv = []): array
             case 'verbose':
                 $opt['verbose'] = 3;
             break;
-            case 'a':
-            case 'all':
-                $opt['trim_trailing_whitespace'] = true;
-                $opt['insert_final_newline'] = true;
-                $opt['trim_final_newlines'] = true;
-                $opt['eol'] = true;
-                $opt['trim_leading_newlines'] = true;
-                $opt['clean_space_before_tab'] = true;
-            break;
         }
     }
 
@@ -517,7 +502,7 @@ function options(array $argv = []): array
         }
     }
 
-    // By default enable basic fixing rules if none were specified
+    // By default enable all fixing rules if none were specified
     if (
         !$opt['trim_trailing_whitespace']
         && !$opt['insert_final_newline']
@@ -531,6 +516,7 @@ function options(array $argv = []): array
         $opt['trim_final_newlines'] = true;
         $opt['eol'] = true;
         $opt['trim_leading_newlines'] = true;
+        $opt['clean_space_before_tab'] = true;
     }
 
     // Disable colors when redirecting output to file ./tidy.php > file
@@ -551,7 +537,7 @@ function getInvalidOptions(string $shortOptions, array $longOptions, array $argv
 {
     $unknown = [];
 
-    // Build regex for validating short options /^\-[hwlLsfoqyvan]*(N.*$|e.*$|$)/
+    // Build regex for validating short options
     $regex = '/^\-[';
 
     // Options without values
@@ -594,24 +580,29 @@ function getInvalidOptions(string $shortOptions, array $longOptions, array $argv
 }
 
 /**
- * Script exits if provided checks fail or outputs warnings about missing system
- * dependencies.
+ * Exit on failed checks or outputs warnings about missing system dependencies.
  */
 function check(array $opt): void
 {
     // Check for help
     if ($opt['help']) {
-        help();
+        output(help(), false);
+
+        exit;
     }
 
     // Invalid option
     if ($opt['invalid']) {
-        invalid($opt['invalid']);
+        output(invalid($opt['invalid']), false);
+
+        exit(1);
     }
 
     // Check if path is set
     if (empty($opt['path'])) {
-        invalid('missing path');
+        output(invalid('missing path'), false);
+
+        exit(1);
     }
 
     // Prompt user for input
@@ -693,14 +684,11 @@ function output(?string $message = null, ?bool $quiet = null): void
 }
 
 /**
- * Output short invalid usage error and exit.
+ * Short invalid usage error.
  */
-function invalid(string $error = 'INVALID USAGE'): void
+function invalid(string $error = 'INVALID USAGE'): string
 {
-    output('tidy.php: **'.$error.'**', false);
-    output("Try '*php tidy.php --help*' for more info.", false);
-
-    exit(1);
+    return 'tidy.php: **'.$error."**\nTry '*php tidy.php --help*' for more info.";
 }
 
 /**
@@ -728,13 +716,9 @@ function prompt(): void
  * Trim trailing spaces and tabs from each line including or without the final
  * newline trimmed.
  */
-function trimTrailingWhitespace(string $content, bool $withFinalLine = true): string
+function trimTrailingWhitespace(string $content): string
 {
-    if ($withFinalLine) {
-        return preg_replace('/(*BSR_ANYCRLF)[\t ]+(\R|$)/m', '$1', $content);
-    }
-
-    return preg_replace('/(*BSR_ANYCRLF)[\t ]+(\R)/m', '$1', $content);
+    return preg_replace('/(*BSR_ANYCRLF)[\t ]+(\R|$)/m', '$1', $content);
 }
 
 /**
@@ -1174,47 +1158,77 @@ function tidyPhpTestFile(string $file): array
         // Section name contains entire line with EOL character so we trim it
         $sectionRealName = trim($nameBuffer);
 
-        // Trim trailing whitespace
+        // Trim trailing whitespace after section names
         if ($opt['trim_trailing_whitespace']) {
-            // Trim trailing whitespace after section names
             $nameBuffer = trimTrailingWhitespace($nameBuffer);
+        }
 
-            // Trim trailing whitespace in only known sections
-            if (in_array($sectionRealName, [
-                '--FILE--',
-                '--FILEEOF--',
-                '--CLEAN--',
-                ], true)) {
-                $buffer = cleanPhpCode($buffer);
-            } elseif (in_array($sectionRealName, [
-                '--TEST--',
-                '--DESCRIPTION--',
-                '--CREDITS--',
-                '--SKIPIF--',
-                '--INI--',
-                '--ENV--',
-                '--EXTENSIONS--',
-                '--COOKIE--',
-                '--HEADERS--',
-                '--ARGS--',
-                '--CAPTURE_STDIO--',
-                '--CGI--',
-                '--PHPDBG--',
-                '--XFAIL--',
-                '--PUT--',
-                '--GET--',
-                '--FILE_EXTERNAL--',
-                '--EXPECT_EXTERNAL--',
-                '--EXPECTF_EXTERNAL--',
-                '--EXPECTREGEX_EXTERNAL--',
-                '--EXPECTHEADERS--',
-                ], true)
-            ) {
+        if ($nameBuffer !== $name) {
+            $logs[] = $sectionRealName.' trailing whitespace';
+        }
+
+        // Sections specific tidying
+        if (in_array($sectionRealName, [
+            '--FILE--',
+            '--FILEEOF--',
+            '--CLEAN--',
+            ], true)) {
+            if ($opt['trim_trailing_whitespace']) {
+                $buffer = trimTrailingWhitespaceFromPhp($buffer);
+            }
+
+            if ($buffer !== $section) {
+                $logs[] = $sectionRealName.' trailing whitespace';
+                $section = $buffer;
+            }
+
+            if ($opt['clean_space_before_tab']) {
+                $buffer = cleanSpaceBeforeTabFromPhp($buffer);
+            }
+
+            if ($buffer !== $section) {
+                $logs[] = $sectionRealName.' space before tab';
+                $section = $buffer;
+            }
+        } elseif (in_array($sectionRealName, [
+            '--TEST--',
+            '--DESCRIPTION--',
+            '--CREDITS--',
+            '--SKIPIF--',
+            '--INI--',
+            '--ENV--',
+            '--EXTENSIONS--',
+            '--COOKIE--',
+            '--ARGS--',
+            '--CAPTURE_STDIO--',
+            '--CGI--',
+            '--PHPDBG--',
+            '--XFAIL--',
+            '--PUT--',
+            '--GET--',
+            '--FILE_EXTERNAL--',
+            '--EXPECT_EXTERNAL--',
+            '--EXPECTF_EXTERNAL--',
+            '--EXPECTREGEX_EXTERNAL--',
+            '--EXPECTHEADERS--',
+            ], true)
+        ) {
+            if ($opt['trim_trailing_whitespace']) {
                 $buffer = trimTrailingWhitespace($buffer);
             }
 
-            if ($nameBuffer !== $name || $buffer !== $section) {
+            if ($buffer !== $section) {
                 $logs[] = $sectionRealName.' trailing whitespace';
+                $section = $buffer;
+            }
+
+            if ($opt['clean_space_before_tab']) {
+                $buffer = cleanSpaceBeforeTab($buffer);
+            }
+
+            if ($buffer !== $section) {
+                $logs[] = $sectionRealName.' space before tab';
+                $section = $buffer;
             }
         }
 
@@ -1258,14 +1272,6 @@ function tidyPhpTestFile(string $file): array
         $content = $buffer;
     }
 
-    // Make space before tab issue a warning only
-    if ($opt['clean_space_before_tab']
-        && cleanSpaceBeforeTab($buffer) !== $content
-        && $opt['verbose'] >= 1
-    ) {
-        output('*WARN*  '.relative($file).': *space before tab*');
-    }
-
     return [$content, $logs];
 }
 
@@ -1302,12 +1308,12 @@ function tidyFile(string $file): bool
         countFixed();
 
         if ($opt['fix']) {
-            output('`FIXED` '.relative($file).': `'.implode(', ', $logs).'`');
+            output('`FIXED` '.relative($file).': `'.implode(', ', array_unique($logs)).'`');
 
             return save($file, $cleaned);
         }
 
-        output('**FAIL**  '.relative($file).': **'.implode(', ', $logs).'**');
+        output('**FAIL**  '.relative($file).': **'.implode(', ', array_unique($logs)).'**');
 
         return false;
     }
@@ -1320,12 +1326,11 @@ function tidyFile(string $file): bool
 }
 
 /**
- * Clean PHP code by using regex or Tokenizer extension.
+ * PHP code specific trimming of trailing whitespace.
  */
-function cleanPhpCode(string $source): string
+function trimTrailingWhitespaceFromPhp(string $source): string
 {
-    $buffer = '';
-
+    // If the tokenizer extension is not enabled several patterns are used.
     if (!extension_loaded('tokenizer')) {
         $patterns = [
             '/(*BSR_ANYCRLF)(\<\?php)[\t ]+(\R|$)/m',
@@ -1340,16 +1345,37 @@ function cleanPhpCode(string $source): string
         ];
 
         foreach ($patterns as $pattern) {
-            $buffer = preg_replace($pattern, '$1$2', $buffer);
+            $source = preg_replace($pattern, '$1$2', $source);
         }
 
-        return $buffer;
+        return $source;
     }
 
+    return tidyPhpCode($source, function ($src) {
+        return trimTrailingWhitespace($src);
+    });
+}
+
+/**
+ * PHP code specific spaces before tabs cleaning.
+ */
+function cleanSpaceBeforeTabFromPhp(string $source): string
+{
+    return tidyPhpCode($source, function ($src) {
+        return cleanSpaceBeforeTab($src);
+    });
+}
+
+/**
+ * Clean PHP code by using a callback and a Tokenizer extension.
+ */
+function tidyPhpCode(string $source, callable $callback): string
+{
     // @ suppresses warning: octal escape sequence overflow \542 is greater than \377
     $tokens = @token_get_all($source);
 
     $content = '';
+    $buffer = '';
 
     foreach ($tokens as $i => $token) {
         if (is_string($token)) {
@@ -1361,17 +1387,18 @@ function cleanPhpCode(string $source): string
             switch ($id) {
                 case T_COMMENT:
                     if (!empty($tokens[$i + 1][0]) && T_CLOSE_TAG !== $tokens[$i + 1][0]) {
-                        $buffer .= trimTrailingWhitespace($text);
+                        $buffer .= $callback($text);
                     } else {
                         $buffer .= $text;
                     }
                 break;
                 case T_DOC_COMMENT:
-                    $buffer .= trimTrailingWhitespace($text);
+                    $buffer .= $callback($text);
                 break;
                 case T_START_HEREDOC:
                     $buffer .= $text;
-                    $content .= trimTrailingWhitespace($buffer);
+                    $content .= $callback($buffer);
+
                     $buffer = '';
                 break;
                 case T_END_HEREDOC:
@@ -1380,7 +1407,13 @@ function cleanPhpCode(string $source): string
                     $buffer = '';
                 break;
                 case T_CONSTANT_ENCAPSED_STRING:
-                    $content .= trimTrailingWhitespace($buffer, false);
+                    $before = (preg_match('/[ \t]+$/', $buffer, $matches)) ? $matches[0] : '';
+                    $content .= $callback($buffer);
+                    $after = (preg_match('/[ \t]+$/', $content, $matches)) ? $matches[0] : '';
+                    if ($before !== $after) {
+                        $content .= $before;
+                    }
+
                     $content .= $text;
                     $buffer = '';
                 break;
@@ -1391,7 +1424,7 @@ function cleanPhpCode(string $source): string
         }
     }
 
-    $content .= trimTrailingWhitespace($buffer);
+    $content .= $callback($buffer);
 
     return $content;
 }
@@ -1446,8 +1479,7 @@ function init(array $argv): int
     $time = microtime(true);
     $opt = options($argv);
 
-    output("Executing `tidy.php`\n");
-    output('Working tree: '.$opt['path']."\n");
+    output("Executing `tidy.php`\nWorking tree: ".$opt['path']."\n");
 
     $files = getFiles();
     $exitCode = 0;
