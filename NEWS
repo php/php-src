@@ -8,8 +8,11 @@ PHP                                                                        NEWS
   . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
 
 - Date:
+  . Upgraded timelib to 2017.08. (Derick)
   . Fixed bug #75851 (Year component overflow with date formats "c", "o", "r"
     and "y"). (Adam Saponara)
+  . Fixed bug #77007 (fractions in `diff()` are not correctly normalized).
+    (Derick)
 
 - FCGI:
   . Fixed #76948 (Failed shutdown/reboot or end session in Windows). (Anatol)
