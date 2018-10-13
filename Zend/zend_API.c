@@ -3973,9 +3973,6 @@ ZEND_API void zend_unset_property(zend_class_entry *scope, zval *object, const c
 
 	EG(fake_scope) = scope;
 
-	if (!Z_OBJ_HT_P(object)->unset_property) {
-		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be unset", name, ZSTR_VAL(Z_OBJCE_P(object)->name));
-	}
 	ZVAL_STRINGL(&property, name, name_length);
 	Z_OBJ_HT_P(object)->unset_property(object, &property, 0);
 	zval_ptr_dtor(&property);
