@@ -5034,13 +5034,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 	} else {
 	    zend_object *orig_obj = obj;
 
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-
-
-			HANDLE_EXCEPTION();
-		}
-
 		if (IS_CONST == IS_CONST) {
 			function_name = RT_CONSTANT(opline, opline->op2);
 		}
@@ -7201,13 +7194,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else {
 	    zend_object *orig_obj = obj;
-
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-			zval_ptr_dtor_nogc(free_op2);
-
-			HANDLE_EXCEPTION();
-		}
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			function_name = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
@@ -10290,13 +10276,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else {
 	    zend_object *orig_obj = obj;
-
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-
-
-			HANDLE_EXCEPTION();
-		}
 
 		if (IS_CV == IS_CONST) {
 			function_name = EX_VAR(opline->op2.var);
@@ -14003,13 +13982,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	} else {
 	    zend_object *orig_obj = obj;
 
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-
-			zval_ptr_dtor_nogc(free_op1);
-			HANDLE_EXCEPTION();
-		}
-
 		if (IS_CONST == IS_CONST) {
 			function_name = RT_CONSTANT(opline, opline->op2);
 		}
@@ -15604,13 +15576,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else {
 	    zend_object *orig_obj = obj;
-
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-			zval_ptr_dtor_nogc(free_op2);
-			zval_ptr_dtor_nogc(free_op1);
-			HANDLE_EXCEPTION();
-		}
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			function_name = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
@@ -17474,13 +17439,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else {
 	    zend_object *orig_obj = obj;
-
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-
-			zval_ptr_dtor_nogc(free_op1);
-			HANDLE_EXCEPTION();
-		}
 
 		if (IS_CV == IS_CONST) {
 			function_name = EX_VAR(opline->op2.var);
@@ -31775,13 +31733,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 	} else {
 	    zend_object *orig_obj = obj;
 
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-
-
-			HANDLE_EXCEPTION();
-		}
-
 		if (IS_CONST == IS_CONST) {
 			function_name = RT_CONSTANT(opline, opline->op2);
 		}
@@ -33466,13 +33417,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else {
 	    zend_object *orig_obj = obj;
-
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-			zval_ptr_dtor_nogc(free_op2);
-
-			HANDLE_EXCEPTION();
-		}
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			function_name = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
@@ -35803,13 +35747,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else {
 	    zend_object *orig_obj = obj;
-
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-
-
-			HANDLE_EXCEPTION();
-		}
 
 		if (IS_CV == IS_CONST) {
 			function_name = EX_VAR(opline->op2.var);
@@ -40774,13 +40711,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 	} else {
 	    zend_object *orig_obj = obj;
 
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-
-
-			HANDLE_EXCEPTION();
-		}
-
 		if (IS_CONST == IS_CONST) {
 			function_name = RT_CONSTANT(opline, opline->op2);
 		}
@@ -44448,13 +44378,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else {
 	    zend_object *orig_obj = obj;
-
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-			zval_ptr_dtor_nogc(free_op2);
-
-			HANDLE_EXCEPTION();
-		}
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			function_name = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
@@ -50257,13 +50180,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 	    fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else {
 	    zend_object *orig_obj = obj;
-
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-
-
-			HANDLE_EXCEPTION();
-		}
 
 		if (IS_CV == IS_CONST) {
 			function_name = EX_VAR(opline->op2.var);

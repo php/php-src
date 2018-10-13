@@ -170,7 +170,7 @@ struct _zend_object_handlers {
 	zend_object_has_dimension_t				has_dimension;
 	zend_object_unset_dimension_t			unset_dimension;
 	zend_object_get_properties_t			get_properties; /* required */
-	zend_object_get_method_t				get_method;
+	zend_object_get_method_t				get_method; /* required */
 	zend_object_call_method_t				call_method;
 	zend_object_get_constructor_t			get_constructor;
 	zend_object_get_class_name_t			get_class_name;

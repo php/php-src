@@ -3056,13 +3056,6 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 	} else {
 	    zend_object *orig_obj = obj;
 
-		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_throw_error(NULL, "Object does not support method calls");
-			FREE_OP2();
-			FREE_OP1();
-			HANDLE_EXCEPTION();
-		}
-
 		if (OP2_TYPE == IS_CONST) {
 			function_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 		}
