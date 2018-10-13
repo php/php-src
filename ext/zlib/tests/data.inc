@@ -36,17 +36,17 @@ With this regard their currents turn away,
 And lose the name of action.
 
 
-Hath not a Jew eyes? Hath not a Jew hands, organs, dimensions,
-senses, affections, passions; fed with the same food, hurt with
-the same weapons, subject to the same diseases, heal'd by
-the same means, warm'd and cool'd by the same winter and summer
-as a Christian is? If you prick us, do we not bleed? If you
-tickle us, do we not laugh? If you poison us, do we not die?
-And if you wrong us, shall we not revenge? If we are like you
-in the rest, we will resemble you in that. If a Jew wrong a
-Christian, what is his humility? Revenge. If a Christian wrong
-a Jew, what should his sufferance be by Christian example? Why,
-revenge. The villainy you teach me, I will execute, and it
+Hath not a Jew eyes? Hath not a Jew hands, organs, dimensions, 
+senses, affections, passions; fed with the same food, hurt with 
+the same weapons, subject to the same diseases, heal'd by 
+the same means, warm'd and cool'd by the same winter and summer 
+as a Christian is? If you prick us, do we not bleed? If you 
+tickle us, do we not laugh? If you poison us, do we not die? 
+And if you wrong us, shall we not revenge? If we are like you 
+in the rest, we will resemble you in that. If a Jew wrong a 
+Christian, what is his humility? Revenge. If a Christian wrong 
+a Jew, what should his sufferance be by Christian example? Why, 
+revenge. The villainy you teach me, I will execute, and it 
 shall go hard but I will better the instruction.
 
 Is this a dagger which I see before me,
@@ -65,7 +65,7 @@ Or else worth all the rest; I see thee still,
 And on thy blade and dudgeon gouts of blood,
 Which was not so before.
 There's no such thing:
-It is the bloody business which informs Thus to mine eyes.
+It is the bloody business which informs Thus to mine eyes. 
 Now o'er the one halfworld Nature seems dead,
 and wicked dreams abuse The curtain'd sleep; witchcraft celebrates
 Pale Hecate's offerings, and wither'd murder,
@@ -73,7 +73,7 @@ Alarum'd by his sentinel, the wolf,
 Whose howl's his watch, thus with his stealthy pace.
 With Tarquin's ravishing strides, towards his design
 Moves like a ghost. Thou sure and firm-set earth,
-Hear not my steps, which way they walk,
+Hear not my steps, which way they walk, 
 for fear Thy very stones prate of my whereabout,
 And take the present horror from the time,
 Which now suits with it.
