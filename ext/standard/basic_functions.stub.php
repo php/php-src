@@ -10,6 +10,8 @@ class AssertionError extends Error
 {
 }
 
+namespace {
+
 /* main/main.c */
 
 function set_time_limit(int $seconds): bool {}
@@ -1510,3 +1512,12 @@ function sapi_windows_set_ctrl_handler(?callable $handler, bool $add = true): bo
 
 function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
 #endif
+} // end global namespace
+
+namespace PHP\iterable {
+
+function any(iterable $iterable, ?callable $callback = null): bool {}
+
+function all(iterable $iterable, ?callable $callback = null): bool {}
+
+}

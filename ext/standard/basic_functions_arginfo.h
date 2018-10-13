@@ -2218,6 +2218,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_PHP_iterable_any, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, iterable, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_PHP_iterable_all arginfo_PHP_iterable_any
+
 
 ZEND_FUNCTION(set_time_limit);
 ZEND_FUNCTION(header_register_callback);
@@ -2839,6 +2846,8 @@ ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
+ZEND_FUNCTION(any);
+ZEND_FUNCTION(all);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -3492,6 +3501,8 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
+	ZEND_NS_FE("PHP\\iterable", any, arginfo_PHP_iterable_any)
+	ZEND_NS_FE("PHP\\iterable", all, arginfo_PHP_iterable_all)
 	ZEND_FE_END
 };
 
