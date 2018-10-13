@@ -153,36 +153,35 @@ typedef int (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval 
 struct _zend_object_handlers {
 	/* offset of real object header (usually zero) */
 	int										offset;
-	/* general object functions */
-	zend_object_free_obj_t					free_obj; /* required */
-	zend_object_dtor_obj_t					dtor_obj; /* required */
-	zend_object_clone_obj_t					clone_obj; /* optional */
-	/* individual object functions */
-	zend_object_read_property_t				read_property; /* required */
-	zend_object_write_property_t			write_property; /* required */
-	zend_object_read_dimension_t			read_dimension; /* required */
-	zend_object_write_dimension_t			write_dimension; /* required */
+	/* object handlers */
+	zend_object_free_obj_t					free_obj;             /* required */
+	zend_object_dtor_obj_t					dtor_obj;             /* required */
+	zend_object_clone_obj_t					clone_obj;            /* optional */
+	zend_object_read_property_t				read_property;        /* required */
+	zend_object_write_property_t			write_property;       /* required */
+	zend_object_read_dimension_t			read_dimension;       /* required */
+	zend_object_write_dimension_t			write_dimension;      /* required */
 	zend_object_get_property_ptr_ptr_t		get_property_ptr_ptr; /* required */
-	zend_object_get_t						get; /* optional */
-	zend_object_set_t						set; /* optional */
-	zend_object_has_property_t				has_property; /* required */
-	zend_object_unset_property_t			unset_property; /* required */
-	zend_object_has_dimension_t				has_dimension; /* required */
-	zend_object_unset_dimension_t			unset_dimension; /* required */
-	zend_object_get_properties_t			get_properties; /* required */
-	zend_object_get_method_t				get_method; /* required */
-	zend_object_call_method_t				call_method; /* optional */
-	zend_object_get_constructor_t			get_constructor; /* required */
-	zend_object_get_class_name_t			get_class_name; /* required */
+	zend_object_get_t						get;                  /* optional */
+	zend_object_set_t						set;                  /* optional */
+	zend_object_has_property_t				has_property;         /* required */
+	zend_object_unset_property_t			unset_property;       /* required */
+	zend_object_has_dimension_t				has_dimension;        /* required */
+	zend_object_unset_dimension_t			unset_dimension;      /* required */
+	zend_object_get_properties_t			get_properties;       /* required */
+	zend_object_get_method_t				get_method;           /* required */
+	zend_object_call_method_t				call_method;          /* optional */
+	zend_object_get_constructor_t			get_constructor;      /* required */
+	zend_object_get_class_name_t			get_class_name;       /* required */
 	zend_object_compare_t					compare_objects;
 	zend_object_cast_t						cast_object;
 	zend_object_count_elements_t			count_elements;
 	zend_object_get_debug_info_t			get_debug_info;
 	zend_object_get_closure_t				get_closure;
 	zend_object_get_gc_t					get_gc;
-	zend_object_do_operation_t				do_operation; /* optional */
-	zend_object_compare_zvals_t				compare; /* optional */
-	zend_object_get_properties_for_t		get_properties_for; /* optional */
+	zend_object_do_operation_t				do_operation;         /* optional */
+	zend_object_compare_zvals_t				compare;              /* optional */
+	zend_object_get_properties_for_t		get_properties_for;   /* optional */
 };
 
 BEGIN_EXTERN_C()
