@@ -97,18 +97,18 @@ if (PHP_INTL != "no") {
 				transliterator_class.c \
 				transliterator_methods.c",
 				"intl");
-		
+
 		ADD_SOURCES(configure_module_dirname + "/timezone", "\
 				timezone_class.cpp \
 				timezone_methods.cpp",
 				"intl");
-				
+
 		ADD_SOURCES(configure_module_dirname + "/calendar", "\
 				calendar_methods.cpp \
 				gregoriancalendar_methods.cpp \
 				calendar_class.cpp",
 				"intl");
-				
+
 		ADD_SOURCES(configure_module_dirname + "/breakiterator", "\
 				breakiterator_class.cpp \
 				breakiterator_methods.cpp \
@@ -117,7 +117,7 @@ if (PHP_INTL != "no") {
 				codepointiterator_internal.cpp \
 				codepointiterator_methods.cpp ",
 				"intl");
-		
+
 		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib");
 
 		/* Compat for ICU before 58.1.*/

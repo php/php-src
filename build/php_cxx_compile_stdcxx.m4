@@ -1,9 +1,9 @@
 dnl
 dnl Based on https://www.gnu.org/software/autoconf-archive/ax_cxx_compile_stdcxx.html
 dnl Author: Anatol Belski <ab@php.net>
-dnl 
+dnl
 dnl PHP_CXX_COMPILE_STDCXX(version, mandatory|optional, var_name_to_put_switch_in)
-dnl 
+dnl
 dnl ARGUMENTS
 dnl
 dnl first arg  - version as 11, 14 or 17
@@ -74,7 +74,7 @@ AC_DEFUN([PHP_CXX_COMPILE_STDCXX], [dnl
 
 dnl
 dnl PHP specific implementation end.
-dnl The relevant part of the unchanged original implementation is below. 
+dnl The relevant part of the unchanged original implementation is below.
 dnl
 
 #

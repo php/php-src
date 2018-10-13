@@ -6,7 +6,7 @@ if (PHP_PDO_FIREBIRD != "no") {
 
 	if ((CHECK_LIB("fbclient_ms.lib", "pdo_firebird", PHP_PHP_BUILD + "\\interbase\\lib_ms;" + PHP_PDO_FIREBIRD)
 			|| CHECK_LIB("gds32_ms.lib", "pdo_firebird", PHP_PHP_BUILD + "\\interbase\\lib_ms;" + PHP_PDO_FIREBIRD)
-		) && CHECK_HEADER_ADD_INCLUDE("ibase.h", "CFLAGS_PDO_FIREBIRD", 
+		) && CHECK_HEADER_ADD_INCLUDE("ibase.h", "CFLAGS_PDO_FIREBIRD",
 				PHP_PHP_BUILD + "\\include\\interbase;" + PHP_PHP_BUILD + "\\interbase\\include;" + PHP_PDO_FIREBIRD)
 		) {
 

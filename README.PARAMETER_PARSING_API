@@ -49,11 +49,11 @@ See also https://wiki.php.net/rfc/zpp_improv#expose_zend_parse_arg_as_zend_parse
 
 Type specifiers
 ---------------
- The following list shows the type specifier, its meaning and the parameter 
+ The following list shows the type specifier, its meaning and the parameter
  types that need to be passed by address. All passed parameters are set
- if the PHP parameter is non optional and untouched if optional and the 
+ if the PHP parameter is non optional and untouched if optional and the
  parameter is not present. The only exception is O where the zend_class_entry*
- has to be provided on input and is used to verify the PHP parameter is an 
+ has to be provided on input and is used to verify the PHP parameter is an
  instance of that class.
 
  a  - array (zval*)
@@ -61,7 +61,7 @@ Type specifiers
  b  - boolean (zend_bool)
  C  - class (zend_class_entry*)
  d  - double (double)
- f  - function or array containing php method call info (returned as 
+ f  - function or array containing php method call info (returned as
       zend_fcall_info and zend_fcall_info_cache)
  h  - array (returned as HashTable*)
  H  - array or HASH_OF(object) (returned as HashTable*)
@@ -95,9 +95,9 @@ Type specifiers
 
 Note on 64bit compatibility
 ---------------------------
-Please note that since version 7 PHP uses zend_long as integer type and 
-zend_string with size_t as length, so make sure you pass zend_longs to "l" 
-and size_t to strings length (i.e. for "s" you need to pass char * and size_t), 
+Please note that since version 7 PHP uses zend_long as integer type and
+zend_string with size_t as length, so make sure you pass zend_longs to "l"
+and size_t to strings length (i.e. for "s" you need to pass char * and size_t),
 not the other way round!
 
 Both mistakes might cause memory corruptions and segfaults:
@@ -110,7 +110,7 @@ Both mistakes might cause memory corruptions and segfaults:
   int num; /* XXX THIS IS WRONG!! Use zend_long instead. */
   zend_parse_parameters(ZEND_NUM_ARGS(), "l", &num)
 
-If you're in doubt, use check_parameters.php script to the parameters 
+If you're in doubt, use check_parameters.php script to the parameters
 and their types (it can be found in ./scripts/dev/ directory of PHP sources):
 
 # php ./scripts/dev/check_parameters.php /path/to/your/sources/
@@ -159,7 +159,7 @@ if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/!",
 /* Get either a set of 3 longs or a string. */
 zend_long l1, l2, l3;
 char *s;
-/* 
+/*
  * The function expects a pointer to a size_t in this case, not a long
  * or any other type.  If you specify a type which is larger
  * than a 'size_t', the upper bits might not be initialized

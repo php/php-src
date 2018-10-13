@@ -31,7 +31,7 @@ PHP                                                                        NEWS
   . Lifted requirements to SQLite 3.5.0. (cmb)
 
 - Standard:
-  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with 
+  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with
     stream_socket_client). (Ville Hukkamäki)
 
 - Reflection:

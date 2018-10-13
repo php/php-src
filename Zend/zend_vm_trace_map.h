@@ -79,4 +79,3 @@ static void zend_vm_trace_init(void)
 	}
 	zend_hash_destroy(&vm_trace_ht);
 }
-	
