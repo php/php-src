@@ -1026,7 +1026,14 @@ function tidyContent(string $content, string $file, array $rules = []): array
     $logs = [];
 
     if ($opt['trim_trailing_whitespace']) {
-        $buffer = trimTrailingWhitespace($buffer);
+        // *.inc files in the php-src repository and *.php files
+        if (preg_match('/\.php$/', $file)
+            || (isThisPhpSrc($opt['path']) && preg_match('/\.inc$/', $file))
+        ) {
+            $buffer = trimTrailingWhitespaceFromPhp($buffer);
+        } else {
+            $buffer = trimTrailingWhitespace($buffer);
+        }
     }
 
     if ($buffer !== $content) {
@@ -1072,7 +1079,14 @@ function tidyContent(string $content, string $file, array $rules = []): array
     }
 
     if ($opt['clean_space_before_tab']) {
-        $buffer = cleanSpaceBeforeTab($buffer);
+        // *.inc files in the php-src repository and *.php files
+        if (preg_match('/\.php$/', $file)
+            || (isThisPhpSrc($opt['path']) && preg_match('/\.inc$/', $file))
+        ) {
+            $buffer = cleanSpaceBeforeTabFromPhp($buffer);
+        } else {
+            $buffer = cleanSpaceBeforeTab($buffer);
+        }
     }
 
     if ($buffer !== $content) {
@@ -1417,7 +1431,7 @@ function tidyPhpCode(string $source, callable $callback): string
                     $after = (preg_match('/[ \t]+\z/', $content, $matches)) ? $matches[0] : '';
 
                     // When trimming trailing whitespace, the final trailing ws should stay
-                    if ($before !== $after && $after === '') {
+                    if ($before !== $after && '' === $after) {
                         $content .= $before;
                     }
 
