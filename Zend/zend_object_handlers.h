@@ -173,7 +173,7 @@ struct _zend_object_handlers {
 	zend_object_get_method_t				get_method; /* required */
 	zend_object_call_method_t				call_method; /* optional */
 	zend_object_get_constructor_t			get_constructor; /* required */
-	zend_object_get_class_name_t			get_class_name;
+	zend_object_get_class_name_t			get_class_name; /* required */
 	zend_object_compare_t					compare_objects;
 	zend_object_cast_t						cast_object;
 	zend_object_count_elements_t			count_elements;
