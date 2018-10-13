@@ -624,6 +624,13 @@ function check(array $opt): void
     if (!extension_loaded('mbstring')) {
         output('**WARN**: Enable mbstring extension for reporting file encodings.');
     }
+
+    // The php-src repository requires Git
+    if (isThisPhpSrc($opt['path']) && !hasGit($opt['path'])) {
+        output(invalid('This seems to be php-src without Git. Obtain PHP with Git.'), false);
+
+        exit(1);
+    }
 }
 
 /**
@@ -1026,14 +1033,7 @@ function tidyContent(string $content, string $file, array $rules = []): array
     $logs = [];
 
     if ($opt['trim_trailing_whitespace']) {
-        // *.inc files in the php-src repository and *.php files
-        if (preg_match('/\.php$/', $file)
-            || (isThisPhpSrc($opt['path']) && preg_match('/\.inc$/', $file))
-        ) {
-            $buffer = trimTrailingWhitespaceFromPhp($buffer);
-        } else {
-            $buffer = trimTrailingWhitespace($buffer);
-        }
+        $buffer = trimTrailingWhitespace($buffer);
     }
 
     if ($buffer !== $content) {
@@ -1079,14 +1079,7 @@ function tidyContent(string $content, string $file, array $rules = []): array
     }
 
     if ($opt['clean_space_before_tab']) {
-        // *.inc files in the php-src repository and *.php files
-        if (preg_match('/\.php$/', $file)
-            || (isThisPhpSrc($opt['path']) && preg_match('/\.inc$/', $file))
-        ) {
-            $buffer = cleanSpaceBeforeTabFromPhp($buffer);
-        } else {
-            $buffer = cleanSpaceBeforeTab($buffer);
-        }
+        $buffer = cleanSpaceBeforeTab($buffer);
     }
 
     if ($buffer !== $content) {
@@ -1295,6 +1288,46 @@ function tidyPhpTestFile(string $file): array
 }
 
 /**
+ * All *.php files and *.inc files in php-src repository have a dedicated tidying.
+ */
+function tidyPhpFile(string $content, string $file): array
+{
+    $opt = options();
+
+    $buffer = $content;
+    $logs = [];
+
+    if ($opt['trim_trailing_whitespace']) {
+        $buffer = trimTrailingWhitespaceFromPhp($buffer);
+    }
+
+    if ($buffer !== $content) {
+        $logs[] = 'trailing whitespace';
+        $content = $buffer;
+    }
+
+    if ($opt['clean_space_before_tab']) {
+        $buffer = cleanSpaceBeforeTabFromPhp($buffer);
+    }
+
+    if ($buffer !== $content) {
+        $logs[] = 'space before tab';
+        $content = $buffer;
+    }
+
+    $rules = [
+        'trim_trailing_whitespace' => false,
+        'clean_space_before_tab' => false,
+    ];
+
+    list($content, $bufferLogs) = tidyContent($buffer, $file, $rules);
+
+    $logs = array_merge($logs, $bufferLogs);
+
+    return [$content, $logs];
+}
+
+/**
  * Output log messages and save file.
  */
 function tidyFile(string $file): bool
@@ -1304,6 +1337,7 @@ function tidyFile(string $file): bool
     $original = file_get_contents($file);
 
     if ('.phpt' === substr($file, -5)) {
+        // *.phpt files
         if ('--TEST--' !== substr($original, 0, 8)) {
             output('**FAIL**  '.relative($file).': **invalid PHP test**');
 
@@ -1311,6 +1345,11 @@ function tidyFile(string $file): bool
         }
 
         list($cleaned, $logs) = tidyPhpTestFile($file);
+    } elseif (preg_match('/\.php$/', $file)
+        || (isThisPhpSrc($opt['path']) && preg_match('/\.inc$/', $file))
+    ) {
+        // *.inc files in the php-src repository and *.php files
+        list($cleaned, $logs) = tidyPhpFile($original, $file);
     } else {
         list($cleaned, $logs) = tidyContent($original, $file);
     }
