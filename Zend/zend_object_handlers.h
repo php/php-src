@@ -163,8 +163,8 @@ struct _zend_object_handlers {
 	zend_object_read_dimension_t			read_dimension;
 	zend_object_write_dimension_t			write_dimension;
 	zend_object_get_property_ptr_ptr_t		get_property_ptr_ptr; /* required */
-	zend_object_get_t						get;
-	zend_object_set_t						set;
+	zend_object_get_t						get; /* optional */
+	zend_object_set_t						set; /* optional */
 	zend_object_has_property_t				has_property; /* required */
 	zend_object_unset_property_t			unset_property; /* required */
 	zend_object_has_dimension_t				has_dimension;
