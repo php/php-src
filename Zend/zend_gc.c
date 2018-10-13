@@ -617,17 +617,15 @@ tail_call:
 	GC_REF_SET_BLACK(ref);
 
 	if (GC_TYPE(ref) == IS_OBJECT) {
-		zend_object_get_gc_t get_gc;
 		zend_object *obj = (zend_object*)ref;
 
-		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-		             (get_gc = obj->handlers->get_gc) != NULL)) {
+		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 			int n;
 			zval *zv, *end;
 			zval tmp;
 
 			ZVAL_OBJ(&tmp, obj);
-			ht = get_gc(&tmp, &zv, &n);
+			ht = obj->handlers->get_gc(&tmp, &zv, &n);
 			end = zv + n;
 			if (EXPECTED(!ht)) {
 				if (!n) return;
@@ -727,17 +725,15 @@ tail_call:
 		GC_REF_SET_COLOR(ref, GC_GREY);
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
-			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-		                 (get_gc = obj->handlers->get_gc) != NULL)) {
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
 				zval tmp;
 
 				ZVAL_OBJ(&tmp, obj);
-				ht = get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(&tmp, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return;
@@ -883,17 +879,15 @@ tail_call:
 		} else {
 			GC_REF_SET_COLOR(ref, GC_WHITE);
 			if (GC_TYPE(ref) == IS_OBJECT) {
-				zend_object_get_gc_t get_gc;
 				zend_object *obj = (zend_object*)ref;
 
-				if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-				             (get_gc = obj->handlers->get_gc) != NULL)) {
+				if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 					int n;
 					zval *zv, *end;
 					zval tmp;
 
 					ZVAL_OBJ(&tmp, obj);
-					ht = get_gc(&tmp, &zv, &n);
+					ht = obj->handlers->get_gc(&tmp, &zv, &n);
 					end = zv + n;
 					if (EXPECTED(!ht)) {
 						if (!n) return;
@@ -1023,11 +1017,9 @@ tail_call:
 		}
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
-			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-			             (get_gc = obj->handlers->get_gc) != NULL)) {
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
 				zval tmp;
@@ -1041,7 +1033,7 @@ tail_call:
 					*flags |= GC_HAS_DESTRUCTORS;
 				}
 				ZVAL_OBJ(&tmp, obj);
-				ht = get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(&tmp, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return count;
@@ -1192,17 +1184,15 @@ tail_call:
 		}
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
-			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-		                 (get_gc = obj->handlers->get_gc) != NULL)) {
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
 				zval tmp;
 
 				ZVAL_OBJ(&tmp, obj);
-				ht = get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(&tmp, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return;
