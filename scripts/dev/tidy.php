@@ -312,8 +312,13 @@ function getBlacklist(): array
         '/^Debug.*/',
         '/^x64.*/',
 
-        // PHP 7.1 specific
+        // PHP 7.1
         '/^stub\.c$/',
+
+        // PHP 7.1, 7.2, 7.3
+        '/^ext\/pcre\/pcrelib/',
+        '/^ext\/zip\/lib/',
+        '/^ext\/sqlite3\/libsqlite/',
     ]);
 }
 
