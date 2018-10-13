@@ -49,9 +49,8 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 				if (!(OBJ_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
 					GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
 
-					if (obj->handlers->dtor_obj
-					 && (obj->handlers->dtor_obj != zend_objects_destroy_object
-					  || obj->ce->destructor)) {
+					if (obj->handlers->dtor_obj != zend_objects_destroy_object
+							|| obj->ce->destructor) {
 						GC_ADDREF(obj);
 						obj->handlers->dtor_obj(obj);
 						GC_DELREF(obj);
@@ -161,9 +160,8 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 	if (!(OBJ_FLAGS(object) & IS_OBJ_DESTRUCTOR_CALLED)) {
 		GC_ADD_FLAGS(object, IS_OBJ_DESTRUCTOR_CALLED);
 
-		if (object->handlers->dtor_obj
-		 && (object->handlers->dtor_obj != zend_objects_destroy_object
-		  || object->ce->destructor)) {
+		if (object->handlers->dtor_obj != zend_objects_destroy_object
+				|| object->ce->destructor) {
 			GC_ADDREF(object);
 			object->handlers->dtor_obj(object);
 			GC_DELREF(object);

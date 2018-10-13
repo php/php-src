@@ -1036,9 +1036,8 @@ tail_call:
 				if (!GC_INFO(ref)) {
 					gc_add_garbage(ref);
 				}
-				if (obj->handlers->dtor_obj &&
-				    ((obj->handlers->dtor_obj != zend_objects_destroy_object) ||
-				     (obj->ce->destructor != NULL))) {
+				if (obj->handlers->dtor_obj != zend_objects_destroy_object ||
+						obj->ce->destructor != NULL) {
 					*flags |= GC_HAS_DESTRUCTORS;
 				}
 				ZVAL_OBJ(&tmp, obj);
@@ -1341,9 +1340,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 						GC_TRACE_REF(obj, "calling destructor");
 						GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
-						if (obj->handlers->dtor_obj
-						 && (obj->handlers->dtor_obj != zend_objects_destroy_object
-						  || obj->ce->destructor)) {
+						if (obj->handlers->dtor_obj != zend_objects_destroy_object
+								|| obj->ce->destructor) {
 							GC_ADDREF(obj);
 							obj->handlers->dtor_obj(obj);
 							GC_DELREF(obj);
