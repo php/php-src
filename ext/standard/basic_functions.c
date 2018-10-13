@@ -604,6 +604,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_combine, 0)
 	ZEND_ARG_INFO(0, keys)   /* ARRAY_INFO(0, keys, 0) */
 	ZEND_ARG_INFO(0, values) /* ARRAY_INFO(0, values, 0) */
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_array_until, 0)
+	ZEND_ARG_INFO(0, arg)
+	ZEND_ARG_INFO(0, callback)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ basic_functions.c */
 ZEND_BEGIN_ARG_INFO(arginfo_get_magic_quotes_gpc, 0)
@@ -3399,6 +3404,8 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_map,														arginfo_array_map)
 	PHP_FE(array_chunk,														arginfo_array_chunk)
 	PHP_FE(array_combine,													arginfo_array_combine)
+	PHP_FE(array_every,														arginfo_array_until)
+	PHP_FE(array_any,														arginfo_array_until)
 	PHP_FE(array_key_exists,												arginfo_array_key_exists)
 
 	/* aliases from array.c */

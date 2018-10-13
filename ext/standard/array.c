@@ -6406,6 +6406,82 @@ PHP_FUNCTION(array_combine)
 }
 /* }}} */
 
+static inline void php_array_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value) /* {{{ */
+{
+	zval *input;
+	zval args[2];
+	zend_ulong num_idx;
+	zend_string *str_idx;
+	zval *entry;
+	zval retval;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	HashTable *htbl;
+	int result = SUCCESS;
+	int found = 0;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY(input)
+		Z_PARAM_FUNC(fci, fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* (zval **)input points to an element of argument stack
+	 * the base pointer of which is subject to change.
+	 * thus we need to keep the pointer to the hashtable for safety */
+	htbl = Z_ARRVAL_P(input);
+
+	if (zend_hash_num_elements(htbl) == 0) {
+		RETURN_BOOL(!stop_value);
+	}
+
+	ZEND_HASH_FOREACH_KEY_VAL(htbl, num_idx, str_idx, entry) {
+		ZVAL_COPY(&args[0], entry);
+		if (str_idx) {
+			ZVAL_STR_COPY(&args[1], str_idx);
+		}
+		else {
+			ZVAL_LONG(&args[1], num_idx);
+		}
+
+		fci.param_count = 2;
+		fci.params = args;
+		fci.retval = &retval;
+		fci.no_separation = 0;
+
+		result = zend_call_function(&fci, &fci_cache);
+		zval_ptr_dtor(&args[0]);
+		zval_ptr_dtor(&args[1]);
+		if (result == FAILURE) {
+			return;
+		}
+
+		if (zend_is_true(&retval) == stop_value) {
+			RETURN_BOOL(stop_value);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (result == SUCCESS) {
+		RETURN_BOOL(!stop_value);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool array_every(array input, mixed predicate)
+   Determines whether the predicate holds for all elements in the array */
+PHP_FUNCTION(array_every)
+{
+	php_array_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto bool array_any(array input, mixed predicate)
+   Determines whether the predicate holds for at least one element in the array */
+PHP_FUNCTION(array_any)
+{
+	php_array_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
