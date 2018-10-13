@@ -99,8 +99,6 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 			if (c_var && *c_var) {
 				res = (char *) estrdup(c_var);
 				free_buffer = 1;
-			} else {
-				free_buffer = 0;
 			}
 			break;
 		case PARSE_COOKIE: /* Cookie data */
@@ -108,8 +106,6 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 			if (c_var && *c_var) {
 				res = (char *) estrdup(c_var);
 				free_buffer = 1;
-			} else {
-				free_buffer = 0;
 			}
 			break;
 		case PARSE_STRING: /* String data */
