@@ -175,7 +175,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
  aa. RETSIGTYPE has been removed from the generated php_config.h and should be
     replaced with void.
 
- bb. php_setcookie() now expects an additional samesite argument, and the 
+ bb. php_setcookie() now expects an additional samesite argument, and the
     url_encode parameter has been moved to the end. The signature is now:
     int php_setcookie(zend_string *name, zend_string *value, time_t expires,
                       zend_string *path, zend_string *domain, int secure,

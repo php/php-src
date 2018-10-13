@@ -237,13 +237,13 @@ readline:
     if PHP is linked against libreadline (rather than libedit).
 
 Standard:
-  . The --with-password-argon2[=dir] configure argument now provides support for 
-    both Argon2i and Argon2id hashes in the password_hash(), password_verify(), 
+  . The --with-password-argon2[=dir] configure argument now provides support for
+    both Argon2i and Argon2id hashes in the password_hash(), password_verify(),
     password_get_info(), and password_needs_rehash() functions. Passwords may be
     hashed and verified using the PASSWORD_ARGON2ID constant.
     Support for both Argon2i and Argon2id in the password_* functions now requires
     PHP be linked against libargon2 reference library >= 20161029.
-    (RFC: https://wiki.php.net/rfc/argon2_password_hash_enhancements). 
+    (RFC: https://wiki.php.net/rfc/argon2_password_hash_enhancements).
 
 ========================================
 3. Changes in SAPI modules
@@ -447,8 +447,8 @@ JSON:
   . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
     defines the set of allowed thousand separator chars.  The default (`"',."`)
     is fully backward compatible with former PHP versions.
-  . FILTER_SANITIZE_ADD_SLASHES has been added as an alias of the 'magic_quotes' 
-    filter (FILTER_SANITIZE_MAGIC_QUOTES). The 'magic_quotes' filter is subject 
+  . FILTER_SANITIZE_ADD_SLASHES has been added as an alias of the 'magic_quotes'
+    filter (FILTER_SANITIZE_MAGIC_QUOTES). The 'magic_quotes' filter is subject
 	to removal in future versions of PHP.
 
  FTP:

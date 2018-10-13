@@ -77,7 +77,7 @@ function count(arr,       n, i)
 END {
 	# order it correctly
 	out_count = 0;
-	
+
 	while (count(mods)) {
 		for (i = 0; i <= mod_count - 1; i++) {
 			if (i in mods) {

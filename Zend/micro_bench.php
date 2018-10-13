@@ -4,12 +4,12 @@ function hallo() {
 }
 
 function simpleucall($n) {
-  for ($i = 0; $i < $n; $i++) 
+  for ($i = 0; $i < $n; $i++)
     hallo();
 }
 
 function simpleudcall($n) {
-  for ($i = 0; $i < $n; $i++) 
+  for ($i = 0; $i < $n; $i++)
     hallo2();
 }
 
@@ -17,7 +17,7 @@ function hallo2() {
 }
 
 function simpleicall($n) {
-  for ($i = 0; $i < $n; $i++) 
+  for ($i = 0; $i < $n; $i++)
     func_num_args();
 }
 

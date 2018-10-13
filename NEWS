@@ -148,7 +148,7 @@ PHP                                                                        NEWS
     (Andrew Nester, Laruence, Anatol)
 
 - iconv:
-  . Fixed bug #68180 (iconv_mime_decode can return extra characters in a 
+  . Fixed bug #68180 (iconv_mime_decode can return extra characters in a
     header). (cmb)
   . Fixed bug #63839 (iconv_mime_decode_headers function is skipping headers).
     (cmb)
@@ -267,7 +267,7 @@ PHP                                                                        NEWS
     (cmb)
 
 - Filter:
-  . Added the 'add_slashes' sanitization mode (FILTER_SANITIZE_ADD_SLASHES). 
+  . Added the 'add_slashes' sanitization mode (FILTER_SANITIZE_ADD_SLASHES).
 	(Kalle)
   . Fixed bug #76366 (References in sub-array for filtering breaks the filter).
     (ZiHang Gao)
@@ -277,7 +277,7 @@ PHP                                                                        NEWS
   . Added fpm_get_status function. (Till Backhaus)
   . Fixed bug #69031 (Long messages into stdout/stderr are truncated
     incorrectly) - added new log related FPM configuration options:
-    log_limit, log_buffering and decorate_workers_output. (Jakub Zelenka) 
+    log_limit, log_buffering and decorate_workers_output. (Jakub Zelenka)
 
 - mbstring:
   . Fixed bug #76574 (use of undeclared identifiers INT_MAX and LONG_MAX). (cmb)
@@ -411,7 +411,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Improved PHP GC. (Dmitry, Nikita)
-  . Redesigned the old ext_skel program written in PHP, run: 
+  . Redesigned the old ext_skel program written in PHP, run:
     'php ext_skel.php' for all options. This means there are no dependencies,
     thus making it work on Windows out of the box. (Kalle)
   . Removed support for BeOS. (Kalle)
@@ -428,13 +428,13 @@ PHP                                                                        NEWS
   . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)
-  . Fixed bug #75220 (Segfault when calling is_callable on parent). 
+  . Fixed bug #75220 (Segfault when calling is_callable on parent).
     (andrewnester)
   . Fixed bug #69954 (broken links and unused config items in distributed ini
     files). (petk)
   . Fixed bug #74922 (Composed class has fatal error with duplicate, equal const
     properties). (pmmaga)
-  . Fixed bug #63911 (identical trait methods raise errors during composition). 
+  . Fixed bug #63911 (identical trait methods raise errors during composition).
     (pmmaga)
   . Fixed bug #75677 (Clang ignores fastcall calling convention on variadic
     function). (Li-Wen Hsu)
@@ -487,14 +487,14 @@ PHP                                                                        NEWS
   . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
 
 - intl:
-  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
+  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead
     of destination). (andrewnester)
 
 - JSON:
   . Added JSON_THROW_ON_ERROR flag. (Andrea)
 
 - LDAP:
-  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
+  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay.
     (Come)
   . Added full support for sending and parsing ldap controls (Come)
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
@@ -503,7 +503,7 @@ PHP                                                                        NEWS
   . Fixed bug #75871 (use pkg-config where available). (pmmaga)
 
 - litespeed:
-  . Fixed bug #75248 (Binary directory doesn't get created when building 
+  . Fixed bug #75248 (Binary directory doesn't get created when building
     only litespeed SAPI). (petk)
   . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
@@ -568,7 +568,7 @@ PHP                                                                        NEWS
     to readline_info() if linked against libreadline. (krageon)
 
 - Session:
-  . Fixed bug #74941 (session fails to start after having headers sent). 
+  . Fixed bug #74941 (session fails to start after having headers sent).
     (morozov)
 
 - SimpleXML:
@@ -580,7 +580,7 @@ PHP                                                                        NEWS
     used). (Anton Artamonov)
 
 - SPL:
-  . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
+  . Fixed bug #74977 (Appending AppendIterator leads to segfault).
     (Andrew Nester)
   . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach
     loop). (jhdxr)
@@ -589,7 +589,7 @@ PHP                                                                        NEWS
   . Fixed bug #75878 (RecursiveTreeIterator::setPostfix has wrong signature).
     (cmb)
   . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
-  . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
+  . Fixed bug #76131 (mismatch arginfo for splarray constructor).
     (carusogabriel)
 
 - SQLite3:
@@ -597,11 +597,11 @@ PHP                                                                        NEWS
 
 - Standard:
   . Added is_countable() function. (Gabriel Caruso)
-  . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
+  . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike,
     Philip Sharp)
   . Fixed unserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
-  . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
+  . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator
     that getrandom() is missing). (sarciszewski)
   . Fixed bug #74719 (fopen() should accept NULL as context). (Alexander Holman)
   . Fixed bug #69948 (path/domain are not sanitized in setcookie). (cmb)

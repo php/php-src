@@ -1,10 +1,10 @@
 #! /bin/sh
 
 # You can use this script if you want to use an external cdb lib. If you
-# compile php using --with-cdb the internal functions will be used and no 
+# compile php using --with-cdb the internal functions will be used and no
 # external library is used so that this script is not necessary.
 #
-# cdb-0.75 lacks support for installing header files and creating a 
+# cdb-0.75 lacks support for installing header files and creating a
 # library which programs can link against.  This shell script fills
 # the gap.
 

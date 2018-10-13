@@ -297,7 +297,7 @@ info (subcommands)
 
 - &lt;classinfo num="" /> with num having an integer value, indicating the number of loaded user-defined classes
 - Each class is enumerated with first a &lt;class>, then an optional &lt;parents> container and then a &lt;classsource> element
-- The &lt;parents> container contains the &lt;class> elements of the parent of the last &lt;class> element. 
+- The &lt;parents> container contains the &lt;class> elements of the parent of the last &lt;class> element.
 - &lt;class type="" flags="" name="" methodcount="" />
  - type: either "User" or "Internal"
  - flags: either "Interface", "Class" or "Abstract Class"

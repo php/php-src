@@ -43,9 +43,9 @@ pspell_new() and specifying the custom dictionary as the first parameter.
 The parameter probably should begin with '/' because otherwise it will
 be relative to $HOME, which is probably set to "/root". This is probably not
 what you want because you need write access for nobody to be able to write
-to a dictionary. Once the dictionary is open, you can use 
-pspell_add_to_personal() to add words to the wordlist and finally 
-pspell_save_wordlist() to save it. 
+to a dictionary. Once the dictionary is open, you can use
+pspell_add_to_personal() to add words to the wordlist and finally
+pspell_save_wordlist() to save it.
 
 Note that at this moment pspell_save_wordlist() will return TRUE, even if
 there was an error. This will be changed once pspell library is fixed.

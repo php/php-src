@@ -867,7 +867,7 @@ expect {
 }
 close
 
-set test "full-width katakanas to full-width hiragana" 
+set test "full-width katakanas to full-width hiragana"
 spawn tests/conv_kana EUC-JP "c"
 expect_after {
     "\[^\r\n\]*\r\n" { fail $test }

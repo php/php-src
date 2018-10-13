@@ -8,32 +8,32 @@
 [options] [
 .B \-f\fP ]
 .IR file
-[[\-\-] 
+[[\-\-]
 .IR args.\|.\|. ]
 .LP
 .B @program_prefix@php
-[options] 
-.B \-r 
+[options]
+.B \-r
 .IR code
 [[\-\-]
 .IR args.\|.\|. ]
 .LP
 .B @program_prefix@php
-[options] [\-B 
+[options] [\-B
 .IR begin_code ]
-.B \-R 
+.B \-R
 .IR code
-[\-E 
+[\-E
 .IR end_code ]
 [[\-\-]
 .IR args.\|.\|. ]
 .LP
 .B @program_prefix@php
-[options] [\-B 
+[options] [\-B
 .IR begin_code ]
-.B \-F 
+.B \-F
 .IR file
-[\-E 
+[\-E
 .IR end_code ]
 [[\-\-]
 .IR args.\|.\|. ]
@@ -51,39 +51,39 @@
 .IR docroot ]
 .LP
 .SH DESCRIPTION
-\fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for 
+\fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for
 Web development and can be embedded into HTML. This is the command line interface
 that enables you to do the following:
 .P
-You can parse and execute files by using parameter \-f followed by the name of the 
-.IR file 
+You can parse and execute files by using parameter \-f followed by the name of the
+.IR file
 to be executed.
 .LP
-Using parameter \-r you can directly execute PHP 
-.IR code 
+Using parameter \-r you can directly execute PHP
+.IR code
 simply as you would do inside a
 .B \.php
-file when using the 
-.B eval() 
+file when using the
+.B eval()
 function.
 .LP
 It is also possible to process the standard input line by line using either
 the parameter \-R or \-F. In this mode each separate input line causes the
-.IR code 
-specified by \-R or the 
+.IR code
+specified by \-R or the
 .IR file
 specified by \-F to be executed.
 You can access the input line by \fB$argn\fP. While processing the input lines
-.B $argi 
+.B $argi
 contains the number of the actual line being processed. Further more
-the parameters \-B and \-E can be used to execute 
+the parameters \-B and \-E can be used to execute
 .IR code
 (see \-r) before and
 after all input lines have been processed respectively. Notice that the
 input is read from
 .B STDIN
-and therefore reading from 
-.B STDIN 
+and therefore reading from
+.B STDIN
 explicitly changes the next input line or skips input lines.
 .LP
 PHP also contains an built-in web server for application development purpose. By using the \-S option where
@@ -92,9 +92,9 @@ point to a local address and port PHP will listen to HTTP requests on that addre
 .B docroot
 passed by the \-t option.
 .LP
-If none of \-r \-f \-B \-R \-F \-E or \-S is present but a single parameter is given 
-then this parameter is taken as the filename to parse and execute (same as 
-with \-f). If no parameter is present then the standard input is read and 
+If none of \-r \-f \-B \-R \-F \-E or \-S is present but a single parameter is given
+then this parameter is taken as the filename to parse and execute (same as
+with \-f). If no parameter is present then the standard input is read and
 executed.
 .SH OPTIONS
 .TP 15
@@ -140,8 +140,8 @@ Measure execution time of script repeated count times (CGI only).
 .TP
 .PD 1
 .B \-c \fIpath\fP|\fIfile\fP
-Look for 
-.B php.ini 
+Look for
+.B php.ini
 file in the directory
 .IR path
 or use the specified
@@ -152,8 +152,8 @@ or use the specified
 .TP
 .PD 1
 .B \-n
-No 
-.B php.ini 
+No
+.B php.ini
 file will be used
 .TP
 .PD 0
@@ -161,8 +161,8 @@ file will be used
 .TP
 .PD 1
 .B \-d \fIfoo\fP[=\fIbar\fP]
-Define INI entry 
-.IR foo 
+Define INI entry
+.IR foo
 with value
 .IR bar
 .TP
@@ -174,7 +174,7 @@ Generate extended information for debugger/profiler
 .TP
 .PD 1
 .B \-f \fIfile\fP
-Parse and execute 
+Parse and execute
 .IR file
 .TP
 .PD 0
@@ -189,8 +189,8 @@ This help
 .TP
 .PD 1
 .B \-H
-Hide script name (\fIfile\fP) and parameters (\fIargs\.\.\.\fP) from external 
-tools. For example you may want to use this when a php script is started as 
+Hide script name (\fIfile\fP) and parameters (\fIargs\.\.\.\fP) from external
+tools. For example you may want to use this when a php script is started as
 a daemon and the command line contains sensitive data such as passwords.
 .TP
 .PD 0
@@ -219,7 +219,7 @@ Show compiled in modules
 .TP
 .PD 1
 .B \-r \fIcode\fP
-Run PHP 
+Run PHP
 .IR code
 without using script tags
 .B '<?..?>'
@@ -229,7 +229,7 @@ without using script tags
 .TP
 .PD 1
 .B \-B \fIbegin_code\fP
-Run PHP 
+Run PHP
 .IR begin_code
 before processing input lines
 .TP
@@ -238,7 +238,7 @@ before processing input lines
 .TP
 .PD 1
 .B \-R \fIcode\fP
-Run PHP 
+Run PHP
 .IR code
 for every input line
 .TP
@@ -247,7 +247,7 @@ for every input line
 .TP
 .PD 1
 .B \-F \fIfile\fP
-Parse and execute 
+Parse and execute
 .IR file
 for every input line
 .TP
@@ -256,7 +256,7 @@ for every input line
 .TP
 .PD 1
 .B \-E \fIend_code\fP
-Run PHP 
+Run PHP
 .IR end_code
 after processing all input lines
 .TP
@@ -300,14 +300,14 @@ Output source with stripped comments and whitespace
 .TP
 .PD 1
 .B \-z \fIfile\fP
-Load Zend extension 
+Load Zend extension
 .IR file
 .TP
 .IR args.\|.\|.
-Arguments passed to script. Use 
+Arguments passed to script. Use
 .B '\-\-'
 .IR args
-when first argument starts with 
+when first argument starts with
 .B '\-'
 or script is read from stdin
 .TP
@@ -369,7 +369,7 @@ Show configuration file names
 The configuration file for the CLI version of PHP.
 .TP
 .B php.ini
-The standard configuration file will only be used when 
+The standard configuration file will only be used when
 .B php\-cli.ini
 cannot be found.
 .SH EXAMPLES
@@ -388,24 +388,24 @@ have such a function. For dba use:
 .RE
 .TP
 \fI@program_prefix@php \-R 'echo strip_tags($argn)."\\n";'\fP
-This PHP command strips off the HTML tags line by line and outputs the 
+This PHP command strips off the HTML tags line by line and outputs the
 result. To see how it works you can first look at the following PHP command
 \'\fIphp \-d html_errors=1 \-i\fP\' which uses PHP to output HTML formatted
-configuration information. If you then combine those two 
+configuration information. If you then combine those two
 \'\fIphp \.\.\.|php \.\.\.\fP\' you'll see what happens.
 .TP
 \fI@program_prefix@php \-E 'echo "Lines: $argi\\n";'\fP
 Using this PHP command you can count the lines being input.
 .TP
 \fI@program_prefix@php \-R '@$l+=count(file($argn));' \-E 'echo "Lines:$l\\n";'\fP
-In this example PHP expects each input line being a file. It counts all lines 
-of the files specified by each input line and shows the summarized result. 
+In this example PHP expects each input line being a file. It counts all lines
+of the files specified by each input line and shows the summarized result.
 You may combine this with tools like find and change the php scriptlet.
 .TP
 \fI@program_prefix@php \-R 'echo "$argn\\n"; fgets(STDIN);'\fP
-Since you have access to STDIN from within \-B \-R \-F and \-E you can skip 
-certain input lines with your code. But note that in such cases $argi only 
-counts the lines being processed by php itself. Having read this you will 
+Since you have access to STDIN from within \-B \-R \-F and \-E you can skip
+certain input lines with your code. But note that in such cases $argi only
+counts the lines being processed by php itself. Having read this you will
 guess what the above program does: skipping every second input line.
 .SH TIPS
 You can use a shebang line to automatically invoke php
@@ -449,7 +449,7 @@ A List of active developers can be found here:
 .B http://www.php.net/credits.php
 .PD 1
 .P
-And last but not least PHP was developed with the help of a huge amount of 
+And last but not least PHP was developed with the help of a huge amount of
 contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
