@@ -131,11 +131,7 @@ PHP_METHOD(sqlite3, open)
 		fullpath = filename;
 	}
 
-#if SQLITE_VERSION_NUMBER >= 3005000
 	rc = sqlite3_open_v2(fullpath, &(db_obj->db), flags, NULL);
-#else
-	rc = sqlite3_open(fullpath, &(db_obj->db));
-#endif
 	if (rc != SQLITE_OK) {
 		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s",
 #ifdef HAVE_SQLITE3_ERRSTR
