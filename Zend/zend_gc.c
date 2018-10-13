@@ -1392,11 +1392,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 						(GC_TYPE_INFO(obj) & ~GC_TYPE_MASK);
 					if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 						GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
-						if (obj->handlers->free_obj) {
-							GC_ADDREF(obj);
-							obj->handlers->free_obj(obj);
-							GC_DELREF(obj);
-						}
+						GC_ADDREF(obj);
+						obj->handlers->free_obj(obj);
+						GC_DELREF(obj);
 					}
 
 					ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(obj->handle);
