@@ -3114,7 +3114,7 @@ get_function_via_handler:
 				fcc->function_handler = zend_get_call_trampoline_func(ce_org, mname, 0);
 				call_via_handler = 1;
 				retval = 1;
-			} else if (fcc->object->handlers->get_method) {
+			} else {
 				fcc->function_handler = fcc->object->handlers->get_method(&fcc->object, mname, NULL);
 				if (fcc->function_handler) {
 					if (strict_class &&
