@@ -1351,7 +1351,7 @@ function trimTrailingWhitespaceFromPhp(string $source): string
         return $source;
     }
 
-    return tidyPhpCode($source, function ($src) {
+    return tidyPhpCode($source, function (string $src) {
         return trimTrailingWhitespace($src);
     });
 }
@@ -1361,7 +1361,7 @@ function trimTrailingWhitespaceFromPhp(string $source): string
  */
 function cleanSpaceBeforeTabFromPhp(string $source): string
 {
-    return tidyPhpCode($source, function ($src) {
+    return tidyPhpCode($source, function (string $src) {
         return cleanSpaceBeforeTab($src);
     });
 }
@@ -1407,10 +1407,12 @@ function tidyPhpCode(string $source, callable $callback): string
                     $buffer = '';
                 break;
                 case T_CONSTANT_ENCAPSED_STRING:
-                    $before = (preg_match('/[ \t]+$/', $buffer, $matches)) ? $matches[0] : '';
+                    $before = (preg_match('/[ \t]+\z/', $buffer, $matches)) ? $matches[0] : '';
                     $content .= $callback($buffer);
-                    $after = (preg_match('/[ \t]+$/', $content, $matches)) ? $matches[0] : '';
-                    if ($before !== $after) {
+                    $after = (preg_match('/[ \t]+\z/', $content, $matches)) ? $matches[0] : '';
+
+                    // When trimming trailing whitespace, the final trailing ws should stay
+                    if ($before !== $after && $after === '') {
                         $content .= $before;
                     }
 
