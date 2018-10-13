@@ -12,11 +12,11 @@
 // {{{ class PharCommand extends CLICommand
 /**
  * PharCommand class
- * 
+ *
  * This class handles the handling of the phar
  * commands. It will be used from command line/console
  * in order to retrieve and execute phar functions.
- * 
+ *
  * @ingroup Phar
  * @brief   Phar console command implementation
  * @author  Marcus Boerger
@@ -47,7 +47,7 @@ class PharCommand extends CLICommand
 	// {{{ static function phar_args
 	/**
 	 * Phar arguments
-	 * 
+	 *
 	 * This function contains all the phar commands
 	 *
 	 * @param  string $which    Which argument is chosen.
@@ -185,7 +185,7 @@ class PharCommand extends CLICommand
 	// {{{ static function strEndsWith
 	/**
 	 * String Ends With
-	 * 
+	 *
 	 * Whether a string ends with another needle.
 	 *
 	 * @param string $haystack  The haystack
@@ -285,7 +285,7 @@ class PharCommand extends CLICommand
 	// {{{ static function cli_arg_typ_pharfile
 	/**
 	 * Argument type existing Phar file
-	 * 
+	 *
 	 * Return filename of an existing Phar.
 	 *
 	 * @param  string $arg      The file in the phar to open.
@@ -312,10 +312,10 @@ class PharCommand extends CLICommand
 	// {{{ static function cli_arg_typ_pharurl
 	/**
 	 * Argument type Phar url-like
-	 * 
+	 *
 	 * Check the argument as cli_arg_Typ_phar and return its name prefixed
 	 * with phar://
-	 * 
+	 *
 	 * Ex:
 	 * <code>
 	 *  $arg = 'pharchive.phar/file.php';
@@ -544,9 +544,9 @@ class PharCommand extends CLICommand
 	// {{{ function cli_cmd_run_pack
 	/**
 	 * Pack a new Phar
-	 * 
+	 *
 	 * This function will try to pack a new Phar archive.
-	 * 
+	 *
 	 * @see Exit to make sure that we are done.
 	 */
 	public function cli_cmd_run_pack()
@@ -617,7 +617,7 @@ class PharCommand extends CLICommand
 	 *
 	 * This function will take a directory and iterate through
 	 * it and get the files to insert into the Phar archive.
-	 * 
+	 *
 	 * @param Phar        $phar      The phar object.
 	 * @param string      $input     The input directory
 	 * @param string      $regex     The regex used in RegexIterator.
@@ -712,7 +712,7 @@ class PharCommand extends CLICommand
 	// {{{ public function phar_dir_operation
 	/**
 	 * Directory operations
-	 * 
+	 *
 	 * Phar directory operations.
 	 *
 	 * @param RecursiveIteratorIterator $dir  The recursiveIteratorIterator object.
@@ -801,9 +801,9 @@ class PharCommand extends CLICommand
 	// {{{ public function cli_cmd_run_tree
 	/**
 	 * Cli Command Run Tree
-	 * 
+	 *
 	 * Set the phar_dir_operation with a directorygraphiterator.
-	 * 
+	 *
 	 * @see DirectoryGraphIterator
 	 * @see $this->phar_dir_operation
 	 *
@@ -834,7 +834,7 @@ class PharCommand extends CLICommand
 	// {{{ static function cli_cmd_arg_extract
 	/**
 	 * Cli Command Arguments Extract
-	 * 
+	 *
 	 * The arguments for the extract function.
 	 *
 	 * @return array  The arguments for the extraction.
@@ -855,7 +855,7 @@ class PharCommand extends CLICommand
 	// {{{ public function cli_cmd_run_extract
 	/**
 	 * Run Extract
-	 * 
+	 *
 	 * Run the extraction of a phar Archive.
 	 *
 	 * @see $this->phar_dir_operation
@@ -889,7 +889,7 @@ class PharCommand extends CLICommand
 	// {{{ public function phar_dir_extract
 	/**
 	 * Extract to a directory
-	 * 
+	 *
 	 * This function will extract the content of a Phar
 	 * to a directory and create new files and directories
 	 * depending on the permissions on that folder.
@@ -1085,7 +1085,7 @@ class PharCommand extends CLICommand
 	// {{{ public function cli_cmd_run_stub_get
 	/**
 	 * Cli Command Run Stub
-	 * 
+	 *
 	 * Get arguments and store them into a stub.
 	 *
 	 * @param arguments $args
@@ -1102,7 +1102,7 @@ class PharCommand extends CLICommand
 	// {{{ public function cli_cmd_inf_compress
 	/**
 	 * Cli Command Inf Compress
-	 * 
+	 *
 	 * Cli Command compress informations
 	 *
 	 * @return string A description of the command.

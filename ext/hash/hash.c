@@ -636,7 +636,7 @@ PHP_FUNCTION(hash_hkdf)
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
 		RETURN_FALSE;
 	}
-	
+
 	if (!php_hash_is_crypto(ZSTR_VAL(algo), ZSTR_LEN(algo))) {
 		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
 		RETURN_FALSE;

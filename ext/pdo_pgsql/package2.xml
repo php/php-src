@@ -45,7 +45,7 @@ This PECL release corresponds to PHP 5.1.3.
 - Fixed bug #36176 (PDO_PGSQL - PDO::exec() does not return number of rows
   affected by the operation). (Ilia)
 - Fixed prepared statement name conflict handling in PDO_PGSQL. (Thies, Ilia)
-- repackage with package2.xml 
+- repackage with package2.xml
 - Added PDO::pgsqlLOBCreate(), PDO::pgsqlLOBOpen() and PDO::pgsqlLOBUnlink().
 
 You require PostgreSQL client libraries installed on the machine where you

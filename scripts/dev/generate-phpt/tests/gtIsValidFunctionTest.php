@@ -20,7 +20,7 @@ class gtIsValidFunctionTest extends PHPUnit_Framework_TestCase {
     $ch = new gtIsValidFunction();
     $this->assertFalse($ch->check($clo));
   }
-  
+
   public function testNotSupplied() {
 
     $clo = new gtCommandLineOptions();
@@ -28,7 +28,7 @@ class gtIsValidFunctionTest extends PHPUnit_Framework_TestCase {
     $ch = new gtIsValidFunction();
     $this->assertTrue($ch->check($clo));
   }
-  
+
   public function testMessage() {
 
     $clo = new gtCommandLineOptions();

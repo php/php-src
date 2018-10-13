@@ -152,11 +152,11 @@ if test "$PHP_GDBM" != "no"; then
   if test -n "$THIS_INCLUDE"; then
     PHP_CHECK_LIBRARY(gdbm, gdbm_open, [
       AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-      AC_DEFINE(DBA_GDBM, 1, [ ]) 
+      AC_DEFINE(DBA_GDBM, 1, [ ])
       THIS_LIBS=gdbm
     ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
   fi
-    
+
   PHP_DBA_STD_ASSIGN
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
@@ -177,12 +177,12 @@ if test "$PHP_NDBM" != "no"; then
       break
     fi
   done
-  
+
   if test -n "$THIS_INCLUDE"; then
     for LIB in ndbm db1 c; do
       PHP_CHECK_LIBRARY($LIB, dbm_open, [
         AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_NDBM, 1, [ ]) 
+        AC_DEFINE(DBA_NDBM, 1, [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -291,7 +291,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     ])
   fi
   if test -n "$THIS_LIBS"; then
-    AC_DEFINE(DBA_DB$1, 1, [ ]) 
+    AC_DEFINE(DBA_DB$1, 1, [ ])
     if test -n "$THIS_INCLUDE"; then
       AC_DEFINE_UNQUOTED(DB$1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
     fi
@@ -533,7 +533,7 @@ if test "$PHP_DBM" != "no"; then
           AC_DEFINE_UNQUOTED(DBM_VERSION, "DBM", [ ])
           AC_MSG_RESULT(no)
         fi
-        AC_DEFINE(DBA_DBM, 1, [ ]) 
+        AC_DEFINE(DBA_DBM, 1, [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -541,7 +541,7 @@ if test "$PHP_DBM" != "no"; then
       fi
     done
   fi
-  
+
   PHP_DBA_STD_ASSIGN
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
@@ -587,7 +587,7 @@ elif test "$PHP_CDB" != "no"; then
     for LIB in cdb c; do
       PHP_CHECK_LIBRARY($LIB, cdb_read, [
         AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_CDB, 1, [ ]) 
+        AC_DEFINE(DBA_CDB, 1, [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -620,7 +620,7 @@ PHP_DBA_STD_RESULT(FlatFile, FlatFile)
 
 dnl
 dnl Extension setup
-dnl 
+dnl
 AC_MSG_CHECKING([whether to enable DBA interface])
 if test "$HAVE_DBA" = "1"; then
   if test "$ext_shared" = "yes"; then

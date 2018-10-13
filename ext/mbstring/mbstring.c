@@ -3107,7 +3107,7 @@ PHP_FUNCTION(mb_strimwidth)
 	if (from < 0) {
 		from += swidth;
 	}
-		
+
 	if (from < 0 || (size_t)from > str_len) {
 		php_error_docref(NULL, E_WARNING, "Start position is out of range");
 		RETURN_FALSE;

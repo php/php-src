@@ -21,7 +21,7 @@
       echo $_COOKIE['foo'];
       break;
     case 'encoding':
-      echo $_SERVER['HTTP_ACCEPT_ENCODING'];  
+      echo $_SERVER['HTTP_ACCEPT_ENCODING'];
       break;
     case 'contenttype':
       header('Content-Type: text/plain;charset=utf-8');

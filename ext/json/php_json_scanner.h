@@ -34,7 +34,7 @@ typedef struct _php_json_scanner {
 	php_json_ctype *pstr;           /* string pointer for escapes conversion */
 	zval value;                     /* value */
 	int str_esc;                    /* number of extra characters for escaping */
-	int state;                      /* condition state */             
+	int state;                      /* condition state */
 	int options;                   /* options */
 	php_json_error_code errcode;    /* error type if there is an error */
 } php_json_scanner;

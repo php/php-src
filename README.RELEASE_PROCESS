@@ -32,7 +32,7 @@ team (Bjori) on hand.
 6. Verify the tags to be extra sure everything was tagged properly.
 
 7. Moving extensions from/to PECL requires write access to the destination.
-Most developers should have this. 
+Most developers should have this.
 
 Moving extensions from php-src to PECL
 - Checkout the pecl directory, most likely you want a sparse-root checkout
@@ -110,7 +110,7 @@ those are made, they should be placed into the same directory as the source snap
 Getting the non stable release (alpha/beta/RC) announced
 --------------------------------------------------------
 
-1. Send an email **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` 
+1. Send an email **To** ``internals@lists.php.net`` and ``php-general@lists.php.net``
 lists pointing out "the location of the release" and "the possible release date of
 either the next RC, or the final release". Include in this information the verification
 information output by ``gen_verify_stub``.
@@ -182,7 +182,7 @@ Check if the pear files are updated (phar).
   ``gpg -u YOUREMAIL --armor --detach-sign php-X.Y.Z.tar.xxx``
 
 11. Commit and push all the tarballs and signature files to web/php-distributions.git,
-    then update the git submodule reference in web/php.git: 
+    then update the git submodule reference in web/php.git:
     ``git submodule init;
     git submodule update;
     cd distributions;
@@ -252,7 +252,7 @@ f.e. ``ChangeLog-5.php`` from the NEWS file
   IV. ``s/Fixed PECL bug #\([0-9]\+\)/<?php peclbugfix(\1); ?>/``
 
   V. ``s/FR #\([0-9]\+\)/FR <?php bugl(\1); ?>/``
-  
+
   e. You may want to try php-web/bin/news2html to automate this task
 
 6. Add a short notice to phpweb stating that there is a new release, and

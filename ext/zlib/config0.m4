@@ -11,8 +11,8 @@ PHP_ARG_WITH(zlib-dir,if the location of ZLIB install directory is defined,
 if test "$PHP_ZLIB" != "no" || test "$PHP_ZLIB_DIR" != "no"; then
   PHP_NEW_EXTENSION(zlib, zlib.c zlib_fopen_wrapper.c zlib_filter.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(ZLIB_SHARED_LIBADD)
-  
-  if test "$PHP_ZLIB" != "yes" -a "$PHP_ZLIB" != "no"; then 
+
+  if test "$PHP_ZLIB" != "yes" -a "$PHP_ZLIB" != "no"; then
     if test -f $PHP_ZLIB/include/zlib/zlib.h; then
       ZLIB_DIR=$PHP_ZLIB
       ZLIB_INCDIR=$ZLIB_DIR/include/zlib
@@ -20,7 +20,7 @@ if test "$PHP_ZLIB" != "no" || test "$PHP_ZLIB_DIR" != "no"; then
       ZLIB_DIR=$PHP_ZLIB
       ZLIB_INCDIR=$ZLIB_DIR/include
     fi
-  else 
+  else
     for i in /usr/local /usr $PHP_ZLIB_DIR; do
       if test -f $i/include/zlib/zlib.h; then
         ZLIB_DIR=$i
@@ -31,13 +31,13 @@ if test "$PHP_ZLIB" != "no" || test "$PHP_ZLIB_DIR" != "no"; then
       fi
     done
   fi
-  
+
   if test -z "$ZLIB_DIR"; then
     AC_MSG_ERROR(Cannot find zlib)
   fi
 
   case $ZLIB_DIR in
-  /usr) ac_extra= ;; 
+  /usr) ac_extra= ;;
   *) ac_extra=-L$ZLIB_DIR/$PHP_LIBDIR ;;
   esac
 
@@ -49,7 +49,7 @@ if test "$PHP_ZLIB" != "no" || test "$PHP_ZLIB_DIR" != "no"; then
   fi
 
   PHP_CHECK_LIBRARY(z, gzgets, [
-    AC_DEFINE(HAVE_ZLIB,1,[ ]) 
+    AC_DEFINE(HAVE_ZLIB,1,[ ])
   ],[
     AC_MSG_ERROR(ZLIB extension requires gzgets in zlib)
   ],[

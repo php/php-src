@@ -233,7 +233,7 @@ void intl_errors_set_code( intl_error* err, UErrorCode err_code )
 void intl_register_IntlException_class( void )
 {
 	zend_class_entry ce;
-	
+
 	/* Create and register 'IntlException' class. */
 	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
 	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,

@@ -14,7 +14,7 @@ $PREFIX source needs to be installed in a folder that contains the version
 number, e.g. ${PREFIX}5 or ${PREFIX}5b2
 EOH
 fi
-	
+
 echo "Usage:"
 echo "$0 <release> <version>"
 echo
@@ -78,7 +78,7 @@ sh ./configure --prefix=/usr \
 make
 mv sapi/cgi/php php.keepme
 
-# then the apache module 
+# then the apache module
 test -f config.cache && rm -f config.cache
 sh ./configure --prefix=/usr \
 	--with-apxs=/usr/sbin/apxs \
@@ -193,7 +193,7 @@ SRCDIR=${RPMBASE}/SOURCES
 (
 make clean
 find . -name config.cache -exec rm -f '{}' \;
-cd .. 
+cd ..
 tar czvf ${SRCDIR}/${TAR} $TARDIR )
 
 cp -a $SPEC $SPECDIR/${SPEC}

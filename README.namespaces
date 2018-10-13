@@ -51,7 +51,7 @@ DB\connect();
 The use statement only defines name aliasing. It may create name alias for
 namespace or class. The simple form of statement "use A\B\C\D;" is
 equivalent to "use A\B\C\D as D;". The use statement can be used at any
-time in the global scope (not inside function/class) and takes effect from 
+time in the global scope (not inside function/class) and takes effect from
 the point of definition down to the end of file. It is recommended however to
 place the use statements at the beginning of the file. The use statements have
 effect only on the file where they appear.
@@ -60,13 +60,13 @@ The special "empty" namespace (\ prefix) is useful as explicit global
 namespace qualification. All class and function names started from \
 interpreted as global.
 
-<?php 
+<?php
 namespace A\B\C;
 
 $con = \mysql_connect(...);
 ?>
 
-A special constant __NAMESPACE__ contains the name of the current namespace. 
+A special constant __NAMESPACE__ contains the name of the current namespace.
 It can be used to construct fully-qualified names to pass them as callbacks.
 
 <?php
@@ -88,19 +88,19 @@ it is translated to "A\B\C\D\e()".
 2) unqualified class names translated during compilation according to
 current import rules. So if we have "use A\B\C" and then "new C()" it
 is translated to "new A\B\C()".
-3) inside namespace, calls to unqualified functions that are defined in 
-current namespace (and are known at the time the call is parsed) are 
+3) inside namespace, calls to unqualified functions that are defined in
+current namespace (and are known at the time the call is parsed) are
 interpreted as calls to these namespace functions.
-4) inside namespace, calls to unqualified functions that are not defined 
-in current namespace are resolved at run-time. The call to function foo() 
-inside namespace (A\B) first tries to find and call function from current 
+4) inside namespace, calls to unqualified functions that are not defined
+in current namespace are resolved at run-time. The call to function foo()
+inside namespace (A\B) first tries to find and call function from current
 namespace A\B\foo() and if it doesn't exist PHP tries to call internal
-function foo(). Note that using foo() inside namespace you can call only 
+function foo(). Note that using foo() inside namespace you can call only
 internal PHP functions, however using \foo() you are able to call any
 function from the global namespace.
 5) unqualified class names are resolved at run-time. E.q. "new Exception()"
-first tries to use (and autoload) class from current namespace and in case 
-of failure uses internal PHP class. Note that using "new A" in namespace 
+first tries to use (and autoload) class from current namespace and in case
+of failure uses internal PHP class. Note that using "new A" in namespace
 you can only create class from this namespace or internal PHP class, however
 using "new \A" you are able to create any class from the global namespace.
 6) Calls to qualified functions are resolved at run-time. Call to

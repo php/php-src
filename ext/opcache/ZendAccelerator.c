@@ -2023,7 +2023,7 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 			zend_string *resolved_path;
 			int key_length;
 			char *key = NULL;
-			
+
 			if (!ZCG(accel_directives).revalidate_path) {
 				/* lookup by "not-real" path */
 				key = accel_make_persistent_key(filename, filename_len, &key_length);

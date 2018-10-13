@@ -102,7 +102,7 @@ class SOAP_Interop_GroupI {
       return array("return"=>$boolean->inputBoolean);
     }
 
-    function echoComplexTypeAsSimpleTypes($input) 
+    function echoComplexTypeAsSimpleTypes($input)
     {
     	if (isset($input->inputComplexType)) {
     	  $ret = array("outputInteger" => $input->inputComplexType->varInt,
@@ -116,7 +116,7 @@ class SOAP_Interop_GroupI {
 	    }
 	  }
 
-    function echoSimpleTypesAsComplexType($input) 
+    function echoSimpleTypesAsComplexType($input)
     {
    	  $ret = array("varInt"   => $input->inputInteger,
    	               "varFloat" => $input->inputFloat);

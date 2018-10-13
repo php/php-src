@@ -33,7 +33,7 @@ class RecursiveCompareDualIterator extends RecursiveIteratorIterator
 	}
 
 	/** Rewind iteration andcomparison process. Starting with $equal = true.
-	 */	
+	 */
 	function rewind()
 	{
 		$this->equal = true;
@@ -49,7 +49,7 @@ class RecursiveCompareDualIterator extends RecursiveIteratorIterator
 		             && !$this->getInnerIterator()->getRHS()->valid();
 	}
 
-	/** @return whether both inner iterators are valid and have identical 
+	/** @return whether both inner iterators are valid and have identical
 	 * current and key values or both are non valid.
 	 */
 	function areIdentical()
@@ -57,7 +57,7 @@ class RecursiveCompareDualIterator extends RecursiveIteratorIterator
 		return $this->equal && $this->getInnerIterator()->areIdentical();
 	}
 
-	/** @return whether both inner iterators are valid and have equal current 
+	/** @return whether both inner iterators are valid and have equal current
 	 * and key values or both are non valid.
 	 */
 	function areEqual()

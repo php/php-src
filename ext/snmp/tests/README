@@ -31,7 +31,7 @@ On Linux/FreeBSD
 - Install package net-snmpd (name may differ based on your distribution).
 - Replace config file (by default this is /etc/snmp/snmpd.conf on Linux and
   /usr/local/etc/snmp/snmpd.conf on FreeBSD) with snmpd.conf supplied.
-  
+
 Before launching daemon make sure that there is no file /var/net-snmp/snmpd.conf
 Delete it if exists. Ingoring to to so will fail SNMPv3 tests.
 

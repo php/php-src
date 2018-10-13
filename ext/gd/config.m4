@@ -356,7 +356,7 @@ dnl
 if test "$PHP_GD" != "no"; then
   PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GDLIB_CFLAGS))
 
-  if test "$GD_MODULE_TYPE" = "builtin"; then 
+  if test "$GD_MODULE_TYPE" = "builtin"; then
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
     GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"

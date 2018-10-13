@@ -2,7 +2,7 @@
 
 /**
  * Retrieves code snippets for adding to test cases
- * 
+ *
  */
 class gtCodeSnippet
 {
@@ -14,21 +14,21 @@ class gtCodeSnippet
    * @return array
    */
   public static function get($name) {
-    
+
     $filename = dirname(__FILE__) . '/codeSnippets/' . $name . '.txt';
 
     if (!file_exists($filename)) {
       throw new LogicException('The code snippet ' . $name . ' does not exist');
     }
-    
+
     $lines = file($filename);
     foreach($lines as $l) {
       $array[] = rtrim($l);
     }
     return $array;
   }
-  
-  
+
+
   /**
    * Append the code snippet on to an existing array
    *
@@ -47,11 +47,11 @@ class gtCodeSnippet
     foreach ($text as $t) {
       $array[] = rtrim($t);
     }
-    
+
     return $array;
   }
-  
-  
+
+
   /**
    * Appends blank entries on to an array
    *
@@ -64,9 +64,9 @@ class gtCodeSnippet
     for ($i=0; $i< $numberOfLines; $i++) {
       $array[] = "";
     }
-    
+
     return $array;
   }
-  
+
 }
 ?>

@@ -51,7 +51,7 @@ $object = new MyClass(); $object->method();
 The previous code will assign $object the handle of a new instance of
 the class MyClass and call one of its methods.
 
- 
+
 Consider the following code:
 
 1	class MyClass
@@ -60,18 +60,18 @@ Consider the following code:
 4		{
 5			$this->member = $value;
 6		}
-7	
+7
 8		function getMember()
 9		{
 10			return $this->member;
 11		}
 12	}
-13	
+13
 14	function foo($obj)
 15	{
 16		$obj->setMember("foo");
 17	}
-18	
+18
 19	$object = new MyClass();
 20	$object->setMember("bar");
 21	foo($object);

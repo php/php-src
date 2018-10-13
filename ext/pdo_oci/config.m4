@@ -29,7 +29,7 @@ AC_DEFUN([AC_PDO_OCI_VERSION],[
     AC_MSG_ERROR(Oracle libclntsh.$SHLIB_SUFFIX_NAME client library not found or its version is lower than 9)
   fi
   AC_MSG_RESULT($PDO_OCI_VERSION)
-])                                                                                                                                                                
+])
 
 AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
   AC_CHECK_SIZEOF(long int, 4)
@@ -57,8 +57,8 @@ AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
 
 PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
 [  --with-pdo-oci[=DIR]      PDO: Oracle OCI support. DIR defaults to \$ORACLE_HOME.
-                          Use --with-pdo-oci=instantclient,prefix,version 
-                          for an Oracle Instant Client SDK. 
+                          Use --with-pdo-oci=instantclient,prefix,version
+                          for an Oracle Instant Client SDK.
                           For example on Linux with 11.2 RPMs use:
                             --with-pdo-oci=instantclient,/usr,11.2
                           With 10.2 RPMs use:
@@ -187,7 +187,7 @@ You need to tell me where to find your Oracle Instant Client SDK, or set ORACLE_
   ])
 
   dnl
-  dnl Check if we need to add -locijdbc8 
+  dnl Check if we need to add -locijdbc8
   dnl
   PHP_CHECK_LIBRARY(clntsh, OCILobIsTemporary,
   [

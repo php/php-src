@@ -10,7 +10,7 @@ abstract class gtTestSubject {
   protected $allowedArgumentLists;
 
   protected $maximumArgumentList;
-  
+
   protected $initialisationStatements;
 
 
@@ -31,7 +31,7 @@ abstract class gtTestSubject {
   public function getOptionalArgumentNames() {
     return $this->optionalArgumentNames;
   }
-  
+
   public function setArgumentLists() {
     $this->setValidArgumentLists();
     $this->setExtraArgumentList();
@@ -48,7 +48,7 @@ abstract class gtTestSubject {
         $this->extraArgumentList .= "\$".$this->mandatoryArgumentNames[$i].", ";
       }
     }
-     
+
     if(count ($this->optionalArgumentNames) > 0) {
       for( $i = 0; $i < count( $this->optionalArgumentNames ); $i++) {
         $this->extraArgumentList .=  "\$".$this->optionalArgumentNames[$i].", ";
@@ -57,7 +57,7 @@ abstract class gtTestSubject {
 
     $this->extraArgumentList= $this->extraArgumentList. "\$extra_arg";
   }
-   
+
 
   /**
    * Return the list of arguments as it appears in the function call
@@ -105,7 +105,7 @@ abstract class gtTestSubject {
         $this->allowedArgumentLists[0] .= "\$".$this->mandatoryArgumentNames[$i].", ";
       }
     }
-     
+
     if(count ($this->optionalArgumentNames) > 0) {
       for( $i = 0; $i < count( $this->optionalArgumentNames ); $i++) {
         $this->allowedArgumentLists[] = $this->allowedArgumentLists[$i]."\$".$this->optionalArgumentNames[$i].", ";
@@ -153,7 +153,7 @@ abstract class gtTestSubject {
       }
     }
   }
-  
+
   /**
    * Return the initialisation statements
    *

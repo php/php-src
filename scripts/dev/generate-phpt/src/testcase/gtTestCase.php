@@ -80,11 +80,11 @@ abstract class gtTestCase {
    */
   public function ConstructCommonClosing() {
     $this->fileClosing();
-     
+
     if ($this->optionalSections->hasDone()) {
       $this->addDone();
     }
-     
+
     if ($this->optionalSections->hasClean()) {
       $this->addClean();
     }

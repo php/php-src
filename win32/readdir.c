@@ -127,7 +127,7 @@ struct dirent *readdir(DIR *dp)
 	strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME+1);
 	dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 	free(_tmp);
-	
+
 	dp->offset++;
 
 	dp->dent.d_ino = 1;

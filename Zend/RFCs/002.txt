@@ -4,7 +4,7 @@ Status:          declined
 Maintainer:      Stig S. Bakken <ssb@php.net>
 Created:         2001-09-08
 Modified:        2001-09-08
-                  
+
 
 1. Background/Need
 ==================
@@ -87,7 +87,7 @@ file.  If no "namespace" operator occurs in the file, it will be in
 the global namespace:
 
  1 namespace HTML;
- 2 
+ 2
  3 class Form {
  4     function Form() {
  5         // constructor
@@ -98,7 +98,7 @@ the global namespace:
 Or with the "nested" name syntax:
 
  1 namespace HTML:Form;
- 2 
+ 2
  3 class Image {
  4     var $src;
  5     function Image($src) {

@@ -16,18 +16,18 @@ function get_tds_version() {
 	return null;
 }
 
-if (false !== getenv('PDO_DBLIB_TEST_DSN')) 
+if (false !== getenv('PDO_DBLIB_TEST_DSN'))
 	$dsn = getenv('PDO_DBLIB_TEST_DSN');
 else
 	$dsn = 'dblib:host=localhost;dbname=test';
 
-if (false !== getenv('PDO_DBLIB_TEST_USER')) 	
+if (false !== getenv('PDO_DBLIB_TEST_USER'))
 	$user = getenv('PDO_DBLIB_TEST_USER');
 else
 	$user = 'php';
-	
-	
-if (false !== getenv('PDO_DBLIB_TEST_PASS')) 	
+
+
+if (false !== getenv('PDO_DBLIB_TEST_PASS'))
 	$pass = getenv('PDO_DBLIB_TEST_PASS');
 else
 	$pass = 'password';

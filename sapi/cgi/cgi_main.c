@@ -2189,8 +2189,8 @@ consult the installation file that came with this distribution, or visit \n\
 			int i;
 
 			ZeroMemory(&kid_cgi_ps, sizeof(kid_cgi_ps));
-			kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN; 
-			
+			kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN;
+
 			InitializeCriticalSection(&cleanup_lock);
 			SetConsoleCtrlHandler(fastcgi_cleanup, TRUE);
 
@@ -2294,10 +2294,10 @@ consult the installation file that came with this distribution, or visit \n\
 						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
 					}
 				}
-				
+
 				WaitForMultipleObjects(kids, kid_cgi_ps, FALSE, INFINITE);
 			}
-			
+
 parent_loop_end:
 			/* restore my env */
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf);
@@ -2773,7 +2773,7 @@ fastcgi_request_done:
 			}
 			/* end of fastcgi loop */
 		}
-		
+
 		if (request) {
 			fcgi_destroy_request(request);
 		}

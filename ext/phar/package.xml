@@ -18,7 +18,7 @@ write access is disabled by the phar.readonly ini variable.
 Executable phar archives can be created using the streams API or with the Phar class, if
 the phar.readonly ini variable is set to false.
 
-Full support for MD5 and SHA1 signatures is possible. Signatures can be required 
+Full support for MD5 and SHA1 signatures is possible. Signatures can be required
 if the ini variable phar.require_hash is set to true. When PECL extension hash is
 available then SHA-256 and SHA-512 signatures are supported as well.
 
@@ -1389,7 +1389,7 @@ Major feature functionality release
 * add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
 * add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
 * fix Phar::CanWrite() [Marcus]
-* add preliminary phar command (phar.php) [Marcus] 
+* add preliminary phar command (phar.php) [Marcus]
 * add phar command (phar.phar) [Marcus]
 * list all available compression methods using Phar::getSupportedCompression() [Marcus]
 * remove RINIT [Marcus]

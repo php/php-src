@@ -79,13 +79,13 @@ MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mysqli
-PRIMARY MAINTAINER:  Georg Richter <georg@php.net>, Andrey Hristov <andrey@php.net>,  Johannes Schlüter <johannes@php.net>, Ulf Wendel <uw@php.net>      
+PRIMARY MAINTAINER:  Georg Richter <georg@php.net>, Andrey Hristov <andrey@php.net>,  Johannes Schlüter <johannes@php.net>, Ulf Wendel <uw@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           mysqlnd
-PRIMARY MAINTAINER:  Andrey Hristov <andrey@php.net>, Johannes Schlüter <johannes@php.net>, Ulf Wendel <uw@php.net>      
+PRIMARY MAINTAINER:  Andrey Hristov <andrey@php.net>, Johannes Schlüter <johannes@php.net>, Ulf Wendel <uw@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -99,7 +99,7 @@ EXTENSION:           odbc
 PRIMARY MAINTAINER:  Daniel R. Kalowsky <kalowsky@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
-COMMENT:             Working 
+COMMENT:             Working
 -------------------------------------------------------------------------------
 EXTENSION:           pdo
 PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Wez Furlong <wez@php.net>
@@ -195,12 +195,12 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           libxml
-PRIMARY MAINTAINER:   Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net> 
+PRIMARY MAINTAINER:   Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xmlreader
-PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net> 
+PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------

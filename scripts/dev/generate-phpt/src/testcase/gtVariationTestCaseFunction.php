@@ -32,22 +32,22 @@ class gtVariationTestCaseFunction extends gtVariationTestCase {
    *
    */
   public function constructTestCase() {
-    $this->constructCommonHeaders(); 
-      
+    $this->constructCommonHeaders();
+
     $this->addVariationEcho();
-    
+
     $this->constructSubjectCalls();
-    
+
     $this->constructCommonClosing();
-    
+
   }
   public function testHeader() {
     $this->testCase[] = "--TEST--";
     $this->testCase[] = "Test function ".$this->subject->getName()."() by substituting argument ".$this->argumentNumber." with ".$this->variationData." values.";
   }
 
-  
-  public function subjectCalls() { 
+
+  public function subjectCalls() {
     $this->testCase = gtCodeSnippet::append('loopStart', $this->testCase);
 
     // Construct the argument list to pass to the function being tested
@@ -59,6 +59,6 @@ class gtVariationTestCaseFunction extends gtVariationTestCase {
     $this->testCase[] = "  var_dump(".$this->subject->getName()."( ".$list." ) );";
     $this->testCase = gtCodeSnippet::append('loopClose', $this->testCase);
   }
-   
+
 }
 ?>

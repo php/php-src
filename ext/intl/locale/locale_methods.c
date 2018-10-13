@@ -410,7 +410,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 		loc_name = intl_locale_get_default();
 		loc_name_len = strlen(loc_name);
 	}
-	
+
 	INTL_CHECK_LOCALE_LEN(loc_name_len);
 
 	/* Call ICU get */
@@ -439,7 +439,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 }
-/* }}} */ 
+/* }}} */
 
 /* {{{ proto static string Locale::getScript($locale)
  * gets the script for the $locale

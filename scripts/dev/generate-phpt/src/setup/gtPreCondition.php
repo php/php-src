@@ -5,10 +5,10 @@
  *
  */
 abstract class gtPreCondition {
-  
-  abstract public function check($clo); 
-  
-  abstract public function getMessage(); 
-  
+
+  abstract public function check($clo);
+
+  abstract public function getMessage();
+
 }
 ?>

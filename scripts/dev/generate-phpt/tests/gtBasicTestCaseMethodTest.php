@@ -6,7 +6,7 @@ class gtBasicTestCaseMethodTest extends PHPUnit_Framework_TestCase {
 
 
   public function testTestCase() {
-   
+
     $f = new gtMethod('DOMDocument','createAttribute');
     $f->setArgumentNames();
     $f->setArgumentLists();
@@ -18,11 +18,11 @@ class gtBasicTestCaseMethodTest extends PHPUnit_Framework_TestCase {
     $btc = gtBasicTestCaseMethod::getInstance($optSect, 'method');
     $btc->setMethod($f);
     $btc->constructTestCase();
-    
+
 
     $fs = $btc->toString();
     $this->assertTrue(is_string($fs));
-    
+
   }
 }
 ?>

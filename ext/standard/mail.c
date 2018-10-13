@@ -302,14 +302,14 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			time_t curtime;
 			zend_string *date_str;
 			size_t len;
-			
-			
+
+
 			time(&curtime);
 			date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
 			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, logline, PHP_EOL);
-			
+
 			php_mail_log_to_file(mail_log, tmp, len);
-			
+
 			zend_string_free(date_str);
 			efree(tmp);
 		}

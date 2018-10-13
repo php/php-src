@@ -3,7 +3,7 @@ $Id: README.NEW-OUTPUT-API 219039 2006-08-30 07:39:09Z mike $
 
 API adjustment to the old output control code:
 
-	Everything now resides beneath the php_output namespace, 
+	Everything now resides beneath the php_output namespace,
 	and there's an API call for every output handler op.
 
 	Checking output control layers status:
@@ -134,7 +134,7 @@ Output handler hooks
 Open questions
 
 	Should the userland API be adjusted and unified?
-	
+
 	Many bits of the manual (and very first implementation) do not comply
 	with the behaviour of the current (to be obsoleted) code, thus should
 	the manual or the behaviour be adjusted?
