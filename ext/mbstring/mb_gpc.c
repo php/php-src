@@ -90,30 +90,32 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 			break;
 	}
 
-	if (arg == PARSE_POST) {
-		sapi_handle_post(&v_array);
-		return;
-	}
-
-	if (arg == PARSE_GET) {		/* GET data */
-		c_var = SG(request_info).query_string;
-		if (c_var && *c_var) {
-			res = (char *) estrdup(c_var);
+	switch (arg) {
+		case PARSE_POST:
+			sapi_handle_post(&v_array);
+			return;
+		case PARSE_GET: /* GET data */
+			c_var = SG(request_info).query_string;
+			if (c_var && *c_var) {
+				res = (char *) estrdup(c_var);
+				free_buffer = 1;
+			} else {
+				free_buffer = 0;
+			}
+			break;
+		case PARSE_COOKIE: /* Cookie data */
+			c_var = SG(request_info).cookie_data;
+			if (c_var && *c_var) {
+				res = (char *) estrdup(c_var);
+				free_buffer = 1;
+			} else {
+				free_buffer = 0;
+			}
+			break;
+		case PARSE_STRING: /* String data */
+			res = str;
 			free_buffer = 1;
-		} else {
-			free_buffer = 0;
-		}
-	} else if (arg == PARSE_COOKIE) {		/* Cookie data */
-		c_var = SG(request_info).cookie_data;
-		if (c_var && *c_var) {
-			res = (char *) estrdup(c_var);
-			free_buffer = 1;
-		} else {
-			free_buffer = 0;
-		}
-	} else if (arg == PARSE_STRING) {		/* String data */
-		res = str;
-		free_buffer = 1;
+			break;
 	}
 
 	if (!res) {
