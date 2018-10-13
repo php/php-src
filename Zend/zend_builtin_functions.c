@@ -1401,7 +1401,6 @@ ZEND_FUNCTION(property_exists)
 	ZVAL_STR(&property_z, property);
 
 	if (Z_TYPE_P(object) ==  IS_OBJECT &&
-		Z_OBJ_HANDLER_P(object, has_property) &&
 		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, NULL)) {
 		RETURN_TRUE;
 	}

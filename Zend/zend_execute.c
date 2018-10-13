@@ -1324,14 +1324,6 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_read(z
 	zend_tmp_string_release(tmp_property_name);
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_check(zval *property)
-{
-	zend_string *tmp_property_name;
-	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
-	zend_error(E_NOTICE, "Trying to check property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(tmp_property_name);
-}
-
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
 {
 	zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",

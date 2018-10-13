@@ -6350,22 +6350,20 @@ ZEND_VM_COLD_CONST_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMPVAR|UNUSED
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);
 			if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
-				ZEND_VM_C_GOTO(isset_no_object);
+				result = (opline->extended_value & ZEND_ISEMPTY);
+				ZEND_VM_C_GOTO(isset_object_finish);
 			}
 		} else {
-			ZEND_VM_C_GOTO(isset_no_object);
+			result = (opline->extended_value & ZEND_ISEMPTY);
+			ZEND_VM_C_GOTO(isset_object_finish);
 		}
 	}
-	if (UNEXPECTED(!Z_OBJ_HT_P(container)->has_property)) {
-		zend_wrong_property_check(offset);
-ZEND_VM_C_LABEL(isset_no_object):
-		result = (opline->extended_value & ZEND_ISEMPTY);
-	} else {
-		result =
-			(opline->extended_value & ZEND_ISEMPTY) ^
-			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY), ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ISEMPTY) : NULL));
-	}
 
+	result =
+		(opline->extended_value & ZEND_ISEMPTY) ^
+		Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY), ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ISEMPTY) : NULL));
+
+ZEND_VM_C_LABEL(isset_object_finish):
 	FREE_OP2();
 	FREE_OP1();
 	ZEND_VM_SMART_BRANCH(result, 1);

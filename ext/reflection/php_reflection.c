@@ -4173,7 +4173,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 		}
 		RETURN_TRUE;
 	} else {
-		if (Z_TYPE(intern->obj) != IS_UNDEF && Z_OBJ_HANDLER(intern->obj, has_property)) {
+		if (Z_TYPE(intern->obj) != IS_UNDEF) {
 			ZVAL_STR_COPY(&property, name);
 			if (Z_OBJ_HANDLER(intern->obj, has_property)(&intern->obj, &property, 2, NULL)) {
 				zval_ptr_dtor(&property);
