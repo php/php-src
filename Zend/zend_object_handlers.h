@@ -177,7 +177,7 @@ struct _zend_object_handlers {
 	zend_object_cast_t						cast_object;
 	zend_object_count_elements_t			count_elements;
 	zend_object_get_debug_info_t			get_debug_info;
-	zend_object_get_closure_t				get_closure;
+	zend_object_get_closure_t				get_closure;          /* optional */
 	zend_object_get_gc_t					get_gc;               /* required */
 	zend_object_do_operation_t				do_operation;         /* optional */
 	zend_object_compare_zvals_t				compare;              /* optional */
