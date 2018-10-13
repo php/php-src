@@ -3114,7 +3114,7 @@ get_function_via_handler:
 				fcc->function_handler = zend_get_call_trampoline_func(ce_org, mname, 0);
 				call_via_handler = 1;
 				retval = 1;
-			} else if (fcc->object->handlers->get_method) {
+			} else {
 				fcc->function_handler = fcc->object->handlers->get_method(&fcc->object, mname, NULL);
 				if (fcc->function_handler) {
 					if (strict_class &&
@@ -3935,9 +3935,6 @@ ZEND_API void zend_update_property_ex(zend_class_entry *scope, zval *object, zen
 
 	EG(fake_scope) = scope;
 
-	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be updated", ZSTR_VAL(name), ZSTR_VAL(Z_OBJCE_P(object)->name));
-	}
 	ZVAL_STR(&property, name);
 	Z_OBJ_HT_P(object)->write_property(object, &property, value, NULL);
 
@@ -3952,9 +3949,6 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const 
 
 	EG(fake_scope) = scope;
 
-	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, ZSTR_VAL(Z_OBJCE_P(object)->name));
-	}
 	ZVAL_STRINGL(&property, name, name_length);
 	Z_OBJ_HT_P(object)->write_property(object, &property, value, NULL);
 	zval_ptr_dtor(&property);
@@ -3979,9 +3973,6 @@ ZEND_API void zend_unset_property(zend_class_entry *scope, zval *object, const c
 
 	EG(fake_scope) = scope;
 
-	if (!Z_OBJ_HT_P(object)->unset_property) {
-		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be unset", name, ZSTR_VAL(Z_OBJCE_P(object)->name));
-	}
 	ZVAL_STRINGL(&property, name, name_length);
 	Z_OBJ_HT_P(object)->unset_property(object, &property, 0);
 	zval_ptr_dtor(&property);
@@ -4142,10 +4133,6 @@ ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zval *object, zend
 	zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
-
-	if (!Z_OBJ_HT_P(object)->read_property) {
-		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be read", ZSTR_VAL(name), ZSTR_VAL(Z_OBJCE_P(object)->name));
-	}
 
 	ZVAL_STR(&property, name);
 	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, rv);

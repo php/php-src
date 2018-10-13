@@ -7,6 +7,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   d. Removed zend_check_private()
   e. php_win32_error_to_msg() memory management
   f. get_properties_for() handler / Z_OBJDEBUG_P
+  g. Required object handlers
 
 2. Build system changes
   a. Abstract
@@ -97,6 +98,28 @@ PHP 7.4 INTERNALS UPGRADE NOTES
          HashTable *ht = zend_get_properties_for(obj, ZEND_PROP_PURPOSE_DEBUG);
          // ...
          zend_release_properties(ht);
+
+  g. The following object handlers are now required (must be non-NULL):
+
+       * free_obj
+       * dtor_obj
+       * read_property
+       * write_property
+       * read_dimension
+       * write_dimension
+       * get_property_ptr_ptr
+       * has_property
+       * unset_property
+       * has_dimension
+       * unset_dimension
+       * get_properties
+       * get_method
+       * get_constructor
+       * get_class_name
+       * get_gc
+
+     It is recommended to initialize object handler structures by copying the
+     std object handlers and only overwriting those you want to change.
 
 ========================
 2. Build system changes

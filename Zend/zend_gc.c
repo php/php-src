@@ -617,17 +617,15 @@ tail_call:
 	GC_REF_SET_BLACK(ref);
 
 	if (GC_TYPE(ref) == IS_OBJECT) {
-		zend_object_get_gc_t get_gc;
 		zend_object *obj = (zend_object*)ref;
 
-		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-		             (get_gc = obj->handlers->get_gc) != NULL)) {
+		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 			int n;
 			zval *zv, *end;
 			zval tmp;
 
 			ZVAL_OBJ(&tmp, obj);
-			ht = get_gc(&tmp, &zv, &n);
+			ht = obj->handlers->get_gc(&tmp, &zv, &n);
 			end = zv + n;
 			if (EXPECTED(!ht)) {
 				if (!n) return;
@@ -727,17 +725,15 @@ tail_call:
 		GC_REF_SET_COLOR(ref, GC_GREY);
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
-			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-		                 (get_gc = obj->handlers->get_gc) != NULL)) {
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
 				zval tmp;
 
 				ZVAL_OBJ(&tmp, obj);
-				ht = get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(&tmp, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return;
@@ -883,17 +879,15 @@ tail_call:
 		} else {
 			GC_REF_SET_COLOR(ref, GC_WHITE);
 			if (GC_TYPE(ref) == IS_OBJECT) {
-				zend_object_get_gc_t get_gc;
 				zend_object *obj = (zend_object*)ref;
 
-				if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-				             (get_gc = obj->handlers->get_gc) != NULL)) {
+				if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 					int n;
 					zval *zv, *end;
 					zval tmp;
 
 					ZVAL_OBJ(&tmp, obj);
-					ht = get_gc(&tmp, &zv, &n);
+					ht = obj->handlers->get_gc(&tmp, &zv, &n);
 					end = zv + n;
 					if (EXPECTED(!ht)) {
 						if (!n) return;
@@ -1023,11 +1017,9 @@ tail_call:
 		}
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
-			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-			             (get_gc = obj->handlers->get_gc) != NULL)) {
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
 				zval tmp;
@@ -1036,13 +1028,12 @@ tail_call:
 				if (!GC_INFO(ref)) {
 					gc_add_garbage(ref);
 				}
-				if (obj->handlers->dtor_obj &&
-				    ((obj->handlers->dtor_obj != zend_objects_destroy_object) ||
-				     (obj->ce->destructor != NULL))) {
+				if (obj->handlers->dtor_obj != zend_objects_destroy_object ||
+						obj->ce->destructor != NULL) {
 					*flags |= GC_HAS_DESTRUCTORS;
 				}
 				ZVAL_OBJ(&tmp, obj);
-				ht = get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(&tmp, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return count;
@@ -1193,17 +1184,15 @@ tail_call:
 		}
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
-			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-		                 (get_gc = obj->handlers->get_gc) != NULL)) {
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
 				zval tmp;
 
 				ZVAL_OBJ(&tmp, obj);
-				ht = get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(&tmp, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return;
@@ -1341,9 +1330,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 						GC_TRACE_REF(obj, "calling destructor");
 						GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
-						if (obj->handlers->dtor_obj
-						 && (obj->handlers->dtor_obj != zend_objects_destroy_object
-						  || obj->ce->destructor)) {
+						if (obj->handlers->dtor_obj != zend_objects_destroy_object
+								|| obj->ce->destructor) {
 							GC_ADDREF(obj);
 							obj->handlers->dtor_obj(obj);
 							GC_DELREF(obj);
@@ -1392,11 +1380,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 						(GC_TYPE_INFO(obj) & ~GC_TYPE_MASK);
 					if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 						GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
-						if (obj->handlers->free_obj) {
-							GC_ADDREF(obj);
-							obj->handlers->free_obj(obj);
-							GC_DELREF(obj);
-						}
+						GC_ADDREF(obj);
+						obj->handlers->free_obj(obj);
+						GC_DELREF(obj);
 					}
 
 					ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(obj->handle);

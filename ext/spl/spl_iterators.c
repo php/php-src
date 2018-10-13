@@ -897,10 +897,8 @@ static zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_st
 	function_handler = zend_std_get_method(zobject, method, key);
 	if (!function_handler) {
 		if ((function_handler = zend_hash_find_ptr(&Z_OBJCE_P(zobj)->function_table, method)) == NULL) {
-			if (Z_OBJ_HT_P(zobj)->get_method) {
-				*zobject = Z_OBJ_P(zobj);
-				function_handler = (*zobject)->handlers->get_method(zobject, method, key);
-			}
+			*zobject = Z_OBJ_P(zobj);
+			function_handler = (*zobject)->handlers->get_method(zobject, method, key);
 		} else {
 			*zobject = Z_OBJ_P(zobj);
 		}
