@@ -3672,6 +3672,84 @@ PHP_FUNCTION(iterator_apply)
 }
 /* }}} */
 
+typedef struct {
+	zval                   *obj;
+	int                    stop_value;
+	int                    result;
+	int                    found;
+	zend_fcall_info        fci;
+	zend_fcall_info_cache  fcc;
+} spl_iterator_until_info;
+
+static int spl_iterator_func_until(zend_object_iterator *iter, void *puser) /* {{{ */
+{
+	zval args[2];
+	zval key;
+	zend_fcall_info fci;
+	zval retval;
+	spl_iterator_until_info *until_info = (spl_iterator_until_info*) puser;
+	int result;
+
+	ZVAL_COPY(&args[0], iter->funcs->get_current_data(iter));
+	iter->funcs->get_current_key(iter, &key);
+	ZVAL_COPY(&args[1], &key);
+
+	fci = until_info->fci;
+	fci.param_count = 2;
+	fci.params = args;
+	fci.retval = &retval;
+	fci.no_separation = 0;
+
+	result = zend_call_function(&fci, &until_info->fcc);
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[1]);
+	if (result == FAILURE) {
+		until_info->result = FAILURE;
+		return ZEND_HASH_APPLY_STOP;
+	}
+
+	if (zend_is_true(&retval) == until_info->stop_value) {
+		until_info->found = 1;
+		return ZEND_HASH_APPLY_STOP;
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+static inline void php_iterator_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value) /* {{{ */
+{
+	spl_iterator_until_info  until_info;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of", &until_info.obj, zend_ce_traversable, &until_info.fci, &until_info.fcc) == FAILURE) {
+		return;
+	}
+
+	until_info.stop_value = stop_value;
+	until_info.result = SUCCESS;
+	until_info.found = 0;
+
+	if (spl_iterator_apply(until_info.obj, spl_iterator_func_until, (void*)&until_info) == SUCCESS && until_info.result == SUCCESS) {
+		RETURN_BOOL(!(until_info.found ^ stop_value));
+	}
+}
+/* }}} */
+
+/* {{{ proto bool iterator_every(Traversable iterator, mixed predicate)
+   Determines whether the predicate holds for all elements in the iterator */
+PHP_FUNCTION(iterator_every)
+{
+	php_iterator_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto bool iterator_any(Traversable iterator, mixed predicate)
+   Determines whether the predicate holds for at least one element in the iterator */
+PHP_FUNCTION(iterator_any)
+{
+	php_iterator_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
 static const zend_function_entry spl_funcs_OuterIterator[] = {
 	SPL_ABSTRACT_ME(OuterIterator, getInnerIterator,   arginfo_recursive_it_void)
 	PHP_FE_END
