@@ -5,10 +5,10 @@
  *
  */
 class gtPreConditionList {
-  
+
   private $preConditions = array(
       'gtIsSpecifiedTestType',
-      'gtIsSpecifiedFunctionOrMethod',  
+      'gtIsSpecifiedFunctionOrMethod',
       'gtIfClassHasMethod',
       'gtIsValidClass',
       'gtIsValidFunction',

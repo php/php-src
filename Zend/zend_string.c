@@ -27,7 +27,7 @@ static zend_string *zend_new_interned_string_permanent(zend_string *str);
 static zend_string *zend_new_interned_string_request(zend_string *str);
 
 /* Any strings interned in the startup phase. Common to all the threads,
-   won't be free'd until process exit. If we want an ability to 
+   won't be free'd until process exit. If we want an ability to
    add permanent strings even after startup, it would be still
    possible on costs of locking in the thread safe builds. */
 static HashTable interned_strings_permanent;

@@ -1,6 +1,6 @@
 (NOTE: you may also want to take a look at the pear package
 	     PECL_Gen, a PHP-only alternative for this script that
-			 supports way more extension writing tasks and is 
+			 supports way more extension writing tasks and is
 			 supposed to replace ext_skel completely in the long run ...)
 
 WHAT IT IS
@@ -17,16 +17,16 @@ HOW TO USE IT
 
    ./ext_skel --extname=module_name
 
-  and everything you need is placed in directory module_name. 
+  and everything you need is placed in directory module_name.
 
-  [ Note that GNU awk is likely required for this script to work.  Debian 
-    systems seem to default to using mawk, so you may need to change the 
+  [ Note that GNU awk is likely required for this script to work.  Debian
+    systems seem to default to using mawk, so you may need to change the
     #! line in skeleton/create_stubs and the cat $proto | awk line in
     ext_skel to use gawk explicitly. ]
 
-  If you don't need to test the existence of any external header files, 
-  libraries or functions in them, the module is already almost ready to be 
-  compiled in PHP.  Just remove 3 comments in your_module_name/config.m4, 
+  If you don't need to test the existence of any external header files,
+  libraries or functions in them, the module is already almost ready to be
+  compiled in PHP.  Just remove 3 comments in your_module_name/config.m4,
   change back up to PHP sources top directory, and do
 
     ./buildconf; ./configure --enable-module_name; make
@@ -83,7 +83,7 @@ FORMAT OF FUNCTION DEFINITIONS FILE
   ']'s as there where '['s. Currently, it does not harm if you forget to do it
   or there is a wrong amount of ']'s, but this may change in the future.
 
-	An additional short description may be added after the parameters. 
+	An additional short description may be added after the parameters.
   If present it will be filled into the 'proto' header comments in the stubs
   code and the <refpurpose> tag in the XML documentation.
 
@@ -135,7 +135,7 @@ CURRENT LIMITATIONS, BUGS AND OTHER ODDITIES
   handled. For other types you must write the code yourself. And for type
   mixed, it wouldn't even be possible to write anything, because only you
   know what to expect.
-  
+
   It can't handle correctly, and probably never will, variable list of
   of arguments. (void foo(int bar [, ...])
 

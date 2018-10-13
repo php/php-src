@@ -103,7 +103,7 @@ fi
 if [ x"$dir_arg" != x ]; then
 	dst=$src
 	src=""
-	
+
 	if [ -d $dst ]; then
 		instcmd=:
 	else
@@ -112,7 +112,7 @@ if [ x"$dir_arg" != x ]; then
 else
 
 # Waiting for this to be detected by the "$instcmd $src $dsttmp" command
-# might cause directories to be created, which would be especially bad 
+# might cause directories to be created, which would be especially bad
 # if $src (and thus $dsttmp) contains '*'.
 
 	if [ -f $src -o -d $src ]
@@ -122,7 +122,7 @@ else
 		echo "install:  $src does not exist"
 		exit 1
 	fi
-	
+
 	if [ x"$dst" = x ]
 	then
 		echo "install:	no destination specified"
@@ -150,7 +150,7 @@ dstdir=`echo $dst | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
 
 # Skip lots of stat calls in the usual case.
 if [ ! -d "$dstdir" ]; then
-defaultIFS='	
+defaultIFS='
 '
 IFS="${IFS-${defaultIFS}}"
 
@@ -189,17 +189,17 @@ else
 
 # If we're going to rename the final executable, determine the name now.
 
-	if [ x"$transformarg" = x ] 
+	if [ x"$transformarg" = x ]
 	then
 		dstfile=`basename $dst`
 	else
-		dstfile=`basename $dst $transformbasename | 
+		dstfile=`basename $dst $transformbasename |
 			sed $transformarg`$transformbasename
 	fi
 
 # don't allow the sed command to completely eliminate the filename
 
-	if [ x"$dstfile" = x ] 
+	if [ x"$dstfile" = x ]
 	then
 		dstfile=`basename $dst`
 	else
@@ -230,7 +230,7 @@ else
 # Now rename the file to the real destination.
 
 	$doit $rmcmd -f $dstdir/$dstfile &&
-	$doit $mvcmd $dsttmp $dstdir/$dstfile 
+	$doit $mvcmd $dsttmp $dstdir/$dstfile
 
 fi &&
 

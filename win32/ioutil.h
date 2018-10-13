@@ -38,7 +38,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- */ 
+ */
 
 #ifndef PHP_WIN32_IOUTIL_H
 #define PHP_WIN32_IOUTIL_H
@@ -150,7 +150,7 @@ typedef enum {
 
 PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len);
 #ifdef PHP_EXPORTS
-/* This symbols are needed only for the DllMain, but should not be exported 
+/* This symbols are needed only for the DllMain, but should not be exported
 	or be available when used with PHP binaries. */
 BOOL php_win32_ioutil_init(void);
 #endif
@@ -161,7 +161,7 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 {/*{{{*/
 	wchar_t *mb, *ret;
 	size_t mb_len;
-	
+
 	mb = php_win32_cp_conv_any_to_w(in, in_len, &mb_len);
 	if (!mb) {
 		return NULL;

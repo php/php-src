@@ -11,7 +11,7 @@
  * If \<value\> is specified then \<key\> is set to \<value\> in \<file\>.
  * Else the value of \<key\> is printed only.
  *
- * Note: configure with --enable-dba 
+ * Note: configure with --enable-dba
  */
 
 if ($argc < 4) {

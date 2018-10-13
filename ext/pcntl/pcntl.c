@@ -187,7 +187,7 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_alarm,			arginfo_pcntl_alarm)
 	PHP_FE(pcntl_get_last_error,	arginfo_pcntl_void)
 	PHP_FALIAS(pcntl_errno, pcntl_get_last_error,	NULL)
-	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror) 
+	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror)
 #ifdef HAVE_GETPRIORITY
 	PHP_FE(pcntl_getpriority,	arginfo_pcntl_getpriority)
 #endif
@@ -764,7 +764,7 @@ PHP_FUNCTION(pcntl_wait)
 #undef PHP_RUSAGE_COMMON
 #undef PHP_RUSAGE_TO_ARRAY
 
-/* {{{ proto bool pcntl_wifexited(int status) 
+/* {{{ proto bool pcntl_wifexited(int status)
    Returns true if the child status code represents a successful exit */
 PHP_FUNCTION(pcntl_wifexited)
 {

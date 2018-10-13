@@ -301,7 +301,7 @@ static int yearOffset[19] =
 /* names for leap (13-month) year */
 char *JewishMonthNameLeap[14] =
 {
-	"", 
+	"",
 	"Tishri",
 	"Heshvan",
 	"Kislev",
@@ -320,7 +320,7 @@ char *JewishMonthNameLeap[14] =
 /* names for regular year */
 char *JewishMonthName[14] =
 {
-	"", 
+	"",
 	"Tishri",
 	"Heshvan",
 	"Kislev",
@@ -339,7 +339,7 @@ char *JewishMonthName[14] =
 /* names for leap (13-month) year */
 char *JewishMonthHebNameLeap[14] =
 {
-	"", 
+	"",
 	"\xFA\xF9\xF8\xE9",
 	"\xE7\xF9\xE5\xEF",
 	"\xEB\xF1\xEC\xE5",
@@ -358,7 +358,7 @@ char *JewishMonthHebNameLeap[14] =
 /* names for regular year */
 char *JewishMonthHebName[14] =
 {
-	"", 
+	"",
 	"\xFA\xF9\xF8\xE9",
 	"\xE7\xF9\xE5\xEF",
 	"\xEB\xF1\xEC\xE5",

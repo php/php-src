@@ -24,7 +24,7 @@ class RecursiveDualIterator extends DualIterator implements RecursiveIterator
 	 * @param rhs   Right Hand Side Iterator
 	 * @param flags iteration flags
 	 */
-	function __construct(RecursiveIterator $lhs, RecursiveIterator $rhs, 
+	function __construct(RecursiveIterator $lhs, RecursiveIterator $rhs,
 				$flags = 0x33 /*DualIterator::DEFAULT_FLAGS*/)
 	{
 		parent::__construct($lhs, $rhs, $flags);
@@ -34,10 +34,10 @@ class RecursiveDualIterator extends DualIterator implements RecursiveIterator
 	 */
 	function hasChildren()
 	{
-		return $this->getLHS()->hasChildren() && $this->getRHS()->hasChildren();	
+		return $this->getLHS()->hasChildren() && $this->getRHS()->hasChildren();
 	}
 
-	/** @return new RecursiveDualIterator (late binding) for the two inner 
+	/** @return new RecursiveDualIterator (late binding) for the two inner
 	 * iterators current children.
 	 */
 	function getChildren()

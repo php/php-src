@@ -87,7 +87,7 @@
   <release>stable</release>
   <api>stable</api>
  </stability>
- <license uri="http://www.php.net/license">PHP License</license> 
+ <license uri="http://www.php.net/license">PHP License</license>
  <notes>Promote to stable</notes>
  </release>
  </changelog>

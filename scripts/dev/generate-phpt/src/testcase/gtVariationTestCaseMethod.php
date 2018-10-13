@@ -34,15 +34,15 @@ class gtVariationTestCaseMethod extends gtVariationTestCase {
    */
   public function constructTestCase() {
     $this->constructCommonHeaders();
-    
+
     $this->addVariationEcho();
-    
+
     $this->constructorArgInit();
     $this->constructorCreateInstance();
-    
+
     $this->constructSubjectcalls();
     $this->constructCommonClosing();
-    
+
   }
 
   public function testHeader() {

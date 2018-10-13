@@ -9,7 +9,7 @@ it failed on your system without providing substantial backup information
 on *why* the test failed on your special setup. Thank you :-)
 
 
-[Testing Basics] 
+[Testing Basics]
 ----------------
  The easiest way to test your PHP build is to run "make test" from the
 command line after successfully compiling. This will run the complete
@@ -36,7 +36,7 @@ If you are running the run-tests.php script from the command line (as above)
 you must set the TEST_PHP_EXECUTABLE environment variable to explicitly
 select the PHP executable that is to be tested, that is, used to run the test scripts.
 
-If you run the tests using make test, the PHP CLI and CGI executables are 
+If you run the tests using make test, the PHP CLI and CGI executables are
 automatically set for you. "make test" executes "run-tests.php" script with the CLI binary.  Some
 test scripts such as session must be executed by CGI SAPI. Therefore,
 you must build PHP with CGI SAPI to perform all tests.
@@ -62,7 +62,7 @@ from the source root and any subdirectories below. If there are files,
 which have a "phpt" extension, "run-tests.php" looks at the sections
 in these files, determines whether it should run it, by evaluating
 the 'SKIP' section. If the test is eligible for execution, the 'FILE'
-section is extracted into a ".php" file (with the same name besides 
+section is extracted into a ".php" file (with the same name besides
 the extension) and gets executed.
 When an argument is given or TESTS environment variable is set, the
 GLOB is expanded by the shell and any file with extension "*.phpt" is
@@ -77,9 +77,9 @@ Examples:
 
 [Test results]
 --------------
- Test results are printed to standard output. If there is a failed test, 
+ Test results are printed to standard output. If there is a failed test,
 the "run-tests.php" script saves the result, the expected result and the
-code executed to the test script directory. For example, if 
+code executed to the test script directory. For example, if
 ext/myext/tests/myext.phpt fails to pass, the following files are created:
 
 ext/myext/tests/myext.php   - actual test file executed
@@ -151,20 +151,20 @@ advised to test for non-zero, rather then a specific value.
 
 [Creating new test files]
 -------------------------
- Writing test file is very easy if you are used to PHP. 
+ Writing test file is very easy if you are used to PHP.
 See the HOWTO at http://qa.php.net/write-test.php
 
 
 [How to help us]
 ----------------
- If you find bug in PHP, you can submit bug report AND test script 
+ If you find bug in PHP, you can submit bug report AND test script
 for us. You don't have to write complete script, just give us test
 script with following format. Please test the script and make sure
 you write the correct ACTUAL OUTPUT and EXPECTED OUTPUT before you
 submit.
 
 <?php
-/* 
+/*
 Bug #12345
 substr() bug. Do not return expected string.
 

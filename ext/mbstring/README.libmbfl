@@ -3,7 +3,7 @@ libmbfl is a streamable multibyte character code filter and
 converter library.
 libmbfl is distributed under LGPL 2.1 and bundled with PHP.
 
-The original version of libmbfl is developed and distributed 
+The original version of libmbfl is developed and distributed
 at http://sourceforge.jp/project/php-i18n/ .
 
 If you need to modify the bundled libmbfl, the change also have to be applied for

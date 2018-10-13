@@ -71,8 +71,8 @@
  */
 static int		ftp_putcmd(	ftpbuf_t *ftp,
 					const char *cmd,
-					const size_t cmd_len, 
-					const char *args, 
+					const size_t cmd_len,
+					const char *args,
 					const size_t args_len);
 
 /* wrapper around send/recv to handle timeouts */

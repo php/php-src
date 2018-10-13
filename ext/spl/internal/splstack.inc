@@ -10,7 +10,7 @@
  */
 
 /** @ingroup SPL
- * @brief Implementation of a stack through a DoublyLinkedList. As SplStack 
+ * @brief Implementation of a stack through a DoublyLinkedList. As SplStack
  *        extends SplDoublyLinkedList, shift() and unshift() are still available even
  *        though they don't make much sense for a stack.
  * @since PHP 5.3
@@ -22,7 +22,7 @@ class SplStack extends SplDoublyLinkedList
 {
 	protected $_it_mode = parent::IT_MODE_LIFO;
 
-	/** Changes the iteration mode. There are two orthogonal sets of modes that 
+	/** Changes the iteration mode. There are two orthogonal sets of modes that
 	 * can be set:
 	 *
 	 * - The behavior of the iterator (either one or the other)

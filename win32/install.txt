@@ -237,8 +237,8 @@ c:\php
    Server modules provide significantly better performance and additional
    functionality compared to the CGI binary. The FastCGI is significantly
    more stable and can be faster than the ISAPI module with IIS.
-   The CLI version is designed to let you use PHP for command line 
-   scripting. More information about CLI is available in the chapter 
+   The CLI version is designed to let you use PHP for command line
+   scripting. More information about CLI is available in the chapter
    about using PHP from the command line.
 
    Warning
@@ -268,8 +268,8 @@ c:\php
 
    The next step is to set up a valid configuration file for PHP, php.ini.
    There are two ini files distributed in the zip file, php.ini-development
-   and php.ini-production. We advise you to use php.ini-production, 
-   because we optimized the default settings in this file for performance, 
+   and php.ini-production. We advise you to use php.ini-production,
+   because we optimized the default settings in this file for performance,
    and security. Read this well documented file carefully because it has
    changes from php.ini-production that will drastically affect your setup.
    Some examples are display_errors being off and magic_quotes_gpc being off.
@@ -670,8 +670,8 @@ AddType application/x-httpd-php .php
 PHPIniDir "C:/php"
 
      Note: Remember to substitute your actual path to PHP for the c:/php/
-     in the above examples. Take care to use either 
-     php5apache2.dll in your LoadModule directive and not php5apache.dll 
+     in the above examples. Take care to use either
+     php5apache2.dll in your LoadModule directive and not php5apache.dll
      as the latter ones are designed to run with Apache 1.3.x.
 
      Note: If you want to use content negotiation, read related FAQ.
@@ -969,8 +969,8 @@ extension_dir = C:\php\extensions
 extension=php_bz2.dll
 
      * Some of the extensions need extra DLLs to work. Couple of them can
-       be found in the distribution package, in in the main folder in PHP 5, 
-       but some, for example Oracle (php_oci8.dll) require DLLs which are 
+       be found in the distribution package, in in the main folder in PHP 5,
+       but some, for example Oracle (php_oci8.dll) require DLLs which are
        not bundled with the distribution package.
      * Some of these DLLs are not bundled with the PHP distribution. See
        each extensions documentation page for details. Also, read the
@@ -1004,7 +1004,7 @@ extension=php_bz2.dll
    php_filepro.dll filePro functions Read-only access
    php_ftp.dll FTP functions
    php_gd2.dll GD library image functions GD2
-   php_gettext.dll Gettext functions, requires libintl-1.dll, 
+   php_gettext.dll Gettext functions, requires libintl-1.dll,
    iconv.dll (bundled).
    php_iconv.dll ICONV characterset conversion Requires: iconv.dll
    php_imap.dll IMAP POP3 and NNTP functions None
@@ -1061,7 +1061,7 @@ Introduction to PECL Installations
 
    When building PHP modules, it's important to have known-good versions
    of the required tools (autoconf, automake, libtool, etc.) See the
-   SVN Instructions for details on the required tools, and required 
+   SVN Instructions for details on the required tools, and required
    versions.
      __________________________________________________________________
 
@@ -1078,10 +1078,10 @@ Downloading PECL extensions
        PECL extensions that have releases listed on the PECL web site are
        available for download and installation using the pecl command.
        Specific revisions may also be specified.
-     * SVN 
+     * SVN
        Most PECL extensions also reside in SVN. A web-based view may be
        seen at http://svn.php.net/pecl/. To download straight from SVN,
-       the following sequence of commands may be used. 
+       the following sequence of commands may be used.
 
 $ svn  co http://svn.php.net/repository/pecl/<extname>/trunk
 

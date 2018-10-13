@@ -74,7 +74,7 @@ PHPDBG_SET(pagination) /* {{{ */
 		default:
 			phpdbg_error("setpagination", "type=\"wrongargs\"", "set pagination used incorrectly: set pagination <on|off>");
 	}
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -90,7 +90,7 @@ PHPDBG_SET(lines) /* {{{ */
 		default:
 			phpdbg_error("setlines", "type=\"wrongargs\"", "set lines used incorrectly: set lines <number>");
 	}
-	
+
 	return SUCCESS;
 } /* }}} */
 

@@ -34,14 +34,14 @@ http://pear.php.net/dtd/package-2.0.xsd">
 - Packaging update; no functional changes in this release
 - Fix Bug #34777; segfault when retrieving non-existent error info
 - Fix Bug #35032; didn&apos;t find FreeTDS includes on some systems
- 
+
 Windows binaries can be found at:
 http://pecl4win.php.net/ext.php/php_pdo_mssql.dll,
 
 however: you are *strongly* recommended to use PDO_ODBC instead of this driver on
 Windows platforms.
 
- 
+
  </notes>
  <contents>
   <dir name="/">

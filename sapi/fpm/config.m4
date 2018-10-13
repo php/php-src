@@ -235,7 +235,7 @@ AC_DEFUN([AC_FPM_TRACE],
 
   if test -n "$proc_mem_file" ; then
     AC_MSG_CHECKING([for proc mem file])
-  
+
     AC_TRY_RUN([
       #define _GNU_SOURCE
       #define _FILE_OFFSET_BITS 64
@@ -271,26 +271,26 @@ AC_DEFUN([AC_FPM_TRACE],
       AC_MSG_RESULT([skipped (cross compiling)])
     ])
   fi
-  
+
   if test -n "$proc_mem_file"; then
     AC_DEFINE_UNQUOTED([PROC_MEM_FILE], "$proc_mem_file", [/proc/pid/mem interface])
   fi
-  
+
   fpm_trace_type=""
 
   if test "$have_ptrace" = "yes"; then
     fpm_trace_type=ptrace
-    
+
   elif test -n "$proc_mem_file"; then
     fpm_trace_type=pread
-    
+
   elif test "$have_mach_vm_read" = "yes" ; then
     fpm_trace_type=mach
-    
+
   else
-    AC_MSG_WARN([FPM Trace - ptrace, pread, or mach: could not be found])    
+    AC_MSG_WARN([FPM Trace - ptrace, pread, or mach: could not be found])
   fi
-  
+
 ])
 
 AC_DEFUN([AC_FPM_BUILTIN_ATOMIC],
@@ -376,7 +376,7 @@ AC_DEFUN([AC_FPM_KQUEUE],
 	AC_MSG_CHECKING([for kqueue])
 
 	AC_TRY_COMPILE(
-	[ 
+	[
 		#include <sys/types.h>
 		#include <sys/event.h>
 		#include <sys/time.h>
@@ -400,7 +400,7 @@ AC_DEFUN([AC_FPM_PORT],
 	AC_MSG_CHECKING([for port framework])
 
 	AC_TRY_COMPILE(
-	[ 
+	[
 		#include <port.h>
 	], [
 		int port;
@@ -423,7 +423,7 @@ AC_DEFUN([AC_FPM_DEVPOLL],
 	AC_MSG_CHECKING([for /dev/poll])
 
 	AC_TRY_COMPILE(
-	[ 
+	[
 		#include <stdio.h>
 		#include <sys/devpoll.h>
 	], [
@@ -448,7 +448,7 @@ AC_DEFUN([AC_FPM_EPOLL],
 	AC_MSG_CHECKING([for epoll])
 
 	AC_TRY_COMPILE(
-	[ 
+	[
 		#include <sys/epoll.h>
 	], [
 		int epollfd;
@@ -484,7 +484,7 @@ AC_DEFUN([AC_FPM_POLL],
 	AC_MSG_CHECKING([for poll])
 
 	AC_TRY_COMPILE(
-	[ 
+	[
 		#include <poll.h>
 	], [
 		struct pollfd fds[2];
@@ -510,7 +510,7 @@ AC_DEFUN([AC_FPM_SELECT],
 	AC_MSG_CHECKING([for select])
 
 	AC_TRY_COMPILE(
-	[ 
+	[
 		/* According to POSIX.1-2001 */
 		#include <sys/select.h>
 
@@ -577,7 +577,7 @@ if test "$PHP_FPM" != "no"; then
   [  --with-fpm-user[=USER]    Set the user for php-fpm to run as. (default: nobody)], nobody, no)
 
   PHP_ARG_WITH(fpm-group,,
-  [  --with-fpm-group[=GRP]    Set the group for php-fpm to run as. For a system user, this 
+  [  --with-fpm-group[=GRP]    Set the group for php-fpm to run as. For a system user, this
                           should usually be set to match the fpm username (default: nobody)], nobody, no)
 
   PHP_ARG_WITH(fpm-systemd,,
@@ -676,13 +676,13 @@ if test "$PHP_FPM" != "no"; then
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
-  
+
   if test "$fpm_trace_type" && test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"; then
     PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"
   fi
-  
+
   PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm"
- 
+
   PHP_FPM_FILES="fpm/fpm.c \
     fpm/fpm_children.c \
     fpm/fpm_cleanup.c \

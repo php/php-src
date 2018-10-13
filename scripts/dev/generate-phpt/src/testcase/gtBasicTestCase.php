@@ -23,12 +23,12 @@ abstract class gtBasicTestCase extends gtTestCase {
       return new gtBasicTestCaseMethod($optionalSections);
     }
   }
-  
+
   public function constructSubjectCalls() {
         $this->argInit();
         $this->subjectCalls();
   }
-  
+
   public function addBasicEcho() {
     $this->testCase[] = "echo \"*** Test by calling method or function with its expected arguments ***\\n\";";
     $this->testCase = gtCodeSnippet::appendBlankLines(1, $this->testCase );

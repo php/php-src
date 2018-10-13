@@ -350,7 +350,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 			}
 			switch (Z_TYPE(op_array->literals[i])) {
 				case IS_NULL:
-					/* Only checking MAY_MERGE for IS_NULL here 
+					/* Only checking MAY_MERGE for IS_NULL here
 					 * is because only IS_NULL can be default value for class type hinting(RECV_INIT). */
 					if ((info[i].flags & LITERAL_MAY_MERGE)) {
 						if (l_null < 0) {

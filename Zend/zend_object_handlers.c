@@ -89,7 +89,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 						zobj->properties->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 					}
 
-					_zend_hash_append_ind(zobj->properties, prop_info->name, 
+					_zend_hash_append_ind(zobj->properties, prop_info->name,
 						OBJ_PROP(zobj, prop_info->offset));
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -616,7 +616,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			*guard |= IN_ISSET;
 			zend_std_call_issetter(&tmp_object, member, &tmp_result);
 			*guard &= ~IN_ISSET;
-	
+
 			if (!zend_is_true(&tmp_result)) {
 				retval = &EG(uninitialized_zval);
 				zval_ptr_dtor(&tmp_object);

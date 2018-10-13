@@ -22,7 +22,7 @@ class gtCommandLineOptions {
     'x',
     'k',
   );
-  
+
   protected $options;
 
   protected function isShortOption($arg)
@@ -44,7 +44,7 @@ class gtCommandLineOptions {
     if(count($argv) < 2) {
       throw new gtMissingOptionsException('Command line options are required');
     }
-    
+
     for ($i=1; $i<count($argv); $i++) {
 
       if ($this->isShortOption($argv[$i])) {
@@ -72,7 +72,7 @@ class gtCommandLineOptions {
       $this->options[$option] = $argv[$i];
     }
   }
-  
+
  /**
    *
    */

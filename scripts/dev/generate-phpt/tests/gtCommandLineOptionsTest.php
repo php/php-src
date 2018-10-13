@@ -5,7 +5,7 @@ require_once 'PHPUnit/Framework.php';
 
   class gtCommandLineOptionsTest extends PHPUnit_Framework_TestCase
   {
-    
+
     /**
     * @expectedException RuntimeException
     */
@@ -26,7 +26,7 @@ require_once 'PHPUnit/Framework.php';
       $this->assertTrue($clo->hasOption('f'));
       $this->assertEquals('some-function', $clo->getOption('f'));
     }
-    
+
     /**
     * @expectedException RuntimeException
     */
@@ -34,7 +34,7 @@ require_once 'PHPUnit/Framework.php';
       $clo = new gtCommandLineOptions();
       $clo->parse(array('generate-phpt.php', '-z'));
     }
-    
+
     /**
     * @expectedException RuntimeException
     */

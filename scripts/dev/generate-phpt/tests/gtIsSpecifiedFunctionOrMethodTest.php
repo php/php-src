@@ -20,16 +20,16 @@ class gtIsSpecifiedFunctionOrMethodTest extends PHPUnit_Framework_TestCase {
     $ch = new gtIsSpecifiedFunctionOrMethod();
     $this->assertTrue($ch->check($clo));
   }
-  
+
    public function testNotValid() {
 
     $clo = new gtCommandLineOptions();
     $clo->parse(array('generate-phpt.php', '-b'));
     $ch = new gtIsSpecifiedFunctionOrMethod();
     $this->assertFalse($ch->check($clo));
-    
+
   }
-  
+
   public function testMessage() {
 
     $clo = new gtCommandLineOptions();

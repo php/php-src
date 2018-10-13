@@ -6,7 +6,7 @@
    that are directly executed, so you can also set things
    like PHPRC here to force an executable to use a
    specific php.ini file. */
-   
+
 $conf = array(
 /* path to the php source tree */
 'TEST_PHP_SRCDIR'      =>    NULL,
@@ -43,7 +43,7 @@ $conf = array(
    TEST_WEB_BASE_URL should be the base url pointing
    to TEST_PHP_SRCDIR, which should then be accessible via
    an http server.
-   
+
    An example would be:
    TEST_WEB_BASE_URL=http://localhost/test
    TEST_BASE_PATH=/path/to/htdocs/test

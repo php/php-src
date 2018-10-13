@@ -12,7 +12,7 @@ enforced.  It is implemented as a SAPI hook and is called from the
 treat_data and post handler functions.  To implement your own security
 policy you will need to write a standard PHP extension.  There is also
 a powerful standard implementation in ext/filter that should suit most
-peoples' needs.  However, if you want to implement your own security 
+peoples' needs.  However, if you want to implement your own security
 policy, read on.
 
 A simple implementation might look like the following.  This stores the

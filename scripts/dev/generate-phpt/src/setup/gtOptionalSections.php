@@ -28,11 +28,11 @@ class gtOptionalSections {
       if($commandLineOptions->hasOption('k')) {
         $this->skipifKey = $commandLineOptions->getOption('k');
       }
-      
+
       if($commandLineOptions->hasOption('x')) {
         $this->skipifExt = $commandLineOptions->getOption('x');
       }
-      
+
     }
   }
 
@@ -46,7 +46,7 @@ class gtOptionalSections {
   public function getSkipifKey() {
     return $this->skipifKey;
   }
-  
+
   public function getSkipifExt() {
     return $this->skipifExt;
   }
@@ -61,7 +61,7 @@ class gtOptionalSections {
     }
     return false;
   }
-  
+
   public function hasSkipifExt() {
     if($this->skipifExt != '') {
       return true;
@@ -75,7 +75,7 @@ class gtOptionalSections {
   public function hasClean() {
     return $this->optSections['clean'];
   }
-  
+
   public function hasDone() {
     return $this->optSections['done'];
   }

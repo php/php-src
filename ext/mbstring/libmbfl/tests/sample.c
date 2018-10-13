@@ -31,7 +31,7 @@ int main()
 
 	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0);
 	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-	mbfl_buffer_converter_delete(convd);	
+	mbfl_buffer_converter_delete(convd);
 
 	puts(ret->val);
 	return 1;

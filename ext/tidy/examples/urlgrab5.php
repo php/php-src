@@ -15,13 +15,13 @@
     function dump_nodes(tidyNode $node, &$urls = NULL) {
 
 	$urls = (is_array($urls)) ? $urls : array();
-	
+
 	if(isset($node->id)) {
 	    if($node->id == TIDY_TAG_A) {
 		$urls[] = $node->attribute['href'];
 	    }
 	}
-		    
+
 	if($node->hasChildren()) {
 
 	    foreach($node->child as $c) {
@@ -29,7 +29,7 @@
 	    }
 
 	}
-	
+
 	return $urls;
     }
 

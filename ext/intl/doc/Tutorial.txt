@@ -1,13 +1,13 @@
 1. Collator::getAvailableLocales().
 Return the locales available at the time of the call, including registered locales.
 If a sever error occurs (such as out of memory condition) this will return null.
-If there is no locale data, an empty enumeration will be returned. 
+If there is no locale data, an empty enumeration will be returned.
 Returned locales list is a strings in format of RFC4646 standart (see http://www.rfc-editor.org/rfc/rfc4646.txt).
 Examle of locales format: 'en_US', 'ru_UA', 'ua_UA' (see http://demo.icu-project.org/icu-bin/locexp).
 
 
 2. Collator::getDisplayName( $obj_locale, $disp_locale ).
-Get name of the object for the desired Locale, in the desired language. Both arguments 
+Get name of the object for the desired Locale, in the desired language. Both arguments
 must be from getAvailableLocales method.
 
      @param  string  $obj_locale   Locale to get display name for.
@@ -19,21 +19,21 @@ For locale format see RFC4647 standart in ftp://ftp.rfc-editor.org/in-notes/rfc4
 3. Collator::getLocaleByType( $type ).
 Allow user to select whether she wants information on requested, valid or actual locale.
 Returned locale tag is a string formatted to a RFC4646 standart and normalize to normal form -
-value is a string from 
-For example, a collator for "en_US_CALIFORNIA" was requested. In the current state of ICU (2.0), 
-the requested locale is "en_US_CALIFORNIA", the valid locale is "en_US" (most specific locale 
-supported by ICU) and the actual locale is "root" (the collation data comes unmodified from the UCA) 
-The locale is considered supported by ICU if there is a core ICU bundle for that locale (although 
-it may be empty). 
+value is a string from
+For example, a collator for "en_US_CALIFORNIA" was requested. In the current state of ICU (2.0),
+the requested locale is "en_US_CALIFORNIA", the valid locale is "en_US" (most specific locale
+supported by ICU) and the actual locale is "root" (the collation data comes unmodified from the UCA)
+The locale is considered supported by ICU if there is a core ICU bundle for that locale (although
+it may be empty).
 
 
 4. VariableTop
 The Variable_Top attribute is only meaningful if the Alternate attribute is not set to NonIgnorable.
-In such a case, it controls which characters count as ignorable. The string value specifies 
+In such a case, it controls which characters count as ignorable. The string value specifies
 the "highest" character (in UCA order) weight that is to be considered ignorable.
-Thus, for example, if a user wanted whitespace to be ignorable, but not any visible characters, 
-then s/he would use the value Variable_Top="\u0020" (space). The string should only be a 
-single character. All characters of the same primary weight are equivalent, so 
+Thus, for example, if a user wanted whitespace to be ignorable, but not any visible characters,
+then s/he would use the value Variable_Top="\u0020" (space). The string should only be a
+single character. All characters of the same primary weight are equivalent, so
 Variable_Top="\u3000" (ideographic space) has the same effect as Variable_Top="\u0020".
 This setting (alone) has little impact on string comparison performance; setting it lower or higher
 will make sort keys slightly shorter or longer respectively.
@@ -124,7 +124,7 @@ the languages currently in use. Therefore, ICU provides a data-driven, flexible,
 customizable mechanism called "tailoring". Tailoring overrides the default order of code points
 and the values of the ICU Collation Service attributes.
 Collator have followed attributes:
-   - FRENCH_COLLATION, possible values are: 
+   - FRENCH_COLLATION, possible values are:
 	ON
 	OFF (default)
 	DEFAULT

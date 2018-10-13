@@ -738,7 +738,7 @@ finish:
 
 	while (!php_stream_eof(stream)) {
 		size_t http_header_line_length;
-		
+
 		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
 			char *http_header_value;
@@ -975,7 +975,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 	php_stream *stream;
 	zval headers;
 	ZVAL_UNDEF(&headers);
-	
+
 	stream = php_stream_url_wrap_http_ex(
 		wrapper, path, mode, options, opened_path, context,
 		PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT, &headers STREAMS_CC);

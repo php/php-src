@@ -7,7 +7,7 @@
 class gtFunction extends gtTestSubject {
 
   private $functionName;
-  
+
   /**
    * Set the name of the name of the function
    *
