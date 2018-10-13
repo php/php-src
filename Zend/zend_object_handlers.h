@@ -160,15 +160,15 @@ struct _zend_object_handlers {
 	/* individual object functions */
 	zend_object_read_property_t				read_property; /* required */
 	zend_object_write_property_t			write_property; /* required */
-	zend_object_read_dimension_t			read_dimension;
-	zend_object_write_dimension_t			write_dimension;
+	zend_object_read_dimension_t			read_dimension; /* required */
+	zend_object_write_dimension_t			write_dimension; /* required */
 	zend_object_get_property_ptr_ptr_t		get_property_ptr_ptr; /* required */
 	zend_object_get_t						get; /* optional */
 	zend_object_set_t						set; /* optional */
 	zend_object_has_property_t				has_property; /* required */
 	zend_object_unset_property_t			unset_property; /* required */
-	zend_object_has_dimension_t				has_dimension;
-	zend_object_unset_dimension_t			unset_dimension;
+	zend_object_has_dimension_t				has_dimension; /* required */
+	zend_object_unset_dimension_t			unset_dimension; /* required */
 	zend_object_get_properties_t			get_properties; /* required */
 	zend_object_get_method_t				get_method; /* required */
 	zend_object_call_method_t				call_method; /* optional */

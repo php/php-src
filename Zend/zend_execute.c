@@ -1101,14 +1101,6 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_offset(void)
 
 static zend_never_inline void zend_assign_to_object_dim(zval *object, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
-	if (UNEXPECTED(!Z_OBJ_HT_P(object)->write_dimension)) {
-		zend_use_object_as_array();
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-		}
-		return;
-	}
-
 	Z_OBJ_HT_P(object)->write_dimension(object, dim, value);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1121,8 +1113,7 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 	zval *z;
 	zval rv, res;
 
-	if (Z_OBJ_HT_P(object)->read_dimension &&
-		(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+	if ((z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
 
 		if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 			zval rv2;
@@ -1787,39 +1778,34 @@ fetch_from_array:
 			zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
 			dim = &EG(uninitialized_zval);
 		}
-		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_use_object_as_array();
-			ZVAL_ERROR(result);
-		} else {
-			if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
-				dim++;
-			}
-			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
+		if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+			dim++;
+		}
+		retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
 
-			if (UNEXPECTED(retval == &EG(uninitialized_zval))) {
-				zend_class_entry *ce = Z_OBJCE_P(container);
+		if (UNEXPECTED(retval == &EG(uninitialized_zval))) {
+			zend_class_entry *ce = Z_OBJCE_P(container);
 
-				ZVAL_NULL(result);
-				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
-			} else if (EXPECTED(retval && Z_TYPE_P(retval) != IS_UNDEF)) {
-				if (!Z_ISREF_P(retval)) {
-					if (result != retval) {
-						ZVAL_COPY(result, retval);
-						retval = result;
-					}
-					if (Z_TYPE_P(retval) != IS_OBJECT) {
-						zend_class_entry *ce = Z_OBJCE_P(container);
-						zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
-					}
-				} else if (UNEXPECTED(Z_REFCOUNT_P(retval) == 1)) {
-					ZVAL_UNREF(retval);
-				}
+			ZVAL_NULL(result);
+			zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
+		} else if (EXPECTED(retval && Z_TYPE_P(retval) != IS_UNDEF)) {
+			if (!Z_ISREF_P(retval)) {
 				if (result != retval) {
-					ZVAL_INDIRECT(result, retval);
+					ZVAL_COPY(result, retval);
+					retval = result;
 				}
-			} else {
-				ZVAL_ERROR(result);
+				if (Z_TYPE_P(retval) != IS_OBJECT) {
+					zend_class_entry *ce = Z_OBJCE_P(container);
+					zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
+				}
+			} else if (UNEXPECTED(Z_REFCOUNT_P(retval) == 1)) {
+				ZVAL_UNREF(retval);
 			}
+			if (result != retval) {
+				ZVAL_INDIRECT(result, retval);
+			}
+		} else {
+			ZVAL_ERROR(result);
 		}
 	} else {
 		if (type != BP_VAR_W && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
@@ -1947,25 +1933,20 @@ try_string_offset:
 			zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
 			dim = &EG(uninitialized_zval);
 		}
-		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_use_object_as_array();
-			ZVAL_NULL(result);
-		} else {
-			if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
-				dim++;
-			}
-			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
+		if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+			dim++;
+		}
+		retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
 
-			ZEND_ASSERT(result != NULL);
-			if (retval) {
-				if (result != retval) {
-					ZVAL_COPY_DEREF(result, retval);
-				} else if (UNEXPECTED(Z_ISREF_P(retval))) {
-					zend_unwrap_reference(result);
-				}
-			} else {
-				ZVAL_NULL(result);
+		ZEND_ASSERT(result != NULL);
+		if (retval) {
+			if (result != retval) {
+				ZVAL_COPY_DEREF(result, retval);
+			} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+				zend_unwrap_reference(result);
 			}
+		} else {
+			ZVAL_NULL(result);
 		}
 	} else {
 		if (type != BP_VAR_IS && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
@@ -2044,12 +2025,7 @@ static zend_never_inline int ZEND_FASTCALL zend_isset_dim_slow(zval *container, 
 	}
 
 	if (/*OP1_TYPE != IS_CONST &&*/ EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			return Z_OBJ_HT_P(container)->has_dimension(container, offset, 0);
-		} else {
-			zend_use_object_as_array();
-			return 0;
-		}
+		return Z_OBJ_HT_P(container)->has_dimension(container, offset, 0);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
 		zend_long lval;
 
@@ -2089,12 +2065,7 @@ static zend_never_inline int ZEND_FASTCALL zend_isempty_dim_slow(zval *container
 	}
 
 	if (/*OP1_TYPE != IS_CONST &&*/ EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			return !Z_OBJ_HT_P(container)->has_dimension(container, offset, 1);
-		} else {
-			zend_use_object_as_array();
-			return 1;
-		}
+		return !Z_OBJ_HT_P(container)->has_dimension(container, offset, 1);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
 		zend_long lval;
 
