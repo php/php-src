@@ -156,7 +156,7 @@ struct _zend_object_handlers {
 	/* general object functions */
 	zend_object_free_obj_t					free_obj; /* required */
 	zend_object_dtor_obj_t					dtor_obj; /* required */
-	zend_object_clone_obj_t					clone_obj;
+	zend_object_clone_obj_t					clone_obj; /* optional */
 	/* individual object functions */
 	zend_object_read_property_t				read_property; /* required */
 	zend_object_write_property_t			write_property; /* required */
