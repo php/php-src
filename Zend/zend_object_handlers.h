@@ -158,8 +158,8 @@ struct _zend_object_handlers {
 	zend_object_dtor_obj_t					dtor_obj; /* required */
 	zend_object_clone_obj_t					clone_obj;
 	/* individual object functions */
-	zend_object_read_property_t				read_property;
-	zend_object_write_property_t			write_property;
+	zend_object_read_property_t				read_property; /* required */
+	zend_object_write_property_t			write_property; /* required */
 	zend_object_read_dimension_t			read_dimension;
 	zend_object_write_dimension_t			write_dimension;
 	zend_object_get_property_ptr_ptr_t		get_property_ptr_ptr;
