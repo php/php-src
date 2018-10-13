@@ -180,7 +180,7 @@ struct _zend_object_handlers {
 	zend_object_get_debug_info_t			get_debug_info;
 	zend_object_get_closure_t				get_closure;
 	zend_object_get_gc_t					get_gc;
-	zend_object_do_operation_t				do_operation;
+	zend_object_do_operation_t				do_operation; /* optional */
 	zend_object_compare_zvals_t				compare;
 	zend_object_get_properties_for_t		get_properties_for; /* optional */
 };
