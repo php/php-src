@@ -54,7 +54,6 @@ var_dump($u1, $u2, $u3, $u4, $u5);
 
 ?>
 --EXPECTF--
-
  ---- Pass uninitialised array & object by ref: function call ---
 array(1) {
   [0]=>

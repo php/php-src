@@ -13,4 +13,3 @@ echo cal_days_in_month(99,0, 2009);
 ?>
 --EXPECTF--
 Warning: cal_days_in_month(): invalid calendar ID 99. in %s on line %d
-

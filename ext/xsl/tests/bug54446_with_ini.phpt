@@ -92,4 +92,3 @@ Warning: XSLTProcessor::transformToXml(): xsltDocumentElem: write rights for %s/
 OK, no file created
 --CREDITS--
 Christian Stocker, chregu@php.net
-

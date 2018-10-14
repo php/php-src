@@ -101,7 +101,6 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strrpos() : usage variations ***
 

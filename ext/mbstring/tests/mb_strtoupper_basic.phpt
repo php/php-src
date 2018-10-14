@@ -46,7 +46,6 @@ if ($mb == $greek_upper) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing mb_strtoupper() : basic functionality ***
 

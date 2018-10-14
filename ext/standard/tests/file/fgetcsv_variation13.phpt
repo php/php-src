@@ -1,6 +1,5 @@
 --TEST--
 Test fgetcsv() : usage variations - with line without any csv fields
-
 --FILE--
 <?php
 /*

@@ -75,4 +75,3 @@ Stack trace:
 #0 [internal function]: gen(Object(Generator), 1)
 #1 %s(%d): Generator->current()
 #2 {main}
-

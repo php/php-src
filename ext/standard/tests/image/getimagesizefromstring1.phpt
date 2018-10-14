@@ -46,4 +46,3 @@ array(7) {
   ["mime"]=>
   string(9) "image/gif"
 }
-

@@ -20,9 +20,7 @@ var_dump($c->getWeekendTransition(0));
 
 var_dump(intlcal_get_weekend_transition($c));
 var_dump(intlcal_get_weekend_transition(1, 1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::getWeekendTransition() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlCalendar::getWeekendTransition(): intlcal_get_weekend_transition: bad arguments in %s on line %d

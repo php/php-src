@@ -18,4 +18,3 @@ var_dump($a instanceof A, $a instanceof B);
 --EXPECTF--
 bool(true)
 bool(true)
-

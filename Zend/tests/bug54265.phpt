@@ -14,4 +14,3 @@ echo "ok\n";
 --EXPECT--
 EROOR: Creating default object from empty value
 ok
-

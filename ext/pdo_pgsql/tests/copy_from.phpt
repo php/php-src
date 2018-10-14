@@ -396,4 +396,3 @@ Testing pgsqlCopyFromFile() with error
 Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %s "test_error" %s
 Testing pgsqlCopyFromFile() with non existing file
 Exception: SQLSTATE[HY000]: General error: 7 Unable to open the file
-

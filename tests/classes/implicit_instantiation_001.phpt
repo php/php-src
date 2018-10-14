@@ -34,8 +34,6 @@ var_dump($c);
 
 ?>
 --EXPECTF--
-
-
 ---( $c->boolFalse )---
   --> Attempting implicit conversion to object using increment...
 

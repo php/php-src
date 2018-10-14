@@ -97,4 +97,3 @@ resource(%d) of type (oci8 persistent connection)
  Select with persistent connection 2
  The value of the package variable is 1000
 Done
-

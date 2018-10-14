@@ -21,4 +21,3 @@ echo 'done!';
 ?>
 --EXPECTF--
 done!
-

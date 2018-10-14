@@ -42,4 +42,3 @@ string(%d) "%s"
 bool(true)
 string(%d) "%s"
 Done
-

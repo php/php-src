@@ -5,7 +5,6 @@ Test mb_encode_mimeheader() function : basic functionality, indent
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is not available in this build");
 ?>
-
 --FILE--
 <?php
 /* Prototype  : string mb_encode_mimeheader
@@ -898,4 +897,3 @@ string(249) "=?UTF-8?Q?=CE=91=CF=85=CF=84=CF=8C=20=CE=B5=CE=AF=CE=BD=CE=B1=CE=B9
  =?UTF-8?Q?=CE=AF=CE=BC=CE=B5=CE=BD=CE=BF=2E=20=30=31=32=33=34=35=36=37=38?=
  =?UTF-8?Q?=39=2E?="
 Done
-

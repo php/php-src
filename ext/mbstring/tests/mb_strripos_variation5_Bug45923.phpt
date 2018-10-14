@@ -44,7 +44,6 @@ for ($i = -10; $i <= 60; $i += 10) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strripos() : usage variations ***
 
@@ -112,4 +111,3 @@ bool(false)
 Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 Done
-

@@ -47,4 +47,3 @@ bool(false)
 Warning: iconv_substr() expects at least 2 parameters, 1 given in %s on line %d
 bool(false)
 Done
-

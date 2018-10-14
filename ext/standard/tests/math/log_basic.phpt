@@ -29,7 +29,6 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
-
 --EXPECTF--
  LOG tests...no base
 float(3.1354942159291)

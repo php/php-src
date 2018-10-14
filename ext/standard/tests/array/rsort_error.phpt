@@ -29,7 +29,6 @@ var_dump($array_arg);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing rsort() : error conditions ***
 

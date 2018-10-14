@@ -24,7 +24,6 @@ gzclose($h);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzclose() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 

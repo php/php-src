@@ -25,7 +25,6 @@ var_dump( array_values($input, $extra_arg) );
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_values() : error conditions ***
 
@@ -39,4 +38,3 @@ NULL
 Warning: array_values() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-

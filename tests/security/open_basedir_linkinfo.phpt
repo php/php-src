@@ -63,4 +63,3 @@ bool(false)
 int(%d)
 bool(true)
 *** Finished testing open_basedir configuration [linkinfo] ***
-

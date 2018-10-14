@@ -25,5 +25,4 @@ echo "Message: " . $foo->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECTF--
-
 Fatal error: Class Exception_foo contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (ThrowableInterface::getErrno) in %s on line %d

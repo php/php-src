@@ -24,7 +24,5 @@ class ReportCollision {
 
 echo "ReportCollision: ";
 $o = new ReportCollision;
-
-
 --EXPECTF--
 Fatal error: Trait method ReportCollision has not been applied, because there are collisions with other trait methods on ReportCollision in %s on line %d

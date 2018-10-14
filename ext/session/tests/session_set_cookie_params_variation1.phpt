@@ -46,4 +46,3 @@ string(4) "1800"
 NULL
 string(10) "1234567890"
 Done
-

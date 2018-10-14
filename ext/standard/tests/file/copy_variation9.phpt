@@ -50,7 +50,6 @@ var_dump( filesize($dest_file_name) );
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_copy_variation9.tmp");

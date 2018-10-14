@@ -9,5 +9,4 @@ echo "Done", PHP_EOL;
 
 ?>
 --EXPECTF--
-
 Done

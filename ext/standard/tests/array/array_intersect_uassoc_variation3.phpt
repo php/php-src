@@ -109,7 +109,6 @@ fclose($fp);
 ?>
 ===DONE===
 --EXPECTF--
-
 *** Testing array_intersect_uassoc() : usage variation ***
 
 --int 0--

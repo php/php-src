@@ -11,5 +11,4 @@ interface if_a {
 
 ?>
 --EXPECTF--
-
 Fatal error: Access type for interface method if_a::err() must be omitted in %s on line %d

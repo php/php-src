@@ -21,6 +21,5 @@ class C {
 
 $o = new C;
 $o->foo();
-
 --EXPECTF--
 C::foo() works.

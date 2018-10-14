@@ -46,4 +46,3 @@ NULL
 Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)
 Done
-

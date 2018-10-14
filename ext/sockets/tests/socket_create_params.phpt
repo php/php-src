@@ -16,7 +16,6 @@ fa@php.net
     $s_w = socket_create(AF_INET, SOCK_STREAM);
 ?>
 --EXPECTF--
-
 Warning: socket_create() expects exactly 3 parameters, 0 given in %s on line %i
 
 Warning: socket_create() expects exactly 3 parameters, 1 given in %s on line %i

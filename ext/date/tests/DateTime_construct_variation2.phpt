@@ -229,4 +229,3 @@ object(DateTime)#%d (3) {
 -- resource --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, resource given
 ===DONE===
-

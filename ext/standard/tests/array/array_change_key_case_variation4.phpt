@@ -22,7 +22,6 @@ for ($i = -5; $i <=5; $i += 1){
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_change_key_case() : usage variations ***
 

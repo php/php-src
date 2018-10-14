@@ -49,4 +49,3 @@ rmdir($d1);
 --EXPECT--
 bool(true)
 bool(true)
-

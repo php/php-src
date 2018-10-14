@@ -19,4 +19,3 @@ bool(true)
 string(0) ""
 bool(true)
 string(3) "moo"
-

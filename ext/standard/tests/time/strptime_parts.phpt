@@ -6,7 +6,6 @@ Test strptime() function : basic functionality
 		die("skip - strptime() function not available in this build");
 	}
 ?>
-
 --FILE--
 <?php
 /* Prototype  : array strptime  ( string $date  , string $format  )

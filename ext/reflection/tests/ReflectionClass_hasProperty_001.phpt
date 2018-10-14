@@ -72,4 +72,3 @@ Reflecting on class subprivf:
   --> Check for a: bool(false)
   --> Check for A: bool(false)
   --> Check for doesntExist: bool(false)
-

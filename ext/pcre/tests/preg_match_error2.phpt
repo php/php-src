@@ -22,7 +22,6 @@ var_dump(preg_match($regex, $value));
 echo "Done";
 ?>
 --EXPECTF--
-
 *** Testing preg_match() : error conditions ***
 
 Arg value is: this is a string

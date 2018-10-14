@@ -25,4 +25,3 @@ unlink("bug53872-phar.phar");
 --EXPECT--
 content of first.txt
 content of third.txt
-

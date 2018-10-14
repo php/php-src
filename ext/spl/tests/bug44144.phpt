@@ -23,5 +23,3 @@ array(1) {
     string(15) "nonstaticMethod"
   }
 }
-
-

@@ -15,6 +15,5 @@ try {
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
-
 --EXPECTF--
 string(%s) "Cannot clone unconstructed IntlDateFormatter"

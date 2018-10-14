@@ -39,7 +39,6 @@ for ($i = 0; $i < count($values1); $i++) {
 }
 ?>
 --EXPECTF--
-
 iteration 0
 float(0)
 float(0)

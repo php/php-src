@@ -62,4 +62,3 @@ echo "Passes.";
 ?>
 --EXPECTF--
 Passes.
-

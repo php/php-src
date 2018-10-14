@@ -55,4 +55,3 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
-

@@ -52,4 +52,3 @@ string(4) "file"
 string(4) "file"
 string(4) "file"
 *** Finished testing open_basedir configuration [filetype] ***
-

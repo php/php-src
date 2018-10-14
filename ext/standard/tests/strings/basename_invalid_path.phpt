@@ -16,7 +16,6 @@ if((substr(PHP_OS, 0, 3) == "WIN"))
 var_dump(basename(chr(-1)));
 
 echo "Done\n";
-
 --EXPECTF--
 string(0) ""
 Done

@@ -17,7 +17,6 @@ test("9.9.9");
 ?>
 ===DONE===
 --EXPECTF--
-
 --> Testing ..9:
 int(0)
 float(0)

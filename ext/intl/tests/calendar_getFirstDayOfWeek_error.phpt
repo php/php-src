@@ -16,9 +16,7 @@ var_dump($c->getFirstDayOfWeek(1));
 
 var_dump(intlcal_get_first_day_of_week($c, 1));
 var_dump(intlcal_get_first_day_of_week(1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::getFirstDayOfWeek() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlCalendar::getFirstDayOfWeek(): intlcal_get_first_day_of_week: bad arguments in %s on line %d

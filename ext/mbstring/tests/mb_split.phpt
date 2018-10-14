@@ -35,7 +35,6 @@ mbstring.func_overload=0
 		verify_split( b"\xa1\xa1+", b"\xa1\xa1\xa1\xa2\xa2\xa1\xa1\xa1\xa1\xa1\xa1\xa2\xa2\xa1\xa1\xa1", $i );
 	}
 ?>
-
 --EXPECTF--
 bool(true)
 ok
@@ -46,4 +45,3 @@ ok
 2-2
 3-3
 4-4
-

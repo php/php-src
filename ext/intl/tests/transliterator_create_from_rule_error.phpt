@@ -30,7 +30,6 @@ RULES;
 $t = Transliterator::createFromRules($rules);
 echo intl_get_error_message(),"\n";
 echo "Done.\n";
-
 --EXPECTF--
 Warning: Transliterator::createFromRules() expects at least 1 parameter, 0 given in %s on line %d
 

@@ -53,7 +53,6 @@ fclose($file_handle2);
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
@@ -157,4 +156,3 @@ array(1) {
 }
 
 --- Done ---
-

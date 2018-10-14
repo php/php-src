@@ -30,4 +30,3 @@ Class [ <user> class Foo ] {
   - Methods [0] {
   }
 }
-

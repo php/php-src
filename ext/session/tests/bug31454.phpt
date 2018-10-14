@@ -16,6 +16,5 @@ session_set_save_handler(
 echo "Done\n";
 ?>
 --EXPECTF--
-
 Warning: session_set_save_handler(): Argument 1 is not a valid callback in %sbug31454.php on line %d
 Done

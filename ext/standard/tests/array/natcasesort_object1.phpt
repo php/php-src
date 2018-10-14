@@ -48,7 +48,6 @@ var_dump($unsorted_str_obj);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing natcasesort() : object functionality ***
 

@@ -253,4 +253,3 @@ Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variat
 Error: 2 - mcrypt_encrypt() expects parameter 1 to be string, resource given, %s(%d)
 NULL
 ===DONE===
-

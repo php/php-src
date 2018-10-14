@@ -87,7 +87,6 @@ rmdir($child_dir_path);
 rmdir($sub_dir_path);
 rmdir($parent_dir_path);
 ?>
-
 --EXPECTF--
 *** Testing opendir() : usage variations ***
 

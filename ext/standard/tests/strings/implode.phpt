@@ -15,8 +15,6 @@ echo implode(':', array('foo', array('bar', 'baz'), 'burp'))."\n";
 echo $php_errormsg."\n";
 ?>
 --EXPECTF--
-
-
 foobarbaz
 foo:bar:baz
 foo:Array:burp

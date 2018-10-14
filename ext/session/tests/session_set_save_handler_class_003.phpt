@@ -63,7 +63,6 @@ session_write_close();
 session_unset();
 
 var_dump(session_id(), $_SESSION, $handler->i);
-
 --EXPECTF--
 *** Testing session_set_save_handler() : inheritance ***
 array(1) {

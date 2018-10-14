@@ -224,4 +224,3 @@ bool(false)
 Warning: mb_substr() expects parameter 4 to be string, resource given in %s on line %d
 string(0) ""
 Done
-

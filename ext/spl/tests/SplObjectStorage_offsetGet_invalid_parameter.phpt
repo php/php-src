@@ -42,4 +42,3 @@ NULL
 
 Warning: SplObjectStorage::offsetGet() expects parameter 1 to be object, null given in %s on line %d
 NULL
-

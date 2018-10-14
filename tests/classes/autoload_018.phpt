@@ -45,4 +45,3 @@ OUT: __autoload(UndefinedClass2)
 OUT: __autoload(UndefinedClass1)
 OUT: __autoload(UndefinedClass0)
 bool(false)
-

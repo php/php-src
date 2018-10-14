@@ -46,4 +46,3 @@ Destructing FooBar
 NULL
 Unsetting $x
 Finishing bar()
-

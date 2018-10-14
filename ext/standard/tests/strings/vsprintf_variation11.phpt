@@ -55,7 +55,6 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing vsprintf() : octal formats with octal values ***
 

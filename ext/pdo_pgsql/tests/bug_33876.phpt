@@ -88,9 +88,6 @@ if (!$res->execute(array(false))) {
 } else {
 	print_r($res->fetchAll(PDO::FETCH_ASSOC));
 }
-
-
-
 --EXPECT--
 Array
 (

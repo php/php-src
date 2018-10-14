@@ -58,4 +58,3 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 ?>
 --EXPECTF--
 done!
-

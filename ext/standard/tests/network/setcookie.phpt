@@ -68,6 +68,5 @@ echo ($i === 0)
 	: 'A total of '.$i.' errors found.';
 ?>
 --EXPECTHEADERS--
-
 --EXPECT--
 OK

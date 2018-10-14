@@ -11,5 +11,4 @@ interface if_a {
 
 ?>
 --EXPECTF--
-
 Fatal error: Interface function if_a::err() cannot contain body %s on line %d

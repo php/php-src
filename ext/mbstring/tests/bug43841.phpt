@@ -33,9 +33,7 @@ foreach ($offsets as $i) {
 	var_dump(strrpos(b'This is na English ta', b'a', $i));
 }
 ?>
-
 --EXPECTF--
-
 -- Offset is -25 --
 Multibyte String:
 

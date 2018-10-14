@@ -21,9 +21,7 @@ var_dump(intlcal_get_skipped_wall_time_option($c, 1));
 var_dump(intlcal_get_repeated_wall_time_option($c, 1));
 
 var_dump(intlcal_get_skipped_wall_time_option(1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::getSkippedWallTimeOption() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlCalendar::getSkippedWallTimeOption(): intlcal_get_skipped_wall_time_option: bad arguments in %s on line %d

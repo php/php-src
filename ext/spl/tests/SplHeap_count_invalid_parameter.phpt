@@ -44,4 +44,3 @@ NULL
 
 Warning: SplHeap::count() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
-

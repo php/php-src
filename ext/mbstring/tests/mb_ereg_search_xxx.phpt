@@ -34,7 +34,6 @@ output_handler=
 		do_tests( $enc, 'x' );
 	}
 ?>
-
 --EXPECT--
 (EUC-JP) (10) ¡¦¢Ï
 (EUC-JP) (5) abcde

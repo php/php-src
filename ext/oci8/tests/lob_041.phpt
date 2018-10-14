@@ -63,7 +63,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-
 --EXPECTF--
 Test 1 - explicit statement close
 test data

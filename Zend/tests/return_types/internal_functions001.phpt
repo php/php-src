@@ -1,12 +1,10 @@
 --TEST--
 Return type for internal functions
-
 --SKIPIF--
 <?php
 if (!function_exists('zend_test_func')) {
     print 'skip';
 }
-
 --FILE--
 <?php
 zend_test_func();

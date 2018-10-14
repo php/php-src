@@ -24,7 +24,6 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
-
 --EXPECTF--
 bool(false)
 bool(false)
@@ -40,6 +39,3 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-
-
-

@@ -16,7 +16,6 @@ echo trim(mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_ECB, $iv)) . "\n"
 
 // a warning must be issued if we don't use a IV on a AES cipher, that usually requires an IV
 mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_ECB);
-
 --EXPECTF--
 Deprecated: Function mcrypt_get_iv_size() is deprecated in %s%emcrypt_ecb.php on line 6
 

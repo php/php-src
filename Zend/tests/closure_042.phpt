@@ -18,7 +18,6 @@ $rm = new ReflectionFunction($d);
 var_dump($rm->getClosureScopeClass()->name); //dummy sope is Closure
 
 echo "Done.\n";
-
 --EXPECTF--
 object(stdClass)#%d (0) {
 }

@@ -4,7 +4,6 @@ datefmt_get_pattern_code and datefmt_set_pattern_code() icu <= 4.2
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
 --FILE--
-
 <?php
 
 /*

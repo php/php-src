@@ -41,4 +41,3 @@ NULL
 Warning: xml_get_current_column_number() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-

@@ -44,4 +44,3 @@ Warning: session_regenerate_id(): Cannot regenerate session id - session is not 
 bool(false)
 string(0) ""
 Done
-

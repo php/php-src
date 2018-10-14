@@ -18,7 +18,6 @@ var_dump($c->setMinimalDaysInFirstWeek(0));
 
 var_dump(intlcal_set_minimal_days_in_first_week($c, 0));
 var_dump(intlcal_set_minimal_days_in_first_week(1, 2));
-
 --EXPECTF--
 Warning: IntlCalendar::setMinimalDaysInFirstWeek() expects exactly 1 parameter, 0 given in %s on line %d
 
@@ -41,4 +40,3 @@ Stack trace:
 #0 %s(%d): intlcal_set_minimal_days_in_first_week(1, 2)
 #1 {main}
   thrown in %s on line %d
-
