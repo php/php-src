@@ -22,7 +22,7 @@ echo $phar2['a']->getContent() . "\n";
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php');
 __halt_compiler();

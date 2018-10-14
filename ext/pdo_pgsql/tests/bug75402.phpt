@@ -59,11 +59,11 @@ $sql = "SELECT
             to_char(INSERT_DATETIME, 'IYYY.MM.DD HH24:MI:SS')  as \"sDatetime\" 
           FROM bug75402 
           ORDER BY INSERT_DATETIME DESC";
-  
+
 if ($db) {
     $stmt = $db->prepare($sql,
 		array(
-			// With the following options memory is not being 
+			// With the following options memory is not being
 			// deallocated
 			  \PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL
 			// With the following option memory is de-allocated

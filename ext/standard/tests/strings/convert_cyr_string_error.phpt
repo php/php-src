@@ -1,5 +1,5 @@
 --TEST--
-Test convert_cyr_string() function : error conditions 
+Test convert_cyr_string() function : error conditions
 --FILE--
 <?php
 
@@ -33,7 +33,7 @@ var_dump(bin2hex( convert_cyr_string($str, $from, "?")) );
 echo "\n-- Testing convert_cyr_string() function with invalid 'from' and 'to' character set --\n";
 var_dump(bin2hex( convert_cyr_string($str, ">", "?")) );
 
-?> 
+?>
 ===DONE===
 --EXPECTF--
 *** Testing convert_cyr_string() : error conditions ***

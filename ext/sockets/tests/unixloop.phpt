@@ -27,7 +27,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 	if (!socket_listen($server, 2)) {
 		die('Unable to listen on socket');
 	}
-	
+
 	/* Connect to it */
 	$client = socket_create(AF_UNIX, SOCK_STREAM, 0);
 	if (!$client) {

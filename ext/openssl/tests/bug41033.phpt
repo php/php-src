@@ -1,7 +1,7 @@
 --TEST--
 #41033, enable signing with DSA keys
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip, openssl required");
 ?>
 --FILE--

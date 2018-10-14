@@ -45,7 +45,7 @@ function get_priority_from_wmic() {
 
 	$f = false;
 	$m = [
-		strpos($t[0], ' ProcessId' ), 
+		strpos($t[0], ' ProcessId' ),
 		strpos($t[0], ' Priority ')
 		];
 
@@ -71,10 +71,10 @@ function get_priority_from_wmic() {
 $p = [
 	/* '<verbose name>' => ['<wmic value>', '<proc_nice value>'] */
 
-	'Idle' 		=> [4, 10], 
-	'Below normal'	=> [6, 5], 
-	'Normal'	=> [8, 0], 
-	'Above normal'	=> [10, -5], 
+	'Idle' 		=> [4, 10],
+	'Below normal'	=> [6, 5],
+	'Normal'	=> [8, 0],
+	'Above normal'	=> [10, -5],
 	'High priority'	=> [13, -10]
 	];
 

@@ -3,7 +3,7 @@ Test array_walk_recursive() function : usage variations - unexpected values in p
 --FILE--
 <?php
 /* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 

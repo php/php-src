@@ -1,9 +1,9 @@
 --TEST--
-Test array_unique() function : basic functionality 
+Test array_unique() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 

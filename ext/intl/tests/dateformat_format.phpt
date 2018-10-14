@@ -20,7 +20,7 @@ function ut_main()
 	$locale_arr = array (
 		'en_US'
 	);
-	
+
 	$datetype_arr = array (
                 IntlDateFormatter::FULL,
                 IntlDateFormatter::LONG,
@@ -73,12 +73,12 @@ function ut_main()
 		$localtime_arr2,
 		$localtime_arr3
 	);
-	
+
 	$d1 = new DateTime("2010-01-01 01:02:03", new DateTimeZone("UTC"));
 	$d2 = new DateTime("2000-12-31 03:04:05", new DateTimeZone("UTC"));
 	$d2->setTimezone(new DateTimeZone("PDT"));
 	$dates = array(
-		$d1, 
+		$d1,
 		$d2,
 		new StdClass(),
 	);
@@ -129,7 +129,7 @@ function ut_main()
 				$res_str .= "\n------------";
 				$res_str .= "\nDate is: ".var_export($date_entry, true);
 				$res_str .= "\n------------";
-				
+
 				$fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN );
 				$formatted1 = ut_datefmt_format( $fmt , $date_entry);
 				if( intl_get_error_code() == U_ZERO_ERROR){

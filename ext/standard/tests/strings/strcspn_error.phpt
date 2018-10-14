@@ -1,10 +1,10 @@
 --TEST--
-Test strcspn() function : error conditions 
+Test strcspn() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters not found in mask.
-                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars) 
+                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */

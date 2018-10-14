@@ -1,11 +1,11 @@
 --TEST--
-Test array_udiff_assoc() function : error conditions 
+Test array_udiff_assoc() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array array_udiff_assoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function. 
+ * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_udiff_assoc() : error conditions ***\n";

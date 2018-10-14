@@ -1,7 +1,7 @@
 --TEST--
 Bug #65729: CN_match gives false positive when wildcard is used
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>

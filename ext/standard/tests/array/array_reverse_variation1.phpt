@@ -58,12 +58,12 @@ $arrays = array (
        // empty data
 /*16*/ "",
        '',
-      
+
        // string data
        'Hello world',
        "Hello world",
        $heredoc_string,
-  
+
        // object data
 /*21*/ new classA(),
 

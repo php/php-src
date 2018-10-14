@@ -8,7 +8,7 @@ Test array_merge_recursive() function : usage variations - common key and value(
 */
 
 /*
- * Testing the functionality of array_merge_recursive() by passing 
+ * Testing the functionality of array_merge_recursive() by passing
  * arrays having common key and value.
 */
 

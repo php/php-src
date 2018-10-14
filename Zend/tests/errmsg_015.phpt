@@ -10,5 +10,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Method test::__clone() cannot accept any arguments in %s on line %d

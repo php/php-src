@@ -1,5 +1,5 @@
 --TEST--
-SPL: Cloning nested ArrayObjects. 
+SPL: Cloning nested ArrayObjects.
 --FILE--
 <?php
 class C {

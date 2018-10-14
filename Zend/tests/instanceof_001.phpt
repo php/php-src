@@ -1,7 +1,7 @@
 --TEST--
 Testing instanceof operator with several operators
 --FILE--
-<?php 
+<?php
 
 $a = new stdClass;
 var_dump($a instanceof stdClass);

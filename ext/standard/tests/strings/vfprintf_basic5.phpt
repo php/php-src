@@ -22,7 +22,7 @@ $arg3 = array(65,66,67);
 $data_file = dirname(__FILE__) . '/vfprintf_basic5.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 vfprintf($fp, $format1,$arg1);
 fprintf($fp, "\n");
 

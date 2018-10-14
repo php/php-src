@@ -1,5 +1,5 @@
 --TEST--
-Test popen() and pclose function: basic functionality 
+Test popen() and pclose function: basic functionality
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN' )

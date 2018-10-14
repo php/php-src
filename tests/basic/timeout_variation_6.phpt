@@ -1,7 +1,7 @@
 --TEST--
 Timeout within function trowing exception before timeout reached
 --SKIPIF--
-<?php 
+<?php
 	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
@@ -11,7 +11,7 @@ include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
 
 set_time_limit($t);
 
-function f($t) { 
+function f($t) {
 	echo "call";
 	busy_wait($t-1);
 	throw new Exception("exception before timeout");

@@ -2,7 +2,7 @@
 No router, no script
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php

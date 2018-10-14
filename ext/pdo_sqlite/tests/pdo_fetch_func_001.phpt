@@ -33,7 +33,7 @@ var_dump($st->fetchAll(PDO::FETCH_FUNC, 1));
 $st = $db->query('SELECT * FROM testing');
 var_dump($st->fetchAll(PDO::FETCH_FUNC, array('self', 'foo')));
 
-class foo { 
+class foo {
 	public function method($x) {
 		return "--- $x ---";
 	}
@@ -43,15 +43,15 @@ class bar extends foo {
 		$st = $db->query('SELECT * FROM testing');
 		var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::method')));
 	}
-	
+
 	static public function test($x, $y) {
 		return $x .'---'. $y;
 	}
-	
+
 	private function test2($x, $y) {
 		return $x;
 	}
-	
+
 	public function test3($x, $y) {
 		return $x .'==='. $y;
 	}

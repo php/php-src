@@ -1,12 +1,12 @@
 --TEST--
-openssl key from zval leaks 
+openssl key from zval leaks
 --SKIPIF--
-<?php 
-if (!extension_loaded("openssl")) die("skip"); 
+<?php
+if (!extension_loaded("openssl")) die("skip");
 ?>
 --FILE--
 <?php
-$pub_key_id = false; 
+$pub_key_id = false;
 $signature = '';
 $ok = openssl_verify("foo", $signature, $pub_key_id, OPENSSL_ALGO_MD5);
 

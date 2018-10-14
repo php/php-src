@@ -13,7 +13,7 @@ foreach (array('N','l') as $v) {
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Array
 (
     [1] => 4294937296

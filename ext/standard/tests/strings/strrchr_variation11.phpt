@@ -19,7 +19,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource

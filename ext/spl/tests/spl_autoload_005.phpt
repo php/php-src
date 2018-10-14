@@ -11,7 +11,7 @@ class MyAutoLoader {
         {
         	echo __METHOD__ . "($className)\n";
         }
-        
+
         function autoThrow($className)
         {
         	echo __METHOD__ . "($className)\n";

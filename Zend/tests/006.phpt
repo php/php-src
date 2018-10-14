@@ -15,7 +15,7 @@ var_dump(strncasecmp("01", "01", 1000));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: strncasecmp() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 

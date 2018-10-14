@@ -1,7 +1,7 @@
 --TEST--
 Bug #41442 (imagegd2() under output control)
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
@@ -31,7 +31,7 @@ var_dump(imagecreatefromstring($str2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (gd)
 resource(%d) of type (gd)
 Done

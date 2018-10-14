@@ -5,7 +5,7 @@ SPL: ArrayObject::exchangeArray() basic usage with object as underlying data sto
 
 class C {
 	public $pub1 = 'public1';
-} 
+}
 
 echo "--> exchangeArray() with objects:\n";
 $original = new C;

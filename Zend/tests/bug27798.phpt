@@ -8,7 +8,7 @@ class Base
 	public    $Foo = 1;
 	protected $Bar = 2;
 	private   $Baz = 3;
-	
+
 	function __construct()
 	{
 		echo __METHOD__ . "\n";

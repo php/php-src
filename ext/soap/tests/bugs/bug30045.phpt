@@ -1,7 +1,7 @@
 --TEST--
 Bug #30045 (Cannot pass big integers (> 2147483647) in SOAP requests)
 --SKIPIF--
-<?php 
+<?php
   if (!extension_loaded('soap')) die('skip soap extension not available');
   if (!extension_loaded('simplexml')) die('skip simplexml extension not available');
 ?>
@@ -42,7 +42,7 @@ $soap = new LocalSoapClient(NULL, array("uri"=>"http://test-uri", "location"=>"t
 function test($type, $num) {
   global $soap;
   try {
-	  printf("  %0.0f\n    ", $num);  	
+	  printf("  %0.0f\n    ", $num);
 	  $ret = $soap->foo($type, new SoapVar($num, $type));
 	  printf("    %0.0f\n", $ret);
 	} catch (SoapFault $ex) {
@@ -127,7 +127,7 @@ test(XSD_LONG, 2147483647);
 test(XSD_LONG, 2147483648);
 test(XSD_LONG,  4294967296);
 test(XSD_LONG,  8589934592);
-test(XSD_LONG, 17179869184); 
+test(XSD_LONG, 17179869184);
 
 echo "\nunsignedLong\n";
 test(XSD_UNSIGNEDLONG,  2147483647);

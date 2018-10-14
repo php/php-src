@@ -4,7 +4,7 @@ Reflection::getClosureThis()
 <?php
 if (!extension_loaded('reflection')) print 'skip';
 ?>
---FILE-- 
+--FILE--
 <?php
 $closure = function($param) { return "this is a closure"; };
 $rf = new ReflectionFunction($closure);

@@ -5,7 +5,7 @@ When being called multiple times with an array,
 registerPHPFunctions adds the new functions to the allowed parameter
 list - it does not replace the previously allowed functions.
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }

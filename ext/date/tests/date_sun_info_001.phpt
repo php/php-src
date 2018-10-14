@@ -7,7 +7,7 @@ $sun_info = date_sun_info(strtotime("2006-12-12"), 31.7667, 35.2333);
 var_dump($sun_info);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(9) {
   ["sunrise"]=>
   int(1165897761)

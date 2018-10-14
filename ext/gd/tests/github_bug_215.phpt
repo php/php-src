@@ -1,15 +1,15 @@
---TEST-- 
+--TEST--
 Github #215 (imagefilltoborder stack overflow when invalid pallete index used)
---SKIPIF-- 
-<?php  
-if (!extension_loaded("gd")) die("skip GD not present"); 
+--SKIPIF--
+<?php
+if (!extension_loaded("gd")) die("skip GD not present");
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
     die("skip test requires GD 2.2.2 or higher");
 }
-?> 
+?>
 --FILE--
 <?php
-$image = imagecreate( 10, 10 ); 
+$image = imagecreate( 10, 10 );
 $bgd = imagecolorallocate( $image, 0, 0, 0 );
 $border = imagecolorallocate( $image, 255, 0, 0 );
 $fillcolor = imagecolorallocate( $image, 255, 0, 0 );
@@ -37,8 +37,8 @@ imagefilltoborder( $image, 0,0, $border+10, $fillcolor+10);
 echo "#5 passes";
 
 
-?> 
---EXPECT-- 
+?>
+--EXPECT--
 #1 passes
 #2 passes
 #3 passes

@@ -29,7 +29,7 @@ var_dump(dba_delete("a", $dba));
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 include "clean.inc";
 ?>
 --EXPECT--

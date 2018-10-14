@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmpset (without MIBs loading)
 --CREDITS--
 Boris Lytochkin

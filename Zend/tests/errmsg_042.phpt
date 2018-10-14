@@ -9,5 +9,5 @@ foreach ($a as &$k=>$v) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Key element cannot be a reference in %s on line %d

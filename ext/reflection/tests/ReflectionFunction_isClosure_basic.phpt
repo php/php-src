@@ -7,7 +7,7 @@ TestFest PHP|Tek
 <?php
 if (!extension_loaded('reflection')) print 'skip';
 ?>
---FILE-- 
+--FILE--
 <?php
 $closure = function($param) { return "this is a closure"; };
 $rc = new ReflectionFunction($closure);

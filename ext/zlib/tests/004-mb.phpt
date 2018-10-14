@@ -14,7 +14,7 @@ var_dump(gzfile(dirname(__FILE__)."/004私はガラスを食べられます.txt.
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gzfile() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

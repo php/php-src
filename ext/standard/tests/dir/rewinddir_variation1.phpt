@@ -3,7 +3,7 @@ Test rewinddir() function : usage variations - different data types as $dir_hand
 --FILE--
 <?php
 /* Prototype  : void rewinddir([resource $dir_handle])
- * Description: Rewind dir_handle back to the start 
+ * Description: Rewind dir_handle back to the start
  * Source code: ext/standard/dir.c
  * Alias to functions: rewind
  */
@@ -56,7 +56,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -66,7 +66,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 

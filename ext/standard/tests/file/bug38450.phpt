@@ -101,7 +101,7 @@ var_dump($myvar);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(12) "constructor!"
 line1
 line2

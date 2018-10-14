@@ -24,7 +24,7 @@ foreach ($strVals as $strVal) {
       }
    }
 }
-   
+
 ?>
 ===DONE===
 --EXPECT--

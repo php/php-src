@@ -32,7 +32,7 @@ class for_string_natcasesort
 
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   new for_string_natcasesort("axx"), new for_string_natcasesort("t"),
   new for_string_natcasesort("w"), new for_string_natcasesort("py"),
   new for_string_natcasesort("apple"), new for_string_natcasesort("Orange"),

@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp_get_valueretrieval / snmp_set_valueretrieval
 --CREDITS--
 Olivier Doucet

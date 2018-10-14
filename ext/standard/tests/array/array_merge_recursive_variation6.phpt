@@ -8,7 +8,7 @@ Test array_merge_recursive() function : usage variations - array with duplicate 
 */
 
 /*
- * Testing the functionality of array_merge_recursive() by passing 
+ * Testing the functionality of array_merge_recursive() by passing
  * array having duplicate keys.
 */
 

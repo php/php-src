@@ -71,7 +71,7 @@ $values =  array (
   // null vlaues
   NULL,
   null,
-  
+
   // resource variable
   $fp,
 

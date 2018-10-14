@@ -39,7 +39,7 @@ echo "Done\n";
 
 setlocale(LC_TIME, $loc);
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: strftime() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 bool(false)

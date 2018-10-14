@@ -38,7 +38,7 @@ var_dump($phar->getStub());
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');

@@ -29,7 +29,7 @@ set_error_handler('error_handler');
 
 $count = 0;
 $checks = array(
-    '/', '.', '../', 'a/..', 'a/', 'b//a.php', 
+    '/', '.', '../', 'a/..', 'a/', 'b//a.php',
     "Font\xE5\x84\xB7\xE9\xBB\x91pro.ttf", //two valid multi-byte characters
     "\xF0\x9F\x98\x8D.ttf", // valid 4 byte char - smiling face with heart-shaped eyes
     "Font\xE9\xBBpro.ttf", //Invalid multi-byte character - missing last byte

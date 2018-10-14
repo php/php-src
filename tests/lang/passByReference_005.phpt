@@ -43,32 +43,32 @@ class C {
 	function v($val) {
 	  $val = "Val changed";
 	}
-	
+
 	function r(&$ref) {
 	  $ref = "Ref changed";
 	}
-	
+
 	function vv($val1, $val2) {
 	  $val1 = "Val1 changed";
 	  $val2 = "Val2 changed";
 	}
-	
+
 	function vr($val, &$ref) {
 	  $val = "Val changed";
 	  $ref = "Ref changed";
 	}
-	
+
 	function rv(&$ref, $val) {
 	  $val = "Val changed";
 	  $ref = "Ref changed";
 	}
-	
+
 	function rr(&$ref1, &$ref2) {
 	  $ref1 = "Ref1 changed";
 	  $ref2 = "Ref2 changed";
 	}
 
-} 
+}
 
 echo "\n ---- Pass by ref / pass by val: functions ----\n";
 unset($u1, $u2);

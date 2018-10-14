@@ -1,5 +1,5 @@
 --TEST--
-Test date_create() function : basic functionality 
+Test date_create() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : DateTime date_create  ([ string $time  [, DateTimeZone $timezone  ]] )
@@ -8,7 +8,7 @@ Test date_create() function : basic functionality
  * Alias to functions: DateTime::__construct
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_create() : basic functionality ***\n";

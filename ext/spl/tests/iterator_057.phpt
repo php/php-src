@@ -5,8 +5,8 @@ Sebastian Schürmann
 --FILE--
 <?php
 /**
- * From Docs: Construct a new array iterator from anything that has a hash table. 
- * NULL, NOTHING is not a hash table ;) 
+ * From Docs: Construct a new array iterator from anything that has a hash table.
+ * NULL, NOTHING is not a hash table ;)
  */
 class myArrayIterator extends ArrayIterator {
 }

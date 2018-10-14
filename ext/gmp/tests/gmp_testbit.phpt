@@ -39,7 +39,7 @@ var_dump(gmp_strval($n));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_testbit() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 

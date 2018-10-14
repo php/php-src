@@ -51,7 +51,7 @@ foreach($file_content_types as $file_content_type) {
     $data_to_be_written="";
     fill_buffer($data_to_be_written,$file_content_type,1024);  //get the data of size 1024
 
-    /*  Write the data into the file, verify it by checking the file pointer position, eof position, 
+    /*  Write the data into the file, verify it by checking the file pointer position, eof position,
         filesize & by displaying the content */
 
     // append the data to the file, starting from current position of the file pointer
@@ -64,9 +64,9 @@ foreach($file_content_types as $file_content_type) {
     fseek($file_handle, SEEK_SET, (1024 + 400)/2 );
     var_dump( ftell($file_handle));  // expected: (1024 + 400)/2
     var_dump( fwrite($file_handle, $data_to_be_written, 200) );
-    var_dump( ftell($file_handle) ); 
+    var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );  //Expecting bool(false)
-       
+
     /* check the filesize and display file content */
     // close the file, get the size and content of the file.
     var_dump( fclose($file_handle) );

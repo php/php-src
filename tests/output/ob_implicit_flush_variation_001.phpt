@@ -1,13 +1,13 @@
 --TEST--
-Test ob_implicit_flush() function : usage variation 
+Test ob_implicit_flush() function : usage variation
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : void ob_implicit_flush([int flag])
- * Description: Turn implicit flush on/off and is equivalent to calling flush() after every output call 
+ * Description: Turn implicit flush on/off and is equivalent to calling flush() after every output call
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ob_implicit_flush() : usage variation ***\n";

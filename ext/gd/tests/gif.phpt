@@ -1,7 +1,7 @@
 --TEST--
 gif in/out
 --SKIPIF--
-<?php 
+<?php
 // $Id$
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
