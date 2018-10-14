@@ -191,31 +191,29 @@ function help(): string
     `-s, --clean-space-before-tab`
           Clean all spaces before tabs in the initial indent part of the lines.
 
-    `-o, --no-backup`
-          Disable backed up files.
     `-f, --fix`
           Edit and save files in place.
     `-q, --quiet`
-          No output messages. Enables also non-interactive mode.
+          No output, enables non-interactive mode, disables backups.
     `-y, --yes`
-          Non-interactive mode, auto yes used for all prompts.
+          Non-interactive mode, 'yes' to prompt to continue, disables backups.
     `-v|vv|vvv, --verbose`
-          With more verbosity, additional information are reported about files
-          such as non-ascii and non-utf8 file encodings, CR EOLs in phpt files,
-          and debugging info such as files that passed the tidying rules and
-          ignored files.
+          With more verbosity, additional info are reported.
+          1 for reporting CR EOLs in the phpt files,
+          2 for non-ascii and non-utf8 file encodings,
+          3 for skipped files and files that passed the tidying rules.
     `    --no-colors`
           Disable colors in the output.
 
   *EXAMPLES*
-    `php tidy.php -f path`              Tidy path with all rules enabled
-    `php scripts/dev/tidy.php .`        Check the php-src repo
-    `php scripts/dev/tidy.php -fo .`    Tidy php-src, no backups
-    `php tidy.php -wf path`             Trim trailing whitespace
-    `php tidy.php -wnfN path`           Tidy trailing whitespace and final EOLs
-    `php tidy.php -N=2 -f path`         Trim final EOL, allow up to 2 final EOL
-    `php tidy.php -e=LF -f path`        Convert newlines to LF style
-    `php tidy.php -vv path`             Check and list more info about files
+    `php scripts/dev/tidy.php .`      Check php-src repository
+    `php tidy.php -f path`            Tidy path with all rules enabled
+    `php scripts/dev/tidy.php -fy .`  Tidy php-src, no backups
+    `php tidy.php -wf path`           Trim trailing whitespace
+    `php tidy.php -wnfN path`         Tidy trailing whitespace and final EOLs
+    `php tidy.php -N=2 -f path`       Trim final EOL, allow up to 2 final EOL
+    `php tidy.php -e=LF -f path`      Convert newlines to LF style
+    `php tidy.php -vv path`           Check and list more info about files
 
   Latest version <https://git.php.net/?p=php-src.git;a=blob;f=scripts/dev/tidy.php>
   Report bugs to <https://bugs.php.net>
@@ -305,10 +303,8 @@ function getBlacklist(string $path): array
         '/^.*tests\/.*\.xsl$/',
         '/^.*tests\/.*\.wsdl$/',
 
-        // PHP 7.1
+        // PHP 7.1, 7.2, or 7.3 specific
         '/^stub\.c$/',
-
-        // PHP 7.1, 7.2, 7.3
         '/^ext\/pcre\/pcrelib/',
         '/^ext\/zip\/lib/',
         '/^ext\/sqlite3\/libsqlite/',
@@ -369,11 +365,13 @@ function getWhitelist(string $path): array
 /**
  * Get options from the command line arguments.
  */
-function options(array $argv = []): array
+function options(array $overrides = [], array $argv = []): array
 {
     static $opt;
 
     if (isset($opt)) {
+        $opt = array_merge($opt, $overrides);
+
         return $opt;
     }
 
@@ -462,18 +460,16 @@ function options(array $argv = []): array
             case 'no-colors':
                 $opt['colors'] = false;
             break;
-            case 'o':
-            case 'no-backup':
-                $opt['backup'] = false;
-            break;
             case 'q':
             case 'quiet':
                 $opt['quiet'] = true;
                 $opt['yes'] = true;
+                $opt['backup'] = false;
             break;
             case 'y':
             case 'yes':
                 $opt['yes'] = true;
+                $opt['backup'] = false;
             break;
             case 'v':
                 $opt['verbose'] = (is_array($value)) ? count($value) : 1;
@@ -706,7 +702,6 @@ function prompt(): void
     $opt = options();
 
     output('This will overwrite'.(is_dir($opt['path']) ? ' all files in' : '').' *'.$opt['path'].'*');
-    output('Backup copies '.($opt['backup'] ? 'will' : '**will NOT**')." be created.\n");
     output('Do you want to continue `[yes|no]`?');
 
     $handle = fopen('php://stdin', 'r');
@@ -716,6 +711,14 @@ function prompt(): void
         output('**ABORTING**');
 
         exit;
+    }
+
+    output('Do you want to create backups (file.ext~) `[yes|no]`?');
+
+    $line = fgets($handle);
+
+    if (in_array(trim((strtolower($line))), ['no', 'n'], true)) {
+        options(['backup' => false]);
     }
 }
 
@@ -1471,11 +1474,11 @@ function tidyPhpCode(string $source, callable $callback): string
                     $buffer = '';
                 break;
                 case T_CONSTANT_ENCAPSED_STRING:
-                    $before = (preg_match('/[ \t]+\z/', $buffer, $matches)) ? $matches[0] : '';
                     $content .= $callback($buffer);
-                    $after = (preg_match('/[ \t]+\z/', $content, $matches)) ? $matches[0] : '';
 
                     // When trimming trailing whitespace, the final trailing ws should stay
+                    $before = (preg_match('/[ \t]+\z/', $buffer, $matches)) ? $matches[0] : '';
+                    $after = (preg_match('/[ \t]+\z/', $content, $matches)) ? $matches[0] : '';
                     if ($before !== $after && '' === $after) {
                         $content .= $before;
                     }
@@ -1553,7 +1556,7 @@ function countSkipped(): int
 function init(array $argv): int
 {
     $time = microtime(true);
-    $opt = options($argv);
+    $opt = options([], $argv);
 
     output("Executing `tidy.php`\nWorking tree: ".$opt['path']."\n");
 
@@ -1569,7 +1572,7 @@ function init(array $argv): int
     $output .= '*'.count($files).'* file(s) checked, ';
     $output .= '*'.countSkipped().'* file(s) skipped ';
     $output .= 'in '.$time.' sec ';
-    $output .= 'and '.(round(memory_get_peak_usage() / 1024 / 1024, 3)).' MB memory consumed.';
+    $output .= 'with '.(round(memory_get_peak_usage() / 1024 / 1024, 3)).' MB memory consumed.';
 
     output($output);
 
