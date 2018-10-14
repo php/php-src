@@ -28,7 +28,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : variation ***
-
 int(2)
 
 Warning: session_save_path(): Cannot change save path when session is active in %s on line 16
