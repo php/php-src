@@ -175,4 +175,3 @@ const char* type_to_str(XMLRPC_VALUE_TYPE type, XMLRPC_VECTOR_TYPE vtype);
 
 
 #endif /* XMLRPC_PRIVATE_ALREADY_INCLUDED */
-

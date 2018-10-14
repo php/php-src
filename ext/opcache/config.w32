@@ -29,4 +29,3 @@ if (PHP_OPCACHE != "no") {
 	ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname);
 
 }
-

@@ -46,4 +46,3 @@ void php_json_scanner_init(php_json_scanner *scanner, char *str, size_t str_len,
 int php_json_scan(php_json_scanner *s);
 
 #endif	/* PHP_JSON_SCANNER_H */
-

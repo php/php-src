@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 #ifdef HAVE_TIMES
 #include <sys/times.h>

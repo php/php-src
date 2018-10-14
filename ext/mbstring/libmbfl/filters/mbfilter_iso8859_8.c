@@ -136,4 +136,3 @@ int mbfl_filt_conv_wchar_8859_8(int c, mbfl_convert_filter *filter)
 
 	return c;
 }
-

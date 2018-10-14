@@ -52,4 +52,3 @@ _bc_rm_leading_zeros (num)
     num->n_len--;
   }
 }
-

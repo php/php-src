@@ -498,5 +498,3 @@ void mbfl_filt_conv_common_dtor(mbfl_convert_filter *filter)
 	filter->status = 0;
 	filter->cache = 0;
 }
-
-

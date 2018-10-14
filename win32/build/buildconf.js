@@ -259,4 +259,3 @@ C.Write(file_get_contents("win32/build/configure.tail"));
 
 B.WriteLine("@echo off");
 B.WriteLine("cscript /nologo configure.js %*");
-

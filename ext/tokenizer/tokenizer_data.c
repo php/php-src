@@ -304,4 +304,3 @@ char *get_token_type_name(int token_type)
 	}
 	return "UNKNOWN";
 }
-

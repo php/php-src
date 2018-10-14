@@ -23,4 +23,3 @@ if (PHP_CLI_WIN32 == "yes") {
 	SAPI('cli_win32', 'cli_win32.c php_cli_process_title.c ps_title.c', 'php-win.exe', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 	ADD_FLAG("LDFLAGS_CLI_WIN32", "/stack:67108864");
 }
-

@@ -146,4 +146,3 @@ function create_data($id, $item = "", $cp = 65001, $utf8 = true)
 
 	return $prefix;
 }
-

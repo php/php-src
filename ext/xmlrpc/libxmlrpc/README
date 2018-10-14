@@ -10,8 +10,3 @@ The rules are:
 
 This allows us to have a nicely encapsulated C api with opaque data types and private functions
 that are nonetheless shared between source files without redundant extern declarations..
-
-
-
-
-

@@ -268,4 +268,3 @@ bc_divide (bc_num n1, bc_num n2, bc_num *quot, int scale)
 
   return 0;	/* Everything is OK. */
 }
-

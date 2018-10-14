@@ -12,4 +12,3 @@ if (PHP_PSPELL != "no") {
 		WARNING("pspell not enabled; libraries and headers not found");
 	}
 }
-

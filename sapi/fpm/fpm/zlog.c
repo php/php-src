@@ -1,4 +1,3 @@
-
 	/* (c) 2004-2007 Andrei Nigmatulin */
 
 #include "fpm_config.h"

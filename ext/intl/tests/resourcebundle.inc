@@ -10,4 +10,3 @@ function debug( $res ) {
 	}
 	return $ret . sprintf( "%5d: %s\n", intl_get_error_code(), intl_get_error_message() );
 }
-

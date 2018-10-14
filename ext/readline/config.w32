@@ -12,4 +12,3 @@ if (PHP_READLINE != "no") {
 		WARNING("readline not enabled; libraries and headers not found");
 	}
 }
-

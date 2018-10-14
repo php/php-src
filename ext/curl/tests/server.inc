@@ -83,4 +83,3 @@ function curl_cli_server_start() {
 
     return PHP_CURL_SERVER_ADDRESS;
 }
-

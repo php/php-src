@@ -234,4 +234,3 @@ if test "$PHP_PDO_OCI" != "no"; then
 
   AC_DEFINE_UNQUOTED(PHP_PDO_OCI_CLIENT_VERSION, "$PDO_OCI_VERSION", [ ])
 fi
-

@@ -1,4 +1,3 @@
-
 	/* (c) 2009 Jerome Loyet */
 
 #include "php.h"
@@ -335,4 +334,3 @@ float fpm_scoreboard_get_tick() /* {{{ */
 }
 /* }}} */
 #endif
-

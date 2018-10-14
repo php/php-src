@@ -3680,4 +3680,3 @@ function setup_verbosity()
 		CMD_MOD2 = "@";
 	}
 }
-
