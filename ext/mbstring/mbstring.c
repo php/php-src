@@ -3688,41 +3688,45 @@ static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zv
 	zval *entry;
 
 	ZVAL_DEREF(var);
-	if (Z_TYPE_P(var) == IS_STRING) {
-		string.val = (unsigned char *)Z_STRVAL_P(var);
-		string.len = Z_STRLEN_P(var);
-		if (mbfl_encoding_detector_feed(identd, &string)) {
-			return 1; /* complete detecting */
-		}
-	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
-		if (Z_REFCOUNTED_P(var)) {
-			if (Z_IS_RECURSIVE_P(var)) {
-				*recursion_error = 1;
-				return 0;
+	switch (Z_TYPE_P(var)) {
+		case IS_STRING:
+			string.val = (unsigned char *)Z_STRVAL_P(var);
+			string.len = Z_STRLEN_P(var);
+			if (mbfl_encoding_detector_feed(identd, &string)) {
+				return 1; /* complete detecting */
 			}
-			Z_PROTECT_RECURSION_P(var);
-		}
-
-		ht = HASH_OF(var);
-		if (ht != NULL) {
-			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
-				if (mb_recursive_encoder_detector_feed(identd, entry, recursion_error)) {
-					if (Z_REFCOUNTED_P(var)) {
-						Z_UNPROTECT_RECURSION_P(var);
-					}
-					return 1;
-				} else if (*recursion_error) {
-					if (Z_REFCOUNTED_P(var)) {
-						Z_UNPROTECT_RECURSION_P(var);
-					}
+			break;
+		case IS_ARRAY:
+		case IS_OBJECT:
+			if (Z_REFCOUNTED_P(var)) {
+				if (Z_IS_RECURSIVE_P(var)) {
+					*recursion_error = 1;
 					return 0;
 				}
-			} ZEND_HASH_FOREACH_END();
-		}
+				Z_PROTECT_RECURSION_P(var);
+			}
 
-		if (Z_REFCOUNTED_P(var)) {
-			Z_UNPROTECT_RECURSION_P(var);
-		}
+			ht = HASH_OF(var);
+			if (ht != NULL) {
+				ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
+					if (mb_recursive_encoder_detector_feed(identd, entry, recursion_error)) {
+						if (Z_REFCOUNTED_P(var)) {
+							Z_UNPROTECT_RECURSION_P(var);
+						}
+						return 1;
+					} else if (*recursion_error) {
+						if (Z_REFCOUNTED_P(var)) {
+							Z_UNPROTECT_RECURSION_P(var);
+						}
+						return 0;
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+
+			if (Z_REFCOUNTED_P(var)) {
+				Z_UNPROTECT_RECURSION_P(var);
+			}
+			break;
 	}
 	return 0;
 } /* }}} */
