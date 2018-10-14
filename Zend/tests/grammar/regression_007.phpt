@@ -28,7 +28,6 @@ Foo::{'new'}();
 var_dump(Foo::use);
 
 echo "\nDone\n";
-
 --EXPECTF--
 Foo::new
 Foo::new

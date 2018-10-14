@@ -33,7 +33,6 @@ fclose($fp);
 echo $data."\n";
 
 @unlink($secretfile);
-
 --EXPECTF--
 FOUND
 FOUND

@@ -13,7 +13,6 @@ class Bar extends Foo {}
 $rc1 = new ReflectionClass("Bar");
 var_dump($rc1->getParentClass());
 ?>
-
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
   ["name"]=>

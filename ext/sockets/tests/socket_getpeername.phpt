@@ -23,7 +23,6 @@ fa@php.net
     var_dump($port);
     socket_close($s_c);
 ?>
-
 --EXPECTF--
 bool(true)
 

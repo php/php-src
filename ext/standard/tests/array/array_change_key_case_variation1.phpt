@@ -94,7 +94,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_change_key_case() : usage variations ***
 

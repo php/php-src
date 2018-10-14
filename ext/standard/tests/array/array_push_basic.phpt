@@ -29,7 +29,6 @@ var_dump($array_assoc);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_push() : basic functionality ***
 

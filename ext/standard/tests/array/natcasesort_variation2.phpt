@@ -117,7 +117,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing natcasesort() : usage variation ***
 

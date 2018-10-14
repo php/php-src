@@ -16,9 +16,7 @@ var_dump($tz->getDisplayName(false, IntlTimeZone::DISPLAY_SHORT, array()));
 var_dump($tz->getDisplayName(false, IntlTimeZone::DISPLAY_SHORT, NULL, NULL));
 
 var_dump(intltz_get_display_name(null, IntlTimeZone::DISPLAY_SHORT, false, 'pt_PT'));
-
 --EXPECTF--
-
 Warning: IntlTimeZone::getDisplayName() expects parameter 1 to be boolean, array given in %s on line %d
 
 Warning: IntlTimeZone::getDisplayName(): intltz_get_display_name: bad arguments in %s on line %d

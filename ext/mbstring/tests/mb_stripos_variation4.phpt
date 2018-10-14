@@ -105,7 +105,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_stripos() : usage variations ***
 

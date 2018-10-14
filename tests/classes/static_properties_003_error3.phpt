@@ -12,7 +12,6 @@ $c->y = 1;
 ?>
 ==Done==
 --EXPECTF--
-
 --> Access non-visible static prop like instance prop:
 
 Fatal error: Uncaught Error: Cannot access protected property C::$y in %s:8

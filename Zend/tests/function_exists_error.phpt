@@ -33,4 +33,3 @@ Too few arguments
 Warning: function_exists() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 ===Done===
-

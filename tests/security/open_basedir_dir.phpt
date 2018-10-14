@@ -86,4 +86,3 @@ object(Directory)#%d (2) {
   resource(%d) of type (stream)
 }
 *** Finished testing open_basedir configuration [dir] ***
-

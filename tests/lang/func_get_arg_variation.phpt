@@ -25,4 +25,3 @@ Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on
 Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
 
 Warning: func_get_arg():  Argument 2 not passed to function in %s on line %d
-

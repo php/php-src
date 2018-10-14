@@ -18,4 +18,3 @@ Stack trace:
 #1 %s
 #2 {main}
   thrown in %s on line %d
-

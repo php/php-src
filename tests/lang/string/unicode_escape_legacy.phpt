@@ -7,7 +7,6 @@ Tolerated Unicode escape sequences: Legacy compatibility
 var_dump("\u");
 var_dump("\u202e");
 var_dump("\ufoobar");
-
 --EXPECTF--
 string(2) "\u"
 string(6) "\u202e"

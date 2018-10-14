@@ -27,4 +27,3 @@ $x = new Bar;
 var_dump($x->run());
 --EXPECT--
 string(3) "Bar"
-

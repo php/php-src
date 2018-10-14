@@ -18,4 +18,3 @@ var_dump($doc->implementation);
 --EXPECTF--
 object(DOMImplementation)#%d (0) {
 }
-

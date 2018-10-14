@@ -44,7 +44,6 @@ try {
 } catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
-
 --EXPECT--
 error: 2, IntlCalendar::equals() expects exactly 1 parameter, 0 given
 error: 2, IntlCalendar::equals(): intlcal_equals: bad arguments

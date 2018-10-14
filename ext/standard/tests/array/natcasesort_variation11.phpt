@@ -111,7 +111,6 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing natcasesort() : usage variations ***
 

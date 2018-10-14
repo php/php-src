@@ -23,4 +23,3 @@ int(0)
 f1 called
 
 Warning: assert(): 0 is 0: "0 != 0" failed in %s on line 10
-

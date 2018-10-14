@@ -119,7 +119,6 @@ print_node_r($p);
 
 ?>
 --EXPECT--
-
 name (value): p ( t1 X t2  xxx )
 parent: NULL
 previousSibling: NULL

@@ -101,8 +101,6 @@ check($a);
 echo "Done";
 ?>
 --EXPECTF--
-
-
 --- No references:
 array(3) {
   [0]=>

@@ -54,7 +54,6 @@ var_dump(key_exists(0, $h));
 // stream resource has index = 0, netherless its position is the latest
 $i = array('foo' => 'baz', $st);
 var_dump(key_exists(0, $i));
-
 --EXPECTF--
 *** test key_exists() by using mixed type of arrays ***
 bool(false)

@@ -31,4 +31,3 @@ echo "New timezone: " . timezone_name_get($tz) . "\n";
 Default timezone: Europe/London
 New timezone: America/Los_Angeles
 ===DONE===
-

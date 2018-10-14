@@ -65,4 +65,3 @@ Warning: is_readable() expects parameter 1 to be a valid path, array given in %s
 NULL
 bool(false)
 Done
-

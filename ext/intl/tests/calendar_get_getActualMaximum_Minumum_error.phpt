@@ -28,7 +28,6 @@ var_dump($c->get(1, 2));
 var_dump($c->getActualMaximum(1, 2));
 var_dump($c->getActualMinimum(1, 2));
 --EXPECTF--
-
 Warning: IntlCalendar::get() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlCalendar::get(): intlcal_get: bad arguments in %s on line %d

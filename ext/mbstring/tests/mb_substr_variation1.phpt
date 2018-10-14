@@ -178,4 +178,3 @@ string(0) ""
 Warning: mb_substr() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done
-

@@ -16,8 +16,6 @@ EOD;
 
 $mf = new MessageFormatter('en_US', $fmt);
 var_dump($mf->format(array("foo" => 7, -1 => "bar")));
-
 --EXPECTF--
-
 Warning: MessageFormatter::format(): Found negative or too large array key in %s on line %d
 bool(false)

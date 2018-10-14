@@ -57,4 +57,3 @@ zip->filename (%d):
 zip->comment (19):
 	empty(): 0
 	isset(): 1
-

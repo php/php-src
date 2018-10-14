@@ -37,5 +37,3 @@ int(180)
 bool(true)
 int(180)
 Done
-
-

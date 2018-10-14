@@ -13,4 +13,3 @@ var_dump($h->insert(NULL));
 --EXPECTF--
 Warning: SplPriorityQueue::insert() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
-

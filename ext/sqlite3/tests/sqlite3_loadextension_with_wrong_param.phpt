@@ -15,4 +15,3 @@ echo "Done\n";
 Warning: SQLite3::loadExtension() expects parameter 1 to be %binary_string_optional%, array given in %s on line %d
 NULL
 Done
-

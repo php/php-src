@@ -15,7 +15,6 @@ debug_zval_dump();
 echo "Done\n";
 
 ?>
-
 --EXPECTF--
 *** Testing error conditions ***
 

@@ -57,4 +57,3 @@ int(20)
 -- Multibyte string 2 --
 bool(false)
 Done
-

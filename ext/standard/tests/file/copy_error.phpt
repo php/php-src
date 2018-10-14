@@ -20,7 +20,6 @@ var_dump( copy(__FILE__, "file1", "file1") );
 
 echo "*** Done ***\n";
 ?>
-
 --EXPECTF--
 *** Testing copy() function: error conditions --
 
@@ -36,4 +35,3 @@ NULL
 Warning: copy() expects parameter 3 to be resource, string given in %s on line %d
 NULL
 *** Done ***
-

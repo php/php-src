@@ -244,4 +244,3 @@ The value of current EDITION is MYEDITION
  The value of edition has been successfully set
 The value of current EDITION is MYEDITION1
 Done
-

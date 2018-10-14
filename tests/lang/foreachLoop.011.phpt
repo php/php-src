@@ -22,7 +22,6 @@ foreach ($a as $v) {
 
 ?>
 --EXPECTF--
-
 Change from array to non iterable:
 int(1)
 int(2)

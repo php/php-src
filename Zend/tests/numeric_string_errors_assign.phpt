@@ -107,7 +107,6 @@ $a ^= "reprehenderit";
 var_dump($a);
 ?>
 --EXPECTF--
-
 Notice: A non well formed numeric value encountered in %s on line %d
 
 Notice: A non well formed numeric value encountered in %s on line %d

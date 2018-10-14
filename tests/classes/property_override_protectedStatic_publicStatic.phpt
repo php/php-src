@@ -30,4 +30,3 @@ Redeclare inherited protected static property as public static.
 A::p (static)
 A::p (static)
 B::p (static)
-

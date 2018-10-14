@@ -43,4 +43,3 @@ Stack trace:
 #1 [internal function]: Foo->__destruct()
 #2 {main}
   thrown in %sbug68652.php on line %d
-

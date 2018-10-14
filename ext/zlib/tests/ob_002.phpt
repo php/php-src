@@ -15,4 +15,3 @@ echo "hi\n";
 ?>
 --EXPECTF--
 hi
-

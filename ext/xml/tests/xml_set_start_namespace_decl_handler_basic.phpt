@@ -58,4 +58,3 @@ Namespace_Start_Handler called
 ...Prefix: aw2
 ...Uri: file:/DTD/somewhere.dtd
 Done
-

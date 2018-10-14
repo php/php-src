@@ -46,7 +46,6 @@ for ($i=0; $i<3; $i++) {
 }
 ?>
 --EXPECT--
-
 Same variable used as static and non static.
 ---------
 0

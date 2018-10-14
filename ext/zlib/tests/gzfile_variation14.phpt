@@ -29,7 +29,6 @@ foreach ( $variation_array as $var ) {
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzfile() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 

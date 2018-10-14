@@ -20,7 +20,6 @@ fa@php.net
     socket_close($s_c);
 ?>
 --EXPECTF--
-
 Warning: socket_write() expects at least 2 parameters, 0 given in %s on line %i
 
 Warning: socket_write() expects at least 2 parameters, 1 given in %s on line %i

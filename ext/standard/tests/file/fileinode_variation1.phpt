@@ -39,7 +39,6 @@ unlink($file_path."/fileinode_variation1_symlink.tmp");
 unlink($file_path."/fileinode_variation1_link.tmp");
 unlink($file_path."/fileinode_variation1.tmp");
 ?>
-
 --EXPECTF--
 *** Testing fileinode() with links ***
 int(%d)

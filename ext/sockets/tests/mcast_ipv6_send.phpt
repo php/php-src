@@ -49,7 +49,6 @@ var_dump($r);
 $r = socket_get_option($s, $level, IPV6_MULTICAST_IF);
 var_dump($r);
 echo "\n";
-
 --EXPECT--
 Setting IPV6_MULTICAST_TTL
 bool(true)

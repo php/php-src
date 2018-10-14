@@ -298,4 +298,3 @@ prepare and exec select
 10	
 ---
 end of test
-

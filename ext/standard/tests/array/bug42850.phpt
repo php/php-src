@@ -22,7 +22,6 @@ function apply_changed(&$input, $key) {
 }
 myfunc($data);
 var_dump($data);
-
 --EXPECT--
 array(2) {
   ["key1"]=>

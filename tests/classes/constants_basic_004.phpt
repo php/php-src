@@ -42,7 +42,6 @@ Test properties with array default values using class constants as keys and valu
   var_dump($x, $b, $c);
 ?>
 --EXPECTF--
-
 Static properties:
 array(1) {
   ["key"]=>

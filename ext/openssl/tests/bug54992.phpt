@@ -45,5 +45,3 @@ Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
 Warning: stream_socket_client(): unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
 bool(false)
-
-

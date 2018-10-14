@@ -12,7 +12,6 @@ var_dump(getimagesize(FILENAME));
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: getimagesize(): corrupt JPEG data: 3 extraneous bytes before marker in %s%ebug72278.php on line %d
 array(7) {
   [0]=>

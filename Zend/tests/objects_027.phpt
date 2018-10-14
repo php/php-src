@@ -40,5 +40,3 @@ Deprecated: %son-static method foo::test() should not be called statically in %s
 Deprecated: Non-static method bar::show() should not be called statically in %s on line %d
 object(foo)#%d (0) {
 }
-
-

@@ -15,7 +15,6 @@ var_dump(file_exists($inputFileName));
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: unlink(): ZLIB does not allow unlinking in %s on line %d
 bool(true)
 ===DONE===

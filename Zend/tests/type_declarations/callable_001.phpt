@@ -36,4 +36,3 @@ array(2) {
 }
 object(Closure)#%d (0) {
 }
-

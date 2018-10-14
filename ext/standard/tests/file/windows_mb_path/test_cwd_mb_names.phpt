@@ -1,8 +1,6 @@
 --TEST--
 Test chdir()/getcwd() with a dir for multibyte filenames
-
 --SKIPIF--
-
 <?php
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -14,9 +12,7 @@ skip_if_no_required_exts();
 
 
 ?>
-
 --FILE--
-
 <?php
 
 
@@ -42,7 +38,6 @@ remove_data("dir_mb");
 
 ?>
 ===DONE===
-
 --EXPECTF--
 Active code page: 65001
 bool(true)

@@ -92,7 +92,6 @@ max_execution_time=240
 	mysqli_query($link, 'DROP USER pamtest@localhost');
 ?>
 --EXPECTF--
-
 Warning: mysqli_real_connect(): (28000/1045): Access denied for user %s
 [001] Cannot connect to the server using host=%s
 done!

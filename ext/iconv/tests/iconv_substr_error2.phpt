@@ -33,4 +33,3 @@ echo "Done";
 Notice: iconv_substr(): Wrong charset, conversion from `unknown-encoding' to `UCS-4LE' is not allowed in %s on line %d
 bool(false)
 Done
-

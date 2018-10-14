@@ -18,4 +18,3 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Fatal error: Access level to DB::__construct() must be public (as in class mysqli) in %s%ebug38003.php on line %d
-

@@ -15,7 +15,6 @@ die('skip not for AIX');
 <?php
 $path = __DIR__ . "/unix_sock";
 @unlink($path);
-
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";

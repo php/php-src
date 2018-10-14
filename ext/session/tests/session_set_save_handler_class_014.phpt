@@ -23,7 +23,6 @@ $handler = new SessionHandler;
 session_set_save_handler($handler);
 
 session_start();
-
 --EXPECTF--
 *** Testing session_set_save_handler() : calling default handler when save_handler=user ***
 

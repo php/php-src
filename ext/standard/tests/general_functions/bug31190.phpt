@@ -23,4 +23,3 @@ try {
 --EXPECT--
 Hello World!
 Hello World!
-

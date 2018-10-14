@@ -46,4 +46,3 @@ bool(true)
 	unlink($test_file);
 	rmdir($dir);
 ?>
-

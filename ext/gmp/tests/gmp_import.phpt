@@ -62,7 +62,6 @@ var_dump(gmp_import(str_repeat('a', 100), 64));
 // Invalid options
 var_dump(gmp_import('a', 1, GMP_MSW_FIRST | GMP_LSW_FIRST));
 var_dump(gmp_import('a', 1, GMP_BIG_ENDIAN | GMP_LITTLE_ENDIAN));
-
 --EXPECTF--
 bool(true)
 

@@ -20,7 +20,6 @@ echo textdomain(null), "\n";
 echo textdomain('foo'), "\n";
 ?>
 --EXPECT--
-
 test
 test
 foo

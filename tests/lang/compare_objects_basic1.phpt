@@ -1,7 +1,6 @@
 --TEST--
 Test standard 'compare' object handler
 --FILE--
-
 <?php
 
 echo "Simple test for standard compare object handler\n";

@@ -16,7 +16,6 @@ debug_zval_dump($str);
 
 echo "\nDone";
 ?>
-
 --EXPECTF--
 int(4)
 string(4) "John" refcount(%d)

@@ -161,7 +161,6 @@ echo Obj::$__NAMESPACE__, PHP_EOL;
 echo Obj::$__halt_compiler, PHP_EOL;
 
 echo "\nDone\n";
-
 --EXPECTF--
 empty
 callable

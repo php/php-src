@@ -55,14 +55,11 @@ foreach($dirs_arr as $dir1) {
 
 echo"\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
 rmdir($file_path."/disk_free_space");
 ?>
-
-
 --EXPECTF--
 *** Testing with a directory ***
 float(%d)

@@ -41,4 +41,3 @@ bool(true)
 Notice: A session had already been started - ignoring session_start() in %s on line %d
 bool(true)
 Done
-

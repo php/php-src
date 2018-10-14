@@ -84,12 +84,10 @@ foreach($dest_files as $dest_file) {
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_variation2.tmp");
 ?>
-
 --EXPECTF--
 *** Test copy() function: destination file names containing special characters ***
 Size of the source file before copy operation => int(1500)

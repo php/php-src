@@ -30,7 +30,6 @@ output_handler=
 		do_tests( $enc );
 	}
 ?>
-
 --EXPECT--
 (15)6162632064656620676869206a6b6c2064656620676869206a6b6c
 (27)a3e1a3e2a3e320a4a2a4aaa4a420a4aba4b3a4ca20a4efa4f1a4f320a3e1a3e2a3e320a4a2a4aaa4a420a4ab20a4b3a4ca20a4efa4f1a4f3

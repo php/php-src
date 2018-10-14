@@ -101,7 +101,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strtoupper() : usage variations ***
 

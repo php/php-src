@@ -25,7 +25,6 @@ var_dump(array_change_key_case($input['English'], CASE_UPPER));
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_change_key_case() : usage variations ***
 

@@ -35,7 +35,6 @@ $file_path = dirname(__FILE__);
 unlink($file_path."/disk_total_space/disk_total_space.tmp");
 rmdir($file_path."/disk_total_space");
 ?>
-
 --EXPECTF--
 *** Testing with normal directory ***
 float(%d)

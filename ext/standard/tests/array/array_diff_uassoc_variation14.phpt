@@ -37,4 +37,3 @@ var_dump( array_diff_uassoc($array1, $array2, $value) );
 Error: 2 - array_diff_uassoc() expects parameter 3 to be a valid callback, no array or string given, %s(%d)
 NULL
 ===DONE===
-
