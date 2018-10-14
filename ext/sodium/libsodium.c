@@ -3424,7 +3424,8 @@ PHP_FUNCTION(sodium_pad)
 		tail = &ZSTR_VAL(padded)[xpadded_len];
 		mask = 0U;
 		for (i = 0; i < blocksize; i++) {
-			barrier_mask = (unsigned char) (((i ^ xpadlen) - 1U) >> 8);
+			barrier_mask = (unsigned char)
+				(((i ^ xpadlen) - 1U) >> ((sizeof(size_t) - 1U) * CHAR_BIT));
 			tail[-i] = (tail[-i] & mask) | (0x80 & barrier_mask);
 			mask |= barrier_mask;
 		}
