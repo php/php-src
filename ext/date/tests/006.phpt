@@ -18,7 +18,7 @@ var_dump(checkdate(1,1,-1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: checkdate() expects exactly 3 parameters, 0 given in %s on line %d
 bool(false)
 bool(true)

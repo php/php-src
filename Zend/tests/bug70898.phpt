@@ -1,7 +1,7 @@
 --TEST--
 Bug #70895 null ptr deref and segfault with crafted callable
 --FILE--
-<?php 
+<?php
 	function m($f,$a){
 		return array_map($f,0);
 	}

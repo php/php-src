@@ -1,5 +1,5 @@
 --TEST--
-Test tempnam() function: usage variations - creating files 
+Test tempnam() function: usage variations - creating files
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
@@ -21,12 +21,12 @@ for($i=1; $i<=10; $i++) {
   echo "-- Iteration $i --\n";
   $files[$i] = tempnam("$file_path", "tempnam_variation1.tmp");
 
-  if( file_exists($files[$i]) ) { 
+  if( file_exists($files[$i]) ) {
 
-    echo "File name is => "; 
+    echo "File name is => ";
     print($files[$i]);
     echo "\n";
-  
+
     echo "File permissions are => ";
     printf("%o", fileperms($files[$i]) );
     echo "\n";
@@ -35,10 +35,10 @@ for($i=1; $i<=10; $i++) {
     echo "File inode is => ";
     print_r( fileinode($files[$i]) ); //checking inodes
     echo "\n";
-    
+
     echo "File created in => ";
-    $file_dir = dirname($files[$i]);    
-        
+    $file_dir = dirname($files[$i]);
+
     if ($file_dir == sys_get_temp_dir()) {
        echo "temp dir\n";
     }

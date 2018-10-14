@@ -3,7 +3,7 @@ XMLWriter: libxml2 XML Writer, membuffer, flush
 --SKIPIF--
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 /* $Id$ */
 
 $xw = new XMLWriter();

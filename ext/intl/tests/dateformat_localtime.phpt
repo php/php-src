@@ -18,7 +18,7 @@ function ut_main()
 	$locale_arr = array (
 		'en_US_CA'
 	);
-	
+
 	$datetype_arr = array (
                 IntlDateFormatter::FULL,
                 IntlDateFormatter::LONG,
@@ -67,7 +67,7 @@ function ut_main()
 			$res_str .= "\n------------";
 			$res_str .= "\nIntlDateFormatter : ".$fmt_desc_array[$cnt];
 		$parse_pos = 0;
-			$cnt++;		
+			$cnt++;
 			$parsed_arr = ut_datefmt_localtime( $fmt_entry , $text_entry , $parse_pos );
 
 				if( $parsed_arr){

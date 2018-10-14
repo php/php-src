@@ -1,7 +1,7 @@
 --TEST--
-Bug #21478 (Zend/zend_alloc.c :: shutdown_memory_manager produces segfault) 
+Bug #21478 (Zend/zend_alloc.c :: shutdown_memory_manager produces segfault)
 --SKIPIF--
-<?php 
+<?php
 	if (!function_exists('stream_filter_register')) die('skip stream_filter_register() not available');
 ?>
 --FILE--
@@ -27,7 +27,7 @@ fwrite($fp, "This is a test.\n");
 print "Done.\n";
 fclose($fp);
 // Uncommenting the following 'print' line causes the segfault to stop occurring
-// print "2\n";  
+// print "2\n";
 readfile(dirname(__FILE__)."/test.txt");
 unlink(dirname(__FILE__)."/test.txt");
 ?>

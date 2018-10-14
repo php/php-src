@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : proto int fpassthru(resource fp)
- * Description: Output all remaining data from a file pointer 
+ * Description: Output all remaining data from a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions: gzpassthru
  */

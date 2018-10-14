@@ -15,7 +15,7 @@ class BBB
 		return array('foo' => 'xyz');
 	}
 }
-	
+
 class CCC
 {
 	public function process($p)

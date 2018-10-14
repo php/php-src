@@ -1,7 +1,7 @@
 --TEST--
 Bug #64895: Integer overflow in SndToJewish
 --SKIPIF--
-<?php 
+<?php
 include 'skipif.inc';
 if (PHP_INT_SIZE == 4) {
         die("skip this test is for 64bit platform only");

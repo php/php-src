@@ -3,7 +3,7 @@ Test sprintf() function : usage variations - float formats with resource values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -21,8 +21,8 @@ $resource_values = array (
 
 // various float formats
 $float_formats = array(
-  "%f", "%hf", "%lf", 
-  "%Lf", " %f", "%f ", 
+  "%f", "%hf", "%lf",
+  "%Lf", " %f", "%f ",
   "\t%f", "\n%f", "%4f",
   "%30f", "%[0-9]", "%*f"
 );
@@ -30,7 +30,7 @@ $float_formats = array(
 $count = 1;
 foreach($resource_values as $resource_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($float_formats as $format) {
     // with two arguments
     var_dump( sprintf($format, $resource_value) );

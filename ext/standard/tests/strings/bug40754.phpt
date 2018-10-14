@@ -26,7 +26,7 @@ var_dump(chunk_split("abcde", $v, "abc"));
 var_dump(substr("abcde", $v, $v));
 
 ?>
---EXPECTF--	
+--EXPECTF--
 string(4) "bcde"
 string(6) "abcdex"
 bool(false)

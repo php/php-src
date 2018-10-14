@@ -1,7 +1,7 @@
 --TEST--
 Bug #14293 (serialize() and __sleep())
 --FILE--
-<?php 
+<?php
 class t
 {
 	function __construct()
@@ -13,7 +13,7 @@ class t
 	{
 		echo "__sleep called\n";
 		return array('a','b');
-	}	
+	}
 }
 
 $t = new t();

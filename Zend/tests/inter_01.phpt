@@ -1,5 +1,5 @@
 --TEST--
-Inherited constant from interface 
+Inherited constant from interface
 --FILE--
 <?php
 interface foo {
@@ -11,7 +11,7 @@ class foobar implements foo {
     const foo = 'bar';
     public function bar($x = foo::foo) {
         var_dump($x);
-    }    
+    }
 }
 ?>
 --EXPECTF--

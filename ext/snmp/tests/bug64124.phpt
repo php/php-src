@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Bug #64124 IPv6 malformed
 --CREDITS--
 Boris Lytochkin

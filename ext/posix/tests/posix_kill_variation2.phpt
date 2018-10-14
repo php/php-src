@@ -1,16 +1,16 @@
 --TEST--
 Test posix_kill() function : usage variations  - second parameter type
 --SKIPIF--
-<?php 
+<?php
     PHP_INT_SIZE == 4 or die("skip - 32-bit only");
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
 /* Prototype  : proto bool posix_kill(int pid, int sig)
- * Description: Send a signal to a process (POSIX.1, 3.3.2) 
+ * Description: Send a signal to a process (POSIX.1, 3.3.2)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_kill() : usage variations ***\n";
@@ -62,7 +62,7 @@ $values = array(
 
       // unset data
       $unset_var,
-      
+
       // object data
       new stdclass(),
 );

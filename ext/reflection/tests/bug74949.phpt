@@ -14,7 +14,7 @@ echo $r, "\n";
 try  {
 	echo $r->getPrototype();
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";	
+	echo $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

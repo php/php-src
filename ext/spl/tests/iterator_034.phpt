@@ -23,7 +23,7 @@ class MyRecursiveArrayIterator extends RecursiveArrayIterator
 		echo __METHOD__ . "()\n";
 		return parent::getChildren();
 	}
-	
+
 	function rewind()
 	{
 		echo __METHOD__ . "()\n";

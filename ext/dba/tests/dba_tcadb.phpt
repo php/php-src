@@ -1,7 +1,7 @@
 --TEST--
 DBA TCADB handler test
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'tcadb';
 	require_once dirname(__FILE__) .'/skipif.inc';
 ?>
@@ -17,7 +17,7 @@ DBA TCADB handler test
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 $db_filename = $db_file = dirname(__FILE__) .'/test0.tch';
 @unlink($db_filename);
 @unlink($db_filename.'.lck');

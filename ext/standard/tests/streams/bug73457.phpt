@@ -16,7 +16,7 @@ $path="ftp://127.0.0.1:" . $port."/bug73457";
 $ds=file_get_contents($path);
 var_dump($ds);
 ?>
-==DONE== 
+==DONE==
 --EXPECTF--
 Warning: file_get_contents(ftp://127.0.0.1:%d/bug73457): failed to open stream: Failed to set up data channel: Connection refused in %s on line %d
 bool(false)

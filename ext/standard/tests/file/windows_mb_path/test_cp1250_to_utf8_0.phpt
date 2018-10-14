@@ -28,13 +28,13 @@ if ($f) {
 	var_dump(fclose($f));
 } else {
 	echo "open utf8 failed\n";
-} 
+}
 
 remove_data("file_cp1250");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 string(37) "reading file wihh multibyte filename
 "

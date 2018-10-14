@@ -92,7 +92,7 @@ foreach($arrays as $arr1) {
 
   $iterator++;
 }
-  
+
 echo "Done";
 ?>
 --EXPECTF--

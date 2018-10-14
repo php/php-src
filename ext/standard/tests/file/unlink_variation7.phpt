@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : bool unlink(string filename[, context context])
- * Description: Delete a file 
+ * Description: Delete a file
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing unlink() : usage variation different types for context ***\n";
@@ -101,7 +101,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // file resource
       'file resource' => $fileRes
 );

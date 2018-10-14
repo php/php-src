@@ -12,7 +12,7 @@ if (!is_resource(enchant_broker_init())) {die("skip, resource dont load\n");}
 $broker = enchant_broker_init();
 if (is_resource($broker)) {
     echo("OK\n");
-    
+
     if (enchant_broker_free($broker)) {
         echo("OK\n");
     } else {

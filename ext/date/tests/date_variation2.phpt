@@ -9,7 +9,7 @@ Test date() function : usage variation - Passing unexpected values to second arg
 
 echo "*** Testing date() : usage variation -  unexpected values to second argument \$timestamp***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -89,8 +89,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 

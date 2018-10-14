@@ -26,7 +26,7 @@ class A {
      * My Doc Comment for A::finalStatPubf
      */
 	final static public function finalStatPubf() {}
-	
+
 }
 
 
@@ -44,7 +44,7 @@ class B extends A {
     private function privf() {}
 
 
-    /** My Doc Comment for B::protStatf 
+    /** My Doc Comment for B::protStatf
 
 
 
@@ -100,7 +100,7 @@ string(%d) "/** *
 
 
 ---> Doc comment for B::protStatf():
-string(%d) "/** My Doc Comment for B::protStatf 
+string(%d) "/** My Doc Comment for B::protStatf
 
 
 

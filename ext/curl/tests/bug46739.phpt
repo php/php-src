@@ -1,7 +1,7 @@
 --TEST--
 Bug #46739 (array returned by curl_getinfo should contain content_type key)
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("curl")) {
 	exit("skip curl extension not loaded");
 }

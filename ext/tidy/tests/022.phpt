@@ -21,7 +21,7 @@ tidy_repair_file($a, $a, $a, $a);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: tidy_repair_string(): Could not load configuration file '1' in %s on line %d
 
 Warning: tidy_repair_string(): Could not set encoding '1' in %s on line %d

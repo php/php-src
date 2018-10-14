@@ -35,7 +35,7 @@ $f1->testNull();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Deprecated: Non-static method foo::bar() should not be called statically in %s on line %d
 string(3) "foo"
 

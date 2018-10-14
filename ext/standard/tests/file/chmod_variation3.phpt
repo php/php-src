@@ -1,11 +1,11 @@
 --TEST--
-Test chmod() function : first parameter variation 
+Test chmod() function : first parameter variation
 --FILE--
 <?php
 /* Prototype  : bool chmod(string filename, int mode)
- * Description: Change file mode 
+ * Description: Change file mode
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing chmod() : usage variation ***\n";

@@ -19,7 +19,7 @@ iterate($xml->unknown);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 SimpleXMLElement Object
 (
 )

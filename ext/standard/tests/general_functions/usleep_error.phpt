@@ -1,13 +1,13 @@
 --TEST--
-Test usleep() function : error conditions 
+Test usleep() function : error conditions
 --FILE--
 <?php
 /* Prototype  : void usleep  ( int $micro_seconds  )
- * Description: Delays program execution for the given number of micro seconds. 
+ * Description: Delays program execution for the given number of micro seconds.
  * Source code: ext/standard/basic_functions.c
  */
- 
-set_time_limit(20); 
+
+set_time_limit(20);
 
 echo "*** Testing usleep() : error conditions ***\n";
 

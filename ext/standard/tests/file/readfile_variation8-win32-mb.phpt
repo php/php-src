@@ -1,5 +1,5 @@
 --TEST--
-Test readfile() function : variation 
+Test readfile() function : variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -10,9 +10,9 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --FILE--
 <?php
 /* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
- * Description: Output a file or a URL 
+ * Description: Output a file or a URL
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing readfile() : variation ***\n";
@@ -44,14 +44,14 @@ $allDirs = array(
   "$absSubDir\\..\\..\\".$mainDir."\\.\\".$subDir,
   "$absSubDir\\..\\\\\\".$subDir."\\\\..\\\\..\\".$subDir,
   "$absSubDir\\BADDIR",
-  
+
   // relative paths
   $mainDir."\\".$subDir,
-  $mainDir."\\\\".$subDir, 
-   $mainDir."\\\\\\".$subDir, 
+  $mainDir."\\\\".$subDir,
+   $mainDir."\\\\\\".$subDir,
   ".\\".$mainDir."\\..\\".$mainDir."\\".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
   // unixifed path
   $unixifiedDir,
 );

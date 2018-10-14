@@ -5,7 +5,7 @@ Try finally (with goto previous label)
 function foo () {
     try {
 label:
-        echo "label"; 
+        echo "label";
         try {
         } finally {
             goto label;

@@ -63,7 +63,7 @@ echo "Done\n";
 $filename = dirname(__FILE__)."/fscanf.dat";
 unlink($filename);
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: fscanf() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 

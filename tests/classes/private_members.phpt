@@ -1,5 +1,5 @@
 --TEST--
-ZE2 A private member is 
+ZE2 A private member is
 --FILE--
 <?php
 

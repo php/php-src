@@ -12,5 +12,5 @@ $t->prop = 1;
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Method test::__set() cannot take arguments by reference in %s on line %d

@@ -5,26 +5,26 @@ Adam Gegotek <adam [dot] gegotek [at] gmail [dot] com>
 --FILE--
 <?php
 /* Prototype  : string http_build_query ( mixed $query_data [, string $numeric_prefix [, string $arg_separator [, int $enc_type = PHP_QUERY_RFC1738 ]]] )
- * Description: Generates a URL-encoded query string from the associative (or indexed) array provided. 
+ * Description: Generates a URL-encoded query string from the associative (or indexed) array provided.
  * Source code: ext/standard/http.c
 */
 
 $mDimensional = array(
-  20, 
-  5 => 13, 
+  20,
+  5 => 13,
   "9" => array(
-    1 => "val1", 
-    3 => "val2", 
+    1 => "val1",
+    3 => "val2",
     "string" => "string"
   ),
-  "name" => "homepage", 
+  "name" => "homepage",
   "page" => 10,
   "sort" => array(
-    "desc", 
+    "desc",
     "admin" => array(
-      "admin1", 
+      "admin1",
       "admin2" => array(
-        "who" => "admin2", 
+        "who" => "admin2",
         2 => "test"
       )
     )

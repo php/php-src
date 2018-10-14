@@ -21,7 +21,7 @@ $filename = "$file_path/fflush_error.tmp";
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
-   
+
 var_dump( fflush($file_handle, $file_handle) );
 fclose($file_handle);
 

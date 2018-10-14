@@ -3,14 +3,14 @@ Test posix_strerror() function : usage variations
 --SKIPIF--
 <?php
     PHP_INT_SIZE == 4 or die("skip - 32-bit only");
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
 /* Prototype  : proto string posix_strerror(int errno)
- * Description: Retrieve the system error message associated with the given errno. 
+ * Description: Retrieve the system error message associated with the given errno.
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_strerror() : usage variations ***\n";
@@ -61,7 +61,7 @@ $values = array(
 
       // unset data
       $unset_var,
-      
+
       // object data
       new stdclass(),
 );

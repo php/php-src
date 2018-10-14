@@ -13,7 +13,7 @@ var_dump((float) $n);
 var_dump((bool) $n);
 
 ?>
---EXPECTF--	
+--EXPECTF--
 42
 string(2) "42"
 int(42)

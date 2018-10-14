@@ -6,7 +6,7 @@ SPL: SplObjectStorage serialization
 class TestClass
 {
 	public $test = 25;
-	
+
 	public function __construct($test = 42)
 	{
 		$this->test = $test;

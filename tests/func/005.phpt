@@ -1,7 +1,7 @@
 --TEST--
 Testing register_shutdown_function()
 --FILE--
-<?php 
+<?php
 
 function foo()
 {

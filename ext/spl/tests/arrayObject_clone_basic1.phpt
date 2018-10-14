@@ -1,5 +1,5 @@
 --TEST--
-SPL: Cloning an instance of ArrayObject which wraps an array. 
+SPL: Cloning an instance of ArrayObject which wraps an array.
 --FILE--
 <?php
 $a = array(1,2);

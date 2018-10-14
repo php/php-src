@@ -28,7 +28,7 @@ foreach ($offsets as $offset) {
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF-- 
+--EXPECTF--
 int(1)
 int(13824)
 int(0)

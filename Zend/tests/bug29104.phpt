@@ -3,15 +3,15 @@ Bug #29104 (Function declaration in method doesn't work)
 --FILE--
 <?php
 class A
-{ 
-  function g() 
-  { 
+{
+  function g()
+  {
     echo "function g - begin\n";
-    
-    function f() 
-    { 
+
+    function f()
+    {
       echo "function f\n";
-    } 
+    }
 
     echo "function g - end\n";
   }

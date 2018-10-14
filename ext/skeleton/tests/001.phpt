@@ -3,7 +3,7 @@ Check for extname presence
 --SKIPIF--
 <?php if (!extension_loaded("extname")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 echo "extname extension is available";
 /*
 	you can add regression tests for your extension here

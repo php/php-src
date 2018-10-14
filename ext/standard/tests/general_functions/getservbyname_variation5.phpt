@@ -6,7 +6,7 @@ Test function getservbyname() by substituting argument 1 with int values.
 
 echo "*** Test substituting argument 1 with int values ***\n";
 
-$protocol = "tcp"; 
+$protocol = "tcp";
 
 
 $variation_array = array (

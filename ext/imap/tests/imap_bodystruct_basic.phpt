@@ -1,7 +1,7 @@
 --TEST--
-Test imap_bodystruct() function : basic functionality 
+Test imap_bodystruct() function : basic functionality
 --SKIPIF--
-<?php 
+<?php
 require_once(dirname(__FILE__).'/skipif.inc');
 ?>
 --FILE--
@@ -20,10 +20,10 @@ if (!is_resource($imap_stream)) {
 	exit("TEST FAILED: Unable to create test mailbox\n");
 }
 
-echo "\nGet and validate structure of body part 1\n"; 
+echo "\nGet and validate structure of body part 1\n";
 
-$m = imap_bodystruct($imap_stream, 1, "1"); 
- 
+$m = imap_bodystruct($imap_stream, 1, "1");
+
 $mandatoryFields = array(
                     'ifsubtype',
                     'ifdescription',
@@ -33,9 +33,9 @@ $mandatoryFields = array(
                     'ifparameters',
                     );
 
-foreach($mandatoryFields as $mf) 
+foreach($mandatoryFields as $mf)
 {
-  if(isValid($m->$mf)) 
+  if(isValid($m->$mf))
   {
     echo "$mf is 0 or 1\n";
   }
@@ -45,32 +45,32 @@ foreach($mandatoryFields as $mf)
   }
 }
 
-if(is_array($m->parameters)) 
+if(is_array($m->parameters))
 {
   echo "parameters is an array\n";
 }
 
 echo "\nTry to get part 4!\n";
-var_dump(imap_bodystruct($imap_stream, 1, "4")); 
+var_dump(imap_bodystruct($imap_stream, 1, "4"));
 
 imap_close($imap_stream);
 
-function isValid($param) 
+function isValid($param)
 {
- if(($param == 0) || ($param == 1)) 
+ if(($param == 0) || ($param == 1))
  {
    $result=true;
  }
  else
  {
    $result=false;
- } 
+ }
 return $result;
 }
 ?>
 ===Done===
 --CLEAN--
-<?php 
+<?php
 require_once('clean.inc');
 ?>
 --EXPECTF--

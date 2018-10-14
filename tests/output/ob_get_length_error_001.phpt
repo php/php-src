@@ -2,10 +2,10 @@
 Test wrong number of arguments for ob_get_length()
 --FILE--
 <?php
-/* 
+/*
  * proto int ob_get_length(void)
  * Function is implemented in main/output.c
-*/ 
+*/
 
 $extra_arg = 1;
 

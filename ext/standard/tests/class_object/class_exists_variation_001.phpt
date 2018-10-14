@@ -3,9 +3,9 @@ Test class_exists() function : usage variations - unexpected types for argument 
 --FILE--
 <?php
 /* Prototype  : proto bool class_exists(string classname [, bool autoload])
- * Description: Checks if the class exists 
+ * Description: Checks if the class exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 spl_autoload_register(function ($className) {

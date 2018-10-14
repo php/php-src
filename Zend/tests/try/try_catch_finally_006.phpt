@@ -11,7 +11,7 @@ function foo($ex = NULL) {
         } finally {
             var_dump("finally1");
             if ($ex) throw $ex;
-        } 
+        }
     } catch (Exception $e) {
        var_dump("catched");
        if ($ex) return "return1";

@@ -26,7 +26,7 @@ $arg3 = array(-1111,-1234567,-2345432);
 $data_file = dirname(__FILE__) . '/vfprintf_basic7_64bit.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 vfprintf($fp, $format1,$arg1);
 fprintf($fp, "\n");
 

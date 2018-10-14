@@ -13,7 +13,7 @@ foreach ($strVals as $strVal) {
    echo "--- testing: '$strVal' ---\n";
    var_dump(-$strVal);
 }
-   
+
 ?>
 ===DONE===
 --EXPECTF--

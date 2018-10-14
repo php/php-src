@@ -1,7 +1,7 @@
 --TEST--
 Gettext basic test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("skip\n");
 	}

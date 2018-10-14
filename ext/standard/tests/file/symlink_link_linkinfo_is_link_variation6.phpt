@@ -54,7 +54,7 @@ echo "\n-- Working with soft links --\n";
 $linkname = "$dirname/non_existent_link_variation5.tmp";
 
 // expected: false
-var_dump( symlink($filename, $linkname) ); // this link won't get created 
+var_dump( symlink($filename, $linkname) ); // this link won't get created
 var_dump( linkinfo($linkname) );
 var_dump( is_link($linkname) );
 // clear the cache

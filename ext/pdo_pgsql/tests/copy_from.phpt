@@ -119,7 +119,7 @@ try {
 }
 $db->rollback();
 
-// Clean up 
+// Clean up
 foreach (array($filename, $filenameWithDifferentNullValues, $filenameWithDifferentNullValuesAndSelectedFields) as $f) {
 	@unlink($f);
 }

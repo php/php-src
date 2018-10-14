@@ -23,7 +23,7 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </ns1:dotest>
  </env:Body>
 <env:Header/>
-</env:Envelope>";	
+</env:Envelope>";
 
 function book_from_xml($xml) {
 	$sxe = simplexml_load_string($xml);
@@ -37,13 +37,13 @@ class test{
 	function dotest($book){
 		$classname=get_class($book);
 		return "Object: ".$classname. "(".$book->a.",".$book->b.")";
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 $options=Array(
 		'actor'   =>'http://schemas.nothing.com',

@@ -7,16 +7,16 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/* 
+/*
  Prototype   : int filesize ( string $filename );
- Description : Returns the size of the file in bytes, or FALSE 
+ Description : Returns the size of the file in bytes, or FALSE
    (and generates an error of level E_WARNING) in case of an error.
 */
 
 $file_path = dirname(__FILE__);
 require($file_path."/file.inc");
 
-echo "*** Testing filesize(): usage variations ***\n"; 
+echo "*** Testing filesize(): usage variations ***\n";
 
 echo "\n*** Testing size of a dir, sub-dir and file with filesize() ***\n";
 echo "-- Creating a base dir, and checking its size --\n";
@@ -24,7 +24,7 @@ mkdir( $file_path."/filesize_variation2");
 var_dump( filesize( $file_path."/filesize_variation2"));
 clearstatcache();
 
-echo "-- Creating a file inside base dir, and checking dir & file size --\n"; 
+echo "-- Creating a file inside base dir, and checking dir & file size --\n";
 create_files($file_path."/filesize_variation2", 1, "numeric", 0755, 1, "w", "filesize_variation");
 var_dump( filesize( $file_path."/filesize_variation2"));
 clearstatcache();

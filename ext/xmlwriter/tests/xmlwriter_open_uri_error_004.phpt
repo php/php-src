@@ -3,7 +3,7 @@ xmlwriter_open_uri with file:///
 --SKIPIF--
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 var_dump(xmlwriter_open_uri('file:///'));
 ?>
 --CREDITS--

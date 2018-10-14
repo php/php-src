@@ -32,7 +32,7 @@ echo "*** Testing stat() with filename & directory name stored inside an array *
 
 // array with default numeric index
 $names = array(
-  "$file_path/lstat_stat_variation19.tmp", 
+  "$file_path/lstat_stat_variation19.tmp",
   "$file_path/lstat_stat_variation19"
 );
 

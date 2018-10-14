@@ -7,10 +7,10 @@ Test session_cache_limiter() function : basic functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_cache_limiter([string $cache_limiter])
  * Description : Get and/or set the current cache limiter
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_cache_limiter() : basic functionality ***\n";

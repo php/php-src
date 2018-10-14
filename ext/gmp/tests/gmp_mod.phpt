@@ -21,7 +21,7 @@ var_dump(gmp_mod($a, $b));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_mod() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 

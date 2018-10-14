@@ -1,8 +1,8 @@
 --TEST--
 show information about extension
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (!extension_loaded("reflection") || !extension_loaded("session")) {
 	die("skip reflection and session extensions required");
 }
@@ -20,7 +20,7 @@ var_dump(`$php -n --re pcre`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(44) "Exception: Extension unknown does not exist
 "
 string(37) "Exception: Extension  does not exist

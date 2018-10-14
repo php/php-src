@@ -7,7 +7,7 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 --FILE--
 <?php
 /* Prototype  : string imap_fetchheader(resource $stream_id, int $msg_no [, int $options])
- * Description: Get the full unfiltered header for a message 
+ * Description: Get the full unfiltered header for a message
  * Source code: ext/imap/php_imap.c
  */
 
@@ -69,7 +69,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -78,14 +78,14 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // array data
 /*21*/ array(),
        $index_array,
        $assoc_array,
        array('foo', $index_array, $assoc_array),
-       
-       
+
+
        // object data
 /*25*/ new classA(),
 

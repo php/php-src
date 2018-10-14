@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplHeap check no arguments to be accepted on recoverFromCorruption 
+SPL: SplHeap check no arguments to be accepted on recoverFromCorruption
 --CREDITS--
 Rohan Abraham (rohanabrahams@gmail.com)
 TestFest London May 2009

@@ -26,7 +26,7 @@ require "$file_path/file.inc";
 /* create temp directory */
 
 $dir_name = "$file_path/lstat_stat_variation5";
-@rmdir($dir_name);  //ensure that dir doesn't exists 
+@rmdir($dir_name);  //ensure that dir doesn't exists
 mkdir($dir_name);  // temp dir
 
 // touch a directory and check stat, there should be difference in atime

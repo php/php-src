@@ -5,8 +5,8 @@ Morten Amundsen mor10am@gmail.com
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
 --SKIPIF--
-<?php 
-        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+<?php
+        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php

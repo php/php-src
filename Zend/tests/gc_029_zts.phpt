@@ -1,6 +1,6 @@
 --TEST--
 GC 029: GC and destructors
---SKIPIF-- 
+--SKIPIF--
 <?php if (!PHP_ZTS) { print "skip only for zts build"; }
 --INI--
 zend.enable_gc=1

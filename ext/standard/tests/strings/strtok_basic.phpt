@@ -1,5 +1,5 @@
 --TEST--
-Test strtok() function : basic functionality 
+Test strtok() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string strtok ( str $str, str $token )

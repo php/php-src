@@ -3,9 +3,9 @@ Test ip2long() function : usage variation 1
 --FILE--
 <?php
 /* Prototype  : int ip2long(string ip_address)
- * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address 
+ * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ip2long() : usage variation ***\n";
@@ -94,7 +94,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource
       'resource' => $res,
 );

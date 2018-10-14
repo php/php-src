@@ -3,7 +3,7 @@ Test usort() function : error conditions - Pass unknown 'cmp_function'
 --FILE--
 <?php
 /* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
@@ -28,7 +28,7 @@ function cmp($value1, $value2)
   }
 }
 
-// Initialize 'array_arg' 
+// Initialize 'array_arg'
 $array_arg = array(0 => 1, 1 => 10, 2 => 'string', 3 => 3, 4 => 2, 5 => 100, 6 => 25);
 $extra_arg = 10;
 

@@ -649,7 +649,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -665,7 +665,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -681,7 +681,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 
@@ -698,7 +698,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -714,7 +714,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -730,7 +730,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -746,7 +746,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -762,7 +762,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -778,7 +778,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -794,7 +794,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -810,7 +810,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -826,7 +826,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -842,7 +842,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 try {
@@ -858,7 +858,7 @@ try {
         var_dump($e->getPrevious() === NULL);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
-    }    
+    }
 }
 
 ?>

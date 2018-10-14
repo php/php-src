@@ -31,8 +31,8 @@ function sort_arrays( $locale, $arrays )
         // with output string.
         $res_dump = "\n" . dump( $array ) .
                     "\n Result: " . dump( $res_val );
-        
-        
+
+
         // Preppend test signature to output string
         $md5 = md5( $res_dump );
 

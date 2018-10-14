@@ -1,11 +1,11 @@
 --TEST--
 ZE2 assign_op property of overloaded object
 --FILE--
-<?php 
+<?php
 
 class Test {
 	private $real_a = 2;
-	
+
 	function __set($property, $value) {
 	  if ($property == "a") {
 	    $this->real_a = $value;

@@ -4,7 +4,7 @@ Reflection::getClosureThis()
 <?php
 if (!extension_loaded('reflection')) print 'skip';
 ?>
---FILE-- 
+--FILE--
 <?php
 class StaticExample
 {

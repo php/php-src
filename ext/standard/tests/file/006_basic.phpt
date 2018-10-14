@@ -29,7 +29,7 @@ unlink($filename);
 */
 $path = dirname(__FILE__);
 
-echo "*** Testing fileperms(), chmod() with files and dirs ***\n"; 
+echo "*** Testing fileperms(), chmod() with files and dirs ***\n";
 fopen($path."/perm.tmp", "w");
 var_dump( chmod($path."/perm.tmp", 0755 ) );
 printf("%o", fileperms($path."/perm.tmp") );
