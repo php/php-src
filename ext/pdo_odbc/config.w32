@@ -16,5 +16,3 @@ if (PHP_PDO_ODBC != "no") {
 		PHP_PDO_ODBC = "no"
 	}
 }
-
-

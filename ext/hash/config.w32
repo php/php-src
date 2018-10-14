@@ -32,4 +32,3 @@ if (PHP_HASH != "no") {
 		WARNING("hash not enabled; libraries and headers not found");
 	}
 }
-

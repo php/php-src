@@ -1,4 +1,3 @@
-
 /*
  * "streamable kanji code filter and converter"
  * Copyright (c) 1998-2002 HappySize, Inc. All rights reserved.
@@ -924,4 +923,3 @@ mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
 
 	return 0;
 }
-

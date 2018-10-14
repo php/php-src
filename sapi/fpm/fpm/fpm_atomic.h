@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_atomic.h,v 1.3 2008/09/18 23:34:11 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
@@ -165,4 +164,3 @@ static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */
 #define fpm_unlock(lock) lock = 0
 
 #endif
-

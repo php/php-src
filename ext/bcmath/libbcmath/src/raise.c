@@ -121,4 +121,3 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale)
      }
    bc_free_num (&power);
 }
-

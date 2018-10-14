@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_children.c,v 1.32.2.2 2008/12/13 03:21:18 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
@@ -478,4 +477,3 @@ int fpm_children_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

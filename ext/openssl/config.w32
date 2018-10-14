@@ -22,5 +22,3 @@ if (PHP_OPENSSL != "no") {
 		}
 	}
 }
-
-

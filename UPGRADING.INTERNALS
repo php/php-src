@@ -80,4 +80,3 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 
 - OpenSSL:
   . Windows builds ship with OpenSSL 1.1 by default, lower versions are still supported with custom deps.
-

@@ -232,4 +232,3 @@ win32/wsyslog.h
 # special cases to invert previous ignore rules
 !ext/fileinfo/libmagic.patch
 !ext/mbstring/oniguruma.patch
-

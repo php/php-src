@@ -19,4 +19,3 @@ if (PHP_XMLRPC != "no") {
 		PHP_XMLRPC = "no";
 	}
 }
-

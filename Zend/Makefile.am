@@ -53,4 +53,3 @@ depend:
 
 zend_execute.lo: $(srcdir)/zend_execute.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(INLINE_CFLAGS) -c $(srcdir)/zend_execute.c
-

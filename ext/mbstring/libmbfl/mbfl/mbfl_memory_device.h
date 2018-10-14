@@ -70,4 +70,3 @@ MBFLAPI extern void mbfl_wchar_device_clear(mbfl_wchar_device *device);
 
 
 #endif /* MBFL_MEMORY_DEVICE_H */
-

@@ -194,4 +194,3 @@ esac
 AC_LANG_POP
 
 ]) dnl end AC_DEFUN
-

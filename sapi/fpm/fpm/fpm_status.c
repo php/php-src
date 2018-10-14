@@ -1,4 +1,3 @@
-
 	/* $Id$ */
 	/* (c) 2009 Jerome Loyet */
 
@@ -479,4 +478,3 @@ int fpm_status_handle_request(void) /* {{{ */
 	return 0;
 }
 /* }}} */
-

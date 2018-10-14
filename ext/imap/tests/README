@@ -1,4 +1,3 @@
-
 Many of the tests in this directory require a mail server to be running, if there is no mail server the test will skip and warn, see skipif.inc for details.
 
 To make the tests run parameters in the skipif.inc and imap_include.inc file will need to be changed to match the local mailserver configuration.
@@ -39,7 +38,3 @@ auth default {
 
   user = root
 }
-
-
-
-

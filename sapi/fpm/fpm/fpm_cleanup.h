@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_cleanup.h,v 1.5 2008/05/24 17:38:47 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
@@ -18,4 +17,3 @@ enum {
 };
 
 #endif
-

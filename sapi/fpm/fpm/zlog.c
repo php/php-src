@@ -1,4 +1,3 @@
-
 	/* $Id: zlog.c,v 1.7 2008/05/22 21:08:32 anight Exp $ */
 	/* (c) 2004-2007 Andrei Nigmatulin */
 

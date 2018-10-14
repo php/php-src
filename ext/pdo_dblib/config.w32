@@ -39,4 +39,3 @@ if (PHP_PDO_MSSQL != "no") {
 		WARNING("pdo_mssql not enabled, libraries or headers not found")
 	}
 }
-

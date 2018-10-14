@@ -1255,4 +1255,3 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
  * vim600: fdm=marker
  * vim: noet sw=4 ts=4
  */
-

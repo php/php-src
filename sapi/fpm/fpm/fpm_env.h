@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_env.h,v 1.9 2008/09/18 23:19:59 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
@@ -24,4 +23,3 @@ void clearenv();
 #endif
 
 #endif
-

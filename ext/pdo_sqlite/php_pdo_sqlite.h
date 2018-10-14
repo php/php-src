@@ -55,4 +55,3 @@ ZEND_END_MODULE_GLOBALS(pdo_sqlite)
 #endif
 
 #endif	/* PHP_PDO_SQLITE_H */
-

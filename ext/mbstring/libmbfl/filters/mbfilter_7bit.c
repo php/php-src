@@ -78,5 +78,3 @@ int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
 	}
 	return c;
 }
-
-
