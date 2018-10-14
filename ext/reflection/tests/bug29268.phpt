@@ -13,7 +13,7 @@ class B{
 }
 
 $ref = new reflectionMethod('B','doit');
-$parameters = $ref->getParameters();	
+$parameters = $ref->getParameters();
 foreach($parameters as $parameter)
 {
 	$class = $parameter->getClass();

@@ -22,7 +22,7 @@ foreach ($classes as $class) {
 
 	foreach ($instances as $name => $instance) {
 		echo "is $name a $class? ";
-		var_dump($rc->isInstance($instance));	
+		var_dump($rc->isInstance($instance));
 	}
 
 }

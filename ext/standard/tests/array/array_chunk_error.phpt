@@ -1,9 +1,9 @@
 --TEST--
-Test array_chunk() function : error conditions 
+Test array_chunk() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array input, int size [, bool preserve_keys])
- * Description: Split array into chunks 
+ * Description: Split array into chunks
  * Source code: ext/standard/array.c
 */
 

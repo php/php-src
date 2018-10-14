@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
+ * Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 set_include_path("rubbish");
@@ -16,12 +16,12 @@ restore_include_path();
 
 
 function testme() {
-	$tmpfile = basename(__FILE__, ".php") . ".tmp"; 
+	$tmpfile = basename(__FILE__, ".php") . ".tmp";
 	$h = fopen($tmpfile, "w", true);
 	fwrite($h, (binary) "This is the test file");
 	fclose($h);
-	
-	
+
+
 	$h = @fopen($tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in working dir\n";
@@ -31,9 +31,9 @@ function testme() {
 	   fclose($h);
 	   unlink($tmpfile);
 	}
-	
 
-	$scriptDirFile = dirname(__FILE__).'/'.$tmpfile; 
+
+	$scriptDirFile = dirname(__FILE__).'/'.$tmpfile;
 	$h = @fopen($scriptDirFile, "r");
 	if ($h === false) {
 	   echo "Not created in script dir\n";
@@ -41,7 +41,7 @@ function testme() {
 	else {
 	   echo "created in script dir\n";
 	   fclose($h);
-	   unlink($scriptDirFile);   
+	   unlink($scriptDirFile);
 	}
 }
 ?>

@@ -11,7 +11,7 @@ Ensure ReflectionClass::getProperty() triggers autoload
   }
 
   $rc = new ReflectionClass("stdClass");
-  
+
   try {
     $rc->getProperty("UndefC::p");
   } catch (ReflectionException $e) {

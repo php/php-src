@@ -26,7 +26,7 @@ var_dump(gzencode($string, 9, ZLIB_ENCODING_DEFLATE));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gzencode() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

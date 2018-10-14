@@ -6,7 +6,7 @@ locale_accept_from_http
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 

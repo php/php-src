@@ -49,17 +49,17 @@ class TestOld
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function unserialize($serialized)
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function __wakeup()
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function __sleep()
 	{
 		echo __METHOD__ . "()\n";
@@ -82,17 +82,17 @@ class TestNew implements Serializable
 			return "2";
 		}
 	}
-	
+
 	function unserialize($serialized)
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function __wakeup()
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function __sleep()
 	{
 		echo __METHOD__ . "()\n";

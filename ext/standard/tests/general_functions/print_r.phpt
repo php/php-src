@@ -28,9 +28,9 @@ function check_printr( $variables ) {
     $counter++;
   }
 }
-  
+
 echo "\n*** Testing print_r() on integer variables ***\n";
-$integers = array ( 
+$integers = array (
   0,  // zero as argument
   000000123,  //octal value of 83
   123000000,
@@ -46,7 +46,7 @@ $integers = array (
   -0x80000000,  // min range of hexadecimal integer
   017777777777,  // max posotive octal integer
   -020000000000  // min range of octal integer
-);		    
+);
 /* calling check_printr() to display contents of integer variables
    using print_r() */
 check_printr($integers);
@@ -84,7 +84,7 @@ $floats = array (
   -0x80000001,  // float value, beyond max negative int
   0x80000001,  // float value, beyond max positive int
   020000000001,  // float value, beyond max positive int
-  -020000000001  // float value, beyond max negative int 
+  -020000000001  // float value, beyond max negative int
 );
 /* calling check_printr() to display contents of float variables
    using print_r() */
@@ -116,7 +116,7 @@ $booleans = array (
   FALSE,
   true,
   false
-);	  
+);
 /* calling check_printr() to display boolean variables using print_r() */
 check_printr($booleans);
 var_dump( reset($booleans) );
@@ -231,7 +231,7 @@ print_r($recursion_obj2);
 
 echo "\n*** Testing print_r() on resources ***\n";
 /* file type resource */
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 /* directory type resource */
 $dir_handle = opendir( dirname(__FILE__) );
@@ -259,9 +259,9 @@ $variations = array (
   array( new no_member_class, array(), false, 0 ),
   array( -0.00, "Where am I?", array(7,8,9), TRUE, 'A', 987654321 ),
   array( @$unset_var, 2.E+10, 100-20.9, 000004.599998 ),  //unusual data
-  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7') 
+  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7')
 );
-/* calling check_printr() to display combinations of scalar and 
+/* calling check_printr() to display combinations of scalar and
    non-scalar variables using print_r() */
 check_printr($variations);
 

@@ -4,7 +4,7 @@ Bug #31190 (exception in call_user_func_array())
 <?php
 
 class test {
-     function throwException() { throw new Exception("Hello World!\n"); 
+     function throwException() { throw new Exception("Hello World!\n");
 } }
 
 $array = array(new test(), 'throwException');

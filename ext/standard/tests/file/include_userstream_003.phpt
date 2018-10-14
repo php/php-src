@@ -20,7 +20,7 @@ class test {
 			$this->pos = strlen($this->data);
 		else
 			$this->po = 0;
-		
+
 		return true;
 	}
 

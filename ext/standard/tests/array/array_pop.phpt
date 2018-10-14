@@ -32,13 +32,13 @@ echo "\n*** Normal testing with various array inputs ***\n";
 
 $counter = 1;
 foreach( $mixed_array as $sub_array )
-{ 
+{
  echo "\n-- Input Array for Iteration $counter is --\n";
  print_r( $sub_array );
  echo "\nOutput after Pop is :\n";
  var_dump( array_pop($sub_array) );
  $counter++;
-} 
+}
 
 echo"\nDone";
 ?>

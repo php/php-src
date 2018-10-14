@@ -1,8 +1,8 @@
 --TEST--
-Test parse_str() function : basic functionality 
+Test parse_str() function : basic functionality
 --FILE--
 <?php
-		
+
 /* Prototype  : void parse_str  ( string $str  [, array &$arr  ] )
  * Description: Parses the string into variables
  * Source code: ext/standard/string.c
@@ -29,7 +29,7 @@ var_dump($res2);
 echo "\nBasic test with an existing array as results array\n";
 $res3_array = array(1,2,3,4);
 var_dump(parse_str($s1, $res3_array));
-var_dump($res3_array); 
+var_dump($res3_array);
 
 ?>
 ===DONE===

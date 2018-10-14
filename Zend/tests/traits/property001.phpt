@@ -32,7 +32,7 @@ class TraitsTest2 {
 var_dump(property_exists('TraitsTest', 'foo'));
 var_dump(property_exists('TraitsTest2', 'foo'));
 ?>
---EXPECTF--	
+--EXPECTF--
 PRE-CLASS-GUARD-TraitsTest
 PRE-CLASS-GUARD-TraitsTest2
 bool(true)

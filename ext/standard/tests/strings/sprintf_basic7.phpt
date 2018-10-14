@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 4) {
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
  */
 

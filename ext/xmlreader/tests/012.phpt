@@ -1,9 +1,9 @@
 --TEST--
-XMLReader: accessing empty and non existing attributes 
+XMLReader: accessing empty and non existing attributes
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 /* $Id$ */
 
 $xmlstring =<<<EOF

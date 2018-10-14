@@ -1,7 +1,7 @@
 --TEST--
 Bug #43143 (Warning about empty IV with MCRYPT_MODE_ECB)
 --SKIPIF--
-<?php if (!extension_loaded("mcrypt")) print "skip"; 
+<?php if (!extension_loaded("mcrypt")) print "skip";
 if (!extension_loaded("hash")) print "skip"; ?>
 --FILE--
 <?php

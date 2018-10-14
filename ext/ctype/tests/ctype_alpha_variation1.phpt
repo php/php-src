@@ -5,7 +5,7 @@ Test ctype_alpha() function : usage variations - different data types as $c arg
 --FILE--
 <?php
 /* Prototype  : bool ctype_alpha(mixed $c)
- * Description: Checks for alphabetic character(s) 
+ * Description: Checks for alphabetic character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -72,7 +72,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 

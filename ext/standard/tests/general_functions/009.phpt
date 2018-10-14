@@ -5,7 +5,7 @@ SHA1
 function test($str) {
 	$res = sha1($str)."\n";
 	return $res;
-} 
+}
 echo test("");
 echo test("a");
 echo test("abc");

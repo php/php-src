@@ -28,7 +28,7 @@ class SOAP_GetProductsResponse {
     public $products;
     function __construct(){
         $this->products = new SOAP_productDetailsType();
-        
+
     }
 }
 

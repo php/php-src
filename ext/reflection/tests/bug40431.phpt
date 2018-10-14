@@ -76,7 +76,7 @@ var_dump($props[0]->isProtected());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 === 1st test ===
 array(1) {
   [0]=>

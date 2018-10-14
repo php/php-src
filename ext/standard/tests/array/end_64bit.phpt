@@ -29,14 +29,14 @@ $arrays = array (
   array(0x7FFFFFFF, -0x80000000, 017777777777, -020000000000 ),
   array(-.6700000E+3, -4.10003E+3, 1e-5, -1E+5, 000002.00 )
 );
-/* loop through $arrays to print the last element of each sub-array */ 
+/* loop through $arrays to print the last element of each sub-array */
 echo "*** Testing end() on different arrays ***\n";
 $counter = 1;
 foreach ($arrays as $sub_array){
   echo "-- Iteration $counter --\n";
   var_dump( end($sub_array) );
   /* ensure that internal pointer is moved to last element */
-  var_dump( current($sub_array) ); 
+  var_dump( current($sub_array) );
   $counter++;
 }
 
@@ -50,19 +50,19 @@ var_dump( end($test_array[1]) );
 echo "\n*** Testing end() when array elements are deleted ***\n";
 $array_test = array("a", "b", "d", 7, "u" => "U", -4, "-.008" => "neg.008");
 
-// remove first element from array 
+// remove first element from array
 echo "\n-- Remove first element from array --\n";
 unset($array_test[0]);
 var_dump( end($array_test) );
 
-// remove last element from array, rewind and check end() 
+// remove last element from array, rewind and check end()
 echo "\n-- Remove last element from array --\n";
 unset($array_test['-.008']);
 var_dump( end($array_test) );
 reset( $array_test );
 var_dump( end($array_test) );
 
-// remove any element  !first, !last, rewind and check end() 
+// remove any element  !first, !last, rewind and check end()
 echo "\n-- Remove any element from array apart from first and last element --\n";
 unset($array_test[7]);
 var_dump( end($array_test) );

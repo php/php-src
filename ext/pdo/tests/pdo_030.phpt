@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $data = array(
@@ -22,23 +22,23 @@ $data = array(
 class PDOStatementX extends PDOStatement
 {
     public $dbh;
-    
+
     protected function __construct($dbh)
     {
     	$this->dbh = $dbh;
     	$this->setFetchMode(PDO::FETCH_ASSOC);
     	echo __METHOD__ . "()\n";
     }
-    
+
     function __destruct()
     {
     	echo __METHOD__ . "()\n";
     }
-    
+
     function execute($params = array())
     {
     	echo __METHOD__ . "()\n";
-		parent::execute();    	
+		parent::execute();
     }
 }
 
@@ -48,7 +48,7 @@ class PDODatabase extends PDO
     {
     	echo __METHOD__ . "()\n";
     }
-    
+
     function query($sql)
     {
     	echo __METHOD__ . "()\n";

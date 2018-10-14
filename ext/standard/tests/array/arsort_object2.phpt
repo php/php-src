@@ -1,15 +1,15 @@
 --TEST--
-Test arsort() function : object functionality - sorting objects with diff. accessibility of member vars 
+Test arsort() function : object functionality - sorting objects with diff. accessibility of member vars
 --FILE--
 <?php
 /* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association.  
+ * Description: Sort an array and maintain index association.
                 Elements will be arranged from highest to lowest when this function has completed.
  * Source code: ext/standard/array.c
 */
 
 /*
- * testing arsort() by providing integer/string object arrays with following flag values 
+ * testing arsort() by providing integer/string object arrays with following flag values
  * 1. Defualt flag value
    2. SORT_REGULAR - compare items normally
 */
@@ -21,7 +21,7 @@ class for_integer_arsort
 {
   public $public_class_value;
   private $private_class_value;
-  protected $protected_class_value; 
+  protected $protected_class_value;
   // initializing object member value
   function __construct($value1, $value2,$value3){
     $this->public_class_value = $value1;
@@ -36,7 +36,7 @@ class for_string_arsort
 {
   public $public_class_value;
   private $private_class_value;
-  protected $protected_class_value; 
+  protected $protected_class_value;
   // initializing object member value
   function __construct($value1, $value2,$value3){
     $this->public_class_value = $value1;
@@ -51,13 +51,13 @@ class for_string_arsort
 }
 
 // array of integer objects
-$unsorted_int_obj = array ( 
+$unsorted_int_obj = array (
   1 => new for_integer_arsort(11, 33,2), 2 =>  new for_integer_asort(44, 66,3),
   3 => new for_integer_arsort(23, 32,6), 4 => new for_integer_asort(-88, -5,-4),
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   "a" => new for_string_arsort("axx","AXX","d"), "b" => new for_string_asort("T", "t","q"),
   "c" => new for_string_arsort("w", "W","c"), "d" => new for_string_asort("PY", "py","s"),
 );

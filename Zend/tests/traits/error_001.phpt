@@ -3,7 +3,7 @@ Trying to use instanceof for a method twice
 --FILE--
 <?php
 
-trait foo {	
+trait foo {
 	public function foo() {
 		return 1;
 	}

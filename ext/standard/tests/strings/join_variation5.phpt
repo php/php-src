@@ -1,5 +1,5 @@
 --TEST--
-Test join() function : usage variations - sub array as argument 
+Test join() function : usage variations - sub array as argument
 --FILE--
 <?php
 /* Prototype  : string join( string $glue, array $pieces )

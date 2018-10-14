@@ -4,8 +4,8 @@ Bug #37158 (if userspace stream is present, fread() reads in 8192 max, otherwise
 <?php
 
 class VariableStream {
-   
-   function stream_open($path, $mode, $options, &$opened_path) 
+
+   function stream_open($path, $mode, $options, &$opened_path)
    {
        return true;
    }
@@ -33,7 +33,7 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(26) "size of contents 1 = 20000"
 string(26) "size of contents 2 = 40960"
 Done

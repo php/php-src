@@ -19,8 +19,8 @@ var_dump( substr_count($str, "I", NULL) );
 var_dump( substr_count($str, "i", NULL, 10) );
 
 echo "\n-- overlapped substrings --\n";
-var_dump( substr_count("abcabcabcabcabc", "abca") ); 
-var_dump( substr_count("abcabcabcabcabc", "abca", 2) ); 
+var_dump( substr_count("abcabcabcabcabc", "abca") );
+var_dump( substr_count("abcabcabcabcabc", "abca", 2) );
 
 echo "\n-- complex strings containing other than 7-bit chars --\n";
 $str = chr(128).chr(129).chr(128).chr(256).chr(255).chr(254).chr(255);
@@ -49,7 +49,7 @@ var_dump(substr_count($str, "\0"));
 var_dump(substr_count($str, "\x000"));
 var_dump(substr_count($str, "0"));
 
-echo "Done\n";	
+echo "Done\n";
 
 ?>
 --EXPECTF--

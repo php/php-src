@@ -6,7 +6,7 @@ Bug #72298: pass2_no_dither out-of-bounds access
 ?>
 --FILE--
 <?php
-$img = imagecreatetruecolor (1 , 1); 
+$img = imagecreatetruecolor (1 , 1);
 imagecolortransparent($img, 0);
 imagetruecolortopalette($img, false, 4);
 ?>

@@ -1,5 +1,5 @@
 --TEST--
-proc_open() with invalid pipes 
+proc_open() with invalid pipes
 --FILE--
 <?php
 

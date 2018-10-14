@@ -15,7 +15,7 @@ foreach (new aaa($start) as $y) {
 
 ?>
 ==DONE==
---EXPECTF--	
+--EXPECTF--
 Fatal error: Uncaught Error: DatePeriod has not been initialized correctly in %sbug75002.php:%d
 Stack trace:
 #0 {main}

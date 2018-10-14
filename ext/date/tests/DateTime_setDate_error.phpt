@@ -1,13 +1,13 @@
 --TEST--
-Test DateTime::setDate() function : error conditions 
+Test DateTime::setDate() function : error conditions
 --FILE--
 <?php
 /* Prototype  : public DateTime DateTime::setDate  ( int $year  , int $month  , int $day  )
- * Description: Resets the current date of the DateTime object to a different date. 
+ * Description: Resets the current date of the DateTime object to a different date.
  * Source code: ext/date/php_date.c
  * Alias to functions: date_date_set()
  */
- 
+
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing DateTime::setDate() : error conditions ***\n";

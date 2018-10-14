@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - scientific formats with arrays 
+Test fscanf() function: usage variations - scientific formats with arrays
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - scientific formats with arrays
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different scientific format types with arrays ***\n"; 
+echo "*** Test fscanf(): different scientific format types with arrays ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation48.tmp";

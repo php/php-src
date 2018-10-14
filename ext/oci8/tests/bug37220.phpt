@@ -31,7 +31,7 @@ $clob = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($stmt, ':data', $clob, -1, OCI_B_CLOB);
 $clob->writetemporary("<MYTAG/>", OCI_TEMP_CLOB);
 $success = oci_execute($stmt, OCI_COMMIT_ON_SUCCESS);
-oci_free_statement($stmt); 
+oci_free_statement($stmt);
 $clob->close();
 
 // Query back the change

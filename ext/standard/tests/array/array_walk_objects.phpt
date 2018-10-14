@@ -3,8 +3,8 @@ array_walk() and objects
 --FILE--
 <?php
 
-function walk($key, $value) { 
-	var_dump($value, $key); 
+function walk($key, $value) {
+	var_dump($value, $key);
 }
 
 class test {
@@ -28,7 +28,7 @@ array_walk($var, "walk");
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 %unicode|string%(3) "foo"
 %unicode|string%(3) "foo"
 %unicode|string%(3) "bar"

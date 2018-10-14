@@ -5,7 +5,7 @@ Test array_fill() function : usage variations - various object values for 'val' 
 --FILE--
 <?php
 /* Prototype  : array array_fill(int $start_key, int $num, mixed $val)
- * Description: Create an array containing num elements starting with index start_key each initialized to val 
+ * Description: Create an array containing num elements starting with index start_key each initialized to val
  * Source code: ext/standard/array.c
  */
 
@@ -15,7 +15,7 @@ Test array_fill() function : usage variations - various object values for 'val' 
 
 echo "*** Testing array_fill() : usage variations ***\n";
 
-// Initialise function arguments not being substituted 
+// Initialise function arguments not being substituted
 $start_key = 0;
 $num = 2;
 
@@ -24,7 +24,7 @@ class Test
 {
 }
 
-//class with public member, static member , constant and consturctor to initialize the public member 
+//class with public member, static member , constant and consturctor to initialize the public member
 class Test1
 {
   const test1_constant = "test1";
@@ -80,14 +80,14 @@ class Child_test2 extends Test2
   }
 }
 
-// class with protected member, static member, constant and consturctor to initialize the protected member 
+// class with protected member, static member, constant and consturctor to initialize the protected member
 class Test3
 {
   const test3_constant = "test3";
   public static $test3_static = 0;
   protected $member1;
   var $var1 = 30;
-  var $var2; 
+  var $var2;
 
   function __construct($value1 , $value2)
   {
@@ -129,7 +129,7 @@ class Test4
 class Child_test4 extends Test4
 {
   var $var1;
-  
+
   function __construct($value1 , $value2 , $value3 , $value4)
   {
     parent::__construct($value1 , $value2 , $value3);
@@ -137,14 +137,14 @@ class Child_test4 extends Test4
   }
 }
 
-// abstract class with public, private, protected members 
+// abstract class with public, private, protected members
 abstract class AbstractClass
 {
   public $member1;
   private $member2;
   protected $member3;
   var $var1 = 30;
-  
+
   abstract protected function display();
 }
 
@@ -175,7 +175,7 @@ class Template1 implements iTemplate
 
 //array of object values for 'val' argument
 $objects = array(
-  
+
   /* 1  */  new Test(),
             new Test1(100 , 101),
             new Child_test1(100 , 101 , 102),
@@ -189,7 +189,7 @@ $objects = array(
   /* 11 */  new Template1()
 );
 
-// loop through each element of the array for 'val' argument 
+// loop through each element of the array for 'val' argument
 // check the working of array_fill()
 echo "--- Testing array_fill() with different object values for 'val' argument ---\n";
 $counter = 1;

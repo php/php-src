@@ -9,7 +9,7 @@ if(!function_exists('imagecreatetruecolor')) {
     die('skip imagecreatetruecolor function is not available');
 }
 if (PHP_INT_SIZE != 8) die('skip 64-bit only');
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
@@ -65,7 +65,7 @@ $values = array(
       'int indexed array' => $index_array,
       'associative array' => $assoc_array,
 	  'nested arrays' => array('foo', $index_array, $assoc_array),
-      
+
       // null data
 	  'uppercase NULL' => NULL,
       'lowercase null' => null,
@@ -95,8 +95,8 @@ $values = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      //resource 
+
+      //resource
       "file resource" => $fp
 );
 // loop through each element of the array for red

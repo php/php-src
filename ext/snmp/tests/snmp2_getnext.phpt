@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp2_getnext
 --CREDITS--
 Olivier Doucet & Boris Lytochkin

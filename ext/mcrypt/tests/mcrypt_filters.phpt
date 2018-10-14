@@ -14,7 +14,7 @@ $secretfile = 'secert-file.tmp';
 $passphrase = 'My secret';
 
 $iv = substr(md5('iv'.$passphrase, true), 0, 8);
-$key = substr(md5('pass1'.$passphrase, true) . 
+$key = substr(md5('pass1'.$passphrase, true) .
                md5('pass2'.$passphrase, true), 0, 24);
 $opts = array('iv'=>$iv, 'key'=>$key);
 

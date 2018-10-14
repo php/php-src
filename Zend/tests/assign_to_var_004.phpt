@@ -15,7 +15,7 @@ var_dump($var2);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(5) "space"
 string(5) "space"
 string(5) "space"

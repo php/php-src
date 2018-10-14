@@ -3,7 +3,7 @@ Test sprintf() function : usage variations - hexa formats with resource values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -20,8 +20,8 @@ $resource_values = array (
 );
 
 // array of hexa formats
-$hexa_formats = array(  
-  "%x", "%xx", "%lx", 
+$hexa_formats = array(
+  "%x", "%xx", "%lx",
   "%Lx", " %x", "%x ",
   "\t%x", "\n%x", "%4x",
   "%30x", "%[0-9A-Fa-f]", "%*x"
@@ -30,7 +30,7 @@ $hexa_formats = array(
 $count = 1;
 foreach($resource_values as $resource_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($hexa_formats as $format) {
     var_dump( sprintf($format, $resource_value) );
   }

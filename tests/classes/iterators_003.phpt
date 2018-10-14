@@ -33,7 +33,7 @@ class c_iter implements Iterator {
 		return $this->num;
 	}
 }
-	
+
 class c implements IteratorAggregate {
 
 	public $max = 4;

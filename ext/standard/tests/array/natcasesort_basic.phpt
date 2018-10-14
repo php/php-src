@@ -1,5 +1,5 @@
 --TEST--
-Test natcasesort() function : basic functionality 
+Test natcasesort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool natcasesort(array &$array_arg)

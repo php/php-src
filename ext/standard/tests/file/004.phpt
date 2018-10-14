@@ -20,7 +20,7 @@ file_put_contents() test
 		echo 'FAIL';
 	}
 	echo "\n";
-	
+
 	$old_int = $int = time() / 1000;
 	$ret = file_put_contents("TEST3", $int);
 	echo "Float Test: ";
@@ -30,7 +30,7 @@ file_put_contents() test
 		echo 'FAIL';
 	}
 	echo "\n";
-	
+
 	$ret = file_put_contents("TEST4", __FILE__);
 	echo "Bool Test: ";
 	if ($ret !== FALSE && md5(__FILE__) == md5_file("TEST4")) {
@@ -39,7 +39,7 @@ file_put_contents() test
 		echo 'FAIL';
 	}
 	echo "\n";
-	
+
 	$ret = @file_put_contents("TEST5", $_SERVER);
 	echo "Array Test: ";
 	if ($ret !== FALSE && @md5(implode('', $_SERVER)) == md5_file("TEST5")) {

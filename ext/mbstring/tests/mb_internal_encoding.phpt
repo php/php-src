@@ -4,7 +4,7 @@ mb_internal_encoding()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
-// TODO: 
+// TODO:
 //$debug = true;
 ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');

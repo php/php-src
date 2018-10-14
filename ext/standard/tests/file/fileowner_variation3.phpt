@@ -29,7 +29,7 @@ $files_arr = array(
   "/fileowner_variation3//fileowner_variation3.tmp",
   "//fileowner_variation3//fileowner_variation3.tmp",
   "/fileowner_variation3/*.tmp",
-  "fileowner_variation3/fileowner*.tmp", 
+  "fileowner_variation3/fileowner*.tmp",
 
   /* Testing Binary safe */
   "/fileowner_variation3/fileowner_variation3.tmp".chr(0),

@@ -3,7 +3,7 @@ Bug #47430 (Errors after writing to nodeValue parameter of an absent previousSib
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
-<?php 
+<?php
 $xml = '<?xml
 version="1.0"?><html><p><i>Hello</i></p><p><i>World!</i></p></html>';
 $dom = new DOMDocument();

@@ -44,7 +44,7 @@ foreach ($obj as $v) {
     	echo "Loop detected\n";
     	break;
     }
-	var_dump($v);    
+	var_dump($v);
 }
 var_dump($obj);
 
@@ -56,9 +56,9 @@ foreach ($obj as &$v) {
 	$obj->$newPropName = "Added property $counter";
     if ($counter++>10) {
     	echo "Loop detected\n";
-    	break;    	
+    	break;
     }
-	var_dump($v);    
+	var_dump($v);
 }
 var_dump($obj);
 
@@ -67,7 +67,7 @@ $obj = new C;
 foreach ($obj as $v) {
 	unset($obj->a);
 	unset($obj->b);
-	unset($obj->c);	
+	unset($obj->c);
 	var_dump($v);
 }
 var_dump($obj);

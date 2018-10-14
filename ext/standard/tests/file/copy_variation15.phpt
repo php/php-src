@@ -40,7 +40,7 @@ chmod($dir, 0555);  //dir without write permissions
 
 $dest = $dir."/copy_copy_variation15.tmp";
 
-var_dump( copy($file, $dir."/copy_copy_variation15.tmp") ); 
+var_dump( copy($file, $dir."/copy_copy_variation15.tmp") );
 var_dump( file_exists($dir."/copy_copy_variation15_dir.tmp") );
 var_dump( filesize($file) );  //size of source
 

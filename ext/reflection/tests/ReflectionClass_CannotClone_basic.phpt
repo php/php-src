@@ -7,7 +7,7 @@ TestFest PHP|Tek
 <?php
 if (!extension_loaded('reflection')) print 'skip';
 ?>
---FILE-- 
+--FILE--
 <?php
 $rc = new ReflectionClass("stdClass");
 $rc2 = clone($rc);

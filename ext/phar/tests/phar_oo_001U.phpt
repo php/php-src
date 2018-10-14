@@ -45,7 +45,7 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/files/phar_oo_001U.phar.php');
 __halt_compiler();
 ?>

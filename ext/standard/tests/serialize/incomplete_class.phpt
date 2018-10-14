@@ -13,7 +13,7 @@ var_dump($o->test2);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 object(__PHP_Incomplete_Class)#%d (0) {
 }
 

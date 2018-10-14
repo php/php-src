@@ -33,7 +33,7 @@ class B {
 set_error_handler(
   array('PHPUnit_Util_ErrorHandler', 'handleError'), E_ALL | E_STRICT
 );
-            
+
 $o = new B;
 $o->bar();
 ?>

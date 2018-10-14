@@ -10,9 +10,9 @@ echo "Simple testcase for get_magic_quotes_runtime() function\n";
 
 var_dump(get_magic_quotes_runtime());
 
-echo "\n-- Error cases --\n"; 
+echo "\n-- Error cases --\n";
 // no checks on number of args
-var_dump(get_magic_quotes_runtime(true)); 
+var_dump(get_magic_quotes_runtime(true));
 
 ?>
 ===DONE===

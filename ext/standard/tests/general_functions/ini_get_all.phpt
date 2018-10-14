@@ -20,7 +20,7 @@ var_dump(ini_get_all("", ""));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(5) "array"
 
 Warning: ini_get_all(): Unable to find extension '' in %s on line %d

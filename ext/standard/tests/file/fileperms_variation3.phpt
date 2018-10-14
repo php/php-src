@@ -28,7 +28,7 @@ $files_arr = array(
   "/fileperms_variation3//fileperms_variation3.tmp",
   "//fileperms_variation3//fileperms_variation3.tmp",
   "/fileperms_variation3/*.tmp",
-  "fileperms_variation3/fileperms*.tmp", 
+  "fileperms_variation3/fileperms*.tmp",
 
   /* Testing Binary safe */
   "/fileperms_variation3/fileperms_variation3.tmp".chr(0),

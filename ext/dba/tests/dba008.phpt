@@ -1,7 +1,7 @@
 --TEST--
 DBA magic_quotes_runtime Test
 --SKIPIF--
-<?php 
+<?php
 	die('skip, magic_quotes removed');
 	require_once(dirname(__FILE__) .'/skipif.inc');
 	die("info $HND handler used");
@@ -26,8 +26,8 @@ DBA magic_quotes_runtime Test
 	}
 ?>
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: %s

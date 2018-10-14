@@ -7,7 +7,7 @@ Ensure implements does trigger autoload.
       echo "In autoload: ";
       var_dump($name);
   }
-  
+
   class C implements UndefI
   {
   }

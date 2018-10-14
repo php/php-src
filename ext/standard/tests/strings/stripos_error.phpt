@@ -1,5 +1,5 @@
 --TEST--
-Test stripos() function : error conditions 
+Test stripos() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );

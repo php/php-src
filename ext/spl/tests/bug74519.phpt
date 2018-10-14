@@ -15,7 +15,7 @@ while($iterator->valid()) {
 }
 ?>
 ===DONE===
---EXPECT--	
+--EXPECT--
 2
 3
 4

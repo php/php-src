@@ -3,7 +3,7 @@ tidy_diagnose()
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 $a = tidy_parse_string('<HTML></HTML>');
 var_dump(tidy_diagnose($a));
 echo str_replace("\r", "", tidy_get_error_buffer($a));

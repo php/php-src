@@ -7,7 +7,7 @@ Bug #69425: Use After Free in unserialize()
 class test
 {
 	var $ryat;
-	
+
 	function __wakeup()
 	{
 		$this->ryat = 1;

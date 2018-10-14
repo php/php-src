@@ -4,7 +4,7 @@ session rfc1867 invalid settings
 session.upload_progress.freq=-1
 error_log=
 --SKIPIF--
-<?php 
+<?php
 include('skipif.inc');
 ?>
 --FILE--

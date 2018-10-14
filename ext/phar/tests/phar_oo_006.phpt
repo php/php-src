@@ -37,7 +37,7 @@ echo $phar['b.php']->getFilename() . "\n";
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/files/phar_oo_006.phar.php');
 __halt_compiler();
 ?>

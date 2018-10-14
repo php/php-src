@@ -7,7 +7,7 @@ Test copy() function: usage variations - destination file names(numerics/strings
      Returns TRUE on success or FALSE on failure.
 */
 
-/* Test copy() function: In creation of destination file names containing numerics/strings 
+/* Test copy() function: In creation of destination file names containing numerics/strings
      and checking the existence and size of destination files
 */
 

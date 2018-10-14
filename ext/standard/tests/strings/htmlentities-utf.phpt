@@ -3,7 +3,7 @@ HTML entities with invalid chars
 --INI--
 output_handler=
 --FILE--
-<?php 
+<?php
 @setlocale (LC_CTYPE, "C");
 $strings = array(b"<", b"\xD0", b"\xD0\x90", b"\xD0\x90\xD0", b"\xD0\x90\xD0\xB0", b"\xE0", b"A\xE0", b"\xE0\x80", b"\xE0\x79", b"\xE0\x80\xBE",
 	b"Voil\xE0", b"Clich\xE9s",

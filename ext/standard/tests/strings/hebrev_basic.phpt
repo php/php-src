@@ -1,5 +1,5 @@
 --TEST--
-Test hebrev() function : basic functionality 
+Test hebrev() function : basic functionality
 --FILE--
 <?php
 

@@ -36,7 +36,7 @@ foreach ($vars as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(0)
 int(8754456)
 int(0)

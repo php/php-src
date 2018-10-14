@@ -13,7 +13,7 @@ error_reporting = E_ALL | E_DEPRECATED | E_STRICT
 	  $bla = new NonExistingClass2();
   }
 
-  public function exception_handler(Error $e) { 
+  public function exception_handler(Error $e) {
 	  echo "Caught, exception: " . $e->getMessage();
   }
  }

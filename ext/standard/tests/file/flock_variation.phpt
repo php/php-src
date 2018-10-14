@@ -2,9 +2,9 @@
 Test flock() function: Variations
 --FILE--
 <?php
-/* 
+/*
 Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
-Description: PHP supports a portable way of locking complete files 
+Description: PHP supports a portable way of locking complete files
   in an advisory way
 */
 
@@ -21,7 +21,7 @@ $operations = array(
   LOCK_EX|LOCK_NB,
   LOCK_SH|LOCK_EX,
   LOCK_UN,
-  1, 
+  1,
   2,
   2.234,
   TRUE
@@ -64,7 +64,7 @@ fclose($fp);
 
 echo "\n*** Done ***\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing flock() fun with the various operation and 
             wouldblock values                                ***
 --- Outer iteration 0 ---

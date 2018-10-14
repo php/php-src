@@ -32,7 +32,7 @@ $args = array(
 $out = filter_var_array($data, $args);
 var_dump($out);
 ?>
---EXPECTF--	
+--EXPECTF--
 array(6) {
   ["product_id"]=>
   string(17) "libgd%3Cscript%3E"

@@ -26,7 +26,7 @@ var_dump(gmp_perfect_square(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(false)

@@ -2,7 +2,7 @@
 Test wrong number of arguments for flush() (no impact)
 --FILE--
 <?php
-/* 
+/*
  * proto void flush(void)
  * Function is implemented in ext/standard/basic_functions.c.
  */

@@ -2,10 +2,10 @@
 Test variations in usage of min()
 --FILE--
 <?php
-/* 
+/*
  * proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]])
  * Function is implemented in ext/standard/array.c
-*/ 
+*/
 
 echo "\n*** Testing boundary conditions ***\n";
 var_dump(min(2147483645, 2147483646) );

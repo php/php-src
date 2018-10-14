@@ -1,5 +1,5 @@
 --TEST--
-Test posix_access() function : parameter validation 
+Test posix_access() function : parameter validation
 --DESCRIPTION--
 cases: no params, wrong param1, wrong param2, null directory, wrong directory,
 --CREDITS--
