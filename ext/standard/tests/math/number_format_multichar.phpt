@@ -10,10 +10,10 @@ $values = array(1234.5678,
 				02777777777,
 				"123456789",
 				"123.456789",
-				"12.3456789e1",				
+				"12.3456789e1",
 				null,
 				true,
-				false);	
+				false);
 
 echo " number_format tests.....multiple character decimal point\n";
 for ($i = 0; $i < count($values); $i++) {

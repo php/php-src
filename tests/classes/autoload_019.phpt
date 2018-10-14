@@ -7,7 +7,7 @@ Ensure __autoload() recursion is guarded for multiple lookups of same class usin
       echo __FUNCTION__ . " $name\n";
       class_exists("undefinedCLASS");
   }
-  
+
   class_exists("unDefinedClass");
 ?>
 --EXPECTF--

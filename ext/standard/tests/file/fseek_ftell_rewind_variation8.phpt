@@ -20,9 +20,9 @@ if( substr(PHP_OS, 0, 3) == "WIN" )
 // include the file.inc for common functions for test
 include ("file.inc");
 
-/* Testing fseek(),ftell(),rewind() functions 
+/* Testing fseek(),ftell(),rewind() functions
      1. All  write and create with write modes
-     2. Testing fseek() with whence = SEEK_END 
+     2. Testing fseek() with whence = SEEK_END
 */
 echo "*** Testing fseek(), ftell(), rewind() : whence = SEEK_END & all r and a modes ***\n";
 
@@ -52,11 +52,11 @@ foreach($file_content_types as $file_content_type){
     rewind($file_handle);
 
     foreach($offset as $count){
-      var_dump( fseek($file_handle,$count,SEEK_END) ); 
+      var_dump( fseek($file_handle,$count,SEEK_END) );
       var_dump( ftell($file_handle) ); // confirm the file pointer position
       var_dump( feof($file_handle) ); //ensure that file pointer is not at end
     } //end of offset loop
-    
+
     //close the file and check the size
     fclose($file_handle);
     var_dump( filesize($filename) );

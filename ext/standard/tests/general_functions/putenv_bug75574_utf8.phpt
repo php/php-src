@@ -24,7 +24,7 @@ var_dump(putenv('FOO=啊a啊啊啊啊'), getenv("FOO"));
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 string(3) "啊"
 bool(true)

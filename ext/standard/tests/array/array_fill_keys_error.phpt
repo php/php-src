@@ -1,11 +1,11 @@
 --TEST--
-Test array_fill_keys() function : error conditions 
+Test array_fill_keys() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto array array_fill_keys(array keys, mixed val)
- * Description: Create an array using the elements of the first parameter as keys each initialized to val 
+ * Description: Create an array using the elements of the first parameter as keys each initialized to val
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_fill_keys() : error conditions ***\n";

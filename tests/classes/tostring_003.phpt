@@ -10,7 +10,7 @@ class Test
 		throw new Exception("Damn!");
 		return "Hello\n";
 	}
-	
+
 	function __destruct()
 	{
 		echo $this;

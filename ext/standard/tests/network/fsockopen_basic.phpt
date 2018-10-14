@@ -1,11 +1,11 @@
 --TEST--
-Test fsockopen() function : basic functionality 
+Test fsockopen() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto resource fsockopen(string hostname, int port [, int errno [, string errstr [, float timeout]]])
- * Description: Open Internet or Unix domain socket connection 
+ * Description: Open Internet or Unix domain socket connection
  * Source code: ext/standard/fsock.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing fsockopen() : basic functionality ***\n";

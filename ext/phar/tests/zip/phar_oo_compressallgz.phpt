@@ -36,7 +36,7 @@ var_dump($phar['c']->isCompressed(Phar::GZ));
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
 ?>
 --EXPECTF--

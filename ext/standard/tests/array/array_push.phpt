@@ -54,13 +54,13 @@ echo "\n*** Testing with various array inputs ***\n";
 
 $counter = 1;
 foreach( $mixed_array as $sub_array )
-{ 
+{
  echo "\n-- Input Array for Iteration $counter is --\n";
  print_r( $sub_array );
  echo "\nOutput after push is :\n";
  var_dump( array_push($sub_array, 22, "abc") );
  $counter++;
-} 
+}
 
 /* Checking for return value and the new array formed from push operation */
 echo "\n*** Checking for return value and the new array formed from push operation ***\n";

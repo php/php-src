@@ -4,7 +4,7 @@ Testing several valid and invalid parameters
 <?php
 
 class foo {
-	
+
 }
 
 var_dump(class_exists(''));

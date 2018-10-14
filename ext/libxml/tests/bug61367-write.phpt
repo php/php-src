@@ -10,7 +10,7 @@ open_basedir=.
 class StreamExploiter {
 	public function stream_close (  ) {
 		$doc = new DOMDocument;
-		$doc->appendChild($doc->createTextNode('hello')); 
+		$doc->appendChild($doc->createTextNode('hello'));
 		var_dump($doc->save(dirname(getcwd()) . '/bad'));
 	}
 

@@ -1,5 +1,5 @@
 --TEST--
-Ensure type hints for unknown types do not trigger autoload. 
+Ensure type hints for unknown types do not trigger autoload.
 --FILE--
 <?php
   function __autoload($name)
@@ -7,7 +7,7 @@ Ensure type hints for unknown types do not trigger autoload.
       echo "In autoload: ";
       var_dump($name);
   }
-  
+
   function f(UndefClass $x)
   {
   }

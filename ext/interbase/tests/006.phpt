@@ -6,9 +6,9 @@ InterBase: binding (may take a while)
 <?php
 
 	require("interbase.inc");
-	
+
 	ibase_connect($test_base);
-	
+
 	ibase_query(
 		"create table test6 (
 			iter		integer,
@@ -171,7 +171,7 @@ InterBase: binding (may take a while)
 			echo "VARCHAR fail\n";
 		}
 		ibase_free_result($sel);
-        
+
 	} /*for iter*/
 
 	echo "prepare and exec insert\n";

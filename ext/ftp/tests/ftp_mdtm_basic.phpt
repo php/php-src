@@ -1,7 +1,7 @@
 --TEST--
 Test the File Modification Time as described in http://tools.ietf.org/html/rfc3659#section-3.1
 --CREDITS--
-Nathaniel McHugh 
+Nathaniel McHugh
 --SKIPIF--
 <?php
 require 'skipif.inc';

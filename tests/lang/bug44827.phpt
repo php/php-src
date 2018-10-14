@@ -1,7 +1,7 @@
 --TEST--
 Bug #44827 (Class error when trying to access :: as constant)
 --CREDITS--
-Sebastian Schürmann 
+Sebastian Schürmann
 sebs@php.net
 Testfest Munich 2009
 --FILE--

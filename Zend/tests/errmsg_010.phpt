@@ -1,5 +1,5 @@
 --TEST--
-errmsg: multiple access type modifiers are not allowed (methods) 
+errmsg: multiple access type modifiers are not allowed (methods)
 --FILE--
 <?php
 
@@ -9,5 +9,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Multiple access type modifiers are not allowed in %s on line %d

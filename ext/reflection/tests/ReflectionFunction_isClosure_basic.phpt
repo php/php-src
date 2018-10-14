@@ -9,7 +9,7 @@ if (!extension_loaded('reflection') || !defined('PHP_VERSION_ID') || PHP_VERSION
   print 'skip';
 }
 ?>
---FILE-- 
+--FILE--
 <?php
 $closure = function($param) { return "this is a closure"; };
 $rc = new ReflectionFunction($closure);

@@ -8,7 +8,7 @@ ZE2 An interface cannot be instantiated
 interface if_a {
 	function f_a();
 }
-	
+
 $t = new if_a();
 
 ?>

@@ -8,7 +8,7 @@ ZE2 An interface extends base interfaces
 interface if_a {
 	function f_a();
 }
-	
+
 interface if_b {
 	function f_b();
 }

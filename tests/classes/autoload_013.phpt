@@ -9,7 +9,7 @@ Ensure the ReflectionClass constructor triggers autoload.
       echo "In autoload: ";
       var_dump($name);
   }
-  
+
   try {
       new ReflectionClass("UndefC");
   }

@@ -1,9 +1,9 @@
 --TEST--
 inet_ntop() & inet_pton() IPv6 tests
 --SKIPIF--
-<?php 
-if (!function_exists("inet_ntop")) die("skip no inet_ntop()"); 
-if (!function_exists("inet_pton")) die("skip no inet_pton()"); 
+<?php
+if (!function_exists("inet_ntop")) die("skip no inet_ntop()");
+if (!function_exists("inet_pton")) die("skip no inet_pton()");
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {
@@ -33,7 +33,7 @@ foreach ($a as $address) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(3) "::1"
 string(3) "::2"
 string(4) "::35"

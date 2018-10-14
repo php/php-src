@@ -5,7 +5,7 @@ Test get_extension_funcs() function: basic test
 /* Prototype  : array get_extension_funcs  ( string $module_name  )
  * Description: Returns an array with the names of the functions of a module.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "Simple testcase for get_extension_funcs() function\n";

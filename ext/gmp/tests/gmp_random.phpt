@@ -19,7 +19,7 @@ var_dump(gmp_random("test"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "%d"
 string(%d) "%d"
 string(1) "%d"

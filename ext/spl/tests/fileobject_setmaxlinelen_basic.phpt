@@ -7,8 +7,8 @@ H�vard Eide <nucleuz at gmail.com>
 include_path=.
 --FILE--
 <?php
-$s = new SplFileObject( __FILE__ ); 
-$s->setMaxLineLen( 3);  
+$s = new SplFileObject( __FILE__ );
+$s->setMaxLineLen( 3);
 echo $s->getCurrentLine();
 ?>
 --EXPECT--

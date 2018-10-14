@@ -1,7 +1,7 @@
 --TEST--
 Timeout within shutdown function
 --SKIPIF--
-<?php 
+<?php
 	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--

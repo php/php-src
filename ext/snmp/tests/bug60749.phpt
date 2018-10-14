@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Bug #60749: SNMP module should not strip non-standard SNMP port from hostname
 --CREDITS--
 Boris Lytochkin

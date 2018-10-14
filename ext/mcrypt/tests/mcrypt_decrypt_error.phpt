@@ -1,17 +1,17 @@
 --TEST--
-Test mcrypt_decrypt() function : error conditions 
+Test mcrypt_decrypt() function : error conditions
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("mcrypt")) {
-	print "skip - mcrypt extension not loaded"; 
-}	 
+	print "skip - mcrypt extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : string mcrypt_decrypt(string cipher, string key, string data, string mode, string iv)
- * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv 
+ * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv
  * Source code: ext/mcrypt/mcrypt.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mcrypt_decrypt() : error conditions ***\n";

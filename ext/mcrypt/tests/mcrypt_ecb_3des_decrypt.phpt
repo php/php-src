@@ -1,19 +1,19 @@
 --TEST--
-Test mcrypt_cbc() function : basic functionality 
+Test mcrypt_cbc() function : basic functionality
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("mcrypt")) {
-	print "skip - mcrypt extension not loaded"; 
-}	 
+	print "skip - mcrypt extension not loaded";
+}
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
 /* Prototype  : string mcrypt_ecb(int cipher, string key, string data, int mode, string iv)
- * Description: ECB crypt/decrypt data using key key with cipher cipher starting with iv 
+ * Description: ECB crypt/decrypt data using key key with cipher cipher starting with iv
  * Source code: ext/mcrypt/mcrypt.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $cipher = MCRYPT_TRIPLEDES;
@@ -21,9 +21,9 @@ $data = b"This is the secret message which must be encrypted";
 
 // tripledes uses keys up to 192 bits (24 bytes)
 $keys = array(
-   b'12345678', 
-   b'12345678901234567890', 
-   b'123456789012345678901234', 
+   b'12345678',
+   b'12345678901234567890',
+   b'123456789012345678901234',
    b'12345678901234567890123456'
 );
 $data1 = array(
@@ -34,8 +34,8 @@ $data1 = array(
 );
 // tripledes is a block cipher of 64 bits (8 bytes)
 $ivs = array(
-   b'1234', 
-   b'12345678', 
+   b'1234',
+   b'12345678',
    b'123456789'
 );
 $data2 = array(
@@ -60,7 +60,7 @@ for ($i = 0; $i < sizeof($ivs); $i++) {
 
 function special_var_dump($str) {
    var_dump(bin2hex($str));
-}  
+}
 ?>
 ===DONE===
 --EXPECTF--

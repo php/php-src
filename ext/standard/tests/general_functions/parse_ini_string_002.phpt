@@ -86,7 +86,7 @@ var_dump(parse_ini_string($ini, true));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: parse_ini_string() expects at least 1 parameter, 0 given in %s
 bool(false)
 

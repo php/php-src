@@ -1,11 +1,11 @@
 --TEST--
-Test array_udiff() function : error conditions 
+Test array_udiff() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array array_udiff(array arr1, array arr2 [, array ...], callback data_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function. 
+ * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_udiff() : error conditions ***\n";

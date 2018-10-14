@@ -1,5 +1,5 @@
 --TEST--
-mb_strpos() 
+mb_strpos()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--

@@ -8,7 +8,7 @@ trait ATrait {
 	function bar() {
 		$this->foo();
 	}
-	abstract function foo(); 
+	abstract function foo();
 }
 
 // A class on the second level in the

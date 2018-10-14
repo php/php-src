@@ -10,9 +10,9 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 --FILE--
 <?php
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written 
+ * Description: Write/Create a file with contents data and return the number of bytes written
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file_put_contents() : usage variation ***\n";
@@ -34,7 +34,7 @@ run_test($softlink);
 
 //can only create a hardlink if the file exists.
 file_put_contents($filename,"");
-link($filename, $hardlink); 
+link($filename, $hardlink);
 run_test($hardlink);
 
 unlink($chainlink);

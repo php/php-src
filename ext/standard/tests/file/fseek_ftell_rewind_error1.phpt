@@ -1,5 +1,5 @@
 --TEST--
-Test fseek(), ftell() & rewind() functions : error conditions - fseek() 
+Test fseek(), ftell() & rewind() functions : error conditions - fseek()
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test strnatcasecmp() function : error conditions 
+Test strnatcasecmp() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int strnatcasecmp  ( string $str1  , string $str2  )

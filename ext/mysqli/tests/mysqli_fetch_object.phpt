@@ -67,7 +67,7 @@ require_once('skipifconnectfailure.inc');
 		}
 	} catch (Throwable $e) {
 		echo "Exception: " . $e->getMessage() . "\n";
-	}	
+	}
 
 	try {
 		$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array('a'));
@@ -77,7 +77,7 @@ require_once('skipifconnectfailure.inc');
 		}
 	} catch (Throwable $e) {
 		echo "Exception: " . $e->getMessage() . "\n";
-	}	
+	}
 
 	$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array('a', 'b'));
 	if (($obj->ID !== "5") || ($obj->label !== "e") || ($obj->a !== 'a') || ($obj->b !== 'b') || (get_class($obj) != 'mysqli_fetch_object_construct')) {

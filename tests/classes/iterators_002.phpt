@@ -43,7 +43,7 @@ class c_iter implements Iterator {
 		echo __METHOD__ . "\n";
 	}
 }
-	
+
 class c implements IteratorAggregate {
 
 	public $max = 3;

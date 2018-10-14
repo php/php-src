@@ -1,17 +1,17 @@
 --TEST--
 Test utf8_encode() function : error conditions
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto string utf8_encode(string data)
- * Description: Encodes an ISO-8859-1 string to UTF-8 
+ * Description: Encodes an ISO-8859-1 string to UTF-8
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing utf8_encode() : error conditions ***\n";

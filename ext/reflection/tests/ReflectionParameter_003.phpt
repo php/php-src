@@ -7,13 +7,13 @@ Steve Seear <stevseea@php.net>
 <?php
 
 class ReflectTestClass {
-    public static function staticMethod($paramOne, $anotherParam = "bob", 
+    public static function staticMethod($paramOne, $anotherParam = "bob",
                                         &$thirdParam = "jack", $arrayParam = array('one')) {
         echo "hello from test\n";
         echo "third is $thirdParam\n";
         return ++$theIncrement;
     }
-    
+
 }
 
 $jane = "jane";
@@ -36,7 +36,7 @@ foreach($refParameters as $parameter) {
 	} else {
 	  echo "this parameter has no default value\n";
 	}
-	
+
 	/*
 	$val = 0;
 	try {
@@ -47,7 +47,7 @@ foreach($refParameters as $parameter) {
 		echo "\n";
 	}
 	*/
-	
+
 	echo "\n";
 }
 

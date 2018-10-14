@@ -37,7 +37,7 @@ var_dump(`"$php" -n -s "unknown"`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "X-Powered-By: PHP/%s
 Content-type: text/html%r; charset=.*|%r
 

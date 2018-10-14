@@ -1,9 +1,9 @@
 --TEST--
-XMLReader: libxml2 XML Reader, file data 
+XMLReader: libxml2 XML Reader, file data
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 /* $Id$ */
 $filename = dirname(__FILE__) . '/_002.xml';
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>

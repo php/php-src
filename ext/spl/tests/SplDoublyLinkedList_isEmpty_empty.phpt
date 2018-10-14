@@ -6,7 +6,7 @@ PHPNW Testfest 2009 - Paul Court ( g@rgoyle.com )
 <?php
 	// Create a new Doubly Linked List
 	$dll = new SplDoublyLinkedList();
-	
+
 	var_dump($dll->isEmpty());
 ?>
 --EXPECT--

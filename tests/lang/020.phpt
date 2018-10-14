@@ -1,7 +1,7 @@
 --TEST--
 Switch test 1
 --FILE--
-<?php 
+<?php
 
 $i="abc";
 

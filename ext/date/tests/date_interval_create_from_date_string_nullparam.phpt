@@ -1,5 +1,5 @@
 --TEST--
-Test date_interval_create_from_date_string() function : null parameter 
+Test date_interval_create_from_date_string() function : null parameter
 --CREDITS--
 Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 --FILE--

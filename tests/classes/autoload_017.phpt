@@ -11,7 +11,7 @@ Ensure ReflectionClass::implementsInterface triggers autoload.
   }
 
   $rc = new ReflectionClass("stdClass");
-  
+
   try {
     $rc->implementsInterface("UndefI");
   } catch (ReflectionException $e) {

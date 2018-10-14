@@ -1,7 +1,7 @@
 --TEST--
 sprintf() function
 --FILE--
-<?php 
+<?php
 
 $agent = sprintf("%.5s", "James Bond, 007");
 

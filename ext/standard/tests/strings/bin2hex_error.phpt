@@ -1,5 +1,5 @@
 --TEST--
-Test bin2hex() function : error conditions 
+Test bin2hex() function : error conditions
 --FILE--
 <?php
 
@@ -17,7 +17,7 @@ echo "\n-- Testing bin2hex() function with more than expected no. of arguments -
 $extra_arg = 10;
 var_dump( bin2hex("Hello World", $extra_arg) );
 
-?> 
+?>
 ===DONE===
 --EXPECTF--
 *** Testing bin2hex() : error conditions ***
@@ -31,5 +31,4 @@ NULL
 
 Warning: bin2hex() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
- 
 ===DONE===

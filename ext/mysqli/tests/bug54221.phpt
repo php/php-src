@@ -30,7 +30,7 @@ mysqli.reconnect = Off
 				$warnings = $link->get_warnings();
 				if ($warnings) {
 					do {
-						echo "Warning: ".$warnings->errno.": ".$warnings->message."\n"; 
+						echo "Warning: ".$warnings->errno.": ".$warnings->message."\n";
 					} while ($warnings->next());
 				}
 			}

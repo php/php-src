@@ -1,9 +1,9 @@
 --TEST--
 Test function gzputs() by calling it with its expected arguments
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--

@@ -5,7 +5,7 @@ crypt() SHA-512
 if (!function_exists('crypt') || !defined("CRYPT_SHA512")) {
 	die("SKIP crypt()-sha512 is not available");
 }
-?> 
+?>
 --FILE--
 <?php
 

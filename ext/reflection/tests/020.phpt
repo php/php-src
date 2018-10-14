@@ -20,7 +20,7 @@ var_dump($obj->hasProperty("p2"));
 var_dump($obj->hasProperty("p3"));
 var_dump($obj->hasProperty("p4"));
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

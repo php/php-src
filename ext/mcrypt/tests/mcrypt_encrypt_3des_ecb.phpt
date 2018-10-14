@@ -1,17 +1,17 @@
 --TEST--
 Test mcrypt_encrypt() function : TripleDES functionality
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("mcrypt")) {
-	print "skip - mcrypt extension not loaded"; 
-}	 
+	print "skip - mcrypt extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : string mcrypt_encrypt(string cipher, string key, string data, string mode, string iv)
- * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv 
+ * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv
  * Source code: ext/mcrypt/mcrypt.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mcrypt_encrypt() : TripleDES functionality ***\n";
@@ -22,9 +22,9 @@ $data = b'This is the secret message which must be encrypted';
 
 // tripledes uses keys up to 192 bits (24 bytes)
 $keys = array(
-   b'12345678', 
-   b'12345678901234567890', 
-   b'123456789012345678901234', 
+   b'12345678',
+   b'12345678901234567890',
+   b'123456789012345678901234',
    b'12345678901234567890123456'
 );
 
@@ -36,8 +36,8 @@ foreach ($keys as $key) {
 
 $key = b'123456789012345678901234';
 $ivs = array(
-   b'1234', 
-   b'12345678', 
+   b'1234',
+   b'12345678',
    b'123456789'
 );
 

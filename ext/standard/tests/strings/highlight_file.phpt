@@ -36,7 +36,7 @@ var_dump(highlight_file($filename));
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: highlight_file() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 

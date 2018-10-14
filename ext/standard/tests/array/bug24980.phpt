@@ -9,7 +9,7 @@ function add_up($running_total, $current_value)
 	$running_total += $current_value * $current_value;
 	return $running_total;
 }
-                        
+
 $numbers = array (2,3,5,7);
 $total = array_reduce($numbers, 'add_up');
 print "Total is $total\n";
@@ -21,7 +21,7 @@ function foo ($a, $b)
 	return $a . $b;
 }
 var_dump(array_reduce($a, "foo"));
-                        
+
 /* test #3: basic test (used to leak memory) */
 function rsum($v, $w)
 {

@@ -1,11 +1,11 @@
 --TEST--
-Test get_extension_funcs() function : error conditions 
+Test get_extension_funcs() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array get_extension_funcs  ( string $module_name  )
  * Description: Returns an array with the names of the functions of a module.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing get_extension_funcs() function: with unexpected inputs for 'module_name' argument ***\n";
@@ -18,7 +18,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource

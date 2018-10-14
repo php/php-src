@@ -3,9 +3,9 @@ Test parse_url() function : usage variations  - unexpected type for arg 1.
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
- * Description: Parse a URL and return its components 
+ * Description: Parse a URL and return its components
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {

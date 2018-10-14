@@ -7,7 +7,7 @@ locale_lookup.phpt() icu >= 4.8 && icu < 50.1.2
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 
@@ -20,7 +20,7 @@ function ut_main()
 		'jbo',
 		'art-lojban'
 	);
-	
+
 	$lang_tags = array(
 		'de-DEVA',
 		'de-DE-1996',

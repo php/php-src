@@ -41,7 +41,7 @@ $b = new SubclassB;
 var_dump($b);
 
 ?>
---EXPECTF--	
+--EXPECTF--
 object(SubclassClassicInheritance)#1 (2) {
   ["hello":"SubclassClassicInheritance":private]=>
   int(0)

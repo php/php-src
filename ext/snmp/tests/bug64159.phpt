@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Bug #64159: Truncated snmpget
 --CREDITS--
 Boris Lytochkin

@@ -8,6 +8,6 @@ $ext = new ReflectionExtension("standard");
 $consts = $ext->getConstants();
 var_dump($consts["CONNECTION_NORMAL"]);
 ?>
---EXPECT--	
+--EXPECT--
 int(0)
 

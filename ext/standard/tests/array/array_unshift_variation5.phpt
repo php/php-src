@@ -2,7 +2,7 @@
 Test array_unshift() function : usage variations - assoc. array with diff values for 'array' argument
 --INI--
 precision=12
---FILE-- 
+--FILE--
 <?php
 /* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
  * Description: Pushes elements onto the beginning of the array
@@ -14,11 +14,11 @@ precision=12
  * associative arrays having different possible values to $array argument.
  * The $var argument passed is a fixed value
 */
- 
+
 echo "*** Testing array_unshift() : associative array with different values ***\n";
 
 // get an unset variable
-$unset_var = 10; 
+$unset_var = 10;
 unset ($unset_var);
 
 // get a resource variable
@@ -74,7 +74,7 @@ foreach($arrays as $array) {
 
   /* with default argument */
   // returns element count in the resulting array after arguments are pushed to
-  // beginning of the given array 
+  // beginning of the given array
   $temp_array = $array;
   var_dump( array_unshift($temp_array, $var) );
 
@@ -83,7 +83,7 @@ foreach($arrays as $array) {
 
   /* with optional arguments */
   // returns element count in the resulting array after arguments are pushed to
-  // beginning of the given array 
+  // beginning of the given array
   $temp_array = $array;
   var_dump( array_unshift($temp_array, $var, "hello", 'world') );
 

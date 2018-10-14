@@ -9,7 +9,7 @@ if (!extension_loaded('reflection')) print 'skip';
 ?>
 --INI--
 disable_functions=is_file
---FILE-- 
+--FILE--
 <?php
 $rc = new ReflectionFunction('is_file');
 var_dump($rc->isDisabled());

@@ -3,7 +3,7 @@ Check xsltprocessor::registerPHPFunctions and a undefined php function
 --DESCRIPTION--
 The XSL script tries to call a php function that is not defined
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }

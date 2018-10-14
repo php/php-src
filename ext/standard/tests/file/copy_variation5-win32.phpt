@@ -12,7 +12,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
      Returns TRUE on success or FALSE on failure.
 */
 
-/* Test copy() function: Checking case sensitivity in creation of destination file names 
+/* Test copy() function: Checking case sensitivity in creation of destination file names
      and the existence and size of destination files
 */
 
@@ -27,7 +27,7 @@ fclose($file_handle);
 $dest_files = array(
 
   /* Checking case sensitiveness */
-  "COPY.tmp", 
+  "COPY.tmp",
   "COPY.TMP",
   "CopY.TMP"
 );

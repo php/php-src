@@ -22,6 +22,6 @@ $o->inc();
 $o->inc();
 
 ?>
---EXPECTF--	
+--EXPECTF--
 1
 2

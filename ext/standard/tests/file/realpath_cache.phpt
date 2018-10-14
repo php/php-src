@@ -15,7 +15,7 @@ var_dump($data[__DIR__]);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(%d)
 array(4) {
   ["key"]=>

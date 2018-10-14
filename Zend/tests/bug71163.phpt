@@ -2,7 +2,7 @@
 Bug #71163 (Segmentation Fault (cleanup_unfinished_calls))
 --FILE--
 <?php
-function __autoload($name) { 
+function __autoload($name) {
 	eval ("class $name extends Exception { public static function foo() {}}");
 	throw new Exception("boom");
 }

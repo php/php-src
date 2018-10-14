@@ -3,9 +3,9 @@ Test get_object_vars() function : usage variations  - unexpected types for argum
 --FILE--
 <?php
 /* Prototype  : proto array get_object_vars(object obj)
- * Description: Returns an array of object properties 
+ * Description: Returns an array of object properties
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing get_object_vars() : usage variations ***\n";

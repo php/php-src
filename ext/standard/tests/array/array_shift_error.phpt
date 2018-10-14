@@ -3,8 +3,8 @@ Test array_shift() function : error conditions - Pass incorrect number of args
 --FILE--
 <?php
 /* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array 
- * Source code: ext/standard/array.c 
+ * Description: Pops an element off the beginning of the array
+ * Source code: ext/standard/array.c
  */
 
 /*
