@@ -225,10 +225,8 @@ HELP;
 /**
  * Exclude these file patterns from processing.
  */
-function getBlacklist(): array
+function getBlacklist(string $path): array
 {
-    $opt = options();
-
     $blacklist = [
         // Version control files
         '/(^|\/)\.git\/.+$/',
@@ -249,7 +247,7 @@ function getBlacklist(): array
     ];
 
     // When working tree is not php-src repository
-    if (!isThisPhpSrc($opt['path'])) {
+    if (!isThisPhpSrc($path)) {
         return $blacklist;
     }
 
@@ -307,11 +305,6 @@ function getBlacklist(): array
         '/^.*tests\/.*\.xsl$/',
         '/^.*tests\/.*\.wsdl$/',
 
-        // Windows builds specific ignores
-        '/^Release.*/',
-        '/^Debug.*/',
-        '/^x64.*/',
-
         // PHP 7.1
         '/^stub\.c$/',
 
@@ -325,12 +318,10 @@ function getBlacklist(): array
 /**
  * Filter and include these files in processing after applying blacklist.
  */
-function getWhitelist(): array
+function getWhitelist(string $path): array
 {
-    $opt = options();
-
-    // When working tree is not php-src repository, whitelist all files by default
-    if (!isThisPhpSrc($opt['path'])) {
+    // When working tree is not php-src repository, whitelist all files
+    if (!isThisPhpSrc($path)) {
         return ['/^.+$/'];
     }
 
@@ -565,14 +556,18 @@ function getInvalidOptions(string $shortOptions, array $longOptions, array $argv
 
     foreach ($argv as $i => $argument) {
         // Discover possible unknown long passed options
-        if (preg_match('/^\-\-([a-z\-]+)\=?.*/i', $argument, $matches)
+        if (
+            preg_match('/^\-\-([a-z\-]+)\=?.*/i', $argument, $matches)
             && !in_array($matches[1], str_replace(':', '', $longOptions), true)
         ) {
             $unknown[] = $argument;
         }
 
         // Discover possible unknown short passed options
-        if (preg_match('/^\-([a-z0-9]+).*$/i', $argument) && !preg_match($regex, $argument)) {
+        if (
+            preg_match('/^\-([a-z0-9]+).*$/i', $argument)
+            && !preg_match($regex, $argument)
+        ) {
             $unknown[] = $argument;
         }
     }
@@ -610,11 +605,6 @@ function check(array $opt): void
         exit(1);
     }
 
-    // Prompt user for input
-    if ($opt['fix'] && !$opt['yes']) {
-        prompt();
-    }
-
     // The Tokenizer extension provides better PHP specific code tidying
     if (!extension_loaded('tokenizer')) {
         output('**WARN**: Enable tokenizer extension for better PHP code tidying.');
@@ -631,6 +621,11 @@ function check(array $opt): void
 
         exit(1);
     }
+
+    // Prompt user for input
+    if ($opt['fix'] && !$opt['yes']) {
+        prompt();
+    }
 }
 
 /**
@@ -638,10 +633,10 @@ function check(array $opt): void
  */
 function isThisPhpSrc(string $path): bool
 {
-    $checks = ['build', 'ext', 'main/php.h', 'Zend'];
+    $structure = ['build', 'ext', 'main/php.h', 'main/php_version.h', 'Zend'];
 
-    foreach (preg_filter('/^/', $path.'/', $checks) as $check) {
-        if (!file_exists($check)) {
+    foreach ($structure as $item) {
+        if (!file_exists($path.'/'.$item)) {
             return false;
         }
     }
@@ -669,24 +664,24 @@ function output(?string $message = null, ?bool $quiet = null): void
     $default = ($opt['colors']) ? "\e[0m" : '';
 
     // Replace ` characters with green color code
-    $cur = $default;
+    $current = $default;
     foreach (str_split($message) as $char) {
-        $cur = ($cur === $default) ? $green : $default;
-        $message = preg_replace('/\`/m', $cur, $message, 1);
+        $current = ($current === $default) ? $green : $default;
+        $message = preg_replace('/\`/m', $current, $message, 1);
     }
 
     // Replace ** characters with red color code
-    $cur = $default;
+    $current = $default;
     foreach (str_split($message) as $char) {
-        $cur = ($cur === $default) ? $red : $default;
-        $message = preg_replace('/\*\*/m', $cur, $message, 1);
+        $current = ($current === $default) ? $red : $default;
+        $message = preg_replace('/\*\*/m', $current, $message, 1);
     }
 
     // Replace single asterisk * characters with yellow color code
-    $cur = $default;
+    $current = $default;
     foreach (str_split($message) as $char) {
-        $cur = ($cur === $default) ? $yellow : $default;
-        $message = preg_replace('/(?<!\\\\)\*/m', $cur, $message, 1);
+        $current = ($current === $default) ? $yellow : $default;
+        $message = preg_replace('/(?<!\\\\)\*/m', $current, $message, 1);
     }
 
     // Replace escaped characters
@@ -806,7 +801,7 @@ function trimFinalNewlines(string $content, int $max = 1): string
 }
 
 /**
- * Get end of line based on the prevailing LF, CRLF or CR newline characters.
+ * Get EOL based on the prevailing LF, CRLF or CR newline characters.
  */
 function getPrevailingEol(string $content): string
 {
@@ -858,15 +853,16 @@ function getEols(string $content): string
 }
 
 /**
- * Convert all EOL characters to default EOL.
+ * Convert all EOL characters to default EOL. Some *.phpt test files include
+ * also CR characters as part of the test so those can be skipped.
  */
-function convertEol(string $content, $file, bool $enableCr = false): string
+function convertEol(string $content, $file, bool $skipCr = false): string
 {
-    if ($enableCr) {
-        return preg_replace('/(*BSR_ANYCRLF)\R/m', getDefaultEol($file), $content);
+    if ($skipCr) {
+        return preg_replace('/(?>\r\n|\n)/m', getDefaultEol($file), $content);
     }
 
-    return preg_replace('/(?>\r\n|\n)/m', getDefaultEol($file), $content);
+    return preg_replace('/(*BSR_ANYCRLF)\R/m', getDefaultEol($file), $content);
 }
 
 /**
@@ -985,28 +981,37 @@ function getFiles(): array
     }
 
     // Remove blacklist matches
-    foreach (getBlacklist() as $regex) {
-        $data = array_filter($files, function ($item) use ($regex, $opt) {
-            $blacklisted = preg_match($regex, relative($item));
-
-            if ($blacklisted && $opt['verbose'] >= 3) {
-                output('*SKIP* '.relative($item).': *ignored*');
-            }
-
-            return $blacklisted;
-        });
-
-        $files = array_diff($files, $data);
-    }
-
-    // Filter files to match the whitelist
-    $filtered = [];
-    foreach (getWhitelist() as $regex) {
+    $blacklisted = [];
+    foreach (getBlacklist($opt['path']) as $regex) {
         $data = array_filter($files, function ($item) use ($regex) {
             return preg_match($regex, relative($item));
         });
 
-        $filtered = array_merge($filtered, array_diff($data, $filtered));
+        $blacklisted = array_merge($blacklisted, array_diff($data, $blacklisted));
+    }
+
+    $filtered = array_diff($files, $blacklisted);
+
+    // Filter files to match the whitelist
+    $whitelisted = [];
+    foreach (getWhitelist($opt['path']) as $regex) {
+        $data = array_filter($filtered, function ($item) use ($regex) {
+            return preg_match($regex, relative($item));
+        });
+
+        $whitelisted = array_merge($whitelisted, array_diff($data, $whitelisted));
+    }
+
+    $filtered = $whitelisted;
+
+    // Debug info
+    $diff = array_diff($files, $filtered);
+    foreach ($diff as $file) {
+        countSkipped();
+
+        if ($opt['verbose'] >= 3) {
+            output('*SKIP* '.relative($file).': *ignored*');
+        }
     }
 
     return $filtered;
@@ -1061,7 +1066,7 @@ function tidyContent(string $content, string $file, array $rules = []): array
     }
 
     if ($opt['eol']) {
-        $buffer = convertEol($buffer, $file, true);
+        $buffer = convertEol($buffer, $file);
     }
 
     if ($buffer !== $content) {
@@ -1272,9 +1277,9 @@ function tidyPhpTestFile(string $file): array
     // Convert EOL for the entire phpt file
     if ($opt['eol']) {
         // Disable converting CR since it might be part of a test
-        $buffer = convertEol($buffer, $file, false);
+        $buffer = convertEol($buffer, $file, true);
 
-        if ($opt['verbose'] >= 1 && $buffer !== convertEol($buffer, $file, true)) {
+        if ($opt['verbose'] >= 1 && $buffer !== convertEol($buffer, $file)) {
             output('*WARN*  '.relative($file).': *'.getEols($content).'line terminators*');
         }
     }
@@ -1345,7 +1350,8 @@ function tidyFile(string $file): bool
         }
 
         list($cleaned, $logs) = tidyPhpTestFile($file);
-    } elseif (preg_match('/\.php$/', $file)
+    } elseif (
+        preg_match('/\.php$/', $file)
         || (isThisPhpSrc($opt['path']) && preg_match('/\.inc$/', $file))
     ) {
         // *.inc files in the php-src repository and *.php files
@@ -1429,7 +1435,7 @@ function cleanSpaceBeforeTabFromPhp(string $source): string
  */
 function tidyPhpCode(string $source, callable $callback): string
 {
-    // @ suppresses warning: octal escape sequence overflow \542 is greater than \377
+    // @ suppress warning octal escape sequence overflow ... is greater than ...
     $tokens = @token_get_all($source);
 
     $content = '';
@@ -1534,6 +1540,16 @@ function countFixed(): int
     return $counter++;
 }
 
+/**
+ * Internal counter of ignored files for logging output.
+ */
+function countSkipped(): int
+{
+    static $counter = 0;
+
+    return $counter++;
+}
+
 function init(array $argv): int
 {
     $time = microtime(true);
@@ -1549,9 +1565,11 @@ function init(array $argv): int
 
     $time = round((microtime(true) - $time), 3);
 
-    $output = "\nAll done. `".countFixed().'` file(s) '.($opt['fix'] ? 'fixed' : 'should be fixed');
-    $output .= '. Checked *'.count($files).'* file(s) in '.$time.' sec';
-    $output .= ' and consumed '.(round(memory_get_peak_usage() / 1024 / 1024, 3)).' MB memory';
+    $output = "\n`".countFixed().'` file(s) '.($opt['fix'] ? 'fixed, ' : 'should be fixed, ');
+    $output .= '*'.count($files).'* file(s) checked, ';
+    $output .= '*'.countSkipped().'* file(s) skipped ';
+    $output .= 'in '.$time.' sec ';
+    $output .= 'and '.(round(memory_get_peak_usage() / 1024 / 1024, 3)).' MB memory consumed.';
 
     output($output);
 
