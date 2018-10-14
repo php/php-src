@@ -100,7 +100,7 @@ string(%d) "/** *
 
 
 ---> Doc comment for B::protStatf():
-string(%d) "/** My Doc Comment for B::protStatf 
+string(%d) "/** My Doc Comment for B::protStatf
 
 
 
