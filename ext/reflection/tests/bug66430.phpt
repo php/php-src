@@ -5,7 +5,7 @@ Bug #66430: ReflectionFunction::invoke does not invoke closure with object scope
 
 class Alpha {
 	public $message = "Valid representation";
-	
+
 	public function bravo() {
 		return $this->message;
 	}

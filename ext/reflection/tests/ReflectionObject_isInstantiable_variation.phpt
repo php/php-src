@@ -57,7 +57,7 @@ $reflectionObjects = array(
 		publicCtorNew::reflectionObjectFactory(),
 		protectedCtorNew::reflectionObjectFactory(),
 		privateCtorNew::reflectionObjectFactory(),
-		publicCtorOld::reflectionObjectFactory(), 
+		publicCtorOld::reflectionObjectFactory(),
 		protectedCtorOld::reflectionObjectFactory(),
 		privateCtorOld::reflectionObjectFactory()
 	);

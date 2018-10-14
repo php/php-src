@@ -1,5 +1,5 @@
 --TEST--
-Test isset() function : basic functionality 
+Test isset() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool isset  ( mixed $var  [, mixed $var  [,  $...  ]] )

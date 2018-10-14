@@ -3,13 +3,13 @@ Test sprintf() function : usage variations - octal formats with array values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : octal formats with array values ***\n";
 
-// different arrays used to test the function 
+// different arrays used to test the function
 $array_values = array(
   array(),
   array(0),

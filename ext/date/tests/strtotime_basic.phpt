@@ -13,12 +13,12 @@ date_default_timezone_set('UTC');
  */
 var_dump(date('Y-m-d', strtotime('1 Monday December 2008')));
 /*
- * This is parsed as the "second following Monday OR the first following 
+ * This is parsed as the "second following Monday OR the first following
  * Monday if the current day is a Monday"
  */
 var_dump(date('Y-m-d', strtotime('2 Monday December 2008')));
 /*
- * This is parsed as the "third following Monday OR the second following 
+ * This is parsed as the "third following Monday OR the second following
  * Monday if the current day is a Monday"
  */
 var_dump(date('Y-m-d', strtotime('3 Monday December 2008')));

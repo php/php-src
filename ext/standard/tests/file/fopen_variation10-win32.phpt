@@ -15,7 +15,7 @@ if (!is_writable('c:\\fopen_variation10.tmp')) {
 --FILE--
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
+ * Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions:
  */
@@ -35,13 +35,13 @@ $paths = array('c:\\',
                'c',
                '\\',
                '/',
-               'c:'.$rootdir, 
+               'c:'.$rootdir,
                'c:adir',
                'c:\\/',
                'c:\\'.$rootdir.'\\/',
                'c:\\'.$rootdir.'\\',
                'c:\\'.$rootdir.'/',
-               $unixifiedDir, 
+               $unixifiedDir,
                '/sortout');
 
 $file = "fopen_variation10.tmp";

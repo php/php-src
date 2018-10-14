@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : bool unlink(string filename[, context context])
- * Description: Delete a file 
+ * Description: Delete a file
  * Source code: ext/standard/file.c
  * Alias to functions:
  */

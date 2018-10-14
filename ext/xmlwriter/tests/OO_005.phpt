@@ -1,5 +1,5 @@
 --TEST--
-XMLWriter: libxml2 XML Writer, comments 
+XMLWriter: libxml2 XML Writer, comments
 --SKIPIF--
 <?php
 if (!extension_loaded("xmlwriter")) die("skip");

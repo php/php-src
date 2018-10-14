@@ -48,7 +48,7 @@ $inputs = array(
        // null data
 /*4*/  'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
 
 /*5*/  'null lowercase' => array(
        null => 'null 2',

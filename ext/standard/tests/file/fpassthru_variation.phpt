@@ -30,7 +30,7 @@ $offset_arr = array(
   35,
   36,
   70,
-  /* Negative offsets, the file pointer should be at the end of file 
+  /* Negative offsets, the file pointer should be at the end of file
   to get data */
   -1,
   -5,

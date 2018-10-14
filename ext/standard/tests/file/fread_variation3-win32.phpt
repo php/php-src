@@ -10,9 +10,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 <?php
 /*
  Prototype: string fread ( resource $handle [, int $length] );
- Description: reads up to length bytes from the file pointer referenced by handle. 
-   Reading stops when up to length bytes have been read, EOF (end of file) is 
-   reached, (for network streams) when a packet becomes available, or (after 
+ Description: reads up to length bytes from the file pointer referenced by handle.
+   Reading stops when up to length bytes have been read, EOF (end of file) is
+   reached, (for network streams) when a packet becomes available, or (after
    opening userspace stream) when 8192 bytes have been read whichever comes first.
 */
 
@@ -20,8 +20,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 include ("file.inc");
 
 /* Function : function check_read(resource $file_handle, int $read_size, int $expect_size)
-   Description : Read data from file of size $read_size and verifies that $expected_size no. of 
-                 bytes are read. 
+   Description : Read data from file of size $read_size and verifies that $expected_size no. of
+                 bytes are read.
      $file_handle : File Handle
      $read_size   : No. of bytes to be read.
      $expect_size : Expected data length

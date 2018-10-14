@@ -44,7 +44,7 @@ class B extends A {
     private function privf() {}
 
 
-    /** My Doc Comment for B::protStatf 
+    /** My Doc Comment for B::protStatf
 
 
 

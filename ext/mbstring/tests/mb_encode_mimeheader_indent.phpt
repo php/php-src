@@ -10,7 +10,7 @@ function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is n
 <?php
 /* Prototype  : string mb_encode_mimeheader
  * (string $str [, string $charset [, string $transfer_encoding [, string $linefeed [, int $indent]]]])
- * Description: Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= 
+ * Description: Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?=
  * Source code: ext/mbstring/mbstring.c
  */
 

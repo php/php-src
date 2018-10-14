@@ -7,7 +7,7 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 --FILE--
 <?php
 /* Prototype  : bool imap_close(resource $stream_id [, int $options])
- * Description: Close an IMAP stream 
+ * Description: Close an IMAP stream
  * Source code: ext/imap/php_imap.c
  */
 

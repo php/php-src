@@ -4,7 +4,7 @@ Test basename() function : usage variations
 <?php
 /* Prototype: string basename ( string $path [, string $suffix] );
    Description: Given a string containing a path to a file,
-                this function will return the base name of the file. 
+                this function will return the base name of the file.
                 If the filename ends in suffix this will also be cut off.
 */
 $file_path_variations = array (

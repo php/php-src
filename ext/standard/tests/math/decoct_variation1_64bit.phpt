@@ -39,7 +39,7 @@ $inputs = array(
        1,
        12345,
        -2345,
-       18446744073709551615,  // largest decimal  
+       18446744073709551615,  // largest decimal
        18446744073709551616,
 
        // float data
@@ -70,7 +70,7 @@ $inputs = array(
        $heredoc,
 
        // object data
-/*24*/ new classA(),         
+/*24*/ new classA(),
 
        // undefined data
 /*25*/ @$undefined_var,

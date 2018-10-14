@@ -1,11 +1,11 @@
 --TEST--
-Test pathinfo() function : usage variation 
+Test pathinfo() function : usage variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : array pathinfo(string path[, int options])
- * Description: Returns information about a certain string 
+ * Description: Returns information about a certain string
  * Source code: ext/standard/string.c
  * Alias to functions:
  */

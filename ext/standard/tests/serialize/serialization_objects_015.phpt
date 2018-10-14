@@ -1,5 +1,5 @@
 --TEST--
-Object serialization / unserialization: properties reference containing object 
+Object serialization / unserialization: properties reference containing object
 --FILE--
 <?php
 

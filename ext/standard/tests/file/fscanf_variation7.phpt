@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - integer formats with boolean 
+Test fscanf() function: usage variations - integer formats with boolean
 --FILE--
 <?php
 

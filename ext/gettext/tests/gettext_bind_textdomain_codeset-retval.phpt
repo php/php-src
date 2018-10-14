@@ -1,5 +1,5 @@
 --TEST--
-test if bind_textdomain_codeset() returns correct value 
+test if bind_textdomain_codeset() returns correct value
 --SKIPIF--
 <?php
 	if (!extension_loaded("gettext")) {

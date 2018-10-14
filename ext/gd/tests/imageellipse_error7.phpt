@@ -1,8 +1,8 @@
 --TEST--
-Testing wrong param passing imageellipse() of GD library 
+Testing wrong param passing imageellipse() of GD library
 --CREDITS--
-Ivan Rosolen <contato [at] ivanrosolen [dot] com> 
-#testfest PHPSP on 2009-06-20 
+Ivan Rosolen <contato [at] ivanrosolen [dot] com>
+#testfest PHPSP on 2009-06-20
 --SKIPIF--
 <?php
 if (!extension_loaded("gd")) die("skip GD not present");
@@ -10,10 +10,10 @@ if (!extension_loaded("gd")) die("skip GD not present");
 --FILE--
 <?php
 
-// Create a resource 
+// Create a resource
 $image = tmpfile();
 
-// try to draw a white ellipse 
+// try to draw a white ellipse
 imageellipse($image, 200, 150, 300, 200, 16777215);
 ?>
 --EXPECTF--

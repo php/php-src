@@ -1,5 +1,5 @@
 --TEST--
-Test DateTimeZone::getOffset() function : error conditions 
+Test DateTimeZone::getOffset() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int DateTimeZone::getOffset  ( DateTime $datetime  )
@@ -8,7 +8,7 @@ Test DateTimeZone::getOffset() function : error conditions
  * Alias to functions: timezone_offset_get()
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("GMT");
 
 $tz = new DateTimeZone("Europe/London");

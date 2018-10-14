@@ -1,5 +1,5 @@
 --TEST--
-Test imap_mail_move() function : basic functionality 
+Test imap_mail_move() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--
@@ -9,7 +9,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
 --FILE--
 <?php
 /* Prototype  : bool imap_mail_move  ( resource $imap_stream  , string $msglist  , string $mailbox  [, int $options = 0  ] )
- * Description: Copies mail messages specified by msglist  to specified mailbox. 
+ * Description: Copies mail messages specified by msglist  to specified mailbox.
  * Source code: ext/imap/php_imap.c
  */
 

@@ -1,9 +1,9 @@
 --TEST--
-Test get_resource_type() function : basic functionality 
+Test get_resource_type() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string get_resource_type  ( resource $handle  )
- * Description:  Returns the resource type 
+ * Description:  Returns the resource type
  * Source code: Zend/zend_builtin_functions.c
  */
 

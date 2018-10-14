@@ -1,5 +1,5 @@
 --TEST--
-DateTime::add() -- february 
+DateTime::add() -- february
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --FILE--

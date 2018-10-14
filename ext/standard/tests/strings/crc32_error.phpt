@@ -3,7 +3,7 @@ Test crc32() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string crc32(string $str)
- * Description: Calculate the crc32 polynomial of a string 
+ * Description: Calculate the crc32 polynomial of a string
  * Source code: ext/standard/crc32.c
  * Alias to functions: none
 */

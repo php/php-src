@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : proto bool file_exists(string filename)
- * Description: Returns true if filename exists 
+ * Description: Returns true if filename exists
  * Source code: ext/standard/filestat.c
  * Alias to functions:
  */

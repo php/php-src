@@ -27,7 +27,7 @@ if (is_resource($broker)) {
             echo("OK\n");
 
             if (
-                  (enchant_broker_get_dict_path($broker,$dictTypeValue1) == $backEndDictType1) && 
+                  (enchant_broker_get_dict_path($broker,$dictTypeValue1) == $backEndDictType1) &&
                   (enchant_broker_get_dict_path($broker,$dictTypeValue2) == $backEndDictType2)
               ) {
                    echo("OK\n");

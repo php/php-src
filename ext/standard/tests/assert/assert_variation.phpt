@@ -1,5 +1,5 @@
 --TEST--
-assert() - variation  - test callback options using ini_get/ini_set/assert_options 
+assert() - variation  - test callback options using ini_get/ini_set/assert_options
 --INI--
 assert.active = 1
 assert.warning = 0

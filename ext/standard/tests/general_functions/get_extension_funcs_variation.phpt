@@ -1,5 +1,5 @@
 --TEST--
-Test get_extension_funcs() function : error conditions 
+Test get_extension_funcs() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array get_extension_funcs  ( string $module_name  )

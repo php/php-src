@@ -19,7 +19,7 @@ if(!function_exists('imagecolorstotal') || !function_exists('imagecreatefromgif'
 
 echo "*** Testing imagecolorstotal() : basic functionality ***\n";
 
-// Get an image 
+// Get an image
 $gif = dirname(__FILE__)."/php.gif";
 $im = imagecreatefromgif($gif);
 

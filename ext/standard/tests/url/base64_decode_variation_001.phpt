@@ -3,7 +3,7 @@ Test base64_decode() function : usage variations  - unexpected types for arg 1
 --FILE--
 <?php
 /* Prototype  : proto string base64_decode(string str[, bool strict])
- * Description: Decodes string using MIME base64 algorithm 
+ * Description: Decodes string using MIME base64 algorithm
  * Source code: ext/standard/base64.c
  * Alias to functions:
  */

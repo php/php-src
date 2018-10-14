@@ -1,5 +1,5 @@
 --TEST--
-imap_headerinfo() function : basic functionality 
+imap_headerinfo() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--

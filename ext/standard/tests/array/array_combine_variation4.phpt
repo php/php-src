@@ -10,7 +10,7 @@ Test array_combine() function : usage variations - associative array with differ
 
 /*
  * Testing the functionality of array_combine() by passing different
- * associative arrays having different possible keys to $keys argument and 
+ * associative arrays having different possible keys to $keys argument and
  * associative arrays having different possible keys to $values argument.
 */
 

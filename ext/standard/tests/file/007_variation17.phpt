@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "rb" mode 
+Test fopen and fclose() functions - usage variations - "rb" mode
 --FILE--
 <?php
 /*

@@ -8,7 +8,7 @@ echo "\nrand() tests with default min and max value (i.e 0 thru ", $default_max,
 for ($i = 0; $i < 100; $i++) {
 	$res = rand();
 
-// By default RAND_MAX is 32768 although no constant is defined for it for user space apps 	
+// By default RAND_MAX is 32768 although no constant is defined for it for user space apps
 	if (!is_int($res) || $res < 0 || $res > $default_max) {
 		break;
 	}
@@ -58,7 +58,7 @@ $min = array(true,
 			 "10",
 			 "10.5");
 
-// Eexepcted numerical equivalent of above non-numerics		
+// Eexepcted numerical equivalent of above non-numerics
 $minval = array(1,
 				0,
 				0,

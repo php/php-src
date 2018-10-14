@@ -18,7 +18,7 @@ $bases = array(23,
 				027,
 				"23",
 				"23.45",
-				"2.345e1",	
+				"2.345e1",
 				PHP_INT_MAX,
 				-PHP_INT_MAX - 1);
 

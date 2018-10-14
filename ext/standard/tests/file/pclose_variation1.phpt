@@ -1,5 +1,5 @@
 --TEST--
-Test pclose() function : usage variation 
+Test pclose() function : usage variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--

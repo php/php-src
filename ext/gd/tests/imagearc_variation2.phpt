@@ -14,7 +14,7 @@ $image = imagecreatetruecolor(100, 100);
 
 $white = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
 
-//create an arc with white color    
+//create an arc with white color
 imagearc($image, 50, 50, 30, 30, -90, 0, $white);
 
 include_once __DIR__ . '/func.inc';

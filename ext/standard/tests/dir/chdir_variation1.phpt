@@ -3,7 +3,7 @@ Test chdir() function : usage variations - different data type as $directory arg
 --FILE--
 <?php
 /* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory 
+ * Description: Change the current directory
  * Source code: ext/standard/dir.c
  */
 

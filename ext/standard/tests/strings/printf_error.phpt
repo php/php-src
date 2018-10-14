@@ -1,5 +1,5 @@
 --TEST--
-Test printf() function : error conditions 
+Test printf() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )

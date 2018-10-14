@@ -4,7 +4,7 @@ Bug #71998 Function pg_insert does not insert when column type = inet
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-// Kudos for the IP regex to 
+// Kudos for the IP regex to
 // http://stackoverflow.com/a/17871737/3358424
 
 include('config.inc');

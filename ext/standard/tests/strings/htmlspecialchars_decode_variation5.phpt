@@ -8,7 +8,7 @@ Test htmlspecialchars_decode() function : usage variations - double quoted strin
 */
 
 /*
- * testing htmlspecialchars_decode() for various double quoted strings as argument for $string 
+ * testing htmlspecialchars_decode() for various double quoted strings as argument for $string
 */
 echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
 

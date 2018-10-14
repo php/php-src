@@ -15,7 +15,7 @@ Test vfprintf() function : usage variations - scientific formats with non-scient
 echo "*** Testing vfprintf() : scientific formats and non-scientific values ***\n";
 
 // defining array of non-scientific formats
-$formats = 
+$formats =
   '%e %+e %-e 
    %le %Le %4e %-4e
    %10.4e %-10.4e %04e %04.4e

@@ -36,7 +36,7 @@ foreach($src_file_names as $src_file_name) {
   var_dump( file_exists($dest_file_name) );
 
   if( file_exists($dest_file_name) ) {
-  var_dump( filesize($dest_file_name) );  //size of destination 
+  var_dump( filesize($dest_file_name) );  //size of destination
   unlink($dest_file_name);
   }
 

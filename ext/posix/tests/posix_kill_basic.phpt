@@ -1,5 +1,5 @@
 --TEST--
-Test posix_kill(), posix_get_last_error and posix_strerror() functions : basic functionality 
+Test posix_kill(), posix_get_last_error and posix_strerror() functions : basic functionality
 --SKIPIF--
 <?php
 	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');

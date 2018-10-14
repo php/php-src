@@ -3,7 +3,7 @@ Test vsprintf() function : usage variations - scientific formats with scientific
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 

@@ -1,5 +1,5 @@
 --TEST--
-Test date_timezone_get() function : error conditions 
+Test date_timezone_get() function : error conditions
 --FILE--
 <?php
 /* Prototype  : DateTimeZone date_timezone_get  ( DateTimeInterface $object  )
@@ -8,7 +8,7 @@ Test date_timezone_get() function : error conditions
  * Alias to functions: DateTimeInterface::getTimezone
  */
 
-// Set timezone 
+// Set timezone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_timezone_get() : error conditions ***\n";

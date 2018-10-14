@@ -1,5 +1,5 @@
 --TEST--
-adding strings to arrays 
+adding strings to arrays
 --FILE--
 <?php
 

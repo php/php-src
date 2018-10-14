@@ -1,5 +1,5 @@
 --TEST--
-Test bin2hex() function : basic functionality 
+Test bin2hex() function : basic functionality
 --FILE--
 <?php
 

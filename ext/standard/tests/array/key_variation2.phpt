@@ -3,7 +3,7 @@ Test key() function : usage variations
 --FILE--
 <?php
 /* Prototype  : mixed key(array $array_arg)
- * Description: Return the key of the element currently pointed to by the internal array pointer 
+ * Description: Return the key of the element currently pointed to by the internal array pointer
  * Source code: ext/standard/array.c
  */
 
@@ -48,7 +48,7 @@ $inputs = array(
        // null data
 /*4*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
 
 /*5*/  'null lowercase' => array(
        null => 'null 2',

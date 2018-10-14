@@ -15,7 +15,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
  */
 
 /*
- * Passing a file as argument to dir() function instead of a directory 
+ * Passing a file as argument to dir() function instead of a directory
  * and checking if proper warning message is generated.
  */
 

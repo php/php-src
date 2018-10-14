@@ -1,9 +1,9 @@
 --TEST--
-Test array_filter() function : object functionality 
+Test array_filter() function : object functionality
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -79,8 +79,8 @@ function always_false($input)
 
 // 'input' array containing objects as elements
 $input = array(
-  new SimpleClass(), 
-  new EmptyClass(), 
+  new SimpleClass(),
+  new EmptyClass(),
   new ChildClass(),
   new FinalClass(),
   new StaticClass()

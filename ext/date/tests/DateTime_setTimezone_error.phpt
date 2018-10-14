@@ -1,5 +1,5 @@
 --TEST--
-Test DateTime::setTimezone () function : error conditions 
+Test DateTime::setTimezone () function : error conditions
 --FILE--
 <?php
 /* Prototype  : public DateTime DateTime::setTimezone  ( DateTimeZone $timezone  )

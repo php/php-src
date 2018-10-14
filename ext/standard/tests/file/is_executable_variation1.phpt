@@ -47,7 +47,7 @@ $files_arr = array(
   "$file_path/is_executable_variation1"  // temp directory, exp: bool(true)
 );
 $counter = 1;
-/* loop through to test each element in the above array 
+/* loop through to test each element in the above array
    is an executable file */
 foreach($files_arr as $file) {
   echo "-- Iteration $counter --\n";

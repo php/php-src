@@ -15,7 +15,7 @@ precision=14
    Description: Returns the type of the PHP variable var
 
    Prototype: bool settype ( mixed &$var, string $type );
-   Description: Set the type of variable var to type 
+   Description: Set the type of variable var to type
 */
 
 /* Test usage variation of gettype() and settype() functions:
@@ -35,7 +35,7 @@ function foo($errno, $errstr, $errfile, $errline) {
    echo "$errno: $errstr\n";
 }
 //set the error handler, this is required as
-// settype() would fail with catachable fatal error 
+// settype() would fail with catachable fatal error
 set_error_handler("foo");
 
 $var1 = "another string";
@@ -62,10 +62,10 @@ class point
 
 $var_values = array (
   /* nulls */
-  null,  
+  null,
 
   /* boolean */
-  FALSE, 
+  FALSE,
   TRUE,
   true,
 
@@ -158,7 +158,7 @@ $var_values = array (
   $undef_var
 );
 
-// test conversion to these types                 
+// test conversion to these types
 $types = array(
   "integer",
   "int"

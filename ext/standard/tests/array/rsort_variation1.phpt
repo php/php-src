@@ -3,7 +3,7 @@ Test rsort() function : usage variations - Pass different data types as $array_a
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order 
+ * Description: Sort an array in reverse order
  * Source code: ext/standard/array.c
  */
 

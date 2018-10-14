@@ -1,9 +1,9 @@
 --TEST--
-Test strftime() function : basic functionality 
+Test strftime() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings 
+ * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */

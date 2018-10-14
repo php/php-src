@@ -1,17 +1,17 @@
 --TEST--
-Test posix_getpid() function : basic functionality 
+Test posix_getpid() function : basic functionality
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 ?>
 --FILE--
-<?php 
+<?php
   echo "Basic test of POSIX getpid function\n";
-  	
+
   $pid = posix_getpid();
-  
+
   var_dump($pid);
-  
+
 ?>
 ===DONE====
 --EXPECTF--

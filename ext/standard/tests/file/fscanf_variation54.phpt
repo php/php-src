@@ -43,7 +43,7 @@ $formats = array( "%d", "%f", "%e", "%u", " %s", "%x", "%o");
 
 $counter = 1;
 
-// opening file for read  
+// opening file for read
 $file_handle = fopen($filename, "r");
   if($file_handle == false) {
     exit("Error:failed to open file $filename");

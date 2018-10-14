@@ -1,5 +1,5 @@
 --TEST--
-Bug #72339 Integer Overflow in _gd2GetHeader() resulting in heap overflow 
+Bug #72339 Integer Overflow in _gd2GetHeader() resulting in heap overflow
 --SKIPIF--
 <?php
 if (!function_exists("imagecreatefromgd2")) print "skip";

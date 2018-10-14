@@ -1,5 +1,5 @@
 --TEST--
-Test ArrayObject::uksort() function : wrong arg count 
+Test ArrayObject::uksort() function : wrong arg count
 --FILE--
 <?php
 /* Prototype  : int ArrayObject::uksort(callback cmp_function)

@@ -1,5 +1,5 @@
 --TEST--
-Force pass-by-reference to __call 
+Force pass-by-reference to __call
 --FILE--
 <?php
   class C

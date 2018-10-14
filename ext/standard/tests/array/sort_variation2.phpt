@@ -3,7 +3,7 @@ Test sort() function : usage variations - unexpected values for 'sort_flags' arg
 --FILE--
 <?php
 /* Prototype  : bool sort(array &array_arg [, int $sort_flags])
- * Description: Sort an array 
+ * Description: Sort an array
  * Source code: ext/standard/array.c
 */
 

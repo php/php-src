@@ -1,5 +1,5 @@
 --TEST--
-locale_filter_matches.phpt() ICU >= 51.2 
+locale_filter_matches.phpt() ICU >= 51.2
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
@@ -7,7 +7,7 @@ locale_filter_matches.phpt() ICU >= 51.2
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 

@@ -22,7 +22,7 @@ $invalid_float2 = array("-67345.76567", "-67345.76567aaa", "  -67345.76567", "- 
 
 
 $toCompare = array(
-  true, array(true), array_merge($valid_true, $valid_false), 
+  true, array(true), array_merge($valid_true, $valid_false),
   false, array(false), array_merge($valid_true, $valid_false),
   $int1, $valid_int1, $invalid_int1,
   $int2, $valid_int2, $invalid_int2,

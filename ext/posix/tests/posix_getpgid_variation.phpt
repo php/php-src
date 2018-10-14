@@ -1,5 +1,5 @@
 --TEST--
-Test posix_getpgid() function : variation 
+Test posix_getpgid() function : variation
 --SKIPIF--
 <?php
 PHP_INT_SIZE == 4 or die("skip - 32-bit only");

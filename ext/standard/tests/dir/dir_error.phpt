@@ -1,5 +1,5 @@
 --TEST--
-Test dir() function : error conditions 
+Test dir() function : error conditions
 --FILE--
 <?php
 /*

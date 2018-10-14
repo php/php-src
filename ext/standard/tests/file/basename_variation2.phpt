@@ -35,7 +35,7 @@ $suffixes = array (
     "foo/bar",
     "foo\\bar",
     "/",
-    "\\",	
+    "\\",
 );
 
 foreach ($paths as $path) {

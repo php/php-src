@@ -72,7 +72,7 @@ foreach($values as $value) {
       echo "\nArg value $value \n";
       $result = posix_getpwuid($value);
       if ((is_array($result) && (count($result) == 7))
-          || 
+          ||
           ($result === false)) {
           echo "valid output\n";
       } else {

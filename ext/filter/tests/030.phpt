@@ -1,5 +1,5 @@
 --TEST--
-filter_var() and IPv6 
+filter_var() and IPv6
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--

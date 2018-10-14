@@ -18,7 +18,7 @@ if(!function_exists('imagecreatetruecolor')) {
 echo "*** Testing imagecolorallocate() : usage variations ***\n";
 
 $values = array(
-      //Decimal integera data  
+      //Decimal integera data
       "Decimal 256" => 256,
 
       // octal integer data

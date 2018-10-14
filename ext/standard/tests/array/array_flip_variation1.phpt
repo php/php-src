@@ -3,7 +3,7 @@ Test array_flip() function : usage variations - unexpected values for 'input' ar
 --FILE--
 <?php
 /* Prototype  : array array_flip(array $input)
- * Description: Return array with key <-> value flipped 
+ * Description: Return array with key <-> value flipped
  * Source code: ext/standard/array.c
 */
 

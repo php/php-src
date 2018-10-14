@@ -17,7 +17,7 @@ echo "-- Testing fgets() with more than expected number of arguments --\n";
 $fp = fopen(__FILE__, "r");
 var_dump( fgets($fp, 10, $fp) );
 
-// invalid length argument 
+// invalid length argument
 echo "-- Testing fgets() with invalid length arguments --\n";
 $len = 0;
 var_dump( fgets($fp, $len) );

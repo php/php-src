@@ -1,5 +1,5 @@
 --TEST--
-Test xml_set_character_data_handler() function : error conditions 
+Test xml_set_character_data_handler() function : error conditions
 --SKIPIF--
 <?php
 if (!extension_loaded("xml")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_character_data_handler(resource parser, string hdl)
- * Description: Set up character data handler 
+ * Description: Set up character data handler
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

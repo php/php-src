@@ -1,5 +1,5 @@
 --TEST--
-Test copy() function: usage variations - destination file access perms 
+Test copy() function: usage variations - destination file access perms
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN')

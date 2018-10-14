@@ -1,5 +1,5 @@
 --TEST--
-Hash: hash_file() function : basic functionality 
+Hash: hash_file() function : basic functionality
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--

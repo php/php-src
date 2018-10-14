@@ -1,5 +1,5 @@
 --TEST--
-Test ctype_cntrl() function : basic functionality 
+Test ctype_cntrl() function : basic functionality
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

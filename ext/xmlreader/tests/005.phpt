@@ -1,5 +1,5 @@
 --TEST--
-XMLReader: libxml2 XML Reader, parser property set/get 
+XMLReader: libxml2 XML Reader, parser property set/get
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--

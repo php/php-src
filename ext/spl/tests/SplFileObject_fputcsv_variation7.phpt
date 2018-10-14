@@ -1,5 +1,5 @@
 --TEST--
-Test fputcsv() : usage variations - with different delimiter and same enclosure 
+Test fputcsv() : usage variations - with different delimiter and same enclosure
 --FILE--
 <?php
 
@@ -10,8 +10,8 @@ Test fputcsv() : usage variations - with different delimiter and same enclosure
 
 echo "*** Testing fputcsv() : with different delimiter and same enclosure ***\n";
 
-/* the array is with three elements in it. Each element should be read as 
-   1st element is delimiter, 2nd element is enclosure 
+/* the array is with three elements in it. Each element should be read as
+   1st element is delimiter, 2nd element is enclosure
    and 3rd element is csv fields
 */
 $csv_lists = array (
@@ -57,12 +57,12 @@ foreach ($csv_lists as $csv_list) {
     //close the file
     unset($fo);
 
-    // print the file contents 
+    // print the file contents
     var_dump( file_get_contents($file) );
 
     //delete file
     unlink($file);
-  } //end of mode loop 
+  } //end of mode loop
 } // end of foreach
 
 echo "Done\n";

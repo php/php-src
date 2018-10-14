@@ -1,5 +1,5 @@
 --TEST--
-Test stripslashes() function : usage variations  - non-string type argument 
+Test stripslashes() function : usage variations  - non-string type argument
 --FILE--
 <?php
 /* Prototype  : string stripslashes ( string $str )
@@ -8,7 +8,7 @@ Test stripslashes() function : usage variations  - non-string type argument
 */
 
 /*
- * Test stripslashes() with non-string type argument such as int, float, etc 
+ * Test stripslashes() with non-string type argument such as int, float, etc
 */
 
 echo "*** Testing stripslashes() : with non-string type argument ***\n";

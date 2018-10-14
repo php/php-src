@@ -37,7 +37,7 @@ $loop_counter = 1;
     fwrite($file_handle, "This is line of text without csv fields\n");
 
     // close the file if the mode to be used is read mode  and re-open using read mode
-    // else rewind the file pointer to beginning of the file 
+    // else rewind the file pointer to beginning of the file
     if ( strstr($file_modes[$mode_counter], "r" ) ) {
       fclose($file_handle);
       $file_handle = fopen($filename, $file_modes[$mode_counter]);
@@ -60,7 +60,7 @@ $loop_counter = 1;
     fclose($file_handle);
     //delete file
     unlink($filename);
-  } //end of mode loop 
+  } //end of mode loop
 
 echo "Done\n";
 ?>

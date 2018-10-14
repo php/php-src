@@ -10,7 +10,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --FILE--
 <?php
 /* Prototype  : bool rename(string old_name, string new_name[, resource context])
- * Description: Rename a file 
+ * Description: Rename a file
  * Source code: ext/standard/file.c
  * Alias to functions:
  */
@@ -42,8 +42,8 @@ $allDirs = array(
 
   // relative paths
   $mainDir."\\".$subDir,
-  $mainDir."\\\\".$subDir, 
-   $mainDir."\\\\\\".$subDir, 
+  $mainDir."\\\\".$subDir,
+   $mainDir."\\\\\\".$subDir,
   ".\\".$mainDir."\\..\\".$mainDir."\\".$subDir,
   "BADDIR",
 

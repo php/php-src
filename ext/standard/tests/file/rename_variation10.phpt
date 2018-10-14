@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : bool rename(string old_name, string new_name[, resource context])
- * Description: Rename a file 
+ * Description: Rename a file
  * Source code: ext/standard/file.c
  * Alias to functions:
  */

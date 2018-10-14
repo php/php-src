@@ -19,7 +19,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing vfprintf() : octal formats and non-octal values ***\n";
 
 // defining array of octal formats
-$formats = 
+$formats =
   '%o %+o %-o 
    %lo %Lo %4o %-4o
    %10.4o %-10.4o %.4o 

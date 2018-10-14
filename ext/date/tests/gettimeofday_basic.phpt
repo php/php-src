@@ -1,9 +1,9 @@
 --TEST--
-Test gettimeofday() function : basic functionality 
+Test gettimeofday() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array gettimeofday([bool get_as_float])
- * Description: Returns the current time as array 
+ * Description: Returns the current time as array
  * Source code: ext/standard/microtime.c
  * Alias to functions:
  */

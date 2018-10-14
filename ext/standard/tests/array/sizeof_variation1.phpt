@@ -15,7 +15,7 @@ echo "--- Testing sizeof() for all scalar types in default,COUNT_NORMAL and COUN
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-// array containing all scalar types 
+// array containing all scalar types
 $values = array (
            // int values
   /* 1  */  0,
@@ -32,22 +32,22 @@ $values = array (
   /* 8  */  NULL,
             null,
 
-            // boolean values 
+            // boolean values
   /* 10 */  TRUE,
             FALSE,
             true,
   /* 13 */  false,
 
-            // string data 
+            // string data
   /* 14 */  "",
             '',
             "string",
   /* 17 */  'string',
 
-            // undefined variable 
+            // undefined variable
             @$undefined_var,
 
-            // resource variable 
+            // resource variable
   /* 19 */  $fp
 );
 

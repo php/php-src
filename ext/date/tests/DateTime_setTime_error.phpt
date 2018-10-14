@@ -1,9 +1,9 @@
 --TEST--
-Test DateTime::setTime() function : error conditions 
+Test DateTime::setTime() function : error conditions
 --FILE--
 <?php
 /* Prototype  : public DateTime DateTime::setTime  ( int $hour  , int $minute  [, int $second  ] )
- * Description: Resets the current time of the DateTime object to a different time. 
+ * Description: Resets the current time of the DateTime object to a different time.
  * Source code: ext/date/php_date.c
  * Alias to functions: date_time_set
  */

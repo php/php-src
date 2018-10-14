@@ -1,5 +1,5 @@
 --TEST--
-Curl_multi_getcontent() error test 
+Curl_multi_getcontent() error test
 --CREDITS--
 Rein Velt (rein@velt.org)
 #TestFest Utrecht 20090509

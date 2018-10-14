@@ -3,7 +3,7 @@ Test sizeof() function : usage variations - different array values for 'var' arg
 --FILE--
 <?php
 /* Prototype  : int sizeof($mixed var[, int $mode])
- * Description: Counts an elements in an array. If Standard PHP library is installed, 
+ * Description: Counts an elements in an array. If Standard PHP library is installed,
  * it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
  * Alias to functions: count()
@@ -16,7 +16,7 @@ $fp = fopen(__FILE__, "r");
 
 echo "--- Testing sizeof() with different array values for 'var' argument ---\n";
 
-// array containing different types of array values for 'var' argument 
+// array containing different types of array values for 'var' argument
 $values = array (
   /* 1  */  array($fp, "resource" => $fp),
             array(1, array(3, 4, array(6, array(8)))),
@@ -34,7 +34,7 @@ $values = array (
   /* 14 */  array($fp, "resource1" => $fp, 'resource2' => $fp, array( $fp, 'type' => $fp) )
 );
 
-// loop through each element of the values array for 'var' argument 
+// loop through each element of the values array for 'var' argument
 // check the working of sizeof()
 $counter = 1;
 for($i = 0; $i < count($values); $i++)

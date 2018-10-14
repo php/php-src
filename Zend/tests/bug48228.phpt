@@ -7,7 +7,7 @@ function do_throw() {
 	throw new Exception();
 }
 
-class aa 
+class aa
 {
 	function check()
 	{

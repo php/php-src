@@ -1,5 +1,5 @@
 --TEST--
-Hash: hash() function : error conditions 
+Hash: hash() function : error conditions
 --FILE--
 <?php
 

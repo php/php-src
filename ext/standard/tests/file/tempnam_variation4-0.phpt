@@ -22,7 +22,7 @@ unlink($filename);
 */
 
 /* Trying to create the file in a dir with permissions from 0000 to 0350,
-     Allowable permissions: files are expected to be created in the input dir 
+     Allowable permissions: files are expected to be created in the input dir
      Non-allowable permissions: files are expected to be created in '/tmp' dir
 */
 

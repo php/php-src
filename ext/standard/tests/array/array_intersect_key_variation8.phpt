@@ -3,7 +3,7 @@ Test array_intersect_key() function : usage variation - Passing Multi dimensiona
 --FILE--
 <?php
 /* Prototype  : array array_intersect_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are present in all the other arguments. 
+ * Description: Returns the entries of arr1 that have keys which are present in all the other arguments.
  * Source code: ext/standard/array.c
  */
 
@@ -25,7 +25,7 @@ $array2 = array (
 
       'second' => array('cyan'   => 8),
 
-      'fourth' => array(2 => 'two'), 
+      'fourth' => array(2 => 'two'),
 );
 var_dump( array_intersect_key($array1, $array2) );
 var_dump( array_intersect_key($array2,$array1 ) );

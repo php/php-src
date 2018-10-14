@@ -1,5 +1,5 @@
 --TEST--
-Test posix_getpid() function : error conditions 
+Test posix_getpid() function : error conditions
 --SKIPIF--
 <?php
 	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";

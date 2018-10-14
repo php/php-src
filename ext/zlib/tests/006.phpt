@@ -1,5 +1,5 @@
 --TEST--
-gzdeflate()/gzinflate() and invalid params 
+gzdeflate()/gzinflate() and invalid params
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--

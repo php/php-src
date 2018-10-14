@@ -1,5 +1,5 @@
 --TEST--
-Test date_parse() function : basic functionality 
+Test date_parse() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array date_parse  ( string $date  )
@@ -7,7 +7,7 @@ Test date_parse() function : basic functionality
  * Source code: ext/date/php_date.c
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_parse() : basic functionality ***\n";

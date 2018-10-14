@@ -7,7 +7,7 @@ short_open_tag = on
 
 echo "*** Testing strip_tags() : obscure functionality ***\n";
 
-// array of arguments 
+// array of arguments
 $string_array = array (
   'hello <img title="<"> world',
   'hello <img title=">"> world',

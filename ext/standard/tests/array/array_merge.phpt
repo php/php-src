@@ -26,7 +26,7 @@ $end_array   = array(
   array( "" => "string"),
   array( -2.44444 => 12),
   array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344),
-  array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344), 
+  array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344),
   array( NULL, 1.23 => "Hi", "string" => "hello",
          array("" => "World", "-2.34" => "a", "0" => "b"))
 );
@@ -47,16 +47,16 @@ foreach($begin_array as $first) {
 
 
 echo "\n*** Testing array_merge() with three or more arrays ***\n";
-var_dump( array_merge( $end_array[0], 
-                       $end_array[5], 
+var_dump( array_merge( $end_array[0],
+                       $end_array[5],
                        $end_array[4],
                        $end_array[6]
                      )
         );
 
-var_dump( array_merge( $end_array[0], 
-                       $end_array[5], 
-                       array("array on fly"), 
+var_dump( array_merge( $end_array[0],
+                       $end_array[5],
+                       array("array on fly"),
                        array("nullarray" => array())
                      )
         );

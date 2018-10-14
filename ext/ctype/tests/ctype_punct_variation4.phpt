@@ -5,8 +5,8 @@ Test ctype_punct() function : usage variations - Octal and Hexadecimal values
 --FILE--
 <?php
 /* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace 
- * or an alphanumeric character 
+ * Description: Checks for any printable character which is not whitespace
+ * or an alphanumeric character
  * Source code: ext/ctype/ctype.c
  */
 

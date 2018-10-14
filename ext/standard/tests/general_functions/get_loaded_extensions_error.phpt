@@ -1,5 +1,5 @@
 --TEST--
-Test get_loaded_extensions() function : error conditions 
+Test get_loaded_extensions() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array get_loaded_extensions  ([ bool $zend_extensions= false  ] )

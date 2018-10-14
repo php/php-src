@@ -1,5 +1,5 @@
 --TEST--
-Test gzopen() function : variation: relative/absolute file 
+Test gzopen() function : variation: relative/absolute file
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("zlib")) {
 --FILE--
 <?php
 /* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
- * Description: Open a .gz-file and return a .gz-file pointer 
+ * Description: Open a .gz-file and return a .gz-file pointer
  * Source code: ext/zlib/zlib.c
  * Alias to functions:
  */

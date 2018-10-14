@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - hexa formats with boolean 
+Test fscanf() function: usage variations - hexa formats with boolean
 --FILE--
 <?php
 

@@ -4,7 +4,7 @@ Test flock() function: Error conditions
 <?php
 /*
 Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
-Description: PHP supports a portable way of locking complete files 
+Description: PHP supports a portable way of locking complete files
   in an advisory way
 */
 
@@ -23,7 +23,7 @@ $operations = array(
   array(),
   "string",
   "",
-  "\0" 
+  "\0"
 );
 
 $i = 0;

@@ -1,5 +1,5 @@
 --TEST--
-errmsg: static abstract function 
+errmsg: static abstract function
 --FILE--
 <?php
 

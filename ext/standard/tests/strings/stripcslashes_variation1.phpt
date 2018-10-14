@@ -1,15 +1,15 @@
 --TEST--
-Test stripcslashes() function : usage variations  - non-string type argument 
+Test stripcslashes() function : usage variations  - non-string type argument
 --FILE--
 <?php
 /* Prototype  : string stripcslashes  ( string $str  )
- * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ..., 
+ * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ...,
  *              octal and hexadecimal representation.
  * Source code: ext/standard/string.c
 */
 
 /*
- * Test stripcslashes() with non-string type argument such as int, float, etc 
+ * Test stripcslashes() with non-string type argument such as int, float, etc
 */
 
 echo "*** Testing stripcslashes() : with non-string type argument ***\n";

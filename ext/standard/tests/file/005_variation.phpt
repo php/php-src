@@ -13,12 +13,12 @@ if (getenv("SKIP_SLOW_TESTS")) {
 <?php
 /*
    Prototype: int fileatime ( string $filename );
-   Description: Returns the time the file was last accessed, or FALSE 
+   Description: Returns the time the file was last accessed, or FALSE
      in case of an error. The time is returned as a Unix timestamp.
 
    Prototype: int filemtime ( string $filename );
-   Description: Returns the time the file was last modified, or FALSE 
-     in case of an error. 
+   Description: Returns the time the file was last modified, or FALSE
+     in case of an error.
 
    Prototype: int filectime ( string $filename );
    Description: Returns the time the file was last changed, or FALSE
@@ -48,7 +48,7 @@ function stat_fn( $filename ) {
 
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
 $file_path = dirname(__FILE__);
-// create files 
+// create files
 $file_handle = fopen("$file_path/005_variation1.tmp", "w");
 fclose($file_handle);
 stat_fn("$file_path/005_variation1.tmp");

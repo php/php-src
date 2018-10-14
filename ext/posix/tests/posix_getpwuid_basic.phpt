@@ -1,5 +1,5 @@
 --TEST--
-Test posix_getpwuid() function : basic functionality 
+Test posix_getpwuid() function : basic functionality
 --SKIPIF--
 <?php
 	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');

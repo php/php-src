@@ -1,5 +1,5 @@
 --TEST--
-Test posix_getsid() function : error conditions 
+Test posix_getsid() function : error conditions
 --DESCRIPTION--
 cases: no params, wrong param, wrong param range
 --CREDITS--

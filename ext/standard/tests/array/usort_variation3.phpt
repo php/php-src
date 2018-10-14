@@ -3,7 +3,7 @@ Test usort() function : usage variations - diff. array values
 --FILE--
 <?php
 /* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
@@ -48,7 +48,7 @@ $array_arg = array(
 
   // string keys
   'key' => 5,  //single quoted key
-  "two" => 4,  //double quoted key 
+  "two" => 4,  //double quoted key
   " " => 0,  // space as key
 
   // bool keys

@@ -1,5 +1,5 @@
 --TEST--
-Test DateTimeZone::getTransitions() function : basic functionality 
+Test DateTimeZone::getTransitions() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array DateTimeZone::getTransitions  ()
@@ -10,7 +10,7 @@ Test DateTimeZone::getTransitions() function : basic functionality
 
 echo "*** Testing DateTimeZone::getTransitions() : basic functionality ***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 // Create a DateTimeZone object

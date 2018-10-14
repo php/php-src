@@ -3,7 +3,7 @@ method_exists() on userspace classes; static & non-static methods with various v
 --FILE--
 <?php
 /* Prototype  : proto bool is_subclass_of(object object, string class_name)
- * Description: Returns true if the object has this class as one of its parents 
+ * Description: Returns true if the object has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */

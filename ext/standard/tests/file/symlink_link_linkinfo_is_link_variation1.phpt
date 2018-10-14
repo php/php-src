@@ -23,7 +23,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* Variation 1 : Creating links across directories where linkname is stored as an object and array member */
 
-// creating temp directory which will contain temp file and links created 
+// creating temp directory which will contain temp file and links created
 $file_path = dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation1/test/home";
 mkdir($dirname, 0777, true);

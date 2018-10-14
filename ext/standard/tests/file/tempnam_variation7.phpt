@@ -11,7 +11,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
    Description: Create file with unique file name.
 */
 
-/* Passing invalid/non-existing args for $dir, 
+/* Passing invalid/non-existing args for $dir,
      hence the unique files will be created in temporary dir */
 
 echo "*** Testing tempnam() with invalid/non-existing directory names ***\n";

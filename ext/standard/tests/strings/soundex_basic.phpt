@@ -24,7 +24,7 @@ var_dump(soundex("Lukasiewicz") == soundex("Lissajous")); // L222
 
 var_dump(soundex("Lukasiewicz") == soundex("Ghosh"));
 var_dump(soundex("Hilbert") == soundex("Ladd"));
-?> 
+?>
 ===DONE===
 --EXPECT--
 *** Testing soundex() : basic functionality ***

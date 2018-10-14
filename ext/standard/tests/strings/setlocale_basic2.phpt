@@ -14,14 +14,14 @@ if (setlocale(LC_ALL, "en_US.utf8", "en_AU.utf8", "ko_KR.utf8", "zh_CN.utf8", "d
 /* Prototype  : string setlocale (int $category , string $locale [,string $..] )
               : string setlocale(int $category , array $locale);
  * Description: Sets locale information.Returns the new current locale , or FALSE
-                if locale  functionality is not implemented in this platform. 
+                if locale  functionality is not implemented in this platform.
  * Source code: ext/standard/string.c
 */
 
 /* Test the setlocale() when an array is provided as input containing list of locales */
 
 /* Prototype  : array list_system_locales( void )
- * Description: To get the currently installed locle in this platform 
+ * Description: To get the currently installed locle in this platform
  * Arguments  : Nil
  * Returns    : set of locale as array
 */
@@ -44,7 +44,7 @@ function list_system_locales() {
   return $system_locales;
 }
 
-/* Collect existing system locales and prepare a list of locales that can be used as 
+/* Collect existing system locales and prepare a list of locales that can be used as
    input to setlocale() */
 
 echo "*** Testing setlocale() with an array containing list of locales ***\n";
@@ -91,7 +91,7 @@ foreach($common_locales as $value) {
   }
 }
 
-// Now $list_of_locales array contains the locales that can be passed to 
+// Now $list_of_locales array contains the locales that can be passed to
 // setlocale() function.
 echo "-- Testing setlocale() : 'category' argument as LC_ALL & 'locale' argument as an array --\n";
 if ( count($list_of_locales) > 0 ) {

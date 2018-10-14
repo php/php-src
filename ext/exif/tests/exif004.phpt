@@ -1,5 +1,5 @@
 --TEST--
-Check for exif_read_data, Unicode WinXP tags	
+Check for exif_read_data, Unicode WinXP tags
 --SKIPIF--
 <?php
 	if (!extension_loaded('exif')) die('skip exif extension not available');

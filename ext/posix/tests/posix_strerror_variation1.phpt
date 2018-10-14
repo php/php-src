@@ -8,7 +8,7 @@ Test posix_strerror() function : usage variations
 --FILE--
 <?php
 /* Prototype  : proto string posix_strerror(int errno)
- * Description: Retrieve the system error message associated with the given errno. 
+ * Description: Retrieve the system error message associated with the given errno.
  * Source code: ext/posix/posix.c
  * Alias to functions:
  */

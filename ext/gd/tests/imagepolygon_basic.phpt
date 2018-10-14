@@ -22,7 +22,7 @@ $dest = dirname(realpath(__FILE__)) . '/imagepolygon.png';
 // create a blank image
 $image = imagecreatetruecolor(400, 300);
 
-// set the background color to black 
+// set the background color to black
 $bg = imagecolorallocate($image, 0, 0, 0);
 
 // draw a red polygon

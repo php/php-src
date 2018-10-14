@@ -3,7 +3,7 @@ Test vprintf() function : usage variations - int formats with int values
 --FILE--
 <?php
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 

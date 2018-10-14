@@ -8,7 +8,7 @@ Object serialization / unserialization with inherited and hidden properties.
  * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
  * Alias to functions:
  */
@@ -44,8 +44,8 @@ Class C extends B {
 	public $CPub = "C.CPub";
 
 	function audit() {
-		return parent::audit() && isset($this->APriv, $this->AProt, $this->APub, 
-					 $this->BProt, $this->BPub, 
+		return parent::audit() && isset($this->APriv, $this->AProt, $this->APub,
+					 $this->BProt, $this->BPub,
 					 $this->CPriv, $this->CProt, $this->CPub);
 	}
 }

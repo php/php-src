@@ -3,7 +3,7 @@ Test array_push() function : usage variations - array keys are different data ty
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array 
+ * Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c
  */
 
@@ -51,7 +51,7 @@ $inputs = array(
        // null data
 /*3*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
        'null lowercase' => array(
        null => 'null 2',
        ),

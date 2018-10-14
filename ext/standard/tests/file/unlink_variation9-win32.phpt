@@ -11,7 +11,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /* Prototype  : bool unlink(string filename[, context context])
- * Description: Delete a file 
+ * Description: Delete a file
  * Source code: ext/standard/file.c
  * Alias to functions:
  */
@@ -40,7 +40,7 @@ $files = array(
              $cwd.'\\.\\'.$workDir.'\\'.$tmpFile,
              $cwd.'\\'.$workDir.'\\..\\'.$workDir.'\\'.$tmpFile,
 
-             //absolute bad path             
+             //absolute bad path
              $cwd.'\\BADDIR\\'.$tmpFile,
 
              //trailing separators
@@ -52,7 +52,7 @@ $files = array(
              $cwd.'\\\\'.$workDir.'\\\\'.$tmpFile,
 
              // Unixified File
-             $unixifiedFile,                                      
+             $unixifiedFile,
 
              );
 

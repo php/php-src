@@ -1,5 +1,5 @@
 --TEST--
-Test strspn() function : error conditions 
+Test strspn() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])

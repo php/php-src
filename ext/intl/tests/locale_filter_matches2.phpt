@@ -7,7 +7,7 @@ locale_filter_matches.phpt() icu >= 4.8 && icu < 50.1.2
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 

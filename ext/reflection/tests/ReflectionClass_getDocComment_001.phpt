@@ -11,8 +11,8 @@ opcache.save_comments=1
 
 
 		My
-Doc 
-		* Comment 
+Doc
+		* Comment
 for A
 
 * */

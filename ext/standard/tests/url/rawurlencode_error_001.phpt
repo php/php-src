@@ -1,9 +1,9 @@
 --TEST--
-Test rawurlencode() function : error conditions 
+Test rawurlencode() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto string rawurlencode(string str)
- * Description: URL-encodes string 
+ * Description: URL-encodes string
  * Source code: ext/standard/url.c
  * Alias to functions:
  */

@@ -1,5 +1,5 @@
 --TEST--
-Test nl_langinfo() function : basic functionality 
+Test nl_langinfo() function : basic functionality
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) == 'WIN'){

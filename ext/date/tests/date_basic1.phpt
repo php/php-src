@@ -1,5 +1,5 @@
 --TEST--
-Test date() function : basic functionality 
+Test date() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string date  ( string $format  [, int $timestamp  ] )
@@ -7,7 +7,7 @@ Test date() function : basic functionality
  * Source code: ext/date/php_date.c
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date() : basic functionality ***\n";

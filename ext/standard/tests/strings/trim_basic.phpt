@@ -1,5 +1,5 @@
 --TEST--
-Test trim() function : basic functionality 
+Test trim() function : basic functionality
 --FILE--
 <?php
 

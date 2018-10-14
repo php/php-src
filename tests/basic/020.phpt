@@ -1,5 +1,5 @@
 --TEST--
-POST Method test and arrays - 8 
+POST Method test and arrays - 8
 --POST--
 a[a[]]=1&a[b[]]=3
 --FILE--

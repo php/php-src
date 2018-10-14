@@ -3,8 +3,8 @@ SPL: ArrayObject/Iterator from IteratorAggregate
 --FILE--
 <?php
 
-// This test also needs to exclude the protected and private variables 
-// since they cannot be accessed from the external object which iterates 
+// This test also needs to exclude the protected and private variables
+// since they cannot be accessed from the external object which iterates
 // them.
 
 class test implements IteratorAggregate

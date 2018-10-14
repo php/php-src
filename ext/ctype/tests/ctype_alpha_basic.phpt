@@ -1,5 +1,5 @@
 --TEST--
-Test ctype_alpha() function : basic functionality 
+Test ctype_alpha() function : basic functionality
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

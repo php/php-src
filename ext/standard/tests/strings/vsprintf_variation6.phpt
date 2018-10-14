@@ -3,7 +3,7 @@ Test vsprintf() function : usage variations - float formats with non-float value
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -15,7 +15,7 @@ Test vsprintf() function : usage variations - float formats with non-float value
 echo "*** Testing vsprintf() : float formats and non-float values ***\n";
 
 // defining array of float formats
-$formats = 
+$formats =
   '%f %+f %-f 
    %lf %Lf %4f %-4f
    %10.4f %-10.4f %04f %04.4f

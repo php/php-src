@@ -80,8 +80,8 @@ function ut_main()
 
 			$str_hex = urlencode($str);
 			$str_norm_hex = urlencode($str_norm);
-			$res_str .= "'$str_hex' normalized to form '{$forms_str[$form]}' is '$str_norm_hex'" 
-					 .	"\terror info: '$error_message' ($error_code)\n" 
+			$res_str .= "'$str_hex' normalized to form '{$forms_str[$form]}' is '$str_norm_hex'"
+					 .	"\terror info: '$error_message' ($error_code)\n"
 					 .	"";
 
 			$is_norm = ut_norm_is_normalized( $str, $form );

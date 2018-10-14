@@ -1,9 +1,9 @@
 --TEST--
-Test rsort() function : basic functionality 
+Test rsort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order 
+ * Description: Sort an array in reverse order
  * Source code: ext/standard/array.c
  */
 
@@ -13,7 +13,7 @@ Test rsort() function : basic functionality
 
 echo "*** Testing rsort() : basic functionality ***\n";
 
-// associative array containing unsorted string values  
+// associative array containing unsorted string values
 $unsorted_strings = array(
 	"l" => "lemon", "o" => "orange",
 	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",

@@ -23,17 +23,17 @@ $ending = "):(";
 $values = array(
   '',  //empty
   ' ',  //space
-  'This is simple string',  //regular string                                   
+  'This is simple string',  //regular string
   'It\'s string with quotes',
-  'This contains @ # $ % ^ & chars',   //special characters                   
-  'This string\tcontains\rwhite space\nchars',  //with white space chars      
+  'This contains @ # $ % ^ & chars',   //special characters
+  'This string\tcontains\rwhite space\nchars',  //with white space chars
   'This is string with 1234 numbers',
-  'This is string with \0 and ".chr(0)."null chars',  //for binary safe 
+  'This is string with \0 and ".chr(0)."null chars',  //for binary safe
   'This is string with    multiple         space char',
   'This is to check string with ()',
   '     Testing with    multiple spaces     ',
   'Testing invalid \k and \m escape char',
-  'This is to check with \\n and \\t'                     
+  'This is to check with \\n and \\t'
 );
 
 

@@ -62,7 +62,7 @@ foreach($file_content_types as $file_content_type) {
    clearstatcache(); // clear previous size value in cache
    var_dump( filesize($filename) ); // check the file size, should be 0
 
-   //delete all files created 
+   //delete all files created
    delete_file($filename);
  } //end of inner for loop
 }//end of outer foreach loop

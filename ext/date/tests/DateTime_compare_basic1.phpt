@@ -5,7 +5,7 @@ Test of compare object handler for DateTime objects
 
 echo "Simple test for DateTime compare object handler\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 class DateTimeExt1 extends DateTime {

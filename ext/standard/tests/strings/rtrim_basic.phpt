@@ -1,5 +1,5 @@
 --TEST--
-Test rtrim() function : basic functionality 
+Test rtrim() function : basic functionality
 --FILE--
 <?php
 

@@ -3,13 +3,13 @@ Test sprintf() function : usage variations - octal formats with boolean values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : octal formats with boolean values ***\n";
 
-// array of boolean values 
+// array of boolean values
 $boolean_values = array(
   true,
   false,

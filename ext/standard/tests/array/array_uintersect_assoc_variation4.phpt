@@ -1,5 +1,5 @@
 --TEST--
-Test array_uintersect_assoc() function : usage variation 
+Test array_uintersect_assoc() function : usage variation
 --FILE--
 <?php
 /* Prototype  : array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func)

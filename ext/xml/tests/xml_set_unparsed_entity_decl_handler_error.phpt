@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_unparsed_entity_decl_handler(resource parser, string hdl)
- * Description: Set up unparsed entity declaration handler 
+ * Description: Set up unparsed entity declaration handler
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

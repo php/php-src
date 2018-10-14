@@ -9,7 +9,7 @@ $adata = str_getcsv($csv,";");
 $b2 = basename($filename);
 if ($filename != $b2)
 	print "BUG";
-else 
+else
 	print "OKEY";
 --EXPECT--
 OKEY

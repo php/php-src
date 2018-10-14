@@ -1,5 +1,5 @@
 --TEST--
-errmsg: __destruct() cannot take arguments 
+errmsg: __destruct() cannot take arguments
 --FILE--
 <?php
 

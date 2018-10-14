@@ -1,5 +1,5 @@
 --TEST--
-Test ctype_space() function : basic functionality 
+Test ctype_space() function : basic functionality
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

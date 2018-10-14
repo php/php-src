@@ -1,5 +1,5 @@
 --TEST--
-Test fopen() for reading cp1256 to UTF-8 path 
+Test fopen() for reading cp1256 to UTF-8 path
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";

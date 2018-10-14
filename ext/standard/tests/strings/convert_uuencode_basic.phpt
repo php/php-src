@@ -1,5 +1,5 @@
 --TEST--
-Test convert_uuencode() function : basic functionality 
+Test convert_uuencode() function : basic functionality
 --FILE--
 <?php
 
@@ -39,7 +39,7 @@ foreach($strings as $string) {
 
 
 ?>
-===DONE=== 
+===DONE===
 --EXPECTF--
 *** Testing convert_uuencode() : basic functionality ***
 -- Iteration 1 --

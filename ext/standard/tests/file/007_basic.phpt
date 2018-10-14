@@ -3,7 +3,7 @@ Test fopen(), fclose() & feof() functions: basic functionality
 --FILE--
 <?php
 /*
- Prototype: resource fopen(string $filename, string $mode 
+ Prototype: resource fopen(string $filename, string $mode
                             [, bool $use_include_path [, resource $context]] );
  Description: Opens file or URL.
 

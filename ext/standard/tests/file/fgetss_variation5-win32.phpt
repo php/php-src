@@ -1,5 +1,5 @@
 --TEST--
-Test fgetss() function : usage variations - read/write modes, file pointer at EOF 
+Test fgetss() function : usage variations - read/write modes, file pointer at EOF
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
@@ -73,10 +73,10 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   var_dump( feof($file_handle) );   // ensure that file pointer is at eof
 
 
-  // close the file 
+  // close the file
   fclose($file_handle);
 
-  // delete the file 
+  // delete the file
   unlink($filename);
 } // end of for - mode_counter
 

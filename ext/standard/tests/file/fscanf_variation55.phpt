@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - tracking file pointer while reading 
+Test fscanf() function: usage variations - tracking file pointer while reading
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {
@@ -34,7 +34,7 @@ $valid_data = array(
   12345,            // integer value
   -12345,
   123.45,	    // float value
-  -123.45,	   
+  -123.45,
   0x123B,           // hexadecimal value
   0x12ab,
   0123,             // octal value
@@ -42,7 +42,7 @@ $valid_data = array(
   "abcde",          // string
   'abcde',
   10e3,             // exponential value
-  10e-3           
+  10e-3
 );
 // various formats
 $int_formats = array( "%d", "%f", "%s", "%o", "%x", "%u", "%c", "%e");

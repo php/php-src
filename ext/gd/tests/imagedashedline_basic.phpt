@@ -22,7 +22,7 @@ $dest = dirname(realpath(__FILE__)) . '/imagedashedline.png';
 // create a blank image
 $image = imagecreatetruecolor(250, 250);
 
-// set the background color to black 
+// set the background color to black
 $bg = imagecolorallocate($image, 0, 0, 0);
 
 // red dashed lines

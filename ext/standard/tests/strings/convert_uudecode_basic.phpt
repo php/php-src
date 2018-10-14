@@ -1,5 +1,5 @@
 --TEST--
-Test convert_uudecode() function : basic functionality 
+Test convert_uudecode() function : basic functionality
 --FILE--
 <?php
 
@@ -47,7 +47,7 @@ foreach($strings as $string) {
 echo "TEST PASSED\n";
 
 ?>
-===DONE=== 
+===DONE===
 --EXPECT--
 *** Testing convert_uudecode() : basic functionality ***
 TEST PASSED

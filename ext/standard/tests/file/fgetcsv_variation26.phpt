@@ -11,8 +11,8 @@ Test fgetcsv() : usage variations - reading files opened in write only mode (Bug
 
 echo "*** Testing fgetcsv() : reading the files opened in write only mode ***\n";
 
-/* the array is with three elements in it. Each element should be read as 
-   1st element is delimiter, 2nd element is enclosure 
+/* the array is with three elements in it. Each element should be read as
+   1st element is delimiter, 2nd element is enclosure
    and 3rd element is csv fields
 */
 $csv_lists = array (
@@ -61,7 +61,7 @@ foreach ($csv_lists as $csv_list) {
 
     // call fgetcsv() to parse csv fields
 
-    // use the right delimiter and enclosure with max length 
+    // use the right delimiter and enclosure with max length
     var_dump( fgetcsv($file_handle, 1024, $delimiter, $enclosure) );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
@@ -71,7 +71,7 @@ foreach ($csv_lists as $csv_list) {
     fclose($file_handle);
     //delete file
     unlink($filename);
-  } //end of mode loop 
+  } //end of mode loop
 } // end of foreach
 
 echo "Done\n";

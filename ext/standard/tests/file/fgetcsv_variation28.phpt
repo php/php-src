@@ -8,14 +8,14 @@ Test fgetcsv() : usage variations - with negative length value along with neithe
 */
 
 /*
-   Testing fgetcsv() to read from a file when provided with negative length argument 
+   Testing fgetcsv() to read from a file when provided with negative length argument
    along with neither delimiter nor enclosure argument
 */
 
 echo "*** Testing fgetcsv() : with negative length value ***\n";
 
-/* the array is with three elements in it. Each element should be read as 
-   1st element is delimiter, 2nd element is enclosure 
+/* the array is with three elements in it. Each element should be read as
+   1st element is delimiter, 2nd element is enclosure
    and 3rd element is csv fields
 */
 $csv_lists = array (
@@ -62,7 +62,7 @@ foreach ($csv_lists as $csv_list) {
     fwrite($file_handle, "\n"); // blank line
 
     // close the file if the mode to be used is read mode  and re-open using read mode
-    // else rewind the file pointer to beginning of the file 
+    // else rewind the file pointer to beginning of the file
     if ( strstr($file_modes[$mode_counter], "r" ) ) {
       fclose($file_handle);
       $file_handle = fopen($filename, $file_modes[$mode_counter]);
@@ -75,7 +75,7 @@ foreach ($csv_lists as $csv_list) {
 
     // call fgetcsv() to parse csv fields
 
-    // use the right delimiter and enclosure with negative length 
+    // use the right delimiter and enclosure with negative length
     var_dump( fgetcsv($file_handle, -10) );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
@@ -85,7 +85,7 @@ foreach ($csv_lists as $csv_list) {
     fclose($file_handle);
     //delete file
     unlink($filename);
-  } //end of mode loop 
+  } //end of mode loop
 } // end of foreach
 
 echo "Done\n";

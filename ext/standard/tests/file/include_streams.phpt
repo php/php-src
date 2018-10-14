@@ -8,7 +8,7 @@ $data1 = $data2 = $data3 = $data4 = $data5 = $data6 = <<<'EOD'
 EOD;
 /*<?*/
 
-class mystream 
+class mystream
 {
 	public $path;
 	public $mode;
@@ -32,7 +32,7 @@ class mystream
 		$this->options = $options;
 
 		$split = parse_url($path);
-		if ($split["host"] !== "GLOBALS" || 
+		if ($split["host"] !== "GLOBALS" ||
 		    empty($split["path"]) ||
 		    empty($GLOBALS[substr($split["path"],1)])) {
 		    return false;

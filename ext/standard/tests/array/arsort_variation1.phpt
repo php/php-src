@@ -4,7 +4,7 @@ Test arsort() function : usage variations - unexpected values for 'array_arg' ar
 <?php
 /* Prototype  : bool arsort(array &array_arg [, int sort_flags])
  * Description: Sort an array and maintain index association
-                Elements will be arranged from highest to lowest when this function has completed. 
+                Elements will be arranged from highest to lowest when this function has completed.
  * Source code: ext/standard/array.c
 */
 

@@ -3,7 +3,7 @@ Test get_class() function : error conditions - wrong number of arguments.
 --FILE--
 <?php
 /* Prototype  : proto string get_class([object object])
- * Description: Retrieves the class name 
+ * Description: Retrieves the class name
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */

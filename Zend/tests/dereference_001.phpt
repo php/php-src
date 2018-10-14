@@ -12,7 +12,7 @@ var_dump(a()[1][0]); // int(5)
 function b() {
 	return array();
 }
-var_dump(b()[0]); // Notice: Undefined offset: 0 
+var_dump(b()[0]); // Notice: Undefined offset: 0
 
 class foo {
 	public $y = 1;

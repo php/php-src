@@ -1,9 +1,9 @@
 --TEST--
-Test sleep() function : error conditions 
+Test sleep() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int sleep  ( int $seconds  )
- * Description: Delays the program execution for the given number of seconds . 
+ * Description: Delays the program execution for the given number of seconds .
  * Source code: ext/standard/basic_functions.c
  */
  set_time_limit(20);

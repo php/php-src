@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "w+" mode 
+Test fopen and fclose() functions - usage variations - "w+" mode
 --FILE--
 <?php
 /*

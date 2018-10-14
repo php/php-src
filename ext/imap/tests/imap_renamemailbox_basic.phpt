@@ -1,5 +1,5 @@
 --TEST--
-imap_renamemailbox() function : basic functionality 
+imap_renamemailbox() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--

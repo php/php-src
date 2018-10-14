@@ -1,5 +1,5 @@
 --TEST--
-openssl_sign/verify: accept different algos 
+openssl_sign/verify: accept different algos
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) die("skip");

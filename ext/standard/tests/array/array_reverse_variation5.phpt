@@ -53,11 +53,11 @@ $arrays = array (
 
        // arrays with string values
        array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "pen\n"),
-/*8*/  array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  'pen\n'), 
+/*8*/  array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  'pen\n'),
        array(1 => "hello", "heredoc" => $heredoc),
 
        // array with object, unset variable and resource variable
-       array(11 => new classA(), "unset" => @$unset_var, "resource" => $fp), 
+       array(11 => new classA(), "unset" => @$unset_var, "resource" => $fp),
 
        // array with mixed values
 /*11*/ array(1 => 'hello', 2 => new classA(), 222 => "fruit", 'resource' => $fp, "int" => 133, "float" => 444.432, "unset" => @$unset_var, "heredoc" => $heredoc)

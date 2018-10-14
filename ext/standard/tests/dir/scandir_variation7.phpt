@@ -18,7 +18,7 @@ unlink($filename);
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 

@@ -33,14 +33,14 @@ $file_paths = array (
   array("bar.zip", "bar.zip"),
   array("\\foo\\bar.zip", ".zip"),
   array("foo\\bar.zip", ".zip"),
-  array("\\bar.zip", ".zip"),  
+  array("\\bar.zip", ".zip"),
 
   /* paths with suffix and trailing slashes with suffix removal*/
   array("bar.zip\\", ".zip"),
   array("\\bar.zip\\", ".zip"),
   array("\\foo\\bar.zip\\", ".zip"),
   array("foo\\bar.zip\\", ".zip"),
-  array("\\bar.zip\\", ".zip"),  
+  array("\\bar.zip\\", ".zip"),
 
   /* paths with basename only suffix, with suffix removal*/
   array("\\.zip", ".zip"),
@@ -116,13 +116,13 @@ echo "\n*** Testing possible variations in path and suffix ***\n";
 check_basename( $file_path_variations );
 
 echo "\n*** Testing error conditions ***\n";
-// zero arguments 
+// zero arguments
 var_dump( basename() );
 
 // more than expected no. of arguments
 var_dump( basename("\\blah\\tmp\\bar.zip", ".zip", ".zip") );
 
-// passing invalid type arguments 
+// passing invalid type arguments
 $object = new stdclass;
 var_dump( basename( array("string\\bar") ) );
 var_dump( basename( array("string\\bar"), "bar" ) );

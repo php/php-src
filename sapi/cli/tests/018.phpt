@@ -1,5 +1,5 @@
 --TEST--
-CLI php -m 
+CLI php -m
 --SKIPIF--
 <?php
 include "skipif.inc";

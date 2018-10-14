@@ -1,5 +1,5 @@
 --TEST--
-Test lchown() function : error functionality 
+Test lchown() function : error functionality
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip no windows support');

@@ -1,5 +1,5 @@
 --TEST--
-Test addslashes() function : usage variations  - non-string type argument 
+Test addslashes() function : usage variations  - non-string type argument
 --FILE--
 <?php
 /* Prototype  : string addslashes ( string $str )
@@ -8,7 +8,7 @@ Test addslashes() function : usage variations  - non-string type argument
 */
 
 /*
- * Test addslashes() with non-string type argument such as int, float, etc 
+ * Test addslashes() with non-string type argument such as int, float, etc
 */
 
 echo "*** Testing addslashes() : with non-string type argument ***\n";

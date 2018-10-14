@@ -1,5 +1,5 @@
 --TEST--
-Test curl_copy_handle() function with basic functionality 
+Test curl_copy_handle() function with basic functionality
 --CREDITS--
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20

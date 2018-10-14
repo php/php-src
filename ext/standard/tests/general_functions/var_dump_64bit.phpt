@@ -41,7 +41,7 @@ $integers = array (
   017777777777,  // max posotive octal integer
   -020000000000  // min range of octal integer
 );
-/* calling check_vardump() to display contents of integer variables 
+/* calling check_vardump() to display contents of integer variables
    using var_dump() */
 check_vardump($integers);
 
@@ -78,9 +78,9 @@ $floats = array (
   -0x80000001,  // float value, beyond max negative int
   0x80000001,  // float value, beyond max positive int
   020000000001,  // float value, beyond max positive int
-  -020000000001  // float value, beyond max negative int 
+  -020000000001  // float value, beyond max negative int
 );
-/* calling check_vardump() to display contents of float variables 
+/* calling check_vardump() to display contents of float variables
    using var_dump() */
 check_vardump($floats);
 
@@ -101,7 +101,7 @@ $strings = array (
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
   "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
 );
-/* calling check_vardump() to display contents of strings 
+/* calling check_vardump() to display contents of strings
    using var_dump() */
 check_vardump($strings);
 
@@ -271,7 +271,7 @@ $misc_values = array (
 check_vardump($misc_values);
 
 echo "\n*** Testing var_dump() on multiple arguments ***\n";
-var_dump( $integers, $floats, $strings, $arrays, $booleans, $resources, 
+var_dump( $integers, $floats, $strings, $arrays, $booleans, $resources,
           $objects, $misc_values, $variations );
 
 /* checking var_dump() on functions */

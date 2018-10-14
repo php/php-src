@@ -2,11 +2,11 @@
 Test array_key_exists() function
 --FILE--
 <?php
-/* Prototype: 
+/* Prototype:
  *  bool array_key_exists ( mixed $key, array $search );
  * Description:
- *  Returns TRUE if the given key is set in the array. 
- *  key can be any value possible for an array index. 
+ *  Returns TRUE if the given key is set in the array.
+ *  key can be any value possible for an array index.
  *  Also also works on objects.
  */
 
@@ -22,7 +22,7 @@ $search_arrays = array(
            array(0 => 'Zero', 1 => 'One', 2 => 'Two', 3 => "Three" ),
            array(0.1 => 'Zero', 1.1 => 'One', 2.2 => 'Two', 3.3 => "Three" )
           );
-/* keys to search in $search_arrays. $keys[0] 
+/* keys to search in $search_arrays. $keys[0]
    is the key to be searched in $search_arrays[0] and so on */
 $keys = array( 1, 'a', 2, 4, "Name", "Red", 0, 3 );
 
@@ -48,7 +48,7 @@ foreach ($search_arrays as $search_array) {
     var_dump( array_key_exists($key, $search_array) );
   }
 }
-// arrays with variation in elements  
+// arrays with variation in elements
 $search_arrays_v = array (
                      array(),
                      array(NULL),
@@ -71,7 +71,7 @@ foreach ($search_arrays_v as $search_array) {
 echo "\n*** Testing error conditions ***\n";
 //Zeor args
 var_dump( array_key_exists() );
-// first args as array 
+// first args as array
 var_dump( array_key_exists(array(), array()) );
 // second args as string
 var_dump( array_key_exists("", "") );
@@ -83,9 +83,9 @@ var_dump( array_key_exists(1, NULL) );
 var_dump( array_key_exists(1, true) );
 // first args as boolean
 var_dump( array_key_exists(false, true) );
-// second args as float 
+// second args as float
 var_dump( array_key_exists(false, 17.5) );
-// args more than expected 
+// args more than expected
 var_dump( array_key_exists(1, array(), array()) );
 // first argument as floating point value
 var_dump( array_key_exists(17.5, array(1,23) ) ) ;

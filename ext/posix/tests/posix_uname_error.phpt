@@ -1,5 +1,5 @@
 --TEST--
-Test posix_uname() function : error conditions 
+Test posix_uname() function : error conditions
 --SKIPIF--
 <?php
 	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";

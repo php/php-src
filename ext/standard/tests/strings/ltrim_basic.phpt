@@ -1,5 +1,5 @@
 --TEST--
-Test ltrim() function : basic functionality 
+Test ltrim() function : basic functionality
 --FILE--
 <?php
 

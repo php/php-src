@@ -1,11 +1,11 @@
 --TEST--
-Test ctype_xdigit() function : basic functionality 
+Test ctype_xdigit() function : basic functionality
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_xdigit(mixed $c)
- * Description: Checks for character(s) representing a hexadecimal digit 
+ * Description: Checks for character(s) representing a hexadecimal digit
  * Source code: ext/ctype/ctype.c
  */
 

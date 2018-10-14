@@ -16,8 +16,8 @@ function startHandler($parser,$tag,$attr)
 }
 
 function endHandler($parser,$tag)
-{ 
-	var_dump($tag); 
+{
+	var_dump($tag);
 }
 
 $xmldata = '<?xml version="1.0" encoding="ISO-8859-1"?><äöü üäß="Üäß">ÄÖÜ</äöü>';

@@ -1,5 +1,5 @@
 --TEST--
-Test parse_str() function : basic functionality 
+Test parse_str() function : basic functionality
 --FILE--
 <?php
 

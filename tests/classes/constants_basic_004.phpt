@@ -1,5 +1,5 @@
 --TEST--
-Test properties with array default values using class constants as keys and values. 
+Test properties with array default values using class constants as keys and values.
 --FILE--
 <?php
   class X
@@ -21,7 +21,7 @@ Test properties with array default values using class constants as keys and valu
 
   class C extends B
   {
-      // Static and instance array using class constants with parent 
+      // Static and instance array using class constants with parent
       public static $sa_c_parent = array(parent::KEY => parent::VALUE);
       public $a_c_parent = array(parent::KEY => parent::VALUE);
 

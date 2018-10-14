@@ -10,7 +10,7 @@ ob_start();
 /*
  * Prototype : void session_unset(void)
  * Description : Free all session variables
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_unset() : error functionality ***\n";

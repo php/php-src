@@ -9,7 +9,7 @@ function_exists('iconv_get_encoding') or die("skip iconv_get_encoding() is not a
 <?php
 /* Prototype  : mixed iconv_get_encoding([string type])
  * Description: Get internal encoding and output encoding for ob_iconv_handler()
- * Source code: ext/iconv/iconv.c 
+ * Source code: ext/iconv/iconv.c
  */
 
 /*

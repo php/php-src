@@ -1,5 +1,5 @@
 --TEST--
-Test date_timezone_set() function : error conditions 
+Test date_timezone_set() function : error conditions
 --FILE--
 <?php
 /* Prototype  : DateTime date_timezone_set  ( DateTime $object  , DateTimeZone $timezone  )

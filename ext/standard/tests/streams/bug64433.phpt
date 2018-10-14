@@ -27,7 +27,7 @@ foreach($codes as $code) {
 echo "follow=0\n";
 $arr = array('http'=>
                         array(
-                                'follow_location'=>0,	
+                                'follow_location'=>0,
                         )
                 );
 $context = stream_context_create($arr);
@@ -37,7 +37,7 @@ foreach($codes as $code) {
 echo "follow=1\n";
 $arr = array('http'=>
                         array(
-                                'follow_location'=>1,	
+                                'follow_location'=>1,
                         )
                 );
 $context = stream_context_create($arr);

@@ -1,9 +1,9 @@
 --TEST--
-Test asort() function : usage variations - sort octal values 
+Test asort() function : usage variations - sort octal values
 --FILE--
 <?php
 /* Prototype  : bool asort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association. 
+ * Description: Sort an array and maintain index association.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */

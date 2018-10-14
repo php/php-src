@@ -1,5 +1,5 @@
 --TEST--
-Test ord() function : basic functionality 
+Test ord() function : basic functionality
 --FILE--
 <?php
 

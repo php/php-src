@@ -1,15 +1,15 @@
 --TEST--
-Test arsort() function : object functionality - sort objects  
+Test arsort() function : object functionality - sort objects
 --FILE--
 <?php
 /* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association.  
+ * Description: Sort an array and maintain index association.
                 Elements will be arranged from highest to lowest when this function has completed.
  * Source code: ext/standard/array.c
 */
 
 /*
- * testing arsort() by providing integer/string object arrays with following flag values 
+ * testing arsort() by providing integer/string object arrays with following flag values
  * 1. Defualt flag value
  * 2. SORT_REGULAR - compare items normally
 */

@@ -1,5 +1,5 @@
 --TEST--
-Test date_timezone_get() function : basic functionality 
+Test date_timezone_get() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : DateTimeZone date_timezone_get  ( DateTime $object  )

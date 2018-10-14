@@ -1,5 +1,5 @@
 --TEST--
-Test long2ip() function : usage variation 
+Test long2ip() function : usage variation
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
@@ -8,7 +8,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 --FILE--
 <?php
 /* Prototype  : string long2ip(int proper_address)
- * Description: Converts an (IPv4) Internet network address into a string in Internet standard dotted format 
+ * Description: Converts an (IPv4) Internet network address into a string in Internet standard dotted format
  * Source code: ext/standard/basic_functions.c
  * Alias to functions:
  */
@@ -99,7 +99,7 @@ $inputs = array(
       'unset var' => @$unset_var,
 
       // resource
-      'resource' => $res,      
+      'resource' => $res,
 );
 
 // loop through each element of the array for proper_address

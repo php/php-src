@@ -3,7 +3,7 @@ Test key() function : usage variations - Pass different data types as $array_arg
 --FILE--
 <?php
 /* Prototype  : mixed key(array $array_arg)
- * Description: Return the key of the element currently pointed to by the internal array pointer 
+ * Description: Return the key of the element currently pointed to by the internal array pointer
  * Source code: ext/standard/array.c
  */
 

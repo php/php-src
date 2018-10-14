@@ -8,8 +8,8 @@ Test strtr() function : usage variations - unexpected inputs for 'to' argument
  * Source code: ext/standard/string.c
 */
 
-/* Test strtr() function: with unexpected inputs for 'to' 
- *  and expected types for 'str' & 'from' arguments 
+/* Test strtr() function: with unexpected inputs for 'to'
+ *  and expected types for 'str' & 'from' arguments
 */
 
 echo "*** Testing strtr() function: with unexpected inputs for 'to' ***\n";

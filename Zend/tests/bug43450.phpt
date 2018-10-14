@@ -5,7 +5,7 @@ opcache.enable_cli=0
 --FILE--
 <?php
 
-class Foo 
+class Foo
 {
     public function __toString()
 	{

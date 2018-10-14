@@ -2,10 +2,10 @@
 Test clone of DateTime derived objects with __clone magic method
 --FILE--
 <?php
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 class DateTimeExt1 extends DateTime {

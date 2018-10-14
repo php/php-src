@@ -1,14 +1,14 @@
 --TEST--
-Test DateTime::modify() function : basic functionality 
+Test DateTime::modify() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : public DateTime DateTime::modify  ( string $modify  )
- * Description: Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime(). 
+ * Description: Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime().
  * Source code: ext/date/php_date.c
  * Alias to functions: public date_modify()
  */
 
- //Set the default time zone 
+ //Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing DateTime::modify() : basic functionality ***\n";

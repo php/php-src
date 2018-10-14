@@ -1,5 +1,5 @@
 --TEST--
-XMLReader: libxml2 XML Reader, DTD 
+XMLReader: libxml2 XML Reader, DTD
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--

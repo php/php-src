@@ -1,9 +1,9 @@
 --TEST--
-Test trait_exists() function : basic functionality 
+Test trait_exists() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto bool trait_exists(string traitname [, bool autoload])
- * Description: Checks if the trait exists 
+ * Description: Checks if the trait exists
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */

@@ -1,5 +1,5 @@
 --TEST--
-Test imap_body() function : basic functionality 
+Test imap_body() function : basic functionality
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__).'/skipif.inc');

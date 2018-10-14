@@ -3,13 +3,13 @@ Test sprintf() function : usage variations - string formats with float values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : string formats with float values ***\n";
 
-// array of float values 
+// array of float values
 $float_values = array(
   -2147483649,
   2147483648,

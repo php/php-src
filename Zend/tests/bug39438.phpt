@@ -22,9 +22,9 @@ $test2=array(
         	                  'typo3' =>'',
         	                  'php' =>'',
         	                  'cms' => ''
-        	           ),        	
-        	          'conflicts' => array('' =>'')        	
-        	    ),        	
+        	           ),
+        	          'conflicts' => array('' =>'')
+        	    ),
         	  	'authorname' => 'Mirko Balluff',
         	  	'authoremail' => 'balluff@amt1.de',
         	  	'ownerusername' => 'amt1',

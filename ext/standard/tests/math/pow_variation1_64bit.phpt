@@ -69,7 +69,7 @@ $inputs = array(
        $heredoc,
 
        // object data
-/*23*/ new classA(),       
+/*23*/ new classA(),
 
        // undefined data
 /*24*/ @$undefined_var,

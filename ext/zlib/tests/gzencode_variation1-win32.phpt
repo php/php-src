@@ -14,7 +14,7 @@ if (!extension_loaded("zlib")) {
 --FILE--
 <?php
 /* Prototype  : string gzencode  ( string $data  [, int $level  [, int $encoding_mode  ]] )
- * Description: Gzip-compress a string 
+ * Description: Gzip-compress a string
  * Source code: ext/zlib/zlib.c
  * Alias to functions:
  */

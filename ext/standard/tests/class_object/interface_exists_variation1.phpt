@@ -1,9 +1,9 @@
 --TEST--
-Test interface_exists() function : usage variation 
+Test interface_exists() function : usage variation
 --FILE--
 <?php
 /* Prototype  : bool interface_exists(string classname [, bool autoload])
- * Description: Checks if the class exists 
+ * Description: Checks if the class exists
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */

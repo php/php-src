@@ -41,12 +41,12 @@ foreach($src_filenames as $src_filename) {
   $dest_filename = "$file_path/rename_variation2.tmp";
   var_dump( rename($src_filename, $dest_filename) );
 
-  // ensure that file got renamed to new name 
+  // ensure that file got renamed to new name
   var_dump( file_exists($src_filename) );  // expecting false
   var_dump( file_exists($dest_filename) );  // expecting true
   $counter++;
 
-  // unlink the file  
+  // unlink the file
   unlink($dest_filename);
 }
 

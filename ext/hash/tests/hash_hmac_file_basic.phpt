@@ -28,7 +28,7 @@ if (is_writable($file)) {
   }
 }
 
-// close the files 
+// close the files
 fclose($fp);
 
 $key = 'secret';

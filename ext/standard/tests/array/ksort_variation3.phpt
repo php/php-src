@@ -3,7 +3,7 @@ Test ksort() function : usage variations - sort integer/float values
 --FILE--
 <?php
 /* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation 
+ * Description: Sort an array by key, maintaining key to data correlation
  * Source code: ext/standard/array.c
 */
 
@@ -23,7 +23,7 @@ $various_arrays = array(
   array(1 => 11, -2 => -11, 3 => 21, -4 => -21, 5 => 31, -6 => -31, 7 => 0, 8 => 41, -10 =>-41),
 
   // float key values
-  array(1.0 => 10.5, 0.2 => -10.5, 3.1 => 10.5e2, 4 => 10.6E-2, .5 => .5, 6 => .0001, -7 => -.1), 
+  array(1.0 => 10.5, 0.2 => -10.5, 3.1 => 10.5e2, 4 => 10.6E-2, .5 => .5, 6 => .0001, -7 => -.1),
 
   // mixed value array with different types of keys
   array(1 => .0001, 2 => .0021, -3 => -.01, 4 => -1, 5 => 0, 6 => .09, 7 => 2, -8 => -.9,

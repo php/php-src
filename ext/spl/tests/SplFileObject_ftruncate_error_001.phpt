@@ -1,5 +1,5 @@
 --TEST--
-SplFileObject::ftruncate function - truncating with stream that does not support truncation 
+SplFileObject::ftruncate function - truncating with stream that does not support truncation
 --FILE--
 <?php
 

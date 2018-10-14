@@ -1,18 +1,18 @@
 --TEST--
-Test uasort() function : object functionality - sort diff. objects 
+Test uasort() function : object functionality - sort diff. objects
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 *
 
 /*
  * This testcase tests uasort() functionality with different objects
- * Objects of different classes: 
+ * Objects of different classes:
  *  simple class,
  *  child class,
- *  empty class & 
+ *  empty class &
  *  static class
  */
 

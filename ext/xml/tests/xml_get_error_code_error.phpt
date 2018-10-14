@@ -1,5 +1,5 @@
 --TEST--
-Test xml_get_error_code() function : error conditions 
+Test xml_get_error_code() function : error conditions
 --SKIPIF--
 <?php
 if (!extension_loaded("xml")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_get_error_code(resource parser)
- * Description: Get XML parser error code 
+ * Description: Get XML parser error code
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

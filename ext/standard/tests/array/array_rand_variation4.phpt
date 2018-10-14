@@ -1,9 +1,9 @@
 --TEST--
-Test array_rand() function : usage variation - with associative arrays for 'input' parameter 
+Test array_rand() function : usage variation - with associative arrays for 'input' parameter
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array $input [, int $num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
@@ -29,7 +29,7 @@ $asso_arrays = array(
        // array with hexa values as keys
 /*3*/  array(0xabc => 2748, 0x12f => '303', 0xff => "255", -0xff => "-255"),
 
-       // array with octal values as keys 
+       // array with octal values as keys
        array(0123 => 83, 012 => 10, 010 => "8", -034 => "-28", 0012 => '10'),
 
        // array with bool values as keys

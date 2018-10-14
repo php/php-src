@@ -8,7 +8,7 @@ function_exists('mb_substr_count') or die("skip mb_substr_count() is not availab
 --FILE--
 <?php
 /* Prototype  : int mb_substr_count(string $haystack, string $needle [, string $encoding])
- * Description: Count the number of substring occurrences 
+ * Description: Count the number of substring occurrences
  * Source code: ext/mbstring/mbstring.c
  */
 

@@ -1,5 +1,5 @@
 --TEST--
-Test fflush() function: usage variations - file opened in read-only mode 
+Test fflush() function: usage variations - file opened in read-only mode
 --FILE--
 <?php
 /*  Prototype: bool fflush ( resource $handle );

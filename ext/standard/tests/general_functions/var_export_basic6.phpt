@@ -3,7 +3,7 @@ Test var_export() function with valid objects
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
  * Alias to functions:
  */
@@ -13,7 +13,7 @@ echo "*** Testing var_export() with valid objects ***\n";
 // class with no members
 class foo
 {
-// no members 
+// no members
 }
 
 // abstract class
@@ -32,7 +32,7 @@ class concreteClass extends abstractClass
   }
 }
 
-// interface class 
+// interface class
 interface iValue
 {
    public function setVal ($name, $val);
@@ -52,8 +52,8 @@ class Value implements iValue
   }
 }
 
-// a gereral class 
-class myClass 
+// a gereral class
+class myClass
 {
   var $foo_object;
   public $public_var;

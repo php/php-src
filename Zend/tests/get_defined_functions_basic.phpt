@@ -1,5 +1,5 @@
 --TEST--
-get_defined_functions() function : basic functionality 
+get_defined_functions() function : basic functionality
 --FILE--
 <?php
 

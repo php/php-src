@@ -1,5 +1,5 @@
 --TEST--
-Test abs() function : basic functionality 
+Test abs() function : basic functionality
 --INI--
 precision = 14
 --FILE--
@@ -20,8 +20,8 @@ $values = array(23,
 				"23",
 				"-23",
 				"23.45",
-				"2.345e1",		
-				"-2.345e1",			
+				"2.345e1",
+				"-2.345e1",
 				null,
 				true,
 				false);

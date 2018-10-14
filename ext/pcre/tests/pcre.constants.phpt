@@ -1,5 +1,5 @@
 --TEST--
-Test for pre-defined pcre constants 
+Test for pre-defined pcre constants
 --FILE--
 <?php
 

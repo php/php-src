@@ -76,11 +76,11 @@ $DATALEN = strlen($DATA);
 if ($n != $DATALEN)
 	die("tmpfile stored $n bytes; should be $DATALEN!");
 
-class uselessstream 
+class uselessstream
 {
 }
 
-class mystream 
+class mystream
 {
 	public $path;
 	public $mode;
@@ -228,7 +228,7 @@ for ($i = 0; $i < 256; $i++) {
 	$seeks[] = array($whence, $offset, $position);
 }
 
-/* we compare the results of fgets using differing line lengths to 
+/* we compare the results of fgets using differing line lengths to
  * test the fgets layer also */
 $line_lengths = array(1024, 256, 64, 16);
 $fail_count = 0;

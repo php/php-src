@@ -8,7 +8,7 @@ Bad unserialize_callback_func
  * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
  * Alias to functions:
  */

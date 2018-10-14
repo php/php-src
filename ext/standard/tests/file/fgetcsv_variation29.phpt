@@ -14,8 +14,8 @@ Test fgetcsv() : usage variations - with only file handle as argument, file poin
 
 echo "*** Testing fgetcsv() : with file handle as only argument and file pointer pointing at end of file ***\n";
 
-/* the array is with two elements in it. Each element should be read as 
-   1st element is delimiter & 2nd element is csv fields 
+/* the array is with two elements in it. Each element should be read as
+   1st element is delimiter & 2nd element is csv fields
 */
 $csv_lists = array (
   array(',', 'water,fruit'),
@@ -57,7 +57,7 @@ foreach ($csv_lists as $csv_list) {
     fwrite($file_handle, "\n"); // blank line
 
     // close the file if the mode to be used is read mode  and re-open using read mode
-    // else rewind the file pointer to beginning of the file 
+    // else rewind the file pointer to beginning of the file
     if ( strstr($file_modes[$mode_counter], "r" ) ) {
       fclose($file_handle);
       $file_handle = fopen($filename, $file_modes[$mode_counter]);
@@ -70,7 +70,7 @@ foreach ($csv_lists as $csv_list) {
 
     // call fgetcsv() to parse csv fields
 
-    // now file pointer should point to end of the file, try reading again 
+    // now file pointer should point to end of the file, try reading again
     var_dump( feof($file_handle) );
     var_dump( fgetcsv($file_handle) );
     // check the file pointer position and if eof
@@ -80,7 +80,7 @@ foreach ($csv_lists as $csv_list) {
     fclose($file_handle);
     //delete file
     unlink($filename);
-  } //end of mode loop 
+  } //end of mode loop
 } // end of foreach
 
 echo "Done\n";

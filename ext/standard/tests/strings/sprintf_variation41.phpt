@@ -9,13 +9,13 @@ if (PHP_INT_SIZE != 4) {
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : unsigned formats with float values ***\n";
 
-// array of float values 
+// array of float values
 $float_values = array(
   2147483647,
   0x800000001, // float value, beyond max positive int

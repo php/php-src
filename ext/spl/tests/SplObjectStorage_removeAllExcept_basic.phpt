@@ -1,5 +1,5 @@
 --TEST--
-Check that SplObjectStorage::removeUncommon functions when receiving proper input 
+Check that SplObjectStorage::removeUncommon functions when receiving proper input
 --CREDITS--
 Matthew Turland (me@matthewturland.com)
 --FILE--

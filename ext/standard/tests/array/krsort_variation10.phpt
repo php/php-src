@@ -1,5 +1,5 @@
 --TEST--
-Test krsort() function : usage variations - sort heredoc strings  
+Test krsort() function : usage variations - sort heredoc strings
 --FILE--
 <?php
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )

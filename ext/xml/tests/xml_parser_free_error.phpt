@@ -1,5 +1,5 @@
 --TEST--
-Test xml_parser_free() function : error conditions 
+Test xml_parser_free() function : error conditions
 --SKIPIF--
 <?php
 if (!extension_loaded("xml")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_parser_free(resource parser)
- * Description: Free an XML parser 
+ * Description: Free an XML parser
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

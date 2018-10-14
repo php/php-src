@@ -44,7 +44,7 @@ foreach( $file_types as $type ) {
       fclose($file_handle);
     }
 
-    // opening the file in different modes 
+    // opening the file in different modes
     $file_handle = fopen($file_name, $mode);
     if($file_handle == false)
       exit("Error:failed to open file $file_name");

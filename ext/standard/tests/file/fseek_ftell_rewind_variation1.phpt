@@ -15,9 +15,9 @@ Test fseek(), ftell() & rewind() functions : usage variations - all r & a modes,
 // include the file.inc for common functions for test
 include ("file.inc");
 
-/* Testing fseek(),ftell(),rewind() functions 
+/* Testing fseek(),ftell(),rewind() functions
      1. All read and append modes
-     2. Testing fseek() without using argument whence 
+     2. Testing fseek() without using argument whence
 */
 echo "*** Testing fseek(), ftell(), rewind() : default whence & all r and a modes ***\n";
 $file_modes = array( "r","rb","rt","r+","r+b","r+t",

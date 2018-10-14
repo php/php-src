@@ -96,7 +96,7 @@ $values = array(
       // unset data
       'unset var' => @$unset_var,
 
-      //resource 
+      //resource
       "file resource" => $fp
 );
 // loop through each element of the array for red

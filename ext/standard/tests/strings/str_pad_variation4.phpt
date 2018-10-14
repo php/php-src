@@ -9,7 +9,7 @@ Test str_pad() function : usage variations - unexpected inputs for '$pad_type' a
  * Source code: ext/standard/string.c
 */
 
-/* Test str_pad() function: with unexpected inputs for '$pad_type' 
+/* Test str_pad() function: with unexpected inputs for '$pad_type'
  *  and expected type for '$input', '$pad_length' and '$pad_string'
 */
 

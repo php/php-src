@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - octal formats with integer values 
+Test fscanf() function: usage variations - octal formats with integer values
 --FILE--
 <?php
 

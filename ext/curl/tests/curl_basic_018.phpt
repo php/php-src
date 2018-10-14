@@ -1,5 +1,5 @@
 --TEST--
-Test curl_setopt() with curl_multi function with basic functionality 
+Test curl_setopt() with curl_multi function with basic functionality
 --CREDITS--
 TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
 --SKIPIF--
