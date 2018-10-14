@@ -1,7 +1,7 @@
 --TEST--
 Classes inheritance test
 --FILE--
-<?php 
+<?php
 
 /* Inheritance test.  Pretty nifty if I do say so myself! */
 

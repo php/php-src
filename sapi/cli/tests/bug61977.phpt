@@ -2,7 +2,7 @@
 Bug #61977 test CLI web-server support for Mime Type File extensions mapping
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php

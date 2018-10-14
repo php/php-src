@@ -2,7 +2,7 @@
 Bug #62892 (ReflectionClass::getTraitAliases crashes on importing trait methods as private)
 --FILE--
 <?php
- 
+
 trait myTrait {
      public function run() {}
 }

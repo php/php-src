@@ -3,7 +3,7 @@ Bug #52484 (__set() ignores setting properties with empty names)
 --FILE--
 <?php
 
-class A {	
+class A {
 	function __unset($prop) {
 		unset($this->$prop);
 	}

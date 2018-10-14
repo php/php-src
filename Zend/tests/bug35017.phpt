@@ -10,7 +10,7 @@ try {
 		echo "0\n";
 	}
 	echo "?\n";
-} catch(Exception $e) { 
+} catch(Exception $e) {
   echo "This Exception should be catched\n";
 }
 function errorHandler($errno, $errstr, $errfile, $errline, $vars) {

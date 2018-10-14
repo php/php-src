@@ -1,11 +1,11 @@
 --TEST--
-XMLWriter: libxml2 XML Writer, startDTD/writeElementNS 
+XMLWriter: libxml2 XML Writer, startDTD/writeElementNS
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
-<?php 
+<?php
 
 $doc_dest = '001.xml';
 $xw = xmlwriter_open_uri($doc_dest);

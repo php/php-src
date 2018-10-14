@@ -1,9 +1,9 @@
 --TEST--
-XMLReader: libxml2 XML Reader, DTD 
+XMLReader: libxml2 XML Reader, DTD
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE LIST SYSTEM "dtdexample.dtd">
@@ -21,7 +21,7 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </MOVIE>
 </LIST>';
 
-$dtdfile = rawurlencode(dirname(__FILE__)) . '/dtdexample.dtd'; 
+$dtdfile = rawurlencode(dirname(__FILE__)) . '/dtdexample.dtd';
 $file = dirname(__FILE__) . '/_008.xml';
 file_put_contents($file, $xmlstring);
 

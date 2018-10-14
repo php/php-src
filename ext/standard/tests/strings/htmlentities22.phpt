@@ -40,7 +40,7 @@ function test($flag, $flag2=ENT_DISALLOWED, $charset="UTF-8") {
         $i++;
         $a = htmlentities($test, $flag | $flag2, $charset, FALSE);
         $b = htmlspecialchars($test, $flag | $flag2, $charset, FALSE);
-        
+
         if ($a == $b)
             echo sprintf("%s\t%s", $test, $a==$test?"NOT CHANGED":"CHANGED"), "\n";
         else

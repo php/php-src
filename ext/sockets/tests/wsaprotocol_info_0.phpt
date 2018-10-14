@@ -38,7 +38,7 @@ if (!extension_loaded('sockets')) {
 	socket_close($sock2);
 	var_dump($sock, $sock2);
 
-	/* Using invalid PID. */	
+	/* Using invalid PID. */
 	$info = socket_wsaprotocol_info_export($sock, 123412341);
 
 	socket_close($sock);

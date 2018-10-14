@@ -7,9 +7,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/* 
+/*
  Prototype   : int filesize ( string $filename );
- Description : Returns the size of the file in bytes, or FALSE 
+ Description : Returns the size of the file in bytes, or FALSE
    (and generates an error of level E_WARNING) in case of an error.
 */
 
@@ -17,7 +17,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $file_path = dirname(__FILE__);
 
-echo "*** Testing filesize(): usage variations ***\n"; 
+echo "*** Testing filesize(): usage variations ***\n";
 echo "\n*** Testing filesize() with data written using different file modes and by creating holes in file ***\n";
 
 $filename = $file_path."/filesize_variation4.tmp";

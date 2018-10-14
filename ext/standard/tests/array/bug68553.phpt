@@ -8,7 +8,7 @@ while ($i--) {
 	$fd = fopen(__FILE__, "r");
 	fclose($fd);
 }
-$a = [ 
+$a = [
 	['a' => 10],
 	['a' => 20],
 	['a' => true],

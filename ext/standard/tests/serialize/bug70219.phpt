@@ -28,7 +28,7 @@ for ($i = 0; $i < 5; $i++) {
     $v[$i] = 'hi'.$i;
 }
 
-var_dump($data);	
+var_dump($data);
 ?>
 --EXPECTF--
 Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s on line %d

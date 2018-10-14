@@ -9,7 +9,7 @@ Test str_pad() function : usage variations - unexpected inputs for '$pad_type' a
  * Source code: ext/standard/string.c
 */
 
-/* Test str_pad() function: with unexpected inputs for '$pad_type' 
+/* Test str_pad() function: with unexpected inputs for '$pad_type'
  *  and expected type for '$input', '$pad_length' and '$pad_string'
 */
 
@@ -23,7 +23,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 // array with different values for $input
@@ -33,43 +33,43 @@ $pad_types =  array (
 /*1*/	  0, // == STR_PAD_LEFT
 		  1, // == STR_PAD_RIGHT
 		  2, // == STR_PAD_BOTH
-		  -2, 
+		  -2,
 		  2147483647,
 		  -2147483648,
-		  	
+
 		  // float values
 /*7*/	  10.5,
 		  -20.5,
 		  10.1234567e10,
-		  
+
 		  // string data
 /*10*/	  "abc",
 		  "STR_PAD_LEFT",
 		  "2",
 		  "0x2",
 		  "02",
-		  
+
 		  // array values
 /*15*/	  array(),
 		  array(0),
 		  array(1, 2),
-		
+
 		  // boolean values
 /*18*/	  true,
 		  false,
 		  TRUE,
 		  FALSE,
-		
+
 		  // null values
 /*22*/	  NULL,
 		  null,
-		
+
 		  // objects
 /*24*/	  new sample(),
-		
+
 		  // undefined variable
 /*25*/	  @$undefined_var,
-		
+
 		  // unset variable
 /*26*/	  @$unset_var
 );

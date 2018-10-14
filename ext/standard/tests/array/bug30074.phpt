@@ -3,7 +3,7 @@ Bug #30074 (EG(uninitialized_zval_ptr) gets set to reference using EXTR_REFS, af
 --FILE--
 <?php
 error_reporting(E_ALL & ~E_NOTICE);   // We don't want the notice for $undefined
-$result = extract(array('a'=>$undefined), EXTR_REFS); 
+$result = extract(array('a'=>$undefined), EXTR_REFS);
 var_dump(array($a));
 echo "Done\n";
 ?>

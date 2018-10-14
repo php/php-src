@@ -7,7 +7,7 @@ class Foo implements IteratorAggregate
     public function bar() {
         throw new Exception;
     }
-					        
+
     public function getIterator() {
         return new ArrayIterator($this->bar());
     }

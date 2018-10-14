@@ -7,10 +7,10 @@ Test DateTime::format() function : usage variation - Passing unexpected values t
  * Source code: ext/date/php_date.c
  * Alias to functions: date_format
  */
- 
+
 echo "*** Testing DateTime::format() : usage variation -  unexpected values to first argument \$format***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -90,8 +90,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 

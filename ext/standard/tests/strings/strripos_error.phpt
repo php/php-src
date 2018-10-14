@@ -1,5 +1,5 @@
 --TEST--
-Test strripos() function : error conditions 
+Test strripos() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int strripos ( string $haystack, string $needle [, int $offset] );

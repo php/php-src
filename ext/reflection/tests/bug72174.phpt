@@ -17,7 +17,7 @@ class Foo
         var_dump(__METHOD__);
         return true;
     }
-    
+
     public function __get($name)
     {
         var_dump(__METHOD__);

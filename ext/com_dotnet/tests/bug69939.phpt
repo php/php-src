@@ -1,7 +1,7 @@
 --TEST--
 Bug #69939 (Casting object to bool returns false)
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
 --FILE--
 <?php

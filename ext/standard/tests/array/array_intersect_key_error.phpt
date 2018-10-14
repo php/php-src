@@ -1,9 +1,9 @@
 --TEST--
-Test array_intersect_key() function : error conditions 
+Test array_intersect_key() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array array_intersect_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are present in all the other arguments. 
+ * Description: Returns the entries of arr1 that have keys which are present in all the other arguments.
  * Source code: ext/standard/array.c
  */
 

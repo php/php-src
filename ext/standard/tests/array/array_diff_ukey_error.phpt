@@ -1,15 +1,15 @@
 --TEST--
-Test array_diff_ukey() function : error conditions 
+Test array_diff_ukey() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array array_diff_ukey(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. 
+ * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
 echo "*** Testing array_diff_ukey() : error conditions ***\n";
 
-// Initialize 
+// Initialize
 $array1 = array('blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4);
 $array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
 $extra_arg = 10;

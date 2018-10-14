@@ -3,7 +3,7 @@ Test array_push() function : error conditions - Pass incorrect number of args
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack[, mixed $...])
- * Description: Pushes elements onto the end of the array 
+ * Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c
  */
 

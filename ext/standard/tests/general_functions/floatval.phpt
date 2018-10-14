@@ -7,7 +7,7 @@ Testing floatval() and its alias doubleval() Functions
  */
 
 echo "*** Testing floatval() with valid float values ***\n";
-// different valid  float values 
+// different valid  float values
 $valid_floats = array(
                 0.0,
                 1.0,
@@ -32,7 +32,7 @@ $valid_floats = array(
 		-.5e+7
 );
 
-/* loop to check that floatval() recognizes different 
+/* loop to check that floatval() recognizes different
    float values, expected output:float value for valid floating point number */
 
 foreach ($valid_floats as $value ) {
@@ -41,7 +41,7 @@ foreach ($valid_floats as $value ) {
 
 
 echo "\n*** Testing doubleval() with valid float values ***\n";
-/* loop to check that doubleval() also recognizes different 
+/* loop to check that doubleval() also recognizes different
    float values, expected output:float value for valid floating point number */
 
 foreach ($valid_floats as $value ) {
@@ -57,7 +57,7 @@ fclose($fp);
 $dfp = opendir ( dirname(__FILE__) );
 closedir($dfp);
 
-// other types in an array 
+// other types in an array
 $not_float_types = array (
                    -2147483648, // max negative integer value
                    2147483648,  // max positive integer value
@@ -76,7 +76,7 @@ $not_float_types = array (
                    NULL,
                    null,
                  );
-/* loop through the $not_float_types to see working of 
+/* loop through the $not_float_types to see working of
    floatval() on non float types, expected output: float value valid floating point numbers */
 foreach ($not_float_types as $type ) {
    var_dump( floatval($type) );
@@ -85,7 +85,7 @@ foreach ($not_float_types as $type ) {
 
 echo "\n*** Testing doubleval() on non floating types ***\n";
 
-/* loop through the $not_float_types to see working of 
+/* loop through the $not_float_types to see working of
    doubleval() on non float types, expected output: float value valid floating point numbers */
 foreach ($not_float_types as $type ) {
    var_dump( doubleval($type) );
@@ -99,10 +99,10 @@ echo "\n*** Testing error conditions ***\n";
 var_dump( floatval() );
 var_dump( doubleval() );
 
-//arguments more than expected 
+//arguments more than expected
 var_dump( floatval(TRUE, FALSE) );
 var_dump( doubleval(TRUE, FALSE) );
- 
+
 echo "\nDone\n";
 
 

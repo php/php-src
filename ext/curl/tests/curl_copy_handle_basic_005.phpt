@@ -21,12 +21,12 @@ Rick Buitenman <rick@meritos.nl>
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_POSTFIELDS, "Hello=World&Foo=Bar&Person=John%20Doe");
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
-  
+
+
   $curl_content = curl_exec($ch);
   $copy = curl_copy_handle($ch);
   curl_close($ch);
-  
+
   $curl_content_copy = curl_exec($copy);
   curl_close($copy);
 

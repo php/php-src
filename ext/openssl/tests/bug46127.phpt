@@ -1,7 +1,7 @@
 --TEST--
-#46127, openssl_sign/verify: accept different algos 
+#46127, openssl_sign/verify: accept different algos
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>

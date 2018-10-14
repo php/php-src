@@ -1,5 +1,5 @@
 --TEST--
-Test is_dir() function: usage variations - invalid arguments 
+Test is_dir() function: usage variations - invalid arguments
 --FILE--
 <?php
 /* Prototype: bool is_dir ( string $dirname );

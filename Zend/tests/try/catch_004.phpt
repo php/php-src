@@ -20,7 +20,7 @@ class MyObject
 	{
 		echo __METHOD__ . "() Must not be called\n";
 	}
-	
+
 	static function test()
 	{
 		try

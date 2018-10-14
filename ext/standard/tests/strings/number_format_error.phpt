@@ -7,7 +7,7 @@ Test number_format() - wrong params test number_format()
  * Description: Format a number with grouped thousands
  * Source code: ext/standard/string.c
  */
- 
+
 echo "*** Testing number_format() : error conditions ***\n";
 
 echo "\n-- Testing number_format() function with less than expected no. of arguments --\n";

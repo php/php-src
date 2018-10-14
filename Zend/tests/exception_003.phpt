@@ -1,7 +1,7 @@
 --TEST--
 Throwing exception in global scope
 --FILE--
-<?php 
+<?php
 
 throw new Exception(1);
 

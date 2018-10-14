@@ -18,7 +18,7 @@ var_dump(array_search(-1,$a, true));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: array_search() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 

@@ -2,10 +2,10 @@
 Test wrong number of arguments for ob_end_clean()
 --FILE--
 <?php
-/* 
+/*
  * proto bool ob_end_clean(void)
  * Function is implemented in main/output.c
-*/ 
+*/
 
 $extra_arg = 1;
 

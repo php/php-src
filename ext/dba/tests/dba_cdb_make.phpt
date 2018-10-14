@@ -1,7 +1,7 @@
 --TEST--
 DBA CDB_MAKE handler test
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'cdb_make';
 	require_once(dirname(__FILE__) .'/skipif.inc');
 	die('info CDB_MAKE does not support reading');
@@ -31,8 +31,8 @@ DBA CDB_MAKE handler test
 	}
 ?>
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECT--
 database handler: cdb_make

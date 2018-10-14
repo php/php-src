@@ -5,7 +5,7 @@ Bug #49908 (throwing exception in __autoload crashes when interface is not defin
 
 spl_autoload_register(function ($className) {
 	var_dump($className);
-	
+
 	if ($className == 'Foo') {
 		class Foo implements Bar {};
 	} else {

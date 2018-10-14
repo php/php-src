@@ -20,7 +20,7 @@ var_dump(gmp_rootrem(100, 0));
 var_dump(gmp_rootrem(100, -3));
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_rootrem() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 array(2) {

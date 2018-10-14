@@ -5,7 +5,7 @@ precision=14
 --FILE--
 <?php
 /* Prototype  : number octdec  ( string $octal_string  )
- * Description: Returns the decimal equivalent of the octal number represented by the octal_string  argument. 
+ * Description: Returns the decimal equivalent of the octal number represented by the octal_string  argument.
  * Source code: ext/standard/math.c
  */
 
@@ -28,9 +28,9 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
-       -2345,       
-       4294967295,  // largest decimal  
-       4294967296, 
+       -2345,
+       4294967295,  // largest decimal
+       4294967296,
 
        // float data
 /*7*/  10.5,
@@ -48,7 +48,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*18*/ "",
        '',
@@ -58,7 +58,7 @@ $inputs = array(
 /*21*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // undefined data
 /*24*/ @$undefined_var,
 

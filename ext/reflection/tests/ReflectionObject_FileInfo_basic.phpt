@@ -1,6 +1,6 @@
 --TEST--
 ReflectionObject::getFileName(), ReflectionObject::getStartLine(), ReflectionObject::getEndLine() - basic function
---FILE-- 
+--FILE--
 <?php
 $rc = new ReflectionObject(new C);
 var_dump($rc->getFileName());

@@ -1,5 +1,5 @@
 --TEST--
-Test exif_tagname() function : basic functionality 
+Test exif_tagname() function : basic functionality
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--

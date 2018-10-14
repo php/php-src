@@ -3,12 +3,12 @@ Test array_unique() function : usage variations - array with duplicate keys
 --FILE--
 <?php
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
 /*
- * Testing the functionality of array_unique() by passing 
+ * Testing the functionality of array_unique() by passing
  * array having duplicate keys as values.
 */
 

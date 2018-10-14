@@ -31,7 +31,7 @@ $paths = array (
 			'..',
 			'...',
 			'/usr/lib/.../afile'
-						
+
 );
 
 $counter = 1;

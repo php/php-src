@@ -7,8 +7,8 @@ Test strrchr() function : usage variations - unexpected inputs for haystack
  * Source code: ext/standard/string.c
 */
 
-/* Test strrchr() function with unexpected inputs for haystack 
- *  and expected type for 'needle' 
+/* Test strrchr() function with unexpected inputs for haystack
+ *  and expected type for 'needle'
 */
 
 echo "*** Testing strrchr() function: with unexpected inputs for haystack ***\n";
@@ -21,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
@@ -108,7 +108,7 @@ $needles =  array (
   //empty string
   "",
   '',
- 
+
   //resource variable in string form
   "\$file_handle",
 

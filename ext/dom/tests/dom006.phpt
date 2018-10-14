@@ -18,7 +18,7 @@ Class books extends domDocument {
         $bookElement->appendChild($authorElement);
         $this->documentElement->appendChild($bookElement);
     }
-   
+
 }
 
 $dom = new books;

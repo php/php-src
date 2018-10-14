@@ -3,7 +3,7 @@ Test function fstat() by calling it more than or less than its expected argument
 --FILE--
 <?php
 $fp = fopen (__FILE__, 'r');
-$extra_arg = 'nothing'; 
+$extra_arg = 'nothing';
 
 var_dump(fstat( $fp, $extra_arg ) );
 var_dump(fstat());

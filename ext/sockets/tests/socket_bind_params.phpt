@@ -16,7 +16,7 @@ fa@php.net
     $s_w = socket_bind();
     var_dump($s_w);
     $s_w = socket_bind($s_c);
-    var_dump($s_w);    
+    var_dump($s_w);
     socket_close($s_c);
 
 ?>

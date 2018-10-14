@@ -38,7 +38,7 @@ var_dump(fgetss($fp, 0));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Deprecated: Function fgetss() is deprecated in %s on line %d
 string(18) "askasdfasdfaaaaaa
 "

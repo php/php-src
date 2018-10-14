@@ -11,5 +11,5 @@ class TraitsTest {
 $test = new TraitsTest();
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Trait 'THello' not found in %s on line %d

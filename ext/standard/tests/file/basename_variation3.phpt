@@ -1,11 +1,11 @@
 --TEST--
-Test basename() function : first parameter type variations 
+Test basename() function : first parameter type variations
 --FILE--
 <?php
 /* Prototype  : string basename(string path [, string suffix])
- * Description: Returns the filename component of the path 
+ * Description: Returns the filename component of the path
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing basename() : usage variation ***\n";

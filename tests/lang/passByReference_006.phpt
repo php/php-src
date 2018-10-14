@@ -30,7 +30,7 @@ class C {
 	  $ref5 = "Ref5 changed";
 	}
 
-} 
+}
 
 echo "\n ---- Pass uninitialised array & object by ref: function call ---\n";
 unset($u1, $u2, $u3, $u4, $u5);

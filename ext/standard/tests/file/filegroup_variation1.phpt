@@ -13,7 +13,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
  * Description: Returns the group ID of the file, or FALSE in case of an error.
  */
 
-/* Creating soft and hard links to a file and applying filegroup() on links */ 
+/* Creating soft and hard links to a file and applying filegroup() on links */
 
 $file_path = dirname(__FILE__);
 fclose( fopen($file_path."/filegroup_variation1.tmp", "w") );

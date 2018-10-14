@@ -1,5 +1,5 @@
 --TEST--
-Test stripslashes() function : error conditions 
+Test stripslashes() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string stripslashes ( string $str )

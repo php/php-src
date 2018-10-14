@@ -12,7 +12,7 @@ include ("file.inc");
 
 $file_modes = array("w+", "w+b", "w+t",
                     "a+", "a+b", "a+t",
-                    "x+", "x+b", "x+t"); 
+                    "x+", "x+b", "x+t");
 
 $file_content_types = array("numeric", "text", "text_with_new_line", "alphanumeric");
 

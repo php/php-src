@@ -9,7 +9,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
  Description: Gets line from file pointer and strip HTML tags
 */
 
-// include the common file related test functions 
+// include the common file related test functions
 include ("file.inc");
 
 /*Test fgetss() with all read modes , reading line by line with allowable tags: <test>, <html>, <?> */
@@ -29,7 +29,7 @@ this text contains some html tags <body> body </body> <br> br </br>
 this is the line with \n character. 
 EOT;
 
-$filename = dirname(__FILE__)."/fgetss_variation2.tmp"; 
+$filename = dirname(__FILE__)."/fgetss_variation2.tmp";
 
 /* try reading the file opened in different modes of reading */
 $file_modes = array("r","rb", "rt","r+", "r+b", "r+t");
@@ -39,7 +39,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
   /* create an empty file and write the strings with tags */
   create_file ($filename); //create an empty file
-  file_put_contents($filename, $string_with_tags); 
+  file_put_contents($filename, $string_with_tags);
   $file_handle = fopen($filename, $file_modes[$mode_counter]);
   if(!$file_handle) {
     echo "Error: failed to open file $filename!\n";
@@ -51,7 +51,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   var_dump( rewind($file_handle) );
   var_dump( ftell($file_handle) );
   var_dump( feof($file_handle) );
-   
+
   /* rewind the file and read the file  line by line with allowable tags */
   echo "-- Reading line by line with allowable tags: <test>, <html>, <?> --\n";
   rewind($file_handle);
@@ -62,10 +62,10 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
      var_dump( ftell($file_handle) );  // check the file pointer position
      var_dump( feof($file_handle) );  // check if eof reached
   }
- 
-  // close the file 
-  fclose($file_handle); 
-  // delete the file 
+
+  // close the file
+  fclose($file_handle);
+  // delete the file
   delete_file($filename);
 } // end of for - mode_counter
 

@@ -1,13 +1,13 @@
 --TEST--
-Test file() function : second parameter variation 
+Test file() function : second parameter variation
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array 
+ * Description: Read entire file into an array
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file() : usage variation ***\n";

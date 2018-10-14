@@ -1,11 +1,11 @@
 --TEST--
 SimpleXML: Split text content
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('simplexml')) print 'skip';
 ?>
 --FILE--
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version="1.0" encoding="ISO-8859-1" ?>

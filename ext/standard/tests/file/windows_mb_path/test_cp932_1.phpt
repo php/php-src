@@ -40,7 +40,7 @@ remove_data("dir_cp932");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)

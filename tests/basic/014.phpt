@@ -4,7 +4,7 @@ POST Method test and arrays - 2
 a[]=1&a[]=1
 --FILE--
 <?php
-var_dump($_POST['a']); 
+var_dump($_POST['a']);
 ?>
 --EXPECT--
 array(2) {

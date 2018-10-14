@@ -1,5 +1,5 @@
 --TEST--
-Test fgetss() function : usage variations - read/write modes 
+Test fgetss() function : usage variations - read/write modes
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
@@ -37,7 +37,7 @@ this text contains some html tags <body> body </body> <br> br </br>
 this is the line with \n character. 
 EOT;
 
-$filename = dirname(__FILE__)."/fgetss_variation3.tmp"; 
+$filename = dirname(__FILE__)."/fgetss_variation3.tmp";
 
 /* try reading the file opened in different modes of reading */
 $file_modes = array("w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t");
@@ -52,7 +52,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
     echo "Error: failed to open file $filename!\n";
     exit();
   }
-  
+
   // rewind the file pointer to beginning of the file
   rewind($file_handle);
   var_dump( ftell($file_handle) );
@@ -68,11 +68,11 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
      var_dump( ftell($file_handle) );  // check the file pointer position
      var_dump( feof($file_handle) );  // check if eof reached
   }
- 
-  // close the file 
+
+  // close the file
   fclose($file_handle);
-   
-  // delete the file 
+
+  // delete the file
   unlink($filename);
 } // end of for - mode_counter
 

@@ -19,7 +19,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 $file_path = dirname(__FILE__);
 require "$file_path/file.inc";
 
-/* test the effects on stats with creating file/subdir in a dir 
+/* test the effects on stats with creating file/subdir in a dir
 */
 
 /* create temp file */
