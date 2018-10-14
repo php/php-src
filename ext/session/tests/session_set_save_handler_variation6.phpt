@@ -62,7 +62,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : test write short circuit ***
-
 Open [%s,PHPSESSID]
 CreateID [PHPT-%s]
 Read [%s,%s]

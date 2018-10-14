@@ -42,7 +42,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_module_name() : variation ***
-
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"
