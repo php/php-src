@@ -4778,6 +4778,7 @@ PHP_FUNCTION(nl2br)
 PHP_FUNCTION(strip_tags)
 {
 	zend_string *buf;
+	zend_string *newbuf;
 	zend_string *str;
 	zval *allow=NULL;
 	const char *allowed_tags=NULL;
@@ -4797,8 +4798,10 @@ PHP_FUNCTION(strip_tags)
 	}
 
 	buf = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-	ZSTR_LEN(buf) = php_strip_tags_ex(ZSTR_VAL(buf), ZSTR_LEN(str), NULL, allowed_tags, allowed_tags_len, 0);
-	RETURN_NEW_STR(buf);
+	newbuf = php_strip_tags_ex(ZSTR_VAL(buf), ZSTR_LEN(str), NULL, allowed_tags, allowed_tags_len, 0);
+	zend_string_release(buf);
+
+	RETURN_NEW_STR(newbuf);
 }
 /* }}} */
 
@@ -5002,7 +5005,7 @@ int php_tag_find(char *tag, size_t len, const char *set) {
 }
 /* }}} */
 
-PHPAPI size_t php_strip_tags(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len) /* {{{ */
+PHPAPI zend_string *php_strip_tags(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len) /* {{{ */
 {
 	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
 }
@@ -5028,9 +5031,9 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, uint8_t *stateptr, const ch
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
+PHPAPI zend_string *php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
-	char *tbuf, *tp, *rp, c, lc;
+	char *tbuf, *tp, *rp, c, lc, *reallocp;
 	const char *buf, *p, *end;
 	int br, depth=0, in_q = 0;
 	uint8_t state = 0;
@@ -5122,8 +5125,25 @@ state_1:
 		case '\0':
 			break;
 		case '<':
+			if (in_q && allow) {
+				// resize return buffer to store escaped > (&gt;)
+				pos = rp - rbuf;
+				rbuf = erealloc(rbuf, len += 3); // there was room for 1 <, add 3 more chars
+				rp = rbuf + pos;
+
+				// resize temporary buffer if necessary
+				if ((tp - tbuf) + 4 >= PHP_TAG_BUF_SIZE) {
+					pos = tp - tbuf;
+					tbuf = erealloc(tbuf, pos + PHP_TAG_BUF_SIZE + 1); // add room for &lt;
+					tp = tbuf + pos;
+				}
+
+				// store escaped <
+				strcpy(tp, "&lt;");
+				tp += 4;
+			}
 			if (in_q) {
-				goto reg_char_1;
+				break;
 			}
 			if (isspace(*(p + 1)) && !allow_tag_spaces) {
 				goto reg_char_1;
@@ -5135,8 +5155,25 @@ state_1:
 				depth--;
 				break;
 			}
+			if (in_q && allow) {
+				// resize return buffer to store escaped > (&gt;)
+				pos = rp - rbuf;
+				rbuf = erealloc(rbuf, len += 3); // there was room for 1 <, add 3 more chars
+				rp = rbuf + pos;
+
+				// resize temporary buffer
+				if ((tp - tbuf) + 4 >= PHP_TAG_BUF_SIZE) {
+					pos = tp - tbuf;
+					tbuf = erealloc(tbuf, pos + PHP_TAG_BUF_SIZE + 1); // add room for &gt;
+					tp = tbuf + pos;
+				}
+
+				// store escaped >
+				strcpy(tp, "&gt;");
+				tp += 4;
+			}
 			if (in_q) {
-				goto reg_char_1;
+				break;
 			}
 
 			lc = '>';
@@ -5196,6 +5233,7 @@ reg_char_1:
 			if (allow) {
 				if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
 					pos = tp - tbuf;
+
 					tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
 					tp = tbuf + pos;
 				}
@@ -5355,7 +5393,10 @@ finish:
 	if (stateptr)
 		*stateptr = state;
 
-	return (size_t)(rp - rbuf);
+	// copy string to new buffer
+	size_t new_len = (size_t)(rp-rbuf);
+
+	return zend_string_init(rbuf, (size_t)(rp - rbuf), 0);
 }
 /* }}} */
 

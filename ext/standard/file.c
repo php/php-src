@@ -1099,7 +1099,8 @@ PHPAPI PHP_FUNCTION(fgetss)
 	zend_long bytes = 0;
 	size_t len = 0;
 	size_t actual_len, retval_len;
-	char *buf = NULL, *retval;
+	char *buf = NULL, *str;
+	zend_string* retval;
 	php_stream *stream;
 	char *allowed_tags=NULL;
 	size_t allowed_tags_len=0;
@@ -1125,18 +1126,16 @@ PHPAPI PHP_FUNCTION(fgetss)
 		memset(buf, 0, len + 1);
 	}
 
-	if ((retval = php_stream_get_line(stream, buf, len, &actual_len)) == NULL)	{
+	if ((str = php_stream_get_line(stream, buf, len, &actual_len)) == NULL)	{
 		if (buf != NULL) {
 			efree(buf);
 		}
 		RETURN_FALSE;
 	}
 
-	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(retval, retval_len);
-	efree(retval);
+	retval = php_strip_tags(str, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
+	efree(str);
+	RETURN_NEW_STR(retval);
 }
 /* }}} */
 

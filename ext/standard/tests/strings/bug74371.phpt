@@ -10,7 +10,7 @@ echo strip_tags('<img alt=< />', '<img>') . PHP_EOL;
 
 ?>
 --EXPECT--
-<img src="example.jpg" alt=":> :<">
-<img src="example.jpg" alt="':> :<">
+<img src="example.jpg" alt=":&gt; :&lt;">
+<img src="example.jpg" alt="':&gt; :&lt;">
 <img src="example.jpg" alt=:>alert(0)
 <img alt=< />
