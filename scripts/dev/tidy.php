@@ -375,7 +375,7 @@ function options(array $overrides = [], array $argv = []): array
         return $opt;
     }
 
-    $shortOptions = 'hwnN::e::lsfoqyv';
+    $shortOptions = 'hwnN::e::lsfqyv';
 
     $longOptions = [
         'help',
@@ -387,7 +387,6 @@ function options(array $overrides = [], array $argv = []): array
         'clean-space-before-tab',
         'no-colors',
         'fix',
-        'no-backup',
         'quiet',
         'yes',
         'verbose',
