@@ -19,11 +19,11 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 //definition of input args
 $haystack = "hello world";

@@ -36,7 +36,7 @@ echo "Done\n";
 $filename = dirname(__FILE__)."/fgetss1.html";
 unlink($filename);
 ?>
---EXPECTF--	
+--EXPECTF--
 string(21) "askasdfasdf<b>aaaaaa
 "
 string(6) "dddddd"

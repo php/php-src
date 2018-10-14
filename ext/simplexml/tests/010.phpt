@@ -3,7 +3,7 @@ SimpleXML: Simple Inheritance
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 class simplexml_inherited extends SimpleXMLElement
 {

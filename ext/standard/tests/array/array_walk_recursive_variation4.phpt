@@ -3,12 +3,12 @@ Test array_walk_recursive() function : usage variations - 'input' array with sub
 --FILE--
 <?php
 /* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
 /*
- * Testing array_walk_recursive() with an array having subarrays as elements 
+ * Testing array_walk_recursive() with an array having subarrays as elements
 */
 
 echo "*** Testing array_walk_recursive() : array with subarray ***\n";

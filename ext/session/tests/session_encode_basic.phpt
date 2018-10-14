@@ -9,10 +9,10 @@ serialize_precision=100
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_encode(void)
  * Description : Encodes the current session data as a string
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_encode() : basic functionality ***\n";
@@ -59,7 +59,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 

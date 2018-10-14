@@ -6,7 +6,7 @@ ZE2 A class can only implement interfaces
 <?php
 class base {
 }
-	
+
 class derived implements base {
 }
 ?>

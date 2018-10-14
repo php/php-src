@@ -3,7 +3,7 @@ Test count() function : usage variations - Pass different data types as $var arg
 --FILE--
 <?php
 /* Prototype  : int count(mixed $var [, int $mode])
- * Description: Count the number of elements in a variable (usually an array) 
+ * Description: Count the number of elements in a variable (usually an array)
  * Source code: ext/standard/array.c
  */
 
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

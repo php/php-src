@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp2_set (without MIBs loading)
 --CREDITS--
 Boris Lytockin

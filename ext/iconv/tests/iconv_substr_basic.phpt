@@ -1,5 +1,5 @@
 --TEST--
-Test iconv_substr() function : basic functionality 
+Test iconv_substr() function : basic functionality
 --SKIPIF--
 <?php
 extension_loaded('iconv') or die('skip');
@@ -12,7 +12,7 @@ iconv.output_encoding=ISO-8859-1
 --FILE--
 <?php
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
- * Description: Returns part of a string 
+ * Description: Returns part of a string
  * Source code: ext/iconv/iconv.c
  */
 

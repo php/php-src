@@ -1,5 +1,5 @@
 --TEST--
-ReflectionObject::export() - ensure dynamic property with same name as inherited private property is shown. 
+ReflectionObject::export() - ensure dynamic property with same name as inherited private property is shown.
 --FILE--
 <?php
 class C {

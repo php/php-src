@@ -74,7 +74,7 @@ $unexpected_values = array (
 // loop though each element of the array and check the working of ksort()
 // when $array argument is supplied with different values from $unexpected_values
 echo "\n-- Testing ksort() by supplying different unexpected values for 'array' argument --\n";
-echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
+echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n";
 
 $counter = 1;
 for($index = 0; $index < count($unexpected_values); $index ++) {

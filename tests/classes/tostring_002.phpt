@@ -11,7 +11,7 @@ class Test
 	{
 		return "Hello\n";
 	}
-	
+
 	function __destruct()
 	{
 		echo $this;

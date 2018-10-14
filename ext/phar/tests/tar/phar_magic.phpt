@@ -24,7 +24,7 @@ include $fname;
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.php');
 __HALT_COMPILER();
 ?>

@@ -5,7 +5,7 @@ When being called multiple times with a stringular function name only,
 registerPHPFunctions adds the new function to the allowed parameter
 list - it does not replace the old function.
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }

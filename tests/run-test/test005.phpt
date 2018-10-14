@@ -10,7 +10,7 @@ extension_loaded("Zend Opcache") or die("skip Zend Opcache is not loaded");
 //
 // We check the general ini settings which affect error handling
 // and than verify if a message is given by a division by zero.
-// EXPECTF is used here since the error format may change but ut 
+// EXPECTF is used here since the error format may change but ut
 // should always contain 'Division by zero'.
 var_dump(ini_get('display_errors'));
 var_dump(ini_get('error_reporting'));

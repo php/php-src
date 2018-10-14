@@ -11,7 +11,7 @@ skip_if_no_required_exts("mbstring");
 ?>
 --FILE--
 <?php
-$p = ""; 
+$p = "";
 $s = str_repeat('x', 50) . "ü";
 $how_many = 32;
 
@@ -19,7 +19,7 @@ $how_many = 32;
 for ($i = 0; $i < $how_many; $i++) {
 	$p .= "$s";
 	$p .= DIRECTORY_SEPARATOR;
-} 
+}
 
 /* path doesn't exist at this point! */
 $p = realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . $p;

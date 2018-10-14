@@ -1,17 +1,17 @@
 --TEST--
 Test gzopen() function : variation: use include path and stream context create a file, relative path
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
- * Description: Open a .gz-file and return a .gz-file pointer 
+ * Description: Open a .gz-file and return a .gz-file pointer
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 require_once('gzopen_include_path.inc');
@@ -38,8 +38,8 @@ function runtest() {
 	$h = gzopen($tmpfile, "w", true);
 	fwrite($h, "This is the test file");
 	fclose($h);
-	
-	
+
+
 	$h = @gzopen($tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in working dir\n";
@@ -49,7 +49,7 @@ function runtest() {
 	   gzclose($h);
 	   unlink($tmpfile);
 	}
-	
+
 	$h = @gzopen('dir1/'.$tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in dir1\n";
@@ -57,7 +57,7 @@ function runtest() {
 	else {
 	   echo "created in dir1\n";
 	   gzclose($h);
-	   unlink('dir1/'.$tmpfile);   
+	   unlink('dir1/'.$tmpfile);
 	}
 }
 ?>

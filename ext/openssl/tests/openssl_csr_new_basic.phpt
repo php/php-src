@@ -25,7 +25,7 @@ var_dump(openssl_csr_new(["countryName" => "DE"], $x, $conf + ["x509_extensions"
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: openssl_csr_new() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 

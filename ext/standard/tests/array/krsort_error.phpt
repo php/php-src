@@ -1,14 +1,14 @@
 --TEST--
-Test krsort() function : error conditions 
+Test krsort() function : error conditions
 --FILE--
 <?php
 /* Prototype  : bool krsort(array &array_arg [, int asort_flags])
- * Description: Sort an array 
+ * Description: Sort an array
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing krsort() function with all possible error conditions 
+* Testing krsort() function with all possible error conditions
 */
 
 echo "*** Testing krsort() : error conditions ***\n";
@@ -28,7 +28,7 @@ foreach($flags as $key => $flag){
   echo "\n- Sort flag = $key -\n";
   $temp_array = $array_arg;
   var_dump( krsort($temp_array,$flag, $extra_arg) );
-  var_dump($temp_array); 
+  var_dump($temp_array);
 }
 
 echo "Done";

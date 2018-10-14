@@ -1,11 +1,11 @@
 --TEST--
-Test get_class_methods() function : error conditions 
+Test get_class_methods() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto array get_class_methods(mixed class)
- * Description: Returns an array of method names for class or class instance. 
+ * Description: Returns an array of method names for class or class instance.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*

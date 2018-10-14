@@ -27,7 +27,7 @@ foreach ($jd_days as $jd_day) {
 echo "Done\n";
 
 ?>
---EXPECTF--	
+--EXPECTF--
 === 2453396
 string(3) "Jan"
 string(7) "January"

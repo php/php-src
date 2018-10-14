@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 OO API: SNMP::setSecurity (errors)
 --CREDITS--
 Boris Lytochkin

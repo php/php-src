@@ -128,7 +128,7 @@ echo "UTF-32 and surrogates area with BOM\n";
 $out = '';
 $cnt = 0;
 for ($i = 0xd7ff; $i <= 0xe000; ++$i) {
-    $s = chk_enc("\x00\x00\xfe\xff". pack('C4', $i >> 24, ($i >> 16) & 0xff, ($i >> 8) & 0xff, $i & 0xff), 
+    $s = chk_enc("\x00\x00\xfe\xff". pack('C4', $i >> 24, ($i >> 16) & 0xff, ($i >> 8) & 0xff, $i & 0xff),
 				 1, "UTF-32", true);
 	if ($s === false) {
 		$cnt++;
@@ -142,7 +142,7 @@ var_dump(str_replace("0000feff","",$out));
 $out = '';
 $cnt = 0;
 for ($i = 0xd7ff; $i <= 0xe000; ++$i) {
-    $s = chk_enc("\xff\xfe\x00\x00". pack('C4', $i & 0xff, ($i >> 8) & 0xff, ($i >> 16) & 0xff, ($i >> 24) & 0xff), 
+    $s = chk_enc("\xff\xfe\x00\x00". pack('C4', $i & 0xff, ($i >> 8) & 0xff, ($i >> 16) & 0xff, ($i >> 24) & 0xff),
 				 1, "UTF-32", true);
 	if ($s === false) {
 		$cnt++;

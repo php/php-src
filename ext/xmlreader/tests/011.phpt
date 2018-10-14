@@ -1,12 +1,12 @@
 --TEST--
-XMLReader: libxml2 XML Reader, string data 
+XMLReader: libxml2 XML Reader, string data
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip";
 $reader = new XMLReader();
 if (!method_exists($reader, 'readInnerXml')) print "skip";
 ?>
 --FILE--
-<?php 
+<?php
 /* $Id$ */
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>

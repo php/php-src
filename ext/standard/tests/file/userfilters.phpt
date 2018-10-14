@@ -10,7 +10,7 @@ class testfilter extends php_user_filter {
       $consumed += strlen($bucket->data);
       stream_bucket_append($out, $bucket);
     }
-    return PSFS_PASS_ON;    
+    return PSFS_PASS_ON;
   }
 
   function oncreate() {

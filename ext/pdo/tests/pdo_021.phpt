@@ -44,7 +44,7 @@ echo 'There are ' . $num . " rows in the table.\n";
 // Insert using named parameters
 $stmt2 = $db->prepare("INSERT INTO test VALUES(:first, :second, :third)");
 foreach ($data as $row) {
-    $stmt2->execute(array(':first'=>($row[0] + 5), ':second'=>$row[1], 
+    $stmt2->execute(array(':first'=>($row[0] + 5), ':second'=>$row[1],
         ':third'=>$row[2]));
 }
 

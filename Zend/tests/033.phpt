@@ -1,7 +1,7 @@
 --TEST--
 Using undefined multidimensional array
 --FILE--
-<?php 
+<?php
 
 $arr[1][2][3][4][5];
 

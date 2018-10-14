@@ -19,7 +19,7 @@ default_charset=cp1254
 #vim: set encoding=cp1254
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc"; 
+include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 
 $item = "çokbaytlı işleri";
@@ -35,7 +35,7 @@ remove_data("file_cp1254");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s\çokbaytlı işleri"
 bool(true)
 bool(true)

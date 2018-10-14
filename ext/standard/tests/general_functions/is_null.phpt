@@ -3,11 +3,11 @@ Test is_null() function
 --FILE--
 <?php
 /* Prototype: bool is_null ( mixed $var );
- * Description: Finds whether the given variable is NULL 
+ * Description: Finds whether the given variable is NULL
  */
 
 echo "*** Testing is_null() with valid null values ***\n";
-// different valid  null vlaues 
+// different valid  null vlaues
 $unset_array = array();
 $unset_int = 10;
 $unset_float = 10.5;
@@ -15,7 +15,7 @@ $unset_bool = true;
 $unset_object = new stdclass;
 $unset_resource = fopen(__FILE__, "r");
 // unset them to make it null.
-unset ($unset_array, $unset_int, $unset_float, $unset_bool, $unset_object, $unset_resource); 
+unset ($unset_array, $unset_int, $unset_float, $unset_bool, $unset_object, $unset_resource);
 $null_var1 = NULL;
 $null_var2 = null;
 
@@ -32,7 +32,7 @@ $valid_nulls = array(
   @$unset_resource,
   @$undefined_var,
 );
-/* loop to check that is_null() recognizes different 
+/* loop to check that is_null() recognizes different
    null values, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($valid_nulls as $null_val ) {
@@ -46,7 +46,7 @@ echo "\n*** Testing is_bool() on non null values ***\n";
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
-// other types in a array 
+// other types in a array
 $not_null_types = array (
 /* integers */
   0,
@@ -119,7 +119,7 @@ $not_null_types = array (
   array(1,2,3,4),
   array(1 => "One", "two" => 2),
 );
-/* loop through the $not_null_types to see working of 
+/* loop through the $not_null_types to see working of
    is_null() on non null types, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_null_types as $type ) {
@@ -131,9 +131,9 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 var_dump( is_null() );
 
-//arguments more than expected 
+//arguments more than expected
 var_dump( is_null(NULL, null) );
- 
+
 echo "Done\n";
 
 // close the resources used

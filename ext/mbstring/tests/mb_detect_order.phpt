@@ -1,5 +1,5 @@
 --TEST--
-mb_detect_order()  
+mb_detect_order()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--

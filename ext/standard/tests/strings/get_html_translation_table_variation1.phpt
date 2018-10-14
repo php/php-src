@@ -8,7 +8,7 @@ Test get_html_translation_table() function : usage variations - unexpected table
 */
 
 /*
- * test get_html_translation_table() with unexpected value for argument $table 
+ * test get_html_translation_table() with unexpected value for argument $table
 */
 
 echo "*** Testing get_html_translation_table() : usage variations ***\n";
@@ -19,7 +19,7 @@ $quote_style = ENT_COMPAT;
 $unset_var = 10;
 unset($unset_var);
 
-// a resource variable 
+// a resource variable
 $fp = fopen(__FILE__, "r");
 
 // array with different values
@@ -81,7 +81,7 @@ for($index = 0; $index < count($values); $index ++) {
    } else {
     var_dump($v);
    }
-   
+
   $v = get_html_translation_table($table, $quote_style, "UTF-8");
   if (is_array($v) && count($v) > 100)
     var_dump(count($v));

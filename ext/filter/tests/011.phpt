@@ -28,7 +28,7 @@ var_dump(filter_var(0, 0, 0, 0, 0));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(4) "test"
 string(18) "http://example.com"
 string(27) "&#60;b&#62;test&#60;/b&#62;"

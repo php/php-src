@@ -1,17 +1,17 @@
 --TEST--
-Test mcrypt_decrypt() function : usage variation 
+Test mcrypt_decrypt() function : usage variation
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("mcrypt")) {
-	print "skip - mcrypt extension not loaded"; 
-}	 
+	print "skip - mcrypt extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : string mcrypt_decrypt(string cipher, string key, string data, string mode, string iv)
- * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv 
+ * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv
  * Source code: ext/mcrypt/mcrypt.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mcrypt_decrypt() : usage variation ***\n";
@@ -104,9 +104,9 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource variable
-      'resource' => $fp      
+      'resource' => $fp
 );
 
 // loop through each element of the array for data

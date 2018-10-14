@@ -1,9 +1,9 @@
 --TEST--
-Test array_pad() function : usage variations - unexpected values for 'input' argument 
+Test array_pad() function : usage variations - unexpected values for 'input' argument
 --FILE--
 <?php
 /* Prototype  : array array_pad(array $input, int $pad_size, mixed $pad_value)
- * Description: Returns a copy of input array padded with pad_value to size pad_size 
+ * Description: Returns a copy of input array padded with pad_value to size pad_size
  * Source code: ext/standard/array.c
 */
 

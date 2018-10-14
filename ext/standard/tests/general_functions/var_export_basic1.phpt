@@ -3,19 +3,19 @@ Test var_export() function with integer values
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing var_export() with integer values ***\n";
-// different integer vlaues 
+// different integer vlaues
 $valid_ints = array(
                 '0' => '0',
                 '1' => '1',
                 '-1' => '-1',
                 '-2147483648' => '-2147483648', // max negative integer value
-                '-2147483647' => '-2147483647', 
+                '-2147483647' => '-2147483647',
                 '2147483647' => 2147483647,  // max positive integer value
                 '2147483640' => 2147483640,
                 '0x123B' => 0x123B,      // integer as hexadecimal

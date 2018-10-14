@@ -3,13 +3,13 @@ Test http_build_query() function: usage variations - testing four parameter adde
 --CREDITS--
 Adam Gegotek <adam [dot] gegotek [at] gmail [dot] com>
 --SKIPIF--
-<?php 
+<?php
   if (version_compare(PHP_VERSION, '5.4.0', '<')) die("skip this test if PHP_VERSION is less than 5.4.0");
 ?>
 --FILE--
 <?php
 /* Prototype  : string http_build_query ( mixed $query_data [, string $numeric_prefix [, string $arg_separator [, int $enc_type = PHP_QUERY_RFC1738 ]]] )
- * Description: Generates a URL-encoded query string from the associative (or indexed) array provided. 
+ * Description: Generates a URL-encoded query string from the associative (or indexed) array provided.
  * Source code: ext/standard/http.c
 */
 

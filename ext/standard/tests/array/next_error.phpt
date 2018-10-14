@@ -3,7 +3,7 @@ Test next() function : error conditions - Pass incorrect number of arguments
 --FILE--
 <?php
 /* Prototype  : mixed next(array $array_arg)
- * Description: Move array argument's internal pointer to the next element and return it 
+ * Description: Move array argument's internal pointer to the next element and return it
  * Source code: ext/standard/array.c
  */
 

@@ -14,7 +14,7 @@ for ($i = 0; $i < $period * 3; $i++) {
     $s = unserialize(serialize(array($b, $a)));
     if ($s[0] === $s[1]) {
         echo "OOPS\n";
-        break; 
+        break;
     }
     $dummy[] = $a;
 }

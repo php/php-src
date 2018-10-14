@@ -1,17 +1,17 @@
 --TEST--
-Test gzopen() function : usage variation 
+Test gzopen() function : usage variation
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - zlib extension not loaded"; 
-}	 
+	print "skip - zlib extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
- * Description: Open a .gz-file and return a .gz-file pointer 
+ * Description: Open a .gz-file and return a .gz-file pointer
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gzopen() : usage variation ***\n";
@@ -102,9 +102,9 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource variable
-      'resource' => $fp      
+      'resource' => $fp
 );
 
 // loop through each element of the array for mode

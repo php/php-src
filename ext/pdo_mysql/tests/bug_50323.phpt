@@ -44,7 +44,7 @@ if (1 === @$db->exec('CREATE DATABASE `crazy;dbname`')) {
     $dsn = changeDSN(getenv('PDOTEST_DSN'), array('dbname' => 'crazy;;dbname'));
     $user = getenv('PDOTEST_USER');
     $pass = getenv('PDOTEST_PASS');
-    
+
     new PDO($dsn, $user, $pass);
 }
 echo 'done!';

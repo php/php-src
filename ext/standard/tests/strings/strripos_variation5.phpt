@@ -7,8 +7,8 @@ Test strripos() function : usage variations - heredoc string containing escape c
  * Source code: ext/standard/string.c
 */
 
-/* Test strripos() function by passing heredoc string containing escape chars for haystack 
- *  and with various needles & offsets 
+/* Test strripos() function by passing heredoc string containing escape chars for haystack
+ *  and with various needles & offsets
 */
 
 echo "*** Testing strripos() function: with heredoc strings ***\n";

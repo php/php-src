@@ -12,7 +12,7 @@ class Test
 		echo __METHOD__ . "\n";
 		if (isset($this->x[$name])) {
 			return $this->x[$name];
-		} 
+		}
 		else
 		{
 			return NULL;

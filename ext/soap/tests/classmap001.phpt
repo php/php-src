@@ -22,19 +22,19 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </dotest>
  </env:Body>
 <env:Header/>
-</env:Envelope>";	
+</env:Envelope>";
 
 class test{
 	function dotest(book $book){
 		$classname=get_class($book);
 		return "Classname: ".$classname;
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 $options=Array(
 		'actor' =>'http://schema.nothing.com',

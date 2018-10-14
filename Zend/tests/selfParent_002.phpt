@@ -5,7 +5,7 @@ Test when constants are initialised. See also selfParent_001.phpt.
 class A {
 	const myConst = "const in A";
 	const myDynConst = self::myConst;
-	
+
 	public static function test() {
 		var_dump(self::myDynConst);
 	}

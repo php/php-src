@@ -15,7 +15,7 @@ var_dump(array_rand(array(1,2,3), 2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: array_rand() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

@@ -28,7 +28,7 @@ __HALT_COMPILER();
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/brandnewphar.phar');
 ?>
 --EXPECT--

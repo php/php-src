@@ -1,7 +1,7 @@
 --TEST--
 Bug #73037 SoapServer reports Bad Request when gzipped, var 0
 --SKIPIF--
-<?php 
+<?php
 	require_once('skipif.inc');
 	if (!extension_loaded("zlib")) {
 		echo "skip zlib is required for this test";
@@ -92,7 +92,7 @@ Expect: 100-continue
 Content-Length: ${len}
 HDRS;
 		if ($b) {
-			$hdrs .="\nContent-Encoding: gzip";		
+			$hdrs .="\nContent-Encoding: gzip";
 		}
 		//echo "Headers sent:\n$hdrs\n\n";
 		$fp = fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT, $errno, $errstr, 5);

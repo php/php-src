@@ -1,5 +1,5 @@
 --TEST--
-mb_http_output()  
+mb_http_output()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--

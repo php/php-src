@@ -1,7 +1,7 @@
 --TEST--
 ZE2 iterators and array wrapping
 --SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 is needed'); ?> 
+<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 is needed'); ?>
 --FILE--
 <?php
 
@@ -48,7 +48,7 @@ class a implements IteratorAggregate {
 $array = new a();
 
 foreach ($array as $property => $value) {
-	print "$property: $value\n";    
+	print "$property: $value\n";
 }
 
 #$array = $array->getIterator();
@@ -61,13 +61,13 @@ echo "===2nd===\n";
 $array = new ai();
 
 foreach ($array as $property => $value) {
-	print "$property: $value\n";    
+	print "$property: $value\n";
 }
 
 echo "===3rd===\n";
 
 foreach ($array as $property => $value) {
-	print "$property: $value\n";    
+	print "$property: $value\n";
 }
 
 ?>

@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 OO API: Generic errors
 --CREDITS--
 Boris Lytochkin

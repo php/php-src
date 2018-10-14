@@ -1,17 +1,17 @@
 --TEST--
 Test xml_parser_create_ns() function : usage variations
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto resource xml_parser_create_ns([string encoding [, string sep]])
- * Description: Create an XML parser 
+ * Description: Create an XML parser
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_parser_create_ns() : usage variations ***\n";
@@ -77,9 +77,9 @@ $values = array(
 
       // object data
       new aClass(),
-      
+
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,
@@ -92,7 +92,7 @@ $values = array(
 
 foreach($values as $value) {
       echo @"\nArg value $value \n";
-      $res = xml_parser_create_ns($value); 
+      $res = xml_parser_create_ns($value);
       var_dump($res);
       if ($res !== false) {
          xml_parser_free($res);

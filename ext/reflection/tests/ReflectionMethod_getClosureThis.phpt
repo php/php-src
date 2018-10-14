@@ -6,7 +6,7 @@ if (!extension_loaded('reflection') || !defined('PHP_VERSION_ID') || PHP_VERSION
   print 'skip';
 }
 ?>
---FILE-- 
+--FILE--
 <?php
 class StaticExample
 {

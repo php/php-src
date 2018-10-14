@@ -27,7 +27,7 @@ var_dump($r_a, $r_b, $r_c, $r_ap);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: import_request_variables() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)

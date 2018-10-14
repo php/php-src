@@ -29,7 +29,7 @@ $result = printf($format);
 echo "\n";
 var_dump($result);
 
-echo "\n-- Calling printf() with one arguments --\n"; 
+echo "\n-- Calling printf() with one arguments --\n";
 $result = printf($format1, $arg1);
 echo "\n";
 var_dump($result);

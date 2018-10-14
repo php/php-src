@@ -7,7 +7,7 @@ Ensure catch blocks for unknown exception types do not trigger autoload.
       echo "In autoload: ";
       var_dump($name);
   }
-  
+
   function f()
   {
       throw new Exception();

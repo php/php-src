@@ -14,7 +14,7 @@ function_exists('mb_stripos') or die("skip mb_stripos() is not available in this
 
 /*
  * Test how mb_stripos() behaves when passed different integers as $offset argument
- * The character length of $string_ascii and $string_mb is the same, 
+ * The character length of $string_ascii and $string_mb is the same,
  * and the needle appears at the same positions in both strings
  */
 

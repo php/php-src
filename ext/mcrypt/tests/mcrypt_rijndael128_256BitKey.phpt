@@ -1,32 +1,32 @@
 --TEST--
-Test mcrypt_encrypt() function : AES functionality 
+Test mcrypt_encrypt() function : AES functionality
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("mcrypt")) {
-	print "skip - mcrypt extension not loaded"; 
-}	 
+	print "skip - mcrypt extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : string mcrypt_encrypt(string cipher, string key, string data, string mode, string iv)
- * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv 
+ * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv
  * Source code: ext/mcrypt/mcrypt.c
- * Alias to functions: 
+ * Alias to functions:
  */
  /* Prototype  : string mcrypt_decrypt(string cipher, string key, string data, string mode, string iv)
- * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv 
+ * Description: OFB crypt/decrypt data using key key with cipher cipher starting with iv
  * Source code: ext/mcrypt/mcrypt.c
- * Alias to functions: 
+ * Alias to functions:
  */
  /* Prototype  : string mcrypt_cbc(int cipher, string key, string data, int mode, string iv)
- * Description: CBC crypt/decrypt data using key key with cipher cipher starting with iv 
+ * Description: CBC crypt/decrypt data using key key with cipher cipher starting with iv
  * Source code: ext/mcrypt/mcrypt.c
- * Alias to functions: 
+ * Alias to functions:
  */
  /* Prototype  : string mcrypt_ecb(int cipher, string key, string data, int mode, string iv)
- * Description: ECB crypt/decrypt data using key key with cipher cipher starting with iv 
+ * Description: ECB crypt/decrypt data using key key with cipher cipher starting with iv
  * Source code: ext/mcrypt/mcrypt.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mcrypt : Rijndael128 functionality ***\n";
@@ -37,8 +37,8 @@ $data = b'This is the secret message which must be encrypted';
 
 // keys : 20 bytes, 24 bytes, 30 Bytes, 32 Bytes, 40 Bytes
 $keys = array(
-              b'12345678901234567890', 
-              b'123456789012345678901234', 
+              b'12345678901234567890',
+              b'123456789012345678901234',
               b'123456789012345678901234567890',
               b'12345678901234567890123456789012',
               b'1234567890123456789012345678901234567890'
@@ -52,7 +52,7 @@ foreach ($keys as $key) {
    $res = mcrypt_encrypt($cipher, $key, $data, MCRYPT_MODE_CBC, $iv);
    var_dump(bin2hex($res));
    $res = mcrypt_decrypt($cipher, $key, $res, MCRYPT_MODE_CBC, $iv);
-   var_dump(bin2hex($res));   
+   var_dump(bin2hex($res));
 }
 ?>
 ===DONE===

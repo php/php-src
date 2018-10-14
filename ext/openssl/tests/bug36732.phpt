@@ -1,11 +1,11 @@
 --TEST--
 Bug #36732 (add support for req_extensions in openss_csr_new and sign)
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip");
 ?>
 --FILE--
-<?php 
+<?php
 $configargs = array(
     "req_extensions" => "v3_req",
     "x509_extensions" => "usr_cert",

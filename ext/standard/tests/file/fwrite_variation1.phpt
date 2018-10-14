@@ -36,7 +36,7 @@ foreach($file_content_types as $file_content_type) {
   /* open the file using $files_modes and perform fwrite() on it */
   foreach($file_modes as $file_mode) {
     echo "-- Opening file in $file_mode --\n";
-    
+
     // create the temp file with content of type $file_content_type
     $filename = dirname(__FILE__)."/fwrite_variation1.tmp"; // this is name of the file
     create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "fwrite_variation");
@@ -50,14 +50,14 @@ foreach($file_content_types as $file_content_type) {
     $data_to_be_written="";
     fill_buffer($data_to_be_written,$file_content_type,1024);  //get the data of size 1024
 
-    /*  Write the data into the file, verify it by checking the file pointer position, eof position, 
+    /*  Write the data into the file, verify it by checking the file pointer position, eof position,
         filesize & by displaying the content */
 
     var_dump( ftell($file_handle) );  // expected: 0
-    var_dump( fwrite($file_handle, $data_to_be_written )); 
+    var_dump( fwrite($file_handle, $data_to_be_written ));
     var_dump( ftell($file_handle) );  // expected: 0
-    var_dump( feof($file_handle) );  // expected: false 
-  
+    var_dump( feof($file_handle) );  // expected: false
+
     // move the file pointer to end of the file and try fwrite()
     fseek($file_handle, SEEK_END, 0);
     var_dump( ftell($file_handle) );  // expecting 1024

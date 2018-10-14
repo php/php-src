@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #40285 (The prepare parser goes into an infinite loop on ': or ":)
 --SKIPIF--
-<?php  
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -23,5 +23,5 @@ $s->execute();
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Done

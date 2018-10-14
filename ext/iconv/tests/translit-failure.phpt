@@ -3,7 +3,7 @@ Translit failure
 --SKIPIF--
 <?php
 include('skipif.inc');
-( ICONV_IMPL != "libiconv" ) and die("skip ICONV_IMPL != \"libiconv\""); 
+( ICONV_IMPL != "libiconv" ) and die("skip ICONV_IMPL != \"libiconv\"");
 ?>
 --INI--
 error_reporting=2039

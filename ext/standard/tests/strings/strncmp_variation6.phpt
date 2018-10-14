@@ -25,7 +25,7 @@ for($ASCII = 0; $ASCII <= 255; $ASCII++) {
 }
 
 echo "\n-- Checking with out of character's range, given in binary format --\n";
-/* Checking with the out of range ASCII value(given in binary format) */ 
+/* Checking with the out of range ASCII value(given in binary format) */
 $str1 = decbin(256);
 $str2 = decbin( ord( chr(256) ));
 var_dump( strncmp($str1, $str2, 8) );  //comparing all the 8-bits; expected: int(1)

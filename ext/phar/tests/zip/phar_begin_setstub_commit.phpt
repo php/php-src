@@ -44,7 +44,7 @@ fclose($a);
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/brandnewphar.phar.zip');
 unlink(dirname(__FILE__) . '/myfakestub.php');
 ?>

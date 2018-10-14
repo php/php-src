@@ -1,9 +1,9 @@
 --TEST--
-Test array_unique() function : error conditions 
+Test array_unique() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 

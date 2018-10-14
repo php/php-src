@@ -1,5 +1,5 @@
 --TEST--
-SplFileObject::fscanf function - basic functionality test 
+SplFileObject::fscanf function - basic functionality test
 --FILE--
 <?php
 $obj = New SplFileObject(dirname(__FILE__).'/SplFileObject_testinput.csv');

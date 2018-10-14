@@ -1,13 +1,13 @@
 --TEST--
-Test for pre-defined pcre constants 
+Test for pre-defined pcre constants
 --FILE--
 <?php
 
-echo "PCRE constants test\n"; 
+echo "PCRE constants test\n";
 
 echo "PREG_PATTERN_ORDER= ", PREG_PATTERN_ORDER, "\n";
 echo "PREG_OFFSET_CAPTURE= ", PREG_OFFSET_CAPTURE, "\n";
-echo "PREG_SPLIT_NO_EMPTY= ", PREG_SPLIT_NO_EMPTY, "\n"; 
+echo "PREG_SPLIT_NO_EMPTY= ", PREG_SPLIT_NO_EMPTY, "\n";
 echo "PREG_SPLIT_DELIM_CAPTURE= ", PREG_SPLIT_DELIM_CAPTURE, "\n";
 echo "PREG_SPLIT_OFFSET_CAPTURE= ", PREG_SPLIT_OFFSET_CAPTURE, "\n";
 echo "PREG_GREP_INVERT= ", PREG_GREP_INVERT, "\n";

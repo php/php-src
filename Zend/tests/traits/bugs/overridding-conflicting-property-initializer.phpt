@@ -19,5 +19,5 @@ class baz
 $obj = new baz();
 echo $obj->zoo, "\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: baz and foo define the same property ($zoo) in the composition of baz. However, the definition differs and is considered incompatible. Class was composed in %s on line %d
