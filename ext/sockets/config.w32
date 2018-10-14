@@ -13,4 +13,3 @@ if (PHP_SOCKETS != "no") {
 		WARNING("sockets not enabled; libraries and headers not found");
 	}
 }
-

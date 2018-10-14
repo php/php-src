@@ -108,4 +108,3 @@ bc_str2num (bc_num *num, char *str, int scale)
   if (bc_is_zero (*num))
     (*num)->n_sign = PLUS;
 }
-

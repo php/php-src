@@ -24,4 +24,3 @@ if (PHP_ICONV != "no") {
 		PHP_ICONV = "no";
 	}
 }
-

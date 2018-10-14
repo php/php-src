@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -285,4 +284,3 @@ char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 	return NULL;
 }
 /* }}} */
-

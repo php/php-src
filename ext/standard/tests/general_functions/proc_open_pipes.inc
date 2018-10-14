@@ -19,4 +19,3 @@ function unlink_sleep_script()
 		unlink($fname);
 	}
 }
-

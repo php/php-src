@@ -10,4 +10,3 @@ Full documentation here:
 [Using Libsodium in PHP Projects](https://paragonie.com/book/pecl-libsodium),
 a guide to using the libsodium PHP extension for modern, secure, and
 fast cryptography.
-

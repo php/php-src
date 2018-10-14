@@ -150,5 +150,3 @@ int mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
 	}
 	return c;
 }
-
-

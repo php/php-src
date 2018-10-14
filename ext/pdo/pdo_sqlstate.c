@@ -331,4 +331,3 @@ const char *pdo_sqlstate_state_to_description(char *state)
 	}
 	return NULL;
 }
-

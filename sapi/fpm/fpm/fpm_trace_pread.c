@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #define _GNU_SOURCE
@@ -63,4 +62,3 @@ int fpm_trace_get_long(long addr, long *data) /* {{{ */
 	return 0;
 }
 /* }}} */
-

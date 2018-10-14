@@ -39,4 +39,3 @@ extern zend_module_entry readline_module_entry;
 #endif /* HAVE_LIBREADLINE */
 
 #endif /* PHP_READLINE_H */
-

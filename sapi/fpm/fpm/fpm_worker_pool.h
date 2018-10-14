@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_WORKER_POOL_H
@@ -54,4 +53,3 @@ int fpm_worker_pool_init_main();
 extern struct fpm_worker_pool_s *fpm_worker_all_pools;
 
 #endif
-

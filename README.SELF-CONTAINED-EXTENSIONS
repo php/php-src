@@ -164,4 +164,3 @@ PECL SITE CONFORMITY
 
     This macros has to be used within your foo_module_entry to indicate the
     extension version.
-

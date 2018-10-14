@@ -3235,4 +3235,3 @@ m4_include([build/ax_check_compile_flag.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
 
 m4_include([build/php_cxx_compile_stdcxx.m4])
-
