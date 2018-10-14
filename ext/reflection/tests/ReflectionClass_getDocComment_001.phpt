@@ -63,8 +63,8 @@ string(%d) "/**
 
 
 		My
-Doc 
-		* Comment 
+Doc
+		* Comment
 for A
 
 * */"
