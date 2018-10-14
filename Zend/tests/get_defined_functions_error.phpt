@@ -26,5 +26,4 @@ var_dump( get_defined_functions($extra_arg, $extra_arg2) );
 
 Warning: get_defined_functions() expects at most 1 parameter, 2 given in %s on line %d
 NULL
-
 ===Done===
