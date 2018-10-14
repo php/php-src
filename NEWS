@@ -32,6 +32,14 @@ PHP                                                                        NEWS
   . Fixed bug #66430 (ReflectionFunction::invoke does not invoke closure with
     object scope). (Nikita)
 
+- Sodium:
+  . Some base64 outputs were truncated; this is not the case any more.
+    (jedisct1)
+  . block sizes >= 256 bytes are now supposed by sodium_pad() even
+    when an old version of libsodium has been installed. (jedisct1)
+  . Fixed bug #77008 (sodium_pad() could read (but not return nor write)
+    uninitialized memory when trying to pad an empty input). (jedisct1)
+
 - Standard:
   . Fixed bug #76965 (INI_SCANNER_RAW doesn't strip trailing whitespace).
     (Pierrick)
