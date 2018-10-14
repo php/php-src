@@ -1,5 +1,5 @@
 --TEST--
-Test timezone_name_from_abbr() function : basic functionality 
+Test timezone_name_from_abbr() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string timezone_name_from_abbr  ( string $abbr  [, int $gmtOffset= -1  [, int $isdst= -1  ]] )
@@ -10,7 +10,7 @@ Test timezone_name_from_abbr() function : basic functionality
 
 echo "*** Testing timezone_name_from_abbr() : basic functionality ***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "-- Tests with special cases first - no lookup needed --\n";

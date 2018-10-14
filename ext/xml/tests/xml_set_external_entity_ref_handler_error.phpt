@@ -1,5 +1,5 @@
 --TEST--
-Test xml_set_external_entity_ref_handler() function : error conditions 
+Test xml_set_external_entity_ref_handler() function : error conditions
 --SKIPIF--
 <?php
 if (!extension_loaded("xml")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_external_entity_ref_handler(resource parser, string hdl)
- * Description: Set up external entity reference handler 
+ * Description: Set up external entity reference handler
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

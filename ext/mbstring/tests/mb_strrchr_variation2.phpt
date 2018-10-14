@@ -8,7 +8,7 @@ function_exists('mb_strrchr') or die("skip mb_strrchr() is not available in this
 --FILE--
 <?php
 /* Prototype  : string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds the last occurrence of a character in a string within another 
+ * Description: Finds the last occurrence of a character in a string within another
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions:
  */
@@ -104,7 +104,7 @@ $inputs = array(
       'unset var' => @$unset_var,
 
       // resource variable
-      'resource' => $fp      
+      'resource' => $fp
 );
 
 // loop through each element of the array for needle

@@ -1,5 +1,5 @@
 --TEST--
-Test posix_getgroups() function : basic functionality 
+Test posix_getgroups() function : basic functionality
 --SKIPIF--
 <?php
 	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');

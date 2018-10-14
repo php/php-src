@@ -11,7 +11,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 
 /* test fgetss with all read modes */
 
-// include the common file related test functions 
+// include the common file related test functions
 include ("file.inc");
 
 echo "*** Testing fgetss() : Basic operations ***\n";
@@ -57,10 +57,10 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   var_dump( ftell($file_handle) ); // checking file pointer position initially
   var_dump( feof($file_handle) ); // confirm file pointer is not at eof
 
-  // close the file 
+  // close the file
   fclose($file_handle);
 
-  // delete the file 
+  // delete the file
   delete_file($filename);
 } // end of for - mode_counter
 

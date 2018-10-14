@@ -1,5 +1,5 @@
 --TEST--
-Test curl_multi_exec() function with basic functionality 
+Test curl_multi_exec() function with basic functionality
 --CREDITS--
 TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
 --SKIPIF--
@@ -7,7 +7,7 @@ TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
 --FILE--
 <?php
 /* Prototype  : bool curl_multi_exec(resource ch)
- * Description: Perform a cURL session 
+ * Description: Perform a cURL session
  * Source code: ext/curl/multi.c
  * Alias to functions:
  */

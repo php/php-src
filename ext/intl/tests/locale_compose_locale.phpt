@@ -6,7 +6,7 @@ locale_compose_locale()
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 
@@ -15,7 +15,7 @@ function ut_main()
 	$loc_parts_arr1 = array(
 		Locale::LANG_TAG =>'sl' ,
 		Locale::SCRIPT_TAG =>'Latn' ,
-		Locale::REGION_TAG =>'IT' 
+		Locale::REGION_TAG =>'IT'
 	);
 	$loc_parts_arr2 = array(
 		Locale::LANG_TAG =>'de' ,
@@ -39,7 +39,7 @@ function ut_main()
 		Locale::SCRIPT_TAG =>'Hans' ,
 		Locale::REGION_TAG =>'CN',
 		Locale::VARIANT_TAG.'14' =>'rozaj' ,
-		'variant1'=>'nedis' 
+		'variant1'=>'nedis'
 	);
 	$loc_parts_arr7 = array(
 		Locale::LANG_TAG =>'en' ,
@@ -70,7 +70,7 @@ function ut_main()
 		Locale::SCRIPT_TAG => 15
 	);
 	$loc_parts_arr11 = array(
-		Locale::LANG_TAG =>'de'  , 
+		Locale::LANG_TAG =>'de'  ,
 		Locale::REGION_TAG =>'DE',
 		'private0' => 13,
 		'variant1' => array(),
@@ -91,7 +91,7 @@ function ut_main()
 		'loc2' => $loc_parts_arr2	,
 		'loc3' => $loc_parts_arr3	,
 		'loc4' => $loc_parts_arr4	,
-		'loc5' => $loc_parts_arr5	,	
+		'loc5' => $loc_parts_arr5	,
 		'loc6' => $loc_parts_arr6	,
 		'loc7' => $loc_parts_arr7	,
 		'loc8' => $loc_parts_arr8	,

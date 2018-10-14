@@ -20,9 +20,9 @@ if( substr(PHP_OS, 0, 3) == "WIN" )
 // include the file.inc for common functions for test
 include ("file.inc");
 
-/* Testing fseek(),ftell(),rewind() functions 
+/* Testing fseek(),ftell(),rewind() functions
      1. All  write and create with write modes
-     2. Testing fseek() with whence = SEEK_SET 
+     2. Testing fseek() with whence = SEEK_SET
 */
 echo "*** Testing fseek(), ftell(), rewind() : whence = SEEK_SET & all w and x modes ***\n";
 $file_modes = array( "w","wb","wt","w+","w+b","w+t",

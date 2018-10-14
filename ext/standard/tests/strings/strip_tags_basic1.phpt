@@ -5,13 +5,13 @@ short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
- * Description: Strips HTML and PHP tags from a string 
+ * Description: Strips HTML and PHP tags from a string
  * Source code: ext/standard/string.c
 */
 
 echo "*** Testing strip_tags() : basic functionality ***\n";
 
-// array of arguments 
+// array of arguments
 $string_array = array (
   "<html>hello</html>",
   '<html>hello</html>',

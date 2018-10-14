@@ -1,9 +1,9 @@
 --TEST--
-Test preg_replace() function : basic 
+Test preg_replace() function : basic
 --FILE--
 <?php
 /* Prototype  : proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
- * Description: Perform Perl-style regular expression replacement. 
+ * Description: Perform Perl-style regular expression replacement.
  * Source code: ext/pcre/php_pcre.c
  * Alias to functions:
 */

@@ -1,9 +1,9 @@
 --TEST--
-Test vprintf() function : error conditions 
+Test vprintf() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int vprintf(string $format , array $args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
  */
 

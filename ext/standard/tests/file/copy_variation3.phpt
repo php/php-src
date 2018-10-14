@@ -30,7 +30,7 @@ $dest_files = array(
   "copy variation3.tmp",  //file name containing blank space
   " copy_variation3.tmp",  //file name starts with blank space
   "copy\tvariation3.tmp",
-  " ",  //blank space as file name 
+  " ",  //blank space as file name
 );
 
 echo "Size of the source file before copy operation => ";

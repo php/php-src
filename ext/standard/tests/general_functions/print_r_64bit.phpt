@@ -29,9 +29,9 @@ function check_printr( $variables ) {
     $counter++;
   }
 }
-  
+
 echo "\n*** Testing print_r() on integer variables ***\n";
-$integers = array ( 
+$integers = array (
   0,  // zero as argument
   000000123,  //octal value of 83
   123000000,
@@ -85,7 +85,7 @@ $floats = array (
   -0x80000001,  // float value, beyond max negative int
   0x80000001,  // float value, beyond max positive int
   020000000001,  // float value, beyond max positive int
-  -020000000001  // float value, beyond max negative int 
+  -020000000001  // float value, beyond max negative int
 );
 /* calling check_printr() to display contents of float variables
    using print_r() */
@@ -260,9 +260,9 @@ $variations = array (
   array( new no_member_class, array(), false, 0 ),
   array( -0.00, "Where am I?", array(7,8,9), TRUE, 'A', 987654321 ),
   array( @$unset_var, 2.E+10, 100-20.9, 000004.599998 ),  //unusual data
-  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7') 
+  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7')
 );
-/* calling check_printr() to display combinations of scalar and 
+/* calling check_printr() to display combinations of scalar and
    non-scalar variables using print_r() */
 check_printr($variations);
 

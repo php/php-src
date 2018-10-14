@@ -1,5 +1,5 @@
 --TEST--
-Object serialization / unserialization: references to external values 
+Object serialization / unserialization: references to external values
 --FILE--
 <?php
 /* Prototype  : proto string serialize(mixed variable)
@@ -8,7 +8,7 @@ Object serialization / unserialization: references to external values
  * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
  * Alias to functions:
  */

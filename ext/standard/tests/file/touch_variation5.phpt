@@ -1,5 +1,5 @@
 --TEST--
-Test touch() function : variation: various valid and invalid paths 
+Test touch() function : variation: various valid and invalid paths
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -11,7 +11,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : bool touch(string filename [, int time [, int atime]])
- * Description: Set modification time of file 
+ * Description: Set modification time of file
  * Source code: ext/standard/filestat.c
  * Alias to functions:
  */
@@ -36,7 +36,7 @@ $paths = array(
              $cwd.'/./'.$workDir.'/'.$subDirOrFile,
              $cwd.'/'.$workDir.'/../'.$workDir.'/'.$subDirOrFile,
 
-             //absolute bad path             
+             //absolute bad path
              $cwd.'/BADDIR/'.$subDirOrFile,
 
              //trailing separators

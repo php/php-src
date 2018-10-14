@@ -31,7 +31,7 @@ $client = new TestSoapClient(NULL, array(
 	'uri' => "test://",
 	'location' => "test://",
 	'soap_version'=>SOAP_1_2,
-	'trace'=>1, 
+	'trace'=>1,
 	'exceptions'=>0));
 $res = $client->Test();
 echo($res->faultstring."\n");

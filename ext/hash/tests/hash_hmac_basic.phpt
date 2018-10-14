@@ -1,5 +1,5 @@
 --TEST--
-Hash: hash_file() function : basic functionality 
+Hash: hash_file() function : basic functionality
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test array_chunk() function : basic functionality - 'preserve_keys' as true/false 
+Test array_chunk() function : basic functionality - 'preserve_keys' as true/false
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])

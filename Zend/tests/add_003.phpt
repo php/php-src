@@ -1,5 +1,5 @@
 --TEST--
-adding arrays to objects 
+adding arrays to objects
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "at" mode 
+Test fopen and fclose() functions - usage variations - "at" mode
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) != "WIN" )

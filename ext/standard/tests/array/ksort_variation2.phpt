@@ -3,7 +3,7 @@ Test ksort() function : usage variations - unexpected values for 'sort_flags' ar
 --FILE--
 <?php
 /* Prototype  : bool ksort(array &array_arg [, int sort_flags])
- * Description: Sort an array by key, maintaining key to data correlation 
+ * Description: Sort an array by key, maintaining key to data correlation
  * Source code: ext/standard/array.c
 */
 

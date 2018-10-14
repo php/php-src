@@ -8,7 +8,7 @@ Test get_html_translation_table() function : usage variations - unexpected table
 */
 
 /*
- * test get_html_translation_table() with unexpected value for argument $table 
+ * test get_html_translation_table() with unexpected value for argument $table
 */
 
 echo "*** Testing get_html_translation_table() : usage variations ***\n";
@@ -19,7 +19,7 @@ $quote_style = ENT_COMPAT;
 $unset_var = 10;
 unset($unset_var);
 
-// a resource variable 
+// a resource variable
 $fp = fopen(__FILE__, "r");
 
 // array with different values

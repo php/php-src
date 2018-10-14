@@ -15,7 +15,7 @@ class SectionClass {
 		$this->Comment = $comment;
  	}
 	function __destruct() {
-		out($this->Comment); // this line doesn't crash PHP 
+		out($this->Comment); // this line doesn't crash PHP
  		out("\n<!-- End Section: " . $this->Comment . "-->"); // this line
  	}
 }

@@ -1,5 +1,5 @@
 --TEST--
-Test quoted_printable_decode() function : basic functionality 
+Test quoted_printable_decode() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string quoted_printable_decode  ( string $str  )

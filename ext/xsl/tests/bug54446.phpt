@@ -30,10 +30,10 @@ EOT;
 
 $xsl->loadXML( $sXsl );
 
-# START XSLT 
+# START XSLT
 $proc->importStylesheet( $xsl );
 
-# TRASNFORM & PRINT 
+# TRASNFORM & PRINT
 print $proc->transformToXML( $dom );
 
 
@@ -46,7 +46,7 @@ if (file_exists($outputfile)) {
 #SET NO SECURITY PREFS
 $proc->setSecurityPrefs(XSL_SECPREF_NONE);
 
-# TRASNFORM & PRINT 
+# TRASNFORM & PRINT
 print $proc->transformToXML( $dom );
 
 
@@ -61,7 +61,7 @@ unlink($outputfile);
 #SET SECURITY PREFS AGAIN
 $proc->setSecurityPrefs( XSL_SECPREF_WRITE_FILE |  XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY);
 
-# TRASNFORM & PRINT 
+# TRASNFORM & PRINT
 print $proc->transformToXML( $dom );
 
 if (file_exists($outputfile)) {

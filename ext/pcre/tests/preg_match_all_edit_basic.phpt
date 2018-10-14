@@ -1,9 +1,9 @@
 --TEST--
-Test preg_match_all() function : basic functionality 
+Test preg_match_all() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
- * Description: Perform a Perl-style global regular expression match 
+ * Description: Perform a Perl-style global regular expression match
  * Source code: ext/pcre/php_pcre.c
  * Alias to functions:
 */
@@ -22,7 +22,7 @@ var_dump($match3);
 var_dump(preg_match_all('/\d{2}$/', $string, $match4));										//tries to find 2 digits at the end of a string (0 matches)
 var_dump($match4);
 
-var_dump(preg_match_all('/(This is a ){2}(.*)\stest/', $string, $match5));							//tries to find "This is aThis is a [...] test" (0 matches)	
+var_dump(preg_match_all('/(This is a ){2}(.*)\stest/', $string, $match5));							//tries to find "This is aThis is a [...] test" (0 matches)
 var_dump($match5);
 ?>
 --EXPECT--

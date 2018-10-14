@@ -1,5 +1,5 @@
 --TEST--
-Test function_exists() function : error conditions 
+Test function_exists() function : error conditions
 --FILE--
 <?php
 /*

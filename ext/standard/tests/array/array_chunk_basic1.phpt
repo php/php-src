@@ -24,7 +24,7 @@ $input_arrays = array (
   // associative arrays - key as numeric
   array(1 => 'one', 2 => "two", 3 => "three"),
 
-  // array containing elements with/witout keys 
+  // array containing elements with/witout keys
   array(1 => 'one','two', 3 => 'three', 4, "five" => 5)
 
 );

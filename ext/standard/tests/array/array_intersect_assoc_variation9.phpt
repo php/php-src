@@ -1,5 +1,5 @@
 --TEST--
-Test array_intersect_assoc() function : usage variations - two dimensional arrays for $arr1 and $arr2 arguments 
+Test array_intersect_assoc() function : usage variations - two dimensional arrays for $arr1 and $arr2 arguments
 --FILE--
 <?php
 /* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])
@@ -10,7 +10,7 @@ Test array_intersect_assoc() function : usage variations - two dimensional array
 
 /*
 * Testing the behavior of array_intersect_assoc() by passing 2-D arrays
-* to both $arr1 and $arr2 argument. 
+* to both $arr1 and $arr2 argument.
 * Optional argument takes the same value as that of $arr1
 */
 

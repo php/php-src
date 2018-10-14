@@ -3,7 +3,7 @@ Test array_values() function : usage variations - Pass different data types as $
 --FILE--
 <?php
 /* Prototype  : array array_values(array $input)
- * Description: Return just the values from the input array 
+ * Description: Return just the values from the input array
  * Source code: ext/standard/array.c
  */
 

@@ -28,7 +28,7 @@ var_dump( array_search((int)$dir_handle, $resources, true) );
 echo "\n*** Testing miscelleneos inputs with array_search() ***\n";
 //matching "Good" in array(0,"hello"), result:true in loose type check
 var_dump( array_search("Good", array(0,"hello")) );
-//false in strict mode 
+//false in strict mode
 var_dump( array_search("Good", array(0,"hello"), TRUE) );
 
 //matching integer 0 in array("this"), result:true in loose type check
@@ -42,8 +42,8 @@ var_dump( array_search("this", array(0)) );
 var_dump( array_search("this", array(0), TRUE) );
 
 //checking for type FALSE in multidimensional array with loose checking, result:false in loose type check
-var_dump( array_search(FALSE, 
-                   array("a"=> TRUE, "b"=> TRUE, 
+var_dump( array_search(FALSE,
+                   array("a"=> TRUE, "b"=> TRUE,
                          array("c"=> TRUE, "d"=>TRUE)
                         )
                   )
@@ -51,7 +51,7 @@ var_dump( array_search(FALSE,
 
 //matching string having integer in beginning, result:true in loose type check
 var_dump( array_search('123abc', array(123)) );
-var_dump( array_search('123abc', array(123), TRUE) ); // false in strict mode 
+var_dump( array_search('123abc', array(123), TRUE) ); // false in strict mode
 
 echo "Done\n";
 ?>

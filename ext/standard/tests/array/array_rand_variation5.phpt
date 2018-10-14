@@ -3,13 +3,13 @@ Test array_rand() function : usage variation - invalid values for 'req_num' para
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array $input [, int $num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
 /*
-* Test behaviour of array_rand() function when associative array and 
-* various invalid values are passed to the 'input' and 'req_num' 
+* Test behaviour of array_rand() function when associative array and
+* various invalid values are passed to the 'input' and 'req_num'
 * parameters respectively
 */
 
@@ -24,7 +24,7 @@ $input = array(
 );
 
 // Testing array_rand() function with various invalid 'req_num' values
-// with valid num_req values  
+// with valid num_req values
 echo"\n-- With default num_req value --\n";
 var_dump( array_rand($input) );  // with default $num_req value
 echo"\n-- With num_req = 1 --\n";

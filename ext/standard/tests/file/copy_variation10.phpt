@@ -1,5 +1,5 @@
 --TEST--
-Test copy() function: usage variations - identical names 
+Test copy() function: usage variations - identical names
 --FILE--
 <?php
 /* Prototype: bool copy ( string $source, string $dest );

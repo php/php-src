@@ -8,7 +8,7 @@ Test array_merge_recursive() function : usage variations - two dimensional array
 */
 
 /*
- * Testing the functionality of array_merge_recursive() by passing 
+ * Testing the functionality of array_merge_recursive() by passing
  * two dimensional arrays for $arr1 argument.
 */
 
@@ -22,7 +22,7 @@ $arr1 = array(
   array(1, 2, 3, 1)
 );
 
-// initialize the second argument 
+// initialize the second argument
 $arr2 = array(1, "hello", "array" => array("hello", 'world'));
 
 echo "-- Passing the entire 2-d array --\n";

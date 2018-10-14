@@ -26,7 +26,7 @@ $heredoc_NULL_string = <<<EOD
 NULL
 EOD;
 
-// different valid  scalar values 
+// different valid  scalar values
 $scalars = array(
   /* integers */
   0,
@@ -91,11 +91,11 @@ $scalars = array(
   "true",
   /*"\0123",
   "\0x12FF",*/
-  $heredoc_string, 
+  $heredoc_string,
   $heredoc_numeric_string,
   $heredoc_empty_string
 );
-/* loop to check that strval() recognizes different 
+/* loop to check that strval() recognizes different
    scalar values and returns the string conversion of same */
 $loop_counter = 1;
 foreach ($scalars as $scalar ) {
@@ -112,7 +112,7 @@ $dfp = opendir( dirname(__FILE__) );
 $unset_var = 10;
 unset ($unset_var);
 
-// non_scalar values, objects, arrays, resources and boolean 
+// non_scalar values, objects, arrays, resources and boolean
 class foo
 {
   function __toString() {
@@ -133,7 +133,7 @@ $not_scalars = array (
   @$unset_var,  // unset variable
   @$undefined_var
 );
-/* loop through the $not_scalars to see working of 
+/* loop through the $not_scalars to see working of
    strval() on objects, arrays, boolean and others */
 $loop_counter = 1;
 foreach ($not_scalars as $value ) {
@@ -145,7 +145,7 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 var_dump( strval() );
 
-//arguments more than expected 
+//arguments more than expected
 var_dump( strval( $scalars[0], $scalars[1]) );
 
 echo "Done\n";

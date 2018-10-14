@@ -77,7 +77,7 @@ $values =  array (
   $unset_var,
 
   /* resource */
-  $file_handle,  
+  $file_handle,
 
   /* object */
   new sample()

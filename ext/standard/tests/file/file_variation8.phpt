@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array 
+ * Description: Read entire file into an array
  * Source code: ext/standard/file.c
  * Alias to functions:
  */
@@ -32,8 +32,8 @@ $allDirs = array(
 
   // relative paths
   $mainDir."/".$subDir,
-  $mainDir."//".$subDir, 
-   $mainDir."///".$subDir, 
+  $mainDir."//".$subDir,
+   $mainDir."///".$subDir,
   "./".$mainDir."/../".$mainDir."/".$subDir,
   "BADDIR",
 

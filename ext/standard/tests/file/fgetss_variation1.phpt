@@ -21,7 +21,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
     x, xb, xt
 */
 
-// include the common file related test functions 
+// include the common file related test functions
 include ("file.inc");
 
 echo "*** Testing fgetss() : usage variations ***\n";
@@ -66,10 +66,10 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   var_dump( ftell($file_handle) ); //ensure that file pointer position is not changed
   var_dump( feof($file_handle) ); // check if end of file pointer is set
 
-  // close the file 
+  // close the file
   fclose($file_handle);
 
-  // delete the file 
+  // delete the file
   delete_file($filename);
 } // end of for - mode_counter
 

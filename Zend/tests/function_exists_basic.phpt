@@ -1,5 +1,5 @@
 --TEST--
-function_exists function : basic functionality 
+function_exists function : basic functionality
 --FILE--
 <?php
 /*

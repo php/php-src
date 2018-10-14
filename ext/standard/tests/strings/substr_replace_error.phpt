@@ -1,5 +1,5 @@
 --TEST--
-Test substr_replace() function : error conditions 
+Test substr_replace() function : error conditions
 --FILE--
 <?php
 /* Prototype  : mixed substr_replace  ( mixed $string  , string $replacement  , int $start  [, int $length  ] )

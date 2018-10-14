@@ -17,7 +17,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 echo "*** Testing vfprintf() : string formats and non-string values ***\n";
 
 // defining array of string formats
-$formats = 
+$formats =
   '%s %+s %-s 
    %ls %Ls %4s %-4s
    %10.4s %-10.4s %04s %04.4s

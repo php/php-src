@@ -30,7 +30,7 @@ $precision = array(2,
 				"2",
 				"04",
 				"3.6",
-				"2.1e1",				
+				"2.1e1",
 				null,
 				true,
 				false);

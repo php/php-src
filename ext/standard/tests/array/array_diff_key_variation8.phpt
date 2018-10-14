@@ -1,9 +1,9 @@
 --TEST--
-Test array_diff_key() function : usage variation - Passing multi-dimensional array 
+Test array_diff_key() function : usage variation - Passing multi-dimensional array
 --FILE--
 <?php
 /* Prototype  : array array_diff_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. 
+ * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
@@ -25,7 +25,7 @@ $array2 = array (
 
       'second' => array('cyan' => 8),
 
-      'fourth' => array(2 => 'two'), 
+      'fourth' => array(2 => 'two'),
 );
 
 echo "\n-- Testing array_diff_key() function with multi dimensional array --\n";

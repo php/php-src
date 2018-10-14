@@ -51,7 +51,7 @@ $mask_array = array(
                     "fhel\t\i\100\xa"
                    );
 
-// defining the array for start values		
+// defining the array for start values
 $start_array = array(
 		    0,
 		    1,

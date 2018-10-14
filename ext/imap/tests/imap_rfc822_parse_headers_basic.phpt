@@ -1,5 +1,5 @@
 --TEST--
-imap_rfc822_parse_headers() function : basic functionality 
+imap_rfc822_parse_headers() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--

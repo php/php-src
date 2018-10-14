@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "x+t" mode 
+Test fopen and fclose() functions - usage variations - "x+t" mode
 --FILE--
 <?php
 /*
@@ -17,7 +17,7 @@ Test fopen and fclose() functions - usage variations - "x+t" mode
 /* Test fopen() and fclose(): Opening the file in "x+t" mode,
    checking for the file creation, write & read operations,
    checking for the file pointer position,
-   checking for the warning msg when trying to open an existing file in "x+t" mode,  
+   checking for the warning msg when trying to open an existing file in "x+t" mode,
    and fclose function
 */
 $file_path = dirname(__FILE__);

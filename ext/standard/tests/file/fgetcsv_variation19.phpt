@@ -8,14 +8,14 @@ Test fgetcsv() : usage variations - with default enclosure & delimiter of two ch
 */
 
 /*
-   Testing fgetcsv() to read a file when provided with default enclosure character 
-   and with delimiter of two characters 
+   Testing fgetcsv() to read a file when provided with default enclosure character
+   and with delimiter of two characters
 */
 
 echo "*** Testing fgetcsv() : with default enclosure & delimiter of two chars ***\n";
 
-/* the array is with two elements in it. Each element should be read as 
-   1st element is delimiter & 2nd element is csv fields 
+/* the array is with two elements in it. Each element should be read as
+   1st element is delimiter & 2nd element is csv fields
 */
 $csv_lists = array (
   array(',', 'water,fruit'),
@@ -56,7 +56,7 @@ foreach ($csv_lists as $csv_list) {
     fwrite($file_handle, "\n"); // blank line
 
     // close the file if the mode to be used is read mode  and re-open using read mode
-    // else rewind the file pointer to beginning of the file 
+    // else rewind the file pointer to beginning of the file
     if ( strstr($file_modes[$mode_counter], "r" ) ) {
       fclose($file_handle);
       $file_handle = fopen($filename, $file_modes[$mode_counter]);
@@ -69,7 +69,7 @@ foreach ($csv_lists as $csv_list) {
 
     // call fgetcsv() to parse csv fields
 
-    // use delimiter & enclosure char of two chars 
+    // use delimiter & enclosure char of two chars
     fseek($file_handle, 0, SEEK_SET);
     $del = "++";
     var_dump( fgetcsv($file_handle, 1024, $del) );
@@ -81,7 +81,7 @@ foreach ($csv_lists as $csv_list) {
     fclose($file_handle);
     //delete file
     unlink($filename);
-  } //end of mode loop 
+  } //end of mode loop
 } // end of foreach
 
 echo "Done\n";

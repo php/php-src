@@ -1,5 +1,5 @@
 --TEST--
-Hash: hash_file() function : basic functionality 
+Hash: hash_file() function : basic functionality
 --FILE--
 <?php
 
@@ -27,7 +27,7 @@ if (is_writable($file)) {
   }
 }
 
-// close the file 
+// close the file
 fclose($fp);
 
 echo "adler32: " . hash_file('adler32', $file) . "\n";

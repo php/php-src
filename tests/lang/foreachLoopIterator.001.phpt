@@ -1,5 +1,5 @@
 --TEST--
-foreach with Iterator. 
+foreach with Iterator.
 --FILE--
 <?php
 

@@ -19,7 +19,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing vfprintf() : unsigned formats and signed & other types of values ***\n";
 
 // defining array of unsigned formats
-$formats = 
+$formats =
   '%u %+u %-u 
    %lu %Lu %4u %-4u
    %10.4u %-10.4u %.4u 

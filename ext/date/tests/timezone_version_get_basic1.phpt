@@ -1,5 +1,5 @@
 --TEST--
-timezone_version_get: Test that timezone_location_get returns a date concatenated with a dot and a version number 
+timezone_version_get: Test that timezone_location_get returns a date concatenated with a dot and a version number
 --CREDITS--
 Rodrigo Wanderley de Melo Cardoso <rodrigogepem@gmail.com>
 #PHPTestFest2014 São Paulo 2014-07-05

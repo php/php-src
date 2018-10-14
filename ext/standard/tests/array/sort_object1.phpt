@@ -3,7 +3,7 @@ Test sort() function : object functionality - sorting objects, 'sort_flags' as d
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */

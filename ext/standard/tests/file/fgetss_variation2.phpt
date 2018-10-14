@@ -9,7 +9,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
  Description: Gets line from file pointer and strip HTML tags
 */
 
-// include the common file related test functions 
+// include the common file related test functions
 include ("file.inc");
 
 /*Test fgetss() with all read modes , reading line by line with allowable tags: <test>, <html>, <?> */
@@ -63,9 +63,9 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
      var_dump( feof($file_handle) );  // check if eof reached
   }
 
-  // close the file 
+  // close the file
   fclose($file_handle);
-  // delete the file 
+  // delete the file
   delete_file($filename);
 } // end of for - mode_counter
 

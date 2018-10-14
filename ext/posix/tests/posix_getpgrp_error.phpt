@@ -1,5 +1,5 @@
 --TEST--
-Test posix_getpgrp() function : error conditions 
+Test posix_getpgrp() function : error conditions
 --SKIPIF--
 <?php
 	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";

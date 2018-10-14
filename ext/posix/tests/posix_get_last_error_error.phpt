@@ -1,5 +1,5 @@
 --TEST--
-Test posix_get_last_error() function : error conditions 
+Test posix_get_last_error() function : error conditions
 --SKIPIF--
 <?php
 	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
@@ -7,7 +7,7 @@ Test posix_get_last_error() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto int posix_get_last_error(void)
- * Description: Retrieve the error number set by the last posix function which failed. 
+ * Description: Retrieve the error number set by the last posix function which failed.
  * Source code: ext/posix/posix.c
  * Alias to functions: posix_errno
  */

@@ -1,5 +1,5 @@
 --TEST--
-SPL: Test class_implements() function : basic 
+SPL: Test class_implements() function : basic
 --FILE--
 <?php
 /* Prototype  : array class_uses(mixed what [, bool autoload ])

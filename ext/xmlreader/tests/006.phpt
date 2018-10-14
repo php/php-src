@@ -1,5 +1,5 @@
 --TEST--
-XMLReader: libxml2 XML Reader, moveToElement 
+XMLReader: libxml2 XML Reader, moveToElement
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
@@ -12,7 +12,7 @@ $reader = new XMLReader();
 
 $reader->XML($xmlstring);
 
-// 2 read to get on the 2nd node 
+// 2 read to get on the 2nd node
 $reader->read();
 $reader->read();
 

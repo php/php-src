@@ -6,7 +6,7 @@ locale_get_all_variants.phpt()
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 

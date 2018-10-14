@@ -4,7 +4,7 @@ Bug #22510 (segfault among complex references)
 error_reporting=E_ALL | E_DEPRECATED
 --FILE--
 <?php
-class foo 
+class foo
 {
 	public $list = array();
 
@@ -29,7 +29,7 @@ class foo
 	}
 }
 
-class bar 
+class bar
 {
 	function run1() {
 		print __CLASS__."::".__FUNCTION__."\n";

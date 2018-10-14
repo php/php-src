@@ -74,7 +74,7 @@ foreach($arrays as $array) {
 
   /* with default argument */
   // returns element count in the resulting array after arguments are pushed to
-  // beginning of the given array 
+  // beginning of the given array
   $temp_array = $array;
   var_dump( array_unshift($temp_array, $var) );
 
@@ -83,7 +83,7 @@ foreach($arrays as $array) {
 
   /* with optional arguments */
   // returns element count in the resulting array after arguments are pushed to
-  // beginning of the given array 
+  // beginning of the given array
   $temp_array = $array;
   var_dump( array_unshift($temp_array, $var, "hello", 'world') );
 

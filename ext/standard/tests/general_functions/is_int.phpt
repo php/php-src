@@ -7,11 +7,11 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype: bool is_int ( mixed $var );
- * Description: Finds whether the given variable is an integer  
+ * Description: Finds whether the given variable is an integer
  */
 
 echo "*** Testing is_int(), is_integer() & is_long()  with valid integer values ***\n";
-// different valid  integer values 
+// different valid  integer values
 $valid_ints = array(
   0,
   1,
@@ -32,7 +32,7 @@ $valid_ints = array(
   -020000000000, // max negative integer as octal
   017777777777,  // max positive integer as octal
 );
-/* loop to check that is_int() recognizes different 
+/* loop to check that is_int() recognizes different
    integer values, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($valid_ints as $int_val ) {
@@ -52,15 +52,15 @@ $dfp = opendir ( dirname(__FILE__) );
 $unset_var = 10;
 unset ($unset_var);
 
-// other types in a array 
+// other types in a array
 $not_int_types = array (
   /* float values */
   -2147483649, // float value
   2147483648,  // float value
   -0x80000001, // float value, beyond max negative int
   0x800000001, // float value, beyond max positive int
-  020000000001, // float value, beyond max positive int 
-  -020000000001, // float value, beyond max negative int 
+  020000000001, // float value, beyond max positive int
+  -020000000001, // float value, beyond max negative int
   0.0,
   -0.1,
   1.0,
@@ -119,10 +119,10 @@ $not_int_types = array (
   FALSE,
 
   /* undefined and unset vars */
-  @$unset_var, 
+  @$unset_var,
   @$undefined_var
 );
-/* loop through the $not_int_types to see working of 
+/* loop through the $not_int_types to see working of
    is_int() on non integer types, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_int_types as $type ) {
@@ -138,7 +138,7 @@ var_dump( is_int() );
 var_dump( is_integer() );
 var_dump( is_long() );
 
-//arguments more than expected 
+//arguments more than expected
 var_dump( is_int(TRUE, FALSE) );
 var_dump( is_integer(TRUE, FALSE) );
 var_dump( is_long(TRUE, FALSE) );

@@ -1,10 +1,10 @@
 --TEST--
-SPL: Test ArrayObject::natsort() function : basic functionality 
+SPL: Test ArrayObject::natsort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int ArrayObject::natsort()
  * Description: proto int ArrayIterator::natsort()
- Sort the entries by values using "natural order" algorithm. 
+ Sort the entries by values using "natural order" algorithm.
  * Source code: ext/spl/spl_array.c
  * Alias to functions:
  */

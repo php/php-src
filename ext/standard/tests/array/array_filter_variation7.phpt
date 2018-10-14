@@ -1,9 +1,9 @@
 --TEST--
-Test array_filter() function : usage variations - anonymous callback functions 
+Test array_filter() function : usage variations - anonymous callback functions
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 

@@ -1,5 +1,5 @@
 --TEST--
-Test print() function : basic functionality 
+Test print() function : basic functionality
 --FILE--
 <?php
 

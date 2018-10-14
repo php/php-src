@@ -22,7 +22,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 */
 
 /* Variation 4 : Create file and a hard link to the file
-                 Access data of the file through the hard link 
+                 Access data of the file through the hard link
                  Update the file through hard link
                  Check size of file and hard link
 */

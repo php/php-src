@@ -24,7 +24,7 @@ if(is_resource($process))
 	$stderr_stream="";
 
 	echo "External command executed\n";
-	do                                     	
+	do
 	{
 		$process_state=proc_get_status($process);
 		$tmp_stdin=stream_get_contents($pipes[1]);

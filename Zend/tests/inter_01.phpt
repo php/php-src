@@ -1,5 +1,5 @@
 --TEST--
-Inherited constant from interface 
+Inherited constant from interface
 --FILE--
 <?php
 interface foo {

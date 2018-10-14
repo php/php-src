@@ -19,7 +19,7 @@ function foo($ret = FALSE) {
         }
     } catch (Exception $e) {
         goto local;
-local: 
+local:
         var_dump("catched");
         if ($ret) return "return";
     } finally {

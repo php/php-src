@@ -42,7 +42,7 @@ block
 -->
 </data>';
 
-// Case 3: replace even more characters so that only textual data is left 
+// Case 3: replace even more characters so that only textual data is left
 $xmls["Text"] ='<?xml version="1.0" encoding="iso-8859-1" ?>
 <data>
 -!-- ATA[
@@ -68,7 +68,7 @@ function endElement($parser, $name) {
 }
 
 function characterData($parser, $data) {
-  // dummy 
+  // dummy
 }
 
 foreach ($xmls as $desc => $xml) {

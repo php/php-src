@@ -1,11 +1,11 @@
 --TEST--
-Test finfo_close() function : basic functionality 
+Test finfo_close() function : basic functionality
 --SKIPIF--
 <?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : resource finfo_close(resource finfo)
- * Description: Close fileinfo resource. 
+ * Description: Close fileinfo resource.
  * Source code: ext/fileinfo/fileinfo.c
  * Alias to functions:
  */

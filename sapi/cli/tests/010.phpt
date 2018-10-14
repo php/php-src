@@ -1,5 +1,5 @@
 --TEST--
-executing a file with -F 
+executing a file with -F
 --SKIPIF--
 <?php
 include "skipif.inc";

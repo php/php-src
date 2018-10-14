@@ -12,7 +12,7 @@ Test fgets() function : usage variations - closed handle
     - unset file handle
 */
 
-// include the header for common test function 
+// include the header for common test function
 include ("file.inc");
 
 echo "*** Testing fgets() : usage variations ***\n";

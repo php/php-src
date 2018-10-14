@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_parse(resource parser, string data [, int isFinal])
- * Description: Start parsing an XML document 
+ * Description: Start parsing an XML document
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */
@@ -77,7 +77,7 @@ $values = array(
       new aClass(),
 
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,

@@ -1,5 +1,5 @@
 --TEST--
-Test get_defined_constants() function : basic functionality 
+Test get_defined_constants() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array get_defined_constants  ([ bool $categorize  ] )

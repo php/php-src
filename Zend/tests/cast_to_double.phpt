@@ -1,5 +1,5 @@
 --TEST--
-casting different variables to double 
+casting different variables to double
 --INI--
 precision=14
 --FILE--

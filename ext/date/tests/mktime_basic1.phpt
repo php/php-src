@@ -1,5 +1,5 @@
 --TEST--
-Test mktime() function : basic functionality 
+Test mktime() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int mktime  ([ int $hour= date("H")  [, int $minute= date("i")  [, int $second= date("s")  [, int $month= date("n")  [, int $day= date("j")  [, int $year= date("Y")  [, int $is_dst= -1  ]]]]]]] )
@@ -8,7 +8,7 @@ Test mktime() function : basic functionality
  * Alias to functions:
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing DateTime::modify() : basic functionality ***\n";

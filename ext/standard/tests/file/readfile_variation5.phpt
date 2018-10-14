@@ -1,11 +1,11 @@
 --TEST--
-Test readfile() function : usage variation 
+Test readfile() function : usage variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
- * Description: Output a file or a URL 
+ * Description: Output a file or a URL
  * Source code: ext/standard/file.c
  * Alias to functions:
  */

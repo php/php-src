@@ -1,5 +1,5 @@
 --TEST--
-Test new DateTime() : basic functionality 
+Test new DateTime() : basic functionality
 --FILE--
 <?php
 /* Prototype  : DateTime::__construct  ([ string $time="now"  [, DateTimeZone $timezone=NULL  ]] )
@@ -8,7 +8,7 @@ Test new DateTime() : basic functionality
  * Alias to functions:
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing new DateTime() : basic functionality ***\n";

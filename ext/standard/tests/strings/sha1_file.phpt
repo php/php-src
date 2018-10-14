@@ -27,7 +27,7 @@ if (is_writable($filename)) {
   }
 }
 
-// close the files 
+// close the files
 fclose($handle);
 fclose($handle2);
 

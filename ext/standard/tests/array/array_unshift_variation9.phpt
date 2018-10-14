@@ -9,7 +9,7 @@ Test array_unshift() function : usage variations - heredoc strings for 'var' arg
 
 /*
  * Testing the functionality of array_unshift() by passing different
- * heredoc strings for $var argument that is prepended to the array 
+ * heredoc strings for $var argument that is prepended to the array
  * passed through $array argument
 */
 

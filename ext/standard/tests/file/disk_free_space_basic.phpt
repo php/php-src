@@ -10,8 +10,8 @@ memory_limit=32M
 <?php
 /*
  *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function 
- *               will return the number of bytes available on the corresponding 
+ *  Description: Given a string containing a directory, this function
+ *               will return the number of bytes available on the corresponding
  *               filesystem or disk partition
  */
 

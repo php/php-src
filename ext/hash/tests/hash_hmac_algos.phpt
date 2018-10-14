@@ -1,5 +1,5 @@
 --TEST--
-Hash: hash_hmac_algos() function : basic functionality 
+Hash: hash_hmac_algos() function : basic functionality
 --FILE--
 <?php
 

@@ -3,7 +3,7 @@ Test sort() function : object functionality - sorting objects with diff. accessi
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -59,7 +59,7 @@ $unsorted_int_obj = array(
 
 // array of string objects
 $unsorted_str_obj = array (
-  new for_string_sort("axx","AXX","ass"), 
+  new for_string_sort("axx","AXX","ass"),
   new for_string_sort("t","eee","abb"),
   new for_string_sort("w","W", "c"),
   new for_string_sort("py","PY", "pt"),

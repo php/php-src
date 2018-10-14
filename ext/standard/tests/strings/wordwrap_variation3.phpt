@@ -8,7 +8,7 @@ Test wordwrap() function : usage variations  - unexptected values for break argu
 */
 
 /*
- * test wordwrap by passing different values for break argument 
+ * test wordwrap by passing different values for break argument
 */
 echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
@@ -88,7 +88,7 @@ for($index = 0; $index < count($values); $index ++) {
   $cut = false;
   var_dump( wordwrap($str, $width, $break, $cut) );
 
-  // $cut as true 
+  // $cut as true
   $cut = true;
   var_dump( wordwrap($str, $width, $break, $cut) );
 

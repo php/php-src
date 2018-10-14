@@ -22,7 +22,7 @@ $extra_arg = 10;
 
 var_dump( join($glue, $pieces, $extra_arg) );
 
-// Less than expected number of arguments 
+// Less than expected number of arguments
 echo "\n-- Testing join() with less than expected no. of arguments --\n";
 $glue = 'string_val';
 

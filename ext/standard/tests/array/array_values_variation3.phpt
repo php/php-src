@@ -3,7 +3,7 @@ Test array_values() function : usage variations - array keys different data type
 --FILE--
 <?php
 /* Prototype  : array array_values(array $input)
- * Description: Return just the values from the input array 
+ * Description: Return just the values from the input array
  * Source code: ext/standard/array.c
  */
 
@@ -49,7 +49,7 @@ $inputs = array(
        // null data
 /*4*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
 
 /*5*/  'null lowercase' => array(
        null => 'null 2',

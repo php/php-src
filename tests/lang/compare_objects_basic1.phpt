@@ -1,5 +1,5 @@
 --TEST--
-Test standard 'compare' object handler 
+Test standard 'compare' object handler
 --FILE--
 
 <?php

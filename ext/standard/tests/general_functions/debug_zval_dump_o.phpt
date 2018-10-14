@@ -9,7 +9,7 @@ Test debug_zval_dump() function : working on objects
 */
 
 /* Prototype: void zval_dump( $value );
-   Description: use debug_zval_dump() to display the objects and its 
+   Description: use debug_zval_dump() to display the objects and its
                 reference count */
 function zval_dump( $values ) {
   $counter = 1;

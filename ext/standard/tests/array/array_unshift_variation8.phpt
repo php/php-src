@@ -9,7 +9,7 @@ Test array_unshift() function : usage variations - single quoted strings for 'va
 
 /*
  * Testing the functionality of array_unshift() by passing different
- * single quoted strings for $var argument that is prepended to the array 
+ * single quoted strings for $var argument that is prepended to the array
  * passed through $array argument
 */
 

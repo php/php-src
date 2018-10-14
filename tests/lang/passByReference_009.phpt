@@ -5,7 +5,7 @@ Assignement as argument
     function foo(&$x, &$y) { $x = 1; echo $y ; }
 
     $x = 0;
-    foo($x, $x); // prints 1 .. 
+    foo($x, $x); // prints 1 ..
 
 
     function foo2($x, &$y, $z)

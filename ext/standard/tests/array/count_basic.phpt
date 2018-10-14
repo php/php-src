@@ -1,5 +1,5 @@
 --TEST--
-Test count() function : basic functionality 
+Test count() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int count(mixed $var [, int $mode])

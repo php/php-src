@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto string xml_error_string(int code)
- * Description: Get XML parser error string 
+ * Description: Get XML parser error string
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

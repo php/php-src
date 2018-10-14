@@ -24,7 +24,7 @@ if ($pid > 0) {
     echo "father ($pid) doesn't know its grandsons\n";
   }
 }
-else 
+else
 {
   echo "son ($pid)\n";
   $pid2 = pcntl_fork();
@@ -33,7 +33,7 @@ else
     pcntl_wait($status2);
     echo "son is father of $pid2\n";
   }
-  else 
+  else
   {
     echo "grandson ($pid2)\n";
   }

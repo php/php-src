@@ -1,7 +1,7 @@
 --TEST--
-Testing wrong param passing imagerectangle() of GD library 
+Testing wrong param passing imagerectangle() of GD library
 --CREDITS--
-Ivan Rosolen <contato [at] ivanrosolen [dot] com> 
+Ivan Rosolen <contato [at] ivanrosolen [dot] com>
 #testfest PHPSP on 2009-06-30
 --SKIPIF--
 <?php
@@ -9,7 +9,7 @@ if ( ! extension_loaded('gd') ) die( 'skip GD not present; skipping test' );
 ?>
 --FILE--
 <?php
-// Create a resource 
+// Create a resource
 $image = tmpfile();
 
 // Draw a rectangle

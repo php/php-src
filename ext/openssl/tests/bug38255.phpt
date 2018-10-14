@@ -1,5 +1,5 @@
 --TEST--
-openssl key from zval leaks 
+openssl key from zval leaks
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) die("skip");

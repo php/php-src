@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_object(resource parser, object &obj)
- * Description: Set up object which should be used for callbacks 
+ * Description: Set up object which should be used for callbacks
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */
@@ -68,7 +68,7 @@ $values = array(
       'string',
 
       // resource data
-      $fp,       
+      $fp,
 
       // undefined data
       $undefined_var,

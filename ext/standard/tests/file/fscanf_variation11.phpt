@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - float formats with arrays 
+Test fscanf() function: usage variations - float formats with arrays
 --FILE--
 <?php
 

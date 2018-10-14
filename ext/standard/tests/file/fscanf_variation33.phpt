@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - hexa formats with integer values 
+Test fscanf() function: usage variations - hexa formats with integer values
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {

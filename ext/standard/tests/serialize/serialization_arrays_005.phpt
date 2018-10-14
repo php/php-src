@@ -8,7 +8,7 @@ serialization: arrays with references, nested
  * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
  * Alias to functions:
  */
@@ -20,7 +20,7 @@ function check(&$a) {
 
 	$b = unserialize($ser);
 
-	// Change each element and dump result. 
+	// Change each element and dump result.
 	foreach($b as $k=>$v) {
 		if (is_array($v)){
 			foreach($b[$k] as $sk=>$sv) {

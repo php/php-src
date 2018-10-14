@@ -33,7 +33,7 @@ $needle = array(
   null,
 
   //boolean false
-  FALSE,  
+  FALSE,
   false,
 
   //empty string
@@ -53,13 +53,13 @@ $needle = array(
   "@",
   "@hEllo",
 
-  "12345", //decimal numeric string  
+  "12345", //decimal numeric string
   "\x23",  //hexadecimal numeric string
   "#",  //respective ASCII char of \x23
   "\101",  //octal numeric string
   "A",  //respective ASCII char of \101
   "456HEE",  //numerics + chars
-  $haystack  //haystack as needle  
+  $haystack  //haystack as needle
 );
 
 /* loop through to get the position of the needle in haystack string */

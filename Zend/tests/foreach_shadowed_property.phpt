@@ -2,7 +2,7 @@
 Foreach over object with shadowed private property
 --FILE--
 <?php
-  
+
 class Test {
     private $prop = "Test";
 

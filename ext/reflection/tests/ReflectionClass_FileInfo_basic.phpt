@@ -14,7 +14,7 @@ var_dump($rc->getStartLine());
 //Get the line number at the end of the definition of class C
 var_dump($rc->getEndLine());
 
-//Same tests as above but stdclass is internal - so all results should be false. 
+//Same tests as above but stdclass is internal - so all results should be false.
 $rc = new ReflectionClass("stdClass");
 var_dump($rc->getFileName());
 var_dump($rc->getStartLine());

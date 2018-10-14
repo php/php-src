@@ -18,7 +18,7 @@ var_dump( file($filename, $filename, $filename, $filename) );  // more than expe
 var_dump( file($filename, "INCORRECT_FLAG", NULL) );  //  Incorrect flag
 var_dump( file($filename, 10, NULL) );  //  Incorrect flag
 
-var_dump( file("temp.tmp") );  // non existing filename 
+var_dump( file("temp.tmp") );  // non existing filename
 fclose($file_handle);
 
 echo "\n--- Done ---";

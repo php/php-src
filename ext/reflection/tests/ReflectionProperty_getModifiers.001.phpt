@@ -23,7 +23,7 @@ class TestClass
     public $pub;
     static public $stat = "static property";
     /**
- 	 * This property has a comment. 
+ 	 * This property has a comment.
  	 */
     protected $prot = 4;
     private $priv = "keepOut";

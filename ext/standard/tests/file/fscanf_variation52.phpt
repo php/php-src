@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - empty file 
+Test fscanf() function: usage variations - empty file
 --FILE--
 <?php
 

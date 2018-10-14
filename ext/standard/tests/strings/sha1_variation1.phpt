@@ -1,5 +1,5 @@
 --TEST--
-Test sha1() function : usage variations - unexpected values for 'str' argument 
+Test sha1() function : usage variations - unexpected values for 'str' argument
 --FILE--
 <?php
 

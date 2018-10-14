@@ -3,7 +3,7 @@ Test get_resource_type() function : usage variations - different data types as h
 --FILE--
 <?php
 /* Prototype  : string get_resource_type  ( resource $handle  )
- * Description:  Returns the resource type 
+ * Description:  Returns the resource type
  * Source code: Zend/zend_builtin_functions.c
  */
 

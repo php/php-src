@@ -1,5 +1,5 @@
 --TEST--
-SPL: ArrayObject::getIteratorClass and ArrayObject::setIteratorClass basic functionality 
+SPL: ArrayObject::getIteratorClass and ArrayObject::setIteratorClass basic functionality
 --FILE--
 <?php
 class MyIterator extends ArrayIterator {

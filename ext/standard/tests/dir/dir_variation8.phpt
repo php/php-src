@@ -15,7 +15,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
  */
 
 /*
- * Create more than one temporary directory & subdirectory and check if dir() function can open 
+ * Create more than one temporary directory & subdirectory and check if dir() function can open
  * those directories when wildcard characters are used to refer to them.
  */
 

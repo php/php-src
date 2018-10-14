@@ -1,5 +1,5 @@
 --TEST--
-Test date_offset_get() function : basic functionality 
+Test date_offset_get() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int date_offset_get  ( DateTime $object  )
@@ -8,7 +8,7 @@ Test date_offset_get() function : basic functionality
  * Alias to functions:  DateTime::getOffset
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set('Europe/London');
 
 echo "*** Testing date_offset_get() : basic functionality ***\n";

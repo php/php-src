@@ -3,7 +3,7 @@ Test strval() function : usage variations  - Pass different data types as strval
 --FILE--
 <?php
 /* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable. 
+ * Description: Get the string value of a variable.
  * Source code: ext/standard/string.c
  */
 
@@ -74,7 +74,7 @@ $values = array(
 /*28*/    new MyClass(),
 
 	      // resource
-/*29*/    $file_handle, 
+/*29*/    $file_handle,
 
 	      // undefined data
 /*30*/    @$undefined_var,

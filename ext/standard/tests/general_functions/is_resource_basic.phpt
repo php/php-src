@@ -1,5 +1,5 @@
 --TEST--
-Test is_resource() function : basic functionality 
+Test is_resource() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool is_resource  ( mixed $var  )

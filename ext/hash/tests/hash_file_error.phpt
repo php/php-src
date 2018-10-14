@@ -1,5 +1,5 @@
 --TEST--
-Hash: hash_file() function : error conditions 
+Hash: hash_file() function : error conditions
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--

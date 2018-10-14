@@ -3,7 +3,7 @@ Test rawurlencode() function : usage variations  - unexpected type for arg 1.
 --FILE--
 <?php
 /* Prototype  : proto string rawurlencode(string str)
- * Description: URL-encodes string 
+ * Description: URL-encodes string
  * Source code: ext/standard/url.c
  * Alias to functions:
  */

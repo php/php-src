@@ -35,7 +35,7 @@ foreach( $file_types as $type ) {
     if($file_handle == false)
       exit("Error:failed to open file $file_name");
 
-    // fill the fill with some data if mode is append mode 
+    // fill the fill with some data if mode is append mode
     if( substr($mode, 0, 1) == "a" )
       fill_file($file_handle, $type, 10);
 

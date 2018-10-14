@@ -1,5 +1,5 @@
 --TEST--
-Test imap_createmailbox() function : basic functionality 
+Test imap_createmailbox() function : basic functionality
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__).'/skipif.inc');
@@ -15,7 +15,7 @@ echo "*** Testing imap_createmailbox() : basic functionality ***\n";
 
 require_once(dirname(__FILE__).'/imap_include.inc');
 
-$imap_stream = imap_open($default_mailbox, $username, $password) or 
+$imap_stream = imap_open($default_mailbox, $username, $password) or
 	die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
 
 $newname = "phpnewbox";

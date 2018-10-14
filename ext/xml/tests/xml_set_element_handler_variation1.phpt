@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_element_handler(resource parser, string shdl, string ehdl)
- * Description: Set up start and end element handlers 
+ * Description: Set up start and end element handlers
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */
@@ -80,7 +80,7 @@ $values = array(
       new aClass(),
 
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,

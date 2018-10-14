@@ -11,8 +11,8 @@ opcache.save_comments=1
 
 
 		My
-Doc 
-		* Comment 
+Doc
+		* Comment
 for A
 
 * */
@@ -63,8 +63,8 @@ string(%d) "/**
 
 
 		My
-Doc 
-		* Comment 
+Doc
+		* Comment
 for A
 
 * */"

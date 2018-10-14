@@ -3,7 +3,7 @@ Test strrev() function : usage variations - unexpected inputs
 --FILE--
 <?php
 /* Prototype  : string strrev(string $str);
- * Description: Reverse a string 
+ * Description: Reverse a string
  * Source code: ext/standard/string.c
 */
 
@@ -17,7 +17,7 @@ class sample {
   }
 }
 
-//get the resource 
+//get the resource
 $resource = fopen(__FILE__, "r");
 
 //get an unset variable

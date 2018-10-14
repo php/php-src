@@ -8,7 +8,7 @@ Test array_unshift() function : usage variations - assoc. array with diff. keys 
 */
 
 /*
- * Testing the functionality of array_unshift() by passing different 
+ * Testing the functionality of array_unshift() by passing different
  * associative arrays having different possible keys to $array argument.
  * The $var argument passed is a fixed value
 */

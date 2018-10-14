@@ -1,17 +1,17 @@
 --TEST--
-Test posix_getpgrp() function : basic functionality 
+Test posix_getpgrp() function : basic functionality
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 ?>
 --FILE--
-<?php 
+<?php
   echo "Basic test of POSIX getpgrp function\n";
-  	
+
   $pgrp = posix_getpgrp();
-  
+
   var_dump($pgrp);
-  
+
 ?>
 ===DONE====
 --EXPECTF--

@@ -1,5 +1,5 @@
 --TEST--
-Test new DateTimeZone() : basic functionality 
+Test new DateTimeZone() : basic functionality
 --FILE--
 <?php
 /* Prototype  : DateTimeZone::__construct  ( string $timezone  )
@@ -8,7 +8,7 @@ Test new DateTimeZone() : basic functionality
  * Alias to functions:
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing new DateTimeZone() : basic functionality ***\n";

@@ -3,7 +3,7 @@ Test array_shift() function : usage variations - Pass array with different data 
 --FILE--
 <?php
 /* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array 
+ * Description: Pops an element off the beginning of the array
  * Source code: ext/standard/array.c
  */
 
@@ -48,7 +48,7 @@ $inputs = array(
        // null data
 /*4*/  'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
 
 /*5*/  'null lowercase' => array(
        null => 'null 2',

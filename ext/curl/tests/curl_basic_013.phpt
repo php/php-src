@@ -1,7 +1,7 @@
 --TEST--
-Test curl_opt() function with CURLOPT_HTTP_VERSION/CURL_HTTP_VERSION_1_1 
+Test curl_opt() function with CURLOPT_HTTP_VERSION/CURL_HTTP_VERSION_1_1
 --CREDITS--
-TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>      
+TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--
@@ -25,7 +25,7 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $curl_content = curl_exec($ch);
   curl_close($ch);
 

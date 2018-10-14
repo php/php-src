@@ -1,5 +1,5 @@
 --TEST--
-Test xml_parser_set_option() function : error conditions 
+Test xml_parser_set_option() function : error conditions
 --SKIPIF--
 <?php
 if (!extension_loaded("xml")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
- * Description: Set options in an XML parser 
+ * Description: Set options in an XML parser
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

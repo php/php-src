@@ -1,5 +1,5 @@
 --TEST--
-Test date_format() function : error conditions 
+Test date_format() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string date_format  ( DateTime $object  , string $format  )
@@ -8,7 +8,7 @@ Test date_format() function : error conditions
  * Alias to functions: DateTime::format
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_format() : error conditions ***\n";

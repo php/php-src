@@ -8,7 +8,7 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
 --FILE--
 <?php
 /* Prototype  : proto string mb_ereg_replace(string pattern, string replacement, string string [, string option])
- * Description: Replace regular expression for multibyte string 
+ * Description: Replace regular expression for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  * Alias to functions:
  */

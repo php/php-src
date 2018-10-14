@@ -26,7 +26,7 @@ clearstatcache();
 
 echo "-- With symlink --\n";
 symlink($file_path."/is_dir_variation2", $file_path."/is_dir_variation2_symlink");
-var_dump( is_dir($file_path."/is_dir_variation2_symlink") );  //is_dir() resolves symlinks 
+var_dump( is_dir($file_path."/is_dir_variation2_symlink") );  //is_dir() resolves symlinks
 clearstatcache();
 
 echo "-- With hardlink --";

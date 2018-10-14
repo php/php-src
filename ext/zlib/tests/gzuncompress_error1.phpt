@@ -1,5 +1,5 @@
 --TEST--
-Test gzuncompress() function : error conditions 
+Test gzuncompress() function : error conditions
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("zlib")) {
 --FILE--
 <?php
 /* Prototype  : string gzuncompress(string data [, int length])
- * Description: Unzip a gzip-compressed string 
+ * Description: Unzip a gzip-compressed string
  * Source code: ext/zlib/zlib.c
  * Alias to functions:
  */

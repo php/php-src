@@ -54,7 +54,7 @@ $arrays = array (
        array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-       array(new classA() => 11, @$unset_var => "hello", $fp => 'resource'), 
+       array(new classA() => 11, @$unset_var => "hello", $fp => 'resource'),
 
        // array with mixed values
 /*11*/ array('hello' => 1, new classA() => 2, "fruit" => 2.2, $fp => 'resource', 133 => "int", 444.432 => "float", @$unset_var => "unset", $heredoc => "heredoc")

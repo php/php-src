@@ -3,7 +3,7 @@ Test array_unshift() function : usage variations - all possible values for 'var'
 --FILE--
 <?php
 /* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array 
+ * Description: Pushes elements onto the beginning of the array
  * Source code: ext/standard/array.c
 */
 
@@ -16,7 +16,7 @@ echo "*** Testing array_unshift() : all possible values for \$var argument ***\n
 // array to be passed to $array argument
 $array = array('f' => "first", "s" => 'second', 1, 2.222);
 
-// get a class 
+// get a class
 class classA
 {
   public function __toString() {

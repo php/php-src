@@ -6,9 +6,9 @@ precision=14
 --FILE--
 <?php
 /* Prototype: array explode ( string $delimiter, string $string [, int $limit] );
-   Description: Returns an array of strings, each of which is a substring of string 
+   Description: Returns an array of strings, each of which is a substring of string
                 formed by splitting it on boundaries formed by the string delimiter.
-                If limit is set, the returned array will contain a maximum of limit 
+                If limit is set, the returned array will contain a maximum of limit
                 elements with the last element containing the rest of string.
 */
 
@@ -28,7 +28,7 @@ $delimiters = array (
 );
 $string = "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND";
 /* loop prints an array of strings, each of which is a substring of $string
-   formed by splitting it on boundaries formed by the string $delimiter. 
+   formed by splitting it on boundaries formed by the string $delimiter.
  */
 $counter = 1;
 foreach($delimiters as $delimiter) {

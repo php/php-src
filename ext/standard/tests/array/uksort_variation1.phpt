@@ -1,9 +1,9 @@
 --TEST--
-Test uksort() function : usage variation 
+Test uksort() function : usage variation
 --FILE--
 <?php
 /* Prototype  : bool uksort(array array_arg, string cmp_function)
- * Description: Sort an array by keys using a user-defined comparison function 
+ * Description: Sort an array by keys using a user-defined comparison function
  * Source code: ext/standard/array.c
  * Alias to functions:
  */

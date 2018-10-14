@@ -3,7 +3,7 @@ Test vsprintf() function : usage variations - string formats with non-string val
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -17,7 +17,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 echo "*** Testing vsprintf() : string formats and non-string values ***\n";
 
 // defining array of string formats
-$formats = 
+$formats =
   '%s %+s %-s 
    %ls %4s %-4s
    %10.4s %-10.4s %04s %04.4s

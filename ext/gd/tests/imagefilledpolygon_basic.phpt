@@ -23,13 +23,13 @@ $points = array(
             60,  60,
             240, 20,
             50,  40,
-            10,  10   
+            10,  10
             );
 
 // create a blank image
 $image = imagecreatetruecolor(250, 250);
 
-// set the background color to black 
+// set the background color to black
 $bg = imagecolorallocate($image, 0, 0, 0);
 
 // fill polygon with green
@@ -41,12 +41,12 @@ imagefilledpolygon($image, $points, count($points)/2, $col_poly);
 // output the picture to a file
 imagepng($image, $dest);
 
-// get it back 
+// get it back
 $image_in = imagecreatefrompng($dest);
 
 //check color of a point on edge..
 $col1 = imagecolorat($image_in, 40, 50);
-//.. a point in filled body 
+//.. a point in filled body
 $col2 = imagecolorat($image_in, 15, 15);
 // ..and a point on background
 $col3 = imagecolorat($image_in, 5, 5);

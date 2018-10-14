@@ -1,5 +1,5 @@
 --TEST--
-Test strrchr() function : basic functionality 
+Test strrchr() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string strrchr(string $haystack, string $needle);

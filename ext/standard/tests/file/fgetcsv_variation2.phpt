@@ -1,5 +1,5 @@
 --TEST--
-Test fgetcsv() : usage variations - with length as 0 
+Test fgetcsv() : usage variations - with length as 0
 --FILE--
 <?php
 /*
@@ -11,8 +11,8 @@ Test fgetcsv() : usage variations - with length as 0
 
 echo "*** Testing fgetcsv() : with length as 0 ***\n";
 
-/* the array is with three elements in it. Each element should be read as 
-   1st element is delimiter, 2nd element is enclosure 
+/* the array is with three elements in it. Each element should be read as
+   1st element is delimiter, 2nd element is enclosure
    and 3rd element is csv fields
 */
 $csv_lists = array (
@@ -59,7 +59,7 @@ foreach ($csv_lists as $csv_list) {
     fwrite($file_handle, "\n"); // blank line
 
     // close the file if the mode to be used is read mode  and re-open using read mode
-    // else rewind the file pointer to beginning of the file 
+    // else rewind the file pointer to beginning of the file
     if ( strstr($file_modes[$mode_counter], "r" ) ) {
       fclose($file_handle);
       $file_handle = fopen($filename, $file_modes[$mode_counter]);
@@ -72,7 +72,7 @@ foreach ($csv_lists as $csv_list) {
 
     // call fgetcsv() to parse csv fields
 
-    // use length as 0 
+    // use length as 0
     fseek($file_handle, 0, SEEK_SET);
     var_dump( fgetcsv($file_handle, 0, $delimiter, $enclosure) );
     // check the file pointer position and if eof
@@ -83,7 +83,7 @@ foreach ($csv_lists as $csv_list) {
     fclose($file_handle);
     //delete file
     unlink($filename);
-  } //end of mode loop 
+  } //end of mode loop
 } // end of foreach
 
 echo "Done\n";

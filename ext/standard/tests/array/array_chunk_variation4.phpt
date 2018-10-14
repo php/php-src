@@ -1,5 +1,5 @@
 --TEST--
-Test array_chunk() function : usage variations - array with diff. sub arrays  
+Test array_chunk() function : usage variations - array with diff. sub arrays
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
@@ -18,8 +18,8 @@ $size = 2;
 
 // input array
 $input_array = array (
-  "array1" => array(), 
-  "array2" => array(1, 2, 3), 
+  "array1" => array(),
+  "array2" => array(1, 2, 3),
   "array3" =>  array(1)
 );
 

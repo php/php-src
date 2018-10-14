@@ -19,7 +19,7 @@ class test
   // no members
 }
 
-// class with only members and with out member functions 
+// class with only members and with out member functions
 class test1
 {
   public $member1;
@@ -33,7 +33,7 @@ class test1
 // class with only member functions
 class test2
 {
-  // no data members 
+  // no data members
 
   public function display()
   {

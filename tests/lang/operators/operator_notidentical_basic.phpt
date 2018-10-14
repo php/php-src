@@ -22,7 +22,7 @@ $invalid_float2 = array(-67345.76567, -6.734576567E4);
 
 
 $toCompare = array(
-  true, array_merge($valid_true, $valid_false), array(true), 
+  true, array_merge($valid_true, $valid_false), array(true),
   false, array_merge($valid_true, $valid_false), array(false),
   $int1, $valid_int1, $invalid_int1,
   $int2, $valid_int2, $invalid_int2,

@@ -15,7 +15,7 @@ function change_copy($copy) {
 $data = [
     'a' => [
         'b' => [],
-    ], 
+    ],
 ];
 
 create_references($data);

@@ -1,5 +1,5 @@
 --TEST--
-Test fgetc() function : usage variations - different read modes 
+Test fgetc() function : usage variations - different read modes
 --FILE--
 <?php
 /*

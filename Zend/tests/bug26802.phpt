@@ -21,8 +21,8 @@ class foo
 	}
 }
 
-/* The following is a BC break with PHP 4 where it would 
- * call foo::fail. In PHP 5 we first evaluate static class 
+/* The following is a BC break with PHP 4 where it would
+ * call foo::fail. In PHP 5 we first evaluate static class
  * properties and then do the function call.
  */
 $method = 'foo_func';

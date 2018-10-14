@@ -1,5 +1,5 @@
 --TEST--
-ReflectionObject::getFileName(), ReflectionObject::getStartLine(), ReflectionObject::getEndLine() -invalid aparams 
+ReflectionObject::getFileName(), ReflectionObject::getStartLine(), ReflectionObject::getEndLine() -invalid aparams
 --FILE--
 <?php
 Class C { }

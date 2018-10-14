@@ -11,7 +11,7 @@ Test fgets() function : usage variations - write only modes (Bug #42036)
     a, ab, at,
     x, xb, xt
 */
-// include the header for common test function 
+// include the header for common test function
 include ("file.inc");
 
 echo "*** Testing fgets() with file opened in write only mode ***\n";

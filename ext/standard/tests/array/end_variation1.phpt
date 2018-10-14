@@ -3,7 +3,7 @@ Test end() function : usage variations - Pass different data types as $array_arg
 --FILE--
 <?php
 /* Prototype  : mixed end(array $array_arg)
- * Description: Advances array argument's internal pointer to the last element and return it 
+ * Description: Advances array argument's internal pointer to the last element and return it
  * Source code: ext/standard/array.c
  */
 

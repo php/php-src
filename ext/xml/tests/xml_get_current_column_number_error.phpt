@@ -1,5 +1,5 @@
 --TEST--
-Test xml_get_current_column_number() function : error conditions 
+Test xml_get_current_column_number() function : error conditions
 --SKIPIF--
 <?php
 if (!extension_loaded("xml")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_get_current_column_number(resource parser)
- * Description: Get current column number for an XML parser 
+ * Description: Get current column number for an XML parser
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

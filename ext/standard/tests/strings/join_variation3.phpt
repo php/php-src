@@ -9,7 +9,7 @@ Test join() function : usage variations - different values for 'pieces' argument
 */
 
 /*
- * test join() by giving different pieces values 
+ * test join() by giving different pieces values
 */
 
 echo "*** Testing join() : usage variations ***\n";

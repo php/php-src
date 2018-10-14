@@ -1,5 +1,5 @@
 --TEST--
-Test strcspn() function : error conditions 
+Test strcspn() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])

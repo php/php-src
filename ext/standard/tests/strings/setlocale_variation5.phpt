@@ -15,8 +15,8 @@ LC_ALL=en_US.utf8;
 <?php
 /* Prototype  : string setlocale (int $category , string $locale [,string $..] )
  *            : string setlocale(int $category , array $locale);
- * Description: Sets locale information.Returns the new current locale , or FALSE 
- *              if locale functionality is not implemented in this platform. 
+ * Description: Sets locale information.Returns the new current locale , or FALSE
+ *              if locale functionality is not implemented in this platform.
  * Source code: ext/standard/string.c
 */
 

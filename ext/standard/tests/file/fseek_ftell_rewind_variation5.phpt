@@ -15,7 +15,7 @@ Test fseek(), ftell() & rewind() functions : usage variations - all r & a modes,
 // include the file.inc for common functions for test
 include ("file.inc");
 
-/* Testing fseek(),ftell(),rewind() functions 
+/* Testing fseek(),ftell(),rewind() functions
      1. All read and append modes
      2. Testing fseek() with whence = SEEK_CUR
 */

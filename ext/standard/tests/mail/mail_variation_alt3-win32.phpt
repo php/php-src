@@ -1,5 +1,5 @@
 --TEST--
-Test mail() function : basic functionality 
+Test mail() function : basic functionality
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) != 'WIN' ) {
@@ -13,7 +13,7 @@ max_execution_time = 120
 --FILE--
 <?php
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
- * Description: Send an email message 
+ * Description: Send an email message
  * Source code: ext/standard/mail.c
  * Alias to functions:
  */
@@ -50,7 +50,7 @@ if ($imap_stream === false) {
 }
 
 $found = false;
-$repeat_count = 20; // we will repeat a max of 20 times 
+$repeat_count = 20; // we will repeat a max of 20 times
 while (!$found && $repeat_count > 0) {
 
 	// sleep for a while to allow msg to be delivered

@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_start_namespace_decl_handler(resource parser, string hdl)
- * Description: Set up character data handler 
+ * Description: Set up character data handler
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */
@@ -80,7 +80,7 @@ $values = array(
       new aClass(),
 
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,

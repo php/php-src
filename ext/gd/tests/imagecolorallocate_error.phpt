@@ -1,5 +1,5 @@
 --TEST--
-Test imagecolorallocate() function : error conditions 
+Test imagecolorallocate() function : error conditions
 --SKIPIF--
 <?php
 if(!extension_loaded('gd')) {

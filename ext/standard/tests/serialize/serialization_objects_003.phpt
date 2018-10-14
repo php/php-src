@@ -10,14 +10,14 @@ serialize_precision=100
  * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
  * Alias to functions:
  */
 
 echo "\n--- Testing Abstract Class ---\n";
 // abstract class
-abstract class Name 
+abstract class Name
 {
   public function __construct() {
     $this->a = 10;
@@ -30,7 +30,7 @@ abstract class Name
   }
 }
 // implement abstract class
-class extendName extends Name 
+class extendName extends Name
 {
   var $a, $b, $c;
 

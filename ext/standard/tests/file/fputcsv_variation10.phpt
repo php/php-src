@@ -1,10 +1,10 @@
 --TEST--
-Test fputcsv() : usage variations - with line without any csv fields 
+Test fputcsv() : usage variations - with line without any csv fields
 --FILE--
 <?php
 /*
  Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
- Description: Format line as CSV and write to the file pointer 
+ Description: Format line as CSV and write to the file pointer
 */
 
 
@@ -12,8 +12,8 @@ Test fputcsv() : usage variations - with line without any csv fields
 
 echo "*** Testing fputcsv() : with no CSV format in the field ***\n";
 
-/* the array is with three elements in it. Each element should be read as 
-   1st element is delimiter, 2nd element is enclosure 
+/* the array is with three elements in it. Each element should be read as
+   1st element is delimiter, 2nd element is enclosure
    and 3rd element is csv fields
 */
 
@@ -56,12 +56,12 @@ foreach ($fields as $field) {
     //close the file
     fclose($file_handle);
 
-    // print the file contents 
+    // print the file contents
     var_dump( file_get_contents($filename) );
 
     //delete file
     unlink($filename);
-  } //end of mode loop 
+  } //end of mode loop
 } // end of foreach
 
 echo "Done\n";

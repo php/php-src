@@ -11,7 +11,7 @@ function switchtest ($i, $j)
 					case 0:
 						echo "zero";
 						break;
-					case 1: 
+					case 1:
 						echo "one";
 						break;
 					default:

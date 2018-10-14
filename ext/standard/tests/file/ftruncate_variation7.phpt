@@ -49,7 +49,7 @@ foreach($file_content_types as $file_content_type) {
      exit();
    }
 
-   rewind($file_handle); // file pointer to 0 
+   rewind($file_handle); // file pointer to 0
 
    echo "-- Testing ftruncate(): File pointer at the end --\n";
    /* try to truncate it to while file pointer at the end */

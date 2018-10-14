@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - file opened in write only mode 
+Test fscanf() function: usage variations - file opened in write only mode
 --FILE--
 <?php
 

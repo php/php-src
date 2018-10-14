@@ -1,16 +1,16 @@
 --TEST--
-Test htmlspecialchars_decode() function : basic functionality 
+Test htmlspecialchars_decode() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string htmlspecialchars_decode(string $string [, int $quote_style])
- * Description: Convert special HTML entities back to characters 
+ * Description: Convert special HTML entities back to characters
  * Source code: ext/standard/html.c
 */
 
 echo "*** Testing htmlspecialchars_decode() : basic functionality ***\n";
 
 
-// Initialise arguments 
+// Initialise arguments
 //value initialized = Roy's height > Sam's height. 13 < 25. 1111 & 0000 = 0000. "double quoted string"
 $single_quote_string = "Roy&#039;s height &gt; Sam&#039;s height. 13 &lt; 25. 1111 &amp; 0000 = 0000. &quot; double quoted string &quot;";
 $double_quote_string = "Roy&#039;s height &gt; Sam&#039;s height. 13 &lt; 25. 1111 &amp; 0000 = 0000. &quot; double quoted string &quot;";

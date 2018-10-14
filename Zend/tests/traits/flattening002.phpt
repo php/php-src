@@ -1,5 +1,5 @@
 --TEST--
-parent:: works like in a method defined without traits. 
+parent:: works like in a method defined without traits.
 --FILE--
 <?php
 error_reporting(E_ALL);

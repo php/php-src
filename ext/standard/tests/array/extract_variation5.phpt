@@ -26,7 +26,7 @@ foreach ( $mixed_array as $sub_array ) {
   var_dump ( extract($sub_array, EXTR_PREFIX_INVALID, "ssd"));
   var_dump ( extract($sub_array, EXTR_PREFIX_SAME, "sss"));
   var_dump ( extract($sub_array, EXTR_PREFIX_ALL, "bb"));
-  var_dump ( extract($sub_array, EXTR_PREFIX_ALL, ""));  // "_" taken as default prefix 
+  var_dump ( extract($sub_array, EXTR_PREFIX_ALL, ""));  // "_" taken as default prefix
   var_dump ( extract($sub_array, EXTR_PREFIX_IF_EXISTS, "bb"));
 }
 

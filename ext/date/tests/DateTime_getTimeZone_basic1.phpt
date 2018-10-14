@@ -1,5 +1,5 @@
 --TEST--
-Test DateTime::getTimezone() function : basic functionality 
+Test DateTime::getTimezone() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : public DateTimeZone DateTime::getTimezone  ( void  )

@@ -3,7 +3,7 @@ Test readdir() function : usage variations - different data types as $dir_handle
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.c
  */
 

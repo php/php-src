@@ -1,5 +1,5 @@
 --TEST--
-Test array_intersect_assoc() function : usage variations - binary safe checking 
+Test array_intersect_assoc() function : usage variations - binary safe checking
 --FILE--
 <?php
 /* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])
@@ -9,8 +9,8 @@ Test array_intersect_assoc() function : usage variations - binary safe checking
 */
 
 /*
-* Testing the behavior of array_intersect_assoc() by passing array with 
-* binary values for $arr1 and $arr2 argument. 
+* Testing the behavior of array_intersect_assoc() by passing array with
+* binary values for $arr1 and $arr2 argument.
 */
 
 echo "*** Testing array_intersect_assoc() : binary safe checking ***\n";

@@ -4,9 +4,9 @@ Test fread() function : basic functionality
 <?php
 /*
  Prototype: string fread ( resource $handle [, int $length] );
- Description: reads up to length bytes from the file pointer referenced by handle. 
-   Reading stops when up to length bytes have been read, EOF (end of file) is 
-   reached, (for network streams) when a packet becomes available, or (after 
+ Description: reads up to length bytes from the file pointer referenced by handle.
+   Reading stops when up to length bytes have been read, EOF (end of file) is
+   reached, (for network streams) when a packet becomes available, or (after
    opening userspace stream) when 8192 bytes have been read whichever comes first.
 */
 
@@ -16,7 +16,7 @@ include ("file.inc");
 /* Function : function check_size(string $data, int $expect_size)
    Description : Check the length of the data, and compare the size with $expect_size
      $data : Text data.
-     $expect_size : Expected data length 
+     $expect_size : Expected data length
 */
 function check_size($data, $expect_size) {
 
@@ -31,7 +31,7 @@ function check_size($data, $expect_size) {
 echo "*** Testing fread() basic operations ***\n";
 /*
  test fread with file opened in "r" and "rb" mode only
- Content with numeric and strings with it 
+ Content with numeric and strings with it
 */
 $file_modes = array( "r", "rb", "rt", "r+", "r+b", "r+t");
 $file_content_types = array("numeric","text","text_with_new_line","alphanumeric");
@@ -54,8 +54,8 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
        exit();
     }
 
-    /* read file by giving the acutal length, check the length and content by calculating the 
-      hash using md5() function 
+    /* read file by giving the acutal length, check the length and content by calculating the
+      hash using md5() function
     */
     /* Reading 1024 bytes from file, expecting 1024 bytes */ ;
 
@@ -94,7 +94,7 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
     var_dump(fclose($file_handle)); // now close the file
   } // end of inner for loop
 
-  // delete the file created 
+  // delete the file created
   delete_file($filename); // delete file with name
 } // end of outer foreach loop
 echo "Done\n";

@@ -1,5 +1,5 @@
 --TEST--
-Test imap_clearflag_full() function : basic functionality 
+Test imap_clearflag_full() function : basic functionality
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__).'/skipif.inc');

@@ -1,5 +1,5 @@
 --TEST--
-Test timezone_abbreviations_list() function : basic functionality 
+Test timezone_abbreviations_list() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array timezone_abbreviations_list  ( void  )
@@ -10,7 +10,7 @@ Test timezone_abbreviations_list() function : basic functionality
 
 echo "*** Testing timezone_abbreviations_list() : basic functionality ***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("GMT");
 
 $abbr = timezone_abbreviations_list();

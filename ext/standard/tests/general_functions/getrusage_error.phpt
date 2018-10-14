@@ -29,7 +29,7 @@ $array_arg = array(1,2,3);
 $dat = getrusage($array_arg);
 
 echo "\n-- Testing getrusage() function with invalid argument - OBJECT --\n";
-class classA 
+class classA
 {
   function __toString() {
     return "ClassAObject";

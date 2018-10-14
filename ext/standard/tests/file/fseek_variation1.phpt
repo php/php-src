@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : proto int fseek(resource fp, int offset [, int whence])
- * Description: Seek on a file pointer 
+ * Description: Seek on a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions: gzseek
  */
@@ -64,7 +64,7 @@ $values = array(
       'string',
 
       // object data
-      new testClass(),      
+      new testClass(),
 
       // undefined data
       $undefined_var,

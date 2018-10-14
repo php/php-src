@@ -3,13 +3,13 @@ Test var_export() function with integer values
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
  * Alias to functions:
  */
 
 echo "*** Testing var_export() with integer values ***\n";
-// different integer values 
+// different integer values
 $valid_ints = array(
                 '0' => '0',
                 '1' => '1',

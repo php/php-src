@@ -1,9 +1,9 @@
 --TEST--
-Test array_reduce() function : variation - invalid parameters 
+Test array_reduce() function : variation - invalid parameters
 --FILE--
 <?php
 /* Prototype  : mixed array_reduce(array input, mixed callback [, int initial])
- * Description: Iteratively reduce the array to a single value via the callback. 
+ * Description: Iteratively reduce the array to a single value via the callback.
  * Source code: ext/standard/array.c
  * Alias to functions:
  */

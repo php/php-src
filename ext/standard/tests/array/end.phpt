@@ -50,7 +50,7 @@ var_dump( end($test_array[1]) );
 echo "\n*** Testing end() when array elements are deleted ***\n";
 $array_test = array("a", "b", "d", 7, "u" => "U", -4, "-.008" => "neg.008");
 
-// remove first element from array 
+// remove first element from array
 echo "\n-- Remove first element from array --\n";
 unset($array_test[0]);
 var_dump( end($array_test) );

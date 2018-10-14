@@ -1,7 +1,7 @@
 --TEST--
 Test basic logging for the Opcache
 --DESCRIPTION--
-This test runs a simple PHP script and ensures the Opcache 
+This test runs a simple PHP script and ensures the Opcache
 outputs the correct logging at the highest log_verbosity_level
 
 --INI--

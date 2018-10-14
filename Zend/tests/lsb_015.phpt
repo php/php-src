@@ -1,5 +1,5 @@
 --TEST--
-ZE2 Late Static Binding with exceptions 
+ZE2 Late Static Binding with exceptions
 --FILE--
 <?php
 function foo() {

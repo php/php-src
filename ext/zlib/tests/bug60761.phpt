@@ -36,11 +36,11 @@ echo "Compressed Lengths\n";
 
 // pass == only ONE length for all iterations
 //         (length didn't change during run)
-// 
+//
 // hard to anticipate what 'correct' length should be since
 // return value of phpinfo() will vary between installations...
 // just check that there is only one length
-// 
+//
 var_dump($lens); // show lengths to help triage in case of failure
 
 // expected headers since its CGI

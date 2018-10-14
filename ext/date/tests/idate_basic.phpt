@@ -1,9 +1,9 @@
 --TEST--
-Test idate() function : basic functionality 
+Test idate() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int idate(string format [, int timestamp])
- * Description: Format a local time/date as integer 
+ * Description: Format a local time/date as integer
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */

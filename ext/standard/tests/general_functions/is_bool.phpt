@@ -3,18 +3,18 @@ Test is_bool() function
 --FILE--
 <?php
 /* Prototype: bool is_bool ( mixed $var );
- * Description: Finds whether the given variable is a boolean  
+ * Description: Finds whether the given variable is a boolean
  */
 
 echo "*** Testing is_bool() with valid boolean values ***\n";
-// different valid  boolean values 
+// different valid  boolean values
 $valid_bools = array(
   TRUE,
   FALSE,
   true,
   false,
 );
-/* loop to check that is_bool() recognizes different 
+/* loop to check that is_bool() recognizes different
    bool values, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($valid_bools as $bool_val ) {
@@ -36,7 +36,7 @@ unset ($unset_bool1);
 unset ($unset_bool2);
 unset ($unset_var);
 
-// other types in a array 
+// other types in a array
 $not_bool_types = array (
   /* integers */
   0,
@@ -116,10 +116,10 @@ $not_bool_types = array (
   /* unset bool vars and undefined var */
   @$unset_bool1,
   @$unset_bool2,
-  @$unset_var, 
+  @$unset_var,
   @$undefined_var
 );
-/* loop through the $not_bool_types to see working of 
+/* loop through the $not_bool_types to see working of
    is_bool() on non bull types, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_bool_types as $type ) {
@@ -131,7 +131,7 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 var_dump( is_bool() );
 
-//arguments more than expected 
+//arguments more than expected
 var_dump( is_bool(TRUE, FALSE) );
 
 echo "Done\n";

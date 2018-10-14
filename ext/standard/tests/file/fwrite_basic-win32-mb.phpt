@@ -44,7 +44,7 @@ foreach($file_content_types as $file_content_type) {
      $data_to_be_written="";
      fill_buffer($data_to_be_written, $file_content_type, 1024);  //get the data of size 1024
 
-    /* Write the data in to the file, verify the write by checking file pointer position, 
+    /* Write the data in to the file, verify the write by checking file pointer position,
        eof position, and data. */
     // writing 100 bytes
     var_dump( ftell($file_handle) );  // Expecting 0
@@ -66,7 +66,7 @@ foreach($file_content_types as $file_content_type) {
     var_dump( fclose($file_handle) ); //expected : true
     clearstatcache();//clears file status cache
     var_dump( filesize($filename) );  // expected:  2148
-    var_dump(md5(file_get_contents($filename))); // hash the output 
+    var_dump(md5(file_get_contents($filename))); // hash the output
 
   } // end of inner for loop
 

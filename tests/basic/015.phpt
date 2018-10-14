@@ -1,5 +1,5 @@
 --TEST--
-POST Method test and arrays - 3 
+POST Method test and arrays - 3
 --POST--
 a[]=1&a[0]=5
 --FILE--

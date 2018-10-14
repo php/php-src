@@ -1,5 +1,5 @@
 --TEST--
-Test posix_times() function : error conditions 
+Test posix_times() function : error conditions
 --SKIPIF--
 <?php
 	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";

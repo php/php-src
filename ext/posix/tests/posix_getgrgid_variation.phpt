@@ -72,7 +72,7 @@ foreach($values as $value) {
       echo "\nArg value $value \n";
       $result = posix_getgrgid($value);
       if ((is_array($result) && (count($result) == 4))
-          || 
+          ||
           ($result === false)) {
           echo "valid output\n";
       } else {

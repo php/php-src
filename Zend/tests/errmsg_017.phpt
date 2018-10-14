@@ -1,5 +1,5 @@
 --TEST--
-errmsg: __unset() must take exactly 1 argument 
+errmsg: __unset() must take exactly 1 argument
 --FILE--
 <?php
 

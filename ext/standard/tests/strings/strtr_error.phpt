@@ -1,9 +1,9 @@
 --TEST--
-Test strtr() function : error conditions 
+Test strtr() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string strtr(string str, string from[, string to])
- * Description: Translates characters in str using given translation tables 
+ * Description: Translates characters in str using given translation tables
  * Source code: ext/standard/string.c
 */
 

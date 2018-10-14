@@ -1,5 +1,5 @@
 --TEST--
-globals in local scope - 3 
+globals in local scope - 3
 --INI--
 variables_order="egpcs"
 --FILE--

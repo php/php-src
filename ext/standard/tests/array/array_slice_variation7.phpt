@@ -3,7 +3,7 @@ Test array_slice() function : usage variations - different data types as keys in
 --FILE--
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
+ * Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 
@@ -53,7 +53,7 @@ $inputs = array(
        // null data
 /*4*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
 
 /*5*/  'null lowercase' => array(
        null => 'null 2',

@@ -3,11 +3,11 @@ Test of compare object handler for DateTime objects
 --FILE--
 <?php
 
-// NB: DateTimeZone class does not define a customized compare class handler so standard object handler will be used  
+// NB: DateTimeZone class does not define a customized compare class handler so standard object handler will be used
 
 echo "Simple test for DateTimeZone compare object handler\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 class DateTimeZoneExt1 extends DateTimeZone {

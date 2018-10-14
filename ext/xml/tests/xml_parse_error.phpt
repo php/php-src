@@ -1,5 +1,5 @@
 --TEST--
-Test xml_parse() function : error conditions 
+Test xml_parse() function : error conditions
 --SKIPIF--
 <?php
 if (!extension_loaded("xml")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("xml")) {
 --FILE--
 <?php
 /* Prototype  : proto int xml_parse(resource parser, string data [, int isFinal])
- * Description: Start parsing an XML document 
+ * Description: Start parsing an XML document
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

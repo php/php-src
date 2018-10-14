@@ -1,5 +1,5 @@
 --TEST--
-Test sha1() function : error conditions 
+Test sha1() function : error conditions
 --FILE--
 <?php
 

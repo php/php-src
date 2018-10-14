@@ -1,9 +1,9 @@
 --TEST--
-Test uasort() function : usage variations - sort diff. strings 
+Test uasort() function : usage variations - sort diff. strings
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -33,7 +33,7 @@ function cmp_function($value1, $value2)
   }
 }
 
-// Different heredoc strings to be sorted 
+// Different heredoc strings to be sorted
 $empty_heredoc =<<<EOT
 EOT;
 

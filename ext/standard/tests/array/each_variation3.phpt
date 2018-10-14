@@ -4,7 +4,7 @@ Test each() function : usage variations - keys of different data types
 <?php
 /* Prototype  : array each(array $arr)
  * Description: Return the currently pointed key..value pair in the passed array,
- * and advance the pointer to the next element 
+ * and advance the pointer to the next element
  * Source code: Zend/zend_builtin_functions.c
  */
 
@@ -49,7 +49,7 @@ $inputs = array(
        // null data
 /*4*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
 
 /*5*/  'null lowercase' => array(
        null => 'null 2',

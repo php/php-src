@@ -3,7 +3,7 @@ Test gmstrftime() function : usage variation - Passing time related format strin
 --FILE--
 <?php
 /* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings 
+ * Description: Format a GMT/UCT time/date according to locale settings
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */

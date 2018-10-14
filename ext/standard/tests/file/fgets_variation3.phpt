@@ -40,7 +40,7 @@ foreach($file_modes as $file_mode) {
     rewind($file_handle);
 
     var_dump( ftell($file_handle) );
-    var_dump( fgets($file_handle) ); // with default length 
+    var_dump( fgets($file_handle) ); // with default length
     var_dump( ftell($file_handle) ); // ensure the file pointer position
     var_dump( feof($file_handle) );  // enusre if eof set
 

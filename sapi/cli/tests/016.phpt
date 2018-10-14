@@ -1,5 +1,5 @@
 --TEST--
-CLI -a and readline 
+CLI -a and readline
 --SKIPIF--
 <?php
 include "skipif.inc";

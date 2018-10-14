@@ -1,5 +1,5 @@
 --TEST--
-SPL: Test class_uses() function : variation 
+SPL: Test class_uses() function : variation
 --FILE--
 <?php
 /* Prototype  : array class_uses(mixed what [, bool autoload ])

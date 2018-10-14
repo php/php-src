@@ -3,7 +3,7 @@ Test array_rand() function : usage variations - unexpected values for 'input' pa
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array input [, int num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
@@ -81,7 +81,7 @@ $values = array(
 /*23*/  @$unset_var,
 );
 
-/* loop through each element of the array to test array_rand() function 
+/* loop through each element of the array to test array_rand() function
  * for different values for 'input' argument
 */
 $count = 1;

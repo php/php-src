@@ -3,7 +3,7 @@ Test DateTime class inheritance : with user space __construct magic method
 --FILE--
 <?php
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing new DateTime() : with user space __construct magic method ***\n";

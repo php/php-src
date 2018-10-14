@@ -1,5 +1,5 @@
 --TEST--
-imap_savebody() function : basic functionality 
+imap_savebody() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--

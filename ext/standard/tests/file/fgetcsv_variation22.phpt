@@ -14,8 +14,8 @@ Test fgetcsv() : usage variations - with default enclosure, file pointer pointin
 
 echo "*** Testing fgetcsv() : with default enclosure, file pointer pointing at end of file ***\n";
 
-/* the array is with two elements in it. Each element should be read as 
-   1st element is delimiter & 2nd element is csv fields 
+/* the array is with two elements in it. Each element should be read as
+   1st element is delimiter & 2nd element is csv fields
 */
 $csv_lists = array (
   array(',', 'water,fruit'),
@@ -69,9 +69,9 @@ foreach ($csv_lists as $csv_list) {
 
     // call fgetcsv() to parse csv fields
 
-    // now file pointer should point to end of the file, try reading again 
+    // now file pointer should point to end of the file, try reading again
     var_dump( feof($file_handle) );
-    var_dump( fgetcsv($file_handle, 1024, $delimiter) ); // with length, delimiter 
+    var_dump( fgetcsv($file_handle, 1024, $delimiter) ); // with length, delimiter
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
@@ -79,7 +79,7 @@ foreach ($csv_lists as $csv_list) {
     fclose($file_handle);
     //delete file
     unlink($filename);
-  } //end of mode loop 
+  } //end of mode loop
 } // end of foreach
 
 echo "Done\n";

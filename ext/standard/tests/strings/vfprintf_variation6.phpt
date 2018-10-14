@@ -15,7 +15,7 @@ Test vfprintf() function : usage variations - float formats with non-float value
 echo "*** Testing vfprintf() : float formats and non-float values ***\n";
 
 // defining array of float formats
-$formats = 
+$formats =
   '%f %+f %-f 
    %lf %Lf %4f %-4f
    %10.4f %-10.4f %04f %04.4f

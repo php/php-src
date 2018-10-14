@@ -1,5 +1,5 @@
 --TEST--
-Test chunk_split() function : usage variations - different heredoc strings for 'ending' argument 
+Test chunk_split() function : usage variations - different heredoc strings for 'ending' argument
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])

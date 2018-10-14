@@ -6,7 +6,7 @@ precision=14
 <?php
 
 /* Prototype  : float expm1  ( float $arg  )
- * Description: Returns exp(number) - 1, computed in a way that is accurate even 
+ * Description: Returns exp(number) - 1, computed in a way that is accurate even
  *              when the value of number is close to zero.
  * Source code: ext/standard/math.c
  */
@@ -71,7 +71,7 @@ $inputs = array(
        array(1,2,4),
 
        // object data
-/*24*/ new classA(),       
+/*24*/ new classA(),
 
        // undefined data
 /*25*/ @$undefined_var,

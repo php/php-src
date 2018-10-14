@@ -2,7 +2,7 @@
 Test key(), current(), next() & reset() functions
 --FILE--
 <?php
-/* Prototype & Usage: 
+/* Prototype & Usage:
    mixed key ( array &$array ) -> returns the index element of the current array position
    mixed current ( array &$array ) -> returns the current element in the array
    mixed next ( array &$array ) -> similar to current() but advances the internal pointer to next element
@@ -23,7 +23,7 @@ $basic_arrays = array (
 $varient_arrays = array (
    array(),    // empty array
    array(""),  // array with null string
-   array(NULL),// array with NULL 
+   array(NULL),// array with NULL
    array(null),// array with null
    array(NULL, true, null, "", 1), // mixed array
    array(-1.5 => "test", -2 => "rest", 2.5 => "two",
@@ -94,7 +94,7 @@ var_dump( current($temp_array, $temp_array) );
 var_dump( reset($temp_array, $temp_array) );
 var_dump( next($temp_array, $temp_array) );
 
-// invalid args type, valid argument: array 
+// invalid args type, valid argument: array
 $int_var = 1;
 $float_var = 1.5;
 $string = "string";

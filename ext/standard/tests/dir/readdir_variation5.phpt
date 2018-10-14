@@ -18,7 +18,7 @@ unlink($filename);
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.c
  */
 

@@ -10,7 +10,7 @@ Test timezone_name_from_abbr() function : usage variation - Passing unexpected v
 
 echo "*** Testing timezone_name_from_abbr() : usage variation -  unexpected values to second argument \$gmtOffset***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -90,7 +90,7 @@ $inputs = array(
       // unset data
       'unset var' => @$unset_var,
 
-      // resource 
+      // resource
       'resource' => $file_handle
 );
 

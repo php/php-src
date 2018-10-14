@@ -3,7 +3,7 @@ Test prev() function : usage variation - Pass different data types as $array_arg
 --FILE--
 <?php
 /* Prototype  : mixed prev(array $array_arg)
- * Description: Move array argument's internal pointer to the previous element and return it 
+ * Description: Move array argument's internal pointer to the previous element and return it
  * Source code: ext/standard/array.c
  */
 

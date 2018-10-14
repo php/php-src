@@ -1,5 +1,5 @@
 --TEST--
-Test tempnam() function: usage variations - creating files 
+Test tempnam() function: usage variations - creating files
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != "WIN")

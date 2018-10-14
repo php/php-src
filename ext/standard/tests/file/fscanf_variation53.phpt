@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - file pointer pointing to EOF 
+Test fscanf() function: usage variations - file pointer pointing to EOF
 --FILE--
 <?php
 
@@ -57,7 +57,7 @@ foreach($modes as $mode) {
   // set the file pointer to eof
   var_dump( fseek($file_handle, 0, SEEK_END) );
 
-  // current location  
+  // current location
   var_dump( ftell($file_handle) );
 
   foreach($formats as $format) {

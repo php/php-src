@@ -1,14 +1,14 @@
 --TEST--
-Test sort() function : error conditions 
+Test sort() function : error conditions
 --FILE--
 <?php
 /* Prototype  : bool sort(array &array_arg [, int sort_flags])
- * Description: Sort an array 
+ * Description: Sort an array
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing sort() function with all possible error conditions 
+* Testing sort() function with all possible error conditions
 */
 
 echo "*** Testing sort() : error conditions ***\n";

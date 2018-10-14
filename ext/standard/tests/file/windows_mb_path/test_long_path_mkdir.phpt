@@ -1,5 +1,5 @@
 --TEST--
-Mkdir with path length < 260 and > 248 has be a long path 
+Mkdir with path length < 260 and > 248 has be a long path
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";

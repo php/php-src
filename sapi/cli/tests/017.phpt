@@ -1,5 +1,5 @@
 --TEST--
-CLI -a and libedit 
+CLI -a and libedit
 --SKIPIF--
 <?php
 include "skipif.inc";

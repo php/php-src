@@ -1,5 +1,5 @@
 --TEST--
-Test print() function : usage variations 
+Test print() function : usage variations
 --FILE--
 <?php
 

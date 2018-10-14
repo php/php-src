@@ -1,5 +1,5 @@
 --TEST--
-Test date_offset_get() function : error conditions 
+Test date_offset_get() function : error conditions
 --FILE--
 <?php
 
@@ -9,7 +9,7 @@ Test date_offset_get() function : error conditions
  * Alias to functions:  DateTimeInterface::getOffset
  */
 
- //Set the default time zone 
+ //Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_offset_get() : error conditions ***\n";

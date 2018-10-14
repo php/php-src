@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - unsigned formats with boolean 
+Test fscanf() function: usage variations - unsigned formats with boolean
 --FILE--
 <?php
 

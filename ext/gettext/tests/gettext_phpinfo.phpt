@@ -1,5 +1,5 @@
 --TEST--
-Test phpinfo() displays gettext support 
+Test phpinfo() displays gettext support
 --SKIPIF--
 <?php
 	if (!extension_loaded("gettext")) {

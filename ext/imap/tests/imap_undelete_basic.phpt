@@ -1,5 +1,5 @@
 --TEST--
-imap_undelete() function : basic functionality 
+imap_undelete() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--

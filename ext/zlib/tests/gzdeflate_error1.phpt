@@ -1,5 +1,5 @@
 --TEST--
-Test gzdeflate() function : error conditions 
+Test gzdeflate() function : error conditions
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
@@ -9,7 +9,7 @@ if (!extension_loaded("zlib")) {
 --FILE--
 <?php
 /* Prototype  : string gzdeflate(string data [, int level, [int encoding]])
- * Description: Gzip-compress a string 
+ * Description: Gzip-compress a string
  * Source code: ext/zlib/zlib.c
  * Alias to functions:
  */

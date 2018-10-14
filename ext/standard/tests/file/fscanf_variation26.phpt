@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - char formats with chars 
+Test fscanf() function: usage variations - char formats with chars
 --FILE--
 <?php
 

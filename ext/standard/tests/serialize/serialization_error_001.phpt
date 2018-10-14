@@ -1,5 +1,5 @@
 --TEST--
-Test serialize() & unserialize() functions: error conditions - wrong number of args. 
+Test serialize() & unserialize() functions: error conditions - wrong number of args.
 --FILE--
 <?php
 /* Prototype  : proto string serialize(mixed variable)
@@ -8,7 +8,7 @@ Test serialize() & unserialize() functions: error conditions - wrong number of a
  * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
  * Alias to functions:
  */

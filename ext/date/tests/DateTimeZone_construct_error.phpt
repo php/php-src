@@ -1,5 +1,5 @@
 --TEST--
-Test new DateTimeZone() : error conditions 
+Test new DateTimeZone() : error conditions
 --FILE--
 <?php
 /* Prototype  : DateTimeZone::__construct  ( string $timezone  )
@@ -7,7 +7,7 @@ Test new DateTimeZone() : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("GMT");
 
 echo "*** Testing DateTimeZone() : error conditions ***\n";

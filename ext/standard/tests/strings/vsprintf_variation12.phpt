@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -19,7 +19,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing vsprintf() : octal formats and non-octal values ***\n";
 
 // defining array of octal formats
-$formats = 
+$formats =
   '%o %+o %-o 
    %lo %Lo %4o %-4o
    %10.4o %-10.4o %.4o 

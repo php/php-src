@@ -3,13 +3,13 @@ Test sprintf() function : usage variations - scientific formats with array value
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : scientific formats with array values ***\n";
 
-// array of array values 
+// array of array values
 $array_values = array(
   array(),
   array(0),

@@ -21,7 +21,7 @@ $dest_sml = dirname(realpath(__FILE__)) . '/imagesmall.png';
 // create a blank image
 $image_lge = imagecreatetruecolor(400, 300);
 
-// set the background color to black 
+// set the background color to black
 $bg = imagecolorallocate($image_lge, 0, 0, 0);
 
 // fill polygon with blue
