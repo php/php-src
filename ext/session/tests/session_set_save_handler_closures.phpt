@@ -51,7 +51,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : using closures as callbacks ***
-
 string(%d) "%s"
 
 Warning: session_module_name(): Cannot find named PHP session module () in %s on line %d

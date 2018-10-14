@@ -51,7 +51,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : variation ***
-
 Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]
