@@ -26,7 +26,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : variation ***
-
 bool(true)
 
 Warning: session_set_save_handler(): Cannot change save handler when session is active in %s on line 17
