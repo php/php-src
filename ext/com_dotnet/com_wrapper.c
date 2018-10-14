@@ -645,5 +645,3 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val)
 
 	return (IDispatch*)disp;
 }
-
-

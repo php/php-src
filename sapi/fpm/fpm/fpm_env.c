@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_env.c,v 1.15 2008/09/18 23:19:59 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
@@ -275,4 +274,3 @@ int fpm_env_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

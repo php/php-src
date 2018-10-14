@@ -19,4 +19,3 @@ if (PHP_JSON != "no") {
 
 	PHP_INSTALL_HEADERS("ext/json/", "php_json.h php_json_parser.h php_json_scanner.h");
 }
-

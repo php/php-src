@@ -171,4 +171,3 @@ TODO
   * Add getNamespace() methods to ReflectionClass and ReflectionFunction
 
 * Rename namespaces to packages?
-

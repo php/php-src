@@ -128,5 +128,3 @@
 	function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_COUNT, $start = 0, &$next) {}
 
 ?>
-
-

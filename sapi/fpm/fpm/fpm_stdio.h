@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_stdio.h,v 1.9 2008/05/24 17:38:47 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
@@ -17,4 +16,3 @@ int fpm_stdio_discard_pipes(struct fpm_child_s *child);
 int fpm_stdio_open_error_log(int reopen);
 
 #endif
-

@@ -1,4 +1,3 @@
-
 version: "{branch}.build.{build}"
 
 image: Visual Studio 2015
@@ -47,4 +46,3 @@ build_script:
 
 test_script:
         - appveyor\test.bat
-

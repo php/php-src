@@ -19,4 +19,3 @@
 /* $Id$ */
 
 PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv);
-

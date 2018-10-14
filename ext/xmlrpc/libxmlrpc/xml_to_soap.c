@@ -667,4 +667,3 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 
 	return root;
 }
-

@@ -37,4 +37,3 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func);
 
 #endif	/* COMMON_DATE_H */
-

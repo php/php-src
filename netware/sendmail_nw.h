@@ -1,4 +1,3 @@
-
 #define closesocket close
 #define LPCSTR char *
 #define LPSTR char*

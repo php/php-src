@@ -31,4 +31,3 @@ if (PHP_PHPDBGS == "yes") {
 	ADD_FLAG("LIBS_PHPDBGS", "ws2_32.lib user32.lib");
 	ADD_FLAG("CFLAGS_PHPDBGS", "/D YY_NO_UNISTD_H");
 }
-

@@ -219,7 +219,3 @@ For support questions, please post to our free support forum, at:
 https://www.litespeedtech.com/support/forum/
 
 For bug report, please send bug report to bug [at] litespeedtech.com.
-
-
-
-

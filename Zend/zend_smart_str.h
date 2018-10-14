@@ -120,4 +120,3 @@ static zend_always_inline void smart_str_setl(smart_str *dest, const char *src, 
 }
 
 #endif
-

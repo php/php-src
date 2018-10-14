@@ -353,4 +353,3 @@ PHPDBG_API void phpdbg_close_socket(int sock) {
 #endif
 	}
 }
-

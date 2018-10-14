@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_conf.c,v 1.33.2.3 2008/12/13 03:50:29 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 

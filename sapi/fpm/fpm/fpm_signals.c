@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_signals.c,v 1.24 2008/08/26 15:09:15 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
@@ -252,4 +251,3 @@ int fpm_signals_get_fd() /* {{{ */
 	return sp[0];
 }
 /* }}} */
-

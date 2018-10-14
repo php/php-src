@@ -252,4 +252,3 @@ You need to tell me where to find your Oracle Instant Client SDK, or set ORACLE_
 
   AC_DEFINE_UNQUOTED(PHP_PDO_OCI_CLIENT_VERSION, "$PDO_OCI_VERSION", [ ])
 fi
-

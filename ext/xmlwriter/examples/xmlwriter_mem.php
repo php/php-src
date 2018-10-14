@@ -36,4 +36,3 @@ echo $out;
 
 $out = xmlwriter_output_memory($xw);
 echo $out;
-

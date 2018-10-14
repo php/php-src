@@ -133,4 +133,3 @@ The new object model is not dependent on other features.  Many of the
 other Zend Engine 2.0 features, such as the $foo->bar()->barbara()
 syntax, destructors and others completely rely on this new object
 model.
-

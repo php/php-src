@@ -65,5 +65,3 @@ int shmop_close(int shmid)
 	shmid 		- shmid which to close
 
 	returns zero
-
-

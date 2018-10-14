@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_stdio.c,v 1.22.2.2 2008/12/13 03:32:24 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
@@ -325,4 +324,3 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	return 0;
 }
 /* }}} */
-

@@ -1,4 +1,3 @@
-
 	/* $Id: fpm_worker_pool.h,v 1.13 2008/08/26 15:09:15 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
@@ -55,4 +54,3 @@ int fpm_worker_pool_init_main();
 extern struct fpm_worker_pool_s *fpm_worker_all_pools;
 
 #endif
-

@@ -114,4 +114,3 @@ struct rusage
 PHPAPI int getrusage(int who, struct rusage *usage);
 
 #endif
-

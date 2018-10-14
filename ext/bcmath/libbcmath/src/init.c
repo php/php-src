@@ -131,4 +131,3 @@ bc_init_num (bc_num *num)
 {
   *num = bc_copy_num (BCG(_zero_));
 }
-

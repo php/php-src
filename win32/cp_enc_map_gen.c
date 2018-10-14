@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 
 #include <windows.h>
@@ -247,4 +246,3 @@ main(int argc, char **argv)
 
 	return 0;
 }
-

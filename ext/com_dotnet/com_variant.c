@@ -1124,4 +1124,3 @@ PHP_FUNCTION(variant_cast)
 	VariantClear(&vres);
 }
 /* }}} */
-
