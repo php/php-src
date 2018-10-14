@@ -7,7 +7,7 @@ Test nl2br() function : usage variations - double quoted strings for 'str' argum
  * Source code: ext/standard/string.c
 */
 
-/* Test nl2br() function by passing double quoted strings containing various 
+/* Test nl2br() function by passing double quoted strings containing various
  *   combinations of new line chars to 'str' argument
 */
 
@@ -22,7 +22,7 @@ $strings = array(
   "Hello\r\nWorld",
   "\r\nHello\r\nWorld\r\n",
 
-  //one blank line 
+  //one blank line
   "
 ",
 

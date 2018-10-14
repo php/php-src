@@ -1,9 +1,9 @@
 --TEST--
 test if bind_textdomain_codeset() fails on wrong param count
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
-		die("skip"); 
+		die("skip");
 	}
 ?>
 --FILE--
@@ -13,7 +13,7 @@ test if bind_textdomain_codeset() fails on wrong param count
 
 	echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: bind_textdomain_codeset() expects exactly 2 parameters, 1 given in %s on line %d
 
 Warning: bind_textdomain_codeset() expects exactly 2 parameters, 3 given in %s on line %d

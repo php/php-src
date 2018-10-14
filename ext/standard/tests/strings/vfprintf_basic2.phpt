@@ -28,13 +28,13 @@ if (!($fp = fopen($data_file, 'wt')))
    return;
 
 vfprintf($fp, $format1, $arg1);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 vfprintf($fp, $format2, $arg2);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 vfprintf($fp, $format3, $arg3);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 fclose($fp);
 print_r(file_get_contents($data_file));

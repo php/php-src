@@ -1,5 +1,5 @@
 --TEST--
-Test array_map() function : object functionality - with non-existent class and method 
+Test array_map() function : object functionality - with non-existent class and method
 --FILE--
 <?php
 /* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )

@@ -15,7 +15,7 @@ var_dump(error_get_last());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 NULL
 NULL
 array(4) {

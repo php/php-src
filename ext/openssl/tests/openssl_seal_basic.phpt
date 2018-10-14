@@ -29,7 +29,7 @@ var_dump(openssl_seal($data, $sealed, $ekeys, array($wrong)));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: openssl_seal(): not a public key (1th member of pubkeys) in %s on line %d
 bool(false)
 

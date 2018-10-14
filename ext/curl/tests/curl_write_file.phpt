@@ -1,5 +1,5 @@
 --TEST--
-Test curl option CURLOPT_FILE 
+Test curl option CURLOPT_FILE
 --CREDITS--
 Mathieu Kooiman <mathieuk@gmail.com>
 Dutch UG, TestFest 2009, Utrecht

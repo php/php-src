@@ -27,7 +27,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_POSTFIELDS, "Hello=World&Foo=Bar&Person=John%20Doe");
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $curl_content = curl_exec($ch);
   curl_close($ch);
 

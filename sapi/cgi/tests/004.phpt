@@ -1,8 +1,8 @@
 --TEST--
 execute a file with -f
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -37,7 +37,7 @@ var_dump(`$php -n -f "wrong"`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "
 <br />
 <b>Fatal error</b>:  Uncaught Error: Cannot access private property test::$pri in %s004.test.php:8

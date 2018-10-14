@@ -16,7 +16,7 @@ class A
 		while ($undef) {
 			$arr[][] = NULL;
 		}
- 
+
 		foreach ($arr as $a) {
 			bar($a + []);
 		}

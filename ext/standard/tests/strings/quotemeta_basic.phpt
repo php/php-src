@@ -1,5 +1,5 @@
 --TEST--
-Test quotemeta() function : basic functionality 
+Test quotemeta() function : basic functionality
 --FILE--
 <?php
 

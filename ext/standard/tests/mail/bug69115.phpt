@@ -7,7 +7,7 @@ if( substr(PHP_OS, 0, 3) != 'WIN' ) {
 }
 ?>
 --INI--
-SMTP = 
+SMTP =
 smtp_port =
 --FILE--
 <?php

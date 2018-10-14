@@ -32,7 +32,7 @@ echo "\n-- Testing ezmlm_hash() function with invalid input - RESOURCE --\n";
 $file_handle = fopen(__FILE__, "r");
 $extra_arg = 10;
 var_dump( ezmlm_hash($file_handle) );
-fclose($file_handle); 
+fclose($file_handle);
 
 ?>
 ===DONE===

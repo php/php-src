@@ -4,13 +4,13 @@ assert()
 error_reporting = 2039
 assert.active = 0
 assert.warning = 1
-assert.callback = 
+assert.callback =
 assert.bail = 0
 assert.quiet_eval = 0
 --FILE--
 <?php
 function a($file,$line,$myev)
-{ 
+{
 	echo "assertion failed $line,\"$myev\"\n";
 }
 

@@ -1,5 +1,5 @@
 --TEST--
-Test preg_replace() function : basic functionality 
+Test preg_replace() function : basic functionality
 --FILE--
 <?php
 /*

@@ -1,7 +1,7 @@
 --TEST--
 Bug #65708 (dba functions cast $key param to string in-place, bypassing copy on write)
 --SKIPIF--
-<?php 
+<?php
 	require_once(dirname(__FILE__) .'/skipif.inc');
 ?>
 --FILE--
@@ -28,8 +28,8 @@ dba_close($db);
 
 ?>
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECT--
 integer

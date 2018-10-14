@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file 
+ * Description: Parse configuration file
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing parse_ini_file() : variation ***\n";
@@ -32,7 +32,7 @@ foreach($newdirs as $newdir) {
 set_include_path($newIncludePath);
 $path = get_include_path();
 echo "New include path is : " . $path . "\n";
- 
+
 $output_file = $dir2."/".$iniFile;
 $iniContent = <<<FILE
 error_reporting  =  E_ALL

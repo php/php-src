@@ -7,7 +7,7 @@ Test getrusage() function : error conditions - incorrect number of args
 /* Prototype  :  array getrusage  ([ int $who  ] )
  * Description: Gets the current resource usages
  * Source code: ext/standard/microtime.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -29,7 +29,7 @@ $array_arg = array(1,2,3);
 $dat = getrusage($array_arg);
 
 echo "\n-- Testing getrusage() function with invalid argument - OBJECT --\n";
-class classA 
+class classA
 {
   function __toString() {
     return "ClassAObject";

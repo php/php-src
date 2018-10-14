@@ -10,9 +10,9 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --FILE--
 <?php
 /* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array 
+ * Description: Read entire file into an array
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file() : variation ***\n";
@@ -35,14 +35,14 @@ $allDirs = array(
   "$absSubDir\\..\\..\\".$mainDir."\\.\\".$subDir,
   "$absSubDir\\..\\\\\\".$subDir."\\\\..\\\\..\\".$subDir,
   "$absSubDir\\BADDIR",
-  
+
   // relative paths
   $mainDir."\\".$subDir,
-  $mainDir."\\\\".$subDir, 
-   $mainDir."\\\\\\".$subDir, 
+  $mainDir."\\\\".$subDir,
+   $mainDir."\\\\\\".$subDir,
   ".\\".$mainDir."\\..\\".$mainDir."\\".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
   // unixifed path
   $unixifiedDir,
 );

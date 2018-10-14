@@ -2,7 +2,7 @@
 Bug #55758 (Digest Authenticate missed in 5.4)
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -31,7 +31,7 @@ HEADER
 }
 
 ?>
---EXPECTF--	
+--EXPECTF--
 HTTP/1.1 401 Unauthorized
 Host: %s
 Date: %s

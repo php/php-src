@@ -13,7 +13,7 @@ foreach($funcs as $func) {
         if($rfunc->getNumberOfRequiredParameters() == 0) {
                 continue;
         }
-		
+
 		try {
 			$res = $func($arg);
 		} catch (Exception $e) {

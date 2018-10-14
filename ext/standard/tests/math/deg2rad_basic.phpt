@@ -4,10 +4,10 @@ Test return type and value for expected input deg2rad()
 precision = 14
 --FILE--
 <?php
-/* 
+/*
  * proto float deg2rad(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 $file_path = dirname(__FILE__);
 require($file_path."/allowed_rounding_error.inc");

@@ -16,7 +16,7 @@ function ut_main()
 	$locale_arr = array (
 		'en_US_CA'
 	);
-	
+
 	$datetype_arr = array (
                 IntlDateFormatter::FULL,
                 IntlDateFormatter::LONG,
@@ -37,7 +37,7 @@ function ut_main()
 	$fmt2 = ut_datefmt_create( 'en_US_CA', IntlDateFormatter::MEDIUM, IntlDateFormatter::MEDIUM);
 	$fmt3 = ut_datefmt_create( 'en_US_CA', IntlDateFormatter::FULL, IntlDateFormatter::FULL);
 	$fmt_array  = array(
-		$fmt1 , $fmt2 ,$fmt3 
+		$fmt1 , $fmt2 ,$fmt3
 	);
 	$fmt_desc_array  = array(
 		"DateType::LONG, TimeType::LONG",
@@ -52,7 +52,7 @@ function ut_main()
                 foreach( $fmt_array as $fmt_entry ){
 			$res_str .= "\n------------";
 			$res_str .= "\nIntlDateFormatter : ".$fmt_desc_array[$cnt];
-			$cnt++;		
+			$cnt++;
 			$parsed_arr = ut_datefmt_localtime( $fmt_entry , $text_entry);
 
 				if( $parsed_arr){

@@ -13,10 +13,10 @@ class B extends A {
 try {
 	$b = new B;
 	$ref = new ReflectionClass($b);
-	
+
 	var_dump(property_exists('b', 'a'));
 	var_dump(property_exists($b, 'a'));
-	var_dump($ref->hasProperty('a'));	
+	var_dump($ref->hasProperty('a'));
 	var_dump($ref->getProperty('a'));
 } catch (Exception $e) {
 	var_dump($e->getMessage());

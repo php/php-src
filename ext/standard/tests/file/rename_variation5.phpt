@@ -11,12 +11,12 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* test rename() by trying to rename an existing file/dir/link to the same name
   and one another */
-// create a dir 
+// create a dir
 $file_path = dirname(__FILE__);
-$dirname = "$file_path/rename_variation5_dir"; 
+$dirname = "$file_path/rename_variation5_dir";
 mkdir($dirname);
 //create a file
-$filename = "$file_path/rename_variation5.tmp"; 
+$filename = "$file_path/rename_variation5.tmp";
 $fp = fopen($filename, "w");
 fclose($fp);
 // create a link

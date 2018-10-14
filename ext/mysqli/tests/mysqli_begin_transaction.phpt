@@ -97,7 +97,7 @@ if (!have_innodb($link))
 			$res = mysqli_query($link, "SELECT id FROM test WHERE id = 2");
 		}
 	}
-	
+
 	if (!mysqli_begin_transaction($link, -1)) {
 			printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}

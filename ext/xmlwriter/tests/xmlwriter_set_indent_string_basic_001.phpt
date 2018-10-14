@@ -3,7 +3,7 @@ xmlwriter_set_indent_string passing xmlwriter resource
 --SKIPIF--
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 $temp_filename = dirname(__FILE__)."/xmlwriter_set_indent_string.tmp";
 	$fp = fopen($temp_filename, "w");
 	fwrite ($fp, "Hi");

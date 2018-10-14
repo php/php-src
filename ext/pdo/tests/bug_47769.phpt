@@ -16,7 +16,7 @@ class test extends PDO
 	private function isPrivate() {
 		echo "this is a private method.\n";
 	}
-    
+
     public function quote($str, $paramtype = NULL) {
     	$this->isProtected();
     	$this->isPrivate();

@@ -1,7 +1,7 @@
 --TEST--
 DBA DB4 File open("rl") & Insert Test
 --SKIPIF--
-<?php 
+<?php
 $handler = "db4";
 require_once(dirname(__FILE__) .'/skipif.inc');
 die("info $HND handler used");
@@ -29,8 +29,8 @@ if (($db_file = dba_popen($db_filename, "rl", $handler)) !== FALSE) {
 
 ?>
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: db4

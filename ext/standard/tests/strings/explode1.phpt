@@ -6,9 +6,9 @@ precision=14
 --FILE--
 <?php
 /* Prototype: array explode ( string $delimiter, string $string [, int $limit] );
-   Description: Returns an array of strings, each of which is a substring of string 
+   Description: Returns an array of strings, each of which is a substring of string
                 formed by splitting it on boundaries formed by the string delimiter.
-                If limit is set, the returned array will contain a maximum of limit 
+                If limit is set, the returned array will contain a maximum of limit
                 elements with the last element containing the rest of string.
 */
 
@@ -28,7 +28,7 @@ $delimiters = array (
 );
 $string = "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND";
 /* loop prints an array of strings, each of which is a substring of $string
-   formed by splitting it on boundaries formed by the string $delimiter. 
+   formed by splitting it on boundaries formed by the string $delimiter.
  */
 $counter = 1;
 foreach($delimiters as $delimiter) {
@@ -51,7 +51,7 @@ echo "\n-- Passing limit values 0 and 1 to explode() --\n";
 var_dump( explode(":", "Name:Phone:Address:City:State", 0) );
 var_dump( explode(":", "Name:Phone:Address:City:State", 1) );
 
-/* to check the maximum limit of string that can be given with limit<=0, 
+/* to check the maximum limit of string that can be given with limit<=0,
    default size is 50 but increases dynamically */
 echo "\n*** Testing explode() for maximum limit of string with Limit = -1 ***\n";
 var_dump( explode(":", "1:2:3:4:5:6:7:7:5:6:7:3:4:5:2:8:9:0:5:5:5:5:5:5:5:5:5:5:5:5:55:5:5:5%:%:%:%:5:5:5:%:%:5:5:5:5:5%:%:%:55:1:1", -1) );

@@ -27,7 +27,7 @@ var_dump($b == 1);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(false)
 bool(true)
 bool(true)

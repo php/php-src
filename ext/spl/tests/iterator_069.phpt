@@ -1,7 +1,7 @@
 --TEST--
 SPL: RecursiveIteratorIterator cannot be used with foreach by reference
 --FILE--
-<?php 
+<?php
 
 $arr = array(array(1,2));
 $arrOb = new ArrayObject($arr);

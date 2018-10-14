@@ -1,17 +1,17 @@
 --TEST--
-Test gzcompress() function : basic functionality 
+Test gzcompress() function : basic functionality
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : string gzcompress(string data [, int level, [int encoding]])
- * Description: Gzip-compress a string 
+ * Description: Gzip-compress a string
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*

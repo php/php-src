@@ -1,5 +1,5 @@
 --TEST--
-Ensure an interface may not shadow an inherited constant. 
+Ensure an interface may not shadow an inherited constant.
 --FILE--
 <?php
 interface I1 {

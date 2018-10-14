@@ -1,11 +1,11 @@
 --TEST--
-Test base64_encode() function : usage variations - unexpected types for argument 1 
+Test base64_encode() function : usage variations - unexpected types for argument 1
 --FILE--
 <?php
 /* Prototype  : proto string base64_encode(string str)
- * Description: Encodes string using MIME base64 algorithm 
+ * Description: Encodes string using MIME base64 algorithm
  * Source code: ext/standard/base64.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing base64_encode() : usage variations ***\n";

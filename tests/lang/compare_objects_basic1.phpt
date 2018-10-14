@@ -1,5 +1,5 @@
 --TEST--
-Test standard 'compare' object handler 
+Test standard 'compare' object handler
 --FILE--
 
 <?php
@@ -31,10 +31,10 @@ $obj3 = new class3();
 $obj4 = new class4();
 $obj5 = new class5();
 
-echo "\n-- The following compare should return TRUE --\n"; 
+echo "\n-- The following compare should return TRUE --\n";
 var_dump($obj1 == $obj1);
 
-echo "\n-- All the following compares should return FALSE --\n"; 
+echo "\n-- All the following compares should return FALSE --\n";
 var_dump($obj1 == $obj2);
 var_dump($obj1 == $obj3);
 var_dump($obj1 == $obj4);

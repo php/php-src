@@ -19,7 +19,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 echo "*** Testing vfprintf() : hexa formats and non-hexa values ***\n";
 
 // defining array of different hexa formats
-$formats = 
+$formats =
   '%x %+x %-x 
    %lx %Lx %4x %-4x
    %10.4x %-10.4x %.4x 
@@ -64,7 +64,7 @@ $args_array = array(
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 /* creating dumping file */

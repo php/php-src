@@ -2,10 +2,10 @@
 Test wrong number of arguments for asinh()
 --FILE--
 <?php
-/* 
+/*
  * proto float asinh(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 $arg_0 = 1.0;
 $extra_arg = 1;

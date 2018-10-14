@@ -29,7 +29,7 @@ unlink($fn);
 
 ?>
 ===DONE===
---EXPECT--	
+--EXPECT--
 bool(true)
 string(3) "啊"
 ===DONE===

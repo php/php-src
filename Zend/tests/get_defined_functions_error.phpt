@@ -1,5 +1,5 @@
 --TEST--
-Test get_defined_functions() function : error conditions 
+Test get_defined_functions() function : error conditions
 --FILE--
 <?php
 
@@ -17,7 +17,7 @@ $extra_arg = 10;
 $extra_arg2 = 20;
 var_dump( get_defined_functions($extra_arg, $extra_arg2) );
 
-?> 
+?>
 ===Done===
 --EXPECTF--
 *** Testing get_defined_functions() : error conditions ***

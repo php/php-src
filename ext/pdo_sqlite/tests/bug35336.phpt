@@ -20,7 +20,7 @@ $rez = $a->query ("SELECT * FROM test")->fetchAll(PDO::FETCH_CLASS, 'EEE');
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 hello world
 hello world
 Done

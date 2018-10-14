@@ -1,10 +1,10 @@
 --TEST--
-Testing error with non-Image resource paramenter of imagegammacorrect() of GD library, 
+Testing error with non-Image resource paramenter of imagegammacorrect() of GD library,
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--

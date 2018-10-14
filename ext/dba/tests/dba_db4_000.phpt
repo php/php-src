@@ -1,7 +1,7 @@
 --TEST--
 DBA DB4 handler test
 --SKIPIF--
-<?php 
+<?php
 $handler = 'db4';
 require_once(dirname(__FILE__) .'/skipif.inc');
 ?>
@@ -13,8 +13,8 @@ require_once(dirname(__FILE__) .'/dba_handler.inc');
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECT--
 database handler: db4

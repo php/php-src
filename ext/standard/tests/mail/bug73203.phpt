@@ -9,7 +9,7 @@ verify that the call succeeds.
 sendmail_path=cat >/dev/null
 mail.add_x_header = Off
 --SKIPIF--
-<?php 
+<?php
 if (substr(PHP_OS, 0, 3) === 'WIN') die('skip won\'t run on Windows');
 ?>
 --FILE--

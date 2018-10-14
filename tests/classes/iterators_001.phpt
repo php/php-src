@@ -37,7 +37,7 @@ class c_iter implements Iterator {
 		}
 	}
 }
-	
+
 class c implements IteratorAggregate {
 
 	public $max = 3;

@@ -1,7 +1,7 @@
 --TEST--
 Check how ngettext() with wrong parameters behaves.
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("SKIP extension gettext not loaded\n");
 	}

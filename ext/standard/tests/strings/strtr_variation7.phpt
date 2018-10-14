@@ -8,8 +8,8 @@ Test strtr() function : usage variations - unexpected inputs for 'to' argument
  * Source code: ext/standard/string.c
 */
 
-/* Test strtr() function: with unexpected inputs for 'to' 
- *  and expected types for 'str' & 'from' arguments 
+/* Test strtr() function: with unexpected inputs for 'to'
+ *  and expected types for 'str' & 'from' arguments
 */
 
 echo "*** Testing strtr() function: with unexpected inputs for 'to' ***\n";
@@ -22,7 +22,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource
@@ -41,36 +41,36 @@ $to_arr =  array (
 /*1*/	  0,
 		  1,
 		  -2,
-		
+
 		  // float values
 /*4*/	  10.5,
 		  -20.5,
 		  10.12345675e10,
-		
+
 		  // array values
 /*7*/	  array(),
 		  array(0),
 		  array(1, 2),
-		
+
 		  // boolean values
 /*10*/	  true,
 		  false,
 		  TRUE,
 		  FALSE,
-		
+
 		  // null values
 /*14*/	  NULL,
 		  null,
-		
+
 		  // objects
 /*16*/	  new sample(),
-		
+
 		  // resource
 /*17*/	  $file_handle,
-		
+
 		  // undefined variable
 /*18*/	  @$undefined_var,
-		
+
 		  // unset variable
 /*19*/	  @$unset_var
 );

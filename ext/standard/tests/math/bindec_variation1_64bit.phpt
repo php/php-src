@@ -48,7 +48,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -58,7 +58,7 @@ $inputs = array(
 /*19*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // undefined data
 /*22*/ @$undefined_var,
 

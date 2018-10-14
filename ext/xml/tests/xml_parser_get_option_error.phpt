@@ -1,17 +1,17 @@
 --TEST--
 Test xml_parser_get_option() function : error conditions
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
-?> 
+	print "skip - XML extension not loaded";
+}
+?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_parser_get_option(resource parser, int option)
- * Description: Get options from an XML parser 
+ * Description: Get options from an XML parser
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_parser_get_option() : error conditions ***\n";

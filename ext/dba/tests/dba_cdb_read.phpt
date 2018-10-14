@@ -1,7 +1,7 @@
 --TEST--
 DBA CDB handler test (read only)
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'cdb_make';
 	require_once dirname(__FILE__) .'/skipif.inc';
 ?>
@@ -15,7 +15,7 @@ DBA CDB handler test (read only)
 		$a = dba_firstkey($db_file);
 		$count= 0;
 		$keys = $a;
-		while($a) {     
+		while($a) {
 			$a = dba_nextkey($db_file);
 			$keys .= $a;
 			$count++;

@@ -1,5 +1,5 @@
 --TEST--
-Bug #38179 (imagecopy from a palette to a truecolor image loses alpha channel) 
+Bug #38179 (imagecopy from a palette to a truecolor image loses alpha channel)
 --SKIPIF--
 <?php
         if (!function_exists('imagecopy')) die("skip gd extension not available\n");

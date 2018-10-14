@@ -1,5 +1,5 @@
 --TEST--
-Test preg_quote() function : basic functionality 
+Test preg_quote() function : basic functionality
 --FILE--
 <?php
 /*
