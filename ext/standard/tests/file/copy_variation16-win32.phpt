@@ -80,7 +80,6 @@ rmdir($base_dir);
 
 echo "*** Done ***\n";
 ?>
-
 --EXPECTF--
 *** Testing copy() function: copying data file across directories ***
 - Size of source file => int(3500)

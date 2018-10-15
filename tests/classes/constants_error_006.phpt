@@ -12,5 +12,4 @@ Basic class support - attempting to modify a class constant by assignment
   var_dump(aclass::myConst);
 ?>
 --EXPECTF--
-
 Parse error: %s in %s on line %d

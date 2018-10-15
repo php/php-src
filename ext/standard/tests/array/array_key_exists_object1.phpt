@@ -46,7 +46,6 @@ var_dump($class2);
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_key_exists() : object functionality ***
 

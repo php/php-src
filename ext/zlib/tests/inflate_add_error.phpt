@@ -15,7 +15,6 @@ $badFlushType = 6789;
 var_dump(inflate_add($resource, "test", $badFlushType));
 ?>
 --EXPECTF--
-
 Warning: inflate_add(): Invalid zlib.inflate resource in %s on line %d
 bool(false)
 

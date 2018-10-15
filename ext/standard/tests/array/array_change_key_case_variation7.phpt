@@ -28,7 +28,6 @@ var_dump($new_input);
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
@@ -61,4 +60,3 @@ array(3) {
   string(3) "xyz"
 }
 Done
-

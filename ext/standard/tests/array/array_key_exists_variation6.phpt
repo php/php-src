@@ -42,7 +42,6 @@ foreach($array as $name => $input) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_key_exists() : usage variations ***
 

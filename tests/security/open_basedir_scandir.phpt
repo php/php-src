@@ -107,4 +107,3 @@ array(3) {
   string(6) "ok.txt"
 }
 *** Finished testing open_basedir configuration [scandir] ***
-

@@ -36,4 +36,3 @@ Stack trace:
 #0 %s(%d): XmlTest->run()
 #1 {main}
   thrown in %sbug34064.php on line 18
-

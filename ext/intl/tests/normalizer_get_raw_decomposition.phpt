@@ -65,4 +65,3 @@ error info: 'Input string must be exactly one UTF-8 encoded code point long.: U_
 ---------------------
 'f5' has no decomposition mapping
 error info: 'Code point out of range: U_ILLEGAL_ARGUMENT_ERROR' (1)
-

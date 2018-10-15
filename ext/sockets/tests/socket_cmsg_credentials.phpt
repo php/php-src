@@ -18,7 +18,6 @@ die('skip SO_PASSCRED is not defined');
 <?php
 $path = __DIR__ . "/unix_sock";
 @unlink($path);
-
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";
@@ -57,7 +56,6 @@ print_r($data);
 
 $pid = getmypid();
 var_dump($data['control'][0]['data']['pid'] === $pid);
-
 --EXPECTF--
 creating send socket
 resource(%d) of type (Socket)

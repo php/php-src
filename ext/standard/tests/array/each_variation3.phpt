@@ -103,7 +103,6 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing each() : usage variations ***
 

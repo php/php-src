@@ -56,4 +56,3 @@ echo "Passes.";
 ?>
 --EXPECT--
 Passes.
-

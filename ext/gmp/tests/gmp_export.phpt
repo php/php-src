@@ -60,7 +60,6 @@ var_dump(gmp_export(123, 0));
 // Invalid options
 var_dump(gmp_export(123, 1, GMP_MSW_FIRST | GMP_LSW_FIRST));
 var_dump(gmp_export(123, 1, GMP_BIG_ENDIAN | GMP_LITTLE_ENDIAN));
-
 --EXPECTF--
 bool(true)
 

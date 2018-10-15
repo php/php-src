@@ -38,7 +38,6 @@ foreach ($uppers as $lang => $sourcestring) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing mb_strtolower() :  usage variations ***
 

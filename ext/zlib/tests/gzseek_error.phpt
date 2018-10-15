@@ -21,7 +21,6 @@ var_dump(gzseek());
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzseek() expects at most 3 parameters, 4 given in %s on line %d
 bool(false)
 

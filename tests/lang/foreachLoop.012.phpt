@@ -69,7 +69,6 @@ withRefValue(4, $transform);
 
 ?>
 --EXPECT--
-
 Popping elements off end of an unreferenced array
 ---( Array with 1 element(s): )---
 --> State of array before loop:

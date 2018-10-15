@@ -19,4 +19,3 @@ string(0) ""
 ERR: Deprecated
 bool(true)
 string(3) "moo"
-

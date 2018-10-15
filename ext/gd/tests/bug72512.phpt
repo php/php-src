@@ -17,4 +17,3 @@ echo "OK";
 ?>
 --EXPECT--
 OK
-

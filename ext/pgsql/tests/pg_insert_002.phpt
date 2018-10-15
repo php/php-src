@@ -15,7 +15,6 @@ foreach (array('', '.', '..') as $table) {
 ?>
 Done
 --EXPECTF--
-
 Warning: pg_insert(): The table name must be specified in %s on line %d
 bool(false)
 

@@ -19,7 +19,6 @@ var_dump($o);
 echo "Done";
 ?>
 --EXPECTF--
-
 Warning: unserialize(): defined (Nonexistent) but not found in %s on line 14
 object(__PHP_Incomplete_Class)#%d (1) {
   ["__PHP_Incomplete_Class_Name"]=>

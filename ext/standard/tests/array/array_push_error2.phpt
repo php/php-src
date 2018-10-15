@@ -21,7 +21,6 @@ var_dump($array);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_push() : error conditions ***
 

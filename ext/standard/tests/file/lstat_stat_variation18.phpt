@@ -51,7 +51,6 @@ var_dump( stat($dir_name->var_name) );
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);

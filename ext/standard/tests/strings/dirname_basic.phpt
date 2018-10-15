@@ -60,7 +60,6 @@ check_dirname( $file_paths );
 
 echo "Done\n";
 ?>
-
 --EXPECTREGEX--
 \*\*\* Testing basic operations \*\*\*
 

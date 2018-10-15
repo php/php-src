@@ -15,4 +15,3 @@ var_dump($f->file(dirname(__FILE__) . "/resources/test.jpg", FILEINFO_EXTENSION)
 --EXPECT--
 string(17) "jpeg/jpg/jpe/jfif"
 ===DONE===
-

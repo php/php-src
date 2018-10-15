@@ -80,7 +80,6 @@ $ret = session_set_save_handler($handler);
 var_dump($ret);
 
 session_start();
-
 --EXPECTF--
 *** Testing session_set_save_handler() function: interface wrong ***
 bool(true)

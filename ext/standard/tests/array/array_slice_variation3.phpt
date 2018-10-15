@@ -81,7 +81,6 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_slice() : usage variations ***
 

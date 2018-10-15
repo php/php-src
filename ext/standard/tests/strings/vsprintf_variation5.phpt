@@ -52,7 +52,6 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing vsprintf() : int formats with float values ***
 

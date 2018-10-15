@@ -215,4 +215,3 @@ bool(false)
 Warning: session_regenerate_id() expects parameter 1 to be bool, resource given in %s on line %d
 NULL
 Done
-

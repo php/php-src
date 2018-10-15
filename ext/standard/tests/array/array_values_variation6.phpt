@@ -29,7 +29,6 @@ var_dump($result1);
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_values() : usage variations ***
 

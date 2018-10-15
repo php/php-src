@@ -37,5 +37,3 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-
-

@@ -20,9 +20,7 @@ var_dump($c->getDayOfWeekType());
 
 var_dump(intlcal_get_day_of_week_type($c, "foo"));
 var_dump(intlcal_get_day_of_week_type(1, 1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::getDayOfWeekType() expects exactly 1 parameter, 2 given in %s on line %d
 
 Warning: IntlCalendar::getDayOfWeekType(): intlcal_get_day_of_week_type: bad arguments in %s on line %d

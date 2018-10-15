@@ -35,4 +35,3 @@ bool(true)
 Warning: Illegal string offset 'foo' in %s line %d
 string(1) "f"
 bool(false)
-

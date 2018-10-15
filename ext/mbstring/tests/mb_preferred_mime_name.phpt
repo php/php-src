@@ -40,7 +40,6 @@ var_dump(mb_preferred_mime_name('BAD_NAME'));
 // No preferred name
 var_dump(mb_preferred_mime_name('auto'));
 ?>
-
 --EXPECTF--
 Shift_JIS
 Shift_JIS

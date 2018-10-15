@@ -26,9 +26,7 @@ var_dump($match4);
 var_dump(preg_match('/hello world/', $string, $match5));							//tries to find "hello world" (should be Hello, world)
 var_dump($match5);
 ?>
-
 --EXPECT--
-
 int(1)
 array(1) {
   [0]=>
@@ -57,4 +55,3 @@ array(1) {
 int(0)
 array(0) {
 }
-

@@ -174,4 +174,3 @@ string(0) ""
 Warning: session_save_path() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done
-

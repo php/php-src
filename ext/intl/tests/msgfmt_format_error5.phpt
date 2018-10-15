@@ -18,7 +18,6 @@ EOD;
 
 $mf = new MessageFormatter('en_US', $fmt);
 var_dump($mf->format(array("foo" => new stdclass())));
-
 --EXPECTF--
 Warning: MessageFormatter::format(): msgfmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted) in %s on line %d
 

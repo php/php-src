@@ -31,7 +31,6 @@ foreach ($bad_args as $bad_arg) {
 ?>
 ===DONE===
 --EXPECTF--
-
 -- Too many arguments --
 
 Warning: microtime() expects at most 1 parameter, 2 given in %s on line 11

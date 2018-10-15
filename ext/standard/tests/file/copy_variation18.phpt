@@ -42,13 +42,11 @@ var_dump( compare_stats($stat_before_copy, $stat_after_copy, $stat_keys_to_compa
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_copy_variation18.tmp");
 unlink(dirname(__FILE__)."/copy_variation18.tmp");
 ?>
-
 --EXPECT--
 *** Test copy() function: stat of file before and after copy ***
 Copy operation => bool(true)

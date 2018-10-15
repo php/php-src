@@ -34,4 +34,3 @@ bool(false)
 
 Warning: openssl_x509_read(): supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
 bool(false)
-

@@ -24,6 +24,3 @@ Function [ <internal:standard> function get_html_translation_table ] {
     Parameter #2 [ <optional> $encoding ]
   }
 }
-
-
-

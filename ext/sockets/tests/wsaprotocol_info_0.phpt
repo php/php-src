@@ -57,4 +57,3 @@ Warning: socket_wsaprotocol_info_export(): Unable to export WSA protocol info [0
  in %s on line %d
 
 Warning: socket_wsaprotocol_info_import(): Unable to open file mapping [0x00000002] in %s on line %d
-

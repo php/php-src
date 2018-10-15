@@ -24,6 +24,5 @@ function heLLO($row) {
 foreach ($db->query("SELECT * FROM test")->fetchAll(PDO::FETCH_FUNC, 'heLLO') as $row) {
 	var_dump($row);
 }
-
 --EXPECT--
 string(1) "1"

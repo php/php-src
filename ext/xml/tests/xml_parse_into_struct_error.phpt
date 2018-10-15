@@ -46,4 +46,3 @@ NULL
 Warning: xml_parse_into_struct() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 Done
-

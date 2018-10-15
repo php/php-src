@@ -40,7 +40,6 @@ try{
 } catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
-
 --EXPECT--
 error: 2, IntlCalendar::setTimeZone() expects exactly 1 parameter, 2 given
 error: 2, IntlCalendar::setTimeZone(): intlcal_set_time_zone: bad arguments

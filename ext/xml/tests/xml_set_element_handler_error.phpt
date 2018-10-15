@@ -44,4 +44,3 @@ NULL
 Warning: xml_set_element_handler() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 Done
-

@@ -15,7 +15,6 @@ var_dump(ob_end_clean($extra_arg));
 
 ?>
 --EXPECTF--
-
 Too many arguments
 
 Warning: ob_end_clean() expects exactly 0 parameters, 1 given in %s on line 10

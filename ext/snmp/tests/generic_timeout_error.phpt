@@ -24,4 +24,3 @@ bool(false)
 
 Warning: snmpget(): No response from %s in %s on line %d
 bool(false)
-

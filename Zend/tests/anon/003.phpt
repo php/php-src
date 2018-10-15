@@ -51,4 +51,3 @@ object(class@%s)#1 (1) {
   ["i"]=>
   int(10)
 }
-

@@ -49,7 +49,6 @@ echo $doc->c14N(TRUE, FALSE,
 echo $doc->C14N(TRUE, FALSE, NULL, array('test'));
 ?>
 --EXPECT--
-
 <contain xmlns="http://www.example.com/ns/foo" xmlns:fubar="http://www.example.com/ns/fubar" xmlns:test="urn::test">
   <bar><test1></test1></bar>
   <bar><test2></test2></bar>

@@ -80,7 +80,6 @@ for ($x = 0; $x < count($min); $x++) {
 }
 ?>
 --EXPECTF--
-
 rand() tests with default min and max value (i.e 0 thru %i)
 PASSED: range min = 0 max = %i
 

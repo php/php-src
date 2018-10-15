@@ -26,7 +26,6 @@ var_dump( each($arr, $extra_arg) );
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing each() : error conditions ***
 
@@ -40,4 +39,3 @@ NULL
 Warning: each() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-

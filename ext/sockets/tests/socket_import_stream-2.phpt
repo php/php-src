@@ -5,7 +5,6 @@ socket_import_stream: Bad arguments
 if (!extension_loaded('sockets')) {
 	die('SKIP sockets extension not available.');
 }
-
 --FILE--
 <?php
 
@@ -46,4 +45,3 @@ bool(true)
 Warning: socket_import_stream(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 Done.
-

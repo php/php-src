@@ -22,7 +22,6 @@ var_dump(max(0, 1, array(2,3)));
 echo "\nDone\n";
 ?>
 --EXPECT--
-
 *** Testing sequences of numbers ***
 int(2)
 int(2)

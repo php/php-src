@@ -21,6 +21,5 @@ $zip->close();
 unlink($filename);
 echo "status: " . $zip->status . "\n";
 echo "\n";
-
 --EXPECT--
 status: 0

@@ -16,7 +16,6 @@ output_handler=
 	print mb_strtoupper( "הכן\n" );
 	print mb_convert_case( "הכן\n", MB_CASE_TITLE );
 ?>
-
 --EXPECT--
 abcdefghijklmnopqrstuvwxyz
 ABCDEFGHIJKLMNOPQRSTUVWXYZ

@@ -25,4 +25,3 @@ imagedestroy($src); imagedestroy($dst_tc);
 ?>
 --EXPECT--
 46FF0000
-

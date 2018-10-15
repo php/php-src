@@ -98,9 +98,7 @@ foreach($inputs as $input) {
 fclose($fp);
 echo "Done";
 ?>
-
 --EXPECTF--
-
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --

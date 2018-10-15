@@ -13,5 +13,4 @@ class C implements I {
 echo "Done\n";
 ?>
 --EXPECTF--
-
 Fatal error: Cannot inherit previously-inherited or override constant FOO from interface I in %s on line 6

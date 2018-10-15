@@ -10,6 +10,5 @@ class Obj
 }
 
 function echo(){} // not valid
-
 --EXPECTF--
 Parse error: syntax error, unexpected 'echo' (T_ECHO), expecting %s in %s on line 9

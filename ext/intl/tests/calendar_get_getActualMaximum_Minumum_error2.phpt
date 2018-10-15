@@ -110,4 +110,3 @@ error: 0, Argument 1 passed to intlcal_get() must be an instance of IntlCalendar
 error: 0, Argument 1 passed to intlcal_get_actual_maximum() must be an instance of IntlCalendar, int given
 
 error: 0, Argument 1 passed to intlcal_get_actual_minimum() must be an instance of IntlCalendar, int given
-

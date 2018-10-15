@@ -22,7 +22,6 @@ try {
 } catch (Throwable $e) {
     echo $e->getMessage();
 }
-
 --EXPECTF--
 array(3) {
   [0]=>

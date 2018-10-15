@@ -401,5 +401,3 @@ LATIN SMALL LETTER THORN: &#xFE; => fe
 
 LATIN SMALL LETTER Y WITH DIAERESIS: &#xFF; => ff
 &#xFF; => ff
-
-

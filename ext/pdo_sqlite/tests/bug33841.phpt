@@ -20,7 +20,6 @@ $stmt = $db->prepare("UPDATE test SET text = :text ");
 $stmt->bindParam(':text', $name);
 $name = 'test2';
 var_dump($stmt->execute(), $stmt->rowCount());
-
 --EXPECT--
 bool(true)
 int(1)

@@ -10,7 +10,5 @@ class A {
 class B extends A {
 	protected const publicConst = 1;
 }
-
-
 --EXPECTF--
 Fatal error: Access level to B::publicConst must be public (as in class A) in %s on line 9

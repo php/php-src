@@ -13,4 +13,3 @@ Test constants with default values based on other constants.
 --EXPECT--
 string(5) "hello"
 string(5) "hello"
-

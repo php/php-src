@@ -215,4 +215,3 @@ bool(false)
 Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
 bool(false)
 Done
-

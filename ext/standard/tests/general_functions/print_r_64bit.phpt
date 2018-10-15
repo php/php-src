@@ -7,7 +7,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --INI--
 precision=14
 --FILE--
-
 <?php
 /* Prototype: bool print_r ( mixed $expression [, bool $return] );
    Description: Prints human-readable information about a variable

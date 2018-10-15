@@ -91,7 +91,6 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_slice() : usage variations ***
 

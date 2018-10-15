@@ -104,7 +104,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strpos() : usage variations ***
 

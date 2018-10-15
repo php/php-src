@@ -12,6 +12,4 @@ $sp->setExtractFlags(1,1); // Should throw a warning as setExtractFlags expects 
 
 ?>
 --EXPECTF--
-
 Warning: SplPriorityQueue::setExtractFlags() expects exactly 1 parameter, 2 given in %s on line %d
-

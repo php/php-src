@@ -83,4 +83,3 @@ unlink($outPath);
 --EXPECT--
 bool(true)
 ==DONE==
-

@@ -11,10 +11,7 @@ ini_set("intl.error_level", E_WARNING);
 var_dump(IntlTimeZone::getCanonicalID());
 var_dump(IntlTimeZone::getCanonicalID(array()));
 var_dump(IntlTimeZone::getCanonicalID("foo\x81"));
-
-
 --EXPECTF--
-
 Warning: IntlTimeZone::getCanonicalID() expects at least 1 parameter, 0 given in %s on line %d
 
 Warning: IntlTimeZone::getCanonicalID(): intltz_get_canonical_id: bad arguments in %s on line %d

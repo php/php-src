@@ -1,6 +1,5 @@
 --TEST--
 Return type covariance error
-
 --FILE--
 <?php
 interface foo {
@@ -14,6 +13,5 @@ class qux implements foo {
         return $this;
     }
 }
-
 --EXPECTF--
 Fatal error: Declaration of qux::bar(): biz must be compatible with foo::bar(): foo in %s on line %d

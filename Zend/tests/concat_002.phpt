@@ -21,4 +21,3 @@ echo "Done\n";
 --EXPECT--
 int(33554432)
 Done
-

@@ -29,7 +29,6 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--
-
 Warning: shm_remove_var() expects exactly 2 parameters, 0 given in %s006.php on line %d
 NULL
 

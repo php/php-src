@@ -124,12 +124,10 @@ var_dump( end($null_array) );
 echo "Done\n";
 
 ?>
-
 --CLEAN--
 /* cleaning resource handles */
 fclose( $file_handle );  //file resource handle deleted
 closedir( $dir_handle );  //dir resource handle deleted
-
 --EXPECTF--
 *** Testing end() on different arrays ***
 -- Iteration 1 --

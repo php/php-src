@@ -54,7 +54,6 @@ var_dump( stat($link_array_with_key['linkname']) );
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);

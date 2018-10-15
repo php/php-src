@@ -36,4 +36,3 @@ Stack trace:
 #0 %s(%d): CL->load('class://non.exi...')
 #1 {main}
   thrown in %s on line %d
-

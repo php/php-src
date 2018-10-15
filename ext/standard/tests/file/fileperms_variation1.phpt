@@ -38,7 +38,6 @@ unlink($file_path."/fileperms_variation1_symlink.tmp");
 unlink($file_path."/fileperms_variation1_link.tmp");
 unlink($file_path."/fileperms_variation1.tmp");
 ?>
-
 --EXPECTF--
 *** Testing fileperms() with links ***
 int(%d)

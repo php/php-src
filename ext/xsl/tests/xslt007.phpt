@@ -12,8 +12,6 @@ $doc = $proc->transformToUri($dom, "file://".dirname(__FILE__)."/out.xml");
 print file_get_contents(dirname(__FILE__)."/out.xml");
 unlink(dirname(__FILE__)."/out.xml");
 print "\n";
-
-
 --EXPECT--
 Test 7: Transform To Uri
 <?xml version="1.0" encoding="iso-8859-1"?>

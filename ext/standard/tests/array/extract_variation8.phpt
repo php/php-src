@@ -17,7 +17,6 @@ var_dump ( extract($var1));
 
 echo "\nDone";
 ?>
-
 --EXPECT--
 *** Testing for Numerical prefixes ***
 int(3)

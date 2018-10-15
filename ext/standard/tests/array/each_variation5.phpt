@@ -32,7 +32,6 @@ var_dump( each($arr[2]));
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing each() : usage variations ***
 
