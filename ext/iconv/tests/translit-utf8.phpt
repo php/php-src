@@ -9,7 +9,6 @@ include('skipif.inc');
 error_reporting=2047
 --FILE--
 <?php // vim600: syn=php
-/* include('test.inc'); */
 //error_reporting(E_ALL);
 $utf = implode('', file(dirname(__FILE__).'/Quotes.UTF-8'));
 
