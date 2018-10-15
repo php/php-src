@@ -6,7 +6,6 @@ EUC-JP to ISO-2022-JP
 error_reporting=2039
 --FILE--
 <?php
-/* include('test.inc'); */
 /* charset=EUC-JP */
 
 function hexdump($str) {

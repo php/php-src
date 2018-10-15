@@ -6,7 +6,6 @@ EUC-JP to SJIS
 error_reporting=2039
 --FILE--
 <?php
-/* include('test.inc'); */
 /* charset=EUC-JP */
 
 $str = "
