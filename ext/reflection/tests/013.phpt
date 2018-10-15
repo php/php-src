@@ -10,4 +10,3 @@ echo $funcs["sleep"]->getName();
 ?>
 --EXPECT--
 sleep
-

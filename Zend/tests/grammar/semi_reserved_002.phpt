@@ -159,7 +159,6 @@ Obj::__DIR__();
 Obj::__NAMESPACE__();
 
 echo "\nDone\n";
-
 --EXPECTF--
 Obj::empty
 Obj::callable

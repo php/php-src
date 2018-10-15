@@ -14,7 +14,6 @@ var_dump($five, $duke);
 
 ?>
 --EXPECTF--
-
 Notice: Undefined offset: 5 in %s on line %d
 
 Notice: Undefined index: duke in %s on line %d

@@ -19,6 +19,5 @@ unlink($temp_filename);
 --CREDITS--
 Koen Kuipers koenk82@gmail.com
 --EXPECTF--
-
 Warning: xmlwriter_set_indent_string() expects exactly %d parameters, %d given in %s on line %d
 NULL

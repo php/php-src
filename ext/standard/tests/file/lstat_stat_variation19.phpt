@@ -52,7 +52,6 @@ var_dump( stat($names_with_key["dir"]) ); // value stored with string key
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);

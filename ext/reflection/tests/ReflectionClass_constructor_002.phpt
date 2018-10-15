@@ -46,7 +46,6 @@ try {
 
 ?>
 --EXPECTF--
-
 Warning: ReflectionClass::__construct() expects exactly 1 parameter, 0 given in %s on line 3
 object(ReflectionClass)#%d (1) {
   ["name"]=>

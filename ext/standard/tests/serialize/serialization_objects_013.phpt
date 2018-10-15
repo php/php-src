@@ -96,7 +96,6 @@ check($obj);
 echo "Done";
 ?>
 --EXPECTF--
-
 --- a refs b:
 object(stdClass)#%d (3) {
   ["b"]=>

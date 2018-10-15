@@ -22,7 +22,6 @@ var_dump( array_values($input) );
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_values() : basic functionality ***
 array(5) {

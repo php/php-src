@@ -50,4 +50,3 @@ array(%d) {
 -- with default argument --
 int(%d)
 Done
-

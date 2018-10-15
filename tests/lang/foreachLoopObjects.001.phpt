@@ -35,8 +35,6 @@ echo "\nCheck key and value after the loop.\n";
 var_dump($k, $v);
 ?>
 --EXPECTF--
-
-
 Simple loop.
 string(10) "Original a"
 string(10) "Original b"

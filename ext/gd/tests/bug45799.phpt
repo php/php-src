@@ -11,5 +11,4 @@ imagepng($img);
 imagedestroy($img);
 ?>
 --EXPECTF--
-
 Warning: imagepng(): gd-png error: no colors in palette in %s on line %d

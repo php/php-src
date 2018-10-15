@@ -71,7 +71,6 @@ echo "relative offset - relative length - cut nothing\n";
 test_splice (-4,-7);
 echo "Done\n";
 ?>
-
 --EXPECT--
 *** array_splice() function : usage variations - lengths and offsets
 absolute offset - absolute length - cut from beginning

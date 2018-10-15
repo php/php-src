@@ -26,4 +26,3 @@ echo "ok\n";
 --EXPECTF--
 Notice: Uninitialized string offset: 3 in %sresult_unused.php on line %d
 ok
-

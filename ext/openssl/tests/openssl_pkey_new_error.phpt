@@ -16,10 +16,8 @@ openssl_pkey_get_details(openssl_pkey_new($dsa));
 openssl_pkey_get_details(openssl_pkey_new($dh));
 ?>
 --EXPECTF--
-
 Warning: openssl_pkey_get_details() expects parameter 1 to be resource, boolean given in %s on line %d
 
 Warning: openssl_pkey_get_details() expects parameter 1 to be resource, boolean given in %s on line %d
 
 Warning: openssl_pkey_get_details() expects parameter 1 to be resource, boolean given in %s on line %d
-

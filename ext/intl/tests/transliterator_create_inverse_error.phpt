@@ -12,7 +12,6 @@ $tr->createInverse(array());
 
 $tr = Transliterator::create("Katakana-Latin");
 transliterator_create_inverse("jj");
-
 --EXPECTF--
 Warning: Transliterator::createInverse() expects exactly 0 parameters, 1 given in %s on line %d
 

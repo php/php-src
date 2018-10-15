@@ -41,4 +41,3 @@ Class [ <user> class A ] {
     }
   }
 }
-

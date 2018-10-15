@@ -19,4 +19,3 @@ ob_end_flush();
 --EXPECTF--
 bool(true)
 ==DONE==
-

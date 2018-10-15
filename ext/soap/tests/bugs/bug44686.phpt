@@ -11,4 +11,3 @@ echo "ok\n";
 ?>
 --EXPECT--
 ok
-

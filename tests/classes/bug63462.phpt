@@ -49,7 +49,6 @@ $test->protectedProperty = 'value';
 $test->privateProperty   = 'value';
 
 ?>
-
 --EXPECTF--
 __get nonExisting
 Notice: Undefined property: Test::$nonExisting in %sbug63462.php on line %d

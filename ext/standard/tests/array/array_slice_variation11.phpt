@@ -97,7 +97,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_slice() : usage variations ***
 

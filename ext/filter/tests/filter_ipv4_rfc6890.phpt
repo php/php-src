@@ -77,9 +77,6 @@ foreach ($reservedRanges as $key => $range) {
 	var_dump(filter_var($min, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
 	var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
 }
-
-
-
 --EXPECT--
 string(10) "10.0.0.0/8"
 bool(false)

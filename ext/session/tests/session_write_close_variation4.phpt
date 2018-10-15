@@ -54,4 +54,3 @@ string(4) "test"
 bool(true)
 bool(true)
 Done
-

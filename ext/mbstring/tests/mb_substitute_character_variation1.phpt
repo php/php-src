@@ -228,4 +228,3 @@ bool(false)
 Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 ===DONE===
-

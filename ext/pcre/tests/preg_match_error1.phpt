@@ -26,7 +26,6 @@ $regex_value = new stdclass(); //Object
 var_dump(preg_match($regex_value, $subject));
 ?>
 --EXPECTF--
-
 *** Testing preg_match() : error conditions ***
 
 Arg value is abcdef

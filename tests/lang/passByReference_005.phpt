@@ -143,7 +143,6 @@ var_dump($u1, $u2);
 
 ?>
 --EXPECTF--
-
 ---- Pass by ref / pass by val: functions ----
 
 Notice: Undefined variable: u1 in %s on line 72

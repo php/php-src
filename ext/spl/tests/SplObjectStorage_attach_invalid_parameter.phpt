@@ -17,4 +17,3 @@ NULL
 
 Warning: SplObjectStorage::attach() expects at most 2 parameters, 3 given in %s on line %d
 NULL
-

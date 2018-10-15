@@ -10,4 +10,3 @@ var_dump($consts["CONNECTION_NORMAL"]);
 ?>
 --EXPECT--
 int(0)
-

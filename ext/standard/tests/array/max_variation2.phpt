@@ -29,7 +29,6 @@ echo "\nDone\n";
 
 ?>
 --EXPECTF--
-
 *** Testing arrays  ***
 int(2)
 int(2)

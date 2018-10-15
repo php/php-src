@@ -27,7 +27,6 @@ echo key($arr) . " => " . current($arr) . "\n";
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing each() : usage variations ***
 

@@ -47,7 +47,6 @@ $anchor = $doc->getElementsByTagName('a')[0];
 var_dump($anchor->attributes[0]->name);
 
 echo "==DONE==\n";
-
 --EXPECTF--
 testing has_dimension
 bool(true)
@@ -84,4 +83,3 @@ NULL
 testing attribute access
 string(4) "href"
 ==DONE==
-

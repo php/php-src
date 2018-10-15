@@ -8,4 +8,3 @@ var_dump($dll->add(2));
 --EXPECTF--
 Warning: SplDoublyLinkedList::add() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
-

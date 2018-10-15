@@ -22,7 +22,6 @@ array_map(array('Element', 'CallBack'), $arr);
 echo "Done\n";
 ?>
 --EXPECTF--
-
 Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 %s(%d): Element->ThrowException()

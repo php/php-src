@@ -66,4 +66,3 @@ bool(false)
 Warning: oci_pconnect(): ORA-01031: %s in %s on line %d
 bool(false)
 Done
-

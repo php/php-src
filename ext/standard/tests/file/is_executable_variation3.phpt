@@ -66,4 +66,3 @@ Warning: is_executable() expects parameter 1 to be a valid path, array given in 
 NULL
 bool(false)
 Done
-

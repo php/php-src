@@ -28,7 +28,6 @@ foreach ( $variation as $var ) {
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzfile() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 

@@ -100,7 +100,6 @@ fclose($fp);
 echo "Done";
 ?>
 --EXPECTF--
-
 *** Testing mb_internal_encoding() : usage variations ***
 
 -- Iteration 1 --

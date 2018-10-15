@@ -87,4 +87,3 @@ do_regression_test();
 (100) "Subject: =?ISO-8859-1?Q?Pr=FCfung?==?ISO-8859-1*de_DE?Q?Pr=FCfung?==?ISO-8859-2?Q?k=F9=D4=F1=D3let?="
 (84) "Subject: Prüfung=?ISO-8859-1*de_DE?Q?Pr=FCfung??   =?ISO-8859-2?X?k=F9=D4=F1=D3let?="
 (27) "From: サンプル文字列サンプル文字列日本語テキスト"
-

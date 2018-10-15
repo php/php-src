@@ -34,4 +34,3 @@ NULL
 Warning: exif_tagname() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 ===Done===
-

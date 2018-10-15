@@ -12,5 +12,3 @@ Stack trace:
 #1 %s%ebug71311.php(2): unserialize('%s')
 #2 {main}
   thrown in %s%ebug71311.php on line 2
-
-

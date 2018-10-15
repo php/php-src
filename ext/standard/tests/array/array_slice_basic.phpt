@@ -29,7 +29,6 @@ var_dump( array_slice($input, $offset) );
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_slice() : basic functionality ***
 

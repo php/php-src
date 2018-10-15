@@ -11,10 +11,7 @@ ini_set("intl.error_level", E_WARNING);
 $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getID('foo'));
 intltz_get_id(null);
-
-
 --EXPECTF--
-
 Warning: IntlTimeZone::getID() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlTimeZone::getID(): intltz_get_id: bad arguments in %s on line %d

@@ -118,7 +118,6 @@ foreach( $misc_values as $value ) {
 
 echo "Done\n";
 ?>
-
 --EXPECTF--
 *** Testing debug_zval_dump() on functions ***
 --- Variation 1: global variable inside a function ---

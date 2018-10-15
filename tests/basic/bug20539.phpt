@@ -17,4 +17,3 @@ session.save_path=./tests/basic/
 --EXPECT--
 good :)
 bool(true)
-

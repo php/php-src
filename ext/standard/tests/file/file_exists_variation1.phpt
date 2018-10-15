@@ -19,7 +19,6 @@ var_dump(file_exists(' '));
 var_dump(file_exists('|'));
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing file_exists() : usage variations ***
 bool(false)

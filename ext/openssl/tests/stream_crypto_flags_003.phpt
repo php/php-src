@@ -53,4 +53,3 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 resource(%d) of type (stream)
 bool(false)
 bool(false)
-

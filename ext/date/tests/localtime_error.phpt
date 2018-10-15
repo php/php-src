@@ -30,4 +30,3 @@ var_dump( localtime($timestamp, $assoc, $extra_arg) );
 Warning: localtime() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
 ===DONE===
-

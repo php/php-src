@@ -60,4 +60,3 @@ Notice: Undefined variable: file_handle in %s on line %d
 Warning: fgets() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
-

@@ -73,7 +73,6 @@ echo $r."\n";
 
 
 ?>
-
 --EXPECT--
 == ASCII ==
 40
@@ -96,6 +95,3 @@ ERR: Warning
 ERR: Warning
 
 ERR: Warning
-
-
-

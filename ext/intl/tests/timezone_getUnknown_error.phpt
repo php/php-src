@@ -17,9 +17,7 @@ $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 IntlTimeZone::getUnknown(1);
 
 intltz_get_unknown(1);
-
 --EXPECTF--
-
 Warning: IntlTimeZone::getUnknown() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlTimeZone::getUnknown(): intltz_get_unknown: bad arguments in %s on line %d

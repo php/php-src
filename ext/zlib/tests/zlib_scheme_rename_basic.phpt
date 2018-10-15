@@ -15,7 +15,6 @@ var_dump(file_exists($inputFileName));
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: rename(): ZLIB wrapper does not support renaming in %s on line %d
 bool(true)
 ===DONE===

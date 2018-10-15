@@ -44,7 +44,6 @@ for ($i = -30; $i <= 60; $i += 10) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing iconv_strpos() : usage variations ***
 

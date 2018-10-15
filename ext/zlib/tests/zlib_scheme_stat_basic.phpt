@@ -15,7 +15,6 @@ lstat($srcFile);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: stat(): stat failed for compress.zlib://%s/004.txt.gz in %s on line %d
 
 Warning: lstat(): Lstat failed for compress.zlib://%s/004.txt.gz in %s on line %d

@@ -11,9 +11,7 @@ ini_set("intl.error_level", E_WARNING);
 $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->useDaylightTime('foo'));
 intltz_use_daylight_time(null);
-
 --EXPECTF--
-
 Warning: IntlTimeZone::useDaylightTime() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlTimeZone::useDaylightTime(): intltz_use_daylight_time: bad arguments in %s on line %d

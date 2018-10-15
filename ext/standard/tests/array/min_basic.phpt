@@ -22,7 +22,6 @@ var_dump(min(0, 1, array(2,3)));
 echo "\nDone\n";
 ?>
 --EXPECT--
-
 *** Testing sequences of numbers ***
 int(1)
 int(-2)

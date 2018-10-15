@@ -43,7 +43,6 @@ var_dump($obj);
 
 ?>
 --EXPECTF--
-
 Removing properties before the current element from an iterated object.
 string(10) "Original a"
 string(10) "Original b"

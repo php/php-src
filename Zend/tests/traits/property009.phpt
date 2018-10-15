@@ -42,7 +42,6 @@ var_dump($b);
 
 ?>
 --EXPECTF--
-
 object(SubclassClassicInheritance)#1 (1) {
   ["hello"]=>
   int(0)

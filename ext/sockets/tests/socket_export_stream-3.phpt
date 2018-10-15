@@ -44,4 +44,3 @@ resource(%d) of type (Socket)
 int(10)
 string(10) "my message"
 Done.
-

@@ -17,9 +17,7 @@ var_dump($bi->preceding(1, 2));
 var_dump($bi->preceding(array()));
 var_dump($bi->isBoundary(1, 2));
 var_dump($bi->isBoundary(array()));
-
 --EXPECTF--
-
 Warning: IntlBreakIterator::following() expects exactly 1 parameter, 2 given in %s on line %d
 
 Warning: IntlBreakIterator::following(): breakiter_following: bad arguments in %s on line %d

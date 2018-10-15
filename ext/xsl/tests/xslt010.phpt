@@ -204,4 +204,3 @@ Test 10: EXSLT Support
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-

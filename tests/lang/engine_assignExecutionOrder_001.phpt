@@ -72,8 +72,6 @@ var_dump(C::$string);
 
 ?>
 --EXPECTF--
-
-
 Order with local assignment:
 in f()
 in g()

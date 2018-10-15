@@ -239,4 +239,3 @@ PASSED: %s\\touchVar5.tmp\\aSubDirOrFile - touched
 --- testing /%s/touchVar5.tmp/aSubDirOrFile ---
 PASSED: /%s/touchVar5.tmp/aSubDirOrFile - touched
 ===DONE===
-

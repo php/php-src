@@ -100,4 +100,3 @@ Stack trace:
 #0 %s ReflectionMethod->__construct('TestCla::foo')
 #1 {main}
 Class and Method in same string (ok):
-

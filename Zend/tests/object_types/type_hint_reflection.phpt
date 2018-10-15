@@ -21,7 +21,6 @@ var_dump($typeHintTwo->isBuiltin(), (string)$typeHintTwo);
 
 $typeHinta = (new ReflectionFunction('a'))->getParameters()[0]->getType();
 var_dump($typeHinta->isBuiltin(), (string)$typeHinta);
-
 --EXPECTF--
 bool(true)
 string(6) "object"

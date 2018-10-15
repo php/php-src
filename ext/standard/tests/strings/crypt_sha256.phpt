@@ -61,4 +61,3 @@ Got       <$res>\n";
 echo "Passes.";?>
 --EXPECTF--
 Passes.
-

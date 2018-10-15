@@ -33,4 +33,3 @@ array(1) {
   ["test"]=>
   &NULL
 }
-

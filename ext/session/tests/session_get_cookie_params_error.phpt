@@ -214,4 +214,3 @@ NULL
 Warning: session_get_cookie_params() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 Done
-

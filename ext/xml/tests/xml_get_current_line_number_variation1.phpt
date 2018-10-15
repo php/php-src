@@ -237,4 +237,3 @@ Arg value
 Warning: xml_get_current_line_number() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 Done
-

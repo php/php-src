@@ -25,4 +25,3 @@ Checking with incorrect parameter type
 Warning: imap_headers() expects parameter 1 to be resource, string given in %s on line %d
 
 Warning: imap_headers() expects parameter 1 to be resource, boolean given in %s on line %d
-

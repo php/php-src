@@ -13,7 +13,6 @@ echo PHP_EOL;
 echo (int) $rm->getParameters()[0]->isOptional();
 
 ?>
-
 --EXPECT--
 1
 0

@@ -126,7 +126,6 @@ echo $o->getPrivateProperty();
 echo "\n\n";
 
 ?>
-
 --EXPECTF--
 publicProperty set
 true

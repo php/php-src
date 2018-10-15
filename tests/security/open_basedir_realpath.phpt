@@ -58,4 +58,3 @@ string(%d) "%s\test\ok\ok.txt"
 string(%d) "%s\test\ok\ok.txt"
 string(%d) "%s\test\ok\ok.txt"
 *** Finished testing open_basedir configuration [realpath] ***
-

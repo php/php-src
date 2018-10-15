@@ -84,8 +84,6 @@ var_dump($ucontainer);
 echo "Done";
 ?>
 --EXPECTF--
-
-
 Array containing same object twice:
 array(2) {
   [0]=>

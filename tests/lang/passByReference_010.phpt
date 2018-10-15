@@ -33,8 +33,6 @@ var_dump($a);
 
 ?>
 --EXPECTF--
-
-
 ---> Pass constant assignment by reference:
 
 Notice: Only variables should be passed by reference in %s on line 9

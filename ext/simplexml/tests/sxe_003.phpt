@@ -59,7 +59,6 @@ for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: Invalid argument supplied for foreach() in %ssxe_003.php on line %d
 ===RESET===
 bool(true)

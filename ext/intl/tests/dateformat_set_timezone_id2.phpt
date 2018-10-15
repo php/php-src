@@ -59,7 +59,6 @@ include_once( 'ut_common.inc' );
 ut_run();
 ?>
 --EXPECTF--
-
 Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d
 
 Warning: datefmt_set_timezone(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d

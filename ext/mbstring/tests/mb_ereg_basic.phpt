@@ -75,7 +75,6 @@ function base64_encode_var_dump($regs) {
 	}
 }
 ?>
-
 --EXPECT--
 *** Testing mb_ereg() : basic functionality ***
 Regex encoding set to utf-8

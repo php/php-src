@@ -45,7 +45,6 @@ $dom = new domDocument();
         return $id;
     }
   }
-
 --EXPECTF--
 Test 11: php:function Support
 
@@ -56,4 +55,3 @@ foobar -
 this is from an external DomDocument
 from the Input Document
 static
-

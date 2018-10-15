@@ -69,4 +69,3 @@ array(2) {
   string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
 }
 ===Done===
-
