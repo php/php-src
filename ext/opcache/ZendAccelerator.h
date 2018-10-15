@@ -143,6 +143,7 @@ typedef struct _zend_persistent_script {
 	accel_time_t   timestamp;              /* the script modification time */
 	zend_bool      corrupted;
 	zend_bool      is_phar;
+	zend_bool      empty;
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
@@ -212,6 +213,7 @@ typedef struct _zend_accel_directives {
 #ifdef HAVE_HUGE_CODE_PAGES
 	zend_bool      huge_code_pages;
 #endif
+	char *preload;
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
@@ -283,6 +285,9 @@ typedef struct _zend_accel_shared_globals {
 	LONGLONG   restart_in;
 #endif
 	zend_bool       restart_in_progress;
+
+	/* Preloading */
+	zend_persistent_script *preload_script;
 
 	/* uninitialized HashTable Support */
 	uint32_t uninitialized_bucket[-HT_MIN_MASK];

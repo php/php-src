@@ -340,6 +340,23 @@ void shutdown_executor(void) /* {{{ */
 				destroy_op_array(&func->op_array);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END_DEL();
+
+			/* Cleanup preloaded immutable functions */
+			ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
+				zend_op_array *op_array = Z_PTR_P(zv);
+				if (op_array->type == ZEND_INTERNAL_FUNCTION) {
+					break;
+				}
+				ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_IMMUTABLE);
+				if (op_array->static_variables) {
+					HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+					if (ht) {
+						ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
+						zend_array_destroy(ht);
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
+
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
 				if (_idx == EG(persistent_classes_count)) {
 					break;
@@ -347,6 +364,33 @@ void shutdown_executor(void) /* {{{ */
 				destroy_zend_class(zv);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END_DEL();
+
+			/* Cleanup preloaded immutable classes */
+			ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
+				zend_class_entry *ce = Z_PTR_P(zv);
+				if (ce->type == ZEND_INTERNAL_CLASS) {
+					break;
+				}
+				ZEND_ASSERT(ce->ce_flags & ZEND_ACC_IMMUTABLE);
+				if (ce->default_static_members_count) {
+					zend_cleanup_internal_class_data(ce);
+				}
+				if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
+					zend_op_array *op_array;
+
+					ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+						if (op_array->type == ZEND_USER_FUNCTION) {
+							if (op_array->static_variables) {
+								HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+								if (ht) {
+									ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
+									zend_array_destroy(ht);
+								}
+							}
+						}
+					} ZEND_HASH_FOREACH_END();
+				}
+			} ZEND_HASH_FOREACH_END();
 		}
 
 		zend_cleanup_internal_classes();

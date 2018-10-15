@@ -6322,6 +6322,10 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 	CG(active_class_entry) = original_ce;
 
+	if (toplevel) {
+		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
+	}
+
 	if (toplevel
 		/* We currently don't early-bind classes that implement interfaces or use traits */
 	 && !(ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
