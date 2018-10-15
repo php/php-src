@@ -24,6 +24,7 @@ PHP_FUNCTION(password_hash);
 PHP_FUNCTION(password_verify);
 PHP_FUNCTION(password_needs_rehash);
 PHP_FUNCTION(password_get_info);
+PHP_FUNCTION(password_algos);
 
 PHP_MINIT_FUNCTION(password);
 
@@ -36,14 +37,32 @@ PHP_MINIT_FUNCTION(password);
 #define PHP_PASSWORD_ARGON2_THREADS 2
 #endif
 
-typedef enum {
-    PHP_PASSWORD_UNKNOWN,
-    PHP_PASSWORD_BCRYPT,
-#if HAVE_ARGON2LIB
-    PHP_PASSWORD_ARGON2I,
-    PHP_PASSWORD_ARGON2ID,
-#endif
+typedef struct _php_password_algo {
+	const char *name;
+	zend_string *(*hash)(const zend_string *password, zend_array *options);
+	zend_bool (*verify)(const zend_string *password, const zend_string *hash);
+	zend_bool (*needs_rehash)(const zend_string *password, zend_array *options);
+	int (*get_info)(zval *return_value, const zend_string *hash);
+	zend_bool (*valid)(const zend_string *hash);
 } php_password_algo;
+
+extern const php_password_algo php_password_algo_bcrypt;
+#if HAVE_ARGON2LIB
+extern const php_password_algo php_password_algo_argon2i;
+extern const php_password_algo php_password_algo_argon2id;
+#endif
+
+PHPAPI int php_password_algo_register(const char*, const php_password_algo*);
+PHPAPI void php_password_algo_unregister(const char*);
+PHPAPI const php_password_algo* php_password_algo_default();
+PHPAPI zend_string *php_password_algo_extract_ident(const zend_string*);
+PHPAPI const php_password_algo* php_password_algo_find(const zend_string*);
+
+PHPAPI const php_password_algo* php_password_algo_identify_ex(const zend_string*, const php_password_algo*);
+static inline const php_password_algo* php_password_algo_identify(const zend_string *hash) {
+	return php_password_algo_identify_ex(hash, php_password_algo_default());
+}
+
 
 #endif
 

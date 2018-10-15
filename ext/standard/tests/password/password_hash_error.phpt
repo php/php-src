@@ -29,7 +29,9 @@ NULL
 Warning: password_hash() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: password_hash() expects parameter 2 to be int, array given in %s on line %d
+Notice: Array to string conversion in %s on line %d
+
+Warning: password_hash(): Unknown password hashing algorithm: Array in %s on line %d
 NULL
 
 Warning: password_hash(): Unknown password hashing algorithm: 19 in %s on line %d
