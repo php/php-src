@@ -157,7 +157,7 @@ function help(): string
     | --DEFLATE_POST--         | no  | yes | yes | crlf<->lf | yes | no  |
     | --PUT--                  | yes | yes | yes | crlf<->lf | yes | yes |
     | --GET--                  | yes | yes | yes | crlf<->lf | yes | yes |
-    | --FILE--                 | PHP | yes | yes | crlf<->lf | yes | PHP |
+    | --FILE--                 | PHP | yes | no  | crlf<->lf | yes | PHP |
     | --FILEEOF--              | PHP | yes | yes | crlf<->lf | yes | PHP |
     | --FILE_EXTERNAL--        | yes | yes | yes | crlf<->lf | yes | yes |
     | --EXPECT--               | no  | yes | yes | crlf<->lf | yes | no  |
@@ -1275,10 +1275,15 @@ function tidyPhpTestFile(string $file): array
             $rules['max_newlines'] = 1;
         }
 
-        // Edge case. --EXPECTHEADERS-- sections can have a single newline
+        // Edge case: --EXPECTHEADERS-- can have a single newline
         if ('--EXPECTHEADERS--' === $sectionRealName && '' === trim($buffer, "\r\n")) {
             $rules['trim_final_newlines'] = false;
             $rules['trim_leading_newlines'] = false;
+        }
+
+        // Edge case: --FILE-- can have final newlines as part of the test
+        if ('--FILE--' === $sectionRealName) {
+            $rules['trim_final_newlines'] = false;
         }
 
         list($buffer, $bufferLogs) = tidyContent($buffer, $file, $rules);
