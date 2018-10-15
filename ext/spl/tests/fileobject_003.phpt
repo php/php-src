@@ -41,7 +41,7 @@ function test($name, $lc, $lp)
 	}
 }
 
-test(dirname(__FILE__) . '/' . 'fileobject_001a.data', 't', substr(dirname(__FILE__),-1));
+test(dirname(__FILE__) . '/' . 'fileobject_001a.data', 'a', substr(dirname(__FILE__),-1));
 test(dirname(__FILE__) . '/', substr(dirname(__FILE__),-1), 'l');
 test(dirname(__FILE__),       substr(dirname(__FILE__),-1), 'l');
 
