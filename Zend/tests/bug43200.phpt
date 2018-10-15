@@ -48,4 +48,3 @@ Class [ <user> class x extends c implements a, b ] {
     }
   }
 }
-

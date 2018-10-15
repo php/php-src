@@ -23,7 +23,6 @@ var_dump( fileinode() );
 var_dump( fileinode(__FILE__, "string") );
 
 echo "\n*** Done ***";
-
 --EXPECTF--
 *** Testing error conditions of fileinode() ***
 Warning: fileinode(): stat failed for /no/such/file/dir in %s on line 10

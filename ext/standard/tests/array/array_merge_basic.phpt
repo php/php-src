@@ -24,7 +24,6 @@ var_dump(array_merge($array2, $array1));
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_merge() : basic functionality ***
 array(6) {

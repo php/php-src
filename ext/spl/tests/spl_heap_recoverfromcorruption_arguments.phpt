@@ -10,6 +10,4 @@ TestFest London May 2009
   $h->recoverFromCorruption("no args");
 ?>
 --EXPECTF--
-
 Warning: SplHeap::recoverFromCorruption() expects exactly 0 parameters, 1 given in %s on line %d
-

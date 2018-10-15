@@ -102,7 +102,6 @@ foreach($inputs as $key => $input) {
 };
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_values() : usage variations ***
 

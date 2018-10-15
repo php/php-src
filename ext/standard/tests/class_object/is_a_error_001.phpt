@@ -32,7 +32,6 @@ var_dump( is_a($object) );
 echo "Done";
 ?>
 --EXPECTF--
-
 *** Testing is_a() : error conditions ***
 
 -- Testing is_a() function with more than expected no. of arguments --

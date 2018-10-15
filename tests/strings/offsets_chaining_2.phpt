@@ -9,4 +9,3 @@ var_dump($string{0}{0}[0][0]);
 ?>
 --EXPECT--
 string(1) "f"
-

@@ -28,4 +28,3 @@ Fatal error: Uncaught Error: Cannot assign by reference to overloaded object in 
 Stack trace:
 #0 {main}
   thrown in %s on line %d
-

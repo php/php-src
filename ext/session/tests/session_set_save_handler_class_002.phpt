@@ -89,7 +89,6 @@ var_dump($_SESSION);
 
 session_write_close();
 session_unset();
-
 --EXPECTF--
 *** Testing session_set_save_handler() : full handler implementation ***
 string(%d) "%s"

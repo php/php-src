@@ -536,5 +536,3 @@ OGONEK: &#x2DB; => fe
 
 CARON: &#x2C7; => ff
 &#xFF; => d8
-
-

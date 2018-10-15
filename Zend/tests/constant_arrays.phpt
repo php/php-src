@@ -30,7 +30,6 @@ var_dump(define('ELEPHPANT', [new StdClass]));
 $recursive = [];
 $recursive[0] = &$recursive;
 var_dump(define('RECURSION', $recursive));
-
 --EXPECTF--
 array(4) {
   [0]=>

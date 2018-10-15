@@ -16,6 +16,5 @@ $output = ob_get_clean();
 var_dump( $output );
 
 ?>
-
 --EXPECT--
 string(73) "テスト用日本語文字列。このモジュールはPHPにマルチバイト関数を提供します。"

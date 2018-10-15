@@ -71,7 +71,6 @@ check($obj);
 echo "Done";
 ?>
 --EXPECTF--
-
 --- a refs external:
 object(stdClass)#%d (3) {
   ["a"]=>

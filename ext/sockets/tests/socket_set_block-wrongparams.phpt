@@ -15,4 +15,3 @@ Warning: socket_set_block() expects parameter 1 to be resource, array given in %
 --CREDITS--
 Robin Mehner, robin@coding-robin.de
 PHP Testfest Berlin 2009-05-09
-

@@ -46,4 +46,3 @@ int(2)
 int(3)
 #0  gen()
 #1  Generator->next() called at [%s:%d]
-

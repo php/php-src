@@ -21,4 +21,3 @@ var_dump($arg);
 bar called!
 bar called!
 int(3)
-

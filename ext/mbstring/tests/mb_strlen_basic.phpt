@@ -30,7 +30,6 @@ var_dump(mb_strlen($string_mb, 'UTF-8'));
 
 echo "\nDone";
 ?>
-
 --EXPECT--
 *** Testing mb_strlen() : basic functionality***
 

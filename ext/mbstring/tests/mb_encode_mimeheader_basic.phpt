@@ -5,7 +5,6 @@ Test mb_encode_mimeheader() function : basic functionality
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is not available in this build");
 ?>
-
 --FILE--
 <?php
 /* Prototype  : string mb_encode_mimeheader

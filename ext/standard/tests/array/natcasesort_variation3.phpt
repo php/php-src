@@ -41,7 +41,6 @@ foreach ($inputs as $array_arg) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing natcasesort() : usage variation ***
 

@@ -1,7 +1,6 @@
 --TEST--
 Test array_diff_assoc() function : usage variations - arrays with different data types as keys
 --FILE--
-
 <?php
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
  * Description: Returns the entries of arr1 that have values which are not present
@@ -100,9 +99,7 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
-
 --EXPECT--
-
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --

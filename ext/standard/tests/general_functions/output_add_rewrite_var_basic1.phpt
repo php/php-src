@@ -74,7 +74,6 @@ Test use_trans_sid=1
 <form action="http://php.net/bar.php" method="get"> </form>
 <form action="bad://php.net/bar.php" method="get"> </form>
 <form action="//www.php.net/bar.php" method="get"> </form>
-
 --EXPECT--
 Without session
 <a href="?%3CNAME%3E=%3CVALUE%3E"> </a>

@@ -55,4 +55,3 @@ Got       <$res>\n";
 echo "Passes.";?>
 --EXPECT--
 Passes.
-

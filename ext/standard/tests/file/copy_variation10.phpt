@@ -23,12 +23,10 @@ var_dump( filesize($file) );
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_variation10.tmp");
 ?>
-
 --EXPECT--
 *** Test copy(): Trying to create a copy of file with the same source name ***
 bool(false)

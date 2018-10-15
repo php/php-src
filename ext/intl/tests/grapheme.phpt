@@ -781,7 +781,6 @@ function check_result($result, $expected) {
 
 ?>
 --EXPECT--
-
 function grapheme_strlen($string) {}
 
 "hindi" in devanagari strlen 3
@@ -1213,4 +1212,3 @@ extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EX
 extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 4 = bca%CC%8Axyz == bca%CC%8Axyz
 extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 5 = ca%CC%8Axyz == ca%CC%8Axyz
 extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 6 = a%CC%8Axyz == a%CC%8Axyz
-

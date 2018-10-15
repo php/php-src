@@ -13,7 +13,6 @@ foreach($params as $key => $value) {
 	ReflectionParameter::export('ReflectionParameterTest', 'incorrect_parameter');
 }
 --EXPECTF--
-
 Fatal error: Uncaught ReflectionException: The parameter specified by its name could not be found in %s.php:%d
 Stack trace:
 #0 [internal function]: ReflectionParameter->__construct('ReflectionParam...', 'incorrect_param...')

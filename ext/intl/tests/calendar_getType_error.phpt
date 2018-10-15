@@ -16,9 +16,7 @@ var_dump($c->getType(1));
 
 var_dump(intlcal_get_type($c, 1));
 var_dump(intlcal_get_type(1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::getType() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlCalendar::getType(): intlcal_get_type: bad arguments in %s on line %d

@@ -25,7 +25,6 @@ unlink($f2);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: ftruncate(): Can't truncate this stream! in %s on line %d
 
 Warning: ftruncate(): Can't truncate this stream! in %s on line %d

@@ -61,7 +61,6 @@ var_dump( stat($obj2->var_name) );
 
 echo "\n*** Done ***";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
@@ -295,4 +294,3 @@ array(26) {
 }
 
 *** Done ***
-

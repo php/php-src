@@ -27,7 +27,6 @@ print $proc->transformToXml($dom);
 
 //this segfaulted before
 print $dom->documentElement->firstChild->nextSibling->nodeName;
-
 --EXPECT--
 HERE
 ROW

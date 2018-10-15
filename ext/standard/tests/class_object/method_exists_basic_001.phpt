@@ -50,7 +50,6 @@ foreach ($methods as $method) {
 echo "Done";
 ?>
 --EXPECT--
-
  ---(Using string class name)---
 Does C::inherit_pub exist? bool(true)
 Does C::inherit_prot exist? bool(true)

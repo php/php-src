@@ -3,7 +3,6 @@ Test basic logging for the Opcache
 --DESCRIPTION--
 This test runs a simple PHP script and ensures the Opcache
 outputs the correct logging at the highest log_verbosity_level
-
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

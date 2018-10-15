@@ -10,7 +10,6 @@ exif_read_data(__DIR__ . '/bug76423.jpg', 0, true, true);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: exif_read_data(%s.jpg): Thumbnail goes IFD boundary or end of file reached in %s on line %d
 
 Warning: exif_read_data(%s.jpg): File structure corrupted in %s on line %d

@@ -72,7 +72,6 @@ echo $dom->saveXML();
 
 ?>
 --EXPECT--
-
 <?xml version="1.0"?>
 <root><first/><newsecond/><newthird/><newfourth/></root>
 
@@ -81,4 +80,3 @@ echo $dom->saveXML();
 
 <?xml version="1.0"?>
 <root><second/><third/><fourth/></root>
-

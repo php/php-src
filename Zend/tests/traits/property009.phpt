@@ -41,7 +41,6 @@ var_dump($b);
 
 ?>
 --EXPECT--
-
 object(SubclassClassicInheritance)#1 (1) {
   ["hello"]=>
   int(0)

@@ -41,7 +41,6 @@ var_dump(ini_get('output_encoding'));
 var_dump(ini_get('iconv.internal_encoding'));
 var_dump(ini_get('iconv.input_encoding'));
 var_dump(ini_get('iconv.output_encoding'));
-
 --EXPECT--
 Getting INI
 string(10) "ISO-8859-1"

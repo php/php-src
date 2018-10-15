@@ -23,4 +23,3 @@ Fatal error: Uncaught Error: Undefined class constant 'I::FOO' in %sbug74657.php
 Stack trace:
 #0 {main}
   thrown in %sbug74657.php on line %d
-

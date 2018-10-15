@@ -39,7 +39,6 @@ unlink($file_path."/fileowner_variation1_symlink.tmp");
 unlink($file_path."/fileowner_variation1_link.tmp");
 unlink($file_path."/fileowner_variation1.tmp");
 ?>
-
 --EXPECTF--
 *** Testing fileowner() with links ***
 int(%d)

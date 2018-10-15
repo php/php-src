@@ -38,7 +38,6 @@ $b->testA($b);
 
 ?>
 --EXPECT--
-
 ---( Declaring class: )---
 B::testB
 array(4) {

@@ -59,7 +59,6 @@ $enc = mb_http_output();
 print "$enc\n";
 
 ?>
-
 --EXPECT--
 OK_ASCII_SET
 ASCII
@@ -81,4 +80,3 @@ EUC-JP
 ERR: Warning
 OK_BAD_OBJ_SET
 EUC-JP
-

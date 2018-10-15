@@ -26,7 +26,6 @@ for ($index = 0; $index < $children->length; $index++) {
 	echo get_class($current), "\n";
 	var_dump($current->textContent);
 }
-
 --EXPECT--
 bool(true)
 --- child 0 ---
@@ -40,4 +39,3 @@ string(14) " Hello World! "
 DOMText
 string(1) "
 "
-

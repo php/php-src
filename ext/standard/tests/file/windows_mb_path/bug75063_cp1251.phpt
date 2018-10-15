@@ -68,7 +68,6 @@ rmdir($d0);
 rmdir($prefix);
 ?>
 ===DONE===
-
 --EXPECTF--
 string(4) "тест"
 bool(true)
@@ -77,4 +76,3 @@ string(8) "code.php"
 string(8) "test.txt"
 string(8) "таст.txt"
 ===DONE===
-

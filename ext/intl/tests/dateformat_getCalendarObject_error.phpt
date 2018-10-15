@@ -20,7 +20,6 @@ var_dump(datefmt_get_calendar_object(new stdclass));
 ?>
 ==DONE==
 --EXPECTF--
-
 Warning: IntlDateFormatter::getCalendarObject() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlDateFormatter::getCalendarObject(): datefmt_get_calendar_object: unable to parse input params in %s on line %d

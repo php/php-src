@@ -38,7 +38,6 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-
 Warning: A non-numeric value encountered in %s on line %d
 int(75636)
 

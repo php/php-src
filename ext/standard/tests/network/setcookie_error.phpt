@@ -17,7 +17,6 @@ setcookie('name3', 'value3', ['path' => '/path/', 'foo' => 'bar']);
 setcookie('name4', 'value4', [], "path", "domain.tld", true, true);
 
 var_dump(headers_list());
-
 --EXPECTHEADERS--
 
 --EXPECTF--

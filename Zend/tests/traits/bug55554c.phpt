@@ -40,7 +40,5 @@ class ReportCollision {
 
 echo "ReportCollision: ";
 $o = new ReportCollision;
-
-
 --EXPECT--
 ReportCollision: New constructor executed

@@ -162,4 +162,3 @@ ut_run();
 		is in form 'UNORM_NONE'? = no	error info: 'normalizer_normalize: illegal normalization form: U_ILLEGAL_ARGUMENT_ERROR' (1)
 '%E1%BA%9B' normalized to form 'UNORM_NONE' is '%E1%BA%9B'	error info: 'U_ZERO_ERROR' (0)
 		is in form 'UNORM_NONE'? = no	error info: 'normalizer_normalize: illegal normalization form: U_ILLEGAL_ARGUMENT_ERROR' (1)
-

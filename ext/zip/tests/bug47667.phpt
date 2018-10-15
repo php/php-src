@@ -35,6 +35,5 @@ echo "files: " , $zip->numFiles;
 $zip->close();
 
 unlink($filename);
-
 --EXPECT--
 files: 1

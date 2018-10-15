@@ -21,7 +21,6 @@ var_dump( filegroup("/no/such/file", "root") );  // args > expected
 
 echo "\n*** Done ***\n";
 ?>
-
 --EXPECTF--
 *** Testing filegroup(): error conditions ***
 
@@ -41,4 +40,3 @@ Warning: filegroup() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Done ***
-

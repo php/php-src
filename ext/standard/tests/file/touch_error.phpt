@@ -19,4 +19,3 @@ NULL
 
 Warning: touch(): Unable to create file /no/such/file/or/directory because No such file or directory in %s on line %d
 bool(false)
-

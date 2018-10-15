@@ -19,7 +19,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test not for Windows platforms
 $fileInfo = new SplFileInfo('not_existing');
 var_dump($fileInfo->getPerms() == 0100557);
 ?>
-
 --EXPECTF--
 Fatal error: Uncaught RuntimeException: SplFileInfo::getPerms(): stat failed for %s in %s
 Stack trace:

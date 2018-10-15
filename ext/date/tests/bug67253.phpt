@@ -41,4 +41,3 @@ array(12) {
   ["is_localtime"]=>
   bool(false)
 }
-

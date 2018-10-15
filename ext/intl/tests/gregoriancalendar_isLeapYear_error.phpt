@@ -19,7 +19,6 @@ var_dump(intlgregcal_is_leap_year($c, 1, 2));
 var_dump(intlgregcal_is_leap_year($c));
 var_dump(intlgregcal_is_leap_year(1, 2));
 --EXPECTF--
-
 Warning: IntlGregorianCalendar::isLeapYear() expects exactly 1 parameter, 2 given in %s on line %d
 
 Warning: IntlGregorianCalendar::isLeapYear(): intlgregcal_is_leap_year: bad arguments in %s on line %d

@@ -39,7 +39,6 @@ foreach ($lowers as $lang => $sourcestring) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing mb_strtoupper() : usage variations ***
 

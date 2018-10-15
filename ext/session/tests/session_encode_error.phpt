@@ -217,4 +217,3 @@ NULL
 Warning: session_encode() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 Done
-

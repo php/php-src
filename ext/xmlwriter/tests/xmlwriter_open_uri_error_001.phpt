@@ -11,6 +11,5 @@ Koen Kuipers koenk82@gmail.com
 Theo van der Zee
 #Test Fest Utrecht 09-05-2009
 --EXPECTF--
-
 Warning: xmlwriter_open_uri(): Empty string as source in %s on line %d
 bool(false)

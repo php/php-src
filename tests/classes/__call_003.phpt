@@ -30,4 +30,3 @@ array(1) {
   [0]=>
   &string(7) "changed"
 }
-

@@ -21,7 +21,6 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-
 *** Testing error conditions of array_splice() ***
 
 Warning: array_splice() expects at least 2 parameters, 0 given in %s on line %d

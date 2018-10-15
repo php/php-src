@@ -15,4 +15,3 @@ var_dump(posix_setrlimit(POSIX_RLIMIT_NOFILE, 129, 128));
 --EXPECT--
 bool(true)
 bool(false)
-

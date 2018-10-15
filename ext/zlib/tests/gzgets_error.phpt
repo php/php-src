@@ -21,7 +21,6 @@ var_dump(gzgets());
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzgets() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
 

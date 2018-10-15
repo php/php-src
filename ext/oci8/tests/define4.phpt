@@ -71,4 +71,3 @@ string(4) "some"
 Warning: oci_result(): supplied resource is not a valid oci8 statement resource in %s on line %d
 bool(false)
 Done
-

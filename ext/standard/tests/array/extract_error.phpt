@@ -30,7 +30,6 @@ var_dump( extract($arr,EXTR_PREFIX_IF_EXISTS) );
 
 echo "Done\n";
 ?>
-
 --EXPECTF--
 *** Testing Error Conditions ***
 

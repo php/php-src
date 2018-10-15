@@ -9,6 +9,5 @@ $arr = array(str_repeat('"', 200)."1"=>1,str_repeat('"', 200)."2"=>1);
 
 $data = unserialize($str);
 var_dump($data);
-
 --EXPECT--
 bool(false)

@@ -59,7 +59,6 @@ echo "\n---( Unrelated class: )---\n";
 X::test($b);
 ?>
 --EXPECT--
-
 ---( Global scope: )---
 array(1) {
   ["pub"]=>

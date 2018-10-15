@@ -27,7 +27,6 @@ var_dump(array_slice($input, -PHP_INT_MAX));
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_slice() : usage variations ***
 

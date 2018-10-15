@@ -32,4 +32,3 @@ Warning: pg_lo_create(): supplied resource is not a valid PostgreSQL link resour
 int(%d)
 int(%d)
 ==DONE==
-

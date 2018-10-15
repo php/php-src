@@ -23,7 +23,6 @@ unlink($filename);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzwrite() expects at most 3 parameters, 4 given in %s on line %d
 bool(false)
 

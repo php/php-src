@@ -27,4 +27,3 @@ object(ReflectionClass)#%d (1) {
   ["name"]=>
   string(1) "B"
 }
-

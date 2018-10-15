@@ -22,7 +22,6 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
-
 --EXPECT--
 string(4) "1010"
 string(12) "111101101110"

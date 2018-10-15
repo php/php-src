@@ -29,5 +29,4 @@ Redeclare inherited public property as protected static.
   B::showB();
 ?>
 --EXPECTF--
-
 Fatal error: Cannot redeclare non static A::$p as static B::$p in %s on line 18

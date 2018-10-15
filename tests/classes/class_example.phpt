@@ -1,7 +1,6 @@
 --TEST--
 Classes general test
 --FILE--
-
 <?php
 
 /* pretty nifty object oriented code! */

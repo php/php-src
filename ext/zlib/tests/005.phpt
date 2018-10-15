@@ -34,7 +34,6 @@ var_dump(gzuncompress($data2));
 echo "Done\n";
 ?>
 --EXPECTF--
-
 Warning: gzcompress() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

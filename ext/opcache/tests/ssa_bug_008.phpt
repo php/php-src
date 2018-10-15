@@ -7,4 +7,3 @@ if (!is_int($info = gc_collect_cycles()) || ($info < 100)) {
 }
 --EXPECT--
 integer
-

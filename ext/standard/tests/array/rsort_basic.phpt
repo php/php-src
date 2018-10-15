@@ -70,7 +70,6 @@ var_dump( $temp_array);
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing rsort() : basic functionality ***
 

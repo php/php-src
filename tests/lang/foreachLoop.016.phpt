@@ -117,7 +117,6 @@ Ensure foreach splits the iterated entity from its cow reference set, for all so
   unset(C::$a[0]->b, $b);
 ?>
 --EXPECTF--
-
 $a
 array(1) {
   [0]=>

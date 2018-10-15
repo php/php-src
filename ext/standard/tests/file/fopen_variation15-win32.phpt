@@ -190,4 +190,3 @@ test passed
 --- WRITE: file:///%s/fopen15.tmpDir/fopen_variation15.tmp ---
 test passed
 ===DONE===
-

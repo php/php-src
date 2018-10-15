@@ -52,4 +52,3 @@ Error: 4096 - Method badToString::__toString() must return a string value
 
 Try 2:
 Error: 4096 - Method badToString::__toString() must return a string value
-

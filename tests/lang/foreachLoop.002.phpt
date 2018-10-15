@@ -72,7 +72,6 @@ var_dump($a);
 
 ?>
 --EXPECT--
-
 Directly changing array values.
 string(10) "original.1"
 string(10) "original.2"

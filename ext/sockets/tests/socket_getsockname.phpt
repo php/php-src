@@ -23,10 +23,8 @@ fa@php.net
     var_dump($port);
     socket_close($s_c);
 ?>
-
 --EXPECTF--
 bool(true)
 bool(true)
 string(7) "0.0.0.0"
 int(%i)
-

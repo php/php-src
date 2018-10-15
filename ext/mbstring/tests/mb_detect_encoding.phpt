@@ -96,7 +96,6 @@ print("MP: $s\n"); // Missing parameter
 
 
 ?>
-
 --EXPECT--
 == BASIC TEST ==
 SJIS: SJIS
@@ -118,4 +117,3 @@ ERR: Warning
 BAD: EUC-JP
 ERR: Warning
 MP: 
-

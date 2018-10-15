@@ -40,7 +40,6 @@ if (is_null($res)) {
 echo "MATHS test script completed\n";
 
 ?>
-
 --EXPECTF--
 MATHS test script started
 
@@ -55,4 +54,3 @@ PASSED
 Warning: lcg_value() expects exactly 0 parameters, 2 given in %slcg_value_basic.php on line %d
 PASSED
 MATHS test script completed
-

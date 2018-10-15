@@ -25,7 +25,6 @@ echo key($input) . " => " . current ($input) . "\n";
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_slice() : usage variations ***
 
