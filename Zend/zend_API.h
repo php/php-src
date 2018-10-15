@@ -219,7 +219,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.trait_precedences = NULL;				\
 		class_container.interfaces = NULL;						\
 		class_container.get_iterator = NULL;					\
-		class_container.iterator_funcs_ptr = NULL;				\
+		ZEND_MAP_PTR_INIT(class_container.iterator_funcs_ptr, NULL);	\
 		class_container.info.internal.module = NULL;			\
 		class_container.info.internal.builtin_functions = functions;	\
 	}
@@ -228,11 +228,8 @@ typedef struct _zend_fcall_info_cache {
 #define INIT_NS_CLASS_ENTRY(class_container, ns, class_name, functions) \
 	INIT_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions)
 
-#ifdef ZTS
-#	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members_table:CG(static_members_table)[(ce)->static_members_table_idx])
-#else
-#	define CE_STATIC_MEMBERS(ce) ((ce)->static_members_table)
-#endif
+#define CE_STATIC_MEMBERS(ce) \
+	((zval*)ZEND_MAP_PTR_GET((ce)->static_members_table))
 
 #define ZEND_FCI_INITIALIZED(fci) ((fci).size != 0)
 

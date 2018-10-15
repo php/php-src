@@ -76,6 +76,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->last_live_range = 0;
 
 	op_array->static_variables = NULL;
+	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 	op_array->last_try_catch = 0;
 
 	op_array->fn_flags = 0;
@@ -83,8 +84,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->last_literal = 0;
 	op_array->literals = NULL;
 
-	op_array->run_time_cache = NULL;
-	op_array->cache_size = 0;
+	ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+	op_array->cache_size = zend_op_array_extension_handles * sizeof(void*);
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
@@ -145,11 +146,7 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 		zval *p = static_members;
 		zval *end = p + ce->default_static_members_count;
 
-#ifdef ZTS
-		CG(static_members_table)[ce->static_members_table_idx] = NULL;
-#else
-		ce->static_members_table = NULL;
-#endif
+		ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
 		while (p != end) {
 			i_zval_ptr_dtor(p);
 			p++;
@@ -213,7 +210,21 @@ ZEND_API void destroy_zend_class(zval *zv)
 	zend_class_entry *ce = Z_PTR_P(zv);
 	zend_function *fn;
 
-	if (--ce->refcount > 0) {
+	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+		zend_op_array *op_array;
+
+		if (ce->default_static_members_count) {
+			zend_cleanup_internal_class_data(ce);
+		}
+		if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
+			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+				if (op_array->type == ZEND_USER_FUNCTION) {
+					destroy_op_array(op_array);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+		return;
+	} else if (--ce->refcount > 0) {
 		return;
 	}
 	switch (ce->type) {
@@ -305,6 +316,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 					p++;
 				}
 				free(ce->default_static_members_table);
+				if (ZEND_MAP_PTR(ce->static_members_table) != &ce->default_static_members_table) {
+					zend_cleanup_internal_class_data(ce);
+				}
 			}
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release_ex(ce->name, 1);
@@ -333,8 +347,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
 			}
-			if (ce->iterator_funcs_ptr) {
-				free(ce->iterator_funcs_ptr);
+			if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
+				free(ZEND_MAP_PTR(ce->iterator_funcs_ptr));
 			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
@@ -355,17 +369,18 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 {
 	uint32_t i;
 
-	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-		if (GC_DELREF(op_array->static_variables) == 0) {
-			zend_array_destroy(op_array->static_variables);
+	if (op_array->static_variables) {
+		HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+		if (ht && !(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+			if (GC_DELREF(ht) == 0) {
+				zend_array_destroy(ht);
+			}
 		}
 	}
 
-	if (op_array->run_time_cache
-	 && (op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE)) {
-		efree(op_array->run_time_cache);
-		op_array->run_time_cache = NULL;
+	if ((op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE)
+	 && ZEND_MAP_PTR(op_array->run_time_cache)) {
+		efree(ZEND_MAP_PTR(op_array->run_time_cache));
 	}
 
 	if (!op_array->refcount || --(*op_array->refcount) > 0) {

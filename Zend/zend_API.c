@@ -2795,7 +2795,9 @@ ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zen
 	ce = zend_hash_add_ptr(CG(class_table), lcname, ce);
 	zend_string_release_ex(lcname, 0);
 	if (ce) {
-		ce->refcount++;
+		if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+			ce->refcount++;
+		}
 		return SUCCESS;
 	}
 	return FAILURE;
@@ -3696,18 +3698,14 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 			ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
 		}
 		ZVAL_COPY_VALUE(&ce->default_static_members_table[property_info->offset], property);
-		if (ce->type == ZEND_USER_CLASS) {
-			ce->static_members_table = ce->default_static_members_table;
-#ifdef ZTS
-		} else if (!ce->static_members_table_idx) {
-			CG(last_static_member)++;
-			ce->static_members_table_idx = CG(last_static_member);
-			if (CG(static_members_table)) {
-				/* Support for run-time declaration: dl() */
-				CG(static_members_table) = realloc(CG(static_members_table), (CG(last_static_member) + 1) * sizeof(zval*));
-				CG(static_members_table)[ce->static_members_table_idx] = NULL;
+		if (!ZEND_MAP_PTR(ce->static_members_table)) {
+			ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
+			if (!EG(current_execute_data)) {
+				ZEND_MAP_PTR_NEW(ce->static_members_table);
+			} else {
+				/* internal class loaded by dl() */
+				ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 			}
-#endif
 		}
 	} else {
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&

@@ -25,6 +25,7 @@
 #define ZEND_ENGINE_3
 
 #include "zend_types.h"
+#include "zend_map_ptr.h"
 #include "zend_errors.h"
 #include "zend_alloc.h"
 #include "zend_llist.h"
@@ -127,10 +128,7 @@ struct _zend_class_entry {
 	int default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
-	union {
-		zval *static_members_table;
-		zend_uintptr_t static_members_table_idx;
-	};
+	ZEND_MAP_PTR_DEF(zval *, static_members_table);
 	HashTable function_table;
 	HashTable properties_info;
 	HashTable constants_table;
@@ -150,7 +148,7 @@ struct _zend_class_entry {
 	zend_function *unserialize_func;
 
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
-	zend_class_iterator_funcs *iterator_funcs_ptr;
+	ZEND_MAP_PTR_DEF(zend_class_iterator_funcs *, iterator_funcs_ptr);
 
 	/* handlers */
 	union {
@@ -271,9 +269,8 @@ ZEND_API void zend_activate_modules(void);
 ZEND_API void zend_deactivate_modules(void);
 ZEND_API void zend_post_deactivate_modules(void);
 
-void zend_reset_internal_classes(void);
-
 ZEND_API void free_estring(char **str_p);
+
 END_EXTERN_C()
 
 /* output support */

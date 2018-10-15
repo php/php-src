@@ -534,6 +534,13 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		SERIALIZE_STR(op_array->doc_comment);
 		SERIALIZE_PTR(op_array->try_catch_array);
 		SERIALIZE_PTR(op_array->prototype);
+
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+		if (op_array->fn_flags & ZEND_ACC_IMMUTABLE) {
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+		} else {
+			SERIALIZE_PTR(ZEND_MAP_PTR(op_array->run_time_cache));
+		}
 	}
 }
 
@@ -749,6 +756,15 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_PTR(ce->__tostring);
 	SERIALIZE_PTR(ce->__callstatic);
 	SERIALIZE_PTR(ce->__debugInfo);
+
+	ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+	if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
+		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+			ZEND_MAP_PTR_INIT(ce->iterator_funcs_ptr, (void*)(uintptr_t)1);
+		} else {
+			SERIALIZE_PTR(ZEND_MAP_PTR(ce->iterator_funcs_ptr));
+		}
+	}
 }
 
 static void zend_file_cache_serialize(zend_persistent_script   *script,
@@ -1183,6 +1199,18 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		UNSERIALIZE_STR(op_array->doc_comment);
 		UNSERIALIZE_PTR(op_array->try_catch_array);
 		UNSERIALIZE_PTR(op_array->prototype);
+
+		if (op_array->fn_flags & ZEND_ACC_IMMUTABLE) {
+			if (op_array->static_variables) {
+				ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+			} else {
+				ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+			}
+			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+		} else {
+			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+			UNSERIALIZE_PTR(ZEND_MAP_PTR(op_array->run_time_cache));
+		}
 	}
 }
 
@@ -1384,6 +1412,20 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		ce->serialize = zend_class_serialize_deny;
 		ce->unserialize = zend_class_unserialize_deny;
 	}
+
+	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+		if (ce->default_static_members_table) {
+			ZEND_MAP_PTR_NEW(ce->static_members_table);
+		} else {
+			ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+		}
+		if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
+			ZEND_MAP_PTR_NEW(ce->iterator_funcs_ptr);
+		}
+	} else {
+		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+		UNSERIALIZE_PTR(ZEND_MAP_PTR(ce->iterator_funcs_ptr));
+	}
 }
 
 static void zend_file_cache_unserialize(zend_persistent_script  *script,
@@ -1546,6 +1588,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 			goto use_process_mem;
 		}
 		memcpy(buf, mem, info.mem_size);
+		zend_map_ptr_extend(ZCSG(map_ptr_last));
 	} else {
 use_process_mem:
 		buf = mem;
@@ -1576,6 +1619,7 @@ use_process_mem:
 	script->corrupted = 0;
 
 	if (cache_it) {
+		ZCSG(map_ptr_last) = CG(map_ptr_last);
 		script->dynamic_members.checksum = zend_accel_script_checksum(script);
 		script->dynamic_members.last_used = ZCG(request_time);
 

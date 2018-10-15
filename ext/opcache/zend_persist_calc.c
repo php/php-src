@@ -28,8 +28,15 @@
 
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
+#define ADD_ARENA_SIZE(m)  ZCG(current_persistent_script)->arena_size += ZEND_ALIGNED_SIZE(m)
 
-#define ADD_ARENA_SIZE(m)        ZCG(current_persistent_script)->arena_size += ZEND_ALIGNED_SIZE(m)
+#define ADD_SIZE_EX(m) do { \
+		if (ZCG(is_immutable_class)) { \
+			ADD_SIZE(m); \
+		} else { \
+			ADD_ARENA_SIZE(m); \
+		} \
+	} while (0)
 
 # define ADD_STRING(str) ADD_DUP_SIZE((str), _ZSTR_STRUCT_SIZE(ZSTR_LEN(str)))
 
@@ -258,6 +265,9 @@ static void zend_persist_op_array_calc(zval *zv)
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
 	ADD_SIZE(sizeof(zend_op_array));
 	zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+	if (ZCG(current_persistent_script)->corrupted) {
+		ADD_ARENA_SIZE(sizeof(void*));
+	}
 }
 
 static void zend_persist_class_method_calc(zval *zv)
@@ -265,12 +275,26 @@ static void zend_persist_class_method_calc(zval *zv)
 	zend_op_array *op_array = Z_PTR_P(zv);
 	zend_op_array *old_op_array;
 
-	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
+	if (op_array->type != ZEND_USER_FUNCTION) {
+		ZEND_ASSERT(op_array->type == ZEND_INTERNAL_FUNCTION);
+		if (op_array->fn_flags & ZEND_ACC_ARENA_ALLOCATED) {
+			old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
+			if (!old_op_array) {
+				ADD_SIZE_EX(sizeof(zend_internal_function));
+				zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
+			}
+		}
+		return;
+	}
+
 	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 	if (!old_op_array) {
-		ADD_ARENA_SIZE(sizeof(zend_op_array));
+		ADD_SIZE_EX(sizeof(zend_op_array));
 		zend_persist_op_array_calc_ex(Z_PTR_P(zv));
 		zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
+		if (!ZCG(is_immutable_class)) {
+			ADD_ARENA_SIZE(sizeof(void*));
+		}
 	}
 }
 
@@ -280,7 +304,7 @@ static void zend_persist_property_info_calc(zval *zv)
 
 	if (!zend_shared_alloc_get_xlat_entry(prop)) {
 		zend_shared_alloc_register_xlat_entry(prop, prop);
-		ADD_ARENA_SIZE(sizeof(zend_property_info));
+		ADD_SIZE_EX(sizeof(zend_property_info));
 		ADD_INTERNED_STRING(prop->name, 0);
 		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 			ADD_STRING(prop->doc_comment);
@@ -294,7 +318,7 @@ static void zend_persist_class_constant_calc(zval *zv)
 
 	if (!zend_shared_alloc_get_xlat_entry(c)) {
 		zend_shared_alloc_register_xlat_entry(c, c);
-		ADD_ARENA_SIZE(sizeof(zend_class_constant));
+		ADD_SIZE_EX(sizeof(zend_class_constant));
 		zend_persist_zval_calc(&c->value);
 		if (ZCG(accel_directives).save_comments && c->doc_comment) {
 			ADD_STRING(c->doc_comment);
@@ -302,13 +326,17 @@ static void zend_persist_class_constant_calc(zval *zv)
 	}
 }
 
-
 static void zend_persist_class_entry_calc(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_USER_CLASS) {
-		ADD_ARENA_SIZE(sizeof(zend_class_entry));
+		ZCG(is_immutable_class) =
+			(ce->ce_flags & ZEND_ACC_LINKED) &&
+			(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) &&
+			!ZCG(current_persistent_script)->corrupted;
+
+		ADD_SIZE_EX(sizeof(zend_class_entry));
 		ADD_INTERNED_STRING(ce->name, 0);
 		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 			ADD_INTERNED_STRING(ce->parent_name, 0);
@@ -346,12 +374,15 @@ static void zend_persist_class_entry_calc(zval *zv)
 		if (ce->num_interfaces) {
 			uint32_t i;
 
-			ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
-			for (i = 0; i < ce->num_interfaces; i++) {
-				ADD_INTERNED_STRING(ce->interface_names[i].name, 0);
-				ADD_INTERNED_STRING(ce->interface_names[i].lc_name, 0);
+			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+				for (i = 0; i < ce->num_interfaces; i++) {
+					ADD_INTERNED_STRING(ce->interface_names[i].name, 0);
+					ADD_INTERNED_STRING(ce->interface_names[i].lc_name, 0);
+				}
+				ADD_SIZE(sizeof(zend_class_name) * ce->num_interfaces);
+			} else {
+				ADD_SIZE(sizeof(zend_class_entry*) * ce->num_interfaces);
 			}
-			ADD_SIZE(sizeof(zend_class_name) * ce->num_interfaces);
 		}
 
 		if (ce->num_traits) {
@@ -397,6 +428,13 @@ static void zend_persist_class_entry_calc(zval *zv)
 					i++;
 				}
 				ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
+			}
+		}
+
+		if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
+			if (!ZCG(is_immutable_class)) {
+				ADD_ARENA_SIZE(sizeof(void*));
+				ADD_ARENA_SIZE(sizeof(zend_class_iterator_funcs));
 			}
 		}
 	}
