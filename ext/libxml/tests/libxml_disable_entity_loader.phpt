@@ -11,7 +11,7 @@ $xml = <<<EOT
 <foo>&xxe;</foo>
 EOT;
 
-$xml = str_replace('XXE_URI', __DIR__ . '/libxml_disable_entity_loader_payload.txt', $xml);
+$xml = str_replace('XXE_URI', __DIR__ . '/libxml_disable_entity_loader_payload.data', $xml);
 
 function parseXML($xml) {
   $doc = new DOMDocument();
