@@ -20,7 +20,6 @@ var_dump(readgzfile(  ) );
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: readgzfile() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 

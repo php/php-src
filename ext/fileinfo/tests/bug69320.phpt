@@ -17,4 +17,3 @@ var_dump(finfo_file(finfo_open(FILEINFO_MIME_TYPE), $fname));
 ?>
 --EXPECTF--
 string(10) "text/plain"
-

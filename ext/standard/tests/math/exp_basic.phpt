@@ -28,7 +28,6 @@ foreach($values as $value) {
 ?>
 ===Done===
 --EXPECTF--
-
 -- Iteration 1 --
 float(22026.465794807)
 

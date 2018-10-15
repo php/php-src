@@ -29,4 +29,3 @@ ob_end_flush();
 *** Testing session_set_save_handler() : variation ***
 bool(false)
 bool(true)
-

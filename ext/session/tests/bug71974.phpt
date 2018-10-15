@@ -19,5 +19,3 @@ session_start()
 <a href="some.php">abc</a>
 --EXPECTF--
 <a href="some.php">abc</a>
-
-

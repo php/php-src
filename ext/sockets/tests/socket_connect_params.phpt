@@ -23,7 +23,6 @@ fa@php.net
 
 ?>
 --EXPECTF--
-
 Warning: socket_connect() expects at least 2 parameters, 0 given in %s on line %i
 
 Warning: socket_connect() expects at least 2 parameters, 1 given in %s on line %i

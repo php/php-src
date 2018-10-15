@@ -529,5 +529,3 @@ BLACK SQUARE: &#x25A0; => fe
 
 NO-BREAK SPACE: &#xA0; => ff
 &#xFF; => &#xFF;
-
-

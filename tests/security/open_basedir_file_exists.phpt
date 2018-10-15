@@ -52,4 +52,3 @@ bool(true)
 bool(true)
 bool(true)
 *** Finished testing open_basedir configuration [file_exists] ***
-

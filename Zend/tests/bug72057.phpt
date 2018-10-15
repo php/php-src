@@ -10,9 +10,7 @@ set_error_handler(
 );
 
 (function (int $i) { bar(); })("7as");
-
 --EXPECTF--
-
 Fatal error: Uncaught Exception: My custom error in %s:%d
 Stack trace:
 #0 %s(%d): {closure}(8, 'A non well form...', '%s', %d, Array)

@@ -79,5 +79,3 @@ bool(true)
 string(0) ""
 bool(true)
 bool(true)
-
-

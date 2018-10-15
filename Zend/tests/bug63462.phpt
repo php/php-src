@@ -49,7 +49,6 @@ $test->protectedProperty = 'value';
 $test->privateProperty   = 'value';
 
 ?>
-
 --EXPECTF--
 __get nonExisting
 
@@ -71,4 +70,3 @@ __set nonExisting
 __set publicProperty
 __set protectedProperty
 __set privateProperty
-

@@ -18,4 +18,3 @@ if($result > 0) {
 ?>
 --EXPECT--
 Pass
-

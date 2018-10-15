@@ -38,4 +38,3 @@ string(%d) "%s"
 bool(true)
 string(0) ""
 Done
-

@@ -21,7 +21,6 @@ fa@php.net
 
 ?>
 --EXPECTF--
-
 Warning: socket_bind() expects at least 2 parameters, 0 given in %s on line %i
 NULL
 

@@ -16,4 +16,3 @@ echo "ok\n";
 --EXPECTF--
 Notice: Undefined variable: GLOBALS in %sbug31158.php on line 6
 ok
-

@@ -13,7 +13,6 @@ var_dump ($array);
 echo "Done\n";
 ?>
 --EXPECTF--
-
 Warning: array_splice() expects at most 4 parameters, 10 given in %s on line %d
 NULL
 array(3) {

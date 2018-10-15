@@ -12,4 +12,3 @@ var_dump($inis["user_agent"]);
 ?>
 --EXPECT--
 string(3) "php"
-

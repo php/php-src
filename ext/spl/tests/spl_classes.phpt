@@ -10,4 +10,3 @@ var_dump(is_array(spl_classes()));
 ?>
 --EXPECT--
 bool(true)
-

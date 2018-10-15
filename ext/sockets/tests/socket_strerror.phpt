@@ -20,7 +20,6 @@ fa@php.net
     }
 ?>
 --EXPECTF--
-
 Warning: socket_strerror() expects exactly 1 parameter, 0 given in %s on line %i
 string(7) "Success"
 string(23) "Operation not permitted"

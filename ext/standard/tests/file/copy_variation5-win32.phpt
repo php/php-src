@@ -73,12 +73,10 @@ foreach($dest_files as $dest_file) {
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_variation5.tmp");
 ?>
-
 --EXPECTF--
 *** Test copy() function: checking case sensitivity in creation of destination file names ***
 Size of the source file before copy operation => int(1500)

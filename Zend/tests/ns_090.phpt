@@ -33,7 +33,6 @@ namespace Fiz\Biz\Buz {
     var_dump(BOZ);
     var_dump(BAR);
 }
-
 --EXPECTF--
 Foo\Bar\Baz\A::__construct
 Foo\Bar\Baz\B::__construct

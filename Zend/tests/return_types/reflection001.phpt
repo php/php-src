@@ -1,12 +1,10 @@
 --TEST--
 Return type and Reflection::export()
-
 --SKIPIF--
 <?php
 if (!extension_loaded('reflection') || !defined('PHP_VERSION_ID') || PHP_VERSION_ID < 70000) {
     print 'skip';
 }
-
 --FILE--
 <?php
 
@@ -44,4 +42,3 @@ Class [ <user> class A ] {
     }
   }
 }
-

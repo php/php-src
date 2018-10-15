@@ -33,7 +33,6 @@ var_dump($session->close());
 
 ?>
 --EXPECTF--
-
 Warning: SNMP::setSecurity() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 

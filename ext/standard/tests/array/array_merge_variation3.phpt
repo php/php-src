@@ -121,7 +121,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_merge() : usage variations ***
 

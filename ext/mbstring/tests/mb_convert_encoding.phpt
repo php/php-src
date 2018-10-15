@@ -108,7 +108,6 @@ print("MP: $s\n"); // Missing parameter
 
 
 ?>
-
 --EXPECT--
 == BASIC TEST ==
 EUC-JP: 日本語テキストです。01234５６７８９。
@@ -134,5 +133,3 @@ ERR: Warning
 BAD: 
 ERR: Warning
 MP: 
-
-

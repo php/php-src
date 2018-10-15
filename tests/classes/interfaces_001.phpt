@@ -23,4 +23,3 @@ echo $foo->getMessage() . "\n";
 ?>
 --EXPECT--
 foo
-

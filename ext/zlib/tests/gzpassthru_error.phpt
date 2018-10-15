@@ -20,7 +20,6 @@ gzclose($h);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzpassthru() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 

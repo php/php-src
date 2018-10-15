@@ -15,11 +15,7 @@ var_dump(IntlTimeZone::getRegion(array()));
 var_dump(IntlTimeZone::getRegion('Europe/Lisbon', 4));
 var_dump(IntlTimeZone::getRegion("foo\x81"));
 var_dump(IntlTimeZone::getRegion("foo"));
-
-
-
 --EXPECTF--
-
 Warning: IntlTimeZone::getRegion() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlTimeZone::getRegion(): intltz_get_region: bad arguments in %s on line %d

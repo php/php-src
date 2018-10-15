@@ -43,7 +43,6 @@ var_dump( htmlentities("\x84\x91",ENT_QUOTES, 'cp1252', "test1") );
 
 echo "Done\n";
 ?>
-
 --EXPECTF--
 *** Retrieving htmlentities for 256 characters ***
 string(12) "636872283029"
@@ -328,4 +327,3 @@ Warning: htmlentities() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 string(14) "&bdquo;&lsquo;"
 Done
-

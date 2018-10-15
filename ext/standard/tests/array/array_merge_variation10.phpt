@@ -34,7 +34,6 @@ echo key($arr3) . " => " . current ($arr3) . "\n";
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_merge() : usage variations ***
 

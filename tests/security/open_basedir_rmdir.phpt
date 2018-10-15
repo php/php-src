@@ -44,4 +44,3 @@ bool(false)
 Warning: rmdir(): open_basedir restriction in effect. File(%s/test/bad) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [rmdir] ***
-

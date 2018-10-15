@@ -126,7 +126,6 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 	mysqli_query($link, 'DROP USER expiretest@localhost');
 ?>
 --EXPECTF--
-
 Warning: mysqli%sconnect(): (HY000/1862): %s in %s on line %d
 [001] Cannot connect [1862] %s
 

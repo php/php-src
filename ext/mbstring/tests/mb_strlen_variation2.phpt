@@ -102,7 +102,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strlen() : usage variations ***
 

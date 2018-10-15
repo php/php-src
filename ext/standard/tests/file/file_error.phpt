@@ -45,4 +45,3 @@ Warning: file(temp.tmp): failed to open stream: No such file or directory in %s 
 bool(false)
 
 --- Done ---
-

@@ -27,7 +27,6 @@ echo key($array_arg) . " => " . current ($array_arg) . "\n";
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing natcasesort() : usage variations ***
 

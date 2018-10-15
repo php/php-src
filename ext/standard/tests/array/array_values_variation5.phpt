@@ -25,7 +25,6 @@ echo key($input) . " => " . current ($input) . "\n";
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_values() : usage variations ***
 

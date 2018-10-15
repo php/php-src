@@ -35,4 +35,3 @@ Fatal error: Uncaught Error: Cannot call abstract method Foo::bar() in %sbug6311
 Stack trace:
 #0 {main}
   thrown in %sbug63111.php on line 20
-

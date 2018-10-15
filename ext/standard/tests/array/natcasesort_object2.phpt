@@ -52,7 +52,6 @@ var_dump($temp_array);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing natcasesort() : object functionality ***
 

@@ -30,7 +30,6 @@ var_dump(isset($ao->p));
 var_dump($ao->p);
 ?>
 --EXPECTF--
-
 --> Access the real property:
 bool(true)
 %unicode|string%(15) "object property"
@@ -48,4 +47,3 @@ NULL
 --> Re-add the real property:
 bool(true)
 %unicode|string%(15) "object property"
-

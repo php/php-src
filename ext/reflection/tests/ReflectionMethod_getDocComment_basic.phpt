@@ -64,8 +64,6 @@ foreach (array('A', 'B') as $class) {
 }
 ?>
 --EXPECTF--
-
-
 ---> Doc comment for A::f():
 string(%d) "/**
      * My Doc Comment for A::f

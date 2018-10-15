@@ -18,7 +18,6 @@ var_dump(deflate_add($resource, "aaaaaaaaaaaaaaaaaaaaaa", ZLIB_BLOCK));
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: deflate_add(): zlib >= 1.2.4 required for BLOCK deflate; current version: %s in %s on line %d
 bool(false)
 ===DONE===

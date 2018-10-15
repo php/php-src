@@ -225,4 +225,3 @@ bool(false)
 Error: 2 - gzopen() expects parameter 1 to be a valid path, resource given, %s(%d)
 NULL
 ===DONE===
-

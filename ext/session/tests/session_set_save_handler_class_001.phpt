@@ -91,7 +91,6 @@ var_dump($_SESSION);
 session_write_close();
 session_unset();
 var_dump($handler->i);
-
 --EXPECTF--
 *** Testing session_set_save_handler() : basic class wrapping existing handler ***
 Open 

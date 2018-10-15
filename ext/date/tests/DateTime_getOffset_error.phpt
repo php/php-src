@@ -30,4 +30,3 @@ var_dump( $datetime->getOffset($extra_arg) );
 Warning: DateTime::getOffset() expects exactly 0 parameters, 1 given in %s on line %d
 bool(false)
 ===DONE===
-

@@ -5,7 +5,6 @@ Test fflush() function: usage variations - files in different modes
 if( substr(PHP_OS, 0, 3) == "WIN" )
   die("skip.. only for linux");
 ?>
-
 --FILE--
 <?php
 /*  Prototype: bool fflush ( resource $handle );
@@ -529,4 +528,3 @@ bool(true)
 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 int(50)
 
 *** Done ***
-

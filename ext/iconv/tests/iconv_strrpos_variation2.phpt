@@ -102,7 +102,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing iconv_strrpos() : usage variations ***
 

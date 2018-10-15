@@ -13,4 +13,3 @@ echo $props["test"];
 ?>
 --EXPECT--
 ok
-

@@ -27,7 +27,6 @@ include $pname . '/b/c.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-
 Warning: fopen(phar://%sopen_for_write_existing_c_5_2.phar.php/b/c.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_c_5_2.php on line %d
 
 Warning: fwrite(): supplied argument is not a valid stream resource in %sopen_for_write_existing_c_5_2.php on line %d

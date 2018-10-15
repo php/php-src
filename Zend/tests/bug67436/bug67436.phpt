@@ -1,9 +1,7 @@
 --TEST--
 bug67436: Autoloader isn't called if user defined error handler is present
-
 --INI--
 error_reporting=-1
-
 --FILE--
 <?php
 
@@ -20,7 +18,6 @@ a::staticTest();
 
 $b = new b();
 $b->test();
-
 --EXPECT--
 b::test()
 a::test(c::TESTCONSTANT)

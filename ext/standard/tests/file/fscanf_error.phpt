@@ -1,6 +1,5 @@
 --TEST--
 Test fscanf() function: error conditions
-
 --FILE--
 <?php
 /*

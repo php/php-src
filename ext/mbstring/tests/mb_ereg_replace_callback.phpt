@@ -12,4 +12,3 @@ echo mb_ereg_replace_callback('(\S+)', function($m){return $m[1].'('.strlen($m[1
 ?>
 --EXPECT--
 abc(3) 123(3) #",;(4) $foo(4)
-

@@ -71,8 +71,6 @@ check($a);
 echo "Done";
 ?>
 --EXPECTF--
-
-
 --- 0 refs external:
 array(3) {
   [0]=>

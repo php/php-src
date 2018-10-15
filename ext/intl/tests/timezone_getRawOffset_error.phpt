@@ -12,9 +12,7 @@ $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getRawOffset('foo'));
 
 intltz_get_raw_offset(null);
-
 --EXPECTF--
-
 Warning: IntlTimeZone::getRawOffset() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlTimeZone::getRawOffset(): intltz_get_raw_offset: bad arguments in %s on line %d

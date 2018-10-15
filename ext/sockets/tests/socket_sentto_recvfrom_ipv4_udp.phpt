@@ -46,7 +46,6 @@ if (!extension_loaded('sockets')) {
 
     socket_close($socket);
 --EXPECTF--
-
 Warning: Wrong parameter count for socket_sendto() in %s on line %d
 bool(false)
 

@@ -20,4 +20,3 @@ namespace lone {
 --EXPECTF--
 object(class@%s)#2 (0) {
 }
-

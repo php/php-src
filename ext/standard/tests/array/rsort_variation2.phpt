@@ -106,7 +106,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing rsort() : variation ***
 

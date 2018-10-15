@@ -45,6 +45,5 @@ if (mysqli_get_server_version($link) < 50600)
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-
 Warning: mysqli_change_user(): (%d/%d): Access denied for user '%s'@'%s' (using password: %s) in %s on line %d
 done!

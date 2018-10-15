@@ -26,7 +26,6 @@ pg_query('DROP SCHEMA phptests');
 
 ?>
 --EXPECTF--
-
 Warning: pg_insert(): Table 'foo' doesn't exists in %s on line %d
 string(55) "INSERT INTO "phptests"."foo" ("id","id2") VALUES (1,2);"
 array(1) {

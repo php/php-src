@@ -59,7 +59,6 @@ function bug($db, $options = array()) {
 		echo $e->getCode()."\n";
 	}
 }
-
 --EXPECTF--
 Test 1
 42P18

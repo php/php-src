@@ -46,4 +46,3 @@ NULL
 Warning: xml_parser_set_option() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 Done
-

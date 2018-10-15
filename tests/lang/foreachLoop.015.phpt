@@ -71,7 +71,6 @@ withRefValue(4, $transform);
 
 ?>
 --EXPECT--
-
 Popping elements off end of a referenced array, using &$value
 ---( Array with 1 element(s): )---
 --> State of referenced array before loop:

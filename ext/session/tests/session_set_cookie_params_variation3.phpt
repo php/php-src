@@ -46,4 +46,3 @@ string(4) "guff"
 NULL
 string(3) "foo"
 Done
-

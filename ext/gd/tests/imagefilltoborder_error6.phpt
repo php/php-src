@@ -25,5 +25,3 @@ imagefilltoborder( $image_foo, 50, 50, imagecolorallocate( $image, 0, 0, 0 ), im
 ?>
 --EXPECTF--
 Warning: imagefilltoborder(): supplied resource is not a valid Image resource in %s on line %d
-
-

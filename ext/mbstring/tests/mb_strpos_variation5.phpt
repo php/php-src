@@ -43,7 +43,6 @@ for ($i = -30; $i <= 60; $i += 10) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strpos() : usage variations ***
 

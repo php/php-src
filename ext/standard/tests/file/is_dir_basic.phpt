@@ -30,7 +30,6 @@ $file_path = dirname(__FILE__);
 $dir_name = $file_path."/is_dir_basic";
 rmdir($dir_name);
 ?>
-
 --EXPECTF--
 *** Testing is_dir(): basic functionality ***
 bool(true)

@@ -37,7 +37,6 @@ namespace Baz {
 }
 ?>
 --EXPECTF--
-
 string(14) "Foo\Bar\ClassA"
 string(14) "Foo\Bar\ClassB"
 string(14) "Foo\Bar\ClassC"

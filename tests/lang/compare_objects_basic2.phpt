@@ -1,7 +1,6 @@
 --TEST--
 Test object compare when object handler different
 --FILE--
-
 <?php
 
 //Set the default time zone

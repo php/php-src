@@ -28,7 +28,6 @@ for ($f= 0; $f < count($frombase); $f++) {
 	}
 }
 ?>
-
 --EXPECTF--
 ...from base is 2
 ......to base is 2

@@ -13,6 +13,5 @@ function_exists('mb_regex_set_options') or die("skip\n");
 	mb_regex_set_options( '' );
 	print mb_ereg_replace(' -', '+', '- - - - -' );
 ?>
-
 --EXPECT--
 + + + + +-++++

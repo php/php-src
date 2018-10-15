@@ -28,7 +28,6 @@ var_dump( array_key_exists($key) );
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_key_exists() : error conditions ***
 

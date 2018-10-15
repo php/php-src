@@ -44,9 +44,7 @@ var_dump(array_diff($arr2, $arr1));
 
 echo "Done";
 ?>
-
 --EXPECTF--
-
 *** Testing array_diff() : usage variations ***
 -- Basic Comparison --
 array(3) {

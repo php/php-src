@@ -8,4 +8,3 @@ $a->{"a"."b"};
 Notice: Undefined variable: a in %sbug47109.php on line 2
 
 Notice: Trying to get property of non-object in %sbug47109.php on line 2
-

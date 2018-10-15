@@ -16,4 +16,3 @@ try {
 ?>
 --EXPECT--
 Error: Closure object cannot have properties
-

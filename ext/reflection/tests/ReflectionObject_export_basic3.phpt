@@ -35,4 +35,3 @@ Object of class [ <user> class D extends C ] {
   - Methods [0] {
   }
 }
-

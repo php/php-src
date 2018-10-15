@@ -47,7 +47,6 @@ $enc = mb_internal_encoding();
 print "$enc\n";
 
 ?>
-
 --EXPECT--
 OK_EUC-JP_SET
 EUC-JP
@@ -65,4 +64,3 @@ ASCII
 ERR: Warning
 OK_BAD_OBJ_SET
 ASCII
-

@@ -123,7 +123,6 @@ function test_fopen($mode) {
 ?>
 ===DONE===
 --EXPECTF--
-
 --- testing include path ---
 
 ** testing with mode=r **
@@ -147,4 +146,3 @@ in dir1
 in working dir
 in script dir
 ===DONE===
-

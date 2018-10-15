@@ -36,4 +36,3 @@ From foo::__call:
 string(3) "abc"
 object(foo)#%d (0) {
 }
-

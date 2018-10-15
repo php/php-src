@@ -38,4 +38,3 @@ Checking working
 bool(%s)
 bool(false)
 bool(true)
-

@@ -7,7 +7,6 @@ Test strptime() function : basic functionality
 	}
         if(PHP_OS == 'Darwin') die("skip - strptime() behaves differently on Darwin");
 ?>
-
 --FILE--
 <?php
 /* Prototype  : array strptime  ( string $date  , string $format  )

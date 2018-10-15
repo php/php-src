@@ -25,7 +25,6 @@ echo "Done", PHP_EOL;
 
 ?>
 --EXPECTF--
-
 string(6) "A.phpt"
 string(6) "B.phpt"
 string(6) "C.phpt"

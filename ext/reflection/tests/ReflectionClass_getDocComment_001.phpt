@@ -56,8 +56,6 @@ foreach ($classes as $class) {
 
 ?>
 --EXPECTF--
-
-
 ---> Doc comment for class A:
 string(%d) "/**
 

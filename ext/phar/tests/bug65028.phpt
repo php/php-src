@@ -153,4 +153,3 @@ catch(UnexpectedValueException $ex)
 ?>
 --EXPECT--
 No exception thrown.
-

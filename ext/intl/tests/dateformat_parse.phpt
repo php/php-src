@@ -70,7 +70,6 @@ include_once( 'ut_common.inc' );
 ut_run();
 ?>
 --EXPECT--
-
 Input text : Sunday, September 18, 2039 4:06:40 PM PT ; DF = 0; TF = 0
 Parsed: 2200000000; parse_pos : 40
 

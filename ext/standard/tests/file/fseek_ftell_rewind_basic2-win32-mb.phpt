@@ -5,7 +5,6 @@ Test fseek(), ftell() & rewind() functions : basic functionality - all w and x m
 if( substr(PHP_OS, 0, 3) != "WIN" )
   die("skip.. only valid for Windows");
 ?>
-
 --FILE--
 <?php
 /* Prototype: int fseek ( resource $handle, int $offset [, int $whence] );

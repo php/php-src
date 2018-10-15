@@ -34,7 +34,6 @@ unlink($filename);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: XMLReader::open(): Empty string supplied as input in %s on line %d
 books
 books

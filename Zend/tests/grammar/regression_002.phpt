@@ -14,7 +14,6 @@ var_dump(Foo::	 CLASS);
 var_dump(Foo::
 
 CLASS);
-
 --EXPECTF--
 string(3) "Foo"
 string(3) "Foo"

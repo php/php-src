@@ -38,7 +38,6 @@ unlink($file_path."/filegroup_variation1_symlink.tmp");
 unlink($file_path."/filegroup_variation1_link.tmp");
 unlink($file_path."/filegroup_variation1.tmp");
 ?>
-
 --EXPECTF--
 *** Testing filegroup() with links ***
 int(%d)
