@@ -132,42 +132,42 @@ function help(): string
     - `PHP`       - PHP specific tidying rules
     - `crlf<->lf` - \\n and \\r\\n get normalized, obsolete \\r is not converted
 
-    +--------------------------+-----+-------+-----------+-----+-----+
-    | PHP TEST SECTION         | -w  | -n -N | -e        | -l  | -s  |
-    +--------------------------+-----+-------+-----------+-----+-----+
-    | --TEST--                 | yes |  yes  | crlf<->lf | yes | yes |
-    | --DESCRIPTION--          | yes |  yes  | crlf<->lf | yes | yes |
-    | --CREDITS--              | yes |  yes  | crlf<->lf | yes | yes |
-    | --SKIPIF--               | yes |  yes  | crlf<->lf | yes | yes |
-    | --INI--                  | yes |  yes  | crlf<->lf | yes | yes |
-    | --ENV--                  | yes |  yes  | crlf<->lf | yes | yes |
-    | --EXTENSIONS--           | yes |  yes  | crlf<->lf | yes | yes |
-    | --COOKIE--               | yes |  yes  | crlf<->lf | yes | yes |
-    | --ARGS--                 | yes |  yes  | crlf<->lf | yes | yes |
-    | --REDIRECTTEST--         | no  |  yes  | crlf<->lf | yes | no  |
-    | --CAPTURE_STDIO--        | yes |  yes  | crlf<->lf | yes | yes |
-    | --STDIN--                | no  |  yes  | crlf<->lf | yes | no  |
-    | --CGI--                  | yes |  yes  | crlf<->lf | yes | yes |
-    | --PHPDBG--               | yes |  yes  | crlf<->lf | yes | yes |
-    | --XFAIL--                | yes |  yes  | crlf<->lf | yes | yes |
-    | --CLEAN--                | PHP |  yes  | crlf<->lf | yes | PHP |
-    | --POST--                 | no  |  yes  | crlf<->lf | yes | no  |
-    | --POST_RAW--             | no  |  yes  | crlf<->lf | yes | no  |
-    | --GZIP_POST--            | no  |  yes  | crlf<->lf | yes | no  |
-    | --DEFLATE_POST--         | no  |  yes  | crlf<->lf | yes | no  |
-    | --PUT--                  | yes |  yes  | crlf<->lf | yes | yes |
-    | --GET--                  | yes |  yes  | crlf<->lf | yes | yes |
-    | --FILE--                 | PHP |  yes  | crlf<->lf | yes | PHP |
-    | --FILEEOF--              | PHP |  yes  | crlf<->lf | yes | PHP |
-    | --FILE_EXTERNAL--        | yes |  yes  | crlf<->lf | yes | yes |
-    | --EXPECT--               | no  |  yes  | crlf<->lf | yes | no  |
-    | --EXPECTF--              | no  |  yes  | crlf<->lf | yes | no  |
-    | --EXPECTREGEX--          | no  |  yes  | crlf<->lf | yes | no  |
-    | --EXPECT_EXTERNAL--      | yes |  yes  | crlf<->lf | yes | yes |
-    | --EXPECTF_EXTERNAL--     | yes |  yes  | crlf<->lf | yes | yes |
-    | --EXPECTREGEX_EXTERNAL-- | yes |  yes  | crlf<->lf | yes | yes |
-    | --EXPECTHEADERS--        | no  |  yes  | crlf<->lf | yes | no  |
-    +--------------------------+-----+-------+-----------+-----+-----+
+    +--------------------------+-----+-----+-----+-----------+-----+-----+
+    | PHP TEST SECTION         | -w  | -n  | -N  | -e        | -l  | -s  |
+    +--------------------------+-----+-----+-----+-----------+-----+-----+
+    | --TEST--                 | yes | yes | yes | crlf<->lf | yes | yes |
+    | --DESCRIPTION--          | yes | yes | yes | crlf<->lf | yes | yes |
+    | --CREDITS--              | yes | yes | yes | crlf<->lf | yes | yes |
+    | --SKIPIF--               | yes | yes | yes | crlf<->lf | yes | yes |
+    | --INI--                  | yes | yes | yes | crlf<->lf | yes | yes |
+    | --ENV--                  | yes | yes | yes | crlf<->lf | yes | yes |
+    | --EXTENSIONS--           | yes | yes | yes | crlf<->lf | yes | yes |
+    | --COOKIE--               | yes | yes | yes | crlf<->lf | yes | yes |
+    | --ARGS--                 | yes | yes | yes | crlf<->lf | yes | yes |
+    | --REDIRECTTEST--         | no  | yes | yes | crlf<->lf | yes | no  |
+    | --CAPTURE_STDIO--        | yes | yes | yes | crlf<->lf | yes | yes |
+    | --STDIN--                | no  | yes | yes | crlf<->lf | yes | no  |
+    | --CGI--                  | yes | yes | yes | crlf<->lf | yes | yes |
+    | --PHPDBG--               | yes | yes | yes | crlf<->lf | yes | yes |
+    | --XFAIL--                | yes | yes | yes | crlf<->lf | yes | yes |
+    | --CLEAN--                | PHP | yes | yes | crlf<->lf | yes | PHP |
+    | --POST--                 | no  | yes | yes | crlf<->lf | yes | no  |
+    | --POST_RAW--             | no  | yes | yes | crlf<->lf | yes | no  |
+    | --GZIP_POST--            | no  | yes | yes | crlf<->lf | yes | no  |
+    | --DEFLATE_POST--         | no  | yes | yes | crlf<->lf | yes | no  |
+    | --PUT--                  | yes | yes | yes | crlf<->lf | yes | yes |
+    | --GET--                  | yes | yes | yes | crlf<->lf | yes | yes |
+    | --FILE--                 | PHP | yes | yes | crlf<->lf | yes | PHP |
+    | --FILEEOF--              | PHP | yes | yes | crlf<->lf | yes | PHP |
+    | --FILE_EXTERNAL--        | yes | yes | yes | crlf<->lf | yes | yes |
+    | --EXPECT--               | no  | yes | yes | crlf<->lf | yes | no  |
+    | --EXPECTF--              | no  | yes | yes | crlf<->lf | yes | no  |
+    | --EXPECTREGEX--          | no  | yes | yes | crlf<->lf | yes | no  |
+    | --EXPECT_EXTERNAL--      | yes | yes | yes | crlf<->lf | yes | yes |
+    | --EXPECTF_EXTERNAL--     | yes | yes | yes | crlf<->lf | yes | yes |
+    | --EXPECTREGEX_EXTERNAL-- | yes | yes | yes | crlf<->lf | yes | yes |
+    | --EXPECTHEADERS--        | no  | yes | no  | crlf<->lf | no  | no  |
+    +--------------------------+-----+-----+-----+-----------+-----+-----+
 
   *OPTIONS*
     `-h, --help`
@@ -199,7 +199,7 @@ function help(): string
           Non-interactive mode, 'yes' to prompt to continue, disables backups.
     `-v|vv|vvv, --verbose`
           With more verbosity, additional info are reported.
-          1 for reporting CR EOLs in the phpt files,
+          1 for reporting CR EOLs and empty sections in the \*.phpt files,
           2 for non-ascii and non-utf8 file encodings,
           3 for skipped files and files that passed the tidying rules.
     `    --no-colors`
@@ -791,6 +791,11 @@ function trimFinalNewlines(string $content, int $max = 1): string
     $newlines = getFinalNewlines($content);
     $trimmed = rtrim($content, "\r\n");
 
+    // Empty content doesn't need one final newline when max = 1
+    if ('' === $trimmed && 1 === $max) {
+        $max = 0;
+    }
+
     for ($i = 0; $i < $max; ++$i) {
         if (empty($newlines[$i])) {
             break;
@@ -1076,8 +1081,15 @@ function tidyContent(string $content, string $file, array $rules = []): array
         $content = $buffer;
     }
 
+    // Trim leading newlines
     if ($opt['trim_leading_newlines']) {
-        $buffer = trimLeadingNewlines($buffer);
+        // Empty files depend on previous trimming of the final newlines.
+        if (
+            '' !== trim($buffer, "\r\n")
+            || ('' === trim($buffer, "\r\n") && !$opt['trim_final_newlines'])
+        ) {
+            $buffer = trimLeadingNewlines($buffer);
+        }
     }
 
     if ($buffer !== $content) {
@@ -1263,10 +1275,26 @@ function tidyPhpTestFile(string $file): array
             $rules['max_newlines'] = 1;
         }
 
+        // Edge case. --EXPECTHEADERS-- sections can have a single newline
+        if ('--EXPECTHEADERS--' === $sectionRealName && '' === trim($buffer, "\r\n")) {
+            $rules['trim_final_newlines'] = false;
+            $rules['trim_leading_newlines'] = false;
+        }
+
         list($buffer, $bufferLogs) = tidyContent($buffer, $file, $rules);
 
         // Add test section name to each log entry
         $bufferLogs = preg_filter('/^/', $sectionRealName.' ', $bufferLogs);
+
+        // Debug empty sections - most sections are expected to have some content
+        if ('' === trim($buffer) && $opt['verbose'] >= 1 && !in_array($sectionRealName, [
+                '--EXPECTHEADERS--',
+                '--EXPECT--',
+                '--CGI--',
+            ], true)
+        ) {
+            output('*WARN*  '.relative($file).': *'.$sectionRealName.' empty*');
+        }
 
         $logs = array_merge($logs, $bufferLogs);
 
