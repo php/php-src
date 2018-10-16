@@ -203,5 +203,6 @@ ext/sqlite3/tests/phpsql*
 
 # Special cases to invert previous ignore rules
 !ext/fileinfo/libmagic.patch
+!ext/fileinfo/magicdata.patch
 !ext/mbstring/oniguruma.patch
 !ext/pcre/pcre2lib/config.h
