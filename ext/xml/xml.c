@@ -1643,6 +1643,12 @@ PHP_FUNCTION(xml_parser_get_option)
 		case PHP_XML_OPTION_CASE_FOLDING:
 			RETURN_LONG(parser->case_folding);
 			break;
+		case PHP_XML_OPTION_SKIP_TAGSTART:
+			RETURN_LONG(parser->toffset);
+			break;
+		case PHP_XML_OPTION_SKIP_WHITE:
+			RETURN_LONG(parser->skipwhite);
+			break;
 		case PHP_XML_OPTION_TARGET_ENCODING:
 			RETURN_STRING((char *)parser->target_encoding);
 			break;
