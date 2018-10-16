@@ -172,8 +172,6 @@ ext/phar/phar.phar
 ext/phar/phar.1
 ext/phar/phar.phar.1
 ext/phar/phar.php
-ext/spl/examples/.htaccess
-ext/spl/examples/*.phps
 ext/sqlite3/tests/phpsql*
 
 # ------------------------------------------------------------------------------ Windows
