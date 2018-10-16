@@ -39,7 +39,6 @@ acconfig.h
 aclocal.m4
 autom4te.cache
 bsd_converted
-buildconf.stamp
 buildmk.stamp
 confdefs.h
 config.h
