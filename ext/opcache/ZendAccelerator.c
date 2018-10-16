@@ -2421,6 +2421,17 @@ int accel_activate(INIT_FUNC_ARGS)
 				}
 
 				zend_shared_alloc_restore_state();
+				if (ZCSG(preload_script)) {
+					zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(ZCSG(preload_script)->script.filename), ZSTR_LEN(ZCSG(preload_script)->script.filename), 0, ZCSG(preload_script));
+					if (ZCSG(saved_scripts)) {
+						zend_persistent_script **p = ZCSG(saved_scripts);
+						while (*p) {
+							zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL((*p)->script.filename), ZSTR_LEN((*p)->script.filename), 0, *p);
+							p++;
+						}
+					}
+					ZCSG(map_ptr_last) = ZCSG(saved_map_ptr_last);
+				}
 				ZCSG(accelerator_enabled) = ZCSG(cache_status_before_restart);
 				if (ZCSG(last_restart_time) < ZCG(request_time)) {
 					ZCSG(last_restart_time) = ZCG(request_time);
@@ -3616,6 +3627,7 @@ static int accel_preload(const char *config)
 	if (ret == SUCCESS) {
 		zend_persistent_script *script;
 		zend_string *filename;
+		int i;
 
 		preload_link();
 		preload_remove_empty_includes();
@@ -3704,13 +3716,24 @@ static int accel_preload(const char *config)
 		EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
 
 		/* Store individual scripts with unlinked classes */
+		HANDLE_BLOCK_INTERRUPTIONS();
+		SHM_UNPROTECT();
+
+		i = 0;
+		zend_shared_alloc_lock();
+		ZCSG(saved_scripts) = zend_shared_alloc((zend_hash_num_elements(preload_scripts) + 1) * sizeof(void*));
+		zend_shared_alloc_unlock();
 		ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
-			HANDLE_BLOCK_INTERRUPTIONS();
-			SHM_UNPROTECT();
-			preload_script_in_shared_memory(script);
-			SHM_PROTECT();
-			HANDLE_UNBLOCK_INTERRUPTIONS();
+			ZCSG(saved_scripts)[i++] = preload_script_in_shared_memory(script);
 		} ZEND_HASH_FOREACH_END();
+		ZCSG(saved_scripts)[i] = NULL;
+
+		ZCSG(saved_map_ptr_last) = ZCSG(map_ptr_last);
+		zend_shared_alloc_save_state();
+		accel_interned_strings_save_state();
+
+		SHM_PROTECT();
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		zend_shared_alloc_destroy_xlat_table();
 	}

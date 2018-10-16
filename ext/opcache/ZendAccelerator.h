@@ -288,6 +288,8 @@ typedef struct _zend_accel_shared_globals {
 
 	/* Preloading */
 	zend_persistent_script *preload_script;
+	zend_persistent_script **saved_scripts;
+	size_t saved_map_ptr_last;
 
 	/* uninitialized HashTable Support */
 	uint32_t uninitialized_bucket[-HT_MIN_MASK];
