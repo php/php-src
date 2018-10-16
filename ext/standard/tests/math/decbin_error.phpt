@@ -5,7 +5,7 @@ precision=14
 --FILE--
 <?php
 /* Prototype  : float expm1  ( float $arg  )
- * Description: Returns exp(number) - 1, computed in a way that is accurate even 
+ * Description: Returns exp(number) - 1, computed in a way that is accurate even
  *              when the value of number is close to zero.
  * Source code: ext/standard/math.c
  */
@@ -30,4 +30,3 @@ Warning: expm1() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: expm1() expects exactly 1 parameter, 2 given in %s on line %d
 ===Done===
-

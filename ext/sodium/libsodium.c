@@ -2780,7 +2780,7 @@ PHP_FUNCTION(sodium_base642bin)
 							 "invalid base64 variant identifier", 0);
 		return;
 	}
-	bin_len = b64_len / 4U * 3U;
+	bin_len = b64_len / 4U * 3U + 1U;
 	bin = zend_string_alloc(bin_len, 0);
 	if (sodium_base642bin((unsigned char *) ZSTR_VAL(bin), bin_len,
 						  b64, b64_len,
@@ -3402,11 +3402,17 @@ PHP_FUNCTION(sodium_pad)
 	st = 1U;
 	i = 0U;
 	k = unpadded_len;
-	for (j = 0U; j <= xpadded_len; j++) {
-		ZSTR_VAL(padded)[j] = unpadded[i];
-		k -= st;
-		st = (~(((((k >> 48) | (k >> 32) | (k >> 16) | k) & 0xffff) - 1U) >> 16)) & 1U;
-		i += st;
+	if (unpadded_len > 0) {
+		st = 1U;
+		i = 0U;
+		k = unpadded_len;
+		for (j = 0U; j <= xpadded_len; j++) {
+			ZSTR_VAL(padded)[j] = unpadded[i];
+			k -= st;
+			st = (size_t) (~(((( (((uint64_t) k) >> 48) | (((uint64_t) k) >> 32) |
+								 (k >> 16) | k) & 0xffff) - 1U) >> 16)) & 1U;
+			i += st;
+		}
 	}
 #if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 	if (sodium_pad(NULL, (unsigned char *) ZSTR_VAL(padded), unpadded_len,
@@ -3423,7 +3429,8 @@ PHP_FUNCTION(sodium_pad)
 		tail = &ZSTR_VAL(padded)[xpadded_len];
 		mask = 0U;
 		for (i = 0; i < blocksize; i++) {
-			barrier_mask = (unsigned char) (((i ^ xpadlen) - 1U) >> 8);
+			barrier_mask = (unsigned char)
+				(((i ^ xpadlen) - 1U) >> ((sizeof(size_t) - 1U) * CHAR_BIT));
 			tail[-i] = (tail[-i] & mask) | (0x80 & barrier_mask);
 			mask |= barrier_mask;
 		}

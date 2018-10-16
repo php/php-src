@@ -1,5 +1,5 @@
 --TEST--
-Test is_callable() function : usage variations - on objects 
+Test is_callable() function : usage variations - on objects
 --FILE--
 <?php
 /* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
@@ -8,7 +8,7 @@ Test is_callable() function : usage variations - on objects
 */
 
 /* Prototype: void check_iscallable_objects( $methods );
-   Description: use is_callable() on given $method to check if the array 
+   Description: use is_callable() on given $method to check if the array
                 contains a valid method name;
                 returns true if valid function name, false otherwise
 */
@@ -32,11 +32,11 @@ echo "\n*** Testing is_callable() on objects ***\n";
 class object_class
 {
   public $value = 100;
-  
+
   /* static method */
   static public function foo() {
   }
-  
+
   public function foo1() {
   }
   /* function name with mixed string and integer */
@@ -47,7 +47,7 @@ class object_class
   }
   /* function name having boolean value */
   public function TRUE() {
-  }  
+  }
 
   protected function foo2() {
   }

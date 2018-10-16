@@ -1,9 +1,9 @@
 --TEST--
-Test strval() function : usage variations  - error conditions 
+Test strval() function : usage variations  - error conditions
 --FILE--
 <?php
 /* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable. 
+ * Description: Get the string value of a variable.
  * Source code: ext/standard/string.c
  */
 
@@ -13,7 +13,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 class MyClass
 {
-	// no toString() method defined 
+	// no toString() method defined
 }
 
 $string  = "Hello";

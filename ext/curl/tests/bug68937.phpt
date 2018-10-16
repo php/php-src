@@ -1,7 +1,7 @@
 --TEST--
 Bug # #68937 (Segfault in curl_multi_exec)
 --SKIPIF--
-<?php 
+<?php
 include 'skipif.inc';
 ?>
 --FILE--

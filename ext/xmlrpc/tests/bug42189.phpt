@@ -10,6 +10,6 @@ var_dump($ok);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 bool(false)
 Done

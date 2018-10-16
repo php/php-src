@@ -232,17 +232,12 @@ PHP_FUNCTION(http_build_query)
 	zend_long enc_type = PHP_QUERY_RFC1738;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
-		Z_PARAM_ZVAL(formdata)
+		Z_PARAM_ARRAY_OR_OBJECT(formdata)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(prefix, prefix_len)
 		Z_PARAM_STRING(arg_sep, arg_sep_len)
 		Z_PARAM_LONG(enc_type)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	if (Z_TYPE_P(formdata) != IS_ARRAY && Z_TYPE_P(formdata) != IS_OBJECT) {
-		php_error_docref(NULL, E_WARNING, "Parameter 1 expected to be Array or Object.  Incorrect value given");
-		RETURN_FALSE;
-	}
 
 	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, (int)enc_type) == FAILURE) {
 		if (formstr.s) {
@@ -269,4 +264,3 @@ PHP_FUNCTION(http_build_query)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-

@@ -20,7 +20,7 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/buildfromiterator.phar.tar');
 __HALT_COMPILER();
 ?>

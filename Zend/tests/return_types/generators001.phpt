@@ -1,6 +1,5 @@
 --TEST--
 Valid generator return types
-
 --FILE--
 <?php
 function test1() : Generator {
@@ -20,7 +19,6 @@ var_dump(
     test2(),
     test3()
 );
-
 --EXPECTF--
 object(Generator)#%d (%d) {
 }

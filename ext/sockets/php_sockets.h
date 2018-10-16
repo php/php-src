@@ -124,4 +124,3 @@ php_socket *socket_import_file_descriptor(PHP_SOCKET sock);
  * c-basic-offset: 4
  * End:
  */
-

@@ -3,14 +3,14 @@ Test posix_getgrgid() function : usage variations  - parameter types
 --SKIPIF--
 <?php
     PHP_INT_SIZE == 4 or die("skip - 32-bit only");
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
 /* Prototype  : proto array posix_getgrgid(long gid)
- * Description: Group database access (POSIX.1, 9.2.1) 
+ * Description: Group database access (POSIX.1, 9.2.1)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_getgrgid() : usage variations ***\n";
@@ -71,8 +71,8 @@ $values = array(
 foreach($values as $value) {
       echo "\nArg value $value \n";
       $result = posix_getgrgid($value);
-      if ((is_array($result) && (count($result) == 4)) 
-          || 
+      if ((is_array($result) && (count($result) == 4))
+          ||
           ($result === false)) {
           echo "valid output\n";
       } else {

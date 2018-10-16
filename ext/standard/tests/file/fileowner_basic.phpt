@@ -7,7 +7,7 @@ Test fileowner() function: basic functionality
  *              FALSE in case of an error.
  */
 
-echo "*** Testing fileowner(): basic functionality ***\n"; 
+echo "*** Testing fileowner(): basic functionality ***\n";
 
 echo "-- Testing with the file or directory created by owner --\n";
 var_dump( fileowner(__FILE__) );
@@ -29,7 +29,6 @@ var_dump( fileowner($dir_name) );
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
@@ -38,7 +37,6 @@ $dir_name = $file_path."/fileowner_basic";
 unlink($file_name);
 rmdir($dir_name);
 ?>
-
 --EXPECTF--
 *** Testing fileowner(): basic functionality ***
 -- Testing with the file or directory created by owner --
@@ -48,4 +46,3 @@ int(%d)
 int(%d)
 int(%d)
 *** Done ***
-

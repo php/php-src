@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -536,4 +535,3 @@ int fpm_event_del(struct fpm_event_s *ev) /* {{{ */
 	return 0;
 }
 /* }}} */
-

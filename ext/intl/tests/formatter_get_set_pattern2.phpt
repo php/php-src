@@ -33,7 +33,7 @@ function ut_main()
     $res_str .= "New pattern: '" . ut_nfmt_get_pattern( $fmt ) . "'\n";
     $res_str .= "Formatted number: " . ut_nfmt_format( $fmt, $test_value ) . "\n";
 
-	ut_nfmt_set_pattern($fmt, str_repeat('@', 200));	
+	ut_nfmt_set_pattern($fmt, str_repeat('@', 200));
 	$res_str .= "New pattern: '" . ut_nfmt_get_pattern( $fmt ) . "'\n";
     $res_str .= "Formatted number: " . ut_nfmt_format( $fmt, $test_value ) . "\n";
 

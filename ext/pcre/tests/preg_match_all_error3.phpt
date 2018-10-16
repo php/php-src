@@ -1,5 +1,5 @@
 --TEST--
-Test preg_match_all() function : error conditions  
+Test preg_match_all() function : error conditions
 --FILE--
 <?php
 /*
@@ -16,5 +16,4 @@ var_dump(preg_match_all($regex, $subject, 'test'));
 echo "Done";
 ?>
 --EXPECTF--
-
 Fatal error: Only variables can be passed by reference in %spreg_match_all_error3.php on line %d

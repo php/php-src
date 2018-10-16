@@ -1,5 +1,5 @@
 --TEST--
-Test wordwrap() function : basic functionality 
+Test wordwrap() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string wordwrap ( string $str [, int $width [, string $break [, bool $cut]]] )

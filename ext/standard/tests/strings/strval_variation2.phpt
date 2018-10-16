@@ -3,7 +3,7 @@ Test strval() function : usage variations  - Pass all valid char codes
 --FILE--
 <?php
 /* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable. 
+ * Description: Get the string value of a variable.
  * Source code: ext/standard/string.c
  */
 

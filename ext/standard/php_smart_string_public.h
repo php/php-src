@@ -19,4 +19,3 @@
 
 /* Header moved to Zend. This file is retained for BC. */
 #include "zend_smart_string_public.h"
-

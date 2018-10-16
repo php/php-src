@@ -1,13 +1,13 @@
 --TEST--
 Test ob_get_contents() function : basic functionality
 --CREDITS--
-Iain Lewis <ilewis@php.net> 
+Iain Lewis <ilewis@php.net>
 --FILE--
 <?php
 /* Prototype  : proto string ob_get_contents(void)
- * Description: Return the contents of the output buffer 
+ * Description: Return the contents of the output buffer
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
@@ -35,14 +35,14 @@ ob_end_flush();
 
 echo "\ncheck that contents disappear after a flush\n";
 ob_start();
-echo "Hello World\n"; 
+echo "Hello World\n";
 ob_flush();
 var_dump(ob_get_contents());
 ob_end_flush();
 
 echo "\ncheck that no contents found after an end\n";
 ob_start();
-echo "Hello World\n"; 
+echo "Hello World\n";
 ob_end_flush();
 var_dump(ob_get_contents());
 

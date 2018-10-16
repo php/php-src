@@ -7,10 +7,10 @@ Test session_destroy() function : error functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_destroy(void)
  * Description : Destroys all data registered to a session
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_destroy() : error functionality ***\n";
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -66,7 +66,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 
@@ -215,4 +215,3 @@ NULL
 Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 Done
-

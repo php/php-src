@@ -1,13 +1,13 @@
 --TEST--
-Test finfo_set_flags() function : basic functionality 
+Test finfo_set_flags() function : basic functionality
 --SKIPIF--
 <?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : bool finfo_set_flags(resource finfo, int options)
- * Description: Set libmagic configuration options. 
+ * Description: Set libmagic configuration options.
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic私はガラスを食べられます';

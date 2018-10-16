@@ -2,7 +2,7 @@
 Test dir() function : basic functionality
 --FILE--
 <?php
-/* 
+/*
  * Prototype  : object dir(string $directory[, resource $context])
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c

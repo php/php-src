@@ -20,7 +20,7 @@ PREPARING YOUR SYSTEM
     GNU libtool
     GNU m4
 
-  All of these are available from 
+  All of these are available from
 
     ftp://ftp.gnu.org/pub/gnu/
 
@@ -30,7 +30,7 @@ CONVERTING AN EXISTING EXTENSION
   extension, we will convert an embedded extension into a
   self-contained one. Install PHP and execute the following
   commands.
-  
+
      $ mkdir /tmp/newext
      $ cd /tmp/newext
 
@@ -53,7 +53,7 @@ CONVERTING AN EXISTING EXTENSION
             [--with-mysql=MYSQL-DIR]
      $ make install
 
-  The MySQL module will either use the embedded MySQL client 
+  The MySQL module will either use the embedded MySQL client
   library or the MySQL installation in MYSQL-DIR.
 
 
@@ -64,8 +64,8 @@ DEFINING THE NEW EXTENSION
   It consists of two source files "foo.c" and "bar.c"
   (and any arbitrary amount of header files, but that is not
   important here).
-  
-  The demo extension does not reference any external 
+
+  The demo extension does not reference any external
   libraries (that is important, because the user does not
   need to specify anything).
 
@@ -75,7 +75,7 @@ DEFINING THE NEW EXTENSION
 
 CREATING THE M4 CONFIGURATION FILE
 
-  The m4 configuration can perform additional checks. For a 
+  The m4 configuration can perform additional checks. For a
   self-contained extension, you do not need more than a few
   macro calls.
 
@@ -94,7 +94,7 @@ fi
   The first argument of PHP_NEW_EXTENSION describes the name of the
   extension.  The second names the source-code files.  The third passes
   $ext_shared which is set by PHP_ARG_ENABLE/WITH to PHP_NEW_EXTENSION.
-  
+
   Please use always PHP_ARG_ENABLE or PHP_ARG_WITH. Even if you do not
   plan to distribute your module with PHP, these facilities allow you
   to integrate your module easily into the main PHP module framework.
@@ -135,7 +135,7 @@ INSTALLING A SELF-CONTAINED EXTENSION
 ADDING SHARED MODULE SUPPORT TO A MODULE
 
   In order to be useful, a self-contained extension must be loadable
-  as a shared module. I will explain now how you can add shared module 
+  as a shared module. I will explain now how you can add shared module
   support to an existing module called foo.
 
   1. In config.m4, use PHP_ARG_WITH/PHP_ARG_ENABLE. Then you will
@@ -164,4 +164,3 @@ PECL SITE CONFORMITY
 
     This macros has to be used within your foo_module_entry to indicate the
     extension version.
-

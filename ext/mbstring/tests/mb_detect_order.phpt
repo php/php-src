@@ -1,5 +1,5 @@
 --TEST--
-mb_detect_order()  
+mb_detect_order()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
@@ -45,7 +45,6 @@ $r = mb_detect_order($a);
 print implode(', ', mb_detect_order()) . "\n";
 
 ?>
-
 --EXPECT--
 OK_AUTO
 ASCII, JIS, UTF-8, EUC-JP, SJIS
@@ -58,4 +57,3 @@ OK_BAD_STR
 ASCII, JIS, EUC-JP, UTF-8
 OK_BAD_ARRAY
 ASCII, JIS, EUC-JP, UTF-8
-

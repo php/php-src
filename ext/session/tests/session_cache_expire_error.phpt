@@ -7,10 +7,10 @@ Test session_cache_expire() function : error functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : int session_cache_expire([int $new_cache_expire])
  * Description : Return current cache expire
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_cache_expire() : error functionality ***\n";
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -66,7 +66,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 
@@ -167,4 +167,3 @@ int(0)
 -- Iteration 24 --
 int(0)
 Done
-

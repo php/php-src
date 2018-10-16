@@ -46,7 +46,6 @@ $r1 = sodium_crypto_secretstream_xchacha20poly1305_pull($stream, $c1, $ad);
 var_dump($r1);
 $r2 = sodium_crypto_secretstream_xchacha20poly1305_pull($stream, $c2);
 var_dump($r2);
-
 --EXPECT--
 secretstream_xchacha20poly1305:
 bool(true)

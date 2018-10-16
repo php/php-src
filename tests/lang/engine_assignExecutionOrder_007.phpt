@@ -1,5 +1,5 @@
 --TEST--
-Check key execution order with new. 
+Check key execution order with new.
 --FILE--
 <?php
 $a[2][3] = 'stdClass';

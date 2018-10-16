@@ -69,4 +69,3 @@ Test 3 - no new define done
 string(4) "some"
 string(5) "thing"
 Done
-

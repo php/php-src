@@ -1,17 +1,17 @@
 --TEST--
-Test xml_parser_set_option() function : error conditions 
+Test xml_parser_set_option() function : error conditions
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
- * Description: Set options in an XML parser 
+ * Description: Set options in an XML parser
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_parser_set_option() : error conditions ***\n";
@@ -46,4 +46,3 @@ NULL
 Warning: xml_parser_set_option() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 Done
-

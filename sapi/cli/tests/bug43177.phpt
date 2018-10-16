@@ -2,7 +2,7 @@
 Bug #61977 Test exit code for various errors
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php

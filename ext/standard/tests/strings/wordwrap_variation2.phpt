@@ -8,7 +8,7 @@ Test wordwrap() function : usage variations  - unexpected values for width argum
 */
 
 /*
- * test wordwrap by passing different values for width argument 
+ * test wordwrap by passing different values for width argument
 */
 echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
@@ -16,7 +16,7 @@ $str = 'testing wordwrap function';
 $break = '<br />\n';
 $cut = true;
 
-// resource var 
+// resource var
 $fp = fopen(__FILE__, "r");
 
 // get an unset variable
@@ -53,7 +53,7 @@ $values =  array (
   // objects
   new stdclass(),
 
-  // Null value 
+  // Null value
   NULL,
   null,
 
@@ -83,7 +83,7 @@ for($index = 0; $index < count($values); $index ++) {
   var_dump( wordwrap($str, $width) );
   var_dump( wordwrap($str, $width, $break) );
 
-  // cut as false 
+  // cut as false
   $cut = false;
   var_dump( wordwrap($str, $width, $break, $cut) );
 

@@ -37,7 +37,6 @@ $str = mb_strimwidth($euc_jp, -10, -12,'...','EUC-JP');
 ($str === FALSE) ? print "13 OK\n" : print "NG: $str\n";
 
 ?>
-
 --EXPECT--
 String width: 68
 1: 0123この文字...

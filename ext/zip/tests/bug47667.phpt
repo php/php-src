@@ -21,7 +21,7 @@ for ($i = 0; $i < 10; $i++) {
 	$zip = new ZipArchive();
 	if ($zip->open($filename, ZipArchive::OVERWRITE) !== true) {
 		exit("Unable to open the zip file");
-	}	
+	}
 	$zip->addFromString("foo_{$i}.txt", 'foo bar foobar');
 	$zip->close();
 }
@@ -35,6 +35,5 @@ echo "files: " , $zip->numFiles;
 $zip->close();
 
 unlink($filename);
-
 --EXPECT--
 files: 1

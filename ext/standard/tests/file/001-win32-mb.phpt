@@ -100,4 +100,3 @@ test_私はガラスを食べられます.file is a regular file
 test_私はガラスを食べられます.file is not a directory
 test_私はガラスを食べられます.file does not exist
 test_私はガラスを食べられます.file does not exist
-

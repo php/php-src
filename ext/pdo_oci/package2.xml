@@ -35,7 +35,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
 You require Oracle OCI 8 or higher client libraries (instantclient is also
 supported) installed on the machine where you intend to build and/or use this
 package.
-   
+
 If you are running on windows, you can download the binary from here:
 http://pecl4win.php.net/ext.php/php_pdo_oci.dll
  </notes>

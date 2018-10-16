@@ -1,5 +1,5 @@
 The CLI (command line interface) SAPI has been introduced
-with a goal of making PHP better at supporting the creation of 
+with a goal of making PHP better at supporting the creation of
 stand alone applications.
 
 It is based on CGI SAPI with all CGI specific things removed.
@@ -11,7 +11,7 @@ The main differences between the two:
 * It does not change the working directory to that of the script.
   (-C switch kept for compatibility)
 * Plain text error message
-* $argc and $argv registered irrespective of the register_argc_argv 
+* $argc and $argv registered irrespective of the register_argc_argv
   php.ini setting.
 * implicit_flush always on
 * -r option which allows execution of PHP code directly from

@@ -27,7 +27,7 @@ class Foo
             //
             /** doc comment */
             #
-        catch /* comment */ 
+        catch /* comment */
             // comment
             # comment
         insteadof TraitB;
@@ -61,7 +61,6 @@ Foo /**/
 attempt();
 
 echo PHP_EOL, "Done", PHP_EOL;
-
 --EXPECT--
 TraitB::try
 

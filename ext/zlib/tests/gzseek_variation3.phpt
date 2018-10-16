@@ -1,15 +1,15 @@
 --TEST--
 Test function gzseek() by calling it with SEEK_CUR when reading
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
 $f = dirname(__FILE__)."/004.txt.gz";
-$h = gzopen($f, 'r'); 
+$h = gzopen($f, 'r');
 
 echo "move to the 50th byte\n";
 var_dump(gzseek( $h, 50, SEEK_CUR ) );

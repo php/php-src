@@ -3,7 +3,7 @@ Test array_rand() function : usage variations - unexpected values for 'input' pa
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array input [, int num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
@@ -28,7 +28,7 @@ $fp = fopen(__FILE__, "r");
 class test
 {
   var $t = 10;
-  function __toString() 
+  function __toString()
   {
     return "object";
   }
@@ -48,8 +48,8 @@ $values = array(
         -10.5,
         12.3456789000e10,
         12.3456789000E-10,
-        .5,   
-      
+        .5,
+
         // null data
 /*10*/  NULL,
         null,
@@ -81,14 +81,14 @@ $values = array(
 /*23*/  @$unset_var,
 );
 
-/* loop through each element of the array to test array_rand() function 
+/* loop through each element of the array to test array_rand() function
  * for different values for 'input' argument
 */
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
   var_dump( array_rand($value,$num_req) );
-  $count++; 
+  $count++;
 };
 
 // closing the resource
@@ -214,4 +214,3 @@ NULL
 Warning: array_rand() expects parameter 1 to be array, null given in %s on line %d
 NULL
 Done
-

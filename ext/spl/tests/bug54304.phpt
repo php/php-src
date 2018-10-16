@@ -23,4 +23,3 @@ int(42)
 string(5) "test3"
 string(2) "42"
 int(42)
-

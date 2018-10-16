@@ -52,4 +52,3 @@ NULL
 Warning: get_headers() expects parameter 2 to be int, object given in %s on line 26
 NULL
 Done
-

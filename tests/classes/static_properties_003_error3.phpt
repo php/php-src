@@ -1,5 +1,5 @@
 --TEST--
-Attempting to access static properties using instance property syntax 
+Attempting to access static properties using instance property syntax
 --FILE--
 <?php
 class C {
@@ -12,7 +12,6 @@ $c->y = 1;
 ?>
 ==Done==
 --EXPECTF--
-
 --> Access non-visible static prop like instance prop:
 
 Fatal error: Uncaught Error: Cannot access protected property C::$y in %s:8

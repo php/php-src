@@ -1,17 +1,17 @@
 --TEST--
-Test array_chunk() function : usage variations - unexpected values for 'size' argument 
+Test array_chunk() function : usage variations - unexpected values for 'size' argument
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks 
+ * Description: Split array into chunks
               : Chunks an array into size  large chunks
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing array_chunk() function with unexpected values for 'size' argument 
+* Testing array_chunk() function with unexpected values for 'size' argument
 */
 
 echo "*** Testing array_chunk() : usage variations ***\n";

@@ -12,4 +12,3 @@ var_dump($h->isEmpty());
 ?>
 --EXPECT--
 bool(true)
-

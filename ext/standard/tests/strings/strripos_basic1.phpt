@@ -23,7 +23,7 @@ echo "\n-- single char for needle --\n";
 var_dump( strripos("Hello, World", "O") );
 var_dump( strripos("Hello, World", ",") );
 
-echo "\n-- heredoc string for haystack & needle --\n"; 
+echo "\n-- heredoc string for haystack & needle --\n";
 var_dump( strripos($heredoc_str, "Hello, WoRLd") );
 var_dump( strripos($heredoc_str, 'HelLO') );
 var_dump( strripos($heredoc_str, $heredoc_str) );

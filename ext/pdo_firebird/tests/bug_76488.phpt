@@ -20,7 +20,7 @@ from r
 
     for ($i = 0; $i < 10; $i++) {
         $sth = $dbh->prepare($sql);
-        $sth->execute();          
+        $sth->execute();
         $rows = $sth->fetchAll();
 	    unset($rows);
 	    unset($sth);

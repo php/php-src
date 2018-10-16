@@ -84,4 +84,3 @@ PHP_JSON_API int php_json_parse(php_json_parser *parser);
 int php_json_yyparse(php_json_parser *parser);
 
 #endif	/* PHP_JSON_PARSER_H */
-

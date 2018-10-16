@@ -1,5 +1,5 @@
 --TEST--
-assert() - variation  - test callback options using ini_get/ini_set/assert_options 
+assert() - variation  - test callback options using ini_get/ini_set/assert_options
 --INI--
 assert.active = 1
 assert.warning = 0
@@ -8,15 +8,15 @@ assert.bail = 0
 assert.quiet_eval = 0
 --FILE--
 <?php
-function f1() 
+function f1()
 {
 	echo "f1 called\n";
 }
-function f2() 
+function f2()
 {
 	echo "f2 called\n";
 }
-function f3() 
+function f3()
 {
 	echo "f3 called\n";
 }
@@ -69,7 +69,6 @@ var_dump($rao=assert_options(ASSERT_CALLBACK));
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n\n";
 var_dump($r2=assert($sa));
 echo"\n";
-
 --EXPECTF--
 Initial values: assert_options(ASSERT_CALLBACK) => [f1]
 Initial values: ini.get("assert.callback") => [f1]

@@ -19,7 +19,7 @@ $filename = dirname(__FILE__)."/fwrite_error.tmp";
 
 echo "-- Testing fwrite() with less than expected number of arguments --\n";
 // zero argument
-var_dump( fwrite() ); 
+var_dump( fwrite() );
 // less than expected, 1 arg
 $file_handle  = fopen ( $filename, "w");
 var_dump( fwrite($file_handle) );
@@ -52,14 +52,14 @@ for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   var_dump( fwrite($invalid_args[$loop_counter - 1], 10) );
 }
 
-// fwrite() on a file handle which is already closed 
+// fwrite() on a file handle which is already closed
 echo "-- Testing fwrite() with closed/unset file handle --\n";
 fclose($file_handle);
 var_dump(fwrite($file_handle,"data"));
 
-// fwrite on a file handle which is unset 
+// fwrite on a file handle which is unset
 $fp = fopen($filename, "w");
-unset($fp); //unset file handle 
+unset($fp); //unset file handle
 var_dump( fwrite(@$fp,"data"));
 
 echo "Done\n";
@@ -118,4 +118,3 @@ bool(false)
 Warning: fwrite() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
-

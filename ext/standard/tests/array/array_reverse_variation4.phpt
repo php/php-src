@@ -43,18 +43,18 @@ $arrays = array (
        array(0 => "0"),
        array(1 => "1"),
        array(1 => "1", 2 => "2", 3 => "3", 4 => "4"),
- 
+
        // arrays with float keys
 /*5*/  array(2.3333 => "float"),
        array(1.2 => "f1", 3.33 => "f2", 4.89999922839999 => "f3", 33333333.333333 => "f4"),
-  
+
        // arrays with string keys
        array("\tHello" => 111, "re\td" => "color", "\v\fworld" => 2.2, "pen\n" => 33),
 /*8*/  array("\tHello" => 111, "re\td" => "color", "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-       array(new classA() => 11, @$unset_var => "hello", $fp => 'resource'), 
+       array(new classA() => 11, @$unset_var => "hello", $fp => 'resource'),
 
        // array with mixed values
 /*11*/ array('hello' => 1, new classA() => 2, "fruit" => 2.2, $fp => 'resource', 133 => "int", 444.432 => "float", @$unset_var => "unset", $heredoc => "heredoc")

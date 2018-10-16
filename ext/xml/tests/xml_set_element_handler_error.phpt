@@ -1,17 +1,17 @@
 --TEST--
 Test xml_set_element_handler() function : error conditions
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
-?> 
+	print "skip - XML extension not loaded";
+}
+?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_element_handler(resource parser, string shdl, string ehdl)
- * Description: Set up start and end element handlers 
+ * Description: Set up start and end element handlers
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_set_element_handler() : error conditions ***\n";
@@ -44,4 +44,3 @@ NULL
 Warning: xml_set_element_handler() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 Done
-

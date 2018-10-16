@@ -1,7 +1,7 @@
 --TEST--
 Formatted print functions
 --FILE--
-<?php 
+<?php
 error_reporting(0);
 
 $fp = fopen("php://stdout", "w") or die("Arrggsgg!!");

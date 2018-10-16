@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -38,7 +38,7 @@ closedir($dir_handle);
 <?php
 $path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_error";
 rmdir($path);
-?> 
+?>
 --EXPECTF--
 *** Testing readdir() : error conditions ***
 

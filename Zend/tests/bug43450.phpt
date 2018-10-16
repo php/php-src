@@ -5,7 +5,7 @@ opcache.enable_cli=0
 --FILE--
 <?php
 
-class Foo 
+class Foo
 {
     public function __toString()
 	{
@@ -16,7 +16,7 @@ class Foo
 $num_repeats = 100000;
 
 $start = memory_get_usage() / 1024;
-for ($i=1;$i<$num_repeats;$i++) 
+for ($i=1;$i<$num_repeats;$i++)
 {
 	$foo = new Foo();
 	md5($foo);

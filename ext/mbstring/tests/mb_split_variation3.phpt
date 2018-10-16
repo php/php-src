@@ -9,9 +9,9 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 --FILE--
 <?php
 /* Prototype  : proto array mb_split(string pattern, string string [, int limit])
- * Description: split multibyte string into array by regular expression 
+ * Description: split multibyte string into array by regular expression
  * Source code: ext/mbstring/php_mbregex.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_split() : usage variations ***\n";
@@ -65,7 +65,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -74,7 +74,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

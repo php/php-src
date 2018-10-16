@@ -12,7 +12,7 @@ var_dump($var1);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 int(2)
 int(2)
 Done

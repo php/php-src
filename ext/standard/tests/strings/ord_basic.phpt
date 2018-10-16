@@ -1,5 +1,5 @@
 --TEST--
-Test ord() function : basic functionality 
+Test ord() function : basic functionality
 --FILE--
 <?php
 
@@ -26,7 +26,7 @@ var_dump(ord("Hello"));
 for ($i = 0; $i < 255; $i++) {
 	if (ord(chr($i)) != $i) {
 		exit("TEST FAILED: $i does not round trip\n");
-	} 	
+	}
 }
 
 ?>

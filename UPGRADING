@@ -40,7 +40,6 @@ PHP 7.4 UPGRADE NOTES
     flag was specified. Other affected operations are:
 
      * ReflectionObject::getProperties()
-     * array_key_exists(). Use isset() or offsetExists() instead.
      * reset(), current(), etc. Use Iterator methods instead.
      * Potentially others working on object properties as a list.
 
@@ -95,7 +94,7 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 
 - Hash:
-  . The hash extension cannot be disabled anymore and is always an integral 
+  . The hash extension cannot be disabled anymore and is always an integral
     part of any PHP build, similar to the date extension.
 
 - Intl:
@@ -112,8 +111,8 @@ PHP 7.4 UPGRADE NOTES
     Use corresponding constants instead (e.g. ReflectionMethod::IS_PUBLIC).
 
 - SQLite3:
-  . The bundled libsqlite has been removed.  To build the SQLite3 and/or 
-    PDO_SQLite extensions a system libsqlite3 ≥ 3.3.9 is now required.
+  . The bundled libsqlite has been removed.  To build the SQLite3 and/or
+    PDO_SQLite extensions a system libsqlite3 ≥ 3.5.0 is now required.
 
 - Zip:
   . The bundled libzip library has been removed. A system libzip >= 0.11 is now

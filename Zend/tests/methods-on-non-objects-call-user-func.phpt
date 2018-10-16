@@ -10,4 +10,3 @@ echo "Alive\n";
 Warning: call_user_func() expects parameter 1 to be a valid callback, first array member is not a valid class name or object in %s on line %d
 NULL
 Alive
-

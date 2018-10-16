@@ -3,7 +3,7 @@ Test array_diff_uassoc() function : usage variation -Passing classWithoutToStrin
 --FILE--
 <?php
 /* Prototype  : array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Computes the difference of arrays with additional index check which is performed by a 
+ * Description: Computes the difference of arrays with additional index check which is performed by a
  * 				user supplied callback function
  * Source code: ext/standard/array.c
  */
@@ -37,4 +37,3 @@ var_dump( array_diff_uassoc($array1, $array2, $value) );
 Error: 2 - array_diff_uassoc() expects parameter 3 to be a valid callback, no array or string given, %s(%d)
 NULL
 ===DONE===
-

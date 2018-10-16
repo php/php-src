@@ -29,4 +29,3 @@ Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr
 Hello World!
 Hello World!* Closing connection 0
 Ok
-

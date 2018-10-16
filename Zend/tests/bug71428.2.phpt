@@ -20,4 +20,3 @@ echo "ok";
 ?>
 --EXPECT--
 ok
-

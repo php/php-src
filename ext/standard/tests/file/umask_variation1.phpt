@@ -28,7 +28,7 @@ for($mask = 0000; $mask <= 0350; $mask++) {
   echo " --\n";
   // setting umask
   umask($mask);
- 
+
   /* umasking file */
   // creating temp file
   $fp = fopen($filename, "w");

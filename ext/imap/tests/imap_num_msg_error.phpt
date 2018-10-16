@@ -25,4 +25,3 @@ Checking with incorrect parameter type
 Warning: imap_num_msg() expects parameter 1 to be resource, string given in %s on line %d
 
 Warning: imap_num_msg() expects parameter 1 to be resource, bool given in %s on line %d
-

@@ -40,7 +40,7 @@ $misc_files = array(
   @array(),
   @$file_handle
 );
-/* loop through to test each element in the above array 
+/* loop through to test each element in the above array
    is a readable file */
 foreach( $misc_files as $misc_file ) {
   var_dump( is_readable($misc_file) );
@@ -65,4 +65,3 @@ Warning: is_readable() expects parameter 1 to be a valid path, array given in %s
 NULL
 bool(false)
 Done
-

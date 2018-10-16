@@ -666,7 +666,6 @@ PHP_FUNCTION(get_headers)
 	size_t url_len;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL, *h;
-	HashTable *hashT;
 	zend_long format = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context;
@@ -691,19 +690,7 @@ PHP_FUNCTION(get_headers)
 
 	array_init(return_value);
 
-	/* check for curl-wrappers that provide headers via a special "headers" element */
-	if ((h = zend_hash_str_find(HASH_OF(&stream->wrapperdata), "headers", sizeof("headers")-1)) != NULL && Z_TYPE_P(h) == IS_ARRAY) {
-		/* curl-wrappers don't load data until the 1st read */
-		if (!Z_ARRVAL_P(h)->nNumOfElements) {
-			php_stream_getc(stream);
-		}
-		h = zend_hash_str_find(HASH_OF(&stream->wrapperdata), "headers", sizeof("headers")-1);
-		hashT = Z_ARRVAL_P(h);
-	} else {
-		hashT = HASH_OF(&stream->wrapperdata);
-	}
-
-	ZEND_HASH_FOREACH_VAL(hashT, hdr) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&stream->wrapperdata), hdr) {
 		if (Z_TYPE_P(hdr) != IS_STRING) {
 			continue;
 		}

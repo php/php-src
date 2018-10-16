@@ -1,10 +1,9 @@
 --TEST--
-Hash: hash_hmac_algos() function : basic functionality 
+Hash: hash_hmac_algos() function : basic functionality
 --FILE--
 <?php
 
 print_r(hash_hmac_algos());
-
 --EXPECTF--
 Array
 (

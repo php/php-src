@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -276,4 +275,3 @@ int fpm_env_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

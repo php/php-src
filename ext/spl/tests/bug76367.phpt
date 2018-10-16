@@ -10,7 +10,7 @@ while($iter->valid()) {
 	    $iter->next();
 }
 
-var_dump($iter->current()); 
+var_dump($iter->current());
 ?>
 --EXPECT--
 NULL

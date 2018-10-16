@@ -3,7 +3,7 @@ Bug #69115 crash in mail (plus indirect pcre test)
 --SKIPIF--
 <?php if (substr(PHP_OS, 0, 3) !== 'WIN') die('skip Windows only test, as in Unix builds it sends an email'); ?>
 --INI--
-SMTP = 
+SMTP =
 smtp_port =
 --FILE--
 <?php

@@ -1,5 +1,5 @@
 --TEST--
-Bug #40374 (php_shutdown_temporary_directory() tries to free local value) 
+Bug #40374 (php_shutdown_temporary_directory() tries to free local value)
 --FILE--
 <?php
 
@@ -12,6 +12,6 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s"
 Done

@@ -47,4 +47,3 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 resource(%d) of type (stream)
-

@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -19,7 +19,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing vsprintf() : hexa formats and non-hexa values ***\n";
 
 // defining array of different hexa formats
-$formats = 
+$formats =
   '%x %+x %-x 
    %lx %Lx %4x %-4x
    %10.4x %-10.4x %.4x 
@@ -64,12 +64,12 @@ $args_array = array(
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 // looping to test vsprintf() with different hexa formats from the above $format array
 // and with non-hexa values from the above $args_array array
- 
+
 $counter = 1;
 foreach($args_array as $args) {
   echo "\n-- Iteration $counter --\n";
@@ -85,35 +85,35 @@ echo "Done";
 -- Iteration 1 --
 string(101) "2 0 a 
    1e240 x fffffb2e 4d2 
-                          
+
    3039 c fffffff4 fffe1dc0
    a 1e240 2 0"
 
 -- Iteration 2 --
 string(124) "2 fffffffe 2 
    1e240 x ff439a5b bc65a5
-                          
+
    bc61b4 127ae7 ff4732f9 ff439ede
    2 1e240 2 fffffffe"
 
 -- Iteration 3 --
 string(82) "0 0 0 
    7b x ffffff85 7b  
-                          
+
    4d2 0 $0 _0
    0 7b 0 0"
 
 -- Iteration 4 --
 string(75) "1 1 1 
    1 x    1 1   
-                          
+
    #1 1 $1 _1
    1 1 1 1"
 
 -- Iteration 5 --
 string(75) "1 1 0 
    1 x    0 1   
-                          
+
    #0 1 $1 _0
    0 1 1 1"
 Done

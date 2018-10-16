@@ -1,5 +1,5 @@
 --TEST--
-PDO MySQL Bug #37445 (Premature stmt object destruction) 
+PDO MySQL Bug #37445 (Premature stmt object destruction)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');

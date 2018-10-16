@@ -46,7 +46,7 @@ ARG_WITH('prefix', 'PHP installation prefix', PHP_PREFIX);
 ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 var PHP_MP_DISABLED = true;
 if (VS_TOOLSET && PHP_MP != 'disable') {
-		// no from disable-all 
+		// no from disable-all
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
 			PHP_MP_DISABLED = false;
@@ -135,4 +135,3 @@ ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations
 	might not work properly, if the optimizations are not available on the target \
 	processor.", "no");
 toolset_setup_intrinsic_cflags();
-

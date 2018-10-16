@@ -370,5 +370,3 @@ int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter)
 	}
 	return 0;
 }
-
-

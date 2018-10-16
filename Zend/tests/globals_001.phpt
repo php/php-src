@@ -1,5 +1,5 @@
 --TEST--
-globals in global scope 
+globals in global scope
 --INI--
 variables_order="egpcs"
 --FILE--
@@ -19,7 +19,7 @@ var_dump($_SERVER);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(false)
 string(5) "array"

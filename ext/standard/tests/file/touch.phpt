@@ -38,7 +38,7 @@ var_dump(touch("/no/such/file/or/directory"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: touch() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 bool(true)
@@ -55,4 +55,3 @@ int(100)
 Warning: touch(): Unable to create file /no/such/file/or/directory because %s in %s on line %d
 bool(false)
 Done
-

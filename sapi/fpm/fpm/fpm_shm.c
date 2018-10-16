@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin, Jerome Loyet */
 
 #include <sys/mman.h>

@@ -23,4 +23,3 @@ var_dump(openssl_verify($data, base64_decode($sig), $key));
 --EXPECTF--
 resource(%d) of type (OpenSSL key)
 int(1)
-

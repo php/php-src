@@ -29,4 +29,3 @@ try {
 --EXPECT--
 finally
 exception in main
-

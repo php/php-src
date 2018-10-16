@@ -4,7 +4,7 @@ Bug #46024 stream_select() doesn't return the correct number
 <?php if (!getenv('TEST_PHP_EXECUTABLE')) die("skip TEST_PHP_EXECUTABLE not defined"); ?>
 --FILE--
 <?php
-$php = realpath(getenv('TEST_PHP_EXECUTABLE')); 
+$php = realpath(getenv('TEST_PHP_EXECUTABLE'));
 $pipes = array();
 $proc = proc_open(
 	"$php -n -i"

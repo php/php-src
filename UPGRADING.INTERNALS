@@ -66,11 +66,11 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
      The handler returns a non-null HashTable with increased refcounted, and
      the return value must be released using zend_release_properties().
-     
+
      This handler serves the same general function as get_properties(), but
      provides more control over different property uses, while also making
      it possible to return a temporary property table.
-     
+
      get_properties() is still used in cases where none of the above purposes
      apply, but overloading get_properties() is generally discouraged. If you
      want to provide purposes for general usage rather than just debugging or
@@ -103,7 +103,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 ========================
 
   a. Abstract
-    - The hash extension is now always available, meaning the --enable-hash 
+    - The hash extension is now always available, meaning the --enable-hash
 	  configure argument has been removed.
 
   b. Unix build system changes
@@ -124,5 +124,5 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       functions and structures are private to the extension now.
 
   b. ext/hash
-    - The hash extension is now always available, allowing extensions to rely 
+    - The hash extension is now always available, allowing extensions to rely
 	  on its functionality to be available without compile time checks.

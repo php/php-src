@@ -1,6 +1,5 @@
 --TEST--
 Ensure a interface can not have private constants
-
 --FILE--
 <?php
 interface A {

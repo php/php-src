@@ -13,7 +13,7 @@ function_exists('mb_strtoupper') or die("skip mb_strtoupper() is not available i
  */
 
 /*
- * 
+ *
  * Pass different data types as $sourcestring argument to mb_strtoupper to test behaviour
  */
 
@@ -66,7 +66,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -75,7 +75,7 @@ $inputs = array(
 /*18*/ "String",
        'String',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -101,7 +101,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strtoupper() : usage variations ***
 

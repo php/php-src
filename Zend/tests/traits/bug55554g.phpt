@@ -14,7 +14,7 @@ trait TLegacy {
 
 class ReportCollision {
     use TLegacy;
-	
+
 	public function __construct() {
 	    echo "ReportCollision executed\n";
 	}
@@ -23,7 +23,5 @@ class ReportCollision {
 
 echo "ReportCollision: ";
 $o = new ReportCollision;
-
-
 --EXPECTF--
 Fatal error: ReportCollision has colliding constructor definitions coming from traits in %s on line %d

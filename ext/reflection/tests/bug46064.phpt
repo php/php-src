@@ -36,7 +36,7 @@ class bar extends test {
 	public function __construct() {
 		$this->foobar = 2;
 		$this->a = 200;
-		
+
 		$p = new reflectionproperty($this, 'foobar');
 		var_dump($p->getValue($this), $p->isDefault(), $p->isPublic());
 	}

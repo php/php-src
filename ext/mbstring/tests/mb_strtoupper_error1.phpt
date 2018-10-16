@@ -31,7 +31,6 @@ var_dump( mb_strtoupper() );
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strtoupper() : error conditions ***
 

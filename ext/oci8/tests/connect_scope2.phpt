@@ -18,7 +18,7 @@ if (!empty($dbase))
 	$c1 = oci_new_connect($user,$password,$dbase);
 else
 	$c1 = oci_new_connect($user,$password);
-						 
+
 oci8_test_sql_execute($c1, $stmtarray);
 
 // Run Test

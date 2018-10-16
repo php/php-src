@@ -1,11 +1,11 @@
 --TEST--
-Test ob_flush() function : error conditions 
+Test ob_flush() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto bool ob_flush(void)
- * Description: Flush (send) contents of the output buffer. The last buffer content is sent to next buffer 
+ * Description: Flush (send) contents of the output buffer. The last buffer content is sent to next buffer
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ob_flush() : error conditions ***\n";

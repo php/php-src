@@ -8,7 +8,7 @@ function_exists('iconv_substr') or die("skip iconv_substr() is not available in 
 --FILE--
 <?php
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
- * Description: Returns part of a string 
+ * Description: Returns part of a string
  * Source code: ext/iconv/iconv.c
  */
 
@@ -47,4 +47,3 @@ bool(false)
 Warning: iconv_substr() expects at least 2 parameters, 1 given in %s on line %d
 bool(false)
 Done
-

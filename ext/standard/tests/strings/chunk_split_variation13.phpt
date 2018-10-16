@@ -5,7 +5,7 @@ Test chunk_split() function : usage variations - default 'chunklen' with long st
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 /*

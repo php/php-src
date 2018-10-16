@@ -10,7 +10,7 @@ function test() {
         case 1:
             break;
     }
-     
+
     while ($foo) {
         switch ($bar) {
             case 0:
@@ -21,7 +21,7 @@ function test() {
                 break;
         }
     }
-     
+
     while ($foo) {
         switch ($bar) {
             case 0:

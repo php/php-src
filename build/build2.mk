@@ -49,4 +49,3 @@ configure: aclocal.m4 configure.ac $(config_m4_files)
 	@echo rebuilding $@
 	@rm -f $@
 	$(PHP_AUTOCONF) -f $(SUPPRESS_WARNINGS)
-

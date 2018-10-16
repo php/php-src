@@ -22,7 +22,7 @@ EOD;
 $str2 = <<<identifier_str2
 Example of heredoc
 string, whose identifier
-having underscore("_") 
+having underscore("_")
 & numeric value.
 identifier_str2;
 

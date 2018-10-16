@@ -29,7 +29,7 @@ function ut_main()
 	$char_fi_ligature = "\xEF\xAC\x81";  // 'LATIN SMALL LIGATURE FI' (U+FB01)
 
 	$char_long_s_dot = "\xE1\xBA\x9B";	// 'LATIN SMALL LETTER LONG S WITH DOT ABOVE' (U+1E9B)
-	
+
 	// the word 'hindi' using Devanagari characters:
 	$hindi = "\xe0\xa4\xb9\xe0\xa4\xbf\xe0\xa4\xa8\xe0\xa5\x8d\xe0\xa4\xa6\xe0\xa5\x80";
 
@@ -42,7 +42,7 @@ function ut_main()
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strlen($string) {}' . "\n\n";
 
-	
+
 	$res_str .= "\"hindi\" in devanagari strlen " . grapheme_strlen($hindi) . "\n";
 	$res_str .= "\"ab\" + \"hindi\" + \"cde\" strlen " . grapheme_strlen('ab' . $hindi . 'cde') . "\n";
 	$res_str .= "\"\" strlen " . grapheme_strlen("") . "\n";
@@ -50,7 +50,7 @@ function ut_main()
 	$res_str .= "char_a_ring_nfd + \"bc\" strlen " . grapheme_strlen($char_a_ring_nfd . 'bc') . "\n";
 	$res_str .= "\"abc\" strlen " . grapheme_strlen('abc') . "\n";
 
-	
+
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strpos($haystack, $needle, $offset = 0) {}' . "\n\n";
 
@@ -75,7 +75,7 @@ function ut_main()
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o", "o", -5, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_a_ring_nfd . "bc", $char_a_ring_nfd, 2, 3 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_a_ring_nfd . "bc", $char_a_ring_nfd, -4, 3 ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "op", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "opq", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, "abc", "false" ),
@@ -119,10 +119,10 @@ function ut_main()
 		}
 		$res_str .= " == " . $test[count($test)-1] . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_stripos($haystack, $needle, $offset = 0) {}' . "\n\n";
-	
+
 	$tests = array(
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O", "o", 2, 6 ),
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Oo", "o", -6, 6 ),
@@ -142,7 +142,7 @@ function ut_main()
 		array( "abc", "A", 0, 0 ),
 		array( "Abc", "a", 1, "false" ),
 		array( "ababc", "A", 1, 2 ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", "oP", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", "opQ", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, "abc", "false" ),
@@ -187,7 +187,7 @@ function ut_main()
 		$res_str .= " == " . $test[count($test)-1] . check_result($result, $test[count($test)-1]) . "\n";
 	}
 
-	
+
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strrpos($haystack, $needle, $offset = 0) {}' . "\n\n";
 
@@ -209,7 +209,7 @@ function ut_main()
 		array( "ababc", "a", 1, 2 ),
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o", "o", 2, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_a_ring_nfd . "bc", $char_a_ring_nfd, 2, 3 ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "op", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "opq", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, "abc", "false" ),
@@ -252,11 +252,11 @@ function ut_main()
 		}
 		$res_str .= " == " . $test[count($test)-1] .  check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strripos($haystack, $needle, $offset = 0) {}' . "\n\n";
-	
+
 	$tests = array(
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O", "o", 2, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_A_ring_nfd . "bc", $char_a_ring_nfd, 2, 3 ),
@@ -274,7 +274,7 @@ function ut_main()
 		array( "abc", "A", 0, 0 ),
 		array( "Abc", "a", 1, "false" ),
 		array( "ababc", "A", 1, 2 ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", "oP", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", "opQ", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, "abc", "false" ),
@@ -317,8 +317,8 @@ function ut_main()
 		}
 		$res_str .= " == " . $test[count($test)-1] . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
-	
+
+
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_substr($string, $start, $length = -1) {}' . "\n\n";
 
@@ -343,7 +343,7 @@ function ut_main()
 		array( "Abc", -4, 1, "false" ),
 		array( "ababc", 1, 2, "ba" ),
 		array( "ababc", 0, 10, "ababc" ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, 10 , "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, "Opq" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, -1, "Op" ),
@@ -392,7 +392,7 @@ function ut_main()
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -7, "a" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -8, "" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -9, "false" ),
-		
+
 	);
 
 	foreach( $tests as $test ) {
@@ -414,7 +414,7 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strstr($haystack, $needle, $before_needle = FALSE) {}' . "\n\n";
@@ -441,7 +441,7 @@ function ut_main()
 		array( "ababc", "bab", TRUE, "a" ),
 		array( "ababc", "abc", TRUE, "ab" ),
 		array( "ababc", "abc", FALSE, "abc" ),
-		
+
 		array( "ab" . $char_a_ring_nfd . "c", "d", "false" ),
 		array( "bc" . $char_a_ring_nfd . "a", "a", "a" ),
 		array( "a" . $char_a_ring_nfd . "bc", "b", "bc" ),
@@ -479,7 +479,7 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_stristr($haystack, $needle, $before_needle = FALSE) {}' . "\n\n";
@@ -506,7 +506,7 @@ function ut_main()
 		array( "aBabc", "bab", TRUE, "a" ),
 		array( "ababc", "aBc", TRUE, "ab" ),
 		array( "ababc", "abC", FALSE, "abc" ),
-		
+
 		array( "ab" . $char_a_ring_nfd . "c", "d", "false" ),
 		array( "bc" . $char_a_ring_nfd . "A", "a", "A" ),
 		array( "a" . $char_a_ring_nfd . "bc", "B", "bc" ),
@@ -544,7 +544,7 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_COUNT, $start = 0[, $next])' . "\n\n";
@@ -635,7 +635,7 @@ function ut_main()
 		}
 		$res_str .= "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_MAXBYTES, $start = 0)' . "\n\n";
@@ -693,7 +693,7 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_MAXCHARS, $start = 0)' . "\n\n";
@@ -757,10 +757,10 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
-	
+
+
 	//=====================================================================================
-	
+
 	return $res_str;
 }
 
@@ -781,7 +781,6 @@ function check_result($result, $expected) {
 
 ?>
 --EXPECT--
-
 function grapheme_strlen($string) {}
 
 "hindi" in devanagari strlen 3
@@ -1213,4 +1212,3 @@ extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EX
 extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 4 = bca%CC%8Axyz == bca%CC%8Axyz
 extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 5 = ca%CC%8Axyz == ca%CC%8Axyz
 extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 6 = a%CC%8Axyz == a%CC%8Axyz
-

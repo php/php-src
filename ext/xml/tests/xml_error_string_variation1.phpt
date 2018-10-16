@@ -3,15 +3,15 @@ Test xml_error_string() function : usage variations  - test different types for 
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto string xml_error_string(int code)
- * Description: Get XML parser error string 
+ * Description: Get XML parser error string
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_error_string() : usage variations ***\n";
@@ -175,5 +175,3 @@ string(8) "No error"
 Arg value  
 string(8) "No error"
 Done
-
-

@@ -8,7 +8,7 @@ class foo {
 	public    $a="a";
 	private   $b="b";
 	protected $c="c";
-		
+
 }
 
 $x = new SoapClient(NULL,array("location"=>"test://",

@@ -210,4 +210,3 @@ PHP_FUNCTION(datefmt_localtime)
 	}
 }
 /* }}} */
-

@@ -49,4 +49,3 @@ bool(false)
 
 Warning: openssl_x509_fingerprint(): Unknown signature algorithm in %s on line %d
 bool(false)
-

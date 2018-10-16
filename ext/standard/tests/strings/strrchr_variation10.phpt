@@ -1,5 +1,5 @@
 --TEST--
-Test strrchr() function : usage variations - unexpected inputs for needle 
+Test strrchr() function : usage variations - unexpected inputs for needle
 --FILE--
 <?php
 /* Prototype  : string strrchr(string $haystack, string $needle);
@@ -7,8 +7,8 @@ Test strrchr() function : usage variations - unexpected inputs for needle
  * Source code: ext/standard/string.c
 */
 
-/* Test strrchr() function: with unexpected inputs for needle 
- *  and expected type for haystack 
+/* Test strrchr() function: with unexpected inputs for needle
+ *  and expected type for haystack
 */
 
 echo "*** Testing strrchr() function with unexpected inputs for needle ***\n";
@@ -21,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource

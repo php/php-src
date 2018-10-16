@@ -601,5 +601,3 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 
 	return ret;
 }
-
-

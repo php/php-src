@@ -20,5 +20,5 @@ stream_get_contents($s);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Done

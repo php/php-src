@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #36798 (Error parsing named parameters with queries containing high-ascii chars)
 --SKIPIF--
-<?php  
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -32,7 +32,7 @@ $row = $stmt->fetch(PDO::FETCH_NUM);
 var_dump( $row );
 
 ?>
---EXPECT--	
+--EXPECT--
 array(1) {
   [0]=>
   string(1) "Ã"

@@ -8,4 +8,3 @@ function busy_wait($how_long)
 
 	while ($until > microtime(TRUE));
 }
-

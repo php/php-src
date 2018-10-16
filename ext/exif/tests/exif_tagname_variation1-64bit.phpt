@@ -23,7 +23,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
   return "obj'ct";
-  } 
+  }
 }
 
 // Defining resource
@@ -67,13 +67,13 @@ $values =  array (
 
   // unset variable
   $unset_var,
-  
+
   // objects
   new sample(),
 
   // resource
   $file_handle,
- 
+
   NULL,
   null
 );
@@ -180,4 +180,3 @@ Done
 
 ?>
 ===Done===
-

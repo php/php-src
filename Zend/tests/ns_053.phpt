@@ -10,4 +10,3 @@ echo \test\ns1\NAME."\n";
 --EXPECT--
 ns_053.php
 ns_053.php
-

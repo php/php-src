@@ -603,7 +603,7 @@ class Client
             }
             if ($resp['type'] == self::END_REQUEST) {
                 $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_OK;
-                if ($resp['requestId'] == $requestId) { 
+                if ($resp['requestId'] == $requestId) {
                     break;
                 }
             }

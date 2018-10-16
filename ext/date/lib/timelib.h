@@ -322,8 +322,8 @@ typedef struct _timelib_tzdb {
 #endif
 
 #define TIMELIB_VERSION 201801
-#define TIMELIB_EXTENDED_VERSION 20180002
-#define TIMELIB_ASCII_VERSION "2018.01alpha2"
+#define TIMELIB_EXTENDED_VERSION 20180103
+#define TIMELIB_ASCII_VERSION "2018.01RC1"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
@@ -452,7 +452,7 @@ int timelib_valid_date(timelib_sll y, timelib_sll m, timelib_sll d);
  * If the **errors points to a timelib_error_container variable, warnings
  * and errors will be recorded. You are responsible for freeing the stored
  * information with timelib_error_container_dtor(). To see whether errors have
- * occured, inspect errors->errors_count. To see whether warnings have occured,
+ * occurred, inspect errors->errors_count. To see whether warnings have occurred,
  * inspect errors->warnings_count.
  *
  * The returned timelib_time* value is dynamically allocated and should be
@@ -473,7 +473,7 @@ timelib_time *timelib_strtotime(char *s, size_t len, timelib_error_container **e
  * If the **errors points to a timelib_error_container variable, warnings
  * and errors will be recorded. You are responsible for freeing the stored
  * information with timelib_error_container_dtor(). To see whether errors have
- * occured, inspect errors->errors_count. To see whether warnings have occured,
+ * occurred, inspect errors->errors_count. To see whether warnings have occurred,
  * inspect errors->warnings_count.
  *
  * The returned timelib_time* value is dynamically allocated and should be
@@ -562,7 +562,7 @@ timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_n
  * If the **errors points to a timelib_error_container variable, warnings
  * and errors will be recorded. You are responsible for freeing the stored
  * information with timelib_error_container_dtor(). To see whether errors have
- * occured, inspect errors->errors_count. To see whether warnings have occured,
+ * occurred, inspect errors->errors_count. To see whether warnings have occurred,
  * inspect errors->warnings_count.
  */
 void timelib_strtointerval(char *s, size_t len,

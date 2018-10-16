@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_TRACE_H
@@ -13,4 +12,3 @@ int fpm_trace_get_long(long addr, long *data);
 int fpm_trace_get_strz(char *buf, size_t sz, long addr);
 
 #endif
-

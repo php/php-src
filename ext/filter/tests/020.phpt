@@ -12,7 +12,7 @@ var_dump(filter_var(-1, FILTER_SANITIZE_MAGIC_QUOTES));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(36) "test\'asd\'asd\'\' asd\\\'\"asdfasdf"
 string(2) "\'"
 string(0) ""

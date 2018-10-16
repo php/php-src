@@ -11,7 +11,7 @@ if (!extension_loaded('sockets')) {
 --FILE--
 <?php
 var_dump(socket_listen(null));
-$socket = socket_create(AF_UNIX, SOCK_STREAM, 0); 
+$socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
 var_dump(socket_listen($socket));
 --EXPECTF--
 Warning: socket_listen() expects parameter 1 to be resource, null given in %s on line %d

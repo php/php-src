@@ -1,5 +1,5 @@
 --TEST--
-Test DateTimeZone::getTransitions() function : error conditions 
+Test DateTimeZone::getTransitions() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array DateTimeZone::getTransitions  ([ int $timestamp_begin  [, int $timestamp_end  ]] )
@@ -7,12 +7,12 @@ Test DateTimeZone::getTransitions() function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions: timezone_transitions_get()
  */
- 
-//Set the default time zone 
+
+//Set the default time zone
 date_default_timezone_set("GMT");
 
 $tz = new DateTimeZone("Europe/London");
- 
+
 echo "*** Testing DateTimeZone::getTransitions() : error conditions ***\n";
 
 echo "\n-- Testing DateTimeZone::getTransitions() function with more than expected no. of arguments --\n";

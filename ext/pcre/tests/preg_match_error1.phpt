@@ -2,7 +2,7 @@
 Test preg_match() function : error conditions - bad regular expressions
 --FILE--
 <?php
-/* 
+/*
  *  proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
  * Function is implemented in ext/pcre/php_pcre.c
 */
@@ -26,7 +26,6 @@ $regex_value = new stdclass(); //Object
 var_dump(preg_match($regex_value, $subject));
 ?>
 --EXPECTF--
-
 *** Testing preg_match() : error conditions ***
 
 Arg value is abcdef

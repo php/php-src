@@ -2,10 +2,10 @@
 ob_start(): ensure multiple buffer initialization with a single call using arrays is not supported on PHP6 (http://bugs.php.net/42641)
 --FILE--
 <?php
-/* 
+/*
  * proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
  * Function is implemented in main/output.c
-*/ 
+*/
 
 function f($string) {
 	static $i=0;
@@ -27,7 +27,7 @@ Class C {
 		$len = strlen($string);
 		return "C::g[call:$i; len:$len] - $string\n";
 	}
-	
+
 	function h($string) {
 		static $i=0;
 		$i++;

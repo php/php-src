@@ -19,5 +19,4 @@ while (! feof($r)) {
 }
 ?>
 --EXPECTF--
-
 Warning: fread(): Zip stream error: CRC error in %s on line %d

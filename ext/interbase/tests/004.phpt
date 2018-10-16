@@ -6,7 +6,7 @@ InterBase: BLOB test
 <?php
 
     require("interbase.inc");
-    
+
     $link = ibase_connect($test_base);
 
     ibase_query(
@@ -38,7 +38,7 @@ InterBase: BLOB test
     $row = ibase_fetch_object($q);
     $bl_h = ibase_blob_open($row->V_BLOB);
 
-	$blob = '';    
+	$blob = '';
     while($piece = ibase_blob_get($bl_h, 1 + rand() % 1024))
         $blob .= $piece;
     if($blob != $blob_str)
@@ -47,7 +47,7 @@ InterBase: BLOB test
 
     $bl_h = ibase_blob_open($link,$row->V_BLOB);
 
-	$blob = '';    
+	$blob = '';
     while($piece = ibase_blob_get($bl_h, 100 * 1024))
         $blob .= $piece;
     if($blob != $blob_str)
@@ -108,7 +108,7 @@ InterBase: BLOB test
     $row = ibase_fetch_object($q);
 	ibase_commit();
 	ibase_close();
-	    
+
     $link = ibase_connect($test_base);
     ibase_blob_echo($link, $row->V_BLOB);
     ibase_free_result($q);

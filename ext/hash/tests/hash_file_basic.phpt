@@ -1,5 +1,5 @@
 --TEST--
-Hash: hash_file() function : basic functionality 
+Hash: hash_file() function : basic functionality
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
@@ -7,7 +7,7 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 /* Prototype  : string hash_file(string algo, string filename[, bool raw_output = false])
  * Description: Generate a hash of a given file
  * Source code: ext/hash/hash.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing hash_file() : basic functionality ***\n";

@@ -3,8 +3,8 @@ Test checkdate() function : usage variation - Passing unexpected values to secon
 --FILE--
 <?php
 /* Prototype  : bool checkdate  ( int $month  , int $day  , int $year  )
- * Description: Checks the validity of the date formed by the arguments. 
- *              A date is considered valid if each parameter is properly defined. 
+ * Description: Checks the validity of the date formed by the arguments.
+ *              A date is considered valid if each parameter is properly defined.
  * Source code: ext/date/php_date.c
  */
 
@@ -80,8 +80,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 
@@ -199,4 +199,3 @@ bool(false)
 Warning: checkdate() expects parameter 2 to be int, resource given in %s on line %d
 bool(false)
 ===DONE===
-

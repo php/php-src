@@ -7,7 +7,7 @@ class C {
 		global $a;
 		return $a;
 	}
-	
+
 	static function &sreturnReference() {
 		global $a;
 		return $a;
@@ -17,7 +17,7 @@ class C {
 		global $a;
 		return $a;
 	}
-	
+
 	function &returnReference() {
 		global $a;
 		return $a;

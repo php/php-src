@@ -17,5 +17,3 @@ if (PHP_ZLIB == "yes") {
 		PHP_ZLIB = "no"
 	}
 }
-
-

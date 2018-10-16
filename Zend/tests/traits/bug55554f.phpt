@@ -14,7 +14,7 @@ trait TNew {
 
 class ReportCollision {
     use TNew;
-	
+
 	public function ReportCollision() {
 	    echo "ReportCollision executed\n";
 	}
@@ -23,7 +23,5 @@ class ReportCollision {
 
 echo "ReportCollision: ";
 $o = new ReportCollision;
-
-
 --EXPECTF--
 Fatal error: ReportCollision has colliding constructor definitions coming from traits in %s on line %d

@@ -25,4 +25,3 @@ GenerateError2("Test2");
 #0  userErrorHandler(8, Undefined variable: b, %sbug29896.php, 11, Array ([A1] => Test1)) called at [%sbug29896.php:11]
 #1  GenerateError1(Test1) called at [%sbug29896.php:16]
 #2  GenerateError2(Test2) called at [%sbug29896.php:19]
-

@@ -1,6 +1,5 @@
 --TEST--
 Closure inside method returned null, expected array
-
 --FILE--
 <?php
 class foo {
@@ -14,7 +13,6 @@ class foo {
 
 $baz = new foo();
 var_dump($func=$baz->bar(), $func());
-
 --EXPECTF--
 Fatal error: Uncaught TypeError: Return value of foo::{closure}() must be of the type array, null returned in %s:%d
 Stack trace:

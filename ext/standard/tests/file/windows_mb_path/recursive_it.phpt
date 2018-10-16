@@ -62,4 +62,3 @@ do {
 string(%d) "%shello.txt"
 bool(false)
 ==DONE==
-

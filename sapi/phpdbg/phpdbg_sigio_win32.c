@@ -109,4 +109,3 @@ sigio_watcher_stop(void)
 	PHPDBG_G(swd).fd = -1;
 	PHPDBG_G(sigio_watcher_thread) = INVALID_HANDLE_VALUE;
 }
-

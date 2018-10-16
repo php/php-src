@@ -16,13 +16,13 @@ require dirname(__FILE__).'/file.inc';
 
 /* creating directory */
 $file_path = dirname(__FILE__);
-$dirname = "$file_path/rename_variation3_dir"; 
+$dirname = "$file_path/rename_variation3_dir";
 mkdir($dirname);
 
 /* test rename() by trying to rename an existing file/dir to the same name
   and one another */
 
-$filename = "$file_path/rename_variation3.tmp"; 
+$filename = "$file_path/rename_variation3.tmp";
 $fp = fopen($filename, "w");
 if (!$fp) {
 	die("Cannot create $filename\n");
@@ -81,4 +81,3 @@ bool(true)
 bool(true)
 bool(false)
 Done
-

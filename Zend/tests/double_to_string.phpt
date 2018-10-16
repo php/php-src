@@ -32,7 +32,7 @@ foreach ($doubles as $d) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(7) "2.9E+17"
 string(7) "2.9E+14"
 string(%d) "2%s"

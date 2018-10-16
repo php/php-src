@@ -1,18 +1,18 @@
 --TEST--
 Test xml_parser_set_option() function : usage variations
 --SKIPIF--
-<?php 
+<?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
- * Description: Set options in an XML parser 
+ * Description: Set options in an XML parser
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_parser_set_option() : usage variations ***\n";
@@ -213,4 +213,3 @@ Arg value
 Warning: xml_parser_set_option(): Unknown option in %s on line %d
 bool(false)
 Done
-

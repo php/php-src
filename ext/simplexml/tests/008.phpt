@@ -1,9 +1,9 @@
 --TEST--
-SimpleXML: XPath 
+SimpleXML: XPath
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>
@@ -25,9 +25,9 @@ EOF;
 $sxe = simplexml_load_string($xml);
 
 var_dump($sxe->xpath("elem1/elem2/elem3/elem4"));
-//valid expression 
+//valid expression
 var_dump($sxe->xpath("***"));
-//invalid expression 
+//invalid expression
 var_dump($sxe->xpath("**"));
 ?>
 --EXPECTF--

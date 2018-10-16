@@ -11,8 +11,8 @@ HOW TO USE IT
 
   and everything you need will be placed in directory ext/extension_name.
 
-  If you don't need to test the existence of any external header files, 
-  libraries or functions in them, the extension is ready to be compiled in 
+  If you don't need to test the existence of any external header files,
+  libraries or functions in them, the extension is ready to be compiled in
   PHP. To compile the extension, run the following:
 
     ./buildconf; ./configure --enable-extension_name; make
@@ -24,7 +24,7 @@ HOW TO USE IT
 
 SOURCE AND HEADER FILE NAME
 
-  The ext_skel.php script generates 'extension_name.c' and 'php_extension_name.h' 
+  The ext_skel.php script generates 'extension_name.c' and 'php_extension_name.h'
   as the main source and header files. Keep these names.
 
   extension functions (User functions) must be named
@@ -41,4 +41,3 @@ SOURCE AND HEADER FILE NAME
 OTHER OPTIONS
 
   Run php ext_skel.php --help to see the available options.
-

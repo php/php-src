@@ -8,7 +8,7 @@ if (!extension_loaded('zlib')) die ('skip zlib extension not available in this b
 <?php
 
 
-$use_include_path = 
+$use_include_path =
 
 
 $variation = array(
@@ -25,7 +25,6 @@ foreach ( $variation as $var ) {
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: readgzfile() expects parameter 2 to be int, array given in %s on line %d
 NULL
 

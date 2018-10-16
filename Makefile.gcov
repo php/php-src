@@ -1,4 +1,3 @@
-
 #
 # LCOV
 #
@@ -62,7 +61,7 @@ php_lcov.info: lcov-test
 			rm -rf lcov_data/$$dir ; \
 		fi; \
 	done
-	@echo 
+	@echo
 	@echo "Generating $@"
 	@$(LTP) --directory lcov_data/ --capture --base-directory=lcov_data --output-file $@
 

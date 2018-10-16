@@ -128,7 +128,7 @@ How to create your PHP, PHP Documentation or PECL patch
 -------------------------------------------------------
 PHP and most PECL packages use Git for revision control. Some PECL
 packages use Subversion (SVN) Read http://www.php.net/git.php for help
-on using Git to get and build PHP source code.  We recommend to look 
+on using Git to get and build PHP source code.  We recommend to look
 at our workflow on https://wiki.php.net/vcs/gitworkflow and our FAQ
 https://wiki.php.net/vcs/gitfaq.
 

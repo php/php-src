@@ -1,5 +1,7 @@
 --TEST--
 Bug #75232: print_r of DateTime creating side-effect
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 

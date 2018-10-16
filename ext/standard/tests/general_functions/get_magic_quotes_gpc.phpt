@@ -9,9 +9,9 @@ Test get_magic_quotes_gpc() function
 echo "Simple testcase for get_magic_quotes_gpc() function\n";
 var_dump(get_magic_quotes_gpc());
 
-echo "\n-- Error cases --\n"; 
+echo "\n-- Error cases --\n";
 // no checks on number of args
-var_dump(get_magic_quotes_gpc(true)); 
+var_dump(get_magic_quotes_gpc(true));
 
 ?>
 ===DONE===

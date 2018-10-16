@@ -43,7 +43,7 @@ var_dump(count(get_extension_funcs("zend")));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: get_resource_type() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 

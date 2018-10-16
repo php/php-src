@@ -9,7 +9,7 @@ require 'ipv6_skipif.inc';
 
 if (!defined('IPPROTO_IPV6'))
 	die('skip IPv6 not available.');
-if (substr(PHP_OS, 0, 3) == 'WIN') 
+if (substr(PHP_OS, 0, 3) == 'WIN')
 	die('skip Not for the Windows!');
 /* Windows supports IPV6_RECVTCLASS and is able to receive the tclass via
  * WSARecvMsg (though only the top 6 bits seem to reported), but WSASendMsg
@@ -60,7 +60,6 @@ $data = [
 ];
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
 print_r($data);
-
 --EXPECTF--
 creating send socket
 resource(5) of type (Socket)

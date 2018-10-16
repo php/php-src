@@ -2,7 +2,7 @@
 Test preg_match() function : error conditions - wrong arg types
 --FILE--
 <?php
-/* 
+/*
  *  proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
  * Function is implemented in ext/pcre/php_pcre.c
 */
@@ -22,7 +22,6 @@ var_dump(preg_match($regex, $value));
 echo "Done";
 ?>
 --EXPECTF--
-
 *** Testing preg_match() : error conditions ***
 
 Arg value is: this is a string

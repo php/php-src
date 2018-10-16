@@ -8,7 +8,7 @@ Test nl2br() function : usage variations - unexpected values for 'str' argument
 */
 
 /*
-* Test nl2br() function by passing different types of values other than 
+* Test nl2br() function by passing different types of values other than
 *   expected type for 'str' argument
 */
 
@@ -74,7 +74,7 @@ $values = array(
   @$unset_var,
 );
 
-// loop through $values array to test nl2br() function with each element 
+// loop through $values array to test nl2br() function with each element
 $count = 1;
 foreach($values as $value) {
   echo "-- Iteration $count --\n";

@@ -194,6 +194,7 @@ static void do_adjust_for_weekday(timelib_time* time)
 
 void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 {
+	do_range_limit_fraction(&rt->us, &rt->s);
 	do_range_limit(0, 60, 60, &rt->s, &rt->i);
 	do_range_limit(0, 60, 60, &rt->i, &rt->h);
 	do_range_limit(0, 24, 24, &rt->h, &rt->d);
