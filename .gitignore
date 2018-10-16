@@ -48,10 +48,6 @@ config.log
 config.nice
 config.status
 config_vars.mk
-configuration-parser.c
-configuration-parser.h
-configuration-parser.output
-configuration-scanner.c
 configure
 conftest
 conftest.c
