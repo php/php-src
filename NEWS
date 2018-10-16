@@ -28,6 +28,7 @@ PHP                                                                        NEWS
 
 - XML:
   . Fixed bug #30875 (xml_parse_into_struct() does not resolve entities). (cmb)
+  . Add support for getting SKIP_TAGSTART and SKIP_WHITE options. (cmb)
 
 11 Oct 2018, PHP 7.1.23
 
