@@ -9,4 +9,4 @@ abc
 0abc
 x
 --EXPECTF_EXTERNAL--
-test012.txt
+test012.data

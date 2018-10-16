@@ -41,7 +41,7 @@ function test($name, $lc, $lp)
 	}
 }
 
-test(dirname(__FILE__) . '/' . 'fileobject_001a.txt', 't', substr(dirname(__FILE__),-1));
+test(dirname(__FILE__) . '/' . 'fileobject_001a.data', 'a', substr(dirname(__FILE__),-1));
 test(dirname(__FILE__) . '/', substr(dirname(__FILE__),-1), 'l');
 test(dirname(__FILE__),       substr(dirname(__FILE__),-1), 'l');
 
@@ -54,26 +54,26 @@ object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
   string(%d) "%s"
   ["fileName":"SplFileInfo":private]=>
-  string(%d) "fileobject_001a.txt"
+  string(%d) "fileobject_001a.data"
 }
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
   string(%d) "%s"
   ["fileName":"SplFileInfo":private]=>
-  string(%d) "fileobject_001a.txt"
+  string(%d) "fileobject_001a.data"
 }
 bool(false)
 bool(true)
 bool(true)
-%s(%d) "%sfileobject_001a.txt"
-string(%d) "%sfileobject_001a.txt"
+%s(%d) "%sfileobject_001a.data"
+string(%d) "%sfileobject_001a.data"
 bool(true)
-string(19) "fileobject_001a.txt"
+string(20) "fileobject_001a.data"
 bool(true)
 string(%d) "%stests"
 bool(true)
-string(%d) "%sfileobject_001a.txt"
-string(19) "fileobject_001a.txt"
+string(%d) "%sfileobject_001a.data"
+string(20) "fileobject_001a.data"
 string(%d) "%stests"
 ===1===
 object(SplFileInfo)#%d (2) {

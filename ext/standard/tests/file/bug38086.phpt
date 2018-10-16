@@ -4,7 +4,7 @@ Bug #38086 (stream_copy_to_stream() returns 0 when maxlen is bigger than the act
 <?php
 define('WIN', substr(PHP_OS, 0, 3) == 'WIN');
 
-$initial_file = dirname(__FILE__).'/bug38086.txt';
+$initial_file = dirname(__FILE__).'/bug38086.data';
 $new_file = dirname(__FILE__).'/bug38086_1.txt';
 
 $src = fopen($initial_file, 'r');

@@ -24,14 +24,14 @@ function test($name)
 	var_dump($o->eof());
 }
 
-test('fileobject_001a.txt');
-test('fileobject_001b.txt');
+test('fileobject_001a.data');
+test('fileobject_001b.data');
 
 ?>
 ===DONE===
 <?php exit(0); ?>
 --EXPECT--
-===fileobject_001a.txt===
+===fileobject_001a.data===
 int(0)
 int(0)
 string(1) "0"
@@ -79,7 +79,7 @@ bool(false)
 bool(true)
 int(6)
 bool(true)
-===fileobject_001b.txt===
+===fileobject_001b.data===
 int(0)
 int(0)
 string(1) "0"
