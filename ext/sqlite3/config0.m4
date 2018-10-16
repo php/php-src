@@ -2,8 +2,8 @@ dnl config.m4 for extension sqlite3
 dnl vim:et:ts=2:sw=2
 
 PHP_ARG_WITH(sqlite3, whether to enable the SQLite3 extension,
-[  --without-sqlite3[=DIR]   Do not include SQLite3 support. DIR is the prefix to
-                          SQLite3 installation directory.], yes)
+[  --with-sqlite3[=DIR]   Include SQLite3 support. DIR is the prefix to
+                          SQLite3 installation directory.])
 
 if test $PHP_SQLITE3 != "no"; then
   sqlite3_extra_sources=""
