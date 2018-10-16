@@ -13,7 +13,7 @@ if test ! -f Makefile.in || test ! -f config.m4; then
 fi
 
 rm -rf modules *.lo *.o *.la config.status config.cache \
-config.log libtool php_config.h config_vars.mk Makefile
+config.log libtool php_config.h Makefile
 
 myname=`basename \`pwd\``
 cd ..

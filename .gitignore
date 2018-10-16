@@ -46,7 +46,6 @@ config.h.in
 config.log
 config.nice
 config.status
-config_vars.mk
 configure
 conftest
 conftest.c
