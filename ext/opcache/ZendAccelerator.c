@@ -3738,6 +3738,7 @@ static int accel_finish_startup(void)
 		int (*orig_send_headers)(sapi_headers_struct *sapi_headers TSRMLS_DC) = sapi_module.send_headers;
 		void (*orig_send_header)(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)= sapi_module.send_header;
 		char *(*orig_getenv)(char *name, size_t name_len TSRMLS_DC) = sapi_module.getenv;
+		zend_bool old_reset_signals = SIGG(reset);
 
 		sapi_module.activate = NULL;
 		sapi_module.deactivate = NULL;
@@ -3752,6 +3753,7 @@ static int accel_finish_startup(void)
 			zend_interned_strings_set_permanent_storage_copy_handlers(NULL, accel_use_permanent_interned_strings);
 		}
 
+		SIGG(reset) = 0;
 		if (php_request_startup() == SUCCESS) {
 
 			/* don't send headers */
@@ -3778,6 +3780,7 @@ static int accel_finish_startup(void)
 		} else {
 			ret = FAILURE;
 		}
+		SIGG(reset) = old_reset_signals;
 
 		sapi_module.activate = orig_activate;
 		sapi_module.deactivate = orig_deactivate;
