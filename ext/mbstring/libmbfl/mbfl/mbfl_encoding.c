@@ -119,22 +119,8 @@
 #endif
 
 
-static const char *mbfl_encoding_auto_aliases[] = {"unknown", NULL};
-
-static const mbfl_encoding mbfl_encoding_auto = {
-	mbfl_no_encoding_auto,
-	"auto",
-	NULL,
-	(const char *(*)[])&mbfl_encoding_auto_aliases,
-	NULL,
-	0,
-	NULL,
-	NULL
-};
-
 static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_pass,
-	&mbfl_encoding_auto,
 	&mbfl_encoding_wchar,
 	&mbfl_encoding_byte2be,
 	&mbfl_encoding_byte2le,

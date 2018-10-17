@@ -38,7 +38,7 @@ echo "== INVALID PARAMETER ==\n";
 var_dump(mb_preferred_mime_name('BAD_NAME'));
 
 // No preferred name
-var_dump(mb_preferred_mime_name('auto'));
+var_dump(mb_preferred_mime_name('pass'));
 ?>
 --EXPECTF--
 Shift_JIS
@@ -55,5 +55,5 @@ UCS-4
 Warning: mb_preferred_mime_name(): Unknown encoding "BAD_NAME" in %s on line %d
 bool(false)
 
-Warning: mb_preferred_mime_name(): No MIME preferred name corresponding to "auto" in %s on line %d
+Warning: mb_preferred_mime_name(): No MIME preferred name corresponding to "pass" in %s on line %d
 bool(false)
