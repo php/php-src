@@ -94,7 +94,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	}
 	if (ZEND_MAP_PTR(parent->iterator_funcs_ptr)) {
 		/* Must be initialized through iface->interface_gets_implemented() */
-		ZEND_ASSERT(ZEND_MAP_PTR(ce->iterator_funcs_ptr) && ZEND_MAP_PTR_GET(ce->iterator_funcs_ptr));
+		ZEND_ASSERT(ZEND_MAP_PTR_GET(ce->iterator_funcs_ptr));
 	}
 	if (EXPECTED(!ce->__get)) {
 		ce->__get = parent->__get;
@@ -885,6 +885,10 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			dst = end + parent_ce->default_static_members_count;
 			ce->default_static_members_table = end;
 		}
+		if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
+			ZEND_ASSERT(parent_ce->type == ZEND_INTERNAL_CLASS || (parent_ce->ce_flags & ZEND_ACC_IMMUTABLE));
+			zend_class_init_statics(parent_ce);
+		}
 		if (UNEXPECTED(parent_ce->type != ce->type)) {
 			/* User class extends internal */
 			if (UNEXPECTED(zend_update_class_constants(parent_ce) != SUCCESS)) {
@@ -901,10 +905,6 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 				}
 			} while (dst != end);
 		} else if (ce->type == ZEND_USER_CLASS) {
-			if (UNEXPECTED(CE_STATIC_MEMBERS(parent_ce) == NULL)) {
-				ZEND_ASSERT(parent_ce->type == ZEND_INTERNAL_CLASS || (parent_ce->ce_flags & ZEND_ACC_IMMUTABLE));
-				zend_class_init_statics(parent_ce);
-			}
 			src = CE_STATIC_MEMBERS(parent_ce) + parent_ce->default_static_members_count;
 			do {
 				dst--;

@@ -668,7 +668,7 @@ struct _zend_execute_data {
 	ZEND_MAP_PTR_GET((op_array)->run_time_cache)
 
 #define ZEND_OP_ARRAY_EXTENSION(op_array, handle) \
-	RUN_TIME_CACHE(op_array)[handle]
+	((void**)RUN_TIME_CACHE(op_array))[handle]
 
 #if ZEND_EX_USE_RUN_TIME_CACHE
 

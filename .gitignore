@@ -38,8 +38,6 @@ _libs
 acconfig.h
 aclocal.m4
 autom4te.cache
-bsd_converted
-buildconf.stamp
 buildmk.stamp
 confdefs.h
 config.h
@@ -48,11 +46,6 @@ config.h.in
 config.log
 config.nice
 config.status
-config_vars.mk
-configuration-parser.c
-configuration-parser.h
-configuration-parser.output
-configuration-scanner.c
 configure
 conftest
 conftest.c
@@ -172,8 +165,6 @@ ext/phar/phar.phar
 ext/phar/phar.1
 ext/phar/phar.phar.1
 ext/phar/phar.php
-ext/spl/examples/.htaccess
-ext/spl/examples/*.phps
 ext/sqlite3/tests/phpsql*
 
 # ------------------------------------------------------------------------------ Windows
@@ -205,5 +196,6 @@ ext/sqlite3/tests/phpsql*
 
 # Special cases to invert previous ignore rules
 !ext/fileinfo/libmagic.patch
+!ext/fileinfo/magicdata.patch
 !ext/mbstring/oniguruma.patch
 !ext/pcre/pcre2lib/config.h

@@ -1139,6 +1139,9 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	size_t mname_len;
 	zend_op_array *func;
 	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
+	/* We use non-NULL value to avoid useless run_time_cache allocation.
+	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
+	 */
 	static const void *dummy = (void*)(intptr_t)2;
 
 	ZEND_ASSERT(fbc);
