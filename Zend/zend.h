@@ -148,7 +148,7 @@ struct _zend_class_entry {
 	zend_function *unserialize_func;
 
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
-	ZEND_MAP_PTR_DEF(zend_class_iterator_funcs *, iterator_funcs_ptr);
+	zend_class_iterator_funcs *iterator_funcs_ptr;
 
 	/* handlers */
 	union {

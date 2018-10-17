@@ -757,14 +757,17 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_PTR(ce->__callstatic);
 	SERIALIZE_PTR(ce->__debugInfo);
 
-	ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
-	if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
-		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-			ZEND_MAP_PTR_INIT(ce->iterator_funcs_ptr, (void*)(uintptr_t)1);
-		} else {
-			SERIALIZE_PTR(ZEND_MAP_PTR(ce->iterator_funcs_ptr));
-		}
+	if (ce->iterator_funcs_ptr) {
+		SERIALIZE_PTR(ce->iterator_funcs_ptr->zf_new_iterator);
+		SERIALIZE_PTR(ce->iterator_funcs_ptr->zf_rewind);
+		SERIALIZE_PTR(ce->iterator_funcs_ptr->zf_valid);
+		SERIALIZE_PTR(ce->iterator_funcs_ptr->zf_key);
+		SERIALIZE_PTR(ce->iterator_funcs_ptr->zf_current);
+		SERIALIZE_PTR(ce->iterator_funcs_ptr->zf_next);
+		SERIALIZE_PTR(ce->iterator_funcs_ptr);
 	}
+
+	ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 }
 
 static void zend_file_cache_serialize(zend_persistent_script   *script,
@@ -1413,18 +1416,20 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		ce->unserialize = zend_class_unserialize_deny;
 	}
 
-	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-		if (ce->default_static_members_table) {
-			ZEND_MAP_PTR_NEW(ce->static_members_table);
-		} else {
-			ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
-		}
-		if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
-			ZEND_MAP_PTR_NEW(ce->iterator_funcs_ptr);
-		}
+	if (ce->iterator_funcs_ptr) {
+		UNSERIALIZE_PTR(ce->iterator_funcs_ptr);
+		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_new_iterator);
+		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_rewind);
+		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_valid);
+		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_key);
+		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_current);
+		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_next);
+	}
+
+	if (ce->ce_flags & ZEND_ACC_IMMUTABLE && ce->default_static_members_table) {
+		ZEND_MAP_PTR_NEW(ce->static_members_table);
 	} else {
 		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
-		UNSERIALIZE_PTR(ZEND_MAP_PTR(ce->iterator_funcs_ptr));
 	}
 }
 

@@ -27,6 +27,7 @@
 #include "zend_vm.h"
 #include "zend_constants.h"
 #include "zend_operators.h"
+#include "zend_interfaces.h"
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 #define zend_set_str_gc_flags(str) do { \
@@ -905,14 +906,8 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 
-		if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
-			if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-				ZEND_MAP_PTR_NEW(ce->iterator_funcs_ptr);
-			} else {
-				ZEND_MAP_PTR_INIT(ce->iterator_funcs_ptr, ZCG(arena_mem));
-				ZCG(arena_mem) = (void*)(((char*)ZCG(arena_mem)) + ZEND_ALIGNED_SIZE(sizeof(void*)));
-				ZEND_MAP_PTR_SET(ce->iterator_funcs_ptr, zend_shared_memdup_arena(ZEND_MAP_PTR_GET(ce->iterator_funcs_ptr), sizeof(zend_class_iterator_funcs)));
-			}
+		if (ce->iterator_funcs_ptr) {
+			ce->iterator_funcs_ptr = zend_shared_memdup(ce->iterator_funcs_ptr, sizeof(zend_class_iterator_funcs));
 		}
 	}
 }
@@ -967,6 +962,20 @@ static int zend_update_parent_ce(zval *zv)
 					}
 				}
 			}
+		}
+
+		if (ce->iterator_funcs_ptr) {
+			memset(ce->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
+			if (instanceof_function_ex(ce, zend_ce_aggregate, 1)) {
+				ce->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&ce->function_table, "getiterator", sizeof("getiterator") - 1);
+			}
+			if (instanceof_function_ex(ce, zend_ce_iterator, 1)) {
+				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", sizeof("rewind") - 1);
+				ce->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&ce->function_table, "valid", sizeof("valid") - 1);
+				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", sizeof("key") - 1);
+				ce->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&ce->function_table, "current", sizeof("current") - 1);
+				ce->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&ce->function_table, "next", sizeof("next") - 1);
+        	}
 		}
 	}
 

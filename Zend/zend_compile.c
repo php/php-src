@@ -1638,7 +1638,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->__tostring = NULL;
 		ce->create_object = NULL;
 		ce->get_iterator = NULL;
-		ZEND_MAP_PTR_INIT(ce->iterator_funcs_ptr, NULL);
+		ce->iterator_funcs_ptr = NULL;
 		ce->get_static_method = NULL;
 		ce->parent = NULL;
 		ce->parent_name = NULL;

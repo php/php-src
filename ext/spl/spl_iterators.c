@@ -494,8 +494,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "o|lzl", &iterator, &flags, &user_caching_it_flags, &mode) == SUCCESS) {
 				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
-					zend_class_iterator_funcs *iterator_funcs_ptr = ZEND_MAP_PTR_GET(Z_OBJCE_P(iterator)->iterator_funcs_ptr);
-					zend_call_method_with_0_params(iterator, Z_OBJCE_P(iterator), &iterator_funcs_ptr->zf_new_iterator, "getiterator", &aggregate_retval);
+					zend_call_method_with_0_params(iterator, Z_OBJCE_P(iterator), &Z_OBJCE_P(iterator)->iterator_funcs_ptr->zf_new_iterator, "getiterator", &aggregate_retval);
 					iterator = &aggregate_retval;
 				} else {
 					Z_ADDREF_P(iterator);
@@ -523,8 +522,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "o|ll", &iterator, &mode, &flags) == SUCCESS) {
 				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
-					zend_class_iterator_funcs *iterator_funcs_ptr = ZEND_MAP_PTR_GET(Z_OBJCE_P(iterator)->iterator_funcs_ptr);
-					zend_call_method_with_0_params(iterator, Z_OBJCE_P(iterator), &iterator_funcs_ptr->zf_new_iterator, "getiterator", &aggregate_retval);
+					zend_call_method_with_0_params(iterator, Z_OBJCE_P(iterator), &Z_OBJCE_P(iterator)->iterator_funcs_ptr->zf_new_iterator, "getiterator", &aggregate_retval);
 					iterator = &aggregate_retval;
 				} else {
 					Z_ADDREF_P(iterator);
@@ -1348,6 +1346,19 @@ static const zend_function_entry spl_funcs_RecursiveTreeIterator[] = {
 	PHP_FE_END
 };
 
+#if MBO_0
+static int spl_dual_it_gets_implemented(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	class_type->iterator_funcs_ptr->zf_valid = NULL;
+	class_type->iterator_funcs_ptr->zf_current = NULL;
+	class_type->iterator_funcs_ptr->zf_key = NULL;
+	class_type->iterator_funcs_ptr->zf_next = NULL;
+	class_type->iterator_funcs_ptr->zf_rewind = NULL;
+
+	return SUCCESS;
+}
+#endif
+
 static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *method, const zval *key)
 {
 	zend_function        *function_handler;
@@ -1500,8 +1511,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 					ce = ce_cast;
 				}
 				if (instanceof_function(ce, zend_ce_aggregate)) {
-					zend_class_iterator_funcs *iterator_funcs_ptr = ZEND_MAP_PTR_GET(ce->iterator_funcs_ptr);
-					zend_call_method_with_0_params(zobject, ce, &iterator_funcs_ptr->zf_new_iterator, "getiterator", &retval);
+					zend_call_method_with_0_params(zobject, ce, &ce->iterator_funcs_ptr->zf_new_iterator, "getiterator", &retval);
 					if (EG(exception)) {
 						zval_ptr_dtor(&retval);
 						return NULL;

@@ -128,9 +128,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      Few related data structures were changed to allow addressing mutable data
      structures from immutable ones. This access is implemented through
      ZEND_MAP_PTR... abstraction macros and, basically, uses additional level of
-     indirection. op_array->run_time_cache, op_array->static_variables_ptr,
-     class_entry->static_members_table and class_entry->iterator_funcs_ptr now
-     have to be accessed through ZEND_MAP_PTR... macros.
+     indirection. op_array->run_time_cache, op_array->static_variables_ptr and
+     class_entry->static_members_table now have to be accessed through
+     ZEND_MAP_PTR... macros.
      It's also not allowed to change op_array->reserved[] handles of immutable
      op_arrays. Instead, now you have to reserve op_array handle using
      zend_get_op_array_extension_handle() during MINIT and access its value

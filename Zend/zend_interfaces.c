@@ -119,36 +119,12 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 }
 /* }}} */
 
-typedef struct _zend_class_iterator_funcs_ptr {
-	zend_class_iterator_funcs *ptr;
-	zend_class_iterator_funcs data;
-} zend_class_iterator_funcs_ptr;
-
 /* iterator interface, c-level functions used by engine */
-static zend_never_inline zend_class_iterator_funcs* zend_alloc_iterator_funcs_ptr(zend_class_entry *ce) /* {{{ */
-{
-	zend_class_iterator_funcs *ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
-	memset(ptr, 0, sizeof(zend_class_iterator_funcs));
-	ZEND_MAP_PTR_SET(ce->iterator_funcs_ptr, ptr);
-	return ptr;
-}
-/* }}} */
-
-static zend_always_inline zend_class_iterator_funcs* zend_get_iterator_funcs_ptr(zend_class_entry *ce) /* {{{ */
-{
-	if (ZEND_MAP_PTR_GET(ce->iterator_funcs_ptr)) {
-		return ZEND_MAP_PTR_GET(ce->iterator_funcs_ptr);
-	} else {
-		return zend_alloc_iterator_funcs_ptr(ce);
-	}
-}
-/* }}} */
 
 /* {{{ zend_user_it_new_iterator */
 ZEND_API void zend_user_it_new_iterator(zend_class_entry *ce, zval *object, zval *retval)
 {
-	zend_class_iterator_funcs *iterator_funcs_ptr = zend_get_iterator_funcs_ptr(ce);
-	zend_call_method_with_0_params(object, ce, &iterator_funcs_ptr->zf_new_iterator, "getiterator", retval);
+	zend_call_method_with_0_params(object, ce, &ce->iterator_funcs_ptr->zf_new_iterator, "getiterator", retval);
 }
 /* }}} */
 
@@ -183,10 +159,8 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
 		zval *object = &iter->it.data;
 		zval more;
 		int result;
-		zend_class_entry *ce = iter->ce;
-		zend_class_iterator_funcs *iterator_funcs_ptr = zend_get_iterator_funcs_ptr(ce);
 
-		zend_call_method_with_0_params(object, ce, &iterator_funcs_ptr->zf_valid, "valid", &more);
+		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_valid, "valid", &more);
 		result = i_zend_is_true(&more);
 		zval_ptr_dtor(&more);
 		return result ? SUCCESS : FAILURE;
@@ -202,10 +176,7 @@ ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter)
 	zval *object = &iter->it.data;
 
 	if (Z_ISUNDEF(iter->value)) {
-		zend_class_entry *ce = iter->ce;
-		zend_class_iterator_funcs *iterator_funcs_ptr = zend_get_iterator_funcs_ptr(ce);
-
-		zend_call_method_with_0_params(object, ce, &iterator_funcs_ptr->zf_current, "current", &iter->value);
+		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_current, "current", &iter->value);
 	}
 	return &iter->value;
 }
@@ -217,10 +188,8 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = &iter->it.data;
 	zval retval;
-	zend_class_entry *ce = iter->ce;
-	zend_class_iterator_funcs *iterator_funcs_ptr = zend_get_iterator_funcs_ptr(ce);
 
-	zend_call_method_with_0_params(object, ce, &iterator_funcs_ptr->zf_key, "key", &retval);
+	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_key, "key", &retval);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		ZVAL_ZVAL(key, &retval, 1, 1);
@@ -239,11 +208,9 @@ ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = &iter->it.data;
-	zend_class_entry *ce = iter->ce;
-	zend_class_iterator_funcs *iterator_funcs_ptr = zend_get_iterator_funcs_ptr(ce);
 
 	zend_user_it_invalidate_current(_iter);
-	zend_call_method_with_0_params(object, ce, &iterator_funcs_ptr->zf_next, "next", NULL);
+	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_next, "next", NULL);
 }
 /* }}} */
 
@@ -252,11 +219,9 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = &iter->it.data;
-	zend_class_entry *ce = iter->ce;
-	zend_class_iterator_funcs *iterator_funcs_ptr = zend_get_iterator_funcs_ptr(ce);
 
 	zend_user_it_invalidate_current(_iter);
-	zend_call_method_with_0_params(object, ce, &iterator_funcs_ptr->zf_rewind, "rewind", NULL);
+	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_rewind, "rewind", NULL);
 }
 /* }}} */
 
@@ -347,7 +312,6 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 {
 	uint32_t i;
 	int t = -1;
-	zend_class_iterator_funcs *iterator_funcs_ptr;
 
 	if (class_type->get_iterator) {
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
@@ -376,31 +340,17 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 		}
 	}
 	class_type->get_iterator = zend_user_it_get_new_iterator;
-	if (ZEND_MAP_PTR(class_type->iterator_funcs_ptr)) {
-		iterator_funcs_ptr = ZEND_MAP_PTR_GET(class_type->iterator_funcs_ptr);
-		ZEND_ASSERT(iterator_funcs_ptr);
-		if (class_type->type == ZEND_USER_CLASS) {
-			iterator_funcs_ptr->zf_new_iterator = NULL;
-			return SUCCESS;
-		}
+	if (class_type->iterator_funcs_ptr != NULL) {
+		class_type->iterator_funcs_ptr->zf_new_iterator = NULL;
 	} else if (class_type->type == ZEND_INTERNAL_CLASS) {
-		/* We can use pointer even in ZTS mode, because this structure is read-only */
-		zend_class_iterator_funcs_ptr *iterator_funcs_ptr_ptr =
-			calloc(1, sizeof(zend_class_iterator_funcs_ptr));
-		ZEND_MAP_PTR_INIT(class_type->iterator_funcs_ptr, &iterator_funcs_ptr_ptr->ptr);
-		iterator_funcs_ptr = &iterator_funcs_ptr_ptr->data;
-		iterator_funcs_ptr_ptr->ptr = iterator_funcs_ptr;
+		class_type->iterator_funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
 	} else {
-		zend_class_iterator_funcs_ptr *iterator_funcs_ptr_ptr =
-			zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs_ptr));
-		iterator_funcs_ptr_ptr->ptr = &iterator_funcs_ptr_ptr->data;
-		ZEND_MAP_PTR_INIT(class_type->iterator_funcs_ptr, &iterator_funcs_ptr_ptr->ptr);
-		iterator_funcs_ptr = &iterator_funcs_ptr_ptr->data;
-		iterator_funcs_ptr_ptr->ptr = iterator_funcs_ptr;
-		memset(iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-		return SUCCESS;
+		class_type->iterator_funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+		memset(class_type->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
 	}
-	iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&class_type->function_table, "getiterator", sizeof("getiterator") - 1);
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		class_type->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&class_type->function_table, "getiterator", sizeof("getiterator") - 1);
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -408,8 +358,6 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 /* {{{ zend_implement_iterator */
 static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
 {
-	zend_class_iterator_funcs *iterator_funcs_ptr;
-
 	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_iterator) {
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
 			/* inheritance ensures the class has the necessary userland methods */
@@ -426,39 +374,25 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		}
 	}
 	class_type->get_iterator = zend_user_it_get_iterator;
-	if (ZEND_MAP_PTR(class_type->iterator_funcs_ptr)) {
-		iterator_funcs_ptr = ZEND_MAP_PTR_GET(class_type->iterator_funcs_ptr);
-		ZEND_ASSERT(iterator_funcs_ptr);
-		if (class_type->type == ZEND_USER_CLASS) {
-			iterator_funcs_ptr->zf_valid = NULL;
-			iterator_funcs_ptr->zf_current = NULL;
-			iterator_funcs_ptr->zf_key = NULL;
-			iterator_funcs_ptr->zf_next = NULL;
-			iterator_funcs_ptr->zf_rewind = NULL;
-			return SUCCESS;
-		}
+	if (class_type->iterator_funcs_ptr != NULL) {
+		class_type->iterator_funcs_ptr->zf_valid = NULL;
+		class_type->iterator_funcs_ptr->zf_current = NULL;
+		class_type->iterator_funcs_ptr->zf_key = NULL;
+		class_type->iterator_funcs_ptr->zf_next = NULL;
+		class_type->iterator_funcs_ptr->zf_rewind = NULL;
 	} else if (class_type->type == ZEND_INTERNAL_CLASS) {
-		/* We can use pointer even in ZTS mode, because this structure is read-only */
-		zend_class_iterator_funcs_ptr *iterator_funcs_ptr_ptr =
-			calloc(1, sizeof(zend_class_iterator_funcs_ptr));
-		ZEND_MAP_PTR_INIT(class_type->iterator_funcs_ptr, &iterator_funcs_ptr_ptr->ptr);
-		iterator_funcs_ptr = &iterator_funcs_ptr_ptr->data;
-		iterator_funcs_ptr_ptr->ptr = iterator_funcs_ptr;
+		class_type->iterator_funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
 	} else {
-		zend_class_iterator_funcs_ptr *iterator_funcs_ptr_ptr =
-			zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs_ptr));
-		iterator_funcs_ptr_ptr->ptr = &iterator_funcs_ptr_ptr->data;
-		ZEND_MAP_PTR_INIT(class_type->iterator_funcs_ptr, &iterator_funcs_ptr_ptr->ptr);
-		iterator_funcs_ptr = &iterator_funcs_ptr_ptr->data;
-		iterator_funcs_ptr_ptr->ptr = iterator_funcs_ptr;
-		memset(iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-		return SUCCESS;
+		class_type->iterator_funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+		memset(class_type->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
 	}
-	iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
-	iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
-	iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
-	iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
-	iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		class_type->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
+		class_type->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
+		class_type->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
+		class_type->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
+		class_type->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
+	}
 	return SUCCESS;
 }
 /* }}} */
