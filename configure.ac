@@ -329,6 +329,7 @@ dnl -------------------------------------------------------------------------
 PTHREADS_CHECK
 PHP_HELP_SEPARATOR([SAPI modules:])
 PHP_SHLIB_SUFFIX_NAMES
+PHP_SYSTEM_SHLIBDIR_PATHS
 PHP_BUILD_PROGRAM
 PHP_SAPI=none
 
@@ -391,7 +392,9 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
    CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
    LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
-test -d /usr/ucblib && PHP_ADD_LIBPATH(/usr/ucblib)
+if test -d /usr/ucblib; then
+  PHP_ADD_LIBPATH(/usr/ucblib)
+fi
 
 
 dnl First, library checks.
@@ -788,7 +791,7 @@ if test "$PHP_VALGRIND" != "no"; then
   AC_MSG_CHECKING([for valgrind header])
 
   if test "$PHP_VALGRIND" = "yes"; then
-    SEARCH_PATH="/usr/local /usr"
+    SEARCH_PATH="/usr/local $SYSTEM_SHLIBDIR_PATHS"
   else
     SEARCH_PATH="$PHP_VALGRIND"
   fi

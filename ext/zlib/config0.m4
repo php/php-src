@@ -19,7 +19,7 @@ if test "$PHP_ZLIB" != "no" || test "$PHP_ZLIB_DIR" != "no"; then
       ZLIB_INCDIR=$ZLIB_DIR/include
     fi
   else
-    for i in /usr/local /usr $PHP_ZLIB_DIR; do
+    for i in $PHP_ZLIB_DIR /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       if test -f $i/include/zlib/zlib.h; then
         ZLIB_DIR=$i
         ZLIB_INCDIR=$i/include/zlib

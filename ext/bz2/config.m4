@@ -8,7 +8,7 @@ if test "$PHP_BZ2" != "no"; then
     BZIP_DIR=$PHP_BZ2
   else
     AC_MSG_CHECKING(for BZip2 in default path)
-    for i in /usr/local /usr; do
+    for i in /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       if test -r $i/include/bzlib.h; then
         BZIP_DIR=$i
         AC_MSG_RESULT(found in $i)

@@ -29,7 +29,7 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   else
     AC_MSG_RESULT(not found)
     if test "$PHP_PDO_PGSQL" = "yes"; then
-      PGSQL_SEARCH_PATHS="/usr /usr/local /usr/local/pgsql"
+      PGSQL_SEARCH_PATHS="/usr/local $SYSTEM_SHLIBDIR_PATHS /usr/local/pgsql"
     else
       PGSQL_SEARCH_PATHS=$PHP_PDO_PGSQL
     fi

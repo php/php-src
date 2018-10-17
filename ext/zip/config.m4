@@ -31,7 +31,7 @@ if test "$PHP_ZIP" != "no"; then
       fi
 
     else
-      for i in /usr/local /usr; do
+      for i in /usr/local $SYSTEM_SHLIBDIR_PATHS; do
         if test -r $i/include/zip.h; then
           LIBZIP_CFLAGS="-I$i/include"
           LIBZIP_LIBDIR="$i/$PHP_LIBDIR"

@@ -9,7 +9,7 @@ if test "$PHP_ENCHANT" != "no"; then
 	if test "$PHP_ENCHANT" != "yes"; then
 	    ENCHANT_SEARCH_DIRS=$PHP_ENCHANT
 	else
-	    ENCHANT_SEARCH_DIRS="/usr/local /usr"
+	    ENCHANT_SEARCH_DIRS="/usr/local $SYSTEM_SHLIBDIR_PATHS"
 	fi
 	for i in $ENCHANT_SEARCH_DIRS; do
 		if test -f $i/include/enchant/enchant.h; then

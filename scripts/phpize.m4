@@ -33,6 +33,7 @@ PHP_ARG_WITH(libdir, for system library directory,
 
 PHP_RUNPATH_SWITCH
 PHP_SHLIB_SUFFIX_NAMES
+PHP_SYSTEM_SHLIBDIR_PATHS
 
 dnl Find php-config script
 PHP_ARG_WITH(php-config,,

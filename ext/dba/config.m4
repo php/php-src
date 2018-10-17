@@ -109,7 +109,7 @@ dnl
 # QDBM
 if test "$PHP_QDBM" != "no"; then
   PHP_DBA_STD_BEGIN
-  for i in $PHP_QDBM /usr/local /usr; do
+  for i in $PHP_QDBM /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -f "$i/include/depot.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/depot.h
@@ -142,7 +142,7 @@ if test "$PHP_GDBM" != "no"; then
   if test "$HAVE_QDBM" = "1"; then
     PHP_DBA_STD_RESULT(gdbm, gdbm, [You cannot combine --with-gdbm with --with-qdbm])
   fi
-  for i in $PHP_GDBM /usr/local /usr; do
+  for i in $PHP_GDBM /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -f "$i/include/gdbm.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/gdbm.h
@@ -167,7 +167,7 @@ PHP_DBA_STD_RESULT(gdbm)
 # NDBM
 if test "$PHP_NDBM" != "no"; then
   PHP_DBA_STD_BEGIN
-  for i in $PHP_NDBM /usr/local /usr; do
+  for i in $PHP_NDBM /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -f "$i/include/ndbm.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/ndbm.h
@@ -201,7 +201,7 @@ PHP_DBA_STD_RESULT(ndbm)
 dnl TCADB
 if test "$PHP_TCADB" != "no"; then
   PHP_DBA_STD_BEGIN
-  for i in $PHP_TCADB /usr/local /usr; do
+  for i in $PHP_TCADB /usr/local $SYSTEM_SHLIBDIR_PATHS; do
 	if test -f "$i/include/tcadb.h"; then
 	  THIS_PREFIX=$i
 	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
@@ -232,7 +232,7 @@ PHP_DBA_STD_RESULT(tcadb)
 dnl LMDB
 if test "$PHP_LMDB" != "no"; then
   PHP_DBA_STD_BEGIN
-  for i in $PHP_LMDB /usr/local /usr; do
+  for i in $PHP_LMDB /usr/local $SYSTEM_SHLIBDIR_PATHS; do
 	if test -f "$i/include/lmdb.h"; then
 	  THIS_PREFIX=$i
 	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
@@ -267,7 +267,8 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     AC_MSG_ERROR([DBA: Could not find necessary header file(s).])
   fi
   for LIB in $2; do
-    if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a || test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
+    PHP_CHECK_SHLIB_EXISTS($THIS_PREFIX/$PHP_LIBDIR/lib$LIB, dba_lib_exists)
+    if test $dba_lib_exists = "yes"; then
       lib_found="";
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/$PHP_LIBDIR, -l$LIB,[
         AC_LINK_IFELSE([AC_LANG_PROGRAM([[
@@ -343,7 +344,7 @@ if test "$PHP_DB4" != "no"; then
   PHP_DBA_STD_BEGIN
   dbdp4="/usr/local/BerkeleyDB.4."
   dbdp5="/usr/local/BerkeleyDB.5."
-  for i in $PHP_DB4 ${dbdp5}1 ${dbdp5}0 ${dbdp4}8 ${dbdp4}7 ${dbdp4}6 ${dbdp4}5 ${dbdp4}4 ${dbdp4}3 ${dbdp4}2 ${dbdp4}1 ${dbdp}0 /usr/local /usr; do
+  for i in $PHP_DB4 ${dbdp5}1 ${dbdp5}0 ${dbdp4}8 ${dbdp4}7 ${dbdp4}6 ${dbdp4}5 ${dbdp4}4 ${dbdp4}3 ${dbdp4}2 ${dbdp4}1 ${dbdp}0 /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -f "$i/db5/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db5/db.h
@@ -408,7 +409,8 @@ if test "$PHP_DB3" != "no"; then
   if test "$HAVE_DB4" = "1"; then
     PHP_DBA_STD_RESULT(db3, Berkeley DB3, [You cannot combine --with-db3 with --with-db4])
   fi
-  for i in $PHP_DB3 /usr/local/BerkeleyDB.3.3 /usr/local/BerkeleyDB.3.2 /usr/local/BerkeleyDB.3.1 /usr/local/BerkeleyDB.3.0 /usr/local /usr; do
+  dbdp3="/usr/local/BerkeleyDB.3."
+  for i in $PHP_DB3 ${dbdp3}.3 ${dbdp3}.2 ${dbdp3}.1 ${dbdp3}.0 /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -f "$i/db3/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/db3/db.h
@@ -441,7 +443,7 @@ if test "$PHP_DB2" != "no"; then
   if test "$HAVE_DB3" = "1" || test "$HAVE_DB4" = "1"; then
     PHP_DBA_STD_RESULT(db2, Berkeley DB2, [You cannot combine --with-db2 with --with-db3 or --with-db4])
   fi
-  for i in $PHP_DB2 $PHP_DB2/BerkeleyDB /usr/BerkeleyDB /usr/local /usr; do
+  for i in $PHP_DB2 $PHP_DB2/BerkeleyDB /usr/BerkeleyDB /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -f "$i/db2/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db2/db.h
@@ -494,7 +496,7 @@ if test "$PHP_DB1" != "no"; then
     done
   else
     AC_DEFINE_UNQUOTED(DB1_VERSION, "Unknown DB1", [ ])
-    for i in $PHP_DB1 /usr/local /usr; do
+    for i in $PHP_DB1 /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       if test -f "$i/db1/db.h"; then
         THIS_PREFIX=$i
         THIS_INCLUDE=$i/db1/db.h
@@ -541,7 +543,7 @@ if test "$PHP_DBM" != "no"; then
   if test "$HAVE_QDBM" = "1"; then
     PHP_DBA_STD_RESULT(dbm, dbm, [You cannot combine --with-dbm with --with-qdbm])
   fi
-  for i in $PHP_DBM /usr/local /usr; do
+  for i in $PHP_DBM /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -f "$i/include/dbm.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/dbm.h
@@ -607,7 +609,7 @@ if test "$PHP_CDB" = "yes"; then
   THIS_RESULT="builtin"
 elif test "$PHP_CDB" != "no"; then
   PHP_DBA_STD_BEGIN
-  for i in $PHP_CDB /usr/local /usr; do
+  for i in $PHP_CDB /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -f "$i/include/cdb.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/cdb.h

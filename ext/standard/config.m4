@@ -413,7 +413,7 @@ PHP_ARG_WITH(password-argon2, for Argon2 support,
 
 if test "$PHP_PASSWORD_ARGON2" != "no"; then
   AC_MSG_CHECKING([for Argon2 library])
-  for i in $PHP_PASSWORD_ARGON2 /usr /usr/local ; do
+  for i in $PHP_PASSWORD_ARGON2 /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -r $i/include/argon2.h; then
       ARGON2_DIR=$i;
       AC_MSG_RESULT(found in $i)

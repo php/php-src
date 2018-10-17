@@ -9,7 +9,7 @@ if test "$PHP_PSPELL" != "no"; then
 	if test "$PHP_PSPELL" != "yes"; then
 	    PSPELL_SEARCH_DIRS=$PHP_PSPELL
 	else
-	    PSPELL_SEARCH_DIRS="/usr/local /usr"
+	    PSPELL_SEARCH_DIRS="/usr/local $SYSTEM_SHLIBDIR_PATHS"
 	fi
 	for i in $PSPELL_SEARCH_DIRS; do
 		if test -f $i/include/pspell/pspell.h; then

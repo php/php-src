@@ -107,7 +107,7 @@ if test "$PHP_IMAP" != "no"; then
     PHP_NEW_EXTENSION(imap, php_imap.c, $ext_shared)
     AC_DEFINE(HAVE_IMAP,1,[ ])
 
-    for i in $PHP_IMAP /usr/local /usr; do
+    for i in $PHP_IMAP /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       IMAP_INC_CHK()
       el[]IMAP_INC_CHK(/include/c-client)
       el[]IMAP_INC_CHK(/include/imap)

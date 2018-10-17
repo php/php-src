@@ -14,7 +14,7 @@ if test "$PHP_XSL" != "no"; then
     AC_MSG_ERROR([XSL extension requires DOM extension, add --enable-dom])
   fi
 
-  for i in $PHP_XSL /usr/local /usr; do
+  for i in $PHP_XSL /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -x "$i/bin/xslt-config"; then
       XSLT_CONFIG=$i/bin/xslt-config
       break
@@ -37,7 +37,7 @@ if test "$PHP_XSL" != "no"; then
       PHP_EVAL_INCLINE($XSL_INCS)
 
       AC_MSG_CHECKING([for EXSLT support])
-      for i in $PHP_XSL /usr/local /usr; do
+      for i in $PHP_XSL /usr/local $SYSTEM_SHLIBDIR_PATHS; do
         if test -r "$i/include/libexslt/exslt.h"; then
           PHP_XSL_EXSL_DIR=$i
           break

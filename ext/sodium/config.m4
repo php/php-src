@@ -4,7 +4,7 @@ PHP_ARG_WITH(sodium, for sodium support,
 [  --with-sodium[=DIR]       Include sodium support])
 
 if test "$PHP_SODIUM" != "no"; then
-  SEARCH_PATH="/usr/local /usr"     # you might want to change this
+  SEARCH_PATH="/usr/local $SYSTEM_SHLIBDIR_PATHS"     # you might want to change this
   SEARCH_FOR="/include/sodium.h"  # you most likely want to change this
 
   AC_PATH_PROG(PKG_CONFIG, pkg-config, no)

@@ -47,7 +47,7 @@ if test "$PHP_CURL" != "no"; then
       CURL_DIR=$PHP_CURL
     else
       AC_MSG_CHECKING(for cURL in default path)
-      for i in /usr/local /usr; do
+      for i in /usr/local $SYSTEM_SHLIBDIR_PATHS; do
         if test -r $i/include/curl/easy.h; then
           CURL_DIR=$i
           AC_MSG_RESULT(found in $i)

@@ -52,7 +52,7 @@ AC_DEFUN([PHP_GD_ZLIB],[
 			AC_MSG_ERROR([Can't find zlib headers under "$PHP_ZLIB_DIR"])
 		fi
 	else
-		for i in /usr/local /usr; do
+		for i in /usr/local $SYSTEM_SHLIBDIR_PATHS; do
 			if test -f "$i/include/zlib/zlib.h"; then
 				PHP_ZLIB_DIR="$i"
 				PHP_ZLIB_INCDIR="$i/include/zlib"
@@ -67,7 +67,7 @@ AC_DEFUN([PHP_GD_ZLIB],[
 AC_DEFUN([PHP_GD_WEBP],[
   if test "$PHP_WEBP_DIR" != "no"; then
 
-    for i in $PHP_WEBP_DIR /usr/local /usr; do
+    for i in $PHP_WEBP_DIR /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       test -f $i/include/webp/decode.h && GD_WEBP_DIR=$i && break
     done
 
@@ -75,7 +75,7 @@ AC_DEFUN([PHP_GD_WEBP],[
       AC_MSG_ERROR([webp/decode.h not found.])
     fi
 
-    for i in $PHP_WEBP_DIR /usr/local /usr; do
+    for i in $PHP_WEBP_DIR /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       test -f $i/include/webp/encode.h && GD_WEBP_DIR=$i && break
     done
 
@@ -101,7 +101,7 @@ AC_DEFUN([PHP_GD_WEBP],[
 AC_DEFUN([PHP_GD_JPEG],[
   if test "$PHP_JPEG_DIR" != "no"; then
 
-    for i in $PHP_JPEG_DIR /usr/local /usr; do
+    for i in $PHP_JPEG_DIR /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       test -f $i/include/jpeglib.h && GD_JPEG_DIR=$i && break
     done
 
@@ -126,7 +126,7 @@ AC_DEFUN([PHP_GD_JPEG],[
 AC_DEFUN([PHP_GD_PNG],[
   if test "$PHP_PNG_DIR" != "no"; then
 
-    for i in $PHP_PNG_DIR /usr/local /usr; do
+    for i in $PHP_PNG_DIR /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       test -f $i/include/png.h && GD_PNG_DIR=$i && break
     done
 
@@ -157,9 +157,12 @@ AC_DEFUN([PHP_GD_PNG],[
 AC_DEFUN([PHP_GD_XPM],[
   if test "$PHP_XPM_DIR" != "no"; then
 
-    for i in $PHP_XPM_DIR /usr/local /usr/X11R6 /usr; do
-      test -f $i/include/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i && break
-      test -f $i/include/X11/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i/X11 && break
+    for i in $PHP_XPM_DIR /usr/X11 /usr/X11R6 /usr/local $SYSTEM_SHLIBDIR_PATHS; do
+      if test -f $i/include/X11/xpm.h; then
+        GD_XPM_DIR=$i
+        GD_XPM_INC=$i/include
+        break
+      fi
     done
 
     if test -z "$GD_XPM_DIR"; then

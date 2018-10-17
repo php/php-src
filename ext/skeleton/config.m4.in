@@ -37,7 +37,7 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl PHP_EVAL_INCLINE($LIBFOO_CFLAGS)
 
   dnl # --with-%EXTNAME% -> check with-path
-  dnl SEARCH_PATH="/usr/local /usr"     # you might want to change this
+  dnl SEARCH_PATH="/usr/local $SYSTEM_SHLIBDIR_PATHS"     # you might want to change this
   dnl SEARCH_FOR="/include/%EXTNAME%.h"  # you most likely want to change this
   dnl if test -r $PHP_%EXTNAMECAPS%/$SEARCH_FOR; then # path given as parameter
   dnl   %EXTNAMECAPS%_DIR=$PHP_%EXTNAMECAPS%

@@ -20,7 +20,7 @@ if test $PHP_SQLITE3 != "no"; then
   fi
 
   AC_MSG_CHECKING([for sqlite3 files in default path])
-  for i in $PHP_SQLITE3 /usr/local /usr; do
+  for i in $PHP_SQLITE3 /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     if test -r $i/include/sqlite3.h; then
       SQLITE3_DIR=$i
       AC_MSG_RESULT(found in $i)

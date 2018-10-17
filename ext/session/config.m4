@@ -18,7 +18,7 @@ if test "$PHP_SESSION" != "no"; then
 fi
 
 if test "$PHP_MM" != "no"; then
-  for i in $PHP_MM /usr/local /usr; do
+  for i in $PHP_MM /usr/local $SYSTEM_SHLIBDIR_PATHS; do
     test -f "$i/include/mm.h" && MM_DIR=$i && break
   done
 

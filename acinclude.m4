@@ -441,7 +441,18 @@ dnl
 dnl Adds a path to linkpath/runpath (LDFLAGS)
 dnl
 AC_DEFUN([PHP_ADD_LIBPATH],[
-  if test "$1" != "/usr/$PHP_LIBDIR" && test "$1" != "/usr/lib"; then
+  is_system_libpath='no'
+  if test "$1" = "/usr/$PHP_LIBDIR"; then
+    is_system_libpath='yes'
+  else
+    for i in $SYSTEM_SHLIBDIR_PATHS; do
+      if test "$1" = "$i/lib"; then
+        is_system_libpath='yes'
+        break
+      fi
+    done
+  fi
+  if test $is_system_libpath = 'no'; then
     PHP_EXPAND_PATH($1, ai_p)
     ifelse([$2],,[
       _PHP_ADD_LIBPATH_GLOBAL([$ai_p])
@@ -487,7 +498,16 @@ dnl add an include path.
 dnl if before is 1, add in the beginning of INCLUDES.
 dnl
 AC_DEFUN([PHP_ADD_INCLUDE],[
-  if test "$1" != "/usr/include"; then
+  is_system_incpath='no'
+  if test $is_system_incpath = 'no'; then
+    for i in $SYSTEM_SHLIBDIR_PATHS; do
+      if test "$1" = "$i/include"; then
+        is_system_incpath='yes'
+        break
+      fi
+    done
+  fi
+  if test $is_system_incpath = 'no'; then
     PHP_EXPAND_PATH($1, ai_p)
     PHP_RUN_ONCE(INCLUDEPATH, $ai_p, [
       if test "$2"; then
@@ -1953,7 +1973,7 @@ dnl
 dnl PHP_SHLIB_SUFFIX_NAMES
 dnl
 dnl Determines link library suffix SHLIB_SUFFIX_NAME
-dnl which can be: .so, .sl or .dylib
+dnl which can be: .so, .sl .tbd or .dylib
 dnl
 dnl Determines shared library suffix SHLIB_DL_SUFFIX_NAME
 dnl suffix can be: .so or .sl
@@ -1961,19 +1981,87 @@ dnl
 AC_DEFUN([PHP_SHLIB_SUFFIX_NAMES],[
  AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
  PHP_SUBST_OLD(SHLIB_SUFFIX_NAME)
+ PHP_SUBST_OLD(SHLIB_SUFFIX_NAMES)
  PHP_SUBST_OLD(SHLIB_DL_SUFFIX_NAME)
  SHLIB_SUFFIX_NAME=so
+ SHLIB_SUFFIX_NAMES="so"
  SHLIB_DL_SUFFIX_NAME=$SHLIB_SUFFIX_NAME
  case $host_alias in
  *hpux*[)]
    SHLIB_SUFFIX_NAME=sl
+   SHLIB_SUFFIX_NAMES="sl"
    SHLIB_DL_SUFFIX_NAME=sl
    ;;
  *darwin*[)]
    SHLIB_SUFFIX_NAME=dylib
+   SHLIB_SUFFIX_NAMES="dylib tbd"
    SHLIB_DL_SUFFIX_NAME=so
    ;;
  esac
+])
+
+AC_DEFUN([PHP_CHECK_SHLIB_EXISTS],[
+  $2=no
+  if test -n "$3"; then
+    for ext in $SHLIB_SUFFIX_NAMES; do
+      for ver in $3; do
+        if test $ext = "dylib" || test $ext = "tbd"; then
+          if test -f $1.$ver.$ext; then
+            $2=yes
+            break
+          fi
+        elif test -f $1.$ext.$ver; then
+          $2=yes
+          break
+        fi
+      done
+      if test $2 = "yes"; then
+        break
+      fi
+    done
+  else
+    for ext in a $SHLIB_SUFFIX_NAMES; do
+      if test -f $1.$ext; then
+        $2=yes
+        break
+      fi
+    done
+  fi
+])
+
+AC_DEFUN([PHP_SYSTEM_SHLIBDIR_PATHS],[
+  AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
+  PHP_SUBST_OLD(SYSTEM_SHLIBDIR_PATHS)
+  SYSTEM_SHLIBDIR_PATHS="/usr"
+  case $host_alias in
+  *darwin*[)]
+    shopt -s nullglob
+
+    CLT_SDK_PATH=""
+    for sdk_path in /Library/Developer/CommandLineTools/SDKs/*.sdk; do
+      CLT_SDK_PATH="$CLT_SDK_PATH $sdk_path/usr"
+    done
+    if test -z "$CLT_SDK_PATH" && xcrun --show-sdk-path >/dev/null 2>&1; then
+      CLT_SDK_PATH="$(xcrun --show-sdk-path)/usr"
+    fi
+    if test -n "$CLT_SDK_PATH"; then
+      SYSTEM_SHLIBDIR_PATHS="$SYSTEM_SHLIBDIR_PATHS $CLT_SDK_PATH"
+    fi
+
+    XCODE_SDK_PATH=""
+    for sdk_path in /Applications/Xcode*.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/*.sdk; do
+      XCODE_SDK_PATH="$XCODE_SDK_PATH $sdk_path/usr"
+    done
+    if test -z "$XCODE_SDK_PATH" && xcrun --show-sdk-platform-path >/dev/null 2>&1; then
+      XCODE_SDK_PATH="$(xcrun --show-sdk-platform-path)/usr"
+    fi
+    if test -n "$XCODE_SDK_PATH"; then
+      SYSTEM_SHLIBDIR_PATHS="$SYSTEM_SHLIBDIR_PATHS $XCODE_SDK_PATH"
+    fi
+
+    shopt -u nullglob
+    ;;
+  esac
 ])
 
 dnl
@@ -2197,11 +2285,12 @@ AC_DEFUN([PHP_SETUP_KERBEROS],[
   if test "$found_kerberos" = "no"; then
 
     if test "$PHP_KERBEROS" = "yes"; then
-      PHP_KERBEROS="/usr/kerberos /usr/local /usr"
+      PHP_KERBEROS="/usr/kerberos /usr/local $SYSTEM_SHLIBDIR_PATHS"
     fi
 
     for i in $PHP_KERBEROS; do
-      if test -f $i/$PHP_LIBDIR/libkrb5.a || test -f $i/$PHP_LIBDIR/libkrb5.$SHLIB_SUFFIX_NAME; then
+      PHP_CHECK_SHLIB_EXISTS($i/$PHP_LIBDIR/libkrb5, krb_lib_exists)
+      if test $krb_lib_exists = "yes"; then
         PHP_KERBEROS_DIR=$i
         break
       fi
@@ -2273,14 +2362,15 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
   if test "$found_openssl" = "no"; then
 
     if test "$PHP_OPENSSL_DIR" = "yes"; then
-      PHP_OPENSSL_DIR="/usr/local/ssl /usr/local /usr /usr/local/openssl"
+      PHP_OPENSSL_DIR="/usr/local/ssl /usr/local/openssl /usr/local $SYSTEM_SHLIBDIR_PATHS"
     fi
 
     for i in $PHP_OPENSSL_DIR; do
       if test -r $i/include/openssl/evp.h; then
         OPENSSL_INCDIR=$i/include
       fi
-      if test -r $i/$PHP_LIBDIR/libssl.a -o -r $i/$PHP_LIBDIR/libssl.$SHLIB_SUFFIX_NAME; then
+      PHP_CHECK_SHLIB_EXISTS($i/$PHP_LIBDIR/libssl, openssl_lib_exists)
+      if test $openssl_lib_exists = "yes"; then
         OPENSSL_LIBDIR=$i/$PHP_LIBDIR
       fi
       test -n "$OPENSSL_INCDIR" && test -n "$OPENSSL_LIBDIR" && break
@@ -2393,7 +2483,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   dnl
   if test "$found_iconv" = "no"; then
 
-    for i in $PHP_ICONV /usr/local /usr; do
+    for i in $PHP_ICONV /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       if test -r $i/include/giconv.h; then
         AC_DEFINE(HAVE_GICONV_H, 1, [ ])
         ICONV_DIR=$i
@@ -2410,9 +2500,8 @@ AC_DEFUN([PHP_SETUP_ICONV], [
       AC_MSG_ERROR([Please specify the install prefix of iconv with --with-iconv=<DIR>])
     fi
 
-    if test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.a ||
-       test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.$SHLIB_SUFFIX_NAME
-    then
+    PHP_CHECK_SHLIB_EXISTS($ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name, iconv_lib_exists)
+    if test $iconv_lib_exists = "yes"; then
       PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
         PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
@@ -2454,7 +2543,7 @@ AC_DEFUN([PHP_SETUP_LIBXML], [
   dnl First try to find xml2-config
   AC_CACHE_CHECK([for xml2-config path], ac_cv_php_xml2_config_path,
   [
-    for i in $PHP_LIBXML_DIR /usr/local /usr; do
+    for i in $PHP_LIBXML_DIR /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       if test -x "$i/bin/xml2-config"; then
         ac_cv_php_xml2_config_path="$i/bin/xml2-config"
         break

@@ -4,7 +4,7 @@ PHP_ARG_WITH(recode,for recode support,
 [  --with-recode[=DIR]       Include recode support])
 
 if test "$PHP_RECODE" != "no"; then
-  RECODE_LIST="$PHP_RECODE /usr/local /usr /opt"
+  RECODE_LIST="$PHP_RECODE /usr/local $SYSTEM_SHLIBDIR_PATHS /opt"
 
   for i in $RECODE_LIST; do
     if test -f $i/include/recode.h; then

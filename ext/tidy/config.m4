@@ -8,7 +8,7 @@ if test "$PHP_TIDY" != "no"; then
   if test "$PHP_TIDY" != "yes"; then
     TIDY_SEARCH_DIRS=$PHP_TIDY
   else
-    TIDY_SEARCH_DIRS="/usr/local /usr"
+    TIDY_SEARCH_DIRS="/usr/local $SYSTEM_SHLIBDIR_PATHS"
   fi
 
   for i in $TIDY_SEARCH_DIRS; do

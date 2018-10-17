@@ -34,8 +34,9 @@ if test "$PHP_XML" != "no"; then
   dnl Check for expat only if --with-libexpat-dir is used.
   dnl
   if test "$PHP_LIBEXPAT_DIR" != "no"; then
-    for i in $PHP_XML $PHP_LIBEXPAT_DIR /usr /usr/local; do
-      if test -f "$i/$PHP_LIBDIR/libexpat.a" || test -f "$i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME"; then
+    for i in $PHP_XML $PHP_LIBEXPAT_DIR /usr/local $SYSTEM_SHLIBDIR_PATHS; do
+      PHP_CHECK_SHLIB_EXISTS($i/$PHP_LIBDIR/libexpat, expat_lib_exists)
+      if test $expat_lib_exists = "yes"; then
         EXPAT_DIR=$i
         break
       fi

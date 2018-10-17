@@ -11,7 +11,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
 
   if test "$PHP_PDO_DBLIB" = "yes"; then
 
-    for i in /usr/local /usr; do
+    for i in /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       if test -f $i/include/sybdb.h; then
         PDO_FREETDS_INSTALLATION_DIR=$i
         PDO_FREETDS_INCLUDE_DIR=$i/include

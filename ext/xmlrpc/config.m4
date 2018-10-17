@@ -44,8 +44,9 @@ if test "$PHP_XMLRPC" != "no"; then
     ])
   else
     testval=no
-    for i in $PHP_LIBEXPAT_DIR $XMLRPC_DIR /usr/local /usr; do
-      if test -f $i/$PHP_LIBDIR/libexpat.a || test -f $i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME; then
+    for i in $PHP_LIBEXPAT_DIR $XMLRPC_DIR /usr/local $SYSTEM_SHLIBDIR_PATHS; do
+      PHP_CHECK_SHLIB_EXISTS($i/$PHP_LIBDIR/libexpat, expat_lib_exists)
+      if test $expat_lib_exists = "yes"; then
         AC_DEFINE(HAVE_LIBEXPAT,1,[ ])
         PHP_ADD_LIBRARY_WITH_PATH(expat, $i/$PHP_LIBDIR, XMLRPC_SHARED_LIBADD)
         PHP_ADD_INCLUDE($i/include)
@@ -100,7 +101,7 @@ dnl for xmlrpc-epi because of this.
     XMLRPC_DIR=$PHP_XMLRPC/include/xmlrpc-epi
   else
     AC_MSG_CHECKING(for XMLRPC-EPI in default path)
-    for i in /usr/local /usr; do
+    for i in /usr/local $SYSTEM_SHLIBDIR_PATHS; do
       if test -r $i/include/xmlrpc.h; then
         XMLRPC_DIR=$i/include
         AC_MSG_RESULT(found in $i)
