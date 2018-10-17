@@ -219,7 +219,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.trait_precedences = NULL;				\
 		class_container.interfaces = NULL;						\
 		class_container.get_iterator = NULL;					\
-		ZEND_MAP_PTR_INIT(class_container.iterator_funcs_ptr, NULL);	\
+		class_container.iterator_funcs_ptr = NULL;				\
 		class_container.info.internal.module = NULL;			\
 		class_container.info.internal.builtin_functions = functions;	\
 	}

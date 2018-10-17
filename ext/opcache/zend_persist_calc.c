@@ -431,11 +431,8 @@ static void zend_persist_class_entry_calc(zval *zv)
 			}
 		}
 
-		if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
-			if (!ZCG(is_immutable_class)) {
-				ADD_ARENA_SIZE(sizeof(void*));
-				ADD_ARENA_SIZE(sizeof(zend_class_iterator_funcs));
-			}
+		if (ce->iterator_funcs_ptr) {
+			ADD_SIZE(sizeof(zend_class_iterator_funcs));
 		}
 	}
 }

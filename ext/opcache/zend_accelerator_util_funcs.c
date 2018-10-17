@@ -373,11 +373,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 			ce->trait_precedences = trait_precedences;
 		}
 	}
-
-	if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
-		ZEND_MAP_PTR_INIT(ce->iterator_funcs_ptr, ARENA_REALLOC(ZEND_MAP_PTR(ce->iterator_funcs_ptr)));
-		ZEND_MAP_PTR_SET(ce->iterator_funcs_ptr, ARENA_REALLOC(ZEND_MAP_PTR_GET(ce->iterator_funcs_ptr)));
-	}
 }
 
 static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)

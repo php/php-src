@@ -347,8 +347,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
 			}
-			if (ZEND_MAP_PTR(ce->iterator_funcs_ptr)) {
-				free(ZEND_MAP_PTR(ce->iterator_funcs_ptr));
+			if (ce->iterator_funcs_ptr) {
+				free(ce->iterator_funcs_ptr);
 			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
