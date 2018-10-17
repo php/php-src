@@ -897,10 +897,8 @@ static zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_st
 	function_handler = zend_std_get_method(zobject, method, key);
 	if (!function_handler) {
 		if ((function_handler = zend_hash_find_ptr(&Z_OBJCE_P(zobj)->function_table, method)) == NULL) {
-			if (Z_OBJ_HT_P(zobj)->get_method) {
-				*zobject = Z_OBJ_P(zobj);
-				function_handler = (*zobject)->handlers->get_method(zobject, method, key);
-			}
+			*zobject = Z_OBJ_P(zobj);
+			function_handler = (*zobject)->handlers->get_method(zobject, method, key);
 		} else {
 			*zobject = Z_OBJ_P(zobj);
 		}
@@ -1347,19 +1345,6 @@ static const zend_function_entry spl_funcs_RecursiveTreeIterator[] = {
 	SPL_ME(RecursiveTreeIterator,     getPostfix,        arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
-
-#if MBO_0
-static int spl_dual_it_gets_implemented(zend_class_entry *interface, zend_class_entry *class_type)
-{
-	class_type->iterator_funcs_ptr->zf_valid = NULL;
-	class_type->iterator_funcs_ptr->zf_current = NULL;
-	class_type->iterator_funcs_ptr->zf_key = NULL;
-	class_type->iterator_funcs_ptr->zf_next = NULL;
-	class_type->iterator_funcs_ptr->zf_rewind = NULL;
-
-	return SUCCESS;
-}
-#endif
 
 static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *method, const zval *key)
 {

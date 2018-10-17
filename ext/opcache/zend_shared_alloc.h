@@ -131,6 +131,8 @@ void *zend_shared_memdup_free(void *source, size_t size);
 void *zend_shared_memdup_get_put(void *source, size_t size);
 void *zend_shared_memdup_put(void *source, size_t size);
 void *zend_shared_memdup(void *source, size_t size);
+void *zend_shared_memdup_arena_put(void *source, size_t size);
+void *zend_shared_memdup_arena(void *source, size_t size);
 
 int  zend_shared_memdup_size(void *p, size_t size);
 
@@ -160,6 +162,8 @@ void zend_shared_alloc_safe_unlock(void);
 void zend_shared_alloc_init_xlat_table(void);
 void zend_shared_alloc_destroy_xlat_table(void);
 void zend_shared_alloc_clear_xlat_table(void);
+uint32_t zend_shared_alloc_checkpoint_xlat_table(void);
+void zend_shared_alloc_restore_xlat_table(uint32_t checkpoint);
 void zend_shared_alloc_register_xlat_entry(const void *old, const void *new);
 void *zend_shared_alloc_get_xlat_entry(const void *old);
 

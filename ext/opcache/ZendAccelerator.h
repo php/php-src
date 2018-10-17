@@ -245,6 +245,7 @@ typedef struct _zend_accel_globals {
 	void                   *mem;
 	void                   *arena_mem;
 	zend_persistent_script *current_persistent_script;
+	zend_bool               is_immutable_class;
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
@@ -271,6 +272,8 @@ typedef struct _zend_accel_shared_globals {
 	zend_ulong   hash_restarts;    /* number of restarts because of hash overflow */
 	zend_ulong   manual_restarts;  /* number of restarts scheduled by opcache_reset() */
 	zend_accel_hash hash;             /* hash table for cached scripts */
+
+	size_t map_ptr_last;
 
 	/* Directives & Maintenance */
 	time_t          start_time;

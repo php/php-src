@@ -1021,7 +1021,9 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 				GC_ADDREF(op_array->static_variables);
 			}
 		}
-		op_array->run_time_cache = NULL;
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+		ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
 		if (function->common.function_name) {
 			zend_string_addref(function->common.function_name);
@@ -1614,9 +1616,9 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
-		ce->static_members_table = NULL;
+		ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	} else {
-		ce->static_members_table = ce->default_static_members_table;
+		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		ce->info.user.doc_comment = NULL;
 	}
 
@@ -5867,6 +5869,9 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
+	ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+	ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
+
 	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);
 	op_array->fn_flags |= decl->flags;
 	op_array->line_start = decl->start_lineno;
@@ -6316,6 +6321,10 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 	}
 
 	CG(active_class_entry) = original_ce;
+
+	if (toplevel) {
+		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
+	}
 
 	if (toplevel
 		/* We currently don't early-bind classes that implement interfaces or use traits */

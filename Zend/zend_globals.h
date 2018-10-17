@@ -117,10 +117,9 @@ struct _zend_compiler_globals {
 
 	zend_stack delayed_oplines_stack;
 
-#ifdef ZTS
-	zval **static_members_table;
-	zend_uintptr_t last_static_member;
-#endif
+	void   *map_ptr_base;
+	size_t  map_ptr_size;
+	size_t  map_ptr_last;
 };
 
 

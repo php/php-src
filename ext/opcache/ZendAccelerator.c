@@ -1378,6 +1378,8 @@ static zend_persistent_script *store_script_in_file_cache(zend_persistent_script
 	ZCG(mem) = zend_arena_alloc(&CG(arena), memory_used);
 #endif
 
+	zend_shared_alloc_clear_xlat_table();
+
 	/* Copy into memory block */
 	new_persistent_script = zend_accel_script_persist(new_persistent_script, NULL, 0, 0);
 
@@ -1542,6 +1544,8 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 #endif
 		return new_persistent_script;
 	}
+
+	zend_shared_alloc_clear_xlat_table();
 
 	/* Copy into shared memory */
 	new_persistent_script = zend_accel_script_persist(new_persistent_script, &key, key_length, 1);
@@ -2282,6 +2286,7 @@ static void zend_reset_cache_vars(void)
 	ZSMMG(wasted_shared_memory) = 0;
 	ZCSG(restart_pending) = 0;
 	ZCSG(force_restart_time) = 0;
+	ZCSG(map_ptr_last) = CG(map_ptr_last);
 }
 
 static void accel_reset_pcre_cache(void)
@@ -2378,6 +2383,7 @@ int accel_activate(INIT_FUNC_ARGS)
 				}
 				accel_restart_enter();
 
+				zend_map_ptr_reset();
 				zend_reset_cache_vars();
 				zend_accel_hash_clean(&ZCSG(hash));
 
@@ -2572,7 +2578,6 @@ static int zend_accel_init_shm(void)
 	ZCSG(start_time) = zend_accel_get_time();
 	ZCSG(last_restart_time) = 0;
 	ZCSG(restart_in_progress) = 0;
-
 
 	for (i = 0; i < -HT_MIN_MASK; i++) {
 		ZCSG(uninitialized_bucket)[i] = HT_INVALID_IDX;

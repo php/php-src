@@ -151,9 +151,14 @@ ZEND_METHOD(Closure, call)
 		if (ZEND_USER_CODE(my_function.type)
 		 && (closure->func.common.scope != Z_OBJCE_P(newthis)
 		  || (closure->func.common.fn_flags & ZEND_ACC_HEAP_RT_CACHE))) {
-			my_function.op_array.run_time_cache = emalloc(my_function.op_array.cache_size);
+			void *ptr;
+
 			my_function.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
-			memset(my_function.op_array.run_time_cache, 0, my_function.op_array.cache_size);
+			ptr = emalloc(sizeof(void*) + my_function.op_array.cache_size);
+			ZEND_MAP_PTR_INIT(my_function.op_array.run_time_cache, ptr);
+			ptr = (char*)ptr + sizeof(void*);
+			ZEND_MAP_PTR_SET(my_function.op_array.run_time_cache, ptr);
+			memset(ptr, 0, my_function.op_array.cache_size);
 		}
 	}
 
@@ -176,7 +181,7 @@ ZEND_METHOD(Closure, call)
 		/* copied upon generator creation */
 		GC_DELREF(&closure->std);
 	} else if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE) {
-		efree(my_function.op_array.run_time_cache);
+		efree(ZEND_MAP_PTR(my_function.op_array.run_time_cache));
 	}
 }
 /* }}} */
@@ -501,7 +506,8 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 	debug_info = zend_new_array(8);
 
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
-		HashTable *static_variables = closure->func.op_array.static_variables;
+		HashTable *static_variables =
+			ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
 		ZVAL_ARR(&val, zend_array_dup(static_variables));
 		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_STATIC), &val);
 	}
@@ -559,7 +565,7 @@ static HashTable *zend_closure_get_gc(zval *obj, zval **table, int *n) /* {{{ */
 	*table = Z_TYPE(closure->this_ptr) != IS_NULL ? &closure->this_ptr : NULL;
 	*n = Z_TYPE(closure->this_ptr) != IS_NULL ? 1 : 0;
 	return (closure->func.type == ZEND_USER_FUNCTION) ?
-		closure->func.op_array.static_variables : NULL;
+		ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr) : NULL;
 }
 /* }}} */
 
@@ -654,28 +660,44 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	if (func->type == ZEND_USER_FUNCTION) {
 		memcpy(&closure->func, func, sizeof(zend_op_array));
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
+		closure->func.common.fn_flags &= ~ZEND_ACC_IMMUTABLE;
+
 		if (closure->func.op_array.static_variables) {
 			closure->func.op_array.static_variables =
 				zend_array_dup(closure->func.op_array.static_variables);
 		}
+		ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
+			&closure->func.op_array.static_variables);
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
-		if (!closure->func.op_array.run_time_cache
+		if (!ZEND_MAP_PTR_GET(closure->func.op_array.run_time_cache)
 			|| func->common.scope != scope
 			|| (func->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE)
 		) {
-			if (!func->op_array.run_time_cache && (func->common.fn_flags & ZEND_ACC_CLOSURE)) {
+			void *ptr;
+
+			if (!ZEND_MAP_PTR_GET(func->op_array.run_time_cache)
+			 && (func->common.fn_flags & ZEND_ACC_CLOSURE)
+			 && (func->common.scope == scope ||
+			     !(func->common.fn_flags & ZEND_ACC_IMMUTABLE))) {
 				/* If a real closure is used for the first time, we create a shared runtime cache
 				 * and remember which scope it is for. */
-				func->common.scope = scope;
-				func->op_array.run_time_cache = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
-				closure->func.op_array.run_time_cache = func->op_array.run_time_cache;
+				if (func->common.scope != scope) {
+					func->common.scope = scope;
+				}
+				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
+				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
+				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
+				ZEND_MAP_PTR_SET(closure->func.op_array.run_time_cache, ptr);
 			} else {
 				/* Otherwise, we use a non-shared runtime cache */
-				closure->func.op_array.run_time_cache = emalloc(func->op_array.cache_size);
 				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
+				ptr = emalloc(sizeof(void*) + func->op_array.cache_size);
+				ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
+				ptr = (char*)ptr + sizeof(void*);
+				ZEND_MAP_PTR_SET(closure->func.op_array.run_time_cache, ptr);
 			}
-			memset(closure->func.op_array.run_time_cache, 0, func->op_array.cache_size);
+			memset(ptr, 0, func->op_array.cache_size);
 		}
 		if (closure->func.op_array.refcount) {
 			(*closure->func.op_array.refcount)++;
@@ -728,7 +750,7 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
-	HashTable *static_variables = closure->func.op_array.static_variables;
+	HashTable *static_variables = ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
 	zend_hash_update(static_variables, var_name, var);
 }
 /* }}} */
@@ -736,7 +758,7 @@ void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var) /
 void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
-	HashTable *static_variables = closure->func.op_array.static_variables;
+	HashTable *static_variables = ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
 	zval *var = (zval*)((char*)static_variables->arData + offset);
 	zval_ptr_dtor(var);
 	ZVAL_COPY_VALUE(var, val);
