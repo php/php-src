@@ -1676,7 +1676,7 @@ ZEND_API void *zend_map_ptr_new(void)
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 	return ptr;
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
-	return (void*)((CG(map_ptr_last) * sizeof(void*)) - (sizeof(void*) - 1));
+	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif

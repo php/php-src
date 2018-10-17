@@ -51,13 +51,19 @@
 	ptr ## __ptr
 # define ZEND_MAP_PTR_DEF(type, name) \
 	type * ZEND_MAP_PTR(name)
+# define ZEND_MAP_PTR_IS_OFFSET(ptr) \
+	(((uintptr_t)ZEND_MAP_PTR(ptr)) & 1L)
+# define ZEND_MAP_PTR_OFFSET2PTR(ptr) \
+	((void**)((char*)CG(map_ptr_base) + (uintptr_t)ZEND_MAP_PTR(ptr) - 1))
+# define ZEND_MAP_PTR_PTR2OFFSET(ptr) \
+	((void*)((uintptr_t)(((char*)(ptr)) - ((char*)CG(map_ptr_base))) | 1L))
 # define ZEND_MAP_PTR_GET(ptr) \
-	((((uintptr_t)ZEND_MAP_PTR(ptr)) & 1L) ? \
-		*(void**)((char*)CG(map_ptr_base) + (uintptr_t)ZEND_MAP_PTR(ptr) - 1) : \
+	(ZEND_MAP_PTR_IS_OFFSET(ptr) ? \
+		*(ZEND_MAP_PTR_OFFSET2PTR(ptr)) : \
 		(void*)(*(ZEND_MAP_PTR(ptr))))
 # define ZEND_MAP_PTR_SET(ptr, val) do { \
-		if (((uintptr_t)ZEND_MAP_PTR(ptr)) & 1L) { \
-			*(void**)((char*)CG(map_ptr_base) + (uintptr_t)ZEND_MAP_PTR(ptr) - 1) = (val); \
+		if (ZEND_MAP_PTR_IS_OFFSET(ptr)) { \
+			*(ZEND_MAP_PTR_OFFSET2PTR(ptr)) = (val); \
 		} else { \
 			*(ZEND_MAP_PTR(ptr)) = (val); \
 		} \
