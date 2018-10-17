@@ -28,20 +28,10 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
 		return NULL;
 	}
 	fbc = Z_FUNC_P(func);
-	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-		if (fbc->op_array.fn_flags & ZEND_ACC_IMMUTABLE) {
-			zend_op_array *new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array) + fbc->op_array.cache_size);
-
-			Z_PTR_P(func) = new_op_array;
-			memcpy(new_op_array, fbc, sizeof(zend_op_array));
-			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
-			new_op_array->run_time_cache = (void**)(new_op_array + 1);
-			memset(new_op_array->run_time_cache, 0, new_op_array->cache_size);
-			return (zend_function*)new_op_array;
-		} else {
-			fbc->op_array.run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
-			memset(fbc->op_array.run_time_cache, 0, fbc->op_array.cache_size);
-		}
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		void **run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
+		memset(run_time_cache, 0, fbc->op_array.cache_size);
+		ZEND_MAP_PTR_SET(fbc->op_array.run_time_cache, run_time_cache);
 	}
 	return fbc;
 }
@@ -56,20 +46,10 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_by_name_helper(zend_strin
 		return NULL;
 	}
 	fbc = Z_FUNC_P(func);
-	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-		if (fbc->op_array.fn_flags & ZEND_ACC_IMMUTABLE) {
-			zend_op_array *new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array) + fbc->op_array.cache_size);
-
-			Z_PTR_P(func) = new_op_array;
-			memcpy(new_op_array, fbc, sizeof(zend_op_array));
-			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
-			new_op_array->run_time_cache = (void**)(new_op_array + 1);
-			memset(new_op_array->run_time_cache, 0, new_op_array->cache_size);
-			return (zend_function*)new_op_array;
-		} else {
-			fbc->op_array.run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
-			memset(fbc->op_array.run_time_cache, 0, fbc->op_array.cache_size);
-		}
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		void **run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
+		memset(run_time_cache, 0, fbc->op_array.cache_size);
+		ZEND_MAP_PTR_SET(fbc->op_array.run_time_cache, run_time_cache);
 	}
 	return fbc;
 }
