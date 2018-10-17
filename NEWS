@@ -44,6 +44,9 @@ PHP                                                                        NEWS
   . Fixed bug #76965 (INI_SCANNER_RAW doesn't strip trailing whitespace).
     (Pierrick)
 
+- Tidy:
+  . Fixed bug #77027 (tidy::getOptDoc() not available on Windows). (cmb)
+
 - XML:
   . Fixed bug #30875 (xml_parse_into_struct() does not resolve entities). (cmb)
   . Add support for getting SKIP_TAGSTART and SKIP_WHITE options. (cmb)
