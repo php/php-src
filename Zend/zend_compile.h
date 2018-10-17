@@ -223,7 +223,7 @@ typedef struct _zend_oparray_context {
 /* Function has typed arguments / class has typed props   |     |     |     */
 #define ZEND_ACC_HAS_TYPE_HINTS          (1 <<  8) /*  ?  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 15...)                            |     |     |     */
+/* Class Flags (unused: 16...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -256,6 +256,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
 #define ZEND_HAS_STATIC_IN_METHODS       (1 << 14) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Top-level class declaration                            |     |     |     */
+#define ZEND_ACC_TOP_LEVEL               (1 << 15) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 25...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
