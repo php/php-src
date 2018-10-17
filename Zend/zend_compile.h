@@ -218,7 +218,7 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Immutable op_array and class_entries                   |     |     |     */
 /* (implemented only for lazy loading of op_arrays)       |     |     |     */
-#define ZEND_ACC_IMMUTABLE               (1 <<  7) /*  ?  |  X  |     |     */
+#define ZEND_ACC_IMMUTABLE               (1 <<  7) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
 /* Function has typed arguments / class has typed props   |     |     |     */
 #define ZEND_ACC_HAS_TYPE_HINTS          (1 <<  8) /*  ?  |  X  |     |     */
