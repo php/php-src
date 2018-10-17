@@ -2507,16 +2507,6 @@ ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *
 ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
 {
 	EX(prev_execute_data) = EG(current_execute_data);
-	if (!ZEND_MAP_PTR(op_array->run_time_cache)) {
-		void *ptr;
-
-		ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE);
-		ptr = emalloc(op_array->cache_size + sizeof(void*));
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, ptr);
-		ptr = (char*)ptr + sizeof(void*);
-		ZEND_MAP_PTR_SET(op_array->run_time_cache, ptr);
-		memset(ptr, 0, op_array->cache_size);
-	}
 	i_init_code_execute_data(execute_data, op_array, return_value);
 }
 /* }}} */
