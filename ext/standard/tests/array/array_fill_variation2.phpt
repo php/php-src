@@ -1,19 +1,19 @@
 --TEST--
-Test array_fill() function : usage variations  - unexpected values for 'num' argument 
+Test array_fill() function : usage variations  - unexpected values for 'num' argument
 --FILE--
 <?php
 /* Prototype  : proto array array_fill(int start_key, int num, mixed val)
- * Description: Create an array containing num elements starting with index start_key each initialized to val 
+ * Description: Create an array containing num elements starting with index start_key each initialized to val
  * Source code: ext/standard/array.c
  */
 
 /*
- * testing array_fill() by passing different unexpected values for 'num' argument  
+ * testing array_fill() by passing different unexpected values for 'num' argument
  */
 
 echo "*** Testing array_fill() : usage variations ***\n";
 
-// Initialise function arguments not being substituted 
+// Initialise function arguments not being substituted
 $start_key = 0;
 $val = 100;
 
@@ -88,7 +88,7 @@ for($index = 0; $index < count($values); $index ++)
   $num = $values[$index];
 
   var_dump( array_fill($start_key,$num,$val) );
- 
+
   $counter ++;
 }
 

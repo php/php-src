@@ -1,5 +1,5 @@
 --TEST--
-mb_strtoupper() / mb_strtolower() 
+mb_strtoupper() / mb_strtolower()
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');
@@ -16,7 +16,6 @@ output_handler=
 	print mb_strtoupper( "הכן\n" );
 	print mb_convert_case( "הכן\n", MB_CASE_TITLE );
 ?>
-
 --EXPECT--
 abcdefghijklmnopqrstuvwxyz
 ABCDEFGHIJKLMNOPQRSTUVWXYZ

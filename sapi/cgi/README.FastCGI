@@ -91,8 +91,8 @@ use the above configuration, but rather the following.
     Alias /fcgi-bin/ /space/fcgi-bin/
     FastCgiServer /path/to/php-cgi -processes 5
 
-For either of the above configurations,  we need to tell Apache to 
-use the FastCGI binary /fcgi-bin/php to deliver PHP pages. 
+For either of the above configurations,  we need to tell Apache to
+use the FastCGI binary /fcgi-bin/php to deliver PHP pages.
 All that is needed is:
 
     AddType application/x-httpd-fastphp .php

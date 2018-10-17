@@ -5,7 +5,7 @@ ZE2 __call()
 
 class Caller {
 	public $x = array(1, 2, 3);
-	
+
 	function __call($m, $a) {
 		echo "Method $m called:\n";
 		var_dump($a);

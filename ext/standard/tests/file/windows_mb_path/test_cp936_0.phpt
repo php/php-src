@@ -1,5 +1,5 @@
 --TEST--
-Test fopen() for reading cp936 path 
+Test fopen() for reading cp936 path
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -31,13 +31,13 @@ if ($f) {
 	var_dump(fclose($f));
 } else {
 	echo "open utf8 failed\n";
-} 
+}
 
 remove_data("file_cp936");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 string(%d) "reading file wihh multibyte filename
 "

@@ -3,7 +3,7 @@ Check for tidy presence
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 echo "tidy extension is available";
 ?>
 --EXPECT--

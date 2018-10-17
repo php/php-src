@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -32,5 +31,3 @@ int fpm_trace_get_strz(char *buf, size_t sz, long addr) /* {{{ */
 	}
 }
 /* }}} */
-
-

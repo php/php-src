@@ -3,8 +3,8 @@ Test array_combine() function : error conditions - empty array
 --FILE--
 <?php
 /* Prototype  : array array_combine(array $keys, array $values)
- * Description: Creates an array by using the elements of the first parameter as keys 
- *              and the elements of the second as the corresponding values 
+ * Description: Creates an array by using the elements of the first parameter as keys
+ *              and the elements of the second as the corresponding values
  * Source code: ext/standard/array.c
 */
 

@@ -2,7 +2,7 @@
 Bug #60477: Segfault after two multipart/form-data POST requestes
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -62,7 +62,6 @@ fclose($fp);
 
 ?>
 --EXPECTF--
-
 HTTP/1.1 200 OK
 Host: %s
 Date: %s

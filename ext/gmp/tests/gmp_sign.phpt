@@ -19,7 +19,7 @@ var_dump(gmp_sign());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(-1)
 int(1)
 int(0)

@@ -6,7 +6,7 @@ Bug #52944 (segfault with zlib filter and corrupted data)
 allow_url_fopen=1
 --FILE--
 <?php
-/* NOTE this test can fail on asm builds of zlib 1.2.5 or 
+/* NOTE this test can fail on asm builds of zlib 1.2.5 or
    1.2.7 on at least Windows and Darwin. Using unoptimized
    zlib build fixes the issue. */
 

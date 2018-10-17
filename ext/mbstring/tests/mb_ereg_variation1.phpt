@@ -8,8 +8,8 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 --FILE--
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
- * Source code: ext/mbstring/php_mbregex.c 
+ * Description: Regular expression match for multibyte string
+ * Source code: ext/mbstring/php_mbregex.c
  */
 
 /*
@@ -65,7 +65,7 @@ $inputs = array(
 /*12*/ "string",
        'string',
        $heredoc,
- 
+
 // object data
 /*15*/ new classA(),
 
@@ -89,7 +89,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing mb_ereg() : usage variations ***
 

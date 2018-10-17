@@ -20,7 +20,7 @@ if (PHP_PDO_OCI != "no") {
 		pdo_oci_lib_paths += pdo_oci_dirs[i] + "\\lib\\msvc;";
 		pdo_oci_inc_paths += pdo_oci_dirs[i] + "\\include;";
 	}
-	
+
 	pdo_oci_inc_paths += PHP_PHP_BUILD + "\\include\\instantclient;"
 	pdo_oci_lib_paths += PHP_PHP_BUILD + "\\lib\\instantclient;";
 

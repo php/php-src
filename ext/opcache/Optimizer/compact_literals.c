@@ -28,6 +28,7 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
+#include "zend_extensions.h"
 
 #define DEBUG_COMPACT_LITERALS 0
 
@@ -516,7 +517,7 @@ literals_handle_static_prop:
 		method_slot = property_slot + j;
 
 		/* Update opcodes to use new literals table */
-		cache_size = 0;
+		cache_size = zend_op_array_extension_handles * sizeof(void*);
 		opline = op_array->opcodes;
 		end = opline + op_array->last;
 		while (opline < end) {

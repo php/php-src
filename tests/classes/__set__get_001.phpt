@@ -13,7 +13,7 @@ class setter {
 			$r = $this->x[$nm];
 			echo "Returning: $r\n";
 			return $r;
-		} 
+		}
 		else {
 			echo "Nothing!\n";
 		}
@@ -21,11 +21,11 @@ class setter {
 
 	function __set($nm, $val) {
 		echo "Setting [$nm] to $val\n";
-                    
+
 		if (isset($this->x[$nm])) {
 			$this->x[$nm] = $val;
 			echo "OK!\n";
-		} 
+		}
 		else {
 			echo "Not OK!\n";
 		}
@@ -42,7 +42,7 @@ $foo->a = 100;
 $foo->a++;
 $foo->z++;
 var_dump($foo);
-        
+
 ?>
 --EXPECTF--
 Setting [a] to 100

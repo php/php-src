@@ -1,7 +1,7 @@
 --TEST--
-Test imap_append() function : basic functionality 
+Test imap_append() function : basic functionality
 --SKIPIF--
-<?php 
+<?php
 require_once(dirname(__FILE__).'/skipif.inc');
 ?>
 --FILE--
@@ -22,7 +22,7 @@ if (!is_resource($imap_stream)) {
 }
 
 $mb_details = imap_mailboxmsginfo($imap_stream);
-echo "Add a couple of msgs to new mailbox " . $mb_details->Mailbox . "\n"; 
+echo "Add a couple of msgs to new mailbox " . $mb_details->Mailbox . "\n";
 var_dump(imap_append($imap_stream, $mb_details->Mailbox
                    , "From: webmaster@something.com\r\n"
                    . "To: info@something.com\r\n"
@@ -30,15 +30,15 @@ var_dump(imap_append($imap_stream, $mb_details->Mailbox
                    . "\r\n"
                    . "this is a test message, please ignore\r\n"
                    ));
-                   
+
 var_dump(imap_append($imap_stream, $mb_details->Mailbox
                    , "From: webmaster@something.com\r\n"
                    . "To: info@something.com\r\n"
                    . "Subject: Another test\r\n"
                    . "\r\n"
                    . "this is another test message, please ignore it too!!\r\n"
-                   ));     
-                   
+                   ));
+
 $check = imap_check($imap_stream);
 echo "Msg Count after append : ". $check->Nmsgs . "\n";
 
@@ -49,7 +49,7 @@ imap_close($imap_stream);
 ?>
 ===Done===
 --CLEAN--
-<?php 
+<?php
 require_once('clean.inc');
 ?>
 --EXPECTF--
@@ -69,4 +69,3 @@ array(2) {
   string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
 }
 ===Done===
-

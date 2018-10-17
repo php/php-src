@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -339,4 +338,3 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	return 0;
 }
 /* }}} */
-

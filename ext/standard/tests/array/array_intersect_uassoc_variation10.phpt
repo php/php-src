@@ -18,11 +18,11 @@ class MyClass
 	static function static_compare_func($a, $b) {
 		return strcasecmp($a, $b);
 	}
-    
+
 	public function class_compare_func($a, $b) {
 		return strcasecmp($a, $b);
 	}
-	
+
 }
 
 echo "\n-- Testing array_intersect_uassoc() function using class with static method as callback --\n";

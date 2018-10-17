@@ -8,5 +8,5 @@ abstract class B extends A { abstract function bar($x, $y = 0); }
 
 echo "DONE";
 ?>
---EXPECT--	
+--EXPECT--
 DONE

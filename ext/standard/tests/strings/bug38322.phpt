@@ -8,6 +8,6 @@ var_dump(sscanf("a ",'%1$s',$str));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 int(1)
 Done

@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - char formats with resource 
+Test fscanf() function: usage variations - char formats with resource
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - char formats with resource
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different char format types with resource ***\n"; 
+echo "*** Test fscanf(): different char format types with resource ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation22.tmp";
@@ -24,14 +24,14 @@ if($file_handle == false)
 // resource type variable
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
-  
+
 // array of resource types
 $resource_types = array (
   $fp,
   $dfp
 );
 
-$char_formats = array( "%c", 
+$char_formats = array( "%c",
 		       "%hc", "%lc", "%Lc",
 		       " %c", "%c ", "% c",
 		       "\t%c", "\n%c", "%4c",
@@ -218,4 +218,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

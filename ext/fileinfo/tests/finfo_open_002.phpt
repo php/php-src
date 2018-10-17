@@ -13,5 +13,3 @@ echo "done!\n";
 ?>
 --EXPECT--
 done!
-
-

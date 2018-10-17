@@ -1,17 +1,17 @@
 --TEST--
-Test xml_set_object() function : error conditions 
+Test xml_set_object() function : error conditions
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_object(resource parser, object &obj)
- * Description: Set up object which should be used for callbacks 
+ * Description: Set up object which should be used for callbacks
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_set_object() : error conditions ***\n";
@@ -48,4 +48,3 @@ NULL
 Warning: xml_set_object() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 Done
-

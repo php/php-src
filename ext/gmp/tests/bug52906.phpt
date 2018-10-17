@@ -24,7 +24,7 @@ foreach($vals as $data) {
 }
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 7%3=1
 7%3=1
 2%7=2

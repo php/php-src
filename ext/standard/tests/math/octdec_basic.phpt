@@ -19,10 +19,10 @@ $values = array(01234567,
 				'0x1234ABC',
 				'12345',
 				31101.3,
-				31.1013e5,				
+				31.1013e5,
 				true,
 				false,
-				null);	
+				null);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = octdec($values[$i]);

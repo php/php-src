@@ -33,6 +33,8 @@
 #include "zend_smart_string.h"
 #include "zend_cpuinfo.h"
 
+static size_t global_map_ptr_last = 0;
+
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
@@ -41,7 +43,6 @@ static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
 static HashTable *global_persistent_list = NULL;
-static zend_uintptr_t global_last_static_member = 0;
 ZEND_TSRMLS_CACHE_DEFINE()
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
@@ -389,7 +390,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			break;
 		case IS_OBJECT:
 		{
-			HashTable *properties = NULL;
+			HashTable *properties;
 			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 			zend_printf("%s Object (", ZSTR_VAL(class_name));
 			zend_string_release_ex(class_name, 0);
@@ -399,9 +400,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 				return;
 			}
 
-			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
-				properties = Z_OBJPROP_P(expr);
-			}
+			properties = Z_OBJPROP_P(expr);
 			if (properties) {
 				Z_PROTECT_RECURSION_P(expr);
 				print_flat_hash(properties);
@@ -440,7 +439,6 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 		case IS_OBJECT:
 			{
 				HashTable *properties;
-				int is_temp;
 
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 				smart_str_appends(buf, ZSTR_VAL(class_name));
@@ -451,7 +449,8 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					smart_str_appends(buf, " *RECURSION*");
 					return;
 				}
-				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
+
+				if ((properties = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_DEBUG)) == NULL) {
 					break;
 				}
 
@@ -459,10 +458,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				print_hash(buf, properties, indent, 1);
 				Z_UNPROTECT_RECURSION_P(expr);
 
-				if (is_temp) {
-					zend_hash_destroy(properties);
-					FREE_HASHTABLE(properties);
-				}
+				zend_release_properties(properties);
 				break;
 			}
 		case IS_LONG:
@@ -631,13 +627,22 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	zend_hash_init_ex(compiler_globals->auto_globals, 8, NULL, auto_global_dtor, 1, 0);
 	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, auto_global_copy_ctor);
 
-	compiler_globals->last_static_member = global_last_static_member;
-	if (compiler_globals->last_static_member) {
-		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member + 1, sizeof(zval*));
-	} else {
-		compiler_globals->static_members_table = NULL;
-	}
 	compiler_globals->script_encoding_list = NULL;
+
+#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
+	/* Map region is going to be created and resized at run-time. */
+	compiler_globals->map_ptr_base = NULL;
+	compiler_globals->map_ptr_size = 0;
+	compiler_globals->map_ptr_last = global_map_ptr_last;
+	if (compiler_globals->map_ptr_last) {
+		/* Allocate map_ptr table */
+		compiler_globals->map_ptr_size = ZEND_MM_ALIGNED_SIZE_EX(compiler_globals->map_ptr_last, 4096);
+		compiler_globals->map_ptr_base = pemalloc(compiler_globals->map_ptr_size * sizeof(void*), 1);
+		memset(compiler_globals->map_ptr_base, 0, compiler_globals->map_ptr_last * sizeof(void*));
+	}
+#else
+# error "Unknown ZEND_MAP_PTR_KIND"
+#endif
 }
 /* }}} */
 
@@ -655,13 +660,14 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		zend_hash_destroy(compiler_globals->auto_globals);
 		free(compiler_globals->auto_globals);
 	}
-	if (compiler_globals->static_members_table) {
-		free(compiler_globals->static_members_table);
-	}
 	if (compiler_globals->script_encoding_list) {
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
-	compiler_globals->last_static_member = 0;
+	if (compiler_globals->map_ptr_base) {
+		free(compiler_globals->map_ptr_base);
+		compiler_globals->map_ptr_base = NULL;
+		compiler_globals->map_ptr_size = 0;
+	}
 }
 /* }}} */
 
@@ -884,6 +890,22 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&EG(windows_version_info));
 #endif
+# if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
+		/* Create a map region, used for indirect pointers from shared to
+		 * process memory. It's allocatred once and never resized.
+		 * All processes must map it into the same address space.
+		 */
+		CG(map_ptr_size) = 1024 * 1024; // TODO: initial size ???
+		CG(map_ptr_last) = 0;
+		CG(map_ptr_base) = pemalloc(CG(map_ptr_size) * sizeof(void*), 1);
+# elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
+		/* Map region is going to be created and resized at run-time. */
+		CG(map_ptr_base) = NULL;
+		CG(map_ptr_size) = 0;
+		CG(map_ptr_last) = 0;
+# else
+#  error "Unknown ZEND_MAP_PTR_KIND"
+# endif
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -959,7 +981,7 @@ int zend_post_startup(void) /* {{{ */
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
-	global_last_static_member = compiler_globals->last_static_member;
+	global_map_ptr_last = compiler_globals->map_ptr_last;
 
 	short_tags_default = CG(short_tags);
 	compiler_options_default = CG(compiler_options);
@@ -980,6 +1002,7 @@ int zend_post_startup(void) /* {{{ */
 	zend_copy_ini_directives();
 #else
 	zend_resolve_property_types();
+	global_map_ptr_last = CG(map_ptr_last);
 #endif
 
 	if (zend_post_startup_cb) {
@@ -1026,6 +1049,12 @@ void zend_shutdown(void) /* {{{ */
 	GLOBAL_CLASS_TABLE = NULL;
 	GLOBAL_AUTO_GLOBALS_TABLE = NULL;
 	GLOBAL_CONSTANTS_TABLE = NULL;
+#else
+	if (CG(map_ptr_base)) {
+		free(CG(map_ptr_base));
+		CG(map_ptr_base) = NULL;
+		CG(map_ptr_size) = 0;
+	}
 #endif
 	zend_destroy_rsrc_list_dtors();
 }
@@ -1107,16 +1136,11 @@ ZEND_API void zend_activate(void) /* {{{ */
 	init_compiler();
 	init_executor();
 	startup_scanner();
+	if (CG(map_ptr_last)) {
+		memset(CG(map_ptr_base), 0, CG(map_ptr_last) * sizeof(void*));
+	}
 }
 /* }}} */
-
-#ifdef ZTS
-void zend_reset_internal_classes(void) /* {{{ */
-{
-	CG(last_static_member) = global_last_static_member;
-}
-/* }}} */
-#endif
 
 void zend_call_destructors(void) /* {{{ */
 {
@@ -1220,6 +1244,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	zend_array *symbol_table;
+	zend_class_entry *orig_fake_scope;
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
@@ -1374,6 +1399,9 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 				CG(in_compilation) = 0;
 			}
 
+			orig_fake_scope = EG(fake_scope);
+			EG(fake_scope) = NULL;
+
 			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
@@ -1385,6 +1413,8 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 				/* The user error handler failed, use built-in error handler */
 				zend_error_cb(type, error_filename, error_lineno, format, args);
 			}
+
+			EG(fake_scope) = orig_fake_scope;
 
 			if (in_compilation) {
 				CG(active_class_entry) = saved_class_entry;
@@ -1642,6 +1672,62 @@ void free_estring(char **str_p) /* {{{ */
 	efree(*str_p);
 }
 /* }}} */
+
+ZEND_API void zend_map_ptr_reset(void)
+{
+	CG(map_ptr_last) = global_map_ptr_last;
+}
+
+ZEND_API void *zend_map_ptr_new(void)
+{
+	void **ptr;
+
+	if (CG(map_ptr_last) >= CG(map_ptr_size)) {
+#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
+		// TODO: error ???
+		ZEND_ASSERT(0);
+#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
+		/* Grow map_ptr table */
+		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
+		CG(map_ptr_base) = perealloc(CG(map_ptr_base), CG(map_ptr_size) * sizeof(void*), 1);
+#else
+# error "Unknown ZEND_MAP_PTR_KIND"
+#endif
+	}
+	ptr = (void**)CG(map_ptr_base) + CG(map_ptr_last);
+	*ptr = NULL;
+	CG(map_ptr_last)++;
+#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
+	return ptr;
+#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
+	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
+#else
+# error "Unknown ZEND_MAP_PTR_KIND"
+#endif
+}
+
+ZEND_API void zend_map_ptr_extend(size_t last)
+{
+	if (last > CG(map_ptr_last)) {
+		void **ptr;
+
+		if (last >= CG(map_ptr_size)) {
+#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
+			/* This may never happen */
+			ZEND_ASSERT(0);
+#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
+			/* Grow map_ptr table */
+			CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(last, 4096);
+			CG(map_ptr_base) = perealloc(CG(map_ptr_base), CG(map_ptr_size) * sizeof(void*), 1);
+#else
+# error "Unknown ZEND_MAP_PTR_KIND"
+#endif
+		}
+		ptr = (void**)CG(map_ptr_base) + CG(map_ptr_last);
+		memset(ptr, 0, (last - CG(map_ptr_last)) * sizeof(void*));
+		CG(map_ptr_last) = last;
+	}
+}
 
 /*
  * Local variables:

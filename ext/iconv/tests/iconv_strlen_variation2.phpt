@@ -8,7 +8,7 @@ function_exists('iconv_strlen') or die("skip iconv_strlen() is not available in 
 --FILE--
 <?php
 /* Prototype  : int iconv_strlen(string str [, string charset])
- * Description: Get character numbers of a string 
+ * Description: Get character numbers of a string
  * Source code: ext/iconv/iconv.c
  */
 
@@ -67,7 +67,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -76,7 +76,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -102,7 +102,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing iconv_strlen() : usage variations ***
 

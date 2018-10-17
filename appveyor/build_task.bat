@@ -69,4 +69,3 @@ nmake /NOLOGO
 if %errorlevel% neq 0 exit /b 3
 
 exit /b 0
-

@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_ENV_H
@@ -23,4 +22,3 @@ void clearenv();
 #endif
 
 #endif
-

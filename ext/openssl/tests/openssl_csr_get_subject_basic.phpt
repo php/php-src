@@ -1,7 +1,7 @@
 --TEST--
 openssl_csr_get_subject() tests
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip");
 ?>
 --FILE--
@@ -39,7 +39,7 @@ $csr_file = file_get_contents(dirname(__FILE__) . '/cert.csr');
 var_dump(openssl_csr_get_subject($csr_file));
 var_dump(openssl_csr_get_subject($csr, false));
 ?>
---EXPECT--	
+--EXPECT--
 array(6) {
   ["C"]=>
   string(2) "NL"

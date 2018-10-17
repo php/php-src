@@ -22,7 +22,7 @@ unlink($filename);
 */
 
 /* Trying to create the file in a dir with permissions from 0351 to 0777,
-     Allowable permissions: files are expected to be created in the input dir 
+     Allowable permissions: files are expected to be created in the input dir
      Non-allowable permissions: files are expected to be created in '/tmp' dir
 */
 
@@ -44,9 +44,9 @@ for($mode = 0351; $mode <= 0777; $mode++) {
 
       if (realpath(dirname($file_name)) != realpath(sys_get_temp_dir())) {
          echo " created in unexpected dir\n";
-      }   
+      }
     }
-    unlink($file_name);    
+    unlink($file_name);
   }
   else {
     print("FAILED: File is not created\n");

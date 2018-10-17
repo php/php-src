@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_ATOMIC_H
@@ -164,4 +163,3 @@ static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */
 #define fpm_unlock(lock) lock = 0
 
 #endif
-

@@ -9,7 +9,7 @@ Test array_intersect_uassoc() function : usage variation - Passing unexpected va
 
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
-// Initialise function arguments 
+// Initialise function arguments
 $array2 = array("a" => "green", "yellow", "red");
 $array3 = array("a"=>"green", "brown");
 
@@ -110,7 +110,6 @@ fclose($fp);
 ?>
 ===DONE===
 --EXPECTF--
-
 *** Testing array_intersect_uassoc() : usage variation ***
 
 --int 0--

@@ -68,11 +68,16 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 			/* reuse the same op_array structure */
 			return func;
 		}
-		if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_ADDREF(func->op_array.static_variables);
-		}
 		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_function, func, sizeof(zend_op_array));
+		if (ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr)) {
+			/* See: Zend/tests/method_static_var.phpt */
+			new_function->op_array.static_variables = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
+		}
+		if (!(GC_FLAGS(new_function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+			GC_ADDREF(new_function->op_array.static_variables);
+		}
+		ZEND_MAP_PTR_INIT(new_function->op_array.static_variables_ptr, &new_function->op_array.static_variables);
 	}
 	return new_function;
 }
@@ -91,23 +96,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->get_iterator)) {
 		ce->get_iterator = parent->get_iterator;
 	}
-	if (EXPECTED(!ce->iterator_funcs_ptr) && UNEXPECTED(parent->iterator_funcs_ptr)) {
-		if (ce->type == ZEND_INTERNAL_CLASS) {
-			ce->iterator_funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
-			if (parent->iterator_funcs_ptr->zf_new_iterator) {
-				ce->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&ce->function_table, "getiterator", sizeof("getiterator") - 1);
-			}
-			if (parent->iterator_funcs_ptr->zf_current) {
-				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", sizeof("rewind") - 1);
-				ce->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&ce->function_table, "valid", sizeof("valid") - 1);
-				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", sizeof("key") - 1);
-				ce->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&ce->function_table, "current", sizeof("current") - 1);
-				ce->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&ce->function_table, "next", sizeof("next") - 1);
-			}
-		} else {
-			ce->iterator_funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
-			memset(ce->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-		}
+	if (parent->iterator_funcs_ptr) {
+		/* Must be initialized through iface->interface_gets_implemented() */
+		ZEND_ASSERT(ce->iterator_funcs_ptr);
 	}
 	if (EXPECTED(!ce->__get)) {
 		ce->__get = parent->__get;
@@ -549,7 +540,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 }
 /* }}} */
 
-static void do_inheritance_check_on_method(zend_function *child, zend_function *parent) /* {{{ */
+static void do_inheritance_check_on_method(zend_function *child, zend_function *parent, zend_class_entry *ce, zval *child_zv) /* {{{ */
 {
 	uint32_t child_flags;
 	uint32_t parent_flags = parent->common.fn_flags;
@@ -580,25 +571,41 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 	do {
 		if (!(parent_flags & ZEND_ACC_PRIVATE)) {
-			if (parent_flags & ZEND_ACC_ABSTRACT) {
-				child->common.prototype = parent;
-			} else {
-				zend_function *proto = parent->common.prototype;
+			zend_function *proto = parent->common.prototype ?
+				parent->common.prototype : parent;
 
-				if (parent->common.scope->constructor != parent) {
-					child->common.prototype = proto ? proto : parent;
-				} else if (proto) {
-					if (proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) {
-						/* ctors only have a prototype if it comes from an interface */
-						child->common.prototype = proto;
-						/* and if that is the case, we want to check inheritance against it */
-						parent = proto;
-					} else if (!(proto->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-						break;
-					}
-				} else {
+			if (parent->common.scope->constructor != parent) {
+				if (!proto) {
+					proto = parent;
+				}
+			} else if (proto) {
+				if (proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) {
+					/* ctors only have a prototype if it comes from an interface */
+					/* and if that is the case, we want to check inheritance against it */
+					parent = proto;
+				} else if (!(proto->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 					break;
 				}
+			} else {
+				break;
+			}
+			if (child_zv && child->common.prototype != proto) {
+				do {
+					if (child->common.scope != ce
+					 && child->type == ZEND_USER_FUNCTION
+					 && !child->op_array.static_variables) {
+						if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+							/* Few parent interfaces contain the same method */
+							break;
+						} else {
+							/* op_array wasn't duplicated yet */
+							zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+							memcpy(new_function, child, sizeof(zend_op_array));
+							Z_PTR_P(child_zv) = child = new_function;
+						}
+					}
+					child->common.prototype = proto;
+				} while (0);
 			}
 			/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
 			if ((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
@@ -641,19 +648,13 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 
 	if (child) {
 		zend_function *func = (zend_function*)Z_PTR_P(child);
-		zend_function *orig_prototype = func->common.prototype;
 
-		do_inheritance_check_on_method(func, parent);
-		if (func->common.prototype != orig_prototype &&
-		    func->type == ZEND_USER_FUNCTION &&
-		    func->common.scope != ce &&
-		    !func->op_array.static_variables) {
-			/* Lazy duplication */
-			zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-			memcpy(new_function, func, sizeof(zend_op_array));
-			Z_PTR_P(child) = new_function;
-			func->common.prototype = orig_prototype;
+		if (UNEXPECTED(func == parent)) {
+			/* The same method in interface may be inherited few times */
+			return NULL;
 		}
+
+		do_inheritance_check_on_method(func, parent, ce, child);
 		return NULL;
 	}
 
@@ -957,6 +958,10 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			dst = end + parent_ce->default_static_members_count;
 			ce->default_static_members_table = end;
 		}
+		if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
+			ZEND_ASSERT(parent_ce->type == ZEND_INTERNAL_CLASS || (parent_ce->ce_flags & ZEND_ACC_IMMUTABLE));
+			zend_class_init_statics(parent_ce);
+		}
 		if (UNEXPECTED(parent_ce->type != ce->type)) {
 			/* User class extends internal */
 			if (UNEXPECTED(zend_update_class_constants(parent_ce) != SUCCESS)) {
@@ -973,7 +978,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 				}
 			} while (dst != end);
 		} else if (ce->type == ZEND_USER_CLASS) {
-			src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
+			src = CE_STATIC_MEMBERS(parent_ce) + parent_ce->default_static_members_count;
 			do {
 				dst--;
 				src--;
@@ -999,18 +1004,14 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			} while (dst != end);
 		}
 		ce->default_static_members_count += parent_ce->default_static_members_count;
-		if (ce->type == ZEND_USER_CLASS) {
-			ce->static_members_table = ce->default_static_members_table;
-#ifdef ZTS
-		} else if (!ce->static_members_table_idx) {
-			CG(last_static_member)++;
-			ce->static_members_table_idx = CG(last_static_member);
-			if (CG(static_members_table)) {
-				/* Support for run-time declaration: dl() */
-				CG(static_members_table) = realloc(CG(static_members_table), (CG(last_static_member) + 1) * sizeof(zval*));
-				CG(static_members_table)[ce->static_members_table_idx] = NULL;
+		if (!ZEND_MAP_PTR(ce->static_members_table)) {
+			ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
+			if (!EG(current_execute_data)) {
+				ZEND_MAP_PTR_NEW(ce->static_members_table);
+			} else {
+				/* internal class loaded by dl() */
+				ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 			}
-#endif
 		}
 	}
 
@@ -1365,7 +1366,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		} else {
 			/* inherited members are overridden by members inserted by traits */
 			/* check whether the trait method fulfills the inheritance requirements */
-			do_inheritance_check_on_method(fn, existing_fn);
+			do_inheritance_check_on_method(fn, existing_fn, ce, NULL);
 			fn->common.prototype = NULL;
 		}
 	}
@@ -1378,6 +1379,10 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	} else {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_fn, fn, sizeof(zend_op_array));
+		new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
+		ZEND_MAP_PTR_INIT(new_fn->op_array.run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+		ZEND_MAP_PTR_SET(new_fn->op_array.run_time_cache, NULL);
+		ZEND_MAP_PTR_INIT(new_fn->op_array.static_variables_ptr, &new_fn->op_array.static_variables);
 	}
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_methods(ce, key, fn);

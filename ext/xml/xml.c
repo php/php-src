@@ -1463,7 +1463,6 @@ PHP_FUNCTION(xml_parse_into_struct)
 	parser->level = 0;
 	parser->ltags = safe_emalloc(XML_MAXLEVEL, sizeof(char *), 0);
 
-	XML_SetDefaultHandler(parser->parser, _xml_defaultHandler);
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 
@@ -1666,6 +1665,12 @@ PHP_FUNCTION(xml_parser_get_option)
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:
 			RETURN_LONG(parser->case_folding);
+			break;
+		case PHP_XML_OPTION_SKIP_TAGSTART:
+			RETURN_LONG(parser->toffset);
+			break;
+		case PHP_XML_OPTION_SKIP_WHITE:
+			RETURN_LONG(parser->skipwhite);
 			break;
 		case PHP_XML_OPTION_TARGET_ENCODING:
 			RETURN_STRING((char *)parser->target_encoding);

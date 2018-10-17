@@ -2,7 +2,7 @@
 Bug #27535 (Objects pointing to each other cause Apache to crash)
 --FILE--
 <?php
-                                                                                                                                
+
 class Class1
 {
 	public $_Class2_obj;

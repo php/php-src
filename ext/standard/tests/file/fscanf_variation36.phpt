@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - hexa formats with arrays 
+Test fscanf() function: usage variations - hexa formats with arrays
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - hexa formats with arrays
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different hexa format types with arrays ***\n"; 
+echo "*** Test fscanf(): different hexa format types with arrays ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation36.tmp";
@@ -705,4 +705,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

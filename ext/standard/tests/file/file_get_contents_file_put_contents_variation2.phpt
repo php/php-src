@@ -1,9 +1,8 @@
 --TEST--
 Test file_get_contents() and file_put_contents() functions : usage variations - use_include_path
-
 --FILE--
 <?php
-/* Prototype: string file_get_contents( string $filename[, bool $use_include_path[, 
+/* Prototype: string file_get_contents( string $filename[, bool $use_include_path[,
  *                                      resource $context[, int $offset[, int $maxlen]]]] )
  * Description: Reads entire file into a string
  */

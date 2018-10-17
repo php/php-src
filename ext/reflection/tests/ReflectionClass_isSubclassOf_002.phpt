@@ -36,7 +36,6 @@ try {
 }
 ?>
 --EXPECTF--
-
 Test bad arguments:
 
 Warning: ReflectionClass::isSubclassOf() expects exactly 1 parameter, 0 given in %s on line 7

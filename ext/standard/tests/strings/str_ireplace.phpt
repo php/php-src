@@ -47,7 +47,7 @@ var_dump($Data = str_ireplace("\n", "<br>", $Data));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: str_ireplace() expects at least 3 parameters, 0 given in %s on line %d
 NULL
 

@@ -23,7 +23,7 @@ class TraitsTest {
 
 $t = new TraitsTest;
 ?>
---EXPECTF--	
+--EXPECTF--
 PRE-CLASS-GUARD
 
 Fatal error: THello1 and THello2 define the same property ($hello) in the composition of TraitsTest. However, the definition differs and is considered incompatible. Class was composed in %s on line %d

@@ -347,7 +347,7 @@ int zend_shared_memdup_size(void *source, size_t size)
 	return ZEND_ALIGNED_SIZE(size);
 }
 
-static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, zend_bool get_xlat, zend_bool set_xlat, zend_bool free_source)
+static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, zend_bool arena, zend_bool get_xlat, zend_bool set_xlat, zend_bool free_source)
 {
 	void *old_p, *retval;
 	zend_ulong key;
@@ -360,8 +360,13 @@ static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, z
 			return old_p;
 		}
 	}
-	retval = ZCG(mem);
-	ZCG(mem) = (void*)(((char*)ZCG(mem)) + ZEND_ALIGNED_SIZE(size));
+	if (arena) {
+		retval = ZCG(arena_mem);
+		ZCG(arena_mem) = (void*)(((char*)ZCG(arena_mem)) + ZEND_ALIGNED_SIZE(size));
+	} else {
+		retval = ZCG(mem);
+		ZCG(mem) = (void*)(((char*)ZCG(mem)) + ZEND_ALIGNED_SIZE(size));
+	}
 	memcpy(retval, source, size);
 	if (set_xlat) {
 		if (!get_xlat) {
@@ -378,32 +383,42 @@ static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, z
 
 void *zend_shared_memdup_get_put_free(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 1, 1, 1);
+	return _zend_shared_memdup(source, size, 0, 1, 1, 1);
 }
 
 void *zend_shared_memdup_put_free(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 1, 1);
+	return _zend_shared_memdup(source, size, 0, 0, 1, 1);
 }
 
 void *zend_shared_memdup_free(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 0, 1);
+	return _zend_shared_memdup(source, size, 0, 0, 0, 1);
 }
 
 void *zend_shared_memdup_get_put(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 1, 1, 0);
+	return _zend_shared_memdup(source, size, 0, 1, 1, 0);
 }
 
 void *zend_shared_memdup_put(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 1, 0);
+	return _zend_shared_memdup(source, size, 0, 0, 1, 0);
 }
 
 void *zend_shared_memdup(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 0, 0);
+	return _zend_shared_memdup(source, size, 0, 0, 0, 0);
+}
+
+void *zend_shared_memdup_arena_put(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 1, 0, 1, 0);
+}
+
+void *zend_shared_memdup_arena(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 1, 0, 0, 0);
 }
 
 void zend_shared_alloc_safe_unlock(void)
@@ -481,6 +496,16 @@ void zend_shared_alloc_destroy_xlat_table(void)
 void zend_shared_alloc_clear_xlat_table(void)
 {
 	zend_hash_clean(&ZCG(xlat_table));
+}
+
+uint32_t zend_shared_alloc_checkpoint_xlat_table(void)
+{
+	return ZCG(xlat_table).nNumUsed;
+}
+
+void zend_shared_alloc_restore_xlat_table(uint32_t checkpoint)
+{
+	zend_hash_discard(&ZCG(xlat_table), checkpoint);
 }
 
 void zend_shared_alloc_register_xlat_entry(const void *old, const void *new)

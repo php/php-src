@@ -24,7 +24,7 @@ function print_node_r(DomNode $node) {
     print_node($node->previousSibling);
   else
     echo "NULL\n";
-  
+
   echo $indent . "nextSibling: ";
   if ( $node->nextSibling )
     print_node($node->nextSibling);
@@ -33,7 +33,7 @@ function print_node_r(DomNode $node) {
 
   if ( !$node->hasChildNodes() )
     return;
-  
+
   foreach ($node->childNodes as $child) {
 
     $old_indent  = $indent;
@@ -119,7 +119,6 @@ print_node_r($p);
 
 ?>
 --EXPECT--
-
 name (value): p ( t1 X t2  xxx )
 parent: NULL
 previousSibling: NULL

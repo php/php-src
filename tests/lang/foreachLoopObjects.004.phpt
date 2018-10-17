@@ -16,13 +16,13 @@ $obj = new C;
 $count=0;
 foreach ($obj as $v) {
 	if ($v==$obj->b) {
-		unset($obj->b);	
+		unset($obj->b);
 	}
 	var_dump($v);
 	if (++$count>10) {
 		echo "Loop detected.\n";
 		break;
-	}	
+	}
 }
 var_dump($obj);
 

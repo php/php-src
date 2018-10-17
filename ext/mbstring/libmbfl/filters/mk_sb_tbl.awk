@@ -54,7 +54,7 @@ END {
 			print ""
 			break;
 		}
-	}	
+	}
 	print "};"
 
 	if (IFNDEF_NAME) {

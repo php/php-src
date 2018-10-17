@@ -4,12 +4,12 @@ Bug #60174 (Notice when array in method prototype error)
 <?php
 Abstract Class Base {
 	public function test($foo, $extra = array("test")) {
-	}	
+	}
 }
 
 class Sub extends Base {
 	public function test($foo, $extra) {
-	}	
+	}
 }
 ?>
 --EXPECTF--

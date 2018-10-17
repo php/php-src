@@ -1,7 +1,7 @@
 --TEST--
 Bug #25378 (unserialize() crashes with invalid data)
 --FILE--
-<?php 
+<?php
 var_dump(unserialize("s:-1:\"\";"));
 var_dump(unserialize("i:823"));
 var_dump(unserialize("O:8:\"stdClass :0:{}"));

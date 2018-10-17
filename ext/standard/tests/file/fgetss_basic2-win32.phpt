@@ -34,7 +34,7 @@ EOT;
 if(substr(PHP_OS, 0, 3) == "WIN")  {
 	$string_with_tags = str_replace("\r",'', $string_with_tags);
 }
-$filename = dirname(__FILE__)."/fgetss_basic2.tmp"; 
+$filename = dirname(__FILE__)."/fgetss_basic2.tmp";
 
 /* try reading the file opened in different modes of reading */
 $file_modes = array("w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t");
@@ -49,7 +49,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
     echo "Error: failed to open file $filename!\n";
     exit();
   }
-  
+
   // rewind the file pointer to beginning of the file
   var_dump( filesize($filename) );
   var_dump( rewind($file_handle) );
@@ -68,11 +68,11 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   var_dump( fgetss($file_handle ,30) ); // length parameter given,not reading entire file
   var_dump( ftell($file_handle) ); // checking file pointer position initially
   var_dump( feof($file_handle) ); // confirm file pointer is not at eof
- 
-  // close the file 
+
+  // close the file
   fclose($file_handle);
-   
-  // delete the file 
+
+  // delete the file
   unlink($filename);
 } // end of for - mode_counter
 

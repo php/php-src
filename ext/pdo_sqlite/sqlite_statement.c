@@ -331,7 +331,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 		add_assoc_string(return_value, "sqlite:decl_type", (char *)str);
 	}
 
-#ifdef SQLITE_ENABLE_COLUMN_METADATA
+#ifdef HAVE_SQLITE3_COLUMN_TABLE_NAME
 	str = sqlite3_column_table_name(S->stmt, colno);
 	if (str) {
 		add_assoc_string(return_value, "table", (char *)str);

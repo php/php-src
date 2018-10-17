@@ -142,4 +142,3 @@ extern PHPAPI php_file_globals file_globals;
 
 
 #endif /* FILE_H */
-

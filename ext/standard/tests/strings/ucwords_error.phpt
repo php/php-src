@@ -1,5 +1,5 @@
 --TEST--
-Test ucwords() function : error conditions 
+Test ucwords() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string ucwords ( string $str )

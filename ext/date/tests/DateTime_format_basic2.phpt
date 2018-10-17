@@ -1,5 +1,5 @@
 --TEST--
-Test date_format() function : basic functionality  
+Test date_format() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : public string DateTime::format  ( string $format  )
@@ -7,8 +7,8 @@ Test date_format() function : basic functionality
  * Source code: ext/date/php_date.c
  * Alias to functions: date_format
  */
- 
-//Set the default time zone 
+
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_format() : basic functionality - formatting coinstants ***\n";

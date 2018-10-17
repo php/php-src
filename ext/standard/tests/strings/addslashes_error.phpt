@@ -1,5 +1,5 @@
 --TEST--
-Test addslashes() function : error conditions 
+Test addslashes() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string addslashes ( string $str )

@@ -249,7 +249,6 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;
 	CG(context).vars_size = 0;
 	CG(context).literals_size = 0;
-	CG(context).backpatch_count = 0;
 	CG(context).fast_call_var = -1;
 	CG(context).try_catch_offset = -1;
 	CG(context).current_brk_cont = -1;
@@ -1024,7 +1023,9 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 				GC_ADDREF(op_array->static_variables);
 			}
 		}
-		op_array->run_time_cache = NULL;
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+		ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
 		if (function->common.function_name) {
 			zend_string_addref(function->common.function_name);
@@ -1617,9 +1618,9 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
-		ce->static_members_table = NULL;
+		ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	} else {
-		ce->static_members_table = ce->default_static_members_table;
+		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		ce->info.user.doc_comment = NULL;
 	}
 
@@ -1642,6 +1643,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->iterator_funcs_ptr = NULL;
 		ce->get_static_method = NULL;
 		ce->parent = NULL;
+		ce->parent_name = NULL;
 		ce->num_interfaces = 0;
 		ce->interfaces = NULL;
 		ce->num_traits = 0;
@@ -5919,6 +5921,9 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	zend_oparray_context orig_oparray_context;
 
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
+
+	ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+	ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
 
 	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);
 	op_array->fn_flags |= decl->flags;

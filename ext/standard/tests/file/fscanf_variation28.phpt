@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - octal formats with float values
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different octal format types with float values ***\n"; 
+echo "*** Test fscanf(): different octal format types with float values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation28.tmp";
@@ -23,8 +23,8 @@ if($file_handle == false)
 // array of float type values
 
 $float_values = array (
-  -2147483649, 
-  2147483648,  
+  -2147483649,
+  2147483648,
   -0x80000001, // float value, beyond max negative int
   0x800000001, // float value, beyond max positive int
   020000000001, // float value, beyond max positive int
@@ -41,7 +41,7 @@ $float_values = array (
 );
 
 $octal_formats = array( "%o",
-                        "%ho", "%lo", "%Lo", 
+                        "%ho", "%lo", "%Lo",
                         " %o", "%o ", "% o",
                         "\t%o", "\n%o", "%4o",
                         "%30o", "%[0-7]", "%*o"

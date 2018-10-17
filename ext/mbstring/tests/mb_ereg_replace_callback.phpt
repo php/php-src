@@ -20,4 +20,3 @@ echo mb_ereg_replace_callback('(?<word>\w+) (?<digit>\d+).*', function ($m) {
 --EXPECT--
 abc(3) 123(3) #",;(4) $foo(4)
 123-abc
-

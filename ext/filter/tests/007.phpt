@@ -31,7 +31,7 @@ var_dump(filter_has_var("", array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(false)

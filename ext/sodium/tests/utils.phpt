@@ -86,6 +86,12 @@ if (defined('SODIUM_BASE64_VARIANT_ORIGINAL')) {
     } catch (Exception $e) {
         var_dump('base64("O") case passed');
     }
+    var_dump(sodium_base642bin('YWJjZA', SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING));
+} else {
+    var_dump('base64("O1R") case passed');
+    var_dump('base64("O1") case passed');
+    var_dump('base64("O") case passed');
+    var_dump('abcd');
 }
 
 ?>
@@ -107,3 +113,4 @@ bool(true)
 string(25) "base64("O1R") case passed"
 string(24) "base64("O1") case passed"
 string(23) "base64("O") case passed"
+string(4) "abcd"

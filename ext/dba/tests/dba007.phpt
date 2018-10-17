@@ -1,7 +1,7 @@
 --TEST--
 DBA Multiple File Creation Test
 --SKIPIF--
-<?php 
+<?php
 	require_once(dirname(__FILE__) .'/skipif.inc');
 	if (!function_exists('dba_list')) die('skip dba_list() not available');
 	die("info $HND handler used");
@@ -10,8 +10,8 @@ DBA Multiple File Creation Test
 <?php
 	require_once(dirname(__FILE__) .'/test.inc');
 	echo "database handler: $handler\n";
-	$db_file1 = $db_filename1 = dirname(__FILE__).'/test1.dbm'; 
-	$db_file2 = $db_filename2 = dirname(__FILE__).'/test2.dbm'; 
+	$db_file1 = $db_filename1 = dirname(__FILE__).'/test1.dbm';
+	$db_file2 = $db_filename2 = dirname(__FILE__).'/test2.dbm';
 	if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
     	echo "database file created\n";
 	} else {
@@ -34,8 +34,8 @@ DBA Multiple File Creation Test
 	@unlink($db_filename2);
 ?>
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: %s

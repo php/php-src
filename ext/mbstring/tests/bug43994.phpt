@@ -8,12 +8,12 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 --FILE--
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
+ * Description: Regular expression match for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  */
 
 /*
- * mb_ereg 'successfully' matching incorrectly: 
+ * mb_ereg 'successfully' matching incorrectly:
  * Bug now seems to be fixed - error message is now generated when an 'empty'
  * pattern is supplied to mb_ereg. Similar error message to ereg().
  */
@@ -37,9 +37,7 @@ foreach($inputs as $input) {
 	$iterator++;
 };
 ?>
-
---EXPECTF-- 
-
+--EXPECTF--
 -- Iteration 1 --
 Without $regs arg:
 

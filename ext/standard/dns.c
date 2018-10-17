@@ -355,7 +355,7 @@ PHP_FUNCTION(dns_check_record)
 	u_char ans[MAXPACKET];
 	char *hostname, *rectype = NULL;
 	size_t hostname_len, rectype_len = 0;
-	int type = T_MX, i;
+	int type = DNS_T_MX, i;
 #if defined(HAVE_DNS_SEARCH)
 	struct sockaddr_storage from;
 	uint32_t fromsize = sizeof(from);
@@ -377,7 +377,7 @@ PHP_FUNCTION(dns_check_record)
 	}
 
 	if (rectype) {
-		if (!strcasecmp("A",     rectype)) type = T_A;
+		if (!strcasecmp("A",     rectype)) type = DNS_T_A;
 		else if (!strcasecmp("NS",    rectype)) type = DNS_T_NS;
 		else if (!strcasecmp("MX",    rectype)) type = DNS_T_MX;
 		else if (!strcasecmp("PTR",   rectype)) type = DNS_T_PTR;
@@ -454,7 +454,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 	GETLONG(ttl, cp);
 	GETSHORT(dlen, cp);
 	CHECKCP(dlen);
-	if (type_to_fetch != T_ANY && type != type_to_fetch) {
+	if (type_to_fetch != DNS_T_ANY && type != type_to_fetch) {
 		cp += dlen;
 		return cp;
 	}

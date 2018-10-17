@@ -1,13 +1,13 @@
 --TEST--
-Test parse_ini_file() function : usage variation 
+Test parse_ini_file() function : usage variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file 
+ * Description: Parse configuration file
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing parse_ini_file() : usage variation ***\n";
@@ -208,4 +208,3 @@ bool(false)
 Error: 2 - parse_ini_file(): Filename cannot be empty!, %s(%d)
 bool(false)
 ===DONE===
-

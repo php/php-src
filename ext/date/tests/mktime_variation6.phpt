@@ -5,12 +5,12 @@ Test mktime() function : usage variation - Passing unexpected values to sixth ar
 /* Prototype  : int mktime  ([ int $hour= date("H")  [, int $minute= date("i")  [, int $second= date("s")  [, int $month= date("n")  [, int $day= date("j")  [, int $year= date("Y")  [, int $is_dst= -1  ]]]]]]] )
  * Description: Get Unix timestamp for a date
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mktime() : usage variation -  unexpected values to sixth argument \$year***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -89,8 +89,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 
@@ -220,4 +220,3 @@ int(%i)
 Warning: mktime() expects parameter 6 to be int, resource given in %s on line %d
 bool(false)
 ===DONE===
-

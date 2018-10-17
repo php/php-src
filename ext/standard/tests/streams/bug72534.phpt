@@ -16,4 +16,3 @@ unlink($fname);
 --EXPECT--
 bool(false)
 bool(false)
-

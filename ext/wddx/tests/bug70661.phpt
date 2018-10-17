@@ -43,12 +43,12 @@ var_dump($y);
 function ptr2str($ptr)
 {
 	$out = '';
-	
+
 	for ($i = 0; $i < 8; $i++) {
 		$out .= chr($ptr & 0xff);
 		$ptr >>= 8;
 	}
-	
+
 	return $out;
 }
 ?>

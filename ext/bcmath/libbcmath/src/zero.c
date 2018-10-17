@@ -60,4 +60,3 @@ bc_is_zero (bc_num num)
   else
     return TRUE;
 }
-

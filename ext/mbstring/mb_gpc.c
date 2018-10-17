@@ -397,4 +397,3 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
  * vim600: fdm=marker
  * vim: noet sw=4 ts=4
  */
-

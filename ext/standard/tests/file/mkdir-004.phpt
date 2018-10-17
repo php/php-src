@@ -17,7 +17,7 @@ var_dump(rmdir("/testdir"));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

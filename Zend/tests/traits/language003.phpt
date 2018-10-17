@@ -15,15 +15,15 @@ trait World {
      echo 'World';
    }
 }
- 
+
 class MyHelloWorld {
    use Hello, World {
      Hello::saySomething insteadof World;
    }
 }
- 
+
 $o = new MyHelloWorld();
 $o->saySomething();
 ?>
---EXPECT--	
+--EXPECT--
 Hello

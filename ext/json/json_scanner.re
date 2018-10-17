@@ -104,7 +104,7 @@ void php_json_scanner_init(php_json_scanner *s, char *str, size_t str_len, int o
 int php_json_scan(php_json_scanner *s)
 {
 	ZVAL_NULL(&s->value);
-	
+
 std:
 	s->token = s->cursor;
 
@@ -393,4 +393,3 @@ std:
 */
 
 }
-

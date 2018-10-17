@@ -76,4 +76,4 @@ END {
 		printf("{ 0x%04x, 0x%04x }", first, prev)
 	}
 	print "\n};\n"
-} 
+}

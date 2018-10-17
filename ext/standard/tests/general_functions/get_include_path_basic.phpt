@@ -17,7 +17,7 @@ if (ini_get("include_path") == get_include_path()) {
 	echo "PASSED\n";
 } else {
 	echo "FAILED\n";
-}		
+}
 
 echo "\nError cases:\n";
 var_dump(get_include_path(TRUE));

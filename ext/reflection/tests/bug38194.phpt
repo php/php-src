@@ -3,7 +3,7 @@ Reflection Bug #38194 (ReflectionClass::isSubclassOf() returns TRUE for the clas
 --FILE--
 <?php
 class ObjectOne { }
-  
+
 $objectClass = new ReflectionClass('ObjectOne');
 var_dump($objectClass->isSubclassOf($objectClass));
 ?>

@@ -1,5 +1,5 @@
 --TEST--
-Test touch() function : variation: various valid and invalid paths 
+Test touch() function : variation: various valid and invalid paths
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -11,9 +11,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : bool touch(string filename [, int time [, int atime]])
- * Description: Set modification time of file 
+ * Description: Set modification time of file
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $workDir = "touchVar5.tmp";
@@ -26,38 +26,38 @@ $paths = array(
              $workDir.'/'.$subDirOrFile,
              './'.$workDir.'/'.$subDirOrFile,
              $workDir.'/../'.$workDir.'/'.$subDirOrFile,
-             
+
              // relative bad path
              $workDir.'/../BADDIR/'.$subDirOrFile,
              'BADDIR/'.$subDirOrFile,
-             
+
              //absolute
              $cwd.'/'.$workDir.'/'.$subDirOrFile,
              $cwd.'/./'.$workDir.'/'.$subDirOrFile,
              $cwd.'/'.$workDir.'/../'.$workDir.'/'.$subDirOrFile,
 
-             //absolute bad path             
+             //absolute bad path
              $cwd.'/BADDIR/'.$subDirOrFile,
-             
+
              //trailing separators
              $workDir.'/'.$subDirOrFile.'/',
              $cwd.'/'.$workDir.'/'.$subDirOrFile.'/',
-             
+
              // multiple separators
              $workDir.'//'.$subDirOrFile,
              $cwd.'//'.$workDir.'//'.$subDirOrFile,
-             
+
              );
-             
+
 echo "*** Testing touch() : variation ***\n";
 
-echo "\n*** testing nonexisting paths ***\n";      
+echo "\n*** testing nonexisting paths ***\n";
 test_nonexisting($paths);
 
-echo "\n*** testing existing files ***\n";      
+echo "\n*** testing existing files ***\n";
 test_existing($paths, false);
 
-echo "\n*** testing existing directories ***\n";      
+echo "\n*** testing existing directories ***\n";
 test_existing($paths, true);
 
 
@@ -68,7 +68,7 @@ rmdir($workDir);
 function test_nonexisting($paths) {
 	foreach($paths as $path) {
 	   echo "--- testing $path ---\n";
-	   
+
 	   if (is_dir($path) || is_file($path)) {
 	      echo "FAILED: $path - exists\n";
 	   }
@@ -115,7 +115,7 @@ function test_existing($paths, $are_dirs) {
 	      if ($res == true) {
              test_path($path);
              rmdir($path);
-          }	   
+          }
 	   }
 	   else {
 	      $h = @fopen($path,"w");
@@ -123,12 +123,12 @@ function test_existing($paths, $are_dirs) {
 	         fclose($h);
              test_path($path);
              unlink($path);
-          }	   
+          }
 	   }
 	}
 }
-	   
-	
+
+
 function test_path($path) {
    echo "--- testing $path ---\n";
    $org_atime = get_atime($path);
@@ -227,4 +227,3 @@ PASSED: touchVar5.tmp//aSubDirOrFile - touched
 --- testing /%s//touchVar5.tmp//aSubDirOrFile ---
 PASSED: /%s//touchVar5.tmp//aSubDirOrFile - touched
 ===DONE===
-

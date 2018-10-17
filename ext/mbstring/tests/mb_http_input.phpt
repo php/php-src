@@ -1,5 +1,5 @@
 --TEST--
-mb_http_input() 
+mb_http_input()
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');
@@ -43,9 +43,7 @@ else {
 }
 
 ?>
-
 --EXPECT--
 日本語0123456789日本語カタカナひらがな
 日本語0123456789日本語カタカナひらがな
 OK
-

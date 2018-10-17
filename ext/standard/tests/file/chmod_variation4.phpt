@@ -1,13 +1,13 @@
 --TEST--
-Test chmod() function : second parameter variation 
+Test chmod() function : second parameter variation
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : bool chmod(string filename, int mode)
- * Description: Change file mode 
+ * Description: Change file mode
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing chmod() : usage variation ***\n";
@@ -200,4 +200,3 @@ bool(true)
 --unset var--
 bool(true)
 ===DONE===
-

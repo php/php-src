@@ -1,7 +1,5 @@
 --TEST--
-hash_equals() function
---SKIPIF--
-<?php if(!extension_loaded('hash')) die('skip hash extension not loaded'); ?>
+Hash: hash_equals() test
 --FILE--
 <?php
 var_dump(hash_equals("same", "same"));

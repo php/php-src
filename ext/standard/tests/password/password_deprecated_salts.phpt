@@ -18,4 +18,3 @@ string(60) "$2y$07$usesomesillystringfore2uDLvp1Ii2e./U9C8sBjqp8I90dH6hi"
 Deprecated: password_hash(): Use of the 'salt' option to password_hash is deprecated in %s on line %d
 string(60) "$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y"
 OK!
-

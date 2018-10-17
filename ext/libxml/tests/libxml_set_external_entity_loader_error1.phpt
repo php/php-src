@@ -24,7 +24,6 @@ try {
 }
 
 echo "Done.\n";
-
 --EXPECTF--
 Warning: libxml_set_external_entity_loader() expects parameter 1 to be a valid callback, array must have exactly two members in %s on line %d
 NULL

@@ -39,7 +39,7 @@ do
 done
 
 for TARBALL in "$PHPROOT/php-$RELEASE_VER.tar.bz2" "$PHPROOT/php-$RELEASE_VER.tar.gz" "$PHPROOT/php-$RELEASE_VER.tar.xz"
-do 
+do
 	basename $TARBALL
 	echo "SHA256 hash: `sha256sum $TARBALL | cut -d' ' -f1`";
 	echo PGP signature:
@@ -48,4 +48,3 @@ do
 done
 
 exit 0
-

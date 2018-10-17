@@ -1,5 +1,5 @@
 --TEST--
-SplFileObject::getCsvControl function - basic test 
+SplFileObject::getCsvControl function - basic test
 --FILE--
 <?php
 $obj = New SplFileObject(dirname(__FILE__).'/SplFileObject_testinput.csv');

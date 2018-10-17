@@ -145,9 +145,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 
 	if (!ce->__debugInfo) {
 		*is_temp = 0;
-		return Z_OBJ_HANDLER_P(object, get_properties)
-			? Z_OBJ_HANDLER_P(object, get_properties)(object)
-			: NULL;
+		return Z_OBJ_HANDLER_P(object, get_properties)(object);
 	}
 
 	zend_call_method_with_0_params(object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
@@ -562,6 +560,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 		} else {
 			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
 		}
+		return SUCCESS;
 	} else {
 		property_info = zend_get_property_info(zobj->ce, prop_info_name, 1);
 		if (property_info == NULL) {
@@ -569,9 +568,8 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 		} else if (property_info == ZEND_WRONG_PROPERTY_INFO) {
 			return FAILURE;
 		}
-		ZEND_ASSERT(property_info->flags & ZEND_ACC_PUBLIC);
+		return (property_info->flags & ZEND_ACC_PUBLIC) ? SUCCESS : FAILURE;
 	}
-	return SUCCESS;
 }
 /* }}} */
 
@@ -1197,6 +1195,10 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	size_t mname_len;
 	zend_op_array *func;
 	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
+	/* We use non-NULL value to avoid useless run_time_cache allocation.
+	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
+	 */
+	static const void *dummy = (void*)(intptr_t)2;
 
 	ZEND_ASSERT(fbc);
 
@@ -1215,7 +1217,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
 	func->opcodes = &EG(call_trampoline_op);
-	func->run_time_cache = (void*)(intptr_t)-1;
+	ZEND_MAP_PTR_INIT(func->run_time_cache, (void***)&dummy);
 	func->scope = fbc->common.scope;
 	/* reserve space for arguments, local and temorary variables */
 	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
@@ -1410,11 +1412,7 @@ static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{
 			zend_intenal_class_init_statics(class_type->parent);
 		}
 
-#if ZTS
-		CG(static_members_table)[class_type->static_members_table_idx] = emalloc(sizeof(zval) * class_type->default_static_members_count);
-#else
-		class_type->static_members_table = emalloc(sizeof(zval) * class_type->default_static_members_count);
-#endif
+		ZEND_MAP_PTR_SET(class_type->static_members_table, emalloc(sizeof(zval) * class_type->default_static_members_count));
 		for (i = 0; i < class_type->default_static_members_count; i++) {
 			p = &class_type->default_static_members_table[i];
 			if (Z_TYPE_P(p) == IS_INDIRECT) {
@@ -1426,6 +1424,11 @@ static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{
 			}
 		}
 	}
+} /* }}} */
+
+ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
+{
+	zend_intenal_class_init_statics(class_type);
 } /* }}} */
 
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, zend_property_info **property_info_ptr) /* {{{ */
@@ -1468,7 +1471,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 
 	/* check if static properties were destroyed */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-		if (ce->type == ZEND_INTERNAL_CLASS) {
+		if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 			zend_intenal_class_init_statics(ce);
 		} else {
 undeclared_property:
@@ -1811,6 +1814,43 @@ ZEND_API int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_fun
 }
 /* }}} */
 
+ZEND_API HashTable *zend_std_get_properties_for(zval *obj, zend_prop_purpose purpose) {
+	HashTable *ht;
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_DEBUG:
+			if (Z_OBJ_HT_P(obj)->get_debug_info) {
+				int is_temp;
+				ht = Z_OBJ_HT_P(obj)->get_debug_info(obj, &is_temp);
+				if (ht && !is_temp && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				return ht;
+			}
+			/* break missing intentionally */
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+		case ZEND_PROP_PURPOSE_SERIALIZE:
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+		case _ZEND_PROP_PURPOSE_ARRAY_KEY_EXISTS:
+			ht = Z_OBJ_HT_P(obj)->get_properties(obj);
+			if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+				GC_ADDREF(ht);
+			}
+			return ht;
+		default:
+			ZEND_ASSERT(0);
+			return NULL;
+	}
+}
+
+ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose) {
+	if (Z_OBJ_HT_P(obj)->get_properties_for) {
+		return Z_OBJ_HT_P(obj)->get_properties_for(obj, purpose);
+	}
+
+	return zend_std_get_properties_for(obj, purpose);
+}
+
 ZEND_API const zend_object_handlers std_object_handlers = {
 	0,										/* offset */
 
@@ -1842,6 +1882,7 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_get_gc,						/* get_gc */
 	NULL,									/* do_operation */
 	NULL,									/* compare */
+	NULL,									/* get_properties_for */
 };
 
 /*

@@ -25,4 +25,3 @@ unlink($dirname.'foo.zip');
 --EXPECT--
 string(8) "No error"
 string(16) "Invalid argument"
-

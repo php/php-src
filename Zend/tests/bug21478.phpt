@@ -1,5 +1,5 @@
 --TEST--
-Bug #21478 (Zend/zend_alloc.c :: shutdown_memory_manager produces segfault) 
+Bug #21478 (Zend/zend_alloc.c :: shutdown_memory_manager produces segfault)
 --FILE--
 <?php
 class debugfilter extends php_user_filter {
@@ -23,7 +23,7 @@ fwrite($fp, "This is a test.\n");
 print "Done.\n";
 fclose($fp);
 // Uncommenting the following 'print' line causes the segfault to stop occurring
-// print "2\n";  
+// print "2\n";
 readfile(dirname(__FILE__)."/test.txt");
 unlink(dirname(__FILE__)."/test.txt");
 ?>

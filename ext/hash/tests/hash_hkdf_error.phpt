@@ -1,7 +1,5 @@
 --TEST--
-Test hash_hkdf() function: error conditions
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_hkdf() function: error conditions
 --FILE--
 <?php
 

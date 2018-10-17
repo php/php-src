@@ -265,5 +265,3 @@ static int mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-

@@ -1,5 +1,5 @@
 --TEST--
-Test copy() function: usage variations - identical names 
+Test copy() function: usage variations - identical names
 --FILE--
 <?php
 /* Prototype: bool copy ( string $source, string $dest );
@@ -17,18 +17,16 @@ $file_handle =  fopen($file, "w");
 fwrite($file_handle, str_repeat("Hello2world...\n", 100));
 fclose($file_handle);
 
-var_dump( copy($file, $file) ); 
-var_dump( file_exists($file) );  
+var_dump( copy($file, $file) );
+var_dump( file_exists($file) );
 var_dump( filesize($file) );
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_variation10.tmp");
 ?>
-
 --EXPECT--
 *** Test copy(): Trying to create a copy of file with the same source name ***
 bool(false)

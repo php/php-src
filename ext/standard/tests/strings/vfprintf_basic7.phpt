@@ -26,7 +26,7 @@ $arg3 = array(-1111,-1234567,-2345432);
 $data_file = dirname(__FILE__) . '/vfprintf_basic7.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 vfprintf($fp, $format1,$arg1);
 fprintf($fp, "\n");
 
@@ -49,5 +49,3 @@ unlink($data_file);
 4294966185 4293732729
 4294966185 4293732729 4292621864
 ===DONE===
-
-

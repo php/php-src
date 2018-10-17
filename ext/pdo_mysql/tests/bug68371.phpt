@@ -98,4 +98,3 @@ string(5) "mysql"
 ERR
 ERR
 int(4)
-

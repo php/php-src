@@ -1,5 +1,5 @@
 --TEST--
-Test preg_grep() function : basic functionality 
+Test preg_grep() function : basic functionality
 --FILE--
 <?php
 /*

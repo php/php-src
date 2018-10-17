@@ -5,9 +5,9 @@
 	The PHP License, version 3.01
 	This is sample real-time status page for FPM. You can change it to better fit your needs.
 -->
-	<head> 
+	<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-		<style type="text/css"> 
+		<style type="text/css">
 			body {background-color: #ffffff; color: #000000;}
 			body, td, th, h1, h2 {font-family: sans-serif;}
 			pre {margin: 0px; font-family: monospace;}
@@ -32,40 +32,40 @@
 			}
 			img {float: right; border: 0px;}
 			hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #000000;}
-		</style> 
+		</style>
 	<title>PHP-FPM status page</title>
-	<meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head> 
+	<meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head>
 	<body>
 		<div class="center">
 			<table border="0" cellpadding="3" width="95%">
 				<tr class="h">
-					<td> 
+					<td>
 						<a href="http://www.php.net/"><img border="0" src="https://static.php.net/www.php.net/images/php.gif" alt="PHP Logo" /></a><h1 class="p">PHP-FPM real-time status page</h1>
 					</td>
 				</tr>
 			</table>
 			<br />
 			<table border="0" cellpadding="3" width="95%">
-				<tr><td class="e">Status URL</td><td class="v"><input type="text" id="url" size="45" /></td></tr> 
-				<tr><td class="e">Ajax status</td><td class="v" id="status"></td></tr> 
-				<tr><td class="e">Refresh Rate</td><td class="v"><input type="text" id="rate" value="1" /></td></tr> 
+				<tr><td class="e">Status URL</td><td class="v"><input type="text" id="url" size="45" /></td></tr>
+				<tr><td class="e">Ajax status</td><td class="v" id="status"></td></tr>
+				<tr><td class="e">Refresh Rate</td><td class="v"><input type="text" id="rate" value="1" /></td></tr>
 				<tr>
 					<td class="e">Actions</td>
 					<td class="v">
 						<button onclick="javascript:refresh();">Manual Refresh</button>
 						<button id="play" onclick="javascript:playpause();">Play</button>
 					</td>
-				</tr> 
+				</tr>
 			</table>
-			<h1>Pool Status</h1> 
+			<h1>Pool Status</h1>
 			<table border="0" cellpadding="3" width="95%" id="short">
 				<tr style="display: none;"><td>&nbsp;</td></tr>
 			</table>
-			<h1>Active Processes status</h1> 
+			<h1>Active Processes status</h1>
 			<table border="0" cellpadding="3" width="95%" id="active">
 				<tr class="h"><th>PID&darr;</th><th>Start Time</th><th>Start Since</th><th>Requests Served</th><th>Request Duration</th><th>Request method</th><th>Request URI</th><th>Content Length</th><th>User</th><th>Script</th></tr>
 			</table>
-			<h1>Idle Processes status</h1> 
+			<h1>Idle Processes status</h1>
 			<table border="0" cellpadding="3" width="95%" id="idle">
 				<tr class="h"><th>PID&darr;</th><th>Start Time</th><th>Start Since</th><th>Requests Served</th><th>Request Duration</th><th>Request method</th><th>Request URI</th><th>Content Length</th><th>User</th><th>Script</th><th>Last Request %CPU</th><th>Last Request Memory</th></tr>
 			</table>

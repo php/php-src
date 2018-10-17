@@ -1,7 +1,7 @@
 --TEST--
 Bug #72730: imagegammacorrect allows arbitrary write access
 --SKIPIF--
-<?php 
+<?php
 if (!function_exists("imagecreatetruecolor")) die("skip");
 ?>
 --FILE--

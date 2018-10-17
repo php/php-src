@@ -667,12 +667,12 @@ static zend_object *date_object_clone_period(zval *this_ptr);
 
 static int date_object_compare_date(zval *d1, zval *d2);
 static HashTable *date_object_get_gc(zval *object, zval **table, int *n);
-static HashTable *date_object_get_properties(zval *object);
+static HashTable *date_object_get_properties_for(zval *object, zend_prop_purpose purpose);
 static HashTable *date_object_get_gc_interval(zval *object, zval **table, int *n);
 static HashTable *date_object_get_properties_interval(zval *object);
 static HashTable *date_object_get_gc_period(zval *object, zval **table, int *n);
 static HashTable *date_object_get_properties_period(zval *object);
-static HashTable *date_object_get_properties_timezone(zval *object);
+static HashTable *date_object_get_properties_for_timezone(zval *object, zend_prop_purpose purpose);
 static HashTable *date_object_get_gc_timezone(zval *object, zval **table, int *n);
 static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp);
 static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv);
@@ -1165,7 +1165,7 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 				length = slprintf(buffer, sizeof(buffer), "%02d", (int) isoweek); break; /* iso weeknr */
 			case 'o':
 				if(!weekYearSet) { timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear); weekYearSet = 1; }
-				length = slprintf(buffer, sizeof(buffer), "%d", (int) isoyear); break; /* iso year */
+				length = slprintf(buffer, sizeof(buffer), ZEND_LONG_FMT, (zend_long) isoyear); break; /* iso year */
 
 			/* month */
 			case 'F': length = slprintf(buffer, sizeof(buffer), "%s", mon_full_names[t->m - 1]); break;
@@ -1176,7 +1176,7 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 
 			/* year */
 			case 'L': length = slprintf(buffer, sizeof(buffer), "%d", timelib_is_leap((int) t->y)); break;
-			case 'y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->y % 100); break;
+			case 'y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) (t->y % 100)); break;
 			case 'Y': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : "", php_date_llabs((timelib_sll) t->y)); break;
 
 			/* time */
@@ -1235,18 +1235,18 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 			case 'Z': length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->offset : 0); break;
 
 			/* full date/time */
-			case 'c': length = slprintf(buffer, sizeof(buffer), "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
-							                (int) t->y, (int) t->m, (int) t->d,
+			case 'c': length = slprintf(buffer, sizeof(buffer), "%04" ZEND_LONG_FMT_SPEC "-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+							                (zend_long) t->y, (int) t->m, (int) t->d,
 											(int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'r': length = slprintf(buffer, sizeof(buffer), "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
+			case 'r': length = slprintf(buffer, sizeof(buffer), "%3s, %02d %3s %04" ZEND_LONG_FMT_SPEC " %02d:%02d:%02d %c%02d%02d",
 							                php_date_short_day_name(t->y, t->m, t->d),
 											(int) t->d, mon_short_names[t->m - 1],
-											(int) t->y, (int) t->h, (int) t->i, (int) t->s,
+											(zend_long) t->y, (int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
 											localtime ? abs((offset->offset % 3600) / 60) : 0
@@ -2123,7 +2123,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_date.free_obj = date_object_free_storage_date;
 	date_object_handlers_date.clone_obj = date_object_clone_date;
 	date_object_handlers_date.compare_objects = date_object_compare_date;
-	date_object_handlers_date.get_properties = date_object_get_properties;
+	date_object_handlers_date.get_properties_for = date_object_get_properties_for;
 	date_object_handlers_date.get_gc = date_object_get_gc;
 	zend_class_implements(date_ce_date, 1, date_ce_interface);
 
@@ -2133,7 +2133,7 @@ static void date_register_classes(void) /* {{{ */
 	memcpy(&date_object_handlers_immutable, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_immutable.clone_obj = date_object_clone_date;
 	date_object_handlers_immutable.compare_objects = date_object_compare_date;
-	date_object_handlers_immutable.get_properties = date_object_get_properties;
+	date_object_handlers_immutable.get_properties_for = date_object_get_properties_for;
 	date_object_handlers_immutable.get_gc = date_object_get_gc;
 	zend_class_implements(date_ce_immutable, 1, date_ce_interface);
 
@@ -2144,7 +2144,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_timezone.offset = XtOffsetOf(php_timezone_obj, std);
 	date_object_handlers_timezone.free_obj = date_object_free_storage_timezone;
 	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
-	date_object_handlers_timezone.get_properties = date_object_get_properties_timezone;
+	date_object_handlers_timezone.get_properties_for = date_object_get_properties_for_timezone;
 	date_object_handlers_timezone.get_gc = date_object_get_gc_timezone;
 	date_object_handlers_timezone.get_debug_info = date_object_get_debug_info_timezone;
 
@@ -2273,17 +2273,24 @@ static HashTable *date_object_get_gc_timezone(zval *object, zval **table, int *n
        return zend_std_get_properties(object);
 } /* }}} */
 
-static HashTable *date_object_get_properties(zval *object) /* {{{ */
+static HashTable *date_object_get_properties_for(zval *object, zend_prop_purpose purpose) /* {{{ */
 {
 	HashTable *props;
 	zval zv;
-	php_date_obj     *dateobj;
+	php_date_obj *dateobj;
 
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_DEBUG:
+		case ZEND_PROP_PURPOSE_SERIALIZE:
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+			break;
+		default:
+			return zend_std_get_properties_for(object, purpose);
+	}
 
 	dateobj = Z_PHPDATE_P(object);
-
-	props = zend_std_get_properties(object);
-
+	props = zend_array_dup(zend_std_get_properties(object));
 	if (!dateobj->time) {
 		return props;
 	}
@@ -2387,16 +2394,24 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 	}
 }
 
-static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
+static HashTable *date_object_get_properties_for_timezone(zval *object, zend_prop_purpose purpose) /* {{{ */
 {
 	HashTable *props;
 	zval zv;
-	php_timezone_obj     *tzobj;
+	php_timezone_obj *tzobj;
+
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_DEBUG:
+		case ZEND_PROP_PURPOSE_SERIALIZE:
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+			break;
+		default:
+			return zend_std_get_properties_for(object, purpose);
+	}
 
 	tzobj = Z_PHPTIMEZONE_P(object);
-
-	props = zend_std_get_properties(object);
-
+	props = zend_array_dup(zend_std_get_properties(object));
 	if (!tzobj->initialized) {
 		return props;
 	}
@@ -2468,12 +2483,10 @@ static HashTable *date_object_get_properties_interval(zval *object) /* {{{ */
 {
 	HashTable *props;
 	zval zv;
-	php_interval_obj     *intervalobj;
+	php_interval_obj *intervalobj;
 
 	intervalobj = Z_PHPINTERVAL_P(object);
-
 	props = zend_std_get_properties(object);
-
 	if (!intervalobj->initialized) {
 		return props;
 	}
@@ -5096,9 +5109,7 @@ static HashTable *date_object_get_properties_period(zval *object) /* {{{ */
 	php_period_obj	*period_obj;
 
 	period_obj = Z_PHPPERIOD_P(object);
-
 	props = zend_std_get_properties(object);
-
 	if (!period_obj->start) {
 		return props;
 	}

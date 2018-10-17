@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 SNMPv3 Support
 --CREDITS--
 Boris Lytochkin
@@ -10,8 +10,8 @@ require_once(dirname(__FILE__).'/skipif.inc');
 <?php
 require_once(dirname(__FILE__).'/snmp_include.inc');
 
-//int snmp3_get(string host, string sec_name, string sec_level, string auth_protocol, 
-//              string auth_passphrase, string priv_protocol, string priv_passphrase, 
+//int snmp3_get(string host, string sec_name, string sec_level, string auth_protocol,
+//              string auth_passphrase, string priv_protocol, string priv_passphrase,
 //              string object_id [, int timeout [, int retries]]);
 
 echo "Working version\n";

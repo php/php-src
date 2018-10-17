@@ -1,8 +1,8 @@
 --TEST--
 Function overloading test 1
 --SKIPIF--
-<?php 
-	extension_loaded('mbstring') or die('skip mbstring not available'); 
+<?php
+	extension_loaded('mbstring') or die('skip mbstring not available');
 ?>
 --INI--
 output_handler=

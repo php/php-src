@@ -9,7 +9,7 @@ function_exists('iconv_set_encoding') or die("skip iconv_set_encoding() is not a
 <?php
 /* Prototype  : bool iconv_set_encoding(string type, string charset)
  * Description: Sets internal encoding and output encoding for ob_iconv_handler()
- * Source code: ext/iconv/iconv.c 
+ * Source code: ext/iconv/iconv.c
  */
 
 /*
@@ -63,7 +63,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -72,7 +72,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

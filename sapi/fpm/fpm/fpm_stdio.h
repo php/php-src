@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_STDIO_H
@@ -17,4 +16,3 @@ int fpm_stdio_discard_pipes(struct fpm_child_s *child);
 int fpm_stdio_open_error_log(int reopen);
 
 #endif
-

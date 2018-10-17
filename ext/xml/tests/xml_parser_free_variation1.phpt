@@ -1,17 +1,17 @@
 --TEST--
 Test xml_parser_free() function : usage variations
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_parser_free(resource parser)
- * Description: Free an XML parser 
+ * Description: Free an XML parser
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_parser_free() : usage variations ***\n";
@@ -73,9 +73,9 @@ $values = array(
 
       // object data
       new aClass(),
-      
+
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,
@@ -237,4 +237,3 @@ Arg value
 Warning: xml_parser_free() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 Done
-

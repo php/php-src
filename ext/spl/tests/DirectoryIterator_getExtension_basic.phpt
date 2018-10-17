@@ -47,4 +47,3 @@ array(3) {
   [2]=>
   string(3) "txt"
 }
-

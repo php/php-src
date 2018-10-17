@@ -3,7 +3,7 @@ SimpleXML: var_dump()
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 $sxe = simplexml_load_file(dirname(__FILE__).'/000.xml');
 

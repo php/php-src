@@ -16,7 +16,6 @@ if (!(isset($matches[0]) && $matches[1] >= 10)) {
 --INI--
 oci8.privileged_connect = On
 --FILE--
-
 <?php
 
 $testuser     = 'testuser_attr_2';  // Used in conn_attr.inc

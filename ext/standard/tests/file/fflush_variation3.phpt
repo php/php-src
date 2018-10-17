@@ -29,28 +29,28 @@ $count = 1;
 foreach( $file_types as $type ) {
   echo "-- Iteration $count with file containing $type data --\n";
   foreach( $file_modes as $mode ) {
-    
+
     // creating the file
     $file_handle = fopen($file_name, "w");
     if($file_handle == false)
       exit("Error:failed to open file $file_name");
 
-    // fill the fill with some data if mode is append mode 
-    if( substr($mode, 0, 1) == "a" ) 
-      fill_file($file_handle, $type, 10); 
+    // fill the fill with some data if mode is append mode
+    if( substr($mode, 0, 1) == "a" )
+      fill_file($file_handle, $type, 10);
 
     // fclose($file_handle);
-   
+
     // creating hard link to the file
     var_dump( link($file_name, $link_name) );
-  
+
     // opening the file in different modes
     $file_handle = fopen($link_name, $mode);
     if($file_handle == false)
       exit("Error:failed to open link $link_name");
-  
+
     // writing data to the file
-    var_dump( fill_file($file_handle, $type, 50) ); 
+    var_dump( fill_file($file_handle, $type, 50) );
     var_dump( fflush($file_handle) );
     fclose($file_handle);
 
@@ -380,4 +380,3 @@ bool(true)
 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 int(60)
 
 *** Done ***
-

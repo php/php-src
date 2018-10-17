@@ -27,7 +27,6 @@ class ChildClass extends ParentClass
 
 $c = new ChildClass();
 $c->hello();
-
 --EXPECT--
 ChildClass
 ParentClass

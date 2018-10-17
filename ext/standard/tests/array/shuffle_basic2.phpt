@@ -3,12 +3,12 @@ Test shuffle() function : basic functionality -  with associative array
 --FILE--
 <?php
 /* Prototype  : bool shuffle(array $array_arg)
- * Description: Randomly shuffle the contents of an array 
+ * Description: Randomly shuffle the contents of an array
  * Source code: ext/standard/array.c
 */
 
 /*
-* Test behaviour of shuffle when an associative array is 
+* Test behaviour of shuffle when an associative array is
 * passed to the 'array_arg' argument and check for the
 * changes in the input array by printing the input array
 * before and after shuffle() function is applied on it
@@ -86,4 +86,3 @@ array(9) {
   int(%d)
 }
 Done
-

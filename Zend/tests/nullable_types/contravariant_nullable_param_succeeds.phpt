@@ -1,6 +1,5 @@
 --TEST--
 Subtype can add nullability to a parameter (contravariance)
-
 --FILE--
 <?php
 
@@ -14,6 +13,4 @@ class B implements A {
 
 $b = new B();
 $b->method(null);
-
 --EXPECT--
-

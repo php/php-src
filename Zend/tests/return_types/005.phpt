@@ -1,6 +1,5 @@
 --TEST--
 Return value fails inheritance check in method
-
 --FILE--
 <?php
 class foo {}
@@ -13,7 +12,6 @@ class qux {
 
 $qux = new qux();
 $qux->foo();
-
 --EXPECTF--
 Fatal error: Uncaught TypeError: Return value of qux::foo() must be an instance of foo, instance of qux returned in %s:%d
 Stack trace:

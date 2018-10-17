@@ -37,7 +37,6 @@ var_dump($a, $b);
 
 ?>
 --EXPECTF--
-
 ---> 1. Trying to assign by reference the return value of a function that returns by value:
 
 Notice: Only variables should be assigned by reference in %s on line 17

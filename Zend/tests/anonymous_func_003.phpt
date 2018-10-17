@@ -1,7 +1,7 @@
 --TEST--
 Using throw $var with anonymous function return
 --FILE--
-<?php 
+<?php
 
 try {
 	$a = create_function('', 'return new Exception("test");');

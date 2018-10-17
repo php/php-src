@@ -24,7 +24,7 @@ class hariCow extends FIIFO {
 		} catch(Exception $e) {
 		}
 	}
-	
+
 	public function __toString() {
 		return "Rusticus in asino sedet.";
 	}

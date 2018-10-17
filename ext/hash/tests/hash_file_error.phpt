@@ -1,7 +1,5 @@
 --TEST--
-Test hash_file() function : error conditions 
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_file() function : error conditions
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
@@ -9,7 +7,7 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 /* Prototype  : string hash_file(string algo, string filename[, bool raw_output = false])
  * Description: Generate a hash of a given file
  * Source code: ext/hash/hash.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing hash_file() : error conditions ***\n";

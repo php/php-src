@@ -16,4 +16,3 @@ if (PHP_SNMP != "no") {
 		WARNING("snmp not enabled; libraries and headers not found");
 	}
 }
-

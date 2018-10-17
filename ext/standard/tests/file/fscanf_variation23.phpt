@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - char formats with arrays 
+Test fscanf() function: usage variations - char formats with arrays
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - char formats with arrays
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different char format types with arrays ***\n"; 
+echo "*** Test fscanf(): different char format types with arrays ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation23.tmp";
@@ -39,7 +39,7 @@ $array_types = array (
 $char_formats = array( "%c",
 		       "%hc", "%lc", "%Lc",
 		       " %c", "%c ", "% c",
-		       "\t%c", "\n%c", "%4c", 
+		       "\t%c", "\n%c", "%4c",
 		       "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
 
 $counter = 1;
@@ -709,4 +709,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

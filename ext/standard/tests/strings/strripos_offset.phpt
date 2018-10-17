@@ -15,7 +15,7 @@ var_dump(strripos(1024, "te", -PHP_INT_MAX-1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: strripos() expects parameter 3 to be int, float given in %s on line %d
 bool(false)
 

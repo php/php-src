@@ -22,7 +22,7 @@ while ( $reader->read() ) {
 $reader->close();
 
 ?>
---EXPECT--	
+--EXPECT--
 10, root, 
 1, root, 
 3, #text, y

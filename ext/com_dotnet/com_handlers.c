@@ -563,7 +563,7 @@ zend_object_handlers php_com_object_handlers = {
 	com_object_count,
 	NULL,									/* get_debug_info */
 	NULL,									/* get_closure */
-	NULL,									/* get_gc */
+	zend_std_get_gc,						/* get_gc */
 };
 
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable)

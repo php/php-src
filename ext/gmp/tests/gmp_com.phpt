@@ -23,7 +23,7 @@ var_dump(gmp_strval(gmp_com()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(2) "-1"
 string(2) "-1"
 

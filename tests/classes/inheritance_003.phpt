@@ -16,6 +16,5 @@ class B extends A
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: Declaration of B::f() should be compatible with A::f($x) in %sinheritance_003.php on line %d
 ===DONE===

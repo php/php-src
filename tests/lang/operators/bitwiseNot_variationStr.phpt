@@ -13,7 +13,7 @@ foreach ($strVals as $strVal) {
    echo "--- testing: '$strVal' ---\n";
    var_dump(bin2hex(~$strVal));
 }
-   
+
 ?>
 ===DONE===
 --EXPECT--

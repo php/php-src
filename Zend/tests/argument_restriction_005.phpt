@@ -4,7 +4,7 @@ Bug #55719 (Argument restriction should come with a more specific error message)
 <?php
 class Sub implements ArrayAccess {
 	public function offsetSet() {
-	}	
+	}
 }
 ?>
 --EXPECTF--

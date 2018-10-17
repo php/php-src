@@ -7,10 +7,10 @@ Test session_decode() function : basic functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_decode(void)
  * Description : Decodes session data from a string
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_decode() : variation ***\n";
@@ -75,4 +75,3 @@ array(4) {
 }
 bool(true)
 Done
-

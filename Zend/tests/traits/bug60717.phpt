@@ -34,12 +34,12 @@ namespace HTML
 	{
 		use TextArea, HTMLAttributes, TextUTF8;
 	}
-	
+
 	class HTMLHelper2 implements Helper
 	{
 		use TextArea, TextUTF8, HTMLAttributes;
 	}
-	
+
 	class HTMLHelper3 implements Helper
 	{
 		use HTMLAttributes, TextArea, TextUTF8;
@@ -49,16 +49,16 @@ namespace HTML
 	{
 		use HTMLAttributes, TextUTF8, TextArea;
 	}
-	
+
 	class HTMLHelper5 implements Helper
 	{
 		use TextUTF8, TextArea, HTMLAttributes;
 	}
-	
+
 	class HTMLHelper6 implements Helper
 	{
 		use TextUTF8, HTMLAttributes, TextArea;
-	}	
+	}
 
 	$o = new HTMLHelper;
     $o = new HTMLHelper2;
@@ -68,6 +68,5 @@ namespace HTML
     $o = new HTMLHelper6;
     echo 'Done';
 }
-
 --EXPECT--
 Done

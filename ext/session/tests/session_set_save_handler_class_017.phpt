@@ -10,10 +10,10 @@ session.name=PHPSESSID
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_set_save_handler(SessionHandlerInterface $handler [, bool $register_shutdown_function = true])
  * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_set_save_handler() function: class with create_sid ***\n";
@@ -75,7 +75,6 @@ var_dump($_SESSION);
 
 session_write_close();
 session_unset();
-
 --EXPECTF--
 *** Testing session_set_save_handler() function: class with create_sid ***
 string(%d) "my_sid"

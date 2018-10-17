@@ -14,7 +14,7 @@ foreach ($strVals as $strVal) {
    $strVal--;
    var_dump($strVal);
 }
-   
+
 ?>
 ===DONE===
 --EXPECT--

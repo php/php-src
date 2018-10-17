@@ -4,7 +4,7 @@ Bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with correct exi
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
 output_handler=
-zlib.output_compression=0 
+zlib.output_compression=0
 --FILE--
 <?php
 $infile = dirname(__FILE__).'/bug74428.jpg';

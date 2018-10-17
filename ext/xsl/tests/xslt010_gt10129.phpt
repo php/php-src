@@ -1,7 +1,7 @@
 --TEST--
 Test 10: EXSLT Support
 --SKIPIF--
-<?php 
+<?php
 require_once dirname(__FILE__) .'/skipif.inc';
 $proc = new xsltprocessor;
 if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');
@@ -15,10 +15,10 @@ $dom = new domDocument();
   $dom->load(dirname(__FILE__)."/exslt.xsl");
   $proc = new xsltprocessor;
   $xsl = $proc->importStylesheet($dom);
-  
+
   $xml = new DomDocument();
   $xml->load(dirname(__FILE__)."/exslt.xml");
-  
+
   print $proc->transformToXml($xml);
 --EXPECT--
 Test 10: EXSLT Support
@@ -203,4 +203,3 @@ Test 10: EXSLT Support
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-

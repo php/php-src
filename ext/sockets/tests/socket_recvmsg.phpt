@@ -47,7 +47,6 @@ $data = [
 ];
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
 print_r($data);
-
 --EXPECTF--
 creating send socket
 resource(%d) of type (Socket)

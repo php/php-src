@@ -1,5 +1,5 @@
 --TEST--
-Test sscanf() function : error conditions 
+Test sscanf() function : error conditions
 --FILE--
 <?php
 

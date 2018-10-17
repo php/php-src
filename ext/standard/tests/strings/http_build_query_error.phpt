@@ -10,4 +10,4 @@ $result = http_build_query(null);
 
 ?>
 --EXPECTF--
-Warning: http_build_query(): Parameter 1 expected to be Array or Object.  %s value given in %s on line %d
+Warning: http_build_query() expects parameter 1 to be array, null given in %s on line %d

@@ -9,5 +9,4 @@ abstract class TestClass
 ?>
 ===DONE===
 --EXPECT--
-
 ===DONE===

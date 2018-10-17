@@ -159,4 +159,3 @@ mbfl_no_language2name(enum mbfl_no_language no_language)
 		return language->name;
 	}
 }
-

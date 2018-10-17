@@ -8,9 +8,9 @@ sinclude(Zend/acinclude.m4)
 dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
-AC_PREREQ([2.64])
+AC_PREREQ([2.68])
 AC_INIT(README.GIT-RULES)
-ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
+AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
 

@@ -5,7 +5,6 @@ IntlCalendar::get/setSkippedWallTimeOption(): basic test
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
-
 <?php
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
@@ -47,7 +46,6 @@ var_dump(
 ?>
 ==DONE==
 --EXPECT--
-
 int(0)
 Should be 3h30
 int(3)

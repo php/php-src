@@ -21,7 +21,7 @@ var_dump(substr_count($a, "bca", -200));
 var_dump(substr_count($a, "bca", -200, 50));
 var_dump(substr_count($a, "bca", -200, -50));
 
-echo "Done\n";	
+echo "Done\n";
 
 ?>
 --EXPECT--

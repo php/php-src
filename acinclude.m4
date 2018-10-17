@@ -2158,7 +2158,6 @@ AC_DEFUN([PHP_SETUP_ICU],[
     PHP_EVAL_INCLINE($ICU_INCS)
     PHP_EVAL_LIBLINE($ICU_LIBS, $1)
 
-    ICU_CXXFLAGS=`$ICU_CONFIG --cxxflags`
     ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
     ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
     if test "$icu_version" -ge "60000"; then
@@ -3234,3 +3233,5 @@ dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
 m4_include([build/ax_check_compile_flag.m4])
 
 m4_include([build/ax_gcc_func_attribute.m4])
+
+m4_include([build/php_cxx_compile_stdcxx.m4])

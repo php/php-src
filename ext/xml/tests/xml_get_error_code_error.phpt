@@ -1,17 +1,17 @@
 --TEST--
-Test xml_get_error_code() function : error conditions 
+Test xml_get_error_code() function : error conditions
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_get_error_code(resource parser)
- * Description: Get XML parser error code 
+ * Description: Get XML parser error code
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_get_error_code() : error conditions ***\n";
@@ -41,4 +41,3 @@ NULL
 Warning: xml_get_error_code() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-
