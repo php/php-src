@@ -477,6 +477,11 @@ PCRE:
     (`(object) array( ... )`), rather than using the nonexistent method
     stdClass::__setState().
 
+ Tidy:
+  . Building against tidyp (<https://github.com/petdance/tidyp>) is now also
+    supported transparently. Since tidyp offers no API to get the release date,
+    tidy_get_release() and tidy::getRelease() return 'unknown' in this case.
+
  Zip:
   . Building against the bundled libzip is discouraged, but still possible by
     adding `--without-libzip` to the configuration.
