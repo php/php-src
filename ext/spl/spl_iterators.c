@@ -1346,19 +1346,6 @@ static const zend_function_entry spl_funcs_RecursiveTreeIterator[] = {
 	PHP_FE_END
 };
 
-#if MBO_0
-static int spl_dual_it_gets_implemented(zend_class_entry *interface, zend_class_entry *class_type)
-{
-	class_type->iterator_funcs_ptr->zf_valid = NULL;
-	class_type->iterator_funcs_ptr->zf_current = NULL;
-	class_type->iterator_funcs_ptr->zf_key = NULL;
-	class_type->iterator_funcs_ptr->zf_next = NULL;
-	class_type->iterator_funcs_ptr->zf_rewind = NULL;
-
-	return SUCCESS;
-}
-#endif
-
 static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *method, const zval *key)
 {
 	zend_function        *function_handler;
