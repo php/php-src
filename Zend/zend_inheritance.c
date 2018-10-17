@@ -94,7 +94,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	}
 	if (ZEND_MAP_PTR(parent->iterator_funcs_ptr)) {
 		/* Must be initialized through iface->interface_gets_implemented() */
-		ZEND_ASSERT(ZEND_MAP_PTR(ce->iterator_funcs_ptr) && ZEND_MAP_PTR_GET(ce->iterator_funcs_ptr));
+		ZEND_ASSERT(ZEND_MAP_PTR_GET(ce->iterator_funcs_ptr));
 	}
 	if (EXPECTED(!ce->__get)) {
 		ce->__get = parent->__get;
