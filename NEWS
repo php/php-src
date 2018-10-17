@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     . Fixed bug #77007 (fractions in `diff()` are not correctly normalized).
       (Derick)
 
+- Mbstring:
+  . Fixed bug #77025 (mb_strpos throws Unknown encoding or conversion error).
+    (Nikita)
+
 - Tokenizer:
   . Fixed bug #76991 (Incorrect tokenization of multiple invalid flexible
     heredoc strings). (Nikita)
