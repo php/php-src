@@ -389,7 +389,8 @@ struct _zend_op_array {
 	uint32_t last;      /* number of opcodes */
 
 	zend_op *opcodes;
-	void **run_time_cache;
+	ZEND_MAP_PTR_DEF(void **, run_time_cache);
+	ZEND_MAP_PTR_DEF(HashTable *, static_variables_ptr);
 	HashTable *static_variables;
 	zend_string **vars; /* names of CV variables */
 
@@ -660,19 +661,25 @@ struct _zend_execute_data {
 		(node).constant = RT_CONSTANT(opline, node) - (op_array)->literals; \
 	} while (0)
 
+#define RUN_TIME_CACHE(op_array) \
+	ZEND_MAP_PTR_GET((op_array)->run_time_cache)
+
+#define ZEND_OP_ARRAY_EXTENSION(op_array, handle) \
+	((void**)RUN_TIME_CACHE(op_array))[handle]
+
 #if ZEND_EX_USE_RUN_TIME_CACHE
 
 # define EX_RUN_TIME_CACHE() \
 	EX(run_time_cache)
 
 # define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
-		EX(run_time_cache) = (op_array)->run_time_cache; \
+		EX(run_time_cache) = RUN_TIME_CACHE(op_array); \
 	} while (0)
 
 #else
 
 # define EX_RUN_TIME_CACHE() \
-	EX(func)->op_array.run_time_cache
+	RUN_TIME_CACHE(&EX(func)->op_array)
 
 # define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
 	} while (0)

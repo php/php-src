@@ -21,6 +21,7 @@
 
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;
+ZEND_API int zend_op_array_extension_handles = 0;
 static int last_resource_number;
 
 int zend_load_extension(const char *path)
@@ -198,6 +199,7 @@ int zend_startup_extensions_mechanism()
 {
 	/* Startup extensions mechanism */
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
+	zend_op_array_extension_handles = 0;
 	last_resource_number = 0;
 	return SUCCESS;
 }
@@ -257,6 +259,10 @@ ZEND_API int zend_get_resource_handle(zend_extension *extension)
 	}
 }
 
+ZEND_API int zend_get_op_array_extension_handle(void)
+{
+	return zend_op_array_extension_handles++;
+}
 
 ZEND_API zend_extension *zend_get_extension(const char *extension_name)
 {

@@ -1769,7 +1769,7 @@ static int copy_class_or_interface_name(zval *el, int num_args, va_list args, ze
 
 	if ((hash_key->key && ZSTR_VAL(hash_key->key)[0] != 0)
 		&& (comply_mask == (ce->ce_flags & mask))) {
-		if (ce->refcount > 1 &&
+		if ((ce->refcount > 1 || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) &&
 		    !same_name(hash_key->key, ce->name)) {
 			add_next_index_str(array, zend_string_copy(hash_key->key));
 		} else {

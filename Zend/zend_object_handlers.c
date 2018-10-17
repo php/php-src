@@ -1139,6 +1139,10 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	size_t mname_len;
 	zend_op_array *func;
 	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
+	/* We use non-NULL value to avoid useless run_time_cache allocation.
+	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
+	 */
+	static const void *dummy = (void*)(intptr_t)2;
 
 	ZEND_ASSERT(fbc);
 
@@ -1157,7 +1161,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
 	func->opcodes = &EG(call_trampoline_op);
-	func->run_time_cache = (void*)(intptr_t)-1;
+	ZEND_MAP_PTR_INIT(func->run_time_cache, (void***)&dummy);
 	func->scope = fbc->common.scope;
 	/* reserve space for arguments, local and temorary variables */
 	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
@@ -1352,11 +1356,7 @@ static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{
 			zend_intenal_class_init_statics(class_type->parent);
 		}
 
-#if ZTS
-		CG(static_members_table)[class_type->static_members_table_idx] = emalloc(sizeof(zval) * class_type->default_static_members_count);
-#else
-		class_type->static_members_table = emalloc(sizeof(zval) * class_type->default_static_members_count);
-#endif
+		ZEND_MAP_PTR_SET(class_type->static_members_table, emalloc(sizeof(zval) * class_type->default_static_members_count));
 		for (i = 0; i < class_type->default_static_members_count; i++) {
 			p = &class_type->default_static_members_table[i];
 			if (Z_TYPE_P(p) == IS_INDIRECT) {
@@ -1368,6 +1368,11 @@ static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{
 			}
 		}
 	}
+} /* }}} */
+
+ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
+{
+	zend_intenal_class_init_statics(class_type);
 } /* }}} */
 
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent) /* {{{ */
@@ -1409,7 +1414,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 
 	/* check if static properties were destroyed */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-		if (ce->type == ZEND_INTERNAL_CLASS) {
+		if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 			zend_intenal_class_init_statics(ce);
 		} else {
 undeclared_property:

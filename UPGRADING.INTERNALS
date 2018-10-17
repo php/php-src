@@ -8,6 +8,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   e. php_win32_error_to_msg() memory management
   f. get_properties_for() handler / Z_OBJDEBUG_P
   g. Required object handlers
+  h. Immutable classes and op_arrays
 
 2. Build system changes
   a. Abstract
@@ -120,6 +121,20 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
      It is recommended to initialize object handler structures by copying the
      std object handlers and only overwriting those you want to change.
+
+  h. Opcache may make classes and op_arrays immutable. Such classes are marked
+     by ZEND_ACC_IMMUTABLE flag, they are not going to be copied from opcache
+     shared memory to process memory and must not be modified at all.
+     Few related data structures were changed to allow addressing mutable data
+     structures from immutable ones. This access is implemented through
+     ZEND_MAP_PTR... abstraction macros and, basically, uses additional level of
+     indirection. op_array->run_time_cache, op_array->static_variables_ptr and
+     class_entry->static_members_table now have to be accessed through
+     ZEND_MAP_PTR... macros.
+     It's also not allowed to change op_array->reserved[] handles of immutable
+     op_arrays. Instead, now you have to reserve op_array handle using
+     zend_get_op_array_extension_handle() during MINIT and access its value
+     using ZEND_OP_ARRAY_EXTENSION(op_array, handle).
 
 ========================
 2. Build system changes
