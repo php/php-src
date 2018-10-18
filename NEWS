@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #76846 (Segfault in shutdown function after memory limit error).
     (Nikita)
   . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
+  . Fixed bug #77035 (The phpize and ./configure create redundant .deps file).
+    (Peter Kokot)
 
 - Date:
   . Upgraded timelib to 2017.08. (Derick)
