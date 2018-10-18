@@ -189,7 +189,6 @@ eof
 
 $ECHO_N " .gitignore$ECHO_C"
 cat >.gitignore <<eof
-.deps
 *.lo
 *.la
 .libs

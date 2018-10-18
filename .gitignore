@@ -26,7 +26,6 @@
 *.tar.xz.asc
 .FBCIndex
 .FBCLockFolder
-.deps
 .libs
 phpt.*
 core
