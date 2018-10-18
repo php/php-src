@@ -2091,7 +2091,7 @@ ZEND_END_ARG_INFO()
 
 #if SQLITE_VERSION_NUMBER >= 3006011
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_backup, 0, 0, 1)
-	ZEND_ARG_INFO(1, destination_db)
+	ZEND_ARG_INFO(0, destination_db)
 	ZEND_ARG_INFO(0, source_dbname)
 	ZEND_ARG_INFO(0, destination_dbname)
 ZEND_END_ARG_INFO()
