@@ -52,11 +52,18 @@ extern const php_password_algo php_password_algo_argon2i;
 extern const php_password_algo php_password_algo_argon2id;
 #endif
 
-PHPAPI zend_long php_password_algo_register(const php_password_algo*);
-PHPAPI const php_password_algo* php_password_algo_default(zend_long*);
-PHPAPI const php_password_algo* php_password_algo_find(zend_long);
-PHPAPI const php_password_algo* php_password_algo_identify(const zend_string*, zend_long *);
-PHPAPI void php_password_algo_unregister(zend_long);
+PHPAPI int php_password_algo_register(const char*, const php_password_algo*);
+PHPAPI void php_password_algo_unregister(const char*);
+PHPAPI const php_password_algo* php_password_algo_default();
+PHPAPI zend_string *php_password_algo_extract_ident(const zend_string*);
+PHPAPI const php_password_algo* php_password_algo_find(const zend_string*);
+PHPAPI const php_password_algo* php_password_algo_get_named(const zend_string*);
+
+PHPAPI const php_password_algo* php_password_algo_identify_ex(const zend_string*, const php_password_algo*);
+static inline const php_password_algo* php_password_algo_identify(const zend_string *hash) {
+	return php_password_algo_identify_ex(hash, php_password_algo_default());
+}
+
 
 #endif
 

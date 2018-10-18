@@ -8,7 +8,7 @@ Test normal operation of password_needs_rehash()
 var_dump(password_needs_rehash('', PASSWORD_BCRYPT));
 
 // Valid, as it's an unknown algorithm
-var_dump(password_needs_rehash('', 0));
+var_dump(password_needs_rehash('', NULL));
 
 // Valid with cost the same
 var_dump(password_needs_rehash('$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT, array('cost' => 10)));

@@ -39,15 +39,17 @@
 
 static zend_array php_password_algos;
 
-zend_long php_password_algo_register(const php_password_algo *algo) {
+int php_password_algo_register(const char *ident, const php_password_algo *algo) {
 	zval zalgo;
 	ZVAL_PTR(&zalgo, (php_password_algo*)algo);
-	zend_hash_next_index_insert(&php_password_algos, &zalgo);
-	return php_password_algos.nNextFreeElement - 1;
+	if (zend_hash_str_add(&php_password_algos, ident, strlen(ident), &zalgo)) {
+		return SUCCESS;
+	}
+	return FAILURE;
 }
 
-void php_password_algo_unregister(zend_long algo_id) {
-	zend_hash_index_del(&php_password_algos, algo_id);
+void php_password_algo_unregister(const char *ident) {
+	zend_hash_str_del(&php_password_algos, ident, strlen(ident));
 }
 
 static int php_password_salt_is_alphabet(const char *str, const size_t len) /* {{{ */
@@ -292,7 +294,6 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	return result;
 }
 
-static zend_long php_password_bcrypt_id;
 const php_password_algo php_password_algo_bcrypt = {
 	"bcrypt",
 	php_password_bcrypt_hash,
@@ -465,7 +466,6 @@ static zend_string *php_password_argon2i_hash(const zend_string *password, zend_
 	return php_password_argon2_hash(password, options, Argon2_i);
 }
 
-static zend_long php_password_argon2i_id;
 const php_password_algo php_password_algo_argon2i = {
 	"argon2i",
 	php_password_argon2i_hash,
@@ -490,7 +490,6 @@ static zend_string *php_password_argon2id_hash(const zend_string *password, zend
 	return php_password_argon2_hash(password, options, Argon2_id);
 }
 
-static zend_long php_password_argon2id_id;
 const php_password_algo php_password_algo_argon2id = {
 	"argon2id",
 	php_password_argon2id_hash,
@@ -505,28 +504,23 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 {
 	zend_hash_init(&php_password_algos, 4, NULL, ZVAL_PTR_DTOR, 1);
 	/* Reseve ID #0 */
-	php_password_algos.nNextFreeElement = 1;
-	REGISTER_LONG_CONSTANT("PASSWORD_DEFAULT", 0, CONST_CS | CONST_PERSISTENT);
+	REGISTER_NULL_CONSTANT("PASSWORD_DEFAULT", CONST_CS | CONST_PERSISTENT);
 
-	php_password_bcrypt_id = php_password_algo_register(&php_password_algo_bcrypt);
-	if (php_password_bcrypt_id < 0) {
+	if (FAILURE == php_password_algo_register("2y", &php_password_algo_bcrypt)) {
 		return FAILURE;
 	}
-
-	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", php_password_bcrypt_id, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PASSWORD_BCRYPT", "2y", CONST_CS | CONST_PERSISTENT);
 
 #if HAVE_ARGON2LIB
-	php_password_argon2i_id = php_password_algo_register(&php_password_algo_argon2i);
-	if (php_password_argon2i_id < 0) {
+	if (FAILURE == php_password_algo_register("argon2i", &php_password_algo_argon2i)) {
 		return FAILURE;
 	}
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2I", php_password_argon2i_id, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2I", "argon2i", CONST_CS | CONST_PERSISTENT);
 
-	php_password_argon2id_id = php_password_algo_register(&php_password_algo_argon2id);
-	if (php_password_argon2id_id < 0) {
+	if (FAILURE == php_password_algo_register("argon2id", &php_password_algo_argon2id)) {
 		return FAILURE;
 	}
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2ID", php_password_argon2id_id, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2ID", "argon2id", CONST_CS | CONST_PERSISTENT);
 #endif
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
@@ -540,30 +534,35 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
-const php_password_algo* php_password_algo_default(zend_long *pid) {
-	if (pid) {
-		*pid = php_password_bcrypt_id;
-	}
+const php_password_algo* php_password_algo_default() {
 	return &php_password_algo_bcrypt;
 }
 
-const php_password_algo* php_password_algo_find(zend_long algo_id) {
-	zval *tmp = zend_hash_index_find(&php_password_algos, algo_id);
+const php_password_algo* php_password_algo_find(const zend_string *ident) {
+	zval *tmp;
+
+	if (!ident) {
+		return NULL;
+	}
+
+	tmp = zend_hash_find(&php_password_algos, (zend_string*)ident);
 	if (!tmp || (Z_TYPE_P(tmp) != IS_PTR)) {
 		return NULL;
 	}
+
 	return Z_PTR_P(tmp);
 }
 
-const php_password_algo* php_password_algo_identify(const zend_string* hash, zend_long *pid) {
-	zend_long id;
+const php_password_algo* php_password_algo_get_named(const zend_string *name) {
 	php_password_algo *algo;
 
-	ZEND_HASH_FOREACH_NUM_KEY_PTR(&php_password_algos, id, algo) {
-		if (algo->valid(hash)) {
-			if (pid) {
-				*pid = id;
-			}
+	if (!name) {
+		return NULL;
+	}
+
+	ZEND_HASH_FOREACH_PTR(&php_password_algos, algo) {
+		if ((ZSTR_LEN(name) == strlen(algo->name)) &&
+			!strncmp(ZSTR_VAL(name), algo->name, ZSTR_LEN(name))) {
 			return algo;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -571,13 +570,43 @@ const php_password_algo* php_password_algo_identify(const zend_string* hash, zen
 	return NULL;
 }
 
+zend_string *php_password_algo_extract_ident(const zend_string* hash) {
+	const char *ident, *ident_end;
+
+	if (!hash || ZSTR_LEN(hash) < 3) {
+		/* Minimum prefix: "$x$" */
+		return NULL;
+	}
+
+	ident = ZSTR_VAL(hash) + 1;
+	ident_end = strchr(ident, '$');
+	if (!ident_end) {
+		/* No terminating '$' */
+		return NULL;
+	}
+
+	return zend_string_init(ident, ident_end - ident, 0);
+}
+
+const php_password_algo* php_password_algo_identify_ex(const zend_string* hash, const php_password_algo *default_algo) {
+	const php_password_algo *algo;
+	zend_string *ident = php_password_algo_extract_ident(hash);
+
+	if (!ident) {
+		return default_algo;
+	}
+
+	algo = php_password_algo_find(ident);
+	zend_string_release(ident);
+	return (algo && algo->valid(hash)) ? algo : default_algo;
+}
+
 /* {{{ proto array password_get_info(string $hash)
 Retrieves information about a given hash */
 PHP_FUNCTION(password_get_info)
 {
-	zend_long algo_id;
 	const php_password_algo *algo;
-	zend_string *hash;
+	zend_string *hash, *ident;
 	zval options;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -587,15 +616,21 @@ PHP_FUNCTION(password_get_info)
 	array_init(return_value);
 	array_init(&options);
 
-	algo = php_password_algo_identify(hash, &algo_id);
-	if (!algo) {
-		add_assoc_long(return_value, "algo", 0);
+	ident = php_password_algo_extract_ident(hash);
+	algo = php_password_algo_find(ident);
+	if (!algo || !algo->valid(hash)) {
+		if (ident) {
+			zend_string_release(ident);
+		}
+		add_assoc_null(return_value, "algo");
 		add_assoc_string(return_value, "algoName", "unknown");
 		add_assoc_zval(return_value, "options", &options);
 		return;
 	}
 
-	add_assoc_long(return_value, "algo", algo_id);
+	add_assoc_str(return_value, "algo", php_password_algo_extract_ident(hash));
+	zend_string_release(ident);
+
 	add_assoc_string(return_value, "algoName", algo->name);
 	if (algo->get_info &&
 		(FAILURE == algo->get_info(&options, hash))) {
@@ -607,33 +642,32 @@ PHP_FUNCTION(password_get_info)
 }
 /** }}} */
 
-/* {{{ proto bool password_needs_rehash(string $hash, int $algo[, array $options])
+/* {{{ proto bool password_needs_rehash(string $hash, ?string $algo[, array $options])
 Determines if a given hash requires re-hashing based upon parameters */
 PHP_FUNCTION(password_needs_rehash)
 {
-	zend_long old_algo = 0, new_algo = 0;
-	const php_password_algo *algo;
-	zend_string *hash;
+	const php_password_algo *old_algo, *new_algo;
+	zend_string *hash, *new_algoname = NULL;
 	zend_array *options = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(hash)
-		Z_PARAM_LONG(new_algo)
+		Z_PARAM_STR_EX(new_algoname, 1, 0)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	algo = php_password_algo_identify(hash, &old_algo);
+	new_algo = php_password_algo_find(new_algoname);
+	if (!new_algo) {
+		RETURN_FALSE;
+	}
 
+	old_algo = php_password_algo_identify(hash);
 	if (old_algo != new_algo) {
 		RETURN_TRUE;
 	}
 
-	if (!algo) {
-		RETURN_FALSE;
-	}
-
-	RETURN_BOOL(algo->needs_rehash(hash, options));
+	RETURN_BOOL(old_algo->needs_rehash(hash, options));
 }
 /* }}} */
 
@@ -642,7 +676,6 @@ Verify a hash created using crypt() or password_hash() */
 PHP_FUNCTION(password_verify)
 {
 	zend_string *password, *hash;
-	zend_bool seen = 0, valid = 1;
 	const php_password_algo *algo;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -650,49 +683,29 @@ PHP_FUNCTION(password_verify)
 		Z_PARAM_STR(hash)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	/* Ordinarily, there should only be one validator per hash signature.
-	 * Guard against multiple validators being registered with different rules
-	 * by requiring all matching validators to pass.
-	 */
-	ZEND_HASH_FOREACH_PTR(&php_password_algos, algo) {
-		if (!algo->valid(hash)) { continue; }
-		seen = 1;
-		valid &= algo->verify(password, hash);
-	} ZEND_HASH_FOREACH_END();
-
-	if (!seen) {
-		/* "Unknown" algo is handled by bcrypt explicitly */
-		RETURN_BOOL(php_password_bcrypt_verify(password, hash));
-	}
-
-	RETURN_BOOL(valid);
+	algo = php_password_algo_identify(hash);
+	RETURN_BOOL(algo && algo->verify(password, hash));
 }
 /* }}} */
 
-/* {{{ proto string password_hash(string password, int algo[, array options = array()])
+/* {{{ proto string password_hash(string password, ?string algo[, array options = array()])
 Hash a password */
 PHP_FUNCTION(password_hash)
 {
-	zend_string *password, *digest = NULL;
-	zend_long algo_id;
+	zend_string *password, *digest = NULL, *algoname = NULL;
 	const php_password_algo *algo;
 	zend_array *options = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(password)
-		Z_PARAM_LONG(algo_id)
+		Z_PARAM_STR_EX(algoname, 1, 0)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (algo_id) {
-		algo = php_password_algo_find(algo_id);
-	} else {
-		algo = php_password_algo_default(NULL);
-	}
-
+	algo = php_password_algo_find(algoname);
 	if (!algo) {
-		php_error_docref(NULL, E_WARNING, "Unknown password hashing algorithm: " ZEND_LONG_FMT, algo_id);
+		php_error_docref(NULL, E_WARNING, "Unknown password hashing algorithm: %s", algoname ? ZSTR_VAL(algoname) : "");
 		RETURN_NULL();
 	}
 
@@ -708,14 +721,13 @@ PHP_FUNCTION(password_hash)
 
 /* {{{ proto array password_algos() */
 PHP_FUNCTION(password_algos) {
-	zend_long idx;
 	php_password_algo *algo;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_NUM_KEY_PTR(&php_password_algos, idx, algo) {
-		add_index_string(return_value, idx, algo->name);
+	ZEND_HASH_FOREACH_PTR(&php_password_algos, algo) {
+		add_next_index_string(return_value, algo->name);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
