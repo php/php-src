@@ -195,7 +195,6 @@ PHP_GEN_BUILD_DIRS
 PHP_GEN_GLOBAL_MAKEFILE
 
 test -d modules || $php_shtool mkdir modules
-touch .deps
 
 AC_CONFIG_HEADERS([config.h])
 
