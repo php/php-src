@@ -81,10 +81,6 @@ main/internal_functions_cli.c
 main/config.w32.h
 main/streams/build-defs.h
 pear/install-pear-nozlib.phar
-pear/phpize
-pear/run-tests
-pear/php-config
-pear/scripts
 sapi/apache2handler/libphp7.module
 sapi/cgi/php-cgi
 sapi/cgi/php-cgi.1
