@@ -2674,6 +2674,7 @@ function gen_vm($def, $skel) {
 	gen_executor($f, $skl, ZEND_VM_SPEC, ZEND_VM_KIND, "execute", "zend_vm_init");
 
 	// Generate zend_vm_get_opcode_handler() function
+	out($f, "\n");
 	out($f, "static const void* ZEND_FASTCALL zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)\n");
 	out($f, "{\n");
 	if (!ZEND_VM_SPEC) {
