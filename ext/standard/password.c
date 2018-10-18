@@ -310,7 +310,7 @@ static int extract_argon2_parameters(const zend_string *hash,
 									  zend_long *v, zend_long *memory_cost,
 									  zend_long *time_cost, zend_long *threads) /* {{{ */
 {
-	const *p = ZSTR_VAL(hash);
+	const char *p = ZSTR_VAL(hash);
 	if (!hash || (ZSTR_LEN(hash) < sizeof("$argon2id$"))) {
 		return FAILURE;
 	}
@@ -349,6 +349,7 @@ static zend_bool php_password_argon2_needs_rehash(const zend_string *hash, zend_
 	zend_long new_memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST, memory_cost = 0;
 	zend_long new_time_cost = PHP_PASSWORD_ARGON2_TIME_COST, time_cost = 0;
 	zend_long new_threads = PHP_PASSWORD_ARGON2_THREADS, threads = 0;
+	zval *option_buffer;
 
 	if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
 		new_memory_cost = zval_get_long(option_buffer);
@@ -367,7 +368,6 @@ static zend_bool php_password_argon2_needs_rehash(const zend_string *hash, zend_
 	return (new_time_cost != time_cost) ||
 			(new_memory_cost != memory_cost) ||
 			(new_threads != threads);
-	}
 }
 
 static zend_string *php_password_argon2_hash(const zend_string *password, zend_array *options, argon2_type type) {
