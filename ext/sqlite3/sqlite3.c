@@ -1308,7 +1308,7 @@ PHP_METHOD(sqlite3, backup)
 
 	if (dbBackup) {
 		do {
-			rc = sqlite3_backup_step(dbBackup, 5);
+			rc = sqlite3_backup_step(dbBackup, -1);
 
 			if (rc == SQLITE_OK || rc == SQLITE_BUSY || rc == SQLITE_LOCKED) {
 				sqlite3_sleep(250);
