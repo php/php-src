@@ -53,6 +53,7 @@ PHP                                                                        NEWS
   . Lifted requirements to SQLite 3.7.4. (cmb)
   . Forbid (un)serialization of SQLite3, SQLite3Stmt and SQLite3Result. (cmb)
   . Added support for the SQLite @name notation. (cmb, BohwaZ)
+  . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. (Bohwaz)
 
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with

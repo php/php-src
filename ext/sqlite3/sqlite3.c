@@ -1495,6 +1495,47 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 }
 /* }}} */
 
+
+/* {{{ proto string SQLite3Stmt::getSQL([expanded = false])
+   Returns the SQL statement used to prepare the query. If expanded is true, binded parameters and values will be expanded. */
+PHP_METHOD(sqlite3stmt, getSQL)
+{
+	php_sqlite3_stmt *stmt_obj;
+	zend_bool expanded = 0;
+	zval *object = getThis();
+	stmt_obj = Z_SQLITE3_STMT_P(object);
+	int bind_rc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &expanded) == FAILURE) {
+		return;
+	}
+
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
+	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
+
+	bind_rc = php_sqlite3_bind_params(stmt_obj);
+
+	if (bind_rc == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (expanded) {
+#if SQLITE_VERSION_NUMBER >= 3014000
+		char *sql = sqlite3_expanded_sql(stmt_obj->stmt);
+		RETVAL_STRING(sql);
+		sqlite3_free(sql);
+#else
+		php_sqlite3_error(stmt_obj->db_obj, "The expanded parameter requires SQLite3 >= 3.14 and %s is installed", sqlite3_libversion());
+		RETURN_FALSE;
+#endif
+	} else {
+		const char *sql = sqlite3_sql(stmt_obj->stmt);
+		RETVAL_STRING(sql);
+	}
+}
+/* }}} */
+
+
 static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *param, php_sqlite3_stmt *stmt) /* {{{ */
 {
 	HashTable *hash;
@@ -2009,6 +2050,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, sqlite3)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_getsql, 0, 0, 0)
+	ZEND_ARG_INFO(0, expanded)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3result_columnname, 0, 0, 1)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
@@ -2064,6 +2109,7 @@ static const zend_function_entry php_sqlite3_stmt_class_methods[] = {
 	PHP_ME(sqlite3stmt, bindParam,	arginfo_sqlite3stmt_bindparam, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, bindValue,	arginfo_sqlite3stmt_bindvalue, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, readOnly,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, getSQL,		arginfo_sqlite3stmt_getsql, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, __construct, arginfo_sqlite3stmt_construct, ZEND_ACC_PRIVATE)
 	PHP_FE_END
 };

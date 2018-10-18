@@ -111,6 +111,11 @@ PHP 7.4 UPGRADE NOTES
     OpenSSL's X509_verify() function.
     See <https://github.com/php/php-src/pull/3624>.
 
+- SQLite3:
+  . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. If TRUE is
+    passed as parameter, query parameters will be replaced in the return value
+    by their currently bound value, if libsqlite ≥ 3.14 is used.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
