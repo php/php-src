@@ -1371,6 +1371,7 @@ PHP_METHOD(sqlite3stmt, clear)
 }
 /* }}} */
 
+#if SQLITE_VERSION_NUMBER >= 3007004
 /* {{{ proto bool SQLite3Stmt::readOnly()
    Returns true if a statement is definitely read only */
 PHP_METHOD(sqlite3stmt, readOnly)
@@ -1386,14 +1387,14 @@ PHP_METHOD(sqlite3stmt, readOnly)
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
-#if SQLITE_VERSION_NUMBER >= 3007004
 	if (sqlite3_stmt_readonly(stmt_obj->stmt)) {
 		RETURN_TRUE;
 	}
-#endif
+
 	RETURN_FALSE;
 }
 /* }}} */
+#endif
 
 static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *param, php_sqlite3_stmt *stmt) /* {{{ */
 {
