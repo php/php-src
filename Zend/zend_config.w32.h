@@ -50,16 +50,9 @@ typedef unsigned int uint;
 #endif
 #define strcasecmp(s1, s2) _stricmp(s1, s2)
 #define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
-#if defined(__cplusplus) && __cplusplus >= 201103L
-#include <cmath>
-#define zend_isnan std::isnan
-#define zend_isinf std::isinf
-#define zend_finite std::isfinite
-#else
 #define zend_isinf(a)	((_fpclass(a) == _FPCLASS_PINF) || (_fpclass(a) == _FPCLASS_NINF))
 #define zend_finite(x)	_finite(x)
 #define zend_isnan(x)	_isnan(x)
-#endif
 
 #define zend_sprintf sprintf
 
