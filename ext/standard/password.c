@@ -314,7 +314,7 @@ static int extract_argon2_parameters(const zend_string *hash,
 	if (!hash || (ZSTR_LEN(hash) < sizeof("$argon2id$"))) {
 		return FAILURE;
 	}
-	if (!memcpy(p, "$argon2i$", sizeof("$argon2i$") - 1)) {
+	if (!memcmp(p, "$argon2i$", sizeof("$argon2i$") - 1)) {
 		p += sizeof("$argon2i$") - 1;
 	} else if (!memcmp(p, "$argon2id$", sizeof("$argon2id$") - 1)) {
 		p += sizeof("$argon2id$") - 1;
