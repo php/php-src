@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0RC4
 
+- Core:
+  . Fixed bug #77035 (The phpize and ./configure create redundant .deps file).
+    (Peter Kokot)
+
 - Date:
   . Updated timelib to 2018.01RC1 to address several bugs: (Derick)
     . Fixed bug #75577 (DateTime::createFromFormat does not accept 'v' format
