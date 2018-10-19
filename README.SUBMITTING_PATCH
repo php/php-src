@@ -138,11 +138,10 @@ work on "master".
 
 Read CODING_STANDARDS before you start working.
 
-After modifying the source see README.TESTING and
-http://qa.php.net/write-test.php for how to test.  Submitting test
-scripts helps us to understand what functionality has changed.  It is
-important for the stability and maintainability of PHP that tests are
-comprehensive.
+After modifying the source see https://qa.php.net/write-test.php for
+how to test.  Submitting test scripts helps us to understand what
+functionality has changed.  It is important for the stability and
+maintainability of PHP that tests are comprehensive.
 
 After testing is finished, create a patch file using the command:
 

@@ -5895,6 +5895,10 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 
 	CG(active_op_array) = op_array;
 
+	if (toplevel) {
+		op_array->fn_flags |= ZEND_ACC_TOP_LEVEL;
+	}
+
 	zend_oparray_context_begin(&orig_oparray_context);
 
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {

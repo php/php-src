@@ -178,7 +178,9 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 					new_entry->prototype = ARENA_REALLOC(new_entry->prototype);
 				}
 			}
-			ZEND_MAP_PTR_INIT(new_entry->run_time_cache, ARENA_REALLOC(ZEND_MAP_PTR(new_entry->run_time_cache)));
+			if (IN_ARENA(ZEND_MAP_PTR(new_entry->run_time_cache))) {
+				ZEND_MAP_PTR_INIT(new_entry->run_time_cache, ARENA_REALLOC(ZEND_MAP_PTR(new_entry->run_time_cache)));
+			}
 			ZEND_MAP_PTR_INIT(new_entry->static_variables_ptr, &new_entry->static_variables);
 		}
 	}

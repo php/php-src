@@ -1534,7 +1534,6 @@ PHP_GEN_GLOBAL_MAKEFILE
 
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
-$php_shtool mkdir -p pear/scripts
 $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
