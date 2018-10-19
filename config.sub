@@ -89,7 +89,7 @@ while test $# -gt 0 ; do
     - )	# Use stdin as input.
        break ;;
     -* )
-       echo "$me: invalid option $1$help"
+       echo "$me: invalid option $1$help" >&2
        exit 1 ;;
 
     *local*)
