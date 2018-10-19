@@ -17,7 +17,7 @@ var_dump(0 === curl_getinfo($ch, CURLINFO_HTTP_VERSION));
 
 $host = curl_cli_server_start();
 
-$url = "{$host}/get.php?test=";
+$url = "{$host}/get.inc?test=";
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_exec($ch);

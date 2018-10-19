@@ -18,7 +18,7 @@ TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
   // start testing
   echo "*** Testing curl_exec() : basic functionality ***\n";
 
-  $url = "{$host}/get.php?test=get";
+  $url = "{$host}/get.inc?test=get";
   $chs = array(
     0 => curl_init(),
     1 => curl_init(),

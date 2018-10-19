@@ -18,7 +18,7 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
   // start testing
   echo '*** Testing curl with HTTP/1.1 ***' . "\n";
 
-  $url = "{$host}/get.php?test=httpversion";
+  $url = "{$host}/get.inc?test=httpversion";
   $ch = curl_init();
 
   ob_start(); // start output buffering
