@@ -1447,6 +1447,9 @@ TEST $file
 		$uses_cgi = true;
 	}
 
+	// Store current SAPI for certain sections if phpdbg will be used as $php
+	$phpcli = $php;
+
 	/* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
 	if (array_key_exists('PHPDBG', $section_text)) {
 		if (!isset($section_text['STDIN'])) {
@@ -1571,9 +1574,9 @@ TEST $file
 		$ext_params = array();
 		settings2array($ini_overwrites, $ext_params);
 		settings2params($ext_params);
-		$ext_dir=`$php $pass_options $ext_params -d display_errors=0 -r "echo ini_get('extension_dir');"`;
+		$ext_dir=`$phpcli $pass_options $ext_params -d display_errors=0 -r "echo ini_get('extension_dir');"`;
 		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-		$loaded = explode(",", `$php $pass_options $ext_params -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+		$loaded = explode(",", `$phpcli $pass_options $ext_params -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
 		$ext_prefix = substr(PHP_OS, 0, 3) === "WIN" ? "php_" : "";
 		foreach ($extensions as $req_ext) {
 			if (!in_array($req_ext, $loaded)) {
@@ -1623,7 +1626,7 @@ TEST $file
 
 			junit_start_timer($shortname);
 
-			$output = system_with_timeout("$extra $php $pass_options -q $ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
+			$output = system_with_timeout("$extra $phpcli $pass_options -q $ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
 
 			junit_finish_timer($shortname);
 
@@ -1961,7 +1964,7 @@ COMMAND $cmd
 				settings2params($clean_params);
 				$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 					"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
-				system_with_timeout("$extra $php $pass_options -q $clean_params $no_file_cache \"$test_clean\"", $env);
+				system_with_timeout("$extra $phpcli $pass_options -q $clean_params $no_file_cache \"$test_clean\"", $env);
 			}
 
 			if (!$cfg['keep']['clean']) {
