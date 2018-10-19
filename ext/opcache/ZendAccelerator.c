@@ -3787,6 +3787,11 @@ static int accel_finish_startup(void)
 		char *(*orig_getenv)(char *name, size_t name_len TSRMLS_DC) = sapi_module.getenv;
 		zend_bool old_reset_signals = SIGG(reset);
 
+		if (UNEXPECTED(file_cache_only)) {
+			zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"file_cache_only\" mode");
+			return SUCCESS;
+		}
+
 		sapi_module.activate = NULL;
 		sapi_module.deactivate = NULL;
 		sapi_module.register_server_variables = NULL;
