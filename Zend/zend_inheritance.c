@@ -885,12 +885,11 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			dst = end + parent_ce->default_static_members_count;
 			ce->default_static_members_table = end;
 		}
-		if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
-			ZEND_ASSERT(parent_ce->type == ZEND_INTERNAL_CLASS || (parent_ce->ce_flags & ZEND_ACC_IMMUTABLE));
-			zend_class_init_statics(parent_ce);
-		}
 		if (UNEXPECTED(parent_ce->type != ce->type)) {
 			/* User class extends internal */
+			if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
+				zend_class_init_statics(parent_ce);
+			}
 			if (UNEXPECTED(zend_update_class_constants(parent_ce) != SUCCESS)) {
 				ZEND_ASSERT(0);
 			}
@@ -905,6 +904,10 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 				}
 			} while (dst != end);
 		} else if (ce->type == ZEND_USER_CLASS) {
+			if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
+				ZEND_ASSERT(parent_ce->ce_flags & ZEND_ACC_IMMUTABLE);
+				zend_class_init_statics(parent_ce);
+			}
 			src = CE_STATIC_MEMBERS(parent_ce) + parent_ce->default_static_members_count;
 			do {
 				dst--;
