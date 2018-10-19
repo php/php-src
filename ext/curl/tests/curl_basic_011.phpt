@@ -18,7 +18,7 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
   // start testing
   echo '*** Testing curl with cookie ***' . "\n";
 
-  $url = "{$host}/get.php?test=cookie";
+  $url = "{$host}/get.inc?test=cookie";
   $ch = curl_init();
 
   ob_start(); // start output buffering

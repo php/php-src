@@ -18,7 +18,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   // start testing
   echo "*** Testing curl_exec() : basic functionality ***\n";
 
-  $url = "{$host}/get.php?test=get";
+  $url = "{$host}/get.inc?test=get";
   $ch = curl_init();
 
   ob_start(); // start output buffering
