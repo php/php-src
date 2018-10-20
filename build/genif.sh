@@ -13,7 +13,7 @@ awk=$1
 shift
 
 if test -z "$infile" || test -z "$srcdir"; then
-	echo "please supply infile and srcdir"
+	echo "please supply infile and srcdir" >&2
 	exit 1
 fi
 

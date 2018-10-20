@@ -28,8 +28,8 @@ while test $# -gt 0; do
 done
 
 if test "$dev" = "0" -a "$devok" = "0"; then
-  echo "You should not run buildconf in a release package."
-  echo "use buildconf --force to override this check."
+  echo "You should not run buildconf in a release package." >&2
+  echo "use buildconf --force to override this check." >&2
   exit 1
 fi
 
