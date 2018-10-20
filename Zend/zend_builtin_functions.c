@@ -1191,18 +1191,18 @@ ZEND_FUNCTION(get_object_vars)
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
 		ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, value) {
-			zend_bool unmangle = 0;
+			zend_bool is_dynamic = 1;
 			if (Z_TYPE_P(value) == IS_INDIRECT) {
 				value = Z_INDIRECT_P(value);
 				if (UNEXPECTED(Z_ISUNDEF_P(value))) {
 					continue;
 				}
 
-				ZEND_ASSERT(key);
-				if (zend_check_property_access(zobj, key) == FAILURE) {
-					continue;
-				}
-				unmangle = 1;
+				is_dynamic = 0;
+			}
+
+			if (key && zend_check_property_access(zobj, key, is_dynamic) == FAILURE) {
+				continue;
 			}
 
 			if (Z_ISREF_P(value) && Z_REFCOUNT_P(value) == 1) {
@@ -1213,7 +1213,7 @@ ZEND_FUNCTION(get_object_vars)
 			if (UNEXPECTED(!key)) {
 				/* This case is only possible due to loopholes, e.g. ArrayObject */
 				zend_hash_index_add(Z_ARRVAL_P(return_value), num_key, value);
-			} else if (unmangle && ZSTR_VAL(key)[0] == 0) {
+			} else if (!is_dynamic && ZSTR_VAL(key)[0] == 0) {
 				const char *prop_name, *class_name;
 				size_t prop_len;
 				zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
