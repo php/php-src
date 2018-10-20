@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #77035 (The phpize and ./configure create redundant .deps file).
     (Peter Kokot)
+  . Fixed bug #77041 (buildconf should output error messages to stderr)
+    (Mizunashi Mana)
 
 - Date:
   . Updated timelib to 2018.01RC1 to address several bugs: (Derick)
