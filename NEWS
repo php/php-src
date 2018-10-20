@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
   . Fixed bug #77035 (The phpize and ./configure create redundant .deps file).
     (Peter Kokot)
+  . Fixed bug #77041 (buildconf should output error messages to stderr)
+    (Mizunashi Mana)
 
 - Date:
   . Fixed bug #75851 (Year component overflow with date formats "c", "o", "r"
