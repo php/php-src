@@ -5,7 +5,7 @@ dnl include Zend specific macro definitions first
 dnl -------------------------------------------------------------------------
 sinclude(Zend/acinclude.m4)
 
-dnl Basic autoconf + automake initialization, generation of config.nice.
+dnl Basic autoconf initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
@@ -1438,7 +1438,7 @@ case $host_alias in
 esac
 
 dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
-dnl SEE https://www.mail-archive.com/automake-patches@gnu.org/msg07705.html
+dnl See https://github.com/php/php-src/pull/3017
 AC_SUBST(AR_FLAGS, [cr])
 
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by PHP_REQUIRE_CXX).

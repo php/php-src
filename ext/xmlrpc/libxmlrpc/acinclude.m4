@@ -1,4 +1,4 @@
-# Local macros for automake & autoconf
+# Local macros for autoconf
 
 AC_DEFUN([XMLRPC_FUNCTION_CHECKS],[
 
