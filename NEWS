@@ -55,6 +55,9 @@ PHP                                                                        NEWS
   . Fixed bug #30875 (xml_parse_into_struct() does not resolve entities). (cmb)
   . Add support for getting SKIP_TAGSTART and SKIP_WHITE options. (cmb)
 
+- XMLRPC:
+  . Fixed bug #75282 (xmlrpc_encode_request() crashes). (cmb)
+
 11 Oct 2018, PHP 7.2.11
 
 - Core:
