@@ -87,6 +87,7 @@ if test "$PHP_XMLRPC" = "yes"; then
           -I@ext_srcdir@/libxmlrpc -DVERSION="0.50")
   PHP_ADD_BUILD_DIR($ext_builddir/libxmlrpc)
   XMLRPC_MODULE_TYPE=builtin
+  AC_DEFINE(HAVE_XMLRPC_BUNDLED, 1, [ ])
 
 elif test "$PHP_XMLRPC" != "no"; then
 
