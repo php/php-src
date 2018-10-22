@@ -50,7 +50,6 @@ $TS \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
---with-curl=/usr \
 --with-tidy \
 --with-xmlrpc \
 --enable-sysvsem \
