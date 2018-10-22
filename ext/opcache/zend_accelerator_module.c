@@ -662,6 +662,44 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_double(&statistics, "opcache_hit_rate", reqs?(((double) ZCSG(hits))/reqs)*100.0:0);
 	add_assoc_zval(return_value, "opcache_statistics", &statistics);
 
+	if (ZCSG(preload_script)) {
+		array_init(&statistics);
+
+		add_assoc_long(&statistics, "memory_consumption", ZCSG(preload_script)->dynamic_members.memory_consumption);
+
+		if (zend_hash_num_elements(&ZCSG(preload_script)->script.function_table)) {
+			zend_op_array *op_array;
+
+			array_init(&scripts);
+			ZEND_HASH_FOREACH_PTR(&ZCSG(preload_script)->script.function_table, op_array) {
+				add_next_index_str(&scripts, op_array->function_name);
+			} ZEND_HASH_FOREACH_END();
+			add_assoc_zval(&statistics, "functions", &scripts);
+		}
+
+		if (zend_hash_num_elements(&ZCSG(preload_script)->script.class_table)) {
+			zend_class_entry *ce;
+
+			array_init(&scripts);
+			ZEND_HASH_FOREACH_PTR(&ZCSG(preload_script)->script.class_table, ce) {
+				add_next_index_str(&scripts, ce->name);
+			} ZEND_HASH_FOREACH_END();
+			add_assoc_zval(&statistics, "classes", &scripts);
+		}
+
+		if (ZCSG(saved_scripts)) {
+			zend_persistent_script **p = ZCSG(saved_scripts);
+
+			array_init(&scripts);
+			while (*p) {
+				add_next_index_str(&scripts, (*p)->script.filename);
+				p++;
+			}
+			add_assoc_zval(&statistics, "scripts", &scripts);
+		}
+		add_assoc_zval(return_value, "preload_statistics", &statistics);
+	}
+
 	if (fetch_scripts) {
 		/* accelerated scripts */
 		if (accelerator_get_scripts(&scripts)) {
