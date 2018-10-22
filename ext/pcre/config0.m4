@@ -11,21 +11,10 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
 
   if test "$PHP_PCRE_REGEX" != "yes" && test "$PHP_PCRE_REGEX" != "no"; then
 
+    # FIXME: don't define "I'm not bundled" as only versions installed in /usr
     if test "$PHP_PCRE_REGEX" = "/usr"; then
-      if test -z "$PKG_CONFIG"; then
-        AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-      fi
-      if test -x "$PKG_CONFIG"; then
-        AC_MSG_CHECKING(for PCRE2 10.30 or greater)
-        if $PKG_CONFIG --atleast-version 10.30 libpcre2-8; then
-          PCRE2_VER=`$PKG_CONFIG --modversion libpcre2-8`
-          AC_MSG_RESULT($PCRE2_VER)
-        else
-          AC_MSG_ERROR(PCRE2 version 10.30 or later is required to compile php with PCRE2 support)
-        fi
-        PCRE2_LIB=`$PKG_CONFIG --libs libpcre2-8`
-        PCRE2_INC=`$PKG_CONFIG --cflags libpcre2-8`
-      fi
+      PKG_CHECK_MODULES([PCRE2], [libpcre2-8 >= 10.30], ,
+        AC_MSG_ERROR(PCRE2 version 10.30 or later is required to compile php with PCRE2 support))
     fi
 
     dnl PCRE2 in a non standard  prefix should still have its config tool.
@@ -41,13 +30,13 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
           AC_MSG_RESULT($PCRE2_VER)
         fi
         PCRE2_LIB=`$PCRE2_CONF --libs8`
-        PCRE2_INC=`$PCRE2_CONF --cflags`
+        PCRE2_CFLAGS=`$PCRE2_CONF --cflags`
       else
         AC_MSG_ERROR(Couldn't find pcre2-config)
       fi
     fi
 
-    PHP_EVAL_INCLINE($PCRE2_INC)
+    PHP_EVAL_INCLINE($PCRE2_CFLAGS)
     PHP_EVAL_LIBLINE($PCRE2_LIB)
     AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
     AC_DEFINE(HAVE_PCRE, 1, [ ])
