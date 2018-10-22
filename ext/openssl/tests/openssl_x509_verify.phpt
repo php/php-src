@@ -25,8 +25,8 @@ var_dump(openssl_x509_verify($cert, $wrongKey));
 ?>
 --EXPECT--
 int(1)
-bool(false)
-bool(false)
-bool(false)
+int(-1)
+int(-1)
+int(-1)
 int(1)
 int(0)

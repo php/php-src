@@ -155,7 +155,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_verify, 0)
 	ZEND_ARG_INFO(0, cert)
-	ZEND_ARG_INFO(0, pub_key)
+	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_parse, 0, 0, 1)
@@ -2238,27 +2238,26 @@ PHP_FUNCTION(openssl_x509_verify)
 	X509 * cert = NULL;
 	EVP_PKEY * key = NULL;
 	zend_resource *keyresource = NULL;
-	int err = 0;
-
-	RETVAL_FALSE;
+	int err = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zcert, &zkey) == FAILURE) {
 		return;
 	}
 	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
 	if (cert == NULL) {
-		RETURN_FALSE;
+		RETURN_LONG(err);
 	}
 	key = php_openssl_evp_from_zval(zkey, 1, NULL, 0, 0, &keyresource);
 	if (key == NULL) {
-	    RETURN_FALSE;
+		X509_free(cert);
+		RETURN_LONG(err);
 	}	
 	
 	err = X509_verify(cert, key);
 	
 	if (err < 0) {
-	    php_openssl_store_errors();
-    }
+		php_openssl_store_errors();
+	}
 
 	if (keyresource == NULL && key) {
 		EVP_PKEY_free(key);
