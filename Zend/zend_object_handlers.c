@@ -525,7 +525,7 @@ found:
 }
 /* }}} */
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name) /* {{{ */
+ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, zend_bool is_dynamic) /* {{{ */
 {
 	zend_property_info *property_info;
 	const char *class_name = NULL;
@@ -534,19 +534,18 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	size_t prop_name_len;
 
 	if (ZSTR_VAL(prop_info_name)[0] == 0) {
+		if (is_dynamic) {
+			return SUCCESS;
+		}
+
 		zend_unmangle_property_name_ex(prop_info_name, &class_name, &prop_name, &prop_name_len);
 		member = zend_string_init(prop_name, prop_name_len, 0);
 		property_info = zend_get_property_info(zobj->ce, member, 1);
 		zend_string_release_ex(member, 0);
-		if (property_info == NULL) {
-			if (class_name[0] != '*') {
-				/* we we're looking for a private prop */
-				return FAILURE;
-			}
-			return SUCCESS;
-		} else if (property_info == ZEND_WRONG_PROPERTY_INFO) {
+		if (property_info == NULL || property_info == ZEND_WRONG_PROPERTY_INFO) {
 			return FAILURE;
 		}
+
 		if (class_name[0] != '*') {
 			if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
 				/* we we're looking for a private prop but found a non private one of the same name */
@@ -562,6 +561,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	} else {
 		property_info = zend_get_property_info(zobj->ce, prop_info_name, 1);
 		if (property_info == NULL) {
+			ZEND_ASSERT(is_dynamic);
 			return SUCCESS;
 		} else if (property_info == ZEND_WRONG_PROPERTY_INFO) {
 			return FAILURE;

@@ -13,7 +13,7 @@ Rick Buitenman <rick@meritos.nl>
 
   echo '*** Testing curl copy handle with User Agent ***' . "\n";
 
-  $url = "{$host}/get.php?test=useragent";
+  $url = "{$host}/get.inc?test=useragent";
   $ch = curl_init();
 
   ob_start(); // start output buffering

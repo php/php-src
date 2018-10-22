@@ -695,7 +695,11 @@ PHP_FUNCTION(xmlrpc_encode_request)
 			outBuf = XMLRPC_REQUEST_ToXML(xRequest, 0);
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
+#ifdef HAVE_XMLRPC_BUNDLED
 				efree(outBuf);
+#else
+				free(outBuf);
+#endif
 			}
 			XMLRPC_RequestFree(xRequest, 1);
 		}
@@ -729,7 +733,11 @@ PHP_FUNCTION(xmlrpc_encode)
 		if (xOut) {
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
+#ifdef HAVE_XMLRPC_BUNDLED
 				efree(outBuf);
+#else
+				free(outBuf);
+#endif
 			}
 			/* cleanup */
 			XMLRPC_CleanupValue(xOut);
@@ -1092,7 +1100,11 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 				outBuf = XMLRPC_REQUEST_ToXML(xResponse, &buf_len);
 				if (outBuf) {
 					RETVAL_STRINGL(outBuf, buf_len);
+#ifdef HAVE_XMLRPC_BUNDLED
 					efree(outBuf);
+#else
+					free(outBuf);
+#endif
 				}
 				/* cleanup after ourselves.  what a sty! */
 				XMLRPC_RequestFree(xResponse, 0);
