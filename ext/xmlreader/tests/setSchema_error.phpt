@@ -6,10 +6,6 @@ XMLReader: setSchema Error
 <?php
 
 $reader = new XMLReader();
-var_dump($reader->setSchema());
-$reader->close();
-
-$reader = new XMLReader();
 var_dump($reader->setSchema(''));
 $reader->close();
 
@@ -22,8 +18,6 @@ var_dump($reader->setSchema('schema-empty.xsd'));
 $reader->close();
 ?>
 --EXPECTF--
-Warning: XMLReader::setSchema() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
 
 Warning: XMLReader::setSchema(): Schema data source is required in %s on line %d
 bool(false)

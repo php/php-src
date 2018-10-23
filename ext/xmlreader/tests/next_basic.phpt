@@ -11,7 +11,6 @@ $xml = '<?xml version="1.0" encoding="UTF-8"?><nodes><node1><sub /></node1>
 $reader = new XMLReader();
 $reader->read();
 $reader->next();
-$reader->next('too', 'many', 'params');
 $reader->close();
 
 $reader->XML($xml);
@@ -33,8 +32,6 @@ $reader->close();
 Warning: XMLReader::read(): Load Data before trying to read in %s on line %d
 
 Warning: XMLReader::next(): Load Data before trying to read in %s on line %d
-
-Warning: XMLReader::next() expects at most 1 parameter, 3 given in %s on line %d
 node1
 bool(true)
 node3
