@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-      Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,18 +30,17 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
-# define YY_PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
-/* Enabling traces.  */
+#ifndef YY_YY_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
+# define YY_YY_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
+/* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
 #if YYDEBUG
-extern int phpdbg_debug;
+extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-/* Line 2060 of yacc.c  */
-#line 36 "sapi/phpdbg/phpdbg_parser.y"
+#line 34 "sapi/phpdbg/phpdbg_parser.y" /* yacc.c:1909  */
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -49,82 +48,45 @@ extern int phpdbg_debug;
 typedef void* yyscan_t;
 #endif
 
+#line 52 "sapi/phpdbg/phpdbg_parser.h" /* yacc.c:1909  */
 
-/* Line 2060 of yacc.c  */
-#line 55 "sapi/phpdbg/phpdbg_parser.h"
-
-/* Tokens.  */
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     T_EVAL = 258,
-     T_RUN = 259,
-     T_SHELL = 260,
-     T_IF = 261,
-     T_TRUTHY = 262,
-     T_FALSY = 263,
-     T_STRING = 264,
-     T_COLON = 265,
-     T_DCOLON = 266,
-     T_POUND = 267,
-     T_SEPARATOR = 268,
-     T_PROTO = 269,
-     T_DIGITS = 270,
-     T_LITERAL = 271,
-     T_ADDR = 272,
-     T_OPCODE = 273,
-     T_ID = 274,
-     T_INPUT = 275,
-     T_UNEXPECTED = 276,
-     T_REQ_ID = 277
-   };
+  enum yytokentype
+  {
+    T_EVAL = 258,
+    T_RUN = 259,
+    T_SHELL = 260,
+    T_IF = 261,
+    T_TRUTHY = 262,
+    T_FALSY = 263,
+    T_STRING = 264,
+    T_COLON = 265,
+    T_DCOLON = 266,
+    T_POUND = 267,
+    T_SEPARATOR = 268,
+    T_PROTO = 269,
+    T_DIGITS = 270,
+    T_LITERAL = 271,
+    T_ADDR = 272,
+    T_OPCODE = 273,
+    T_ID = 274,
+    T_INPUT = 275,
+    T_UNEXPECTED = 276,
+    T_REQ_ID = 277
+  };
 #endif
-/* Tokens.  */
-#define T_EVAL 258
-#define T_RUN 259
-#define T_SHELL 260
-#define T_IF 261
-#define T_TRUTHY 262
-#define T_FALSY 263
-#define T_STRING 264
-#define T_COLON 265
-#define T_DCOLON 266
-#define T_POUND 267
-#define T_SEPARATOR 268
-#define T_PROTO 269
-#define T_DIGITS 270
-#define T_LITERAL 271
-#define T_ADDR 272
-#define T_OPCODE 273
-#define T_ID 274
-#define T_INPUT 275
-#define T_UNEXPECTED 276
-#define T_REQ_ID 277
 
-
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef int YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
 
-#ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
-int phpdbg_parse (void *YYPARSE_PARAM);
-#else
-int phpdbg_parse ();
-#endif
-#else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
-int phpdbg_parse (void);
-#else
-int phpdbg_parse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
 
-#endif /* !YY_PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED  */
+int yyparse (void);
+
+#endif /* !YY_YY_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED  */
