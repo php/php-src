@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018, PHP 7.2.12
+?? ??? 2018, PHP 7.2.13
+
+
+08 Nov 2018, PHP 7.2.12
 
 - Core:
   . Fixed bug #76846 (Segfault in shutdown function after memory limit error).
