@@ -87,7 +87,7 @@ foreach($args_array as $args) {
 -- Iteration 1 --
 2 0 a 
    1e240 x fffffb2e 4d2 
-
+                          
    3039 c fffffff4 fffe1dc0
    a 1e240 2 0
 int(101)
@@ -95,7 +95,7 @@ int(101)
 -- Iteration 2 --
 2 fffffffe 2 
    1e240 x ff439a5b bc65a5
-
+                          
    bc61b4 127ae7 ff4732f9 ff439ede
    2 1e240 2 fffffffe
 int(124)
@@ -103,7 +103,7 @@ int(124)
 -- Iteration 3 --
 0 0 0 
    7b x ffffff85 7b  
-
+                          
    4d2 0 $0 _0
    0 7b 0 0
 int(82)
@@ -111,7 +111,7 @@ int(82)
 -- Iteration 4 --
 1 1 1 
    1 x    1 1   
-
+                          
    #1 1 $1 _1
    1 1 1 1
 int(75)
@@ -119,7 +119,7 @@ int(75)
 -- Iteration 5 --
 1 1 0 
    1 x    0 1   
-
+                          
    #0 1 $1 _0
    0 1 1 1
 int(75)
