@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0RC4
+?? ??? ????, PHP 7.3.0RC5
+
+
+25 Oct 2018, PHP 7.3.0RC4
 
 - Core:
   . Fixed bug #77035 (The phpize and ./configure create redundant .deps file).
