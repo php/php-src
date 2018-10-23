@@ -296,8 +296,6 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 			if (node_ptr == node) {
 				return 0;
 			}
-			xmlNodeSetName(node, node_ptr->name);
-			xmlSetNs(node, node_ptr->ns);
 			if (SOAP_GLOBAL(soap_version) == SOAP_1_1) {
 				while (1) {
 					attr = get_attribute(attr, "id");
