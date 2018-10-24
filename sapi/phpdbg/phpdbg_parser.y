@@ -39,9 +39,6 @@ typedef void* yyscan_t;
 #endif
 }
 
-%output  "sapi/phpdbg/phpdbg_parser.c"
-%defines "sapi/phpdbg/phpdbg_parser.h"
-
 %token T_EVAL       "eval"
 %token T_RUN        "run"
 %token T_SHELL      "shell"
