@@ -16,7 +16,6 @@ PREPARING YOUR SYSTEM
   tools:
 
     GNU autoconf
-    GNU automake
     GNU libtool
     GNU m4
 

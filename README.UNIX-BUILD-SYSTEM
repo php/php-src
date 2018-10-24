@@ -16,7 +16,7 @@ PHP Build System V5 Overview
   build-modules: builds and copies dynamic modules into modules/
   install-cli: installs the CLI only, so that the install-sapi
                target does only what its name says
-- finally abandoned automake (still requires aclocal at this time)
+- finally abandoned automake
 - changed some configure-time constructs to run at buildconf-time
 - upgraded shtool to 1.5.4
 - removed $(moduledir) (use EXTENSION_DIR)

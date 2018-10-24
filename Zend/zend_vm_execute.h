@@ -470,10 +470,20 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_ab
 	HANDLE_EXCEPTION();
 }
 
-static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_undefined_function_helper_SPEC(zval *function_name ZEND_OPCODE_HANDLER_ARGS_DC)
+static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
+	USE_OPLINE
+	zval *function_name;
+	char *name;
+
 	SAVE_OPLINE();
-	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	function_name = RT_CONSTANT(opline, opline->op2);
+	if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+		name = Z_STRVAL_P(function_name + 2);
+	} else {
+		name = Z_STRVAL_P(function_name);
+	}
+	zend_throw_error(NULL, "Call to undefined function %s()", name);
 	HANDLE_EXCEPTION();
 }
 
@@ -2023,7 +2033,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_ex(EG(function_table), Z_STR_P(function_name+1), 1);
 		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(function_name ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
@@ -2111,7 +2121,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 			func_name++;
 			func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name), 1);
 			if (UNEXPECTED(func == NULL)) {
-				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(func_name ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			}
 		}
 		fbc = Z_FUNC_P(func);
@@ -2132,7 +2142,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-
 	zval *fname;
 	zval *func;
 	zend_function *fbc;
@@ -2140,10 +2149,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CO
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		fname = RT_CONSTANT(opline, opline->op2);
+		fname = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_ex(EG(function_table), Z_STR_P(fname), 1);
 		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(fname ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
@@ -21258,10 +21267,12 @@ fe_fetch_r_exit:
 						value = Z_INDIRECT_P(value);
 						value_type = Z_TYPE_INFO_P(value);
 						if (EXPECTED(value_type != IS_UNDEF)
-						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS)) {
+						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
 							break;
 						}
-					} else {
+					} else if (EXPECTED(Z_OBJCE_P(array)->default_properties_count == 0)
+							|| !p->key
+							|| zend_check_property_access(Z_OBJ_P(array), p->key, 1) == SUCCESS) {
 						break;
 					}
 				}
@@ -21408,10 +21419,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 						value = Z_INDIRECT_P(value);
 						value_type = Z_TYPE_INFO_P(value);
 						if (EXPECTED(value_type != IS_UNDEF)
-						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS)) {
+						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
 							break;
 						}
-					} else {
+					} else if (EXPECTED(Z_OBJCE_P(array)->default_properties_count == 0)
+							|| !p->key
+							|| zend_check_property_access(Z_OBJ_P(array), p->key, 1) == SUCCESS) {
 						break;
 					}
 				}

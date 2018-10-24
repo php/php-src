@@ -19,7 +19,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   // start testing
   echo '*** Testing curl with user agent ***' . "\n";
 
-  $url = "{$host}/get.php?test=useragent";
+  $url = "{$host}/get.inc?test=useragent";
   $ch = curl_init();
 
   ob_start(); // start output buffering

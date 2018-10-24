@@ -11,7 +11,7 @@ Mattijs Hoitink mattijshoitink@gmail.com
 include 'server.inc';
 $host = curl_cli_server_start();
 // The URL to POST to
-$url = $host . '/get.php?test=post';
+$url = $host . '/get.inc?test=post';
 
 // Create a temporary file to read the data from
 $tempname = tempnam(sys_get_temp_dir(), 'CURL_DATA');

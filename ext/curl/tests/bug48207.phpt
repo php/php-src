@@ -19,7 +19,7 @@ $host = curl_cli_server_start();
 if(!empty($host)) {
 
     // Use the set Environment variable
-    $url = "$host/get.php?test=1";
+    $url = "$host/get.inc?test=1";
 
 } else {
 

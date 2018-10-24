@@ -9,7 +9,7 @@ Test curl_copy_handle() with simple POST
 
   echo '*** Testing curl copy handle with simple POST using array as arguments ***' . "\n";
 
-  $url = "{$host}/get.php?test=getpost";
+  $url = "{$host}/get.inc?test=getpost";
   $ch = curl_init();
 
   ob_start(); // start output buffering

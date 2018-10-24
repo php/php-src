@@ -12,7 +12,7 @@ Rick Buitenman <rick@meritos.nl>
 
   echo '*** Testing curl copy handle with simple POST ***' . "\n";
 
-  $url = "{$host}/get.php?test=getpost";
+  $url = "{$host}/get.inc?test=getpost";
   $ch = curl_init();
 
   ob_start(); // start output buffering

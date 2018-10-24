@@ -19,7 +19,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   // start testing
   echo '*** Testing curl sending through GET an POST ***' . "\n";
 
-  $url = "{$host}/get.php?test=getpost&get_param=Hello%20World";
+  $url = "{$host}/get.inc?test=getpost&get_param=Hello%20World";
   $ch = curl_init();
 
   ob_start(); // start output buffering
