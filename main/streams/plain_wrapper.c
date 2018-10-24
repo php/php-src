@@ -1453,7 +1453,8 @@ static const php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_metadata
 };
 
-PHPAPI const php_stream_wrapper php_plain_files_wrapper = {
+/* TODO: We have to make php_plain_files_wrapper writable to support SWOOLE */
+PHPAPI /*const*/ php_stream_wrapper php_plain_files_wrapper = {
 	&php_plain_files_wrapper_ops,
 	NULL,
 	0
