@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018, PHP 7.1.24
+08 Nov 2018, PHP 7.1.24
 
 - Core:
   . Fixed bug #76946 (Cyclic reference in generator not detected). (Nikita)
