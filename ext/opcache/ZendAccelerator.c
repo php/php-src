@@ -380,6 +380,9 @@ static void accel_interned_strings_restore_state(void)
 	memset(ZCSG(interned_strings).saved_top,
 			0, (char*)ZCSG(interned_strings).top - (char*)ZCSG(interned_strings).saved_top);
 
+	/* Reset "top" */
+	ZCSG(interned_strings).top = ZCSG(interned_strings).saved_top;
+
 	/* rehash */
 	memset((char*)&ZCSG(interned_strings) + sizeof(zend_string_table),
 		STRTAB_INVALID_POS,
