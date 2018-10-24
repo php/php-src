@@ -719,7 +719,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 		: "r"(delta)
 		: "cc", "memory", "%xmm0", "%xmm1", "%xmm1", "%xmm2");
 }
-# elif defined(__GNUC__) && defined(__x86_64__)
+# elif defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
 static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
 {
 	size_t delta = (char*)dest - (char*)src;
