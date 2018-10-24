@@ -20,7 +20,7 @@
 
 /* operations for a plain file; use the php_stream_fopen_XXX funcs below */
 PHPAPI extern php_stream_ops php_stream_stdio_ops;
-PHPAPI extern const php_stream_wrapper php_plain_files_wrapper;
+PHPAPI extern /*const*/ php_stream_wrapper php_plain_files_wrapper;
 
 BEGIN_EXTERN_C()
 
