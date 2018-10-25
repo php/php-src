@@ -1927,7 +1927,10 @@ static void handle_type_narrowing(const zend_op_array *op_array, zend_ssa *ssa, 
 {
 	if (1) {
 		/* Right now, this is always a bug */
-		zend_error(E_WARNING, "Narrowing occurred during type inference. Please file a bug report on bugs.php.net");
+		int def_op_num = ssa->vars[var].definition;
+		const zend_op *def_opline = def_op_num >= 0 ? &op_array->opcodes[def_op_num] : NULL;
+		const char *def_op_name = def_opline ? zend_get_opcode_name(def_opline->opcode) : "PHI";
+		zend_error(E_WARNING, "Narrowing occurred during type inference of %s. Please file a bug report on bugs.php.net", def_op_name);
 	} else {
 		/* if new_type set resets some bits from old_type set
 		 * We have completely recalculate types of some dependent SSA variables
