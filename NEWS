@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.1.25
 
-
+- Opcache:
+  . Fixed bug #77058 (Type inference in opcache causes side effects). (Nikita)
 
 08 Nov 2018, PHP 7.1.24
 
