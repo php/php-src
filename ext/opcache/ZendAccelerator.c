@@ -134,7 +134,6 @@ static int accel_finish_startup(void);
 
 static void preload_shutdown(void);
 static void preload_activate(void);
-static void preload_deactivate(void);
 static void preload_restart(void);
 
 #ifdef ZEND_WIN32
@@ -2433,10 +2432,6 @@ int accel_post_deactivate(void)
 		return SUCCESS;
 	}
 
-	if (ZCSG(preload_script)) {
-		preload_deactivate();
-	}
-
 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
 	accel_unlock_all();
 	ZCG(counted) = 0;
@@ -3086,55 +3081,6 @@ static void preload_activate(void)
 	}
 }
 
-static void preload_deactivate(void)
-{
-	if ((ZEND_DEBUG || !is_zend_mm()) && !EG(full_tables_cleanup)) {
-		zval *zv;
-
-		/* Cleanup preloaded immutable functions */
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
-			zend_op_array *op_array = Z_PTR_P(zv);
-			if (op_array->type == ZEND_INTERNAL_FUNCTION) {
-				break;
-			}
-			ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_IMMUTABLE);
-			if (op_array->static_variables) {
-				HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
-				if (ht) {
-					ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
-					zend_array_destroy(ht);
-				}
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		/* Cleanup preloaded immutable classes */
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-			zend_class_entry *ce = Z_PTR_P(zv);
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				break;
-			}
-			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_IMMUTABLE);
-			if (ce->default_static_members_count) {
-				zend_cleanup_internal_class_data(ce);
-			}
-			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-				zend_op_array *op_array;
-					ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-					if (op_array->type == ZEND_USER_FUNCTION) {
-						if (op_array->static_variables) {
-							HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
-							if (ht) {
-								ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
-								zend_array_destroy(ht);
-							}
-						}
-					}
-				} ZEND_HASH_FOREACH_END();
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-}
-
 static void preload_restart(void)
 {
 	zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(ZCSG(preload_script)->script.filename), ZSTR_LEN(ZCSG(preload_script)->script.filename), 0, ZCSG(preload_script));
@@ -3145,7 +3091,6 @@ static void preload_restart(void)
 			p++;
 		}
 	}
-	ZCSG(map_ptr_last) = ZCSG(saved_map_ptr_last);
 }
 
 static void preload_move_user_functions(HashTable *src, HashTable *dst)
@@ -3821,7 +3766,7 @@ static int accel_preload(const char *config)
 		} ZEND_HASH_FOREACH_END();
 		ZCSG(saved_scripts)[i] = NULL;
 
-		ZCSG(saved_map_ptr_last) = ZCSG(map_ptr_last);
+		CG(map_ptr_last) = ZCSG(map_ptr_last);
 		zend_shared_alloc_save_state();
 		accel_interned_strings_save_state();
 
