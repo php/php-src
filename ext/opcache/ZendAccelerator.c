@@ -567,10 +567,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	Bucket *p, *q;
 	HashTable *ht;
 
-	if (ZCSG(preload_script)) {
-		preload_shutdown();
-	}
-
 	/* empty string */
 	zend_empty_string = new_interned_string(zend_empty_string);
 	for (j = 0; j < 256; j++) {
@@ -774,6 +770,10 @@ static void accel_use_shm_interned_strings(void)
 
 static void accel_use_permanent_interned_strings(void)
 {
+	if (ZCSG(preload_script)) {
+		preload_shutdown();
+	}
+
 	accel_copy_permanent_strings(accel_replace_string_by_process_permanent);
 }
 
