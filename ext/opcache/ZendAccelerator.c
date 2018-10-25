@@ -31,7 +31,6 @@
 #include "zend_accelerator_blacklist.h"
 #include "zend_list.h"
 #include "zend_execute.h"
-#include "zend_ini_scanner.h"
 #include "zend_inheritance.h"
 #include "main/php_main.h"
 #include "main/SAPI.h"
@@ -132,6 +131,11 @@ static int (*orig_post_startup_cb)(void);
 static void accel_gen_system_id(void);
 static int accel_post_startup(void);
 static int accel_finish_startup(void);
+
+static void preload_shutdown(void);
+static void preload_activate(void);
+static void preload_deactivate(void);
+static void preload_restart(void);
 
 #ifdef ZEND_WIN32
 # define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
@@ -564,30 +568,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	HashTable *ht;
 
 	if (ZCSG(preload_script)) {
-		zval *zv;
-
-#if 0
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(zend_constants), zv) {
-			zend_constant *c = Z_PTR_P(zv);
-			if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END_DEL();
-#endif
-
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
-			zend_function *func = Z_PTR_P(zv);
-			if (func->type == ZEND_INTERNAL_FUNCTION) {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END_DEL();
-
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-			zend_class_entry *ce = Z_PTR_P(zv);
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END_DEL();
+		preload_shutdown();
 	}
 
 	/* empty string */
@@ -1123,7 +1104,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
 {
 	if (persistent_script->timestamp == 0) {
-		return SUCCESS; // TODO: preloaded script ???
+		return SUCCESS; /* Don't check timestamps of preloaded scripts */
 	} else if (ZCG(accel_directives).revalidate_freq &&
 	    persistent_script->dynamic_members.revalidate >= ZCG(request_time)) {
 		return SUCCESS;
@@ -2425,15 +2406,7 @@ int accel_activate(INIT_FUNC_ARGS)
 
 				zend_shared_alloc_restore_state();
 				if (ZCSG(preload_script)) {
-					zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(ZCSG(preload_script)->script.filename), ZSTR_LEN(ZCSG(preload_script)->script.filename), 0, ZCSG(preload_script));
-					if (ZCSG(saved_scripts)) {
-						zend_persistent_script **p = ZCSG(saved_scripts);
-						while (*p) {
-							zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL((*p)->script.filename), ZSTR_LEN((*p)->script.filename), 0, *p);
-							p++;
-						}
-					}
-					ZCSG(map_ptr_last) = ZCSG(saved_map_ptr_last);
+					preload_restart();
 				}
 				ZCSG(accelerator_enabled) = ZCSG(cache_status_before_restart);
 				if (ZCSG(last_restart_time) < ZCG(request_time)) {
@@ -2465,9 +2438,7 @@ int accel_activate(INIT_FUNC_ARGS)
 	}
 
 	if (ZCSG(preload_script)) {
-		if (ZCSG(preload_script)->ping_auto_globals_mask) {
-			zend_accel_set_auto_globals(ZCSG(preload_script)->ping_auto_globals_mask);
-		}
+		preload_activate();
 	}
 
 	return SUCCESS;
@@ -2482,6 +2453,10 @@ int accel_post_deactivate(void)
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
+	}
+
+	if (ZCSG(preload_script)) {
+		preload_deactivate();
 	}
 
 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
@@ -3082,7 +3057,104 @@ void accelerator_shm_read_unlock(void)
 static HashTable *preload_scripts = NULL;
 static zend_op_array *(*preload_orig_compile_file)(zend_file_handle *file_handle, int type);
 
-void preload_move_user_functions(HashTable *src, HashTable *dst)
+static void preload_shutdown(void)
+{
+	zval *zv;
+
+#if 0
+	ZEND_HASH_REVERSE_FOREACH_VAL(EG(zend_constants), zv) {
+		zend_constant *c = Z_PTR_P(zv);
+		if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
+			break;
+		}
+	} ZEND_HASH_FOREACH_END_DEL();
+#endif
+
+	ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
+		zend_function *func = Z_PTR_P(zv);
+		if (func->type == ZEND_INTERNAL_FUNCTION) {
+			break;
+		}
+	} ZEND_HASH_FOREACH_END_DEL();
+
+	ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
+		zend_class_entry *ce = Z_PTR_P(zv);
+		if (ce->type == ZEND_INTERNAL_CLASS) {
+			break;
+		}
+	} ZEND_HASH_FOREACH_END_DEL();
+}
+
+static void preload_activate(void)
+{
+	if (ZCSG(preload_script)->ping_auto_globals_mask) {
+		zend_accel_set_auto_globals(ZCSG(preload_script)->ping_auto_globals_mask);
+	}
+}
+
+static void preload_deactivate(void)
+{
+	if ((ZEND_DEBUG || !is_zend_mm()) && !EG(full_tables_cleanup)) {
+		zval *zv;
+
+		/* Cleanup preloaded immutable functions */
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
+			zend_op_array *op_array = Z_PTR_P(zv);
+			if (op_array->type == ZEND_INTERNAL_FUNCTION) {
+				break;
+			}
+			ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_IMMUTABLE);
+			if (op_array->static_variables) {
+				HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+				if (ht) {
+					ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
+					zend_array_destroy(ht);
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		/* Cleanup preloaded immutable classes */
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
+			zend_class_entry *ce = Z_PTR_P(zv);
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				break;
+			}
+			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_IMMUTABLE);
+			if (ce->default_static_members_count) {
+				zend_cleanup_internal_class_data(ce);
+			}
+			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
+				zend_op_array *op_array;
+					ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+					if (op_array->type == ZEND_USER_FUNCTION) {
+						if (op_array->static_variables) {
+							HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+							if (ht) {
+								ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
+								zend_array_destroy(ht);
+							}
+						}
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+
+static void preload_restart(void)
+{
+	zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(ZCSG(preload_script)->script.filename), ZSTR_LEN(ZCSG(preload_script)->script.filename), 0, ZCSG(preload_script));
+	if (ZCSG(saved_scripts)) {
+		zend_persistent_script **p = ZCSG(saved_scripts);
+		while (*p) {
+			zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL((*p)->script.filename), ZSTR_LEN((*p)->script.filename), 0, *p);
+			p++;
+		}
+	}
+	ZCSG(map_ptr_last) = ZCSG(saved_map_ptr_last);
+}
+
+static void preload_move_user_functions(HashTable *src, HashTable *dst)
 {
 	Bucket *p;
 	dtor_func_t orig_dtor = src->pDestructor;
@@ -3102,7 +3174,7 @@ void preload_move_user_functions(HashTable *src, HashTable *dst)
 	src->pDestructor = orig_dtor;
 }
 
-void preload_move_user_classes(HashTable *src, HashTable *dst)
+static void preload_move_user_classes(HashTable *src, HashTable *dst)
 {
 	Bucket *p;
 	dtor_func_t orig_dtor = src->pDestructor;
