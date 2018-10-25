@@ -3238,6 +3238,10 @@ static void preload_link(void)
 					parent = zend_hash_find_ptr(EG(class_table), key);
 					zend_string_release(key);
 					if (!parent) continue;
+#ifdef ZEND_WIN32
+					/* On Windows we can't link with internal class, because of ASLR */
+					if (parent->type == ZEND_INTERNAL_CLASS) continue;
+#endif
 				}
 
 				if (ce->num_interfaces) {
@@ -3248,6 +3252,13 @@ static void preload_link(void)
 							found = 0;
 							break;
 						}
+#ifdef ZEND_WIN32
+						/* On Windows we can't link with internal class, because of ASLR */
+						if (p->type == ZEND_INTERNAL_CLASS) {
+							found = 0;
+							break;
+						}
+#endif
 					}
 					if (!found) continue;
 				}
@@ -3260,6 +3271,13 @@ static void preload_link(void)
 							found = 0;
 							break;
 						}
+#ifdef ZEND_WIN32
+						/* On Windows we can't link with internal class, because of ASLR */
+						if (p->type == ZEND_INTERNAL_CLASS) {
+							found = 0;
+							break;
+						}
+#endif
 					}
 					if (!found) continue;
 				}
