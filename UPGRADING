@@ -22,7 +22,7 @@ PHP 7.3 UPGRADE NOTES
 Core:
   . The ext_skel utility has been completely redesigned with new options and
     some old options removed. This is now written in PHP and has no external
-	dependencies.
+    dependencies.
   . Support for BeOS has been dropped.
   . Exceptions thrown due to automatic conversion of warnings into exceptions
     in EH_THROW mode (e.g. some DateTime exceptions) no longer populate
