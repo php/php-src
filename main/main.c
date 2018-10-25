@@ -2520,6 +2520,13 @@ void php_module_shutdown(void)
 	zend_interned_strings_dtor();
 #endif
 
+	if (zend_post_shutdown_cb) {
+		void (*cb)(void) = zend_post_shutdown_cb;
+
+		zend_post_shutdown_cb = NULL;
+		cb();
+	}
+
 	module_initialized = 0;
 
 #ifndef ZTS

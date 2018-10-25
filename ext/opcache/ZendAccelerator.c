@@ -734,19 +734,6 @@ static zend_string* ZEND_FASTCALL accel_replace_string_by_shm_permanent(zend_str
 	return str;
 }
 
-static zend_string* ZEND_FASTCALL accel_replace_string_by_process_permanent(zend_string *str)
-{
-	zend_string *ret = zend_interned_string_find_permanent(str);
-
-	if (ret) {
-		zend_string_release(str);
-		return ret;
-	}
-	ZEND_ASSERT(0);
-	return str;
-}
-
-
 static void accel_use_shm_interned_strings(void)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -766,15 +753,6 @@ static void accel_use_shm_interned_strings(void)
 	zend_shared_alloc_unlock();
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
-}
-
-static void accel_use_permanent_interned_strings(void)
-{
-	if (ZCSG(preload_script)) {
-		preload_shutdown();
-	}
-
-	accel_copy_permanent_strings(accel_replace_string_by_process_permanent);
 }
 
 #ifndef ZEND_WIN32
@@ -2578,8 +2556,6 @@ static int zend_accel_init_shm(void)
 			STRTAB_INVALID_POS,
 			(char*)ZCSG(interned_strings).start -
 				((char*)&ZCSG(interned_strings) + sizeof(zend_string_table)));
-
-		zend_interned_strings_set_permanent_storage_copy_handlers(accel_use_shm_interned_strings, accel_use_permanent_interned_strings);
 	}
 
 	zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
@@ -2802,6 +2778,9 @@ static int accel_startup(zend_extension *extension)
 	orig_post_startup_cb = zend_post_startup_cb;
 	zend_post_startup_cb = accel_post_startup;
 
+	/* Prevent unloadig */
+	extension->handle = 0;
+
 	return SUCCESS;
 }
 
@@ -2842,9 +2821,6 @@ static int accel_post_startup(void)
 			case SUCCESSFULLY_REATTACHED:
 				zend_shared_alloc_lock();
 				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
-				if (ZCG(accel_directives).interned_strings_buffer) {
-					zend_interned_strings_set_permanent_storage_copy_handlers(accel_use_shm_interned_strings, accel_use_permanent_interned_strings);
-				}
 				zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
 				zend_shared_alloc_unlock();
 				break;
@@ -2940,7 +2916,18 @@ file_cache_fallback:
 
 	zend_optimizer_startup();
 
+	if (!file_cache_only && ZCG(accel_directives).interned_strings_buffer) {
+		accel_use_shm_interned_strings();
+	}
+
 	return accel_finish_startup();
+}
+
+static void (*orig_post_shutdown_cb)(void);
+
+static void accel_post_shutdown(void)
+{
+	zend_shared_alloc_shutdown();
 }
 
 void accel_shutdown(void)
@@ -2959,6 +2946,10 @@ void accel_shutdown(void)
 		return;
 	}
 
+	if (ZCSG(preload_script)) {
+		preload_shutdown();
+	}
+
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	_file_cache_only = file_cache_only;
 #endif
@@ -2970,8 +2961,11 @@ void accel_shutdown(void)
 #endif
 
 	if (!_file_cache_only) {
-		zend_shared_alloc_shutdown();
+		/* Delay SHM dettach */
+		orig_post_shutdown_cb = zend_post_shutdown_cb;
+		zend_post_shutdown_cb = accel_post_shutdown;
 	}
+
 	zend_compile_file = accelerator_orig_compile_file;
 
 	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {
@@ -3876,9 +3870,6 @@ static int accel_finish_startup(void)
 		sapi_module.getenv = NULL;
 
 		zend_interned_strings_switch_storage(1);
-		if (ZCG(accel_directives).interned_strings_buffer) {
-			zend_interned_strings_set_permanent_storage_copy_handlers(NULL, accel_use_permanent_interned_strings);
-		}
 
 		SIGG(reset) = 0;
 		if (php_request_startup() == SUCCESS) {
