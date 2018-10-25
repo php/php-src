@@ -17,9 +17,9 @@ class C {
 }
 
 $rc = new ReflectionClass("C");
-$StaticFlag = 0x01;
-$pubFlag =  0x100;
-$privFlag = 0x400;
+$StaticFlag = ReflectionProperty::IS_STATIC;
+$pubFlag =  ReflectionProperty::IS_PUBLIC;
+$privFlag = ReflectionProperty::IS_PRIVATE;
 
 echo "No properties:";
 var_dump($rc->getProperties(0));

@@ -27,7 +27,6 @@ var_dump(preg_grep($value, $array));
 echo "Done"
 ?>
 --EXPECTF--
-
 *** Testing preg_grep() : error conditions ***
 
 Arg value is abcdef

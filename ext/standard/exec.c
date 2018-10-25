@@ -16,7 +16,6 @@
    |         Ilia Alshanetsky <iliaa@php.net>                             |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include <stdio.h>
 #include "php.h"
@@ -565,7 +564,9 @@ PHP_FUNCTION(proc_nice)
 	php_ignore_value(nice(pri));
 	if (errno) {
 #ifdef PHP_WIN32
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 #else
 		php_error_docref(NULL, E_WARNING, "Only a super user may attempt to increase the priority of a process");
 #endif

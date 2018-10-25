@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef FPM_EVENTS_KQUEUE_H
 #define FPM_EVENTS_KQUEUE_H
 

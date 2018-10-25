@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --FILE--
 <?php
 /* Prototype  : proto array array_fill(int start_key, int num, mixed val)
- * Description: Create an array containing num elements starting with index start_key each initialized to val 
+ * Description: Create an array containing num elements starting with index start_key each initialized to val
  * Source code: ext/standard/array.c
  */
 
@@ -17,7 +17,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 
 echo "*** Testing array_fill() : usage variations ***\n";
 
-// Initialise function arguments not being substituted 
+// Initialise function arguments not being substituted
 $num = 2;
 $val = 100;
 
@@ -60,13 +60,13 @@ $values = array(
   /* 11 */  NULL,
             null,
 
-            // boolean values 
+            // boolean values
   /* 13 */  true,
             false,
             TRUE,
             FALSE,
 
-            // empty string 
+            // empty string
   /* 17 */  "",
             '',
 
@@ -80,14 +80,14 @@ $values = array(
             // undefined  variable
             @$undefined_var,
 
-            // unset variable 
+            // unset variable
             @$unset_var,
 
             // resource variable
   /* 24 */  $fp
 );
 
-// loop through each element of the array for start_key 
+// loop through each element of the array for start_key
 // check the working of array_fill()
 echo "--- Testing array_fill() with different values for 'start_key' arg ---\n";
 $counter = 1;
@@ -95,9 +95,9 @@ for($index = 0; $index < count($values); $index ++)
 {
   echo "-- Iteration $counter --\n";
   $start_key = $values[$index];
- 
+
   var_dump( array_fill($start_key,$num,$val) );
- 
+
   $counter ++;
 }
 

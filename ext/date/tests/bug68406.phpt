@@ -17,7 +17,6 @@ if($tz2 == $d->getTimezone()) {
 else {
     echo "no";
 }
-
 --EXPECT--
 object(DateTimeZone)#4 (2) {
   ["timezone_type"]=>

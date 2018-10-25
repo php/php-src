@@ -20,8 +20,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1393,7 +1391,7 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FALIAS(gzeof,		feof,			arginfo_gzpassthru)
 	PHP_FALIAS(gzgetc,		fgetc,			arginfo_gzpassthru)
 	PHP_FALIAS(gzgets,		fgets,			arginfo_gzgets)
-	PHP_FALIAS(gzgetss,		fgetss,			arginfo_gzgetss)
+	PHP_DEP_FALIAS(gzgetss,	fgetss,			arginfo_gzgetss)
 	PHP_FALIAS(gzread,		fread,			arginfo_gzread)
 	PHP_FE(gzopen,							arginfo_gzopen)
 	PHP_FALIAS(gzpassthru,	fpassthru,		arginfo_gzpassthru)

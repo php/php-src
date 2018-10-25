@@ -1,9 +1,9 @@
 --TEST--
 Test function posix_setgid() by substituting argument 1 with float values.
 --SKIPIF--
-<?php 
+<?php
         PHP_INT_SIZE == 4 or die("skip - 32-bit only");
-        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
         if(posix_geteuid() == 0) print "skip - Cannot run test as root.";
 ?>
 --CREDITS--
@@ -44,4 +44,3 @@ Warning: posix_setgid() expects parameter 1 to be int, float given in %s on line
 bool(false)
 bool(false)
 ===DONE===
-	

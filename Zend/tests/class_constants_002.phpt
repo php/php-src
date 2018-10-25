@@ -23,9 +23,13 @@ bar();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(1)
 int(5)
 int(10)
 
-Fatal error: Class 'NoSuchClass' not found in %s on line %d
+Fatal error: Uncaught Error: Class 'NoSuchClass' not found in %s:%d
+Stack trace:
+#0 %s(%d): bar()
+#1 {main}
+  thrown in %s on line %d

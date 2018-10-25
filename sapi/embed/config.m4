@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for sapi embed
 
 PHP_ARG_ENABLE(embed,,
 [  --enable-embed[=TYPE]     EXPERIMENTAL: Enable building of embedded SAPI library
@@ -30,4 +28,3 @@ if test "$PHP_EMBED" != "no"; then
 else
   AC_MSG_RESULT(no)
 fi
-

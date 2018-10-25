@@ -21,7 +21,7 @@ mbstring.func_overload=0
 			print "ok\n";
 		} else {
 			print count($result1).'-'.count($result2)."\n";
-		}	
+		}
 	}
 
 	var_dump( mb_split( " ", "a b c d e f g" )
@@ -35,7 +35,6 @@ mbstring.func_overload=0
 		verify_split( "\xa1\xa1+", "\xa1\xa1\xa1\xa2\xa2\xa1\xa1\xa1\xa1\xa1\xa1\xa2\xa2\xa1\xa1\xa1", $i );
 	}
 ?>
-
 --EXPECT--
 bool(true)
 ok
@@ -46,4 +45,3 @@ ok
 2-2
 3-3
 4-4
-

@@ -4,7 +4,7 @@ testing @ and error_reporting - 9
 <?php
 
 error_reporting(E_ALL);
-	
+
 function bar() {
 	echo @$blah;
 	echo $undef2;
@@ -16,14 +16,14 @@ function foo() {
 	echo $blah;
 	return bar();
 }
-	
-@foo();					
+
+@foo();
 
 var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Notice: Undefined variable: blah in %s on line %d
 
 Notice: Undefined variable: undef2 in %s on line %d

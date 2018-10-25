@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for input filtering extension
 
 PHP_ARG_ENABLE(filter, whether to enable input filter support,

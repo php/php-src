@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifndef PHP_MYSQLI_STRUCTS_H
@@ -343,9 +341,6 @@ ZEND_END_MODULE_GLOBALS(mysqli)
 #if defined(ZTS) && defined(COMPILE_DL_MYSQLI)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
-
-#define my_estrdup(x) (x) ? estrdup(x) : NULL
-#define my_efree(x) if (x) efree(x)
 
 ZEND_EXTERN_MODULE_GLOBALS(mysqli)
 

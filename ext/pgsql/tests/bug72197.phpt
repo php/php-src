@@ -1,5 +1,5 @@
 --TEST--
-Bug #72197 pg_lo_create arbitrary read 
+Bug #72197 pg_lo_create arbitrary read
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -32,4 +32,3 @@ Warning: pg_lo_create(): supplied resource is not a valid PostgreSQL link resour
 int(%d)
 int(%d)
 ==DONE==
-

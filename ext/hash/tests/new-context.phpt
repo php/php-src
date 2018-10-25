@@ -1,5 +1,5 @@
 --TEST--
-Attempt to instantiate a HashContext directly
+Hash: Attempt to instantiate a HashContext directly
 --SKIPIF--
 <?php if (!extension_loaded('hash')) echo 'skip';
 --FILE--

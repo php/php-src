@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -92,6 +90,9 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 		char *instance = INI_STR("pdo_odbc.db2_instance_name");
 		if (instance) {
 			char *env = malloc(sizeof("DB2INSTANCE=") + strlen(instance));
+
+			php_error_docref(NULL, E_DEPRECATED, "The pdo_odbc.db2_instance_name ini directive is deprecated and will be removed in the future");
+
 			if (!env) {
 				return FAILURE;
 			}

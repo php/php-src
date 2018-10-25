@@ -1,5 +1,5 @@
 --TEST--
-ZE2 a class cannot extend an interface 
+ZE2 a class cannot extend an interface
 --FILE--
 <?php
 

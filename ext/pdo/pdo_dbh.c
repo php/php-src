@@ -18,8 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* The PDO Database Handle Class */
 
 #ifdef HAVE_CONFIG_H
@@ -1337,7 +1335,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 	return 1;
 }
 
-static union _zend_function *dbh_method_get(zend_object **object, zend_string *method_name, const zval *key)
+static zend_function *dbh_method_get(zend_object **object, zend_string *method_name, const zval *key)
 {
 	zend_function *fbc = NULL;
 	pdo_dbh_object_t *dbh_obj = php_pdo_dbh_fetch_object(*object);

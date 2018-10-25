@@ -16,7 +16,6 @@
    |          Ilia Alshanetsky <ilia@prohost.org>                         |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

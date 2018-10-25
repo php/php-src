@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmpget
 --CREDITS--
 Olivier Doucet & Boris Lytochkin

@@ -175,6 +175,8 @@ Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure
 -------------------
 
 bindTo(null, Cls::class):
+Unbinding $this of a method is deprecated
+
 Success!
 
 bindTo(new Cls, Cls::class):

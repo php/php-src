@@ -1,7 +1,7 @@
 --TEST--
 Various pow() tests
 --FILE--
-<?php // $Id$
+<?php
 
 $x = 2;
 $x **= 3;
@@ -16,7 +16,6 @@ TESTS;
 
  echo "On failure, please mail result to php-dev@lists.php.net\n";
  include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
-
 --EXPECT--
 On failure, please mail result to php-dev@lists.php.net
 OK

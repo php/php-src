@@ -7,7 +7,7 @@ Test copy() function: usage variations - destination file names(numerics/strings
      Returns TRUE on success or FALSE on failure.
 */
 
-/* Test copy() function: In creation of destination file names containing numerics/strings 
+/* Test copy() function: In creation of destination file names containing numerics/strings
      and checking the existence and size of destination files
 */
 
@@ -69,12 +69,10 @@ foreach($dest_files as $dest_file) {
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_variation1.tmp");
 ?>
-
 --EXPECTF--
 *** Test copy() function: destination file names containing numerics/strings ***
 Size of the source file before copy operation => int(1500)

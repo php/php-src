@@ -1,4 +1,4 @@
-Oniguruma Regular Expressions Version 6.8.0    2018/04/13
+Oniguruma Regular Expressions Version 6.8.0    2018/07/26
 
 syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
@@ -221,7 +221,8 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
   (?#...)            comment
 
-  (?imxWDSP-imxWDSP)         option on/off
+  (?imxWDSP-imxWDSP:subexp)  option on/off for subexp
+
                                i: ignore case
                                m: multi-line (dot (.) also matches newline)
                                x: extended form
@@ -233,7 +234,11 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
                                   (alnum, alpha, blank, cntrl, digit, graph,
                                    lower, print, punct, space, upper, xdigit, word)
 
-  (?imxWDSP-imxWDSP:subexp)  option on/off for subexp
+  (?imxWDSP-imxWDSP)  isolated option
+
+                      * It makes a group to the next ')' or end of the pattern.
+                        /ab(?i)c|def|gh/ == /ab(?i:c|def|gh)/
+
 
   (?:subexp)         non-capturing group
   (subexp)           capturing group
@@ -475,7 +480,6 @@ A-3. Missing features compared with perl 5.8.0
 
    + \N{name}
    + \l,\u,\L,\U,\C
-   + (?{code})
    + (??{code})
 
    * \Q...\E

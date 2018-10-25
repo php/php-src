@@ -24,9 +24,7 @@
 #include "grapheme_util.h"
 
 #include <unicode/utypes.h>
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 #include <unicode/utf8.h>
-#endif
 #include <unicode/ucol.h>
 #include <unicode/ustring.h>
 #include <unicode/ubrk.h>
@@ -911,4 +909,3 @@ PHP_FUNCTION(grapheme_extract)
  * vim600: fdm=marker
  * vim: noet sw=4 ts=4
  */
-

@@ -51,8 +51,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /**********************************************************************
 * BUGS:                                                               *
 *  - when calling a php user function, there appears to be no way to  *
@@ -697,7 +695,11 @@ PHP_FUNCTION(xmlrpc_encode_request)
 			outBuf = XMLRPC_REQUEST_ToXML(xRequest, 0);
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
+#ifdef HAVE_XMLRPC_BUNDLED
 				efree(outBuf);
+#else
+				free(outBuf);
+#endif
 			}
 			XMLRPC_RequestFree(xRequest, 1);
 		}
@@ -731,7 +733,11 @@ PHP_FUNCTION(xmlrpc_encode)
 		if (xOut) {
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
+#ifdef HAVE_XMLRPC_BUNDLED
 				efree(outBuf);
+#else
+				free(outBuf);
+#endif
 			}
 			/* cleanup */
 			XMLRPC_CleanupValue(xOut);
@@ -1026,7 +1032,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	php_output_options out;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
+	if (zend_parse_parameters(argc, "rsz|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
 		return;
 	}
 	/* user output options */
@@ -1094,7 +1100,11 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 				outBuf = XMLRPC_REQUEST_ToXML(xResponse, &buf_len);
 				if (outBuf) {
 					RETVAL_STRINGL(outBuf, buf_len);
+#ifdef HAVE_XMLRPC_BUNDLED
 					efree(outBuf);
+#else
+					free(outBuf);
+#endif
 				}
 				/* cleanup after ourselves.  what a sty! */
 				XMLRPC_RequestFree(xResponse, 0);
@@ -1447,4 +1457,3 @@ PHP_FUNCTION(xmlrpc_is_fault)
  * c-basic-offset: 4
  * End:
  */
-

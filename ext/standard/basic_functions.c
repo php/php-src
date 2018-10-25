@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_streams.h"
 #include "php_main.h"
@@ -77,11 +75,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 # include <unistd.h>
 #endif
 
-#if HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #if HAVE_LOCALE_H
 # include <locale.h>
@@ -417,6 +411,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_keys, 0, 0, 1)
 	ZEND_ARG_INFO(0, search_value)
 	ZEND_ARG_INFO(0, strict)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_array_key_first, 0)
+	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_array_key_last, 0)
+	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
+ZEND_END_ARG_INFO()
+
 
 ZEND_BEGIN_ARG_INFO(arginfo_array_values, 0)
 	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
@@ -1424,7 +1427,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_setcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, expires)
+	ZEND_ARG_INFO(0, expires_or_options)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, domain)
 	ZEND_ARG_INFO(0, secure)
@@ -1434,7 +1437,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_setrawcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, expires)
+	ZEND_ARG_INFO(0, expires_or_options)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, domain)
 	ZEND_ARG_INFO(0, secure)
@@ -3128,7 +3131,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(feof,															arginfo_feof)
 	PHP_FE(fgetc,															arginfo_fgetc)
 	PHP_FE(fgets,															arginfo_fgets)
-	PHP_FE(fgetss,															arginfo_fgetss)
+	PHP_DEP_FE(fgetss,														arginfo_fgetss)
 	PHP_FE(fread,															arginfo_fread)
 	PHP_NAMED_FE(fopen,				php_if_fopen,							arginfo_fopen)
 	PHP_FE(fpassthru,														arginfo_fpassthru)
@@ -3362,6 +3365,8 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_replace,													arginfo_array_replace)
 	PHP_FE(array_replace_recursive,											arginfo_array_replace_recursive)
 	PHP_FE(array_keys,														arginfo_array_keys)
+	PHP_FE(array_key_first,													arginfo_array_key_first)
+	PHP_FE(array_key_last,													arginfo_array_key_last)
 	PHP_FE(array_values,													arginfo_array_values)
 	PHP_FE(array_count_values,												arginfo_array_count_values)
 	PHP_FE(array_column,													arginfo_array_column)

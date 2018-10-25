@@ -3,7 +3,7 @@ Test array_intersect_ukey() function : usage variation - Passing unexpected valu
 --FILE--
 <?php
 /* Prototype  : array array_intersect_ukey(array arr1, array arr2 [, array ...], callback key_compare_func)
- * Description: Computes the intersection of arrays using a callback function on the keys for comparison. 
+ * Description: Computes the intersection of arrays using a callback function on the keys for comparison.
  * Source code: ext/standard/array.c
  */
 
@@ -20,7 +20,7 @@ function key_compare_func($key1, $key2)
     if ($key1 == $key2)
         return 0;
     else
-        return ($key1 > $key2)? 1:-1; 
+        return ($key1 > $key2)? 1:-1;
 }
 
 //get an unset variable
@@ -113,209 +113,209 @@ fclose($fp);
 
 --int 0--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
 --int 1--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
 --int 12345--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
 --int -12345--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
 --float 10.5--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --float -10.5--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --float 12.3456789000e10--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --float -12.3456789000e10--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --float .5--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --uppercase NULL--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
 --lowercase null--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
 --lowercase true--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
 --lowercase false--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
 --uppercase TRUE--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
 --uppercase FALSE--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
 --empty string DQ--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --empty string SQ--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --string DQ--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --string SQ--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --mixed case string--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --heredoc--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --instance of classWithToString--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, object given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, object given in %s on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, object given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, object given in %s on line %d
 NULL
 
 --undefined var--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
 --unset var--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
 --resource var--
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, resource given in %s on line %d
 NULL
 
-Warning: array_intersect_ukey(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_ukey(): Expected parameter 3 to be an array, resource given in %s on line %d
 NULL
 ===DONE===

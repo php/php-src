@@ -1,18 +1,18 @@
 --TEST--
-Test posix_getpgid() function : variation 
+Test posix_getpgid() function : variation
 --SKIPIF--
-<?php 
+<?php
 PHP_INT_SIZE == 4 or die("skip - 32-bit only");
 if((!extension_loaded("posix")) || (!function_exists("posix_getpgid"))) {
 	 print "skip - POSIX extension not loaded or posix_getpgid() does not exist";
-} 
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int posix_getpgid(void)
- * Description: Get the process group id of the specified process (This is not a POSIX function, but a SVR4ism, so we compile conditionally) 
+ * Description: Get the process group id of the specified process (This is not a POSIX function, but a SVR4ism, so we compile conditionally)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_getpgid() : usage variations ***\n";
@@ -63,7 +63,7 @@ $values = array(
 
       // unset data
       $unset_var,
-      
+
       // object data
       new stdclass(),
 );

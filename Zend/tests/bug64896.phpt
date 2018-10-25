@@ -29,7 +29,7 @@ gc_disable();
 
 unserialize(serialize($foo));
 gc_collect_cycles();
-var_dump($bar); 
+var_dump($bar);
 gc_enable();
 /*  will output:
 object(bad)#4 (1) {

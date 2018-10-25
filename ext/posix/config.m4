@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension posix
 
 PHP_ARG_ENABLE(posix,whether to enable POSIX-like functions,
 [  --disable-posix         Disable POSIX-like functions], yes)
@@ -14,7 +12,7 @@ if test "$PHP_POSIX" = "yes"; then
   AC_CHECK_FUNCS(seteuid setegid setsid getsid setpgid getpgid ctermid mkfifo mknod setrlimit getrlimit getlogin getgroups makedev initgroups getpwuid_r getgrgid_r)
 
   AC_MSG_CHECKING([for working ttyname_r() implementation])
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <unistd.h>
 
 int main(int argc, char *argv[])
@@ -23,7 +21,7 @@ int main(int argc, char *argv[])
 
 	return !ttyname_r(0, buf, 64);
 }
-  ],[
+  ]])],[
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_TTYNAME_R, 1, [Whether you have a working ttyname_r])
   ],[
@@ -33,12 +31,12 @@ int main(int argc, char *argv[])
   ])
 
   AC_CACHE_CHECK([for utsname.domainname], ac_cv_have_utsname_domainname, [
-    AC_TRY_COMPILE([
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
       #define _GNU_SOURCE
       #include <sys/utsname.h>
-    ],[
+    ]],[[
       return sizeof(((struct utsname *)0)->domainname);
-    ],[
+    ]])],[
       ac_cv_have_utsname_domainname=yes
     ],[
       ac_cv_have_utsname_domainname=no

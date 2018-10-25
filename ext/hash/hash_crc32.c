@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php_hash.h"
 #include "php_hash_crc32.h"
 #include "php_hash_crc32_tables.h"

@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/flock_compat.h"
@@ -339,7 +337,7 @@ PHP_FUNCTION(stream_socket_get_name)
 }
 /* }}} */
 
-/* {{{ proto int stream_socket_sendto(resouce stream, string data [, int flags [, string target_addr]])
+/* {{{ proto int stream_socket_sendto(resource stream, string data [, int flags [, string target_addr]])
    Send data to a socket stream.  If target_addr is specified it must be in dotted quad (or [ipv6]) format */
 PHP_FUNCTION(stream_socket_sendto)
 {

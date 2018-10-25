@@ -4,7 +4,7 @@ mb_internal_encoding()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
-// TODO: 
+// TODO:
 //$debug = true;
 ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');
@@ -47,7 +47,6 @@ $enc = mb_internal_encoding();
 print "$enc\n";
 
 ?>
-
 --EXPECT--
 OK_EUC-JP_SET
 EUC-JP
@@ -65,4 +64,3 @@ ASCII
 ERR: Warning
 OK_BAD_OBJ_SET
 ASCII
-

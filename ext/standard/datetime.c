@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "zend_operators.h"
 #include "datetime.h"

@@ -1,5 +1,5 @@
 --TEST--
-Test imap_fetch_overview() function : usage variations - $msg_no argument 
+Test imap_fetch_overview() function : usage variations - $msg_no argument
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__).'/skipif.inc');
@@ -7,8 +7,8 @@ require_once(dirname(__FILE__).'/skipif.inc');
 --FILE--
 <?php
 /* Prototype  : array imap_fetch_overview(resource $stream_id, int $msg_no [, int $options])
- * Description: Read an overview of the information in the headers 
- * of the given message sequence 
+ * Description: Read an overview of the information in the headers
+ * of the given message sequence
  * Source code: ext/imap/php_imap.c
  */
 

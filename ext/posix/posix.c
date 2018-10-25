@@ -34,11 +34,6 @@
 #endif
 
 #include <sys/resource.h>
-
-#if defined(_GNU_SOURCE) && !defined(__USE_GNU)
-# define __USE_GNU
-#endif
-
 #include <sys/utsname.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1081,9 +1076,15 @@ PHP_FUNCTION(posix_getgrnam)
 		RETURN_FALSE;
 	}
 	buf = emalloc(buflen);
+try_again:
 	g = &gbuf;
 
 	if (getgrnam_r(name, g, buf, buflen, &g) || g == NULL) {
+		if (errno == ERANGE) {
+			buflen *= 2;
+			buf = erealloc(buf, buflen);
+			goto try_again;
+		}
 		POSIX_G(last_error) = errno;
 		efree(buf);
 		RETURN_FALSE;

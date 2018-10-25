@@ -1,6 +1,5 @@
 --TEST--
 Fully qualified classes in trait return types
-
 --FILE--
 <?php
 
@@ -18,7 +17,6 @@ class Foo {
 
 $foo = new Foo;
 var_dump($foo->foo([]));
-
 --EXPECTF--
 object(EmptyIterator)#%d (%d) {
 }

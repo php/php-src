@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* Latest update build anc tested on Linux 2.2.14
  *
  * This has been built and tested on Solaris 2.6 and Linux 2.1.122.
@@ -408,7 +406,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
 #endif
-		php_error_docref(NULL, E_WARNING, "failed for SysV sempphore " ZEND_LONG_FMT ": %s", Z_LVAL_P(arg_id), strerror(errno));
+		php_error_docref(NULL, E_WARNING, "failed for SysV semaphore " ZEND_LONG_FMT ": %s", Z_LVAL_P(arg_id), strerror(errno));
 		RETURN_FALSE;
 	}
 

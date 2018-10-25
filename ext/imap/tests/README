@@ -1,7 +1,6 @@
-
 Many of the tests in this directory require a mail server to be running, if there is no mail server the test will skip and warn, see skipif.inc for details.
 
-To make the tests run parameters in the skipif.inc and imap_include.inc file will need to be changed to match the local mailserver configuration. 
+To make the tests run parameters in the skipif.inc and imap_include.inc file will need to be changed to match the local mailserver configuration.
 
 
 The tests have been checked using dovecot (on Linux 32 and 64 bit systems) and hMailServer on Windows. The tests are intended to be mailserver agnostic.
@@ -39,7 +38,3 @@ auth default {
 
   user = root
 }
-
-
-
-

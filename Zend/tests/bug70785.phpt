@@ -8,7 +8,7 @@ set_error_handler(function($no, $msg) {
 });
 
 try {
-	if ($a === null) { // ZEND_VM_SMART_BRANCH  
+	if ($a === null) { // ZEND_VM_SMART_BRANCH
 		undefined_function('Null');
 	}
 } catch (Exception $e) {

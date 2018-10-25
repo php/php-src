@@ -7,16 +7,16 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/* 
+/*
  Prototype   : int filesize ( string $filename );
- Description : Returns the size of the file in bytes, or FALSE 
+ Description : Returns the size of the file in bytes, or FALSE
    (and generates an error of level E_WARNING) in case of an error.
 */
 
 $file_path = dirname(__FILE__);
 require($file_path."/file.inc");
 
-echo "*** Testing filesize(): usage variations ***\n"; 
+echo "*** Testing filesize(): usage variations ***\n";
 
 echo "*** Checking filesize() with different size of files ***\n";
 for($size = 1; $size <10000; $size = $size+1000)
@@ -28,7 +28,6 @@ for($size = 1; $size <10000; $size = $size+1000)
 }
 
 echo "Done\n";
-
 --EXPECTF--
 *** Testing filesize(): usage variations ***
 *** Checking filesize() with different size of files ***

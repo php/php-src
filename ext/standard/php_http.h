@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_HTTP_H
 #define PHP_HTTP_H
 
@@ -43,4 +41,3 @@ PHP_FUNCTION(http_build_query);
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-

@@ -38,7 +38,7 @@ $misc_files = array(
   @array(),
   @$file_handle
 );
-/* loop through to test each element in the above array 
+/* loop through to test each element in the above array
    is a writable file */
 foreach( $misc_files as $misc_file ) {
   var_dump( is_writable($misc_file) );
@@ -75,4 +75,3 @@ NULL
 bool(false)
 bool(false)
 Done
-

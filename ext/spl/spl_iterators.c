@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -884,9 +882,9 @@ SPL_METHOD(RecursiveIteratorIterator, getMaxDepth)
 	}
 } /* }}} */
 
-static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_string *method, const zval *key)
+static zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_string *method, const zval *key)
 {
-	union _zend_function    *function_handler;
+	zend_function           *function_handler;
 	spl_recursive_it_object *object = spl_recursive_it_from_obj(*zobject);
 	zend_long                     level = object->level;
 	zval                    *zobj;
@@ -899,10 +897,8 @@ static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, 
 	function_handler = zend_std_get_method(zobject, method, key);
 	if (!function_handler) {
 		if ((function_handler = zend_hash_find_ptr(&Z_OBJCE_P(zobj)->function_table, method)) == NULL) {
-			if (Z_OBJ_HT_P(zobj)->get_method) {
-				*zobject = Z_OBJ_P(zobj);
-				function_handler = (*zobject)->handlers->get_method(zobject, method, key);
-			}
+			*zobject = Z_OBJ_P(zobj);
+			function_handler = (*zobject)->handlers->get_method(zobject, method, key);
 		} else {
 			*zobject = Z_OBJ_P(zobj);
 		}
@@ -1350,22 +1346,9 @@ static const zend_function_entry spl_funcs_RecursiveTreeIterator[] = {
 	PHP_FE_END
 };
 
-#if MBO_0
-static int spl_dual_it_gets_implemented(zend_class_entry *interface, zend_class_entry *class_type)
+static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *method, const zval *key)
 {
-	class_type->iterator_funcs_ptr->zf_valid = NULL;
-	class_type->iterator_funcs_ptr->zf_current = NULL;
-	class_type->iterator_funcs_ptr->zf_key = NULL;
-	class_type->iterator_funcs_ptr->zf_next = NULL;
-	class_type->iterator_funcs_ptr->zf_rewind = NULL;
-
-	return SUCCESS;
-}
-#endif
-
-static union _zend_function *spl_dual_it_get_method(zend_object **object, zend_string *method, const zval *key)
-{
-	union _zend_function *function_handler;
+	zend_function        *function_handler;
 	spl_dual_it_object   *intern;
 
 	intern = spl_dual_it_from_obj(*object);
@@ -2204,7 +2187,7 @@ SPL_METHOD(RegexIterator, getPregFlags)
 	if (intern->u.regex.use_flags) {
 		RETURN_LONG(intern->u.regex.preg_flags);
 	} else {
-		return;
+		RETURN_LONG(0);
 	}
 } /* }}} */
 
@@ -3646,12 +3629,8 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 
 	apply_info->count++;
 	zend_fcall_info_call(&apply_info->fci, &apply_info->fcc, &retval, NULL);
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		result = zend_is_true(&retval) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
-		zval_ptr_dtor(&retval);
-	} else {
-		result = ZEND_HASH_APPLY_STOP;
-	}
+	result = zend_is_true(&retval) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
+	zval_ptr_dtor(&retval);
 	return result;
 }
 /* }}} */

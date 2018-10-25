@@ -29,6 +29,12 @@ typedef struct _zend_cpu_info {
 static zend_cpu_info cpuinfo = {0};
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+# ifdef HAVE_CPUID_H
+# include <cpuid.h>
+static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
+	__cpuid_count(func, subfunc, cpuinfo->eax, cpuinfo->ebx, cpuinfo->ecx, cpuinfo->edx);
+}
+# else
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	__asm__ __volatile__ (
 		"cpuid"
@@ -36,7 +42,8 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 		: "a"(func), "c"(subfunc)
 	);
 }
-#elif defined(ZEND_WIN32)
+# endif
+#elif defined(ZEND_WIN32) && !defined(__clang__)
 # include <intrin.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	int regs[4];

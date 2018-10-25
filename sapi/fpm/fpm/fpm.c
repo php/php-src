@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -121,4 +120,3 @@ run_child: /* only workers reach this point */
 	return fpm_globals.listening_socket;
 }
 /* }}} */
-

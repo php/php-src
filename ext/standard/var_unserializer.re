@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "php_incomplete_class.h"
@@ -231,7 +229,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 				}
 			}
 
-			i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(zv);
 		}
 		next = var_dtor_hash->next;
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
@@ -513,7 +511,7 @@ string_key:
 		}
 
 		var_push_dtor(var_hash, data);
-		zval_ptr_dtor(&key);
+		zval_ptr_dtor_str(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;

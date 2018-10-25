@@ -13,9 +13,8 @@ fa@php.net
 <?php
     // wrong parameter count
     $s_c = socket_close();
-    var_dump($s_c);  
+    var_dump($s_c);
 ?>
 --EXPECTF--
-
 Warning: socket_close() expects exactly 1 parameter, 0 given in %s on line %d
 NULL

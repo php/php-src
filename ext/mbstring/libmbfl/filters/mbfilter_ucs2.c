@@ -239,6 +239,3 @@ int mbfl_filt_conv_wchar_ucs2le(int c, mbfl_convert_filter *filter)
 
 	return c;
 }
-
-
-

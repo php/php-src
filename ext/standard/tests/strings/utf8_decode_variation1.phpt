@@ -3,9 +3,9 @@ Test utf8_decode() function : usage variations  - different types for data
 --FILE--
 <?php
 /* Prototype  : proto string utf8_decode(string data)
- * Description: Converts a UTF-8 encoded string to ISO-8859-1 
+ * Description: Converts a UTF-8 encoded string to ISO-8859-1
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing utf8_decode() : usage variations ***\n";
@@ -167,4 +167,3 @@ string(0) ""
 Arg value  
 string(0) ""
 Done
-

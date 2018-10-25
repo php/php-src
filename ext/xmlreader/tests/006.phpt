@@ -1,10 +1,9 @@
 --TEST--
-XMLReader: libxml2 XML Reader, moveToElement 
+XMLReader: libxml2 XML Reader, moveToElement
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1"></book><test /></books>';
@@ -13,7 +12,7 @@ $reader = new XMLReader();
 
 $reader->XML($xmlstring);
 
-// 2 read to get on the 2nd node 
+// 2 read to get on the 2nd node
 $reader->read();
 $reader->read();
 

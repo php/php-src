@@ -1,9 +1,9 @@
+#!/usr/bin/env php
 <?php
-/* $Id$ */
 
 /*
  This gives rather interesting results :)
- 
+
  Measures on a Notebook P4M-1.7 256MB Windows 2000:
 	sha1         0.556691
 	tiger160,3   0.774469

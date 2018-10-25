@@ -67,5 +67,3 @@ Warning: mb_ereg_search_setpos(): Position is out of range in %s on line %d
 bool(false)
 int(0)
 ==DONE==
-
-

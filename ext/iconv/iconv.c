@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -31,10 +29,7 @@
 #include "SAPI.h"
 #include "php_ini.h"
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-
+#include <stdlib.h>
 #include <errno.h>
 
 #include "php_iconv.h"
@@ -462,7 +457,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 
 	if (in_p != NULL) {
 		while (in_left > 0) {
-			out_left = buf_growth - out_left;
+			out_left = buf_growth;
 			smart_str_alloc(d, out_left, 0);
 
 			out_p = ZSTR_VAL((d)->s) + ZSTR_LEN((d)->s);
@@ -496,7 +491,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 		}
 	} else {
 		for (;;) {
-			out_left = buf_growth - out_left;
+			out_left = buf_growth;
 			smart_str_alloc(d, out_left, 0);
 
 			out_p = ZSTR_VAL((d)->s) + ZSTR_LEN((d)->s);
@@ -1226,8 +1221,9 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 	do {
 		size_t prev_in_left;
 		size_t out_size;
+		size_t encoded_word_min_len = sizeof("=\?\?X\?\?=")-1 + out_charset_len + (enc_scheme == PHP_ICONV_ENC_SCHEME_BASE64 ? 4 : 3);
 
-		if (char_cnt < (out_charset_len + 12)) {
+		if (char_cnt < encoded_word_min_len + lfchars_len + 1) {
 			/* lfchars must be encoded in ASCII here*/
 			smart_str_appendl(pretval, lfchars, lfchars_len);
 			smart_str_appendc(pretval, ' ');
@@ -1358,7 +1354,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 				prev_in_left = ini_in_left = in_left;
 				ini_in_p = in_p;
 
-				for (out_size = (char_cnt - 2) / 3; out_size > 0;) {
+				for (out_size = (char_cnt - 2); out_size > 0;) {
 #if !ICONV_SUPPORTS_ERRNO
 					size_t prev_out_left;
 #endif
@@ -1422,7 +1418,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 						break;
 					}
 
-					out_size -= ((nbytes_required - (char_cnt - 2)) + 1) / 3;
+					out_size -= ((nbytes_required - (char_cnt - 2)) + 2) / 3;
 					in_left = ini_in_left;
 					in_p = ini_in_p;
 				}
@@ -1535,7 +1531,10 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 						break;
 
 					default: /* first letter of a non-encoded word */
-						_php_iconv_appendc(pretval, *p1, cd_pl);
+						err = _php_iconv_appendc(pretval, *p1, cd_pl);
+						if (err != PHP_ICONV_ERR_SUCCESS) {
+							goto out;
+						}
 						encoded_word = NULL;
 						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
 							scan_stat = 12;
@@ -1546,6 +1545,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 			case 1: /* expecting a delimiter */
 				if (*p1 != '?') {
+					if (*p1 == '\r' || *p1 == '\n') {
+						--p1;
+					}
 					err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 					if (err != PHP_ICONV_ERR_SUCCESS) {
 						goto out;
@@ -1571,6 +1573,23 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 					case '*': /* new style delimiter: locale id follows */
 						scan_stat = 10;
 						break;
+
+					case '\r': case '\n': /* not an encoded-word */
+						--p1;
+						_php_iconv_appendc(pretval, '=', cd_pl);
+						_php_iconv_appendc(pretval, '?', cd_pl);
+						err = _php_iconv_appendl(pretval, csname, (size_t)((p1 + 1) - csname), cd_pl);
+						if (err != PHP_ICONV_ERR_SUCCESS) {
+							goto out;
+						}
+						csname = NULL;
+						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+							scan_stat = 12;
+						}
+						else {
+							scan_stat = 0;
+						}
+						continue;
 				}
 				if (scan_stat != 2) {
 					char tmpbuf[80];

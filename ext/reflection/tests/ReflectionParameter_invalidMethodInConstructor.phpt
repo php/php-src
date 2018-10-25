@@ -1,6 +1,6 @@
 --TEST--
 ReflectionParameter::__construct(): Invalid method as constructor
---FILE-- 
+--FILE--
 <?php
 
 // Invalid class name

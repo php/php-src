@@ -16,7 +16,6 @@ var_dump(preg_replace('/(.)/e', 'for ($', 'abc'));
 
 ?>
 --EXPECTF--
-
 Warning: preg_match() expects at least 2 parameters, 0 given in %s002.php on line 3
 bool(false)
 

@@ -3,7 +3,7 @@ Test debug_zval_dump() function : error conditions
 --FILE--
 <?php
 /* Prototype: void debug_zval_dump ( mixed $variable );
-   Description: Dumps a string representation of an internal zend value 
+   Description: Dumps a string representation of an internal zend value
                 to output.
 */
 
@@ -15,7 +15,6 @@ debug_zval_dump();
 echo "Done\n";
 
 ?>
-
 --EXPECTF--
 *** Testing error conditions ***
 

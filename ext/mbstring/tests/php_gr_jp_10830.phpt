@@ -1,5 +1,5 @@
 --TEST--
-php-users@php.gr.jp #10830 
+php-users@php.gr.jp #10830
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');
@@ -12,7 +12,6 @@ $a="aaa\n<>";
 var_dump( mb_ereg("^[^><]+$",$a) );
 var_dump( !!preg_match("/^[^><]+$/",$a) );
 ?>
-
 --EXPECT--
 bool(false)
 bool(false)

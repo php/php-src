@@ -35,7 +35,7 @@ if (!isset($config['ENV']['PDOTEST_DSN']) || $config['ENV']['PDOTEST_DSN']===fal
 //       -otherwise, you'll have to open MS Access, create a database, then load that file in this Window to map it to a DSN
 // 7. set the environment variable PDOTEST_DSN="odbc:<system dsn from step 5>" ex: SET PDOTEST_DSN=odbc:accdb12
 //         -note: on Windows, " is included in environment variable
-// 
+//
 // easy way to compile:
 // configure --disable-all --enable-cli --enable-zts --enable-pdo --with-pdo-odbc --enable-debug
 // configure --disable-all --eanble-cli --enable-pdo --with-pdo-odbc=unixODBC,/usr,/usr --with-unixODBC=/usr --enable-debug
@@ -90,7 +90,6 @@ foreach ($db->query('SELECT id, data from TEST ORDER BY LEN(data) ASC') as $row)
 }
 
 echo "Finished\n";
-
 --EXPECT--
 Passed on size 32
 Passed on size 53

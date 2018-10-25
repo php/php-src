@@ -1,4 +1,3 @@
-
 	/* (c) 2009 Jerome Loyet */
 
 #ifndef FPM_LOG_H

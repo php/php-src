@@ -1,11 +1,10 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("mysqlnd", "Mysql Native Client Driver", "yes");
 if (PHP_MYSQLND != "no") {
 
 	if (CHECK_LIB("ws2_32.lib", "mysqlnd")) {
-		mysqlnd_source = 
+		mysqlnd_source =
 			"mysqlnd_alloc.c " +
 			"mysqlnd_auth.c " +
 			"mysqlnd_block_alloc.c " +

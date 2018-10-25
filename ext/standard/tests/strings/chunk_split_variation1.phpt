@@ -81,7 +81,7 @@ $values = array(
   @$unset_var,
 
   // resource data
-  $fp	
+  $fp
 );
 
 // loop through each element of the array for 'str'

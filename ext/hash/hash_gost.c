@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php_hash.h"
 #include "php_hash_gost.h"
 #include "php_hash_gost_tables.h"

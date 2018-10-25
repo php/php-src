@@ -6,10 +6,10 @@ PDO_Firebird: prepare/execute/binding
 --INI--
 ibase.timestampformat=%Y-%m-%d %H:%M:%S
 --FILE--
-<?php /* $Id$ */
+<?php
 
 	require("testdb.inc");
-    
+
 	$db = new PDO("firebird:dbname=$test_base",$user,$password) or die;
 
 	var_dump($db->getAttribute(PDO::ATTR_CONNECTION_STATUS));
@@ -19,7 +19,7 @@ ibase.timestampformat=%Y-%m-%d %H:%M:%S
 	$db->exec("CREATE TABLE ddl (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
 		datetime TIMESTAMP DEFAULT '2000-02-12' NOT NULL)");
 	$db->exec("INSERT INTO ddl (id,text) VALUES (1,'bla')");
-	
+
 	$s = $db->prepare("SELECT * FROM ddl WHERE id=? FOR UPDATE");
 
 	$id = 0;
@@ -29,21 +29,21 @@ ibase.timestampformat=%Y-%m-%d %H:%M:%S
 	$id = 1;
 	$s->execute();
 	$s->setAttribute(PDO::ATTR_CURSOR_NAME, "c");
-	
+
 	var_dump($id);
 
 	var_dump($s->fetch());
 
 	var_dump($var);
-	
+
 	var_dump($db->exec("UPDATE ddl SET id=2 WHERE CURRENT OF c"));
 
 	var_dump($s->fetch());
-	
-	unset($s);	
+
+	unset($s);
 	unset($db);
 	echo "done\n";
-	
+
 ?>
 --EXPECT--
 bool(true)

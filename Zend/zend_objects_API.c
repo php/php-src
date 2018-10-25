@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
@@ -51,9 +49,8 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 				if (!(OBJ_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
 					GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
 
-					if (obj->handlers->dtor_obj
-					 && (obj->handlers->dtor_obj != zend_objects_destroy_object
-					  || obj->ce->destructor)) {
+					if (obj->handlers->dtor_obj != zend_objects_destroy_object
+							|| obj->ce->destructor) {
 						GC_ADDREF(obj);
 						obj->handlers->dtor_obj(obj);
 						GC_DELREF(obj);
@@ -100,7 +97,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 			if (IS_OBJ_VALID(obj)) {
 				if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 					GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
-					if (obj->handlers->free_obj && obj->handlers->free_obj != zend_object_std_dtor) {
+					if (obj->handlers->free_obj != zend_object_std_dtor) {
 						GC_ADDREF(obj);
 						obj->handlers->free_obj(obj);
 						GC_DELREF(obj);
@@ -115,11 +112,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 			if (IS_OBJ_VALID(obj)) {
 				if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 					GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
-					if (obj->handlers->free_obj) {
-						GC_ADDREF(obj);
-						obj->handlers->free_obj(obj);
-						GC_DELREF(obj);
-					}
+					GC_ADDREF(obj);
+					obj->handlers->free_obj(obj);
+					GC_DELREF(obj);
 				}
 			}
 		} while (obj_ptr != end);
@@ -141,8 +136,10 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 		EG(objects_store).free_list_head = GET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle]);
 	} else {
 		if (EG(objects_store).top == EG(objects_store).size) {
-			EG(objects_store).size <<= 1;
-			EG(objects_store).object_buckets = (zend_object **) erealloc(EG(objects_store).object_buckets, EG(objects_store).size * sizeof(zend_object*));
+			uint32_t new_size = 2 * EG(objects_store).size;
+			EG(objects_store).object_buckets = (zend_object **) erealloc(EG(objects_store).object_buckets, new_size * sizeof(zend_object*));
+			/* Assign size after realloc, in case it fails */
+			EG(objects_store).size = new_size;
 		}
 		handle = EG(objects_store).top++;
 	}
@@ -163,9 +160,8 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 	if (!(OBJ_FLAGS(object) & IS_OBJ_DESTRUCTOR_CALLED)) {
 		GC_ADD_FLAGS(object, IS_OBJ_DESTRUCTOR_CALLED);
 
-		if (object->handlers->dtor_obj
-		 && (object->handlers->dtor_obj != zend_objects_destroy_object
-		  || object->ce->destructor)) {
+		if (object->handlers->dtor_obj != zend_objects_destroy_object
+				|| object->ce->destructor) {
 			GC_ADDREF(object);
 			object->handlers->dtor_obj(object);
 			GC_DELREF(object);
@@ -179,11 +175,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 		EG(objects_store).object_buckets[handle] = SET_OBJ_INVALID(object);
 		if (!(OBJ_FLAGS(object) & IS_OBJ_FREE_CALLED)) {
 			GC_ADD_FLAGS(object, IS_OBJ_FREE_CALLED);
-			if (object->handlers->free_obj) {
-				GC_ADDREF(object);
-				object->handlers->free_obj(object);
-				GC_DELREF(object);
-			}
+			GC_ADDREF(object);
+			object->handlers->free_obj(object);
+			GC_DELREF(object);
 		}
 		ptr = ((char*)object) - object->handlers->offset;
 		GC_REMOVE_FROM_BUFFER(object);

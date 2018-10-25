@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* {{{ includes */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -711,7 +709,7 @@ static const mbfl_encoding *php_mb_get_encoding(const char *encoding_name) {
 }
 
 /* {{{ static int php_mb_parse_encoding_list()
- *  Return 0 if input contains any illegal encoding, otherwise 1.
+ *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  *  Even if any illegal encoding is detected the result may contain a list
  *  of parsed encodings.
  */
@@ -788,7 +786,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 					*entry++ = encoding;
 					n++;
 				} else {
-					ret = 0;
+					ret = FAILURE;
 				}
 			}
 			p1 = p2 + 1;
@@ -804,7 +802,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 			if (return_list) {
 				*return_list = NULL;
 			}
-			ret = 0;
+			ret = FAILURE;
 		}
 		if (return_size) {
 			*return_size = n;
@@ -817,7 +815,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 /* }}} */
 
 /* {{{ static int php_mb_parse_encoding_array()
- *  Return 0 if input contains any illegal encoding, otherwise 1.
+ *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  *  Even if any illegal encoding is detected the result may contain a list
  *  of parsed encodings.
  */
@@ -1070,7 +1068,7 @@ static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
 		php_error_docref(NULL, E_WARNING, "Cannot allocate match data");
 		return FAILURE;
 	}
-	res = pcre2_match(opaque, (PCRE2_SPTR)str, str_len, 0, 0, match_data, php_pcre_mctx());
+	res = pcre2_match(opaque, (PCRE2_SPTR)str, str_len, 0, 0, match_data, php_pcre_mctx()) >= 0;
 	php_pcre_free_match_data(match_data);
 
 	return res;
@@ -3151,7 +3149,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 				ZVAL_COPY(&entry_tmp, entry);
 				break;
 			case IS_ARRAY:
-				chash = php_mb_convert_encoding_recursive(HASH_OF(entry), _to_encoding, _from_encodings);
+				chash = php_mb_convert_encoding_recursive(Z_ARRVAL_P(entry), _to_encoding, _from_encodings);
 				if (chash) {
 					ZVAL_ARR(&entry_tmp, chash);
 				} else {
@@ -3250,7 +3248,7 @@ PHP_FUNCTION(mb_convert_encoding)
 		}
 	} else {
 		HashTable *tmp;
-		tmp = php_mb_convert_encoding_recursive(HASH_OF(input), arg_new, _from_encodings);
+		tmp = php_mb_convert_encoding_recursive(Z_ARRVAL_P(input), arg_new, _from_encodings);
 		RETURN_ARR(tmp);
 	}
 
@@ -4757,7 +4755,7 @@ MBSTRING_API int php_mb_check_encoding_recursive(HashTable *vars, const zend_str
 				}
 				break;
 			case IS_ARRAY:
-				if (!php_mb_check_encoding_recursive(HASH_OF(entry), enc)) {
+				if (!php_mb_check_encoding_recursive(Z_ARRVAL_P(entry), enc)) {
 					valid = 0;
 					break;
 				}
@@ -4813,7 +4811,7 @@ PHP_FUNCTION(mb_check_encoding)
 			}
 			break;
 		case IS_ARRAY:
-			if (!php_mb_check_encoding_recursive(HASH_OF(input), enc)) {
+			if (!php_mb_check_encoding_recursive(Z_ARRVAL_P(input), enc)) {
 				RETURN_FALSE;
 			}
 			break;

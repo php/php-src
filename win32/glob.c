@@ -34,8 +34,6 @@
  * SUCH DAMAGE.
  */
 
-/* $Id$ */
-
 /*
  * glob(3) -- a superset of the one defined in POSIX 1003.2.
  *

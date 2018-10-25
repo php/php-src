@@ -10,9 +10,9 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
 --FILE--
 <?php
 /* Prototype  : proto string mb_ereg_replace(string pattern, string replacement, string string [, string option])
- * Description: Replace regular expression for multibyte string 
+ * Description: Replace regular expression for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_ereg_replace() : usage variations ***\n";
@@ -64,7 +64,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -73,7 +73,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

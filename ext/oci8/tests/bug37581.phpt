@@ -4,7 +4,7 @@ Bug #37581 (oci_bind_array_by_name clobbers input array when using SQLT_AFC, AVC
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -44,7 +44,7 @@ var_dump($strings);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(5) {
   [0]=>
   string(1) "A"

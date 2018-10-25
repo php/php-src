@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -119,7 +118,9 @@ static char * nvmatch(char *s1, char *s2) /* {{{ */
 
 void fpm_env_setproctitle(char *title) /* {{{ */
 {
-#ifdef HAVE_SETPROCTITLE
+#if defined(HAVE_SETPROCTITLE_FAST)
+	setproctitle_fast("%s", title);
+#elif defined(HAVE_SETPROCTITLE)
 	setproctitle("%s", title);
 #else
 #ifdef __linux__
@@ -274,4 +275,3 @@ int fpm_env_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -126,4 +125,3 @@ bc_sqrt (bc_num *num, int scale)
   bc_free_num (&diff);
   return 1;
 }
-

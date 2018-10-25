@@ -16,7 +16,7 @@ var_dump(imagecreatefrompng($file));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: imagecreatefrompng(%s001私はガラスを食べられます.test): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 

@@ -1,11 +1,11 @@
 --TEST--
-Test utf8_decode() function : error conditions 
+Test utf8_decode() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto string utf8_decode(string data)
- * Description: Converts a UTF-8 encoded string to ISO-8859-1 
+ * Description: Converts a UTF-8 encoded string to ISO-8859-1
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing utf8_decode() : error conditions ***\n";
@@ -35,4 +35,3 @@ NULL
 Warning: utf8_decode() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-

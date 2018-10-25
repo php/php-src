@@ -21,7 +21,6 @@ var_dump( fileowner("/no/such/file", "root") );  // args > expected
 
 echo "\n*** Done ***\n";
 ?>
-
 --EXPECTF--
 *** Testing fileowner(): error conditions ***
 
@@ -41,4 +40,3 @@ Warning: fileowner() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Done ***
-

@@ -2,12 +2,12 @@
 posix_initgroups(): Basic tests
 --SKIPIF--
 <?php
-if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
+if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 if (!function_exists('posix_initgroups')) die('skip posix_initgroups() not found');
 ?>
 --FILE--
 <?php
-echo "Basic test of POSIX posix_initgroups function\n"; 
+echo "Basic test of POSIX posix_initgroups function\n";
 var_dump(posix_initgroups('foo', 'bar'));
 var_dump(posix_initgroups(NULL, NULL));
 

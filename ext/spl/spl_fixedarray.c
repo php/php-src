@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -209,6 +207,7 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	spl_fixedarray_object *intern;
 	zend_class_entry     *parent = class_type;
 	int                   inherited = 0;
+	zend_class_iterator_funcs *funcs_ptr;
 
 	intern = zend_object_alloc(sizeof(spl_fixedarray_object), parent);
 
@@ -240,27 +239,28 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 		php_error_docref(NULL, E_COMPILE_ERROR, "Internal compiler error, Class is not child of SplFixedArray");
 	}
 
-	if (!class_type->iterator_funcs_ptr->zf_current) {
-		class_type->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
-		class_type->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
-		class_type->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
-		class_type->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
-		class_type->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
+	funcs_ptr = class_type->iterator_funcs_ptr;
+	if (!funcs_ptr->zf_current) {
+		funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
+		funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
+		funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
+		funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
+		funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
 	}
 	if (inherited) {
-		if (class_type->iterator_funcs_ptr->zf_rewind->common.scope  != parent) {
+		if (funcs_ptr->zf_rewind->common.scope  != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_REWIND;
 		}
-		if (class_type->iterator_funcs_ptr->zf_valid->common.scope   != parent) {
+		if (funcs_ptr->zf_valid->common.scope   != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_VALID;
 		}
-		if (class_type->iterator_funcs_ptr->zf_key->common.scope     != parent) {
+		if (funcs_ptr->zf_key->common.scope     != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_KEY;
 		}
-		if (class_type->iterator_funcs_ptr->zf_current->common.scope != parent) {
+		if (funcs_ptr->zf_current->common.scope != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_CURRENT;
 		}
-		if (class_type->iterator_funcs_ptr->zf_next->common.scope    != parent) {
+		if (funcs_ptr->zf_next->common.scope    != parent) {
 			intern->flags |= SPL_FIXEDARRAY_OVERLOADED_NEXT;
 		}
 
@@ -509,15 +509,14 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 
 	if (intern->fptr_offset_has) {
 		zval rv;
+		zend_bool result;
+
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
-		if (!Z_ISUNDEF(rv)) {
-			zend_bool result = zend_is_true(&rv);
-			zval_ptr_dtor(&rv);
-			return result;
-		}
-		return 0;
+		result = zend_is_true(&rv);
+		zval_ptr_dtor(&rv);
+		return result;
 	}
 
 	return spl_fixedarray_object_has_dimension_helper(intern, offset, check_empty);

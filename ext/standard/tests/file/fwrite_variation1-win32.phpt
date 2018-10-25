@@ -50,7 +50,7 @@ foreach($file_content_types as $file_content_type) {
 
     $data_to_be_written="";
     fill_buffer($data_to_be_written,$file_content_type,1024);  //get the data of size 1024
-    
+
     /*  Write the data into the file, verify it by checking the file pointer position, eof position,
         filesize & by displaying the content */
 

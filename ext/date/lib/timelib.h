@@ -30,6 +30,7 @@
 #endif
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <limits.h>
 #include <inttypes.h>
 
@@ -264,6 +265,16 @@ typedef struct _timelib_abbr_info {
 #define TIMELIB_ERR_WRONG_FORMAT_SEP           0x219
 #define TIMELIB_ERR_TRAILING_DATA              0x21a
 #define TIMELIB_ERR_DATA_MISSING               0x21b
+#define TIMELIB_ERR_NO_THREE_DIGIT_MILLISECOND 0x21c
+#define TIMELIB_ERR_NO_FOUR_DIGIT_YEAR_ISO     0x21d
+#define TIMELIB_ERR_NO_TWO_DIGIT_WEEK          0x21e
+#define TIMELIB_ERR_INVALID_WEEK               0x21f
+#define TIMELIB_ERR_NO_DAY_OF_WEEK             0x220
+#define TIMELIB_ERR_INVALID_DAY_OF_WEEK        0x221
+#define TIMELIB_ERR_INVALID_SPECIFIER          0x222
+#define TIMELIB_ERR_INVALID_TZ_OFFSET          0x223
+#define TIMELIB_ERR_FORMAT_LITERAL_MISMATCH    0x224
+#define TIMELIB_ERR_MIX_ISO_WITH_NATURAL       0x225
 
 #define TIMELIB_ZONETYPE_OFFSET 1
 #define TIMELIB_ZONETYPE_ABBR   2
@@ -310,9 +321,9 @@ typedef struct _timelib_tzdb {
 # define timelib_free    free
 #endif
 
-#define TIMELIB_VERSION 201706
-#define TIMELIB_EXTENDED_VERSION 20170600
-#define TIMELIB_ASCII_VERSION "2017.06"
+#define TIMELIB_VERSION 201801
+#define TIMELIB_EXTENDED_VERSION 20180103
+#define TIMELIB_ASCII_VERSION "2018.01RC1"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
@@ -333,6 +344,60 @@ typedef struct _timelib_tzdb {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef enum _timelib_format_specifier_code {
+	TIMELIB_FORMAT_ALLOW_EXTRA_CHARACTERS = 0,
+	TIMELIB_FORMAT_ANY_SEPARATOR,
+	TIMELIB_FORMAT_DAY_TWO_DIGIT,
+	TIMELIB_FORMAT_DAY_TWO_DIGIT_PADDED,
+	TIMELIB_FORMAT_DAY_OF_WEEK_ISO,
+	TIMELIB_FORMAT_DAY_OF_WEEK,
+	TIMELIB_FORMAT_DAY_OF_YEAR,
+	TIMELIB_FORMAT_DAY_SUFFIX,
+	TIMELIB_FORMAT_END,
+	TIMELIB_FORMAT_EPOCH_SECONDS,
+	TIMELIB_FORMAT_ESCAPE,
+	TIMELIB_FORMAT_HOUR_TWO_DIGIT_12_MAX,
+	TIMELIB_FORMAT_HOUR_TWO_DIGIT_12_MAX_PADDED,
+	TIMELIB_FORMAT_HOUR_TWO_DIGIT_24_MAX,
+	TIMELIB_FORMAT_HOUR_TWO_DIGIT_24_MAX_PADDED,
+	TIMELIB_FORMAT_LITERAL,
+	TIMELIB_FORMAT_MERIDIAN,
+	TIMELIB_FORMAT_MICROSECOND_SIX_DIGIT,
+	TIMELIB_FORMAT_MILLISECOND_THREE_DIGIT,
+	TIMELIB_FORMAT_MINUTE_TWO_DIGIT,
+	TIMELIB_FORMAT_MONTH_TWO_DIGIT,
+	TIMELIB_FORMAT_MONTH_TWO_DIGIT_PADDED,
+	TIMELIB_FORMAT_RANDOM_CHAR,
+	TIMELIB_FORMAT_RESET_ALL,
+	TIMELIB_FORMAT_RESET_ALL_WHEN_NOT_SET,
+	TIMELIB_FORMAT_SECOND_TWO_DIGIT,
+	TIMELIB_FORMAT_SEPARATOR,
+	TIMELIB_FORMAT_SKIP_TO_SEPARATOR,
+	TIMELIB_FORMAT_TEXTUAL_DAY_3_LETTER,
+	TIMELIB_FORMAT_TEXTUAL_DAY_FULL,
+	TIMELIB_FORMAT_TEXTUAL_MONTH_3_LETTER,
+	TIMELIB_FORMAT_TEXTUAL_MONTH_FULL,
+	TIMELIB_FORMAT_TIMEZONE_OFFSET,
+	TIMELIB_FORMAT_TIMEZONE_OFFSET_MINUTES,
+	TIMELIB_FORMAT_WEEK_OF_YEAR_ISO,
+	TIMELIB_FORMAT_WEEK_OF_YEAR,
+	TIMELIB_FORMAT_WHITESPACE,
+	TIMELIB_FORMAT_YEAR_TWO_DIGIT,
+	TIMELIB_FORMAT_YEAR_FOUR_DIGIT,
+	TIMELIB_FORMAT_YEAR_ISO
+} timelib_format_specifier_code;
+
+typedef struct _timelib_format_specifier {
+	char                          specifier;
+	timelib_format_specifier_code code;
+} timelib_format_specifier;
+
+typedef struct _timelib_format_config {
+	const timelib_format_specifier *format_map;
+	/* Format speciifiers must be preceded by 'prefix_char' if not '\0'. */
+	char                            prefix_char;
+} timelib_format_config;
 
 /* Function pointers */
 typedef timelib_tzinfo* (*timelib_tz_get_wrapper)(char *tzname, const timelib_tzdb *tzdb, int *error_code);
@@ -387,7 +452,7 @@ int timelib_valid_date(timelib_sll y, timelib_sll m, timelib_sll d);
  * If the **errors points to a timelib_error_container variable, warnings
  * and errors will be recorded. You are responsible for freeing the stored
  * information with timelib_error_container_dtor(). To see whether errors have
- * occured, inspect errors->errors_count. To see whether warnings have occured,
+ * occurred, inspect errors->errors_count. To see whether warnings have occurred,
  * inspect errors->warnings_count.
  *
  * The returned timelib_time* value is dynamically allocated and should be
@@ -408,13 +473,27 @@ timelib_time *timelib_strtotime(char *s, size_t len, timelib_error_container **e
  * If the **errors points to a timelib_error_container variable, warnings
  * and errors will be recorded. You are responsible for freeing the stored
  * information with timelib_error_container_dtor(). To see whether errors have
- * occured, inspect errors->errors_count. To see whether warnings have occured,
+ * occurred, inspect errors->errors_count. To see whether warnings have occurred,
  * inspect errors->warnings_count.
  *
  * The returned timelib_time* value is dynamically allocated and should be
  * freed with timelib_time_dtor().
  */
 timelib_time *timelib_parse_from_format(char *format, char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
+
+/* Parses the date/time string in 's' with length 'len' into the constituent
+ * parts of timelib_time* according to the format in 'format' with format
+ * specifier configuration 'format_config'.
+ *
+ * 'format_map' is an array of pairs, with the first element being the format
+ * specifier as a character and the second element corresponds to the
+ * representation of the specifier from the enum list
+ * 'timelib_format_specifier_code'.
+ *
+ * Note: 'format_map' must be terminated with specifier '\0' to indicate to the
+ * parser that there are no more format specifiers in the list.
+ */
+timelib_time *timelib_parse_from_format_with_map(char *format, char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper, const timelib_format_config* format_config);
 
 /* Fills the gaps in the parsed timelib_time with information from the reference date/time in 'now'
  *
@@ -483,13 +562,13 @@ timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_n
  * If the **errors points to a timelib_error_container variable, warnings
  * and errors will be recorded. You are responsible for freeing the stored
  * information with timelib_error_container_dtor(). To see whether errors have
- * occured, inspect errors->errors_count. To see whether warnings have occured,
+ * occurred, inspect errors->errors_count. To see whether warnings have occurred,
  * inspect errors->warnings_count.
  */
 void timelib_strtointerval(char *s, size_t len,
                            timelib_time **begin, timelib_time **end,
-						   timelib_rel_time **period, int *recurrences,
-						   timelib_error_container **errors);
+                           timelib_rel_time **period, int *recurrences,
+                           timelib_error_container **errors);
 
 
 /* From tm2unixtime.c */
@@ -630,7 +709,7 @@ int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz);
  * The returned information contains: the offset in seconds East of UTC (in
  * 'offset'), whether DST is active ('is_dst'), what the current time zone
  * abbreviation is ('abbr') and the transition time that got to this state (in
- * 'transistion_time');
+ * 'transition_time');
  */
 timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *tz);
 

@@ -5,7 +5,7 @@ Prefetch with REF cursor. Test No 4
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && 
+if (!(isset($matches[0]) &&
       ($matches[1] >= 10))) {
        	die("skip expected output only valid when using Oracle 10g or greater database server");
 }
@@ -21,7 +21,7 @@ if (!(isset($matches[0]) &&
 <?php
 require dirname(__FILE__)."/connect.inc";
 
-// Creates the necessary package and tables. 
+// Creates the necessary package and tables.
 $stmtarray = array(
 	   "DROP TABLE refcurtest",
 
@@ -89,7 +89,7 @@ if (!oci_bind_by_name($s2, ":c2", $c2, 20, SQLT_CHR)) {
 
 echo "------Test 1 - Set Prefetch after PL/SQL fetch ----------\n";
 $cur1 = oci_new_cursor($c);
-// Fetch from PL/SQL 
+// Fetch from PL/SQL
 if (!oci_bind_by_name($s2,":curs1",$cur1,-1,SQLT_RSET)) {
     die("oci_bind_by_name(sql2) failed!\n");
 }

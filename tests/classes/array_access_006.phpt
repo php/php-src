@@ -1,11 +1,11 @@
 --TEST--
 ZE2 ArrayAccess and ASSIGN_OP operators (+=)
 --FILE--
-<?php 
+<?php
 
 class OverloadedArray implements ArrayAccess {
 	public $realArray;
-	
+
 	function __construct() {
 		$this->realArray = array(1,2,3);
 	}

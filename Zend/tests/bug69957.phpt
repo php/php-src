@@ -81,4 +81,3 @@ float(INF)
 Double mod
 Type: DivisionByZeroError
 Message: Modulo by zero
-

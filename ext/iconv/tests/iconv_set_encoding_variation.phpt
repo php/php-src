@@ -11,7 +11,7 @@ error_reporting=E_ALL & ~E_DEPRECATED
 <?php
 /* Prototype  : bool iconv_set_encoding(string type, string charset)
  * Description: Sets internal encoding and output encoding for ob_iconv_handler()
- * Source code: ext/iconv/iconv.c 
+ * Source code: ext/iconv/iconv.c
  */
 
 /*
@@ -65,7 +65,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -74,7 +74,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

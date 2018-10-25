@@ -3,7 +3,7 @@ Test array_key_exists() function : object functionality
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -18,7 +18,7 @@ class myClass {
 	var $var1;
 	var $var2;
 	var $var3;
-	
+
 	function __construct($a, $b, $c = null) {
 		$this->var1 = $a;
 		$this->var2 = $b;
@@ -46,7 +46,6 @@ var_dump($class2);
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_key_exists() : object functionality ***
 

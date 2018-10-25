@@ -23,4 +23,3 @@ Fatal error: Uncaught Error: Non-static method Exception::getMessage() cannot be
 Stack trace:
 #0 {main}
   thrown in %sbug47857.php on line %d
-

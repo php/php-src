@@ -3,9 +3,7 @@
 #include "intl_convert.h"
 
 #include <unicode/uchar.h>
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 #include <unicode/utf8.h>
-#endif
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
@@ -779,4 +777,3 @@ int php_uchar_minit(INIT_FUNC_ARGS) {
 
 	return SUCCESS;
 }
-

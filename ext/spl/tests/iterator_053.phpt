@@ -6,7 +6,7 @@ SPL: RegexIterator::ALL_MATCHES
 class MyRegexIterator extends RegexIterator
 {
 	public $uk, $re;
-	
+
 	function __construct($it, $re, $mode, $flags = 0)
 	{
 		$this->uk = $flags & self::USE_KEY;
@@ -22,7 +22,7 @@ class MyRegexIterator extends RegexIterator
 			var_dump($v);
 		}
 	}
-	
+
 	function accept()
 	{
 		@preg_match_all($this->re, (string)($this->uk ? $this->key() : $this->current()), $sub);

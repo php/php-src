@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -16,11 +15,7 @@
 # include <stdint.h>
 #endif
 #ifdef HAVE_GLOB
-# ifndef PHP_WIN32
-#  include <glob.h>
-# else
-#  include "win32/glob.h"
-# endif
+# include <glob.h>
 #endif
 
 #include <stdio.h>

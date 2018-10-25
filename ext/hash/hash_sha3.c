@@ -156,15 +156,21 @@ static void PHP_SHA3_Init(PHP_SHA3_CTX* ctx,
 
 static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
                             const unsigned char* buf,
-                            unsigned int count,
+                            size_t count,
                             size_t block_size) {
 	while (count > 0) {
-		unsigned int len = block_size - ctx->pos;
-		if (len > count) len = count;
+		size_t len = block_size - ctx->pos;
+
+		if (len > count) {
+			len = count;
+		}
+
 		count -= len;
+
 		while (len-- > 0) {
 			ctx->state[ctx->pos++] ^= *(buf++);
 		}
+
 		if (ctx->pos >= block_size) {
 			permute(ctx);
 			ctx->pos = 0;
@@ -174,9 +180,9 @@ static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
 
 static void PHP_SHA3_Final(unsigned char* digest,
                            PHP_SHA3_CTX* ctx,
-                           int block_size,
-                           int digest_size) {
-	int len = digest_size;
+                           size_t block_size,
+                           size_t digest_size) {
+	size_t len = digest_size;
 
 	// Pad state to finalize
 	ctx->state[ctx->pos++] ^= 0x06;
@@ -205,7 +211,7 @@ void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
 } \
 void PHP_SHA3##bits##Update(PHP_SHA3_##bits##_CTX* ctx, \
                             const unsigned char* input, \
-                            unsigned int inputLen) { \
+                            size_t inputLen) { \
 	PHP_SHA3_Update(ctx, input, inputLen, \
                     (1600 - (2 * bits)) >> 3); \
 } \
@@ -251,7 +257,7 @@ void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
 } \
 void PHP_SHA3##bits##Update(PHP_SHA3_##bits##_CTX* ctx, \
                             const unsigned char* input, \
-                            unsigned int inputLen) { \
+                            size_t inputLen) { \
 	Keccak_HashUpdate((Keccak_HashInstance *)ctx->hashinstance, input, inputLen * 8); \
 } \
 void PHP_SHA3##bits##Final(unsigned char* digest, \

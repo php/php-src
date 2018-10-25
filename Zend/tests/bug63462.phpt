@@ -11,8 +11,8 @@ class Test {
 
 	public function __construct() {
 		unset(
-			$this->publicProperty, 
-			$this->protectedProperty, 
+			$this->publicProperty,
+			$this->protectedProperty,
 			$this->privateProperty
 		);
 	}
@@ -49,7 +49,6 @@ $test->protectedProperty = 'value';
 $test->privateProperty   = 'value';
 
 ?>
-
 --EXPECTF--
 __get nonExisting
 
@@ -71,4 +70,3 @@ __set nonExisting
 __set publicProperty
 __set protectedProperty
 __set privateProperty
-

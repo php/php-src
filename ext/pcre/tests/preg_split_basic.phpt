@@ -1,5 +1,5 @@
 --TEST--
-Test preg_split() function : basic functionality 
+Test preg_split() function : basic functionality
 --FILE--
 <?php
 /*

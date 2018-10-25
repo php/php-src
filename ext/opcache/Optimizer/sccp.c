@@ -235,10 +235,6 @@ static zend_bool can_replace_op1(
 		case ZEND_FE_RESET_RW:
 			return 0;
 		/* Do not accept CONST */
-		case ZEND_VERIFY_ABSTRACT_CLASS:
-		case ZEND_ADD_INTERFACE:
-		case ZEND_ADD_TRAIT:
-		case ZEND_BIND_TRAITS:
 		case ZEND_ROPE_ADD:
 		case ZEND_ROPE_END:
 		case ZEND_BIND_STATIC:
@@ -953,7 +949,8 @@ static inline int ct_eval_func_call(
 	}
 
 	func = zend_hash_find_ptr(CG(function_table), name);
-	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
+	if (!func || func->type != ZEND_INTERNAL_FUNCTION
+			|| func->internal_function.handler == ZEND_FN(display_disabled_function)) {
 		return FAILURE;
 	}
 
@@ -2045,7 +2042,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 		if (ssa_op->result_def == var_num) {
 			if (ssa_op->op1_def >= 0
 					|| ssa_op->op2_def >= 0) {
-				/* we cannot remove instruction that defines other varibales */
+				/* we cannot remove instruction that defines other variables */
 				return 0;
 			} else if (opline->opcode == ZEND_JMPZ_EX
 					|| opline->opcode == ZEND_JMPNZ_EX

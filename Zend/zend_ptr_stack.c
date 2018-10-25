@@ -17,13 +17,9 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_ptr_stack.h"
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
+#include <stdarg.h>
 
 ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, zend_bool persistent)
 {

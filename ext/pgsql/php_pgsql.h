@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef PHP_PGSQL_H
 #define PHP_PGSQL_H
 
@@ -200,7 +198,7 @@ PHP_FUNCTION(pg_select);
 #define PGSQL_CONNECT_FORCE_NEW     (1<<1)
 #define PGSQL_CONNECT_ASYNC         (1<<2)
 /* php_pgsql_convert options */
-#define PGSQL_CONV_IGNORE_DEFAULT   (1<<1)     /* Do not use DEAFULT value by removing field from returned array */
+#define PGSQL_CONV_IGNORE_DEFAULT   (1<<1)     /* Do not use DEFAULT value by removing field from returned array */
 #define PGSQL_CONV_FORCE_NULL       (1<<2)     /* Convert to NULL if string is null string */
 #define PGSQL_CONV_IGNORE_NOT_NULL  (1<<3)     /* Ignore NOT NULL constraints */
 #define PGSQL_CONV_OPTS             (PGSQL_CONV_IGNORE_DEFAULT|PGSQL_CONV_FORCE_NULL|PGSQL_CONV_IGNORE_NOT_NULL)

@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -320,7 +318,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp) /* {{{ 
 }
 /* }}} */
 
-/* overriden for garbage collection */
+/* overridden for garbage collection */
 static HashTable *spl_object_storage_get_gc(zval *obj, zval **table, int *n) /* {{{ */
 {
 	int i = 0;

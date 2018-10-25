@@ -6,7 +6,7 @@ Test hypot() - wrong params test hypot()
  * Description: Calculate the length of the hypotenuse of a right-angle triangle.
  * Source code: ext/standard/math.c
  */
- 
+
 echo "*** Testing hypot() : error conditions ***\n";
 
 echo "\n-- Testing hypot() function with less than expected no. of arguments --\n";

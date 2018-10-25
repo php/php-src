@@ -14,8 +14,6 @@
   +----------------------------------------------------------------------+
   | Author: Pierre-Alain Joye <paj@pearfr.org>                           |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifndef PHP_ENCHANT_H
@@ -79,4 +77,3 @@ PHP_FUNCTION(enchant_dict_quick_check);
  * indent-tabs-mode: t
  * End:
  */
-

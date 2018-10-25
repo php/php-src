@@ -32,8 +32,8 @@ $p = new DatePeriod($start, $diff_un, 2);
 var_dump($unser, $p);
 
 ?>
---EXPECT--
-object(DateInterval)#3 (16) {
+--EXPECTF--
+object(DateInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -85,7 +85,7 @@ DateInterval::__set_state(array(
    'special_amount' => 0,
    'have_weekday_relative' => 0,
    'have_special_relative' => 0,
-))object(DateInterval)#5 (16) {
+))object(DateInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -119,9 +119,9 @@ DateInterval::__set_state(array(
   ["have_special_relative"]=>
   int(0)
 }
-object(DatePeriod)#6 (6) {
+object(DatePeriod)#%d (6) {
   ["start"]=>
-  object(DateTime)#4 (3) {
+  object(DateTime)#%d (3) {
     ["date"]=>
     string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
@@ -134,7 +134,7 @@ object(DatePeriod)#6 (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#7 (16) {
+  object(DateInterval)#%d (16) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -173,7 +173,7 @@ object(DatePeriod)#6 (6) {
   ["include_start_date"]=>
   bool(true)
 }
-object(DateInterval)#8 (16) {
+object(DateInterval)#%d (16) {
   ["y"]=>
   int(7)
   ["m"]=>
@@ -207,9 +207,9 @@ object(DateInterval)#8 (16) {
   ["have_special_relative"]=>
   int(0)
 }
-object(DatePeriod)#9 (6) {
+object(DatePeriod)#%d (6) {
   ["start"]=>
-  object(DateTime)#6 (3) {
+  object(DateTime)#%d (3) {
     ["date"]=>
     string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
@@ -222,7 +222,7 @@ object(DatePeriod)#9 (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#7 (16) {
+  object(DateInterval)#%d (16) {
     ["y"]=>
     int(0)
     ["m"]=>

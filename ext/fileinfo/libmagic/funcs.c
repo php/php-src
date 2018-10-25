@@ -239,8 +239,15 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 	}
 
 	/* Check if we have a CDF file */
-	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
-		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
+	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0 && stream) {
+#ifdef _WIN64
+		php_socket_t _fd = fd;
+		int _ret = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&_fd, 0);
+		fd = (int)_fd;
+#else
+		int _ret = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0);
+#endif
+		if (SUCCESS == _ret) {
 			m = file_trycdf(ms, &b);
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				(void)fprintf(stderr, "[try cdf %d]\n", m);

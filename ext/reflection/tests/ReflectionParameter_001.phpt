@@ -9,11 +9,11 @@ class ReflectTestClass {
     public static function twoArgFunction($theIncrement, $anotherParam) {
         return ++$theIncrement;
     }
-    
+
     public function oneArgNonStatic($theParam) {
     	$theParam--;
     }
-    
+
     public function noArgs() {
     	echo "No arg function\n";
     }

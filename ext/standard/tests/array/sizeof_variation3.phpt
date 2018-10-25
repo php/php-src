@@ -1,5 +1,5 @@
 --TEST--
-Test sizeof() function : usage variations - checking for infinite recursion in COUNT_RECURSIVE mode 
+Test sizeof() function : usage variations - checking for infinite recursion in COUNT_RECURSIVE mode
 --FILE--
 <?php
 /* Prototype  : int sizeof($mixed var[, int $mode])

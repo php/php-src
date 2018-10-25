@@ -13,7 +13,7 @@ foreach ($tests as $q) {
 	do {
 	    $id = ftok(__FILE__, chr(mt_rand(0, 255)));
 	} while (msg_queue_exists($id));
-	
+
 	$q = msg_get_queue($id) or die("Failed to create queue");
 	msg_remove_queue($q) or die("Failed to close queue");
     }
@@ -21,7 +21,7 @@ foreach ($tests as $q) {
     echo "Using '$q' as queue resource:\n";
 
     $errno = 0;
-    
+
     var_dump(msg_set_queue($q, array('msg_qbytes' => 1)));
 
     var_dump(msg_stat_queue($q));

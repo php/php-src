@@ -7,7 +7,7 @@ php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
 [options]
 .LP
 .SH DESCRIPTION
-\fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for 
+\fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for
 Web development and can be embedded into HTML. This is a variant of PHP that will run in the background as a daemon, listening for CGI requests. Output is logged to @php_fpm_localstatedir@/log/php-fpm.log.
 .LP
 Most options are set in the configuration file. The configuration file is @php_fpm_sysconfdir@/php-fpm.conf. By default, php-fpm will respond to CGI requests listening on localhost http port 9000. Therefore php-fpm expects your webserver to forward all requests for '.php' files to port 9000 and you should edit your webserver configuration file appropriately.
@@ -21,8 +21,8 @@ Do not chdir to the script's directory
 .TP
 .PD 1
 .B \-c \fIpath\fP|\fIfile\fP
-Look for 
-.B php.ini 
+Look for
+.B php.ini
 file in the directory
 .IR path
 or use the specified
@@ -33,8 +33,8 @@ or use the specified
 .TP
 .PD 1
 .B \-n
-No 
-.B php.ini 
+No
+.B php.ini
 file will be used
 .TP
 .PD 0
@@ -42,8 +42,8 @@ file will be used
 .TP
 .PD 1
 .B \-d \fIfoo\fP[=\fIbar\fP]
-Define INI entry 
-.IR foo 
+Define INI entry
+.IR foo
 with value
 .IR bar
 .TP
@@ -208,7 +208,7 @@ A List of active developers can be found here:
 .B http://www.php.net/credits.php
 .PD 1
 .P
-And last but not least PHP was developed with the help of a huge amount of 
+And last but not least PHP was developed with the help of a huge amount of
 contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphp-fpm\fP, version @PHP_VERSION@.

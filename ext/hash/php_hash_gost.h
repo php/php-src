@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_HASH_GOST_H
 #define PHP_HASH_GOST_H
 
@@ -26,7 +24,7 @@
 /* GOST context */
 typedef struct {
 	uint32_t state[16];
-	uint32_t count[2];
+	size_t count[2];
 	unsigned char length;
 	unsigned char buffer[32];
 	const uint32_t (*tables)[4][256];

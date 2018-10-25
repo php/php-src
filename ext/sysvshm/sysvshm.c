@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* This has been built and tested on Linux 2.2.14
  *
  * This has been built and tested on Solaris 2.6.

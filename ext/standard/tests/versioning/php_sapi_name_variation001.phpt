@@ -1,5 +1,5 @@
 --TEST--
-php_sapi_name() function when switching to webserver by using post 
+php_sapi_name() function when switching to webserver by using post
 --POST--
 foo=BAR
 --CREDITS--

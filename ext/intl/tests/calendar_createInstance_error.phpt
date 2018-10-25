@@ -16,9 +16,7 @@ var_dump(IntlCalendar::createInstance(1, 2, 3));
 var_dump(intlcal_create_instance(1, 2, 3));
 var_dump(intlcal_create_instance(new X, NULL));
 var_dump(intlcal_create_instance(NULL, array()));
-
 --EXPECTF--
-
 Warning: IntlCalendar::createInstance() expects at most 2 parameters, 3 given in %s on line %d
 
 Warning: IntlCalendar::createInstance(): intlcal_create_calendar: bad arguments in %s on line %d

@@ -5,9 +5,6 @@ Test symlink(), linkinfo(), link() and is_link() functions : error conditions - 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no symlinks on Windows');
 }
-if (PHP_INT_SIZE != 4) {
-  die("skip this test is for 32bit platform only");
-}
 ?>
 --FILE--
 <?php
@@ -111,4 +108,3 @@ bool(false)
 bool(false)
 bool(false)
 Done
-

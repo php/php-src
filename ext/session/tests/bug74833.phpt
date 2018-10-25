@@ -19,4 +19,3 @@ ob_end_flush();
 --EXPECT--
 bool(true)
 ==DONE==
-

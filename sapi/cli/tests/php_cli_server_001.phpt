@@ -4,7 +4,7 @@ basic function
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php

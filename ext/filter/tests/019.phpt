@@ -13,7 +13,7 @@ var_dump(filter_var("1.1.1.1", FILTER_VALIDATE_IP));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

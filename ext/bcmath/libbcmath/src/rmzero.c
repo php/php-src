@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -52,4 +51,3 @@ _bc_rm_leading_zeros (num)
     num->n_len--;
   }
 }
-

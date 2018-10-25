@@ -1,15 +1,15 @@
 --TEST--
-Test localtime() function : error conditions 
+Test localtime() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array localtime([int timestamp [, bool associative_array]])
- * Description: Returns the results of the C system call localtime as an associative array 
- * if the associative_array argument is set to 1 other wise it is a regular array 
+ * Description: Returns the results of the C system call localtime as an associative array
+ * if the associative_array argument is set to 1 other wise it is a regular array
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing localtime() : error conditions ***\n";
@@ -30,4 +30,3 @@ var_dump( localtime($timestamp, $assoc, $extra_arg) );
 Warning: localtime() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
 ===DONE===
-

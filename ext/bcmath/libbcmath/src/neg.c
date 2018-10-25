@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -46,4 +45,3 @@ bc_is_neg (num)
 {
   return num->n_sign == MINUS;
 }
-

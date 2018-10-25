@@ -1,5 +1,4 @@
 // vim:ft=javascript
-// $Id$
 
 ARG_WITH("password-argon2", "Argon2 support", "no");
 

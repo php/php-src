@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id*/
-
 #ifndef PHP_HASH_JOAAT_H
 #define PHP_HASH_JOAAT_H
 
@@ -26,7 +24,7 @@ typedef struct {
 } PHP_JOAAT_CTX;
 
 PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context);
-PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, unsigned int inputLen);
+PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, size_t inputLen);
 PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[16], PHP_JOAAT_CTX * context);
 
 static uint32_t joaat_buf(void *buf, size_t len, uint32_t hval);

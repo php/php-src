@@ -1,7 +1,5 @@
 --TEST--
 date_create() function [1]
---SKIPIF--
-<?php if (!function_exists('date_create')) echo "SKIP"; ?>
 --FILE--
 <?php
 date_default_timezone_set('Europe/Oslo');

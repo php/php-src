@@ -9,16 +9,16 @@ class foo2 {
 
 class foo extends foo2 {
 	const BAR = "foo's bar";
-	
+
 	function test($a = self::BAR) {
 	}
-	
+
 	function test2($a = parent::BAR) {
 	}
 
 	function test3($a = foo::BAR) {
 	}
-	
+
 	function test4($a = foo2::BAR) {
 	}
 }

@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef _PHP_MBREGEX_H
 #define _PHP_MBREGEX_H
 
@@ -44,20 +42,20 @@
 	PHP_FE(mb_ereg_search_getregs,	arginfo_mb_ereg_search_getregs) \
 	PHP_FE(mb_ereg_search_getpos,	arginfo_mb_ereg_search_getpos) \
 	PHP_FE(mb_ereg_search_setpos,	arginfo_mb_ereg_search_setpos) \
-	PHP_FALIAS(mbregex_encoding,	mb_regex_encoding,	arginfo_mb_regex_encoding) \
-	PHP_FALIAS(mbereg,	mb_ereg,	arginfo_mb_ereg) \
-	PHP_FALIAS(mberegi,	mb_eregi,	arginfo_mb_eregi) \
-	PHP_FALIAS(mbereg_replace,	mb_ereg_replace,	arginfo_mb_ereg_replace) \
-	PHP_FALIAS(mberegi_replace,	mb_eregi_replace,	arginfo_mb_eregi_replace) \
-	PHP_FALIAS(mbsplit,	mb_split,	arginfo_mb_split) \
-	PHP_FALIAS(mbereg_match,	mb_ereg_match,	arginfo_mb_ereg_match) \
-	PHP_FALIAS(mbereg_search,	mb_ereg_search,	arginfo_mb_ereg_search) \
-	PHP_FALIAS(mbereg_search_pos,	mb_ereg_search_pos,	arginfo_mb_ereg_search_pos) \
-	PHP_FALIAS(mbereg_search_regs,	mb_ereg_search_regs,	arginfo_mb_ereg_search_regs) \
-	PHP_FALIAS(mbereg_search_init,	mb_ereg_search_init,	arginfo_mb_ereg_search_init) \
-	PHP_FALIAS(mbereg_search_getregs,	mb_ereg_search_getregs,	arginfo_mb_ereg_search_getregs) \
-	PHP_FALIAS(mbereg_search_getpos,	mb_ereg_search_getpos,	arginfo_mb_ereg_search_getpos) \
-	PHP_FALIAS(mbereg_search_setpos,	mb_ereg_search_setpos,	arginfo_mb_ereg_search_setpos)
+	PHP_DEP_FALIAS(mbregex_encoding,	mb_regex_encoding,	arginfo_mb_regex_encoding) \
+	PHP_DEP_FALIAS(mbereg,	mb_ereg,	arginfo_mb_ereg) \
+	PHP_DEP_FALIAS(mberegi,	mb_eregi,	arginfo_mb_eregi) \
+	PHP_DEP_FALIAS(mbereg_replace,	mb_ereg_replace,	arginfo_mb_ereg_replace) \
+	PHP_DEP_FALIAS(mberegi_replace,	mb_eregi_replace,	arginfo_mb_eregi_replace) \
+	PHP_DEP_FALIAS(mbsplit,	mb_split,	arginfo_mb_split) \
+	PHP_DEP_FALIAS(mbereg_match,	mb_ereg_match,	arginfo_mb_ereg_match) \
+	PHP_DEP_FALIAS(mbereg_search,	mb_ereg_search,	arginfo_mb_ereg_search) \
+	PHP_DEP_FALIAS(mbereg_search_pos,	mb_ereg_search_pos,	arginfo_mb_ereg_search_pos) \
+	PHP_DEP_FALIAS(mbereg_search_regs,	mb_ereg_search_regs,	arginfo_mb_ereg_search_regs) \
+	PHP_DEP_FALIAS(mbereg_search_init,	mb_ereg_search_init,	arginfo_mb_ereg_search_init) \
+	PHP_DEP_FALIAS(mbereg_search_getregs,	mb_ereg_search_getregs,	arginfo_mb_ereg_search_getregs) \
+	PHP_DEP_FALIAS(mbereg_search_getpos,	mb_ereg_search_getpos,	arginfo_mb_ereg_search_getpos) \
+	PHP_DEP_FALIAS(mbereg_search_setpos,	mb_ereg_search_setpos,	arginfo_mb_ereg_search_setpos)
 /* }}} */
 
 #define PHP_MBREGEX_MAXCACHE 50
@@ -106,4 +104,3 @@ PHP_FUNCTION(mb_regex_set_options);
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
-

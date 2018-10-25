@@ -3,7 +3,7 @@ Test next() function : usage variation - Pass different data types as $array_arg
 --FILE--
 <?php
 /* Prototype  : mixed next(array $array_arg)
- * Description: Move array argument's internal pointer to the next element and return it 
+ * Description: Move array argument's internal pointer to the next element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 

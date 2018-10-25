@@ -8,7 +8,7 @@ variables_order=GPS
 --ARGS--
 ab cd ef 123 test
 --FILE--
-<?php 
+<?php
 $argc = $_SERVER['argc'];
 $argv = $_SERVER['argv'];
 

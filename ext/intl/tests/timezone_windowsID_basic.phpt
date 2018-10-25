@@ -28,7 +28,6 @@ foreach ($tzs as $tz) {
     echo "Error: ", intl_get_error_message(), "\n";
   }
 }
-
 --EXPECT--
 string(24) "SA Pacific Standard Time"
 string(21) "Eastern Standard Time"

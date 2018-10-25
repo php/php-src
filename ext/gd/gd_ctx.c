@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php_gd.h"
 
 #define CTX_PUTC(c,ctx) ctx->putC(ctx, c)
@@ -101,12 +99,12 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	 */
 	switch (image_type) {
 		case PHP_GDIMG_TYPE_XBM:
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "rp!|ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
+			if (zend_parse_parameters(argc, "rp!|ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
 				return;
 			}
 			break;
 		case PHP_GDIMG_TYPE_BMP:
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!b", &imgind, &to_zval, &compressed) == FAILURE) {
+			if (zend_parse_parameters(argc, "r|z!b", &imgind, &to_zval, &compressed) == FAILURE) {
 				return;
 			}
 			break;
@@ -117,7 +115,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			 * PHP_GDIMG_TYPE_WBM
 			 * PHP_GDIMG_TYPE_WEBP
 			 * */
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
+			if (zend_parse_parameters(argc, "r|z!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
 				return;
 			}
 	}

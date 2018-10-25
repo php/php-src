@@ -1,7 +1,5 @@
 --TEST--
-Jenkins's one-at-a-time
---SKIPIF--
-<?php extension_loaded('hash') or die ('Skip - hash extension not available'); ?>
+Hash: Jenkins's one-at-a-time
 --FILE--
 <?php
 $tests = array(
@@ -17,7 +15,7 @@ $pass = true;
 
 foreach ($tests as $test) {
 	++$i;
-	
+
 	$result = hash("joaat", $test[0]);
 	if ($result != $test[1]) {
 		echo "Iteration " . $i . " failed - expected '" . $test[1] . "', got '" . $result . "' for '" . $test[1] . "'\n";

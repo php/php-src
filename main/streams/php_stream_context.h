@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* Stream context and status notification related definitions */
 
 /* callback for status notifications */

@@ -15,7 +15,6 @@
    | Author: Hartmut Holzgraefe <hholzgra@php.net>                        |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include "php.h"
 #include <stdlib.h>

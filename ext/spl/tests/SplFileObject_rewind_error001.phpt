@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplFileObject::rewind() with a parameter. 
+SPL: SplFileObject::rewind() with a parameter.
 --CREDITS--
 Ricardo Oedietram <ricardo@odracir.nl>
 Erwin Poeze <erwin.poeze@gmail.com>

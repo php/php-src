@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp_get_quick_print / snmp_set_quick_print
 --CREDITS--
 Olivier Doucet
@@ -38,4 +38,3 @@ Checking working
 bool(%s)
 bool(false)
 bool(true)
-

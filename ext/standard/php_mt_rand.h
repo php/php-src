@@ -20,7 +20,6 @@
    | Based on code from: Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #ifndef PHP_MT_RAND_H
 #define PHP_MT_RAND_H
@@ -41,4 +40,3 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max);
 PHP_MINIT_FUNCTION(mt_rand);
 
 #endif	/* PHP_MT_RAND_H */
-

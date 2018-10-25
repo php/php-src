@@ -4,7 +4,7 @@ Test each() function : usage variations - Pass different data types as $arr arg
 <?php
 /* Prototype  : array each(array $arr)
  * Description: Return the currently pointed key..value pair in the passed array,
- * and advance the pointer to the next element 
+ * and advance the pointer to the next element
  * Source code: Zend/zend_builtin_functions.c
  */
 
@@ -59,7 +59,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -69,7 +69,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -95,7 +95,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing each() : usage variations ***
 

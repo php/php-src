@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_PROCESS_CTL_H
@@ -49,4 +48,3 @@ enum {
 };
 
 #endif
-

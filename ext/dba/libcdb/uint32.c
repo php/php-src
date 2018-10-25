@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* incorporated from D.J.Bernstein's cdb-0.75 (http://cr.yp.to/cdb.html)*/
 
 #ifdef HAVE_CONFIG_H

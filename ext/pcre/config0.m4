@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension pcre
 
 dnl By default we'll compile and link against the bundled PCRE library
 dnl if DIR is supplied, we'll use that for linking
@@ -49,14 +47,16 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
       fi
     fi
 
-    PHP_CHECK_LIBRARY(pcre2-8, pcre2_jit_compile_8,
-    [
-      AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
-    ],[
-    ],[
-      $PCRE2_LIB
-    ])
-    
+    if test "$PHP_PCRE_JIT" != "no"; then
+      PHP_CHECK_LIBRARY(pcre2-8, pcre2_jit_compile_8,
+      [
+        AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
+      ],[
+      ],[
+        $PCRE2_LIB
+      ])
+    fi
+
     PHP_EVAL_INCLINE($PCRE2_INC)
     PHP_EVAL_LIBLINE($PCRE2_LIB)
     AC_DEFINE(HAVE_PCRE, 1, [ ])
@@ -116,4 +116,3 @@ PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
       fi
     fi
   fi
-

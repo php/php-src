@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 /*
   +----------------------------------------------------------------------+
@@ -16,9 +17,6 @@
   | Author: Nuno Lopes <nlopess@php.net>                                 |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 
 define('REPORT_LEVEL', 1); // 0 reports less false-positives. up to level 5.
 define('VERSION', '7.0');  // minimum is 7.0

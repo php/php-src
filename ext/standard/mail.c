@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -164,12 +162,10 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 
 static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *val)
 {
-	zend_ulong idx;
 	zend_string *tmp_key;
 	zval *tmp_val;
 
-	(void)(idx);
-	ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(val), idx, tmp_key, tmp_val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
 		if (tmp_key) {
 			php_error_docref(NULL, E_WARNING, "Multiple header key must be numeric index (%s)", ZSTR_VAL(tmp_key));
 			continue;
@@ -192,7 +188,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 
 	ZEND_ASSERT(Z_TYPE_P(headers) == IS_ARRAY);
 
-	ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(headers), idx, key, val) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(headers), idx, key, val) {
 		if (!key) {
 			php_error_docref(NULL, E_WARNING, "Found numeric header (" ZEND_LONG_FMT ")", idx);
 			continue;

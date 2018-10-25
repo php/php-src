@@ -1,4 +1,4 @@
-﻿/*
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -2919,7 +2919,10 @@ static void exif_thumbnail_extract(image_info_type *ImageInfo, char *offset, siz
 		return;
 	}
 	/* Check to make sure we are not going to go past the ExifLength */
-	if ((ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) > length) {
+	if (ImageInfo->Thumbnail.size > length
+		|| (ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) > length
+		|| ImageInfo->Thumbnail.offset > length - ImageInfo->Thumbnail.size
+	) {
 		EXIF_ERRLOG_THUMBEOF(ImageInfo)
 		return;
 	}
@@ -3101,6 +3104,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 #endif
 	const maker_note_type *maker_note;
 	char *dir_start;
+	int data_len;
 
 	for (i=0; i<=sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
 		if (i==sizeof(maker_note_array)/sizeof(maker_note_type)) {
@@ -3153,6 +3157,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	switch (maker_note->offset_mode) {
 		case MN_OFFSET_MAKER:
 			offset_base = value_ptr;
+			data_len = value_len;
 			break;
 #ifdef KALLE_0
 		case MN_OFFSET_GUESS:
@@ -3170,6 +3175,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 				return FALSE;
 			}
 			offset_base = value_ptr + offset_diff;
+			data_len = value_len - offset_diff;
 			break;
 #endif
 		default:
@@ -3184,7 +3190,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 
 	for (de=0;de<NumDirEntries;de++) {
 		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,
-								  offset_base, IFDlength, displacement, section_index, 0, maker_note->tag_table)) {
+								  offset_base, data_len, displacement, section_index, 0, maker_note->tag_table)) {
 			return FALSE;
 		}
 	}
@@ -3362,7 +3368,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						ImageInfo->CopyrightPhotographer  = estrdup(value_ptr);
 						ImageInfo->CopyrightEditor        = estrndup(value_ptr+length+1, byte_count-length-1);
 						spprintf(&ImageInfo->Copyright, 0, "%s, %s", ImageInfo->CopyrightPhotographer, ImageInfo->CopyrightEditor);
-						/* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
+						/* format = TAG_FMT_UNDEFINED; this mustn't be ASCII         */
 						/* but we are not supposed to change this                   */
 						/* keep in mind that image_info does not store editor value */
 					} else {

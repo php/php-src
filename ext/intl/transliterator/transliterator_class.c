@@ -311,7 +311,7 @@ ZEND_END_ARG_INFO()
  * Every 'Transliterator' class method has an entry in this table
  */
 static const zend_function_entry Transliterator_class_functions[] = {
-	PHP_ME( Transliterator,			__construct,						ainfo_trans_void,				ZEND_ACC_PRIVATE | ZEND_ACC_CTOR | ZEND_ACC_FINAL )
+	PHP_ME( Transliterator,			__construct,						ainfo_trans_void,				ZEND_ACC_PRIVATE | ZEND_ACC_FINAL )
 	PHP_ME_MAPPING( create,			transliterator_create,				ainfo_trans_create,				ZEND_ACC_STATIC |ZEND_ACC_PUBLIC )
 	PHP_ME_MAPPING( createFromRules,transliterator_create_from_rules,	ainfo_trans_create_from_rules,	ZEND_ACC_STATIC | ZEND_ACC_PUBLIC )
 	PHP_ME_MAPPING( createInverse,	transliterator_create_inverse,		ainfo_trans_void,				ZEND_ACC_PUBLIC )

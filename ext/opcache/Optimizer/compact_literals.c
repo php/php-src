@@ -28,6 +28,7 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
+#include "zend_extensions.h"
 
 #define DEBUG_COMPACT_LITERALS 0
 
@@ -198,8 +199,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_FETCH_CLASS:
-				case ZEND_ADD_INTERFACE:
-				case ZEND_ADD_TRAIT:
 				case ZEND_INSTANCEOF:
 					if (opline->op2_type == IS_CONST) {
 						LITERAL_INFO(opline->op2.constant, LITERAL_CLASS, 2);
@@ -261,9 +260,16 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_DECLARE_FUNCTION:
 				case ZEND_DECLARE_CLASS:
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
+					break;
 				case ZEND_DECLARE_INHERITED_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
 					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
+					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 2);
+					break;
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1);
+					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 2);
 					break;
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 				case ZEND_ASSIGN_DIM:
@@ -326,7 +332,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		memset(map, 0, op_array->last_literal * sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].flags) {
-				/* unsed literal */
+				/* unset literal */
 				zval_ptr_dtor_nogc(&op_array->literals[i]);
 				continue;
 			}
@@ -371,6 +377,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						} else {
 							map[i] = j;
 							ZVAL_LONG(&zv, j);
+							Z_EXTRA(op_array->literals[i]) = 0; /* allow merging with FETCH_DIM_... */
 							zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
 							if (i != j) {
 								op_array->literals[j] = op_array->literals[i];
@@ -499,7 +506,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		method_slot = property_slot + j;
 
 		/* Update opcodes to use new literals table */
-		cache_size = 0;
+		cache_size = zend_op_array_extension_handles * sizeof(void*);
 		opline = op_array->opcodes;
 		end = opline + op_array->last;
 		while (opline < end) {
@@ -738,8 +745,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_FETCH_CLASS:
-				case ZEND_ADD_INTERFACE:
-				case ZEND_ADD_TRAIT:
 				case ZEND_INSTANCEOF:
 					if (opline->op2_type == IS_CONST) {
 						// op2 class

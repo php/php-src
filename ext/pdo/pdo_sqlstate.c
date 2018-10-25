@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -333,4 +331,3 @@ const char *pdo_sqlstate_state_to_description(char *state)
 	}
 	return NULL;
 }
-

@@ -1,11 +1,11 @@
 --TEST--
-Test array_uintersect_assoc() function : usage variation 
+Test array_uintersect_assoc() function : usage variation
 --FILE--
 <?php
 /* Prototype  : array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func)
  * Description: U
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_uintersect_assoc() : usage variation ***\n";
@@ -102,126 +102,126 @@ foreach($inputs as $key =>$value) {
 
 --int 0--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, int given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --int 1--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, int given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --int 12345--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, int given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --int -12345--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, int given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --float 10.5--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, float given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --float -10.5--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, float given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --float 12.3456789000e10--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, float given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --float -12.3456789000e10--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, float given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --float .5--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, float given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --uppercase NULL--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, null given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --lowercase null--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, null given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --lowercase true--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, bool given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --lowercase false--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, bool given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --uppercase TRUE--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, bool given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --uppercase FALSE--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, bool given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --empty string DQ--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, string given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --empty string SQ--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, string given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --string DQ--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, string given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --string SQ--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, string given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --mixed case string--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, string given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --heredoc--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, string given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --instance of classWithToString--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, object given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, object given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --undefined var--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, null given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 
 --unset var--
 
-Warning: array_uintersect_assoc(): Argument #1 is not an array in %sarray_uintersect_assoc_variation1.php on line %d
+Warning: array_uintersect_assoc(): Expected parameter 1 to be an array, null given in %sarray_uintersect_assoc_variation1.php on line %d
 NULL
 ===DONE===

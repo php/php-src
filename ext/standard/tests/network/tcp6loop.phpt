@@ -3,7 +3,7 @@ Streams Based IPv6 TCP Loopback test
 --SKIPIF--
 <?php
 	/* If IPv6 is supported on the platform this will error out with code 111 - Connection refused.
-	   If IPv6 is NOT supported, $errno will be set to something else (indicating parse/getaddrinfo error) 
+	   If IPv6 is NOT supported, $errno will be set to something else (indicating parse/getaddrinfo error)
 	   Note: Might be a good idea to export an IPv6 support indicator (such as AF_INET6 exported by ext/sockets) */
 	@stream_socket_client('tcp://[::1]:0', $errno);
 	if ($errno != 111) die('skip IPv6 not supported.');

@@ -38,9 +38,8 @@ Content-Type: application/octet-stream
 phpinfo();
 ?>
 -----------------------------240723202011929--
-
 --FILE--
-<?php 
+<?php
 print @$_POST['choices'];
 ?>
 --EXPECT--

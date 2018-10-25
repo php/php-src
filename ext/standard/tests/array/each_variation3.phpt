@@ -4,7 +4,7 @@ Test each() function : usage variations - keys of different data types
 <?php
 /* Prototype  : array each(array $arr)
  * Description: Return the currently pointed key..value pair in the passed array,
- * and advance the pointer to the next element 
+ * and advance the pointer to the next element
  * Source code: Zend/zend_builtin_functions.c
  */
 
@@ -40,7 +40,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
 /*3*/  'extreme floats' => array(
        12.3456789000e6 => 'large',
        12.3456789000E-10 => 'small',
@@ -49,8 +49,8 @@ $inputs = array(
        // null data
 /*4*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
-       
+       ),
+
 /*5*/  'null lowercase' => array(
        null => 'null 2',
        ),
@@ -60,17 +60,17 @@ $inputs = array(
        true => 'lowert',
        false => 'lowerf',
        ),
-       
+
 /*7*/  'bool uppercase' => array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*8*/ 'empty double quotes' => array(
        "" => 'emptyd',
        ),
-       
+
 /*9*/  'empty single quotes' => array(
        '' => 'emptys',
        ),
@@ -103,7 +103,6 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing each() : usage variations ***
 

@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* Code originally from ext/sockets */
 
 #ifndef PHP_WIN32_SOCKETS_H

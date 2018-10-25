@@ -1,10 +1,10 @@
 --TEST--
 Test compress.zlib:// scheme with the unlink function
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php
@@ -15,7 +15,6 @@ var_dump(file_exists($inputFileName));
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: unlink(): ZLIB does not allow unlinking in %s on line %d
 bool(true)
 ===DONE===

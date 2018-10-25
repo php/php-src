@@ -1,5 +1,5 @@
 --TEST--
-When __call() is invoked via ::, ensure private implementation of __call() in superclass is accessed without error. 
+When __call() is invoked via ::, ensure private implementation of __call() in superclass is accessed without error.
 --FILE--
 <?php
 class A {

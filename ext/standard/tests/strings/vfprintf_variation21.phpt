@@ -41,41 +41,41 @@ $values = array(
 		  1,
 		  12345,
 		  -2345,
-		
+
 		  // float data
 /*5*/	  10.5,
 		  -10.5,
 		  10.1234567e10,
 		  10.7654321E-10,
 		  .5,
-		
+
 		  // null data
 /*10*/	  NULL,
 		  null,
-		
+
 		  // boolean data
 /*12*/	  true,
 		  false,
 		  TRUE,
 		  FALSE,
-		
+
 		  // empty data
 /*16*/	  "",
 		  '',
-		
+
 		  // string data
 /*18*/	  "string",
 		  'string',
-		
+
 		  // object data
 /*20*/	  new sample(),
-		
+
 		  // undefined data
 /*21*/	  @$undefined_var,
-		
+
 		  // unset data
 /*22*/	  @$unset_var,
-		
+
 		  // resource data
 /*23*/	  $file_handle
 );
@@ -165,4 +165,3 @@ string
 -- Iteration 23 --
 Resource id #%d
 ===DONE===
-

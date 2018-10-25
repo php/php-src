@@ -8,7 +8,7 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 --FILE--
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
+ * Description: Regular expression match for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  */
 
@@ -69,7 +69,6 @@ function base64_encode_var_dump($regs) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing mb_ereg() : variation ***
 

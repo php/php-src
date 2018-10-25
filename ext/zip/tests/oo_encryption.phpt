@@ -2,7 +2,6 @@
 ZipArchive::setEncryption*() functions
 --SKIPIF--
 <?php
-/* $Id$ */
 if (!extension_loaded('zip')) die('skip');
 if (!method_exists('ZipArchive', 'setEncryptionName')) die('skip encrytion not supported');
 ?>
@@ -16,7 +15,7 @@ echo "== Write\n";
 $zip  = new ZipArchive;
 $r = $zip->open($name, ZIPARCHIVE::CREATE);
 // Clear
-$zip->addFromString('foo.txt', 'foo'); 
+$zip->addFromString('foo.txt', 'foo');
 // Encrypted
 $zip->addFromString('bar.txt', 'bar');
 var_dump($zip->setEncryptionName('bar.txt', 9999, $pass)); // Fails

@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1860,11 +1858,9 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 		RETURN_FALSE;
 	}
 
-#if LIBXML_VERSION >= 20614
 	if (flags & XML_SCHEMA_VAL_VC_I_CREATE) {
 		valid_opts |= XML_SCHEMA_VAL_VC_I_CREATE;
 	}
-#endif
 
 	xmlSchemaSetValidOptions(vptr, valid_opts);
 	xmlSchemaSetValidErrors(vptr, php_libxml_error_handler, php_libxml_error_handler, vptr);
@@ -2154,7 +2150,7 @@ PHP_FUNCTION(dom_document_save_html)
 	xmlBufferPtr buf;
 	dom_object *intern, *nodeobj;
 	xmlChar *mem = NULL;
-	int size = 0, format;
+	int format;
 	dom_doc_propsptr doc_props;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
@@ -2177,46 +2173,34 @@ PHP_FUNCTION(dom_document_save_html)
 		}
 
 		buf = xmlBufferCreate();
-		outBuf = xmlOutputBufferCreateBuffer(buf, NULL);
-		if (!outBuf || !buf) {
+		if (!buf) {
 			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
+			RETURN_FALSE;
+		}
+		outBuf = xmlOutputBufferCreateBuffer(buf, NULL);
+		if (!outBuf) {
+			xmlBufferFree(buf);
+			php_error_docref(NULL, E_WARNING, "Could not fetch output buffer");
 			RETURN_FALSE;
 		}
 
 		if (node->type == XML_DOCUMENT_FRAG_NODE) {
-			int one_size;
-
 			for (node = node->children; node; node = node->next) {
 				htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
-#ifdef LIBXML2_NEW_BUFFER
-				one_size = !outBuf->error ? xmlOutputBufferGetSize(outBuf) : -1;
-#else
-				one_size = !outBuf->error ? outBuf->buffer->use : -1;
-#endif
-				if (one_size >= 0) {
-					size = one_size;
-				} else {
-					size = -1;
+				if (outBuf->error) {
 					break;
 				}
 			}
 		} else {
 			htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
-#ifdef LIBXML2_NEW_BUFFER
-			size = !outBuf->error ? xmlOutputBufferGetSize(outBuf): -1;
-#else
-			size = !outBuf->error ? outBuf->buffer->use : -1;
-#endif
 		}
-		if (size >= 0) {
-#ifdef LIBXML2_NEW_BUFFER
-			mem = (xmlChar*) xmlOutputBufferGetContent(outBuf);
-#else
-			mem = (xmlChar*) outBuf->buffer->content;
-#endif
+		if (!outBuf->error) {
+			xmlOutputBufferFlush(outBuf);
+			mem = (xmlChar*) xmlBufferContent(buf);
 			if (!mem) {
 				RETVAL_FALSE;
 			} else {
+				int size = xmlBufferLength(buf);
 				RETVAL_STRINGL((const char*) mem, size);
 			}
 		} else {
@@ -2224,12 +2208,10 @@ PHP_FUNCTION(dom_document_save_html)
 			RETVAL_FALSE;
 		}
 		xmlOutputBufferClose(outBuf);
+		xmlBufferFree(buf);
 	} else {
-#if LIBXML_VERSION >= 20623
+		int size = 0;
 		htmlDocDumpMemoryFormat(docp, &mem, &size, format);
-#else
-		htmlDocDumpMemory(docp, &mem, &size);
-#endif
 		if (!size || !mem) {
 			RETVAL_FALSE;
 		} else {

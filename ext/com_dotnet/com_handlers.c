@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -255,10 +253,10 @@ static PHP_FUNCTION(com_method_handler)
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-static union _zend_function *com_method_get(zend_object **object_ptr, zend_string *name, const zval *key)
+static zend_function *com_method_get(zend_object **object_ptr, zend_string *name, const zval *key)
 {
 	zend_internal_function f, *fptr = NULL;
-	union _zend_function *func;
+	zend_function *func;
 	DISPID dummy;
 	php_com_dotnet_object *obj = (php_com_dotnet_object*)*object_ptr;
 
@@ -390,7 +388,7 @@ static int com_call_method(zend_string *method, zend_object *object, INTERNAL_FU
 	return ret;
 }
 
-static union _zend_function *com_constructor_get(zend_object *object)
+static zend_function *com_constructor_get(zend_object *object)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *) object;
 	static zend_internal_function c, d, v;
@@ -403,7 +401,7 @@ static union _zend_function *com_constructor_get(zend_object *object)
 	f.num_args = 0; \
 	f.fn_flags = 0; \
 	f.handler = ZEND_FN(fn); \
-	return (union _zend_function*)&f;
+	return (zend_function*)&f;
 
 	switch (obj->ce->name->val[0]) {
 #if HAVE_MSCOREE_H
@@ -564,7 +562,7 @@ zend_object_handlers php_com_object_handlers = {
 	com_object_count,
 	NULL,									/* get_debug_info */
 	NULL,									/* get_closure */
-	NULL,									/* get_gc */
+	zend_std_get_gc,						/* get_gc */
 };
 
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable)

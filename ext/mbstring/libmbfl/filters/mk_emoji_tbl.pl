@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# script to generate Shift_JIS encoded Emoji to/from Unicode conversion table. 
+# script to generate Shift_JIS encoded Emoji to/from Unicode conversion table.
 # Rui Hirokawa <hirokawa@php.net>
 #
 # usage: mktbl.pl EmojiSources.txt
@@ -22,7 +22,7 @@ sub sjis2code {
 
   # Shift_JIS -> JIS
   $c[0] = (($c[0]-($c[0]<160?112:176))<<1)-($c[1]<159?1:0);
-  $c[1] -= ($c[1]<159?($c[1]>127?32:31):126); 
+  $c[1] -= ($c[1]<159?($c[1]>127?32:31):126);
 
   $s = ($c[0] - 0x21)*94 + $c[1]-0x21;
 
@@ -131,19 +131,19 @@ push(@r_docomo2_val, 0x00);
 push(@r_docomo3_key, 0x00);
 push(@r_docomo3_val, 0x00);
 
-print OUT "int mb_tbl_code2uni_docomo_min = $docomo_min;\n"; 
-print OUT "int mb_tbl_code2uni_docomo_max = $docomo_max;\n\n"; 
+print OUT "int mb_tbl_code2uni_docomo_min = $docomo_min;\n";
+print OUT "int mb_tbl_code2uni_docomo_max = $docomo_max;\n\n";
 
 print OUT "int mb_tbl_code2uni_docomo[] = {\n";
 print OUT &show_code(@docomo_v);
 print OUT "};\n\n";
 
-print OUT "int mb_tbl_uni_docomo2code_min1 = $to_docomo_min1;\n"; 
-print OUT "int mb_tbl_uni_docomo2code_max1 = $to_docomo_max1;\n"; 
-print OUT "int mb_tbl_uni_docomo2code_min2 = $to_docomo_min2;\n"; 
-print OUT "int mb_tbl_uni_docomo2code_max2 = $to_docomo_max2;\n"; 
-print OUT "int mb_tbl_uni_docomo2code_min3 = $to_docomo_min3;\n"; 
-print OUT "int mb_tbl_uni_docomo2code_max3 = $to_docomo_max3;\n\n"; 
+print OUT "int mb_tbl_uni_docomo2code_min1 = $to_docomo_min1;\n";
+print OUT "int mb_tbl_uni_docomo2code_max1 = $to_docomo_max1;\n";
+print OUT "int mb_tbl_uni_docomo2code_min2 = $to_docomo_min2;\n";
+print OUT "int mb_tbl_uni_docomo2code_max2 = $to_docomo_max2;\n";
+print OUT "int mb_tbl_uni_docomo2code_min3 = $to_docomo_min3;\n";
+print OUT "int mb_tbl_uni_docomo2code_max3 = $to_docomo_max3;\n\n";
 
 #print "DOCOMO reverse 1\n";
 
@@ -238,10 +238,10 @@ push(@r_kddi2_val, 0x00);
 push(@r_kddi3_key, 0x00);
 push(@r_kddi3_val, 0x00);
 
-print OUT "int mb_tbl_code2uni_kddi1_min = $kddi_min1;\n"; 
-print OUT "int mb_tbl_code2uni_kddi1_max = $kddi_max1;\n"; 
-print OUT "int mb_tbl_code2uni_kddi2_min = $kddi_min2;\n"; 
-print OUT "int mb_tbl_code2uni_kddi2_max = $kddi_max2;\n\n"; 
+print OUT "int mb_tbl_code2uni_kddi1_min = $kddi_min1;\n";
+print OUT "int mb_tbl_code2uni_kddi1_max = $kddi_max1;\n";
+print OUT "int mb_tbl_code2uni_kddi2_min = $kddi_min2;\n";
+print OUT "int mb_tbl_code2uni_kddi2_max = $kddi_max2;\n\n";
 
 #print "KDDI 1\n";
 
@@ -255,12 +255,12 @@ print OUT "int mb_tbl_code2uni_kddi2[] = {\n";
 print OUT &show_code(@kddi_v2);
 print OUT "};\n\n";
 
-print OUT "int mb_tbl_uni_kddi2code_min1 = $to_kddi_min1;\n"; 
-print OUT "int mb_tbl_uni_kddi2code_max1 = $to_kddi_max1;\n"; 
-print OUT "int mb_tbl_uni_kddi2code_min2 = $to_kddi_min2;\n"; 
-print OUT "int mb_tbl_uni_kddi2code_max2 = $to_kddi_max2;\n"; 
-print OUT "int mb_tbl_uni_kddi2code_min3 = $to_kddi_min3;\n"; 
-print OUT "int mb_tbl_uni_kddi2code_max3 = $to_kddi_max3;\n\n"; 
+print OUT "int mb_tbl_uni_kddi2code_min1 = $to_kddi_min1;\n";
+print OUT "int mb_tbl_uni_kddi2code_max1 = $to_kddi_max1;\n";
+print OUT "int mb_tbl_uni_kddi2code_min2 = $to_kddi_min2;\n";
+print OUT "int mb_tbl_uni_kddi2code_max2 = $to_kddi_max2;\n";
+print OUT "int mb_tbl_uni_kddi2code_min3 = $to_kddi_min3;\n";
+print OUT "int mb_tbl_uni_kddi2code_max3 = $to_kddi_max3;\n\n";
 
 #print "KDDI reverse 1\n";
 
@@ -303,7 +303,7 @@ $sb_max3 = 10153+901;
 
 if (1) {
     print "SoftBank\n";
-    
+
     foreach $key (sort {hex($a) <=> hex($b)} keys(%softbank)) {
 	$s = $key;
 	$pos = $s % 94;
@@ -319,7 +319,7 @@ if (1) {
 	    $sb_v3[$key-$sb_min3] = $softbank{$key};
 	}
     }
-   
+
 }
 
 $to_sb_min = 10263;
@@ -362,12 +362,12 @@ push(@r_sb3_key, 0x00);
 push(@r_sb3_val, 0x00);
 
 
-print OUT "int mb_tbl_code2uni_sb1_min = $sb_min1;\n"; 
-print OUT "int mb_tbl_code2uni_sb1_max = $sb_max1;\n"; 
-print OUT "int mb_tbl_code2uni_sb2_min = $sb_min2;\n"; 
-print OUT "int mb_tbl_code2uni_sb2_max = $sb_max2;\n"; 
-print OUT "int mb_tbl_code2uni_sb3_min = $sb_min3;\n"; 
-print OUT "int mb_tbl_code2uni_sb3_max = $sb_max3;\n\n"; 
+print OUT "int mb_tbl_code2uni_sb1_min = $sb_min1;\n";
+print OUT "int mb_tbl_code2uni_sb1_max = $sb_max1;\n";
+print OUT "int mb_tbl_code2uni_sb2_min = $sb_min2;\n";
+print OUT "int mb_tbl_code2uni_sb2_max = $sb_max2;\n";
+print OUT "int mb_tbl_code2uni_sb3_min = $sb_min3;\n";
+print OUT "int mb_tbl_code2uni_sb3_max = $sb_max3;\n\n";
 
 #print "SoftBank 1\n";
 
@@ -387,12 +387,12 @@ print OUT "int mb_tbl_code2uni_sb3[] = {\n";
 print OUT &show_code(@sb_v3);
 print OUT "};\n\n";
 
-print OUT "int mb_tbl_uni_sb2code_min1 = $to_sb_min1;\n"; 
-print OUT "int mb_tbl_uni_sb2code_max1 = $to_sb_max1;\n"; 
-print OUT "int mb_tbl_uni_sb2code_min2 = $to_sb_min2;\n"; 
-print OUT "int mb_tbl_uni_sb2code_max2 = $to_sb_max2;\n"; 
-print OUT "int mb_tbl_uni_sb2code_min3 = $to_sb_min3;\n"; 
-print OUT "int mb_tbl_uni_sb2code_max3 = $to_sb_max3;\n\n"; 
+print OUT "int mb_tbl_uni_sb2code_min1 = $to_sb_min1;\n";
+print OUT "int mb_tbl_uni_sb2code_max1 = $to_sb_max1;\n";
+print OUT "int mb_tbl_uni_sb2code_min2 = $to_sb_min2;\n";
+print OUT "int mb_tbl_uni_sb2code_max2 = $to_sb_max2;\n";
+print OUT "int mb_tbl_uni_sb2code_min3 = $to_sb_min3;\n";
+print OUT "int mb_tbl_uni_sb2code_max3 = $to_sb_max3;\n\n";
 
 #print "SB reverse 1\n";
 

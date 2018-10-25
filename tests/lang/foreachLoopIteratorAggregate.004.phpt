@@ -40,7 +40,7 @@ class c_iter implements Iterator {
 	function __destruct() {
 	}
 }
-	
+
 class c implements IteratorAggregate {
 
 	public $max = 3;

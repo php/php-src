@@ -1,5 +1,5 @@
 --TEST--
-globals in local scope - 3 
+globals in local scope - 3
 --INI--
 variables_order="egpcs"
 --FILE--
@@ -13,7 +13,7 @@ test();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(false)
 string(5) "array"

@@ -1,7 +1,5 @@
 OpenSSL extension for PHP
 
-$Id$
-
 The functions implemented so far make it possible to seal and open data, and
 also create and verify signatures.
 
@@ -274,7 +272,7 @@ Seal and open
 
      // now we try to decrypt data for one of the recipients
      $fp = fopen("/src/openssl-0.9.6/demos/sign/key.pem", "r");
-     // Get PEM coded key into $pkey 
+     // Get PEM coded key into $pkey
      $pkey = fread($fp, 8192);
      fclose($fp);
      // $key will be resource id for unpacked $pkey

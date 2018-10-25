@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
@@ -27,7 +25,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class_entry *ce)
+static zend_always_inline void _zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
@@ -37,6 +35,11 @@ ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		ZVAL_UNDEF(object->properties_table + object->ce->default_properties_count);
 	}
+}
+
+ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class_entry *ce)
+{
+	_zend_object_std_init(object, ce);
 }
 
 ZEND_API void zend_object_std_dtor(zend_object *object)
@@ -54,7 +57,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	if (EXPECTED(object->ce->default_properties_count)) {
 		end = p + object->ce->default_properties_count;
 		do {
-			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(p);
 			p++;
 		} while (p != end);
 	}
@@ -176,7 +179,7 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 {
 	zend_object *object = emalloc(sizeof(zend_object) + zend_object_properties_size(ce));
 
-	zend_object_std_init(object, ce);
+	_zend_object_std_init(object, ce);
 	object->handlers = &std_object_handlers;
 	return object;
 }
@@ -189,7 +192,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		zval *end = src + old_object->ce->default_properties_count;
 
 		do {
-			i_zval_ptr_dtor(dst ZEND_FILE_LINE_CC);
+			i_zval_ptr_dtor(dst);
 			ZVAL_COPY_VALUE(dst, src);
 			zval_add_ref(dst);
 			src++;

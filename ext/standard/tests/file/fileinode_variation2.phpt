@@ -4,7 +4,7 @@ Test fileinode() function: usage variations - invalid filenames
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* 
+/*
 Prototype: int fileinode ( string $filename );
 Description: Returns the inode number of the file, or FALSE in case of an error.
 */
@@ -24,12 +24,12 @@ $filenames = array(
   FALSE,
   NULL,
   $file_handle,
-  
+
   /* scalars */
   1234,
   0
 );
-   
+
 /* loop through to test each element the above array */
 foreach( $filenames as $filename ) {
   var_dump( fileinode($filename) );
@@ -69,4 +69,3 @@ Warning: fileinode(): stat failed for 0 in %s on line %d
 bool(false)
 
 *** Done ***
-

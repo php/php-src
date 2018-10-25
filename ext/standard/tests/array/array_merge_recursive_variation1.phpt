@@ -8,7 +8,7 @@ Test array_merge_recursive() function : usage variations - unexpected values for
 */
 
 /*
- * Passing non array values to 'arr1' argument of array_merge_recursive() and see 
+ * Passing non array values to 'arr1' argument of array_merge_recursive() and see
  * that the function outputs proper warning messages wherever expected.
 */
 
@@ -82,22 +82,22 @@ $arrays = array (
 /*24*/ new A()
 );
 
-// initialise the second argument 
+// initialise the second argument
 $arr2 = array(1, array("hello", 'world'));
 
 // loop through each element of $arrays and check the behavior of array_merge_recursive()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "\n-- Iteration $iterator --";
-  
+
   // with default argument
   echo "\n-- With default argument --";
   var_dump( array_merge_recursive($arr1) );
- 
+
   // with more arguments
   echo "-- With more arguments --";
   var_dump( array_merge_recursive($arr1, $arr2) );
- 
+
   $iterator++;
 }
 
@@ -111,193 +111,193 @@ echo "Done";
 
 -- Iteration 1 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 -- Iteration 2 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 -- Iteration 3 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 -- Iteration 4 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 -- Iteration 5 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 10 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 -- Iteration 11 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 -- Iteration 12 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 -- Iteration 13 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 -- Iteration 14 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 -- Iteration 15 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 -- Iteration 16 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 -- Iteration 22 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 -- Iteration 23 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, resource given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, resource given in %s on line %d
 NULL
 
 -- Iteration 24 --
 -- With default argument --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, object given in %s on line %d
 NULL
 -- With more arguments --
-Warning: array_merge_recursive(): Argument #1 is not an array in %s on line %d
+Warning: array_merge_recursive(): Expected parameter 1 to be an array, object given in %s on line %d
 NULL
 Done

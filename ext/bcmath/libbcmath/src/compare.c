@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -158,4 +157,3 @@ bc_compare (n1, n2)
 {
   return _bc_do_compare (n1, n2, TRUE, FALSE);
 }
-

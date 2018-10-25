@@ -15,10 +15,7 @@
 #ifdef ZTS
 
 #include <stdio.h>
-
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 typedef struct _tsrm_tls_entry tsrm_tls_entry;
 

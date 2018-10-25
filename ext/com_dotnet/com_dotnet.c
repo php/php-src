@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -207,8 +205,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
 			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] %s", where, err);
-			if (err)
-				LocalFree(err);
+			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			return;
 		}
@@ -221,8 +218,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
 			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
-			if (err)
-				LocalFree(err);
+			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
 			return;
@@ -234,8 +230,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
 			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
-			if (err)
-				LocalFree(err);
+			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
 			return;
@@ -317,9 +312,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 		char buf[1024];
 		char *err = php_win32_error_to_msg(hr);
 		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] [0x%08x] %s", where, hr, err);
-		if (err && err[0]) {
-			LocalFree(err);
-		}
+		php_win32_error_msg_free(err);
 		php_com_throw_exception(hr, buf);
 		return;
 	}

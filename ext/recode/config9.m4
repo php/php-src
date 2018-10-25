@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension recode
 
 dnl Check for extensions with which Recode can not work
 if test "$PHP_RECODE" != "no"; then

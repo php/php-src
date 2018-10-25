@@ -15,7 +15,6 @@
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #ifdef PHP_WIN32
 typedef HANDLE php_file_descriptor_t;
@@ -47,4 +46,3 @@ struct php_process_handle {
 	int is_persistent;
 	php_process_env_t env;
 };
-

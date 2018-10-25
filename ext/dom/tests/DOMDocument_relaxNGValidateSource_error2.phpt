@@ -9,7 +9,7 @@ require_once('skipif.inc');
 --FILE--
 <?php
 $rng = <<< RNG
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 <grammar ns="" xmlns="http://relaxng.org/ns/structure/1.0" 
   datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <start>
@@ -20,7 +20,7 @@ $rng = <<< RNG
 RNG;
 
 $xml = <<< XML
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 <apple> 
   <pear>Pear</pear>
 </apple>

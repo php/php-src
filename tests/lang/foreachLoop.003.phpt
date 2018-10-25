@@ -31,7 +31,6 @@ foreach ($a as $v) {
 echo "done.\n";
 ?>
 --EXPECTF--
-
 Not an array.
 
 Warning: Invalid argument supplied for foreach() in %s on line 4

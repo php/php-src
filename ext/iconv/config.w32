@@ -1,4 +1,3 @@
-// $Id$
 // vim: ft=javascript
 
 ARG_WITH("iconv", "iconv support", "yes");
@@ -9,7 +8,7 @@ if (PHP_ICONV != "no") {
 		CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_ICONV", PHP_ICONV)) {
 
 		EXTENSION("iconv", "iconv.c", PHP_ICONV_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-		
+
 		AC_DEFINE("HAVE_ICONV", 1, "Define if iconv extension is enabled");
 		AC_DEFINE("HAVE_LIBICONV", 1, "Define if libiconv is available");
 		AC_DEFINE("ICONV_ALIASED_LIBICONV", 1, "The iconv function is called iconv() in libiconv");
@@ -25,4 +24,3 @@ if (PHP_ICONV != "no") {
 		PHP_ICONV = "no";
 	}
 }
-

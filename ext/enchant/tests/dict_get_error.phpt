@@ -16,7 +16,7 @@ $dicts = enchant_broker_list_dicts($broker);
 if (is_resource($broker)) {
     echo("OK\n");
     $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
-    
+
     if ($requestDict) {
         var_dump(enchant_dict_get_error($requestDict));
     } else {

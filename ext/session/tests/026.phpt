@@ -19,14 +19,14 @@ session_start();
 class a {
     public $test = "hallo";
 }
- 
+
 class b {
     public $a;
     function __construct(&$a) {
         $this->a = &$a;
     }
 }
- 
+
 $a = new a();
 $b = new b($a);
 

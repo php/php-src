@@ -1,18 +1,18 @@
 --TEST--
-Test mkdir() function : variation: various valid and invalid paths 
+Test mkdir() function : variation: various valid and invalid paths
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip Not valid for Windows");
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
- * Description: Create a directory 
+ * Description: Create a directory
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mkdir() : variation ***\n";
@@ -27,32 +27,32 @@ $dirs = array(
              $workDir.'/'.$subDir,
              './'.$workDir.'/'.$subDir,
              $workDir.'/../'.$workDir.'/'.$subDir,
-             
+
              // relative bad path
              $workDir.'/../BADDIR/'.$subDir,
              'BADDIR/'.$subDir,
-             
+
              //absolute
              $cwd.'/'.$workDir.'/'.$subDir,
              $cwd.'/./'.$workDir.'/'.$subDir,
              $cwd.'/'.$workDir.'/../'.$workDir.'/'.$subDir,
 
-             //absolute bad path             
+             //absolute bad path
              $cwd.'/BADDIR/'.$subDir,
-             
+
              //trailing separators
              $workDir.'/'.$subDir.'/',
              $cwd.'/'.$workDir.'/'.$subDir.'/',
-             
+
              // multiple separators
              $workDir.'//'.$subDir,
              $cwd.'//'.$workDir.'//'.$subDir,
-             
+
              );
-             
+
 
 foreach($dirs as $dir) {
-   echo "-- creating $dir --\n";           
+   echo "-- creating $dir --\n";
    $res = mkdir($dir);
    if ($res === true) {
       echo "Directory created\n";

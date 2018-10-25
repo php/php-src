@@ -1,14 +1,13 @@
 --TEST--
 locale_filter_matches.phpt() icu >= 4.8 && icu < 50.1.2
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 
@@ -22,7 +21,7 @@ function ut_main()
 		'art-lojban',
 		'sl_IT'
 	);
-	
+
 	$lang_tags = array(
 		'de-DEVA',
 		'de-DE-1996',
@@ -49,7 +48,7 @@ function ut_main()
 			$res_str .="--------------\n";
 			$result= ut_loc_locale_filter_matches( $lang_tag , $loc_range , $isCanonical);
 			$res_str .= "loc_range:$loc_range matches lang_tag $lang_tag ? ";
-			if( $result){	
+			if( $result){
 				$res_str .= "YES\n";
 			}else{
 				$res_str .= "NO\n";
@@ -59,7 +58,7 @@ function ut_main()
 			$can_loc_range = ut_loc_canonicalize($loc_range);
 			$can_lang_tag = ut_loc_canonicalize($lang_tag);
 			$res_str .= "loc_range:$can_loc_range canonically matches lang_tag $can_lang_tag ? ";
-			if( $result){	
+			if( $result){
 				$res_str .= "YES\n";
 			}else{
 				$res_str .= "NO\n";

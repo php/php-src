@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_HASH_FNV_H
 #define PHP_HASH_FNV_H
 
@@ -55,13 +53,13 @@ typedef struct {
 
 
 PHP_HASH_API void PHP_FNV132Init(PHP_FNV132_CTX *context);
-PHP_HASH_API void PHP_FNV132Update(PHP_FNV132_CTX *context, const unsigned char *input, unsigned int inputLen);
-PHP_HASH_API void PHP_FNV1a32Update(PHP_FNV132_CTX *context, const unsigned char *input, unsigned int inputLen);
+PHP_HASH_API void PHP_FNV132Update(PHP_FNV132_CTX *context, const unsigned char *input, size_t inputLen);
+PHP_HASH_API void PHP_FNV1a32Update(PHP_FNV132_CTX *context, const unsigned char *input, size_t inputLen);
 PHP_HASH_API void PHP_FNV132Final(unsigned char digest[16], PHP_FNV132_CTX * context);
 
 PHP_HASH_API void PHP_FNV164Init(PHP_FNV164_CTX *context);
-PHP_HASH_API void PHP_FNV164Update(PHP_FNV164_CTX *context, const unsigned char *input, unsigned int inputLen);
-PHP_HASH_API void PHP_FNV1a64Update(PHP_FNV164_CTX *context, const unsigned char *input, unsigned int inputLen);
+PHP_HASH_API void PHP_FNV164Update(PHP_FNV164_CTX *context, const unsigned char *input, size_t inputLen);
+PHP_HASH_API void PHP_FNV1a64Update(PHP_FNV164_CTX *context, const unsigned char *input, size_t inputLen);
 PHP_HASH_API void PHP_FNV164Final(unsigned char digest[16], PHP_FNV164_CTX * context);
 
 static uint32_t fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate);

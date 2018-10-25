@@ -107,20 +107,20 @@ Locale is: de
 
 Locale is: fr
 '1234567.8912345\d+'
-'1 234 567,891'
-'1 234 567,89 XXX'
-'123 456 789 ?%'
+'1.+234.+567,891'
+'1.+234.+567,89.+(XXX|¤)'
+'123.+456.+789(.+)?%'
 '1.2345678912345\d+E6'
 'un million deux cent trente-quatre mille cinq cent soixante-sept virgule huit neuf un deux trois quatre cinq( six)? sept( neuf)?'
-'1 234 567e'
-'1 234 567'
+'1.+234.+567e'
+'1.+234.+567'
 '#####.###'
-'1 234 567,89 XXX'
+'1.+234.+567,89.+XXX'
 
 Locale is: en_UK
 '1234567.8912345\d+'
 '1,234,567.891'
-'XXX 1,234,567.89'
+'(¤|XXX )1,234,567.89'
 '123,456,789%'
 '1.2345678912345\d+E6'
 'one million,? two hundred (and )?thirty-four thousand,? five hundred (and )?sixty-seven point eight nine one two three four five( six)? seven( nine)?'

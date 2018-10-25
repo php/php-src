@@ -1,5 +1,5 @@
 --TEST--
-Test hebrevc() function : error conditions 
+Test hebrevc() function : error conditions
 --FILE--
 <?php
 
@@ -17,7 +17,7 @@ echo "\n-- Testing hebrevc() function with more than expected no. of arguments -
 $extra_arg = 10;
 var_dump( hebrevc("Hello World", 5, $extra_arg) );
 
-?> 
+?>
 ===DONE===
 --EXPECTF--
 *** Testing hebrevc() : error conditions ***
@@ -31,5 +31,4 @@ NULL
 
 Warning: hebrevc() expects at most 2 parameters, 3 given in %s on line %d
 NULL
- 
 ===DONE===

@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_OUTPUT_DEBUG
 # define PHP_OUTPUT_DEBUG 0
 #endif
@@ -134,7 +132,7 @@ static void reverse_conflict_dtor(zval *zv)
 }
 
 /* {{{ void php_output_startup(void)
- * Set up module globals and initalize the conflict and reverse conflict hash tables */
+ * Set up module globals and initialize the conflict and reverse conflict hash tables */
 PHPAPI void php_output_startup(void)
 {
 	ZEND_INIT_MODULE_GLOBALS(output, php_output_init_globals, NULL);

@@ -43,9 +43,8 @@ Content-Type: application/octet-stream
 phpinfo();
 ?>
 -----------------------------240723202011929--
-
 --FILE--
-<?php 
+<?php
 error_reporting(0);
 print_r($_POST);
 print_r($_FILES);

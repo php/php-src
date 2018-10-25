@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* {{{ includes
 */
 #include <stdio.h>
@@ -84,7 +82,6 @@ PHPAPI void php_var_dump(zval *struc, int level) /* {{{ */
 {
 	HashTable *myht;
 	zend_string *class_name;
-	int is_temp;
 	int is_ref = 0;
 	zend_ulong num;
 	zend_string *key;
@@ -147,7 +144,7 @@ again:
 			}
 			Z_PROTECT_RECURSION_P(struc);
 
-			myht = Z_OBJDEBUG_P(struc, is_temp);
+			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
 			zend_string_release_ex(class_name, 0);
@@ -160,10 +157,7 @@ again:
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 					php_object_property_dump(val, num, key, level);
 				} ZEND_HASH_FOREACH_END();
-				if (is_temp) {
-					zend_hash_destroy(myht);
-					efree(myht);
-				}
+				zend_release_properties(myht);
 			}
 			if (level > 1) {
 				php_printf("%*c", level-1, ' ');
@@ -251,7 +245,6 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 {
 	HashTable *myht = NULL;
 	zend_string *class_name;
-	int is_temp = 0;
 	int is_ref = 0;
 	zend_ulong index;
 	zend_string *key;
@@ -301,20 +294,17 @@ again:
 		if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 			GC_UNPROTECT_RECURSION(myht);
 		}
-		if (is_temp) {
-			zend_hash_destroy(myht);
-			efree(myht);
-		}
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');
 		}
 		PUTS("}\n");
 		break;
 	case IS_OBJECT:
-		myht = Z_OBJDEBUG_P(struc, is_temp);
+		myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 		if (myht) {
 			if (GC_IS_RECURSIVE(myht)) {
 				PUTS("*RECURSION*\n");
+				zend_release_properties(myht);
 				return;
 			}
 			GC_PROTECT_RECURSION(myht);
@@ -327,10 +317,7 @@ again:
 				zval_object_property_dump(val, index, key, level);
 			} ZEND_HASH_FOREACH_END();
 			GC_UNPROTECT_RECURSION(myht);
-			if (is_temp) {
-				zend_hash_destroy(myht);
-				efree(myht);
-			}
+			zend_release_properties(myht);
 		}
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');
@@ -512,11 +499,12 @@ again:
 			break;
 
 		case IS_OBJECT:
-			myht = Z_OBJPROP_P(struc);
+			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
 			if (myht) {
 				if (GC_IS_RECURSIVE(myht)) {
 					smart_str_appendl(buf, "NULL", 4);
 					zend_error(E_WARNING, "var_export does not handle circular references");
+					zend_release_properties(myht);
 					return;
 				} else {
 					GC_PROTECT_RECURSION(myht);
@@ -540,6 +528,7 @@ again:
 					php_object_element_export(val, index, key, level, buf);
 				} ZEND_HASH_FOREACH_END();
 				GC_UNPROTECT_RECURSION(myht);
+				zend_release_properties(myht);
 			}
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
@@ -745,7 +734,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	smart_str_appendl(buf, ":{", 2);
 
 	ZVAL_NULL(&nval);
-	propers = Z_OBJPROP_P(struc);
+	propers = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
 
 	ZEND_HASH_FOREACH_STR_KEY(&names, name) {
 		zend_string *prot_name, *priv_name;
@@ -811,6 +800,7 @@ undef_prop:
 	smart_str_appendc(buf, '}');
 
 	zend_hash_destroy(&names);
+	zend_release_properties(propers);
 }
 /* }}} */
 
@@ -927,7 +917,7 @@ again:
 				i = zend_array_count(myht);
 			} else {
 				incomplete_class = php_var_serialize_class_name(buf, struc);
-				myht = Z_OBJPROP_P(struc);
+				myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
 				/* count after serializing name, since php_var_serialize_class_name
 				 * changes the count if the variable is incomplete class */
 				i = zend_array_count(myht);
@@ -961,9 +951,9 @@ again:
 					/* we should still add element even if it's not OK,
 					 * since we already wrote the length of the array before */
 					if (Z_TYPE_P(data) == IS_ARRAY) {
-						if (Z_TYPE_P(data) == IS_ARRAY
-						 && (UNEXPECTED(Z_IS_RECURSIVE_P(data))
-						  || UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc)))) {
+						if (UNEXPECTED(Z_IS_RECURSIVE_P(data))
+							|| UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))) {
+							php_add_var_hash(var_hash, struc);
 							smart_str_appendl(buf, "N;", 2);
 						} else {
 							if (Z_REFCOUNTED_P(data)) {
@@ -980,6 +970,9 @@ again:
 				} ZEND_HASH_FOREACH_END();
 			}
 			smart_str_appendc(buf, '}');
+			if (Z_TYPE_P(struc) == IS_OBJECT) {
+				zend_release_properties(myht);
+			}
 			return;
 		}
 		case IS_REFERENCE:

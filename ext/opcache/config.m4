@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension opcache
 
 PHP_ARG_ENABLE(opcache, whether to enable Zend OPcache support,
 [  --disable-opcache       Disable Zend OPcache support], yes)
@@ -29,7 +27,7 @@ if test "$PHP_OPCACHE" != "no"; then
   AC_CHECK_HEADERS([unistd.h sys/uio.h])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/ipc.h>
@@ -93,13 +91,13 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_IPC, 1, [Define if you have SysV IPC SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using MAP_ANON shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -145,13 +143,13 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_ANON, 1, [Define if you have mmap(MAP_ANON) SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using /dev/zero shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -200,13 +198,13 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_ZERO, 1, [Define if you have mmap("/dev/zero") SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -269,13 +267,13 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using regular file shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -338,43 +336,43 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_FILE, 1, [Define if you have mmap() SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
 flock_type=unknown
 AC_MSG_CHECKING("whether flock struct is linux ordered")
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
   #include <fcntl.h>
   struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() { 
+  int main() {
     if(lock.l_type == 1 && lock.l_whence == 2 && lock.l_start == 3 && lock.l_len == 4) {
 		return 0;
     }
     return 1;
-  } 
-], [
+  }
+]])], [
 	flock_type=linux
     AC_DEFINE([HAVE_FLOCK_LINUX], [], [Struct flock is Linux-type])
     AC_MSG_RESULT("yes")
-], AC_MSG_RESULT("no") )
+], [AC_MSG_RESULT("no")], [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING("whether flock struct is BSD ordered")
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
   #include <fcntl.h>
   struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() { 
+  int main() {
     if(lock.l_start == 1 && lock.l_len == 2 && lock.l_type == 4 && lock.l_whence == 5) {
 		return 0;
     }
     return 1;
-  } 
-], [
+  }
+]])], [
 	flock_type=bsd
-    AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type]) 
+    AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type])
     AC_MSG_RESULT("yes")
-], AC_MSG_RESULT("no") )
+], [AC_MSG_RESULT("no")], [AC_MSG_RESULT([no])])
 
 if test "$flock_type" = "unknown"; then
 	AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])

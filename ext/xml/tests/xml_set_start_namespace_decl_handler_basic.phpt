@@ -1,17 +1,17 @@
 --TEST--
-Test xml_set_start_namespace_decl_handler function: basic 
+Test xml_set_start_namespace_decl_handler function: basic
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : bool xml_set_start_namespace_decl_handler  ( resource $parser  , callback $handler  )
  * Description: Set up start namespace declaration handler.
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $xml = <<<HERE
@@ -34,13 +34,13 @@ xml_parser_free( $parser );
 echo "Done\n";
 
 function Namespace_Start_Handler( $parser, $prefix, $uri ) {
-	echo "Namespace_Start_Handler called\n"; 
+	echo "Namespace_Start_Handler called\n";
  	echo "...Prefix: ". $prefix . "\n";
  	echo "...Uri: ". $uri . "\n";
 }
 
 function Namespace_End_Handler($parser, $prefix) {
-	echo "Namespace_End_Handler called\n"; 
+	echo "Namespace_End_Handler called\n";
  	echo "...Prefix: ". $prefix . "\n\n";
 }
 
@@ -58,4 +58,3 @@ Namespace_Start_Handler called
 ...Prefix: aw2
 ...Uri: file:/DTD/somewhere.dtd
 Done
-

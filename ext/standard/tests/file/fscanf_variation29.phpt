@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - octal formats with resource 
+Test fscanf() function: usage variations - octal formats with resource
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - octal formats with resource
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different octal format types with resource ***\n"; 
+echo "*** Test fscanf(): different octal format types with resource ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation29.tmp";
@@ -24,7 +24,7 @@ if($file_handle == false)
 // resource type variable
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
-  
+
 // array of resource types
 $resource_types = array (
   $fp,
@@ -33,7 +33,7 @@ $resource_types = array (
 
 $octal_formats = array(  "%o",
 			 "%ho", "%lo", "%Lo",
-			 " %o", "%o ", "% o", 
+			 " %o", "%o ", "% o",
 			 "\t%o", "\n%o", "%4o",
 			 "%30o", "%[0-7]", "%*o"
   		 );
@@ -219,4 +219,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

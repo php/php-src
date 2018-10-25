@@ -3,7 +3,7 @@ Test chdir() function : usage variations - different data type as $directory arg
 --FILE--
 <?php
 /* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory 
+ * Description: Change the current directory
  * Source code: ext/standard/dir.c
  */
 
@@ -25,11 +25,11 @@ unset ($unset_var);
 // get a class
 class classA {
 	var $dir_path;
-	
+
 	function __construct($dir) {
 		$this->dir_path = $dir;
 	}
-	
+
 	public function __toString() {
 		return "$this->dir_path";
 	}
@@ -68,7 +68,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -78,7 +78,7 @@ $inputs = array(
 /*19*/ "$dir_path",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA($dir_path),
 

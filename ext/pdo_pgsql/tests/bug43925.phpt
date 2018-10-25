@@ -31,10 +31,10 @@ $dbh->query('INSERT INTO nodes (id, root, lft, rgt) VALUES (3, 1, 4, 5);');
 $stmt = $dbh->prepare('
 	SELECT * 
 	FROM nodes 
-	WHERE (:rootId > 0 OR lft > :left OR rgt > :left) 
+	WHERE (:rootId > 0 OR lft > :left OR rgt > :left)
 		AND (root = :rootId OR root  = :left)
-		AND (1 > :left OR 1 < :left OR 1 = :left) 
-		AND (:x > 0 OR :x < 10 OR :x > 100) 
+		AND (1 > :left OR 1 < :left OR 1 = :left)
+		AND (:x > 0 OR :x < 10 OR :x > 100)
 		OR :y = 1 OR :left = 1
 ');
 

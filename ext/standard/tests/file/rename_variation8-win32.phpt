@@ -32,7 +32,7 @@ var_dump( rename($dir_name, $new_dir_name) );
 var_dump( file_exists($dir_name) );  // expecting false
 var_dump( file_exists($new_dir_name) );  // expecting true
 
-// try to rename an non_existing dir 
+// try to rename an non_existing dir
 echo "\n*** Testing rename() on non-existing directory ***\n";
 $non_existent_dir_name = $file_path."/non_existent_dir";
 $new_dir_name = "$file_path/rename_basic_dir2";
@@ -67,4 +67,3 @@ bool(false)
 bool(false)
 bool(false)
 Done
-

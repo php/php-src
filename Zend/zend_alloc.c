@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*
  * zend_alloc is designed to be a modern CPU cache friendly memory manager
  * for PHP. Most ideas are taken from jemalloc and tcmalloc implementations.
@@ -70,6 +68,7 @@
 #ifdef ZEND_WIN32
 # include <wincrypt.h>
 # include <process.h>
+# include "win32/winutil.h"
 #endif
 
 #include <stdio.h>
@@ -89,18 +88,12 @@
 #  ifndef _GNU_SOURCE
 #   define _GNU_SOURCE
 #  endif
-#  ifndef __USE_GNU
-#   define __USE_GNU
-#  endif
 # endif
 # include <sys/mman.h>
 # ifndef MAP_ANON
 #  ifdef MAP_ANONYMOUS
 #   define MAP_ANON MAP_ANONYMOUS
 #  endif
-# endif
-# ifndef MREMAP_MAYMOVE
-#  define MREMAP_MAYMOVE 0
 # endif
 # ifndef MAP_FAILED
 #  define MAP_FAILED ((void*)-1)
@@ -198,7 +191,7 @@ int zend_mm_use_huge_pages = 0;
 #endif
 
 /*
- * Memory is retrived from OS by chunks of fixed size 2MB.
+ * Memory is retrieved from OS by chunks of fixed size 2MB.
  * Inside chunk it's managed by pages of fixed size 4096B.
  * So each chunk consists from 512 pages.
  * The first page of each chunk is reseved for chunk header.
@@ -256,7 +249,7 @@ struct _zend_mm_heap {
 
 	zend_mm_chunk     *main_chunk;
 	zend_mm_chunk     *cached_chunks;			/* list of unused chunks */
-	int                chunks_count;			/* number of alocated chunks */
+	int                chunks_count;			/* number of allocated chunks */
 	int                peak_chunks_count;		/* peak number of allocated chunks for current request */
 	int                cached_chunks_count;		/* number of cached chunks */
 	double             avg_chunks_count;		/* average number of chunks allocated per request */
@@ -396,23 +389,17 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 void
 stderr_last_error(char *msg)
 {
-	LPSTR buf = NULL;
 	DWORD err = GetLastError();
+	char *buf = php_win32_error_to_msg(err);
 
-	if (!FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			FORMAT_MESSAGE_FROM_SYSTEM |
-			FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,
-			err,
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPSTR)&buf,
-		0, NULL)) {
+	if (!buf[0]) {
 		fprintf(stderr, "\n%s: [0x%08lx]\n", msg, err);
 	}
 	else {
 		fprintf(stderr, "\n%s: [0x%08lx] %s\n", msg, err, buf);
 	}
+
+	php_win32_error_msg_free(buf);
 }
 #endif
 
@@ -425,11 +412,15 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 #ifdef _WIN32
 	return VirtualAlloc(addr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #else
+	int flags = MAP_PRIVATE | MAP_ANON;
+#if defined(MAP_EXCL)
+	flags |= MAP_FIXED | MAP_EXCL;
+#endif
 	/* MAP_FIXED leads to discarding of the old mapping, so it can't be used. */
-	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
+	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
 
 	if (ptr == MAP_FAILED) {
-#if ZEND_MM_ERROR
+#if ZEND_MM_ERROR && !defined(MAP_EXCL)
 		fprintf(stderr, "\nmmap() failed: [%d] %s\n", errno, strerror(errno));
 #endif
 		return NULL;
@@ -2746,10 +2737,14 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
 
-	_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-	_heap->custom_heap.std._malloc = _malloc;
-	_heap->custom_heap.std._free = _free;
-	_heap->custom_heap.std._realloc = _realloc;
+	if (!_malloc && !_free && !_realloc) {
+		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_NONE;
+	} else {
+		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
+		_heap->custom_heap.std._malloc = _malloc;
+		_heap->custom_heap.std._free = _free;
+		_heap->custom_heap.std._realloc = _realloc;
+	}
 #endif
 }
 

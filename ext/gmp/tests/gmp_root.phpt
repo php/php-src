@@ -20,7 +20,7 @@ var_dump(gmp_root(100, 0));
 var_dump(gmp_root(100, -3));
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_root() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 object(GMP)#%d (1) {

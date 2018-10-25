@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef FILE_H
 #define FILE_H
 
@@ -144,4 +142,3 @@ extern PHPAPI php_file_globals file_globals;
 
 
 #endif /* FILE_H */
-

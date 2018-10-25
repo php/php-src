@@ -3,7 +3,7 @@ Test chdir() function : error conditions - Incorrect number of arguments
 --FILE--
 <?php
 /* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory 
+ * Description: Change the current directory
  * Source code: ext/standard/dir.c
  */
 

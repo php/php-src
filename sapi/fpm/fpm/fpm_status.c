@@ -1,5 +1,3 @@
-
-	/* $Id$ */
 	/* (c) 2009 Jerome Loyet */
 
 #include "php.h"

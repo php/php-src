@@ -15,12 +15,12 @@ browscap={PWD}/browscap.ini
 --FILE--
 <?php
 /* Prototype  : mixed get_browser([string browser_name [, bool return_array]])
- * Description: Get information about the capabilities of a browser. 
- * If browser_name is omitted or null, HTTP_USER_AGENT is used. 
- * Returns an object by default; if return_array is true, returns an array. 
+ * Description: Get information about the capabilities of a browser.
+ * If browser_name is omitted or null, HTTP_USER_AGENT is used.
+ * Returns an object by default; if return_array is true, returns an array.
  *
  * Source code: ext/standard/browscap.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $browsers = include dirname(__FILE__) . DIRECTORY_SEPARATOR . 'browsernames.inc';

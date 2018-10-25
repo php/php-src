@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 /*
    +----------------------------------------------------------------------+
@@ -15,8 +16,6 @@
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
-
-	 $Id$
 */
 
 const HEADER_TEXT = <<< DATA
@@ -707,7 +706,7 @@ function opcode_name($name, $spec, $op1, $op2) {
 			} else if (isset($opcode["op2"]["ANY"])) {
 				$op2 = "ANY";
 			} else if ($spec) {
-				/* dispatch to unkonwn handler in unreachable code */
+				/* dispatch to unknown handler in unreachable code */
 				return "ZEND_NULL";
 			}
 		}
@@ -1395,7 +1394,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 						$label++;
 						return;
 					}
-					
+
 					// Emit pointer to specialized handler
 					$spec_name = $dsc["op"]."_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec);
 					switch ($kind) {
@@ -1882,6 +1881,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 								out($f,"# endif\n");
 							} else {
 								out($f,"# define ZEND_VM_RETURN()        opline = NULL; return\n");
+								out($f,"# define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE\n");
 							}
 							out($f,"#else\n");
 							out($f,"# define ZEND_OPCODE_HANDLER_RET int\n");
@@ -2149,7 +2149,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 								"# endif\n" .
 								$m[1]."return;\n" .
 								"#else\n" .
-								$m[1]."if (EXPECTED(ret > 0)) {\n" . 
+								$m[1]."if (EXPECTED(ret > 0)) {\n" .
 						        $m[1]."\texecute_data = EG(current_execute_data);\n".
 								$m[1]."\tZEND_VM_LOOP_INTERRUPT_CHECK();\n".
 						        $m[1]."} else {\n" .
@@ -2573,7 +2573,7 @@ function gen_vm($def, $skel) {
 	fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode);\n");
 	fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);\n\n");
 	fputs($f, "END_EXTERN_C()\n\n");
-	
+
 	foreach ($opcodes as $code => $dsc) {
 		$code = str_pad((string)$code,$code_len," ",STR_PAD_LEFT);
 		$op = str_pad($dsc["op"],$max_opcode_len);
@@ -2598,13 +2598,13 @@ function gen_vm($def, $skel) {
 	fputs($f,"#include <stdio.h>\n");
 	fputs($f,"#include <zend.h>\n");
 	fputs($f,"#include <zend_vm_opcodes.h>\n\n");
-	
+
 	fputs($f,"static const char *zend_vm_opcodes_names[".($max_opcode + 1)."] = {\n");
 	for ($i = 0; $i <= $max_opcode; $i++) {
 		fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
 	}
 	fputs($f, "};\n\n");
-	
+
 	fputs($f,"static uint32_t zend_vm_opcodes_flags[".($max_opcode + 1)."] = {\n");
 	for ($i = 0; $i <= $max_opcode; $i++) {
 		fprintf($f, "\t0x%08x,\n", isset($opcodes[$i]["flags"]) ? $opcodes[$i]["flags"] : 0);
@@ -2624,7 +2624,7 @@ function gen_vm($def, $skel) {
 	fputs($f, "\t}\n");
 	fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
 	fputs($f, "}\n");
-    
+
 	fclose($f);
 	echo "zend_vm_opcodes.c generated successfully.\n";
 
@@ -2655,7 +2655,7 @@ function gen_vm($def, $skel) {
 		out($f, "# pragma warning(once : 6326)\n");
 	}
 	out($f, "#endif\n");
-	
+
 	// Support for ZEND_USER_OPCODE
 	out($f, "static user_opcode_handler_t zend_user_opcode_handlers[256] = {\n");
 	for ($i = 0; $i < 255; ++$i) {
@@ -2674,6 +2674,7 @@ function gen_vm($def, $skel) {
 	gen_executor($f, $skl, ZEND_VM_SPEC, ZEND_VM_KIND, "execute", "zend_vm_init");
 
 	// Generate zend_vm_get_opcode_handler() function
+	out($f, "\n");
 	out($f, "static const void* ZEND_FASTCALL zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)\n");
 	out($f, "{\n");
 	if (!ZEND_VM_SPEC) {
@@ -2846,13 +2847,13 @@ function gen_vm($def, $skel) {
 	if (!ZEND_VM_SPEC) {
 		out($f, "\top->handler = zend_vm_get_opcode_handler(opcode, op);\n");
 	} else {
-		out($f, "\tuint32_t spec = zend_spec_handlers[opcode];\n\n");
-		out($f, "\tif (spec & SPEC_RULE_COMMUTATIVE) {\n");
+		out($f, "\n");
+		out($f, "\tif (zend_spec_handlers[op->opcode] & SPEC_RULE_COMMUTATIVE) {\n");
 		out($f, "\t\tif (op->op1_type < op->op2_type) {\n");
 		out($f, "\t\t\tzend_swap_operands(op);\n");
 		out($f, "\t\t}\n");
 		out($f, "\t}\n");
-		out($f, "\top->handler = zend_vm_get_opcode_handler_ex(spec, op);\n");
+		out($f, "\top->handler = zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);\n");
 	}
 	out($f, "}\n\n");
 
@@ -2916,6 +2917,13 @@ function gen_vm($def, $skel) {
 			if ($has_commutative) {
 				out($f, "\t\t\tif (op->op1_type < op->op2_type) {\n");
 				out($f, "\t\t\t\tzend_swap_operands(op);\n");
+				out($f, "\t\t\t}\n");
+				out($f, "\t\t\tbreak;\n");
+				out($f, "\t\tcase ZEND_USER_OPCODE:\n");
+				out($f, "\t\t\tif (zend_spec_handlers[op->opcode] & SPEC_RULE_COMMUTATIVE) {\n");
+				out($f, "\t\t\t\tif (op->op1_type < op->op2_type) {\n");
+				out($f, "\t\t\t\t\tzend_swap_operands(op);\n");
+				out($f, "\t\t\t\t}\n");
 				out($f, "\t\t\t}\n");
 				out($f, "\t\t\tbreak;\n");
 			}

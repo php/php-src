@@ -25,7 +25,7 @@ $xml1 = <<<XML
         </array>
     </wddxPacket>
 XML;
-    
+
 $xml2 = <<<XML
 <?xml version='1.0' ?>
     <!DOCTYPE et SYSTEM 'w'>

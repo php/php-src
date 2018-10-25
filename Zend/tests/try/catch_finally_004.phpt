@@ -19,7 +19,7 @@ function foo (&$ex) {
       } finally {
         echo "4";
         throw_exception("finally");
-      } 
+      }
    } catch (Exception $e) {
       $ex = $e;
       echo "3";

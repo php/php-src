@@ -17,7 +17,7 @@ Test token_get_all() function : usage variations - with different arithmetic ope
 
 echo "*** Testing token_get_all() : 'source' string with different arithmetic operators ***\n";
 
-// arithmetic operators - '+', '-', '*', '/', '%' 
+// arithmetic operators - '+', '-', '*', '/', '%'
 $source = array (
   '<?php $a = 1 + 2; ?>',
   '<?php $b = $b - 2; ?>',

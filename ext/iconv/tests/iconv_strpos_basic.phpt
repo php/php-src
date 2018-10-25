@@ -10,7 +10,7 @@ error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
 /* Prototype  : int iconv_strpos(string haystack, string needle [, int offset [, string charset]])
- * Description: Find position of first occurrence of a string within another 
+ * Description: Find position of first occurrence of a string within another
  * Source code: ext/iconv/iconv.c
  */
 
