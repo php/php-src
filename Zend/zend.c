@@ -566,8 +566,13 @@ static void auto_global_dtor(zval *zv) /* {{{ */
 static void function_copy_ctor(zval *zv) /* {{{ */
 {
 	zend_function *old_func = Z_FUNC_P(zv);
-	zend_function *func = pemalloc(sizeof(zend_internal_function), 1);
+	zend_function *func;
 
+	if (old_func->type == ZEND_USER_FUNCTION) {
+		ZEND_ASSERT(old_func->op_array.fn_flags & ZEND_ACC_IMMUTABLE);
+		return;
+	}
+	func = pemalloc(sizeof(zend_internal_function), 1);
 	Z_FUNC_P(zv) = func;
 	memcpy(func, old_func, sizeof(zend_internal_function));
 	function_add_ref(func);
