@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0RC5
 
+- Opcache:
+  . Fixed bug #77058 (Type inference in opcache causes side effects). (Nikita)
+
 - SOAP:
   . Fixed bug #50675 (SoapClient can't handle object references correctly).
     (Cameron Porter)
