@@ -78,6 +78,7 @@ void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap)
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
 ZEND_API int (*zend_post_startup_cb)(void) = NULL;
+ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
 
 void (*zend_on_timeout)(int seconds);
 
@@ -954,7 +955,18 @@ int zend_post_startup(void) /* {{{ */
 
 	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
+#endif
 
+	if (zend_post_startup_cb) {
+		int (*cb)(void) = zend_post_startup_cb;
+
+		zend_post_startup_cb = NULL;
+		if (cb() != SUCCESS) {
+			return FAILURE;
+		}
+	}
+
+#ifdef ZTS
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
@@ -980,15 +992,6 @@ int zend_post_startup(void) /* {{{ */
 #else
 	global_map_ptr_last = CG(map_ptr_last);
 #endif
-
-	if (zend_post_startup_cb) {
-		int (*cb)(void) = zend_post_startup_cb;
-
-		zend_post_startup_cb = NULL;
-		if (cb() != SUCCESS) {
-			return FAILURE;
-		}
-	}
 
 	return SUCCESS;
 }
@@ -1025,6 +1028,8 @@ void zend_shutdown(void) /* {{{ */
 	GLOBAL_CLASS_TABLE = NULL;
 	GLOBAL_AUTO_GLOBALS_TABLE = NULL;
 	GLOBAL_CONSTANTS_TABLE = NULL;
+	ts_free_id(executor_globals_id);
+	ts_free_id(compiler_globals_id);
 #else
 	if (CG(map_ptr_base)) {
 		free(CG(map_ptr_base));
