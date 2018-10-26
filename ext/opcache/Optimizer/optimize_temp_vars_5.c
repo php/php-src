@@ -52,7 +52,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 	int currT;
 	int i;
 	int max = -1;
-	int var_to_free = -1;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
 	bitset_len = zend_bitset_len(T);
@@ -178,11 +177,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 				zend_bitset_incl(valid_T, currT);
 				opline->result.var = NUM_VAR(i + offset);
 			}
-		}
-
-		if (var_to_free >= 0) {
-			zend_bitset_excl(taken_T, var_to_free);
-			var_to_free = -1;
 		}
 
 		opline--;
