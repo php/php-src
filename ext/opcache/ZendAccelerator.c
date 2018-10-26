@@ -3545,11 +3545,7 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	uint32_t memory_used;
 	uint32_t checkpoint;
 
-	/* exclusive lock */
-	zend_shared_alloc_lock();
-
 	if (zend_accel_hash_is_full(&ZCSG(hash))) {
-		zend_shared_alloc_unlock();
 		zend_accel_error(ACCEL_LOG_FATAL, "Not enough entries in hash table for preloading!");
 		return NULL;
 	}
@@ -3602,7 +3598,6 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	}
 #endif
 	if (!ZCG(mem)) {
-		zend_shared_alloc_unlock();
 		zend_accel_error(ACCEL_LOG_FATAL, "Not enough shared memory for preloading!");
 		return NULL;
 	}
@@ -3635,9 +3630,35 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 
 	new_persistent_script->dynamic_members.memory_consumption = ZEND_ALIGNED_SIZE(new_persistent_script->size);
 
-	zend_shared_alloc_unlock();
-
 	return new_persistent_script;
+}
+
+static void preload_load(void)
+{
+	/* Load into process tables */
+	if (zend_hash_num_elements(&ZCSG(preload_script)->script.function_table)) {
+		Bucket *p = ZCSG(preload_script)->script.function_table.arData;
+		Bucket *end = p + ZCSG(preload_script)->script.function_table.nNumUsed;
+
+		for (; p != end; p++) {
+			_zend_hash_append_ptr_ex(EG(function_table), p->key, Z_PTR(p->val), 1);
+		}
+	}
+
+	if (zend_hash_num_elements(&ZCSG(preload_script)->script.class_table)) {
+		Bucket *p = ZCSG(preload_script)->script.class_table.arData;
+		Bucket *end = p + ZCSG(preload_script)->script.class_table.nNumUsed;
+
+		for (; p != end; p++) {
+			_zend_hash_append_ptr_ex(EG(class_table), p->key, Z_PTR(p->val), 1);
+		}
+	}
+
+	EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
+	EG(persistent_functions_count) = EG(function_table)->nNumUsed;
+	EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
+
+	CG(map_ptr_last) = ZCSG(map_ptr_last);
 }
 
 static int accel_preload(const char *config)
@@ -3748,43 +3769,19 @@ static int accel_preload(const char *config)
 
 		ZEND_ASSERT(ZCSG(preload_script)->arena_size == 0);
 
-		/* Load into system heap */
-		if (zend_hash_num_elements(&ZCSG(preload_script)->script.function_table)) {
-			Bucket *p = ZCSG(preload_script)->script.function_table.arData;
-			Bucket *end = p + ZCSG(preload_script)->script.function_table.nNumUsed;
-
-			for (; p != end; p++) {
-				_zend_hash_append_ptr_ex(EG(function_table), p->key, Z_PTR(p->val), 1);
-			}
-		}
-
-		if (zend_hash_num_elements(&ZCSG(preload_script)->script.class_table)) {
-			Bucket *p = ZCSG(preload_script)->script.class_table.arData;
-			Bucket *end = p + ZCSG(preload_script)->script.class_table.nNumUsed;
-
-			for (; p != end; p++) {
-				_zend_hash_append_ptr_ex(EG(class_table), p->key, Z_PTR(p->val), 1);
-			}
-		}
-
-		EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
-		EG(persistent_functions_count) = EG(function_table)->nNumUsed;
-		EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
+		preload_load();
 
 		/* Store individual scripts with unlinked classes */
 		HANDLE_BLOCK_INTERRUPTIONS();
 		SHM_UNPROTECT();
 
 		i = 0;
-		zend_shared_alloc_lock();
 		ZCSG(saved_scripts) = zend_shared_alloc((zend_hash_num_elements(preload_scripts) + 1) * sizeof(void*));
-		zend_shared_alloc_unlock();
 		ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
 			ZCSG(saved_scripts)[i++] = preload_script_in_shared_memory(script);
 		} ZEND_HASH_FOREACH_END();
 		ZCSG(saved_scripts)[i] = NULL;
 
-		CG(map_ptr_last) = ZCSG(map_ptr_last);
 		zend_shared_alloc_save_state();
 		accel_interned_strings_save_state();
 
@@ -3823,6 +3820,17 @@ static int accel_finish_startup(void)
 
 		if (UNEXPECTED(file_cache_only)) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"file_cache_only\" mode");
+			return SUCCESS;
+		}
+
+		/* exclusive lock */
+		zend_shared_alloc_lock();
+
+		if (ZCSG(preload_script)) {
+			/* Preloading was done in another process */
+			preload_load();
+			preload_restart();
+			zend_shared_alloc_unlock();
 			return SUCCESS;
 		}
 
@@ -3876,6 +3884,8 @@ static int accel_finish_startup(void)
 		sapi_module.send_headers = orig_send_headers;
 		sapi_module.send_header = orig_send_header;
 		sapi_module.getenv = orig_getenv;
+
+		zend_shared_alloc_unlock();
 
 		sapi_activate();
 
