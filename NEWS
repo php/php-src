@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #50675 (SoapClient can't handle object references correctly).
     (Cameron Porter)
 
+- XML:
+  . Fixed bug 71592 (External entity processing never fails). (cmb)
+
 25 Oct 2018, PHP 7.3.0RC4
 
 - Core:

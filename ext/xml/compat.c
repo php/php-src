@@ -359,7 +359,10 @@ _external_entity_ref_handler(void *user, const xmlChar *names, int type, const x
 		return;
 	}
 
-	parser->h_external_entity_ref(parser, names, (XML_Char *) "", sys_id, pub_id);
+	if (!parser->h_external_entity_ref(parser, names, (XML_Char *) "", sys_id, pub_id)) {
+		xmlStopParser(parser->parser);
+		parser->parser->errNo = XML_ERROR_EXTERNAL_ENTITY_HANDLING;
+	};
 }
 
 static xmlEntityPtr
