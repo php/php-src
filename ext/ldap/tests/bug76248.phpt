@@ -11,10 +11,11 @@ $pid = pcntl_fork();
 const PORT = 12345;
 if ($pid == 0) {
 	// child
-    $server = stream_socket_server("tcp://127.0.0.1:12345");
+    $server = stream_socket_server("tcp://127.0.0.1:" . PORT);
 	$socket = stream_socket_accept($server, 3);
 	fwrite($socket, base64_decode("MAwCAQFhBwoBAAQABAAweQIBAmR0BJljbj1yb290LGRjPWV4YW1wbGUsZGM9Y29tMFcwIwQLb2JqZWN0Q2xhc3MxFAQSb3JnYW5pemF0aW9uYWxSb2xlMAwEAmNuMQYEBHJvb3QwIgQLZGVzY3JpcHRpb24xEwQRRGlyZWN0b3J5IE1hbmFnZXIwDAIBAmUHCgEABAAEADB5AgEDZHQEmWNuPXJvb3QsZGM9ZXhhbXBsZSxkYz1jb20wVzAjBAtvYmplY3RDbGFzczEUBBJvcmdhbml6YXRpb25hbFJvbGUwDAQCY24xBgQEcm9vdDAiBAtkZXNjcmlwdGlvbjETBBFEaXJlY3RvcnkgTWFuYWdlcjAMAgEDZQcKAQAEAAQA"));
 	fflush($socket);
+    stream_socket_shutdown($socket, STREAM_SHUT_RD);
 } else {
 	// parent
 	$ds = ldap_connect("127.0.0.1", PORT);
