@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -154,7 +152,7 @@ ZEND_END_ARG_INFO()
 
 
 static const zend_function_entry curlfile_funcs[] = {
-	PHP_ME(CURLFile,			__construct,        arginfo_curlfile_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			__construct,        arginfo_curlfile_create, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			getFilename,        NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			getMimeType,        NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			setMimeType,        arginfo_curlfile_name, ZEND_ACC_PUBLIC)

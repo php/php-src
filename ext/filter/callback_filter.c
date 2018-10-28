@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php_filter.h"
 
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)

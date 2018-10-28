@@ -16,4 +16,3 @@ echo "Value: {$properties[1234]}\n";
 --EXPECT--
 bool(true)
 Value: Numeric
-

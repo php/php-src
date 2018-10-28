@@ -16,7 +16,7 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Exception: Unsupported operand types
 
 Fatal error: Uncaught Error: Unsupported operand types in %s:%d

@@ -16,10 +16,10 @@ trait THelloA {
 
 class TraitsTest1 {
 	use THelloB;
-	use THelloA;  
+	use THelloA;
 }
 
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Declaration of THelloB::hello() must be compatible with THelloA::hello($a) in %s on line %d

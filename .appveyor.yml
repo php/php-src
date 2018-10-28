@@ -1,4 +1,3 @@
-
 version: "{branch}.build.{build}"
 
 image: Visual Studio 2017
@@ -14,10 +13,10 @@ cache:
         - c:\build-cache
 
 environment:
-        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache  
+        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
         PHP_BUILD_OBJ_DIR: c:\obj
         PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
-        PHP_BUILD_SDK_BRANCH: php-sdk-2.1.7beta1
+        PHP_BUILD_SDK_BRANCH: php-sdk-2.1.9beta1
         PHP_BUILD_CRT: vc15
         # ext and env setup for tests
         #MYSQL_TEST_PASSWD: Password12!
@@ -50,4 +49,3 @@ build_script:
 
 test_script:
         - appveyor\test.bat
-

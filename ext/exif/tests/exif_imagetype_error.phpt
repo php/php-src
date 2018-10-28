@@ -1,5 +1,5 @@
 --TEST--
-Test exif_imagetype() function : error conditions 
+Test exif_imagetype() function : error conditions
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --FILE--
@@ -43,4 +43,3 @@ NULL
 Warning: exif_imagetype(%s/foo.jpg): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 ===Done===
-

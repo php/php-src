@@ -4,7 +4,7 @@ Null bytes in SQL statements
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --INI--
 display_errors = On
 error_reporting = E_WARNING
@@ -28,7 +28,7 @@ $s = oci_parse($c, "select * from dual where :bv = 1");
 $bv = 1;
 oci_bind_by_name($s, ":bv\0:bv", $bv);
 oci_execute($s);
- 
+
 
 ?>
 ===DONE===

@@ -4,7 +4,7 @@ Test each() function : usage variations - Multi-dimensional arrays
 <?php
 /* Prototype  : array each(array $arr)
  * Description: Return the currently pointed key..value pair in the passed array,
- * and advance the pointer to the next element 
+ * and advance the pointer to the next element
  * Source code: Zend/zend_builtin_functions.c
  */
 
@@ -32,7 +32,6 @@ var_dump( each($arr[2]));
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing each() : usage variations ***
 

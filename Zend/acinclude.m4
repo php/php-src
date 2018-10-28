@@ -1,5 +1,3 @@
-dnl $Id$
-dnl
 dnl This file contains local autoconf functions.
 
 AC_DEFUN([LIBZEND_BISON_CHECK],[
@@ -7,7 +5,7 @@ AC_DEFUN([LIBZEND_BISON_CHECK],[
   # min: 2.4 (i.e. 204, major * 100 + minor for easier comparison)
   bison_version_min="204"
   # non-working versions, e.g. "3.0 3.2";
-  # remove "none" when introducing the first incompatible bison version an 
+  # remove "none" when introducing the first incompatible bison version an
   # separate any following additions by spaces
   bison_version_exclude=""
 
@@ -46,14 +44,12 @@ AC_DEFUN([LIBZEND_BISON_CHECK],[
 
 AC_DEFUN([ZEND_FP_EXCEPT],[
   AC_CACHE_CHECK(whether fp_except is defined, ac_cv_type_fp_except,[
-    AC_TRY_COMPILE([
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <floatingpoint.h>
-],[
+]],[[
 fp_except x = (fp_except) 0;
-],[
+]])],[
      ac_cv_type_fp_except=yes
-],[
-     ac_cv_type_fp_except=no
 ],[
      ac_cv_type_fp_except=no
 ])])
@@ -67,7 +63,7 @@ dnl Check for broken sprintf()
 dnl
 AC_DEFUN([AC_ZEND_BROKEN_SPRINTF],[
   AC_CACHE_CHECK(whether sprintf is broken, ac_cv_broken_sprintf,[
-    AC_TRY_RUN([main() {char buf[20];exit(sprintf(buf,"testing 123")!=11); }],[
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[main() {char buf[20];exit(sprintf(buf,"testing 123")!=11); }]])],[
       ac_cv_broken_sprintf=no
     ],[
       ac_cv_broken_sprintf=yes
@@ -91,8 +87,7 @@ AC_DEFUN([AC_ZEND_C_BIGENDIAN],
 [AC_CACHE_CHECK([whether byte ordering is bigendian], ac_cv_c_bigendian_php,
  [
   ac_cv_c_bigendian_php=unknown
-  AC_TRY_RUN(
-  [
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 int main(void)
 {
         short one = 1;
@@ -104,7 +99,7 @@ int main(void)
                 return(1);
         }
 }
-  ], [ac_cv_c_bigendian_php=yes], [ac_cv_c_bigendian_php=no], [ac_cv_c_bigendian_php=unknown])
+  ]])], [ac_cv_c_bigendian_php=yes], [ac_cv_c_bigendian_php=no], [ac_cv_c_bigendian_php=unknown])
  ])
  if test $ac_cv_c_bigendian_php = yes; then
    AC_DEFINE(WORDS_BIGENDIAN, 1, [Define if processor uses big-endian word])
@@ -119,9 +114,9 @@ dnl x87 floating point internal precision control checks
 dnl See: http://wiki.php.net/rfc/rounding
 AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
   AC_MSG_CHECKING([for usable _FPU_SETCW])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
     #include <fpu_control.h>
-  ],[
+  ]],[[
     fpu_control_t fpu_oldcw, fpu_cw;
     volatile double result;
     double a = 2877.0;
@@ -132,18 +127,18 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     _FPU_SETCW(fpu_cw);
     result = a / b;
     _FPU_SETCW(fpu_oldcw);
-  ], [ac_cfp_have__fpu_setcw=yes], [ac_cfp_have__fpu_setcw=no])
+  ]])],[ac_cfp_have__fpu_setcw=yes],[ac_cfp_have__fpu_setcw=no])
   if test "$ac_cfp_have__fpu_setcw" = "yes" ; then
     AC_DEFINE(HAVE__FPU_SETCW, 1, [whether _FPU_SETCW is present and usable])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
   fi
-  
+
   AC_MSG_CHECKING([for usable fpsetprec])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
     #include <machine/ieeefp.h>
-  ],[
+  ]],[[
     fp_prec_t fpu_oldprec;
     volatile double result;
     double a = 2877.0;
@@ -153,7 +148,7 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     fpsetprec(FP_PD);
     result = a / b;
     fpsetprec(fpu_oldprec);
-  ], [ac_cfp_have_fpsetprec=yes], [ac_cfp_have_fpsetprec=no])
+  ]])], [ac_cfp_have_fpsetprec=yes], [ac_cfp_have_fpsetprec=no])
   if test "$ac_cfp_have_fpsetprec" = "yes" ; then
     AC_DEFINE(HAVE_FPSETPREC, 1, [whether fpsetprec is present and usable])
     AC_MSG_RESULT(yes)
@@ -162,9 +157,9 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
   fi
 
   AC_MSG_CHECKING([for usable _controlfp])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
     #include <float.h>
-  ],[
+  ]],[[
     unsigned int fpu_oldcw;
     volatile double result;
     double a = 2877.0;
@@ -174,7 +169,7 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     _controlfp(_PC_53, _MCW_PC);
     result = a / b;
     _controlfp(fpu_oldcw, _MCW_PC);
-  ], [ac_cfp_have__controlfp=yes], [ac_cfp_have__controlfp=no])
+  ]])], [ac_cfp_have__controlfp=yes], [ac_cfp_have__controlfp=no])
   if test "$ac_cfp_have__controlfp" = "yes" ; then
     AC_DEFINE(HAVE__CONTROLFP, 1, [whether _controlfp is present usable])
     AC_MSG_RESULT(yes)
@@ -183,9 +178,9 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
   fi
 
   AC_MSG_CHECKING([for usable _controlfp_s])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
    #include <float.h>
-  ],[
+  ]],[[
     unsigned int fpu_oldcw, fpu_cw;
     volatile double result;
     double a = 2877.0;
@@ -196,7 +191,7 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     _controlfp_s(&fpu_cw, _PC_53, _MCW_PC);
     result = a / b;
     _controlfp_s(&fpu_cw, fpu_oldcw, _MCW_PC);
-  ], [ac_cfp_have__controlfp_s=yes], [ac_cfp_have__controlfp_s=no])
+  ]])], [ac_cfp_have__controlfp_s=yes], [ac_cfp_have__controlfp_s=no])
   if test "$ac_cfp_have__controlfp_s" = "yes" ; then
     AC_DEFINE(HAVE__CONTROLFP_S, 1, [whether _controlfp_s is present and usable])
     AC_MSG_RESULT(yes)
@@ -205,9 +200,9 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
   fi
 
   AC_MSG_CHECKING([whether FPU control word can be manipulated by inline assembler])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
     /* nothing */
-  ],[
+  ]],[[
     unsigned int oldcw, cw;
     volatile double result;
     double a = 2877.0;
@@ -220,7 +215,7 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     result = a / b;
 
     __asm__ __volatile__ ("fldcw %0" : : "m" (*&oldcw));
-  ], [ac_cfp_have_fpu_inline_asm_x86=yes], [ac_cfp_have_fpu_inline_asm_x86=no])
+  ]])], [ac_cfp_have_fpu_inline_asm_x86=yes], [ac_cfp_have_fpu_inline_asm_x86=no])
   if test "$ac_cfp_have_fpu_inline_asm_x86" = "yes" ; then
     AC_DEFINE(HAVE_FPU_INLINE_ASM_X86, 1, [whether FPU control word can be manipulated by inline assembler])
     AC_MSG_RESULT(yes)

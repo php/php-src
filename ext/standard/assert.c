@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* {{{ includes */
 #include "php.h"
 #include "php_assert.h"
@@ -389,4 +387,3 @@ PHP_FUNCTION(assert_options)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-

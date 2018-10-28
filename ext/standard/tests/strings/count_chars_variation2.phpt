@@ -29,40 +29,40 @@ $inputs =  array (
 			  255,
 			  2147483647,
 		      -2147483648,
-			
+
 			  // float values
 /* 6 */		  0.0,
 			  1.3,
 			  10.5,
 			  -20.5,
 			  10.1234567e10,
-			
+
 			  // array values
 /* 11 */	  array(),
 			  array(1, 2, 3, 4, 5, 6, 7, 8, 9),
-			
+
 			  // boolean values
 /* 14 */	  true,
 			  false,
 			  TRUE,
 			  FALSE,
-			
+
 			  // null values
 /* 18 */	  NULL,
 			  null,
-			  
+
 			  // string values
 /* 20 */	  "ABCD",
 			  'abcd',
 			  "1ABC",
 			  "5ABC",
-			  
+
 			  // objects
 /* 24 */ 	  new sample(),
-			
+
 			   // undefined variable
 /* 25 */	  @$undefined_var,
-			
+
 			  // unset variable
 /* 26 */	  @$unset_var
 );

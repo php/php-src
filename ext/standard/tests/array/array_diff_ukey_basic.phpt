@@ -1,5 +1,5 @@
 --TEST--
-array_diff_ukey() : Basic test. 
+array_diff_ukey() : Basic test.
 --FILE--
 <?php
 /*

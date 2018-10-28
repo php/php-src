@@ -481,7 +481,7 @@ static zend_always_inline zend_bool phpdbg_is_ignored_opcode(zend_uchar opcode) 
 	return
 	    opcode == ZEND_NOP || opcode == ZEND_OP_DATA || opcode == ZEND_FE_FREE || opcode == ZEND_FREE || opcode == ZEND_ASSERT_CHECK || opcode == ZEND_VERIFY_RETURN_TYPE
 	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_INHERITED_CLASS || opcode == ZEND_DECLARE_FUNCTION
-	 || opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED || opcode == ZEND_VERIFY_ABSTRACT_CLASS || opcode == ZEND_ADD_TRAIT || opcode == ZEND_BIND_TRAITS
+	 || opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED
 	 || opcode == ZEND_DECLARE_ANON_CLASS || opcode == ZEND_DECLARE_ANON_INHERITED_CLASS || opcode == ZEND_FAST_RET || opcode == ZEND_TICKS
 	 || opcode == ZEND_EXT_STMT || opcode == ZEND_EXT_FCALL_BEGIN || opcode == ZEND_EXT_FCALL_END || opcode == ZEND_EXT_NOP || opcode == ZEND_BIND_GLOBAL
 	;
@@ -1013,23 +1013,20 @@ void phpdbg_register_file_handles(void) /* {{{ */
 	php_stream_to_zval(s_err, &zerr);
 
 	ic.value = zin;
-	ic.flags = CONST_CS;
+	ZEND_CONSTANT_SET_FLAGS(&ic, CONST_CS, 0);
 	ic.name = zend_string_init(ZEND_STRL("STDIN"), 0);
-	ic.module_number = 0;
 	zend_hash_del(EG(zend_constants), ic.name);
 	zend_register_constant(&ic);
 
 	oc.value = zout;
-	oc.flags = CONST_CS;
+	ZEND_CONSTANT_SET_FLAGS(&oc, CONST_CS, 0);
 	oc.name = zend_string_init(ZEND_STRL("STDOUT"), 0);
-	oc.module_number = 0;
 	zend_hash_del(EG(zend_constants), oc.name);
 	zend_register_constant(&oc);
 
 	ec.value = zerr;
-	ec.flags = CONST_CS;
+	ZEND_CONSTANT_SET_FLAGS(&ec, CONST_CS, 0);
 	ec.name = zend_string_init(ZEND_STRL("STDERR"), 0);
-	ec.module_number = 0;
 	zend_hash_del(EG(zend_constants), ec.name);
 	zend_register_constant(&ec);
 }
@@ -2160,9 +2157,7 @@ phpdbg_out:
 
 		zend_hash_destroy(&PHPDBG_G(file_sources));
 
-		zend_try {
-			php_module_shutdown();
-		} zend_end_try();
+		php_module_shutdown();
 
 #ifndef _WIN32
 		/* force override (no zend_signals) to prevent crashes due to signal recursion in SIGSEGV/SIGBUS handlers */

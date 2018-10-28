@@ -23,7 +23,7 @@ for($ASCII = 97; $ASCII <= 122; $ASCII++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTREGEX--	
+--EXPECTREGEX--
 \*\*\* Test strncmp\(\) function: with alphabets \*\*\*
 -- Passing upper-case letters for 'str1' --
 int\(0\)

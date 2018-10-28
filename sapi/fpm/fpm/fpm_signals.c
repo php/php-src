@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -251,4 +250,3 @@ int fpm_signals_get_fd() /* {{{ */
 	return sp[0];
 }
 /* }}} */
-

@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* This module exports a PHP object as a COM object by wrapping it
  * using IDispatchEx */
 
@@ -645,5 +643,3 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val)
 
 	return (IDispatch*)disp;
 }
-
-

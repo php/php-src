@@ -1,11 +1,8 @@
 --TEST--
-Function overloading test 2 
+Function overloading test 2
 --SKIPIF--
-<?php 
-	extension_loaded('mbstring') or die('skip mbstring not available'); 
-	if (!function_exists("mail")) {
-		die('skip mail() function is not available.');
-	}
+<?php
+	extension_loaded('mbstring') or die('skip mbstring not available');
 	if (!function_exists("mb_ereg_replace")) {
 		die('skip mb_ereg_replace() function is not available.');
 	}

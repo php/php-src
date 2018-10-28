@@ -16,10 +16,14 @@ var_dump(stristr($email, 97));
 var_dump(stristr($email, 97, 1));
 
 ?>
---EXPECT--
+--EXPECTF--
 string(7) "cCdEfGh"
 string(2) "Ab"
 string(5) "eEfGh"
 string(4) "AbCd"
+
+Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(11) "azAbCdeEfGh"
+
+Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 string(1) "w"

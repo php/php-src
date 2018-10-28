@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -209,9 +207,8 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 				/* register the constant */
 				php_com_zval_from_variant(&value, pVarDesc->lpvarValue, codepage);
 				if (Z_TYPE(value) == IS_LONG) {
-					c.flags = mode;
+					ZEND_CONSTANT_SET_FLAGS(&c, mode, 0);
 					ZVAL_LONG(&c.value, Z_LVAL(value));
-					c.module_number = 0;
 					zend_register_constant(&c);
 				}
 				ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
@@ -223,9 +220,9 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 }
 
 /* Type-library stuff */
-void php_com_typelibrary_dtor(void *pDest)
+void php_com_typelibrary_dtor(zval *pDest)
 {
-	ITypeLib **Lib = (ITypeLib**)pDest;
+	ITypeLib **Lib = (ITypeLib**)Z_PTR_P(pDest);
 	ITypeLib_Release(*Lib);
 }
 
@@ -604,5 +601,3 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 
 	return ret;
 }
-
-

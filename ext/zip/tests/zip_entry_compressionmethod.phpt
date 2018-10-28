@@ -2,7 +2,6 @@
 zip_entry_compressionmethod() function
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -21,4 +20,3 @@ stored
 stored
 stored
 deflated
-

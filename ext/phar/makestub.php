@@ -48,8 +48,6 @@ $stub = '/*
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 static inline void phar_get_stub(const char *index_php, const char *web, size_t *len, char **stub, const int name_len, const int web_len)
 {
 ';

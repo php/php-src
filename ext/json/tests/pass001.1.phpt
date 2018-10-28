@@ -4,8 +4,7 @@ JSON (http://www.crockford.com/JSON/JSON_checker/test/pass1.json)
 serialize_precision=-1
 --SKIPIF--
 <?php
-if (!extension_loaded('json')) die('skip');
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (!extension_loaded('json')) die('skip json extension not loaded');
 ?>
 --FILE--
 <?php

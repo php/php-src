@@ -17,7 +17,6 @@
   |          Dmitry Stogov <dmitry@zend.com>                             |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #include "php_soap.h"
 #include "ext/standard/base64.h"
@@ -947,7 +946,7 @@ try_again:
 	/* Grab and send back every cookie */
 
 	/* Not going to worry about Path: because
-	   we shouldn't be changing urls so path dont
+	   we shouldn't be changing urls so path doesn't
 	   matter too much
 	*/
 	cookie_itt = strstr(ZSTR_VAL(http_headers), "Set-Cookie: ");
@@ -1448,7 +1447,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 						ch = php_stream_getc(stream);
 					}
 					if (ch != '\n') {
-						/* Somthing wrong in chunked encoding */
+						/* Something wrong in chunked encoding */
 						if (http_buf) {
 							zend_string_release_ex(http_buf, 0);
 						}
@@ -1456,7 +1455,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 					}
  				}
 			} else {
-				/* Somthing wrong in chunked encoding */
+				/* Something wrong in chunked encoding */
 				if (http_buf) {
 					zend_string_release_ex(http_buf, 0);
 				}

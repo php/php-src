@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension pdo_odbc
 dnl vim:et:sw=2:ts=2:
 
@@ -6,13 +5,13 @@ define([PDO_ODBC_HELP_TEXT],[[
 			  include and lib dirs are looked for under 'dir'.
 
 			  'flavour' can be one of:  ibm-db2, iODBC, unixODBC, generic
-			  If ',dir' part is omitted, default for the flavour 
+			  If ',dir' part is omitted, default for the flavour
 			  you have selected will be used. e.g.:
 
 			    --with-pdo-odbc=unixODBC
 
-			  will check for unixODBC under /usr/local. You may attempt 
-			  to use an otherwise unsupported driver using the \"generic\" 
+			  will check for unixODBC under /usr/local. You may attempt
+			  to use an otherwise unsupported driver using the 'generic'
 			  flavour.  The syntax for generic ODBC support is:
 
 			    --with-pdo-odbc=generic,dir,libname,ldflags,cflags
@@ -34,7 +33,7 @@ AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
     AC_MSG_RESULT(no)
   fi
 ])
-                                  
+
 if test "$PHP_PDO_ODBC" != "no"; then
 
   if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
@@ -111,7 +110,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
     PDO_ODBC_INCDIR="$pdo_odbc_def_incdir"
     PDO_ODBC_LIBDIR="$pdo_odbc_def_libdir"
   fi
-  
+
   AC_MSG_RESULT([$pdo_odbc_flavour
           libs       $PDO_ODBC_LIBDIR,
           headers    $PDO_ODBC_INCDIR])

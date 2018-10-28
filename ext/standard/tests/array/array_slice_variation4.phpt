@@ -3,7 +3,7 @@ Test array_slice() function : usage variations - Pass different data types as $p
 --FILE--
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
+ * Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 
@@ -60,7 +60,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -70,7 +70,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -91,7 +91,6 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_slice() : usage variations ***
 

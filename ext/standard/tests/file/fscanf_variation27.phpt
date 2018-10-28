@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - octal formats with integer values 
+Test fscanf() function: usage variations - octal formats with integer values
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - octal formats with integer values
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different octal format types with different integer values ***\n"; 
+echo "*** Test fscanf(): different octal format types with different integer values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation27.tmp";
@@ -1010,4 +1010,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

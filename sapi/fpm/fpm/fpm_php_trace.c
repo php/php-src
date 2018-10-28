@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -231,4 +230,3 @@ done0:
 /* }}} */
 
 #endif
-

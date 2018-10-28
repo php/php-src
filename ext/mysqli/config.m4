@@ -1,5 +1,3 @@
-dnl
-dnl $Id$
 dnl config.m4 for extension mysqli
 
 dnl ext/pdo_mysql/config.m4 also depends on this macro.
@@ -31,11 +29,11 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 PHP_ARG_WITH(mysqli, for MySQLi support,
 [  --with-mysqli[=FILE]      Include MySQLi support.  FILE is the path
-                          to mysql_config.  If no value or mysqlnd is passed 
+                          to mysql_config.  If no value or mysqlnd is passed
                           as FILE, the MySQL native driver will be used])
 
 PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
-[  --enable-embedded-mysqli  
+[  --enable-embedded-mysqli
                           MYSQLi: Enable embedded support
                           Note: Does not work with MySQL native driver!], no, no)
 
@@ -65,7 +63,7 @@ elif test "$PHP_MYSQLI" != "no"; then
   else
     MYSQL_LIB_CFG='--libs'
   fi
-  
+
   if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG $MYSQL_LIB_CFG > /dev/null 2>&1; then
     MYSQLI_INCLINE=`$MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
     MYSQLI_LIBLINE=`$MYSQL_CONFIG $MYSQL_LIB_CFG | $SED -e "s/'//g"`

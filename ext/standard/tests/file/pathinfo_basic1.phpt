@@ -27,14 +27,14 @@ $paths = array (
 			'/usr/include/arpa',
 			'/usr/include/arpa/',
 			'usr/include/arpa',
-			'usr/include/arpa/',			
+			'usr/include/arpa/',
 			'c:\test\afile',
 			'c:\\test\\afile',
 			'c://test//afile',
 			'c:\test\afile\\',
 			'c:\test\prog.exe',
 			'c:\\test\\prog.exe',
-			'c:/test/prog.exe',			
+			'c:/test/prog.exe',
 			'/usr/include/arpa/inet.h',
 			'//usr/include//arpa/inet.h',
 			'\\',
@@ -607,4 +607,3 @@ array(3) {
   string(3) "usr"
 }
 Done
-

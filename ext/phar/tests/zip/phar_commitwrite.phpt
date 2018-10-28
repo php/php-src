@@ -25,7 +25,7 @@ var_dump($p->isFileFormat(Phar::ZIP));
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/brandnewphar.phar.zip');
 ?>
 --EXPECT--

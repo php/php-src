@@ -5,7 +5,7 @@ Test array_slice() function : usage variations - Pass different data types as $l
 --FILE--
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
+ * Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 
@@ -53,7 +53,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -81,7 +81,6 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_slice() : usage variations ***
 

@@ -1,8 +1,7 @@
 /* This is a template RC file.
- * $Id$
  * Do not edit with MSVC */
 #ifdef APSTUDIO_INVOKED
-# error dont edit with MSVC
+# error Do not edit with MSVC
 #endif
 
 #include "winresrc.h"

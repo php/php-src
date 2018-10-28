@@ -35,7 +35,7 @@ function ut_main()
     ut_msgfmt_set_pattern($fmt, str_repeat($pattern, 10));
     $res_str .= "New pattern: '" . ut_msgfmt_get_pattern( $fmt ) . "'\n";
     $res_str .= "Formatted message: " . ut_msgfmt_format( $fmt, array(123, 456) ) . "\n";
- 
+
 
     return $res_str;
 }

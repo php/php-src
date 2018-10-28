@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 // Note: The extension name is "mysqli", you enable it with "--with-mysqli".
@@ -31,7 +30,7 @@ if (PHP_MYSQLI != "no") {
 		PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h");
 	} else {
 		if (CHECK_LIB("libmysql.lib", "mysqli", PHP_MYSQLI) &&
-			CHECK_HEADER_ADD_INCLUDE("mysql.h", "CFLAGS_MYSQLI", PHP_MYSQLI + 
+			CHECK_HEADER_ADD_INCLUDE("mysql.h", "CFLAGS_MYSQLI", PHP_MYSQLI +
 										"\\include;" + PHP_PHP_BUILD +
 										"\\include\\mysql;" + PHP_MYSQLI)) {
 			EXTENSION("mysqli", mysqli_source, PHP_MYSQLI_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");

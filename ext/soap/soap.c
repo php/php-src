@@ -17,7 +17,6 @@
   |          Dmitry Stogov <dmitry@zend.com>                             |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -551,9 +550,7 @@ static void php_soap_prepare_globals()
 			}
 		}
 		/* Index everything by number */
-		if (!zend_hash_index_exists(&defEncIndex, defaultEncoding[i].details.type)) {
-			zend_hash_index_update_ptr(&defEncIndex, defaultEncoding[i].details.type, (void*)enc);
-		}
+		zend_hash_index_add_ptr(&defEncIndex, defaultEncoding[i].details.type, (void*)enc);
 		i++;
 	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 
@@ -644,7 +641,7 @@ PHP_MINIT_FUNCTION(soap)
 
 	/* Register SoapClient class */
 	/* BIG NOTE : THIS EMITS AN COMPILATION WARNING UNDER ZE2 - handle_function_call deprecated.
-		soap_call_function_handler should be of type struct _zend_function, not (*handle_function_call).
+		soap_call_function_handler should be of type zend_function, not (*handle_function_call).
 	*/
 	{
 		INIT_CLASS_ENTRY(ce, PHP_SOAP_CLIENT_CLASSNAME, soap_client_functions);

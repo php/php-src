@@ -39,7 +39,7 @@ $s = mb_convert_encoding($s, 'JIS', 'EUC-JP');
 print("JIS: ".base64_encode($s)."\n"); // JIS
 
 
-// Using Encoding List Array 
+// Using Encoding List Array
 echo "== STRING ENCODING LIST ==\n";
 
 $a = 'JIS,UTF-8,EUC-JP,SJIS';
@@ -56,7 +56,7 @@ $s = mb_convert_encoding($s, 'JIS', $a);
 print("JIS: ".base64_encode($s)."\n"); // JIS
 
 
-// Using Encoding List Array 
+// Using Encoding List Array
 echo "== ARRAY ENCODING LIST ==\n";
 
 $a = array(0=>'JIS', 1=>'UTF-8', 2=>'EUC-JP', 3=>'SJIS');
@@ -73,7 +73,7 @@ $s = mb_convert_encoding($s, 'JIS', $a);
 print("JIS: ".base64_encode($s)."\n"); // JIS
 
 
-// Using Detect Order 
+// Using Detect Order
 echo "== DETECT ORDER ==\n";
 
 $s = $jis;
@@ -108,7 +108,6 @@ print("MP: $s\n"); // Missing parameter
 
 
 ?>
-
 --EXPECT--
 == BASIC TEST ==
 EUC-JP: 日本語テキストです。01234５６７８９。
@@ -134,5 +133,3 @@ ERR: Warning
 BAD: 
 ERR: Warning
 MP: 
-
-

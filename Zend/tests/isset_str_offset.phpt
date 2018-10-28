@@ -60,7 +60,7 @@ var_dump(isset($str[$f]));
 print "done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 - isset ---
 bool(true)
 bool(false)

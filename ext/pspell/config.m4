@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension pspell
 
 PHP_ARG_WITH(pspell,for PSPELL support,
 [  --with-pspell[=DIR]       Include PSPELL support.

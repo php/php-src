@@ -1,9 +1,7 @@
 --TEST--
 Test exif_tagname() function : usage variations  - different types for index argument
 --SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';
-if (PHP_INT_SIZE != 4) die('skip 32-bit only');
-?>
+<?php if (!extension_loaded('exif')) print 'skip exif extension not available'; ?>
 --FILE--
 <?php
 
@@ -23,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
   return "obj'ct";
-  } 
+  }
 }
 
 // Defining resource
@@ -65,13 +63,13 @@ $values =  array (
 
   // unset variable
   $unset_var,
-  
+
   // objects
   new sample(),
 
   // resource
   $file_handle,
- 
+
   NULL,
   null
 );
@@ -174,4 +172,3 @@ Done
 
 ?>
 ===Done===
-

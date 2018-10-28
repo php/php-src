@@ -40,12 +40,12 @@ foreach($o as $n => $l)
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 int(0)
-string(2) "0
+string(%d) "0
 "
 int(0)
-string(2) "0
+string(%d) "0
 "
 int(0)
 int(1)

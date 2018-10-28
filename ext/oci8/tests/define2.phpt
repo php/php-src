@@ -4,7 +4,7 @@ Test oci_define_by_name types
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -14,7 +14,7 @@ $stmtarray = array(
 	"drop table phptestrawtable",
 	"create table phptestrawtable( id number(10), fileimage raw(1000))"
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 $stmt = oci_parse ($c, "insert into phptestrawtable (id, fileimage) values (:id, :fileimage)");

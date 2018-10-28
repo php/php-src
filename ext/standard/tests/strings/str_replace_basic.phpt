@@ -4,10 +4,10 @@ Test str_replace() function basic function
 precision=14
 --FILE--
 <?php
-/* 
-  Prototype: mixed str_replace(mixed $search, mixed $replace, 
+/*
+  Prototype: mixed str_replace(mixed $search, mixed $replace,
                                mixed $subject [, int &$count]);
-  Description: Replace all occurrences of the search string with 
+  Description: Replace all occurrences of the search string with
                the replacement string
 */
 
@@ -27,14 +27,14 @@ var_dump( str_replace("long string here", "", "", $count) );
 var_dump( $count );
 
 $fp = fopen( __FILE__, "r" );
-$fp_copy = $fp; 
+$fp_copy = $fp;
 var_dump( str_replace($fp_copy, $fp_copy, $fp_copy, $fp_copy) );
 var_dump( $fp_copy );
 fclose($fp);
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 *** Testing str_replace() on basic operations ***
 string(0) ""
 string(4) "tbst"

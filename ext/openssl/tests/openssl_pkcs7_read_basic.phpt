@@ -16,7 +16,6 @@ var_dump(openssl_pkcs7_read($infile, $result));
 var_dump($result);
 ?>
 --EXPECTF--
-
 Warning: openssl_pkcs7_read() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 

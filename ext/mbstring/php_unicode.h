@@ -197,6 +197,3 @@ static inline int php_unicode_is_upper(unsigned long code) {
 
 
 #endif /* PHP_UNICODE_H */
-
-
-

@@ -1,5 +1,5 @@
 --TEST--
-Test fgetss() function : usage variations - read/write modes, file pointer at EOF 
+Test fgetss() function : usage variations - read/write modes, file pointer at EOF
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
@@ -8,6 +8,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 /*
  Prototype: string fgetss ( resource $handle [, int $length [, string $allowable_tags]] );
  Description: Gets line from file pointer and strip HTML tags
@@ -37,7 +39,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")  {
 	$string_with_tags = str_replace("\r",'', $string_with_tags);
 }
 
-$filename = dirname(__FILE__)."/fgetss_variation5.tmp"; 
+$filename = dirname(__FILE__)."/fgetss_variation5.tmp";
 
 /* try reading the file opened in different modes of reading */
 $file_modes = array("w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t");
@@ -70,11 +72,11 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   var_dump( ftell($file_handle) );  // find out file position
   var_dump( feof($file_handle) );   // ensure that file pointer is at eof
 
- 
-  // close the file 
+
+  // close the file
   fclose($file_handle);
-   
-  // delete the file 
+
+  // delete the file
   unlink($filename);
 } // end of for - mode_counter
 

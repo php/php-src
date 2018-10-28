@@ -1,5 +1,5 @@
 --TEST--
-If the LHS of ref-assign ERRORs, that takes precendence over the "only variables" notice
+If the LHS of ref-assign ERRORs, that takes precedence over the "only variables" notice
 --FILE--
 <?php
 

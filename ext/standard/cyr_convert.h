@@ -16,14 +16,9 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef CYR_CONVERT_H
 #define CYR_CONVERT_H
 
 PHP_FUNCTION(convert_cyr_string);
 
 #endif /* CYR_CONVERT_H */
-
-
-

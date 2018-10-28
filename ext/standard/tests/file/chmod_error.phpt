@@ -1,11 +1,11 @@
 --TEST--
-Test chmod() function : error conditions 
+Test chmod() function : error conditions
 --FILE--
 <?php
 /* Prototype  : bool chmod(string filename, int mode)
- * Description: Change file mode 
+ * Description: Change file mode
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing chmod() : error conditions ***\n";

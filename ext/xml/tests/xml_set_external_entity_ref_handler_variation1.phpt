@@ -1,17 +1,17 @@
 --TEST--
 Test xml_set_external_entity_ref_handler() function : usage variations
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_external_entity_ref_handler(resource parser, string hdl)
- * Description: Set up external entity reference handler 
+ * Description: Set up external entity reference handler
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_set_external_entity_ref_handler() : usage variations ***\n";
@@ -78,9 +78,9 @@ $values = array(
 
       // object data
       new aClass(),
-      
+
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,
@@ -242,4 +242,3 @@ Arg value
 Warning: xml_set_external_entity_ref_handler() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 Done
-

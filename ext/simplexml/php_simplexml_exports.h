@@ -18,8 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_SIMPLEXML_EXPORTS_H
 #define PHP_SIMPLEXML_EXPORTS_H
 
@@ -52,6 +50,9 @@ typedef struct {
 	zend_object_iterator  intern;
 	php_sxe_object        *sxe;
 } php_sxe_iterator;
+
+PHP_SXE_API void php_sxe_rewind_iterator(php_sxe_object *sxe);
+PHP_SXE_API void php_sxe_move_forward_iterator(php_sxe_object *sxe);
 
 #endif /* PHP_SIMPLEXML_EXPORTS_H */
 

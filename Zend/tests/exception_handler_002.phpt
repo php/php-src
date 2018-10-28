@@ -17,7 +17,7 @@ throw new test();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(12) "test thrown!"
 
 Fatal error: Uncaught Exception in %sexception_handler_002.php:7

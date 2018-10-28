@@ -33,7 +33,7 @@ for ($i = 0; $i < 10; $i++) {
 $token_array = token_get_all($phpstr);
 
 $script = "";
-// reconstruct a script (without open/close tags) from the token array 
+// reconstruct a script (without open/close tags) from the token array
 foreach ($token_array as $token) {
 	if (is_array($token)) {
 		if (strncmp($token[1], '<?php', 5) == 0) {

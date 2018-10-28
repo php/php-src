@@ -1,4 +1,4 @@
-Callouts API  Version 6.8.2 2018/04/13
+Callouts API  Version 6.8.2 2018/06/08
 
 #include <oniguruma.h>
 
@@ -24,9 +24,9 @@ Callouts API  Version 6.8.2 2018/04/13
 
   * 呼び出し関数の戻り値 (int)
 
-    ONIG_CALLOUT_FAIL(1):     失敗
-    ONIG_CALLOUT_SUCCESS(0):  成功
-    -1未満:                   エラーコード (検索/照合の終了)
+    ONIG_CALLOUT_FAIL (== 1):     失敗
+    ONIG_CALLOUT_SUCCESS (== 0):  成功
+    -1未満:                       エラーコード (検索/照合の終了)
 
     ONIG_CALLOUT_FAIL/SUCCESSは、後退中の呼び出しでは無視される。
     後退は失敗の回復過程なので。
@@ -44,12 +44,12 @@ Callouts API  Version 6.8.2 2018/04/13
 
 # OnigCalloutFunc onig_get_progress_callout(void)
 
-  内容の呼び出し関数(前進)を返す
+  内容の呼び出し関数(前進中)を返す
 
 
 # int onig_set_progress_callout(OnigCalloutFunc f)
 
-  内容の呼び出し関数(前進)をセットする。
+  内容の呼び出し関数(前進中)をセットする。
   この値はonig_initialize_match_param()の中でデフォルトの呼び出し関数として
   セットされる。
 
@@ -58,12 +58,12 @@ Callouts API  Version 6.8.2 2018/04/13
 
 # OnigCalloutFunc onig_get_retraction_callout(void)
 
-  内容の呼び出し関数(後退)を返す
+  内容の呼び出し関数(後退中)を返す
 
 
 # int onig_set_retraction_callout(OnigCalloutFunc f)
 
-  内容の呼び出し関数(後退)をセットする。
+  内容の呼び出し関数(後退中)をセットする。
   この値はonig_initialize_match_param()の中でデフォルトの呼び出し関数として
   セットされる。
 
@@ -72,7 +72,7 @@ Callouts API  Version 6.8.2 2018/04/13
 
 # int onig_set_progress_callout_of_match_param(OnigMatchParam* mp, OnigCalloutFunc f)
 
-  内容の呼び出し関数(前進)をセットする。
+  内容の呼び出し関数(前進中)をセットする。
 
   引数
   1 mp: match-paramアドレス
@@ -83,7 +83,7 @@ Callouts API  Version 6.8.2 2018/04/13
 
 # int onig_set_retraction_callout_of_match_param(OnigMatchParam* mp, OnigCalloutFunc f)
 
-  内容の呼び出し関数(後退)をセットする。
+  内容の呼び出し関数(後退中)をセットする。
 
   引数
   1 mp: match-paramアドレス

@@ -25,7 +25,6 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
     // An unclosed backref is ignored
     echo mb_ereg_replace('(?<a>\w+)', '-\k<a', 'AA'), PHP_EOL;
 ?>
-
 --EXPECT--
 _a_ _b_ _c_ _d_ _e_
 <abc> <def> <ghi>

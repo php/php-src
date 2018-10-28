@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "hrtime.h"
 
@@ -203,4 +201,3 @@ PHPAPI php_hrtime_t php_hrtime_current(void)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-

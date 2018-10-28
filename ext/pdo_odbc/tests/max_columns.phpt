@@ -41,6 +41,5 @@ foreach ($db->query('SELECT id, data from TEST') as $row) {
 }
 
 echo "Finished\n";
-
 --EXPECT--
 Finished

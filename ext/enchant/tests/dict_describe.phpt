@@ -16,14 +16,14 @@ $dicts = enchant_broker_list_dicts($broker);
 if (is_resource($broker)) {
     echo("OK\n");
     $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
-    
+
     if ($requestDict) {
         echo("OK\n");
         $dictDescribe = enchant_dict_describe($requestDict);
-        
+
         if (is_array($dictDescribe)) {
             echo("OK\n");
-        
+
         } else {
            echo("broker request dict failed\n");
         }

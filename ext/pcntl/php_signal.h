@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <signal.h>
 #ifndef PHP_SIGNAL_H
 #define PHP_SIGNAL_H

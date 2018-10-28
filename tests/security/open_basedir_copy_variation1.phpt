@@ -31,4 +31,3 @@ bool(false)
 Warning: unlink(copy.txt): No such file or directory in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [copy] ***
-

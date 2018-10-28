@@ -1,7 +1,7 @@
 --TEST--
 Testing register_shutdown_function()
 --FILE--
-<?php 
+<?php
 
 function foo()
 {
@@ -16,4 +16,3 @@ print "foo() will be called on shutdown...\n";
 --EXPECT--
 foo() will be called on shutdown...
 foo
-

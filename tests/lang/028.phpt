@@ -19,7 +19,7 @@ function still_working()
 function dafna()
 {
 	static $foo = 0;
-	
+
 	print "Dafna!\n";
 	print call_user_func("still_working")."\n";
 	$foo++;
@@ -1055,4 +1055,3 @@ I'm still alive
 Hey there!!
 199
 Dafna
-

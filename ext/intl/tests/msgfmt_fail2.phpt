@@ -1,8 +1,7 @@
 --TEST--
 msgfmt creation failures icu >= 4.8
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
 --FILE--
 <?php
 
@@ -51,9 +50,9 @@ try {
 	print_exception($e);
 	$fmt = null;
 }
-err($fmt); 
+err($fmt);
 $fmt = msgfmt_create();
-err($fmt); 
+err($fmt);
 $fmt = MessageFormatter::create();
 err($fmt);
 try {
@@ -62,11 +61,11 @@ try {
 	print_exception($e);
 	$fmt = null;
 }
-err($fmt); 
+err($fmt);
 $fmt = msgfmt_create('en');
-err($fmt); 
+err($fmt);
 $fmt = MessageFormatter::create('en');
-err($fmt); 
+err($fmt);
 
 foreach($args as $arg) {
 	$fmt = crt("O", $arg[0], $arg[1]);

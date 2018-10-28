@@ -16,4 +16,3 @@ function get_zlib_version()
 
 	return $version;
 }
-

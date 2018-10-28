@@ -26,4 +26,3 @@ require_once('skipifconnectfailure.inc');
 object(mysqli)#%d (%d) {
 %A
 }
-

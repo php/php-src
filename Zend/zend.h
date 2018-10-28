@@ -17,16 +17,15 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "3.3.0-dev"
+#define ZEND_VERSION "3.4.0-dev"
 
 #define ZEND_ENGINE_3
 
 #include "zend_types.h"
+#include "zend_map_ptr.h"
 #include "zend_errors.h"
 #include "zend_alloc.h"
 #include "zend_llist.h"
@@ -84,22 +83,24 @@ struct _zend_unserialize_data;
 typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
+typedef struct _zend_class_name {
+	zend_string *name;
+	zend_string *lc_name;
+} zend_class_name;
+
 typedef struct _zend_trait_method_reference {
 	zend_string *method_name;
-	zend_class_entry *ce;
 	zend_string *class_name;
 } zend_trait_method_reference;
 
 typedef struct _zend_trait_precedence {
-	zend_trait_method_reference *trait_method;
-	union {
-		zend_class_entry  *ce;
-		zend_string       *class_name;
-	} *exclude_from_classes;
+	zend_trait_method_reference trait_method;
+	uint32_t num_excludes;
+	zend_string *exclude_class_names[1];
 } zend_trait_precedence;
 
 typedef struct _zend_trait_alias {
-	zend_trait_method_reference *trait_method;
+	zend_trait_method_reference trait_method;
 
 	/**
 	* name for method to be added
@@ -115,7 +116,11 @@ typedef struct _zend_trait_alias {
 struct _zend_class_entry {
 	char type;
 	zend_string *name;
-	struct _zend_class_entry *parent;
+	/* class_entry or string depending on ZEND_ACC_LINKED */
+	union {
+		zend_class_entry *parent;
+		zend_string *parent_name;
+	};
 	int refcount;
 	uint32_t ce_flags;
 
@@ -123,32 +128,35 @@ struct _zend_class_entry {
 	int default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
-	zval *static_members_table;
+	ZEND_MAP_PTR_DEF(zval *, static_members_table);
 	HashTable function_table;
 	HashTable properties_info;
 	HashTable constants_table;
 
-	union _zend_function *constructor;
-	union _zend_function *destructor;
-	union _zend_function *clone;
-	union _zend_function *__get;
-	union _zend_function *__set;
-	union _zend_function *__unset;
-	union _zend_function *__isset;
-	union _zend_function *__call;
-	union _zend_function *__callstatic;
-	union _zend_function *__tostring;
-	union _zend_function *__debugInfo;
-	union _zend_function *serialize_func;
-	union _zend_function *unserialize_func;
+	zend_function *constructor;
+	zend_function *destructor;
+	zend_function *clone;
+	zend_function *__get;
+	zend_function *__set;
+	zend_function *__unset;
+	zend_function *__isset;
+	zend_function *__call;
+	zend_function *__callstatic;
+	zend_function *__tostring;
+	zend_function *__debugInfo;
+	zend_function *serialize_func;
+	zend_function *unserialize_func;
 
-	zend_class_iterator_funcs iterator_funcs;
+	/* allocated only if class implements Iterator or IteratorAggregate interface */
+	zend_class_iterator_funcs *iterator_funcs_ptr;
 
 	/* handlers */
-	zend_object* (*create_object)(zend_class_entry *class_type);
+	union {
+		zend_object* (*create_object)(zend_class_entry *class_type);
+		int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */
+	};
 	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object, int by_ref);
-	int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */
-	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method);
+	zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method);
 
 	/* serializer callbacks */
 	int (*serialize)(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
@@ -156,9 +164,14 @@ struct _zend_class_entry {
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;
-	zend_class_entry **interfaces;
 
-	zend_class_entry **traits;
+	/* class_entry or string(s) depending on ZEND_ACC_LINKED */
+	union {
+		zend_class_entry **interfaces;
+		zend_class_name *interface_names;
+	};
+
+	zend_class_name *trait_names;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 
@@ -257,6 +270,7 @@ ZEND_API void zend_deactivate_modules(void);
 ZEND_API void zend_post_deactivate_modules(void);
 
 ZEND_API void free_estring(char **str_p);
+
 END_EXTERN_C()
 
 /* output support */
@@ -279,7 +293,10 @@ extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
+
+/* These two callbacks are especially for opcache */
 extern ZEND_API int (*zend_post_startup_cb)(void);
+extern ZEND_API void (*zend_post_shutdown_cb)(void);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);

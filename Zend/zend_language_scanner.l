@@ -21,8 +21,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #if 0
 # define YYDEBUG(s, c) printf("state: %d char: %c\n", s, c)
 #else
@@ -77,9 +75,7 @@
 # error ZEND_MMAP_AHEAD should be greater than or equal to YYMAXFILL
 #endif
 
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
+#include <stdarg.h>
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -593,6 +589,9 @@ static zend_op_array *zend_compile(int type)
 		op_array = emalloc(sizeof(zend_op_array));
 		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
 		CG(active_op_array) = op_array;
+
+		/* Use heap to not waste arena memory */
+		op_array->fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 
 		if (zend_ast_process) {
 			zend_ast_process(CG(ast));
@@ -2349,6 +2348,7 @@ skip_escape_conversion:
 
 		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
 
+		zend_exception_save();
 		while (heredoc_nesting_level) {
 			zval zv;
 			int retval;
@@ -2377,6 +2377,7 @@ skip_escape_conversion:
 					heredoc_nesting_level = 0;
 			}
 		}
+		zend_exception_restore();
 
 		if (
 		    (first_token == T_VARIABLE

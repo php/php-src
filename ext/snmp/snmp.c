@@ -21,8 +21,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1994,10 +1992,10 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 
 	if ((hnd = zend_hash_find_ptr(&php_snmp_properties, Z_STR_P(member))) != NULL) {
 		switch (has_set_exists) {
-			case 2:
+			case ZEND_PROPERTY_EXISTS:
 				ret = 1;
 				break;
-			case 0: {
+			case ZEND_PROPERTY_ISSET: {
 				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					ret = Z_TYPE_P(value) != IS_NULL? 1 : 0;

@@ -55,17 +55,17 @@ function find_config_w32(dirname)
 	var c, i, ok, n;
 	var item = null;
 	var re_dep_line = new RegExp("ADD_EXTENSION_DEP\\([^,]*\\s*,\\s*['\"]([^'\"]+)['\"].*\\)", "gm");
-	
+
 	for (; !fc.atEnd(); fc.moveNext())
 	{
 		ok = true;
 		/* check if we already picked up a module with the same dirname;
 		 * if we have, don't include it here */
 		n = FSO.GetFileName(fc.item());
-		
+
 		if (n == '.svn' || n == 'tests')
 			continue;
-			
+
 	//	WScript.StdOut.WriteLine("checking " + dirname + "/" + n);
 		if (MODULES.Exists(n)) {
 			WScript.StdOut.WriteLine("Skipping " + dirname + "/" + n + " -- already have a module with that name");
@@ -259,4 +259,3 @@ C.Write(file_get_contents("win32/build/configure.tail"));
 
 B.WriteLine("@echo off");
 B.WriteLine("cscript /nologo configure.js %*");
-

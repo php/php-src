@@ -19,7 +19,7 @@ var_dump(convert_cyr_string("", "d", "i"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: convert_cyr_string() expects exactly 3 parameters, 0 given in %s on line %d
 NULL
 

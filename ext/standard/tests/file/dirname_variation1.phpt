@@ -1,13 +1,13 @@
 --TEST--
-Test dirname() function : usage variation 
+Test dirname() function : usage variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : string dirname(string path)
- * Description: Returns the directory name component of the path 
+ * Description: Returns the directory name component of the path
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing dirname() : usage variation ***\n";
@@ -187,4 +187,3 @@ string(0) ""
 --unset var--
 string(0) ""
 ===DONE===
-

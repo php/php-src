@@ -15,7 +15,6 @@
    | Author: Edin Kadribasic <edink@php.net>                              |
    +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #include "php_embed.h"
 #include "ext/standard/php_standard.h"

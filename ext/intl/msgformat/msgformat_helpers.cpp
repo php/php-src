@@ -27,6 +27,7 @@
 #include <unicode/timezone.h>
 #include <unicode/datefmt.h>
 #include <unicode/calendar.h>
+#include <unicode/strenum.h>
 
 #include <vector>
 
@@ -43,10 +44,6 @@ extern "C" {
 #include "../timezone/timezone_class.h"
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
-#define HAS_MESSAGE_PATTERN 1
-#endif
-
 U_NAMESPACE_BEGIN
 /**
  * This class isolates our access to private internal methods of
@@ -57,9 +54,7 @@ class MessageFormatAdapter {
 public:
     static const Formattable::Type* getArgTypeList(const MessageFormat& m,
                                                    int32_t& count);
-#ifdef HAS_MESSAGE_PATTERN
     static const MessagePattern getMessagePattern(MessageFormat* m);
-#endif
 };
 
 const Formattable::Type*
@@ -68,21 +63,17 @@ MessageFormatAdapter::getArgTypeList(const MessageFormat& m,
     return m.getArgTypeList(count);
 }
 
-#ifdef HAS_MESSAGE_PATTERN
 const MessagePattern
 MessageFormatAdapter::getMessagePattern(MessageFormat* m) {
     return m->msgPattern;
 }
-#endif
 U_NAMESPACE_END
 
 using icu::Formattable;
 using icu::Format;
 using icu::DateFormat;
 using icu::MessageFormat;
-#ifdef HAS_MESSAGE_PATTERN
 using icu::MessagePattern;
-#endif
 using icu::MessageFormatAdapter;
 using icu::FieldPosition;
 
@@ -137,7 +128,6 @@ static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
 	return ret;
 }
 
-#ifdef HAS_MESSAGE_PATTERN
 static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 									const MessagePattern& mp,
 									intl_error& err)
@@ -264,10 +254,8 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 				type = Formattable::kDouble;
 			} else if (argType == UMSGPAT_ARG_TYPE_SELECT) {
 				type = Formattable::kString;
-#if U_ICU_VERSION_MAJOR_NUM >= 50
 			} else if (argType == UMSGPAT_ARG_TYPE_SELECTORDINAL) {
 				type = Formattable::kDouble;
-#endif
 			} else {
 				type = Formattable::kString;
 			}
@@ -294,26 +282,15 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 
 	return ret;
 }
-#endif
 
 static HashTable *umsg_get_types(MessageFormatter_object *mfo,
 								 intl_error& err)
 {
 	MessageFormat *mf = (MessageFormat *)mfo->mf_data.umsgf;
 
-#ifdef HAS_MESSAGE_PATTERN
 	const MessagePattern mp = MessageFormatAdapter::getMessagePattern(mf);
 
 	return umsg_parse_format(mfo, mp, err);
-#else
-	if (mf->usesNamedArguments()) {
-			intl_errors_set(&err, U_UNSUPPORTED_ERROR,
-				"This extension supports named arguments only on ICU 4.8+",
-				0);
-		return NULL;
-	}
-	return umsg_get_numeric_types(mfo, err);
-#endif
 }
 
 static void umsg_set_timezone(MessageFormatter_object *mfo,
@@ -331,6 +308,24 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 
 	if (mfo->mf_data.tz_set) {
 		return; /* already done */
+	}
+
+	/* There is a bug in ICU which prevents MessageFormatter::getFormats()
+	   to handle more than 10 formats correctly. The enumerator could be
+	   used to walk through the present formatters using getFormat(), which
+	   however seems to provide just a readonly access. This workaround
+	   prevents crash when there are > 10 formats but doesn't set any error.
+	   As a result, only DateFormatters with > 10 subformats are affected.
+	   This workaround should be ifdef'd out, when the bug has been fixed
+	   in ICU. */
+	icu::StringEnumeration* fnames = mf->getFormatNames(err.code);
+	if (!fnames || U_FAILURE(err.code)) {
+		return;
+	}
+	count = fnames->count(err.code);
+	delete fnames;
+	if (count > 10) {
+		return;
 	}
 
 	formats = mf->getFormats(count);

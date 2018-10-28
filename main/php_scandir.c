@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_scandir.h"
 
@@ -44,9 +42,7 @@
 
 #ifndef HAVE_ALPHASORT
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
 
 PHPAPI int php_alphasort(const struct dirent **a, const struct dirent **b)
 {

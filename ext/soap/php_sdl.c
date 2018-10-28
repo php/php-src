@@ -17,7 +17,6 @@
   |          Dmitry Stogov <dmitry@zend.com>                             |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #include "php_soap.h"
 #include "ext/libxml/php_libxml.h"
@@ -3661,4 +3660,3 @@ static void delete_document(zval *zv)
 	xmlDocPtr doc = Z_PTR_P(zv);
 	xmlFreeDoc(doc);
 }
-

@@ -17,15 +17,11 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <stdio.h>
 
 #include "zend.h"
 
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
+#include <stdarg.h>
 
 #if ZEND_BROKEN_SPRINTF
 int zend_sprintf(char *buffer, const char *format, ...)

@@ -18,9 +18,7 @@ $dt = new DateTime('2012-08-01 00:00:00 WEST');
 var_dump(IntlTimeZone::fromDateTimeZone($dt->getTimeZone()));
 
 var_dump(intltz_from_date_time_zone());
-
 --EXPECTF--
-
 Warning: IntlTimeZone::fromDateTimeZone() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlTimeZone::fromDateTimeZone(): intltz_from_date_time_zone: bad arguments in %s on line %d

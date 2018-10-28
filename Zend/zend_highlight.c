@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include <zend_language_parser.h>
 #include "zend_compile.h"
@@ -240,4 +238,3 @@ ZEND_API void zend_strip(void)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-

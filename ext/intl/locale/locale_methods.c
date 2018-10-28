@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -342,7 +340,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 				continue;
 			}
 
-			/* Error in retriving data */
+			/* Error in retrieving data */
 			*result = 0;
 			if( tag_value ){
 				zend_string_release_ex( tag_value, 0 );
@@ -1519,12 +1517,12 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 /* }}} */
 
 /* {{{ proto string Locale::lookup(array $langtag, string $locale[, bool $canonicalize[, string $default = null]])
-* Searchs the items in $langtag for the best match to the language
+* Searches the items in $langtag for the best match to the language
 * range
 */
 /* }}} */
 /* {{{ proto string locale_lookup(array $langtag, string $locale[, bool $canonicalize[, string $default = null]])
-* Searchs the items in $langtag for the best match to the language
+* Searches the items in $langtag for the best match to the language
 * range
 */
 PHP_FUNCTION(locale_lookup)

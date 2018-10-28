@@ -89,7 +89,7 @@ if (ob_get_level()) echo "Not all buffers were deleted.\n";
 
 error_reporting(E_ALL);
 
-$environment = isset($_ENV) ? $_ENV : array();
+$environment = $_ENV ?? array();
 // Note: php.ini-development sets variables_order="GPCS" not "EGPCS", in which case $_ENV is NOT populated.
 //       detect and handle this case, or die or warn
 if (empty($environment)) {
@@ -205,7 +205,7 @@ function verify_config()
 		error('environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!');
 	}
 
-	if (function_exists('is_executable') && !is_executable($php)) {
+	if (!is_executable($php)) {
 		error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = $php");
 	}
 }
@@ -758,7 +758,7 @@ Options:
                 filenames to generate with <tdir>. If --html is being used and
                 <url> given then the generated links are relative and prefixed
                 with the given url. In general you want to make <sdir> the path
-                to your source files and <tdir> some pach in your web page
+                to your source files and <tdir> some patch in your web page
                 hierarchy with <url> pointing to <tdir>.
 
     --keep-[all|php|skip|clean]
@@ -1028,7 +1028,7 @@ function mail_qa_team($data, $status = false)
 {
 	$url_bits = parse_url(QA_SUBMISSION_PAGE);
 
-	if (($proxy = getenv('http_proxy'))) {
+	if ($proxy = getenv('http_proxy')) {
 		$proxy = parse_url($proxy);
 		$path = $url_bits['host'].$url_bits['path'];
 		$host = $proxy['host'];
@@ -1148,7 +1148,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 		unset($pipes[0]);
 	}
 
-	$timeout = $valgrind ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
+	$timeout = $valgrind ? 300 : ($env['TEST_TIMEOUT'] ?? 60);
 
 	while (true) {
 		/* hide errors from interrupted syscalls */
@@ -1448,6 +1448,7 @@ TEST $file
 	}
 
 	/* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
+	$extra_options = '';
 	if (array_key_exists('PHPDBG', $section_text)) {
 		if (!isset($section_text['STDIN'])) {
 			$section_text['STDIN'] = $section_text['PHPDBG']."\n";
@@ -1455,6 +1456,10 @@ TEST $file
 
 		if (isset($phpdbg)) {
 			$php = $phpdbg . ' -qIb';
+
+			// Additional phpdbg command line options for sections that need to
+			// be run straight away. For example, EXTENSIONS, SKIPIF, CLEAN.
+			$extra_options = '-rr';
 		} else {
 			show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
 
@@ -1571,9 +1576,9 @@ TEST $file
 		$ext_params = array();
 		settings2array($ini_overwrites, $ext_params);
 		settings2params($ext_params);
-		$ext_dir=`$php $pass_options $ext_params -d display_errors=0 -r "echo ini_get('extension_dir');"`;
+		$ext_dir=`$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo ini_get('extension_dir');"`;
 		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-		$loaded = explode(",", `$php $pass_options $ext_params -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+		$loaded = explode(",", `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
 		$ext_prefix = substr(PHP_OS, 0, 3) === "WIN" ? "php_" : "";
 		foreach ($extensions as $req_ext) {
 			if (!in_array($req_ext, $loaded)) {
@@ -1623,7 +1628,7 @@ TEST $file
 
 			junit_start_timer($shortname);
 
-			$output = system_with_timeout("$extra $php $pass_options -q $ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
+			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
 
 			junit_finish_timer($shortname);
 
@@ -1934,7 +1939,7 @@ COMMAND $cmd
 	$hrtime = hrtime();
 	$startTime = $hrtime[0]*1000000000 + $hrtime[1];
 
-	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdIn, $captureStdOut, $captureStdErr);
+	$out = system_with_timeout($cmd, $env, $section_text['STDIN'] ?? null, $captureStdIn, $captureStdOut, $captureStdErr);
 
 	junit_finish_timer($shortname);
 	$hrtime = hrtime();
@@ -1961,7 +1966,7 @@ COMMAND $cmd
 				settings2params($clean_params);
 				$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 					"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
-				system_with_timeout("$extra $php $pass_options -q $clean_params $no_file_cache \"$test_clean\"", $env);
+				system_with_timeout("$extra $php $pass_options $extra_options -q $clean_params $no_file_cache \"$test_clean\"", $env);
 			}
 
 			if (!$cfg['keep']['clean']) {
@@ -2215,7 +2220,7 @@ $output
 			error_report($file, $log_filename, $tested);
 		}
 	}
-	
+
 	if ($valgrind && $leaked && $cfg["show"]["mem"]) {
 		show_file_block('mem', file_get_contents($memcheck_filename));
 	}
@@ -2823,7 +2828,7 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 
 	junit_suite_record($suite, 'test_total');
 
-	$time = null !== $time ? $time : junit_get_timer($file_name);
+	$time = $time ?? junit_get_timer($file_name);
 	junit_suite_record($suite, 'execution_time', $time);
 
 	$escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
@@ -2924,7 +2929,7 @@ function junit_path_to_classname($file_name) {
 			array_shift($_tmp);
 		}
 		foreach ($_tmp as $p) {
-			$ret = $ret . "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
+			$ret .= "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
 		}
 		return $ret;
 	}

@@ -19,7 +19,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing vfprintf() : int formats and non-integer values ***\n";
 
 // defining array of int formats
-$formats = 
+$formats =
   '%d %+d %-d 
    %ld %Ld %4d %-4d
    %10.4d %-10.4d %.4d %04.4d
@@ -57,7 +57,7 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 

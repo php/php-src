@@ -1,8 +1,7 @@
 --TEST--
 image_type_to_extension()
 --SKIPIF--
-<?php 
-    if (!function_exists('image_type_to_extension')) die('skip image_type_to_extension() not available'); 
+<?php
     require_once('skipif_imagetype.inc');
 ?>
 --FILE--

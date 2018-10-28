@@ -38,20 +38,19 @@ class names {
 // directory name stored in an object
 $dir_name = new names("$file_path/lstat_stat_variation18");
 
-// file name stored in an object 
+// file name stored in an object
 $file_name = new names("$file_path/lstat_stat_variation18.tmp");
 
 echo "\n-- Testing stat() on filename stored inside an object --\n";
-// dump the stat returned value 
+// dump the stat returned value
 var_dump( stat($file_name->var_name) );
 
 echo "\n-- Testing stat() on directory name stored inside an object --\n";
-// dump the stat returned value 
+// dump the stat returned value
 var_dump( stat($dir_name->var_name) );
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);

@@ -7,10 +7,10 @@ Test session_get_cookie_params() function : error functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : array session_get_cookie_params(void)
  * Description : Get the session cookie parameters
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_get_cookie_params() : error functionality ***\n";
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -66,7 +66,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 
@@ -214,4 +214,3 @@ NULL
 Warning: session_get_cookie_params() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 Done
-

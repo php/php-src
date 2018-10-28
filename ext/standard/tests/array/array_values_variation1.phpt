@@ -3,7 +3,7 @@ Test array_values() function : usage variations - Pass different data types as $
 --FILE--
 <?php
 /* Prototype  : array array_values(array $input)
- * Description: Return just the values from the input array 
+ * Description: Return just the values from the input array
  * Source code: ext/standard/array.c
  */
 
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -94,7 +94,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_values() : usage variations ***
 

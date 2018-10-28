@@ -1,6 +1,6 @@
-dist: trusty
+dist: xenial
 language: c
-sudo: false
+sudo: required
 addons:
   apt:
     packages:
@@ -16,11 +16,16 @@ addons:
       - librecode-dev
       - libsasl2-dev
       - libxpm-dev
-      - libt1-dev
       - libzip-dev
+      - libsqlite3-dev
+
+
+services:
+  - mysql
+  - postgresql
 
 notifications:
-    email: 
+    email:
        on_failure: change
     irc:
       template:
@@ -62,9 +67,9 @@ before_script:
     - . ./travis/ext/pgsql/setup.sh
     - . ./travis/ext/pdo_pgsql/setup.sh
 
-# Run PHPs run-tests.php 
+# Run PHPs run-tests.php
 script:
-    - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --show-slow 1000 --set-timeout 120
+    - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d opcache.protect_memory=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --show-slow 1000 --set-timeout 120
 
 after_success:
     - ccache --show-stats

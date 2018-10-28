@@ -16,9 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
-
 #ifndef PHP_PDO_SQLITE_H
 #define PHP_PDO_SQLITE_H
 
@@ -56,4 +53,3 @@ ZEND_EXTERN_MODULE_GLOBALS(pdo_sqlite)
 #endif
 
 #endif	/* PHP_PDO_SQLITE_H */
-

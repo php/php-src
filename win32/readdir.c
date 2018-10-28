@@ -29,38 +29,48 @@ DIR *opendir(const char *dir)
 	DIR *dp;
 	wchar_t *filespecw, *resolvedw;
 	HANDLE handle;
-	int index;
 	char resolved_path_buff[MAXPATHLEN];
-	size_t resolvedw_len, filespecw_len;
+	size_t resolvedw_len, filespecw_len, index;
+	zend_bool might_need_prefix;
 
 	if (!VCWD_REALPATH(dir, resolved_path_buff)) {
 		return NULL;
 	}
 
-	dp = (DIR *) calloc(1, sizeof(DIR) + (_MAX_FNAME*5+1)*sizeof(char));
-	if (dp == NULL) {
-		return NULL;
-	}
-
 	resolvedw = php_win32_ioutil_conv_any_to_w(resolved_path_buff, PHP_WIN32_CP_IGNORE_LEN, &resolvedw_len);
 	if (!resolvedw) {
-		free(dp);
 		return NULL;
 	}
 
+	might_need_prefix = resolvedw_len >= 3 && PHP_WIN32_IOUTIL_IS_LETTERW(resolvedw[0]) && L':' == resolvedw[1] && PHP_WIN32_IOUTIL_IS_SLASHW(resolvedw[2]);
+
 	filespecw_len = resolvedw_len + 2;
+	if (filespecw_len >= _MAX_PATH && might_need_prefix) {
+		filespecw_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+	}
 	filespecw = (wchar_t *)malloc((filespecw_len + 1)*sizeof(wchar_t));
 	if (filespecw == NULL) {
-		free(dp);
 		free(resolvedw);
 		return NULL;
 	}
 
-	wcscpy(filespecw, resolvedw);
-	index = (int)filespecw_len - 1;
+	if (filespecw_len >= _MAX_PATH && might_need_prefix) {
+		wcscpy(filespecw, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW);
+		wcscpy(filespecw + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, resolvedw);
+		index = resolvedw_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW - 1;
+	} else {
+		wcscpy(filespecw, resolvedw);
+		index = resolvedw_len - 1;
+	}
 	if (index >= 0 && filespecw[index] == L'/' || index == 0 && filespecw[index] == L'\\')
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
+
+	dp = (DIR *) calloc(1, sizeof(DIR) + (_MAX_FNAME*5+1)*sizeof(char));
+	if (dp == NULL) {
+		free(resolvedw);
+		return NULL;
+	}
 
 	if ((handle = FindFirstFileExW(filespecw, FindExInfoBasic, &(dp->fileinfo), FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH)) == INVALID_HANDLE_VALUE) {
 		DWORD err = GetLastError();
@@ -178,24 +188,42 @@ int rewinddir(DIR *dp)
 	/* Re-set to the beginning */
 	wchar_t *filespecw;
 	HANDLE handle;
-	int index;
+	size_t dirw_len, filespecw_len, index;
+	zend_bool might_need_prefix;
 
 	FindClose(dp->handle);
 
 	dp->offset = 0;
 	dp->finished = 0;
 
-	filespecw = (wchar_t *)malloc((wcslen((wchar_t *)dp->dirw) + 2 + 1)*sizeof(wchar_t));
+	/* XXX save the dir len into the struct. */
+	dirw_len = wcslen((wchar_t *)dp->dirw);
+
+	might_need_prefix = dirw_len >= 3 && PHP_WIN32_IOUTIL_IS_LETTERW(dp->dirw[0]) && L':' == dp->dirw[1] && PHP_WIN32_IOUTIL_IS_SLASHW(dp->dirw[2]);
+
+	filespecw_len = dirw_len + 2;
+	if (filespecw_len >= _MAX_PATH && might_need_prefix) {
+		filespecw_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+	}
+
+	filespecw = (wchar_t *)malloc((filespecw_len + 1)*sizeof(wchar_t));
 	if (filespecw == NULL) {
 		return -1;
 	}
 
-	wcscpy(filespecw, (wchar_t *)dp->dirw);
-	index = (int)wcslen(filespecw) - 1;
+	if (filespecw_len >= _MAX_PATH && might_need_prefix) {
+		wcscpy(filespecw, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW);
+		wcscpy(filespecw + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, dp->dirw);
+		index = dirw_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW - 1;
+	} else {
+		wcscpy(filespecw, dp->dirw);
+		index = dirw_len - 1;
+	}
+
 	if (index >= 0 && (filespecw[index] == L'/' ||
 	   (filespecw[index] == L'\\' && index == 0)))
 		filespecw[index] = L'\0';
-	wcscat(filespecw, L"/*");
+	wcscat(filespecw, L"\\*");
 
 	if ((handle = FindFirstFileExW(filespecw, FindExInfoBasic, &(dp->fileinfo), FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH)) == INVALID_HANDLE_VALUE) {
 		dp->finished = 1;

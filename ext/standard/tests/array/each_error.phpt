@@ -3,8 +3,8 @@ Test each() function : error conditions - pass incorrect number of args
 --FILE--
 <?php
 /* Prototype  : array each(array $arr)
- * Description: Return the currently pointed key..value pair in the passed array, 
- * and advance the pointer to the next element 
+ * Description: Return the currently pointed key..value pair in the passed array,
+ * and advance the pointer to the next element
  * Source code: Zend/zend_builtin_functions.c
  */
 
@@ -26,7 +26,6 @@ var_dump( each($arr, $extra_arg) );
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing each() : error conditions ***
 
@@ -40,4 +39,3 @@ NULL
 Warning: each() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-

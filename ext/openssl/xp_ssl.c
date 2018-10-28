@@ -19,8 +19,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -487,6 +485,7 @@ static zend_bool php_openssl_matches_common_name(X509 *peer, const char *subject
 static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stream) /* {{{ */
 {
 	zval *val = NULL;
+	zval *peer_fingerprint;
 	char *peer_name = NULL;
 	int err,
 		must_verify_peer,
@@ -504,6 +503,7 @@ static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_
 		: sslsock->is_client;
 
 	must_verify_fingerprint = GET_VER_OPT("peer_fingerprint");
+	peer_fingerprint = val;
 
 	if ((must_verify_peer || must_verify_peer_name || must_verify_fingerprint) && peer == NULL) {
 		php_error_docref(NULL, E_WARNING, "Could not get peer certificate");
@@ -535,8 +535,8 @@ static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_
 
 	/* If a peer_fingerprint match is required this trumps peer and peer_name verification */
 	if (must_verify_fingerprint) {
-		if (Z_TYPE_P(val) == IS_STRING || Z_TYPE_P(val) == IS_ARRAY) {
-			if (!php_openssl_x509_fingerprint_match(peer, val)) {
+		if (Z_TYPE_P(peer_fingerprint) == IS_STRING || Z_TYPE_P(peer_fingerprint) == IS_ARRAY) {
+			if (!php_openssl_x509_fingerprint_match(peer, peer_fingerprint)) {
 				php_error_docref(NULL, E_WARNING,
 					"peer_fingerprint match failure"
 				);
@@ -637,7 +637,9 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		OPENSSL_free(der_buf);
 
 		if (cert_ctx == NULL) {
-			php_error_docref(NULL, E_WARNING, "Error creating certificate context: %s", php_win_err());
+			char *err = php_win_err();
+			php_error_docref(NULL, E_WARNING, "Error creating certificate context: %s", err);
+			php_win_err_free(err);
 			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 		}
 	}
@@ -659,7 +661,9 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		chain_flags = CERT_CHAIN_CACHE_END_CERT | CERT_CHAIN_REVOCATION_CHECK_CHAIN_EXCLUDE_ROOT;
 
 		if (!CertGetCertificateChain(NULL, cert_ctx, NULL, NULL, &chain_params, chain_flags, NULL, &cert_chain_ctx)) {
-			php_error_docref(NULL, E_WARNING, "Error getting certificate chain: %s", php_win_err());
+			char *err = php_win_err();
+			php_error_docref(NULL, E_WARNING, "Error getting certificate chain: %s", err);
+			php_win_err_free(err);
 			CertFreeCertificateContext(cert_ctx);
 			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 		}
@@ -743,7 +747,9 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		CertFreeCertificateContext(cert_ctx);
 
 		if (!verify_result) {
-			php_error_docref(NULL, E_WARNING, "Error verifying certificate chain policy: %s", php_win_err());
+			char *err = php_win_err();
+			php_error_docref(NULL, E_WARNING, "Error verifying certificate chain policy: %s", err);
+			php_win_err_free(err);
 			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 		}
 

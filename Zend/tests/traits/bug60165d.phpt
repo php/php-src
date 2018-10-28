@@ -16,6 +16,5 @@ class MyClass {
         A::bar insteadof B;
     }
 }
-
 --EXPECTF--
 Fatal error: A precedence rule was defined for A::bar but this method does not exist in %s on line %d

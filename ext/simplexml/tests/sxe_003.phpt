@@ -1,12 +1,12 @@
 --TEST--
 SPL: SimpleXMLIterator and getChildren()
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded('simplexml')) print 'skip';
 if (!extension_loaded("libxml")) print "skip LibXML not present";
 ?>
 --FILE--
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>
@@ -59,7 +59,6 @@ for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: Invalid argument supplied for foreach() in %ssxe_003.php on line %d
 ===RESET===
 bool(true)

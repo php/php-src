@@ -428,7 +428,7 @@ class Client
     }
 
     /**
-     * Get Informations on the FastCGI application
+     * Get Information on the FastCGI application
      *
      * @param array $requestedInfo information to retrieve
      * @return array
@@ -603,7 +603,7 @@ class Client
             }
             if ($resp['type'] == self::END_REQUEST) {
                 $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_OK;
-                if ($resp['requestId'] == $requestId) { 
+                if ($resp['requestId'] == $requestId) {
                     break;
                 }
             }

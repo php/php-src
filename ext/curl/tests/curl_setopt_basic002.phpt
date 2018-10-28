@@ -49,4 +49,3 @@ curl_close($ch);
 *** Testing curl_setopt with CURLOPT_STDERR
 string(%d) "%S"
 string(%d) "%S"
-

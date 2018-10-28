@@ -11,7 +11,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 
 spl_autoload_register(function ($class) {
-    if (!require_once($class.'.php')) {
+    if (!require_once($class.'.inc')) {
         error_log('Error: Autoload class: '.$class.' not found!');
     }
 });

@@ -22,14 +22,18 @@ if(substr(PHP_OS, 0, 3) == 'WIN') {
  */
 
 $serverCode = <<<'CODE'
+    $printed = false;
     $serverUri = "ssl://127.0.0.1:64321";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => __DIR__ . '/bug54992.pem',
         'reneg_limit' => 0,
         'reneg_window' => 30,
-        'reneg_limit_callback' => function($stream) {
-            var_dump($stream);
+        'reneg_limit_callback' => function($stream) use (&$printed) {
+            if (!$printed) {
+                $printed = true;
+                var_dump($stream);
+            }
         }
     ]]);
 

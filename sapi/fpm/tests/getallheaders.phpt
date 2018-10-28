@@ -31,7 +31,7 @@ $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
 $tester->request(
-		'', 
+		'',
 		[
 			'HTTP_X_FOO' => 'BAR',
 			'HTTP_FOO'   => 'foo'

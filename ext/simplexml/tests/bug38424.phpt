@@ -21,6 +21,6 @@ $xml["a4"] = $str ;
 
 echo $xml->asXML();
 ?>
---EXPECT--	
+--EXPECT--
 <?xml version="1.0"?>
 <xml a1="abc &amp;amp; def" a2="abc &amp;amp; def" a3="abc &amp; def" a4="abc &amp; def"/>

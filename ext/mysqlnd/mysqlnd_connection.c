@@ -666,13 +666,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	{
 		const MYSQLND_CSTRING scheme = { transport.s, transport.l };
-		/* This will be overwritten below with a copy, but we can use it during authentication */
-		conn->unix_socket.s = (char *)socket_or_pipe.s;
 		if (FAIL == conn->m->connect_handshake(conn, &scheme, &username, &password, &database, mysql_flags)) {
-			conn->unix_socket.s = NULL;
 			goto err;
 		}
-		conn->unix_socket.s = NULL;
 	}
 
 	{
@@ -1814,10 +1810,17 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
 				zval attrz;
-				zend_string *str = zend_string_init(key, strlen(key), 1);
-				GC_MAKE_PERSISTENT_LOCAL(str);
-				ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), conn->persistent));
-				GC_MAKE_PERSISTENT_LOCAL(Z_COUNTED(attrz));
+				zend_string *str;
+
+				if (conn->persistent) {
+					str = zend_string_init(key, strlen(key), 1);
+					GC_MAKE_PERSISTENT_LOCAL(str);
+					ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 1));
+					GC_MAKE_PERSISTENT_LOCAL(Z_COUNTED(attrz));
+				} else {
+					str = zend_string_init(key, strlen(key), 0);
+					ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 0));
+				}
 				zend_hash_update(conn->options->connect_attr, str, &attrz);
 				zend_string_release_ex(str, 1);
 			}

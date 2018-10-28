@@ -44,7 +44,7 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 		zend_str_tolower(lookup_name, ZSTR_LEN(name));
 
 		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, ZSTR_LEN(name))) != NULL) {
-			if (!(c->flags & CONST_CT_SUBST) || (c->flags & CONST_CS)) {
+			if (!(ZEND_CONSTANT_FLAGS(c) & CONST_CT_SUBST) || (ZEND_CONSTANT_FLAGS(c) & CONST_CS)) {
 				retval = 0;
 			}
 		} else {
@@ -54,8 +54,8 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	}
 
 	if (retval) {
-		if ((c->flags & CONST_PERSISTENT)
-		 && (!(c->flags & CONST_NO_FILE_CACHE)
+		if ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
+		 && (!(ZEND_CONSTANT_FLAGS(c) & CONST_NO_FILE_CACHE)
 		  || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE))) {
 			ZVAL_COPY_VALUE(result, &c->value);
 			if (copy) {

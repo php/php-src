@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* {{{ includes
  */
 
@@ -53,6 +51,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_main.h"
+#include "php_syslog.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_string.h"
@@ -329,6 +328,28 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 }
 /* }}} */
 
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnSetLogFilter)
+{
+	const char *filter = ZSTR_VAL(new_value);
+
+	if (!strcmp(filter, "all")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_ALL;
+		return SUCCESS;
+	}
+	if (!strcmp(filter, "no-ctrl")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_NO_CTRL;
+		return SUCCESS;
+	}
+	if (!strcmp(filter, "ascii")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_ASCII;
+		return SUCCESS;
+	}
+
+	return FAILURE;
+}
+/* }}} */
 
 /* {{{ php_disable_functions
  */
@@ -775,6 +796,7 @@ PHP_INI_BEGIN()
 #endif
 	STD_PHP_INI_ENTRY("syslog.facility",		"LOG_USER",		PHP_INI_SYSTEM,		OnSetFacility,		syslog_facility,	php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
+	STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -1140,24 +1162,18 @@ PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, 
 /* }}} */
 
 #ifdef PHP_WIN32
-#define PHP_WIN32_ERROR_MSG_BUFFER_SIZE 512
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
-	if (error == 0) {
-		php_error_docref2(NULL, param1, param2, E_WARNING, "%s", strerror(errno));
-	} else {
-		char buf[PHP_WIN32_ERROR_MSG_BUFFER_SIZE + 1];
-		size_t buf_len;
+	char *buf = php_win32_error_to_msg(error);
+	size_t buf_len;
 
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error, 0, buf, PHP_WIN32_ERROR_MSG_BUFFER_SIZE, NULL);
-		buf_len = strlen(buf);
-		if (buf_len >= 2) {
-			buf[buf_len - 1] = '\0';
-			buf[buf_len - 2] = '\0';
-		}
-		php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", (char *)buf, error);
+	buf_len = strlen(buf);
+	if (buf_len >= 2) {
+		buf[buf_len - 1] = '\0';
+		buf[buf_len - 2] = '\0';
 	}
+	php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", buf, error);
+	php_win32_error_msg_free(buf);
 }
-#undef PHP_WIN32_ERROR_MSG_BUFFER_SIZE
 #endif
 
 /* {{{ php_html_puts */
@@ -1659,7 +1675,11 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 					snprintf(memory_leak_buf, 512, "Last leak repeated %lu time%s\n", leak_count, (leak_count>1?"s":""));
 				}
 #	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
+				if (IsDebuggerPresent()) {
+					OutputDebugString(memory_leak_buf);
+				} else {
+					fprintf(stderr, "%s", memory_leak_buf);
+				}
 #	else
 				fprintf(stderr, "%s", memory_leak_buf);
 #	endif
@@ -1673,7 +1693,11 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 
 				snprintf(memory_leak_buf, 512, "=== Total %d memory leaks detected ===\n", *((uint32_t *) data));
 #	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
+				if (IsDebuggerPresent()) {
+					OutputDebugString(memory_leak_buf);
+				} else {
+					fprintf(stderr, "%s", memory_leak_buf);
+				}
 #	else
 				fprintf(stderr, "%s", memory_leak_buf);
 #	endif
@@ -1696,7 +1720,11 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 					snprintf(memory_leak_buf, sizeof(memory_leak_buf), "[null]  Script:  '%s'\n", SAFE_FILENAME(SG(request_info).path_translated));
 				}
 #	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
+				if (IsDebuggerPresent()) {
+					OutputDebugString(memory_leak_buf);
+				} else {
+					fprintf(stderr, "%s", memory_leak_buf);
+				}
 #	else
 				fprintf(stderr, "%s", memory_leak_buf);
 #	endif
@@ -2257,7 +2285,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #ifdef ZEND_WIN32
 	/* Until the current ini values was setup, the current cp is 65001.
-		If the actual ini vaues are different, some stuff needs to be updated.
+		If the actual ini values are different, some stuff needs to be updated.
 		It concerns at least main_cwd_state and there might be more. As we're
 		still in the startup phase, lets use the chance and reinit the relevant
 		item according to the current codepage. Still, if ini_set() is used
@@ -2491,6 +2519,13 @@ void php_module_shutdown(void)
 #ifndef ZTS
 	zend_interned_strings_dtor();
 #endif
+
+	if (zend_post_shutdown_cb) {
+		void (*cb)(void) = zend_post_shutdown_cb;
+
+		zend_post_shutdown_cb = NULL;
+		cb();
+	}
 
 	module_initialized = 0;
 

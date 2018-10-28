@@ -357,5 +357,3 @@ retry:
 
 	return c;
 }
-
-

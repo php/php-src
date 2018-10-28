@@ -4,7 +4,7 @@ Test disk_free_space and its alias diskfreespace() functions : Usage Variations
 <?php
 /*
  *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function 
+ *  Description: Given a string containing a directory, this function
  *               will return the number of bytes available on the corresponding
  *               filesystem or disk partition
  */
@@ -12,11 +12,11 @@ Test disk_free_space and its alias diskfreespace() functions : Usage Variations
 $file_path = dirname(__FILE__);
 
 echo "*** Testing with a directory ***\n";
-var_dump( disk_free_space($file_path."/..") ); 
-var_dump( diskfreespace($file_path."/..") ); 
+var_dump( disk_free_space($file_path."/..") );
+var_dump( diskfreespace($file_path."/..") );
 
 echo "\nTesting for the return type ***\n";
-$return_value = disk_free_space($file_path); 
+$return_value = disk_free_space($file_path);
 var_dump( is_float($return_value) );
 
 echo "\n*** Testing with different directory combinations ***";
@@ -55,14 +55,11 @@ foreach($dirs_arr as $dir1) {
 
 echo"\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
 rmdir($file_path."/disk_free_space");
 ?>
-
-
 --EXPECTF--
 *** Testing with a directory ***
 float(%d)

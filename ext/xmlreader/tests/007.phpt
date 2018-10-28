@@ -3,11 +3,10 @@ XMLReader: libxml2 XML Reader, setRelaxNGSchema
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
 $xmlstring = '<TEI.2>hello</TEI.2>';
-$relaxngfile = dirname(__FILE__) . '/relaxNG.rng'; 
+$relaxngfile = dirname(__FILE__) . '/relaxNG.rng';
 $file = dirname(__FILE__) . '/_007.xml';
 file_put_contents($file, $xmlstring);
 

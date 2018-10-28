@@ -215,10 +215,6 @@ typedef struct _zend_accel_directives {
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
-    /* copy of CG(function_table) used for compilation scripts into cache */
-    /* initially it contains only internal functions */
-	HashTable               function_table;
-	int                     internal_functions_count;
 	int                     counted;   /* the process uses shared memory */
 	zend_bool               enabled;
 	zend_bool               locked;    /* thread obtained exclusive lock */
@@ -244,6 +240,7 @@ typedef struct _zend_accel_globals {
 	void                   *mem;
 	void                   *arena_mem;
 	zend_persistent_script *current_persistent_script;
+	zend_bool               is_immutable_class;
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
@@ -270,6 +267,8 @@ typedef struct _zend_accel_shared_globals {
 	zend_ulong   hash_restarts;    /* number of restarts because of hash overflow */
 	zend_ulong   manual_restarts;  /* number of restarts scheduled by opcache_reset() */
 	zend_accel_hash hash;             /* hash table for cached scripts */
+
+	size_t map_ptr_last;
 
 	/* Directives & Maintenance */
 	time_t          start_time;
@@ -317,6 +316,7 @@ extern zend_accel_globals accel_globals;
 extern char *zps_api_failure_reason;
 
 void accel_shutdown(void);
+int  accel_activate(INIT_FUNC_ARGS);
 int  accel_post_deactivate(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);

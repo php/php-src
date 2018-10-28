@@ -8,7 +8,7 @@ if ((string) variant_cat(new VARIANT(false), new VARIANT(0.5)) != 'False0.5')
 	print "skip English locale only";
 ?>
 --FILE--
-<?php // $Id$
+<?php
 error_reporting(E_ALL);
 
 $v = new VARIANT();

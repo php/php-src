@@ -8,9 +8,6 @@ if ( substr(PHP_OS, 0, 3) == 'WIN' ) {
 if ( substr(PHP_OS, 0, 3) == 'MAC' ) {
     die('skip Not valid for MacOS');
 }
-if (PHP_INT_SIZE != 4) {
-  die("skip this test is for 32bit platform only");
-}
 
 // Skip if being run by root (files are always readable, writeable and executable)
 $filename = dirname(__FILE__)."/symlink_link_linkinfo_is_link6_check_root.tmp";
@@ -54,7 +51,7 @@ echo "\n-- Working with soft links --\n";
 $linkname = "$dirname/non_existent_link_variation5.tmp";
 
 // expected: false
-var_dump( symlink($filename, $linkname) ); // this link won't get created 
+var_dump( symlink($filename, $linkname) ); // this link won't get created
 var_dump( linkinfo($linkname) );
 var_dump( is_link($linkname) );
 // clear the cache

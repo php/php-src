@@ -1,11 +1,11 @@
 --TEST--
-Test fwrite() function : usage variation 
+Test fwrite() function : usage variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : int fwrite(resource fp, string str [, int length])
- * Description: Binary-safe file write 
+ * Description: Binary-safe file write
  * Source code: ext/standard/file.c
  * Alias to functions: bzwrite fputs gzwrite
  */
@@ -170,4 +170,3 @@ Error: 2 - fwrite() expects parameter 2 to be string, object given, %s(%d)
 
 --unset var--
 ===DONE===
-

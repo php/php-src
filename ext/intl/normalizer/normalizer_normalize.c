@@ -28,9 +28,7 @@
 #include "normalizer_class.h"
 #include "normalizer_normalize.h"
 #include "intl_convert.h"
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 #include <unicode/utf8.h>
-#endif
 
 
 #if U_ICU_VERSION_MAJOR_NUM >= 56
@@ -380,7 +378,7 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 		intl_error_set_custom_msg(NULL, "Code point out of range", 0);
 		return;
 	}
-	
+
 	decomposition_length = unorm2_getRawDecomposition(norm, codepoint, decomposition, 32, &status);
 	if (decomposition_length == -1) {
 		RETURN_NULL();

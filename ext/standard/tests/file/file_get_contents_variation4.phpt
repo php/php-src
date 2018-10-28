@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
- * Description: Read the entire file into a string 
+ * Description: Read the entire file into a string
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file_get_contents() : usage variation ***\n";
@@ -107,10 +107,10 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       //non context resource
       'file resource' => $fileRes,
-      
+
       //valid stream context
       'stream context' => $strContext,
 );

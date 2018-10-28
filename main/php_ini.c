@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "ext/standard/info.h"
 #include "zend_ini.h"
@@ -31,6 +29,7 @@
 #include "php_scandir.h"
 #ifdef PHP_WIN32
 #include "win32/php_registry.h"
+#include "win32/winutil.h"
 #endif
 
 #if HAVE_SCANDIR && HAVE_ALPHASORT && HAVE_DIRENT_H

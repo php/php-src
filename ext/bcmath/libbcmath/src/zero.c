@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -61,4 +60,3 @@ bc_is_zero (bc_num num)
   else
     return TRUE;
 }
-

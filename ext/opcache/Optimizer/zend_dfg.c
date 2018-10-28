@@ -164,7 +164,7 @@ op1_use:
 							}
 							goto op2_use;
 						case ZEND_BIND_LEXICAL:
-							if ((build_flags & ZEND_SSA_RC_INFERENCE) || opline->extended_value) {
+							if ((build_flags & ZEND_SSA_RC_INFERENCE) || (opline->extended_value & ZEND_BIND_REF)) {
 								goto op2_def;
 							}
 							goto op2_use;

@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -133,11 +131,7 @@ PHP_METHOD(sqlite3, open)
 		fullpath = filename;
 	}
 
-#if SQLITE_VERSION_NUMBER >= 3005000
 	rc = sqlite3_open_v2(fullpath, &(db_obj->db), flags, NULL);
-#else
-	rc = sqlite3_open(fullpath, &(db_obj->db));
-#endif
 	if (rc != SQLITE_OK) {
 		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s",
 #ifdef HAVE_SQLITE3_ERRSTR
@@ -1593,7 +1587,7 @@ PHP_METHOD(sqlite3stmt, execute)
 					break;
 
 				case SQLITE_FLOAT:
-					/* convert_to_double(parameter);*/
+					convert_to_double(parameter);
 					sqlite3_bind_double(stmt_obj->stmt, param->param_number, Z_DVAL_P(parameter));
 					break;
 
@@ -2016,7 +2010,7 @@ static const zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		openBlob,			arginfo_sqlite3_openblob, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		enableExceptions,	arginfo_sqlite3_enableexceptions, ZEND_ACC_PUBLIC)
 	/* Aliases */
-	PHP_MALIAS(sqlite3,	__construct, open, arginfo_sqlite3_open, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
+	PHP_MALIAS(sqlite3,	__construct, open, arginfo_sqlite3_open, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -2031,7 +2025,7 @@ static const zend_function_entry php_sqlite3_stmt_class_methods[] = {
 	PHP_ME(sqlite3stmt, bindParam,	arginfo_sqlite3stmt_bindparam, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, bindValue,	arginfo_sqlite3stmt_bindvalue, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, readOnly,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, __construct, arginfo_sqlite3stmt_construct, ZEND_ACC_PRIVATE|ZEND_ACC_CTOR)
+	PHP_ME(sqlite3stmt, __construct, arginfo_sqlite3stmt_construct, ZEND_ACC_PRIVATE)
 	PHP_FE_END
 };
 /* }}} */
@@ -2044,7 +2038,7 @@ static const zend_function_entry php_sqlite3_result_class_methods[] = {
 	PHP_ME(sqlite3result, fetchArray,		arginfo_sqlite3result_fetcharray, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3result, reset,			arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3result, finalize,			arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3result, __construct, 		arginfo_sqlite3_void, ZEND_ACC_PRIVATE|ZEND_ACC_CTOR)
+	PHP_ME(sqlite3result, __construct, 		arginfo_sqlite3_void, ZEND_ACC_PRIVATE)
 	PHP_FE_END
 };
 /* }}} */

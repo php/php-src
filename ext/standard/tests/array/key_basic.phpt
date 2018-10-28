@@ -1,5 +1,5 @@
 --TEST--
-Test key() function : basic functionality 
+Test key() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : mixed key(array $array_arg)

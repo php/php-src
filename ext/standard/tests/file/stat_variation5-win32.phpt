@@ -49,18 +49,15 @@ clearstatcache();
 
 echo "\n*** Done ***";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/stat_variation5.tmp");
 ?>
 --EXPECT--
-
 *** Testing stat(): on a file with read/write permission ***
 bool(true)
 bool(true)
 bool(true)
 
 *** Done ***
-

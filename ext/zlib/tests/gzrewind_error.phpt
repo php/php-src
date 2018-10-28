@@ -1,9 +1,9 @@
 --TEST--
 Test function gzrewind() by calling it more than or less than its expected arguments
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -11,7 +11,7 @@ if (!extension_loaded("zlib")) {
 
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
-$extra_arg = 'nothing'; 
+$extra_arg = 'nothing';
 var_dump(gzrewind( $h, $extra_arg ) );
 var_dump(gzrewind());
 gzclose($h);

@@ -7,7 +7,7 @@ Philip Norton philipnorton42@gmail.com
 $array = SplFixedArray::fromArray(array(array('1')));
 var_dump($array);
 ?>
---EXPECTF--
+--EXPECT--
 object(SplFixedArray)#1 (1) {
   [0]=>
   array(1) {

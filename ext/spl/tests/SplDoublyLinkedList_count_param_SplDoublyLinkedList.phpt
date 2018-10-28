@@ -1,5 +1,5 @@
 --TEST--
-Create a SplDoublyLinkedList, call count() and pass a SplDoublyLinkedList object as the parameter. 
+Create a SplDoublyLinkedList, call count() and pass a SplDoublyLinkedList object as the parameter.
 --CREDITS--
 Philip Norton philipnorton42@gmail.com
 --FILE--

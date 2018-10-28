@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1374,7 +1372,7 @@ PHP_FUNCTION(dom_node_clone_node)
 	}
 
 	/* When deep is false Element nodes still require the attributes
-	Following taken from libxml as xmlDocCopyNode doesnt do this */
+	Following taken from libxml as xmlDocCopyNode doesn't do this */
 	if (n->type == XML_ELEMENT_NODE && recursive == 0) {
 		if (n->nsDef != NULL) {
 			node->nsDef = xmlCopyNamespaceList(n->nsDef);

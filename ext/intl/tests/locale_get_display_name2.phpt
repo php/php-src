@@ -1,8 +1,7 @@
 --TEST--
 locale_get_display_name() icu >= 4.8 && icu < 50.1.2
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
@@ -90,10 +89,10 @@ function ut_main()
    		foreach( $disp_locales as $disp_locale )
     	{
         	$scr = ut_loc_get_display_name( $locale ,$disp_locale );
-		$scr = str_replace(array('(', ')'), '#', $scr); 
+		$scr = str_replace(array('(', ')'), '#', $scr);
         	$res_str .= "disp_locale=$disp_locale :  display_name=$scr";
         	$res_str .= "\n";
-		} 
+		}
         $res_str .= "-----------------\n";
     }
 

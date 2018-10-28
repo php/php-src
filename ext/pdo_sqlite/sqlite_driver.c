@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -898,11 +896,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 
 	flags = pdo_attr_lval(driver_options, PDO_SQLITE_ATTR_OPEN_FLAGS, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 
-#if SQLITE_VERSION_NUMBER >= 3005000
 	i = sqlite3_open_v2(filename, &H->db, flags, NULL);
-#else
-	i = sqlite3_open(filename, &H->db);
-#endif
 
 	efree(filename);
 

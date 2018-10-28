@@ -38,7 +38,7 @@ if (!extension_loaded('sockets')) {
 	socket_close($sock2);
 	var_dump($sock, $sock2);
 
-	/* Using invalid PID. */	
+	/* Using invalid PID. */
 	$info = socket_wsaprotocol_info_export($sock, 123412341);
 
 	socket_close($sock);
@@ -57,4 +57,3 @@ Warning: socket_wsaprotocol_info_export(): Unable to export WSA protocol info [0
  in %s on line %d
 
 Warning: socket_wsaprotocol_info_import(): Unable to open file mapping [0x00000002] in %s on line %d
-

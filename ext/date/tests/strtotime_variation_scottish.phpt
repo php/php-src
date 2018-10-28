@@ -8,7 +8,7 @@ Checking whisky time
 	var_dump(date('H:i:s', strtotime('back of 19')));
 	var_dump(date('H:i:s', strtotime('front of 19')));
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "07:15:00"
 string(8) "06:45:00"
 string(8) "19:15:00"

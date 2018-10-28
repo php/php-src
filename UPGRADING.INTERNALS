@@ -1,167 +1,166 @@
-PHP 7.3 INTERNALS UPGRADE NOTES
+PHP 7.4 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
-  a. array_init() and array_init_size()
-  b. Run-time constant operand addressing
-  c. Array/Object recursion protection
-  d. HASH_FLAG_PERSISTENT
-  e. AST and IS_CONSTANT
-  f. GC_REFCOUNT()
-  g. zend_get_parameters()
-  h. zend_register_persistent_resource()
-  i. RAND_RANGE()
-  j. cast_object() with _IS_NUMBER
-  k. zend_fcall_info_cache.initialized
-  l. php_hrtime_current()
-  m. zend_cpu_supports()
-  n. IS_TYPE_COPYABLE
-  o. IS_UNUSED
-  p. VM instruction operands (FETCH_CLASS, FETCH_CONSTANT, CATCH)
-  q. sapi_cli_single_write()
-  r. php_url
-  s. zend_function.reserved[]
-  t. zif_handler
-  u. GC_G
+  a. php_sys_symlink() and php_sys_link()
+  b. zend_lookup_class_ex() and zend_fetch_class_by_name()
+  c. Function/property/class flags
+  d. Removed zend_check_private()
+  e. php_win32_error_to_msg() memory management
+  f. get_properties_for() handler / Z_OBJDEBUG_P
+  g. Required object handlers
+  h. Immutable classes and op_arrays
 
 2. Build system changes
-  a. Unix build system changes
-  b. Windows build system changes
-
+  a. Abstract
+  b. Unix build system changes
+  c. Windows build system changes
 
 3. Module changes
+  a. ext/xml
+  b. ext/hash
 
 ========================
 1. Internal API changes
 ========================
 
-  a. array_init() and array_init_size() are not functions anymore.
-     They don't return any values.
+ a. php_sys_symlink() and php_sys_link() portability macros have been
+    added, which behave like POSIX's symlink() and link(), respectively, on
+    POSIX compliant systems and on Windows.
 
-  b. In 64-bit builds PHP-7.2 and below used relative run-time constant operand
-     addressing. E.g. opline->op1.constant kept an offset from start of literals
-     table - op_array->literals. To speedup access op_array->literals was cached
-     in execute_data->literals. So the resulting address calculated as
-     EX(literals) + opline->op1.constant.
+ b. zend_lookup_class_ex() and zend_fetch_class_by_name() prototypes were
+    changed to accept optional lower-case class name as zend_string*,
+    instead of zval*.
 
-     Now at run-time literals allocated close to opcodes, and addressed
-     relatively from current opline. This eliminates load of EX(literals) on
-     each constant access as well as EX(literals) initialization on each call.
+ c. Function/property/class flags changes
+    - ZEND_ACC_CTOR and ZEND_ACC_DTOR are removed. It's possible to check if
+      method is a constructor/destructor using the following condition
+      (func->common.scope->constructor == func).
+    - ZEND_ACC_IMPLEMENTED_ABSTRACT is removed (it was used only internally
+      during inheritance).
+    - ZEND_ACC_IMPLICIT_PUBLIC is removed (it was used only for reflection)
+    - ZEND_ACC_SHADOW property flag is removed. Instead of creating shadow
+      clone, now we use the same private property_info, and should also
+      check property_info->ce (in the same way as with methods).
+    - ZEND_ACC_ANON_BOUND is replaced with ZEND_ACC_LINKED. This flag is set
+      not only during anonymous classes declaration, but also during any
+      run-time or compile-time class declaration.
+    - ZEND_ACC_NO_RT_ARENA renamed into ZEND_ACC_HEAP_RT_CACHE. Now it's used
+      not only for closures, but also for pseudo-main op_arrays.
+    - ZEND_ACC_... flags are re-numbered.
 
-     As result some related macros were removed (ZEND_EX_USE_LITERALS,
-     EX_LOAD_LITERALS, EX_LITERALS, RT_CONSTANT_EX, EX_CONSTANT) or changed
-     (RT_CONSTANT, ZEND_PASS_TWO_UPDATE_CONSTANT, ZEND_PASS_TWO_UNDO_CONSTANT).
-     This change way affect only some "system" extensions. EX_LITERALS,
-     RT_CONSTANT_EX, EX_CONSTANT should be substituted by RT_CONSTANT than now
-     use "opline" (instead of "op_array") as first argument.
+  d. zend_check_private() is removed. Use (func->common.scope == scope) instead.
 
-  c. Protection from recursion during processing circular data structures was
-     refactored. HashTable.nApplyCount and IS_OBJ_APPLY_COUNT are replaced by
-     single flag GC_PROTECTED. Corresponding macros Z_OBJ_APPLY_COUNT,
-     Z_OBJ_INC_APPLY_COUNT, Z_OBJ_DEC_APPLY_COUNT, ZEND_HASH_GET_APPLY_COUNT,
-     ZEND_HASH_INC_APPLY_COUNT, ZEND_HASH_DEC_APPLY_COUNT are replaced with
-     GC_IS_RECURSIVE, GC_PROTECT_RECURSION, GC_UNPROTECT_RECURSION,
-     Z_IS_RECURSIVE, Z_PROTECT_RECURSION, Z_UNPROTECT_RECURSION.
+  e. Pointers returned by php_win32_error_to_msg() have to be freed using
+     php_win32_error_msg_free(). Same regarding php_win_err() vs.
+     php_win_err_free().
 
-     HASH_FLAG_APPLY_PROTECTION flag and ZEND_HASH_APPLY_PROTECTION() macro
-     are removed. All mutable arrays should use recursion protection.
-     Corresponding checks should be replaced by Z_REFCOUNTED() or
-     !(GC_GLAGS(p) & GC_IMMUTABLE).
+  f. A new, optional object handler with the signature
 
-  d. HASH_FLAG_PERSISTENT renamed into IS_ARRAY_PERSISTENT and moved into
-     GC_FLAGS (to be consistent with IS_STR_PERSISTENT).
+         HashTable *get_properties_for(zval *obj, zend_prop_purpose purpose)
 
-  e. zend_ast_ref structure is changed to use only one allocation.
-     zend_ast_copy() now returns zend_ast_ref (instead of zend_asr).
-     zend_ast_destroy_and_free() is removed. ZVAL_NEW_AST() is replaced
-     by ZVAL_AST().
+     has been introduced, where zend_prop_purpose (currently) takes one of:
 
-     IS_CONSTANT type and Z_CONST_FLAGS() are removed. Now constants are always
-     represented using IS_CONSTANT_AST (ZEND_AST_CONSTANT kind). AST node
-     attributes are used instead of constant flags. IS_TYPE_CONSTANT flag is
-     removed, but Z_CONSTANT() macro is kept for compatibility.
+         ZEND_PROP_PURPOSE_DEBUG       // var_dump etc.
+         ZEND_PROP_PURPOSE_ARRAY_CAST  // (array) $obj
+         ZEND_PROP_PURPOSE_SERIALIZE   // "O"-format serialization (__wakeup)
+         ZEND_PROP_PURPOSE_VAR_EXPORT  // var_export (__set_state)
+         ZEND_PROP_PURPOSE_JSON        // json_encode
 
-  f. GC_REFCOUNT() is turned into inline function and can't be modified direcly.
-     All reference-counting operations should be done through corresponding
-     macros GC_SET_REFCOUNT(), GC_ADDREF() and GC_DELREF().
+     The handler returns a non-null HashTable with increased refcounted, and
+     the return value must be released using zend_release_properties().
 
-     GC_REFCOUNT(p)++ should be changed into GC_ADDREF(p),
-     GC_REFCOUNT(p)-- into GC_DELREF(p),
-     GC_REFCOUNT(p) = 1 into GC_SET_REFCOUNT(p, 1).
+     This handler serves the same general function as get_properties(), but
+     provides more control over different property uses, while also making
+     it possible to return a temporary property table.
 
-  g. The zend_get_parameters() and zend_get_parameters_ex() functions were
-     removed. Instead zend_parse_parameters() should be used.
+     get_properties() is still used in cases where none of the above purposes
+     apply, but overloading get_properties() is generally discouraged. If you
+     want to provide purposes for general usage rather than just debugging or
+     serialization, please prefer using properly declared properties.
 
-  h. New functions zend_register_persistent_resource() or
-     zend_register_persistent_resource_ex() should beused to register
-     persistent resources, instead of manual insertion into EG(persistent_list).
+     get_debug_info() is superseded by get_properties_for() with the
+     ZEND_PROP_PURPOSE_DEBUG purpose, but remains available for backwards-
+     compatibility reasons. However, while it is fine to define this handler,
+     it should never be directly called by consuming code.
 
-  i. The RAND_RANGE() macro has been removed. php_mt_rand_range() should be
-     used instead.
+     The Z_OBJDEBUG_P macro has been removed. It should be replaced by calls to
+     zend_get_properties_for() with the ZEND_PROP_PURPOSE_DEBUG purpose:
 
-  j. The cast_object() object handler now also accepts the _IS_NUMBER type. The
-     handler should return either an integer or float value in this case,
-     whichever is more appropriate.
+         // OLD
+         int is_temp;
+         HashTable *ht = Z_OBJDEBUG_P(obj, is_temp);
+         // ...
+         if (is_temp) {
+            zend_hash_destroy(ht);
+            FREE_HASHTABLE(ht);
+         }
 
-  k. zend_fcall_info_cache.initialized is removed. zend_fcall_info_cache is
-     initialized if zend_fcall_info_cache.function_handler is set.
+         // NEW
+         HashTable *ht = zend_get_properties_for(obj, ZEND_PROP_PURPOSE_DEBUG);
+         // ...
+         zend_release_properties(ht);
 
-  l. php_hrtime_current() delivers the number of nanoseconds since an uncertain
-     point in the past.
+  g. The following object handlers are now required (must be non-NULL):
 
-  m. zend_cpu_supports() determines if a feature is supported by current cpu.
-     Also serial inline zend_cpu_supports_xxx() are added, which is designed for
-     ifunc resolver function, as resolver function should not depend on any
-     external function.
+       * free_obj
+       * dtor_obj
+       * read_property
+       * write_property
+       * read_dimension
+       * write_dimension
+       * get_property_ptr_ptr
+       * has_property
+       * unset_property
+       * has_dimension
+       * unset_dimension
+       * get_properties
+       * get_method
+       * get_constructor
+       * get_class_name
+       * get_gc
 
-  n. IS_TYPE_COPYABLE flag is removed. IS_STRING zvals didn't need to be
-     duplication by zval_copy_ctor(), ZVAL_DUP() and SEPARATE_ZVAL*() macros.
-     Interned strings didn't set IS_TYPE_COPYALE, so they aren't affected at
-     all. Now instead of checking for IS_TYPE_COPYABLE, engine checks for
-     IS_ARRAY type (it may be IS_TYPE_REFCOUNTED or not). All the related
-     macros: Z_COPYABLE..., Z_IMMUTABLE... are kept for compatibility.
+     It is recommended to initialize object handler structures by copying the
+     std object handlers and only overwriting those you want to change.
 
-  o. IS_UNUSED became zero and can't be used as a bitmask (there were no such
-     usages in PHP sources).
-
-  p. Operands of few VM instructions were changed
-    - FETCH_CLASS     op1<fetch-flags>, op2<name>, result<var>
-    - FETCH_CONSTANT  op1<fetch-flags>, op2<name>, result<tmp>
-    - CATCH           ext<last-flag>, op1<name>, op2<jump_addr>, result<cv>
-
- q.  sapi_cli_single_write() now returns ssize_t instead of size_t.
-
- r.  fields of php_url struct change from char * to zend_string *
-
- s. Special purpose zend_functions marked by ZEND_ACC_CALL_VIA_TRAMPOLINE or
-    ZEND_ACC_FAKE_CLOSURE flags use reserved[0] for internal purpose.
-    Third party extensions must not modify reserved[] fields of these functions.
-
- t. For internal functions the typedef zif_handler has been introduced.  It is
-    recommended to use this from now on, instead of defining own handler types.
-
- u. The GC globals (GC_G) are now private. Use the new zend_gc_get_status() to
-    retrieve status information of the GC.
+  h. Opcache may make classes and op_arrays immutable. Such classes are marked
+     by ZEND_ACC_IMMUTABLE flag, they are not going to be copied from opcache
+     shared memory to process memory and must not be modified at all.
+     Few related data structures were changed to allow addressing mutable data
+     structures from immutable ones. This access is implemented through
+     ZEND_MAP_PTR... abstraction macros and, basically, uses additional level of
+     indirection. op_array->run_time_cache, op_array->static_variables_ptr and
+     class_entry->static_members_table now have to be accessed through
+     ZEND_MAP_PTR... macros.
+     It's also not allowed to change op_array->reserved[] handles of immutable
+     op_arrays. Instead, now you have to reserve op_array handle using
+     zend_get_op_array_extension_handle() during MINIT and access its value
+     using ZEND_OP_ARRAY_EXTENSION(op_array, handle).
 
 ========================
 2. Build system changes
 ========================
 
-  a. Unix build system changes
+  a. Abstract
+    - The hash extension is now always available, meaning the --enable-hash
+	  configure argument has been removed.
 
-  b. Windows build system changes
-    - ZEND_WIN32_FORCE_INLINE doesn't affect C++ anymore. zend_always_inline is
-      still usable in C++, but anything else inlining related is up to
-      compiler.
-    - ZEND_WIN32_KEEP_INLINE was removed, it was only needed for C++
-      convenience and is now default behavior with C++.
-    - New configure option --enable-native-intrinsics accepts a list of the
-      intrinsic optimizations to enable. It affects both the code generation
-      and the explicit optimizations guarded by preprocessor macros.
-    - The configure option --with-codegen-arch accepts only ia32 as a value.
-      Use it, to produce builds suitable for older processors without SSE2 or
-      even SSE support.
+  b. Unix build system changes
+    - configure --help now also outputs --program-suffix and --program-prefix
+      information by using the Autoconf AC_ARG_PROGRAM macro.
+    - Obsolescent macros AC_FUNC_VPRINTF and AC_FUNC_UTIME_NULL have been
+      removed. Symbols HAVE_VPRINTF and HAVE_UTIME_NULL are no longer defined
+      since they are not needed on the current systems.
+
+  c. Windows build system changes
 
 ========================
 3. Module changes
 ========================
 
+  a. ext/xml
+    - The public (internal) API of the ext/xml extension has been removed. All
+      functions and structures are private to the extension now.
+
+  b. ext/hash
+    - The hash extension is now always available, allowing extensions to rely
+	  on its functionality to be available without compile time checks.

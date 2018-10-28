@@ -9,8 +9,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /* Prototype  : mixed getcwd(void)
- * Description: Gets the current directory 
- * Source code: ext/standard/dir.c 
+ * Description: Gets the current directory
+ * Source code: ext/standard/dir.c
  */
 
 /*

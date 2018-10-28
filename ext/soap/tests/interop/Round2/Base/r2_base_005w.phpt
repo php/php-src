@@ -2,7 +2,6 @@
 SOAP Interop Round2 base 005 (php/wsdl): echoString(utf-8)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
-<?php if (!function_exists('utf8_encode')) die('skip utf8_encode() not available'); ?>
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

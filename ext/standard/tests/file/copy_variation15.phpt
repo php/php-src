@@ -40,7 +40,7 @@ chmod($dir, 0555);  //dir without write permissions
 
 $dest = $dir."/copy_copy_variation15.tmp";
 
-var_dump( copy($file, $dir."/copy_copy_variation15.tmp") ); 
+var_dump( copy($file, $dir."/copy_copy_variation15.tmp") );
 var_dump( file_exists($dir."/copy_copy_variation15_dir.tmp") );
 var_dump( filesize($file) );  //size of source
 
@@ -48,13 +48,11 @@ chmod($dir, $old_perms);
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_variation15.tmp");
 rmdir(dirname(__FILE__)."/copy_variation15");
 ?>
-
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of file in a dir which doesn't have write permissions ***
 Warning: copy(%s): %s

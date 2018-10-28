@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php_filter.h"
 #include "filter_private.h"
 #include "zend_smart_str.h"

@@ -2,14 +2,14 @@
 Test image_type_to_mime_type() function : usage variations - Passing IMAGETYPE_ICO and IMAGETYPE_SWC
 --SKIPIF--
 <?php
-	if (!defined("IMAGETYPE_SWC") || !defined("IMAGETYPE_ICO") || !extension_loaded('zlib')) {
-		die("skip zlib extension is not available or IMAGETYPE_SWC/IMAGETYPE_ICO is not defined ");
+	if (!defined("IMAGETYPE_SWC") || !extension_loaded('zlib')) {
+		die("skip zlib extension is not available or IMAGETYPE_SWC is not defined ");
 	}
 ?>
 --FILE--
 <?php
 /* Prototype  : string image_type_to_mime_type(int imagetype)
- * Description: Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype 
+ * Description: Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype
  * Source code: ext/standard/image.c
  */
 

@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("readline", "Readline support", "yes");
@@ -13,4 +12,3 @@ if (PHP_READLINE != "no") {
 		WARNING("readline not enabled; libraries and headers not found");
 	}
 }
-

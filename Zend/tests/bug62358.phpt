@@ -1,7 +1,7 @@
 --TEST--
 Bug #62358 (Segfault when using traits a lot)
 --FILE--
-<?php 
+<?php
 
 trait T {
     public function foo() {
@@ -19,7 +19,7 @@ abstract class A implements I{
 
 class B extends A {
    public function foo($var) {
-   } 
+   }
 }
 ?>
 --EXPECTF--

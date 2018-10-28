@@ -26,7 +26,7 @@ foreach ($values as $value) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(17) "01-23-45-67-89-ab"
 string(17) "01-23-45-67-89-ab"
 bool(false)

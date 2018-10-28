@@ -13,7 +13,7 @@ var_dump(metaphone("valid phrase", 0));
 var_dump(metaphone("valid phrase", 10000));
 
 $array = array(
-"They fell forward, grovelling heedlessly on the cold earth.", 
+"They fell forward, grovelling heedlessly on the cold earth.",
 "But the shadow of horror wheeled and returned, passing lower now, right above them, sweeping the fen-reek with its ghastly wings.",
 "And then it was gone, flying back to Mordor with the speed of the wrath of Sauron; and behind it the wind roared away, leaving the Dead Marshes bare and bleak.",
 "The naked waste, as far as the eye could pierce, even to the distant menace of the mountains, was dappled with the fitful moonlight."
@@ -25,7 +25,7 @@ foreach($array as $str) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: metaphone() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 string(0) ""

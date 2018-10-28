@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* Heavily borrowed from md5.c & sha1.c of PHP archival fame
    Note that ripemd laughs in the face of logic and uses
    little endian byte ordering */
@@ -257,7 +255,7 @@ static void RIPEMD128Transform(uint32_t state[4], const unsigned char block[64])
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -355,7 +353,7 @@ static void RIPEMD256Transform(uint32_t state[8], const unsigned char block[64])
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -454,7 +452,7 @@ static void RIPEMD160Transform(uint32_t state[5], const unsigned char block[64])
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -562,7 +560,7 @@ static void RIPEMD320Transform(uint32_t state[10], const unsigned char block[64]
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD320Update(PHP_RIPEMD320_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD320Update(PHP_RIPEMD320_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 

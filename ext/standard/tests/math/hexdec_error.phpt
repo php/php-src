@@ -3,7 +3,7 @@ Test hexdec() - wrong params test hexdec()
 --FILE--
 <?php
 /* Prototype  : number hexdec  ( string $hex_string  )
- * Description: Returns the decimal equivalent of the hexadecimal number represented by the hex_string  argument. 
+ * Description: Returns the decimal equivalent of the hexadecimal number represented by the hex_string  argument.
  * Source code: ext/standard/math.c
  */
 

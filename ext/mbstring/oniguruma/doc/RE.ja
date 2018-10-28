@@ -1,4 +1,4 @@
-鬼車 正規表現 Version 6.8.0    2018/04/13
+鬼車 正規表現 Version 6.8.0    2018/07/26
 
 使用文法: ONIG_SYNTAX_ONIGURUMA (既定値)
 
@@ -219,7 +219,9 @@
 7. 拡張式集合
 
   (?#...)           注釈
-  (?imxWDSP-imxWDSP)      孤立オプション
+
+  (?imxWDSP-imxWDSP:式)   式オプション
+
                             i: 大文字小文字照合
                             m: 複数行
                             x: 拡張形式
@@ -231,7 +233,11 @@
                                (alnum, alpha, blank, cntrl, digit, graph,
                                 lower, print, punct, space, upper, xdigit, word)
 
-  (?imxWDSP-imxWDSP:式)   式オプション
+  (?imxWDSP-imxWDSP)  孤立オプション
+
+                      * これは次の')'またはパターンの終わりまでのグループを形成する
+                        /ab(?i)c|def|gh/ == /ab(?i:c|def|gh)/
+
 
   (式)              捕獲式集合
   (?:式)            非捕獲式集合
@@ -485,7 +491,6 @@
 
    + \N{name}
    + \l,\u,\L,\U,\C
-   + (?{code})
    + (??{code})
 
    * \Q...\E

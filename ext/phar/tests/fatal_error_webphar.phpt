@@ -9,7 +9,7 @@ SCRIPT_NAME=/fatal_error_webphar.php
 REQUEST_URI=/fatal_error_webphar.php/index.php
 PATH_INFO=/index.php
 --FILE_EXTERNAL--
-files/pear2coverage.phar.php
+files/pear2coverage.phar
 --EXPECTHEADERS--
 Content-type: text/html; charset=UTF-8
 --EXPECTF--

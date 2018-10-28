@@ -1,7 +1,7 @@
 --TEST--
 Gettext basic test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("skip\n");
 	}
@@ -10,7 +10,7 @@ Gettext basic test
 	}
 ?>
 --FILE--
-<?php // $Id$
+<?php
 
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'fi_FI');

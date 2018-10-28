@@ -1,9 +1,9 @@
 --TEST--
-Test array_key_exists() function : basic functionality 
+Test array_key_exists() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */

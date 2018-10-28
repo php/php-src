@@ -2,11 +2,6 @@
 Bug #48203 (Crash when CURLOPT_STDERR is set to regular file)
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
-<?php
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-    die('skip now for Windows');
-}
-?>
 --FILE--
 <?php
 include 'server.inc';
@@ -29,6 +24,8 @@ echo "Ok\n";
 --CLEAN--
 <?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>
 --EXPECTF--
-Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %sbug48203.php on line %d
+Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
 %A
+Hello World!
+Hello World!* Closing connection 0
 Ok

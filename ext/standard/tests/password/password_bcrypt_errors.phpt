@@ -41,5 +41,3 @@ NULL
 
 Warning: password_hash(): Invalid bcrypt cost parameter specified: 0 in %s on line %d
 NULL
-
-

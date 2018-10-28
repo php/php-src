@@ -1,8 +1,8 @@
 --TEST--
-Bug #37251 (deadlock when custom error handler is to catch array type hint error) 
+Bug #37251 (deadlock when custom error handler is to catch array type hint error)
 --FILE--
 <?php
-class Foo {	
+class Foo {
 	function bar(array $foo) {
 	}
 }

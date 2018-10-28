@@ -1,7 +1,7 @@
 --TEST--
 PDO_Firebird: Bug #74462 Returns only NULLs for boolean fields
 --SKIPIF--
-<?php if (!extension_loaded('interbase') || !extension_loaded('pdo_firebird')) die('skip'); 
+<?php if (!extension_loaded('interbase') || !extension_loaded('pdo_firebird')) die('skip');
 ?>
 --FILE--
 <?php

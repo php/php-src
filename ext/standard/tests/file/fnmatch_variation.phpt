@@ -8,8 +8,8 @@ if (!function_exists('fnmatch'))
 --FILE--
 <?php
 /* Prototype: bool fnmatch ( string $pattern, string $string [, int $flags] )
-   Description: fnmatch() checks if the passed string would match 
-     the given shell wildcard pattern. 
+   Description: fnmatch() checks if the passed string would match
+     the given shell wildcard pattern.
 */
 
 echo "*** Testing fnmatch() with file and various patterns ***\n";
@@ -43,7 +43,7 @@ $pattern_arr = array(
 17 => "?match?",
 18 => "match.tmp",
 19 => "/match.tmp",
-20 => "/match.tmp/", 
+20 => "/match.tmp/",
 21 => 'match.tmp',
 22 => 'match.tmp\0',
 23 => "match.tmp\0",

@@ -38,7 +38,6 @@ if (defined("MCAST_JOIN_SOURCE_GROUP")) {
 	    die('skip protocol independent multicast API is available.');
 	}
 }
-
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";

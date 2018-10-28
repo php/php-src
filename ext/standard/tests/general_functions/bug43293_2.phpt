@@ -10,4 +10,3 @@ var_dump(getopt("abcd"));
 --EXPECT--
 array(0) {
 }
-

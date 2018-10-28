@@ -3,14 +3,14 @@ Test date_isodate_set() function : usage variation - Passing unexpected values t
 --FILE--
 <?php
 /* Prototype  : DateTime date_isodate_set  ( DateTime $object  , int $year  , int $week  [, int $day  ] )
- * Description: Set a date according to the ISO 8601 standard - using weeks and day offsets rather than specific dates. 
+ * Description: Set a date according to the ISO 8601 standard - using weeks and day offsets rather than specific dates.
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::setISODate
  */
 
 echo "*** Testing date_isodate_set() : usage variation -  unexpected values to third argument \$week***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -90,8 +90,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 

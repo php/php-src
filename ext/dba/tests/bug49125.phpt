@@ -1,7 +1,7 @@
 --TEST--
 Bug #49125 (Error in dba_exists C code)
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'db4';
 	require_once(dirname(__FILE__) .'/skipif.inc');
 ?>
@@ -23,8 +23,8 @@ dba_close($db);
 
 ?>
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECT--
 bool(true)

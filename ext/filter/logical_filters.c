@@ -18,8 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php_filter.h"
 #include "filter_private.h"
 #include "ext/standard/url.h"
@@ -41,7 +39,7 @@
    	var_name = 0; \
 	var_name##_set = 0; \
 	if (option_array) { \
-		if ((option_val = zend_hash_str_find(HASH_OF(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
+		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
 			var_name = zval_get_long(option_val); \
 			var_name##_set = 1; \
 		} \
@@ -54,7 +52,7 @@
 	var_name##_set = 0; \
 	var_name##_len = 0; \
 	if (option_array) { \
-		if ((option_val = zend_hash_str_find(HASH_OF(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
+		if ((option_val = zend_hash_str_find_deref(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
 			if (Z_TYPE_P(option_val) == IS_STRING) { \
 				var_name = Z_STRVAL_P(option_val); \
 				var_name##_len = Z_STRLEN_P(option_val); \
@@ -69,7 +67,7 @@
 	var_name = NULL; \
 	var_name##_set = 0; \
 	if (option_array) { \
-		if ((option_val = zend_hash_str_find(HASH_OF(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
+		if ((option_val = zend_hash_str_find_deref(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
 			if (Z_TYPE_P(option_val) == IS_STRING) { \
 				var_name = Z_STR_P(option_val); \
 				var_name##_set = 1; \
@@ -539,6 +537,11 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	php_url *url;
 	size_t old_len = Z_STRLEN_P(value);
 
+	if (flags & (FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED)) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"explicit use of FILTER_FLAG_SCHEME_REQUIRED and FILTER_FLAG_HOST_REQUIRED is deprecated");
+	}
+
 	php_filter_url(value, flags, option_array, charset);
 
 	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRLEN_P(value)) {
@@ -755,7 +758,7 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 					return (blocks <= 8);
 				}
 			} else if ((str - 1) == s) {
-				/* dont allow leading : without another : following */
+				/* don't allow leading : without another : following */
 				return 0;
 			}
 		}

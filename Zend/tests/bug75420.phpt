@@ -1,5 +1,5 @@
 --TEST--
-Bug #75420 (Crash when modifing property name in __isset for BP_VAR_IS)
+Bug #75420 (Crash when modifying property name in __isset for BP_VAR_IS)
 --FILE--
 <?php
 

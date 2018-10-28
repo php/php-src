@@ -2,7 +2,6 @@
 Bug #49072 (feof never returns true for damaged file in zip)
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -20,5 +19,4 @@ while (! feof($r)) {
 }
 ?>
 --EXPECTF--
-
 Warning: fread(): Zip stream error: CRC error in %s on line %d

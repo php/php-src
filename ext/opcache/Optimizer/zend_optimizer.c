@@ -390,8 +390,6 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				(opline + 1)->op2.var == opline->result.var) {
 				return 0;
 			}
-		case ZEND_ADD_INTERFACE:
-		case ZEND_ADD_TRAIT:
 		case ZEND_INSTANCEOF:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
@@ -1483,8 +1481,11 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (func_info) {
-				zend_dfa_analyze_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa);
-				func_info->flags = func_info->ssa.cfg.flags;
+				if (zend_dfa_analyze_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa) == SUCCESS) {
+					func_info->flags = func_info->ssa.cfg.flags;
+				} else {
+					ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+				}
 			}
 		}
 
@@ -1541,7 +1542,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 
 		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
-				if (op_array->scope != ce) {
+				if (op_array->scope != ce && op_array->type == ZEND_USER_FUNCTION) {
 					zend_op_array *orig_op_array;
 					if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, name)) != NULL) {
 						HashTable *ht = op_array->static_variables;

@@ -43,4 +43,3 @@ char *phpdbg_eol_rep(int id);
 void phpdbg_eol_convert(char **str, int *len);
 
 #endif /* PHPDBG_EOL_H */
-

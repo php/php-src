@@ -8,6 +8,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 /*
  Prototype: string fgetss ( resource $handle [, int $length [, string $allowable_tags]] );
  Description: Gets line from file pointer and strip HTML tags
@@ -19,7 +21,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
     x, xb, xt
 */
 
-// include the common file related test functions 
+// include the common file related test functions
 include ("file.inc");
 
 echo "*** Testing fgetss() : usage variations ***\n";
@@ -55,23 +57,23 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
     echo "Error: failed to open file $filename!\n";
     exit();
   }
-  
+
   // rewind the file pointer to beginning of the file
   var_dump( filesize($filename) );
   var_dump( rewind($file_handle) );
   var_dump( ftell($file_handle) );
   var_dump( feof($file_handle) );
 
-  /* read entire file and strip tags */ 
+  /* read entire file and strip tags */
   echo "-- fgetss() with default length, file pointer at 0 , expected : no character should be read --\n";
   var_dump( fgetss($file_handle) ); // expected : no character should be read
   var_dump( ftell($file_handle) ); //ensure that file pointer position is not changed
   var_dump( feof($file_handle) ); // check if end of file pointer is set
-  
-  // close the file 
+
+  // close the file
   fclose($file_handle);
-   
-  // delete the file 
+
+  // delete the file
   delete_file($filename);
 } // end of for - mode_counter
 

@@ -1,15 +1,15 @@
 --TEST--
-Test posix_uname() function : error conditions 
+Test posix_uname() function : error conditions
 --SKIPIF--
-<?php 
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+<?php
+	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
 /* Prototype  : proto array posix_uname(void)
- * Description: Get system name (POSIX.1, 4.4.1) 
+ * Description: Get system name (POSIX.1, 4.4.1)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_uname() : error conditions ***\n";

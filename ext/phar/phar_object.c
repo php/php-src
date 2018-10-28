@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "phar_internal.h"
 #include "func_interceptors.h"
 

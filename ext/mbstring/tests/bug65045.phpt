@@ -17,11 +17,10 @@ $expected2 = "\xF0\xA4\xAD\xA2"."\xF0\xA4\xAD\xA2"."\xEF\xBF\xBD";
 mb_substitute_character(0xFFFD);
 var_dump(
     $expected === htmlspecialchars_decode(htmlspecialchars($str, ENT_SUBSTITUTE, 'UTF-8')),
-    $expected2 === htmlspecialchars_decode(htmlspecialchars($str2, ENT_SUBSTITUTE, 'UTF-8')), 
+    $expected2 === htmlspecialchars_decode(htmlspecialchars($str2, ENT_SUBSTITUTE, 'UTF-8')),
     $expected === mb_convert_encoding($str, 'UTF-8', 'UTF-8'),
     $expected2 === mb_convert_encoding($str2, 'UTF-8', 'UTF-8')
 );
-
 --EXPECT--
 bool(true)
 bool(true)

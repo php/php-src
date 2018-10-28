@@ -90,7 +90,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'message'
 isPublic: yes
@@ -98,7 +98,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'sqlstate'
 isPublic: yes
@@ -106,7 +106,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 Default property 'errno'
 Default property 'message'
 Default property 'sqlstate'

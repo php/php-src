@@ -13,10 +13,7 @@ var_dump(IntlBreakIterator::createSentenceInstance(NULL, 2));
 var_dump(IntlBreakIterator::createCharacterInstance(NULL, 2));
 var_dump(IntlBreakIterator::createTitleInstance(NULL, 2));
 var_dump(IntlBreakIterator::createLineInstance(NULL, 2));
-
-
 --EXPECTF--
-
 Warning: IntlBreakIterator::createWordInstance() expects parameter 1 to be string, array given in %s on line %d
 
 Warning: IntlBreakIterator::createWordInstance(): breakiter_create_word_instance: bad arguments in %s on line %d

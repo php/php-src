@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - float formats with resource 
+Test fscanf() function: usage variations - float formats with resource
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - float formats with resource
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different float format types with resource ***\n"; 
+echo "*** Test fscanf(): different float format types with resource ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation10.tmp";
@@ -24,14 +24,14 @@ if($file_handle == false)
 // resource type variable
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
-  
+
 // array of resource types
 $resource_types = array (
   $fp,
   $dfp
 );
 
-$float_formats = array( "%f", 
+$float_formats = array( "%f",
                       "%hf", "%lf", "%Lf",
                       " %f", "%f ", "% f",
                       "\t%f", "\n%f", "%4f",
@@ -219,4 +219,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

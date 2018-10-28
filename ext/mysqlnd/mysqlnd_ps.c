@@ -641,39 +641,6 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, const enum_my
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 	if (stmt->result && stmt->state >= MYSQLND_STMT_PREPARED && stmt->field_count) {
-		/*
-		  We don need to copy the data from the buffers which we will clean.
-		  Because it has already been copied. See
-		  #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-		*/
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-		if (stmt->result_bind &&
-			stmt->result_zvals_separated_once == TRUE &&
-			stmt->state >= MYSQLND_STMT_USER_FETCHING)
-		{
-			/*
-			  We need to copy the data from the buffers which we will clean.
-			  The bound variables point to them only if the user has started
-			  to fetch data (MYSQLND_STMT_USER_FETCHING).
-			  We need to check 'result_zvals_separated_once' or we will leak
-			  in the following scenario
-			  prepare("select 1 from dual");
-			  execute();
-			  fetch(); <-- no binding, but that's not a problem
-			  bind_result();
-			  execute(); <-- here we will leak because we separate without need
-			  */
-			unsigned int i;
-			for (i = 0; i < stmt->field_count; i++) {
-				if (stmt->result_bind[i].bound == TRUE) {
-					zval *result = &stmt->result_bind[i].zv;
-					ZVAL_DEREF(result);
-					Z_TRY_ADDREF_P(result);
-				}
-			}
-		}
-#endif
-
 		s->m->flush(s);
 
 		/*
@@ -798,28 +765,11 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, const unsign
 
 					ZVAL_DEREF(result);
 					/* Clean what we copied last time */
-#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
 					zval_ptr_dtor(result);
-#endif
 					/* copy the type */
 					if (stmt->result_bind[i].bound == TRUE) {
 						DBG_INF_FMT("i=%u type=%u", i, Z_TYPE(current_row[i]));
-						if (Z_TYPE(current_row[i]) != IS_NULL) {
-							/*
-							  Copy the value.
-							  Pre-condition is that the zvals in the result_bind buffer
-							  have been  ZVAL_NULL()-ed or to another simple type
-							  (int, double, bool but not string). Because of the reference
-							  counting the user can't delete the strings the variables point to.
-							*/
-
-							ZVAL_COPY_VALUE(result, &current_row[i]);
-#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-							Z_TRY_ADDREF_P(result);
-#endif
-						} else {
-							ZVAL_NULL(result);
-						}
+						ZVAL_COPY(result, &current_row[i]);
 					}
 				}
 			}
@@ -903,24 +853,15 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 					zval *data = &result->unbuf->last_row_data[i];
 					zval *result = &stmt->result_bind[i].zv;
 
-					ZVAL_DEREF(result);
-					/*
-					  stmt->result_bind[i].zv has been already destructed
-					  in result->unbuf->m.free_last_data()
-					*/
-#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					zval_ptr_dtor(result);
-#endif
-					if (!Z_ISNULL_P(data)) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
-							meta->fields[i].max_length = Z_STRLEN_P(data);
-						}
-						ZVAL_COPY_VALUE(result, data);
-						/* copied data, thus also the ownership. Thus null data */
-						ZVAL_NULL(data);
-					} else {
-						ZVAL_NULL(result);
+					if (Z_TYPE_P(data) == IS_STRING && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
+						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
+
+					ZVAL_DEREF(result);
+					zval_ptr_dtor(result);
+					ZVAL_COPY_VALUE(result, data);
+					/* copied data, thus also the ownership. Thus null data */
+					ZVAL_NULL(data);
 				}
 			}
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_UNBUF);
@@ -1089,28 +1030,19 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 					zval *result = &stmt->result_bind[i].zv;
 
 					ZVAL_DEREF(result);
-					/*
-					  stmt->result_bind[i].zv has been already destructed
-					  in result->unbuf->m.free_last_data()
-					*/
-#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
 					zval_ptr_dtor(result);
-#endif
 					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, &stmt->result_bind[i].zv,
 								Z_TYPE_P(data), Z_REFCOUNTED(stmt->result_bind[i].zv)?
 							   	Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
 
-					if (!Z_ISNULL_P(data)) {
-						if ((Z_TYPE_P(data) == IS_STRING) &&
-								(meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
-							meta->fields[i].max_length = Z_STRLEN_P(data);
-						}
-						ZVAL_COPY_VALUE(result, data);
-						/* copied data, thus also the ownership. Thus null data */
-						ZVAL_NULL(data);
-					} else {
-						ZVAL_NULL(result);
+					if (Z_TYPE_P(data) == IS_STRING &&
+							(meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
+						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
+
+					ZVAL_COPY_VALUE(result, data);
+					/* copied data, thus also the ownership. Thus null data */
+					ZVAL_NULL(data);
 				}
 			}
 		} else {

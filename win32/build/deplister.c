@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /* This little application will list the DLL dependencies for a PE
  * module to it's stdout for use by distro/installer building tools */
 

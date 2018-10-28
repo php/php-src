@@ -8,7 +8,7 @@ function_exists('mb_strrpos') or die("skip mb_strrpos() is not available in this
 --FILE--
 <?php
 /* Prototype  : int mb_strrpos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of last occurrence of a string within another 
+ * Description: Find position of last occurrence of a string within another
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -69,7 +69,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -78,7 +78,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -104,7 +104,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strrpos() : usage variations ***
 

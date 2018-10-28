@@ -2019,7 +2019,10 @@ static void handle_type_narrowing(const zend_op_array *op_array, zend_ssa *ssa, 
 {
 	if (1) {
 		/* Right now, this is always a bug */
-		zend_error(E_WARNING, "Narrowing occurred during type inference. Please file a bug report on bugs.php.net");
+		int def_op_num = ssa->vars[var].definition;
+		const zend_op *def_opline = def_op_num >= 0 ? &op_array->opcodes[def_op_num] : NULL;
+		const char *def_op_name = def_opline ? zend_get_opcode_name(def_opline->opcode) : "PHI";
+		zend_error(E_WARNING, "Narrowing occurred during type inference of %s. Please file a bug report on bugs.php.net", def_op_name);
 	} else {
 		/* if new_type set resets some bits from old_type set
 		 * We have completely recalculate types of some dependent SSA variables
@@ -2555,7 +2558,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					tmp |= MAY_BE_RCN;
 				}
 			}
-			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG) {
+			if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) {
 				if (!ssa_var_info[ssa_ops[i].op1_use].has_range ||
 				    (opline->opcode == ZEND_PRE_DEC &&
 				     (ssa_var_info[ssa_ops[i].op1_use].range.underflow ||
@@ -2617,7 +2620,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
 				tmp |= MAY_BE_RC1;
 			}
-			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG) {
+			if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) {
 				if (!ssa_var_info[ssa_ops[i].op1_use].has_range ||
 				     (opline->opcode == ZEND_PRE_DEC &&
 				      (ssa_var_info[ssa_ops[i].op1_use].range.underflow ||
@@ -2824,7 +2827,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			break;
 		case ZEND_BIND_STATIC:
 			tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
-				| (opline->extended_value ? MAY_BE_REF : (MAY_BE_RC1 | MAY_BE_RCN));
+				| ((opline->extended_value & ZEND_BIND_REF) ? MAY_BE_REF : (MAY_BE_RC1 | MAY_BE_RCN));
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			break;
 		case ZEND_SEND_VAR:
@@ -2839,7 +2842,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			break;
 		case ZEND_BIND_LEXICAL:
 			if (ssa_ops[i].op2_def >= 0) {
-				if (opline->extended_value) {
+				if (opline->extended_value & ZEND_BIND_REF) {
 					tmp = t2 | MAY_BE_REF;
 				} else {
 					tmp = t2 & ~(MAY_BE_RC1|MAY_BE_RCN);
@@ -2960,8 +2963,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		}
-		case ZEND_DECLARE_CLASS:
-		case ZEND_DECLARE_INHERITED_CLASS:
 		case ZEND_DECLARE_ANON_CLASS:
 		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_ops[i].result_def);
@@ -2981,7 +2982,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						}
 						break;
 					case ZEND_FETCH_CLASS_PARENT:
-						if (op_array->scope && op_array->scope->parent) {
+						if (op_array->scope && op_array->scope->parent && (op_array->scope->ce_flags & ZEND_ACC_LINKED)) {
 							UPDATE_SSA_OBJ_TYPE(op_array->scope->parent, 0, ssa_ops[i].result_def);
 						} else {
 							UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].result_def);
@@ -3464,9 +3465,11 @@ unknown_opcode:
 
 static uint32_t get_class_entry_rank(zend_class_entry *ce) {
 	uint32_t rank = 0;
-	while (ce->parent) {
-		rank++;
-		ce = ce->parent;
+	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		while (ce->parent) {
+			rank++;
+			ce = ce->parent;
+		}
 	}
 	return rank;
 }
@@ -3487,17 +3490,17 @@ static zend_class_entry *join_class_entries(
 
 	while (rank1 != rank2) {
 		if (rank1 > rank2) {
-			ce1 = ce1->parent;
+			ce1 = !(ce1->ce_flags & ZEND_ACC_LINKED) ? NULL : ce1->parent;
 			rank1--;
 		} else {
-			ce2 = ce2->parent;
+			ce2 = !(ce2->ce_flags & ZEND_ACC_LINKED) ? NULL : ce2->parent;
 			rank2--;
 		}
 	}
 
 	while (ce1 != ce2) {
-		ce1 = ce1->parent;
-		ce2 = ce2->parent;
+		ce1 = !(ce1->ce_flags & ZEND_ACC_LINKED) ? NULL : ce1->parent;
+		ce2 = !(ce2->ce_flags & ZEND_ACC_LINKED) ? NULL : ce2->parent;
 	}
 
 	if (ce1) {

@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -444,7 +442,6 @@ static void php_xmlreader_free_prop_handler(zval *el) /* {{{ */ {
 	pefree(Z_PTR_P(el), 1);
 } /* }}} */
 
-#if LIBXML_VERSION >= 20620
 /* {{{ php_xmlreader_no_arg_string */
 static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_char_t internal_function) {
 	zval *id;
@@ -466,7 +463,6 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ php_xmlreader_set_relaxng_schema */
 static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int type) {
@@ -812,12 +808,6 @@ PHP_METHOD(xmlreader, next)
 	id = getThis();
 	intern = Z_XMLREADER_P(id);
 	if (intern != NULL && intern->ptr != NULL) {
-#if LIBXML_VERSION <= 20617
-		/* Bug in libxml prevents a next in certain cases when positioned on end of element */
-		if (xmlTextReaderNodeType(intern->ptr) == XML_READER_TYPE_END_ELEMENT) {
-			retval = xmlTextReaderRead(intern->ptr);
-		} else
-#endif
 		retval = xmlTextReaderNext(intern->ptr);
 		while (name != NULL && retval == 1) {
 			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), (xmlChar *)name)) {
@@ -901,7 +891,6 @@ PHP_METHOD(xmlreader, resetState)
 }
 */
 
-#if LIBXML_VERSION >= 20620
 /* {{{ proto string XMLReader::readInnerXml()
 Reads the contents of the current node, including child nodes and markup. */
 PHP_METHOD(xmlreader, readInnerXml)
@@ -967,7 +956,6 @@ PHP_METHOD(xmlreader, setSchema)
 #endif
 }
 /* }}} */
-#endif
 
 /* {{{ proto bool XMLReader::setParserProperty(int property, bool value)
 Sets parser property (one of the parser option constants).
@@ -1073,9 +1061,7 @@ PHP_METHOD(xmlreader, XML)
 		reader = xmlNewTextReader(inputbfr, uri);
 
 		if (reader != NULL) {
-#if LIBXML_VERSION >= 20628
 			ret = xmlTextReaderSetup(reader, NULL, uri, encoding, options);
-#endif
 			if (ret == 0) {
 				if (id == NULL) {
 					object_init_ex(return_value, xmlreader_class_entry);
@@ -1273,12 +1259,10 @@ static const zend_function_entry xmlreader_functions[] /* {{{ */ =  {
 	PHP_ME(xmlreader, open, arginfo_xmlreader_open, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	PHP_ME(xmlreader, read, arginfo_xmlreader_read, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, next, arginfo_xmlreader_next, ZEND_ACC_PUBLIC)
-#if LIBXML_VERSION >= 20620
 	PHP_ME(xmlreader, readInnerXml, arginfo_xmlreader_readInnerXml, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, readOuterXml, arginfo_xmlreader_readOuterXml, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, readString, arginfo_xmlreader_readString, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, setSchema, arginfo_xmlreader_setSchema, ZEND_ACC_PUBLIC)
-#endif
 /* Not Yet Implemented though defined in libxml as of 2.6.9dev
 	PHP_ME(xmlreader, resetState, NULL, ZEND_ACC_PUBLIC)
 */

@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "phar_internal.h"
 
 #define PHAR_FUNC(name) \
@@ -528,7 +526,7 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
 		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
 		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
-#ifdef HAVE_ST_RDEV
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
 #else
 		ZVAL_LONG(&stat_rdev, -1);
@@ -537,12 +535,12 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
 		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
 		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
 		ZVAL_LONG(&stat_blksize,-1);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
 #else
 		ZVAL_LONG(&stat_blocks,-1);
@@ -1166,4 +1164,3 @@ void phar_restore_orig_functions(void) /* {{{ */
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
-

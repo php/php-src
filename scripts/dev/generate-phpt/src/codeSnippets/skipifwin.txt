@@ -1,1 +1,0 @@
-if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test is not for Windows platforms");

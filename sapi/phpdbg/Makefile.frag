@@ -28,7 +28,7 @@ install-phpdbg: $(BUILD_BINARY)
 	@$(INSTALL) -m 0755 $(BUILD_BINARY) $(INSTALL_ROOT)$(bindir)/$(program_prefix)phpdbg$(program_suffix)$(EXEEXT)
 	@echo "Installing phpdbg man page:       $(INSTALL_ROOT)$(mandir)/man1/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
-	@$(INSTALL_DATA) $(srcdir)/phpdbg.1 $(INSTALL_ROOT)$(mandir)/man1/$(program_prefix)phpdbg$(program_suffix).1
+	@$(INSTALL_DATA) sapi/phpdbg/phpdbg.1 $(INSTALL_ROOT)$(mandir)/man1/$(program_prefix)phpdbg$(program_suffix).1
 
 clean-phpdbg:
 	@echo "Cleaning phpdbg object files ..."
@@ -39,4 +39,3 @@ test-phpdbg:
 	@$(top_builddir)/sapi/cli/php sapi/phpdbg/tests/run-tests.php --phpdbg sapi/phpdbg/phpdbg
 
 .PHONY: clean-phpdbg test-phpdbg
-

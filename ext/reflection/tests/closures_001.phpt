@@ -1,6 +1,6 @@
 --TEST--
 Reflection on closures
---FILE-- 
+--FILE--
 <?php
 
 $closure = function($a, $b = 0) { };

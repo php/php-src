@@ -3,14 +3,14 @@ Test getrusage() function : usage variation - diff data types as $who arg
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
-if (!function_exists("getrusage")) die("skip"); 
+if (!function_exists("getrusage")) die("skip");
 ?>
 --FILE--
 <?php
 /* Prototype  :  array getrusage  ([ int $who  ] )
  * Description: Gets the current resource usages
  * Source code: ext/standard/microtime.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
@@ -50,13 +50,13 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // string data
 /*16*/ "0",
        '1',
        "1232456",
        "1.23E4",
-       
+
        // undefined data
 /*20*/ @$undefined_var,
 

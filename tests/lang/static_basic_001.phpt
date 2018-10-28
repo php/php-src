@@ -5,12 +5,12 @@ Static keyword - basic tests
 
 echo "\nSame variable used as static and non static.\n";
 function staticNonStatic() {
-	echo "---------\n";	
+	echo "---------\n";
 	$a=0;
-	echo "$a\n";	
+	echo "$a\n";
 	static $a=10;
 	echo "$a\n";
-	$a++;	
+	$a++;
 }
 staticNonStatic();
 staticNonStatic();
@@ -46,7 +46,6 @@ for ($i=0; $i<3; $i++) {
 }
 ?>
 --EXPECT--
-
 Same variable used as static and non static.
 ---------
 0

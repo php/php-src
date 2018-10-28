@@ -8,8 +8,8 @@ function_exists('iconv_get_encoding') or die("skip iconv_get_encoding() is not a
 --FILE--
 <?php
 /* Prototype  : mixed iconv_get_encoding([string type])
- * Description: Get internal encoding and output encoding for ob_iconv_handler() 
- * Source code: ext/iconv/iconv.c 
+ * Description: Get internal encoding and output encoding for ob_iconv_handler()
+ * Source code: ext/iconv/iconv.c
  */
 
 /*
@@ -63,7 +63,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -72,7 +72,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

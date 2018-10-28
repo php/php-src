@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "zend_smart_str_public.h"
 
@@ -39,5 +37,3 @@ extern PHP_MSHUTDOWN_FUNCTION(cli_readline);
 extern PHP_MINFO_FUNCTION(cli_readline);
 
 ZEND_EXTERN_MODULE_GLOBALS(cli_readline)
-
-

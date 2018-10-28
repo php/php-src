@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* {{{ includes/startup/misc */
 
 #include "php.h"
@@ -27,10 +25,6 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
-
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 
 #if HAVE_UNISTD_H
 #include <unistd.h>

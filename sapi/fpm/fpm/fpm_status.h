@@ -1,5 +1,3 @@
-
-	/* $Id$ */
 	/* (c) 2009 Jerome Loyet */
 
 #ifndef FPM_STATUS_H

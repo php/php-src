@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*  Based on the public domain algorithm found at
 	http://www.isthe.com/chongo/tech/comp/fnv/index.html */
 
@@ -78,13 +76,13 @@ PHP_HASH_API void PHP_FNV132Init(PHP_FNV132_CTX *context)
 /* }}} */
 
 PHP_HASH_API void PHP_FNV132Update(PHP_FNV132_CTX *context, const unsigned char *input,
-		unsigned int inputLen)
+		size_t inputLen)
 {
 	context->state = fnv_32_buf((void *)input, inputLen, context->state, 0);
 }
 
 PHP_HASH_API void PHP_FNV1a32Update(PHP_FNV132_CTX *context, const unsigned char *input,
-		unsigned int inputLen)
+		size_t inputLen)
 {
 	context->state = fnv_32_buf((void *)input, inputLen, context->state, 1);
 }
@@ -113,13 +111,13 @@ PHP_HASH_API void PHP_FNV164Init(PHP_FNV164_CTX *context)
 /* }}} */
 
 PHP_HASH_API void PHP_FNV164Update(PHP_FNV164_CTX *context, const unsigned char *input,
-		unsigned int inputLen)
+		size_t inputLen)
 {
 	context->state = fnv_64_buf((void *)input, inputLen, context->state, 0);
 }
 
 PHP_HASH_API void PHP_FNV1a64Update(PHP_FNV164_CTX *context, const unsigned char *input,
-		unsigned int inputLen)
+		size_t inputLen)
 {
 	context->state = fnv_64_buf((void *)input, inputLen, context->state, 1);
 }

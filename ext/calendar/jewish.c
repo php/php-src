@@ -272,7 +272,7 @@
 #define HALAKIM_PER_METONIC_CYCLE (HALAKIM_PER_LUNAR_CYCLE * (12 * 19 + 7))
 
 #define JEWISH_SDN_OFFSET 347997
-#define JEWISH_SDN_MAX 324542846L /* 12/13/887605, greater value raises interger overflow */
+#define JEWISH_SDN_MAX 324542846L /* 12/13/887605, greater value raises integer overflow */
 #define NEW_MOON_OF_CREATION 31524
 
 #define SUNDAY    0
@@ -340,38 +340,38 @@ const char * const JewishMonthName[14] =
 const char * const JewishMonthHebNameLeap[14] =
 {
 	"",
-	"תשרי",
-	"חשון",
-	"כסלו",
-	"טבת",
-	"שבט",
-	"אדר א'",
-	"אדר ב'",
-	"ניסן",
-	"אייר",
-	"סיון",
-	"תמוז",
-	"אב",
-	"אלול"
+	"\xFA\xF9\xF8\xE9",
+	"\xE7\xF9\xE5\xEF",
+	"\xEB\xF1\xEC\xE5",
+	"\xE8\xE1\xFA",
+	"\xF9\xE1\xE8",
+	"\xE0\xE3\xF8 \xE0'",
+	"\xE0\xE3\xF8 \xE1'",
+	"\xF0\xE9\xF1\xEF",
+	"\xE0\xE9\xE9\xF8",
+	"\xF1\xE9\xe5\xEF",
+	"\xFA\xEE\xE5\xE6",
+	"\xE0\xE1",
+	"\xE0\xEC\xE5\xEC"
 };
 
 /* names for regular year */
 const char * const JewishMonthHebName[14] =
 {
 	"",
-	"תשרי",
-	"חשון",
-	"כסלו",
-	"טבת",
-	"שבט",
+	"\xFA\xF9\xF8\xE9",
+	"\xE7\xF9\xE5\xEF",
+	"\xEB\xF1\xEC\xE5",
+	"\xE8\xE1\xFA",
+	"\xF9\xE1\xE8",
 	"",
-	"אדר",
-	"ניסן",
-	"אייר",
-	"סיון",
-	"תמוז",
-	"אב",
-	"אלול"
+	"\xE0\xE3\xF8",
+	"\xF0\xE9\xF1\xEF",
+	"\xE0\xE9\xE9\xF8",
+	"\xF1\xE9\xE5\xEF",
+	"\xFA\xEE\xE5\xE6",
+	"\xE0\xE1",
+	"\xE0\xEC\xE5\xEC"
 };
 
 /************************************************************************

@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -66,4 +65,3 @@ bc_is_near_zero (num, scale)
   else
     return TRUE;
 }
-

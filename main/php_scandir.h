@@ -17,16 +17,10 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_SCANDIR_H
 #define PHP_SCANDIR_H
 
 #include <sys/types.h>
-
-#ifdef HAVE_SYS_DIR_H
-#include <sys/dir.h>
-#endif
 
 #ifdef PHP_WIN32
 #include "config.w32.h"

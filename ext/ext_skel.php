@@ -138,7 +138,7 @@ function process_args($argv, $argc) {
 				if (!isset($argv[$i + 1]) || ($argv[$i + 1]{0} == '-' && $argv[$i + 1]{1} == '-')) {
 					error('Argument "' . $val . '" expects a value, none passed');
 				} else if ($opt == 'dir' && empty($argv[$i + 1])) {
-					continue;
+					continue 2;
 				}
 
 				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) . DIRECTORY_SEPARATOR : $argv[$i + 1]);
@@ -324,7 +324,7 @@ if ($argc < 1) {
 $options = process_args($argv, $argc);
 
 if (!$options['dir'] || !is_dir($options['dir'])) {
-	error('The selected output directory does not exists');
+	error('The selected output directory does not exist');
 } else if (is_dir($options['dir'] . $options['ext'])) {
 	error('There is already a folder named "' . $options['ext'] . '" in the output directory');
 } else if (!mkdir($options['dir'] . $options['ext'])) {

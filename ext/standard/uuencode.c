@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /*
  * Portions of this code are based on Berkeley's uuencode/uudecode
  * implementation.

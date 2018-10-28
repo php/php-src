@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_PORTABILITY_H
 #define ZEND_PORTABILITY_H
 
@@ -56,9 +54,7 @@
 # include <unix.h>
 #endif
 
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
+#include <stdarg.h>
 
 #ifdef HAVE_DLFCN_H
 # include <dlfcn.h>
@@ -72,7 +68,7 @@
 # include <alloca.h>
 #endif
 
-#if defined(ZEND_WIN32)
+#if defined(ZEND_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
 

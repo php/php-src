@@ -332,14 +332,14 @@ PHP_MINFO_FUNCTION(enchant)
 #define PHP_ENCHANT_GET_BROKER	\
 	pbroker = (enchant_broker *)zend_fetch_resource(Z_RES_P(broker), "enchant_broker", le_enchant_broker); \
 	if (!pbroker || !pbroker->pbroker) {	\
-		php_error_docref(NULL, E_WARNING, "%s", "Resource broker invalid");	\
+		php_error_docref(NULL, E_WARNING, "Resource broker invalid");	\
 		RETURN_FALSE;	\
 	}
 
 #define PHP_ENCHANT_GET_DICT	\
 	pdict = (enchant_dict *)zend_fetch_resource(Z_RES_P(dict), "enchant_dict", le_enchant_dict); \
 	if (!pdict || !pdict->pdict) {	\
-		php_error_docref(NULL, E_WARNING, "%s", "Invalid dictionary resource.");	\
+		php_error_docref(NULL, E_WARNING, "Invalid dictionary resource.");	\
 		RETURN_FALSE;	\
 	}
 

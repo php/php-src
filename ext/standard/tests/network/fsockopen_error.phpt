@@ -1,11 +1,11 @@
 --TEST--
-Test fsockopen() function : error conditions 
+Test fsockopen() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto resource fsockopen(string hostname, int port [, int errno [, string errstr [, float timeout]]])
- * Description: Open Internet or Unix domain socket connection 
+ * Description: Open Internet or Unix domain socket connection
  * Source code: ext/standard/fsock.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 

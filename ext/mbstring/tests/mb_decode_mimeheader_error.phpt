@@ -1,5 +1,5 @@
 --TEST--
-Test mb_decode_mimeheader() function : error conditions 
+Test mb_decode_mimeheader() function : error conditions
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,9 +8,9 @@ function_exists('mb_decode_mimeheader') or die("skip mb_decode_mimeheader() is n
 --FILE--
 <?php
 /* Prototype  : string mb_decode_mimeheader(string string)
- * Description: Decodes the MIME "encoded-word" in the string 
+ * Description: Decodes the MIME "encoded-word" in the string
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_decode_mimeheader() : error conditions ***\n";

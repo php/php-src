@@ -34,6 +34,7 @@
 #endif
 
 #include "config.h"
+#include <stddef.h>
 
 #ifdef ONIG_ESCAPE_UCHAR_COLLISION
 #undef ONIG_ESCAPE_UCHAR_COLLISION
@@ -158,9 +159,8 @@ extern int onigenc_mb2_is_code_ctype P_((OnigEncoding enc, OnigCodePoint code, u
 extern int onigenc_mb4_code_to_mbclen P_((OnigCodePoint code));
 extern int onigenc_mb4_code_to_mbc P_((OnigEncoding enc, OnigCodePoint code, UChar *buf));
 extern int onigenc_mb4_is_code_ctype P_((OnigEncoding enc, OnigCodePoint code, unsigned int ctype));
-extern struct PropertyNameCtype* euc_jp_lookup_property_name P_((register const char *str, register unsigned int len));
-extern struct PropertyNameCtype* sjis_lookup_property_name P_((register const char *str, register unsigned int len));
-/* extern const struct PropertyNameCtype* unicode_lookup_property_name P_((register const char *str, register unsigned int len)); */
+extern struct PropertyNameCtype* onigenc_euc_jp_lookup_property_name P_((register const char *str, register size_t len));
+extern struct PropertyNameCtype* onigenc_sjis_lookup_property_name P_((register const char *str, register size_t len));
 
 /* in enc/unicode.c */
 extern int onigenc_unicode_is_code_ctype P_((OnigCodePoint code, unsigned int ctype));
@@ -210,10 +210,10 @@ struct ByUnfoldKey {
   short int     fold_len;
 };
 
-extern const struct ByUnfoldKey* unicode_unfold_key(OnigCodePoint code);
-extern int unicode_fold1_key(OnigCodePoint code[]);
-extern int unicode_fold2_key(OnigCodePoint code[]);
-extern int unicode_fold3_key(OnigCodePoint code[]);
+extern const struct ByUnfoldKey* onigenc_unicode_unfold_key(OnigCodePoint code);
+extern int onigenc_unicode_fold1_key(OnigCodePoint code[]);
+extern int onigenc_unicode_fold2_key(OnigCodePoint code[]);
+extern int onigenc_unicode_fold3_key(OnigCodePoint code[]);
 
 extern int onig_codes_cmp(OnigCodePoint a[], OnigCodePoint b[], int n);
 extern int onig_codes_byte_at(OnigCodePoint code[], int at);

@@ -1,5 +1,5 @@
 --TEST--
-ReflectionClass::getStaticPropertyValue() 
+ReflectionClass::getStaticPropertyValue()
 --CREDITS--
 Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>
@@ -42,7 +42,7 @@ try {
 
 try {
 	var_dump($rcA->getStaticPropertyValue("privateOverridden"));
-	echo "you should not see this";	
+	echo "you should not see this";
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }

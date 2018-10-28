@@ -2,7 +2,7 @@
 ReflectionClass::export() - various parameters
 --FILE--
 <?php
-Class A { 
+Class A {
 	public function privf(Exception $a) {}
 	public function pubf(A $a,
 						 $b,

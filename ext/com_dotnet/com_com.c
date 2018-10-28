@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -233,7 +231,7 @@ PHP_FUNCTION(com_create_instance)
 
 		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Failed to create COM object `%s': %s", module_name, werr);
-		LocalFree(werr);
+		php_win32_error_msg_free(werr);
 
 		php_com_throw_exception(res, msg);
 		efree(msg);
@@ -391,7 +389,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 			case DISP_E_TYPEMISMATCH:
 				desc = php_win32_error_to_msg(hr);
 				spprintf(&msg, 0, "Parameter %d: %s", arg_err, desc);
-				LocalFree(desc);
+				php_win32_error_msg_free(desc);
 				break;
 
 			case DISP_E_BADPARAMCOUNT:
@@ -407,7 +405,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 			default:
 				desc = php_win32_error_to_msg(hr);
 				spprintf(&msg, 0, "Error [0x%08x] %s", hr, desc);
-				LocalFree(desc);
+				php_win32_error_msg_free(desc);
 				break;
 		}
 
@@ -487,11 +485,10 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 	hr = php_com_get_id_of_name(obj, f->function_name->val, f->function_name->len, &dispid);
 
 	if (FAILED(hr)) {
-		char *winerr = NULL;
 		char *msg = NULL;
-		winerr = php_win32_error_to_msg(hr);
+		char *winerr = php_win32_error_to_msg(hr);
 		spprintf(&msg, 0, "Unable to lookup `%s': %s", f->function_name->val, winerr);
-		LocalFree(winerr);
+		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
 		return FAILURE;
@@ -650,15 +647,14 @@ int php_com_do_invoke(php_com_dotnet_object *obj, char *name, size_t namelen,
 {
 	DISPID dispid;
 	HRESULT hr;
-	char *winerr = NULL;
 	char *msg = NULL;
 
 	hr = php_com_get_id_of_name(obj, name, namelen, &dispid);
 
 	if (FAILED(hr)) {
-		winerr = php_win32_error_to_msg(hr);
+		char *winerr = php_win32_error_to_msg(hr);
 		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
-		LocalFree(winerr);
+		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
 		return FAILURE;

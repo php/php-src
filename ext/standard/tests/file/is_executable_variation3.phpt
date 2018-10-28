@@ -41,7 +41,7 @@ $invalid_files = array(
   @array(),
   @$file_handle
 );
-/* loop through to test each element in the above array 
+/* loop through to test each element in the above array
    is an executable file */
 foreach( $invalid_files as $invalid_file ) {
   var_dump( is_executable($invalid_file) );
@@ -66,4 +66,3 @@ Warning: is_executable() expects parameter 1 to be a valid path, array given in 
 NULL
 bool(false)
 Done
-

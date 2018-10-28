@@ -18,6 +18,6 @@ if($a==0) {
 		echo "bad";
 	}
 }
-?>	
+?>
 --EXPECT--
 good

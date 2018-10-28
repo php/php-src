@@ -8,7 +8,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
- 
+
 define("MAX_64Bit", 9223372036854775807);
 define("MAX_32Bit", 2147483647);
 define("MIN_64Bit", -9223372036854775807 - 1);
@@ -25,7 +25,7 @@ foreach ($longVals as $longVal) {
    echo "--- testing: $longVal ---\n";
    var_dump(tan($longVal));
 }
-   
+
 ?>
 ===DONE===
 --EXPECT--
@@ -60,4 +60,3 @@ float(-84.739)
 --- testing: -9.2234E+18 ---
 float(-84.739)
 ===DONE===
-

@@ -4,7 +4,7 @@ Introducing new private variables of the same name in a subclass is ok, and does
 <?php
 
 class Base {
-  protected $hello;    
+  protected $hello;
 }
 
 trait THello1 {
@@ -27,7 +27,7 @@ class Notice extends Base {
 }
 echo "POST-CLASS-GUARD2\n";
 ?>
---EXPECT--	
+--EXPECT--
 PRE-CLASS-GUARD
 POST-CLASS-GUARD
 POST-CLASS-GUARD2

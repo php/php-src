@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include <math.h>				/* modf() */
 #include "php.h"
 #include "ext/standard/head.h"
@@ -435,7 +433,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 
 	currarg = 1;
 
-	while (inpos < Z_STRLEN(args[format_offset])) {
+	while (inpos < format_len) {
 		int expprec = 0;
 		zval *tmp;
 

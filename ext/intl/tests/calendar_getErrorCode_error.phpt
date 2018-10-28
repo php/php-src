@@ -15,9 +15,7 @@ $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 var_dump($c->getErrorCode(array()));
 
 var_dump(intlcal_get_error_code(null));
-
 --EXPECTF--
-
 Warning: IntlCalendar::getErrorCode() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlCalendar::getErrorCode(): intlcal_get_error_code: bad arguments in %s on line %d

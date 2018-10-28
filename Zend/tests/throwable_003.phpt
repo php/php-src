@@ -7,5 +7,4 @@ Aaron Piotrowski <aaron@icicle.io>
 class Failure implements Throwable {}
 ?>
 --EXPECTF--
-
 Fatal error: Class Failure cannot implement interface Throwable, extend Exception or Error instead in %s on line %d

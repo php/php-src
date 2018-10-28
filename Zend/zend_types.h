@@ -19,8 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
@@ -205,6 +203,7 @@ struct _zval_struct {
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
 		uint32_t     access_flags;         /* class constant access flags */
 		uint32_t     property_guard;       /* single property guard */
+		uint32_t     constant_flags;       /* constant flags */
 		uint32_t     extra;                /* not further specified */
 	} u2;
 };
@@ -451,6 +450,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_PROPERTY_GUARD(zval)		(zval).u2.property_guard
 #define Z_PROPERTY_GUARD_P(zval_p)	Z_PROPERTY_GUARD(*(zval_p))
 
+#define Z_CONSTANT_FLAGS(zval)		(zval).u2.constant_flags
+#define Z_CONSTANT_FLAGS_P(zval_p)	Z_CONSTANT_FLAGS(*(zval_p))
+
 #define Z_EXTRA(zval)				(zval).u2.extra
 #define Z_EXTRA_P(zval_p)			Z_EXTRA(*(zval_p))
 
@@ -510,7 +512,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_GC_TYPE_INFO(zval)		GC_TYPE_INFO(Z_COUNTED(zval))
 #define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
 
-/* zval.value->gc.u.v.flags (common flags) */
+/* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
 #define GC_COLLECTABLE				(1<<4)
 #define GC_PROTECTED                (1<<5) /* used for recursion detection */
 #define GC_IMMUTABLE                (1<<6) /* can't be canged in place */
@@ -588,7 +590,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_REFCOUNTED_P(zval_p)		Z_REFCOUNTED(*(zval_p))
 
 /* deprecated: (COPYABLE is the same as IS_ARRAY) */
-#define Z_COPYABLE(zval)			((Z_TYPE(zval) == IS_ARRAY)
+#define Z_COPYABLE(zval)			(Z_TYPE(zval) == IS_ARRAY)
 #define Z_COPYABLE_P(zval_p)		Z_COPYABLE(*(zval_p))
 
 /* deprecated: (IMMUTABLE is the same as IS_ARRAY && !REFCOUNTED) */
@@ -608,7 +610,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_OPT_REFCOUNTED_P(zval_p)	Z_OPT_REFCOUNTED(*(zval_p))
 
 /* deprecated: (COPYABLE is the same as IS_ARRAY) */
-#define Z_OPT_COPYABLE(zval)		((Z_OPT_TYPE(zval) == IS_ARRAY)
+#define Z_OPT_COPYABLE(zval)		(Z_OPT_TYPE(zval) == IS_ARRAY)
 #define Z_OPT_COPYABLE_P(zval_p)	Z_OPT_COPYABLE(*(zval_p))
 
 #define Z_OPT_ISREF(zval)			(Z_OPT_TYPE(zval) == IS_REFERENCE)
@@ -667,9 +669,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(&(zval))
 #define Z_OBJPROP_P(zval_p)			Z_OBJPROP(*(zval_p))
-
-#define Z_OBJDEBUG(zval,tmp)		(Z_OBJ_HANDLER((zval),get_debug_info)?Z_OBJ_HANDLER((zval),get_debug_info)(&(zval),&tmp):(tmp=0,Z_OBJ_HANDLER((zval),get_properties)?Z_OBJPROP(zval):NULL))
-#define Z_OBJDEBUG_P(zval_p,tmp)	Z_OBJDEBUG(*(zval_p), tmp)
 
 #define Z_RES(zval)					(zval).value.res
 #define Z_RES_P(zval_p)				Z_RES(*zval_p)
@@ -953,8 +952,8 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 extern ZEND_API zend_bool zend_rc_debug;
 # define ZEND_RC_MOD_CHECK(p) do { \
 		if (zend_rc_debug) { \
-			ZEND_ASSERT(!((p)->u.v.flags & GC_IMMUTABLE)); \
-			ZEND_ASSERT(((p)->u.v.flags & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \
+			ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \
+			ZEND_ASSERT((zval_gc_flags((p)->u.type_info) & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \
 		} \
 	} while (0)
 # define GC_MAKE_PERSISTENT_LOCAL(p) do { \

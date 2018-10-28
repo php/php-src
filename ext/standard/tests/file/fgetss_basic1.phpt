@@ -2,6 +2,8 @@
 Test fgetss() function : Basic functionality - read modes only
 --FILE--
 <?php
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 /*
  Prototype: string fgetss ( resource $handle [, int $length [, string $allowable_tags]] );
  Description: Gets line from file pointer and strip HTML tags
@@ -9,7 +11,7 @@ Test fgetss() function : Basic functionality - read modes only
 
 /* test fgetss with all read modes */
 
-// include the common file related test functions 
+// include the common file related test functions
 include ("file.inc");
 
 echo "*** Testing fgetss() : Basic operations ***\n";
@@ -32,33 +34,33 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   echo "\n-- Testing fgetss() with file opened using $file_modes[$mode_counter] mode --\n";
 
   /* create an empty file and write the strings with tags */
-  $filename = dirname(__FILE__)."/fgetss_basic1.tmp"; 
+  $filename = dirname(__FILE__)."/fgetss_basic1.tmp";
   create_file ($filename); //create an empty file
-  file_put_contents($filename, $string_with_tags); 
+  file_put_contents($filename, $string_with_tags);
   $file_handle = fopen($filename, $file_modes[$mode_counter]);
   if(!$file_handle) {
     echo "Error: failed to open file $filename!\n";
     exit();
   }
-  
-  rewind($file_handle); 
-  /* read entire file and strip tags */ 
+
+  rewind($file_handle);
+  /* read entire file and strip tags */
   echo "-- fgetss() with default length, file pointer at 0 --\n";
   var_dump( fgetss($file_handle) ); // no length and allowable tags provided, reads entire file
   var_dump( ftell($file_handle) );
   var_dump( feof($file_handle) );
- 
+
   rewind($file_handle);
   /* read entire file and strip tags tags */
   echo "-- fgets() with length = 30, file pointer at 0 --\n";
   var_dump( fgetss($file_handle ,30) ); // length parameter given,not reading entire file
   var_dump( ftell($file_handle) ); // checking file pointer position initially
   var_dump( feof($file_handle) ); // confirm file pointer is not at eof
- 
-  // close the file 
+
+  // close the file
   fclose($file_handle);
- 
-  // delete the file 
+
+  // delete the file
   delete_file($filename);
 } // end of for - mode_counter
 

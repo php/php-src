@@ -1,5 +1,5 @@
 --TEST--
-Inherited static properties cannot be separated from their reference set. 
+Inherited static properties cannot be separated from their reference set.
 --FILE--
 <?php
 class C { public static $p = 'original'; }

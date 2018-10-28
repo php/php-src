@@ -4,18 +4,18 @@ Bug #63635 (Segfault in gc_collect_cycles)
 <?php
 class Node {
 	public $parent = NULL;
-	public $childs = array();
-	
+	public $children = array();
+
 	function __construct(Node $parent=NULL) {
 		if ($parent) {
-			$parent->childs[] = $this;
+			$parent->children[] = $this;
 		}
-		$this->childs[] = $this;
+		$this->children[] = $this;
 	}
-	
+
 	function __destruct() {
-		$this->childs = NULL;
-	}	
+		$this->children = NULL;
+	}
 }
 
 define("MAX", 16);

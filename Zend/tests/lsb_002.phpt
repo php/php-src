@@ -10,7 +10,7 @@ class TestClass {
 	protected static function staticFunction() {
 		return 'TestClassFunction';
 	}
-	
+
 	public function testStaticVar() {
 		return static::$staticVar;
 	}

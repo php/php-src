@@ -10,7 +10,7 @@ require("interbase.inc");
 unlink($file = tempnam('/tmp',"php_ibase_test"));
 
 
-$db = ibase_query(IBASE_CREATE, 
+$db = ibase_query(IBASE_CREATE,
 		sprintf("CREATE SCHEMA '%s' USER '%s' PASSWORD '%s' DEFAULT CHARACTER SET %s",$file,
 		$user, $password, ($charset = ini_get('ibase.default_charset')) ? $charset : 'NONE'));
 

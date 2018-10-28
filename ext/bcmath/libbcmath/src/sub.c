@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -87,4 +86,3 @@ bc_sub (n1, n2, result, scale_min)
   bc_free_num (result);
   *result = diff;
 }
-

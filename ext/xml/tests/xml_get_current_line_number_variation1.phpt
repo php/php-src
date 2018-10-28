@@ -1,17 +1,17 @@
 --TEST--
 Test xml_get_current_line_number() function : usage variations
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
-?>  
+	print "skip - XML extension not loaded";
+}
+?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_get_current_line_number(resource parser)
- * Description: Get current line number for an XML parser 
+ * Description: Get current line number for an XML parser
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_get_current_line_number() : usage variations ***\n";
@@ -73,9 +73,9 @@ $values = array(
 
       // object data
       new aClass(),
-      
+
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,
@@ -237,4 +237,3 @@ Arg value
 Warning: xml_get_current_line_number() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 Done
-

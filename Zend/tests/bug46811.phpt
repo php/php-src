@@ -10,4 +10,3 @@ var_dump(ini_get("arg_separator.output"));
 --EXPECT--
 bool(false)
 string(1) "&"
-
