@@ -466,6 +466,11 @@ JSON:
   . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
 
+ OpenSSL:
+  . The min_proto_version and max_proto_version ssl stream options as well as
+    related constants for possible TLS protocol values have been added.
+    See <https://github.com/php/php-src/pull/3317>.
+
 PCRE:
   . The PCRE extension has been upgraded to PCRE2, which may cause minor
     behavioral changes (for instance, character ranges in classes are now more
