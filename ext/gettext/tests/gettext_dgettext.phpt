@@ -11,7 +11,9 @@ if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
 --FILE--
 <?php
 chdir(dirname(__FILE__));
+putenv('LC_MESSAGES=en_US.UTF-8');
 setlocale(LC_MESSAGES, 'en_US.UTF-8');
+putenv('LC_ALL=en_US.UTF-8');
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('dgettextTest', './locale');
 bindtextdomain('dgettextTest_switch', './locale');
