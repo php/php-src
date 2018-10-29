@@ -3712,6 +3712,10 @@ static int accel_preload(const char *config)
 		zend_string *filename;
 		int i;
 
+		/* Release stored values to avoid dangling pointers */
+		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
+		zend_hash_init(&EG(symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
+
 		preload_link();
 		preload_remove_empty_includes();
 
