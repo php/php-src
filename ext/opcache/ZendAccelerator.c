@@ -3759,7 +3759,7 @@ static int accel_preload(const char *config)
 		zend_hash_sort_ex(&script->script.class_table, preload_sort_classes, NULL, 0);
 
 		if (preload_optimize(script) != SUCCESS) {
-			zend_accel_error(ACCEL_LOG_FATAL, "Optimization error durinf preloading!");
+			zend_accel_error(ACCEL_LOG_FATAL, "Optimization error during preloading!");
 			return FAILURE;
 		}
 
