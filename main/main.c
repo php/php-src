@@ -2362,11 +2362,11 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->info_func = PHP_MINFO(php_core);
 	}
 
+	module_initialized = 1;
+
 	if (zend_post_startup() != SUCCESS) {
 		return FAILURE;
 	}
-
-	module_initialized = 1;
 
 	/* Check for deprecated directives */
 	/* NOTE: If you add anything here, remember to add it to Makefile.global! */
