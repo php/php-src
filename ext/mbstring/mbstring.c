@@ -2399,12 +2399,6 @@ PHP_FUNCTION(mb_strrpos)
 		return;
 	}
 
-	haystack.no_language = needle.no_language = MBSTRG(language);
-	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name);
-	if (!haystack.encoding) {
-		RETURN_FALSE;
-	}
-
 	if (zoffset) {
 		if (Z_TYPE_P(zoffset) == IS_STRING) {
 			enc_name2     = Z_STRVAL_P(zoffset);
@@ -2444,6 +2438,12 @@ PHP_FUNCTION(mb_strrpos)
 			convert_to_long_ex(zoffset);
 			offset = Z_LVAL_P(zoffset);
 		}
+	}
+
+	haystack.no_language = needle.no_language = MBSTRG(language);
+	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name);
+	if (!haystack.encoding) {
+		RETURN_FALSE;
 	}
 
 	if (offset != 0) {
