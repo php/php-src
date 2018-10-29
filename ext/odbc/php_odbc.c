@@ -1838,7 +1838,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 /* }}} */
 
 
-/* {{{ proto object odbc_fetch_object(int result [, int rownumber])
+/* {{{ proto object odbc_fetch_object(resource result [, int rownumber])
    Fetch a result row as an object */
 PHP_FUNCTION(odbc_fetch_object)
 {
@@ -1849,7 +1849,7 @@ PHP_FUNCTION(odbc_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array odbc_fetch_array(int result [, int rownumber])
+/* {{{ proto array odbc_fetch_array(resource result [, int rownumber])
    Fetch a result row as an associative array */
 PHP_FUNCTION(odbc_fetch_array)
 {
