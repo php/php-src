@@ -3798,6 +3798,16 @@ static int accel_preload(const char *config)
 	return ret;
 }
 
+size_t preload_ub_write(const char *str, size_t str_length)
+{
+	return fwrite(str, 1, str_length, stdout);
+}
+
+void preload_flush(void *server_context)
+{
+	fflush(stdout);
+}
+
 static int accel_finish_startup(void)
 {
 	if (!ZCG(enabled) || !accel_startup_ok) {
@@ -3814,6 +3824,8 @@ static int accel_finish_startup(void)
 		int (*orig_send_headers)(sapi_headers_struct *sapi_headers TSRMLS_DC) = sapi_module.send_headers;
 		void (*orig_send_header)(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)= sapi_module.send_header;
 		char *(*orig_getenv)(char *name, size_t name_len TSRMLS_DC) = sapi_module.getenv;
+		size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
+		void (*orig_flush)(void *server_context) = sapi_module.flush;
 #ifdef ZEND_SIGNALS
 		zend_bool old_reset_signals = SIGG(reset);
 #endif
@@ -3841,6 +3853,8 @@ static int accel_finish_startup(void)
 		sapi_module.send_headers = NULL;
 		sapi_module.send_header = NULL;
 		sapi_module.getenv = NULL;
+		sapi_module.ub_write = preload_ub_write;
+		sapi_module.flush = preload_flush;
 
 		zend_interned_strings_switch_storage(1);
 
@@ -3884,6 +3898,8 @@ static int accel_finish_startup(void)
 		sapi_module.send_headers = orig_send_headers;
 		sapi_module.send_header = orig_send_header;
 		sapi_module.getenv = orig_getenv;
+		sapi_module.ub_write = orig_ub_write;
+		sapi_module.flush = orig_flush;
 
 		zend_shared_alloc_unlock();
 
