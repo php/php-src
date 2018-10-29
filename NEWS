@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.1.25
 
+- ODBC:
+  . Fixed bug #77079 (odbc_fetch_object has incorrect type signature).
+    (Jon Allen)
+
 - Opcache:
   . Fixed bug #77058 (Type inference in opcache causes side effects). (Nikita)
 
