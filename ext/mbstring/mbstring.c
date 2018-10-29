@@ -2732,7 +2732,7 @@ PHP_FUNCTION(mb_substr_count)
 PHP_FUNCTION(mb_substr)
 {
 	char *str;
-	zend_string *encoding;
+	zend_string *encoding = NULL;
 	zend_long from, len;
 	size_t mblen, real_from, real_len;
 	size_t str_len;
