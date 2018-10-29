@@ -38,4 +38,7 @@ PHP                                                                        NEWS
   . Fixed bug #76737 (Unserialized reflection objects are broken, they
     shouldn't be serializable). (Nikita)
 
+- Tidy:
+  . Added TIDY_TAG_* constants for HTML5 elements. (cmb)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
