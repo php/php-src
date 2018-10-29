@@ -3051,27 +3051,33 @@ static void preload_shutdown(void)
 	zval *zv;
 
 #if 0
-	ZEND_HASH_REVERSE_FOREACH_VAL(EG(zend_constants), zv) {
-		zend_constant *c = Z_PTR_P(zv);
-		if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
-			break;
-		}
-	} ZEND_HASH_FOREACH_END_DEL();
+    if (EG(zend_constants)) {
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(zend_constants), zv) {
+			zend_constant *c = Z_PTR_P(zv);
+			if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END_DEL();
+	}
 #endif
 
-	ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
-		zend_function *func = Z_PTR_P(zv);
-		if (func->type == ZEND_INTERNAL_FUNCTION) {
-			break;
-		}
-	} ZEND_HASH_FOREACH_END_DEL();
+    if (EG(function_table)) {
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
+			zend_function *func = Z_PTR_P(zv);
+			if (func->type == ZEND_INTERNAL_FUNCTION) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END_DEL();
+	}
 
-	ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-		zend_class_entry *ce = Z_PTR_P(zv);
-		if (ce->type == ZEND_INTERNAL_CLASS) {
-			break;
-		}
-	} ZEND_HASH_FOREACH_END_DEL();
+	if (EG(class_table)) {
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
+			zend_class_entry *ce = Z_PTR_P(zv);
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END_DEL();
+	}
 }
 
 static void preload_activate(void)

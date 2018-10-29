@@ -982,7 +982,9 @@ int zend_post_startup(void) /* {{{ */
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
 	free(compiler_globals->function_table);
+	compiler_globals->function_table = NULL;
 	free(compiler_globals->class_table);
+	compiler_globals->class_table = NULL;
 	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
 		compiler_globals_ctor(compiler_globals);
 		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
@@ -990,6 +992,7 @@ int zend_post_startup(void) /* {{{ */
 		compiler_globals_ctor(compiler_globals);
 	}
 	free(EG(zend_constants));
+	EG(zend_constants) = NULL;
 
 	executor_globals_ctor(executor_globals);
 	global_persistent_list = &EG(persistent_list);
