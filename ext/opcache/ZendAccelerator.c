@@ -3534,9 +3534,44 @@ static void preload_remove_empty_includes(void)
 
 static int preload_optimize(zend_persistent_script *script)
 {
+	zend_class_entry *ce;
+	zend_op_array *op_array;
+
+	zend_shared_alloc_init_xlat_table();
+
+	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
+		if (ce->ce_flags & ZEND_ACC_TRAIT) {
+			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+				if (!(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+					zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	if (!zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
 		return FAILURE;
 	}
+
+	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
+		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+				if (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE) {
+					zend_op_array *orig_op_array = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
+					uint32_t fn_flags = op_array->fn_flags;
+					zend_function *prototype = op_array->prototype;
+					HashTable *ht = op_array->static_variables;
+					*op_array = *orig_op_array;
+					op_array->fn_flags = fn_flags;
+					op_array->prototype = prototype;
+					op_array->static_variables = ht;
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zend_shared_alloc_destroy_xlat_table();
+
 	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
 		if (!zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
 			return FAILURE;
@@ -3729,8 +3764,6 @@ static int accel_preload(const char *config)
 			script->ping_auto_globals_mask = zend_accel_get_auto_globals_no_jit();
 		}
 
-		zend_shared_alloc_init_xlat_table();
-
 		/* Store all functions and classes in a single pseudo-file */
 		filename = zend_string_init("$PRELOAD$", strlen("$PRELOAD$"), 0);
 #if ZEND_USE_ABS_CONST_ADDR
@@ -3766,6 +3799,8 @@ static int accel_preload(const char *config)
 			zend_accel_error(ACCEL_LOG_FATAL, "Optimization error during preloading!");
 			return FAILURE;
 		}
+
+		zend_shared_alloc_init_xlat_table();
 
 		HANDLE_BLOCK_INTERRUPTIONS();
 		SHM_UNPROTECT();

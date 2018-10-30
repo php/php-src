@@ -1442,7 +1442,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 
 	ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
-			if (op_array->scope == ce) {
+			if (op_array->scope == ce && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 				zend_optimize_op_array(op_array, &ctx);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1546,7 +1546,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 
 		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
-				if (op_array->scope == ce) {
+				if (op_array->scope == ce && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 					zend_adjust_fcall_stack_size(op_array, &ctx);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1582,7 +1582,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 
 		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
-				if (op_array->scope == ce) {
+				if (op_array->scope == ce && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 					zend_dump_op_array(op_array, ZEND_DUMP_RT_CONSTANTS, "after optimizer", NULL);
 				}
 			} ZEND_HASH_FOREACH_END();

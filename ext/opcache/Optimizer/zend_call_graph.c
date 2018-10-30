@@ -67,7 +67,7 @@ static int zend_foreach_op_array(zend_call_graph *call_graph, zend_script *scrip
 
 	ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
 		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-			if (op_array->scope == ce) {
+			if (op_array->scope == ce && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 				if (func(call_graph, op_array) != SUCCESS) {
 					return FAILURE;
 				}
