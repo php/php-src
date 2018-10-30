@@ -22,3 +22,18 @@ abstract class c {
 class x extends c implements a, b {
 	function foo() { }
 }
+
+trait T1 {
+	static function foo() {
+		var_dump(__METHOD__);
+	}
+}
+trait T2 {
+	use T1;
+	static function bar() {
+		var_dump(__METHOD__);
+	}
+}
+class Y {
+	use T2;
+}
