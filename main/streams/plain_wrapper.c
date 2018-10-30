@@ -872,13 +872,13 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 					sz.HighPart = 0;
 					sz.LowPart = new_size;
 #endif
-					if (INVALID_SET_FILE_POINTER == SetFilePointerEx(h, sz, NULL, FILE_BEGIN) && NO_ERROR != GetLastError()) {
+					if (!SetFilePointerEx(h, sz, NULL, FILE_BEGIN)) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 					if (0 == SetEndOfFile(h)) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
-					if (INVALID_SET_FILE_POINTER == SetFilePointerEx(h, old_sz, NULL, FILE_BEGIN) && NO_ERROR != GetLastError()) {
+					if (!SetFilePointerEx(h, old_sz, NULL, FILE_BEGIN)) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
