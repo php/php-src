@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #50675 (SoapClient can't handle object references correctly).
     (Cameron Porter)
 
+- Standard:
+  . Fixed bug #77081 (ftruncate() changes seek pointer in c mode). (cmb, Anatol)
+
 - XML:
   . Fixed bug 71592 (External entity processing never fails). (cmb)
 

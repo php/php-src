@@ -858,12 +858,13 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 
-					LARGE_INTEGER old_sz;
-					if (!GetFileSizeEx(h, &old_sz)) {
+					LARGE_INTEGER sz, old_sz;
+					sz.QuadPart = 0;
+
+					if (!SetFilePointerEx(h, sz, &old_sz, FILE_CURRENT)) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 
-					LARGE_INTEGER sz;
 #if defined(_WIN64)
 					sz.HighPart = (new_size >> 32);
 					sz.LowPart = (new_size & 0xffffffff);
