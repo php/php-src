@@ -5936,7 +5936,7 @@ PHP_FUNCTION(array_product)
 PHP_FUNCTION(array_reduce)
 {
 	zval *input;
-	zval args[2];
+	zval args[3];
 	zval *operand;
 	zval result;
 	zval retval;
@@ -5944,6 +5944,8 @@ PHP_FUNCTION(array_reduce)
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	zval *initial = NULL;
 	HashTable *htbl;
+	zend_long lkey;
+	zend_string *skey;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY(input)
@@ -5970,19 +5972,28 @@ PHP_FUNCTION(array_reduce)
 	}
 
 	fci.retval = &retval;
-	fci.param_count = 2;
+	fci.param_count = 3;
 	fci.no_separation = 0;
 
-	ZEND_HASH_FOREACH_VAL(htbl, operand) {
+	ZEND_HASH_FOREACH_KEY_VAL(htbl, lkey, skey, operand) {
 		ZVAL_COPY_VALUE(&args[0], &result);
 		ZVAL_COPY(&args[1], operand);
+
+		if (skey) {
+			ZVAL_STR(&args[2], skey);
+		} else {
+			ZVAL_LONG(&args[2], lkey);
+		}
+
 		fci.params = args;
 
 		if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+			zval_ptr_dtor(&args[2]);
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
 			ZVAL_COPY_VALUE(&result, &retval);
 		} else {
+			zval_ptr_dtor(&args[2]);
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
 			return;
