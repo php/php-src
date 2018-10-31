@@ -78,7 +78,6 @@ fclose($fp);
 Done
 --EXPECTF--
 Test
-
 HTTP/1.1 200 OK
 Host: %s
 Date: %s
