@@ -7,6 +7,7 @@ include('skipif.inc');
 --INI--
 session.save_handler=user
 display_errors=off
+error_log=
 --FILE--
 <?php
 
