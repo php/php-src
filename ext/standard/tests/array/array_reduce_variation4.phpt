@@ -1,7 +1,8 @@
 --TEST--
-Test array_reduce() function : variation - key argument on callback
+Test array_reduce() function : variation
 --FILE--
 <?php
+
 /* Prototype  : mixed array_reduce(array input, mixed callback [, int initial])
  * Description: Iteratively reduce the array to a single value via the callback.
  * Source code: ext/standard/array.c
@@ -27,6 +28,7 @@ function reduce_string_key($v, $w, $x){
 var_dump(array_reduce($array, 'reduce_string_key'));
 
 ?>
+===DONE===
 --EXPECT--
 *** Testing array_reduce() : variation - key argument on callback ***
 
@@ -35,5 +37,4 @@ string(40) ",0-nyan,1-lamp,2-binary,3-php,4-elephant"
 
 --- Testing array_reduce() with string key argument  ---
 string(59) ",nyan-nyan,lamp-lamp,binay-binary,php-php,elephant-elephant"
-
-Done
+===DONE===
