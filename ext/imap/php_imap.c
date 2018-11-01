@@ -23,7 +23,7 @@
    |          Hartmut Holzgraefe  <hholzgra@php.net>                      |
    |          Jani Taskinen       <jani.taskinen@iki.fi>                  |
    |          Daniel R. Kalowsky  <kalowsky@php.net>                      |
-   | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
+   | PHP 4.0 updates:  Zeev Suraski <zeev@php.net>                        |
    +----------------------------------------------------------------------+
  */
 

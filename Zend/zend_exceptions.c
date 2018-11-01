@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Marcus Boerger <helly@php.net>                              |
    |          Sterling Hughes <sterling@php.net>                          |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 

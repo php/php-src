@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jouni Ahto <jouni.ahto@exdec.fi>                            |
    |          Yasuo Ohgaki <yohgaki@php.net>                              |
    |          Youichi Iwakiri <yiwakiri@st.rim.or.jp> (pg_copy_*)         |

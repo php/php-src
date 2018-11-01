@@ -13,7 +13,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: David Wang <planetbeing@gmail.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 

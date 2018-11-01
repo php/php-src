@@ -6,7 +6,7 @@
    | This source file is subject to the TSRM license, that is bundled     |
    | with this package in the file LICENSE                                |
    +----------------------------------------------------------------------+
-   | Authors:  Zeev Suraski <zeev@zend.com>                               |
+   | Authors:  Zeev Suraski <zeev@php.net>                                |
    +----------------------------------------------------------------------+
 */
 

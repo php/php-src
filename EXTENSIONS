@@ -194,7 +194,7 @@ STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           soap
-PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@zend.com> (2004 - 2018)
+PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2004 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -244,7 +244,7 @@ SINCE:               5.0
 
 -------------------------------------------------------------------------------
 EXTENSION:           bcmath
-MAINTENANCE:         Andi Gutmans <andi@zend.com> (2000 - 2004)
+MAINTENANCE:         Andi Gutmans <andi@php.net> (2000 - 2004)
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           bz2
@@ -378,7 +378,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           opcache
-PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@zend.com> (2013 - 2018)
+PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2013 - 2018)
                      Xinchen Hui <laruence@php.net> (2013 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working

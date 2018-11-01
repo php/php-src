@@ -14,7 +14,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jani Taskinen <jani@php.net>                                |
    |          Marcus Boerger <helly@php.net>                              |
    |          Nuno Lopes <nlopess@php.net>                                |

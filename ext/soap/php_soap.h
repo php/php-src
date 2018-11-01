@@ -14,7 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
-  |          Dmitry Stogov <dmitry@zend.com>                             |
+  |          Dmitry Stogov <dmitry@php.net>                              |
   +----------------------------------------------------------------------+
 */
 
