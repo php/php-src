@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #77058 (Type inference in opcache causes side effects). (Nikita)
+  . Fixed bug #77092 (array_diff_key() - segmentation fault). (Nikita)
 
 - SOAP:
   . Fixed bug #50675 (SoapClient can't handle object references correctly).
