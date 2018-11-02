@@ -3686,7 +3686,7 @@ static void preload_load(void)
 		Bucket *end = p + ZCSG(preload_script)->script.function_table.nNumUsed;
 
 		for (; p != end; p++) {
-			_zend_hash_append_ptr_ex(EG(function_table), p->key, Z_PTR(p->val), 1);
+			_zend_hash_append_ptr_ex(CG(function_table), p->key, Z_PTR(p->val), 1);
 		}
 	}
 
@@ -3695,14 +3695,19 @@ static void preload_load(void)
 		Bucket *end = p + ZCSG(preload_script)->script.class_table.nNumUsed;
 
 		for (; p != end; p++) {
-			_zend_hash_append_ptr_ex(EG(class_table), p->key, Z_PTR(p->val), 1);
+			_zend_hash_append_ptr_ex(CG(class_table), p->key, Z_PTR(p->val), 1);
 		}
 	}
 
-	EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
-	EG(persistent_functions_count) = EG(function_table)->nNumUsed;
-	EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
-
+	if (EG(zend_constants)) {
+		EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
+	}
+	if (EG(function_table)) {
+		EG(persistent_functions_count) = EG(function_table)->nNumUsed;
+	}
+	if (EG(class_table)) {
+		EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
+	}
 	CG(map_ptr_last) = ZCSG(map_ptr_last);
 }
 
