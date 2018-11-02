@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Marcus Boerger <helly@php.net>                              |
    | New API: Michael Wallner <mike@php.net>                              |
