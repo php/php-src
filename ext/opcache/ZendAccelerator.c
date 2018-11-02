@@ -3895,7 +3895,6 @@ static int accel_finish_startup(void)
 		if (ZCSG(preload_script)) {
 			/* Preloading was done in another process */
 			preload_load();
-			preload_restart();
 			zend_shared_alloc_unlock();
 			return SUCCESS;
 		}
