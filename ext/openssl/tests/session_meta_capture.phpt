@@ -49,6 +49,11 @@ $clientCode = <<<'CODE'
     @stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx);
     $meta = stream_context_get_options($clientCtx)['ssl']['session_meta'];
     var_dump($meta['protocol']);
+
+    stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT);
+    @stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx);
+    $meta = stream_context_get_options($clientCtx)['ssl']['session_meta'];
+    var_dump($meta['protocol']);
 CODE;
 
 include 'ServerClientTestCase.inc';
@@ -58,3 +63,4 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 string(5) "TLSv1"
 string(7) "TLSv1.1"
 string(7) "TLSv1.2"
+string(7) "TLSv1.3"
