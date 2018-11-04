@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #50675 (SoapClient can't handle object references correctly).
     (Cameron Porter)
+  . Fixed bug #76348 (WSDL_CACHE_MEMORY causes Segmentation fault). (cmb)
 
 - Standard:
   . Fixed bug #77081 (ftruncate() changes seek pointer in c mode). (cmb, Anatol)
