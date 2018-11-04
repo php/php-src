@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #77058 (Type inference in opcache causes side effects). (Nikita)
 
+- SOAP:
+  . Fixed bug #76348 (WSDL_CACHE_MEMORY causes Segmentation fault). (cmb)
+
 08 Nov 2018, PHP 7.1.24
 
 - Core:
