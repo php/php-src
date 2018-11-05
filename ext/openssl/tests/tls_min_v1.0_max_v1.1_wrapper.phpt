@@ -44,9 +44,6 @@ $clientCode = <<<'CODE'
     $client = @stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tlsv1.3://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
-    var_dump($client);
-
     $client = @stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
@@ -61,7 +58,6 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 resource(%d) of type (stream)
 bool(false)
 resource(%d) of type (stream)
-bool(false)
 bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)

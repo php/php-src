@@ -16,7 +16,7 @@ $serverCode = <<<'CODE'
     $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
     phpt_notify();
 
-    for ($i=0; $i < 7; $i++) {
+    for ($i=0; $i < 6; $i++) {
         @stream_socket_accept($server, 3);
     }
 CODE;
@@ -42,9 +42,6 @@ $clientCode = <<<'CODE'
     $client = @stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tlsv1.3://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
-    var_dump($client);
-
     $client = @stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
@@ -58,7 +55,6 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 resource(%d) of type (stream)
 bool(false)
-resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
