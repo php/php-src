@@ -295,7 +295,9 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, int persis
 }
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+BEGIN_EXTERN_C()
 ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+END_EXTERN_C()
 #else
 static zend_always_inline zend_bool zend_string_equal_val(zend_string *s1, zend_string *s2)
 {
