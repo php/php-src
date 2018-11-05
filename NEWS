@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #77110 (undefined symbol zend_string_equal_val in C++ build).
     (Remi)
 
+- Fileinfo:
+  . Fixed bug #77095 (slowness regression in 7.2/7.3 (compared to 7.1)).
+    (Anatol)
+
 - ODBC:
   . Fixed bug #77079 (odbc_fetch_object has incorrect type signature).
     (Jon Allen)
