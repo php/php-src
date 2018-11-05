@@ -488,6 +488,9 @@ protected int file_os2_apptype(struct magic_set *, const char *, const void *,
     size_t);
 #endif /* __EMX__ */
 
+public void 
+convert_libmagic_pattern(zval *pattern, char *val, int len, int options);
+
 typedef struct {
 	char *buf;
 	uint32_t offset;
