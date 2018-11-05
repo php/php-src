@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0RC5
 
+- Core:
+  . Fixed bug #77110 (undefined symbol zend_string_equal_val in C++ build).
+    (Remi)
+
 - ODBC:
   . Fixed bug #77079 (odbc_fetch_object has incorrect type signature).
     (Jon Allen)
