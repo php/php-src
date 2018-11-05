@@ -71,8 +71,16 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
         AC_MSG_RESULT([no])
       ],
       [
-        dnl cross compilation might want to rely on arch names
-        AC_MSG_RESULT([no])
+        AC_CANONICAL_HOST
+        case $host_cpu in
+        arm*|i[34567]86|x86_64|mips*|powerpc*|sparc)
+          AC_MSG_RESULT([yes])
+          AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [])
+          ;;
+        *)
+          AC_MSG_RESULT([no])
+          ;;
+        esac
       ])
     fi
 
