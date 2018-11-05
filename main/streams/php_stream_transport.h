@@ -167,11 +167,10 @@ typedef enum {
 	STREAM_CRYPTO_METHOD_SSLv2_CLIENT = (1 << 1 | 1),
 	STREAM_CRYPTO_METHOD_SSLv3_CLIENT = (1 << 2 | 1),
 	/* v23 no longer negotiates SSL2 or SSL3 */
-	STREAM_CRYPTO_METHOD_SSLv23_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | 1),
+	STREAM_CRYPTO_METHOD_SSLv23_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | 1),
 	STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT = (1 << 3 | 1),
 	STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT = (1 << 4 | 1),
 	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT = (1 << 5 | 1),
-	STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT = (1 << 6 | 1),
 
 	/* TLS equates to TLS_ANY as of PHP 7.2 */
 	STREAM_CRYPTO_METHOD_TLS_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | 1),
