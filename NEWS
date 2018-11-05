@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0RC5
 
 - Core:
+  . Fixed bug #76825 (Undefined symbols ___cpuid_count). (Laruence, cmb)
   . Fixed bug #77110 (undefined symbol zend_string_equal_val in C++ build).
     (Remi)
 
@@ -139,7 +140,6 @@ PHP                                                                        NEWS
 13 Sep 2018, PHP 7.3.0RC1
 
 - Core:
-  . Fixed bug #76825 (Undefined symbols ___cpuid_count). (Laruence)
   . Fixed bug #76820 (Z_COPYABLE invalid definition). (mvdwerve, cmb)
   . Fixed bug #76510 (file_exists() stopped working for phar://). (cmb)
 
