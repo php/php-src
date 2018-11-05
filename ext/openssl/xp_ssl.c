@@ -71,7 +71,9 @@
 
 #define HAVE_TLS11 1
 #define HAVE_TLS12 1
+#if OPENSSL_VERSION_NUMBER >= 0x1010100fL
 #define HAVE_TLS13 1
+#endif
 
 #ifndef OPENSSL_NO_ECDH
 #define HAVE_ECDH 1
@@ -1050,8 +1052,10 @@ static inline int php_openssl_map_proto_version(int flag) /* {{{ */
 		case STREAM_CRYPTO_METHOD_TLSv1_2:
 			return TLS1_2_VERSION;
 		/* case STREAM_CRYPTO_METHOD_TLSv1_3: */
+#ifdef HAVE_TLS13
 		default:
 			return TLS1_3_VERSION;
+#endif
 
 	}
 }
