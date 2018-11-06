@@ -92,28 +92,31 @@ static void strip_leading_nops(zend_op_array *op_array, zend_basic_block *b)
 {
 	zend_op *opcodes = op_array->opcodes;
 
-	while (b->len > 0 && opcodes[b->start].opcode == ZEND_NOP) {
+	do {
 	    /* check if NOP breaks incorrect smart branch */
 		if (b->len == 2
-		 && (op_array->opcodes[b->start + 1].opcode == ZEND_JMPZ
-		  || op_array->opcodes[b->start + 1].opcode == ZEND_JMPNZ)
-		 && (op_array->opcodes[b->start + 1].op1_type & (IS_CV|IS_CONST))
+		 && (opcodes[b->start + 1].opcode == ZEND_JMPZ
+		  || opcodes[b->start + 1].opcode == ZEND_JMPNZ)
+		 && (opcodes[b->start + 1].op1_type & (IS_CV|IS_CONST))
 		 && b->start > 0
-		 && zend_is_smart_branch(op_array->opcodes + b->start - 1)) {
+		 && zend_is_smart_branch(opcodes + b->start - 1)) {
 			break;
 		}
 		b->start++;
 		b->len--;
-	}
+	} while (b->len > 0 && opcodes[b->start].opcode == ZEND_NOP);
 }
 
 static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 {
 	uint32_t i, j;
 
-	strip_leading_nops(op_array, b);
 	if (b->len == 0) {
 		return;
+	}
+
+	if (op_array->opcodes[b->start].opcode == ZEND_NOP) {
+		strip_leading_nops(op_array, b);
 	}
 
 	/* strip the inside NOPs */
@@ -168,8 +171,14 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 	zend_op *opline, *src;
 	zend_op *end, *last_op = NULL;
 
-	/* remove leading NOPs */
-	strip_leading_nops(op_array, block);
+	if (block->len == 0) {
+		return;
+	}
+
+	if (op_array->opcodes[block->start].opcode == ZEND_NOP) {
+		/* remove leading NOPs */
+		strip_leading_nops(op_array, block);
+	}
 
 	opline = op_array->opcodes + block->start;
 	end = opline + block->len;
