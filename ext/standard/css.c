@@ -30,6 +30,7 @@ PHPAPI void php_info_print_css(void) /* {{{ */
 	PUTS(".center table {margin: 1em auto; text-align: left;}\n");
 	PUTS(".center th {text-align: center !important;}\n");
 	PUTS("td, th {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px;}\n");
+	PUTS("th {position: sticky; top: 0; background: inherit;}\n");
 	PUTS("h1 {font-size: 150%;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
 	PUTS(".p {text-align: left;}\n");

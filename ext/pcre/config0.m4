@@ -47,20 +47,43 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
       fi
     fi
 
+    PHP_EVAL_INCLINE($PCRE2_INC)
+    PHP_EVAL_LIBLINE($PCRE2_LIB)
+    AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
+    AC_DEFINE(HAVE_PCRE, 1, [ ])
+
     if test "$PHP_PCRE_JIT" != "no"; then
-      PHP_CHECK_LIBRARY(pcre2-8, pcre2_jit_compile_8,
+      AC_MSG_CHECKING([for JIT support in PCRE2])
+      AC_RUN_IFELSE([
+        AC_LANG_SOURCE([[
+            #include <pcre2.h>
+            #include <stdlib.h>
+            int main(void) {
+              uint32_t have_jit;
+              pcre2_config_8(PCRE2_CONFIG_JIT, &have_jit);
+              return !have_jit;
+            }
+        ]])], [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [])
+      ],
       [
-        AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
-      ],[
-      ],[
-        $PCRE2_LIB
+        AC_MSG_RESULT([no])
+      ],
+      [
+        AC_CANONICAL_HOST
+        case $host_cpu in
+        arm*|i[34567]86|x86_64|mips*|powerpc*|sparc)
+          AC_MSG_RESULT([yes])
+          AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [])
+          ;;
+        *)
+          AC_MSG_RESULT([no])
+          ;;
+        esac
       ])
     fi
 
-    PHP_EVAL_INCLINE($PCRE2_INC)
-    PHP_EVAL_LIBLINE($PCRE2_LIB)
-    AC_DEFINE(HAVE_PCRE, 1, [ ])
-    AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
     PHP_NEW_EXTENSION(pcre, php_pcre.c, no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h])
   else

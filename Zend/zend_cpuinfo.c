@@ -29,7 +29,7 @@ typedef struct _zend_cpu_info {
 static zend_cpu_info cpuinfo = {0};
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-# ifdef HAVE_CPUID_H
+# if defined(HAVE_CPUID_H) && defined(HAVE_CPUID_COUNT)
 # include <cpuid.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	__cpuid_count(func, subfunc, cpuinfo->eax, cpuinfo->ebx, cpuinfo->ecx, cpuinfo->edx);
