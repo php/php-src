@@ -57,7 +57,7 @@ static const char HEXCHARS[] = "0123456789ABCDEF";
 inline static void
 php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add)
 {
-	if (!*buffer || (*pos + 1) >= ZSTR_LEN(*buffer)) {
+	if ((*pos + 1) >= ZSTR_LEN(*buffer)) {
 		PRINTF_DEBUG(("%s(): ereallocing buffer to %d bytes\n", get_active_function_name(), ZSTR_LEN(*buffer)));
 		*buffer = zend_string_extend(*buffer, ZSTR_LEN(*buffer) << 1, 0);
 	}
@@ -90,7 +90,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 
 	req_size = *pos + m_width + 1;
 
-	if (!*buffer || req_size > ZSTR_LEN(*buffer)) {
+	if (req_size > ZSTR_LEN(*buffer)) {
 		size_t size = ZSTR_LEN(*buffer);
 		while (req_size > size) {
 			if (size > ZEND_SIZE_MAX/2) {
