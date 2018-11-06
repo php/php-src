@@ -718,6 +718,7 @@ static void zend_persist_class_method(zval *zv)
 static void zend_persist_property_info(zval *zv)
 {
 	zend_property_info *prop = zend_shared_alloc_get_xlat_entry(Z_PTR_P(zv));
+	zend_class_entry *ce;
 
 	if (prop) {
 		Z_PTR_P(zv) = prop;
@@ -728,7 +729,10 @@ static void zend_persist_property_info(zval *zv)
 	} else {
 		prop = Z_PTR_P(zv) = zend_shared_memdup_arena_put(Z_PTR_P(zv), sizeof(zend_property_info));
 	}
-	prop->ce = zend_shared_alloc_get_xlat_entry(prop->ce);
+	ce = zend_shared_alloc_get_xlat_entry(prop->ce);
+	if (ce) {
+		prop->ce = ce;
+	}
 	zend_accel_store_interned_string(prop->name);
 	if (prop->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
@@ -746,6 +750,7 @@ static void zend_persist_property_info(zval *zv)
 static void zend_persist_class_constant(zval *zv)
 {
 	zend_class_constant *c = zend_shared_alloc_get_xlat_entry(Z_PTR_P(zv));
+	zend_class_entry *ce;
 
 	if (c) {
 		Z_PTR_P(zv) = c;
@@ -757,7 +762,10 @@ static void zend_persist_class_constant(zval *zv)
 		c = Z_PTR_P(zv) = zend_shared_memdup_arena_put(Z_PTR_P(zv), sizeof(zend_class_constant));
 	}
 	zend_persist_zval(&c->value);
-	c->ce = zend_shared_alloc_get_xlat_entry(c->ce);
+	ce = zend_shared_alloc_get_xlat_entry(c->ce);
+	if (ce) {
+		c->ce = ce;
+	}
 	if (c->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
 			zend_string *doc_comment = zend_shared_alloc_get_xlat_entry(c->doc_comment);
