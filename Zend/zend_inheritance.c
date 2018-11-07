@@ -22,6 +22,7 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_inheritance.h"
+#include "zend_interfaces.h"
 #include "zend_smart_str.h"
 #include "zend_operators.h"
 
@@ -225,7 +226,7 @@ typedef enum {
 } _variance;
 
 static
-int _check_inherited_type_constraint(
+int _check_zce_variance(
 	const zend_class_entry *ce1, const zend_class_entry *ce2,
 	_variance variance) /* {{{ */
 {
@@ -245,53 +246,85 @@ int _check_inherited_type_constraint(
 }
 
 static
-int _do_perform_type_hint_check(
+int _check_inherited_arg_info(
     const zend_function *fe, zend_arg_info *fe_arg_info,
     const zend_function *proto, zend_arg_info *proto_arg_info,
     _variance variance) /* {{{ */
 {
 	zend_type fe_type = fe_arg_info->type;
 	zend_type proto_type = proto_arg_info->type;
+	zend_long fe_type_code = ZEND_TYPE_CODE(fe_type);
+	zend_long proto_type_code = ZEND_TYPE_CODE(proto_type);
+
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type));
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(proto_type));
 
-	if (ZEND_TYPE_IS_CLASS(fe_type) && ZEND_TYPE_IS_CLASS(proto_type)) {
-		zend_string *fe_class_name =
-			_resolve_parent_and_self(fe, ZEND_TYPE_NAME(fe_type));
-		zend_string *proto_class_name =
-			_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
-		int code = 1;
-
-		if (!zend_string_equals_ci(fe_class_name, proto_class_name)) {
-			if (fe->common.type == ZEND_USER_FUNCTION) {
-				zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
-				zend_class_entry * proto_ce = zend_lookup_class(proto_class_name);
-
-				if (fe_ce && proto_ce) {
-					code = _check_inherited_type_constraint(fe_ce, proto_ce, variance);
-				} else {
-					/* todo: delay to runtime. How? */
-					/* Don't break bug62441! */
-					code = 0;
-				}
-			} else {
-				code = 0;
-			}
-		}
-		zend_string_release(proto_class_name);
-		zend_string_release(fe_class_name);
-		return code;
-	} else if (ZEND_TYPE_CODE(fe_type) != ZEND_TYPE_CODE(proto_type)) {
-		/* Incompatible built-in types */
+	if (variance == COVARIANT && ZEND_TYPE_ALLOW_NULL(fe_type) && !ZEND_TYPE_ALLOW_NULL(proto_type)) {
 		return 0;
 	}
 
-	return 1;
+	// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
+	if (variance == CONTRAVARIANT && ZEND_TYPE_ALLOW_NULL(proto_type) && !ZEND_TYPE_ALLOW_NULL(fe_type)) {
+		return 0;
+	}
+
+	if (ZEND_TYPE_IS_CLASS(fe_type)) {
+		zend_string *fe_class_name =
+			_resolve_parent_and_self(fe, ZEND_TYPE_NAME(fe_type));
+		int code = 1;
+		if (ZEND_TYPE_IS_CLASS(proto_type)) {
+			zend_string *proto_class_name =
+				_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
+
+			if (!zend_string_equals_ci(fe_class_name, proto_class_name)) {
+				if (fe->common.type == ZEND_USER_FUNCTION) {
+					zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
+					zend_class_entry * proto_ce = zend_lookup_class(proto_class_name);
+
+					if (fe_ce && proto_ce) {
+						code = _check_zce_variance(fe_ce, proto_ce, variance);
+					} else {
+						/* todo: delay to runtime. How? */
+						/* Don't break bug62441! */
+						code = 0;
+					}
+				} else {
+					code = 0;
+				}
+			}
+			zend_string_release(proto_class_name);
+		} else if (proto_type_code == IS_ITERABLE && variance == COVARIANT) {
+			zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
+			code = fe_ce && instanceof_function(fe_ce, zend_ce_traversable);
+		} else {
+			code = 0;
+		}
+
+		zend_string_release(fe_class_name);
+		return code;
+	} else if (ZEND_TYPE_IS_CLASS(proto_type)) {
+		if (variance == CONTRAVARIANT && fe_type_code == IS_ITERABLE) {
+			zend_string *proto_class_name =
+				_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
+			zend_class_entry *proto_ce = zend_lookup_class(proto_class_name);
+			zend_string_release(proto_class_name);
+			return proto_ce && instanceof_function(proto_ce, zend_ce_traversable);
+		} else {
+			return 0;
+		}
+	} else if (fe_type_code == IS_ITERABLE || proto_type_code == IS_ITERABLE) {
+		return (variance == COVARIANT && fe_type_code == IS_ARRAY)
+			|| (variance == CONTRAVARIANT && proto_type_code == IS_ARRAY);
+	} else if (fe_type_code == proto_type_code) {
+		return 1;
+	}
+
+	return 0;
 }
 /* }}} */
 
 static
-int _check_inherited_return_type_constraint(
+int _check_inherited_return_type(
 	const zend_function *fe, zend_arg_info *fe_arg_info,
 	const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
@@ -300,21 +333,7 @@ int _check_inherited_return_type_constraint(
 		return 0;
 	}
 
-	if (!_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info, COVARIANT)) {
-		switch (ZEND_TYPE_CODE(proto_arg_info->type)) {
-		case IS_ITERABLE:
-			if (!zend_iterable_compatibility_check(fe_arg_info)) {
-				return 0;
-			}
-			break;
-
-		default:
-			return 0;
-		}
-	}
-
-	/* Adding nullability is not valid */
-	if (ZEND_TYPE_ALLOW_NULL(fe_arg_info->type) && !ZEND_TYPE_ALLOW_NULL(proto_arg_info->type)) {
+	if (!_check_inherited_arg_info(fe, fe_arg_info, proto, proto_arg_info, COVARIANT)) {
 		return 0;
 	}
 
@@ -322,10 +341,16 @@ int _check_inherited_return_type_constraint(
 }
 
 static
-int zend_do_perform_arg_type_hint_check(
+int _check_inherited_parameter_type(
 	const zend_function *fe, zend_arg_info *fe_arg_info,
 	const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
+
+	/* by-ref constraints on arguments are invariant */
+	if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
+		return 0;
+	}
+
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type)) {
 		/* Child with no type is always compatible */
 		return 1;
@@ -336,7 +361,7 @@ int zend_do_perform_arg_type_hint_check(
 		return 0;
 	}
 
-	return _do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info, CONTRAVARIANT);
+	return _check_inherited_arg_info(fe, fe_arg_info, proto, proto_arg_info, CONTRAVARIANT);
 }
 /* }}} */
 
@@ -390,7 +415,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	num_args = proto->common.num_args;
 	if (proto->common.fn_flags & ZEND_ACC_VARIADIC) {
 		num_args++;
-        if (fe->common.num_args >= proto->common.num_args) {
+		if (fe->common.num_args >= proto->common.num_args) {
 			num_args = fe->common.num_args;
 			if (fe->common.fn_flags & ZEND_ACC_VARIADIC) {
 				num_args++;
@@ -400,35 +425,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 	for (i = 0; i < num_args; i++) {
 		zend_arg_info *fe_arg_info = &fe->common.arg_info[i];
+		zend_arg_info *proto_arg_info = (i < proto->common.num_args)
+			? &proto->common.arg_info[i]
+			: &proto->common.arg_info[proto->common.num_args];
 
-		zend_arg_info *proto_arg_info;
-		if (i < proto->common.num_args) {
-			proto_arg_info = &proto->common.arg_info[i];
-		} else {
-			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
-		}
-
-		if (!zend_do_perform_arg_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
-			switch (ZEND_TYPE_CODE(fe_arg_info->type)) {
-				case IS_ITERABLE:
-					if (!zend_iterable_compatibility_check(proto_arg_info)) {
-						return 0;
-					}
-					break;
-
-				default:
-					return 0;
-			}
-		}
-
-		// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
-		if (ZEND_TYPE_IS_SET(proto_arg_info->type) && ZEND_TYPE_ALLOW_NULL(proto_arg_info->type) && !ZEND_TYPE_ALLOW_NULL(fe_arg_info->type)) {
-			/* incompatible nullability */
-			return 0;
-		}
-
-		/* by-ref constraints on arguments are invariant */
-		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
+		if (!_check_inherited_parameter_type(fe, fe_arg_info, proto, proto_arg_info)) {
 			return 0;
 		}
 	}
@@ -436,7 +437,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	/* Check return type compatibility, but only if the prototype already specifies
 	 * a return type. Adding a new return type is always valid. */
 	if (proto->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		return _check_inherited_return_type_constraint(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1);
+		return _check_inherited_return_type(
+			fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1);
 	}
 	return 1;
 }
@@ -687,7 +689,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 					error_level = E_COMPILE_ERROR;
 					error_verb = "must";
 				} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
-				           !_check_inherited_return_type_constraint(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1)) {
+				           !_check_inherited_return_type(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1)) {
 					error_level = E_COMPILE_ERROR;
 					error_verb = "must";
 				} else {
