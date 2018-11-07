@@ -3308,7 +3308,8 @@ static void preload_link(void)
 			if (ce->type == ZEND_INTERNAL_CLASS) {
 				break;
 			}
-			if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+			if ((ce->ce_flags & ZEND_ACC_LINKED)
+			 && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 				zend_bool ok = 1;
 				zend_class_constant *c;
 				zval *val;
