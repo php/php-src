@@ -1415,7 +1415,7 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 			memmove(ZSTR_VAL(temp) + 1, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1);
 			param->name = temp;
 		} else {
-			param->name = zend_string_init(ZSTR_VAL(param->name), ZSTR_LEN(param->name), 0);
+			param->name = zend_string_copy(param->name);
 		}
 		/* do lookup*/
 		param->param_number = sqlite3_bind_parameter_index(stmt->stmt, ZSTR_VAL(param->name));
