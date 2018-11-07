@@ -1553,7 +1553,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_stream_xport_register("tlsv1.0", php_openssl_ssl_socket_factory);
 	php_stream_xport_register("tlsv1.1", php_openssl_ssl_socket_factory);
 	php_stream_xport_register("tlsv1.2", php_openssl_ssl_socket_factory);
-#if OPENSSL_VERSION_NUMBER >= 0x1010100fL
+#if OPENSSL_VERSION_NUMBER >= 0x10101000
 	php_stream_xport_register("tlsv1.3", php_openssl_ssl_socket_factory);
 #endif
 
@@ -1629,7 +1629,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_stream_xport_unregister("tlsv1.0");
 	php_stream_xport_unregister("tlsv1.1");
 	php_stream_xport_unregister("tlsv1.2");
-#if OPENSSL_VERSION_NUMBER >= 0x1010100fL
+#if OPENSSL_VERSION_NUMBER >= 0x10101000
 	php_stream_xport_unregister("tlsv1.3");
 #endif
 

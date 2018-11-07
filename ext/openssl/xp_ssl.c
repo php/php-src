@@ -71,7 +71,7 @@
 
 #define HAVE_TLS11 1
 #define HAVE_TLS12 1
-#if OPENSSL_VERSION_NUMBER >= 0x1010100fL
+#if OPENSSL_VERSION_NUMBER >= 0x10101000
 #define HAVE_TLS13 1
 #endif
 
@@ -2772,6 +2772,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		return NULL;
 #endif
 	}
+
 	sslsock->url_name = php_openssl_get_url_name(resourcename, resourcenamelen, !!persistent_id);
 
 	return stream;

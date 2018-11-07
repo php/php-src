@@ -22,7 +22,6 @@ $serverCode = <<<'CODE'
     @stream_socket_accept($server, 1);
     @stream_socket_accept($server, 1);
     @stream_socket_accept($server, 1);
-    @stream_socket_accept($server, 1);
 CODE;
 
 $clientCode = <<<'CODE'
@@ -48,10 +47,6 @@ $clientCode = <<<'CODE'
     stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT);
     var_dump(@stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 
-    // Should fail because the TLSv1.3 hello method is not supported
-    stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT);
-    var_dump(@stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
-
     // Should succeed because we use the same TLSv1 hello
     stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT);
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
@@ -62,7 +57,6 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 resource(%d) of type (stream)
-bool(false)
 bool(false)
 bool(false)
 resource(%d) of type (stream)
