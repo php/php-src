@@ -119,6 +119,10 @@ static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 		strip_leading_nops(op_array, b);
 	}
 
+	if (b->len == 0) {
+		return;
+	}
+
 	/* strip the inside NOPs */
 	i = j = b->start + 1;
 	while (i < b->start + b->len) {
