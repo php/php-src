@@ -92,6 +92,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 
 	HT_FLAGS(ht) |= HASH_FLAG_STATIC_KEYS;
 	ht->pDestructor = NULL;
+	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
