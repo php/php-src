@@ -130,7 +130,7 @@ PHP 7.4 UPGRADE NOTES
 
 - GD:
   . Freetype detection now relies on pkg-config. The --with-freetype-dir option
-    has been renamed to --enable-freetype and no longer accepts a directory.
+    has been renamed to --with-freetype and no longer accepts a directory.
     Instead pkg-config environment variables can be used to configure custom paths,
     see either ./configure --help or follow the instructions in error messages.
   . The behavior of imagecropauto() in the bundled libgd has been synced with

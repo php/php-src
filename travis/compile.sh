@@ -70,7 +70,7 @@ $TS \
 --with-pspell=/usr \
 --with-enchant=/usr \
 --enable-wddx \
---enable-freetype \
+--with-freetype \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg \
