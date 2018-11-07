@@ -3544,7 +3544,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CLASS_SPEC_CONST_HANDL
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	do_bind_class(RT_CONSTANT(opline, opline->op1));
+	do_bind_class(RT_CONSTANT(opline, opline->op1), NULL);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -5754,7 +5754,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_INHERITED_CLASS_SPEC_C
 		ZEND_ASSERT(EG(exception));
 		HANDLE_EXCEPTION();
 	}
-	do_bind_inherited_class(RT_CONSTANT(opline, opline->op1), parent);
+	do_bind_class(RT_CONSTANT(opline, opline->op1), parent);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -5775,7 +5775,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_INHERITED_CLASS_DELAYE
 			ZEND_ASSERT(EG(exception));
 			HANDLE_EXCEPTION();
 		}
-		do_bind_inherited_class(RT_CONSTANT(opline, opline->op1), parent);
+		do_bind_class(RT_CONSTANT(opline, opline->op1), parent);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
