@@ -4,7 +4,7 @@ tlsv1.3 stream wrapper
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (OPENSSL_VERSION_NUMBER < 0x101010000) die("skip OpenSSL v1.1.1 required");
+if (OPENSSL_VERSION_NUMBER < 0x10101000) die("skip OpenSSL v1.1.1 required");
 ?>
 --FILE--
 <?php
