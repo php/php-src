@@ -679,10 +679,15 @@ static ZEND_FUNCTION(opcache_get_status)
 
 		if (zend_hash_num_elements(&ZCSG(preload_script)->script.class_table)) {
 			zend_class_entry *ce;
+			zend_string *key;
 
 			array_init(&scripts);
-			ZEND_HASH_FOREACH_PTR(&ZCSG(preload_script)->script.class_table, ce) {
-				add_next_index_str(&scripts, ce->name);
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&ZCSG(preload_script)->script.class_table, key, ce) {
+				if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
+					add_next_index_str(&scripts, key);
+				} else {
+					add_next_index_str(&scripts, ce->name);
+				}
 			} ZEND_HASH_FOREACH_END();
 			add_assoc_zval(&statistics, "classes", &scripts);
 		}
