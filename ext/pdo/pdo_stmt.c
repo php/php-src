@@ -530,6 +530,13 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 	int caller_frees = 0;
 	int type, new_type;
 
+	if (colno < 0 || colno >= stmt->column_count) {
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index");
+		ZVAL_FALSE(dest);
+
+		return;
+	}
+
 	col = &stmt->columns[colno];
 	type = PDO_PARAM_TYPE(col->param_type);
 	new_type =  type_override ? (int)PDO_PARAM_TYPE(*type_override) : type;
