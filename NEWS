@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #77200 (imagecropauto(…, GD_CROP_SIDES) crops left but not right).
     (cmb)
 
+- PDO:
+  . Handle invalid index passed to PDOStatement::fetchColumn() as error. (Sergei
+    Morozov)
+
 - Sockets:
   . Fixed bug #77136 (Unsupported IPV6_RECVPKTINFO constants on macOS).
     (Mizunashi Mana)
