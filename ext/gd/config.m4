@@ -30,8 +30,8 @@ fi
 PHP_ARG_WITH(xpm-dir, for the location of libXpm,
 [  --with-xpm-dir[=DIR]      GD: Set the path to libXpm install prefix], no, no)
 
-PHP_ARG_ENABLE(freetype, for FreeType 2,
-[  --enable-freetype       GD: Enable FreeType 2 support], no, no)
+PHP_ARG_WITH(freetype, for FreeType 2,
+[  --with-freetype         GD: Enable FreeType 2 support], no, no)
 
 PHP_ARG_ENABLE(gd-jis-conv, whether to enable JIS-mapped Japanese font support in GD,
 [  --enable-gd-jis-conv    GD: Enable JIS-mapped Japanese font support], no, no)
