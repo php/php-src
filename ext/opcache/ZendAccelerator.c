@@ -3764,6 +3764,18 @@ static int accel_preload(const char *config)
 		preload_link();
 		preload_remove_empty_includes();
 
+		/* Don't preload constants */
+		if (EG(zend_constants)) {
+			zval *zv;
+			ZEND_HASH_REVERSE_FOREACH_VAL(EG(zend_constants), zv) {
+				zend_constant *c = Z_PTR_P(zv);
+				if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
+					break;
+				}
+				EG(zend_constants)->pDestructor(zv);
+			} ZEND_HASH_FOREACH_END_DEL();
+		}
+
 		script = create_persistent_script();
 
 		/* Fill in the ping_auto_globals_mask for the new script. If jit for auto globals is enabled we
