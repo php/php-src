@@ -6,7 +6,10 @@ Jelle Lampaert
 --SKIPIF--
 <?php
 require_once(__DIR__ . '/skipif.inc');
-require_once(__DIR__ . '/skipif_loadExtension.inc');
+
+if (!method_exists('SQLite3', 'loadExtension')) {
+	die("skip if SQLITE_OMIT_LOAD_EXTENSION defined");
+}
 ?>
 --FILE--
 <?php
