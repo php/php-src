@@ -4,7 +4,10 @@ SQLite3::loadExtension with disabled extensions
 Jelle Lampaert
 #Belgian Testfest 2009
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php
+require_once(__DIR__ . '/skipif.inc');
+require_once(__DIR__ . '/skipif_loadExtension.inc');
+?>
 --FILE--
 <?php
 

@@ -4,7 +4,10 @@ SQLite3::loadExtension test with wrong parameter type
 Thijs Feryn <thijs@feryn.eu>
 #TestFest PHPBelgium 2009
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php
+require_once(__DIR__ . '/skipif.inc');
+require_once(__DIR__ . '/skipif_loadExtension.inc');
+?>
 --FILE--
 <?php
 $db = new SQLite3(':memory:');

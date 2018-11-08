@@ -6,7 +6,10 @@ Jelle Lampaert
 --INI--
 sqlite3.extension_dir=/tmp
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php
+require_once(__DIR__ . '/skipif.inc');
+require_once(__DIR__ . '/skipif_loadExtension.inc');
+?>
 --FILE--
 <?php
 
