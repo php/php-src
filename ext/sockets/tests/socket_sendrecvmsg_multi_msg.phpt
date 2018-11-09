@@ -6,6 +6,8 @@ if (!extension_loaded('sockets'))
 	die('skip sockets extension not available.');
 if (!defined('IPPROTO_IPV6'))
 	die('skip IPv6 not available.');
+if (substr(PHP_OS, 0, 3) != 'WIN')
+	die('skip not for Windows');
 /* Windows supports IPV6_RECVTCLASS and is able to receive the tclass via
  * WSARecvMsg (though only the top 6 bits seem to reported), but WSASendMsg
  * does not accept IPV6_TCLASS messages. We still  test that sendmsg() works
