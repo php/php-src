@@ -431,7 +431,7 @@ check_fmt(struct magic_set *ms, const char *fmt)
 		return 0;
 
 	(void)setlocale(LC_CTYPE, "C");
-	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
+	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
 	if ((pce = pcre_get_compiled_regex(pattern, &capture_count, &re_options)) == NULL) {
 		rv = -1;
 	} else {
