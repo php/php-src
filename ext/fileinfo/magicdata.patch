@@ -1,86 +1,7 @@
-diff -u Magdir.orig/cafebabe Magdir/cafebabe
---- Magdir.orig/cafebabe	2017-05-25 22:07:23.000000000 +0200
-+++ Magdir/cafebabe	2018-04-28 12:26:00.840857162 +0200
-@@ -15,22 +15,6 @@
- # might add another one or two as time goes by...
- #
- ### JAVA START ###
--0	belong		0xcafebabe
-->4	belong		>30		compiled Java class data,
--!:mime	application/x-java-applet
-->>6	beshort		x	        version %d.
-->>4	beshort		x       	\b%d
--# Which is which?
--#>>4	belong		0x032d		(Java 1.0)
--#>>4	belong		0x032d		(Java 1.1)
-->>4	belong		0x002e		(Java 1.2)
-->>4	belong		0x002f		(Java 1.3)
-->>4	belong		0x0030		(Java 1.4)
-->>4	belong		0x0031		(Java 1.5)
-->>4	belong		0x0032		(Java 1.6)
-->>4	belong		0x0033		(Java 1.7)
-->>4	belong		0x0034		(Java 1.8)
--
- 0	belong		0xcafed00d	JAR compressed with pack200,
- >5	byte		x		version %d.
- >4	byte		x		\b%d
-@@ -52,15 +36,28 @@
- 
- 0	belong		0xcafebabe
- >4	belong		1		Mach-O universal binary with 1 architecture:
--!:mime application/x-mach-binary
- >>8	use		mach-o		\b
-+0	belong		0xcafebabe
-+>4	belong		>30		compiled Java class data,
-+!:mime	application/x-java-applet
-+>>6	beshort		x	        version %d.
-+>>4	beshort		x       	\b%d
-+# Which is which?
-+#>>4	belong		0x032d		(Java 1.0)
-+#>>4	belong		0x032d		(Java 1.1)
-+>>4	belong		0x002e		(Java 1.2)
-+>>4	belong		0x002f		(Java 1.3)
-+>>4	belong		0x0030		(Java 1.4)
-+>>4	belong		0x0031		(Java 1.5)
-+>>4	belong		0x0032		(Java 1.6)
-+>>4	belong		0x0033		(Java 1.7)
-+>>4	belong		0x0034		(Java 1.8)
- >4	belong		>1
- >>4	belong		<20		Mach-O universal binary with %d architectures:
--!:mime application/x-mach-binary
- >>>8	use		mach-o		\b
-->>4	belong		2
-+>>4	belong		>2
- >>>28	use		mach-o		\b
-->>4	belong		3
-+>>4	belong		>3
- >>>48	use		mach-o		\b
- >>4	belong		4
- >>>68	use		mach-o		\b
-diff -u Magdir.orig/filesystems Magdir/filesystems
---- Magdir.orig/filesystems	2018-03-11 01:46:42.000000000 +0100
-+++ Magdir/filesystems	2018-04-28 12:26:11.080817126 +0200
-@@ -254,7 +254,7 @@
- 30		search/481	\x55\xAA
- # to display DOS/MBR boot sector (40) before old one (strength=50+21),Syslinux bootloader (71),SYSLINUX MBR (37+36),NetBSD mbr (110),AdvanceMAME mbr (111)
- # DOS BPB information (70) and after DOS floppy (120) like in previous file version
--!:strength +65
-+!:strength +0
- # for sector sizes < 512 Bytes
- >11		uleshort	<512
- >>(11.s-2)	uleshort	0xAA55		DOS/MBR boot sector
-@@ -266,7 +266,7 @@
- 0x1FE          leshort         0xAA55         	DOS/MBR boot sector
- #
- # to display information (50) before DOS BPB (strength=70) and after DOS floppy (120) like in old file version
--!:strength +65
-+!:strength +0
- >2		string		OSBS		OS/BS MBR
- # added by Joerg Jenderek at Feb 2013 according to http://thestarman.pcministry.com/asm/mbr/
- # and http://en.wikipedia.org/wiki/Master_Boot_Record
-diff -u Magdir.orig/rpm Magdir/rpm
---- Magdir.orig/rpm	2013-01-11 17:45:23.000000000 +0100
-+++ Magdir/rpm	2018-04-28 12:26:14.072805431 +0200
+diff --git a/magic/Magdir/rpm b/magic/Magdir/rpm
+index 9a795f8..31db083 100644
+--- a/magic/Magdir/rpm
++++ b/magic/Magdir/rpm
 @@ -29,6 +29,7 @@
  >>8	beshort		17		SuperH
  >>8	beshort		18		Xtensa
@@ -89,51 +10,149 @@ diff -u Magdir.orig/rpm Magdir/rpm
  
  #delta RPM    Daniel Novotny (dnovotny@redhat.com)
  0	string		drpm		Delta RPM
-diff -u Magdir.orig/securitycerts Magdir/securitycerts
---- Magdir.orig/securitycerts	2009-09-19 18:28:12.000000000 +0200
-+++ Magdir/securitycerts	2018-04-28 12:26:14.072805431 +0200
+diff --git a/magic/Magdir/securitycerts b/magic/Magdir/securitycerts
+index 8785dd8..1c340be 100644
+--- a/magic/Magdir/securitycerts
++++ b/magic/Magdir/securitycerts
 @@ -4,3 +4,5 @@
  0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
  0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
  0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
 +
 +0	string \0volume_key	volume_key escrow packet
-diff -u Magdir.orig/varied.script Magdir/varied.script
---- Magdir.orig/varied.script	2015-03-27 18:59:39.000000000 +0100
-+++ Magdir/varied.script	2018-04-28 12:26:14.072805431 +0200
-@@ -4,27 +4,35 @@
+From fb1604080767501fde17eb601382e84f1c1ddca3 Mon Sep 17 00:00:00 2001
+From: Christos Zoulas <christos@zoulas.com>
+Date: Mon, 16 Jul 2018 12:30:41 +0000
+Subject: [PATCH] remember to put a space between the version and the number,
+ plus more version parsing (Kamil Dudka)
+
+Upstream-commit: 1a7f58c9f253e3b902bfb7a77afd8375b0b428b7
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ magic/Magdir/fsav | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/magic/Magdir/fsav b/magic/Magdir/fsav
+index 5714798..5d72ab9 100644
+--- a/magic/Magdir/fsav
++++ b/magic/Magdir/fsav
+@@ -48,13 +48,15 @@
+ >11	string		>\0		Clam AntiVirus database %-.23s
+ >>34	string		:
+ >>>35		string		!:	\b, version
+->>>>35		string		x 	\b%-.1s
+->>>>>36		string 		!:
++>>>>35		string		x 	\b %-.1s
++>>>>>36		string		!:
+ >>>>>>36	string		x 	\b%-.1s
+ >>>>>>>37	string		!:
+ >>>>>>>>37	string		x 	\b%-.1s
+ >>>>>>>>>38	string		!:
+ >>>>>>>>>>38	string		x 	\b%-.1s
++>>>>>>>>>>>39	string		!:
++>>>>>>>>>>>>39	string		x 	\b%-.1s
+ >512	string		\037\213	\b, gzipped
+ >769	string		ustar\0		\b, tarred
  
- 0	string/t		#!\ /			a
- >3	string		>\0			%s script text executable
-+!:strength / 10
+-- 
+2.14.4
+
+From f0e846528e1c839ab44895a1f13d167a4ad8def3 Mon Sep 17 00:00:00 2001
+From: Marek Cermak <macermak@redhat.com>
+Date: Wed, 20 Dec 2017 16:18:46 +0100
+Subject: [PATCH] Resolves: #1515180 - image/gif classifed as
+ application/octet-stream
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1515180
+
+Signed-off-by: Marek Cermak <macermak@redhat.com>
+---
+ magic/Magdir/images | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/magic/Magdir/images b/magic/Magdir/images
+index 69e8e90f..76f7e7da 100644
+--- a/magic/Magdir/images
++++ b/magic/Magdir/images
+@@ -468,7 +468,9 @@
+ !:mime	image/x-unknown
  
- 0	string/b		#!\ /			a
- >3	string		>\0			%s script executable (binary data)
-+!:strength / 10
- 
- 0	string/t		#!\t/			a
- >3	string		>\0			%s script text executable
-+!:strength / 10
- 
- 0	string/b		#!\t/			a
- >3	string		>\0			%s script executable (binary data)
-+!:strength / 10
- 
- 0	string/t		#!/			a
- >2	string		>\0			%s script text executable
-+!:strength / 10
- 
- 0	string/b		#!/			a
- >2	string		>\0			%s script executable (binary data)
-+!:strength / 10
- 
- 0	string/t		#!\ 			script text executable
- >3	string		>\0			for %s
-+!:strength / 10
- 
- 0	string/b		#!\ 			script executable
- >3	string		>\0			for %s (binary data)
-+!:strength / 10
- 
- # using env
- 0	string/t	#!/usr/bin/env		a
+ # GIF
++# Strength set up to beat 0x55AA DOS/MBR signature word lookups (+65)
+ 0	string		GIF8		GIF image data
++!:strength +80
+ !:mime	image/gif
+ !:apple	8BIMGIFf
+ >4	string		7a		\b, version 8%s,
+-- 
+2.13.6
+
+From 719116b196fd873f5a463dfdb0fd6258cee51591 Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Tue, 22 May 2018 18:18:06 +0200
+Subject: [PATCH] Revert "add a conditional in description"
+
+Upstream-commit: 6876ebadcdf27224b3ffa9dfa4343127aa97c9b2
+
+... and partially revert upstream commit
+7dbecfe406a6bb2de1fe7ec2fe413dcd8871ac74
+
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ magic/Magdir/elf | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/magic/Magdir/elf b/magic/Magdir/elf
+index 7fd5de1..dba5a73 100644
+--- a/magic/Magdir/elf
++++ b/magic/Magdir/elf
+@@ -48,9 +48,8 @@
+ !:mime	application/x-object
+ >16	leshort		2		executable,
+ !:mime	application/x-executable
+->16	leshort		3		${x?pie executable:shared object}
+-
+-!:mime	application/x-${x?pie-executable:sharedlib}
++>16	leshort		3		shared object,
++!:mime	application/x-sharedlib
+ >16	leshort		4		core file
+ !:mime	application/x-coredump
+ # Core file detection is not reliable.
+-- 
+2.14.3
+
+From ed6062995ae60d6772f2dabc39e03cbf28ee7343 Mon Sep 17 00:00:00 2001
+From: Christos Zoulas <christos@zoulas.com>
+Date: Mon, 16 Jul 2018 12:32:08 +0000
+Subject: [PATCH] more info for ppc swapspace (Kamil Dudka)
+
+Upstream-commit: 65f9c7053548df8945df600c07123c9151531ee6
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ magic/Magdir/linux | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/magic/Magdir/linux b/magic/Magdir/linux
+index 0630a8a..11e9237 100644
+--- a/magic/Magdir/linux
++++ b/magic/Magdir/linux
+@@ -94,6 +94,16 @@
+ # From Daniel Novotny <dnovotny@redhat.com>
+ # swap file for PowerPC
+ 65526	string		SWAPSPACE2	Linux/ppc swap file
++>0x400	long		x		version %d,
++>0x404	long		x		size %d pages,
++>1052	string		\0		no label,
++>1052	string		>\0		LABEL=%s,
++>0x40c	belong		x		UUID=%08x
++>0x410	beshort		x		\b-%04x
++>0x412	beshort		x		\b-%04x
++>0x414	beshort		x		\b-%04x
++>0x416	belong		x		\b-%08x
++>0x41a	beshort		x		\b%04x
+ 16374	string		SWAPSPACE2	Linux/ia64 swap file
+ #
+ # Linux kernel boot images, from Albert Cahalan <acahalan@cs.uml.edu>
+-- 
+2.14.4
+
