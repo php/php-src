@@ -3882,7 +3882,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  	    if (NOTMIME(ms)) {
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2018-04-15 20:49:15.000000000 +0200
-+++ libmagic/softmagic.c	2018-11-05 21:33:14.919371593 +0100
++++ libmagic/softmagic.c	2018-11-10 12:18:21.864916065 +0100
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
@@ -3944,7 +3944,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 -	if (rc) {
 -		file_regerror(&rx, rc, ms);
 +	(void)setlocale(LC_CTYPE, "C");
-+	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
++	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
 +	if ((pce = pcre_get_compiled_regex(pattern, &capture_count, &re_options)) == NULL) {
 +		rv = -1;
  	} else {
