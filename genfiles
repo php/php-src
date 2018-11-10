@@ -1,4 +1,32 @@
 #!/bin/sh
+#  +----------------------------------------------------------------------+
+#  | PHP Version 7                                                        |
+#  +----------------------------------------------------------------------+
+#  | Copyright (c) 1997-2018 The PHP Group                                |
+#  +----------------------------------------------------------------------+
+#  | This source file is subject to version 3.01 of the PHP license,      |
+#  | that is bundled with this package in the file LICENSE, and is        |
+#  | available through the world-wide-web at the following url:           |
+#  | https://php.net/license/3_01.txt                                     |
+#  | If you did not receive a copy of the PHP license and are unable to   |
+#  | obtain it through the world-wide-web, please send a note to          |
+#  | license@php.net so we can mail you a copy immediately.               |
+#  +----------------------------------------------------------------------+
+#  | Authors: Sascha Schumann <sascha@schumann.cx>                        |
+#  +----------------------------------------------------------------------+
+#
+# Development helper tool for generating certain files, such as PHP lexer and
+# parser, required to build PHP. It can be used, for example, by the release
+# process so the end PHP installation doesn't need additional dependencies, such
+# as bison or re2c.
+#
+# Usage: genfiles
+#
+# Environment:
+# The following environment variables can override default generator programs.
+#
+#     YACC    Parser generator program, default bison
+#     RE2C    Lexer generator program, default re2c
 
 if [ -z $YACC ]; then
   YACC="bison"
@@ -9,27 +37,27 @@ if [ -z $RE2C ]; then
   RE2C="re2c"
 fi
 
-# Generate Zend parser and lexer files
+echo "Generating Zend parser and lexer files"
 STD="make -f Zend/Makefile.frag RE2C='$RE2C' RE2C_FLAGS='-i' YACC='$YACC' srcdir=Zend builddir=Zend top_srcdir=."
 (eval "$STD Zend/zend_language_parser.c Zend/zend_language_scanner.c Zend/zend_ini_parser.c Zend/zend_ini_scanner.c")
 
-# Generate phpdbg parser and lexer files
+echo "Generating phpdbg parser and lexer files"
 STD="make -f sapi/phpdbg/Makefile.frag RE2C='$RE2C' RE2C_FLAGS='-i' YACC='$YACC' srcdir=sapi/phpdbg builddir=sapi/phpdbg top_srcdir=."
 (eval "$STD sapi/phpdbg/phpdbg_parser.c sapi/phpdbg/phpdbg_lexer.c")
 
-# Generate json parser and lexer files
+echo "Generating json extension parser and lexer files"
 STD="make -f ext/json/Makefile.frag RE2C='$RE2C' RE2C_FLAGS='-i' YACC='$YACC' srcdir=ext/json builddir=ext/json top_srcdir=."
 (eval "$STD ext/json/json_parser.tab.c ext/json/json_scanner.c")
 
-# Generate PDO lexer file
+echo "Generating PDO lexer file"
 STD="make -f ext/pdo/Makefile.frag RE2C='$RE2C' RE2C_FLAGS='-i' srcdir=ext/pdo builddir=ext/pdo top_srcdir=."
 (eval "$STD ext/pdo/pdo_sql_parser.c")
 
-# Generate standard extension lexer files
+echo "Generating standard extension lexer files"
 STD="make -f ext/standard/Makefile.frag RE2C='$RE2C' RE2C_FLAGS='-i' srcdir=ext/standard builddir=ext/standard top_srcdir=."
 (eval "$STD ext/standard/var_unserializer.c ext/standard/url_scanner_ex.c")
 
-# Generate phar extension lexer files
+echo "Generating phar extension lexer file"
 STD="make -f ext/phar/Makefile.frag RE2C='$RE2C' RE2C_FLAGS='-i' srcdir=ext/phar builddir=ext/phar top_srcdir=."
 (eval "$STD ext/phar/phar_path_check.c")
 
@@ -43,6 +71,6 @@ CLEANUP_FILES=" \
 for f in $CLEANUP_FILES; do
   echo "Cleaning file $f"
   cp $f $f.orig
-  grep -v '#line ' $f.orig > $f
-  rm $f.orig
+  grep -v '^#line ' $f.orig > $f
+  rm -f $f.orig
 done
