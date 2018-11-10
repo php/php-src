@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.2.14
 
+- Sockets:
+  . Fixed bug #77136 (Unsupported IPV6_RECVPKTINFO constants on macOS).
+    (Mizunashi Mana)
 
 06 Dec 2018, PHP 7.2.13
 

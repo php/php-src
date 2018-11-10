@@ -82,6 +82,14 @@ if test "$PHP_SOCKETS" != "no"; then
     AC_DEFINE(HAVE_AI_IDN,1,[Whether you have AI_IDN])
   fi
 
-  PHP_NEW_EXTENSION([sockets], [sockets.c multicast.c conversions.c sockaddr_conv.c sendrecvmsg.c], [$ext_shared],, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_SOCKETS_CFLAGS=-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
+  case $host_alias in
+  *darwin*) PHP_SOCKETS_CFLAGS="$PHP_SOCKETS_CFLAGS -D__APPLE_USE_RFC_3542"
+  esac
+  PHP_NEW_EXTENSION(
+    [sockets],
+    [sockets.c multicast.c conversions.c sockaddr_conv.c sendrecvmsg.c],
+    [$ext_shared],,
+    $PHP_SOCKETS_CFLAGS)
   PHP_INSTALL_HEADERS([ext/sockets/], [php_sockets.h])
 fi
