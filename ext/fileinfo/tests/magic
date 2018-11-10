@@ -4829,6 +4829,22 @@
 # might add another one or two as time goes by...
 #
 ### JAVA START ###
+0	belong		0xcafebabe
+>4	belong		>30		compiled Java class data,
+!:mime	application/x-java-applet
+>>6	beshort		x	        version %d.
+>>4	beshort		x       	\b%d
+# Which is which?
+#>>4	belong		0x032d		(Java 1.0)
+#>>4	belong		0x032d		(Java 1.1)
+>>4	belong		0x002e		(Java 1.2)
+>>4	belong		0x002f		(Java 1.3)
+>>4	belong		0x0030		(Java 1.4)
+>>4	belong		0x0031		(Java 1.5)
+>>4	belong		0x0032		(Java 1.6)
+>>4	belong		0x0033		(Java 1.7)
+>>4	belong		0x0034		(Java 1.8)
+
 0	belong		0xcafed00d	JAR compressed with pack200,
 >5	byte		x		version %d.
 >4	byte		x		\b%d
@@ -4850,28 +4866,15 @@
 
 0	belong		0xcafebabe
 >4	belong		1		Mach-O universal binary with 1 architecture:
+!:mime application/x-mach-binary
 >>8	use		mach-o		\b
-0	belong		0xcafebabe
->4	belong		>30		compiled Java class data,
-!:mime	application/x-java-applet
->>6	beshort		x	        version %d.
->>4	beshort		x       	\b%d
-# Which is which?
-#>>4	belong		0x032d		(Java 1.0)
-#>>4	belong		0x032d		(Java 1.1)
->>4	belong		0x002e		(Java 1.2)
->>4	belong		0x002f		(Java 1.3)
->>4	belong		0x0030		(Java 1.4)
->>4	belong		0x0031		(Java 1.5)
->>4	belong		0x0032		(Java 1.6)
->>4	belong		0x0033		(Java 1.7)
->>4	belong		0x0034		(Java 1.8)
 >4	belong		>1
 >>4	belong		<20		Mach-O universal binary with %d architectures:
+!:mime application/x-mach-binary
 >>>8	use		mach-o		\b
->>4	belong		>2
+>>4	belong		2
 >>>28	use		mach-o		\b
->>4	belong		>3
+>>4	belong		3
 >>>48	use		mach-o		\b
 >>4	belong		4
 >>>68	use		mach-o		\b
@@ -8674,7 +8677,7 @@
 30		search/481	\x55\xAA
 # to display DOS/MBR boot sector (40) before old one (strength=50+21),Syslinux bootloader (71),SYSLINUX MBR (37+36),NetBSD mbr (110),AdvanceMAME mbr (111)
 # DOS BPB information (70) and after DOS floppy (120) like in previous file version
-!:strength +0
+!:strength +65
 # for sector sizes < 512 Bytes
 >11		uleshort	<512
 >>(11.s-2)	uleshort	0xAA55		DOS/MBR boot sector
@@ -8686,7 +8689,7 @@
 0x1FE          leshort         0xAA55         	DOS/MBR boot sector
 #
 # to display information (50) before DOS BPB (strength=70) and after DOS floppy (120) like in old file version
-!:strength +0
+!:strength +65
 >2		string		OSBS		OS/BS MBR
 # added by Joerg Jenderek at Feb 2013 according to http://thestarman.pcministry.com/asm/mbr/
 # and http://en.wikipedia.org/wiki/Master_Boot_Record
@@ -11682,16 +11685,6 @@
 >4	byte		79			for Objective-C++
 
 #------------------------------------------------------------------------------
-# $File: gconv
-# gconv: file(1) magic for iconv/gconv module configuration cache
-#
-# Magic number defined in glibc/iconv/iconvconfig.h as GCONVCACHE_MAGIC
-#
-# From: Marek Cermak <macermak@redhat.com>
-#
-0		lelong		0x20010324 	gconv module configuration cache data
-
-#------------------------------------------------------------------------------
 # $File: geo,v 1.4 2017/03/17 21:35:28 christos Exp $
 # Geo- files from Kurt Schwehr <schwehr@ccom.unh.edu>
 
@@ -13706,7 +13699,9 @@
 !:mime	image/x-unknown
 
 # GIF
+# Strength set up to beat 0x55AA DOS/MBR signature word lookups (+65)
 0	string		GIF8		GIF image data
+!:strength +80
 !:mime	image/gif
 !:apple	8BIMGIFf
 >4	string		7a		\b, version 8%s,
@@ -21629,48 +21624,29 @@
 # From: Reuben Thomas <rrt@sc3d.org>
 
 # Ruby scripts
-0	search/1/w	#!\ /usr/bin/ruby				Ruby script text executable
+0	search/1/w	#!\ /usr/bin/ruby	Ruby script text executable
 !:strength + 15
 !:mime text/x-ruby
 0	search/1/w	#!\ /usr/local/bin/ruby	Ruby script text executable
 !:strength + 15
 !:mime text/x-ruby
-0	search/1	#!/usr/bin/env\ ruby				Ruby script text executable
+0	search/1	#!/usr/bin/env\ ruby	Ruby script text executable
 !:strength + 15
 !:mime text/x-ruby
-0	search/1	#!\ /usr/bin/env\ ruby			Ruby script text executable
+0	search/1	#!\ /usr/bin/env\ ruby	Ruby script text executable
 !:strength + 15
 !:mime text/x-ruby
 
 # What looks like ruby, but does not have a shebang
 # (modules and such)
 # From: Lubomir Rintel <lkundrak@v3.sk>
-0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'
->0	regex		def\ [a-z]|\ do$
->>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
-!:strength + 30
+0	regex		\^[\ \t]*require[\ \t]'[A-Za-z_/]+'
+>0	regex		include\ [A-Z]|def\ [a-z]|\ do$
+>>0	regex		\^[\ \t]*end([\ \t]*[;#].*)?$		Ruby script text
 !:mime	text/x-ruby
-0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
+0	regex		\^[\ \t]*(class|module)[\ \t][A-Z]
 >0	regex		(modul|includ)e\ [A-Z]|def\ [a-z]
->>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
-!:strength + 30
-!:mime	text/x-ruby
-# Classes with no modules or defs, beats simple ASCII
-0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
->&0	regex	\^[[:space:]]*end([[:space:]]+[;#if].*)?$		Ruby script text
-!:strength + 10
-!:mime	text/x-ruby
-# Looks for function definiton to balance python magic
-# def name (args)
-# end
-0	regex		\^[[:space:]]*def\ [a-z]|def\ [[:alpha:]]+::[a-z]
->&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
-!:strength + 10
-!:mime	text/x-ruby
-
-0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'	Ruby script text
-!:mime	text/x-ruby
-0 regex 	\^[[:space:]]*include\ ([A-Z]+[a-z]*(::))+	Ruby script text
+>>0	regex		\^[\ \t]*end([\ \t]*[;#].*)?$		Ruby module source text
 !:mime	text/x-ruby
 
 #------------------------------------------------------------------------------
@@ -24194,35 +24170,27 @@
 
 0	string/t		#!\ /			a
 >3	string		>\0			%s script text executable
-!:strength / 10
 
 0	string/b		#!\ /			a
 >3	string		>\0			%s script executable (binary data)
-!:strength / 10
 
 0	string/t		#!\t/			a
 >3	string		>\0			%s script text executable
-!:strength / 10
 
 0	string/b		#!\t/			a
 >3	string		>\0			%s script executable (binary data)
-!:strength / 10
 
 0	string/t		#!/			a
 >2	string		>\0			%s script text executable
-!:strength / 10
 
 0	string/b		#!/			a
 >2	string		>\0			%s script executable (binary data)
-!:strength / 10
 
 0	string/t		#!\ 			script text executable
 >3	string		>\0			for %s
-!:strength / 10
 
 0	string/b		#!\ 			script executable
 >3	string		>\0			for %s (binary data)
-!:strength / 10
 
 # using env
 0	string/t	#!/usr/bin/env		a
