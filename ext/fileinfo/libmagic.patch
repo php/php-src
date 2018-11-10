@@ -951,7 +951,7 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  }
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2017-05-08 20:10:13.000000000 +0200
-+++ libmagic/cdf.c	2018-11-04 00:59:30.775724767 +0100
++++ libmagic/cdf.c	2018-11-07 19:06:50.045202539 +0100
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -3205,7 +3205,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  						*ec = '\0';
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2017-05-08 20:10:13.000000000 +0200
-+++ libmagic/softmagic.c	2018-11-05 20:23:12.586762678 +0100
++++ libmagic/softmagic.c	2018-11-10 13:08:23.811239067 +0100
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
@@ -3267,7 +3267,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 -	if (rc) {
 -		file_regerror(&rx, rc, ms);
 +	(void)setlocale(LC_CTYPE, "C");
-+	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
++	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
 +	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options)) == NULL) {
 +		rv = -1;
  	} else {
@@ -3303,21 +3303,16 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  private int32_t
  mprint(struct magic_set *ms, struct magic *m)
  {
-@@ -667,19 +657,18 @@
- 		t = ms->offset + sizeof(double);
-   		break;
- 
--	case FILE_SEARCH:
- 	case FILE_REGEX: {
+@@ -672,14 +662,10 @@
  		char *cp;
  		int rval;
  
 -		cp = strndup((const char *)ms->search.s, ms->search.rm_len);
+-		if (cp == NULL) {
+-			file_oomem(ms, ms->search.rm_len);
+-			return -1;
+-		}
 +		cp = estrndup((const char *)ms->search.s, ms->search.rm_len);
- 		if (cp == NULL) {
- 			file_oomem(ms, ms->search.rm_len);
- 			return -1;
- 		}
  		rval = file_printf(ms, F(ms, m, "%s"),
  		    file_printable(sbuf, sizeof(sbuf), cp));
 -		free(cp);
@@ -3325,23 +3320,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  
  		if (rval == -1)
  			return -1;
-@@ -691,6 +680,15 @@
- 		break;
- 	}
- 
-+	case FILE_SEARCH:
-+		if (file_printf(ms, F(ms, m, "%s"), m->value.s) == -1)
-+			return -1;
-+		if ((m->str_flags & REGEX_OFFSET_START))
-+			t = ms->search.offset;
-+		else
-+			t = ms->search.offset + m->vallen;
-+		break;
-+
- 	case FILE_DEFAULT:
- 	case FILE_CLEAR:
- 	  	if (file_printf(ms, "%s", m->desc) == -1)
-@@ -1373,9 +1371,6 @@
+@@ -1373,9 +1359,6 @@
  		    m->type, m->flag, offset, o, nbytes,
  		    *indir_count, *name_count);
  		mdebug(offset, (char *)(void *)p, sizeof(union VALUETYPE));
@@ -3351,7 +3330,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	}
  
  	if (m->flag & INDIR) {
-@@ -1488,9 +1483,6 @@
+@@ -1488,9 +1471,6 @@
  		if ((ms->flags & MAGIC_DEBUG) != 0) {
  			mdebug(offset, (char *)(void *)p,
  			    sizeof(union VALUETYPE));
@@ -3361,7 +3340,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		}
  	}
  
-@@ -1572,15 +1564,15 @@
+@@ -1572,15 +1552,15 @@
  		if (rv == 1) {
  			if ((ms->flags & MAGIC_NODESC) == 0 &&
  			    file_printf(ms, F(ms, m, "%u"), offset) == -1) {
@@ -3380,7 +3359,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		return rv;
  
  	case FILE_USE:
-@@ -1703,6 +1695,41 @@
+@@ -1703,6 +1683,41 @@
  	return file_strncmp(a, b, len, flags);
  }
  
@@ -3422,7 +3401,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  private int
  magiccheck(struct magic_set *ms, struct magic *m)
  {
-@@ -1863,65 +1890,77 @@
+@@ -1863,65 +1878,77 @@
  		break;
  	}
  	case FILE_REGEX: {
