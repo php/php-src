@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - SQLite3:
   . Unbundled libsqlite. (cmb)
   . Lifted requirements to SQLite 3.5.0. (cmb)
+  . Added support for the SQLite @name notation. (cmb, BohwaZ)
 
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with

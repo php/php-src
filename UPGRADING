@@ -119,6 +119,7 @@ PHP 7.4 UPGRADE NOTES
 - SQLite3:
   . The bundled libsqlite has been removed.  To build the SQLite3 and/or
     PDO_SQLite extensions a system libsqlite3 ≥ 3.5.0 is now required.
+  . The @param notation can now also be used to denote SQL query parameters.
 
 - Zip:
   . The bundled libzip library has been removed. A system libzip >= 0.11 is now
