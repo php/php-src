@@ -4094,7 +4094,6 @@ PHP_FUNCTION(imap_mail)
 	if (!message_len) {
 		/* this is not really an error, so it is allowed. */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No message string in mail command");
-		message = NULL;
 	}
 
 	if (_php_imap_mail(to, subject, message, headers, cc, bcc, rpath TSRMLS_CC)) {
