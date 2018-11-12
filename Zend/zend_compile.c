@@ -6471,6 +6471,8 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			opline->opcode = ZEND_DECLARE_CLASS;
 		}
 	}
+
+	// todo: add to set of classnames that need variance checks iff inheritance is involved
 }
 /* }}} */
 

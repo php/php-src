@@ -286,7 +286,7 @@ int _check_inherited_arg_info(
 					} else {
 						/* todo: delay to runtime. How? */
 						/* Don't break bug62441! */
-						code = 0;
+						code = -1;
 					}
 				} else {
 					code = 0;
@@ -333,11 +333,7 @@ int _check_inherited_return_type(
 		return 0;
 	}
 
-	if (!_check_inherited_arg_info(fe, fe_arg_info, proto, proto_arg_info, COVARIANT)) {
-		return 0;
-	}
-
-	return 1;
+	return _check_inherited_arg_info(fe, fe_arg_info, proto, proto_arg_info, COVARIANT);
 }
 
 static
@@ -365,7 +361,7 @@ int _check_inherited_parameter_type(
 }
 /* }}} */
 
-static zend_bool zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto) /* {{{ */
+static int zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto) /* {{{ */
 {
 	uint32_t i, num_args;
 
@@ -1997,6 +1993,72 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent)
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		zend_verify_abstract_class(ce);
 	}
+}
+/* }}} */
+
+ZEND_API void zend_verify_variance(zend_class_entry *ce) /* {{{ */
+{
+	// todo: name? "verify" typically means something else
+	// todo: de-duplicate all this
+	zend_function *child;
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
+
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, child) {
+		zend_function *parent = child->common.prototype;
+			/* If the parenttype method is private do not enforce a signature */
+		if (parent && !(parent ->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			uint32_t i, num_args;
+
+			/* Checks for constructors only if they are declared in an interface,
+			 * or explicitly marked as abstract
+			 */
+			if ((ce->constructor == child)
+			    && ((parent->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
+			    && (parent->common.fn_flags & ZEND_ACC_ABSTRACT) == 0))
+			{
+				continue;
+			}
+
+			/* Check return type compatibility, but only if the prototype already
+			 * specifies a return type. Adding a new return type is always valid. */
+			if (parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				int check = _check_inherited_return_type(
+					child, child->common.arg_info - 1,
+					parent, parent->common.arg_info - 1);
+				if (check < 0) {
+					zend_error_noreturn(E_ERROR, "Bad return!");
+				}
+			}
+
+			num_args = parent->common.num_args;
+			if (parent->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+				if (child->common.num_args >= parent->common.num_args) {
+					num_args = child->common.num_args;
+					if (child->common.fn_flags & ZEND_ACC_VARIADIC) {
+						num_args++;
+					}
+				}
+			}
+
+			for (i = 0; i < num_args; i++) {
+				zend_arg_info *child_arg_info = &child->common.arg_info[i];
+				zend_arg_info *parent_arg_info = (i < parent->common.num_args)
+					? &parent->common.arg_info[i]
+					: &parent->common.arg_info[parent->common.num_args];
+
+				int check = _check_inherited_parameter_type(
+					child, child_arg_info,
+					parent, parent_arg_info);
+
+				if (check < 0) {
+					zend_error_noreturn(E_ERROR, "Bad arg!");
+				}
+			}
+
+		}
+	} ZEND_HASH_FOREACH_END();
+
 }
 /* }}} */
 
