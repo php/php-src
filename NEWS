@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0RC6
 
+- SOAP:
+  . Fixed bug #77141 (Signedness issue in SOAP when precision=-1). (cmb)
 
 08 Nov 2018 PHP 7.3.0RC5
 
