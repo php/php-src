@@ -641,6 +641,18 @@ int phar_parse_metadata(char **buffer, zval *metadata, uint32_t zip_metadata_len
 /* }}}*/
 
 /**
+ * Size of fixed fields in the manifest.
+ * See: http://php.net/manual/en/phar.fileformat.phar.php
+ */
+#define MANIFEST_FIXED_LEN	18
+
+#define SAFE_PHAR_GET_32(buffer, endbuffer, var) \
+	if (UNEXPECTED(buffer + 4 >= endbuffer)) { \
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)"); \
+	} \
+	PHAR_GET_32(buffer, var);
+
+/**
  * Does not check for a previously opened phar in the cache.
  *
  * Parse a new one and add it to the cache, returning either SUCCESS or
@@ -725,12 +737,12 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	savebuf = buffer;
 	endbuffer = buffer + manifest_len;
 
-	if (manifest_len < 10 || manifest_len != php_stream_read(fp, buffer, manifest_len)) {
+	if (manifest_len < MANIFEST_FIXED_LEN || manifest_len != php_stream_read(fp, buffer, manifest_len)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)")
 	}
 
 	/* extract the number of entries */
-	PHAR_GET_32(buffer, manifest_count);
+	SAFE_PHAR_GET_32(buffer, endbuffer, manifest_count);
 
 	if (manifest_count == 0) {
 		MAPPHAR_FAIL("in phar \"%s\", manifest claims to have zero entries.  Phars must have at least 1 entry");
@@ -750,7 +762,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 		return FAILURE;
 	}
 
-	PHAR_GET_32(buffer, manifest_flags);
+	SAFE_PHAR_GET_32(buffer, endbuffer, manifest_flags);
 
 	manifest_flags &= ~PHAR_HDR_COMPRESSION_MASK;
 	manifest_flags &= ~PHAR_FILE_COMPRESSION_MASK;
@@ -970,13 +982,13 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	}
 
 	/* extract alias */
-	PHAR_GET_32(buffer, tmp_len);
+	SAFE_PHAR_GET_32(buffer, endbuffer, tmp_len);
 
 	if (buffer + tmp_len > endbuffer) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)");
 	}
 
-	if (manifest_len < 10 + tmp_len) {
+	if (manifest_len < MANIFEST_FIXED_LEN + tmp_len) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)")
 	}
 
@@ -1014,7 +1026,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	}
 
 	/* we have 5 32-bit items plus 1 byte at least */
-	if (manifest_count > ((manifest_len - 10 - tmp_len) / (5 * 4 + 1))) {
+	if (manifest_count > ((manifest_len - MANIFEST_FIXED_LEN - tmp_len) / (5 * 4 + 1))) {
 		/* prevent serious memory issues */
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (too many manifest entries for size of manifest)")
 	}
@@ -1023,12 +1035,12 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	mydata->is_persistent = PHAR_G(persist);
 
 	/* check whether we have meta data, zero check works regardless of byte order */
-	PHAR_GET_32(buffer, len);
+	SAFE_PHAR_GET_32(buffer, endbuffer, len);
 	if (mydata->is_persistent) {
 		mydata->metadata_len = len;
-		if(!len) {
+		if (!len) {
 			/* FIXME: not sure why this is needed but removing it breaks tests */
-			PHAR_GET_32(buffer, len);
+			SAFE_PHAR_GET_32(buffer, endbuffer, len);
 		}
 	}
 	if(len > (size_t)(endbuffer - buffer)) {
