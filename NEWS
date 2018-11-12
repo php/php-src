@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug #77058 (Type inference in opcache causes side effects). (Nikita)
   . Fixed bug #77092 (array_diff_key() - segmentation fault). (Nikita)
 
+- Phar:
+  . Fixed bug #77143 (Heap Buffer Overflow (READ: 4) in phar_parse_pharfile).
+    (Stas)
+
 - PGSQL:
   . Fixed bug #77047 (pg_convert has a broken regex for the 'TIME WITHOUT
     TIMEZONE' data type). (Andy Gajetzki)
