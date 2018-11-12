@@ -9,7 +9,8 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fixed bug #77022 (PharData always creates new files with mode 0666). (Stas)
-
+  . Fixed bug #77143 (Heap Buffer Overflow (READ: 4) in phar_parse_pharfile).
+    (Stas)
 
 13 Sep 2018, PHP 5.6.38
 
