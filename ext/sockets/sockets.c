@@ -1208,6 +1208,11 @@ PHP_FUNCTION(socket_write)
 		return;
 	}
 
+	if (length < 0) {
+		php_error_docref(NULL, E_WARNING, "Length cannot be negative");
+		RETURN_FALSE;
+	}
+
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
 		RETURN_FALSE;
 	}
@@ -1750,6 +1755,11 @@ PHP_FUNCTION(socket_send)
 		return;
 	}
 
+	if (len < 0) {
+		php_error_docref(NULL, E_WARNING, "Length cannot be negative");
+		RETURN_FALSE;
+	}
+
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
 		RETURN_FALSE;
 	}
@@ -1910,6 +1920,11 @@ PHP_FUNCTION(socket_sendto)
 
 	if (zend_parse_parameters(argc, "rslls|l", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE) {
 		return;
+	}
+
+	if (len < 0) {
+		php_error_docref(NULL, E_WARNING, "Length cannot be negative");
+		RETURN_FALSE;
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
