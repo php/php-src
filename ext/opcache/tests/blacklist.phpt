@@ -9,9 +9,12 @@ opcache.file_cache_only=0
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN' || PHP_OS_FAMILY === 'Darwin') {
-    die('skip only for Linux');
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip not for Windows');
 }
+/* On macOS, `/tmp` is an alias to `/private/tmp` .
+ * So, we should write `%S/tmp/path` as `/tmp/path` not for Windows.
+ */
 ?>
 --FILE--
 <?php
@@ -24,7 +27,7 @@ include("blacklist.inc");
 $status = opcache_get_status();
 print_r(count($status['scripts']));
 ?>
---EXPECT--
+--EXPECTF--
 Array
 (
     [0] => /path/to/foo
@@ -32,8 +35,8 @@ Array
     [2] => /path/to/bar
     [3] => __DIR__/blacklist.inc
     [4] => __DIR__/current.php
-    [5] => /tmp/path/?nocache.inc
-    [6] => /tmp/path/*/somedir
+    [5] => %S/tmp/path/?nocache.inc
+    [6] => %S/tmp/path/*/somedir
 )
 ok
 1
