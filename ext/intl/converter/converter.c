@@ -125,7 +125,7 @@ static PHP_METHOD(UConverter, toUCallback) {
 		return;
 	}
 
-	php_converter_default_callback(return_value, getThis(), reason, error);
+	php_converter_default_callback(return_value, &EX(This), reason, error);
 }
 /* }}} */
 
@@ -147,7 +147,7 @@ static PHP_METHOD(UConverter, fromUCallback) {
 		return;
 	}
 
-	php_converter_default_callback(return_value, getThis(), reason, error);
+	php_converter_default_callback(return_value, &EX(This), reason, error);
 }
 /* }}} */
 
@@ -414,7 +414,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_set_encoding_arginfo, 0, ZEND_RETURN_VALUE,
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO();
 static void php_converter_do_set_encoding(UConverter **pcnv, INTERNAL_FUNCTION_PARAMETERS) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	char *enc;
 	size_t enc_len;
 
@@ -431,14 +431,14 @@ static void php_converter_do_set_encoding(UConverter **pcnv, INTERNAL_FUNCTION_P
 
 /* {{{ proto bool UConverter::setSourceEncoding(string encoding) */
 static PHP_METHOD(UConverter, setSourceEncoding) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	php_converter_do_set_encoding(&(objval->src), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ proto bool UConverter::setDestinationEncoding(string encoding) */
 static PHP_METHOD(UConverter, setDestinationEncoding) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	php_converter_do_set_encoding(&(objval->dest), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
@@ -472,14 +472,14 @@ static void php_converter_do_get_encoding(php_converter_object *objval, UConvert
 
 /* {{{ proto string UConverter::getSourceEncoding() */
 static PHP_METHOD(UConverter, getSourceEncoding) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	php_converter_do_get_encoding(objval, objval->src, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ proto string UConverter::getDestinationEncoding() */
 static PHP_METHOD(UConverter, getDestinationEncoding) {
-        php_converter_object *objval = CONV_GET(getThis());
+        php_converter_object *objval = CONV_GET(&EX(This));
         php_converter_do_get_encoding(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
@@ -512,14 +512,14 @@ static void php_converter_do_get_type(php_converter_object *objval, UConverter *
 
 /* {{{ proto int UConverter::getSourceType() */
 static PHP_METHOD(UConverter, getSourceType) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	php_converter_do_get_type(objval, objval->src, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ proto int UConverter::getDestinationType() */
 static PHP_METHOD(UConverter, getDestinationType) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	php_converter_do_get_type(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
@@ -555,7 +555,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_arginfo, 0, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO();
 
 static PHP_METHOD(UConverter, __construct) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	char *src = "utf-8";
 	size_t src_len = sizeof("utf-8") - 1;
 	char *dest = src;
@@ -569,8 +569,8 @@ static PHP_METHOD(UConverter, __construct) {
 
 	php_converter_set_encoding(objval, &(objval->src),  src,  src_len );
 	php_converter_set_encoding(objval, &(objval->dest), dest, dest_len);
-	php_converter_resolve_callback(getThis(), objval, "toUCallback",   &(objval->to_cb),   &(objval->to_cache));
-	php_converter_resolve_callback(getThis(), objval, "fromUCallback", &(objval->from_cb), &(objval->from_cache));
+	php_converter_resolve_callback(&EX(This), objval, "toUCallback",   &(objval->to_cb),   &(objval->to_cache));
+	php_converter_resolve_callback(&EX(This), objval, "fromUCallback", &(objval->from_cb), &(objval->from_cache));
 }
 /* }}} */
 
@@ -580,7 +580,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_setSubstChars_arginfo, 0, ZEND_RETURN_VALUE
 ZEND_END_ARG_INFO();
 
 static PHP_METHOD(UConverter, setSubstChars) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	char *chars;
 	size_t chars_len;
 	int ret = 1;
@@ -625,7 +625,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_getSubstChars_arginfo, 0, ZEND_RETURN_VALUE
 ZEND_END_ARG_INFO();
 
 static PHP_METHOD(UConverter, getSubstChars) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	char chars[127];
 	int8_t chars_len = sizeof(chars);
 	UErrorCode error = U_ZERO_ERROR;
@@ -748,7 +748,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_convert_arginfo, 0, ZEND_RETURN_VALUE, 1)
 ZEND_END_ARG_INFO();
 
 static PHP_METHOD(UConverter, convert) {
-        php_converter_object *objval = CONV_GET(getThis());
+        php_converter_object *objval = CONV_GET(&EX(This));
 	char *str;
 	size_t str_len;
 	zend_string *ret;
@@ -844,7 +844,7 @@ static PHP_METHOD(UConverter, transcode) {
 ZEND_BEGIN_ARG_INFO_EX(php_converter_geterrorcode_arginfo, 0, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, getErrorCode) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -860,7 +860,7 @@ static PHP_METHOD(UConverter, getErrorCode) {
 ZEND_BEGIN_ARG_INFO_EX(php_converter_geterrormsg_arginfo, 0, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, getErrorMessage) {
-	php_converter_object *objval = CONV_GET(getThis());
+	php_converter_object *objval = CONV_GET(&EX(This));
 	zend_string *message = intl_error_get_message(&(objval->error));
 
 	if (zend_parse_parameters_none() == FAILURE) {

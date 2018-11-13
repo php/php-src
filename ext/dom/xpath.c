@@ -250,7 +250,7 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 /* {{{ proto DOMXPath::__construct(DOMDocument doc) U */
 PHP_METHOD(domxpath, __construct)
 {
-	zval *id = getThis(), *doc;
+	zval *doc;
 	xmlDocPtr docp = NULL;
 	dom_object *docobj;
 	dom_xpath_object *intern;
@@ -268,7 +268,7 @@ PHP_METHOD(domxpath, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_XPATHOBJ_P(id);
+	intern = Z_XPATHOBJ_P(&EX(This));
 	if (intern != NULL) {
 		oldctx = (xmlXPathContextPtr)intern->dom.ptr;
 		if (oldctx != NULL) {

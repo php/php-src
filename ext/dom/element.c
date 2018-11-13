@@ -151,8 +151,6 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 /* {{{ proto DOMElement::__construct(string name, [string value], [string uri]) */
 PHP_METHOD(domelement, __construct)
 {
-
-	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL, *uri = NULL;
@@ -214,7 +212,7 @@ PHP_METHOD(domelement, __construct)
 		xmlNodeSetContentLen(nodep, (xmlChar *) value, value_len);
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(&EX(This));
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
 		php_libxml_node_free_resource(oldnode );

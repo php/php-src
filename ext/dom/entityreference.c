@@ -46,7 +46,6 @@ const zend_function_entry php_dom_entityreference_class_functions[] = {
 /* {{{ proto DOMEntityReference::__construct(string name) */
 PHP_METHOD(domentityreference, __construct)
 {
-	zval *id = getThis();
 	xmlNode *node;
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
@@ -70,7 +69,7 @@ PHP_METHOD(domentityreference, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(&EX(This));
 	if (intern != NULL) {
 		oldnode = dom_object_get_node(intern);
 		if (oldnode != NULL) {

@@ -626,24 +626,6 @@ static zend_object_handlers date_object_handlers_timezone;
 static zend_object_handlers date_object_handlers_interval;
 static zend_object_handlers date_object_handlers_period;
 
-#define DATE_SET_CONTEXT \
-	zval *object; \
-	object = getThis(); \
-
-#define DATE_FETCH_OBJECT	\
-	php_date_obj *obj;	\
-	DATE_SET_CONTEXT; \
-	if (object) {	\
-		if (zend_parse_parameters_none() == FAILURE) {	\
-			return;	\
-		}	\
-	} else {	\
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), NULL, "O", &object, date_ce_date) == FAILURE) {	\
-			RETURN_FALSE;	\
-		}	\
-	}	\
-	obj = Z_PHPDATE_P(object);	\
-
 #define DATE_CHECK_INITIALIZED(member, class_name) \
 	if (!(member)) { \
 		php_error_docref(NULL, E_WARNING, "The " #class_name " object has not been correctly initialized by its constructor"); \
@@ -2844,7 +2826,7 @@ PHP_METHOD(DateTime, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	php_date_initialize(Z_PHPDATE_P(getThis()), time_str, time_str_len, NULL, timezone_object, 1);
+	php_date_initialize(Z_PHPDATE_P(&EX(This)), time_str, time_str_len, NULL, timezone_object, 1);
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
@@ -2866,7 +2848,7 @@ PHP_METHOD(DateTimeImmutable, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	php_date_initialize(Z_PHPDATE_P(getThis()), time_str, time_str_len, NULL, timezone_object, 1);
+	php_date_initialize(Z_PHPDATE_P(&EX(This)), time_str, time_str_len, NULL, timezone_object, 1);
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
@@ -3010,7 +2992,7 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 */
 PHP_METHOD(DateTime, __wakeup)
 {
-	zval             *object = getThis();
+	zval             *object = &EX(This);
 	php_date_obj     *dateobj;
 	HashTable        *myht;
 
@@ -3861,7 +3843,7 @@ PHP_METHOD(DateTimeZone, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	tzobj = Z_PHPTIMEZONE_P(getThis());
+	tzobj = Z_PHPTIMEZONE_P(&EX(This));
 	timezone_initialize(tzobj, ZSTR_VAL(tz), ZSTR_LEN(tz));
 	zend_restore_error_handling(&error_handling);
 }
@@ -3916,7 +3898,7 @@ PHP_METHOD(DateTimeZone, __set_state)
  *  */
 PHP_METHOD(DateTimeZone, __wakeup)
 {
-	zval             *object = getThis();
+	zval             *object = &EX(This);
 	php_timezone_obj *tzobj;
 	HashTable        *myht;
 
@@ -4319,7 +4301,7 @@ PHP_METHOD(DateInterval, __construct)
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	if (date_interval_initialize(&reltime, ZSTR_VAL(interval_string), ZSTR_LEN(interval_string)) == SUCCESS) {
-		php_interval_obj *diobj = Z_PHPINTERVAL_P(getThis());
+		php_interval_obj *diobj = Z_PHPINTERVAL_P(&EX(This));
 		diobj->diff = reltime;
 		diobj->initialized = 1;
 	}
@@ -4417,7 +4399,7 @@ PHP_METHOD(DateInterval, __set_state)
 */
 PHP_METHOD(DateInterval, __wakeup)
 {
-	zval             *object = getThis();
+	zval             *object = &EX(This);
 	php_interval_obj *intobj;
 	HashTable        *myht;
 
@@ -4593,7 +4575,7 @@ PHP_METHOD(DatePeriod, __construct)
 		}
 	}
 
-	dpobj = Z_PHPPERIOD_P(getThis());
+	dpobj = Z_PHPPERIOD_P(&EX(This));
 	dpobj->current = NULL;
 
 	if (isostr) {
@@ -4667,7 +4649,7 @@ PHP_METHOD(DatePeriod, getStartDate)
 		return;
 	}
 
-	dpobj = Z_PHPPERIOD_P(getThis());
+	dpobj = Z_PHPPERIOD_P(&EX(This));
 
         php_date_instantiate(dpobj->start_ce, return_value);
 	dateobj = Z_PHPDATE_P(return_value);
@@ -4694,7 +4676,7 @@ PHP_METHOD(DatePeriod, getEndDate)
                 return;
         }
 
-        dpobj = Z_PHPPERIOD_P(getThis());
+        dpobj = Z_PHPPERIOD_P(&EX(This));
 
         if (!dpobj->end) {
                 return;
@@ -4725,7 +4707,7 @@ PHP_METHOD(DatePeriod, getDateInterval)
                 return;
         }
 
-	dpobj = Z_PHPPERIOD_P(getThis());
+	dpobj = Z_PHPPERIOD_P(&EX(This));
 
 	php_date_instantiate(date_ce_interval, return_value);
 	diobj = Z_PHPINTERVAL_P(return_value);
@@ -5269,7 +5251,7 @@ PHP_METHOD(DatePeriod, __set_state)
 */
 PHP_METHOD(DatePeriod, __wakeup)
 {
-	zval             *object = getThis();
+	zval             *object = &EX(This);
 	php_period_obj   *period_obj;
 	HashTable        *myht;
 

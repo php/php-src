@@ -62,8 +62,6 @@ const zend_function_entry php_dom_text_class_functions[] = {
 /* {{{ proto DOMText::__construct([string value]); */
 PHP_METHOD(domtext, __construct)
 {
-
-	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
@@ -80,7 +78,7 @@ PHP_METHOD(domtext, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(&EX(This));
 	if (intern != NULL) {
 		oldnode = dom_object_get_node(intern);
 		if (oldnode != NULL) {

@@ -548,7 +548,7 @@ static int spl_fixedarray_object_count_elements(zval *object, zend_long *count) 
 */
 SPL_METHOD(SplFixedArray, __construct)
 {
-	zval *object = getThis();
+	zval *object = &EX(This);
 	spl_fixedarray_object *intern;
 	zend_long size = 0;
 
@@ -576,8 +576,8 @@ SPL_METHOD(SplFixedArray, __construct)
 */
 SPL_METHOD(SplFixedArray, __wakeup)
 {
-	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
-	HashTable *intern_ht = zend_std_get_properties(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(&EX(This));
+	HashTable *intern_ht = zend_std_get_properties(&EX(This));
 	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -606,7 +606,7 @@ SPL_METHOD(SplFixedArray, __wakeup)
 */
 SPL_METHOD(SplFixedArray, count)
 {
-	zval *object = getThis();
+	zval *object = &EX(This);
 	spl_fixedarray_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -628,7 +628,7 @@ SPL_METHOD(SplFixedArray, toArray)
 		return;
 	}
 
-	intern = Z_SPLFIXEDARRAY_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(&EX(This));
 
 	if (intern->array.size > 0) {
 		int i = 0;
@@ -717,7 +717,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 */
 SPL_METHOD(SplFixedArray, getSize)
 {
-	zval *object = getThis();
+	zval *object = &EX(This);
 	spl_fixedarray_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -733,7 +733,7 @@ SPL_METHOD(SplFixedArray, getSize)
 */
 SPL_METHOD(SplFixedArray, setSize)
 {
-	zval *object = getThis();
+	zval *object = &EX(This);
 	spl_fixedarray_object *intern;
 	zend_long size;
 
@@ -764,7 +764,7 @@ SPL_METHOD(SplFixedArray, offsetExists)
 		return;
 	}
 
-	intern = Z_SPLFIXEDARRAY_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(&EX(This));
 
 	RETURN_BOOL(spl_fixedarray_object_has_dimension_helper(intern, zindex, 0));
 } /* }}} */
@@ -780,7 +780,7 @@ SPL_METHOD(SplFixedArray, offsetGet)
 		return;
 	}
 
-	intern = Z_SPLFIXEDARRAY_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(&EX(This));
 	value = spl_fixedarray_object_read_dimension_helper(intern, zindex);
 
 	if (value) {
@@ -801,7 +801,7 @@ SPL_METHOD(SplFixedArray, offsetSet)
 		return;
 	}
 
-	intern = Z_SPLFIXEDARRAY_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(&EX(This));
 	spl_fixedarray_object_write_dimension_helper(intern, zindex, value);
 
 } /* }}} */
@@ -817,7 +817,7 @@ SPL_METHOD(SplFixedArray, offsetUnset)
 		return;
 	}
 
-	intern = Z_SPLFIXEDARRAY_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(&EX(This));
 	spl_fixedarray_object_unset_dimension_helper(intern, zindex);
 
 } /* }}} */
@@ -910,7 +910,7 @@ static void spl_fixedarray_it_move_forward(zend_object_iterator *iter) /* {{{ */
    Return current array key */
 SPL_METHOD(SplFixedArray, key)
 {
-	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -924,7 +924,7 @@ SPL_METHOD(SplFixedArray, key)
    Move to next entry */
 SPL_METHOD(SplFixedArray, next)
 {
-	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -938,7 +938,7 @@ SPL_METHOD(SplFixedArray, next)
    Check whether the datastructure contains more entries */
 SPL_METHOD(SplFixedArray, valid)
 {
-	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -952,7 +952,7 @@ SPL_METHOD(SplFixedArray, valid)
    Rewind the datastructure back to the start */
 SPL_METHOD(SplFixedArray, rewind)
 {
-	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -967,7 +967,7 @@ SPL_METHOD(SplFixedArray, rewind)
 SPL_METHOD(SplFixedArray, current)
 {
 	zval zindex, *value;
-	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(getThis());
+	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;

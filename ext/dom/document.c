@@ -1251,8 +1251,6 @@ PHP_FUNCTION(dom_document_rename_node)
 /* {{{ proto DOMDocument::__construct([string version], [string encoding]); */
 PHP_METHOD(domdocument, __construct)
 {
-
-	zval *id = getThis();
 	xmlDoc *docp = NULL, *olddoc;
 	dom_object *intern;
 	char *encoding, *version = NULL;
@@ -1274,7 +1272,7 @@ PHP_METHOD(domdocument, __construct)
 		docp->encoding = (const xmlChar *) xmlStrdup((xmlChar *) encoding);
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(&EX(This));
 	if (intern != NULL) {
 		olddoc = (xmlDocPtr) dom_object_get_node(intern);
 		if (olddoc != NULL) {

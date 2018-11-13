@@ -543,7 +543,7 @@ static HashTable* spl_pqueue_object_get_debug_info(zval *obj, int *is_temp) /* {
 SPL_METHOD(SplHeap, count)
 {
 	zend_long count;
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -558,7 +558,7 @@ SPL_METHOD(SplHeap, count)
  Return true if the heap is empty. */
 SPL_METHOD(SplHeap, isEmpty)
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -579,7 +579,7 @@ SPL_METHOD(SplHeap, insert)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
@@ -587,7 +587,7 @@ SPL_METHOD(SplHeap, insert)
 	}
 
 	Z_TRY_ADDREF_P(value);
-	spl_ptr_heap_insert(intern->heap, value, getThis());
+	spl_ptr_heap_insert(intern->heap, value, &EX(This));
 
 	RETURN_TRUE;
 }
@@ -603,14 +603,14 @@ SPL_METHOD(SplHeap, extract)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
-	spl_ptr_heap_delete_top(intern->heap, return_value, getThis());
+	spl_ptr_heap_delete_top(intern->heap, return_value, &EX(This));
 
 	if (Z_ISUNDEF_P(return_value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
@@ -630,7 +630,7 @@ SPL_METHOD(SplPriorityQueue, insert)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
@@ -644,7 +644,7 @@ SPL_METHOD(SplPriorityQueue, insert)
 	add_assoc_zval_ex(&elem, "data", sizeof("data") - 1, data);
 	add_assoc_zval_ex(&elem, "priority", sizeof("priority") - 1, priority);
 
-	spl_ptr_heap_insert(intern->heap, &elem, getThis());
+	spl_ptr_heap_insert(intern->heap, &elem, &EX(This));
 
 	RETURN_TRUE;
 }
@@ -661,14 +661,14 @@ SPL_METHOD(SplPriorityQueue, extract)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
-	spl_ptr_heap_delete_top(intern->heap, &value, getThis());
+	spl_ptr_heap_delete_top(intern->heap, &value, &EX(This));
 
 	if (Z_ISUNDEF(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
@@ -699,7 +699,7 @@ SPL_METHOD(SplPriorityQueue, top)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
@@ -736,7 +736,7 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	intern->flags = value & SPL_PQUEUE_EXTR_MASK;
 
@@ -754,7 +754,7 @@ SPL_METHOD(SplPriorityQueue, getExtractFlags)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	RETURN_LONG(intern->flags);
 }
@@ -770,7 +770,7 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	intern->heap->flags = intern->heap->flags & ~SPL_HEAP_CORRUPTED;
 
@@ -788,7 +788,7 @@ SPL_METHOD(SplHeap, isCorrupted)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	RETURN_BOOL(intern->heap->flags & SPL_HEAP_CORRUPTED);
 }
@@ -819,7 +819,7 @@ SPL_METHOD(SplHeap, top)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(&EX(This));
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
@@ -956,7 +956,7 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
    Return current array key */
 SPL_METHOD(SplHeap, key)
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -970,9 +970,9 @@ SPL_METHOD(SplHeap, key)
    Move to next entry */
 SPL_METHOD(SplHeap, next)
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(&EX(This));
 	zval elem;
-	spl_ptr_heap_delete_top(intern->heap, &elem, getThis());
+	spl_ptr_heap_delete_top(intern->heap, &elem, &EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -986,7 +986,7 @@ SPL_METHOD(SplHeap, next)
    Check whether the datastructure contains more entries */
 SPL_METHOD(SplHeap, valid)
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(&EX(This));
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1011,7 +1011,7 @@ SPL_METHOD(SplHeap, rewind)
    Return current datastructure entry */
 SPL_METHOD(SplHeap, current)
 {
-	spl_heap_object *intern  = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern  = Z_SPLHEAP_P(&EX(This));
 	zval *element = &intern->heap->elements[0];
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1030,7 +1030,7 @@ SPL_METHOD(SplHeap, current)
    Return current datastructure entry */
 SPL_METHOD(SplPriorityQueue, current)
 {
-	spl_heap_object  *intern  = Z_SPLHEAP_P(getThis());
+	spl_heap_object  *intern  = Z_SPLHEAP_P(&EX(This));
 	zval *element = &intern->heap->elements[0];
 
 	if (zend_parse_parameters_none() == FAILURE) {

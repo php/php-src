@@ -877,7 +877,7 @@ ZEND_METHOD(Generator, rewind)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ(EX(This));
 
 	zend_generator_rewind(generator);
 }
@@ -893,7 +893,7 @@ ZEND_METHOD(Generator, valid)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ(EX(This));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -913,7 +913,7 @@ ZEND_METHOD(Generator, current)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ(EX(This));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -936,7 +936,7 @@ ZEND_METHOD(Generator, key)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ(EX(This));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -959,7 +959,7 @@ ZEND_METHOD(Generator, next)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ(EX(This));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -978,7 +978,7 @@ ZEND_METHOD(Generator, send)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ(EX(This));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -1017,7 +1017,7 @@ ZEND_METHOD(Generator, throw)
 
 	Z_TRY_ADDREF_P(exception);
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ(EX(This));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -1052,7 +1052,7 @@ ZEND_METHOD(Generator, getReturn)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ(EX(This));
 
 	zend_generator_ensure_initialized(generator);
 	if (UNEXPECTED(EG(exception))) {

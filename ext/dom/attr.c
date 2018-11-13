@@ -53,7 +53,6 @@ const zend_function_entry php_dom_attr_class_functions[] = {
 /* {{{ proto DOMAttr::__construct(string name, [string value]) */
 PHP_METHOD(domattr, __construct)
 {
-	zval *id = getThis();
 	xmlAttrPtr nodep = NULL;
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
@@ -64,7 +63,7 @@ PHP_METHOD(domattr, __construct)
 		return;
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(&EX(This));
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {

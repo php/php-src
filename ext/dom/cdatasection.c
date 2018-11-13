@@ -47,8 +47,6 @@ const zend_function_entry php_dom_cdatasection_class_functions[] = {
 /* {{{ proto DOMCdataSection::__construct(string value); */
 PHP_METHOD(domcdatasection, __construct)
 {
-
-	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
@@ -65,7 +63,7 @@ PHP_METHOD(domcdatasection, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(&EX(This));
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
 		php_libxml_node_free_resource(oldnode );
