@@ -29,6 +29,9 @@ PHP                                                                        NEWS
     (Cameron Porter)
   . Fixed bug #76348 (WSDL_CACHE_MEMORY causes Segmentation fault). (cmb)
 
+- Sockets:
+  . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
+
 - Standard:
   . Fixed bug #77081 (ftruncate() changes seek pointer in c mode). (cmb, Anatol)
 
