@@ -1537,7 +1537,11 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 					default: /* first letter of a non-encoded word */
 						err = _php_iconv_appendc(pretval, *p1, cd_pl);
 						if (err != PHP_ICONV_ERR_SUCCESS) {
-							goto out;
+							if (mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR) {
+								err = PHP_ICONV_ERR_SUCCESS;
+							} else {
+								goto out;
+							}
 						}
 						encoded_word = NULL;
 						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
