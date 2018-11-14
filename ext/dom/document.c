@@ -700,7 +700,8 @@ PHP_FUNCTION(dom_document_create_element)
 	size_t name_len, value_len;
 	char *name, *value = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s", &id, dom_document_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -732,7 +733,8 @@ PHP_FUNCTION(dom_document_create_document_fragment)
 	dom_object *intern;
 	int ret;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_document_class_entry) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -761,7 +763,8 @@ PHP_FUNCTION(dom_document_create_text_node)
 	dom_object *intern;
 	char *value;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_document_class_entry, &value, &value_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -790,7 +793,8 @@ PHP_FUNCTION(dom_document_create_comment)
 	dom_object *intern;
 	char *value;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_document_class_entry, &value, &value_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -819,7 +823,8 @@ PHP_FUNCTION(dom_document_create_cdatasection)
 	dom_object *intern;
 	char *value;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_document_class_entry, &value, &value_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -848,7 +853,8 @@ PHP_FUNCTION(dom_document_create_processing_instruction)
 	dom_object *intern;
 	char *name, *value = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s", &id, dom_document_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -884,7 +890,8 @@ PHP_FUNCTION(dom_document_create_attribute)
 	dom_object *intern;
 	char *name;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_document_class_entry, &name, &name_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -919,7 +926,8 @@ PHP_FUNCTION(dom_document_create_entity_reference)
 	size_t name_len;
 	char *name;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_document_class_entry, &name, &name_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -952,7 +960,8 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 	char *name;
 	xmlChar *local;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_document_class_entry, &name, &name_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -978,7 +987,8 @@ PHP_FUNCTION(dom_document_import_node)
 	int ret;
 	zend_bool recursive = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|b", &id, dom_document_class_entry, &node, dom_node_class_entry, &recursive) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, dom_node_class_entry, &recursive) == FAILURE) {
 		return;
 	}
 
@@ -1037,7 +1047,8 @@ PHP_FUNCTION(dom_document_create_element_ns)
 	int errorcode;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!s|s", &id, dom_document_class_entry, &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s|s", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -1101,7 +1112,8 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 	dom_object *intern;
 	int errorcode;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!s", &id, dom_document_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -1163,7 +1175,8 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name_ns)
 	char *uri, *name;
 	xmlChar *local, *nsuri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss", &id, dom_document_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -1191,7 +1204,8 @@ PHP_FUNCTION(dom_document_get_element_by_id)
 	dom_object *intern;
 	char *idname;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_document_class_entry, &idname, &idname_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &idname, &idname_len) == FAILURE) {
 		return;
 	}
 
@@ -1228,7 +1242,8 @@ PHP_FUNCTION(dom_document_normalize_document)
 	xmlDocPtr docp;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_document_class_entry) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1567,7 +1582,8 @@ PHP_FUNCTION(dom_document_save)
 	char *file;
 	zend_long options = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Op|l", &id, dom_document_class_entry, &file, &file_len, &options) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &file, &file_len, &options) == FAILURE) {
 		return;
 	}
 
@@ -1613,7 +1629,8 @@ PHP_FUNCTION(dom_document_savexml)
 	int size, format, saveempty = 0;
 	zend_long options = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|O!l", &id, dom_document_class_entry, &nodep, dom_node_class_entry, &options) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!l", &nodep, dom_node_class_entry, &options) == FAILURE) {
 		return;
 	}
 
@@ -1720,7 +1737,8 @@ PHP_FUNCTION(dom_document_xinclude)
 	int err;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &id, dom_document_class_entry, &flags) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flags) == FAILURE) {
 		return;
 	}
 
@@ -1764,7 +1782,8 @@ PHP_FUNCTION(dom_document_validate)
 	dom_object *intern;
 	xmlValidCtxt *cvp;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_document_class_entry) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1803,7 +1822,8 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	int                     is_valid;
 	char resolved_path[MAXPATHLEN + 1];
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|l", &id, dom_document_class_entry, &source, &source_len, &flags) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &flags) == FAILURE) {
 		return;
 	}
 
@@ -1901,7 +1921,8 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 	int                     is_valid;
 	char resolved_path[MAXPATHLEN + 1];
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_document_class_entry, &source, &source_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &source_len) == FAILURE) {
 		return;
 	}
 
@@ -2111,7 +2132,8 @@ PHP_FUNCTION(dom_document_save_html_file)
 	char *file;
 	const char *encoding;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Op", &id, dom_document_class_entry, &file, &file_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &file, &file_len) == FAILURE) {
 		return;
 	}
 
@@ -2151,8 +2173,9 @@ PHP_FUNCTION(dom_document_save_html)
 	int format;
 	dom_doc_propsptr doc_props;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-		"O|O!", &id, dom_document_class_entry, &nodep, dom_node_class_entry)
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(),
+		"|O!", &nodep, dom_node_class_entry)
 		== FAILURE) {
 		return;
 	}
@@ -2233,7 +2256,8 @@ PHP_METHOD(domdocument, registerNodeClass)
 	zend_class_entry *basece = dom_node_class_entry, *ce = NULL;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OCC!", &id, dom_document_class_entry, &basece, &ce) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "CC!", &basece, &ce) == FAILURE) {
 		return;
 	}
 

@@ -227,7 +227,8 @@ PHP_FUNCTION(dom_attr_is_id)
 	dom_object *intern;
 	xmlAttrPtr attrp;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_attr_class_entry) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 

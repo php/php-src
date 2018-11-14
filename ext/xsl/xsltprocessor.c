@@ -399,7 +399,8 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xmlNode *nodep = NULL;
 	zval *cloneDocu, member, rv;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo", &id, xsl_xsltprocessor_class_entry, &docp) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &docp) == FAILURE) {
 		RETURN_FALSE;
 	}
 

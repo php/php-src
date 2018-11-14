@@ -145,7 +145,8 @@ PHP_FUNCTION(dom_text_split_text)
 	int         length;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &id, dom_text_class_entry, &offset) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
 		return;
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -200,7 +201,8 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 	xmlNodePtr  node;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_text_class_entry) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
