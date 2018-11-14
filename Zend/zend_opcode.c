@@ -362,7 +362,9 @@ void zend_class_add_ref(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
-	ce->refcount++;
+	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		ce->refcount++;
+	}
 }
 
 ZEND_API void destroy_op_array(zend_op_array *op_array)

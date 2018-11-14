@@ -566,8 +566,13 @@ static void auto_global_dtor(zval *zv) /* {{{ */
 static void function_copy_ctor(zval *zv) /* {{{ */
 {
 	zend_function *old_func = Z_FUNC_P(zv);
-	zend_function *func = pemalloc(sizeof(zend_internal_function), 1);
+	zend_function *func;
 
+	if (old_func->type == ZEND_USER_FUNCTION) {
+		ZEND_ASSERT(old_func->op_array.fn_flags & ZEND_ACC_IMMUTABLE);
+		return;
+	}
+	func = pemalloc(sizeof(zend_internal_function), 1);
 	Z_FUNC_P(zv) = func;
 	memcpy(func, old_func, sizeof(zend_internal_function));
 	function_add_ref(func);
@@ -977,7 +982,9 @@ int zend_post_startup(void) /* {{{ */
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
 	free(compiler_globals->function_table);
+	compiler_globals->function_table = NULL;
 	free(compiler_globals->class_table);
+	compiler_globals->class_table = NULL;
 	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
 		compiler_globals_ctor(compiler_globals);
 		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
@@ -985,6 +992,7 @@ int zend_post_startup(void) /* {{{ */
 		compiler_globals_ctor(compiler_globals);
 	}
 	free(EG(zend_constants));
+	EG(zend_constants) = NULL;
 
 	executor_globals_ctor(executor_globals);
 	global_persistent_list = &EG(persistent_list);
