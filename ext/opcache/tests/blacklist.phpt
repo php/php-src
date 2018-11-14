@@ -13,7 +13,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for Windows');
 }
 /* On macOS, `/tmp` is an alias to `/private/tmp` .
- * So, we should write `%S/tmp/path` as `/tmp/path` not for Windows.
+ * So, we should write `%S/tmp/path` as `/tmp/path`, except for Windows.
  */
 ?>
 --FILE--
