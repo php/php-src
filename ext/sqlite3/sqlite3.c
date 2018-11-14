@@ -1293,16 +1293,15 @@ PHP_METHOD(sqlite3, backup)
 	int rc; // Return code
 
 	source_obj = Z_SQLITE3_DB_P(source_zval);
+	SQLITE3_CHECK_INITIALIZED(source_obj, source_obj->initialised, SQLite3)
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O|ss", &destination_zval, php_sqlite3_sc_entry, &source_dbname, &source_dbname_length, &destination_dbname, &destination_dbname_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|ss", &destination_zval, php_sqlite3_sc_entry, &source_dbname, &source_dbname_length, &destination_dbname, &destination_dbname_length) == FAILURE) {
 		return;
 	}
 
 	destination_obj = Z_SQLITE3_DB_P(destination_zval);
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	SQLITE3_CHECK_INITIALIZED(destination_obj, destination_obj->initialised, SQLite3)
-	zend_restore_error_handling(&error_handling);
 
 	dbBackup = sqlite3_backup_init(destination_obj->db, destination_dbname, source_obj->db, source_dbname);
 
