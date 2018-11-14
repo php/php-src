@@ -462,12 +462,10 @@ varexpand(char *buf, size_t len, const struct buffer *b, const char *str)
 		ptr += 2;
 		if (!*ptr || ptr[1] != '?')
 			return -1;
-		for (et = t = ptr + 2; *et && *et != ':'; et++)
-			continue;
+		for (et = t = ptr + 2; *et && *et != ':'; et++);
 		if (*et != ':')
 			return -1;
-		for (ee = e = et + 1; *ee && *ee != '}'; ee++)
-			continue;
+		for (ee = e = et + 1; *ee && *ee != '}'; ee++);
 		if (*ee != '}')
 			return -1;
 		switch (*ptr) {

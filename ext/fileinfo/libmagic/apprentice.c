@@ -2119,8 +2119,7 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
 		++l;
 		m->flag |= NOSPACE;
 	}
-	for (i = 0; (m->desc[i++] = *l++) != '\0' && i < sizeof(m->desc); )
-		continue;
+	for (i = 0; (m->desc[i++] = *l++) != '\0' && i < sizeof(m->desc); );
 	if (i == sizeof(m->desc)) {
 		m->desc[sizeof(m->desc) - 1] = '\0';
 		if (ms->flags & MAGIC_CHECK)
@@ -2227,8 +2226,7 @@ parse_extra(struct magic_set *ms, struct magic_entry *me, const char *line,
 	}
 
 	EATAB;
-	for (i = 0; *l && i < len && goodchar(*l, extra); buf[i++] = *l++)
-		continue;
+	for (i = 0; *l && i < len && goodchar(*l, extra); buf[i++] = *l++);
 
 	if (i == len && *l) {
 		if (nt)
@@ -2625,8 +2623,7 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 				    "Expected numeric type got `%s'",
 				    type_tbl[m->type].name);
 			}
-			for (q = *p; isspace((unsigned char)*q); q++)
-				continue;
+			for (q = *p; isspace((unsigned char)*q); q++);
 			if (*q == '-')
 				ull = -(int64_t)ull;
 			switch (ts) {
@@ -3223,8 +3220,7 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 			fn = ++p;
 	}
 
-	for (q = fn; *q; q++)
-		continue;
+	for (q = fn; *q; q++);
 	/* Look for .mgc */
 	for (p = ext + sizeof(ext) - 1; p >= ext && q >= fn; p--, q--)
 		if (*p != *q)
