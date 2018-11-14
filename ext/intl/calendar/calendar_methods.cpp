@@ -409,23 +409,25 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	int		variant; /* number of args of the set() overload */
 	CALENDAR_METHOD_INIT_VARS;
 
+	object = getThis();
+	
 	/* must come before zpp because zpp would convert the args in the stack to 0 */
-	if (ZEND_NUM_ARGS() > (getThis() ? 6 : 7) ||
+	if (ZEND_NUM_ARGS() > (object ? 6 : 7) ||
 				zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_set: too many arguments", 0);
 		RETURN_FALSE;
 	}
-	if (!getThis()) {
+	if (!object) {
 		args++;
 	}
-	variant = ZEND_NUM_ARGS() - (getThis() ? 0 : 1);
+	variant = ZEND_NUM_ARGS() - (object ? 0 : 1);
 	while (variant > 2 && Z_TYPE(args[variant - 1]) == IS_NULL) {
 		variant--;
 	}
 
 	if (variant == 4 ||
-			zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
+			zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
 			"Oll|llll",	&object, Calendar_ce_ptr, &arg1, &arg2, &arg3, &arg4,
 			&arg5, &arg6) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -472,17 +474,19 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 	zend_bool	bool_variant_val = (zend_bool)-1;
 	CALENDAR_METHOD_INIT_VARS;
 
-	if (ZEND_NUM_ARGS() > (getThis() ? 2 :3) ||
+	object = getThis();
+
+	if (ZEND_NUM_ARGS() > (object ? 2 :3) ||
 			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_set: too many arguments", 0);
 		RETURN_FALSE;
 	}
-	if (!getThis()) {
+	if (!object) {
 		args++;
 	}
 	if (!Z_ISUNDEF(args[1]) && (Z_TYPE(args[1]) == IS_TRUE || Z_TYPE(args[1]) == IS_FALSE)) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
 				"Olb", &object, Calendar_ce_ptr, &field, &bool_variant_val)
 				== FAILURE) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -490,7 +494,7 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 			RETURN_FALSE;
 		}
 		bool_variant_val = Z_TYPE(args[1]) == IS_TRUE? 1 : 0;
-	} else if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
+	} else if (zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
 			"Oll", &object, Calendar_ce_ptr, &field, &value) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_roll: bad arguments", 0);

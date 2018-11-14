@@ -3269,7 +3269,8 @@ PHP_METHOD(DateTimeImmutable, modify)
 	char *modify;
 	size_t   modify_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, date_ce_immutable, &modify, &modify_len) == FAILURE) {
+	object = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &modify, &modify_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3322,7 +3323,8 @@ PHP_METHOD(DateTimeImmutable, add)
 {
 	zval *object, *interval, new_object;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO", &object, date_ce_immutable, &interval, date_ce_interval) == FAILURE) {
+	object = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &interval, date_ce_interval) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3378,7 +3380,8 @@ PHP_METHOD(DateTimeImmutable, sub)
 {
 	zval *object, *interval, new_object;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO", &object, date_ce_immutable, &interval, date_ce_interval) == FAILURE) {
+	object = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &interval, date_ce_interval) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3482,7 +3485,8 @@ PHP_METHOD(DateTimeImmutable, setTimezone)
 	zval *object, new_object;
 	zval *timezone_object;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO", &object, date_ce_immutable, &timezone_object, date_ce_timezone) == FAILURE) {
+	object = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &timezone_object, date_ce_timezone) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3567,7 +3571,8 @@ PHP_METHOD(DateTimeImmutable, setTime)
 	zval *object, new_object;
 	zend_long  h, i, s = 0, ms = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oll|ll", &object, date_ce_immutable, &h, &i, &s, &ms) == FAILURE) {
+	object = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|ll", &h, &i, &s, &ms) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3616,7 +3621,8 @@ PHP_METHOD(DateTimeImmutable, setDate)
 	zval *object, new_object;
 	zend_long  y, m, d;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Olll", &object, date_ce_immutable, &y, &m, &d) == FAILURE) {
+	object = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &y, &m, &d) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3669,7 +3675,8 @@ PHP_METHOD(DateTimeImmutable, setISODate)
 	zval *object, new_object;
 	zend_long  y, w, d = 1;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oll|l", &object, date_ce_immutable, &y, &w, &d) == FAILURE) {
+	object = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l", &y, &w, &d) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3717,7 +3724,8 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 	zval *object, new_object;
 	zend_long  timestamp;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &object, date_ce_immutable, &timestamp) == FAILURE) {
+	object = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timestamp) == FAILURE) {
 		RETURN_FALSE;
 	}
 

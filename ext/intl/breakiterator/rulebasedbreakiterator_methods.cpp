@@ -102,7 +102,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = &EX(This);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -129,7 +129,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = &EX(This);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -145,7 +145,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = &EX(This);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -185,7 +185,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = &EX(This);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
