@@ -260,7 +260,7 @@ typedef struct _zend_oparray_context {
 /* User class has methods with static variables           |     |     |     */
 #define ZEND_HAS_STATIC_IN_METHODS       (1 << 15) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 26...30)                       |     |     |     */
+/* Function Flags (unused: 27...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -309,6 +309,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* internal function is allocated at arena (int only)     |     |     |     */
 #define ZEND_ACC_ARENA_ALLOCATED         (1 << 25) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* op_array is a clone of trait method                    |     |     |     */
+#define ZEND_ACC_TRAIT_CLONE             (1 << 26) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1 << 31) /*     |  X  |     |     */

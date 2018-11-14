@@ -95,6 +95,8 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 {
 	if (func->type == ZEND_USER_FUNCTION
 	 && !(func->op_array.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_HAS_TYPE_HINTS))
+		/* TODO: function copied from trait may be inconsistent ??? */
+	 && !(func->op_array.fn_flags & (ZEND_ACC_TRAIT_CLONE))
 	 && fcall->extended_value >= func->op_array.required_num_args
 	 && func->op_array.opcodes[func->op_array.num_args].opcode == ZEND_RETURN) {
 
