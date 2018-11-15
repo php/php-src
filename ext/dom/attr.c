@@ -63,7 +63,7 @@ PHP_METHOD(domattr, __construct)
 		return;
 	}
 
-	intern = Z_DOMOBJ_P(&EX(This));
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
@@ -227,7 +227,7 @@ PHP_FUNCTION(dom_attr_is_id)
 	dom_object *intern;
 	xmlAttrPtr attrp;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}

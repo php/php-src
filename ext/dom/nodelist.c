@@ -109,7 +109,7 @@ PHP_FUNCTION(dom_nodelist_count)
 	zval *id;
 	dom_object *intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -139,7 +139,7 @@ PHP_FUNCTION(dom_nodelist_item)
 	xmlNodePtr nodep, curnode;
 	int count = 0;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
 		return;
 	}

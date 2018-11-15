@@ -708,7 +708,7 @@ SPL_METHOD(Array, offsetExists)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		return;
 	}
-	RETURN_BOOL(spl_array_has_dimension_ex(0, &EX(This), index, 2));
+	RETURN_BOOL(spl_array_has_dimension_ex(0, ZEND_THIS, index, 2));
 } /* }}} */
 
 /* {{{ proto mixed ArrayObject::offsetGet(mixed $index)
@@ -720,7 +720,7 @@ SPL_METHOD(Array, offsetGet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		return;
 	}
-	value = spl_array_read_dimension_ex(0, &EX(This), index, BP_VAR_R, return_value);
+	value = spl_array_read_dimension_ex(0, ZEND_THIS, index, BP_VAR_R, return_value);
 	if (value != return_value) {
 		ZVAL_COPY_DEREF(return_value, value);
 	}
@@ -735,7 +735,7 @@ SPL_METHOD(Array, offsetSet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &index, &value) == FAILURE) {
 		return;
 	}
-	spl_array_write_dimension_ex(0, &EX(This), index, value);
+	spl_array_write_dimension_ex(0, ZEND_THIS, index, value);
 } /* }}} */
 
 void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
@@ -760,7 +760,7 @@ SPL_METHOD(Array, append)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		return;
 	}
-	spl_array_iterator_append(&EX(This), value);
+	spl_array_iterator_append(ZEND_THIS, value);
 } /* }}} */
 
 /* {{{ proto void ArrayObject::offsetUnset(mixed $index)
@@ -772,7 +772,7 @@ SPL_METHOD(Array, offsetUnset)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		return;
 	}
-	spl_array_unset_dimension_ex(0, &EX(This), index);
+	spl_array_unset_dimension_ex(0, ZEND_THIS, index);
 } /* }}} */
 
 /* {{{ proto array ArrayObject::getArrayCopy()
@@ -780,7 +780,7 @@ SPL_METHOD(Array, offsetUnset)
    Return a copy of the contained array */
 SPL_METHOD(Array, getArrayCopy)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	RETURN_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
@@ -1177,7 +1177,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
    Constructs a new array object from an array or object. */
 SPL_METHOD(Array, __construct)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern;
 	zval *array;
 	zend_long ar_flags = 0;
@@ -1207,7 +1207,7 @@ SPL_METHOD(Array, __construct)
    Constructs a new array iterator from an array or object. */
 SPL_METHOD(ArrayIterator, __construct)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern;
 	zval *array;
 	zend_long ar_flags = 0;
@@ -1232,7 +1232,7 @@ SPL_METHOD(ArrayIterator, __construct)
    Set the class used in getIterator. */
 SPL_METHOD(Array, setIteratorClass)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zend_class_entry * ce_get_iterator = spl_ce_Iterator;
 
@@ -1248,7 +1248,7 @@ SPL_METHOD(Array, setIteratorClass)
    Get the class used in getIterator. */
 SPL_METHOD(Array, getIteratorClass)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1264,7 +1264,7 @@ SPL_METHOD(Array, getIteratorClass)
    Get flags */
 SPL_METHOD(Array, getFlags)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1279,7 +1279,7 @@ SPL_METHOD(Array, getFlags)
    Set flags */
 SPL_METHOD(Array, setFlags)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zend_long ar_flags = 0;
 
@@ -1295,7 +1295,7 @@ SPL_METHOD(Array, setFlags)
    Replace the referenced array or object with a new one and return the old one (right now copy - to be changed) */
 SPL_METHOD(Array, exchangeArray)
 {
-	zval *object = &EX(This), *array;
+	zval *object = ZEND_THIS, *array;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &array) == FAILURE) {
@@ -1316,7 +1316,7 @@ SPL_METHOD(Array, exchangeArray)
    Create a new iterator from a ArrayObject instance */
 SPL_METHOD(Array, getIterator)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1331,7 +1331,7 @@ SPL_METHOD(Array, getIterator)
    Rewind array back to the start */
 SPL_METHOD(Array, rewind)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1347,7 +1347,7 @@ SPL_METHOD(Array, rewind)
 SPL_METHOD(Array, seek)
 {
 	zend_long opos, position;
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 	int result;
@@ -1416,7 +1416,7 @@ int spl_array_object_count_elements(zval *object, zend_long *count) /* {{{ */
    Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {
-	spl_array_object *intern = Z_SPLARRAY_P(&EX(This));
+	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1427,7 +1427,7 @@ SPL_METHOD(Array, count)
 
 static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(&EX(This));
+	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 	HashTable *aht = spl_array_get_hash_table(intern);
 	zval function_name, params[2], *arg = NULL;
 
@@ -1516,7 +1516,7 @@ SPL_ARRAY_METHOD(Array, natcasesort, SPL_ARRAY_METHOD_NO_ARG) /* }}} */
    Return current array entry */
 SPL_METHOD(Array, current)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zval *entry;
 	HashTable *aht = spl_array_get_hash_table(intern);
@@ -1546,7 +1546,7 @@ SPL_METHOD(Array, key)
 		return;
 	}
 
-	spl_array_iterator_key(&EX(This), return_value);
+	spl_array_iterator_key(ZEND_THIS, return_value);
 } /* }}} */
 
 void spl_array_iterator_key(zval *object, zval *return_value) /* {{{ */
@@ -1562,7 +1562,7 @@ void spl_array_iterator_key(zval *object, zval *return_value) /* {{{ */
    Move to next entry */
 SPL_METHOD(Array, next)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
@@ -1578,7 +1578,7 @@ SPL_METHOD(Array, next)
    Check whether array contains more entries */
 SPL_METHOD(Array, valid)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
@@ -1594,7 +1594,7 @@ SPL_METHOD(Array, valid)
    Check whether current element has children (e.g. is an array) */
 SPL_METHOD(Array, hasChildren)
 {
-	zval *object = &EX(This), *entry;
+	zval *object = ZEND_THIS, *entry;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
@@ -1619,7 +1619,7 @@ SPL_METHOD(Array, hasChildren)
    Create a sub iterator for the current element (same class as $this) */
 SPL_METHOD(Array, getChildren)
 {
-	zval *object = &EX(This), *entry, flags;
+	zval *object = ZEND_THIS, *entry, flags;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
@@ -1640,7 +1640,7 @@ SPL_METHOD(Array, getChildren)
 		if ((intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) != 0) {
 			return;
 		}
-		if (instanceof_function(Z_OBJCE_P(entry), Z_OBJCE(EX(This)))) {
+		if (instanceof_function(Z_OBJCE_P(entry), Z_OBJCE_P(ZEND_THIS))) {
 			ZVAL_OBJ(return_value, Z_OBJ_P(entry));
 			Z_ADDREF_P(return_value);
 			return;
@@ -1648,7 +1648,7 @@ SPL_METHOD(Array, getChildren)
 	}
 
 	ZVAL_LONG(&flags, intern->ar_flags);
-	spl_instantiate_arg_ex2(Z_OBJCE(EX(This)), return_value, entry, &flags);
+	spl_instantiate_arg_ex2(Z_OBJCE_P(ZEND_THIS), return_value, entry, &flags);
 }
 /* }}} */
 
@@ -1656,7 +1656,7 @@ SPL_METHOD(Array, getChildren)
    Serialize the object */
 SPL_METHOD(Array, serialize)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zval members, flags;
 	php_serialize_data_t var_hash;
@@ -1704,7 +1704,7 @@ SPL_METHOD(Array, serialize)
  */
 SPL_METHOD(Array, unserialize)
 {
-	zval *object = &EX(This);
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	char *buf;

@@ -158,7 +158,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	int         length;
 	dom_object	*intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
 		return;
 	}
@@ -206,7 +206,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 	char *arg;
 	size_t arg_len;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
@@ -232,7 +232,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	size_t arg_len;
 	dom_object	*intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &offset, &arg, &arg_len) == FAILURE) {
 		return;
 	}
@@ -280,7 +280,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 	int         length;
 	dom_object	*intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
 		return;
 	}
@@ -338,7 +338,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	size_t arg_len;
 	dom_object	*intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &offset, &count, &arg, &arg_len) == FAILURE) {
 		return;
 	}

@@ -69,7 +69,7 @@ PHP_METHOD(domentityreference, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(&EX(This));
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 	if (intern != NULL) {
 		oldnode = dom_object_get_node(intern);
 		if (oldnode != NULL) {

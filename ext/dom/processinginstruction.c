@@ -71,7 +71,7 @@ PHP_METHOD(domprocessinginstruction, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(&EX(This));
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
 		php_libxml_node_free_resource(oldnode );

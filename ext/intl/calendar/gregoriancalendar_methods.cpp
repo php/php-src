@@ -220,7 +220,7 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-	return_value = &EX(This);
+	return_value = ZEND_THIS;
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 	zend_restore_error_handling(&error_handling);
 }

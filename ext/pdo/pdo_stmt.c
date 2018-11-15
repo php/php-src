@@ -106,7 +106,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 #define PHP_STMT_GET_OBJ	\
-  pdo_stmt_t *stmt = Z_PDO_STMT_P(&EX(This));	\
+  pdo_stmt_t *stmt = Z_PDO_STMT_P(ZEND_THIS);	\
   if (!stmt->dbh) {	\
 	  RETURN_FALSE;	\
   }	\
