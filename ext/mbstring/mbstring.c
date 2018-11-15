@@ -2478,7 +2478,6 @@ PHP_FUNCTION(mb_strripos)
 	zend_long offset = 0;
 	mbfl_string haystack, needle;
 	zend_string *from_encoding = NULL;
-	size_t from_encoding_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|lS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &from_encoding) == FAILURE) {
 		return;
@@ -2603,7 +2602,7 @@ PHP_FUNCTION(mb_strrchr)
 PHP_FUNCTION(mb_stristr)
 {
 	zend_bool part = 0;
-	size_t from_encoding_len, n;
+	size_t n;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	zend_string *from_encoding = NULL;
 
