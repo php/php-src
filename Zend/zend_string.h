@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -39,7 +39,6 @@ ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
 ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler);
-ZEND_API void zend_interned_strings_set_permanent_storage_copy_handlers(zend_string_copy_storage_func_t copy_handler, zend_string_copy_storage_func_t restore_handler);
 ZEND_API void zend_interned_strings_switch_storage(zend_bool request);
 
 ZEND_API extern zend_string  *zend_empty_string;
@@ -294,8 +293,10 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, int persis
 	}
 }
 
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+#if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
+BEGIN_EXTERN_C()
 ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+END_EXTERN_C()
 #else
 static zend_always_inline zend_bool zend_string_equal_val(zend_string *s1, zend_string *s2)
 {

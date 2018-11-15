@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -780,10 +780,20 @@ ZEND_VM_COLD_HELPER(zend_abstract_method_helper, ANY, ANY, zend_function *fbc)
 	HANDLE_EXCEPTION();
 }
 
-ZEND_VM_COLD_HELPER(zend_undefined_function_helper, ANY, ANY, zval *function_name)
+ZEND_VM_COLD_HELPER(zend_undefined_function_helper, ANY, ANY)
 {
+	USE_OPLINE
+	zval *function_name;
+	char *name;
+
 	SAVE_OPLINE();
-	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	function_name = RT_CONSTANT(opline, opline->op2);
+	if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+		name = Z_STRVAL_P(function_name + 2);
+	} else {
+		name = Z_STRVAL_P(function_name);
+	}
+	zend_throw_error(NULL, "Call to undefined function %s()", name);
 	HANDLE_EXCEPTION();
 }
 
@@ -3263,7 +3273,7 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_ex(EG(function_table), Z_STR_P(function_name+1), 1);
 		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper, function_name, function_name);
+			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
@@ -3426,7 +3436,7 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 			func_name++;
 			func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name), 1);
 			if (UNEXPECTED(func == NULL)) {
-				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper, function_name, func_name);
+				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 			}
 		}
 		fbc = Z_FUNC_P(func);
@@ -3447,7 +3457,6 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 ZEND_VM_HOT_HANDLER(61, ZEND_INIT_FCALL, NUM, CONST, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
-	zend_free_op free_op2;
 	zval *fname;
 	zval *func;
 	zend_function *fbc;
@@ -3455,10 +3464,10 @@ ZEND_VM_HOT_HANDLER(61, ZEND_INIT_FCALL, NUM, CONST, NUM|CACHE_SLOT)
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		fname = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		fname = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_ex(EG(function_table), Z_STR_P(fname), 1);
 		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper, function_name, fname);
+			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
@@ -6604,7 +6613,7 @@ ZEND_VM_HANDLER(139, ZEND_DECLARE_CLASS, CONST, ANY)
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	do_bind_class(RT_CONSTANT(opline, opline->op1));
+	do_bind_class(RT_CONSTANT(opline, opline->op1), NULL);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -6621,7 +6630,7 @@ ZEND_VM_HANDLER(140, ZEND_DECLARE_INHERITED_CLASS, CONST, CONST)
 		ZEND_ASSERT(EG(exception));
 		HANDLE_EXCEPTION();
 	}
-	do_bind_inherited_class(RT_CONSTANT(opline, opline->op1), parent);
+	do_bind_class(RT_CONSTANT(opline, opline->op1), parent);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -6642,7 +6651,7 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_INHERITED_CLASS_DELAYED, CONST, CONST)
 			ZEND_ASSERT(EG(exception));
 			HANDLE_EXCEPTION();
 		}
-		do_bind_inherited_class(RT_CONSTANT(opline, opline->op1), parent);
+		do_bind_class(RT_CONSTANT(opline, opline->op1), parent);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }

@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -52,7 +52,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 	int currT;
 	int i;
 	int max = -1;
-	int var_to_free = -1;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
 	bitset_len = zend_bitset_len(T);
@@ -178,11 +177,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 				zend_bitset_incl(valid_T, currT);
 				opline->result.var = NUM_VAR(i + offset);
 			}
-		}
-
-		if (var_to_free >= 0) {
-			zend_bitset_excl(taken_T, var_to_free);
-			var_to_free = -1;
 		}
 
 		opline--;

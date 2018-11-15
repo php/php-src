@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Jim Winstead <jimw@php.net>                                 |
    |          Stig Sæther Bakken <ssb@php.net>                            |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    | PHP 4.0 patches by Thies C. Arntzen <thies@thieso.net>               |
    +----------------------------------------------------------------------+
 */

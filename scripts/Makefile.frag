@@ -12,6 +12,7 @@ BUILD_FILES = \
 	build/ax_check_compile_flag.m4 \
 	build/ax_gcc_func_attribute.m4 \
 	build/php_cxx_compile_stdcxx.m4 \
+	build/pkg.m4 \
 	Makefile.global \
 	acinclude.m4 \
 	ltmain.sh \

@@ -57,7 +57,7 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
 /* Auxiliary macros */
 
 #define SPOOFCHECKER_METHOD_INIT_VARS       \
-    zval*             object  = getThis();   \
+    zval*             object  = &EX(This);  \
     Spoofchecker_object*  co  = NULL;   \
     intl_error_reset(NULL); \
 

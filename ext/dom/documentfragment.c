@@ -50,8 +50,6 @@ const zend_function_entry php_dom_documentfragment_class_functions[] = {
 /* {{{ proto DOMDocumentFragment::__construct() */
 PHP_METHOD(domdocumentfragment, __construct)
 {
-
-	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 
@@ -66,7 +64,7 @@ PHP_METHOD(domdocumentfragment, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(&EX(This));
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
 		php_libxml_node_free_resource(oldnode );
@@ -120,7 +118,8 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	int err;
 	xmlNodePtr lst;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_documentfragment_class_entry, &data, &data_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &data, &data_len) == FAILURE) {
 		return;
 	}
 

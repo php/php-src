@@ -14,7 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
-  |          Dmitry Stogov <dmitry@zend.com>                             |
+  |          Dmitry Stogov <dmitry@php.net>                              |
   +----------------------------------------------------------------------+
 */
 
@@ -2448,7 +2448,7 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 			pheader->ns = strdup(pheader->ns);
 		}
 
-		if (pheader->encode->details.sdl_type) {
+		if (pheader->encode && pheader->encode->details.sdl_type) {
 			if ((penc = zend_hash_str_find_ptr(ptr_map, (char*)&pheader->encode, sizeof(encodePtr))) == NULL) {
 				assert(0);
 			}

@@ -13,7 +13,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Christian Seiler <chris_se@gmx.net>                         |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
@@ -49,7 +49,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	zend_function *func = EX(func);
 	zval *arguments = ZEND_CALL_ARG(execute_data, 1);
 
-	if (call_user_function(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments) == FAILURE) {
+	if (call_user_function(CG(function_table), NULL, &EX(This), return_value, ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		RETVAL_FALSE;
 	}
 
@@ -112,7 +112,7 @@ static zend_bool zend_valid_closure_binding(
    Call closure, binding to a given object with its class as the scope */
 ZEND_METHOD(Closure, call)
 {
-	zval *zclosure, *newthis, closure_result;
+	zval *newthis, closure_result;
 	zend_closure *closure;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
@@ -126,8 +126,7 @@ ZEND_METHOD(Closure, call)
 		return;
 	}
 
-	zclosure = getThis();
-	closure = (zend_closure *) Z_OBJ_P(zclosure);
+	closure = (zend_closure *) Z_OBJ(EX(This));
 
 	newobj = Z_OBJ_P(newthis);
 
@@ -166,7 +165,7 @@ ZEND_METHOD(Closure, call)
 	fci_cache.object = fci.object = newobj;
 
 	fci.size = sizeof(fci);
-	ZVAL_COPY_VALUE(&fci.function_name, zclosure);
+	ZVAL_OBJ(&fci.function_name, &closure->std);
 	fci.retval = &closure_result;
 	fci.no_separation = 1;
 

@@ -250,7 +250,7 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 /* {{{ proto DOMXPath::__construct(DOMDocument doc) U */
 PHP_METHOD(domxpath, __construct)
 {
-	zval *id = getThis(), *doc;
+	zval *doc;
 	xmlDocPtr docp = NULL;
 	dom_object *docobj;
 	dom_xpath_object *intern;
@@ -268,7 +268,7 @@ PHP_METHOD(domxpath, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_XPATHOBJ_P(id);
+	intern = Z_XPATHOBJ_P(&EX(This));
 	if (intern != NULL) {
 		oldctx = (xmlXPathContextPtr)intern->dom.ptr;
 		if (oldctx != NULL) {
@@ -315,7 +315,8 @@ PHP_FUNCTION(dom_xpath_register_ns)
 	dom_xpath_object *intern;
 	unsigned char *prefix, *ns_uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss", &id, dom_xpath_class_entry, &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
 		return;
 	}
 
@@ -357,7 +358,8 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	xmlNsPtr *ns = NULL;
 	zend_bool register_node_ns = 1;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|O!b", &id, dom_xpath_class_entry, &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
 		return;
 	}
 

@@ -665,7 +665,7 @@ PHP_FUNCTION(get_headers)
 	char *url;
 	size_t url_len;
 	php_stream *stream;
-	zval *prev_val, *hdr = NULL, *h;
+	zval *prev_val, *hdr = NULL;
 	zend_long format = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context;

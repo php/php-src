@@ -2157,9 +2157,7 @@ phpdbg_out:
 
 		zend_hash_destroy(&PHPDBG_G(file_sources));
 
-		zend_try {
-			php_module_shutdown();
-		} zend_end_try();
+		php_module_shutdown();
 
 #ifndef _WIN32
 		/* force override (no zend_signals) to prevent crashes due to signal recursion in SIGSEGV/SIGBUS handlers */

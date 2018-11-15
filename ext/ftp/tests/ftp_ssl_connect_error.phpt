@@ -29,7 +29,7 @@ echo "===DONE===\n";
 
 -- Testing ftp_ssl_connect() function on failure --
 
-Warning: ftp_ssl_connect(): php_network_getaddresses: getaddrinfo failed: Name or service not known in %s on line %d
+Warning: ftp_ssl_connect(): php_network_getaddresses: getaddrinfo failed: %s in %s on line %d
 bool(false)
 
 -- Testing ftp_ssl_connect() function invalid argument type --

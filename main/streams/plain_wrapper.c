@@ -858,12 +858,13 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 
-					LARGE_INTEGER old_sz;
-					if (!GetFileSizeEx(h, &old_sz)) {
+					LARGE_INTEGER sz, old_sz;
+					sz.QuadPart = 0;
+
+					if (!SetFilePointerEx(h, sz, &old_sz, FILE_CURRENT)) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 
-					LARGE_INTEGER sz;
 #if defined(_WIN64)
 					sz.HighPart = (new_size >> 32);
 					sz.LowPart = (new_size & 0xffffffff);
@@ -871,13 +872,13 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 					sz.HighPart = 0;
 					sz.LowPart = new_size;
 #endif
-					if (INVALID_SET_FILE_POINTER == SetFilePointerEx(h, sz, NULL, FILE_BEGIN) && NO_ERROR != GetLastError()) {
+					if (!SetFilePointerEx(h, sz, NULL, FILE_BEGIN)) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 					if (0 == SetEndOfFile(h)) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
-					if (INVALID_SET_FILE_POINTER == SetFilePointerEx(h, old_sz, NULL, FILE_BEGIN) && NO_ERROR != GetLastError()) {
+					if (!SetFilePointerEx(h, old_sz, NULL, FILE_BEGIN)) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
@@ -1453,7 +1454,8 @@ static const php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_metadata
 };
 
-PHPAPI const php_stream_wrapper php_plain_files_wrapper = {
+/* TODO: We have to make php_plain_files_wrapper writable to support SWOOLE */
+PHPAPI /*const*/ php_stream_wrapper php_plain_files_wrapper = {
 	&php_plain_files_wrapper_ops,
 	NULL,
 	0

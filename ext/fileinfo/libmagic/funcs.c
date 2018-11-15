@@ -56,8 +56,6 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.94 2017/11/02 20:25:39 christos Exp $")
 # define PREG_OFFSET_CAPTURE                 (1<<8)
 #endif
 
-extern public void convert_libmagic_pattern(zval *pattern, char *val, size_t len, uint32_t options);
-
 protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {

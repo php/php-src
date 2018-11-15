@@ -482,7 +482,9 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	zend_signal_startup();
 
 	sapi_startup(&apache2_sapi_module);
-	apache2_sapi_module.startup(&apache2_sapi_module);
+	if (apache2_sapi_module.startup(&apache2_sapi_module) != SUCCESS) {
+		return DONE;
+	}
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_add_version(pconf);
 

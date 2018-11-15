@@ -109,7 +109,8 @@ PHP_FUNCTION(dom_nodelist_count)
 	zval *id;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_nodelist_class_entry) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -138,7 +139,8 @@ PHP_FUNCTION(dom_nodelist_item)
 	xmlNodePtr nodep, curnode;
 	int count = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &id, dom_nodelist_class_entry, &index) == FAILURE) {
+	id = &EX(This);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
 		return;
 	}
 

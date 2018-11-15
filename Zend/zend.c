@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -78,6 +78,7 @@ void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap)
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
 ZEND_API int (*zend_post_startup_cb)(void) = NULL;
+ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
 
 void (*zend_on_timeout)(int seconds);
 
@@ -565,8 +566,13 @@ static void auto_global_dtor(zval *zv) /* {{{ */
 static void function_copy_ctor(zval *zv) /* {{{ */
 {
 	zend_function *old_func = Z_FUNC_P(zv);
-	zend_function *func = pemalloc(sizeof(zend_internal_function), 1);
+	zend_function *func;
 
+	if (old_func->type == ZEND_USER_FUNCTION) {
+		ZEND_ASSERT(old_func->op_array.fn_flags & ZEND_ACC_IMMUTABLE);
+		return;
+	}
+	func = pemalloc(sizeof(zend_internal_function), 1);
 	Z_FUNC_P(zv) = func;
 	memcpy(func, old_func, sizeof(zend_internal_function));
 	function_add_ref(func);
@@ -954,31 +960,6 @@ int zend_post_startup(void) /* {{{ */
 
 	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
-
-	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
-	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
-	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
-	global_map_ptr_last = compiler_globals->map_ptr_last;
-
-	short_tags_default = CG(short_tags);
-	compiler_options_default = CG(compiler_options);
-
-	zend_destroy_rsrc_list(&EG(persistent_list));
-	free(compiler_globals->function_table);
-	free(compiler_globals->class_table);
-	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
-		compiler_globals_ctor(compiler_globals);
-		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
-	} else {
-		compiler_globals_ctor(compiler_globals);
-	}
-	free(EG(zend_constants));
-
-	executor_globals_ctor(executor_globals);
-	global_persistent_list = &EG(persistent_list);
-	zend_copy_ini_directives();
-#else
-	global_map_ptr_last = CG(map_ptr_last);
 #endif
 
 	if (zend_post_startup_cb) {
@@ -989,6 +970,36 @@ int zend_post_startup(void) /* {{{ */
 			return FAILURE;
 		}
 	}
+
+#ifdef ZTS
+	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
+	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
+	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
+	global_map_ptr_last = compiler_globals->map_ptr_last;
+
+	short_tags_default = CG(short_tags);
+	compiler_options_default = CG(compiler_options);
+
+	zend_destroy_rsrc_list(&EG(persistent_list));
+	free(compiler_globals->function_table);
+	compiler_globals->function_table = NULL;
+	free(compiler_globals->class_table);
+	compiler_globals->class_table = NULL;
+	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
+		compiler_globals_ctor(compiler_globals);
+		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
+	} else {
+		compiler_globals_ctor(compiler_globals);
+	}
+	free(EG(zend_constants));
+	EG(zend_constants) = NULL;
+
+	executor_globals_ctor(executor_globals);
+	global_persistent_list = &EG(persistent_list);
+	zend_copy_ini_directives();
+#else
+	global_map_ptr_last = CG(map_ptr_last);
+#endif
 
 	return SUCCESS;
 }
@@ -1025,6 +1036,8 @@ void zend_shutdown(void) /* {{{ */
 	GLOBAL_CLASS_TABLE = NULL;
 	GLOBAL_AUTO_GLOBALS_TABLE = NULL;
 	GLOBAL_CONSTANTS_TABLE = NULL;
+	ts_free_id(executor_globals_id);
+	ts_free_id(compiler_globals_id);
 #else
 	if (CG(map_ptr_base)) {
 		free(CG(map_ptr_base));
