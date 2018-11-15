@@ -10,7 +10,7 @@ opcache.preload={PWD}/preload.inc
 --FILE--
 <?php
 var_dump((new ReflectionMethod('x', 'foo'))->getPrototype()->class);
-vaR_dump((new ReflectionMethod('x', 'bar'))->getPrototype()->class);
+var_dump((new ReflectionMethod('x', 'bar'))->getPrototype()->class);
 ?>
 OK
 --EXPECT--

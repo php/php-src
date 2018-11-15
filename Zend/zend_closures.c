@@ -49,7 +49,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	zend_function *func = EX(func);
 	zval *arguments = ZEND_CALL_ARG(execute_data, 1);
 
-	if (call_user_function(CG(function_table), NULL, &EX(This), return_value, ZEND_NUM_ARGS(), arguments) == FAILURE) {
+	if (call_user_function(CG(function_table), NULL, ZEND_THIS, return_value, ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		RETVAL_FALSE;
 	}
 
@@ -126,7 +126,7 @@ ZEND_METHOD(Closure, call)
 		return;
 	}
 
-	closure = (zend_closure *) Z_OBJ(EX(This));
+	closure = (zend_closure *) Z_OBJ_P(ZEND_THIS);
 
 	newobj = Z_OBJ_P(newthis);
 
@@ -257,8 +257,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 		ZVAL_EMPTY_ARRAY(&fci.params[1]);
 	}
 
-	fci.object = Z_OBJ(EX(This));
-	fcc.object = Z_OBJ(EX(This));
+	fcc.object = fci.object = Z_OBJ_P(ZEND_THIS);
 
 	zend_call_function(&fci, &fcc);
 

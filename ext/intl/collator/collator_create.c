@@ -79,7 +79,7 @@ PHP_METHOD( Collator, __construct )
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-	return_value = &EX(This);
+	return_value = ZEND_THIS;
 	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);

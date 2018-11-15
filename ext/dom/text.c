@@ -78,7 +78,7 @@ PHP_METHOD(domtext, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(&EX(This));
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 	if (intern != NULL) {
 		oldnode = dom_object_get_node(intern);
 		if (oldnode != NULL) {
@@ -145,7 +145,7 @@ PHP_FUNCTION(dom_text_split_text)
 	int         length;
 	dom_object	*intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
 		return;
 	}
@@ -201,7 +201,7 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 	xmlNodePtr  node;
 	dom_object	*intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}

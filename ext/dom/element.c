@@ -212,7 +212,7 @@ PHP_METHOD(domelement, __construct)
 		xmlNodeSetContentLen(nodep, (xmlChar *) value, value_len);
 	}
 
-	intern = Z_DOMOBJ_P(&EX(This));
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
 		php_libxml_node_free_resource(oldnode );
@@ -325,7 +325,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 	xmlNodePtr attr;
 	size_t name_len;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -369,7 +369,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 	dom_object *intern;
 	char *name, *value;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
@@ -435,7 +435,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 	size_t name_len;
 	char *name;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -485,7 +485,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 	dom_object *intern;
 	char *name;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -532,7 +532,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 	dom_object *intern, *attrobj, *oldobj;
 	int ret;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_attr_class_entry) == FAILURE) {
 		return;
 	}
@@ -599,7 +599,7 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 	dom_object *intern, *attrobj;
 	int ret;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_attr_class_entry) == FAILURE) {
 		return;
 	}
@@ -638,7 +638,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 	char *name;
 	xmlChar *local;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -666,7 +666,7 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	char *uri, *name;
 	xmlChar *strattr;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -749,7 +749,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	dom_object *intern;
 	int errorcode = 0, stricterror, is_xmlns = 0, name_valid;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!ss", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
@@ -876,7 +876,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 	size_t name_len, uri_len;
 	char *name, *uri;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -934,7 +934,7 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 	int ret;
 	char *uri, *name;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -989,7 +989,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 	dom_object *intern, *attrobj, *oldobj;
 	int ret;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_attr_class_entry) == FAILURE) {
 		return;
 	}
@@ -1063,7 +1063,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 	char *uri, *name;
 	xmlChar *local, *nsuri;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(dom_element_has_attribute)
 	size_t name_len;
 	xmlNodePtr attr;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -1122,7 +1122,7 @@ PHP_FUNCTION(dom_element_has_attribute_ns)
 	char *uri, *name;
 	xmlChar *value;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -1180,7 +1180,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 	size_t name_len;
 	zend_bool is_id;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sb", &name, &name_len, &is_id) == FAILURE) {
 		return;
 	}
@@ -1217,7 +1217,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 	char *uri, *name;
 	zend_bool is_id;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssb", &uri, &uri_len, &name, &name_len, &is_id) == FAILURE) {
 		return;
 	}
@@ -1252,7 +1252,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_node)
 	dom_object *intern, *attrobj;
 	zend_bool is_id;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &node, dom_attr_class_entry, &is_id) == FAILURE) {
 		return;
 	}

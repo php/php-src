@@ -399,7 +399,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xmlNode *nodep = NULL;
 	zval *cloneDocu, member, rv;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &docp) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -622,7 +622,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	zend_string *ret_class = NULL;
 	xsl_object *intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	intern = Z_XSL_P(id);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
@@ -679,7 +679,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	char *uri;
 	xsl_object *intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	intern = Z_XSL_P(id);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
@@ -711,7 +711,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	int doc_txt_len;
 	xsl_object *intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	intern = Z_XSL_P(id);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 

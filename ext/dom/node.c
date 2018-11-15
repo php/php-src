@@ -929,7 +929,7 @@ PHP_FUNCTION(dom_node_insert_before)
 	dom_object *intern, *childobj, *refpobj;
 	int ret, stricterror;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|O!", &node, dom_node_class_entry, &ref, dom_node_class_entry) == FAILURE) {
 		return;
 	}
@@ -1093,7 +1093,7 @@ PHP_FUNCTION(dom_node_replace_child)
 
 	int ret;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OO", &newnode, dom_node_class_entry, &oldnode, dom_node_class_entry) == FAILURE) {
 		return;
 	}
@@ -1180,7 +1180,7 @@ PHP_FUNCTION(dom_node_remove_child)
 	dom_object *intern, *childobj;
 	int ret, stricterror;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) == FAILURE) {
 		return;
 	}
@@ -1232,7 +1232,7 @@ PHP_FUNCTION(dom_node_append_child)
 	dom_object *intern, *childobj;
 	int ret, stricterror;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) == FAILURE) {
 		return;
 	}
@@ -1333,7 +1333,7 @@ PHP_FUNCTION(dom_node_has_child_nodes)
 	xmlNode *nodep;
 	dom_object *intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1364,7 +1364,7 @@ PHP_FUNCTION(dom_node_clone_node)
 	dom_object *intern;
 	zend_bool recursive = 0;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &recursive) == FAILURE) {
 		return;
 	}
@@ -1424,7 +1424,7 @@ PHP_FUNCTION(dom_node_normalize)
 	xmlNode *nodep;
 	dom_object *intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1467,7 +1467,7 @@ PHP_FUNCTION(dom_node_has_attributes)
 	xmlNode *nodep;
 	dom_object *intern;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1505,7 +1505,7 @@ PHP_FUNCTION(dom_node_is_same_node)
 	xmlNodePtr nodeotherp, nodep;
 	dom_object *intern, *nodeotherobj;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) == FAILURE) {
 		return;
 	}
@@ -1535,7 +1535,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 	size_t uri_len = 0;
 	char *uri;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &uri, &uri_len) == FAILURE) {
 		return;
 	}
@@ -1587,7 +1587,7 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 	size_t uri_len = 0;
 	char *uri;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &uri, &uri_len) == FAILURE) {
 		return;
 	}
@@ -1621,7 +1621,7 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	size_t prefix_len;
 	char *prefix;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &prefix, &prefix_len) == FAILURE) {
 		return;
 	}
@@ -1700,7 +1700,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	xmlXPathContextPtr ctxp=NULL;
 	xmlXPathObjectPtr xpathobjp=NULL;
 
-	id = &EX(This);
+	id = ZEND_THIS;
 	if (mode == 0) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(),
 			"|bba!a!", &exclusive, &with_comments,

@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Implemented preloading RFC: https://wiki.php.net/rfc/preload. (Dmitry)
 
+- OpenSSL:
+  . Added openssl_x509_verify function. (Ben Scholzen)
+
 - PDO_OCI:
   . Implemented FR #76908 (PDO_OCI getColumnMeta() not implemented).
     (Valentin Collet, Chris Jones, Remi)

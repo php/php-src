@@ -81,6 +81,12 @@ PHP 7.4 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- OpenSSL:
+  . Added openssl_x509_verify(mixed cert, mixed key) function that verifies the
+    signature of the certificate using a public key. A wrapper around the
+    OpenSSL's X509_verify() function.
+    See <https://github.com/php/php-src/pull/3624>.
+
 ========================================
 7. New Classes and Interfaces
 ========================================

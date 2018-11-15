@@ -2478,7 +2478,6 @@ PHP_FUNCTION(mb_strripos)
 	zend_long offset = 0;
 	mbfl_string haystack, needle;
 	zend_string *from_encoding = NULL;
-	size_t from_encoding_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|lS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &from_encoding) == FAILURE) {
 		return;
@@ -2603,7 +2602,7 @@ PHP_FUNCTION(mb_strrchr)
 PHP_FUNCTION(mb_stristr)
 {
 	zend_bool part = 0;
-	size_t from_encoding_len, n;
+	size_t n;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	zend_string *from_encoding = NULL;
 
@@ -3076,7 +3075,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 		php_error_docref(NULL, E_WARNING, "Cannot convert recursively referenced values");
 		return NULL;
 	}
-	GC_PROTECT_RECURSION(input);
+	GC_TRY_PROTECT_RECURSION(input);
 	output = zend_new_array(zend_hash_num_elements(input));
 	ZEND_HASH_FOREACH_KEY_VAL(input, idx, key, entry) {
 		/* convert key */
@@ -3121,7 +3120,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 			zend_hash_index_add(output, idx, &entry_tmp);
 		}
 	} ZEND_HASH_FOREACH_END();
-	GC_UNPROTECT_RECURSION(input);
+	GC_TRY_UNPROTECT_RECURSION(input);
 
 	return output;
 }
@@ -4683,7 +4682,7 @@ MBSTRING_API int php_mb_check_encoding_recursive(HashTable *vars, const zend_str
 		php_error_docref(NULL, E_WARNING, "Cannot not handle circular references");
 		return 0;
 	}
-	GC_PROTECT_RECURSION(vars);
+	GC_TRY_PROTECT_RECURSION(vars);
 	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
@@ -4717,7 +4716,7 @@ MBSTRING_API int php_mb_check_encoding_recursive(HashTable *vars, const zend_str
 				break;
 		}
 	} ZEND_HASH_FOREACH_END();
-	GC_UNPROTECT_RECURSION(vars);
+	GC_TRY_UNPROTECT_RECURSION(vars);
 	mbfl_buffer_converter_delete(convd);
 	return valid;
 }

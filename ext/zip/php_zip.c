@@ -1441,7 +1441,7 @@ static ZIPARCHIVE_METHOD(open)
 	zend_long flags = 0;
 	char *resolved_path;
 	zend_string *filename;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	ze_zip_object *ze_obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &filename, &flags) == FAILURE) {
@@ -1495,7 +1495,7 @@ Set the password for the active archive */
 static ZIPARCHIVE_METHOD(setPassword)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	char *password;
 	size_t	password_len;
 
@@ -1523,7 +1523,7 @@ close the zip archive */
 static ZIPARCHIVE_METHOD(close)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	ze_zip_object *ze_obj;
 	int err;
 
@@ -1558,7 +1558,7 @@ close the zip archive */
 static ZIPARCHIVE_METHOD(count)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 
 	ZIP_FROM_OBJECT(intern, self);
 
@@ -1571,7 +1571,7 @@ static ZIPARCHIVE_METHOD(count)
 static ZIPARCHIVE_METHOD(getStatusString)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 #if LIBZIP_VERSION_MAJOR < 1
 	int zep, syp, len;
 	char error_string[128];
@@ -1599,7 +1599,7 @@ Returns the index of the entry named filename in the archive */
 static ZIPARCHIVE_METHOD(addEmptyDir)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	char *dirname;
 	size_t   dirname_len;
 	int idx;
@@ -1646,7 +1646,7 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	char *path = ".";
 	char *remove_path = NULL;
 	char *add_path = NULL;
@@ -1767,7 +1767,7 @@ Add a file in a Zip archive using its path and the name to use. */
 static ZIPARCHIVE_METHOD(addFile)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	char *entry_name = NULL;
 	size_t entry_name_len = 0;
 	zend_long offset_start = 0, offset_len = 0;
@@ -1803,7 +1803,7 @@ Add a file using content and the entry name */
 static ZIPARCHIVE_METHOD(addFromString)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_string *buffer;
 	char *name;
 	size_t name_len;
@@ -1861,7 +1861,7 @@ Returns the information about a the zip entry filename */
 static ZIPARCHIVE_METHOD(statName)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long flags = 0;
 	struct zip_stat sb;
 	zend_string *name;
@@ -1883,7 +1883,7 @@ Returns the zip entry information using its index */
 static ZIPARCHIVE_METHOD(statIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long index, flags = 0;
 
 	struct zip_stat sb;
@@ -1907,7 +1907,7 @@ Returns the index of the entry named filename in the archive */
 static ZIPARCHIVE_METHOD(locateName)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long flags = 0;
 	zend_long idx = -1;
 	zend_string *name;
@@ -1937,7 +1937,7 @@ Returns the name of the file at position index */
 static ZIPARCHIVE_METHOD(getNameIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	const char *name;
 	zend_long flags = 0, index = 0;
 
@@ -1963,7 +1963,7 @@ Set or remove (NULL/'') the comment of the archive */
 static ZIPARCHIVE_METHOD(setArchiveComment)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	size_t comment_len;
 	char * comment;
 
@@ -1985,7 +1985,7 @@ Returns the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(getArchiveComment)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long flags = 0;
 	const char * comment;
 	int comment_len = 0;
@@ -2009,7 +2009,7 @@ Set or remove (NULL/'') the comment of an entry using its Name */
 static ZIPARCHIVE_METHOD(setCommentName)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	size_t comment_len, name_len;
 	char * comment, *name;
 	int idx;
@@ -2038,7 +2038,7 @@ Set or remove (NULL/'') the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(setCommentIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long index;
 	size_t comment_len;
 	char * comment;
@@ -2064,7 +2064,7 @@ Set external attributes for file in zip, using its name */
 static ZIPARCHIVE_METHOD(setExternalAttributesName)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	size_t name_len;
 	char *name;
 	zend_long flags=0, opsys, attr;
@@ -2098,7 +2098,7 @@ Set external attributes for file in zip, using its index */
 static ZIPARCHIVE_METHOD(setExternalAttributesIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long index, flags=0, opsys, attr;
 	struct zip_stat sb;
 
@@ -2123,7 +2123,7 @@ Get external attributes for file in zip, using its name */
 static ZIPARCHIVE_METHOD(getExternalAttributesName)
 {
 	struct zip *intern;
-	zval *self = &EX(This), *z_opsys, *z_attr;
+	zval *self = ZEND_THIS, *z_opsys, *z_attr;
 	size_t name_len;
 	char *name;
 	zend_long flags=0;
@@ -2163,7 +2163,7 @@ Get external attributes for file in zip, using its index */
 static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This), *z_opsys, *z_attr;
+	zval *self = ZEND_THIS, *z_opsys, *z_attr;
 	zend_long index, flags=0;
 	zip_uint8_t opsys;
 	zip_uint32_t attr;
@@ -2196,7 +2196,7 @@ Set encryption method for file in zip, using its name */
 static ZIPARCHIVE_METHOD(setEncryptionName)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long method;
 	zip_int64_t idx;
 	char *name, *password = NULL;
@@ -2230,7 +2230,7 @@ Set encryption method for file in zip, using its index */
 static ZIPARCHIVE_METHOD(setEncryptionIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long index, method;
 	char *password = NULL;
 	size_t password_len;
@@ -2255,7 +2255,7 @@ Returns the comment of an entry using its name */
 static ZIPARCHIVE_METHOD(getCommentName)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	size_t name_len;
 	int idx;
 	zend_long flags = 0;
@@ -2289,7 +2289,7 @@ Returns the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(getCommentIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long index, flags = 0;
 	const char * comment;
 	int comment_len = 0;
@@ -2313,7 +2313,7 @@ Set the compression of a file in zip, using its name */
 static ZIPARCHIVE_METHOD(setCompressionName)
  {
 	struct zip *intern;
-	zval *this = &EX(This);
+	zval *this = ZEND_THIS;
 	size_t name_len;
 	char *name;
 	zip_int64_t idx;
@@ -2348,7 +2348,7 @@ Set the compression of a file in zip, using its index */
 static ZIPARCHIVE_METHOD(setCompressionIndex)
 {
 	struct zip *intern;
-	zval *this = &EX(This);
+	zval *this = ZEND_THIS;
 	zend_long index;
 	zend_long comp_method, comp_flags = 0;
 
@@ -2372,7 +2372,7 @@ Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long index;
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -2398,7 +2398,7 @@ Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteName)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	size_t name_len;
 	char *name;
 	struct zip_stat sb;
@@ -2425,7 +2425,7 @@ Rename an entry selected by its index to new_name */
 static ZIPARCHIVE_METHOD(renameIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	char *new_name;
 	size_t new_name_len;
 	zend_long index;
@@ -2457,7 +2457,7 @@ Rename an entry selected by its name to new_name */
 static ZIPARCHIVE_METHOD(renameName)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	struct zip_stat sb;
 	char *name, *new_name;
 	size_t name_len, new_name_len;
@@ -2487,7 +2487,7 @@ Changes to the file at position index are reverted */
 static ZIPARCHIVE_METHOD(unchangeIndex)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zend_long index;
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -2513,7 +2513,7 @@ Changes to the file named 'name' are reverted */
 static ZIPARCHIVE_METHOD(unchangeName)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	struct zip_stat sb;
 	char *name;
 	size_t name_len;
@@ -2543,7 +2543,7 @@ All changes to files and global information in archive are reverted */
 static ZIPARCHIVE_METHOD(unchangeAll)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 
 	ZIP_FROM_OBJECT(intern, self);
 
@@ -2560,7 +2560,7 @@ Revert all global changes to the archive archive.  For now, this only reverts ar
 static ZIPARCHIVE_METHOD(unchangeArchive)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 
 	ZIP_FROM_OBJECT(intern, self);
 
@@ -2583,7 +2583,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 {
 	struct zip *intern;
 
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	zval *zval_files = NULL;
 	zval *zval_file = NULL;
 	php_stream_statbuf ssb;
@@ -2663,7 +2663,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 
 	struct zip_stat sb;
 	struct zip_file *zf;
@@ -2743,7 +2743,7 @@ get a stream for an entry using its name */
 static ZIPARCHIVE_METHOD(getStream)
 {
 	struct zip *intern;
-	zval *self = &EX(This);
+	zval *self = ZEND_THIS;
 	struct zip_stat sb;
 	char *mode = "rb";
 	zend_string *filename;
