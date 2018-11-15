@@ -570,6 +570,14 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_DEL_FLAGS(p, GC_PROTECTED); \
 	} while (0)
 
+#define GC_TRY_PROTECT_RECURSION(p) do { \
+		if (!(GC_FLAGS(p) & GC_IMMUTABLE)) GC_PROTECT_RECURSION(p); \
+	} while (0)
+
+#define GC_TRY_UNPROTECT_RECURSION(p) do { \
+		if (!(GC_FLAGS(p) & GC_IMMUTABLE)) GC_UNPROTECT_RECURSION(p); \
+	} while (0)
+
 #define Z_IS_RECURSIVE(zval)        GC_IS_RECURSIVE(Z_COUNTED(zval))
 #define Z_PROTECT_RECURSION(zval)   GC_PROTECT_RECURSION(Z_COUNTED(zval))
 #define Z_UNPROTECT_RECURSION(zval) GC_UNPROTECT_RECURSION(Z_COUNTED(zval))
