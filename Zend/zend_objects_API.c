@@ -162,8 +162,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 		otherwise, when the destructor ends the storage might be freed
 		when the refcount reaches 0 a second time
 	 */
-	ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
-	ZEND_ASSERT(IS_OBJ_VALID(EG(objects_store).object_buckets[object->handle]));
 	ZEND_ASSERT(GC_REFCOUNT(object) == 0);
 
 	if (!(OBJ_FLAGS(object) & IS_OBJ_DESTRUCTOR_CALLED)) {
@@ -171,7 +169,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 
 		if (object->handlers->dtor_obj != zend_objects_destroy_object
 				|| object->ce->destructor) {
-			GC_ADDREF(object);
+			GC_SET_REFCOUNT(object, 1);
 			object->handlers->dtor_obj(object);
 			GC_DELREF(object);
 		}
@@ -181,12 +179,13 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 		uint32_t handle = object->handle;
 		void *ptr;
 
+		ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
+		ZEND_ASSERT(IS_OBJ_VALID(EG(objects_store).object_buckets[handle]));
 		EG(objects_store).object_buckets[handle] = SET_OBJ_INVALID(object);
 		if (!(OBJ_FLAGS(object) & IS_OBJ_FREE_CALLED)) {
 			GC_ADD_FLAGS(object, IS_OBJ_FREE_CALLED);
-			GC_ADDREF(object);
+			GC_SET_REFCOUNT(object, 1);
 			object->handlers->free_obj(object);
-			GC_DELREF(object);
 		}
 		ptr = ((char*)object) - object->handlers->offset;
 		GC_REMOVE_FROM_BUFFER(object);
