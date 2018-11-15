@@ -12,11 +12,6 @@ function f1()
 {
 	echo "f1 called\n";
 }
-function handler($errno, $errstr) {
-        echo "in handler()\n\n";
-        assert(E_RECOVERABLE_ERROR === $errno);
-        var_dump($errstr);
-}
 
 //Wrong number of parameters for assert_options()
 assert_options(ASSERT_WARNING, 1);
@@ -30,8 +25,6 @@ var_dump($rao=assert_options("F1", "f1"));
 $sa="0 != 0";
 var_dump($r2 = assert($sa, "message", 1));
 
-
-//Catch recoverable error with handler
 var_dump($rc = assert('aa=sd+as+safsafasfaçsafçsafç'));
 --EXPECTF--
 Warning: assert_options() expects at most 2 parameters, 3 given in %s on line %d
