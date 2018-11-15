@@ -105,10 +105,12 @@ static void spl_ptr_heap_zval_ctor(zval *elem) { /* {{{ */
 /* }}} */
 
 static void spl_ptr_heap_pqueue_elem_dtor(zval *zv) { /* {{{ */
-	spl_pqueue_elem *elem = Z_PTR_P(zv);
-	zval_ptr_dtor(&elem->data);
-	zval_ptr_dtor(&elem->priority);
-	efree(elem);
+	if (!Z_ISUNDEF_P(zv)) {
+		spl_pqueue_elem *elem = Z_PTR_P(zv);
+		zval_ptr_dtor(&elem->data);
+		zval_ptr_dtor(&elem->priority);
+		efree(elem);
+	}
 }
 /* }}} */
 
@@ -702,6 +704,7 @@ SPL_METHOD(SplPriorityQueue, extract)
 	}
 
 	spl_pqueue_extract_helper(return_value, &value, intern->flags);
+	spl_ptr_heap_pqueue_elem_dtor(&value);
 }
 /* }}} */
 
@@ -958,8 +961,7 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
 	}
 
 	spl_ptr_heap_delete_top(object->heap, &elem, &iter->data);
-
-	zval_ptr_dtor(&elem);
+	object->heap->dtor(&elem);
 
 	zend_user_it_invalidate_current(iter);
 }
@@ -985,13 +987,13 @@ SPL_METHOD(SplHeap, next)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 	zval elem;
-	spl_ptr_heap_delete_top(intern->heap, &elem, ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	zval_ptr_dtor(&elem);
+	spl_ptr_heap_delete_top(intern->heap, &elem, ZEND_THIS);
+	intern->heap->dtor(&elem);
 }
 /* }}} */
 
