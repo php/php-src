@@ -46,6 +46,9 @@ PHP 7.4 UPGRADE NOTES
     (array) casts are *not* affected. They will continue to return either the
     wrapped array, or the ArrayObject properties, depending on whether the
     STD_PROP_LIST flag is used.
+  . SplPriorityQueue::setExtractFlags() will throw an exception if zero is
+    passed. Previously this would generate a recoverable fatal error on the
+    next extraction operation.
 
 ========================================
 2. New Features

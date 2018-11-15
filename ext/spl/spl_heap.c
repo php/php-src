@@ -137,27 +137,27 @@ static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object
 }
 /* }}} */
 
-static int spl_pqueue_extract_helper(zval *result, zval *value, int flags) /* {{{ */
+static void spl_pqueue_extract_helper(zval *result, zval *value, int flags) /* {{{ */
 {
 	spl_pqueue_elem *elem = Z_PTR_P(value);
 	if ((flags & SPL_PQUEUE_EXTR_BOTH) == SPL_PQUEUE_EXTR_BOTH) {
 		array_init(result);
 		add_assoc_zval_ex(result, "data", sizeof("data") - 1, &elem->data);
 		add_assoc_zval_ex(result, "priority", sizeof("priority") - 1, &elem->priority);
-		return SUCCESS;
+		return;
 	}
 
 	if (flags & SPL_PQUEUE_EXTR_DATA) {
 		ZVAL_COPY(result, &elem->data);
-		return SUCCESS;
+		return;
 	}
 
 	if (flags & SPL_PQUEUE_EXTR_PRIORITY) {
 		ZVAL_COPY(result, &elem->priority);
-		return SUCCESS;
+		return;
 	}
 
-	return FAILURE;
+	ZEND_ASSERT(0);
 }
 /* }}} */
 
@@ -701,11 +701,7 @@ SPL_METHOD(SplPriorityQueue, extract)
 		return;
 	}
 
-	if (spl_pqueue_extract_helper(return_value, &value, intern->flags) == FAILURE) {
-		zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
-		spl_ptr_heap_pqueue_elem_dtor(&value);
-		return;
-	}
+	spl_pqueue_extract_helper(return_value, &value, intern->flags);
 }
 /* }}} */
 
@@ -734,9 +730,7 @@ SPL_METHOD(SplPriorityQueue, top)
 		return;
 	}
 
-	if (spl_pqueue_extract_helper(return_value, value, intern->flags) == FAILURE) {
-		zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
-	}
+	spl_pqueue_extract_helper(return_value, value, intern->flags);
 }
 /* }}} */
 
@@ -752,10 +746,14 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 		return;
 	}
 
+	value &= SPL_PQUEUE_EXTR_MASK;
+	if (!value) {
+		zend_throw_exception(spl_ce_RuntimeException, "Must specify at least one extract flag", 0);
+		return;
+	}
+
 	intern = Z_SPLHEAP_P(ZEND_THIS);
-
-	intern->flags = value & SPL_PQUEUE_EXTR_MASK;
-
+	intern->flags = value;
 	RETURN_LONG(intern->flags);
 }
 /* }}} */
@@ -935,9 +933,7 @@ static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter) /* {{{ *
 		return NULL;
 	}
 	if (Z_ISUNDEF(user_it->value)) {
-		if (spl_pqueue_extract_helper(&user_it->value, element, object->flags) == FAILURE) {
-			zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
-		}
+		spl_pqueue_extract_helper(&user_it->value, element, object->flags);
 	}
 	return &user_it->value;
 }
@@ -1057,10 +1053,7 @@ SPL_METHOD(SplPriorityQueue, current)
 	if (!intern->heap->count || Z_ISUNDEF_P(element)) {
 		RETURN_NULL();
 	} else {
-		if (spl_pqueue_extract_helper(return_value, element, intern->flags) == FAILURE) {
-			zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
-			RETURN_NULL();
-		}
+		spl_pqueue_extract_helper(return_value, element, intern->flags);
 	}
 }
 /* }}} */
