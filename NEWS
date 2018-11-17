@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.2.13
 
+- CLI:
+  . Fixed bug #77111 (php-win.exe corrupts unicode symbols from cli
+    parameters). (Anatol)
+
 - Fileinfo:
   . Fixed bug #77095 (slowness regression in 7.2/7.3 (compared to 7.1)).
     (Anatol)
