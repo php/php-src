@@ -866,8 +866,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 					}
 
 #if defined(_WIN64)
-					sz.HighPart = (new_size >> 32);
-					sz.LowPart = (new_size & 0xffffffff);
+					sz.QuadPart = new_size;
 #else
 					sz.HighPart = 0;
 					sz.LowPart = new_size;
