@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #77165 (mb_check_encoding crashes when argument given an empty
     array). (Nikita)
 
+- PGSQL:
+  . Fixed bug #77047 (pg_convert has a broken regex for the 'TIME WITHOUT
+    TIMEZONE' data type). (Andy Gajetzki)
+
 - SOAP:
   . Fixed bug #77141 (Signedness issue in SOAP when precision=-1). (cmb)
 
