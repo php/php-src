@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #77058 (Type inference in opcache causes side effects). (Nikita)
 
+- PGSQL:
+  . Fixed bug #77047 (pg_convert has a broken regex for the 'TIME WITHOUT
+    TIMEZONE' data type). (Andy Gajetzki)
+
 - SOAP:
   . Fixed bug #76348 (WSDL_CACHE_MEMORY causes Segmentation fault). (cmb)
   . Fixed bug #77141 (Signedness issue in SOAP when precision=-1). (cmb)
