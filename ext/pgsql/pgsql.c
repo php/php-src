@@ -6253,7 +6253,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_P(val), Z_STRLEN_P(val), "^(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1})){0,1}$", 1) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_P(val), Z_STRLEN_P(val), "^(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1}){0,1}$", 1) == FAILURE) {
 								err = 1;
 							}
 							else {
