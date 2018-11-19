@@ -42,6 +42,8 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Added openssl_x509_verify function. (Ben Scholzen)
+  . openssl_random_pseudo_bytes() now throws in error conditions.
+    (Sammy Kaye Powers)
 
 - PDO_OCI:
   . Implemented FR #76908 (PDO_OCI getColumnMeta() not implemented).

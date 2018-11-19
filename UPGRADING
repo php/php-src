@@ -37,6 +37,15 @@ PHP 7.4 UPGRADE NOTES
   . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
     INTL_IDNA_VARIANT_UTS46 instead of the deprecated INTL_IDNA_VARIANT_2003.
 
+- Openssl:
+  . The openssl_random_pseudo_bytes() function will now throw an exception in
+    error situations, similar to random_bytes(). In particular, an Error is
+    thrown if the number of requested bytes is smaller *or equal* than zero,
+    and an Exception is thrown is sufficient randomness cannot be gathered.
+    The $crypto_strong output argument is guaranteed to always be true if the
+    function does not throw, so explicitly checking it is not necessary.
+    RFC: http://php.net/manual/de/function.openssl-random-pseudo-bytes.php
+
 - PDO:
   . Attempting to serialize a PDO or PDOStatement instance will now generate
     an Exception rather than a PDOException, consistent with other internal
