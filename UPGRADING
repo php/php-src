@@ -64,6 +64,13 @@ PHP 5.6 UPGRADE NOTES
 - cURL:
   Uploads using the @file syntax are now unsupported by default.
 
+- IMAP:
+  Starting with 5.6.38, rsh/ssh logins are disabled by default. Use
+  imap.enable_insecure_rsh if you want to enable them. Note that the IMAP
+  library does not filter mailbox names before passing them to rsh/ssh
+  command, thus passing untrusted data to this function with rsh/ssh enabled
+  is insecure.
+
 ========================================
 2. New Features
 ========================================
