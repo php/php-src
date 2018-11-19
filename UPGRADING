@@ -99,6 +99,13 @@ PHP 7.2 UPGRADE NOTES
     from PHP 7.1 on 64-bit machines. This change was necessary to resolve a
     modulo bias bug in the implementation.
 
+- IMAP:
+  Starting with 7.1.25, rsh/ssh logins are disabled by default. Use
+  imap.enable_insecure_rsh if you want to enable them. Note that the IMAP
+  library does not filter mailbox names before passing them to rsh/ssh
+  command, thus passing untrusted data to this function with rsh/ssh enabled
+  is insecure.
+
 ========================================
 2. New Features
 ========================================
