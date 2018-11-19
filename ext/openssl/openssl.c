@@ -28,6 +28,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_openssl.h"
+#include "zend_exceptions.h"
 
 /* PHP Includes */
 #include "ext/standard/file.h"
@@ -6861,7 +6862,8 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		|| ZEND_LONG_INT_OVFL(buffer_length)
 #endif
 			) {
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
+		return;
 	}
 	buffer = zend_string_alloc(buffer_length, 0);
 
@@ -6872,7 +6874,8 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		if (zstrong_result_returned) {
 			ZVAL_FALSE(zstrong_result_returned);
 		}
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+		return;
 	}
 #else
 
@@ -6884,7 +6887,8 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		if (zstrong_result_returned) {
 			ZVAL_FALSE(zstrong_result_returned);
 		}
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+		return;
 	} else {
 		php_openssl_store_errors();
 	}
