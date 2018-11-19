@@ -65,6 +65,7 @@ struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
 
 	zend_class_entry *active_class_entry;
+	HashTable *unverified_types;
 
 	zend_string *compiled_filename;
 
