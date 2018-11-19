@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #77147 (Fixing 60494 ignored ICONV_MIME_DECODE_CONTINUE_ON_ERROR).
     (cmb)
 
+- IMAP:
+  . Fixed bug #77153 (imap_open allows to run arbitrary shell commands via
+    mailbox parameter). (Stas)
+
 - ODBC:
   . Fixed bug #77079 (odbc_fetch_object has incorrect type signature).
     (Jon Allen)
