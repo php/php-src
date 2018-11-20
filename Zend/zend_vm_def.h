@@ -903,11 +903,6 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 				ZEND_VM_C_GOTO(assign_dim_op_array);
 			}
-		} else if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-ZEND_VM_C_LABEL(assign_dim_op_convert_to_array):
-			ZVAL_ARR(container, zend_new_array(8));
-			ZEND_VM_C_GOTO(assign_dim_op_new_array);
 		}
 
 		dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
@@ -928,7 +923,11 @@ ZEND_VM_C_LABEL(assign_dim_op_convert_to_array):
 				}
 				UNDEF_RESULT();
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+				if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+					container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
+				}
+				ZVAL_ARR(container, zend_new_array(8));
+				ZEND_VM_C_GOTO(assign_dim_op_new_array);
 			} else {
 				if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_use_scalar_as_array();
