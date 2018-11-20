@@ -29,6 +29,8 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 
+const HashTable com_dotnet_object_properties;
+
 static zval *com_property_read(zval *object, zval *member, int type, void **cahce_slot, zval *rv)
 {
 	php_com_dotnet_object *obj;
@@ -231,7 +233,7 @@ static HashTable *com_properties_get(zval *object)
 	 * infinite recursion when the hash is displayed via var_dump().
 	 * Perhaps it is best to leave it un-implemented.
 	 */
-	return NULL;
+	return &com_dotnet_object_properties;
 }
 
 static void function_dtor(zval *zv)
