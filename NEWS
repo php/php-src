@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #77147 (Fixing 60494 ignored ICONV_MIME_DECODE_CONTINUE_ON_ERROR).
     (cmb)
 
+- IMAP:
+  . Fixed bug #77153 (imap_open allows to run arbitrary shell commands via
+    mailbox parameter). (Stas)
+
 - MBstring:
   . Fixed bug #77165 (mb_check_encoding crashes when argument given an empty
     array). (Nikita)

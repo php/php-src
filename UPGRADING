@@ -112,6 +112,12 @@ BCMath:
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
 
+IMAP:
+  rsh/ssh logins are disabled by default. Use imap.enable_insecure_rsh if you want
+  to enable them. Note that the IMAP library does not filter mailbox names before
+  passing them to rsh/ssh command, thus passing untrusted data to this function
+  with rsh/ssh enabled is insecure.
+
 MBString:
   . Due to added support for named captures, mb_ereg_*() patterns using named
     captures will behave differently. In particular named captures will be part
