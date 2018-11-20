@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0RC6
+22 Nov 2018, PHP 7.3.0RC6
 
 - CLI:
   . Fixed bug #77111 (php-win.exe corrupts unicode symbols from cli
