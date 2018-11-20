@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.1.25
 
+- Core:
+  . Fixed bug #71041 (zend_signal_startup() needs ZEND_API).
+    (Valentin V. Bartenev)
+
 - ftp:
   . Fixed bug #77151 (ftp_close(): SSL_read on shutdown). (Remi)
 
