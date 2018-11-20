@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-22 Nov 2018, PHP 7.2.13RC1
+06 Dec 2018, PHP 7.2.13
 
 - ftp:
   . Fixed bug #77151 (ftp_close(): SSL_read on shutdown). (Remi)
