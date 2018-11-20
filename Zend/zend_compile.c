@@ -8107,8 +8107,8 @@ static zend_bool _is_not_decl_stmt(zend_ast *ast) {
 
 static zend_ast **_ast_find(zend_ast **begin, zend_ast **end,
                             zend_bool (*pred)(zend_ast *)) {
-	while (begin < end)
-		if (pred(*begin++))
+	for (; begin < end; ++begin)
+		if (pred(*begin))
 			return begin;
 	return begin;
 }
