@@ -3592,7 +3592,7 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	uint32_t checkpoint;
 
 	if (zend_accel_hash_is_full(&ZCSG(hash))) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Not enough entries in hash table for preloading!");
+		zend_accel_error(ACCEL_LOG_FATAL, "Not enough entries in hash table for preloading. Consider increasing the value for the opcache.max_accelerated_files directive in php.ini.");
 		return NULL;
 	}
 
@@ -3644,7 +3644,7 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	}
 #endif
 	if (!ZCG(mem)) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Not enough shared memory for preloading!");
+		zend_accel_error(ACCEL_LOG_FATAL, "Not enough shared memory for preloading. Consider increasing the value for the opcache.memory_consumption directive in php.ini.");
 		return NULL;
 	}
 
