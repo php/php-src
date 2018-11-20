@@ -8135,6 +8135,7 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 
 		/* Compile decl stmts */
 		{
+			zend_string *lcname;
 			HashTable unverified_types;
 			HashTable *prev_unverified_types;
 			zend_hash_init(&unverified_types, 0, NULL, NULL, 1);
@@ -8146,6 +8147,15 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 			}
 
 			/* todo: emit ZEND_VERIFY_VARIANCE */
+			ZEND_HASH_FOREACH_STR_KEY(&unverified_types, lcname) {
+				zend_op *opline = get_next_op(CG(active_op_array));
+
+				opline->op1_type = IS_CONST;
+				opline->opcode = ZEND_VERIFY_VARIANCE;
+				LITERAL_STR(opline->op1, lcname);
+
+			} ZEND_HASH_FOREACH_END();
+
 			zend_hash_destroy(&unverified_types);
 			CG(unverified_types) = prev_unverified_types;
 		}

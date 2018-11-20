@@ -14,6 +14,7 @@ class SomeCollection implements Collection {
     }
 }
 
+$some = new SomeCollection();
 echo get_class($some->getIterator());
 
 --EXPECT--

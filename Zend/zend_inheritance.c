@@ -1996,6 +1996,31 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent)
 }
 /* }}} */
 
+static void _inheritance_runtime_error_msg(zend_function *child, zend_function *parent)
+{
+	int error_level;
+	const char *error_verb;
+	zend_string *method_prototype = zend_get_function_declaration(parent);
+	zend_string *child_prototype = zend_get_function_declaration(child);
+
+	if (child->common.prototype && (
+		child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
+	)) {
+		error_level = E_ERROR;
+		error_verb = "must";
+	} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
+						 !_check_inherited_return_type(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1)) {
+		error_level = E_ERROR;
+		error_verb = "must";
+	} else {
+		error_level = E_WARNING;
+		error_verb = "should";
+	}
+	zend_error(error_level, "Declaration of %s %s be compatible with %s", ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
+	zend_string_efree(child_prototype);
+	zend_string_efree(method_prototype);
+}
+
 ZEND_API void zend_verify_variance(zend_class_entry *ce) /* {{{ */
 {
 	// todo: name? "verify" typically means something else
@@ -2022,12 +2047,28 @@ ZEND_API void zend_verify_variance(zend_class_entry *ce) /* {{{ */
 			/* Check return type compatibility, but only if the prototype already
 			 * specifies a return type. Adding a new return type is always valid. */
 			if (parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-				int check = _check_inherited_return_type(
-					child, child->common.arg_info - 1,
-					parent, parent->common.arg_info - 1);
-				if (check < 0) {
-					zend_error_noreturn(E_ERROR, "Bad return!");
+				if (child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+					int check = _check_inherited_return_type(
+						child, &child->common.arg_info[-1],
+						parent, &parent->common.arg_info[-1]);
+					if (check < 0) {
+						_inheritance_runtime_error_msg(child, parent);
+						// todo: what to do with errors, not warnings?
+						continue;
+					}
+				} else {
+						_inheritance_runtime_error_msg(child, parent);
+						// todo: what to do with errors, not warnings?
+						continue;
 				}
+			}
+
+			if (parent->common.required_num_args < child->common.required_num_args
+			    || parent->common.num_args > child->common.num_args)
+			{
+				_inheritance_runtime_error_msg(child, parent);
+				// todo: what to do with errors, not warnings?
+				continue;
 			}
 
 			num_args = parent->common.num_args;
