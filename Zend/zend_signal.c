@@ -397,7 +397,7 @@ void zend_signal_init(void) /* {{{ */
 
 /* {{{ zend_signal_startup
  * alloc zend signal globals */
-void zend_signal_startup(void)
+ZEND_API void zend_signal_startup(void)
 {
 
 #ifdef ZTS
