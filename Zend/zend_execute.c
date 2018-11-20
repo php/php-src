@@ -1131,7 +1131,7 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 			zval_ptr_dtor(&rv);
 		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), value);
+			ZVAL_COPY(EX_VAR(opline->result.var), &res);
 		}
 		zval_ptr_dtor(&res);
 	} else {
