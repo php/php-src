@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #77111 (php-win.exe corrupts unicode symbols from cli
     parameters). (Anatol)
 
+- ftp:
+  . Fixed bug #77151 (ftp_close(): SSL_read on shutdown). (Remi)
+
 - iconv:
   . Fixed bug #77147 (Fixing 60494 ignored ICONV_MIME_DECODE_CONTINUE_ON_ERROR).
     (cmb)
