@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.2.13
 
+- ftp:
+  . Fixed bug #77151 (ftp_close(): SSL_read on shutdown). (Remi)
+
 - CLI:
   . Fixed bug #77111 (php-win.exe corrupts unicode symbols from cli
     parameters). (Anatol)
