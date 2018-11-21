@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #71041 (zend_signal_startup() needs ZEND_API).
     (Valentin V. Bartenev)
 
+- Soap:
+  . Fixed bug #77088 (Segfault when using SoapClient with null options).
+    (Laruence)
+
 - Sockets:
   . Fixed bug #77136 (Unsupported IPV6_RECVPKTINFO constants on macOS).
     (Mizunashi Mana)
