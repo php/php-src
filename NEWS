@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #77177 (Serializing or unserializing COM objects crashes). (cmb)
 
+- Exif:
+  . Fixed bug #77184 (Unsigned rational numbers are written out as signed
+    rationals). (Colin Basnett)
+
 - GD:
   . Fixed bug #77195 (Incorrect error handling of imagecreatefromjpeg()). (cmb)
   . Fixed bug #77198 (auto cropping has insufficient precision). (cmb)

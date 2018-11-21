@@ -2440,7 +2440,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									break;
 
 								case TAG_FMT_URATIONAL:
-									snprintf(buffer, sizeof(buffer), "%i/%i", info_value->ur.num, info_value->ur.den);
+									snprintf(buffer, sizeof(buffer), "%u/%u", info_value->ur.num, info_value->ur.den);
 									if (l==1) {
 										add_assoc_string(&tmpi, name, buffer);
 									} else {
