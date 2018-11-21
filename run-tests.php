@@ -895,7 +895,7 @@ $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
 $test_dirs = array();
-$optionals = array('tests', 'ext', 'Zend', 'sapi');
+$optionals = array('tests', 'ext', 'Zend');
 
 foreach($optionals as $dir) {
 	if (is_dir($dir)) {
@@ -1320,7 +1320,7 @@ TEST $file
 			// check for unknown sections
 			if (!in_array($section, array(
 				'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL', 'EXPECTHEADERS',
-				'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'PUT', 'GET', 'COOKIE', 'ARGS', 'REQUEST', 'HEADERS',
+				'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'PUT', 'GET', 'COOKIE', 'ARGS',
 				'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
 				'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
 				'INI', 'ENV', 'EXTENSIONS',
