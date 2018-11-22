@@ -46,6 +46,9 @@ PHP 7.4 UPGRADE NOTES
     (array) casts are *not* affected. They will continue to return either the
     wrapped array, or the ArrayObject properties, depending on whether the
     STD_PROP_LIST flag is used.
+  . SplPriorityQueue::setExtractFlags() will throw an exception if zero is
+    passed. Previously this would generate a recoverable fatal error on the
+    next extraction operation.
 
 ========================================
 2. New Features
@@ -81,6 +84,12 @@ PHP 7.4 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- OpenSSL:
+  . Added openssl_x509_verify(mixed cert, mixed key) function that verifies the
+    signature of the certificate using a public key. A wrapper around the
+    OpenSSL's X509_verify() function.
+    See <https://github.com/php/php-src/pull/3624>.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
@@ -92,6 +101,12 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+
+- GD:
+  . Freetype detection now relies on pkg-config. The --with-freetype-dir option
+    has been renamed to --enable-freetype and no longer accepts a directory.
+    Instead pkg-config environment variables can be used to configure custom paths,
+    see either ./configure --help or follow the instructions in error messages.
 
 - Hash:
   . The hash extension cannot be disabled anymore and is always an integral
@@ -113,6 +128,7 @@ PHP 7.4 UPGRADE NOTES
 - SQLite3:
   . The bundled libsqlite has been removed.  To build the SQLite3 and/or
     PDO_SQLite extensions a system libsqlite3 ≥ 3.5.0 is now required.
+  . The @param notation can now also be used to denote SQL query parameters.
 
 - Zip:
   . The bundled libzip library has been removed. A system libzip >= 0.11 is now
@@ -121,6 +137,36 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- Tidy:
+  . TIDY_TAG_ARTICLE
+  . TIDY_TAG_ASIDE
+  . TIDY_TAG_AUDIO
+  . TIDY_TAG_BDI
+  . TIDY_TAG_CANVAS
+  . TIDY_TAG_COMMAND
+  . TIDY_TAG_DATALIST
+  . TIDY_TAG_DETAILS
+  . TIDY_TAG_DIALOG
+  . TIDY_TAG_FIGCAPTION
+  . TIDY_TAG_FIGURE
+  . TIDY_TAG_FOOTER
+  . TIDY_TAG_HEADER
+  . TIDY_TAG_HGROUP
+  . TIDY_TAG_MAIN
+  . TIDY_TAG_MARK
+  . TIDY_TAG_MENUITEM
+  . TIDY_TAG_METER
+  . TIDY_TAG_NAV
+  . TIDY_TAG_OUTPUT
+  . TIDY_TAG_PROGRESS
+  . TIDY_TAG_SECTION
+  . TIDY_TAG_SOURCE
+  . TIDY_TAG_SUMMARY
+  . TIDY_TAG_TEMPLATE
+  . TIDY_TAG_TIME
+  . TIDY_TAG_TRACK
+  . TIDY_TAG_VIDEO
 
 ========================================
 11. Changes to INI File Handling

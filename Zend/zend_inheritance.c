@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -958,12 +958,11 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			dst = end + parent_ce->default_static_members_count;
 			ce->default_static_members_table = end;
 		}
-		if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
-			ZEND_ASSERT(parent_ce->type == ZEND_INTERNAL_CLASS || (parent_ce->ce_flags & ZEND_ACC_IMMUTABLE));
-			zend_class_init_statics(parent_ce);
-		}
 		if (UNEXPECTED(parent_ce->type != ce->type)) {
 			/* User class extends internal */
+			if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
+				zend_class_init_statics(parent_ce);
+			}
 			if (UNEXPECTED(zend_update_class_constants(parent_ce) != SUCCESS)) {
 				ZEND_ASSERT(0);
 			}
@@ -978,6 +977,10 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 				}
 			} while (dst != end);
 		} else if (ce->type == ZEND_USER_CLASS) {
+			if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
+				ZEND_ASSERT(parent_ce->ce_flags & ZEND_ACC_IMMUTABLE);
+				zend_class_init_statics(parent_ce);
+			}
 			src = CE_STATIC_MEMBERS(parent_ce) + parent_ce->default_static_members_count;
 			do {
 				dst--;
@@ -1371,7 +1374,6 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		}
 	}
 
-	function_add_ref(fn);
 	if (UNEXPECTED(fn->type == ZEND_INTERNAL_FUNCTION)) {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
 		memcpy(new_fn, fn, sizeof(zend_internal_function));
@@ -1379,11 +1381,10 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	} else {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_fn, fn, sizeof(zend_op_array));
+		new_fn->op_array.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 		new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
-		ZEND_MAP_PTR_INIT(new_fn->op_array.run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
-		ZEND_MAP_PTR_SET(new_fn->op_array.run_time_cache, NULL);
-		ZEND_MAP_PTR_INIT(new_fn->op_array.static_variables_ptr, &new_fn->op_array.static_variables);
 	}
+	function_add_ref(new_fn);
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_methods(ce, key, fn);
 }

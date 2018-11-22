@@ -251,7 +251,7 @@ Testing
 -------
 
 1.  Extensions should be well tested using *.phpt tests. Read about that
-    in README.TESTING.
+    at https://qa.php.net/write-test.php.
 
 Documentation and Folding Hooks
 -------------------------------

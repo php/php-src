@@ -153,6 +153,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_check_private_key, 0)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_verify, 0)
+	ZEND_ARG_INFO(0, cert)
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_parse, 0, 0, 1)
 	ZEND_ARG_INFO(0, x509)
 	ZEND_ARG_INFO(0, shortname)
@@ -492,6 +497,7 @@ static const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_x509_parse,			 	arginfo_openssl_x509_parse)
 	PHP_FE(openssl_x509_checkpurpose,		arginfo_openssl_x509_checkpurpose)
 	PHP_FE(openssl_x509_check_private_key,	arginfo_openssl_x509_check_private_key)
+	PHP_FE(openssl_x509_verify,	            arginfo_openssl_x509_verify)
 	PHP_FE(openssl_x509_export,				arginfo_openssl_x509_export)
 	PHP_FE(openssl_x509_fingerprint,			arginfo_openssl_x509_fingerprint)
 	PHP_FE(openssl_x509_export_to_file,		arginfo_openssl_x509_export_to_file)
@@ -2220,6 +2226,46 @@ PHP_FUNCTION(openssl_x509_check_private_key)
 	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
 	}
+}
+/* }}} */
+
+/* {{{ proto int openssl_x509_verify(mixed cert, mixed key)
+   Verifies the signature of certificate cert using public key key */
+PHP_FUNCTION(openssl_x509_verify)
+{
+	zval * zcert, *zkey;
+	X509 * cert = NULL;
+	EVP_PKEY * key = NULL;
+	zend_resource *keyresource = NULL;
+	int err = -1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zcert, &zkey) == FAILURE) {
+		return;
+	}
+	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
+	if (cert == NULL) {
+		RETURN_LONG(err);
+	}
+	key = php_openssl_evp_from_zval(zkey, 1, NULL, 0, 0, &keyresource);
+	if (key == NULL) {
+		X509_free(cert);
+		RETURN_LONG(err);
+	}	
+	
+	err = X509_verify(cert, key);
+	
+	if (err < 0) {
+		php_openssl_store_errors();
+	}
+
+	if (keyresource == NULL && key) {
+		EVP_PKEY_free(key);
+	}
+	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
+		X509_free(cert);
+	}
+	
+	RETURN_LONG(err);
 }
 /* }}} */
 

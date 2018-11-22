@@ -1748,7 +1748,7 @@ PHP_FUNCTION(snmp_read_mib)
 PHP_METHOD(snmp, __construct)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	char *a1, *a2;
 	size_t a1_len, a2_len;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
@@ -1795,7 +1795,7 @@ PHP_METHOD(snmp, __construct)
 PHP_METHOD(snmp, close)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 
 	snmp_object = Z_SNMP_P(object);
 
@@ -1846,7 +1846,7 @@ PHP_METHOD(snmp, set)
 PHP_METHOD(snmp, setSecurity)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	char *a1 = "", *a2 = "", *a3 = "", *a4 = "", *a5 = "", *a6 = "", *a7 = "";
 	size_t a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
 	int argc = ZEND_NUM_ARGS();
@@ -1871,7 +1871,7 @@ PHP_METHOD(snmp, setSecurity)
 PHP_METHOD(snmp, getErrno)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 
 	snmp_object = Z_SNMP_P(object);
 
@@ -1885,7 +1885,7 @@ PHP_METHOD(snmp, getErrno)
 PHP_METHOD(snmp, getError)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 
 	snmp_object = Z_SNMP_P(object);
 

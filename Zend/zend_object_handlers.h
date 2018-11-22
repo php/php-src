@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -226,7 +226,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name);
+ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, zend_bool is_dynamic);
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
 

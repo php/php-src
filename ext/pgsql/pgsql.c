@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jouni Ahto <jouni.ahto@exdec.fi>                            |
    |          Yasuo Ohgaki <yohgaki@php.net>                              |
    |          Youichi Iwakiri <yiwakiri@st.rim.or.jp> (pg_copy_*)         |
@@ -6267,7 +6267,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
 						}
 						else {
-#define REGEX0 "^(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1})){0,1}$"
+#define REGEX0 "^(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1}){0,1}$"
 							/* FIXME: better regex must be used */
 							if (php_pgsql_convert_match(Z_STRVAL_P(val), Z_STRLEN_P(val), REGEX0, sizeof(REGEX0)-1, 1) == FAILURE) {
 								err = 1;

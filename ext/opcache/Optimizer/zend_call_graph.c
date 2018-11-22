@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -53,6 +53,7 @@ static int zend_op_array_collect(zend_call_graph *call_graph, zend_op_array *op_
 static int zend_foreach_op_array(zend_call_graph *call_graph, zend_script *script, zend_op_array_func_t func)
 {
 	zend_class_entry *ce;
+	zend_string *key;
 	zend_op_array *op_array;
 
 	if (func(call_graph, &script->main_op_array) != SUCCESS) {
@@ -65,9 +66,12 @@ static int zend_foreach_op_array(zend_call_graph *call_graph, zend_script *scrip
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
+		if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
+			continue;
+		}
 		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-			if (op_array->scope == ce) {
+			if (op_array->scope == ce && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 				if (func(call_graph, op_array) != SUCCESS) {
 					return FAILURE;
 				}

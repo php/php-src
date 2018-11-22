@@ -1292,7 +1292,7 @@ SXE_METHOD(xpath)
 		return;
 	}
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		return; /* attributes don't have attributes */
@@ -1377,7 +1377,7 @@ SXE_METHOD(registerXPathNamespace)
 		return;
 	}
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	if (!sxe->xpath) {
 		sxe->xpath = xmlXPathNewContext((xmlDocPtr) sxe->document->ptr);
 	}
@@ -1411,7 +1411,7 @@ SXE_METHOD(asXML)
 			RETURN_FALSE;
 		}
 
-		sxe = Z_SXEOBJ_P(getThis());
+		sxe = Z_SXEOBJ_P(ZEND_THIS);
 		GET_NODE(sxe, node);
 		node = php_sxe_get_first_node(sxe, node);
 
@@ -1440,7 +1440,7 @@ SXE_METHOD(asXML)
 		}
 	}
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node);
 
@@ -1542,7 +1542,7 @@ SXE_METHOD(getNamespaces)
 
 	array_init(return_value);
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node);
 
@@ -1589,7 +1589,7 @@ SXE_METHOD(getDocNamespaces)
 		return;
 	}
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	if(from_root){
 		node = xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr);
 	}else{
@@ -1619,7 +1619,7 @@ SXE_METHOD(children)
 		return;
 	}
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		return; /* attributes don't have attributes */
@@ -1641,7 +1641,7 @@ SXE_METHOD(getName)
 	xmlNodePtr      node;
 	int             namelen;
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node);
@@ -1668,7 +1668,7 @@ SXE_METHOD(attributes)
 		return;
 	}
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
@@ -1702,7 +1702,7 @@ SXE_METHOD(addChild)
 		return;
 	}
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
@@ -1768,7 +1768,7 @@ SXE_METHOD(addAttribute)
 		return;
 	}
 
-	sxe = Z_SXEOBJ_P(getThis());
+	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 
 	node = php_sxe_get_first_node(sxe, node);
@@ -1920,7 +1920,7 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type)
    Returns the string content */
 SXE_METHOD(__toString)
 {
-	if (sxe_object_cast_ex(getThis(), return_value, IS_STRING) != SUCCESS) {
+	if (sxe_object_cast_ex(ZEND_THIS, return_value, IS_STRING) != SUCCESS) {
 		zval_ptr_dtor(return_value);
 		RETURN_EMPTY_STRING();
 	}
@@ -1977,7 +1977,7 @@ static int sxe_count_elements(zval *object, zend_long *count) /* {{{ */
 SXE_METHOD(count)
 {
 	zend_long count = 0;
-	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2254,7 +2254,7 @@ PHP_FUNCTION(simplexml_load_string)
    SimpleXMLElement constructor */
 SXE_METHOD(__construct)
 {
-	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 	char           *data, *ns = NULL;
 	size_t             data_len, ns_len = 0;
 	xmlDocPtr       docp;

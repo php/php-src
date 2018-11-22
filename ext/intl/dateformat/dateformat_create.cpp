@@ -209,7 +209,7 @@ U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
-	return_value = getThis();
+	return_value = ZEND_THIS;
 	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
 		if (!EG(exception)) {
 			zend_string *err = intl_error_get_message(NULL);

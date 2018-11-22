@@ -138,7 +138,8 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 	xmlNodePtr nodep;
 	xmlNotation *notep = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_namednodemap_class_entry, &named, &namedlen) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &named, &namedlen) == FAILURE) {
 		return;
 	}
 
@@ -212,7 +213,8 @@ PHP_FUNCTION(dom_namednodemap_item)
 	xmlNodePtr nodep, curnode;
 	int count;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &id, dom_namednodemap_class_entry, &index) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
 		return;
 	}
 	if (index >= 0) {
@@ -276,7 +278,8 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 	xmlNodePtr nodep;
 	xmlNotation *notep = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!s", &id, dom_namednodemap_class_entry, &uri, &urilen, &named, &namedlen) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &urilen, &named, &namedlen) == FAILURE) {
 		return;
 	}
 
@@ -341,7 +344,8 @@ PHP_FUNCTION(dom_namednodemap_count)
 	zval *id;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_namednodemap_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 

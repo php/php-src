@@ -48,7 +48,6 @@ const zend_function_entry php_dom_processinginstruction_class_functions[] = {
 /* {{{ proto DOMProcessingInstruction::__construct(string name, [string value]); */
 PHP_METHOD(domprocessinginstruction, __construct)
 {
-	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
@@ -72,7 +71,7 @@ PHP_METHOD(domprocessinginstruction, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
 		php_libxml_node_free_resource(oldnode );

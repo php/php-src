@@ -194,7 +194,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
    */
 static PHP_METHOD(PDO, dbh_constructor)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	pdo_dbh_t *dbh = NULL;
 	zend_bool is_persistent = 0;
 	char *data_source;
@@ -462,7 +462,7 @@ static PHP_METHOD(PDO, prepare)
 	size_t statement_len;
 	zval *options = NULL, *opt, *item, ctor_args;
 	zend_class_entry *dbstmt_ce, *pce;
-	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(getThis());
+	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -557,7 +557,7 @@ static PHP_METHOD(PDO, prepare)
    Initiates a transaction */
 static PHP_METHOD(PDO, beginTransaction)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -590,7 +590,7 @@ static PHP_METHOD(PDO, beginTransaction)
    Commit a transaction */
 static PHP_METHOD(PDO, commit)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -616,7 +616,7 @@ static PHP_METHOD(PDO, commit)
    roll back a transaction */
 static PHP_METHOD(PDO, rollBack)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -642,7 +642,7 @@ static PHP_METHOD(PDO, rollBack)
    determine if inside a transaction */
 static PHP_METHOD(PDO, inTransaction)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -815,7 +815,7 @@ fail:
    Set an attribute */
 static PHP_METHOD(PDO, setAttribute)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	zend_long attr;
 	zval *value;
 
@@ -838,7 +838,7 @@ static PHP_METHOD(PDO, setAttribute)
    Get an attribute */
 static PHP_METHOD(PDO, getAttribute)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	zend_long attr;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -903,7 +903,7 @@ static PHP_METHOD(PDO, getAttribute)
    Execute a query that does not return a row set, returning the number of affected rows */
 static PHP_METHOD(PDO, exec)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	char *statement;
 	size_t statement_len;
 	zend_long ret;
@@ -932,7 +932,7 @@ static PHP_METHOD(PDO, exec)
    Returns the id of the last row that we affected on this connection.  Some databases require a sequence or table name to be passed in.  Not always meaningful. */
 static PHP_METHOD(PDO, lastInsertId)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	char *name = NULL;
 	size_t namelen;
 
@@ -966,7 +966,7 @@ static PHP_METHOD(PDO, lastInsertId)
    Fetch the error code associated with the last operation on the database handle */
 static PHP_METHOD(PDO, errorCode)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -997,7 +997,7 @@ static PHP_METHOD(PDO, errorInfo)
 	int error_count_diff 	 = 0;
 	int error_expected_count = 3;
 
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1045,7 +1045,7 @@ static PHP_METHOD(PDO, query)
 	pdo_stmt_t *stmt;
 	char *statement;
 	size_t statement_len;
-	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(getThis());
+	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
 	/* Return a meaningful error when no parameters were passed */
@@ -1123,7 +1123,7 @@ static PHP_METHOD(PDO, query)
    quotes string for use in a query.  The optional paramtype acts as a hint for drivers that have alternate quoting styles.  The default value is PDO_PARAM_STR */
 static PHP_METHOD(PDO, quote)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	char *str;
 	size_t str_len;
 	zend_long paramtype = PDO_PARAM_STR;

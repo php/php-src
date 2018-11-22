@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Marcus Boerger <helly@php.net>                              |
    |          Sterling Hughes <sterling@php.net>                          |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -270,7 +270,7 @@ ZEND_METHOD(exception, __construct)
 	zend_class_entry *base_ce;
 	int    argc = ZEND_NUM_ARGS();
 
-	object = getThis();
+	object = ZEND_THIS;
 	base_ce = i_get_exception_base(object);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SlO!", &message, &code, &previous, zend_ce_throwable) == FAILURE) {
@@ -314,7 +314,7 @@ ZEND_METHOD(exception, __construct)
 ZEND_METHOD(exception, __wakeup)
 {
 	zval value, *pvalue;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	CHECK_EXC_TYPE(ZEND_STR_MESSAGE,  IS_STRING);
 	CHECK_EXC_TYPE(ZEND_STR_STRING,   IS_STRING);
 	CHECK_EXC_TYPE(ZEND_STR_CODE,     IS_LONG);
@@ -353,7 +353,7 @@ ZEND_METHOD(error_exception, __construct)
 		return;
 	}
 
-	object = getThis();
+	object = ZEND_THIS;
 
 	if (message) {
 		ZVAL_STR_COPY(&tmp, message);
@@ -404,7 +404,7 @@ ZEND_METHOD(exception, getFile)
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_FILE));
+	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_FILE));
 }
 /* }}} */
 
@@ -416,7 +416,7 @@ ZEND_METHOD(exception, getLine)
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_LINE));
+	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_LINE));
 }
 /* }}} */
 
@@ -428,7 +428,7 @@ ZEND_METHOD(exception, getMessage)
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_MESSAGE));
+	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_MESSAGE));
 }
 /* }}} */
 
@@ -440,7 +440,7 @@ ZEND_METHOD(exception, getCode)
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_CODE));
+	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_CODE));
 }
 /* }}} */
 
@@ -452,7 +452,7 @@ ZEND_METHOD(exception, getTrace)
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_TRACE));
+	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_TRACE));
 }
 /* }}} */
 
@@ -464,7 +464,7 @@ ZEND_METHOD(error_exception, getSeverity)
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), ZEND_STR_SEVERITY));
+	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_SEVERITY));
 }
 /* }}} */
 
@@ -610,7 +610,7 @@ ZEND_METHOD(exception, getTraceAsString)
 
 	DEFAULT_0_PARAMS;
 
-	object = getThis();
+	object = ZEND_THIS;
 	base_ce = i_get_exception_base(object);
 
 	trace = zend_read_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
@@ -643,7 +643,7 @@ ZEND_METHOD(exception, getPrevious)
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(getThis(), ZEND_STR_PREVIOUS));
+	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_PREVIOUS));
 } /* }}} */
 
 /* {{{ proto string Exception|Error::__toString()
@@ -661,7 +661,7 @@ ZEND_METHOD(exception, __toString)
 
 	str = ZSTR_EMPTY_ALLOC();
 
-	exception = getThis();
+	exception = ZEND_THIS;
 	fname = zend_string_init("gettraceasstring", sizeof("gettraceasstring")-1, 0);
 
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT && instanceof_function(Z_OBJCE_P(exception), zend_ce_throwable)) {
@@ -718,7 +718,7 @@ ZEND_METHOD(exception, __toString)
 	}
 	zend_string_release_ex(fname, 0);
 
-	exception = getThis();
+	exception = ZEND_THIS;
 	/* Reset apply counts */
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT && (base_ce = i_get_exception_base(exception)) && instanceof_function(Z_OBJCE_P(exception), base_ce)) {
 		if (Z_IS_RECURSIVE_P(exception)) {
@@ -729,7 +729,7 @@ ZEND_METHOD(exception, __toString)
 		exception = GET_PROPERTY(exception, ZEND_STR_PREVIOUS);
 	}
 
-	exception = getThis();
+	exception = ZEND_THIS;
 	base_ce = i_get_exception_base(exception);
 
 	/* We store the result in the private property string so we can access

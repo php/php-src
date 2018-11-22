@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Sascha Schumann <sascha@schumann.cx>                        |
    |          Pierre Joye <pierre@php.net>                                |
    +----------------------------------------------------------------------+

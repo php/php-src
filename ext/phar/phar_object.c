@@ -1121,7 +1121,7 @@ PHP_METHOD(Phar, __construct)
 	zend_long format = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
-	zval *zobj = getThis(), arg1, arg2;
+	zval *zobj = ZEND_THIS, arg1, arg2;
 
 	phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
 
@@ -1357,7 +1357,7 @@ PHP_METHOD(Phar, unlinkArchive)
 /* }}} */
 
 #define PHAR_ARCHIVE_OBJECT() \
-	zval *zobj = getThis(); \
+	zval *zobj = ZEND_THIS; \
 	phar_archive_object *phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset); \
 	if (!phar_obj->archive) { \
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
@@ -1370,7 +1370,7 @@ PHP_METHOD(Phar, unlinkArchive)
  */
 PHP_METHOD(Phar, __destruct)
 {
-	zval *zobj = getThis();
+	zval *zobj = ZEND_THIS;
 	phar_archive_object *phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
 
 	if (phar_obj->archive && phar_obj->archive->is_persistent) {
@@ -4421,7 +4421,7 @@ PHP_METHOD(PharFileInfo, __construct)
 	phar_entry_object *entry_obj;
 	phar_entry_info *entry_info;
 	phar_archive_data *phar_data;
-	zval *zobj = getThis(), arg1;
+	zval *zobj = ZEND_THIS, arg1;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
 		return;
@@ -4477,7 +4477,7 @@ PHP_METHOD(PharFileInfo, __construct)
 /* }}} */
 
 #define PHAR_ENTRY_OBJECT() \
-	zval *zobj = getThis(); \
+	zval *zobj = ZEND_THIS; \
 	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset); \
 	if (!entry_obj->entry) { \
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
@@ -4490,7 +4490,7 @@ PHP_METHOD(PharFileInfo, __construct)
  */
 PHP_METHOD(PharFileInfo, __destruct)
 {
-	zval *zobj = getThis();
+	zval *zobj = ZEND_THIS;
 	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
 
 	if (entry_obj->entry && entry_obj->entry->is_temp_dir) {

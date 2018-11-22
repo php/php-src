@@ -14,7 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
-  |          Dmitry Stogov <dmitry@zend.com>                             |
+  |          Dmitry Stogov <dmitry@php.net>                              |
   +----------------------------------------------------------------------+
 */
 
@@ -296,8 +296,6 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 			if (node_ptr == node) {
 				return 0;
 			}
-			xmlNodeSetName(node, node_ptr->name);
-			xmlSetNs(node, node_ptr->ns);
 			if (SOAP_GLOBAL(soap_version) == SOAP_1_1) {
 				while (1) {
 					attr = get_attribute(attr, "id");
@@ -1086,7 +1084,7 @@ static xmlNodePtr to_xml_double(encodeTypePtr type, zval *data, int style, xmlNo
 
 	ZVAL_DOUBLE(&tmp, zval_get_double(data));
 
-	str = (char *) safe_emalloc(EG(precision), 1, MAX_LENGTH_OF_DOUBLE + 1);
+	str = (char *) safe_emalloc(EG(precision) >= 0 ? EG(precision) : 17, 1, MAX_LENGTH_OF_DOUBLE + 1);
 	php_gcvt(Z_DVAL(tmp), EG(precision), '.', 'E', str);
 	xmlNodeSetContentLen(ret, BAD_CAST(str), strlen(str));
 	efree(str);

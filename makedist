@@ -65,8 +65,8 @@ DIR=php-$VER
 DIRPATH=$MY_OLDPWD/$DIR
 
 if test -d "$DIRPATH"; then
-    echo "The directory $DIR"
-    echo "already exists, rename or remove it and run makedist again."
+    echo "The directory $DIR" >&2
+    echo "already exists, rename or remove it and run makedist again." >&2
     exit 1
 fi
 

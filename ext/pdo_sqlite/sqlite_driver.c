@@ -529,7 +529,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(callback, 0, NULL)) {
@@ -601,7 +601,7 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 		Z_PARAM_LONG(argc)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(step_callback, 0, NULL)) {
@@ -661,7 +661,7 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 		Z_PARAM_ZVAL(callback)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(callback, 0, NULL)) {

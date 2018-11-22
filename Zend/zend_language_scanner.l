@@ -16,8 +16,8 @@
    |          Nuno Lopes <nlopess@php.net>                                |
    |          Scott MacVicar <scottmac@php.net>                           |
    | Flex version authors:                                                |
-   |          Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 

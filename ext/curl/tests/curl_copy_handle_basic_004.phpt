@@ -13,7 +13,7 @@ Rick Buitenman <rick@meritos.nl>
 
   echo '*** Test curl_copy_handle() after exec() ***' . "\n";
 
-  $url = "{$host}/get.php?test=getpost&get_param=Hello%20World";
+  $url = "{$host}/get.inc?test=getpost&get_param=Hello%20World";
   $ch = curl_init();
 
   ob_start(); // start output buffering

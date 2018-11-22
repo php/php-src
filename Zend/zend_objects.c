@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -25,7 +25,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class_entry *ce)
+static zend_always_inline void _zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
@@ -35,6 +35,11 @@ ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		ZVAL_UNDEF(object->properties_table + object->ce->default_properties_count);
 	}
+}
+
+ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class_entry *ce)
+{
+	_zend_object_std_init(object, ce);
 }
 
 ZEND_API void zend_object_std_dtor(zend_object *object)
@@ -185,7 +190,7 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 {
 	zend_object *object = emalloc(sizeof(zend_object) + zend_object_properties_size(ce));
 
-	zend_object_std_init(object, ce);
+	_zend_object_std_init(object, ce);
 	object->handlers = &std_object_handlers;
 	return object;
 }

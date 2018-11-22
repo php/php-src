@@ -19,12 +19,6 @@ $files['b.php'] = '<?php echo "This is b\n"; ?>';
 $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 include 'files/phar_test.inc';
 
-function err_handler($errno, $errstr, $errfile, $errline) {
-  echo "Recoverable fatal error: $errstr in $errfile on line $errline\n";
-}
-
-set_error_handler("err_handler", E_RECOVERABLE_ERROR);
-
 $fp = fopen($pname . '/b/c.php', 'wb');
 fwrite($fp, 'extra');
 fclose($fp);

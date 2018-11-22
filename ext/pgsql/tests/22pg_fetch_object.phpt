@@ -17,7 +17,7 @@ class test_class {
 $db = pg_connect($conn_str);
 
 $sql = "SELECT * FROM $table_name WHERE num = 0";
-$result = pg_query($db, $sql) or die('Cannot qeury db');
+$result = pg_query($db, $sql) or die('Cannot query db');
 $rows = pg_num_rows($result);
 
 var_dump(pg_fetch_object($result, NULL, 'test_class', array(1, 2)));

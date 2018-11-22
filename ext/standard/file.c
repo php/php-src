@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Stig Bakken <ssb@php.net>                                   |
-   |          Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    | PHP 4.0 patches by Thies C. Arntzen (thies@thieso.net)               |
    | PHP streams by Wez Furlong (wez@thebrainroom.com)                    |
    +----------------------------------------------------------------------+

@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -259,6 +259,7 @@ int zend_shared_alloc_startup(size_t requested_size)
 void zend_shared_alloc_shutdown(void)
 {
 	zend_shared_segment **tmp_shared_segments;
+	zend_shared_segment *shared_segments_buf[16];
 	size_t shared_segments_array_size;
 	zend_smm_shared_globals tmp_shared_globals;
 	int i;
@@ -266,14 +267,20 @@ void zend_shared_alloc_shutdown(void)
 	tmp_shared_globals = *smm_shared_globals;
 	smm_shared_globals = &tmp_shared_globals;
 	shared_segments_array_size = ZSMMG(shared_segments_count) * (S_H(segment_type_size)() + sizeof(void *));
-	tmp_shared_segments = emalloc(shared_segments_array_size);
+	if (shared_segments_array_size > 16) {
+		tmp_shared_segments = malloc(shared_segments_array_size);
+	} else {
+		tmp_shared_segments = shared_segments_buf;
+	}
 	copy_shared_segments(tmp_shared_segments, ZSMMG(shared_segments)[0], ZSMMG(shared_segments_count), S_H(segment_type_size)());
 	ZSMMG(shared_segments) = tmp_shared_segments;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		S_H(detach_segment)(ZSMMG(shared_segments)[i]);
 	}
-	efree(ZSMMG(shared_segments));
+	if (shared_segments_array_size > 16) {
+		free(ZSMMG(shared_segments));
+	}
 	ZSMMG(shared_segments) = NULL;
 	g_shared_alloc_handler = NULL;
 #ifndef ZEND_WIN32

@@ -54,7 +54,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
    Create the CURLFile object */
 ZEND_METHOD(CURLFile, __construct)
 {
-	return_value = getThis();
+	return_value = ZEND_THIS;
 	curlfile_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
@@ -75,7 +75,7 @@ static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	res = zend_read_property(curl_CURLFile_class, getThis(), name, name_len, 1, &rv);
+	res = zend_read_property(curl_CURLFile_class, ZEND_THIS, name, name_len, 1, &rv);
 	ZVAL_COPY_DEREF(return_value, res);
 }
 
@@ -87,7 +87,7 @@ static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_update_property_string(curl_CURLFile_class, getThis(), name, name_len, ZSTR_VAL(arg));
+	zend_update_property_string(curl_CURLFile_class, ZEND_THIS, name, name_len, ZSTR_VAL(arg));
 }
 
 /* {{{ proto string CURLFile::getFilename()
@@ -134,8 +134,8 @@ ZEND_METHOD(CURLFile, setPostFilename)
    Unserialization handler */
 ZEND_METHOD(CURLFile, __wakeup)
 {
-	zend_unset_property(curl_CURLFile_class, getThis(), "name", sizeof("name")-1);
-	zend_update_property_string(curl_CURLFile_class, getThis(), "name", sizeof("name")-1, "");
+	zend_unset_property(curl_CURLFile_class, ZEND_THIS, "name", sizeof("name")-1);
+	zend_update_property_string(curl_CURLFile_class, ZEND_THIS, "name", sizeof("name")-1, "");
 	zend_throw_exception(NULL, "Unserialization of CURLFile instances is not allowed", 0);
 }
 /* }}} */

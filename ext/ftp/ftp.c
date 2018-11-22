@@ -1906,10 +1906,10 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 		done = 0;
 	}
 
-	while (!done) {
-		if (data_available(ftp, fd)) {
-			ERR_clear_error();
-			nread = SSL_read(ssl_handle, buf, sizeof(buf));
+	while (!done && data_available(ftp, fd)) {
+		ERR_clear_error();
+		nread = SSL_read(ssl_handle, buf, sizeof(buf));
+		if (nread <= 0) {
 			err = SSL_get_error(ssl_handle, nread);
 			switch (err) {
 				case SSL_ERROR_NONE: /* this is not an error */
@@ -1927,9 +1927,11 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 					break;
 				default:
 					if ((sslerror = ERR_get_error())) {
-					    ERR_error_string_n(sslerror, buf, sizeof(buf));
+						ERR_error_string_n(sslerror, buf, sizeof(buf));
+						php_error_docref(NULL, E_WARNING, "SSL_read on shutdown: %s", buf);
+					} else if (errno) {
+						php_error_docref(NULL, E_WARNING, "SSL_read on shutdown: %s (%d)", strerror(errno), errno);
 					}
-					php_error_docref(NULL, E_WARNING, "SSL_read on shutdown: %s (%d)", (sslerror ? buf : strerror(errno)), errno);
 					done = 1;
 					break;
 			}

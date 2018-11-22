@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -2362,11 +2362,11 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->info_func = PHP_MINFO(php_core);
 	}
 
+	module_initialized = 1;
+
 	if (zend_post_startup() != SUCCESS) {
 		return FAILURE;
 	}
-
-	module_initialized = 1;
 
 	/* Check for deprecated directives */
 	/* NOTE: If you add anything here, remember to add it to Makefile.global! */
@@ -2519,6 +2519,13 @@ void php_module_shutdown(void)
 #ifndef ZTS
 	zend_interned_strings_dtor();
 #endif
+
+	if (zend_post_shutdown_cb) {
+		void (*cb)(void) = zend_post_shutdown_cb;
+
+		zend_post_shutdown_cb = NULL;
+		cb();
+	}
 
 	module_initialized = 0;
 

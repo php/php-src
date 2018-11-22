@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -218,12 +218,15 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Immutable op_array and class_entries                   |     |     |     */
 /* (implemented only for lazy loading of op_arrays)       |     |     |     */
-#define ZEND_ACC_IMMUTABLE               (1 <<  7) /*  ?  |  X  |     |     */
+#define ZEND_ACC_IMMUTABLE               (1 <<  7) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
 /* Function has typed arguments / class has typed props   |     |     |     */
 #define ZEND_ACC_HAS_TYPE_HINTS          (1 <<  8) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 15...)                            |     |     |     */
+/* Top-level class or function declaration                |     |     |     */
+#define ZEND_ACC_TOP_LEVEL               (1 <<  9) /*  X  |  X  |     |     */
+/*                                                        |     |     |     */
+/* Class Flags (unused: 16...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -240,72 +243,75 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class has magic methods __get/__set/__unset/           |     |     |     */
 /* __isset that use guards                                |     |     |     */
-#define ZEND_ACC_USE_GUARDS              (1 <<  9) /*  X  |     |     |     */
+#define ZEND_ACC_USE_GUARDS              (1 << 10) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class constants updated                                |     |     |     */
-#define ZEND_ACC_CONSTANTS_UPDATED       (1 << 10) /*  X  |     |     |     */
+#define ZEND_ACC_CONSTANTS_UPDATED       (1 << 11) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class extends another class                            |     |     |     */
-#define ZEND_ACC_INHERITED               (1 << 11) /*  X  |     |     |     */
+#define ZEND_ACC_INHERITED               (1 << 12) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class implements interface(s)                          |     |     |     */
-#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 12) /*  X  |     |     |     */
+#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 13) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class uses trait(s)                                    |     |     |     */
-#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 13) /*  X  |     |     |     */
+#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 14) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
-#define ZEND_HAS_STATIC_IN_METHODS       (1 << 14) /*  X  |     |     |     */
+#define ZEND_HAS_STATIC_IN_METHODS       (1 << 15) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 25...30)                       |     |     |     */
+/* Function Flags (unused: 27...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
-#define ZEND_ACC_DEPRECATED              (1 <<  9) /*     |  X  |     |     */
+#define ZEND_ACC_DEPRECATED              (1 << 10) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Function returning by reference                        |     |     |     */
-#define ZEND_ACC_RETURN_REFERENCE        (1 << 10) /*     |  X  |     |     */
+#define ZEND_ACC_RETURN_REFERENCE        (1 << 11) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Function has a return type                             |     |     |     */
-#define ZEND_ACC_HAS_RETURN_TYPE         (1 << 11) /*     |  X  |     |     */
+#define ZEND_ACC_HAS_RETURN_TYPE         (1 << 12) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Function with variable number of arguments             |     |     |     */
-#define ZEND_ACC_VARIADIC                (1 << 12) /*     |  X  |     |     */
+#define ZEND_ACC_VARIADIC                (1 << 13) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array has finally blocks (user only)                |     |     |     */
-#define ZEND_ACC_HAS_FINALLY_BLOCK       (1 << 13) /*     |  X  |     |     */
+#define ZEND_ACC_HAS_FINALLY_BLOCK       (1 << 14) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* "main" op_array with                                   |     |     |     */
 /* ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes           |     |     |     */
-#define ZEND_ACC_EARLY_BINDING           (1 << 14) /*     |  X  |     |     */
+#define ZEND_ACC_EARLY_BINDING           (1 << 15) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* method flag (bc only), any method that has this        |     |     |     */
 /* flag can be used statically and non statically.        |     |     |     */
-#define ZEND_ACC_ALLOW_STATIC            (1 << 15) /*     |  X  |     |     */
+#define ZEND_ACC_ALLOW_STATIC            (1 << 16) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* call through user function trampoline. e.g.            |     |     |     */
 /* __call, __callstatic                                   |     |     |     */
-#define ZEND_ACC_CALL_VIA_TRAMPOLINE     (1 << 16) /*     |  X  |     |     */
+#define ZEND_ACC_CALL_VIA_TRAMPOLINE     (1 << 17) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* disable inline caching                                 |     |     |     */
-#define ZEND_ACC_NEVER_CACHE             (1 << 17) /*     |  X  |     |     */
+#define ZEND_ACC_NEVER_CACHE             (1 << 18) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Closure related                                        |     |     |     */
-#define ZEND_ACC_CLOSURE                 (1 << 18) /*     |  X  |     |     */
-#define ZEND_ACC_FAKE_CLOSURE            (1 << 19) /*     |  X  |     |     */
+#define ZEND_ACC_CLOSURE                 (1 << 19) /*     |  X  |     |     */
+#define ZEND_ACC_FAKE_CLOSURE            (1 << 20) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* run_time_cache allocated on heap (user only)           |     |     |     */
-#define ZEND_ACC_HEAP_RT_CACHE           (1 << 20) /*     |  X  |     |     */
+#define ZEND_ACC_HEAP_RT_CACHE           (1 << 21) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* method flag used by Closure::__invoke()                |     |     |     */
-#define ZEND_ACC_USER_ARG_INFO           (1 << 21) /*     |  X  |     |     */
+#define ZEND_ACC_USER_ARG_INFO           (1 << 22) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-#define ZEND_ACC_GENERATOR               (1 << 22) /*     |  X  |     |     */
+#define ZEND_ACC_GENERATOR               (1 << 23) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-#define ZEND_ACC_DONE_PASS_TWO           (1 << 23) /*     |  X  |     |     */
+#define ZEND_ACC_DONE_PASS_TWO           (1 << 24) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* internal function is allocated at arena (int only)     |     |     |     */
-#define ZEND_ACC_ARENA_ALLOCATED         (1 << 24) /*     |  X  |     |     */
+#define ZEND_ACC_ARENA_ALLOCATED         (1 << 25) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* op_array is a clone of trait method                    |     |     |     */
+#define ZEND_ACC_TRAIT_CLONE             (1 << 26) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1 << 31) /*     |  X  |     |     */
@@ -748,8 +754,7 @@ zend_bool zend_handle_encoding_declaration(zend_ast *ast);
 void zend_do_free(znode *op1);
 
 ZEND_API int do_bind_function(zval *lcname);
-ZEND_API int do_bind_class(zval *lcname);
-ZEND_API int do_bind_inherited_class(zval *lcname, zend_class_entry *parent_ce);
+ZEND_API int do_bind_class(zval *lcname, zend_class_entry *parent_ce);
 ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint32_t first_early_binding_opline);
 

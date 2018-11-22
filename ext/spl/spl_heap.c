@@ -80,6 +80,11 @@ struct _spl_heap_it {
 	int                 flags;
 };
 
+typedef struct _spl_pqueue_elem {
+	zval data;
+	zval priority;
+} spl_pqueue_elem;
+
 static inline spl_heap_object *spl_heap_from_obj(zend_object *obj) /* {{{ */ {
 	return (spl_heap_object*)((char*)(obj) - XtOffsetOf(spl_heap_object, std));
 }
@@ -99,6 +104,25 @@ static void spl_ptr_heap_zval_ctor(zval *elem) { /* {{{ */
 }
 /* }}} */
 
+static void spl_ptr_heap_pqueue_elem_dtor(zval *zv) { /* {{{ */
+	if (!Z_ISUNDEF_P(zv)) {
+		spl_pqueue_elem *elem = Z_PTR_P(zv);
+		zval_ptr_dtor(&elem->data);
+		zval_ptr_dtor(&elem->priority);
+		efree(elem);
+	}
+}
+/* }}} */
+
+static void spl_ptr_heap_pqueue_elem_ctor(zval *zv) { /* {{{ */
+	spl_pqueue_elem *old_elem = Z_PTR_P(zv);
+	spl_pqueue_elem *new_elem = emalloc(sizeof(spl_pqueue_elem));
+	ZVAL_COPY(&new_elem->data, &old_elem->data);
+	ZVAL_COPY(&new_elem->priority, &old_elem->priority);
+	Z_PTR_P(zv) = new_elem;
+}
+/* }}} */
+
 static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, zend_long *result) { /* {{{ */
 	zval zresult;
 
@@ -115,25 +139,27 @@ static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object
 }
 /* }}} */
 
-static zval *spl_pqueue_extract_helper(zval *value, int flags) /* {{{ */
+static void spl_pqueue_extract_helper(zval *result, zval *value, int flags) /* {{{ */
 {
+	spl_pqueue_elem *elem = Z_PTR_P(value);
 	if ((flags & SPL_PQUEUE_EXTR_BOTH) == SPL_PQUEUE_EXTR_BOTH) {
-		return value;
-	} else if ((flags & SPL_PQUEUE_EXTR_BOTH) > 0) {
-		if ((flags & SPL_PQUEUE_EXTR_DATA) == SPL_PQUEUE_EXTR_DATA) {
-			zval *data;
-			if ((data = zend_hash_str_find(Z_ARRVAL_P(value), "data", sizeof("data") - 1)) != NULL) {
-				return data;
-			}
-		} else {
-			zval *priority;
-			if ((priority = zend_hash_str_find(Z_ARRVAL_P(value), "priority", sizeof("priority") - 1)) != NULL) {
-				return priority;
-			}
-		}
+		array_init(result);
+		add_assoc_zval_ex(result, "data", sizeof("data") - 1, &elem->data);
+		add_assoc_zval_ex(result, "priority", sizeof("priority") - 1, &elem->priority);
+		return;
 	}
 
-	return NULL;
+	if (flags & SPL_PQUEUE_EXTR_DATA) {
+		ZVAL_COPY(result, &elem->data);
+		return;
+	}
+
+	if (flags & SPL_PQUEUE_EXTR_PRIORITY) {
+		ZVAL_COPY(result, &elem->priority);
+		return;
+	}
+
+	ZEND_ASSERT(0);
 }
 /* }}} */
 
@@ -185,15 +211,12 @@ static int spl_ptr_heap_zval_min_cmp(zval *a, zval *b, zval *object) { /* {{{ */
 }
 /* }}} */
 
-static int spl_ptr_pqueue_zval_cmp(zval *a, zval *b, zval *object) { /* {{{ */
+static int spl_ptr_pqueue_elem_cmp(zval *a_zv, zval *b_zv, zval *object) { /* {{{ */
+	spl_pqueue_elem *a = Z_PTR_P(a_zv);
+	spl_pqueue_elem *b = Z_PTR_P(b_zv);
+	zval *a_priority_p = &a->priority;
+	zval *b_priority_p = &b->priority;
 	zval result;
-	zval *a_priority_p = spl_pqueue_extract_helper(a, SPL_PQUEUE_EXTR_PRIORITY);
-	zval *b_priority_p = spl_pqueue_extract_helper(b, SPL_PQUEUE_EXTR_PRIORITY);
-
-	if ((!a_priority_p) || (!b_priority_p)) {
-		zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
-		return 0;
-	}
 
 	if (EG(exception)) {
 		return 0;
@@ -203,7 +226,7 @@ static int spl_ptr_pqueue_zval_cmp(zval *a, zval *b, zval *object) { /* {{{ */
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
 			zend_long lval = 0;
-			if (spl_ptr_heap_cmp_cb_helper((zval *)object, heap_object, a_priority_p, b_priority_p, &lval) == FAILURE) {
+			if (spl_ptr_heap_cmp_cb_helper(object, heap_object, a_priority_p, b_priority_p, &lval) == FAILURE) {
 				/* exception or call failure */
 				return 0;
 			}
@@ -388,7 +411,9 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 
 	while (parent) {
 		if (parent == spl_ce_SplPriorityQueue) {
-			intern->heap->cmp = spl_ptr_pqueue_zval_cmp;
+			intern->heap->cmp = spl_ptr_pqueue_elem_cmp;
+			intern->heap->ctor = spl_ptr_heap_pqueue_elem_ctor;
+			intern->heap->dtor = spl_ptr_heap_pqueue_elem_dtor;
 			intern->flags = SPL_PQUEUE_EXTR_DATA;
 			intern->std.handlers = &spl_handler_SplPriorityQueue;
 			break;
@@ -502,9 +527,13 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 	array_init(&heap_array);
 
 	for (i = 0; i < intern->heap->count; ++i) {
-		add_index_zval(&heap_array, i, &intern->heap->elements[i]);
-		if (Z_REFCOUNTED(intern->heap->elements[i])) {
-			Z_ADDREF(intern->heap->elements[i]);
+		if (ce == spl_ce_SplPriorityQueue) {
+			zval elem;
+			spl_pqueue_extract_helper(&elem, &intern->heap->elements[i], SPL_PQUEUE_EXTR_BOTH);
+			add_index_zval(&heap_array, i, &elem);
+		} else {
+			add_index_zval(&heap_array, i, &intern->heap->elements[i]);
+			Z_TRY_ADDREF(intern->heap->elements[i]);
 		}
 	}
 
@@ -543,7 +572,7 @@ static HashTable* spl_pqueue_object_get_debug_info(zval *obj, int *is_temp) /* {
 SPL_METHOD(SplHeap, count)
 {
 	zend_long count;
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -558,7 +587,7 @@ SPL_METHOD(SplHeap, count)
  Return true if the heap is empty. */
 SPL_METHOD(SplHeap, isEmpty)
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -579,7 +608,7 @@ SPL_METHOD(SplHeap, insert)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
@@ -587,7 +616,7 @@ SPL_METHOD(SplHeap, insert)
 	}
 
 	Z_TRY_ADDREF_P(value);
-	spl_ptr_heap_insert(intern->heap, value, getThis());
+	spl_ptr_heap_insert(intern->heap, value, ZEND_THIS);
 
 	RETURN_TRUE;
 }
@@ -603,14 +632,14 @@ SPL_METHOD(SplHeap, extract)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
-	spl_ptr_heap_delete_top(intern->heap, return_value, getThis());
+	spl_ptr_heap_delete_top(intern->heap, return_value, ZEND_THIS);
 
 	if (Z_ISUNDEF_P(return_value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
@@ -623,28 +652,27 @@ SPL_METHOD(SplHeap, extract)
 	   Push $value with the priority $priodiry on the priorityqueue */
 SPL_METHOD(SplPriorityQueue, insert)
 {
-	zval *data, *priority, elem;
+	zval *data, *priority, elem_zv;
 	spl_heap_object *intern;
+	spl_pqueue_elem *elem;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &data, &priority) == FAILURE) {
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
-	Z_TRY_ADDREF_P(data);
-	Z_TRY_ADDREF_P(priority);
+	elem = emalloc(sizeof(spl_pqueue_elem));
+	ZVAL_COPY(&elem->data, data);
+	ZVAL_COPY(&elem->priority, priority);
+	ZVAL_PTR(&elem_zv, elem);
 
-	array_init(&elem);
-	add_assoc_zval_ex(&elem, "data", sizeof("data") - 1, data);
-	add_assoc_zval_ex(&elem, "priority", sizeof("priority") - 1, priority);
-
-	spl_ptr_heap_insert(intern->heap, &elem, getThis());
+	spl_ptr_heap_insert(intern->heap, &elem_zv, ZEND_THIS);
 
 	RETURN_TRUE;
 }
@@ -661,30 +689,22 @@ SPL_METHOD(SplPriorityQueue, extract)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
-	spl_ptr_heap_delete_top(intern->heap, &value, getThis());
+	spl_ptr_heap_delete_top(intern->heap, &value, ZEND_THIS);
 
 	if (Z_ISUNDEF(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
 		return;
 	}
 
-	value_out = spl_pqueue_extract_helper(&value, intern->flags);
-
-	if (!value_out) {
-		zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
-		zval_ptr_dtor(&value);
-		return;
-	}
-
-	ZVAL_COPY_DEREF(return_value, value_out);
-	zval_ptr_dtor(&value);
+	spl_pqueue_extract_helper(return_value, &value, intern->flags);
+	spl_ptr_heap_pqueue_elem_dtor(&value);
 }
 /* }}} */
 
@@ -699,7 +719,7 @@ SPL_METHOD(SplPriorityQueue, top)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
@@ -713,14 +733,7 @@ SPL_METHOD(SplPriorityQueue, top)
 		return;
 	}
 
-	value_out = spl_pqueue_extract_helper(value, intern->flags);
-
-	if (!value_out) {
-		zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
-		return;
-	}
-
-	ZVAL_COPY_DEREF(return_value, value_out);
+	spl_pqueue_extract_helper(return_value, value, intern->flags);
 }
 /* }}} */
 
@@ -736,10 +749,14 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	value &= SPL_PQUEUE_EXTR_MASK;
+	if (!value) {
+		zend_throw_exception(spl_ce_RuntimeException, "Must specify at least one extract flag", 0);
+		return;
+	}
 
-	intern->flags = value & SPL_PQUEUE_EXTR_MASK;
-
+	intern = Z_SPLHEAP_P(ZEND_THIS);
+	intern->flags = value;
 	RETURN_LONG(intern->flags);
 }
 /* }}} */
@@ -754,7 +771,7 @@ SPL_METHOD(SplPriorityQueue, getExtractFlags)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	RETURN_LONG(intern->flags);
 }
@@ -770,7 +787,7 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	intern->heap->flags = intern->heap->flags & ~SPL_HEAP_CORRUPTED;
 
@@ -788,7 +805,7 @@ SPL_METHOD(SplHeap, isCorrupted)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	RETURN_BOOL(intern->heap->flags & SPL_HEAP_CORRUPTED);
 }
@@ -819,7 +836,7 @@ SPL_METHOD(SplHeap, top)
 		return;
 	}
 
-	intern = Z_SPLHEAP_P(getThis());
+	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
@@ -906,6 +923,7 @@ static zval *spl_heap_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 
 static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 {
+	zend_user_iterator *user_it = (zend_user_iterator *) iter;
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 	zval *element = &object->heap->elements[0];
 
@@ -916,13 +934,11 @@ static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter) /* {{{ *
 
 	if (object->heap->count == 0 || Z_ISUNDEF_P(element)) {
 		return NULL;
-	} else {
-		zval *data = spl_pqueue_extract_helper(element, object->flags);
-		if (!data) {
-			zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
-		}
-		return data;
 	}
+	if (Z_ISUNDEF(user_it->value)) {
+		spl_pqueue_extract_helper(&user_it->value, element, object->flags);
+	}
+	return &user_it->value;
 }
 /* }}} */
 
@@ -945,8 +961,7 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
 	}
 
 	spl_ptr_heap_delete_top(object->heap, &elem, &iter->data);
-
-	zval_ptr_dtor(&elem);
+	object->heap->dtor(&elem);
 
 	zend_user_it_invalidate_current(iter);
 }
@@ -956,7 +971,7 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
    Return current array key */
 SPL_METHOD(SplHeap, key)
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -970,15 +985,15 @@ SPL_METHOD(SplHeap, key)
    Move to next entry */
 SPL_METHOD(SplHeap, next)
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 	zval elem;
-	spl_ptr_heap_delete_top(intern->heap, &elem, getThis());
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	zval_ptr_dtor(&elem);
+	spl_ptr_heap_delete_top(intern->heap, &elem, ZEND_THIS);
+	intern->heap->dtor(&elem);
 }
 /* }}} */
 
@@ -986,7 +1001,7 @@ SPL_METHOD(SplHeap, next)
    Check whether the datastructure contains more entries */
 SPL_METHOD(SplHeap, valid)
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1011,7 +1026,7 @@ SPL_METHOD(SplHeap, rewind)
    Return current datastructure entry */
 SPL_METHOD(SplHeap, current)
 {
-	spl_heap_object *intern  = Z_SPLHEAP_P(getThis());
+	spl_heap_object *intern  = Z_SPLHEAP_P(ZEND_THIS);
 	zval *element = &intern->heap->elements[0];
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1030,7 +1045,7 @@ SPL_METHOD(SplHeap, current)
    Return current datastructure entry */
 SPL_METHOD(SplPriorityQueue, current)
 {
-	spl_heap_object  *intern  = Z_SPLHEAP_P(getThis());
+	spl_heap_object  *intern  = Z_SPLHEAP_P(ZEND_THIS);
 	zval *element = &intern->heap->elements[0];
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1040,14 +1055,7 @@ SPL_METHOD(SplPriorityQueue, current)
 	if (!intern->heap->count || Z_ISUNDEF_P(element)) {
 		RETURN_NULL();
 	} else {
-		zval *data = spl_pqueue_extract_helper(element, intern->flags);
-
-		if (!data) {
-			zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
-			RETURN_NULL();
-		}
-
-		ZVAL_COPY_DEREF(return_value, data);
+		spl_pqueue_extract_helper(return_value, element, intern->flags);
 	}
 }
 /* }}} */

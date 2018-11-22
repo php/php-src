@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <xinchen.h@zend.com>                            |
    +----------------------------------------------------------------------+
 */
@@ -600,6 +600,14 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define GC_UNPROTECT_RECURSION(p) do { \
 		GC_DEL_FLAGS(p, GC_PROTECTED); \
+	} while (0)
+
+#define GC_TRY_PROTECT_RECURSION(p) do { \
+		if (!(GC_FLAGS(p) & GC_IMMUTABLE)) GC_PROTECT_RECURSION(p); \
+	} while (0)
+
+#define GC_TRY_UNPROTECT_RECURSION(p) do { \
+		if (!(GC_FLAGS(p) & GC_IMMUTABLE)) GC_UNPROTECT_RECURSION(p); \
 	} while (0)
 
 #define Z_IS_RECURSIVE(zval)        GC_IS_RECURSIVE(Z_COUNTED(zval))

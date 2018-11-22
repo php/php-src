@@ -562,7 +562,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 		RETURN_FALSE;
 	}
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
 
@@ -667,7 +667,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 	}
 
 	/* Obtain db Handler */
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
 
@@ -767,7 +767,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 		return;
 	}
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
 
@@ -860,7 +860,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 		return;
 	}
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
 
@@ -925,7 +925,7 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 	pdo_pgsql_db_handle *H;
 	Oid lfd;
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
 
@@ -973,7 +973,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 		mode = INV_READ|INV_WRITE;
 	}
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
 
@@ -982,7 +982,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 	lfd = lo_open(H->server, oid, mode);
 
 	if (lfd >= 0) {
-		php_stream *stream = pdo_pgsql_create_lob_stream(getThis(), lfd, oid);
+		php_stream *stream = pdo_pgsql_create_lob_stream(ZEND_THIS, lfd, oid);
 		if (stream) {
 			php_stream_to_zval(stream, return_value);
 			return;
@@ -1016,7 +1016,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 		RETURN_FALSE;
 	}
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
 
@@ -1047,7 +1047,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 		RETURN_FALSE;
 	}
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
 	if (result_type == PDO_FETCH_USE_DEFAULT) {
@@ -1112,7 +1112,7 @@ static PHP_METHOD(PDO, pgsqlGetPid)
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;

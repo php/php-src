@@ -312,6 +312,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 {
 	uint32_t i;
 	int t = -1;
+	zend_class_iterator_funcs *funcs_ptr;
 
 	if (class_type->get_iterator) {
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
@@ -340,16 +341,21 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 		}
 	}
 	class_type->get_iterator = zend_user_it_get_new_iterator;
-	if (class_type->iterator_funcs_ptr != NULL) {
-		class_type->iterator_funcs_ptr->zf_new_iterator = NULL;
-	} else if (class_type->type == ZEND_INTERNAL_CLASS) {
-		class_type->iterator_funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
-	} else {
-		class_type->iterator_funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
-		memset(class_type->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-	}
+	funcs_ptr = class_type->iterator_funcs_ptr;
 	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		class_type->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&class_type->function_table, "getiterator", sizeof("getiterator") - 1);
+		if (!funcs_ptr) {
+			funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
+			class_type->iterator_funcs_ptr = funcs_ptr;
+		}
+		funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&class_type->function_table, "getiterator", sizeof("getiterator") - 1);
+	} else {
+		if (!funcs_ptr) {
+			funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+			class_type->iterator_funcs_ptr = funcs_ptr;
+			memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
+		} else {
+			funcs_ptr->zf_new_iterator = NULL;
+		}
 	}
 	return SUCCESS;
 }
@@ -358,6 +364,8 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 /* {{{ zend_implement_iterator */
 static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
 {
+	zend_class_iterator_funcs *funcs_ptr;
+
 	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_iterator) {
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
 			/* inheritance ensures the class has the necessary userland methods */
@@ -374,24 +382,30 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		}
 	}
 	class_type->get_iterator = zend_user_it_get_iterator;
-	if (class_type->iterator_funcs_ptr != NULL) {
-		class_type->iterator_funcs_ptr->zf_valid = NULL;
-		class_type->iterator_funcs_ptr->zf_current = NULL;
-		class_type->iterator_funcs_ptr->zf_key = NULL;
-		class_type->iterator_funcs_ptr->zf_next = NULL;
-		class_type->iterator_funcs_ptr->zf_rewind = NULL;
-	} else if (class_type->type == ZEND_INTERNAL_CLASS) {
-		class_type->iterator_funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
-	} else {
-		class_type->iterator_funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
-		memset(class_type->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-	}
+	funcs_ptr = class_type->iterator_funcs_ptr;
 	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		class_type->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
-		class_type->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
-		class_type->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
-		class_type->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
-		class_type->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
+		if (!funcs_ptr) {
+			funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
+			class_type->iterator_funcs_ptr = funcs_ptr;
+		} else {
+			funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
+			funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
+			funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
+			funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
+			funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
+		}
+	} else {
+		if (!funcs_ptr) {
+			funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+			class_type->iterator_funcs_ptr = funcs_ptr;
+			memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
+		} else {
+			funcs_ptr->zf_valid = NULL;
+			funcs_ptr->zf_current = NULL;
+			funcs_ptr->zf_key = NULL;
+			funcs_ptr->zf_next = NULL;
+			funcs_ptr->zf_rewind = NULL;
+		}
 	}
 	return SUCCESS;
 }

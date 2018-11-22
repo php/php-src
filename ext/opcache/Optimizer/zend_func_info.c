@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
    +----------------------------------------------------------------------+
 */
@@ -606,6 +606,7 @@ static const func_info_t func_infos[] = {
 	F0("is_scalar",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_callable",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_countable",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_iterable",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("pclose",                       MAY_BE_FALSE | MAY_BE_LONG),
 	F1("popen",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("readfile",                     MAY_BE_FALSE | MAY_BE_LONG),

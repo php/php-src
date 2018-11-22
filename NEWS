@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
 
+- GD:
+  . Fixed bug #76324 (cannot detect recent versions of freetype with
+    pkg-config). (Eli Schwartz)
+
 - Hash:
   . The hash extension is now an integral part of PHP and cannot be disabled
     as per RFC: https://wiki.php.net/rfc/permanent_hash_ext. (Kalle)
@@ -18,6 +22,12 @@ PHP                                                                        NEWS
   . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
     (cmb)
 
+- Opcache:
+  . Implemented preloading RFC: https://wiki.php.net/rfc/preload. (Dmitry)
+
+- OpenSSL:
+  . Added openssl_x509_verify function. (Ben Scholzen)
+
 - PDO_OCI:
   . Implemented FR #76908 (PDO_OCI getColumnMeta() not implemented).
     (Valentin Collet, Chris Jones, Remi)
@@ -26,9 +36,13 @@ PHP                                                                        NEWS
   . Implemented sqlite_stmt_readonly in PDO_SQLite. (BohwaZ)
   . Lifted requirements to SQLite 3.5.0. (cmb)
 
+- Sockets:
+  . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
+
 - SQLite3:
   . Unbundled libsqlite. (cmb)
   . Lifted requirements to SQLite 3.5.0. (cmb)
+  . Added support for the SQLite @name notation. (cmb, BohwaZ)
 
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with
@@ -37,5 +51,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #76737 (Unserialized reflection objects are broken, they
     shouldn't be serializable). (Nikita)
+
+- Tidy:
+  . Added TIDY_TAG_* constants for HTML5 elements. (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

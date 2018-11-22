@@ -30,7 +30,7 @@ static inline CodePointBreakIterator *fetch_cpbi(BreakIterator_object *bio) {
 U_CFUNC PHP_FUNCTION(cpbi_get_last_code_point)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,

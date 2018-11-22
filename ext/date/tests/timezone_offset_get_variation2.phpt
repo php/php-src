@@ -13,14 +13,6 @@ echo "*** Testing timezone_offset_get() : usage variation -  unexpected values t
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 
-set_error_handler('handler');
-
-function handler($errno, $errstr) {
-	if ($errno === E_RECOVERABLE_ERROR) {
-		echo $errstr . "\n";
-	}
-}
-
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);

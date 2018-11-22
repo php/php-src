@@ -5230,6 +5230,22 @@
 # might add another one or two as time goes by...
 #
 ### JAVA START ###
+0	belong		0xcafebabe
+>4	belong		>30		compiled Java class data,
+!:mime	application/x-java-applet
+>>6	beshort		x	        version %d.
+>>4	beshort		x       	\b%d
+# Which is which?
+#>>4	belong		0x032d		(Java 1.0)
+#>>4	belong		0x032d		(Java 1.1)
+>>4	belong		0x002e		(Java 1.2)
+>>4	belong		0x002f		(Java 1.3)
+>>4	belong		0x0030		(Java 1.4)
+>>4	belong		0x0031		(Java 1.5)
+>>4	belong		0x0032		(Java 1.6)
+>>4	belong		0x0033		(Java 1.7)
+>>4	belong		0x0034		(Java 1.8)
+
 0	belong		0xcafed00d	JAR compressed with pack200,
 >5	byte		x		version %d.
 >4	byte		x		\b%d
@@ -5251,28 +5267,15 @@
 
 0	belong		0xcafebabe
 >4	belong		1		Mach-O universal binary with 1 architecture:
+!:mime application/x-mach-binary
 >>8	use		mach-o		\b
-0	belong		0xcafebabe
->4	belong		>30		compiled Java class data,
-!:mime	application/x-java-applet
->>6	beshort		x	        version %d.
->>4	beshort		x       	\b%d
-# Which is which?
-#>>4	belong		0x032d		(Java 1.0)
-#>>4	belong		0x032d		(Java 1.1)
->>4	belong		0x002e		(Java 1.2)
->>4	belong		0x002f		(Java 1.3)
->>4	belong		0x0030		(Java 1.4)
->>4	belong		0x0031		(Java 1.5)
->>4	belong		0x0032		(Java 1.6)
->>4	belong		0x0033		(Java 1.7)
->>4	belong		0x0034		(Java 1.8)
 >4	belong		>1
 >>4	belong		<20		Mach-O universal binary with %d architectures:
+!:mime application/x-mach-binary
 >>>8	use		mach-o		\b
->>4	belong		>2
+>>4	belong		2
 >>>28	use		mach-o		\b
->>4	belong		>3
+>>4	belong		3
 >>>48	use		mach-o		\b
 >>4	belong		4
 >>>68	use		mach-o		\b
@@ -5365,61 +5368,61 @@
 # C
 # Check for class if include is found, otherwise class is beaten by include becouse of lowered strength
 0	regex	\^#include			C
->0	regex	\^class[[:space:]]+
+>0	regex/4096	\^class[[:space:]]+
 >>&0	regex 	\\{[\.\*]\\}(;)?$			\b++
 >&0	clear	x				source text
 !:strength + 13
 !:mime	text/x-c
-0	regex	\^#[[:space:]]*pragma	C source text
+0	regex/4096	\^#[[:space:]]*pragma	C source text
 !:mime	text/x-c
-0	regex	\^#[[:space:]]*(if\|ifn)def
->&0	regex	\^#[[:space:]]*endif$	C source text
+0	regex/4096	\^#[[:space:]]*(if\|ifn)def
+>&0	regex/4096	\^#[[:space:]]*endif$	C source text
 !:mime	text/x-c
-0	regex	\^#[[:space:]]*(if\|ifn)def
->&0	regex	\^#[[:space:]]*define	C source text
+0	regex/4096	\^#[[:space:]]*(if\|ifn)def
+>&0	regex/4096	\^#[[:space:]]*define	C source text
 !:mime	text/x-c
-0	regex	\^[[:space:]]*char(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
+0	regex/4096	\^[[:space:]]*char(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
 !:mime	text/x-c
-0	regex	\^[[:space:]]*double(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
+0	regex/4096	\^[[:space:]]*double(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
 !:mime	text/x-c
-0	regex	\^[[:space:]]*extern[[:space:]]+		C source text
+0	regex/4096	\^[[:space:]]*extern[[:space:]]+		C source text
 !:mime	text/x-c
-0	regex	\^[[:space:]]*float(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
+0	regex/4096	\^[[:space:]]*float(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
 !:mime	text/x-c
-0	regex	\^struct[[:space:]]+		C source text
+0	regex/4096	\^struct[[:space:]]+		C source text
 !:mime	text/x-c
-0	regex	\^union[[:space:]]+		C source text
+0	regex/4096	\^union[[:space:]]+		C source text
 !:mime	text/x-c
 0	search/8192	main(
->&0 regex	\\)[[:space:]]*\\{		C source text
+>&0 regex/4096	\\)[[:space:]]*\\{		C source text
 !:mime	text/x-c
 
 # C++
 # The strength of these rules is increased so they beat the C rules above
-0	regex	\^namespace[[:space:]]+[_[:alpha:]]{1,30}[[:space:]]*\\{	C++ source text
+0	regex/4096	\^namespace[[:space:]]+[_[:alpha:]]{1,30}[[:space:]]*\\{	C++ source text
 !:strength + 30
 !:mime	text/x-c++
 # using namespace [namespace] or using std::[lib]
-0	regex	\^using[[:space:]]+(namespace\ )?std(::)?[[:alpha:]]*[[:space:]]*;		C++ source text
+0	regex/4096	\^using[[:space:]]+(namespace\ )?std(::)?[[:alpha:]]*[[:space:]]*;		C++ source text
 !:strength + 30
 !:mime	text/x-c++
-0	regex	\^[[:space:]]*template[[:space:]]*<.*>[[:space:]]*$	C++ source text
+0	regex/4096	\^[[:space:]]*template[[:space:]]*<.*>[[:space:]]*$	C++ source text
 !:strength + 30
 !:mime	text/x-c++
-0	regex	\^[[:space:]]*virtual[[:space:]]+.*[};][[:space:]]*$		C++ source text
+0	regex/4096	\^[[:space:]]*virtual[[:space:]]+.*[};][[:space:]]*$		C++ source text
 !:strength + 30
 !:mime	text/x-c++
 # But class alone is reduced to avoid beating php (Jens Schleusener)
-0	regex	\^[[:space:]]*class[[:space:]]+[[:digit:][:alpha:]:_]+[[:space:]]*\\{(.*[\n]*)*\\}(;)?$		C++ source text
+0	regex/4096	\^[[:space:]]*class[[:space:]]+[[:digit:][:alpha:]:_]+[[:space:]]*\\{(.*[\n]*)*\\}(;)?$		C++ source text
 !:strength + 13
 !:mime	text/x-c++
-0	regex	\^[[:space:]]*public:		C++ source text
+0	regex/4096	\^[[:space:]]*public:		C++ source text
 !:strength + 30
 !:mime	text/x-c++
-0	regex	\^[[:space:]]*private:		C++ source text
+0	regex/4096	\^[[:space:]]*private:		C++ source text
 !:strength + 30
 !:mime	text/x-c++
-0	regex	\^[[:space:]]*protected:		C++ source text
+0	regex/4096	\^[[:space:]]*protected:		C++ source text
 !:strength + 30
 !:mime	text/x-c++
 
@@ -8464,9 +8467,8 @@
 !:mime	application/x-object
 >16	leshort		2		executable,
 !:mime	application/x-executable
->16	leshort		3		${x?pie executable:shared object}
-
-!:mime	application/x-${x?pie-executable:sharedlib}
+>16	leshort		3		shared object,
+!:mime	application/x-sharedlib
 >16	leshort		4		core file
 !:mime	application/x-coredump
 # Core file detection is not reliable.
@@ -9136,7 +9138,7 @@
 30		search/481	\x55\xAA
 # to display DOS/MBR boot sector (40) before old one (strength=50+21),Syslinux bootloader (71),SYSLINUX MBR (37+36),NetBSD mbr (110),AdvanceMAME mbr (111)
 # DOS BPB information (70) and after DOS floppy (120) like in previous file version
-!:strength +0
+!:strength +65
 # for sector sizes < 512 Bytes
 >11		uleshort	<512
 >>(11.s-2)	uleshort	0xAA55		DOS/MBR boot sector
@@ -9148,7 +9150,7 @@
 0x1FE          leshort         0xAA55         	DOS/MBR boot sector
 #
 # to display information (50) before DOS BPB (strength=70) and after DOS floppy (120) like in old file version
-!:strength +0
+!:strength +65
 >2		string		OSBS		OS/BS MBR
 # added by Joerg Jenderek at Feb 2013 according to http://thestarman.pcministry.com/asm/mbr/
 # and http://en.wikipedia.org/wiki/Master_Boot_Record
@@ -12001,13 +12003,15 @@
 >11	string		>\0		Clam AntiVirus database %-.23s
 >>34	string		:
 >>>35		string		!:	\b, version
->>>>35		string		x 	\b%-.1s
->>>>>36		string 		!:
+>>>>35		string		x 	\b %-.1s
+>>>>>36		string		!:
 >>>>>>36	string		x 	\b%-.1s
 >>>>>>>37	string		!:
 >>>>>>>>37	string		x 	\b%-.1s
 >>>>>>>>>38	string		!:
 >>>>>>>>>>38	string		x 	\b%-.1s
+>>>>>>>>>>>39	string		!:
+>>>>>>>>>>>>39	string		x 	\b%-.1s
 >512	string		\037\213	\b, gzipped
 >769	string		ustar\0		\b, tarred
 
@@ -14486,7 +14490,9 @@
 !:mime	image/x-unknown
 
 # GIF
+# Strength set up to beat 0x55AA DOS/MBR signature word lookups (+65)
 0	string		GIF8		GIF image data
+!:strength +80
 !:mime	image/gif
 !:apple	8BIMGIFf
 >4	string		7a		\b, version 8%s,
@@ -16115,6 +16121,16 @@
 # From Daniel Novotny <dnovotny@redhat.com>
 # swap file for PowerPC
 65526	string		SWAPSPACE2	Linux/ppc swap file
+>0x400	long		x		version %d,
+>0x404	long		x		size %d pages,
+>1052	string		\0		no label,
+>1052	string		>\0		LABEL=%s,
+>0x40c	belong		x		UUID=%08x
+>0x410	beshort		x		\b-%04x
+>0x412	beshort		x		\b-%04x
+>0x414	beshort		x		\b-%04x
+>0x416	belong		x		\b-%08x
+>0x41a	beshort		x		\b%04x
 16374	string		SWAPSPACE2	Linux/ia64 swap file
 #
 # Linux kernel boot images, from Albert Cahalan <acahalan@cs.uml.edu>
@@ -22191,7 +22207,7 @@
 !:mime text/x-python
 
 # import module [as abrev]
-0	regex	\^import\ [_[:alpha:]]+\ as\ [[:alpha:]][[:space:]]*$ Python script text executable
+0	regex/4096	\^import\ [_[:alpha:]]+\ as\ [[:alpha:]][[:space:]]*$ Python script text executable
 !:mime text/x-python
 
 # comments
@@ -22207,7 +22223,7 @@
 # except: or finally:
 # block
 0	search/4096	try:
->&0	regex	\^[[:space:]]*except.*:$	Python script text executable
+>&0	regex/4096	\^[[:space:]]*except.*:$	Python script text executable
 !:strength + 15
 !:mime text/x-python
 >&0	search/4096	finally:	Python script text executable
@@ -22219,7 +22235,7 @@
 !:mime text/x-python
 
 # def name(*args, **kwargs):
-0	regex	 \^[[:space:]]{0,50}def\ {1,50}[_a-zA-Z]{1,100}
+0	regex/4096	 \^[[:space:]]{0,50}def\ {1,50}[_a-zA-Z]{1,100}
 >&0	regex	 \\(([[:alpha:]*_,\ ]){0,255}\\):$ Python script text executable
 !:strength + 15
 !:mime text/x-python
@@ -22741,32 +22757,32 @@
 # What looks like ruby, but does not have a shebang
 # (modules and such)
 # From: Lubomir Rintel <lkundrak@v3.sk>
-0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'
+0	regex/4096		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'
 >0	regex		def\ [a-z]|\ do$
->>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
+>>&0	regex/4096		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
 !:strength + 30
 !:mime	text/x-ruby
-0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
+0	regex/4096		\^[[:space:]]*(class|module)[[:space:]][A-Z]
 >0	regex		(modul|includ)e\ [A-Z]|def\ [a-z]
->>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
+>>&0	regex/4096		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
 !:strength + 30
 !:mime	text/x-ruby
 # Classes with no modules or defs, beats simple ASCII
-0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
->&0	regex	\^[[:space:]]*end([[:space:]]+[;#if].*)?$		Ruby script text
+0	regex/4096		\^[[:space:]]*(class|module)[[:space:]][A-Z]
+>&0	regex/4096	\^[[:space:]]*end([[:space:]]+[;#if].*)?$		Ruby script text
 !:strength + 10
 !:mime	text/x-ruby
 # Looks for function definition to balance python magic
 # def name (args)
 # end
-0	regex		\^[[:space:]]*def\ [a-z]|def\ [[:alpha:]]+::[a-z]
->&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
+0	regex/4096		\^[[:space:]]*def\ [a-z]|def\ [[:alpha:]]+::[a-z]
+>&0	regex/4096		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
 !:strength + 10
 !:mime	text/x-ruby
 
-0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'	Ruby script text
+0	regex/4096		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'	Ruby script text
 !:mime	text/x-ruby
-0 regex 	\^[[:space:]]*include\ ([A-Z]+[a-z]*(::))+	Ruby script text
+0 regex/4096 	\^[[:space:]]*include\ ([A-Z]+[a-z]*(::))+	Ruby script text
 !:mime	text/x-ruby
 
 #------------------------------------------------------------------------------
@@ -25419,35 +25435,27 @@
 
 0	string/t		#!\ /			a
 >3	string		>\0			%s script text executable
-!:strength / 10
 
 0	string/b		#!\ /			a
 >3	string		>\0			%s script executable (binary data)
-!:strength / 10
 
 0	string/t		#!\t/			a
 >3	string		>\0			%s script text executable
-!:strength / 10
 
 0	string/b		#!\t/			a
 >3	string		>\0			%s script executable (binary data)
-!:strength / 10
 
 0	string/t		#!/			a
 >2	string		>\0			%s script text executable
-!:strength / 10
 
 0	string/b		#!/			a
 >2	string		>\0			%s script executable (binary data)
-!:strength / 10
 
 0	string/t		#!\ 			script text executable
 >3	string		>\0			for %s
-!:strength / 10
 
 0	string/b		#!\ 			script executable
 >3	string		>\0			for %s (binary data)
-!:strength / 10
 
 # using env
 0	string/t	#!/usr/bin/env		a

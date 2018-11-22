@@ -322,8 +322,10 @@ void zend_signal_activate(void)
 
 	memcpy(&SIGG(handlers), &global_orig_handlers, sizeof(global_orig_handlers));
 
-	for (x = 0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
-		zend_signal_register(zend_sigs[x], zend_signal_handler_defer);
+	if (SIGG(reset)) {
+		for (x = 0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
+			zend_signal_register(zend_sigs[x], zend_signal_handler_defer);
+		}
 	}
 
 	SIGG(active) = 1;
@@ -365,6 +367,7 @@ static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
 	size_t x;
 
 	memset(zend_signal_globals, 0, sizeof(*zend_signal_globals));
+	zend_signal_globals->reset = 1;
 
 	for (x = 0; x < sizeof(zend_signal_globals->pstorage) / sizeof(*zend_signal_globals->pstorage); ++x) {
 		zend_signal_queue_t *queue = &zend_signal_globals->pstorage[x];
@@ -397,7 +400,7 @@ void zend_signal_init(void) /* {{{ */
 
 /* {{{ zend_signal_startup
  * alloc zend signal globals */
-void zend_signal_startup(void)
+ZEND_API void zend_signal_startup(void)
 {
 
 #ifdef ZTS

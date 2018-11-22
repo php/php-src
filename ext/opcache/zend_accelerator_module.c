@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -323,6 +323,7 @@ ZEND_INI_BEGIN()
 #ifdef HAVE_HUGE_CODE_PAGES
 	STD_PHP_INI_BOOLEAN("opcache.huge_code_pages"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.huge_code_pages,               zend_accel_globals, accel_globals)
 #endif
+	STD_PHP_INI_ENTRY("opcache.preload"                       , ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,    accel_directives.preload,                zend_accel_globals, accel_globals)
 ZEND_INI_END()
 
 static int filename_is_in_cache(zend_string *filename)
@@ -660,6 +661,49 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_double(&statistics, "blacklist_miss_ratio", reqs?(((double) ZCSG(blacklist_misses))/reqs)*100.0:0);
 	add_assoc_double(&statistics, "opcache_hit_rate", reqs?(((double) ZCSG(hits))/reqs)*100.0:0);
 	add_assoc_zval(return_value, "opcache_statistics", &statistics);
+
+	if (ZCSG(preload_script)) {
+		array_init(&statistics);
+
+		add_assoc_long(&statistics, "memory_consumption", ZCSG(preload_script)->dynamic_members.memory_consumption);
+
+		if (zend_hash_num_elements(&ZCSG(preload_script)->script.function_table)) {
+			zend_op_array *op_array;
+
+			array_init(&scripts);
+			ZEND_HASH_FOREACH_PTR(&ZCSG(preload_script)->script.function_table, op_array) {
+				add_next_index_str(&scripts, op_array->function_name);
+			} ZEND_HASH_FOREACH_END();
+			add_assoc_zval(&statistics, "functions", &scripts);
+		}
+
+		if (zend_hash_num_elements(&ZCSG(preload_script)->script.class_table)) {
+			zend_class_entry *ce;
+			zend_string *key;
+
+			array_init(&scripts);
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&ZCSG(preload_script)->script.class_table, key, ce) {
+				if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
+					add_next_index_str(&scripts, key);
+				} else {
+					add_next_index_str(&scripts, ce->name);
+				}
+			} ZEND_HASH_FOREACH_END();
+			add_assoc_zval(&statistics, "classes", &scripts);
+		}
+
+		if (ZCSG(saved_scripts)) {
+			zend_persistent_script **p = ZCSG(saved_scripts);
+
+			array_init(&scripts);
+			while (*p) {
+				add_next_index_str(&scripts, (*p)->script.filename);
+				p++;
+			}
+			add_assoc_zval(&statistics, "scripts", &scripts);
+		}
+		add_assoc_zval(return_value, "preload_statistics", &statistics);
+	}
 
 	if (fetch_scripts) {
 		/* accelerated scripts */
