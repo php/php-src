@@ -6300,7 +6300,6 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 	zend_class_entry *original_ce = CG(active_class_entry);
 
-
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
 		zend_string *unqualified_name = decl->name;
 
@@ -6427,7 +6426,6 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
-	// todo: add to set of classnames that need variance checks iff inheritance is involved
 	if (extends_ast || implements_ast) {
 		if (CG(unverified_types)) {
 			zend_hash_add_empty_element(CG(unverified_types), lcname);
