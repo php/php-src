@@ -4114,6 +4114,27 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
+
+static
+void _backup_unverified_variance_types(HashTable *unverified_types,
+                                       HashTable **prev_unverified_types)
+{
+	zend_hash_init(unverified_types, 0, NULL, NULL, 1);
+	*prev_unverified_types = CG(unverified_types);
+	CG(unverified_types) = unverified_types;
+}
+
+static void _compile_verify_variance(HashTable *unverified_types)
+{
+	zend_string *lcname;
+	ZEND_HASH_FOREACH_STR_KEY(unverified_types, lcname) {
+		zend_op *opline = get_next_op();
+		opline->op1_type = IS_CONST;
+		opline->opcode = ZEND_VERIFY_VARIANCE;
+		LITERAL_STR(opline->op1, lcname);
+	} ZEND_HASH_FOREACH_END();
+}
+
 void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
 
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
@@ -4125,16 +4146,29 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	zend_op *opline;
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
-		uint32_t dcl_opnum = get_next_op_number();
-		zend_compile_class_decl(class_ast, 0);
-		/* jump over anon class declaration */
-		opline = &CG(active_op_array)->opcodes[dcl_opnum];
-		if (opline->opcode == ZEND_FETCH_CLASS) {
-			opline++;
+		/* backup previous unverified variance list; anon classes are immediately verified */
+		HashTable unverified_types;
+		HashTable *prev_unverified_types;
+		_backup_unverified_variance_types(&unverified_types, &prev_unverified_types);
+
+		{
+			uint32_t dcl_opnum = get_next_op_number();
+			zend_compile_class_decl(class_ast, 0);
+			/* jump over anon class declaration */
+			opline = &CG(active_op_array)->opcodes[dcl_opnum];
+			if (opline->opcode == ZEND_FETCH_CLASS) {
+				opline++;
+			}
+			class_node.op_type = opline->result_type;
+			class_node.u.op.var = opline->result.var;
+			opline->extended_value = get_next_op_number();
 		}
-		class_node.op_type = opline->result_type;
-		class_node.u.op.var = opline->result.var;
-		opline->extended_value = get_next_op_number();
+
+		_compile_verify_variance(&unverified_types);
+
+		zend_hash_destroy(&unverified_types);
+		CG(unverified_types) = prev_unverified_types;
+
 	} else {
 		zend_compile_class_ref_ex(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 	}
@@ -8135,26 +8169,15 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 
 		/* Compile decl stmts */
 		{
-			zend_string *lcname;
 			HashTable unverified_types;
 			HashTable *prev_unverified_types;
-			zend_hash_init(&unverified_types, 0, NULL, NULL, 1);
-			prev_unverified_types = CG(unverified_types);
-			CG(unverified_types) = &unverified_types;
+			_backup_unverified_variance_types(&unverified_types, &prev_unverified_types);
 
 			for (p = first_decl; p < last_decl; ++p) {
 				zend_compile_top_stmt(*p);
 			}
 
-			/* todo: emit ZEND_VERIFY_VARIANCE */
-			ZEND_HASH_FOREACH_STR_KEY(&unverified_types, lcname) {
-				zend_op *opline = get_next_op(CG(active_op_array));
-
-				opline->op1_type = IS_CONST;
-				opline->opcode = ZEND_VERIFY_VARIANCE;
-				LITERAL_STR(opline->op1, lcname);
-
-			} ZEND_HASH_FOREACH_END();
+			_compile_verify_variance(&unverified_types);
 
 			zend_hash_destroy(&unverified_types);
 			CG(unverified_types) = prev_unverified_types;
