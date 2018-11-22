@@ -193,6 +193,14 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 			if (IN_ARENA(prop_info->ce)) {
 				prop_info->ce = ARENA_REALLOC(prop_info->ce);
 			}
+
+			if (ZEND_TYPE_IS_CE(prop_info->type)) {
+				zend_class_entry *ce = ZEND_TYPE_CE(prop_info->type);
+				if (IN_ARENA(ce)) {
+					ce = ARENA_REALLOC(ce);
+					prop_info->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop_info->type));
+				}
+			}
 		}
 	}
 }
