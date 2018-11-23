@@ -4685,12 +4685,12 @@ PHP_FUNCTION(imagecrop)
 }
 /* }}} */
 
-/* {{{ proto resource imagecropauto(resource im [, int mode [, float threshold [, int color]]])
+/* {{{ proto resource imagecropauto(resource im [, int mode = GD_CROP_DEFAULT [, float threshold [, int color]]])
    Crop an image automatically using one of the available modes. */
 PHP_FUNCTION(imagecropauto)
 {
 	zval *IM;
-	zend_long mode = -1;
+	zend_long mode = GD_CROP_DEFAULT;
 	zend_long color = -1;
 	double threshold = 0.5f;
 	gdImagePtr im;
@@ -4706,7 +4706,9 @@ PHP_FUNCTION(imagecropauto)
 
 	switch (mode) {
 		case -1:
+			php_error_docref(NULL, E_DEPRECATED, "Crop mode -1 is deprecated. Use IMG_CROP_DEFAULT instead.");
 			mode = GD_CROP_DEFAULT;
+			/* FALLTHRU */
 		case GD_CROP_DEFAULT:
 		case GD_CROP_TRANSPARENT:
 		case GD_CROP_BLACK:
