@@ -1657,8 +1657,8 @@ static void zend_accel_init_auto_globals(void)
 static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handle, int type, const char *key, zend_op_array **op_array_p)
 {
 	zend_persistent_script *new_persistent_script;
+	uint32_t orig_functions_count, orig_class_count;
 	zend_op_array *orig_active_op_array;
-	HashTable *orig_class_table;
 	zval orig_user_error_handler;
 	zend_op_array *op_array;
 	int do_bailout = 0;
@@ -1718,15 +1718,13 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		}
 	}
 
-	new_persistent_script = create_persistent_script();
-
 	/* Save the original values for the op_array, function table and class table */
 	orig_active_op_array = CG(active_op_array);
-	orig_class_table = CG(class_table);
+	orig_functions_count = EG(function_table)->nNumUsed;
+	orig_class_count = EG(class_table)->nNumUsed;
 	ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
 
 	/* Override them with ours */
-	EG(class_table) = CG(class_table) = &new_persistent_script->script.class_table;
 	ZVAL_UNDEF(&EG(user_error_handler));
 
 	zend_try {
@@ -1751,12 +1749,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
 	/* Restore originals */
 	CG(active_op_array) = orig_active_op_array;
-	EG(class_table) = CG(class_table) = orig_class_table;
 	EG(user_error_handler) = orig_user_error_handler;
 
 	if (!op_array) {
 		/* compilation failed */
-		free_persistent_script(new_persistent_script, 1);
 		if (do_bailout) {
 			zend_bailout();
 		}
@@ -1767,8 +1763,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	   Here we aren't sure we would store it, but we will need it
 	   further anyway.
 	*/
+	new_persistent_script = create_persistent_script();
 	new_persistent_script->script.main_op_array = *op_array;
-	zend_accel_move_user_functions(CG(function_table), &new_persistent_script->script);
+	zend_accel_move_user_functions(CG(function_table), CG(function_table)->nNumUsed - orig_functions_count, &new_persistent_script->script);
+	zend_accel_move_user_classes(CG(class_table), CG(class_table)->nNumUsed - orig_class_count, &new_persistent_script->script);
 	new_persistent_script->script.first_early_binding_opline =
 		(op_array->fn_flags & ZEND_ACC_EARLY_BINDING) ?
 			zend_build_delayed_early_binding_list(op_array) :
