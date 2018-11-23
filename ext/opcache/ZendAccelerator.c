@@ -3101,6 +3101,8 @@ static void preload_move_user_functions(HashTable *src, HashTable *dst)
 {
 	Bucket *p;
 	dtor_func_t orig_dtor = src->pDestructor;
+	zend_string *filename = NULL;
+	int copy = 0;
 
 	src->pDestructor = NULL;
 	zend_hash_extend(dst, dst->nNumUsed + src->nNumUsed, 0);
@@ -3108,7 +3110,19 @@ static void preload_move_user_functions(HashTable *src, HashTable *dst)
 		zend_function *function = Z_PTR(p->val);
 
 		if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
-			_zend_hash_append_ptr(dst, p->key, function);
+			if (function->op_array.filename != filename) {
+				filename = function->op_array.filename;
+				if (filename) {
+					copy = zend_hash_exists(preload_scripts, filename);
+				} else {
+					copy = 0;
+				}
+			}
+			if (copy) {
+				_zend_hash_append_ptr(dst, p->key, function);
+			} else {
+				orig_dtor(&p->val);
+			}
 			zend_hash_del_bucket(src, p);
 		} else {
 			break;
@@ -3121,6 +3135,8 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 {
 	Bucket *p;
 	dtor_func_t orig_dtor = src->pDestructor;
+	zend_string *filename = NULL;
+	int copy = 0;
 
 	src->pDestructor = NULL;
 	zend_hash_extend(dst, dst->nNumUsed + src->nNumUsed, 0);
@@ -3128,7 +3144,19 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 		zend_class_entry *ce = Z_PTR(p->val);
 
 		if (EXPECTED(ce->type == ZEND_USER_CLASS)) {
-			_zend_hash_append_ptr(dst, p->key, ce);
+			if (ce->info.user.filename != filename) {
+				filename = ce->info.user.filename;
+				if (filename) {
+					copy = zend_hash_exists(preload_scripts, filename);
+				} else {
+					copy = 0;
+				}
+			}
+			if (copy) {
+				_zend_hash_append_ptr(dst, p->key, ce);
+			} else {
+				orig_dtor(&p->val);
+			}
 			zend_hash_del_bucket(src, p);
 		} else {
 			break;
