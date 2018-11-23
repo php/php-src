@@ -291,6 +291,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_CALL_VIA_TRAMPOLINE     (1 << 17) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* disable inline caching                                 |     |     |     */
+/* or disable caching in opcache for main op_array        |     |     |     */
 #define ZEND_ACC_NEVER_CACHE             (1 << 18) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Closure related                                        |     |     |     */

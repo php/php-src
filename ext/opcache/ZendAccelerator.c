@@ -1759,6 +1759,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		return NULL;
 	}
 
+	if (op_array->fn_flags & ZEND_ACC_NEVER_CACHE) {
+		return NULL;
+	}
+
 	/* Build the persistent_script structure.
 	   Here we aren't sure we would store it, but we will need it
 	   further anyway.
@@ -3169,7 +3173,7 @@ static zend_op_array *preload_compile_file(zend_file_handle *file_handle, int ty
 {
 	zend_op_array *op_array = preload_orig_compile_file(file_handle, type);
 
-	if (op_array && op_array->refcount) {
+	if (op_array && op_array->refcount && !(op_array->fn_flags & ZEND_ACC_NEVER_CACHE)) {
 		zend_persistent_script *script;
 
 		script = create_persistent_script();

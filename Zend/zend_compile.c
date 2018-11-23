@@ -5245,6 +5245,29 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
 			}
 
+		} else if (zend_string_equals_literal_ci(name, "cache")) {
+			zval value_zv;
+
+			if (FAILURE == zend_declare_is_first_statement(ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "cache declaration must be "
+					"the very first statement in the script");
+			}
+
+			if (ast->child[1] != NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "cache declaration must not "
+					"use block mode");
+			}
+
+			zend_const_expr_to_zval(&value_zv, value_ast);
+
+			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "cache declaration must have 0 or 1 as its value");
+			}
+
+			if (Z_LVAL(value_zv) == 0) {
+				CG(active_op_array)->fn_flags |= ZEND_ACC_NEVER_CACHE;
+			}
+
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", ZSTR_VAL(name));
 		}
