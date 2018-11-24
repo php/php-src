@@ -2780,7 +2780,7 @@ PHP_FUNCTION(sodium_base642bin)
 							 "invalid base64 variant identifier", 0);
 		return;
 	}
-	bin_len = b64_len / 4U * 3U + 1U;
+	bin_len = b64_len / 4U * 3U + 2U;
 	bin = zend_string_alloc(bin_len, 0);
 	if (sodium_base642bin((unsigned char *) ZSTR_VAL(bin), bin_len,
 						  b64, b64_len,
@@ -3399,9 +3399,6 @@ PHP_FUNCTION(sodium_pad)
 	}
 	xpadded_len = unpadded_len + xpadlen;
 	padded = zend_string_alloc(xpadded_len + 1U, 0);
-	st = 1U;
-	i = 0U;
-	k = unpadded_len;
 	if (unpadded_len > 0) {
 		st = 1U;
 		i = 0U;
