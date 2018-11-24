@@ -15,5 +15,5 @@ imagecreatefromjpeg($filename);
 --EXPECTF--
 Warning: imagecreatefromjpeg(): gd-jpeg: JPEG library reports unrecoverable error: JPEG datastream contains no image in %s on line %d
 
-Warning: imagecreatefromjpeg(): '/mnt/c/Users/cmb/php-dev/php-src/ext/gd/tests/bug77195.jpeg' is not a valid JPEG file in %s on line %d
+Warning: imagecreatefromjpeg(): '%s' is not a valid JPEG file in %s on line %d
 ===DONE===
