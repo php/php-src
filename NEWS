@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #77177 (Serializing or unserializing COM objects crashes). (cmb)
 
+- GD:
+  . Fixed bug #77195 (Incorrect error handling of imagecreatefromjpeg()). (cmb)
+
 - Sockets:
   . Fixed bug #77136 (Unsupported IPV6_RECVPKTINFO constants on macOS).
     (Mizunashi Mana)
