@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #77177 (Serializing or unserializing COM objects crashes). (cmb)
 
+- GD:
+  . Fixed bug #77195 (Incorrect error handling of imagecreatefromjpeg()). (cmb)
+
 - Soap:
   . Fixed bug #77088 (Segfault when using SoapClient with null options).
     (Laruence)
