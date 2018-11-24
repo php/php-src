@@ -3399,9 +3399,6 @@ PHP_FUNCTION(sodium_pad)
 	}
 	xpadded_len = unpadded_len + xpadlen;
 	padded = zend_string_alloc(xpadded_len + 1U, 0);
-	st = 1U;
-	i = 0U;
-	k = unpadded_len;
 	if (unpadded_len > 0) {
 		st = 1U;
 		i = 0U;
