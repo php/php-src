@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #77195 (Incorrect error handling of imagecreatefromjpeg()). (cmb)
+  . Fixed bug #77198 (auto cropping has insufficient precision). (cmb)
 
 - Sockets:
   . Fixed bug #77136 (Unsupported IPV6_RECVPKTINFO constants on macOS).
