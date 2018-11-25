@@ -109,9 +109,6 @@ gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode)
 		case GD_CROP_DEFAULT:
 		default:
 			color = gdImageGetTransparent(im);
-			if (color == -1) {
-				gdGuessBackgroundColorFromCorners(im, &color);
-			}
 			break;
 	}
 
@@ -158,9 +155,6 @@ gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode)
 	}
 	crop.width = x - crop.x + 2;
 
-	if (crop.x < 0 || crop.y < 0 || crop.width <= 0 || crop.height <= 0) {
-		return NULL;
-	}
 	return gdImageCrop(im, &crop);
 }
 /*TODOs: Implement DeltaE instead, way better perceptual differences */
