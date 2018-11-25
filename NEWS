@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
 
 - GD:
+  . Fixed bug #73291 (imagecropauto() $threshold differs from external libgd).
+    (cmb)
   . Fixed bug #76324 (cannot detect recent versions of freetype with
     pkg-config). (Eli Schwartz)
   . The bundled libgd behaves now like system libgd wrt. GD_CROP_DEFAULT never

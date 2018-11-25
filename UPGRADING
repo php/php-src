@@ -116,8 +116,10 @@ PHP 7.4 UPGRADE NOTES
     has been renamed to --enable-freetype and no longer accepts a directory.
     Instead pkg-config environment variables can be used to configure custom paths,
     see either ./configure --help or follow the instructions in error messages.
-  . The bundled libgd behaves now like system libgd wrt. GD_CROP_DEFAULT never
-    falling back to GD_CROP_SIDES.
+  . The behavior of imagecropauto() in the bundled libgd has been synced with
+    that of system libgd:
+     * GD_CROP_DEFAULT is no longer falling back to GD_CROP_SIDES
+     * Threshold-cropping now uses the algorithm of system libgd
 
 - Hash:
   . The hash extension cannot be disabled anymore and is always an integral
