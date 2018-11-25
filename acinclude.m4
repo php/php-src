@@ -2098,8 +2098,8 @@ AC_DEFUN([PHP_PROG_RE2C],[
   case $php_cv_re2c_version in
     ""|invalid[)]
       AC_CHECK_FILE([$abs_srcdir/Zend/zend_language_scanner.c],
-        [AC_MSG_WARN([You will need re2c 0.13.4 or later if you want to regenerate PHP parsers.])],
-        [AC_MSG_ERROR([You will need re2c 0.13.4 or later to generate PHP parsers.])]
+        [AC_MSG_WARN([You will need re2c 0.13.4 or later if you want to regenerate PHP lexers.])],
+        [AC_MSG_ERROR([You will need re2c 0.13.4 or later to generate PHP lexers.])]
       )
 
       RE2C="exit 0;"
