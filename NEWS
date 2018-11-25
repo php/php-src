@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #77195 (Incorrect error handling of imagecreatefromjpeg()). (cmb)
+  . Fixed bug #77198 (auto cropping has insufficient precision). (cmb)
 
 - Soap:
   . Fixed bug #77088 (Segfault when using SoapClient with null options).
