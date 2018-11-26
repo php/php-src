@@ -293,8 +293,6 @@ PHP_MINIT_FUNCTION(com_dotnet)
 {
 	zend_class_entry ce, *tmp;
 
-	zend_hash_init(&com_dotnet_object_properties, 0, NULL, NULL, 0);
-
 	php_com_wrapper_minit(INIT_FUNC_ARGS_PASSTHRU);
 	php_com_persist_minit(INIT_FUNC_ARGS_PASSTHRU);
 

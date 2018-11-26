@@ -29,8 +29,6 @@
 
 #include "zend_ts_hash.h"
 
-extern const HashTable com_dotnet_object_properties;
-
 typedef struct _php_com_dotnet_object {
 	zend_object zo;
 
