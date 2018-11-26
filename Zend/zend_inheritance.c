@@ -293,9 +293,13 @@ int _check_inherited_arg_info(
 				}
 			}
 			zend_string_release(proto_class_name);
-		} else if (proto_type_code == IS_ITERABLE && variance == COVARIANT) {
-			zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
-			code = fe_ce && instanceof_function(fe_ce, zend_ce_traversable);
+		} else if (variance == COVARIANT) {
+			if (proto_type_code == IS_ITERABLE) {
+				zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
+				code = fe_ce && instanceof_function(fe_ce, zend_ce_traversable);
+			} else if (proto_type_code != IS_OBJECT) {
+				code = 0;
+			}
 		} else {
 			code = 0;
 		}
@@ -303,14 +307,16 @@ int _check_inherited_arg_info(
 		zend_string_release(fe_class_name);
 		return code;
 	} else if (ZEND_TYPE_IS_CLASS(proto_type)) {
-		if (variance == CONTRAVARIANT && fe_type_code == IS_ITERABLE) {
-			zend_string *proto_class_name =
-				_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
-			zend_class_entry *proto_ce = zend_lookup_class(proto_class_name);
-			zend_string_release(proto_class_name);
-			return proto_ce && instanceof_function(proto_ce, zend_ce_traversable);
-		} else {
-			return 0;
+		if (variance == CONTRAVARIANT) {
+			if (fe_type_code == IS_ITERABLE) {
+				zend_string *proto_class_name =
+					_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
+				zend_class_entry *proto_ce = zend_lookup_class(proto_class_name);
+				zend_string_release(proto_class_name);
+				return proto_ce && instanceof_function(proto_ce, zend_ce_traversable);
+			} else if (fe_type_code == IS_OBJECT) {
+				return 1;
+			}
 		}
 	} else if (fe_type_code == IS_ITERABLE || proto_type_code == IS_ITERABLE) {
 		return (variance == COVARIANT && fe_type_code == IS_ARRAY)
