@@ -2145,22 +2145,6 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 }
 /* }}} */
 
-/* {{{ proto PDOStatement::__wakeup()
-   Prevents use of a PDOStatement instance that has been unserialized */
-static PHP_METHOD(PDOStatement, __wakeup)
-{
-	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You cannot serialize or unserialize PDOStatement instances");
-}
-/* }}} */
-
-/* {{{ proto int PDOStatement::__sleep()
-   Prevents serialization of a PDOStatement instance */
-static PHP_METHOD(PDOStatement, __sleep)
-{
-	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You cannot serialize or unserialize PDOStatement instances");
-}
-/* }}} */
-
 const zend_function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		arginfo_pdostatement_execute,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetch,			arginfo_pdostatement_fetch,			ZEND_ACC_PUBLIC)
@@ -2181,8 +2165,6 @@ const zend_function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, nextRowset,	arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, closeCursor,	arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, debugDumpParams, arginfo_pdostatement__void,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, __wakeup,		arginfo_pdostatement__void,			ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	PHP_ME(PDOStatement, __sleep,		arginfo_pdostatement__void,			ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_FE_END
 };
 
@@ -2283,6 +2265,8 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_ce = zend_register_internal_class(&ce);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
+	pdo_dbstmt_ce->serialize = zend_class_serialize_deny;
+	pdo_dbstmt_ce->unserialize = zend_class_unserialize_deny;
 	zend_class_implements(pdo_dbstmt_ce, 1, zend_ce_traversable);
 	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC);
 
