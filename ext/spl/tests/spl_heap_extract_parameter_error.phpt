@@ -8,7 +8,7 @@ TestFest London May 2009
 
 class TestHeap extends SplHeap {
 
-  function compare() {
+  function compare($a, $b) {
     print "This shouldn't be printed";
   }
 }

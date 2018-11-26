@@ -2,14 +2,14 @@
 SPL: SplHeap: isEmpty argument variation.
 --FILE--
 <?php
-class SplHeap2 extends SplHeap{
 
-  public function compare() {
-           return -parent::compare();
-       }
+class SplHeap2 extends SplHeap {
+  public function compare($a, $b) {
+    return -parent::compare($a, $b);
+  }
 }
 
-$h = new SplHeap2;
+$h = new SplHeap2();
 $h->isEmpty(1);
 ?>
 --EXPECTF--
