@@ -263,7 +263,7 @@ int _check_inherited_arg_info(
 		return 0;
 	}
 
-	// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
+	/* This introduces BC break described at https://bugs.php.net/bug.php?id=72119 */
 	if (variance == CONTRAVARIANT && ZEND_TYPE_ALLOW_NULL(proto_type) && !ZEND_TYPE_ALLOW_NULL(fe_type)) {
 		return 0;
 	}
