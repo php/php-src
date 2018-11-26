@@ -8182,6 +8182,7 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 		}
 
 		/* Compile remainder */
+		/* todo: loop to catch any non-consecutive type declarations */
 		for (p = last_decl; p < end; ++p) {
 			zend_compile_top_stmt(*p);
 		}

@@ -245,6 +245,12 @@ int _check_zce_variance(
 	}
 }
 
+/* This int return is not a boolean, but will often be treated this way.
+ *   *  0 means there is definitely an error.
+ *   *  1 means there are definitely not any errors.
+ *   * -1 means there are no known errors but it is not known to be good
+ *     either (there is not enough information at the moment).
+ */
 static
 int _check_inherited_arg_info(
     const zend_function *fe, zend_arg_info *fe_arg_info,
@@ -284,8 +290,9 @@ int _check_inherited_arg_info(
 					if (fe_ce && proto_ce) {
 						code = _check_zce_variance(fe_ce, proto_ce, variance);
 					} else {
-						/* todo: delay to runtime. How? */
-						/* Don't break bug62441! */
+						/* The -1 will still be considered "truthy". It means there
+						 * is not enough information at the moment, but there are
+						 * not any known errors either. */
 						code = -1;
 					}
 				} else {
