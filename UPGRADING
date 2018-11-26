@@ -42,6 +42,30 @@ PHP 8.0 UPGRADE NOTES
   . Any array that has a number n as its first numeric key will use n+1 for
     its next implicit key. Even if n is negative.
     RFC: https://wiki.php.net/rfc/negative_array_index
+  . The @ operator will no longer silence fatal errors (E_ERROR, E_CORE_ERROR,
+    E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR, E_PARSE). Error handlers
+    that expect error_reporting to be 0 when @ is used, should be adjusted to
+    use a mask check instead:
+
+        // Replace
+        function my_error_handler($err_no, $err_msg, $filename, $linenum) {
+            if (error_reporting() == 0)
+                return; // Silenced
+            }
+            // ...
+        }
+
+        // With
+        function my_error_handler($err_no, $err_msg, $filename, $linenum) {
+            if (error_reporting() & $err_no)
+                return; // Silenced
+            }
+            // ...
+        }
+
+    Additionally, care should be taken that error messages are not displayed in
+    production environments, which can result in information leaks. Please
+    ensure that display_errors=Off is used in conjunction with error logging.
 
 - Date:
   . mktime() and gmmktime() now require at least one argument. time() can be

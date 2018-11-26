@@ -13,7 +13,7 @@ echo "*** Testing class_implements() : variation ***\n";
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-	if (error_reporting() != 0) {
+	if (error_reporting() & $err_no) {
 		// report non-silenced errors
 		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 	}
