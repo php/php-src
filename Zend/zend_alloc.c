@@ -105,6 +105,9 @@
 #    define REAL_PAGE_SIZE _real_page_size
 static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #  endif
+# ifdef MAP_ALIGNED_SUPER
+#    define MAP_HUGETLB MAP_ALIGNED_SUPER
+# endif
 #endif
 
 #ifndef REAL_PAGE_SIZE
