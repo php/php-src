@@ -2283,6 +2283,8 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_object_handlers.clone_obj = NULL;
 	sqlite3_object_handlers.free_obj = php_sqlite3_object_free_storage;
 	php_sqlite3_sc_entry = zend_register_internal_class(&ce);
+	php_sqlite3_sc_entry->serialize = zend_class_serialize_deny;
+	php_sqlite3_sc_entry->unserialize = zend_class_unserialize_deny;
 
 	/* Register SQLite 3 Prepared Statement Class */
 	INIT_CLASS_ENTRY(ce, "SQLite3Stmt", php_sqlite3_stmt_class_methods);
@@ -2291,6 +2293,8 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_stmt_object_handlers.clone_obj = NULL;
 	sqlite3_stmt_object_handlers.free_obj = php_sqlite3_stmt_object_free_storage;
 	php_sqlite3_stmt_entry = zend_register_internal_class(&ce);
+	php_sqlite3_stmt_entry->serialize = zend_class_serialize_deny;
+	php_sqlite3_stmt_entry->unserialize = zend_class_unserialize_deny;
 
 	/* Register SQLite 3 Result Class */
 	INIT_CLASS_ENTRY(ce, "SQLite3Result", php_sqlite3_result_class_methods);
@@ -2299,6 +2303,8 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_result_object_handlers.clone_obj = NULL;
 	sqlite3_result_object_handlers.free_obj = php_sqlite3_result_object_free_storage;
 	php_sqlite3_result_entry = zend_register_internal_class(&ce);
+	php_sqlite3_result_entry->serialize = zend_class_serialize_deny;
+	php_sqlite3_result_entry->unserialize = zend_class_unserialize_deny;
 
 	REGISTER_INI_ENTRIES();
 
