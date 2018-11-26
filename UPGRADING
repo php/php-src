@@ -19,6 +19,10 @@ PHP 7.4 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Curl:
+  . Attempting to serialize a CURLFile class will now generate an exception.
+    Previously the exception was only thrown on unserialization.
+
 - Date:
   . Calling var_dump() or similar on a DateTime(Immutable) instance will no
     longer leave behind accessible properties on the object.
