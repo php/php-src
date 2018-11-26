@@ -29,8 +29,6 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 		'getAttribute'							=> true,
 		'quote'								=> true,
 		'inTransaction'							=> true,
-		'__wakeup'							=> true,
-		'__sleep'							=> true,
 		'getAvailableDrivers'	=> true,
 	);
 	$classname = get_class($db);
