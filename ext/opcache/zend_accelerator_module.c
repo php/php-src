@@ -844,6 +844,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 	zend_file_handle handle;
 	zend_op_array *op_array = NULL;
 	zend_execute_data *orig_execute_data = NULL;
+	uint32_t orig_compiler_options;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
 		return;
@@ -855,6 +856,8 @@ static ZEND_FUNCTION(opcache_compile_file)
 	handle.type = ZEND_HANDLE_FILENAME;
 
 	orig_execute_data = EG(current_execute_data);
+	orig_compiler_options = CG(compiler_options);
+	CG(compiler_options) |= ZEND_COMPILE_WITHOUT_EXECUTION;
 
 	zend_try {
 		op_array = persistent_compile_file(&handle, ZEND_INCLUDE);
@@ -862,6 +865,8 @@ static ZEND_FUNCTION(opcache_compile_file)
 		EG(current_execute_data) = orig_execute_data;
 		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s", handle.filename);
 	} zend_end_try();
+
+	CG(compiler_options) = orig_compiler_options;
 
 	if(op_array != NULL) {
 		destroy_op_array(op_array);

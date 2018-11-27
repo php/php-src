@@ -3749,6 +3749,7 @@ static int accel_preload(const char *config)
 	accelerator_orig_compile_file = preload_compile_file;
 
 	orig_compiler_options = CG(compiler_options);
+	CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
 	CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
 //	CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
 	CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
