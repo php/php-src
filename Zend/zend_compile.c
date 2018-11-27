@@ -4703,6 +4703,10 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 
 	zend_compile_stmt(stmt_ast);
 
+	/* Place JMP and FE_FREE on the line where foreach starts. It would be
+	 * better to use the end line, but this information is not available
+	 * currently. */
+	CG(zend_lineno) = ast->lineno;
 	zend_emit_jump(opnum_fetch);
 
 	opline = &CG(active_op_array)->opcodes[opnum_reset];
@@ -4713,7 +4717,6 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 
 	zend_end_loop(opnum_fetch, &reset_node);
 
-	CG(zend_lineno) = ast->lineno;
 	opline = zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
 }
 /* }}} */
