@@ -4713,6 +4713,7 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 
 	zend_end_loop(opnum_fetch, &reset_node);
 
+	CG(zend_lineno) = ast->lineno;
 	opline = zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
 }
 /* }}} */
