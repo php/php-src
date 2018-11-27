@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #71041 (zend_signal_startup() needs ZEND_API).
     (Valentin V. Bartenev)
+  . Fixed bug #76046 (PHP generates "FE_FREE" opcode on the wrong line).
+    (Nikita)
 
 - COM:
   . Fixed bug #77177 (Serializing or unserializing COM objects crashes). (cmb)
