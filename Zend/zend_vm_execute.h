@@ -21899,11 +21899,6 @@ assign_dim_op_new_array:
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 				goto assign_dim_op_array;
 			}
-		} else if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-assign_dim_op_convert_to_array:
-			ZVAL_ARR(container, zend_new_array(8));
-			goto assign_dim_op_new_array;
 		}
 
 		dim = RT_CONSTANT(opline, opline->op2);
@@ -21913,7 +21908,7 @@ assign_dim_op_convert_to_array:
 			if (IS_CONST == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(container, dim, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CONST == IS_UNUSED) {
@@ -21924,7 +21919,11 @@ assign_dim_op_convert_to_array:
 				}
 				UNDEF_RESULT();
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				goto assign_dim_op_convert_to_array;
+				if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+					container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
+				}
+				ZVAL_ARR(container, zend_new_array(8));
+				goto assign_dim_op_new_array;
 			} else {
 				if (UNEXPECTED(IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_use_scalar_as_array();
@@ -24229,11 +24228,6 @@ assign_dim_op_new_array:
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 				goto assign_dim_op_array;
 			}
-		} else if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-assign_dim_op_convert_to_array:
-			ZVAL_ARR(container, zend_new_array(8));
-			goto assign_dim_op_new_array;
 		}
 
 		dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
@@ -24243,7 +24237,7 @@ assign_dim_op_convert_to_array:
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(container, dim, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
@@ -24254,7 +24248,11 @@ assign_dim_op_convert_to_array:
 				}
 				UNDEF_RESULT();
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				goto assign_dim_op_convert_to_array;
+				if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+					container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
+				}
+				ZVAL_ARR(container, zend_new_array(8));
+				goto assign_dim_op_new_array;
 			} else {
 				if (UNEXPECTED(IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_use_scalar_as_array();
@@ -26710,11 +26708,6 @@ assign_dim_op_new_array:
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 				goto assign_dim_op_array;
 			}
-		} else if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-assign_dim_op_convert_to_array:
-			ZVAL_ARR(container, zend_new_array(8));
-			goto assign_dim_op_new_array;
 		}
 
 		dim = NULL;
@@ -26724,7 +26717,7 @@ assign_dim_op_convert_to_array:
 			if (IS_UNUSED == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(container, dim, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_UNUSED == IS_UNUSED) {
@@ -26735,7 +26728,11 @@ assign_dim_op_convert_to_array:
 				}
 				UNDEF_RESULT();
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				goto assign_dim_op_convert_to_array;
+				if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+					container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
+				}
+				ZVAL_ARR(container, zend_new_array(8));
+				goto assign_dim_op_new_array;
 			} else {
 				if (UNEXPECTED(IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_use_scalar_as_array();
@@ -28092,11 +28089,6 @@ assign_dim_op_new_array:
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 				goto assign_dim_op_array;
 			}
-		} else if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-assign_dim_op_convert_to_array:
-			ZVAL_ARR(container, zend_new_array(8));
-			goto assign_dim_op_new_array;
 		}
 
 		dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
@@ -28106,7 +28098,7 @@ assign_dim_op_convert_to_array:
 			if (IS_CV == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(container, dim, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CV == IS_UNUSED) {
@@ -28117,7 +28109,11 @@ assign_dim_op_convert_to_array:
 				}
 				UNDEF_RESULT();
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				goto assign_dim_op_convert_to_array;
+				if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+					container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
+				}
+				ZVAL_ARR(container, zend_new_array(8));
+				goto assign_dim_op_new_array;
 			} else {
 				if (UNEXPECTED(IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_use_scalar_as_array();
@@ -38562,11 +38558,6 @@ assign_dim_op_new_array:
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 				goto assign_dim_op_array;
 			}
-		} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-assign_dim_op_convert_to_array:
-			ZVAL_ARR(container, zend_new_array(8));
-			goto assign_dim_op_new_array;
 		}
 
 		dim = RT_CONSTANT(opline, opline->op2);
@@ -38576,7 +38567,7 @@ assign_dim_op_convert_to_array:
 			if (IS_CONST == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(container, dim, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CONST == IS_UNUSED) {
@@ -38587,7 +38578,11 @@ assign_dim_op_convert_to_array:
 				}
 				UNDEF_RESULT();
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				goto assign_dim_op_convert_to_array;
+				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+					container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
+				}
+				ZVAL_ARR(container, zend_new_array(8));
+				goto assign_dim_op_new_array;
 			} else {
 				if (UNEXPECTED(IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_use_scalar_as_array();
@@ -42403,11 +42398,6 @@ assign_dim_op_new_array:
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 				goto assign_dim_op_array;
 			}
-		} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-assign_dim_op_convert_to_array:
-			ZVAL_ARR(container, zend_new_array(8));
-			goto assign_dim_op_new_array;
 		}
 
 		dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
@@ -42417,7 +42407,7 @@ assign_dim_op_convert_to_array:
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(container, dim, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
@@ -42428,7 +42418,11 @@ assign_dim_op_convert_to_array:
 				}
 				UNDEF_RESULT();
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				goto assign_dim_op_convert_to_array;
+				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+					container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
+				}
+				ZVAL_ARR(container, zend_new_array(8));
+				goto assign_dim_op_new_array;
 			} else {
 				if (UNEXPECTED(IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_use_scalar_as_array();
@@ -45632,11 +45626,6 @@ assign_dim_op_new_array:
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 				goto assign_dim_op_array;
 			}
-		} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-assign_dim_op_convert_to_array:
-			ZVAL_ARR(container, zend_new_array(8));
-			goto assign_dim_op_new_array;
 		}
 
 		dim = NULL;
@@ -45646,7 +45635,7 @@ assign_dim_op_convert_to_array:
 			if (IS_UNUSED == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(container, dim, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_UNUSED == IS_UNUSED) {
@@ -45657,7 +45646,11 @@ assign_dim_op_convert_to_array:
 				}
 				UNDEF_RESULT();
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				goto assign_dim_op_convert_to_array;
+				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+					container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
+				}
+				ZVAL_ARR(container, zend_new_array(8));
+				goto assign_dim_op_new_array;
 			} else {
 				if (UNEXPECTED(IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_use_scalar_as_array();
@@ -48105,11 +48098,6 @@ assign_dim_op_new_array:
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 				goto assign_dim_op_array;
 			}
-		} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-assign_dim_op_convert_to_array:
-			ZVAL_ARR(container, zend_new_array(8));
-			goto assign_dim_op_new_array;
 		}
 
 		dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
@@ -48119,7 +48107,7 @@ assign_dim_op_convert_to_array:
 			if (IS_CV == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(container, dim, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CV == IS_UNUSED) {
@@ -48130,7 +48118,11 @@ assign_dim_op_convert_to_array:
 				}
 				UNDEF_RESULT();
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				goto assign_dim_op_convert_to_array;
+				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+					container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
+				}
+				ZVAL_ARR(container, zend_new_array(8));
+				goto assign_dim_op_new_array;
 			} else {
 				if (UNEXPECTED(IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_use_scalar_as_array();

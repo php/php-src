@@ -11,7 +11,7 @@ include 'config.inc';
 $db = pg_connect($conn_str);
 
 $sql = "SELECT * FROM $table_name";
-$result = pg_query($db, $sql) or die('Cannot qeury db');
+$result = pg_query($db, $sql) or die('Cannot query db');
 $rows = pg_num_rows($result);
 
 var_dump(pg_result_seek($result, 1));

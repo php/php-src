@@ -1070,22 +1070,6 @@ ZEND_METHOD(Generator, getReturn)
 }
 /* }}} */
 
-/* {{{ proto Generator::__wakeup()
- * Throws an Exception as generators can't be serialized */
-ZEND_METHOD(Generator, __wakeup)
-{
-	/* Just specifying the zend_class_unserialize_deny handler is not enough,
-	 * because it is only invoked for C unserialization. For O the error has
-	 * to be thrown in __wakeup. */
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	zend_throw_exception(NULL, "Unserialization of 'Generator' is not allowed", 0);
-}
-/* }}} */
-
 /* get_iterator implementation */
 
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ */
@@ -1212,7 +1196,6 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, throw,    arginfo_generator_throw, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, getReturn,arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, __wakeup, arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

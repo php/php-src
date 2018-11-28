@@ -1,10 +1,5 @@
 --TEST--
 Bug #68996 (Invalid free of CG(interned_empty_string))
---SKIPIF--
-<?php
-if (getenv("USE_ZEND_ALLOC") !== "0")
-    print "skip Need Zend MM disabled";
-?>
 --INI--
 html_errors=1
 --FILE--

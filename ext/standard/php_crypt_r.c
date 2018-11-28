@@ -154,9 +154,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	}
 
 	/* It stops at the first '$', max 8 chars */
-	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++) {
-		continue;
-	}
+	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++);
 
 	/* get the length of the true salt */
 	sl = (DWORD)(ep - sp);
@@ -335,8 +333,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 		sp += MD5_MAGIC_LEN;
 
 	/* It stops at the first '$', max 8 chars */
-	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++)
-		continue;
+	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++);
 
 	/* get the length of the true salt */
 	sl = ep - sp;

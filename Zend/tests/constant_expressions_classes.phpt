@@ -5,7 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 --SKIPIF--
-<?php if (!extension_loaded('Zend OPcache') || php_sapi_name() != "cli") die("skip CLI only"); ?>
+<?php if (php_sapi_name() != "cli") die("skip CLI only"); ?>
 --FILE--
 <?php
 

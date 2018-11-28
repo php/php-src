@@ -8,10 +8,6 @@ $res = @include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.in
 if(!$res) {
 	die("skip could not open cli server script");
 }
-
-if (CURL_WRAPPERS_ENABLED) {
-	die("skip curl wrappers used");
-}
 ?>
 --FILE--
 <?php

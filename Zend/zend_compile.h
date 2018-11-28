@@ -1042,6 +1042,12 @@ END_EXTERN_C()
 /* ignore functions and classes declared in other files */
 #define ZEND_COMPILE_IGNORE_OTHER_FILES			(1<<12)
 
+/* this flag is set when compiler invoked by opcache_compile_file() */
+#define ZEND_COMPILE_WITHOUT_EXECUTION          (1<<13)
+
+/* this flag is set when compiler invoked during preloading */
+#define ZEND_COMPILE_PRELOAD                    (1<<14)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 

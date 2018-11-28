@@ -1661,8 +1661,8 @@ static void zend_accel_init_auto_globals(void)
 static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handle, int type, const char *key, zend_op_array **op_array_p)
 {
 	zend_persistent_script *new_persistent_script;
+	uint32_t orig_functions_count, orig_class_count;
 	zend_op_array *orig_active_op_array;
-	HashTable *orig_class_table;
 	zval orig_user_error_handler;
 	zend_op_array *op_array;
 	int do_bailout = 0;
@@ -1722,15 +1722,13 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		}
 	}
 
-	new_persistent_script = create_persistent_script();
-
 	/* Save the original values for the op_array, function table and class table */
 	orig_active_op_array = CG(active_op_array);
-	orig_class_table = CG(class_table);
+	orig_functions_count = EG(function_table)->nNumUsed;
+	orig_class_count = EG(class_table)->nNumUsed;
 	ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
 
 	/* Override them with ours */
-	EG(class_table) = CG(class_table) = &new_persistent_script->script.class_table;
 	ZVAL_UNDEF(&EG(user_error_handler));
 
 	zend_try {
@@ -1755,12 +1753,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
 	/* Restore originals */
 	CG(active_op_array) = orig_active_op_array;
-	EG(class_table) = CG(class_table) = orig_class_table;
 	EG(user_error_handler) = orig_user_error_handler;
 
 	if (!op_array) {
 		/* compilation failed */
-		free_persistent_script(new_persistent_script, 1);
 		if (do_bailout) {
 			zend_bailout();
 		}
@@ -1771,8 +1767,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	   Here we aren't sure we would store it, but we will need it
 	   further anyway.
 	*/
+	new_persistent_script = create_persistent_script();
 	new_persistent_script->script.main_op_array = *op_array;
-	zend_accel_move_user_functions(CG(function_table), &new_persistent_script->script);
+	zend_accel_move_user_functions(CG(function_table), CG(function_table)->nNumUsed - orig_functions_count, &new_persistent_script->script);
+	zend_accel_move_user_classes(CG(class_table), CG(class_table)->nNumUsed - orig_class_count, &new_persistent_script->script);
 	new_persistent_script->script.first_early_binding_opline =
 		(op_array->fn_flags & ZEND_ACC_EARLY_BINDING) ?
 			zend_build_delayed_early_binding_list(op_array) :
@@ -3133,6 +3131,8 @@ static void preload_move_user_functions(HashTable *src, HashTable *dst)
 {
 	Bucket *p;
 	dtor_func_t orig_dtor = src->pDestructor;
+	zend_string *filename = NULL;
+	int copy = 0;
 
 	src->pDestructor = NULL;
 	zend_hash_extend(dst, dst->nNumUsed + src->nNumUsed, 0);
@@ -3140,7 +3140,19 @@ static void preload_move_user_functions(HashTable *src, HashTable *dst)
 		zend_function *function = Z_PTR(p->val);
 
 		if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
-			_zend_hash_append_ptr(dst, p->key, function);
+			if (function->op_array.filename != filename) {
+				filename = function->op_array.filename;
+				if (filename) {
+					copy = zend_hash_exists(preload_scripts, filename);
+				} else {
+					copy = 0;
+				}
+			}
+			if (copy) {
+				_zend_hash_append_ptr(dst, p->key, function);
+			} else {
+				orig_dtor(&p->val);
+			}
 			zend_hash_del_bucket(src, p);
 		} else {
 			break;
@@ -3153,6 +3165,8 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 {
 	Bucket *p;
 	dtor_func_t orig_dtor = src->pDestructor;
+	zend_string *filename = NULL;
+	int copy = 0;
 
 	src->pDestructor = NULL;
 	zend_hash_extend(dst, dst->nNumUsed + src->nNumUsed, 0);
@@ -3160,7 +3174,19 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 		zend_class_entry *ce = Z_PTR(p->val);
 
 		if (EXPECTED(ce->type == ZEND_USER_CLASS)) {
-			_zend_hash_append_ptr(dst, p->key, ce);
+			if (ce->info.user.filename != filename) {
+				filename = ce->info.user.filename;
+				if (filename) {
+					copy = zend_hash_exists(preload_scripts, filename);
+				} else {
+					copy = 0;
+				}
+			}
+			if (copy) {
+				_zend_hash_append_ptr(dst, p->key, ce);
+			} else {
+				orig_dtor(&p->val);
+			}
 			zend_hash_del_bucket(src, p);
 		} else {
 			break;
@@ -3622,7 +3648,7 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	uint32_t checkpoint;
 
 	if (zend_accel_hash_is_full(&ZCSG(hash))) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Not enough entries in hash table for preloading!");
+		zend_accel_error(ACCEL_LOG_FATAL, "Not enough entries in hash table for preloading. Consider increasing the value for the opcache.max_accelerated_files directive in php.ini.");
 		return NULL;
 	}
 
@@ -3674,7 +3700,7 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	}
 #endif
 	if (!ZCG(mem)) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Not enough shared memory for preloading!");
+		zend_accel_error(ACCEL_LOG_FATAL, "Not enough shared memory for preloading. Consider increasing the value for the opcache.memory_consumption directive in php.ini.");
 		return NULL;
 	}
 
@@ -3753,6 +3779,7 @@ static int accel_preload(const char *config)
 	accelerator_orig_compile_file = preload_compile_file;
 
 	orig_compiler_options = CG(compiler_options);
+	CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
 	CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
 //	CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
 	CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;

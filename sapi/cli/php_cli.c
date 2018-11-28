@@ -637,7 +637,7 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 /* }}} */
 
 /*{{{ php_cli_win32_ctrl_handler */
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+#if defined(PHP_WIN32)
 BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
 {
 	(void)php_win32_cp_cli_do_restore(orig_cp);
@@ -1190,12 +1190,11 @@ int main(int argc, char *argv[])
 # ifdef PHP_CLI_WIN32_NO_CONSOLE
 	int argc = __argc;
 	char **argv = __argv;
-# else
+# endif
 	int num_args;
 	wchar_t **argv_wide;
 	char **argv_save = argv;
 	BOOL using_wide_argv = 0;
-# endif
 #endif
 
 	int c;
@@ -1365,7 +1364,7 @@ exit_loop:
 	}
 	module_started = 1;
 
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+#if defined(PHP_WIN32)
 	php_win32_cp_cli_setup();
 	orig_cp = (php_win32_cp_get_orig())->id;
 	/* Ignore the delivered argv and argc, read from W API. This place
@@ -1411,7 +1410,7 @@ out:
 	tsrm_shutdown();
 #endif
 
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+#if defined(PHP_WIN32)
 	(void)php_win32_cp_cli_restore();
 
 	if (using_wide_argv) {

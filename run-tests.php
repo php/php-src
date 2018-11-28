@@ -771,12 +771,12 @@ Options:
                 seconds. The default value is 60 seconds, or 300 seconds when
                 testing for memory leaks.
 
-    --show-[all|php|skip|clean|exp|diff|out]
+    --show-[all|php|skip|clean|exp|diff|out|mem]
                 Show 'all' files, 'php' test file, 'skip' or 'clean' file. You
                 can also use this to show the output 'out', the expected result
-                'exp' or the difference between them 'diff'. The result types
-                get written independent of the log format, however 'diff' only
-                exists when a test fails.
+                'exp', the difference between them 'diff' or the valgrind log
+                'mem'. The result types get written independent of the log format,
+                however 'diff' only exists when a test fails.
 
     --show-slow [n]
                 Show all tests that took longer than [n] milliseconds to run.
@@ -895,7 +895,7 @@ $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
 $test_dirs = array();
-$optionals = array('tests', 'ext', 'Zend', 'sapi');
+$optionals = array('tests', 'ext', 'Zend');
 
 foreach($optionals as $dir) {
 	if (is_dir($dir)) {
@@ -1320,7 +1320,7 @@ TEST $file
 			// check for unknown sections
 			if (!in_array($section, array(
 				'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL', 'EXPECTHEADERS',
-				'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'PUT', 'GET', 'COOKIE', 'ARGS', 'REQUEST', 'HEADERS',
+				'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'PUT', 'GET', 'COOKIE', 'ARGS',
 				'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
 				'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
 				'INI', 'ENV', 'EXTENSIONS',

@@ -22,6 +22,7 @@
 
 #include "php.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_interfaces.h"
 #include "php_curl.h"
 #if HAVE_CURL
 
@@ -130,16 +131,6 @@ ZEND_METHOD(CURLFile, setPostFilename)
 }
 /* }}} */
 
-/* {{{ proto CURLFile::__wakeup()
-   Unserialization handler */
-ZEND_METHOD(CURLFile, __wakeup)
-{
-	zend_unset_property(curl_CURLFile_class, ZEND_THIS, "name", sizeof("name")-1);
-	zend_update_property_string(curl_CURLFile_class, ZEND_THIS, "name", sizeof("name")-1, "");
-	zend_throw_exception(NULL, "Unserialization of CURLFile instances is not allowed", 0);
-}
-/* }}} */
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curlfile_create, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, mimetype)
@@ -158,7 +149,6 @@ static const zend_function_entry curlfile_funcs[] = {
 	PHP_ME(CURLFile,			setMimeType,        arginfo_curlfile_name, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			getPostFilename,    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			setPostFilename,    arginfo_curlfile_name, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,            __wakeup,           NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -167,6 +157,8 @@ void curlfile_register_class(void)
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY( ce, "CURLFile", curlfile_funcs );
 	curl_CURLFile_class = zend_register_internal_class(&ce);
+	curl_CURLFile_class->serialize = zend_class_serialize_deny;
+	curl_CURLFile_class->unserialize = zend_class_unserialize_deny;
 	zend_declare_property_string(curl_CURLFile_class, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 	zend_declare_property_string(curl_CURLFile_class, "mime", sizeof("mime")-1, "", ZEND_ACC_PUBLIC);
 	zend_declare_property_string(curl_CURLFile_class, "postname", sizeof("postname")-1, "", ZEND_ACC_PUBLIC);

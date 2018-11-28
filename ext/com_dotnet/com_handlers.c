@@ -229,7 +229,7 @@ static HashTable *com_properties_get(zval *object)
 	 * infinite recursion when the hash is displayed via var_dump().
 	 * Perhaps it is best to leave it un-implemented.
 	 */
-	return NULL;
+	return &zend_empty_array;
 }
 
 static void function_dtor(zval *zv)
