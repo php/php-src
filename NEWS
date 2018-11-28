@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #77177 (Serializing or unserializing COM objects crashes). (cmb)
 
+- Date:
+  . Fixed bug #77097 (DateTime::diff gives wrong diff when the actual diff is
+    less than 1 second). (Derick)
+
 - Exif:
   . Fixed bug #77184 (Unsigned rational numbers are written out as signed
     rationals). (Colin Basnett)
