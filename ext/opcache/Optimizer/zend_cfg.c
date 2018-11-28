@@ -153,7 +153,6 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 							changed = 1;
 							zend_mark_reachable(op_array->opcodes, cfg, b);
 						} else {
-							ZEND_ASSERT(b->start == live_range->end);
 							b->flags |= ZEND_BB_UNREACHABLE_FREE;
 						}
 					}
