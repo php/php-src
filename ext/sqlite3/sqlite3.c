@@ -1575,7 +1575,10 @@ PHP_METHOD(sqlite3stmt, execute)
 
 			/* If the ZVAL is null then it should be bound as that */
 			if (Z_TYPE_P(parameter) == IS_NULL) {
-				sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+				return_code = sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+				if (return_code != SQLITE_OK) {
+					php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+				}
 				continue;
 			}
 
@@ -1583,15 +1586,21 @@ PHP_METHOD(sqlite3stmt, execute)
 				case SQLITE_INTEGER:
 					convert_to_long(parameter);
 #if ZEND_LONG_MAX > 2147483647
-					sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
+					return_code = sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
 #else
-					sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
+					return_code = sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
 #endif
+					if (return_code != SQLITE_OK) {
+						php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+					}
 					break;
 
 				case SQLITE_FLOAT:
 					convert_to_double(parameter);
-					sqlite3_bind_double(stmt_obj->stmt, param->param_number, Z_DVAL_P(parameter));
+					return_code = sqlite3_bind_double(stmt_obj->stmt, param->param_number, Z_DVAL_P(parameter));
+					if (return_code != SQLITE_OK) {
+						php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+					}
 					break;
 
 				case SQLITE_BLOB:
@@ -1610,21 +1619,33 @@ PHP_METHOD(sqlite3stmt, execute)
 					}
 
 					if (buffer) {
-						sqlite3_bind_blob(stmt_obj->stmt, param->param_number, ZSTR_VAL(buffer), ZSTR_LEN(buffer), SQLITE_TRANSIENT);
+						return_code = sqlite3_bind_blob(stmt_obj->stmt, param->param_number, ZSTR_VAL(buffer), ZSTR_LEN(buffer), SQLITE_TRANSIENT);
 						zend_string_release_ex(buffer, 0);
+						if (return_code != SQLITE_OK) {
+							php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+						}
 					} else {
-						sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+						return_code = sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+						if (return_code != SQLITE_OK) {
+							php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+						}
 					}
 					break;
 				}
 
 				case SQLITE3_TEXT:
 					convert_to_string(parameter);
-					sqlite3_bind_text(stmt_obj->stmt, param->param_number, Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), SQLITE_STATIC);
+					return_code = sqlite3_bind_text(stmt_obj->stmt, param->param_number, Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), SQLITE_STATIC);
+					if (return_code != SQLITE_OK) {
+						php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+					}
 					break;
 
 				case SQLITE_NULL:
-					sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+					return_code = sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+					if (return_code != SQLITE_OK) {
+						php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+					}
 					break;
 
 				default:
