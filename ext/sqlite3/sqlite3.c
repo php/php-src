@@ -1564,6 +1564,9 @@ PHP_METHOD(sqlite3stmt, execute)
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 
+	/* Always reset statement before execution, see bug #77051 */
+	sqlite3_reset(stmt_obj->stmt);
+
 	if (stmt_obj->bound_params) {
 		ZEND_HASH_FOREACH_PTR(stmt_obj->bound_params, param) {
 			zval *parameter;
