@@ -41,7 +41,7 @@ PHP                                                                        NEWS
 
 - SQLite3:
   . Unbundled libsqlite. (cmb)
-  . Lifted requirements to SQLite 3.5.0. (cmb)
+  . Lifted requirements to SQLite 3.7.4. (cmb)
   . Forbid (un)serialization of SQLite3, SQLite3Stmt and SQLite3Result. (cmb)
   . Added support for the SQLite @name notation. (cmb, BohwaZ)
 
