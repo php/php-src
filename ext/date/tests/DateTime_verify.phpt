@@ -168,13 +168,15 @@ array(19) {
   }
 }
 ..and get names of all its class constants
-array(13) {
+array(14) {
   ["ATOM"]=>
   string(13) "Y-m-d\TH:i:sP"
   ["COOKIE"]=>
   string(16) "l, d-M-Y H:i:s T"
   ["ISO8601"]=>
   string(13) "Y-m-d\TH:i:sO"
+  ["MYSQL"]=>
+  string(11) "Y-m-d H:i:s"
   ["RFC822"]=>
   string(16) "D, d M y H:i:s O"
   ["RFC850"]=>

@@ -7,6 +7,7 @@ var_dump(
     DATE_ATOM    === DateTimeInterface::ATOM,
     DATE_COOKIE  === DateTimeInterface::COOKIE,
     DATE_ISO8601 === DateTimeInterface::ISO8601,
+    DATE_MYSQL   === DateTimeInterface::MYSQL,
     DATE_RFC822  === DateTimeInterface::RFC822,
     DATE_RFC850  === DateTimeInterface::RFC850,
     DATE_RFC1036 === DateTimeInterface::RFC1036,
@@ -19,6 +20,7 @@ var_dump(
 
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)
 bool(true)
