@@ -2608,7 +2608,7 @@ dnl Generates the config.nice file
 dnl
 AC_DEFUN([PHP_CONFIG_NICE],[
   AC_REQUIRE([AC_PROG_EGREP])
-  AC_REQUIRE([LT_AC_PROG_SED])
+  AC_REQUIRE([AC_PROG_SED])
   PHP_SUBST_OLD(EGREP)
   PHP_SUBST_OLD(SED)
   test -f $1 && mv $1 $1.old
