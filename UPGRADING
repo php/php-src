@@ -118,7 +118,7 @@ PHP 7.4 UPGRADE NOTES
     see either ./configure --help or follow the instructions in error messages.
   . The behavior of imagecropauto() in the bundled libgd has been synced with
     that of system libgd:
-     * GD_CROP_DEFAULT is no longer falling back to GD_CROP_SIDES
+     * IMG_CROP_DEFAULT is no longer falling back to IMG_CROP_SIDES
      * Threshold-cropping now uses the algorithm of system libgd
 
 - Hash:
