@@ -901,17 +901,21 @@ PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capt
 		required, perhaps just a minimum sized data would suffice. */
 PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre2_code *re)
 {/*{{{*/
-	int rc = 0;
 
 	assert(NULL != re);
 
-	if (!capture_count) {
-		/* As we deal with a non cached pattern, no other way to gather this info. */
-		rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &capture_count);
-	}
+	if (EXPECTED(!mdata_used)) {
+		int rc = 0;
 
-	if (rc >= 0 && capture_count + 1 <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
-		return mdata;
+		if (!capture_count) {
+			/* As we deal with a non cached pattern, no other way to gather this info. */
+			rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &capture_count);
+		}
+
+		if (rc >= 0 && capture_count + 1 <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
+			mdata_used = 1;
+			return mdata;
+		}
 	}
 
 	return pcre2_match_data_create_from_pattern(re, gctx);
@@ -919,8 +923,10 @@ PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre
 
 PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
 {/*{{{*/
-	if (match_data != mdata) {
+	if (UNEXPECTED(match_data != mdata)) {
 		pcre2_match_data_free(match_data);
+	} else {
+		mdata_used = 0;
 	}
 }/*}}}*/
 
