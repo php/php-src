@@ -79,33 +79,6 @@ AC_DEFUN([AC_ZEND_BROKEN_SPRINTF],[
   AC_DEFINE_UNQUOTED(ZEND_BROKEN_SPRINTF, $ac_result, [Whether sprintf is broken])
 ])
 
-dnl
-dnl AC_ZEND_C_BIGENDIAN
-dnl Replacement macro for AC_C_BIGENDIAN
-dnl
-AC_DEFUN([AC_ZEND_C_BIGENDIAN],
-[AC_CACHE_CHECK([whether byte ordering is bigendian], ac_cv_c_bigendian_php,
- [
-  ac_cv_c_bigendian_php=unknown
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-int main(void)
-{
-        short one = 1;
-        char *cp = (char *)&one;
-
-        if (*cp == 0) {
-                return(0);
-        } else {
-                return(1);
-        }
-}
-  ]])], [ac_cv_c_bigendian_php=yes], [ac_cv_c_bigendian_php=no], [ac_cv_c_bigendian_php=unknown])
- ])
- if test $ac_cv_c_bigendian_php = yes; then
-   AC_DEFINE(WORDS_BIGENDIAN, 1, [Define if processor uses big-endian word])
- fi
-])
-
 AC_DEFUN([AM_SET_LIBTOOL_VARIABLE],[
   LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
 ])
