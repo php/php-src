@@ -6,13 +6,20 @@ if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!extension_loaded("phar")) die("skip phar not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
+--INI--
+phar.readonly=0
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug65538_003.pem.tmp';
+
+$cacertFile = 'bug65538_003-ca.pem';
+$cacertPhar = __DIR__ . DIRECTORY_SEPARATOR . 'bug65538_003-ca.phar.tmp';
+
 $serverCode = <<<'CODE'
     $serverUri = "ssl://127.0.0.1:64321";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/bug54992.pem',
+        'local_cert' => '%s',
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
@@ -34,12 +41,14 @@ $serverCode = <<<'CODE'
         fclose($client);
     }
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
+$peerName = 'bug65538_003';
 $clientCode = <<<'CODE'
     $serverUri = "https://127.0.0.1:64321/";
     $clientCtx = stream_context_create(['ssl' => [
-        'cafile' => 'phar://' . __DIR__ . '/bug65538.phar/bug54992-ca.pem',
-        'peer_name' => 'bug54992.local',
+        'cafile' => 'phar://%s/%s',
+        'peer_name' => '%s',
     ]]);
 
     phpt_wait();
@@ -47,9 +56,22 @@ $clientCode = <<<'CODE'
 
     var_dump($html);
 CODE;
+$clientCode = sprintf($clientCode, $cacertPhar, $cacertFile, $peerName);
+
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveNewCertAsFileWithKey($peerName, $certFile);
+
+$phar = new Phar($cacertPhar);
+$phar->addFromString($cacertFile, $certificateGenerator->getCaCert());
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
---EXPECTF--
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'bug65538_003.pem.tmp');
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'bug65538_003-ca.phar.tmp');
+?>
+--EXPECT--
 string(12) "Hello World!"
