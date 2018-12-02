@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #77153 (imap_open allows to run arbitrary shell commands via
     mailbox parameter). (Stas)
 
+- Phar:
+  . Fixed bug #77022 (PharData always creates new files with mode 0666). (Stas)
+
 13 Sep 2018 PHP 7.0.32
 
 - Apache2
