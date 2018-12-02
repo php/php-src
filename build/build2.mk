@@ -18,8 +18,6 @@ include generated_lists
 
 TOUCH_FILES = mkinstalldirs install-sh missing
 
-LT_TARGETS = ltmain.sh config.guess config.sub
-
 config_h_in = main/php_config.h.in
 
 targets = $(TOUCH_FILES) configure $(config_h_in)

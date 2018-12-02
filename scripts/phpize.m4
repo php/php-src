@@ -2,6 +2,7 @@ dnl This file becomes configure.ac for self-contained extensions.
 
 AC_PREREQ([2.68])
 AC_INIT(config.m4)
+AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
