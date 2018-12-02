@@ -30,6 +30,7 @@ PHP                                                                        NEWS
   . Fixed bug #77092 (array_diff_key() - segmentation fault). (Nikita)
 
 - Phar:
+  . Fixed bug #77022 (PharData always creates new files with mode 0666). (Stas)
   . Fixed bug #77143 (Heap Buffer Overflow (READ: 4) in phar_parse_pharfile).
     (Stas)
 
