@@ -2747,17 +2747,31 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend
 	zend_ulong num_key;
 	zend_string *str_key;
 	zval *zv;
+	zend_bool has_invisible = 0, has_numeric = 0;
 
 	ZEND_HASH_FOREACH_STR_KEY(ht, str_key) {
-		/* The `str_key &&` here might seem redundant: property tables should
-		 * only have string keys. Unfortunately, this isn't true, at the very
-		 * least because of ArrayObject, which stores a symtable where the
-		 * property table should be.
-		 */
-		if (str_key && ZEND_HANDLE_NUMERIC(str_key, num_key)) {
-			goto convert;
+		if (str_key) {
+			/* The `str_key &&` here might seem redundant: property tables should
+			 * only have string keys. Unfortunately, this isn't true, at the very
+			 * least because of ArrayObject, which stores a symtable where the
+			 * property table should be.
+			 */
+			if (ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+				has_numeric = 1;
+			}
+			/* The `str_key` is not the original property name!
+			 * just like `json_encode` does, we should skip invisible properties
+			 */
+			if (ZSTR_VAL(str_key)[0] == '\0' && ZSTR_LEN(str_key) > 0) {
+				has_invisible = 1;
+			}
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	if (UNEXPECTED(has_numeric || has_invisible))
+	{
+		goto convert;
+	}
 
 	if (always_duplicate) {
 		return zend_array_dup(ht);
@@ -2774,6 +2788,10 @@ convert:
 		HashTable *new_ht = zend_new_array(zend_hash_num_elements(ht));
 
 		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+			if (has_invisible && str_key && ZSTR_VAL(str_key)[0] == '\0' && ZSTR_LEN(str_key) > 0) {
+				/* Skip protected and private members. */
+				continue;
+			}
 			do {
 				if (Z_OPT_REFCOUNTED_P(zv)) {
 					if (Z_ISREF_P(zv) && Z_REFCOUNT_P(zv) == 1) {
@@ -2786,7 +2804,7 @@ convert:
 				}
 			} while (0);
 			/* Again, thank ArrayObject for `!str_key ||`. */
-			if (!str_key || ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+			if (has_numeric && (!str_key || ZEND_HANDLE_NUMERIC(str_key, num_key))) {
 				zend_hash_index_update(new_ht, num_key, zv);
 			} else {
 				zend_hash_update(new_ht, str_key, zv);
