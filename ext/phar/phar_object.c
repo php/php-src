@@ -3725,7 +3725,7 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, int filenam
 			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 		}
 
-		if (contents_file != NULL && php_stream_stat(contents_file, &ssb TSRMLS_CC) != -1) {
+		if (contents_file != NULL && php_stream_stat(contents_file, &ssb) != -1) {
 			data->internal_file->flags = ssb.sb.st_mode & PHAR_ENT_PERM_MASK ;
 		} else {
 #ifndef _WIN32
