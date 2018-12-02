@@ -89,6 +89,18 @@ PHP 7.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- SPL:
+  . SplFileObject::fputcsv(), ::fgetcsv() and ::setCsvControl() now accept an
+    emptry string as $escape argument, which disables the propriertary PHP
+    escaping mechanism. SplFileObject::getCsvControl() now may also return an
+    empty string for the third array element, accordingly.
+
+- Standard:
+  . fputcsv() and fgetcsv() now accept an emptry string as $escape argument,
+    which disables the propriertary PHP escaping mechanism. The behavior of
+    str_getcsv() has been adjusted accordingly (formerly, an empty string was
+    identical to using the default).
+
 ========================================
 6. New Functions
 ========================================

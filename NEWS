@@ -57,6 +57,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with
     stream_socket_client). (Ville Hukkamäki)
+  . Implemented FR #38301 (field enclosure behavior in fputcsv). (cmb)
+  . Implemented FR #51496 (fgetcsv should take empty string as an escape). (cmb)
 
 - Reflection:
   . Fixed bug #76737 (Unserialized reflection objects are broken, they

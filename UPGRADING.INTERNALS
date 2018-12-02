@@ -9,6 +9,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   f. get_properties_for() handler / Z_OBJDEBUG_P
   g. Required object handlers
   h. Immutable classes and op_arrays
+  i. php_fgetcsv() and php_fputcsv()
 
 2. Build system changes
   a. Abstract
@@ -135,6 +136,11 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      op_arrays. Instead, now you have to reserve op_array handle using
      zend_get_op_array_extension_handle() during MINIT and access its value
      using ZEND_OP_ARRAY_EXTENSION(op_array, handle).
+
+  i. The type of the escape parameter of php_fgetcsv() and php_fputcsv() has
+     been changed from char to int. This allows to pass the new constant macro
+     PHP_CSV_NO_ESCAPE to this parameter, to disable PHP's proprietary escape
+     mechanism.
 
 ========================
 2. Build system changes

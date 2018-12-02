@@ -22,4 +22,4 @@ $s->setCsvControl('|', '\'', 'three');
 unlink('csv_control_data.csv');
 ?>
 --EXPECTF--
-Warning: SplFileObject::setCsvControl(): escape must be a character in %s on line %d
+Warning: SplFileObject::setCsvControl(): escape must be empty or a single character in %s on line %d
