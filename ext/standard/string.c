@@ -5365,7 +5365,8 @@ Parse a CSV string into an array */
 PHP_FUNCTION(str_getcsv)
 {
 	zend_string *str;
-	char delim = ',', enc = '"', esc = '\\';
+	char delim = ',', enc = '"';
+	int esc = (unsigned char) '\\';
 	char *delim_str = NULL, *enc_str = NULL, *esc_str = NULL;
 	size_t delim_len = 0, enc_len = 0, esc_len = 0;
 
@@ -5379,7 +5380,9 @@ PHP_FUNCTION(str_getcsv)
 
 	delim = delim_len ? delim_str[0] : delim;
 	enc = enc_len ? enc_str[0] : enc;
-	esc = esc_len ? esc_str[0] : esc;
+	if (esc_str != NULL) {
+		esc = esc_len ? (unsigned char) esc_str[0] : PHP_CSV_NO_ESCAPE;
+	}
 
 	php_fgetcsv(NULL, delim, enc, esc, ZSTR_LEN(str), ZSTR_VAL(str), return_value);
 }
