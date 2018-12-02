@@ -19,6 +19,8 @@ foreach([Phar::TAR => 'tar', Phar::ZIP => 'zip'] as $mode => $ext) {
 	$phar->addFile($sFile, 'test-file-phar');
 	$phar->addFromString("test-from-string", 'test-file-phar');
 	$phar->extractTo(__DIR__);
+	clearstatcache(__DIR__ . '/test-file-phar');
+	clearstatcache(__DIR__ . '/test-from-string');
 	var_dump(decoct(stat(__DIR__ . '/test-file-phar')['mode']));
 	var_dump(decoct(stat(__DIR__ . '/test-from-string')['mode']));
 	unlink(__DIR__ . '/test-file-phar');
