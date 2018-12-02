@@ -3637,7 +3637,8 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, int filenam
 	char *error;
 	size_t contents_len;
 	phar_entry_data *data;
-	php_stream *contents_file;
+	php_stream *contents_file = NULL;
+	php_stream_statbuf ssb;
 
 	if (filename_len >= (int)sizeof(".phar")-1) {
 		start_pos = ('/' == filename[0] ? 1 : 0); /* account for any leading slash: multiple-leads handled elsewhere */
@@ -3674,8 +3675,18 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, int filenam
 				}
 				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
 			}
-
 			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
+		}
+
+		if (contents_file != NULL && php_stream_stat(contents_file, &ssb TSRMLS_CC) != -1) {
+			data->internal_file->flags = ssb.sb.st_mode & PHAR_ENT_PERM_MASK ;
+		} else {
+#ifndef _WIN32
+			mode_t mask;
+			mask = umask(0);
+			umask(mask);
+			data->internal_file->flags &= ~mask;
+#endif
 		}
 
 		/* check for copy-on-write */
