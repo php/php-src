@@ -33,12 +33,12 @@ $clientCode = <<<'CODE'
 
     phpt_wait();
 
-    // should be: 81cafc260aa8d82956ebc6212a362ecc
-    stream_context_set_option($clientCtx, 'ssl', 'peer_fingerprint', '81cafc260aa8d82956ebc6212a362ece');
+    // should be: 3610606deda596b3ae3859d33c4ce1d9
+    stream_context_set_option($clientCtx, 'ssl', 'peer_fingerprint', '3610606deda596b3ae3859d33c4ce1da');
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));
 
     stream_context_set_option($clientCtx, 'ssl', 'peer_fingerprint', [
-        'sha256' => '78ea579f2c3b439359dec5dac9d445108772927427c4780037e87df3799a0aa0',
+        'sha256' => 'dffa72247ab7e44d94b2858528e3f67015925782148d2cf0b15cd82d1c931215',
     ]);
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));
 CODE;
