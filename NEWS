@@ -25,6 +25,7 @@ PHP                                                                        NEWS
   . Fixed bug #77058 (Type inference in opcache causes side effects). (Nikita)
 
 - Phar:
+  . Fixed bug #77022 (PharData always creates new files with mode 0666). (Stas)
   . Fixed bug #77143 (Heap Buffer Overflow (READ: 4) in phar_parse_pharfile).
     (Stas)
 
