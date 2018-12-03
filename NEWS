@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #77147 (Fixing 60494 ignored ICONV_MIME_DECODE_CONTINUE_ON_ERROR).
     (cmb)
 
+- Core:
+  . Fixed bug #77231 (Segfault when using convert.quoted-printable-encode 
+    filter). (Stas)
+
 - IMAP:
   . Fixed bug #77153 (imap_open allows to run arbitrary shell commands via
     mailbox parameter). (Stas)
