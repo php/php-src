@@ -260,6 +260,14 @@ phpdbg:
     PHPDBG_FUNC have been removed.
 
 FPM:
+  . A new global option log_limit has been added. It can be used for setting
+    log limit for logged line which allows to log messages longer than 1024
+    characters without wrapping. It also fixes various wrapping issues.
+  . A new global option log_buffering has been added. It allows an experimental
+    logging without extra buffering.
+  . A new pool option decorate_workers_output has been added. It allows
+    disabling output decoration for workers output when catch_workers_output
+    enabled.
   . The getallheaders() function is now also available.
 
 ========================================
