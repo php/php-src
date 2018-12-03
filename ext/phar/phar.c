@@ -649,7 +649,7 @@ int phar_parse_metadata(char **buffer, zval *metadata, php_uint32 zip_metadata_l
 #define MANIFEST_FIXED_LEN	18
 
 #define SAFE_PHAR_GET_32(buffer, endbuffer, var) \
-	if (UNEXPECTED(buffer + 4 >= endbuffer)) { \
+	if (UNEXPECTED(buffer + 4 > endbuffer)) { \
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)"); \
 	} \
 	PHAR_GET_32(buffer, var);
