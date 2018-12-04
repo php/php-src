@@ -682,7 +682,7 @@ SPL_METHOD(SplPriorityQueue, insert)
 	   extract the element out of the top of the priority queue */
 SPL_METHOD(SplPriorityQueue, extract)
 {
-	zval value, *value_out;
+	zval value;
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -712,7 +712,7 @@ SPL_METHOD(SplPriorityQueue, extract)
 	   Peek at the top element of the priority queue */
 SPL_METHOD(SplPriorityQueue, top)
 {
-	zval *value, *value_out;
+	zval *value;
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
