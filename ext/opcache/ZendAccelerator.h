@@ -206,6 +206,7 @@ typedef struct _zend_accel_directives {
 	char          *file_cache;
 	zend_bool      file_cache_only;
 	zend_bool      file_cache_consistency_checks;
+	zend_bool      allow_inplace_bin;
 #endif
 #if ENABLE_FILE_CACHE_FALLBACK
 	zend_bool      file_cache_fallback;

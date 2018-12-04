@@ -1449,6 +1449,38 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	UNSERIALIZE_PTR(script->arena_mem);
 }
 
+/* Check wheather the source file is actually already a serialized opline file.
+ * If it is, we skip the lookup from cache folder, and we unserialize the
+ * persisted oplines inside the origin file. */
+int zend_file_script_is_inplace_bin(char *filename)
+{
+	int fd;
+	zend_file_cache_metainfo info;
+	void *mem, *checkpoint;
+	if (ZCG(accel_directives).allow_inplace_bin) {
+		/* Open the source file */
+		fd = open(filename, O_RDONLY | O_BINARY);
+		/* If file is shorter that OPcache header, it's not a bin candidate */
+		if (read(fd, &info, sizeof(info)) != sizeof(info)) {
+			close(fd);
+			return 0;
+		}
+		/* verify header */
+		if (memcmp(info.magic, "OPCACHE", 8) != 0) {
+			close(fd);
+			return 0;
+		}
+		/* verify system id */
+		if (memcmp(info.system_id, ZCG(system_id), 32) != 0) {
+			close(fd);
+			return 0;
+		}
+		close(fd);
+		return 1;
+	}
+	return 0;
+}
+
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
 {
 	zend_string *full_path = file_handle->opened_path;
@@ -1464,7 +1496,15 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	if (!full_path) {
 		return NULL;
 	}
-	filename = zend_file_cache_get_bin_file_path(full_path);
+
+	/* Check whether the source script is already binary */
+	if (zend_file_script_is_inplace_bin(ZSTR_VAL(file_handle->opened_path))) {
+		filename = emalloc(ZSTR_LEN(file_handle->opened_path) + 1);
+		strcpy(filename, ZSTR_VAL(file_handle->opened_path));
+	}
+	else {
+		filename = zend_file_cache_get_bin_file_path(full_path);
+	}
 
 	fd = zend_file_cache_open(filename, O_RDONLY | O_BINARY);
 	if (fd < 0) {

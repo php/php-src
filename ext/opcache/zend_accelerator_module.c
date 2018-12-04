@@ -65,6 +65,7 @@ ZEND_END_ARG_INFO()
 static ZEND_FUNCTION(opcache_reset);
 static ZEND_FUNCTION(opcache_invalidate);
 static ZEND_FUNCTION(opcache_is_script_cached);
+static ZEND_FUNCTION(opcache_get_system_id);
 
 /* Private functions */
 static ZEND_FUNCTION(opcache_get_status);
@@ -77,6 +78,7 @@ static const zend_function_entry accel_functions[] = {
 	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)
 	ZEND_FE(opcache_compile_file,			arginfo_opcache_compile_file)
 	ZEND_FE(opcache_is_script_cached,		arginfo_opcache_is_script_cached)
+	ZEND_FE(opcache_get_system_id,				arginfo_opcache_none)
 	/* Private functions */
 	ZEND_FE(opcache_get_configuration,		arginfo_opcache_none)
 	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
@@ -316,6 +318,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.allow_inplace_bin"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.allow_inplace_bin,             zend_accel_globals, accel_globals)
 #endif
 #if ENABLE_FILE_CACHE_FALLBACK
 	STD_PHP_INI_ENTRY("opcache.file_cache_fallback"           , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_fallback,           zend_accel_globals, accel_globals)
@@ -788,6 +791,11 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	array_init(&blacklist);
 	zend_accel_blacklist_apply(&accel_blacklist, add_blacklist_path, &blacklist);
 	add_assoc_zval(return_value, "blacklist", &blacklist);
+}
+
+static ZEND_FUNCTION(opcache_get_system_id)
+{
+	ZVAL_STRING(return_value, ZCG(system_id));
 }
 
 /* {{{ proto void accelerator_reset()
