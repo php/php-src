@@ -1,13 +1,20 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018 PHP 7.0.33
+06 Dec 2018 PHP 7.0.33
+
+- Core:
+  . Fixed bug #77231 (Segfault when using convert.quoted-printable-encode
+    filter). (Stas)
 
 - IMAP:
+  . Fixed bug #77020 (null pointer dereference in imap_mail). (cmb)
   . Fixed bug #77153 (imap_open allows to run arbitrary shell commands via
     mailbox parameter). (Stas)
 
 - Phar:
   . Fixed bug #77022 (PharData always creates new files with mode 0666). (Stas)
+  . Fixed bug #77143 (Heap Buffer Overflow (READ: 4) in phar_parse_pharfile).
+    (Stas)
 
 13 Sep 2018 PHP 7.0.32
 
