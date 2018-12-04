@@ -82,6 +82,8 @@ PHP                                                                        NEWS
   . Fixed bug #76825 (Undefined symbols ___cpuid_count). (Laruence, cmb)
   . Fixed bug #77110 (undefined symbol zend_string_equal_val in C++ build).
     (Remi)
+  . Fixed bug #77231 (Segfault when using convert.quoted-printable-encode 
+    filter). (Stas)
 
 - BCMath:
   . Implemented request #67855 (No way to get current scale in use). (Chris
@@ -113,6 +115,8 @@ PHP                                                                        NEWS
       specifier). (Derick)
     . Fixed bug #75642 (Wrap around behaviour for microseconds is not working).
       (Derick)
+  . Fixed bug #77097 (DateTime::diff gives wrong diff when the actual diff is
+    less than 1 second). (Derick)
 
 - DBA:
   . Fixed bug #75264 (compiler warnings emitted). (petk)
@@ -157,6 +161,7 @@ PHP                                                                        NEWS
 - IMAP:
   . Fixed bug #77153 (imap_open allows to run arbitrary shell commands via
     mailbox parameter). (Stas)
+  . Fixed bug #77020 (null pointer dereference in imap_mail). (cmb)
 
 - Interbase:
   . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
@@ -279,6 +284,9 @@ PHP                                                                        NEWS
     (bwbroersma)
   . Fixed bug #65414 (deal with leading slash when adding files correctly).
     (bishopb)
+  . Fixed bug #77022 (PharData always creates new files with mode 0666). (Stas)
+  . Fixed bug #77143 (Heap Buffer Overflow (READ: 4) in phar_parse_pharfile).
+    (Stas)
 
 - readline:
   . Added completion_append_character and completion_suppress_append options
