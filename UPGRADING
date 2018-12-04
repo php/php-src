@@ -251,6 +251,10 @@ Standard:
     PHP be linked against libargon2 reference library >= 20161029.
     (RFC: https://wiki.php.net/rfc/argon2_password_hash_enhancements).
 
+LDAP:
+  . Full support for LDAP Controls has been added to LDAP querying functions
+    and ldap_parse_result
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -369,6 +373,16 @@ Standard:
 PCRE:
   . preg_quote() now also escapes the '#' character.
 
+LDAP:
+  . Added a serverctrls parameter to send controls to the server in ldap_add,
+    ldap_mod_replace, ldap_mod_add, ldap_mod_del, ldap_rename,
+    ldap_compare, ldap_delete, ldap_modify_batch,
+    ldap_search, ldap_list, ldap_read
+  . Added an out parameter to get controls from the server in ldap_parse_result
+  . Fixed support for LDAP_OPT_SERVER_CONTROLS and LDAP_OPT_CLIENT_CONTROLS in
+    ldap_get_option and ldap_set_option.
+
+
 ========================================
 6. New Functions
 ========================================
@@ -438,6 +452,13 @@ Standard:
   . Added array_key_first() and array_key_last() which retrieve the first and
     last key of an array, respectively.
     (RFC: <https://wiki.php.net/rfc/array_key_first_last>)
+
+LDAP:
+  . Added functions ldap_add_ext, ldap_bind_ext, ldap_delete_ext, ldap_mod_add_ext,
+    ldap_mod_replace_ext, ldap_mod_del_ext, ldap_rename_ext
+    which gives access to the result object to be able to parse it
+    with ldap_parse_result and get more information than just success/failure.
+
 
 ========================================
 7. New Classes and Interfaces
@@ -619,6 +640,34 @@ PGSQL:
 
 Standard:
   . PASSWORD_ARGON2ID
+
+LDAP:
+  . LDAP_CONTROL_MANAGEDSAIT
+  . LDAP_CONTROL_PROXY_AUTHZ
+  . LDAP_CONTROL_SUBENTRIES
+  . LDAP_CONTROL_VALUESRETURNFILTER
+  . LDAP_CONTROL_ASSERT
+  . LDAP_CONTROL_PRE_READ
+  . LDAP_CONTROL_POST_READ
+  . LDAP_CONTROL_SORTREQUEST
+  . LDAP_CONTROL_SORTRESPONSE
+  . LDAP_CONTROL_PAGEDRESULTS
+  . LDAP_CONTROL_AUTHZID_REQUEST
+  . LDAP_CONTROL_AUTHZID_RESPONSE
+  . LDAP_CONTROL_SYNC
+  . LDAP_CONTROL_SYNC_STATE
+  . LDAP_CONTROL_SYNC_DONE
+  . LDAP_CONTROL_DONTUSECOPY
+  . LDAP_CONTROL_PASSWORDPOLICYREQUEST
+  . LDAP_CONTROL_PASSWORDPOLICYRESPONSE
+  . LDAP_CONTROL_X_INCREMENTAL_VALUES
+  . LDAP_CONTROL_X_DOMAIN_SCOPE
+  . LDAP_CONTROL_X_PERMISSIVE_MODIFY
+  . LDAP_CONTROL_X_SEARCH_OPTIONS
+  . LDAP_CONTROL_X_TREE_DELETE
+  . LDAP_CONTROL_X_EXTENDED_DN
+  . LDAP_CONTROL_VLVREQUEST
+  . LDAP_CONTROL_VLVRESPONSE
 
 ========================================
 11. Changes to INI File Handling
