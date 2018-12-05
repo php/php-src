@@ -327,7 +327,7 @@ Standard:
   . Passing a non-string needle to string search functions is deprecated. In the
     future the needle will be interpreted as a string instead of an ASCII codepoint.
     Depending on the intended behavior, you should either explicitly cast the
-    needle to string or perform an explicit call to ord(). The following functions
+    needle to string or perform an explicit call to chr(). The following functions
     are affected:
       . strpos()
       . strrpos()
