@@ -60,7 +60,7 @@ PHP                                                                        NEWS
     RFC https://wiki.php.net/rfc/list_reference_assignment.
     (David Walker)
   . Improved effectiveness of ZEND_SECURE_ZERO for NetBSD and systems
-    without native similar feature (devnexen).
+    without native similar feature. (devnexen)
   . Added syslog.facility and syslog.ident INI entries for customizing syslog
     logging. (Philip Prindeville)
   . Fixed bug #75683 (Memory leak in zend_register_functions() in ZTS mode).
@@ -106,9 +106,9 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #76030 (RE2C_FLAGS rarely honoured) (Cristian Rodríguez)
   . Fixed broken zend_read_static_property (Laruence)
-  . Fixed #76773 (Traits used on the parent are ignored for child classes).
+  . Fixed bug #76773 (Traits used on the parent are ignored for child classes).
     (daverandom)
-  . Fixed #76767 (‘asm’ operand has impossible constraints in zend_operators.h).
+  . Fixed bug #76767 (‘asm’ operand has impossible constraints in zend_operators.h).
     (ondrej)
   . Fixed bug #76752 (Crash in ZEND_COALESCE_SPEC_TMP_HANDLER - assertion in
     _get_zval_ptr_tmp failed). (Laruence)
@@ -127,8 +127,8 @@ PHP                                                                        NEWS
     (Remi)
 
 - BCMath:
-  . Implemented request #67855 (No way to get current scale in use). (Chris
-    Wright, cmb)
+  . Implemented FR #67855 (No way to get current scale in use). (Chris Wright,
+    cmb)
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
   . Fixed bug #75164 (split_bc_num() is pointless). (cmb)
   . Fixed bug #75169 (BCMath errors/warnings bypass PHP's error handling). (cmb)
@@ -151,7 +151,7 @@ PHP                                                                        NEWS
   . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
     (jhdxr)
   . Fixed bug #76131 (mismatch arginfo for date_create). (carusogabriel)
-  . Updated timelib to 2018.01RC1 to address several bugs: (Derick)
+  . Updated timelib to 2018.01RC1 to address several bugs:
     . Fixed bug #75577 (DateTime::createFromFormat does not accept 'v' format
       specifier). (Derick)
     . Fixed bug #75642 (Wrap around behaviour for microseconds is not working).
@@ -183,7 +183,7 @@ PHP                                                                        NEWS
   . Fixed bug #77151 (ftp_close(): SSL_read on shutdown). (Remi)
 
 - GD:
-  . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
+  . Added support for WebP in imagecreatefromstring(). (Andreas Treichel, cmb)
 
 - GMP:
   . Export internal structures and accessor helpers for GMP object. (Sara)
@@ -218,7 +218,7 @@ PHP                                                                        NEWS
 - LDAP:
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay.
     (Come)
-  . Added full support for sending and parsing ldap controls (Come)
+  . Added full support for sending and parsing ldap controls. (Come)
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
 
 - libxml2:
@@ -233,7 +233,7 @@ PHP                                                                        NEWS
   . Updated to Oniguruma 6.9.0. (cmb)
   . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
     capitalized). (Nikita)
-  . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote.
+  . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote).
     (Nikita)
   . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
   . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
@@ -276,7 +276,7 @@ PHP                                                                        NEWS
     related constants for possible TLS protocol values. (Jakub Zelenka)
 
 - PCRE:
-  . Implemented https://wiki.php.net/rfc/pcre2-migration (Anatol, Dmitry)
+  . Implemented https://wiki.php.net/rfc/pcre2-migration. (Anatol, Dmitry)
   . Upgrade PCRE2 to 10.32. (Anatol)
   . Fixed bug #75355 (preg_quote() does not quote # control character).
     (Michael Moravec)
@@ -286,8 +286,8 @@ PHP                                                                        NEWS
   . Fixed bug #76909 (preg_match difference between 7.3 and < 7.3). (Anatol)
 
 - PDO_DBlib:
-  . Implemented request #69592 (allow 0-column rowsets to be skipped
-    automatically). (fandrieu)
+  . Implemented FR #69592 (allow 0-column rowsets to be skipped automatically).
+    (fandrieu)
   . Expose TDS version as \PDO::DBLIB_ATTR_TDS_VERSION attribute on \PDO
     instance. (fandrieu)
   . Treat DATETIME2 columns like DATETIME. (fandrieu)
@@ -305,15 +305,9 @@ PHP                                                                        NEWS
   . Add support for additional open flags
 
 - pgsql:
-  . Added new error constants for pg_result_error(): (Kalle)
-    . Requires Postgres 9.3
-      . PGSQL_DIAG_SCHEMA_NAME
-	  . PGSQL_DIAG_TABLE_NAME
-	  . PGSQL_DIAG_COLUMN_NAME
-	  . PGSQL_DIAG_DATATYPE_NAME
-	  . PGSQL_DIAG_CONSTRAINT_NAME
-	. Requires Postgres 9.6
-	  . PGSQL_DIAG_SEVERITY_NONLOCALIZED
+  . Added new error constants for pg_result_error(): PGSQL_DIAG_SCHEMA_NAME,
+    PGSQL_DIAG_TABLE_NAME, PGSQL_DIAG_COLUMN_NAME, PGSQL_DIAG_DATATYPE_NAME,
+    PGSQL_DIAG_CONSTRAINT_NAME and PGSQL_DIAG_SEVERITY_NONLOCALIZED. (Kalle) 
   . Fixed bug #77047 (pg_convert has a broken regex for the 'TIME WITHOUT
     TIMEZONE' data type). (Andy Gajetzki)
 
@@ -398,11 +392,10 @@ PHP                                                                        NEWS
   . Fixed bug #77081 (ftruncate() changes seek pointer in c mode). (cmb, Anatol)
 
 - Testing:
-  . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
-    (cmb)
+  . Implemented FR #62055 (Make run-tests.php support --CGI-- sections). (cmb)
 
 - Tidy:
-  . Support using tidyp instead of tidy (devnexen).
+  . Support using tidyp instead of tidy. (devnexen)
   . Fixed bug #74707 (Tidy has incorrect ReflectionFunction param counts for
     functions taking tidy). (Gabriel Caruso)
   . Fixed arginfo for tidy::__construct(). (Tyson Andre)
@@ -418,7 +411,7 @@ PHP                                                                        NEWS
     heredoc strings). (Nikita)
 
 - XML:
-  . Fixed bug 71592 (External entity processing never fails). (cmb)
+  . Fixed bug #71592 (External entity processing never fails). (cmb)
 
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)
