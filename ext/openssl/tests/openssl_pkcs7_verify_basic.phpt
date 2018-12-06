@@ -43,9 +43,7 @@ if (file_exists($contentfile)) {
 ?>
 --CLEAN--
 <?php
-if (file_exists($pkcsfile)) {
-	unlink($pkcsfile);
-}
+unlink(__DIR__ . DIRECTORY_SEPARATOR . '/openssl_pkcs7_verify__pkcsfile.tmp');
 ?>
 --EXPECTF--
 int(-1)
