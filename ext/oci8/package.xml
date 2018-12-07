@@ -167,6 +167,8 @@ Fixed reference counting and memory issues. (Dmitry, Tianfang)
     <file name="bug51291_1.phpt" role="test" />
     <file name="bug51291_2.phpt" role="test" />
     <file name="bug68298.phpt" role="test" />
+    <file name="bug70700.phpt" role="test" />
+    <file name="bug71148.phpt" role="test" />
     <file name="bug71422.phpt" role="test" />
     <file name="bug71600.phpt" role="test" />
     <file name="bug72524.phpt" role="test" />
@@ -242,7 +244,6 @@ Fixed reference counting and memory issues. (Dmitry, Tianfang)
     <file name="db_op_2.phpt" role="test" />
     <file name="dbmsoutput.phpt" role="test" />
     <file name="debug.phpt" role="test" />
-    <file name="default_prefetch.phpt" role="test" />
     <file name="default_prefetch0.phpt" role="test" />
     <file name="default_prefetch1.phpt" role="test" />
     <file name="default_prefetch2.phpt" role="test" />
@@ -297,7 +298,6 @@ Fixed reference counting and memory issues. (Dmitry, Tianfang)
     <file name="extauth_03.phpt" role="test" />
     <file name="extauth_04.phpt" role="test" />
     <file name="fetch.phpt" role="test" />
-    <file name="fetch_all.phpt" role="test" />
     <file name="fetch_all1.phpt" role="test" />
     <file name="fetch_all2.phpt" role="test" />
     <file name="fetch_all3.phpt" role="test" />
