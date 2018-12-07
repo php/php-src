@@ -111,11 +111,7 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 	statement->impres_child_stmt = NULL;
 	statement->impres_count = 0;
 	statement->impres_flag = PHP_OCI_IMPRES_UNKNOWN;  /* may or may not have Implicit Result Set children */
-#if PHP_VERSION_ID < 70300
-	++GC_REFCOUNT(statement->connection->id);
-#else
 	GC_ADDREF(statement->connection->id);
-#endif
 
 	if (OCI_G(default_prefetch) >= 0) {
 		php_oci_statement_set_prefetch(statement, (ub4)OCI_G(default_prefetch));
@@ -175,13 +171,8 @@ php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement)
 		statement2->has_descr = 0;
 		statement2->stmttype = 0;
 
-#if PHP_VERSION_ID < 70300
-		GC_REFCOUNT(statement->id)++;
-		GC_REFCOUNT(statement2->connection->id)++;
-#else
 		GC_ADDREF(statement->id);
 		GC_ADDREF(statement2->connection->id);
-#endif
 
 		php_oci_statement_set_prefetch(statement2, statement->prefetch_count);
 
@@ -442,11 +433,7 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 					return OCI_ERROR;
 				}
 				nested_stmt->parent_stmtid = outcol->statement->id;
-#if PHP_VERSION_ID < 70300
-				++GC_REFCOUNT(outcol->statement->id);
-#else
 				GC_ADDREF(outcol->statement->id);
-#endif
 				outcol->nested_statement = nested_stmt;
 				outcol->stmtid = nested_stmt->id;
 
@@ -608,15 +595,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 		for (counter = 1; counter <= colcount; counter++) {
 			outcol = (php_oci_out_column *) ecalloc(1, sizeof(php_oci_out_column));
 
-#if PHP_VERSION_ID < 70300
-			if ((outcol = zend_hash_index_update_ptr(statement->columns, counter, outcol)) == NULL) {
-				FREE_HASHTABLE(statement->columns);
-				/* out of memory */
-				return 1;
-			}
-#else
 			outcol = zend_hash_index_update_ptr(statement->columns, counter, outcol);
-#endif
 
 			/* get column */
 			PHP_OCI_CALL_RETURN(errstatus, OCIParamGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, statement->err, (dvoid**)&param, counter));
@@ -1553,22 +1532,7 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 			return NULL;
 		}
 	} else {
-#if PHP_VERSION_ID < 70300
-		zval tmp;
-		/* NB: for PHP4 compat only, it should be using 'Z' instead */
-		tmp = *column_index;
-		zval_copy_ctor(&tmp);
-		convert_to_long(&tmp);
-		column = php_oci_statement_get_column(statement, Z_LVAL(tmp), NULL, 0);
-		if (!column) {
-			php_error_docref(NULL, E_WARNING, "Invalid column index \"" ZEND_LONG_FMT "\"", Z_LVAL(tmp));
-			zval_ptr_dtor(&tmp);
-			return NULL;
-		}
-		zval_ptr_dtor(&tmp);
-#else
 		zend_long tmp;
-		/* NB: for PHP4 compat only, it should be using 'Z' instead */
 
 		tmp = zval_get_long(column_index);
 		column = php_oci_statement_get_column(statement, tmp, NULL, 0);
@@ -1576,7 +1540,6 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 			php_error_docref(NULL, E_WARNING, "Invalid column index \"" ZEND_LONG_FMT "\"", tmp);
 			return NULL;
 		}
-#endif
 	}
 	return column;
 }
@@ -1639,13 +1602,8 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t 
 
 	ZEND_ASSERT(Z_ISREF_P(var));
 	val = Z_REFVAL_P(var);
-#if PHP_VERSION_ID < 70300
-	SEPARATE_ZVAL_NOREF(val);
-	convert_to_array(val);
-#else
 	convert_to_array(val);
 	SEPARATE_ARRAY(val);
-#endif
 
 	if (maxlength < -1) {
 		php_error_docref(NULL, E_WARNING, "Invalid max length value (" ZEND_LONG_FMT ")", maxlength);
