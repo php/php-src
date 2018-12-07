@@ -1437,7 +1437,7 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 						php_stream_from_zval_no_verify(stream, parameter);
 						if (stream == NULL) {
 							php_sqlite3_error(stmt_obj->db_obj, "Unable to read stream for parameter %ld", param->param_number);
-							return 0;
+							return FAILURE;
 						}
 						buffer = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 					} else {
@@ -1464,11 +1464,12 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 
 				default:
 					php_sqlite3_error(stmt_obj->db_obj, "Unknown parameter type: %pd for parameter %pd", param->type, param->param_number);
-					return 0;
+					return FAILURE;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
-	return 1;
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1643,7 +1644,7 @@ PHP_METHOD(sqlite3stmt, execute)
 	/* Bind parameters to the statement */
 	bind_rc = php_sqlite3_bind_params(stmt_obj);
 
-	if (bind_rc == 0) {
+	if (bind_rc == FAILURE) {
 		RETURN_FALSE;
 	}
 
