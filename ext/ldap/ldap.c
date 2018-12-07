@@ -3194,9 +3194,15 @@ PHP_FUNCTION(ldap_control_paged_result)
 	ctrl.ldctl_oid = LDAP_CONTROL_PAGEDRESULTS;
 
 	if (ldap) {
-		/* directly set the option */
-		ctrlsp[0] = &ctrl;
-		ctrlsp[1] = NULL;
+		/* directly set the cookie */
+		if (lcookie.bv_val != 0 || pagesize != 0) {
+			/* a cookie or a page size gets sent along with the next request */
+			ctrlsp[0] = &ctrl;
+			ctrlsp[1] = NULL;
+		} else {
+			/* we have no cookie and no page size, we just need to clear the oid */
+			ctrlsp[0] = NULL;
+		}
 
 		rc = ldap_set_option(ldap, LDAP_OPT_SERVER_CONTROLS, ctrlsp);
 		if (rc != LDAP_SUCCESS) {
@@ -3209,12 +3215,15 @@ PHP_FUNCTION(ldap_control_paged_result)
 		/* return a PHP control object */
 		array_init(return_value);
 
-		add_assoc_string(return_value, "oid", ctrl.ldctl_oid);
-		if (ctrl.ldctl_value.bv_len) {
-			add_assoc_stringl(return_value, "value", ctrl.ldctl_value.bv_val, ctrl.ldctl_value.bv_len);
-		}
-		if (ctrl.ldctl_iscritical) {
-			add_assoc_bool(return_value, "iscritical", ctrl.ldctl_iscritical);
+		/* we only have a populated control object if we were given a cookie or specified a page size */
+		if (lcookie.bv_val != 0 || pagesize != 0) {
+			add_assoc_string(return_value, "oid", ctrl.ldctl_oid);
+			if (ctrl.ldctl_value.bv_len) {
+				add_assoc_stringl(return_value, "value", ctrl.ldctl_value.bv_val, ctrl.ldctl_value.bv_len);
+			}
+			if (ctrl.ldctl_iscritical) {
+				add_assoc_bool(return_value, "iscritical", ctrl.ldctl_iscritical);
+			}
 		}
 	}
 
