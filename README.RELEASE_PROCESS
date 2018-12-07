@@ -359,7 +359,8 @@ New Release Manager Checklist
    `gpg --keyserver pgp.mit.edu --send-keys $KEYID`
 
 3. Request karma to edit main/php_version.h. Possibly karma for other restricted parts of
-   php-src might come in question.
+   php-src might come in question. To edit main/php_version.h in a release branch,
+   you need release manager karma in global_avail.
 
 4. Request karma for web/qa.git and web/php.git for publishing release announcements.
 
