@@ -443,9 +443,8 @@ static int lookup_cv(zend_string *name) /* {{{ */{
 	zend_ulong hash_value = zend_string_hash_val(name);
 
 	while (i < op_array->last_var) {
-		if (ZSTR_VAL(op_array->vars[i]) == ZSTR_VAL(name) ||
-		    (ZSTR_H(op_array->vars[i]) == hash_value &&
-		     zend_string_equal_content(op_array->vars[i], name))) {
+		if (ZSTR_H(op_array->vars[i]) == hash_value
+		 && zend_string_equals(op_array->vars[i], name)) {
 			return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 		}
 		i++;
