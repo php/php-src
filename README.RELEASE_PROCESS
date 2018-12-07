@@ -234,8 +234,6 @@ Getting the stable release announced
  e. Make sure there are no outdated "notes" or edited "date" keys in the
  ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
 
- f. if the windows builds aren't ready yet prefix the "windows" key with a dot (".windows")
-
 3. Create the release file (releases/x_y_z.php)
    Usually we use the same content as for point 6, but included in php template
    instead of the release xml.
