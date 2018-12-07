@@ -2097,10 +2097,11 @@ AC_DEFUN([PHP_PROG_RE2C],[
   fi
   case $php_cv_re2c_version in
     ""|invalid[)]
-      AC_CHECK_FILE([$abs_srcdir/Zend/zend_language_scanner.c],
-        [AC_MSG_WARN([You will need re2c 0.13.4 or later if you want to regenerate PHP lexers.])],
-        [AC_MSG_ERROR([You will need re2c 0.13.4 or later to generate PHP lexers.])]
-      )
+      if test -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
+        AC_MSG_WARN([You will need re2c 0.13.4 or later if you want to regenerate PHP lexers.])
+      else
+        AC_MSG_ERROR([You will need re2c 0.13.4 or later to generate PHP lexers.])
+      fi
 
       RE2C="exit 0;"
       ;;
@@ -2607,7 +2608,7 @@ dnl Generates the config.nice file
 dnl
 AC_DEFUN([PHP_CONFIG_NICE],[
   AC_REQUIRE([AC_PROG_EGREP])
-  AC_REQUIRE([LT_AC_PROG_SED])
+  AC_REQUIRE([AC_PROG_SED])
   PHP_SUBST_OLD(EGREP)
   PHP_SUBST_OLD(SED)
   test -f $1 && mv $1 $1.old

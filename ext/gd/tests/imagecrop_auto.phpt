@@ -3,7 +3,6 @@ Testing imagecropauto()
 --SKIPIF--
 <?php
 if ( ! extension_loaded('gd') || !function_exists('imagecrop')) die( 'skip GD imagecropauto not present; skipping test' );
-if (!GD_BUNDLED) die('skip requires bundled libgd');
 ?>
 --FILE--
 <?php
@@ -63,11 +62,11 @@ var_dump(imagesy($im_crop));
 ?>
 --EXPECT--
 TC IMG_CROP_DEFAULT
-int(11)
-int(11)
+int(99)
+int(99)
 Palette IMG_CROP_DEFAULT
-int(11)
-int(11)
+int(99)
+int(99)
 TC IMG_CROP_SIDES
 int(11)
 int(11)

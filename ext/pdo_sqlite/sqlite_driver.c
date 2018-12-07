@@ -45,33 +45,33 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 		}
 		einfo->errmsg = pestrdup((char*)sqlite3_errmsg(H->db), dbh->is_persistent);
 	} else { /* no error */
-		strncpy(*pdo_err, PDO_ERR_NONE, sizeof(PDO_ERR_NONE));
+		strncpy(*pdo_err, PDO_ERR_NONE, sizeof(*pdo_err));
 		return 0;
 	}
 	switch (einfo->errcode) {
 		case SQLITE_NOTFOUND:
-			strncpy(*pdo_err, "42S02", sizeof("42S02"));
+			strncpy(*pdo_err, "42S02", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_INTERRUPT:
-			strncpy(*pdo_err, "01002", sizeof("01002"));
+			strncpy(*pdo_err, "01002", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_NOLFS:
-			strncpy(*pdo_err, "HYC00", sizeof("HYC00"));
+			strncpy(*pdo_err, "HYC00", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_TOOBIG:
-			strncpy(*pdo_err, "22001", sizeof("22001"));
+			strncpy(*pdo_err, "22001", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_CONSTRAINT:
-			strncpy(*pdo_err, "23000", sizeof("23000"));
+			strncpy(*pdo_err, "23000", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_ERROR:
 		default:
-			strncpy(*pdo_err, "HY000", sizeof("HY000"));
+			strncpy(*pdo_err, "HY000", sizeof(*pdo_err));
 			break;
 	}
 

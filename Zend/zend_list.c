@@ -245,11 +245,8 @@ void zend_destroy_rsrc_list(HashTable *ht)
 static int clean_module_resource(zval *zv, void *arg)
 {
 	int resource_id = *(int *)arg;
-	if (Z_RES_TYPE_P(zv) == resource_id) {
-		return 1;
-	} else {
-		return 0;
-	}
+
+	return Z_RES_TYPE_P(zv) == resource_id;
 }
 
 

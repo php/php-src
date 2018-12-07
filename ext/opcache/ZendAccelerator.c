@@ -3150,6 +3150,7 @@ static void preload_move_user_functions(HashTable *src, HashTable *dst)
 			}
 			if (copy) {
 				_zend_hash_append_ptr(dst, p->key, function);
+				function->common.fn_flags |= ZEND_ACC_PRELOADED;
 			} else {
 				orig_dtor(&p->val);
 			}
@@ -3183,7 +3184,14 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 				}
 			}
 			if (copy) {
+				zend_function *function;
+
 				_zend_hash_append_ptr(dst, p->key, ce);
+				ZEND_HASH_FOREACH_PTR(&ce->function_table, function) {
+					if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
+						function->common.fn_flags |= ZEND_ACC_PRELOADED;
+					}
+				} ZEND_HASH_FOREACH_END();
 			} else {
 				orig_dtor(&p->val);
 			}

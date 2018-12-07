@@ -51,7 +51,7 @@ $ipv6_test = array(
 );
 foreach ($ipv6_test as $ip => $exp) {
 	$out = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
-	$out = (int) ($out === false ? 0 : 1);
+	$out = $out !== false;
 	if ($exp != $out) {
 		echo "$ip failed (expected ", $exp?"true":"false", ", got ",
             $out?"true":"false", ")\n";

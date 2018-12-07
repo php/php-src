@@ -4340,7 +4340,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 			(*opts >= 97 && *opts <= 122)   /* a - z */
 	) {
 		paras->opt_char = *opts;
-		paras->need_param = (*(++opts) == ':') ? 1 : 0;
+		paras->need_param = *(++opts) == ':';
 		paras->opt_name = NULL;
 		if (paras->need_param == 1) {
 			opts++;

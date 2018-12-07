@@ -10,8 +10,12 @@ PHP                                                                        NEWS
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
 
 - GD:
+  . Fixed bug #73291 (imagecropauto() $threshold differs from external libgd).
+    (cmb)
   . Fixed bug #76324 (cannot detect recent versions of freetype with
     pkg-config). (Eli Schwartz)
+  . The bundled libgd behaves now like system libgd wrt. IMG_CROP_DEFAULT never
+    falling back to IMG_CROP_SIDES.
 
 - Hash:
   . The hash extension is now an integral part of PHP and cannot be disabled
@@ -41,7 +45,8 @@ PHP                                                                        NEWS
 
 - SQLite3:
   . Unbundled libsqlite. (cmb)
-  . Lifted requirements to SQLite 3.5.0. (cmb)
+  . Lifted requirements to SQLite 3.7.4. (cmb)
+  . Forbid (un)serialization of SQLite3, SQLite3Stmt and SQLite3Result. (cmb)
   . Added support for the SQLite @name notation. (cmb, BohwaZ)
 
 - Standard:

@@ -1386,11 +1386,9 @@ PHP_METHOD(sqlite3stmt, readOnly)
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
-#if SQLITE_VERSION_NUMBER >= 3007004
 	if (sqlite3_stmt_readonly(stmt_obj->stmt)) {
 		RETURN_TRUE;
 	}
-#endif
 	RETURN_FALSE;
 }
 /* }}} */
@@ -1560,6 +1558,9 @@ PHP_METHOD(sqlite3stmt, execute)
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 
+	/* Always reset statement before execution, see bug #77051 */
+	sqlite3_reset(stmt_obj->stmt);
+
 	if (stmt_obj->bound_params) {
 		ZEND_HASH_FOREACH_PTR(stmt_obj->bound_params, param) {
 			zval *parameter;
@@ -1572,7 +1573,10 @@ PHP_METHOD(sqlite3stmt, execute)
 
 			/* If the ZVAL is null then it should be bound as that */
 			if (Z_TYPE_P(parameter) == IS_NULL) {
-				sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+				return_code = sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+				if (return_code != SQLITE_OK) {
+					php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+				}
 				continue;
 			}
 
@@ -1580,15 +1584,21 @@ PHP_METHOD(sqlite3stmt, execute)
 				case SQLITE_INTEGER:
 					convert_to_long(parameter);
 #if ZEND_LONG_MAX > 2147483647
-					sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
+					return_code = sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
 #else
-					sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
+					return_code = sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
 #endif
+					if (return_code != SQLITE_OK) {
+						php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+					}
 					break;
 
 				case SQLITE_FLOAT:
 					convert_to_double(parameter);
-					sqlite3_bind_double(stmt_obj->stmt, param->param_number, Z_DVAL_P(parameter));
+					return_code = sqlite3_bind_double(stmt_obj->stmt, param->param_number, Z_DVAL_P(parameter));
+					if (return_code != SQLITE_OK) {
+						php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+					}
 					break;
 
 				case SQLITE_BLOB:
@@ -1607,21 +1617,33 @@ PHP_METHOD(sqlite3stmt, execute)
 					}
 
 					if (buffer) {
-						sqlite3_bind_blob(stmt_obj->stmt, param->param_number, ZSTR_VAL(buffer), ZSTR_LEN(buffer), SQLITE_TRANSIENT);
+						return_code = sqlite3_bind_blob(stmt_obj->stmt, param->param_number, ZSTR_VAL(buffer), ZSTR_LEN(buffer), SQLITE_TRANSIENT);
 						zend_string_release_ex(buffer, 0);
+						if (return_code != SQLITE_OK) {
+							php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+						}
 					} else {
-						sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+						return_code = sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+						if (return_code != SQLITE_OK) {
+							php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+						}
 					}
 					break;
 				}
 
 				case SQLITE3_TEXT:
 					convert_to_string(parameter);
-					sqlite3_bind_text(stmt_obj->stmt, param->param_number, Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), SQLITE_STATIC);
+					return_code = sqlite3_bind_text(stmt_obj->stmt, param->param_number, Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), SQLITE_STATIC);
+					if (return_code != SQLITE_OK) {
+						php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+					}
 					break;
 
 				case SQLITE_NULL:
-					sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+					return_code = sqlite3_bind_null(stmt_obj->stmt, param->param_number);
+					if (return_code != SQLITE_OK) {
+						php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
+					}
 					break;
 
 				default:
@@ -2283,6 +2305,8 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_object_handlers.clone_obj = NULL;
 	sqlite3_object_handlers.free_obj = php_sqlite3_object_free_storage;
 	php_sqlite3_sc_entry = zend_register_internal_class(&ce);
+	php_sqlite3_sc_entry->serialize = zend_class_serialize_deny;
+	php_sqlite3_sc_entry->unserialize = zend_class_unserialize_deny;
 
 	/* Register SQLite 3 Prepared Statement Class */
 	INIT_CLASS_ENTRY(ce, "SQLite3Stmt", php_sqlite3_stmt_class_methods);
@@ -2291,6 +2315,8 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_stmt_object_handlers.clone_obj = NULL;
 	sqlite3_stmt_object_handlers.free_obj = php_sqlite3_stmt_object_free_storage;
 	php_sqlite3_stmt_entry = zend_register_internal_class(&ce);
+	php_sqlite3_stmt_entry->serialize = zend_class_serialize_deny;
+	php_sqlite3_stmt_entry->unserialize = zend_class_unserialize_deny;
 
 	/* Register SQLite 3 Result Class */
 	INIT_CLASS_ENTRY(ce, "SQLite3Result", php_sqlite3_result_class_methods);
@@ -2299,6 +2325,8 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_result_object_handlers.clone_obj = NULL;
 	sqlite3_result_object_handlers.free_obj = php_sqlite3_result_object_free_storage;
 	php_sqlite3_result_entry = zend_register_internal_class(&ce);
+	php_sqlite3_result_entry->serialize = zend_class_serialize_deny;
+	php_sqlite3_result_entry->unserialize = zend_class_unserialize_deny;
 
 	REGISTER_INI_ENTRIES();
 

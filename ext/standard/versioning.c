@@ -24,8 +24,6 @@
 #include "php.h"
 #include "php_versioning.h"
 
-#define sign(n) ((n)<0?-1:((n)>0?1:0))
-
 /* {{{ php_canonicalize_version() */
 
 PHPAPI char *
@@ -115,7 +113,7 @@ compare_special_version_forms(char *form1, char *form2)
 			break;
 		}
 	}
-	return sign(found1 - found2);
+	return ZEND_NORMALIZE_BOOL(found1 - found2);
 }
 
 /* }}} */
@@ -160,7 +158,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 			/* compare element numerically */
 			l1 = strtol(p1, NULL, 10);
 			l2 = strtol(p2, NULL, 10);
-			compare = sign(l1 - l2);
+			compare = ZEND_NORMALIZE_BOOL(l1 - l2);
 		} else if (!isdigit(*p1) && !isdigit(*p2)) {
 			/* compare element names */
 			compare = compare_special_version_forms(p1, p2);

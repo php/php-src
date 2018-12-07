@@ -83,9 +83,9 @@ static int clean_module_constant(zval *el, void *arg)
 	int module_number = *(int *)arg;
 
 	if (ZEND_CONSTANT_MODULE_NUMBER(c) == module_number) {
-		return 1;
+		return ZEND_HASH_APPLY_REMOVE;
 	} else {
-		return 0;
+		return ZEND_HASH_APPLY_KEEP;
 	}
 }
 

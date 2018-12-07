@@ -1152,6 +1152,8 @@ PHP_MINFO_FUNCTION(imap)
 	php_info_print_table_row(2, "Kerberos Support", "enabled");
 #endif
 	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 
@@ -4072,11 +4074,8 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		}
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
-		if (ret == -1) {
-			return 0;
-		} else {
-			return 1;
-		}
+
+		return ret != -1;
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not execute mail delivery program");
 		return 0;
@@ -4114,7 +4113,6 @@ PHP_FUNCTION(imap_mail)
 	if (!ZSTR_LEN(message)) {
 		/* this is not really an error, so it is allowed. */
 		php_error_docref(NULL, E_WARNING, "No message string in mail command");
-		message = NULL;
 	}
 
 	if (_php_imap_mail(ZSTR_VAL(to), ZSTR_VAL(subject), ZSTR_VAL(message), headers?ZSTR_VAL(headers):NULL, cc?ZSTR_VAL(cc):NULL,

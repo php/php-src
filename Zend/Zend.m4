@@ -39,12 +39,6 @@ if test "$CC" = "gcc" -a "$ac_cv_prog_cc_g" = "yes" -a \
 	CFLAGS=`echo $CFLAGS | sed -e 's/-g//'`
 fi
 
-dnl Hack to work around a Mac OS X cpp problem
-dnl Known versions needing this workaround are 5.3 and 5.4
-if test "$ac_cv_prog_gcc" = "yes" -a "`uname -s`" = "Rhapsody"; then
-        CPPFLAGS="$CPPFLAGS -traditional-cpp"
-fi
-
 AC_CHECK_HEADERS(
 inttypes.h \
 stdint.h \

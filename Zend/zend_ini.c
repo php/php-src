@@ -36,11 +36,8 @@ static int zend_remove_ini_entries(zval *el, void *arg) /* {{{ */
 {
 	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
 	int module_number = *(int *)arg;
-	if (ini_entry->module_number == module_number) {
-		return 1;
-	} else {
-		return 0;
-	}
+
+	return ini_entry->module_number == module_number;
 }
 /* }}} */
 
@@ -517,46 +514,6 @@ ZEND_API zend_bool zend_ini_parse_bool(zend_string *str)
 		return atoi(ZSTR_VAL(str)) != 0;
 	}
 }
-
-#if TONY_20070307
-static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
-{
-	if (ini_entry->displayer) {
-		ini_entry->displayer(ini_entry, type);
-	} else {
-		char *display_string;
-		uint32_t display_string_length;
-
-		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-			if (ini_entry->orig_value) {
-				display_string = ini_entry->orig_value;
-				display_string_length = ini_entry->orig_value_length;
-			} else {
-				if (zend_uv.html_errors) {
-					display_string = NO_VALUE_HTML;
-					display_string_length = sizeof(NO_VALUE_HTML) - 1;
-				} else {
-					display_string = NO_VALUE_PLAINTEXT;
-					display_string_length = sizeof(NO_VALUE_PLAINTEXT) - 1;
-				}
-			}
-		} else if (ini_entry->value && ini_entry->value[0]) {
-			display_string = ini_entry->value;
-			display_string_length = ini_entry->value_length;
-		} else {
-			if (zend_uv.html_errors) {
-				display_string = NO_VALUE_HTML;
-				display_string_length = sizeof(NO_VALUE_HTML) - 1;
-			} else {
-				display_string = NO_VALUE_PLAINTEXT;
-				display_string_length = sizeof(NO_VALUE_PLAINTEXT) - 1;
-			}
-		}
-		ZEND_WRITE(display_string, display_string_length);
-	}
-}
-/* }}} */
-#endif
 
 ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 {
