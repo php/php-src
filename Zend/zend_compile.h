@@ -807,11 +807,6 @@ uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
 ZEND_API int zend_is_smart_branch(zend_op *opline);
 
-static zend_always_inline uint32_t get_next_op_number(zend_op_array *op_array)
-{
-	return op_array->last;
-}
-
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
 	zend_string *name;
@@ -828,8 +823,6 @@ ZEND_API size_t zend_dirname(char *path, size_t len);
 ZEND_API void zend_set_function_arg_flags(zend_function *func);
 
 int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem);
-
-int zend_add_literal(zend_op_array *op_array, zval *zv);
 
 void zend_assert_valid_class_name(const zend_string *const_name);
 
