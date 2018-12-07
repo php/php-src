@@ -1913,10 +1913,9 @@ static zend_always_inline int zend_is_def_range(zend_op *opline, zend_uchar type
 }
 /* }}} */
 
-static void zend_check_live_ranges(zend_op *opline) /* {{{ */
+static void zend_check_live_ranges_op1(zend_op *opline) /* {{{ */
 {
-	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
-		!zend_is_def_range(opline - 1, opline->op1_type, opline->op1.var)) {
+	if (!zend_is_def_range(opline - 1, opline->op1_type, opline->op1.var)) {
 
 		if (opline->opcode == ZEND_OP_DATA) {
 			if (!zend_is_def_range(opline - 2, opline->op1_type, opline->op1.var)) {
@@ -1946,9 +1945,12 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 			zend_find_live_range(opline, opline->op1_type, opline->op1.var);
 		}
 	}
+}
+/* }}} */
 
-	if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
-		!zend_is_def_range(opline - 1, opline->op2_type, opline->op2.var)) {
+static void zend_check_live_ranges_op2(zend_op *opline) /* {{{ */
+{
+	if (!zend_is_def_range(opline - 1, opline->op2_type, opline->op2.var)) {
 
 		if (opline->opcode == ZEND_OP_DATA) {
 			if (!zend_is_def_range(opline - 2, opline->op2_type, opline->op2.var)) {
@@ -1971,6 +1973,17 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 }
 /* }}} */
 
+static void zend_check_live_ranges(zend_op *opline) /* {{{ */
+{
+	if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+		zend_check_live_ranges_op1(opline);
+	}
+	if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
+		zend_check_live_ranges_op2(opline);
+	}
+}
+/* }}} */
+
 static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */
 {
 	zend_op *opline = get_next_op();
@@ -1978,13 +1991,17 @@ static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode
 
 	if (op1 != NULL) {
 		SET_NODE(opline->op1, op1);
+		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			zend_check_live_ranges_op1(opline);
+		}
 	}
 
 	if (op2 != NULL) {
 		SET_NODE(opline->op2, op2);
+		if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
+			zend_check_live_ranges_op2(opline);
+		}
 	}
-
-	zend_check_live_ranges(opline);
 
 	if (result) {
 		zend_make_var_result(result, opline);
@@ -2000,13 +2017,17 @@ static zend_op *zend_emit_op_tmp(znode *result, zend_uchar opcode, znode *op1, z
 
 	if (op1 != NULL) {
 		SET_NODE(opline->op1, op1);
+		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			zend_check_live_ranges_op1(opline);
+		}
 	}
 
 	if (op2 != NULL) {
 		SET_NODE(opline->op2, op2);
+		if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
+			zend_check_live_ranges_op2(opline);
+		}
 	}
-
-	zend_check_live_ranges(opline);
 
 	if (result) {
 		zend_make_tmp_result(result, opline);
