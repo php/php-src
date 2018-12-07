@@ -545,6 +545,14 @@ int php_oci_unregister_taf_callback(php_oci_connection *connection);
 #define OCI_G(v) (oci_globals.v)
 #endif
 
+/* Allow install from PECL on PHP < 7.3 */
+#ifndef GC_ADDREF
+# define GC_ADDREF(p) (++GC_REFCOUNT(p))
+#endif
+#ifndef GC_DELREF
+# define GC_DELREF(p) (GC_REFCOUNT(p)--)
+#endif
+
 ZEND_EXTERN_MODULE_GLOBALS(oci)
 
 # endif /* !PHP_OCI8_INT_H */
