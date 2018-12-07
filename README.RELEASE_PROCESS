@@ -347,6 +347,29 @@ Forking a new release branch
 
 5. Notify nlopess@ to add PHP_X_Y tag to gcov.php.net
 
+Preparing for the initial stable version (PHP X.Y.0)
+----------------------------------------------------
+
+1. About the time you release the first RC, remind the documentation team
+   (phpdoc@lists.php.net) to write the migration guide.  See to it that they
+   have done it before you release the initial stable version, since you want
+   to link to it in the release announcements.
+
+2. Timely get used to the differences in preparing and announcing a stable
+   release.
+
+Prime the selection of the Release Managers of the next version
+---------------------------------------------------------------
+
+1. About three months before the scheduled release of the first alpha of the
+   next minor or major release, issue a call for volunteers on 
+   internals@lists.php.net (cf. http://news.php.net/php.internals/98652).
+
+2. Make sure that there are two or more volunteers, and hold a vote if necessary
+   (see https://wiki.php.net/rfc/releaseprocess#release_managers_selection).
+
+3. Help the new release managers with their first steps.
+
 New Release Manager Checklist
 -----------------------------
 
