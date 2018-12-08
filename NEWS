@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.1.26
 
+- IMAP:
+  . Fixed bug #77020 (null pointer dereference in imap_mail). (cmb)
+
 06 Dec 2018, PHP 7.1.25
 
 - Core:
