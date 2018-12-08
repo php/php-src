@@ -3294,52 +3294,27 @@ PHP_FUNCTION(curl_getinfo)
 			CAAS("scheme", s_code);
 		}
 #endif
-#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
-		if (curl_easy_getinfo(ch->cp, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &co) == CURLE_OK) {
-			CAAL("content_length_download", co);
-		}
-		if (curl_easy_getinfo(ch->cp, CURLINFO_CONTENT_LENGTH_UPLOAD_T, &co) == CURLE_OK) {
-			CAAL("content_length_upload", co);
-		}
-		if (curl_easy_getinfo(ch->cp, CURLINFO_SIZE_DOWNLOAD_T, &co) == CURLE_OK) {
-			CAAL("size_download", co);
-		}
-		if (curl_easy_getinfo(ch->cp, CURLINFO_SIZE_UPLOAD_T, &co) == CURLE_OK) {
-			CAAL("size_upload", co);
-		}
-		if (curl_easy_getinfo(ch->cp, CURLINFO_SPEED_DOWNLOAD_T, &co) == CURLE_OK) {
-			CAAL("speed_download", co);
-		}
-		if (curl_easy_getinfo(ch->cp, CURLINFO_SPEED_UPLOAD_T, &co) == CURLE_OK) {
-			CAAL("speed_upload", co);
-		}
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
-		if (curl_easy_getinfo(ch->cp, CURLINFO_FILETIME_T, &co) == CURLE_OK) {
-			CAAL("filetime", co);
-		}
-#endif
 #if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
 		if (curl_easy_getinfo(ch->cp, CURLINFO_APPCONNECT_TIME_T, &co) == CURLE_OK) {
-			CAAL("appconnect_time", co);
+			CAAL("appconnect_time_us", co);
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_CONNECT_TIME_T, &co) == CURLE_OK) {
-			CAAL("connect_time", co);
+			CAAL("connect_time_us", co);
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_NAMELOOKUP_TIME_T, &co) == CURLE_OK) {
-			CAAL("namelookup_time", co);
+			CAAL("namelookup_time_us", co);
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_PRETRANSFER_TIME_T, &co) == CURLE_OK) {
-			CAAL("pretransfer_time", co);
+			CAAL("pretransfer_time_us", co);
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_REDIRECT_TIME_T, &co) == CURLE_OK) {
-			CAAL("redirect_time", co);
+			CAAL("redirect_time_us", co);
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_STARTTRANSFER_TIME_T, &co) == CURLE_OK) {
-			CAAL("starttransfer_time", co);
+			CAAL("starttransfer_time_us", co);
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_TOTAL_TIME_T, &co) == CURLE_OK) {
-			CAAL("total_time", co);
+			CAAL("total_time_us", co);
 		}
 #endif
 		if (ch->header.str) {

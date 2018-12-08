@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #76046 (PHP generates "FE_FREE" opcode on the wrong line).
     (Nikita)
 
+- CURL:
+  . Fixed bug #77264 (curl_getinfo returning microseconds, not seconds).
+    (Pierrick)
+
 - COM:
   . Fixed bug #77177 (Serializing or unserializing COM objects crashes). (cmb)
 
