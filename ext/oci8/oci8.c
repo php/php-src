@@ -2465,7 +2465,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 			descriptor = (php_oci_descriptor *) column->descid->ptr;
 
 			if (!descriptor) {
-				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #%d", column->descid);
+				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #%d", column->descid->handle);
 				return 1;
 			}
 
