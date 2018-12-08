@@ -67,6 +67,7 @@ Interoperability Support" (ID 207303.1) for details.
   <notes>
 This version is for PHP 7 only.
 Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
+Fixed installation on 7.3.
   </notes>
  <contents>
   <dir name="/">
