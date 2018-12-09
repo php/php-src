@@ -175,6 +175,7 @@ Internal change: Convert some parameter parsing to the Fast Parameter Parsing AP
     <file name="bug71600.phpt" role="test" />
     <file name="bug72524.phpt" role="test" />
     <file name="bug74625.phpt" role="test" />
+    <file name="calltimeout1.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
