@@ -56,8 +56,8 @@ Interoperability Support" (ID 207303.1) for details.
  <time>12:00:00</time>
 
   <version>
-   <release>2.1.9</release>
-   <api>2.1.9</api>
+   <release>2.10.0</release>
+   <api>2.10.0</api>
   </version>
   <stability>
    <release>stable</release>
@@ -66,8 +66,9 @@ Interoperability Support" (ID 207303.1) for details.
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
+Added oci_set_call_timeout() for call timeouts. (Requires Oracle client libraries 18c or later)
+Added oci_set_db_operation() for the Oracle Database 'DBOP' end-to-end-tracing attribute. (Requires Oracle 12.2 or later)
 Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
-Support setting Oracle Database 'DBOP' end-to-end-tracing attribute. (Requires Oracle 12.2 or later)
 Fixed installation on 7.3.
 Internal change: Convert some parameter parsing to the Fast Parameter Parsing API.
   </notes>
