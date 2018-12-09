@@ -423,12 +423,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_client_info, 0, 0, 2)
 	ZEND_ARG_INFO(0, client_information)
 ZEND_END_ARG_INFO()
 
-#ifdef WAITIING_ORACLE_BUG_16695981_FIX
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_db_operation, 0, 0, 2)
 ZEND_ARG_INFO(0, connection_resource)
 ZEND_ARG_INFO(0, action)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_password_change, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection_resource_or_connection_string)
@@ -672,9 +670,7 @@ PHP_FUNCTION(oci_statement_type);
 PHP_FUNCTION(oci_num_rows);
 PHP_FUNCTION(oci_set_prefetch);
 PHP_FUNCTION(oci_set_client_identifier);
-#ifdef WAITIING_ORACLE_BUG_16695981_FIX
 PHP_FUNCTION(oci_set_db_operation);
-#endif
 PHP_FUNCTION(oci_set_edition);
 PHP_FUNCTION(oci_set_module_name);
 PHP_FUNCTION(oci_set_action);
@@ -777,9 +773,7 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_new_descriptor,			arginfo_oci_new_descriptor)
 	PHP_FE(oci_set_prefetch,			arginfo_oci_set_prefetch)
 	PHP_FE(oci_set_client_identifier,	arginfo_oci_set_client_identifier)
-#ifdef WAITIING_ORACLE_BUG_16695981_FIX
 	PHP_FE(oci_set_db_operation,		arginfo_oci_set_db_operation)
-#endif
 	PHP_FE(oci_set_edition,				arginfo_oci_set_edition)
 	PHP_FE(oci_set_module_name,			arginfo_oci_set_module_name)
 	PHP_FE(oci_set_action,				arginfo_oci_set_action)

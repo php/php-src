@@ -67,6 +67,7 @@ Interoperability Support" (ID 207303.1) for details.
   <notes>
 This version is for PHP 7 only.
 Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
+Support setting Oracle Database 'DBOP' end-to-end-tracing attribute. (Requires Oracle 12.2 or later)
 Fixed installation on 7.3.
 Internal change: Convert some parameter parsing to the Fast Parameter Parsing API.
   </notes>
