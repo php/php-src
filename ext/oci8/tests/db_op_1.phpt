@@ -16,10 +16,6 @@ preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
 if (!(isset($matches[0]) && $matches[0] >= 12)) {
     die("skip works only with Oracle 12c or greater version of Oracle client libraries");
 }
-if (!function_exists('oci_set_db_operation'))
-{
-    die("skip function oci_set_db_operation() does not exist");
-}
 ?>
 --FILE--
 <?php
@@ -40,7 +36,7 @@ function dq($c, $q)
 }
 
 oci_set_db_operation($c, "db_op_1");
-dq($c, 'select * from dual');
+dq($c, 'select /*+ MONITOR */ * from dual');
 
 dq($c, 'select dbop_name from v$sql_monitor where dbop_name is not null order by dbop_exec_id desc');
 

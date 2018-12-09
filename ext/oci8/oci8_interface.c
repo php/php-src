@@ -2027,9 +2027,9 @@ PHP_FUNCTION(oci_set_client_info)
 }
 /* }}} */
 
-#ifdef WAITIING_ORACLE_BUG_16695981_FIX
 /* {{{ proto bool oci_set_db_operation(resource connection, string value)
-   Sets the "DB operation" on the connection for Oracle end-to-end tracing */
+   Sets the "DB operation" on the connection for Oracle end-to-end tracing.
+   For history, see Oracle bug 16695981 */
 PHP_FUNCTION(oci_set_db_operation)
 {
 #if (OCI_MAJOR_VERSION > 11)
@@ -2058,7 +2058,6 @@ PHP_FUNCTION(oci_set_db_operation)
 #endif
 }
 /* }}} */
-#endif /* WAITIING_ORACLE_BUG_16695981_FIX */
 
 /* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password)
   Changes the password of an account */
