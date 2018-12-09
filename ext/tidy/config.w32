@@ -4,7 +4,7 @@ ARG_WITH("tidy", "TIDY support", "no");
 
 if (PHP_TIDY != "no") {
 	var tidy_static = false;
-	if (CHECK_LIB("libtidy_a.lib;tidy_a.lib", "tidy", PHP_TIDY) && (tidy_static = true) ||
+	if ((CHECK_LIB("libtidy_a.lib;tidy_a.lib", "tidy", PHP_TIDY) && (tidy_static = true) ||
 		CHECK_LIB("libtidy.lib;tidy.lib", "tidy", PHP_TIDY)) &&
 			(
 				CHECK_HEADER_ADD_INCLUDE("tidy.h", "CFLAGS_TIDY") ||
