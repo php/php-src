@@ -2059,6 +2059,36 @@ PHP_FUNCTION(oci_set_db_operation)
 }
 /* }}} */
 
+/* {{{ proto bool oci_set_call_timeout(resource connection, int call_timeout)
+ */
+PHP_FUNCTION(oci_set_call_timeout)
+{
+#if (OCI_MAJOR_VERSION >= 18)
+	zval *z_connection;
+	php_oci_connection *connection;
+	zend_long call_timeout;  // milliseconds
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_connection)
+		Z_PARAM_LONG(call_timeout)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX, (ub4 *) &call_timeout, 0, OCI_ATTR_CALL_TIMEOUT, OCI_G(err)));
+
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode));
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+#else
+	php_error_docref(NULL, E_NOTICE, "Unsupported with this version of Oracle Client");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
 /* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password)
   Changes the password of an account */
 PHP_FUNCTION(oci_password_change)
