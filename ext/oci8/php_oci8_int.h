@@ -344,7 +344,9 @@ typedef struct {
 			case  3114:							  \
 			case  3122:							  \
 			case  3135:							  \
+			case  3136:							  \
 			case 12153:							  \
+			case 12161:							  \
 			case 27146:							  \
 			case 28511:							  \
 				(connection)->is_open = 0;		  \

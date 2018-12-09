@@ -424,8 +424,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_client_info, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_db_operation, 0, 0, 2)
-ZEND_ARG_INFO(0, connection_resource)
-ZEND_ARG_INFO(0, action)
+	ZEND_ARG_INFO(0, connection_resource)
+	ZEND_ARG_INFO(0, action)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_call_timeout, 0, 0, 2)
+	ZEND_ARG_INFO(0, connection_resource)
+	ZEND_ARG_INFO(0, call_timeout)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_password_change, 0, 0, 4)
@@ -671,6 +676,7 @@ PHP_FUNCTION(oci_num_rows);
 PHP_FUNCTION(oci_set_prefetch);
 PHP_FUNCTION(oci_set_client_identifier);
 PHP_FUNCTION(oci_set_db_operation);
+PHP_FUNCTION(oci_set_call_timeout);
 PHP_FUNCTION(oci_set_edition);
 PHP_FUNCTION(oci_set_module_name);
 PHP_FUNCTION(oci_set_action);
@@ -774,6 +780,7 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_set_prefetch,			arginfo_oci_set_prefetch)
 	PHP_FE(oci_set_client_identifier,	arginfo_oci_set_client_identifier)
 	PHP_FE(oci_set_db_operation,		arginfo_oci_set_db_operation)
+	PHP_FE(oci_set_call_timeout,		arginfo_oci_set_call_timeout)
 	PHP_FE(oci_set_edition,				arginfo_oci_set_edition)
 	PHP_FE(oci_set_module_name,			arginfo_oci_set_module_name)
 	PHP_FE(oci_set_action,				arginfo_oci_set_action)
