@@ -79,11 +79,18 @@ void ldap_memvfree(void **v)
 }
 #endif
 
+typedef struct ldap_optdata {
+	struct ldap_optdata *next;
+	LDAPControl *ctrl;
+} ldap_optdata;
+
 typedef struct {
 	LDAP *link;
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 	zval rebindproc;
 #endif
+	ldap_optdata *server_opts;
+	int server_opt_sz;
 } ldap_linkdata;
 
 typedef struct {
@@ -573,7 +580,7 @@ failure:
 	return -1;
 }
 
-static void _php_ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* array, int request)
+static void _ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* array, int request)
 {
 	zval tmp1;
 	LDAPControl **ctrlp;
@@ -588,6 +595,11 @@ static void _php_ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* arr
 		add_assoc_zval(array, (*ctrlp)->ldctl_oid, &tmp1);
 		ctrlp++;
 	}
+}
+
+static void _php_ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* array, int request)
+{
+	_ldap_controls_to_array(ld, ctrls, array, request);
 	ldap_controls_free(ctrls);
 }
 
@@ -645,6 +657,186 @@ static void _php_ldap_controls_free (LDAPControl*** ctrls)
 		efree(*ctrls);
 		*ctrls = NULL;
 	}
+}
+/* }}} */
+
+static ldap_optdata *_new_ldap_link_ctrl_node(const LDAPControl *ctrl) /* {{{ */
+{
+	ldap_optdata *od = emalloc(sizeof(*od));
+	if (od == NULL) {
+		return (NULL);
+	}
+
+	od->next = NULL;
+	od->ctrl = ldap_control_dup(ctrl);
+	return (od);
+}
+/* }}} */
+
+static void _free_ldap_link_ctrl_node(ldap_optdata *od)
+{
+	ldap_control_free(od->ctrl);
+	efree(od);
+}
+
+static void _free_ldap_link_ctrl_chain(ldap_optdata **od) /* {{{ */
+{
+	ldap_optdata *prev, *walker;
+
+	prev = walker = *od;
+	while (walker != NULL) {
+		walker = prev->next;
+		_free_ldap_link_ctrl_node(prev);
+		prev = walker;
+	}
+	*od = NULL;
+}
+/* }}} */
+
+static int _add_ldap_link_ctrl(ldap_optdata **od, const LDAPControl *ctrl) /* {{{ */
+{
+	ldap_optdata *ntail, *walker;
+
+	ntail = _new_ldap_link_ctrl_node(ctrl);
+	if (ntail == NULL) {
+		return (1);
+	}
+
+	/* list is empty; construct a new node */
+	if (*od == NULL) {
+		*od = ntail;
+		return (0);
+	}
+
+	/* otherwise, append a node to the tail */
+	walker = *od;
+	while (walker->next != NULL)
+		walker = walker->next;
+	walker->next = ntail;
+	return (0);
+}
+/* }}} */
+
+static int _del_ldap_link_ctrl(ldap_optdata **od, const char *oid) /* {{{ */
+{
+	ldap_optdata *prev, *walker;
+
+	prev = NULL;
+	walker = *od;
+	while (walker != NULL) {
+		if (strcmp(walker->ctrl->ldctl_oid, oid) == 0) {
+			/* unlink this one */
+			if (prev != NULL) {
+				prev->next = walker->next;
+			} else {
+				*od = walker->next;
+			}
+
+			_free_ldap_link_ctrl_node(walker);
+			return (0);
+		}
+
+		prev = walker;
+		walker = walker->next;
+	}
+
+	return (1);
+}
+/* }}} */
+
+static int _php_add_ldap_link_server_ctrl(ldap_linkdata *ld, const LDAPControl *ctrl) /* {{{ */
+{
+	int ret = _add_ldap_link_ctrl(&ld->server_opts, ctrl);
+	if (ret == 0) {
+		++ld->server_opt_sz;
+	}
+	return (ret);
+}
+/* }}} */
+
+static int _php_del_ldap_link_server_ctrl(ldap_linkdata *ld, const char *oid) /* {{{ */
+{
+	int ret = _del_ldap_link_ctrl(&ld->server_opts, oid);
+	if (ret == 0) {
+		--ld->server_opt_sz;
+	}
+	return (ret);
+}
+/* }}} */
+
+static void _php_clear_ldap_link_server_ctrls(ldap_linkdata *ld) /* {{{ */
+{
+	_free_ldap_link_ctrl_chain(&ld->server_opts);
+	ld->server_opt_sz = 0;
+}
+/* }}} */
+
+static LDAPControl** _php_ldap_server_controls_from_linkdata(ldap_linkdata *ld) /* {{{ */
+{
+	LDAPControl **ctrls = NULL, **ctrlp = NULL;
+	ldap_optdata *walker;
+
+	ctrlp = ctrls = safe_emalloc((1 + ld->server_opt_sz), sizeof(*ctrls), 0);
+	walker = ld->server_opts;
+	while (walker != NULL) {
+		*ctrlp++ = walker->ctrl;
+		walker = walker->next;
+	}
+
+	*ctrlp = NULL;
+
+	return ctrls;
+}
+/* }}} */
+
+static int _php_ldap_set_ctrl_option(ldap_linkdata *ld, int option, LDAPControl **ctrls) /* {{{ */
+{
+	int (*add_option_fn)(ldap_linkdata *, const LDAPControl *);
+	void (*clear_fn)(ldap_linkdata *);
+	LDAPControl **walker;
+
+	if (option == LDAP_OPT_SERVER_CONTROLS) {
+		add_option_fn = _php_add_ldap_link_server_ctrl;
+		clear_fn = _php_clear_ldap_link_server_ctrls;
+	} else if (option == LDAP_OPT_CLIENT_CONTROLS) {
+		return (ldap_set_option(ld->link, option, ctrls));
+	} else {
+		/* unrecognized option */
+		return (LDAP_OPT_ERROR);
+	}
+
+	clear_fn(ld);
+	walker = ctrls;
+	while (*walker) {
+		if (add_option_fn(ld, *walker) != 0) {
+			clear_fn(ld);
+			return (LDAP_NO_MEMORY);
+		}
+
+		walker++;
+	}
+
+	return (LDAP_OPT_SUCCESS);
+}
+/* }}} */
+
+static int _php_ldap_get_ctrl_option(ldap_linkdata *ld, int option, LDAPControl ***ctrls) /* {{{ */
+{
+	if (option == LDAP_OPT_SERVER_CONTROLS) {
+		*ctrls = _php_ldap_server_controls_from_linkdata(ld);
+	} else if (option == LDAP_OPT_CLIENT_CONTROLS) {
+		if (_php_ldap_get_ctrl_option(ld, option, ctrls) || *ctrls == NULL) {
+			if (*ctrls) {
+				ldap_memfree(*ctrls);
+				*ctrls = NULL;
+			}
+			return (1);
+		}
+	} else {
+		return (1);
+	}
+
+	return (0);
 }
 /* }}} */
 
@@ -1188,6 +1380,8 @@ PHP_FUNCTION(ldap_bind_ext)
 			RETVAL_FALSE;
 			goto cleanup;
 		}
+	} else {
+		lserverctrls = _php_ldap_server_controls_from_linkdata(ld);
 	}
 
 	{
@@ -1219,7 +1413,11 @@ PHP_FUNCTION(ldap_bind_ext)
 
 cleanup:
 	if (lserverctrls) {
-		_php_ldap_controls_free(&lserverctrls);
+		if (serverctrls == NULL) {
+			efree(lserverctrls);
+		} else {
+			_php_ldap_controls_free(&lserverctrls);
+		}
 	}
 
 	return;
@@ -1544,7 +1742,11 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 					rcs[i] = -1;
 					continue;
 				}
+			} else {
+				efree(lserverctrls);
+				lserverctrls = _php_ldap_server_controls_from_linkdata(ld);
 			}
+
 
 			php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
@@ -1593,6 +1795,8 @@ cleanup_parallel:
 				ret = 0;
 				goto cleanup;
 			}
+		} else {
+			lserverctrls = _php_ldap_server_controls_from_linkdata(ld);
 		}
 
 		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
@@ -1637,7 +1841,11 @@ cleanup:
 		RETVAL_BOOL(ret);
 	}
 	if (lserverctrls) {
-		_php_ldap_controls_free(&lserverctrls);
+		if (argcount <= 8) {
+			efree(lserverctrls);
+		} else {
+			_php_ldap_controls_free(&lserverctrls);
+		}
 	}
 }
 /* }}} */
@@ -2254,6 +2462,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			RETVAL_FALSE;
 			goto cleanup;
 		}
+	} else {
+		lserverctrls = _php_ldap_server_controls_from_linkdata(ld);
 	}
 
 /* check flag to see if do_mod was called to perform full add , gerrit thomson */
@@ -2312,7 +2522,11 @@ cleanup:
 	efree(ldap_mods);
 
 	if (lserverctrls) {
-		_php_ldap_controls_free(&lserverctrls);
+		if (serverctrls == NULL) {
+			efree(lserverctrls);
+		} else {
+			_php_ldap_controls_free(&lserverctrls);
+		}
 	}
 
 	return;
@@ -2413,6 +2627,8 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 			RETVAL_FALSE;
 			goto cleanup;
 		}
+	} else {
+		lserverctrls = _php_ldap_server_controls_from_linkdata(ld);
 	}
 
 	if (ext) {
@@ -2440,7 +2656,11 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 
 cleanup:
 	if (lserverctrls) {
-		_php_ldap_controls_free(&lserverctrls);
+		if (serverctrls == NULL) {
+			efree(lserverctrls);
+		} else {
+			_php_ldap_controls_free(&lserverctrls);
+		}
 	}
 
 	return;
@@ -2781,6 +3001,8 @@ PHP_FUNCTION(ldap_modify_batch)
 			RETVAL_FALSE;
 			goto cleanup;
 		}
+	} else {
+		lserverctrls = _php_ldap_server_controls_from_linkdata(ld);
 	}
 
 	/* perform (finally) */
@@ -2817,7 +3039,11 @@ PHP_FUNCTION(ldap_modify_batch)
 		efree(ldap_mods);
 
 		if (lserverctrls) {
-			_php_ldap_controls_free(&lserverctrls);
+			if (serverctrls == NULL) {
+				efree(lserverctrls);
+			} else {
+				_php_ldap_controls_free(&lserverctrls);
+			}
 		}
 	}
 }
@@ -2905,6 +3131,8 @@ PHP_FUNCTION(ldap_compare)
 			RETVAL_FALSE;
 			goto cleanup;
 		}
+	} else {
+		lserverctrls = _php_ldap_server_controls_from_linkdata(ld);
 	}
 
 	lvalue.bv_val = value;
@@ -2928,7 +3156,11 @@ PHP_FUNCTION(ldap_compare)
 
 cleanup:
 	if (lserverctrls) {
-		_php_ldap_controls_free(&lserverctrls);
+		if (serverctrls == NULL) {
+			efree(lserverctrls);
+		} else {
+			_php_ldap_controls_free(&lserverctrls);
+		}
 	}
 
 	return;
@@ -3123,13 +3355,13 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			LDAPControl **ctrls = NULL;
 
-			if (ldap_get_option(ld->link, option, &ctrls) || ctrls == NULL) {
-				if (ctrls) {
-					ldap_memfree(ctrls);
-				}
+			if (_php_ldap_get_ctrl_option(ld, option, &ctrls) || ctrls == NULL) {
 				RETURN_FALSE;
 			}
-			_php_ldap_controls_to_array(ld->link, ctrls, retval, 1);
+			_ldap_controls_to_array(ld->link, ctrls, retval, 1);
+			if (option == LDAP_OPT_CLIENT_CONTROLS) {
+				ldap_controls_free(ctrls);
+			}
 		} break;
 /* options not implemented
 	case LDAP_OPT_API_INFO:
@@ -3308,7 +3540,7 @@ PHP_FUNCTION(ldap_set_option)
 			if (ctrls == NULL) {
 				RETURN_FALSE;
 			} else {
-				rc = ldap_set_option(ldap, option, ctrls);
+				rc = _php_ldap_set_ctrl_option(ld, option, ctrls);
 				_php_ldap_controls_free(&ctrls);
 				if (rc != LDAP_SUCCESS) {
 					RETURN_FALSE;
@@ -3599,6 +3831,8 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 			RETVAL_FALSE;
 			goto cleanup;
 		}
+	} else {
+		lserverctrls = _php_ldap_server_controls_from_linkdata(ld);
 	}
 
 	if (ext) {
@@ -3641,7 +3875,11 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 
 cleanup:
 	if (lserverctrls) {
-		_php_ldap_controls_free(&lserverctrls);
+		if (serverctrls == NULL) {
+			efree(lserverctrls);
+		} else {
+			_php_ldap_controls_free(&lserverctrls);
+		}
 	}
 
 	return;
@@ -3922,7 +4160,7 @@ PHP_FUNCTION(ldap_control_paged_result)
 	ldap_linkdata *ld;
 	LDAP *ldap;
 	BerElement *ber = NULL;
-	LDAPControl	ctrl, *ctrlsp[2];
+	LDAPControl	ctrl;
 	int rc, myargcount = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(myargcount, "rl|bs", &link, &pagesize, &iscritical, &cookie, &cookie_len) != SUCCESS) {
@@ -3974,19 +4212,19 @@ PHP_FUNCTION(ldap_control_paged_result)
 		/* directly set the cookie */
 		if (lcookie.bv_val != 0 || pagesize != 0) {
 			/* a cookie or a page size gets sent along with the next request */
-			ctrlsp[0] = &ctrl;
-			ctrlsp[1] = NULL;
+			_php_clear_ldap_link_server_ctrls(ld);
+			rc = _php_add_ldap_link_server_ctrl(ld, &ctrl);
+			if (rc != LDAP_SUCCESS) {
+				/* there's only one way to fail at this point */
+				php_error_docref(NULL, E_WARNING, "Unable to set paged results control: out of memory (%d)", rc);
+				RETVAL_FALSE;
+				goto lcpr_error_out;
+			}
 		} else {
 			/* we have no cookie and no page size, we just need to clear the oid */
-			ctrlsp[0] = NULL;
+			_php_del_ldap_link_server_ctrl(ld, LDAP_CONTROL_PAGEDRESULTS);
 		}
 
-		rc = ldap_set_option(ldap, LDAP_OPT_SERVER_CONTROLS, ctrlsp);
-		if (rc != LDAP_SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Unable to set paged results control: %s (%d)", ldap_err2string(rc), rc);
-			RETVAL_FALSE;
-			goto lcpr_error_out;
-		}
 		RETVAL_TRUE;
 	} else {
 		/* return a PHP control object */
@@ -4147,6 +4385,8 @@ PHP_FUNCTION(ldap_exop)
 			RETVAL_FALSE;
 			goto cleanup;
 		}
+	} else {
+		lserverctrls = _php_ldap_server_controls_from_linkdata(ld);
 	}
 
 	if (retdata) {
@@ -4210,7 +4450,11 @@ PHP_FUNCTION(ldap_exop)
 
 	cleanup:
 	if (lserverctrls) {
-		_php_ldap_controls_free(&lserverctrls);
+		if (serverctrls == NULL) {
+			efree(lserverctrls);
+		} else {
+			_php_ldap_controls_free(&lserverctrls);
+		}
 	}
 }
 /* }}} */
