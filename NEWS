@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 
 - OCI8:
   . Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
+  . Added oci_set_call_timeout() for call timeouts.
+  . Added oci_set_db_operation() for the DBOP end-to-end-tracing attribute.
 
 - Opcache:
   . Fixed bug #77215 (CFG assertion failure on multiple finalizing switch
