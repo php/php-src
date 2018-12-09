@@ -42,16 +42,10 @@ echo "Test 1\n";
 oci_set_call_timeout($c, 4000);  // milliseconds
 $r = mysleep($c, 8);             // seconds
 
-echo "Test 2\n";
-oci_set_call_timeout($c, 0);
-$r = mysleep($c, 5);
-
 ?>
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
 Test 1
 Execute error was ORA-03136: %s
-Test 2
-Execute error was ORA-03114: %s
 ===DONE===

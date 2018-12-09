@@ -46,7 +46,7 @@ echo "Test 2\n";
 oci_set_db_operation($c, "");
 dq($c, 'select /*+ MONITOR */ \'dboptest\' from dual');
 
-dq($c, 'select sql_text, dbop_name from v$sql_monitor where sql_text like \'%dboptest2%\' order by dbop_exec_id desc');
+dq($c, 'select sql_text, dbop_name from v$sql_monitor where sql_text like \'%dboptest%\' order by dbop_exec_id desc');
 
 ?>
 ===DONE===
@@ -72,7 +72,7 @@ array(1) {
 }
 array(2) {
   ["SQL_TEXT"]=>
-  string(121) "select /*+ MONITOR */ sql_text, dbop_name from v$sql_monitor where sql_text like '%dboptest2%' order by dbop_exec_id desc"
+  string(42) "select /*+ MONITOR */ 'dboptest' from dual"
   ["DBOP_NAME"]=>
   NULL
 }
