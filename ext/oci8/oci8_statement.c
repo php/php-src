@@ -1511,9 +1511,10 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 	php_oci_statement *statement;
 	php_oci_out_column *column;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &z_statement, &column_index) == FAILURE) {
-		return NULL;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_statement)
+		Z_PARAM_ZVAL(column_index)
+	ZEND_PARSE_PARAMETERS_END_EX(return NULL);
 
 	statement = (php_oci_statement *) zend_fetch_resource_ex(z_statement, "oci8 statement", le_statement);
 

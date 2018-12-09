@@ -1630,9 +1630,14 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 	zend_long session_mode = OCI_DEFAULT;
 
 	/* if a fourth parameter is handed over, it is the charset identifier (but is only used in Oracle 9i+) */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|ssl", &username, &username_len, &password, &password_len, &dbname, &dbname_len, &charset, &charset_len, &session_mode) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STRING(username, username_len)
+		Z_PARAM_STRING(password, password_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(dbname, dbname_len)
+		Z_PARAM_STRING(charset, charset_len)
+		Z_PARAM_LONG(session_mode)
+	ZEND_PARSE_PARAMETERS_END();
 
 #ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CONNECT_ENTRY_ENABLED()) {
@@ -2547,9 +2552,12 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 	if (expected_args > 2) {
 		/* only for ocifetchinto BC */
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|l", &z_statement, &array, &fetch_mode) == FAILURE) {
-			return;
-		}
+		ZEND_PARSE_PARAMETERS_START(2, 3)
+			Z_PARAM_RESOURCE(z_statement)
+			Z_PARAM_ZVAL(array)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(fetch_mode)
+		ZEND_PARSE_PARAMETERS_END();
 
 		if (ZEND_NUM_ARGS() == 2) {
 			fetch_mode = mode;
@@ -2563,9 +2571,11 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 	} else if (expected_args == 2) {
 		/* only for oci_fetch_array() */
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &z_statement, &fetch_mode) == FAILURE) {
-			return;
-		}
+		ZEND_PARSE_PARAMETERS_START(1, 2)
+			Z_PARAM_RESOURCE(z_statement)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(fetch_mode)
+		ZEND_PARSE_PARAMETERS_END();
 
 		if (ZEND_NUM_ARGS() == 1) {
 			fetch_mode = mode;
@@ -2573,9 +2583,9 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 	} else {
 		/* for all oci_fetch_*() */
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_statement) == FAILURE) {
-			return;
-		}
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_RESOURCE(z_statement)
+		ZEND_PARSE_PARAMETERS_END();
 
 		fetch_mode = mode;
 	}
