@@ -3178,7 +3178,7 @@ PHP_FUNCTION(curl_getinfo)
 		struct curl_certinfo *ci = NULL;
 		zval listcode;
 #endif
-#if LIBCURL_VERSION_NUM >= 0x073700 /* 7.55.0 */
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* 7.61.0 */
 		curl_off_t co;
 #endif
 
