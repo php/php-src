@@ -206,6 +206,7 @@ int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
 	op_array->last_literal++;
 	op_array->literals = (zval*)erealloc(op_array->literals, op_array->last_literal * sizeof(zval));
 	ZVAL_COPY_VALUE(&op_array->literals[i], zv);
+	Z_EXTRA(op_array->literals[i]) = 0;
 	return i;
 }
 
@@ -533,7 +534,6 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 					}
 				}
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-				Z_EXTRA(op_array->literals[opline->op2.constant]) = 0;
 			} else {
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			}
@@ -562,7 +562,6 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				}
 			}
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			Z_EXTRA(op_array->literals[opline->op2.constant]) = 0;
 			break;
 		case ZEND_ADD_ARRAY_ELEMENT:
 		case ZEND_INIT_ARRAY:

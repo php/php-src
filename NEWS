@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #77215 (CFG assertion failure on multiple finalizing switch
     frees in one block). (Nikita)
+  . Fixed bug #77275 (OPcache optimization problem for ArrayAccess->offsetGet).
+    (Nikita)
 
 - PCRE:
   . Fixed bug #77193 (Infinite loop in preg_replace_callback). (Anatol)
