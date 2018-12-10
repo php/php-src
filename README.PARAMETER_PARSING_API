@@ -1,11 +1,21 @@
-New parameter parsing functions
-===============================
+Fast Parameter Parsing API
+==========================
 
-It should be easier to parse input parameters to an extension function.
-Hence, borrowing from Python's example, there are now a set of functions
-that given the string of type specifiers, can parse the input parameters
-and store the results in the user specified variables. This avoids most
-of the IS_* checks and convert_to_* conversions. The functions also
+In PHP 7, a "Fast Parameter Parsing API" was introduced.  See
+
+  https://wiki.php.net/rfc/fast_zpp
+
+This API uses inlining to improve applications performance compared
+with the zend_parse_parameters() function described below.
+
+
+Parameter parsing functions
+===========================
+
+Borrowing from Python's example, there is a set of functions that
+given the string of type specifiers, can parse the input parameters
+and store the results in the user specified variables. This avoids
+using IS_* checks and convert_to_* conversions. The functions also
 check for the appropriate number of parameters, and try to output
 meaningful error messages.
 
