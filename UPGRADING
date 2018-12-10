@@ -53,7 +53,7 @@ Core:
                 case "baz":
                     continue;
                     // Warning: "continue" targeting switch is equivalent to
-                                "break". Did you mean to use "continue 2"?
+                    //          "break". Did you mean to use "continue 2"?
             }
         }
 
@@ -397,6 +397,8 @@ Core:
     are available under Linux, FreeBSD, Windows, Mac, SunOS, AIX and their
     derivatives. If no required timers are provided by a corresponding
     platform, the function returns false.
+  . Added net_get_interfaces() to retrieve an array of available network
+    interfaces including several details.
 
 Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
@@ -425,6 +427,10 @@ Intl:
     http://icu-project.org/apiref/icu4c/uspoof_8h.html
   . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
     to retrieve the Decomposition_Mapping property of a character.
+
+LDAP:
+  . Added ldap_exop_refresh() to conveniently perform a Refresh extended
+    operation.
 
 OpenSSL:
   . Added openssl_pkey_derive that derives a shared secret for DH, ECDH and
@@ -484,7 +490,7 @@ JSON:
     is fully backward compatible with former PHP versions.
   . FILTER_SANITIZE_ADD_SLASHES has been added as an alias of the 'magic_quotes'
     filter (FILTER_SANITIZE_MAGIC_QUOTES). The 'magic_quotes' filter is subject
-	to removal in future versions of PHP.
+  	to removal in future versions of PHP.
 
  FTP:
   . Set default transfer mode to binary
@@ -506,11 +512,21 @@ JSON:
     related constants for possible TLS protocol values have been added.
     See <https://github.com/php/php-src/pull/3317>.
 
-PCRE:
+ PCRE:
   . The PCRE extension has been upgraded to PCRE2, which may cause minor
     behavioral changes (for instance, character ranges in classes are now more
     strictly interpreted), and augments the existing regular expression syntax.
     See <https://wiki.php.net/rfc/pcre2-migration> for details.
+
+ PDO_DBLIB:
+  . Added the attribute PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS to enable automatic
+    skipping of empty rowsets.
+  . Exposed the TDS version via the PDO::DBLIB_ATTR_TDS_VERSION attribute.
+  . DATETIME2 columns are now treated like DATETIME columns.
+
+ PDO_SQLite:
+  . SQLite3 databases can now be opened in read-only mode by setting the
+    new PDO::SQLITE_ATTR_OPEN_FLAGS attribute to PDO::SQLITE_READONLY.
 
  Standard:
   . var_export() now exports stdClass objects as an array casted to an object
@@ -530,6 +546,10 @@ PCRE:
  Zip:
   . Building against the bundled libzip is discouraged, but still possible by
     adding `--without-libzip` to the configuration.
+
+ zlib:
+  . Added the zlib/level context option for the compress.zlib wrapper to
+    facilitate setting the desired compression level.
 
 ========================================
 10. New Global Constants
@@ -608,7 +628,6 @@ Curl:
   . CURL_VERSION_GSSNEGOTIATE
   . CURL_VERSION_HTTPS_PROXY
   . CURL_VERSION_IDN
-  . CURL_VERSION_KERBEROS5
   . CURL_VERSION_LARGEFILE
   . CURL_VERSION_MULTI_SSL
   . CURL_VERSION_NTLM
@@ -616,10 +635,18 @@ Curl:
   . CURL_VERSION_SPNEGO
   . CURL_VERSION_SSPI
   . CURL_VERSION_TLSAUTH_SRP
-  . CURL_VERSION_UNIX_SOCKETS
+
+Filter:
+  . FILTER_SANITIZE_ADD_SLASHES
 
 JSON:
   . JSON_THROW_ON_ERROR
+
+OpenSSL:
+  . STREAM_CRYPTO_PROTO_SSLv3
+  . STREAM_CRYPTO_PROTO_TLSv1_0
+  . STREAM_CRYPTO_PROTO_TLSv1_1
+  . STREAM_CRYPTO_PROTO_TLSv1_2
 
 MBString:
   . MB_CASE_FOLD
@@ -712,3 +739,7 @@ LDAP:
 ========================================
 13. Other Changes
 ========================================
+
+. The cyclic GC has been enhanced, which may result in considerable performance
+  improvements.
+ 
