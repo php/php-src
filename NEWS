@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.1
 
 - Core:
+  . Fixed bug #76654 (Build failure on Mac OS X on 32-bit Intel). (Ryandesign)
   . Fixed bug #71041 (zend_signal_startup() needs ZEND_API).
     (Valentin V. Bartenev)
   . Fixed bug #76046 (PHP generates "FE_FREE" opcode on the wrong line).
