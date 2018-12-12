@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     pkg-config). (Eli Schwartz)
   . The bundled libgd behaves now like system libgd wrt. IMG_CROP_DEFAULT never
     falling back to IMG_CROP_SIDES.
+  . The default $mode parameter of imagecropauto() has been changed to
+    IMG_CROP_DEFAULT; passing -1 is now deprecated.
 
 - Hash:
   . The hash extension is now an integral part of PHP and cannot be disabled

@@ -120,6 +120,8 @@ PHP 7.4 UPGRADE NOTES
     that of system libgd:
      * IMG_CROP_DEFAULT is no longer falling back to IMG_CROP_SIDES
      * Threshold-cropping now uses the algorithm of system libgd
+  . The default $mode parameter of imagecropauto() has been changed to
+    IMG_CROP_DEFAULT; passing -1 is now deprecated.
 
 - Hash:
   . The hash extension cannot be disabled anymore and is always an integral
