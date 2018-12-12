@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   . Fixed bug #77198 (auto cropping has insufficient precision). (cmb)
   . Fixed bug #77200 (imagecropauto(…, GD_CROP_SIDES) crops left but not right).
     (cmb)
+  . Fixed bug #77269 (efree() on uninitialized Heap data in imagescale leads to 
+    use-after-free). (cmb)
 
 - OCI8:
   . Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)

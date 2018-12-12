@@ -890,8 +890,13 @@ static inline LineContribType * _gdContributionsAlloc(unsigned int line_length, 
 {
 	unsigned int u = 0;
 	LineContribType *res;
-	int overflow_error = 0;
+	size_t weights_size;
 
+	if (overflow2(windows_size, sizeof(double))) {
+		return NULL;
+	} else {
+		weights_size = windows_size * sizeof(double);
+	}
 	res = (LineContribType *) gdMalloc(sizeof(LineContribType));
 	if (!res) {
 		return NULL;
@@ -908,15 +913,10 @@ static inline LineContribType * _gdContributionsAlloc(unsigned int line_length, 
 		return NULL;
 	}
 	for (u = 0 ; u < line_length ; u++) {
-		if (overflow2(windows_size, sizeof(double))) {
-			overflow_error = 1;
-		} else {
-			res->ContribRow[u].Weights = (double *) gdMalloc(windows_size * sizeof(double));
-		}
-		if (overflow_error == 1 || res->ContribRow[u].Weights == NULL) {
+		res->ContribRow[u].Weights = (double *) gdMalloc(weights_size);
+		if (res->ContribRow[u].Weights == NULL) {
 			unsigned int i;
-			u--;
-			for (i=0;i<=u;i++) {
+			for (i=0;i<u;i++) {
 				gdFree(res->ContribRow[i].Weights);
 			}
 			gdFree(res->ContribRow);
