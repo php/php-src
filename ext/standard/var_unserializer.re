@@ -109,11 +109,13 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 {
-	zval *tmp_var = var_tmp_var(var_hashx);
-    if (!tmp_var) {
-        return;
-    }
-	ZVAL_COPY(tmp_var, rval);
+	if (Z_REFCOUNTED_P(rval)) {
+		zval *tmp_var = var_tmp_var(var_hashx);
+		if (!tmp_var) {
+			return;
+		}
+		ZVAL_COPY(tmp_var, rval);
+	}
 }
 
 PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
@@ -510,7 +512,9 @@ string_key:
 			return 0;
 		}
 
-		var_push_dtor(var_hash, data);
+		if (BG(unserialize).level > 1) {
+			var_push_dtor(var_hash, data);
+		}
 		zval_ptr_dtor_str(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {

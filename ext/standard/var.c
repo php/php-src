@@ -1102,15 +1102,25 @@ PHP_FUNCTION(unserialize)
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
 	}
 
-	retval = var_tmp_var(&var_hash);
+	if (BG(unserialize).level > 1) {
+		retval = var_tmp_var(&var_hash);
+	} else {
+		retval = return_value;
+	}
 	if (!php_var_unserialize(retval, &p, p + buf_len, &var_hash)) {
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
 				(zend_long)((char*)p - buf), buf_len);
 		}
+		if (BG(unserialize).level <= 1) {
+			zval_ptr_dtor(return_value);
+		}
 		RETVAL_FALSE;
-	} else {
+	} else if (BG(unserialize).level > 1) {
 		ZVAL_COPY(return_value, retval);
+	} else if (Z_REFCOUNTED_P(return_value)) {
+		zend_refcounted *ref = Z_COUNTED_P(return_value);
+		gc_check_possible_root(ref);
 	}
 
 	if (class_hash) {
