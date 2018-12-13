@@ -3782,6 +3782,7 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #endif
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
 	BASIC_MSHUTDOWN_SUBMODULE(random)
+	BASIC_MSHUTDOWN_SUBMODULE(password)
 
 	zend_hash_destroy(&basic_submodules);
 	return SUCCESS;
