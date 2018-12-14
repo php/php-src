@@ -54,6 +54,9 @@ PHP                                                                        NEWS
   . Fixed bug #77136 (Unsupported IPV6_RECVPKTINFO constants on macOS).
     (Mizunashi Mana)
 
+- Sodium:
+  . Fixed bug #77297 (SodiumException segfaults on PHP 7.3). (Nikita, Scott)
+
 - SQLite3:
   . Fixed bug #77051 (Issue with re-binding on SQLite3). (BohwaZ)
 
