@@ -32,6 +32,9 @@ PHP                                                                        NEWS
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
+- SQLite3:
+  . Added sqlite3.defensive INI directive. (BohwaZ)
+
 - Standard:
   . Fixed bug #77664 (Segmentation fault when using undefined constant in
     custom wrapper). (Laruence)

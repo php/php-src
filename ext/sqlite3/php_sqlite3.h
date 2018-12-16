@@ -28,6 +28,7 @@ extern zend_module_entry sqlite3_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(sqlite3)
 	char *extension_dir;
+	int dbconfig_defensive;
 ZEND_END_MODULE_GLOBALS(sqlite3)
 
 #ifdef ZTS
