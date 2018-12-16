@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.1.28
 
-
+- SQLite3:
+  . Added sqlite3.defensive INI directive. (BohwaZ)
 
 07 Mar 2019, PHP 7.1.27
 
