@@ -794,7 +794,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 	_real_arg++; \
 	_arg = _real_arg; \
 	if (deref) { \
-		ZVAL_DEREF(_arg); \
+		if (EXPECTED(Z_ISREF_P(_arg))) { \
+			_arg = Z_REFVAL_P(_arg); \
+		} \
 	} \
 	if (separate) { \
 		SEPARATE_ZVAL_NOREF(_arg); \
