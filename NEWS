@@ -217,6 +217,7 @@ PHP                                                                        NEWS
     (cmb)
 
 - IMAP:
+  . Fixed bug #77020 (null pointer dereference in imap_mail). (cmb)
   . Fixed bug #77153 (imap_open allows to run arbitrary shell commands via
     mailbox parameter). (Stas)
 
