@@ -190,15 +190,6 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 }
 /* }}} */
 
-static int unlink_filename(zval *el) /* {{{ */
-{
-	zend_string *filename = Z_STR_P(el);
-	VCWD_UNLINK(ZSTR_VAL(filename));
-	return 0;
-}
-/* }}} */
-
-
 static void free_filename(zval *el) {
 	zend_string *filename = Z_STR_P(el);
 	zend_string_release_ex(filename, 0);
@@ -206,7 +197,12 @@ static void free_filename(zval *el) {
 
 PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
 {
-	zend_hash_apply(SG(rfc1867_uploaded_files), unlink_filename);
+	zval *el;
+
+	ZEND_HASH_FOREACH_VAL(SG(rfc1867_uploaded_files), el) {
+		zend_string *filename = Z_STR_P(el);
+		VCWD_UNLINK(ZSTR_VAL(filename));
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
 }

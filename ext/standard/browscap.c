@@ -563,12 +563,8 @@ static inline size_t browscap_get_minimum_length(browscap_entry *entry) {
 	return len;
 }
 
-static int browser_reg_compare(
-		zval *entry_zv, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, browscap_entry **found_entry_ptr) /* {{{ */
 {
-	browscap_entry *entry = Z_PTR_P(entry_zv);
-	zend_string *agent_name = va_arg(args, zend_string *);
-	browscap_entry **found_entry_ptr = va_arg(args, browscap_entry **);
 	browscap_entry *found_entry = *found_entry_ptr;
 	ALLOCA_FLAG(use_heap)
 	zend_string *pattern_lc, *regex;
@@ -616,7 +612,7 @@ static int browser_reg_compare(
 	if (zend_string_equals(agent_name, pattern_lc)) {
 		*found_entry_ptr = entry;
 		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-		return ZEND_HASH_APPLY_STOP;
+		return 1;
 	}
 
 	regex = browscap_convert_pattern(entry->pattern, 0);
@@ -749,7 +745,13 @@ PHP_FUNCTION(get_browser)
 	lookup_browser_name = zend_string_tolower(agent_name);
 	found_entry = zend_hash_find_ptr(bdata->htab, lookup_browser_name);
 	if (found_entry == NULL) {
-		zend_hash_apply_with_arguments(bdata->htab, browser_reg_compare, 2, lookup_browser_name, &found_entry);
+		browscap_entry *entry;
+
+		ZEND_HASH_FOREACH_PTR(bdata->htab, entry) {
+			if (browser_reg_compare(entry, lookup_browser_name, &found_entry)) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
 
 		if (found_entry == NULL) {
 			found_entry = zend_hash_str_find_ptr(bdata->htab,

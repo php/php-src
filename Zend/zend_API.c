@@ -2626,28 +2626,22 @@ ZEND_API void zend_activate_modules(void) /* {{{ */
 }
 /* }}} */
 
-/* call request shutdown for all modules */
-static int module_registry_cleanup(zval *zv) /* {{{ */
-{
-	zend_module_entry *module = Z_PTR_P(zv);
-
-	if (module->request_shutdown_func) {
-#if 0
-		zend_printf("%s: Request shutdown\n", module->name);
-#endif
-		module->request_shutdown_func(module->type, module->module_number);
-	}
-	return 0;
-}
-/* }}} */
-
 ZEND_API void zend_deactivate_modules(void) /* {{{ */
 {
 	EG(current_execute_data) = NULL; /* we're no longer executing anything */
 
 	zend_try {
 		if (EG(full_tables_cleanup)) {
-			zend_hash_reverse_apply(&module_registry, module_registry_cleanup);
+			zend_module_entry *module;
+
+			ZEND_HASH_REVERSE_FOREACH_PTR(&module_registry, module) {
+				if (module->request_shutdown_func) {
+#if 0
+					zend_printf("%s: Request shutdown\n", module->name);
+#endif
+					module->request_shutdown_func(module->type, module->module_number);
+				}
+			} ZEND_HASH_FOREACH_END();
 		} else {
 			zend_module_entry **p = module_request_shutdown_handlers;
 
@@ -2673,34 +2667,21 @@ ZEND_API void zend_cleanup_internal_classes(void) /* {{{ */
 }
 /* }}} */
 
-int module_registry_unload_temp(const zend_module_entry *module) /* {{{ */
-{
-	return (module->type == MODULE_TEMPORARY) ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_STOP;
-}
-/* }}} */
-
-static int module_registry_unload_temp_wrapper(zval *el) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry *)Z_PTR_P(el);
-	return module_registry_unload_temp((const zend_module_entry *)module);
-}
-/* }}} */
-
-static int exec_done_cb(zval *el) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry *)Z_PTR_P(el);
-	if (module->post_deactivate_func) {
-		module->post_deactivate_func();
-	}
-	return 0;
-}
-/* }}} */
-
 ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
-		zend_hash_apply(&module_registry, exec_done_cb);
-		zend_hash_reverse_apply(&module_registry, module_registry_unload_temp_wrapper);
+		zend_module_entry *module;
+
+		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
+			if (module->post_deactivate_func) {
+				module->post_deactivate_func();
+			}
+		} ZEND_HASH_FOREACH_END();
+		ZEND_HASH_REVERSE_FOREACH_PTR(&module_registry, module) {
+			if (module->type != MODULE_TEMPORARY) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END_DEL();
 	} else {
 		zend_module_entry **p = module_post_deactivate_handlers;
 

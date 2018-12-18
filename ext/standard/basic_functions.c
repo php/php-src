@@ -4688,25 +4688,41 @@ PHP_FUNCTION(get_current_user)
 }
 /* }}} */
 
-/* {{{ add_config_entry_cb
+/* {{{ add_config_entry
  */
-static int add_config_entry_cb(zval *entry, int num_args, va_list args, zend_hash_key *hash_key)
+static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *retval)
 {
-	zval *retval = (zval *)va_arg(args, zval*);
-	zval tmp;
-
 	if (Z_TYPE_P(entry) == IS_STRING) {
-		if (hash_key->key) {
-			add_assoc_str_ex(retval, ZSTR_VAL(hash_key->key), ZSTR_LEN(hash_key->key), zend_string_copy(Z_STR_P(entry)));
+		if (key) {
+			add_assoc_str_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), zend_string_copy(Z_STR_P(entry)));
 		} else {
-			add_index_str(retval, hash_key->h, zend_string_copy(Z_STR_P(entry)));
+			add_index_str(retval, h, zend_string_copy(Z_STR_P(entry)));
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
+		zend_ulong h;
+		zend_string *key;
+		zval *zv, tmp;
+
 		array_init(&tmp);
-		zend_hash_apply_with_arguments(Z_ARRVAL_P(entry), add_config_entry_cb, 1, tmp);
-		zend_hash_update(Z_ARRVAL_P(retval), hash_key->key, &tmp);
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(entry), h, key, zv)
+			add_config_entry(h, key, zv, &tmp);
+		ZEND_HASH_FOREACH_END();
+		zend_hash_update(Z_ARRVAL_P(retval), key, &tmp);
 	}
-	return 0;
+}
+/* }}} */
+
+/* {{{ add_config_entries
+ */
+static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
+{
+	zend_ulong h;
+	zend_string *key;
+	zval *zv;
+
+	ZEND_HASH_FOREACH_KEY_VAL(hash, h, key, zv)
+		add_config_entry(h, key, zv, return_value);
+	ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -4727,7 +4743,7 @@ PHP_FUNCTION(get_cfg_var)
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
 			array_init(return_value);
-			zend_hash_apply_with_arguments(Z_ARRVAL_P(retval), add_config_entry_cb, 1, return_value);
+			add_config_entries(Z_ARRVAL_P(retval), return_value);
 			return;
 		} else {
 			RETURN_STRING(Z_STRVAL_P(retval));
@@ -5407,64 +5423,17 @@ PHP_FUNCTION(ini_get)
 }
 /* }}} */
 
-static int php_ini_get_option(zval *zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
-{
-	zend_ini_entry *ini_entry = Z_PTR_P(zv);
-	zval *ini_array = va_arg(args, zval *);
-	int module_number = va_arg(args, int);
-	int details = va_arg(args, int);
-	zval option;
-
-	if (module_number != 0 && ini_entry->module_number != module_number) {
-		return 0;
-	}
-
-	if (hash_key->key == NULL ||
-		ZSTR_VAL(hash_key->key)[0] != 0
-	) {
-		if (details) {
-			array_init(&option);
-
-			if (ini_entry->orig_value) {
-				add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->orig_value));
-			} else if (ini_entry->value) {
-				add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->value));
-			} else {
-				add_assoc_null(&option, "global_value");
-			}
-
-			if (ini_entry->value) {
-				add_assoc_str(&option, "local_value", zend_string_copy(ini_entry->value));
-			} else {
-				add_assoc_null(&option, "local_value");
-			}
-
-			add_assoc_long(&option, "access", ini_entry->modifiable);
-
-			zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &option);
-		} else {
-			if (ini_entry->value) {
-				zval zv;
-
-				ZVAL_STR_COPY(&zv, ini_entry->value);
-				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &zv);
-			} else {
-				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &EG(uninitialized_zval));
-			}
-		}
-	}
-	return 0;
-}
-/* }}} */
-
 /* {{{ proto array ini_get_all([string extension[, bool details = true]])
    Get all configuration options */
 PHP_FUNCTION(ini_get_all)
 {
 	char *extname = NULL;
-	size_t extname_len = 0, extnumber = 0;
+	size_t extname_len = 0, module_number = 0;
 	zend_module_entry *module;
 	zend_bool details = 1;
+	zend_string *key;
+	zend_ini_entry *ini_entry;
+
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -5479,11 +5448,50 @@ PHP_FUNCTION(ini_get_all)
 			php_error_docref(NULL, E_WARNING, "Unable to find extension '%s'", extname);
 			RETURN_FALSE;
 		}
-		extnumber = module->module_number;
+		module_number = module->module_number;
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(ini_directives), php_ini_get_option, 2, return_value, extnumber, details);
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(ini_directives), key, ini_entry) {
+		zval option;
+
+		if (module_number != 0 && ini_entry->module_number != module_number) {
+			continue;
+		}
+
+		if (key == NULL || ZSTR_VAL(key)[0] != 0) {
+			if (details) {
+				array_init(&option);
+
+				if (ini_entry->orig_value) {
+					add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->orig_value));
+				} else if (ini_entry->value) {
+					add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->value));
+				} else {
+					add_assoc_null(&option, "global_value");
+				}
+
+				if (ini_entry->value) {
+					add_assoc_str(&option, "local_value", zend_string_copy(ini_entry->value));
+				} else {
+					add_assoc_null(&option, "local_value");
+				}
+
+				add_assoc_long(&option, "access", ini_entry->modifiable);
+
+				zend_symtable_update(Z_ARRVAL_P(return_value), ini_entry->name, &option);
+			} else {
+				if (ini_entry->value) {
+					zval zv;
+
+					ZVAL_STR_COPY(&zv, ini_entry->value);
+					zend_symtable_update(Z_ARRVAL_P(return_value), ini_entry->name, &zv);
+				} else {
+					zend_symtable_update(Z_ARRVAL_P(return_value), ini_entry->name, &EG(uninitialized_zval));
+				}
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -6142,7 +6150,7 @@ PHP_FUNCTION(config_get_hash) /* {{{ */
 	HashTable *hash = php_ini_get_configuration_hash();
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(hash, add_config_entry_cb, 1, return_value);
+	add_config_entries(hash, return_value);
 }
 /* }}} */
 #endif
