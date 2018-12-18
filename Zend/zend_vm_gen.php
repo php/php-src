@@ -2705,28 +2705,20 @@ function gen_vm($def, $skel) {
 			$else = "";
 			out($f, "\tif (spec & SPEC_EXTRA_MASK) {\n");
 
-			if (isset($used_extra_spec["OP_DATA"])) {
-				out($f, "\t\t{$else}if (spec & SPEC_RULE_OP_DATA) offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];\n");
-				$else = "else ";
-			}
 			if (isset($used_extra_spec["RETVAL"])) {
-				out($f, "\t\t{$else}if (spec & SPEC_RULE_RETVAL) offset = offset * 2 + (op->result_type != IS_UNUSED);\n");
-				$else = "else ";
+				out($f, "\t\t{$else}if (spec & SPEC_RULE_RETVAL) {\n");
+				out($f, "\t\t\toffset = offset * 2 + (op->result_type != IS_UNUSED);\n");
+				$else = "} else ";
 			}
 			if (isset($used_extra_spec["QUICK_ARG"])) {
-				out($f, "\t\t{$else}if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num <= MAX_ARG_FLAG_NUM);\n");
-				$else = "else ";
+				out($f, "\t\t{$else}if (spec & SPEC_RULE_QUICK_ARG) {\n");
+				out($f, "\t\t\toffset = offset * 2 + (op->op2.num <= MAX_ARG_FLAG_NUM);\n");
+				$else = "} else ";
 			}
-			if (isset($used_extra_spec["SMART_BRANCH"])) {
-				out($f, "\t\t{$else}if (spec & SPEC_RULE_SMART_BRANCH) {\n");
-				out($f,	"\t\t\toffset = offset * 3;\n");
-				out($f, "\t\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
-				out($f,	"\t\t\t\toffset += 1;\n");
-				out($f, "\t\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
-				out($f,	"\t\t\t\toffset += 2;\n");
-				out($f, "\t\t\t}\n");
-				out($f, "\t\t}\n");
-				$else = "else ";
+			if (isset($used_extra_spec["OP_DATA"])) {
+				out($f, "\t\t{$else}if (spec & SPEC_RULE_OP_DATA) {\n");
+				out($f, "\t\t\toffset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];\n");
+				$else = "} else ";
 			}
 			if (isset($used_extra_spec["DIM_OBJ"])) {
 				out($f, "\t\t{$else}if (spec & SPEC_RULE_DIM_OBJ) {\n");
@@ -2736,12 +2728,25 @@ function gen_vm($def, $skel) {
 				out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
 				out($f,	"\t\t\t\toffset += 2;\n");
 				out($f, "\t\t\t}\n");
-				out($f, "\t\t}\n");
-				$else = "else ";
+				$else = "} else ";
 			}
 			if (isset($used_extra_spec["ISSET"])) {
-				out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);\n");
-				$else = "else ";
+				out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) {\n");
+				out($f, "\t\t\toffset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);\n");
+				$else = "} else ";
+			}
+			if (isset($used_extra_spec["SMART_BRANCH"])) {
+				out($f, "\t\t{$else}if (spec & SPEC_RULE_SMART_BRANCH) {\n");
+				out($f,	"\t\t\toffset = offset * 3;\n");
+				out($f, "\t\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
+				out($f,	"\t\t\t\toffset += 1;\n");
+				out($f, "\t\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
+				out($f,	"\t\t\t\toffset += 2;\n");
+				out($f, "\t\t\t}\n");
+				$else = "} else ";
+			}
+			if ($else !== "") {
+				out($f, "\t\t}\n");
 			}
 			out($f, "\t}\n");
 		}

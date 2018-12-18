@@ -64460,10 +64460,22 @@ static const void* ZEND_FASTCALL zend_vm_get_opcode_handler_ex(uint32_t spec, co
 	if (spec & SPEC_RULE_OP1) offset = offset * 5 + zend_vm_decode[op->op1_type];
 	if (spec & SPEC_RULE_OP2) offset = offset * 5 + zend_vm_decode[op->op2_type];
 	if (spec & SPEC_EXTRA_MASK) {
-		if (spec & SPEC_RULE_OP_DATA) offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];
-		else if (spec & SPEC_RULE_RETVAL) offset = offset * 2 + (op->result_type != IS_UNUSED);
-		else if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num <= MAX_ARG_FLAG_NUM);
-		else if (spec & SPEC_RULE_SMART_BRANCH) {
+		if (spec & SPEC_RULE_RETVAL) {
+			offset = offset * 2 + (op->result_type != IS_UNUSED);
+		} else if (spec & SPEC_RULE_QUICK_ARG) {
+			offset = offset * 2 + (op->op2.num <= MAX_ARG_FLAG_NUM);
+		} else if (spec & SPEC_RULE_OP_DATA) {
+			offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];
+		} else if (spec & SPEC_RULE_DIM_OBJ) {
+			offset = offset * 3;
+			if (op->extended_value == ZEND_ASSIGN_DIM) {
+				offset += 1;
+			} else if (op->extended_value == ZEND_ASSIGN_OBJ) {
+				offset += 2;
+			}
+		} else if (spec & SPEC_RULE_ISSET) {
+			offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);
+		} else if (spec & SPEC_RULE_SMART_BRANCH) {
 			offset = offset * 3;
 			if ((op+1)->opcode == ZEND_JMPZ) {
 				offset += 1;
@@ -64471,15 +64483,6 @@ static const void* ZEND_FASTCALL zend_vm_get_opcode_handler_ex(uint32_t spec, co
 				offset += 2;
 			}
 		}
-		else if (spec & SPEC_RULE_DIM_OBJ) {
-			offset = offset * 3;
-			if (op->extended_value == ZEND_ASSIGN_DIM) {
-				offset += 1;
-			} else if (op->extended_value == ZEND_ASSIGN_OBJ) {
-				offset += 2;
-			}
-		}
-		else if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);
 	}
 	return zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];
 }
