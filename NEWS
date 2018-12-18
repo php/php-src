@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug #77200 (imagecropauto(…, GD_CROP_SIDES) crops left but not right).
     (cmb)
 
+- IMAP:
+  . Fixed bug #77020 (null pointer dereference in imap_mail). (cmb)
+
 - OCI8:
   . Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
   . Added oci_set_call_timeout() for call timeouts.
