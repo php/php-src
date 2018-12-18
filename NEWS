@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.1
+20 Dec 2018, PHP 7.3.1
 
 - Core:
   . Fixed bug #76654 (Build failure on Mac OS X on 32-bit Intel). (Ryandesign)
