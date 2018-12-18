@@ -217,6 +217,7 @@ PHP                                                                        NEWS
 - IMAP:
   . Fixed bug #77153 (imap_open allows to run arbitrary shell commands via
     mailbox parameter). (Stas)
+  . Fixed bug #77020 (null pointer dereference in imap_mail). (cmb)
 
 - Interbase:
   . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
