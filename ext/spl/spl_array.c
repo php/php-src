@@ -91,6 +91,7 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 		spl_array_object *other = Z_SPLARRAY_P(&intern->array);
 		return spl_array_get_hash_table_ptr(other);
 	} else if (Z_TYPE(intern->array) == IS_ARRAY) {
+		SEPARATE_ARRAY(&intern->array);
 		return &Z_ARRVAL(intern->array);
 	} else {
 		zend_object *obj = Z_OBJ(intern->array);
