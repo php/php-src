@@ -1842,7 +1842,9 @@ SPL_METHOD(Array, unserialize)
 
 		if (Z_TYPE_P(array) == IS_ARRAY) {
 			zval_ptr_dtor(&intern->array);
-			ZVAL_COPY(&intern->array, array);
+			ZVAL_COPY_VALUE(&intern->array, array);
+			ZVAL_NULL(array);
+			SEPARATE_ARRAY(&intern->array);
 		} else {
 			spl_array_set_array(object, intern, array, 0L, 1);
 		}
