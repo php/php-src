@@ -527,10 +527,11 @@ PHP_MSHUTDOWN_FUNCTION(password) /* {{{ */
 {
 #ifdef ZTS
 	if (!tsrm_is_main_thread()) {
-		return;
+		return SUCCESS;
 	}
 #endif
 	zend_hash_destroy(&php_password_algos);
+	return SUCCESS;
 }
 /* }}} */
 
