@@ -1529,13 +1529,6 @@ ZEND_API int add_index_stringl(zval *arg, zend_ulong index, const char *str, siz
 }
 /* }}} */
 
-ZEND_API int add_index_zval(zval *arg, zend_ulong index, zval *value) /* {{{ */
-{
-	zend_hash_index_update(Z_ARRVAL_P(arg), index, value);
-	return SUCCESS;
-}
-/* }}} */
-
 ZEND_API int add_next_index_long(zval *arg, zend_long n) /* {{{ */
 {
 	zval tmp;
@@ -1605,12 +1598,6 @@ ZEND_API int add_next_index_stringl(zval *arg, const char *str, size_t length) /
 
 	ZVAL_STRINGL(&tmp, str, length);
 	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp) ? SUCCESS : FAILURE;
-}
-/* }}} */
-
-ZEND_API int add_next_index_zval(zval *arg, zval *value) /* {{{ */
-{
-	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), value) ? SUCCESS : FAILURE;
 }
 /* }}} */
 

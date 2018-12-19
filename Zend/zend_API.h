@@ -412,7 +412,9 @@ ZEND_API int add_index_double(zval *arg, zend_ulong idx, double d);
 ZEND_API int add_index_str(zval *arg, zend_ulong idx, zend_string *str);
 ZEND_API int add_index_string(zval *arg, zend_ulong idx, const char *str);
 ZEND_API int add_index_stringl(zval *arg, zend_ulong idx, const char *str, size_t length);
-ZEND_API int add_index_zval(zval *arg, zend_ulong index, zval *value);
+
+#define add_index_zval(arg, index, value) \
+	(zend_hash_index_update(Z_ARRVAL_P(arg), index, value) ? SUCCESS : FAILURE)
 
 ZEND_API int add_next_index_long(zval *arg, zend_long n);
 ZEND_API int add_next_index_null(zval *arg);
@@ -422,7 +424,9 @@ ZEND_API int add_next_index_double(zval *arg, double d);
 ZEND_API int add_next_index_str(zval *arg, zend_string *str);
 ZEND_API int add_next_index_string(zval *arg, const char *str);
 ZEND_API int add_next_index_stringl(zval *arg, const char *str, size_t length);
-ZEND_API int add_next_index_zval(zval *arg, zval *value);
+
+#define add_next_index_zval(arg, value) \
+	(zend_hash_next_index_insert(Z_ARRVAL_P(arg), value) ? SUCCESS : FAILURE)
 
 ZEND_API zval *add_get_assoc_string_ex(zval *arg, const char *key, uint32_t key_len, const char *str);
 ZEND_API zval *add_get_assoc_stringl_ex(zval *arg, const char *key, uint32_t key_len, const char *str, size_t length);
