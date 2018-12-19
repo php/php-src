@@ -10,6 +10,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   g. Required object handlers
   h. Immutable classes and op_arrays
   i. php_fgetcsv() and php_fputcsv()
+  j. Removed add_get_assoc_*() and add_get_index_*()
 
 2. Build system changes
   a. Abstract
@@ -141,6 +142,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      been changed from char to int. This allows to pass the new constant macro
      PHP_CSV_NO_ESCAPE to this parameter, to disable PHP's proprietary escape
      mechanism.
+
+  j. add_get_assoc_*() and add_get_index_*() are removed. Use add_assoc*(),
+     add_index*() or zend_hash_*() API functions instead.
 
 ========================
 2. Build system changes
