@@ -128,38 +128,42 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 {
 	uint32_t nSize = ht->nTableSize;
 
-	ht->nTableMask = HT_SIZE_TO_MASK(nSize);
-	HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
-	HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED;
-	if (EXPECTED(ht->nTableMask == HT_SIZE_TO_MASK(HT_MIN_SIZE))) {
-		Bucket *arData = ht->arData;
-
+	if (EXPECTED(nSize == HT_MIN_SIZE)) {
+		ht->nTableMask = HT_SIZE_TO_MASK(HT_MIN_SIZE);
+		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE_EX(HT_MIN_SIZE, HT_SIZE_TO_MASK(HT_MIN_SIZE)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+		HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED;
+		do {
+			Bucket *arData = ht->arData;
 #ifdef __SSE2__
-		__m128i xmm0 = _mm_setzero_si128();
-		xmm0 = _mm_cmpeq_epi8(xmm0, xmm0);
-		_mm_storeu_si128((__m128i*)&HT_HASH_EX(arData, -16), xmm0);
-		_mm_storeu_si128((__m128i*)&HT_HASH_EX(arData, -12), xmm0);
-		_mm_storeu_si128((__m128i*)&HT_HASH_EX(arData, -8), xmm0);
-		_mm_storeu_si128((__m128i*)&HT_HASH_EX(arData, -4), xmm0);
+			__m128i xmm0 = _mm_setzero_si128();
+			xmm0 = _mm_cmpeq_epi8(xmm0, xmm0);
+			_mm_storeu_si128((__m128i*)&HT_HASH_EX(arData, -16), xmm0);
+			_mm_storeu_si128((__m128i*)&HT_HASH_EX(arData, -12), xmm0);
+			_mm_storeu_si128((__m128i*)&HT_HASH_EX(arData, -8), xmm0);
+			_mm_storeu_si128((__m128i*)&HT_HASH_EX(arData, -4), xmm0);
 #else
-		HT_HASH_EX(arData, -16) = -1;
-		HT_HASH_EX(arData, -15) = -1;
-		HT_HASH_EX(arData, -14) = -1;
-		HT_HASH_EX(arData, -13) = -1;
-		HT_HASH_EX(arData, -12) = -1;
-		HT_HASH_EX(arData, -11) = -1;
-		HT_HASH_EX(arData, -10) = -1;
-		HT_HASH_EX(arData, -9) = -1;
-		HT_HASH_EX(arData, -8) = -1;
-		HT_HASH_EX(arData, -7) = -1;
-		HT_HASH_EX(arData, -6) = -1;
-		HT_HASH_EX(arData, -5) = -1;
-		HT_HASH_EX(arData, -4) = -1;
-		HT_HASH_EX(arData, -3) = -1;
-		HT_HASH_EX(arData, -2) = -1;
-		HT_HASH_EX(arData, -1) = -1;
+			HT_HASH_EX(arData, -16) = -1;
+			HT_HASH_EX(arData, -15) = -1;
+			HT_HASH_EX(arData, -14) = -1;
+			HT_HASH_EX(arData, -13) = -1;
+			HT_HASH_EX(arData, -12) = -1;
+			HT_HASH_EX(arData, -11) = -1;
+			HT_HASH_EX(arData, -10) = -1;
+			HT_HASH_EX(arData, -9) = -1;
+			HT_HASH_EX(arData, -8) = -1;
+			HT_HASH_EX(arData, -7) = -1;
+			HT_HASH_EX(arData, -6) = -1;
+			HT_HASH_EX(arData, -5) = -1;
+			HT_HASH_EX(arData, -4) = -1;
+			HT_HASH_EX(arData, -3) = -1;
+			HT_HASH_EX(arData, -2) = -1;
+			HT_HASH_EX(arData, -1) = -1;
 #endif
+		} while (0);
 	} else {
+		ht->nTableMask = HT_SIZE_TO_MASK(nSize);
+		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+		HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED;
 		HT_HASH_RESET(ht);
 	}
 }
