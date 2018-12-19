@@ -1645,52 +1645,37 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 ZEND_API int add_property_long_ex(zval *arg, const char *key, size_t key_len, zend_long n) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_LONG(&tmp, n);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&z_key);
-	return SUCCESS;
+	return add_property_zval_ex(arg, key, key_len, &tmp);
 }
 /* }}} */
 
 ZEND_API int add_property_bool_ex(zval *arg, const char *key, size_t key_len, zend_long b) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_BOOL(&tmp, b);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&z_key);
-	return SUCCESS;
+	return add_property_zval_ex(arg, key, key_len, &tmp);
 }
 /* }}} */
 
 ZEND_API int add_property_null_ex(zval *arg, const char *key, size_t key_len) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_NULL(&tmp);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&z_key);
-	return SUCCESS;
+	return add_property_zval_ex(arg, key, key_len, &tmp);
 }
 /* }}} */
 
 ZEND_API int add_property_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_RES(&tmp, r);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
+	add_property_zval_ex(arg, key, key_len, &tmp);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 /* }}} */
@@ -1698,26 +1683,19 @@ ZEND_API int add_property_resource_ex(zval *arg, const char *key, size_t key_len
 ZEND_API int add_property_double_ex(zval *arg, const char *key, size_t key_len, double d) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_DOUBLE(&tmp, d);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&z_key);
-	return SUCCESS;
+	return add_property_zval_ex(arg, key, key_len, &tmp);
 }
 /* }}} */
 
 ZEND_API int add_property_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_STR(&tmp, str);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
+	add_property_zval_ex(arg, key, key_len, &tmp);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 /* }}} */
@@ -1725,13 +1703,10 @@ ZEND_API int add_property_str_ex(zval *arg, const char *key, size_t key_len, zen
 ZEND_API int add_property_string_ex(zval *arg, const char *key, size_t key_len, const char *str) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_STRING(&tmp, str);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
+	add_property_zval_ex(arg, key, key_len, &tmp);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 /* }}} */
@@ -1739,13 +1714,10 @@ ZEND_API int add_property_string_ex(zval *arg, const char *key, size_t key_len, 
 ZEND_API int add_property_stringl_ex(zval *arg, const char *key, size_t key_len, const char *str, size_t length) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_STRINGL(&tmp, str, length);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
+	add_property_zval_ex(arg, key, key_len, &tmp);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 /* }}} */
