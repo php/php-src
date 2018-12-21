@@ -903,7 +903,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 	}
 
 	/* Remove unused free_op1 and free_op2 declarations */
-	if ($spec && preg_match_all('/^\s*zend_free_op\s+[^;]+;\s*$/me', $code, $matches, PREG_SET_ORDER)) {
+	if ($spec && preg_match_all('/^\s*zend_free_op\s+[^;]+;\s*$/m', $code, $matches, PREG_SET_ORDER)) {
 		$n = 0;
 		foreach ($matches as $match) {
 		  $code = preg_replace('/'.preg_quote($match[0],'/').'/', "\$D$n", $code);
@@ -2383,6 +2383,7 @@ function gen_vm($def, $skel) {
 
 	// Generate specialized executor
 	gen_executor($f, $skl, ZEND_VM_SPEC, ZEND_VM_KIND, "execute", "zend_init_opcodes_handlers");
+	out($f, "\n");
 
 	// Generate zend_vm_get_opcode_handler() function
 	out($f, "static const void *zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)\n");
