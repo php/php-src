@@ -4032,7 +4032,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx]); \
 		add_next_index_zval(return_value, &element);
 
-#define add_last() add(tzobj->tzi.tz->bit32.timecnt - 1, timestamp_begin)
+#define add_last() add(tzobj->tzi.tz->bit64.timecnt - 1, timestamp_begin)
 
 	array_init(return_value);
 
@@ -4043,7 +4043,7 @@ PHP_FUNCTION(timezone_transitions_get)
 	} else {
 		begin = 0;
 		found = 0;
-		if (tzobj->tzi.tz->bit32.timecnt > 0) {
+		if (tzobj->tzi.tz->bit64.timecnt > 0) {
 			do {
 				if (tzobj->tzi.tz->trans[begin] > timestamp_begin) {
 					if (begin > 0) {
@@ -4055,19 +4055,19 @@ PHP_FUNCTION(timezone_transitions_get)
 					break;
 				}
 				begin++;
-			} while (begin < tzobj->tzi.tz->bit32.timecnt);
+			} while (begin < tzobj->tzi.tz->bit64.timecnt);
 		}
 	}
 
 	if (!found) {
-		if (tzobj->tzi.tz->bit32.timecnt > 0) {
+		if (tzobj->tzi.tz->bit64.timecnt > 0) {
 			add_last();
 		} else {
 			add_nominal();
 		}
 	} else {
 		unsigned int i;
-		for (i = begin; i < tzobj->tzi.tz->bit32.timecnt; ++i) {
+		for (i = begin; i < tzobj->tzi.tz->bit64.timecnt; ++i) {
 			if (tzobj->tzi.tz->trans[i] < timestamp_end) {
 				add(i, tzobj->tzi.tz->trans[i]);
 			}
