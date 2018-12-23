@@ -6163,6 +6163,67 @@ PHP_FUNCTION(str_split)
 }
 /* }}} */
 
+/* {{{ proto array mb_str_split(string str [, int split_length])
+ Convert a multibyte string to an array. If split_length is specified,
+ break the string down into chunks each split_length characters long. */
+PHP_FUNCTION(mb_str_split){
+	zend_string * str;
+	zend_long split_length = 1;
+	const unsigned char *p, *last; //string pointers
+	uint32_t mb_char_length; //multibyte chunk length
+
+	ZindenindeEND_PARSE_PARAMETERS_START(1, 2)
+	Z_PARAM_STR(str)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_LONG(split_length)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (split_length <= 0) {
+		php_error_docref(NULL, E_WARNING, "The length of each segment must be greater than zero");
+		RETURN_FALSE;
+	}
+
+	if (0 == ZSTR_LEN(str) || (size_t)split_length >= ZSTR_LEN(str)) {
+		array_init_size(return_value, 1);
+		add_next_index_stringl(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
+		return;
+	}
+
+	//minimum array size is string length / 4 bytes / split_length
+	array_init_size(return_value, (ZSTR_LEN(str) >> 2) / (size_t)split_length);
+
+
+	p = ZSTR_VAL(str);
+	last = p + ZSTR_LEN(str);
+
+	while (p < last) {
+		const unsigned char *chunk_p = p;
+		uint32_t
+		chunk_length = 0;
+		for (uint32_t char_count = 0; char_count < split_length; ++char_count)
+		{
+			if (*p < 128)
+			{         //1 byte max 0b01111111 (127)
+				mb_char_length = 1;
+			} else if (*p < 224)
+			{  //2 byte max 0b11011111 (223)
+				mb_char_length = 2;
+			} else if (*p < 240)
+			{  //3 byte max 0b11101111 (239)
+				mb_char_length = 3;
+			} else
+			{                //4 byte max 0b11110111 (247)
+				mb_char_length = 4;
+			}
+			p += mb_char_length;
+			chunk_length += mb_char_length;
+		}
+		add_next_index_stringl(return_value, chunk_p, chunk_length);
+	}
+	return;
+}
+/* }}} */
+
 /* {{{ proto array strpbrk(string haystack, string char_list)
    Search a string for any of a set of characters */
 PHP_FUNCTION(strpbrk)

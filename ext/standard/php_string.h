@@ -87,6 +87,7 @@ PHP_FUNCTION(sscanf);
 PHP_FUNCTION(str_shuffle);
 PHP_FUNCTION(str_word_count);
 PHP_FUNCTION(str_split);
+PHP_FUNCTION(mb_str_split);
 PHP_FUNCTION(strpbrk);
 PHP_FUNCTION(substr_compare);
 PHP_FUNCTION(utf8_encode);
