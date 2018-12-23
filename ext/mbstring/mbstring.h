@@ -78,6 +78,7 @@ PHP_FUNCTION(mb_substitute_character);
 PHP_FUNCTION(mb_preferred_mime_name);
 PHP_FUNCTION(mb_parse_str);
 PHP_FUNCTION(mb_output_handler);
+PHP_FUNCTION(mb_str_split);
 PHP_FUNCTION(mb_strlen);
 PHP_FUNCTION(mb_strpos);
 PHP_FUNCTION(mb_strrpos);
