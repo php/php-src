@@ -295,7 +295,7 @@ tmp-php.ini
 
 # ------------------------------------------------------------------------------
 # Special cases to invert previous ignore patterns
-# ----------gitp--------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 !/ext/bcmath/libbcmath/src/config.h
 !/ext/fileinfo/libmagic/config.h
 !/ext/fileinfo/libmagic.patch
