@@ -713,7 +713,7 @@ PHP_FUNCTION(get_browser)
 			found_entry = zend_hash_str_find_ptr(bdata->htab,
 				DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME)-1);
 			if (found_entry == NULL) {
-				efree(lookup_browser_name);
+				zend_string_release(lookup_browser_name);
 				RETURN_FALSE;
 			}
 		}
