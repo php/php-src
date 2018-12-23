@@ -2332,8 +2332,8 @@ PHP_FUNCTION(mb_str_split){
 			 * 2 byte max 0b11011111 (223)
 			 * 3 byte max 0b11101111 (239)
 			 * 4 byte max ob11110111 (247) */
-			p += byte[*p];
 			chunk_length += byte[*p];
+			p += byte[*p];
 		}
 		add_next_index_stringl(return_value, chunk_p, chunk_length);
 	}
