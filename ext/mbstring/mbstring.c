@@ -232,6 +232,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_output_handler, 0, 0, 2)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_split, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, split_length)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strlen, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, encoding)
