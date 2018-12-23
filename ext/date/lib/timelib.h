@@ -153,7 +153,7 @@ typedef struct _timelib_tzinfo
 		uint32_t timecnt;
 		uint32_t typecnt;
 		uint32_t charcnt;
-	} bit32;
+	} _bit32;
 	struct {
 		uint64_t ttisgmtcnt;
 		uint64_t ttisstdcnt;
@@ -163,7 +163,7 @@ typedef struct _timelib_tzinfo
 		uint64_t charcnt;
 	} bit64;
 
-	int32_t *trans;
+	int64_t *trans;
 	unsigned char *trans_idx;
 
 	ttinfo  *type;
@@ -322,8 +322,8 @@ typedef struct _timelib_tzdb {
 #endif
 
 #define TIMELIB_VERSION 201801
-#define TIMELIB_EXTENDED_VERSION 20180104
-#define TIMELIB_ASCII_VERSION "2018.01RC2"
+#define TIMELIB_EXTENDED_VERSION 20180105
+#define TIMELIB_ASCII_VERSION "2018.01RC3"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
