@@ -2,10 +2,6 @@
 Test ceil() - basic function test for ceil()
 --INI--
 precision=14
---SKIPIF--
-if (strtolower(PHP_OS) == 'darwin') {
-    die('SKIP OSX does weird things with -0 so this test doesn't work there');
-}
 --FILE--
 <?php
 /* Prototype  : float ceil  ( float $value  )
