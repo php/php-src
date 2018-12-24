@@ -4127,6 +4127,14 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		if (ce) {
 			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op2) + 1);
 			fbc = zend_hash_find_ptr(&ce->function_table, lcname);
+			if (fbc && !(fbc->common.fn_flags & ZEND_ACC_PUBLIC)) {
+				if (ce != CG(active_class_entry)
+				 &&((fbc->common.fn_flags & ZEND_ACC_PRIVATE)
+				  || !zend_check_protected(zend_get_function_root_class(fbc), CG(active_class_entry)))) {
+					/* incompatibe function */
+					fbc = NULL;
+				}
+			}
 		}
 	}
 

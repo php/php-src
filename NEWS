@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     (Valentin V. Bartenev)
   . Fixed bug #76046 (PHP generates "FE_FREE" opcode on the wrong line).
     (Nikita)
+  . Fixed bug #77339 (__callStatic may get incorrect arguments). (Dmitry)
 
 - COM:
   . Fixed bug #77177 (Serializing or unserializing COM objects crashes). (cmb)
