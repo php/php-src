@@ -2,7 +2,6 @@
 time_nanosleep — Delay for a number of seconds and nanoseconds
 --SKIPIF--
 <?php
-if (strpos(strtoupper(PHP_OS), 'WIN') !== false) die("skip Test is not valid for Windows");
 if (!function_exists('time_nanosleep')) die("skip");
 ?>
 --CREDITS--

@@ -1,11 +1,5 @@
 --TEST--
 Test function getservbyname() by substituting argument 2 with emptyUnsetUndefNull values.
---SKIPIF--
-<?php
-if(PHP_OS == 'Darwin') {
-  die("skip.. Mac OS X is fine with NULLs in getservbyname");
-}
-?>
 --FILE--
 <?php
 

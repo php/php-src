@@ -5,9 +5,6 @@ Test symlink(), linkinfo(), link() and is_link() functions : usage variations - 
 if ( substr(PHP_OS, 0, 3) == 'WIN' ) {
     die('skip no symlinks on Windows');
 }
-if ( substr(PHP_OS, 0, 3) == 'MAC' ) {
-    die('skip Not valid for MacOS');
-}
 
 // Skip if being run by root (files are always readable, writeable and executable)
 $filename = dirname(__FILE__)."/symlink_link_linkinfo_is_link6_check_root.tmp";
