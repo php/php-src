@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.2
 
+- Core:
+  . Fixed bug #77339 (__callStatic may get incorrect arguments). (Dmitry)
+
 - SPL:
   . Fixed bug #77298 (segfault occurs when add property to unserialized empty
     ArrayObject). (jhdxr)
