@@ -11,6 +11,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   h. Immutable classes and op_arrays
   i. php_fgetcsv() and php_fputcsv()
   j. Removed add_get_assoc_*() and add_get_index_*()
+  k. Class declaration opcodes
 
 2. Build system changes
   a. Abstract
@@ -145,6 +146,12 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
   j. add_get_assoc_*() and add_get_index_*() are removed. Use add_assoc*(),
      add_index*() or zend_hash_*() API functions instead.
+
+  k. Complex class declaration opcodes ZEND_ADD_INTERFACE, ZEND_ADD_TRAIT,
+     ZEND_BIND_TRAITS and ZEND_VERIFY_ABSTRACT_CLASS were removed. Information
+     about interfaces and traits is kept in zend_class_entry structure and
+     actual linked performed by ZEND_DECLARE_...CLASS... opcode(s).
+     Linked classes have ZEND_ACC_LINKED flag set.
 
 ========================
 2. Build system changes
