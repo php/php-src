@@ -930,10 +930,6 @@ void zend_shutdown(void) /* {{{ */
 	GLOBAL_CONSTANTS_TABLE = NULL;
 #endif
 	zend_destroy_rsrc_list_dtors();
-
-#ifndef ZTS
-	zend_interned_strings_dtor();
-#endif
 }
 /* }}} */
 
