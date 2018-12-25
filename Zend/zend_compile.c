@@ -4057,7 +4057,10 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 			fbc = zend_hash_find_ptr(&ce->function_table, lcname);
 			if (fbc && !(fbc->common.fn_flags & ZEND_ACC_PUBLIC)) {
 				if (ce != CG(active_class_entry)
-				 &&((fbc->common.fn_flags & ZEND_ACC_PRIVATE)
+				 && ((fbc->common.fn_flags & ZEND_ACC_PRIVATE)
+				  || !(fbc->common.scope->ce_flags & ZEND_ACC_LINKED)
+				  || (CG(active_class_entry)
+				   && !(CG(active_class_entry)->ce_flags & ZEND_ACC_LINKED))
 				  || !zend_check_protected(zend_get_function_root_class(fbc), CG(active_class_entry)))) {
 					/* incompatibe function */
 					fbc = NULL;
