@@ -2099,6 +2099,57 @@ str_offset:
 	}
 }
 
+static zend_never_inline uint32_t ZEND_FASTCALL zend_array_key_exists_fast(HashTable *ht, zval *key OPLINE_DC EXECUTE_DATA_DC)
+{
+	zend_string *str;
+	zend_ulong hval;
+
+try_again:
+	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
+		str = Z_STR_P(key);
+		if (ZEND_HANDLE_NUMERIC(str, hval)) {
+			goto num_key;
+		}
+str_key:
+		return zend_hash_find_ind(ht, str) != NULL ? IS_TRUE : IS_FALSE;
+	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
+		hval = Z_LVAL_P(key);
+num_key:
+		return zend_hash_index_find(ht, hval) != NULL ? IS_TRUE : IS_FALSE;
+	} else if (EXPECTED(Z_ISREF_P(key))) {
+		key = Z_REFVAL_P(key);
+		goto try_again;
+	} else if (Z_TYPE_P(key) <= IS_NULL) {
+		if (UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
+		}
+		str = ZSTR_EMPTY_ALLOC();
+		goto str_key;
+	} else {
+		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
+		return IS_FALSE;
+	}
+}
+
+static zend_never_inline uint32_t ZEND_FASTCALL zend_array_key_exists_slow(zval *subject, zval *key OPLINE_DC EXECUTE_DATA_DC)
+{
+	if (EXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
+		HashTable *ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
+		uint32_t result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_release_properties(ht);
+		return result;
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
+		}
+		if (UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP2();
+		}
+		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
+		return IS_NULL;
+	}
+}
+
 static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type OPLINE_DC)
 {
 	zval *ptr;

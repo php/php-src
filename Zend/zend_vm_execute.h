@@ -5742,63 +5742,31 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_CO
 
 
 	zval *key, *subject;
-	HashTable* ht;
-	int result;
+	HashTable *ht;
+	uint32_t result;
 
 	SAVE_OPLINE();
 
 	key = RT_CONSTANT(opline, opline->op1);
 	subject = RT_CONSTANT(opline, opline->op2);
 
-try_again_subject:
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+array_key_exists_array:
 		ht = Z_ARRVAL_P(subject);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-	} else if (Z_ISREF_P(subject)) {
-		subject = Z_REFVAL_P(subject);
-		goto try_again_subject;
+		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+		if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
+			subject = Z_REFVAL_P(subject);
+			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+				goto array_key_exists_array;
+			}
 		}
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			subject = ZVAL_UNDEFINED_OP2();
-		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-
-
-		ZVAL_NULL(EX_VAR(opline->result.var));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-try_again_key:
-	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
-		result = zend_symtable_exists_ind(ht, Z_STR_P(key));
-	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
-		result = zend_hash_index_exists(ht, Z_LVAL_P(key));
-	} else if (UNEXPECTED(Z_TYPE_P(key) == IS_NULL)) {
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_TYPE_P(key) <= IS_NULL) {
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_ISREF_P(key)) {
-		key = Z_REFVAL_P(key);
-		goto try_again_key;
-	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		result = 0;
-	}
-
-	if (Z_TYPE_P(subject) != IS_ARRAY) {
-		zend_release_properties(ht);
+		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 
-	ZEND_VM_SMART_BRANCH(result, 1);
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	Z_TYPE_INFO_P(EX_VAR(opline->result.var)) = result;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -7766,64 +7734,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_TM
 
 	zend_free_op free_op2;
 	zval *key, *subject;
-	HashTable* ht;
-	int result;
+	HashTable *ht;
+	uint32_t result;
 
 	SAVE_OPLINE();
 
 	key = RT_CONSTANT(opline, opline->op1);
 	subject = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-try_again_subject:
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+array_key_exists_array:
 		ht = Z_ARRVAL_P(subject);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-	} else if (Z_ISREF_P(subject)) {
-		subject = Z_REFVAL_P(subject);
-		goto try_again_subject;
+		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
+			subject = Z_REFVAL_P(subject);
+			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+				goto array_key_exists_array;
+			}
 		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			subject = ZVAL_UNDEFINED_OP2();
-		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-		zval_ptr_dtor_nogc(free_op2);
-
-		ZVAL_NULL(EX_VAR(opline->result.var));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-try_again_key:
-	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
-		result = zend_symtable_exists_ind(ht, Z_STR_P(key));
-	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
-		result = zend_hash_index_exists(ht, Z_LVAL_P(key));
-	} else if (UNEXPECTED(Z_TYPE_P(key) == IS_NULL)) {
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_TYPE_P(key) <= IS_NULL) {
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_ISREF_P(key)) {
-		key = Z_REFVAL_P(key);
-		goto try_again_key;
-	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		result = 0;
-	}
-
-	if (Z_TYPE_P(subject) != IS_ARRAY) {
-		zend_release_properties(ht);
+		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
 
-	ZEND_VM_SMART_BRANCH(result, 1);
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	Z_TYPE_INFO_P(EX_VAR(opline->result.var)) = result;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -10901,63 +10837,31 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_CV
 
 
 	zval *key, *subject;
-	HashTable* ht;
-	int result;
+	HashTable *ht;
+	uint32_t result;
 
 	SAVE_OPLINE();
 
 	key = RT_CONSTANT(opline, opline->op1);
 	subject = EX_VAR(opline->op2.var);
 
-try_again_subject:
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+array_key_exists_array:
 		ht = Z_ARRVAL_P(subject);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-	} else if (Z_ISREF_P(subject)) {
-		subject = Z_REFVAL_P(subject);
-		goto try_again_subject;
+		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+		if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
+			subject = Z_REFVAL_P(subject);
+			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+				goto array_key_exists_array;
+			}
 		}
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			subject = ZVAL_UNDEFINED_OP2();
-		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-
-
-		ZVAL_NULL(EX_VAR(opline->result.var));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-try_again_key:
-	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
-		result = zend_symtable_exists_ind(ht, Z_STR_P(key));
-	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
-		result = zend_hash_index_exists(ht, Z_LVAL_P(key));
-	} else if (UNEXPECTED(Z_TYPE_P(key) == IS_NULL)) {
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_TYPE_P(key) <= IS_NULL) {
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_ISREF_P(key)) {
-		key = Z_REFVAL_P(key);
-		goto try_again_key;
-	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		result = 0;
-	}
-
-	if (Z_TYPE_P(subject) != IS_ARRAY) {
-		zend_release_properties(ht);
+		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 
-	ZEND_VM_SMART_BRANCH(result, 1);
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	Z_TYPE_INFO_P(EX_VAR(opline->result.var)) = result;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -14530,63 +14434,31 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_TMPVAR_C
 
 	zend_free_op free_op1;
 	zval *key, *subject;
-	HashTable* ht;
-	int result;
+	HashTable *ht;
+	uint32_t result;
 
 	SAVE_OPLINE();
 
 	key = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 	subject = RT_CONSTANT(opline, opline->op2);
 
-try_again_subject:
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+array_key_exists_array:
 		ht = Z_ARRVAL_P(subject);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-	} else if (Z_ISREF_P(subject)) {
-		subject = Z_REFVAL_P(subject);
-		goto try_again_subject;
+		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+		if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
+			subject = Z_REFVAL_P(subject);
+			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+				goto array_key_exists_array;
+			}
 		}
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			subject = ZVAL_UNDEFINED_OP2();
-		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-
-		zval_ptr_dtor_nogc(free_op1);
-		ZVAL_NULL(EX_VAR(opline->result.var));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-try_again_key:
-	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
-		result = zend_symtable_exists_ind(ht, Z_STR_P(key));
-	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
-		result = zend_hash_index_exists(ht, Z_LVAL_P(key));
-	} else if (UNEXPECTED(Z_TYPE_P(key) == IS_NULL)) {
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_TYPE_P(key) <= IS_NULL) {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_ISREF_P(key)) {
-		key = Z_REFVAL_P(key);
-		goto try_again_key;
-	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		result = 0;
-	}
-
-	if (Z_TYPE_P(subject) != IS_ARRAY) {
-		zend_release_properties(ht);
+		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 	zval_ptr_dtor_nogc(free_op1);
-	ZEND_VM_SMART_BRANCH(result, 1);
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	Z_TYPE_INFO_P(EX_VAR(opline->result.var)) = result;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -16057,64 +15929,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_TMPVAR_T
 
 	zend_free_op free_op1, free_op2;
 	zval *key, *subject;
-	HashTable* ht;
-	int result;
+	HashTable *ht;
+	uint32_t result;
 
 	SAVE_OPLINE();
 
 	key = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 	subject = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-try_again_subject:
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+array_key_exists_array:
 		ht = Z_ARRVAL_P(subject);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-	} else if (Z_ISREF_P(subject)) {
-		subject = Z_REFVAL_P(subject);
-		goto try_again_subject;
+		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
+			subject = Z_REFVAL_P(subject);
+			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+				goto array_key_exists_array;
+			}
 		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			subject = ZVAL_UNDEFINED_OP2();
-		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-		zval_ptr_dtor_nogc(free_op2);
-		zval_ptr_dtor_nogc(free_op1);
-		ZVAL_NULL(EX_VAR(opline->result.var));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-try_again_key:
-	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
-		result = zend_symtable_exists_ind(ht, Z_STR_P(key));
-	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
-		result = zend_hash_index_exists(ht, Z_LVAL_P(key));
-	} else if (UNEXPECTED(Z_TYPE_P(key) == IS_NULL)) {
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_TYPE_P(key) <= IS_NULL) {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_ISREF_P(key)) {
-		key = Z_REFVAL_P(key);
-		goto try_again_key;
-	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		result = 0;
-	}
-
-	if (Z_TYPE_P(subject) != IS_ARRAY) {
-		zend_release_properties(ht);
+		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
 	zval_ptr_dtor_nogc(free_op1);
-	ZEND_VM_SMART_BRANCH(result, 1);
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	Z_TYPE_INFO_P(EX_VAR(opline->result.var)) = result;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -17984,63 +17824,31 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_TMPVAR_C
 
 	zend_free_op free_op1;
 	zval *key, *subject;
-	HashTable* ht;
-	int result;
+	HashTable *ht;
+	uint32_t result;
 
 	SAVE_OPLINE();
 
 	key = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 	subject = EX_VAR(opline->op2.var);
 
-try_again_subject:
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+array_key_exists_array:
 		ht = Z_ARRVAL_P(subject);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-	} else if (Z_ISREF_P(subject)) {
-		subject = Z_REFVAL_P(subject);
-		goto try_again_subject;
+		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+		if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
+			subject = Z_REFVAL_P(subject);
+			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+				goto array_key_exists_array;
+			}
 		}
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			subject = ZVAL_UNDEFINED_OP2();
-		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-
-		zval_ptr_dtor_nogc(free_op1);
-		ZVAL_NULL(EX_VAR(opline->result.var));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-try_again_key:
-	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
-		result = zend_symtable_exists_ind(ht, Z_STR_P(key));
-	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
-		result = zend_hash_index_exists(ht, Z_LVAL_P(key));
-	} else if (UNEXPECTED(Z_TYPE_P(key) == IS_NULL)) {
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_TYPE_P(key) <= IS_NULL) {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_ISREF_P(key)) {
-		key = Z_REFVAL_P(key);
-		goto try_again_key;
-	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		result = 0;
-	}
-
-	if (Z_TYPE_P(subject) != IS_ARRAY) {
-		zend_release_properties(ht);
+		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 	zval_ptr_dtor_nogc(free_op1);
-	ZEND_VM_SMART_BRANCH(result, 1);
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	Z_TYPE_INFO_P(EX_VAR(opline->result.var)) = result;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -41626,63 +41434,31 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CV_CONST
 
 
 	zval *key, *subject;
-	HashTable* ht;
-	int result;
+	HashTable *ht;
+	uint32_t result;
 
 	SAVE_OPLINE();
 
 	key = EX_VAR(opline->op1.var);
 	subject = RT_CONSTANT(opline, opline->op2);
 
-try_again_subject:
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+array_key_exists_array:
 		ht = Z_ARRVAL_P(subject);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-	} else if (Z_ISREF_P(subject)) {
-		subject = Z_REFVAL_P(subject);
-		goto try_again_subject;
+		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+		if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
+			subject = Z_REFVAL_P(subject);
+			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+				goto array_key_exists_array;
+			}
 		}
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			subject = ZVAL_UNDEFINED_OP2();
-		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-
-
-		ZVAL_NULL(EX_VAR(opline->result.var));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-try_again_key:
-	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
-		result = zend_symtable_exists_ind(ht, Z_STR_P(key));
-	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
-		result = zend_hash_index_exists(ht, Z_LVAL_P(key));
-	} else if (UNEXPECTED(Z_TYPE_P(key) == IS_NULL)) {
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_TYPE_P(key) <= IS_NULL) {
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_ISREF_P(key)) {
-		key = Z_REFVAL_P(key);
-		goto try_again_key;
-	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		result = 0;
-	}
-
-	if (Z_TYPE_P(subject) != IS_ARRAY) {
-		zend_release_properties(ht);
+		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 
-	ZEND_VM_SMART_BRANCH(result, 1);
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	Z_TYPE_INFO_P(EX_VAR(opline->result.var)) = result;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -45225,64 +45001,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CV_TMPVA
 
 	zend_free_op free_op2;
 	zval *key, *subject;
-	HashTable* ht;
-	int result;
+	HashTable *ht;
+	uint32_t result;
 
 	SAVE_OPLINE();
 
 	key = EX_VAR(opline->op1.var);
 	subject = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-try_again_subject:
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+array_key_exists_array:
 		ht = Z_ARRVAL_P(subject);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-	} else if (Z_ISREF_P(subject)) {
-		subject = Z_REFVAL_P(subject);
-		goto try_again_subject;
+		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
+			subject = Z_REFVAL_P(subject);
+			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+				goto array_key_exists_array;
+			}
 		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			subject = ZVAL_UNDEFINED_OP2();
-		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-		zval_ptr_dtor_nogc(free_op2);
-
-		ZVAL_NULL(EX_VAR(opline->result.var));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-try_again_key:
-	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
-		result = zend_symtable_exists_ind(ht, Z_STR_P(key));
-	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
-		result = zend_hash_index_exists(ht, Z_LVAL_P(key));
-	} else if (UNEXPECTED(Z_TYPE_P(key) == IS_NULL)) {
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_TYPE_P(key) <= IS_NULL) {
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_ISREF_P(key)) {
-		key = Z_REFVAL_P(key);
-		goto try_again_key;
-	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		result = 0;
-	}
-
-	if (Z_TYPE_P(subject) != IS_ARRAY) {
-		zend_release_properties(ht);
+		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
 
-	ZEND_VM_SMART_BRANCH(result, 1);
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	Z_TYPE_INFO_P(EX_VAR(opline->result.var)) = result;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -51089,63 +50833,31 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CV_CV_HA
 
 
 	zval *key, *subject;
-	HashTable* ht;
-	int result;
+	HashTable *ht;
+	uint32_t result;
 
 	SAVE_OPLINE();
 
 	key = EX_VAR(opline->op1.var);
 	subject = EX_VAR(opline->op2.var);
 
-try_again_subject:
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+array_key_exists_array:
 		ht = Z_ARRVAL_P(subject);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-	} else if (Z_ISREF_P(subject)) {
-		subject = Z_REFVAL_P(subject);
-		goto try_again_subject;
+		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+		if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
+			subject = Z_REFVAL_P(subject);
+			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
+				goto array_key_exists_array;
+			}
 		}
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			subject = ZVAL_UNDEFINED_OP2();
-		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-
-
-		ZVAL_NULL(EX_VAR(opline->result.var));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-try_again_key:
-	if (EXPECTED(Z_TYPE_P(key) == IS_STRING)) {
-		result = zend_symtable_exists_ind(ht, Z_STR_P(key));
-	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
-		result = zend_hash_index_exists(ht, Z_LVAL_P(key));
-	} else if (UNEXPECTED(Z_TYPE_P(key) == IS_NULL)) {
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_TYPE_P(key) <= IS_NULL) {
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		result = zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC());
-	} else if (Z_ISREF_P(key)) {
-		key = Z_REFVAL_P(key);
-		goto try_again_key;
-	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		result = 0;
-	}
-
-	if (Z_TYPE_P(subject) != IS_ARRAY) {
-		zend_release_properties(ht);
+		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 
-	ZEND_VM_SMART_BRANCH(result, 1);
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	Z_TYPE_INFO_P(EX_VAR(opline->result.var)) = result;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
