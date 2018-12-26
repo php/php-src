@@ -2129,7 +2129,6 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 
 		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, &intern->u.file.current_zval);
 		if (return_value) {
-			zval_ptr_dtor(return_value);
 			value = &intern->u.file.current_zval;
 			ZVAL_COPY_DEREF(return_value, value);
 		}
