@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.15
 
+- Sockets:
+  . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
+    on MacOS). (Michael Meyer)
 
 03 Jan 2019, PHP 7.2.14
 
