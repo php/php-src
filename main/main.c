@@ -1987,14 +1987,6 @@ PHPAPI void php_com_initialize(void)
 }
 /* }}} */
 
-/* {{{ php_output_wrapper
- */
-static size_t php_output_wrapper(const char *str, size_t str_length)
-{
-	return php_output_write(str, str_length);
-}
-/* }}} */
-
 #ifdef ZTS
 /* {{{ core_globals_ctor
  */
@@ -2171,7 +2163,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	zuf.error_function = php_error_cb;
 	zuf.printf_function = php_printf;
-	zuf.write_function = php_output_wrapper;
+	zuf.write_function = php_output_write;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
 	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
