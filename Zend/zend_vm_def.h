@@ -6388,7 +6388,7 @@ ZEND_VM_C_LABEL(try_again_subject):
 	if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
 		ht = Z_ARRVAL_P(subject);
 	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		ht = Z_OBJPROP_P(subject);
+		ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
 	} else if (Z_ISREF_P(subject)) {
 		subject = Z_REFVAL_P(subject);
 		ZEND_VM_C_GOTO(try_again_subject);
@@ -6424,6 +6424,10 @@ ZEND_VM_C_LABEL(try_again_key):
 	} else {
 		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
 		result = 0;
+	}
+
+	if (Z_TYPE_P(subject) != IS_ARRAY) {
+		zend_release_properties(ht);
 	}
 
 	FREE_OP2();
