@@ -573,7 +573,7 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 
 	pcre2_code *re;
 	pcre2_match_data *match_data;
-	uint32_t re_options, capture_count;
+	uint32_t capture_count;
 	int rc;
 
 	/* Agent name too short */
@@ -616,7 +616,7 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 	}
 
 	regex = browscap_convert_pattern(entry->pattern, 0);
-	re = pcre_get_compiled_regex(regex, &capture_count, &re_options);
+	re = pcre_get_compiled_regex(regex, &capture_count);
 	if (re == NULL) {
 		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 		zend_string_release(regex);
@@ -629,7 +629,7 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 		zend_string_release(regex);
 		return 0;
 	}
-	rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, re_options, match_data, php_pcre_mctx());
+	rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, 0, match_data, php_pcre_mctx());
 	php_pcre_free_match_data(match_data);
 	if (PCRE2_ERROR_NOMATCH != rc) {
 		/* If we've found a possible browser, we need to do a comparison of the

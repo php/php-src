@@ -32,7 +32,7 @@
 #endif
 
 PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count);
-PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count, uint32_t *options);
+PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count);
 PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *coptions);
 
 extern zend_module_entry pcre_module_entry;
