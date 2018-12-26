@@ -1812,7 +1812,9 @@ PHP_FUNCTION(socket_recvfrom)
 	switch (php_sock->type) {
 		case AF_UNIX:
 			slen = sizeof(s_un);
+			memset(&s_un, 0, slen);
 			s_un.sun_family = AF_UNIX;
+
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&s_un, (socklen_t *)&slen);
 
 			if (retval < 0) {
