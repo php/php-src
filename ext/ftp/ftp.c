@@ -76,7 +76,13 @@ static int		ftp_putcmd(	ftpbuf_t *ftp,
 /* wrapper around send/recv to handle timeouts */
 static int		my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len);
 static int		my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len);
+
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+static int		my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, int *addrlen);
+#else
 static int		my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrlen);
+#endif
 
 /* reads a line the socket , returns true on success, false on error */
 static int		ftp_readline(ftpbuf_t *ftp);
@@ -117,7 +123,12 @@ ftpbuf_t*
 ftp_open(const char *host, short port, zend_long timeout_sec)
 {
 	ftpbuf_t		*ftp;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int 			 size;
+#else
 	socklen_t		 size;
+#endif
 	struct timeval tv;
 
 
@@ -795,7 +806,12 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 	char			*ptr;
 	union ipbox		ipbox;
 	unsigned long		b[6];
-	socklen_t			n;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int 			n;
+#else
+	socklen_t		n;
+#endif
 	struct sockaddr *sa;
 	struct sockaddr_in *sin;
 
@@ -1618,7 +1634,12 @@ data_writeable(ftpbuf_t *ftp, php_socket_t s)
 /* {{{ my_accept
  */
 int
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, int *addrlen)
+#else
 my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrlen)
+#endif
 {
 	int		n;
 
@@ -1649,7 +1670,12 @@ ftp_getdata(ftpbuf_t *ftp)
 	databuf_t		*data;
 	php_sockaddr_storage addr;
 	struct sockaddr *sa;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int			size;
+#else
 	socklen_t		size;
+#endif
 	union ipbox		ipbox;
 	char			arg[sizeof("255, 255, 255, 255, 255, 255")];
 	struct timeval	tv;
@@ -1777,8 +1803,12 @@ databuf_t*
 data_accept(databuf_t *data, ftpbuf_t *ftp)
 {
 	php_sockaddr_storage addr;
-	socklen_t			size;
-
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+        int                     size;
+#else
+        socklen_t               size;
+#endif
 #ifdef HAVE_FTP_SSL
 	SSL_CTX		*ctx;
 	SSL_SESSION *session;

@@ -44,6 +44,11 @@
 #include "unixd.h"
 #endif
 
+#if defined (__hpux)
+/* HP-UX include following header to get the latest version of apache modules */
+#include "ap_mmn.h"
+#endif
+
 #include "php_apache.h"
 
 #ifdef ZTS

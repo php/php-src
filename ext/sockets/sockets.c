@@ -537,8 +537,12 @@ static int php_open_listen_sock(php_socket **php_sock, int port, int backlog) /*
 	return 1;
 }
 /* }}} */
-
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la, int *la_len) /* {{{ */
+#else
 static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la, socklen_t *la_len) /* {{{ */
+#endif
 {
 	php_socket	*out_sock = php_create_socket();
 
@@ -1043,7 +1047,12 @@ PHP_FUNCTION(socket_accept)
 	zval				 *arg1;
 	php_socket			 *php_sock, *new_sock;
 	php_sockaddr_storage sa;
-	socklen_t			 php_sa_len = sizeof(sa);
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int				 php_sa_len = sizeof(sa);
+#else
+	socklen_t                        php_sa_len = sizeof(sa);
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
 		return;
@@ -1311,7 +1320,12 @@ PHP_FUNCTION(socket_getsockname)
 #endif
 	struct sockaddr_un		*s_un;
 	char					*addr_string;
-	socklen_t				salen = sizeof(php_sockaddr_storage);
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int				salen = sizeof(php_sockaddr_storage);
+#else
+	socklen_t                               salen = sizeof(php_sockaddr_storage);
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/|z/", &arg1, &addr, &port) == FAILURE) {
 		return;
@@ -1394,7 +1408,12 @@ PHP_FUNCTION(socket_getpeername)
 #endif
 	struct sockaddr_un		*s_un;
 	char					*addr_string;
-	socklen_t				salen = sizeof(php_sockaddr_storage);
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int					salen = sizeof(php_sockaddr_storage);
+#else
+	socklen_t                               salen = sizeof(php_sockaddr_storage);
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/|z/", &arg1, &arg2, &arg3) == FAILURE) {
 		return;
@@ -1575,8 +1594,14 @@ PHP_FUNCTION(socket_connect)
 
 			s_un.sun_family = AF_UNIX;
 			memcpy(&s_un.sun_path, addr, addr_len);
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
 			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un,
-				(socklen_t)(XtOffsetOf(struct sockaddr_un, sun_path) + addr_len));
+				(int)(XtOffsetOf(struct sockaddr_un, sun_path) + addr_len));
+#else
+			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un,
+				 (socklen_t)(XtOffsetOf(struct sockaddr_un, sun_path) + addr_len));
+#endif
 			break;
 		}
 
@@ -1787,7 +1812,12 @@ PHP_FUNCTION(socket_recvfrom)
 	struct sockaddr_in6	sin6;
 	char				addr6[INET6_ADDRSTRLEN];
 #endif
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int				slen;
+#else
 	socklen_t			slen;
+#endif
 	int					retval;
 	zend_long				arg3, arg4;
 	char				*address;
@@ -1812,7 +1842,12 @@ PHP_FUNCTION(socket_recvfrom)
 		case AF_UNIX:
 			slen = sizeof(s_un);
 			s_un.sun_family = AF_UNIX;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&s_un, (int *)&slen);
+#else
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&s_un, (socklen_t *)&slen);
+#endif
 
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
@@ -1838,9 +1873,12 @@ PHP_FUNCTION(socket_recvfrom)
 				zend_string_efree(recv_buf);
 				WRONG_PARAM_COUNT;
 			}
-
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin, (int *)&slen);
+#else
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin, (socklen_t *)&slen);
-
+#endif
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				zend_string_efree(recv_buf);
@@ -1869,8 +1907,12 @@ PHP_FUNCTION(socket_recvfrom)
 				zend_string_efree(recv_buf);
 				WRONG_PARAM_COUNT;
 			}
-
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin6, (int *)&slen);
+#else
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin6, (socklen_t *)&slen);
+#endif
 
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
@@ -1996,7 +2038,12 @@ PHP_FUNCTION(socket_get_option)
 #ifdef PHP_WIN32
 	int				timeout = 0;
 #endif
-	socklen_t		optlen;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int			optlen;
+#else
+	socklen_t               optlen;
+#endif
 	php_socket		*php_sock;
 	int				other_val;
 	zend_long			level, optname;
@@ -2384,7 +2431,12 @@ php_socket *socket_import_file_descriptor(PHP_SOCKET socket)
 #endif
 	php_socket 				*retsock;
 	php_sockaddr_storage	addr;
-	socklen_t				addr_len = sizeof(addr);
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+	int				addr_len = sizeof(addr);
+#else
+	socklen_t                               addr_len = sizeof(addr);
+#endif
 #ifndef PHP_WIN32
 	int					 t;
 #endif
@@ -2501,7 +2553,12 @@ PHP_FUNCTION(socket_export_stream)
 #endif
 	) {
 		int protoid;
+#if defined (__hpux)
+/* On HP-UX, socket APIs expect "integer" as data type for length of the "option" data structure. */
+		int	  protoidlen = sizeof(protoid);
+#else
 		socklen_t protoidlen = sizeof(protoid);
+#endif
 
 		getsockopt(socket->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &protoid, &protoidlen);
 
