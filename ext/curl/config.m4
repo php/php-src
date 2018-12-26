@@ -7,10 +7,8 @@ if test "$PHP_CURL" != "no"; then
   PKG_CHECK_MODULES([CURL], [libcurl >= 7.15.5])
   PKG_CHECK_VAR([CURL_FEATURES], [libcurl], [supported_features])
 
-  dnl common stuff (pkg-config / curl-config)
-
   PHP_EVAL_LIBLINE($CURL_LIBS, CURL_SHARED_LIBADD)
-  PHP_EVAL_INCLINE($CURL_CFLAGS, CURL_SHARED_LIBADD)
+  PHP_EVAL_INCLINE($CURL_CFLAGS)
 
   AC_MSG_CHECKING([for SSL support in libcurl])
   case "$CURL_FEATURES" in
