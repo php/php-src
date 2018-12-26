@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #77338 (get_browser with empty string). (Nikita)
 
+- Sockets:
+  . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
+    on MacOS). (Michael Meyer)
+
 - SPL:
   . Fixed bug #77298 (segfault occurs when add property to unserialized empty
     ArrayObject). (jhdxr)
