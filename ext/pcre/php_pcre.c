@@ -867,7 +867,7 @@ PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture
 	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
 
 	if (preg_options) {
-		*preg_options = pce ? pce->preg_options : 0;
+		*preg_options = 0;
 	}
 	if (capture_count) {
 		*capture_count = pce ? pce->capture_count : 0;
@@ -884,7 +884,7 @@ PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capt
 	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
 
 	if (preg_options) {
-		*preg_options = pce ? pce->preg_options : 0;
+		*preg_options = 0;
 	}
 	if (compile_options) {
 		*compile_options = pce ? pce->compile_options : 0;
