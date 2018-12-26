@@ -631,17 +631,16 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 			if (PZVAL_IS_REF(value)) {
 				SEPARATE_ZVAL(&value);
 			}
-			if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
-			    property_info->offset >= 0) {
-					if (!zobj->properties) {
-						zobj->properties_table[property_info->offset] = value;
-					} else if (zobj->properties_table[property_info->offset]) {
-						*(zval**)zobj->properties_table[property_info->offset] = value;
-					} else {
-						zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), (void**)&zobj->properties_table[property_info->offset]);
-					}
+			if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) && property_info->offset >= 0) {
+				if (!zobj->properties) {
+					zobj->properties_table[property_info->offset] = value;
+				} else if (zobj->properties_table[property_info->offset]) {
+					*(zval**)zobj->properties_table[property_info->offset] = value;
 				} else {
-					if (!zobj->properties) {
+					zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), (void**)&zobj->properties_table[property_info->offset]);
+				}
+			} else {
+				if (!zobj->properties) {
 					rebuild_object_properties(zobj);
 				}
 				zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), NULL);
