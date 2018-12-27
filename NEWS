@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #75684 (In mysqlnd_ext_plugin.h the plugin methods family has
     no external visibility). (Anatol)
 
+- Opcache:
+  . Fix bug #77361 (configure fails on 64-bit AIX when opcache enabled).
+    (Kevin Adler)
+
 - PDO:
   . Fixed bug #77273 (array_walk_recursive corrupts value types leading to PDO
     failure). (Nikita)
