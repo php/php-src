@@ -40,6 +40,8 @@ var_dump(openssl_csr_export_to_file($wrong, $csrfile));
 var_dump(openssl_csr_export_to_file($dh, $csrfile));
 var_dump(openssl_csr_export_to_file(array(), $csrfile));
 var_dump(openssl_csr_export_to_file($csr, $csrfile, false));
+var_dump(openssl_csr_export_to_file('file://'.$csrfile, $csrfile));
+var_dump(openssl_csr_export_to_file(file_get_contents($csrfile), $csrfile));
 ?>
 --CLEAN--
 <?php
@@ -70,14 +72,16 @@ JViHkCA9x6m8RJXAFvqmgLlWlUzbDv/cRrDfjWjR
 -----END CERTIFICATE REQUEST-----
 "
 
-Warning: openssl_csr_export_to_file() expects parameter 1 to be resource, string given in %s on line %d
-NULL
+Warning: openssl_csr_export_to_file(): cannot get CSR from parameter 1 in %s on line %d
+bool(false)
 
 Warning: openssl_csr_export_to_file(): supplied resource is not a valid OpenSSL X.509 CSR resource in %s on line %d
 
 Warning: openssl_csr_export_to_file(): cannot get CSR from parameter 1 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_export_to_file() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+Warning: openssl_csr_export_to_file(): cannot get CSR from parameter 1 in %s on line %d
+bool(false)
+bool(true)
+bool(true)
 bool(true)
