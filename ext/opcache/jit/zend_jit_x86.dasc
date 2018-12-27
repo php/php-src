@@ -7323,7 +7323,7 @@ static int zend_jit_new(dasm_State **Dst, const zend_op *opline, int *opnum, zen
 		}
 
 		(*opnum)++;
-		if (!ce || ce->constructor) {
+		if (!ce || !(ce->ce_flags & ZEND_ACC_LINKED) || ce->constructor) {
 			const zend_op *next_opline = opline + 1;
 
 			|	cmp IPl, next_opline
