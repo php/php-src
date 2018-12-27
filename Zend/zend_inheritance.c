@@ -303,7 +303,7 @@ int _check_inherited_arg_info(
 		} else if (variance == COVARIANT) {
 			if (proto_type_code == IS_ITERABLE) {
 				zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
-				code = fe_ce && instanceof_function(fe_ce, zend_ce_traversable);
+				code = fe_ce ? instanceof_function(fe_ce, zend_ce_traversable) : -1;
 			} else if (proto_type_code != IS_OBJECT) {
 				code = 0;
 			}
@@ -336,7 +336,7 @@ int _check_inherited_arg_info(
 
 	return 0;
 }
-/* }}} */
+ /* }}} */
 
 static
 int _check_inherited_return_type(
