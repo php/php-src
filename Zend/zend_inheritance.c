@@ -320,7 +320,9 @@ int _check_inherited_arg_info(
 					_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
 				zend_class_entry *proto_ce = zend_lookup_class(proto_class_name);
 				zend_string_release(proto_class_name);
-				return proto_ce && instanceof_function(proto_ce, zend_ce_traversable);
+				return proto_ce
+					? instanceof_function(proto_ce, zend_ce_traversable)
+					: -1;
 			} else if (fe_type_code == IS_OBJECT) {
 				return 1;
 			}
