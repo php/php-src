@@ -3319,7 +3319,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_r
 }
 /* }}} */
 
-/* {{{ proto bool openssl_csr_export_to_file(resource csr, string outfilename [, bool notext=true])
+/* {{{ proto bool openssl_csr_export_to_file(mixed csr, string outfilename [, bool notext=true])
    Exports a CSR to file */
 PHP_FUNCTION(openssl_csr_export_to_file)
 {
@@ -3331,7 +3331,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	BIO * bio_out;
 	zend_resource *csr_resource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rp|b", &zcsr, &filename, &filename_len, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zp|b", &zcsr, &filename, &filename_len, &notext) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
@@ -3369,7 +3369,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 }
 /* }}} */
 
-/* {{{ proto bool openssl_csr_export(resource csr, string &out [, bool notext=true])
+/* {{{ proto bool openssl_csr_export(mixed csr, string &out [, bool notext=true])
    Exports a CSR to file or a var */
 PHP_FUNCTION(openssl_csr_export)
 {
@@ -3379,7 +3379,7 @@ PHP_FUNCTION(openssl_csr_export)
 	BIO * bio_out;
 	zend_resource *csr_resource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/|b", &zcsr, &zout, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz/|b", &zcsr, &zout, &notext) == FAILURE) {
 		return;
 	}
 
