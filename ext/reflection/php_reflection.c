@@ -4436,7 +4436,10 @@ ZEND_METHOD(reflection_class, getReflectionConstant)
 	}
 
 	if ((constant = zend_hash_find_ptr(&ce->constants_table, name)) == NULL) {
-		RETURN_FALSE;
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		zval_dtor(return_value);
+		RETURN_NULL();
 	}
 	reflection_class_constant_factory(ce, name, constant, return_value);
 }
