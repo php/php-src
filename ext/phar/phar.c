@@ -3375,6 +3375,9 @@ PHP_GINIT_FUNCTION(phar) /* {{{ */
 	phar_mime_type mime;
 
 	memset(phar_globals, 0, sizeof(zend_phar_globals));
+	HT_INVALIDATE(&phar_globals->phar_persist_map);
+	HT_INVALIDATE(&phar_globals->phar_fname_map);
+	HT_INVALIDATE(&phar_globals->phar_alias_map);
 	phar_globals->readonly = 1;
 
 	zend_hash_init(&phar_globals->mime_types, 0, NULL, mime_type_dtor, 1);
