@@ -59,6 +59,7 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #77359 (spl_autoload causes segfault). (Lauri Kenttä)
+  . Fixed bug #77360 (class_uses causes segfault). (Lauri Kenttä)
 
 - SQLite3:
   . Fixed bug #77051 (Issue with re-binding on SQLite3). (BohwaZ)
