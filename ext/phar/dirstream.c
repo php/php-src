@@ -361,7 +361,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return ret;
 	}
 
-	if (!HT_FLAGS(&phar->manifest)) {
+	if (!HT_IS_INITIALIZED(&phar->manifest)) {
 		php_url_free(resource);
 		return NULL;
 	}

@@ -42,6 +42,13 @@
 
 #define HT_FLAGS(ht) (ht)->u.flags
 
+#define HT_INVALIDATE(ht) do { \
+		HT_FLAGS(ht) = 0; \
+	} while (0)
+
+#define HT_IS_INITIALIZED(ht) \
+	((HT_FLAGS(ht) & HASH_FLAG_INITIALIZED) != 0)
+
 #define HT_IS_PACKED(ht) \
 	((HT_FLAGS(ht) & HASH_FLAG_PACKED) != 0)
 

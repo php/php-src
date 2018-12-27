@@ -497,7 +497,7 @@ carry_on:
 		}
 
 		return;
-	} else if (HT_FLAGS(&PHAR_G(phar_fname_map)) && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
+	} else if (HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
 		goto carry_on;
 	} else if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_str_find_ptr(&cached_phars, fname, fname_len))) {
 		if (SUCCESS == phar_copy_on_write(&pphar)) {
