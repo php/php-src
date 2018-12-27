@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fixed bug #77298 (segfault occurs when add property to unserialized empty
     ArrayObject). (jhdxr)
   . Fixed bug #77359 (spl_autoload causes segfault). (Lauri Kenttä)
+  . Fixed bug #77360 (class_uses causes segfault). (Lauri Kenttä)
 
 03 Jan 2019, PHP 7.3.1
 
