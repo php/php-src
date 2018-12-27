@@ -44,9 +44,8 @@ static int phar_dir_close(php_stream *stream, int close_handle)  /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
-	if (data && HT_FLAGS(data)) {
+	if (data) {
 		zend_hash_destroy(data);
-		HT_FLAGS(data) = 0;
 		FREE_HASHTABLE(data);
 		stream->abstract = NULL;
 	}
