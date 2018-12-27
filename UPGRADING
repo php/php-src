@@ -13,6 +13,7 @@ PHP 7.4 UPGRADE NOTES
 11. Changes to INI File Handling
 12. Windows Support
 13. Other Changes
+14. Performance Improvements
 
 
 ========================================
@@ -89,6 +90,18 @@ PHP 7.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- SPL:
+  . SplFileObject::fputcsv(), ::fgetcsv() and ::setCsvControl() now accept an
+    emptry string as $escape argument, which disables the propriertary PHP
+    escaping mechanism. SplFileObject::getCsvControl() now may also return an
+    empty string for the third array element, accordingly.
+
+- Standard:
+  . fputcsv() and fgetcsv() now accept an emptry string as $escape argument,
+    which disables the propriertary PHP escaping mechanism. The behavior of
+    str_getcsv() has been adjusted accordingly (formerly, an empty string was
+    identical to using the default).
+
 ========================================
 6. New Functions
 ========================================
@@ -98,6 +111,11 @@ PHP 7.4 UPGRADE NOTES
     signature of the certificate using a public key. A wrapper around the
     OpenSSL's X509_verify() function.
     See <https://github.com/php/php-src/pull/3624>.
+
+- SQLite3:
+  . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. If TRUE is
+    passed as parameter, query parameters will be replaced in the return value
+    by their currently bound value, if libsqlite ≥ 3.14 is used.
 
 ========================================
 7. New Classes and Interfaces
@@ -113,13 +131,15 @@ PHP 7.4 UPGRADE NOTES
 
 - GD:
   . Freetype detection now relies on pkg-config. The --with-freetype-dir option
-    has been renamed to --enable-freetype and no longer accepts a directory.
+    has been renamed to --with-freetype and no longer accepts a directory.
     Instead pkg-config environment variables can be used to configure custom paths,
     see either ./configure --help or follow the instructions in error messages.
   . The behavior of imagecropauto() in the bundled libgd has been synced with
     that of system libgd:
      * IMG_CROP_DEFAULT is no longer falling back to IMG_CROP_SIDES
      * Threshold-cropping now uses the algorithm of system libgd
+  . The default $mode parameter of imagecropauto() has been changed to
+    IMG_CROP_DEFAULT; passing -1 is now deprecated.
 
 - Hash:
   . The hash extension cannot be disabled anymore and is always an integral
@@ -205,3 +225,13 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+========================================
+14. Performance Improvements
+========================================
+
+- Core:
+  . A specialized VM opcode for the array_key_exists() function has been added,
+    which improves performance of this function if it can be statically
+    resolved. In namespaced code, this may require writing \array_key_exists()
+    or explicitly importing the function.

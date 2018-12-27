@@ -523,6 +523,18 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
+PHP_MSHUTDOWN_FUNCTION(password) /* {{{ */
+{
+#ifdef ZTS
+	if (!tsrm_is_main_thread()) {
+		return SUCCESS;
+	}
+#endif
+	zend_hash_destroy(&php_password_algos);
+	return SUCCESS;
+}
+/* }}} */
+
 const php_password_algo* php_password_algo_default() {
 	return &php_password_algo_bcrypt;
 }

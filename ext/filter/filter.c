@@ -676,11 +676,9 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 	zval *tmp, *arg_elm;
 
 	if (!op) {
-		zval_ptr_dtor(return_value);
 		ZVAL_DUP(return_value, input);
 		php_filter_call(return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY);
 	} else if (Z_TYPE_P(op) == IS_LONG) {
-		zval_ptr_dtor(return_value);
 		ZVAL_DUP(return_value, input);
 		php_filter_call(return_value, Z_LVAL_P(op), NULL, 0, FILTER_REQUIRE_ARRAY);
 	} else if (Z_TYPE_P(op) == IS_ARRAY) {

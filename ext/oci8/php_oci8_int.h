@@ -344,7 +344,9 @@ typedef struct {
 			case  3114:							  \
 			case  3122:							  \
 			case  3135:							  \
+			case  3136:							  \
 			case 12153:							  \
+			case 12161:							  \
 			case 27146:							  \
 			case 28511:							  \
 				(connection)->is_open = 0;		  \
@@ -543,6 +545,14 @@ int php_oci_unregister_taf_callback(php_oci_connection *connection);
 #define OCI_G(v) TSRMG(oci_globals_id, zend_oci_globals *, v)
 #else
 #define OCI_G(v) (oci_globals.v)
+#endif
+
+/* Allow install from PECL on PHP < 7.3 */
+#ifndef GC_ADDREF
+# define GC_ADDREF(p) (++GC_REFCOUNT(p))
+#endif
+#ifndef GC_DELREF
+# define GC_DELREF(p) (GC_REFCOUNT(p)--)
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(oci)

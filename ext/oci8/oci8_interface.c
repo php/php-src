@@ -129,9 +129,13 @@ PHP_FUNCTION(oci_define_by_name)
 	php_oci_define *define;
 	zend_string *zvtmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|l", &stmt, &name, &name_len, &var, &type) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_RESOURCE(stmt)
+		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_ZVAL(var)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!name_len) {
 		php_error_docref(NULL, E_WARNING, "Column name cannot be empty");
@@ -193,9 +197,14 @@ PHP_FUNCTION(oci_bind_by_name)
 	zval *bind_var = NULL;
 	php_oci_statement *statement;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|ll", &z_statement, &name, &name_len, &bind_var, &maxlen, &type) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_RESOURCE(z_statement)
+		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_ZVAL(bind_var)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(maxlen)
+		Z_PARAM_LONG(type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (type) {
 		bind_type = (ub2) type;
@@ -223,9 +232,15 @@ PHP_FUNCTION(oci_bind_array_by_name)
 	zval *bind_var = NULL;
 	php_oci_statement *statement;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rszl|ll", &z_statement, &name, &name_len, &bind_var, &max_array_len, &max_item_len, &type) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(4, 6)
+		Z_PARAM_RESOURCE(z_statement)
+		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_ZVAL(bind_var)
+		Z_PARAM_LONG(max_array_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(max_item_len)
+		Z_PARAM_LONG(type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
@@ -1157,9 +1172,9 @@ PHP_FUNCTION(oci_rollback)
 	zval *z_connection;
 	php_oci_connection *connection;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_connection) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_connection)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1181,9 +1196,9 @@ PHP_FUNCTION(oci_commit)
 	zval *z_connection;
 	php_oci_connection *connection;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_connection) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_connection)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1379,9 +1394,11 @@ PHP_FUNCTION(oci_execute)
 	php_oci_statement *statement;
 	zend_long mode = OCI_COMMIT_ON_SUCCESS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &z_statement, &mode) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_RESOURCE(z_statement)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
@@ -1420,9 +1437,9 @@ PHP_FUNCTION(oci_fetch)
 	php_oci_statement *statement;
 	ub4 nrows = 1; /* only one row at a time is supported for now */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_statement) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_statement)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
@@ -1454,9 +1471,14 @@ PHP_FUNCTION(oci_fetch_all)
 	int i;
 	zend_long rows = 0, flags = 0, skip = 0, maxrows = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/|lll", &z_statement, &array, &skip, &maxrows, &flags) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_RESOURCE(z_statement)
+		Z_PARAM_ZVAL_DEREF_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(skip)
+		Z_PARAM_LONG(maxrows)
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
@@ -1604,9 +1626,9 @@ PHP_FUNCTION(oci_free_statement)
 	zval *z_statement;
 	php_oci_statement *statement;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_statement) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_statement)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
@@ -1634,9 +1656,9 @@ PHP_FUNCTION(oci_close)
 		return;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_connection) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_connection)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 	if (GC_REFCOUNT(connection->id) == 2) { /* CHANGED VERSION::PHP7
@@ -1692,9 +1714,10 @@ PHP_FUNCTION(oci_error)
 	ub2 error_offset = 0;
 	text *sqltext = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_RESOURCE(arg)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() > 0) {
 		statement = (php_oci_statement *) zend_fetch_resource_ex(arg, NULL, le_statement);
@@ -1758,9 +1781,9 @@ PHP_FUNCTION(oci_num_fields)
 	zval *z_statement;
 	php_oci_statement *statement;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_statement) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_statement)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
@@ -1778,9 +1801,10 @@ PHP_FUNCTION(oci_parse)
 	char *query;
 	size_t query_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_connection, &query, &query_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_connection)
+		Z_PARAM_STRING(query, query_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1801,9 +1825,10 @@ PHP_FUNCTION(oci_set_prefetch)
 	php_oci_statement *statement;
 	zend_long size;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &z_statement, &size) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_statement)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
@@ -1829,9 +1854,10 @@ PHP_FUNCTION(oci_set_client_identifier)
 	size_t client_id_len;
 	sword errstatus;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_connection, &client_id, &client_id_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_connection)
+		Z_PARAM_STRING(client_id, client_id_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1878,9 +1904,9 @@ PHP_FUNCTION(oci_set_edition)
 	char *edition;
 	size_t edition_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &edition, &edition_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(edition, edition_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (OCI_G(edition)) {
 		efree(OCI_G(edition));
@@ -1913,9 +1939,10 @@ PHP_FUNCTION(oci_set_module_name)
 	size_t module_len;
 	sword errstatus;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_connection, &module, &module_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_connection)
+		Z_PARAM_STRING(module, module_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1945,9 +1972,10 @@ PHP_FUNCTION(oci_set_action)
 	size_t action_len;
 	sword errstatus;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_connection, &action, &action_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_connection)
+		Z_PARAM_STRING(action, action_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1977,9 +2005,10 @@ PHP_FUNCTION(oci_set_client_info)
 	size_t client_info_len;
 	sword errstatus;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_connection, &client_info, &client_info_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_connection)
+		Z_PARAM_STRING(client_info, client_info_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1998,9 +2027,9 @@ PHP_FUNCTION(oci_set_client_info)
 }
 /* }}} */
 
-#ifdef WAITIING_ORACLE_BUG_16695981_FIX
 /* {{{ proto bool oci_set_db_operation(resource connection, string value)
-   Sets the "DB operation" on the connection for Oracle end-to-end tracing */
+   Sets the "DB operation" on the connection for Oracle end-to-end tracing.
+   For history, see Oracle bug 16695981 */
 PHP_FUNCTION(oci_set_db_operation)
 {
 #if (OCI_MAJOR_VERSION > 11)
@@ -2009,9 +2038,10 @@ PHP_FUNCTION(oci_set_db_operation)
 	char *dbop_name;
 	size_t dbop_name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_connection, &dbop_name, &dbop_name_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_connection)
+		Z_PARAM_STRING(dbop_name, dbop_name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -2028,7 +2058,36 @@ PHP_FUNCTION(oci_set_db_operation)
 #endif
 }
 /* }}} */
-#endif /* WAITIING_ORACLE_BUG_16695981_FIX */
+
+/* {{{ proto bool oci_set_call_timeout(resource connection, int call_timeout)
+ */
+PHP_FUNCTION(oci_set_call_timeout)
+{
+#if (OCI_MAJOR_VERSION >= 18)
+	zval *z_connection;
+	php_oci_connection *connection;
+	zend_long call_timeout;  // milliseconds
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_connection)
+		Z_PARAM_LONG(call_timeout)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX, (ub4 *) &call_timeout, 0, OCI_ATTR_CALL_TIMEOUT, OCI_G(err)));
+
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode));
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+#else
+	php_error_docref(NULL, E_NOTICE, "Unsupported with this version of Oracle Client");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
 
 /* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password)
   Changes the password of an account */
@@ -2092,9 +2151,9 @@ PHP_FUNCTION(oci_new_cursor)
 	php_oci_connection *connection;
 	php_oci_statement *statement;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_connection) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_connection)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -2143,9 +2202,9 @@ PHP_FUNCTION(oci_server_version)
 	char version[256];
 	zend_string *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_connection) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_connection)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -2166,9 +2225,9 @@ PHP_FUNCTION(oci_statement_type)
 	php_oci_statement *statement;
 	ub2 type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_statement) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_statement)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
@@ -2221,9 +2280,9 @@ PHP_FUNCTION(oci_num_rows)
 	php_oci_statement *statement;
 	ub4 rowcount;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_statement) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_statement)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
@@ -2524,9 +2583,9 @@ PHP_FUNCTION(oci_get_implicit_resultset)
 	php_oci_statement *statement;
 	php_oci_statement *imp_statement;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_statement) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(z_statement)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 

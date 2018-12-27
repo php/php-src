@@ -1529,13 +1529,6 @@ ZEND_API int add_index_stringl(zval *arg, zend_ulong index, const char *str, siz
 }
 /* }}} */
 
-ZEND_API int add_index_zval(zval *arg, zend_ulong index, zval *value) /* {{{ */
-{
-	zend_hash_index_update(Z_ARRVAL_P(arg), index, value);
-	return SUCCESS;
-}
-/* }}} */
-
 ZEND_API int add_next_index_long(zval *arg, zend_long n) /* {{{ */
 {
 	zval tmp;
@@ -1608,77 +1601,6 @@ ZEND_API int add_next_index_stringl(zval *arg, const char *str, size_t length) /
 }
 /* }}} */
 
-ZEND_API int add_next_index_zval(zval *arg, zval *value) /* {{{ */
-{
-	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), value) ? SUCCESS : FAILURE;
-}
-/* }}} */
-
-ZEND_API zval *add_get_assoc_string_ex(zval *arg, const char *key, uint32_t key_len, const char *str) /* {{{ */
-{
-	zval tmp, *ret;
-
-	ZVAL_STRING(&tmp, str);
-	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return ret;
-}
-/* }}} */
-
-ZEND_API zval *add_get_assoc_stringl_ex(zval *arg, const char *key, uint32_t key_len, const char *str, size_t length) /* {{{ */
-{
-	zval tmp, *ret;
-
-	ZVAL_STRINGL(&tmp, str, length);
-	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return ret;
-}
-/* }}} */
-
-ZEND_API zval *add_get_index_long(zval *arg, zend_ulong index, zend_long l) /* {{{ */
-{
-	zval tmp;
-
-	ZVAL_LONG(&tmp, l);
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-}
-/* }}} */
-
-ZEND_API zval *add_get_index_double(zval *arg, zend_ulong index, double d) /* {{{ */
-{
-	zval tmp;
-
-	ZVAL_DOUBLE(&tmp, d);
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-}
-/* }}} */
-
-ZEND_API zval *add_get_index_str(zval *arg, zend_ulong index, zend_string *str) /* {{{ */
-{
-	zval tmp;
-
-	ZVAL_STR(&tmp, str);
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-}
-/* }}} */
-
-ZEND_API zval *add_get_index_string(zval *arg, zend_ulong index, const char *str) /* {{{ */
-{
-	zval tmp;
-
-	ZVAL_STRING(&tmp, str);
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-}
-/* }}} */
-
-ZEND_API zval *add_get_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length) /* {{{ */
-{
-	zval tmp;
-
-	ZVAL_STRINGL(&tmp, str, length);
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-}
-/* }}} */
-
 ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 {
 	zval *result;
@@ -1723,52 +1645,37 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 ZEND_API int add_property_long_ex(zval *arg, const char *key, size_t key_len, zend_long n) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_LONG(&tmp, n);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&z_key);
-	return SUCCESS;
+	return add_property_zval_ex(arg, key, key_len, &tmp);
 }
 /* }}} */
 
 ZEND_API int add_property_bool_ex(zval *arg, const char *key, size_t key_len, zend_long b) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_BOOL(&tmp, b);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&z_key);
-	return SUCCESS;
+	return add_property_zval_ex(arg, key, key_len, &tmp);
 }
 /* }}} */
 
 ZEND_API int add_property_null_ex(zval *arg, const char *key, size_t key_len) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_NULL(&tmp);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&z_key);
-	return SUCCESS;
+	return add_property_zval_ex(arg, key, key_len, &tmp);
 }
 /* }}} */
 
 ZEND_API int add_property_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_RES(&tmp, r);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
+	add_property_zval_ex(arg, key, key_len, &tmp);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 /* }}} */
@@ -1776,26 +1683,19 @@ ZEND_API int add_property_resource_ex(zval *arg, const char *key, size_t key_len
 ZEND_API int add_property_double_ex(zval *arg, const char *key, size_t key_len, double d) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_DOUBLE(&tmp, d);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&z_key);
-	return SUCCESS;
+	return add_property_zval_ex(arg, key, key_len, &tmp);
 }
 /* }}} */
 
 ZEND_API int add_property_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_STR(&tmp, str);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
+	add_property_zval_ex(arg, key, key_len, &tmp);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 /* }}} */
@@ -1803,13 +1703,10 @@ ZEND_API int add_property_str_ex(zval *arg, const char *key, size_t key_len, zen
 ZEND_API int add_property_string_ex(zval *arg, const char *key, size_t key_len, const char *str) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_STRING(&tmp, str);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
+	add_property_zval_ex(arg, key, key_len, &tmp);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 /* }}} */
@@ -1817,13 +1714,10 @@ ZEND_API int add_property_string_ex(zval *arg, const char *key, size_t key_len, 
 ZEND_API int add_property_stringl_ex(zval *arg, const char *key, size_t key_len, const char *str, size_t length) /* {{{ */
 {
 	zval tmp;
-	zval z_key;
 
 	ZVAL_STRINGL(&tmp, str, length);
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
+	add_property_zval_ex(arg, key, key_len, &tmp);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 /* }}} */
@@ -2626,28 +2520,22 @@ ZEND_API void zend_activate_modules(void) /* {{{ */
 }
 /* }}} */
 
-/* call request shutdown for all modules */
-static int module_registry_cleanup(zval *zv) /* {{{ */
-{
-	zend_module_entry *module = Z_PTR_P(zv);
-
-	if (module->request_shutdown_func) {
-#if 0
-		zend_printf("%s: Request shutdown\n", module->name);
-#endif
-		module->request_shutdown_func(module->type, module->module_number);
-	}
-	return 0;
-}
-/* }}} */
-
 ZEND_API void zend_deactivate_modules(void) /* {{{ */
 {
 	EG(current_execute_data) = NULL; /* we're no longer executing anything */
 
 	zend_try {
 		if (EG(full_tables_cleanup)) {
-			zend_hash_reverse_apply(&module_registry, module_registry_cleanup);
+			zend_module_entry *module;
+
+			ZEND_HASH_REVERSE_FOREACH_PTR(&module_registry, module) {
+				if (module->request_shutdown_func) {
+#if 0
+					zend_printf("%s: Request shutdown\n", module->name);
+#endif
+					module->request_shutdown_func(module->type, module->module_number);
+				}
+			} ZEND_HASH_FOREACH_END();
 		} else {
 			zend_module_entry **p = module_request_shutdown_handlers;
 
@@ -2673,34 +2561,21 @@ ZEND_API void zend_cleanup_internal_classes(void) /* {{{ */
 }
 /* }}} */
 
-int module_registry_unload_temp(const zend_module_entry *module) /* {{{ */
-{
-	return (module->type == MODULE_TEMPORARY) ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_STOP;
-}
-/* }}} */
-
-static int module_registry_unload_temp_wrapper(zval *el) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry *)Z_PTR_P(el);
-	return module_registry_unload_temp((const zend_module_entry *)module);
-}
-/* }}} */
-
-static int exec_done_cb(zval *el) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry *)Z_PTR_P(el);
-	if (module->post_deactivate_func) {
-		module->post_deactivate_func();
-	}
-	return 0;
-}
-/* }}} */
-
 ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
-		zend_hash_apply(&module_registry, exec_done_cb);
-		zend_hash_reverse_apply(&module_registry, module_registry_unload_temp_wrapper);
+		zend_module_entry *module;
+
+		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
+			if (module->post_deactivate_func) {
+				module->post_deactivate_func();
+			}
+		} ZEND_HASH_FOREACH_END();
+		ZEND_HASH_REVERSE_FOREACH_PTR(&module_registry, module) {
+			if (module->type != MODULE_TEMPORARY) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END_DEL();
 	} else {
 		zend_module_entry **p = module_post_deactivate_handlers;
 

@@ -35,7 +35,7 @@
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
 		if ((src)->op_type == IS_CONST) { \
-			target.constant = zend_add_literal(CG(active_op_array), &(src)->u.constant); \
+			target.constant = zend_add_literal(&(src)->u.constant); \
 		} else { \
 			target = (src)->u.op; \
 		} \
@@ -96,8 +96,14 @@ static void init_op(zend_op *op)
 	op->lineno = CG(zend_lineno);
 }
 
-static zend_op *get_next_op(zend_op_array *op_array)
+static zend_always_inline uint32_t get_next_op_number(void)
 {
+	return CG(active_op_array)->last;
+}
+
+static zend_op *get_next_op(void)
+{
+	zend_op_array *op_array = CG(active_op_array);
 	uint32_t next_op_num = op_array->last++;
 	zend_op *next_op;
 
@@ -425,20 +431,20 @@ ZEND_API zend_bool zend_is_compiling(void) /* {{{ */
 }
 /* }}} */
 
-static uint32_t get_temporary_variable(zend_op_array *op_array) /* {{{ */
+static zend_always_inline uint32_t get_temporary_variable(void) /* {{{ */
 {
-	return (uint32_t)op_array->T++;
+	return (uint32_t)CG(active_op_array)->T++;
 }
 /* }}} */
 
-static int lookup_cv(zend_op_array *op_array, zend_string *name) /* {{{ */{
+static int lookup_cv(zend_string *name) /* {{{ */{
+	zend_op_array *op_array = CG(active_op_array);
 	int i = 0;
 	zend_ulong hash_value = zend_string_hash_val(name);
 
 	while (i < op_array->last_var) {
-		if (ZSTR_VAL(op_array->vars[i]) == ZSTR_VAL(name) ||
-		    (ZSTR_H(op_array->vars[i]) == hash_value &&
-		     zend_string_equal_content(op_array->vars[i], name))) {
+		if (ZSTR_H(op_array->vars[i]) == hash_value
+		 && zend_string_equals(op_array->vars[i], name)) {
 			return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 		}
 		i++;
@@ -479,18 +485,21 @@ static inline zend_string *zval_make_interned_string(zval *zv) /* {{{ */
 /* Common part of zend_add_literal and zend_append_individual_literal */
 static inline void zend_insert_literal(zend_op_array *op_array, zval *zv, int literal_position) /* {{{ */
 {
+	zval *lit = CT_CONSTANT_EX(op_array, literal_position);
 	if (Z_TYPE_P(zv) == IS_STRING) {
 		zval_make_interned_string(zv);
 	}
-	ZVAL_COPY_VALUE(CT_CONSTANT_EX(op_array, literal_position), zv);
+	ZVAL_COPY_VALUE(lit, zv);
+	Z_EXTRA_P(lit) = 0;
 }
 /* }}} */
 
 /* Is used while compiling a function, using the context to keep track
    of an approximate size to avoid to relocate to often.
    Literals are truncated to actual size in the second compiler pass (pass_two()). */
-int zend_add_literal(zend_op_array *op_array, zval *zv) /* {{{ */
+static int zend_add_literal(zval *zv) /* {{{ */
 {
+	zend_op_array *op_array = CG(active_op_array);
 	int i = op_array->last_literal;
 	op_array->last_literal++;
 	if (i >= CG(context).literals_size) {
@@ -504,71 +513,71 @@ int zend_add_literal(zend_op_array *op_array, zval *zv) /* {{{ */
 }
 /* }}} */
 
-static inline int zend_add_literal_string(zend_op_array *op_array, zend_string **str) /* {{{ */
+static inline int zend_add_literal_string(zend_string **str) /* {{{ */
 {
 	int ret;
 	zval zv;
 	ZVAL_STR(&zv, *str);
-	ret = zend_add_literal(op_array, &zv);
+	ret = zend_add_literal(&zv);
 	*str = Z_STR(zv);
 	return ret;
 }
 /* }}} */
 
-static int zend_add_func_name_literal(zend_op_array *op_array, zend_string *name) /* {{{ */
+static int zend_add_func_name_literal(zend_string *name) /* {{{ */
 {
 	/* Original name */
-	int ret = zend_add_literal_string(op_array, &name);
+	int ret = zend_add_literal_string(&name);
 
 	/* Lowercased name */
 	zend_string *lc_name = zend_string_tolower(name);
-	zend_add_literal_string(op_array, &lc_name);
+	zend_add_literal_string(&lc_name);
 
 	return ret;
 }
 /* }}} */
 
-static int zend_add_ns_func_name_literal(zend_op_array *op_array, zend_string *name) /* {{{ */
+static int zend_add_ns_func_name_literal(zend_string *name) /* {{{ */
 {
 	const char *unqualified_name;
 	size_t unqualified_name_len;
 
 	/* Original name */
-	int ret = zend_add_literal_string(op_array, &name);
+	int ret = zend_add_literal_string(&name);
 
 	/* Lowercased name */
 	zend_string *lc_name = zend_string_tolower(name);
-	zend_add_literal_string(op_array, &lc_name);
+	zend_add_literal_string(&lc_name);
 
 	/* Lowercased unqualfied name */
 	if (zend_get_unqualified_name(name, &unqualified_name, &unqualified_name_len)) {
 		lc_name = zend_string_alloc(unqualified_name_len, 0);
 		zend_str_tolower_copy(ZSTR_VAL(lc_name), unqualified_name, unqualified_name_len);
-		zend_add_literal_string(op_array, &lc_name);
+		zend_add_literal_string(&lc_name);
 	}
 
 	return ret;
 }
 /* }}} */
 
-static int zend_add_class_name_literal(zend_op_array *op_array, zend_string *name) /* {{{ */
+static int zend_add_class_name_literal(zend_string *name) /* {{{ */
 {
 	/* Original name */
-	int ret = zend_add_literal_string(op_array, &name);
+	int ret = zend_add_literal_string(&name);
 
 	/* Lowercased name */
 	zend_string *lc_name = zend_string_tolower(name);
-	zend_add_literal_string(op_array, &lc_name);
+	zend_add_literal_string(&lc_name);
 
 	return ret;
 }
 /* }}} */
 
-static int zend_add_const_name_literal(zend_op_array *op_array, zend_string *name, zend_bool unqualified) /* {{{ */
+static int zend_add_const_name_literal(zend_string *name, zend_bool unqualified) /* {{{ */
 {
 	zend_string *tmp_name;
 
-	int ret = zend_add_literal_string(op_array, &name);
+	int ret = zend_add_literal_string(&name);
 
 	size_t ns_len = 0, after_ns_len = ZSTR_LEN(name);
 	const char *after_ns = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
@@ -580,11 +589,11 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zend_string *nam
 		/* lowercased namespace name & original constant name */
 		tmp_name = zend_string_init(ZSTR_VAL(name), ZSTR_LEN(name), 0);
 		zend_str_tolower(ZSTR_VAL(tmp_name), ns_len);
-		zend_add_literal_string(op_array, &tmp_name);
+		zend_add_literal_string(&tmp_name);
 
 		/* lowercased namespace name & lowercased constant name */
 		tmp_name = zend_string_tolower(name);
-		zend_add_literal_string(op_array, &tmp_name);
+		zend_add_literal_string(&tmp_name);
 
 		if (!unqualified) {
 			return ret;
@@ -595,12 +604,12 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zend_string *nam
 
 	/* original unqualified constant name */
 	tmp_name = zend_string_init(after_ns, after_ns_len, 0);
-	zend_add_literal_string(op_array, &tmp_name);
+	zend_add_literal_string(&tmp_name);
 
 	/* lowercased unqualified constant name */
 	tmp_name = zend_string_alloc(after_ns_len, 0);
 	zend_str_tolower_copy(ZSTR_VAL(tmp_name), after_ns, after_ns_len);
-	zend_add_literal_string(op_array, &tmp_name);
+	zend_add_literal_string(&tmp_name);
 
 	return ret;
 }
@@ -609,7 +618,7 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zend_string *nam
 #define LITERAL_STR(op, str) do { \
 		zval _c; \
 		ZVAL_STR(&_c, str); \
-		op.constant = zend_add_literal(CG(active_op_array), &_c); \
+		op.constant = zend_add_literal(&_c); \
 	} while (0)
 
 void zend_stop_lexing(void)
@@ -621,8 +630,9 @@ void zend_stop_lexing(void)
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
 
-static uint32_t zend_start_live_range(zend_op_array *op_array, uint32_t start) /* {{{ */
+static uint32_t zend_start_live_range(uint32_t start) /* {{{ */
 {
+	zend_op_array *op_array = CG(active_op_array);
 	zend_live_range *range;
 
 	op_array->last_live_range++;
@@ -633,8 +643,9 @@ static uint32_t zend_start_live_range(zend_op_array *op_array, uint32_t start) /
 }
 /* }}} */
 
-static void zend_end_live_range(zend_op_array *op_array, uint32_t offset, uint32_t end, uint32_t kind, uint32_t var) /* {{{ */
+static void zend_end_live_range(uint32_t offset, uint32_t end, uint32_t kind, uint32_t var) /* {{{ */
 {
+	zend_op_array *op_array = CG(active_op_array);
 	zend_live_range *range = op_array->live_range + offset;
 
 	if (range->start == end && offset == (uint32_t)op_array->last_live_range - 1) {
@@ -659,12 +670,12 @@ static inline void zend_begin_loop(
 	brk_cont_element->is_switch = is_switch;
 
 	if (loop_var && (loop_var->op_type & (IS_VAR|IS_TMP_VAR))) {
-		uint32_t start = get_next_op_number(CG(active_op_array));
+		uint32_t start = get_next_op_number();
 
 		info.opcode = free_opcode;
 		info.var_type = loop_var->op_type;
 		info.var_num = loop_var->u.op.var;
-		info.u.live_range_offset = zend_start_live_range(CG(active_op_array), start);
+		info.u.live_range_offset = zend_start_live_range(start);
 		brk_cont_element->start = start;
 	} else {
 		info.opcode = ZEND_NOP;
@@ -679,7 +690,7 @@ static inline void zend_begin_loop(
 
 static inline void zend_end_loop(int cont_addr, const znode *var_node) /* {{{ */
 {
-	uint32_t end = get_next_op_number(CG(active_op_array));
+	uint32_t end = get_next_op_number();
 	zend_brk_cont_element *brk_cont_element
 		= &CG(context).brk_cont_array[CG(context).current_brk_cont];
 	brk_cont_element->cont = cont_addr;
@@ -688,7 +699,7 @@ static inline void zend_end_loop(int cont_addr, const znode *var_node) /* {{{ */
 
 	if (brk_cont_element->start != -1) {
 		zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
-		zend_end_live_range(CG(active_op_array), loop_var->u.live_range_offset, end,
+		zend_end_live_range(loop_var->u.live_range_offset, end,
 			loop_var->opcode == ZEND_FE_FREE ? ZEND_LIVE_LOOP : ZEND_LIVE_TMPVAR,
 			var_node->u.op.var);
 	}
@@ -1469,7 +1480,7 @@ void zend_do_extended_info(void) /* {{{ */
 		return;
 	}
 
-	opline = get_next_op(CG(active_op_array));
+	opline = get_next_op();
 
 	opline->opcode = ZEND_EXT_STMT;
 }
@@ -1483,7 +1494,7 @@ void zend_do_extended_fcall_begin(void) /* {{{ */
 		return;
 	}
 
-	opline = get_next_op(CG(active_op_array));
+	opline = get_next_op();
 
 	opline->opcode = ZEND_EXT_FCALL_BEGIN;
 }
@@ -1497,7 +1508,7 @@ void zend_do_extended_fcall_end(void) /* {{{ */
 		return;
 	}
 
-	opline = get_next_op(CG(active_op_array));
+	opline = get_next_op();
 
 	opline->opcode = ZEND_EXT_FCALL_END;
 }
@@ -1795,7 +1806,7 @@ static void zend_adjust_for_fetch_type(zend_op *opline, znode *result, uint32_t 
 static inline void zend_make_var_result(znode *result, zend_op *opline) /* {{{ */
 {
 	opline->result_type = IS_VAR;
-	opline->result.var = get_temporary_variable(CG(active_op_array));
+	opline->result.var = get_temporary_variable();
 	GET_NODE(result, opline->result);
 }
 /* }}} */
@@ -1803,7 +1814,7 @@ static inline void zend_make_var_result(znode *result, zend_op *opline) /* {{{ *
 static inline void zend_make_tmp_result(znode *result, zend_op *opline) /* {{{ */
 {
 	opline->result_type = IS_TMP_VAR;
-	opline->result.var = get_temporary_variable(CG(active_op_array));
+	opline->result.var = get_temporary_variable();
 	GET_NODE(result, opline->result);
 }
 /* }}} */
@@ -1868,8 +1879,8 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 				}
 			}
 
-	        zend_end_live_range(CG(active_op_array),
-				zend_start_live_range(CG(active_op_array),
+	        zend_end_live_range(
+				zend_start_live_range(
 					def + 1 - CG(active_op_array)->opcodes),
 				opline - CG(active_op_array)->opcodes,
 				ZEND_LIVE_TMPVAR, var);
@@ -1903,10 +1914,9 @@ static zend_always_inline int zend_is_def_range(zend_op *opline, zend_uchar type
 }
 /* }}} */
 
-static void zend_check_live_ranges(zend_op *opline) /* {{{ */
+static void zend_check_live_ranges_op1(zend_op *opline) /* {{{ */
 {
-	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
-		!zend_is_def_range(opline - 1, opline->op1_type, opline->op1.var)) {
+	if (!zend_is_def_range(opline - 1, opline->op1_type, opline->op1.var)) {
 
 		if (opline->opcode == ZEND_OP_DATA) {
 			if (!zend_is_def_range(opline - 2, opline->op1_type, opline->op1.var)) {
@@ -1936,9 +1946,12 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 			zend_find_live_range(opline, opline->op1_type, opline->op1.var);
 		}
 	}
+}
+/* }}} */
 
-	if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
-		!zend_is_def_range(opline - 1, opline->op2_type, opline->op2.var)) {
+static void zend_check_live_ranges_op2(zend_op *opline) /* {{{ */
+{
+	if (!zend_is_def_range(opline - 1, opline->op2_type, opline->op2.var)) {
 
 		if (opline->opcode == ZEND_OP_DATA) {
 			if (!zend_is_def_range(opline - 2, opline->op2_type, opline->op2.var)) {
@@ -1961,20 +1974,35 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 }
 /* }}} */
 
+static void zend_check_live_ranges(zend_op *opline) /* {{{ */
+{
+	if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+		zend_check_live_ranges_op1(opline);
+	}
+	if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
+		zend_check_live_ranges_op2(opline);
+	}
+}
+/* }}} */
+
 static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */
 {
-	zend_op *opline = get_next_op(CG(active_op_array));
+	zend_op *opline = get_next_op();
 	opline->opcode = opcode;
 
 	if (op1 != NULL) {
 		SET_NODE(opline->op1, op1);
+		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			zend_check_live_ranges_op1(opline);
+		}
 	}
 
 	if (op2 != NULL) {
 		SET_NODE(opline->op2, op2);
+		if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
+			zend_check_live_ranges_op2(opline);
+		}
 	}
-
-	zend_check_live_ranges(opline);
 
 	if (result) {
 		zend_make_var_result(result, opline);
@@ -1985,18 +2013,22 @@ static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode
 
 static zend_op *zend_emit_op_tmp(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */
 {
-	zend_op *opline = get_next_op(CG(active_op_array));
+	zend_op *opline = get_next_op();
 	opline->opcode = opcode;
 
 	if (op1 != NULL) {
 		SET_NODE(opline->op1, op1);
+		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			zend_check_live_ranges_op1(opline);
+		}
 	}
 
 	if (op2 != NULL) {
 		SET_NODE(opline->op2, op2);
+		if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
+			zend_check_live_ranges_op2(opline);
+		}
 	}
-
-	zend_check_live_ranges(opline);
 
 	if (result) {
 		zend_make_tmp_result(result, opline);
@@ -2015,7 +2047,7 @@ static void zend_emit_tick(void) /* {{{ */
 		return;
 	}
 
-	opline = get_next_op(CG(active_op_array));
+	opline = get_next_op();
 
 	opline->opcode = ZEND_TICKS;
 	opline->extended_value = FC(declarables).ticks;
@@ -2030,7 +2062,7 @@ static inline zend_op *zend_emit_op_data(znode *value) /* {{{ */
 
 static inline uint32_t zend_emit_jump(uint32_t opnum_target) /* {{{ */
 {
-	uint32_t opnum = get_next_op_number(CG(active_op_array));
+	uint32_t opnum = get_next_op_number();
 	zend_op *opline = zend_emit_op(NULL, ZEND_JMP, NULL, NULL);
 	opline->op1.opline_num = opnum_target;
 	return opnum;
@@ -2056,6 +2088,7 @@ ZEND_API int zend_is_smart_branch(zend_op *opline) /* {{{ */
 		case ZEND_TYPE_CHECK:
 		case ZEND_DEFINED:
 		case ZEND_IN_ARRAY:
+		case ZEND_ARRAY_KEY_EXISTS:
 			return 1;
 		default:
 			return 0;
@@ -2065,7 +2098,7 @@ ZEND_API int zend_is_smart_branch(zend_op *opline) /* {{{ */
 
 static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint32_t opnum_target) /* {{{ */
 {
-	uint32_t opnum = get_next_op_number(CG(active_op_array));
+	uint32_t opnum = get_next_op_number();
 	zend_op *opline;
 
 	if ((cond->op_type & (IS_CV|IS_CONST))
@@ -2073,7 +2106,7 @@ static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint3
 	 && zend_is_smart_branch(CG(active_op_array)->opcodes + opnum - 1)) {
 		/* emit extra NOP to avoid incorrect SMART_BRANCH in very rare cases */
 		zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
-		opnum = get_next_op_number(CG(active_op_array));
+		opnum = get_next_op_number();
 	}
 	opline = zend_emit_op(NULL, opcode, cond, NULL);
 	opline->op2.opline_num = opnum_target;
@@ -2102,7 +2135,7 @@ static inline void zend_update_jump_target(uint32_t opnum_jump, uint32_t opnum_t
 
 static inline void zend_update_jump_target_to_next(uint32_t opnum_jump) /* {{{ */
 {
-	zend_update_jump_target(opnum_jump, get_next_op_number(CG(active_op_array)));
+	zend_update_jump_target(opnum_jump, get_next_op_number());
 }
 /* }}} */
 
@@ -2141,7 +2174,7 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 
 	ZEND_ASSERT(count >= offset);
 	for (i = offset; i < count; ++i) {
-		opline = get_next_op(CG(active_op_array));
+		opline = get_next_op();
 		memcpy(opline, &oplines[i], sizeof(zend_op));
 		zend_check_live_ranges(opline);
 	}
@@ -2197,7 +2230,7 @@ static void zend_emit_return_type_check(
 		opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
 		if (expr && expr->op_type == IS_CONST) {
 			opline->result_type = expr->op_type = IS_TMP_VAR;
-			opline->result.var = expr->u.op.var = get_temporary_variable(CG(active_op_array));
+			opline->result.var = expr->u.op.var = get_temporary_variable();
 		}
 		if (ZEND_TYPE_IS_CLASS(return_info->type)) {
 			opline->op2.num = CG(active_op_array)->cache_size;
@@ -2299,14 +2332,13 @@ static inline void zend_handle_numeric_dim(zend_op *opline, znode *dim_node) /* 
 			/* For numeric indexs we also keep the original value to use by ArrayAccess
 			 * See bug #63217
 			 */
-			int c = zend_add_literal(CG(active_op_array), &dim_node->u.constant);
+			int c = zend_add_literal(&dim_node->u.constant);
 			ZEND_ASSERT(opline->op2.constant + 1 == c);
 			ZVAL_LONG(CT_CONSTANT(opline->op2), index);
 			Z_EXTRA_P(CT_CONSTANT(opline->op2)) = ZEND_EXTRA_VALUE;
 			return;
 		}
 	}
-	Z_EXTRA_P(CT_CONSTANT(opline->op2)) = 0;
 }
 /* }}} */
 
@@ -2315,7 +2347,7 @@ static inline void zend_set_class_name_op1(zend_op *opline, znode *class_node) /
 	if (class_node->op_type == IS_CONST) {
 		opline->op1_type = IS_CONST;
 		opline->op1.constant = zend_add_class_name_literal(
-			CG(active_op_array), Z_STR(class_node->u.constant));
+			Z_STR(class_node->u.constant));
 	} else {
 		SET_NODE(opline->op1, class_node);
 	}
@@ -2395,7 +2427,7 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 		}
 
 		result->op_type = IS_CV;
-		result->u.op.var = lookup_cv(CG(active_op_array), name);
+		result->u.op.var = lookup_cv(name);
 
 		if (UNEXPECTED(Z_TYPE_P(zv) != IS_STRING)) {
 			zend_string_release_ex(name, 0);
@@ -2590,7 +2622,7 @@ zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, i
 	if (class_node.op_type == IS_CONST) {
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_class_name_literal(
-			CG(active_op_array), Z_STR(class_node.u.constant));
+			Z_STR(class_node.u.constant));
 		if (opline->op1_type != IS_CONST) {
 			opline->extended_value = zend_alloc_cache_slot();
 		}
@@ -3159,7 +3191,7 @@ ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc)
 void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
 {
 	zend_op *opline;
-	uint32_t opnum_init = get_next_op_number(CG(active_op_array)) - 1;
+	uint32_t opnum_init = get_next_op_number() - 1;
 	uint32_t arg_count;
 	uint32_t call_flags;
 
@@ -3197,11 +3229,11 @@ zend_bool zend_compile_function_name(znode *name_node, zend_ast *name_ast) /* {{
 
 void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
 {
-	zend_op *opline = get_next_op(CG(active_op_array));
+	zend_op *opline = get_next_op();
 	opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_ns_func_name_literal(
-		CG(active_op_array), Z_STR(name_node->u.constant));
+		Z_STR(name_node->u.constant));
 	opline->result.num = zend_alloc_cache_slot();
 
 	zend_compile_call_common(result, args_ast, NULL);
@@ -3216,22 +3248,22 @@ void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_a
 		if ((colon = zend_memrchr(ZSTR_VAL(str), ':', ZSTR_LEN(str))) != NULL && colon > ZSTR_VAL(str) && *(colon - 1) == ':') {
 			zend_string *class = zend_string_init(ZSTR_VAL(str), colon - ZSTR_VAL(str) - 1, 0);
 			zend_string *method = zend_string_init(colon + 1, ZSTR_LEN(str) - (colon - ZSTR_VAL(str)) - 1, 0);
-			zend_op *opline = get_next_op(CG(active_op_array));
+			zend_op *opline = get_next_op();
 
 			opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
 			opline->op1_type = IS_CONST;
-			opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), class);
+			opline->op1.constant = zend_add_class_name_literal(class);
 			opline->op2_type = IS_CONST;
-			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), method);
+			opline->op2.constant = zend_add_func_name_literal(method);
 			/* 2 slots, for class and method */
 			opline->result.num = zend_alloc_polymorphic_cache_slot();
 			zval_ptr_dtor(&name_node->u.constant);
 		} else {
-			zend_op *opline = get_next_op(CG(active_op_array));
+			zend_op *opline = get_next_op();
 
 			opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 			opline->op2_type = IS_CONST;
-			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), str);
+			opline->op2.constant = zend_add_func_name_literal(str);
 			opline->result.num = zend_alloc_cache_slot();
 		}
 	} else {
@@ -3345,7 +3377,7 @@ int zend_compile_func_defined(znode *result, zend_ast_list *args) /* {{{ */
 		zval c;
 		zend_string *lcname = zend_string_tolower(name);
 		ZVAL_NEW_STR(&c, lcname);
-		zend_add_literal(CG(active_op_array), &c);
+		zend_add_literal(&c);
 	}
 	return SUCCESS;
 }
@@ -3520,7 +3552,7 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 	if (EG(assertions) >= 0) {
 		znode name_node;
 		zend_op *opline;
-		uint32_t check_op_number = get_next_op_number(CG(active_op_array));
+		uint32_t check_op_number = get_next_op_number();
 
 		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
 
@@ -3533,8 +3565,7 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 		} else {
 			opline = zend_emit_op(NULL, ZEND_INIT_NS_FCALL_BY_NAME, NULL, NULL);
 			opline->op2_type = IS_CONST;
-			opline->op2.constant = zend_add_ns_func_name_literal(
-				CG(active_op_array), name);
+			opline->op2.constant = zend_add_ns_func_name_literal(name);
 		}
 		opline->result.num = zend_alloc_cache_slot();
 
@@ -3550,7 +3581,7 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 		zend_compile_call_common(result, (zend_ast*)args, fbc);
 
 		opline = &CG(active_op_array)->opcodes[check_op_number];
-		opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+		opline->op2.opline_num = get_next_op_number();
 		SET_NODE(opline->result, result);
 	} else {
 		if (!fbc) {
@@ -3728,6 +3759,22 @@ int zend_compile_func_get_args(znode *result, zend_ast_list *args) /* {{{ */
 }
 /* }}} */
 
+int zend_compile_func_array_key_exists(znode *result, zend_ast_list *args) /* {{{ */
+{
+	znode subject, needle;
+
+	if (args->children != 2) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&needle, args->child[0]);
+	zend_compile_expr(&subject, args->child[1]);
+
+	zend_emit_op_tmp(result, ZEND_ARRAY_KEY_EXISTS, &needle, &subject);
+	return SUCCESS;
+}
+/* }}} */
+
 int zend_compile_func_array_slice(znode *result, zend_ast_list *args) /* {{{ */
 {
 	if (CG(active_op_array)->function_name
@@ -3839,6 +3886,8 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_get_args(result, args);
 	} else if (zend_string_equals_literal(lcname, "array_slice")) {
 		return zend_compile_func_array_slice(result, args);
+	} else if (zend_string_equals_literal(lcname, "array_key_exists")) {
+		return zend_compile_func_array_key_exists(result, args);
 	} else {
 		return FAILURE;
 	}
@@ -3935,7 +3984,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 
 		opline->op2_type = IS_CONST;
-		opline->op2.constant = zend_add_func_name_literal(CG(active_op_array),
+		opline->op2.constant = zend_add_func_name_literal(
 			Z_STR(method_node.u.constant));
 		opline->result.num = zend_alloc_polymorphic_cache_slot();
 	} else {
@@ -3989,14 +4038,14 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 	}
 
-	opline = get_next_op(CG(active_op_array));
+	opline = get_next_op();
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
 
 	zend_set_class_name_op1(opline, &class_node);
 
 	if (method_node.op_type == IS_CONST) {
 		opline->op2_type = IS_CONST;
-		opline->op2.constant = zend_add_func_name_literal(CG(active_op_array),
+		opline->op2.constant = zend_add_func_name_literal(
 			Z_STR(method_node.u.constant));
 		opline->result.num = zend_alloc_polymorphic_cache_slot();
 	} else {
@@ -4025,6 +4074,17 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		if (ce) {
 			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op2) + 1);
 			fbc = zend_hash_find_ptr(&ce->function_table, lcname);
+			if (fbc && !(fbc->common.fn_flags & ZEND_ACC_PUBLIC)) {
+				if (ce != CG(active_class_entry)
+				 && ((fbc->common.fn_flags & ZEND_ACC_PRIVATE)
+				  || !(fbc->common.scope->ce_flags & ZEND_ACC_LINKED)
+				  || (CG(active_class_entry)
+				   && !(CG(active_class_entry)->ce_flags & ZEND_ACC_LINKED))
+				  || !zend_check_protected(zend_get_function_root_class(fbc), CG(active_class_entry)))) {
+					/* incompatibe function */
+					fbc = NULL;
+				}
+			}
 		}
 	}
 
@@ -4043,7 +4103,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	zend_op *opline;
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
-		uint32_t dcl_opnum = get_next_op_number(CG(active_op_array));
+		uint32_t dcl_opnum = get_next_op_number();
 		zend_compile_class_decl(class_ast, 0);
 		/* jump over anon class declaration */
 		opline = &CG(active_op_array)->opcodes[dcl_opnum];
@@ -4052,7 +4112,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		}
 		class_node.op_type = opline->result_type;
 		class_node.u.op.var = opline->result.var;
-		opline->extended_value = get_next_op_number(CG(active_op_array));
+		opline->extended_value = get_next_op_number();
 	} else {
 		zend_compile_class_ref_ex(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 	}
@@ -4062,7 +4122,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	if (class_node.op_type == IS_CONST) {
 		opline->op1_type = IS_CONST;
 		opline->op1.constant = zend_add_class_name_literal(
-			CG(active_op_array), Z_STR(class_node.u.constant));
+			Z_STR(class_node.u.constant));
 		opline->op2.num = zend_alloc_cache_slot();
 	} else {
 		SET_NODE(opline->op1, &class_node);
@@ -4140,7 +4200,7 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, uint3
 
 	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, NULL);
 	opline->op1_type = IS_CV;
-	opline->op1.var = lookup_cv(CG(active_op_array), var_name);
+	opline->op1.var = lookup_cv(var_name);
 	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | by_ref;
 }
 /* }}} */
@@ -4208,7 +4268,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value
 	base = zend_stack_base(&CG(loop_var_stack));
 	for (; loop_var >= base; loop_var--) {
 		if (loop_var->opcode == ZEND_FAST_CALL) {
-			zend_op *opline = get_next_op(CG(active_op_array));
+			zend_op *opline = get_next_op();
 
 			opline->opcode = ZEND_FAST_CALL;
 			opline->result_type = IS_TMP_VAR;
@@ -4218,7 +4278,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value
 			}
 			opline->op1.num = loop_var->u.try_catch_offset;
 		} else if (loop_var->opcode == ZEND_DISCARD_EXCEPTION) {
-			zend_op *opline = get_next_op(CG(active_op_array));
+			zend_op *opline = get_next_op();
 			opline->opcode = ZEND_DISCARD_EXCEPTION;
 			opline->op1_type = IS_TMP_VAR;
 			opline->op1.var = loop_var->var_num;
@@ -4234,7 +4294,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value
 			zend_op *opline;
 
 			ZEND_ASSERT(loop_var->var_type & (IS_VAR|IS_TMP_VAR));
-			opline = get_next_op(CG(active_op_array));
+			opline = get_next_op();
 			opline->opcode = loop_var->opcode;
 			opline->op1_type = loop_var->var_type;
 			opline->op1.var = loop_var->var_num;
@@ -4495,14 +4555,14 @@ void zend_compile_goto(zend_ast *ast) /* {{{ */
 	zend_ast *label_ast = ast->child[0];
 	znode label_node;
 	zend_op *opline;
-	uint32_t opnum_start = get_next_op_number(CG(active_op_array));
+	uint32_t opnum_start = get_next_op_number();
 
 	zend_compile_expr(&label_node, label_ast);
 
 	/* Label resolution and unwinding adjustments happen in pass two. */
 	zend_handle_loops_and_finally(NULL);
 	opline = zend_emit_op(NULL, ZEND_GOTO, NULL, &label_node);
-	opline->op1.num = get_next_op_number(CG(active_op_array)) - opnum_start - 1;
+	opline->op1.num = get_next_op_number() - opnum_start - 1;
 	opline->extended_value = CG(context).current_brk_cont;
 }
 /* }}} */
@@ -4518,7 +4578,7 @@ void zend_compile_label(zend_ast *ast) /* {{{ */
 	}
 
 	dest.brk_cont = CG(context).current_brk_cont;
-	dest.opline_num = get_next_op_number(CG(active_op_array));
+	dest.opline_num = get_next_op_number();
 
 	if (!zend_hash_add_mem(CG(context).labels, label, &dest, sizeof(zend_label))) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Label '%s' already defined", ZSTR_VAL(label));
@@ -4537,10 +4597,10 @@ void zend_compile_while(zend_ast *ast) /* {{{ */
 
 	zend_begin_loop(ZEND_NOP, NULL, 0);
 
-	opnum_start = get_next_op_number(CG(active_op_array));
+	opnum_start = get_next_op_number();
 	zend_compile_stmt(stmt_ast);
 
-	opnum_cond = get_next_op_number(CG(active_op_array));
+	opnum_cond = get_next_op_number();
 	zend_update_jump_target(opnum_jmp, opnum_cond);
 	zend_compile_expr(&cond_node, cond_ast);
 
@@ -4560,10 +4620,10 @@ void zend_compile_do_while(zend_ast *ast) /* {{{ */
 
 	zend_begin_loop(ZEND_NOP, NULL, 0);
 
-	opnum_start = get_next_op_number(CG(active_op_array));
+	opnum_start = get_next_op_number();
 	zend_compile_stmt(stmt_ast);
 
-	opnum_cond = get_next_op_number(CG(active_op_array));
+	opnum_cond = get_next_op_number();
 	zend_compile_expr(&cond_node, cond_ast);
 
 	zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, opnum_start);
@@ -4611,10 +4671,10 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 
 	zend_begin_loop(ZEND_NOP, NULL, 0);
 
-	opnum_start = get_next_op_number(CG(active_op_array));
+	opnum_start = get_next_op_number();
 	zend_compile_stmt(stmt_ast);
 
-	opnum_loop = get_next_op_number(CG(active_op_array));
+	opnum_loop = get_next_op_number();
 	zend_compile_expr_list(&result, loop_ast);
 	zend_do_free(&result);
 
@@ -4669,12 +4729,12 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		zend_separate_if_call_and_write(&expr_node, expr_ast, BP_VAR_W);
 	}
 
-	opnum_reset = get_next_op_number(CG(active_op_array));
+	opnum_reset = get_next_op_number();
 	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
 	zend_begin_loop(ZEND_FE_FREE, &reset_node, 0);
 
-	opnum_fetch = get_next_op_number(CG(active_op_array));
+	opnum_fetch = get_next_op_number();
 	opline = zend_emit_op(NULL, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
 
 	if (is_this_fetch(value_ast)) {
@@ -4684,7 +4744,7 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		SET_NODE(opline->op2, &value_node);
 	} else {
 		opline->op2_type = IS_VAR;
-		opline->op2.var = get_temporary_variable(CG(active_op_array));
+		opline->op2.var = get_temporary_variable();
 		GET_NODE(&value_node, opline->op2);
 		if (value_ast->kind == ZEND_AST_ARRAY) {
 			zend_compile_list_assign(NULL, value_ast, &value_node, value_ast->attr);
@@ -4710,10 +4770,10 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	zend_emit_jump(opnum_fetch);
 
 	opline = &CG(active_op_array)->opcodes[opnum_reset];
-	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+	opline->op2.opline_num = get_next_op_number();
 
 	opline = &CG(active_op_array)->opcodes[opnum_fetch];
-	opline->extended_value = get_next_op_number(CG(active_op_array));
+	opline->extended_value = get_next_op_number();
 
 	zend_end_loop(opnum_fetch, &reset_node);
 
@@ -4834,7 +4894,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	zend_begin_loop(ZEND_FREE, &expr_node, 1);
 
 	case_node.op_type = IS_TMP_VAR;
-	case_node.u.op.var = get_temporary_variable(CG(active_op_array));
+	case_node.u.op.var = get_temporary_variable();
 
 	jumptable_type = determine_switch_jumptable_type(cases);
 	if (jumptable_type != IS_UNDEF && should_use_jumptable(cases, jumptable_type)) {
@@ -4904,7 +4964,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 			if (jumptable) {
 				zval *cond_zv = zend_ast_get_zval(cond_ast);
 				zval jmp_target;
-				ZVAL_LONG(&jmp_target, get_next_op_number(CG(active_op_array)));
+				ZVAL_LONG(&jmp_target, get_next_op_number());
 
 				ZEND_ASSERT(Z_TYPE_P(cond_zv) == jumptable_type);
 				if (Z_TYPE_P(cond_zv) == IS_LONG) {
@@ -4919,7 +4979,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 			if (jumptable) {
 				opline = &CG(active_op_array)->opcodes[opnum_switch];
-				opline->extended_value = get_next_op_number(CG(active_op_array));
+				opline->extended_value = get_next_op_number();
 			}
 		}
 
@@ -4931,15 +4991,15 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 		if (jumptable) {
 			opline = &CG(active_op_array)->opcodes[opnum_switch];
-			opline->extended_value = get_next_op_number(CG(active_op_array));
+			opline->extended_value = get_next_op_number();
 		}
 	}
 
-	zend_end_loop(get_next_op_number(CG(active_op_array)), &expr_node);
+	zend_end_loop(get_next_op_number(), &expr_node);
 
 	if (expr_node.op_type & (IS_VAR|IS_TMP_VAR)) {
 		/* don't use emit_op() to prevent automatic live-range construction */
-		opline = get_next_op(CG(active_op_array));
+		opline = get_next_op();
 		opline->opcode = ZEND_FREE;
 		SET_NODE(opline->op1, &expr_node);
 	} else if (expr_node.op_type == IS_CONST) {
@@ -4971,21 +5031,21 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 	if (CG(context).labels) {
 		zend_label *label;
 		ZEND_HASH_REVERSE_FOREACH_PTR(CG(context).labels, label) {
-			if (label->opline_num == get_next_op_number(CG(active_op_array))) {
+			if (label->opline_num == get_next_op_number()) {
 				zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
 			}
 			break;
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	try_catch_offset = zend_add_try_element(get_next_op_number(CG(active_op_array)));
+	try_catch_offset = zend_add_try_element(get_next_op_number());
 
 	if (finally_ast) {
 		zend_loop_var fast_call;
 		if (!(CG(active_op_array)->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
 			CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_FINALLY_BLOCK;
 		}
-		CG(context).fast_call_var = get_temporary_variable(CG(active_op_array));
+		CG(context).fast_call_var = get_temporary_variable();
 
 		/* Push FAST_CALL on unwind stack */
 		fast_call.opcode = ZEND_FAST_CALL;
@@ -5025,15 +5085,15 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "Bad class name in the catch statement");
 			}
 
-			opnum_catch = get_next_op_number(CG(active_op_array));
+			opnum_catch = get_next_op_number();
 			if (i == 0 && j == 0) {
 				CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = opnum_catch;
 			}
 
-			opline = get_next_op(CG(active_op_array));
+			opline = get_next_op();
 			opline->opcode = ZEND_CATCH;
 			opline->op1_type = IS_CONST;
-			opline->op1.constant = zend_add_class_name_literal(CG(active_op_array),
+			opline->op1.constant = zend_add_class_name_literal(
 					zend_resolve_class_name_ast(class_ast));
 			opline->extended_value = zend_alloc_cache_slot();
 
@@ -5042,7 +5102,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 			}
 
 			opline->result_type = IS_CV;
-			opline->result.var = lookup_cv(CG(active_op_array), var_name);
+			opline->result.var = lookup_cv(var_name);
 
 			if (is_last_catch && is_last_class) {
 				opline->extended_value |= ZEND_LAST_CATCH;
@@ -5051,7 +5111,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 			if (!is_last_class) {
 				jmp_multicatch[j] = zend_emit_jump(0);
 				opline = &CG(active_op_array)->opcodes[opnum_catch];
-				opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+				opline->op2.opline_num = get_next_op_number();
 			}
 		}
 
@@ -5069,7 +5129,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 		opline = &CG(active_op_array)->opcodes[opnum_catch];
 		if (!is_last_catch) {
-			opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+			opline->op2.opline_num = get_next_op_number();
 		}
 	}
 
@@ -5079,7 +5139,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 	if (finally_ast) {
 		zend_loop_var discard_exception;
-		uint32_t opnum_jmp = get_next_op_number(CG(active_op_array)) + 1;
+		uint32_t opnum_jmp = get_next_op_number() + 1;
 
 		/* Pop FAST_CALL from unwind stack */
 		zend_stack_del_top(&CG(loop_var_stack));
@@ -5103,7 +5163,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = opnum_jmp + 1;
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_end
-			= get_next_op_number(CG(active_op_array));
+			= get_next_op_number();
 
 		opline = zend_emit_op(NULL, ZEND_FAST_RET, NULL, NULL);
 		opline->op1_type = IS_TMP_VAR;
@@ -5382,7 +5442,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		}
 
 		var_node.op_type = IS_CV;
-		var_node.u.op.var = lookup_cv(CG(active_op_array), name);
+		var_node.u.op.var = lookup_cv(name);
 
 		if (EX_VAR_TO_NUM(var_node.u.op.var) != i) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of parameter $%s",
@@ -5562,7 +5622,7 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 
 		opline = zend_emit_op(NULL, ZEND_BIND_LEXICAL, closure, NULL);
 		opline->op2_type = IS_CV;
-		opline->op2.var = lookup_cv(CG(active_op_array), var_name);
+		opline->op2.var = lookup_cv(var_name);
 		opline->extended_value = (uint32_t)((char*)value - (char*)op_array->static_variables->arData) | by_ref;
 	}
 }
@@ -5823,12 +5883,12 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		opline->op1_type = IS_CONST;
 		LITERAL_STR(opline->op1, key);
 	} else {
-		opline = get_next_op(CG(active_op_array));
+		opline = get_next_op();
 		opline->opcode = ZEND_DECLARE_FUNCTION;
 		opline->op1_type = IS_CONST;
 		LITERAL_STR(opline->op1, zend_string_copy(lcname));
 		/* RTD key is placed after lcname literal in op1 */
-		zend_add_literal_string(CG(active_op_array), &key);
+		zend_add_literal_string(&key);
 	}
 	zend_string_release_ex(lcname, 0);
 }
@@ -6341,18 +6401,18 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		}
 	}
 
-	opline = get_next_op(CG(active_op_array));
+	opline = get_next_op();
 
 	opline->op1_type = IS_CONST;
 	LITERAL_STR(opline->op1, lcname);
 
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
 		opline->result_type = IS_VAR;
-		opline->result.var = get_temporary_variable(CG(active_op_array));
+		opline->result.var = get_temporary_variable();
 		if (extends_ast) {
 			opline->opcode = ZEND_DECLARE_ANON_INHERITED_CLASS;
 			opline->op2_type = IS_CONST;
-			opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), zend_string_copy(ce->parent_name));
+			opline->op2.constant = zend_add_class_name_literal(zend_string_copy(ce->parent_name));
 		} else {
 			opline->opcode = ZEND_DECLARE_ANON_CLASS;
 		}
@@ -6368,7 +6428,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
 
 		/* RTD key is placed after lcname literal in op1 */
-		zend_add_literal_string(CG(active_op_array), &key);
+		zend_add_literal_string(&key);
 		zend_hash_update_ptr(CG(class_table), key, ce);
 
 		if (extends_ast) {
@@ -6384,7 +6444,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
 			}
 			opline->op2_type = IS_CONST;
-			opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), zend_string_copy(ce->parent_name));
+			opline->op2.constant = zend_add_class_name_literal(zend_string_copy(ce->parent_name));
 		} else {
 			opline->opcode = ZEND_DECLARE_CLASS;
 		}
@@ -7102,14 +7162,14 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	opnum_jmpz = get_next_op_number(CG(active_op_array));
+	opnum_jmpz = get_next_op_number();
 	opline_jmpz = zend_emit_op(NULL, ast->kind == ZEND_AST_AND ? ZEND_JMPZ_EX : ZEND_JMPNZ_EX,
 		&left_node, NULL);
 
 	if (left_node.op_type == IS_TMP_VAR) {
 		SET_NODE(opline_jmpz->result, &left_node);
 	} else {
-		opline_jmpz->result.var = get_temporary_variable(CG(active_op_array));
+		opline_jmpz->result.var = get_temporary_variable();
 		opline_jmpz->result_type = IS_TMP_VAR;
 	}
 
@@ -7192,7 +7252,7 @@ static void zend_compile_shorthand_conditional(znode *result, zend_ast *ast) /* 
 
 	zend_compile_expr(&cond_node, cond_ast);
 
-	opnum_jmp_set = get_next_op_number(CG(active_op_array));
+	opnum_jmp_set = get_next_op_number();
 	zend_emit_op_tmp(result, ZEND_JMP_SET, &cond_node, NULL);
 
 	zend_compile_expr(&false_node, false_ast);
@@ -7251,7 +7311,7 @@ void zend_compile_coalesce(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_var(&expr_node, expr_ast, BP_VAR_IS);
 
-	opnum = get_next_op_number(CG(active_op_array));
+	opnum = get_next_op_number();
 	zend_emit_op_tmp(result, ZEND_COALESCE, &expr_node, NULL);
 
 	zend_compile_expr(&default_node, default_ast);
@@ -7260,7 +7320,7 @@ void zend_compile_coalesce(znode *result, zend_ast *ast) /* {{{ */
 	SET_NODE(opline->result, result);
 
 	opline = &CG(active_op_array)->opcodes[opnum];
-	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+	opline->op2.opline_num = get_next_op_number();
 }
 /* }}} */
 
@@ -7372,7 +7432,7 @@ void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 	if (class_node.op_type == IS_CONST) {
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_class_name_literal(
-			CG(active_op_array), Z_STR(class_node.u.constant));
+			Z_STR(class_node.u.constant));
 		opline->extended_value = zend_alloc_cache_slot();
 	} else {
 		SET_NODE(opline->op2, &class_node);
@@ -7457,7 +7517,7 @@ void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 	znode silence_node;
 	uint32_t range;
 
-	range = zend_start_live_range(CG(active_op_array), get_next_op_number(CG(active_op_array)));
+	range = zend_start_live_range(get_next_op_number());
 	zend_emit_op_tmp(&silence_node, ZEND_BEGIN_SILENCE, NULL, NULL);
 
 	if (expr_ast->kind == ZEND_AST_VAR) {
@@ -7470,7 +7530,7 @@ void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 
 	/* Store BEGIN_SILENCE/END_SILENCE pair to restore previous
 	 * EG(error_reporting) value on exception */
-	zend_end_live_range(CG(active_op_array), range, get_next_op_number(CG(active_op_array)),
+	zend_end_live_range(range, get_next_op_number(),
 		ZEND_LIVE_SILENCE, silence_node.u.op.var);
 
 	zend_emit_op(NULL, ZEND_END_SILENCE, &silence_node, NULL);
@@ -7538,7 +7598,7 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		}
 
 		if (i == 0) {
-			opnum_init = get_next_op_number(CG(active_op_array));
+			opnum_init = get_next_op_number();
 			opline = zend_emit_op_tmp(result, ZEND_INIT_ARRAY, &value_node, key_node_ptr);
 			opline->extended_value = list->children << ZEND_ARRAY_SIZE_SHIFT;
 		} else {
@@ -7598,16 +7658,16 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 
 	if (is_fully_qualified) {
 		opline->op2.constant = zend_add_const_name_literal(
-			CG(active_op_array), resolved_name, 0);
+			resolved_name, 0);
 	} else {
 		opline->op1.num = IS_CONSTANT_UNQUALIFIED;
 		if (FC(current_namespace)) {
 			opline->op1.num |= IS_CONSTANT_IN_NAMESPACE;
 			opline->op2.constant = zend_add_const_name_literal(
-				CG(active_op_array), resolved_name, 1);
+				resolved_name, 1);
 		} else {
 			opline->op2.constant = zend_add_const_name_literal(
-				CG(active_op_array), resolved_name, 0);
+				resolved_name, 0);
 		}
 	}
 	opline->extended_value = zend_alloc_cache_slot();
@@ -7700,7 +7760,7 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 
 static zend_op *zend_compile_rope_add(znode *result, uint32_t num, znode *elem_node) /* {{{ */
 {
-	zend_op *opline = get_next_op(CG(active_op_array));
+	zend_op *opline = get_next_op();
 
 	if (num == 0) {
 		result->op_type = IS_TMP_VAR;
@@ -7747,7 +7807,7 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 			continue;
 		} else {
 			if (j == 0) {
-				rope_init_lineno = get_next_op_number(CG(active_op_array));
+				rope_init_lineno = get_next_op_number();
 			}
 			if (last_const_node.op_type == IS_CONST) {
 				zend_compile_rope_add(result, j++, &last_const_node);
@@ -7780,7 +7840,7 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 			opline->op1_type = opline->op2_type;
 			opline->op1 = opline->op2;
 			opline->result_type = IS_TMP_VAR;
-			opline->result.var = get_temporary_variable(CG(active_op_array));
+			opline->result.var = get_temporary_variable();
 			SET_UNUSED(opline->op2);
 			GET_NODE(result, opline->result);
 		}
@@ -7790,27 +7850,27 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		opline->op1_type = init_opline->op2_type;
 		opline->op1 = init_opline->op2;
 		opline->result_type = IS_TMP_VAR;
-		opline->result.var = get_temporary_variable(CG(active_op_array));
+		opline->result.var = get_temporary_variable();
 		MAKE_NOP(init_opline);
 		GET_NODE(result, opline->result);
 	} else {
 		uint32_t var;
-		uint32_t range = zend_start_live_range(CG(active_op_array), rope_init_lineno);
+		uint32_t range = zend_start_live_range(rope_init_lineno);
 
 		init_opline->extended_value = j;
 		opline->opcode = ZEND_ROPE_END;
-		opline->result.var = get_temporary_variable(CG(active_op_array));
-		var = opline->op1.var = get_temporary_variable(CG(active_op_array));
+		opline->result.var = get_temporary_variable();
+		var = opline->op1.var = get_temporary_variable();
 		GET_NODE(result, opline->result);
 
 		/* Allocates the necessary number of zval slots to keep the rope */
 		i = ((j * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
 		while (i > 1) {
-			get_temporary_variable(CG(active_op_array));
+			get_temporary_variable();
 			i--;
 		}
 
-		zend_end_live_range(CG(active_op_array), range, opline - CG(active_op_array)->opcodes,
+		zend_end_live_range(range, opline - CG(active_op_array)->opcodes,
 			ZEND_LIVE_ROPE, var);
 
 		/* Update all the previous opcodes to use the same variable */

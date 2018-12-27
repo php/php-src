@@ -1,5 +1,5 @@
 --TEST--
-oci_set_db_operation: basic test for end-to-end tracing
+oci_set_db_operation: test DBOP for end-to-end tracing
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
@@ -35,34 +35,45 @@ function dq($c, $q)
 
 echo "Test 1\n";
 oci_set_db_operation($c, "db_op_2_a");
-dq($c, 'select * from dual');
+dq($c, 'select /*+ MONITOR */ * from dual');
+
+oci_set_db_operation($c, "db_op_2_b");
+dq($c, 'select /*+ MONITOR */ * from dual');
+
+dq($c, 'select dbop_name from v$sql_monitor where dbop_name like \'db_op_2%\' order by dbop_exec_id desc');
 
 echo "Test 2\n";
-oci_set_db_operation($c, "db_op_2_b");
-dq($c, 'select * from dual');
+oci_set_db_operation($c, "");
+dq($c, 'select /*+ MONITOR */ \'dboptest\' from dual');
 
-echo "Test 3\n";
-dq($c, 'select dbop_name from v$sql_monitor where dbop_name like \'db_op2%\' order by dbop_exec_id desc');
+dq($c, 'select sql_text, dbop_name from v$sql_monitor where sql_text like \'%dboptest%\' order by dbop_exec_id desc');
 
 ?>
 ===DONE===
 <?php exit(0); ?>
---XFAIL--
-Fails due to Oracle Bug 16695981
 --EXPECT--
 Test 1
 array(1) {
   ["DUMMY"]=>
   string(1) "X"
 }
-Test 2
 array(1) {
   ["DUMMY"]=>
   string(1) "X"
 }
-Test 3
-array(2) {
+array(1) {
   ["DBOP_NAME"]=>
-  string(7) "db_op_2a"
+  string(9) "db_op_2_b"
+}
+Test 2
+array(1) {
+  ["'DBOPTEST'"]=>
+  string(8) "dboptest"
+}
+array(2) {
+  ["SQL_TEXT"]=>
+  string(42) "select /*+ MONITOR */ 'dboptest' from dual"
+  ["DBOP_NAME"]=>
+  NULL
 }
 ===DONE===

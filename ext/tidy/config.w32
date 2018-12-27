@@ -3,7 +3,9 @@
 ARG_WITH("tidy", "TIDY support", "no");
 
 if (PHP_TIDY != "no") {
-	if (CHECK_LIB("libtidy_a.lib;libtidy.lib;tidy_a.lib;tidy.lib", "tidy", PHP_TIDY) &&
+	var tidy_static = false;
+	if ((CHECK_LIB("libtidy_a.lib;tidy_a.lib", "tidy", PHP_TIDY) && (tidy_static = true) ||
+		CHECK_LIB("libtidy.lib;tidy.lib", "tidy", PHP_TIDY)) &&
 			(
 				CHECK_HEADER_ADD_INCLUDE("tidy.h", "CFLAGS_TIDY") ||
 				CHECK_HEADER_ADD_INCLUDE("tidy/tidy.h", "CFLAGS_TIDY", null, null, true) ||
@@ -23,6 +25,10 @@ if (PHP_TIDY != "no") {
 		if (!PHP_TIDY_SHARED) {
 			ADD_DEF_FILE("ext\\tidy\\php_tidy.def");
 		}
+		if (tidy_static) {
+			ADD_FLAG("CFLAGS_TIDY", "/DTIDY_STATIC=1");
+		}
+
 	} else {
 		WARNING("tidy not enabled; libraries and headers not found");
 	}

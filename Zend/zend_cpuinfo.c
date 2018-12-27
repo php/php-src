@@ -36,11 +36,23 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 }
 # else
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
+#if defined(__i386__) && (defined(__pic__) || defined(__PIC__))
+	/* PIC on i386 uses %ebx, so preserve it. */
+	__asm__ __volatile__ (
+		"pushl  %%ebx\n"
+		"cpuid\n"
+		"mov    %%ebx,%1\n"
+		"popl   %%ebx"
+		: "=a"(cpuinfo->eax), "=r"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
+		: "a"(func), "c"(subfunc)
+	);
+#else
 	__asm__ __volatile__ (
 		"cpuid"
 		: "=a"(cpuinfo->eax), "=b"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
 		: "a"(func), "c"(subfunc)
 	);
+#endif
 }
 # endif
 #elif defined(ZEND_WIN32) && !defined(__clang__)

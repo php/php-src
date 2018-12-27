@@ -329,39 +329,41 @@ PHP_FUNCTION(hash_hmac_file)
 }
 /* }}} */
 
-static void php_hashcontext_ctor(INTERNAL_FUNCTION_PARAMETERS, zval *objval) {
+/* {{{ proto HashContext hash_init(string algo[, int options, string key])
+Initialize a hashing context */
+PHP_FUNCTION(hash_init)
+{
 	zend_string *algo, *key = NULL;
 	zend_long options = 0;
 	int argc = ZEND_NUM_ARGS();
 	void *context;
 	const php_hash_ops *ops;
-	php_hashcontext_object *hash = php_hashcontext_from_object(Z_OBJ_P(objval));
+	php_hashcontext_object *hash;
 
 	if (zend_parse_parameters(argc, "S|lS", &algo, &options, &key) == FAILURE) {
-		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 
 	if (options & PHP_HASH_HMAC) {
 		if (!ops->is_crypto) {
 			php_error_docref(NULL, E_WARNING, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
 			php_error_docref(NULL, E_WARNING, "HMAC requested without a key");
-			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 	}
+
+	object_init_ex(return_value, php_hashcontext_ce);
+	hash = php_hashcontext_from_object(Z_OBJ_P(return_value));
 
 	context = emalloc(ops->context_size);
 	ops->hash_init(context);
@@ -395,14 +397,6 @@ static void php_hashcontext_ctor(INTERNAL_FUNCTION_PARAMETERS, zval *objval) {
 		ops->hash_update(context, (unsigned char *) K, ops->block_size);
 		hash->key = (unsigned char *) K;
 	}
-}
-
-/* {{{ proto HashContext hash_init(string algo[, int options, string key])
-Initialize a hashing context */
-PHP_FUNCTION(hash_init)
-{
-	object_init_ex(return_value, php_hashcontext_ce);
-	php_hashcontext_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, return_value);
 }
 /* }}} */
 

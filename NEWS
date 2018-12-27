@@ -2,12 +2,19 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0alpha1
 
+- Core:
+  . Implemented request #76148 (Add array_key_exists() to the list of
+    specially compiled functions). (Majkl578)
+
 - CURL:
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
     (Pierrick)
 
 - Date:
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
+
+- FPM:
+  . Implemented FR #72510 (systemd service should be hardened). (Craig Andrews)
 
 - GD:
   . Fixed bug #73291 (imagecropauto() $threshold differs from external libgd).
@@ -16,6 +23,8 @@ PHP                                                                        NEWS
     pkg-config). (Eli Schwartz)
   . The bundled libgd behaves now like system libgd wrt. IMG_CROP_DEFAULT never
     falling back to IMG_CROP_SIDES.
+  . The default $mode parameter of imagecropauto() has been changed to
+    IMG_CROP_DEFAULT; passing -1 is now deprecated.
 
 - Hash:
   . The hash extension is now an integral part of PHP and cannot be disabled
@@ -48,10 +57,13 @@ PHP                                                                        NEWS
   . Lifted requirements to SQLite 3.7.4. (cmb)
   . Forbid (un)serialization of SQLite3, SQLite3Stmt and SQLite3Result. (cmb)
   . Added support for the SQLite @name notation. (cmb, BohwaZ)
+  . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. (Bohwaz)
 
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with
     stream_socket_client). (Ville Hukkamäki)
+  . Implemented FR #38301 (field enclosure behavior in fputcsv). (cmb)
+  . Implemented FR #51496 (fgetcsv should take empty string as an escape). (cmb)
 
 - Reflection:
   . Fixed bug #76737 (Unserialized reflection objects are broken, they

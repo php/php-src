@@ -71,14 +71,6 @@ static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage) /* {{
 }
 /* }}} */
 
-static int zend_restore_ini_entry_wrapper(zval *el) /* {{{ */
-{
-	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
-	zend_restore_ini_entry_cb(ini_entry, ZEND_INI_STAGE_DEACTIVATE);
-	return 1;
-}
-/* }}} */
-
 static void free_ini_entry(zval *zv) /* {{{ */
 {
 	zend_ini_entry *entry = (zend_ini_entry*)Z_PTR_P(zv);
@@ -134,7 +126,11 @@ ZEND_API int zend_ini_global_shutdown(void) /* {{{ */
 ZEND_API int zend_ini_deactivate(void) /* {{{ */
 {
 	if (EG(modified_ini_directives)) {
-		zend_hash_apply(EG(modified_ini_directives), zend_restore_ini_entry_wrapper);
+		zend_ini_entry *ini_entry;
+
+		ZEND_HASH_FOREACH_PTR(EG(modified_ini_directives), ini_entry) {
+			zend_restore_ini_entry_cb(ini_entry, ZEND_INI_STAGE_DEACTIVATE);
+		} ZEND_HASH_FOREACH_END();
 		zend_hash_destroy(EG(modified_ini_directives));
 		FREE_HASHTABLE(EG(modified_ini_directives));
 		EG(modified_ini_directives) = NULL;
@@ -277,21 +273,15 @@ ZEND_API void zend_unregister_ini_entries(int module_number) /* {{{ */
 /* }}} */
 
 #ifdef ZTS
-static int zend_ini_refresh_cache(zval *el, void *arg) /* {{{ */
-{
-	zend_ini_entry *p = (zend_ini_entry *)Z_PTR_P(el);
-	int stage = (int)(zend_intptr_t)arg;
-
-	if (p->on_modify) {
-		p->on_modify(p, p->value, p->mh_arg1, p->mh_arg2, p->mh_arg3, stage);
-	}
-	return 0;
-}
-/* }}} */
-
 ZEND_API void zend_ini_refresh_caches(int stage) /* {{{ */
 {
-	zend_hash_apply_with_argument(EG(ini_directives), zend_ini_refresh_cache, (void *)(zend_intptr_t) stage);
+	zend_ini_entry *p;
+
+	ZEND_HASH_FOREACH_PTR(EG(ini_directives), p) {
+		if (p->on_modify) {
+			p->on_modify(p, p->value, p->mh_arg1, p->mh_arg2, p->mh_arg3, stage);
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 #endif

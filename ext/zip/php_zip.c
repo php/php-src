@@ -654,10 +654,10 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 	if (files_cnt > 0) {
 		pcre2_code *re = NULL;
 		pcre2_match_data *match_data = NULL;
-		uint32_t preg_options = 0, i, capture_count;
+		uint32_t i, capture_count;
 		int rc;
 
-		re = pcre_get_compiled_regex(regexp, &capture_count, &preg_options);
+		re = pcre_get_compiled_regex(regexp, &capture_count);
 		if (!re) {
 			php_error_docref(NULL, E_WARNING, "Invalid expression");
 			return -1;
@@ -703,7 +703,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 				zend_string_release_ex(namelist[i], 0);
 				continue;
 			}
-			rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, preg_options, match_data, mctx);
+			rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, 0, match_data, mctx);
 			php_pcre_free_match_data(match_data);
 			/* 0 means that the vector is too small to hold all the captured substring offsets */
 			if (rc < 0) {

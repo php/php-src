@@ -123,7 +123,7 @@ struct _ttinfo
 
 struct _tlinfo
 {
-	int32_t  trans;
+	int64_t  trans;
 	int32_t  offset;
 };
 

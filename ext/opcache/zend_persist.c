@@ -940,10 +940,8 @@ static void zend_persist_class_entry(zval *zv)
 //	return 0;
 //}
 
-static int zend_update_parent_ce(zval *zv)
+static void zend_update_parent_ce(zend_class_entry *ce)
 {
-	zend_class_entry *ce = Z_PTR_P(zv);
-
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
 		if (ce->parent) {
 			int i, end;
@@ -1078,14 +1076,16 @@ static int zend_update_parent_ce(zval *zv)
 			ce->__debugInfo = tmp;
 		}
 	}
-//	zend_hash_apply(&ce->properties_info, (apply_func_t) zend_update_property_info_ce);
-	return 0;
 }
 
 static void zend_accel_persist_class_table(HashTable *class_table)
 {
+	zend_class_entry *ce;
+
     zend_hash_persist(class_table, zend_persist_class_entry);
-	zend_hash_apply(class_table, (apply_func_t) zend_update_parent_ce);
+    ZEND_HASH_FOREACH_PTR(class_table, ce) {
+		zend_update_parent_ce(ce);
+	} ZEND_HASH_FOREACH_END();
 }
 
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, const char **key, unsigned int key_length, int for_shm)
