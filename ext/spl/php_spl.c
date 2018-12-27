@@ -335,7 +335,7 @@ PHP_FUNCTION(spl_autoload)
 		pos = pos1 ? pos1 + 1 : NULL;
 		pos_len = pos1? pos_len - pos1_len - 1 : 0;
 	}
-	zend_string_free(lc_name);
+	zend_string_release(lc_name);
 } /* }}} */
 
 /* {{{ proto string spl_autoload_extensions([string file_extensions])
