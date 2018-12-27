@@ -937,7 +937,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim, zval *value, zval *result)
 {
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
-
+		ZVAL_DEREF(value);
 		if (UNEXPECTED(!Z_OBJ_HT_P(object_ptr)->write_dimension)) {
 			zend_throw_error(NULL, "Cannot use object as array");
 		} else {
