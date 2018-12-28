@@ -2291,58 +2291,57 @@ PHP_FUNCTION(mb_output_handler)
 /* {{{ proto array mb_str_split(string str [, int split_length])
  Convert a multibyte string to an array. If split_length is specified,
  break the string down into chunks each split_length characters long. */
-PHP_FUNCTION(mb_str_split){
-	zend_string *str;
-	zend_long split_length = 1;
-	const unsigned char *p, *last; //string pointers
+PHP_FUNCTION(mb_str_split)
+{
+	char *p;
+	zend_string *str, *encoding = NULL;
+	size_t mblen, offset = 0;
+	size_t str_len;
+	mbfl_string string, result, *ret;
+	zend_long split_len = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-	Z_PARAM_STR(str)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_LONG(split_length)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(split_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (split_length <= 0) {
+	if (split_len <= 0) {
 		php_error_docref(NULL, E_WARNING, "The length of each segment must be greater than zero");
 		RETURN_FALSE;
 	}
 
-	if (0 == ZSTR_LEN(str) || (size_t)split_length >= ZSTR_LEN(str)) {
-		array_init_size(return_value, 1);
-		add_next_index_stringl(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
-		return;
-	}
-
-	//minimum array size is string length / 4 bytes / split_length
-	array_init_size(return_value, (ZSTR_LEN(str) >> 2) / (size_t)split_length);
-
-
-	//MACROS to create precount array
-	#define B4(n) n,n,n,n
-	#define B8(n) B4(n),B4(n)
-	#define B16(n) B8(n),B8(n)
-	#define B32(n) B16(n),B16(n)
-	#define B64(n) B32(n),B32(n)
-
-	unsigned char byte[256] = {B64(1),B64(1),B64(2),B32(2),B16(3),B8(4),B8(0)};
-
+	str_len = ZSTR_LEN(str);
 	p = ZSTR_VAL(str);
-	last = p + ZSTR_LEN(str);
 
-	while (p < last) {
-		const unsigned char *chunk_p = p;
-		uint32_t chunk_length = 0;
-		for(uint32_t char_count = 0; char_count < split_length; ++char_count) {
-			/* 1 byte max 0b01111111 (127)
-			 * 2 byte max 0b11011111 (223)
-			 * 3 byte max 0b11101111 (239)
-			 * 4 byte max ob11110111 (247) */
-			chunk_length += byte[*p];
-			p += byte[*p];
-		}
-		add_next_index_stringl(return_value, chunk_p, chunk_length);
+
+	string.no_language = MBSTRG(language);
+	string.encoding = php_mb_get_encoding(encoding);
+	if (!string.encoding) {
+		RETURN_FALSE;
 	}
-	return;
+
+
+	string.val = (unsigned char *)p;
+	string.len = str_len;
+
+	/* mb length */
+	mblen = mbfl_strlen(&string);
+
+	//init array
+	array_init_size(return_value, mblen / split_len);
+
+	//split string
+	while(offset < mblen){
+		ret = mbfl_substr(&string, &result, offset, split_len);
+
+		add_next_index_stringl(return_value, (char *)ret->val, ret->len);
+
+		efree(ret->val);
+		offset += split_len;
+	}
+
+
 }
 /* }}} */
 
