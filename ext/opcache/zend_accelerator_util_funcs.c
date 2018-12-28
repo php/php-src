@@ -143,7 +143,7 @@ static void zend_hash_clone_constants(HashTable *ht)
 	Bucket *p, *end;
 	zend_class_constant *c;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		return;
 	}
 
@@ -174,7 +174,7 @@ static void zend_hash_clone_methods(HashTable *ht)
 
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		return;
 	}
 
@@ -212,7 +212,7 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 	Bucket *p, *end;
 	zend_property_info *prop_info;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		return;
 	}
 

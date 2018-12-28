@@ -60,7 +60,7 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 	uint32_t idx;
 	Bucket *p;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED) || ht->nNumUsed == 0) {
+	if ((HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) || ht->nNumUsed == 0) {
 		return;
 	}
 

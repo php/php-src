@@ -12,6 +12,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   i. php_fgetcsv() and php_fputcsv()
   j. Removed add_get_assoc_*() and add_get_index_*()
   k. Class declaration opcodes
+  l. HASH_FLAG_INITIALIZED
 
 2. Build system changes
   a. Abstract
@@ -152,6 +153,10 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      about interfaces and traits is kept in zend_class_entry structure and
      actual linked performed by ZEND_DECLARE_...CLASS... opcode(s).
      Linked classes have ZEND_ACC_LINKED flag set.
+
+  l. HASH_FLAG_INITIALIZED was reverted into HASH_FLAG_UNINITIALIZED.
+     Special HT_IS_INITIALIZED() and HT_INVALIDATE() macro were introduced
+     to hide implementation details.
 
 ========================
 2. Build system changes
