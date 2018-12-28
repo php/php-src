@@ -234,7 +234,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_split, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, split_len)
+	ZEND_ARG_INFO(0, split_length)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
@@ -2289,7 +2289,7 @@ PHP_FUNCTION(mb_output_handler)
 }
 /* }}} */
 
-/* {{{ proto array mb_str_split(string str [, int split_length] [, string $encoding = mb_internal_encoding() ])
+/* {{{ proto array mb_str_split(string str [, int split_length] [, string encoding])
  Convert a multibyte string to an array. If split_length is specified,
  break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(mb_str_split)
