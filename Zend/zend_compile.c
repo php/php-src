@@ -4131,7 +4131,7 @@ static void _compile_verify_variance(HashTable *unverified_types)
 		zend_op *opline = get_next_op();
 		opline->op1_type = IS_CONST;
 		opline->opcode = ZEND_VERIFY_VARIANCE;
-		LITERAL_STR(opline->op1, lcname);
+		LITERAL_STR(opline->op1, zend_string_copy(lcname));
 	} ZEND_HASH_FOREACH_END();
 }
 
