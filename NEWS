@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #77317 (__DIR__, __FILE__, realpath() reveal physical path for
     subst virtual drive). (Anatol)
 
+- Fileinfo:
+  . Fixed bug #77346 (webm files incorrectly detected as
+    application/octet-stream). (Anatol)
+
 - PCRE:
   . Fixed bug #77338 (get_browser with empty string). (Nikita)
 
