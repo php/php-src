@@ -2294,7 +2294,7 @@ PHP_FUNCTION(mb_output_handler)
  break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(mb_str_split)
 {
-	const char *p;
+	char *p;
 	zend_string *str, *encoding = NULL;
 	size_t mblen, offset = 0;
 	size_t str_len;
@@ -2337,7 +2337,7 @@ PHP_FUNCTION(mb_str_split)
 	while(offset < mblen){
 		ret = mbfl_substr(&string, &result, offset, (size_t)split_len);
 
-		add_next_index_stringl(return_value, (const char *)ret->val, ret->len);
+		add_next_index_stringl(return_value, (char *)ret->val, ret->len);
 
 		efree(ret->val);
 		offset += split_len;
