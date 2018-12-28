@@ -234,7 +234,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_split, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, split_length)
+	ZEND_ARG_INFO(0, split_len)
+	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strlen, 0, 0, 1)
@@ -2288,22 +2289,23 @@ PHP_FUNCTION(mb_output_handler)
 }
 /* }}} */
 
-/* {{{ proto array mb_str_split(string str [, int split_length])
+/* {{{ proto array mb_str_split(string str [, int split_length] [, string $encoding = mb_internal_encoding() ])
  Convert a multibyte string to an array. If split_length is specified,
  break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(mb_str_split)
 {
-	char *p;
+	const char *p;
 	zend_string *str, *encoding = NULL;
 	size_t mblen, offset = 0;
 	size_t str_len;
 	mbfl_string string, result, *ret;
 	zend_long split_len = 1;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(split_len)
+		Z_PARAM_STR(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_len <= 0) {
@@ -2333,9 +2335,9 @@ PHP_FUNCTION(mb_str_split)
 
 	//split string
 	while(offset < mblen){
-		ret = mbfl_substr(&string, &result, offset, split_len);
+		ret = mbfl_substr(&string, &result, offset, (size_t)split_len);
 
-		add_next_index_stringl(return_value, (char *)ret->val, ret->len);
+		add_next_index_stringl(return_value, (const char *)ret->val, ret->len);
 
 		efree(ret->val);
 		offset += split_len;
