@@ -4757,14 +4757,18 @@ PHP_FUNCTION(imagescale)
 		RETURN_FALSE;
 	}
 
-	if (tmp_h < 0) {
+	if (tmp_h < 0 || tmp_w < 0) {
 		/* preserve ratio */
 		long src_x, src_y;
 
 		src_x = gdImageSX(im);
 		src_y = gdImageSY(im);
-		if (src_x) {
+
+		if (src_x && tmp_h < 0) {
 			tmp_h = tmp_w * src_y / src_x;
+		}
+		if (src_y && tmp_w < 0) {
+			tmp_w = tmp_h * src_x / src_y;
 		}
 	}
 
