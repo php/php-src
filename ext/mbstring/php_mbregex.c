@@ -1238,7 +1238,6 @@ PHP_FUNCTION(mb_split)
 	size_t string_len;
 
 	int err;
-	size_t n;
 	zend_long count = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
@@ -1296,8 +1295,8 @@ PHP_FUNCTION(mb_split)
 	}
 
 	/* otherwise we just have one last element to add to the array */
-	n = ((OnigUChar *)(string + string_len) - chunk_pos);
-	if (n > 0) {
+	if ((OnigUChar *)(string + string_len) > chunk_pos) {
+		size_t n = ((OnigUChar *)(string + string_len) - chunk_pos);
 		add_next_index_stringl(return_value, (char *)chunk_pos, n);
 	} else {
 		add_next_index_stringl(return_value, "", 0);

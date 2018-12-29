@@ -31,6 +31,9 @@ PHP                                                                        NEWS
     use-after-free). (cmb)
   . Fixed bug #77270 (imagecolormatch Out Of Bounds Write on Heap). (cmb)
 
+- MBString:
+  . Fixed bug #77367 (Negative size parameter in mb_split). (Stas)
+
 - OCI8:
   . Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
   . Added oci_set_call_timeout() for call timeouts.
