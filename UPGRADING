@@ -145,6 +145,8 @@ PHP 7.4 UPGRADE NOTES
      * Threshold-cropping now uses the algorithm of system libgd
   . The default $mode parameter of imagecropauto() has been changed to
     IMG_CROP_DEFAULT; passing -1 is now deprecated.
+  . imagescale() now supports aspect ratio preserving scaling to a fixed height
+    by passing -1 as $new_width.
 
 - Hash:
   . The hash extension cannot be disabled anymore and is always an integral

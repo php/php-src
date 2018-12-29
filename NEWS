@@ -25,6 +25,8 @@ PHP                                                                        NEWS
     falling back to IMG_CROP_SIDES.
   . The default $mode parameter of imagecropauto() has been changed to
     IMG_CROP_DEFAULT; passing -1 is now deprecated.
+  . Added support for aspect ratio preserving scaling to a fixed height for
+    imagescale(). (Andreas Treichel)
 
 - Hash:
   . The hash extension is now an integral part of PHP and cannot be disabled
