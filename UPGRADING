@@ -121,6 +121,10 @@ PHP 7.4 UPGRADE NOTES
     check whether this statement is read-only, i.e. whether it doesn't modify
     the database.
 
+- Standard:
+  . strip_tags() now also accepts an array of allowed tags: Instead of
+    strip_tags($str, '<a><p>') you can now write strip_tags($str, ['a', 'p']).
+
 ========================================
 3. Changes in SAPI modules
 ========================================
