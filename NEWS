@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Handle invalid index passed to PDOStatement::fetchColumn() as error. (Sergei
     Morozov)
 
+- Phar:
+  . Fixed bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext).
+    (Stas)
+
 - Soap:
   . Fixed bug #77088 (Segfault when using SoapClient with null options).
     (Laruence)
