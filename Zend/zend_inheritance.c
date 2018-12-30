@@ -351,6 +351,12 @@ int _check_inherited_return_type(
 	return _check_inherited_arg_info(fe, fe_arg_info, proto, proto_arg_info, COVARIANT);
 }
 
+
+static zend_bool _missing_internal_arginfo(zend_function const *fn)
+{
+    return !fn->common.arg_info && fn->common.type == ZEND_INTERNAL_FUNCTION;
+}
+
 static
 int _check_inherited_parameter_type(
 	const zend_function *fe, zend_arg_info *fe_arg_info,
@@ -384,7 +390,7 @@ static int zend_do_perform_implementation_check(const zend_function *fe, const z
 	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
 	 * functions because extensions don't always define arg_info.
 	 */
-	if (!proto->common.arg_info && proto->common.type != ZEND_USER_FUNCTION) {
+	if (_missing_internal_arginfo(proto)) {
 		return 1;
 	}
 
@@ -2035,8 +2041,18 @@ ZEND_API void zend_verify_variance(zend_class_entry *ce) /* {{{ */
 
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, child) {
 		zend_function *parent = child->common.prototype;
-			/* If the parenttype method is private do not enforce a signature */
-		if (parent && !(parent ->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (!parent) {
+			continue;
+		}
+
+		/* We are only willing to ignore this for internal functions because
+		 * extensions don't always define arg_info. */
+		if (_missing_internal_arginfo(parent)) {
+			continue;
+		}
+
+		/* If the parenttype method is private do not enforce a signature */
+		if (!(parent->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			uint32_t i, num_args;
 
 			/* Checks for constructors only if they are declared in an interface,
