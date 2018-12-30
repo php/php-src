@@ -524,6 +524,7 @@ compile_string_node(Node* node, regex_t* reg)
 
   for (; p < end; ) {
     len = enclen(enc, p);
+    if (p + len > end) len = end - p;
     if (len == prev_len) {
       slen++;
     }
