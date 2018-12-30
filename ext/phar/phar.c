@@ -2008,7 +2008,7 @@ next_extension:
 	}
 
 	while (pos != filename && (*(pos - 1) == '/' || *(pos - 1) == '\0')) {
-		pos = memchr(pos + 1, '.', filename_len - (pos - filename) + 1);
+		pos = memchr(pos + 1, '.', filename_len - (pos - filename) - 1);
 		if (!pos) {
 			return FAILURE;
 		}
