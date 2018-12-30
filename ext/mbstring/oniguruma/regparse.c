@@ -246,6 +246,12 @@ strdup_with_null(OnigEncoding enc, UChar* s, UChar* end)
 }
 #endif
 
+#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
+# define UNEXPECTED(condition) __builtin_expect(condition, 0)
+#else
+# define UNEXPECTED(condition) (condition)
+#endif
+
 /* scan pattern methods */
 #define PEND_VALUE   0
 
@@ -260,14 +266,17 @@ strdup_with_null(OnigEncoding enc, UChar* s, UChar* end)
   c = ONIGENC_MBC_TO_CODE(enc, p, end); \
   pfetch_prev = p; \
   p += ONIGENC_MBC_ENC_LEN(enc, p); \
+  if(UNEXPECTED(p > end)) p = end; \
 } while (0)
 
 #define PINC_S     do { \
   p += ONIGENC_MBC_ENC_LEN(enc, p); \
+  if(UNEXPECTED(p > end)) p = end; \
 } while (0)
 #define PFETCH_S(c) do { \
   c = ONIGENC_MBC_TO_CODE(enc, p, end); \
   p += ONIGENC_MBC_ENC_LEN(enc, p); \
+  if(UNEXPECTED(p > end)) p = end; \
 } while (0)
 
 #define PPEEK        (p < end ? ONIGENC_MBC_TO_CODE(enc, p, end) : PEND_VALUE)
