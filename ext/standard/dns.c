@@ -459,6 +459,10 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 	GETLONG(ttl, cp);
 	GETSHORT(dlen, cp);
 	CHECKCP(dlen);
+	if (dlen == 0) {
+		/* No data in the response - nothing to do */
+		return NULL;
+	}
 	if (type_to_fetch != T_ANY && type != type_to_fetch) {
 		cp += dlen;
 		return cp;
@@ -549,6 +553,9 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			CHECKCP(n);
 			add_assoc_stringl(subarray, "tag", (char*)cp, n);
 			cp += n;
+			if ( (size_t) dlen < ((size_t)n) + 2 ) {
+				return NULL;
+			}
 			n = dlen - n - 2;
 			CHECKCP(n);
 			add_assoc_stringl(subarray, "value", (char*)cp, n);
