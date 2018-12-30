@@ -64,6 +64,9 @@ PHP                                                                        NEWS
 - SQLite3:
   . Fixed bug #77051 (Issue with re-binding on SQLite3). (BohwaZ)
 
+- Xmlrpc:
+  . Fixed bug #77242 (heap out of bounds read in xmlrpc_decode()). (cmb)
+
 06 Dec 2018, PHP 7.3.0
 
 - Core:
