@@ -723,6 +723,9 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
          long byte_idx = XML_GetCurrentByteIndex(parser);
 /*         int byte_total = XML_GetCurrentByteCount(parser); */
          const char * error_str = XML_ErrorString(err_code);
+         if(byte_idx > len) {
+             byte_idx = len;
+         }
          if(byte_idx >= 0) {
              snprintf(buf, 
                       sizeof(buf),
