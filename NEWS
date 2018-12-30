@@ -29,6 +29,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #77269 (efree() on uninitialized Heap data in imagescale leads to 
     use-after-free). (cmb)
+  . Fixed bug #77270 (imagecolormatch Out Of Bounds Write on Heap). (cmb)
 
 - OCI8:
   . Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
