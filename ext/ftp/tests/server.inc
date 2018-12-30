@@ -314,7 +314,7 @@ if ($pid) {
 				die("SSLv23 handshake failed.\n");
 			}
 
-			if (empty($m[1]) || $m[1] !== 'emptydir') {
+			if (empty($m[1]) || $m[1] !== 'emptydir' || $m[1] !== '.') {
 				fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
 			}
 
@@ -473,6 +473,9 @@ if ($pid) {
 		}elseif (preg_match('/^LIST www\//', $buf, $matches)) {
 			fputs($s, "226 Transfer complete\r\n");
 
+		}elseif (preg_match('/^LIST \./', $buf, $matches)) {
+			fputs($s, "226 Transfer complete\r\n");
+
 		}elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
 			fputs($s, "425 Error establishing connection\r\n");
 
@@ -517,7 +520,7 @@ if ($pid) {
 				die("SSLv23 handshake failed.\n");
 			}
 
-			if(empty($m[1]) || $m[1] !== 'emptydir') {
+			if(empty($m[1]) || $m[1] !== 'emptydir' || $m[1] !== '.') {
 				fputs($fs, "modify=20170127230002;perm=flcdmpe;type=cdir;unique=811U4340002;UNIX.group=33;UNIX.mode=0755;UNIX.owner=33; .\r\n");
 				fputs($fs, "modify=20170127230002;perm=flcdmpe;type=pdir;unique=811U4340002;UNIX.group=33;UNIX.mode=0755;UNIX.owner=33; ..\r\n");
 				fputs($fs, "modify=20170126121225;perm=adfrw;size=4729;type=file;unique=811U4340CB9;UNIX.group=33;UNIX.mode=0644;UNIX.owner=33; foobar\r\n");

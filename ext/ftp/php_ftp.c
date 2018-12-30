@@ -699,16 +699,16 @@ PHP_FUNCTION(ftp_alloc)
 }
 /* }}} */
 
-/* {{{ proto array ftp_nlist(resource stream, string directory)
+/* {{{ proto array ftp_nlist(resource stream [, string directory = "."])
    Returns an array of filenames in the given directory */
 PHP_FUNCTION(ftp_nlist)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	char		**nlist, **ptr, *dir;
-	size_t		dir_len;
+	char		**nlist, **ptr, *dir = ".";
+	size_t		dir_len = sizeof(dir);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rp", &z_ftp, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|p", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
 	}
 
@@ -729,17 +729,17 @@ PHP_FUNCTION(ftp_nlist)
 }
 /* }}} */
 
-/* {{{ proto array ftp_rawlist(resource stream, string directory [, bool recursive])
+/* {{{ proto array ftp_rawlist(resource stream [, string directory = "." [, bool recursive]])
    Returns a detailed listing of a directory as an array of output lines */
 PHP_FUNCTION(ftp_rawlist)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	char		**llist, **ptr, *dir;
-	size_t		dir_len;
+	char		**llist, **ptr, *dir = ".";
+	size_t		dir_len = sizeof(dir);
 	zend_bool	recursive = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|b", &z_ftp, &dir, &dir_len, &recursive) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|sb", &z_ftp, &dir, &dir_len, &recursive) == FAILURE) {
 		return;
 	}
 
@@ -760,17 +760,17 @@ PHP_FUNCTION(ftp_rawlist)
 }
 /* }}} */
 
-/* {{{ proto array ftp_mlsd(resource stream, string directory)
+/* {{{ proto array ftp_mlsd(resource stream [, string directory = "."])
    Returns a detailed listing of a directory as an array of parsed output lines */
 PHP_FUNCTION(ftp_mlsd)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	char		**llist, **ptr, *dir;
-	size_t		dir_len;
+	char		**llist, **ptr, *dir = ".";
+	size_t		dir_len = sizeof(dir);
 	zval		entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
 	}
 
