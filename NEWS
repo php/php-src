@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #77346 (webm files incorrectly detected as
     application/octet-stream). (Anatol)
 
+- GD:
+  . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
+
 - PCRE:
   . Fixed bug #77338 (get_browser with empty string). (Nikita)
 
