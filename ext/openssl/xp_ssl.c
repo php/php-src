@@ -2413,13 +2413,12 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 								int err = SSL_get_error(sslsock->ssl_handle, n);
 
 								if (err == SSL_ERROR_SYSCALL) {
-									alive = php_socket_errno() == EAGAIN;
+									alive = n == -1 && php_socket_errno() == EAGAIN;
 									break;
 								}
 
 								if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
-									/* re-negotiate */
-									continue;
+									break;
 								}
 
 								/* any other problem is a fatal error */
