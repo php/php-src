@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.15
 
+- GD:
+  . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
+
 - Sockets:
   . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
     on MacOS). (Michael Meyer)
