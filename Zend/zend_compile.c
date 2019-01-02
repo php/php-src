@@ -6911,6 +6911,7 @@ static inline void zend_ct_eval_greater(zval *result, zend_ast_kind kind, zval *
 static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
+	zend_ast *last_elem_ast = NULL;
 	uint32_t i;
 	zend_bool is_constant = 1;
 
@@ -6923,6 +6924,10 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		zend_ast *elem_ast = list->child[i];
 
 		if (elem_ast == NULL) {
+			/* Report error at line of last non-empty element */
+			if (last_elem_ast) {
+				CG(zend_lineno) = zend_ast_get_lineno(last_elem_ast);
+			}
 			zend_error(E_COMPILE_ERROR, "Cannot use empty array elements in arrays");
 		}
 
@@ -6934,6 +6939,8 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		) {
 			is_constant = 0;
 		}
+
+		last_elem_ast = elem_ast;
 	}
 
 	if (!is_constant) {
