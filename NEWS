@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
 
+- MySQLnd:
+  . Fixed bug #75684 (In mysqlnd_ext_plugin.h the plugin methods family has
+    no external visibility). (Anatol)
+
 - Sockets:
   . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
     on MacOS). (Michael Meyer)

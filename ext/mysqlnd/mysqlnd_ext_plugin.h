@@ -35,7 +35,7 @@ struct st_mysqlnd_plugin__plugin_area_getters
 	void ** (*get_vio_area)(const MYSQLND_VIO * vio, const unsigned int plugin_id);
 };
 
-extern struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters;
+PHPAPI extern struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters;
 
 #define mysqlnd_plugin_get_plugin_connection_data(c, p_id)				mysqlnd_plugin_area_getters.get_connection_area((c), (p_id))
 #define mysqlnd_plugin_get_plugin_connection_data_data(c, p_id)			mysqlnd_plugin_area_getters.get_connection_data_area((c), (p_id))
@@ -124,7 +124,7 @@ struct st_mysqlnd_plugin_methods_xetters
 	} command_factory;
 };
 
-extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
+PHPAPI extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
 
 
 #define mysqlnd_object_factory_get_methods()	mysqlnd_plugin_methods_xetters.object_factory.get()
