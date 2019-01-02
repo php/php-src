@@ -805,9 +805,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					zval *val = &op_array->literals[opline->op2.constant];
 
 					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-						uint32_t slot = ZEND_MM_ALIGNED_SIZE_EX(op_array->cache_size, 8);
-
-						Z_CACHE_SLOT_P(val) = slot;
+						/* Ensure zval is aligned to 8 bytes */
+						op_array->cache_size = ZEND_MM_ALIGNED_SIZE_EX(op_array->cache_size, 8);
+						Z_CACHE_SLOT_P(val) = op_array->cache_size;
 						op_array->cache_size += sizeof(zval);
 					}
 				} else if (opline->opcode != ZEND_RECV) {
