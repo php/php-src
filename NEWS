@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
 
+- Opcache:
+  . Fixed bug #77257 (value of variable assigned in a switch() construct gets
+    lost). (Nikita)
+
 - PCRE:
   . Fixed bug #77338 (get_browser with empty string). (Nikita)
 
