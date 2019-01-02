@@ -10,13 +10,13 @@ mbstring.func_overload=0
 ini_set('include_path','.');
 include_once('common.inc');
 
-// EUC-JP
+// Japanese
 $utf8_jp = "どうも";
 $euc_jp = mb_convert_encoding($utf8_jp, "EUC-JP", "UTF-8");
 
-// UTF-8 russian
-$utf8_ru_1 = "Путин";
-$utf8_ru_2 = "вор";
+// Russian
+$utf8_ru_1 = "Миру";
+$utf8_ru_2 = "Мир";
 $cp866_ru = mb_convert_encoding($utf8_ru_2, "CP866", "UTF-8");
 
 
@@ -28,7 +28,7 @@ printf("4: %s\n", mb_convert_encoding(serialize(mb_str_split($euc_jp, 3, "EUC-JP
 
 ?>
 --EXPECT--
-1: a:5:{i:0;s:2:"П";i:1;s:2:"у";i:2;s:2:"т";i:3;s:2:"и";i:4;s:2:"н";}
-2: a:3:{i:0;s:1:"в";i:1;s:1:"о";i:2;s:1:"р";}
+1: a:4:{i:0;s:2:"М";i:1;s:2:"и";i:2;s:2:"р";i:3;s:2:"у";}
+2: a:3:{i:0;s:1:"М";i:1;s:1:"и";i:2;s:1:"р";}
 3: a:3:{i:0;s:2:"ど";i:1;s:2:"う";i:2;s:2:"も";}
 4: a:1:{i:0;s:6:"どうも";}

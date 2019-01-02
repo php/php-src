@@ -2294,18 +2294,16 @@ PHP_FUNCTION(mb_output_handler)
  break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(mb_str_split)
 {
-	char *p;
 	zend_string *str, *encoding = NULL;
 	size_t mblen, offset = 0;
-	size_t str_len;
 	mbfl_string string, result, *ret;
 	zend_long split_len = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(split_len)
-		Z_PARAM_STR(encoding)
+			Z_PARAM_LONG(split_len)
+			Z_PARAM_STR(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_len <= 0) {
@@ -2313,37 +2311,31 @@ PHP_FUNCTION(mb_str_split)
 		RETURN_FALSE;
 	}
 
-	str_len = ZSTR_LEN(str);
-	p = ZSTR_VAL(str);
-
-
+	//fill mbfl_string structure
 	string.no_language = MBSTRG(language);
 	string.encoding = php_mb_get_encoding(encoding);
 	if (!string.encoding) {
 		RETURN_FALSE;
 	}
 
-
-	string.val = (unsigned char *)p;
-	string.len = str_len;
+	string.val = (char unsigned *)ZSTR_VAL(str);
+	string.len = ZSTR_LEN(str);
 
 	/* mb length */
 	mblen = mbfl_strlen(&string);
 
-	//init array
+	//init array with defined size
 	array_init_size(return_value, mblen / split_len);
 
 	//split string
 	while(offset < mblen){
 		ret = mbfl_substr(&string, &result, offset, (size_t)split_len);
 
-		add_next_index_stringl(return_value, (char *)ret->val, ret->len);
+		add_next_index_stringl(return_value, (char const *)ret->val, ret->len);
 
 		efree(ret->val);
 		offset += split_len;
 	}
-
-
 }
 /* }}} */
 
