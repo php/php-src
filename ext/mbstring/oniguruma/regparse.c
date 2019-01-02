@@ -246,12 +246,6 @@ strdup_with_null(OnigEncoding enc, UChar* s, UChar* end)
 }
 #endif
 
-#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
-# define UNEXPECTED(condition) __builtin_expect(condition, 0)
-#else
-# define UNEXPECTED(condition) (condition)
-#endif
-
 /* scan pattern methods */
 #define PEND_VALUE   0
 
@@ -3589,7 +3583,9 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
 	tok->u.code = (OnigCodePoint )num;
       }
       else { /* string */
-	p = tok->backp + enclen(enc, tok->backp);
+          int len;
+          SAFE_ENC_LEN(enc, tok->backp, end, len);
+          p = tok->backp + len;
       }
       break;
     }

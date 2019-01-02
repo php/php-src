@@ -10971,6 +10971,7 @@ onigenc_unicode_mbc_case_fold(OnigEncoding enc,
 
   code = ONIGENC_MBC_TO_CODE(enc, p, end);
   len = enclen(enc, p);
+  if (*pp + len > end) len = end - *pp;
   *pp += len;
 
 #ifdef USE_UNICODE_CASE_FOLD_TURKISH_AZERI
