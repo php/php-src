@@ -449,6 +449,7 @@ struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
 	},
 };
 
+
 /*
  * Local variables:
  * tab-width: 4
