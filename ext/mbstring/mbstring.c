@@ -2311,7 +2311,7 @@ PHP_FUNCTION(mb_str_split)
 		RETURN_FALSE;
 	}
 
-	//fill mbfl_string structure
+	/* fill mbfl_string structure */
 	string.no_language = MBSTRG(language);
 	string.encoding = php_mb_get_encoding(encoding);
 	if (!string.encoding) {
@@ -2324,10 +2324,10 @@ PHP_FUNCTION(mb_str_split)
 	/* mb length */
 	mblen = mbfl_strlen(&string);
 
-	//init array with defined size
+	/* init array with defined size */
 	array_init_size(return_value, mblen / split_len);
 
-	//split string
+	/* split string */
 	while(offset < mblen){
 		ret = mbfl_substr(&string, &result, offset, (size_t)split_len);
 
