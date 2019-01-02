@@ -105,6 +105,9 @@
 #    define REAL_PAGE_SIZE _real_page_size
 static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #  endif
+# ifdef MAP_ALIGNED_SUPER
+#    define MAP_HUGETLB MAP_ALIGNED_SUPER
+# endif
 #endif
 
 #ifndef REAL_PAGE_SIZE
@@ -2371,6 +2374,40 @@ ZEND_API int is_zend_mm(void)
 #else
 	return 1;
 #endif
+}
+
+ZEND_API int is_zend_ptr(const void *ptr)
+{
+#if ZEND_MM_CUSTOM
+	if (AG(mm_heap)->use_custom_heap) {
+		return 0;
+	}
+#endif
+
+	if (AG(mm_heap)->main_chunk) {
+		zend_mm_chunk *chunk = AG(mm_heap)->main_chunk;
+
+		do {
+			if (ptr >= (void*)chunk
+			 && ptr < (void*)((char*)chunk + ZEND_MM_CHUNK_SIZE)) {
+				return 1;
+			}
+			chunk = chunk->next;
+		} while (chunk != AG(mm_heap)->main_chunk);
+	}
+
+	if (AG(mm_heap)->huge_list) {
+		zend_mm_huge_list *block = AG(mm_heap)->huge_list;
+
+		do {
+			if (ptr >= (void*)block
+			 && ptr < (void*)((char*)block + block->size)) {
+				return 1;
+			}
+			block = block->next;
+		} while (block != AG(mm_heap)->huge_list);
+	}
+	return 0;
 }
 
 #if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)

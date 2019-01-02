@@ -47,8 +47,6 @@ Warning: oci_bind_by_name() expects at most 5 parameters, 7 given in %s on line 
 Warning: oci_bind_by_name() expects at least 3 parameters, 2 given in %s on line %d
 
 Warning: oci_bind_by_name() expects at least 3 parameters, 1 given in %s on line %d
-
-Warning: oci_execute(): ORA-00932: %s on line %d
 object(OCI-Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)

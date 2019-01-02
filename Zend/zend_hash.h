@@ -35,12 +35,19 @@
 
 #define HASH_FLAG_CONSISTENCY      ((1<<0) | (1<<1))
 #define HASH_FLAG_PACKED           (1<<2)
-#define HASH_FLAG_INITIALIZED      (1<<3)
+#define HASH_FLAG_UNINITIALIZED    (1<<3)
 #define HASH_FLAG_STATIC_KEYS      (1<<4) /* long and interned strings */
 #define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
 #define HASH_FLAG_ALLOW_COW_VIOLATION (1<<6)
 
 #define HT_FLAGS(ht) (ht)->u.flags
+
+#define HT_INVALIDATE(ht) do { \
+		HT_FLAGS(ht) = HASH_FLAG_UNINITIALIZED; \
+	} while (0)
+
+#define HT_IS_INITIALIZED(ht) \
+	((HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) == 0)
 
 #define HT_IS_PACKED(ht) \
 	((HT_FLAGS(ht) & HASH_FLAG_PACKED) != 0)

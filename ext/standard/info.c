@@ -164,26 +164,6 @@ PHPAPI void php_info_print_module(zend_module_entry *zend_module) /* {{{ */
 }
 /* }}} */
 
-static int _display_module_info_func(zval *el) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);
-	if (module->info_func || module->version) {
-		php_info_print_module(module);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
-static int _display_module_info_def(zval *el) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);
-	if (!module->info_func && !module->version) {
-		php_info_print_module(module);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
 /* {{{ php_print_gpcse_array
  */
 static void php_print_gpcse_array(char *name, uint32_t name_length)
@@ -945,17 +925,26 @@ PHPAPI void php_print_info(int flag)
 
 	if (flag & PHP_INFO_MODULES) {
 		HashTable sorted_registry;
+		zend_module_entry *module;
 
 		zend_hash_init(&sorted_registry, zend_hash_num_elements(&module_registry), NULL, NULL, 1);
 		zend_hash_copy(&sorted_registry, &module_registry, NULL);
 		zend_hash_sort(&sorted_registry, module_name_cmp, 0);
 
-		zend_hash_apply(&sorted_registry, _display_module_info_func);
+		ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+			if (module->info_func || module->version) {
+				php_info_print_module(module);
+			}
+		} ZEND_HASH_FOREACH_END();
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
 		php_info_print_table_header(1, "Module Name");
-		zend_hash_apply(&sorted_registry, _display_module_info_def);
+		ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+			if (!module->info_func && !module->version) {
+				php_info_print_module(module);
+			}
+		} ZEND_HASH_FOREACH_END();
 		php_info_print_table_end();
 
 		zend_hash_destroy(&sorted_registry);

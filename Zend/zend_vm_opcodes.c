@@ -22,7 +22,7 @@
 #include <zend.h>
 #include <zend_vm_opcodes.h>
 
-static const char *zend_vm_opcodes_names[206] = {
+static const char *zend_vm_opcodes_names[207] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -222,6 +222,7 @@ static const char *zend_vm_opcodes_names[206] = {
 	"ZEND_UNSET_CV",
 	"ZEND_ISSET_ISEMPTY_CV",
 	"ZEND_FETCH_LIST_W",
+	"ZEND_ARRAY_KEY_EXISTS",
 	"ZEND_ASSIGN_OBJ_REF",
 	"ZEND_ASSIGN_STATIC_PROP",
 	"ZEND_ASSIGN_STATIC_PROP_REF",
@@ -231,7 +232,7 @@ static const char *zend_vm_opcodes_names[206] = {
 	"ZEND_POST_DEC_STATIC_PROP",
 };
 
-static uint32_t zend_vm_opcodes_flags[206] = {
+static uint32_t zend_vm_opcodes_flags[207] = {
 	0x00000000,
 	0x00000707,
 	0x00000707,
@@ -431,6 +432,7 @@ static uint32_t zend_vm_opcodes_flags[206] = {
 	0x00000101,
 	0x00020101,
 	0x00000701,
+	0x00000707,
 	0x0b040751,
 	0x00040307,
 	0x0b040307,

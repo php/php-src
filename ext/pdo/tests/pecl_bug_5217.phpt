@@ -25,5 +25,5 @@ try {
 echo "PHP Didn't crash!\n";
 ?>
 --EXPECT--
-Safely caught You cannot serialize or unserialize PDO instances
+Safely caught Serialization of 'PDO' is not allowed
 PHP Didn't crash!

@@ -862,13 +862,10 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 /* {{{ pcre_get_compiled_regex
  */
-PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options)
+PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count)
 {
 	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
 
-	if (preg_options) {
-		*preg_options = pce ? pce->preg_options : 0;
-	}
 	if (capture_count) {
 		*capture_count = pce ? pce->capture_count : 0;
 	}
@@ -901,17 +898,21 @@ PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capt
 		required, perhaps just a minimum sized data would suffice. */
 PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre2_code *re)
 {/*{{{*/
-	int rc = 0;
 
 	assert(NULL != re);
 
-	if (!capture_count) {
-		/* As we deal with a non cached pattern, no other way to gather this info. */
-		rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &capture_count);
-	}
+	if (EXPECTED(!mdata_used)) {
+		int rc = 0;
 
-	if (rc >= 0 && capture_count + 1 <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
-		return mdata;
+		if (!capture_count) {
+			/* As we deal with a non cached pattern, no other way to gather this info. */
+			rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &capture_count);
+		}
+
+		if (rc >= 0 && capture_count + 1 <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
+			mdata_used = 1;
+			return mdata;
+		}
 	}
 
 	return pcre2_match_data_create_from_pattern(re, gctx);
@@ -919,8 +920,10 @@ PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre
 
 PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
 {/*{{{*/
-	if (match_data != mdata) {
+	if (UNEXPECTED(match_data != mdata)) {
 		pcre2_match_data_free(match_data);
+	} else {
+		mdata_used = 0;
 	}
 }/*}}}*/
 
@@ -2908,8 +2911,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
    Returns the error code of the last regexp execution. */
 static PHP_FUNCTION(preg_last_error)
 {
-	ZEND_PARSE_PARAMETERS_START(0, 0)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(PCRE_G(error_code));
 }

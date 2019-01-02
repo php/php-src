@@ -224,6 +224,7 @@ ZEND_API int zend_set_memory_limit(size_t memory_limit);
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(int silent, int full_shutdown);
 ZEND_API int is_zend_mm(void);
+ZEND_API int is_zend_ptr(const void *ptr);
 
 ZEND_API size_t zend_memory_usage(int real_usage);
 ZEND_API size_t zend_memory_peak_usage(int real_usage);

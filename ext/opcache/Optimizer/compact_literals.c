@@ -321,13 +321,13 @@ literals_handle_static_prop:
 			int i, use_copy;
 			fprintf(stderr, "File %s func %s\n", op_array->filename->val,
 					op_array->function_name ? op_array->function_name->val : "main");
-			fprintf(stderr, "Literlas table size %d\n", op_array->last_literal);
+			fprintf(stderr, "Literals table size %d\n", op_array->last_literal);
 
 			for (i = 0; i < op_array->last_literal; i++) {
 				zval zv;
 				ZVAL_COPY_VALUE(&zv, op_array->literals + i);
 				use_copy = zend_make_printable_zval(op_array->literals + i, &zv);
-				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
+				fprintf(stderr, "Literal %d, val (%zu):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_ptr_dtor_nogc(&zv);
 				}
@@ -388,7 +388,6 @@ literals_handle_static_prop:
 						} else {
 							map[i] = j;
 							ZVAL_LONG(&zv, j);
-							Z_EXTRA(op_array->literals[i]) = 0; /* allow merging with FETCH_DIM_... */
 							zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
 							if (i != j) {
 								op_array->literals[j] = op_array->literals[i];
@@ -823,9 +822,9 @@ literals_handle_static_prop:
 					zval *val = &op_array->literals[opline->op2.constant];
 
 					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-						uint32_t slot = ZEND_MM_ALIGNED_SIZE_EX(op_array->cache_size, 8);
-
-						Z_CACHE_SLOT_P(val) = slot;
+						/* Ensure zval is aligned to 8 bytes */
+						op_array->cache_size = ZEND_MM_ALIGNED_SIZE_EX(op_array->cache_size, 8);
+						Z_CACHE_SLOT_P(val) = op_array->cache_size;
 						op_array->cache_size += sizeof(zval);
 					}
 				} else if (opline->opcode != ZEND_RECV) {
@@ -838,13 +837,13 @@ literals_handle_static_prop:
 #if DEBUG_COMPACT_LITERALS
 		{
 			int i, use_copy;
-			fprintf(stderr, "Optimized literlas table size %d\n", op_array->last_literal);
+			fprintf(stderr, "Optimized literals table size %d\n", op_array->last_literal);
 
 			for (i = 0; i < op_array->last_literal; i++) {
 				zval zv;
 				ZVAL_COPY_VALUE(&zv, op_array->literals + i);
 				use_copy = zend_make_printable_zval(op_array->literals + i, &zv);
-				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
+				fprintf(stderr, "Literal %d, val (%zu):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_ptr_dtor_nogc(&zv);
 				}

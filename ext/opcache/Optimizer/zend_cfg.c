@@ -153,7 +153,6 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 							changed = 1;
 							zend_mark_reachable(op_array->opcodes, cfg, b);
 						} else {
-							ZEND_ASSERT(b->start == live_range->end);
 							b->flags |= ZEND_BB_UNREACHABLE_FREE;
 						}
 					}
@@ -414,21 +413,14 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(i + 1);
 				break;
 			}
-			case ZEND_UNSET_VAR:
-			case ZEND_ISSET_ISEMPTY_VAR:
-				if (opline->extended_value & ZEND_FETCH_LOCAL) {
-					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-				} else if ((opline->extended_value & (ZEND_FETCH_GLOBAL | ZEND_FETCH_GLOBAL_LOCK)) &&
-				           !op_array->function_name) {
-					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-				}
-				break;
 			case ZEND_FETCH_R:
 			case ZEND_FETCH_W:
 			case ZEND_FETCH_RW:
 			case ZEND_FETCH_FUNC_ARG:
 			case ZEND_FETCH_IS:
 			case ZEND_FETCH_UNSET:
+			case ZEND_UNSET_VAR:
+			case ZEND_ISSET_ISEMPTY_VAR:
 				if (opline->extended_value & ZEND_FETCH_LOCAL) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				} else if ((opline->extended_value & (ZEND_FETCH_GLOBAL | ZEND_FETCH_GLOBAL_LOCK)) &&

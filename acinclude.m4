@@ -2097,7 +2097,12 @@ AC_DEFUN([PHP_PROG_RE2C],[
   fi
   case $php_cv_re2c_version in
     ""|invalid[)]
-      AC_MSG_WARN([You will need re2c 0.13.4 or later if you want to regenerate PHP parsers.])
+      if test -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
+        AC_MSG_WARN([You will need re2c 0.13.4 or later if you want to regenerate PHP lexers.])
+      else
+        AC_MSG_ERROR([You will need re2c 0.13.4 or later to generate PHP lexers.])
+      fi
+
       RE2C="exit 0;"
       ;;
   esac
@@ -2114,55 +2119,16 @@ dnl
 dnl Common setup macro for ICU
 dnl
 AC_DEFUN([PHP_SETUP_ICU],[
-  PHP_ARG_WITH(icu-dir,,
-  [  --with-icu-dir=DIR      Specify where ICU libraries and headers can be found], DEFAULT, no)
+  PKG_CHECK_MODULES([ICU], [icu-io >= 50.1])
 
-  if test "$PHP_ICU_DIR" = "no"; then
-    PHP_ICU_DIR=DEFAULT
-  fi
+  PHP_EVAL_INCLINE($ICU_CFLAGS)
+  PHP_EVAL_LIBLINE($ICU_LIBS, $1)
 
-  if test "$PHP_ICU_DIR" = "DEFAULT"; then
-    dnl Try to find icu-config
-    AC_PATH_PROG(ICU_CONFIG, icu-config, no, [$PATH:/usr/local/bin])
-  else
-    ICU_CONFIG="$PHP_ICU_DIR/bin/icu-config"
-  fi
+  ICU_CFLAGS="$ICU_CFLAGS -DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
+  ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
 
-  AC_MSG_CHECKING([for location of ICU headers and libraries])
-
-  dnl Trust icu-config to know better what the install prefix is..
-  icu_install_prefix=`$ICU_CONFIG --prefix 2> /dev/null`
-  if test "$?" != "0" || test -z "$icu_install_prefix"; then
-    AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([Unable to detect ICU prefix or $ICU_CONFIG failed. Please verify ICU install prefix and make sure icu-config works.])
-  else
-    AC_MSG_RESULT([$icu_install_prefix])
-
-    dnl Check ICU version
-    AC_MSG_CHECKING([for ICU 50.1 or greater])
-    icu_version_full=`$ICU_CONFIG --version`
-    ac_IFS=$IFS
-    IFS="."
-    set $icu_version_full
-    IFS=$ac_IFS
-    icu_version=`expr [$]1 \* 1000 + [$]2`
-    AC_MSG_RESULT([found $icu_version_full])
-
-    if test "$icu_version" -lt "50001"; then
-      AC_MSG_ERROR([ICU version 50.1 or later is required])
-    fi
-
-    ICU_VERSION=$icu_version
-    ICU_INCS=`$ICU_CONFIG --cppflags-searchpath`
-    ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
-    PHP_EVAL_INCLINE($ICU_INCS)
-    PHP_EVAL_LIBLINE($ICU_LIBS, $1)
-
-    ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
-    ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
-    if test "$icu_version" -ge "60000"; then
-      ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
-    fi
+  if test "$PKG_CONFIG icu-io --atleast-version=60"; then
+    ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
   fi
 ])
 
@@ -2603,7 +2569,7 @@ dnl Generates the config.nice file
 dnl
 AC_DEFUN([PHP_CONFIG_NICE],[
   AC_REQUIRE([AC_PROG_EGREP])
-  AC_REQUIRE([LT_AC_PROG_SED])
+  AC_REQUIRE([AC_PROG_SED])
   PHP_SUBST_OLD(EGREP)
   PHP_SUBST_OLD(SED)
   test -f $1 && mv $1 $1.old

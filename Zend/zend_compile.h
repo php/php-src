@@ -260,7 +260,7 @@ typedef struct _zend_oparray_context {
 /* User class has methods with static variables           |     |     |     */
 #define ZEND_HAS_STATIC_IN_METHODS       (1 << 15) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 27...30)                       |     |     |     */
+/* Function Flags (unused: 28...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -312,6 +312,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* op_array is a clone of trait method                    |     |     |     */
 #define ZEND_ACC_TRAIT_CLONE             (1 << 26) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* op_array is preloaded                                  |     |     |     */
+#define ZEND_ACC_PRELOADED               (1 << 27) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1 << 31) /*     |  X  |     |     */
@@ -811,11 +814,6 @@ uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
 ZEND_API int zend_is_smart_branch(zend_op *opline);
 
-static zend_always_inline uint32_t get_next_op_number(zend_op_array *op_array)
-{
-	return op_array->last;
-}
-
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
 	zend_string *name;
@@ -832,8 +830,6 @@ ZEND_API size_t zend_dirname(char *path, size_t len);
 ZEND_API void zend_set_function_arg_flags(zend_function *func);
 
 int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem);
-
-int zend_add_literal(zend_op_array *op_array, zval *zv);
 
 void zend_assert_valid_class_name(const zend_string *const_name);
 
@@ -1051,6 +1047,12 @@ END_EXTERN_C()
 
 /* ignore functions and classes declared in other files */
 #define ZEND_COMPILE_IGNORE_OTHER_FILES			(1<<12)
+
+/* this flag is set when compiler invoked by opcache_compile_file() */
+#define ZEND_COMPILE_WITHOUT_EXECUTION          (1<<13)
+
+/* this flag is set when compiler invoked during preloading */
+#define ZEND_COMPILE_PRELOAD                    (1<<14)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

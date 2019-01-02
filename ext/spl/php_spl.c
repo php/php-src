@@ -69,7 +69,7 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, zend_bool autol
 		zend_string *lc_name = zend_string_tolower(name);
 
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		zend_string_free(lc_name);
+		zend_string_release(lc_name);
 	} else {
  		ce = zend_lookup_class(name);
  	}
@@ -335,7 +335,7 @@ PHP_FUNCTION(spl_autoload)
 		pos = pos1 ? pos1 + 1 : NULL;
 		pos_len = pos1? pos_len - pos1_len - 1 : 0;
 	}
-	zend_string_free(lc_name);
+	zend_string_release(lc_name);
 } /* }}} */
 
 /* {{{ proto string spl_autoload_extensions([string file_extensions])
@@ -855,21 +855,20 @@ PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
 }
 /* }}} */
 
-int spl_build_class_list_string(zval *entry, char **list) /* {{{ */
+static void spl_build_class_list_string(zval *entry, char **list) /* {{{ */
 {
 	char *res;
 
 	spprintf(&res, 0, "%s, %s", *list, Z_STRVAL_P(entry));
 	efree(*list);
 	*list = res;
-	return ZEND_HASH_APPLY_KEEP;
 } /* }}} */
 
 /* {{{ PHP_MINFO(spl)
  */
 PHP_MINFO_FUNCTION(spl)
 {
-	zval list;
+	zval list, *zv;
 	char *strg;
 
 	php_info_print_table_start();
@@ -878,7 +877,9 @@ PHP_MINFO_FUNCTION(spl)
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, 1, ZEND_ACC_INTERFACE)
 	strg = estrdup("");
-	zend_hash_apply_with_argument(Z_ARRVAL_P(&list), (apply_func_arg_t)spl_build_class_list_string, &strg);
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
+		spl_build_class_list_string(zv, &strg);
+	} ZEND_HASH_FOREACH_END();
 	zend_array_destroy(Z_ARR(list));
 	php_info_print_table_row(2, "Interfaces", strg + 2);
 	efree(strg);
@@ -886,7 +887,9 @@ PHP_MINFO_FUNCTION(spl)
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, -1, ZEND_ACC_INTERFACE)
 	strg = estrdup("");
-	zend_hash_apply_with_argument(Z_ARRVAL_P(&list), (apply_func_arg_t)spl_build_class_list_string, &strg);
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
+		spl_build_class_list_string(zv, &strg);
+	} ZEND_HASH_FOREACH_END();
 	zend_array_destroy(Z_ARR(list));
 	php_info_print_table_row(2, "Classes", strg + 2);
 	efree(strg);

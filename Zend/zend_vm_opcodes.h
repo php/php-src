@@ -271,14 +271,15 @@ END_EXTERN_C()
 #define ZEND_UNSET_CV                        196
 #define ZEND_ISSET_ISEMPTY_CV                197
 #define ZEND_FETCH_LIST_W                    198
-#define ZEND_ASSIGN_OBJ_REF                  199
-#define ZEND_ASSIGN_STATIC_PROP              200
-#define ZEND_ASSIGN_STATIC_PROP_REF          201
-#define ZEND_PRE_INC_STATIC_PROP             202
-#define ZEND_PRE_DEC_STATIC_PROP             203
-#define ZEND_POST_INC_STATIC_PROP            204
-#define ZEND_POST_DEC_STATIC_PROP            205
+#define ZEND_ARRAY_KEY_EXISTS                199
+#define ZEND_ASSIGN_OBJ_REF                  200
+#define ZEND_ASSIGN_STATIC_PROP              201
+#define ZEND_ASSIGN_STATIC_PROP_REF          202
+#define ZEND_PRE_INC_STATIC_PROP             203
+#define ZEND_PRE_DEC_STATIC_PROP             204
+#define ZEND_POST_INC_STATIC_PROP            205
+#define ZEND_POST_DEC_STATIC_PROP            206
 
-#define ZEND_VM_LAST_OPCODE                  205
+#define ZEND_VM_LAST_OPCODE                  206
 
 #endif

@@ -50,7 +50,6 @@ $TS \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
---with-curl=/usr \
 --with-tidy \
 --with-xmlrpc \
 --enable-sysvsem \
@@ -71,7 +70,7 @@ $TS \
 --with-pspell=/usr \
 --with-enchant=/usr \
 --enable-wddx \
---enable-freetype \
+--with-freetype \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg \

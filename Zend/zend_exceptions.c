@@ -251,15 +251,6 @@ static zend_object *zend_error_exception_new(zend_class_entry *class_type) /* {{
 }
 /* }}} */
 
-/* {{{ proto Exception|Error Exception|Error::__clone()
-   Clone the exception object */
-ZEND_COLD ZEND_METHOD(exception, __clone)
-{
-	/* Should never be executable */
-	zend_throw_exception(NULL, "Cannot clone object using __clone()", 0);
-}
-/* }}} */
-
 /* {{{ proto Exception|Error::__construct(string message, int code [, Throwable previous])
    Exception constructor */
 ZEND_METHOD(exception, __construct)
@@ -772,7 +763,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_exception___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry default_exception_functions[] = {
-	ZEND_ME(exception, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(exception, __construct, arginfo_exception___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(exception, __wakeup, NULL, ZEND_ACC_PUBLIC)
 	ZEND_ME(exception, getMessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)

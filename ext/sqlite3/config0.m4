@@ -33,14 +33,14 @@ if test $PHP_SQLITE3 != "no"; then
     AC_MSG_ERROR([Please reinstall the sqlite distribution from http://www.sqlite.org])
   fi
 
-  AC_MSG_CHECKING([for SQLite 3.5.0+])
-  PHP_CHECK_LIBRARY(sqlite3, sqlite3_open_v2, [
+  AC_MSG_CHECKING([for SQLite 3.7.4+])
+  PHP_CHECK_LIBRARY(sqlite3, sqlite3_stmt_readonly, [
     AC_MSG_RESULT(found)
     PHP_ADD_LIBRARY_WITH_PATH(sqlite3, $SQLITE3_DIR/$PHP_LIBDIR, SQLITE3_SHARED_LIBADD)
     PHP_ADD_INCLUDE($SQLITE3_DIR/include)
   ],[
     AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([Please install SQLite 3.5.0 first or check libsqlite3 is present])
+    AC_MSG_ERROR([Please install SQLite 3.7.4 first or check libsqlite3 is present])
   ],[
     -L$SQLITE3_DIR/$PHP_LIBDIR -lm
   ])

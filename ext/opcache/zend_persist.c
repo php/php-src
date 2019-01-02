@@ -94,7 +94,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	ht->pDestructor = NULL;
 	ht->nInternalPointer = 0;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
 		} else {
@@ -110,7 +110,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		} else {
 			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		}
-		HT_FLAGS(ht) &= ~HASH_FLAG_INITIALIZED;
+		HT_FLAGS(ht) |= HASH_FLAG_UNINITIALIZED;
 		return;
 	}
 	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
@@ -189,7 +189,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	HT_FLAGS(ht) |= HASH_FLAG_STATIC_KEYS;
 	ht->pDestructor = NULL;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
 		} else {
@@ -205,7 +205,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 		} else {
 			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		}
-		HT_FLAGS(ht) &= ~HASH_FLAG_INITIALIZED;
+		HT_FLAGS(ht) |= HASH_FLAG_UNINITIALIZED;
 		return;
 	}
 	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
@@ -823,7 +823,7 @@ static void zend_persist_class_entry(zval *zv)
 			zend_accel_store_interned_string(ce->parent_name);
 		}
 		zend_hash_persist(&ce->function_table, zend_persist_class_method);
-		HT_FLAGS(&ce->function_table) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
+		HT_FLAGS(&ce->function_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 		if (ce->default_properties_table) {
 		    int i;
 
@@ -852,7 +852,7 @@ static void zend_persist_class_entry(zval *zv)
 		}
 
 		zend_hash_persist(&ce->constants_table, zend_persist_class_constant);
-		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
+		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 
 		if (ce->info.user.filename) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */
@@ -870,7 +870,7 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
-		HT_FLAGS(&ce->properties_info) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
+		HT_FLAGS(&ce->properties_info) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 
 		if (ce->num_interfaces && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 			uint32_t i = 0;
@@ -946,10 +946,8 @@ static void zend_persist_class_entry(zval *zv)
 //	return 0;
 //}
 
-static int zend_update_parent_ce(zval *zv)
+static void zend_update_parent_ce(zend_class_entry *ce)
 {
-	zend_class_entry *ce = Z_PTR_P(zv);
-
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
 		if (ce->parent) {
 			int i, end;
@@ -1084,14 +1082,16 @@ static int zend_update_parent_ce(zval *zv)
 			ce->__debugInfo = tmp;
 		}
 	}
-//	zend_hash_apply(&ce->properties_info, (apply_func_t) zend_update_property_info_ce);
-	return 0;
 }
 
 static void zend_accel_persist_class_table(HashTable *class_table)
 {
+	zend_class_entry *ce;
+
     zend_hash_persist(class_table, zend_persist_class_entry);
-	zend_hash_apply(class_table, (apply_func_t) zend_update_parent_ce);
+    ZEND_HASH_FOREACH_PTR(class_table, ce) {
+		zend_update_parent_ce(ce);
+	} ZEND_HASH_FOREACH_END();
 }
 
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, const char **key, unsigned int key_length, int for_shm)

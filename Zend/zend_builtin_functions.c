@@ -1759,24 +1759,13 @@ ZEND_FUNCTION(restore_exception_handler)
 }
 /* }}} */
 
-static int copy_class_or_interface_name(zval *el, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static void copy_class_or_interface_name(zval *array, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
-	zend_class_entry *ce = (zend_class_entry *)Z_PTR_P(el);
-	zval *array = va_arg(args, zval *);
-	uint32_t mask = va_arg(args, uint32_t);
-	uint32_t comply = va_arg(args, uint32_t);
-	uint32_t comply_mask = (comply)? mask:0;
-
-	if ((hash_key->key && ZSTR_VAL(hash_key->key)[0] != 0)
-		&& (comply_mask == (ce->ce_flags & mask))) {
-		if ((ce->refcount > 1 || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) &&
-		    !same_name(hash_key->key, ce->name)) {
-			add_next_index_str(array, zend_string_copy(hash_key->key));
-		} else {
-			add_next_index_str(array, zend_string_copy(ce->name));
-		}
+	if ((ce->refcount == 1 && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) ||
+	    same_name(key, ce->name)) {
+		key = ce->name;
 	}
-	return ZEND_HASH_APPLY_KEEP;
+	add_next_index_str(array, zend_string_copy(key));
 }
 /* }}} */
 
@@ -1784,15 +1773,21 @@ static int copy_class_or_interface_name(zval *el, int num_args, va_list args, ze
    Returns an array of all declared traits. */
 ZEND_FUNCTION(get_declared_traits)
 {
-	uint32_t mask = ZEND_ACC_TRAIT;
-	uint32_t comply = 1;
+	zend_string *key;
+	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), copy_class_or_interface_name, 3, return_value, mask, comply);
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+		if (key
+		 && ZSTR_VAL(key)[0] != 0
+		 && (ce->ce_flags & ZEND_ACC_TRAIT)) {
+			copy_class_or_interface_name(return_value, key, ce);
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -1800,15 +1795,21 @@ ZEND_FUNCTION(get_declared_traits)
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-	uint32_t mask = ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
-	uint32_t comply = 0;
+	zend_string *key;
+	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), copy_class_or_interface_name, 3, return_value, mask, comply);
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+		if (key
+		 && ZSTR_VAL(key)[0] != 0
+		 && !(ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT))) {
+			copy_class_or_interface_name(return_value, key, ce);
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -1816,44 +1817,21 @@ ZEND_FUNCTION(get_declared_classes)
    Returns an array of all declared interfaces. */
 ZEND_FUNCTION(get_declared_interfaces)
 {
-	uint32_t mask = ZEND_ACC_INTERFACE;
-	uint32_t comply = 1;
+	zend_string *key;
+	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), copy_class_or_interface_name, 3, return_value, mask, comply);
-}
-/* }}} */
-
-static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
-{
-	zend_function *func = Z_PTR_P(zv);
-	zval *internal_ar = va_arg(args, zval *),
-	     *user_ar     = va_arg(args, zval *);
-	zend_bool *exclude_disabled = va_arg(args, zend_bool *);
-
-	if (hash_key->key == NULL || ZSTR_VAL(hash_key->key)[0] == 0) {
-		return 0;
-	}
-
-	if (func->type == ZEND_INTERNAL_FUNCTION) {
-		char *disable_functions = INI_STR("disable_functions");
-
-		if ((*exclude_disabled == 1) && (disable_functions != NULL)) {
-			if (strstr(disable_functions, func->common.function_name->val) == NULL) {
-				add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
-			}
-		} else {
-			add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+		if (key
+		 && ZSTR_VAL(key)[0] != 0
+		 && (ce->ce_flags & ZEND_ACC_INTERFACE)) {
+			copy_class_or_interface_name(return_value, key, ce);
 		}
-	} else if (func->type == ZEND_USER_FUNCTION) {
-		add_next_index_str(user_ar, zend_string_copy(hash_key->key));
-	}
-
-	return 0;
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -1862,7 +1840,10 @@ static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_ke
 ZEND_FUNCTION(get_defined_functions)
 {
 	zval internal, user;
+	zend_string *key;
+	zend_function *func;
 	zend_bool exclude_disabled = 0;
+	char *disable_functions = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &exclude_disabled) == FAILURE) {
 		return;
@@ -1872,7 +1853,24 @@ ZEND_FUNCTION(get_defined_functions)
 	array_init(&user);
 	array_init(return_value);
 
-	zend_hash_apply_with_arguments(EG(function_table), copy_function_name, 3, &internal, &user, &exclude_disabled);
+	if (exclude_disabled) {
+		disable_functions = INI_STR("disable_functions");
+	}
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), key, func) {
+		if (key && ZSTR_VAL(key)[0] != 0) {
+			if (func->type == ZEND_INTERNAL_FUNCTION) {
+				if (disable_functions != NULL) {
+					if (strstr(disable_functions, func->common.function_name->val) == NULL) {
+						add_next_index_str(&internal, zend_string_copy(key));
+					}
+				} else {
+					add_next_index_str(&internal, zend_string_copy(key));
+				}
+			} else if (func->type == ZEND_USER_FUNCTION) {
+				add_next_index_str(&user, zend_string_copy(key));
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
@@ -2044,36 +2042,10 @@ ZEND_FUNCTION(get_resources)
 }
 /* }}} */
 
-static int add_extension_info(zval *item, void *arg) /* {{{ */
-{
-	zval *name_array = (zval *)arg;
-	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(item);
-	add_next_index_string(name_array, module->name);
-	return 0;
-}
-/* }}} */
-
 static int add_zendext_info(zend_extension *ext, void *arg) /* {{{ */
 {
 	zval *name_array = (zval *)arg;
 	add_next_index_string(name_array, ext->name);
-	return 0;
-}
-/* }}} */
-
-static int add_constant_info(zval *item, void *arg) /* {{{ */
-{
-	zval *name_array = (zval *)arg;
-	zend_constant *constant = (zend_constant*)Z_PTR_P(item);
-	zval const_val;
-
-	if (!constant->name) {
-		/* skip special constants */
-		return 0;
-	}
-
-	ZVAL_COPY_OR_DUP(&const_val, &constant->value);
-	zend_hash_add_new(Z_ARRVAL_P(name_array), constant->name, &const_val);
 	return 0;
 }
 /* }}} */
@@ -2093,7 +2065,11 @@ ZEND_FUNCTION(get_loaded_extensions)
 	if (zendext) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t)add_zendext_info, return_value);
 	} else {
-		zend_hash_apply_with_argument(&module_registry, add_extension_info, return_value);
+		zend_module_entry *module;
+
+		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
+			add_next_index_string(return_value, module->name);
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 /* }}} */
@@ -2155,7 +2131,17 @@ ZEND_FUNCTION(get_defined_constants)
 		efree(module_names);
 		efree(modules);
 	} else {
-		zend_hash_apply_with_argument(EG(zend_constants), add_constant_info, return_value);
+		zend_constant *constant;
+		zval const_val;
+
+		ZEND_HASH_FOREACH_PTR(EG(zend_constants), constant) {
+			if (!constant->name) {
+				/* skip special constants */
+				continue;
+			}
+			ZVAL_COPY_OR_DUP(&const_val, &constant->value);
+			zend_hash_add_new(Z_ARRVAL_P(return_value), constant->name, &const_val);
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 /* }}} */

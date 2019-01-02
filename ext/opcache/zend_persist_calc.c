@@ -40,7 +40,7 @@
 
 # define ADD_STRING(str) ADD_DUP_SIZE((str), _ZSTR_STRUCT_SIZE(ZSTR_LEN(str)))
 
-# define ADD_INTERNED_STRING(str, do_free) do { \
+# define ADD_INTERNED_STRING(str) do { \
 		if (ZCG(current_persistent_script)->corrupted) { \
 			ADD_STRING(str); \
 		} else if (!IS_ACCEL_INTERNED(str)) { \
@@ -60,7 +60,7 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 	uint32_t idx;
 	Bucket *p;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED) || ht->nNumUsed == 0) {
+	if ((HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) || ht->nNumUsed == 0) {
 		return;
 	}
 
@@ -87,7 +87,7 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 
 		/* persist bucket and key */
 		if (p->key) {
-			ADD_INTERNED_STRING(p->key, 1);
+			ADD_INTERNED_STRING(p->key);
 		}
 
 		pPersistElement(&p->val);
@@ -126,7 +126,7 @@ static void zend_persist_zval_calc(zval *z)
 
 	switch (Z_TYPE_P(z)) {
 		case IS_STRING:
-			ADD_INTERNED_STRING(Z_STR_P(z), 0);
+			ADD_INTERNED_STRING(Z_STR_P(z));
 			if (ZSTR_IS_INTERNED(Z_STR_P(z))) {
 				Z_TYPE_FLAGS_P(z) = 0;
 			}
@@ -197,7 +197,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		if (new_name) {
 			op_array->function_name = new_name;
 		} else {
-			ADD_INTERNED_STRING(op_array->function_name, 0);
+			ADD_INTERNED_STRING(op_array->function_name);
 			zend_shared_alloc_register_xlat_entry(old_name, op_array->function_name);
 		}
     }
@@ -222,13 +222,13 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		ADD_SIZE(sizeof(zend_arg_info) * num_args);
 		for (i = 0; i < num_args; i++) {
 			if (arg_info[i].name) {
-				ADD_INTERNED_STRING(arg_info[i].name, 1);
+				ADD_INTERNED_STRING(arg_info[i].name);
 			}
 			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
 				zend_string *type_name = ZEND_TYPE_NAME(arg_info[i].type);
 				zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
 
-				ADD_INTERNED_STRING(type_name, 1);
+				ADD_INTERNED_STRING(type_name);
 				arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
 			}
 		}
@@ -251,7 +251,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 
 		ADD_SIZE(sizeof(zend_string*) * op_array->last_var);
 		for (i = 0; i < op_array->last_var; i++) {
-			ADD_INTERNED_STRING(op_array->vars[i], 0);
+			ADD_INTERNED_STRING(op_array->vars[i]);
 		}
 	}
 
@@ -305,10 +305,10 @@ static void zend_persist_property_info_calc(zval *zv)
 	if (!zend_shared_alloc_get_xlat_entry(prop)) {
 		zend_shared_alloc_register_xlat_entry(prop, prop);
 		ADD_SIZE_EX(sizeof(zend_property_info));
-		ADD_INTERNED_STRING(prop->name, 0);
+		ADD_INTERNED_STRING(prop->name);
 		if (ZEND_TYPE_IS_NAME(prop->type)) {
 			zend_string *class_name = ZEND_TYPE_NAME(prop->type);
-			ADD_INTERNED_STRING(class_name, 0);
+			ADD_INTERNED_STRING(class_name);
 			prop->type = ZEND_TYPE_ENCODE_CLASS(class_name, ZEND_TYPE_ALLOW_NULL(prop->type));
 		}
 		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
@@ -353,9 +353,9 @@ static void zend_persist_class_entry_calc(zval *zv)
 			!ZCG(current_persistent_script)->corrupted;
 
 		ADD_SIZE_EX(sizeof(zend_class_entry));
-		ADD_INTERNED_STRING(ce->name, 0);
+		ADD_INTERNED_STRING(ce->name);
 		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
-			ADD_INTERNED_STRING(ce->parent_name, 0);
+			ADD_INTERNED_STRING(ce->parent_name);
 		}
 		zend_hash_persist_calc(&ce->function_table, zend_persist_class_method_calc);
 		if (ce->default_properties_table) {
@@ -392,8 +392,8 @@ static void zend_persist_class_entry_calc(zval *zv)
 
 			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 				for (i = 0; i < ce->num_interfaces; i++) {
-					ADD_INTERNED_STRING(ce->interface_names[i].name, 0);
-					ADD_INTERNED_STRING(ce->interface_names[i].lc_name, 0);
+					ADD_INTERNED_STRING(ce->interface_names[i].name);
+					ADD_INTERNED_STRING(ce->interface_names[i].lc_name);
 				}
 				ADD_SIZE(sizeof(zend_class_name) * ce->num_interfaces);
 			} else {
@@ -405,8 +405,8 @@ static void zend_persist_class_entry_calc(zval *zv)
 			uint32_t i;
 
 			for (i = 0; i < ce->num_traits; i++) {
-				ADD_INTERNED_STRING(ce->trait_names[i].name, 0);
-				ADD_INTERNED_STRING(ce->trait_names[i].lc_name, 0);
+				ADD_INTERNED_STRING(ce->trait_names[i].name);
+				ADD_INTERNED_STRING(ce->trait_names[i].lc_name);
 			}
 			ADD_SIZE(sizeof(zend_class_name) * ce->num_traits);
 
@@ -414,14 +414,14 @@ static void zend_persist_class_entry_calc(zval *zv)
 				i = 0;
 				while (ce->trait_aliases[i]) {
 					if (ce->trait_aliases[i]->trait_method.method_name) {
-						ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.method_name, 0);
+						ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.method_name);
 					}
 					if (ce->trait_aliases[i]->trait_method.class_name) {
-						ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.class_name, 0);
+						ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_method.class_name);
 					}
 
 					if (ce->trait_aliases[i]->alias) {
-						ADD_INTERNED_STRING(ce->trait_aliases[i]->alias, 0);
+						ADD_INTERNED_STRING(ce->trait_aliases[i]->alias);
 					}
 					ADD_SIZE(sizeof(zend_trait_alias));
 					i++;
@@ -434,11 +434,11 @@ static void zend_persist_class_entry_calc(zval *zv)
 
 				i = 0;
 				while (ce->trait_precedences[i]) {
-					ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.method_name, 0);
-					ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.class_name, 0);
+					ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.method_name);
+					ADD_INTERNED_STRING(ce->trait_precedences[i]->trait_method.class_name);
 
 					for (j = 0; j < ce->trait_precedences[i]->num_excludes; j++) {
-						ADD_INTERNED_STRING(ce->trait_precedences[i]->exclude_class_names[j], 0);
+						ADD_INTERNED_STRING(ce->trait_precedences[i]->exclude_class_names[j]);
 					}
 					ADD_SIZE(sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
 					i++;

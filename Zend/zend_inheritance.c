@@ -1251,17 +1251,7 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
-	if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {
-		zend_string *lowercase_name = zend_string_tolower(ce->name);
-		lowercase_name = zend_new_interned_string(lowercase_name);
-		if (!memcmp(ZSTR_VAL(mname), ZSTR_VAL(lowercase_name), ZSTR_LEN(mname))) {
-			if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
-			}
-			ce->constructor = fe;
-		}
-		zend_string_release_ex(lowercase_name, 0);
-	} else if (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_') {
+	if (ZSTR_LEN(ce->name) != ZSTR_LEN(mname) && (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_')) {
 		/* pass */
 	} else if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = fe;
@@ -1292,6 +1282,16 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->__tostring = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		ce->__debugInfo = fe;
+	} else if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {
+		zend_string *lowercase_name = zend_string_tolower(ce->name);
+		lowercase_name = zend_new_interned_string(lowercase_name);
+		if (!memcmp(ZSTR_VAL(mname), ZSTR_VAL(lowercase_name), ZSTR_LEN(mname))) {
+			if (ce->constructor  && (!ce->parent || ce->constructor != ce->parent->constructor)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
+			}
+			ce->constructor = fe;
+		}
+		zend_string_release_ex(lowercase_name, 0);
 	}
 }
 /* }}} */
@@ -1406,7 +1406,7 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 }
 /* }}} */
 
-static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable **overridden, HashTable *exclude_table, zend_class_entry **aliases) /* {{{ */
+static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable **overridden, HashTable *exclude_table, zend_class_entry **aliases) /* {{{ */
 {
 	zend_trait_alias  *alias, **alias_ptr;
 	zend_string       *lcname;
@@ -1486,8 +1486,6 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 
 		zend_add_trait_method(ce, ZSTR_VAL(fn->common.function_name), fnname, &fn_copy, overridden);
 	}
-
-	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 

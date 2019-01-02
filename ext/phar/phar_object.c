@@ -497,7 +497,7 @@ carry_on:
 		}
 
 		return;
-	} else if (HT_FLAGS(&PHAR_G(phar_fname_map)) && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
+	} else if (HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
 		goto carry_on;
 	} else if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_str_find_ptr(&cached_phars, fname, fname_len))) {
 		if (SUCCESS == phar_copy_on_write(&pphar)) {
@@ -3614,10 +3614,11 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, size_t file
 	char *error;
 	size_t contents_len;
 	phar_entry_data *data;
-	php_stream *contents_file;
+	php_stream *contents_file = NULL;
+	php_stream_statbuf ssb;
 
 	if (filename_len >= sizeof(".phar")-1) {
-		start_pos = ('/' == filename[0] ? 1 : 0); /* account for any leading slash: multiple-leads handled elsewhere */
+		start_pos = '/' == filename[0]; /* account for any leading slash: multiple-leads handled elsewhere */
 		if (!memcmp(&filename[start_pos], ".phar", sizeof(".phar")-1) && (filename[start_pos+5] == '/' || filename[start_pos+5] == '\\' || filename[start_pos+5] == '\0')) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory");
 			return;
@@ -3651,8 +3652,18 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, size_t file
 				}
 				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
 			}
-
 			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
+		}
+
+		if (contents_file != NULL && php_stream_stat(contents_file, &ssb) != -1) {
+			data->internal_file->flags = ssb.sb.st_mode & PHAR_ENT_PERM_MASK ;
+		} else {
+#ifndef _WIN32
+			mode_t mask;
+			mask = umask(0);
+			umask(mask);
+			data->internal_file->flags &= ~mask;
+#endif
 		}
 
 		/* check for copy-on-write */

@@ -171,6 +171,7 @@ COMMENT:             Use PostgreSQL 7.0.x or later. PostgreSQL 6.5.3 or less hav
 -------------------------------------------------------------------------------
 EXTENSION:           sqlite3
 PRIMARY MAINTAINER:  Scott MacVicar <scottmac@php.net> (2008 - 2011)
+                     Christoph M. Becker <cmb@php.net> (2016 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -218,7 +219,8 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xmlreader
-PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net>
+PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2004 - 2010)
+                     Christian Stocker <chregu@php.net> (2004 - 2004)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------

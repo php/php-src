@@ -323,7 +323,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 
 	intern->u.file.delimiter = ',';
 	intern->u.file.enclosure = '"';
-	intern->u.file.escape = '\\';
+	intern->u.file.escape = (unsigned char) '\\';
 
 	intern->u.file.func_getCurr = zend_hash_str_find_ptr(&intern->std.ce->function_table, "getcurrentline", sizeof("getcurrentline") - 1);
 
@@ -2109,7 +2109,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	spl_filesystem_file_call(intern, func_ptr, pass_num_args, return_value, arg2); \
 } /* }}} */
 
-static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, char escape, zval *return_value) /* {{{ */
+static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
 {
 	int ret = SUCCESS;
 	zval *value;
@@ -2129,7 +2129,6 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 
 		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, &intern->u.file.current_zval);
 		if (return_value) {
-			zval_ptr_dtor(return_value);
 			value = &intern->u.file.current_zval;
 			ZVAL_COPY_DEREF(return_value, value);
 		}
@@ -2562,7 +2561,8 @@ SPL_METHOD(SplFileObject, func_name) \
 SPL_METHOD(SplFileObject, fgetcsv)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
+	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure;
+	int escape = intern->u.file.escape;
 	char *delim = NULL, *enclo = NULL, *esc = NULL;
 	size_t d_len = 0, e_len = 0, esc_len = 0;
 
@@ -2576,11 +2576,15 @@ SPL_METHOD(SplFileObject, fgetcsv)
 		switch(ZEND_NUM_ARGS())
 		{
 		case 3:
-			if (esc_len != 1) {
-				php_error_docref(NULL, E_WARNING, "escape must be a character");
+			if (esc_len > 1) {
+				php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
 				RETURN_FALSE;
 			}
-			escape = esc[0];
+			if (esc_len == 0) {
+				escape = PHP_CSV_NO_ESCAPE;
+			} else {
+				escape = (unsigned char) esc[0];
+			}
 			/* no break */
 		case 2:
 			if (e_len != 1) {
@@ -2609,7 +2613,8 @@ SPL_METHOD(SplFileObject, fgetcsv)
 SPL_METHOD(SplFileObject, fputcsv)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
+	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure;
+	int escape = intern->u.file.escape;
 	char *delim = NULL, *enclo = NULL, *esc = NULL;
 	size_t d_len = 0, e_len = 0, esc_len = 0;
 	zend_long ret;
@@ -2619,11 +2624,17 @@ SPL_METHOD(SplFileObject, fputcsv)
 		switch(ZEND_NUM_ARGS())
 		{
 		case 4:
-			if (esc_len != 1) {
-				php_error_docref(NULL, E_WARNING, "escape must be a character");
-				RETURN_FALSE;
+			switch (esc_len) {
+				case 0:
+					escape = PHP_CSV_NO_ESCAPE;
+					break;
+				case 1:
+					escape = (unsigned char) esc[0];
+					break;
+				default:
+					php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
+					RETURN_FALSE;
 			}
-			escape = esc[0];
 			/* no break */
 		case 3:
 			if (e_len != 1) {
@@ -2654,7 +2665,8 @@ SPL_METHOD(SplFileObject, fputcsv)
 SPL_METHOD(SplFileObject, setCsvControl)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	char delimiter = ',', enclosure = '"', escape='\\';
+	char delimiter = ',', enclosure = '"';
+	int escape = (unsigned char) '\\';
 	char *delim = NULL, *enclo = NULL, *esc = NULL;
 	size_t d_len = 0, e_len = 0, esc_len = 0;
 
@@ -2662,11 +2674,17 @@ SPL_METHOD(SplFileObject, setCsvControl)
 		switch(ZEND_NUM_ARGS())
 		{
 		case 3:
-			if (esc_len != 1) {
-				php_error_docref(NULL, E_WARNING, "escape must be a character");
-				RETURN_FALSE;
+			switch (esc_len) {
+				case 0: 
+					escape = PHP_CSV_NO_ESCAPE;
+					break;
+				case 1:
+					escape = (unsigned char) esc[0];
+					break;
+				default:
+					php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
+					RETURN_FALSE;
 			}
-			escape = esc[0];
 			/* no break */
 		case 2:
 			if (e_len != 1) {
@@ -2705,8 +2723,12 @@ SPL_METHOD(SplFileObject, getCsvControl)
 	delimiter[1] = '\0';
 	enclosure[0] = intern->u.file.enclosure;
 	enclosure[1] = '\0';
-	escape[0] = intern->u.file.escape;
-	escape[1] = '\0';
+	if (intern->u.file.escape == PHP_CSV_NO_ESCAPE) {
+		escape[0] = '\0';
+	} else {
+		escape[0] = (unsigned char) intern->u.file.escape;
+		escape[1] = '\0';
+	}
 
 	add_next_index_string(return_value, delimiter);
 	add_next_index_string(return_value, enclosure);

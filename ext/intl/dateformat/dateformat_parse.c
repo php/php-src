@@ -116,7 +116,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 	/* Is in DST? */
 	isInDST = ucal_inDaylightTime(parsed_calendar	, &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing - localtime failed : while checking if currently in DST." );
-	add_assoc_long( return_value, CALENDAR_ISDST,(isInDST==1?1:0));
+	add_assoc_long( return_value, CALENDAR_ISDST,isInDST==1);
 }
 /* }}} */
 

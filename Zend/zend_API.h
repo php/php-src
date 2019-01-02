@@ -415,7 +415,9 @@ ZEND_API int add_index_double(zval *arg, zend_ulong idx, double d);
 ZEND_API int add_index_str(zval *arg, zend_ulong idx, zend_string *str);
 ZEND_API int add_index_string(zval *arg, zend_ulong idx, const char *str);
 ZEND_API int add_index_stringl(zval *arg, zend_ulong idx, const char *str, size_t length);
-ZEND_API int add_index_zval(zval *arg, zend_ulong index, zval *value);
+
+#define add_index_zval(arg, index, value) \
+	(zend_hash_index_update(Z_ARRVAL_P(arg), index, value) ? SUCCESS : FAILURE)
 
 ZEND_API int add_next_index_long(zval *arg, zend_long n);
 ZEND_API int add_next_index_null(zval *arg);
@@ -425,19 +427,9 @@ ZEND_API int add_next_index_double(zval *arg, double d);
 ZEND_API int add_next_index_str(zval *arg, zend_string *str);
 ZEND_API int add_next_index_string(zval *arg, const char *str);
 ZEND_API int add_next_index_stringl(zval *arg, const char *str, size_t length);
-ZEND_API int add_next_index_zval(zval *arg, zval *value);
 
-ZEND_API zval *add_get_assoc_string_ex(zval *arg, const char *key, uint32_t key_len, const char *str);
-ZEND_API zval *add_get_assoc_stringl_ex(zval *arg, const char *key, uint32_t key_len, const char *str, size_t length);
-
-#define add_get_assoc_string(__arg, __key, __str) add_get_assoc_string_ex(__arg, __key, strlen(__key), __str)
-#define add_get_assoc_stringl(__arg, __key, __str, __length) add_get_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
-
-ZEND_API zval *add_get_index_long(zval *arg, zend_ulong idx, zend_long l);
-ZEND_API zval *add_get_index_double(zval *arg, zend_ulong idx, double d);
-ZEND_API zval *add_get_index_str(zval *arg, zend_ulong index, zend_string *str);
-ZEND_API zval *add_get_index_string(zval *arg, zend_ulong idx, const char *str);
-ZEND_API zval *add_get_index_stringl(zval *arg, zend_ulong idx, const char *str, size_t length);
+#define add_next_index_zval(arg, value) \
+	(zend_hash_next_index_insert(Z_ARRVAL_P(arg), value) ? SUCCESS : FAILURE)
 
 ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value);
 
@@ -911,7 +903,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 	_real_arg++; \
 	_arg = _real_arg; \
 	if (deref) { \
-		ZVAL_DEREF(_arg); \
+		if (EXPECTED(Z_ISREF_P(_arg))) { \
+			_arg = Z_REFVAL_P(_arg); \
+		} \
 	} \
 	if (separate) { \
 		SEPARATE_ZVAL_NOREF(_arg); \

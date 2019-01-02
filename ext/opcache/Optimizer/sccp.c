@@ -699,6 +699,26 @@ static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *
 	return SUCCESS;
 }
 
+static inline int ct_eval_array_key_exists(zval *result, zval *op1, zval *op2) {
+	zval *value;
+
+	if (Z_TYPE_P(op2) != IS_ARRAY && !IS_PARTIAL_ARRAY(op2)) {
+		return FAILURE;
+	}
+	if (Z_TYPE_P(op1) != IS_STRING && Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_NULL) {
+		return FAILURE;
+	}
+	if (fetch_array_elem(&value, op2, op1) == FAILURE) {
+		return FAILURE;
+	}
+	if (IS_PARTIAL_ARRAY(op2) && (!value || IS_BOT(value))) {
+		return FAILURE;
+	}
+
+	ZVAL_BOOL(result, value != NULL);
+	return SUCCESS;
+}
+
 /* The functions chosen here are simple to implement and either likely to affect a branch,
  * or just happened to be commonly used with constant operands in WP (need to test other
  * applications as well, of course). */
@@ -1570,6 +1590,16 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 			if (ct_eval_in_array(&zv, opline->extended_value, op1, op2) == SUCCESS) {
+				SET_RESULT(result, &zv);
+				zval_ptr_dtor_nogc(&zv);
+				break;
+			}
+			SET_RESULT_BOT(result);
+			break;
+		case ZEND_ARRAY_KEY_EXISTS:
+			SKIP_IF_TOP(op1);
+			SKIP_IF_TOP(op2);
+			if (ct_eval_array_key_exists(&zv, op1, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;

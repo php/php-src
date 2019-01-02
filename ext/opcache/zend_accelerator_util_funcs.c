@@ -49,12 +49,12 @@ zend_persistent_script* create_persistent_script(void)
 	zend_persistent_script *persistent_script = (zend_persistent_script *) emalloc(sizeof(zend_persistent_script));
 	memset(persistent_script, 0, sizeof(zend_persistent_script));
 
-	zend_hash_init(&persistent_script->script.function_table, 128, NULL, ZEND_FUNCTION_DTOR, 0);
+	zend_hash_init(&persistent_script->script.function_table, 0, NULL, ZEND_FUNCTION_DTOR, 0);
 	/* class_table is usually destroyed by free_persistent_script() that
 	 * overrides destructor. ZEND_CLASS_DTOR may be used by standard
 	 * PHP compiler
 	 */
-	zend_hash_init(&persistent_script->script.class_table, 16, NULL, ZEND_CLASS_DTOR, 0);
+	zend_hash_init(&persistent_script->script.class_table, 0, NULL, ZEND_CLASS_DTOR, 0);
 
 	return persistent_script;
 }
@@ -76,26 +76,65 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 	efree(persistent_script);
 }
 
-void zend_accel_move_user_functions(HashTable *src, zend_script *script)
+void zend_accel_move_user_functions(HashTable *src, uint32_t count, zend_script *script)
 {
-	Bucket *p;
-	HashTable *dst = &script->function_table;
-	zend_string *filename = script->main_op_array.filename;
-	dtor_func_t orig_dtor = src->pDestructor;
+	Bucket *p, *end;
+	HashTable *dst;
+	zend_string *filename;
+	dtor_func_t orig_dtor;
+	zend_function *function;
 
+	if (!count) {
+		return;
+	}
+
+	dst = &script->function_table;
+	filename = script->main_op_array.filename;
+	orig_dtor = src->pDestructor;
 	src->pDestructor = NULL;
-	zend_hash_extend(dst, dst->nNumUsed + src->nNumUsed, 0);
-	ZEND_HASH_REVERSE_FOREACH_BUCKET(src, p) {
-		zend_function *function = Z_PTR(p->val);
-
+	zend_hash_extend(dst, count, 0);
+	end = src->arData + src->nNumUsed;
+	p = end - count;
+	for (; p != end; p++) {
+		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		function = Z_PTR(p->val);
 		if (EXPECTED(function->type == ZEND_USER_FUNCTION)
 		 && EXPECTED(function->op_array.filename == filename)) {
 			_zend_hash_append_ptr(dst, p->key, function);
 			zend_hash_del_bucket(src, p);
-		} else {
-			break;
 		}
-	} ZEND_HASH_FOREACH_END();
+	}
+	src->pDestructor = orig_dtor;
+}
+
+void zend_accel_move_user_classes(HashTable *src, uint32_t count, zend_script *script)
+{
+	Bucket *p, *end;
+	HashTable *dst;
+	zend_string *filename;
+	dtor_func_t orig_dtor;
+	zend_class_entry *ce;
+
+	if (!count) {
+		return;
+	}
+
+	dst = &script->class_table;
+	filename = script->main_op_array.filename;
+	orig_dtor = src->pDestructor;
+	src->pDestructor = NULL;
+	zend_hash_extend(dst, count, 0);
+	end = src->arData + src->nNumUsed;
+	p = end - count;
+	for (; p != end; p++) {
+		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ce = Z_PTR(p->val);
+		if (EXPECTED(ce->type == ZEND_USER_CLASS)
+		 && EXPECTED(ce->info.user.filename == filename)) {
+			_zend_hash_append_ptr(dst, p->key, ce);
+			zend_hash_del_bucket(src, p);
+		}
+	}
 	src->pDestructor = orig_dtor;
 }
 
@@ -104,7 +143,7 @@ static void zend_hash_clone_constants(HashTable *ht)
 	Bucket *p, *end;
 	zend_class_constant *c;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		return;
 	}
 
@@ -135,7 +174,7 @@ static void zend_hash_clone_methods(HashTable *ht)
 
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		return;
 	}
 
@@ -173,7 +212,7 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 	Bucket *p, *end;
 	zend_property_info *prop_info;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		return;
 	}
 

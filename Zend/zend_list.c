@@ -220,20 +220,15 @@ int zend_init_rsrc_plist(void)
 }
 
 
-static int zend_close_rsrc(zval *zv)
-{
-	zend_resource *res = Z_PTR_P(zv);
-
-	if (res->type >= 0) {
-		zend_resource_dtor(res);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-
-
 void zend_close_rsrc_list(HashTable *ht)
 {
-	zend_hash_reverse_apply(ht, zend_close_rsrc);
+	zend_resource *res;
+
+	ZEND_HASH_REVERSE_FOREACH_PTR(ht, res) {
+		if (res->type >= 0) {
+			zend_resource_dtor(res);
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 
 
@@ -245,11 +240,8 @@ void zend_destroy_rsrc_list(HashTable *ht)
 static int clean_module_resource(zval *zv, void *arg)
 {
 	int resource_id = *(int *)arg;
-	if (Z_RES_TYPE_P(zv) == resource_id) {
-		return 1;
-	} else {
-		return 0;
-	}
+
+	return Z_RES_TYPE_P(zv) == resource_id;
 }
 
 

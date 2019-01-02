@@ -388,7 +388,7 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			PDO_DBG_RETURN(1);
 
 		case PDO_ATTR_DEFAULT_STR_PARAM:
-			((pdo_mysql_db_handle *)dbh->driver_data)->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL ? 1 : 0;
+			((pdo_mysql_db_handle *)dbh->driver_data)->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL;
 			PDO_DBG_RETURN(1);
 
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
@@ -617,7 +617,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			PDO_ATTR_EMULATE_PREPARES, H->emulate_prepare);
 
 		H->assume_national_character_set_strings = pdo_attr_lval(driver_options,
-			PDO_ATTR_DEFAULT_STR_PARAM, 0) == PDO_PARAM_STR_NATL ? 1 : 0;
+			PDO_ATTR_DEFAULT_STR_PARAM, 0) == PDO_PARAM_STR_NATL;
 
 #ifndef PDO_USE_MYSQLND
 		H->max_buffer_size = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_MAX_BUFFER_SIZE, H->max_buffer_size);

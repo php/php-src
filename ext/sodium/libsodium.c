@@ -387,9 +387,8 @@ static void sodium_remove_param_values_from_backtrace(zend_object *obj) {
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(trace), frame) {
 			if (Z_TYPE_P(frame) == IS_ARRAY) {
 				zval *args = zend_hash_str_find(Z_ARRVAL_P(frame), "args", sizeof("args")-1);
-				if (args && Z_TYPE_P(frame) == IS_ARRAY) {
-					zend_hash_clean(Z_ARRVAL_P(args));
-				}
+				zval_ptr_dtor(args);
+				ZVAL_EMPTY_ARRAY(args);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -2780,7 +2779,7 @@ PHP_FUNCTION(sodium_base642bin)
 							 "invalid base64 variant identifier", 0);
 		return;
 	}
-	bin_len = b64_len / 4U * 3U + 1U;
+	bin_len = b64_len / 4U * 3U + 2U;
 	bin = zend_string_alloc(bin_len, 0);
 	if (sodium_base642bin((unsigned char *) ZSTR_VAL(bin), bin_len,
 						  b64, b64_len,
@@ -3399,9 +3398,6 @@ PHP_FUNCTION(sodium_pad)
 	}
 	xpadded_len = unpadded_len + xpadlen;
 	padded = zend_string_alloc(xpadded_len + 1U, 0);
-	st = 1U;
-	i = 0U;
-	k = unpadded_len;
 	if (unpadded_len > 0) {
 		st = 1U;
 		i = 0U;

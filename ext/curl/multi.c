@@ -594,11 +594,8 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 	}
 
 	SAVE_CURLM_ERROR(mh, error);
-	if (error != CURLM_OK) {
-		return 1;
-	} else {
-		return 0;
-	}
+
+	return error != CURLM_OK;
 }
 /* }}} */
 

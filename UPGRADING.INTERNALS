@@ -9,6 +9,10 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   f. get_properties_for() handler / Z_OBJDEBUG_P
   g. Required object handlers
   h. Immutable classes and op_arrays
+  i. php_fgetcsv() and php_fputcsv()
+  j. Removed add_get_assoc_*() and add_get_index_*()
+  k. Class declaration opcodes
+  l. HASH_FLAG_INITIALIZED
 
 2. Build system changes
   a. Abstract
@@ -135,6 +139,24 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      op_arrays. Instead, now you have to reserve op_array handle using
      zend_get_op_array_extension_handle() during MINIT and access its value
      using ZEND_OP_ARRAY_EXTENSION(op_array, handle).
+
+  i. The type of the escape parameter of php_fgetcsv() and php_fputcsv() has
+     been changed from char to int. This allows to pass the new constant macro
+     PHP_CSV_NO_ESCAPE to this parameter, to disable PHP's proprietary escape
+     mechanism.
+
+  j. add_get_assoc_*() and add_get_index_*() are removed. Use add_assoc*(),
+     add_index*() or zend_hash_*() API functions instead.
+
+  k. Complex class declaration opcodes ZEND_ADD_INTERFACE, ZEND_ADD_TRAIT,
+     ZEND_BIND_TRAITS and ZEND_VERIFY_ABSTRACT_CLASS were removed. Information
+     about interfaces and traits is kept in zend_class_entry structure and
+     actual linked performed by ZEND_DECLARE_...CLASS... opcode(s).
+     Linked classes have ZEND_ACC_LINKED flag set.
+
+  l. HASH_FLAG_INITIALIZED was reverted into HASH_FLAG_UNINITIALIZED.
+     Special HT_IS_INITIALIZED() and HT_INVALIDATE() macro were introduced
+     to hide implementation details.
 
 ========================
 2. Build system changes

@@ -80,7 +80,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 
 	if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
 		PHAR_G(readonly) = ini;
-		if (PHAR_G(request_init) && HT_FLAGS(&PHAR_G(phar_fname_map))) {
+		if (PHAR_G(request_init) && HT_IS_INITIALIZED(&PHAR_G(phar_fname_map))) {
 			zend_hash_apply_with_argument(&(PHAR_G(phar_fname_map)), phar_set_writeable_bit, (void *)&ini);
 		}
 	} else {
@@ -144,9 +144,9 @@ finish_error:
 				PHAR_G(manifest_cached) = 0;
 				efree(tmp);
 				zend_hash_destroy(&(PHAR_G(phar_fname_map)));
-				HT_FLAGS(&PHAR_G(phar_fname_map)) = 0;
+				HT_INVALIDATE(&PHAR_G(phar_fname_map));
 				zend_hash_destroy(&(PHAR_G(phar_alias_map)));
-				HT_FLAGS(&PHAR_G(phar_alias_map)) = 0;
+				HT_INVALIDATE(&PHAR_G(phar_alias_map));
 				zend_hash_destroy(&cached_phars);
 				zend_hash_destroy(&cached_alias);
 				zend_hash_graceful_reverse_destroy(&EG(regular_list));
@@ -171,8 +171,8 @@ finish_error:
 	zend_hash_destroy(&cached_alias);
 	cached_phars = PHAR_G(phar_fname_map);
 	cached_alias = PHAR_G(phar_alias_map);
-	HT_FLAGS(&PHAR_G(phar_fname_map)) = 0;
-	HT_FLAGS(&PHAR_G(phar_alias_map)) = 0;
+	HT_INVALIDATE(&PHAR_G(phar_fname_map));
+	HT_INVALIDATE(&PHAR_G(phar_alias_map));
 	zend_hash_graceful_reverse_destroy(&EG(regular_list));
 	memset(&EG(regular_list), 0, sizeof(HashTable));
 	efree(tmp);
@@ -218,19 +218,19 @@ void phar_destroy_phar_data(phar_archive_data *phar) /* {{{ */
 		phar->signature = NULL;
 	}
 
-	if (HT_FLAGS(&phar->manifest)) {
+	if (HT_IS_INITIALIZED(&phar->manifest)) {
 		zend_hash_destroy(&phar->manifest);
-		HT_FLAGS(&phar->manifest) = 0;
+		HT_INVALIDATE(&phar->manifest);
 	}
 
-	if (HT_FLAGS(&phar->mounted_dirs)) {
+	if (HT_IS_INITIALIZED(&phar->mounted_dirs)) {
 		zend_hash_destroy(&phar->mounted_dirs);
-		HT_FLAGS(&phar->mounted_dirs) = 0;
+		HT_INVALIDATE(&phar->mounted_dirs);
 	}
 
-	if (HT_FLAGS(&phar->virtual_dirs)) {
+	if (HT_IS_INITIALIZED(&phar->virtual_dirs)) {
 		zend_hash_destroy(&phar->virtual_dirs);
-		HT_FLAGS(&phar->virtual_dirs) = 0;
+		HT_INVALIDATE(&phar->virtual_dirs);
 	}
 
 	if (Z_TYPE(phar->metadata) != IS_UNDEF) {
@@ -641,6 +641,18 @@ int phar_parse_metadata(char **buffer, zval *metadata, uint32_t zip_metadata_len
 /* }}}*/
 
 /**
+ * Size of fixed fields in the manifest.
+ * See: http://php.net/manual/en/phar.fileformat.phar.php
+ */
+#define MANIFEST_FIXED_LEN	18
+
+#define SAFE_PHAR_GET_32(buffer, endbuffer, var) \
+	if (UNEXPECTED(buffer + 4 > endbuffer)) { \
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)"); \
+	} \
+	PHAR_GET_32(buffer, var);
+
+/**
  * Does not check for a previously opened phar in the cache.
  *
  * Parse a new one and add it to the cache, returning either SUCCESS or
@@ -725,12 +737,12 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	savebuf = buffer;
 	endbuffer = buffer + manifest_len;
 
-	if (manifest_len < 10 || manifest_len != php_stream_read(fp, buffer, manifest_len)) {
+	if (manifest_len < MANIFEST_FIXED_LEN || manifest_len != php_stream_read(fp, buffer, manifest_len)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)")
 	}
 
 	/* extract the number of entries */
-	PHAR_GET_32(buffer, manifest_count);
+	SAFE_PHAR_GET_32(buffer, endbuffer, manifest_count);
 
 	if (manifest_count == 0) {
 		MAPPHAR_FAIL("in phar \"%s\", manifest claims to have zero entries.  Phars must have at least 1 entry");
@@ -750,7 +762,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 		return FAILURE;
 	}
 
-	PHAR_GET_32(buffer, manifest_flags);
+	SAFE_PHAR_GET_32(buffer, endbuffer, manifest_flags);
 
 	manifest_flags &= ~PHAR_HDR_COMPRESSION_MASK;
 	manifest_flags &= ~PHAR_FILE_COMPRESSION_MASK;
@@ -970,13 +982,13 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	}
 
 	/* extract alias */
-	PHAR_GET_32(buffer, tmp_len);
+	SAFE_PHAR_GET_32(buffer, endbuffer, tmp_len);
 
 	if (buffer + tmp_len > endbuffer) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)");
 	}
 
-	if (manifest_len < 10 + tmp_len) {
+	if (manifest_len < MANIFEST_FIXED_LEN + tmp_len) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)")
 	}
 
@@ -1014,7 +1026,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	}
 
 	/* we have 5 32-bit items plus 1 byte at least */
-	if (manifest_count > ((manifest_len - 10 - tmp_len) / (5 * 4 + 1))) {
+	if (manifest_count > ((manifest_len - MANIFEST_FIXED_LEN - tmp_len) / (5 * 4 + 1))) {
 		/* prevent serious memory issues */
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (too many manifest entries for size of manifest)")
 	}
@@ -1023,12 +1035,12 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	mydata->is_persistent = PHAR_G(persist);
 
 	/* check whether we have meta data, zero check works regardless of byte order */
-	PHAR_GET_32(buffer, len);
+	SAFE_PHAR_GET_32(buffer, endbuffer, len);
 	if (mydata->is_persistent) {
 		mydata->metadata_len = len;
-		if(!len) {
+		if (!len) {
 			/* FIXME: not sure why this is needed but removing it breaks tests */
-			PHAR_GET_32(buffer, len);
+			SAFE_PHAR_GET_32(buffer, endbuffer, len);
 		}
 	}
 	if(len > (size_t)(endbuffer - buffer)) {
@@ -3363,6 +3375,9 @@ PHP_GINIT_FUNCTION(phar) /* {{{ */
 	phar_mime_type mime;
 
 	memset(phar_globals, 0, sizeof(zend_phar_globals));
+	HT_INVALIDATE(&phar_globals->phar_persist_map);
+	HT_INVALIDATE(&phar_globals->phar_fname_map);
+	HT_INVALIDATE(&phar_globals->phar_alias_map);
 	phar_globals->readonly = 1;
 
 	zend_hash_init(&phar_globals->mime_types, 0, NULL, mime_type_dtor, 1);
@@ -3508,11 +3523,11 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 	{
 		phar_release_functions();
 		zend_hash_destroy(&(PHAR_G(phar_alias_map)));
-		HT_FLAGS(&PHAR_G(phar_alias_map)) = 0;
+		HT_INVALIDATE(&PHAR_G(phar_alias_map));
 		zend_hash_destroy(&(PHAR_G(phar_fname_map)));
-		HT_FLAGS(&PHAR_G(phar_fname_map)) = 0;
+		HT_INVALIDATE(&PHAR_G(phar_fname_map));
 		zend_hash_destroy(&(PHAR_G(phar_persist_map)));
-		HT_FLAGS(&PHAR_G(phar_persist_map)) = 0;
+		HT_INVALIDATE(&PHAR_G(phar_persist_map));
 		PHAR_G(phar_SERVER_mung_list) = 0;
 
 		if (PHAR_G(cached_fp)) {

@@ -10,6 +10,7 @@ dnl -------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
 AC_INIT(README.GIT-RULES)
+AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
@@ -275,7 +276,7 @@ case $host_alias in
   *dgux*)
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
     ;;
-  *darwin*|*rhapsody*)
+  *darwin*)
     if test -n "$GCC"; then
       PHP_CHECK_GCC_ARG(-no-cpp-precomp, gcc_no_cpp_precomp=yes)
       if test "$gcc_no_cpp_precomp" = "yes"; then
@@ -580,7 +581,10 @@ PHP_SOCKADDR_CHECKS
 
 dnl Checks for GCC function attributes on all systems except ones without glibc
 dnl Fix for these systems is already included in GCC 7, but not on GCC 6
-AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*], [true], [
+dnl
+dnl At least some versions of FreeBSD seem to have buggy ifunc support, see
+dnl bug #77284. Conservatively don't use ifuncs on FreeBSD.
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*freebsd*], [true], [
   AX_GCC_FUNC_ATTRIBUTE([ifunc])
   AX_GCC_FUNC_ATTRIBUTE([target])
 ])
