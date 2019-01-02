@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.2
 
 - Core:
+  . Fixed bug #77376 ("undefined function" message no longer includes
+    namespace). (Laruence)
   . Fixed bug #77339 (__callStatic may get incorrect arguments). (Dmitry)
   . Fixed bug #77317 (__DIR__, __FILE__, realpath() reveal physical path for
     subst virtual drive). (Anatol)
