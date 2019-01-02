@@ -58,6 +58,7 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init() {
 		d->last = &d->entries;
 		d->first_dtor = d->last_dtor = NULL;
 		d->allowed_classes = NULL;
+		d->refs = NULL;
 		d->entries.used_slots = 0;
 		d->entries.next = NULL;
 		if (!BG(serialize_lock)) {
