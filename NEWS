@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
     on MacOS). (Michael Meyer)
 
+- Standard:
+  . Fixed bug #77395 (segfault about array_multisort). (Laruence)
+
 03 Jan 2019, PHP 7.2.14
 
 - Core:
