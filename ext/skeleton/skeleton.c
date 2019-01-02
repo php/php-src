@@ -8,6 +8,13 @@
 #include "ext/standard/info.h"
 #include "php_%EXTNAME%.h"
 
+/* For compatibility with older PHP versions */
+#ifndef ZEND_PARSE_PARAMETERS_NONE
+#define ZEND_PARSE_PARAMETERS_NONE() \
+	ZEND_PARSE_PARAMETERS_START(0, 0) \
+	ZEND_PARSE_PARAMETERS_END()
+#endif
+
 /* {{{ void %EXTNAME%_test1()
  */
 PHP_FUNCTION(%EXTNAME%_test1)
