@@ -2354,7 +2354,7 @@ static inline void zend_set_class_name_op1(zend_op *opline, znode *class_node) /
 }
 /* }}} */
 
-static void zend_compile_class_ref_ex(znode *result, zend_ast *name_ast, uint32_t fetch_flags) /* {{{ */
+static void zend_compile_class_ref(znode *result, zend_ast *name_ast, uint32_t fetch_flags) /* {{{ */
 {
 	uint32_t fetch_type;
 
@@ -2606,7 +2606,7 @@ zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, i
 	znode class_node, prop_node;
 	zend_op *opline;
 
-	zend_compile_class_ref_ex(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
+	zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 
 	zend_compile_expr(&prop_node, prop_ast);
 
@@ -4024,7 +4024,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 	zend_op *opline;
 	zend_function *fbc = NULL;
 
-	zend_compile_class_ref_ex(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
+	zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 
 	zend_compile_expr(&method_node, method_ast);
 	if (method_node.op_type == IS_CONST) {
@@ -4114,7 +4114,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		class_node.u.op.var = opline->result.var;
 		opline->extended_value = get_next_op_number();
 	} else {
-		zend_compile_class_ref_ex(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
+		zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 	}
 
 	opline = zend_emit_op(result, ZEND_NEW, NULL, NULL);
@@ -7424,7 +7424,7 @@ void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	zend_compile_class_ref_ex(&class_node, class_ast,
+	zend_compile_class_ref(&class_node, class_ast,
 		ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_EXCEPTION);
 
 	opline = zend_emit_op_tmp(result, ZEND_INSTANCEOF, &obj_node, NULL);
@@ -7714,7 +7714,7 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 			"Dynamic class names are not allowed in compile-time ::class fetch");
 	}
 
-	zend_compile_class_ref_ex(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
+	zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 
 	zend_compile_expr(&const_node, const_ast);
 
