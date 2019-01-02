@@ -3431,11 +3431,10 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		func_name = RT_CONSTANT(opline, opline->op2) + 1;
-		func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name), 1);
+		func_name = (zval *)RT_CONSTANT(opline, opline->op2);
+		func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 1), 1);
 		if (func == NULL) {
-			func_name++;
-			func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name), 1);
+			func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 2), 1);
 			if (UNEXPECTED(func == NULL)) {
 				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 			}
