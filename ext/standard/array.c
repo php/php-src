@@ -5572,7 +5572,7 @@ PHPAPI int php_multisort_compare(const void *a, const void *b) /* {{{ */
 /* }}} */
 
 #define MULTISORT_ABORT				\
-	efree(ARRAYG(multisort_func));	\
+	efree(func);	\
 	efree(arrays);					\
 	RETURN_FALSE;
 
@@ -5604,6 +5604,7 @@ PHP_FUNCTION(array_multisort)
 	int				sort_order = PHP_SORT_ASC;
 	int				sort_type  = PHP_SORT_REGULAR;
 	int				i, k, n;
+	compare_func_t  *func;
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
@@ -5614,7 +5615,7 @@ PHP_FUNCTION(array_multisort)
 	for (i = 0; i < MULTISORT_LAST; i++) {
 		parse_state[i] = 0;
 	}
-	ARRAYG(multisort_func) = (compare_func_t*)ecalloc(argc, sizeof(compare_func_t));
+	func = ARRAYG(multisort_func) = (compare_func_t*)ecalloc(argc, sizeof(compare_func_t));
 
 	/* Here we go through the input arguments and parse them. Each one can
 	 * be either an array or a sort flag which follows an array. If not
@@ -5698,7 +5699,7 @@ PHP_FUNCTION(array_multisort)
 
 	/* If all arrays are empty we don't need to do anything. */
 	if (array_size < 1) {
-		efree(ARRAYG(multisort_func));
+		efree(func);
 		efree(arrays);
 		RETURN_TRUE;
 	}
@@ -5757,7 +5758,7 @@ PHP_FUNCTION(array_multisort)
 		efree(indirect[i]);
 	}
 	efree(indirect);
-	efree(ARRAYG(multisort_func));
+	efree(func);
 	efree(arrays);
 	RETURN_TRUE;
 }
