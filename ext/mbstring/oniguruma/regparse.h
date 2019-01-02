@@ -348,4 +348,16 @@ extern int onig_print_names(FILE*, regex_t*);
 #endif
 #endif
 
+#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
+# define UNEXPECTED(condition) __builtin_expect(condition, 0)
+#else
+# define UNEXPECTED(condition) (condition)
+#endif
+
+#define SAFE_ENC_LEN(enc, p, end, res) do {  \
+    int __res = enclen(enc, p);              \
+    if (UNEXPECTED(p + __res > end)) __res = end - p;    \
+	res = __res;                             \
+} while(0);
+
 #endif /* REGPARSE_H */
