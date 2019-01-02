@@ -2912,8 +2912,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
    Returns the error code of the last regexp execution. */
 static PHP_FUNCTION(preg_last_error)
 {
-	ZEND_PARSE_PARAMETERS_START(0, 0)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(PCRE_G(error_code));
 }
