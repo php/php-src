@@ -170,7 +170,7 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 			}
 		}
 	}
-	return ZEND_NORMALIZE_BOOL(l1 > l2);
+	return ZEND_NORMALIZE_BOOL(l1 - l2);
 }
 /* }}} */
 
