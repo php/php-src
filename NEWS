@@ -29,6 +29,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #77338 (get_browser with empty string). (Nikita)
 
+- PDO:
+  . Fixed bug #77273 (array_walk_recursive corrupts value types leading to PDO
+    failure). (Nikita)
+
 - Sockets:
   . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
     on MacOS). (Michael Meyer)
