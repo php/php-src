@@ -821,13 +821,12 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 		value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (Z_ISREF_P(object)) {
+			if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
 				object = Z_REFVAL_P(object);
-				if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-					ZEND_VM_C_GOTO(assign_op_object);
-				}
+				ZEND_VM_C_GOTO(assign_op_object);
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
+			object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(!object)) {
 				break;
 			}
 		}
@@ -1225,13 +1224,12 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 
 	do {
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (Z_ISREF_P(object)) {
+			if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
 				object = Z_REFVAL_P(object);
-				if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-					ZEND_VM_C_GOTO(pre_incdec_object);
-				}
+				ZEND_VM_C_GOTO(pre_incdec_object);
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
+			object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(!object)) {
 				break;
 			}
 		}
@@ -1295,13 +1293,12 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 
 	do {
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (Z_ISREF_P(object)) {
+			if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
 				object = Z_REFVAL_P(object);
-				if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-					ZEND_VM_C_GOTO(post_incdec_object);
-				}
+				ZEND_VM_C_GOTO(post_incdec_object);
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
+			object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(!object)) {
 				break;
 			}
 		}
@@ -2314,13 +2311,12 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE
 	value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		if (Z_ISREF_P(object)) {
+		if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
 			object = Z_REFVAL_P(object);
-			if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				ZEND_VM_C_GOTO(assign_object);
-			}
+			ZEND_VM_C_GOTO(assign_object);
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
+		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
+		if (UNEXPECTED(!object)) {
 			FREE_OP_DATA();
 			ZEND_VM_C_GOTO(exit_assign_obj);
 		}

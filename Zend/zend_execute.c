@@ -634,16 +634,20 @@ static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(z
 	return 1;
 }
 
+static zend_always_inline zend_property_info *i_zend_check_ref_stdClass_assignable(zend_reference *ref);
+
 /* this should modify object only if it's empty */
-static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_object *obj;
+	zval *ref = NULL;
+	if (Z_ISREF_P(object)) {
+		ref = object;
+		object = Z_REFVAL_P(object);
+	}
 
-	if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
-		/* nothing to destroy */
-	} else if (EXPECTED((Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
-		zval_ptr_dtor_nogc(object);
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) > IS_FALSE &&
+			(Z_TYPE_P(object) != IS_STRING || Z_STRLEN_P(object) != 0))) {
 		if (opline->op1_type != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
 			zend_string *tmp_property_name;
 			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
@@ -661,8 +665,23 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *obje
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		return 0;
+		return NULL;
 	}
+
+	if (ref) {
+		zend_property_info *error_prop = i_zend_check_ref_stdClass_assignable(Z_REF_P(ref));
+		if (error_prop) {
+			zend_type_error("Cannot write an stdClass to a null or false reference held by %s::$%s which does not allow for stdClass",
+				ZSTR_VAL(error_prop->ce->name),
+				zend_get_mangled_property_name(error_prop->name));
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+			}
+			return NULL;
+		}
+	}
+
+	zval_ptr_dtor_nogc(object);
 	object_init(object);
 	Z_ADDREF_P(object);
 	obj = Z_OBJ_P(object);
@@ -673,29 +692,47 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *obje
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		return 0;
+		return NULL;
 	}
 	Z_DELREF_P(object);
-	return 1;
+	return object;
 }
 
-static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object_rw(zval *object, zval *property OPLINE_DC)
+static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object_rw(zval *object, zval *property OPLINE_DC)
 {
-	if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
-		/* nothing to destroy */
-	} else if (EXPECTED((Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
-		zval_ptr_dtor_nogc(object);
-	} else {
+	zval *ref = NULL;
+	if (Z_ISREF_P(object)) {
+		ref = object;
+		object = Z_REFVAL_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) > IS_FALSE &&
+			(Z_TYPE_P(object) != IS_STRING || Z_STRLEN_P(object) != 0))) {
 		if (opline->op1_type != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
 			zend_string *tmp_property_name;
 			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 			zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
 			zend_tmp_string_release(tmp_property_name);
 		}
-		return 0;
+		return NULL;
 	}
+
+	if (ref) {
+		zend_property_info *error_prop = i_zend_check_ref_stdClass_assignable(Z_REF_P(ref));
+		if (error_prop) {
+			zend_type_error("Cannot write an stdClass to a null or false reference held by %s::$%s which does not allow for stdClass",
+				ZSTR_VAL(error_prop->ce->name),
+				zend_get_mangled_property_name(error_prop->name));
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+			}
+			return NULL;
+		}
+	}
+
+	zval_ptr_dtor_nogc(object);
 	object_init(object);
-	return 1;
+	return object;
 }
 
 static ZEND_COLD void zend_verify_type_error_common(
@@ -2463,22 +2500,59 @@ static zend_always_inline zend_bool check_type_stdClass_assignable(zend_type typ
 	}
 }
 
+/* Checks whether an array can be assigned to the reference. Returns conflicting property if
+ * assignment is not possible, NULL otherwise. */
+static zend_always_inline zend_property_info *i_zend_check_ref_array_assignable(zend_reference *ref) {
+	zend_property_info *prop;
+	if (!ZEND_REF_HAS_TYPE_SOURCES(ref)) {
+		return NULL;
+	}
+	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
+		if (!check_type_array_assignable(prop->type)) {
+			return prop;
+		}
+	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+	return NULL;
+}
+
+/* Checks whether an stdClass can be assigned to the reference. Returns conflicting property if
+ * assignment is not possible, NULL otherwise. */
+static zend_always_inline zend_property_info *i_zend_check_ref_stdClass_assignable(zend_reference *ref) {
+	zend_property_info *prop;
+	if (!ZEND_REF_HAS_TYPE_SOURCES(ref)) {
+		return NULL;
+	}
+	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
+		if (!check_type_stdClass_assignable(prop->type)) {
+			return prop;
+		}
+	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+	return NULL;
+}
+
+ZEND_API zend_property_info *zend_check_ref_array_assignable(zend_reference *ref) {
+	return i_zend_check_ref_array_assignable(ref);
+}
+
 static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t flags OPLINE_DC)
 {
 	zval *ptr;
 
 	if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
-			if (Z_ISREF_P(container)) {
+			if (Z_ISREF_P(container) && Z_TYPE_P(Z_REFVAL_P(container)) == IS_OBJECT) {
 				container = Z_REFVAL_P(container);
-				if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					break;
-				}
+				break;
 			}
 
 			/* this should modify object only if it's empty */
-			if (type == BP_VAR_UNSET ||
-				UNEXPECTED(!make_real_object_rw(container, prop_ptr OPLINE_CC))) {
+			if (type == BP_VAR_UNSET) {
+				return;
+			}
+
+
+			container = make_real_object_rw(container, prop_ptr OPLINE_CC);
+			if (UNEXPECTED(!container)) {
 				ZVAL_ERROR(result);
 				return;
 			}
@@ -2713,26 +2787,6 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 	}
 
 	return SUCCESS;
-}
-
-/* Checks whether an array can be assigned to the reference. Returns conflicting property if
- * assignment is not possible, NULL otherwise. */
-static zend_always_inline zend_property_info *i_zend_check_ref_array_assignable(zend_reference *ref) {
-	zend_property_info *prop;
-	if (!ZEND_REF_HAS_TYPE_SOURCES(ref)) {
-		return NULL;
-	}
-
-	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
-		if (!check_type_array_assignable(prop->type)) {
-			return prop;
-		}
-	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
-	return NULL;
-}
-
-ZEND_API zend_property_info *zend_check_ref_array_assignable(zend_reference *ref) {
-	return i_zend_check_ref_array_assignable(ref);
 }
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1, zend_property_info *prop2, zval *zv) {
