@@ -649,6 +649,28 @@ static void zend_format_type(zend_type type, const char **part1, const char **pa
 	}
 }
 
+static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(zend_property_info *prop, const char *type) {
+	const char *prop_type1, *prop_type2;
+	zend_format_type(prop->type, &prop_type1, &prop_type2);
+	zend_type_error(
+		"Cannot auto-initialize an %s inside property %s::$%s of type %s%s",
+		type,
+		ZSTR_VAL(prop->ce->name), zend_get_mangled_property_name(prop->name),
+		prop_type1, prop_type2
+	);
+}
+
+static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_ref_error(zend_property_info *prop, const char *type) {
+	const char *prop_type1, *prop_type2;
+	zend_format_type(prop->type, &prop_type1, &prop_type2);
+	zend_type_error(
+		"Cannot auto-initialize an %s inside a reference held by property %s::$%s of type %s%s",
+		type,
+		ZSTR_VAL(prop->ce->name), zend_get_mangled_property_name(prop->name),
+		prop_type1, prop_type2
+	);
+}
+
 
 /* this should modify object only if it's empty */
 static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
@@ -685,12 +707,7 @@ static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object(zval *ob
 	if (ref) {
 		zend_property_info *error_prop = i_zend_check_ref_stdClass_assignable(Z_REF_P(ref));
 		if (error_prop) {
-			const char *prop_type1, *prop_type2;
-			zend_format_type(error_prop->type, &prop_type1, &prop_type2);
-			zend_type_error("Cannot auto-initialize an stdClass inside a reference held by property %s::$%s of type %s%s",
-				ZSTR_VAL(error_prop->ce->name),
-				zend_get_mangled_property_name(error_prop->name),
-				prop_type1, prop_type2);
+			zend_throw_auto_init_in_ref_error(error_prop, "stdClass");
 			if (RETURN_VALUE_USED(opline)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
@@ -737,12 +754,7 @@ static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object_rw(zval 
 	if (ref) {
 		zend_property_info *error_prop = i_zend_check_ref_stdClass_assignable(Z_REF_P(ref));
 		if (error_prop) {
-			const char *prop_type1, *prop_type2;
-			zend_format_type(error_prop->type, &prop_type1, &prop_type2);
-			zend_type_error("Cannot auto-initialize an stdClass inside a reference held by property %s::$%s of type %s%s",
-				ZSTR_VAL(error_prop->ce->name),
-				zend_get_mangled_property_name(error_prop->name),
-				prop_type1, prop_type2);
+			zend_throw_auto_init_in_ref_error(error_prop, "stdClass");
 			if (RETURN_VALUE_USED(opline)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
@@ -2157,12 +2169,7 @@ fetch_from_array:
 			if (type != BP_VAR_UNSET) {
 				zend_property_info *error_prop;
 				if (UNEXPECTED(orig_container != container) && Z_ISREF_P(orig_container) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_container))) != NULL) {
-					const char *prop_type1, *prop_type2;
-					zend_format_type(error_prop->type, &prop_type1, &prop_type2);
-					zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
-						ZSTR_VAL(error_prop->ce->name),
-						zend_get_mangled_property_name(error_prop->name),
-						prop_type1, prop_type2);
+					zend_throw_auto_init_in_ref_error(error_prop, "array");
 					ZVAL_ERROR(result);
 				} else {
 					array_init(container);
@@ -2614,12 +2621,7 @@ return_indirect:
 					if (UNEXPECTED(prop_info)) {
 						if ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(ptr)) {
 							if (!check_type_array_assignable(prop_info->type)) {
-								const char *prop_type1, *prop_type2;
-								zend_format_type(prop_info->type, &prop_type1, &prop_type2);
-								zend_type_error("Cannot auto-initialize and array inside property %s::$%s of type %s%s",
-									ZSTR_VAL(prop_info->ce->name),
-									zend_get_mangled_property_name(prop_info->name),
-									prop_type1, prop_type2);
+								zend_throw_auto_init_in_prop_error(prop_info, "array");
 								ZVAL_UNDEF(ptr);
 								ZVAL_ERROR(result);
 							}
@@ -2627,12 +2629,7 @@ return_indirect:
 						}
 						if ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(ptr)) {
 							if (!check_type_stdClass_assignable(prop_info->type)) {
-								const char *prop_type1, *prop_type2;
-								zend_format_type(prop_info->type, &prop_type1, &prop_type2);
-								zend_type_error("Cannot auto-initialize an stdClass inside property %s::$%s of type %s%s",
-									ZSTR_VAL(prop_info->ce->name),
-									zend_get_mangled_property_name(prop_info->name),
-									prop_type1, prop_type2);
+								zend_throw_auto_init_in_prop_error(prop_info, "stdClass");
 								ZVAL_UNDEF(ptr);
 								ZVAL_ERROR(result);
 							}
@@ -2785,22 +2782,12 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 	if (flags) {
 		if ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(*retval)
 		    && !check_type_array_assignable(property_info->type)) {
-			const char *prop_type1, *prop_type2;
-			zend_format_type(property_info->type, &prop_type1, &prop_type2);
-			zend_type_error("Cannot auto-initialize an array inside property %s::$%s of type %s%s",
-				ZSTR_VAL(property_info->ce->name),
-				zend_get_mangled_property_name(property_info->name),
-				prop_type1, prop_type2);
+			zend_throw_auto_init_in_prop_error(property_info, "array");
 			return FAILURE;
 		}
 		if ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(*retval)
 		    && !check_type_stdClass_assignable(property_info->type)) {
-			const char *prop_type1, *prop_type2;
-			zend_format_type(property_info->type, &prop_type1, &prop_type2);
-			zend_type_error("Cannot auto-initialize an stdClass inside property %s::$%s of type %s%s",
-				ZSTR_VAL(property_info->ce->name),
-				zend_get_mangled_property_name(property_info->name),
-				prop_type1, prop_type2);
+			zend_throw_auto_init_in_prop_error(property_info, "stdClass");
 			return FAILURE;
 		}
 		if ((flags & ZEND_FETCH_REF) && Z_TYPE_P(*retval) != IS_REFERENCE) {

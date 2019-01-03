@@ -54,7 +54,7 @@ array(1) {
   [0]=>
   int(1)
 }
-string(72) "Cannot auto-initialize and array inside property Foo::$p of type ?string"
+string(71) "Cannot auto-initialize an array inside property Foo::$p of type ?string"
 string(65) "Typed property Foo::$p must not be accessed before initialization"
 array(1) {
   ["bar"]=>
