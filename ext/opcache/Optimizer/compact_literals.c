@@ -566,17 +566,17 @@ literals_handle_static_prop:
 									opline->op2.constant,
 									opline->op1.constant,
 									LITERAL_STATIC_PROPERTY,
-									&cache_size) | ((opline+1)->extended_value & (ZEND_FETCH_REF|ZEND_ISEMPTY));
+									&cache_size);
 							} else {
-								(opline+1)->extended_value = cache_size | ((opline+1)->extended_value & (ZEND_FETCH_REF|ZEND_ISEMPTY));
+								(opline+1)->extended_value = cache_size;
 								cache_size += 3 * sizeof(void *);
 							}
 						} else if (opline->op2_type == IS_CONST) {
 							// op2 class
 							if (class_slot[opline->op2.constant] >= 0) {
-								(opline+1)->extended_value = class_slot[opline->op2.constant] | ((opline+1)->extended_value & (ZEND_FETCH_REF|ZEND_ISEMPTY));
+								(opline+1)->extended_value = class_slot[opline->op2.constant];
 							} else {
-								(opline+1)->extended_value = cache_size | ((opline+1)->extended_value & (ZEND_FETCH_REF|ZEND_ISEMPTY));
+								(opline+1)->extended_value = cache_size;
 								class_slot[opline->op2.constant] = cache_size;
 								cache_size += sizeof(void *);
 							}
