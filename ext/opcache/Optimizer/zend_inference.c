@@ -2280,10 +2280,9 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 	return tmp;
 }
 
-static uint32_t zend_fetch_prop_type_info(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, int i, zend_class_entry **pce)
+static zend_property_info *zend_fetch_prop_info(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, int i)
 {
 	zend_property_info *prop_info = NULL;
-
 	if (opline->op2_type == IS_CONST) {
 		zend_class_entry *ce = NULL;
 
@@ -2295,9 +2294,52 @@ static uint32_t zend_fetch_prop_type_info(const zend_op_array *op_array, zend_ss
 		if (ce) {
 			prop_info = zend_hash_find_ptr(&ce->properties_info,
 				Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)));
+			if (prop_info && (prop_info->flags & ZEND_ACC_STATIC)) {
+				prop_info = NULL;
+			}
 		}
 	}
+	return prop_info;
+}
 
+static zend_property_info *zend_fetch_static_prop_info(const zend_script *script, const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline)
+{
+	zend_property_info *prop_info = NULL;
+	if (opline->op1_type == IS_CONST) {
+		zend_class_entry *ce = NULL;
+		if (opline->op2_type == IS_UNUSED) {
+			int fetch_type = opline->op2.num & ZEND_FETCH_CLASS_MASK;
+			switch (fetch_type) {
+				case ZEND_FETCH_CLASS_SELF:
+				case ZEND_FETCH_CLASS_STATIC:
+					/* We enforce that static property types cannot change during inheritance, so
+					 * handling static the same way as self here is legal. */
+					ce = op_array->scope;
+					break;
+				case ZEND_FETCH_CLASS_PARENT:
+					if (op_array->scope) {
+						ce = op_array->scope->parent;
+					}
+					break;
+			}
+		} else if (opline->op2_type == IS_CONST) {
+			zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants);
+			ce = get_class_entry(script, Z_STR_P(zv + 1));
+		}
+
+		if (ce) {
+			zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants);
+			prop_info = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(zv));
+			if (prop_info && !(prop_info->flags & ZEND_ACC_STATIC)) {
+				prop_info = NULL;
+			}
+		}
+	}
+	return prop_info;
+}
+
+static uint32_t zend_fetch_prop_type(zend_property_info *prop_info, zend_class_entry **pce)
+{
 	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 		uint32_t type = ZEND_TYPE_IS_CLASS(prop_info->type)
 			? MAY_BE_OBJECT
@@ -2314,7 +2356,6 @@ static uint32_t zend_fetch_prop_type_info(const zend_op_array *op_array, zend_ss
 		}
 		return type;
 	}
-
 	if (pce) {
 		*pce = NULL;
 	}
@@ -2523,7 +2564,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			tmp = 0;
 			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 				orig = t1;
-				t1 = zend_fetch_prop_type_info(op_array, ssa, opline, i, NULL);
+				t1 = zend_fetch_prop_type(zend_fetch_prop_info(op_array, ssa, opline, i), NULL);
 				t2 = OP1_DATA_INFO();
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				if (t1 & MAY_BE_ARRAY_OF_REF) {
@@ -2595,7 +2636,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					}
 
 					/* The return value must also satisfy the property type */
-					t1 = zend_fetch_prop_type_info(op_array, ssa, opline, i, &ce);
+					t1 = zend_fetch_prop_type(zend_fetch_prop_info(op_array, ssa, opline, i), &ce);
 					if (t1) {
 						tmp &= t1;
 					}
@@ -2782,7 +2823,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			if (ssa_ops[i].result_def >= 0) {
 				// TODO: If there is no __set we might do better
-				tmp = zend_fetch_prop_type_info(op_array, ssa, opline, i, &ce);
+				tmp = zend_fetch_prop_type(zend_fetch_prop_info(op_array, ssa, opline, i), &ce);
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 				if (ce) {
 					UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_ops[i].result_def);
@@ -3436,7 +3477,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 			}
 			if (ssa_ops[i].result_def >= 0) {
-				tmp = zend_fetch_prop_type_info(op_array, ssa, opline, i, &ce);
+				tmp = zend_fetch_prop_type(zend_fetch_prop_info(op_array, ssa, opline, i), &ce);
 				if (opline->result_type != IS_TMP_VAR) {
 					tmp |= MAY_BE_REF | MAY_BE_ERROR;
 				}
