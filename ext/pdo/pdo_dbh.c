@@ -273,7 +273,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		pdo_dbh_t *pdbh = NULL;
 		zval *v;
 
-		if ((v = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT)) != NULL) {
+		if ((v = zend_hash_index_find_deref(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT)) != NULL) {
 			if (Z_TYPE_P(v) == IS_STRING &&
 				!is_numeric_string(Z_STRVAL_P(v), Z_STRLEN_P(v), NULL, NULL, 0) && Z_STRLEN_P(v) > 0) {
 				/* user specified key */
@@ -386,6 +386,7 @@ options:
 				if (str_key) {
 					continue;
 				}
+				ZVAL_DEREF(attr_value);
 				pdo_dbh_attribute_set(dbh, long_key, attr_value);
 			} ZEND_HASH_FOREACH_END();
 		}
