@@ -77,16 +77,24 @@ void zend_cpu_startup(void)
 {
 	if (!cpuinfo.initialized) {
 		zend_cpu_info ebx;
+		int max_feature;
 
 		cpuinfo.initialized = 1;
 		__zend_cpuid(0, 0, &cpuinfo);
-		if (cpuinfo.eax == 0) {
+		max_feature = cpuinfo.eax;
+		if (max_feature == 0) {
 			return;
 		}
+
 		__zend_cpuid(1, 0, &cpuinfo);
+
 		/* for avx2 */
-		__zend_cpuid(7, 0, &ebx);
-		cpuinfo.ebx = ebx.ebx;
+		if (max_feature >= 7) {
+			__zend_cpuid(7, 0, &ebx);
+			cpuinfo.ebx = ebx.ebx;
+		} else {
+			cpuinfo.ebx = 0;
+		}
 	}
 }
 
