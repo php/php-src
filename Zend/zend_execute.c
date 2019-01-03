@@ -673,7 +673,7 @@ static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_ref_error(zend_p
 
 
 /* this should modify object only if it's empty */
-static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_object *obj;
 	zval *ref = NULL;
@@ -732,7 +732,7 @@ static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object(zval *ob
 	return object;
 }
 
-static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object_rw(zval *object, zval *property OPLINE_DC)
+static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object_rw(zval *object, zval *property OPLINE_DC)
 {
 	zval *ref = NULL;
 	if (Z_ISREF_P(object)) {
