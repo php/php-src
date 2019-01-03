@@ -54,19 +54,19 @@ array(1) {
   [0]=>
   int(1)
 }
-string(79) "Cannot write an array to a null property Foo::$p which does not allow for array"
+string(72) "Cannot auto-initialize and array inside property Foo::$p of type ?string"
 string(65) "Typed property Foo::$p must not be accessed before initialization"
 array(1) {
   ["bar"]=>
   int(2)
 }
-string(79) "Cannot write an array to a null property Foo::$s which does not allow for array"
+string(71) "Cannot auto-initialize an array inside property Foo::$s of type ?string"
 string(72) "Typed static property Foo::$s must not be accessed before initialization"
 array(1) {
   [0]=>
   int(3)
 }
-string(97) "Cannot write an array to a null or false reference held by Foo::$p which does not allow for array"
+string(91) "Cannot auto-initialize an array inside a reference held by property Foo::$p of type ?string"
 NULL
-string(97) "Cannot write an array to a null or false reference held by Foo::$p which does not allow for array"
+string(91) "Cannot auto-initialize an array inside a reference held by property Foo::$p of type ?string"
 NULL

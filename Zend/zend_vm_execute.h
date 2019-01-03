@@ -26192,9 +26192,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -26314,9 +26317,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -26436,9 +26442,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -26557,9 +26566,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -29090,9 +29102,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -29212,9 +29227,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -29334,9 +29352,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -29455,9 +29476,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -31066,9 +31090,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -31188,9 +31215,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -31310,9 +31340,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -31431,9 +31464,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -33589,9 +33625,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -33711,9 +33750,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -33833,9 +33875,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -33954,9 +33999,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -46285,9 +46333,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 
@@ -46407,9 +46458,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
@@ -46529,9 +46583,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
@@ -46650,9 +46707,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 
@@ -50596,9 +50656,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
 
@@ -50718,9 +50781,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
@@ -50840,9 +50906,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
@@ -50961,9 +51030,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 				zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
 
@@ -53889,9 +53961,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 
@@ -54011,9 +54086,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
@@ -54133,9 +54211,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
@@ -54254,9 +54335,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 
@@ -57476,9 +57560,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 
@@ -57598,9 +57685,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
@@ -57720,9 +57810,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
@@ -57841,9 +57934,12 @@ try_assign_dim_array:
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+				const char *prop_type1, *prop_type2;
+				zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+				zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 					ZSTR_VAL(error_prop->ce->name),
-					zend_get_mangled_property_name(error_prop->name));
+					zend_get_mangled_property_name(error_prop->name),
+					prop_type1, prop_type2);
 
 
 

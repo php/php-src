@@ -636,6 +636,20 @@ static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(z
 
 static zend_always_inline zend_property_info *i_zend_check_ref_stdClass_assignable(zend_reference *ref);
 
+static void zend_format_type(zend_type type, const char **part1, const char **part2) {
+	*part1 = ZEND_TYPE_ALLOW_NULL(type) ? "?" : "";
+	if (ZEND_TYPE_IS_CLASS(type)) {
+		if (ZEND_TYPE_IS_CE(type)) {
+			*part2 = ZSTR_VAL(ZEND_TYPE_CE(type)->name);
+		} else {
+			*part2 = ZSTR_VAL(ZEND_TYPE_NAME(type));
+		}
+	} else {
+		*part2 = zend_get_type_by_const(ZEND_TYPE_CODE(type));
+	}
+}
+
+
 /* this should modify object only if it's empty */
 static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
@@ -671,9 +685,12 @@ static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object(zval *ob
 	if (ref) {
 		zend_property_info *error_prop = i_zend_check_ref_stdClass_assignable(Z_REF_P(ref));
 		if (error_prop) {
-			zend_type_error("Cannot write an stdClass to a null or false reference held by %s::$%s which does not allow for stdClass",
+			const char *prop_type1, *prop_type2;
+			zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+			zend_type_error("Cannot auto-initialize an stdClass inside a reference held by property %s::$%s of type %s%s",
 				ZSTR_VAL(error_prop->ce->name),
-				zend_get_mangled_property_name(error_prop->name));
+				zend_get_mangled_property_name(error_prop->name),
+				prop_type1, prop_type2);
 			if (RETURN_VALUE_USED(opline)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
@@ -720,9 +737,12 @@ static zend_never_inline ZEND_COLD ZEND_FASTCALL zval *make_real_object_rw(zval 
 	if (ref) {
 		zend_property_info *error_prop = i_zend_check_ref_stdClass_assignable(Z_REF_P(ref));
 		if (error_prop) {
-			zend_type_error("Cannot write an stdClass to a null or false reference held by %s::$%s which does not allow for stdClass",
+			const char *prop_type1, *prop_type2;
+			zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+			zend_type_error("Cannot auto-initialize an stdClass inside a reference held by property %s::$%s of type %s%s",
 				ZSTR_VAL(error_prop->ce->name),
-				zend_get_mangled_property_name(error_prop->name));
+				zend_get_mangled_property_name(error_prop->name),
+				prop_type1, prop_type2);
 			if (RETURN_VALUE_USED(opline)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
@@ -2137,9 +2157,12 @@ fetch_from_array:
 			if (type != BP_VAR_UNSET) {
 				zend_property_info *error_prop;
 				if (UNEXPECTED(orig_container != container) && Z_ISREF_P(orig_container) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_container))) != NULL) {
-					zend_type_error("Cannot write an array to a null or false reference held by %s::$%s which does not allow for array",
+					const char *prop_type1, *prop_type2;
+					zend_format_type(error_prop->type, &prop_type1, &prop_type2);
+					zend_type_error("Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s%s",
 						ZSTR_VAL(error_prop->ce->name),
-						zend_get_mangled_property_name(error_prop->name));
+						zend_get_mangled_property_name(error_prop->name),
+						prop_type1, prop_type2);
 					ZVAL_ERROR(result);
 				} else {
 					array_init(container);
@@ -2591,9 +2614,12 @@ return_indirect:
 					if (UNEXPECTED(prop_info)) {
 						if ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(ptr)) {
 							if (!check_type_array_assignable(prop_info->type)) {
-								zend_type_error("Cannot write an array to a null property %s::$%s which does not allow for array",
+								const char *prop_type1, *prop_type2;
+								zend_format_type(prop_info->type, &prop_type1, &prop_type2);
+								zend_type_error("Cannot auto-initialize and array inside property %s::$%s of type %s%s",
 									ZSTR_VAL(prop_info->ce->name),
-									zend_get_mangled_property_name(prop_info->name));
+									zend_get_mangled_property_name(prop_info->name),
+									prop_type1, prop_type2);
 								ZVAL_UNDEF(ptr);
 								ZVAL_ERROR(result);
 							}
@@ -2601,9 +2627,12 @@ return_indirect:
 						}
 						if ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(ptr)) {
 							if (!check_type_stdClass_assignable(prop_info->type)) {
-								zend_type_error("Cannot write an stdClass to a null property %s::$%s which does not allow for stdClass",
+								const char *prop_type1, *prop_type2;
+								zend_format_type(prop_info->type, &prop_type1, &prop_type2);
+								zend_type_error("Cannot auto-initialize an stdClass inside property %s::$%s of type %s%s",
 									ZSTR_VAL(prop_info->ce->name),
-									zend_get_mangled_property_name(prop_info->name));
+									zend_get_mangled_property_name(prop_info->name),
+									prop_type1, prop_type2);
 								ZVAL_UNDEF(ptr);
 								ZVAL_ERROR(result);
 							}
@@ -2756,16 +2785,22 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 	if (flags) {
 		if ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(*retval)
 		    && !check_type_array_assignable(property_info->type)) {
-			zend_type_error("Cannot write an array to a null property %s::$%s which does not allow for array",
+			const char *prop_type1, *prop_type2;
+			zend_format_type(property_info->type, &prop_type1, &prop_type2);
+			zend_type_error("Cannot auto-initialize an array inside property %s::$%s of type %s%s",
 				ZSTR_VAL(property_info->ce->name),
-				zend_get_mangled_property_name(property_info->name));
+				zend_get_mangled_property_name(property_info->name),
+				prop_type1, prop_type2);
 			return FAILURE;
 		}
 		if ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(*retval)
 		    && !check_type_stdClass_assignable(property_info->type)) {
-			zend_type_error("Cannot write an stdClass to a null property %s::$%s which does not allow for stdClass",
+			const char *prop_type1, *prop_type2;
+			zend_format_type(property_info->type, &prop_type1, &prop_type2);
+			zend_type_error("Cannot auto-initialize an stdClass inside property %s::$%s of type %s%s",
 				ZSTR_VAL(property_info->ce->name),
-				zend_get_mangled_property_name(property_info->name));
+				zend_get_mangled_property_name(property_info->name),
+				prop_type1, prop_type2);
 			return FAILURE;
 		}
 		if ((flags & ZEND_FETCH_REF) && Z_TYPE_P(*retval) != IS_REFERENCE) {
@@ -2794,40 +2829,43 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 }
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1, zend_property_info *prop2, zval *zv) {
+	const char *prop1_type1, *prop1_type2, *prop2_type1, *prop2_type2;
+	zend_format_type(prop1->type, &prop1_type1, &prop1_type2);
+	zend_format_type(prop2->type, &prop2_type1, &prop2_type2);
 	zend_type_error("Reference with value of type %s held by property %s::$%s of type %s%s is not compatible with property %s::$%s of type %s%s",
 		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_get_type_by_const(Z_TYPE_P(zv)),
 		ZSTR_VAL(prop1->ce->name),
 		zend_get_mangled_property_name(prop1->name),
-		ZEND_TYPE_ALLOW_NULL(prop1->type) ? "?" : "",
-		ZEND_TYPE_IS_CLASS(prop1->type) ? ZSTR_VAL(ZEND_TYPE_CE(prop1->type)->name) : zend_get_type_by_const(ZEND_TYPE_CODE(prop1->type)),
+		prop1_type1, prop1_type2,
 		ZSTR_VAL(prop2->ce->name),
 		zend_get_mangled_property_name(prop2->name),
-		ZEND_TYPE_ALLOW_NULL(prop2->type) ? "?" : "",
-		ZEND_TYPE_IS_CLASS(prop2->type) ? ZSTR_VAL(ZEND_TYPE_CE(prop2->type)->name) : zend_get_type_by_const(ZEND_TYPE_CODE(prop2->type))
+		prop2_type1, prop2_type2
 	);
 }
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv) {
+	const char *prop_type1, *prop_type2;
+	zend_format_type(prop->type, &prop_type1, &prop_type2);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s%s",
 		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_get_type_by_const(Z_TYPE_P(zv)),
 		ZSTR_VAL(prop->ce->name),
 		zend_get_mangled_property_name(prop->name),
-		ZEND_TYPE_ALLOW_NULL(prop->type) ? "?" : "",
-		ZEND_TYPE_IS_CLASS(prop->type) ? ZSTR_VAL(ZEND_TYPE_CE(prop->type)->name) : zend_get_type_by_const(ZEND_TYPE_CODE(prop->type))
+		prop_type1, prop_type2
 	);
 }
 
 ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info *prop1, zend_property_info *prop2, zval *zv) {
+	const char *prop1_type1, *prop1_type2, *prop2_type1, *prop2_type2;
+	zend_format_type(prop1->type, &prop1_type1, &prop1_type2);
+	zend_format_type(prop2->type, &prop2_type1, &prop2_type2);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s%s and property %s::$%s of type %s%s, as this would result in an inconsistent type conversion",
 		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_get_type_by_const(Z_TYPE_P(zv)),
 		ZSTR_VAL(prop1->ce->name),
 		zend_get_mangled_property_name(prop1->name),
-		ZEND_TYPE_ALLOW_NULL(prop1->type) ? "?" : "",
-		ZEND_TYPE_IS_CLASS(prop1->type) ? ZSTR_VAL(ZEND_TYPE_CE(prop1->type)->name) : zend_get_type_by_const(ZEND_TYPE_CODE(prop1->type)),
+		prop1_type1, prop1_type2,
 		ZSTR_VAL(prop2->ce->name),
 		zend_get_mangled_property_name(prop2->name),
-		ZEND_TYPE_ALLOW_NULL(prop2->type) ? "?" : "",
-		ZEND_TYPE_IS_CLASS(prop2->type) ? ZSTR_VAL(ZEND_TYPE_CE(prop2->type)->name) : zend_get_type_by_const(ZEND_TYPE_CODE(prop2->type))
+		prop2_type1, prop2_type2
 	);
 }
 

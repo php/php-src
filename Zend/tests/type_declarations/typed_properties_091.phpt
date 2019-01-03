@@ -78,7 +78,7 @@ var_dump($test);
 
 ?>
 --EXPECTF--
-Cannot write an stdClass to a null property Test::$prop which does not allow for stdClass
+Cannot auto-initialize an stdClass inside property Test::$prop of type ?Test
 
 Warning: Creating default object from empty value in %s on line %d
 
@@ -97,7 +97,7 @@ object(Test)#1 (2) {
     int(123)
   }
 }
-Cannot write an stdClass to a null or false reference held by Test::$prop which does not allow for stdClass
+Cannot auto-initialize an stdClass inside a reference held by property Test::$prop of type ?Test
 
 Warning: Creating default object from empty value in %s on line %d
 
@@ -116,7 +116,7 @@ object(Test)#5 (3) {
     int(123)
   }
 }
-Cannot write an stdClass to a null or false reference held by Test::$prop which does not allow for stdClass
+Cannot auto-initialize an stdClass inside a reference held by property Test::$prop of type ?Test
 
 Warning: Creating default object from empty value in %s on line %d
 
@@ -141,7 +141,7 @@ object(Test)#3 (3) {
     }
   }
 }
-Cannot write an stdClass to a null property Test::$staticProp which does not allow for stdClass
+Cannot auto-initialize an stdClass inside property Test::$staticProp of type ?Test
 
 Warning: Creating default object from empty value in /home/nikic/php-src-refs/Zend/tests/type_declarations/typed_properties_091.php on line 58
 
@@ -155,7 +155,7 @@ object(stdClass)#8 (1) {
   ["wat"]=>
   int(123)
 }
-Cannot write an stdClass to a null property Test::$prop which does not allow for stdClass
+Cannot auto-initialize an stdClass inside property Test::$prop of type ?Test
 object(Test)#9 (0) {
   ["prop"]=>
   uninitialized(?Test)
