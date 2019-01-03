@@ -351,10 +351,10 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_POST_DEC_STATIC_PROP:
 			TO_STRING_NOWARN(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			if (opline->op2_type == IS_CONST && (opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE|ZEND_ISEMPTY)) + sizeof(void*) == op_array->cache_size) {
+			if (opline->op2_type == IS_CONST && (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) == op_array->cache_size) {
 				op_array->cache_size += sizeof(void *);
 			} else {
-				opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE|ZEND_ISEMPTY));
+				opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 			}
 			break;
 		case ZEND_SEND_VAR:
@@ -445,7 +445,7 @@ handle_static_prop:
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			if (opline->op1_type != IS_CONST) {
-				opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & (ZEND_RETURNS_FUNCTION|ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE|ZEND_ISEMPTY));
+				opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & (ZEND_RETURNS_FUNCTION|ZEND_ISEMPTY|ZEND_FETCH_OBJ_FLAGS));
 			}
 			break;
 		case ZEND_INIT_FCALL:

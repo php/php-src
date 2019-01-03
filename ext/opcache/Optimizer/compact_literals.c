@@ -615,12 +615,12 @@ literals_handle_static_prop:
 						// op2 property
 						if (opline->op1_type == IS_UNUSED &&
 						    property_slot[opline->op2.constant] >= 0) {
-							opline->extended_value = property_slot[opline->op2.constant] | (opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE));
+							opline->extended_value = property_slot[opline->op2.constant] | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 						} else {
-							opline->extended_value = cache_size | (opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE));
+							opline->extended_value = cache_size | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 							cache_size += 3 * sizeof(void *);
 							if (opline->op1_type == IS_UNUSED) {
-								property_slot[opline->op2.constant] = opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE);
+								property_slot[opline->op2.constant] = opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS;
 							}
 						}
 					}
@@ -745,17 +745,17 @@ literals_handle_static_prop:
 								opline->op2.constant,
 								opline->op1.constant,
 								LITERAL_STATIC_PROPERTY,
-								&cache_size) | (opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE|ZEND_ISEMPTY));
+								&cache_size) | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 						} else {
-							opline->extended_value = cache_size | (opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE|ZEND_ISEMPTY));
+							opline->extended_value = cache_size | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 							cache_size += 3 * sizeof(void *);
 						}
 					} else if (opline->op2_type == IS_CONST) {
 						// op2 class
 						if (class_slot[opline->op2.constant] >= 0) {
-							opline->extended_value = class_slot[opline->op2.constant] | (opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE|ZEND_ISEMPTY));
+							opline->extended_value = class_slot[opline->op2.constant] | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 						} else {
-							opline->extended_value = cache_size | (opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE|ZEND_ISEMPTY));
+							opline->extended_value = cache_size | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 							class_slot[opline->op2.constant] = cache_size;
 							cache_size += sizeof(void *);
 						}
