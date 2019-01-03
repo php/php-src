@@ -143,9 +143,9 @@ object(Test)#3 (3) {
 }
 Cannot auto-initialize an stdClass inside property Test::$staticProp of type ?Test
 
-Warning: Creating default object from empty value in /home/nikic/php-src-refs/Zend/tests/type_declarations/typed_properties_091.php on line 58
+Warning: Creating default object from empty value in %s on line %d
 
-Warning: Creating default object from empty value in /home/nikic/php-src-refs/Zend/tests/type_declarations/typed_properties_091.php on line 59
+Warning: Creating default object from empty value in %s on line %d
 NULL
 object(stdClass)#4 (1) {
   ["wat"]=>
