@@ -2484,11 +2484,17 @@ static zend_always_inline zend_bool promotes_to_object(zval *val) {
 }
 
 static zend_always_inline zend_bool check_type_array_assignable(zend_type type) {
+	if (!type) {
+		return 1;
+	}
 	return ZEND_TYPE_IS_CODE(type)
 		&& (ZEND_TYPE_CODE(type) == IS_ARRAY || ZEND_TYPE_CODE(type) == IS_ITERABLE);
 }
 
 static zend_always_inline zend_bool check_type_stdClass_assignable(zend_type type) {
+	if (!type) {
+		return 1;
+	}
 	if (ZEND_TYPE_IS_CLASS(type)) {
 		if (ZEND_TYPE_IS_CE(type)) {
 			return ZEND_TYPE_CE(type) == zend_standard_class_def;
