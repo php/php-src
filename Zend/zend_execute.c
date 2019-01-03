@@ -755,9 +755,6 @@ static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object_rw(zval 
 		zend_property_info *error_prop = i_zend_check_ref_stdClass_assignable(Z_REF_P(ref));
 		if (error_prop) {
 			zend_throw_auto_init_in_ref_error(error_prop, "stdClass");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-			}
 			return NULL;
 		}
 	}
