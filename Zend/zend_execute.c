@@ -2602,9 +2602,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 return_indirect:
 				ZVAL_INDIRECT(result, ptr);
 				if (flags &&
-					(((flags & ZEND_FETCH_REF) && Z_TYPE_P(ptr) != IS_REFERENCE) ||
-					 ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(ptr)) ||
-					 ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(ptr)))
+					((flags == ZEND_FETCH_REF && Z_TYPE_P(ptr) != IS_REFERENCE) ||
+					 (flags == ZEND_FETCH_DIM_WRITE && promotes_to_array(ptr)) ||
+					 (flags == ZEND_FETCH_OBJ_WRITE && promotes_to_object(ptr)))
 				 ) {
 					zend_property_info *prop_info;
 
@@ -2616,7 +2616,7 @@ return_indirect:
 						zend_tmp_string_release(tmp_str);
 					}
 					if (UNEXPECTED(prop_info)) {
-						if ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(ptr)) {
+						if (flags == ZEND_FETCH_DIM_WRITE && promotes_to_array(ptr)) {
 							if (!check_type_array_assignable(prop_info->type)) {
 								zend_throw_auto_init_in_prop_error(prop_info, "array");
 								ZVAL_UNDEF(ptr);
@@ -2624,7 +2624,7 @@ return_indirect:
 							}
 							return;
 						}
-						if ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(ptr)) {
+						if (flags == ZEND_FETCH_OBJ_WRITE && promotes_to_object(ptr)) {
 							if (!check_type_stdClass_assignable(prop_info->type)) {
 								zend_throw_auto_init_in_prop_error(prop_info, "stdClass");
 								ZVAL_UNDEF(ptr);
@@ -2777,17 +2777,17 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 	}
 
 	if (flags) {
-		if ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(*retval)
+		if (flags == ZEND_FETCH_DIM_WRITE && promotes_to_array(*retval)
 		    && !check_type_array_assignable(property_info->type)) {
 			zend_throw_auto_init_in_prop_error(property_info, "array");
 			return FAILURE;
 		}
-		if ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(*retval)
+		if (flags == ZEND_FETCH_OBJ_WRITE && promotes_to_object(*retval)
 		    && !check_type_stdClass_assignable(property_info->type)) {
 			zend_throw_auto_init_in_prop_error(property_info, "stdClass");
 			return FAILURE;
 		}
-		if ((flags & ZEND_FETCH_REF) && Z_TYPE_P(*retval) != IS_REFERENCE) {
+		if (flags == ZEND_FETCH_REF && Z_TYPE_P(*retval) != IS_REFERENCE) {
 			zval *ref = *retval;
 			if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(ref) <= IS_NULL)) {
 				zend_throw_error(NULL, "Cannot access uninitialized property %s::$%s by reference",
