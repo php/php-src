@@ -2582,7 +2582,11 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
 	} else {
-		zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
+		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
+		if (opline && type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
+			opline->extended_value |= ZEND_FETCH_OBJ_WRITE;
+		}
+
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
 	}
 	zend_compile_expr(&prop_node, prop_ast);

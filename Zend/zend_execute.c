@@ -2435,6 +2435,34 @@ static zend_never_inline uint32_t ZEND_FASTCALL zend_array_key_exists_slow(zval 
 	}
 }
 
+static zend_always_inline zend_bool promotes_to_array(zval *val) {
+	return Z_TYPE_P(val) <= IS_FALSE
+		|| (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE);
+}
+
+static zend_always_inline zend_bool promotes_to_object(zval *val) {
+	ZVAL_DEREF(val);
+	return Z_TYPE_P(val) <= IS_FALSE
+		|| (Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) == 0);
+}
+
+static zend_always_inline zend_bool check_type_array_assignable(zend_type type) {
+	return ZEND_TYPE_IS_CODE(type)
+		&& (ZEND_TYPE_CODE(type) == IS_ARRAY || ZEND_TYPE_CODE(type) == IS_ITERABLE);
+}
+
+static zend_always_inline zend_bool check_type_stdClass_assignable(zend_type type) {
+	if (ZEND_TYPE_IS_CLASS(type)) {
+		if (ZEND_TYPE_IS_CE(type)) {
+			return ZEND_TYPE_CE(type) == zend_standard_class_def;
+		} else {
+			return zend_string_equals_literal_ci(ZEND_TYPE_NAME(type), "stdclass");
+		}
+	} else {
+		return ZEND_TYPE_CODE(type) == IS_OBJECT;
+	}
+}
+
 static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t flags OPLINE_DC)
 {
 	zval *ptr;
@@ -2466,10 +2494,13 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			if (EXPECTED(Z_TYPE_P(ptr) != IS_UNDEF)) {
 return_indirect:
 				ZVAL_INDIRECT(result, ptr);
-				if (flags
-				 && (prop_op_type == IS_CONST || EXPECTED(Z_TYPE_P(prop_ptr) == IS_STRING))
-				 && (((flags & ZEND_FETCH_REF) && Z_TYPE_P(ptr) != IS_REFERENCE)
-				     || ((flags & ZEND_FETCH_DIM_WRITE) && (Z_TYPE_P(ptr) <= IS_FALSE || (Z_ISREF_P(ptr) && Z_TYPE_P(Z_REFVAL_P(ptr)) == IS_NULL))))) {
+				// TODO IS_STRING check here looks wrong.
+				if (flags &&
+					(prop_op_type == IS_CONST || EXPECTED(Z_TYPE_P(prop_ptr) == IS_STRING)) &&
+					(((flags & ZEND_FETCH_REF) && Z_TYPE_P(ptr) != IS_REFERENCE) ||
+					 ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(ptr)) ||
+					 ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(ptr)))
+				 ) {
 					zend_property_info *prop_info;
 
 					if (prop_op_type == IS_CONST) {
@@ -2480,9 +2511,19 @@ return_indirect:
 						zend_tmp_string_release(tmp_str);
 					}
 					if (UNEXPECTED(prop_info)) {
-						if ((flags & ZEND_FETCH_DIM_WRITE) && (Z_TYPE_P(ptr) <= IS_FALSE || (Z_ISREF_P(ptr) && Z_TYPE_P(Z_REFVAL_P(ptr)) == IS_NULL))) {
-							if (!zend_verify_type_assignable(prop_info->type, IS_ARRAY)) {
+						if ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(ptr)) {
+							if (!check_type_array_assignable(prop_info->type)) {
 								zend_type_error("Cannot write an array to a null property %s::$%s which does not allow for array",
+									ZSTR_VAL(prop_info->ce->name),
+									zend_get_mangled_property_name(prop_info->name));
+								ZVAL_UNDEF(ptr);
+								ZVAL_ERROR(result);
+							}
+							return;
+						}
+						if ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(ptr)) {
+							if (!check_type_stdClass_assignable(prop_info->type)) {
+								zend_type_error("Cannot write an stdClass to a null property %s::$%s which does not allow for stdClass",
 									ZSTR_VAL(prop_info->ce->name),
 									zend_get_mangled_property_name(prop_info->name));
 								ZVAL_UNDEF(ptr);
@@ -2635,10 +2676,16 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 	}
 
 	if (flags) {
-		if ((flags & ZEND_FETCH_DIM_WRITE)
-		    && (Z_TYPE_P(*retval) <= IS_FALSE || (Z_ISREF_P(*retval) && Z_TYPE_P(Z_REFVAL_P(*retval)) == IS_NULL))
-		    && !zend_verify_type_assignable(property_info->type, IS_ARRAY)) {
+		if ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(*retval)
+		    && !check_type_array_assignable(property_info->type)) {
 			zend_type_error("Cannot write an array to a null property %s::$%s which does not allow for array",
+				ZSTR_VAL(property_info->ce->name),
+				zend_get_mangled_property_name(property_info->name));
+			return FAILURE;
+		}
+		if ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(*retval)
+		    && !check_type_stdClass_assignable(property_info->type)) {
+			zend_type_error("Cannot write an stdClass to a null property %s::$%s which does not allow for stdClass",
 				ZSTR_VAL(property_info->ce->name),
 				zend_get_mangled_property_name(property_info->name));
 			return FAILURE;
@@ -2677,7 +2724,7 @@ static zend_always_inline zend_property_info *i_zend_check_ref_array_assignable(
 	}
 
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
-		if (ZEND_TYPE_IS_CLASS(prop->type) || (ZEND_TYPE_CODE(prop->type) != IS_ITERABLE && ZEND_TYPE_CODE(prop->type) != IS_ARRAY)) {
+		if (!check_type_array_assignable(prop->type)) {
 			return prop;
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();

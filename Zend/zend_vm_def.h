@@ -1794,7 +1794,7 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE), type, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type, opline->extended_value & ZEND_FETCH_OBJ_FLAGS OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		if (EG(exception)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
@@ -2101,7 +2101,10 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, FETCH
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE)) : NULL), BP_VAR_W, opline->extended_value & (ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE) OPLINE_CC);
+	zend_fetch_property_address(
+		result, container, OP1_TYPE, property, OP2_TYPE,
+		((OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) : NULL),
+		BP_VAR_W, opline->extended_value & ZEND_FETCH_OBJ_FLAGS OPLINE_CC);
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);

@@ -898,8 +898,12 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_TYPE_MASK	0xe
 
+// TODO We only have 2 bits of flag space in the low bits, this won't work on
+// 32-bit systems
 #define ZEND_FETCH_REF			(1<<0)
-#define ZEND_FETCH_DIM_WRITE		(1<<1)
+#define ZEND_FETCH_DIM_WRITE	(1<<1)
+#define ZEND_FETCH_OBJ_WRITE	(1<<2)
+#define ZEND_FETCH_OBJ_FLAGS	(ZEND_FETCH_REF|ZEND_FETCH_DIM_WRITE|ZEND_FETCH_OBJ_WRITE)
 
 #define ZEND_ISEMPTY			(1<<0)
 
