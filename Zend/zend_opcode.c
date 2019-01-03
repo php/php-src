@@ -148,6 +148,15 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 
 		ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
 		while (p != end) {
+			if (UNEXPECTED(Z_ISREF_P(p))) {
+				zend_property_info *prop_info;
+				ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
+					if (prop_info->ce == ce && p - static_members == prop_info->offset) {
+						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+						break; /* stop iteration here, the array might be realloc()'ed */
+					}
+				} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+			}
 			i_zval_ptr_dtor(p);
 			p++;
 		}
