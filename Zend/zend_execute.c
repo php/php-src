@@ -2568,9 +2568,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			if (EXPECTED(Z_TYPE_P(ptr) != IS_UNDEF)) {
 return_indirect:
 				ZVAL_INDIRECT(result, ptr);
-				// TODO IS_STRING check here looks wrong.
 				if (flags &&
-					(prop_op_type == IS_CONST || EXPECTED(Z_TYPE_P(prop_ptr) == IS_STRING)) &&
 					(((flags & ZEND_FETCH_REF) && Z_TYPE_P(ptr) != IS_REFERENCE) ||
 					 ((flags & ZEND_FETCH_DIM_WRITE) && promotes_to_array(ptr)) ||
 					 ((flags & ZEND_FETCH_OBJ_WRITE) && promotes_to_object(ptr)))
