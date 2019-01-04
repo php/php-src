@@ -1366,7 +1366,7 @@ static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 }
 /* }}} */
 
-static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *class_ast, zend_bool constant) /* {{{ */
+static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *class_ast) /* {{{ */
 {
 	uint32_t fetch_type;
 
@@ -1386,12 +1386,6 @@ static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_a
 			return 0;
 		case ZEND_FETCH_CLASS_STATIC:
 		case ZEND_FETCH_CLASS_PARENT:
-			if (constant) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"%s::class cannot be used for compile-time class name resolution",
-					fetch_type == ZEND_FETCH_CLASS_STATIC ? "static" : "parent"
-				);
-			}
 			return 0;
 		case ZEND_FETCH_CLASS_DEFAULT:
 			ZVAL_STR(zv, zend_resolve_class_name_ast(class_ast));
@@ -7712,7 +7706,7 @@ void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *class_ast = ast->child[0];
 	zend_op *opline;
 
-	if (zend_try_compile_const_expr_resolve_class_name(&result->u.constant, class_ast, 0)) {
+	if (zend_try_compile_const_expr_resolve_class_name(&result->u.constant, class_ast)) {
 		result->op_type = IS_CONST;
 		return;
 	}
@@ -7962,8 +7956,14 @@ void zend_compile_const_expr_class_name(zend_ast **ast_ptr) /* {{{ */
 	zend_ast *class_ast = (*ast_ptr)->child[0];
 	uint32_t fetch_type = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
 
-	/* If we reach here, ::class should have either been constant evaluated or replaced
-	 * by a AST_MAGIC_CONST, so only the error case is left here. */
+	/* TODO We should not use AST_CONSTANT_CLASS for this, because the semantics are slightly
+	 * different. */
+	if (fetch_type == ZEND_FETCH_CLASS_SELF) {
+		zend_ast_destroy(*ast_ptr);
+		*ast_ptr = zend_ast_create(ZEND_AST_CONSTANT_CLASS);
+		return;
+	}
+
 	zend_error_noreturn(E_COMPILE_ERROR,
 		"%s::class cannot be used for compile-time class name resolution",
 		fetch_type == ZEND_FETCH_CLASS_STATIC ? "static" : "parent"
@@ -8635,16 +8635,10 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 		case ZEND_AST_CLASS_NAME:
 		{
 			zend_ast *class_ast = ast->child[0];
-			if (zend_try_compile_const_expr_resolve_class_name(&result, class_ast, 0)) {
-				break;
+			if (!zend_try_compile_const_expr_resolve_class_name(&result, class_ast)) {
+				return;
 			}
-			/* TODO We should not use AST_MAGIC_CONST for this, because the semantics are slightly
-			 * different. */
-			if (zend_get_class_fetch_type(zend_ast_get_str(class_ast)) == ZEND_FETCH_CLASS_SELF) {
-				zend_ast_destroy(ast);
-				*ast_ptr = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_CLASS_C);
-			}
-			return;
+			break;
 		}
 		default:
 			return;
