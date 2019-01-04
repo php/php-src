@@ -20,6 +20,11 @@ PHP 7.4 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Referencing parent:: inside a class that does not have a parent will now
+    generate a compile-time error. Previously the error was only emitted at
+    run-time.
+
 - Curl:
   . Attempting to serialize a CURLFile class will now generate an exception.
     Previously the exception was only thrown on unserialization.
