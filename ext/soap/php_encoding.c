@@ -1856,9 +1856,9 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
 
-				if (prop) {GC_PROTECT_RECURSION(prop);}
+				if (prop) { GC_TRY_PROTECT_RECURSION(prop); }
 				xmlParam = master_to_xml(sdlType->encode, data, style, parent);
-				if (prop) {GC_UNPROTECT_RECURSION(prop);}
+				if (prop) { GC_TRY_UNPROTECT_RECURSION(prop); }
 			} else {
 				zval rv;
 				zval *tmp = get_zval_property(data, "_", &rv);

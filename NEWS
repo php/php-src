@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug #77273 (array_walk_recursive corrupts value types leading to PDO
     failure). (Nikita)
 
+- SOAP:
+  . Fixed bug #77410 (Segmentation Fault when executing method with an empty
+    parameter). (Nikita)
+
 - Sockets:
   . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
     on MacOS). (Michael Meyer)
