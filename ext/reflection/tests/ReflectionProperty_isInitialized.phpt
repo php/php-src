@@ -62,6 +62,29 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+class WithMagic {
+    public $prop;
+    public int $intProp;
+
+    public function __isset($name) {
+        echo "__isset($name)\n";
+        return true;
+    }
+
+    public function __get($name) {
+        echo "__get($name)\n";
+        return "foobar";
+    }
+}
+
+echo "Class with __isset:\n";
+$obj = new WithMagic;
+unset($obj->prop);
+$rp = new ReflectionProperty('WithMagic', 'prop');
+var_dump($rp->isInitialized($obj));
+$rp = new ReflectionProperty('WithMagic', 'intProp');
+var_dump($rp->isInitialized($obj));
+
 ?>
 --EXPECT--
 Static properties:
@@ -85,3 +108,6 @@ bool(false)
 Object type:
 bool(false)
 Given object is not an instance of the class this property was declared in
+Class with __isset:
+bool(false)
+bool(false)

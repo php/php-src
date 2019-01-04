@@ -5507,7 +5507,9 @@ ZEND_METHOD(reflection_property, isInitialized)
 		}
 		RETURN_FALSE;
 	} else {
-		zval rv;
+		zval name_zv;
+		zend_class_entry *old_scope;
+		int retval;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
 			return;
@@ -5518,11 +5520,13 @@ ZEND_METHOD(reflection_property, isInitialized)
 			/* Returns from this function */
 		}
 
-		member_p = zend_read_property_ex(intern->ce, object, ref->unmangled_name, 1, &rv);
-		RETVAL_BOOL(member_p != &EG(uninitialized_zval));
-		if (member_p == &rv) {
-			zval_ptr_dtor(member_p);
-		}
+		old_scope = EG(fake_scope);
+		EG(fake_scope) = intern->ce;
+		ZVAL_STR(&name_zv, ref->unmangled_name);
+		retval = Z_OBJ_HT_P(object)->has_property(object, &name_zv, ZEND_PROPERTY_EXISTS, NULL);
+		EG(fake_scope) = old_scope;
+
+		RETVAL_BOOL(retval);
 	}
 }
 /* }}} */
