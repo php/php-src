@@ -7953,14 +7953,16 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 
 void zend_compile_const_expr_class_name(zend_ast **ast_ptr) /* {{{ */
 {
-	zend_ast *class_ast = (*ast_ptr)->child[0];
-	uint32_t fetch_type = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
+	zend_ast *ast = *ast_ptr;
+	zend_ast *class_ast = ast->child[0];
+	zend_string *class_name = zend_ast_get_str(class_ast);
+	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
 
-	/* TODO We should not use AST_CONSTANT_CLASS for this, because the semantics are slightly
-	 * different. */
+	/* For the const-eval representation store the fetch type instead of the name. */
 	if (fetch_type == ZEND_FETCH_CLASS_SELF) {
-		zend_ast_destroy(*ast_ptr);
-		*ast_ptr = zend_ast_create(ZEND_AST_CONSTANT_CLASS);
+		zend_string_release(class_name);
+		ast->child[0] = NULL;
+		ast->attr = fetch_type;
 		return;
 	}
 

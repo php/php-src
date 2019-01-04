@@ -13,11 +13,14 @@ class Test {
 }
 (new Test)->foobar();
 
-// This should error, but doesn't
 const BAR = self::class;
 var_dump(BAR);
 
 ?>
---EXPECT--
+--EXPECTF--
 string(4) "Test"
-string(0) ""
+
+Fatal error: Uncaught Error: Cannot use "self" when no class scope is active in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d
