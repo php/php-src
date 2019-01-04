@@ -174,6 +174,12 @@ typedef struct st_mysqlnd_infile_info
 } MYSQLND_INFILE_INFO;
 
 
+typedef int (*func_mysqlnd_local_infile__init)(void ** ptr, const char * const filename);
+typedef int (*func_mysqlnd_local_infile__read)(void * ptr, zend_uchar * buf, unsigned int buf_len);
+typedef int (*func_mysqlnd_local_infile__error)(void * ptr, char * error_msg, unsigned int error_msg_len);
+typedef void (*func_mysqlnd_local_infile__end)(void * ptr);
+
+
 /* character set information */
 typedef struct st_mysqlnd_charset
 {
@@ -191,11 +197,12 @@ typedef struct st_mysqlnd_charset
 /* local infile handler */
 typedef struct st_mysqlnd_infile
 {
-	int		(*local_infile_init)(void **ptr, const char * const filename);
-	int		(*local_infile_read)(void *ptr, zend_uchar * buf, unsigned int buf_len);
-	int		(*local_infile_error)(void *ptr, char * error_msg, unsigned int error_msg_len);
-	void	(*local_infile_end)(void *ptr);
+	func_mysqlnd_local_infile__init		local_infile_init;
+	func_mysqlnd_local_infile__read		local_infile_read;
+	func_mysqlnd_local_infile__error	local_infile_error;
+	func_mysqlnd_local_infile__end		local_infile_end;
 } MYSQLND_INFILE;
+
 
 typedef struct st_mysqlnd_session_options
 {
