@@ -1390,8 +1390,14 @@ static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_a
 				return 1;
 			}
 			return 0;
-		case ZEND_FETCH_CLASS_STATIC:
 		case ZEND_FETCH_CLASS_PARENT:
+			if (CG(active_class_entry) && CG(active_class_entry)->parent_name
+					&& zend_is_scope_known()) {
+				ZVAL_STR_COPY(zv, CG(active_class_entry)->parent_name);
+				return 1;
+			}
+			return 0;
+		case ZEND_FETCH_CLASS_STATIC:
 			return 0;
 		case ZEND_FETCH_CLASS_DEFAULT:
 			ZVAL_STR(zv, zend_resolve_class_name_ast(class_ast));
@@ -7719,38 +7725,6 @@ void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
 
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
 	opline->op1.num = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
-}
-/* }}} */
-
-void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
-{
-	zend_ast *name_ast = ast->child[0];
-	uint32_t fetch_type = zend_get_class_fetch_type(zend_ast_get_str(name_ast));
-	zend_ensure_valid_class_fetch_type(fetch_type);
-
-	switch (fetch_type) {
-		case ZEND_FETCH_CLASS_SELF:
-			if (CG(active_class_entry) && zend_is_scope_known()) {
-				result->op_type = IS_CONST;
-				ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
-			} else {
-				zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
-				opline->op1.num = fetch_type;
-			}
-			break;
-		case ZEND_FETCH_CLASS_STATIC:
-		case ZEND_FETCH_CLASS_PARENT:
-			{
-				zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
-				opline->op1.num = fetch_type;
-			}
-			break;
-		case ZEND_FETCH_CLASS_DEFAULT:
-			result->op_type = IS_CONST;
-			ZVAL_STR(&result->u.constant, zend_resolve_class_name_ast(name_ast));
-			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
 }
 /* }}} */
 
