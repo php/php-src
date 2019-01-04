@@ -535,7 +535,6 @@ handle_static_prop:
 				(opline+1)->extended_value = alloc_cache_slots(op_array, 3);
 			} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
 				goto handle_static_prop;
-				(opline+1)->extended_value = alloc_cache_slots(op_array, 2);
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				if (Z_TYPE_P(val) == IS_STRING) {
 					zend_ulong index;
