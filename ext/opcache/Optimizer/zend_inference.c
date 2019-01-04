@@ -2559,12 +2559,14 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_ASSIGN_BW_OR:
 		case ZEND_ASSIGN_BW_AND:
 		case ZEND_ASSIGN_BW_XOR:
-		case ZEND_ASSIGN_CONCAT:
+		case ZEND_ASSIGN_CONCAT: {
+			zend_property_info *prop_info = NULL;
 			orig = 0;
 			tmp = 0;
 			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+				prop_info = zend_fetch_prop_info(op_array, ssa, opline, i);
 				orig = t1;
-				t1 = zend_fetch_prop_type(zend_fetch_prop_info(op_array, ssa, opline, i), NULL);
+				t1 = zend_fetch_prop_type(prop_info, &ce);
 				t2 = OP1_DATA_INFO();
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				if (t1 & MAY_BE_ARRAY_OF_REF) {
@@ -2572,6 +2574,10 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				}
 				orig = t1;
 				t1 = zend_array_element_type(t1, 1, 0);
+				t2 = OP1_DATA_INFO();
+			} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+				prop_info = zend_fetch_static_prop_info(script, op_array, ssa, opline);
+				t1 = zend_fetch_prop_type(prop_info, &ce);
 				t2 = OP1_DATA_INFO();
 			} else {
 				if (t1 & MAY_BE_REF) {
@@ -2608,6 +2614,8 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
 					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 				}
+			} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+				/* Nothing to do */
 			} else {
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			}
@@ -2636,9 +2644,13 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					}
 
 					/* The return value must also satisfy the property type */
-					t1 = zend_fetch_prop_type(zend_fetch_prop_info(op_array, ssa, opline, i), &ce);
-					if (t1) {
-						tmp &= t1;
+					if (prop_info) {
+						tmp &= zend_fetch_prop_type(prop_info, NULL);
+					}
+				} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+					/* The return value must also satisfy the property type */
+					if (prop_info) {
+						tmp &= zend_fetch_prop_type(prop_info, NULL);
 					}
 				}
 				tmp &= ~MAY_BE_REF;
@@ -2648,6 +2660,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				}
 			}
 			break;
+		}
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
 			tmp = 0;
@@ -3485,6 +3498,22 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				if (ce) {
 					UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_ops[i].result_def);
 				}
+			}
+			break;
+		case ZEND_FETCH_STATIC_PROP_R:
+		case ZEND_FETCH_STATIC_PROP_IS:
+		case ZEND_FETCH_STATIC_PROP_RW:
+		case ZEND_FETCH_STATIC_PROP_W:
+		case ZEND_FETCH_STATIC_PROP_UNSET:
+		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
+			tmp = zend_fetch_prop_type(
+				zend_fetch_static_prop_info(script, op_array, ssa, opline), &ce);
+			if (opline->result_type != IS_TMP_VAR) {
+				tmp |= MAY_BE_REF | MAY_BE_ERROR;
+			}
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+			if (ce) {
+				UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_ops[i].result_def);
 			}
 			break;
 		case ZEND_DO_FCALL:
