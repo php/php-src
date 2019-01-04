@@ -746,7 +746,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 
 			if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_info->type))) {
-				if (ZEND_TYPE_IS_CLASS(parent_info->type) ? !property_types_compatible(parent_info, child_info) : parent_info->type != child_info->type) {
+				if (!property_types_compatible(parent_info, child_info)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 					"Type of %s::$%s must be %s%s (as in class %s)",
 						ZSTR_VAL(ce->name),
