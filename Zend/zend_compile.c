@@ -1513,7 +1513,7 @@ static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_a
 
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
-			if (constant || (CG(active_class_entry) && zend_is_scope_known())) {
+			if (CG(active_class_entry) && zend_is_scope_known()) {
 				ZVAL_STR_COPY(zv, CG(active_class_entry)->name);
 			} else {
 				ZVAL_NULL(zv);
@@ -8009,9 +8009,7 @@ void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 	zend_ast *ast = *ast_ptr;
 
 	/* Other cases already resolved by constant folding */
-	ZEND_ASSERT(ast->attr == T_CLASS_C &&
-	            CG(active_class_entry) &&
-	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
+	ZEND_ASSERT(ast->attr == T_CLASS_C);
 
 	{
 		zval const_zv;
