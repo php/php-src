@@ -46,7 +46,7 @@ struct php_unserialize_data {
 	var_dtor_entries *first_dtor;
 	var_dtor_entries *last_dtor;
 	HashTable        *allowed_classes;
-	HashTable        *refs;
+	HashTable        *ref_props;
 	var_entries       entries;
 };
 
@@ -58,7 +58,7 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init() {
 		d->last = &d->entries;
 		d->first_dtor = d->last_dtor = NULL;
 		d->allowed_classes = NULL;
-		d->refs = NULL;
+		d->ref_props = NULL;
 		d->entries.used_slots = 0;
 		d->entries.next = NULL;
 		if (!BG(serialize_lock)) {
@@ -242,8 +242,8 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 	zval_ptr_dtor_nogc(&wakeup_name);
 
-	if ((*var_hashx)->refs) {
-		zend_array_destroy((*var_hashx)->refs);
+	if ((*var_hashx)->ref_props) {
+		zend_array_destroy((*var_hashx)->ref_props);
 	}
 }
 
@@ -497,6 +497,7 @@ string_key:
 
 				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
 					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+						// TODO Deduplicate with above code?
 						old_data = Z_INDIRECT_P(old_data);
 						if (Z_STRVAL(key)[0] == 0) {
 							zend_string *member, *class;
@@ -515,18 +516,19 @@ string_key:
 							info = zend_get_property_info(ce, Z_STR(key), 1);
 						}
 						var_push_dtor(var_hash, old_data);
-						old_data = zend_hash_update_ind(ht, Z_STR(key), &d);
+						data = zend_hash_update_ind(ht, Z_STR(key), &d);
 
 						if (EXPECTED(!info->type)) {
 							info = NULL;
-							data = old_data;
 						} else {
-							/* little hack to disallow references */
-							if (!(*var_hash)->refs) {
-								(*var_hash)->refs = emalloc(sizeof(HashTable));
-								zend_hash_init((*var_hash)->refs, 8, NULL, ZVAL_PTR_DTOR, 0);
+							/* Remember to which property this slot belongs, so we can add a type
+							 * source if it is turned into a reference lateron. */
+							if (!(*var_hash)->ref_props) {
+								(*var_hash)->ref_props = emalloc(sizeof(HashTable));
+								zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
 							}
-							data = zend_hash_next_index_insert((*var_hash)->refs, &d);
+							zend_hash_index_update_ptr(
+								(*var_hash)->ref_props, (zend_uintptr_t) data, info);
 						}
 					} else {
 						var_push_dtor(var_hash, old_data);
@@ -551,6 +553,8 @@ string_key:
 		}
 
 		if (UNEXPECTED(info)) {
+			// TODO Throw an error instead?
+			// TODO Handle references correctly
 			ZVAL_COPY_VALUE(&tmp, data);
 			if (UNEXPECTED(!zend_verify_property_type(info, &tmp, 1))) {
 				zval_dtor(&key);
@@ -745,12 +749,18 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key)
 		return 0;
 	}
 
-	if (Z_ISREF_P(rval_ref)) {
-		ZVAL_COPY(rval, rval_ref);
-	} else {
+	if (!Z_ISREF_P(rval_ref)) {
+		zend_property_info *info = NULL;
+		if ((*var_hash)->ref_props) {
+			info = zend_hash_index_find_ptr((*var_hash)->ref_props, (zend_uintptr_t) rval_ref);
+		}
 		ZVAL_NEW_REF(rval_ref, rval_ref);
-		ZVAL_COPY(rval, rval_ref);
+		if (info) {
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(rval_ref), info);
+		}
 	}
+
+	ZVAL_COPY(rval, rval_ref);
 
 	return 1;
 }
