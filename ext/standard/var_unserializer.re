@@ -404,7 +404,7 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key);
 static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_class_entry *ce)
 {
 	while (elements-- > 0) {
-		zval key, *data, d, *old_data, tmp;
+		zval key, *data, d, *old_data;
 		zend_ulong idx;
 		zend_property_info *info = NULL;
 
@@ -553,15 +553,15 @@ string_key:
 		}
 
 		if (UNEXPECTED(info)) {
-			// TODO Throw an error instead?
-			// TODO Handle references correctly
-			ZVAL_COPY_VALUE(&tmp, data);
-			if (UNEXPECTED(!zend_verify_property_type(info, &tmp, 1))) {
+			if (!zend_verify_prop_assignable_by_ref(info, data, /* strict */ 1)) {
+				zval_ptr_dtor(data);
+				ZVAL_UNDEF(data);
 				zval_dtor(&key);
 				return 0;
 			}
-			data = &tmp;
-			ZVAL_COPY(old_data, data);
+			if (Z_ISREF_P(data)) {
+				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+			}
 		}
 
 		if (BG(unserialize).level > 1) {
