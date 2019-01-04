@@ -43,6 +43,9 @@ var_dump( lchown( 'foobar_lchown.txt', $uid ) );
 var_dump( lchown( new StdClass(), $uid ) );
 var_dump( lchown( array(), $uid ) );
 
+// Bad user
+var_dump( lchown( $filename, -5 ) );
+
 ?>
 ===DONE===
 --CLEAN--
@@ -69,4 +72,7 @@ bool(true)
 
 Warning: lchown() expects parameter 1 to be a valid path, array given in %s on line %d
 bool(true)
+
+Warning: lchown(): %r(Operation not permitted|Invalid argument)%r in %s on line %d
+bool(false)
 ===DONE===
