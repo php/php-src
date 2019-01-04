@@ -2241,21 +2241,21 @@ static inline zend_class_entry *get_class_entry(const zend_script *script, zend_
 }
 
 static uint32_t zend_convert_type_code_to_may_be(zend_uchar type_code) {
-	if (type_code == IS_VOID) {
-		return MAY_BE_NULL;
-	} else if (type_code == IS_CALLABLE) {
-		return MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-	} else if (type_code == IS_ITERABLE) {
-		return MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-	} else if (type_code == IS_ARRAY) {
-		return MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-	} else if (type_code == _IS_BOOL) {
-		return MAY_BE_TRUE|MAY_BE_FALSE;
+	switch (type_code) {
+		case IS_VOID:
+			return MAY_BE_NULL;
+		case IS_CALLABLE:
+			return MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+		case IS_ITERABLE:
+			return MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+		case IS_ARRAY:
+			return MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+		case _IS_BOOL:
+			return MAY_BE_TRUE|MAY_BE_FALSE;
+		default:
+			ZEND_ASSERT(type_code < IS_REFERENCE);
+			return 1 << type_code;
 	}
-
-	ZEND_ASSERT(type_code < IS_REFERENCE);
-	return 1 << type_code;
-	
 }
 
 static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
