@@ -7958,18 +7958,20 @@ void zend_compile_const_expr_class_name(zend_ast **ast_ptr) /* {{{ */
 	zend_string *class_name = zend_ast_get_str(class_ast);
 	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
 
-	/* For the const-eval representation store the fetch type instead of the name. */
-	if (fetch_type == ZEND_FETCH_CLASS_SELF) {
-		zend_string_release(class_name);
-		ast->child[0] = NULL;
-		ast->attr = fetch_type;
-		return;
+	switch (fetch_type) {
+		case ZEND_FETCH_CLASS_SELF:
+		case ZEND_FETCH_CLASS_PARENT:
+			/* For the const-eval representation store the fetch type instead of the name. */
+			zend_string_release(class_name);
+			ast->child[0] = NULL;
+			ast->attr = fetch_type;
+			return;
+		case ZEND_FETCH_CLASS_STATIC:
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"static::class cannot be used for compile-time class name resolution");
+			return;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-
-	zend_error_noreturn(E_COMPILE_ERROR,
-		"%s::class cannot be used for compile-time class name resolution",
-		fetch_type == ZEND_FETCH_CLASS_STATIC ? "static" : "parent"
-	);
 }
 
 void zend_compile_const_expr_const(zend_ast **ast_ptr) /* {{{ */

@@ -511,19 +511,28 @@ ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_c
 			break;
 		}
 		case ZEND_AST_CONSTANT_CLASS:
-			if (scope && scope->name) {
+			if (scope) {
 				ZVAL_STR_COPY(result, scope->name);
 			} else {
 				ZVAL_EMPTY_STRING(result);
 			}
 			break;
 		case ZEND_AST_CLASS_NAME:
-			ZEND_ASSERT(ast->attr == ZEND_FETCH_CLASS_SELF);
-			if (scope && scope->name) {
-				ZVAL_STR_COPY(result, scope->name);
-			} else {
+			if (!scope) {
 				zend_throw_error(NULL, "Cannot use \"self\" when no class scope is active");
-				ret = FAILURE;
+				return FAILURE;
+			}
+			if (ast->attr == ZEND_FETCH_CLASS_SELF) {
+				ZVAL_STR_COPY(result, scope->name);
+			} else if (ast->attr == ZEND_FETCH_CLASS_PARENT) {
+				if (!scope->parent) {
+					zend_throw_error(NULL,
+						"Cannot use \"parent\" when current class scope has no parent");
+					return FAILURE;
+				}
+				ZVAL_STR_COPY(result, scope->parent->name);
+			} else {
+				ZEND_ASSERT(0 && "Should have errored during compilation");
 			}
 			break;
 		case ZEND_AST_AND:
