@@ -178,29 +178,34 @@ static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_i
 }
 /* }}} */
 
+/* todo: this is probably useful elsewhere too */
+/* caller is responsible for adding any necessary refcount */
+static zend_string *_get_parent_class_name(zend_class_entry *ce)
+{ /* {{{ */
+	zend_string *pname;
+
+	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		ZEND_ASSERT(ce->parent);
+		pname = ce->parent->name;
+	} else {
+		pname = ce->parent_name;
+	}
+
+	/* If there is a parent, it must have a name */
+	ZEND_ASSERT(pname);
+	return pname;
+}/* }}} */
+
 static
 zend_string *_resolve_parent_and_self(const zend_function *fe, zend_string *name)
-{
+{ /* {{{ */
 	zend_class_entry *ce = fe->common.scope;
 	/* if there isn't a class then we shouldn't be resolving parent and self */
 	ZEND_ASSERT(fe->common.scope);
 
 	switch (zend_get_class_fetch_type(name)) {
 		case ZEND_FETCH_CLASS_PARENT:
-			name = NULL;
-			if (ce->ce_flags & ZEND_ACC_LINKED) {
-				if (ce->parent && ce->parent->name) {
-					name = ce->parent->name;
-				}
-			} else if (ce->parent_name) {
-				name = ce->parent_name;
-			}
-			if (name == NULL) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot use parent as type constraint in %s::%s() because %s does not have a parent type",
-					ZEND_FN_SCOPE_NAME(fe), ZSTR_VAL(fe->common.function_name),
-					ZEND_FN_SCOPE_NAME(fe));
-			}
+			name = _get_parent_class_name(ce);
 			break;
 
 		case ZEND_FETCH_CLASS_SELF:
@@ -221,7 +226,7 @@ zend_string *_resolve_parent_and_self(const zend_function *fe, zend_string *name
 	}
 
 	return zend_string_copy(name);
-}
+} /* }}} */
 
 typedef enum {
 	CONTRAVARIANT = -1,
