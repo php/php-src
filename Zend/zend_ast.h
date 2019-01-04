@@ -87,6 +87,7 @@ enum _zend_ast_kind {
 	ZEND_AST_POST_INC,
 	ZEND_AST_POST_DEC,
 	ZEND_AST_YIELD_FROM,
+	ZEND_AST_CLASS_NAME,
 
 	ZEND_AST_GLOBAL,
 	ZEND_AST_UNSET,
@@ -200,6 +201,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_str(zend_string *str
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_long lval);
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, zend_ast_attr attr);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *class, zend_ast *name);
 
 #if ZEND_AST_SPEC
 # define ZEND_AST_SPEC_CALL(name, ...) \

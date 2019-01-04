@@ -102,6 +102,16 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, ze
 	return (zend_ast *) ast;
 }
 
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *class, zend_ast *name) {
+	zend_string *name_str = zend_ast_get_str(name);
+	if (zend_string_equals_literal_ci(name_str, "class")) {
+		zend_string_release(name_str);
+		return zend_ast_create(ZEND_AST_CLASS_NAME, class);
+	} else {
+		return zend_ast_create(ZEND_AST_CLASS_CONST, class, name);
+	}
+}
+
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
@@ -1605,6 +1615,10 @@ simple_list:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::");
 			zend_ast_export_name(str, ast->child[1], 0, indent);
+			break;
+		case ZEND_AST_CLASS_NAME:
+			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			smart_str_appends(str, "::class");
 			break;
 		case ZEND_AST_ASSIGN:            BINARY_OP(" = ",   90, 91, 90);
 		case ZEND_AST_ASSIGN_REF:        BINARY_OP(" =& ",  90, 91, 90);

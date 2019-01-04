@@ -1366,21 +1366,12 @@ static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 }
 /* }}} */
 
-static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *class_ast, zend_ast *name_ast, zend_bool constant) /* {{{ */
+static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *class_ast, zend_bool constant) /* {{{ */
 {
 	uint32_t fetch_type;
 
-	if (name_ast->kind != ZEND_AST_ZVAL) {
-		return 0;
-	}
-
-	if (!zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "class")) {
-		return 0;
-	}
-
 	if (class_ast->kind != ZEND_AST_ZVAL) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Dynamic class names are not allowed in compile-time ::class fetch");
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use ::class with dynamic class name");
 	}
 
 	fetch_type = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
@@ -1390,10 +1381,9 @@ static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_a
 		case ZEND_FETCH_CLASS_SELF:
 			if (CG(active_class_entry) && zend_is_scope_known()) {
 				ZVAL_STR_COPY(zv, CG(active_class_entry)->name);
-			} else {
-				ZVAL_NULL(zv);
+				return 1;
 			}
-			return 1;
+			return 0;
 		case ZEND_FETCH_CLASS_STATIC:
 		case ZEND_FETCH_CLASS_PARENT:
 			if (constant) {
@@ -1401,10 +1391,8 @@ static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_a
 					"%s::class cannot be used for compile-time class name resolution",
 					fetch_type == ZEND_FETCH_CLASS_STATIC ? "static" : "parent"
 				);
-			} else {
-				ZVAL_NULL(zv);
 			}
-			return 1;
+			return 0;
 		case ZEND_FETCH_CLASS_DEFAULT:
 			ZVAL_STR(zv, zend_resolve_class_name_ast(class_ast));
 			return 1;
@@ -7689,16 +7677,6 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 	znode class_node, const_node;
 	zend_op *opline;
 
-	if (zend_try_compile_const_expr_resolve_class_name(&result->u.constant, class_ast, const_ast, 0)) {
-		if (Z_TYPE(result->u.constant) == IS_NULL) {
-			zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
-			opline->op1.num = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
-		} else {
-			result->op_type = IS_CONST;
-		}
-		return;
-	}
-
 	zend_eval_const_expr(&ast->child[0]);
 	zend_eval_const_expr(&ast->child[1]);
 
@@ -7716,10 +7694,6 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 		}
 		zend_string_release_ex(resolved_name, 0);
 	}
-	if (const_ast->kind == ZEND_AST_ZVAL && zend_string_equals_literal_ci(zend_ast_get_str(const_ast), "class")) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Dynamic class names are not allowed in compile-time ::class fetch");
-	}
 
 	zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 
@@ -7730,6 +7704,21 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 	zend_set_class_name_op1(opline, &class_node);
 
 	opline->extended_value = zend_alloc_polymorphic_cache_slot();
+}
+/* }}} */
+
+void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *class_ast = ast->child[0];
+	zend_op *opline;
+
+	if (zend_try_compile_const_expr_resolve_class_name(&result->u.constant, class_ast, 0)) {
+		result->op_type = IS_CONST;
+		return;
+	}
+
+	opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
+	opline->op1.num = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
 }
 /* }}} */
 
@@ -7924,6 +7913,7 @@ zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_CONDITIONAL || kind == ZEND_AST_DIM
 		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM
 		|| kind == ZEND_AST_CONST || kind == ZEND_AST_CLASS_CONST
+		|| kind == ZEND_AST_CLASS_NAME
 		|| kind == ZEND_AST_MAGIC_CONST || kind == ZEND_AST_COALESCE;
 }
 /* }}} */
@@ -7936,17 +7926,11 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 	zend_string *class_name;
 	zend_string *const_name = zend_ast_get_str(const_ast);
 	zend_string *name;
-	zval result;
 	int fetch_type;
 
 	if (class_ast->kind != ZEND_AST_ZVAL) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Dynamic class names are not allowed in compile-time class constant references");
-	}
-
-	if (zend_try_compile_const_expr_resolve_class_name(&result, class_ast, const_ast, 1)) {
-		*ast_ptr = zend_ast_create_zval(&result);
-		return;
 	}
 
 	class_name = zend_ast_get_str(class_ast);
@@ -7972,6 +7956,19 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 	*ast_ptr = zend_ast_create_constant(name, fetch_type | ZEND_FETCH_CLASS_EXCEPTION);
 }
 /* }}} */
+
+void zend_compile_const_expr_class_name(zend_ast **ast_ptr) /* {{{ */
+{
+	zend_ast *class_ast = (*ast_ptr)->child[0];
+	uint32_t fetch_type = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
+
+	/* If we reach here, ::class should have either been constant evaluated or replaced
+	 * by a AST_MAGIC_CONST, so only the error case is left here. */
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"%s::class cannot be used for compile-time class name resolution",
+		fetch_type == ZEND_FETCH_CLASS_STATIC ? "static" : "parent"
+	);
+}
 
 void zend_compile_const_expr_const(zend_ast **ast_ptr) /* {{{ */
 {
@@ -8023,6 +8020,9 @@ void zend_compile_const_expr(zend_ast **ast_ptr) /* {{{ */
 	switch (ast->kind) {
 		case ZEND_AST_CLASS_CONST:
 			zend_compile_const_expr_class_const(ast_ptr);
+			break;
+		case ZEND_AST_CLASS_NAME:
+			zend_compile_const_expr_class_name(ast_ptr);
 			break;
 		case ZEND_AST_CONST:
 			zend_compile_const_expr_const(ast_ptr);
@@ -8311,6 +8311,9 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_CLASS_CONST:
 			zend_compile_class_const(result, ast);
+			return;
+		case ZEND_AST_CLASS_NAME:
+			zend_compile_class_name(result, ast);
 			return;
 		case ZEND_AST_ENCAPS_LIST:
 			zend_compile_encaps_list(result, ast);
@@ -8605,31 +8608,15 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 		}
 		case ZEND_AST_CLASS_CONST:
 		{
-			zend_ast *class_ast = ast->child[0];
-			zend_ast *name_ast = ast->child[1];
+			zend_ast *class_ast;
+			zend_ast *name_ast;
 			zend_string *resolved_name;
-
-			if (zend_try_compile_const_expr_resolve_class_name(&result, class_ast, name_ast, 0)) {
-				if (Z_TYPE(result) == IS_NULL) {
-					if (zend_get_class_fetch_type(zend_ast_get_str(class_ast)) == ZEND_FETCH_CLASS_SELF) {
-						zend_ast_destroy(ast);
-						*ast_ptr = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_CLASS_C);
-					}
-					return;
-				}
-				break;
-			}
 
 			zend_eval_const_expr(&ast->child[0]);
 			zend_eval_const_expr(&ast->child[1]);
 
 			class_ast = ast->child[0];
 			name_ast = ast->child[1];
-
-			if (name_ast->kind == ZEND_AST_ZVAL && zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "class")) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Dynamic class names are not allowed in compile-time ::class fetch");
-			}
 
 			if (class_ast->kind != ZEND_AST_ZVAL || name_ast->kind != ZEND_AST_ZVAL) {
 				return;
@@ -8645,7 +8632,20 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_string_release_ex(resolved_name, 0);
 			break;
 		}
-
+		case ZEND_AST_CLASS_NAME:
+		{
+			zend_ast *class_ast = ast->child[0];
+			if (zend_try_compile_const_expr_resolve_class_name(&result, class_ast, 0)) {
+				break;
+			}
+			/* TODO We should not use AST_MAGIC_CONST for this, because the semantics are slightly
+			 * different. */
+			if (zend_get_class_fetch_type(zend_ast_get_str(class_ast)) == ZEND_FETCH_CLASS_SELF) {
+				zend_ast_destroy(ast);
+				*ast_ptr = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_CLASS_C);
+			}
+			return;
+		}
 		default:
 			return;
 	}
