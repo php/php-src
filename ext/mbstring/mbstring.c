@@ -2297,16 +2297,16 @@ PHP_FUNCTION(mb_str_split)
 	zend_string *str, *encoding = NULL;
 	size_t mblen, offset = 0;
 	mbfl_string string, result, *ret;
-	zend_long split_len = 1;
+	zend_long split_length = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-			Z_PARAM_LONG(split_len)
+			Z_PARAM_LONG(split_length)
 			Z_PARAM_STR(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (split_len <= 0) {
+	if (split_length <= 0) {
 		php_error_docref(NULL, E_WARNING, "The length of each segment must be greater than zero");
 		RETURN_FALSE;
 	}
@@ -2325,16 +2325,16 @@ PHP_FUNCTION(mb_str_split)
 	mblen = mbfl_strlen(&string);
 
 	/* init array with defined size */
-	array_init_size(return_value, mblen / split_len);
+	array_init_size(return_value, mblen / split_length);
 
 	/* split string */
 	while(offset < mblen){
-		ret = mbfl_substr(&string, &result, offset, (size_t)split_len);
+		ret = mbfl_substr(&string, &result, offset, (size_t)split_length);
 
 		add_next_index_stringl(return_value, (char const *)ret->val, ret->len);
 
 		efree(ret->val);
-		offset += split_len;
+		offset += split_length;
 	}
 }
 /* }}} */
