@@ -150,7 +150,7 @@ PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_c
 static inline void php_hash_bin2hex(char *out, const unsigned char *in, size_t in_len)
 {
 	static const char hexits[17] = "0123456789abcdef";
-	int i;
+	size_t i;
 
 	for(i = 0; i < in_len; i++) {
 		out[i * 2]       = hexits[in[i] >> 4];
