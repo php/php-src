@@ -9,8 +9,15 @@ var_dump(mb_ereg("(?i)000000000000000000000\xf0",""));
 var_dump(mb_ereg("0000\\"."\xf5","0"));
 var_dump(mb_ereg("(?i)FFF00000000000000000\xfd",""));
 ?>
---EXPECT--
-int(1)
+--EXPECTF--
+Warning: mb_ereg(): mbregex compile err: invalid code point value in %sbug77381.php on line %d
 bool(false)
+
+Warning: mb_ereg(): mbregex compile err: invalid code point value in %sbug77381.php on line %d
 bool(false)
+
+Warning: mb_ereg(): mbregex compile err: invalid code point value in %sbug77381.php on line %d
+bool(false)
+
+Warning: mb_ereg(): mbregex compile err: invalid code point value in %sbug77381.php on line %d
 bool(false)
