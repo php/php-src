@@ -6,8 +6,6 @@ Bug #77370 (Buffer overflow on mb regex functions - fetch_token)
 <?php
 var_dump(mb_split("   \xfd",""));
 ?>
---EXPECT--
-array(1) {
-  [0]=>
-  string(0) ""
-}
+--EXPECTF--
+Warning: mb_split(): mbregex compile err: invalid code point value in %sbug77370.php on line %d
+bool(false)
