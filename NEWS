@@ -2,8 +2,24 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.15
 
+- Core:
+  . Fixed bug #77369 (memcpy with negative length via crafted DNS response). (Stas)
+
 - GD:
+  . Fixed bug #77269 (efree() on uninitialized Heap data in imagescale leads to
+    use-after-free). (cmb)
+  . Fixed bug #77270 (imagecolormatch Out Of Bounds Write on Heap). (cmb)
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
+
+- Mbstring:
+  . Fixed bug #77370 (Buffer overflow on mb regex functions - fetch_token). (Stas)
+  . Fixed bug #77371 (heap buffer overflow in mb regex functions
+    - compile_string_node). (Stas)
+  . Fixed bug #77381 (heap buffer overflow in multibyte match_at). (Stas)
+  . Fixed bug #77382 (heap buffer overflow due to incorrect length in
+    expand_case_fold_string). (Stas)
+  . Fixed bug #77385 (buffer overflow in fetch_token). (Stas)
+  . Fixed bug #77394 (Buffer overflow in multibyte case folding - unicode). (Stas)
 
 - MySQLnd:
   . Fixed bug #75684 (In mysqlnd_ext_plugin.h the plugin methods family has
@@ -13,12 +29,19 @@ PHP                                                                        NEWS
   . Fixed bug #77273 (array_walk_recursive corrupts value types leading to PDO
     failure). (Nikita)
 
+- Phar:
+  . Fixed bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext). (Stas)
+
 - Sockets:
   . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
     on MacOS). (Michael Meyer)
 
 - Standard:
   . Fixed bug #77395 (segfault about array_multisort). (Laruence)
+
+- Xmlrpc:
+  . Fixed bug #77242 (heap out of bounds read in xmlrpc_decode()). (cmb)
+  . Fixed bug #77380 (Global out of bounds read in xmlrpc base64 code). (Stas)
 
 03 Jan 2019, PHP 7.2.14
 
