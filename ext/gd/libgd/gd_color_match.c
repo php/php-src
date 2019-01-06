@@ -33,8 +33,8 @@ int gdImageColorMatch (gdImagePtr im1, gdImagePtr im2)
 		return -4; /* At least 1 color must be allocated */
 	}
 
-	buf = (unsigned long *)safe_emalloc(sizeof(unsigned long), 5 * im2->colorsTotal, 0);
-	memset( buf, 0, sizeof(unsigned long) * 5 * im2->colorsTotal );
+	buf = (unsigned long *)safe_emalloc(sizeof(unsigned long), 5 * gdMaxColors, 0);
+	memset( buf, 0, sizeof(unsigned long) * 5 * gdMaxColors );
 
 	for (x=0; x<im1->sx; x++) {
 		for( y=0; y<im1->sy; y++ ) {
