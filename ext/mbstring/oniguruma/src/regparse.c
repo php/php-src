@@ -393,14 +393,17 @@ save_entry(ScanEnv* env, enum SaveType type, int* id)
   c = ONIGENC_MBC_TO_CODE(enc, p, end); \
   pfetch_prev = p; \
   p += ONIGENC_MBC_ENC_LEN(enc, p); \
+  if(UNEXPECTED(p > end)) p = end; \
 } while (0)
 
 #define PINC_S     do { \
   p += ONIGENC_MBC_ENC_LEN(enc, p); \
+  if(UNEXPECTED(p > end)) p = end; \
 } while (0)
 #define PFETCH_S(c) do { \
   c = ONIGENC_MBC_TO_CODE(enc, p, end); \
   p += ONIGENC_MBC_ENC_LEN(enc, p); \
+  if(UNEXPECTED(p > end)) p = end; \
 } while (0)
 
 #define PPEEK        (p < end ? ONIGENC_MBC_TO_CODE(enc, p, end) : PEND_VALUE)
@@ -5410,6 +5413,9 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
         }
         else { /* string */
           p = tok->backp + enclen(enc, tok->backp);
+          int len;
+          SAFE_ENC_LEN(enc, tok->backp, end, len);
+          p = tok->backp + len;
         }
       }
       break;

@@ -540,13 +540,13 @@ compile_length_string_node(Node* node, regex_t* reg)
   ambig = NODE_STRING_IS_AMBIG(node);
 
   p = prev = sn->s;
-  prev_len = enclen(enc, p);
+  SAFE_ENC_LEN(enc, p, sn->end, prev_len);
   p += prev_len;
   slen = 1;
   rlen = 0;
 
   for (; p < sn->end; ) {
-    len = enclen(enc, p);
+    SAFE_ENC_LEN(enc, p, sn->end, len);
     if (len == prev_len) {
       slen++;
     }
@@ -591,12 +591,12 @@ compile_string_node(Node* node, regex_t* reg)
   ambig = NODE_STRING_IS_AMBIG(node);
 
   p = prev = sn->s;
-  prev_len = enclen(enc, p);
+  SAFE_ENC_LEN(enc, p, end, prev_len);
   p += prev_len;
   slen = 1;
 
   for (; p < end; ) {
-    len = enclen(enc, p);
+    SAFE_ENC_LEN(enc, p, end, len);
     if (len == prev_len) {
       slen++;
     }
@@ -3624,7 +3624,7 @@ expand_case_fold_string(Node* node, regex_t* reg)
       goto err;
     }
 
-    len = enclen(reg->enc, p);
+	SAFE_ENC_LEN(reg->enc, p, end, len);
 
     if (n == 0) {
       if (IS_NULL(snode)) {
