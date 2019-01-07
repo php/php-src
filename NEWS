@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 
 - MBString:
   . Fixed bug #77367 (Negative size parameter in mb_split). (Stas)
+  . Fixed bug #77418 (Heap overflow in utf32be_mbc_to_code). (Stas)
 
 - OCI8:
   . Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
