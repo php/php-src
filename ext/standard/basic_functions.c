@@ -4376,13 +4376,12 @@ PHP_FUNCTION(getopt)
 		Z_PARAM_STRING(options, options_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(p_longopts)
-		Z_PARAM_ZVAL_DEREF(zoptind)
+		Z_PARAM_ZVAL(zoptind)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	/* Init zoptind to 1 */
 	if (zoptind) {
-		zval_ptr_dtor(zoptind);
-		ZVAL_LONG(zoptind, 1);
+		ZEND_TRY_ASSIGN_LONG(zoptind, 1);
 	}
 
 	/* Get argv from the global symbol table. We calculate argc ourselves
@@ -4530,7 +4529,7 @@ PHP_FUNCTION(getopt)
 
 	/* Set zoptind to php_optind */
 	if (zoptind) {
-		ZVAL_LONG(zoptind, php_optind);
+		ZEND_TRY_ASSIGN_LONG(zoptind, php_optind);
 	}
 
 	free_longopts(orig_opts);

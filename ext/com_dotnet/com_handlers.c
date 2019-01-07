@@ -58,7 +58,7 @@ static zval *com_property_read(zval *object, zval *member, int type, void **cahc
 	return rv;
 }
 
-static void com_property_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *com_property_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -76,6 +76,7 @@ static void com_property_write(zval *object, zval *member, zval *value, void **c
 	} else {
 		php_com_throw_exception(E_INVALIDARG, "this variant has no properties");
 	}
+	return value;
 }
 
 static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv)

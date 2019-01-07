@@ -863,13 +863,15 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	OnigOptionType options;
 	char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z/", &arg_pattern, &string, &string_len, &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z", &arg_pattern, &string, &string_len, &array) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (array != NULL) {
-		zval_ptr_dtor(array);
-		array_init(array);
+		array = zend_try_array_init(array);
+		if (!array) {
+			return;
+		}
 	}
 
 	if (!php_mb_check_encoding(

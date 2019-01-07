@@ -716,8 +716,9 @@ class_statement_list:
 
 
 class_statement:
-		variable_modifiers property_list ';'
-			{ $$ = $2; $$->attr = $1; }
+		variable_modifiers optional_type property_list ';'
+			{ $$ = zend_ast_create(ZEND_AST_PROP_GROUP, $2, $3);
+			  $$->attr = $1; }
 	|	method_modifiers T_CONST class_const_list ';'
 			{ $$ = $3; $$->attr = $1; }
 	|	T_USE name_list trait_adaptations

@@ -2133,7 +2133,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l",
 			&name, &name_len, &z_opsys, &z_attr, &flags) == FAILURE) {
 		return;
 	}
@@ -2150,10 +2150,8 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
-	zval_ptr_dtor(z_opsys);
-	ZVAL_LONG(z_opsys, opsys);
-	zval_ptr_dtor(z_attr);
-	ZVAL_LONG(z_attr, attr);
+	ZEND_TRY_ASSIGN_LONG(z_opsys, opsys);
+	ZEND_TRY_ASSIGN_LONG(z_attr, attr);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2171,7 +2169,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz/z/|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lzz|l",
 			&index, &z_opsys, &z_attr, &flags) == FAILURE) {
 		return;
 	}
@@ -2181,10 +2179,8 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
-	zval_ptr_dtor(z_opsys);
-	ZVAL_LONG(z_opsys, opsys);
-	zval_ptr_dtor(z_attr);
-	ZVAL_LONG(z_attr, attr);
+	ZEND_TRY_ASSIGN_LONG(z_opsys, opsys);
+	ZEND_TRY_ASSIGN_LONG(z_attr, attr);
 	RETURN_TRUE;
 }
 /* }}} */

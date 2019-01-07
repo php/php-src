@@ -2176,7 +2176,7 @@ const zend_function_entry pdo_dbstmt_functions[] = {
 };
 
 /* {{{ overloaded handlers for PDOStatement class */
-static void dbstmt_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *dbstmt_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
 
@@ -2184,8 +2184,9 @@ static void dbstmt_prop_write(zval *object, zval *member, zval *value, void **ca
 
 	if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
+		return value;
 	} else {
-		zend_std_write_property(object, member, value, cache_slot);
+		return zend_std_write_property(object, member, value, cache_slot);
 	}
 }
 
@@ -2499,9 +2500,10 @@ static zval *row_dim_read(zval *object, zval *member, int type, zval *rv)
 	return row_prop_read(object, member, type, NULL, rv);
 }
 
-static void row_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *row_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	php_error_docref(NULL, E_WARNING, "This PDORow is not from a writable result set");
+	return value;
 }
 
 static void row_dim_write(zval *object, zval *member, zval *value)

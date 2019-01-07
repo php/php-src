@@ -2800,7 +2800,7 @@ static void verify_soap_headers_array(HashTable *ht) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed SoapClient::__call(string function_name, array arguments [, array options [, array input_headers [, array output_headers]]])
+/* {{{ proto mixed SoapClient::__call(string function_name, array arguments [, array options [, array input_headers [, array &output_headers]]])
    Calls a SOAP function */
 PHP_METHOD(SoapClient, __call)
 {
@@ -2819,7 +2819,7 @@ PHP_METHOD(SoapClient, __call)
 	zend_bool free_soap_headers = 0;
 	zval *this_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|a!zz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|a!zz",
 		&function, &function_len, &args, &options, &headers, &output_headers) == FAILURE) {
 		return;
 	}
@@ -2891,14 +2891,18 @@ PHP_METHOD(SoapClient, __call)
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (output_headers) {
-		zval_ptr_dtor(output_headers);
-		array_init(output_headers);
+		output_headers = zend_try_array_init(output_headers);
+		if (!output_headers) {
+			goto cleanup;
+		}
 	}
+
 	do_soap_call(execute_data, this_ptr, function, function_len, arg_count, real_args, return_value, location, soap_action, uri, soap_headers, output_headers);
+
+cleanup:
 	if (arg_count > 0) {
 		efree(real_args);
 	}
-
 	if (soap_headers && free_soap_headers) {
 		zend_hash_destroy(soap_headers);
 		efree(soap_headers);

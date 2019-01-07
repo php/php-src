@@ -356,7 +356,7 @@ zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot,
 /* }}} */
 
 /* {{{ dom_write_property */
-void dom_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *dom_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	dom_object *obj = Z_DOMOBJ_P(object);
 	zend_string *member_str = zval_get_string(member);
@@ -368,10 +368,12 @@ void dom_write_property(zval *object, zval *member, zval *value, void **cache_sl
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		zend_std_write_property(object, member, value, cache_slot);
+		value = zend_std_write_property(object, member, value, cache_slot);
 	}
 
 	zend_string_release_ex(member_str, 0);
+
+	return value;
 }
 /* }}} */
 

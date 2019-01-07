@@ -764,11 +764,9 @@ void decode_request_worker(char *xml_in, int xml_in_len, char *encoding_in, zval
 			if (method_name_out) {
 				method_name = XMLRPC_RequestGetMethodName(response);
 				if (method_name) {
-					zval_ptr_dtor(method_name_out);
-					ZVAL_STRING(method_name_out, method_name);
+					ZEND_TRY_ASSIGN_STRING(method_name_out, method_name);
 				} else {
-					zval_ptr_dtor(retval);
-					ZVAL_NULL(retval);
+					ZEND_TRY_ASSIGN_NULL(retval);
 				}
 			}
 		}
@@ -787,7 +785,7 @@ PHP_FUNCTION(xmlrpc_decode_request)
 	zval *method;
 	size_t xml_len, encoding_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/|s", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|s", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
@@ -1389,15 +1387,19 @@ PHP_FUNCTION(xmlrpc_set_type)
 	size_t type_len;
 	XMLRPC_VALUE_TYPE vtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/s", &arg, &type, &type_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &arg, &type, &type_len) == FAILURE) {
 		return;
 	}
 
 	vtype = xmlrpc_str_as_type(type);
 	if (vtype != xmlrpc_none) {
-		if (set_zval_xmlrpc_type(arg, vtype) == SUCCESS) {
+		zval tmp;
+		ZVAL_COPY(&tmp, Z_REFVAL_P(arg));
+		if (set_zval_xmlrpc_type(&tmp, vtype) == SUCCESS) {
+			ZEND_TRY_ASSIGN_VALUE(arg, &tmp);
 			RETURN_TRUE;
 		}
+		Z_TRY_DELREF(tmp);
 	} else {
 		zend_error(E_WARNING,"invalid type '%s' passed to xmlrpc_set_type()", type);
 	}

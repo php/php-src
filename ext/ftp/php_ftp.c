@@ -677,7 +677,7 @@ PHP_FUNCTION(ftp_alloc)
 	zend_long		size, ret;
 	zend_string	*response = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|z/", &z_ftp, &size, &zresponse) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|z", &z_ftp, &size, &zresponse) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -686,9 +686,9 @@ PHP_FUNCTION(ftp_alloc)
 	}
 
 	ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
+
 	if (response) {
-		zval_ptr_dtor(zresponse);
-		ZVAL_STR(zresponse, response);
+		ZEND_TRY_ASSIGN_STR(zresponse, response);
 	}
 
 	if (!ret) {

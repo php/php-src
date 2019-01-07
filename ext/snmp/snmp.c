@@ -1949,7 +1949,7 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_
 
 /* {{{ php_snmp_write_property(zval *object, zval *member, zval *value[, const zend_literal *key])
    Generic object property writer */
-void php_snmp_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *php_snmp_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	zval tmp_member;
 	php_snmp_object *obj;
@@ -1973,12 +1973,14 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, void **cac
 		}
 		*/
 	} else {
-		zend_std_write_property(object, member, value, cache_slot);
+		value = zend_std_write_property(object, member, value, cache_slot);
 	}
 
 	if (member == &tmp_member) {
 		zval_ptr_dtor(member);
 	}
+
+	return value;
 }
 /* }}} */
 

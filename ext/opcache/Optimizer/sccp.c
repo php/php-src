@@ -203,6 +203,7 @@ static zend_bool can_replace_op1(
 		case ZEND_ASSIGN_REF:
 		case ZEND_ASSIGN_DIM:
 		case ZEND_ASSIGN_OBJ:
+		case ZEND_ASSIGN_OBJ_REF:
 		case ZEND_ASSIGN_ADD:
 		case ZEND_ASSIGN_SUB:
 		case ZEND_ASSIGN_MUL:
@@ -251,6 +252,9 @@ static zend_bool can_replace_op1(
 		case ZEND_VERIFY_RETURN_TYPE:
 			// TODO: This would require a non-local change ???
 			return 0;
+		case ZEND_OP_DATA:
+			return (opline - 1)->opcode != ZEND_ASSIGN_OBJ_REF &&
+				(opline - 1)->opcode != ZEND_ASSIGN_STATIC_PROP_REF;
 		default:
 			if (ssa_op->op1_def != -1) {
 				ZEND_ASSERT(0);
@@ -1400,7 +1404,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			if (op2) {
 				SKIP_IF_TOP(op2);
 			}
-			if (!opline->extended_value) {
+			if (opline->extended_value == 0) {
 				if (zend_optimizer_eval_binary_op(&zv, zend_compound_assign_to_binary_op(opline->opcode), op1, op2) == SUCCESS) {
 					SET_RESULT(op1, &zv);
 					SET_RESULT(result, &zv);
@@ -1494,6 +1498,11 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						zval_ptr_dtor_nogc(&zv);
 					}
 				}
+			} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+				SET_RESULT_BOT(result);
+				break;
+			} else {
+				ZEND_ASSERT(0 && "Invalid compound assignment kind");
 			}
 			SET_RESULT_BOT(result);
 			SET_RESULT_BOT(op1);

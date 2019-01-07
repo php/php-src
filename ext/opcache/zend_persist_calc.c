@@ -306,6 +306,11 @@ static void zend_persist_property_info_calc(zval *zv)
 		zend_shared_alloc_register_xlat_entry(prop, prop);
 		ADD_SIZE_EX(sizeof(zend_property_info));
 		ADD_INTERNED_STRING(prop->name);
+		if (ZEND_TYPE_IS_NAME(prop->type)) {
+			zend_string *class_name = ZEND_TYPE_NAME(prop->type);
+			ADD_INTERNED_STRING(class_name);
+			prop->type = ZEND_TYPE_ENCODE_CLASS(class_name, ZEND_TYPE_ALLOW_NULL(prop->type));
+		}
 		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 			ADD_STRING(prop->doc_comment);
 		}
@@ -326,6 +331,16 @@ static void zend_persist_class_constant_calc(zval *zv)
 	}
 }
 
+static zend_bool has_unresolved_property_types(zend_class_entry *ce) {
+	zend_property_info *prop;
+	ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+		if (ZEND_TYPE_IS_NAME(prop->type)) {
+			return 1;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return 0;
+}
+
 static void zend_persist_class_entry_calc(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
@@ -334,6 +349,7 @@ static void zend_persist_class_entry_calc(zval *zv)
 		ZCG(is_immutable_class) =
 			(ce->ce_flags & ZEND_ACC_LINKED) &&
 			(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) &&
+			!has_unresolved_property_types(ce) &&
 			!ZCG(current_persistent_script)->corrupted;
 
 		ADD_SIZE_EX(sizeof(zend_class_entry));
@@ -370,6 +386,10 @@ static void zend_persist_class_entry_calc(zval *zv)
 		}
 
 		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
+
+		if (ce->properties_info_table) {
+			ADD_ARENA_SIZE(sizeof(zend_property_info *) * ce->default_properties_count);
+		}
 
 		if (ce->num_interfaces) {
 			uint32_t i;

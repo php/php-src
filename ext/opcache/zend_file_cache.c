@@ -577,6 +577,17 @@ static void zend_file_cache_serialize_prop_info(zval                     *zv,
 				SERIALIZE_STR(prop->doc_comment);
 			}
 		}
+		if (prop->type) {
+			if (ZEND_TYPE_IS_NAME(prop->type)) {
+				zend_string *name = ZEND_TYPE_NAME(prop->type);
+				SERIALIZE_STR(name);
+				prop->type = ZEND_TYPE_ENCODE_CLASS(name, ZEND_TYPE_ALLOW_NULL(prop->type));
+			} else if (ZEND_TYPE_IS_CE(prop->type)) {
+				zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
+				SERIALIZE_PTR(ce);
+				prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
+			}
+		}
 	}
 }
 
@@ -659,6 +670,19 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_STR(ce->info.user.filename);
 	SERIALIZE_STR(ce->info.user.doc_comment);
 	zend_file_cache_serialize_hash(&ce->properties_info, script, info, buf, zend_file_cache_serialize_prop_info);
+
+	if (ce->properties_info_table) {
+		uint32_t i;
+		zend_property_info **table;
+
+		SERIALIZE_PTR(ce->properties_info_table);
+		table = ce->properties_info_table;
+		UNSERIALIZE_PTR(table);
+
+		for (i = 0; i < ce->default_properties_count; i++) {
+			SERIALIZE_PTR(table[i]);
+		}
+	}
 
 	if (ce->num_interfaces) {
 		uint32_t i;
@@ -1246,6 +1270,17 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
 				UNSERIALIZE_STR(prop->doc_comment);
 			}
 		}
+		if (prop->type) {
+			if (ZEND_TYPE_IS_NAME(prop->type)) {
+				zend_string *name = ZEND_TYPE_NAME(prop->type);
+				UNSERIALIZE_STR(name);
+				prop->type = ZEND_TYPE_ENCODE_CLASS(name, ZEND_TYPE_ALLOW_NULL(prop->type));
+			} else if (ZEND_TYPE_IS_CE(prop->type)) {
+				zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
+				UNSERIALIZE_PTR(ce);
+				prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
+			}
+		}
 	}
 }
 
@@ -1324,6 +1359,15 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_STR(ce->info.user.doc_comment);
 	zend_file_cache_unserialize_hash(&ce->properties_info,
 			script, buf, zend_file_cache_unserialize_prop_info, NULL);
+
+	if (ce->properties_info_table) {
+		uint32_t i;
+		UNSERIALIZE_PTR(ce->properties_info_table);
+
+		for (i = 0; i < ce->default_properties_count; i++) {
+			UNSERIALIZE_PTR(ce->properties_info_table[i]);
+		}
+	}
 
 	if (ce->num_interfaces) {
 		uint32_t i;

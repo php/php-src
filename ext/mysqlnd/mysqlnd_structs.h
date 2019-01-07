@@ -1309,7 +1309,6 @@ struct st_mysqlnd_stmt_data
 	unsigned char				send_types_to_server;
 	MYSQLND_PARAM_BIND			*param_bind;
 	MYSQLND_RESULT_BIND			*result_bind;
-	zend_bool					result_zvals_separated_once;
 
 	MYSQLND_UPSERT_STATUS * 	upsert_status;
 	MYSQLND_UPSERT_STATUS 		upsert_status_impl;

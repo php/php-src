@@ -711,13 +711,15 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|z/", &dict, &word, &wordlen, &sugg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|z", &dict, &word, &wordlen, &sugg) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (sugg) {
-		zval_ptr_dtor(sugg);
-		array_init(sugg);
+		sugg = zend_try_array_init(sugg);
+		if (!sugg) {
+			return;
+		}
 	}
 
 	PHP_ENCHANT_GET_DICT;

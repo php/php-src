@@ -78,8 +78,20 @@ PHP 7.4 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . Added support for typed properties. For example:
+
+        class User {
+            public int $id;
+            public string $name;
+        }
+
+    This will enforce that $user->id can only be assigned integer and
+    $user->name can only be assigned strings. For more information see the
+    RFC: https://wiki.php.net/rfc/typed_properties_v2
+
 - PDO_OCI:
-  . PDOStatement::getColumnMeta is now available
+  . PDOStatement::getColumnMeta() is now available
 
 - PDO_SQLite:
   . PDOStatement::getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT) allows to

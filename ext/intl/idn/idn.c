@@ -259,7 +259,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llz",
 			&domain, &option, &variant, &idna_info) == FAILURE) {
 		php_intl_bad_args("bad arguments");
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */
@@ -291,8 +291,10 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 				"4 arguments were provided, but INTL_IDNA_VARIANT_2003 only "
 				"takes 3 - extra argument ignored");
 		} else {
-			zval_ptr_dtor(idna_info);
-			array_init(idna_info);
+			idna_info = zend_try_array_init(idna_info);
+			if (!idna_info) {
+				return;
+			}
 		}
 	}
 

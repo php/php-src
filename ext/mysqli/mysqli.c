@@ -333,7 +333,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 /* }}} */
 
 /* {{{ mysqli_write_property */
-void mysqli_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *mysqli_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	zval tmp_member;
 	mysqli_object *obj;
@@ -353,12 +353,14 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		zend_std_write_property(object, member, value, cache_slot);
+		value = zend_std_write_property(object, member, value, cache_slot);
 	}
 
 	if (member == &tmp_member) {
 		zval_ptr_dtor_str(&tmp_member);
 	}
+
+	return value;
 }
 /* }}} */
 
