@@ -196,7 +196,7 @@ mysqlnd_switch_to_ssl_if_needed(MYSQLND_CONN_DATA * const conn,
 
 	{
 		const size_t client_capabilities = mysql_flags;
-		ret = conn->run_command(COM_ENABLE_SSL, conn, client_capabilities, server_capabilities, charset_no);
+		ret = conn->command->enable_ssl(conn, client_capabilities, server_capabilities, charset_no);
 	}
 	DBG_RETURN(ret);
 }

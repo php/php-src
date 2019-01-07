@@ -117,11 +117,11 @@ struct st_mysqlnd_plugin_methods_xetters
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) * methods);
 	} error_info;
 
-	struct st_mnd_command_factory_xetters
+	struct st_mnd_command_xetters
 	{
-		func_mysqlnd__run_command (*get)();
-		void (*set)(func_mysqlnd__run_command factory);
-	} command_factory;
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * methods);
+	} command;
 };
 
 PHPAPI extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
@@ -157,8 +157,8 @@ PHPAPI extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xe
 #define mysqlnd_vio_get_methods()		mysqlnd_plugin_methods_xetters.vio.get()
 #define mysqlnd_vio_set_methods(m)		mysqlnd_plugin_methods_xetters.vio.set((m))
 
-#define mysqlnd_command_factory_get()		mysqlnd_plugin_methods_xetters.command_factory.get()
-#define mysqlnd_command_factory_set(m)		mysqlnd_plugin_methods_xetters.command_factory.set((m))
+#define mysqlnd_command_get_methods()		mysqlnd_plugin_methods_xetters.command.get()
+#define mysqlnd_command_set_methods(m)		mysqlnd_plugin_methods_xetters.command.set((m))
 
 #define mysqlnd_error_info_get_methods()	mysqlnd_plugin_methods_xetters.error_info.get()
 #define mysqlnd_error_info_set_methods(m)	mysqlnd_plugin_methods_xetters.error_info.set((m))

@@ -316,6 +316,54 @@ struct st_mysqlnd_stats
 };
 
 
+typedef enum_func_status (*func_mysqlnd_execute_com_set_option)(MYSQLND_CONN_DATA * const conn, const enum_mysqlnd_server_option option);
+typedef enum_func_status (*func_mysqlnd_execute_com_debug)(MYSQLND_CONN_DATA * const conn);
+typedef enum_func_status (*func_mysqlnd_execute_com_init_db)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING db);
+typedef enum_func_status (*func_mysqlnd_execute_com_ping)(MYSQLND_CONN_DATA * const conn);
+typedef enum_func_status (*func_mysqlnd_execute_com_statistics)(MYSQLND_CONN_DATA * const conn, zend_string ** message);
+typedef enum_func_status (*func_mysqlnd_execute_com_process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const zend_bool read_response);
+typedef enum_func_status (*func_mysqlnd_execute_com_refresh)(MYSQLND_CONN_DATA * const conn, const uint8_t options);
+typedef enum_func_status (*func_mysqlnd_execute_com_shutdown)(MYSQLND_CONN_DATA * const conn, const uint8_t level);
+typedef enum_func_status (*func_mysqlnd_execute_com_quit)(MYSQLND_CONN_DATA * const conn);
+typedef enum_func_status (*func_mysqlnd_execute_com_query)(MYSQLND_CONN_DATA * const conn, MYSQLND_CSTRING query);
+typedef enum_func_status (*func_mysqlnd_execute_com_change_user)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload, const zend_bool silent);
+typedef enum_func_status (*func_mysqlnd_execute_com_reap_result)(MYSQLND_CONN_DATA * const conn);
+typedef enum_func_status (*func_mysqlnd_execute_com_stmt_prepare)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING query);
+typedef enum_func_status (*func_mysqlnd_execute_com_stmt_execute)(MYSQLND_CONN_DATA * conn, const MYSQLND_CSTRING payload);
+typedef enum_func_status (*func_mysqlnd_execute_com_stmt_fetch)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload);
+typedef enum_func_status (*func_mysqlnd_execute_com_stmt_reset)(MYSQLND_CONN_DATA * const conn, const zend_ulong stmt_id);
+typedef enum_func_status (*func_mysqlnd_execute_com_stmt_send_long_data)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload);
+typedef enum_func_status (*func_mysqlnd_execute_com_stmt_close)(MYSQLND_CONN_DATA * const conn, const zend_ulong stmt_id);
+typedef enum_func_status (*func_mysqlnd_execute_com_enable_ssl)(MYSQLND_CONN_DATA * const conn, const size_t client_capabilities, const size_t server_capabilities, const unsigned int charset_no);
+typedef enum_func_status (*func_mysqlnd_execute_com_handshake)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING username, const MYSQLND_CSTRING password, const MYSQLND_CSTRING database, const size_t client_flags);
+
+
+MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command)
+{
+	func_mysqlnd_execute_com_set_option set_option;
+	func_mysqlnd_execute_com_debug debug;
+	func_mysqlnd_execute_com_init_db init_db;
+	func_mysqlnd_execute_com_ping ping;
+	func_mysqlnd_execute_com_statistics statistics;
+	func_mysqlnd_execute_com_process_kill process_kill;
+	func_mysqlnd_execute_com_refresh refresh;
+	func_mysqlnd_execute_com_shutdown shutdown;
+	func_mysqlnd_execute_com_quit quit;
+	func_mysqlnd_execute_com_query query;
+	func_mysqlnd_execute_com_change_user change_user;
+	func_mysqlnd_execute_com_reap_result reap_result;
+	func_mysqlnd_execute_com_stmt_prepare stmt_prepare;
+	func_mysqlnd_execute_com_stmt_execute stmt_execute;
+	func_mysqlnd_execute_com_stmt_fetch stmt_fetch;
+	func_mysqlnd_execute_com_stmt_reset stmt_reset;
+	func_mysqlnd_execute_com_stmt_send_long_data stmt_send_long_data;
+	func_mysqlnd_execute_com_stmt_close stmt_close;
+	func_mysqlnd_execute_com_enable_ssl enable_ssl;
+	func_mysqlnd_execute_com_handshake handshake;
+};
+
+
+
 typedef enum_func_status	(*func_mysqlnd_vio__init)(MYSQLND_VIO * const vio, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info);
 typedef void				(*func_mysqlnd_vio__dtor)(MYSQLND_VIO * const vio, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 
@@ -848,10 +896,6 @@ struct st_mysqlnd_vio
 
 
 
-typedef enum_func_status (*func_mysqlnd__run_command)(enum php_mysqlnd_server_command command, ...);
-
-
-
 typedef struct st_mysqlnd_connection_state MYSQLND_CONNECTION_STATE;
 typedef enum mysqlnd_connection_state (*func_mysqlnd_connection_state__get)(const MYSQLND_CONNECTION_STATE * const state_struct);
 typedef void (*func_mysqlnd_connection_state__set)(MYSQLND_CONNECTION_STATE * const state_struct, const enum mysqlnd_connection_state state);
@@ -936,8 +980,7 @@ struct st_mysqlnd_connection_data
 	zend_bool		in_async_err_cb;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) object_factory;
-	func_mysqlnd__run_command run_command;
-
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * command;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * m;
 
 	/* persistent connection */
