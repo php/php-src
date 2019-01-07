@@ -1338,7 +1338,7 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 														const MYSQLND_SESSION_OPTIONS * const session_options,
-														const MYSQLND_PFC_DATA * const pfc_data, zend_ulong mysql_flags
+														const MYSQLND_PFC_DATA * const pfc_data, const zend_ulong mysql_flags
 														);
 
 typedef void (*func_auth_plugin__handle_server_response)(struct st_mysqlnd_authentication_plugin * self, 

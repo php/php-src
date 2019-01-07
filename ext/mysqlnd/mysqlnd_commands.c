@@ -51,13 +51,13 @@ struct st_mysqlnd_protocol_com_set_option_command
 static enum_func_status
 mysqlnd_com_set_option_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_set_option_command * command = (struct st_mysqlnd_protocol_com_set_option_command *) cmd;
+	const struct st_mysqlnd_protocol_com_set_option_command * const command = (const struct st_mysqlnd_protocol_com_set_option_command *) cmd;
 	zend_uchar buffer[2];
 	enum_func_status ret = FAIL;
 	MYSQLND_CONN_DATA * conn = command->context.conn;
-	enum_mysqlnd_server_option option = command->context.option;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
+	const enum_mysqlnd_server_option option = command->context.option;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
 
 	DBG_ENTER("mysqlnd_com_set_option_run");
 	int2store(buffer, (unsigned int) option);
@@ -101,11 +101,11 @@ mysqlnd_com_set_option_run_command(va_list args)
 static enum_func_status
 mysqlnd_com_debug_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_no_params_command * command = (struct st_mysqlnd_protocol_no_params_command *) cmd;
+	const struct st_mysqlnd_protocol_no_params_command * const command = (const struct st_mysqlnd_protocol_no_params_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
 
 	DBG_ENTER("mysqlnd_com_debug_run");
 
@@ -158,16 +158,16 @@ struct st_mysqlnd_protocol_com_init_db_command
 static enum_func_status
 mysqlnd_com_init_db_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_init_db_command * command = (struct st_mysqlnd_protocol_com_init_db_command *) cmd;
+	const struct st_mysqlnd_protocol_com_init_db_command * const command = (const struct st_mysqlnd_protocol_com_init_db_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	const MYSQLND_CSTRING db = command->context.db;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
 
 	DBG_ENTER("mysqlnd_com_init_db_run");
 
-	ret = send_command(conn->payload_decoder_factory, COM_INIT_DB, (zend_uchar*) command->context.db.s, command->context.db.l, FALSE,
+	ret = send_command(conn->payload_decoder_factory, COM_INIT_DB, (const zend_uchar*) command->context.db.s, command->context.db.l, FALSE,
 					   &conn->state,
 					   conn->error_info,
 					   conn->upsert_status,
@@ -225,11 +225,11 @@ mysqlnd_com_init_db_run_command(va_list args)
 static enum_func_status
 mysqlnd_com_ping_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_no_params_command * command = (struct st_mysqlnd_protocol_no_params_command *) cmd;
+	const struct st_mysqlnd_protocol_no_params_command * const command = (const struct st_mysqlnd_protocol_no_params_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
 
 	DBG_ENTER("mysqlnd_com_ping_run");
 
@@ -287,11 +287,11 @@ struct st_mysqlnd_protocol_com_statistics_command
 static enum_func_status
 mysqlnd_com_statistics_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_statistics_command * command = (struct st_mysqlnd_protocol_com_statistics_command *) cmd;
+	const struct st_mysqlnd_protocol_com_statistics_command * const command = (const struct st_mysqlnd_protocol_com_statistics_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	zend_string **message = command->context.message;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 
 	DBG_ENTER("mysqlnd_com_statistics_run");
 
@@ -353,13 +353,13 @@ struct st_mysqlnd_protocol_com_process_kill_command
 enum_func_status
 mysqlnd_com_process_kill_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_process_kill_command * command = (struct st_mysqlnd_protocol_com_process_kill_command *) cmd;
+	const struct st_mysqlnd_protocol_com_process_kill_command * const command = (const struct st_mysqlnd_protocol_com_process_kill_command *) cmd;
 	zend_uchar buff[4];
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
-	zend_bool read_response = command->context.read_response;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
+	const zend_bool read_response = command->context.read_response;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
 
 	DBG_ENTER("mysqlnd_com_process_kill_run");
 	int4store(buff, command->context.process_id);
@@ -425,12 +425,12 @@ struct st_mysqlnd_protocol_com_refresh_command
 enum_func_status
 mysqlnd_com_refresh_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_refresh_command * command = (struct st_mysqlnd_protocol_com_refresh_command *) cmd;
+	const struct st_mysqlnd_protocol_com_refresh_command * const command = (const struct st_mysqlnd_protocol_com_refresh_command *) cmd;
 	zend_uchar bits[1];
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
 
 	DBG_ENTER("mysqlnd_com_refresh_run");
 	int1store(bits, command->context.options);
@@ -485,12 +485,12 @@ struct st_mysqlnd_protocol_com_shutdown_command
 enum_func_status
 mysqlnd_com_shutdown_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_shutdown_command * command = (struct st_mysqlnd_protocol_com_shutdown_command *) cmd;
+	const struct st_mysqlnd_protocol_com_shutdown_command * const command = (const struct st_mysqlnd_protocol_com_shutdown_command *) cmd;
 	zend_uchar bits[1];
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
 
 	DBG_ENTER("mysqlnd_com_shutdown_run");
 	int1store(bits, command->context.level);
@@ -544,10 +544,10 @@ struct st_mysqlnd_protocol_com_quit_command
 enum_func_status
 mysqlnd_com_quit_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_quit_command * command = (struct st_mysqlnd_protocol_com_quit_command *) cmd;
+	const struct st_mysqlnd_protocol_com_quit_command * const command = (const struct st_mysqlnd_protocol_com_quit_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 
 	DBG_ENTER("mysqlnd_com_quit_run");
 
@@ -595,14 +595,14 @@ struct st_mysqlnd_protocol_com_query_command
 static enum_func_status
 mysqlnd_com_query_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_query_command * command = (struct st_mysqlnd_protocol_com_query_command *) cmd;
+	const struct st_mysqlnd_protocol_com_query_command * const command = (const struct st_mysqlnd_protocol_com_query_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 
 	DBG_ENTER("mysqlnd_com_query_run");
 
-	ret = send_command(conn->payload_decoder_factory, COM_QUERY, (zend_uchar*) command->context.query.s, command->context.query.l, FALSE,
+	ret = send_command(conn->payload_decoder_factory, COM_QUERY, (const zend_uchar*) command->context.query.s, command->context.query.l, FALSE,
 					   &conn->state,
 					   conn->error_info,
 					   conn->upsert_status,
@@ -652,14 +652,14 @@ struct st_mysqlnd_protocol_com_change_user_command
 static enum_func_status
 mysqlnd_com_change_user_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_change_user_command * command = (struct st_mysqlnd_protocol_com_change_user_command *) cmd;
+	const struct st_mysqlnd_protocol_com_change_user_command * const command = (const struct st_mysqlnd_protocol_com_change_user_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 
 	DBG_ENTER("mysqlnd_com_change_user_run");
 
-	ret = send_command(conn->payload_decoder_factory, COM_CHANGE_USER, (zend_uchar*) command->context.payload.s, command->context.payload.l, command->context.silent,
+	ret = send_command(conn->payload_decoder_factory, COM_CHANGE_USER, (const zend_uchar*) command->context.payload.s, command->context.payload.l, command->context.silent,
 					   &conn->state,
 					   conn->error_info,
 					   conn->upsert_status,
@@ -705,9 +705,9 @@ struct st_mysqlnd_protocol_com_reap_result_command
 static enum_func_status
 mysqlnd_com_reap_result_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_reap_result_command * command = (struct st_mysqlnd_protocol_com_reap_result_command *) cmd;
+	const struct st_mysqlnd_protocol_com_reap_result_command * const command = (const struct st_mysqlnd_protocol_com_reap_result_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	const enum_mysqlnd_connection_state state = GET_CONNECTION_STATE(&conn->state);
 
 	DBG_ENTER("mysqlnd_com_reap_result_run");
@@ -755,14 +755,14 @@ struct st_mysqlnd_protocol_com_stmt_prepare_command
 static enum_func_status
 mysqlnd_com_stmt_prepare_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_stmt_prepare_command * command = (struct st_mysqlnd_protocol_com_stmt_prepare_command *) cmd;
+	const struct st_mysqlnd_protocol_com_stmt_prepare_command * const command = (const struct st_mysqlnd_protocol_com_stmt_prepare_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 
 	DBG_ENTER("mysqlnd_com_stmt_prepare_run");
 
-	ret = send_command(conn->payload_decoder_factory, COM_STMT_PREPARE, (zend_uchar*) command->context.query.s, command->context.query.l, FALSE,
+	ret = send_command(conn->payload_decoder_factory, COM_STMT_PREPARE, (const zend_uchar*) command->context.query.s, command->context.query.l, FALSE,
 					   &conn->state,
 					   conn->error_info,
 					   conn->upsert_status,
@@ -808,14 +808,14 @@ struct st_mysqlnd_protocol_com_stmt_execute_command
 static enum_func_status
 mysqlnd_com_stmt_execute_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_stmt_execute_command * command = (struct st_mysqlnd_protocol_com_stmt_execute_command *) cmd;
+	const struct st_mysqlnd_protocol_com_stmt_execute_command * const command = (const struct st_mysqlnd_protocol_com_stmt_execute_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 
 	DBG_ENTER("mysqlnd_com_stmt_execute_run");
 
-	ret = send_command(conn->payload_decoder_factory, COM_STMT_EXECUTE, (zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE,
+	ret = send_command(conn->payload_decoder_factory, COM_STMT_EXECUTE, (const zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE,
 					   &conn->state,
 					   conn->error_info,
 					   conn->upsert_status,
@@ -861,14 +861,14 @@ struct st_mysqlnd_protocol_com_stmt_fetch_command
 static enum_func_status
 mysqlnd_com_stmt_fetch_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_stmt_fetch_command * command = (struct st_mysqlnd_protocol_com_stmt_fetch_command *) cmd;
+	const struct st_mysqlnd_protocol_com_stmt_fetch_command * const command = (const struct st_mysqlnd_protocol_com_stmt_fetch_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 
 	DBG_ENTER("mysqlnd_com_stmt_fetch_run");
 
-	ret = send_command(conn->payload_decoder_factory, COM_STMT_FETCH, (zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE,
+	ret = send_command(conn->payload_decoder_factory, COM_STMT_FETCH, (const zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE,
 					   &conn->state,
 					   conn->error_info,
 					   conn->upsert_status,
@@ -915,11 +915,11 @@ static enum_func_status
 mysqlnd_com_stmt_reset_run(void *cmd)
 {
 	zend_uchar cmd_buf[MYSQLND_STMT_ID_LENGTH /* statement id */];
-	struct st_mysqlnd_protocol_com_stmt_reset_command * command = (struct st_mysqlnd_protocol_com_stmt_reset_command *) cmd;
+	const struct st_mysqlnd_protocol_com_stmt_reset_command * const command = (const struct st_mysqlnd_protocol_com_stmt_reset_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
+	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
 
 	DBG_ENTER("mysqlnd_com_stmt_reset_run");
 
@@ -974,14 +974,14 @@ struct st_mysqlnd_protocol_com_stmt_send_long_data_command
 static enum_func_status
 mysqlnd_com_stmt_send_long_data_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_stmt_send_long_data_command * command = (struct st_mysqlnd_protocol_com_stmt_send_long_data_command *) cmd;
+	const struct st_mysqlnd_protocol_com_stmt_send_long_data_command * const command = (const struct st_mysqlnd_protocol_com_stmt_send_long_data_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 
 	DBG_ENTER("mysqlnd_com_stmt_send_long_data_run");
 
-	ret = send_command(conn->payload_decoder_factory, COM_STMT_SEND_LONG_DATA, (zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE,
+	ret = send_command(conn->payload_decoder_factory, COM_STMT_SEND_LONG_DATA, (const zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE,
 					   &conn->state,
 					   conn->error_info,
 					   conn->upsert_status,
@@ -1028,9 +1028,9 @@ static enum_func_status
 mysqlnd_com_stmt_close_run(void *cmd)
 {
 	zend_uchar cmd_buf[MYSQLND_STMT_ID_LENGTH /* statement id */];
-	struct st_mysqlnd_protocol_com_stmt_close_command * command = (struct st_mysqlnd_protocol_com_stmt_close_command *) cmd;
+	const struct st_mysqlnd_protocol_com_stmt_close_command * const command = (const struct st_mysqlnd_protocol_com_stmt_close_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 
 	DBG_ENTER("mysqlnd_com_stmt_close_run");
@@ -1085,12 +1085,12 @@ struct st_mysqlnd_protocol_com_enable_ssl_command
 static enum_func_status
 mysqlnd_com_enable_ssl_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_enable_ssl_command * command = (struct st_mysqlnd_protocol_com_enable_ssl_command *) cmd;
+	const struct st_mysqlnd_protocol_com_enable_ssl_command * const command = (const struct st_mysqlnd_protocol_com_enable_ssl_command *) cmd;
 	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_CONN_DATA * const conn = command->context.conn;
 	MYSQLND_PACKET_AUTH auth_packet;
-	size_t client_capabilities = command->context.client_capabilities;
-	size_t server_capabilities = command->context.server_capabilities;
+	const size_t client_capabilities = command->context.client_capabilities;
+	const size_t server_capabilities = command->context.server_capabilities;
 
 	DBG_ENTER("mysqlnd_com_enable_ssl_run");
 	DBG_INF_FMT("client_capability_flags=%lu", client_capabilities);
@@ -1206,16 +1206,16 @@ struct st_mysqlnd_protocol_com_handshake_command
 static enum_func_status
 mysqlnd_com_handshake_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_com_handshake_command * command = (struct st_mysqlnd_protocol_com_handshake_command *) cmd;
+	const struct st_mysqlnd_protocol_com_handshake_command * const command = (const struct st_mysqlnd_protocol_com_handshake_command *) cmd;
 	const char * user = command->context.user.s;
 
 	const char * passwd = command->context.passwd.s;
-	size_t passwd_len = command->context.passwd.l;
+	const size_t passwd_len = command->context.passwd.l;
 
 	const char * db = command->context.database.s;
-	size_t db_len = command->context.database.l;
+	const size_t db_len = command->context.database.l;
 
-	size_t mysql_flags =  command->context.client_flags;
+	const size_t mysql_flags =  command->context.client_flags;
 
 	MYSQLND_CONN_DATA * conn = command->context.conn;
 	MYSQLND_PACKET_GREET greet_packet;
@@ -1303,7 +1303,7 @@ mysqlnd_com_handshake_run_command(va_list args)
 
 /* {{{ _mysqlnd_run_command */
 static enum_func_status
-_mysqlnd_run_command(enum php_mysqlnd_server_command command, ...)
+_mysqlnd_run_command(const enum php_mysqlnd_server_command command, ...)
 {
 	enum_func_status ret = FAIL;
 	va_list args;

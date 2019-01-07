@@ -2480,7 +2480,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 		const zend_bool silent,
 
 		struct st_mysqlnd_connection_state * connection_state,
-		MYSQLND_ERROR_INFO	* error_info,
+		MYSQLND_ERROR_INFO * error_info,
 		MYSQLND_UPSERT_STATUS * upsert_status,
 		MYSQLND_STATS * stats,
 		func_mysqlnd_conn_data__send_close send_close,
