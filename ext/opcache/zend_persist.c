@@ -872,6 +872,19 @@ static void zend_persist_class_entry(zval *zv)
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
 		HT_FLAGS(&ce->properties_info) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 
+		if (ce->properties_info_table) {
+			int i;
+
+			size_t size = sizeof(zend_property_info *) * ce->default_properties_count;
+			memcpy(ZCG(arena_mem), ce->properties_info_table, size);
+			ce->properties_info_table = ZCG(arena_mem);
+			ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(size));
+
+			for (i = 0; i < ce->default_properties_count; i++) {
+				ce->properties_info_table[i] = zend_shared_alloc_get_xlat_entry(ce->properties_info_table[i]);
+			}
+		}
+
 		if (ce->num_interfaces && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 			uint32_t i = 0;
 

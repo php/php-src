@@ -374,6 +374,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}
+			if (ce->properties_info_table) {
+				free(ce->properties_info_table);
+			}
 			free(ce);
 			break;
 	}

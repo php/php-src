@@ -1613,6 +1613,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->default_properties_count = 0;
 	ce->default_static_members_count = 0;
+	ce->properties_info_table = NULL;
 
 	if (nullify_handlers) {
 		ce->constructor = NULL;
@@ -6495,6 +6496,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 					CG(zend_lineno) = decl->end_lineno;
 					ce->ce_flags |= ZEND_ACC_LINKED;
 					zend_do_inheritance(ce, parent_ce);
+					zend_build_properties_info_table(ce);
 					if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 						zend_verify_abstract_class(ce);
 					}
@@ -6506,6 +6508,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		} else {
 			if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 				zend_string_release(lcname);
+				zend_build_properties_info_table(ce);
 				ce->ce_flags |= ZEND_ACC_LINKED;
 				return;
 			}

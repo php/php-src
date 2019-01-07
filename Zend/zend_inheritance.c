@@ -846,6 +846,42 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 }
 /* }}} */
 
+void zend_build_properties_info_table(zend_class_entry *ce)
+{
+	zend_property_info **table, *prop;
+	if (ce->default_properties_count == 0) {
+		return;
+	}
+
+	ZEND_ASSERT(ce->properties_info_table == NULL);
+	if (ce->type == ZEND_USER_CLASS) {
+		ce->properties_info_table = table = zend_arena_alloc(&CG(arena),
+			sizeof(zend_property_info *) * ce->default_properties_count);
+	} else {
+		ce->properties_info_table = table = pemalloc(
+			sizeof(zend_property_info *) * ce->default_properties_count, 1);
+	}
+
+	if (ce->parent && ce->parent->default_properties_count != 0) {
+		zend_property_info **parent_table = ce->parent->properties_info_table;
+		memcpy(
+			table, parent_table,
+			sizeof(zend_property_info *) * ce->parent->default_properties_count
+		);
+
+		/* Child did not add any new properties, we are done */
+		if (ce->default_properties_count == ce->parent->default_properties_count) {
+			return;
+		}
+	}
+
+	ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+		if (prop->ce == ce && (prop->flags & ZEND_ACC_STATIC) == 0) {
+			table[OBJ_PROP_TO_NUM(prop->offset)] = prop;
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
 {
 	zend_property_info *property_info;
@@ -2003,6 +2039,8 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent)
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		zend_verify_abstract_class(ce);
 	}
+
+	zend_build_properties_info_table(ce);
 }
 /* }}} */
 

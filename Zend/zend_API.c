@@ -2658,6 +2658,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 
 	if (parent_ce) {
 		zend_do_inheritance(register_class, parent_ce);
+		zend_build_properties_info_table(register_class);
 	}
 	return register_class;
 }
@@ -3632,10 +3633,20 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 			property_info->offset = property_info_ptr->offset;
 			zval_ptr_dtor(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
 			zend_hash_del(&ce->properties_info, name);
+
+			ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
+			ZEND_ASSERT(ce->properties_info_table != NULL);
+			ce->properties_info_table[OBJ_PROP_TO_NUM(property_info->offset)] = property_info;
 		} else {
 			property_info->offset = OBJ_PROP_TO_OFFSET(ce->default_properties_count);
 			ce->default_properties_count++;
 			ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
+
+			/* For user classes this is handled during linking */
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				ce->properties_info_table = perealloc(ce->properties_info_table, sizeof(zend_property_info *) * ce->default_properties_count, 1);
+				ce->properties_info_table[ce->default_properties_count - 1] = property_info;
+			}
 		}
 		ZVAL_COPY_VALUE(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)], property);
 	}
