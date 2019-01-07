@@ -960,16 +960,17 @@ static void zend_resolve_property_types(void) /* {{{ */
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (ZEND_TYPE_IS_NAME(prop_info->type)) {
 					zend_string *type_name = zend_string_tolower(ZEND_TYPE_NAME(prop_info->type));
-					zend_class_entry *prop_ce = (zend_class_entry*) zend_hash_find_ptr(CG(class_table), type_name);
+					zend_class_entry *prop_ce = zend_hash_find_ptr(CG(class_table), type_name);
 
-					assert(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
+					ZEND_ASSERT(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
 					prop_info->type = ZEND_TYPE_ENCODE_CE(prop_ce, ZEND_TYPE_ALLOW_NULL(prop_info->type));
 					zend_string_release(type_name);
 				}
 			} ZEND_HASH_FOREACH_END();
 		}
 	} ZEND_HASH_FOREACH_END();
-} /* }}} */
+}
+/* }}} */
 
 /* Unlink the global (r/o) copies of the class, function and constant tables,
  * and use a fresh r/w copy for the startup thread
