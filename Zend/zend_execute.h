@@ -62,9 +62,7 @@ ZEND_API zend_bool zend_load_property_class_type(zend_property_info *info);
 
 static zend_always_inline zend_type zend_get_prop_info_ref_type(zend_property_info *prop_info) {
 	if (ZEND_TYPE_IS_CLASS(prop_info->type) && UNEXPECTED(!ZEND_TYPE_IS_CE(prop_info->type)) && UNEXPECTED(!zend_load_property_class_type(prop_info))) {
-		if (!EG(exception)) {
-			zend_throw_error(NULL, "Class %s must be loaded when used by reference for property type", ZSTR_VAL(ZEND_TYPE_NAME(prop_info->type)));
-		}
+		ZEND_ASSERT(EG(exception));
 		return ZEND_TYPE_CODE(_IS_ERROR);
 	}
 

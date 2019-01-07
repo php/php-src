@@ -966,30 +966,28 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 }
 
 ZEND_API zend_bool zend_load_property_class_type(zend_property_info *info) {
+	zend_class_entry *ce;
 	if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(info->type), "self")) {
 		if (UNEXPECTED((info->ce->ce_flags & ZEND_ACC_TRAIT) != 0)) {
 			zend_throw_error(NULL, "Cannot write a%s value to a 'self' typed static property of a trait", ZEND_TYPE_ALLOW_NULL(info->type) ? " non-null" : "");
 			return 0;
 		}
-
-		zend_string_release(ZEND_TYPE_NAME(info->type));
-		info->type = ZEND_TYPE_ENCODE_CE(info->ce, ZEND_TYPE_ALLOW_NULL(info->type));
+		ce = info->ce;
 	} else if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(info->type), "parent")) {
 		if (UNEXPECTED(!info->ce->parent)) {
 			zend_throw_error(NULL, "Cannot access parent:: when current class scope has no parent");
 			return 0;
 		}
-		zend_string_release(ZEND_TYPE_NAME(info->type));
-		info->type = ZEND_TYPE_ENCODE_CE(info->ce->parent, ZEND_TYPE_ALLOW_NULL(info->type));
+		ce = info->ce->parent;
 	} else {
-		zend_class_entry *ce = zend_lookup_class(ZEND_TYPE_NAME(info->type));
+		ce = zend_lookup_class(ZEND_TYPE_NAME(info->type));
 		if (UNEXPECTED(!ce)) {
 			return 0;
 		}
-		zend_string_release(ZEND_TYPE_NAME(info->type));
-		info->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(info->type));
 	}
 
+	zend_string_release(ZEND_TYPE_NAME(info->type));
+	info->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(info->type));
 	return 1;
 }
 
