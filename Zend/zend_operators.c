@@ -29,6 +29,7 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_interfaces.h"
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
@@ -923,6 +924,19 @@ static zend_always_inline int add_function_fast(zval *result, zval *op1, zval *o
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_ARRAY, IS_ARRAY))) {
 		add_function_array(result, op1, op2);
 		return SUCCESS;
+        } else if (EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_OBJECT)) ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_ARRAY))  ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_DOUBLE)) ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_LONG))
+        ) {
+		zend_call_method_with_1_params(op1, Z_OBJCE_P(op1), NULL, "__add", result, op2);
+                return SUCCESS;
+        } else if (EXPECTED(type_pair == TYPE_PAIR(IS_ARRAY, IS_OBJECT))  ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_OBJECT)) ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_OBJECT))
+        ) {
+                zend_call_method_with_1_params(op2, Z_OBJCE_P(op2), NULL, "__add", result, op1);
+                return SUCCESS;
 	} else {
 		return FAILURE;
 	}
@@ -994,7 +1008,20 @@ static zend_always_inline int sub_function_fast(zval *result, zval *op1, zval *o
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
 		return SUCCESS;
-	} else {
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_OBJECT)) ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_ARRAY))  ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_DOUBLE)) ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_LONG))
+        ) {
+                zend_call_method_with_1_params(op1, Z_OBJCE_P(op1), NULL, "__sub", result, op2);
+                return SUCCESS;
+        } else if (EXPECTED(type_pair == TYPE_PAIR(IS_ARRAY, IS_OBJECT))  ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_OBJECT)) ||
+                   EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_OBJECT))
+        ) {
+                zend_call_method_with_1_params(op2, Z_OBJCE_P(op2), NULL, "__sub", result, op1);
+                return SUCCESS;
+        } else {
 		return FAILURE;
 	}
 }
@@ -1077,7 +1104,19 @@ ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {
 		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
 			return SUCCESS;
-
+                 } else if (EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_OBJECT)) ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_ARRAY))  ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_DOUBLE)) ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_LONG))
+                 ) {
+                        zend_call_method_with_1_params(op1, Z_OBJCE_P(op1), NULL, "__mul", result, op2);
+                        return SUCCESS;
+                 } else if (EXPECTED(type_pair == TYPE_PAIR(IS_ARRAY, IS_OBJECT))  ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_OBJECT)) ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_OBJECT))
+                 ) {
+                        zend_call_method_with_1_params(op2, Z_OBJCE_P(op2), NULL, "__mul", result, op1);
+                        return SUCCESS;
 		} else {
 			if (Z_ISREF_P(op1)) {
 				op1 = Z_REFVAL_P(op1);
@@ -1265,7 +1304,19 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 			}
 			ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
 			return SUCCESS;
-
+                 } else if (EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_OBJECT)) ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_ARRAY))  ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_DOUBLE)) ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_OBJECT, IS_LONG))
+                 ) {
+                        zend_call_method_with_1_params(op1, Z_OBJCE_P(op1), NULL, "__div", result, op2);
+                        return SUCCESS;
+                 } else if (EXPECTED(type_pair == TYPE_PAIR(IS_ARRAY, IS_OBJECT))  ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_OBJECT)) ||
+                            EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_OBJECT))
+                 ) {
+                        zend_call_method_with_1_params(op2, Z_OBJCE_P(op2), NULL, "__div", result, op1);
+                        return SUCCESS;
 		} else {
 			if (Z_ISREF_P(op1)) {
 				op1 = Z_REFVAL_P(op1);
