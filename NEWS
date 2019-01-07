@@ -65,8 +65,6 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #77298 (segfault occurs when add property to unserialized empty
     ArrayObject). (jhdxr)
-  . Fixed bug #77359 (spl_autoload causes segfault). (Lauri Kenttä)
-  . Fixed bug #77360 (class_uses causes segfault). (Lauri Kenttä)
 
 - Standard:
   . Fixed bug #77395 (segfault about array_multisort). (Laruence)
@@ -75,7 +73,7 @@ PHP                                                                        NEWS
   . Fixed bug #77242 (heap out of bounds read in xmlrpc_decode()). (cmb)
   . Fixed bug #77380 (Global out of bounds read in xmlrpc base64 code). (Stas)
 
-03 Jan 2019, PHP 7.3.1
+10 Jan 2019, PHP 7.3.1
 
 - Core:
   . Fixed bug #76654 (Build failure on Mac OS X on 32-bit Intel). (Ryandesign)
@@ -131,6 +129,10 @@ PHP                                                                        NEWS
 
 - Sodium:
   . Fixed bug #77297 (SodiumException segfaults on PHP 7.3). (Nikita, Scott)
+
+- SPL:
+  . Fixed bug #77359 (spl_autoload causes segfault). (Lauri Kenttä)
+  . Fixed bug #77360 (class_uses causes segfault). (Lauri Kenttä)
 
 - SQLite3:
   . Fixed bug #77051 (Issue with re-binding on SQLite3). (BohwaZ)
