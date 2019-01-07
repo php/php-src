@@ -287,7 +287,8 @@ mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
 									MYSQLND_STATS * stats,
 									MYSQLND_ERROR_INFO * error_info,
 									MYSQLND_CONNECTION_STATE * connection_state,
-									zend_uchar * buf, size_t buf_size, const char * const packet_type_as_text,
+									zend_uchar * const buf, const size_t buf_size,
+									const char * const packet_type_as_text,
 									enum mysqlnd_packet_type packet_type)
 {
 	DBG_ENTER("mysqlnd_read_packet_header_and_body");
@@ -621,7 +622,11 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 		ret = conn->command->change_user(conn, payload, silent);
 		DBG_RETURN(ret == PASS? (p - buffer - MYSQLND_HEADER_SIZE) : 0);
 	} else {
-		size_t sent = pfc->data->m.send(pfc, vio, buffer, p - buffer - MYSQLND_HEADER_SIZE, stats, error_info);
+		/*
+		  The auth handshake packet has no command in it. Thus we can't go over conn->command directly.
+		  Well, we can have a command->no_command(conn, payload)
+		*/
+		const size_t sent = pfc->data->m.send(pfc, vio, buffer, p - buffer - MYSQLND_HEADER_SIZE, stats, error_info);
 		if (!sent) {
 			SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 		}
@@ -766,7 +771,7 @@ php_mysqlnd_change_auth_response_write(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	zend_uchar * buffer = pfc->cmd_buffer.length >= packet->auth_data_len? pfc->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
+	zend_uchar * const buffer = pfc->cmd_buffer.length >= packet->auth_data_len? pfc->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
 	zend_uchar * p = buffer + MYSQLND_HEADER_SIZE; /* start after the header */
 
 	DBG_ENTER("php_mysqlnd_change_auth_response_write");
@@ -777,7 +782,11 @@ php_mysqlnd_change_auth_response_write(MYSQLND_CONN_DATA * conn, void * _packet)
 	}
 
 	{
-		size_t sent = pfc->data->m.send(pfc, vio, buffer, p - buffer - MYSQLND_HEADER_SIZE, stats, error_info);
+		/*
+		  The auth handshake packet has no command in it. Thus we can't go over conn->command directly.
+		  Well, we can have a command->no_command(conn, payload)
+		*/
+		const size_t sent = pfc->data->m.send(pfc, vio, buffer, p - buffer - MYSQLND_HEADER_SIZE, stats, error_info);
 		if (buffer != pfc->cmd_buffer.buffer) {
 			mnd_efree(buffer);
 		}
@@ -803,8 +812,8 @@ php_mysqlnd_ok_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
 	zend_uchar local_buf[OK_BUFFER_SIZE];
-	size_t buf_len = pfc->cmd_buffer.buffer? pfc->cmd_buffer.length : OK_BUFFER_SIZE;
-	zend_uchar * buf = pfc->cmd_buffer.buffer? (zend_uchar *) pfc->cmd_buffer.buffer : local_buf;
+	const size_t buf_len = pfc->cmd_buffer.buffer? pfc->cmd_buffer.length : OK_BUFFER_SIZE;
+	zend_uchar * const buf = pfc->cmd_buffer.buffer? (zend_uchar *) pfc->cmd_buffer.buffer : local_buf;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 	zend_ulong net_len;
@@ -897,8 +906,8 @@ php_mysqlnd_eof_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	size_t buf_len = pfc->cmd_buffer.length;
-	zend_uchar * buf = (zend_uchar *) pfc->cmd_buffer.buffer;
+	const size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 
@@ -965,7 +974,7 @@ size_t php_mysqlnd_cmd_write(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	unsigned int error_reporting = EG(error_reporting);
+	const unsigned int error_reporting = EG(error_reporting);
 	size_t sent = 0;
 
 	DBG_ENTER("php_mysqlnd_cmd_write");
@@ -1034,8 +1043,8 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
 	enum_func_status ret = PASS;
-	size_t buf_len = pfc->cmd_buffer.length;
-	zend_uchar * buf = (zend_uchar *) pfc->cmd_buffer.buffer;
+	const size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 	size_t len;
@@ -1175,8 +1184,9 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	size_t buf_len = pfc->cmd_buffer.length, total_len = 0;
-	zend_uchar * buf = (zend_uchar *) pfc->cmd_buffer.buffer;
+	const size_t buf_len = pfc->cmd_buffer.length;
+	size_t total_len = 0;
+	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 	char *root_ptr;
@@ -1353,7 +1363,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 						MYSQLND_ERROR_INFO * error_info,
 						MYSQLND_MEMORY_POOL * pool,
 						MYSQLND_ROW_BUFFER * buffer,
-						size_t * data_size)
+						size_t * const data_size)
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_HEADER header;
@@ -1433,8 +1443,8 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 /* {{{ php_mysqlnd_rowp_read_binary_protocol */
 enum_func_status
 php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-									  unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									  zend_bool as_int_or_float, MYSQLND_STATS * stats)
+									  const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
+									  const zend_bool as_int_or_float, MYSQLND_STATS * const stats)
 {
 	unsigned int i;
 	const zend_uchar * p = row_buffer->ptr;
@@ -1530,7 +1540,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 	unsigned int i;
 	zval *current_field, *end_field, *start_field;
 	zend_uchar * p = row_buffer->ptr;
-	size_t data_size = row_buffer->size;
+	const size_t data_size = row_buffer->size;
 	const zend_uchar * const packet_end = (zend_uchar*) p + data_size;
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
@@ -1677,8 +1687,8 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 /* {{{ php_mysqlnd_rowp_read_text_protocol_zval */
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats)
+										 const unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+										 const zend_bool as_int_or_float, MYSQLND_STATS * stats)
 {
 	enum_func_status ret;
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_zval");
@@ -1691,8 +1701,8 @@ php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_ROW_BUFFER * row_buffer, zval *
 /* {{{ php_mysqlnd_rowp_read_text_protocol_c */
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats)
+									  const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
+									  const zend_bool as_int_or_float, MYSQLND_STATS * const stats)
 {
 	enum_func_status ret;
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_c");
@@ -1836,7 +1846,7 @@ php_mysqlnd_stats_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	size_t buf_len = pfc->cmd_buffer.length;
+	const size_t buf_len = pfc->cmd_buffer.length;
 	zend_uchar *buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 
 	DBG_ENTER("php_mysqlnd_stats_read");
@@ -1883,7 +1893,7 @@ php_mysqlnd_prepare_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
 	/* In case of an error, we should have place to put it */
-	size_t buf_len = pfc->cmd_buffer.length;
+	const size_t buf_len = pfc->cmd_buffer.length;
 	zend_uchar *buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	const zend_uchar * const begin = buf;
@@ -1966,7 +1976,7 @@ php_mysqlnd_chg_user_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
 	/* There could be an error message */
-	size_t buf_len = pfc->cmd_buffer.length;
+	const size_t buf_len = pfc->cmd_buffer.length;
 	zend_uchar *buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	const zend_uchar * const begin = buf;

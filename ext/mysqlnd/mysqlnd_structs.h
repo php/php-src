@@ -639,8 +639,8 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn)
 
 	/* for decoding - binary or text protocol */
 typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats);
+															 const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
+															 const zend_bool as_int_or_float, MYSQLND_STATS * const stats);
 
 
 typedef MYSQLND_RES *		(*func_mysqlnd_res__use_result)(MYSQLND_RES * const result, const zend_bool ps_protocol);
@@ -648,7 +648,7 @@ typedef MYSQLND_RES *		(*func_mysqlnd_res__store_result)(MYSQLND_RES * result, M
 typedef void 				(*func_mysqlnd_res__fetch_into)(MYSQLND_RES *result, const unsigned int flags, zval *return_value, enum_mysqlnd_extension ext ZEND_FILE_LINE_DC);
 typedef MYSQLND_ROW_C 		(*func_mysqlnd_res__fetch_row_c)(MYSQLND_RES *result);
 typedef void 				(*func_mysqlnd_res__fetch_all)(MYSQLND_RES *result, const unsigned int flags, zval *return_value ZEND_FILE_LINE_DC);
-typedef void 				(*func_mysqlnd_res__fetch_field_data)(MYSQLND_RES *result, unsigned int offset, zval *return_value);
+typedef void 				(*func_mysqlnd_res__fetch_field_data)(MYSQLND_RES *result, const unsigned int offset, zval *return_value);
 typedef uint64_t			(*func_mysqlnd_res__num_rows)(const MYSQLND_RES * const result);
 typedef unsigned int		(*func_mysqlnd_res__num_fields)(const MYSQLND_RES * const result);
 typedef enum_func_status	(*func_mysqlnd_res__skip_result)(MYSQLND_RES * const result);
@@ -660,7 +660,7 @@ typedef const MYSQLND_FIELD *(*func_mysqlnd_res__fetch_field_direct)(MYSQLND_RES
 typedef const MYSQLND_FIELD *(*func_mysqlnd_res__fetch_fields)(MYSQLND_RES * const result);
 
 typedef enum_func_status	(*func_mysqlnd_res__read_result_metadata)(MYSQLND_RES * result, MYSQLND_CONN_DATA * conn);
-typedef const size_t *		(*func_mysqlnd_res__fetch_lengths)(MYSQLND_RES * const result);
+typedef const size_t *		(*func_mysqlnd_res__fetch_lengths)(const MYSQLND_RES * const result);
 typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result, MYSQLND_RES_METADATA * meta, MYSQLND_ROW_BUFFER ** row_buffers, zend_bool binary_protocol);
 
 typedef void				(*func_mysqlnd_res__free_result_buffers)(MYSQLND_RES * result);	/* private */
@@ -711,7 +711,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res)
 
 
 typedef uint64_t		(*func_mysqlnd_result_unbuffered__num_rows)(const MYSQLND_RES_UNBUFFERED * const result);
-typedef const size_t *	(*func_mysqlnd_result_unbuffered__fetch_lengths)(MYSQLND_RES_UNBUFFERED * const result);
+typedef const size_t *	(*func_mysqlnd_result_unbuffered__fetch_lengths)(const MYSQLND_RES_UNBUFFERED * const result);
 typedef void			(*func_mysqlnd_result_unbuffered__free_last_data)(MYSQLND_RES_UNBUFFERED * result, MYSQLND_STATS * const global_stats);
 typedef void			(*func_mysqlnd_result_unbuffered__free_result)(MYSQLND_RES_UNBUFFERED * const result, MYSQLND_STATS * const global_stats);
 
@@ -727,8 +727,8 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered)
 
 typedef uint64_t			(*func_mysqlnd_result_buffered__num_rows)(const MYSQLND_RES_BUFFERED * const result);
 typedef enum_func_status	(*func_mysqlnd_result_buffered__initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result, MYSQLND_RES_METADATA * const meta,
-																						MYSQLND_STATS * stats, zend_bool int_and_float_native);
-typedef const size_t *		(*func_mysqlnd_result_buffered__fetch_lengths)(MYSQLND_RES_BUFFERED * const result);
+																						MYSQLND_STATS * stats, const zend_bool int_and_float_native);
+typedef const size_t *		(*func_mysqlnd_result_buffered__fetch_lengths)(const MYSQLND_RES_BUFFERED * const result);
 typedef enum_func_status	(*func_mysqlnd_result_buffered__data_seek)(MYSQLND_RES_BUFFERED * const result, const uint64_t row);
 typedef void				(*func_mysqlnd_result_buffered__free_result)(MYSQLND_RES_BUFFERED * const result);
 

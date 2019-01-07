@@ -89,7 +89,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result,
 																	  MYSQLND_RES_METADATA * const meta,
 																	  MYSQLND_STATS * stats,
-																	  zend_bool int_and_float_native)
+																	  const zend_bool int_and_float_native)
 {
 	unsigned int i;
 	enum_func_status ret = PASS;
@@ -568,9 +568,9 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
   completeness.
 */
 static const size_t *
-MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(MYSQLND_RES_BUFFERED * const result)
+MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(const MYSQLND_RES_BUFFERED * const result)
 {
-	const MYSQLND_RES_BUFFERED_ZVAL * set = (MYSQLND_RES_BUFFERED_ZVAL *) result;
+	const MYSQLND_RES_BUFFERED_ZVAL * const set = (const MYSQLND_RES_BUFFERED_ZVAL *) result;
 	/*
 	  If:
 	  - unbuffered result
@@ -600,9 +600,9 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(MYSQLND_RES_BUFFERED
   completeness.
 */
 static const size_t *
-MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(MYSQLND_RES_BUFFERED * const result)
+MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(const MYSQLND_RES_BUFFERED * const result)
 {
-	const MYSQLND_RES_BUFFERED_C * set = (MYSQLND_RES_BUFFERED_C *) result;
+	const MYSQLND_RES_BUFFERED_C * const set = (const MYSQLND_RES_BUFFERED_C *) result;
 	DBG_ENTER("mysqlnd_result_buffered_c::fetch_lengths");
 
 	if (set->current_row > set->row_count || set->current_row == 0) {
@@ -617,7 +617,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(MYSQLND_RES_BUFFERED * 
 
 /* {{{ mysqlnd_result_unbuffered::fetch_lengths */
 static const size_t *
-MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(MYSQLND_RES_UNBUFFERED * const result)
+MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(const MYSQLND_RES_UNBUFFERED * const result)
 {
 	/* simulate output of libmysql */
 	return (result->last_row_data || result->eof_reached)? result->lengths : NULL;
@@ -627,7 +627,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(MYSQLND_RES_UNBUFFERED 
 
 /* {{{ mysqlnd_res::fetch_lengths */
 static const size_t *
-MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(MYSQLND_RES * const result)
+MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(const MYSQLND_RES * const result)
 {
 	const size_t * ret;
 	DBG_ENTER("mysqlnd_res::fetch_lengths");
@@ -939,12 +939,12 @@ oom:
 
 /* {{{ mysqlnd_result_buffered::fetch_row_c */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything)
+MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * const fetched_anything)
 {
 	enum_func_status ret = FAIL;
 	MYSQLND_ROW_C * row = (MYSQLND_ROW_C *) param;
 	const MYSQLND_RES_METADATA * const meta = result->meta;
-	unsigned int field_count = meta->field_count;
+	const unsigned int field_count = meta->field_count;
 	MYSQLND_CONN_DATA * const conn = result->conn;
 	DBG_ENTER("mysqlnd_result_buffered::fetch_row_c");
 
@@ -1032,7 +1032,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 
 /* {{{ mysqlnd_result_buffered_zval::fetch_row */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * fetched_anything)
+MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * const fetched_anything)
 {
 	enum_func_status ret = FAIL;
 	zval * row = (zval *) param;
@@ -1802,7 +1802,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int 
 
 /* {{{ mysqlnd_res::fetch_field_data */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int offset, zval *return_value)
+MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, const unsigned int offset, zval *return_value)
 {
 	zval row;
 	zval *entry;
