@@ -22,6 +22,7 @@ PHP                                                                        NEWS
     expand_case_fold_string). (Stas)
   . Fixed bug #77385 (buffer overflow in fetch_token). (Stas)
   . Fixed bug #77394 (Buffer overflow in multibyte case folding - unicode). (Stas)
+  . Fixed bug #77418 (Heap overflow in utf32be_mbc_to_code). (Stas)
 
 - Phar:
   . Fixed bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext). (Stas)
