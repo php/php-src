@@ -59,13 +59,10 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 		do {
 			if (Z_REFCOUNTED_P(p)) {
 				if (UNEXPECTED(Z_ISREF_P(p))) {
-					zend_property_info *prop_info;
-					ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
-						if (prop_info->ce == object->ce && p == OBJ_PROP(object, prop_info->offset)) {
-							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
-							break; /* stop iteration here, the array might be realloc()'ed */
-						}
-					} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+					zend_property_info *prop_info = zend_get_property_info_for_slot(object, p);
+					if (prop_info->type) {
+						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+					}
 				}
 				i_zval_ptr_dtor(p);
 			}
