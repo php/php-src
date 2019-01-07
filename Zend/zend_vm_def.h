@@ -2331,23 +2331,43 @@ ZEND_VM_C_LABEL(assign_object):
 				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					ZVAL_COPY_VALUE(&tmp, value);
+					zend_reference *ref = NULL;
+					if ((OP_DATA_TYPE & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
+						ref = Z_REF_P(value);
+						value = Z_REFVAL_P(value);
+					}
+					if (((OP_DATA_TYPE & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
+						ZVAL_COPY(&tmp, value);
+					} else {
+						ZVAL_COPY_VALUE(&tmp, value);
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, value);
-						FREE_OP_DATA();
+						zval_ptr_dtor(value);
+						if ((OP_DATA_TYPE & IS_VAR) && ref && GC_DELREF(ref) == 0) {
+							efree(ref);
+						}
 						FREE_OP2();
 						FREE_OP1_VAR_PTR();
+						UNDEF_RESULT();
 						HANDLE_EXCEPTION();
 					}
+
 					/* will remain valid, thus no need to check prop_info in future here */
 					if (OP_DATA_TYPE == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					value = &tmp;
-				}
 
+					value = &tmp;
+					if ((OP_DATA_TYPE & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
+						efree(ref);
+					}
+
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+				} else {
 ZEND_VM_C_LABEL(fast_assign_obj):
-				value = zend_assign_to_variable(property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
+					value = zend_assign_to_variable(property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
+				}
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -2427,11 +2447,8 @@ ZEND_VM_HANDLER(201, ZEND_ASSIGN_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 	USE_OPLINE
 	zend_free_op free_op_data;
 	zval *prop, *value;
-	zend_reference *ref = NULL;
 	zend_property_info *prop_info;
-#if !defined(ZEND_VM_SPEC) || !(OP_DATA_TYPE & IS_TMP_VAR)
 	zval tmp;
-#endif
 
 	SAVE_OPLINE();
 
@@ -2444,22 +2461,17 @@ ZEND_VM_HANDLER(201, ZEND_ASSIGN_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 	value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 
 	if (UNEXPECTED(prop_info->type)) {
-#if defined(ZEND_VM_SPEC) && (OP_DATA_TYPE & IS_TMP_VAR)
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
-#else
-#if !defined(ZEND_VM_SPEC) || (OP_DATA_TYPE & (IS_CV | IS_VAR))
-		if (Z_ISREF_P(value)) {
+		zend_reference *ref = NULL;
+		if ((OP_DATA_TYPE & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
 			ref = Z_REF_P(value);
 			value = Z_REFVAL_P(value);
 		}
-#endif
-		if (((OP_DATA_TYPE & (IS_CONST | IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
+		if (((OP_DATA_TYPE & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
 			ZVAL_COPY(&tmp, value);
 		} else {
 			ZVAL_COPY_VALUE(&tmp, value);
 		}
 		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-#endif
 			zend_verify_property_type_error(prop_info, value);
 			zval_ptr_dtor(value);
 			if ((OP_DATA_TYPE & IS_VAR) && ref && GC_DELREF(ref) == 0) {
@@ -2468,13 +2480,11 @@ ZEND_VM_HANDLER(201, ZEND_ASSIGN_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-#if !defined(ZEND_VM_SPEC) || !(OP_DATA_TYPE & IS_TMP_VAR)
-		value = &tmp;
 
+		value = &tmp;
 		if ((OP_DATA_TYPE & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
 			efree(ref);
 		}
-#endif
 
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
