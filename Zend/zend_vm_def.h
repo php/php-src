@@ -2756,26 +2756,24 @@ ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 	} else {
 		zend_property_info *prop_info = NULL;
 
-		if ((OP2_TYPE == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			if (OP2_TYPE == IS_CONST) {
-				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
-			} else {
-				zend_string *tmp_str, *prop_name = zval_get_tmp_string(property, &tmp_str);
-				prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), prop_name, NULL);
-				zend_tmp_string_release(tmp_str);
+		if (OP2_TYPE == IS_CONST) {
+			prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
+		} else {
+			zend_string *tmp_str, *prop_name = zval_get_tmp_string(property, &tmp_str);
+			prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), prop_name, NULL);
+			zend_tmp_string_release(tmp_str);
+		}
+
+		if (UNEXPECTED(prop_info)) {
+			if (!zend_verify_prop_assignable_by_ref(prop_info, value_ptr, EX_USES_STRICT_TYPES())) {
+				FREE_OP1_VAR_PTR();
+				FREE_OP2();
+				FREE_OP_DATA_VAR_PTR();
+				HANDLE_EXCEPTION();
 			}
 
-			if (UNEXPECTED(prop_info)) {
-				if (!zend_verify_prop_assignable_by_ref(prop_info, value_ptr, EX_USES_STRICT_TYPES())) {
-					FREE_OP1_VAR_PTR();
-					FREE_OP2();
-					FREE_OP_DATA_VAR_PTR();
-					HANDLE_EXCEPTION();
-				}
-
-				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
-					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
-				}
+			if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+				ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
