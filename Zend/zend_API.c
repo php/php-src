@@ -1180,7 +1180,8 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 							if (UNEXPECTED(zval_update_constant_ex(&tmp, ce) != SUCCESS)) {
 								return FAILURE;
 							}
-							if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, 1 /* property initializers must always be evaluated with strict types */))) {
+							/* property initializers must always be evaluated with strict types */;
+							if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, /* strict */ 1))) {
 								zend_verify_property_type_error(prop_info, &tmp);
 								zval_ptr_dtor(&tmp);
 								return FAILURE;
@@ -3987,10 +3988,11 @@ ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string
 		return FAILURE;
 	}
 
+	ZEND_ASSERT(!Z_ISREF_P(value));
 	Z_TRY_ADDREF_P(value);
 	if (prop_info->type) {
 		ZVAL_COPY_VALUE(&tmp, value);
-		if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, /* strict */ 0))) {
+		if (!zend_verify_property_type(prop_info, &tmp, /* strict */ 0)) {
 			zend_verify_property_type_error(prop_info, value);
 			Z_TRY_DELREF_P(value);
 			return FAILURE;
@@ -3998,7 +4000,7 @@ ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string
 		value = &tmp;
 	}
 
-	zend_assign_to_variable(property, value, IS_VAR, /* strict */ 0);
+	zend_assign_to_variable(property, value, IS_TMP_VAR, /* strict */ 0);
 	return SUCCESS;
 }
 /* }}} */
