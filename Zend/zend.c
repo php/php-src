@@ -1022,7 +1022,6 @@ int zend_post_startup(void) /* {{{ */
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #else
-	zend_resolve_property_types();
 	global_map_ptr_last = CG(map_ptr_last);
 #endif
 
