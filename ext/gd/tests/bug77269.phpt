@@ -16,6 +16,6 @@ if(is_resource($im)) {
 ?>
 ===DONE===
 --EXPECTF--
-Warning: imagecreate():%S product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imagescale():%S product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %s on line %d
 ===DONE===
