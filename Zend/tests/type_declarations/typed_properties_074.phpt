@@ -39,4 +39,3 @@ object(Test)#1 (1) {
   uninitialized(int)
 }
 string(1) "y"
-

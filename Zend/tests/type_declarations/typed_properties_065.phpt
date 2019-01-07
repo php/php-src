@@ -69,4 +69,3 @@ Cannot increment a reference held by property class@anonymous::$foo of type int 
 integer
 Cannot increment a reference held by property class@anonymous::$foo of type int past its maximal value
 integer
-

@@ -22,4 +22,3 @@ object(Test)#1 (0) {
   uninitialized(int)
 }
 int(42)
-

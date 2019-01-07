@@ -16,5 +16,3 @@ Stack trace:
 #0 %s(2): class@anonymous->__construct('PHP 7 is better...')
 #1 {main}
   thrown in %s on line 6
-
-

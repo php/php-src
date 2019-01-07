@@ -14,4 +14,3 @@ object(class@anonymous)#%d (1) {
   ["qux"]=>
   uninitialized(int)
 }
-

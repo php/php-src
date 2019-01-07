@@ -47,4 +47,3 @@ Typed property Foo::$i must be int, float used
 int(1)
 Typed property Foo::$i must be int, string used
 int(1)
-

@@ -23,4 +23,3 @@ Fatal error: Uncaught TypeError: Typed property Foo::$bar must be int, null used
 Stack trace:
 #0 {main}
   thrown in %s on line 14
-

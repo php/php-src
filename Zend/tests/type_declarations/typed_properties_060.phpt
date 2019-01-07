@@ -20,4 +20,3 @@ Fatal error: Uncaught TypeError: Typed property A::$a must be int, string used i
 Stack trace:
 #0 {main}
   thrown in %s on line %d
-

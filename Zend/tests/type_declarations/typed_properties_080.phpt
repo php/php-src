@@ -34,4 +34,3 @@ Test::run();
 Typed static property Test::$a must not be accessed before initialization
 Typed static property Test::$b must not be accessed before initialization
 Typed static property Test::$c must not be accessed before initialization
-

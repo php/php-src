@@ -42,4 +42,3 @@ object(class@anonymous)#%d (6) {
     string(4) "four"
   }
 }
-

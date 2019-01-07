@@ -20,4 +20,3 @@ var_dump($test2->x);
 --EXPECT--
 Cannot assign string to reference held by property Test::$x of type int
 int(42)
-

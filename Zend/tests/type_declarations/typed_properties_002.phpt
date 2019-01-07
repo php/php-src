@@ -13,5 +13,3 @@ Fatal error: Uncaught Error: Typed property class@anonymous::$int must not be ac
 Stack trace:
 #0 {main}
   thrown in %s on line 6
-
-

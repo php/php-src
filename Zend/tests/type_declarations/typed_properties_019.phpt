@@ -20,8 +20,3 @@ Stack trace:
 #0 %s(12): Foo->inc()
 #1 {main}
   thrown in %s on line 6
-
-
-
-
-

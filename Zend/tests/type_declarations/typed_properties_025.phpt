@@ -9,9 +9,3 @@ class Foo {
 ?>
 --EXPECTF--
 Parse error: syntax error, unexpected 'int' (T_STRING), expecting variable (T_VARIABLE) in %s on line 4
-
-
-
-
-
-

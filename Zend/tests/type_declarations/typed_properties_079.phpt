@@ -31,4 +31,3 @@ array(0) {
 }
 string(68) "Cannot assign int to reference held by property A::$a of type ?array"
 NULL
-

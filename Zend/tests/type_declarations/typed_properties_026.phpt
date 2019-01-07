@@ -21,9 +21,3 @@ Stack trace:
 #0 %s(14): Baz->get()
 #1 {main}
   thrown in %s on line 10
-
-
-
-
-
-

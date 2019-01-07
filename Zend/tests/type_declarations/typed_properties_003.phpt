@@ -13,4 +13,3 @@ Fatal error: Uncaught Error: Cannot access uninitialized non-nullable property c
 Stack trace:
 #0 {main}
   thrown in %s on line %d
-
