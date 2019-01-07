@@ -387,7 +387,7 @@ PHP_FUNCTION(msg_receive)
 				ZEND_TRY_ASSIGN_FALSE(out_message);
 				RETVAL_FALSE;
 			} else {
-				zend_try_assign(out_message, &tmp);
+				ZEND_TRY_ASSIGN_VALUE(out_message, &tmp);
 			}
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		} else {

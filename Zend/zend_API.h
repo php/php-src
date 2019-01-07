@@ -656,25 +656,22 @@ END_EXTERN_C()
 #define ZEND_GINIT_FUNCTION			ZEND_MODULE_GLOBALS_CTOR_D
 #define ZEND_GSHUTDOWN_FUNCTION		ZEND_MODULE_GLOBALS_DTOR_D
 
+/* May modify arg in-place. Will free arg in failure case (and take ownership in success case).
+ * Prefer using the ZEND_TRY_ASSIGN_* macros over these APIs. */
 static zend_always_inline int zend_try_assign_ex(zval *zv, zval *arg, zend_bool strict) {
-	zend_reference *ref;
-	if (EXPECTED(Z_ISREF_P(zv)) && UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref = Z_REF_P(zv)))) {
-		zval tmp;
-		ZVAL_COPY_VALUE(&tmp, arg);
-		if (EXPECTED(zend_verify_ref_assignable_zval(ref, &tmp, strict))) {
-			zv = Z_REFVAL_P(zv);
-			zval_ptr_dtor(zv);
-			ZVAL_COPY_VALUE(zv, &tmp);
-		} else {
-			zval_ptr_dtor(&tmp);
+	if (EXPECTED(Z_ISREF_P(zv))) {
+		zend_reference *ref = Z_REF_P(zv);
+		zv = Z_REFVAL_P(zv);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref)) &&
+			UNEXPECTED(!zend_verify_ref_assignable_zval(ref, arg, strict))
+		) {
+			zval_ptr_dtor(arg);
 			return FAILURE;
 		}
-	} else {
-		ZVAL_DEREF(zv);
-		zval_ptr_dtor(zv);
-		ZVAL_COPY_VALUE(zv, arg);
 	}
 
+	zval_ptr_dtor(zv);
+	ZVAL_COPY_VALUE(zv, arg);
 	return SUCCESS;
 } 
 
@@ -747,6 +744,23 @@ static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
 	ZVAL_RES(&_zv, res); \
 	zend_try_assign(zv, &_zv); \
 } while (0)
+
+#define ZEND_TRY_ASSIGN_VALUE_EX(zv, other_zv, strict) do { \
+	zval _zv; \
+	ZVAL_COPY_VALUE(&_zv, other_zv); \
+	zend_try_assign_ex(zv, &_zv, strict); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_COPY_EX(zv, other_zv, strict) do { \
+	zval _zv; \
+	ZVAL_COPY(&_zv, other_zv); \
+	zend_try_assign_ex(zv, &_zv, strict); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_VALUE(zv, other_zv) \
+	ZEND_TRY_ASSIGN_VALUE_EX(zv, other_zv, ZEND_ARG_USES_STRICT_TYPES())
+#define ZEND_TRY_ASSIGN_COPY(zv, other_zv) \
+	ZEND_TRY_ASSIGN_COPY_EX(zv, other_zv, ZEND_ARG_USES_STRICT_TYPES())
 
 /* Initializes a reference to an empty array and returns dereferenced zval,
  * or NULL if the initialization failed. */

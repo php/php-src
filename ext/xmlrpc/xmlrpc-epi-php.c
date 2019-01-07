@@ -1396,7 +1396,7 @@ PHP_FUNCTION(xmlrpc_set_type)
 		zval tmp;
 		ZVAL_COPY(&tmp, Z_REFVAL_P(arg));
 		if (set_zval_xmlrpc_type(&tmp, vtype) == SUCCESS) {
-			zend_try_assign(arg, &tmp);
+			ZEND_TRY_ASSIGN_VALUE(arg, &tmp);
 			RETURN_TRUE;
 		}
 		Z_TRY_DELREF(tmp);

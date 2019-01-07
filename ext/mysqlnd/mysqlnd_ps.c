@@ -765,8 +765,7 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, const unsign
 					zval *resultzv = &stmt->result_bind[i].zv;
 					if (stmt->result_bind[i].bound == TRUE) {
 						DBG_INF_FMT("i=%u type=%u", i, Z_TYPE(current_row[i]));
-						Z_TRY_ADDREF(current_row[i]);
-						zend_try_assign_ex(resultzv, &current_row[i], 0);
+						ZEND_TRY_ASSIGN_COPY_EX(resultzv, &current_row[i], 0);
 					}
 				}
 			}
@@ -854,7 +853,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
 
-					zend_try_assign_ex(resultzv, data, 0);
+					ZEND_TRY_ASSIGN_VALUE_EX(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
 					ZVAL_NULL(data);
 				}
@@ -1033,7 +1032,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
 
-					zend_try_assign_ex(resultzv, data, 0);
+					ZEND_TRY_ASSIGN_VALUE_EX(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
 					ZVAL_NULL(data);
 				}
