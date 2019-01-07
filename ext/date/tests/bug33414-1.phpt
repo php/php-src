@@ -95,11 +95,11 @@ print "wanted=Friday            00:00:00\n\n";
 
 print "TZ=Pacific/Kwajalein - wrong day.\n";
 date_default_timezone_set("Pacific/Kwajalein");
-$tStamp = mktime (17, 17, 17, 1, 8626, 1970);
+$tStamp = mktime (17, 17, 17, 1, 8627, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("next Friday", $tStamp);
+$strtotime_tstamp = strtotime("next Saturday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Friday            00:00:00\n\n";
+print "wanted=Sunday            00:00:00\n\n";
 
 print "TZ=Asia/Ulan_Bator - wrong day.\n";
 date_default_timezone_set("Asia/Ulan_Bator");
@@ -256,9 +256,9 @@ result=Friday 2003-04-04 00:00:00 EEST 1
 wanted=Friday            00:00:00
 
 TZ=Pacific/Kwajalein - wrong day.
-tStamp=Friday 1993-08-13 17:17:17 -12 0
-result=Saturday 1993-08-21 00:00:00 +12 0
-wanted=Friday            00:00:00
+tStamp=Saturday 1993-08-14 17:17:17 -12 0
+result=Sunday 1993-08-22 00:00:00 +12 0
+wanted=Sunday            00:00:00
 
 TZ=Asia/Ulan_Bator - wrong day.
 tStamp=Saturday 2001-09-22 17:17:17 +09 1
