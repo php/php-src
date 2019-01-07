@@ -36,6 +36,10 @@ static zend_property_info *zend_duplicate_property_info_internal(zend_property_i
 	zend_property_info* new_property_info = pemalloc(sizeof(zend_property_info), 1);
 	memcpy(new_property_info, property_info, sizeof(zend_property_info));
 	zend_string_addref(new_property_info->name);
+	if (ZEND_TYPE_IS_NAME(new_property_info->type)) {
+		zend_string_addref(ZEND_TYPE_NAME(new_property_info->type));
+	}
+
 	return new_property_info;
 }
 /* }}} */
@@ -662,6 +666,55 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 }
 /* }}} */
 
+zend_string* zend_resolve_property_type(zend_string *type, zend_class_entry *scope) /* {{{ */
+{
+	if (zend_string_equals_literal_ci(type, "parent")) {
+		if (scope && scope->parent) {
+			return scope->parent->name;
+		}
+	}
+
+	if (zend_string_equals_literal_ci(type, "self")) {
+		if (scope) {
+			return scope->name;
+		}
+	}
+
+	return type;
+} /* }}} */
+
+zend_bool property_types_compatible(zend_property_info *parent_info, zend_property_info *child_info) {
+	zend_string *parent_name, *child_name;
+	zend_class_entry *parent_type_ce, *child_type_ce;
+	if (parent_info->type == child_info->type) {
+		return 1;
+	}
+
+	if (!ZEND_TYPE_IS_CLASS(parent_info->type) || !ZEND_TYPE_IS_CLASS(child_info->type) ||
+			ZEND_TYPE_ALLOW_NULL(parent_info->type) != ZEND_TYPE_ALLOW_NULL(child_info->type)) {
+		return 0;
+	}
+
+	parent_name = ZEND_TYPE_IS_CE(parent_info->type)
+		? ZEND_TYPE_CE(parent_info->type)->name
+		: zend_resolve_property_type(ZEND_TYPE_NAME(parent_info->type), parent_info->ce);
+	child_name = ZEND_TYPE_IS_CE(child_info->type)
+		? ZEND_TYPE_CE(child_info->type)->name
+		: zend_resolve_property_type(ZEND_TYPE_NAME(child_info->type), child_info->ce);
+	if (zend_string_equals_ci(parent_name, child_name)) {
+		return 1;
+	}
+
+	/* Check for class aliases */
+	parent_type_ce = ZEND_TYPE_IS_CE(parent_info->type)
+		? ZEND_TYPE_CE(parent_info->type)
+		: zend_lookup_class(parent_name);
+	child_type_ce = ZEND_TYPE_IS_CE(child_info->type)
+		? ZEND_TYPE_CE(child_info->type)
+		: zend_lookup_class(child_name);
+	return parent_type_ce && child_type_ce && parent_type_ce == child_type_ce;
+}
+
 static void do_inherit_property(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
 	zval *child = zend_hash_find_ex(&ce->properties_info, key, 1);
@@ -690,6 +743,26 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
 				ZVAL_UNDEF(&ce->default_properties_table[child_num]);
 				child_info->offset = parent_info->offset;
+			}
+
+			if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_info->type))) {
+				if (!property_types_compatible(parent_info, child_info)) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+					"Type of %s::$%s must be %s%s (as in class %s)",
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(key),
+						ZEND_TYPE_ALLOW_NULL(parent_info->type) ? "?" : "",
+						ZEND_TYPE_IS_CLASS(parent_info->type)
+							? ZSTR_VAL(ZEND_TYPE_IS_CE(parent_info->type) ? ZEND_TYPE_CE(parent_info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(parent_info->type), parent_info->ce))
+							: zend_get_type_by_const(ZEND_TYPE_CODE(parent_info->type)),
+						ZSTR_VAL(ce->parent->name));
+				}
+			} else if (UNEXPECTED(ZEND_TYPE_IS_SET(child_info->type) && !ZEND_TYPE_IS_SET(parent_info->type))) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+						"Type of %s::$%s must not be defined (as in class %s)",
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(key),
+						ZSTR_VAL(ce->parent->name));
 			}
 		}
 	} else {
@@ -772,6 +845,42 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 	}
 }
 /* }}} */
+
+void zend_build_properties_info_table(zend_class_entry *ce)
+{
+	zend_property_info **table, *prop;
+	if (ce->default_properties_count == 0) {
+		return;
+	}
+
+	ZEND_ASSERT(ce->properties_info_table == NULL);
+	if (ce->type == ZEND_USER_CLASS) {
+		ce->properties_info_table = table = zend_arena_alloc(&CG(arena),
+			sizeof(zend_property_info *) * ce->default_properties_count);
+	} else {
+		ce->properties_info_table = table = pemalloc(
+			sizeof(zend_property_info *) * ce->default_properties_count, 1);
+	}
+
+	if (ce->parent && ce->parent->default_properties_count != 0) {
+		zend_property_info **parent_table = ce->parent->properties_info_table;
+		memcpy(
+			table, parent_table,
+			sizeof(zend_property_info *) * ce->parent->default_properties_count
+		);
+
+		/* Child did not add any new properties, we are done */
+		if (ce->default_properties_count == ce->parent->default_properties_count) {
+			return;
+		}
+	}
+
+	ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+		if (prop->ce == ce && (prop->flags & ZEND_ACC_STATIC) == 0) {
+			table[OBJ_PROP_TO_NUM(prop->offset)] = prop;
+		}
+	} ZEND_HASH_FOREACH_END();
+}
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
 {
@@ -1653,7 +1762,9 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					not_compatible = 1;
 
 					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
-						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
+						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC)) &&
+						property_types_compatible(property_info, coliding_prop)
+					) {
 						/* the flags are identical, thus, the properties may be compatible */
 						zval *op1, *op2;
 						zval op1_tmp, op2_tmp;
@@ -1714,9 +1825,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 			Z_TRY_ADDREF_P(prop_value);
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
-			zend_declare_property_ex(ce, prop_name,
-									 prop_value, flags,
-								     doc_comment);
+			zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type);
 			zend_string_release_ex(prop_name, 0);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1930,6 +2039,8 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent)
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		zend_verify_abstract_class(ce);
 	}
+
+	zend_build_properties_info_table(ce);
 }
 /* }}} */
 

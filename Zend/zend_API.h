@@ -309,6 +309,9 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint32_t check_flags, zend_s
 ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_name);
 ZEND_API const char *zend_get_module_version(const char *module_name);
 ZEND_API int zend_get_module_started(const char *module_name);
+
+ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type);
+
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment);
 ZEND_API int zend_declare_property(zend_class_entry *ce, const char *name, size_t name_length, zval *property, int access_type);
 ZEND_API int zend_declare_property_null(zend_class_entry *ce, const char *name, size_t name_length, int access_type);
@@ -652,6 +655,120 @@ END_EXTERN_C()
 #define ZEND_MINFO_FUNCTION			ZEND_MODULE_INFO_D
 #define ZEND_GINIT_FUNCTION			ZEND_MODULE_GLOBALS_CTOR_D
 #define ZEND_GSHUTDOWN_FUNCTION		ZEND_MODULE_GLOBALS_DTOR_D
+
+static zend_always_inline int zend_try_assign_ex(zval *zv, zval *arg, zend_bool strict) {
+	zend_reference *ref;
+	if (EXPECTED(Z_ISREF_P(zv)) && UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref = Z_REF_P(zv)))) {
+		zval tmp;
+		ZVAL_COPY_VALUE(&tmp, arg);
+		if (EXPECTED(zend_verify_ref_assignable_zval(ref, &tmp, strict))) {
+			zv = Z_REFVAL_P(zv);
+			zval_ptr_dtor(zv);
+			ZVAL_COPY_VALUE(zv, &tmp);
+		} else {
+			zval_ptr_dtor(&tmp);
+			return FAILURE;
+		}
+	} else {
+		ZVAL_DEREF(zv);
+		zval_ptr_dtor(zv);
+		ZVAL_COPY_VALUE(zv, arg);
+	}
+
+	return SUCCESS;
+} 
+
+static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
+	return zend_try_assign_ex(zv, arg, ZEND_ARG_USES_STRICT_TYPES());
+}
+
+#define ZEND_TRY_ASSIGN_NULL(zv) do { \
+	zval _zv; \
+	ZVAL_NULL(&_zv); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_FALSE(zv) do { \
+	zval _zv; \
+	ZVAL_FALSE(&_zv); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_TRUE(zv) do { \
+	zval _zv; \
+	ZVAL_TRUE(&_zv); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_LONG(zv, lval) do { \
+	zval _zv; \
+	ZVAL_LONG(&_zv, lval); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_DOUBLE(zv, dval) do { \
+	zval _zv; \
+	ZVAL_DOUBLE(&_zv, dval); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_EMPTY_STRING(zv) do { \
+	zval _zv; \
+	ZVAL_EMPTY_STRING(&_zv); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_STR(zv, str) do { \
+	zval _zv; \
+	ZVAL_STR(&_zv, str); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_NEW_STR(zv, str) do { \
+	zval _zv; \
+	ZVAL_NEW_STR(&_zv, str); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_STRING(zv, string) do { \
+	zval _zv; \
+	ZVAL_STRING(&_zv, string); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_STRINGL(zv, string, len) do { \
+	zval _zv; \
+	ZVAL_STRINGL(&_zv, string, len); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_RES(zv, res) do { \
+	zval _zv; \
+	ZVAL_RES(&_zv, res); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+/* Initializes a reference to an empty array and returns dereferenced zval,
+ * or NULL if the initialization failed. */
+static zend_always_inline zval *zend_try_array_init(zval *zv) {
+	zval tmp;
+	ZVAL_ARR(&tmp, zend_new_array(0));
+	if (UNEXPECTED(zend_try_assign(zv, &tmp) == FAILURE)) {
+		return NULL;
+	}
+	ZVAL_DEREF(zv);
+	return zv;
+}
+
+static zend_always_inline zval *zend_try_array_init_size(zval *zv, size_t size) {
+	zval tmp;
+	ZVAL_ARR(&tmp, zend_new_array(size));
+	if (UNEXPECTED(zend_try_assign(zv, &tmp) == FAILURE)) {
+		return NULL;
+	}
+	ZVAL_DEREF(zv);
+	return zv;
+}
 
 /* Fast parameter parsing API */
 

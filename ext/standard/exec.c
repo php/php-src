@@ -216,9 +216,9 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		Z_PARAM_STRING(cmd, cmd_len)
 		Z_PARAM_OPTIONAL
 		if (!mode) {
-			Z_PARAM_ZVAL_DEREF(ret_array)
+			Z_PARAM_ZVAL(ret_array)
 		}
-		Z_PARAM_ZVAL_DEREF(ret_code)
+		Z_PARAM_ZVAL(ret_code)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!cmd_len) {
@@ -233,18 +233,20 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	if (!ret_array) {
 		ret = php_exec(mode, cmd, NULL, return_value);
 	} else {
-		if (Z_TYPE_P(ret_array) != IS_ARRAY) {
-			zval_ptr_dtor(ret_array);
-			array_init(ret_array);
-		} else if (Z_REFCOUNT_P(ret_array) > 1) {
-			zval_ptr_dtor(ret_array);
-			ZVAL_ARR(ret_array, zend_array_dup(Z_ARR_P(ret_array)));
+		if (Z_TYPE_P(Z_REFVAL_P(ret_array)) == IS_ARRAY) {
+			ZVAL_DEREF(ret_array);
+			SEPARATE_ARRAY(ret_array);
+		} else {
+			ret_array = zend_try_array_init(ret_array);
+			if (!ret_array) {
+				return;
+			}
 		}
+
 		ret = php_exec(2, cmd, ret_array, return_value);
 	}
 	if (ret_code) {
-		zval_ptr_dtor(ret_code);
-		ZVAL_LONG(ret_code, ret);
+		ZEND_TRY_ASSIGN_LONG(ret_code, ret);
 	}
 }
 /* }}} */

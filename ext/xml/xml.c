@@ -1434,21 +1434,25 @@ PHP_FUNCTION(xml_parse_into_struct)
 	size_t data_len;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz/|z/", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|z", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
 		return;
 	}
 
 	if (info) {
-		zval_ptr_dtor(info);
-		array_init(info);
+		info = zend_try_array_init(info);
+		if (!info) {
+			return;
+		}
 	}
 
 	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
 		RETURN_FALSE;
 	}
 
-	zval_ptr_dtor(xdata);
-	array_init(xdata);
+	xdata = zend_try_array_init(xdata);
+	if (!xdata) {
+		return;
+	}
 
 	ZVAL_COPY_VALUE(&parser->data, xdata);
 

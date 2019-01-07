@@ -52,8 +52,14 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 				if (next < end && next->opcode == ZEND_OP_DATA) {
 					if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 						var_num = EX_VAR_TO_NUM(next->op1.var);
-						if (!DFG_ISSET(def, set_size, j, var_num)) {
+						if (opline->opcode == ZEND_ASSIGN_OBJ_REF
+								|| opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
 							DFG_SET(use, set_size, j, var_num);
+							DFG_SET(def, set_size, j, var_num);
+						} else {
+							if (!DFG_ISSET(def, set_size, j, var_num)) {
+								DFG_SET(use, set_size, j, var_num);
+							}
 						}
 					}
 					if (next->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
@@ -92,6 +98,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_UNSET_CV:
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
+					case ZEND_ASSIGN_OBJ_REF:
 					case ZEND_BIND_GLOBAL:
 					case ZEND_BIND_STATIC:
 					case ZEND_SEND_VAR_EX:

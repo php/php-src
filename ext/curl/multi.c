@@ -265,7 +265,7 @@ PHP_FUNCTION(curl_multi_exec)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(z_mh)
-		Z_PARAM_ZVAL_DEREF(z_still_running)
+		Z_PARAM_ZVAL(z_still_running)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((mh = (php_curlm *)zend_fetch_resource(Z_RES_P(z_mh), le_curl_multi_handle_name, le_curl_multi_handle)) == NULL) {
@@ -290,8 +290,7 @@ PHP_FUNCTION(curl_multi_exec)
 
 	still_running = zval_get_long(z_still_running);
 	error = curl_multi_perform(mh->multi, &still_running);
-	zval_ptr_dtor(z_still_running);
-	ZVAL_LONG(z_still_running, still_running);
+	ZEND_TRY_ASSIGN_LONG(z_still_running, still_running);
 
 	SAVE_CURLM_ERROR(mh, error);
 	RETURN_LONG((zend_long) error);
@@ -338,7 +337,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_RESOURCE(z_mh)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(zmsgs_in_queue)
+		Z_PARAM_ZVAL(zmsgs_in_queue)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((mh = (php_curlm *)zend_fetch_resource(Z_RES_P(z_mh), le_curl_multi_handle_name, le_curl_multi_handle)) == NULL) {
@@ -349,9 +348,9 @@ PHP_FUNCTION(curl_multi_info_read)
 	if (tmp_msg == NULL) {
 		RETURN_FALSE;
 	}
+
 	if (zmsgs_in_queue) {
-		zval_ptr_dtor(zmsgs_in_queue);
-		ZVAL_LONG(zmsgs_in_queue, queued_msgs);
+		ZEND_TRY_ASSIGN_LONG(zmsgs_in_queue, queued_msgs);
 	}
 
 	array_init(return_value);

@@ -70,6 +70,7 @@ static void ZEND_FASTCALL zend_string_destroy(zend_string *str)
 
 static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref)
 {
+	ZEND_ASSERT(!ZEND_REF_HAS_TYPE_SOURCES(ref));
 	i_zval_ptr_dtor(&ref->val);
 	efree_size(ref, sizeof(zend_reference));
 }

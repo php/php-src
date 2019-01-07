@@ -878,16 +878,16 @@ static zval *spl_array_read_property(zval *object, zval *member, int type, void 
 	return zend_std_read_property(object, member, type, cache_slot, rv);
 } /* }}} */
 
-static void spl_array_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static zval *spl_array_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 	&& !zend_std_has_property(object, member, ZEND_PROPERTY_EXISTS, NULL)) {
 		spl_array_write_dimension(object, member, value);
-		return;
+		return value;
 	}
-	zend_std_write_property(object, member, value, cache_slot);
+	return zend_std_write_property(object, member, value, cache_slot);
 } /* }}} */
 
 static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */

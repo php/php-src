@@ -46,6 +46,7 @@ struct php_unserialize_data {
 	var_dtor_entries *first_dtor;
 	var_dtor_entries *last_dtor;
 	HashTable        *allowed_classes;
+	HashTable        *ref_props;
 	var_entries       entries;
 };
 
@@ -57,6 +58,7 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init() {
 		d->last = &d->entries;
 		d->first_dtor = d->last_dtor = NULL;
 		d->allowed_classes = NULL;
+		d->ref_props = NULL;
 		d->entries.used_slots = 0;
 		d->entries.next = NULL;
 		if (!BG(serialize_lock)) {
@@ -239,6 +241,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	}
 
 	zval_ptr_dtor_nogc(&wakeup_name);
+
+	if ((*var_hashx)->ref_props) {
+		zend_array_destroy((*var_hashx)->ref_props);
+	}
 }
 
 /* }}} */
@@ -395,11 +401,12 @@ static inline size_t parse_uiv(const unsigned char *p)
 
 static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key);
 
-static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
+static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_class_entry *ce)
 {
 	while (elements-- > 0) {
 		zval key, *data, d, *old_data;
 		zend_ulong idx;
+		zend_property_info *info = NULL;
 
 		ZVAL_UNDEF(&key);
 
@@ -411,7 +418,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 		data = NULL;
 		ZVAL_UNDEF(&d);
 
-		if (!objprops) {
+		if (!ce) {
 			if (Z_TYPE(key) == IS_LONG) {
 				idx = Z_LVAL(key);
 numeric_key:
@@ -490,10 +497,43 @@ string_key:
 
 				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
 					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+						// TODO Deduplicate with above code?
 						old_data = Z_INDIRECT_P(old_data);
+						if (Z_STRVAL(key)[0] == 0) {
+							zend_string *member, *class;
+							const char *class_name, *prop_name;
+							size_t prop_name_len;
+							zend_unmangle_property_name_ex(Z_STR(key), &class_name, &prop_name, &prop_name_len);
+							member = zend_string_init(prop_name, prop_name_len, 0);
+							class = zend_string_init(class_name, strlen(class_name), 0);
+							zend_str_tolower(ZSTR_VAL(class), ZSTR_LEN(class));
+							EG(fake_scope) = class_name[0] == '*' ? ce : zend_hash_find_ptr(EG(class_table), class);
+							info = zend_get_property_info(EG(fake_scope), member, 1);
+							EG(fake_scope) = NULL;
+							zend_string_release(member);
+							zend_string_release(class);
+						} else {
+							info = zend_get_property_info(ce, Z_STR(key), 1);
+						}
+						var_push_dtor(var_hash, old_data);
+						data = zend_hash_update_ind(ht, Z_STR(key), &d);
+
+						if (EXPECTED(!info->type)) {
+							info = NULL;
+						} else {
+							/* Remember to which property this slot belongs, so we can add a type
+							 * source if it is turned into a reference lateron. */
+							if (!(*var_hash)->ref_props) {
+								(*var_hash)->ref_props = emalloc(sizeof(HashTable));
+								zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
+							}
+							zend_hash_index_update_ptr(
+								(*var_hash)->ref_props, (zend_uintptr_t) data, info);
+						}
+					} else {
+						var_push_dtor(var_hash, old_data);
+						data = zend_hash_update_ind(ht, Z_STR(key), &d);
 					}
-					var_push_dtor(var_hash, old_data);
-					data = zend_hash_update_ind(ht, Z_STR(key), &d);
 				} else {
 					data = zend_hash_add_new(ht, Z_STR(key), &d);
 				}
@@ -510,6 +550,18 @@ string_key:
 		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
 			zval_ptr_dtor(&key);
 			return 0;
+		}
+
+		if (UNEXPECTED(info)) {
+			if (!zend_verify_prop_assignable_by_ref(info, data, /* strict */ 1)) {
+				zval_ptr_dtor(data);
+				ZVAL_UNDEF(data);
+				zval_dtor(&key);
+				return 0;
+			}
+			if (Z_ISREF_P(data)) {
+				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+			}
 		}
 
 		if (BG(unserialize).level > 1) {
@@ -613,7 +665,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 	}
 
 	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, HT_FLAGS(ht) & HASH_FLAG_PACKED);
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, 1)) {
+	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJCE_P(rval))) {
 		if (has_wakeup) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
@@ -697,12 +749,18 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key)
 		return 0;
 	}
 
-	if (Z_ISREF_P(rval_ref)) {
-		ZVAL_COPY(rval, rval_ref);
-	} else {
+	if (!Z_ISREF_P(rval_ref)) {
+		zend_property_info *info = NULL;
+		if ((*var_hash)->ref_props) {
+			info = zend_hash_index_find_ptr((*var_hash)->ref_props, (zend_uintptr_t) rval_ref);
+		}
 		ZVAL_NEW_REF(rval_ref, rval_ref);
-		ZVAL_COPY(rval, rval_ref);
+		if (info) {
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(rval_ref), info);
+		}
 	}
+
+	ZVAL_COPY(rval, rval_ref);
 
 	return 1;
 }

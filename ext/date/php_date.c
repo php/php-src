@@ -660,10 +660,10 @@ static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp
 static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv);
 
 zval *date_interval_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
-void date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot);
+zval *date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot);
 static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot);
 static zval *date_period_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
-static void date_period_write_property(zval *object, zval *member, zval *value, void **cache_slot);
+static zval *date_period_write_property(zval *object, zval *member, zval *value, void **cache_slot);
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -4211,7 +4211,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 /* }}} */
 
 /* {{{ date_interval_write_property */
-void date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	php_interval_obj *obj;
 	zval tmp_member;
@@ -4225,17 +4225,17 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 	obj = Z_PHPINTERVAL_P(object);
 
 	if (!obj->initialized) {
-		zend_std_write_property(object, member, value, cache_slot);
+		value = zend_std_write_property(object, member, value, cache_slot);
 		if (member == &tmp_member) {
 			zval_ptr_dtor_str(&tmp_member);
 		}
-		return;
+		return value;
 	}
 
 #define SET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \
 		obj->diff->n = zval_get_long(value); \
-		break;								  \
+		break; \
 	}
 
 	do {
@@ -4251,12 +4251,14 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 		}
 		SET_VALUE_FROM_STRUCT(invert, "invert");
 		/* didn't find any */
-		zend_std_write_property(object, member, value, cache_slot);
+		value = zend_std_write_property(object, member, value, cache_slot);
 	} while(0);
 
 	if (member == &tmp_member) {
 		zval_ptr_dtor_str(&tmp_member);
 	}
+
+	return value;
 }
 /* }}} */
 
@@ -5295,9 +5297,10 @@ static zval *date_period_read_property(zval *object, zval *member, int type, voi
 /* }}} */
 
 /* {{{ date_period_write_property */
-static void date_period_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *date_period_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	zend_throw_error(NULL, "Writing to DatePeriod properties is unsupported");
+	return value;
 }
 /* }}} */
 

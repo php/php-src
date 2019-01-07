@@ -69,7 +69,7 @@ static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, in
 	}
 }
 
-static zval *saproxy_property_read(zval *object, zval *member, int type, void **cahce_slot, zval *rv)
+static zval *saproxy_property_read(zval *object, zval *member, int type, void **cache_slot, zval *rv)
 {
 	ZVAL_NULL(rv);
 

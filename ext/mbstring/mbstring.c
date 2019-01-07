@@ -2131,14 +2131,15 @@ PHP_FUNCTION(mb_parse_str)
 	const mbfl_encoding *detected;
 
 	track_vars_array = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
 		return;
 	}
 
 	if (track_vars_array != NULL) {
-		/* Clear out the array */
-		zval_ptr_dtor(track_vars_array);
-		array_init(track_vars_array);
+		track_vars_array = zend_try_array_init(track_vars_array);
+		if (!track_vars_array) {
+			return;
+		}
 	}
 
 	encstr = estrndup(encstr, encstr_len);

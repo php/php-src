@@ -56,9 +56,59 @@ ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 
-static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
+ZEND_API zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type type, zend_reference *ref);
+
+ZEND_API zend_bool zend_load_property_class_type(zend_property_info *info);
+
+static zend_always_inline zend_type zend_get_prop_info_ref_type(zend_property_info *prop_info) {
+	if (ZEND_TYPE_IS_CLASS(prop_info->type) && UNEXPECTED(!ZEND_TYPE_IS_CE(prop_info->type)) && UNEXPECTED(!zend_load_property_class_type(prop_info))) {
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Class %s must be loaded when used by reference for property type", ZSTR_VAL(ZEND_TYPE_NAME(prop_info->type)));
+		}
+		return ZEND_TYPE_CODE(_IS_ERROR);
+	}
+
+	return prop_info->type;
+}
+
+/* do not call when new_type == IS_REFERENCE or new_type == IS_OBJECT! */
+static zend_always_inline zend_bool zend_verify_type_assignable(zend_type type, zend_uchar new_type) {
+	if (!type) {
+		return 1;
+	}
+	zend_uchar cur_type = ZEND_TYPE_CODE(type);
+	return new_type == cur_type
+	    || (ZEND_TYPE_ALLOW_NULL(type) && new_type == IS_NULL)
+	    || (cur_type == _IS_BOOL && (new_type == IS_FALSE || new_type == IS_TRUE))
+	    || (cur_type == IS_ITERABLE && new_type == IS_ARRAY);
+}
+
+ZEND_API zend_property_info *zend_check_ref_array_assignable(zend_reference *ref);
+ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict);
+ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict);
+
+ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv);
+ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1, zend_property_info *prop2, zval *zv);
+
+#define ZEND_REF_TYPE_SOURCES(ref) \
+	(ref)->sources
+
+#define ZEND_REF_HAS_TYPE_SOURCES(ref) \
+	(ZEND_REF_TYPE_SOURCES(ref).ptr != NULL)
+
+#define ZEND_REF_FIRST_SOURCE(ref) \
+	(ZEND_PROPERTY_INFO_SOURCE_IS_LIST((ref)->sources.list) \
+		? ZEND_PROPERTY_INFO_SOURCE_TO_LIST((ref)->sources.list)->ptr[0] \
+		: (ref)->sources.ptr)
+
+
+ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
+ZEND_API void zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
+
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
 {
 	zend_refcounted *ref = NULL;
+	zval tmp;
 
 	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
 		ref = Z_COUNTED_P(value);
@@ -70,6 +120,21 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			zend_refcounted *garbage;
 
 			if (Z_ISREF_P(variable_ptr)) {
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
+					zend_bool need_copy = (value_type & (IS_CONST|IS_CV)) || ((value_type & IS_VAR) && UNEXPECTED(ref) && Z_REFCOUNT_P(variable_ptr) > 1);
+					if (need_copy) {
+						ZVAL_COPY(&tmp, value);
+						value = &tmp;
+					}
+					if (!zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict)) {
+						zval_ptr_dtor(value);
+						return Z_REFVAL_P(variable_ptr);
+					}
+					if (need_copy) {
+						Z_TRY_DELREF_P(value);
+					}
+				}
+
 				variable_ptr = Z_REFVAL_P(variable_ptr);
 				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
 					break;
@@ -394,6 +459,63 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 			(opline)--;                                  \
 		}                                                \
 	} while (0)
+
+#define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
+
+static zend_always_inline zend_property_info* zend_object_fetch_property_type_info(zend_class_entry *ce, zend_string *property, void **cache_slot)
+{
+	zend_property_info *info;
+
+	/* if we have a cache_slot, let's assume it's valid. Callers task to ensure validity! */
+	if (EXPECTED(cache_slot)) {
+		return (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+	}
+
+	if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
+		return NULL;
+	}
+
+	info = zend_get_property_info(ce, property, 1);
+
+	if (EXPECTED(info)
+	 && UNEXPECTED(info != ZEND_WRONG_PROPERTY_INFO)
+	 && UNEXPECTED(info->type)) {
+		return info;
+	}
+
+	return NULL;
+}
+
+zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict);
+ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *property);
+
+#define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \
+	zend_ref_add_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
+
+#define ZEND_REF_DEL_TYPE_SOURCE(ref, source) \
+	zend_ref_del_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
+
+#define ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) do { \
+		zend_property_info_source_list *_source_list = &ZEND_REF_TYPE_SOURCES(ref); \
+		zend_property_info **_prop, **_end; \
+		zend_property_info_list *_list; \
+		if (_source_list->ptr) { \
+			if (ZEND_PROPERTY_INFO_SOURCE_IS_LIST(_source_list->list)) { \
+				_list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(_source_list->list); \
+				_prop = _list->ptr; \
+				_end = _list->ptr + _list->num; \
+			} else { \
+				_prop = &_source_list->ptr; \
+				_end = _prop + 1; \
+			} \
+			for (; _prop < _end; _prop++) { \
+				prop = *_prop; \
+
+#define ZEND_REF_FOREACH_TYPE_SOURCES_END() \
+			} \
+		} \
+	} while (0)
+
 
 END_EXTERN_C()
 

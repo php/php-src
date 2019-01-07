@@ -4606,9 +4606,9 @@ PHP_FUNCTION(exif_thumbnail)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_ZVAL(stream)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(z_width)
-		Z_PARAM_ZVAL_DEREF(z_height)
-		Z_PARAM_ZVAL_DEREF(z_imagetype)
+		Z_PARAM_ZVAL(z_width)
+		Z_PARAM_ZVAL(z_height)
+		Z_PARAM_ZVAL(z_imagetype)
 	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
@@ -4653,14 +4653,11 @@ PHP_FUNCTION(exif_thumbnail)
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo);
 		}
-		zval_ptr_dtor(z_width);
-		zval_ptr_dtor(z_height);
-		ZVAL_LONG(z_width,  ImageInfo.Thumbnail.width);
-		ZVAL_LONG(z_height, ImageInfo.Thumbnail.height);
+		ZEND_TRY_ASSIGN_LONG(z_width,  ImageInfo.Thumbnail.width);
+		ZEND_TRY_ASSIGN_LONG(z_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
-		zval_ptr_dtor(z_imagetype);
-		ZVAL_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
+		ZEND_TRY_ASSIGN_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
 #ifdef EXIF_DEBUG
