@@ -6133,7 +6133,8 @@ void zend_compile_prop_group(zend_ast *list) /* {{{ */
 	zend_ast *prop_ast = list->child[1];
 
 	zend_compile_prop_decl(prop_ast, type_ast, list->attr);
-} /* }}} */
+}
+/* }}} */
 
 void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 {

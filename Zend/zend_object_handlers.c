@@ -1480,7 +1480,7 @@ undeclared_property:
 				&& Z_TYPE_P(ret) == IS_UNDEF && property_info->type != 0)) {
 		zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 			ZSTR_VAL(property_info->ce->name),
-			zend_get_mangled_property_name(property_name));
+			zend_get_unmangled_property_name(property_name));
 		return NULL;
 	}
 

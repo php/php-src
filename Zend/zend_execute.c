@@ -655,7 +655,7 @@ static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(zend_
 	zend_type_error(
 		"Cannot auto-initialize an %s inside property %s::$%s of type %s%s",
 		type,
-		ZSTR_VAL(prop->ce->name), zend_get_mangled_property_name(prop->name),
+		ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name),
 		prop_type1, prop_type2
 	);
 }
@@ -666,7 +666,7 @@ static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_ref_error(zend_p
 	zend_type_error(
 		"Cannot auto-initialize an %s inside a reference held by property %s::$%s of type %s%s",
 		type,
-		ZSTR_VAL(prop->ce->name), zend_get_mangled_property_name(prop->name),
+		ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name),
 		prop_type1, prop_type2
 	);
 }
@@ -951,14 +951,14 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	if (ZEND_TYPE_IS_CLASS(info->type)) {
 		zend_type_error("Typed property %s::$%s must be an instance of %s%s, %s used",
 			ZSTR_VAL(info->ce->name),
-			zend_get_mangled_property_name(info->name),
+			zend_get_unmangled_property_name(info->name),
 			ZSTR_VAL(ZEND_TYPE_IS_CE(info->type) ? ZEND_TYPE_CE(info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(info->type), info->ce)),
 			ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
 			Z_TYPE_P(property) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(property)->name) : zend_get_type_by_const(Z_TYPE_P(property)));
 	} else {
 		zend_type_error("Typed property %s::$%s must be %s%s, %s used",
 			ZSTR_VAL(info->ce->name),
-			zend_get_mangled_property_name(info->name),
+			zend_get_unmangled_property_name(info->name),
 			zend_get_type_by_const(ZEND_TYPE_CODE(info->type)),
 			ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
 			Z_TYPE_P(property) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(property)->name) : zend_get_type_by_const(Z_TYPE_P(property)));
@@ -1583,7 +1583,7 @@ static ZEND_COLD zend_bool zend_ref_verify_assign_incdec_double(zend_reference *
 		zend_type_error("Cannot %screment a reference held by property %s::$%s of type %sint past its %simal value",
 			inc ? "in" : "de",
 			ZSTR_VAL(error_prop->ce->name),
-			zend_get_mangled_property_name(error_prop->name),
+			zend_get_unmangled_property_name(error_prop->name),
 			ZEND_TYPE_ALLOW_NULL(error_prop->type) ? "?" : "",
 			inc ? "max" : "min");
 		return 0;
@@ -1636,7 +1636,7 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 					zend_type_error("Cannot %screment a property %s::$%s of type %sint past its %simal value",
 						inc ? "in" : "de",
 						ZSTR_VAL(prop_info->ce->name),
-						zend_get_mangled_property_name(prop_info->name),
+						zend_get_unmangled_property_name(prop_info->name),
 						ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
 						inc ? "max" : "min");
 				}
@@ -1713,7 +1713,7 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 					zend_type_error("Cannot %screment a property %s::$%s of type %sint past its %simal value",
 						inc ? "in" : "de",
 						ZSTR_VAL(prop_info->ce->name),
-						zend_get_mangled_property_name(prop_info->name),
+						zend_get_unmangled_property_name(prop_info->name),
 						ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
 						inc ? "max" : "min");
 				}
@@ -2635,7 +2635,7 @@ return_indirect:
 						if (!ZEND_TYPE_ALLOW_NULL(prop_info->type) && Z_TYPE_P(ptr) == IS_NULL) {
 							zend_throw_error(NULL, "Cannot access uninitialized non-nullable property %s::$%s by reference",
 								ZSTR_VAL(prop_info->ce->name),
-								zend_get_mangled_property_name(prop_info->name));
+								zend_get_unmangled_property_name(prop_info->name));
 							ZVAL_UNDEF(ptr);
 							ZVAL_ERROR(result);
 							return;
@@ -2766,7 +2766,7 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 				&& UNEXPECTED(Z_TYPE_P(*retval) == IS_UNDEF) && UNEXPECTED(property_info->type != 0)) {
 			zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(property_info->ce->name),
-				zend_get_mangled_property_name(property_info->name));
+				zend_get_unmangled_property_name(property_info->name));
 			return FAILURE;
 		}
 	} else {
@@ -2792,7 +2792,7 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 			if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(ref) <= IS_NULL)) {
 				zend_throw_error(NULL, "Cannot access uninitialized property %s::$%s by reference",
 					ZSTR_VAL(property_info->ce->name),
-					zend_get_mangled_property_name(property_info->name));
+					zend_get_unmangled_property_name(property_info->name));
 				return FAILURE;
 			}
 			if (UNEXPECTED(Z_ISUNDEF_P(ref))) {
@@ -2819,10 +2819,10 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 	zend_type_error("Reference with value of type %s held by property %s::$%s of type %s%s is not compatible with property %s::$%s of type %s%s",
 		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_get_type_by_const(Z_TYPE_P(zv)),
 		ZSTR_VAL(prop1->ce->name),
-		zend_get_mangled_property_name(prop1->name),
+		zend_get_unmangled_property_name(prop1->name),
 		prop1_type1, prop1_type2,
 		ZSTR_VAL(prop2->ce->name),
-		zend_get_mangled_property_name(prop2->name),
+		zend_get_unmangled_property_name(prop2->name),
 		prop2_type1, prop2_type2
 	);
 }
@@ -2833,7 +2833,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop,
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s%s",
 		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_get_type_by_const(Z_TYPE_P(zv)),
 		ZSTR_VAL(prop->ce->name),
-		zend_get_mangled_property_name(prop->name),
+		zend_get_unmangled_property_name(prop->name),
 		prop_type1, prop_type2
 	);
 }
@@ -2845,10 +2845,10 @@ ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s%s and property %s::$%s of type %s%s, as this would result in an inconsistent type conversion",
 		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_get_type_by_const(Z_TYPE_P(zv)),
 		ZSTR_VAL(prop1->ce->name),
-		zend_get_mangled_property_name(prop1->name),
+		zend_get_unmangled_property_name(prop1->name),
 		prop1_type1, prop1_type2,
 		ZSTR_VAL(prop2->ce->name),
-		zend_get_mangled_property_name(prop2->name),
+		zend_get_unmangled_property_name(prop2->name),
 		prop2_type1, prop2_type2
 	);
 }

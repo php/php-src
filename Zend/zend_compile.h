@@ -797,7 +797,7 @@ ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_le
         zend_unmangle_property_name_ex(mangled_property, class_name, prop_name, NULL)
 ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len);
 
-static zend_always_inline const char *zend_get_mangled_property_name(const zend_string *mangled_prop) {
+static zend_always_inline const char *zend_get_unmangled_property_name(const zend_string *mangled_prop) {
 	const char *class_name, *prop_name;
 	zend_unmangle_property_name(mangled_prop, &class_name, &prop_name);
 	return prop_name;
