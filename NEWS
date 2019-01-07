@@ -2,25 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.15
 
-- Core:
-  . Fixed bug #77369 (memcpy with negative length via crafted DNS response). (Stas)
-
 - GD:
-  . Fixed bug #77269 (efree() on uninitialized Heap data in imagescale leads to
-    use-after-free). (cmb)
-  . Fixed bug #77270 (imagecolormatch Out Of Bounds Write on Heap). (cmb)
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
-
-- Mbstring:
-  . Fixed bug #77370 (Buffer overflow on mb regex functions - fetch_token). (Stas)
-  . Fixed bug #77371 (heap buffer overflow in mb regex functions
-    - compile_string_node). (Stas)
-  . Fixed bug #77381 (heap buffer overflow in multibyte match_at). (Stas)
-  . Fixed bug #77382 (heap buffer overflow due to incorrect length in
-    expand_case_fold_string). (Stas)
-  . Fixed bug #77385 (buffer overflow in fetch_token). (Stas)
-  . Fixed bug #77394 (Buffer overflow in multibyte case folding - unicode). (Stas)
-  . Fixed bug #77418 (Heap overflow in utf32be_mbc_to_code). (Stas)
 
 - MySQLnd:
   . Fixed bug #75684 (In mysqlnd_ext_plugin.h the plugin methods family has
@@ -30,9 +13,6 @@ PHP                                                                        NEWS
   . Fixed bug #77273 (array_walk_recursive corrupts value types leading to PDO
     failure). (Nikita)
 
-- Phar:
-  . Fixed bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext). (Stas)
-
 - Sockets:
   . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
     on MacOS). (Michael Meyer)
@@ -40,13 +20,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #77395 (segfault about array_multisort). (Laruence)
 
-- Xmlrpc:
-  . Fixed bug #77242 (heap out of bounds read in xmlrpc_decode()). (cmb)
-  . Fixed bug #77380 (Global out of bounds read in xmlrpc base64 code). (Stas)
-
-03 Jan 2019, PHP 7.2.14
+10 Jan 2019, PHP 7.2.14
 
 - Core:
+  . Fixed bug #77369 (memcpy with negative length via crafted DNS response). (Stas)
   . Fixed bug #71041 (zend_signal_startup() needs ZEND_API).
     (Valentin V. Bartenev)
   . Fixed bug #76046 (PHP generates "FE_FREE" opcode on the wrong line).
@@ -65,6 +42,9 @@ PHP                                                                        NEWS
     rationals). (Colin Basnett)
 
 - GD:
+  . Fixed bug #77269 (efree() on uninitialized Heap data in imagescale leads to
+    use-after-free). (cmb)
+  . Fixed bug #77270 (imagecolormatch Out Of Bounds Write on Heap). (cmb)
   . Fixed bug #77195 (Incorrect error handling of imagecreatefromjpeg()). (cmb)
   . Fixed bug #77198 (auto cropping has insufficient precision). (cmb)
   . Fixed bug #77200 (imagecropauto(…, GD_CROP_SIDES) crops left but not right).
@@ -72,6 +52,17 @@ PHP                                                                        NEWS
 
 - IMAP:
   . Fixed bug #77020 (null pointer dereference in imap_mail). (cmb)
+
+- Mbstring:
+  . Fixed bug #77370 (Buffer overflow on mb regex functions - fetch_token). (Stas)
+  . Fixed bug #77371 (heap buffer overflow in mb regex functions
+    - compile_string_node). (Stas)
+  . Fixed bug #77381 (heap buffer overflow in multibyte match_at). (Stas)
+  . Fixed bug #77382 (heap buffer overflow due to incorrect length in
+    expand_case_fold_string). (Stas)
+  . Fixed bug #77385 (buffer overflow in fetch_token). (Stas)
+  . Fixed bug #77394 (Buffer overflow in multibyte case folding - unicode). (Stas)
+  . Fixed bug #77418 (Heap overflow in utf32be_mbc_to_code). (Stas)
 
 - OCI8:
   . Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
@@ -86,12 +77,19 @@ PHP                                                                        NEWS
   . Handle invalid index passed to PDOStatement::fetchColumn() as error. (Sergei
     Morozov)
 
+- Phar:
+  . Fixed bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext). (Stas)
+
 - Sockets:
   . Fixed bug #77136 (Unsupported IPV6_RECVPKTINFO constants on macOS).
     (Mizunashi Mana)
 
 - SQLite3:
   . Fixed bug #77051 (Issue with re-binding on SQLite3). (BohwaZ)
+
+- Xmlrpc:
+  . Fixed bug #77242 (heap out of bounds read in xmlrpc_decode()). (cmb)
+  . Fixed bug #77380 (Global out of bounds read in xmlrpc base64 code). (Stas)
 
 06 Dec 2018, PHP 7.2.13
 
