@@ -1075,8 +1075,8 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
 			if (UNEXPECTED(Z_ISREF_P(slot)) && Z_REFCOUNT_P(slot) > 1) {
-				zend_property_info *prop_info = zend_object_fetch_property_type_info(zobj->ce, name, cache_slot);
-				if (UNEXPECTED(prop_info != NULL)) {
+				zend_property_info *prop_info = zend_get_property_info_for_slot(zobj, slot);
+				if (UNEXPECTED(prop_info->type)) {
 					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(slot), prop_info);
 				}
 			}
