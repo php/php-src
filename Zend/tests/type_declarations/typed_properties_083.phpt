@@ -4,10 +4,10 @@ Test array promotion does not violate type restrictions
 <?php
 
 class Foo {
-	public ?string $p;
-	public ?iterable $i;
-	public static ?string $s;
-	public static ?array $a;
+    public ?string $p;
+    public ?iterable $i;
+    public static ?string $s;
+    public static ?array $a;
 }
 
 $a = new Foo;
@@ -16,20 +16,26 @@ $a->i[] = 1;
 var_dump($a->i);
 
 try {
-	$a->p[] = "test";
+    $a->p[] = "test";
 } catch (TypeError $e) { var_dump($e->getMessage()); }
 try { // must be uninit
-	var_dump($a->p);
+    var_dump($a->p); // WRONG!
 } catch (Error $e) { var_dump($e->getMessage()); }
+
+$a->p = null;
+try {
+    $a->p[] = "test";
+} catch (TypeError $e) { var_dump($e->getMessage()); }
+var_dump($a->p);
 
 Foo::$a["bar"] = 2;
 var_dump(Foo::$a);
 
 try {
-	Foo::$s["baz"][] = "baz";
+    Foo::$s["baz"][] = "baz";
 } catch (TypeError $e) { var_dump($e->getMessage()); }
 try { // must be uninit
-	var_dump(Foo::$s);
+    var_dump(Foo::$s);
 } catch (Error $e) { var_dump($e->getMessage()); }
 
 Foo::$a = null;
@@ -39,12 +45,12 @@ var_dump($ref);
 
 $ref = &$a->p;
 try {
-	$ref[] = "bar";
+    $ref[] = "bar";
 } catch (TypeError $e) { var_dump($e->getMessage()); }
 var_dump($ref);
 
 try {
-	$ref["baz"][] = "bar"; // indirect assign
+    $ref["baz"][] = "bar"; // indirect assign
 } catch (TypeError $e) { var_dump($e->getMessage()); }
 var_dump($ref);
 
@@ -56,6 +62,8 @@ array(1) {
 }
 string(71) "Cannot auto-initialize an array inside property Foo::$p of type ?string"
 string(65) "Typed property Foo::$p must not be accessed before initialization"
+string(71) "Cannot auto-initialize an array inside property Foo::$p of type ?string"
+NULL
 array(1) {
   ["bar"]=>
   int(2)

@@ -1005,9 +1005,6 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int typ
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
 			if (EXPECTED(!zobj->ce->__get) ||
 			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET)) {
-				ZVAL_NULL(retval);
-				/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
-				 * being overwritten in an error handler. */
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 					zend_error(E_NOTICE, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				}

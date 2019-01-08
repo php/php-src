@@ -32,9 +32,9 @@ var_dump($test);
 ?>
 --EXPECT--
 Typed property Test1::$prop must be an instance of Foobar, int used
-object(Test1)#1 (2) {
+object(Test1)#1 (1) {
   ["prop"]=>
-  NULL
+  uninitialized(Foobar)
   ["prop2"]=>
   &int(123)
 }

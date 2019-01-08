@@ -76,6 +76,20 @@ try {
 }
 var_dump($test);
 
+// Initially null
+$test = new Test;
+$test->prop = NULL;
+$test->stdProp = NULL;
+$test->objectProp = NULL;
+try {
+    $test->prop->wat = 123;
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+$test->stdProp->wat = 123;
+$test->objectProp->wat = 123;
+var_dump($test);
+
 ?>
 --EXPECTF--
 Cannot auto-initialize an stdClass inside property Test::$prop of type ?Test
@@ -163,4 +177,23 @@ object(Test)#9 (0) {
   uninitialized(?stdClass)
   ["objectProp"]=>
   uninitialized(?object)
+}
+Cannot auto-initialize an stdClass inside property Test::$prop of type ?Test
+
+Warning: Creating default object from empty value in /home/nikic/php-src-refs/Zend/tests/type_declarations/typed_properties_091.php on line 86
+
+Warning: Creating default object from empty value in /home/nikic/php-src-refs/Zend/tests/type_declarations/typed_properties_091.php on line 87
+object(Test)#7 (3) {
+  ["prop"]=>
+  NULL
+  ["stdProp"]=>
+  object(stdClass)#10 (1) {
+    ["wat"]=>
+    int(123)
+  }
+  ["objectProp"]=>
+  object(stdClass)#11 (1) {
+    ["wat"]=>
+    int(123)
+  }
 }
