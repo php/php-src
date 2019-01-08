@@ -996,35 +996,24 @@ static zend_bool zend_resolve_class_type(zend_type *type, zend_class_entry *self
 
 static zend_always_inline zend_bool i_zend_check_property_type(zend_property_info *info, zval *property, zend_bool strict)
 {
+	ZEND_ASSERT(!Z_ISREF_P(property));
 	if (ZEND_TYPE_IS_CLASS(info->type)) {
 		if (UNEXPECTED(Z_TYPE_P(property) != IS_OBJECT)) {
-			if (EXPECTED(Z_TYPE_P(property) == IS_NULL) && EXPECTED(ZEND_TYPE_ALLOW_NULL(info->type))) {
-				return 1;
-			}
-			return 0;
+			return Z_TYPE_P(property) == IS_NULL && ZEND_TYPE_ALLOW_NULL(info->type);
 		}
 
 		if (UNEXPECTED(!ZEND_TYPE_IS_CE(info->type)) && UNEXPECTED(!zend_resolve_class_type(&info->type, info->ce))) {
 			return 0;
 		}
 
-		if (EXPECTED(instanceof_function(Z_OBJCE_P(property), ZEND_TYPE_CE(info->type)))) {
-			return 1;
-		}
-
-		return 0;
+		return instanceof_function(Z_OBJCE_P(property), ZEND_TYPE_CE(info->type));
 	}
 
+	ZEND_ASSERT(ZEND_TYPE_CODE(info->type) != IS_CALLABLE);
 	if (EXPECTED(ZEND_TYPE_CODE(info->type) == Z_TYPE_P(property))) {
 		return 1;
 	} else if (EXPECTED(Z_TYPE_P(property) == IS_NULL)) {
 		return ZEND_TYPE_ALLOW_NULL(info->type);
-	} else if (EXPECTED(ZEND_TYPE_CODE(info->type) == IS_CALLABLE)) {
-		if (Z_TYPE_P(property) == IS_OBJECT) {
-			return instanceof_function(zend_ce_closure, Z_OBJCE_P(property));
-		} else {
-			return zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL);
-		}
 	} else if (ZEND_TYPE_CODE(info->type) == _IS_BOOL && EXPECTED(Z_TYPE_P(property) == IS_FALSE || Z_TYPE_P(property) == IS_TRUE)) {
 		return 1;
 	} else if (ZEND_TYPE_CODE(info->type) == IS_ITERABLE) {
@@ -1054,7 +1043,6 @@ static zend_always_inline zend_bool zend_check_type(
 		zval *default_value, zend_class_entry *scope,
 		zend_bool is_return_type)
 {
-
 	zend_reference *ref = NULL;
 
 	if (!ZEND_TYPE_IS_SET(type)) {
@@ -1588,10 +1576,10 @@ static zend_property_info *zend_ref_accepts_double(zend_reference *ref)
 
 static ZEND_COLD zend_bool zend_ref_verify_assign_incdec_double(zend_reference *ref, int inc)
 {
-	zend_property_info *error_prop;
-	if ((error_prop = zend_ref_accepts_double(ref))) {
-		zend_type_error("Cannot %screment a reference held by property %s::$%s of type %sint past its %simal value",
-			inc ? "in" : "de",
+	zend_property_info *error_prop = zend_ref_accepts_double(ref);
+	if (error_prop) {
+		zend_type_error("Cannot %s a reference held by property %s::$%s of type %sint past its %simal value",
+			inc ? "increment" : "decrement",
 			ZSTR_VAL(error_prop->ce->name),
 			zend_get_unmangled_property_name(error_prop->name),
 			ZEND_TYPE_ALLOW_NULL(error_prop->type) ? "?" : "",
