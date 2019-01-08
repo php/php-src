@@ -1626,9 +1626,7 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 		}
 
 		if (UNEXPECTED(ref || prop_info)) {
-			/* special case for typed properties */
 			zval z_copy;
-
 			ZVAL_COPY(&z_copy, prop);
 			if (inc) {
 				increment_function(&z_copy);
@@ -1636,10 +1634,10 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 				decrement_function(&z_copy);
 			}
 			if (UNEXPECTED(Z_TYPE(z_copy) == IS_DOUBLE) && Z_TYPE_P(prop) == IS_LONG) {
-				if (ref) {
-					zend_throw_incdec_ref_error(ref, inc);
-				} else {
+				if (prop_info) {
 					zend_throw_incdec_prop_error(prop_info, inc);
+				} else {
+					zend_throw_incdec_ref_error(ref, inc);
 				}
 			} else if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 				zval_ptr_dtor(prop);
@@ -1648,7 +1646,6 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 				zval_ptr_dtor(&z_copy);
 			}
 		} else {
-			SEPARATE_ZVAL_NOREF(prop);
 			if (inc) {
 				increment_function(prop);
 			} else {
@@ -1690,9 +1687,7 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 		ZVAL_COPY(EX_VAR(opline->result.var), prop);
 
 		if (UNEXPECTED(ref || prop_info)) {
-			/* special case for typed properties */
 			zval z_copy;
-
 			ZVAL_COPY(&z_copy, prop);
 			if (inc) {
 				increment_function(&z_copy);
@@ -1700,10 +1695,10 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 				decrement_function(&z_copy);
 			}
 			if (UNEXPECTED(Z_TYPE(z_copy) == IS_DOUBLE) && Z_TYPE_P(prop) == IS_LONG) {
-				if (ref) {
-					zend_throw_incdec_ref_error(ref, inc);
-				} else {
+				if (prop_info) {
 					zend_throw_incdec_prop_error(prop_info, inc);
+				} else {
+					zend_throw_incdec_ref_error(ref, inc);
 				}
 			} else if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 				zval_ptr_dtor(prop);
