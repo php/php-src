@@ -441,7 +441,7 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
 
-static zend_always_inline zend_property_info* zend_object_fetch_property_type_info(zend_class_entry *ce, zend_string *property, void **cache_slot)
+static zend_always_inline zend_property_info *zend_object_fetch_property_type_info(zend_class_entry *ce, zend_string *property, void **cache_slot)
 {
 	zend_property_info *info;
 
@@ -456,9 +456,7 @@ static zend_always_inline zend_property_info* zend_object_fetch_property_type_in
 
 	info = zend_get_property_info(ce, property, 1);
 
-	if (EXPECTED(info)
-	 && UNEXPECTED(info != ZEND_WRONG_PROPERTY_INFO)
-	 && UNEXPECTED(info->type)) {
+	if (info && info != ZEND_WRONG_PROPERTY_INFO && info->type) {
 		return info;
 	}
 
