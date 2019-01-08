@@ -614,7 +614,7 @@ PHP_FUNCTION(hash_hkdf)
 	zend_string *returnval, *ikm, *algo, *info = NULL, *salt = NULL;
 	zend_long length = 0;
 	unsigned char *prk, *digest, *K;
-	int i;
+    size_t i;
 	size_t rounds;
 	const php_hash_ops *ops;
 	void *context;
