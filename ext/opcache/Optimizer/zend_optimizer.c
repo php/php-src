@@ -614,6 +614,39 @@ void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var)
 	}
 }
 
+static uint32_t zend_determine_constructor_call(zend_op_array *op_array, uint32_t start) {
+	int call = 0;
+	while (start++ < op_array->last) {
+		switch (op_array->opcodes[start].opcode) {
+			case ZEND_INIT_FCALL_BY_NAME:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_FCALL:
+			case ZEND_NEW:
+			case ZEND_INIT_DYNAMIC_CALL:
+			case ZEND_INIT_USER_CALL:
+				call++;
+				break;
+			case ZEND_DO_FCALL:
+				if (call == 0) {
+					return start;
+				}
+			/* break missing intentionally */
+			case ZEND_DO_ICALL:
+			case ZEND_DO_UCALL:
+			case ZEND_DO_FCALL_BY_NAME:
+				call--;
+				break;
+			default:
+				break;
+		}
+	}
+
+	ZEND_ASSERT(0);
+	return -1;
+}
+
 void zend_optimizer_remove_live_range_ex(zend_op_array *op_array, uint32_t var, uint32_t start)
 {
 	uint32_t i = 0;
@@ -631,7 +664,12 @@ void zend_optimizer_remove_live_range_ex(zend_op_array *op_array, uint32_t var, 
 		case ZEND_FE_RESET_R:
 		case ZEND_FE_RESET_RW:
 			var |= ZEND_LIVE_LOOP;
-			/* break missing intentionally */
+			start++;
+			break;
+		case ZEND_NEW:
+			start = zend_determine_constructor_call(op_array, start);
+			start++;
+			break;
 		default:
 			start++;
 	}
