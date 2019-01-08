@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018, PHP 7.1.26
+?? ??? 2019, PHP 7.1.27
+
+
+10 Jan 2019, PHP 7.1.26
 
 - Core:
   . Fixed bug #77369 (memcpy with negative length via crafted DNS response). (Stas)
