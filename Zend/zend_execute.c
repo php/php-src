@@ -669,6 +669,14 @@ static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_ref_error(zend_p
 	);
 }
 
+static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_error(
+		zend_property_info *prop) {
+	zend_throw_error(NULL,
+		"Cannot access uninitialized non-nullable property %s::$%s by reference",
+		ZSTR_VAL(prop->ce->name),
+		zend_get_unmangled_property_name(prop->name));
+}
+
 static zend_always_inline zend_property_info *i_zend_check_ref_stdClass_assignable(zend_reference *ref);
 
 /* this should modify object only if it's empty */
@@ -2596,33 +2604,34 @@ return_indirect:
 						zend_tmp_string_release(tmp_str);
 					}
 					if (UNEXPECTED(prop_info)) {
-						if (flags == ZEND_FETCH_DIM_WRITE && promotes_to_array(ptr)) {
-							if (!check_type_array_assignable(prop_info->type)) {
-								zend_throw_auto_init_in_prop_error(prop_info, "array");
-								ZVAL_UNDEF(ptr);
-								ZVAL_ERROR(result);
-							}
-							return;
-						}
-						if (flags == ZEND_FETCH_OBJ_WRITE && promotes_to_object(ptr)) {
-							if (!check_type_stdClass_assignable(prop_info->type)) {
-								zend_throw_auto_init_in_prop_error(prop_info, "stdClass");
-								ZVAL_UNDEF(ptr);
-								ZVAL_ERROR(result);
-							}
-							return;
-						}
-						if (!ZEND_TYPE_ALLOW_NULL(prop_info->type) && Z_TYPE_P(ptr) == IS_NULL) {
-							zend_throw_error(NULL, "Cannot access uninitialized non-nullable property %s::$%s by reference",
-								ZSTR_VAL(prop_info->ce->name),
-								zend_get_unmangled_property_name(prop_info->name));
-							ZVAL_UNDEF(ptr);
-							ZVAL_ERROR(result);
-							return;
-						}
+						switch (flags) {
+							case ZEND_FETCH_DIM_WRITE:
+								if (!check_type_array_assignable(prop_info->type)) {
+									zend_throw_auto_init_in_prop_error(prop_info, "array");
+									ZVAL_UNDEF(ptr);
+									ZVAL_ERROR(result);
+								}
+								return;
+							case ZEND_FETCH_OBJ_WRITE:
+								if (!check_type_stdClass_assignable(prop_info->type)) {
+									zend_throw_auto_init_in_prop_error(prop_info, "stdClass");
+									ZVAL_UNDEF(ptr);
+									ZVAL_ERROR(result);
+								}
+								return;
+							case ZEND_FETCH_REF:
+								if (!ZEND_TYPE_ALLOW_NULL(prop_info->type) && Z_TYPE_P(ptr) == IS_NULL) {
+									zend_throw_access_uninit_prop_by_ref_error(prop_info);
+									ZVAL_UNDEF(ptr);
+									ZVAL_ERROR(result);
+									return;
+								}
 
-						ZVAL_NEW_REF(ptr, ptr);
-						ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
+								ZVAL_NEW_REF(ptr, ptr);
+								ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
+								return;
+							EMPTY_SWITCH_DEFAULT_CASE()
+						}
 					}
 				}
 				return;
@@ -2770,9 +2779,7 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 		if (flags == ZEND_FETCH_REF && Z_TYPE_P(*retval) != IS_REFERENCE) {
 			zval *ref = *retval;
 			if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(ref) <= IS_NULL)) {
-				zend_throw_error(NULL, "Cannot access uninitialized property %s::$%s by reference",
-					ZSTR_VAL(property_info->ce->name),
-					zend_get_unmangled_property_name(property_info->name));
+				zend_throw_access_uninit_prop_by_ref_error(property_info);
 				return FAILURE;
 			}
 			if (UNEXPECTED(Z_ISUNDEF_P(ref))) {
