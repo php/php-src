@@ -19,22 +19,9 @@ PHP                                                                        NEWS
     application/octet-stream). (Anatol)
 
 - GD:
-  . Fixed bug #77269 (efree() on uninitialized Heap data in imagescale leads to
-    use-after-free). (cmb)
-  . Fixed bug #77270 (imagecolormatch Out Of Bounds Write on Heap). (cmb)
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
 
 - Mbstring:
-  . Fixed bug #77367 (Negative size parameter in mb_split). (Stas)
-  . Fixed bug #77370 (Buffer overflow on mb regex functions - fetch_token). (Stas)
-  . Fixed bug #77371 (heap buffer overflow in mb regex functions
-    - compile_string_node). (Stas)
-  . Fixed bug #77381 (heap buffer overflow in multibyte match_at). (Stas)
-  . Fixed bug #77382 (heap buffer overflow due to incorrect length in
-    expand_case_fold_string). (Stas)
-  . Fixed bug #77385 (buffer overflow in fetch_token). (Stas)
-  . Fixed bug #77394 (Buffer overflow in multibyte case folding - unicode). (Stas)
-  . Fixed bug #77418 (Heap overflow in utf32be_mbc_to_code). (Stas)
   . Fixed bug #77428 (mb_ereg_replace() doesn't replace a substitution
     variable). (Nikita)
 
@@ -54,9 +41,6 @@ PHP                                                                        NEWS
   . Fixed bug #77273 (array_walk_recursive corrupts value types leading to PDO
     failure). (Nikita)
 
-- Phar:
-  . Fixed bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext). (Stas)
-
 - SOAP:
   . Fixed bug #77410 (Segmentation Fault when executing method with an empty
     parameter). (Nikita)
@@ -71,10 +55,6 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #77395 (segfault about array_multisort). (Laruence)
-
-- Xmlrpc:
-  . Fixed bug #77242 (heap out of bounds read in xmlrpc_decode()). (cmb)
-  . Fixed bug #77380 (Global out of bounds read in xmlrpc base64 code). (Stas)
 
 10 Jan 2019, PHP 7.3.1
 
@@ -103,6 +83,21 @@ PHP                                                                        NEWS
   . Fixed bug #77198 (auto cropping has insufficient precision). (cmb)
   . Fixed bug #77200 (imagecropauto(…, GD_CROP_SIDES) crops left but not right).
     (cmb)
+  . Fixed bug #77269 (efree() on uninitialized Heap data in imagescale leads to
+    use-after-free). (cmb)
+  . Fixed bug #77270 (imagecolormatch Out Of Bounds Write on Heap). (cmb)
+
+- MBString:
+  . Fixed bug #77367 (Negative size parameter in mb_split). (Stas)
+  . Fixed bug #77370 (Buffer overflow on mb regex functions - fetch_token). (Stas)
+  . Fixed bug #77371 (heap buffer overflow in mb regex functions
+    - compile_string_node). (Stas)
+  . Fixed bug #77381 (heap buffer overflow in multibyte match_at). (Stas)
+  . Fixed bug #77382 (heap buffer overflow due to incorrect length in
+    expand_case_fold_string). (Stas)
+  . Fixed bug #77385 (buffer overflow in fetch_token). (Stas)
+  . Fixed bug #77394 (Buffer overflow in multibyte case folding - unicode). (Stas)
+  . Fixed bug #77418 (Heap overflow in utf32be_mbc_to_code). (Stas)
 
 - OCI8:
   . Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
@@ -122,6 +117,9 @@ PHP                                                                        NEWS
   . Handle invalid index passed to PDOStatement::fetchColumn() as error. (Sergei
     Morozov)
 
+- Phar:
+  . Fixed bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext). (Stas)
+
 - Soap:
   . Fixed bug #77088 (Segfault when using SoapClient with null options).
     (Laruence)
@@ -139,6 +137,10 @@ PHP                                                                        NEWS
 
 - SQLite3:
   . Fixed bug #77051 (Issue with re-binding on SQLite3). (BohwaZ)
+
+- Xmlrpc:
+  . Fixed bug #77242 (heap out of bounds read in xmlrpc_decode()). (cmb)
+  . Fixed bug #77380 (Global out of bounds read in xmlrpc base64 code). (Stas)
 
 06 Dec 2018, PHP 7.3.0
 
