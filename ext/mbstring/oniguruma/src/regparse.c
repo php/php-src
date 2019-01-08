@@ -3596,7 +3596,6 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
           tok->u.code = c2;
         }
         else { /* string */
-          p = tok->backp + enclen(enc, tok->backp);
           int len;
           SAFE_ENC_LEN(enc, tok->backp, end, len);
           p = tok->backp + len;
