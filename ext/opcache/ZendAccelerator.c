@@ -2501,7 +2501,7 @@ static inline int accel_find_sapi(void)
 
 static int zend_accel_init_shm(void)
 {
-    size_t i;
+    int i;
 
 	zend_shared_alloc_lock();
 

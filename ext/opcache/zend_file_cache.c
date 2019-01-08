@@ -717,7 +717,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 		if (ce->trait_precedences) {
 			zend_trait_precedence **p, *q;
-            size_t j;
+            uint32_t j;
 
 			SERIALIZE_PTR(ce->trait_precedences);
 			p = ce->trait_precedences;
