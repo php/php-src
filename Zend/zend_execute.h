@@ -58,17 +58,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 
 ZEND_API zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type type, zend_reference *ref);
 
-ZEND_API zend_bool zend_load_property_class_type(zend_property_info *info);
-
-static zend_always_inline zend_type zend_get_prop_info_ref_type(zend_property_info *prop_info) {
-	if (ZEND_TYPE_IS_CLASS(prop_info->type) && UNEXPECTED(!ZEND_TYPE_IS_CE(prop_info->type)) && UNEXPECTED(!zend_load_property_class_type(prop_info))) {
-		ZEND_ASSERT(EG(exception));
-		return ZEND_TYPE_CODE(_IS_ERROR);
-	}
-
-	return prop_info->type;
-}
-
 /* do not call when new_type == IS_REFERENCE or new_type == IS_OBJECT! */
 static zend_always_inline zend_bool zend_verify_type_assignable(zend_type type, zend_uchar new_type) {
 	if (!type) {

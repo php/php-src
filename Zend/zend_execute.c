@@ -965,7 +965,7 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	}
 }
 
-ZEND_API zend_bool zend_load_property_class_type(zend_property_info *info) {
+static zend_bool zend_load_property_class_type(zend_property_info *info) {
 	zend_class_entry *ce;
 	if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(info->type), "self")) {
 		if (UNEXPECTED((info->ce->ce_flags & ZEND_ACC_TRAIT) != 0)) {
@@ -990,6 +990,7 @@ ZEND_API zend_bool zend_load_property_class_type(zend_property_info *info) {
 	info->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(info->type));
 	return 1;
 }
+
 
 static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
 {
@@ -2942,10 +2943,21 @@ ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv
 	return i_zend_verify_ref_assignable_zval(ref, zv, strict);
 }
 
+static zend_always_inline zend_type zend_get_resolved_prop_info_type(zend_property_info *prop_info) {
+	if (ZEND_TYPE_IS_CLASS(prop_info->type) && UNEXPECTED(!ZEND_TYPE_IS_CE(prop_info->type)) && UNEXPECTED(!zend_load_property_class_type(prop_info))) {
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Class %s must be loaded when used by reference for property type", ZSTR_VAL(ZEND_TYPE_NAME(prop_info->type)));
+		}
+		return ZEND_TYPE_CODE(_IS_ERROR);
+	}
+
+	return prop_info->type;
+}
+
 ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict) {
 	zval *val = orig_val;
 	if (Z_ISREF_P(val) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(val))) {
-		zend_type prop_type = zend_get_prop_info_ref_type(prop_info);
+		zend_type prop_type = zend_get_resolved_prop_info_type(prop_info);
 		int result;
 
 		val = Z_REFVAL_P(val);
