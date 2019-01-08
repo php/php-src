@@ -14,8 +14,9 @@ $ref =& $test->prop2;
 try {
     $test->prop =& $ref;
 } catch (Error $e) {
-    echo $e, "\n";
+    echo $e->getMessage(), "\n";
 }
+var_dump($test);
 
 class Test2 {
     public ?Foobar $prop;
@@ -25,21 +26,21 @@ class Test2 {
 $test = new Test2;
 $test->prop2 = null;
 $ref =& $test->prop2;
-try {
-    $test->prop =& $ref;
-} catch (Error $e) {
-    echo $e, "\n";
-}
+$test->prop =& $ref;
+var_dump($test);
 
 ?>
---EXPECTF--
-Error: Class Foobar must be loaded when used by reference for property type in %s:%d
-Stack trace:
-#0 {main}
-
-Next TypeError: Reference with value of type int held by property Test1::$prop2 of type int is not compatible with property Test1::$prop of type Foobar in %s:%d
-Stack trace:
-#0 {main}
-Error: Class Foobar must be loaded when used by reference for property type in %s:%d
-Stack trace:
-#0 {main}
+--EXPECT--
+Typed property Test1::$prop must be an instance of Foobar, int used
+object(Test1)#1 (2) {
+  ["prop"]=>
+  NULL
+  ["prop2"]=>
+  &int(123)
+}
+object(Test2)#3 (2) {
+  ["prop"]=>
+  &NULL
+  ["prop2"]=>
+  &NULL
+}

@@ -58,18 +58,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 
 ZEND_API zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type type, zend_reference *ref);
 
-/* do not call when new_type == IS_REFERENCE or new_type == IS_OBJECT! */
-static zend_always_inline zend_bool zend_verify_type_assignable(zend_type type, zend_uchar new_type) {
-	if (!type) {
-		return 1;
-	}
-	zend_uchar cur_type = ZEND_TYPE_CODE(type);
-	return new_type == cur_type
-	    || (ZEND_TYPE_ALLOW_NULL(type) && new_type == IS_NULL)
-	    || (cur_type == _IS_BOOL && (new_type == IS_FALSE || new_type == IS_TRUE))
-	    || (cur_type == IS_ITERABLE && new_type == IS_ARRAY);
-}
-
 ZEND_API zend_property_info *zend_check_ref_array_assignable(zend_reference *ref);
 ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict);
 ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict);

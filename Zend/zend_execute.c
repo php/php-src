@@ -965,29 +965,29 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	}
 }
 
-static zend_bool zend_load_property_class_type(zend_property_info *info) {
+static zend_bool zend_resolve_type(zend_type *type, zend_class_entry *self_ce) {
 	zend_class_entry *ce;
-	if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(info->type), "self")) {
-		if (UNEXPECTED((info->ce->ce_flags & ZEND_ACC_TRAIT) != 0)) {
-			zend_throw_error(NULL, "Cannot write a%s value to a 'self' typed static property of a trait", ZEND_TYPE_ALLOW_NULL(info->type) ? " non-null" : "");
+	if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(*type), "self")) {
+		if (UNEXPECTED((self_ce->ce_flags & ZEND_ACC_TRAIT) != 0)) {
+			zend_throw_error(NULL, "Cannot write a%s value to a 'self' typed static property of a trait", ZEND_TYPE_ALLOW_NULL(*type) ? " non-null" : "");
 			return 0;
 		}
-		ce = info->ce;
-	} else if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(info->type), "parent")) {
-		if (UNEXPECTED(!info->ce->parent)) {
+		ce = self_ce;
+	} else if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(*type), "parent")) {
+		if (UNEXPECTED(!self_ce->parent)) {
 			zend_throw_error(NULL, "Cannot access parent:: when current class scope has no parent");
 			return 0;
 		}
-		ce = info->ce->parent;
+		ce = self_ce->parent;
 	} else {
-		ce = zend_lookup_class(ZEND_TYPE_NAME(info->type));
+		ce = zend_lookup_class(ZEND_TYPE_NAME(*type));
 		if (UNEXPECTED(!ce)) {
 			return 0;
 		}
 	}
 
-	zend_string_release(ZEND_TYPE_NAME(info->type));
-	info->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(info->type));
+	zend_string_release(ZEND_TYPE_NAME(*type));
+	*type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(*type));
 	return 1;
 }
 
@@ -1002,7 +1002,7 @@ static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_in
 			return 0;
 		}
 
-		if (UNEXPECTED(!ZEND_TYPE_IS_CE(info->type)) && UNEXPECTED(!zend_load_property_class_type(info))) {
+		if (UNEXPECTED(!ZEND_TYPE_IS_CE(info->type)) && UNEXPECTED(!zend_resolve_type(&info->type, info->ce))) {
 			return 0;
 		}
 
@@ -2853,18 +2853,28 @@ ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info
 }
 
 /* 1: valid, 0: invalid, -1: may be valid after type coercion */
-static zend_always_inline int i_zend_verify_type_assignable_zval(zend_type type, zval *zv, zend_bool strict) {
+static zend_always_inline int i_zend_verify_type_assignable_zval(
+		zend_type *type_ptr, zend_class_entry *self_ce, zval *zv, zend_bool strict) {
+	zend_type type = *type_ptr;
 	zend_uchar type_code;
 	zend_uchar zv_type = Z_TYPE_P(zv);
 
+	if (ZEND_TYPE_ALLOW_NULL(type) && zv_type == IS_NULL) {
+		return 1;
+	}
+
 	if (ZEND_TYPE_IS_CLASS(type)) {
-		return (zv_type == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), ZEND_TYPE_CE(type)))
-			|| (ZEND_TYPE_ALLOW_NULL(type) && zv_type == IS_NULL);
+		if (!ZEND_TYPE_IS_CE(type)) {
+			if (!zend_resolve_type(type_ptr, self_ce)) {
+				return 0;
+			}
+			type = *type_ptr;
+		}
+		return zv_type == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), ZEND_TYPE_CE(type));
 	}
 
 	type_code = ZEND_TYPE_CODE(type);
 	if (type_code == zv_type ||
-			(ZEND_TYPE_ALLOW_NULL(type) && zv_type == IS_NULL) ||
 			(type_code == _IS_BOOL && (zv_type == IS_FALSE || zv_type == IS_TRUE))) {
 		return 1;
 	}
@@ -2905,13 +2915,7 @@ static zend_always_inline zend_bool i_zend_verify_ref_assignable_zval(zend_refer
 
 	ZEND_ASSERT(Z_TYPE_P(zv) != IS_REFERENCE);
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
-		int result;
-
-		/* Only sources that carry a type should be registered. */
-		zend_type type = prop->type;
-		ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
-
-		result = i_zend_verify_type_assignable_zval(type, zv, strict);
+		int result = i_zend_verify_type_assignable_zval(&prop->type, prop->ce, zv, strict);
 		if (result == 0) {
 			zend_throw_ref_type_error_zval(prop, zv);
 			return 0;
@@ -2923,8 +2927,8 @@ static zend_always_inline zend_bool i_zend_verify_ref_assignable_zval(zend_refer
 
 		if (!seen_prop) {
 			seen_prop = prop;
-			seen_type = ZEND_TYPE_IS_CLASS(type) ? IS_OBJECT : ZEND_TYPE_CODE(type);
-		} else if (needs_coercion && seen_type != ZEND_TYPE_CODE(type)) {
+			seen_type = ZEND_TYPE_IS_CLASS(prop->type) ? IS_OBJECT : ZEND_TYPE_CODE(prop->type);
+		} else if (needs_coercion && seen_type != ZEND_TYPE_CODE(prop->type)) {
 			zend_throw_conflicting_coercion_error(seen_prop, prop, zv);
 			return 0;
 		}
@@ -2943,37 +2947,25 @@ ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv
 	return i_zend_verify_ref_assignable_zval(ref, zv, strict);
 }
 
-static zend_always_inline zend_type zend_get_resolved_prop_info_type(zend_property_info *prop_info) {
-	if (ZEND_TYPE_IS_CLASS(prop_info->type) && UNEXPECTED(!ZEND_TYPE_IS_CE(prop_info->type)) && UNEXPECTED(!zend_load_property_class_type(prop_info))) {
-		if (!EG(exception)) {
-			zend_throw_error(NULL, "Class %s must be loaded when used by reference for property type", ZSTR_VAL(ZEND_TYPE_NAME(prop_info->type)));
-		}
-		return ZEND_TYPE_CODE(_IS_ERROR);
-	}
-
-	return prop_info->type;
-}
-
 ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict) {
 	zval *val = orig_val;
 	if (Z_ISREF_P(val) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(val))) {
-		zend_type prop_type = zend_get_resolved_prop_info_type(prop_info);
 		int result;
 
 		val = Z_REFVAL_P(val);
-		result = i_zend_verify_type_assignable_zval(prop_type, val, strict);
+		result = i_zend_verify_type_assignable_zval(&prop_info->type, prop_info->ce, val, strict);
 		if (result > 0) {
 			return 1;
 		}
 
 		if (result < 0) {
 			zend_property_info *ref_prop = ZEND_REF_FIRST_SOURCE(Z_REF_P(orig_val));
-			if (ZEND_TYPE_CODE(prop_type) != ZEND_TYPE_CODE(ref_prop->type)) {
+			if (ZEND_TYPE_CODE(prop_info->type) != ZEND_TYPE_CODE(ref_prop->type)) {
 				/* Invalid due to conflicting coercion */
 				zend_throw_ref_type_error_type(ref_prop, prop_info, val);
 				return 0;
 			}
-			if (zend_verify_weak_scalar_type_hint(ZEND_TYPE_CODE(prop_type), val)) {
+			if (zend_verify_weak_scalar_type_hint(ZEND_TYPE_CODE(prop_info->type), val)) {
 				return 1;
 			}
 		}
