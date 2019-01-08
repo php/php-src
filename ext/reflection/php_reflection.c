@@ -2403,7 +2403,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	ref = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	ref->arg_info = &arg_info[position];
 	ref->offset = (uint32_t)position;
-	ref->required = position < fptr->common.required_num_args;
+    ref->required = (uint32_t)position < fptr->common.required_num_args;
 	ref->fptr = fptr;
 	/* TODO: copy fptr */
 	intern->ptr = ref;

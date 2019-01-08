@@ -76,7 +76,7 @@ static void zend_init_interned_strings_ht(HashTable *interned_strings, int perma
 ZEND_API void zend_interned_strings_init(void)
 {
 	char s[2];
-	int i;
+    size_t i;
 	zend_string *str;
 
 	interned_string_request_handler = zend_new_interned_string_request;
