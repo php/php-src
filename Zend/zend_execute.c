@@ -1563,7 +1563,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	}
 }
 
-static zend_property_info *zend_ref_accepts_double(zend_reference *ref)
+static zend_property_info *zend_get_prop_not_accepting_double(zend_reference *ref)
 {
 	zend_property_info *prop;
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
@@ -1574,19 +1574,30 @@ static zend_property_info *zend_ref_accepts_double(zend_reference *ref)
 	return NULL;
 }
 
-static ZEND_COLD zend_bool zend_ref_verify_assign_incdec_double(zend_reference *ref, int inc)
+static ZEND_COLD void zend_throw_incdec_ref_error(zend_reference *ref, zend_bool inc)
 {
-	zend_property_info *error_prop = zend_ref_accepts_double(ref);
-	if (error_prop) {
-		zend_type_error("Cannot %s a reference held by property %s::$%s of type %sint past its %simal value",
-			inc ? "increment" : "decrement",
-			ZSTR_VAL(error_prop->ce->name),
-			zend_get_unmangled_property_name(error_prop->name),
-			ZEND_TYPE_ALLOW_NULL(error_prop->type) ? "?" : "",
-			inc ? "max" : "min");
-		return 0;
-	}
-	return 1;
+	zend_property_info *error_prop = zend_get_prop_not_accepting_double(ref);
+	/* Currently there should be no way for a typed reference to accept both int and double.
+	 * Generalize this and the related property code once this becomes possible. */
+	ZEND_ASSERT(error_prop);
+	zend_type_error(
+		"Cannot %s a reference held by property %s::$%s of type %sint past its %simal value",
+		inc ? "increment" : "decrement",
+		ZSTR_VAL(error_prop->ce->name),
+		zend_get_unmangled_property_name(error_prop->name),
+		ZEND_TYPE_ALLOW_NULL(error_prop->type) ? "?" : "",
+		inc ? "max" : "min");
+}
+
+static ZEND_COLD void zend_throw_incdec_prop_error(zend_property_info *prop, zend_bool inc) {
+	const char *prop_type1, *prop_type2;
+	zend_format_type(prop->type, &prop_type1, &prop_type2);
+	zend_type_error("Cannot %s property %s::$%s of type %s%s past its %simal value",
+		inc ? "increment" : "decrement",
+		ZSTR_VAL(prop->ce->name),
+		zend_get_unmangled_property_name(prop->name),
+		prop_type1, prop_type2,
+		inc ? "max" : "min");
 }
 
 static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_info, int inc OPLINE_DC EXECUTE_DATA_DC)
@@ -1597,7 +1608,8 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info) && UNEXPECTED(!zend_verify_property_type(prop_info, prop, EX_USES_STRICT_TYPES()))) {
+		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)) {
+			zend_throw_incdec_prop_error(prop_info, inc);
 			if (inc) {
 				ZVAL_LONG(prop, ZEND_LONG_MAX);
 			} else {
@@ -1625,17 +1637,9 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 			}
 			if (UNEXPECTED(Z_TYPE(z_copy) == IS_DOUBLE) && Z_TYPE_P(prop) == IS_LONG) {
 				if (ref) {
-					if (zend_ref_verify_assign_incdec_double(ref, inc)) {
-						ZVAL_COPY_VALUE(&ref->val, &z_copy);
-					}
+					zend_throw_incdec_ref_error(ref, inc);
 				} else {
-					ZEND_ASSERT(ZEND_TYPE_CODE(prop_info->type) == IS_LONG);
-					zend_type_error("Cannot %screment a property %s::$%s of type %sint past its %simal value",
-						inc ? "in" : "de",
-						ZSTR_VAL(prop_info->ce->name),
-						zend_get_unmangled_property_name(prop_info->name),
-						ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
-						inc ? "max" : "min");
+					zend_throw_incdec_prop_error(prop_info, inc);
 				}
 			} else if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 				zval_ptr_dtor(prop);
@@ -1666,13 +1670,12 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG)) {
-			if (UNEXPECTED(prop_info) && UNEXPECTED(!zend_verify_property_type(prop_info, prop, EX_USES_STRICT_TYPES()))) {
-				if (inc) {
-					ZVAL_LONG(prop, ZEND_LONG_MAX);
-				} else {
-					ZVAL_LONG(prop, ZEND_LONG_MIN);
-				}
+		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)) {
+			zend_throw_incdec_prop_error(prop_info, inc);
+			if (inc) {
+				ZVAL_LONG(prop, ZEND_LONG_MAX);
+			} else {
+				ZVAL_LONG(prop, ZEND_LONG_MIN);
 			}
 		}
 	} else {
@@ -1698,17 +1701,9 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 			}
 			if (UNEXPECTED(Z_TYPE(z_copy) == IS_DOUBLE) && Z_TYPE_P(prop) == IS_LONG) {
 				if (ref) {
-					if (zend_ref_verify_assign_incdec_double(ref, inc)) {
-						ZVAL_COPY_VALUE(&ref->val, &z_copy);
-					}
+					zend_throw_incdec_ref_error(ref, inc);
 				} else {
-					ZEND_ASSERT(ZEND_TYPE_CODE(prop_info->type) == IS_LONG);
-					zend_type_error("Cannot %screment a property %s::$%s of type %sint past its %simal value",
-						inc ? "in" : "de",
-						ZSTR_VAL(prop_info->ce->name),
-						zend_get_unmangled_property_name(prop_info->name),
-						ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
-						inc ? "max" : "min");
+					zend_throw_incdec_prop_error(prop_info, inc);
 				}
 			} else if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 				zval_ptr_dtor(prop);
