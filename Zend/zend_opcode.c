@@ -187,7 +187,7 @@ static void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	}
 
 	if (ce->trait_precedences) {
-		int j;
+		uint32_t j;
 
 		i = 0;
 		while (ce->trait_precedences[i]) {
