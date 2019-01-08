@@ -2765,30 +2765,35 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 		}
 	}
 
-	if (flags) {
-		if (flags == ZEND_FETCH_DIM_WRITE && promotes_to_array(*retval)
-		    && !check_type_array_assignable(property_info->type)) {
-			zend_throw_auto_init_in_prop_error(property_info, "array");
-			return FAILURE;
-		}
-		if (flags == ZEND_FETCH_OBJ_WRITE && promotes_to_object(*retval)
-		    && !check_type_stdClass_assignable(property_info->type)) {
-			zend_throw_auto_init_in_prop_error(property_info, "stdClass");
-			return FAILURE;
-		}
-		if (flags == ZEND_FETCH_REF && Z_TYPE_P(*retval) != IS_REFERENCE) {
-			zval *ref = *retval;
-			if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(ref) <= IS_NULL)) {
-				zend_throw_access_uninit_prop_by_ref_error(property_info);
-				return FAILURE;
-			}
-			if (UNEXPECTED(Z_ISUNDEF_P(ref))) {
-				ZVAL_NULL(ref);
-			}
-			ZVAL_NEW_REF(ref, ref);
-			if (property_info->type) {
-				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ref), property_info);
-			}
+	if (flags && property_info->type) {
+		switch (flags) {
+			case ZEND_FETCH_DIM_WRITE:
+				if (promotes_to_array(*retval) && !check_type_array_assignable(property_info->type)) {
+					zend_throw_auto_init_in_prop_error(property_info, "array");
+					return FAILURE;
+				}
+				break;
+			case ZEND_FETCH_OBJ_WRITE:
+				if (promotes_to_object(*retval) && !check_type_stdClass_assignable(property_info->type)) {
+					zend_throw_auto_init_in_prop_error(property_info, "stdClass");
+					return FAILURE;
+				}
+				break;
+			case ZEND_FETCH_REF:
+				if (Z_TYPE_P(*retval) != IS_REFERENCE) {
+					zval *ref = *retval;
+					if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(ref) <= IS_NULL)) {
+						zend_throw_access_uninit_prop_by_ref_error(property_info);
+						return FAILURE;
+					}
+					if (UNEXPECTED(Z_ISUNDEF_P(ref))) {
+						ZVAL_NULL(ref);
+					}
+					ZVAL_NEW_REF(ref, ref);
+					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ref), property_info);
+				}
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
 
