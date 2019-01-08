@@ -93,7 +93,6 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 					if ((opline->op2_type & (IS_VAR | IS_CV))
 						&& opline->op2.var == next_opline->op1.var &&
 						(opline->opcode == ZEND_ADD ||
-						 opline->opcode == ZEND_MUL ||
 						 opline->opcode == ZEND_BW_OR ||
 						 opline->opcode == ZEND_BW_AND ||
 						 opline->opcode == ZEND_BW_XOR)) {
