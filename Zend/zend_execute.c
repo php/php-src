@@ -634,8 +634,6 @@ static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(z
 	return 1;
 }
 
-static zend_always_inline zend_property_info *i_zend_check_ref_stdClass_assignable(zend_reference *ref);
-
 static void zend_format_type(zend_type type, const char **part1, const char **part2) {
 	*part1 = ZEND_TYPE_ALLOW_NULL(type) ? "?" : "";
 	if (ZEND_TYPE_IS_CLASS(type)) {
@@ -671,6 +669,7 @@ static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_ref_error(zend_p
 	);
 }
 
+static zend_always_inline zend_property_info *i_zend_check_ref_stdClass_assignable(zend_reference *ref);
 
 /* this should modify object only if it's empty */
 static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
@@ -965,34 +964,37 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	}
 }
 
-static zend_bool zend_resolve_type(zend_type *type, zend_class_entry *self_ce) {
+static zend_bool zend_resolve_class_type(zend_type *type, zend_class_entry *self_ce) {
 	zend_class_entry *ce;
-	if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(*type), "self")) {
+	zend_string *name = ZEND_TYPE_NAME(*type);
+	if (zend_string_equals_literal_ci(name, "self")) {
+		/* We need to explicitly check for this here, to avoid updating the type in the trait and
+		 * later using the wrong "self" when the trait is used in a class. */
 		if (UNEXPECTED((self_ce->ce_flags & ZEND_ACC_TRAIT) != 0)) {
 			zend_throw_error(NULL, "Cannot write a%s value to a 'self' typed static property of a trait", ZEND_TYPE_ALLOW_NULL(*type) ? " non-null" : "");
 			return 0;
 		}
 		ce = self_ce;
-	} else if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(*type), "parent")) {
+	} else if (zend_string_equals_literal_ci(name, "parent")) {
 		if (UNEXPECTED(!self_ce->parent)) {
 			zend_throw_error(NULL, "Cannot access parent:: when current class scope has no parent");
 			return 0;
 		}
 		ce = self_ce->parent;
 	} else {
-		ce = zend_lookup_class(ZEND_TYPE_NAME(*type));
+		ce = zend_lookup_class(name);
 		if (UNEXPECTED(!ce)) {
 			return 0;
 		}
 	}
 
-	zend_string_release(ZEND_TYPE_NAME(*type));
+	zend_string_release(name);
 	*type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(*type));
 	return 1;
 }
 
 
-static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
+static zend_always_inline zend_bool i_zend_check_property_type(zend_property_info *info, zval *property, zend_bool strict)
 {
 	if (ZEND_TYPE_IS_CLASS(info->type)) {
 		if (UNEXPECTED(Z_TYPE_P(property) != IS_OBJECT)) {
@@ -1002,7 +1004,7 @@ static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_in
 			return 0;
 		}
 
-		if (UNEXPECTED(!ZEND_TYPE_IS_CE(info->type)) && UNEXPECTED(!zend_resolve_type(&info->type, info->ce))) {
+		if (UNEXPECTED(!ZEND_TYPE_IS_CE(info->type)) && UNEXPECTED(!zend_resolve_class_type(&info->type, info->ce))) {
 			return 0;
 		}
 
@@ -1032,8 +1034,17 @@ static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_in
 	}
 }
 
-zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
+static zend_bool zend_always_inline i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
 {
+	if (i_zend_check_property_type(info, property, strict)) {
+		return 1;
+	}
+
+	zend_verify_property_type_error(info, property);
+	return 0;
+}
+
+zend_bool zend_never_inline zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
 	return i_zend_verify_property_type(info, property, strict);
 }
 
@@ -1599,7 +1610,6 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 			fast_long_decrement_function(prop);
 		}
 		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info) && UNEXPECTED(!zend_verify_property_type(prop_info, prop, EX_USES_STRICT_TYPES()))) {
-			zend_verify_property_type_error(prop_info, prop);
 			if (inc) {
 				ZVAL_LONG(prop, ZEND_LONG_MAX);
 			} else {
@@ -1643,9 +1653,6 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 				zval_ptr_dtor(prop);
 				ZVAL_COPY_VALUE(prop, &z_copy);
 			} else {
-				if (!ref) {
-					zend_verify_property_type_error(prop_info, &z_copy);
-				}
 				zval_ptr_dtor(&z_copy);
 			}
 		} else {
@@ -1673,7 +1680,6 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 		}
 		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG)) {
 			if (UNEXPECTED(prop_info) && UNEXPECTED(!zend_verify_property_type(prop_info, prop, EX_USES_STRICT_TYPES()))) {
-				zend_verify_property_type_error(prop_info, prop);
 				if (inc) {
 					ZVAL_LONG(prop, ZEND_LONG_MAX);
 				} else {
@@ -1720,9 +1726,6 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 				zval_ptr_dtor(prop);
 				ZVAL_COPY_VALUE(prop, &z_copy);
 			} else {
-				if (!ref) {
-					zend_verify_property_type_error(prop_info, &z_copy);
-				}
 				zval_ptr_dtor(&z_copy);
 			}
 		} else {
@@ -2865,7 +2868,7 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 
 	if (ZEND_TYPE_IS_CLASS(type)) {
 		if (!ZEND_TYPE_IS_CE(type)) {
-			if (!zend_resolve_type(type_ptr, self_ce)) {
+			if (!zend_resolve_class_type(type_ptr, self_ce)) {
 				return 0;
 			}
 			type = *type_ptr;
@@ -2971,7 +2974,7 @@ ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_i
 		}
 	} else {
 		ZVAL_DEREF(val);
-		if (i_zend_verify_property_type(prop_info, val, strict)) {
+		if (i_zend_check_property_type(prop_info, val, strict)) {
 			return 1;
 		}
 	}

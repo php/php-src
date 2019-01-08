@@ -798,7 +798,6 @@ ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, 
 			if (UNEXPECTED(prop_info)) {
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
-					zend_verify_property_type_error(prop_info, value);
 					Z_TRY_DELREF_P(value);
 					variable_ptr = &EG(error_zval);
 					goto exit;
@@ -860,7 +859,6 @@ write_std_property:
 			if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot))) {
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
-					zend_verify_property_type_error(prop_info, value);
 					zval_ptr_dtor(value);
 					goto exit;
 				}

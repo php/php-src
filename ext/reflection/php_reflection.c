@@ -3863,7 +3863,6 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	}
 
 	if (prop_info->type && !zend_verify_property_type(prop_info, value, 0)) {
-        	zend_verify_property_type_error(prop_info, value);
 		return;
 	}
 
