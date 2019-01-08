@@ -43,6 +43,7 @@ PHP                                                                        NEWS
       no external visibility). (Anatol)
 
 - Opcache:
+  . Fixed bug #77266 (Assertion failed in dce_live_ranges). (Laruence)
   . Fixed bug #77257 (value of variable assigned in a switch() construct gets
     lost). (Nikita)
 
