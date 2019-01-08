@@ -33,6 +33,16 @@ PHP                                                                        NEWS
 
 - MBString:
   . Fixed bug #77367 (Negative size parameter in mb_split). (Stas)
+  . Fixed bug #77370 (Buffer overflow on mb regex functions - fetch_token).
+    (Stas)
+  . Fixed bug #77371 (heap buffer overflow in mb regex functions -
+    compile_string_node). (Stas)
+  . Fixed bug #77381 (heap buffer overflow in multibyte match_at). (Stas)
+  . Fixed bug #77382 (heap buffer overflow due to incorrect length in
+    expand_case_fold_string). (Stas)
+  . Fixed bug #77385 (buffer overflow in fetch_token). (Stas)
+  . Fixed bug #77394 (Buffer overflow in multibyte case folding - unicode).
+    (Stas)
   . Fixed bug #77418 (Heap overflow in utf32be_mbc_to_code). (Stas)
 
 - OCI8:
