@@ -450,10 +450,9 @@ static zend_always_inline zend_property_info *zend_object_fetch_property_type_in
 		return (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 	}
 
-	// TODO Possibly broken with inheritance?
-	/*if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
+	if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
 		return NULL;
-	}*/
+	}
 
 	info = zend_get_property_info(ce, property, 1);
 
