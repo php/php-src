@@ -9909,12 +9909,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_VARIANCE_SPEC_CONST_UNU
 
 	SAVE_OPLINE();
 	zce = zend_lookup_class(Z_STR_P(RT_CONSTANT(opline, opline->op1)));
-	if (zce) {
-		zend_verify_variance(zce);
-	} else {
-		ZEND_ASSERT(EG(exception));
-		HANDLE_EXCEPTION();
-	}
+	ZEND_ASSERT(zce);
+	zend_verify_variance(zce);
+
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 

@@ -3959,7 +3959,6 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-
 static
 void _backup_unverified_variance_types(HashTable *unverified_types,
                                        HashTable **prev_unverified_types)
@@ -8138,8 +8137,9 @@ static zend_bool _is_not_decl_stmt(zend_ast *ast) {
 	if (ast) {
 		/* todo: what else should be considered a decl stmt? */
 		switch (ast->kind) {
-		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_CLASS:
+		case ZEND_AST_CONST_DECL:
+		case ZEND_AST_FUNC_DECL:
 			return 0;
 
 		default:
@@ -8167,11 +8167,10 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 	}
 
 	if (ast->kind == ZEND_AST_STMT_LIST) {
-		zend_ast_list *list = zend_ast_get_list(ast);
-		zend_ast **begin = list->child;
-		zend_ast **end = begin + list->children;
+		zend_ast_list *const list = zend_ast_get_list(ast);
+		zend_ast ** const begin = list->child;
+		zend_ast ** const end = begin + list->children;
 		zend_ast **first_decl = _ast_find(begin, end, &_is_type_decl);
-		zend_ast **last_decl = _ast_find(first_decl, end, &_is_not_decl_stmt);
 		zend_ast **p;
 
 		/* Compile opcodes before first type decl */
@@ -8180,7 +8179,8 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 		}
 
 		/* Compile decl stmts */
-		{
+		while (first_decl != end) {
+			zend_ast **last_decl = _ast_find(first_decl, end, &_is_not_decl_stmt);
 			HashTable unverified_types;
 			HashTable *prev_unverified_types;
 			_backup_unverified_variance_types(&unverified_types, &prev_unverified_types);
@@ -8193,12 +8193,14 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 
 			zend_hash_destroy(&unverified_types);
 			CG(unverified_types) = prev_unverified_types;
-		}
 
-		/* Compile remainder */
-		/* todo: loop to catch any non-consecutive type declarations */
-		for (p = last_decl; p < end; ++p) {
-			zend_compile_top_stmt(*p);
+			/* There can be non-consecutive type decls, so continue searching */
+			first_decl = _ast_find(last_decl, end, &_is_type_decl);
+
+			/* Compile any stmts between the two type decls (or the end) */
+			for (p = last_decl; p < first_decl; ++p) {
+				zend_compile_top_stmt(*p);
+			}
 		}
 		return;
 	}

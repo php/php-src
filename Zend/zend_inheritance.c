@@ -209,7 +209,7 @@ zend_string *_resolve_parent_and_self(const zend_function *fe, zend_string *name
 			break;
 
 		case ZEND_FETCH_CLASS_SELF:
-			name = fe->common.scope->name;
+			name = ce->name;
 			break;
 
 		case ZEND_FETCH_CLASS_DEFAULT:
@@ -229,43 +229,20 @@ zend_string *_resolve_parent_and_self(const zend_function *fe, zend_string *name
 } /* }}} */
 
 typedef enum {
-	CONTRAVARIANT = -1,
-	INVARIANT = 0,
-	COVARIANT = +1,
-} _variance;
+	INHERITANCE_UNRESOLVED = -1,
+	INHERITANCE_ERROR = 0,
+	INHERITANCE_SUCCESS = 1,
+} _inheritance_status;
 
+/* Parameters are contravariant; return types are covariant. We can rely on
+ * the fact that they are inverses to improve correctness and simplify code.
+ * We can implement covariance, and then implement contravariance simply by
+ * reversing the argument order. */
 static
-int _check_zce_variance(
-	const zend_class_entry *ce1, const zend_class_entry *ce2,
-	_variance variance) /* {{{ */
-{
-	if (ce1 == ce2) return 1;
-
-	switch (variance) {
-		case INVARIANT:
-			// todo: does ce1 == ce2 above catch all possible cases?
-			return 0;
-		case COVARIANT:
-			return instanceof_function(ce1, ce2);
-		case CONTRAVARIANT:
-			return instanceof_function(ce2, ce1);
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-}
-
-/* This int return is not a boolean, but will often be treated this way.
- *   *  0 means there is definitely an error.
- *   *  1 means there are definitely not any errors.
- *   * -1 means there are no known errors but it is not known to be good
- *     either (there is not enough information at the moment).
- */
-static
-int _check_inherited_arg_info(
+_inheritance_status _check_covariance(
 	const zend_function *fe, zend_arg_info *fe_arg_info,
-	const zend_function *proto, zend_arg_info *proto_arg_info,
-	_variance variance) /* {{{ */
-{
+	const zend_function *proto, zend_arg_info *proto_arg_info)
+{ /* {{{ */
 	zend_type fe_type = fe_arg_info->type;
 	zend_type proto_type = proto_arg_info->type;
 	zend_long fe_type_code = ZEND_TYPE_CODE(fe_type);
@@ -274,90 +251,78 @@ int _check_inherited_arg_info(
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type));
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(proto_type));
 
-	if (variance == COVARIANT && ZEND_TYPE_ALLOW_NULL(fe_type) && !ZEND_TYPE_ALLOW_NULL(proto_type)) {
-		return 0;
-	}
-
-	/* This introduces BC break described at https://bugs.php.net/bug.php?id=72119 */
-	if (variance == CONTRAVARIANT && ZEND_TYPE_ALLOW_NULL(proto_type) && !ZEND_TYPE_ALLOW_NULL(fe_type)) {
-		return 0;
+	if (ZEND_TYPE_ALLOW_NULL(fe_type) && !ZEND_TYPE_ALLOW_NULL(proto_type)) {
+		return INHERITANCE_ERROR;
 	}
 
 	if (ZEND_TYPE_IS_CLASS(fe_type)) {
 		zend_string *fe_class_name =
 			_resolve_parent_and_self(fe, ZEND_TYPE_NAME(fe_type));
-		int code = 1;
+		_inheritance_status code;
 		if (ZEND_TYPE_IS_CLASS(proto_type)) {
 			zend_string *proto_class_name =
 				_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
 
-			if (!zend_string_equals_ci(fe_class_name, proto_class_name)) {
+			if (zend_string_equals_ci(fe_class_name, proto_class_name)) {
+				code = INHERITANCE_SUCCESS;
+			} else {
 				if (fe->common.type == ZEND_USER_FUNCTION) {
-					zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
-					zend_class_entry * proto_ce = zend_lookup_class(proto_class_name);
+					zend_class_entry *fe_ce = zend_lookup_class(fe_class_name);
+					zend_class_entry *proto_ce = zend_lookup_class(proto_class_name);
 
 					if (fe_ce && proto_ce) {
-						code = _check_zce_variance(fe_ce, proto_ce, variance);
+						code = instanceof_function(fe_ce, proto_ce)
+							? INHERITANCE_SUCCESS
+							: INHERITANCE_ERROR;
 					} else {
-						/* The -1 will still be considered "truthy". It means there
-						 * is not enough information at the moment, but there are
-						 * not any known errors either. */
-						code = -1;
+						code = INHERITANCE_UNRESOLVED;
 					}
 				} else {
-					code = 0;
+					/* todo: what should this actually do? */
+					code = INHERITANCE_ERROR;
 				}
 			}
 			zend_string_release(proto_class_name);
-		} else if (variance == COVARIANT) {
-			if (proto_type_code == IS_ITERABLE) {
-				zend_class_entry * fe_ce = zend_lookup_class(fe_class_name);
-				code = fe_ce ? instanceof_function(fe_ce, zend_ce_traversable) : -1;
-			} else if (proto_type_code != IS_OBJECT) {
-				code = 0;
+		} else if (proto_type_code == IS_ITERABLE) {
+			zend_class_entry *fe_ce = zend_lookup_class(fe_class_name);
+			if (fe_ce) {
+				code = instanceof_function(fe_ce, zend_ce_traversable)
+					? INHERITANCE_SUCCESS
+					: INHERITANCE_ERROR;
+			} else {
+				code = INHERITANCE_UNRESOLVED;
 			}
+		} else if (proto_type_code == IS_OBJECT) {
+			code = INHERITANCE_SUCCESS;
 		} else {
-			code = 0;
+			code = INHERITANCE_ERROR;
 		}
 
 		zend_string_release(fe_class_name);
 		return code;
 	} else if (ZEND_TYPE_IS_CLASS(proto_type)) {
-		if (variance == CONTRAVARIANT) {
-			if (fe_type_code == IS_ITERABLE) {
-				zend_string *proto_class_name =
-					_resolve_parent_and_self(proto, ZEND_TYPE_NAME(proto_type));
-				zend_class_entry *proto_ce = zend_lookup_class(proto_class_name);
-				zend_string_release(proto_class_name);
-				return proto_ce
-					? instanceof_function(proto_ce, zend_ce_traversable)
-					: -1;
-			} else if (fe_type_code == IS_OBJECT) {
-				return 1;
-			}
-		}
-	} else if (fe_type_code == IS_ITERABLE || proto_type_code == IS_ITERABLE) {
-		return (variance == COVARIANT && fe_type_code == IS_ARRAY)
-			|| (variance == CONTRAVARIANT && proto_type_code == IS_ARRAY);
+		return INHERITANCE_ERROR;
+	} else if (proto_type_code == IS_ITERABLE) {
+		return fe_type_code == IS_ARRAY ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	} else if (fe_type_code == proto_type_code) {
-		return 1;
+		return INHERITANCE_SUCCESS;
 	}
 
-	return 0;
+	return INHERITANCE_ERROR;
 }
  /* }}} */
 
 static
-int _check_inherited_return_type(
+_inheritance_status _check_inherited_return_type(
 	const zend_function *fe, zend_arg_info *fe_arg_info,
 	const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	/* Removing a return type is not valid. */
 	if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
-		return 0;
+		return INHERITANCE_ERROR;
 	}
 
-	return _check_inherited_arg_info(fe, fe_arg_info, proto, proto_arg_info, COVARIANT);
+	return _check_covariance(fe, fe_arg_info, proto, proto_arg_info);
 }
 
 
@@ -367,31 +332,33 @@ static zend_bool _missing_internal_arginfo(zend_function const *fn)
 }
 
 static
-int _check_inherited_parameter_type(
+_inheritance_status _check_inherited_parameter_type(
 	const zend_function *fe, zend_arg_info *fe_arg_info,
 	const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 
 	/* by-ref constraints on arguments are invariant */
 	if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
-		return 0;
+		return INHERITANCE_ERROR;
 	}
 
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type)) {
 		/* Child with no type is always compatible */
-		return 1;
+		return INHERITANCE_SUCCESS;
 	}
 
 	if (!ZEND_TYPE_IS_SET(proto_arg_info->type)) {
 		/* Child defines a type, but parent doesn't, violates LSP */
-		return 0;
+		return INHERITANCE_ERROR;
 	}
 
-	return _check_inherited_arg_info(fe, fe_arg_info, proto, proto_arg_info, CONTRAVARIANT);
+	/* CONTRAVARIANT is inverse of COVARIANT, so call with reversed args. */
+	return _check_covariance(proto, proto_arg_info, fe, fe_arg_info);
 }
 /* }}} */
 
-static int zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto) /* {{{ */
+static
+_inheritance_status zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto) /* {{{ */
 {
 	uint32_t i, num_args;
 
@@ -400,7 +367,7 @@ static int zend_do_perform_implementation_check(const zend_function *fe, const z
 	 * functions because extensions don't always define arg_info.
 	 */
 	if (_missing_internal_arginfo(proto)) {
-		return 1;
+		return INHERITANCE_SUCCESS;
 	}
 
 	/* Checks for constructors only if they are declared in an interface,
@@ -409,29 +376,29 @@ static int zend_do_perform_implementation_check(const zend_function *fe, const z
 	if ((fe->common.scope->constructor == fe)
 		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
 			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
-		return 1;
+		return INHERITANCE_SUCCESS;
 	}
 
 	/* If the prototype method is private do not enforce a signature */
 	if (proto->common.fn_flags & ZEND_ACC_PRIVATE) {
-		return 1;
+		return INHERITANCE_SUCCESS;
 	}
 
 	/* check number of arguments */
 	if (proto->common.required_num_args < fe->common.required_num_args
 		|| proto->common.num_args > fe->common.num_args) {
-		return 0;
+		return INHERITANCE_ERROR;
 	}
 
 	/* by-ref constraints on return values are covariant */
 	if ((proto->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 		&& !(fe->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-		return 0;
+		return INHERITANCE_ERROR;
 	}
 
 	if ((proto->common.fn_flags & ZEND_ACC_VARIADIC)
 		&& !(fe->common.fn_flags & ZEND_ACC_VARIADIC)) {
-		return 0;
+		return INHERITANCE_ERROR;
 	}
 
 	/* For variadic functions any additional (optional) arguments that were added must be
@@ -456,7 +423,7 @@ static int zend_do_perform_implementation_check(const zend_function *fe, const z
 			: &proto->common.arg_info[proto->common.num_args];
 
 		if (!_check_inherited_parameter_type(fe, fe_arg_info, proto, proto_arg_info)) {
-			return 0;
+			return INHERITANCE_ERROR;
 		}
 	}
 
@@ -466,7 +433,7 @@ static int zend_do_perform_implementation_check(const zend_function *fe, const z
 		return _check_inherited_return_type(
 			fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1);
 	}
-	return 1;
+	return INHERITANCE_SUCCESS;
 }
 /* }}} */
 
@@ -703,7 +670,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 			}
 
-			if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
+			if (UNEXPECTED(zend_do_perform_implementation_check(child, parent)) == INHERITANCE_ERROR) {
 				int error_level;
 				const char *error_verb;
 				zend_string *method_prototype = zend_get_function_declaration(parent);
@@ -1442,7 +1409,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 				if ((existing_fn = zend_hash_find_ptr(*overridden, key)) != NULL) {
 					if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the trait method is compatible with previosly declared abstract method */
-						if (UNEXPECTED(!zend_do_perform_implementation_check(fn, existing_fn))) {
+						if (UNEXPECTED(zend_do_perform_implementation_check(fn, existing_fn) == INHERITANCE_ERROR)) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								ZSTR_VAL(zend_get_function_declaration(fn)),
 								ZSTR_VAL(zend_get_function_declaration(existing_fn)));
@@ -1450,7 +1417,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 					}
 					if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
-						if (UNEXPECTED(!zend_do_perform_implementation_check(existing_fn, fn))) {
+						if (UNEXPECTED(zend_do_perform_implementation_check(existing_fn, fn) == INHERITANCE_ERROR)) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								ZSTR_VAL(zend_get_function_declaration(existing_fn)),
 								ZSTR_VAL(zend_get_function_declaration(fn)));
@@ -1467,14 +1434,14 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT &&
 				(existing_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0) {
 			/* Make sure the trait method is compatible with previosly declared abstract method */
-			if (UNEXPECTED(!zend_do_perform_implementation_check(fn, existing_fn))) {
+			if (UNEXPECTED(zend_do_perform_implementation_check(fn, existing_fn) == INHERITANCE_ERROR)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					ZSTR_VAL(zend_get_function_declaration(fn)),
 					ZSTR_VAL(zend_get_function_declaration(existing_fn)));
 			}
 		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
-			if (UNEXPECTED(!zend_do_perform_implementation_check(existing_fn, fn))) {
+			if (UNEXPECTED(zend_do_perform_implementation_check(existing_fn, fn) == INHERITANCE_ERROR)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					ZSTR_VAL(zend_get_function_declaration(existing_fn)),
 					ZSTR_VAL(zend_get_function_declaration(fn)));
@@ -2139,7 +2106,11 @@ static void _inheritance_runtime_error_msg(zend_function *child, zend_function *
 	const char *verb = "should";
 	ZEND_ASSERT(child && parent);
 	if ((parent->common.fn_flags & ZEND_ACC_ABSTRACT)
-	    || ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)))
+	    || (
+	        (parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)
+	        && _check_inherited_return_type(child, child->common.arg_info - 1,
+	                                        parent, parent->common.arg_info - 1) != INHERITANCE_SUCCESS
+	    ))
 	{
 		level = E_ERROR;
 		verb = "must";
@@ -2163,7 +2134,16 @@ ZEND_API void zend_verify_variance(zend_class_entry *ce)
 
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, child) {
 		zend_function *parent = child->common.prototype;
+
+		/* Methods without prototypes do not need checked for variance. */
 		if (!parent) {
+			continue;
+		}
+
+		/* If a method's scope does not match this class, then it has been
+		 * inherited without being overridden. We do not need to re-check
+		 * these types. */
+		if (child->common.scope != ce) {
 			continue;
 		}
 
@@ -2196,7 +2176,6 @@ ZEND_API void zend_verify_variance(zend_class_entry *ce)
 						parent, &parent->common.arg_info[-1]);
 					if (check < 0) {
 						_inheritance_runtime_error_msg(child, parent);
-						// todo: what to do with errors, not warnings?
 						continue;
 					}
 				} else {

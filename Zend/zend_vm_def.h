@@ -6948,12 +6948,9 @@ ZEND_VM_HANDLER(146, ZEND_VERIFY_VARIANCE, CONST, UNUSED)
 
 	SAVE_OPLINE();
 	zce = zend_lookup_class(Z_STR_P(RT_CONSTANT(opline, opline->op1)));
-	if (zce) {
-		zend_verify_variance(zce);
-	} else {
-		ZEND_ASSERT(EG(exception));
-		HANDLE_EXCEPTION();
-	}
+	ZEND_ASSERT(zce);
+	zend_verify_variance(zce);
+
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 

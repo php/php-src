@@ -13,4 +13,3 @@ class Y implements X {
 ?>
 --EXPECTF--
 Fatal error: Declaration of Y::m(UndefinedA $z) must be compatible with X::m(stdClass $z) in %s on line %d
-
