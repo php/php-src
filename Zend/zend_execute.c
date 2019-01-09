@@ -950,23 +950,28 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 
 ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_info *info, zval *property)
 {
+	const char *prop_type1, *prop_type2;
+
 	/* we _may_ land here in case reading already errored and runtime cache thus has not been updated (i.e. it contains a valid but unrelated info) */
 	if (EG(exception)) {
 		return;
 	}
 
+	// TODO Switch to a more standard error message?
+	zend_format_type(info->type, &prop_type1, &prop_type2);
+	(void) prop_type1;
 	if (ZEND_TYPE_IS_CLASS(info->type)) {
 		zend_type_error("Typed property %s::$%s must be an instance of %s%s, %s used",
 			ZSTR_VAL(info->ce->name),
 			zend_get_unmangled_property_name(info->name),
-			ZSTR_VAL(ZEND_TYPE_IS_CE(info->type) ? ZEND_TYPE_CE(info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(info->type), info->ce)),
+			prop_type2,
 			ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
 			Z_TYPE_P(property) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(property)->name) : zend_get_type_by_const(Z_TYPE_P(property)));
 	} else {
 		zend_type_error("Typed property %s::$%s must be %s%s, %s used",
 			ZSTR_VAL(info->ce->name),
 			zend_get_unmangled_property_name(info->name),
-			zend_get_type_by_const(ZEND_TYPE_CODE(info->type)),
+			prop_type2,
 			ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
 			Z_TYPE_P(property) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(property)->name) : zend_get_type_by_const(Z_TYPE_P(property)));
 	}
