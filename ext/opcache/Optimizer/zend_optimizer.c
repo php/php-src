@@ -1131,7 +1131,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	 * - change $i++ to ++$i where possible
 	 */
 	if (ZEND_OPTIMIZER_PASS_3 & ctx->optimization_level) {
-		zend_optimizer_pass3(op_array);
+		zend_optimizer_pass3(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_3) {
 			zend_dump_op_array(op_array, 0, "after pass 3", NULL);
 		}
