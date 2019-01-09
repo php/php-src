@@ -2960,32 +2960,31 @@ ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_i
 
 ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
 {
-	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
-
+	zend_property_info_list *list;
 	if (source_list->ptr == NULL) {
 		source_list->ptr = prop;
 		return;
 	}
 
+	list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
 	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
 		list = emalloc(sizeof(zend_property_info_list) + (4 - 1) * sizeof(zend_property_info *));
 		list->ptr[0] = source_list->ptr;
 		list->num_allocated = 4;
 		list->num = 1;
-		source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list);
 	} else if (list->num_allocated == list->num) {
 		list->num_allocated = list->num * 2;
 		list = erealloc(list, sizeof(zend_property_info_list) + (list->num_allocated - 1) * sizeof(zend_property_info *));
-		source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list);
 	}
 
 	list->ptr[list->num++] = prop;
+	source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list);
 }
 
 ZEND_API void zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
 {
 	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
-	zend_property_info **ptr;
+	zend_property_info **ptr, **end;
 
 	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
 		ZEND_ASSERT(source_list->ptr == prop);
@@ -3000,13 +2999,17 @@ ZEND_API void zend_ref_del_type_source(zend_property_info_source_list *source_li
 		return;
 	}
 
-	--list->num;
-
+	/* Checking against end here to get a more graceful failure mode if we missed adding a type
+	 * source at some point. */
 	ptr = list->ptr;
-	while (*ptr != prop) {
+	end = ptr + list->num;
+	while (ptr < end && *ptr != prop) {
 		ptr++;
 	}
-	*ptr = list->ptr[list->num];
+	ZEND_ASSERT(*ptr == prop);
+
+	/* Copy the last list element into the deleted slot. */
+	*ptr = list->ptr[--list->num];
 
 	if (list->num >= 4 && list->num * 4 == list->num_allocated) {
 		list->num_allocated = list->num * 2;
