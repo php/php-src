@@ -2562,22 +2562,9 @@ static zend_always_inline zend_bool zend_need_to_handle_fetch_obj_flags(uint32_t
 }
 
 static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
-		zval *result, zval *ptr, zval *container, zval *prop_ptr,
-		uint32_t prop_op_type, void **cache_slot, uint32_t flags)
+		zval *result, zval *ptr, zend_property_info *prop_info, uint32_t flags)
 {
-	zend_property_info *prop_info;
-
-	if (prop_op_type == IS_CONST) {
-		prop_info = CACHED_PTR_EX(cache_slot + 2);
-	} else {
-		zend_string *tmp_str, *prop_name = zval_get_tmp_string(prop_ptr, &tmp_str);
-		prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), prop_name, NULL);
-		zend_tmp_string_release(tmp_str);
-	}
-	if (!prop_info) {
-		return 1;
-	}
-
+	ZEND_ASSERT(prop_info && prop_info->type);
 	switch (flags) {
 		case ZEND_FETCH_DIM_WRITE:
 			if (!check_type_array_assignable(prop_info->type)) {
@@ -2611,7 +2598,7 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 	return 1;
 }
 
-static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t flags OPLINE_DC)
+static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t flags, zend_bool init_undef OPLINE_DC)
 {
 	zval *ptr;
 
@@ -2642,10 +2629,11 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 			ptr = OBJ_PROP(zobj, prop_offset);
 			if (EXPECTED(Z_TYPE_P(ptr) != IS_UNDEF)) {
+				zend_property_info *prop_info;
 				ZVAL_INDIRECT(result, ptr);
-				if (flags && UNEXPECTED(zend_need_to_handle_fetch_obj_flags(flags, ptr))) {
-					zend_handle_fetch_obj_flags(
-						result, ptr, container, prop_ptr, prop_op_type, cache_slot, flags);
+				if (flags && (prop_info = CACHED_PTR_EX(cache_slot + 2)) &&
+						UNEXPECTED(zend_need_to_handle_fetch_obj_flags(flags, ptr))) {
+					zend_handle_fetch_obj_flags(result, ptr, prop_info, flags);
 				}
 				return;
 			}
@@ -2675,11 +2663,20 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	}
 
 	ZVAL_INDIRECT(result, ptr);
-	if (flags && UNEXPECTED(zend_need_to_handle_fetch_obj_flags(flags, ptr)) &&
-		zend_handle_fetch_obj_flags(
-			result, ptr, container, prop_ptr, prop_op_type, cache_slot, flags) &&
-		Z_TYPE_P(ptr) == IS_UNDEF
-	) {
+	if (flags && UNEXPECTED(zend_need_to_handle_fetch_obj_flags(flags, ptr))) {
+		// TODO Switch to using the slot API?
+		/*zend_property_info *prop_info = zend_get_property_info_for_slot(Z_OBJ_P(container), ptr);
+		if (prop_info && prop_info->type && !zend_handle_fetch_obj_flags(result, ptr, prop_info, flags)) {
+			return;
+		}*/
+		zend_string *tmp_str, *prop_name = zval_get_tmp_string(prop_ptr, &tmp_str);
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), prop_name, NULL);
+		zend_tmp_string_release(tmp_str);
+		if (prop_info && !zend_handle_fetch_obj_flags(result, ptr, prop_info, flags)) {
+			return;
+		}
+	}
+	if (init_undef && UNEXPECTED(Z_TYPE_P(ptr) == IS_UNDEF)) {
 		ZVAL_NULL(ptr);
 	}
 }
