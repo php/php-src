@@ -808,7 +808,7 @@ ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, 
 			}
 
 found:
-			zend_assign_to_variable(variable_ptr, value, IS_VAR, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
+			zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
 			goto exit;
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
