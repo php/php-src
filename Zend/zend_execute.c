@@ -2861,18 +2861,18 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 		return zend_is_iterable(zv);
 	}
 
+	/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
+	if (strict) {
+		return type_code == IS_DOUBLE && zv_type == IS_LONG;
+	}
+
 	/* No weak conversions for arrays and objects */
 	if (type_code == IS_ARRAY || type_code == IS_OBJECT) {
 		return 0;
 	}
 
-	if (strict) {
-		/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
-		if (type_code != IS_DOUBLE || Z_TYPE_P(zv) != IS_LONG) {
-			return 0;
-		}
-	} else if (Z_TYPE_P(zv) == IS_NULL) {
-		/* NULL may be accepted only by nullable hints (this is already checked) */
+	/* NULL may be accepted only by nullable hints (this is already checked) */
+	if (zv_type == IS_NULL) {
 		return 0;
 	}
 
