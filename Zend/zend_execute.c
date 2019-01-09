@@ -2569,14 +2569,14 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 		case ZEND_FETCH_DIM_WRITE:
 			if (!check_type_array_assignable(prop_info->type)) {
 				zend_throw_auto_init_in_prop_error(prop_info, "array");
-				ZVAL_ERROR(result);
+				if (result) ZVAL_ERROR(result);
 				return 0;
 			}
 			break;
 		case ZEND_FETCH_OBJ_WRITE:
 			if (!check_type_stdClass_assignable(prop_info->type)) {
 				zend_throw_auto_init_in_prop_error(prop_info, "stdClass");
-				ZVAL_ERROR(result);
+				if (result) ZVAL_ERROR(result);
 				return 0;
 			}
 			break;
@@ -2584,7 +2584,7 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 			if (Z_TYPE_P(ptr) == IS_UNDEF) {
 				if (!ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
 					zend_throw_access_uninit_prop_by_ref_error(prop_info);
-					ZVAL_ERROR(result);
+					if (result) ZVAL_ERROR(result);
 					return 0;
 				}
 				ZVAL_NULL(ptr);
@@ -2784,34 +2784,7 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 	}
 
 	if (flags && property_info->type && zend_need_to_handle_fetch_obj_flags(flags, *retval)) {
-		switch (flags) {
-			case ZEND_FETCH_DIM_WRITE:
-				if (!check_type_array_assignable(property_info->type)) {
-					zend_throw_auto_init_in_prop_error(property_info, "array");
-					return FAILURE;
-				}
-				break;
-			case ZEND_FETCH_OBJ_WRITE:
-				if (!check_type_stdClass_assignable(property_info->type)) {
-					zend_throw_auto_init_in_prop_error(property_info, "stdClass");
-					return FAILURE;
-				}
-				break;
-			case ZEND_FETCH_REF: {
-				zval *ref = *retval;
-				if (Z_TYPE_P(ref) == IS_UNDEF) {
-					if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type))) {
-						zend_throw_access_uninit_prop_by_ref_error(property_info);
-						return FAILURE;
-					}
-					ZVAL_NULL(ref);
-				}
-				ZVAL_NEW_REF(ref, ref);
-				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ref), property_info);
-				break;
-			}
-			EMPTY_SWITCH_DEFAULT_CASE()
-		}
+		zend_handle_fetch_obj_flags(NULL, *retval, property_info, flags);
 	}
 
 	if (prop_info) {
