@@ -742,7 +742,8 @@ call_getter:
 			}
 
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) &&
-				(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, IS_VALID_PROPERTY_OFFSET(property_offset) ? cache_slot : NULL)))) {
+				IS_VALID_PROPERTY_OFFSET(property_offset) &&
+				(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot)))) {
 				zend_verify_prop_assignable_by_ref(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
 			}
 
@@ -757,8 +758,9 @@ call_getter:
 		}
 	}
 
-	if ((type != BP_VAR_IS)) {
-		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot))) {
+	if (type != BP_VAR_IS) {
+		if (IS_VALID_PROPERTY_OFFSET(property_offset) &&
+			(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot))) {
 			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(prop_info->ce->name),
 				ZSTR_VAL(name));
