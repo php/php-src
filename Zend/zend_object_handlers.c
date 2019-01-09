@@ -766,6 +766,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 	zend_string *name, *tmp_name;
 	zval *variable_ptr;
 	uintptr_t property_offset;
+	ZEND_ASSERT(!Z_ISREF_P(value));
 
 	zobj = Z_OBJ_P(object);
 	name = zval_get_tmp_string(member, &tmp_name);
@@ -816,17 +817,7 @@ found:
 	} else {
 		ZEND_ASSERT(!IS_WRONG_PROPERTY_OFFSET(property_offset));
 write_std_property:
-		if (Z_REFCOUNTED_P(value)) {
-			if (Z_ISREF_P(value)) {
-				/* if we assign referenced variable, we should separate it */
-				value = Z_REFVAL_P(value);
-				if (Z_REFCOUNTED_P(value)) {
-					Z_ADDREF_P(value);
-				}
-			} else {
-				Z_ADDREF_P(value);
-			}
-		}
+		Z_TRY_ADDREF_P(value);
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 			ZVAL_COPY_VALUE(OBJ_PROP(zobj, property_offset), value);
 		} else {
