@@ -2664,11 +2664,6 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 
 	ZVAL_INDIRECT(result, ptr);
 	if (flags && UNEXPECTED(zend_need_to_handle_fetch_obj_flags(flags, ptr))) {
-		// TODO Switch to using the slot API?
-		/*zend_property_info *prop_info = zend_get_property_info_for_slot(Z_OBJ_P(container), ptr);
-		if (prop_info && prop_info->type && !zend_handle_fetch_obj_flags(result, ptr, prop_info, flags)) {
-			return;
-		}*/
 		zend_string *tmp_str, *prop_name = zval_get_tmp_string(prop_ptr, &tmp_str);
 		zend_property_info *prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), prop_name, NULL);
 		zend_tmp_string_release(tmp_str);
