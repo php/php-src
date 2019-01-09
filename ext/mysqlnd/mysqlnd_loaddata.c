@@ -123,7 +123,7 @@ void mysqlnd_local_infile_end(void * ptr)
 
 
 /* {{{ mysqlnd_local_infile_default */
-void
+PHPAPI void
 mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn)
 {
 	conn->infile.local_infile_init = mysqlnd_local_infile_init;
