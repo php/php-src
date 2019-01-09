@@ -2574,37 +2574,39 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 		prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), prop_name, NULL);
 		zend_tmp_string_release(tmp_str);
 	}
-	if (UNEXPECTED(prop_info)) {
-		switch (flags) {
-			case ZEND_FETCH_DIM_WRITE:
-				if (!check_type_array_assignable(prop_info->type)) {
-					zend_throw_auto_init_in_prop_error(prop_info, "array");
-					ZVAL_ERROR(result);
-					return 0;
-				}
-				return 1;
-			case ZEND_FETCH_OBJ_WRITE:
-				if (!check_type_stdClass_assignable(prop_info->type)) {
-					zend_throw_auto_init_in_prop_error(prop_info, "stdClass");
-					ZVAL_ERROR(result);
-					return 0;
-				}
-				return 1;
-			case ZEND_FETCH_REF:
-				if (Z_TYPE_P(ptr) == IS_UNDEF) {
-					if (!ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
-						zend_throw_access_uninit_prop_by_ref_error(prop_info);
-						ZVAL_ERROR(result);
-						return 0;
-					}
-					ZVAL_NULL(ptr);
-				}
+	if (!prop_info) {
+		return 1;
+	}
 
-				ZVAL_NEW_REF(ptr, ptr);
-				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
-				return 1;
-			EMPTY_SWITCH_DEFAULT_CASE()
-		}
+	switch (flags) {
+		case ZEND_FETCH_DIM_WRITE:
+			if (!check_type_array_assignable(prop_info->type)) {
+				zend_throw_auto_init_in_prop_error(prop_info, "array");
+				ZVAL_ERROR(result);
+				return 0;
+			}
+			break;
+		case ZEND_FETCH_OBJ_WRITE:
+			if (!check_type_stdClass_assignable(prop_info->type)) {
+				zend_throw_auto_init_in_prop_error(prop_info, "stdClass");
+				ZVAL_ERROR(result);
+				return 0;
+			}
+			break;
+		case ZEND_FETCH_REF:
+			if (Z_TYPE_P(ptr) == IS_UNDEF) {
+				if (!ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
+					zend_throw_access_uninit_prop_by_ref_error(prop_info);
+					ZVAL_ERROR(result);
+					return 0;
+				}
+				ZVAL_NULL(ptr);
+			}
+
+			ZVAL_NEW_REF(ptr, ptr);
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return 1;
 }
