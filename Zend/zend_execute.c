@@ -2868,7 +2868,10 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 
 	/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
 	if (strict) {
-		return type_code == IS_DOUBLE && zv_type == IS_LONG;
+		if (type_code == IS_DOUBLE && zv_type == IS_LONG) {
+			return -1;
+		}
+		return 0;
 	}
 
 	/* No weak conversions for arrays and objects */
