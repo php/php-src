@@ -54,6 +54,10 @@ PHP                                                                        NEWS
   . Fixed bug #77273 (array_walk_recursive corrupts value types leading to PDO
     failure). (Nikita)
 
+- PDO MySQL:
+  . Fixed bug #77289 (PDO MySQL segfaults with persistent connection).
+    (Lauri Kenttä)
+
 - Phar:
   . Fixed bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext). (Stas)
 
