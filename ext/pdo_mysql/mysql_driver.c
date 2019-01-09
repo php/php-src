@@ -509,6 +509,21 @@ static int pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 }
 /* }}} */
 
+/* {{{ pdo_mysql_request_shutdown */
+static void pdo_mysql_request_shutdown(pdo_dbh_t *dbh)
+{
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+
+	PDO_DBG_ENTER("pdo_mysql_request_shutdown");
+	PDO_DBG_INF_FMT("dbh=%p", dbh);
+#ifdef PDO_USE_MYSQLND
+	if (H->server) {
+		mysqlnd_end_psession(H->server);
+	}
+#endif
+}
+/* }}} */
+
 /* {{{ mysql_methods */
 static const struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
@@ -524,7 +539,7 @@ static const struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_get_attribute,
 	pdo_mysql_check_liveness,
 	NULL,
-	NULL,
+	pdo_mysql_request_shutdown,
 	NULL
 };
 /* }}} */
@@ -589,6 +604,11 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		pdo_mysql_error(dbh);
 		goto cleanup;
 	}
+#if defined(PDO_USE_MYSQLND)
+	if (dbh->is_persistent) {
+		mysqlnd_restart_psession(H->server);
+	}
+#endif
 
 	dbh->driver_data = H;
 
