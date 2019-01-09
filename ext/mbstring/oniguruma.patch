@@ -1,9 +1,16 @@
- ext/mbstring/oniguruma/src/config.h.win32 | 1 +
- ext/mbstring/oniguruma/src/config.h.win64 | 1 +
- 2 files changed, 2 insertions(+)
+ ext/mbstring/oniguruma/src/config.h.win32 |  1 +
+ ext/mbstring/oniguruma/src/config.h.win64 |  1 +
+ ext/mbstring/oniguruma/src/regcomp.c      | 10 +++++-----
+ ext/mbstring/oniguruma/src/regparse.c     |  7 ++++++-
+ ext/mbstring/oniguruma/src/regparse.h     | 12 ++++++++++++
+ ext/mbstring/oniguruma/src/utf16_be.c     |  4 +++-
+ ext/mbstring/oniguruma/src/utf16_le.c     |  3 ++-
+ ext/mbstring/oniguruma/src/utf32_be.c     |  1 +
+ ext/mbstring/oniguruma/src/utf32_le.c     |  1 +
+ 9 files changed, 32 insertions(+), 8 deletions(-)
 
 diff --git a/ext/mbstring/oniguruma/src/config.h.win32 b/ext/mbstring/oniguruma/src/config.h.win32
-index bdbdaf25c1..9a9c43f26d 100644
+index 12609dfc9d..3c855588fa 100644
 --- a/ext/mbstring/oniguruma/src/config.h.win32
 +++ b/ext/mbstring/oniguruma/src/config.h.win32
 @@ -15,6 +15,7 @@
@@ -15,7 +22,7 @@ index bdbdaf25c1..9a9c43f26d 100644
  #define TOKEN_PASTE(x,y) x##y
  #define HAVE_STDARG_PROTOTYPES 1
 diff --git a/ext/mbstring/oniguruma/src/config.h.win64 b/ext/mbstring/oniguruma/src/config.h.win64
-index 01a86c7bb9..dec7b75773 100644
+index e8920860aa..c8b8c2b8b6 100644
 --- a/ext/mbstring/oniguruma/src/config.h.win64
 +++ b/ext/mbstring/oniguruma/src/config.h.win64
 @@ -15,6 +15,7 @@
@@ -26,3 +33,169 @@ index 01a86c7bb9..dec7b75773 100644
  #define HAVE_PROTOTYPES 1
  #define TOKEN_PASTE(x,y) x##y
  #define HAVE_STDARG_PROTOTYPES 1
+diff --git a/ext/mbstring/oniguruma/src/regcomp.c b/ext/mbstring/oniguruma/src/regcomp.c
+index 83b92525d9..3ea28412a7 100644
+--- a/ext/mbstring/oniguruma/src/regcomp.c
++++ b/ext/mbstring/oniguruma/src/regcomp.c
+@@ -540,13 +540,13 @@ compile_length_string_node(Node* node, regex_t* reg)
+   ambig = NODE_STRING_IS_AMBIG(node);
+ 
+   p = prev = sn->s;
+-  prev_len = enclen(enc, p);
++  SAFE_ENC_LEN(enc, p, sn->end, prev_len);
+   p += prev_len;
+   slen = 1;
+   rlen = 0;
+ 
+   for (; p < sn->end; ) {
+-    len = enclen(enc, p);
++    SAFE_ENC_LEN(enc, p, sn->end, len);
+     if (len == prev_len) {
+       slen++;
+     }
+@@ -591,12 +591,12 @@ compile_string_node(Node* node, regex_t* reg)
+   ambig = NODE_STRING_IS_AMBIG(node);
+ 
+   p = prev = sn->s;
+-  prev_len = enclen(enc, p);
++  SAFE_ENC_LEN(enc, p, end, prev_len);
+   p += prev_len;
+   slen = 1;
+ 
+   for (; p < end; ) {
+-    len = enclen(enc, p);
++    SAFE_ENC_LEN(enc, p, end, len);
+     if (len == prev_len) {
+       slen++;
+     }
+@@ -3624,7 +3624,7 @@ expand_case_fold_string(Node* node, regex_t* reg)
+       goto err;
+     }
+ 
+-    len = enclen(reg->enc, p);
++	SAFE_ENC_LEN(reg->enc, p, end, len);
+ 
+     if (n == 0) {
+       if (IS_NULL(snode)) {
+diff --git a/ext/mbstring/oniguruma/src/regparse.c b/ext/mbstring/oniguruma/src/regparse.c
+index fcc05cf79e..ac5774bb2b 100644
+--- a/ext/mbstring/oniguruma/src/regparse.c
++++ b/ext/mbstring/oniguruma/src/regparse.c
+@@ -393,14 +393,17 @@ save_entry(ScanEnv* env, enum SaveType type, int* id)
+   c = ONIGENC_MBC_TO_CODE(enc, p, end); \
+   pfetch_prev = p; \
+   p += ONIGENC_MBC_ENC_LEN(enc, p); \
++  if(UNEXPECTED(p > end)) p = end; \
+ } while (0)
+ 
+ #define PINC_S     do { \
+   p += ONIGENC_MBC_ENC_LEN(enc, p); \
++  if(UNEXPECTED(p > end)) p = end; \
+ } while (0)
+ #define PFETCH_S(c) do { \
+   c = ONIGENC_MBC_TO_CODE(enc, p, end); \
+   p += ONIGENC_MBC_ENC_LEN(enc, p); \
++  if(UNEXPECTED(p > end)) p = end; \
+ } while (0)
+ 
+ #define PPEEK        (p < end ? ONIGENC_MBC_TO_CODE(enc, p, end) : PEND_VALUE)
+@@ -5409,7 +5412,9 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
+           tok->u.code = c2;
+         }
+         else { /* string */
+-          p = tok->backp + enclen(enc, tok->backp);
++          int len;
++          SAFE_ENC_LEN(enc, tok->backp, end, len);
++          p = tok->backp + len;
+         }
+       }
+       break;
+diff --git a/ext/mbstring/oniguruma/src/regparse.h b/ext/mbstring/oniguruma/src/regparse.h
+index ff24eeb7d3..2855616d82 100644
+--- a/ext/mbstring/oniguruma/src/regparse.h
++++ b/ext/mbstring/oniguruma/src/regparse.h
+@@ -455,4 +455,16 @@ extern int onig_global_callout_names_free(void);
+ extern int onig_print_names(FILE*, regex_t*);
+ #endif
+ 
++#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
++# define UNEXPECTED(condition) __builtin_expect(condition, 0)
++#else
++# define UNEXPECTED(condition) (condition)
++#endif
++
++#define SAFE_ENC_LEN(enc, p, end, res) do {  \
++    int __res = enclen(enc, p);              \
++    if (UNEXPECTED(p + __res > end)) __res = end - p;    \
++	res = __res;                             \
++} while(0);
++
+ #endif /* REGPARSE_H */
+diff --git a/ext/mbstring/oniguruma/src/utf16_be.c b/ext/mbstring/oniguruma/src/utf16_be.c
+index 8f5b8bf64b..0fd298d2b4 100644
+--- a/ext/mbstring/oniguruma/src/utf16_be.c
++++ b/ext/mbstring/oniguruma/src/utf16_be.c
+@@ -128,16 +128,18 @@ utf16be_is_mbc_newline(const UChar* p, const UChar* end)
+ }
+ 
+ static OnigCodePoint
+-utf16be_mbc_to_code(const UChar* p, const UChar* end ARG_UNUSED)
++utf16be_mbc_to_code(const UChar* p, const UChar* end)
+ {
+   OnigCodePoint code;
+ 
+   if (UTF16_IS_SURROGATE_FIRST(*p)) {
++    if (end - p < 4) return 0;
+     code = ((((p[0] - 0xd8) << 2) + ((p[1] & 0xc0) >> 6) + 1) << 16)
+          + ((((p[1] & 0x3f) << 2) + (p[2] - 0xdc)) << 8)
+          + p[3];
+   }
+   else {
++    if (end - p < 2) return 0;
+     code = p[0] * 256 + p[1];
+   }
+   return code;
+diff --git a/ext/mbstring/oniguruma/src/utf16_le.c b/ext/mbstring/oniguruma/src/utf16_le.c
+index 92bf3186f5..47cacffdaf 100644
+--- a/ext/mbstring/oniguruma/src/utf16_le.c
++++ b/ext/mbstring/oniguruma/src/utf16_le.c
+@@ -141,13 +141,14 @@ utf16le_is_mbc_newline(const UChar* p, const UChar* end)
+ }
+ 
+ static OnigCodePoint
+-utf16le_mbc_to_code(const UChar* p, const UChar* end ARG_UNUSED)
++utf16le_mbc_to_code(const UChar* p, const UChar* end)
+ {
+   OnigCodePoint code;
+   UChar c0 = *p;
+   UChar c1 = *(p+1);
+ 
+   if (UTF16_IS_SURROGATE_FIRST(c1)) {
++    if (end - p < 4) return 0;
+     code = ((((c1 - 0xd8) << 2) + ((c0  & 0xc0) >> 6) + 1) << 16)
+          + ((((c0 & 0x3f) << 2) + (p[3] - 0xdc)) << 8)
+          + p[2];
+diff --git a/ext/mbstring/oniguruma/src/utf32_be.c b/ext/mbstring/oniguruma/src/utf32_be.c
+index 92476ec033..db353afc50 100644
+--- a/ext/mbstring/oniguruma/src/utf32_be.c
++++ b/ext/mbstring/oniguruma/src/utf32_be.c
+@@ -67,6 +67,7 @@ utf32be_is_mbc_newline(const UChar* p, const UChar* end)
+ static OnigCodePoint
+ utf32be_mbc_to_code(const UChar* p, const UChar* end ARG_UNUSED)
+ {
++  if (end - p < 4) return 0;
+   return (OnigCodePoint )(((p[0] * 256 + p[1]) * 256 + p[2]) * 256 + p[3]);
+ }
+ 
+diff --git a/ext/mbstring/oniguruma/src/utf32_le.c b/ext/mbstring/oniguruma/src/utf32_le.c
+index dc3fd92806..f32ce9a61c 100644
+--- a/ext/mbstring/oniguruma/src/utf32_le.c
++++ b/ext/mbstring/oniguruma/src/utf32_le.c
+@@ -67,6 +67,7 @@ utf32le_is_mbc_newline(const UChar* p, const UChar* end)
+ static OnigCodePoint
+ utf32le_mbc_to_code(const UChar* p, const UChar* end ARG_UNUSED)
+ {
++  if (end - p < 4) return 0;
+   return (OnigCodePoint )(((p[3] * 256 + p[2]) * 256 + p[1]) * 256 + p[0]);
+ }
+ 
