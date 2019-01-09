@@ -3586,7 +3586,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 {
 	zend_property_info *property_info, *property_info_ptr;
 
-	if (ZEND_TYPE_IS_SET(type) && (access_type & ZEND_ACC_STATIC) == 0) {
+	if (ZEND_TYPE_IS_SET(type)) {
 		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 	}
 
