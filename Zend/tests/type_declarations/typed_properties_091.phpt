@@ -180,9 +180,9 @@ object(Test)#9 (0) {
 }
 Cannot auto-initialize an stdClass inside property Test::$prop of type ?Test
 
-Warning: Creating default object from empty value in /home/nikic/php-src-refs/Zend/tests/type_declarations/typed_properties_091.php on line 86
+Warning: Creating default object from empty value in %s on line %d
 
-Warning: Creating default object from empty value in /home/nikic/php-src-refs/Zend/tests/type_declarations/typed_properties_091.php on line 87
+Warning: Creating default object from empty value in %s on line %d
 object(Test)#7 (3) {
   ["prop"]=>
   NULL
