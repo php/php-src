@@ -2280,6 +2280,32 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 	return tmp;
 }
 
+static zend_property_info *lookup_prop_info(zend_class_entry *ce, zend_string *name, zend_class_entry *scope) {
+	zend_property_info *prop_info;
+
+	/* If the class is linked, reuse the precise runtime logic. */
+	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		zend_class_entry *prev_scope = EG(fake_scope);
+		EG(fake_scope) = scope;
+		prop_info = zend_get_property_info(ce, name, 1);
+		EG(fake_scope) = prev_scope;
+		if (prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO) {
+			return prop_info;
+		}
+		return NULL;
+	}
+
+	/* Otherwise, handle only some safe cases */
+	prop_info = zend_hash_find_ptr(&ce->properties_info, name);
+	if (prop_info &&
+		((prop_info->ce == scope) ||
+		 (!scope && (prop_info->flags & ZEND_ACC_PUBLIC)))
+	) {
+		return prop_info;
+	}
+	return NULL;
+}
+
 static zend_property_info *zend_fetch_prop_info(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, int i)
 {
 	zend_property_info *prop_info = NULL;
@@ -2292,8 +2318,9 @@ static zend_property_info *zend_fetch_prop_info(const zend_op_array *op_array, z
 			ce = ssa->var_info[ssa->ops[i].op1_use].ce;
 		}
 		if (ce) {
-			prop_info = zend_hash_find_ptr(&ce->properties_info,
-				Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)));
+			prop_info = lookup_prop_info(ce,
+				Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)),
+				op_array->scope);
 			if (prop_info && (prop_info->flags & ZEND_ACC_STATIC)) {
 				prop_info = NULL;
 			}
@@ -2329,7 +2356,7 @@ static zend_property_info *zend_fetch_static_prop_info(const zend_script *script
 
 		if (ce) {
 			zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants);
-			prop_info = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(zv));
+			prop_info = lookup_prop_info(ce, Z_STR_P(zv), op_array->scope);
 			if (prop_info && !(prop_info->flags & ZEND_ACC_STATIC)) {
 				prop_info = NULL;
 			}
