@@ -662,43 +662,7 @@ static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, co
 		}
 		return c;
 	} else {
-		register int border = 0;
-
-		if (y < im->cy1) {
-			border = im->tpixels[0][im->cx1];
-			goto processborder;
-		}
-
-		if (y < im->cy1) {
-			border = im->tpixels[0][im->cx1];
-			goto processborder;
-		}
-
-		if (y > im->cy2) {
-			if (x >= im->cx1 && x <= im->cx1) {
-				border = im->tpixels[im->cy2][x];
-				goto processborder;
-			} else {
-				return gdTrueColorAlpha(0, 0, 0, 127);
-			}
-		}
-
-		/* y is bound safe at this point */
-		if (x < im->cx1) {
-			border = im->tpixels[y][im->cx1];
-			goto processborder;
-		}
-
-		if (x > im->cx2) {
-			border = im->tpixels[y][im->cx2];
-		}
-
-processborder:
-		if (border == im->transparent) {
-			return gdTrueColorAlpha(0, 0, 0, 127);
-		} else{
-			return gdTrueColorAlpha(gdTrueColorGetRed(border), gdTrueColorGetGreen(border), gdTrueColorGetBlue(border), 127);
-		}
+		return bgColor;
 	}
 }
 
@@ -713,42 +677,7 @@ static inline int getPixelOverflowPalette(gdImagePtr im, const int x, const int 
 		}
 		return colorIndex2RGBA(c);
 	} else {
-		register int border = 0;
-		if (y < im->cy1) {
-			border = gdImageGetPixel(im, im->cx1, 0);
-			goto processborder;
-		}
-
-		if (y < im->cy1) {
-			border = gdImageGetPixel(im, im->cx1, 0);
-			goto processborder;
-		}
-
-		if (y > im->cy2) {
-			if (x >= im->cx1 && x <= im->cx1) {
-				border = gdImageGetPixel(im, x,  im->cy2);
-				goto processborder;
-			} else {
-				return gdTrueColorAlpha(0, 0, 0, 127);
-			}
-		}
-
-		/* y is bound safe at this point */
-		if (x < im->cx1) {
-			border = gdImageGetPixel(im, im->cx1, y);
-			goto processborder;
-		}
-
-		if (x > im->cx2) {
-			border = gdImageGetPixel(im, im->cx2, y);
-		}
-
-processborder:
-		if (border == im->transparent) {
-			return gdTrueColorAlpha(0, 0, 0, 127);
-		} else{
-			return colorIndex2RGBcustomA(border, 127);
-		}
+		return bgColor;
 	}
 }
 
@@ -1306,11 +1235,11 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
 					f_b1, f_b2, f_b3, f_b4,
 					f_a1, f_a2, f_a3, f_a4;
 
-			/* zero for the background color, nothig gets outside anyway */
+			/* 0 for bgColor; (n,m) is supposed to be valid anyway */
 			pixel1 = getPixelOverflowPalette(im, n, m, 0);
-			pixel2 = getPixelOverflowPalette(im, n + 1, m, 0);
-			pixel3 = getPixelOverflowPalette(im, n, m + 1, 0);
-			pixel4 = getPixelOverflowPalette(im, n + 1, m + 1, 0);
+			pixel2 = getPixelOverflowPalette(im, n + 1, m, pixel1);
+			pixel3 = getPixelOverflowPalette(im, n, m + 1, pixel1);
+			pixel4 = getPixelOverflowPalette(im, n + 1, m + 1, pixel1);
 
 			f_r1 = gd_itofx(gdTrueColorGetRed(pixel1));
 			f_r2 = gd_itofx(gdTrueColorGetRed(pixel2));
@@ -1398,11 +1327,11 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 					f_b1, f_b2, f_b3, f_b4,
 					f_a1, f_a2, f_a3, f_a4;
 			dwSrcTotalOffset = m + n;
-			/* 0 for bgColor, nothing gets outside anyway */
+			/* 0 for bgColor; (n,m) is supposed to be valid anyway */
 			pixel1 = getPixelOverflowTC(im, n, m, 0);
-			pixel2 = getPixelOverflowTC(im, n + 1, m, 0);
-			pixel3 = getPixelOverflowTC(im, n, m + 1, 0);
-			pixel4 = getPixelOverflowTC(im, n + 1, m + 1, 0);
+			pixel2 = getPixelOverflowTC(im, n + 1, m, pixel1);
+			pixel3 = getPixelOverflowTC(im, n, m + 1, pixel1);
+			pixel4 = getPixelOverflowTC(im, n + 1, m + 1, pixel1);
 
 			f_r1 = gd_itofx(gdTrueColorGetRed(pixel1));
 			f_r2 = gd_itofx(gdTrueColorGetRed(pixel2));
