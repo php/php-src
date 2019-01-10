@@ -2562,27 +2562,28 @@ static void row_dim_delete(zval *object, zval *offset)
 	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a PDORow");
 }
 
-static HashTable *row_get_properties(zval *object)
+static HashTable *row_get_properties_for(zval *object, zend_prop_purpose purpose)
 {
 	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
 	pdo_stmt_t *stmt = row->stmt;
+	HashTable *props;
 	int i;
 
-	if (stmt == NULL) {
-		return NULL;
+	if (purpose != ZEND_PROP_PURPOSE_DEBUG || stmt == NULL) {
+		return zend_std_get_properties_for(object, purpose);
 	}
 
 	if (!stmt->std.properties) {
 		rebuild_object_properties(&stmt->std);
 	}
+	props = zend_array_dup(stmt->std.properties);
 	for (i = 0; i < stmt->column_count; i++) {
 		zval val;
 		fetch_value(stmt, &val, i, NULL);
 
-		zend_hash_update(stmt->std.properties, stmt->columns[i].name, &val);
+		zend_hash_update(props, stmt->columns[i].name, &val);
 	}
-
-	return stmt->std.properties;
+	return props;
 }
 
 static zend_function *row_method_get(
@@ -2685,7 +2686,7 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.write_dimension = row_dim_write;
 	pdo_row_object_handlers.has_dimension = row_dim_exists;
 	pdo_row_object_handlers.unset_dimension = row_dim_delete;
-	pdo_row_object_handlers.get_properties = row_get_properties;
+	pdo_row_object_handlers.get_properties_for = row_get_properties_for;
 	pdo_row_object_handlers.get_method = row_method_get;
 	pdo_row_object_handlers.call_method = row_call_method;
 	pdo_row_object_handlers.get_constructor = row_get_ctor;
