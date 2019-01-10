@@ -18,31 +18,6 @@ $charset = [
       "UTF-32LE", "UTF-8"
 ];
 
-$expected = [
-    [
-    "BIG-5" => "a4e9",
-    "EUC-JP" => "c6fc",
-    "ISO-2022-JP" => "1b2442467c1b2842",
-    "SJIS" => "93fa",
-    "UTF-16BE" => "65e5",
-    "UTF-16LE" => "e565",
-    "UTF-32BE" => "000065e5",
-    "UTF-32LE" => "e5650000",
-    "UTF-8" => "e697a5",
-    ],
-    [
-    "BIG-5" => "a5bb",
-    "EUC-JP" => "cbdc",
-    "ISO-2022-JP" => "1b24424b5c1b2842",
-    "SJIS" => "967b",
-    "UTF-16BE" => "672c",
-    "UTF-16LE" => "2c67",
-    "UTF-32BE" => "0000672c",
-    "UTF-32LE" => "2c670000",
-    "UTF-8" => "e69cac",
-    ],
-];
-
 
 foreach($charset as $cs){
     $enc = mb_convert_encoding($string, $cs, "UTF-8");
