@@ -13,6 +13,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   j. Removed add_get_assoc_*() and add_get_index_*()
   k. Class declaration opcodes
   l. HASH_FLAG_INITIALIZED
+  m. write_property return value
+  n. Assignments to references
 
 2. Build system changes
   a. Abstract
@@ -157,6 +159,17 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   l. HASH_FLAG_INITIALIZED was reverted into HASH_FLAG_UNINITIALIZED.
      Special HT_IS_INITIALIZED() and HT_INVALIDATE() macro were introduced
      to hide implementation details.
+
+  m. The write_property() object handler now returns the assigned value (after
+     possible type coercions) rather than void. For extensions, it should
+     usually be sufficient to return whatever was passed as the argument.
+
+  n. Assignments to references now need to ensure that they respect property
+     types that affect the reference. This means that references should no
+     longer be directly assigned to, and instead a set of specialized macros
+     of the form ZEND_TRY_ASSIGN* needs to be used. You can find detailed
+     porting instructions as well as a compatibility shim in the wiki:
+     https://wiki.php.net/rfc/typed_properties_v2#assignments_to_references
 
 ========================
 2. Build system changes
