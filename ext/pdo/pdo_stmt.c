@@ -2643,13 +2643,6 @@ zend_object *pdo_row_new(zend_class_entry *ce)
 	return &row->std;
 }
 
-static int pdo_row_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
-{
-	php_error_docref(NULL, E_WARNING, "PDORow instances may not be serialized");
-	return FAILURE;
-}
-/* }}} */
-
 void pdo_stmt_init(void)
 {
 	zend_class_entry ce;
@@ -2677,7 +2670,7 @@ void pdo_stmt_init(void)
 	pdo_row_ce = zend_register_internal_class(&ce);
 	pdo_row_ce->ce_flags |= ZEND_ACC_FINAL; /* when removing this a lot of handlers need to be redone */
 	pdo_row_ce->create_object = pdo_row_new;
-	pdo_row_ce->serialize = pdo_row_serialize;
+	pdo_row_ce->serialize = zend_class_serialize_deny;
 	pdo_row_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
