@@ -577,6 +577,17 @@ static void zend_file_cache_serialize_prop_info(zval                     *zv,
 				SERIALIZE_STR(prop->doc_comment);
 			}
 		}
+		if (prop->type) {
+			if (ZEND_TYPE_IS_NAME(prop->type)) {
+				zend_string *name = ZEND_TYPE_NAME(prop->type);
+				SERIALIZE_STR(name);
+				prop->type = ZEND_TYPE_ENCODE_CLASS(name, ZEND_TYPE_ALLOW_NULL(prop->type));
+			} else if (ZEND_TYPE_IS_CE(prop->type)) {
+				zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
+				SERIALIZE_PTR(ce);
+				prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
+			}
+		}
 	}
 }
 
@@ -1257,6 +1268,17 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
 			UNSERIALIZE_STR(prop->name);
 			if (prop->doc_comment) {
 				UNSERIALIZE_STR(prop->doc_comment);
+			}
+		}
+		if (prop->type) {
+			if (ZEND_TYPE_IS_NAME(prop->type)) {
+				zend_string *name = ZEND_TYPE_NAME(prop->type);
+				UNSERIALIZE_STR(name);
+				prop->type = ZEND_TYPE_ENCODE_CLASS(name, ZEND_TYPE_ALLOW_NULL(prop->type));
+			} else if (ZEND_TYPE_IS_CE(prop->type)) {
+				zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
+				UNSERIALIZE_PTR(ce);
+				prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
 			}
 		}
 	}
