@@ -243,7 +243,8 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	zval_ptr_dtor_nogc(&wakeup_name);
 
 	if ((*var_hashx)->ref_props) {
-		zend_array_destroy((*var_hashx)->ref_props);
+		zend_hash_destroy((*var_hashx)->ref_props);
+		FREE_HASHTABLE((*var_hashx)->ref_props);
 	}
 }
 
@@ -401,7 +402,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 
 static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key);
 
-static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_class_entry *ce)
+static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_object *obj)
 {
 	while (elements-- > 0) {
 		zval key, *data, d, *old_data;
@@ -418,7 +419,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 		data = NULL;
 		ZVAL_UNDEF(&d);
 
-		if (!ce) {
+		if (!obj) {
 			if (Z_TYPE(key) == IS_LONG) {
 				idx = Z_LVAL(key);
 numeric_key:
@@ -447,8 +448,7 @@ numeric_key:
 		} else {
 			if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
 string_key:
-				if (Z_TYPE_P(rval) == IS_OBJECT
-						&& zend_hash_num_elements(&Z_OBJCE_P(rval)->properties_info) > 0) {
+				if (obj && zend_hash_num_elements(&obj->ce->properties_info) > 0) {
 					zend_property_info *existing_propinfo;
 					zend_string *new_key;
 					const char *unmangled_class = NULL;
@@ -463,8 +463,8 @@ string_key:
 
 					unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
 
-					existing_propinfo = zend_hash_find_ptr(&Z_OBJCE_P(rval)->properties_info, unmangled);
-                    if ((unmangled_class == NULL || !strcmp(unmangled_class, "*") || !strcasecmp(unmangled_class, ZSTR_VAL(Z_OBJCE_P(rval)->name)))
+					existing_propinfo = zend_hash_find_ptr(&obj->ce->properties_info, unmangled);
+                    if ((unmangled_class == NULL || !strcmp(unmangled_class, "*") || !strcasecmp(unmangled_class, ZSTR_VAL(obj->ce->name)))
                             && (existing_propinfo != NULL)
 							&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
 						if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
@@ -497,32 +497,14 @@ string_key:
 
 				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
 					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
-						// TODO Deduplicate with above code?
 						old_data = Z_INDIRECT_P(old_data);
-						if (Z_STRVAL(key)[0] == 0) {
-							zend_string *member, *class;
-							const char *class_name, *prop_name;
-							size_t prop_name_len;
-							zend_unmangle_property_name_ex(Z_STR(key), &class_name, &prop_name, &prop_name_len);
-							member = zend_string_init(prop_name, prop_name_len, 0);
-							class = zend_string_init(class_name, strlen(class_name), 0);
-							zend_str_tolower(ZSTR_VAL(class), ZSTR_LEN(class));
-							EG(fake_scope) = class_name[0] == '*' ? ce : zend_hash_find_ptr(EG(class_table), class);
-							info = zend_get_property_info(EG(fake_scope), member, 1);
-							EG(fake_scope) = NULL;
-							zend_string_release(member);
-							zend_string_release(class);
-						} else {
-							info = zend_get_property_info(ce, Z_STR(key), 1);
-						}
+						info = zend_get_typed_property_info_for_slot(obj, old_data);
 						var_push_dtor(var_hash, old_data);
 						data = zend_hash_update_ind(ht, Z_STR(key), &d);
 
-						if (EXPECTED(!info->type)) {
-							info = NULL;
-						} else {
-							/* Remember to which property this slot belongs, so we can add a type
-							 * source if it is turned into a reference lateron. */
+						if (UNEXPECTED(info)) {
+							/* Remember to which property this slot belongs, so we can add a
+							 * type source if it is turned into a reference lateron. */
 							if (!(*var_hash)->ref_props) {
 								(*var_hash)->ref_props = emalloc(sizeof(HashTable));
 								zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
@@ -665,7 +647,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 	}
 
 	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, HT_FLAGS(ht) & HASH_FLAG_PACKED);
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJCE_P(rval))) {
+	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJ_P(rval))) {
 		if (has_wakeup) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
@@ -959,7 +941,7 @@ use_double:
 	 * prohibit "r:" references to non-objects, as we only generate them for objects. */
 	HT_ALLOW_COW_VIOLATION(Z_ARRVAL_P(rval));
 
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements, 0)) {
+	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements, NULL)) {
 		return 0;
 	}
 
