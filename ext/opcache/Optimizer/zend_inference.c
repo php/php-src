@@ -3428,6 +3428,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_FETCH_OBJ_RW:
 						case ZEND_FETCH_OBJ_FUNC_ARG:
 						case ZEND_ASSIGN_OBJ:
+						case ZEND_ASSIGN_OBJ_REF:
 						case ZEND_PRE_INC_OBJ:
 						case ZEND_PRE_DEC_OBJ:
 						case ZEND_POST_INC_OBJ:
@@ -3440,7 +3441,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_SEND_VAR_NO_REF_EX:
 						case ZEND_SEND_REF:
 						case ZEND_ASSIGN_REF:
-						case ZEND_ASSIGN_OBJ_REF:
 						case ZEND_YIELD:
 						case ZEND_INIT_ARRAY:
 						case ZEND_ADD_ARRAY_ELEMENT:
