@@ -1473,7 +1473,7 @@ PHP_FUNCTION(oci_fetch_all)
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_RESOURCE(z_statement)
-		Z_PARAM_ZVAL_DEREF(array)
+		Z_PARAM_ZVAL(array)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(skip)
 		Z_PARAM_LONG(maxrows)
