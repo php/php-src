@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #77339 (__callStatic may get incorrect arguments). (Dmitry)
 
 - GD:
+  . Fixed bug #73281 (imagescale(…, IMG_BILINEAR_FIXED) can cause black border).
+    (cmb)
   . Fixed bug #77272 (imagescale() may return image resource on failure). (cmb)
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
 
