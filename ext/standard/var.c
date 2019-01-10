@@ -175,7 +175,7 @@ again:
 					if (Z_TYPE_P(val) == IS_INDIRECT) {
 						val = Z_INDIRECT_P(val);
 						if (key) {
-							prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(struc), key, NULL);
+							prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
 						}
 					}
 
@@ -359,7 +359,7 @@ again:
 				if (Z_TYPE_P(val) == IS_INDIRECT) {
 					val = Z_INDIRECT_P(val);
 					if (key) {
-						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(struc), key, NULL);
+						prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
 					}
 				}
 

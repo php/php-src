@@ -634,8 +634,7 @@ static zend_always_inline zend_property_info *prop_info_for_offset(
 	if (cache_slot) {
 		return cache_slot[2];
 	} else {
-		zend_property_info *info = zend_get_property_info_for_slot(obj, OBJ_PROP(obj, prop_offset));
-		return (info && info->type) ? info : NULL;
+		return zend_get_typed_property_info_for_slot(obj, OBJ_PROP(obj, prop_offset));
 	}
 }
 

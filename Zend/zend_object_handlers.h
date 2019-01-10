@@ -246,14 +246,6 @@ ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose
 	} \
 } while (0)
 
-static inline struct _zend_property_info *zend_get_property_info_for_slot(zend_object *obj, zval *slot)
-{
-	struct _zend_property_info **table = obj->ce->properties_info_table;
-	intptr_t prop_num = slot - obj->properties_table;
-	ZEND_ASSERT(prop_num >= 0 && prop_num < obj->ce->default_properties_count);
-	return table[prop_num];
-}
-
 #define zend_free_trampoline(func) do { \
 		if ((func) == &EG(trampoline)) { \
 			EG(trampoline).common.function_name = NULL; \

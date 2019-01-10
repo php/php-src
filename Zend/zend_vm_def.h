@@ -6458,9 +6458,9 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 						if (EXPECTED(value_type != IS_UNDEF)
 						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
 							if ((value_type & Z_TYPE_MASK) != IS_REFERENCE) {
-								zend_property_info *prop_info = zend_get_property_info_for_slot(
-									Z_OBJ_P(array), value);
-								if (UNEXPECTED(prop_info && prop_info->type)) {
+								zend_property_info *prop_info =
+									zend_get_typed_property_info_for_slot(Z_OBJ_P(array), value);
+								if (UNEXPECTED(prop_info)) {
 									ZVAL_NEW_REF(value, value);
 									ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(value), prop_info);
 									value_type = IS_REFERENCE_EX;
