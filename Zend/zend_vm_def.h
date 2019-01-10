@@ -986,9 +986,6 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 				binary_op(var_ptr, var_ptr, value);
 			}
 		} else {
-			if (OP2_TYPE != IS_UNUSED) {
-				SEPARATE_ZVAL_NOREF(var_ptr);
-			}
 			binary_op(var_ptr, var_ptr, value);
 		}
 

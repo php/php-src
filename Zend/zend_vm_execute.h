@@ -24468,9 +24468,6 @@ assign_dim_op_new_array:
 				binary_op(var_ptr, var_ptr, value);
 			}
 		} else {
-			if (IS_CONST != IS_UNUSED) {
-				SEPARATE_ZVAL_NOREF(var_ptr);
-			}
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -27408,9 +27405,6 @@ assign_dim_op_new_array:
 				binary_op(var_ptr, var_ptr, value);
 			}
 		} else {
-			if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
-				SEPARATE_ZVAL_NOREF(var_ptr);
-			}
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -30470,9 +30464,6 @@ assign_dim_op_new_array:
 				binary_op(var_ptr, var_ptr, value);
 			}
 		} else {
-			if (IS_UNUSED != IS_UNUSED) {
-				SEPARATE_ZVAL_NOREF(var_ptr);
-			}
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -32045,9 +32036,6 @@ assign_dim_op_new_array:
 				binary_op(var_ptr, var_ptr, value);
 			}
 		} else {
-			if (IS_CV != IS_UNUSED) {
-				SEPARATE_ZVAL_NOREF(var_ptr);
-			}
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -44268,9 +44256,6 @@ assign_dim_op_new_array:
 				binary_op(var_ptr, var_ptr, value);
 			}
 		} else {
-			if (IS_CONST != IS_UNUSED) {
-				SEPARATE_ZVAL_NOREF(var_ptr);
-			}
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -48960,9 +48945,6 @@ assign_dim_op_new_array:
 				binary_op(var_ptr, var_ptr, value);
 			}
 		} else {
-			if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
-				SEPARATE_ZVAL_NOREF(var_ptr);
-			}
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -53011,9 +52993,6 @@ assign_dim_op_new_array:
 				binary_op(var_ptr, var_ptr, value);
 			}
 		} else {
-			if (IS_UNUSED != IS_UNUSED) {
-				SEPARATE_ZVAL_NOREF(var_ptr);
-			}
 			binary_op(var_ptr, var_ptr, value);
 		}
 
@@ -55889,9 +55868,6 @@ assign_dim_op_new_array:
 				binary_op(var_ptr, var_ptr, value);
 			}
 		} else {
-			if (IS_CV != IS_UNUSED) {
-				SEPARATE_ZVAL_NOREF(var_ptr);
-			}
 			binary_op(var_ptr, var_ptr, value);
 		}
 
