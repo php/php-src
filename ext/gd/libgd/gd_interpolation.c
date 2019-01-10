@@ -1020,7 +1020,7 @@ static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImage
     }
 }
 
-static inline void _gdScaleHoriz(gdImagePtr pSrc, unsigned int src_width, unsigned int src_height, gdImagePtr pDst,  unsigned int dst_width, unsigned int dst_height)
+static inline int _gdScaleHoriz(gdImagePtr pSrc, unsigned int src_width, unsigned int src_height, gdImagePtr pDst,  unsigned int dst_width, unsigned int dst_height)
 {
 	unsigned int u;
 	LineContribType * contrib;
@@ -1035,13 +1035,14 @@ static inline void _gdScaleHoriz(gdImagePtr pSrc, unsigned int src_width, unsign
 
 	contrib = _gdContributionsCalc(dst_width, src_width, (double)dst_width / (double)src_width, pSrc->interpolation);
 	if (contrib == NULL) {
-		return;
+		return 0;
 	}
 	/* Scale each row */
 	for (u = 0; u < dst_height - 1; u++) {
 		_gdScaleRow(pSrc, src_width, pDst, dst_width, u, contrib);
 	}
 	_gdContributionsFree (contrib);
+	return 1;
 }
 
 static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImagePtr pRes, unsigned int dst_width, unsigned int dst_height, unsigned int uCol, LineContribType *contrib)
@@ -1066,7 +1067,7 @@ static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImag
 	}
 }
 
-static inline void _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_width, const unsigned int src_height, const gdImagePtr pDst, const unsigned int dst_width, const unsigned int dst_height)
+static inline int _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_width, const unsigned int src_height, const gdImagePtr pDst, const unsigned int dst_width, const unsigned int dst_height)
 {
 	unsigned int u;
 	LineContribType * contrib;
@@ -1081,19 +1082,21 @@ static inline void _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_w
 
 	contrib = _gdContributionsCalc(dst_height, src_height, (double)(dst_height) / (double)(src_height), pSrc->interpolation);
 	if (contrib == NULL) {
-		return;
+		return 0;
 	}
 	/* scale each column */
 	for (u = 0; u < dst_width - 1; u++) {
 		_gdScaleCol(pSrc, src_width, pDst, dst_width, dst_height, u, contrib);
 	}
 	_gdContributionsFree(contrib);
+	return 1;
 }
 
 gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const unsigned int new_width, const unsigned int new_height)
 {
 	gdImagePtr tmp_im;
 	gdImagePtr dst;
+	int scale_pass_res;
 
 	if (new_width == 0 || new_height == 0) {
 		return NULL;
@@ -1109,7 +1112,11 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 		return NULL;
 	}
 	gdImageSetInterpolationMethod(tmp_im, src->interpolation_id);
-	_gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
+	scale_pass_res = _gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
+	if (scale_pass_res != 1) {
+		gdImageDestroy(tmp_im);
+		return NULL;
+	}
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (dst == NULL) {
@@ -1117,30 +1124,14 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 		return NULL;
 	}
 	gdImageSetInterpolationMethod(dst, src->interpolation_id);
-	_gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
-	gdImageDestroy(tmp_im);
-
-	return dst;
-}
-
-gdImagePtr Scale(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const gdImagePtr dst, const unsigned int new_width, const unsigned int new_height)
-{
-	gdImagePtr tmp_im;
-
-	if (new_width == 0 || new_height == 0) {
+	scale_pass_res = _gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
+	if (scale_pass_res != 1) {
+		gdImageDestroy(dst);
+		gdImageDestroy(tmp_im);
 		return NULL;
 	}
-
-	tmp_im = gdImageCreateTrueColor(new_width, src_height);
-	if (tmp_im == NULL) {
-		return NULL;
-	}
-	gdImageSetInterpolationMethod(tmp_im, src->interpolation_id);
-
-	_gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
-	_gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
-
 	gdImageDestroy(tmp_im);
+
 	return dst;
 }
 
