@@ -361,6 +361,7 @@ static
 _inheritance_status zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto) /* {{{ */
 {
 	uint32_t i, num_args;
+	_inheritance_status status;
 
 	/* If it's a user function then arg_info == NULL means we don't have any parameters but
 	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
@@ -416,24 +417,45 @@ _inheritance_status zend_do_perform_implementation_check(const zend_function *fe
 		}
 	}
 
+	status = INHERITANCE_SUCCESS;
+
 	for (i = 0; i < num_args; i++) {
 		zend_arg_info *fe_arg_info = &fe->common.arg_info[i];
 		zend_arg_info *proto_arg_info = (i < proto->common.num_args)
 			? &proto->common.arg_info[i]
 			: &proto->common.arg_info[proto->common.num_args];
 
-		if (!_check_inherited_parameter_type(fe, fe_arg_info, proto, proto_arg_info)) {
+		_inheritance_status local_status =
+			_check_inherited_parameter_type(fe, fe_arg_info, proto, proto_arg_info);
+		if (local_status == INHERITANCE_ERROR) {
 			return INHERITANCE_ERROR;
+		} else if (local_status == INHERITANCE_UNRESOLVED) {
+			status = INHERITANCE_UNRESOLVED;
 		}
 	}
 
 	/* Check return type compatibility, but only if the prototype already specifies
 	 * a return type. Adding a new return type is always valid. */
 	if (proto->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		return _check_inherited_return_type(
-			fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1);
+		_inheritance_status local_result =
+			_check_inherited_return_type(fe, fe->common.arg_info - 1,
+			                             proto, proto->common.arg_info - 1);
+		if (local_result == INHERITANCE_ERROR) {
+			return INHERITANCE_ERROR;
+		} else if (local_result == INHERITANCE_UNRESOLVED) {
+			status = INHERITANCE_UNRESOLVED;
+		}
 	}
-	return INHERITANCE_SUCCESS;
+
+	/*
+  if (status == INHERITANCE_UNRESOLVED && CG(unverified_types)) {
+		zend_string *key = zend_string_tolower(fe->common.scope->name);
+		zend_hash_add_empty_element(CG(unverified_types), key);
+		zend_string_release(key);
+  }
+	*/
+
+	return status;
 }
 /* }}} */
 
@@ -2214,7 +2236,6 @@ ZEND_API void zend_verify_variance(zend_class_entry *ce)
 
 				if (check < 0) {
 					_inheritance_runtime_error_msg(child, parent);
-					// todo: what to do with errors, not warnings?
 					continue;
 				}
 			}

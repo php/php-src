@@ -5220,12 +5220,72 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static zend_ast **_ast_find(zend_ast **begin, zend_ast **end,
+                            zend_bool (*pred)(zend_ast *)) {
+	for (; begin < end; ++begin)
+		if (pred(*begin))
+			return begin;
+	return begin;
+}
+
+static zend_bool _is_type_decl(zend_ast *ast) {
+	return ast && ast->kind == ZEND_AST_CLASS;
+}
+
+static zend_bool _is_not_decl_stmt(zend_ast *ast) {
+	if (ast) {
+		/* todo: what else should be considered a decl stmt? */
+		switch (ast->kind) {
+		case ZEND_AST_CLASS:
+		case ZEND_AST_CONST_DECL:
+		case ZEND_AST_FUNC_DECL:
+			return 0;
+
+		default:
+			return 1;
+		}
+	}
+
+	/* todo: why are these sometimes null? */
+	return 0;
+}
+
 void zend_compile_stmt_list(zend_ast *ast) /* {{{ */
 {
-	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t i;
-	for (i = 0; i < list->children; ++i) {
-		zend_compile_stmt(list->child[i]);
+	zend_ast_list *const list = zend_ast_get_list(ast);
+	zend_ast ** const begin = list->child;
+	zend_ast ** const end = begin + list->children;
+	zend_ast **first_decl = _ast_find(begin, end, &_is_type_decl);
+	zend_ast **p;
+
+	/* Compile opcodes before first type decl */
+	for (p = begin; p < first_decl; ++p) {
+		zend_compile_stmt(*p);
+	}
+
+	/* Compile decl stmts */
+	while (first_decl != end) {
+		zend_ast **last_decl = _ast_find(first_decl, end, &_is_not_decl_stmt);
+		HashTable unverified_types;
+		HashTable *prev_unverified_types;
+		_backup_unverified_variance_types(&unverified_types, &prev_unverified_types);
+
+		for (p = first_decl; p < last_decl; ++p) {
+			zend_compile_stmt(*p);
+		}
+
+		_compile_verify_variance(&unverified_types);
+
+		zend_hash_destroy(&unverified_types);
+		CG(unverified_types) = prev_unverified_types;
+
+		/* There can be non-consecutive type decls, so continue searching */
+		first_decl = _ast_find(last_decl, end, &_is_type_decl);
+
+		/* Compile any stmts between the two type decls (or the end) */
+		for (p = last_decl; p < first_decl; ++p) {
+			zend_compile_stmt(*p);
+		}
 	}
 }
 /* }}} */
@@ -6327,7 +6387,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		if (CG(unverified_types)) {
 			zend_hash_add_empty_element(CG(unverified_types), lcname);
 		} else {
-			// todo: figure out why it's null; need a caller (somewhere) to initialize, emit, and destroy the unverified types
+			ZEND_ASSERT(0 && "todo: find out why this is null");
 		}
 	}
 
@@ -8128,36 +8188,6 @@ void zend_const_expr_to_zval(zval *result, zend_ast *ast) /* {{{ */
 	orig_ast->kind = 0;
 }
 /* }}} */
-
-static zend_bool _is_type_decl(zend_ast *ast) {
-	return ast && ast->kind == ZEND_AST_CLASS;
-}
-
-static zend_bool _is_not_decl_stmt(zend_ast *ast) {
-	if (ast) {
-		/* todo: what else should be considered a decl stmt? */
-		switch (ast->kind) {
-		case ZEND_AST_CLASS:
-		case ZEND_AST_CONST_DECL:
-		case ZEND_AST_FUNC_DECL:
-			return 0;
-
-		default:
-			return 1;
-		}
-	}
-
-	/* todo: why are these sometimes null? */
-	return 0;
-}
-
-static zend_ast **_ast_find(zend_ast **begin, zend_ast **end,
-                            zend_bool (*pred)(zend_ast *)) {
-	for (; begin < end; ++begin)
-		if (pred(*begin))
-			return begin;
-	return begin;
-}
 
 /* Same as compile_stmt, but with early binding */
 void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
