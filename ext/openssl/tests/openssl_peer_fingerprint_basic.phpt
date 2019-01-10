@@ -7,11 +7,14 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'openssl_peer_fingerprint_basic.pem.tmp';
+$cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'openssl_peer_fingerprint_basic-ca.pem.tmp';
+
 $serverCode = <<<'CODE'
     $serverUri = "ssl://127.0.0.1:64321";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/bug54992.pem'
+        'local_cert' => '%s'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
@@ -20,36 +23,51 @@ $serverCode = <<<'CODE'
     @stream_socket_accept($server, 1);
     @stream_socket_accept($server, 1);
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
+$peerName = 'openssl_peer_fingerprint_basic';
 $clientCode = <<<'CODE'
     $serverUri = "ssl://127.0.0.1:64321";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer'       => true,
-        'cafile'            => __DIR__ . '/bug54992-ca.pem',
-        'capture_peer_cert'    => true,
-        'peer_name'          => 'bug54992.local',
+        'cafile'            => '%s',
+        'capture_peer_cert' => true,
+        'peer_name'         => '%s',
     ]]);
 
     phpt_wait();
 
-    // Run the following to get actual md5 (from sources root):
-    // openssl x509 -noout -fingerprint -md5 -inform pem -in ext/openssl/tests/bug54992.pem | cut -d '=' -f 2 | tr -d ':' | tr 'A-F' 'a-f'
-    // Currently it's 4edbbaf40a6a4b6af22b6d6d9818378f
-    // One below is intentionally broken (compare the last character):
-    stream_context_set_option($clientCtx, 'ssl', 'peer_fingerprint', '4edbbaf40a6a4b6af22b6d6d98183780');
+    stream_context_set_option($clientCtx, 'ssl', 'peer_fingerprint', '%s');
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));
 
-    // Run the following to get actual sha256 (from sources root):
-    // openssl x509 -noout -fingerprint -sha256 -inform pem -in ext/openssl/tests/bug54992.pem | cut -d '=' -f 2 | tr -d ':' | tr 'A-F' 'a-f'
     stream_context_set_option($clientCtx, 'ssl', 'peer_fingerprint', [
-        'sha256' => 'b1d480a2f83594fa243d26378cf611f334d369e59558d87e3de1abe8f36cb997',
+        'sha256' => '%s',
     ]);
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));
 CODE;
 
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveCaCert($cacertFile);
+$certificateGenerator->saveNewCertAsFileWithKey($peerName, $certFile);
+
+$actualMd5 = $certificateGenerator->getCertDigest('md5');
+$lastCharacter = substr($actualMd5, -1, 1);
+$brokenLastCharacter = dechex(hexdec($lastCharacter) ^ 1);
+$brokenMd5 = substr($actualMd5, 0, -1) . $brokenLastCharacter;
+$actualSha256 = $certificateGenerator->getCertDigest('sha256');
+
+$clientCode = sprintf($clientCode, $cacertFile, $peerName, $brokenMd5, $actualSha256);
+
+
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'openssl_peer_fingerprint_basic.pem.tmp');
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'openssl_peer_fingerprint_basic-ca.pem.tmp');
 ?>
 --EXPECTF--
 Warning: stream_socket_client(): peer_fingerprint match failure in %s on line %d
