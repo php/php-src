@@ -2606,8 +2606,6 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 static zend_always_inline zend_property_info *zend_object_fetch_property_type_info(
 		zend_object *obj, zval *slot)
 {
-	zend_property_info *info;
-
 	if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(obj->ce))) {
 		return NULL;
 	}

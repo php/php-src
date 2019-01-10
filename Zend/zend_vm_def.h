@@ -900,8 +900,6 @@ ZEND_VM_HELPER(zend_binary_assign_op_static_prop_helper, CONST|TMP|VAR|CV, UNUSE
 		HANDLE_EXCEPTION();
 	}
 
-	ZVAL_DEREF(prop);
-
 	value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 
 	if (UNEXPECTED(Z_ISREF_P(prop))) {
