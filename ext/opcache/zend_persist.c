@@ -751,6 +751,10 @@ static void zend_persist_property_info(zval *zv)
 		zend_string *class_name = ZEND_TYPE_NAME(prop->type);
 		zend_accel_store_interned_string(class_name);
 		prop->type = ZEND_TYPE_ENCODE_CLASS(class_name, ZEND_TYPE_ALLOW_NULL(prop->type));
+	} else if (ZEND_TYPE_IS_CE(prop->type)) {
+		zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
+		ce = zend_shared_alloc_get_xlat_entry(ce);
+		prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
 	}
 }
 
