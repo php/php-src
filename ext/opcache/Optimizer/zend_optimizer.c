@@ -616,7 +616,7 @@ void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var)
 
 static uint32_t zend_determine_constructor_call(zend_op_array *op_array, uint32_t start) {
 	int call = 0;
-	while (start++ < op_array->last) {
+	while (++start < op_array->last) {
 		switch (op_array->opcodes[start].opcode) {
 			case ZEND_INIT_FCALL_BY_NAME:
 			case ZEND_INIT_NS_FCALL_BY_NAME:
