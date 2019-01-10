@@ -1406,9 +1406,8 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY, SPEC(RETVAL))
 		var_ptr = Z_REFVAL_P(var_ptr);
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
 			zval old;
-			ZVAL_COPY_VALUE(&old, var_ptr);
+			ZVAL_COPY(&old, var_ptr);
 
-			zval_opt_copy_ctor(var_ptr);
 			increment_function(var_ptr);
 
 			if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE(old) == IS_LONG) {
@@ -1474,9 +1473,8 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY, SPEC(RETVAL))
 
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
 			zval old;
-			ZVAL_COPY_VALUE(&old, var_ptr);
+			ZVAL_COPY(&old, var_ptr);
 
-			zval_opt_copy_ctor(var_ptr);
 			decrement_function(var_ptr);
 
 			if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE(old) == IS_LONG) {
@@ -1540,12 +1538,14 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 
 		increment_function(var_ptr);
 
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(EX_VAR(opline->result.var)) == IS_LONG) {
-			zend_throw_incdec_ref_error(ref, 1);
-			ZVAL_COPY_VALUE(var_ptr, EX_VAR(opline->result.var));
-		} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(var_ptr);
-			ZVAL_COPY_VALUE(var_ptr, EX_VAR(opline->result.var));
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(EX_VAR(opline->result.var)) == IS_LONG) {
+				zend_throw_incdec_ref_error(ref, 1);
+				ZVAL_COPY_VALUE(var_ptr, EX_VAR(opline->result.var));
+			} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
+				zval_ptr_dtor(var_ptr);
+				ZVAL_COPY_VALUE(var_ptr, EX_VAR(opline->result.var));
+			}
 		}
 	} else {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -1590,12 +1590,14 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 
 		decrement_function(var_ptr);
 
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(EX_VAR(opline->result.var)) == IS_LONG) {
-			zend_throw_incdec_ref_error(ref, 0);
-			ZVAL_COPY_VALUE(var_ptr, EX_VAR(opline->result.var));
-		} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(var_ptr);
-			ZVAL_COPY_VALUE(var_ptr, EX_VAR(opline->result.var));
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(EX_VAR(opline->result.var)) == IS_LONG) {
+				zend_throw_incdec_ref_error(ref, 0);
+				ZVAL_COPY_VALUE(var_ptr, EX_VAR(opline->result.var));
+			} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
+				zval_ptr_dtor(var_ptr);
+				ZVAL_COPY_VALUE(var_ptr, EX_VAR(opline->result.var));
+			}
 		}
 	} else {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
