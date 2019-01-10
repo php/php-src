@@ -441,30 +441,6 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
 
-// TODO We might want to migrate this (or at least some of its uses) to the
-// zend_get_property_info_for_slot() API in the future.
-static zend_always_inline zend_property_info *zend_object_fetch_property_type_info(zend_class_entry *ce, zend_string *property, void **cache_slot)
-{
-	zend_property_info *info;
-
-	/* if we have a cache_slot, let's assume it's valid. Callers task to ensure validity! */
-	if (EXPECTED(cache_slot)) {
-		return (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-	}
-
-	if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
-		return NULL;
-	}
-
-	info = zend_get_property_info(ce, property, 1);
-
-	if (info && info != ZEND_WRONG_PROPERTY_INFO && info->type) {
-		return info;
-	}
-
-	return NULL;
-}
-
 zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict);
 ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *property);
 

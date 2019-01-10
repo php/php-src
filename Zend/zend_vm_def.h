@@ -834,6 +834,7 @@ ZEND_VM_C_LABEL(assign_op_object):
 					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
+				zval *orig_zptr = zptr;
 				zend_reference *ref;
 				zend_bool is_typed_ref = 0;
 
@@ -846,9 +847,7 @@ ZEND_VM_C_LABEL(assign_op_object):
 				if (OP2_TYPE == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
-					zend_string *tmp_str, *prop_name = zval_get_tmp_string(property, &tmp_str);
-					prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), prop_name, NULL);
-					zend_tmp_string_release(tmp_str);
+					prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), orig_zptr);
 				}
 				if (UNEXPECTED(prop_info || is_typed_ref)) {
 					/* special case for typed properties */
@@ -1234,9 +1233,7 @@ ZEND_VM_C_LABEL(pre_incdec_object):
 				if (OP2_TYPE == IS_CONST) {
 					prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
 				} else {
-					zend_string *tmp_str, *prop_name = zval_get_tmp_string(property, &tmp_str);
-					prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), prop_name, NULL);
-					zend_tmp_string_release(tmp_str);
+					prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), zptr);
 				}
 				zend_pre_incdec_property_zval(zptr, prop_info, inc OPLINE_CC EXECUTE_DATA_CC);
 			}
@@ -1301,9 +1298,7 @@ ZEND_VM_C_LABEL(post_incdec_object):
 				if (OP2_TYPE == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
-					zend_string *tmp_str, *prop_name = zval_get_tmp_string(property, &tmp_str);
-					prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), prop_name, NULL);
-					zend_tmp_string_release(tmp_str);
+					prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), zptr);
 				}
 
 				zend_post_incdec_property_zval(zptr, prop_info, inc OPLINE_CC EXECUTE_DATA_CC);
@@ -2747,9 +2742,7 @@ ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 		if (OP2_TYPE == IS_CONST) {
 			prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 		} else {
-			zend_string *tmp_str, *prop_name = zval_get_tmp_string(property, &tmp_str);
-			prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), prop_name, NULL);
-			zend_tmp_string_release(tmp_str);
+			prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(container), variable_ptr);
 		}
 
 		if (UNEXPECTED(prop_info)) {
