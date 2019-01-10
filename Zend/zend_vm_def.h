@@ -1066,16 +1066,14 @@ ZEND_VM_HELPER(zend_binary_assign_op_simple_helper, VAR|CV, CONST|TMPVAR|CV, bin
 		}
 
 		if (UNEXPECTED(ref && ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-			zval old;
-			ZVAL_COPY_VALUE(&old, var_ptr);
+			zval tmp;
+			binary_op(&tmp, var_ptr, value);
 
-			binary_op(var_ptr, var_ptr, value);
-
-			if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
+			if (UNEXPECTED(zend_verify_ref_assignable_zval(ref, &tmp, EX_USES_STRICT_TYPES()))) {
 				zval_ptr_dtor(var_ptr);
-				ZVAL_COPY_VALUE(var_ptr, &old);
+				ZVAL_COPY_VALUE(var_ptr, &tmp);
 			} else {
-				zval_ptr_dtor(&old);
+				zval_ptr_dtor(&tmp);
 			}
 		} else {
 			binary_op(var_ptr, var_ptr, value);
