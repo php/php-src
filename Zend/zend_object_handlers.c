@@ -629,6 +629,16 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 }
 /* }}} */
 
+static zend_always_inline zend_property_info *prop_info_for_offset(
+		zend_object *obj, uint32_t prop_offset, void **cache_slot) {
+	if (cache_slot) {
+		return cache_slot[2];
+	} else {
+		zend_property_info *info = zend_get_property_info_for_slot(obj, OBJ_PROP(obj, prop_offset));
+		return (info && info->type) ? info : NULL;
+	}
+}
+
 ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	zend_object *zobj;
@@ -743,7 +753,8 @@ call_getter:
 
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) &&
 				IS_VALID_PROPERTY_OFFSET(property_offset) &&
-				(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot)))) {
+				(prop_info = prop_info_for_offset(Z_OBJ_P(object), property_offset, cache_slot)))
+			) {
 				zend_verify_prop_assignable_by_ref(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
 			}
 
@@ -760,7 +771,7 @@ call_getter:
 
 	if (type != BP_VAR_IS) {
 		if (IS_VALID_PROPERTY_OFFSET(property_offset) &&
-			(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot))) {
+			(prop_info = prop_info_for_offset(Z_OBJ_P(object), property_offset, cache_slot))) {
 			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(prop_info->ce->name),
 				ZSTR_VAL(name));
@@ -793,7 +804,7 @@ ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		variable_ptr = OBJ_PROP(zobj, property_offset);
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot);
+			zend_property_info *prop_info = prop_info_for_offset(Z_OBJ_P(object), property_offset, cache_slot);
 
 			Z_TRY_ADDREF_P(value);
 
@@ -858,7 +869,7 @@ write_std_property:
 
 			variable_ptr = OBJ_PROP(zobj, property_offset);
 
-			if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), name, cache_slot))) {
+			if (UNEXPECTED(prop_info = prop_info_for_offset(Z_OBJ_P(object), property_offset, cache_slot))) {
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 					zval_ptr_dtor(value);
