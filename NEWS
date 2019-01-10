@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #77395 (segfault about array_multisort). (Laruence)
+  . Fixed bug #77439 (parse_str segfaults when inserting item into existing
+    array). (Nikita)
 
 10 Jan 2019, PHP 7.2.14
 

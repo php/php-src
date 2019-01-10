@@ -218,6 +218,8 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 					if (Z_TYPE_P(gpc_element_p) != IS_ARRAY) {
 						zval_ptr_dtor(gpc_element_p);
 						array_init(gpc_element_p);
+					} else {
+						SEPARATE_ARRAY(gpc_element_p);
 					}
 				}
 			}
