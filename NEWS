@@ -33,6 +33,8 @@ PHP                                                                        NEWS
   . Fixed bug #77266 (Assertion failed in dce_live_ranges). (Laruence)
   . Fixed bug #77257 (value of variable assigned in a switch() construct gets
     lost). (Nikita)
+  . Fixed bug #77434 (php-fpm workers are segfaulting in zend_gc_addre).
+    (Nikita)
 
 - PCRE:
   . Fixed bug #77338 (get_browser with empty string). (Nikita)
