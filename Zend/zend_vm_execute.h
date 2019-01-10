@@ -47922,7 +47922,6 @@ check_indirect:
 	if (UNEXPECTED(!Z_ISREF_P(value))) {
 		ZVAL_MAKE_REF_EX(value, 2);
 		ref = Z_REF_P(value);
-		ref->sources.ptr = NULL;
 	} else {
 		ref = Z_REF_P(value);
 		GC_ADDREF(ref);
