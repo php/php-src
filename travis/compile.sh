@@ -41,8 +41,10 @@ $TS \
 --enable-intl \
 --without-pear \
 --with-gd \
---with-jpeg-dir=/usr \
---with-png-dir=/usr \
+--with-jpeg \
+--with-webp \
+--with-freetype \
+--with-xpm \
 --enable-exif \
 --enable-zip \
 --with-zlib \
@@ -70,8 +72,6 @@ $TS \
 --with-pspell=/usr \
 --with-enchant=/usr \
 --enable-wddx \
---with-freetype \
---with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg \
 --enable-zend-test \
