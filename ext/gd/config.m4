@@ -7,28 +7,28 @@ dnl
 PHP_ARG_WITH(gd, for GD support,
 [  --with-gd[=DIR]           Include GD support.  DIR is the GD library base
                           install directory [BUNDLED]])
-if test -z "$PHP_WEBP_DIR"; then
-  PHP_ARG_WITH(webp-dir, for the location of libwebp,
-  [  --with-webp-dir[=DIR]     GD: Set the path to libwebp install prefix], no, no)
+if test -z "$PHP_WEBP"; then
+  PHP_ARG_WITH(webp, for libwebp,
+  [  --with-webp             GD: Enable WEBP support], no, no)
 fi
 
-if test -z "$PHP_JPEG_DIR"; then
-  PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
-  [  --with-jpeg-dir[=DIR]     GD: Set the path to libjpeg install prefix], no, no)
+if test -z "$PHP_JPEG"; then
+  PHP_ARG_WITH(jpeg, for libjpeg,
+  [  --with-jpeg             GD: Enable JPEG support], no, no)
 fi
 
-if test -z "$PHP_PNG_DIR"; then
-  PHP_ARG_WITH(png-dir, for the location of libpng,
-  [  --with-png-dir[=DIR]      GD: Set the path to libpng install prefix], no, no)
+if test -z "$PHP_PNG"; then
+  PHP_ARG_WITH(png, for libpng,
+  [  --with-png              GD: Enable PNG support], no, no)
 fi
 
-if test -z "$PHP_ZLIB_DIR"; then
-  PHP_ARG_WITH(zlib-dir, for the location of libz,
-  [  --with-zlib-dir[=DIR]     GD: Set the path to libz install prefix], no, no)
+if test -z "$PHP_ZLIB"; then
+  PHP_ARG_WITH(zlib, for zlib support,
+  [  --with-zlib             GD: Enable zlib support], no, no)
 fi
 
-PHP_ARG_WITH(xpm-dir, for the location of libXpm,
-[  --with-xpm-dir[=DIR]      GD: Set the path to libXpm install prefix], no, no)
+PHP_ARG_WITH(xpm, for libXpm,
+[  --with-xpm              GD: Enable XPM support], no, no)
 
 PHP_ARG_WITH(freetype, for FreeType 2,
 [  --with-freetype         GD: Enable FreeType 2 support], no, no)
@@ -41,149 +41,52 @@ dnl Checks for the configure options
 dnl
 
 AC_DEFUN([PHP_GD_ZLIB],[
-	if test "$PHP_ZLIB_DIR" != "no" && test "$PHP_ZLIB_DIR" != "yes"; then
-		if test -f "$PHP_ZLIB_DIR/include/zlib/zlib.h"; then
-			PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
-			PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/include/zlib"
-		elif test -f "$PHP_ZLIB_DIR/include/zlib.h"; then
-			PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
-			PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/include"
-		else
-			AC_MSG_ERROR([Can't find zlib headers under "$PHP_ZLIB_DIR"])
-		fi
-	else
-		for i in /usr/local /usr; do
-			if test -f "$i/include/zlib/zlib.h"; then
-				PHP_ZLIB_DIR="$i"
-				PHP_ZLIB_INCDIR="$i/include/zlib"
-			elif test -f "$i/include/zlib.h"; then
-				PHP_ZLIB_DIR="$i"
-				PHP_ZLIB_INCDIR="$i/include"
-			fi
-		done
-	fi
+  if test "$PHP_ZLIB" != "no"; then
+    PKG_CHECK_MODULES([ZLIB], [zlib])
+    PHP_EVAL_LIBLINE($ZLIB_LIBS, GD_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($ZLIB_CFLAGS)
+  fi
 ])
 
 AC_DEFUN([PHP_GD_WEBP],[
-  if test "$PHP_WEBP_DIR" != "no"; then
-
-    for i in $PHP_WEBP_DIR /usr/local /usr; do
-      test -f $i/include/webp/decode.h && GD_WEBP_DIR=$i && break
-    done
-
-    if test -z "$GD_WEBP_DIR"; then
-      AC_MSG_ERROR([webp/decode.h not found.])
-    fi
-
-    for i in $PHP_WEBP_DIR /usr/local /usr; do
-      test -f $i/include/webp/encode.h && GD_WEBP_DIR=$i && break
-    done
-
-    if test -z "$GD_WEBP_DIR"; then
-      AC_MSG_ERROR([webp/encode.h not found.])
-    fi
-
-    PHP_CHECK_LIBRARY(webp,WebPGetInfo,
-    [
-      PHP_ADD_INCLUDE($GD_WEBP_DIR/include)
-      PHP_ADD_LIBRARY(pthread)
-      PHP_ADD_LIBRARY_WITH_PATH(webp, $GD_WEBP_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
-    ],[
-      AC_MSG_ERROR([Problem with libwebp.(a|so). Please check config.log for more information.])
-    ],[
-      -L$GD_WEBP_DIR/$PHP_LIBDIR
-    ])
-  else
-    AC_MSG_RESULT([If configure fails try --with-webp-dir=<DIR>])
+  if test "$PHP_WEBP" != "no"; then
+    PKG_CHECK_MODULES([WEBP], [libwebp])
+    PHP_EVAL_LIBLINE($WEBP_LIBS, GD_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($WEBP_CFLAGS)
   fi
 ])
 
 AC_DEFUN([PHP_GD_JPEG],[
-  if test "$PHP_JPEG_DIR" != "no"; then
-
-    for i in $PHP_JPEG_DIR /usr/local /usr; do
-      test -f $i/include/jpeglib.h && GD_JPEG_DIR=$i && break
-    done
-
-    if test -z "$GD_JPEG_DIR"; then
-      AC_MSG_ERROR([jpeglib.h not found.])
-    fi
-
-    PHP_CHECK_LIBRARY(jpeg,jpeg_read_header,
-    [
-      PHP_ADD_INCLUDE($GD_JPEG_DIR/include)
-      PHP_ADD_LIBRARY_WITH_PATH(jpeg, $GD_JPEG_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
-    ],[
-      AC_MSG_ERROR([Problem with libjpeg.(a|so). Please check config.log for more information.])
-    ],[
-      -L$GD_JPEG_DIR/$PHP_LIBDIR
-    ])
-  else
-    AC_MSG_RESULT([If configure fails try --with-jpeg-dir=<DIR>])
+  if test "$PHP_JPEG" != "no"; then
+    PKG_CHECK_MODULES([JPEG], [libjpeg])
+    PHP_EVAL_LIBLINE($JPEG_LIBS, GD_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($JPEG_CFLAGS)
   fi
 ])
 
 AC_DEFUN([PHP_GD_PNG],[
-  if test "$PHP_PNG_DIR" != "no"; then
+  if test "$PHP_PNG" != "no"; then
+    PKG_CHECK_MODULES([PNG], [libpng])
 
-    for i in $PHP_PNG_DIR /usr/local /usr; do
-      test -f $i/include/png.h && GD_PNG_DIR=$i && break
-    done
-
-    if test -z "$GD_PNG_DIR"; then
-      AC_MSG_ERROR([png.h not found.])
+    if test "$PHP_ZLIB" = "no"; then
+      AC_MSG_ERROR([PNG support requires ZLIB. Use --with-zlib])
     fi
 
-    if test "$PHP_ZLIB_DIR" = "no"; then
-      AC_MSG_ERROR([PNG support requires ZLIB. Use --with-zlib-dir=<DIR>])
-    fi
-
-    PHP_CHECK_LIBRARY(png,png_write_image,
-    [
-      PHP_ADD_INCLUDE($GD_PNG_DIR/include)
-      PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
-      PHP_ADD_LIBRARY_WITH_PATH(png, $GD_PNG_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
-    ],[
-      AC_MSG_ERROR([Problem with libpng.(a|so) or libz.(a|so). Please check config.log for more information.])
-    ],[
-      -L$PHP_ZLIB_DIR/$PHP_LIBDIR -lz -L$GD_PNG_DIR/$PHP_LIBDIR
-    ])
-
-  else
-    AC_MSG_RESULT([If configure fails try --with-png-dir=<DIR> and --with-zlib-dir=<DIR>])
+    PHP_EVAL_LIBLINE($PNG_LIBS, GD_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($PNG_CFLAGS)
   fi
 ])
 
 AC_DEFUN([PHP_GD_XPM],[
-  if test "$PHP_XPM_DIR" != "no"; then
-
-    for i in $PHP_XPM_DIR /usr/local /usr/X11R6 /usr; do
-      test -f $i/include/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i && break
-      test -f $i/include/X11/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i/X11 && break
-    done
-
-    if test -z "$GD_XPM_DIR"; then
-      AC_MSG_ERROR([xpm.h not found.])
-    fi
-
-    PHP_CHECK_LIBRARY(Xpm,XpmFreeXpmImage,
-    [
-      PHP_ADD_INCLUDE($GD_XPM_INC)
-      PHP_ADD_LIBRARY_WITH_PATH(Xpm, $GD_XPM_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
-      PHP_ADD_LIBRARY_WITH_PATH(X11, $GD_XPM_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
-    ],[
-      AC_MSG_ERROR([Problem with libXpm.(a|so) or libX11.(a|so). Please check config.log for more information.])
-    ],[
-      -L$GD_XPM_DIR/$PHP_LIBDIR -lX11
-    ])
-  else
-    AC_MSG_RESULT(If configure fails try --with-xpm-dir=<DIR>)
+  if test "$PHP_XPM" != "no"; then
+    PKG_CHECK_MODULES([XPM], [xpm])
+    PHP_EVAL_LIBLINE($XPM_LIBS, GD_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($XPM_CFLAGS)
   fi
 ])
 
 AC_DEFUN([PHP_GD_FREETYPE2],[
   if test "$PHP_FREETYPE" != "no"; then
-
     PKG_CHECK_MODULES([FREETYPE2], [freetype2], [FREETYPE2_FOUND=true])
 
     PHP_EVAL_INCLINE($FREETYPE2_CFLAGS)
@@ -219,7 +122,7 @@ dnl
 if test "$PHP_GD" != "no"; then
 
 dnl PNG is required by GD library
-  test "$PHP_PNG_DIR" = "no" && PHP_PNG_DIR=yes
+  test "$PHP_PNG" = "no" && PHP_PNG=yes
 
 dnl Various checks for GD features
   PHP_GD_ZLIB
@@ -258,17 +161,17 @@ dnl Make sure the libgd/ is first in the include path
 dnl Depending which libraries were included to PHP configure,
 dnl enable the support in bundled GD library
 
-  if test -n "$GD_WEBP_DIR"; then
+  if test -n "$GD_WEBP"; then
     AC_DEFINE(HAVE_GD_WEBP, 1, [ ])
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBWEBP"
   fi
 
-  if test -n "$GD_JPEG_DIR"; then
+  if test -n "$GD_JPEG"; then
     AC_DEFINE(HAVE_GD_JPG, 1, [ ])
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBJPEG"
   fi
 
-  if test -n "$GD_XPM_DIR"; then
+  if test -n "$GD_XPM"; then
     AC_DEFINE(HAVE_GD_XPM, 1, [ ])
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_XPM"
   fi
