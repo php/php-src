@@ -17,16 +17,6 @@ if test -z "$PHP_JPEG"; then
   [  --with-jpeg             GD: Enable JPEG support], no, no)
 fi
 
-if test -z "$PHP_PNG"; then
-  PHP_ARG_WITH(png, for libpng,
-  [  --with-png              GD: Enable PNG support], no, no)
-fi
-
-if test -z "$PHP_ZLIB"; then
-  PHP_ARG_WITH(zlib, for zlib support,
-  [  --with-zlib             GD: Enable zlib support], no, no)
-fi
-
 PHP_ARG_WITH(xpm, for libXpm,
 [  --with-xpm              GD: Enable XPM support], no, no)
 
@@ -40,12 +30,18 @@ dnl
 dnl Checks for the configure options
 dnl
 
+dnl zlib is always required
 AC_DEFUN([PHP_GD_ZLIB],[
-  if test "$PHP_ZLIB" != "no"; then
-    PKG_CHECK_MODULES([ZLIB], [zlib])
-    PHP_EVAL_LIBLINE($ZLIB_LIBS, GD_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($ZLIB_CFLAGS)
-  fi
+  PKG_CHECK_MODULES([ZLIB], [zlib])
+  PHP_EVAL_LIBLINE($ZLIB_LIBS, GD_SHARED_LIBADD)
+  PHP_EVAL_INCLINE($ZLIB_CFLAGS)
+])
+
+dnl libpng is always required
+AC_DEFUN([PHP_GD_PNG],[
+  PKG_CHECK_MODULES([PNG], [libpng])
+  PHP_EVAL_LIBLINE($PNG_LIBS, GD_SHARED_LIBADD)
+  PHP_EVAL_INCLINE($PNG_CFLAGS)
 ])
 
 AC_DEFUN([PHP_GD_WEBP],[
@@ -61,19 +57,6 @@ AC_DEFUN([PHP_GD_JPEG],[
     PKG_CHECK_MODULES([JPEG], [libjpeg])
     PHP_EVAL_LIBLINE($JPEG_LIBS, GD_SHARED_LIBADD)
     PHP_EVAL_INCLINE($JPEG_CFLAGS)
-  fi
-])
-
-AC_DEFUN([PHP_GD_PNG],[
-  if test "$PHP_PNG" != "no"; then
-    PKG_CHECK_MODULES([PNG], [libpng])
-
-    if test "$PHP_ZLIB" = "no"; then
-      AC_MSG_ERROR([PNG support requires ZLIB. Use --with-zlib])
-    fi
-
-    PHP_EVAL_LIBLINE($PNG_LIBS, GD_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($PNG_CFLAGS)
   fi
 ])
 
@@ -121,14 +104,11 @@ dnl Common for both builtin and external GD
 dnl
 if test "$PHP_GD" != "no"; then
 
-dnl PNG is required by GD library
-  test "$PHP_PNG" = "no" && PHP_PNG=yes
-
 dnl Various checks for GD features
   PHP_GD_ZLIB
+  PHP_GD_PNG
   PHP_GD_WEBP
   PHP_GD_JPEG
-  PHP_GD_PNG
   PHP_GD_XPM
   PHP_GD_FREETYPE2
   PHP_GD_JISX0208
@@ -192,14 +172,6 @@ else
  if test "$PHP_GD" != "no"; then
   GD_MODULE_TYPE=external
   extra_sources="gd_compat.c"
-
-dnl Various checks for GD features
-  PHP_GD_ZLIB
-  PHP_GD_WEBP
-  PHP_GD_JPEG
-  PHP_GD_PNG
-  PHP_GD_XPM
-  PHP_GD_FREETYPE2
 
 dnl Header path
   for i in include/gd include/gd2 include gd ""; do
