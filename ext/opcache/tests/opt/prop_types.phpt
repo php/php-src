@@ -38,12 +38,13 @@ function noScope(Test $test) {
 
 ?>
 --EXPECTF--
-$_main: ; (lines=1, args=0, vars=0, tmps=0, ssa_vars=0, no_loops)
+$_main: ; (lines=2, args=0, vars=0, tmps=0, ssa_vars=0, no_loops)
     ; (before dfa pass)
     ; %s
     ; return  [long] RANGE[1..1]
-BB0: start exit lines=[0-0]
+BB0: start exit lines=[0-1]
     ; level=0
+            VERIFY_VARIANCE string("test2")
             RETURN int(1)
 
 noScope: ; (lines=10, args=1, vars=1, tmps=1, ssa_vars=5, no_loops)
