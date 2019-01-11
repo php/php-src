@@ -342,7 +342,25 @@ int main() {
   AC_MSG_RESULT([$msg])
 
 flock_type=unknown
-AC_MSG_CHECKING("whether flock struct is linux ordered")
+AC_MSG_CHECKING(for struct flock layout)
+
+if test "$flock_type" = "unknown"; then
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  #include <fcntl.h>
+  struct flock lock = { 1, 2, 3, 4, 5, 6, 7 };
+  int main() {
+    if(lock.l_type == 1 && lock.l_whence == 2 && lock.l_start == 6 && lock.l_len== 7) {
+		return 0;
+    }
+    return 1;
+  }
+]])], [
+    flock_type=aix64
+    AC_DEFINE([HAVE_FLOCK_AIX64], [], [Struct flock is 64-bit AIX-type])
+], [])
+fi
+
+if test "$flock_type" = "unknown"; then
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
   #include <fcntl.h>
   struct flock lock = { 1, 2, 3, 4, 5 };
@@ -355,10 +373,10 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 ]])], [
 	flock_type=linux
     AC_DEFINE([HAVE_FLOCK_LINUX], [], [Struct flock is Linux-type])
-    AC_MSG_RESULT("yes")
-], [AC_MSG_RESULT("no")], [AC_MSG_RESULT([no])])
+], [])
+fi
 
-AC_MSG_CHECKING("whether flock struct is BSD ordered")
+if test "$flock_type" = "unknown"; then
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
   #include <fcntl.h>
   struct flock lock = { 1, 2, 3, 4, 5 };
@@ -371,8 +389,10 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 ]])], [
 	flock_type=bsd
     AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type])
-    AC_MSG_RESULT("yes")
-], [AC_MSG_RESULT("no")], [AC_MSG_RESULT([no])])
+], [])
+fi
+
+AC_MSG_RESULT([$flock_type])
 
 if test "$flock_type" = "unknown"; then
 	AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])

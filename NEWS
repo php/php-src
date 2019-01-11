@@ -38,6 +38,8 @@ PHP                                                                        NEWS
     lost). (Nikita)
   . Fixed bug #77434 (php-fpm workers are segfaulting in zend_gc_addre).
     (Nikita)
+  . Fixed bug #77361 (configure fails on 64-bit AIX when opcache enabled).
+    (Kevin Adler)
 
 - PCRE:
   . Fixed bug #77338 (get_browser with empty string). (Nikita)
