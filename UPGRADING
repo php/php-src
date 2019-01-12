@@ -56,6 +56,8 @@ PHP 7.4 UPGRADE NOTES
     to serialize them. Serialization for reflection objects was never
     supported and resulted in corrupted reflection objects. It has been
     explicitly prohibited now.
+  . The __clone method has been removed from reflection objects. Attempts to
+    access them via reflection will result in an exception.
 
 - SPL:
   . Calling get_object_vars() on an ArrayObject instance will now always return
