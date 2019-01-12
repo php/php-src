@@ -160,6 +160,11 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	if (dom_node_is_read_only((xmlNodePtr) attrp) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(obj->document));
+		return FAILURE;
+	}
+
 	if (attrp->children) {
 		node_list_unlink(attrp->children);
 	}
