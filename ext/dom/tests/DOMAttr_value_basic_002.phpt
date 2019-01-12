@@ -2,14 +2,16 @@
 Write non-string $value property
 --CREDITS--
 Eric Berg <ehberg@gmail.com>
+Adam Martinson
 # TestFest Atlanta 2009-05-14
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$attr = new DOMAttr('category');
-$attr->value = 1;
-print $attr->value;
+$Doc = new DOMDocument('1.0', 'UTF-8');
+$Attr = $Doc->createAttribute('category');
+$Attr->value = 1;
+print $Attr->value;
 ?>
 --EXPECT--
 1
