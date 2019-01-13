@@ -648,7 +648,7 @@ mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int eli
 /*
  *  strlen
  */
-static int
+int
 filter_count_output(int c, void *data)
 {
 	(*(size_t *)data)++;
@@ -690,6 +690,7 @@ mbfl_strlen(mbfl_string *string)
 		  &mbfl_encoding_wchar,
 		  filter_count_output, 0, &len);
 		if (filter == NULL) {
+			mbfl_convert_filter_delete(filter);
 			return (size_t) -1;
 		}
 		/* count */
@@ -1092,17 +1093,8 @@ mbfl_substr_count(
 	return result;
 }
 
-/*
- *  substr
- */
-struct collector_substr_data {
-	mbfl_convert_filter *next_filter;
-	size_t start;
-	size_t stop;
-	size_t output;
-};
 
-static int
+int
 collector_substr(int c, void* data)
 {
 	struct collector_substr_data *pc = (struct collector_substr_data*)data;

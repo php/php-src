@@ -2292,18 +2292,49 @@ PHP_FUNCTION(mb_output_handler)
 /* {{{ proto array mb_str_split(string str [, int split_length] [, string encoding])
  Convert a multibyte string to an array. If split_length is specified,
  break the string down into chunks each split_length characters long. */
+
+/*structure to pass split params to callback*/
+struct mbfl_split_params {
+	zval *return_value; /* php function return value structure pointer */
+	mbfl_string *result_string; /* string to store result chunk */
+	size_t mb_chunk_size; /* chunk size in chars */
+	size_t split_length; /* defined chunk size in chars */
+	size_t *mb_len; /* string length pointer in chars */
+	mbfl_convert_filter *next_filter; /* widechar to encoding filter */
+};
+
+/* callback function to fill split array */
+int mbfl_split_output(int c, void *data)
+{
+	struct mbfl_split_params *params = (struct mbfl_split_params *)data; /* cast passed data */
+
+	(*params->next_filter->filter_function)(c, params->next_filter); /* decoder filter */
+
+	size_t mb_chunk_size = ++params->mb_chunk_size; /* increment chunk size */
+	if(params->split_length == mb_chunk_size) { /* if current chunk size reached defined chunk size */
+		mbfl_convert_filter_flush(params->next_filter);/* concatenate separate decoded chars to the solid string */
+		mbfl_memory_device *device = (mbfl_memory_device *)params->next_filter->data; /* chars container */
+		mbfl_string *chunk = params->result_string;
+		mbfl_memory_device_result(device, chunk); /* make chunk */
+		add_next_index_stringl(params->return_value, chunk->val, chunk->len); /* add chunk to the array */
+		params->mb_chunk_size = 0; /* reset mb_chunk size */
+	}
+	return 0;
+}
+
 PHP_FUNCTION(mb_str_split)
 {
 	zend_string *str, *encoding = NULL;
-	size_t mblen, offset = 0;
-	mbfl_string string, result, *ret;
+	size_t mb_len = 0, chunks;
+	char unsigned const *last, *p;
+	mbfl_string string, result_string;
 	zend_long split_length = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-			Z_PARAM_LONG(split_length)
-			Z_PARAM_STR(encoding)
+		Z_PARAM_LONG(split_length)
+		Z_PARAM_STR(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_length <= 0) {
@@ -2318,23 +2349,193 @@ PHP_FUNCTION(mb_str_split)
 		RETURN_FALSE;
 	}
 
-	string.val = (char unsigned *)ZSTR_VAL(str);
+	p = (char unsigned *)ZSTR_VAL(str); /* string cursor pointer */
+	string.val = (char unsigned *)p;
 	string.len = ZSTR_LEN(str);
+	last = string.val + string.len;
 
-	/* mb length */
-	mblen = mbfl_strlen(&string);
 
-	/* init array with defined size */
-	array_init_size(return_value, mblen / split_length);
+	/*
+	 * +----------------------------------------------------------------------+
+	 * |                           3 scenarios                                |
+	 * +----------------------------------------------------------------------+
+	 */
+	const mbfl_encoding *mbfl_encoding = string.encoding;
 
-	/* split string */
-	while(offset < mblen){
-		ret = mbfl_substr(&string, &result, offset, (size_t)split_length);
+	/*
+	 * +----------------------------------------------------------------------+
+	 * | first scenario: "fixed width encodings"                              |
+	 * +----------------------------------------------------------------------+
+	 */
+	if (mbfl_encoding->flag & MBFL_ENCTYPE_SBCS) { /* 1 byte */
+		mb_len = string.len;
+		size_t chunk_len = (size_t)split_length; /* chunk length in bytes */
+		if(chunk_len >= string.len){
+			chunk_len = string.len; /* chunk length can't be bigger then string */
+			chunks = 1;
+			array_init_size(return_value, chunks);
+			add_next_index_stringl(return_value, p, chunk_len);
+		} else{
+			chunks = mb_len / (size_t)split_length;
+			if(string.len % chunk_len == 0){
+				array_init_size(return_value, chunks);
+				for(size_t i = 0; i < chunks; p += chunk_len, ++i){
+					add_next_index_stringl(return_value, p, chunk_len);
+				}
+			} else{
+				array_init_size(return_value, chunks + 1);
+				for(size_t i = 0; i < chunks; p += chunk_len, ++i){ /* split cycle except last chunk */
+					add_next_index_stringl(return_value, p, chunk_len);
+				}
+				add_next_index_stringl(return_value, p, last - p); /* last chunk */
+			}
+		}
+	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_MWC2BE
+	| MBFL_ENCTYPE_MWC2LE)) { /* 2 bytes */
+		mb_len = string.len>>1; /* string length in chars */
+		size_t chunk_len = split_length<<1; /* chunk length in bytes */
+		if(chunk_len >= string.len){
+			chunk_len = string.len; /* chunk length can't be bigger then string */
+			chunks = 1;
+			array_init_size(return_value, chunks);
+			add_next_index_stringl(return_value, p, chunk_len);
+		} else{
+			chunks = mb_len / (size_t)split_length;
+			if(string.len % chunk_len == 0){
+				array_init_size(return_value, chunks);
+				for(size_t i = 0; i < chunks; p += chunk_len, ++i){
+					add_next_index_stringl(return_value, p, chunk_len);
+				}
+			} else{
+				array_init_size(return_value, chunks + 1);
+				for(size_t i = 0; i < chunks; p += chunk_len, ++i){ /* split cycle except last chunk */
+					add_next_index_stringl(return_value, p, chunk_len);
+				}
+				add_next_index_stringl(return_value, p, last - p); /* last chunk */
+			}
+		}
+	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE )) { /* 4 bytes */
+		mb_len = string.len>>2;
+		size_t chunk_len = split_length<<2; /* split length in bytes */
+		if(chunk_len >= string.len){
+			chunk_len = string.len; /* chunk length can't be bigger then string */
+			chunks = 1;
+			array_init_size(return_value, chunks);
+			add_next_index_stringl(return_value, p, chunk_len);
+		} else{
+			chunks = mb_len / (size_t)split_length;
+			if(string.len % chunk_len == 0){
+				array_init_size(return_value, chunks);
+				for(size_t i = 0; i < chunks; p += chunk_len, ++i){
+					add_next_index_stringl(return_value, p, chunk_len);
+				}
+			} else{
+				array_init_size(return_value, chunks + 1);
+				for(size_t i = 0; i < chunks; p += chunk_len, ++i){ /* split cycle except last chunk */
+					add_next_index_stringl(return_value, p, chunk_len);
+				}
+				add_next_index_stringl(return_value, p, last - p); /* last chunk */
+			}
+		}
+	/*
+	 * +----------------------------------------------------------------------+
+	 * | second scenario: "variable width encodings with length table"        |
+	 * +----------------------------------------------------------------------+
+	 */
+	} else if (mbfl_encoding->mblen_table != NULL) {
+		char unsigned const *mbtab = mbfl_encoding->mblen_table;
+		array_init_size(return_value, string.len / split_length); /* init array with maximum possible size */
 
-		add_next_index_stringl(return_value, (char const *)ret->val, ret->len);
+		while (p < last) { /* split cycle work until the cursor has reached the last byte */
+			char const *chunk_p = p; /* chunk first byte pointer */
+			size_t chunk_length = 0; /* chunk length in bytes */
+			for(uint32_t char_count = 0; char_count < split_length; ++char_count) {
+				char unsigned const m = mbtab[*p]; /* single character length table */
+				chunk_length += m;
+				p += m;
+				++mb_len;
+			}
+			add_next_index_stringl(return_value, chunk_p, chunk_length);
+		}
+	/*
+	 * +----------------------------------------------------------------------+
+	 * | third scenario: "else multibyte encodings without length table"      |
+	 * +----------------------------------------------------------------------+
+	 */
+	} else {
+		mbfl_convert_filter *filter;
+		/* count mb_len */
+		filter = mbfl_convert_filter_new(
+			string.encoding,
+			&mbfl_encoding_wchar,
+			filter_count_output,
+			0,
+			&mb_len);
+		if (filter == NULL){
+			mbfl_convert_filter_delete(filter);
+			RETURN_FALSE; /* something wrong with the filter */
+		}
+		while (p < last) { /* cycle each byte with callback function */
+			(*filter->filter_function)(*p++, filter);
+		}
+		mbfl_convert_filter_delete(filter);
+		/* count mb_len end */
 
-		efree(ret->val);
-		offset += split_length;
+		/* one chunk case */
+		if(mb_len <= (size_t)split_length){
+			array_init_size(return_value, 1);
+			add_next_index_stringl(return_value, (char *)string.val, string.len); /* add chunk to the array */
+			return;
+		}
+
+		/* more than one chunk case */
+		array_init_size(return_value, string.len / split_length); /* maximum possible size */
+		p = (char const *)string.val; /* reset string cursor position */
+
+		/* decoder filter */
+		mbfl_memory_device device;
+		mbfl_memory_device_init(&device, split_length + 1, 0);
+
+		mbfl_convert_filter *decoder = mbfl_convert_filter_new(
+			&mbfl_encoding_wchar,
+			string.encoding,
+			mbfl_memory_device_output,
+			0,
+			&device);
+		if (decoder == NULL){
+			mbfl_convert_filter_delete(decoder);
+			RETURN_FALSE; /* something wrong with the filter */
+		}
+
+		/* wchar filter */
+		mbfl_string_init(&result_string);
+		struct mbfl_split_params params = { /* init callback function params structure */
+			.return_value = return_value,
+			.result_string = &result_string,
+			.mb_chunk_size = 0,
+			.split_length = (size_t)split_length,
+			.mb_len = &mb_len,
+			.next_filter = decoder,
+		};
+
+		filter = mbfl_convert_filter_new(
+			string.encoding,
+			&mbfl_encoding_wchar,
+			mbfl_split_output,
+			0,
+			&params);
+		if (filter == NULL){
+			mbfl_convert_filter_delete(decoder);
+			mbfl_convert_filter_delete(filter);
+			RETURN_FALSE; /* something wrong with the filter */
+		}
+
+		while (p < last) { /* cycle each byte with callback function */
+			(*filter->filter_function)(*p++, filter);
+		}
+
+		mbfl_convert_filter_delete(decoder);
+		mbfl_convert_filter_delete(filter);
 	}
 }
 /* }}} */

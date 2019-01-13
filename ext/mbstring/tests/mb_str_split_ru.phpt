@@ -32,7 +32,7 @@ foreach($charset as $cs){
     /* check length */
     for($i = 1; $i <= $len; ++$i){
         $ceil = ceil($len / $i);
-        if($ceil != count(mb_str_split($enc,$i,$cs))) echo "ERROR";
+        if($ceil != count(mb_str_split($enc,$i,$cs))) echo "ERROR ";
     }
 
     /* check content */

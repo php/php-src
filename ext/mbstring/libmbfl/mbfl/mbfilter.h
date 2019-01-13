@@ -132,6 +132,16 @@
 #endif
 
 /*
+ *  substr
+ */
+struct collector_substr_data {
+	mbfl_convert_filter *next_filter;
+	size_t start;
+	size_t stop;
+	size_t output;
+};
+
+/*
  * buffering converter
  */
 typedef struct _mbfl_buffer_converter mbfl_buffer_converter;
@@ -157,6 +167,8 @@ MBFLAPI extern mbfl_string * mbfl_buffer_converter_getbuffer(mbfl_buffer_convert
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
 MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
+MBFLAPI extern int filter_count_output(int c, void *data);
+MBFLAPI extern int collector_substr(int c, void* data);
 
 /*
  * encoding detector
