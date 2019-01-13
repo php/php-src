@@ -62,7 +62,7 @@ if(end($array) !== $enc){
 
 ?>
 --EXPECT--
-EUC-JP: a7e2 a7d1 a7db 20 a7e2 a7d1 a7db 20 a7e2 a7d1 gita7db 20
+EUC-JP: a7e2 a7d1 a7db 20 a7e2 a7d1 a7db 20 a7e2 a7d1 a7db 20
 CP866: e0 a0 a9 20 e0 a0 a9 20 e0 a0 a9 20
 KOI8-R: d2 c1 ca 20 d2 c1 ca 20 d2 c1 ca 20
 UTF-16BE: 0440 0430 0439 0020 0440 0430 0439 0020 0440 0430 0439 0020
