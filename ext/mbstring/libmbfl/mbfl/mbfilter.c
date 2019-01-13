@@ -1094,7 +1094,7 @@ mbfl_substr_count(
 }
 
 
-int
+static int
 collector_substr(int c, void* data)
 {
 	struct collector_substr_data *pc = (struct collector_substr_data*)data;
