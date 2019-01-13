@@ -2303,7 +2303,7 @@ struct mbfl_split_params {
 };
 
 /* callback function to fill split array */
-int mbfl_split_output(int c, void *data)
+static int mbfl_split_output(int c, void *data)
 {
 	struct mbfl_split_params *params = (struct mbfl_split_params *)data; /* cast passed data */
 
@@ -2316,7 +2316,7 @@ int mbfl_split_output(int c, void *data)
 		mbfl_string *chunk = params->result_string;
 		mbfl_memory_device_result(device, chunk); /* make chunk */
 		add_next_index_stringl(params->return_value, chunk->val, chunk->len); /* add chunk to the array */
-		mbfl_string_clear(chunk);
+		efree(chunk->val);
 		params->mb_chunk_size = 0; /* reset mb_chunk size */
 	}
 	return 0;

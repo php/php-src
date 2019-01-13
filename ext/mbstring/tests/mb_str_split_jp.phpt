@@ -36,9 +36,9 @@ foreach($charset as $cs){
     }
 
     /* check content */
-    echo "$cs: ";
+    echo "$cs:";
     for($i = 0; $i < $len; ++$i){
-        echo unpack("H*", $split[$i])[1] . " ";
+        echo  " " . unpack("H*", $split[$i])[1];
     }
     echo "\n";
 }
@@ -71,4 +71,3 @@ UTF-16LE: e565 2c67
 UTF-32BE: 000065e5 0000672c
 UTF-32LE: e5650000 2c670000
 UTF-8: e697a5 e69cac
-
