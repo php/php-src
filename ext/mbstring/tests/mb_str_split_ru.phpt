@@ -38,20 +38,36 @@ foreach($charset as $cs){
     /* check content */
     echo "$cs: ";
     for($i = 0; $i < $len; ++$i){
-        echo unpack("H*", $split[$i])[1];
+        echo unpack("H*", $split[$i])[1] . " ";
     }
     echo "\n";
 }
 
+/* super long string test */
+$size = 250000;
+$long = str_repeat($string, $size); /* 250k x 12 chars = 3e6 chars */
+$enc = mb_convert_encoding($long, "EUC-JP", "UTF-8");
+$array = mb_str_split($enc, $len, "EUC-JP");
+$count = count($array);
+
+/* check array size */
+if($size !== $count) printf("Long string splitting error: actual array size: %d expected: %d\n", $count, $size);
+
+/* compare initial string and last array element after splitting */
+$enc = mb_convert_encoding($string, "EUC-JP", "UTF-8");
+if(end($array) !== $enc){
+    printf("Long string splitting error:
+        last array element: %s expected: %s\n", unpack("H*", end($array))[1],unpack("H*", $enc)[1]);
+}
 
 ?>
 --EXPECT--
-EUC-JP: a7e2a7d1a7db20a7e2a7d1a7db20a7e2a7d1a7db20
-CP866: e0a0a920e0a0a920e0a0a920
-KOI8-R: d2c1ca20d2c1ca20d2c1ca20
-UTF-16BE: 044004300439002004400430043900200440043004390020
-UTF-16LE: 400430043904200040043004390420004004300439042000
-UTF-32BE: 000004400000043000000439000000200000044000000430000004390000002000000440000004300000043900000020
-UTF-32LE: 400400003004000039040000200000004004000030040000390400002000000040040000300400003904000020000000
-UTF-8: d180d0b0d0b920d180d0b0d0b920d180d0b0d0b920
+EUC-JP: a7e2 a7d1 a7db 20 a7e2a7 d1a7db 20 a7e2a7 d1a7db 20
+CP866: e0 a0 a9 20 e0 a0 a9 20 e0 a0 a9 20
+KOI8-R: d2 c1 ca 20 d2 c1 ca 20 d2 c1 ca 20
+UTF-16BE: 0440 0430 0439 0020 0440 0430 0439 0020 0440 0430 0439 0020
+UTF-16LE: 4004 3004 3904 2000 4004 3004 3904 2000 4004 3004 3904 2000
+UTF-32BE: 00000440 00000430 00000439 00000020 00000440 00000430 00000439 00000020 00000440 00000430 00000439 00000020
+UTF-32LE: 40040000 30040000 39040000 20000000 40040000 30040000 39040000 20000000 40040000 30040000 39040000 20000000
+UTF-8: d180 d0b0 d0b9 20 d180 d0b0 d0b9 20 d180 d0b0 d0b9 20
 
