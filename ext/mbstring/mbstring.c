@@ -2299,7 +2299,6 @@ struct mbfl_split_params {
 	mbfl_string *result_string; /* string to store result chunk */
 	size_t mb_chunk_size; /* chunk size in chars */
 	size_t split_length; /* defined chunk size in chars */
-	size_t *mb_len; /* string length pointer in chars */
 	mbfl_convert_filter *next_filter; /* widechar to encoding filter */
 };
 
@@ -2317,6 +2316,7 @@ int mbfl_split_output(int c, void *data)
 		mbfl_string *chunk = params->result_string;
 		mbfl_memory_device_result(device, chunk); /* make chunk */
 		add_next_index_stringl(params->return_value, chunk->val, chunk->len); /* add chunk to the array */
+		mbfl_string_clear(chunk);
 		params->mb_chunk_size = 0; /* reset mb_chunk size */
 	}
 	return 0;
@@ -2514,7 +2514,6 @@ PHP_FUNCTION(mb_str_split)
 			.result_string = &result_string,
 			.mb_chunk_size = 0,
 			.split_length = (size_t)split_length,
-			.mb_len = &mb_len,
 			.next_filter = decoder,
 		};
 
