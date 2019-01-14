@@ -999,8 +999,9 @@ PHP_FUNCTION(pcntl_signal)
 	zval *handle;
 	zend_long signo;
 	zend_bool restart_syscalls = 1;
+	zend_bool restart_syscalls_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz|b", &signo, &handle, &restart_syscalls) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz|b!", &signo, &handle, &restart_syscalls, &restart_syscalls_is_null) == FAILURE) {
 		return;
 	}
 
@@ -1020,6 +1021,13 @@ PHP_FUNCTION(pcntl_signal)
 			psig->next = PCNTL_G(spares);
 			PCNTL_G(spares) = psig;
 		}
+	}
+
+	/* If restart_syscalls was not explicitly specified and the signal is SIGALRM, then default
+	 * restart_syscalls to false. PHP used to enforce that restart_syscalls is false for SIGALRM,
+	 * so we keep this differing default to reduce the degree of BC breakage. */
+	if (restart_syscalls_is_null && signo == SIGALRM) {
+		restart_syscalls = 0;
 	}
 
 	/* Special long value case for SIG_DFL and SIG_IGN */

@@ -41,7 +41,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 #ifdef HAVE_STRUCT_SIGINFO_T
 	act.sa_flags |= SA_SIGINFO;
 #endif
-	if (signo == SIGALRM || (! restart)) {
+	if (!restart) {
 #ifdef SA_INTERRUPT
 		act.sa_flags |= SA_INTERRUPT; /* SunOS */
 #endif
