@@ -774,9 +774,9 @@ static zend_always_inline zval *zend_try_array_init(zval *zv) {
 	return zv;
 }
 
-static zend_always_inline zval *zend_try_array_init_size(zval *zv, size_t size) {
+static zend_always_inline zval *zend_try_array_init_size(zval *zv, uint32_t size) {
 	zval tmp;
-	ZVAL_ARR(&tmp, zend_new_array((uint32_t)size));
+	ZVAL_ARR(&tmp, zend_new_array(size));
 	if (UNEXPECTED(zend_try_assign(zv, &tmp) == FAILURE)) {
 		return NULL;
 	}
