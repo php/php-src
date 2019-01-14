@@ -100,12 +100,22 @@ typedef enum _zend_cpu_feature {
 void zend_cpu_startup();
 ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
 
+/* Address sanitizer is incompatible with ifunc resolvers, so exclude the
+ * CPU support helpers from asan.
+ * See also https://github.com/google/sanitizers/issues/342. */
+#if __has_attribute(no_sanitize_address)
+# define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
+#else
+# define ZEND_NO_SANITIZE_ADDRESS
+#endif
+
 #if PHP_HAVE_BUILTIN_CPU_SUPPORTS
 /* NOTE: you should use following inline function in
  * resolver functions (ifunc), as it could be called
  * before all PLT symbols are resloved. in other words,
  * resolver functions should not depends any external
  * functions */
+ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_sse2() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
@@ -113,6 +123,7 @@ static zend_always_inline int zend_cpu_supports_sse2() {
 	return __builtin_cpu_supports("sse2");
 }
 
+ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_sse3() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
@@ -120,6 +131,7 @@ static zend_always_inline int zend_cpu_supports_sse3() {
 	return __builtin_cpu_supports("sse3");
 }
 
+ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_ssse3() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
@@ -127,6 +139,7 @@ static zend_always_inline int zend_cpu_supports_ssse3() {
 	return __builtin_cpu_supports("ssse3");
 }
 
+ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_sse41() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
@@ -134,6 +147,7 @@ static zend_always_inline int zend_cpu_supports_sse41() {
 	return __builtin_cpu_supports("sse4.1");
 }
 
+ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_sse42() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
@@ -141,6 +155,7 @@ static zend_always_inline int zend_cpu_supports_sse42() {
 	return __builtin_cpu_supports("sse4.2");
 }
 
+ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_avx() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
@@ -148,6 +163,7 @@ static zend_always_inline int zend_cpu_supports_avx() {
 	return __builtin_cpu_supports("avx");
 }
 
+ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_avx2() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
