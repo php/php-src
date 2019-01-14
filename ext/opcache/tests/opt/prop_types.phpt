@@ -54,7 +54,7 @@ noScope: ; (lines=10, args=1, vars=1, tmps=1, ssa_vars=5, no_loops)
 BB0: start exit lines=[0-9]
     ; level=0
             #1.CV0($test) [object (instanceof Test)] = RECV 1
-            INIT_FCALL 3 128 string("var_dump")
+            INIT_FCALL 3 %d string("var_dump")
             #2.T1 [bool] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("public")
             SEND_VAL #2.T1 [bool] 1
             #3.T1 [any] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("protected")
@@ -70,7 +70,7 @@ Test::inTest: ; (lines=9, args=0, vars=0, tmps=1, ssa_vars=3, no_loops)
     ; return  [null] RANGE[0..0]
 BB0: start exit lines=[0-8]
     ; level=0
-            INIT_FCALL 3 128 string("var_dump")
+            INIT_FCALL 3 %d string("var_dump")
             #0.T0 [bool] = FETCH_OBJ_R THIS string("public")
             SEND_VAL #0.T0 [bool] 1
             #1.T0 [long] = FETCH_OBJ_R THIS string("protected")
@@ -88,7 +88,7 @@ Test::inTestWithTest2: ; (lines=10, args=1, vars=1, tmps=1, ssa_vars=5, no_loops
 BB0: start exit lines=[0-9]
     ; level=0
             #1.CV0($test2) [object (instanceof Test2)] = RECV 1
-            INIT_FCALL 3 128 string("var_dump")
+            INIT_FCALL 3 %d string("var_dump")
             #2.T1 [bool] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("public")
             SEND_VAL #2.T1 [bool] 1
             #3.T1 [long] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("protected")
@@ -104,7 +104,7 @@ Test2::inTest2: ; (lines=9, args=0, vars=0, tmps=1, ssa_vars=3, no_loops)
     ; return  [null] RANGE[0..0]
 BB0: start exit lines=[0-8]
     ; level=0
-            INIT_FCALL 3 128 string("var_dump")
+            INIT_FCALL 3 %d string("var_dump")
             #0.T0 [bool] = FETCH_OBJ_R THIS string("public")
             SEND_VAL #0.T0 [bool] 1
             #1.T0 [long] = FETCH_OBJ_R THIS string("protected")
