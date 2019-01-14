@@ -82,6 +82,11 @@ PHP 7.4 UPGRADE NOTES
     function does not throw, so explicitly checking it is not necessary.
     RFC: http://php.net/manual/de/function.openssl-random-pseudo-bytes.php
 
+- Pcntl:
+  . The $restart_syscalls flag for pcntl_signal() will now be respected for
+    SIGALARM. Previously it was hardcoded to false. To reduce the backwards
+    compatibility impact, the default for SIGALARM will remain false however.
+
 - PCRE:
   . When PREG_UNMATCHED_AS_NULL mode is used, trailing unmatched capturing
     groups will now also be set to null (or [null, -1] if offset capture is
