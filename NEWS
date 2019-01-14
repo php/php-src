@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - Mbstring:
   . Fixed bug #77428 (mb_ereg_replace() doesn't replace a substitution
     variable). (Nikita)
+  . Fixed bug #77454 (mb_scrub() silently truncates after a null byte).
+    (64796c6e69 at gmail dot com)
 
 - MySQLnd:
   . Fixed bug #75684 (In mysqlnd_ext_plugin.h the plugin methods family has
