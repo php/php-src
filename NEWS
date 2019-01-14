@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug #77317 (__DIR__, __FILE__, realpath() reveal physical path for
     subst virtual drive). (Anatol)
   . Fixed bug #77263 (Segfault when using 2 RecursiveFilterIterator). (Dmitry)
+  . Fixed bug #77447 (PHP 7.3 built with ASAN crashes in
+    zend_cpu_supports_avx2). (Nikita)
 
 - Fileinfo:
   . Fixed bug #77346 (webm files incorrectly detected as
