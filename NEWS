@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
 
+- FFI:
+  . Added FFI extension. (Dmitry)
+
 - FPM:
   . Implemented FR #72510 (systemd service should be hardened). (Craig Andrews)
 

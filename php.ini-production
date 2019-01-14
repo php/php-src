@@ -1925,6 +1925,13 @@ ldap.max_links = -1
 ; SSL stream context option.
 ;openssl.capath=
 
+[ffi]
+; FFI API restriction. Possibe values:
+; "preload" - enabled in CLI scripts and preloaded files (default)
+; "false"   - always disabled
+; "true"    - always enabled
+;ffi.enable=preload
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
