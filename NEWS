@@ -34,6 +34,7 @@ PHP                                                                        NEWS
     (64796c6e69 at gmail dot com)
 
 - MySQLnd:
+  . Fixed bug #77308 (Unbuffered queries memory leak). (Dmitry)
   . Fixed bug #75684 (In mysqlnd_ext_plugin.h the plugin methods family has
       no external visibility). (Anatol)
 
