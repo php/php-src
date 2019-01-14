@@ -300,6 +300,7 @@ serialize_precision = -1
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
 ; or per-virtualhost web server configuration file.
+; Note: disables the realpath cache
 ; http://php.net/open-basedir
 ;open_basedir =
 
@@ -332,6 +333,7 @@ disable_classes =
 ; Determines the size of the realpath cache to be used by PHP. This value should
 ; be increased on systems where PHP opens many files to reflect the quantity of
 ; the file operations performed.
+; Note: if open_basedir is set, the cache is disabled
 ; http://php.net/realpath-cache-size
 ;realpath_cache_size = 4096k
 
