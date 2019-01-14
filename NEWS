@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #77272 (imagescale() may return image resource on failure). (cmb)
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
 
+- Mbstring:
+  . Fixed bug #77454 (mb_scrub() silently truncates after a null byte).
+    (64796c6e69 at gmail dot com)
+
 - MySQLnd:
   . Fixed bug #75684 (In mysqlnd_ext_plugin.h the plugin methods family has
     no external visibility). (Anatol)
