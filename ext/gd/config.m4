@@ -42,6 +42,7 @@ AC_DEFUN([PHP_GD_PNG],[
   PKG_CHECK_MODULES([PNG], [libpng])
   PHP_EVAL_LIBLINE($PNG_LIBS, GD_SHARED_LIBADD)
   PHP_EVAL_INCLINE($PNG_CFLAGS)
+  AC_DEFINE(HAVE_LIBPNG, 1, [ ])
 ])
 
 AC_DEFUN([PHP_GD_WEBP],[
@@ -49,6 +50,8 @@ AC_DEFUN([PHP_GD_WEBP],[
     PKG_CHECK_MODULES([WEBP], [libwebp])
     PHP_EVAL_LIBLINE($WEBP_LIBS, GD_SHARED_LIBADD)
     PHP_EVAL_INCLINE($WEBP_CFLAGS)
+    AC_DEFINE(HAVE_LIBWEBP, 1, [ ])
+    AC_DEFINE(HAVE_GD_WEBP, 1, [ ])
   fi
 ])
 
@@ -57,6 +60,8 @@ AC_DEFUN([PHP_GD_JPEG],[
     PKG_CHECK_MODULES([JPEG], [libjpeg])
     PHP_EVAL_LIBLINE($JPEG_LIBS, GD_SHARED_LIBADD)
     PHP_EVAL_INCLINE($JPEG_CFLAGS)
+    AC_DEFINE(HAVE_LIBJPEG, 1, [ ])
+    AC_DEFINE(HAVE_GD_JPG, 1, [ ])
   fi
 ])
 
@@ -65,6 +70,8 @@ AC_DEFUN([PHP_GD_XPM],[
     PKG_CHECK_MODULES([XPM], [xpm])
     PHP_EVAL_LIBLINE($XPM_LIBS, GD_SHARED_LIBADD)
     PHP_EVAL_INCLINE($XPM_CFLAGS)
+    AC_DEFINE(HAVE_XPM, 1, [ ])
+    AC_DEFINE(HAVE_GD_XPM, 1, [ ])
   fi
 ])
 
@@ -74,14 +81,16 @@ AC_DEFUN([PHP_GD_FREETYPE2],[
 
     PHP_EVAL_INCLINE($FREETYPE2_CFLAGS)
     PHP_EVAL_LIBLINE($FREETYPE2_LIBS, GD_SHARED_LIBADD)
-    AC_DEFINE(HAVE_LIBFREETYPE,1,[ ])
-    AC_DEFINE(ENABLE_GD_TTF,1,[ ])
+    AC_DEFINE(HAVE_LIBFREETYPE, 1, [ ])
+    AC_DEFINE(HAVE_GD_FREETYPE, 1, [ ])
+    AC_DEFINE(ENABLE_GD_TTF, 1, [ ])
   fi
 ])
 
 AC_DEFUN([PHP_GD_JISX0208],[
   if test "$PHP_GD_JIS_CONV" = "yes"; then
-    USE_GD_JIS_CONV=1
+    AC_DEFINE(USE_GD_JISX0208, 1, [ ])
+    AC_DEFINE(JISX0208, 1, [ ])
   fi
 ])
 
@@ -99,23 +108,9 @@ dnl
 dnl Main GD configure
 dnl
 
-dnl
-dnl Common for both builtin and external GD
-dnl
-if test "$PHP_GD" != "no"; then
-
-dnl Various checks for GD features
-  PHP_GD_ZLIB
-  PHP_GD_PNG
-  PHP_GD_WEBP
-  PHP_GD_JPEG
-  PHP_GD_XPM
-  PHP_GD_FREETYPE2
-  PHP_GD_JISX0208
-fi
-
 if test "$PHP_GD" = "yes"; then
   GD_MODULE_TYPE=builtin
+  GDLIB_CFLAGS=""
   extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
                  libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_webp.c \
                  libgd/gd_png.c libgd/gd_jpeg.c libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c \
@@ -133,39 +128,15 @@ dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
   AC_DEFINE(HAVE_GD_PNG,              1, [ ])
   AC_DEFINE(HAVE_GD_BMP,              1, [ ])
-  AC_DEFINE(HAVE_GD_CACHE_CREATE,     1, [ ])
 
-dnl Make sure the libgd/ is first in the include path
-  GDLIB_CFLAGS="-DHAVE_LIBPNG"
-
-dnl Depending which libraries were included to PHP configure,
-dnl enable the support in bundled GD library
-
-  if test -n "$GD_WEBP"; then
-    AC_DEFINE(HAVE_GD_WEBP, 1, [ ])
-    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBWEBP"
-  fi
-
-  if test -n "$GD_JPEG"; then
-    AC_DEFINE(HAVE_GD_JPG, 1, [ ])
-    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBJPEG"
-  fi
-
-  if test -n "$GD_XPM"; then
-    AC_DEFINE(HAVE_GD_XPM, 1, [ ])
-    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_XPM"
-  fi
-
-  if test -n "$FREETYPE2_FOUND"; then
-    AC_DEFINE(HAVE_GD_FREETYPE,   1, [ ])
-    AC_DEFINE(ENABLE_GD_TTF, 1, [ ])
-    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBFREETYPE -DENABLE_GD_TTF"
-  fi
-
-  if test -n "$USE_GD_JIS_CONV"; then
-    AC_DEFINE(USE_GD_JISX0208, 1, [ ])
-    GDLIB_CFLAGS="$GDLIB_CFLAGS -DJISX0208"
-  fi
+dnl Various checks for GD features
+  PHP_GD_ZLIB
+  PHP_GD_PNG
+  PHP_GD_WEBP
+  PHP_GD_JPEG
+  PHP_GD_XPM
+  PHP_GD_FREETYPE2
+  PHP_GD_JISX0208
 
 else
 
