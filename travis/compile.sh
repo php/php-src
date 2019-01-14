@@ -42,6 +42,7 @@ $TS \
 --without-pear \
 --with-gd \
 --with-jpeg \
+--with-webp \
 --with-freetype \
 --with-xpm \
 --enable-exif \
