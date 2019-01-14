@@ -4953,11 +4953,9 @@ PHP_FUNCTION(mb_chr)
 /* }}} */
 
 
-static inline char* php_mb_scrub(const char* str, size_t str_len, const mbfl_encoding *enc)
+static inline char* php_mb_scrub(const char* str, size_t str_len, const mbfl_encoding *enc, size_t *ret_len)
 {
-	size_t ret_len;
-
-	return php_mb_convert_encoding_ex(str, str_len, enc, enc, &ret_len);
+	return php_mb_convert_encoding_ex(str, str_len, enc, enc, ret_len);
 }
 
 
@@ -4969,6 +4967,7 @@ PHP_FUNCTION(mb_scrub)
 	size_t str_len;
 	zend_string *enc_name = NULL;
 	char *ret;
+	size_t ret_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
@@ -4981,13 +4980,13 @@ PHP_FUNCTION(mb_scrub)
 		RETURN_FALSE;
 	}
 
-	ret = php_mb_scrub(str, str_len, enc);
+	ret = php_mb_scrub(str, str_len, enc, &ret_len);
 
 	if (ret == NULL) {
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRING(ret);
+	RETVAL_STRINGL(ret, ret_len);
 	efree(ret);
 }
 /* }}} */
