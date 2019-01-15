@@ -1613,6 +1613,34 @@ static ZEND_COLD void zend_throw_incdec_prop_error(zend_property_info *prop, zen
 		inc ? "max" : "min");
 }
 
+static void zend_incdec_typed_ref(zend_reference *ref, zval *copy, int inc EXECUTE_DATA_DC)
+{
+	zval tmp;
+	zval *var_ptr = &ref->val;
+
+	if (!copy) {
+		copy = &tmp;
+	}
+
+	ZVAL_COPY(copy, var_ptr);
+
+	if (inc) {
+		increment_function(var_ptr);
+	} else {
+		decrement_function(var_ptr);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
+		zend_throw_incdec_ref_error(ref, inc);
+		ZVAL_COPY_VALUE(var_ptr, copy);
+	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, copy);
+	} else if (copy == &tmp) {
+		zval_ptr_dtor(&tmp);
+	}
+}
+
 static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_info, int inc OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
