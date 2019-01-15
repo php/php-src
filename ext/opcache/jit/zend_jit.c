@@ -1999,6 +1999,7 @@ static void zend_calc_checked_this_r(zend_bitset checked_this, zend_op_array *op
 			case ZEND_FETCH_OBJ_FUNC_ARG:
 			case ZEND_FETCH_OBJ_UNSET:
 			case ZEND_ASSIGN_OBJ:
+			case ZEND_ASSIGN_OBJ_REF:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_CLONE:
 			case ZEND_UNSET_OBJ:

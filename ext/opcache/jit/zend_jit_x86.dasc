@@ -2261,6 +2261,8 @@ static int zend_jit_handler(dasm_State **Dst, const zend_op *opline, int may_thr
 	switch (opline->opcode) {
 		case ZEND_ASSIGN_DIM:
 		case ZEND_ASSIGN_OBJ:
+		case ZEND_ASSIGN_STATIC_PROP:
+		case ZEND_ASSIGN_OBJ_REF:
 			last_valid_opline++;
 			break;
 		case ZEND_ASSIGN_ADD:
@@ -4745,7 +4747,7 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, zend_op_a
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		return zend_jit_assign_dim_op(Dst, opline, op_array, ssa);
-	} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+	} else if (opline->extended_value == ZEND_ASSIGN_OBJ || opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
 		goto fallback;
 	}
 
@@ -7433,7 +7435,8 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	SET_ZVAL_PTR arg_addr, r0
 			|	SET_ZVAL_TYPE_INFO arg_addr, IS_REFERENCE_EX
 			|	mov dword [r0], 1
-			|	mov dword [r0 + 4], IS_REFERENCE;
+			|	mov dword [r0 + offsetof(zend_reference, gc.u.type_info)], IS_REFERENCE
+			|	mov aword [r0 + offsetof(zend_reference, sources.ptr)], 0
 			ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 8);
 			|	// ZVAL_NULL(Z_REFVAL_P(arg));
 			|	SET_ZVAL_TYPE_INFO ref_addr, IS_NULL
@@ -7483,7 +7486,8 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		}
 		|	EMALLOC sizeof(zend_reference), op_array, opline
 		|	mov dword [r0], 2
-		|	mov dword [r0 + 4], IS_REFERENCE;
+		|	mov dword [r0 + offsetof(zend_reference, gc.u.type_info)], IS_REFERENCE
+		|	mov aword [r0 + offsetof(zend_reference, sources.ptr)], 0
 		ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 8);
 		if (opline->op1_type == IS_VAR) {
 			zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R1, 0);
@@ -8841,14 +8845,14 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 				if (!ZEND_TYPE_IS_CLASS(type)) {
 					unsigned char code = ZEND_TYPE_CODE(type);
 
-					if (type == _IS_BOOL) {
+					if (code == _IS_BOOL) {
 						|	cmp byte [r0 + 8], IS_FALSE
 						|	je >1
 						|	cmp byte [r0 + 8], IS_TRUE
 						|	jne >8
 						|1:
 					} else {
-					|	cmp byte [r0 + 8], code
+						|	cmp byte [r0 + 8], code
 						|	jne >8
 					}
 				} else {

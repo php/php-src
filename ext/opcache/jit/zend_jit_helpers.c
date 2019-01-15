@@ -1672,6 +1672,7 @@ static zval* ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
 	zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
 	GC_SET_REFCOUNT(ref, 1);
 	GC_TYPE_INFO(ref) = IS_REFERENCE;
+	ref->sources.ptr = NULL;
 	ZVAL_COPY_VALUE(&ref->val, value);
 	Z_REF_P(value) = ref;
 	Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
