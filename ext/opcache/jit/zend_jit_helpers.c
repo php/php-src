@@ -2094,6 +2094,34 @@ static int ZEND_FASTCALL zend_jit_verify_internal_arg_types_helper(zend_execute_
 	return 1;
 }
 
+static zend_always_inline void zend_jit_assign_to_typed_ref(zend_reference *ref, zval *value, zend_uchar value_type)
+{
+	zval variable;
+
+	ZVAL_REF(&variable, ref);
+	zend_assign_to_variable(&variable, value, value_type, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
+}
+
+static void ZEND_FASTCALL zend_jit_assign_const_to_typed_ref(zend_reference *ref, zval *value)
+{
+	zend_jit_assign_to_typed_ref(ref, value, IS_CONST);
+}
+
+static void ZEND_FASTCALL zend_jit_assign_tmp_to_typed_ref(zend_reference *ref, zval *value)
+{
+	zend_jit_assign_to_typed_ref(ref, value, IS_TMP_VAR);
+}
+
+static void ZEND_FASTCALL zend_jit_assign_var_to_typed_ref(zend_reference *ref, zval *value)
+{
+	zend_jit_assign_to_typed_ref(ref, value, IS_VAR);
+}
+
+static void ZEND_FASTCALL zend_jit_assign_cv_to_typed_ref(zend_reference *ref, zval *value)
+{
+	zend_jit_assign_to_typed_ref(ref, value, IS_CV);
+}
+
 /*
  * Local variables:
  * tab-width: 4

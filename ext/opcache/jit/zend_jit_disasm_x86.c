@@ -432,6 +432,10 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_copy_extra_args_helper);
 	REGISTER_HELPER(zend_jit_deprecated_or_abstract_helper);
 	REGISTER_HELPER(zend_jit_verify_internal_arg_types_helper);
+	REGISTER_HELPER(zend_jit_assign_const_to_typed_ref);
+	REGISTER_HELPER(zend_jit_assign_tmp_to_typed_ref);
+	REGISTER_HELPER(zend_jit_assign_var_to_typed_ref);
+	REGISTER_HELPER(zend_jit_assign_cv_to_typed_ref);
 	REGISTER_HELPER(zend_runtime_jit);
 	REGISTER_HELPER(zend_jit_hot_func);
 #undef  REGISTER_HELPER
