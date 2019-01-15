@@ -1331,6 +1331,32 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 	}
 }
 
+static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *ref, zval *value, binary_op_type binary_op EXECUTE_DATA_DC)
+{
+	zval z_copy;
+
+	binary_op(&z_copy, &ref->val, value);
+	if (EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(&ref->val);
+		ZVAL_COPY_VALUE(&ref->val, &z_copy);
+	} else {
+		zval_ptr_dtor(&z_copy);
+	}
+}
+
+static zend_never_inline void zend_binary_assign_op_typed_prop(zend_property_info *prop_info, zval *zptr, zval *value, binary_op_type binary_op EXECUTE_DATA_DC)
+{
+	zval z_copy;
+
+	binary_op(&z_copy, zptr, value);
+	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(zptr);
+		ZVAL_COPY_VALUE(zptr, &z_copy);
+	} else {
+		zval_ptr_dtor(&z_copy);
+	}
+}
+
 static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type EXECUTE_DATA_DC)
 {
 	zend_long offset;
