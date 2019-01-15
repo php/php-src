@@ -1667,6 +1667,33 @@ static void zend_incdec_typed_ref(zend_reference *ref, zval *copy, int inc EXECU
 	}
 }
 
+static void zend_incdec_typed_prop(zend_property_info *prop_info, zval *var_ptr, zval *copy, int inc EXECUTE_DATA_DC)
+{
+	zval tmp;
+
+	if (!copy) {
+		copy = &tmp;
+	}
+
+	ZVAL_COPY(copy, var_ptr);
+
+	if (inc) {
+		increment_function(var_ptr);
+	} else {
+		decrement_function(var_ptr);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
+		zend_throw_incdec_prop_error(prop_info, inc);
+		ZVAL_COPY_VALUE(var_ptr, copy);
+	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, copy);
+	} else if (copy == &tmp) {
+		zval_ptr_dtor(&tmp);
+	}
+}
+
 static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_info, int inc OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
@@ -1684,41 +1711,24 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 			}
 		}
 	} else {
-		zend_reference *ref = NULL;
-		if (Z_ISREF_P(prop)) {
-			if (ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(prop))) {
-				ref = Z_REF_P(prop);
-			}
-			prop = Z_REFVAL_P(prop);
-		}
-
-		if (UNEXPECTED(ref || prop_info)) {
-			zval z_copy;
-			ZVAL_COPY(&z_copy, prop);
-			if (inc) {
-				increment_function(&z_copy);
-			} else {
-				decrement_function(&z_copy);
-			}
-			if (UNEXPECTED(Z_TYPE(z_copy) == IS_DOUBLE) && Z_TYPE_P(prop) == IS_LONG) {
-				if (prop_info) {
-					zend_throw_incdec_prop_error(prop_info, inc);
-				} else {
-					zend_throw_incdec_ref_error(ref, inc);
+		do {
+			if (Z_ISREF_P(prop)) {
+				zend_reference *ref = Z_REF_P(prop);
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+					zend_incdec_typed_ref(ref, NULL, inc EXECUTE_DATA_CC);
+					break;
 				}
-			} else if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
-				zval_ptr_dtor(prop);
-				ZVAL_COPY_VALUE(prop, &z_copy);
-			} else {
-				zval_ptr_dtor(&z_copy);
+				prop = Z_REFVAL_P(prop);
 			}
-		} else {
-			if (inc) {
+
+			if (UNEXPECTED(prop_info)) {
+				zend_incdec_typed_prop(prop_info, prop, NULL, inc EXECUTE_DATA_CC);
+			} else if (inc) {
 				increment_function(prop);
 			} else {
 				decrement_function(prop);
 			}
-		}
+		} while (0);
 	}
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), prop);
@@ -1743,37 +1753,19 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 			}
 		}
 	} else {
-		zend_reference *ref = NULL;
 		if (Z_ISREF_P(prop)) {
-			if (ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(prop))) {
-				ref = Z_REF_P(prop);
+			zend_reference *ref = Z_REF_P(prop);
+			if (ZEND_REF_HAS_TYPE_SOURCES(ref)) {
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var), inc EXECUTE_DATA_CC);
+				return;
 			}
 			prop = Z_REFVAL_P(prop);
 		}
 
-		ZVAL_COPY(EX_VAR(opline->result.var), prop);
-
-		if (UNEXPECTED(ref || prop_info)) {
-			zval z_copy;
-			ZVAL_COPY(&z_copy, prop);
-			if (inc) {
-				increment_function(&z_copy);
-			} else {
-				decrement_function(&z_copy);
-			}
-			if (UNEXPECTED(Z_TYPE(z_copy) == IS_DOUBLE) && Z_TYPE_P(prop) == IS_LONG) {
-				if (prop_info) {
-					zend_throw_incdec_prop_error(prop_info, inc);
-				} else {
-					zend_throw_incdec_ref_error(ref, inc);
-				}
-			} else if (EXPECTED(ref ? zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
-				zval_ptr_dtor(prop);
-				ZVAL_COPY_VALUE(prop, &z_copy);
-			} else {
-				zval_ptr_dtor(&z_copy);
-			}
+		if (UNEXPECTED(prop_info)) {
+			zend_incdec_typed_prop(prop_info, prop, EX_VAR(opline->result.var), inc EXECUTE_DATA_CC);
 		} else {
+			ZVAL_COPY(EX_VAR(opline->result.var), prop);
 			if (inc) {
 				increment_function(prop);
 			} else {
