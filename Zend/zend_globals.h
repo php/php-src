@@ -116,6 +116,8 @@ struct _zend_compiler_globals {
 	zend_arena *ast_arena;
 
 	zend_stack delayed_oplines_stack;
+	HashTable *memoized_exprs;
+	int memoize_mode;
 
 	void   *map_ptr_base;
 	size_t  map_ptr_size;

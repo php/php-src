@@ -332,6 +332,8 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 	CG(start_lineno) = 0;
 
 	CG(encoding_declared) = 0;
+	CG(memoized_exprs) = NULL;
+	CG(memoize_mode) = 0;
 }
 /* }}} */
 
@@ -1900,6 +1902,7 @@ static inline void zend_update_jump_target(uint32_t opnum_jump, uint32_t opnum_t
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 		case ZEND_JMP_SET:
+		case ZEND_COALESCE:
 			opline->op2.opline_num = opnum_target;
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -1953,6 +1956,43 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 	}
 	CG(delayed_oplines_stack).top = offset;
 	return opline;
+}
+/* }}} */
+
+#define ZEND_MEMOIZE_NONE 0
+#define ZEND_MEMOIZE_COMPILE 1
+#define ZEND_MEMOIZE_FETCH 2
+
+static void zend_compile_memoized_expr(znode *result, zend_ast *expr) /* {{{ */
+{
+	int memoize_mode = CG(memoize_mode);
+	if (memoize_mode == ZEND_MEMOIZE_COMPILE) {
+		znode memoized_result;
+
+		/* Go through normal compilation */
+		CG(memoize_mode) = ZEND_MEMOIZE_NONE;
+		zend_compile_expr(result, expr);
+		CG(memoize_mode) = ZEND_MEMOIZE_COMPILE;
+
+		if (result->op_type == IS_VAR) {
+			zend_emit_op(&memoized_result, ZEND_COPY_TMP, result, NULL);
+		} else if (result->op_type == IS_TMP_VAR) {
+			zend_emit_op_tmp(&memoized_result, ZEND_COPY_TMP, result, NULL);
+		} else {
+			memoized_result = *result;
+		}
+
+		zend_hash_index_update_mem(
+			CG(memoized_exprs), (uintptr_t) expr, &memoized_result, sizeof(znode));
+	} else if (memoize_mode == ZEND_MEMOIZE_FETCH) {
+		znode *memoized_result = zend_hash_index_find_ptr(CG(memoized_exprs), (uintptr_t) expr);
+		*result = *memoized_result;
+		if (result->op_type == IS_CONST) {
+			Z_TRY_ADDREF(result->u.constant);
+		}
+	} else {
+		ZEND_ASSERT(0);
+	}
 }
 /* }}} */
 
@@ -7220,6 +7260,100 @@ void zend_compile_coalesce(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void znode_dtor(zval *zv) {
+	efree(Z_PTR_P(zv));
+}
+
+void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *var_ast = ast->child[0];
+	zend_ast *default_ast = ast->child[1];
+
+	znode var_node_is, var_node_w, default_node, assign_node, *node;
+	zend_op *opline;
+	uint32_t coalesce_opnum;
+	zend_bool need_frees = 0;
+
+	/* Remember expressions compiled during the initial BP_VAR_IS lookup,
+	 * to avoid double-evaluation when we compile again with BP_VAR_W. */
+	HashTable *orig_memoized_exprs = CG(memoized_exprs);
+	int orig_memoize_mode = CG(memoize_mode);
+
+	zend_ensure_writable_variable(var_ast);
+	if (is_this_fetch(var_ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
+	}
+
+	ALLOC_HASHTABLE(CG(memoized_exprs));
+	zend_hash_init(CG(memoized_exprs), 0, NULL, znode_dtor, 0);
+
+	CG(memoize_mode) = ZEND_MEMOIZE_COMPILE;
+	zend_compile_var(&var_node_is, var_ast, BP_VAR_IS, 0);
+
+	coalesce_opnum = get_next_op_number();
+	zend_emit_op_tmp(result, ZEND_COALESCE, &var_node_is, NULL);
+
+	CG(memoize_mode) = ZEND_MEMOIZE_NONE;
+	zend_compile_expr(&default_node, default_ast);
+
+	CG(memoize_mode) = ZEND_MEMOIZE_FETCH;
+	zend_compile_var(&var_node_w, var_ast, BP_VAR_W, 0);
+
+	/* Reproduce some of the zend_compile_assign() opcode fixup logic here. */
+	opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+	switch (var_ast->kind) {
+		case ZEND_AST_VAR:
+			zend_emit_op(&assign_node, ZEND_ASSIGN, &var_node_w, &default_node);
+			break;
+		case ZEND_AST_STATIC_PROP:
+			opline->opcode = ZEND_ASSIGN_STATIC_PROP;
+			zend_emit_op_data(&default_node);
+			assign_node = var_node_w;
+			break;
+		case ZEND_AST_DIM:
+			opline->opcode = ZEND_ASSIGN_DIM;
+			zend_emit_op_data(&default_node);
+			assign_node = var_node_w;
+			break;
+		case ZEND_AST_PROP:
+			opline->opcode = ZEND_ASSIGN_OBJ;
+			zend_emit_op_data(&default_node);
+			assign_node = var_node_w;
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+	opline = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &assign_node, NULL);
+	SET_NODE(opline->result, result);
+
+	ZEND_HASH_FOREACH_PTR(CG(memoized_exprs), node) {
+		if (node->op_type == IS_TMP_VAR || node->op_type == IS_VAR) {
+			need_frees = 1;
+			break;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	/* Free DUPed expressions if there are any */
+	if (need_frees) {
+		uint32_t jump_opnum = zend_emit_jump(0);
+		zend_update_jump_target_to_next(coalesce_opnum);
+		ZEND_HASH_FOREACH_PTR(CG(memoized_exprs), node) {
+			if (node->op_type == IS_TMP_VAR || node->op_type == IS_VAR) {
+				zend_emit_op(NULL, ZEND_FREE, node, NULL);
+			}
+		} ZEND_HASH_FOREACH_END();
+		zend_update_jump_target_to_next(jump_opnum);
+	} else {
+		zend_update_jump_target_to_next(coalesce_opnum);
+	}
+
+	zend_hash_destroy(CG(memoized_exprs));
+	FREE_HASHTABLE(CG(memoized_exprs));
+	CG(memoized_exprs) = orig_memoized_exprs;
+	CG(memoize_mode) = orig_memoize_mode;
+}
+/* }}} */
+
 void zend_compile_print(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_op *opline;
@@ -8105,6 +8239,11 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 	/* CG(zend_lineno) = ast->lineno; */
 	CG(zend_lineno) = zend_ast_get_lineno(ast);
 
+	if (CG(memoize_mode) != ZEND_MEMOIZE_NONE) {
+		zend_compile_memoized_expr(result, ast);
+		return;
+	}
+
 	switch (ast->kind) {
 		case ZEND_AST_ZVAL:
 			ZVAL_COPY(&result->u.constant, zend_ast_get_zval(ast));
@@ -8171,6 +8310,9 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_COALESCE:
 			zend_compile_coalesce(result, ast);
+			return;
+		case ZEND_AST_ASSIGN_COALESCE:
+			zend_compile_assign_coalesce(result, ast);
 			return;
 		case ZEND_AST_PRINT:
 			zend_compile_print(result, ast);

@@ -547,12 +547,27 @@ static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const ze
 	return opline->opcode == ZEND_BRK ? jmp_to->brk : jmp_to->cont;
 }
 
+static void emit_live_range_raw(
+		zend_op_array *op_array, uint32_t var_num, uint32_t kind, uint32_t start, uint32_t end) {
+	zend_live_range *range;
+
+	op_array->last_live_range++;
+	op_array->live_range = erealloc(op_array->live_range,
+		sizeof(zend_live_range) * op_array->last_live_range);
+
+	ZEND_ASSERT(start < end);
+	range = &op_array->live_range[op_array->last_live_range - 1];
+	range->var = (uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
+	range->var |= kind;
+	range->start = start;
+	range->end = end;
+}
+
 static void emit_live_range(
 		zend_op_array *op_array, uint32_t var_num, uint32_t start, uint32_t end,
 		zend_needs_live_range_cb needs_live_range) {
 	zend_op *def_opline = &op_array->opcodes[start], *orig_def_opline = def_opline;
 	zend_op *use_opline = &op_array->opcodes[end];
-	zend_live_range *range;
 	uint32_t kind;
 
 	switch (def_opline->opcode) {
@@ -589,7 +604,8 @@ static void emit_live_range(
 			break;
 		/* Objects created via ZEND_NEW are only fully initialized
 		 * after the DO_FCALL (constructor call). */
-		case ZEND_NEW: {
+		case ZEND_NEW:
+		{
 			int level = 0;
 			while (def_opline + 1 < use_opline) {
 				def_opline++;
@@ -629,6 +645,41 @@ static void emit_live_range(
 			kind = ZEND_LIVE_TMPVAR;
 			break;
 		}
+		case ZEND_COPY_TMP:
+		{
+			/* COPY_TMP has a split live-range: One from the definition until the use in
+			 * "null" branch, and another from the start of the "non-null" branch to the
+			 * FREE opcode. */
+			uint32_t rt_var_num =
+				(uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
+			zend_op *block_start_op = use_opline;
+
+			if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
+				return;
+			}
+
+			while ((block_start_op-1)->opcode == ZEND_FREE) {
+				block_start_op--;
+			}
+
+			kind = ZEND_LIVE_TMPVAR;
+			start = block_start_op - op_array->opcodes;
+			if (start != end) {
+				emit_live_range_raw(op_array, var_num, kind, start, end);
+			}
+
+			do {
+				use_opline--;
+			} while (!(
+				((use_opline->op1_type & (IS_TMP_VAR|IS_VAR)) && use_opline->op1.var == rt_var_num) ||
+				((use_opline->op2_type & (IS_TMP_VAR|IS_VAR)) && use_opline->op2.var == rt_var_num)
+			));
+
+			start = def_opline + 1 - op_array->opcodes;
+			end = use_opline - op_array->opcodes;
+			emit_live_range_raw(op_array, var_num, kind, start, end);
+			return;
+		}
 	}
 
 	/* Check hook to determine whether a live range is necessary, e.g. based on type info. */
@@ -636,16 +687,7 @@ static void emit_live_range(
 		return;
 	}
 
-	op_array->last_live_range++;
-	op_array->live_range = erealloc(op_array->live_range,
-		sizeof(zend_live_range) * op_array->last_live_range);
-
-	ZEND_ASSERT(start < end);
-	range = &op_array->live_range[op_array->last_live_range - 1];
-	range->var = (uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
-	range->var |= kind;
-	range->start = start;
-	range->end = end;
+	emit_live_range_raw(op_array, var_num, kind, start, end);
 }
 
 static zend_bool is_fake_def(zend_op *opline) {
@@ -659,7 +701,8 @@ static zend_bool keeps_op1_alive(zend_op *opline) {
 	 * it is later freed by something else. */
 	if (opline->opcode == ZEND_CASE
 	 || opline->opcode == ZEND_SWITCH_LONG
-	 || opline->opcode == ZEND_FETCH_LIST_R) {
+	 || opline->opcode == ZEND_FETCH_LIST_R
+	 || opline->opcode == ZEND_COPY_TMP) {
 		return 1;
 	}
 	ZEND_ASSERT(opline->opcode != ZEND_SWITCH_STRING
