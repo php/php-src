@@ -24,6 +24,7 @@ static zend_class_entry zend_iterator_class_entry;
 
 static void iter_wrapper_free(zend_object *object);
 static void iter_wrapper_dtor(zend_object *object);
+static HashTable *iter_wrapper_get_gc(zval *object, zval **table, int *n);
 
 static const zend_object_handlers iterator_object_handlers = {
 	0,
@@ -51,7 +52,7 @@ static const zend_object_handlers iterator_object_handlers = {
 	NULL, /* count */
 	NULL, /* get_debug_info */
 	NULL, /* get_closure */
-	NULL, /* get_gc */
+	iter_wrapper_get_gc,
 	NULL, /* do_operation */
 	NULL  /* compare */
 };
@@ -69,6 +70,13 @@ static void iter_wrapper_free(zend_object *object)
 
 static void iter_wrapper_dtor(zend_object *object)
 {
+}
+
+static HashTable *iter_wrapper_get_gc(zval *object, zval **table, int *n) {
+	/* TODO: We need a get_gc iterator handler */
+	*table = NULL;
+	*n = 0;
+	return NULL;
 }
 
 ZEND_API void zend_iterator_init(zend_object_iterator *iter)
