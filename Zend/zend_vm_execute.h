@@ -4976,7 +4976,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -4989,31 +4988,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -5032,7 +5008,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -5045,31 +5020,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -5088,7 +5040,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -5101,31 +5052,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = _get_zval_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -5144,7 +5072,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -5157,31 +5084,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -8518,7 +8422,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -8531,31 +8434,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -8574,7 +8454,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -8587,31 +8466,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -8630,7 +8486,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -8643,31 +8498,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = _get_zval_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -8686,7 +8518,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -8699,31 +8530,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -9397,7 +9205,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -9410,31 +9217,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -9453,7 +9237,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -9466,31 +9249,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -9509,7 +9269,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -9522,31 +9281,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = _get_zval_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -9565,7 +9301,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -9578,31 +9313,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CONST_
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -14934,7 +14646,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -14947,31 +14658,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -14990,7 +14678,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -15003,31 +14690,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -15046,7 +14710,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -15059,31 +14722,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = _get_zval_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -15102,7 +14742,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -15115,31 +14754,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -17360,7 +16976,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -17373,31 +16988,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -17416,7 +17008,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -17429,31 +17020,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -17472,7 +17040,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -17485,31 +17052,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = _get_zval_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -17528,7 +17072,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -17541,31 +17084,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -17994,7 +17514,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -18007,31 +17526,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -18050,7 +17546,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -18063,31 +17558,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -18106,7 +17578,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -18119,31 +17590,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = _get_zval_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -18162,7 +17610,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -18175,31 +17622,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_TMPVAR
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -25178,41 +24602,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CONST == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -25331,41 +24735,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_TMP_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -25484,41 +24868,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -25637,41 +25001,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CV == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -28091,41 +27435,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					zend_uchar orig_type = IS_UNDEF;
+
+					if (IS_CONST == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
 
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
+
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -28244,41 +27568,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
+					zend_uchar orig_type = IS_UNDEF;
+
+					if (IS_TMP_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
-					if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
-					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -28397,41 +27701,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
+					zend_uchar orig_type = IS_UNDEF;
+
+					if (IS_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
-					if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
-					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -28550,41 +27834,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					zend_uchar orig_type = IS_UNDEF;
+
+					if (IS_CV == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
 
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
+
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -32583,41 +31847,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CONST == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -32736,41 +31980,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_TMP_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -32889,41 +32113,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -33042,41 +32246,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CV == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -35346,41 +34530,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CONST == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -35499,41 +34663,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_TMP_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -35652,41 +34796,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -35805,41 +34929,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CV == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -37391,41 +36495,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
+					zend_uchar orig_type = IS_UNDEF;
 
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CONST == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -37544,41 +36628,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
+					zend_uchar orig_type = IS_UNDEF;
 
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_TMP_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -37697,41 +36761,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
+					zend_uchar orig_type = IS_UNDEF;
 
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -37850,41 +36894,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
+					zend_uchar orig_type = IS_UNDEF;
 
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CV == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -40083,41 +39107,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CONST == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -40236,41 +39240,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_TMP_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -40389,41 +39373,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -40542,41 +39506,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CV == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -45116,41 +44060,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CONST == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -45269,41 +44193,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_TMP_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -45422,41 +44326,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -45575,41 +44459,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CV == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -45694,7 +44558,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_CON
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -45707,31 +44570,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_CON
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -45750,7 +44590,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_CON
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -45763,31 +44602,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_CON
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -45806,7 +44622,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_CON
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -45819,31 +44634,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_CON
 	value = _get_zval_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -45862,7 +44654,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_CON
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -45875,31 +44666,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_CON
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -49669,41 +48437,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
+					zend_uchar orig_type = IS_UNDEF;
 
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CONST == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -49822,41 +48570,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
+					zend_uchar orig_type = IS_UNDEF;
 
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_TMP_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -49975,41 +48703,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
+					zend_uchar orig_type = IS_UNDEF;
 
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -50128,41 +48836,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
-						zval_ptr_dtor_nogc(free_op2);
+					zend_uchar orig_type = IS_UNDEF;
 
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CV == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -51933,7 +50621,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_VAR
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -51946,31 +50633,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_VAR
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -51989,7 +50653,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_VAR
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -52002,31 +50665,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_VAR
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -52045,7 +50685,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_VAR
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -52058,31 +50697,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_VAR
 	value = _get_zval_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -52101,7 +50717,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_VAR
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -52114,31 +50729,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_VAR
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -53193,7 +51785,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_UNU
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -53206,31 +51797,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_UNU
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -53249,7 +51817,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_UNU
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -53262,31 +51829,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_UNU
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -53305,7 +51849,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_UNU
 	zend_free_op free_op_data;
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -53318,31 +51861,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_UNU
 	value = _get_zval_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
-
-		value = &tmp;
-		if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		zval_ptr_dtor_nogc(free_op_data);
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -53361,7 +51881,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_UNU
 
 	zval *prop, *value;
 	zend_property_info *prop_info;
-	zval tmp;
 
 	SAVE_OPLINE();
 
@@ -53374,31 +51893,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_CV_UNU
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(prop_info->type)) {
-		zend_reference *ref = NULL;
-		if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-			ref = Z_REF_P(value);
-			value = Z_REFVAL_P(value);
-		}
-		if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-			ZVAL_COPY(&tmp, value);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, value);
-		}
-		if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-			zval_ptr_dtor(value);
-			if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-				efree(ref);
-			}
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
 
-		value = &tmp;
-		if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-			efree(ref);
-		}
-
-		value = zend_assign_to_variable(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		value = zend_assign_to_variable(prop, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -56458,41 +54954,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CONST & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CONST & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CONST & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CONST == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CONST & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -56611,41 +55087,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_TMP_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_TMP_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_TMP_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_TMP_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -56764,41 +55220,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_VAR & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_VAR & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_VAR == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
-					value = &tmp;
-					if ((IS_VAR & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					zval_ptr_dtor_nogc(free_op_data);
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -56917,41 +55353,21 @@ assign_object:
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-				zval tmp;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					zend_reference *ref = NULL;
-					if ((IS_CV & (IS_CV|IS_VAR)) && UNEXPECTED(Z_ISREF_P(value))) {
-						ref = Z_REF_P(value);
-						value = Z_REFVAL_P(value);
-					}
-					if (((IS_CV & (IS_CONST|IS_CV)) || (ref && GC_REFCOUNT(ref) > 1))) {
-						ZVAL_COPY(&tmp, value);
-					} else {
-						ZVAL_COPY_VALUE(&tmp, value);
-					}
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, &tmp, EX_USES_STRICT_TYPES()))) {
-						zval_ptr_dtor(value);
-						if ((IS_CV & IS_VAR) && ref && GC_DELREF(ref) == 0) {
-							efree(ref);
-						}
+					zend_uchar orig_type = IS_UNDEF;
 
-
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
+					if (IS_CV == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
 					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST && Z_TYPE(tmp) == Z_TYPE_P(value)) {
+					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 
-					value = &tmp;
-					if ((IS_CV & IS_VAR) && UNEXPECTED(ref) && GC_DELREF(ref) == 0) {
-						efree(ref);
-					}
-
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());

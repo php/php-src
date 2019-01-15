@@ -1050,6 +1050,22 @@ zend_bool zend_never_inline zend_verify_property_type(zend_property_info *info, 
 	return i_zend_verify_property_type(info, property, strict);
 }
 
+static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *info, zval *property_val, zval *value EXECUTE_DATA_DC)
+{
+	zval tmp;
+
+	ZVAL_DEREF(value);
+	ZVAL_COPY(&tmp, value);
+
+	if (UNEXPECTED(!i_zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES()))) {
+		zval_ptr_dtor(&tmp);
+		return &EG(uninitialized_zval);
+	}
+
+	return zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+}
+
+
 static zend_always_inline zend_bool zend_check_type(
 		zend_type type,
 		zval *arg, zend_class_entry **ce, void **cache_slot,
