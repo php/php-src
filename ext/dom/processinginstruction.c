@@ -103,7 +103,7 @@ int dom_processinginstruction_target_read(dom_object *obj, zval *retval)
 
 /* {{{ data	string
 readonly=no
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-837822393
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-837822393
 Since:
 */
 int dom_processinginstruction_data_read(dom_object *obj, zval *retval)
@@ -135,6 +135,11 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		return FAILURE;
+	}
+
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(obj->document));
 		return FAILURE;
 	}
 
