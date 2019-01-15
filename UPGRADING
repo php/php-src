@@ -12,8 +12,9 @@ PHP 7.4 UPGRADE NOTES
 10. New Global Constants
 11. Changes to INI File Handling
 12. Windows Support
-13. Other Changes
-14. Performance Improvements
+12. Migration to pkg-config
+14. Other Changes
+15. Performance Improvements
 
 
 ========================================
@@ -156,10 +157,6 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 
 - GD:
-  . Freetype detection now relies on pkg-config. The --with-freetype-dir option
-    has been renamed to --with-freetype and no longer accepts a directory.
-    Instead pkg-config environment variables can be used to configure custom paths,
-    see either ./configure --help or follow the instructions in error messages.
   . The behavior of imagecropauto() in the bundled libgd has been synced with
     that of system libgd:
      * IMG_CROP_DEFAULT is no longer falling back to IMG_CROP_SIDES
@@ -251,11 +248,46 @@ PHP 7.4 UPGRADE NOTES
   PHP, so they're a fake.
 
 ========================================
-13. Other Changes
+13. Migration to pkg-config
+========================================
+
+A number of extensions have been migrated to exclusively use pkg-config for
+the detection of library dependencies. Generally, this means that instead of
+using --with-foo-dir=DIR or similar only --with-foo is used. Custom library
+paths can be specified either by adding additional directories to
+PKG_CONFIG_PATH or by explicitly specifying compilation options through
+FOO_CFLAGS and FOO_LIBS.
+
+The following extensions are affected:
+
+- Curl:
+  . --with-curl no longer accepts a directory.
+
+- Intl:
+  . --with-icu-dir has been removed. If --enable-intl is passed, then libicu is
+    always required.
+
+- OpenSSL:
+  . --with-openssl no longer accepts a directory.
+
+- PCRE:
+  . --with-pcre-regex has been removed. Instead --with-external-pcre is provided
+    to opt into using an external PCRE library, rather than the bundled one.
+
+- GD:
+  . --with-png-dir has been removed. libpng is required.
+  . --with-zlib-dir has been removed. zlib is required.
+  . --with-freetype-dir becomes --with-freetype.
+  . --with-jpeg-dir becomes --with-jpeg.
+  . --with-webp-dir becomes --with-webp.
+  . --with-xpm-dir becomes --with-xpm.
+
+========================================
+14. Other Changes
 ========================================
 
 ========================================
-14. Performance Improvements
+15. Performance Improvements
 ========================================
 
 - Core:
