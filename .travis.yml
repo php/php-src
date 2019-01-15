@@ -21,6 +21,7 @@ addons:
       - libxpm-dev
       - libzip-dev
       - libsqlite3-dev
+      - libwebp-dev
 
 
 services:
