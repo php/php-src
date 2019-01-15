@@ -2556,7 +2556,7 @@ static zend_always_inline zend_property_info *i_zend_check_ref_stdClass_assignab
 	return NULL;
 }
 
-ZEND_API zend_property_info *zend_check_ref_array_assignable(zend_reference *ref) {
+ZEND_API zend_property_info* ZEND_FASTCALL zend_check_ref_array_assignable(zend_reference *ref) {
 	return i_zend_check_ref_array_assignable(ref);
 }
 
@@ -2943,12 +2943,12 @@ static zend_always_inline zend_bool i_zend_verify_ref_assignable_zval(zend_refer
 	return 1;
 }
 
-ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict)
+ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict)
 {
 	return i_zend_verify_ref_assignable_zval(ref, zv, strict);
 }
 
-ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict) {
+ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict) {
 	zval *val = orig_val;
 	if (Z_ISREF_P(val) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(val))) {
 		int result;
@@ -2981,7 +2981,7 @@ ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_i
 	return 0;
 }
 
-ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
+ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
 {
 	zend_property_info_list *list;
 	if (source_list->ptr == NULL) {
@@ -3004,7 +3004,7 @@ ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_li
 	source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list);
 }
 
-ZEND_API void zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
+ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
 {
 	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
 	zend_property_info **ptr, **end;
