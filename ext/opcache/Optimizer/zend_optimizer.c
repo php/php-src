@@ -371,6 +371,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			return 0;
 		case ZEND_CASE:
 		case ZEND_FETCH_LIST_R:
+		case ZEND_COPY_TMP:
 			return 0;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:

@@ -1208,6 +1208,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+		case ZEND_COPY_TMP:
 			if (ssa->ops[line].op1_def == var) {
 				if (ssa->ops[line].op1_def >= 0) {
 					if (OP1_HAS_RANGE()) {
@@ -2554,6 +2555,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+		case ZEND_COPY_TMP:
 			if (ssa_ops[i].op1_def >= 0) {
 				tmp = t1;
 				if ((t1 & (MAY_BE_RC1|MAY_BE_REF)) && (opline->op1_type == IS_CV)) {
@@ -4458,6 +4460,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 		case ZEND_ISSET_ISEMPTY_CV:
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
+		case ZEND_COPY_TMP:
 			return 0;
 		case ZEND_INIT_FCALL:
 			/* can't throw, because call is resolved at compile time */
