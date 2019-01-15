@@ -20,7 +20,7 @@
 #ifndef MYSQLND_COMMANDS_H
 #define MYSQLND_COMMANDS_H
 
-extern func_mysqlnd__run_command mysqlnd_run_command;
+//extern func_mysqlnd__run_command mysqlnd_run_command;
 
 #endif /* MYSQLND_COMMANDS_H */
 

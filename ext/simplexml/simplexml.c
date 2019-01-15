@@ -415,7 +415,7 @@ static void change_node_zval(xmlNodePtr node, zval *value)
 
 /* {{{ sxe_property_write()
  */
-static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool elements, zend_bool attribs, xmlNodePtr *pnewnode)
+static zval *sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool elements, zend_bool attribs, xmlNodePtr *pnewnode)
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
@@ -429,7 +429,6 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 	int             test = 0;
 	int				new_value = 0;
 	zend_long            cnt = 0;
-	int				retval = SUCCESS;
 	zval            tmp_zv, zval_copy;
 	zend_string    *trim_str;
 
@@ -442,7 +441,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			 * and this is during runtime.
 			 */
 			zend_throw_error(NULL, "Cannot create unnamed attribute");
-			return FAILURE;
+			return &EG(error_zval);
 		}
 		goto long_dim;
 	} else {
@@ -466,7 +465,7 @@ long_dim:
 				if (member == &tmp_zv) {
 					zval_ptr_dtor_str(&tmp_zv);
 				}
-				return FAILURE;
+				return &EG(error_zval);
 			}
 		}
 	}
@@ -491,7 +490,7 @@ long_dim:
 			 * and this is during runtime.
 			 */
 			zend_throw_error(NULL, "Cannot create unnamed attribute");
-			return FAILURE;
+			return &EG(error_zval);
 		}
 		if (attribs && !node && sxe->iter.type == SXE_ITER_ELEMENT) {
 			node = xmlNewChild(mynode, mynode->ns, sxe->iter.name, NULL);
@@ -528,7 +527,7 @@ long_dim:
 					zval_ptr_dtor_str(&tmp_zv);
 				}
 				zend_error(E_WARNING, "It is not yet possible to assign complex types to %s", attribs ? "attributes" : "properties");
-				return FAILURE;
+				return &EG(error_zval);
 		}
 	}
 
@@ -566,7 +565,7 @@ long_dim:
 					if (new_value) {
 						zval_ptr_dtor(value);
 					}
-					return FAILURE;
+					return &EG(error_zval);
 				}
 
 				if (sxe->iter.type == SXE_ITER_NONE) {
@@ -574,7 +573,7 @@ long_dim:
 					++counter;
 					if (member && Z_LVAL_P(member) > 0) {
 						php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only 0 such elements exist", mynode->name, Z_LVAL_P(member));
-						retval = FAILURE;
+						value = &EG(error_zval);
 					}
 				} else if (member) {
 					newnode = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node, &cnt);
@@ -611,7 +610,7 @@ next_iter:
 			}
 		} else if (counter > 1) {
 			php_error_docref(NULL, E_WARNING, "Cannot assign to an array of nodes (duplicate subnodes or attr detected)");
-			retval = FAILURE;
+			value = &EG(error_zval);
 		} else if (elements) {
 			if (!node) {
 				if (!member || Z_TYPE_P(member) == IS_LONG) {
@@ -622,14 +621,12 @@ next_iter:
 			} else if (!member || Z_TYPE_P(member) == IS_LONG) {
 				if (member && cnt < Z_LVAL_P(member)) {
 					php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only " ZEND_LONG_FMT " such elements exist", mynode->name, Z_LVAL_P(member), cnt);
-					retval = FAILURE;
 				}
 				newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
 			}
 		} else if (attribs) {
 			if (Z_TYPE_P(member) == IS_LONG) {
 				php_error_docref(NULL, E_WARNING, "Cannot change attribute number " ZEND_LONG_FMT " when only %d attributes exist", Z_LVAL_P(member), nodendx);
-				retval = FAILURE;
 			} else {
 				newnode = (xmlNodePtr)xmlNewProp(node, (xmlChar *)Z_STRVAL_P(member), value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
 			}
@@ -645,15 +642,17 @@ next_iter:
 	if (new_value) {
 		zval_ptr_dtor(value);
 	}
-	return retval;
+	return value;
 }
 /* }}} */
 
 /* {{{ sxe_property_write()
  */
-static void sxe_property_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *sxe_property_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
-	sxe_prop_dim_write(object, member, value, 1, 0, NULL);
+	zval *retval = sxe_prop_dim_write(object, member, value, 1, 0, NULL);
+
+	return retval == &EG(error_zval) ? &EG(uninitialized_zval) : retval;
 }
 /* }}} */
 
@@ -682,7 +681,7 @@ static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, vo
 	if (node) {
 		return NULL;
 	}
-	if (sxe_prop_dim_write(object, member, NULL, 1, 0, &node) != SUCCESS) {
+	if (sxe_prop_dim_write(object, member, NULL, 1, 0, &node) == &EG(error_zval)) {
 		return NULL;
 	}
 	type = SXE_ITER_NONE;

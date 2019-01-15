@@ -36,7 +36,7 @@ static const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL
 /* {{{ mysqlnd_run_authentication */
 enum_func_status
 mysqlnd_run_authentication(
-			MYSQLND_CONN_DATA * conn,
+			MYSQLND_CONN_DATA * const conn,
 			const char * const user,
 			const char * const passwd,
 			const size_t passwd_len,
@@ -44,11 +44,11 @@ mysqlnd_run_authentication(
 			const size_t db_len,
 			const MYSQLND_STRING auth_plugin_data,
 			const char * const auth_protocol,
-			unsigned int charset_no,
+			const unsigned int charset_no,
 			const MYSQLND_SESSION_OPTIONS * const session_options,
-			zend_ulong mysql_flags,
-			zend_bool silent,
-			zend_bool is_change_user
+			const zend_ulong mysql_flags,
+			const zend_bool silent,
+			const zend_bool is_change_user
 			)
 {
 	enum_func_status ret = FAIL;
@@ -180,23 +180,23 @@ end:
 
 /* {{{ mysqlnd_switch_to_ssl_if_needed */
 static enum_func_status
-mysqlnd_switch_to_ssl_if_needed(MYSQLND_CONN_DATA * conn,
+mysqlnd_switch_to_ssl_if_needed(MYSQLND_CONN_DATA * const conn,
 								unsigned int charset_no,
-								size_t server_capabilities,
+								const size_t server_capabilities,
 								const MYSQLND_SESSION_OPTIONS * const session_options,
-								zend_ulong mysql_flags)
+								const zend_ulong mysql_flags)
 {
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * charset;
 	DBG_ENTER("mysqlnd_switch_to_ssl_if_needed");
 
 	if (session_options->charset_name && (charset = mysqlnd_find_charset_name(session_options->charset_name))) {
-		charset_no	= charset->nr;
+		charset_no = charset->nr;
 	}
 
 	{
-		size_t client_capabilities = mysql_flags;
-		ret = conn->run_command(COM_ENABLE_SSL, conn, client_capabilities, server_capabilities, charset_no);
+		const size_t client_capabilities = mysql_flags;
+		ret = conn->command->enable_ssl(conn, client_capabilities, server_capabilities, charset_no);
 	}
 	DBG_RETURN(ret);
 }
@@ -206,18 +206,18 @@ mysqlnd_switch_to_ssl_if_needed(MYSQLND_CONN_DATA * conn,
 /* {{{ mysqlnd_connect_run_authentication */
 enum_func_status
 mysqlnd_connect_run_authentication(
-			MYSQLND_CONN_DATA * conn,
+			MYSQLND_CONN_DATA * const conn,
 			const char * const user,
 			const char * const passwd,
 			const char * const db,
-			size_t db_len,
-			size_t passwd_len,
-			MYSQLND_STRING authentication_plugin_data,
+			const size_t db_len,
+			const size_t passwd_len,
+			const MYSQLND_STRING authentication_plugin_data,
 			const char * const authentication_protocol,
 			const unsigned int charset_no,
-			size_t server_capabilities,
+			const size_t server_capabilities,
 			const MYSQLND_SESSION_OPTIONS * const session_options,
-			zend_ulong mysql_flags
+			const zend_ulong mysql_flags
 			)
 {
 	enum_func_status ret = FAIL;
@@ -243,9 +243,9 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const char * const db,
 							  const size_t db_len,
 							  const MYSQLND_SESSION_OPTIONS * const session_options,
-							  zend_ulong mysql_flags,
-							  unsigned int server_charset_no,
-							  zend_bool use_full_blown_auth_packet,
+							  const zend_ulong mysql_flags,
+							  const unsigned int server_charset_no,
+							  const zend_bool use_full_blown_auth_packet,
 							  const char * const auth_protocol,
 							  struct st_mysqlnd_authentication_plugin * auth_plugin,
 							  const zend_uchar * const orig_auth_plugin_data,
@@ -253,9 +253,9 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const zend_uchar * const auth_plugin_data,
 							  const size_t auth_plugin_data_len,
 							  char ** switch_to_auth_protocol,
-							  size_t * switch_to_auth_protocol_len,
+							  size_t * const switch_to_auth_protocol_len,
 							  zend_uchar ** switch_to_auth_protocol_data,
-							  size_t * switch_to_auth_protocol_data_len
+							  size_t * const switch_to_auth_protocol_data_len
 							 )
 {
 	enum_func_status ret = FAIL;
@@ -371,14 +371,14 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								const char * const db,
 								const size_t db_len,
 								const zend_bool silent,
-								zend_bool use_full_blown_auth_packet,
+								const zend_bool use_full_blown_auth_packet,
 								const char * const auth_protocol,
-								zend_uchar * auth_plugin_data,
-								size_t auth_plugin_data_len,
+								const zend_uchar * const auth_plugin_data,
+								const size_t auth_plugin_data_len,
 								char ** switch_to_auth_protocol,
-								size_t * switch_to_auth_protocol_len,
+								size_t * const switch_to_auth_protocol_len,
 								zend_uchar ** switch_to_auth_protocol_data,
-								size_t * switch_to_auth_protocol_data_len
+								size_t * const switch_to_auth_protocol_data_len
 								)
 {
 	enum_func_status ret = FAIL;
@@ -559,10 +559,10 @@ static zend_uchar *
 mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 								  size_t * auth_data_len,
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
-								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+								  const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
 								  const MYSQLND_SESSION_OPTIONS * const session_options,
 								  const MYSQLND_PFC_DATA * const pfc_data,
-								  zend_ulong mysql_flags
+								  const zend_ulong mysql_flags
 								 )
 {
 	zend_uchar * ret = NULL;
@@ -620,10 +620,10 @@ static zend_uchar *
 mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   size_t * auth_data_len,
 							   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
-							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+							   const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
 							   const MYSQLND_SESSION_OPTIONS * const session_options,
 							   const MYSQLND_PFC_DATA * const pfc_data,
-							   zend_ulong mysql_flags
+							   const zend_ulong mysql_flags
 							  )
 {
 	zend_uchar * ret = NULL;
@@ -762,10 +762,10 @@ static zend_uchar *
 mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 								  size_t * auth_data_len,
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
-								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+								  const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
 								  const MYSQLND_SESSION_OPTIONS * const session_options,
 								  const MYSQLND_PFC_DATA * const pfc_data,
-								  zend_ulong mysql_flags
+								  const zend_ulong mysql_flags
 								 )
 {
 	RSA * server_public_key;
@@ -883,10 +883,10 @@ static zend_uchar *
 mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 								   size_t * auth_data_len,
 							 	   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
-								   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+								   const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
 								   const MYSQLND_SESSION_OPTIONS * const session_options,
 								   const MYSQLND_PFC_DATA * const pfc_data,
-								   zend_ulong mysql_flags
+								   const zend_ulong mysql_flags
 								  )
 {
 	zend_uchar * ret = NULL;
@@ -986,7 +986,7 @@ mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
 /* {{{ mysqlnd_caching_sha2_get_key */
 static size_t
 mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
-		const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
 		unsigned char **crypted,
 		const char * const passwd,
 		const size_t passwd_len)
@@ -1028,7 +1028,7 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 static void
 mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plugin *self,
 		MYSQLND_CONN_DATA * conn,
-		const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
 		const char * const passwd,
 		const size_t passwd_len)
 {

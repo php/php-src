@@ -1,5 +1,5 @@
 --TEST--
-ReflectionClass::getStaticPropertyValue() - bad params
+ReflectionClass::setStaticPropertyValue() - bad params
 --CREDITS--
 Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>

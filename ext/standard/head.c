@@ -358,8 +358,8 @@ PHP_FUNCTION(headers_sent)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(arg1)
-		Z_PARAM_ZVAL_DEREF(arg2)
+		Z_PARAM_ZVAL(arg1)
+		Z_PARAM_ZVAL(arg2)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (SG(headers_sent)) {
@@ -369,14 +369,12 @@ PHP_FUNCTION(headers_sent)
 
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
-		zval_ptr_dtor(arg2);
-		ZVAL_LONG(arg2, line);
+		ZEND_TRY_ASSIGN_LONG(arg2, line);
 	case 1:
-		zval_ptr_dtor(arg1);
 		if (file) {
-			ZVAL_STRING(arg1, file);
+			ZEND_TRY_ASSIGN_STRING(arg1, file);
 		} else {
-			ZVAL_EMPTY_STRING(arg1);
+			ZEND_TRY_ASSIGN_EMPTY_STRING(arg1);
 		}
 		break;
 	}

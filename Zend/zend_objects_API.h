@@ -95,6 +95,24 @@ static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_en
 	return obj;
 }
 
+static inline zend_property_info *zend_get_property_info_for_slot(zend_object *obj, zval *slot)
+{
+	zend_property_info **table = obj->ce->properties_info_table;
+	intptr_t prop_num = slot - obj->properties_table;
+	ZEND_ASSERT(prop_num >= 0 && prop_num < obj->ce->default_properties_count);
+	return table[prop_num];
+}
+
+/* Helper for cases where we're only interested in property info of typed properties. */
+static inline zend_property_info *zend_get_typed_property_info_for_slot(zend_object *obj, zval *slot)
+{
+	zend_property_info *prop_info = zend_get_property_info_for_slot(obj, slot);
+	if (prop_info && prop_info->type) {
+		return prop_info;
+	}
+	return NULL;
+}
+
 
 #endif /* ZEND_OBJECTS_H */
 

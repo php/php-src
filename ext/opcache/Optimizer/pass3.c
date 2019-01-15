@@ -50,7 +50,7 @@
 	}										\
 	jmp_hitlist[jmp_hitlist_count++] = ZEND_OP2_JMP_ADDR(target);
 
-void zend_optimizer_pass3(zend_op_array *op_array)
+void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
@@ -90,16 +90,17 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 						break;
 					}
 
-					if ((opline->op2_type & (IS_VAR | IS_CV))
+					/* change $i=expr+$i to $i=$i+expr so that the following optimization
+					 * works on it. Only do this if we are ignoring operator overloading,
+					 * as operand order might be significant otherwise. */
+					if ((ctx->optimization_level & ZEND_OPTIMIZER_IGNORE_OVERLOADING)
+						&& (opline->op2_type & (IS_VAR | IS_CV))
 						&& opline->op2.var == next_opline->op1.var &&
 						(opline->opcode == ZEND_ADD ||
 						 opline->opcode == ZEND_MUL ||
 						 opline->opcode == ZEND_BW_OR ||
 						 opline->opcode == ZEND_BW_AND ||
 						 opline->opcode == ZEND_BW_XOR)) {
-						/* change $i=expr+$i to $i=$i+expr so that the next
-						* optimization works on it
-						*/
 						zend_uchar tmp_type = opline->op1_type;
 						znode_op tmp = opline->op1;
 
@@ -111,6 +112,7 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 							COPY_NODE(opline->op2, tmp);
 						}
 					}
+
 					if ((opline->op1_type & (IS_VAR | IS_CV))
 						&& opline->op1.var == next_opline->op1.var
 						&& opline->op1_type == next_opline->op1_type) {

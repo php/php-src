@@ -195,14 +195,14 @@ PHP_FUNCTION(hash_file)
 /* }}} */
 
 static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const size_t length) {
-	int i;
+	size_t i;
 	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with;
 	}
 }
 
 static inline void php_hash_string_xor(unsigned char *out, const unsigned char *in, const unsigned char *xor_with, const size_t length) {
-	int i;
+	size_t i;
 	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with[i];
 	}
@@ -614,7 +614,7 @@ PHP_FUNCTION(hash_hkdf)
 	zend_string *returnval, *ikm, *algo, *info = NULL, *salt = NULL;
 	zend_long length = 0;
 	unsigned char *prk, *digest, *K;
-	int i;
+	size_t i;
 	size_t rounds;
 	const php_hash_ops *ops;
 	void *context;

@@ -325,10 +325,10 @@ ZEND_METHOD(Closure, fromCallable)
 
 	if (success == FAILURE || error) {
 		if (error) {
-			zend_throw_exception_ex(zend_ce_type_error, 0, "Failed to create closure from callable: %s", error);
+			zend_type_error("Failed to create closure from callable: %s", error);
 			efree(error);
 		} else {
-			zend_throw_exception_ex(zend_ce_type_error, 0, "Failed to create closure from callable");
+			zend_type_error("Failed to create closure from callable");
 		}
 	}
 }
@@ -406,9 +406,10 @@ static zval *zend_closure_read_property(zval *object, zval *member, int type, vo
 }
 /* }}} */
 
-static void zend_closure_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static zval *zend_closure_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
+	return value;
 }
 /* }}} */
 

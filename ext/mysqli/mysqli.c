@@ -333,7 +333,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 /* }}} */
 
 /* {{{ mysqli_write_property */
-void mysqli_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *mysqli_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	zval tmp_member;
 	mysqli_object *obj;
@@ -353,12 +353,14 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		zend_std_write_property(object, member, value, cache_slot);
+		value = zend_std_write_property(object, member, value, cache_slot);
 	}
 
 	if (member == &tmp_member) {
 		zval_ptr_dtor_str(&tmp_member);
 	}
+
+	return value;
 }
 /* }}} */
 
@@ -1267,7 +1269,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 
-		object_and_properties_init(return_value, ce, NULL);
+		object_init_ex(return_value, ce);
 		if (!ce->default_properties_count && !ce->__set) {
 			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
 		} else {

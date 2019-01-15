@@ -293,11 +293,11 @@ foundit:
 	entry.is_persistent = mydata->is_persistent;
 #define PHAR_ZIP_FAIL_FREE(errmsg, save) \
 			zend_hash_destroy(&mydata->manifest); \
-			HT_FLAGS(&mydata->manifest) = 0; \
+			HT_INVALIDATE(&mydata->manifest); \
 			zend_hash_destroy(&mydata->mounted_dirs); \
-			HT_FLAGS(&mydata->mounted_dirs) = 0; \
+			HT_INVALIDATE(&mydata->mounted_dirs); \
 			zend_hash_destroy(&mydata->virtual_dirs); \
-			HT_FLAGS(&mydata->virtual_dirs) = 0; \
+			HT_INVALIDATE(&mydata->virtual_dirs); \
 			php_stream_close(fp); \
 			zval_ptr_dtor(&mydata->metadata); \
 			if (mydata->signature) { \
@@ -315,11 +315,11 @@ foundit:
 			return FAILURE;
 #define PHAR_ZIP_FAIL(errmsg) \
 			zend_hash_destroy(&mydata->manifest); \
-			HT_FLAGS(&mydata->manifest) = 0; \
+			HT_INVALIDATE(&mydata->manifest); \
 			zend_hash_destroy(&mydata->mounted_dirs); \
-			HT_FLAGS(&mydata->mounted_dirs) = 0; \
+			HT_INVALIDATE(&mydata->mounted_dirs); \
 			zend_hash_destroy(&mydata->virtual_dirs); \
-			HT_FLAGS(&mydata->virtual_dirs) = 0; \
+			HT_INVALIDATE(&mydata->virtual_dirs); \
 			php_stream_close(fp); \
 			zval_ptr_dtor(&mydata->metadata); \
 			if (mydata->signature) { \

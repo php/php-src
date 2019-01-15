@@ -454,7 +454,11 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 	GETLONG(ttl, cp);
 	GETSHORT(dlen, cp);
 	CHECKCP(dlen);
-	if (type_to_fetch != DNS_T_ANY && type != type_to_fetch) {
+    if (dlen == 0) {
+        /* No data in the response - nothing to do */
+        return NULL;
+    }
+    if (type_to_fetch != DNS_T_ANY && type != type_to_fetch) {
 		cp += dlen;
 		return cp;
 	}
@@ -544,6 +548,9 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			CHECKCP(n);
 			add_assoc_stringl(subarray, "tag", (char*)cp, n);
 			cp += n;
+			if ( (size_t) dlen < ((size_t)n) + 2 ) {
+				return NULL;
+			}
 			n = dlen - n - 2;
 			CHECKCP(n);
 			add_assoc_stringl(subarray, "value", (char*)cp, n);
@@ -809,18 +816,22 @@ PHP_FUNCTION(dns_get_record)
 		Z_PARAM_STRING(hostname, hostname_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(type_param)
-		Z_PARAM_ZVAL_DEREF_EX(authns, 1, 0)
-		Z_PARAM_ZVAL_DEREF_EX(addtl, 1, 0)
+		Z_PARAM_ZVAL(authns)
+		Z_PARAM_ZVAL(addtl)
 		Z_PARAM_BOOL(raw)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (authns) {
-		zval_ptr_dtor(authns);
-		array_init(authns);
+		authns = zend_try_array_init(authns);
+		if (!authns) {
+			return;
+		}
 	}
 	if (addtl) {
-		zval_ptr_dtor(addtl);
-		array_init(addtl);
+		addtl = zend_try_array_init(addtl);
+		if (!addtl) {
+			return;
+		}
 	}
 
 	if (!raw) {
@@ -1042,17 +1053,21 @@ PHP_FUNCTION(dns_get_mx)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(hostname, hostname_len)
-		Z_PARAM_ZVAL_DEREF(mx_list)
+		Z_PARAM_ZVAL(mx_list)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(weight_list)
+		Z_PARAM_ZVAL(weight_list)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_ptr_dtor(mx_list);
-	array_init(mx_list);
+	mx_list = zend_try_array_init(mx_list);
+	if (!mx_list) {
+		return;
+	}
 
 	if (weight_list) {
-		zval_ptr_dtor(weight_list);
-		array_init(weight_list);
+		weight_list = zend_try_array_init(weight_list);
+		if (!weight_list) {
+			return;
+		}
 	}
 
 #if defined(HAVE_DNS_SEARCH)

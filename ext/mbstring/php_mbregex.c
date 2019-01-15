@@ -791,7 +791,9 @@ static inline void mb_regex_substitute(
 				no = onig_name_to_backref_number(regexp, (OnigUChar *)name, (OnigUChar *)name_end, regs);
 				break;
 			default:
-				p += clen;
+				/* We're not treating \ as an escape character and will interpret something like
+				 * \\1 as \ followed by \1, rather than \\ followed by 1. This is because this
+				 * function has not supported escaping of backslashes historically. */
 				smart_str_appendl(pbuf, sp, p - sp);
 				continue;
 		}
@@ -861,13 +863,15 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	OnigOptionType options;
 	char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z/", &arg_pattern, &string, &string_len, &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z", &arg_pattern, &string, &string_len, &array) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (array != NULL) {
-		zval_ptr_dtor(array);
-		array_init(array);
+		array = zend_try_array_init(array);
+		if (!array) {
+			return;
+		}
 	}
 
 	if (!php_mb_check_encoding(
@@ -1238,7 +1242,6 @@ PHP_FUNCTION(mb_split)
 	size_t string_len;
 
 	int err;
-	size_t n;
 	zend_long count = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
@@ -1296,8 +1299,8 @@ PHP_FUNCTION(mb_split)
 	}
 
 	/* otherwise we just have one last element to add to the array */
-	n = ((OnigUChar *)(string + string_len) - chunk_pos);
-	if (n > 0) {
+	if ((OnigUChar *)(string + string_len) > chunk_pos) {
+		size_t n = ((OnigUChar *)(string + string_len) - chunk_pos);
 		add_next_index_stringl(return_value, (char *)chunk_pos, n);
 	} else {
 		add_next_index_stringl(return_value, "", 0);

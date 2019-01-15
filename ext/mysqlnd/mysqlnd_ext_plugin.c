@@ -362,19 +362,19 @@ _mysqlnd_vio_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * methods)
 
 
 /* {{{ mysqlnd_command_factory_get */
-static func_mysqlnd__run_command
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) *
 _mysqlnd_command_factory_get()
 {
-	return mysqlnd_run_command;
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_command);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_command_factory_set */
 static void
-_mysqlnd_command_factory_set(func_mysqlnd__run_command run_command)
+_mysqlnd_command_factory_set(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * methods)
 {
-	mysqlnd_run_command = run_command;
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_command) = *methods;
 }
 /* }}} */
 
@@ -448,6 +448,7 @@ struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
 		_mysqlnd_command_factory_set,
 	},
 };
+
 
 /*
  * Local variables:

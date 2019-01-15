@@ -330,6 +330,9 @@ static zend_bool try_remove_var_def(context *ctx, int free_var, int use_chain, z
 				case ZEND_ASSIGN_REF:
 				case ZEND_ASSIGN_DIM:
 				case ZEND_ASSIGN_OBJ:
+				case ZEND_ASSIGN_OBJ_REF:
+				case ZEND_ASSIGN_STATIC_PROP:
+				case ZEND_ASSIGN_STATIC_PROP_REF:
 				case ZEND_ASSIGN_ADD:
 				case ZEND_ASSIGN_SUB:
 				case ZEND_ASSIGN_MUL:

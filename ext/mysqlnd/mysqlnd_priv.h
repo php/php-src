@@ -30,6 +30,7 @@ PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol_packet_fr
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_vio);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_upsert_status);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_error_info);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_command);
 
 enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filename, zend_bool * is_warning);
 #endif	/* MYSQLND_PRIV_H */

@@ -56,9 +56,34 @@ ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 
-static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
+ZEND_API zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type type, zend_reference *ref);
+
+ZEND_API zend_property_info *zend_check_ref_array_assignable(zend_reference *ref);
+ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict);
+ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict);
+
+ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv);
+ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1, zend_property_info *prop2, zval *zv);
+
+#define ZEND_REF_TYPE_SOURCES(ref) \
+	(ref)->sources
+
+#define ZEND_REF_HAS_TYPE_SOURCES(ref) \
+	(ZEND_REF_TYPE_SOURCES(ref).ptr != NULL)
+
+#define ZEND_REF_FIRST_SOURCE(ref) \
+	(ZEND_PROPERTY_INFO_SOURCE_IS_LIST((ref)->sources.list) \
+		? ZEND_PROPERTY_INFO_SOURCE_TO_LIST((ref)->sources.list)->ptr[0] \
+		: (ref)->sources.ptr)
+
+
+ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
+ZEND_API void zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
+
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
 {
 	zend_refcounted *ref = NULL;
+	zval tmp;
 
 	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
 		ref = Z_COUNTED_P(value);
@@ -70,6 +95,25 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			zend_refcounted *garbage;
 
 			if (Z_ISREF_P(variable_ptr)) {
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
+					zend_bool need_copy = ZEND_CONST_COND(value_type & (IS_CONST|IS_CV), 1) ||
+						((value_type & IS_VAR) && UNEXPECTED(ref) && GC_REFCOUNT(ref) > 1);
+					if (need_copy) {
+						ZVAL_COPY(&tmp, value);
+						value = &tmp;
+					}
+					if (!zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict)) {
+						if (need_copy) {
+							Z_TRY_DELREF_P(value);
+						}
+						zval_ptr_dtor(value);
+						return Z_REFVAL_P(variable_ptr);
+					}
+					if (need_copy) {
+						Z_TRY_DELREF_P(value);
+					}
+				}
+
 				variable_ptr = Z_REFVAL_P(variable_ptr);
 				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
 					break;
@@ -394,6 +438,39 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 			(opline)--;                                  \
 		}                                                \
 	} while (0)
+
+#define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
+
+zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict);
+ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *property);
+
+#define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \
+	zend_ref_add_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
+
+#define ZEND_REF_DEL_TYPE_SOURCE(ref, source) \
+	zend_ref_del_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
+
+#define ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) do { \
+		zend_property_info_source_list *_source_list = &ZEND_REF_TYPE_SOURCES(ref); \
+		zend_property_info **_prop, **_end; \
+		zend_property_info_list *_list; \
+		if (_source_list->ptr) { \
+			if (ZEND_PROPERTY_INFO_SOURCE_IS_LIST(_source_list->list)) { \
+				_list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(_source_list->list); \
+				_prop = _list->ptr; \
+				_end = _list->ptr + _list->num; \
+			} else { \
+				_prop = &_source_list->ptr; \
+				_end = _prop + 1; \
+			} \
+			for (; _prop < _end; _prop++) { \
+				prop = *_prop; \
+
+#define ZEND_REF_FOREACH_TYPE_SOURCES_END() \
+			} \
+		} \
+	} while (0)
+
 
 END_EXTERN_C()
 

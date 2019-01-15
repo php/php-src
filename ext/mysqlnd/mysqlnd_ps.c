@@ -409,7 +409,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 		enum_func_status ret = FAIL;
 		const MYSQLND_CSTRING query_string = {query, query_len};
 
-		ret = conn->run_command(COM_STMT_PREPARE, conn, query_string);
+		ret = conn->command->stmt_prepare(conn, query_string);
 		if (FAIL == ret) {
 			goto fail;
 		}
@@ -686,7 +686,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, const enum_my
 	if (ret == PASS) {
 		const MYSQLND_CSTRING payload = {(const char*) request, request_len};
 
-		ret = conn->run_command(COM_STMT_EXECUTE, conn, payload);
+		ret = conn->command->stmt_execute(conn, payload);
 	} else {
 		SET_CLIENT_ERROR(stmt->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Couldn't generate the request. Possibly OOM.");
 	}
@@ -761,15 +761,11 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, const unsign
 				}
 
 				for (i = 0; i < result->field_count; i++) {
-					zval *result = &stmt->result_bind[i].zv;
-
-					ZVAL_DEREF(result);
-					/* Clean what we copied last time */
-					zval_ptr_dtor(result);
 					/* copy the type */
+					zval *resultzv = &stmt->result_bind[i].zv;
 					if (stmt->result_bind[i].bound == TRUE) {
 						DBG_INF_FMT("i=%u type=%u", i, Z_TYPE(current_row[i]));
-						ZVAL_COPY(result, &current_row[i]);
+						ZEND_TRY_ASSIGN_COPY_EX(resultzv, &current_row[i], 0);
 					}
 				}
 			}
@@ -849,17 +845,15 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 			}
 
 			for (i = 0; i < field_count; i++) {
+				zval *resultzv = &stmt->result_bind[i].zv;
 				if (stmt->result_bind[i].bound == TRUE) {
 					zval *data = &result->unbuf->last_row_data[i];
-					zval *result = &stmt->result_bind[i].zv;
 
 					if (Z_TYPE_P(data) == IS_STRING && (meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))){
 						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
 
-					ZVAL_DEREF(result);
-					zval_ptr_dtor(result);
-					ZVAL_COPY_VALUE(result, data);
+					ZEND_TRY_ASSIGN_VALUE_EX(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
 					ZVAL_NULL(data);
 				}
@@ -990,7 +984,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 	{
 		const MYSQLND_CSTRING payload = {(const char*) buf, sizeof(buf)};
 
-		ret = conn->run_command(COM_STMT_FETCH, conn, payload);
+		ret = conn->command->stmt_fetch(conn, payload);
 		if (ret == FAIL) {
 			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			DBG_RETURN(FAIL);
@@ -1025,12 +1019,10 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 
 			/* If no result bind, do nothing. We consumed the data */
 			for (i = 0; i < field_count; i++) {
+				zval *resultzv = &stmt->result_bind[i].zv;
 				if (stmt->result_bind[i].bound == TRUE) {
 					zval *data = &result->unbuf->last_row_data[i];
-					zval *result = &stmt->result_bind[i].zv;
 
-					ZVAL_DEREF(result);
-					zval_ptr_dtor(result);
 					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, &stmt->result_bind[i].zv,
 								Z_TYPE_P(data), Z_REFCOUNTED(stmt->result_bind[i].zv)?
 							   	Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
@@ -1040,7 +1032,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 						meta->fields[i].max_length = Z_STRLEN_P(data);
 					}
 
-					ZVAL_COPY_VALUE(result, data);
+					ZEND_TRY_ASSIGN_VALUE_EX(resultzv, data, 0);
 					/* copied data, thus also the ownership. Thus null data */
 					ZVAL_NULL(data);
 				}
@@ -1120,28 +1112,6 @@ MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, zend_bool * const fe
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(conn->error_info);
 
-	DBG_INF_FMT("result_bind=%p separated_once=%u", &stmt->result_bind, stmt->result_zvals_separated_once);
-	/*
-	  The user might have not bound any variables for result.
-	  Do the binding once she does it.
-	*/
-	if (stmt->result_bind && !stmt->result_zvals_separated_once) {
-		unsigned int i;
-		/*
-		  mysqlnd_stmt_store_result() has been called free the bind
-		  variables to prevent leaking of their previous content.
-		*/
-		for (i = 0; i < stmt->result->field_count; i++) {
-			if (stmt->result_bind[i].bound == TRUE) {
-				zval *result = &stmt->result_bind[i].zv;
-				ZVAL_DEREF(result);
-				zval_ptr_dtor(result);
-				ZVAL_NULL(result);
-			}
-		}
-		stmt->result_zvals_separated_once = TRUE;
-	}
-
 	ret = stmt->result->m.fetch_row(stmt->result, (void*)s, 0, fetched_anything);
 	DBG_RETURN(ret);
 }
@@ -1189,7 +1159,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
 			size_t stmt_id = stmt->stmt_id;
 
-			ret = stmt->conn->run_command(COM_STMT_RESET, stmt->conn, stmt_id);
+			ret = stmt->conn->command->stmt_reset(stmt->conn, stmt_id);
 			if (ret == FAIL) {
 				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			}
@@ -1295,7 +1265,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 			{
 				const MYSQLND_CSTRING payload = {(const char *) cmd_buf, packet_len};
 
-				ret = conn->run_command(COM_STMT_SEND_LONG_DATA, conn, payload);
+				ret = conn->command->stmt_send_long_data(conn, payload);
 				if (ret == FAIL) {
 					COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 				}
@@ -1537,7 +1507,6 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const s,
 		}
 
 		mysqlnd_stmt_separate_result_bind(s);
-		stmt->result_zvals_separated_once = FALSE;
 		stmt->result_bind = result_bind;
 		for (i = 0; i < stmt->field_count; i++) {
 			/* Prevent from freeing */
@@ -2120,9 +2089,9 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, ze
 
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
 			enum_func_status ret = FAIL;
-			size_t stmt_id = stmt->stmt_id;
+			const size_t stmt_id = stmt->stmt_id;
 
-			ret = conn->run_command(COM_STMT_CLOSE, conn, stmt_id);
+			ret = conn->command->stmt_close(conn, stmt_id);
 			if (ret == FAIL) {
 				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 				DBG_RETURN(FAIL);

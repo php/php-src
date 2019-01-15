@@ -102,6 +102,16 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, ze
 	return (zend_ast *) ast;
 }
 
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *class_name, zend_ast *name) {
+	zend_string *name_str = zend_ast_get_str(name);
+	if (zend_string_equals_literal_ci(name_str, "class")) {
+		zend_string_release(name_str);
+		return zend_ast_create(ZEND_AST_CLASS_NAME, class_name);
+	} else {
+		return zend_ast_create(ZEND_AST_CLASS_CONST, class_name, name);
+	}
+}
+
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
@@ -501,11 +511,28 @@ ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_c
 			break;
 		}
 		case ZEND_AST_CONSTANT_CLASS:
-			ZEND_ASSERT(EG(current_execute_data));
-			if (scope && scope->name) {
+			if (scope) {
 				ZVAL_STR_COPY(result, scope->name);
 			} else {
 				ZVAL_EMPTY_STRING(result);
+			}
+			break;
+		case ZEND_AST_CLASS_NAME:
+			if (!scope) {
+				zend_throw_error(NULL, "Cannot use \"self\" when no class scope is active");
+				return FAILURE;
+			}
+			if (ast->attr == ZEND_FETCH_CLASS_SELF) {
+				ZVAL_STR_COPY(result, scope->name);
+			} else if (ast->attr == ZEND_FETCH_CLASS_PARENT) {
+				if (!scope->parent) {
+					zend_throw_error(NULL,
+						"Cannot use \"parent\" when current class scope has no parent");
+					return FAILURE;
+				}
+				ZVAL_STR_COPY(result, scope->parent->name);
+			} else {
+				ZEND_ASSERT(0 && "Should have errored during compilation");
 			}
 			break;
 		case ZEND_AST_AND:
@@ -1415,7 +1442,10 @@ simple_list:
 			zend_ast_export_var_list(str, (zend_ast_list*)ast, indent);
 			smart_str_appendc(str, ')');
 			break;
-		case ZEND_AST_PROP_DECL:
+		case ZEND_AST_PROP_GROUP: {
+			zend_ast *type_ast = ast->child[0];
+			zend_ast *prop_ast = ast->child[1];
+
 			if (ast->attr & ZEND_ACC_PUBLIC) {
 				smart_str_appends(str, "public ");
 			} else if (ast->attr & ZEND_ACC_PROTECTED) {
@@ -1426,7 +1456,20 @@ simple_list:
 			if (ast->attr & ZEND_ACC_STATIC) {
 				smart_str_appends(str, "static ");
 			}
+
+			if (type_ast) {
+				if (type_ast->attr & ZEND_TYPE_NULLABLE) {
+					smart_str_appendc(str, '?');
+				}
+				zend_ast_export_ns_name(
+					str, type_ast, 0, indent);
+				smart_str_appendc(str, ' ');
+			}
+
+			ast = prop_ast;
 			goto simple_list;
+		}
+
 		case ZEND_AST_CONST_DECL:
 		case ZEND_AST_CLASS_CONST_DECL:
 			smart_str_appends(str, "const ");
@@ -1605,6 +1648,10 @@ simple_list:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::");
 			zend_ast_export_name(str, ast->child[1], 0, indent);
+			break;
+		case ZEND_AST_CLASS_NAME:
+			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			smart_str_appends(str, "::class");
 			break;
 		case ZEND_AST_ASSIGN:            BINARY_OP(" = ",   90, 91, 90);
 		case ZEND_AST_ASSIGN_REF:        BINARY_OP(" =& ",  90, 91, 90);

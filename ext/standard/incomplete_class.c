@@ -60,9 +60,10 @@ static zval *incomplete_class_get_property(zval *object, zval *member, int type,
 }
 /* }}} */
 
-static void incomplete_class_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static zval *incomplete_class_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE);
+	return value;
 }
 /* }}} */
 

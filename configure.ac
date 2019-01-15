@@ -581,7 +581,10 @@ PHP_SOCKADDR_CHECKS
 
 dnl Checks for GCC function attributes on all systems except ones without glibc
 dnl Fix for these systems is already included in GCC 7, but not on GCC 6
-AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*], [true], [
+dnl
+dnl At least some versions of FreeBSD seem to have buggy ifunc support, see
+dnl bug #77284. Conservatively don't use ifuncs on FreeBSD.
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*freebsd*], [true], [
   AX_GCC_FUNC_ATTRIBUTE([ifunc])
   AX_GCC_FUNC_ATTRIBUTE([target])
 ])

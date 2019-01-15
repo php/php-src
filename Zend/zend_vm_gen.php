@@ -76,6 +76,8 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_CACHE_SLOT"  => 1<<18,
 	"ZEND_VM_EXT_ARRAY_INIT"  => 1<<19,
 	"ZEND_VM_EXT_REF"         => 1<<20,
+	"ZEND_VM_EXT_FETCH_REF"   => 1<<21,
+	"ZEND_VM_EXT_DIM_OBJ_WRITE" => 1<<22,
 	"ZEND_VM_EXT_MASK"        => 0x0f000000,
 	"ZEND_VM_EXT_NUM"         => 0x01000000,
 	"ZEND_VM_EXT_LAST_CATCH"  => 0x02000000,
@@ -129,8 +131,10 @@ $vm_ext_decode = array(
 	"TYPE_MASK"            => ZEND_VM_EXT_TYPE_MASK,
 	"ISSET"                => ZEND_VM_EXT_ISSET,
 	"REF"                  => ZEND_VM_EXT_REF,
+	"FETCH_REF"            => ZEND_VM_EXT_FETCH_REF,
 	"SRC"                  => ZEND_VM_EXT_SRC,
 	"CACHE_SLOT"           => ZEND_VM_EXT_CACHE_SLOT,
+	"DIM_OBJ_WRITE"        => ZEND_VM_EXT_DIM_OBJ_WRITE,
 );
 
 $vm_kind_name = array(
@@ -567,6 +571,17 @@ $op_data_get_zval_ptr_deref = array(
 	"TMPVARCV" => "???",
 );
 
+$op_data_get_zval_ptr_ptr = array(
+	"ANY"      => "get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_\\1((opline+1)->op1.var EXECUTE_DATA_CC)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
+);
+
 $op_data_free_op = array(
 	"ANY"      => "FREE_OP(free_op_data)",
 	"TMP"      => "zval_ptr_dtor_nogc(free_op_data)",
@@ -575,6 +590,17 @@ $op_data_free_op = array(
 	"UNUSED"   => "",
 	"CV"       => "",
 	"TMPVAR"   => "zval_ptr_dtor_nogc(free_op_data)",
+	"TMPVARCV" => "???",
+);
+
+$op_data_free_op_var_ptr = array(
+	"ANY"      => "if (free_op_data) {zval_ptr_dtor_nogc(free_op_data);}",
+	"TMP"      => "",
+	"VAR"      => "if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);}",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "???",
 	"TMPVARCV" => "???",
 );
 
@@ -669,8 +695,10 @@ function helper_name($name, $spec, $op1, $op2, $extra_spec) {
 	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2].$extra;
 }
 
-function opcode_name($name, $spec, $op1, $op2) {
+function opcode_name($name, $spec, $op1, $op2, $extra_spec) {
 	global $prefix, $opnames, $opcodes;
+
+	$extra = "";
 
 	if (isset($opnames[$name])) {
 		$opcode = $opcodes[$opnames[$name]];
@@ -710,8 +738,12 @@ function opcode_name($name, $spec, $op1, $op2) {
 				return "ZEND_NULL";
 			}
 		}
+		/* forward common specs (e.g. in ZEND_VM_DISPATCH_TO_HANDLER) */
+		if (isset($extra_spec, $opcode["spec"])) {
+			$extra = extra_spec_name(array_intersect_key($extra_spec, $opcode["spec"]));
+		}
 	}
-	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2];
+	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2].$extra;
 }
 
 // Formats condition, protecting it by parentheses when needed.
@@ -742,8 +774,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 		$op1_free, $op2_free, $op1_free_unfetched, $op2_free_unfetched,
 		$op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
 		$op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix,
-		$op_data_type, $op_data_get_zval_ptr, $op_data_get_zval_ptr_deref,
-		$op_data_free_op, $op_data_free_unfetched;
+		$op_data_type, $op_data_get_zval_ptr,
+		$op_data_get_zval_ptr_deref, $op_data_get_zval_ptr_ptr,
+		$op_data_free_op, $op_data_free_op_var_ptr, $op_data_free_unfetched;
 
 	// Specializing
 	$code = preg_replace(
@@ -793,7 +826,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/OP_DATA_TYPE/",
 			"/GET_OP_DATA_ZVAL_PTR\(([^)]*)\)/",
 			"/GET_OP_DATA_ZVAL_PTR_DEREF\(([^)]*)\)/",
+			"/GET_OP_DATA_ZVAL_PTR_PTR\(([^)]*)\)/",
 			"/FREE_OP_DATA\(\)/",
+			"/FREE_OP_DATA_VAR_PTR\(\)/",
 			"/FREE_UNFETCHED_OP_DATA\(\)/",
 			"/RETURN_VALUE_USED\(opline\)/",
 			"/arg_num <= MAX_ARG_FLAG_NUM/",
@@ -801,6 +836,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/opline->extended_value\s*==\s*0/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_DIM/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_OBJ/",
+			"/opline->extended_value\s*==\s*ZEND_ASSIGN_STATIC_PROP/",
 			"/opline->extended_value\s*&\s*ZEND_ISEMPTY/",
 			"/opline->extended_value\s*&\s*~\s*ZEND_ISEMPTY/",
 		),
@@ -850,7 +886,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			$op_data_type[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			$op_data_get_zval_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			$op_data_get_zval_ptr_deref[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_get_zval_ptr_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			$op_data_free_op[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_free_op_var_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			$op_data_free_unfetched[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			isset($extra_spec['RETVAL']) ? $extra_spec['RETVAL'] : "RETURN_VALUE_USED(opline)",
 			isset($extra_spec['QUICK_ARG']) ? $extra_spec['QUICK_ARG'] : "arg_num <= MAX_ARG_FLAG_NUM",
@@ -868,6 +906,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 				: "\\0",
 			isset($extra_spec['DIM_OBJ']) ?
 				($extra_spec['DIM_OBJ'] == 2 ? "1" : "0")
+				: "\\0",
+			isset($extra_spec['DIM_OBJ']) ?
+				($extra_spec['DIM_OBJ'] == 3 ? "1" : "0")
 				: "\\0",
 			isset($extra_spec['ISSET']) ?
 				($extra_spec['ISSET'] == 0 ? "0" : "1")
@@ -929,7 +970,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "ZEND_VM_TAIL_CALL(" . opcode_name($matches[1], $spec, $op1, $op2) . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
+						return "ZEND_VM_TAIL_CALL(" . opcode_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
@@ -953,7 +994,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "goto " . opcode_name($matches[1], $spec, $op1, $op2) . "_LABEL";
+						return "goto " . opcode_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_LABEL";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
@@ -977,7 +1018,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "goto " . opcode_name($matches[1], $spec, $op1, $op2) . "_LABEL";
+						return "goto " . opcode_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_LABEL";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
@@ -1055,7 +1096,9 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 	}
 
 	if (isset($extra_spec["DIM_OBJ"]) &&
-	    (($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1) ||
+	    ((($op1 == "CONST" || $op1 == "TMP") && $extra_spec["DIM_OBJ"] != 3) ||
+	     ($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1 && $extra_spec["DIM_OBJ"] != 3) ||
+	     ($op2 == "CV" && $extra_spec["DIM_OBJ"] == 3) ||
 	     ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] != 2))) {
 	    // Skip useless handlers
 		return true;
@@ -1579,6 +1622,8 @@ function extra_spec_name($extra_spec) {
 			$s .= "_DIM";
 		} else if ($extra_spec["DIM_OBJ"] == 2) {
 			$s .= "_OBJ";
+		} else if ($extra_spec["DIM_OBJ"] == 3) {
+			$s .= "_STATIC_PROP";
 		}
 	}
 	if (isset($extra_spec["ISSET"])) {
@@ -2281,7 +2326,7 @@ function parse_spec_rules($def, $lineno, $str) {
 					$ret["SMART_BRANCH"] = array(0, 1, 2);
 					break;
 				case "DIM_OBJ":
-					$ret["DIM_OBJ"] = array(0, 1, 2);
+					$ret["DIM_OBJ"] = array(0, 1, 2, 3);
 					break;
 				case "NO_CONST_CONST":
 					$ret["NO_CONST_CONST"] = array(1);
@@ -2722,11 +2767,13 @@ function gen_vm($def, $skel) {
 			}
 			if (isset($used_extra_spec["DIM_OBJ"])) {
 				out($f, "\t\t{$else}if (spec & SPEC_RULE_DIM_OBJ) {\n");
-				out($f,	"\t\t\toffset = offset * 3;\n");
+				out($f,	"\t\t\toffset = offset * 4;\n");
 				out($f, "\t\t\tif (op->extended_value == ZEND_ASSIGN_DIM) {\n");
 				out($f,	"\t\t\t\toffset += 1;\n");
 				out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
 				out($f,	"\t\t\t\toffset += 2;\n");
+				out($f, "\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
+				out($f,	"\t\t\toffset += 3;\n");
 				out($f, "\t\t\t}\n");
 				$else = "} else ";
 			}

@@ -31,8 +31,8 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !HT_FLAGS(&cached_phars)) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 
@@ -104,8 +104,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !HT_FLAGS(&cached_phars)) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 
@@ -237,8 +237,8 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !HT_FLAGS(&cached_phars)) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
@@ -337,8 +337,8 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !HT_FLAGS(&cached_phars)) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		/* no need to check, include_path not even specified in fopen/ no active phars */
 		goto skip_phar;
 	}
@@ -852,8 +852,8 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !HT_FLAGS(&cached_phars)) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
@@ -919,8 +919,8 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !HT_FLAGS(&cached_phars)) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {

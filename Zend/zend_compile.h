@@ -128,7 +128,7 @@ typedef union _zend_parser_stack_elem {
 void zend_compile_top_stmt(zend_ast *ast);
 void zend_compile_stmt(zend_ast *ast);
 void zend_compile_expr(znode *node, zend_ast *ast);
-void zend_compile_var(znode *node, zend_ast *ast, uint32_t type);
+zend_op *zend_compile_var(znode *node, zend_ast *ast, uint32_t type, int by_ref);
 void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
@@ -221,7 +221,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_IMMUTABLE               (1 <<  7) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
 /* Function has typed arguments / class has typed props   |     |     |     */
-#define ZEND_ACC_HAS_TYPE_HINTS          (1 <<  8) /*  ?  |  X  |     |     */
+#define ZEND_ACC_HAS_TYPE_HINTS          (1 <<  8) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
 /* Top-level class or function declaration                |     |     |     */
 #define ZEND_ACC_TOP_LEVEL               (1 <<  9) /*  X  |  X  |     |     */
@@ -334,6 +334,7 @@ typedef struct _zend_property_info {
 	zend_string *name;
 	zend_string *doc_comment;
 	zend_class_entry *ce;
+	zend_type type;
 } zend_property_info;
 
 #define OBJ_PROP(obj, offset) \
@@ -796,6 +797,12 @@ ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_le
         zend_unmangle_property_name_ex(mangled_property, class_name, prop_name, NULL)
 ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len);
 
+static zend_always_inline const char *zend_get_unmangled_property_name(const zend_string *mangled_prop) {
+	const char *class_name, *prop_name;
+	zend_unmangle_property_name(mangled_prop, &class_name, &prop_name);
+	return prop_name;
+}
+
 #define ZEND_FUNCTION_DTOR zend_function_dtor
 #define ZEND_CLASS_DTOR destroy_zend_class
 
@@ -890,6 +897,12 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_GLOBAL_LOCK	(1<<3)
 
 #define ZEND_FETCH_TYPE_MASK	0xe
+
+/* Only one of these can ever be in use */
+#define ZEND_FETCH_REF			1
+#define ZEND_FETCH_DIM_WRITE	2
+#define ZEND_FETCH_OBJ_WRITE	3
+#define ZEND_FETCH_OBJ_FLAGS	3
 
 #define ZEND_ISEMPTY			(1<<0)
 

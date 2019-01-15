@@ -137,6 +137,7 @@ ZEND_FUNCTION(zend_leak_variable)
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
 	zend_object *obj = zend_objects_new(class_type);
+	object_properties_init(obj, class_type);
 	obj->handlers = &zend_test_class_handlers;
 	return obj;
 }
@@ -202,6 +203,36 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
 
 	zend_declare_property_null(zend_test_class, "_StaticProp", sizeof("_StaticProp") - 1, ZEND_ACC_STATIC);
+
+	{
+		zend_string *name = zend_string_init("intProp", sizeof("intProp") - 1, 1);
+		zval val;
+		ZVAL_LONG(&val, 123);
+		zend_declare_typed_property(
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, ZEND_TYPE_ENCODE(IS_LONG, 0));
+		zend_string_release(name);
+	}
+
+	{
+		zend_string *name = zend_string_init("classProp", sizeof("classProp") - 1, 1);
+		zend_string *class_name = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
+		zval val;
+		ZVAL_NULL(&val);
+		zend_declare_typed_property(
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL,
+			ZEND_TYPE_ENCODE_CLASS(class_name, 1));
+		zend_string_release(name);
+	}
+
+	{
+		zend_string *name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, 1);
+		zval val;
+		ZVAL_LONG(&val, 123);
+		zend_declare_typed_property(
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC, NULL,
+			ZEND_TYPE_ENCODE(IS_LONG, 0));
+		zend_string_release(name);
+	}
 
 	INIT_CLASS_ENTRY(class_entry, "_ZendTestChildClass", NULL);
 	zend_test_child_class = zend_register_internal_class_ex(&class_entry, zend_test_class);

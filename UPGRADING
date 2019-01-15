@@ -20,6 +20,11 @@ PHP 7.4 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Referencing parent:: inside a class that does not have a parent will now
+    generate a compile-time error. Previously the error was only emitted at
+    run-time.
+
 - Curl:
   . Attempting to serialize a CURLFile class will now generate an exception.
     Previously the exception was only thrown on unserialization.
@@ -31,6 +36,15 @@ PHP 7.4 UPGRADE NOTES
 - Intl:
   . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
     INTL_IDNA_VARIANT_UTS46 instead of the deprecated INTL_IDNA_VARIANT_2003.
+
+- Openssl:
+  . The openssl_random_pseudo_bytes() function will now throw an exception in
+    error situations, similar to random_bytes(). In particular, an Error is
+    thrown if the number of requested bytes is smaller *or equal* than zero,
+    and an Exception is thrown is sufficient randomness cannot be gathered.
+    The $crypto_strong output argument is guaranteed to always be true if the
+    function does not throw, so explicitly checking it is not necessary.
+    RFC: http://php.net/manual/de/function.openssl-random-pseudo-bytes.php
 
 - PDO:
   . Attempting to serialize a PDO or PDOStatement instance will now generate
@@ -64,8 +78,20 @@ PHP 7.4 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . Added support for typed properties. For example:
+
+        class User {
+            public int $id;
+            public string $name;
+        }
+
+    This will enforce that $user->id can only be assigned integer and
+    $user->name can only be assigned strings. For more information see the
+    RFC: https://wiki.php.net/rfc/typed_properties_v2
+
 - PDO_OCI:
-  . PDOStatement::getColumnMeta is now available
+  . PDOStatement::getColumnMeta() is now available
 
 - PDO_SQLite:
   . PDOStatement::getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT) allows to
@@ -140,6 +166,8 @@ PHP 7.4 UPGRADE NOTES
      * Threshold-cropping now uses the algorithm of system libgd
   . The default $mode parameter of imagecropauto() has been changed to
     IMG_CROP_DEFAULT; passing -1 is now deprecated.
+  . imagescale() now supports aspect ratio preserving scaling to a fixed height
+    by passing -1 as $new_width.
 
 - Hash:
   . The hash extension cannot be disabled anymore and is always an integral

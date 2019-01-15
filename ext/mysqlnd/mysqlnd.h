@@ -78,7 +78,7 @@ PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
 #define mysqlnd_thread_safe()	TRUE
 
-PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(unsigned int charsetno);
+PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(const unsigned int charsetno);
 PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const charsetname);
 
 
@@ -188,7 +188,7 @@ PHPAPI void mysqlnd_free_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind);
 PHPAPI const char * mysqlnd_field_type_name(const enum mysqlnd_field_types field_type);
 
 /* LOAD DATA LOCAL */
-void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
+PHPAPI void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 
 /* Simple commands */
 #define mysqlnd_autocommit(conn, mode)		((conn)->data)->m->set_autocommit((conn)->data, (mode))

@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
 
+- FFI:
+  . Added FFI extension. (Dmitry)
+
 - FPM:
   . Implemented FR #72510 (systemd service should be hardened). (Craig Andrews)
 
@@ -25,6 +28,8 @@ PHP                                                                        NEWS
     falling back to IMG_CROP_SIDES.
   . The default $mode parameter of imagecropauto() has been changed to
     IMG_CROP_DEFAULT; passing -1 is now deprecated.
+  . Added support for aspect ratio preserving scaling to a fixed height for
+    imagescale(). (Andreas Treichel)
 
 - Hash:
   . The hash extension is now an integral part of PHP and cannot be disabled
@@ -40,6 +45,8 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Added openssl_x509_verify function. (Ben Scholzen)
+  . openssl_random_pseudo_bytes() now throws in error conditions.
+    (Sammy Kaye Powers)
 
 - PDO_OCI:
   . Implemented FR #76908 (PDO_OCI getColumnMeta() not implemented).

@@ -451,6 +451,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			fprintf(stderr, " (dim)");
 		} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 			fprintf(stderr, " (obj)");
+		} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+			fprintf(stderr, " (static prop)");
 		}
 	} else if (ZEND_VM_EXT_TYPE == (flags & ZEND_VM_EXT_MASK)) {
 		switch (opline->extended_value) {
@@ -554,7 +556,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	} else if (ZEND_VM_EXT_SRC == (flags & ZEND_VM_EXT_MASK)) {
 		if (opline->extended_value == ZEND_RETURNS_VALUE) {
 			fprintf(stderr, " (value)");
-		} else if (opline->extended_value == ZEND_RETURNS_FUNCTION) {
+		} else if (opline->extended_value & ZEND_RETURNS_FUNCTION) {
 			fprintf(stderr, " (function)");
 		}
 	} else {
@@ -583,6 +585,16 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		if (ZEND_VM_EXT_REF & flags) {
 			if (opline->extended_value & ZEND_ARRAY_ELEMENT_REF) {
 				fprintf(stderr, " (ref)");
+			}
+		}
+		if ((ZEND_VM_EXT_DIM_OBJ_WRITE|ZEND_VM_EXT_FETCH_REF) & flags) {
+			uint32_t obj_flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
+			if (obj_flags == ZEND_FETCH_REF) {
+				fprintf(stderr, " (ref)");
+			} else if (obj_flags == ZEND_FETCH_DIM_WRITE) {
+				fprintf(stderr, " (dim write)");
+			} else if (obj_flags == ZEND_FETCH_OBJ_WRITE) {
+				fprintf(stderr, " (obj write)");
 			}
 		}
 	}

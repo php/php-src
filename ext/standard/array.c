@@ -170,7 +170,7 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 			}
 		}
 	}
-	return ZEND_NORMALIZE_BOOL(l1 > l2);
+	return ZEND_NORMALIZE_BOOL(l1 - l2);
 }
 /* }}} */
 
@@ -1786,9 +1786,11 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 				zend_throw_error(NULL, "Cannot re-assign $this");
 				return -1;
 			}
-			ZVAL_DEREF(orig_var);
-			zval_ptr_dtor(orig_var);
-			ZVAL_COPY_DEREF(orig_var, entry);
+			ZVAL_DEREF(entry);
+			ZEND_TRY_ASSIGN_COPY_EX(orig_var, entry, 0);
+			if (UNEXPECTED(EG(exception))) {
+				return -1;
+			}
 			count++;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1869,9 +1871,11 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 			if (zend_string_equals_literal(var_name, "GLOBALS")) {
 				continue;
 			}
-			ZVAL_DEREF(orig_var);
-			zval_ptr_dtor(orig_var);
-			ZVAL_COPY_DEREF(orig_var, entry);
+			ZVAL_DEREF(entry);
+			ZEND_TRY_ASSIGN_COPY_EX(orig_var, entry, 0);
+			if (UNEXPECTED(EG(exception))) {
+				return -1;
+			}
 		} else {
 			ZVAL_DEREF(entry);
 			Z_TRY_ADDREF_P(entry);
@@ -1971,9 +1975,11 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 						if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 							orig_var = Z_INDIRECT_P(orig_var);
 						}
-						ZVAL_DEREF(orig_var);
-						zval_ptr_dtor(orig_var);
-						ZVAL_COPY(orig_var, entry);
+						ZEND_TRY_ASSIGN_COPY_EX(orig_var, entry, 0);
+						if (UNEXPECTED(EG(exception))) {
+							zend_string_release_ex(Z_STR(final_name), 0);
+							return -1;
+						}
 					} else {
 						Z_TRY_ADDREF_P(entry);
 						zend_hash_add_new(symbol_table, Z_STR(final_name), entry);
@@ -2097,9 +2103,11 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 						if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 							orig_var = Z_INDIRECT_P(orig_var);
 						}
-						ZVAL_DEREF(orig_var);
-						zval_ptr_dtor(orig_var);
-						ZVAL_COPY(orig_var, entry);
+						ZEND_TRY_ASSIGN_COPY_EX(orig_var, entry, 0);
+						if (UNEXPECTED(EG(exception))) {
+							zend_string_release_ex(Z_STR(final_name), 0);
+							return -1;
+						}
 					} else {
 						Z_TRY_ADDREF_P(entry);
 						zend_hash_add_new(symbol_table, Z_STR(final_name), entry);
@@ -2202,9 +2210,11 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 					if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 						orig_var = Z_INDIRECT_P(orig_var);
 					}
-					ZVAL_DEREF(orig_var);
-					zval_ptr_dtor(orig_var);
-					ZVAL_COPY(orig_var, entry);
+					ZEND_TRY_ASSIGN_COPY_EX(orig_var, entry, 0);
+					if (UNEXPECTED(EG(exception))) {
+						zend_string_release_ex(Z_STR(final_name), 0);
+						return -1;
+					}
 				} else {
 					Z_TRY_ADDREF_P(entry);
 					zend_hash_add_new(symbol_table, Z_STR(final_name), entry);
@@ -2309,9 +2319,11 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 				if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 					orig_var = Z_INDIRECT_P(orig_var);
 				}
-				ZVAL_DEREF(orig_var);
-				zval_ptr_dtor(orig_var);
-				ZVAL_COPY(orig_var, entry);
+				ZEND_TRY_ASSIGN_COPY_EX(orig_var, entry, 0);
+				if (UNEXPECTED(EG(exception))) {
+					zend_string_release_ex(Z_STR(final_name), 0);
+					return -1;
+				}
 			} else {
 				Z_TRY_ADDREF_P(entry);
 				zend_hash_add_new(symbol_table, Z_STR(final_name), entry);
@@ -5604,7 +5616,7 @@ PHPAPI int php_multisort_compare(const void *a, const void *b) /* {{{ */
 /* }}} */
 
 #define MULTISORT_ABORT				\
-	efree(ARRAYG(multisort_func));	\
+	efree(func);	\
 	efree(arrays);					\
 	RETURN_FALSE;
 
@@ -5636,6 +5648,7 @@ PHP_FUNCTION(array_multisort)
 	int				sort_order = PHP_SORT_ASC;
 	int				sort_type  = PHP_SORT_REGULAR;
 	int				i, k, n;
+	compare_func_t  *func;
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
@@ -5646,7 +5659,7 @@ PHP_FUNCTION(array_multisort)
 	for (i = 0; i < MULTISORT_LAST; i++) {
 		parse_state[i] = 0;
 	}
-	ARRAYG(multisort_func) = (compare_func_t*)ecalloc(argc, sizeof(compare_func_t));
+	func = ARRAYG(multisort_func) = (compare_func_t*)ecalloc(argc, sizeof(compare_func_t));
 
 	/* Here we go through the input arguments and parse them. Each one can
 	 * be either an array or a sort flag which follows an array. If not
@@ -5730,7 +5743,7 @@ PHP_FUNCTION(array_multisort)
 
 	/* If all arrays are empty we don't need to do anything. */
 	if (array_size < 1) {
-		efree(ARRAYG(multisort_func));
+		efree(func);
 		efree(arrays);
 		RETURN_TRUE;
 	}
@@ -5789,7 +5802,7 @@ PHP_FUNCTION(array_multisort)
 		efree(indirect[i]);
 	}
 	efree(indirect);
-	efree(ARRAYG(multisort_func));
+	efree(func);
 	efree(arrays);
 	RETURN_TRUE;
 }

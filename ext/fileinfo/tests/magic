@@ -520,7 +520,7 @@
 0	lelong	0x00080003	Android binary XML
 
 #------------------------------------------------------------------------------
-# $File: animation,v 1.66 2017/10/06 15:36:38 christos Exp $
+# $File: animation,v 1.68 2018/05/06 16:08:07 christos Exp $
 # animation:  file(1) magic for animation/movie formats
 #
 # animation formats
@@ -1578,6 +1578,13 @@
 !:ext	mxf
 !:mime	application/mxf
 
+# Recognize LucasArts Smush video files (cf.
+# https://wiki.multimedia.cx/index.php/Smush)
+0	string	ANIM
+>8	string	AHDR	LucasArts Smush Animation Format (SAN) video
+0	string	SANM
+>8	string	SHDR	LucasArts Smush v2 (SANM) video
+
 #------------------------------------------------------------------------------
 # $File: aout,v 1.1 2013/01/09 22:37:23 christos Exp $
 # aout:  file(1) magic for a.out executable/object/etc entries that
@@ -2180,7 +2187,7 @@
 >>5	ubyte	    	x		\b.%u, little-endian
 >>0	use		\^apt-cache-be
 #------------------------------------------------------------------------------
-# $File: archive,v 1.117 2018/03/17 02:11:04 christos Exp $
+# $File: archive,v 1.119 2018/04/24 23:19:45 christos Exp $
 # archive:  file(1) magic for archive formats (see also "msdos" for self-
 #           extracting compressed archives)
 #
@@ -2192,6 +2199,7 @@
 # Reference: https://www.freebsd.org/cgi/man.cgi?query=tar&sektion=5&manpath=FreeBSD+8-current
 # header mainly padded with nul bytes
 500	quad		0		
+!:strength /2
 # filename or extended attribute printable strings in range space null til umlaut ue
 >0	ubeshort	>0x1F00		
 >>0	ubeshort	<0xFCFD
@@ -2442,7 +2450,7 @@
 #
 # BSD/SVR2-and-later portable archive formats.
 #
-0	string		=!<arch>		current ar archive
+0	string		=!<arch>\n		current ar archive
 !:mime	application/x-archive
 >8	string		__.SYMDEF	random library
 >68	string		__.SYMDEF\ SORTED	random library
@@ -3686,7 +3694,7 @@
 >364	string		>\0		of '%s'
 
 #------------------------------------------------------------------------------
-# $File: audio,v 1.86 2018/03/11 00:53:11 christos Exp $
+# $File: audio,v 1.89 2018/07/03 20:55:37 christos Exp $
 # audio:  file(1) magic for sound formats (see also "iff")
 #
 # Jan Nicolai Langfeldt (janl@ifi.uio.no), Dan Quinlan (quinlan@yggdrasil.com),
@@ -4545,6 +4553,36 @@
 >0	byte	x		\b, version %u
 >1	byte	x		\b.%u
 
+# CRI ADX ADPCM audio
+# Used by various Sega games.
+# https://en.wikipedia.org/wiki/ADX_(file_format)
+# https://wiki.multimedia.cx/index.php/CRI_ADX_file
+# Added by David Korth <gerbilsoft@gerbilsoft.com>
+0x00		beshort		0x8000
+>(2.S-2)	string		(c)CRI		CRI ADX ADPCM audio
+>>0x12		byte		x		v%u
+>>0x04		byte		0x02		\b, pre-set prediction coefficients
+>>0x04		byte		0x03		\b, standard ADX
+>>0x04		byte		0x04		\b, exponential scale
+>>0x04		byte		0x05		\b, AHX
+>>0x08		belong		x		\b, %u Hz
+>>0x12		byte		0x03
+>>>0x02		beshort		>0x2B
+>>>>0x18	belong		!0		\b, looping
+>>0x12		byte		0x04
+>>>0x02		beshort		>0x37
+>>>>0x24	belong		!0		\b, looping
+>>0x13		byte&0x08	0x08		\b, encrypted
+
+# Lossless audio (.la) (http://www.lossless-audio.com/)
+0	string	LA
+>2	string	03	Lossless audio version 0.3
+>2	string	04	Lossless audio version 0.4
+
+# Sony PlayStation Audio (.xa)
+0	leshort 0x4158	Sony PlayStation Audio
+
+
 #----------------------------------------------------------------
 # $File: basis,v 1.4 2009/09/19 16:28:08 christos Exp $
 # basis: file(1) magic for BBx/Pro5-files
@@ -5054,7 +5092,7 @@
 
 
 #------------------------------------------------------------------------------
-# $File: cad,v 1.15 2017/06/24 15:24:56 christos Exp $
+# $File: cad,v 1.16 2018/05/07 23:26:31 christos Exp $
 # autocad:  file(1) magic for cad files
 #
 
@@ -5207,12 +5245,20 @@
 >>8	lelong		0xa
 >>>16	leshort		0x3d3d	3D Studio model
 !:mime	image/x-3ds
-!:extension 3ds
+!:ext 3ds
 
 # MegaCAD 2D/3D drawing (.prt)
 # http://megacad.de/
 # From: Markus Heidelberg <markus.heidelberg@web.de>
 0	string	MegaCad23\0	MegaCAD 2D/3D drawing
+
+# Hoops CAD files
+# https://docs.techsoft3d.com/visualize/3df/latest/build/general/hsf/\
+# HSF_architecture.html
+# Stephane Charette <stephane.charette@gmail.com>
+0	string	;;\020HSF\020V		OpenHSF (Hoops Stream Format)
+>7	regex/9 V[.0-9]{4,5}\020	%s
+!:ext hsf
 
 #------------------------------------------------------------------------------
 # $File: cafebabe,v 1.23 2017/05/25 20:07:23 christos Exp $
@@ -6127,7 +6173,7 @@
 0	string	bvxn	lzfse encoded, lzvn compressed
 
 #------------------------------------------------------------------------------
-# $File: console,v 1.35 2017/11/14 15:48:36 christos Exp $
+# $File: console,v 1.40 2018/06/23 16:40:40 christos Exp $
 # Console game magic
 # Toby Deshane <hac@shoelace.digivill.net>
 
@@ -6174,10 +6220,12 @@
 
 # Standard iNES ROM header.
 0	string		NES\x1A		NES ROM image (iNES)
+!:mime	application/x-nes-rom
 >0	use		nes-rom-image-ines
 
 # Wii U Virtual Console iNES ROM header.
 0	belong		0x4E455300	NES ROM image (Wii U Virtual Console)
+!:mime	application/x-nes-rom
 >0	use		nes-rom-image-ines
 
 #------------------------------------------------------------------------------
@@ -6190,6 +6238,7 @@
 #
 0	string	UNIF
 >4	lelong	<16	NES ROM image (UNIF v%d format)
+!:mime	application/x-nes-rom
 
 #------------------------------------------------------------------------------
 # fds: file(1) magic for Famciom Disk System disk images
@@ -6208,12 +6257,14 @@
 # Headered version.
 0	string	FDS\x1A
 >0x11	string	*NINTENDO-HVC*	Famicom Disk System disk image:
+!:mime	application/x-fds-disk
 >>0x10	use	nintendo-fds-disk-info-block
 >4	byte	1	(%u side)
 >4	byte	!1	(%u sides)
 
 # Unheadered version.
 1	string	*NINTENDO-HVC*	Famicom Disk System disk image:
+!:mime	application/x-fds-disk
 >0	use	nintendo-fds-disk-info-block
 
 #------------------------------------------------------------------------------
@@ -6222,6 +6273,7 @@
 # From: David Korth <gerbilsoft@gerbilsoft.com>
 #
 0		string	TNES	NES ROM image (Nintendo 3DS Virtual Console)
+!:mime		application/x-nes-rom
 >4		byte	100	\b: FDS,
 >>0x2010	use	nintendo-fds-disk-info-block
 >4		byte	!100	\b: TNES mapper %u
@@ -6237,6 +6289,8 @@
 # Reference: http://gbdev.gg8.se/wiki/articles/The_Cartridge_Header
 #
 0x104		bequad		0xCEED6666CC0D000B	Game Boy ROM image
+# TODO: application/x-gameboy-color-rom for GBC.
+!:mime		application/x-gameboy-rom
 >0x143		byte&0x80	0x80
 >>0x134		string		>\0			\b: "%.15s"
 >0x143		byte&0x80	!0x80
@@ -6251,6 +6305,7 @@
 >>0x146		byte		!0x03
 >>>0x143	byte&0xC0	0x80	[CGB]
 >>>0x143	byte&0xC0	0xC0	[CGB ONLY]
+>0x14b		byte		!0x33
 
 # Mapper.
 >0x147 byte 0x00  [ROM ONLY]
@@ -6326,29 +6381,37 @@
 # TODO: Check for 32X CD?
 # Sega Mega CD disc images: 2048-byte sectors.
 0	string	SEGADISCSYSTEM\ \ 	Sega Mega CD disc image
+!:mime	application/x-sega-cd-rom
 >0	use	sega-mega-drive-header
 >0	byte	x			\b, 2048-byte sectors
 0	string	SEGABOOTDISC\ \ \ \ 	Sega Mega CD disc image
+!:mime	application/x-sega-cd-rom
 >0	use	sega-mega-drive-header
 >0	byte	x			\b, 2048-byte sectors
 # Sega Mega CD disc images: 2352-byte sectors.
 0x10	string	SEGADISCSYSTEM\ \ 	Sega Mega CD disc image
+!:mime	application/x-sega-cd-rom
 >0x10	use	sega-mega-drive-header
 >0	byte	x			\b, 2352-byte sectors
 0x10	string	SEGABOOTDISC\ \ \ \ 	Sega Mega CD disc image
+!:mime	application/x-sega-cd-rom
 >0x10	use	sega-mega-drive-header
 >0	byte	x			\b, 2352-byte sectors
 
 # Sega Mega Drive, 32X, Pico, and Mega CD Boot ROM images.
 0x100		string	SEGA
 >0x3C0		bequad	0x4D41525320434845	Sega 32X ROM image
+!:mime		application/x-genesis-32x-rom
 >>0		use	sega-mega-drive-header
 >0x3C0		bequad	!0x4D41525320434845
 >>0x105		belong	0x5049434F	Sega Pico ROM image
+!:mime		application/x-sega-pico-rom
 >>>0		use	sega-mega-drive-header
 >>0x105		belong	!0x5049434F
 >>>0x180	beshort	0x4252		Sega Mega CD Boot ROM image
+!:mime		application/x-genesis-rom
 >>>0x180	beshort	!0x4252		Sega Mega Drive / Genesis ROM image
+!:mime		application/x-genesis-rom
 >>>0		use	sega-mega-drive-header
 
 #------------------------------------------------------------------------------
@@ -6365,11 +6428,13 @@
 # "Sega Genesis" header.
 0x280	string EAGN
 >8	beshort	0xAABB	Sega Mega Drive / Genesis ROM image (SMD format):
+!:mime	application/x-genesis-rom
 >>0	use     sega-genesis-smd-header
 
 # "Sega Mega Drive" header.
 0x280	string EAMG
 >8	beshort	0xAABB	Sega Mega Drive / Genesis ROM image (SMD format):
+!:mime	application/x-genesis-rom
 >>0	use     sega-genesis-smd-header
 
 #------------------------------------------------------------------------------
@@ -6385,12 +6450,17 @@
 0	name	sega-master-system-rom-header
 # Machine type.
 >0x0F	byte&0xF0	0x30	Sega Master System
+!:mime	application/x-sms-rom
 >0x0F	byte&0xF0	0x40	Sega Master System
+!:mime	application/x-sms-rom
 >0x0F	byte&0xF0	0x50	Sega Game Gear
+!:mime	application/x-gamegear-rom
 >0x0F	byte&0xF0	0x60	Sega Game Gear
+!:mime	application/x-gamegear-rom
 >0x0F	byte&0xF0	0x70	Sega Game Gear
->0x0F	byte&0xF0	<0x30	Sega Master System / Game Gear
->0x0F	byte&0xF0	>0x70	Sega Master System / Game Gear
+!:mime	application/x-gamegear-rom
+>0x0F	default		x	Sega Master System / Game Gear
+!:mime	application/x-sms-rom
 >0	byte		x	ROM image:
 # Product code.
 >0x0E	byte&0xF0	0x10	1
@@ -6450,10 +6520,12 @@
 
 # 2048-byte sector version.
 0	string	SEGA\ SEGASATURN\ 	Sega Saturn disc image
+!:mime	application/x-saturn-rom
 >0	use	sega-saturn-disc-header
 >0	byte	x			(2048-byte sectors)
 # 2352-byte sector version.
 0x10	string	SEGA\ SEGASATURN\ 	Sega Saturn disc image
+!:mime	application/x-saturn-rom
 >0x10	use	sega-saturn-disc-header
 >0	byte	x			(2352-byte sectors)
 
@@ -6474,10 +6546,12 @@
 
 # 2048-byte sector version.
 0	string	SEGA\ SEGAKATANA\ 	Sega Dreamcast disc image
+!:mime	application/x-dc-rom
 >0	use	sega-dreamcast-disc-header
 >0	byte	x			(2048-byte sectors)
 # 2352-byte sector version.
 0x10	string	SEGA\ SEGAKATANA\ 	Sega Dreamcast disc image
+!:mime	application/x-dc-rom
 >0x10	use	sega-dreamcast-disc-header
 >0	byte	x			(2352-byte sectors)
 
@@ -6493,6 +6567,7 @@
 # From: David Korth <gerbilsoft@gerbilsoft.com>
 #
 0	bequad	0x803712400000000F	Nintendo 64 ROM image
+!:mime	application/x-n64-rom
 >0x20	string	>\0	\b: "%.20s"
 >0x3B	string	x	(%.4s
 >0x3F	byte	x	\b, Rev.%02u)
@@ -6502,18 +6577,21 @@
 # Same as z64 format, but with 16-bit byteswapping.
 #
 0	bequad	0x3780401200000F00	Nintendo 64 ROM image (V64)
+!:mime	application/x-n64-rom
 
 #------------------------------------------------------------------------------
 # n64-swap2: file(1) magic for the swap2 format N64 ROM dumps
 # Same as z64 format, but with swapped 16-bit words.
 #
 0	bequad	0x12408037000F0000	Nintendo 64 ROM image (wordswapped)
+!:mime	application/x-n64-rom
 
 #------------------------------------------------------------------------------
 # n64-le32: file(1) magic for the 32-bit byteswapped format N64 ROM dumps
 # Same as z64 format, but with 32-bit byteswapping.
 #
 0	bequad	0x401237800F000000	Nintendo 64 ROM image (32-bit byteswapped)
+!:mime	application/x-n64-rom
 
 #------------------------------------------------------------------------------
 # gba: file(1) magic for the Nintendo Game Boy Advance raw ROM format
@@ -6523,6 +6601,7 @@
 # Updated version from: David Korth <gerbilsoft@gerbilsoft.com>
 #
 4	bequad	0x24FFAE51699AA221	Game Boy Advance ROM image
+!:mime	application/x-gba-rom
 >0xA0	string	>\0	\b: "%.12s"
 >0xAC	string	x	(%.6s
 >0xBC	byte	x	\b, Rev.%02u)
@@ -6535,6 +6614,7 @@
 # Updated version from: David Korth <gerbilsoft@gerbilsoft.com>
 #
 0xC0	bequad	0x24FFAE51699AA221	Nintendo DS ROM image
+!:mime	application/x-nintendo-ds-rom
 >0x00	string	>\0		\b: "%.12s"
 >0x0C	string	x		(%.6s
 >0x1E	byte	x		\b, Rev.%02u)
@@ -6555,6 +6635,7 @@
 # This is also used for loading .nds files using the MSET exploit on 3DS.
 # Reference: https://github.com/devkitPro/ndstool/blob/master/source/ndscreate.cpp
 0xC0	bequad	0xC8604FE201708FE2	Nintendo DS Slot-2 ROM image (PassMe)
+!:mime	application/x-nintendo-ds-rom
 
 #------------------------------------------------------------------------------
 # ngp: file(1) magic for the Neo Geo Pocket (Color) raw ROM format.
@@ -6564,6 +6645,7 @@
 # - http://www.devrs.com/ngp/files/ngpctech.txt
 #
 0x0A	string	BY\ SNK\ CORPORATION	Neo Geo Pocket
+!:mime	application/x-neo-geo-pocket-rom
 >0x23	byte	0x10			Color
 >0	byte	x			ROM image
 >0x24	string	>\0			\b: "%.12s"
@@ -6629,8 +6711,10 @@
 # 8 character OMF-86 object file headers.
 0	beshort		0x8008
 >6	string		BS93		Lynx homebrew cartridge
+!:mime	application/x-atari-lynx-rom
 >>2	beshort		x		\b, RAM start $%04x
 >6	string		LYNX		Lynx cartridge
+!:mime	application/x-atari-lynx-rom
 >>2	beshort		x		\b, RAM start $%04x
 
 # Opera file system that is used on the 3DO console
@@ -6645,11 +6729,11 @@
 # Gameboy%20Sound%20System%20(.gbs).txt
 0	string		GBS		Nintendo Gameboy Music/Audio Data
 #12	string		GameBoy\ Music\ Module	Nintendo Gameboy Music Module
->16	string		>\0	("%s" by
->48	string		>\0	%s, copyright
->80	string		>\0	%s),
->3	byte		x	version %d,
->4	byte		x	%d tracks
+>16	string		>\0	("%.32s" by
+>48	string		>\0	%.32s, copyright
+>80	string		>\0	%.32s),
+>3	byte		x	version %u,
+>4	byte		x	%u tracks
 
 # IPS Patch Files from: From: Thomas Klausner <tk@giga.or.at>
 # see http://zerosoft.zophar.net/ips.php
@@ -6752,11 +6836,14 @@
 >>0x06	byte	2	\b, Disc 3
 >>0x06	byte	3	\b, Disc 4
 >0x07	byte	x	\b, Rev.%02u)
+>0x18	belong	0x5D1C9EA3
+>>0x60	beshort	0x0101	\b (Unencrypted)
 
 # Type: Nintendo GameCube disc image
 # From: David Korth <gerbilsoft@gerbilsoft.com>
 # Reference: http://wiibrew.org/wiki/Wii_Disc
 0x1C	belong	0xC2339F3D	Nintendo GameCube disc image:
+!:mime	application/x-gamecube-rom
 >0	use	nintendo-gcn-disc-common
 
 # Type: Nintendo GameCube embedded disc image
@@ -6766,6 +6853,7 @@
 0		belong	0xAE0F38A2
 >0x0C		belong	0x00100000
 >>(8.L+0x1C)	belong	0xC2339F3D	Nintendo GameCube embedded disc image:
+!:mime	application/x-gamecube-rom
 >>>(8.L)	use	nintendo-gcn-disc-common
 
 # Type: Nintendo Wii disc image
@@ -6779,6 +6867,7 @@
 # Reference: http://wiibrew.org/wiki/Wii_Disc
 0	string	WBFS
 >0x218	belong	0x5D1C9EA3	Nintendo Wii disc image (WBFS format):
+!:mime	application/x-wii-rom
 >>0x200	use	nintendo-gcn-disc-common
 
 # Type: Nintendo GameCube/Wii disc image (CISO format)
@@ -6792,40 +6881,60 @@
 >4		lelong	0x200000
 >>8		byte	1
 >>>0x801C	belong	0xC2339F3D	Nintendo GameCube disc image (CISO format):
+!:mime	application/x-wii-rom
 >>>>0x8000	use	nintendo-gcn-disc-common
 >>>0x8018	belong	0x5D1C9EA3	Nintendo Wii disc image (CISO format):
+!:mime	application/x-wii-rom
 >>>>0x8000	use	nintendo-gcn-disc-common
 
 # Type: Nintendo GameCube/Wii disc image (GCZ format)
 # Due to zlib compression, we can't get the actual disc information.
 0	lelong	0xB10BC001
 >4	lelong	0		Nintendo GameCube disc image (GCZ format)
+!:mime	application/x-gamecube-rom
 >4	lelong	1		Nintendo Wii disc image (GCZ format)
->4	lelong	>1		Nintendo GameCube/Wii disc image (GCZ format)
+!:mime	application/x-wii-rom
+>4	default	x		Nintendo GameCube/Wii disc image (GCZ format)
 
 # Type: Nintendo GameCube/Wii disc image (WDF format)
 0		string	WII\001DISC
 >8		belong	1
 # WDFv1
 >>0x54		belong	0xC2339F3D	Nintendo GameCube disc image (WDFv1 format):
+!:mime	application/x-gamecube-rom
 >>>0x38		use	nintendo-gcn-disc-common
 >>0x58		belong	0x5D1C9EA3	Nintendo Wii disc image (WDFv1 format):
+!:mime	application/x-wii-rom
 >>>0x38		use	nintendo-gcn-disc-common
 >8		belong	2
 # WDFv2
 >>(12.L+0x1C)	belong	0xC2339F3D	Nintendo GameCube disc image (WDFv2 format):
+!:mime	application/x-gamecube-rom
 >>>(12.L)	use	nintendo-gcn-disc-common
 >>(12.L+0x18)	belong	0x5D1C9EA3	Nintendo Wii disc image (WDFv2 format):
+!:mime	application/x-wii-rom
 >>>(12.L)	use	nintendo-gcn-disc-common
 
 # Type: Nintendo GameCube/Wii disc image (WIA format)
 0	string	WIA\001	Nintendo
->0x48	belong	0	GameCube/Wii
 >0x48	belong	1	GameCube
+!:mime	application/x-gamecube-rom
 >0x48	belong	2	Wii
->0x48	belong	>2	GameCube/Wii
+!:mime	application/x-wii-rom
+>0x48	default	x	GameCube/Wii
 >0x48	belong	x	disc image (WIA format):
 >>0x58	use	nintendo-gcn-disc-common
+
+# Type: Nintendo GameCube/Wii disc image (with SDK header)
+# From: David Korth <gerbilsoft@gerbilsoft.com>
+# Reference: http://wiibrew.org/wiki/Wii_Disc
+0		belong	0xFFFF0000
+>0x18		belong	0x00000000
+>>0x1C		belong	0x00000000
+>>>0x8018	belong	0x5D1C9EA3	Nintendo Wii SDK disc image:
+>>>>0x8000	use	nintendo-gcn-disc-common
+>>>0x801C	belong	0xC2339F3D	Nintendo GameCube SDK disc image:
+>>>>0x8000	use	nintendo-gcn-disc-common
 
 #------------------------------------------------------------------------------
 # Nintendo 3DS file formats.
@@ -6943,6 +7052,7 @@
 0	byte	>0
 >0	byte	<3
 >>1	string	ATARI7800	Atari 7800 ROM image
+!:mime	application/x-atari-7800-rom
 >>>0x11	string	>\0	\b: "%.32s"
 # Display type.
 >>>0x39	byte	0	(NTSC)
@@ -7254,7 +7364,7 @@
 >15	long		>30		$BS, block size: %i bytes
 
 #------------------------------------------------------------------------------
-# $File: database,v 1.52 2017/08/13 00:21:47 christos Exp $
+# $File: database,v 1.54 2018/06/23 16:37:21 christos Exp $
 # database:  file(1) magic for various databases
 #
 # extracted from header/code files by Graeme Wilford (eep2gw@ee.surrey.ac.uk)
@@ -7887,8 +7997,67 @@
 >32	lelong	x		\b, index %d
 >36	lelong	x		\b, seed %#x
 
+#
+# Redis RDB - https://redis.io/topics/persistence
+0	string	REDIS			Redis RDB file,
+>5	regex	[0-9][0-9][0-9][0-9]	version %s
+
+# Mork database.
+# Used by older versions of Mozilla Suite and Firefox,
+# and current versions of Thunderbird.
+# From: David Korth <gerbilsoft@gerbilsoft.com>
+0	string	//\ <!--\ <mdb:mork:z\ v="	Mozilla Mork database
+>23	string	x		\b, version %.3s
+
 #------------------------------------------------------------------------------
-# $File: dbpf,v 1.1 2017/10/13 20:47:14 christos Exp $
+# $File: dataone,v 1.1 2018/06/06 01:16:40 christos Exp $
+#
+# DataONE- files from Dave Vieglais <dave.vieglais@gmail.com> &
+#                     Pratik Shrivastava <pratikshrivastava23@gmail.com>
+#
+# file formats:   https://cn.dataone.org/cn/v2/formats
+#------------------------------------------------------------------------------
+
+# EML (Ecological Metadata Language Format)
+0	string	<?xml
+>&0	regex	(eml)-[0-9].[0-9].[0-9]+	eml://ecoinformatics.org/%s
+
+# onedcx (DataONE Dublin Core Extended v1.0)
+>&0	regex	(onedcx/v)[0-9].[0-9]+		http://ns.dataone.org/metadata/schema/onedcx/v1.0
+
+# FGDC-STD-001-1998 (Content Standard for Digital Geospatial Metadata,
+# version 001-1998)
+>&0	regex	fgdc				FGDC-STD-001-1998
+
+# Mercury (Oak Ridge National Lab Mercury Metadata version 1.0)
+>&0	regex	(mercury/terms/v)[0-9].[0-9]	http://purl.org/ornl/schema/mercury/terms/v1.0
+
+# ISOTC211 (Geographic MetaData (GMD) Extensible Markup Language)
+>&0	regex	isotc211
+>>&0	regex	eng;USA				http://www.isotc211.org/2005/gmd
+
+# ISOTC211 (NOAA Variant Geographic MetaData (GMD) Extensible Markup Language)
+>>&0	regex	gov.noaa.nodc:[0-9]+		http://www.isotc211.org/2005/gmd-noaa
+
+# ISOTC211 PANGAEA Variant Geographic MetaData (GMD) Extensible Markup Language
+>>&0	regex	pangaea.dataset[0-9][0-9][0-9][0-9][0-9][0-9]+	http://www.isotc211.org/2005/gmd-pangaea
+!:mime	text/xml
+
+
+# Object Reuse and Exchange Vocabulary
+0	string	<?xml
+>&0	regex	rdf
+>>&0	regex	openarchives	http://www.openarchives.org/ore/terms
+!:mime application/rdf+xml
+
+
+# Dryad Metadata Application Profile Version 3.1
+0	string	<DryadData
+>&0	regex	(dryad-bibo/v)[0-9].[0-9]	http://datadryad.org/profile/v3.1
+!:mime	text/xml
+
+#------------------------------------------------------------------------------
+# $File: dbpf,v 1.2 2018/05/24 18:54:40 christos Exp $
 # dppf:	Maxis Database Packed Files, the stored data file format used by all
 #	Maxis games after the Sims: http://wiki.niotso.org/DBPF
 # 	http://www.wiki.sc4devotion.com/index.php?title=DBPF
@@ -7897,12 +8066,10 @@
 >4	ulelong	x	\b, version: %u.
 >>8	ulelong	x	\b%u
 >>>36	ulelong	x       \b, files: %u
+>>24	ledate	!0	\b, created: %s
+>>28	ledate	!0	\b, modified: %s
 !:ext	dbpf/package/dat/sc4
 !:mime	application/x-maxis-dbpf
-4	ulelong	1
->8	ulelong	!1
->>24	ledate	!0	\b, created: %s
->>>28	ledate	!0	\b, modified: %s
 #------------------------------------------------------------------------------
 # $File: der,v 1.2 2017/03/17 21:35:28 christos Exp $
 # der: file(1) magic for DER encoded files
@@ -8200,14 +8367,14 @@
 >4	byte&0x3e = 0x24	\b, 640 kbit/s
 
 #------------------------------------------------------------------------------
-# $File: dump,v 1.16 2017/07/22 19:21:02 christos Exp $
+# $File: dump,v 1.17 2018/06/26 01:07:17 christos Exp $
 # dump:  file(1) magic for dump file format--for new and old dump filesystems
 #
 # We specify both byte orders in order to recognize byte-swapped dumps.
 #
 0	name	new-dump-be
->4	bedate	x		Previous dump %s,
->8	bedate	x		This dump %s,
+>4	bedate	x		This dump %s,
+>8	bedate	x		Previous dump %s,
 >12	belong	>0		Volume %d,
 >692	belong	0		Level zero, type:
 >692	belong	>0		Level %d, type:
@@ -8225,8 +8392,8 @@
 >888	belong	>0		Flags %x
 
 0	name	old-dump-be
-#>4	bedate	x		Previous dump %s,
-#>8	bedate	x		This dump %s,
+#>4	bedate	x		This dump %s,
+#>8	bedate	x		Previous dump %s,
 >12	belong	>0		Volume %d,
 >692	belong	0		Level zero, type:
 >692	belong	>0		Level %d, type:
@@ -8244,8 +8411,8 @@
 >888	belong	>0		Flags %x
 
 0	name	ufs2-dump-be
->896	beqdate	x		Previous dump %s,
->904	beqdate	x		This dump %s,
+>896	beqdate	x		This dump %s,
+>904	beqdate	x		Previous dump %s,
 >12	belong	>0		Volume %d,
 >692	belong	0		Level zero, type:
 >692	belong	>0		Level %d, type:
@@ -8419,7 +8586,7 @@
 >4	lelong	>2		Universal EFI binary with %d architectures
 
 #------------------------------------------------------------------------------
-# $File: elf,v 1.72 2018/02/24 19:50:04 christos Exp $
+# $File: elf,v 1.74 2018/06/23 16:39:53 christos Exp $
 # elf:  file(1) magic for ELF executables
 #
 # We have to check the byte order flag to see what byte order all the
@@ -8467,10 +8634,15 @@
 !:mime	application/x-object
 >16	leshort		2		executable,
 !:mime	application/x-executable
->16	leshort		3		shared object,
-!:mime	application/x-sharedlib
->16	leshort		4		core file
+>16	leshort		3		${x?pie executable:shared object},
+
+!:mime	application/x-${x?pie-executable:sharedlib}
+>16	leshort		4		core file,
 !:mime	application/x-coredump
+# OS-specific
+>7	byte		202
+>>16	leshort		0xFE01		executable,
+!:mime	application/x-executable
 # Core file detection is not reliable.
 #>>>(0x38+0xcc) string	>\0		of '%s'
 #>>>(0x38+0x10) lelong	>0		(signal %d),
@@ -8739,6 +8911,7 @@
 >7	byte		16		(FenixOS)
 >7	byte		17		(Nuxi CloudABI)
 >7	byte		97		(ARM)
+>7	byte		202		(Cafe OS)
 >7	byte		255		(embedded)
 
 #------------------------------------------------------------------------------
@@ -11955,7 +12128,7 @@
 >>11	byte	x		%d chars high
 
 #------------------------------------------------------------------------------
-# $File: fsav,v 1.14 2017/03/17 21:35:28 christos Exp $
+# $File: fsav,v 1.15 2018/07/16 12:30:41 christos Exp $
 # fsav:  file(1) magic for datafellows fsav virus definition files
 # Anthon van der Neut (anthon@mnt.org)
 
@@ -14026,7 +14199,7 @@
 !:mime	application/x-blorb
 
 #------------------------------------------------------------------------------
-# $File: images,v 1.131 2018/02/16 15:44:28 christos Exp $
+# $File: images,v 1.146 2018/07/03 20:55:37 christos Exp $
 # images:  file(1) magic for image formats (see also "iff", and "c-lang" for
 # XPM bitmaps)
 #
@@ -14281,10 +14454,12 @@
 # The second word of TIFF files is the TIFF version number, 42, which has
 # never changed.  The TIFF specification recommends testing for it.
 0	string		MM\x00\x2a	TIFF image data, big-endian
+!:strength +70
 !:mime	image/tiff
 >(4.L)	use		\^tiff_ifd
 0	string		II\x2a\x00	TIFF image data, little-endian
 !:mime	image/tiff
+!:strength +70
 >(4.l)	use		tiff_ifd
 
 0	name		tiff_ifd
@@ -14708,6 +14883,8 @@
 # data and image transfer, storage, etc., for the astronomical community.
 # (FITS floating point formats are big-endian.)
 0	string	SIMPLE\ \ =	FITS image data
+!:mime	image/fits
+!:ext	fits/fts
 >109	string	8		\b, 8-bit, character or unsigned binary integer
 >108	string	16		\b, 16-bit, two's complement binary integer
 >107	string	\ 32		\b, 32-bit, two's complement binary integer
@@ -15420,6 +15597,115 @@
 >8		ubelong		x		%dx
 >12		ubelong		x		\b%d
 
+# Type: Microsoft DirectDraw Surface (common data)
+# URL:	http://msdn.microsoft.com/library/default.asp?url=/library/en-us/directx9_c/directx/graphics/reference/DDSFileReference/ddsfileformat.asp
+# From: Morten Hustveit <morten@debian.org>
+# Updated by: David Korth <gerbilsoft@gerbilsoft.com>
+0	name	ms-directdraw-surface
+>0x10	ulelong	x			%u x
+>0x0C	ulelong	x			%u
+# Color depth.
+>0x58	ulelong	>0			\b, %u-bit color
+# Determine the pixel format.
+>0x50	ulelong&0x4	4
+# FIXME: Handle DX10 and XBOX formats.
+>>0x54	string	x			\b, compressed using %.4s
+>0x50	ulelong&0x2	0x2		\b, alpha only
+>0x50	ulelong&0x200	0x200		\b, YUV
+>0x50	ulelong&0x20000	0x20000		\b, luminance
+# RGB pixel format
+>0x50	ulelong&0x40	0x40
+
+# Determine the RGB format using the color masks.
+# ulequad order: 0xGGGGGGGGRRRRRRRR, 0xAAAAAAAABBBBBBBB
+
+>>0x58		ulelong	16
+
+# NOTE: 15-bit color formats usually have 16-bit listed as the color depth.
+>>>0x5C		ulequad	0x000003E000007C00
+>>>>0x64	ulequad 0x000000000000001F	\b, RGB555
+>>>0x5C		ulequad	0x000003E000001F00
+>>>>0x64	ulequad 0x000000000000007C	\b, BGR555
+
+>>>0x5C		ulequad	0x000007E00000F800
+>>>>0x64	ulequad 0x000000000000001F	\b, RGB565
+>>>0x5C		ulequad	0x000007E000001F00
+>>>>0x64	ulequad 0x00000000000000F8	\b, BGR565
+
+>>>0x5C		ulequad	0x000000F000000F00
+>>>>0x64	ulequad 0x0000F0000000000F	\b, ARGB4444
+>>>0x5C		ulequad	0x000000F00000000F
+>>>>0x64	ulequad 0x0000F00000000F00	\b, ABGR4444
+
+>>>0x5C		ulequad	0x00000F000000F000
+>>>>0x64	ulequad 0x0000000F000000F0	\b, RGBA4444
+>>>0x5C		ulequad	0x00000F00000000F0
+>>>>0x64	ulequad 0x0000000F0000F000	\b, BGRA4444
+
+>>>0x5C		ulequad	0x000000F000000F00
+>>>>0x64	ulequad 0x000000000000000F	\b, xRGB4444
+>>>0x5C		ulequad	0x000000F00000000F
+>>>>0x64	ulequad 0x0000000000000F00	\b, xBGR4444
+
+>>>0x5C		ulequad	0x00000F000000F000
+>>>>0x64	ulequad 0x00000000000000F0	\b, RGBx4444
+>>>0x5C		ulequad	0x00000F00000000F0
+>>>>0x64	ulequad 0x000000000000F000	\b, BGRx4444
+
+>>>0x5C		ulequad	0x000003E000007C00
+>>>>0x64	ulequad 0x000080000000001F	\b, ARGB1555
+>>>0x5C		ulequad	0x000003E000001F00
+>>>>0x64	ulequad 0x000080000000007C	\b, ABGR1555
+>>>0x5C		ulequad	0x000007C00000F800
+>>>>0x64	ulequad 0x000000010000003E	\b, RGBA5551
+>>>0x5C		ulequad	0x000007C00000003E
+>>>>0x64	ulequad 0x000000010000F800	\b, BGRA5551
+
+>>88		ulelong 24
+>>>0x5C		ulequad	0x0000FF0000FF0000
+>>>>0x64	ulequad 0x00000000000000FF	\b, RGB888
+>>>0x5C		ulequad	0x0000FF00000000FF
+>>>>0x64	ulequad 0x0000000000FF0000	\b, BGR888
+
+>>88		ulelong 32
+>>>0x5C		ulequad	0x0000FF0000FF0000
+>>>>0x64	ulequad 0xFF000000000000FF	\b, ARGB8888
+>>>0x5C		ulequad	0x0000FF00000000FF
+>>>>0x64	ulequad 0xFF00000000FF0000	\b, ABGR8888
+
+>>>0x5C		ulequad	0x00FF0000FF000000
+>>>>0x64	ulequad 0x000000FF0000FF00	\b, RGBA8888
+>>>0x5C		ulequad	0x00FF00000000FF00
+>>>>0x64	ulequad 0x000000FFFF000000	\b, BGBA8888
+
+>>>0x5C		ulequad	0x0000FF0000FF0000
+>>>>0x64	ulequad 0x00000000000000FF	\b, xRGB8888
+>>>0x5C		ulequad	0x0000FF00000000FF
+>>>>0x64	ulequad 0x0000000000FF0000	\b, xBGR8888
+
+>>>0x5C		ulequad	0x00FF0000FF000000
+>>>>0x64	ulequad 0x000000000000FF00	\b, RGBx8888
+>>>0x5C		ulequad	0x00FF00000000FF00
+>>>>0x64	ulequad 0x00000000FF000000	\b, BGBx8888
+
+# Less common 32-bit color formats.
+>>>0x5C		ulequad	0xFFFF00000000FFFF
+>>>>0x64	ulequad 0x0000000000000000	\b, G16R16
+>>>0x5C		ulequad	0x0000FFFFFFFF0000
+>>>>0x64	ulequad 0x0000000000000000	\b, R16G16
+
+>>>0x5C		ulequad	0x000FFC003FF00000
+>>>>0x64	ulequad 0xC0000000000003FF	\b, A2R10G10B10
+>>>0x5C		ulequad	0x000FFC00000003FF
+>>>>0x64	ulequad 0xC00000003FF00000	\b, A2B10G10R10
+
+# Type: Microsoft DirectDraw Surface
+# URL:	http://msdn.microsoft.com/library/default.asp?url=/library/en-us/directx9_c/directx/graphics/reference/DDSFileReference/ddsfileformat.asp
+# From: Morten Hustveit <morten@debian.org>
+# Updated by: David Korth <gerbilsoft@gerbilsoft.com>
+0	string/b	DDS\040\174\000\000\000 Microsoft DirectDraw Surface (DDS):
+>0	use	ms-directdraw-surface
+
 # Type: Sega PVR image.
 # From: David Korth <gerbilsoft@gerbilsoft.com>
 # References:
@@ -15429,8 +15715,8 @@
 
 # Sega PVR header.
 0	name	sega-pvr-image-header
->0x0C	leshort	x	%d x
->0x0E	leshort	x	%d
+>0x0C	leshort	x	%u x
+>0x0E	leshort	x	%u
 # Image format.
 >0x08	byte	0	\b, ARGB1555
 >0x08	byte	1	\b, RGB565
@@ -15455,17 +15741,10 @@
 >0x09	byte	0x11	\b, small VQ & mipmap
 >0x09	byte	0x12	\b, square twiddled & mipmap
 
-# Sega PVR (Xbox) image header.
-# Contains an embedded DirectDraw surface instead of PVR data.
-0	name	sega-pvr-xbox-dds-header
->16	lelong	x	%d x
->12	lelong	x	%d,
->84	string	x	%.4s
-
 # Sega PVR image.
 0	string	PVRT
 >0x10	string	DDS\040\174\000\000\000 Sega PVR (Xbox) image:
->>0x20	use	sega-pvr-xbox-dds-header
+>>0x20	use	ms-directdraw-surface
 >0x10	belong	!0x44445320		Sega PVR image:
 >>0	use	sega-pvr-image-header
 
@@ -15473,15 +15752,15 @@
 0	string	GBIX
 >0x10	string	PVRT
 >>0x10	string	DDS\040\174\000\000\000 Sega PVR (Xbox) image:
->>>0x20	use	sega-pvr-xbox-dds-header
+>>0x20	use	ms-directdraw-surface
 >>0x10	belong	!0x44445320		Sega PVR image:
 >>>0x10	use	sega-pvr-image-header
 >>0x08	lelong	x	\b, global index = %u
 
 # Sega GVR header.
 0	name	sega-gvr-image-header
->0x0C	beshort	x	%d x
->0x0E	beshort	x	%d
+>0x0C	beshort	x	%u x
+>0x0E	beshort	x	%u
 # Image data format.
 >0x0B	byte	0	\b, I4
 >0x0B	byte	1	\b, I8
@@ -15500,6 +15779,12 @@
 
 # Sega GVR image with GBIX.
 0	string	GBIX
+>0x10	string	GVRT	Sega GVR image:
+>>0x10	use	sega-gvr-image-header
+>>0x08	belong	x	\b, global index = %u
+
+# Sega GVR image with GCIX. (Wii)
+0	string	GCIX
 >0x10	string	GVRT	Sega GVR image:
 >>0x10	use	sega-gvr-image-header
 >>0x08	belong	x	\b, global index = %u
@@ -15539,6 +15824,174 @@
 >12	lelong x		version %d,
 >20	lelong x 		%dx
 >24	lelong x		\b%d
+
+# Type: Khronos KTX texture.
+# From: David Korth <gerbilsoft@gerbilsoft.com>
+# References:
+# - https://www.khronos.org/opengles/sdk/tools/KTX/file_format_spec/
+
+# glEnum decoding.
+# NOTE: Only the most common formats are listed here.
+0	name	khronos-ktx-glEnum
+>0	lelong	0x1907	\b, RGB
+>0	lelong	0x1908	\b, RGBA
+>0	lelong	0x1909	\b, LUMINANCE
+>0	lelong	0x190A	\b, LUMINANCE_ALPHA
+>0	lelong	0x80E1	\b, BGR
+>0	lelong	0x80E2	\b, BGRA
+>0	lelong	0x83A0	\b, RGB_S3TC
+>0	lelong	0x83A1	\b, RGB4_S3TC
+>0	lelong	0x83A2	\b, RGBA_S3TC
+>0	lelong	0x83A3	\b, RGBA4_S3TC
+>0	lelong	0x83A4	\b, RGBA_DXT5_S3TC
+>0	lelong	0x83A5	\b, RGBA4_DXT5_S3TC
+>0	lelong	0x8D64	\b, ETC1_RGB8_OES
+>0	lelong	0x9270	\b, COMPRESSED_R11_EAC
+>0	lelong	0x9271	\b, COMPRESSED_SIGNED_R11_EAC
+>0	lelong	0x9272	\b, COMPRESSED_RG11_EAC
+>0	lelong	0x9273	\b, COMPRESSED_SIGNED_RG11_EAC
+>0	lelong	0x9274	\b, COMPRESSED_RGB8_ETC2
+>0	lelong	0x9275	\b, COMPRESSED_SRGB8_ETC2
+>0	lelong	0x9276	\b, COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
+>0	lelong	0x9277	\b, COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
+>0	lelong	0x9278	\b, COMPRESSED_RGBA2_ETC2_EAC
+>0	lelong	0x9279	\b, COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+>0	lelong	0x93B0	\b, COMPRESSED_RGBA_ASTC_4x4_KHR
+>0	lelong	0x93B1	\b, COMPRESSED_RGBA_ASTC_5x4_KHR
+>0	lelong	0x93B2	\b, COMPRESSED_RGBA_ASTC_5x5_KHR
+>0	lelong	0x93B3	\b, COMPRESSED_RGBA_ASTC_6x5_KHR
+>0	lelong	0x93B4	\b, COMPRESSED_RGBA_ASTC_6x6_KHR
+>0	lelong	0x93B5	\b, COMPRESSED_RGBA_ASTC_8x5_KHR
+>0	lelong	0x93B6	\b, COMPRESSED_RGBA_ASTC_8x6_KHR
+>0	lelong	0x93B7	\b, COMPRESSED_RGBA_ASTC_8x8_KHR
+>0	lelong	0x93B8	\b, COMPRESSED_RGBA_ASTC_10x5_KHR
+>0	lelong	0x93B9	\b, COMPRESSED_RGBA_ASTC_10x6_KHR
+>0	lelong	0x93BA	\b, COMPRESSED_RGBA_ASTC_10x8_KHR
+>0	lelong	0x93BB	\b, COMPRESSED_RGBA_ASTC_10x10_KHR
+>0	lelong	0x93BC	\b, COMPRESSED_RGBA_ASTC_12x10_KHR
+>0	lelong	0x93BD	\b, COMPRESSED_RGBA_ASTC_12x12_KHR
+>0	lelong	0x93D0	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
+>0	lelong	0x93D1	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
+>0	lelong	0x93D2	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
+>0	lelong	0x93D3	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
+>0	lelong	0x93D4	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
+>0	lelong	0x93D5	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
+>0	lelong	0x93D6	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
+>0	lelong	0x93D7	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
+>0	lelong	0x93D8	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
+>0	lelong	0x93D9	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
+>0	lelong	0x93DA	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
+>0	lelong	0x93DB	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
+>0	lelong	0x93DC	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
+>0	lelong	0x93DD	\b, COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
+
+# Endian-specific KTX header.
+# TODO: glType (all textures I've seen so far are GL_UNSIGNED_BYTE)
+0	name	khronos-ktx-endian-header
+>20	lelong	x	\b, %u
+>24	lelong	>1	x %u
+>28	lelong	>1	x %u
+>8	lelong	>0
+>>8	use	khronos-ktx-glEnum
+>8	lelong	0
+>>12	use	khronos-ktx-glEnum
+
+# Main KTX header.
+# Determine endianness, then check the rest of the header.
+0	string	\xABKTX\ 11\xBB\r\n\x1A\n	Khronos KTX texture
+>12	lelong	0x04030201			(little-endian)
+>>16	use	khronos-ktx-endian-header
+>12	belong	0x04030201			(big-endian)
+>>16	use	^khronos-ktx-endian-header
+
+# Type: Valve VTF texture.
+# From: David Korth <gerbilsoft@gerbilsoft.com>
+# References:
+# - https://developer.valvesoftware.com/wiki/Valve_Texture_Format
+
+# VTF image formats.
+0	name	vtf-image-format
+>0	lelong	0	RGBA8888
+>0	lelong	1	ABGR8888
+>0	lelong	2	RGB888
+>0	lelong	3	BGR888
+>0	lelong	4	RGB565
+>0	lelong	5	I8
+>0	lelong	6	IA88
+>0	lelong	7	P8
+>0	lelong	8	A8
+>0	lelong	9	RGB888 (bluescreen)
+>0	lelong	10	BGR888 (bluescreen)
+>0	lelong	11	ARGB8888
+>0	lelong	12	BGRA8888
+>0	lelong	13	DXT1
+>0	lelong	14	DXT3
+>0	lelong	15	DXT5
+>0	lelong	16	BGRx8888
+>0	lelong	17	BGR565
+>0	lelong	18	BGRx5551
+>0	lelong	19	BGRA4444
+>0	lelong	20	DXT1+A1
+>0	lelong	21	BGRA5551
+>0	lelong	22	UV88
+>0	lelong	23	UVWQ8888
+>0	lelong	24	RGBA16161616F
+>0	lelong	25	RGBA16161616
+>0	lelong	26	UVLX8888
+
+# Main VTF header.
+0	string	VTF\0				Valve Texture Format
+>4	lelong	x				v%u
+>8	lelong	x				\b.%u
+>0x10	leshort	x				\b, %u
+>0x12	leshort	>1				x %u
+>4	lequad	0x0000000700000002
+>>0x3F	leshort	>1				x %u
+>0x18	leshort	>1				\b, %u frames
+>0x38	byte	x				\b, mipmaps: %u
+>0x34	lelong	>-1				\b,
+>>0x34	use	vtf-image-format
+
+# Type: Valve VTF3 (PS3) texture.
+# From: David Korth <gerbilsoft@gerbilsoft.com>
+0	string		VTF3	Valve Texture Format (PS3)
+>0x14	beshort		x	\b, %u
+>0x16	beshort		x	\b x %u
+>0x10	belong&0x2000	0	\b, DXT1
+>0x10	belong&0x2000	0x2000	\b, DXT5
+
+# Type: ASTC texture.
+# From: David Korth <gerbilsoft@gerbilsoft.com>
+# References:
+# - https://stackoverflow.com/questions/22600678/determine-internal-format-of-given-astc-compressed-image-through-its-header
+# - https://stackoverflow.com/a/22682244
+0	lelong	0x5ca1ab13			ASTC
+>4	byte	x				%u
+>5	byte	x				\bx%u
+>6	byte	>1				\bx%u
+# X, Y, and Z dimensions are stored as 24-bit LE.
+# Pretend it's 32-bit and mask off the high byte.
+>7	lelong&0x00FFFFFF	x		texture, %u
+>10	lelong&0x00FFFFFF	x		x %u
+>13	lelong&0x00FFFFFF	>1		x %u
+
+# Zebra Metafile graphic
+# http://www.fileformat.info/format/zbr/egff.htm
+0	beshort	0x9a02	Zebra Metafile graphic
+>2	leshort 1	(version 1.x)
+>2	leshort	2	(version 1.1x or 1.2x)
+>2	leshort	3	(version 1.49)
+>2	leshort	4	(version 1.50)
+>4	string	x	(comment = %s)
+
+# Microsoft Paint graphic
+# http://www.fileformat.info/format/mspaint/egff.htm
+0	string	DanM 	icrosoft Paint image data (version 1.x)
+>4	leshort	x	(%d
+>>6	leshort	x	x %d)
+0	string	LinS 	Microsoft Paint image data (version 2.0)
+>4	leshort	x	(%d
+>>6	leshort	x	x %d)
 
 #------------------------------------------------------------------------------
 # $File: inform,v 1.5 2009/09/19 16:28:09 christos Exp $
@@ -16027,7 +16480,7 @@
 0	beshort		0x8000		lif file
 
 #------------------------------------------------------------------------------
-# $File: linux,v 1.64 2017/03/17 21:35:28 christos Exp $
+# $File: linux,v 1.65 2018/07/16 12:32:08 christos Exp $
 # linux:  file(1) magic for Linux files
 #
 # Values for Linux/i386 binaries, from Daniel Quinlan <quinlan@yggdrasil.com>
@@ -17460,7 +17913,7 @@
 >12     lelong =1       version 1, little-endian
 >12     belong x        version %d, network-endian
 #------------------------------------------------------------------------------
-# $File: make,v 1.3 2016/12/10 14:21:29 christos Exp $
+# $File: make,v 1.4 2018/05/29 17:26:02 christos Exp $
 # make:  file(1) magic for makefiles
 #
 # URL: https://en.wikipedia.org/wiki/Make_(software)
@@ -17478,16 +17931,23 @@
 # Reference: https://www.freebsd.org/cgi/man.cgi?make(1)
 # exclude grub-core\lib\libgcrypt\mpi\Makefile.am with "#BEGIN_ASM_LIST"
 # by additional escaping point character
-0	regex/100l	\^\\.BEGIN	BSD makefile script text with "%s"
+0	regex/100l	\^\\.BEGIN	BSD makefile script text
 !:mime	text/x-makefile
 !:ext	/mk
+!:strength +10
 # exclude MS Windows help file CoNtenT with ":include FOOBAR.CNT"
 # and NSIS script with "!include" by additional escaping point character
-0	regex/100l	\^\\.include	BSD makefile script text with "%s"
+0	regex/100l	\^\\.include	BSD makefile script text
 !:mime	text/x-makefile
 !:ext	/mk
+!:strength +10
+0	regex/100l	\^\\.endif	BSD makefile script text
+!:mime	text/x-makefile
+!:ext	/mk
+!:strength +10
 0	regex/100l	\^SUBDIRS	automake makefile script text
 !:mime	text/x-makefile
+!:strength +10
 
 
 #------------------------------------------------------------------------------
@@ -17762,7 +18222,7 @@
 >5	byte		3		keymode: MD5 hash
 
 #------------------------------------------------------------------------------
-# $File: measure,v 1.1 2017/11/28 14:01:14 christos Exp $
+# $File: measure,v 1.2 2018/06/23 16:13:15 christos Exp $
 # measure: file(1) magic for measurement data
 
 # DIY-Thermocam raw data
@@ -17770,31 +18230,31 @@
 >0	beshort	x	scale %d-
 >2	beshort x	\b%d,
 >4	lefloat	x	spot sensor temperature %f,
->9	byte	0	unit celsius,
->9	byte	1	unit fahrenheit,
->8	byte	x	color scheme %d
->10	byte	1	\b, show spot sensor
->11	byte	1	\b, show scale bar
->12	byte	&1	\b, minimum point enabled
->12	byte	&2	\b, maximum point enabled
+>9	ubyte	0	unit celsius,
+>9	ubyte	1	unit fahrenheit,
+>8	ubyte	x	color scheme %d
+>10	ubyte	1	\b, show spot sensor
+>11	ubyte	1	\b, show scale bar
+>12	ubyte	&1	\b, minimum point enabled
+>12	ubyte	&2	\b, maximum point enabled
 >13	lefloat	x	\b, calibration: offset %f,
 >17	lefloat x	slope %f
 
 0	name	diy-thermocam-checker
->9	byte	<2
->>10	byte	<2
->>>11	byte	<2
->>>>12	byte	<4
+>9	ubyte	<2
+>>10	ubyte	<2
+>>>11	ubyte	<2
+>>>>12	ubyte	<4
 >>>>>17	lefloat	>0.0001	DIY-Thermocam raw data
 
 # V2 and Leption 3.x:
-38408	byte	<19
+38408	ubyte	<19
 >38400	use	diy-thermocam-checker
 >>38400	default x	(Lepton 3.x),
 >>>38400	use	diy-thermocam-parser
 
 # V1 or Lepton 2.x
-9608	byte	<19
+9608	ubyte	<19
 >9600	use	diy-thermocam-checker
 >>9600	default	x	(Lepton 2.x),
 >>>9600	use	diy-thermocam-parser
@@ -18298,7 +18758,7 @@
 #>4	use	zip-dir-entry
 
 #------------------------------------------------------------------------------
-# $File: msdos,v 1.121 2017/10/27 21:43:23 christos Exp $
+# $File: msdos,v 1.124 2018/07/10 04:05:50 christos Exp $
 # msdos:  file(1) magic for MS-DOS files
 #
 
@@ -19090,10 +19550,16 @@
 #0	string	Nullsoft\ AVS\ Preset\ \060\056\061\032 A plug in for Winamp ms-windows Freeware media player
 0	string/b	Nullsoft\ AVS\ Preset\ 	Winamp plug in
 
-# Windows Metafont .WMF
-0	string/b	\327\315\306\232	ms-windows metafont .wmf
-0	string/b	\002\000\011\000	ms-windows metafont .wmf
-0	string/b	\001\000\011\000	ms-windows metafont .wmf
+# Windows Metafile .WMF
+0	string/b	\327\315\306\232	Windows metafile
+!:mime	image/wmf
+!:ext	wmf
+0	string/b	\002\000\011\000	Windows metafile
+!:mime	image/wmf
+!:ext	wmf
+0	string/b	\001\000\011\000	Windows metafile
+!:mime	image/wmf
+!:ext	wmf
 
 #tz3 files whatever that is (MS Works files)
 0	string/b	\003\001\001\004\070\001\000\000	tz3 ms-works file
@@ -19330,12 +19796,246 @@
 
 #------------------------------------------------------------------------------
 # From Stuart Caie <kyzer@4u.net> (developer of cabextract)
+# Update: Joerg Jenderek
+# URL: https://en.wikipedia.org/wiki/Cabinet_(file_format)
+# Reference: https://msdn.microsoft.com/en-us/library/bb267310.aspx
+# Note: verified by `7z l *.cab`
 # Microsoft Cabinet files
 0	string/b	MSCF\0\0\0\0	Microsoft Cabinet archive data
-!:mime application/vnd.ms-cab-compressed
->8	lelong		x		\b, %u bytes
->28	leshort		1		\b, 1 file
->28	leshort		>1		\b, %u files
+#
+# https://support.microsoft.com/en-us/help/973559/frequently-asked-questions-about-the-microsoft-support-diagnostic-tool
+# CAB with *.{diagcfg,diagpkg} is used by Microsoft Support Diagnostic Tool MSDT.EXE
+# because some archive does not have *.diag* as 1st or 2nd archive member like
+# O15CTRRemove.diagcab or AzureStorageAnalyticsLogs_global.DiagCab
+# brute looking after header for filenames with diagcfg or diagpkg extension in CFFILE section
+>0x2c	search/980/c	.diag		\b, Diagnostic
+!:mime	application/vnd.ms-cab-compressed
+!:ext	diagcab
+# http://fileformats.archiveteam.org/wiki/PUZ
+# Microsoft Publisher version about 2003 has a "Pack and Go" feature that
+# bundles a Publisher document *PNG.pub with all links into a CAB
+>0x2c	search/300/c	png.pub\0		\b, Publisher Packed and Go
+!:mime	application/vnd.ms-cab-compressed
+!:ext	puz
+# ppz variant with Microsoft PowerPoint Viewer ppview32.exe to play PowerPoint presentation
+>0x2c	search/17/c	ppview32.exe\0		\b, PowerPoint Viewer Packed and Go
+!:mime	application/vnd.ms-powerpoint
+#!:mime	application/mspowerpoint
+!:ext	ppz
+# http://www.incredimail.com/
+# IncrediMail CAB contains an initialisation file "content.ini" like in im2.ims
+>0x2c	search/3369/c	content.ini\0	\b, IncrediMail
+!:mime	application/x-incredimail
+# member Flavor.htm implies IncrediMail ecard like in tell_a_friend.imf
+>>0x2c	search/83/c	Flavor.htm\0	ecard
+!:ext	imf
+# member Macromedia Flash data *.swf implies IncrediMail skin like in im2.ims
+>>0x2c	search/211/c	.swf\0		skin
+!:ext	ims
+# member anim.im3 implies IncrediMail animation like in letter_fold.ima 
+>>0x2c	search/92/c	anim.im3\0	animation
+!:ext	ima
+# other IncrediMail cab archive
+>>0x2c	default		x
+>>>0x2c	search/116/c	thumb		ecard, image, notifier or skin
+!:ext	imf/imi/imn/ims
+# http://file-extension.net/seeker/file_extension_ime
+>>>0x2c	default		x		emoticons or sound
+!:ext	ime/imw
+# no Diagnostic and IncrediMail
+>0x2c	default		x
+# look for 1st member name
+>>(16.l+16)	ubyte	x
+# https://en.wikipedia.org/wiki/SNP_file_format
+>>>&-1	string/c 	_accrpt_.snp	\b, Access report snapshot
+!:mime	application/msaccess
+!:ext	snp
+# https://www.cabextract.org.uk/wince_cab_format/
+# extension of DOS 8+3 name with ".000" of 1st archive member name implies Windows CE installer
+>>>&7	string 		=.000		\b, WinCE install
+!:mime	application/vnd.ms-cab-compressed
+!:ext	cab
+
+# http://support.microsoft.com/kb/934307/en-US
+# All inspected MSU contain a file with name WSUSSCAN.cab
+# that is called "Windows Update meta data" by Microsoft
+>>>&-1	string/c 	wsusscan.cab	\b, Microsoft Standalone Update
+!:mime	application/vnd.ms-cab-compressed
+!:ext	msu
+>>>&-1	default		x
+# look at point charcter of 1st archive member name for file name extension
+>>>>&-1	search/255 	.
+# http://www.pptfaq.com/FAQ00164_What_is_a_PPZ_file-.htm
+# PPZ were created using Pack & Go feature of PowerPoint versions 97 - 2002
+# packs optional files, a PowerPoint presentation *.ppt with optional PLAYLIST.LST to CAB
+>>>>>&0	string/c	ppt\0		\b, PowerPoint Packed and Go
+!:mime	application/vnd.ms-powerpoint
+#!:mime	application/mspowerpoint
+!:ext	ppz
+# https://msdn.microsoft.com/en-us/library/windows/desktop/bb773190(v=vs.85).aspx
+# first member *.theme implies Windows 7 Theme Pack like in CommunityShowcaseAqua3.themepack
+# or Windows 8 Desktop Theme Pack like in PanoramicGlaciers.deskthemepack
+>>>>>&0	string/c	theme		\b, Windows
+!:mime	application/x-windows-themepack
+# http://www.drewkeller.com/content/using-theme-both-windows-7-and-windows-8
+# 1st member Panoramic.theme or Panoramas.theme implies Windows 8-10 Theme Pack
+# with MTSM=RJSPBS in [MasterThemeSelector] inside *.theme
+>>>>>>(16.l+16)	string	=Panoram	8
+!:ext	deskthemepack
+>>>>>>(16.l+16)	string	!Panoram	7 or 8
+!:ext	themepack/deskthemepack
+>>>>>>(16.l+16)	ubyte	x		Theme Pack
+>>>>>&0	default		x
+# look for null terminator of 1st member name
+>>>>>>&0	search/255 	\0
+# 2nd member name WSUSSCAN.cab like in Microsoft-Windows-MediaFeaturePack-OOB-Package.msu
+>>>>>>>&16	string/c 	wsusscan.cab	\b, Microsoft Standalone Update
+!:mime	application/vnd.ms-cab-compressed
+!:ext	msu
+>>>>>>>&16	default	x
+# archive with more then one file need some output in version 5.32 to avoid error message like
+# Magdir/msdos, 1138: Warning: Current entry does not yet have a description for adding a MIME type
+# Magdir/msdos, 1139: Warning: Current entry does not yet have a description for adding a EXTENSION type
+# file: could not find any valid magic files!
+>>>>>>>>28	uleshort	>1	\b, many
+!:mime	application/vnd.ms-cab-compressed
+!:ext	cab
+# remaining archives with just one file
+>>>>>>>>28	uleshort	=1
+# neither extra bytes nor cab chain implies Windows 2000,XP setup files in directory i386
+>>>>>>>>>30	uleshort	=0x0000	\b, Windows 2000/XP setup
+# cut of last char of source extension and add underscore to generate extension
+# TERMCAP._ ... FXSCOUNT.H_ ... L3CODECA.AC_ ... NPDRMV2.ZI_
+!:mime	application/vnd.ms-cab-compressed
+!:ext	_/?_/??_
+# archive need some output like "single" in version 5.32 to avoid error messages
+>>>>>>>>>30	uleshort	!0x0000	\b, single
+!:mime	application/vnd.ms-cab-compressed
+!:ext	cab
+# TODO: additional extensions like
+# .xsn	InfoPath Dynamic Form
+# .xtp	InfoPath Template Part
+# .lvf	Logitech Video Effects Face Accessory
+>8	ulelong		x		\b, %u bytes
+>28	uleshort		1		\b, 1 file
+>28	uleshort		>1		\b, %u files
+# Reserved fields, set to zero
+#>4	belong		!0		\b, reserved1 %x
+#>12	belong		!0		\b, reserved2 %x
+# offset of the first CFFILE entry coffFiles: minimal 2Ch
+>16	ulelong		x		\b, at 0x%x
+>(16.l)	use		cab-file
+# at least also 2nd member
+>28	uleshort		>1
+>>(16.l+16)	ubyte	x
+>>>&0	search/255 	\0
+# second member info
+>>>>&0	use		cab-file
+#>20	belong		!0		\b, reserved %x
+# Cabinet file format version. Currently, versionMajor = 1 and versionMinor = 3
+>24	ubeshort	!0x0301		\b version 0x%x
+# number of CFFOLDER entries
+>26	uleshort	>1		\b, %u cffolders
+# cabinet file option indicators 1~PREVIOUS, 2~NEXT, 4~reserved fields
+# only found for flags 0 1 2 3 4 not 7
+>30	uleshort	>0		\b, flags 0x%x
+# Cabinet files have a 16-bit cabinet setID field that is designed for application use.
+# default is zero, however, the -i option of cabarc can be used to set this field
+>32	uleshort	>0		\b, ID %u
+# iCabinet is number of this cabinet file in a set, where 0 for the first cabinet
+#>34	uleshort	x		\b, iCabinet %u
+# add one for display because humans start numbering by 1 and also fit to name of disk szDisk*
+>34	uleshort+1	x		\b, number %u
+>30	uleshort	&0x0004		\b, extra bytes
+# cbCFHeader optional size of per-cabinet reserved area 14h 1800h
+>>36	uleshort	>0		%u in head
+# cbCFFolder is optional size of per-folder reserved area
+>>38	ubyte		>0		%u in folder
+# cbCFData is optional size of per-datablock reserved area
+>>39	ubyte		>0		%u in data block
+# optional per-cabinet reserved area abReserve[cbCFHeader]
+>>36	uleshort	>0
+# 1st CFFOLDER after reserved area in header
+>>>(36.s+40)	use			cab-folder
+# no reserved area in header
+>30	uleshort	^0x0004
+# no previous and next cab archive
+>>30	uleshort		=0x0000
+>>>36	use				cab-folder
+# only previous cab archive
+>>30	uleshort		=0x0001	\b, previous
+>>>36	use				cab-anchor
+# only next cab archive
+>>30	uleshort		=0x0002	\b, next
+>>>36	use				cab-anchor
+# previous+next cab archive
+# can not use sub routine cab-anchor to display previous and next cabinet together
+#>>>36	use				cab-anchor
+#>>>>&0	use				cab-anchor
+>>30	uleshort		=0x0003	\b, previous
+>>>36	string		x		%s
+# optional name of previous disk szDisk*
+>>>>&1	string		x		disk %s
+>>>>>&1	string		x		\b, next %s
+# optional name of previous disk szDisk*
+>>>>>>&1	string		x	disk %s
+>>>>>>>&1	use			cab-folder
+#	display filename and disk name of previous or next cabinet
+0       name    			cab-anchor
+# optional name of previous/next cabinet file szCabinet*[255]
+>&0	string		x		%s
+# optional name of previous/next disk szDisk*[255]
+>>&1	string		x		disk %s
+#	display folder structure CFFOLDER information like compression of cabinet
+0       name    			cab-folder
+# offset of the CFDATA block in this folder
+#>0	ulelong		x		\b, coffCabStart 0x%x
+# number of CFDATA blocks in folder
+>4	uleshort	x		\b, %u datablock
+# plural s
+>4	uleshort	>1		\bs
+# compression typeCompress: 0~None 1~MSZIP 0x1503~LZX:21 0x1003~LZX:16 0x0f03~LZX:15
+>6	uleshort	x		\b, 0x%x compression
+# optional per-folder reserved area
+#>8	ubequad		x		\b, abReserve 0x%llx
+#	display member structure CFFILE information like member name of cabinet
+0       name    			cab-file
+# cbFile is uncompressed size of file in bytes 
+#>0	ulelong		x		\b, cbFile %u
+# uoffFolderStart is uncompressed offset of file in folder
+#>4	ulelong		>0		\b, uoffFolderStart 0x%x
+# iFolder is index into the CFFOLDER area. 0 indicates first folder in cabinet
+# define ifoldCONTINUED_FROM_PREV      (0xFFFD)
+# define ifoldCONTINUED_TO_NEXT        (0xFFFE)
+# define ifoldCONTINUED_PREV_AND_NEXT  (0xFFFF)
+>8	uleshort	>0		\b, iFolder 0x%x
+# date stamp for file
+#>10	uleshort	x		\b, date 0x%x
+# time stamp for file
+#>12	uleshort	x		\b, time 0x%x
+# attribs is attribute flags for file
+# define  _A_RDONLY       (0x01)  file is read-only
+# define  _A_HIDDEN       (0x02)  file is hidden
+# define  _A_SYSTEM       (0x04)  file is a system file
+# define  _A_ARCH         (0x20)  file modified since last backup
+# example http://sebastien.kirche.free.fr/pebuilder_plugins/depends.cab
+# define  _A_EXEC         (0x40)  run after extraction
+# define  _A_NAME_IS_UTF  (0x80)  szName[] contains UTF
+# define  UNKNOWN       (0x0100)  undocumented or accident
+#>14	uleshort	x		\b, attribs 0x%x
+>14	uleshort	>0		+
+>>14	uleshort	&0x0001		\bR
+>>14	uleshort	&0x0002		\bH
+>>14	uleshort	&0x0004		\bS
+>>14	uleshort	&0x0020		\bA
+>>14	uleshort	&0x0040		\bX
+>>14	uleshort	&0x0080		\bUtf
+# unknown 0x0100 flag found on one XP_CD:\I386\DRIVER.CAB
+>>14	uleshort	&0x0100		\b?
+# szName is name of archive member
+>16	string		x		"%s"
+# next archive member name if more files
+#>>&17	string		>\0		\b, NEXT NAME %-.50s
 
 # InstallShield Cabinet files
 0	string/b	ISc(		InstallShield Cabinet archive data
@@ -19385,14 +20085,6 @@
 >>50	byte   x			\b%d
 >5	byte   <2
 >>48	string x			version %.3s
-
-# Type: Microsoft DirectDraw Surface
-# URL:	http://msdn.microsoft.com/library/default.asp?url=/library/en-us/directx9_c/directx/graphics/reference/DDSFileReference/ddsfileformat.asp
-# From: Morten Hustveit <morten@debian.org>
-0	string/b	DDS\040\174\000\000\000 Microsoft DirectDraw Surface (DDS),
->16	lelong	>0			%d x
->12	lelong	>0			%d,
->84	string	x			%.4s
 
 # Type: Microsoft Document Imaging Format (.mdi)
 # URL:	http://en.wikipedia.org/wiki/Microsoft_Document_Imaging_Format
@@ -19489,7 +20181,7 @@
 # concatenated.
 
 #------------------------------------------------------------------------------
-# $File: msooxml,v 1.7 2018/03/12 12:38:59 christos Exp $
+# $File: msooxml,v 1.8 2018/05/24 18:11:17 christos Exp $
 # msooxml:  file(1) magic for Microsoft Office XML
 # From: Ralf Brown <ralf.brown@gmail.com>
 
@@ -19513,6 +20205,7 @@
 0		string		PK\003\004
 !:strength +10
 # make sure the first file is correct
+>0x1E		use		msooxml
 >0x1E		regex		\\[Content_Types\\]\\.xml|_rels/\\.rels
 # skip to the second local file header
 # since some documents include a 520-byte extra field following the file
@@ -21069,17 +21762,19 @@
 >>>&12	ubeshort	x		\b%d
 
 #------------------------------------------------------------------------------
-# $File: pdf,v 1.9 2017/05/24 17:35:20 christos Exp $
+# $File: pdf,v 1.10 2018/05/23 22:21:01 christos Exp $
 # pdf:  file(1) magic for Portable Document Format
 #
 
 0	string		%PDF-		PDF document
 !:mime	application/pdf
+!:strength +60
 >5	byte		x		\b, version %c
 >7	byte		x		\b.%c
 
 0	string		\012%PDF-	PDF document
 !:mime	application/pdf
+!:strength +60
 >6	byte		x		\b, version %c
 >8	byte		x		\b.%c
 
@@ -21087,11 +21782,13 @@
 # Forms Data Format
 0       string          %FDF-           FDF document
 !:mime application/vnd.fdf
+!:strength +60
 >5      byte            x               \b, version %c
 >7      byte            x               \b.%c
 
 0	search/256	%PDF-		PDF document
 !:mime	application/pdf
+!:strength +60
 >&0	byte		x		\b, version %c
 >&2	byte		x		\b.%c
 
@@ -23072,7 +23769,7 @@
 
 
 #------------------------------------------------------------------------------
-# $File: sgi,v 1.22 2015/08/29 07:10:35 christos Exp $
+# $File: sgi,v 1.23 2018/05/29 02:26:56 christos Exp $
 # sgi:  file(1) magic for Silicon Graphics operating systems and applications
 #
 # Executable images are handled either in aout (for old-style a.out
@@ -23142,8 +23839,6 @@
 4	belong	0x00000010		GLS_BINARY_MSB_FIRST
 !:strength -30
 
-#
-#
 # Performance Co-Pilot file types
 0	string	PmNs				PCP compiled namespace (V.0)
 0	string	PmN				PCP compiled namespace
@@ -23186,6 +23881,8 @@
 >16	string	>\0				(V.%1.1s)
 3	string	pmieconf-pmie			PCP pmie config
 >17	string	>\0				(V.%1.1s)
+0	string	MMV				PCP memory mapped values
+>4	long	x				(V.%d)
 
 # SpeedShop data files
 0	lelong	0x13130303			SpeedShop data file

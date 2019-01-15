@@ -108,6 +108,8 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  * ZEND_TYPE_IS_SET()     - checks if type-hint exists
  * ZEND_TYPE_IS_CODE()    - checks if type-hint refer to standard type
  * ZEND_TYPE_IS_CLASS()   - checks if type-hint refer to some class
+ * ZEND_TYPE_IS_CE()      - checks if type-hint refer to some class by zend_class_entry *
+ * ZEND_TYPE_IS_NAME()    - checks if type-hint refer to some class by zend_string *
  *
  * ZEND_TYPE_NAME()       - returns referenced class name
  * ZEND_TYPE_CE()         - returns referenced class entry
@@ -122,13 +124,19 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
 typedef uintptr_t zend_type;
 
 #define ZEND_TYPE_IS_SET(t) \
-	((t) > Z_L(1))
+	((t) > Z_L(0x3))
 
 #define ZEND_TYPE_IS_CODE(t) \
-	(((t) > Z_L(1)) && ((t) <= Z_L(0x1ff)))
+	(((t) > Z_L(0x3)) && ((t) <= Z_L(0x3ff)))
 
 #define ZEND_TYPE_IS_CLASS(t) \
-	((t) > Z_L(0x1ff))
+	((t) > Z_L(0x3ff))
+
+#define ZEND_TYPE_IS_CE(t) \
+	(((t) & Z_L(0x2)) != 0)
+
+#define ZEND_TYPE_IS_NAME(t) \
+	(ZEND_TYPE_IS_CLASS(t) && !ZEND_TYPE_IS_CE(t))
 
 #define ZEND_TYPE_NAME(t) \
 	((zend_string*)((t) & ~Z_L(0x3)))
@@ -137,16 +145,22 @@ typedef uintptr_t zend_type;
 	((zend_class_entry*)((t) & ~Z_L(0x3)))
 
 #define ZEND_TYPE_CODE(t) \
-	((t) >> Z_L(1))
+	((t) >> Z_L(2))
 
 #define ZEND_TYPE_ALLOW_NULL(t) \
 	(((t) & Z_L(0x1)) != 0)
 
+#define ZEND_TYPE_WITHOUT_NULL(t) \
+	((t) & ~Z_L(0x1))
+
 #define ZEND_TYPE_ENCODE(code, allow_null) \
-	(((code) << Z_L(1)) | ((allow_null) ? Z_L(0x1) : Z_L(0x0)))
+	(((code) << Z_L(2)) | ((allow_null) ? Z_L(0x1) : Z_L(0x0)))
+
+#define ZEND_TYPE_ENCODE_CE(ce, allow_null) \
+	(((uintptr_t)(ce)) | ((allow_null) ? Z_L(0x3) : Z_L(0x2)))
 
 #define ZEND_TYPE_ENCODE_CLASS(class_name, allow_null) \
-	(((uintptr_t)(class_name)) | ((allow_null) ? Z_L(0x1) : Z_L(0)))
+	(((uintptr_t)(class_name)) | ((allow_null) ? Z_L(0x1) : Z_L(0x0)))
 
 #define ZEND_TYPE_ENCODE_CLASS_CONST_0(class_name) \
 	((zend_type) class_name)
@@ -369,9 +383,27 @@ struct _zend_resource {
 	void             *ptr;
 };
 
+typedef struct _zend_property_info zend_property_info;
+
+typedef struct {
+	size_t num;
+	size_t num_allocated;
+	zend_property_info *ptr[1];
+} zend_property_info_list;
+
+typedef union {
+	zend_property_info *ptr;
+	uintptr_t list;
+} zend_property_info_source_list;
+
+#define ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list) (0x1 | (uintptr_t) (list))
+#define ZEND_PROPERTY_INFO_SOURCE_TO_LIST(list) ((zend_property_info_list *) ((list) & ~0x1))
+#define ZEND_PROPERTY_INFO_SOURCE_IS_LIST(list) ((list) & 0x1)
+
 struct _zend_reference {
-	zend_refcounted_h gc;
-	zval              val;
+	zend_refcounted_h              gc;
+	zval                           val;
+	zend_property_info_source_list sources;
 };
 
 struct _zend_ast_ref {
@@ -861,6 +893,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
+		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
@@ -871,6 +904,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
+		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
@@ -882,6 +916,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_SET_REFCOUNT(_ref, (refcount));						\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, _z);						\
+		_ref->sources.ptr = NULL;									\
 		Z_REF_P(_z) = _ref;										\
 		Z_TYPE_INFO_P(_z) = IS_REFERENCE_EX;					\
 	} while (0)
@@ -893,6 +928,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_TYPE_INFO(_ref) = IS_REFERENCE |						\
 			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
+		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)

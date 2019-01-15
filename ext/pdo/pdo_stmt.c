@@ -2176,7 +2176,7 @@ const zend_function_entry pdo_dbstmt_functions[] = {
 };
 
 /* {{{ overloaded handlers for PDOStatement class */
-static void dbstmt_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *dbstmt_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
 
@@ -2184,8 +2184,9 @@ static void dbstmt_prop_write(zval *object, zval *member, zval *value, void **ca
 
 	if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
+		return value;
 	} else {
-		zend_std_write_property(object, member, value, cache_slot);
+		return zend_std_write_property(object, member, value, cache_slot);
 	}
 }
 
@@ -2262,38 +2263,7 @@ static zend_object *dbstmt_clone_obj(zval *zobject)
 }
 
 zend_object_handlers pdo_dbstmt_object_handlers;
-static int pdo_row_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
-
-void pdo_stmt_init(void)
-{
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "PDOStatement", pdo_dbstmt_functions);
-	pdo_dbstmt_ce = zend_register_internal_class(&ce);
-	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
-	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
-	pdo_dbstmt_ce->serialize = zend_class_serialize_deny;
-	pdo_dbstmt_ce->unserialize = zend_class_unserialize_deny;
-	zend_class_implements(pdo_dbstmt_ce, 1, zend_ce_traversable);
-	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC);
-
-	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
-	pdo_dbstmt_object_handlers.dtor_obj = zend_objects_destroy_object;
-	pdo_dbstmt_object_handlers.free_obj = pdo_dbstmt_free_storage;
-	pdo_dbstmt_object_handlers.write_property = dbstmt_prop_write;
-	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
-	pdo_dbstmt_object_handlers.get_method = dbstmt_method_get;
-	pdo_dbstmt_object_handlers.compare_objects = dbstmt_compare;
-	pdo_dbstmt_object_handlers.clone_obj = dbstmt_clone_obj;
-
-	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
-	pdo_row_ce = zend_register_internal_class(&ce);
-	pdo_row_ce->ce_flags |= ZEND_ACC_FINAL; /* when removing this a lot of handlers need to be redone */
-	pdo_row_ce->create_object = pdo_row_new;
-	pdo_row_ce->serialize = pdo_row_serialize;
-	pdo_row_ce->unserialize = zend_class_unserialize_deny;
-}
+zend_object_handlers pdo_row_object_handlers;
 
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 {
@@ -2530,9 +2500,10 @@ static zval *row_dim_read(zval *object, zval *member, int type, zval *rv)
 	return row_prop_read(object, member, type, NULL, rv);
 }
 
-static void row_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *row_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	php_error_docref(NULL, E_WARNING, "This PDORow is not from a writable result set");
+	return value;
 }
 
 static void row_dim_write(zval *object, zval *member, zval *value)
@@ -2593,27 +2564,28 @@ static void row_dim_delete(zval *object, zval *offset)
 	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a PDORow");
 }
 
-static HashTable *row_get_properties(zval *object)
+static HashTable *row_get_properties_for(zval *object, zend_prop_purpose purpose)
 {
 	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
 	pdo_stmt_t *stmt = row->stmt;
+	HashTable *props;
 	int i;
 
-	if (stmt == NULL) {
-		return NULL;
+	if (purpose != ZEND_PROP_PURPOSE_DEBUG || stmt == NULL) {
+		return zend_std_get_properties_for(object, purpose);
 	}
 
 	if (!stmt->std.properties) {
 		rebuild_object_properties(&stmt->std);
 	}
+	props = zend_array_dup(stmt->std.properties);
 	for (i = 0; i < stmt->column_count; i++) {
 		zval val;
 		fetch_value(stmt, &val, i, NULL);
 
-		zend_hash_update(stmt->std.properties, stmt->columns[i].name, &val);
+		zend_hash_update(props, stmt->columns[i].name, &val);
 	}
-
-	return stmt->std.properties;
+	return props;
 }
 
 static zend_function *row_method_get(
@@ -2656,37 +2628,6 @@ static int row_compare(zval *object1, zval *object2)
 	return -1;
 }
 
-const zend_object_handlers pdo_row_object_handlers = {
-	0,
-	zend_objects_destroy_object,
-	pdo_row_free_storage,
-	NULL,
-	row_prop_read,
-	row_prop_write,
-	row_dim_read,
-	row_dim_write,
-	NULL,
-	NULL,
-	NULL,
-	row_prop_exists,
-	row_prop_delete,
-	row_dim_exists,
-	row_dim_delete,
-	row_get_properties,
-	row_method_get,
-	row_call_method,
-	row_get_ctor,
-	row_get_classname,
-	row_compare,
-	NULL, /* cast */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL
-};
-
 void pdo_row_free_storage(zend_object *std)
 {
 	pdo_row_t *row = (pdo_row_t *)std;
@@ -2705,12 +2646,55 @@ zend_object *pdo_row_new(zend_class_entry *ce)
 	return &row->std;
 }
 
-static int pdo_row_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
+void pdo_stmt_init(void)
 {
-	php_error_docref(NULL, E_WARNING, "PDORow instances may not be serialized");
-	return FAILURE;
+	zend_class_entry ce;
+
+	INIT_CLASS_ENTRY(ce, "PDOStatement", pdo_dbstmt_functions);
+	pdo_dbstmt_ce = zend_register_internal_class(&ce);
+	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
+	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
+	pdo_dbstmt_ce->serialize = zend_class_serialize_deny;
+	pdo_dbstmt_ce->unserialize = zend_class_unserialize_deny;
+	zend_class_implements(pdo_dbstmt_ce, 1, zend_ce_traversable);
+	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC);
+
+	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
+	pdo_dbstmt_object_handlers.dtor_obj = zend_objects_destroy_object;
+	pdo_dbstmt_object_handlers.free_obj = pdo_dbstmt_free_storage;
+	pdo_dbstmt_object_handlers.write_property = dbstmt_prop_write;
+	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
+	pdo_dbstmt_object_handlers.get_method = dbstmt_method_get;
+	pdo_dbstmt_object_handlers.compare_objects = dbstmt_compare;
+	pdo_dbstmt_object_handlers.clone_obj = dbstmt_clone_obj;
+
+	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
+	pdo_row_ce = zend_register_internal_class(&ce);
+	pdo_row_ce->ce_flags |= ZEND_ACC_FINAL; /* when removing this a lot of handlers need to be redone */
+	pdo_row_ce->create_object = pdo_row_new;
+	pdo_row_ce->serialize = zend_class_serialize_deny;
+	pdo_row_ce->unserialize = zend_class_unserialize_deny;
+
+	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	pdo_row_object_handlers.free_obj = pdo_row_free_storage;
+	pdo_row_object_handlers.clone_obj = NULL;
+	pdo_row_object_handlers.get_property_ptr_ptr = NULL;
+	pdo_row_object_handlers.read_property = row_prop_read;
+	pdo_row_object_handlers.write_property = row_prop_write;
+	pdo_row_object_handlers.has_property = row_prop_exists;
+	pdo_row_object_handlers.unset_property = row_prop_delete;
+	pdo_row_object_handlers.read_dimension = row_dim_read;
+	pdo_row_object_handlers.write_dimension = row_dim_write;
+	pdo_row_object_handlers.has_dimension = row_dim_exists;
+	pdo_row_object_handlers.unset_dimension = row_dim_delete;
+	pdo_row_object_handlers.get_properties_for = row_get_properties_for;
+	pdo_row_object_handlers.get_method = row_method_get;
+	pdo_row_object_handlers.call_method = row_call_method;
+	pdo_row_object_handlers.get_constructor = row_get_ctor;
+	pdo_row_object_handlers.get_class_name = row_get_classname;
+	pdo_row_object_handlers.compare_objects = row_compare;
 }
-/* }}} */
 
 /*
  * Local variables:

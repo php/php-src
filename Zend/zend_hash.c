@@ -129,7 +129,7 @@ static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
 		data = emalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK));
 	}
 	HT_SET_DATA_ADDR(ht, data);
-	HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED | HASH_FLAG_PACKED;
+	HT_FLAGS(ht) = HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
 	HT_HASH_RESET_PACKED(ht);
 }
 
@@ -144,7 +144,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 		data = emalloc(HT_SIZE_EX(HT_MIN_SIZE, HT_SIZE_TO_MASK(HT_MIN_SIZE)));
 		ht->nTableMask = HT_SIZE_TO_MASK(HT_MIN_SIZE);
 		HT_SET_DATA_ADDR(ht, data);
-		HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED;
+		HT_FLAGS(ht) = HASH_FLAG_STATIC_KEYS;
 #ifdef __SSE2__
 		do {
 			__m128i xmm0 = _mm_setzero_si128();
@@ -178,14 +178,14 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 	}
 	ht->nTableMask = HT_SIZE_TO_MASK(nSize);
 	HT_SET_DATA_ADDR(ht, data);
-	HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED;
+	HT_FLAGS(ht) = HASH_FLAG_STATIC_KEYS;
 	HT_HASH_RESET(ht);
 }
 
 static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, int packed)
 {
 	HT_ASSERT_RC1(ht);
-	ZEND_ASSERT(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED));
+	ZEND_ASSERT(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED);
 	if (packed) {
 		zend_hash_real_init_packed_ex(ht);
 	} else {
@@ -199,7 +199,7 @@ static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 ZEND_API const HashTable zend_empty_array = {
 	.gc.refcount = 2,
 	.gc.u.type_info = IS_ARRAY | (GC_IMMUTABLE << GC_FLAGS_SHIFT),
-	.u.flags = HASH_FLAG_STATIC_KEYS,
+	.u.flags = HASH_FLAG_UNINITIALIZED,
 	.nTableMask = HT_MIN_MASK,
 	.arData = (Bucket*)&uninitialized_bucket[2],
 	.nNumUsed = 0,
@@ -214,7 +214,7 @@ static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize
 {
 	GC_SET_REFCOUNT(ht, 1);
 	GC_TYPE_INFO(ht) = IS_ARRAY | (persistent ? (GC_PERSISTENT << GC_FLAGS_SHIFT) : (GC_COLLECTABLE << GC_FLAGS_SHIFT));
-	HT_FLAGS(ht) = HASH_FLAG_STATIC_KEYS;
+	HT_FLAGS(ht) = HASH_FLAG_UNINITIALIZED;
 	ht->nTableMask = HT_MIN_MASK;
 	HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 	ht->nNumUsed = 0;
@@ -313,7 +313,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend
 {
 	HT_ASSERT_RC1(ht);
 	if (nSize == 0) return;
-	if (UNEXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
+	if (UNEXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		if (nSize > ht->nTableSize) {
 			ht->nTableSize = zend_hash_check_size(nSize);
 		}
@@ -680,20 +680,22 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
-	if (UNEXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
-		zend_hash_real_init_mixed(ht);
-		if (!ZSTR_IS_INTERNED(key)) {
-			zend_string_addref(key);
-			HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
-			zend_string_hash_val(key);
-		}
-		goto add_to_hash;
-	} else if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
-		zend_hash_packed_to_hash(ht);
-		if (!ZSTR_IS_INTERNED(key)) {
-			zend_string_addref(key);
-			HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
-			zend_string_hash_val(key);
+	if (UNEXPECTED(HT_FLAGS(ht) & (HASH_FLAG_UNINITIALIZED|HASH_FLAG_PACKED))) {
+		if (EXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
+			zend_hash_real_init_mixed(ht);
+			if (!ZSTR_IS_INTERNED(key)) {
+				zend_string_addref(key);
+				HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
+				zend_string_hash_val(key);
+			}
+			goto add_to_hash;
+		} else {
+			zend_hash_packed_to_hash(ht);
+			if (!ZSTR_IS_INTERNED(key)) {
+				zend_string_addref(key);
+				HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
+				zend_string_hash_val(key);
+			}
 		}
 	} else if ((flag & HASH_ADD_NEW) == 0) {
 		p = zend_hash_find_bucket(ht, key, 0);
@@ -765,11 +767,13 @@ static zend_always_inline zval *_zend_hash_str_add_or_update_i(HashTable *ht, co
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
-	if (UNEXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
-		zend_hash_real_init_mixed(ht);
-		goto add_to_hash;
-	} else if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
-		zend_hash_packed_to_hash(ht);
+	if (UNEXPECTED(HT_FLAGS(ht) & (HASH_FLAG_UNINITIALIZED|HASH_FLAG_PACKED))) {
+		if (EXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
+			zend_hash_real_init_mixed(ht);
+			goto add_to_hash;
+		} else {
+			zend_hash_packed_to_hash(ht);
+		}
 	} else if ((flag & HASH_ADD_NEW) == 0) {
 		p = zend_hash_str_find_bucket(ht, str, len, h);
 
@@ -973,7 +977,7 @@ add_to_packed:
 convert_to_hash:
 			zend_hash_packed_to_hash(ht);
 		}
-	} else if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	} else if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		if (h < ht->nTableSize) {
 			zend_hash_real_init_packed_ex(ht);
 			goto add_to_packed;
@@ -1142,7 +1146,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 	IS_CONSISTENT(ht);
 
 	if (UNEXPECTED(ht->nNumOfElements == 0)) {
-		if (HT_FLAGS(ht) & HASH_FLAG_INITIALIZED) {
+		if (!(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 			ht->nNumUsed = 0;
 			HT_HASH_RESET(ht);
 		}
@@ -1537,7 +1541,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
 			}
 		}
 		zend_hash_iterators_remove(ht);
-	} else if (EXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
+	} else if (EXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		return;
 	}
 	pefree(HT_GET_DATA_ADDR(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
@@ -1588,7 +1592,7 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 		}
 		zend_hash_iterators_remove(ht);
 		SET_INCONSISTENT(HT_DESTROYED);
-	} else if (EXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
+	} else if (EXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		goto free_ht;
 	}
 	efree(HT_GET_DATA_ADDR(ht));
@@ -1717,7 +1721,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_graceful_destroy(HashTable *ht)
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		_zend_hash_del_el(ht, HT_IDX_TO_HASH(idx), p);
 	}
-	if (HT_FLAGS(ht) & HASH_FLAG_INITIALIZED) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		pefree(HT_GET_DATA_ADDR(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 	}
 
@@ -1741,7 +1745,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_graceful_reverse_destroy(HashTable *ht)
 		_zend_hash_del_el(ht, HT_IDX_TO_HASH(idx), p);
 	}
 
-	if (HT_FLAGS(ht) & HASH_FLAG_INITIALIZED) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		pefree(HT_GET_DATA_ADDR(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 	}
 
@@ -2010,7 +2014,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	target->pDestructor = ZVAL_PTR_DTOR;
 
 	if (source->nNumOfElements == 0) {
-		HT_FLAGS(target) = (HT_FLAGS(source) & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED)) | HASH_FLAG_STATIC_KEYS;
+		HT_FLAGS(target) = HASH_FLAG_UNINITIALIZED;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
 		target->nNumOfElements = 0;

@@ -510,13 +510,54 @@ static void compress_block(zend_op_array *op_array, zend_basic_block *block)
 	}
 }
 
+static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int new_pred) {
+	zend_basic_block *block = &ssa->cfg.blocks[block_id];
+	int *predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
+	zend_ssa_phi *phi;
+
+	int i;
+	int old_pred_idx = -1;
+	int new_pred_idx = -1;
+	for (i = 0; i < block->predecessors_count; i++) {
+		if (predecessors[i] == old_pred) {
+			old_pred_idx = i;
+		}
+		if (predecessors[i] == new_pred) {
+			new_pred_idx = i;
+		}
+	}
+
+	ZEND_ASSERT(old_pred_idx != -1);
+	if (new_pred_idx == -1) {
+		/* If the new predecessor doesn't exist yet, simply rewire the old one */
+		predecessors[old_pred_idx] = new_pred;
+	} else {
+		/* Otherwise, rewiring the old predecessor would make the new predecessor appear
+		 * twice, which violates our CFG invariants. Remove the old predecessor instead. */
+		memmove(
+			predecessors + old_pred_idx,
+			predecessors + old_pred_idx + 1,
+			sizeof(int) * (block->predecessors_count - old_pred_idx - 1)
+		);
+
+		/* Also remove the corresponding phi node entries */
+		for (phi = ssa->blocks[block_id].phis; phi; phi = phi->next) {
+			memmove(
+				phi->sources + old_pred_idx,
+				phi->sources + old_pred_idx + 1,
+				sizeof(int) * (block->predecessors_count - old_pred_idx - 1)
+			);
+		}
+
+		block->predecessors_count--;
+	}
+}
+
 static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa, int from, int to, int new_to)
 {
 	zend_basic_block *src = &ssa->cfg.blocks[from];
 	zend_basic_block *old = &ssa->cfg.blocks[to];
 	zend_basic_block *dst = &ssa->cfg.blocks[new_to];
-	int *predecessors = &ssa->cfg.predecessors[dst->predecessor_offset];
-	int dup = 0;
 	int i;
 	zend_op *opline;
 
@@ -585,16 +626,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 		}
 	}
 
-	for (i = 0; i < dst->predecessors_count; i++) {
-		if (dup) {
-			predecessors[i] = predecessors[i+1];
-		} else if (predecessors[i] == to) {
-			predecessors[i] = from;
-		} else if (predecessors[i] == from) {
-			dup = 1;
-			dst->predecessors_count--;
-		}
-	}
+	replace_predecessor(ssa, new_to, to, from);
 }
 
 static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_basic_block *block, int block_num)

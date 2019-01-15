@@ -69,7 +69,7 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, zend_bool autol
 		zend_string *lc_name = zend_string_tolower(name);
 
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		zend_string_free(lc_name);
+		zend_string_release(lc_name);
 	} else {
  		ce = zend_lookup_class(name);
  	}
@@ -335,7 +335,7 @@ PHP_FUNCTION(spl_autoload)
 		pos = pos1 ? pos1 + 1 : NULL;
 		pos_len = pos1? pos_len - pos1_len - 1 : 0;
 	}
-	zend_string_free(lc_name);
+	zend_string_release(lc_name);
 } /* }}} */
 
 /* {{{ proto string spl_autoload_extensions([string file_extensions])

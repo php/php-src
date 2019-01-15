@@ -256,6 +256,14 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
                                     zval          *val)
 {
 	switch (opline->opcode) {
+		case ZEND_OP_DATA:
+			switch ((opline-1)->opcode) {
+				case ZEND_ASSIGN_OBJ_REF:
+				case ZEND_ASSIGN_STATIC_PROP_REF:
+					return 0;
+			}
+			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
+			break;
 		case ZEND_FREE:
 		case ZEND_CHECK_VAR:
 			MAKE_NOP(opline);
@@ -312,6 +320,23 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			}
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
+		case ZEND_ASSIGN_ADD:
+		case ZEND_ASSIGN_SUB:
+		case ZEND_ASSIGN_MUL:
+		case ZEND_ASSIGN_DIV:
+		case ZEND_ASSIGN_MOD:
+		case ZEND_ASSIGN_SL:
+		case ZEND_ASSIGN_SR:
+		case ZEND_ASSIGN_CONCAT:
+		case ZEND_ASSIGN_BW_OR:
+		case ZEND_ASSIGN_BW_AND:
+		case ZEND_ASSIGN_BW_XOR:
+		case ZEND_ASSIGN_POW:
+			if (opline->extended_value != ZEND_ASSIGN_STATIC_PROP) {
+				break;
+			}
+		case ZEND_ASSIGN_STATIC_PROP:
+		case ZEND_ASSIGN_STATIC_PROP_REF:
 		case ZEND_FETCH_STATIC_PROP_R:
 		case ZEND_FETCH_STATIC_PROP_W:
 		case ZEND_FETCH_STATIC_PROP_RW:
@@ -319,21 +344,17 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_STATIC_PROP_UNSET:
 		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 		case ZEND_UNSET_STATIC_PROP:
-			TO_STRING_NOWARN(val);
-			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			if (opline->op2_type == IS_CONST && opline->extended_value + sizeof(void*) == op_array->cache_size) {
-				op_array->cache_size += sizeof(void *);
-			} else {
-				opline->extended_value = alloc_cache_slots(op_array, 2);
-			}
-			break;
 		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+		case ZEND_PRE_INC_STATIC_PROP:
+		case ZEND_PRE_DEC_STATIC_PROP:
+		case ZEND_POST_INC_STATIC_PROP:
+		case ZEND_POST_DEC_STATIC_PROP:
 			TO_STRING_NOWARN(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			if (opline->op2_type == IS_CONST && (opline->extended_value & ~ZEND_ISEMPTY) + sizeof(void*) == op_array->cache_size) {
+			if (opline->op2_type == IS_CONST && (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) == op_array->cache_size) {
 				op_array->cache_size += sizeof(void *);
 			} else {
-				opline->extended_value = alloc_cache_slots(op_array, 2) | (opline->extended_value & ZEND_ISEMPTY);
+				opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 			}
 			break;
 		case ZEND_SEND_VAR:
@@ -405,6 +426,8 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			opline->result.num = alloc_cache_slots(op_array, 1);
 			break;
+		case ZEND_ASSIGN_STATIC_PROP:
+		case ZEND_ASSIGN_STATIC_PROP_REF:
 		case ZEND_FETCH_STATIC_PROP_R:
 		case ZEND_FETCH_STATIC_PROP_W:
 		case ZEND_FETCH_STATIC_PROP_RW:
@@ -412,21 +435,17 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FETCH_STATIC_PROP_UNSET:
 		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 		case ZEND_UNSET_STATIC_PROP:
+		case ZEND_PRE_INC_STATIC_PROP:
+		case ZEND_PRE_DEC_STATIC_PROP:
+		case ZEND_POST_INC_STATIC_PROP:
+		case ZEND_POST_DEC_STATIC_PROP:
+handle_static_prop:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			if (opline->op1_type != IS_CONST) {
-				opline->extended_value = alloc_cache_slots(op_array, 1);
-			}
-			break;
-		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
-			REQUIRES_STRING(val);
-			drop_leading_backslash(val);
-			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
-			if (opline->op1_type != IS_CONST) {
-				opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & ZEND_ISEMPTY);
+				opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & (ZEND_RETURNS_FUNCTION|ZEND_ISEMPTY|ZEND_FETCH_OBJ_FLAGS));
 			}
 			break;
 		case ZEND_INIT_FCALL:
@@ -477,6 +496,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			}
 			break;
 		case ZEND_ASSIGN_OBJ:
+		case ZEND_ASSIGN_OBJ_REF:
 		case ZEND_FETCH_OBJ_R:
 		case ZEND_FETCH_OBJ_W:
 		case ZEND_FETCH_OBJ_RW:
@@ -490,12 +510,12 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_POST_DEC_OBJ:
 			TO_STRING_NOWARN(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			opline->extended_value = alloc_cache_slots(op_array, 2);
+			opline->extended_value = alloc_cache_slots(op_array, 3);
 			break;
 		case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 			TO_STRING_NOWARN(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			opline->extended_value = alloc_cache_slots(op_array, 2) | (opline->extended_value & ZEND_ISEMPTY);
+			opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & ZEND_ISEMPTY);
 			break;
 		case ZEND_ASSIGN_ADD:
 		case ZEND_ASSIGN_SUB:
@@ -512,7 +532,9 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 				TO_STRING_NOWARN(val);
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-				(opline+1)->extended_value = alloc_cache_slots(op_array, 2);
+				(opline+1)->extended_value = alloc_cache_slots(op_array, 3);
+			} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+				goto handle_static_prop;
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				if (Z_TYPE_P(val) == IS_STRING) {
 					zend_ulong index;
@@ -614,6 +636,39 @@ void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var)
 	}
 }
 
+static uint32_t zend_determine_constructor_call(zend_op_array *op_array, uint32_t start) {
+	int call = 0;
+	while (++start < op_array->last) {
+		switch (op_array->opcodes[start].opcode) {
+			case ZEND_INIT_FCALL_BY_NAME:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_FCALL:
+			case ZEND_NEW:
+			case ZEND_INIT_DYNAMIC_CALL:
+			case ZEND_INIT_USER_CALL:
+				call++;
+				break;
+			case ZEND_DO_FCALL:
+				if (call == 0) {
+					return start;
+				}
+			/* break missing intentionally */
+			case ZEND_DO_ICALL:
+			case ZEND_DO_UCALL:
+			case ZEND_DO_FCALL_BY_NAME:
+				call--;
+				break;
+			default:
+				break;
+		}
+	}
+
+	ZEND_ASSERT(0);
+	return -1;
+}
+
 void zend_optimizer_remove_live_range_ex(zend_op_array *op_array, uint32_t var, uint32_t start)
 {
 	uint32_t i = 0;
@@ -631,7 +686,12 @@ void zend_optimizer_remove_live_range_ex(zend_op_array *op_array, uint32_t var, 
 		case ZEND_FE_RESET_R:
 		case ZEND_FE_RESET_RW:
 			var |= ZEND_LIVE_LOOP;
-			/* break missing intentionally */
+			start++;
+			break;
+		case ZEND_NEW:
+			start = zend_determine_constructor_call(op_array, start);
+			start++;
+			break;
 		default:
 			start++;
 	}
@@ -1093,7 +1153,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	 * - change $i++ to ++$i where possible
 	 */
 	if (ZEND_OPTIMIZER_PASS_3 & ctx->optimization_level) {
-		zend_optimizer_pass3(op_array);
+		zend_optimizer_pass3(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_3) {
 			zend_dump_op_array(op_array, 0, "after pass 3", NULL);
 		}

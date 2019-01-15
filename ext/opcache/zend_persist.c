@@ -98,7 +98,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	ht->pDestructor = NULL;
 	ht->nInternalPointer = 0;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
 		} else {
@@ -114,7 +114,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		} else {
 			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		}
-		HT_FLAGS(ht) &= ~HASH_FLAG_INITIALIZED;
+		HT_FLAGS(ht) |= HASH_FLAG_UNINITIALIZED;
 		return;
 	}
 	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
@@ -193,7 +193,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	HT_FLAGS(ht) |= HASH_FLAG_STATIC_KEYS;
 	ht->pDestructor = NULL;
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
 		} else {
@@ -209,7 +209,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 		} else {
 			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		}
-		HT_FLAGS(ht) &= ~HASH_FLAG_INITIALIZED;
+		HT_FLAGS(ht) |= HASH_FLAG_UNINITIALIZED;
 		return;
 	}
 	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
@@ -757,6 +757,16 @@ static void zend_persist_property_info(zval *zv)
 			prop->doc_comment = NULL;
 		}
 	}
+
+	if (ZEND_TYPE_IS_NAME(prop->type)) {
+		zend_string *class_name = ZEND_TYPE_NAME(prop->type);
+		zend_accel_store_interned_string(class_name);
+		prop->type = ZEND_TYPE_ENCODE_CLASS(class_name, ZEND_TYPE_ALLOW_NULL(prop->type));
+	} else if (ZEND_TYPE_IS_CE(prop->type)) {
+		zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
+		ce = zend_shared_alloc_get_xlat_entry(ce);
+		prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
+	}
 }
 
 static void zend_persist_class_constant(zval *zv)
@@ -797,6 +807,16 @@ static void zend_persist_class_constant(zval *zv)
 	}
 }
 
+static zend_bool has_unresolved_property_types(zend_class_entry *ce) {
+	zend_property_info *prop;
+	ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+		if (ZEND_TYPE_IS_NAME(prop->type)) {
+			return 1;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return 0;
+}
+
 static void zend_persist_class_entry(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
@@ -804,6 +824,7 @@ static void zend_persist_class_entry(zval *zv)
 	if (ce->type == ZEND_USER_CLASS) {
 		if ((ce->ce_flags & ZEND_ACC_LINKED)
 		 && (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)
+		 && !has_unresolved_property_types(ce)
 		 && !ZCG(current_persistent_script)->corrupted) {
 			ZCG(is_immutable_class) = 1;
 			ce = Z_PTR_P(zv) = zend_shared_memdup_put(ce, sizeof(zend_class_entry));
@@ -817,7 +838,7 @@ static void zend_persist_class_entry(zval *zv)
 			zend_accel_store_interned_string(ce->parent_name);
 		}
 		zend_hash_persist(&ce->function_table, zend_persist_class_method);
-		HT_FLAGS(&ce->function_table) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
+		HT_FLAGS(&ce->function_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 		if (ce->default_properties_table) {
 		    int i;
 
@@ -846,7 +867,7 @@ static void zend_persist_class_entry(zval *zv)
 		}
 
 		zend_hash_persist(&ce->constants_table, zend_persist_class_constant);
-		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
+		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 
 		if (ce->info.user.filename) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */
@@ -864,7 +885,20 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
-		HT_FLAGS(&ce->properties_info) &= (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS);
+		HT_FLAGS(&ce->properties_info) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
+
+		if (ce->properties_info_table) {
+			int i;
+
+			size_t size = sizeof(zend_property_info *) * ce->default_properties_count;
+			memcpy(ZCG(arena_mem), ce->properties_info_table, size);
+			ce->properties_info_table = ZCG(arena_mem);
+			ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(size));
+
+			for (i = 0; i < ce->default_properties_count; i++) {
+				ce->properties_info_table[i] = zend_shared_alloc_get_xlat_entry(ce->properties_info_table[i]);
+			}
+		}
 
 		if (ce->num_interfaces && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 			uint32_t i = 0;
@@ -907,7 +941,7 @@ static void zend_persist_class_entry(zval *zv)
 			}
 
 			if (ce->trait_precedences) {
-				int j;
+				uint32_t j;
 
 				i = 0;
 				while (ce->trait_precedences[i]) {
