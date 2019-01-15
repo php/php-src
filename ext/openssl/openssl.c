@@ -716,15 +716,29 @@ static int X509_get_signature_nid(const X509 *x)
 			RETURN_FALSE; \
 		} \
 	} while(0)
+/* number conversion flags checks */
+#define PHP_OPENSSL_CHECK_NUMBER_CONVERSION_NORET(_cond, _name) \
+	do { \
+		if (_cond) { \
+			php_error_docref(NULL, E_WARNING, #_name" is too long"); \
+			return NULL; \
+		} \
+	} while(0)
 /* check if size_t can be safely casted to int */
 #define PHP_OPENSSL_CHECK_SIZE_T_TO_INT(_var, _name) \
 	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_SIZE_T_INT_OVFL(_var), _name)
+/* check if size_t can be safely casted to int */
+#define PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NORET(_var, _name) \
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION_NORET(ZEND_SIZE_T_INT_OVFL(_var), _name)
 /* check if size_t can be safely casted to unsigned int */
 #define PHP_OPENSSL_CHECK_SIZE_T_TO_UINT(_var, _name) \
 	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_SIZE_T_UINT_OVFL(_var), _name)
 /* check if long can be safely casted to int */
 #define PHP_OPENSSL_CHECK_LONG_TO_INT(_var, _name) \
 	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_LONG_EXCEEDS_INT(_var), _name)
+/* check if long can be safely casted to int */
+#define PHP_OPENSSL_CHECK_LONG_TO_INT_NORET(_var, _name) \
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION_NORET(ZEND_LONG_EXCEEDS_INT(_var), _name)
 
 /* {{{ php_openssl_store_errors */
 void php_openssl_store_errors()
@@ -6625,42 +6639,34 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 }
 /* }}} */
 
-/* {{{ proto string openssl_encrypt(string data, string method, string password [, int options=0 [, string $iv=''[, string &$tag = ''[, string $aad = ''[, int $tag_length = 16]]]]])
-   Encrypts given data with given method and key, returns raw or base64 encoded string */
-PHP_FUNCTION(openssl_encrypt)
+
+PHP_OPENSSL_API zend_string* php_openssl_encrypt(char *data, size_t data_len, char *method, size_t method_len, char *password, size_t password_len, zend_long options, char *iv, size_t iv_len, zval *tag, zend_long tag_len, char *aad, size_t aad_len)
 {
-	zend_long options = 0, tag_len = 16;
-	char *data, *method, *password, *iv = "", *aad = "";
-	size_t data_len, method_len, password_len, iv_len = 0, aad_len = 0;
-	zval *tag = NULL;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
-	int i=0, outlen;
-	zend_string *outbuf;
+	int i = 0, outlen;
 	zend_bool free_iv = 0, free_password = 0;
+	zend_string *outbuf = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lszsl", &data, &data_len, &method, &method_len,
-					&password, &password_len, &options, &iv, &iv_len, &tag, &aad, &aad_len, &tag_len) == FAILURE) {
-		return;
-	}
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NORET(data_len, data);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NORET(password_len, password);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NORET(aad_len, aad);
+	PHP_OPENSSL_CHECK_LONG_TO_INT_NORET(tag_len, tag_len);
 
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(aad_len, aad);
-	PHP_OPENSSL_CHECK_LONG_TO_INT(tag_len, tag_len);
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		RETURN_FALSE;
+		return NULL;
 	}
 
 	cipher_ctx = EVP_CIPHER_CTX_new();
 	if (!cipher_ctx) {
 		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
-		RETURN_FALSE;
+		return NULL;
 	}
+
 	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, &mode,
@@ -6668,20 +6674,21 @@ PHP_FUNCTION(openssl_encrypt)
 				&iv, &iv_len, &free_iv, NULL, tag_len, options, 1) == FAILURE ||
 			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
 				data, data_len, aad, aad_len, 1) == FAILURE) {
-		RETVAL_FALSE;
+		if (outbuf)
+			zend_string_release_ex(outbuf, 0);
+		outbuf = NULL;
+		goto cleanup;
 	} else if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + outlen, &i)) {
 		outlen += i;
 		if (options & OPENSSL_RAW_DATA) {
 			ZSTR_VAL(outbuf)[outlen] = '\0';
 			ZSTR_LEN(outbuf) = outlen;
-			RETVAL_STR(outbuf);
 		} else {
 			zend_string *base64_str;
 
 			base64_str = php_base64_encode((unsigned char*)ZSTR_VAL(outbuf), outlen);
 			zend_string_release_ex(outbuf, 0);
 			outbuf = base64_str;
-			RETVAL_STR(base64_str);
 		}
 		if (mode.is_aead && tag) {
 			zend_string *tag_str = zend_string_alloc(tag_len, 0);
@@ -6694,7 +6701,7 @@ PHP_FUNCTION(openssl_encrypt)
 				php_error_docref(NULL, E_WARNING, "Retrieving verification tag failed");
 				zend_string_release_ex(tag_str, 0);
 				zend_string_release_ex(outbuf, 0);
-				RETVAL_FALSE;
+				outbuf = NULL;
 			}
 		} else if (tag) {
 			ZEND_TRY_ASSIGN_NULL(tag);
@@ -6703,14 +6710,15 @@ PHP_FUNCTION(openssl_encrypt)
 		} else if (mode.is_aead) {
 			php_error_docref(NULL, E_WARNING, "A tag should be provided when using AEAD mode");
 			zend_string_release_ex(outbuf, 0);
-			RETVAL_FALSE;
+			outbuf = NULL;
 		}
 	} else {
 		php_openssl_store_errors();
 		zend_string_release_ex(outbuf, 0);
-		RETVAL_FALSE;
+		outbuf = NULL;
 	}
 
+cleanup:
 	if (free_password) {
 		efree(password);
 	}
@@ -6719,49 +6727,58 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 	EVP_CIPHER_CTX_cleanup(cipher_ctx);
 	EVP_CIPHER_CTX_free(cipher_ctx);
+	return outbuf;
+}
+
+/* {{{ proto string openssl_encrypt(string data, string method, string password [, int options=0 [, string $iv=''[, string &$tag = ''[, string $aad = ''[, int $tag_length = 16]]]]])
+   Encrypts given data with given method and key, returns raw or base64 encoded string */
+PHP_FUNCTION(openssl_encrypt)
+{
+	zend_long options = 0, tag_len = 16;
+	char *data, *method, *password, *iv = "", *aad = "";
+	size_t data_len, method_len, password_len, iv_len = 0, aad_len = 0;
+	zend_string *ret;
+	zval *tag = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lszsl", &data, &data_len, &method, &method_len,
+					&password, &password_len, &options, &iv, &iv_len, &tag, &aad, &aad_len, &tag_len) == FAILURE) {
+		return;
+	}
+
+	if ((ret = php_openssl_encrypt(data, data_len, method, method_len, password, password_len, options, iv, iv_len, tag, tag_len, aad, aad_len))) {
+		RETVAL_STR(ret);
+	} else {
+		RETVAL_FALSE;
+	}
 }
 /* }}} */
 
-/* {{{ proto string openssl_decrypt(string data, string method, string password [, int options=0 [, string $iv = ''[, string $tag = ''[, string $aad = '']]]])
-   Takes raw or base64 encoded string and decrypts it using given method and key */
-PHP_FUNCTION(openssl_decrypt)
+PHP_OPENSSL_API zend_string* php_openssl_decrypt(char *data, size_t data_len, char *method, size_t method_len, char *password, size_t password_len, zend_long options, char *iv, size_t iv_len, char *tag, zend_long tag_len, char *aad, size_t aad_len)
 {
-	zend_long options = 0;
-	char *data, *method, *password, *iv = "", *tag = NULL, *aad = "";
-	size_t data_len, method_len, password_len, iv_len = 0, tag_len = 0, aad_len = 0;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
 	int i = 0, outlen;
-	zend_string *outbuf;
 	zend_string *base64_str = NULL;
 	zend_bool free_iv = 0, free_password = 0;
+	zend_string *outbuf = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lsss", &data, &data_len, &method, &method_len,
-					&password, &password_len, &options, &iv, &iv_len, &tag, &tag_len, &aad, &aad_len) == FAILURE) {
-		return;
-	}
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NORET(data_len, data);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NORET(password_len, password);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NORET(aad_len, aad);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NORET(tag_len, tag);
 
-	if (!method_len) {
-		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		RETURN_FALSE;
-	}
-
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(aad_len, aad);
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(tag_len, tag);
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		RETURN_FALSE;
+		return NULL;
 	}
 
 	cipher_ctx = EVP_CIPHER_CTX_new();
 	if (!cipher_ctx) {
 		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
-		RETURN_FALSE;
+		return NULL;
 	}
 
 	php_openssl_load_cipher_mode(&mode, cipher_type);
@@ -6771,7 +6788,7 @@ PHP_FUNCTION(openssl_decrypt)
 		if (!base64_str) {
 			php_error_docref(NULL, E_WARNING, "Failed to base64 decode the input");
 			EVP_CIPHER_CTX_free(cipher_ctx);
-			RETURN_FALSE;
+			return NULL;
 		}
 		data_len = ZSTR_LEN(base64_str);
 		data = ZSTR_VAL(base64_str);
@@ -6782,19 +6799,22 @@ PHP_FUNCTION(openssl_decrypt)
 				&iv, &iv_len, &free_iv, tag, tag_len, options, 0) == FAILURE ||
 			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
 				data, data_len, aad, aad_len, 0) == FAILURE) {
-		RETVAL_FALSE;
+		if (outbuf)
+			zend_string_release_ex(outbuf, 0);
+		outbuf = NULL;
+		goto cleanup;
 	} else if (mode.is_single_run_aead ||
 			EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + outlen, &i)) {
 		outlen += i;
 		ZSTR_VAL(outbuf)[outlen] = '\0';
 		ZSTR_LEN(outbuf) = outlen;
-		RETVAL_STR(outbuf);
 	} else {
 		php_openssl_store_errors();
 		zend_string_release_ex(outbuf, 0);
-		RETVAL_FALSE;
+		outbuf = NULL;
 	}
 
+cleanup:
 	if (free_password) {
 		efree(password);
 	}
@@ -6806,15 +6826,55 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 	EVP_CIPHER_CTX_cleanup(cipher_ctx);
 	EVP_CIPHER_CTX_free(cipher_ctx);
+	return outbuf;
+}
+
+/* {{{ proto string openssl_decrypt(string data, string method, string password [, int options=0 [, string $iv = ''[, string $tag = ''[, string $aad = '']]]])
+   Takes raw or base64 encoded string and decrypts it using given method and key */
+PHP_FUNCTION(openssl_decrypt)
+{
+	zend_long options = 0;
+	char *data, *method, *password, *iv = "", *tag = NULL, *aad = "";
+	size_t data_len, method_len, password_len, iv_len = 0, tag_len = 0, aad_len = 0;
+	zend_string *ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lsss", &data, &data_len, &method, &method_len,
+					&password, &password_len, &options, &iv, &iv_len, &tag, &tag_len, &aad, &aad_len) == FAILURE) {
+		return;
+	}
+
+	if (!method_len) {
+		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
+		RETURN_FALSE;
+	}
+
+	if ((ret = php_openssl_decrypt(data, data_len, method, method_len, password, password_len, options, iv, iv_len, tag, tag_len, aad, aad_len))) {
+		RETVAL_STR(ret);
+	} else {
+		RETVAL_FALSE;
+	}
 }
 /* }}} */
+
+PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(char *method)
+{
+	const EVP_CIPHER *cipher_type;
+
+	cipher_type = EVP_get_cipherbyname(method);
+	if (!cipher_type) {
+		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
+		return -1;
+	}
+
+	return EVP_CIPHER_iv_length(cipher_type);
+}
 
 /* {{{ proto int openssl_cipher_iv_length(string $method) */
 PHP_FUNCTION(openssl_cipher_iv_length)
 {
 	char *method;
 	size_t method_len;
-	const EVP_CIPHER *cipher_type;
+	zend_long ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &method, &method_len) == FAILURE) {
 		return;
@@ -6825,26 +6885,60 @@ PHP_FUNCTION(openssl_cipher_iv_length)
 		RETURN_FALSE;
 	}
 
-	cipher_type = EVP_get_cipherbyname(method);
-	if (!cipher_type) {
-		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
+	if ((ret = php_openssl_cipher_iv_length(method)) == -1) {
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(EVP_CIPHER_iv_length(cipher_type));
+	RETURN_LONG(ret);
 }
 /* }}} */
 
+
+PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_length)
+{
+	zend_string *buffer = NULL;
+	if (buffer_length <= 0
+#ifndef PHP_WIN32
+		|| ZEND_LONG_INT_OVFL(buffer_length)
+#endif
+			) {
+		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
+		return NULL;
+	}
+	buffer = zend_string_alloc(buffer_length, 0);
+
+#ifdef PHP_WIN32
+	/* random/urandom equivalent on Windows */
+	if (php_win32_get_random_bytes((unsigned char*)(buffer)->val, (size_t) buffer_length) == FAILURE){
+		zend_string_release_ex(buffer, 0);
+		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+		return NULL;
+	}
+#else
+
+	PHP_OPENSSL_CHECK_LONG_TO_INT_NORET(buffer_length, length);
+	PHP_OPENSSL_RAND_ADD_TIME();
+	/* FIXME loop if requested size > INT_MAX */
+	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
+		zend_string_release_ex(buffer, 0);
+		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+		return NULL;
+	} else {
+		php_openssl_store_errors();
+	}
+#endif
+	return buffer;
+}
 
 /* {{{ proto string openssl_random_pseudo_bytes(int length [, &bool returned_strong_result])
    Returns a string of the length specified filled with random pseudo bytes */
 PHP_FUNCTION(openssl_random_pseudo_bytes)
 {
-	zend_long buffer_length;
 	zend_string *buffer = NULL;
+	zend_long buffer_length;
 	zval *zstrong_result_returned = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z", &buffer_length, &zstrong_result_returned) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z/", &buffer_length, &zstrong_result_returned) == FAILURE) {
 		return;
 	}
 
@@ -6852,45 +6946,10 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		ZEND_TRY_ASSIGN_FALSE(zstrong_result_returned);
 	}
 
-	if (buffer_length <= 0
-#ifndef PHP_WIN32
-		|| ZEND_LONG_INT_OVFL(buffer_length)
-#endif
-			) {
-		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
-		return;
+	if ((buffer = php_openssl_random_pseudo_bytes(buffer_length))) {
+		ZSTR_VAL(buffer)[buffer_length] = 0;
+		RETVAL_NEW_STR(buffer);
 	}
-	buffer = zend_string_alloc(buffer_length, 0);
-
-#ifdef PHP_WIN32
-	/* random/urandom equivalent on Windows */
-	if (php_win32_get_random_bytes((unsigned char*)buffer->val, (size_t) buffer_length) == FAILURE){
-		zend_string_release_ex(buffer, 0);
-		if (zstrong_result_returned) {
-			ZEND_TRY_ASSIGN_FALSE(zstrong_result_returned);
-		}
-		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
-		return;
-	}
-#else
-
-	PHP_OPENSSL_CHECK_LONG_TO_INT(buffer_length, length);
-	PHP_OPENSSL_RAND_ADD_TIME();
-	/* FIXME loop if requested size > INT_MAX */
-	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
-		zend_string_release_ex(buffer, 0);
-		if (zstrong_result_returned) {
-			ZEND_TRY_ASSIGN_FALSE(zstrong_result_returned);
-		}
-		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
-		return;
-	} else {
-		php_openssl_store_errors();
-	}
-#endif
-
-	ZSTR_VAL(buffer)[buffer_length] = 0;
-	RETVAL_NEW_STR(buffer);
 
 	if (zstrong_result_returned) {
 		ZEND_TRY_ASSIGN_TRUE(zstrong_result_returned);
