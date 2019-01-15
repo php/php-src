@@ -56,8 +56,6 @@ ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 
-ZEND_API zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type type, zend_reference *ref);
-
 ZEND_API zend_property_info *zend_check_ref_array_assignable(zend_reference *ref);
 ZEND_API zend_bool zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict);
 ZEND_API zend_bool zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict);
