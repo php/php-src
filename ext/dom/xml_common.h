@@ -61,6 +61,11 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 #define DOM_XMLNS_NAMESPACE \
     (const xmlChar *) "http://www.w3.org/2000/xmlns/"
 
+#if !defined(DOM_PHP_CLASS_PI_DISABLED)
+#	define DOM_PHP_CLASS_PI \
+		(const xmlChar *) "php-class"
+#endif
+
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_LIBXML_NODE_P(__id); \
 	if (__intern->node == NULL || !(__ptr = (__prtype)__intern->node->node)) { \

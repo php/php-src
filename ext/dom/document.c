@@ -45,6 +45,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_element, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
 
+#if defined(DOM_PHP_CLASS_PI)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_object, 0, 0, 2)
+	ZEND_ARG_INFO(0, tagName)
+	ZEND_ARG_INFO(0, className)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_document_fragment, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
@@ -87,6 +95,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_element_ns, 0, 0, 2)
 	ZEND_ARG_INFO(0, qualifiedName)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
+
+#if defined(DOM_PHP_CLASS_PI)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_object_ns, 0, 0, 3)
+	ZEND_ARG_INFO(0, namespaceURI)
+	ZEND_ARG_INFO(0, qualifiedName)
+	ZEND_ARG_INFO(0, className)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_attribute_ns, 0, 0, 2)
 	ZEND_ARG_INFO(0, namespaceURI)
@@ -194,6 +211,9 @@ ZEND_END_ARG_INFO();
 
 const zend_function_entry php_dom_document_class_functions[] = { /* {{{ */
 	PHP_FALIAS(createElement, dom_document_create_element, arginfo_dom_document_create_element)
+#if defined(DOM_PHP_CLASS_PI)
+	PHP_FALIAS(createObject, dom_document_create_object, arginfo_dom_document_create_object)
+#endif
 	PHP_FALIAS(createDocumentFragment, dom_document_create_document_fragment, arginfo_dom_document_create_document_fragment)
 	PHP_FALIAS(createTextNode, dom_document_create_text_node, arginfo_dom_document_create_text_node)
 	PHP_FALIAS(createComment, dom_document_create_comment, arginfo_dom_document_create_comment)
@@ -204,6 +224,9 @@ const zend_function_entry php_dom_document_class_functions[] = { /* {{{ */
 	PHP_FALIAS(getElementsByTagName, dom_document_get_elements_by_tag_name, arginfo_dom_document_get_elements_by_tag_name)
 	PHP_FALIAS(importNode, dom_document_import_node, arginfo_dom_document_import_node)
 	PHP_FALIAS(createElementNS, dom_document_create_element_ns, arginfo_dom_document_create_element_ns)
+#if defined(DOM_PHP_CLASS_PI)
+	PHP_FALIAS(createObjectNS, dom_document_create_object_ns, arginfo_dom_document_create_object_ns)
+#endif
 	PHP_FALIAS(createAttributeNS, dom_document_create_attribute_ns, arginfo_dom_document_create_attribute_ns)
 	PHP_FALIAS(getElementsByTagNameNS, dom_document_get_elements_by_tag_name_ns, arginfo_dom_document_get_elements_by_tag_name_ns)
 	PHP_FALIAS(getElementById, dom_document_get_element_by_id, arginfo_dom_document_get_element_by_id)
@@ -721,6 +744,59 @@ PHP_FUNCTION(dom_document_create_element)
 }
 /* }}} end dom_document_create_element */
 
+#if defined(DOM_PHP_CLASS_PI)
+/* {{{ proto DOMElement dom_document_create_object(string tagName, string className [, string value]) */
+PHP_FUNCTION(dom_document_create_object)
+{
+	zval *id;
+	xmlNodePtr nodep = NULL, pip = NULL;
+	xmlDocPtr docp;
+	dom_object *intern;
+	int ret;
+	size_t name_len, value_len;
+	char *name, *value = NULL;
+	zend_class_entry *ce = dom_element_class_entry;
+
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sC|s", &name, &name_len, &ce, &value, &value_len) == FAILURE) {
+		return;
+	}
+
+	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+
+	if (xmlValidateName((xmlChar *) name, 0) != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
+
+	nodep = xmlNewDocNode(docp, NULL, (xmlChar *) name, NULL);
+	if (!nodep) {
+		RETURN_FALSE;
+	}
+
+	pip = xmlNewDocPI(docp, DOM_PHP_CLASS_PI, (const xmlChar *) ZSTR_VAL(ce->name));
+	if (!pip) {
+		xmlFreeNode(nodep);
+		RETURN_FALSE;
+	}
+
+	if (value && value_len) { // empty text node can be safely ignored
+		// TODO: xmlEncodeEntitiesReentrant() || xmlEncodeSpecialChars()?
+		pip->next = xmlNewDocTextLen(docp, (const xmlChar *) value, value_len);
+		if (!pip->next) {
+			xmlFreeNode(nodep);
+			xmlFreeNode(pip);
+			RETURN_FALSE;
+		}
+	}
+
+	xmlAddChildList(nodep, pip);
+
+	DOM_RET_OBJ(nodep, &ret, intern);
+}
+/* }}} end dom_document_create_object */
+#endif
+
 /* {{{ proto DOMDocumentFragment dom_document_create_document_fragment()
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-35CB04B5
 Since:
@@ -848,7 +924,7 @@ PHP_FUNCTION(dom_document_create_processing_instruction)
 	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret;
+	int ret, stricterror;
 	size_t value_len, name_len = 0;
 	dom_object *intern;
 	char *name, *value = NULL;
@@ -860,10 +936,23 @@ PHP_FUNCTION(dom_document_create_processing_instruction)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
+	stricterror = dom_get_strict_error(intern->document);
+
 	if (xmlValidateName((xmlChar *) name, 0) != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document));
+		php_dom_throw_error(INVALID_CHARACTER_ERR, stricterror);
 		RETURN_FALSE;
 	}
+
+#if defined(DOM_PHP_CLASS_PI)
+	// check for DOM_PHP_CLASS_PI
+	if (!xmlStrcasecmp((xmlChar *) name, DOM_PHP_CLASS_PI)) {
+		char *str;
+		spprintf(&str, 0, "<?%s ...?> processing instruction may not be explicitly created", (const char *) DOM_PHP_CLASS_PI);
+		php_dom_throw_error_with_message(0, str, stricterror);
+		efree(str);
+		RETURN_FALSE;
+	}
+#endif
 
 	node = xmlNewPI((xmlChar *) name, (xmlChar *) value);
 	if (!node) {
@@ -1094,6 +1183,88 @@ PHP_FUNCTION(dom_document_create_element_ns)
 	DOM_RET_OBJ(nodep, &ret, intern);
 }
 /* }}} end dom_document_create_element_ns */
+
+#if defined(DOM_PHP_CLASS_PI)
+/* {{{ proto DOMElement dom_document_create_object_ns(string namespaceURI, string qualifiedName, string className [,string value]) */
+PHP_FUNCTION(dom_document_create_object_ns)
+{
+	zval *id;
+	xmlDocPtr docp;
+	xmlNodePtr nodep = NULL, pip = NULL;
+	xmlNsPtr nsptr = NULL;
+	int ret;
+	size_t uri_len = 0, name_len = 0, value_len = 0;
+	char *uri, *name, *value = NULL;
+	char *localname = NULL, *prefix = NULL;
+	int errorcode;
+	dom_object *intern;
+	zend_class_entry *ce = dom_element_class_entry;
+
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!sC|s", &uri, &uri_len, &name, &name_len, &ce, &value, &value_len) == FAILURE) {
+		return;
+	}
+
+	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+
+	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
+
+	if (errorcode == 0) {
+		if (xmlValidateName((xmlChar *) localname, 0) == 0) {
+			nodep = xmlNewDocNode(docp, NULL, (xmlChar *) localname, NULL);
+			if (nodep != NULL && uri != NULL) {
+				nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar *) uri);
+				if (nsptr == NULL) {
+					nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
+				}
+				xmlSetNs(nodep, nsptr);
+			}
+		} else {
+			errorcode = INVALID_CHARACTER_ERR;
+		}
+	}
+
+	xmlFree(localname);
+	if (prefix != NULL) {
+		xmlFree(prefix);
+	}
+
+	if (errorcode != 0) {
+		if (nodep != NULL) {
+			xmlFreeNode(nodep);
+		}
+		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
+
+	if (nodep == NULL) {
+		RETURN_FALSE;
+	}
+
+	nodep->ns = nsptr;
+
+	pip = xmlNewDocPI(docp, DOM_PHP_CLASS_PI, (const xmlChar *) ZSTR_VAL(ce->name));
+	if (!pip) {
+		xmlFreeNode(nodep);
+		RETURN_FALSE;
+	}
+
+	if (value && value_len) { // empty text node can be safely ignored
+		// TODO: xmlEncodeEntitiesReentrant() || xmlEncodeSpecialChars()?
+		pip->next = xmlNewDocTextLen(docp, (const xmlChar *) value, value_len);
+		if (!pip->next) {
+			xmlFreeNode(nodep);
+			xmlFreeNode(pip);
+			RETURN_FALSE;
+		}
+	}
+
+	xmlAddChildList(nodep, pip);
+
+	DOM_RET_OBJ(nodep, &ret, intern);
+}
+/* }}} end dom_document_create_object_ns */
+#endif
 
 /* {{{ proto DOMAttr dom_document_create_attribute_ns(string namespaceURI, string qualifiedName)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrAttrNS

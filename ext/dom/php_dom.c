@@ -33,6 +33,10 @@
 #define PHP_XPATH 1
 #define PHP_XPTR 2
 
+#if defined(DOM_PHP_CLASS_PI)
+#include "zend_execute.h"
+#endif
+
 /* {{{ class entries */
 PHP_DOM_EXPORT zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domexception_class_entry;
@@ -127,6 +131,12 @@ int dom_node_is_read_only(xmlNodePtr node) {
 		case XML_NAMESPACE_DECL:
 			return SUCCESS;
 			break;
+#if defined (DOM_PHP_CLASS_PI)
+		case XML_PI_NODE:
+			if (xmlStrEqual(node->name, DOM_PHP_CLASS_PI)) {
+				return SUCCESS;
+			} // else fallthrough
+#endif
 		default:
 			if (node->doc == NULL) {
 				return SUCCESS;
@@ -1186,7 +1196,7 @@ void php_dom_create_interator(zval *return_value, int ce_type) /* {{{ */
 /* {{{ php_dom_create_object */
 PHP_DOM_EXPORT zend_bool php_dom_create_object(xmlNodePtr obj, zval *return_value, dom_object *domobj)
 {
-	zend_class_entry *ce;
+	zend_class_entry *ce = NULL;
 	dom_object *intern;
 
 	if (!obj) {
@@ -1215,7 +1225,22 @@ PHP_DOM_EXPORT zend_bool php_dom_create_object(xmlNodePtr obj, zval *return_valu
 		}
 		case XML_ELEMENT_NODE:
 		{
-			ce = dom_element_class_entry;
+#if defined(DOM_PHP_CLASS_PI)
+			// check for DOM_PHP_CLASS_PI
+			if (obj->children && obj->children->type == XML_PI_NODE && xmlStrEqual(obj->children->name, DOM_PHP_CLASS_PI)) {
+				zend_string *str = zend_string_init((const char *) obj->children->content, xmlStrlen(obj->children->content), 0);
+				ce = zend_lookup_class(str);
+				if (!ce) {
+					php_error_docref(NULL, E_WARNING, "Class %s does not exist; ignoring <?%s %s?>", ZSTR_VAL(str), (const char *) DOM_PHP_CLASS_PI, ZSTR_VAL(str));
+				} else if (!instanceof_function(ce, dom_element_class_entry)) {
+					php_error_docref(NULL, E_WARNING, "Class %s is not derived from %s; ignoring <?%s %s?>", ZSTR_VAL(ce->name), ZSTR_VAL(dom_element_class_entry->name), (const char *) DOM_PHP_CLASS_PI, ZSTR_VAL(str));
+					ce = NULL;
+				}
+				zend_string_release(str);
+			}
+			if (!ce)
+#endif
+				ce = dom_element_class_entry;
 			break;
 		}
 		case XML_ATTRIBUTE_NODE:

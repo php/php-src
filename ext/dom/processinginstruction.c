@@ -64,6 +64,19 @@ PHP_METHOD(domprocessinginstruction, __construct)
 		RETURN_FALSE;
 	}
 
+	intern = Z_DOMOBJ_P(ZEND_THIS);
+
+#if defined(DOM_PHP_CLASS_PI)
+	// check for DOM_PHP_CLASS_PI
+	if (!xmlStrcasecmp((xmlChar *) name, DOM_PHP_CLASS_PI)) {
+		char *str;
+		spprintf(&str, 0, "<?%s ...?> processing instruction may not be explicitly created", (const char *) DOM_PHP_CLASS_PI);
+		php_dom_throw_error_with_message(0, str, dom_get_strict_error(intern->document));
+		efree(str);
+		RETURN_FALSE;
+	}
+#endif
+
 	nodep = xmlNewPI((xmlChar *) name, (xmlChar *) value);
 
 	if (!nodep) {
@@ -71,7 +84,6 @@ PHP_METHOD(domprocessinginstruction, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(ZEND_THIS);
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
 		php_libxml_node_free_resource(oldnode );

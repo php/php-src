@@ -347,6 +347,29 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 	/* Access to Element node is implemented as a convience method */
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
+#if defined(DOM_PHP_CLASS_PI)
+			// check for DOM_PHP_CLASS_PI
+			if (nodep->children && nodep->children->type == XML_PI_NODE && xmlStrEqual(nodep->children->name, DOM_PHP_CLASS_PI)) {
+				zend_string *str = zval_get_string(newval);
+				// TODO: xmlEncodeEntitiesReentrant() || xmlEncodeSpecialChars()?
+				xmlNodePtr textp = xmlNewDocTextLen(nodep->doc, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+				if (!textp) {
+					zend_string_release_ex(str, 0);
+					return FAILURE;
+				}
+
+				if (nodep->children->next) {
+					node_list_unlink(nodep->children->next);
+					php_libxml_node_free_list((xmlNodePtr) nodep->children->next);
+					nodep->children->next = NULL;
+					nodep->last = nodep->children;
+				}
+
+				xmlAddChild(nodep, textp);
+				zend_string_release_ex(str, 0);
+				return SUCCESS;
+			}
+#endif
 		case XML_ATTRIBUTE_NODE:
 			if (nodep->children) {
 				node_list_unlink(nodep->children);
@@ -879,6 +902,29 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+#if defined(DOM_PHP_CLASS_PI)
+	// check for DOM_PHP_CLASS_PI
+	if (nodep->type == XML_ELEMENT_NODE && nodep->children && nodep->children->type == XML_PI_NODE && xmlStrEqual(nodep->children->name, DOM_PHP_CLASS_PI)) {
+		str = zval_get_string(newval);
+		// TODO: xmlEncodeEntitiesReentrant() || xmlEncodeSpecialChars()?
+		xmlNodePtr textp = xmlNewDocTextLen(nodep->doc, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+		if (!textp) {
+			zend_string_release_ex(str, 0);
+			return FAILURE;
+		}
+
+		if (nodep->children->next) {
+			node_list_unlink(nodep->children->next);
+			php_libxml_node_free_list((xmlNodePtr) nodep->children->next);
+			nodep->children->next = NULL;
+			nodep->last = nodep->children;
+		}
+
+		xmlAddChild(nodep, textp);
+		zend_string_release_ex(str, 0);
+		return SUCCESS;
+	}
+#endif
 	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
 		if (nodep->children) {
 			node_list_unlink(nodep->children);
@@ -1003,6 +1049,17 @@ PHP_FUNCTION(dom_node_insert_before)
 			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 			RETURN_FALSE;
 		}
+
+#if defined(DOM_PHP_CLASS_PI)
+		// check for DOM_PHP_CLASS_PI
+		if (refp->type == XML_PI_NODE && xmlStrEqual(refp->name, DOM_PHP_CLASS_PI)) {
+			char *str;
+			spprintf(&str, 0, "<?%s ...?> processing instruction must be the first child", (const char *) DOM_PHP_CLASS_PI);
+			php_dom_throw_error_with_message(0, str, stricterror);
+			efree(str);
+			RETURN_FALSE;
+		}
+#endif
 
 		if (child->parent != NULL) {
 			xmlUnlinkNode(child);
@@ -1155,6 +1212,17 @@ PHP_FUNCTION(dom_node_replace_child)
 		RETURN_FALSE;
 	}
 
+#if defined(DOM_PHP_CLASS_PI)
+	// check for DOM_PHP_CLASS_PI
+	if (oldchild->type == XML_PI_NODE && xmlStrEqual(oldchild->name, DOM_PHP_CLASS_PI)) {
+		char *str;
+		spprintf(&str, 0, "<?%s ...?> processing instruction may not be replaced", (const char *) DOM_PHP_CLASS_PI);
+		php_dom_throw_error_with_message(0, str, stricterror);
+		efree(str);
+		RETURN_FALSE;
+	}
+#endif
+
 	/* check for the old child and whether the new child is already a child */
 	while (children) {
 		if (children == oldchild) {
@@ -1226,6 +1294,17 @@ PHP_FUNCTION(dom_node_remove_child)
 		RETURN_FALSE;
 	}
 
+#if defined(DOM_PHP_CLASS_PI)
+	// check for DOM_PHP_CLASS_PI
+	if (child->type == XML_PI_NODE && xmlStrEqual(child->name, DOM_PHP_CLASS_PI)) {
+		char *str;
+		spprintf(&str, 0, "<?%s ...?> processing instruction may not be removed", (const char *) DOM_PHP_CLASS_PI);
+		php_dom_throw_error_with_message(0, str, stricterror);
+		efree(str);
+		RETURN_FALSE;
+	}
+#endif
+
 	children = nodep->children;
 	if (!children) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
@@ -1292,6 +1371,17 @@ PHP_FUNCTION(dom_node_append_child)
 		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
 		RETURN_FALSE;
 	}
+
+#if defined(DOM_PHP_CLASS_PI)
+	// check for DOM_PHP_CLASS_PI
+	if (child->type == XML_PI_NODE && xmlStrEqual(child->name, DOM_PHP_CLASS_PI)) {
+		char *str;
+		spprintf(&str, 0, "<?%s ...?> processing instruction may not be moved", (const char *) DOM_PHP_CLASS_PI);
+		php_dom_throw_error_with_message(0, str, stricterror);
+		efree(str);
+		RETURN_FALSE;
+	}
+#endif
 
 	if (child->doc == NULL && nodep->doc != NULL) {
 		childobj->document = intern->document;

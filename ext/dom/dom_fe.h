@@ -105,6 +105,9 @@ PHP_METHOD(domdocumentfragment, appendXML);
 
 /* domdocument methods */
 PHP_FUNCTION(dom_document_create_element);
+#if defined(DOM_PHP_CLASS_PI)
+PHP_FUNCTION(dom_document_create_object);
+#endif
 PHP_FUNCTION(dom_document_create_document_fragment);
 PHP_FUNCTION(dom_document_create_text_node);
 PHP_FUNCTION(dom_document_create_comment);
@@ -115,6 +118,9 @@ PHP_FUNCTION(dom_document_create_entity_reference);
 PHP_FUNCTION(dom_document_get_elements_by_tag_name);
 PHP_FUNCTION(dom_document_import_node);
 PHP_FUNCTION(dom_document_create_element_ns);
+#if defined(DOM_PHP_CLASS_PI)
+PHP_FUNCTION(dom_document_create_object_ns);
+#endif
 PHP_FUNCTION(dom_document_create_attribute_ns);
 PHP_FUNCTION(dom_document_get_elements_by_tag_name_ns);
 PHP_FUNCTION(dom_document_get_element_by_id);
