@@ -841,7 +841,7 @@ ZEND_VM_C_LABEL(assign_op_object):
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
 						if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-							zend_binary_assign_op_typed_ref(ref, value, binary_op);
+							zend_binary_assign_op_typed_ref(ref, value, binary_op EXECUTE_DATA_CC);
 							break;
 						}
 						zptr = Z_REFVAL_P(zptr);
@@ -854,7 +854,7 @@ ZEND_VM_C_LABEL(assign_op_object):
 					}
 					if (UNEXPECTED(prop_info)) {
 						/* special case for typed properties */
-						zend_binary_assign_op_typed_prop(prop_info, zptr, value, binary_op);
+						zend_binary_assign_op_typed_prop(prop_info, zptr, value, binary_op EXECUTE_DATA_CC);
 					} else {
 						binary_op(zptr, zptr, value);
 					}
@@ -901,7 +901,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_static_prop_helper, CONST|TMP|VAR|CV, UNUSE
 		if (UNEXPECTED(Z_ISREF_P(prop))) {
 			ref = Z_REF_P(prop);
 			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value, binary_op);
+				zend_binary_assign_op_typed_ref(ref, value, binary_op EXECUTE_DATA_CC);
 				break;
 			}
 			prop = Z_REFVAL_P(prop);
@@ -909,7 +909,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_static_prop_helper, CONST|TMP|VAR|CV, UNUSE
 
 		if (UNEXPECTED(prop_info->type)) {
 			/* special case for typed properties */
-			zend_binary_assign_op_typed_prop(prop_info, prop, value, binary_op);
+			zend_binary_assign_op_typed_prop(prop_info, prop, value, binary_op EXECUTE_DATA_CC);
 		} else {
 			binary_op(prop, prop, value);
 		}
@@ -963,7 +963,7 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 				zend_reference *ref = Z_REF_P(var_ptr);
 				var_ptr = Z_REFVAL_P(var_ptr);
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-					zend_binary_assign_op_typed_ref(ref, value, binary_op);
+					zend_binary_assign_op_typed_ref(ref, value, binary_op EXECUTE_DATA_CC);
 					break;
 				}
 			}
@@ -1044,7 +1044,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_simple_helper, VAR|CV, CONST|TMPVAR|CV, bin
 			if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
 				zend_reference *ref = Z_REF_P(var_ptr);
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-					zend_binary_assign_op_typed_ref(ref, value, binary_op);
+					zend_binary_assign_op_typed_ref(ref, value, binary_op EXECUTE_DATA_CC);
 					break;
 				}
 				var_ptr = Z_REFVAL_P(var_ptr);
