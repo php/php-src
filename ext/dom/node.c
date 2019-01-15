@@ -329,6 +329,21 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	switch (nodep->type) {
+		case XML_ELEMENT_NODE:
+		case XML_ATTRIBUTE_NODE:
+		case XML_TEXT_NODE:
+		case XML_COMMENT_NODE:
+		case XML_CDATA_SECTION_NODE:
+		case XML_PI_NODE:
+			if (dom_node_is_read_only(nodep) == SUCCESS) {
+				php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(obj->document));
+				return FAILURE;
+			}
+		default:
+			break;
+	}
+
 	/* Access to Element node is implemented as a convience method */
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
