@@ -726,6 +726,11 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(obj->document));
+		return FAILURE;
+	}
+
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 			nsnode = nodep;
