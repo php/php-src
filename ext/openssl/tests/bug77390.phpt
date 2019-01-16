@@ -1,5 +1,5 @@
 --TEST--
-php_stream_eof() should not block on SSL non-blocking streams when packets are fragmented
+Bug #76705: feof might hang on TLS streams in case of fragmented TLS records
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
@@ -7,9 +7,12 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug77390.pem.tmp';
+$cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug77390-ca.pem.tmp';
 
+$peerName = 'bug77390';
 $clientCode = <<<'CODE'
-	$context = stream_context_create(['ssl' => ['verify_peer' => false, 'peer_name' => 'bug54992.local']]);
+	$context = stream_context_create(['ssl' => ['verify_peer' => false, 'peer_name' => '%s']]);
 
 	phpt_wait('server');
 	phpt_notify('proxy');
@@ -32,9 +35,10 @@ $clientCode = <<<'CODE'
 	phpt_notify('server');
 	phpt_notify('proxy');
 CODE;
+$clientCode = sprintf($clientCode, $peerName);
 
 $serverCode = <<<'CODE'
-	$context = stream_context_create(['ssl' => ['local_cert' => __DIR__ . '/bug54992.pem']]);
+	$context = stream_context_create(['ssl' => ['local_cert' => '%s']]);
 
 	$flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
 	$fp = stream_socket_server("ssl://127.0.0.1:10011", $errornum, $errorstr, $flags, $context);
@@ -46,6 +50,7 @@ $serverCode = <<<'CODE'
 	phpt_wait();
 	fclose($conn);
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
 $proxyCode = <<<'CODE'
 	phpt_wait();
@@ -87,11 +92,21 @@ $proxyCode = <<<'CODE'
 	phpt_wait();
 CODE;
 
-include 'ServerClientProxyTestCase.inc';
-ServerClientProxyTestCase::getInstance()->run($clientCode, [
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveCaCert($cacertFile);
+$certificateGenerator->saveNewCertAsFileWithKey($peerName, $certFile);
+
+include 'ServerClientTestCase.inc';
+ServerClientTestCase::getInstance()->run($clientCode, [
 	'server' => $serverCode,
 	'proxy' => $proxyCode,
 ]);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'bug77390.pem.tmp');
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'bug77390-ca.pem.tmp');
 ?>
 --EXPECT--
 string(0) ""
