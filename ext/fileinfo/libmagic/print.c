@@ -242,6 +242,7 @@ file_fmttime(uint64_t v, int flags, char *buf)
 	char *pp;
 	time_t t = (time_t)v;
 	struct tm *tm = NULL;
+	struct tm tm_instance;
 
 	if (flags & FILE_T_WINDOWS) {
 		struct timespec ts;
@@ -273,7 +274,7 @@ file_fmttime(uint64_t v, int flags, char *buf)
 #endif /* HAVE_DAYLIGHT */
 		if (daylight)
 			t += 3600;
-		tm = gmtime(&t);
+		tm = gmtime_r(&t, &tm_instance);
 		if (tm == NULL)
 			goto out;
 		pp = asctime_r(tm, buf);
