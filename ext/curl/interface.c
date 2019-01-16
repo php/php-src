@@ -2014,7 +2014,7 @@ static void _php_curl_set_default_options(php_curl *ch)
 }
 /* }}} */
 
-/* {{{ proto resource curl_init([string url])
+/* {{{ proto resource|false curl_init([string url])
    Initialize a cURL session */
 PHP_FUNCTION(curl_init)
 {

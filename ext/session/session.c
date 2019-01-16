@@ -2538,7 +2538,7 @@ static PHP_FUNCTION(session_unset)
 }
 /* }}} */
 
-/* {{{ proto int session_gc(void)
+/* {{{ proto int|false session_gc(void)
    Perform GC and return number of deleted sessions */
 static PHP_FUNCTION(session_gc)
 {
