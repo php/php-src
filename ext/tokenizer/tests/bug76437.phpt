@@ -12,36 +12,15 @@ $tests = [
 foreach ($tests as [$code, $index]) {
     $open_tag1 = token_get_all($code)[$index];
     $open_tag2 = token_get_all($code, TOKEN_PARSE)[$index];
-    var_dump($open_tag1);
+    echo token_name($open_tag1[0]), ": \"$open_tag1[1]\" on line $open_tag1[2]\n";
     var_dump($open_tag1 === $open_tag2);
 }
 ?>
 --EXPECT--
-array(3) {
-  [0]=>
-  int(380)
-  [1]=>
-  string(3) "<?="
-  [2]=>
-  int(1)
-}
+T_OPEN_TAG_WITH_ECHO: "<?=" on line 1
 bool(true)
-array(3) {
-  [0]=>
-  int(381)
-  [1]=>
-  string(2) "?>"
-  [2]=>
-  int(1)
-}
+T_CLOSE_TAG: "?>" on line 1
 bool(true)
-array(3) {
-  [0]=>
-  int(381)
-  [1]=>
-  string(3) "?>
-"
-  [2]=>
-  int(1)
-}
+T_CLOSE_TAG: "?>
+" on line 1
 bool(true)
