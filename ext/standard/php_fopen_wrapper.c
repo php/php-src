@@ -128,7 +128,7 @@ static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int when
 
 	if (input->body) {
 		int sought = php_stream_seek(input->body, offset, whence);
-		*newoffset = (input->body)->position;
+		*newoffset = input->position = (input->body)->position;
 		return sought;
 	}
 
