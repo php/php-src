@@ -116,6 +116,9 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	PS(define_sid) = 1;
 	PS(session_vars) = NULL;
 	PS(module_number) = my_module_number;
+#if defined(HAVE_OPENSSL_EXT)
+	PS(ssl_iv) = NULL;
+#endif
 	ZVAL_UNDEF(&PS(http_session_vars));
 }
 /* }}} */
@@ -142,6 +145,13 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 		zend_string_release_ex(PS(session_vars), 0);
 		PS(session_vars) = NULL;
 	}
+
+#if defined(HAVE_OPENSSL_EXT)
+	if (PS(ssl_iv)) {
+		zend_string_release_ex(PS(ssl_iv), 0);
+		PS(ssl_iv) = NULL;
+	}
+#endif
 
 	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
 	/* Set session status to prevent error while restoring save handler INI value. */
@@ -462,6 +472,41 @@ static int php_session_initialize(void) /* {{{ */
 		php_session_decode(val);
 		zend_string_release_ex(val, 0);
 	}
+#if defined(HAVE_OPENSSL_EXT)
+	if (PS(ssl_encrypt)) {
+		zend_long ssl_method_len = strlen(PS(ssl_method));
+		if (!ssl_method_len) {
+			php_error_docref(NULL, E_WARNING, "A cipher method is needed to encrypt the session");
+			PS(ssl_encrypt) = 0;
+		} else {
+			zend_string *iv;
+			zend_long iv_len;
+			zend_long ssl_tag_len = strlen(PS(ssl_tag));
+
+			if (PS(ssl_iv))
+				zend_string_release_ex(PS(ssl_iv), 0);
+
+			if ((iv_len = php_openssl_cipher_iv_length(PS(ssl_method))) == -1 || iv_len == 0) {
+				php_error_docref(NULL, E_ERROR, "session.ssl_method `%s` is invalid", PS(ssl_method));
+				return FAILURE;
+			}
+
+			if ((iv = php_openssl_random_pseudo_bytes(iv_len)) == NULL) {
+				php_error_docref(NULL, E_ERROR, "session iv data failure");
+				return FAILURE;
+			}
+
+			if (!ssl_tag_len)
+				PS(ssl_tag) = NULL;
+			PS(ssl_tag_len) = ssl_tag_len;
+
+			ZSTR_VAL(iv)[iv_len] = 0;
+			PS(ssl_method_len) = ssl_method_len;
+			PS(ssl_iv) = iv;
+			PS(ssl_iv_len) = iv_len;
+		}
+	}
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -823,6 +868,13 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.sid_length",             "32",        PHP_INI_ALL, OnUpdateSidLength)
 	PHP_INI_ENTRY("session.sid_bits_per_character", "4",         PHP_INI_ALL, OnUpdateSidBits)
 	STD_PHP_INI_BOOLEAN("session.lazy_write",       "1",         PHP_INI_ALL, OnUpdateLazyWrite,     lazy_write,         php_ps_globals,    ps_globals)
+#if defined(HAVE_OPENSSL_EXT)
+	STD_PHP_INI_BOOLEAN("session.ssl_encrypt",      "0",         PHP_INI_ALL, OnUpdateBool,           ssl_encrypt,       php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.ssl_method",         "",          PHP_INI_ALL, OnUpdateSessionString,      ssl_method,        php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.ssl_tag",            "",          PHP_INI_ALL, OnUpdateSessionString,      ssl_tag,           php_ps_globals,    ps_globals)
+#endif
+
+	/* Commented out until future discussion */
 
 	/* Upload progress */
 	STD_PHP_INI_BOOLEAN("session.upload_progress.enabled",
@@ -836,15 +888,69 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.upload_progress.freq",  "1%", ZEND_INI_PERDIR, OnUpdateRfc1867Freq, rfc1867_freq,    php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.min_freq",
 	                                                   "1",  ZEND_INI_PERDIR, OnUpdateReal,        rfc1867_min_freq,php_ps_globals, ps_globals)
-
-	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
 PHP_INI_END()
-/* }}} */
+/* }}} */  
 
 /* ***************
    * Serializers *
    *************** */
+
+#if defined(HAVE_OPENSSL_EXT)
+static int php_session_encrypt(smart_str *buf) /* {{{ */
+{
+	zend_string* buffer;
+	smart_str res = {0};
+
+	if (!PS(ssl_encrypt) || !PS(id) || !buf->a)
+		return SUCCESS;
+
+	zval *ztag = NULL;
+
+	if (PS(ssl_tag_len) > 0) {
+		ztag = emalloc(sizeof(*ztag));
+		ZVAL_STRINGL(ztag, PS(ssl_tag), PS(ssl_tag_len));
+	}
+
+	if ((buffer = php_openssl_encrypt(ZSTR_VAL(buf->s), buf->a, PS(ssl_method), PS(ssl_method_len),
+					ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 0, ZSTR_VAL(PS(ssl_iv)), PS(ssl_iv_len),
+					ztag, PS(ssl_tag_len), NULL, 0)) == NULL) {
+		php_error_docref(NULL, E_WARNING, "Cannot encrypt the session data with method '%s', tag '%s'",
+						PS(ssl_method), PS(ssl_tag));
+		efree(ztag);
+		return FAILURE;
+	} 
+
+	smart_str_free(buf);
+	res.s = zend_string_dup(buffer, 0);
+	res.a = ZSTR_LEN(buffer);
+	*buf = res;
+	zend_string_release_ex(buffer, 0);
+	efree(ztag);
+	return SUCCESS;
+}
+/* }}} */ 
+
+static zend_string *php_session_decrypt(PS_SERIALIZER_DECODE_ARGS) /* {{{ */
+{
+	zend_string* buffer;
+
+	if (!PS(ssl_encrypt) || !PS(id) || !vallen)
+		return NULL;
+
+	if ((buffer = php_openssl_decrypt((char *)val, vallen, PS(ssl_method), PS(ssl_method_len),
+					ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 0, ZSTR_VAL(PS(ssl_iv)), PS(ssl_iv_len),
+					PS(ssl_tag), PS(ssl_tag_len), NULL, 0)) == NULL) {
+		php_error_docref(NULL, E_WARNING, "Cannot decrypt the session data with method '%s'",
+						PS(ssl_method));
+		return NULL;
+	}
+
+	return buffer;
+}
+/* }}} */
+#endif
+
 PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
 {
 	smart_str buf = {0};
@@ -853,6 +959,9 @@ PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
 	IF_SESSION_VARS() {
 		PHP_VAR_SERIALIZE_INIT(var_hash);
 		php_var_serialize(&buf, Z_REFVAL(PS(http_session_vars)), &var_hash);
+#if defined(HAVE_OPENSSL_EXT)
+		php_session_encrypt(&buf);
+#endif
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	}
 	return buf.s;
@@ -867,6 +976,13 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	int result;
 	zend_string *var_name = zend_string_init("_SESSION", sizeof("_SESSION") - 1, 0);
 
+#if defined(HAVE_OPENSSL_EXT)
+	zend_string* buffer = php_session_decrypt(val, vallen);
+	if (buffer) {
+		val = ZSTR_VAL(buffer);
+		endptr = val + ZSTR_LEN(buffer);
+	}
+#endif
 	ZVAL_NULL(&session_vars);
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	result = php_var_unserialize(
@@ -887,9 +1003,14 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	Z_ADDREF_P(&PS(http_session_vars));
 	zend_hash_update_ind(&EG(symbol_table), var_name, &PS(http_session_vars));
 	zend_string_release_ex(var_name, 0);
+#if defined(HAVE_OPENSSL_EXT)
+	if (buffer)
+		zend_string_release_ex(buffer, 0);
+#endif
+
 	return result || !vallen ? SUCCESS : FAILURE;
 }
-/* }}} */
+/* }}} */ 
 
 #define PS_BIN_NR_OF_BITS 8
 #define PS_BIN_UNDEF (1<<(PS_BIN_NR_OF_BITS-1))
@@ -911,6 +1032,9 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary) /* {{{ */
 	);
 
 	smart_str_0(&buf);
+#if defined(HAVE_OPENSSL_EXT)
+	php_session_encrypt(&buf);
+#endif
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	return buf.s;
@@ -925,6 +1049,13 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 	zend_string *name;
 	php_unserialize_data_t var_hash;
 	zval *current, rv;
+#if defined(HAVE_OPENSSL_EXT)
+	zend_string* buffer = php_session_decrypt(val, vallen);
+	if (buffer) {
+		val = ZSTR_VAL(buffer);
+		endptr = val + ZSTR_LEN(buffer);
+	}
+#endif
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
@@ -954,6 +1085,10 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 
 	php_session_normalize_vars();
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+#if defined(HAVE_OPENSSL_EXT)
+	if (buffer)
+		zend_string_release_ex(buffer, 0);
+#endif
 
 	return SUCCESS;
 }
@@ -981,6 +1116,9 @@ PS_SERIALIZER_ENCODE_FUNC(php) /* {{{ */
 	);
 
 	smart_str_0(&buf);
+#if defined(HAVE_OPENSSL_EXT)
+	php_session_encrypt(&buf);
+#endif
 
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	return buf.s;
@@ -997,6 +1135,13 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	php_unserialize_data_t var_hash;
 	zval *current, rv;
 
+#if defined(HAVE_OPENSSL_EXT)
+	zend_string* buffer = php_session_decrypt(val, vallen);
+	if (buffer) {
+		val = ZSTR_VAL(buffer);
+		endptr = val + ZSTR_LEN(buffer);
+	}
+#endif
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	p = val;
@@ -1031,6 +1176,10 @@ break_outer_loop:
 	php_session_normalize_vars();
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+#if defined(HAVE_OPENSSL_EXT)
+	if (buffer)
+		zend_string_release_ex(buffer, 0);
+#endif
 
 	return retval;
 }

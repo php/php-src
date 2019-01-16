@@ -20,6 +20,10 @@
 #include "ext/standard/php_var.h"
 #include "ext/hash/php_hash.h"
 
+#if defined(HAVE_OPENSSL_EXT)
+# include "ext/openssl/php_openssl.h"
+#endif
+
 #define PHP_SESSION_API 20161017
 
 #include "php_version.h"
@@ -201,6 +205,15 @@ typedef struct _php_ps_globals {
 	bool lazy_write; /* omit session write when it is possible */
 	bool in_save_handler; /* state if session is in save handler or not */
 	bool set_handler;     /* state if session module i setting handler or not */
+#if defined(HAVE_OPENSSL_EXT)
+	bool ssl_encrypt; /* encrypt the session data */
+	zend_string *ssl_iv;
+	char *ssl_tag;
+	char *ssl_method;
+	zend_long ssl_method_len;
+	zend_long ssl_iv_len;
+	zend_long ssl_tag_len;
+#endif
 	zend_string *session_vars; /* serialized original session data */
 } php_ps_globals;
 
