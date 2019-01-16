@@ -509,6 +509,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	Z_ADDREF_P(pz_parent_ch);
 
 	res = zend_register_resource(ch, le_curl);
+	ch->res = res;
 	ZVAL_RES(&pz_ch, res);
 
 	size_t i;
