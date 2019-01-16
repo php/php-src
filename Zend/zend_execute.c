@@ -627,6 +627,7 @@ static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(z
 	}
 
 	/* Use IS_TMP_VAR instead of IS_VAR to avoid ISREF check */
+	Z_TRY_ADDREF_P(value_ptr);
 	value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
