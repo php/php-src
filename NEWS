@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #77339 (__callStatic may get incorrect arguments). (Dmitry)
 
+- Curl:
+  . Fixed bug #76675 (Segfault with H2 server push). (Pedro Magalhães)
+
 - GD:
   . Fixed bug #73281 (imagescale(…, IMG_BILINEAR_FIXED) can cause black border).
     (cmb)
