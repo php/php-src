@@ -379,6 +379,7 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 	zend_property_info *property_info;
 	uint32_t flags;
 	zend_class_entry *scope;
+	uintptr_t offset;
 
 	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
 		*info_ptr = CACHED_PTR_EX(cache_slot + 2);
@@ -450,14 +451,18 @@ found:
 		}
 		return ZEND_DYNAMIC_PROPERTY_OFFSET;
 	}
-	if (cache_slot) {
-		CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)(uintptr_t)property_info->offset);
-		CACHE_PTR_EX(cache_slot + 2, property_info->type ? property_info : NULL);
-	}
-	if (property_info->type) {
+
+	offset = property_info->offset;
+	if (EXPECTED(!property_info->type)) {
+		property_info = NULL;
+	} else {
 		*info_ptr = property_info;
 	}
-	return property_info->offset;
+	if (cache_slot) {
+		CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)(uintptr_t)offset);
+		CACHE_PTR_EX(cache_slot + 2, property_info);
+	}
+	return offset;
 }
 /* }}} */
 
