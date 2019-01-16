@@ -80,11 +80,11 @@ Cannot increment property Test::$foo of type int past its maximal value
 int(9223372036854775807)
 Cannot increment property Test::$foo of type int past its maximal value
 int(9223372036854775807)
-Cannot decrement property Test::$foo of type int past its minimal value
+Cannot decrement a reference held by property Test::$foo of type int past its minimal value
 int(-9223372036854775808)
-Cannot decrement property Test::$foo of type int past its minimal value
+Cannot decrement a reference held by property Test::$foo of type int past its minimal value
 int(-9223372036854775808)
-Cannot increment property Test::$foo of type int past its maximal value
+Cannot increment a reference held by property Test::$foo of type int past its maximal value
 int(9223372036854775807)
-Cannot increment property Test::$foo of type int past its maximal value
+Cannot increment a reference held by property Test::$foo of type int past its maximal value
 int(9223372036854775807)
