@@ -84,7 +84,7 @@ PHP_FUNCTION(settype)
 		RETURN_FALSE;
 	}
 
-	zend_try_assign(var, &tmp);
+	ZEND_TRY_ASSIGN_TMP(var, &tmp);
 	RETVAL_TRUE;
 }
 /* }}} */
