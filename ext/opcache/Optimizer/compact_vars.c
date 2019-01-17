@@ -95,15 +95,6 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 		}
 	}
 
-	/* Update TMP references in live ranges */
-	if (op_array->live_range) {
-		for (i = 0; i < op_array->last_live_range; i++) {
-			op_array->live_range[i].var =
-				(op_array->live_range[i].var & ZEND_LIVE_MASK) |
-				NUM_VAR(vars_map[VAR_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK)]);
-		}
-	}
-
 	/* Update CV name table */
 	if (num_cvs != op_array->last_var) {
 		if (num_cvs) {

@@ -182,14 +182,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 		opline--;
 	}
 
-	if (op_array->live_range) {
-		for (i = 0; i < op_array->last_live_range; i++) {
-			op_array->live_range[i].var =
-				NUM_VAR(map_T[VAR_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK) - offset] + offset) |
-				(op_array->live_range[i].var & ZEND_LIVE_MASK);
-		}
-	}
-
 	zend_arena_release(&ctx->arena, checkpoint);
 	op_array->T = max + 1;
 }

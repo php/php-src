@@ -340,7 +340,6 @@ static zend_bool try_replace_op2(
 						ZEND_ASSERT(ssa_op->result_def == (ssa_op + 1)->op2_use);
 						if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline + 1, &zv)) {
 							zend_ssa_op *next_op = ssa_op + 1;
-							zend_optimizer_remove_live_range_ex(ctx->scdf.op_array, opline->result.var, ssa_op - ctx->scdf.ssa->ops);
 							zend_ssa_unlink_use_chain(ctx->scdf.ssa, next_op - ctx->scdf.ssa->ops, next_op->op2_use);
 							next_op->op2_use = -1;
 							next_op->op2_use_chain = -1;
@@ -2128,7 +2127,6 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					uint32_t old_var = opline->result.var;
 
 					ssa_op->result_def = -1;
-					zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
 					if (opline->opcode == ZEND_DO_ICALL) {
 						removed_ops = remove_call(ctx, opline, ssa_op) - 1;
 					} else {
@@ -2143,9 +2141,6 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				}
 				return 0;
 			} else {
-				if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-					zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
-				}
 				zend_ssa_remove_result_def(ssa, ssa_op);
 				if (opline->opcode == ZEND_DO_ICALL) {
 					removed_ops = remove_call(ctx, opline, ssa_op);
@@ -2199,9 +2194,6 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 			if (ssa_op->result_def >= 0) {
 				if (ssa->vars[ssa_op->result_def].use_chain < 0
 						&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
-					if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-						zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
-					}
 					zend_ssa_remove_result_def(ssa, ssa_op);
 					opline->result_type = IS_UNUSED;
 				} else if (opline->opcode != ZEND_PRE_INC &&

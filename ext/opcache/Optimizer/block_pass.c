@@ -197,7 +197,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			) {
 				znode_op op1 = opline->op1;
 				if (opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
-					zend_optimizer_remove_live_range(op_array, op1.var);
 					COPY_NODE(opline->result, opline->op1);
 					COPY_NODE(opline->op1, src->op1);
 					VAR_SOURCE(op1) = NULL;
@@ -207,7 +206,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					zval c;
 					ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 					if (zend_optimizer_update_op1_const(op_array, opline, &c)) {
-						zend_optimizer_remove_live_range(op_array, op1.var);
 						VAR_SOURCE(op1) = NULL;
 						literal_dtor(&ZEND_OP1_LITERAL(src));
 						MAKE_NOP(src);
@@ -277,7 +275,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 
 				ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 				if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
-					zend_optimizer_remove_live_range(op_array, op2.var);
 					VAR_SOURCE(op2) = NULL;
 					literal_dtor(&ZEND_OP1_LITERAL(src));
 					MAKE_NOP(src);
@@ -295,7 +292,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				    src->opcode == ZEND_CAST &&
 				    src->extended_value == IS_STRING) {
 					/* T = CAST(X, String), ECHO(T) => NOP, ECHO(X) */
-					zend_optimizer_remove_live_range(op_array, opline->op1.var);
 					VAR_SOURCE(opline->op1) = NULL;
 					COPY_NODE(opline->op1, src->op1);
 					MAKE_NOP(src);
@@ -731,7 +727,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					    src->opcode == ZEND_CAST &&
 					    src->extended_value == IS_STRING) {
 						/* convert T1 = CAST(STRING, X), T2 = CONCAT(T1, Y) to T2 = CONCAT(X,Y) */
-						zend_optimizer_remove_live_range(op_array, opline->op1.var);
 						VAR_SOURCE(opline->op1) = NULL;
 						COPY_NODE(opline->op1, src->op1);
 						MAKE_NOP(src);
@@ -744,7 +739,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					    src->opcode == ZEND_CAST &&
 					    src->extended_value == IS_STRING) {
 						/* convert T1 = CAST(STRING, X), T2 = CONCAT(Y, T1) to T2 = CONCAT(Y,X) */
-						zend_optimizer_remove_live_range(op_array, opline->op2.var);
 						zend_op *src = VAR_SOURCE(opline->op2);
 						VAR_SOURCE(opline->op2) = NULL;
 						COPY_NODE(opline->op2, src->op1);
@@ -1083,43 +1077,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 			}
 		}
 		free_alloca(map, use_heap);
-	}
-
-	/* adjust loop jump targets & remove unused live range entries */
-	if (op_array->last_live_range) {
-		int i, j;
-
-		for (i = 0, j = 0; i < op_array->last_live_range; i++) {
-			if (op_array->live_range[i].var == (uint32_t)-1) {
-				/* this live range already removed */
-				continue;
-			}
-			if (!(blocks[cfg->map[op_array->live_range[i].start]].flags & ZEND_BB_REACHABLE)) {
-				ZEND_ASSERT(!(blocks[cfg->map[op_array->live_range[i].end]].flags & ZEND_BB_REACHABLE));
-			} else {
-				uint32_t start_op = blocks[cfg->map[op_array->live_range[i].start]].start;
-				uint32_t end_op = blocks[cfg->map[op_array->live_range[i].end]].start;
-
-				if (start_op == end_op) {
-					/* skip empty live range */
-					continue;
-				}
-				op_array->live_range[i].start = start_op;
-				op_array->live_range[i].end = end_op;
-				if (i != j) {
-					op_array->live_range[j]  = op_array->live_range[i];
-				}
-				j++;
-			}
-		}
-
-		if (i != j) {
-			op_array->last_live_range = j;
-			if (j == 0) {
-				efree(op_array->live_range);
-				op_array->live_range = NULL;
-			}
-		}
 	}
 
 	/* adjust early binding list */
@@ -1943,7 +1900,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_SPLIT_AT_LIVE_RANGES, &cfg) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array, 0, &cfg) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}

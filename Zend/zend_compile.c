@@ -56,10 +56,7 @@ typedef struct _zend_loop_var {
 	zend_uchar opcode;
 	zend_uchar var_type;
 	uint32_t   var_num;
-	union {
-		uint32_t try_catch_offset;
-		uint32_t live_range_offset;
-	} u;
+	uint32_t   try_catch_offset;
 } zend_loop_var;
 
 static inline uint32_t zend_alloc_cache_slots(unsigned count) {
@@ -625,33 +622,6 @@ void zend_stop_lexing(void)
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
 
-static uint32_t zend_start_live_range(uint32_t start) /* {{{ */
-{
-	zend_op_array *op_array = CG(active_op_array);
-	zend_live_range *range;
-
-	op_array->last_live_range++;
-	op_array->live_range = erealloc(op_array->live_range, sizeof(zend_live_range) * op_array->last_live_range);
-	range = op_array->live_range + op_array->last_live_range - 1;
-	range->start = start;
-	return op_array->last_live_range - 1;
-}
-/* }}} */
-
-static void zend_end_live_range(uint32_t offset, uint32_t end, uint32_t kind, uint32_t var) /* {{{ */
-{
-	zend_op_array *op_array = CG(active_op_array);
-	zend_live_range *range = op_array->live_range + offset;
-
-	if (range->start == end && offset == (uint32_t)op_array->last_live_range - 1) {
-		op_array->last_live_range--;
-	} else {
-		range->end = end;
-		range->var = (var * sizeof(zval)) | kind;
-	}
-}
-/* }}} */
-
 static inline void zend_begin_loop(
 		zend_uchar free_opcode, const znode *loop_var, zend_bool is_switch) /* {{{ */
 {
@@ -670,7 +640,6 @@ static inline void zend_begin_loop(
 		info.opcode = free_opcode;
 		info.var_type = loop_var->op_type;
 		info.var_num = loop_var->u.op.var;
-		info.u.live_range_offset = zend_start_live_range(start);
 		brk_cont_element->start = start;
 	} else {
 		info.opcode = ZEND_NOP;
@@ -691,13 +660,6 @@ static inline void zend_end_loop(int cont_addr, const znode *var_node) /* {{{ */
 	brk_cont_element->cont = cont_addr;
 	brk_cont_element->brk = end;
 	CG(context).current_brk_cont = brk_cont_element->parent;
-
-	if (brk_cont_element->start != -1) {
-		zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
-		zend_end_live_range(loop_var->u.live_range_offset, end,
-			loop_var->opcode == ZEND_FE_FREE ? ZEND_LIVE_LOOP : ZEND_LIVE_TMPVAR,
-			var_node->u.op.var);
-	}
 
 	zend_stack_del_top(&CG(loop_var_stack));
 }
@@ -1809,172 +1771,6 @@ static inline void zend_make_tmp_result(znode *result, zend_op *opline) /* {{{ *
 }
 /* }}} */
 
-static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var) /* {{{ */
-{
-	zend_op *def = opline;
-
-	while (def != CG(active_op_array)->opcodes) {
-		def--;
-		if (def->result_type == type && def->result.var == var) {
-			if (def->opcode == ZEND_ADD_ARRAY_ELEMENT ||
-			    def->opcode == ZEND_ROPE_ADD) {
-			    /* not a real definition */
-				continue;
-			} else if (def->opcode == ZEND_JMPZ_EX ||
-			           def->opcode == ZEND_JMPNZ_EX ||
-			           def->opcode == ZEND_BOOL ||
-			           def->opcode == ZEND_BOOL_NOT) {
-				/* result IS_BOOL, it doesn't have to be destroyed */
-				break;
-			} else if (def->opcode == ZEND_DECLARE_ANON_CLASS ||
-			           def->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS) {
-				/* classes don't have to be destroyed */
-				break;
-			} else if (def->opcode == ZEND_FAST_CALL) {
-				/* fast_calls don't have to be destroyed */
-				break;
-			} else if (def->opcode == ZEND_NEW) {
-				/* Objects created via ZEND_NEW are only fully initialized
-				 * after the DO_FCALL (constructor call) */
-				int level = 0;
-				while (def + 1 != opline) {
-					def++;
-					if (def->opcode == ZEND_DO_FCALL) {
-						if (level == 0) {
-							break;
-						}
-						level--;
-					} else {
-						switch(def->opcode) {
-							case ZEND_INIT_FCALL:
-							case ZEND_INIT_FCALL_BY_NAME:
-							case ZEND_INIT_NS_FCALL_BY_NAME:
-							case ZEND_INIT_DYNAMIC_CALL:
-							case ZEND_INIT_USER_CALL:
-							case ZEND_INIT_METHOD_CALL:
-							case ZEND_INIT_STATIC_METHOD_CALL:
-							case ZEND_NEW:
-								level++;
-								break;
-							case ZEND_DO_ICALL:
-							case ZEND_DO_UCALL:
-							case ZEND_DO_FCALL_BY_NAME:
-								level--;
-								break;
-						}
-					}
-				}
-				if (def + 1 == opline) {
-					break;
-				}
-			}
-
-	        zend_end_live_range(
-				zend_start_live_range(
-					def + 1 - CG(active_op_array)->opcodes),
-				opline - CG(active_op_array)->opcodes,
-				ZEND_LIVE_TMPVAR, var);
-		    break;
-		}
-	}
-}
-/* }}} */
-
-static zend_always_inline int zend_is_def_range(zend_op *opline, zend_uchar type, uint32_t var) /* {{{ */
-{
-	while (1) {
-		if (opline->result_type == type && opline->result.var == var) {
-			return opline->opcode != ZEND_ADD_ARRAY_ELEMENT &&
-				opline->opcode != ZEND_ROPE_ADD;
-		} else if (opline->opcode == ZEND_OP_DATA) {
-			return (opline-1)->result_type == type &&
-				(opline-1)->result.var == var;
-		} else if (opline->opcode == ZEND_END_SILENCE ||
-		           opline->opcode == ZEND_NOP ||
-	    	       opline->opcode == ZEND_EXT_NOP ||
-	        	   opline->opcode == ZEND_EXT_STMT ||
-	        	   opline->opcode == ZEND_EXT_FCALL_BEGIN ||
-	        	   opline->opcode == ZEND_EXT_FCALL_END ||
-	        	   opline->opcode == ZEND_TICKS) {
-			opline--;
-		} else {
-			return 0;
-		}
-	}
-}
-/* }}} */
-
-static void zend_check_live_ranges_op1(zend_op *opline) /* {{{ */
-{
-	if (!zend_is_def_range(opline - 1, opline->op1_type, opline->op1.var)) {
-
-		if (opline->opcode == ZEND_OP_DATA) {
-			if (!zend_is_def_range(opline - 2, opline->op1_type, opline->op1.var)) {
-				zend_find_live_range(opline - 1, opline->op1_type, opline->op1.var);
-			}
-		} else if (opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-		           opline->opcode == ZEND_NEW ||
-		           opline->opcode == ZEND_FETCH_CLASS_CONSTANT) {
-			/* classes don't have to be destroyed */
-		} else if (opline->opcode == ZEND_FAST_RET) {
-			/* fast_calls don't have to be destroyed */
-		} else if (opline->opcode == ZEND_CASE ||
-		           opline->opcode == ZEND_SWITCH_LONG ||
-		           opline->opcode == ZEND_SWITCH_STRING ||
-		           opline->opcode == ZEND_FE_FETCH_R ||
-		           opline->opcode == ZEND_FE_FETCH_RW ||
-			       opline->opcode == ZEND_FE_FREE ||
-			       opline->opcode == ZEND_ROPE_ADD ||
-			       opline->opcode == ZEND_ROPE_END ||
-			       opline->opcode == ZEND_END_SILENCE ||
-			       opline->opcode == ZEND_FETCH_LIST_R ||
-			       opline->opcode == ZEND_FETCH_LIST_W ||
-			       opline->opcode == ZEND_VERIFY_RETURN_TYPE ||
-			       opline->opcode == ZEND_BIND_LEXICAL) {
-			/* these opcodes are handled separately */
-		} else {
-			zend_find_live_range(opline, opline->op1_type, opline->op1.var);
-		}
-	}
-}
-/* }}} */
-
-static void zend_check_live_ranges_op2(zend_op *opline) /* {{{ */
-{
-	if (!zend_is_def_range(opline - 1, opline->op2_type, opline->op2.var)) {
-
-		if (opline->opcode == ZEND_OP_DATA) {
-			if (!zend_is_def_range(opline - 2, opline->op2_type, opline->op2.var)) {
-				zend_find_live_range(opline-1, opline->op2_type, opline->op2.var);
-			}
-		} else if (opline->opcode == ZEND_FETCH_STATIC_PROP_R ||
-		           opline->opcode == ZEND_FETCH_STATIC_PROP_W ||
-		           opline->opcode == ZEND_FETCH_STATIC_PROP_RW ||
-		           opline->opcode == ZEND_FETCH_STATIC_PROP_IS ||
-		           opline->opcode == ZEND_FETCH_STATIC_PROP_FUNC_ARG ||
-		           opline->opcode == ZEND_FETCH_STATIC_PROP_UNSET ||
-		           opline->opcode == ZEND_UNSET_STATIC_PROP ||
-		           opline->opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
-		           opline->opcode == ZEND_INSTANCEOF) {
-			/* classes don't have to be destroyed */
-		} else {
-			zend_find_live_range(opline, opline->op2_type, opline->op2.var);
-		}
-	}
-}
-/* }}} */
-
-static void zend_check_live_ranges(zend_op *opline) /* {{{ */
-{
-	if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-		zend_check_live_ranges_op1(opline);
-	}
-	if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-		zend_check_live_ranges_op2(opline);
-	}
-}
-/* }}} */
-
 static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */
 {
 	zend_op *opline = get_next_op();
@@ -1982,16 +1778,10 @@ static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode
 
 	if (op1 != NULL) {
 		SET_NODE(opline->op1, op1);
-		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			zend_check_live_ranges_op1(opline);
-		}
 	}
 
 	if (op2 != NULL) {
 		SET_NODE(opline->op2, op2);
-		if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			zend_check_live_ranges_op2(opline);
-		}
 	}
 
 	if (result) {
@@ -2008,16 +1798,10 @@ static zend_op *zend_emit_op_tmp(znode *result, zend_uchar opcode, znode *op1, z
 
 	if (op1 != NULL) {
 		SET_NODE(opline->op1, op1);
-		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			zend_check_live_ranges_op1(opline);
-		}
 	}
 
 	if (op2 != NULL) {
 		SET_NODE(opline->op2, op2);
-		if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			zend_check_live_ranges_op2(opline);
-		}
 	}
 
 	if (result) {
@@ -2166,7 +1950,6 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 	for (i = offset; i < count; ++i) {
 		opline = get_next_op();
 		memcpy(opline, &oplines[i], sizeof(zend_op));
-		zend_check_live_ranges(opline);
 	}
 	CG(delayed_oplines_stack).top = offset;
 	return opline;
@@ -4099,7 +3882,6 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 		SET_NODE(opline->op2, &method_node);
 	}
-	zend_check_live_ranges(opline);
 
 	/* Check if we already know which method we're calling */
 	if (opline->op2_type == IS_CONST) {
@@ -4321,7 +4103,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value
 			if (return_value) {
 				SET_NODE(opline->op2, return_value);
 			}
-			opline->op1.num = loop_var->u.try_catch_offset;
+			opline->op1.num = loop_var->try_catch_offset;
 		} else if (loop_var->opcode == ZEND_DISCARD_EXCEPTION) {
 			zend_op *opline = get_next_op();
 			opline->opcode = ZEND_DISCARD_EXCEPTION;
@@ -5043,10 +4825,8 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	zend_end_loop(get_next_op_number(), &expr_node);
 
 	if (expr_node.op_type & (IS_VAR|IS_TMP_VAR)) {
-		/* don't use emit_op() to prevent automatic live-range construction */
-		opline = get_next_op();
-		opline->opcode = ZEND_FREE;
-		SET_NODE(opline->op1, &expr_node);
+		opline = zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
+		opline->extended_value = ZEND_FREE_SWITCH;
 	} else if (expr_node.op_type == IS_CONST) {
 		zval_ptr_dtor_nogc(&expr_node.u.constant);
 	}
@@ -5096,7 +4876,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		fast_call.opcode = ZEND_FAST_CALL;
 		fast_call.var_type = IS_TMP_VAR;
 		fast_call.var_num = CG(context).fast_call_var;
-		fast_call.u.try_catch_offset = try_catch_offset;
+		fast_call.try_catch_offset = try_catch_offset;
 		zend_stack_push(&CG(loop_var_stack), &fast_call);
 	}
 
@@ -7631,9 +7411,7 @@ void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	znode silence_node;
-	uint32_t range;
 
-	range = zend_start_live_range(get_next_op_number());
 	zend_emit_op_tmp(&silence_node, ZEND_BEGIN_SILENCE, NULL, NULL);
 
 	if (expr_ast->kind == ZEND_AST_VAR) {
@@ -7643,11 +7421,6 @@ void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 	} else {
 		zend_compile_expr(result, expr_ast);
 	}
-
-	/* Store BEGIN_SILENCE/END_SILENCE pair to restore previous
-	 * EG(error_reporting) value on exception */
-	zend_end_live_range(range, get_next_op_number(),
-		ZEND_LIVE_SILENCE, silence_node.u.op.var);
 
 	zend_emit_op(NULL, ZEND_END_SILENCE, &silence_node, NULL);
 }
@@ -7940,7 +7713,6 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		GET_NODE(result, opline->result);
 	} else {
 		uint32_t var;
-		uint32_t range = zend_start_live_range(rope_init_lineno);
 
 		init_opline->extended_value = j;
 		opline->opcode = ZEND_ROPE_END;
@@ -7954,9 +7726,6 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 			get_temporary_variable();
 			i--;
 		}
-
-		zend_end_live_range(range, opline - CG(active_op_array)->opcodes,
-			ZEND_LIVE_ROPE, var);
 
 		/* Update all the previous opcodes to use the same variable */
 		while (opline != init_opline) {
