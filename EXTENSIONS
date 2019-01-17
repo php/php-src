@@ -387,6 +387,7 @@ SINCE:               5.5.0
 EXTENSION:           openssl
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net> (2001 - 2006)
                      Pierre-Alain Joye <pajoye@php.net> (2006 - 2011)
+                     Jakub Zelenka <bukka@php.net> (2015 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.4
