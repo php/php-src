@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #77346 (webm files incorrectly detected as
     application/octet-stream). (Anatol)
 
+- FPM:
+  . Fixed bug #77430 (php-fpm crashes with Main process exited, code=dumped,
+    status=11/SEGV). (Jakub Zelenka)
+
 - GD:
   . Fixed bug #73281 (imagescale(…, IMG_BILINEAR_FIXED) can cause black border).
     (cmb)
