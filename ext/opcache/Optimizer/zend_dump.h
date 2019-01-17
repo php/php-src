@@ -26,6 +26,7 @@
 #define ZEND_DUMP_RC_INFERENCE         (1<<1)
 #define ZEND_DUMP_CFG                  (1<<2)
 #define ZEND_DUMP_SSA                  (1<<3)
+#define ZEND_DUMP_LIVE_RANGES          (1<<4)
 #define ZEND_DUMP_RT_CONSTANTS         ZEND_RT_CONSTANTS
 
 BEGIN_EXTERN_C()

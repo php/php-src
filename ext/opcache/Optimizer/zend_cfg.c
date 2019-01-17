@@ -118,49 +118,6 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 		do {
 			changed = 0;
 
-			/* Add live range paths */
-			for (j = 0; j < op_array->last_live_range; j++) {
-				zend_live_range *live_range = &op_array->live_range[j];
-				if (live_range->var == (uint32_t)-1) {
-					/* this live range already removed */
-					continue;
-				}
-				b = blocks + block_map[live_range->start];
-				if (b->flags & ZEND_BB_REACHABLE) {
-					while (b->len > 0 && op_array->opcodes[b->start].opcode == ZEND_NOP) {
-					    /* check if NOP breaks incorrect smart branch */
-						if (b->len == 2
-						 && (op_array->opcodes[b->start + 1].opcode == ZEND_JMPZ
-						  || op_array->opcodes[b->start + 1].opcode == ZEND_JMPNZ)
-						 && (op_array->opcodes[b->start + 1].op1_type & (IS_CV|IS_CONST))
-						 && b->start > 0
-						 && zend_is_smart_branch(op_array->opcodes + b->start - 1)) {
-							break;
-						}
-						b->start++;
-						b->len--;
-					}
-					if (b->len == 0 && (uint32_t)b->successors[0] == block_map[live_range->end]) {
-						/* mark as removed (empty live range) */
-						live_range->var = (uint32_t)-1;
-						continue;
-					}
-					b->flags |= ZEND_BB_GEN_VAR;
-					b = blocks + block_map[live_range->end];
-					b->flags |= ZEND_BB_KILL_VAR;
-					if (!(b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE))) {
-						if ((cfg->flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES)) {
-							changed = 1;
-							zend_mark_reachable(op_array->opcodes, cfg, b);
-						} else {
-							b->flags |= ZEND_BB_UNREACHABLE_FREE;
-						}
-					}
-				} else {
-					ZEND_ASSERT(!(blocks[block_map[live_range->end]].flags & ZEND_BB_REACHABLE));
-				}
-			}
-
 			/* Add exception paths */
 			for (j = 0; j < op_array->last_try_catch; j++) {
 
@@ -236,6 +193,29 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 				}
 			}
 		} while (changed);
+
+		/* Mark blocks that are unreachable, but free a loop var created in a reachable block. */
+		for (b = blocks; b < blocks + cfg->blocks_count; b++) {
+			if (b->flags & ZEND_BB_REACHABLE) {
+				continue;
+			}
+
+			for (j = b->start; j < b->start + b->len; j++) {
+				zend_op *opline = &op_array->opcodes[j];
+				if (opline->opcode == ZEND_FE_FREE ||
+					(opline->opcode == ZEND_FREE && opline->extended_value == ZEND_FREE_SWITCH)
+				) {
+					zend_op *def_opline = zend_optimizer_get_loop_var_def(op_array, opline);
+					if (def_opline) {
+						uint32_t def_block = block_map[def_opline - op_array->opcodes];
+						if (blocks[def_block].flags & ZEND_BB_REACHABLE) {
+							b->flags |= ZEND_BB_UNREACHABLE_FREE;
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 }
 /* }}} */
@@ -293,7 +273,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	zval *zv;
 	zend_bool extra_entry_block = 0;
 
-	cfg->flags = build_flags & (ZEND_CFG_SPLIT_AT_LIVE_RANGES|ZEND_CFG_STACKLESS|ZEND_CFG_RECV_ENTRY);
+	cfg->flags = build_flags & (ZEND_CFG_STACKLESS|ZEND_CFG_RECV_ENTRY);
 
 	cfg->map = block_map = zend_arena_calloc(arena, op_array->last, sizeof(uint32_t));
 
@@ -444,13 +424,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	if ((build_flags & ZEND_CFG_NO_ENTRY_PREDECESSORS)
 			&& op_array->last > 0 && block_map[0] > 1) {
 		extra_entry_block = 1;
-	}
-
-	if ((cfg->flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES)) {
-		for (j = 0; j < op_array->last_live_range; j++) {
-			BB_START(op_array->live_range[j].start);
-			BB_START(op_array->live_range[j].end);
-		}
 	}
 
 	if (op_array->last_try_catch) {

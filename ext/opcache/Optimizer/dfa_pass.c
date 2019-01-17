@@ -247,12 +247,6 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 			}
 		}
 
-		/* update brk/cont array */
-		for (j = 0; j < op_array->last_live_range; j++) {
-			op_array->live_range[j].start -= shiftlist[op_array->live_range[j].start];
-			op_array->live_range[j].end   -= shiftlist[op_array->live_range[j].end];
-		}
-
 		/* update try/catch array */
 		for (j = 0; j < op_array->last_try_catch; j++) {
 			op_array->try_catch_array[j].try_op -= shiftlist[op_array->try_catch_array[j].try_op];
@@ -852,9 +846,6 @@ optimize_jmpnz:
 							take_successor_1(ssa, block_num, block);
 							goto optimize_nop;
 						} else {
-							if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-								zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
-							}
 							opline->opcode = ZEND_JMP;
 							opline->result_type = IS_UNUSED;
 							zend_ssa_remove_result_def(ssa, ssa_op);
