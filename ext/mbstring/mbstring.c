@@ -2381,7 +2381,7 @@ PHP_FUNCTION(mb_str_split)
 
 	/*
 	 * +----------------------------------------------------------------------+
-	 * | second scenario: "2- or 4-bytes width encodings UTF-16LE             |
+	 * | second scenario: "2- or 4-bytes width encodings UTF-16LE UTF-16BE    |
 	 * +----------------------------------------------------------------------+
 	 */
 	} else if (mbfl_encoding->flag & ( MBFL_ENCTYPE_MWC2LE | MBFL_ENCTYPE_MWC2BE )) {
