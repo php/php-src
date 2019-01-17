@@ -2446,11 +2446,11 @@ PHP_FUNCTION(mb_str_split)
 
 		/* Determine endianness */
 		const int _i = 1;
-		const char is_le = (*(char*)&_i) == 1 ? 1 : 0; 
+		const char is_le = (*(char*)&_i) == 0 ? 1 : 0; 
 		
 		char unsigned const *mbtab;
-		if(is_le && mbfl_encoding->flag == MBFL_ENCTYPE_MWC2LE ||
-		  !is_le && mbfl_encoding->flag == MBFL_ENCTYPE_MWC2BE){
+		if(is_le && mbfl_encoding->flag == MBFL_ENCTYPE_MWC2BE ||
+		  !is_le && mbfl_encoding->flag == MBFL_ENCTYPE_MWC2LE){
 			mbtab = mbtab_le;
 		} else {
 			mbtab = mbtab_be;
