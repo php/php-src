@@ -132,16 +132,6 @@
 #endif
 
 /*
- *  substr
- */
-struct collector_substr_data {
-	mbfl_convert_filter *next_filter;
-	size_t start;
-	size_t stop;
-	size_t output;
-};
-
-/*
  * buffering converter
  */
 typedef struct _mbfl_buffer_converter mbfl_buffer_converter;
@@ -167,7 +157,6 @@ MBFLAPI extern mbfl_string * mbfl_buffer_converter_getbuffer(mbfl_buffer_convert
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
 MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
-MBFLAPI extern int filter_count_output(int c, void *data);
 
 /*
  * encoding detector
@@ -264,9 +253,9 @@ struct mime_header_encoder_data;	/* forward declaration */
 
 MBFLAPI extern struct mime_header_encoder_data *
 mime_header_encoder_new(
-    const mbfl_encoding *incode,
-    const mbfl_encoding *outcode,
-    const mbfl_encoding *encoding);
+	const mbfl_encoding *incode,
+	const mbfl_encoding *outcode,
+	const mbfl_encoding *encoding);
 
 MBFLAPI extern void
 mime_header_encoder_delete(struct mime_header_encoder_data *pe);
@@ -279,11 +268,11 @@ mime_header_encoder_result(struct mime_header_encoder_data *pe, mbfl_string *res
 
 MBFLAPI extern mbfl_string *
 mbfl_mime_header_encode(
-    mbfl_string *string, mbfl_string *result,
-    const mbfl_encoding *outcode,
-    const mbfl_encoding *encoding,
-    const char *linefeed,
-    int indent);
+	mbfl_string *string, mbfl_string *result,
+	const mbfl_encoding *outcode,
+	const mbfl_encoding *encoding,
+	const char *linefeed,
+	int indent);
 
 /*
  * MIME header decode
@@ -304,9 +293,9 @@ mime_header_decoder_result(struct mime_header_decoder_data *pd, mbfl_string *res
 
 MBFLAPI extern mbfl_string *
 mbfl_mime_header_decode(
-    mbfl_string *string,
-    mbfl_string *result,
-    const mbfl_encoding *outcode);
+	mbfl_string *string,
+	mbfl_string *result,
+	const mbfl_encoding *outcode);
 
 /*
  * convert HTML numeric entity
