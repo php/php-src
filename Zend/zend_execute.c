@@ -619,14 +619,16 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 	ZVAL_REF(variable_ptr, ref);
 }
 
-static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr, zend_uchar value_type OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_error(E_NOTICE, "Only variables should be assigned by reference");
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		return 0;
 	}
 
-	value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, value_type, EX_USES_STRICT_TYPES());
+	/* Use IS_TMP_VAR instead of IS_VAR to avoid ISREF check */
+	Z_TRY_ADDREF_P(value_ptr);
+	value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
