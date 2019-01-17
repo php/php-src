@@ -2610,8 +2610,47 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 			}
 			|2:
 			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+
 			|	// ZVAL_DEREF(var_ptr);
-			|	ZVAL_DEREF FCARG1a, op1_info
+			if (op1_info & MAY_BE_REF) {
+				|	IF_NOT_Z_TYPE, FCARG1a, IS_REFERENCE, >2
+				|	GET_Z_PTR FCARG2a, FCARG1a
+				|	cmp aword [FCARG2a + offsetof(zend_reference, sources.ptr)], 0
+				|	lea FCARG1a, [FCARG2a + offsetof(zend_reference, val)]
+				|	jz >2
+				|.if X64
+					if (RETURN_VALUE_USED(opline)) {
+						|	LOAD_ZVAL_ADDR CARG3, res_addr
+					} else {
+						|	mov CARG3, 0
+					}
+				|.else
+					|	sub r4, 12
+					if (RETURN_VALUE_USED(opline)) {
+						|	PUSH_ZVAL_ADDR res_addr, r0
+					} else {
+						|	push 0
+					}
+				|.endif
+				if (opline->opcode == ZEND_PRE_INC) {
+					|	EXT_CALL zend_jit_pre_inc_typed_ref, r0
+				} else if (opline->opcode == ZEND_PRE_DEC) {
+					|	EXT_CALL zend_jit_pre_dec_typed_ref, r0
+				} else if (opline->opcode == ZEND_POST_INC) {
+					|	EXT_CALL zend_jit_post_inc_typed_ref, r0
+				} else if (opline->opcode == ZEND_POST_DEC) {
+					|	EXT_CALL zend_jit_post_dec_typed_ref, r0
+				} else {
+					ZEND_ASSERT(0);
+				}
+				|.if not(X64)
+					|	add r4, 12
+				|.endif
+				zend_jit_check_exception(Dst);
+				|	jmp >3
+				|2:
+			}
+
 			if ((opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC)) {
 				if (opline->result_type != IS_UNUSED) {
 					zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);

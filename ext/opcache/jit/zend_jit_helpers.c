@@ -2122,6 +2122,106 @@ static void ZEND_FASTCALL zend_jit_assign_cv_to_typed_ref(zend_reference *ref, z
 	zend_jit_assign_to_typed_ref(ref, value, IS_CV);
 }
 
+static zend_property_info *zend_jit_get_prop_not_accepting_double(zend_reference *ref)
+{
+	zend_property_info *prop;
+	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
+		if (ZEND_TYPE_CODE(prop->type) != IS_DOUBLE) {
+			return prop;
+		}
+	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+	return NULL;
+}
+
+static ZEND_COLD void zend_jit_throw_incdec_ref_error(zend_reference *ref, zend_bool inc)
+{
+	zend_property_info *error_prop = zend_jit_get_prop_not_accepting_double(ref);
+	/* Currently there should be no way for a typed reference to accept both int and double.
+	 * Generalize this and the related property code once this becomes possible. */
+	ZEND_ASSERT(error_prop);
+	zend_type_error(
+		"Cannot %s a reference held by property %s::$%s of type %sint past its %simal value",
+		inc ? "increment" : "decrement",
+		ZSTR_VAL(error_prop->ce->name),
+		zend_get_unmangled_property_name(error_prop->name),
+		ZEND_TYPE_ALLOW_NULL(error_prop->type) ? "?" : "",
+		inc ? "max" : "min");
+}
+
+static void ZEND_FASTCALL zend_jit_pre_inc_typed_ref(zval *var_ptr, zend_reference *ref, zval *ret)
+{
+	zval tmp;
+
+	ZVAL_COPY(&tmp, var_ptr);
+
+	increment_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE(tmp) == IS_LONG) {
+		zend_jit_throw_incdec_ref_error(ref, 1);
+		ZVAL_COPY_VALUE(var_ptr, &tmp);
+	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, &tmp);
+	} else {
+		zval_ptr_dtor(&tmp);
+	}
+	if (ret) {
+		ZVAL_COPY(ret, var_ptr);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_pre_dec_typed_ref(zval *var_ptr, zend_reference *ref, zval *ret)
+{
+	zval tmp;
+
+	ZVAL_COPY(&tmp, var_ptr);
+
+	decrement_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE(tmp) == IS_LONG) {
+		zend_jit_throw_incdec_ref_error(ref, 0);
+		ZVAL_COPY_VALUE(var_ptr, &tmp);
+	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, &tmp);
+	} else {
+		zval_ptr_dtor(&tmp);
+	}
+	if (ret) {
+		ZVAL_COPY(ret, var_ptr);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_post_inc_typed_ref(zval *var_ptr, zend_reference *ref, zval *ret)
+{
+	ZVAL_COPY(ret, var_ptr);
+
+	increment_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(ret) == IS_LONG) {
+		zend_jit_throw_incdec_ref_error(ref, 1);
+		ZVAL_COPY_VALUE(var_ptr, ret);
+	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, ret);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_post_dec_typed_ref(zval *var_ptr, zend_reference *ref, zval *ret)
+{
+	ZVAL_COPY(ret, var_ptr);
+
+	decrement_function(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(ret) == IS_LONG) {
+		zend_jit_throw_incdec_ref_error(ref, 0);
+		ZVAL_COPY_VALUE(var_ptr, ret);
+	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+		zval_ptr_dtor(var_ptr);
+		ZVAL_COPY_VALUE(var_ptr, ret);
+	}
+}
+
 /*
  * Local variables:
  * tab-width: 4
