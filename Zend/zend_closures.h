@@ -22,6 +22,14 @@
 
 BEGIN_EXTERN_C()
 
+typedef struct _zend_closure {
+	zend_object       std;
+	zend_function     func;
+	zval              this_ptr;
+	zend_class_entry *called_scope;
+	zif_handler       orig_internal_handler;
+} zend_closure;
+
 /* This macro depends on zend_closure structure layout */
 #define ZEND_CLOSURE_OBJECT(op_array) \
 	((zend_object*)((char*)(op_array) - sizeof(zend_object)))

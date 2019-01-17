@@ -32,14 +32,6 @@
 #define ZEND_CLOSURE_PROPERTY_ERROR() \
 	zend_throw_error(NULL, "Closure object cannot have properties")
 
-typedef struct _zend_closure {
-	zend_object       std;
-	zend_function     func;
-	zval              this_ptr;
-	zend_class_entry *called_scope;
-	zif_handler       orig_internal_handler;
-} zend_closure;
-
 /* non-static since it needs to be referenced */
 ZEND_API zend_class_entry *zend_ce_closure;
 static zend_object_handlers closure_handlers;
