@@ -2604,7 +2604,7 @@ ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 					break;
 				}
 
-				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+				if (Z_ISREF_P(variable_ptr)) {
 					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 				}
 			}
@@ -2655,7 +2655,7 @@ ZEND_VM_HANDLER(202, ZEND_ASSIGN_STATIC_PROP_REF, CONST|TMPVAR|CV, UNUSED|CONST|
 					prop = &EG(uninitialized_zval);
 					break;
 				}
-				if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				if (Z_ISREF_P(prop)) {
 					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 				}
 			}
