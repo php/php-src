@@ -2143,7 +2143,7 @@ static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_
 
 static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *container, zval *dim, int dim_type, int type EXECUTE_DATA_DC)
 {
-	zval *retval, *orig_container = container;
+	zval *retval;
 
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 try_array:
@@ -2166,9 +2166,25 @@ fetch_from_array:
 		ZVAL_INDIRECT(result, retval);
 		return;
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
+		zend_reference *ref = Z_REF_P(container);
 		container = Z_REFVAL_P(container);
 		if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 			goto try_array;
+		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+			if (type != BP_VAR_UNSET) {
+				if (ZEND_REF_HAS_TYPE_SOURCES(ref)) {
+					zend_property_info *error_prop = zend_check_ref_array_assignable(ref);
+					if (UNEXPECTED(error_prop != NULL)) {
+						zend_throw_auto_init_in_ref_error(error_prop, "array");
+						ZVAL_ERROR(result);
+						return;
+					}
+				}
+				array_init(container);
+				goto fetch_from_array;
+			} else {
+				goto return_null;
+			}
 		}
 	}
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
@@ -2213,24 +2229,19 @@ fetch_from_array:
 			ZVAL_ERROR(result);
 		}
 	} else {
-		if (type != BP_VAR_W && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		if (/*dim_type == IS_CV &&*/ dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP2();
-		}
 		if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+			if (type != BP_VAR_W && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+				ZVAL_UNDEFINED_OP1();
+			}
 			if (type != BP_VAR_UNSET) {
-				zend_property_info *error_prop;
-				if (UNEXPECTED(orig_container != container) && Z_ISREF_P(orig_container) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_container))) != NULL) {
-					zend_throw_auto_init_in_ref_error(error_prop, "array");
-					ZVAL_ERROR(result);
-				} else {
-					array_init(container);
-					goto fetch_from_array;
-				}
+				array_init(container);
+				goto fetch_from_array;
 			} else {
+return_null:
 				/* for read-mode only */
+				if (/*dim_type == IS_CV &&*/ dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+					ZVAL_UNDEFINED_OP2();
+				}
 				ZVAL_NULL(result);
 			}
 		} else if (EXPECTED(Z_ISERROR_P(container))) {
