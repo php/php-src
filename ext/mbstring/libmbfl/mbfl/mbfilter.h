@@ -253,9 +253,9 @@ struct mime_header_encoder_data;	/* forward declaration */
 
 MBFLAPI extern struct mime_header_encoder_data *
 mime_header_encoder_new(
-	const mbfl_encoding *incode,
-	const mbfl_encoding *outcode,
-	const mbfl_encoding *encoding);
+    const mbfl_encoding *incode,
+    const mbfl_encoding *outcode,
+    const mbfl_encoding *encoding);
 
 MBFLAPI extern void
 mime_header_encoder_delete(struct mime_header_encoder_data *pe);
@@ -268,11 +268,11 @@ mime_header_encoder_result(struct mime_header_encoder_data *pe, mbfl_string *res
 
 MBFLAPI extern mbfl_string *
 mbfl_mime_header_encode(
-	mbfl_string *string, mbfl_string *result,
-	const mbfl_encoding *outcode,
-	const mbfl_encoding *encoding,
-	const char *linefeed,
-	int indent);
+    mbfl_string *string, mbfl_string *result,
+    const mbfl_encoding *outcode,
+    const mbfl_encoding *encoding,
+    const char *linefeed,
+    int indent);
 
 /*
  * MIME header decode
@@ -293,9 +293,9 @@ mime_header_decoder_result(struct mime_header_decoder_data *pd, mbfl_string *res
 
 MBFLAPI extern mbfl_string *
 mbfl_mime_header_decode(
-	mbfl_string *string,
-	mbfl_string *result,
-	const mbfl_encoding *outcode);
+    mbfl_string *string,
+    mbfl_string *result,
+    const mbfl_encoding *outcode);
 
 /*
  * convert HTML numeric entity

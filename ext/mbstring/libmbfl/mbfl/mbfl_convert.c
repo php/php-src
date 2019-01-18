@@ -165,7 +165,7 @@ mbfl_convert_filter_new(
     int (*flush_function)(void*),
     void* data)
 {
-	mbfl_convert_filter *filter;
+	mbfl_convert_filter * filter;
 	const struct mbfl_convert_vtbl *vtbl;
 
 	vtbl = mbfl_convert_filter_get_vtbl(from, to);
