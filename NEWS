@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug #77447 (PHP 7.3 built with ASAN crashes in
     zend_cpu_supports_avx2). (Nikita)
 
+- Curl:
+  . Fixed bug #76675 (Segfault with H2 server push). (Pedro Magalhães)
+
 - Fileinfo:
   . Fixed bug #77346 (webm files incorrectly detected as
     application/octet-stream). (Anatol)
