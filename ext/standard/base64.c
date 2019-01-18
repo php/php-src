@@ -216,6 +216,7 @@ zend_string *php_base64_decode_ex_default(const unsigned char *str, size_t lengt
 PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) __attribute__((ifunc("resolve_base64_encode")));
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, zend_bool strict) __attribute__((ifunc("resolve_base64_decode")));
 
+ZEND_NO_SANITIZE_ADDRESS
 static void *resolve_base64_encode() {
 # if ZEND_INTRIN_AVX2_FUNC_PROTO
 	if (zend_cpu_supports_avx2()) {
@@ -230,6 +231,7 @@ static void *resolve_base64_encode() {
 	return php_base64_encode_default;
 }
 
+ZEND_NO_SANITIZE_ADDRESS
 static void *resolve_base64_decode() {
 # if ZEND_INTRIN_AVX2_FUNC_PROTO
 	if (zend_cpu_supports_avx2()) {
