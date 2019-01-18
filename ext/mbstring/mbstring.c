@@ -2372,12 +2372,12 @@ PHP_FUNCTION(mb_str_split)
 		chunk_len = (size_t)split_length; /* chunk length in bytes */
 
 	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE )) { /* 2 bytes */
-		mb_len = string.len>>1; /* string length in chars */
-		chunk_len = split_length<<1; /* chunk length in bytes */
+		mb_len = string.len>>1; /* eq. string.len / 2 String length in chars */
+		chunk_len = split_length<<1; /* eq. split_length * 2 chunk length in bytes */
 
 	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE )) { /* 4 bytes */
-		mb_len = string.len>>2;
-		chunk_len = split_length<<2; /* split length in bytes */
+		mb_len = string.len>>2; /* eq. string.len / 4 */
+		chunk_len = split_length<<2; /* eq. split_length * 4 */
 
 	/*
 	 * +----------------------------------------------------------------------+
