@@ -119,12 +119,12 @@ PHP 7.4 UPGRADE NOTES
 
 - SPL:
   . SplFileObject::fputcsv(), ::fgetcsv() and ::setCsvControl() now accept an
-    emptry string as $escape argument, which disables the propriertary PHP
+    empty string as $escape argument, which disables the propriertary PHP
     escaping mechanism. SplFileObject::getCsvControl() now may also return an
     empty string for the third array element, accordingly.
 
 - Standard:
-  . fputcsv() and fgetcsv() now accept an emptry string as $escape argument,
+  . fputcsv() and fgetcsv() now accept an empty string as $escape argument,
     which disables the propriertary PHP escaping mechanism. The behavior of
     str_getcsv() has been adjusted accordingly (formerly, an empty string was
     identical to using the default).
@@ -187,7 +187,7 @@ PHP 7.4 UPGRADE NOTES
   . The bundled libsqlite has been removed.  To build the SQLite3 extension
     a system libsqlite3 ≥ 3.7.4 is now required. To build the PDO_SQLite
     extension a system libsqlite3 ≥ 3.5.0 is now required.
-  . (Un)serialization of SQLite3, SQLite3Stmt and SQLite3Result is now explictly
+  . (Un)serialization of SQLite3, SQLite3Stmt and SQLite3Result is now explicitly
     forbidden. Formerly, serialization of instances of these classes was
     possible, but unserialization yielded unusable objects.
   . The @param notation can now also be used to denote SQL query parameters.
