@@ -5,6 +5,10 @@ Bug #77484 Zend engine crashes when calling realpath in invalid working dir
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die("skip can't remove CWD on Windows");
 }
+if (PHP_ZTS) {
+    /* TODO eliminate difference in TS build. */
+    die("skip Not for ZTS");
+}
 ?>
 --FILE--
 <?php
