@@ -2409,13 +2409,14 @@ PHP_FUNCTION(mb_str_split)
 			 B16384(2),
 			 B4096(2),
 			 B2048(2),
-			 B2048(4), /* surrogate pairs range 0xD800 - 0xDFFF */
+			 B1024(4), /* surrogate pairs: 0xD800-0xDFFF. High surrogate first: 0xD800, last: 0xDBFF */
+			 B1024(2), /* Low surrogate first: 0xDC00, last: 0xDFFF */
 			 B8192(2),
 		};
 
 		
 		/* macro to make swapped length table */
-		#define BY B128(2),B64(2),B16(2),B8(2),B8(4),B32(2)
+		#define BY B128(2),B64(2),B16(2),B8(2),B4(4),B4(2),B32(2)
 
 		/* swapped bytes table */
 		static char unsigned const mbtab_be[65536] = {
