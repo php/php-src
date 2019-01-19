@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #73614 (gdImageFilledArc() doesn't properly draw pies). (cmb)
   . Fixed bug #77272 (imagescale() may return image resource on failure). (cmb)
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
+  . Fixed bug #77479 (imagewbmp() segfaults with very large images). (cmb)
 
 - Mbstring:
   . Fixed bug #77454 (mb_scrub() silently truncates after a null byte).
