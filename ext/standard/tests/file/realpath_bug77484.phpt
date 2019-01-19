@@ -9,21 +9,23 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-var_dump(\getcwd());
+$old_cwd = getcwd();
 
-\mkdir(__DIR__ . "/foo");
-\chdir(__DIR__ . "/foo");
-\rmdir(__DIR__ . "/foo");
+mkdir(__DIR__ . "/foo");
+chdir(__DIR__ . "/foo");
+rmdir(__DIR__ . "/foo");
 
 // Outputs: / (incorrect)
-var_dump(\getcwd());
+$new_cwd = getcwd();
 
 // Outputs: false (correct)
-var_dump(\realpath(''));
+$rp0 = realpath('');
 
 // Crash
-var_dump(\realpath('.'), \realpath('./'));
+$rp1 = realpath('.');
+$rp2 = realpath('./');
 
+var_dump($old_cwd, $new_cwd, $rp0, $rp1, $rp2);
 ?>
 --EXPECTF--
 string(%d) "%s"
