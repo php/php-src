@@ -90,52 +90,52 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_kddi = {
 #define idxtojis2(c) (((c) % 94) + 0x21)
 
 #define SJIS_ENCODE(c1, c2, s1, s2)    \
-        do {                        \
-            s1 = c1;                \
-            s1--;                    \
-            s1 >>= 1;                \
-            if ((c1) < 0x5f) {        \
+        do {                           \
+            s1 = c1;                   \
+            s1--;                      \
+            s1 >>= 1;                  \
+            if ((c1) < 0x5f) {         \
                 s1 += 0x71;            \
-            } else {                \
+            } else {                   \
                 s1 += 0xb1;            \
-            }                        \
-            s2 = c2;                \
+            }                          \
+            s2 = c2;                   \
             if ((c1) & 1) {            \
-                if ((c2) < 0x60) {    \
-                    s2--;            \
-                }                    \
+                if ((c2) < 0x60) {     \
+                    s2--;              \
+                }                      \
                 s2 += 0x20;            \
-            } else {                \
+            } else {                   \
                 s2 += 0x7e;            \
-            }                        \
+            }                          \
         } while (0)
 
 #define SJIS_DECODE(c1, c2, s1, s2)    \
-        do {                        \
-            s1 = c1;                \
-            if (s1 < 0xa0) {        \
+        do {                           \
+            s1 = c1;                   \
+            if (s1 < 0xa0) {           \
                 s1 -= 0x81;            \
-            } else {                \
+            } else {                   \
                 s1 -= 0xc1;            \
-            }                        \
-            s1 <<= 1;                \
+            }                          \
+            s1 <<= 1;                  \
             s1 += 0x21;                \
-            s2 = c2;                \
-            if (s2 < 0x9f) {        \
-                if (s2 < 0x7f) {    \
-                    s2++;            \
-                }                    \
+            s2 = c2;                   \
+            if (s2 < 0x9f) {           \
+                if (s2 < 0x7f) {       \
+                    s2++;              \
+                }                      \
                 s2 -= 0x20;            \
-            } else {                \
-                s1++;                \
+            } else {                   \
+                s1++;                  \
                 s2 -= 0x7e;            \
-            }                        \
+            }                          \
         } while (0)
 
 #define CODE2JIS(c1, c2, s1, s2)       \
-    c1 = (s1)/94+0x21;                \
-    c2 = (s1)-94*((c1)-0x21)+0x21;    \
-    s1 = ((c1) << 8) | (c2);        \
+    c1 = (s1)/94+0x21;                 \
+    c2 = (s1)-94*((c1)-0x21)+0x21;     \
+    s1 = ((c1) << 8) | (c2);           \
     s2 = 1
 
 /*
