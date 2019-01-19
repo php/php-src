@@ -56,9 +56,9 @@ struct mbfl_identify_vtbl {
 	int (*filter_function)(int c, mbfl_identify_filter *filter);
 };
 
-MBFLAPI extern const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding);
-MBFLAPI extern mbfl_identify_filter * mbfl_identify_filter_new(enum mbfl_no_encoding encoding);
-MBFLAPI extern mbfl_identify_filter * mbfl_identify_filter_new2(const mbfl_encoding *encoding);
+MBFLAPI extern const struct mbfl_identify_vtbl *mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding);
+MBFLAPI extern mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding);
+MBFLAPI extern mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding);
 MBFLAPI extern void mbfl_identify_filter_delete(mbfl_identify_filter *filter);
 MBFLAPI extern int mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding);
 MBFLAPI extern int mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding);
@@ -72,3 +72,14 @@ MBFLAPI extern int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter);
 MBFLAPI extern int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter);
 
 #endif /* MBFL_IDENT_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

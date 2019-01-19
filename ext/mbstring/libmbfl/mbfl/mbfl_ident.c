@@ -101,82 +101,32 @@
 #include "filters/mbfilter_cp850.h"
 
 static const struct mbfl_identify_vtbl vtbl_identify_false = {
-	mbfl_no_encoding_pass,
-	mbfl_filt_ident_false_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_false };
+	mbfl_no_encoding_pass, mbfl_filt_ident_false_ctor, mbfl_filt_ident_common_dtor, mbfl_filt_ident_false
+};
 
 
 static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
-	&vtbl_identify_utf8,
-	&vtbl_identify_utf7,
-	&vtbl_identify_ascii,
-	&vtbl_identify_eucjp,
-	&vtbl_identify_sjis,
-	&vtbl_identify_sjis_open,
-	&vtbl_identify_eucjpwin,
-	&vtbl_identify_eucjp2004,
-	&vtbl_identify_cp932,
-	&vtbl_identify_jis,
-	&vtbl_identify_2022jp,
-	&vtbl_identify_2022jpms,
-	&vtbl_identify_2022jp_2004,
-	&vtbl_identify_2022jp_kddi,
-	&vtbl_identify_cp51932,
-	&vtbl_identify_sjis_docomo,
-	&vtbl_identify_sjis_kddi,
-	&vtbl_identify_sjis_sb,
-	&vtbl_identify_utf8_docomo,
-	&vtbl_identify_utf8_kddi_a,
-	&vtbl_identify_utf8_kddi_b,
-	&vtbl_identify_utf8_sb,
-	&vtbl_identify_euccn,
-	&vtbl_identify_cp936,
-	&vtbl_identify_hz,
-	&vtbl_identify_euctw,
-	&vtbl_identify_big5,
-	&vtbl_identify_cp950,
-	&vtbl_identify_euckr,
-	&vtbl_identify_uhc,
-	&vtbl_identify_2022kr,
-	&vtbl_identify_cp1251,
-	&vtbl_identify_cp866,
-	&vtbl_identify_koi8r,
-	&vtbl_identify_koi8u,
-	&vtbl_identify_cp1252,
-	&vtbl_identify_cp1254,
-	&vtbl_identify_8859_1,
-	&vtbl_identify_8859_2,
-	&vtbl_identify_8859_3,
-	&vtbl_identify_8859_4,
-	&vtbl_identify_8859_5,
-	&vtbl_identify_8859_6,
-	&vtbl_identify_8859_7,
-	&vtbl_identify_8859_8,
-	&vtbl_identify_8859_9,
-	&vtbl_identify_8859_10,
-	&vtbl_identify_8859_13,
-	&vtbl_identify_8859_14,
-	&vtbl_identify_8859_15,
-	&vtbl_identify_armscii8,
-	&vtbl_identify_cp850,
-	&vtbl_identify_jis_ms,
-	&vtbl_identify_cp50220,
-	&vtbl_identify_cp50221,
-	&vtbl_identify_cp50222,
-	&vtbl_identify_gb18030,
-	&vtbl_identify_false,
-	NULL
+	&vtbl_identify_utf8, &vtbl_identify_utf7, &vtbl_identify_ascii, &vtbl_identify_eucjp, &vtbl_identify_sjis,
+	&vtbl_identify_sjis_open, &vtbl_identify_eucjpwin, &vtbl_identify_eucjp2004, &vtbl_identify_cp932,
+	&vtbl_identify_jis, &vtbl_identify_2022jp, &vtbl_identify_2022jpms, &vtbl_identify_2022jp_2004,
+	&vtbl_identify_2022jp_kddi, &vtbl_identify_cp51932, &vtbl_identify_sjis_docomo, &vtbl_identify_sjis_kddi,
+	&vtbl_identify_sjis_sb, &vtbl_identify_utf8_docomo, &vtbl_identify_utf8_kddi_a, &vtbl_identify_utf8_kddi_b,
+	&vtbl_identify_utf8_sb, &vtbl_identify_euccn, &vtbl_identify_cp936, &vtbl_identify_hz, &vtbl_identify_euctw,
+	&vtbl_identify_big5, &vtbl_identify_cp950, &vtbl_identify_euckr, &vtbl_identify_uhc, &vtbl_identify_2022kr,
+	&vtbl_identify_cp1251, &vtbl_identify_cp866, &vtbl_identify_koi8r, &vtbl_identify_koi8u, &vtbl_identify_cp1252,
+	&vtbl_identify_cp1254, &vtbl_identify_8859_1, &vtbl_identify_8859_2, &vtbl_identify_8859_3, &vtbl_identify_8859_4,
+	&vtbl_identify_8859_5, &vtbl_identify_8859_6, &vtbl_identify_8859_7, &vtbl_identify_8859_8, &vtbl_identify_8859_9,
+	&vtbl_identify_8859_10, &vtbl_identify_8859_13, &vtbl_identify_8859_14, &vtbl_identify_8859_15,
+	&vtbl_identify_armscii8, &vtbl_identify_cp850, &vtbl_identify_jis_ms, &vtbl_identify_cp50220,
+	&vtbl_identify_cp50221, &vtbl_identify_cp50222, &vtbl_identify_gb18030, &vtbl_identify_false, NULL
 };
-
 
 
 /*
  * identify filter
  */
-const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding)
-{
-	const struct mbfl_identify_vtbl * vtbl;
+const struct mbfl_identify_vtbl *mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding) {
+	const struct mbfl_identify_vtbl *vtbl;
 	int i;
 
 	i = 0;
@@ -189,12 +139,11 @@ const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_enc
 	return vtbl;
 }
 
-mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
-{
+mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding) {
 	mbfl_identify_filter *filter;
 
 	/* allocate */
-	filter = (mbfl_identify_filter *)mbfl_malloc(sizeof(mbfl_identify_filter));
+	filter = (mbfl_identify_filter *) mbfl_malloc(sizeof(mbfl_identify_filter));
 	if (filter == NULL) {
 		return NULL;
 	}
@@ -207,12 +156,11 @@ mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 	return filter;
 }
 
-mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding)
-{
+mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding) {
 	mbfl_identify_filter *filter;
 
 	/* allocate */
-	filter = (mbfl_identify_filter *)mbfl_malloc(sizeof(mbfl_identify_filter));
+	filter = (mbfl_identify_filter *) mbfl_malloc(sizeof(mbfl_identify_filter));
 	if (filter == NULL) {
 		return NULL;
 	}
@@ -226,14 +174,12 @@ mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding)
 }
 
 
-int mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding)
-{
+int mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding) {
 	const mbfl_encoding *enc = mbfl_no2encoding(encoding);
-	return mbfl_identify_filter_init2(filter, enc ? enc: &mbfl_encoding_pass);
+	return mbfl_identify_filter_init2(filter, enc ? enc : &mbfl_encoding_pass);
 }
 
-int mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding)
-{
+int mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding) {
 	const struct mbfl_identify_vtbl *vtbl;
 
 	/* encoding structure */
@@ -258,45 +204,49 @@ int mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding
 	return 0;
 }
 
-void mbfl_identify_filter_delete(mbfl_identify_filter *filter)
-{
+void mbfl_identify_filter_delete(mbfl_identify_filter *filter) {
 	if (filter == NULL) {
 		return;
 	}
 
 	mbfl_identify_filter_cleanup(filter);
-	mbfl_free((void*)filter);
+	mbfl_free((void *) filter);
 }
 
-void mbfl_identify_filter_cleanup(mbfl_identify_filter *filter)
-{
+void mbfl_identify_filter_cleanup(mbfl_identify_filter *filter) {
 	(*filter->filter_dtor)(filter);
 }
 
-void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter)
-{
+void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter) {
 	filter->status = 0;
 	filter->flag = 0;
 }
 
-void mbfl_filt_ident_common_dtor(mbfl_identify_filter *filter)
-{
+void mbfl_filt_ident_common_dtor(mbfl_identify_filter *filter) {
 	filter->status = 0;
 }
 
-int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter)
-{
-	filter->flag = 1;	/* bad */
+int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter) {
+	filter->flag = 1;    /* bad */
 	return c;
 }
 
-void mbfl_filt_ident_false_ctor(mbfl_identify_filter *filter)
-{
+void mbfl_filt_ident_false_ctor(mbfl_identify_filter *filter) {
 	filter->status = 0;
 	filter->flag = 1;
 }
 
-int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter)
-{
+int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter) {
 	return c;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

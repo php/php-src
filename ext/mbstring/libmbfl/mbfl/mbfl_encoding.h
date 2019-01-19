@@ -73,10 +73,10 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_sjis,
 	mbfl_no_encoding_eucjp_win,
 	mbfl_no_encoding_sjis_open,
- 	mbfl_no_encoding_sjis_docomo,
- 	mbfl_no_encoding_sjis_kddi,
- 	mbfl_no_encoding_sjis_sb,
- 	mbfl_no_encoding_sjis_mac,
+	mbfl_no_encoding_sjis_docomo,
+	mbfl_no_encoding_sjis_kddi,
+	mbfl_no_encoding_sjis_sb,
+	mbfl_no_encoding_sjis_mac,
 	mbfl_no_encoding_sjis2004,
 	mbfl_no_encoding_cp932,
 	mbfl_no_encoding_cp51932,
@@ -128,6 +128,7 @@ enum mbfl_no_encoding {
 typedef enum mbfl_no_encoding mbfl_encoding_id;
 
 struct _mbfl_convert_filter;
+
 struct mbfl_convert_vtbl {
 	enum mbfl_no_encoding from;
 	enum mbfl_no_encoding to;
@@ -152,13 +153,24 @@ typedef struct _mbfl_encoding {
 	const struct mbfl_convert_vtbl *output_filter;
 } mbfl_encoding;
 
-MBFLAPI extern const mbfl_encoding * mbfl_name2encoding(const char *name);
-MBFLAPI extern const mbfl_encoding * mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
+MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);
+MBFLAPI extern const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);
-MBFLAPI extern const mbfl_encoding ** mbfl_get_supported_encodings();
-MBFLAPI extern const char * mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
-MBFLAPI extern const char * mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
+MBFLAPI extern const mbfl_encoding **mbfl_get_supported_encodings();
+MBFLAPI extern const char *mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
+MBFLAPI extern const char *mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern int mbfl_is_support_encoding(const char *name);
 
 
 #endif /* MBFL_ENCODING_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

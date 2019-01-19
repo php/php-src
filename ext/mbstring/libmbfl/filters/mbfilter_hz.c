@@ -74,76 +74,75 @@ const struct mbfl_convert_vtbl vtbl_wchar_hz = {
 	mbfl_filt_conv_any_hz_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * HZ => wchar
  */
 int
-mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter) {
 	int c1, s, w;
 
 	switch (filter->status & 0xf) {
 /*	case 0x00:	 ASCII */
 /*	case 0x10:	 GB2312 */
-	case 0:
-		if (c == 0x7e) {
-			filter->status += 2;
-		} else if (filter->status == 0x10 && c > 0x20 && c < 0x7f) {	/* DBCS first char */
-			filter->cache = c;
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			CK((*filter->output_function)(c, filter->data));
-		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
+		case 0:
+			if (c == 0x7e) {
+				filter->status += 2;
+			} else if (filter->status == 0x10 && c > 0x20 && c < 0x7f) {    /* DBCS first char */
+				filter->cache = c;
+				filter->status += 1;
+			} else if (c >= 0 && c < 0x80) {        /* latin, CTLs */
+				CK((*filter->output_function)(c, filter->data));
+			} else {
+				w = c & MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
+			}
+			break;
 
 /*	case 0x11:	 GB2312 second char */
-	case 1:
-		filter->status &= ~0xf;
-		c1 = filter->cache;
-		if (c1 > 0x20 && c1 < 0x7f && c > 0x20 && c < 0x7f) {
-			s = (c1 - 1)*192 + c + 0x40; /* GB2312 */
-			if (s >= 0 && s < cp936_ucs_table_size) {
-				w = cp936_ucs_table[s];
+		case 1:
+			filter->status &= ~0xf;
+			c1 = filter->cache;
+			if (c1 > 0x20 && c1 < 0x7f && c > 0x20 && c < 0x7f) {
+				s = (c1 - 1) * 192 + c + 0x40; /* GB2312 */
+				if (s >= 0 && s < cp936_ucs_table_size) {
+					w = cp936_ucs_table[s];
+				} else {
+					w = 0;
+				}
+				if (w <= 0) {
+					w = (c1 << 8) | c;
+					w &= MBFL_WCSPLANE_MASK;
+					w |= MBFL_WCSPLANE_GB2312;
+				}
+				CK((*filter->output_function)(w, filter->data));
+			} else if ((c >= 0 && c < 0x21) || c == 0x7f) {        /* CTLs */
+				CK((*filter->output_function)(c, filter->data));
 			} else {
-				w = 0;
-			}
-			if (w <= 0) {
 				w = (c1 << 8) | c;
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_GB2312;
+				w &= MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
 			}
-			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
-		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
+			break;
 
-	/* '~' */
-	case 2:
-		if (c == 0x7d) {		/* '}' */
-			filter->status = 0x0;
-		} else if (c == 0x7b) {		/* '{' */
-			filter->status = 0x10;
-		} else if (c == 0x7e) { /* '~' */
-			filter->status = 0x0;
-			CK((*filter->output_function)(0x007e, filter->data));
-		}
-		break;
+			/* '~' */
+		case 2:
+			if (c == 0x7d) {        /* '}' */
+				filter->status = 0x0;
+			} else if (c == 0x7b) {        /* '{' */
+				filter->status = 0x10;
+			} else if (c == 0x7e) { /* '~' */
+				filter->status = 0x0;
+				CK((*filter->output_function)(0x007e, filter->data));
+			}
+			break;
 
-	default:
-		filter->status = 0;
-		break;
+		default:
+			filter->status = 0;
+			break;
 	}
 
 	return c;
@@ -153,8 +152,7 @@ mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
  * wchar => HZ
  */
 int
-mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter) {
 	int s;
 
 	s = 0;
@@ -174,7 +172,7 @@ mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 		} else if (c >= 0xff01 && c <= 0xff5d) {
 			s = c - 0xff01 + 0xa3a1;
 		} else if (c >= 0xffe0 && c <= 0xffe5) {
-			s = ucs_hff_s_cp936_table[c-0xffe0];
+			s = ucs_hff_s_cp936_table[c - 0xffe0];
 		}
 	}
 	if (s & 0x8000) {
@@ -193,18 +191,18 @@ mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 	if (s >= 0) {
 		if (s < 0x80) { /* ASCII */
 			if ((filter->status & 0xff00) != 0) {
-				CK((*filter->output_function)(0x7e, filter->data));		/* '~' */
-				CK((*filter->output_function)(0x7d, filter->data));		/* '}' */
+				CK((*filter->output_function)(0x7e, filter->data));        /* '~' */
+				CK((*filter->output_function)(0x7d, filter->data));        /* '}' */
 			}
 			filter->status = 0;
-			if (s == 0x7e){
+			if (s == 0x7e) {
 				CK((*filter->output_function)(0x7e, filter->data));
 			}
 			CK((*filter->output_function)(s, filter->data));
 		} else { /* GB 2312-80 */
 			if ((filter->status & 0xff00) != 0x200) {
-				CK((*filter->output_function)(0x7e, filter->data));		/* '~' */
-				CK((*filter->output_function)(0x7b, filter->data));		/* '{' */
+				CK((*filter->output_function)(0x7e, filter->data));        /* '~' */
+				CK((*filter->output_function)(0x7b, filter->data));        /* '{' */
 			}
 			filter->status = 0x200;
 			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
@@ -220,67 +218,68 @@ mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 }
 
 int
-mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter) {
 	/* back to latin */
 	if ((filter->status & 0xff00) != 0) {
-		CK((*filter->output_function)(0x7e, filter->data));		/* ~ */
-		CK((*filter->output_function)(0x7d, filter->data));		/* '{' */
+		CK((*filter->output_function)(0x7e, filter->data));        /* ~ */
+		CK((*filter->output_function)(0x7d, filter->data));        /* '{' */
 	}
 	filter->status &= 0xff;
 	return 0;
 }
 
-static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter)
-{
+static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter) {
 	switch (filter->status & 0xf) {
 /*	case 0x00:	 ASCII */
 /*	case 0x10:	 GB2312 */
-	case 0:
-		if (c == 0x7e) {
-			filter->status += 2;
-		} else if (filter->status == 0x10 && c > 0x20 && c < 0x7f) {		/* DBCS first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
+		case 0:
+			if (c == 0x7e) {
+				filter->status += 2;
+			} else if (filter->status == 0x10 && c > 0x20 && c < 0x7f) {        /* DBCS first char */
+				filter->status += 1;
+			} else if (c >= 0 && c < 0x80) {        /* latin, CTLs */
+				;
+			} else {
+				filter->flag = 1;    /* bad */
+			}
+			break;
 
 /*	case 0x11:	 GB2312 second char */
-	case 1:
-		filter->status &= ~0xf;
-		if (c < 0x21 || c > 0x7e) {		/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	case 2:
-		if (c == 0x7d) {		/* '}' */
-			filter->status = 0;
-		} else if (c == 0x7b) {		/* '{' */
-			filter->status = 0x10;
-		} else if (c == 0x7e) {		/* '~' */
-			filter->status = 0;
-		} else {
-			filter->flag = 1;	/* bad */
+		case 1:
 			filter->status &= ~0xf;
-		}
-		break;
+			if (c < 0x21 || c > 0x7e) {        /* bad */
+				filter->flag = 1;
+			}
+			break;
 
-	default:
-		filter->status = 0;
-		break;
+		case 2:
+			if (c == 0x7d) {        /* '}' */
+				filter->status = 0;
+			} else if (c == 0x7b) {        /* '{' */
+				filter->status = 0x10;
+			} else if (c == 0x7e) {        /* '~' */
+				filter->status = 0;
+			} else {
+				filter->flag = 1;    /* bad */
+				filter->status &= ~0xf;
+			}
+			break;
+
+		default:
+			filter->status = 0;
+			break;
 	}
 
 	return c;
 }
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
+ * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */
+

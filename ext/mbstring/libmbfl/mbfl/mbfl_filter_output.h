@@ -31,8 +31,19 @@
 #ifndef MBFL_FILTER_OUTPUT_H
 #define MBFL_FILTER_OUTPUT_H
 
-MBFLAPI extern int mbfl_filter_output_pipe(int c, void* data);
-MBFLAPI extern int mbfl_filter_output_pipe_flush(void* data);
-MBFLAPI extern int mbfl_filter_output_null(int c, void* data);
+MBFLAPI extern int mbfl_filter_output_pipe(int c, void *data);
+MBFLAPI extern int mbfl_filter_output_pipe_flush(void *data);
+MBFLAPI extern int mbfl_filter_output_null(int c, void *data);
 
 #endif /* MBFL_FILTER_OUTPUT_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

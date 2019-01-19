@@ -35,3 +35,14 @@ int mbfl_filt_conv_cp850_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_cp850(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_CP850_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

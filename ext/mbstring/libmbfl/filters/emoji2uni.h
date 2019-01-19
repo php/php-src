@@ -243,7 +243,7 @@ static const unsigned short mb_tbl_code2uni_kddi2[] = { // 0x26ec - 0x2863
 	0xf43b,	0xf42d,	0xf609,	0xf60d,
 	0xf631,	0xf613,	0xf419,	0xf680,
 	0xf451,	0xf48f,	0xf528,	0xf386,
-	};
+};
 static const int mb_tbl_code2uni_sb1_min = 0x27a9;
 static const int mb_tbl_code2uni_sb1_max = 0x2861;
 
@@ -343,7 +343,7 @@ static const unsigned short mb_tbl_code2uni_sb2[] = { // 0x2921 - 0x29cc
 	0xf359,	0xf362,	0xf363,	0xf34e,
 	0xf34a,	0xf353,	0xf349,	0xf345,
 	0xf346,	0xf382,	0xf371,	0xf372,
-	};
+};
 static const int mb_tbl_code2uni_sb3_min = 0x2a99;
 static const int mb_tbl_code2uni_sb3_max = 0x2b35;
 
@@ -593,7 +593,7 @@ static const unsigned short mb_tbl_uni_kddi2code2_key[] = { // 0x2002 - 0x3299
 	0x27b0,	0x2934,	0x2935,	0x2b05,
 	0x2b06,	0x2b07,	0x2b1b,	0x2b1c,
 	0x2b50,	0x2b55,	0x3297,	0x3299,
-	};
+};
 
 static const unsigned short mb_tbl_uni_kddi2code2_value[] = { // 0x2002 - 0x3299
 	0x2811,	0x2810,	0x2812,	0x2568,
@@ -624,7 +624,7 @@ static const unsigned short mb_tbl_uni_kddi2code2_value[] = { // 0x2002 - 0x3299
 	0x2569,	0x2565,	0x2566,	0x27d7,
 	0x27c3,	0x27c4,	0x27cd,	0x27cc,
 	0x270f,	0x24f8,	0x24e4,	0x2775,
-	};
+};
 
 static const int mb_tbl_uni_kddi2code2_len = sizeof(mb_tbl_uni_kddi2code2_key)/sizeof(unsigned short);
 
@@ -759,7 +759,7 @@ static const unsigned short mb_tbl_uni_kddi2code3_key[] = { // 0x1f004 - 0x1f6c0
 	0xf6a2,	0xf6a5,	0xf6a7,	0xf6a8,
 	0xf6a9,	0xf6ab,	0xf6ac,	0xf6ad,
 	0xf6b2,	0xf6b6,	0xf6bb,	0xf6c0,
-	};
+};
 
 static const unsigned short mb_tbl_uni_kddi2code3_value[] = { // 0x1f004 - 0x1f6c0
 	0x24bc,	0x25a7,	0x255e,	0x255f,
@@ -889,7 +889,7 @@ static const unsigned short mb_tbl_uni_kddi2code3_value[] = { // 0x1f004 - 0x1f6
 	0x24cd,	0x26ee,	0x24c2,	0x25ab,
 	0x2564,	0x27c5,	0x2701,	0x2702,
 	0x2732,	0x25aa,	0x2729,	0x24c3,
-	};
+};
 
 static const int mb_tbl_uni_kddi2code3_len = sizeof(mb_tbl_uni_kddi2code3_key)/sizeof(unsigned short);
 
@@ -1224,3 +1224,14 @@ static const unsigned short mb_tbl_uni_sb2code5_val[] = { // 0xfe4c5 - 0xfee7d
 	0x285F,	0x2860,	0x2861,	};
 
 static const unsigned short mb_tbl_uni_sb2code5_len = sizeof(mb_tbl_uni_sb2code5_key)/sizeof(unsigned short);
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

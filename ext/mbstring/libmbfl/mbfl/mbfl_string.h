@@ -47,7 +47,8 @@ typedef struct _mbfl_string {
 } mbfl_string;
 
 MBFLAPI extern void mbfl_string_init(mbfl_string *string);
-MBFLAPI extern void mbfl_string_init_set(mbfl_string *string, mbfl_language_id no_language, const mbfl_encoding *encoding);
+MBFLAPI extern void
+mbfl_string_init_set(mbfl_string *string, mbfl_language_id no_language, const mbfl_encoding *encoding);
 MBFLAPI extern void mbfl_string_clear(mbfl_string *string);
 
 #ifndef NULL
@@ -55,3 +56,14 @@ MBFLAPI extern void mbfl_string_clear(mbfl_string *string);
 #endif
 
 #endif /* MBFL_STRING_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

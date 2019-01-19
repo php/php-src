@@ -38,22 +38,22 @@
 static int mbfl_filt_ident_euckr(int c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_euckr[] = { /* 0xA1-0xFE */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
 };
 
 static const char *mbfl_encoding_euc_kr_aliases[] = {"EUC_KR", "eucKR", "x-euc-kr", NULL};
@@ -62,7 +62,7 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 	mbfl_no_encoding_euc_kr,
 	"EUC-KR",
 	"EUC-KR",
-	(const char *(*)[])&mbfl_encoding_euc_kr_aliases,
+	(const char *(*)[]) &mbfl_encoding_euc_kr_aliases,
 	mblen_table_euckr,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_euckr_wchar,
@@ -95,75 +95,74 @@ const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 };
 
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * EUC-KR => wchar
  */
 int
-mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter) {
 	int c1, w, flag;
 
 	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xff && c != 0xc9) {	/* dbcs lead byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
-
-	case 1:		/* dbcs second byte */
-		filter->status = 0;
-		c1 = filter->cache;
-		flag = 0;
-		if (c1 >= 0xa1 && c1 <= 0xc6) {
-			flag = 1;
-		} else if (c1 >= 0xc7 && c1 <= 0xfe && c1 != 0xc9) {
-			flag = 2;
-		}
-		if (flag > 0 && c >= 0xa1 && c <= 0xfe) {
-			if (flag == 1){ /* 1st: 0xa1..0xc6, 2nd: 0x41..0x7a, 0x81..0xfe */
-				w = (c1 - 0xa1)*190 + (c - 0x41);
-				if (w >= 0 && w < uhc2_ucs_table_size) {
-					w = uhc2_ucs_table[w];
-				} else {
-					w = 0;
-				}
-			} else { /* 1st: 0xc7..0xc8,0xca..0xfe, 2nd: 0xa1..0xfe */
-				w = (c1 - 0xc7)*94 + (c - 0xa1);
-				if (w >= 0 && w < uhc3_ucs_table_size) {
-					w = uhc3_ucs_table[w];
-				} else {
-					w = 0;
-				}
+		case 0:
+			if (c >= 0 && c < 0x80) {    /* latin */
+				CK((*filter->output_function)(c, filter->data));
+			} else if (c > 0xa0 && c < 0xff && c != 0xc9) {    /* dbcs lead byte */
+				filter->status = 1;
+				filter->cache = c;
+			} else {
+				w = c & MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
 			}
+			break;
 
-			if (w <= 0) {
+		case 1:        /* dbcs second byte */
+			filter->status = 0;
+			c1 = filter->cache;
+			flag = 0;
+			if (c1 >= 0xa1 && c1 <= 0xc6) {
+				flag = 1;
+			} else if (c1 >= 0xc7 && c1 <= 0xfe && c1 != 0xc9) {
+				flag = 2;
+			}
+			if (flag > 0 && c >= 0xa1 && c <= 0xfe) {
+				if (flag == 1) { /* 1st: 0xa1..0xc6, 2nd: 0x41..0x7a, 0x81..0xfe */
+					w = (c1 - 0xa1) * 190 + (c - 0x41);
+					if (w >= 0 && w < uhc2_ucs_table_size) {
+						w = uhc2_ucs_table[w];
+					} else {
+						w = 0;
+					}
+				} else { /* 1st: 0xc7..0xc8,0xca..0xfe, 2nd: 0xa1..0xfe */
+					w = (c1 - 0xc7) * 94 + (c - 0xa1);
+					if (w >= 0 && w < uhc3_ucs_table_size) {
+						w = uhc3_ucs_table[w];
+					} else {
+						w = 0;
+					}
+				}
+
+				if (w <= 0) {
+					w = (c1 << 8) | c;
+					w &= MBFL_WCSPLANE_MASK;
+					w |= MBFL_WCSPLANE_KSC5601;
+				}
+				CK((*filter->output_function)(w, filter->data));
+			} else if ((c >= 0 && c < 0x21) || c == 0x7f) {        /* CTLs */
+				CK((*filter->output_function)(c, filter->data));
+			} else {
 				w = (c1 << 8) | c;
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_KSC5601;
+				w &= MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
 			}
-			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
-		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
+			break;
 
-	default:
-		filter->status = 0;
-		break;
+		default:
+			filter->status = 0;
+			break;
 	}
 
 	return c;
@@ -173,8 +172,7 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
  * wchar => EUC-KR
  */
 int
-mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter) {
 	int c1, c2, s;
 
 	s = 0;
@@ -198,7 +196,7 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 	c1 = (s >> 8) & 0xff;
 	c2 = s & 0xff;
 	/* exclude UHC extension area */
-	if (c1 < 0xa1 || c2 < 0xa1){
+	if (c1 < 0xa1 || c2 < 0xa1) {
 		s = c;
 	}
 
@@ -214,7 +212,7 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 		}
 	}
 	if (s >= 0) {
-		if (s < 0x80) {	/* latin */
+		if (s < 0x80) {    /* latin */
 			CK((*filter->output_function)(s, filter->data));
 		} else {
 			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
@@ -229,30 +227,40 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_ident_euckr(int c, mbfl_identify_filter *filter)
-{
+static int mbfl_filt_ident_euckr(int c, mbfl_identify_filter *filter) {
 	switch (filter->status) {
-	case  0:	/* latin */
-		if (c >= 0 && c < 0x80) {	/* ok */
-			;
-		} else if (c > 0xa0 && c < 0xff) {	/* DBCS lead byte */
-			filter->status = 1;
-		} else {							/* bad */
-			filter->flag = 1;
-		}
-		break;
+		case 0:    /* latin */
+			if (c >= 0 && c < 0x80) {    /* ok */
+				;
+			} else if (c > 0xa0 && c < 0xff) {    /* DBCS lead byte */
+				filter->status = 1;
+			} else {                            /* bad */
+				filter->flag = 1;
+			}
+			break;
 
-	case  1:	/* got lead byte */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
+		case 1:    /* got lead byte */
+			if (c < 0xa1 || c > 0xfe) {        /* bad */
+				filter->flag = 1;
+			}
+			filter->status = 0;
+			break;
 
-	default:
-		filter->status = 0;
-		break;
+		default:
+			filter->status = 0;
+			break;
 	}
 
 	return c;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

@@ -40,7 +40,7 @@ const mbfl_encoding mbfl_encoding_8859_1 = {
 	mbfl_no_encoding_8859_1,
 	"ISO-8859-1",
 	"ISO-8859-1",
-	(const char *(*)[])&mbfl_encoding_8859_1_aliases,
+	(const char *(*)[]) &mbfl_encoding_8859_1_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_8859_1_wchar,
@@ -73,21 +73,19 @@ const struct mbfl_convert_vtbl vtbl_wchar_8859_1 = {
 };
 
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * ISO-8859-1 => wchar
  */
-int mbfl_filt_conv_8859_1_wchar(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_8859_1_wchar(int c, mbfl_convert_filter *filter) {
 	return (*filter->output_function)(c, filter->data);
 }
 
 /*
  * wchar => ISO-8859-1
  */
-int mbfl_filt_conv_wchar_8859_1(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_wchar_8859_1(int c, mbfl_convert_filter *filter) {
 	if (c >= 0 && c < 0x100) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
@@ -98,3 +96,14 @@ int mbfl_filt_conv_wchar_8859_1(int c, mbfl_convert_filter *filter)
 
 	return c;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

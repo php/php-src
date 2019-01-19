@@ -41,22 +41,22 @@
 static int mbfl_filt_ident_cp51932(int c, mbfl_identify_filter *filter);
 
 static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
 };
 
 
@@ -73,7 +73,7 @@ const mbfl_encoding mbfl_encoding_cp51932 = {
 	mbfl_no_encoding_cp51932,
 	"CP51932",
 	"CP51932",
-	(const char *(*)[])&mbfl_encoding_cp51932_aliases,
+	(const char *(*)[]) &mbfl_encoding_cp51932_aliases,
 	mblen_table_eucjp,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_cp51932_wchar,
@@ -98,7 +98,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp51932 = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 #define sjistoidx(c1, c2) \
         (((c1) > 0x9f) \
@@ -111,92 +111,92 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp51932 = {
  * cp51932 => wchar
  */
 int
-mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter) {
 	int c1, s, w;
 
 	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xff) {	/* CP932 first char */
-			filter->status = 1;
-			filter->cache = c;
-		} else if (c == 0x8e) {	/* kana first char */
-			filter->status = 2;
-		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
+		case 0:
+			if (c >= 0 && c < 0x80) {    /* latin */
+				CK((*filter->output_function)(c, filter->data));
+			} else if (c > 0xa0 && c < 0xff) {    /* CP932 first char */
+				filter->status = 1;
+				filter->cache = c;
+			} else if (c == 0x8e) {    /* kana first char */
+				filter->status = 2;
+			} else {
+				w = c & MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
+			}
+			break;
 
-	case 1:	/* got first half */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c > 0xa0 && c < 0xff) {
-			w = 0;
-			s = (c1 - 0xa1)*94 + c - 0xa1;
-			if (s <= 137) {
-				if (s == 31) {
-					w = 0xff3c;			/* FULLWIDTH REVERSE SOLIDUS */
-				} else if (s == 32) {
-					w = 0xff5e;			/* FULLWIDTH TILDE */
-				} else if (s == 33) {
-					w = 0x2225;			/* PARALLEL TO */
-				} else if (s == 60) {
-					w = 0xff0d;			/* FULLWIDTH HYPHEN-MINUS */
-				} else if (s == 80) {
-					w = 0xffe0;			/* FULLWIDTH CENT SIGN */
-				} else if (s == 81) {
-					w = 0xffe1;			/* FULLWIDTH POUND SIGN */
-				} else if (s == 137) {
-					w = 0xffe2;			/* FULLWIDTH NOT SIGN */
+		case 1:    /* got first half */
+			filter->status = 0;
+			c1 = filter->cache;
+			if (c > 0xa0 && c < 0xff) {
+				w = 0;
+				s = (c1 - 0xa1) * 94 + c - 0xa1;
+				if (s <= 137) {
+					if (s == 31) {
+						w = 0xff3c;            /* FULLWIDTH REVERSE SOLIDUS */
+					} else if (s == 32) {
+						w = 0xff5e;            /* FULLWIDTH TILDE */
+					} else if (s == 33) {
+						w = 0x2225;            /* PARALLEL TO */
+					} else if (s == 60) {
+						w = 0xff0d;            /* FULLWIDTH HYPHEN-MINUS */
+					} else if (s == 80) {
+						w = 0xffe0;            /* FULLWIDTH CENT SIGN */
+					} else if (s == 81) {
+						w = 0xffe1;            /* FULLWIDTH POUND SIGN */
+					} else if (s == 137) {
+						w = 0xffe2;            /* FULLWIDTH NOT SIGN */
+					}
 				}
-			}
-			if (w == 0) {
-				if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {		/* vendor ext1 (13ku) */
-					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
-				} else if (s >= 0 && s < jisx0208_ucs_table_size) {		/* X 0208 */
-					w = jisx0208_ucs_table[s];
-				} else if (s >= cp932ext2_ucs_table_min && s < cp932ext2_ucs_table_max) {		/* vendor ext2 (89ku - 92ku) */
-					w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
+				if (w == 0) {
+					if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {        /* vendor ext1 (13ku) */
+						w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
+					} else if (s >= 0 && s < jisx0208_ucs_table_size) {        /* X 0208 */
+						w = jisx0208_ucs_table[s];
+					} else if (s >= cp932ext2_ucs_table_min &&
+							   s < cp932ext2_ucs_table_max) {        /* vendor ext2 (89ku - 92ku) */
+						w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
+					}
 				}
+				if (w <= 0) {
+					w = ((c1 & 0x7f) << 8) | (c & 0x7f);
+					w &= MBFL_WCSPLANE_MASK;
+					w |= MBFL_WCSPLANE_WINCP932;
+				}
+				CK((*filter->output_function)(w, filter->data));
+			} else if ((c >= 0 && c < 0x21) || c == 0x7f) {        /* CTLs */
+				CK((*filter->output_function)(c, filter->data));
+			} else {
+				w = (c1 << 8) | c;
+				w &= MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
 			}
-			if (w <= 0) {
-				w = ((c1 & 0x7f) << 8) | (c & 0x7f);
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_WINCP932;
+			break;
+
+		case 2:    /* got 0x8e, X0201 kana */
+			filter->status = 0;
+			if (c > 0xa0 && c < 0xe0) {
+				w = 0xfec0 + c;
+				CK((*filter->output_function)(w, filter->data));
+			} else if ((c >= 0 && c < 0x21) || c == 0x7f) {        /* CTLs */
+				CK((*filter->output_function)(c, filter->data));
+			} else {
+				w = 0x8e00 | c;
+				w &= MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
 			}
-			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
-		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
+			break;
 
-	case 2:	/* got 0x8e, X0201 kana */
-		filter->status = 0;
-		if (c > 0xa0 && c < 0xe0) {
-			w = 0xfec0 + c;
-			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
-		} else {
-			w = 0x8e00 | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
+		default:
+			filter->status = 0;
+			break;
 	}
 
 	return c;
@@ -206,8 +206,7 @@ mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
  * wchar => cp51932
  */
 int
-mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter) {
 	int c1, c2, s1;
 
 	s1 = 0;
@@ -225,42 +224,42 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 		c1 = c & ~MBFL_WCSPLANE_MASK;
 		if (c1 == MBFL_WCSPLANE_WINCP932) {
 			s1 = c & MBFL_WCSPLANE_MASK;
-			if (s1 >= ((85 + 0x20) << 8)) {	/* 85ku - 120ku */
+			if (s1 >= ((85 + 0x20) << 8)) {    /* 85ku - 120ku */
 				s1 = -1;
 			}
 		} else if (c1 == MBFL_WCSPLANE_JIS0208) {
 			s1 = c & MBFL_WCSPLANE_MASK;
 			if ((s1 >= ((85 + 0x20) << 8) &&  /* 85ku - 94ku */
-                             s1 <= ((88 + 0x20) << 8)) ||/* IBM extension */
-			    (s1 >= ((93 + 0x20) << 8) && /* 89ku - 92ku */
-                             s1 <= ((94 + 0x20) << 8))) {
+				 s1 <= ((88 + 0x20) << 8)) ||/* IBM extension */
+				(s1 >= ((93 + 0x20) << 8) && /* 89ku - 92ku */
+				 s1 <= ((94 + 0x20) << 8))) {
 				s1 = -1;
 			}
-		} else if (c == 0xa5) {		/* YEN SIGN */
-			s1 = 0x005c;			/* YEN SIGN */
-		} else if (c == 0x203e) {	/* OVER LINE */
-			s1 = 0x007e;			/* FULLWIDTH MACRON */
-		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
+		} else if (c == 0xa5) {        /* YEN SIGN */
+			s1 = 0x005c;            /* YEN SIGN */
+		} else if (c == 0x203e) {    /* OVER LINE */
+			s1 = 0x007e;            /* FULLWIDTH MACRON */
+		} else if (c == 0xff3c) {    /* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
+		} else if (c == 0xff5e) {    /* FULLWIDTH TILDE */
 			s1 = 0x2141;
-		} else if (c == 0x2225) {	/* PARALLEL TO */
+		} else if (c == 0x2225) {    /* PARALLEL TO */
 			s1 = 0x2142;
-		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */
+		} else if (c == 0xff0d) {    /* FULLWIDTH HYPHEN-MINUS */
 			s1 = 0x215d;
-		} else if (c == 0xffe0) {	/* FULLWIDTH CENT SIGN */
+		} else if (c == 0xffe0) {    /* FULLWIDTH CENT SIGN */
 			s1 = 0x2171;
-		} else if (c == 0xffe1) {	/* FULLWIDTH POUND SIGN */
+		} else if (c == 0xffe1) {    /* FULLWIDTH POUND SIGN */
 			s1 = 0x2172;
-		} else if (c == 0xffe2) {	/* FULLWIDTH NOT SIGN */
+		} else if (c == 0xffe2) {    /* FULLWIDTH NOT SIGN */
 			s1 = 0x224c;
 		} else {
 			s1 = -1;
 			c1 = 0;
 			c2 = cp932ext1_ucs_table_max - cp932ext1_ucs_table_min;
-			while (c1 < c2) {		/* CP932 vendor ext1 (13ku) */
+			while (c1 < c2) {        /* CP932 vendor ext1 (13ku) */
 				if (c == cp932ext1_ucs_table[c1]) {
-					s1 = ((c1/94 + 0x2d) << 8) + (c1%94 + 0x21);
+					s1 = ((c1 / 94 + 0x2d) << 8) + (c1 % 94 + 0x21);
 					break;
 				}
 				c1++;
@@ -268,10 +267,10 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 			if (s1 < 0) {
 				c1 = 0;
 				c2 = cp932ext2_ucs_table_max - cp932ext2_ucs_table_min;
-				while (c1 < c2) {		/* CP932 vendor ext3 (115ku - 119ku) */
+				while (c1 < c2) {        /* CP932 vendor ext3 (115ku - 119ku) */
 					if (c == cp932ext2_ucs_table[c1]) {
-					  s1 = ((c1/94 + 0x79) << 8) +(c1%94 + 0x21);
-					  break;
+						s1 = ((c1 / 94 + 0x79) << 8) + (c1 % 94 + 0x21);
+						break;
 					}
 					c1++;
 				}
@@ -285,18 +284,18 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 	}
 
 	if (s1 >= 0) {
-		if (s1 < 0x80) {	/* latin */
+		if (s1 < 0x80) {    /* latin */
 			CK((*filter->output_function)(s1, filter->data));
-		} else if (s1 < 0x100) {	/* kana */
+		} else if (s1 < 0x100) {    /* kana */
 			CK((*filter->output_function)(0x8e, filter->data));
 			CK((*filter->output_function)(s1, filter->data));
-		} else if (s1 < 0x8080)  {	/* X 0208 */
+		} else if (s1 < 0x8080) {    /* X 0208 */
 			CK((*filter->output_function)(((s1 >> 8) & 0xff) | 0x80, filter->data));
 			CK((*filter->output_function)((s1 & 0xff) | 0x80, filter->data));
 		} else {
-		  if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-		    CK(mbfl_filt_conv_illegal_output(c, filter));
-		  }
+			if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+				CK(mbfl_filt_conv_illegal_output(c, filter));
+			}
 		}
 	} else {
 		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
@@ -307,39 +306,49 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_ident_cp51932(int c, mbfl_identify_filter *filter)
-{
+static int mbfl_filt_ident_cp51932(int c, mbfl_identify_filter *filter) {
 	switch (filter->status) {
-	case  0:	/* latin */
-		if (c >= 0 && c < 0x80) {	/* ok */
-			;
-		} else if (c > 0xa0 && c < 0xff) {	/* kanji first char */
-			filter->status = 1;
-		} else if (c == 0x8e) {				/* kana first char */
-			filter->status = 2;
-		} else {							/* bad */
-			filter->flag = 1;
-		}
-		break;
+		case 0:    /* latin */
+			if (c >= 0 && c < 0x80) {    /* ok */
+				;
+			} else if (c > 0xa0 && c < 0xff) {    /* kanji first char */
+				filter->status = 1;
+			} else if (c == 0x8e) {                /* kana first char */
+				filter->status = 2;
+			} else {                            /* bad */
+				filter->flag = 1;
+			}
+			break;
 
-	case  1:	/* got first half */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
+		case 1:    /* got first half */
+			if (c < 0xa1 || c > 0xfe) {        /* bad */
+				filter->flag = 1;
+			}
+			filter->status = 0;
+			break;
 
-	case  2:	/* got 0x8e */
-		if (c < 0xa1 || c > 0xdf) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
+		case 2:    /* got 0x8e */
+			if (c < 0xa1 || c > 0xdf) {        /* bad */
+				filter->flag = 1;
+			}
+			filter->status = 0;
+			break;
 
-	default:
-		filter->status = 0;
-		break;
+		default:
+			filter->status = 0;
+			break;
 	}
 
 	return c;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

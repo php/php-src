@@ -41,7 +41,7 @@ const mbfl_encoding mbfl_encoding_8859_4 = {
 	mbfl_no_encoding_8859_4,
 	"ISO-8859-4",
 	"ISO-8859-4",
-	(const char *(*)[])&mbfl_encoding_8859_4_aliases,
+	(const char *(*)[]) &mbfl_encoding_8859_4_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_8859_4_wchar,
@@ -52,7 +52,8 @@ const struct mbfl_identify_vtbl vtbl_identify_8859_4 = {
 	mbfl_no_encoding_8859_4,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true
+};
 
 const struct mbfl_convert_vtbl vtbl_8859_4_wchar = {
 	mbfl_no_encoding_8859_4,
@@ -72,13 +73,12 @@ const struct mbfl_convert_vtbl vtbl_wchar_8859_4 = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * ISO-8859-4 => wchar
  */
-int mbfl_filt_conv_8859_4_wchar(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_8859_4_wchar(int c, mbfl_convert_filter *filter) {
 	int s;
 
 	if (c >= 0 && c < 0xa0) {
@@ -104,8 +104,7 @@ int mbfl_filt_conv_8859_4_wchar(int c, mbfl_convert_filter *filter)
 /*
  * wchar => ISO-8859-4
  */
-int mbfl_filt_conv_wchar_8859_4(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_wchar_8859_4(int c, mbfl_convert_filter *filter) {
 	int s, n;
 
 	if (c >= 0 && c < 0xa0) {
@@ -135,3 +134,14 @@ int mbfl_filt_conv_wchar_8859_4(int c, mbfl_convert_filter *filter)
 
 	return c;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

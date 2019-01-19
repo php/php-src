@@ -47,3 +47,14 @@ void mbfl_filt_conv_html_dec_ctor(mbfl_convert_filter *filter);
 void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_HTMLENT_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

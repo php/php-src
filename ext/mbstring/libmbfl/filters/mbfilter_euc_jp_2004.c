@@ -46,7 +46,7 @@ const mbfl_encoding mbfl_encoding_eucjp2004 = {
 	mbfl_no_encoding_eucjp2004,
 	"EUC-JP-2004",
 	"EUC-JP",
-	(const char *(*)[])&mbfl_encoding_eucjp2004_aliases,
+	(const char *(*)[]) &mbfl_encoding_eucjp2004_aliases,
 	mblen_table_eucjp,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_eucjp2004_wchar,
@@ -77,3 +77,14 @@ const struct mbfl_convert_vtbl vtbl_wchar_eucjp2004 = {
 	mbfl_filt_conv_wchar_jis2004,
 	mbfl_filt_conv_jis2004_flush
 };
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

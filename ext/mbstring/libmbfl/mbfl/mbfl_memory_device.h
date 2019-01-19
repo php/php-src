@@ -34,7 +34,7 @@
 #include "mbfl_defs.h"
 #include "mbfl_string.h"
 
-#define MBFL_MEMORY_DEVICE_ALLOC_SIZE	64
+#define MBFL_MEMORY_DEVICE_ALLOC_SIZE    64
 
 typedef struct _mbfl_memory_device {
 	unsigned char *buffer;
@@ -50,21 +50,17 @@ typedef struct _mbfl_wchar_device {
 	size_t allocsz;
 } mbfl_wchar_device;
 
-MBFLAPI extern void mbfl_memory_device_init(
-		mbfl_memory_device *device, size_t initsz, size_t allocsz);
-MBFLAPI extern void mbfl_memory_device_realloc(
-		mbfl_memory_device *device, size_t initsz, size_t allocsz);
+MBFLAPI extern void mbfl_memory_device_init(mbfl_memory_device *device, size_t initsz, size_t allocsz);
+MBFLAPI extern void mbfl_memory_device_realloc(mbfl_memory_device *device, size_t initsz, size_t allocsz);
 MBFLAPI extern void mbfl_memory_device_clear(mbfl_memory_device *device);
 MBFLAPI extern void mbfl_memory_device_reset(mbfl_memory_device *device);
-MBFLAPI extern mbfl_string * mbfl_memory_device_result(
-		mbfl_memory_device *device, mbfl_string *result);
+MBFLAPI extern mbfl_string *mbfl_memory_device_result(mbfl_memory_device *device, mbfl_string *result);
 MBFLAPI extern void mbfl_memory_device_unput(mbfl_memory_device *device);
 MBFLAPI extern int mbfl_memory_device_output(int c, void *data);
 MBFLAPI extern int mbfl_memory_device_output2(int c, void *data);
 MBFLAPI extern int mbfl_memory_device_output4(int c, void *data);
 MBFLAPI extern int mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc);
-MBFLAPI extern int mbfl_memory_device_strncat(
-		mbfl_memory_device *device, const char *psrc, size_t len);
+MBFLAPI extern int mbfl_memory_device_strncat(mbfl_memory_device *device, const char *psrc, size_t len);
 MBFLAPI extern int mbfl_memory_device_devcat(mbfl_memory_device *dest, mbfl_memory_device *src);
 
 MBFLAPI extern void mbfl_wchar_device_init(mbfl_wchar_device *device);
@@ -72,5 +68,15 @@ MBFLAPI extern int mbfl_wchar_device_output(int c, void *data);
 MBFLAPI extern void mbfl_wchar_device_clear(mbfl_wchar_device *device);
 
 
-
 #endif /* MBFL_MEMORY_DEVICE_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

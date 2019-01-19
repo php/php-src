@@ -43,7 +43,7 @@ const mbfl_encoding mbfl_encoding_cp866 = {
 	mbfl_no_encoding_cp866,
 	"CP866",
 	"CP866",
-	(const char *(*)[])&mbfl_encoding_cp866_aliases,
+	(const char *(*)[]) &mbfl_encoding_cp866_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_cp866_wchar,
@@ -75,14 +75,13 @@ const struct mbfl_convert_vtbl vtbl_cp866_wchar = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * cp866 => wchar
  */
 int
-mbfl_filt_conv_cp866_wchar(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_cp866_wchar(int c, mbfl_convert_filter *filter) {
 	int s;
 
 	if (c >= 0 && c < cp866_ucs_table_min) {
@@ -109,15 +108,14 @@ mbfl_filt_conv_cp866_wchar(int c, mbfl_convert_filter *filter)
  * wchar => cp866
  */
 int
-mbfl_filt_conv_wchar_cp866(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_wchar_cp866(int c, mbfl_convert_filter *filter) {
 	int s, n;
 
 	if (c < 0x80) {
 		s = c;
 	} else {
 		s = -1;
-		n = cp866_ucs_table_len-1;
+		n = cp866_ucs_table_len - 1;
 		while (n >= 0) {
 			if (c == cp866_ucs_table[n]) {
 				s = cp866_ucs_table_min + n;
@@ -141,11 +139,21 @@ mbfl_filt_conv_wchar_cp866(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter)
-{
+static int mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter) {
 	if (c >= 0x80 && c < 0xff)
 		filter->flag = 0;
 	else
 		filter->flag = 1; /* not it */
 	return c;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

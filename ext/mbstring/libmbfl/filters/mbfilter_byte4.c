@@ -72,7 +72,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte4be = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_byte4be,
-	mbfl_filt_conv_common_flush };
+	mbfl_filt_conv_common_flush
+};
 
 const struct mbfl_convert_vtbl vtbl_byte4le_wchar = {
 	mbfl_no_encoding_byte4le,
@@ -92,10 +93,9 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
-int mbfl_filt_conv_byte4be_wchar(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_byte4be_wchar(int c, mbfl_convert_filter *filter) {
 	int n;
 
 	if (filter->status == 0) {
@@ -118,8 +118,7 @@ int mbfl_filt_conv_byte4be_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_wchar_byte4be(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_wchar_byte4be(int c, mbfl_convert_filter *filter) {
 	CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
 	CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
 	CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
@@ -127,8 +126,7 @@ int mbfl_filt_conv_wchar_byte4be(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_byte4le_wchar(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_byte4le_wchar(int c, mbfl_convert_filter *filter) {
 	int n;
 
 	if (filter->status == 0) {
@@ -151,11 +149,21 @@ int mbfl_filt_conv_byte4le_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter) {
 	CK((*filter->output_function)(c & 0xff, filter->data));
 	CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
 	CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
 	CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
 	return c;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

@@ -41,3 +41,14 @@ int mbfl_filt_conv_eucjp2004_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_eucjp2004(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_EUC_JP_2004_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

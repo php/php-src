@@ -41,7 +41,7 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	mbfl_no_encoding_qprint,
 	"Quoted-Printable",
 	"Quoted-Printable",
-	(const char *(*)[])&mbfl_encoding_qprint_aliases,
+	(const char *(*)[]) &mbfl_encoding_qprint_aliases,
 	NULL,
 	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,
@@ -54,7 +54,8 @@ const struct mbfl_convert_vtbl vtbl_8bit_qprint = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_qprintenc,
-	mbfl_filt_conv_qprintenc_flush };
+	mbfl_filt_conv_qprintenc_flush
+};
 
 const struct mbfl_convert_vtbl vtbl_qprint_8bit = {
 	mbfl_no_encoding_qprint,
@@ -62,89 +63,88 @@ const struct mbfl_convert_vtbl vtbl_qprint_8bit = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_qprintdec,
-	mbfl_filt_conv_qprintdec_flush };
+	mbfl_filt_conv_qprintdec_flush
+};
 
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * any => Quoted-Printable
  */
 
-int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter) {
 	int s, n;
 
 	switch (filter->status & 0xff) {
-	case 0:
-		filter->cache = c;
-		filter->status++;
-		break;
-	default:
-		s = filter->cache;
-		filter->cache = c;
-		n = (filter->status & 0xff00) >> 8;
-
-		if (s == 0) {		/* null */
-			CK((*filter->output_function)(s, filter->data));
-			filter->status &= ~0xff00;
+		case 0:
+			filter->cache = c;
+			filter->status++;
 			break;
-		}
+		default:
+			s = filter->cache;
+			filter->cache = c;
+			n = (filter->status & 0xff00) >> 8;
 
-		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
-			if (s == 0x0a || (s == 0x0d && c != 0x0a)) {	/* line feed */
-				CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-				CK((*filter->output_function)(0x0a, filter->data));		/* LF */
+			if (s == 0) {        /* null */
+				CK((*filter->output_function)(s, filter->data));
 				filter->status &= ~0xff00;
 				break;
-			} else if (s == 0x0d) {
-				break;
 			}
-		}
 
-		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0  && n >= 72) {	/* soft line feed */
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-			CK((*filter->output_function)(0x0a, filter->data));		/* LF */
-			filter->status &= ~0xff00;
-		}
+			if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
+				if (s == 0x0a || (s == 0x0d && c != 0x0a)) {    /* line feed */
+					CK((*filter->output_function)(0x0d, filter->data));        /* CR */
+					CK((*filter->output_function)(0x0a, filter->data));        /* LF */
+					filter->status &= ~0xff00;
+					break;
+				} else if (s == 0x0d) {
+					break;
+				}
+			}
 
-		if (s <= 0 || s >= 0x80 || s == 0x3d		/* not ASCII or '=' */
-		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) != 0 &&
-		       (mbfl_charprop_table[s] & MBFL_CHP_MMHQENC) != 0)) {
-			/* hex-octet */
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			n = (s >> 4) & 0xf;
-			if (n < 10) {
-				n += 48;		/* '0' */
+			if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0 && n >= 72) {    /* soft line feed */
+				CK((*filter->output_function)(0x3d, filter->data));        /* '=' */
+				CK((*filter->output_function)(0x0d, filter->data));        /* CR */
+				CK((*filter->output_function)(0x0a, filter->data));        /* LF */
+				filter->status &= ~0xff00;
+			}
+
+			if (s <= 0 || s >= 0x80 || s == 0x3d        /* not ASCII or '=' */
+			    || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) != 0 &&
+			        (mbfl_charprop_table[s] & MBFL_CHP_MMHQENC) != 0)) {
+				/* hex-octet */
+				CK((*filter->output_function)(0x3d, filter->data));        /* '=' */
+				n = (s >> 4) & 0xf;
+				if (n < 10) {
+					n += 48;        /* '0' */
+				} else {
+					n += 55;        /* 'A' - 10 */
+				}
+				CK((*filter->output_function)(n, filter->data));
+				n = s & 0xf;
+				if (n < 10) {
+					n += 48;
+				} else {
+					n += 55;
+				}
+				CK((*filter->output_function)(n, filter->data));
+				if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
+					filter->status += 0x300;
+				}
 			} else {
-				n += 55;		/* 'A' - 10 */
+				CK((*filter->output_function)(s, filter->data));
+				if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
+					filter->status += 0x100;
+				}
 			}
-			CK((*filter->output_function)(n, filter->data));
-			n = s & 0xf;
-			if (n < 10) {
-				n += 48;
-			} else {
-				n += 55;
-			}
-			CK((*filter->output_function)(n, filter->data));
-			if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
-				filter->status += 0x300;
-			}
-		} else {
-			CK((*filter->output_function)(s, filter->data));
-			if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
-				filter->status += 0x100;
-			}
-		}
-		break;
+			break;
 	}
 
 	return c;
 }
 
-int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter) {
 	/* flush filter cache */
 	(*filter->filter_function)('\0', filter);
 	filter->status &= ~0xffff;
@@ -155,8 +155,7 @@ int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
 /*
  * Quoted-Printable => any
  */
-int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter) {
 	int n, m;
 
 	static int hex2code_map[] = {
@@ -179,52 +178,51 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 	};
 
 	switch (filter->status) {
-	case 1:
-		if (hex2code_map[c & 0xff] >= 0) {
-			filter->cache = c;
-			filter->status = 2;
-		} else if (c == 0x0d) {	/* soft line feed */
-			filter->status = 3;
-		} else if (c == 0x0a) {	/* soft line feed */
+		case 1:
+			if (hex2code_map[c & 0xff] >= 0) {
+				filter->cache = c;
+				filter->status = 2;
+			} else if (c == 0x0d) {    /* soft line feed */
+				filter->status = 3;
+			} else if (c == 0x0a) {    /* soft line feed */
+				filter->status = 0;
+			} else {
+				CK((*filter->output_function)(0x3d, filter->data));        /* '=' */
+				CK((*filter->output_function)(c, filter->data));
+				filter->status = 0;
+			}
+			break;
+		case 2:
+			m = hex2code_map[c & 0xff];
+			if (m < 0) {
+				CK((*filter->output_function)(0x3d, filter->data));        /* '=' */
+				CK((*filter->output_function)(filter->cache, filter->data));
+				n = c;
+			} else {
+				n = hex2code_map[filter->cache] << 4 | m;
+			}
+			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
-		} else {
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			CK((*filter->output_function)(c, filter->data));
+			break;
+		case 3:
+			if (c != 0x0a) {        /* LF */
+				CK((*filter->output_function)(c, filter->data));
+			}
 			filter->status = 0;
-		}
-		break;
-	case 2:
-		m = hex2code_map[c & 0xff];
-		if (m < 0) {
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			CK((*filter->output_function)(filter->cache, filter->data));
-			n = c;
-		} else {
-			n = hex2code_map[filter->cache] << 4 | m;
-		}
-		CK((*filter->output_function)(n, filter->data));
-		filter->status = 0;
-		break;
-	case 3:
-		if (c != 0x0a) {		/* LF */
-			CK((*filter->output_function)(c, filter->data));
-		}
-		filter->status = 0;
-		break;
-	default:
-		if (c == 0x3d) {		/* '=' */
-			filter->status = 1;
-		} else {
-			CK((*filter->output_function)(c, filter->data));
-		}
-		break;
+			break;
+		default:
+			if (c == 0x3d) {        /* '=' */
+				filter->status = 1;
+			} else {
+				CK((*filter->output_function)(c, filter->data));
+			}
+			break;
 	}
 
 	return c;
 }
 
-int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter) {
 	int status, cache;
 
 	status = filter->status;
@@ -233,11 +231,22 @@ int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
 	filter->cache = 0;
 	/* flush fragments */
 	if (status == 1) {
-		CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
+		CK((*filter->output_function)(0x3d, filter->data));        /* '=' */
 	} else if (status == 2) {
-		CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
+		CK((*filter->output_function)(0x3d, filter->data));        /* '=' */
 		CK((*filter->output_function)(cache, filter->data));
 	}
 
 	return 0;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

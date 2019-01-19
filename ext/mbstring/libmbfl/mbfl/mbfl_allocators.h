@@ -55,3 +55,14 @@ MBFLAPI extern mbfl_allocators *__mbfl_allocators;
 #define mbfl_pfree (__mbfl_allocators->pfree)
 
 #endif /* MBFL_ALLOCATORS_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

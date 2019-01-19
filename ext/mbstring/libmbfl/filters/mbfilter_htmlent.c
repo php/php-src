@@ -37,22 +37,22 @@
 #include "html_entities.h"
 
 static const int htmlentitifieds[256] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 };
 
 static const char *mbfl_encoding_html_ent_aliases[] = {"HTML", "html", NULL};
@@ -61,7 +61,7 @@ const mbfl_encoding mbfl_encoding_html_ent = {
 	mbfl_no_encoding_html_ent,
 	"HTML-ENTITIES",
 	"HTML-ENTITIES",
-	(const char *(*)[])&mbfl_encoding_html_ent_aliases,
+	(const char *(*)[]) &mbfl_encoding_html_ent_aliases,
 	NULL,
 	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_html_wchar,
@@ -84,32 +84,32 @@ const struct mbfl_convert_vtbl vtbl_html_wchar = {
 	mbfl_filt_conv_html_dec_dtor,
 	mbfl_filt_conv_html_dec,
 	mbfl_filt_conv_html_dec_flush,
-	mbfl_filt_conv_html_dec_copy };
+	mbfl_filt_conv_html_dec_copy
+};
 
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * any => HTML
  */
-int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter) {
 	int tmp[64];
 	int i;
 	unsigned int uc;
 	const mbfl_html_entity_entry *e;
 
 	if (c < sizeof(htmlentitifieds) / sizeof(htmlentitifieds[0]) &&
-				htmlentitifieds[c] != 1) {
+	    htmlentitifieds[c] != 1) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
- 		CK((*filter->output_function)('&', filter->data));
+		CK((*filter->output_function)('&', filter->data));
 		for (i = 0; (e = &mbfl_html_entity_list[i])->name != NULL; i++) {
 			if (c == e->code) {
 				char *p;
 
 				for (p = e->name; *p != '\0'; p++) {
-					CK((*filter->output_function)((int)*p, filter->data));
+					CK((*filter->output_function)((int) *p, filter->data));
 				}
 				goto last;
 			}
@@ -120,26 +120,26 @@ int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
 
 			CK((*filter->output_function)('#', filter->data));
 
-			uc = (unsigned int)c;
+			uc = (unsigned int) c;
 
 			*(--p) = '\0';
 			do {
 				*(--p) = "0123456789"[uc % 10];
 				uc /= 10;
-			} while (uc);
+			}
+			while (uc);
 
 			for (; *p != '\0'; p++) {
 				CK((*filter->output_function)(*p, filter->data));
 			}
 		}
-	last:
+		last:
 		CK((*filter->output_function)(';', filter->data));
 	}
 	return c;
 }
 
-int mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter) {
 	filter->status = 0;
 	filter->opaque = NULL;
 
@@ -153,33 +153,29 @@ int mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter)
 /*
  * HTML => any
  */
-#define html_enc_buffer_size	16
+#define html_enc_buffer_size    16
 static const char html_entity_chars[] = "#0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-void mbfl_filt_conv_html_dec_ctor(mbfl_convert_filter *filter)
-{
+void mbfl_filt_conv_html_dec_ctor(mbfl_convert_filter *filter) {
 	filter->status = 0;
-	filter->opaque = mbfl_malloc(html_enc_buffer_size+1);
+	filter->opaque = mbfl_malloc(html_enc_buffer_size + 1);
 }
 
-void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter)
-{
+void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter) {
 	filter->status = 0;
-	if (filter->opaque)
-	{
-		mbfl_free((void*)filter->opaque);
+	if (filter->opaque) {
+		mbfl_free((void *) filter->opaque);
 	}
 	filter->opaque = NULL;
 }
 
-int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
-{
-	int  pos, ent = 0;
+int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter) {
+	int pos, ent = 0;
 	mbfl_html_entity_entry *entity;
-	char *buffer = (char*)filter->opaque;
+	char *buffer = (char *) filter->opaque;
 
 	if (!filter->status) {
-		if (c == '&' ) {
+		if (c == '&') {
 			filter->status = 1;
 			buffer[0] = '&';
 		} else {
@@ -187,12 +183,12 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		if (c == ';') {
-			if (buffer[1]=='#') {
+			if (buffer[1] == '#') {
 				if (filter->status > 2 && (buffer[2] == 'x' || buffer[2] == 'X')) {
 					if (filter->status > 3) {
 						/* numeric entity */
-						for (pos=3; pos<filter->status; pos++) {
-							int v =  buffer[pos];
+						for (pos = 3; pos < filter->status; pos++) {
+							int v = buffer[pos];
 							if (v >= '0' && v <= '9') {
 								v = v - '0';
 							} else if (v >= 'A' && v <= 'F') {
@@ -211,7 +207,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 				} else {
 					/* numeric entity */
 					if (filter->status > 2) {
-						for (pos=2; pos<filter->status; pos++) {
+						for (pos = 2; pos < filter->status; pos++) {
 							int v = buffer[pos];
 							if (v >= '0' && v <= '9') {
 								v = v - '0';
@@ -219,7 +215,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 								ent = -1;
 								break;
 							}
-							ent = ent*10 + v;
+							ent = ent * 10 + v;
 						}
 					} else {
 						ent = -1;
@@ -238,9 +234,9 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 			} else {
 				/* named entity */
 				buffer[filter->status] = 0;
-				entity = (mbfl_html_entity_entry *)mbfl_html_entity_list;
+				entity = (mbfl_html_entity_entry *) mbfl_html_entity_list;
 				while (entity->name) {
-					if (!strcmp(buffer+1, entity->name))	{
+					if (!strcmp(buffer + 1, entity->name)) {
 						ent = entity->code;
 						break;
 					}
@@ -263,16 +259,15 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 			/* add character */
 			buffer[filter->status++] = c;
 			/* add character and check */
-			if (!strchr(html_entity_chars, c) || filter->status+1==html_enc_buffer_size || (c=='#' && filter->status>2))
-			{
+			if (!strchr(html_entity_chars, c) || filter->status + 1 == html_enc_buffer_size ||
+			    (c == '#' && filter->status > 2)) {
 				/* illegal character or end of buffer */
-				if (c=='&')
+				if (c == '&')
 					filter->status--;
 				buffer[filter->status] = 0;
 				/* php_error_docref("ref.mbstring", E_WARNING, "mbstring cannot decode '%s'", buffer)l */
 				mbfl_filt_conv_html_dec_flush(filter);
-				if (c=='&')
-				{
+				if (c == '&') {
 					buffer[filter->status++] = '&';
 				}
 			}
@@ -281,13 +276,12 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter) {
 	int status, pos = 0;
 	unsigned char *buffer;
 	int err = 0;
 
-	buffer = (unsigned char*)filter->opaque;
+	buffer = (unsigned char *) filter->opaque;
 	status = filter->status;
 	filter->status = 0;
 
@@ -305,9 +299,19 @@ int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
 	return err;
 }
 
-void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest)
-{
+void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest) {
 	*dest = *src;
-	dest->opaque = mbfl_malloc(html_enc_buffer_size+1);
-	memcpy(dest->opaque, src->opaque, html_enc_buffer_size+1);
+	dest->opaque = mbfl_malloc(html_enc_buffer_size + 1);
+	memcpy(dest->opaque, src->opaque, html_enc_buffer_size + 1);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

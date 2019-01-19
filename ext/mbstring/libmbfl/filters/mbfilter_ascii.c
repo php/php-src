@@ -37,13 +37,16 @@
 
 static int mbfl_filt_ident_ascii(int c, mbfl_identify_filter *filter);
 
-static const char *mbfl_encoding_ascii_aliases[] = {"ANSI_X3.4-1968", "iso-ir-6", "ANSI_X3.4-1986", "ISO_646.irv:1991", "US-ASCII", "ISO646-US", "us", "IBM367", "IBM-367", "cp367", "csASCII", NULL};
+static const char *mbfl_encoding_ascii_aliases[] = {
+	"ANSI_X3.4-1968", "iso-ir-6", "ANSI_X3.4-1986", "ISO_646.irv:1991", "US-ASCII", "ISO646-US", "us", "IBM367",
+	"IBM-367", "cp367", "csASCII", NULL
+};
 
 const mbfl_encoding mbfl_encoding_ascii = {
 	mbfl_no_encoding_ascii,
 	"ASCII",
 	"US-ASCII", /* preferred MIME name */
-	(const char *(*)[])&mbfl_encoding_ascii_aliases,
+	(const char *(*)[]) &mbfl_encoding_ascii_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_ascii_wchar,
@@ -75,13 +78,12 @@ const struct mbfl_convert_vtbl vtbl_wchar_ascii = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * ASCII => wchar
  */
-int mbfl_filt_conv_ascii_wchar(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_ascii_wchar(int c, mbfl_convert_filter *filter) {
 	return (*filter->output_function)(c, filter->data);
 }
 
@@ -89,8 +91,7 @@ int mbfl_filt_conv_ascii_wchar(int c, mbfl_convert_filter *filter)
 /*
  * wchar => ASCII
  */
-int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
-{
+int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter) {
 	if (c >= 0 && c < 0x80) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
@@ -102,11 +103,9 @@ int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_ident_ascii(int c, mbfl_identify_filter *filter)
-{
-	if (c >= 0x20 && c < 0x80) {
-		;
-	} else if (c == 0x0d || c == 0x0a || c == 0x09 || c == 0) {	/* CR or LF or HTAB or null */
+static int mbfl_filt_ident_ascii(int c, mbfl_identify_filter *filter) {
+	if (c >= 0x20 && c < 0x80) { ;
+	} else if (c == 0x0d || c == 0x0a || c == 0x09 || c == 0) {    /* CR or LF or HTAB or null */
 		;
 	} else {
 		filter->flag = 1;
@@ -114,3 +113,14 @@ static int mbfl_filt_ident_ascii(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

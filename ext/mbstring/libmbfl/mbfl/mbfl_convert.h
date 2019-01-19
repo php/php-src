@@ -84,3 +84,14 @@ MBFLAPI extern int mbfl_convert_filter_devcat(mbfl_convert_filter *filter, mbfl_
 MBFLAPI extern int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char *p);
 
 #endif /* MBFL_CONVERT_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+

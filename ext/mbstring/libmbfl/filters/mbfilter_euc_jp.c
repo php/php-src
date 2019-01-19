@@ -40,22 +40,22 @@
 int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter);
 
 const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
 };
 
 static const char *mbfl_encoding_euc_jp_aliases[] = {"EUC", "EUC_JP", "eucJP", "x-euc-jp", NULL};
@@ -64,7 +64,7 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 	mbfl_no_encoding_euc_jp,
 	"EUC-JP",
 	"EUC-JP",
-	(const char *(*)[])&mbfl_encoding_euc_jp_aliases,
+	(const char *(*)[]) &mbfl_encoding_euc_jp_aliases,
 	mblen_table_eucjp,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_eucjp_wchar,
@@ -96,113 +96,112 @@ const struct mbfl_convert_vtbl vtbl_wchar_eucjp = {
 	mbfl_filt_conv_common_flush
 };
 
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+#define CK(statement)    do { if ((statement) < 0) return (-1); } while (0)
 
 /*
  * EUC-JP => wchar
  */
 int
-mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter) {
 	int c1, s, w;
 
 	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xff) {	/* X 0208 first char */
-			filter->status = 1;
-			filter->cache = c;
-		} else if (c == 0x8e) {	/* kana first char */
-			filter->status = 2;
-		} else if (c == 0x8f) {	/* X 0212 first char */
-			filter->status = 3;
-		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
-
-	case 1:	/* got first half */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c > 0xa0 && c < 0xff) {
-			s = (c1 - 0xa1)*94 + c - 0xa1;
-			if (s >= 0 && s < jisx0208_ucs_table_size) {
-				w = jisx0208_ucs_table[s];
+		case 0:
+			if (c >= 0 && c < 0x80) {    /* latin */
+				CK((*filter->output_function)(c, filter->data));
+			} else if (c > 0xa0 && c < 0xff) {    /* X 0208 first char */
+				filter->status = 1;
+				filter->cache = c;
+			} else if (c == 0x8e) {    /* kana first char */
+				filter->status = 2;
+			} else if (c == 0x8f) {    /* X 0212 first char */
+				filter->status = 3;
 			} else {
-				w = 0;
+				w = c & MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
 			}
-			if (w <= 0) {
-				w = ((c1 & 0x7f) << 8) | (c & 0x7f);
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_JIS0208;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
-		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
+			break;
 
-	case 2:	/* got 0x8e */
-		filter->status = 0;
-		if (c > 0xa0 && c < 0xe0) {
-			w = 0xfec0 + c;
-			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
-		} else {
-			w = 0x8e00 | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
-
-	case 3:	/* got 0x8f,  X 0212 first char */
-		if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
+		case 1:    /* got first half */
 			filter->status = 0;
-		} else {
-			filter->status++;
-			filter->cache = c;
-		}
-		break;
-	case 4:	/* got 0x8f,  X 0212 second char */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c1 > 0xa0 && c1 < 0xff && c > 0xa0 && c < 0xff) {
-			s = (c1 - 0xa1)*94 + c - 0xa1;
-			if (s >= 0 && s < jisx0212_ucs_table_size) {
-				w = jisx0212_ucs_table[s];
+			c1 = filter->cache;
+			if (c > 0xa0 && c < 0xff) {
+				s = (c1 - 0xa1) * 94 + c - 0xa1;
+				if (s >= 0 && s < jisx0208_ucs_table_size) {
+					w = jisx0208_ucs_table[s];
+				} else {
+					w = 0;
+				}
+				if (w <= 0) {
+					w = ((c1 & 0x7f) << 8) | (c & 0x7f);
+					w &= MBFL_WCSPLANE_MASK;
+					w |= MBFL_WCSPLANE_JIS0208;
+				}
+				CK((*filter->output_function)(w, filter->data));
+			} else if ((c >= 0 && c < 0x21) || c == 0x7f) {        /* CTLs */
+				CK((*filter->output_function)(c, filter->data));
 			} else {
-				w = 0;
+				w = (c1 << 8) | c;
+				w &= MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
 			}
-			if (w <= 0) {
-				w = ((c1 & 0x7f) << 8) | (c & 0x7f);
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_JIS0212;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
-		} else {
-			w = (c1 << 8) | c | 0x8f0000;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
-		}
-		break;
+			break;
 
-	default:
-		filter->status = 0;
-		break;
+		case 2:    /* got 0x8e */
+			filter->status = 0;
+			if (c > 0xa0 && c < 0xe0) {
+				w = 0xfec0 + c;
+				CK((*filter->output_function)(w, filter->data));
+			} else if ((c >= 0 && c < 0x21) || c == 0x7f) {        /* CTLs */
+				CK((*filter->output_function)(c, filter->data));
+			} else {
+				w = 0x8e00 | c;
+				w &= MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
+			}
+			break;
+
+		case 3:    /* got 0x8f,  X 0212 first char */
+			if ((c >= 0 && c < 0x21) || c == 0x7f) {        /* CTLs */
+				CK((*filter->output_function)(c, filter->data));
+				filter->status = 0;
+			} else {
+				filter->status++;
+				filter->cache = c;
+			}
+			break;
+		case 4:    /* got 0x8f,  X 0212 second char */
+			filter->status = 0;
+			c1 = filter->cache;
+			if (c1 > 0xa0 && c1 < 0xff && c > 0xa0 && c < 0xff) {
+				s = (c1 - 0xa1) * 94 + c - 0xa1;
+				if (s >= 0 && s < jisx0212_ucs_table_size) {
+					w = jisx0212_ucs_table[s];
+				} else {
+					w = 0;
+				}
+				if (w <= 0) {
+					w = ((c1 & 0x7f) << 8) | (c & 0x7f);
+					w &= MBFL_WCSPLANE_MASK;
+					w |= MBFL_WCSPLANE_JIS0212;
+				}
+				CK((*filter->output_function)(w, filter->data));
+			} else if ((c >= 0 && c < 0x21) || c == 0x7f) {        /* CTLs */
+				CK((*filter->output_function)(c, filter->data));
+			} else {
+				w = (c1 << 8) | c | 0x8f0000;
+				w &= MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
+			}
+			break;
+
+		default:
+			filter->status = 0;
+			break;
 	}
 
 	return c;
@@ -212,8 +211,7 @@ mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
  * wchar => EUC-JP
  */
 int
-mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
-{
+mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter) {
 	int c1, s;
 
 	s = 0;
@@ -233,19 +231,19 @@ mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
 		} else if (c1 == MBFL_WCSPLANE_JIS0212) {
 			s = c & MBFL_WCSPLANE_MASK;
 			s |= 0x8080;
-		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
+		} else if (c == 0xff3c) {    /* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
+		} else if (c == 0xff5e) {    /* FULLWIDTH TILDE */
 			s = 0x2141;
-		} else if (c == 0x2225) {	/* PARALLEL TO */
+		} else if (c == 0x2225) {    /* PARALLEL TO */
 			s = 0x2142;
-		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */
+		} else if (c == 0xff0d) {    /* FULLWIDTH HYPHEN-MINUS */
 			s = 0x215d;
-		} else if (c == 0xffe0) {	/* FULLWIDTH CENT SIGN */
+		} else if (c == 0xffe0) {    /* FULLWIDTH CENT SIGN */
 			s = 0x2171;
-		} else if (c == 0xffe1) {	/* FULLWIDTH POUND SIGN */
+		} else if (c == 0xffe1) {    /* FULLWIDTH POUND SIGN */
 			s = 0x2172;
-		} else if (c == 0xffe2) {	/* FULLWIDTH NOT SIGN */
+		} else if (c == 0xffe2) {    /* FULLWIDTH NOT SIGN */
 			s = 0x224c;
 		}
 		if (c == 0) {
@@ -255,15 +253,15 @@ mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
 		}
 	}
 	if (s >= 0) {
-		if (s < 0x80) {	/* latin */
+		if (s < 0x80) {    /* latin */
 			CK((*filter->output_function)(s, filter->data));
-		} else if (s < 0x100) {	/* kana */
+		} else if (s < 0x100) {    /* kana */
 			CK((*filter->output_function)(0x8e, filter->data));
 			CK((*filter->output_function)(s, filter->data));
-		} else if (s < 0x8080)  {	/* X 0208 */
+		} else if (s < 0x8080) {    /* X 0208 */
 			CK((*filter->output_function)(((s >> 8) & 0xff) | 0x80, filter->data));
 			CK((*filter->output_function)((s & 0xff) | 0x80, filter->data));
-		} else {	/* X 0212 */
+		} else {    /* X 0212 */
 			CK((*filter->output_function)(0x8f, filter->data));
 			CK((*filter->output_function)(((s >> 8) & 0xff) | 0x80, filter->data));
 			CK((*filter->output_function)((s & 0xff) | 0x80, filter->data));
@@ -277,54 +275,64 @@ mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter)
-{
+int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter) {
 	switch (filter->status) {
-	case  0:	/* latin */
-		if (c >= 0 && c < 0x80) {	/* ok */
-			;
-		} else if (c > 0xa0 && c < 0xff) {	/* kanji first char */
-			filter->status = 1;
-		} else if (c == 0x8e) {				/* kana first char */
-			filter->status = 2;
-		} else if (c == 0x8f) {				/* X 0212 first char */
-			filter->status = 3;
-		} else {							/* bad */
-			filter->flag = 1;
-		}
-		break;
+		case 0:    /* latin */
+			if (c >= 0 && c < 0x80) {    /* ok */
+				;
+			} else if (c > 0xa0 && c < 0xff) {    /* kanji first char */
+				filter->status = 1;
+			} else if (c == 0x8e) {                /* kana first char */
+				filter->status = 2;
+			} else if (c == 0x8f) {                /* X 0212 first char */
+				filter->status = 3;
+			} else {                            /* bad */
+				filter->flag = 1;
+			}
+			break;
 
-	case  1:	/* got first half */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
+		case 1:    /* got first half */
+			if (c < 0xa1 || c > 0xfe) {        /* bad */
+				filter->flag = 1;
+			}
+			filter->status = 0;
+			break;
 
-	case  2:	/* got 0x8e */
-		if (c < 0xa1 || c > 0xdf) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
+		case 2:    /* got 0x8e */
+			if (c < 0xa1 || c > 0xdf) {        /* bad */
+				filter->flag = 1;
+			}
+			filter->status = 0;
+			break;
 
-	case  3:	/* got 0x8f */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status++;
-		break;
-	case  4:	/* got 0x8f */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
+		case 3:    /* got 0x8f */
+			if (c < 0xa1 || c > 0xfe) {        /* bad */
+				filter->flag = 1;
+			}
+			filter->status++;
+			break;
+		case 4:    /* got 0x8f */
+			if (c < 0xa1 || c > 0xfe) {        /* bad */
+				filter->flag = 1;
+			}
+			filter->status = 0;
+			break;
 
-	default:
-		filter->status = 0;
-		break;
+		default:
+			filter->status = 0;
+			break;
 	}
 
 	return c;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+
