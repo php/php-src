@@ -146,11 +146,7 @@ dnl Various checks for GD features
   else
     GD_MODULE_TYPE=external
     extra_sources="gd_compat.c"
-    if test "$ext_shared" = "no"; then
-      PKG_CHECK_MODULES_STATIC([GDLIB], [gdlib >= 2.1.0])
-    else
-      PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])
-    fi
+    PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])
     PHP_EVAL_LIBLINE($GDLIB_LIBS, GD_SHARED_LIBADD)
     PHP_EVAL_INCLINE($GDLIB_CFLAGS)
     AC_DEFINE(HAVE_LIBGD, 1, [ ])
