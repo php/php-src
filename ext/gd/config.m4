@@ -114,7 +114,6 @@ dnl
 if test "$PHP_GD" != "no"; then
 
   if test "$PHP_EXTERNAL_GD" = "no"; then
-    GD_MODULE_TYPE=builtin
     GD_CFLAGS=""
     extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
                   libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_webp.c \
@@ -143,23 +142,6 @@ dnl Various checks for GD features
     PHP_GD_FREETYPE2
     PHP_GD_JISX0208
 
-  else
-    GD_MODULE_TYPE=external
-    extra_sources="gd_compat.c"
-    PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])
-    PHP_EVAL_LIBLINE($GDLIB_LIBS, GD_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($GDLIB_CFLAGS)
-    AC_DEFINE(HAVE_LIBGD, 1, [ ])
-    PHP_GD_CHECK_VERSION
-  fi
-fi
-
-dnl
-dnl Common for both builtin and external GD
-dnl
-if test "$PHP_GD" != "no"; then
-
-  if test "$GD_MODULE_TYPE" = "builtin"; then
     PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GD_CFLAGS))
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GD_CFLAGS="-I$ext_srcdir/libgd $GD_CFLAGS"
@@ -168,7 +150,15 @@ if test "$PHP_GD" != "no"; then
     PHP_TEST_BUILD(foobar, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
     ], [ $GD_SHARED_LIBADD ], [char foobar () {}])
+
   else
+    extra_sources="gd_compat.c"
+    PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])
+    PHP_EVAL_LIBLINE($GDLIB_LIBS, GD_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($GDLIB_CFLAGS)
+    AC_DEFINE(HAVE_LIBGD, 1, [ ])
+    PHP_GD_CHECK_VERSION
+
     PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared)
     GD_HEADER_DIRS="ext/gd/"
     PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
