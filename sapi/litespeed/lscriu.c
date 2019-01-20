@@ -119,7 +119,7 @@ static GlobalCounterType_t s_global_counter_type = CRIU_GCOUNTER_SHM;
 typedef void (*sighandler_t)(int);
 #endif
 
-void lsapi_error( const char * pMessage, int err_no );
+void lsapi_perror( const char * pMessage, int err_no );
 void LSAPI_reset_server_state( void );
 int LSAPI_Get_ppid();
 
@@ -309,13 +309,13 @@ static void LSCRIU_Wink_Server_is_Ready(void)
     sem_t *is_ready_sem = psem_open(sem_name, O_RDWR);
     if (is_ready_sem) {
         if (psem_post(is_ready_sem) < 0)
-            lsapi_error(sem_name, errno);
+            lsapi_perror(sem_name, errno);
 
         if (psem_close(is_ready_sem) < 0)
-            lsapi_error(sem_name, errno);
+            lsapi_perror(sem_name, errno);
     }
     else if (errno != ENOENT)
-        lsapi_error(sem_name, errno);
+        lsapi_perror(sem_name, errno);
 }
 
 
