@@ -16,6 +16,8 @@ PHP                                                                        NEWS
   . Fixed bug #77263 (Segfault when using 2 RecursiveFilterIterator). (Dmitry)
   . Fixed bug #77447 (PHP 7.3 built with ASAN crashes in
     zend_cpu_supports_avx2). (Nikita)
+  . Fixed bug #77484 (Zend engine crashes when calling realpath in invalid
+    working dir). (Anatol)
 
 - Curl:
   . Fixed bug #76675 (Segfault with H2 server push). (Pedro Magalhães)
@@ -35,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed bug #77272 (imagescale() may return image resource on failure). (cmb)
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
   . Fixed bug #77479 (imagewbmp() segfaults with very large images). (cmb)
+
+- ldap:
+  . Fixed bug #77440 (ldap_bind using ldaps or ldap_start_tls()=exception in
+    libcrypto-1_1-x64.dll). (Anatol)
 
 - Mbstring:
   . Fixed bug #77428 (mb_ereg_replace() doesn't replace a substitution
