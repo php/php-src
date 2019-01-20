@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #77391 (1bpp BMPs may fail to be loaded). (Romain Déoux, cmb)
   . Fixed bug #77479 (imagewbmp() segfaults with very large images). (cmb)
 
+- ldap:
+  . Fixed bug #77440 (ldap_bind using ldaps or ldap_start_tls()=exception in
+    libcrypto-1_1-x64.dll). (Anatol)
+
 - Mbstring:
   . Fixed bug #77454 (mb_scrub() silently truncates after a null byte).
     (64796c6e69 at gmail dot com)
