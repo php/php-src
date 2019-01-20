@@ -145,12 +145,16 @@ static int s_keepListener = 0;
 static int s_dump_debug_info = 0;
 static int s_pid_dump_debug_info = 0;
 static int s_req_processed = 0;
+static int s_skip_write = 0;
+static int (*pthread_atfork_func)(void (*prepare)(void), void (*parent)(void),
+                                  void (*child)(void)) = NULL;
 
 static int *s_busy_workers = NULL;
 static int *s_accepting_workers = NULL;
 static int *s_global_counter = &s_req_processed;
 static int s_max_busy_workers = -1;
 static char *s_stderr_log_path = NULL;
+static int s_stderr_is_pipe = 0;
 static int s_ignore_pid = -1;
 
 LSAPI_Request g_req =
@@ -226,7 +230,8 @@ void LSAPI_Log(int flag, const char * fmt, ...)
 {
     char buf[1024];
     char *p = buf;
-    if (flag & LSAPI_LOG_TIMESTAMP_BITS)
+    if ((flag & LSAPI_LOG_TIMESTAMP_BITS) &&
+        !((flag & LSAPI_LOG_TIMESTAMP_STDERR) && s_stderr_is_pipe))
     {
         struct timeval  tv;
         struct tm       tm;
@@ -274,6 +279,8 @@ void LSAPI_Log(int flag, const char * fmt, ...)
 #define lsapi_dbg(...)
 
 #endif
+
+#define lsapi_log(...)  LSAPI_Log(LSAPI_LOG_TIMESTAMP_FULL|LSAPI_LOG_TIMESTAMP_STDERR|LSAPI_LOG_PID, __VA_ARGS__)
 
 
 static int lsapi_parent_dead()
@@ -453,6 +460,10 @@ static int lsapi_writev( int fd, struct iovec ** pVec, int count, int totalLen )
     int ret;
     int left = totalLen;
     int n = count;
+
+    if (s_skip_write)
+        return totalLen;
+
     while(( left > 0 )&&g_running )
     {
         ret = writev( fd, *pVec, n );
@@ -822,32 +833,32 @@ static int readSecret( const char * pSecretFile )
     int fd = open( pSecretFile, O_RDONLY , 0600 );
     if ( fd == -1 )
     {
-        fprintf( stderr, "LSAPI: failed to open secret file: %s!\n", pSecretFile );
+        lsapi_log("LSAPI: failed to open secret file: %s!\n", pSecretFile );
         return -1;
     }
     if ( fstat( fd, &st ) == -1 )
     {
-        fprintf( stderr, "LSAPI: failed to check state of file: %s!\n", pSecretFile );
+        lsapi_log("LSAPI: failed to check state of file: %s!\n", pSecretFile );
         close( fd );
         return -1;
     }
 /*
     if ( st.st_uid != s_uid )
     {
-        fprintf( stderr, "LSAPI: file owner check failure: %s!\n", pSecretFile );
+        lsapi_log("LSAPI: file owner check failure: %s!\n", pSecretFile );
         close( fd );
         return -1;
     }
 */
     if ( st.st_mode & 0077 )
     {
-        fprintf( stderr, "LSAPI: file permission check failure: %s\n", pSecretFile );
+        lsapi_log("LSAPI: file permission check failure: %s\n", pSecretFile );
         close( fd );
         return -1;
     }
     if ( read( fd, s_secret, 16 ) < 16 )
     {
-        fprintf( stderr, "LSAPI: failed to read secret from secret file: %s\n", pSecretFile );
+        lsapi_log("LSAPI: failed to read secret from secret file: %s\n", pSecretFile );
         close( fd );
         return -1;
     }
@@ -914,7 +925,7 @@ static int lsapi_enterLVE( LSAPI_Request * pReq, uid_t uid )
         ret = (*fp_lve_enter)(s_lve, uid, -1, -1, &cookie);
         if ( ret < 0 )
         {
-            fprintf( stderr, "Pid (%d): enter LVE (%d) : ressult: %d !\n", getpid(), uid, ret );
+            lsapi_log("enter LVE (%d) : ressult: %d !\n", uid, ret );
             LSAPI_perror_r(pReq, "LSAPI: lve_enter() failure, reached resource limit.", NULL );
             lsapi_lve_error( pReq );
             return -1;
@@ -934,8 +945,8 @@ static int lsapi_jailLVE( LSAPI_Request * pReq, uid_t uid, struct passwd * pw )
     ret = (*fp_lve_jail)( pw, error_msg );
     if ( ret < 0 )
     {
-        fprintf( stderr, "LSAPI (%d): LVE jail(%d) ressult: %d, error: %s !\n",
-                        getpid(), uid, ret, error_msg );
+        lsapi_log("LSAPI: LVE jail(%d) ressult: %d, error: %s !\n",
+                  uid, ret, error_msg );
         LSAPI_perror_r( pReq, "LSAPI: jail() failure.", NULL );
         return -1;
     }
@@ -1102,11 +1113,11 @@ static int lsapi_changeUGid( LSAPI_Request * pReq )
                 --pReq->m_pHeader->m_cntSpecialEnv;
                 uid = *(uint32_t *)pEnv->pValue;
                 gid = *(((uint32_t *)pEnv->pValue) + 1 );
-                //fprintf( stderr, "LSAPI: SUEXEC_UGID set UID: %d, GID: %d\n", uid, gid );
+                //lsapi_log("LSAPI: SUEXEC_UGID set UID: %d, GID: %d\n", uid, gid );
             }
             else
             {
-                fprintf( stderr, "LSAPI: missing SUEXEC_UGID env, use default user!\n" );
+                lsapi_log("LSAPI: missing SUEXEC_UGID env, use default user!\n" );
                 pEnv = NULL;
             }
             if ( pEnv&& lsapi_suexec_auth( pReq, pAuth->pValue, pAuth->valLen, pEnv->pValue, pEnv->valLen ) == 0 )
@@ -1117,13 +1128,13 @@ static int lsapi_changeUGid( LSAPI_Request * pReq )
             else
             {
                 //authentication error
-                fprintf( stderr, "LSAPI: SUEXEC_AUTH authentication failed, use default user!\n" );
+                lsapi_log("LSAPI: SUEXEC_AUTH authentication failed, use default user!\n" );
                 uid = 0;
             }
         }
         else
         {
-            //fprintf( stderr, "LSAPI: no SUEXEC_AUTH env, use default user!\n" );
+            //lsapi_log("LSAPI: no SUEXEC_AUTH env, use default user!\n" );
         }
     }
 
@@ -1203,7 +1214,7 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
         || pReq->m_pHeader->m_requestMethodOff < 0
         || pReq->m_pHeader->m_requestMethodOff >= totalLen)
     {
-        fprintf(stderr, "%d: bad request header - ERROR#1\n", getpid());
+        lsapi_log("Bad request header - ERROR#1\n");
         return -1;
     }
     pReq->m_pScriptFile     = pReq->m_pReqBuf + pReq->m_pHeader->m_scriptFileOff;
@@ -1223,8 +1234,8 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
     pBegin += pReq->m_pHeader->m_httpHeaderLen;
     if ( pBegin != pEnd )
     {
-        fprintf( stderr, "%d: request header does match total size, total: %d, "
-                 "real: %ld\n", getpid(), totalLen, pBegin - pReq->m_pReqBuf );
+        lsapi_log("Request header does match total size, total: %d, "
+                 "real: %ld\n", totalLen, pBegin - pReq->m_pReqBuf );
         return -1;
     }
     if ( shouldFixEndian )
@@ -1234,7 +1245,7 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
 
     if (validateHeaders(pReq) == -1)
     {
-        fprintf(stderr, "%d: bad request header - ERROR#2\n", getpid());
+        lsapi_log("Bad request header - ERROR#2\n");
         return -1;
     }
 
@@ -1372,12 +1383,12 @@ static int readReq( LSAPI_Request * pReq )
     packetLen = verifyHeader( &pReq->m_pHeader->m_pktHeader, LSAPI_BEGIN_REQUEST );
     if ( packetLen < 0 )
     {
-        fprintf( stderr, "%d: packetLen < 0\n", getpid() );
+        lsapi_log("packetLen < 0\n");
         return -1;
     }
     if ( packetLen > LSAPI_MAX_HEADER_LEN )
     {
-        fprintf( stderr, "%d: packetLen > %d\n", getpid(), LSAPI_MAX_HEADER_LEN );
+        lsapi_log("packetLen > %d\n", LSAPI_MAX_HEADER_LEN );
         return -1;
     }
 
@@ -1395,7 +1406,7 @@ static int readReq( LSAPI_Request * pReq )
     }
     if ( parseRequest( pReq, packetLen ) < 0 )
     {
-        fprintf( stderr, "%d: parseRequest error\n", getpid() );
+        lsapi_log("ParseRequest error\n");
         return -1;
     }
 
@@ -1439,6 +1450,10 @@ int LSAPI_Init(void)
             return -1;
         g_inited = 1;
         s_ppid = getppid();
+        void *pthread_lib = dlopen("libpthread.so", RTLD_LAZY);
+        if (pthread_lib)
+            pthread_atfork_func = dlsym(pthread_lib, "pthread_atfork");
+
     }
     return 0;
 }
@@ -2805,7 +2820,7 @@ static void lsapi_sigchild( int signal )
         {
             int sig_num = WTERMSIG( status );
             int dump = WCOREDUMP( status );
-            fprintf( stderr, "Child process with pid: %d was killed by signal: "
+            lsapi_log("Child process with pid: %d was killed by signal: "
                      "%d, core dump: %d\n", pid, sig_num, dump );
         }
         if ( pid == s_pid_dump_debug_info )
@@ -2874,19 +2889,23 @@ static void dump_debug_info( lsapi_child_status * pStatus, long tmCur )
         if ( kill( s_pid_dump_debug_info, 0 ) == 0 )
             return;
     }
-    s_pid_dump_debug_info = fork();
 
-    fprintf( stderr, "[%s] Possible runaway process, PPID: %d, PID: %d, "
+    lsapi_log("Possible runaway process, PPID: %d, PID: %d, "
              "reqCount: %d, process time: %ld, checkpoint time: %ld, start "
-             "time: %ld\n", ctime(&tmCur), getpid(), pStatus->m_pid,
+             "time: %ld\n", getpid(), pStatus->m_pid,
              pStatus->m_iReqCounter, tmCur - pStatus->m_tmReqBegin,
              tmCur - pStatus->m_tmLastCheckPoint, tmCur - pStatus->m_tmStart );
-    snprintf( achCmd, 1024, "gdb --batch -ex \"attach %d\" -ex \"set height 0\" "
-              "-ex \"bt\" >&2;PATH=$PATH:/usr/sbin lsof -p %d >&2",
-              pStatus->m_pid, pStatus->m_pid );
-    if ( system( achCmd ) == -1 )
-        perror( "system()" );
-    exit( 0 );
+
+    s_pid_dump_debug_info = fork();
+    if (s_pid_dump_debug_info == 0)
+    {
+        snprintf( achCmd, 1024, "gdb --batch -ex \"attach %d\" -ex \"set height 0\" "
+                "-ex \"bt\" >&2;PATH=$PATH:/usr/sbin lsof -p %d >&2",
+                pStatus->m_pid, pStatus->m_pid );
+        if ( system( achCmd ) == -1 )
+            perror( "system()" );
+        exit( 0 );
+    }
 }
 
 
@@ -2936,13 +2955,13 @@ static void lsapi_check_child_status( long tmCur )
                     if ( pStatus->m_iKillSent > 5 )
                     {
                         tobekilled = SIGKILL;
-                        fprintf( stderr, "Force killing runaway process PID: %d"
+                        lsapi_log("Force killing runaway process PID: %d"
                                  " with SIGKILL\n", pStatus->m_pid );
                     }
                     else
                     {
                         tobekilled = SIGTERM;
-                        fprintf( stderr, "Killing runaway process PID: %d with "
+                        lsapi_log("Killing runaway process PID: %d with "
                                  "SIGTERM\n", pStatus->m_pid );
                     }
                 }
@@ -2966,9 +2985,9 @@ static void lsapi_check_child_status( long tmCur )
     }
     if ( abs( g_prefork_server->m_iCurChildren - count ) > 1 )
     {
-        fprintf( stderr, "Children tracking is wrong: PID: %d, Cur Children: %d,"
-                 " count: %d, idle: %d, dying: %d\n", getpid(),
-                 g_prefork_server->m_iCurChildren, count, idle, dying );
+        lsapi_log("Children tracking is wrong: Cur Children: %d,"
+                  " count: %d, idle: %d, dying: %d\n",
+                  g_prefork_server->m_iCurChildren, count, idle, dying );
     }
 }
 
@@ -2991,6 +3010,10 @@ static void lsapi_check_child_status( long tmCur )
 //        kill( -getpgrp(), SIGKILL );
 //    return 0;
 //}
+
+
+void set_skip_write()
+{   s_skip_write = 1;   }
 
 
 static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
@@ -3016,6 +3039,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
 
     act.sa_flags = 0;
     act.sa_handler = lsapi_sigchild;
+    sigemptyset(&(act.sa_mask));
     if( sigaction( SIGCHLD, &act, &old_child ) )
     {
         perror( "Can't set signal handler for SIGCHILD" );
@@ -3025,6 +3049,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
     /* Set up handler to kill children upon exit */
     act.sa_flags = 0;
     act.sa_handler = lsapi_cleanup;
+    sigemptyset(&(act.sa_mask));
     if( sigaction( SIGTERM, &act, &old_term ) ||
         sigaction( SIGINT,  &act, &old_int  ) ||
         sigaction( SIGUSR1, &act, &old_usr1 ) ||
@@ -3090,7 +3115,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
         if (pServer->m_iCurChildren >=
             pServer->m_iMaxChildren + pServer->m_iExtraChildren)
         {
-            fprintf( stderr, "Reached max children process limit: %d, extra: %d,"
+            lsapi_log("Reached max children process limit: %d, extra: %d,"
                      " current: %d, busy: %d, please increase LSAPI_CHILDREN.\n",
                      pServer->m_iMaxChildren, pServer->m_iExtraChildren,
                      pServer->m_iCurChildren,
@@ -3102,6 +3127,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
         pReq->m_fd = lsapi_accept( pServer->m_fd );
         if ( pReq->m_fd != -1 )
         {
+            wait_secs = 0;
             child_status = find_child_status( 0 );
             if ( child_status )
                 memset( child_status, 0, sizeof( *child_status ) );
@@ -3127,6 +3153,9 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
                 s_req_processed = 0;
                 s_proc_group_timer_cb = NULL;
                 s_worker_status = child_status;
+
+                if (pthread_atfork_func)
+                    (*pthread_atfork_func)(NULL, NULL, set_skip_write);
 
                 s_worker_status->m_connected = 1;
                 if (s_busy_workers)
@@ -3190,10 +3219,10 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
 }
 
 
-void lsapi_error( const char * pMessage, int err_no )
+void lsapi_perror( const char * pMessage, int err_no )
 {
-    fprintf( stderr, "%d: %s, errno: %d (%s)\n", getpid(), pMessage, err_no,
-             strerror( err_no ) );
+    lsapi_log("%s, errno: %d (%s)\n", pMessage, err_no,
+              strerror( err_no ) );
 }
 
 
@@ -3204,6 +3233,9 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
     int             wait_secs;
     fd_set          readfds;
     struct timeval  timeout;
+
+    if (s_skip_write)
+        return -1;
 
     LSAPI_Finish_r( pReq );
 
@@ -3321,7 +3353,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
                     {
                         if (( errno == EINTR )||( errno == EAGAIN))
                             continue;
-                        lsapi_error( "lsapi_accept() error", errno );
+                        lsapi_perror( "lsapi_accept() error", errno );
                         return -1;
                     }
                 }
@@ -3538,7 +3570,7 @@ static int lsapi_reopen_stderr2(const char *full_path)
     int newfd = open(full_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
     if (newfd == -1)
     {
-        LSAPI_perror_r(NULL, "failed to open custom stderr log", full_path);
+        LSAPI_perror_r(NULL, "Failed to open custom stderr log", full_path);
         return -1;
     }
     if (newfd != 2)
@@ -3564,7 +3596,7 @@ static int lsapi_reopen_stderr(const char *p)
         return -1;
     if (lsapi_check_path(p, full_path, PATH_MAX) == -1)
     {
-        LSAPI_perror_r(NULL, "invalid custom stderr log path", p);
+        LSAPI_perror_r(NULL, "Invalid custom stderr log path", p);
         return -1;
     }
     return lsapi_reopen_stderr2(full_path);
@@ -3582,6 +3614,8 @@ int LSAPI_Init_Env_Parameters( fn_select_t fp )
     {
         lsapi_reopen_stderr(p);
     }
+    if (!s_stderr_log_path)
+        s_stderr_is_pipe = isPipe(STDERR_FILENO);
 
     p = getenv( "PHP_LSAPI_MAX_REQUESTS" );
     if ( !p )
