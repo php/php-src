@@ -370,6 +370,8 @@ static void sapi_lsapi_log_message(char *message, int syslog_type_int)
     {
         snprintf( buf, 8191, "%s\n", message );
         message = buf;
+        if (len > 8191)
+            len = 8191;
         ++len;
     }
     LSAPI_Write_Stderr( message, len);
@@ -453,7 +455,7 @@ static int sapi_lsapi_activate()
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.1",
+    "LiteSpeed V7.2",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
