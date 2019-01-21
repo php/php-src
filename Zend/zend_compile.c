@@ -7616,6 +7616,23 @@ void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static zend_op *zend_compile_rope_add_ex(zend_op *opline, znode *result, uint32_t num, znode *elem_node) /* {{{ */
+{
+	if (num == 0) {
+		result->op_type = IS_TMP_VAR;
+		result->u.op.var = -1;
+		opline->opcode = ZEND_ROPE_INIT;
+	} else {
+		opline->opcode = ZEND_ROPE_ADD;
+		SET_NODE(opline->op1, result);
+	}
+	SET_NODE(opline->op2, elem_node);
+	SET_NODE(opline->result, result);
+	opline->extended_value = num;
+	return opline;
+}
+/* }}} */
+
 static zend_op *zend_compile_rope_add(znode *result, uint32_t num, znode *elem_node) /* {{{ */
 {
 	zend_op *opline = get_next_op();
@@ -7642,6 +7659,7 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 	zend_op *opline = NULL, *init_opline;
 	znode elem_node, last_const_node;
 	zend_ast_list *list = zend_ast_get_list(ast);
+	uint32_t reserved_op_number = -1;
 
 	ZEND_ASSERT(list->children > 0);
 
@@ -7661,14 +7679,23 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 			} else {
 				last_const_node.op_type = IS_CONST;
 				ZVAL_COPY_VALUE(&last_const_node.u.constant, &elem_node.u.constant);
+				/* Reserve place for ZEND_ROPE_ADD instruction */
+				reserved_op_number = get_next_op_number();
+				opline = get_next_op();
+				opline->opcode = ZEND_NOP;
 			}
 			continue;
 		} else {
 			if (j == 0) {
-				rope_init_lineno = get_next_op_number();
+				if (last_const_node.op_type == IS_CONST) {
+					rope_init_lineno = reserved_op_number;
+				} else {
+					rope_init_lineno = get_next_op_number();
+				}
 			}
 			if (last_const_node.op_type == IS_CONST) {
-				zend_compile_rope_add(result, j++, &last_const_node);
+				opline = &CG(active_op_array)->opcodes[reserved_op_number];
+				zend_compile_rope_add_ex(opline, result, j++, &last_const_node);
 				last_const_node.op_type = IS_UNUSED;
 			}
 			opline = zend_compile_rope_add(result, j++, &elem_node);
@@ -7683,9 +7710,11 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 			ZVAL_EMPTY_STRING(&result->u.constant);
 			/* empty string */
 		}
+		CG(active_op_array)->last = reserved_op_number - 1;
 		return;
 	} else if (last_const_node.op_type == IS_CONST) {
-		opline = zend_compile_rope_add(result, j++, &last_const_node);
+		opline = &CG(active_op_array)->opcodes[reserved_op_number];
+		opline = zend_compile_rope_add_ex(opline, result, j++, &last_const_node);
 	}
 	init_opline = CG(active_op_array)->opcodes + rope_init_lineno;
 	if (j == 1) {
