@@ -193,9 +193,12 @@ static zend_bool kept_alive_by_loop_var_free(scdf_ctx *scdf, uint32_t block_idx)
 		zend_op *opline = &op_array->opcodes[i];
 		if (opline->opcode == ZEND_FE_FREE ||
 				(opline->opcode == ZEND_FREE && opline->extended_value == ZEND_FREE_SWITCH)) {
-			zend_op *def_opline = zend_optimizer_get_loop_var_def(op_array, opline);
-			if (def_opline) {
-				uint32_t def_block = cfg->map[def_opline - op_array->opcodes];
+			int ssa_var = scdf->ssa->ops[i].op1_use;
+			if (ssa_var >= 0) {
+				int op_num = scdf->ssa->vars[ssa_var].definition;
+				uint32_t def_block;
+				ZEND_ASSERT(op_num >= 0);
+				def_block = cfg->map[op_num];
 				if (zend_bitset_in(scdf->executable_blocks, def_block)) {
 					return 1;
 				}
