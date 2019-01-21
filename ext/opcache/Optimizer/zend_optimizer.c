@@ -1327,7 +1327,9 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 	/* Redo pass_two() */
 	zend_redo_pass_two(op_array);
 
-	zend_recalc_live_ranges(op_array, NULL);
+	if (op_array->live_range) {
+		zend_recalc_live_ranges(op_array, NULL);
+	}
 }
 
 static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer_ctx *ctx)
@@ -1487,13 +1489,18 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
-			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			op_array = call_graph.op_arrays[i];
+			func_info = ZEND_FUNC_INFO(op_array);
 			if (func_info && func_info->ssa.var_info) {
-				zend_redo_pass_two_ex(call_graph.op_arrays[i], &func_info->ssa);
-				zend_recalc_live_ranges(call_graph.op_arrays[i], needs_live_range);
+				zend_redo_pass_two_ex(op_array, &func_info->ssa);
+				if (op_array->live_range) {
+					zend_recalc_live_ranges(op_array, needs_live_range);
+				}
 			} else {
-				zend_redo_pass_two(call_graph.op_arrays[i]);
-				zend_recalc_live_ranges(call_graph.op_arrays[i], NULL);
+				zend_redo_pass_two(op_array);
+				if (op_array->live_range) {
+					zend_recalc_live_ranges(op_array, NULL);
+				}
 			}
 		}
 
