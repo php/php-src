@@ -657,16 +657,19 @@ static zend_bool is_fake_def(zend_op *opline) {
 static zend_bool keeps_op1_alive(zend_op *opline) {
 	/* These opcodes don't consume their OP1 operand,
 	 * it is later freed by something else. */
-	return opline->opcode == ZEND_CASE
-		|| opline->opcode == ZEND_SWITCH_LONG
-		|| opline->opcode == ZEND_SWITCH_STRING
-		|| opline->opcode == ZEND_FE_FETCH_R
-		|| opline->opcode == ZEND_FE_FETCH_RW
-		|| opline->opcode == ZEND_FETCH_LIST_R
-		|| opline->opcode == ZEND_FETCH_LIST_W
-		|| opline->opcode == ZEND_VERIFY_RETURN_TYPE
-		|| opline->opcode == ZEND_BIND_LEXICAL
-		|| opline->opcode == ZEND_ROPE_ADD;
+	if (opline->opcode == ZEND_CASE
+	 || opline->opcode == ZEND_SWITCH_LONG
+	 || opline->opcode == ZEND_FETCH_LIST_R) {
+		return 1;
+	}
+	ZEND_ASSERT(opline->opcode != ZEND_SWITCH_STRING
+		&& opline->opcode != ZEND_FE_FETCH_R
+		&& opline->opcode != ZEND_FE_FETCH_RW
+		&& opline->opcode != ZEND_FETCH_LIST_W
+		&& opline->opcode != ZEND_VERIFY_RETURN_TYPE
+		&& opline->opcode != ZEND_BIND_LEXICAL
+		&& opline->opcode != ZEND_ROPE_ADD);
+	return 0;
 }
 
 /* Live ranges must be sorted by increasing start opline */
@@ -707,7 +710,7 @@ static void zend_calc_live_ranges(
 			 * because there are multiple defining opcodes (e.g. JMPZ_EX and QM_ASSIGN), in
 			 * which case the last one starts the live range. As such, we can simply ignore
 			 * missing uses here. */
-			if (last_use[var_num] != (uint32_t) -1) {
+			if (EXPECTED(last_use[var_num] != (uint32_t) -1)) {
 				/* Skip trivial live-range */
 				if (opnum + 1 != last_use[var_num]) {
 					uint32_t num;
@@ -726,16 +729,18 @@ static void zend_calc_live_ranges(
 			}
 		}
 
-		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR)) && !keeps_op1_alive(opline)) {
+		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR))) {
 			uint32_t var_num = EX_VAR_TO_NUM(opline->op1.var) - var_offset;
-			if (last_use[var_num] == (uint32_t) -1) {
-				/* OP_DATA is really part of the previous opcode. */
-				last_use[var_num] = opnum - (opline->opcode == ZEND_OP_DATA);
+			if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
+				if (EXPECTED(!keeps_op1_alive(opline))) {
+					/* OP_DATA is really part of the previous opcode. */
+					last_use[var_num] = opnum - (opline->opcode == ZEND_OP_DATA);
+				}
 			}
 		}
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
 			uint32_t var_num = EX_VAR_TO_NUM(opline->op2.var) - var_offset;
-			if (last_use[var_num] == (uint32_t) -1) {
+			if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
 #if 1
 				/* OP_DATA uses only op1 operand */
 				ZEND_ASSERT(opline->opcode != ZEND_OP_DATA);
