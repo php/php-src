@@ -27,6 +27,7 @@
 #define ZEND_FUNC_VARARG                   (1<<2)  /* uses func_get_args()        */
 #define ZEND_FUNC_NO_LOOPS                 (1<<3)
 #define ZEND_FUNC_IRREDUCIBLE              (1<<4)
+#define ZEND_FUNC_FREE_LOOP_VAR            (1<<5)
 #define ZEND_FUNC_RECURSIVE                (1<<7)
 #define ZEND_FUNC_RECURSIVE_DIRECTLY       (1<<8)
 #define ZEND_FUNC_RECURSIVE_INDIRECTLY     (1<<9)

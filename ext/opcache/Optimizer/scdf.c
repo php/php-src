@@ -213,6 +213,9 @@ int scdf_remove_unreachable_blocks(scdf_ctx *scdf) {
 	int i;
 	int removed_ops = 0;
 
+	if (!(ssa->cfg.flags & ZEND_FUNC_FREE_LOOP_VAR)) {
+		return 0;
+	}
 	for (i = 0; i < ssa->cfg.blocks_count; i++) {
 		if (!zend_bitset_in(scdf->executable_blocks, i)
 				&& (ssa->cfg.blocks[i].flags & ZEND_BB_REACHABLE)

@@ -110,7 +110,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 	blocks[start].flags = ZEND_BB_START;
 	zend_mark_reachable(op_array->opcodes, cfg, blocks + start);
 
-	if (op_array->last_live_range || op_array->last_try_catch) {
+	if (op_array->last_try_catch) {
 		zend_basic_block *b;
 		int j, changed;
 		uint32_t *block_map = cfg->map;
@@ -193,6 +193,12 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 				}
 			}
 		} while (changed);
+	}
+
+	if (cfg->flags & ZEND_FUNC_FREE_LOOP_VAR) {
+		zend_basic_block *b;
+		int j;
+		uint32_t *block_map = cfg->map;
 
 		/* Mark blocks that are unreachable, but free a loop var created in a reachable block. */
 		for (b = blocks; b < blocks + cfg->blocks_count; b++) {
@@ -416,6 +422,14 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_EXT_FCALL_BEGIN:
 			case ZEND_EXT_FCALL_END:
 				flags |= ZEND_FUNC_HAS_EXTENDED_INFO;
+				break;
+			case ZEND_FREE:
+				if (opline->extended_value == ZEND_FREE_SWITCH) {
+					flags |= ZEND_FUNC_FREE_LOOP_VAR;
+				}
+				break;
+			case ZEND_FE_FREE:
+				flags |= ZEND_FUNC_FREE_LOOP_VAR;
 				break;
 		}
 	}
