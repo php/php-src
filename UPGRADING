@@ -275,6 +275,9 @@ The following extensions are affected:
     to opt into using an external PCRE library, rather than the bundled one.
 
 - GD:
+  . --with-gd becomes --enable-gd (whether to enable the extension at all) and
+    --with-external-gd (to opt into using an external libgd, rather than the
+    bundled one).
   . --with-png-dir has been removed. libpng is required.
   . --with-zlib-dir has been removed. zlib is required.
   . --with-freetype-dir becomes --with-freetype.
