@@ -1328,6 +1328,12 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 	zend_redo_pass_two(op_array);
 
 	if (op_array->live_range) {
+#if HAVE_DFA_PASS
+		if ((ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) &&
+		    (ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level)) {
+			return;
+		}
+#endif
 		zend_recalc_live_ranges(op_array, NULL);
 	}
 }
