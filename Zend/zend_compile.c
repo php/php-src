@@ -6968,7 +6968,7 @@ void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_emit_op_tmp(result,
 		ast->kind == ZEND_AST_GREATER ? ZEND_IS_SMALLER : ZEND_IS_SMALLER_OR_EQUAL,
-		&right_node, &left_node);
+		&right_node, &left_node)->extended_value = 1;
 }
 /* }}} */
 
