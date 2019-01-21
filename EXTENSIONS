@@ -299,6 +299,12 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.2
 -------------------------------------------------------------------------------
+EXTENSION:           ffi
+PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2018 - 2019)
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+SINCE:               7.4.0
+-------------------------------------------------------------------------------
 EXTENSION:           fileinfo
 PRIMARY MAINTAINER:  Derick Rethans <derick@php.net> (2004 - 2008)
                      Anatol Belski <ab@php.net> (2012 - 2018)
