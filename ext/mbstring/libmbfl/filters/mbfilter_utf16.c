@@ -34,6 +34,60 @@
 #include "mbfilter.h"
 #include "mbfilter_utf16.h"
 
+/* Macros to create char length table */
+#define B2(n) n,n
+#define B4(n) B2(n),B2(n)
+#define B8(n) B4(n),B4(n)
+#define B16(n) B8(n),B8(n)
+#define B32(n) B16(n),B16(n)
+#define B64(n) B32(n),B32(n)
+#define B128(n) B64(n),B64(n)
+#define B256(n) B128(n),B128(n)
+#define B512(n) B256(n),B256(n)
+#define B1024(n) B512(n),B512(n)
+#define B2048(n) B1024(n),B1024(n)
+#define B4096(n) B2048(n),B2048(n)
+#define B8192(n) B4096(n),B4096(n)
+#define B16384(n) B8192(n),B8192(n)
+
+/* UTF-16 character length table */
+const char unsigned mblen_table_utf16_le[65536] = {
+	B16384(2),
+	B16384(2),
+	B16384(2),
+	B4096(2),
+	B2048(2),
+	B1024(4), /* surrogate pairs: 0xD800-0xDFFF. High surrogate first: 0xD800, last: 0xDBFF */
+	B1024(2), /* Low surrogate first: 0xDC00, last: 0xDFFF */
+	B8192(2),
+};
+
+/* macro to make swapped length table */
+#define BY B128(2),B64(2),B16(2),B8(2),B4(4),B4(2),B32(2)
+
+/* swapped bytes table */
+const char unsigned mblen_table_utf16_be[65536] = {
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+	BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
+};
+
 static const char *mbfl_encoding_utf16_aliases[] = {"utf16", NULL};
 
 const mbfl_encoding mbfl_encoding_utf16 = {
@@ -41,7 +95,7 @@ const mbfl_encoding mbfl_encoding_utf16 = {
 	"UTF-16",
 	"UTF-16",
 	(const char *(*)[])&mbfl_encoding_utf16_aliases,
-	NULL,
+	mblen_table_utf16_be,
 	MBFL_ENCTYPE_MWC2BE,
 	&vtbl_utf16_wchar,
 	&vtbl_wchar_utf16
@@ -52,7 +106,7 @@ const mbfl_encoding mbfl_encoding_utf16be = {
 	"UTF-16BE",
 	"UTF-16BE",
 	NULL,
-	NULL,
+	mblen_table_utf16_be,
 	MBFL_ENCTYPE_MWC2BE,
 	&vtbl_utf16be_wchar,
 	&vtbl_wchar_utf16be
@@ -63,7 +117,7 @@ const mbfl_encoding mbfl_encoding_utf16le = {
 	"UTF-16LE",
 	"UTF-16LE",
 	NULL,
-	NULL,
+	mblen_table_utf16_le,
 	MBFL_ENCTYPE_MWC2LE,
 	&vtbl_utf16le_wchar,
 	&vtbl_wchar_utf16le

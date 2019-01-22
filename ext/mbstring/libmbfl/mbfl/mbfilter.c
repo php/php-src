@@ -1,8 +1,4 @@
 /*
- * charset=UTF-8
- */
-
-/*
  * "streamable kanji code filter and converter"
  *
  * Copyright (c) 1998,1999,2000,2001 HappySize, Inc. All rights reserved.
@@ -86,6 +82,8 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <inttypes.h>
+#include <endian.h>
 
 #include "mbfilter.h"
 #include "mbfl_filter_output.h"
@@ -163,8 +161,7 @@ mbfl_buffer_converter_new(
 }
 
 
-void
-mbfl_buffer_converter_delete(mbfl_buffer_converter *convd)
+void mbfl_buffer_converter_delete(mbfl_buffer_converter *convd)
 {
 	if (convd != NULL) {
 		if (convd->filter1) {
@@ -178,14 +175,12 @@ mbfl_buffer_converter_delete(mbfl_buffer_converter *convd)
 	}
 }
 
-void
-mbfl_buffer_converter_reset(mbfl_buffer_converter *convd)
+void mbfl_buffer_converter_reset(mbfl_buffer_converter *convd)
 {
 	mbfl_memory_device_reset(&convd->device);
 }
 
-int
-mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode)
+int mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode)
 {
 	if (convd != NULL) {
 		if (convd->filter2 != NULL) {
@@ -280,8 +275,7 @@ mbfl_buffer_converter_feed2(mbfl_buffer_converter *convd, mbfl_string *string, s
 }
 
 
-int
-mbfl_buffer_converter_flush(mbfl_buffer_converter *convd)
+int mbfl_buffer_converter_flush(mbfl_buffer_converter *convd)
 {
 	if (convd == NULL) {
 		return -1;
@@ -404,8 +398,7 @@ mbfl_encoding_detector_new(const mbfl_encoding **elist, int elistsz, int strict)
 }
 
 
-void
-mbfl_encoding_detector_delete(mbfl_encoding_detector *identd)
+void mbfl_encoding_detector_delete(mbfl_encoding_detector *identd)
 {
 	int i;
 
@@ -493,8 +486,7 @@ const mbfl_encoding *mbfl_encoding_detector_judge(mbfl_encoding_detector *identd
 /*
  * encoding converter
  */
-mbfl_string *
-mbfl_convert_encoding(
+mbfl_string *mbfl_convert_encoding(
     mbfl_string *string,
     mbfl_string *result,
     const mbfl_encoding *toenc)
@@ -648,39 +640,55 @@ mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int eli
 /*
  *  strlen
  */
-static int
-filter_count_output(int c, void *data)
+static int filter_count_output(int c, void *data)
 {
 	(*(size_t *)data)++;
 	return c;
 }
 
-size_t
-mbfl_strlen(mbfl_string *string)
+size_t mbfl_strlen(mbfl_string *string)
 {
 	size_t len, n, k;
 	unsigned char *p;
-	const mbfl_encoding *encoding = string->encoding;
+	const mbfl_encoding *mbfl_encoding = string->encoding;
 
 	len = 0;
-	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+	if (mbfl_encoding->flag & MBFL_ENCTYPE_SBCS) {
 		len = string->len;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
 		len = string->len/2;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
 		len = string->len/4;
-	} else if (encoding->mblen_table != NULL) {
-		const unsigned char *mbtab = encoding->mblen_table;
+	} else if (mbfl_encoding->mblen_table != NULL) {
+		char unsigned const *mbtab;
+		if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
+			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+		} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
+			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+		} else {
+			mbtab = mbfl_encoding->mblen_table;
+		}
+
 		n = 0;
 		p = string->val;
 		k = string->len;
+
 		/* count */
 		if (p != NULL) {
-			while (n < k) {
-				unsigned m = mbtab[*p];
-				n += m;
-				p += m;
-				len++;
+			if (mbfl_encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+				while (n < k) {
+					unsigned m = mbtab[*(uint16_t *)p];
+					n += m;
+					p += m;
+					len++;
+				}
+			} else {
+				while (n < k) {
+					unsigned m = mbtab[*p];
+					n += m;
+					p += m;
+					len++;
+				}
 			}
 		}
 	} else {
@@ -722,8 +730,7 @@ struct collector_strpos_data {
 	size_t matched_pos;
 };
 
-static int
-collector_strpos(int c, void* data)
+static int collector_strpos(int c, void* data)
 {
 	int *p, *h, *m;
 	ssize_t n;
@@ -774,33 +781,50 @@ retry:
 /*
  *	oddlen
  */
-size_t
-mbfl_oddlen(mbfl_string *string)
+size_t mbfl_oddlen(mbfl_string *string)
 {
 	size_t len, n, k;
 	unsigned char *p;
-	const mbfl_encoding *encoding = string->encoding;
+	const mbfl_encoding *mbfl_encoding = string->encoding;
 
 	len = 0;
-	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+	if (mbfl_encoding->flag & MBFL_ENCTYPE_SBCS) {
 		return 0;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
 		return len % 2;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
 		return len % 4;
-	} else if (encoding->mblen_table != NULL) {
-		const unsigned char *mbtab = encoding->mblen_table;
+	} else if (mbfl_encoding->mblen_table != NULL) {
+		char unsigned const *mbtab;
+		if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
+			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+		} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
+			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+		} else {
+			mbtab = mbfl_encoding->mblen_table;
+		}
+
  		n = 0;
 		p = string->val;
 		k = string->len;
+
 		/* count */
 		if (p != NULL) {
-			while (n < k) {
-				unsigned m = mbtab[*p];
-				n += m;
-				p += m;
-			};
+			if (mbfl_encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+				while (n < k) {
+					unsigned char m = mbtab[*(uint16_t *)p];
+					n += m;
+					p += m;
+				}
+			} else {
+				while (n < k) {
+					unsigned char m = mbtab[*p];
+					n += m;
+					p += m;
+				}
+			}
 		}
+
 		return n-k;
 	} else {
 		/* how can i do ? */
@@ -809,8 +833,7 @@ mbfl_oddlen(mbfl_string *string)
 	/* NOT REACHED */
 }
 
-size_t
-mbfl_strpos(
+size_t mbfl_strpos(
     mbfl_string *haystack,
     mbfl_string *needle,
     ssize_t offset,
@@ -1019,12 +1042,7 @@ out:
  *  substr_count
  */
 
-size_t
-mbfl_substr_count(
-    mbfl_string *haystack,
-    mbfl_string *needle
-   )
-{
+size_t mbfl_substr_count(mbfl_string *haystack, mbfl_string *needle) {
 	size_t n, result = 0;
 	unsigned char *p;
 	mbfl_convert_filter *filter;
@@ -1102,8 +1120,7 @@ struct collector_substr_data {
 	size_t output;
 };
 
-static int
-collector_substr(int c, void* data)
+static int collector_substr(int c, void* data)
 {
 	struct collector_substr_data *pc = (struct collector_substr_data*)data;
 
@@ -1120,14 +1137,8 @@ collector_substr(int c, void* data)
 	return c;
 }
 
-mbfl_string *
-mbfl_substr(
-    mbfl_string *string,
-    mbfl_string *result,
-    size_t from,
-    size_t length)
-{
-	const mbfl_encoding *encoding = string->encoding;
+mbfl_string *mbfl_substr(mbfl_string *string, mbfl_string *result, size_t from, size_t length) {
+	const mbfl_encoding *mbfl_encoding = string->encoding;
 	size_t n, k, len, start, end;
 	unsigned m;
 	unsigned char *p, *w;
@@ -1136,58 +1147,100 @@ mbfl_substr(
 	result->no_language = string->no_language;
 	result->encoding = string->encoding;
 
-	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) ||
-	   encoding->mblen_table != NULL) {
+	if ((mbfl_encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) ||
+	   mbfl_encoding->mblen_table != NULL) {
 		len = string->len;
-		if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+		if (mbfl_encoding->flag & MBFL_ENCTYPE_SBCS) {
 			start = from;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+		} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
 			start = from*2;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+		} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
 			start = from*4;
 		} else {
-			const unsigned char *mbtab = encoding->mblen_table;
+			char unsigned const *mbtab;
+			if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
+				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+			} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
+				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+			} else {
+				mbtab = mbfl_encoding->mblen_table;
+			}
+
 			start = 0;
 			n = 0;
 			k = 0;
 			p = string->val;
 			/* search start position */
-			while (k <= from) {
-				start = n;
-				if (n >= len) {
-					break;
+			if (mbfl_encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+				while (k <= from) {
+					start = n;
+					if (n >= len) {
+						break;
+					}
+					m = mbtab[*(uint16_t *)p];
+					n += m;
+					p += m;
+					k++;
 				}
-				m = mbtab[*p];
-				n += m;
-				p += m;
-				k++;
+			} else {
+				while (k <= from) {
+					start = n;
+					if (n >= len) {
+						break;
+					}
+					m = mbtab[*p];
+					n += m;
+					p += m;
+					k++;
+				}
 			}
 		}
 
 		if (length == MBFL_SUBSTR_UNTIL_END) {
 			end = len;
-		} else if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+		} else if (mbfl_encoding->flag & MBFL_ENCTYPE_SBCS) {
 			end = start + length;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+		} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
 			end = start + length*2;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+		} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
 			end = start + length*4;
 		} else {
-			const unsigned char *mbtab = encoding->mblen_table;
+			char unsigned const *mbtab;
+			if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
+				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+			} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
+				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+			} else {
+				mbtab = mbfl_encoding->mblen_table;
+			}
+
 			end = start;
 			n = start;
 			k = 0;
 			p = string->val + start;
 			/* detect end position */
-			while (k <= length) {
-				end = n;
-				if (n >= len) {
-					break;
+			if (mbfl_encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+				while (k <= length) {
+					end = n;
+					if (n >= len) {
+						break;
+					}
+					m = mbtab[*(uint16_t *)p];
+					n += m;
+					p += m;
+					k++;
 				}
-				m = mbtab[*p];
-				n += m;
-				p += m;
-				k++;
+			} else {
+				while (k <= length) {
+					end = n;
+					if (n >= len) {
+						break;
+					}
+					m = mbtab[*p];
+					n += m;
+					p += m;
+					k++;
+				}
 			}
 		}
 
@@ -1271,14 +1324,13 @@ mbfl_substr(
 /*
  *  strcut
  */
-mbfl_string *
-mbfl_strcut(
+mbfl_string *mbfl_strcut(
     mbfl_string *string,
     mbfl_string *result,
     size_t from,
     size_t length)
 {
-	const mbfl_encoding *encoding = string->encoding;
+	const mbfl_encoding *mbfl_encoding = string->encoding;
 	mbfl_memory_device device;
 
 	if (from >= string->len) {
@@ -1289,18 +1341,18 @@ mbfl_strcut(
 	result->no_language = string->no_language;
 	result->encoding = string->encoding;
 
-	if ((encoding->flag & (MBFL_ENCTYPE_SBCS
+	if ((mbfl_encoding->flag & (MBFL_ENCTYPE_SBCS
 				| MBFL_ENCTYPE_WCS2BE
 				| MBFL_ENCTYPE_WCS2LE
 				| MBFL_ENCTYPE_WCS4BE
 				| MBFL_ENCTYPE_WCS4LE))
-			|| encoding->mblen_table != NULL) {
+			|| mbfl_encoding->mblen_table != NULL) {
 		const unsigned char *start = NULL;
 		const unsigned char *end = NULL;
 		unsigned char *w;
 		size_t sz;
 
-		if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+		if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
 			from &= -2;
 
 			if (length >= string->len - from) {
@@ -1309,7 +1361,7 @@ mbfl_strcut(
 
 			start = string->val + from;
 			end   = start + (length & -2);
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+		} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
 			from &= -4;
 
 			if (length >= string->len - from) {
@@ -1318,21 +1370,32 @@ mbfl_strcut(
 
 			start = string->val + from;
 			end   = start + (length & -4);
-		} else if ((encoding->flag & MBFL_ENCTYPE_SBCS)) {
+		} else if ((mbfl_encoding->flag & MBFL_ENCTYPE_SBCS)) {
 			if (length >= string->len - from) {
 				length = string->len - from;
 			}
 
 			start = string->val + from;
 			end = start + length;
-		} else if (encoding->mblen_table != NULL) {
-			const unsigned char *mbtab = encoding->mblen_table;
+		} else if (mbfl_encoding->mblen_table != NULL) {
+			char unsigned const *mbtab;
+			if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
+				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+			} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
+				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+			} else {
+				mbtab = mbfl_encoding->mblen_table;
+			}
+
 			const unsigned char *p, *q;
 			int m;
 
 			/* search start position */
-			for (m = 0, p = string->val, q = p + from;
-					p < q; p += (m = mbtab[*p]));
+			if (mbfl_encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+				for (m = 0, p = string->val, q = p + from; p < q; p += (m = mbtab[*(uint16_t *)p]));
+			} else {
+				for (m = 0, p = string->val, q = p + from; p < q; p += (m = mbtab[*p]));
+			}
 
 			if (p > q) {
 				p -= m;
@@ -1344,7 +1407,11 @@ mbfl_strcut(
 			if (length >= string->len - (start - string->val)) {
 				end = string->val + string->len;
 			} else {
-				for (q = p + length; p < q; p += (m = mbtab[*p]));
+				if (mbfl_encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+					for (q = p + length; p < q; p += (m = mbtab[*(uint16_t *)p]));
+				} else {
+					for (q = p + length; p < q; p += (m = mbtab[*p]));
+				}
 
 				if (p > q) {
 					p -= m;
@@ -1569,15 +1636,13 @@ static size_t is_fullwidth(int c)
 	return 0;
 }
 
-static int
-filter_count_width(int c, void* data)
+static int filter_count_width(int c, void* data)
 {
 	(*(size_t *)data) += (is_fullwidth(c) ? 2: 1);
 	return c;
 }
 
-size_t
-mbfl_strwidth(mbfl_string *string)
+size_t mbfl_strwidth(mbfl_string *string)
 {
 	size_t len, n;
 	unsigned char *p;
@@ -1626,8 +1691,7 @@ struct collector_strimwidth_data {
 	int status;
 };
 
-static int
-collector_strimwidth(int c, void* data)
+static int collector_strimwidth(int c, void* data)
 {
 	struct collector_strimwidth_data *pc = (struct collector_strimwidth_data*)data;
 
@@ -1658,8 +1722,7 @@ collector_strimwidth(int c, void* data)
 	return c;
 }
 
-mbfl_string *
-mbfl_strimwidth(
+mbfl_string *mbfl_strimwidth(
     mbfl_string *string,
     mbfl_string *marker,
     mbfl_string *result,
@@ -1759,8 +1822,7 @@ mbfl_strimwidth(
 	return result;
 }
 
-mbfl_string *
-mbfl_ja_jp_hantozen(
+mbfl_string *mbfl_ja_jp_hantozen(
     mbfl_string *string,
     mbfl_string *result,
     int mode)
@@ -1877,8 +1939,7 @@ struct mime_header_encoder_data {
 	char lwsp[16];
 };
 
-static int
-mime_header_encoder_block_collector(int c, void *data)
+static int mime_header_encoder_block_collector(int c, void *data)
 {
 	size_t n;
 	struct mime_header_encoder_data *pe = (struct mime_header_encoder_data *)data;
@@ -1919,9 +1980,7 @@ mime_header_encoder_block_collector(int c, void *data)
 	return c;
 }
 
-static int
-mime_header_encoder_collector(int c, void *data)
-{
+static int mime_header_encoder_collector(int c, void *data){
 	static int qp_table[256] = {
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /* 0x00 */
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /* 0x00 */
@@ -2015,8 +2074,7 @@ mime_header_encoder_result(struct mime_header_encoder_data *pe, mbfl_string *res
 	return mbfl_memory_device_result(&pe->outdev, result);
 }
 
-struct mime_header_encoder_data*
-mime_header_encoder_new(
+struct mime_header_encoder_data *mime_header_encoder_new(
     const mbfl_encoding *incode,
     const mbfl_encoding *outcode,
     const mbfl_encoding *transenc)
@@ -2103,8 +2161,7 @@ mime_header_encoder_new(
 	return pe;
 }
 
-void
-mime_header_encoder_delete(struct mime_header_encoder_data *pe)
+void mime_header_encoder_delete(struct mime_header_encoder_data *pe)
 {
 	if (pe) {
 		mbfl_convert_filter_delete(pe->conv1_filter);
@@ -2119,14 +2176,12 @@ mime_header_encoder_delete(struct mime_header_encoder_data *pe)
 	}
 }
 
-int
-mime_header_encoder_feed(int c, struct mime_header_encoder_data *pe)
+int mime_header_encoder_feed(int c, struct mime_header_encoder_data *pe)
 {
 	return (*pe->conv1_filter->filter_function)(c, pe->conv1_filter);
 }
 
-mbfl_string *
-mbfl_mime_header_encode(
+mbfl_string *mbfl_mime_header_encode(
     mbfl_string *string,
     mbfl_string *result,
     const mbfl_encoding *outcode,
@@ -2190,8 +2245,7 @@ struct mime_header_decoder_data {
 	const mbfl_encoding *outcode;
 };
 
-static int
-mime_header_decoder_collector(int c, void* data)
+static int mime_header_decoder_collector(int c, void* data)
 {
 	const mbfl_encoding *encoding;
 	struct mime_header_decoder_data *pd = (struct mime_header_decoder_data*)data;
@@ -2406,8 +2460,7 @@ mime_header_decoder_new(const mbfl_encoding *outcode)
 	return pd;
 }
 
-void
-mime_header_decoder_delete(struct mime_header_decoder_data *pd)
+void mime_header_decoder_delete(struct mime_header_decoder_data *pd)
 {
 	if (pd) {
 		mbfl_convert_filter_delete(pd->conv2_filter);
@@ -2419,14 +2472,12 @@ mime_header_decoder_delete(struct mime_header_decoder_data *pd)
 	}
 }
 
-int
-mime_header_decoder_feed(int c, struct mime_header_decoder_data *pd)
+int mime_header_decoder_feed(int c, struct mime_header_decoder_data *pd)
 {
 	return mime_header_decoder_collector(c, pd);
 }
 
-mbfl_string *
-mbfl_mime_header_decode(
+mbfl_string *mbfl_mime_header_decode(
     mbfl_string *string,
     mbfl_string *result,
     const mbfl_encoding *outcode)
@@ -2472,8 +2523,7 @@ struct collector_htmlnumericentity_data {
 	int mapsize;
 };
 
-static int
-collector_encode_htmlnumericentity(int c, void *data)
+static int collector_encode_htmlnumericentity(int c, void *data)
 {
 	struct collector_htmlnumericentity_data *pc = (struct collector_htmlnumericentity_data *)data;
 	int f, n, s, r, d, size, *mapelm;
@@ -2518,8 +2568,7 @@ collector_encode_htmlnumericentity(int c, void *data)
 	return c;
 }
 
-static int
-collector_decode_htmlnumericentity(int c, void *data)
+static int collector_decode_htmlnumericentity(int c, void *data)
 {
 	struct collector_htmlnumericentity_data *pc = (struct collector_htmlnumericentity_data *)data;
 	int f, n, s, r, d, size, *mapelm;
@@ -2696,8 +2745,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 	return c;
 }
 
-static int
-collector_encode_hex_htmlnumericentity(int c, void *data)
+static int collector_encode_hex_htmlnumericentity(int c, void *data)
 {
 	struct collector_htmlnumericentity_data *pc = (struct collector_htmlnumericentity_data *)data;
 	int f, n, s, r, d, size, *mapelm;
@@ -2817,8 +2865,7 @@ int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)
 }
 
 
-mbfl_string *
-mbfl_html_numeric_entity(
+mbfl_string *mbfl_html_numeric_entity(
     mbfl_string *string,
     mbfl_string *result,
     int *convmap,

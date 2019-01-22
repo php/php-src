@@ -205,8 +205,7 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 };
 
 /* encoding resolver */
-const mbfl_encoding *
-mbfl_name2encoding(const char *name)
+const mbfl_encoding *mbfl_name2encoding(const char *name)
 {
 	const mbfl_encoding *encoding;
 	int i, j;
@@ -249,8 +248,7 @@ mbfl_name2encoding(const char *name)
 	return NULL;
 }
 
-const mbfl_encoding *
-mbfl_no2encoding(enum mbfl_no_encoding no_encoding)
+const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding)
 {
 	const mbfl_encoding *encoding;
 	int i;
@@ -265,8 +263,7 @@ mbfl_no2encoding(enum mbfl_no_encoding no_encoding)
 	return NULL;
 }
 
-enum mbfl_no_encoding
-mbfl_name2no_encoding(const char *name)
+enum mbfl_no_encoding mbfl_name2no_encoding(const char *name)
 {
 	const mbfl_encoding *encoding;
 
@@ -278,9 +275,7 @@ mbfl_name2no_encoding(const char *name)
 	}
 }
 
-const char *
-mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding)
-{
+const char *mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding) {
 	const mbfl_encoding *encoding;
 
 	encoding = mbfl_no2encoding(no_encoding);
@@ -291,15 +286,11 @@ mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding)
 	}
 }
 
-const mbfl_encoding **
-mbfl_get_supported_encodings(void)
-{
+const mbfl_encoding **mbfl_get_supported_encodings(void) {
 	return mbfl_encoding_ptr_list;
 }
 
-const char *
-mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding)
-{
+const char *mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding) {
 	const mbfl_encoding *encoding;
 
 	encoding = mbfl_no2encoding(no_encoding);

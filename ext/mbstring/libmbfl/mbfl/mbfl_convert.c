@@ -33,6 +33,7 @@
 #endif
 
 #include <stddef.h>
+#include <endian.h>
 
 #include "mbfl_encoding.h"
 #include "mbfl_allocators.h"
@@ -220,18 +221,14 @@ mbfl_convert_filter_new2(
 	return filter;
 }
 
-void
-mbfl_convert_filter_delete(mbfl_convert_filter *filter)
-{
+void mbfl_convert_filter_delete(mbfl_convert_filter *filter) {
 	if (filter) {
 		(*filter->filter_dtor)(filter);
 		mbfl_free((void*)filter);
 	}
 }
 
-int
-mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter)
-{
+int mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter) {
 	return (*filter->filter_function)(c, filter);
 }
 
@@ -246,16 +243,13 @@ mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, const unsigned char
 	return 0;
 }
 
-int
-mbfl_convert_filter_flush(mbfl_convert_filter *filter)
-{
+int mbfl_convert_filter_flush(mbfl_convert_filter *filter) {
 	(*filter->filter_flush)(filter);
 	return (filter->flush_function ? (*filter->flush_function)(filter->data) : 0);
 }
 
 void mbfl_convert_filter_reset(mbfl_convert_filter *filter,
-	    const mbfl_encoding *from, const mbfl_encoding *to)
-{
+	    const mbfl_encoding *from, const mbfl_encoding *to) {
 	const struct mbfl_convert_vtbl *vtbl;
 
 	/* destruct old filter */

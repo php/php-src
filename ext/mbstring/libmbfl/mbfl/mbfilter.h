@@ -225,26 +225,22 @@ mbfl_substr_count(mbfl_string *haystack, mbfl_string *needle);
 /*
  * substr
  */
-MBFLAPI extern mbfl_string *
-mbfl_substr(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
+MBFLAPI extern mbfl_string *mbfl_substr(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
 
 /*
  * strcut
  */
-MBFLAPI extern mbfl_string *
-mbfl_strcut(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
+MBFLAPI extern mbfl_string *mbfl_strcut(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
 
 /*
  *  strwidth
  */
-MBFLAPI extern size_t
-mbfl_strwidth(mbfl_string *string);
+MBFLAPI extern size_t mbfl_strwidth(mbfl_string *string);
 
 /*
  *  strimwidth
  */
-MBFLAPI extern mbfl_string *
-mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, size_t from, size_t width);
+MBFLAPI extern mbfl_string *mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, size_t from, size_t width);
 
 /*
  * MIME header encode

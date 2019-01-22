@@ -63,7 +63,7 @@
 
 #if HAVE_ONIG
 #include "php_onig_compat.h"
-#include <oniguruma.h>
+#include "oniguruma/oniguruma.h"
 #undef UChar
 #elif HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
@@ -2357,7 +2357,7 @@ PHP_FUNCTION(mb_str_split)
 
 	/*
 	 * +----------------------------------------------------------------------+
-	 * |                           4 scenarios                                |
+	 * |                           3 scenarios                                |
 	 * +----------------------------------------------------------------------+
 	 */
 	const mbfl_encoding *mbfl_encoding = string.encoding;
@@ -2378,123 +2378,54 @@ PHP_FUNCTION(mb_str_split)
 	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE )) { /* 4 bytes */
 		mb_len = string.len>>2; /* eq. string.len / 4 */
 		chunk_len = split_length<<2; /* eq. split_length * 4 */
-
 	/*
 	 * +----------------------------------------------------------------------+
-	 * | second scenario: "2- or 4-bytes width encodings UTF-16LE UTF-16BE    |
-	 * +----------------------------------------------------------------------+
-	 */
-	} else if (mbfl_encoding->flag & ( MBFL_ENCTYPE_MWC2LE | MBFL_ENCTYPE_MWC2BE )) {
-
-		/* Macros to create char length table */
-		#define B2(n) n,n
-		#define B4(n) B2(n),B2(n)
-		#define B8(n) B4(n),B4(n)
-		#define B16(n) B8(n),B8(n)
-		#define B32(n) B16(n),B16(n)
-		#define B64(n) B32(n),B32(n)
-		#define B128(n) B64(n),B64(n)
-		#define B256(n) B128(n),B128(n)
-		#define B512(n) B256(n),B256(n)
-		#define B1024(n) B512(n),B512(n)
-		#define B2048(n) B1024(n),B1024(n)
-		#define B4096(n) B2048(n),B2048(n)
-		#define B8192(n) B4096(n),B4096(n)
-		#define B16384(n) B8192(n),B8192(n)
-
-		/* UTF-16 character length table */
-		static char unsigned const mbtab_le[65536] = {
-			 B16384(2),
-			 B16384(2),
-			 B16384(2),
-			 B4096(2),
-			 B2048(2),
-			 B1024(4), /* surrogate pairs: 0xD800-0xDFFF. High surrogate first: 0xD800, last: 0xDBFF */
-			 B1024(2), /* Low surrogate first: 0xDC00, last: 0xDFFF */
-			 B8192(2),
-		};
-
-		
-		/* macro to make swapped length table */
-		#define BY B128(2),B64(2),B16(2),B8(2),B4(4),B4(2),B32(2)
-
-		/* swapped bytes table */
-		static char unsigned const mbtab_be[65536] = {
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-			BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,BY,
-		};
-		
-
-		/* assume that we have 2-bytes characters */
-		array_init_size(return_value, (string.len>>1 + split_length) / split_length);
-
-		/* Determine endianness */
-		const int _i = 1;
-		const char is_le = (*(char*)&_i) == 0 ? 1 : 0; 
-		
-		char unsigned const *mbtab;
-		if(is_le && mbfl_encoding->flag == MBFL_ENCTYPE_MWC2BE ||
-		  !is_le && mbfl_encoding->flag == MBFL_ENCTYPE_MWC2LE){
-			mbtab = mbtab_le;
-		} else {
-			mbtab = mbtab_be;
-		}
-		
-		while (p < last) { /* split cycle work until the cursor has reached the last byte */
-			char const *chunk_p = p; /* chunk first byte pointer */
-			chunk_len = 0; /* chunk length in bytes */
-			for (uint32_t char_count = 0; char_count < split_length; ++char_count) {
-				char unsigned const m = mbtab[*(uint16_t *)p]; /* single character length table */
-				chunk_len += m;
-				p += m;
-			}
-			if (p > last) chunk_len -= p - last; /* check if chunk is in bounds */
-			add_next_index_stringl(return_value, chunk_p, chunk_len);
-		}
-		return;
-
-	/*
-	 * +----------------------------------------------------------------------+
-	 * | third scenario: "variable width encodings with length table"         |
+	 * | second scenario: "variable width encodings with length table"        |
 	 * +----------------------------------------------------------------------+
 	 */
 	} else if (mbfl_encoding->mblen_table != NULL) {
-		char unsigned const *mbtab = mbfl_encoding->mblen_table;
+		char unsigned const *mbtab;
+		if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
+			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+		} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
+			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+		} else {
+			mbtab = mbfl_encoding->mblen_table;
+		}
+
 		/* assume that we have 2-bytes characters */
 		array_init_size(return_value, (string.len>>1 + split_length) / split_length);
-		while (p < last) { /* split cycle work until the cursor has reached the last byte */
-			char const *chunk_p = p; /* chunk first byte pointer */
-			chunk_len = 0; /* chunk length in bytes */
-			for (uint32_t char_count = 0; char_count < split_length; ++char_count) {
-				char unsigned const m = mbtab[*p]; /* single character length table */
-				chunk_len += m;
-				p += m;
+
+		if(mbfl_encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+			while (p < last) { /* split cycle work until the cursor has reached the last byte */
+				char const *chunk_p = p; /* chunk first byte pointer */
+				chunk_len = 0; /* chunk length in bytes */
+				for (uint32_t char_count = 0; char_count < split_length; ++char_count) {
+					char unsigned const m = mbtab[*(uint16_t *)p]; /* single character length table */
+					chunk_len += m;
+					p += m;
+				}
+				if (p > last) chunk_len -= p - last; /* check if chunk is in bounds */
+				add_next_index_stringl(return_value, chunk_p, chunk_len);
 			}
-			if (p > last) chunk_len -= p - last; /* check if chunk is in bounds */
-			add_next_index_stringl(return_value, chunk_p, chunk_len);
+		} else {
+			while (p < last) { /* split cycle work until the cursor has reached the last byte */
+				char const *chunk_p = p; /* chunk first byte pointer */
+				chunk_len = 0; /* chunk length in bytes */
+				for (uint32_t char_count = 0; char_count < split_length; ++char_count) {
+					char unsigned const m = mbtab[*p]; /* single character length table */
+					chunk_len += m;
+					p += m;
+				}
+				if (p > last) chunk_len -= p - last; /* check if chunk is in bounds */
+				add_next_index_stringl(return_value, chunk_p, chunk_len);
+			}
 		}
 		return;
 
 	/*
 	 * +----------------------------------------------------------------------+
-	 * | fourth scenario: "else multibyte encodings"                          |
+	 * | third scenario: "else multibyte encodings"                           |
 	 * +----------------------------------------------------------------------+
 	 */
 	} else {
@@ -5315,7 +5246,21 @@ MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *e
 	if (enc != NULL) {
 		if (enc->flag & MBFL_ENCTYPE_MBCS) {
 			if (enc->mblen_table != NULL) {
-				if (s != NULL) return enc->mblen_table[*(unsigned char *)s];
+				char unsigned const *mbtab;
+				if (enc->flag & MBFL_ENCTYPE_MWC2BE){
+					mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? enc->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+				} else if (enc->flag & MBFL_ENCTYPE_MWC2LE) {
+					mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? enc->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+				} else {
+					mbtab = enc->mblen_table;
+				}
+				if (s != NULL){
+					if(enc->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+						return mbtab[*(uint16_t *)s];
+					} else{
+						return mbtab[*(unsigned char *)s];
+					}
+				}
 			}
 		} else if (enc->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
 			return 2;

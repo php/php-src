@@ -24,6 +24,10 @@ $string_ascii = 'ABCDEF';
 //Japanese string in UTF-8
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
+//Japanese string in UTF-16
+$string_utf16 = mb_convert_encoding($string_mb, "UTF-16", "UTF-8");
+
+
 echo "\n-- ASCII string 1 --\n";
 var_dump(mb_substr($string_ascii, 3));
 
@@ -37,6 +41,11 @@ var_dump(base64_encode($result_1));
 echo "\n-- Multibyte string 2 --\n";
 $result_2 = mb_substr($string_mb, 2, 7, 'utf-8');
 var_dump(base64_encode($result_2));
+
+echo "\n-- Multibyte string utf-16 --\n";
+$result_3 = mb_substr($string_utf16, 2, 7, 'utf-16');
+var_dump(base64_encode(mb_convert_encoding($result_3, "UTF-8", "UTF-16")));
+
 
 echo "Done";
 ?>
@@ -53,5 +62,8 @@ string(3) "DEF"
 string(12) "peacrOiqng=="
 
 -- Multibyte string 2 --
+string(28) "6Kqe44OG44Kt44K544OI44Gn44GZ"
+
+-- Multibyte string utf-16 --
 string(28) "6Kqe44OG44Kt44K544OI44Gn44GZ"
 Done
