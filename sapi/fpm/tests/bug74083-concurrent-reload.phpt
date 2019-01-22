@@ -57,10 +57,12 @@ $tester->getLogLines(2000);
 $tester->signal('USR2');
 $tester->expectLogNotice('Reloading in progress ...');
 $tester->expectLogNotice('reloading: .*');
+$tester->expectLogNotice('exiting after reload');
 $tester->expectLogNotice('using inherited socket fd=\d+, "127.0.0.1:\d+"');
 $tester->expectLogStartNotices();
 $tester->ping('{{ADDR}}');
 
+$tester->signal('TERM');
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();

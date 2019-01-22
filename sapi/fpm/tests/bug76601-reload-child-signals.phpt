@@ -73,9 +73,11 @@ if (!$tester->expectLogNotice('reloading: .*')) {
     echo "Skipped messages\n";
     echo implode('', $skipped);
 }
+$tester->expectLogNotice('exiting after reload');
 $tester->expectLogNotice('using inherited socket fd=\d+, "127.0.0.1:\d+"');
 $tester->expectLogStartNotices();
 
+$tester->signal('TERM');
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();

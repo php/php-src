@@ -77,11 +77,16 @@ static void fpm_pctl_exit() /* {{{ */
 
 static void fpm_pctl_exec() /* {{{ */
 {
-	zlog(ZLOG_DEBUG, "Blocking some signals before reexec");
-	if (0 > fpm_signals_block()) {
-		zlog(ZLOG_WARNING, "concurrent reloads may be unstable");
+	switch (fork()) {
+	case 0:
+		break;
+	case -1:
+		zlog(ZLOG_SYSERROR, "failed to reload: fork() failed");
+		/* no break */
+	default:
+		fpm_global_config.pid_file = NULL;
+		return;
 	}
-
 	zlog(ZLOG_NOTICE, "reloading: execvp(\"%s\", {\"%s\""
 			"%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s"
 			"%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s"
@@ -99,6 +104,11 @@ static void fpm_pctl_exec() /* {{{ */
 		optional_arg(10)
 	);
 
+	zlog(ZLOG_DEBUG, "Blocking some signals before reexec");
+	if (0 > fpm_signals_block()) {
+		zlog(ZLOG_WARNING, "concurrent reloads may be unstable");
+	}
+
 	fpm_cleanups_run(FPM_CLEANUP_PARENT_EXEC);
 	execvp(saved_argv[0], saved_argv);
 	zlog(ZLOG_SYSERROR, "failed to reload: execvp() failed");
@@ -110,9 +120,8 @@ static void fpm_pctl_action_last() /* {{{ */
 {
 	switch (fpm_state) {
 		case FPM_PCTL_STATE_RELOADING:
-			fpm_pctl_exec();
-			break;
-
+			zlog(ZLOG_NOTICE, "exiting after reload");
+			exit(FPM_EXIT_OK);
 		case FPM_PCTL_STATE_FINISHING:
 		case FPM_PCTL_STATE_TERMINATING:
 			fpm_pctl_exit();
@@ -199,6 +208,10 @@ static void fpm_pctl_action_next() /* {{{ */
 	fpm_pctl_kill_all(sig);
 	fpm_signal_sent = sig;
 	fpm_pctl_timeout_set(timeout);
+
+	if (fpm_signal_sent == SIGQUIT && fpm_state == FPM_PCTL_STATE_RELOADING) {
+		fpm_pctl_exec();
+	}
 }
 /* }}} */
 

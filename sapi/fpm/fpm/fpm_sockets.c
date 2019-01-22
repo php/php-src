@@ -74,7 +74,17 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 
 		if (which == FPM_CLEANUP_PARENT_EXIT_MAIN) {
 			if (ls->type == FPM_AF_UNIX) {
-				unlink(ls->key);
+				struct sockaddr_un sa_un;
+
+				memset(&sa_un, 0, sizeof(sa_un));
+				strlcpy(sa_un.sun_path, ls->key, sizeof(sa_un.sun_path));
+				sa_un.sun_family = AF_UNIX;
+
+				if (fpm_socket_unix_test_connect(&sa_un, sizeof(sa_un)) == 0) {
+					zlog(ZLOG_WARNING, "Keeping unix socket, another FPM instance seems to already listen on %s", ls->key);
+				} else {
+					unlink(ls->key);
+				}
 			}
 		}
 		free(ls->key);

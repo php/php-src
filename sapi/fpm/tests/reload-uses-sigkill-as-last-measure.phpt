@@ -45,6 +45,9 @@ sleep(2);
 $tester->expectLogNotice('using inherited socket fd=\d+, "127.0.0.1:\d+"');
 $tester->expectLogStartNotices();
 $tester->ping('{{ADDR}}');
+$tester->expectLogNotice('exiting after reload');
+
+$tester->signal('TERM');
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();
