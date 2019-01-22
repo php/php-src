@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.2
+?? ??? ????, PHP 7.3.3
+
+- Opcache:
+  . Fixed bug #77287 (Opcache literal compaction is incompatible with EXT
+    opcodes). (Nikita)
+
+07 Feb 2019, PHP 7.3.2
 
 - Core:
   . Fixed bug #77369 (memcpy with negative length via crafted DNS response). (Stas)
@@ -61,8 +67,6 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #77361 (configure fails on 64-bit AIX when opcache enabled).
     (Kevin Adler)
-  . Fixed bug #77287 (Opcache literal compaction is incompatible with EXT
-    opcodes). (Nikita)
 
 - PCRE:
   . Fixed bug #77338 (get_browser with empty string). (Nikita)
