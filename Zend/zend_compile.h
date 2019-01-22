@@ -806,6 +806,10 @@ static zend_always_inline const char *zend_get_unmangled_property_name(const zen
 #define ZEND_FUNCTION_DTOR zend_function_dtor
 #define ZEND_CLASS_DTOR destroy_zend_class
 
+typedef zend_bool (*zend_needs_live_range_cb)(zend_op_array *op_array, zend_op *opline);
+ZEND_API void zend_recalc_live_ranges(
+	zend_op_array *op_array, zend_needs_live_range_cb needs_live_range);
+
 ZEND_API int pass_two(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
@@ -909,6 +913,7 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_LAST_CATCH			(1<<0)
 
 #define ZEND_FREE_ON_RETURN     (1<<0)
+#define ZEND_FREE_SWITCH        (1<<1)
 
 #define ZEND_SEND_BY_VAL     0
 #define ZEND_SEND_BY_REF     1

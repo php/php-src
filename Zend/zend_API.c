@@ -3685,6 +3685,133 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 }
 /* }}} */
 
+ZEND_API int zend_try_assign_typed_ref_ex(zend_reference *ref, zval *val, zend_bool strict) /* {{{ */
+{
+	if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, val, strict))) {
+		zval_ptr_dtor(val);
+		return FAILURE;
+	} else {
+		zval_ptr_dtor(&ref->val);
+		ZVAL_COPY_VALUE(&ref->val, val);
+		return SUCCESS;
+	}
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref(zend_reference *ref, zval *val) /* {{{ */
+{
+	return zend_try_assign_typed_ref_ex(ref, val, ZEND_ARG_USES_STRICT_TYPES());
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_null(zend_reference *ref) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_NULL(&tmp);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_bool(zend_reference *ref, zend_bool val) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_BOOL(&tmp, val);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_long(zend_reference *ref, zend_long lval) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_LONG(&tmp, lval);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_double(zend_reference *ref, double dval) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_DOUBLE(&tmp, dval);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_empty_string(zend_reference *ref) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_EMPTY_STRING(&tmp);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_str(zend_reference *ref, zend_string *str) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_STR(&tmp, str);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_string(zend_reference *ref, const char *string) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_STRING(&tmp, string);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_stringl(zend_reference *ref, const char *string, size_t len) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_STRINGL(&tmp, string, len);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_arr(zend_reference *ref, zend_array *arr) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_ARR(&tmp, arr);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_res(zend_reference *ref, zend_resource *res) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_RES(&tmp, res);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_zval(zend_reference *ref, zval *zv) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_COPY_VALUE(&tmp, zv);
+	return zend_try_assign_typed_ref(ref, &tmp);
+}
+/* }}} */
+
+ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, zend_bool strict) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_COPY_VALUE(&tmp, zv);
+	return zend_try_assign_typed_ref_ex(ref, &tmp, strict);
+}
+/* }}} */
+
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
 {
 	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, 0);

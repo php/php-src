@@ -184,18 +184,25 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 /* If a live range starts in a reachable block and ends in an unreachable block, we should
  * not eliminate the latter. While it cannot be reached, the FREE opcode of the loop var
  * is necessary for the correctness of temporary compaction. */
-static zend_bool kept_alive_by_live_range(scdf_ctx *scdf, uint32_t block) {
+static zend_bool kept_alive_by_loop_var_free(scdf_ctx *scdf, uint32_t block_idx) {
 	uint32_t i;
 	const zend_op_array *op_array = scdf->op_array;
 	const zend_cfg *cfg = &scdf->ssa->cfg;
-	for (i = 0; i < op_array->last_live_range; i++) {
-		zend_live_range *live_range = &op_array->live_range[i];
-		uint32_t start_block = cfg->map[live_range->start];
-		uint32_t end_block = cfg->map[live_range->end];
-
-		if (end_block == block && start_block != block
-				&& zend_bitset_in(scdf->executable_blocks, start_block)) {
-			return 1;
+	const zend_basic_block *block = &cfg->blocks[block_idx];
+	for (i = block->start; i < block->start + block->len; i++) {
+		zend_op *opline = &op_array->opcodes[i];
+		if (opline->opcode == ZEND_FE_FREE ||
+				(opline->opcode == ZEND_FREE && opline->extended_value == ZEND_FREE_SWITCH)) {
+			int ssa_var = scdf->ssa->ops[i].op1_use;
+			if (ssa_var >= 0) {
+				int op_num = scdf->ssa->vars[ssa_var].definition;
+				uint32_t def_block;
+				ZEND_ASSERT(op_num >= 0);
+				def_block = cfg->map[op_num];
+				if (zend_bitset_in(scdf->executable_blocks, def_block)) {
+					return 1;
+				}
+			}
 		}
 	}
 	return 0;
@@ -209,10 +216,13 @@ int scdf_remove_unreachable_blocks(scdf_ctx *scdf) {
 	int i;
 	int removed_ops = 0;
 
+	if (!(ssa->cfg.flags & ZEND_FUNC_FREE_LOOP_VAR)) {
+		return 0;
+	}
 	for (i = 0; i < ssa->cfg.blocks_count; i++) {
 		if (!zend_bitset_in(scdf->executable_blocks, i)
 				&& (ssa->cfg.blocks[i].flags & ZEND_BB_REACHABLE)
-				&& !kept_alive_by_live_range(scdf, i)) {
+				&& !kept_alive_by_loop_var_free(scdf, i)) {
 			removed_ops += ssa->cfg.blocks[i].len;
 			zend_ssa_remove_block(scdf->op_array, ssa, i);
 		}

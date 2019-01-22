@@ -547,18 +547,246 @@ static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const ze
 	return opline->opcode == ZEND_BRK ? jmp_to->brk : jmp_to->cont;
 }
 
+static void emit_live_range(
+		zend_op_array *op_array, uint32_t var_num, uint32_t start, uint32_t end,
+		zend_needs_live_range_cb needs_live_range) {
+	zend_op *def_opline = &op_array->opcodes[start], *orig_def_opline = def_opline;
+	zend_op *use_opline = &op_array->opcodes[end];
+	zend_live_range *range;
+	uint32_t kind;
+
+	switch (def_opline->opcode) {
+		/* These should never be the first def. */
+		case ZEND_ADD_ARRAY_ELEMENT:
+		case ZEND_ROPE_ADD:
+			ZEND_ASSERT(0);
+			return;
+		/* Result is boolean, it doesn't have to be destroyed. */
+		case ZEND_JMPZ_EX:
+		case ZEND_JMPNZ_EX:
+		case ZEND_BOOL:
+		case ZEND_BOOL_NOT:
+		/* Classes don't have to be destroyed. */
+		case ZEND_FETCH_CLASS:
+		case ZEND_DECLARE_ANON_CLASS:
+		case ZEND_DECLARE_ANON_INHERITED_CLASS:
+		/* FAST_CALLs don't have to be destroyed. */
+		case ZEND_FAST_CALL:
+			return;
+		case ZEND_BEGIN_SILENCE:
+			kind = ZEND_LIVE_SILENCE;
+			start++;
+			break;
+		case ZEND_ROPE_INIT:
+			kind = ZEND_LIVE_ROPE;
+			/* ROPE live ranges include the generating opcode. */
+			def_opline--;
+			break;
+		case ZEND_FE_RESET_R:
+		case ZEND_FE_RESET_RW:
+			kind = ZEND_LIVE_LOOP;
+			start++;
+			break;
+		/* Objects created via ZEND_NEW are only fully initialized
+		 * after the DO_FCALL (constructor call). */
+		case ZEND_NEW: {
+			int level = 0;
+			while (def_opline + 1 < use_opline) {
+				def_opline++;
+				start++;
+				if (def_opline->opcode == ZEND_DO_FCALL) {
+					if (level == 0) {
+						break;
+					}
+					level--;
+				} else {
+					switch (def_opline->opcode) {
+						case ZEND_INIT_FCALL:
+						case ZEND_INIT_FCALL_BY_NAME:
+						case ZEND_INIT_NS_FCALL_BY_NAME:
+						case ZEND_INIT_DYNAMIC_CALL:
+						case ZEND_INIT_USER_CALL:
+						case ZEND_INIT_METHOD_CALL:
+						case ZEND_INIT_STATIC_METHOD_CALL:
+						case ZEND_NEW:
+							level++;
+							break;
+						case ZEND_DO_ICALL:
+						case ZEND_DO_UCALL:
+						case ZEND_DO_FCALL_BY_NAME:
+							level--;
+							break;
+					}
+				}
+			}
+			if (start + 1 == end) {
+				/* Trivial live-range, no need to store it. */
+				return;
+			}
+			/* break missing intentionally */
+		default:
+			start++;
+			kind = ZEND_LIVE_TMPVAR;
+			break;
+		}
+	}
+
+	/* Check hook to determine whether a live range is necessary, e.g. based on type info. */
+	if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
+		return;
+	}
+
+	op_array->last_live_range++;
+	op_array->live_range = erealloc(op_array->live_range,
+		sizeof(zend_live_range) * op_array->last_live_range);
+
+	ZEND_ASSERT(start < end);
+	range = &op_array->live_range[op_array->last_live_range - 1];
+	range->var = (uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
+	range->var |= kind;
+	range->start = start;
+	range->end = end;
+}
+
+static zend_bool is_fake_def(zend_op *opline) {
+	/* These opcodes only modify the result, not create it. */
+	return opline->opcode == ZEND_ROPE_ADD
+		|| opline->opcode == ZEND_ADD_ARRAY_ELEMENT;
+}
+
+static zend_bool keeps_op1_alive(zend_op *opline) {
+	/* These opcodes don't consume their OP1 operand,
+	 * it is later freed by something else. */
+	if (opline->opcode == ZEND_CASE
+	 || opline->opcode == ZEND_SWITCH_LONG
+	 || opline->opcode == ZEND_FETCH_LIST_R) {
+		return 1;
+	}
+	ZEND_ASSERT(opline->opcode != ZEND_SWITCH_STRING
+		&& opline->opcode != ZEND_FE_FETCH_R
+		&& opline->opcode != ZEND_FE_FETCH_RW
+		&& opline->opcode != ZEND_FETCH_LIST_W
+		&& opline->opcode != ZEND_VERIFY_RETURN_TYPE
+		&& opline->opcode != ZEND_BIND_LEXICAL
+		&& opline->opcode != ZEND_ROPE_ADD);
+	return 0;
+}
+
 /* Live ranges must be sorted by increasing start opline */
 static int cmp_live_range(const zend_live_range *a, const zend_live_range *b) {
 	return a->start - b->start;
 }
 static void swap_live_range(zend_live_range *a, zend_live_range *b) {
-	zend_live_range tmp = *a;
-	*a = *b;
-	*b = tmp;
+	uint32_t tmp;
+	tmp = a->var;
+	a->var = b->var;
+	b->var = tmp;
+	tmp = a->start;
+	a->start = b->start;
+	b->start = tmp;
+	tmp = a->end;
+	a->end = b->end;
+	b->end = tmp;
 }
-static void zend_sort_live_ranges(zend_op_array *op_array) {
-	zend_sort(op_array->live_range, op_array->last_live_range, sizeof(zend_live_range),
-			(compare_func_t) cmp_live_range, (swap_func_t) swap_live_range);
+
+static void zend_calc_live_ranges(
+		zend_op_array *op_array, zend_needs_live_range_cb needs_live_range) {
+	uint32_t opnum = op_array->last;
+	zend_op *opline = &op_array->opcodes[opnum];
+	ALLOCA_FLAG(use_heap)
+	uint32_t var_offset = op_array->last_var;
+	uint32_t *last_use = do_alloca(sizeof(uint32_t) * op_array->T, use_heap);
+	memset(last_use, -1, sizeof(uint32_t) * op_array->T);
+
+	ZEND_ASSERT(!op_array->live_range);
+	while (opnum > 0) {
+		opnum--;
+		opline--;
+
+		if ((opline->result_type & (IS_TMP_VAR|IS_VAR)) && !is_fake_def(opline)) {
+			uint32_t var_num = EX_VAR_TO_NUM(opline->result.var) - var_offset;
+			/* Defs without uses can occur for two reasons: Either because the result is
+			 * genuinely unused (e.g. omitted FREE opcode for an unused boolean result), or
+			 * because there are multiple defining opcodes (e.g. JMPZ_EX and QM_ASSIGN), in
+			 * which case the last one starts the live range. As such, we can simply ignore
+			 * missing uses here. */
+			if (EXPECTED(last_use[var_num] != (uint32_t) -1)) {
+				/* Skip trivial live-range */
+				if (opnum + 1 != last_use[var_num]) {
+					uint32_t num;
+
+#if 1
+					/* OP_DATA uses only op1 operand */
+					ZEND_ASSERT(opline->opcode != ZEND_OP_DATA);
+					num = opnum;
+#else
+					/* OP_DATA is really part of the previous opcode. */
+					num = opnum - (opline->opcode == ZEND_OP_DATA);
+#endif
+					emit_live_range(op_array, var_num, num, last_use[var_num], needs_live_range);
+				}
+				last_use[var_num] = (uint32_t) -1;
+			}
+		}
+
+		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR))) {
+			uint32_t var_num = EX_VAR_TO_NUM(opline->op1.var) - var_offset;
+			if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
+				if (EXPECTED(!keeps_op1_alive(opline))) {
+					/* OP_DATA is really part of the previous opcode. */
+					last_use[var_num] = opnum - (opline->opcode == ZEND_OP_DATA);
+				}
+			}
+		}
+		if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
+			uint32_t var_num = EX_VAR_TO_NUM(opline->op2.var) - var_offset;
+			if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
+#if 1
+				/* OP_DATA uses only op1 operand */
+				ZEND_ASSERT(opline->opcode != ZEND_OP_DATA);
+				last_use[var_num] = opnum;
+#else
+				/* OP_DATA is really part of the previous opcode. */
+				last_use[var_num] = opnum - (opline->opcode == ZEND_OP_DATA);
+#endif
+			}
+		}
+	}
+
+	if (op_array->last_live_range > 1) {
+		zend_live_range *r1 = op_array->live_range;
+		zend_live_range *r2 = r1 + op_array->last_live_range - 1;
+
+		/* In most cases we need just revert the array */
+		while (r1 < r2) {
+			swap_live_range(r1, r2);
+			r1++;
+			r2--;
+		}
+
+		r1 = op_array->live_range;
+		r2 = r1 + op_array->last_live_range - 1;
+		while (r1 < r2) {
+			if (r1->start > (r1+1)->start) {
+				zend_sort(r1, r2 - r1 + 1, sizeof(zend_live_range),
+					(compare_func_t) cmp_live_range, (swap_func_t) swap_live_range);
+				break;
+			}
+			r1++;
+		}
+	}
+
+	free_alloca(last_use, use_heap);
+}
+
+ZEND_API void zend_recalc_live_ranges(
+		zend_op_array *op_array, zend_needs_live_range_cb needs_live_range) {
+	/* We assume that we never create live-ranges where there were none before. */
+	ZEND_ASSERT(op_array->live_range);
+	efree(op_array->live_range);
+	op_array->live_range = NULL;
+	op_array->last_live_range = 0;
+	zend_calc_live_ranges(op_array, needs_live_range);
 }
 
 ZEND_API int pass_two(zend_op_array *op_array)
@@ -726,16 +954,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		opline++;
 	}
 
-	if (op_array->live_range) {
-		int i;
-
-		zend_sort_live_ranges(op_array);
-		for (i = 0; i < op_array->last_live_range; i++) {
-			op_array->live_range[i].var =
-				(uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + (op_array->live_range[i].var / sizeof(zval))) |
-				(op_array->live_range[i].var & ZEND_LIVE_MASK);
-		}
-	}
+	zend_calc_live_ranges(op_array, NULL);
 
 	return 0;
 }

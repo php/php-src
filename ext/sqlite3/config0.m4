@@ -6,7 +6,6 @@ PHP_ARG_WITH(sqlite3, whether to enable the SQLite3 extension,
                           SQLite3 installation directory.], yes)
 
 if test $PHP_SQLITE3 != "no"; then
-  sqlite3_extra_sources=""
   PHP_SQLITE3_CFLAGS=" -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 "
 
   dnl when running phpize enable_maintainer_zts is not available
@@ -62,7 +61,7 @@ if test $PHP_SQLITE3 != "no"; then
 
   AC_DEFINE(HAVE_SQLITE3,1,[ ])
 
-  sqlite3_sources="sqlite3.c $sqlite3_extra_sources"
+  sqlite3_sources="sqlite3.c"
 
   PHP_NEW_EXTENSION(sqlite3, $sqlite3_sources, $ext_shared,,$PHP_SQLITE3_CFLAGS)
   PHP_ADD_BUILD_DIR([$ext_builddir/libsqlite])

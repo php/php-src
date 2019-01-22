@@ -514,7 +514,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 		if (i == len ||
 			(i + 1 == len && path[i] == '.')) {
 			/* remove double slashes and '.' */
-			len = i - 1;
+			len = EXPECTED(i > 0) ? i - 1 : 0;
 			is_dir = 1;
 			continue;
 		} else if (i + 2 == len && path[i] == '.' && path[i+1] == '.') {

@@ -132,6 +132,7 @@ const char * gdJpegGetVersionString()
 	}
 }
 
+static int _gdImageJpegCtx(gdImagePtr im, gdIOCtx *outfile, int quality);
 
 /*
  * Write IM to OUTFILE as a JFIF-formatted JPEG image, using quality
@@ -153,8 +154,11 @@ void *gdImageJpegPtr (gdImagePtr im, int *size, int quality)
 {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx (2048, NULL);
-	gdImageJpegCtx (im, out, quality);
-	rv = gdDPExtractData (out, size);
+	if (!_gdImageJpegCtx(im, out, quality)) {
+		rv = gdDPExtractData(out, size);
+	} else {
+		rv = NULL;
+	}
 	out->gd_free (out);
 
 	return rv;
@@ -163,6 +167,12 @@ void *gdImageJpegPtr (gdImagePtr im, int *size, int quality)
 void jpeg_gdIOCtx_dest (j_compress_ptr cinfo, gdIOCtx * outfile);
 
 void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
+{
+	_gdImageJpegCtx(im, outfile, quality);
+}
+
+/* returns 0 on success, 1 on failure */
+static int _gdImageJpegCtx(gdImagePtr im, gdIOCtx *outfile, int quality)
 {
 	struct jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr jerr;
@@ -184,7 +194,7 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 		if (row) {
 			gdFree (row);
 		}
-		return;
+		return 1;
 	}
 
 	cinfo.err->error_exit = fatal_jpeg_error;
@@ -277,6 +287,7 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	jpeg_finish_compress (&cinfo);
 	jpeg_destroy_compress (&cinfo);
 	gdFree (row);
+	return 0;
 }
 
 gdImagePtr gdImageCreateFromJpeg (FILE * inFile)
