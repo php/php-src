@@ -83,8 +83,8 @@
 #include <stddef.h>
 #include <string.h>
 #include <inttypes.h>
-#include <endian.h>
 
+#include "brg_endian.h"
 #include "mbfilter.h"
 #include "mbfl_filter_output.h"
 #include "mbfilter_8bit.h"
@@ -662,9 +662,9 @@ size_t mbfl_strlen(mbfl_string *string)
 	} else if (mbfl_encoding->mblen_table != NULL) {
 		char unsigned const *mbtab;
 		if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
-			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+			mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
 		} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
-			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+			mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
 		} else {
 			mbtab = mbfl_encoding->mblen_table;
 		}
@@ -797,9 +797,9 @@ size_t mbfl_oddlen(mbfl_string *string)
 	} else if (mbfl_encoding->mblen_table != NULL) {
 		char unsigned const *mbtab;
 		if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
-			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+			mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
 		} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
-			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+			mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
 		} else {
 			mbtab = mbfl_encoding->mblen_table;
 		}
@@ -1159,9 +1159,9 @@ mbfl_string *mbfl_substr(mbfl_string *string, mbfl_string *result, size_t from, 
 		} else {
 			char unsigned const *mbtab;
 			if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
-				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+				mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
 			} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
-				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+				mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
 			} else {
 				mbtab = mbfl_encoding->mblen_table;
 			}
@@ -1207,9 +1207,9 @@ mbfl_string *mbfl_substr(mbfl_string *string, mbfl_string *result, size_t from, 
 		} else {
 			char unsigned const *mbtab;
 			if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
-				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+				mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
 			} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
-				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+				mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
 			} else {
 				mbtab = mbfl_encoding->mblen_table;
 			}
@@ -1380,9 +1380,9 @@ mbfl_string *mbfl_strcut(
 		} else if (mbfl_encoding->mblen_table != NULL) {
 			char unsigned const *mbtab;
 			if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
-				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+				mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
 			} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
-				mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+				mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
 			} else {
 				mbtab = mbfl_encoding->mblen_table;
 			}

@@ -33,8 +33,8 @@
 #endif
 
 #include <stddef.h>
-#include <endian.h>
 
+#include "brg_endian.h"
 #include "mbfl_encoding.h"
 #include "mbfl_allocators.h"
 #include "mbfl_filter_output.h"

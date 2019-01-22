@@ -35,6 +35,7 @@
 #include "main/php_output.h"
 #include "ext/standard/info.h"
 
+#include "libmbfl/mbfl/brg_endian.h"
 #include "libmbfl/mbfl/mbfl_allocators.h"
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
@@ -2386,9 +2387,9 @@ PHP_FUNCTION(mb_str_split)
 	} else if (mbfl_encoding->mblen_table != NULL) {
 		char unsigned const *mbtab;
 		if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
-			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+			mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
 		} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
-			mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+			mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
 		} else {
 			mbtab = mbfl_encoding->mblen_table;
 		}
@@ -5248,9 +5249,9 @@ MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *e
 			if (enc->mblen_table != NULL) {
 				char unsigned const *mbtab;
 				if (enc->flag & MBFL_ENCTYPE_MWC2BE){
-					mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? enc->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
+					mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? enc->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
 				} else if (enc->flag & MBFL_ENCTYPE_MWC2LE) {
-					mbtab = __BYTE_ORDER == __LITTLE_ENDIAN ? enc->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+					mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? enc->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
 				} else {
 					mbtab = enc->mblen_table;
 				}
