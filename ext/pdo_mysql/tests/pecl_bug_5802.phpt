@@ -1,7 +1,7 @@
 --TEST--
 PDO MySQL PECL Bug #5802 (bindParam/bindValue retain the is_null flag)
 --SKIPIF--
-<?php # vim:ft=php:
+<?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
 require dirname(__FILE__) . '/config.inc';
 require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';

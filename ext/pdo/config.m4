@@ -1,5 +1,4 @@
 dnl config.m4 for extension pdo
-dnl vim:se ts=2 sw=2 et:
 
 AC_DEFUN([PHP_PDO_PEAR_CHECK],[
   pdo_running_under_pear=0
