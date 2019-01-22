@@ -262,12 +262,3 @@ PHP_FUNCTION(output_add_rewrite_var);
 PHP_FUNCTION(output_reset_rewrite_vars);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

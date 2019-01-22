@@ -111,13 +111,3 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 #endif /* ZEND_SIGNALS */
 
 #endif /* ZEND_SIGNAL_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

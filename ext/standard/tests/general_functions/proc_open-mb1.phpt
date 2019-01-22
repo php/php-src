@@ -1,7 +1,7 @@
 --TEST--
 proc_open without bypass_shell subprocess parameter passing
 --SKIPIF--
-<?php # vim:syn=php
+<?php
 if (php_sapi_name() != "cli") die('skip CLI only test');
 if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 ?>

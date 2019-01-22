@@ -91,12 +91,3 @@ const php_hash_ops php_hash_crc32b_ops = {
 	sizeof(PHP_CRC32_CTX),
 	0
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

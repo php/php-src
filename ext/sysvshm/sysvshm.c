@@ -444,12 +444,3 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 /* }}} */
 
 #endif /* HAVE_SYSVSHM */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

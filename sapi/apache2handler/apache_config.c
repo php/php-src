@@ -233,12 +233,3 @@ void *create_php_config(apr_pool_t *p, char *dummy)
 	apr_pool_cleanup_register(p, newx, destroy_php_config, apr_pool_cleanup_null);
 	return (void *) newx;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

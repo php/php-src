@@ -223,12 +223,3 @@ fnv_64_buf(void *buf, size_t len, uint64_t hval, int alternate)
 	/* return our new hash value */
 	return hval;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

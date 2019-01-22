@@ -40,10 +40,3 @@ unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint32_t len)
 unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_script);
 
 #endif /* ZEND_ACCELERATOR_UTIL_FUNCS_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

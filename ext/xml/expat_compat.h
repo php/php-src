@@ -157,10 +157,3 @@ PHP_XML_API void XML_ParserFree(XML_Parser);
 #endif /* HAVE_LIBEXPAT */
 
 #endif /* PHP_EXPAT_COMPAT_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

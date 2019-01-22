@@ -2,7 +2,6 @@
 basic stream filter tests
 --FILE--
 <?php
-# vim600:syn=php:
 
 $text = "Hello There!";
 $filters = array("string.rot13", "string.toupper", "string.tolower");

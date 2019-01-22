@@ -1773,11 +1773,3 @@ int zend_func_info_shutdown(void)
 	}
 	return SUCCESS;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -191,10 +191,3 @@ void php_ibase_service_minit(INIT_FUNC_ARGS);
 #endif
 
 #endif /* PHP_IBASE_INCLUDES_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

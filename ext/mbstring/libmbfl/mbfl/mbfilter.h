@@ -1,7 +1,3 @@
-/* charset=UTF-8
- * vim: encoding=utf-8:
- * */
-
 /*
  * "streamable kanji code filter and converter"
  *

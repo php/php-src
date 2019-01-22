@@ -73,12 +73,3 @@ PHP_FUNCTION(class_uses);
 PHPAPI zend_string *php_spl_object_hash(zval *obj);
 
 #endif /* PHP_SPL_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

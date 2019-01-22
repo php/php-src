@@ -2518,12 +2518,3 @@ PHP_FUNCTION(sys_get_temp_dir)
 	RETURN_STRING((char *)php_get_temporary_directory());
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

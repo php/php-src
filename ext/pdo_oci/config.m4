@@ -1,5 +1,4 @@
 dnl config.m4 for extension pdo_oci
-dnl vim:et:sw=2:ts=2:
 
 if test -z "$SED"; then
   PHP_PDO_OCI_SED="sed";

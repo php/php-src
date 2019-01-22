@@ -73,11 +73,3 @@ extern zend_module_entry php_zlib_module_entry;
 #define phpext_zlib_ptr zlib_module_ptr
 
 #endif /* PHP_ZLIB_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

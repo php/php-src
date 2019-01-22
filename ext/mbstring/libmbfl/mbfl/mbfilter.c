@@ -2892,10 +2892,3 @@ mbfl_html_numeric_entity(
 
 	return result;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

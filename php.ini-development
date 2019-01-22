@@ -1931,7 +1931,3 @@ ldap.max_links = -1
 ; "false"   - always disabled
 ; "true"    - always enabled
 ;ffi.enable=preload
-
-; Local Variables:
-; tab-width: 4
-; End:

@@ -231,11 +231,3 @@ typedef struct _phar_zip_dir_end {
 	char comment_len[2];      /* .ZIP file comment length        2 bytes */
 /* .ZIP file comment       (variable size) */
 } phar_zip_dir_end;
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

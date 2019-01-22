@@ -66,11 +66,3 @@ static inline const php_password_algo* php_password_algo_identify(const zend_str
 
 
 #endif
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
