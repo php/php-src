@@ -327,5 +327,3 @@ if test "$PHP_MBSTRING" != "no"; then
   PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION
 fi
-
-# vim600: sts=2 sw=2 et

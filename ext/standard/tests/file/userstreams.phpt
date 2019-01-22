@@ -2,7 +2,6 @@
 User-space streams
 --FILE--
 <?php
-# vim600:syn=php:
 
 /* This is a fairly aggressive test that looks at
  * user streams and also gives the seek/gets/buffer

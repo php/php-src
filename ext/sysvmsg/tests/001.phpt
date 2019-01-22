@@ -1,7 +1,7 @@
 --TEST--
 send/receive serialized message.
 --SKIPIF--
-<?php // vim600:syn=php
+<?php
 if (!extension_loaded("sysvmsg")) print "skip"; ?>
 --FILE--
 <?php
