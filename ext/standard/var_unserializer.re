@@ -26,8 +26,10 @@
 #define VAR_DTOR_ENTRIES_MAX 255 /* 256 - offsetof(var_dtor_entries, data) / sizeof(zval) */
 #define VAR_ENTRIES_DBG 0
 
-/* VAR_FLAG used in var_dtor entries to signify an entry on which __wakeup should be called */
+/* VAR_FLAG used in var_dtor entries to signify an entry on which
+ * __wakeup/__unserialize should be called */
 #define VAR_WAKEUP_FLAG 1
+#define VAR_UNSERIALIZE_FLAG 2
 
 typedef struct {
 	zend_long used_slots;
@@ -191,9 +193,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	zend_long i;
 	var_entries *var_hash = (*var_hashx)->entries.next;
 	var_dtor_entries *var_dtor_hash = (*var_hashx)->first_dtor;
-	zend_bool wakeup_failed = 0;
-	zval wakeup_name;
+	zend_bool delayed_call_failed = 0;
+	zval wakeup_name, unserialize_name;
 	ZVAL_UNDEF(&wakeup_name);
+	ZVAL_UNDEF(&unserialize_name);
 
 #if VAR_ENTRIES_DBG
 	fprintf(stderr, "var_destroy(%ld)\n", var_hash?var_hash->used_slots:-1L);
@@ -212,9 +215,9 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 			fprintf(stderr, "var_destroy dtor(%p, %ld)\n", var_dtor_hash->data[i], Z_REFCOUNT_P(var_dtor_hash->data[i]));
 #endif
 
-			/* Perform delayed __wakeup calls */
 			if (Z_EXTRA_P(zv) == VAR_WAKEUP_FLAG) {
-				if (!wakeup_failed) {
+				/* Perform delayed __wakeup calls */
+				if (!delayed_call_failed) {
 					zval retval;
 					if (Z_ISUNDEF(wakeup_name)) {
 						ZVAL_STRINGL(&wakeup_name, "__wakeup", sizeof("__wakeup") - 1);
@@ -222,11 +225,33 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 					BG(serialize_lock)++;
 					if (call_user_function(NULL, zv, &wakeup_name, &retval, 0, 0) == FAILURE || Z_ISUNDEF(retval)) {
-						wakeup_failed = 1;
+						delayed_call_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
 					BG(serialize_lock)--;
 
+					zval_ptr_dtor(&retval);
+				} else {
+					GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
+				}
+			} else if (Z_EXTRA_P(zv) == VAR_UNSERIALIZE_FLAG) {
+				/* Perform delayed __unserialize calls */
+				if (!delayed_call_failed) {
+					zval retval, param;
+					ZVAL_COPY(&param, &var_dtor_hash->data[i + 1]);
+
+					if (Z_ISUNDEF(unserialize_name)) {
+						ZVAL_STRINGL(&unserialize_name, "__unserialize", sizeof("__unserialize") - 1);
+					}
+
+					BG(serialize_lock)++;
+					if (call_user_function(CG(function_table), zv, &unserialize_name, &retval, 1, &param) == FAILURE || Z_ISUNDEF(retval)) {
+						delayed_call_failed = 1;
+						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
+					}
+					BG(serialize_lock)--;
+
+					zval_ptr_dtor(&param);
 					zval_ptr_dtor(&retval);
 				} else {
 					GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
@@ -241,6 +266,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	}
 
 	zval_ptr_dtor_nogc(&wakeup_name);
+	zval_ptr_dtor_nogc(&unserialize_name);
 
 	if ((*var_hashx)->ref_props) {
 		zend_hash_destroy((*var_hashx)->ref_props);
@@ -601,41 +627,38 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	return 1;
 }
 
-static inline zend_long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
-{
-	zend_long elements;
-
-	if( *p >= max - 2) {
-		zend_error(E_WARNING, "Bad unserialize data");
-		return -1;
-	}
-
-	elements = parse_iv2((*p) + 2, p);
-
-	(*p) += 2;
-
-	if (ce->serialize == NULL) {
-		object_init_ex(rval, ce);
-	} else {
-		/* If this class implements Serializable, it should not land here but in object_custom(). The passed string
-		obviously doesn't descend from the regular serializer. */
-		zend_error(E_WARNING, "Erroneous data format for unserializing '%s'", ZSTR_VAL(ce->name));
-		return -1;
-	}
-
-	return elements;
-}
-
 #ifdef PHP_WIN32
 # pragma optimize("", off)
 #endif
-static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
+static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_bool has_unserialize)
 {
 	HashTable *ht;
 	zend_bool has_wakeup;
 
-	if (Z_TYPE_P(rval) != IS_OBJECT) {
-		return 0;
+	if (has_unserialize) {
+		zval ary, *tmp;
+
+		if (elements >= HT_MAX_SIZE) {
+			return 0;
+		}
+
+		array_init_size(&ary, elements);
+		if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements, NULL)) {
+			ZVAL_DEREF(rval);
+			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
+			return 0;
+		}
+
+		/* Delay __unserialize() call until end of serialization. We use two slots here to
+		 * store both the object and the unserialized data array. */
+		ZVAL_DEREF(rval);
+		tmp = var_tmp_var(var_hash);
+		ZVAL_COPY(tmp, rval);
+		Z_EXTRA_P(tmp) = VAR_UNSERIALIZE_FLAG;
+		tmp = var_tmp_var(var_hash);
+		ZVAL_COPY_VALUE(tmp, &ary);
+
+		return finish_nested_data(UNSERIALIZE_PASSTHRU);
 	}
 
 	has_wakeup = Z_OBJCE_P(rval) != PHP_IC_ENTRY
@@ -954,9 +977,9 @@ object ":" uiv ":" ["]	{
 	char *str;
 	zend_string *class_name;
 	zend_class_entry *ce;
-	int incomplete_class = 0;
-
-	int custom_object = 0;
+	zend_bool incomplete_class = 0;
+	zend_bool custom_object = 0;
+	zend_bool has_unserialize = 0;
 
 	zval user_func;
 	zval retval;
@@ -1085,19 +1108,39 @@ object ":" uiv ":" ["]	{
 		return ret;
 	}
 
-	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
-
-	if (elements < 0) {
-	   zend_string_release_ex(class_name, 0);
-	   return 0;
+	if (*p >= max - 2) {
+		zend_error(E_WARNING, "Bad unserialize data");
+		zend_string_release_ex(class_name, 0);
+		return 0;
 	}
 
+	elements = parse_iv2(*p + 2, p);
+	if (elements < 0) {
+		zend_string_release_ex(class_name, 0);
+		return 0;
+	}
+	*p += 2;
+
+	has_unserialize = !incomplete_class
+		&& zend_hash_str_exists(&ce->function_table, "__unserialize", sizeof("__unserialize")-1);
+
+	/* If this class implements Serializable, it should not land here but in object_custom().
+	 * The passed string obviously doesn't descend from the regular serializer. However, if
+	 * there is both Serializable::unserialize() and __unserialize(), then both may be used,
+	 * depending on the serialization format. */
+	if (ce->serialize != NULL && !has_unserialize) {
+		zend_error(E_WARNING, "Erroneous data format for unserializing '%s'", ZSTR_VAL(ce->name));
+		zend_string_release_ex(class_name, 0);
+		return 0;
+	}
+
+	object_init_ex(rval, ce);
 	if (incomplete_class) {
 		php_store_class_name(rval, ZSTR_VAL(class_name), len2);
 	}
 	zend_string_release_ex(class_name, 0);
 
-	return object_common2(UNSERIALIZE_PASSTHRU, elements);
+	return object_common(UNSERIALIZE_PASSTHRU, elements, has_unserialize);
 }
 
 "}" {

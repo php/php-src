@@ -107,6 +107,7 @@ PHP 7.4 UPGRADE NOTES
     This will enforce that $user->id can only be assigned integer and
     $user->name can only be assigned strings. For more information see the
     RFC: https://wiki.php.net/rfc/typed_properties_v2
+
   . Added support for coalesce assign (??=) operator. For example:
 
         $array['key'] ??= computeDefault();
@@ -155,6 +156,20 @@ PHP 7.4 UPGRADE NOTES
 - Standard:
   . strip_tags() now also accepts an array of allowed tags: Instead of
     strip_tags($str, '<a><p>') you can now write strip_tags($str, ['a', 'p']).
+
+  . A new mechanism for custom object serialization has been added, which
+    uses two new magic methods:
+
+        // Returns array containing all the necessary state of the object.
+        public function __serialize(): array;
+
+        // Restores the object state from the given data array.
+        public function __unserialize(array $data): void;
+
+    The new serialization mechanism supersedes the Serializable interface,
+    which will be deprecated in the future.
+
+    RFC: https://wiki.php.net/rfc/custom_object_serialization
 
 ========================================
 3. Changes in SAPI modules
