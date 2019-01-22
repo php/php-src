@@ -385,12 +385,3 @@ static PHP_FUNCTION(json_last_error_msg)
 	RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

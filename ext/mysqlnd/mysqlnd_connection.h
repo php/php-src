@@ -76,12 +76,3 @@ PHPAPI void	mysqlnd_error_info_free_contents(MYSQLND_ERROR_INFO * const info);
 PHPAPI void mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state);
 
 #endif /* MYSQLND_CONNECTION_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

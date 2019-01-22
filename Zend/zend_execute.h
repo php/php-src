@@ -473,13 +473,3 @@ ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *p
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -182,10 +182,3 @@ PHP_FUNCTION(openssl_get_cert_locations);
 
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

@@ -65,11 +65,3 @@ extern const php_stream_ops php_stream_bz2io_ops;
 #define PHP_BZ2_FILTER_DEFAULT_WORKFACTOR       0
 
 #endif
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

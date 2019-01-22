@@ -330,12 +330,3 @@ _mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * met
 	DBG_RETURN((void *)((char *)meta + sizeof(MYSQLND_RES_METADATA) + plugin_id * sizeof(void *)));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

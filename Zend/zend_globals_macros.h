@@ -67,13 +67,3 @@ extern ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 END_EXTERN_C()
 
 #endif /* ZEND_GLOBALS_MACROS_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

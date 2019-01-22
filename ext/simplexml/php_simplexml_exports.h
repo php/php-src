@@ -55,13 +55,3 @@ PHP_SXE_API void php_sxe_rewind_iterator(php_sxe_object *sxe);
 PHP_SXE_API void php_sxe_move_forward_iterator(php_sxe_object *sxe);
 
 #endif /* PHP_SIMPLEXML_EXPORTS_H */
-
-/**
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * indent-tabs-mode: t
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

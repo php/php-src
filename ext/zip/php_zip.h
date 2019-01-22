@@ -80,12 +80,3 @@ php_stream *php_stream_zip_open(const char *filename, const char *path, const ch
 extern const php_stream_wrapper php_stream_zip_wrapper;
 
 #endif	/* PHP_ZIP_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -36,13 +36,3 @@ int zend_sprintf(char *buffer, const char *format, ...)
 	return len;
 }
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

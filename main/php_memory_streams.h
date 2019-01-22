@@ -63,12 +63,3 @@ extern PHPAPI const php_stream_wrapper php_stream_rfc2397_wrapper;
 #define PHP_STREAM_IS_TEMP   &php_stream_temp_ops
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -562,12 +562,3 @@ zend_module_entry php_apache_module = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

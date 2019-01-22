@@ -503,12 +503,3 @@ PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, in
 	}
 	return filter;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

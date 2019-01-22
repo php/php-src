@@ -116,10 +116,3 @@ PHP_FUNCTION(odbc_statistics);
 #define phpext_odbc_ptr odbc_module_ptr
 
 #endif /* PHP_ODBC_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

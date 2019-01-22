@@ -1017,12 +1017,3 @@ static const php_cli_server_ext_mime_type_pair mime_type_map[] = {
 };
 
 #endif /* PHP_CLI_SERVER_MIME_TYPE_MAP_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

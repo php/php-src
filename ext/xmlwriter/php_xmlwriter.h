@@ -54,12 +54,3 @@ static inline ze_xmlwriter_object *php_xmlwriter_fetch_object(zend_object *obj) 
 #define Z_XMLWRITER_P(zv) php_xmlwriter_fetch_object(Z_OBJ_P((zv)))
 
 #endif	/* PHP_XMLWRITER_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

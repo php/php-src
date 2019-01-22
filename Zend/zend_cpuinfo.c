@@ -107,11 +107,3 @@ ZEND_API int zend_cpu_supports(zend_cpu_feature feature) {
 		return (cpuinfo.ecx & feature);
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

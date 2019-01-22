@@ -602,12 +602,3 @@ int inifile_append(inifile *dba, const key_type *key, const val_type *value)
 	return inifile_delete_replace_append(dba, key, value, 1, NULL);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

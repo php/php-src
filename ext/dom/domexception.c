@@ -112,12 +112,3 @@ void php_dom_throw_error(int error_code, int strict_error)
 /* }}} end php_dom_throw_error */
 
 #endif /* HAVE_LIBXML && HAVE_DOM */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

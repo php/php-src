@@ -5196,12 +5196,3 @@ static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding) /* {{{ 
 /* }}} */
 
 #endif	/* HAVE_MBSTRING */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

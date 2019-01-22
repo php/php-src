@@ -31,12 +31,3 @@ PHPAPI int   _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_
 #define php_glob_stream_get_count(stream, pflags)	_php_glob_stream_get_count((stream), (pflags) STREAMS_CC)
 
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

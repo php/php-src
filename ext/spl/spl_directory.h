@@ -147,12 +147,3 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 #define SPL_FILE_DIR_OTHERS_MASK           0x00003000 /* mask used for get/setFlags */
 
 #endif /* SPL_DIRECTORY_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

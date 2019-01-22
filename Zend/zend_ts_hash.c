@@ -353,11 +353,3 @@ ZEND_API zval *zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len
 
 	return retval;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

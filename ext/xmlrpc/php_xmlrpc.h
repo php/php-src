@@ -87,11 +87,3 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback);
 #endif
 
 #endif	/* _PHP_XMLRPC_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

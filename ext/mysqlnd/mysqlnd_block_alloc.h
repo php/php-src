@@ -26,13 +26,3 @@ PHPAPI void						mysqlnd_mempool_save_state(MYSQLND_MEMORY_POOL * pool);
 PHPAPI void						mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool);
 
 #endif	/* MYSQLND_BLOCK_ALLOC_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

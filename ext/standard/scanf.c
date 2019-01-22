@@ -1201,12 +1201,3 @@ static inline void scan_set_error_return(int numVars, zval *return_value) /* {{{
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

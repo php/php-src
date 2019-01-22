@@ -68,12 +68,3 @@ PHP_FUNCTION(rand)
 	RETURN_LONG(php_mt_rand_common(min, max));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

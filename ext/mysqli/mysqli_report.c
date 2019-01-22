@@ -65,12 +65,3 @@ void php_mysqli_report_index(const char *query, unsigned int status) {
 	php_mysqli_throw_sql_exception("00000", 0, "%s used in query/prepared statement %s", index, query);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

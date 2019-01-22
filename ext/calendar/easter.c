@@ -132,10 +132,3 @@ PHP_FUNCTION(easter_days)
 	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

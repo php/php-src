@@ -106,12 +106,3 @@ static inline int php_json_decode(zval *return_value, char *str, int str_len, ze
 }
 
 #endif  /* PHP_JSON_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

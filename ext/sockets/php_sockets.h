@@ -117,10 +117,3 @@ php_socket *socket_import_file_descriptor(PHP_SOCKET sock);
 #endif
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

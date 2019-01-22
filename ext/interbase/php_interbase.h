@@ -99,10 +99,3 @@ PHP_FUNCTION(ibase_free_event_handler);
 #define phpext_interbase_ptr NULL
 
 #endif /* PHP_INTERBASE_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

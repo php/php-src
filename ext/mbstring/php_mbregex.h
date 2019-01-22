@@ -95,12 +95,3 @@ PHP_FUNCTION(mb_regex_set_options);
 #endif /* HAVE_MBREGEX */
 
 #endif /* _PHP_MBREGEX_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

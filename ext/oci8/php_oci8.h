@@ -63,10 +63,3 @@ PHP_MINFO_FUNCTION(oci);
 # define oci8_module_ptr NULL
 
 #endif /* HAVE_OCI8 */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

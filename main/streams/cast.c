@@ -404,12 +404,3 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 	return PHP_STREAM_RELEASED;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

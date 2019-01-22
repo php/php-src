@@ -447,13 +447,3 @@ ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_
 #endif
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

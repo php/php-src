@@ -444,11 +444,3 @@ zval* collator_normalize_sort_argument( zval* arg, zval *rv )
 	return n_arg;
 }
 /* }}} */
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -66,11 +66,3 @@
 #define phpext_standard_ptr basic_functions_module_ptr
 PHP_MINIT_FUNCTION(standard_filters);
 PHP_MSHUTDOWN_FUNCTION(standard_filters);
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

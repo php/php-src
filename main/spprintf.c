@@ -836,12 +836,3 @@ PHPAPI void php_printf_to_smart_str(smart_str *buf, const char *format, va_list 
 	xbuf_format_converter(buf, 0, format, ap);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

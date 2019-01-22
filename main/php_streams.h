@@ -606,11 +606,3 @@ END_EXTERN_C()
 #define PHP_STREAM_META_GROUP_NAME	4
 #define PHP_STREAM_META_GROUP		5
 #define PHP_STREAM_META_ACCESS		6
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

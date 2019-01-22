@@ -28,13 +28,3 @@ extern zend_module_entry mysqli_module_entry;
 #define PHP_MYSQLI_VERSION PHP_VERSION
 
 #endif	/* PHP_MYSQLI.H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

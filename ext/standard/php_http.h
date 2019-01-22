@@ -32,12 +32,3 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 PHP_FUNCTION(http_build_query);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

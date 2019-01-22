@@ -2054,12 +2054,3 @@ static void _php_tidy_register_tags(INIT_FUNC_ARGS)
 }
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

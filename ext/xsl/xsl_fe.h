@@ -36,12 +36,3 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs);
 PHP_FUNCTION(xsl_xsltprocessor_get_security_prefs);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

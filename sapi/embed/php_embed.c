@@ -233,12 +233,3 @@ EMBED_SAPI_API void php_embed_shutdown(void)
 		php_embed_module.ini_entries = NULL;
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

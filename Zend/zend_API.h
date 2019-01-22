@@ -1579,14 +1579,3 @@ static zend_always_inline void zend_parse_arg_zval_deref(zval *arg, zval **dest,
 END_EXTERN_C()
 
 #endif /* ZEND_API_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

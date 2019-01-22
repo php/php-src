@@ -68,11 +68,3 @@ typedef struct {
 #endif
 
 #endif	/* PHP_SHMOP_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

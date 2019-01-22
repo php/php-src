@@ -395,12 +395,3 @@ unsigned int len;
 			(((uint32_t) input[j + 1]) << 16) | (((uint32_t) input[j]) << 24);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

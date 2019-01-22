@@ -259,12 +259,3 @@ PHP_HASH_TIGER_OPS(3, 192);
 PHP_HASH_TIGER_OPS(4, 128);
 PHP_HASH_TIGER_OPS(4, 160);
 PHP_HASH_TIGER_OPS(4, 192);
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

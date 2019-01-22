@@ -365,13 +365,3 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #endif
 
 #endif /* VIRTUAL_CWD_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

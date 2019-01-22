@@ -75,12 +75,3 @@ PHPAPI int _php_stream_mmap_unmap(php_stream *stream);
 PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden);
 #define php_stream_mmap_unmap_ex(stream, readden)			_php_stream_mmap_unmap_ex((stream), (readden))
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

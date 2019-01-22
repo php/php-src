@@ -152,12 +152,3 @@ PHP_FUNCTION( msgfmt_parse_message )
 	msgformat_data_free(&mfo->mf_data);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

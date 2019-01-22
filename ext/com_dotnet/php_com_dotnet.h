@@ -55,12 +55,3 @@ extern ZEND_DECLARE_MODULE_GLOBALS(com_dotnet);
 #define COMG(v) ZEND_MODULE_GLOBALS_ACCESSOR(com_dotnet, v)
 
 #endif	/* PHP_COM_DOTNET_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

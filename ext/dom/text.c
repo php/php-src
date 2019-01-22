@@ -226,12 +226,3 @@ PHP_FUNCTION(dom_text_replace_whole_text)
 /* }}} end dom_text_replace_whole_text */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

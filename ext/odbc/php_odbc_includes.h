@@ -278,10 +278,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 #endif /* HAVE_UODBC */
 #endif /* PHP_ODBC_INCLUDES_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

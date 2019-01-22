@@ -1557,12 +1557,3 @@ ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor) /* {{{ */
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

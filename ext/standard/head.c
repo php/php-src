@@ -443,11 +443,3 @@ PHP_FUNCTION(http_response_code)
 	RETURN_LONG(SG(sapi_headers).http_response_code);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4 * End:
- */

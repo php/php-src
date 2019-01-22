@@ -279,12 +279,3 @@ const php_stream_wrapper  php_glob_stream_wrapper = {
 	0
 };
 #endif /* HAVE_GLOB */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

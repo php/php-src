@@ -565,11 +565,3 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

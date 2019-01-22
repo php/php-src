@@ -470,12 +470,3 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 	return 0;
 }								/* END metaphone */
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

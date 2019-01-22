@@ -691,12 +691,3 @@ PHP_HASH_API void PHP_MD2Final(unsigned char output[16], PHP_MD2_CTX *context)
 
 	memcpy(output, context->state, 16);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -967,12 +967,3 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	return 1;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -31,12 +31,3 @@ PHP_HASH_API void PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *con
 PHP_HASH_API int PHP_ADLER32Copy(const php_hash_ops *ops, PHP_ADLER32_CTX *orig_context, PHP_ADLER32_CTX *copy_context);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

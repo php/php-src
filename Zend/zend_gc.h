@@ -81,13 +81,3 @@ static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 }
 
 #endif /* ZEND_GC_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

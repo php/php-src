@@ -102,13 +102,3 @@ ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr)
 	}
 	return NULL;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

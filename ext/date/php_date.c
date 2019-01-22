@@ -5303,12 +5303,3 @@ static zval *date_period_write_property(zval *object, zval *member, zval *value,
 	return value;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

@@ -30,12 +30,3 @@ extern zend_module_entry sysvmsg_module_entry;
 #endif /* HAVE_SYSVMSG */
 
 #endif	/* PHP_SYSVMSG_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

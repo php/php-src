@@ -866,12 +866,3 @@ const struct pdo_stmt_methods odbc_stmt_methods = {
 	NULL, /* get column meta */
 	odbc_stmt_next_rowset
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
