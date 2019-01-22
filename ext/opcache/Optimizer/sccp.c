@@ -1680,6 +1680,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+		case ZEND_COPY_TMP:
 			SET_RESULT(result, op1);
 			break;
 #if 0

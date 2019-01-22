@@ -90,6 +90,15 @@ PHP 7.4 UPGRADE NOTES
     This will enforce that $user->id can only be assigned integer and
     $user->name can only be assigned strings. For more information see the
     RFC: https://wiki.php.net/rfc/typed_properties_v2
+  . Added support for coalesce assign (??=) operator. For example:
+
+        $array['key'] ??= computeDefault();
+        // is roughly equivalent to
+        if (!isset($array['key'])) {
+            $array['key'] = computeDefault();
+        }
+
+    RFC: https://wiki.php.net/rfc/null_coalesce_equal_operator
 
 - FFI:
   . A new extension which provides a simple way to call native functions, access
