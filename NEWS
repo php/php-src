@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #77946 (Bad cURL resources returned by curl_multi_info_read()).
     (Abyr Valg)
 
+- FPM:
+  . Fixed bug #77185 (Use-after-free in FPM master event handling).
+    (Maksim Nikulin)
+
 - Standard:
   . Fixed bug #69100 (Bus error from stream_copy_to_stream (file -> SSL stream)
     with invalid length). (Nikita)
