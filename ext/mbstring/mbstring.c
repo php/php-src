@@ -2386,10 +2386,15 @@ PHP_FUNCTION(mb_str_split)
 	 */
 	} else if (mbfl_encoding->mblen_table != NULL) {
 		char unsigned const *mbtab;
-		if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE){
-			mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
-		} else if (mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE) {
-			mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? mbfl_encoding->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+		/*swap UTF-16LE and UTF-16BE tables on big-endian platform */
+		if(PLATFORM_BYTE_ORDER == IS_BIG_ENDIAN) {
+			if (mbfl_encoding->flag == MBFL_ENCTYPE_MWC2BE) {
+				mbtab = mbfl_name2encoding("UTF-16LE")->mblen_table;
+			} else if (mbfl_encoding->flag == MBFL_ENCTYPE_MWC2LE) {
+				mbtab = mbfl_name2encoding("UTF-16BE")->mblen_table;
+			} else {
+				mbtab = mbfl_encoding->mblen_table;
+			}
 		} else {
 			mbtab = mbfl_encoding->mblen_table;
 		}
@@ -5244,25 +5249,28 @@ static int php_mb_encoding_translation(void)
 /* {{{ MBSTRING_API size_t php_mb_mbchar_bytes_ex() */
 MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc)
 {
-	if (enc != NULL) {
-		if (enc->flag & MBFL_ENCTYPE_MBCS) {
-			if (enc->mblen_table != NULL) {
-				char unsigned const *mbtab;
-				if (enc->flag & MBFL_ENCTYPE_MWC2BE){
-					mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? enc->mblen_table : mbfl_name2encoding("UTF-16LE")->mblen_table;
-				} else if (enc->flag & MBFL_ENCTYPE_MWC2LE) {
-					mbtab = PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN ? enc->mblen_table : mbfl_name2encoding("UTF-16BE")->mblen_table;
+	if (enc != NULL && s != NULL) {
+		if (enc->mblen_table != NULL) {
+			char unsigned const *mbtab;
+			/*swap UTF-16LE and UTF-16BE tables on big-endian platform */
+			if(PLATFORM_BYTE_ORDER == IS_BIG_ENDIAN) {
+				if (enc->flag == MBFL_ENCTYPE_MWC2BE) {
+					mbtab = mbfl_name2encoding("UTF-16LE")->mblen_table;
+				} else if (enc->flag == MBFL_ENCTYPE_MWC2LE) {
+					mbtab = mbfl_name2encoding("UTF-16BE")->mblen_table;
 				} else {
 					mbtab = enc->mblen_table;
 				}
-				if (s != NULL){
-					if(enc->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
-						return mbtab[*(uint16_t *)s];
-					} else{
-						return mbtab[*(unsigned char *)s];
-					}
-				}
+			} else {
+				mbtab = enc->mblen_table;
 			}
+			/* UTF-16LE or UTF-16BE */
+			if(enc->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+				return mbtab[*(uint16_t *)s];
+			} else{
+				return mbtab[*(unsigned char *)s];
+			}
+
 		} else if (enc->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
 			return 2;
 		} else if (enc->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
