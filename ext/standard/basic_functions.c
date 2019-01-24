@@ -123,8 +123,6 @@ typedef struct _user_tick_function_entry {
 static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
-static HashTable basic_submodules;
-
 #undef sprintf
 
 /* {{{ arginfo */
@@ -3579,32 +3577,21 @@ PHPAPI double php_get_inf(void) /* {{{ */
 /* }}} */
 
 #define BASIC_MINIT_SUBMODULE(module) \
-	if (PHP_MINIT(module)(INIT_FUNC_ARGS_PASSTHRU) == SUCCESS) {\
-		BASIC_ADD_SUBMODULE(module); \
+	if (PHP_MINIT(module)(INIT_FUNC_ARGS_PASSTHRU) != SUCCESS) {\
+		return FAILURE; \
 	}
-
-#define BASIC_ADD_SUBMODULE(module) \
-	zend_hash_str_add_empty_element(&basic_submodules, #module, strlen(#module));
 
 #define BASIC_RINIT_SUBMODULE(module) \
-	if (zend_hash_str_exists(&basic_submodules, #module, strlen(#module))) { \
-		PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU); \
-	}
+	PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU);
 
 #define BASIC_MINFO_SUBMODULE(module) \
-	if (zend_hash_str_exists(&basic_submodules, #module, strlen(#module))) { \
-		PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU); \
-	}
+	PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 
 #define BASIC_RSHUTDOWN_SUBMODULE(module) \
-	if (zend_hash_str_exists(&basic_submodules, #module, strlen(#module))) { \
-		PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU); \
-	}
+	PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 #define BASIC_MSHUTDOWN_SUBMODULE(module) \
-	if (zend_hash_str_exists(&basic_submodules, #module, strlen(#module))) { \
-		PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU); \
-	}
+	PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 PHP_MINIT_FUNCTION(basic) /* {{{ */
 {
@@ -3619,8 +3606,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_win32_core_globals_ctor(&the_php_win32_core_globals);
 #endif
 #endif
-
-	zend_hash_init(&basic_submodules, 0, NULL, NULL, 1);
 
 	BG(incomplete_class) = incomplete_class_entry = php_create_incomplete_class();
 
@@ -3682,9 +3667,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
 
-	BASIC_ADD_SUBMODULE(dl)
-	BASIC_ADD_SUBMODULE(mail)
-	BASIC_ADD_SUBMODULE(streams)
 	BASIC_MINIT_SUBMODULE(file)
 	BASIC_MINIT_SUBMODULE(pack)
 	BASIC_MINIT_SUBMODULE(browscap)
@@ -3784,7 +3766,6 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_MSHUTDOWN_SUBMODULE(random)
 	BASIC_MSHUTDOWN_SUBMODULE(password)
 
-	zend_hash_destroy(&basic_submodules);
 	return SUCCESS;
 }
 /* }}} */
