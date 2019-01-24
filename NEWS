@@ -36,7 +36,7 @@ PHP                                                                        NEWS
     as per RFC: https://wiki.php.net/rfc/permanent_hash_ext. (Kalle)
 
 - Intl:
-  . Lifted requirements to ICU ≥ 50.1. (cmb)
+  . Raised requirements to ICU ≥ 50.1. (cmb)
   . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
     (cmb)
 
@@ -54,14 +54,14 @@ PHP                                                                        NEWS
 
 - PDO_SQLite:
   . Implemented sqlite_stmt_readonly in PDO_SQLite. (BohwaZ)
-  . Lifted requirements to SQLite 3.5.0. (cmb)
+  . Raised requirements to SQLite 3.5.0. (cmb)
 
 - Sockets:
   . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
 
 - SQLite3:
   . Unbundled libsqlite. (cmb)
-  . Lifted requirements to SQLite 3.7.4. (cmb)
+  . Raised requirements to SQLite 3.7.4. (cmb)
   . Forbid (un)serialization of SQLite3, SQLite3Stmt and SQLite3Result. (cmb)
   . Added support for the SQLite @name notation. (cmb, BohwaZ)
   . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. (Bohwaz)
