@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.3
+-Core:
+  . Fixed bug #77494 (Disabling class causes segfault on member access).
+    (Dmitry)
 
 - Opcache:
   . Fixed bug #77287 (Opcache literal compaction is incompatible with EXT
