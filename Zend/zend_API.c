@@ -2855,6 +2855,17 @@ static zend_object *display_disabled_class(zend_class_entry *class_type) /* {{{ 
 	zend_object *intern;
 
 	intern = zend_objects_new(class_type);
+
+	/* Initialize default properties */
+	if (EXPECTED(class_type->default_properties_count != 0)) {
+		zval *p = intern->properties_table;
+		zval *end = p + class_type->default_properties_count;
+		do {
+			ZVAL_UNDEF(p);
+			p++;
+		} while (p != end);
+	}
+
 	zend_error(E_WARNING, "%s() has been disabled for security reasons", ZSTR_VAL(class_type->name));
 	return intern;
 }
