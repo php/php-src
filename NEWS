@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #77339 (__callStatic may get incorrect arguments). (Dmitry)
+  . Fixed bug #77494 (Disabling class causes segfault on member access).
+    (Dmitry)
 
 - Curl:
   . Fixed bug #76675 (Segfault with H2 server push). (Pedro Magalhães)
