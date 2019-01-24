@@ -1048,6 +1048,9 @@ END_EXTERN_C()
 /* result of compilation may be stored in file cache */
 #define ZEND_COMPILE_WITH_FILE_CACHE			(1<<11)
 
+/* disable jumptable optimization for switch statements */
+#define ZEND_COMPILE_NO_JUMPTABLES				(1<<12)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 
