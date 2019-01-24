@@ -67,10 +67,12 @@ ZEND_KNOWN_STRINGS(_ZEND_STR_DSC)
 	NULL
 };
 
-static void zend_init_interned_strings_ht(HashTable *interned_strings, int permanent)
+static zend_always_inline void zend_init_interned_strings_ht(HashTable *interned_strings, int permanent)
 {
 	zend_hash_init(interned_strings, 1024, NULL, _str_dtor, permanent);
-	zend_hash_real_init_mixed(interned_strings);
+	if (permanent) {
+		zend_hash_real_init_mixed(interned_strings);
+	}
 }
 
 ZEND_API void zend_interned_strings_init(void)
