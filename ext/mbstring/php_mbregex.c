@@ -713,8 +713,7 @@ static inline void mb_regex_substitute(
 		sp = p; /* save position */
 		clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
 		if (clen != 1 || p == eos) {
-			/* skip escaped multibyte char */
-			p += clen;
+			/* skip backslash followed by multibyte char */
 			smart_str_appendl(pbuf, sp, p - sp);
 			continue;
 		}

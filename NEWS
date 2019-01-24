@@ -1,9 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.3
--Core:
+
+- Core:
   . Fixed bug #77494 (Disabling class causes segfault on member access).
     (Dmitry)
+
+- Mbstring:
+  . Fixed bug #77514 (mb_ereg_replace() with trailing backslash adds null byte).
+    (Nikita)
 
 - Opcache:
   . Fixed bug #77287 (Opcache literal compaction is incompatible with EXT
