@@ -124,9 +124,12 @@ Getting the non stable release (alpha/beta/RC) announced
 
  b. ``$PHP_x_RC_DATE`` = "06 September 2007"
 
-3. Add a short notice to phpweb stating that there is a new release, and
-highlight the major important things (security fixes) and when it is important
-to upgrade.
+3. Skip this step for non stable releases after GA of minor or major versions
+   (e.g. announce 7.3.0RC1, but not 7.3.1RC1):
+
+   Add a short notice to phpweb stating that there is a new release, and
+   highlight the major important things (security fixes) and when it is
+   important to upgrade.
 
  a. Call php bin/createNewsEntry in your local phpweb checkout
     Use category "frontpage" *and* "releases" for all stable releases.
