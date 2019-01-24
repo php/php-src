@@ -182,6 +182,7 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	size_t new_len;
 	unsigned char enc[256] = {0};
+	zend_string* newval;
 
 	if (!Z_REFCOUNTED_P(value)) {
 		ZVAL_STRINGL(value, Z_STRVAL_P(value), Z_STRLEN_P(value));
@@ -206,10 +207,11 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	php_filter_encode_html(value, enc);
 
 	/* strip tags, implicitly also removes \0 chars */
-	new_len = php_strip_tags_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), NULL, NULL, 0, 1);
-	Z_STRLEN_P(value) = new_len;
+	newval = php_strip_tags_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), NULL, NULL, 0, 1);
+	zval_ptr_dtor(value);
+	ZVAL_STR(value, newval);
 
-	if (new_len == 0) {
+	if (ZSTR_LEN(newval) == 0) {
 		zval_ptr_dtor(value);
 		if (flags & FILTER_FLAG_EMPTY_STRING_NULL) {
 			ZVAL_NULL(value);
