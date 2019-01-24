@@ -2345,7 +2345,7 @@ static zend_property_info *zend_fetch_static_prop_info(const zend_script *script
 					ce = op_array->scope;
 					break;
 				case ZEND_FETCH_CLASS_PARENT:
-					if (op_array->scope) {
+					if (op_array->scope && (op_array->scope->ce_flags & ZEND_ACC_LINKED)) {
 						ce = op_array->scope->parent;
 					}
 					break;
