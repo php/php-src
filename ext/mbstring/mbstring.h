@@ -123,8 +123,6 @@ MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length,
                                       const char *_from_encodings,
                                       size_t *output_len);
 
-MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list);
-
 MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
 MBSTRING_API size_t php_mb_mbchar_bytes(const char *s);
 
