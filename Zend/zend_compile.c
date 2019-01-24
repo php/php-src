@@ -4907,6 +4907,10 @@ static zend_uchar determine_switch_jumptable_type(zend_ast_list *cases) {
 }
 
 static zend_bool should_use_jumptable(zend_ast_list *cases, zend_uchar jumptable_type) {
+	if (CG(compiler_options) & ZEND_COMPILE_NO_JUMPTABLES) {
+		return 0;
+	}
+
 	/* Thresholds are chosen based on when the average switch time for equidistributed
 	 * input becomes smaller when using the jumptable optimization. */
 	if (jumptable_type == IS_LONG) {
