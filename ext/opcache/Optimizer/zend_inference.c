@@ -2285,7 +2285,8 @@ static zend_property_info *lookup_prop_info(zend_class_entry *ce, zend_string *n
 	zend_property_info *prop_info;
 
 	/* If the class is linked, reuse the precise runtime logic. */
-	if (ce->ce_flags & ZEND_ACC_LINKED) {
+	if ((ce->ce_flags & ZEND_ACC_LINKED)
+	 && (!scope || (scope->ce_flags & ZEND_ACC_LINKED))) {
 		zend_class_entry *prev_scope = EG(fake_scope);
 		EG(fake_scope) = scope;
 		prop_info = zend_get_property_info(ce, name, 1);
