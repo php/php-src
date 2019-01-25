@@ -1436,14 +1436,12 @@ static zend_never_inline void *zend_mm_realloc_slow(zend_mm_heap *heap, void *pt
 #if ZEND_MM_STAT
 	do {
 		size_t orig_peak = heap->peak;
-		size_t orig_real_peak = heap->real_peak;
 #endif
 		ret = zend_mm_alloc_heap(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 		memcpy(ret, ptr, copy_size);
 		zend_mm_free_heap(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 #if ZEND_MM_STAT
 		heap->peak = MAX(orig_peak, heap->size);
-		heap->real_peak = MAX(orig_real_peak, heap->real_size);
 	} while (0);
 #endif
 	return ret;
@@ -1589,7 +1587,6 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 #if ZEND_MM_STAT
 					do {
 						size_t orig_peak = heap->peak;
-						size_t orig_real_peak = heap->real_peak;
 #endif
 						ret = zend_mm_alloc_small(heap, size, ZEND_MM_SMALL_SIZE_TO_BIN(size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 						copy_size = use_copy_size ? MIN(old_size, copy_size) : old_size;
@@ -1597,7 +1594,6 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 						zend_mm_free_small(heap, ptr, old_bin_num);
 #if ZEND_MM_STAT
 						heap->peak = MAX(orig_peak, heap->size);
-						heap->real_peak = MAX(orig_real_peak, heap->real_size);
 					} while (0);
 #endif
 				} else {
