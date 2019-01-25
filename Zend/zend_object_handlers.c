@@ -1406,14 +1406,14 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 }
 /* }}} */
 
-static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{ */
+ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 {
 	int i;
 	zval *p;
 
 	if (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count) {
 		if (class_type->parent) {
-			zend_intenal_class_init_statics(class_type->parent);
+			zend_class_init_statics(class_type->parent);
 		}
 
 		ZEND_MAP_PTR_SET(class_type->static_members_table, emalloc(sizeof(zval) * class_type->default_static_members_count));
@@ -1428,11 +1428,6 @@ static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{
 			}
 		}
 	}
-} /* }}} */
-
-ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
-{
-	zend_intenal_class_init_statics(class_type);
 } /* }}} */
 
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, zend_property_info **property_info_ptr) /* {{{ */
@@ -1476,7 +1471,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 	/* check if static properties were destroyed */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
 		if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-			zend_intenal_class_init_statics(ce);
+			zend_class_init_statics(ce);
 		} else {
 undeclared_property:
 			if (type != BP_VAR_IS) {
