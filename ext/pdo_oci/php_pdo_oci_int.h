@@ -103,4 +103,6 @@ extern const struct pdo_stmt_methods oci_stmt_methods;
 enum {
 	PDO_OCI_ATTR_ACTION = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_OCI_ATTR_CLIENT_INFO,
+	PDO_OCI_ATTR_CLIENT_IDENTIFIER,
+	PDO_OCI_ATTR_MODULE
 };

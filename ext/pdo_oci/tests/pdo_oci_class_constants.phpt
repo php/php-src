@@ -12,8 +12,10 @@ PDOTest::skip();
 require(dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc');
 
 $expected = [
-	'OCI_ATTR_CLIENT_INFO' => true,
-	'OCI_ATTR_ACTION'      => true,
+	'OCI_ATTR_CLIENT_INFO'        => true,
+	'OCI_ATTR_ACTION'             => true,
+	'OCI_ATTR_CLIENT_IDENTIFIER'  => true,
+	'OCI_ATTR_MODULE'             => true,
 ];
 
 $ref = new ReflectionClass('PDO');
