@@ -1374,14 +1374,14 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 }
 /* }}} */
 
-static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{ */
+ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 {
 	int i;
 	zval *p;
 
 	if (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count) {
 		if (class_type->parent) {
-			zend_intenal_class_init_statics(class_type->parent);
+			zend_class_init_statics(class_type->parent);
 		}
 
 #if ZTS
@@ -1431,7 +1431,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 	/* check if static properties were destoyed */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
 		if (ce->type == ZEND_INTERNAL_CLASS) {
-			zend_intenal_class_init_statics(ce);
+			zend_class_init_statics(ce);
 		} else {
 undeclared_property:
 			if (!silent) {
