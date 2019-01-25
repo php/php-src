@@ -66,6 +66,10 @@ PHP                                                                        NEWS
   . Added support for the SQLite @name notation. (cmb, BohwaZ)
   . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. (Bohwaz)
 
+- SPL:
+  . Fixed bug #77518 (SeekableIterator::seek() should accept 'int' typehint as
+    documented). (Nikita)
+
 - Standard:
   . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with
     stream_socket_client). (Ville Hukkamäki)
