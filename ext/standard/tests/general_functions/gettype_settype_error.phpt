@@ -30,6 +30,10 @@ var_dump( settype( $var, $var, "int" ) );
 // passing an invalid type to set
 var_dump( settype( $var, "unknown" ) );
 
+// passing an invalid nullable type to set (even for a null variable)
+$null = NULL;
+var_dump( settype( $null, "?unknown" ) );
+
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -50,6 +54,9 @@ NULL
 
 Warning: settype() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
+
+Warning: settype(): Invalid type in %s on line %d
+bool(false)
 
 Warning: settype(): Invalid type in %s on line %d
 bool(false)

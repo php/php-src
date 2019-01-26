@@ -46,6 +46,7 @@ PHP_FUNCTION(settype)
 	zval *var;
 	char *type;
 	size_t type_len;
+	zend_bool type_is_nullable = 0;
 	zval tmp;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -53,26 +54,52 @@ PHP_FUNCTION(settype)
 		Z_PARAM_STRING(type, type_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (*type == '?') {
+		type++;
+		type_len--;
+		type_is_nullable = 1;
+	}
+
 	ZVAL_COPY(&tmp, var);
+
+#define CHECK_NULLABLE() do { \
+		if (type_is_nullable && zend_is_null(&tmp)) { \
+			convert_to_null(&tmp); \
+			goto end; \
+		} \
+	} while (0)
+
 	if (!strcasecmp(type, "integer")) {
+		CHECK_NULLABLE();
 		convert_to_long(&tmp);
 	} else if (!strcasecmp(type, "int")) {
+		CHECK_NULLABLE();
 		convert_to_long(&tmp);
 	} else if (!strcasecmp(type, "float")) {
+		CHECK_NULLABLE();
 		convert_to_double(&tmp);
 	} else if (!strcasecmp(type, "double")) { /* deprecated */
+		CHECK_NULLABLE();
 		convert_to_double(&tmp);
 	} else if (!strcasecmp(type, "string")) {
+		CHECK_NULLABLE();
 		convert_to_string(&tmp);
 	} else if (!strcasecmp(type, "array")) {
+		CHECK_NULLABLE();
 		convert_to_array(&tmp);
 	} else if (!strcasecmp(type, "object")) {
+		CHECK_NULLABLE();
 		convert_to_object(&tmp);
 	} else if (!strcasecmp(type, "bool")) {
+		CHECK_NULLABLE();
 		convert_to_boolean(&tmp);
 	} else if (!strcasecmp(type, "boolean")) {
+		CHECK_NULLABLE();
 		convert_to_boolean(&tmp);
 	} else if (!strcasecmp(type, "null")) {
+		if (type_is_nullable) {
+			php_error_docref(NULL, E_NOTICE, "Redundant nullable prefix on null type");
+		}
 		convert_to_null(&tmp);
 	} else if (!strcasecmp(type, "resource")) {
 		zval_ptr_dtor(&tmp);
@@ -83,6 +110,9 @@ PHP_FUNCTION(settype)
 		php_error_docref(NULL, E_WARNING, "Invalid type");
 		RETURN_FALSE;
 	}
+
+end:
+#undef CHECK_NULLABLE
 
 	ZEND_TRY_ASSIGN_TMP(var, &tmp);
 	RETVAL_TRUE;
