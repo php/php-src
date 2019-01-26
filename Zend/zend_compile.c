@@ -2081,7 +2081,7 @@ void zend_emit_final_return(int return_one) /* {{{ */
 static inline zend_bool zend_is_variable(zend_ast *ast) /* {{{ */
 {
 	return ast->kind == ZEND_AST_VAR || ast->kind == ZEND_AST_DIM
-		   || ast->kind == ZEND_AST_PROP || ast->kind == ZEND_AST_STATIC_PROP;
+		|| ast->kind == ZEND_AST_PROP || ast->kind == ZEND_AST_STATIC_PROP;
 }
 /* }}} */
 
