@@ -4263,7 +4263,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	if (by_ref && expr_ast) {
 		if (zend_is_call(expr_ast)) {
 			opline->extended_value = ZEND_RETURNS_FUNCTION;
-		} else if (!zend_is_variable_or_call(expr_ast)) {
+		} else if (!zend_is_variable(expr_ast)) {
 			opline->extended_value = ZEND_RETURNS_VALUE;
 		}
 	}
