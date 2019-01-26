@@ -468,23 +468,41 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			case IS_LONG:
 				fprintf(stderr, " (long)");
 				break;
+			case IS_LONG|ZEND_TYPE_NULLABLE:
+				fprintf(stderr, " (?long)");
+				break;
 			case IS_DOUBLE:
 				fprintf(stderr, " (double)");
+				break;
+			case IS_DOUBLE|ZEND_TYPE_NULLABLE:
+				fprintf(stderr, " (?double)");
 				break;
 			case IS_STRING:
 				fprintf(stderr, " (string)");
 				break;
+			case IS_STRING|ZEND_TYPE_NULLABLE:
+				fprintf(stderr, " (?string)");
+				break;
 			case IS_ARRAY:
 				fprintf(stderr, " (array)");
 				break;
+			case IS_ARRAY|ZEND_TYPE_NULLABLE:
+				fprintf(stderr, " (?array)");
+				break;
 			case IS_OBJECT:
 				fprintf(stderr, " (object)");
+				break;
+			case IS_OBJECT|ZEND_TYPE_NULLABLE:
+				fprintf(stderr, " (?object)");
 				break;
 			case IS_RESOURCE:
 				fprintf(stderr, " (resource)");
 				break;
 			case _IS_BOOL:
 				fprintf(stderr, " (bool)");
+				break;
+			case _IS_BOOL|ZEND_TYPE_NULLABLE:
+				fprintf(stderr, " (?bool)");
 				break;
 			case IS_CALLABLE:
 				fprintf(stderr, " (callable)");

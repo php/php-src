@@ -1042,7 +1042,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					tmp->min = 0;
 					tmp->max = 0;
 					return 1;
-				} else if (opline->extended_value == _IS_BOOL) {
+				} else if ((opline->extended_value & ~ZEND_TYPE_NULLABLE) == _IS_BOOL) {
 					if (OP1_HAS_RANGE()) {
 						op1_min = OP1_MIN_RANGE();
 						op1_max = OP1_MAX_RANGE();
@@ -1054,7 +1054,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						tmp->max = 1;
 						return 1;
 					}
-				} else if (opline->extended_value == IS_LONG) {
+				} else if ((opline->extended_value & ~ZEND_TYPE_NULLABLE) == IS_LONG) {
 					if (OP1_HAS_RANGE()) {
 						tmp->min = OP1_MIN_RANGE();
 						tmp->max = OP1_MAX_RANGE();
@@ -2510,34 +2510,38 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			break;
 		case ZEND_CAST:
+			orig = opline->extended_value & ~ZEND_TYPE_NULLABLE;
 			if (ssa_ops[i].op1_def >= 0) {
 				tmp = t1;
 				if ((t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) &&
 				    (opline->op1_type == IS_CV) &&
-				    (opline->extended_value == IS_ARRAY ||
-				     opline->extended_value == IS_OBJECT)) {
+				    (orig == IS_ARRAY ||
+				     orig == IS_OBJECT)) {
 					tmp |= MAY_BE_RCN;
 				} else if ((t1 & MAY_BE_STRING) &&
 				    (opline->op1_type == IS_CV) &&
-				    opline->extended_value == IS_STRING) {
+				    orig == IS_STRING) {
 					tmp |= MAY_BE_RCN;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 			}
 			tmp = 0;
-			if (opline->extended_value == _IS_BOOL) {
+			if (opline->extended_value & ZEND_TYPE_NULLABLE) {
+				tmp |= MAY_BE_NULL;
+			}
+			if (orig == _IS_BOOL) {
 				tmp |= MAY_BE_TRUE|MAY_BE_FALSE;
 			} else {
-				tmp |= 1 << opline->extended_value;
+				tmp |= 1 << orig;
 				if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 					if ((tmp & MAY_BE_ANY) == (t1 & MAY_BE_ANY)) {
 						tmp |= (t1 & MAY_BE_RC1) | MAY_BE_RCN;
-					} else if ((opline->extended_value == IS_ARRAY ||
-					            opline->extended_value == IS_OBJECT) &&
+					} else if ((orig == IS_ARRAY ||
+					            orig == IS_OBJECT) &&
 					           (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT))) {
 							tmp |= MAY_BE_RC1 | MAY_BE_RCN;
-					} else if (opline->extended_value == IS_STRING &&
+					} else if (orig == IS_STRING &&
 					           (t1 & (MAY_BE_STRING|MAY_BE_OBJECT))) {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					} else {
@@ -2545,7 +2549,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					}
 				}
 			}
-			if (opline->extended_value == IS_ARRAY) {
+			if (orig == IS_ARRAY) {
 				if (t1 & MAY_BE_ARRAY) {
 					tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF);
 				}
@@ -4689,7 +4693,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 		case ZEND_FETCH_DIM_IS:
 			return (t1 & MAY_BE_OBJECT) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_CAST:
-			switch (opline->extended_value) {
+			switch (opline->extended_value & ~ZEND_TYPE_NULLABLE) {
 				case IS_NULL:
 					return 0;
 				case _IS_BOOL:

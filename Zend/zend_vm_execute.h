@@ -3378,12 +3378,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_H
 
 	zval *expr;
 	zval *result = EX_VAR(opline->result.var);
+	uint32_t type;
 	HashTable *ht;
 
 	SAVE_OPLINE();
 	expr = RT_CONSTANT(opline, opline->op1);
 
-	switch (opline->extended_value) {
+	if ((opline->extended_value & ZEND_TYPE_NULLABLE) && i_zend_is_null(expr)) {
+		ZVAL_NULL(result);
+	} else switch (type = opline->extended_value & ~ZEND_TYPE_NULLABLE) {
 		case IS_NULL:
 			ZVAL_NULL(result);
 			break;
@@ -3404,7 +3407,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_H
 				ZVAL_DEREF(expr);
 			}
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == type) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
@@ -3415,7 +3418,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_H
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
 
-			if (opline->extended_value == IS_ARRAY) {
+			if (type == IS_ARRAY) {
 				if (IS_CONST == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 					if (Z_TYPE_P(expr) != IS_NULL) {
 						ZVAL_ARR(result, zend_new_array(1));
@@ -18220,12 +18223,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 	zend_free_op free_op1;
 	zval *expr;
 	zval *result = EX_VAR(opline->result.var);
+	uint32_t type;
 	HashTable *ht;
 
 	SAVE_OPLINE();
 	expr = _get_zval_ptr_tmp(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-	switch (opline->extended_value) {
+	if ((opline->extended_value & ZEND_TYPE_NULLABLE) && i_zend_is_null(expr)) {
+		ZVAL_NULL(result);
+	} else switch (type = opline->extended_value & ~ZEND_TYPE_NULLABLE) {
 		case IS_NULL:
 			ZVAL_NULL(result);
 			break;
@@ -18246,7 +18252,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 				ZVAL_DEREF(expr);
 			}
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == type) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
@@ -18257,7 +18263,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
 
-			if (opline->extended_value == IS_ARRAY) {
+			if (type == IS_ARRAY) {
 				if (IS_TMP_VAR == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 					if (Z_TYPE_P(expr) != IS_NULL) {
 						ZVAL_ARR(result, zend_new_array(1));
@@ -21572,12 +21578,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 	zend_free_op free_op1;
 	zval *expr;
 	zval *result = EX_VAR(opline->result.var);
+	uint32_t type;
 	HashTable *ht;
 
 	SAVE_OPLINE();
 	expr = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-	switch (opline->extended_value) {
+	if ((opline->extended_value & ZEND_TYPE_NULLABLE) && i_zend_is_null(expr)) {
+		ZVAL_NULL(result);
+	} else switch (type = opline->extended_value & ~ZEND_TYPE_NULLABLE) {
 		case IS_NULL:
 			ZVAL_NULL(result);
 			break;
@@ -21598,7 +21607,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 				ZVAL_DEREF(expr);
 			}
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == type) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
@@ -21610,7 +21619,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
 
-			if (opline->extended_value == IS_ARRAY) {
+			if (type == IS_ARRAY) {
 				if (IS_VAR == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 					if (Z_TYPE_P(expr) != IS_NULL) {
 						ZVAL_ARR(result, zend_new_array(1));
@@ -39854,12 +39863,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 
 	zval *expr;
 	zval *result = EX_VAR(opline->result.var);
+	uint32_t type;
 	HashTable *ht;
 
 	SAVE_OPLINE();
 	expr = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 
-	switch (opline->extended_value) {
+	if ((opline->extended_value & ZEND_TYPE_NULLABLE) && i_zend_is_null(expr)) {
+		ZVAL_NULL(result);
+	} else switch (type = opline->extended_value & ~ZEND_TYPE_NULLABLE) {
 		case IS_NULL:
 			ZVAL_NULL(result);
 			break;
@@ -39880,7 +39892,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 				ZVAL_DEREF(expr);
 			}
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == type) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
@@ -39891,7 +39903,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
 
-			if (opline->extended_value == IS_ARRAY) {
+			if (type == IS_ARRAY) {
 				if (IS_CV == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 					if (Z_TYPE_P(expr) != IS_NULL) {
 						ZVAL_ARR(result, zend_new_array(1));

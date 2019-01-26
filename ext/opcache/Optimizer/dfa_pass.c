@@ -342,7 +342,7 @@ static zend_bool opline_supports_assign_contraction(
 	}
 
 	if (opline->opcode == ZEND_CAST
-			&& (opline->extended_value == IS_ARRAY || opline->extended_value == IS_OBJECT)) {
+			&& ((opline->extended_value & ~ZEND_TYPE_NULLABLE) == IS_ARRAY || (opline->extended_value & ~ZEND_TYPE_NULLABLE) == IS_OBJECT)) {
 		/* CAST to array/object may initialize the result to an empty array/object before
 		 * reading the expression. */
 		return opline->op1_type != IS_CV || opline->op1.var != cv_var;

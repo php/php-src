@@ -296,10 +296,14 @@ static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
 
 
 ZEND_API int ZEND_FASTCALL zend_is_true(zval *op);
+ZEND_API int ZEND_FASTCALL zend_is_null(zval *op);
 ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op);
 
 #define zval_is_true(op) \
 	zend_is_true(op)
+
+#define zval_is_null(op) \
+	zend_is_null(op)
 
 static zend_always_inline int i_zend_is_true(zval *op)
 {
@@ -341,6 +345,26 @@ again:
 			if (EXPECTED(Z_RES_HANDLE_P(op))) {
 				result = 1;
 			}
+			break;
+		case IS_REFERENCE:
+			op = Z_REFVAL_P(op);
+			goto again;
+			break;
+		default:
+			break;
+	}
+	return result;
+}
+
+static zend_always_inline int i_zend_is_null(zval *op)
+{
+	int result = 0;
+
+again:
+	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
+		case IS_NULL:
+			result = 1;
 			break;
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);

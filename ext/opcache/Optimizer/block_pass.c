@@ -283,7 +283,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				src = VAR_SOURCE(opline->op1);
 				if (src &&
 				    src->opcode == ZEND_CAST &&
-				    src->extended_value == IS_STRING) {
+				    (src->extended_value & ~ZEND_TYPE_NULLABLE) == IS_STRING) {
 					/* T = CAST(X, String), ECHO(T) => NOP, ECHO(X) */
 					VAR_SOURCE(opline->op1) = NULL;
 					COPY_NODE(opline->op1, src->op1);
@@ -719,7 +719,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					src = VAR_SOURCE(opline->op1);
 					if (src &&
 					    src->opcode == ZEND_CAST &&
-					    src->extended_value == IS_STRING &&
+					    (src->extended_value & ~ZEND_TYPE_NULLABLE) == IS_STRING &&
 					    src->op1_type != IS_CONST) {
 						/* convert T1 = CAST(STRING, X), T2 = CONCAT(T1, Y) to T2 = CONCAT(X,Y) */
 						VAR_SOURCE(opline->op1) = NULL;
@@ -732,7 +732,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					src = VAR_SOURCE(opline->op2);
 					if (src &&
 					    src->opcode == ZEND_CAST &&
-					    src->extended_value == IS_STRING &&
+					    (src->extended_value & ~ZEND_TYPE_NULLABLE) == IS_STRING &&
 					    src->op1_type != IS_CONST) {
 						/* convert T1 = CAST(STRING, X), T2 = CONCAT(Y, T1) to T2 = CONCAT(Y,X) */
 						zend_op *src = VAR_SOURCE(opline->op2);

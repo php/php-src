@@ -2561,6 +2561,12 @@ ZEND_API int ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
 }
 /* }}} */
 
+ZEND_API int ZEND_FASTCALL zend_is_null(zval *op) /* {{{ */
+{
+	return i_zend_is_null(op);
+}
+/* }}} */
+
 ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 {
 	if (Z_OBJ_HT_P(op)->cast_object) {

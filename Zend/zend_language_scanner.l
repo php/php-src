@@ -1233,6 +1233,16 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 		goto skip_token; \
 	} while (0)
 
+#define IF_IS_NULLABLE_CAST_THEN_RETURN_TOKEN(_token) do { \
+		char *s = yytext + 1; \
+		while (*s == ' ' || *s == '\t') { \
+			s++; \
+		} \
+		if (*s == '?') { \
+			RETURN_TOKEN(_token); \
+		} \
+	} while (0)
+
 int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
 {
 int token;
@@ -1474,27 +1484,33 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_VAR);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("?"{TABS_AND_SPACES})?("int"|"integer"){TABS_AND_SPACES}")" {
+	IF_IS_NULLABLE_CAST_THEN_RETURN_TOKEN(T_NULLABLE_INT_CAST);
 	RETURN_TOKEN(T_INT_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("?"{TABS_AND_SPACES})?("real"|"double"|"float"){TABS_AND_SPACES}")" {
+	IF_IS_NULLABLE_CAST_THEN_RETURN_TOKEN(T_NULLABLE_DOUBLE_CAST);
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("?"{TABS_AND_SPACES})?("string"|"binary"){TABS_AND_SPACES}")" {
+	IF_IS_NULLABLE_CAST_THEN_RETURN_TOKEN(T_NULLABLE_STRING_CAST);
 	RETURN_TOKEN(T_STRING_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("?"{TABS_AND_SPACES})?"array"{TABS_AND_SPACES}")" {
+	IF_IS_NULLABLE_CAST_THEN_RETURN_TOKEN(T_NULLABLE_ARRAY_CAST);
 	RETURN_TOKEN(T_ARRAY_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("?"{TABS_AND_SPACES})?"object"{TABS_AND_SPACES}")" {
+	IF_IS_NULLABLE_CAST_THEN_RETURN_TOKEN(T_NULLABLE_OBJECT_CAST);
 	RETURN_TOKEN(T_OBJECT_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("?"{TABS_AND_SPACES})?("bool"|"boolean"){TABS_AND_SPACES}")" {
+	IF_IS_NULLABLE_CAST_THEN_RETURN_TOKEN(T_NULLABLE_BOOL_CAST);
 	RETURN_TOKEN(T_BOOL_CAST);
 }
 

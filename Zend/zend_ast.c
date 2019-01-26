@@ -1526,11 +1526,17 @@ simple_list:
 			switch (ast->attr) {
 				case IS_NULL:      PREFIX_OP("(unset)",  240, 241);
 				case _IS_BOOL:     PREFIX_OP("(bool)",   240, 241);
+				case _IS_BOOL|ZEND_TYPE_NULLABLE:     PREFIX_OP("(?bool)",   240, 241);
 				case IS_LONG:      PREFIX_OP("(int)",    240, 241);
+				case IS_LONG|ZEND_TYPE_NULLABLE:      PREFIX_OP("(?int)",    240, 241);
 				case IS_DOUBLE:    PREFIX_OP("(double)", 240, 241);
+				case IS_DOUBLE|ZEND_TYPE_NULLABLE:    PREFIX_OP("(?double)", 240, 241);
 				case IS_STRING:    PREFIX_OP("(string)", 240, 241);
+				case IS_STRING|ZEND_TYPE_NULLABLE:    PREFIX_OP("(?string)", 240, 241);
 				case IS_ARRAY:     PREFIX_OP("(array)",  240, 241);
+				case IS_ARRAY|ZEND_TYPE_NULLABLE:     PREFIX_OP("(?array)",  240, 241);
 				case IS_OBJECT:    PREFIX_OP("(object)", 240, 241);
+				case IS_OBJECT|ZEND_TYPE_NULLABLE:    PREFIX_OP("(?object)", 240, 241);
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;

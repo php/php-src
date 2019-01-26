@@ -149,6 +149,13 @@ int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* 
 
 int zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* {{{ */
 {
+	if (type & ZEND_TYPE_NULLABLE) {
+		if (zval_is_null(op1)) {
+			ZVAL_NULL(result);
+			return SUCCESS;
+		}
+		type &= ~ZEND_TYPE_NULLABLE;
+	}
 	switch (type) {
 		case IS_NULL:
 			ZVAL_NULL(result);
