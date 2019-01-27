@@ -2611,7 +2611,7 @@ zend_bool zend_is_assign_to_self(zend_ast *var_ast, zend_ast *expr_ast) /* {{{ *
 		return 0;
 	}
 
-	while (zend_is_variable_or_call(var_ast)) {
+	while (zend_is_variable(var_ast) && var_ast->kind != ZEND_AST_VAR) {
 		var_ast = var_ast->child[0];
 	}
 
