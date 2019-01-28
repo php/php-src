@@ -519,14 +519,6 @@ report_memleaks = On
 ; This setting is on by default.
 ;report_zend_debug = 0
 
-; Store the last error/warning message in $php_errormsg (boolean).
-; This directive is DEPRECATED.
-; Default Value: Off
-; Development Value: Off
-; Production Value: Off
-; http://php.net/track-errors
-;track_errors = Off
-
 ; Turn off normal error reporting and emit XML-RPC error XML
 ; http://php.net/xmlrpc-errors
 ;xmlrpc_errors = 0

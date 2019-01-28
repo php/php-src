@@ -95,7 +95,6 @@ typedef struct _zend_ssa_op {
 typedef enum _zend_ssa_alias_kind {
 	NO_ALIAS,
 	SYMTABLE_ALIAS,
-	PHP_ERRORMSG_ALIAS,
 	HTTP_RESPONSE_HEADER_ALIAS
 } zend_ssa_alias_kind;
 

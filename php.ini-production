@@ -153,11 +153,6 @@
 ;   Development Value: Off
 ;   Production Value: Off
 
-; track_errors
-;   Default Value: Off
-;   Development Value: On
-;   Production Value: Off
-
 ; variables_order
 ;   Default Value: "EGPCS"
 ;   Development Value: "GPCS"
@@ -523,16 +518,6 @@ report_memleaks = On
 
 ; This setting is on by default.
 ;report_zend_debug = 0
-
-; Store the last error/warning message in $php_errormsg (boolean). Setting this value
-; to On can assist in debugging and is appropriate for development servers. It should
-; however be disabled on production servers.
-; This directive is DEPRECATED.
-; Default Value: Off
-; Development Value: Off
-; Production Value: Off
-; http://php.net/track-errors
-;track_errors = Off
 
 ; Turn off normal error reporting and emit XML-RPC error XML
 ; http://php.net/xmlrpc-errors

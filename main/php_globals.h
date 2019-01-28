@@ -66,7 +66,6 @@ struct _php_core_globals {
 	zend_long memory_limit;
 	zend_long max_input_time;
 
-	zend_bool track_errors;
 	zend_bool display_errors;
 	zend_bool display_startup_errors;
 	zend_bool log_errors;
