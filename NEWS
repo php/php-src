@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #77339 (__callStatic may get incorrect arguments). (Dmitry)
   . Fixed bug #77494 (Disabling class causes segfault on member access).
     (Dmitry)
+  . Fixed bug #77530 (PHP crashes when parsing `(2)::class`). (Ekin)
 
 - Curl:
   . Fixed bug #76675 (Segfault with H2 server push). (Pedro Magalhães)
