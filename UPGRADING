@@ -26,6 +26,8 @@ PHP 8.0 UPGRADE NOTES
 - GD:
   . The deprecated function image2wbmp() has been removed.
     RFC: https://wiki.php.net/rfc/image2wbmp
+  . The deprecated functions png2wbmp() and jpeg2wbmp() have been removed.
+    RFC: https://wiki.php.net/rfc/deprecate-png-jpeg-2wbmp
 
 ========================================
 2. New Features

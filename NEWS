@@ -7,5 +7,6 @@ PHP                                                                        NEWS
 
 - GD:
   . Removed deprecated image2wbmp(). (cmb)
+  . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
