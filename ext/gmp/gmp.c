@@ -99,10 +99,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_prob_prime, 0, 0, 1)
 	ZEND_ARG_INFO(0, reps)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random, 0, 0, 0)
-	ZEND_ARG_INFO(0, limiter)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random_seed, 0, 0, 1)
 	ZEND_ARG_INFO(0, seed)
 ZEND_END_ARG_INFO()
@@ -175,7 +171,6 @@ static const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_kronecker,	arginfo_gmp_binary)
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
-	ZEND_DEP_FE(gmp_random,		arginfo_gmp_random)
 	ZEND_FE(gmp_random_seed,	arginfo_gmp_random_seed)
 	ZEND_FE(gmp_random_bits,  arginfo_gmp_random_bits)
 	ZEND_FE(gmp_random_range, arginfo_gmp_random_range)
@@ -1881,28 +1876,6 @@ static void gmp_init_random(void)
 		GMPG(rand_initialized) = 1;
 	}
 }
-
-/* {{{ proto GMP gmp_random([int limiter])
-   Gets random number */
-ZEND_FUNCTION(gmp_random)
-{
-	zend_long limiter = 20;
-	mpz_ptr gmpnum_result;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &limiter) == FAILURE) {
-		return;
-	}
-
-	INIT_GMP_RETVAL(gmpnum_result);
-	gmp_init_random();
-
-#ifdef GMP_LIMB_BITS
-	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * GMP_LIMB_BITS);
-#else
-	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * __GMP_BITS_PER_MP_LIMB);
-#endif
-}
-/* }}} */
 
 /* {{{ proto GMP gmp_random_seed(mixed seed)
    Seed the RNG */
