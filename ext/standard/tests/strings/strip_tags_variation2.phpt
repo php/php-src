@@ -48,13 +48,6 @@ $values = array(
       10.6E-10,
       .5,
 
-      // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
-
       // null data
       NULL,
       null,
@@ -113,24 +106,14 @@ string(10) "helloworld"
 -- Iteration 9 --
 string(10) "helloworld"
 -- Iteration 10 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 11 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 12 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 13 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 14 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 15 --
 string(10) "helloworld"
@@ -145,15 +128,5 @@ string(10) "helloworld"
 -- Iteration 20 --
 string(10) "helloworld"
 -- Iteration 21 --
-string(10) "helloworld"
--- Iteration 22 --
-string(10) "helloworld"
--- Iteration 23 --
-string(10) "helloworld"
--- Iteration 24 --
-string(10) "helloworld"
--- Iteration 25 --
-string(10) "helloworld"
--- Iteration 26 --
 string(10) "helloworld"
 Done

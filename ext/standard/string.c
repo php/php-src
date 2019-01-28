@@ -4780,6 +4780,7 @@ PHP_FUNCTION(strip_tags)
 	zval *allow=NULL;
 	const char *allowed_tags=NULL;
 	size_t allowed_tags_len=0;
+	smart_str tags_ss = {0};
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
@@ -4787,15 +4788,34 @@ PHP_FUNCTION(strip_tags)
 		Z_PARAM_ZVAL(allow)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* To maintain a certain BC, we allow anything for the second parameter and return original string */
 	if (allow) {
-		convert_to_string(allow);
-		allowed_tags = Z_STRVAL_P(allow);
-		allowed_tags_len = Z_STRLEN_P(allow);
+		if (Z_TYPE_P(allow) == IS_ARRAY) {
+			zval *tmp;
+			zend_string *tag;
+
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(allow), tmp) {
+				tag = zval_get_string(tmp);
+				smart_str_appendc(&tags_ss, '<');
+				smart_str_append(&tags_ss, tag);
+				smart_str_appendc(&tags_ss, '>');
+				zend_string_release(tag);
+			} ZEND_HASH_FOREACH_END();
+			if (tags_ss.s) {
+				smart_str_0(&tags_ss);
+				allowed_tags = ZSTR_VAL(tags_ss.s);
+				allowed_tags_len = ZSTR_LEN(tags_ss.s);
+			}
+		} else {
+			/* To maintain a certain BC, we allow anything for the second parameter and return original string */
+			convert_to_string(allow);
+			allowed_tags = Z_STRVAL_P(allow);
+			allowed_tags_len = Z_STRLEN_P(allow);
+		}
 	}
 
 	buf = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
 	ZSTR_LEN(buf) = php_strip_tags_ex(ZSTR_VAL(buf), ZSTR_LEN(str), NULL, allowed_tags, allowed_tags_len, 0);
+	smart_str_free(&tags_ss);
 	RETURN_NEW_STR(buf);
 }
 /* }}} */

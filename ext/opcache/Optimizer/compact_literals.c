@@ -827,7 +827,7 @@ literals_handle_static_prop:
 						Z_CACHE_SLOT_P(val) = op_array->cache_size;
 						op_array->cache_size += sizeof(zval);
 					}
-				} else if (opline->opcode != ZEND_RECV) {
+				} else if (opline->opcode != ZEND_RECV && opline->opcode != ZEND_EXT_NOP) {
 					break;
 				}
 				opline++;

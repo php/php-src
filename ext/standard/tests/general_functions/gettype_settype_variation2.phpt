@@ -3,10 +3,11 @@ Test gettype() & settype() functions : usage variations
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
-if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'MAC' ) {
+
+if (PHP_OS_FAMILY === 'Darwin') {
     die('skip Do not run on MacOS');
 }
+?>
 --INI--
 precision=14
 --FILE--

@@ -75,6 +75,10 @@ PHP 7.4 UPGRADE NOTES
     passed. Previously this would generate a recoverable fatal error on the
     next extraction operation.
 
+- Standard:
+  . The "o" serialization format has been removed. As it is never produced by
+    PHP, this may only break unserialization of manually crafted strings.
+
 ========================================
 2. New Features
 ========================================
@@ -116,6 +120,10 @@ PHP 7.4 UPGRADE NOTES
   . PDOStatement::getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT) allows to
     check whether this statement is read-only, i.e. whether it doesn't modify
     the database.
+
+- Standard:
+  . strip_tags() now also accepts an array of allowed tags: Instead of
+    strip_tags($str, '<a><p>') you can now write strip_tags($str, ['a', 'p']).
 
 ========================================
 3. Changes in SAPI modules

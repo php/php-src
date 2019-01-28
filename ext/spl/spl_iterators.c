@@ -2572,7 +2572,7 @@ SPL_METHOD(LimitIterator, getPosition)
 } /* }}} */
 
 ZEND_BEGIN_ARG_INFO(arginfo_seekable_it_seek, 0)
-	ZEND_ARG_INFO(0, position)
+	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
 ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_SeekableIterator[] = {

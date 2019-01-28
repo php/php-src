@@ -1062,6 +1062,9 @@ END_EXTERN_C()
 /* this flag is set when compiler invoked during preloading */
 #define ZEND_COMPILE_PRELOAD                    (1<<14)
 
+/* disable jumptable optimization for switch statements */
+#define ZEND_COMPILE_NO_JUMPTABLES				(1<<15)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 

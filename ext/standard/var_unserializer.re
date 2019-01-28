@@ -948,17 +948,6 @@ use_double:
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 }
 
-"o:" uiv ":" ["] {
-	zend_long elements;
-    if (!var_hash) return 0;
-
-	elements = object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR);
-	if (elements < 0 || elements >= HT_MAX_SIZE) {
-		return 0;
-	}
-	return object_common2(UNSERIALIZE_PASSTHRU, elements);
-}
-
 object ":" uiv ":" ["]	{
 	size_t len, len2, len3, maxlen;
 	zend_long elements;

@@ -1334,12 +1334,19 @@ static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *class_ast) /* {{{ */
 {
 	uint32_t fetch_type;
+	zval *class_name;
 
 	if (class_ast->kind != ZEND_AST_ZVAL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use ::class with dynamic class name");
 	}
 
-	fetch_type = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
+	class_name = zend_ast_get_zval(class_ast);
+
+	if (Z_TYPE_P(class_name) != IS_STRING) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Illegal class name");
+	}
+
+	fetch_type = zend_get_class_fetch_type(Z_STR_P(class_name));
 	zend_ensure_valid_class_fetch_type(fetch_type);
 
 	switch (fetch_type) {
@@ -2081,9 +2088,7 @@ void zend_emit_final_return(int return_one) /* {{{ */
 static inline zend_bool zend_is_variable(zend_ast *ast) /* {{{ */
 {
 	return ast->kind == ZEND_AST_VAR || ast->kind == ZEND_AST_DIM
-		|| ast->kind == ZEND_AST_PROP || ast->kind == ZEND_AST_STATIC_PROP
-		|| ast->kind == ZEND_AST_CALL || ast->kind == ZEND_AST_METHOD_CALL
-		|| ast->kind == ZEND_AST_STATIC_CALL;
+		|| ast->kind == ZEND_AST_PROP || ast->kind == ZEND_AST_STATIC_PROP;
 }
 /* }}} */
 
@@ -2092,6 +2097,12 @@ static inline zend_bool zend_is_call(zend_ast *ast) /* {{{ */
 	return ast->kind == ZEND_AST_CALL
 		|| ast->kind == ZEND_AST_METHOD_CALL
 		|| ast->kind == ZEND_AST_STATIC_CALL;
+}
+/* }}} */
+
+static inline zend_bool zend_is_variable_or_call(zend_ast *ast) /* {{{ */
+{
+	return zend_is_variable(ast) || zend_is_call(ast);
 }
 /* }}} */
 
@@ -2109,7 +2120,7 @@ static inline zend_bool zend_can_write_to_variable(zend_ast *ast) /* {{{ */
 		ast = ast->child[0];
 	}
 
-	return zend_is_variable(ast);
+	return zend_is_variable_or_call(ast);
 }
 /* }}} */
 
@@ -2741,7 +2752,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_ARRAY:
 			if (zend_propagate_list_refs(var_ast)) {
-				if (!zend_is_variable(expr_ast)) {
+				if (!zend_is_variable_or_call(expr_ast)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Cannot assign reference to non referencable value");
 				}
@@ -2938,7 +2949,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 		}
 
 		arg_count++;
-		if (zend_is_variable(arg)) {
+		if (zend_is_variable_or_call(arg)) {
 			if (zend_is_call(arg)) {
 				zend_compile_var(&arg_node, arg, BP_VAR_R, 0);
 				if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
@@ -4228,7 +4239,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	if (!expr_ast) {
 		expr_node.op_type = IS_CONST;
 		ZVAL_NULL(&expr_node.u.constant);
-	} else if (by_ref && zend_is_variable(expr_ast) && !zend_is_call(expr_ast)) {
+	} else if (by_ref && zend_is_variable(expr_ast)) {
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
@@ -4562,8 +4573,7 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	zend_ast *key_ast = ast->child[2];
 	zend_ast *stmt_ast = ast->child[3];
 	zend_bool by_ref = value_ast->kind == ZEND_AST_REF;
-	zend_bool is_variable = zend_is_variable(expr_ast) && !zend_is_call(expr_ast)
-		&& zend_can_write_to_variable(expr_ast);
+	zend_bool is_variable = zend_is_variable(expr_ast) && zend_can_write_to_variable(expr_ast);
 
 	znode expr_node, reset_node, value_node, key_node;
 	zend_op *opline;
@@ -4732,6 +4742,10 @@ static zend_uchar determine_switch_jumptable_type(zend_ast_list *cases) {
 }
 
 static zend_bool should_use_jumptable(zend_ast_list *cases, zend_uchar jumptable_type) {
+	if (CG(compiler_options) & ZEND_COMPILE_NO_JUMPTABLES) {
+		return 0;
+	}
+
 	/* Thresholds are chosen based on when the average switch time for equidistributed
 	 * input becomes smaller when using the jumptable optimization. */
 	if (jumptable_type == IS_LONG) {
@@ -7405,7 +7419,7 @@ void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	if (value_ast) {
-		if (returns_by_ref && zend_is_variable(value_ast) && !zend_is_call(value_ast)) {
+		if (returns_by_ref && zend_is_variable(value_ast)) {
 			zend_compile_var(&value_node, value_ast, BP_VAR_W, 1);
 		} else {
 			zend_compile_expr(&value_node, value_ast);
@@ -7495,7 +7509,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_ISSET || ast->kind == ZEND_AST_EMPTY);
 
-	if (!zend_is_variable(var_ast) || zend_is_call(var_ast)) {
+	if (!zend_is_variable(var_ast)) {
 		if (ast->kind == ZEND_AST_EMPTY) {
 			/* empty(expr) can be transformed to !expr */
 			zend_ast *not_ast = zend_ast_create_ex(ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, var_ast);
