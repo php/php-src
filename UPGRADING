@@ -64,6 +64,9 @@ PHP 8.0 UPGRADE NOTES
      * mbereg_search_getpos()  -> mb_ereg_search_getpos()
      * mbereg_search_setpos()  -> mb_ereg_search_setpos()
 
+- SPL:
+  . SplFileObject::fgetss() has been removed.
+
 - Standard:
   . assert() will no longer evaluate string arguments, instead they will be
     treated like any other argument. assert($a == $b) should be used instead of
@@ -71,6 +74,11 @@ PHP 8.0 UPGRADE NOTES
     ASSERT_QUIET_EVAL constants have also been removed, as they would no longer
     have any effect.
   . parse_str() can no longer be used without specifying a result array.
+  . fgetss() has been removed.
+  . The string.strip_tags filter has been removed.
+
+- Zlib:
+  . gzgetss() has been removed.
 
 ========================================
 2. New Features
