@@ -203,7 +203,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_preferred_mime_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_parse_str, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_parse_str, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoded_string)
 	ZEND_ARG_INFO(1, result)
 ZEND_END_ARG_INFO()
@@ -2037,26 +2037,24 @@ PHP_FUNCTION(mb_preferred_mime_name)
 #define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
 #define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
 
-/* {{{ proto bool mb_parse_str(string encoded_string [, array result])
+/* {{{ proto bool mb_parse_str(string encoded_string, array &result)
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(mb_parse_str)
 {
-	zval *track_vars_array = NULL;
-	char *encstr = NULL;
+	zval *track_vars_array;
+	char *encstr;
 	size_t encstr_len;
 	php_mb_encoding_handler_info_t info;
 	const mbfl_encoding *detected;
 
 	track_vars_array = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
 		return;
 	}
 
-	if (track_vars_array != NULL) {
-		track_vars_array = zend_try_array_init(track_vars_array);
-		if (!track_vars_array) {
-			return;
-		}
+	track_vars_array = zend_try_array_init(track_vars_array);
+	if (!track_vars_array) {
+		return;
 	}
 
 	encstr = estrndup(encstr, encstr_len);
@@ -2070,22 +2068,7 @@ PHP_FUNCTION(mb_parse_str)
 	info.num_from_encodings     = MBSTRG(http_input_list_size);
 	info.from_language          = MBSTRG(language);
 
-	if (track_vars_array != NULL) {
-		detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr);
-	} else {
-		zval tmp;
-		zend_array *symbol_table;
-		if (zend_forbid_dynamic_call("mb_parse_str() with a single argument") == FAILURE) {
-			efree(encstr);
-			return;
-		}
-
-		php_error_docref(NULL, E_DEPRECATED, "Calling mb_parse_str() without the result argument is deprecated");
-
-		symbol_table = zend_rebuild_symbol_table();
-		ZVAL_ARR(&tmp, symbol_table);
-		detected = _php_mb_encoding_handler_ex(&info, &tmp, encstr);
-	}
+	detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr);
 
 	MBSTRG(http_input_identify) = detected;
 

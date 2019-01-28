@@ -4911,7 +4911,7 @@ PHP_FUNCTION(setlocale)
 }
 /* }}} */
 
-/* {{{ proto void parse_str(string encoded_string [, array &result])
+/* {{{ proto void parse_str(string encoded_string, array &result)
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(parse_str)
 {
@@ -4920,38 +4920,18 @@ PHP_FUNCTION(parse_str)
 	char *res = NULL;
 	size_t arglen;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(arg, arglen)
-		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(arrayArg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	res = estrndup(arg, arglen);
-
-	if (arrayArg == NULL) {
-		zval tmp;
-		zend_array *symbol_table;
-		if (zend_forbid_dynamic_call("parse_str() with a single argument") == FAILURE) {
-			efree(res);
-			return;
-		}
-
-		php_error_docref(NULL, E_DEPRECATED, "Calling parse_str() without the result argument is deprecated");
-
-		symbol_table = zend_rebuild_symbol_table();
-		ZVAL_ARR(&tmp, symbol_table);
-		sapi_module.treat_data(PARSE_STRING, res, &tmp);
-		if (UNEXPECTED(zend_hash_del(symbol_table, ZSTR_KNOWN(ZEND_STR_THIS)) == SUCCESS)) {
-			zend_throw_error(NULL, "Cannot re-assign $this");
-		}
-	} else 	{
-		arrayArg = zend_try_array_init(arrayArg);
-		if (!arrayArg) {
-			return;
-		}
-
-		sapi_module.treat_data(PARSE_STRING, res, arrayArg);
+	arrayArg = zend_try_array_init(arrayArg);
+	if (!arrayArg) {
+		return;
 	}
+
+	res = estrndup(arg, arglen);
+	sapi_module.treat_data(PARSE_STRING, res, arrayArg);
 }
 /* }}} */
 
