@@ -67,7 +67,6 @@ static ZEND_FUNCTION(get_declared_traits);
 static ZEND_FUNCTION(get_declared_interfaces);
 static ZEND_FUNCTION(get_defined_functions);
 static ZEND_FUNCTION(get_defined_vars);
-static ZEND_FUNCTION(create_function);
 static ZEND_FUNCTION(get_resource_type);
 static ZEND_FUNCTION(get_resources);
 static ZEND_FUNCTION(get_loaded_extensions);
@@ -197,11 +196,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_defined_functions, 0, 0, 0)
 	ZEND_ARG_INFO(0, exclude_disabled)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_create_function, 0, 0, 2)
-	ZEND_ARG_INFO(0, args)
-	ZEND_ARG_INFO(0, code)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_resource_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, res)
 ZEND_END_ARG_INFO()
@@ -276,7 +270,6 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_declared_interfaces, 	arginfo_zend__void)
 	ZEND_FE(get_defined_functions, 		arginfo_get_defined_functions)
 	ZEND_FE(get_defined_vars,		arginfo_zend__void)
-	ZEND_DEP_FE(create_function,		arginfo_create_function)
 	ZEND_FE(get_resource_type,		arginfo_get_resource_type)
 	ZEND_FE(get_resources,			arginfo_get_resources)
 	ZEND_FE(get_loaded_extensions,		arginfo_get_loaded_extensions)
@@ -1892,78 +1885,6 @@ ZEND_FUNCTION(get_defined_vars)
 	}
 
 	RETURN_ARR(zend_array_dup(symbol_table));
-}
-/* }}} */
-
-#define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
-/* {{{ proto string create_function(string args, string code)
-   Creates an anonymous function, and returns its name (funny, eh?) */
-ZEND_FUNCTION(create_function)
-{
-    zend_string *function_name;
-	char *eval_code, *function_args, *function_code;
-	size_t eval_code_length, function_args_len, function_code_len;
-	int retval;
-	char *eval_name;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &function_args, &function_args_len, &function_code, &function_code_len) == FAILURE) {
-		return;
-	}
-
-	eval_code = (char *) emalloc(sizeof("function " LAMBDA_TEMP_FUNCNAME)
-			+function_args_len
-			+2	/* for the args parentheses */
-			+2	/* for the curly braces */
-			+function_code_len);
-
-	eval_code_length = sizeof("function " LAMBDA_TEMP_FUNCNAME "(") - 1;
-	memcpy(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(", eval_code_length);
-
-	memcpy(eval_code + eval_code_length, function_args, function_args_len);
-	eval_code_length += function_args_len;
-
-	eval_code[eval_code_length++] = ')';
-	eval_code[eval_code_length++] = '{';
-
-	memcpy(eval_code + eval_code_length, function_code, function_code_len);
-	eval_code_length += function_code_len;
-
-	eval_code[eval_code_length++] = '}';
-	eval_code[eval_code_length] = '\0';
-
-	eval_name = zend_make_compiled_string_description("runtime-created function");
-	retval = zend_eval_stringl(eval_code, eval_code_length, NULL, eval_name);
-	efree(eval_code);
-	efree(eval_name);
-
-	if (retval==SUCCESS) {
-		zend_op_array *func;
-		HashTable *static_variables;
-
-		func = zend_hash_str_find_ptr(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
-		if (!func) {
-			zend_error_noreturn(E_CORE_ERROR, "Unexpected inconsistency in create_function()");
-			RETURN_FALSE;
-		}
-		if (func->refcount) {
-			(*func->refcount)++;
-		}
-		static_variables = func->static_variables;
-		func->static_variables = NULL;
-		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
-		func->static_variables = static_variables;
-
-		function_name = zend_string_alloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG, 0);
-		ZSTR_VAL(function_name)[0] = '\0';
-
-		do {
-			ZSTR_LEN(function_name) = snprintf(ZSTR_VAL(function_name) + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count)) + 1;
-		} while (zend_hash_add_ptr(EG(function_table), function_name, func) == NULL);
-		RETURN_NEW_STR(function_name);
-	} else {
-		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
-		RETURN_FALSE;
-	}
 }
 /* }}} */
 
