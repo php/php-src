@@ -1,20 +1,7 @@
-PHP 7.4 INTERNALS UPGRADE NOTES
+PHP 8.0 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
-  a. php_sys_symlink() and php_sys_link()
-  b. zend_lookup_class_ex() and zend_fetch_class_by_name()
-  c. Function/property/class flags
-  d. Removed zend_check_private()
-  e. php_win32_error_to_msg() memory management
-  f. get_properties_for() handler / Z_OBJDEBUG_P
-  g. Required object handlers
-  h. Immutable classes and op_arrays
-  i. php_fgetcsv() and php_fputcsv()
-  j. Removed add_get_assoc_*() and add_get_index_*()
-  k. Class declaration opcodes
-  l. HASH_FLAG_INITIALIZED
-  m. write_property return value
-  n. Assignments to references
+  a. TBD
 
 2. Build system changes
   a. Abstract
@@ -22,169 +9,20 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   c. Windows build system changes
 
 3. Module changes
-  a. ext/xml
-  b. ext/hash
 
 ========================
 1. Internal API changes
 ========================
 
- a. php_sys_symlink() and php_sys_link() portability macros have been
-    added, which behave like POSIX's symlink() and link(), respectively, on
-    POSIX compliant systems and on Windows.
-
- b. zend_lookup_class_ex() and zend_fetch_class_by_name() prototypes were
-    changed to accept optional lower-case class name as zend_string*,
-    instead of zval*.
-
- c. Function/property/class flags changes
-    - ZEND_ACC_CTOR and ZEND_ACC_DTOR are removed. It's possible to check if
-      method is a constructor/destructor using the following condition
-      (func->common.scope->constructor == func).
-    - ZEND_ACC_IMPLEMENTED_ABSTRACT is removed (it was used only internally
-      during inheritance).
-    - ZEND_ACC_IMPLICIT_PUBLIC is removed (it was used only for reflection)
-    - ZEND_ACC_SHADOW property flag is removed. Instead of creating shadow
-      clone, now we use the same private property_info, and should also
-      check property_info->ce (in the same way as with methods).
-    - ZEND_ACC_ANON_BOUND is replaced with ZEND_ACC_LINKED. This flag is set
-      not only during anonymous classes declaration, but also during any
-      run-time or compile-time class declaration.
-    - ZEND_ACC_NO_RT_ARENA renamed into ZEND_ACC_HEAP_RT_CACHE. Now it's used
-      not only for closures, but also for pseudo-main op_arrays.
-    - ZEND_ACC_... flags are re-numbered.
-
-  d. zend_check_private() is removed. Use (func->common.scope == scope) instead.
-
-  e. Pointers returned by php_win32_error_to_msg() have to be freed using
-     php_win32_error_msg_free(). Same regarding php_win_err() vs.
-     php_win_err_free().
-
-  f. A new, optional object handler with the signature
-
-         HashTable *get_properties_for(zval *obj, zend_prop_purpose purpose)
-
-     has been introduced, where zend_prop_purpose (currently) takes one of:
-
-         ZEND_PROP_PURPOSE_DEBUG       // var_dump etc.
-         ZEND_PROP_PURPOSE_ARRAY_CAST  // (array) $obj
-         ZEND_PROP_PURPOSE_SERIALIZE   // "O"-format serialization (__wakeup)
-         ZEND_PROP_PURPOSE_VAR_EXPORT  // var_export (__set_state)
-         ZEND_PROP_PURPOSE_JSON        // json_encode
-
-     The handler returns a non-null HashTable with increased refcounted, and
-     the return value must be released using zend_release_properties().
-
-     This handler serves the same general function as get_properties(), but
-     provides more control over different property uses, while also making
-     it possible to return a temporary property table.
-
-     get_properties() is still used in cases where none of the above purposes
-     apply, but overloading get_properties() is generally discouraged. If you
-     want to provide purposes for general usage rather than just debugging or
-     serialization, please prefer using properly declared properties.
-
-     get_debug_info() is superseded by get_properties_for() with the
-     ZEND_PROP_PURPOSE_DEBUG purpose, but remains available for backwards-
-     compatibility reasons. However, while it is fine to define this handler,
-     it should never be directly called by consuming code.
-
-     The Z_OBJDEBUG_P macro has been removed. It should be replaced by calls to
-     zend_get_properties_for() with the ZEND_PROP_PURPOSE_DEBUG purpose:
-
-         // OLD
-         int is_temp;
-         HashTable *ht = Z_OBJDEBUG_P(obj, is_temp);
-         // ...
-         if (is_temp) {
-            zend_hash_destroy(ht);
-            FREE_HASHTABLE(ht);
-         }
-
-         // NEW
-         HashTable *ht = zend_get_properties_for(obj, ZEND_PROP_PURPOSE_DEBUG);
-         // ...
-         zend_release_properties(ht);
-
-  g. The following object handlers are now required (must be non-NULL):
-
-       * free_obj
-       * dtor_obj
-       * read_property
-       * write_property
-       * read_dimension
-       * write_dimension
-       * get_property_ptr_ptr
-       * has_property
-       * unset_property
-       * has_dimension
-       * unset_dimension
-       * get_properties
-       * get_method
-       * get_constructor
-       * get_class_name
-       * get_gc
-
-     It is recommended to initialize object handler structures by copying the
-     std object handlers and only overwriting those you want to change.
-
-  h. Opcache may make classes and op_arrays immutable. Such classes are marked
-     by ZEND_ACC_IMMUTABLE flag, they are not going to be copied from opcache
-     shared memory to process memory and must not be modified at all.
-     Few related data structures were changed to allow addressing mutable data
-     structures from immutable ones. This access is implemented through
-     ZEND_MAP_PTR... abstraction macros and, basically, uses additional level of
-     indirection. op_array->run_time_cache, op_array->static_variables_ptr and
-     class_entry->static_members_table now have to be accessed through
-     ZEND_MAP_PTR... macros.
-     It's also not allowed to change op_array->reserved[] handles of immutable
-     op_arrays. Instead, now you have to reserve op_array handle using
-     zend_get_op_array_extension_handle() during MINIT and access its value
-     using ZEND_OP_ARRAY_EXTENSION(op_array, handle).
-
-  i. The type of the escape parameter of php_fgetcsv() and php_fputcsv() has
-     been changed from char to int. This allows to pass the new constant macro
-     PHP_CSV_NO_ESCAPE to this parameter, to disable PHP's proprietary escape
-     mechanism.
-
-  j. add_get_assoc_*() and add_get_index_*() are removed. Use add_assoc*(),
-     add_index*() or zend_hash_*() API functions instead.
-
-  k. Complex class declaration opcodes ZEND_ADD_INTERFACE, ZEND_ADD_TRAIT,
-     ZEND_BIND_TRAITS and ZEND_VERIFY_ABSTRACT_CLASS were removed. Information
-     about interfaces and traits is kept in zend_class_entry structure and
-     actual linked performed by ZEND_DECLARE_...CLASS... opcode(s).
-     Linked classes have ZEND_ACC_LINKED flag set.
-
-  l. HASH_FLAG_INITIALIZED was reverted into HASH_FLAG_UNINITIALIZED.
-     Special HT_IS_INITIALIZED() and HT_INVALIDATE() macro were introduced
-     to hide implementation details.
-
-  m. The write_property() object handler now returns the assigned value (after
-     possible type coercions) rather than void. For extensions, it should
-     usually be sufficient to return whatever was passed as the argument.
-
-  n. Assignments to references now need to ensure that they respect property
-     types that affect the reference. This means that references should no
-     longer be directly assigned to, and instead a set of specialized macros
-     of the form ZEND_TRY_ASSIGN* needs to be used. You can find detailed
-     porting instructions as well as a compatibility shim in the wiki:
-     https://wiki.php.net/rfc/typed_properties_v2#assignments_to_references
+ a. TBD
 
 ========================
 2. Build system changes
 ========================
 
   a. Abstract
-    - The hash extension is now always available, meaning the --enable-hash
-	  configure argument has been removed.
 
   b. Unix build system changes
-    - configure --help now also outputs --program-suffix and --program-prefix
-      information by using the Autoconf AC_ARG_PROGRAM macro.
-    - Obsolescent macros AC_FUNC_VPRINTF and AC_FUNC_UTIME_NULL have been
-      removed. Symbols HAVE_VPRINTF and HAVE_UTIME_NULL are no longer defined
-      since they are not needed on the current systems.
 
   c. Windows build system changes
 
@@ -192,10 +30,3 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
-  a. ext/xml
-    - The public (internal) API of the ext/xml extension has been removed. All
-      functions and structures are private to the extension now.
-
-  b. ext/hash
-    - The hash extension is now always available, allowing extensions to rely
-	  on its functionality to be available without compile time checks.
