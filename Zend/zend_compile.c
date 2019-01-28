@@ -1334,12 +1334,19 @@ static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *class_ast) /* {{{ */
 {
 	uint32_t fetch_type;
+	zval *class_name;
 
 	if (class_ast->kind != ZEND_AST_ZVAL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use ::class with dynamic class name");
 	}
 
-	fetch_type = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
+	class_name = zend_ast_get_zval(class_ast);
+
+	if (Z_TYPE_P(class_name) != IS_STRING) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Illegal class name");
+	}
+
+	fetch_type = zend_get_class_fetch_type(Z_STR_P(class_name));
 	zend_ensure_valid_class_fetch_type(fetch_type);
 
 	switch (fetch_type) {
