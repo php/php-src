@@ -29,6 +29,10 @@ PHP 8.0 UPGRADE NOTES
   . The deprecated functions png2wbmp() and jpeg2wbmp() have been removed.
     RFC: https://wiki.php.net/rfc/deprecate-png-jpeg-2wbmp
 
+- Intl:
+  . The deprecated constant INTL_IDNA_VARIANT_2003 has been removed.
+    RFC: https://wiki.php.net/rfc/deprecate-and-remove-intl_idna_variant_2003
+
 ========================================
 2. New Features
 ========================================
