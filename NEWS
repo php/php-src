@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (Dmitry)
   . Fixed bug #77498 (Custom extension Segmentation fault when declare static
     property). (Nikita)
+  . Fixed bug #77530 (PHP crashes when parsing `(2)::class`). (Ekin)
 
 - Mbstring:
   . Fixed bug #77514 (mb_ereg_replace() with trailing backslash adds null byte).
