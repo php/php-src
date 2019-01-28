@@ -3169,9 +3169,7 @@ int zend_compile_func_strlen(znode *result, zend_ast_list *args) /* {{{ */
 {
 	znode arg_node;
 
-	if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)
-		|| args->children != 1
-	) {
+	if (args->children != 1) {
 		return FAILURE;
 	}
 
