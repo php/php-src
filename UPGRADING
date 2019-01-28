@@ -47,6 +47,11 @@ PHP 8.0 UPGRADE NOTES
   . mb_parse_str() can no longer be used without specifying a result array.
 
 - Standard:
+  . assert() will no longer evaluate string arguments, instead they will be
+    treated like any other argument. assert($a == $b) should be used instead of
+    assert('$a == $b'). The assert.quiet_eval ini directive and
+    ASSERT_QUIET_EVAL constants have also been removed, as they would no longer
+    have any effect.
   . parse_str() can no longer be used without specifying a result array.
 
 ========================================
