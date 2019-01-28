@@ -206,7 +206,6 @@ PHP_FUNCTION(imagettftext);
 
 PHP_FUNCTION(jpeg2wbmp);
 PHP_FUNCTION(png2wbmp);
-PHP_FUNCTION(image2wbmp);
 
 PHP_FUNCTION(imagecolormatch);
 

@@ -758,12 +758,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagettftext, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_image2wbmp, 0, 0, 1)
-	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, foreground)
-ZEND_END_ARG_INFO()
-
 #if defined(HAVE_GD_JPG)
 ZEND_BEGIN_ARG_INFO(arginfo_jpeg2wbmp, 0)
 	ZEND_ARG_INFO(0, f_org)
@@ -997,7 +991,6 @@ static const zend_function_entry gd_functions[] = {
 #if defined(HAVE_GD_PNG)
 	PHP_DEP_FE(png2wbmp,							arginfo_png2wbmp)
 #endif
-	PHP_DEP_FE(image2wbmp,							arginfo_image2wbmp)
 	PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
 	PHP_FE(imagexbm,                                arginfo_imagexbm)
 
@@ -2594,7 +2587,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	int argc = ZEND_NUM_ARGS();
 	int q = -1, i, t = 1;
 
-	/* The quality parameter for Wbmp stands for the foreground when called from image2wbmp() */
 	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 	/* The quality parameter for gd2 stands for chunk size */
 
@@ -4066,14 +4058,6 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 }
 /* }}} */
 #endif	/* ENABLE_GD_TTF */
-
-/* {{{ proto bool image2wbmp(resource im [, string filename [, int foreground]])
-   Output WBMP image to browser or file */
-PHP_FUNCTION(image2wbmp)
-{
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_CONVERT_WBM, "WBMP", NULL);
-}
-/* }}} */
 
 #if defined(HAVE_GD_JPG)
 /* {{{ proto bool jpeg2wbmp(string f_org, string f_dest, int d_height, int d_width, int threshold)

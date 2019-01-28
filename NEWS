@@ -5,4 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #NNNNN (Summary). (Author)
 
+- GD:
+  . Removed deprecated image2wbmp(). (cmb)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

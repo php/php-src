@@ -23,6 +23,10 @@ PHP 8.0 UPGRADE NOTES
 - Core:
   . TBD
 
+- GD:
+  . The deprecated function image2wbmp() has been removed.
+    RFC: https://wiki.php.net/rfc/image2wbmp
+
 ========================================
 2. New Features
 ========================================
