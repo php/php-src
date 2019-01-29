@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
 
+- SPL:
+  . Fixed bug #51068 (DirectoryIterator glob:// don't support current path
+    relative queries). (Ahmed Abdou)
+
 - Standard:
   . Fixed bug #77552 (Unintialized php_stream_statbuf in stat functions).
     (John Stevenson)
