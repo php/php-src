@@ -197,7 +197,7 @@ PHP_FUNCTION(is_soap_fault);
 
 
 /* Server Functions */
-PHP_METHOD(SoapServer, SoapServer);
+PHP_METHOD(SoapServer, __construct);
 PHP_METHOD(SoapServer, setClass);
 PHP_METHOD(SoapServer, setObject);
 PHP_METHOD(SoapServer, addFunction);
@@ -208,7 +208,7 @@ PHP_METHOD(SoapServer, fault);
 PHP_METHOD(SoapServer, addSoapHeader);
 
 /* Client Functions */
-PHP_METHOD(SoapClient, SoapClient);
+PHP_METHOD(SoapClient, __construct);
 PHP_METHOD(SoapClient, __call);
 PHP_METHOD(SoapClient, __getLastRequest);
 PHP_METHOD(SoapClient, __getLastResponse);
@@ -223,30 +223,28 @@ PHP_METHOD(SoapClient, __setLocation);
 PHP_METHOD(SoapClient, __setSoapHeaders);
 
 /* SoapVar Functions */
-PHP_METHOD(SoapVar, SoapVar);
+PHP_METHOD(SoapVar, __construct);
 
 /* SoapFault Functions */
-PHP_METHOD(SoapFault, SoapFault);
+PHP_METHOD(SoapFault, __construct);
 PHP_METHOD(SoapFault, __toString);
 
 /* SoapParam Functions */
-PHP_METHOD(SoapParam, SoapParam);
+PHP_METHOD(SoapParam, __construct);
 
 /* SoapHeader Functions */
-PHP_METHOD(SoapHeader, SoapHeader);
-
-#define SOAP_CTOR(class_name, func_name, arginfo, flags) PHP_ME(class_name, func_name, arginfo, flags)
+PHP_METHOD(SoapHeader, __construct);
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_soap__void, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapparam_soapparam, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_soapparam___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapheader_soapheader, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_soapheader___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, namespace)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, data)
@@ -254,7 +252,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_soapheader_soapheader, 0, 0, 2)
 	ZEND_ARG_INFO(0, actor)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapfault_soapfault, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_soapfault___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, faultcode)
 	ZEND_ARG_INFO(0, faultstring)
 	ZEND_ARG_INFO(0, faultactor)
@@ -263,7 +261,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_soapfault_soapfault, 0, 0, 2)
 	ZEND_ARG_INFO(0, headerfault)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapvar_soapvar, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_soapvar___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, encoding)
 	ZEND_ARG_INFO(0, type_name)
@@ -284,7 +282,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_addsoapheader, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_soapserver, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, wsdl)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
@@ -313,7 +311,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_handle, 0, 0, 0)
 	ZEND_ARG_INFO(0, soap_request)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient_soapclient, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, wsdl)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
@@ -389,13 +387,13 @@ static const zend_function_entry soap_functions[] = {
 };
 
 static const zend_function_entry soap_fault_functions[] = {
-	SOAP_CTOR(SoapFault, SoapFault, arginfo_soapfault_soapfault, 0)
+	PHP_ME(SoapFault, __construct, arginfo_soapfault___construct, 0)
 	PHP_ME(SoapFault, __toString, arginfo_soap__void, 0)
 	PHP_FE_END
 };
 
 static const zend_function_entry soap_server_functions[] = {
-	SOAP_CTOR(SoapServer, SoapServer, 	arginfo_soapserver_soapserver, 0)
+	PHP_ME(SoapServer, __construct, 	arginfo_soapserver___construct, 0)
 	PHP_ME(SoapServer, setPersistence, 	arginfo_soapserver_setpersistence, 0)
 	PHP_ME(SoapServer, setClass, 		arginfo_soapserver_setclass, 0)
 	PHP_ME(SoapServer, setObject, 		arginfo_soapserver_setobject, 0)
@@ -408,7 +406,7 @@ static const zend_function_entry soap_server_functions[] = {
 };
 
 static const zend_function_entry soap_client_functions[] = {
-	SOAP_CTOR(SoapClient, SoapClient, arginfo_soapclient_soapclient, 0)
+	PHP_ME(SoapClient, __construct, 				arginfo_soapclient___construct, 0)
 	PHP_ME(SoapClient, __call, 						arginfo_soapclient___call, 0)
 	ZEND_NAMED_ME(__soapCall, ZEND_MN(SoapClient___call), arginfo_soapclient___soapcall, 0)
 	PHP_ME(SoapClient, __getLastRequest, 			arginfo_soapclient___getlastrequest, 0)
@@ -426,17 +424,17 @@ static const zend_function_entry soap_client_functions[] = {
 };
 
 static const zend_function_entry soap_var_functions[] = {
-	SOAP_CTOR(SoapVar, SoapVar, arginfo_soapvar_soapvar, 0)
+	PHP_ME(SoapVar, __construct, arginfo_soapvar___construct, 0)
 	PHP_FE_END
 };
 
 static const zend_function_entry soap_param_functions[] = {
-	SOAP_CTOR(SoapParam, SoapParam, arginfo_soapparam_soapparam, 0)
+	PHP_ME(SoapParam, __construct, arginfo_soapparam___construct, 0)
 	PHP_FE_END
 };
 
 static const zend_function_entry soap_header_functions[] = {
-	SOAP_CTOR(SoapHeader, SoapHeader, arginfo_soapheader_soapheader, 0)
+	PHP_ME(SoapHeader, __construct, arginfo_soapheader___construct, 0)
 	PHP_FE_END
 };
 
@@ -785,9 +783,9 @@ PHP_MINFO_FUNCTION(soap)
 }
 
 
-/* {{{ proto object SoapParam::SoapParam(mixed data, string name)
+/* {{{ proto object SoapParam::__construct(mixed data, string name)
    SoapParam constructor */
-PHP_METHOD(SoapParam, SoapParam)
+PHP_METHOD(SoapParam, __construct)
 {
 	zval *data;
 	char *name;
@@ -809,9 +807,9 @@ PHP_METHOD(SoapParam, SoapParam)
 /* }}} */
 
 
-/* {{{ proto object SoapHeader::SoapHeader(string namespace, string name [, mixed data [, bool mustUnderstand [, mixed actor]]])
+/* {{{ proto object SoapHeader::__construct(string namespace, string name [, mixed data [, bool mustUnderstand [, mixed actor]]])
    SoapHeader constructor */
-PHP_METHOD(SoapHeader, SoapHeader)
+PHP_METHOD(SoapHeader, __construct)
 {
 	zval *data = NULL, *actor = NULL;
 	char *name, *ns;
@@ -852,9 +850,9 @@ PHP_METHOD(SoapHeader, SoapHeader)
 }
 /* }}} */
 
-/* {{{ proto object SoapFault::SoapFault(string faultcode, string faultstring [, string faultactor [, mixed detail [, string faultname [, mixed headerfault]]]])
+/* {{{ proto object SoapFault::__construct(string faultcode, string faultstring [, string faultactor [, mixed detail [, string faultname [, mixed headerfault]]]])
    SoapFault constructor */
-PHP_METHOD(SoapFault, SoapFault)
+PHP_METHOD(SoapFault, __construct)
 {
 	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL, *name = NULL, *fault_code_ns = NULL;
 	size_t fault_string_len, fault_actor_len = 0, name_len = 0, fault_code_len = 0;
@@ -955,9 +953,9 @@ PHP_METHOD(SoapFault, __toString)
 }
 /* }}} */
 
-/* {{{ proto object SoapVar::SoapVar(mixed data, int encoding [, string type_name [, string type_namespace [, string node_name [, string node_namespace]]]])
+/* {{{ proto object SoapVar::__construct(mixed data, int encoding [, string type_name [, string type_namespace [, string node_name [, string node_namespace]]]])
    SoapVar constructor */
-PHP_METHOD(SoapVar, SoapVar)
+PHP_METHOD(SoapVar, __construct)
 {
 	zval *data, *type, *this_ptr;
 	char *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
@@ -1102,9 +1100,9 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto object SoapServer::SoapServer(mixed wsdl [, array options])
+/* {{{ proto object SoapServer::__construct(mixed wsdl [, array options])
    SoapServer constructor */
-PHP_METHOD(SoapServer, SoapServer)
+PHP_METHOD(SoapServer, __construct)
 {
 	soapServicePtr service;
 	zval *wsdl = NULL, *options = NULL;
@@ -2256,9 +2254,9 @@ PHP_FUNCTION(is_soap_fault)
 
 /* SoapClient functions */
 
-/* {{{ proto object SoapClient::SoapClient(mixed wsdl [, array options])
+/* {{{ proto object SoapClient::__construct(mixed wsdl [, array options])
    SoapClient constructor */
-PHP_METHOD(SoapClient, SoapClient)
+PHP_METHOD(SoapClient, __construct)
 {
 
 	zval *wsdl, *options = NULL;
