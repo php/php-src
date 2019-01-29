@@ -1287,14 +1287,11 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
-	if (ZSTR_LEN(ce->name) != ZSTR_LEN(mname) && (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_')) {
+	if (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_') {
 		/* pass */
 	} else if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
-		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
-		}
 		ce->constructor = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 		ce->destructor = fe;
@@ -1318,16 +1315,6 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->__tostring = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		ce->__debugInfo = fe;
-	} else if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {
-		zend_string *lowercase_name = zend_string_tolower(ce->name);
-		lowercase_name = zend_new_interned_string(lowercase_name);
-		if (!memcmp(ZSTR_VAL(mname), ZSTR_VAL(lowercase_name), ZSTR_LEN(mname))) {
-			if (ce->constructor  && (!ce->parent || ce->constructor != ce->parent->constructor)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
-			}
-			ce->constructor = fe;
-		}
-		zend_string_release_ex(lowercase_name, 0);
 	}
 }
 /* }}} */
@@ -1934,32 +1921,6 @@ static void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 	zend_do_traits_property_binding(ce, traits);
 
 	efree(traits);
-
-	/* Emit E_DEPRECATED for PHP 4 constructors */
-	zend_check_deprecated_constructor(ce);
-}
-/* }}} */
-
-
-static zend_bool zend_has_deprecated_constructor(const zend_class_entry *ce) /* {{{ */
-{
-	const zend_string *constructor_name;
-	if (!ce->constructor) {
-		return 0;
-	}
-	constructor_name = ce->constructor->common.function_name;
-	return !zend_binary_strcasecmp(
-		ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
-		ZSTR_VAL(constructor_name), ZSTR_LEN(constructor_name)
-	);
-}
-/* }}} */
-
-void zend_check_deprecated_constructor(const zend_class_entry *ce) /* {{{ */
-{
-	if (zend_has_deprecated_constructor(ce)) {
-		zend_error(E_DEPRECATED, "Methods with the same name as their class will not be constructors in a future version of PHP; %s has a deprecated constructor", ZSTR_VAL(ce->name));
-	}
 }
 /* }}} */
 

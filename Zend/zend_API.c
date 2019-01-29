@@ -2262,13 +2262,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 
 		if (scope) {
-			/* Look for ctor, dtor, clone
-			 * If it's an old-style constructor, store it only if we don't have
-			 * a constructor already.
-			 */
-			if ((fname_len == class_name_len) && !ctor && !memcmp(ZSTR_VAL(lowercase_name), lc_class_name, class_name_len+1)) {
-				ctor = reg_function;
-			} else if (ZSTR_VAL(lowercase_name)[0] != '_' || ZSTR_VAL(lowercase_name)[1] != '_') {
+			/* Look for ctor, dtor, clone */
+			if (ZSTR_VAL(lowercase_name)[0] != '_' || ZSTR_VAL(lowercase_name)[1] != '_') {
 				reg_function = NULL;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 				ctor = reg_function;

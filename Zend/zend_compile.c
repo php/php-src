@@ -5539,7 +5539,6 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 {
 	zend_class_entry *ce = CG(active_class_entry);
 	zend_bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
-	zend_bool in_trait = (ce->ce_flags & ZEND_ACC_TRAIT) != 0;
 	zend_bool is_public = (op_array->fn_flags & ZEND_ACC_PUBLIC) != 0;
 	zend_bool is_static = (op_array->fn_flags & ZEND_ACC_STATIC) != 0;
 
@@ -5631,11 +5630,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 			}
 		}
 	} else {
-		if (!in_trait && zend_string_equals_ci(lcname, ce->name)) {
-			if (!ce->constructor) {
-				ce->constructor = (zend_function *) op_array;
-			}
-		} else if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
+		if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
 			if (!is_static) {
 				op_array->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
@@ -6252,11 +6247,6 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 	/* Reset lineno for final opcodes and errors */
 	CG(zend_lineno) = ast->lineno;
-
-	if (!(ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
-		/* For traits this check is delayed until after trait binding */
-		zend_check_deprecated_constructor(ce);
-	}
 
 	if (ce->constructor) {
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
