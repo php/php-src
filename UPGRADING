@@ -27,6 +27,11 @@ PHP 8.0 UPGRADE NOTES
   . Removed create_function(). Anonymous functions may be used instead.
   . Removed each(). foreach or ArrayIterator should be used instead.
 
+- Filter:
+  . The FILTER_FLAG_SCHEME_REQUIRED and FILTER_FLAG_HOST_REQUIRED flags for the
+    FILTER_VALIDATE_URL filter have been removed. The scheme and host are (and
+    have been) always required.
+
 - GD:
   . The deprecated function image2wbmp() has been removed.
     RFC: https://wiki.php.net/rfc/image2wbmp
