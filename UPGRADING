@@ -39,6 +39,9 @@ PHP 8.0 UPGRADE NOTES
   . Removed each(). foreach or ArrayIterator should be used instead.
   . Removed ability to unbind $this from closures that were created from a
     method, using Closure::fromCallable() or ReflectionMethod::getClosure().
+  . Any array that has a number n as its first numeric key will use n+1 for
+    its next implicit key. Even if n is negative.
+    RFC: https://wiki.php.net/rfc/negative_array_index
 
 - Date:
   . mktime() and gmmktime() now require at least one argument. time() can be
