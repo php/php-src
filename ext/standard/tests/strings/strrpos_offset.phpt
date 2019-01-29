@@ -27,15 +27,11 @@ bool(false)
 Warning: strrpos() expects parameter 3 to be int, float given in %s on line %d
 bool(false)
 
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)

@@ -76,6 +76,11 @@ PHP 8.0 UPGRADE NOTES
   . parse_str() can no longer be used without specifying a result array.
   . fgetss() has been removed.
   . The string.strip_tags filter has been removed.
+  . The needle argument of strpos(), strrpos(), stripos(), strripos(), strstr(),
+    strchr(), strrchr(), and stristr() will now always be interpreted as a
+    string. Previously non-string needles were interpreted as an ASCII code
+    point. An explicit call to chr() can be used to restore the previous
+    behavior.
 
 - Zlib:
   . gzgetss() has been removed.
