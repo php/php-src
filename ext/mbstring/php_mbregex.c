@@ -1043,7 +1043,8 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		}
 	}
 	if (eval && !is_callable) {
-		php_error_docref(NULL, E_DEPRECATED, "The 'e' option is deprecated, use mb_ereg_replace_callback instead");
+		php_error_docref(NULL, E_WARNING, "The 'e' option is no longer supported, use mb_ereg_replace_callback instead");
+		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(arg_pattern_zval) == IS_STRING) {
 		arg_pattern = Z_STRVAL_P(arg_pattern_zval);

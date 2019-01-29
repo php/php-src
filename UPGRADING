@@ -72,6 +72,9 @@ PHP 8.0 UPGRADE NOTES
      * mbereg_search_getpos()  -> mb_ereg_search_getpos()
      * mbereg_search_setpos()  -> mb_ereg_search_setpos()
 
+  . The 'e' modifier for mb_ereg_replace() has been removed.
+    mb_ereg_replace_callback() should be used instead.
+
 - SPL:
   . SplFileObject::fgetss() has been removed.
 
