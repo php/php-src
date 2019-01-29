@@ -5740,8 +5740,8 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 	}
 
 	if (zend_string_equals_literal_ci(unqualified_name, "assert")) {
-		zend_error(E_DEPRECATED,
-			"Defining a custom assert() function is deprecated, "
+		zend_error(E_COMPILE_ERROR,
+			"Defining a custom assert() function is not allowed, "
 			"as the function has special semantics");
 	}
 
