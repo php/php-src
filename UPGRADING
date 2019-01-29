@@ -30,6 +30,8 @@ PHP 8.0 UPGRADE NOTES
     argument to define() may no longer be true.
   . Removed create_function(). Anonymous functions may be used instead.
   . Removed each(). foreach or ArrayIterator should be used instead.
+  . Removed ability to unbind $this from closures that were created from a
+    method, using Closure::fromCallable() or ReflectionMethod::getClosure().
 
 - Filter:
   . The FILTER_FLAG_SCHEME_REQUIRED and FILTER_FLAG_HOST_REQUIRED flags for the

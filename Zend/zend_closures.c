@@ -84,12 +84,8 @@ static zend_bool zend_valid_closure_binding(
 		}
 	} else if (is_fake_closure && func->common.scope
 			&& !(func->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (func->type == ZEND_INTERNAL_FUNCTION) {
-			zend_error(E_WARNING, "Cannot unbind $this of internal method");
-			return 0;
-		} else {
-			zend_error(E_DEPRECATED, "Unbinding $this of a method is deprecated");
-		}
+		zend_error(E_WARNING, "Cannot unbind $this of method");
+		return 0;
 	}
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {
