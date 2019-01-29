@@ -834,8 +834,7 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "strpos")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING
-					|| !Z_STRLEN_P(args[1])
-					|| (CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)) {
+					|| !Z_STRLEN_P(args[1])) {
 				return FAILURE;
 			}
 			/* pass */
@@ -914,8 +913,7 @@ static inline int ct_eval_func_call(
 			/* pass */
 		} else if (zend_string_equals_literal(name, "substr")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_LONG
-					|| (CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)) {
+					|| Z_TYPE_P(args[1]) != IS_LONG) {
 				return FAILURE;
 			}
 			/* pass */
@@ -959,8 +957,7 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "substr")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_LONG
-					|| Z_TYPE_P(args[2]) != IS_LONG
-					|| (CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)) {
+					|| Z_TYPE_P(args[2]) != IS_LONG) {
 				return FAILURE;
 			}
 			/* pass */

@@ -964,10 +964,6 @@ uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args) 
 		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	} else if (zend_string_equals_literal(name, "compact")) {
 		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
-	} else if (zend_string_equals_literal(name, "parse_str") && num_args <= 1) {
-		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
-	} else if (zend_string_equals_literal(name, "mb_parse_str") && num_args <= 1) {
-		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	} else if (zend_string_equals_literal(name, "get_defined_vars")) {
 		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	} else if (zend_string_equals_literal(name, "assert")) {

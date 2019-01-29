@@ -9,9 +9,6 @@ function test() {
     $func = 'compact';
     $func(['a']);
 
-    $func = 'parse_str';
-    $func('a=b');
-
     $func = 'get_defined_vars';
     $func();
 
@@ -34,8 +31,6 @@ test();
 Warning: Cannot call extract() dynamically in %s on line %d
 
 Warning: Cannot call compact() dynamically in %s on line %d
-
-Warning: Cannot call parse_str() with a single argument dynamically in %s on line %d
 
 Warning: Cannot call get_defined_vars() dynamically in %s on line %d
 

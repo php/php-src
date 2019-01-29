@@ -2394,7 +2394,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_setlocale, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(0, locales)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_str, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_str, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoded_string)
 	ZEND_ARG_INFO(1, result)
 ZEND_END_ARG_INFO()

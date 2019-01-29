@@ -93,8 +93,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	php_stream *stream;
 	int close_stream = 1;
 
-	/* The third (quality) parameter for Wbmp stands for the foreground when called from image2wbmp().
-	 * The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
+	/* The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
 	 * from imagey<type>().
 	 */
 	switch (image_type) {

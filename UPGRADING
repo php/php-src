@@ -21,7 +21,33 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Core:
-  . TBD
+  . Removed track_errors ini directive. This means that $php_errormsg is no
+    longer available. The error_get_last() function may be used instead.
+  . Removed create_function(). Anonymous functions may be used instead.
+
+- GD:
+  . The deprecated function image2wbmp() has been removed.
+    RFC: https://wiki.php.net/rfc/image2wbmp
+  . The deprecated functions png2wbmp() and jpeg2wbmp() have been removed.
+    RFC: https://wiki.php.net/rfc/deprecate-png-jpeg-2wbmp
+
+- GMP:
+  . gmp_random() has been removed. One of gmp_random_range() or
+    gmp_random_bits() should be used instead.
+
+- Intl:
+  . The deprecated constant INTL_IDNA_VARIANT_2003 has been removed.
+    RFC: https://wiki.php.net/rfc/deprecate-and-remove-intl_idna_variant_2003
+
+- Mbstring:
+  . The mbstring.func_overload directive has been removed. The related
+    MB_OVERLOAD_MAIL, MB_OVERLOAD_STRING, and MB_OVERLOAD_REGEX constants have
+    also been removed. Finally, the "func_overload" and "func_overload_list"
+    entries in mb_get_info() have been removed.
+  . mb_parse_str() can no longer be used without specifying a result array.
+
+- Standard:
+  . parse_str() can no longer be used without specifying a result array.
 
 ========================================
 2. New Features
