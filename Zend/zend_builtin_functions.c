@@ -765,7 +765,6 @@ ZEND_FUNCTION(define)
 	zend_string *name;
 	zval *val, val_free;
 	zend_bool non_cs = 0;
-	int case_sensitive = CONST_CS;
 	zend_constant c;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -775,12 +774,14 @@ ZEND_FUNCTION(define)
 		Z_PARAM_BOOL(non_cs)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (non_cs) {
-		case_sensitive = 0;
-	}
-
 	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
 		zend_error(E_WARNING, "Class constants cannot be defined or redefined");
+		RETURN_FALSE;
+	}
+
+	if (non_cs) {
+		zend_error(E_WARNING,
+			"define(): Declaration of case-insensitive constants is no longer supported");
 		RETURN_FALSE;
 	}
 
@@ -831,13 +832,8 @@ repeat:
 	zval_ptr_dtor(&val_free);
 
 register_constant:
-	if (non_cs) {
-		zend_error(E_DEPRECATED,
-			"define(): Declaration of case-insensitive constants is deprecated");
-	}
-
 	/* non persistent */
-	ZEND_CONSTANT_SET_FLAGS(&c, case_sensitive, PHP_USER_CONSTANT);
+	ZEND_CONSTANT_SET_FLAGS(&c, CONST_CS, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
 	if (zend_register_constant(&c) == SUCCESS) {
 		RETURN_TRUE;

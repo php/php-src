@@ -26,6 +26,8 @@ PHP 8.0 UPGRADE NOTES
   . Removed (unset) cast.
   . Removed track_errors ini directive. This means that $php_errormsg is no
     longer available. The error_get_last() function may be used instead.
+  . Removed the ability to define case-insensitive constants. The third
+    argument to define() may no longer be true.
   . Removed create_function(). Anonymous functions may be used instead.
   . Removed each(). foreach or ArrayIterator should be used instead.
 
