@@ -1969,16 +1969,10 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(z
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc)
 {
-	if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-		zend_error(E_DEPRECATED,
-			"Non-static method %s::%s() should not be called statically",
-			ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-	} else {
-		zend_throw_error(
-			zend_ce_error,
-			"Non-static method %s::%s() cannot be called statically",
-			ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-	}
+	zend_throw_error(
+		zend_ce_error,
+		"Non-static method %s::%s() cannot be called statically",
+		ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num)
@@ -3829,9 +3823,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 
 		if (UNEXPECTED(!(fbc->common.fn_flags & ZEND_ACC_STATIC))) {
 			zend_non_static_method_call(fbc);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				return NULL;
-			}
+			return NULL;
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
@@ -3947,9 +3939,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 			}
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 				zend_non_static_method_call(fbc);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					return NULL;
-				}
+				return NULL;
 			}
 		} else {
 			called_scope = Z_OBJCE_P(obj);

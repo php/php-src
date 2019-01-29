@@ -282,10 +282,6 @@ typedef struct _zend_oparray_context {
 /* ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes           |     |     |     */
 #define ZEND_ACC_EARLY_BINDING           (1 << 15) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* method flag (bc only), any method that has this        |     |     |     */
-/* flag can be used statically and non statically.        |     |     |     */
-#define ZEND_ACC_ALLOW_STATIC            (1 << 16) /*     |  X  |     |     */
-/*                                                        |     |     |     */
 /* call through user function trampoline. e.g.            |     |     |     */
 /* __call, __callstatic                                   |     |     |     */
 #define ZEND_ACC_CALL_VIA_TRAMPOLINE     (1 << 17) /*     |  X  |     |     */
