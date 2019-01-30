@@ -415,7 +415,6 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_THIS,                   "this") \
 	_(ZEND_STR_VALUE,                  "value") \
 	_(ZEND_STR_KEY,                    "key") \
-	_(ZEND_STR_MAGIC_AUTOLOAD,         "__autoload") \
 	_(ZEND_STR_MAGIC_INVOKE,           "__invoke") \
 	_(ZEND_STR_PREVIOUS,               "previous") \
 	_(ZEND_STR_CODE,                   "code") \

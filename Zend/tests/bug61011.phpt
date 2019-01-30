@@ -1,5 +1,5 @@
 --TEST--
-Bug #61011 (Crash when an exception is thrown by __autoload accessing a static property)
+Bug #61011 (Crash when an exception is thrown by autoloader accessing a static property)
 --FILE--
 <?php
 spl_autoload_register(function ($name) {

@@ -5702,7 +5702,6 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 
 static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, zend_bool toplevel) /* {{{ */
 {
-	zend_ast *params_ast = decl->child[0];
 	zend_string *unqualified_name, *name, *lcname, *key;
 	zend_op *opline;
 
@@ -5719,13 +5718,9 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		}
 	}
 
-	if (zend_string_equals_literal(lcname, ZEND_AUTOLOAD_FUNC_NAME)) {
-		if (zend_ast_get_list(params_ast)->children != 1) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument",
-				ZEND_AUTOLOAD_FUNC_NAME);
-		}
-
-		zend_error(E_DEPRECATED, "__autoload() is deprecated, use spl_autoload_register() instead");
+	if (zend_string_equals_literal(lcname, "__autoload")) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"__autoload() is no longer supported, use spl_autoload_register() instead");
 	}
 
 	if (zend_string_equals_literal_ci(unqualified_name, "assert")) {

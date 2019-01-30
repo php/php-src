@@ -903,16 +903,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	}
 
 	if (!EG(autoload_func)) {
-		zend_function *func = zend_fetch_function(ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD));
-
-		if (func) {
-			EG(autoload_func) = func;
-		} else {
-			if (!key) {
-				zend_string_release_ex(lc_name, 0);
-			}
-			return NULL;
+		if (!key) {
+			zend_string_release_ex(lc_name, 0);
 		}
+		return NULL;
 
 	}
 
