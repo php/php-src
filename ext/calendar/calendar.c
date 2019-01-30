@@ -218,7 +218,7 @@ enum { CAL_MONTH_GREGORIAN_SHORT, CAL_MONTH_GREGORIAN_LONG,
 };
 
 /* for heb_number_to_chars */
-static char alef_bet[25] = "0пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
+static char alef_bet[25] = "0абвгдежзийлморстфцчшщъ";
 
 #define CAL_JEWISH_ADD_ALAFIM_GERESH 0x2
 #define CAL_JEWISH_ADD_ALAFIM 0x4
@@ -505,7 +505,7 @@ PHP_FUNCTION(juliantojd)
 /* {{{ heb_number_to_chars*/
 /*
 caution: the Hebrew format produces non unique result.
-for example both: year '5' and year '5000' produce 'пїЅ'.
+for example both: year '5' and year '5000' produce 'д'.
 use the numeric one for calculations.
  */
 static char *heb_number_to_chars(int n, int fl, char **ret)
@@ -532,7 +532,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 			p++;
 		}
 		if (CAL_JEWISH_ADD_ALAFIM & fl) {
-			strcpy(p, " пїЅпїЅпїЅпїЅпїЅ ");
+			strcpy(p, " амфйн ");
 			p += 7;
 		}
 
