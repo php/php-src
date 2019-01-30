@@ -52,19 +52,6 @@ void php_password_algo_unregister(const char *ident) {
 	zend_hash_str_del(&php_password_algos, ident, strlen(ident));
 }
 
-static int php_password_salt_is_alphabet(const char *str, const size_t len) /* {{{ */
-{
-	size_t i = 0;
-
-	for (i = 0; i < len; i++) {
-		if (!((str[i] >= 'A' && str[i] <= 'Z') || (str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9') || str[i] == '.' || str[i] == '/')) {
-			return FAILURE;
-		}
-	}
-	return SUCCESS;
-}
-/* }}} */
-
 static int php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
 {
 	size_t pos = 0;
@@ -123,65 +110,11 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 /* }}} */
 
 static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_len, HashTable *options) {
-	zend_string *buffer;
-	zval *option_buffer;
-
-	if (!options || !(option_buffer = zend_hash_str_find(options, "salt", sizeof("salt") - 1))) {
-		return php_password_make_salt(required_salt_len);
+	if (options && zend_hash_str_exists(options, "salt", sizeof("salt") - 1)) {
+		php_error_docref(NULL, E_WARNING, "The 'salt' option is no longer supported. The provided salt has been been ignored");
 	}
 
-	php_error_docref(NULL, E_DEPRECATED, "Use of the 'salt' option to password_hash is deprecated");
-
-	switch (Z_TYPE_P(option_buffer)) {
-		case IS_STRING:
-			buffer = zend_string_copy(Z_STR_P(option_buffer));
-			break;
-		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_OBJECT:
-			buffer = zval_get_string(option_buffer);
-			break;
-		case IS_FALSE:
-		case IS_TRUE:
-		case IS_NULL:
-		case IS_RESOURCE:
-		case IS_ARRAY:
-		default:
-			php_error_docref(NULL, E_WARNING, "Non-string salt parameter supplied");
-			return NULL;
-	}
-
-	/* XXX all the crypt related APIs work with int for string length.
-		That should be revised for size_t and then we maybe don't require
-		the > INT_MAX check. */
-	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(buffer))) {
-		php_error_docref(NULL, E_WARNING, "Supplied salt is too long");
-		zend_string_release_ex(buffer, 0);
-		return NULL;
-	}
-
-	if (ZSTR_LEN(buffer) < required_salt_len) {
-		php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd expecting %zd", ZSTR_LEN(buffer), required_salt_len);
-		zend_string_release_ex(buffer, 0);
-		return NULL;
-	}
-
-	if (php_password_salt_is_alphabet(ZSTR_VAL(buffer), ZSTR_LEN(buffer)) == FAILURE) {
-		zend_string *salt = zend_string_alloc(required_salt_len, 0);
-		if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), required_salt_len, ZSTR_VAL(salt)) == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd", ZSTR_LEN(buffer));
-			zend_string_release_ex(salt, 0);
-			zend_string_release_ex(buffer, 0);
-			return NULL;
-		}
-		zend_string_release_ex(buffer, 0);
-		return salt;
-	} else {
-		zend_string *salt = zend_string_alloc(required_salt_len, 0);
-		memcpy(ZSTR_VAL(salt), ZSTR_VAL(buffer), required_salt_len);
-		zend_string_release_ex(buffer, 0);
-		return salt;
-	}
+	return php_password_make_salt(required_salt_len);
 }
 
 /* bcrypt implementation */
