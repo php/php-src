@@ -3,6 +3,8 @@ iptcembed() valid jpg stream
 --FILE--
 <?php
 /*
+# source code to generate base64 use behind as $base64_1x1_jpeg
+# we don't want to be gd library dependant for this test
 $file="1x1.jpg";
 $ret=imagejpeg(imagecreatetruecolor(1, 1), $file, 100);
 echo md5(file_get_contents($file)).PHP_EOL;
@@ -10,6 +12,17 @@ echo base64_encode(file_get_contents($file)).PHP_EOL;
 unlink($file);
 */
 
+/*
+test description :
+1) create local file 1x1 jpeg (without iptc) (use base64 content to create file)
+2) generate iptcdata string with function iptc_make_tag describe behind
+3) use iptcembed php function with our 1x1 jpeg file and our iptcdata string
+4) write local file2 with iptcembed return content
+5) various check on file2 to verify that's a valid jpeg file with our tags
+*/
+
+
+#iptc_make_tag function from http://php.net/iptcembed
 function iptc_make_tag($rec, $data, $value)
   {
     $length = strlen($value);
@@ -26,6 +39,7 @@ $base64_1x1_jpeg="/9j/4AAQSkZJRgABAQEAYABgAAD//gA8Q1JFQVRPUjogZ2QtanBlZyB2MS4wIC
 #write file
 $fd=fopen($file,"wb");
 if ($fd) { fputs($fd,base64_decode($base64_1x1_jpeg)); fclose($fd); }
+else { echo "error cant write $file".PHP_EOL;exit(1); }
 #check file md5
 $md5=md5_file($file);
 if ($md5!="07dd8594450e8c18ab8a79d7cb4573c7") { echo "md5 error".PHP_EOL;exit(1); }
@@ -49,11 +63,15 @@ foreach ($tags as $tag => $string) { $rec=$tag[0]; $tag = substr($tag, 2); $iptc
 #check iptc string md5
 if (md5(base64_encode($iptc))!="7056c4b3060f92a4f9e5b7d0caa61859") { echo "iptc md5 error".PHP_EOL;exit(1); }
 
-#
+#use iptcembed to get jpeg stream content with iptc tags
 $content = iptcembed($iptc, $file,0);
+
+#write new image with iptc tags
 if ($content === false) {echo "iptcembed error".PHP_EOL;exit(1); }
 $fd=fopen($file2,"wb");
 if ($fd) { fputs($fd,$content); fclose($fd); }
+else { echo "error cant write $file2".PHP_EOL;exit(1); }
+
 
 #check jpeg properties for new image with iptc tags
 echo "new generated image with itpc tags : $file2".PHP_EOL;
