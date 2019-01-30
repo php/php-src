@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed bug #77390 (feof might hang on TLS streams in case of fragmented TLS
     records). (Abyl Valg, Jakub Zelenka)
 
+- phpdbg:
+  . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
+
 07 Feb 2019, PHP 7.3.2
 
 - Core:
