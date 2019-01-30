@@ -12,6 +12,6 @@ $y = &$x["bar"];
 --EXPECTF--
 Fatal error: Uncaught Exception: Illegal string offset 'bar' in %sbug76534.php:%d
 Stack trace:
-#0 %sbug76534.php(%d): {closure}(2, 'Illegal string ...', '%s', %d, Array)
+#0 %sbug76534.php(%d): {closure}(2, 'Illegal string ...', '%s', %d)
 #1 {main}
   thrown in %sbug76534.php on line %d
