@@ -4452,10 +4452,6 @@ PHP_FUNCTION(imagecropauto)
 	}
 
 	switch (mode) {
-		case -1:
-			php_error_docref(NULL, E_DEPRECATED, "Crop mode -1 is deprecated. Use IMG_CROP_DEFAULT instead.");
-			mode = GD_CROP_DEFAULT;
-			/* FALLTHRU */
 		case GD_CROP_DEFAULT:
 		case GD_CROP_TRANSPARENT:
 		case GD_CROP_BLACK:
