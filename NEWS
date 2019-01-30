@@ -57,6 +57,9 @@ PHP                                                                        NEWS
   . Implemented sqlite_stmt_readonly in PDO_SQLite. (BohwaZ)
   . Raised requirements to SQLite 3.5.0. (cmb)
 
+- phpdbg:
+  . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
+
 - Sockets:
   . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
 
