@@ -90,4 +90,3 @@ echo "something wrong: $error errors".PHP_EOL;
 --EXPECT--
 new generated image with itpc tags : 1x1_with_iptc_tags.jpg
 OK
-Done
