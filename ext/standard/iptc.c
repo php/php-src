@@ -273,7 +273,7 @@ PHP_FUNCTION(iptcembed)
 					iptcdata_len++; /* make the length even */
 				}
 
-				psheader[ 2 ] = (char) (iptcdata_len+28)>>8;
+				psheader[ 2 ] = (char) ((iptcdata_len+28)>>8);
 				psheader[ 3 ] = (iptcdata_len+28)&0xff;
 
 				for (inx = 0; inx < 28; inx++) {
