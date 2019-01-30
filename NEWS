@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Implemented request #76148 (Add array_key_exists() to the list of
     specially compiled functions). (Majkl578)
+  . Fixed bug #77546 (iptcembed broken function). (gdegoulet)
 
 - CURL:
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
