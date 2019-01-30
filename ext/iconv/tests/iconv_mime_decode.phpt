@@ -6,7 +6,7 @@ iconv_mime_decode()
 iconv.internal_charset=iso-8859-1
 --FILE--
 <?php
-function my_error_handler($errno, $errmsg, $filename, $linenum, $vars)
+function my_error_handler($errno, $errmsg, $filename, $linenum)
 {
 	echo "$errno: $errmsg\n";
 }

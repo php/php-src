@@ -34,6 +34,7 @@ PHP 8.0 UPGRADE NOTES
     interpreted as strings.
   . Removed ability to specify an autoloader using an __autoload() function.
     spl_autoload_register() should be used instead.
+  . Removed the $errcontext argument for custom error handlers.
   . Removed create_function(). Anonymous functions may be used instead.
   . Removed each(). foreach or ArrayIterator should be used instead.
   . Removed ability to unbind $this from closures that were created from a
