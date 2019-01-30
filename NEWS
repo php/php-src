@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.2.15
+?? ??? 2019, PHP 7.2.16
+
+07 Feb 2019, PHP 7.2.15
 
 - Core:
   . Fixed bug #77339 (__callStatic may get incorrect arguments). (Dmitry)
