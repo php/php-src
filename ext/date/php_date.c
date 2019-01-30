@@ -81,7 +81,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_strtotime, 0, 0, 1)
 	ZEND_ARG_INFO(0, now)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mktime, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mktime, 0, 0, 1)
 	ZEND_ARG_INFO(0, hour)
 	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, sec)
@@ -90,7 +90,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mktime, 0, 0, 0)
 	ZEND_ARG_INFO(0, year)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_gmmktime, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmmktime, 0, 0, 1)
 	ZEND_ARG_INFO(0, hour)
 	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, sec)
@@ -1531,9 +1531,9 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	zend_long ts, adjust_seconds = 0;
 	int error;
 
-	ZEND_PARSE_PARAMETERS_START(0, 6)
-		Z_PARAM_OPTIONAL
+	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_LONG(hou)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(min)
 		Z_PARAM_LONG(sec)
 		Z_PARAM_LONG(mon)
@@ -1553,8 +1553,6 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	}
 	/* Fill in the new data */
 	switch (ZEND_NUM_ARGS()) {
-		case 7:
-			/* break intentionally missing */
 		case 6:
 			if (yea >= 0 && yea < 70) {
 				yea += 2000;
@@ -1578,8 +1576,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		case 1:
 			now->h = hou;
 			break;
-		default:
-			php_error_docref(NULL, E_DEPRECATED, "You should be using the time() function instead");
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	/* Update the timestamp */
 	if (gmt) {
@@ -1601,7 +1598,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 }
 /* }}} */
 
-/* {{{ proto int mktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
+/* {{{ proto int mktime(int hour [, int min [, int sec [, int mon [, int day [, int year]]]]])
    Get UNIX timestamp for a date */
 PHP_FUNCTION(mktime)
 {
@@ -1609,7 +1606,7 @@ PHP_FUNCTION(mktime)
 }
 /* }}} */
 
-/* {{{ proto int gmmktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
+/* {{{ proto int gmmktime(int hour [, int min [, int sec [, int mon [, int day [, int year]]]]])
    Get UNIX timestamp for a GMT date */
 PHP_FUNCTION(gmmktime)
 {

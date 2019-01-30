@@ -34,6 +34,10 @@ PHP 8.0 UPGRADE NOTES
   . Removed ability to unbind $this from closures that were created from a
     method, using Closure::fromCallable() or ReflectionMethod::getClosure().
 
+- Date:
+  . mktime() and gmmktime() now require at least one argument. time() can be
+    used to get the current timestamp.
+
 - Filter:
   . The FILTER_FLAG_SCHEME_REQUIRED and FILTER_FLAG_HOST_REQUIRED flags for the
     FILTER_VALIDATE_URL filter have been removed. The scheme and host are (and
