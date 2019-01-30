@@ -111,14 +111,14 @@ The init file
 The online manual can be found at
 .PD 0
 .P
-.B http://php.net/manual/book.phpdbg.php
+.B https://php.net/manual/book.phpdbg.php
 .PD 1
 .SH BUGS
 You can view the list of known bugs or report any new bug you
 found at
 .PD 0
 .P
-.B http://bugs.php.net/
+.B https://bugs.php.net/
 .PD 1
 .SH AUTHORS
 Written by Felipe Pena, Joe Watkins and Bob Weinand, formatted by Ondřej Surý for Debian project.
@@ -126,7 +126,7 @@ Written by Felipe Pena, Joe Watkins and Bob Weinand, formatted by Ondřej Surý 
 A List of active developers can be found at
 .PD 0
 .P
-.B http://www.php.net/credits.php
+.B https://php.net/credits.php
 .PD 1
 .P
 And last but not least PHP was developed with the help of a huge amount of
@@ -141,7 +141,7 @@ that is bundled with this package in the file LICENSE, and is
 available through the world-wide-web at the following url:
 .PD 0
 .P
-.B http://www.php.net/license/3_01.txt
+.B https://php.net/license/3_01.txt
 .PD 1
 .P
 If you did not receive a copy of the PHP license and are unable to
