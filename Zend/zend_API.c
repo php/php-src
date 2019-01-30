@@ -315,17 +315,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_deprecated(int num, char *error) /* {{{ */
-{
-	const char *space;
-	const char *class_name = get_active_class_name(&space);
-
-	zend_error(E_DEPRECATED, "%s%s%s() expects parameter %d to be a valid callback, %s",
-		class_name, space, get_active_function_name(), num, error);
-	efree(error);
-}
-/* }}} */
-
 ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null) /* {{{ */
 {
 	zend_class_entry *ce_base = *pce;
@@ -557,7 +546,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest
 }
 /* }}} */
 
-static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, const char **spec, char **error, int *severity) /* {{{ */
+static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, const char **spec, char **error) /* {{{ */
 {
 	const char *spec_walk = *spec;
 	char c = *spec_walk++;
@@ -773,7 +762,6 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 
 				if (is_callable_error) {
-					*severity = E_ERROR;
 					zend_spprintf(error, 0, "to be a valid callback, %s", is_callable_error);
 					efree(is_callable_error);
 					return "";
@@ -807,9 +795,8 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 {
 	const char *expected_type = NULL;
 	char *error = NULL;
-	int severity = 0;
 
-	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, &error, &severity);
+	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, &error);
 	if (expected_type) {
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET) && (*expected_type || error)) {
 			const char *space;
@@ -828,9 +815,7 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 						zend_zval_type_name(arg));
 			}
 		}
-		if (severity != E_DEPRECATED) {
-			return FAILURE;
-		}
+		return FAILURE;
 	}
 
 	return SUCCESS;

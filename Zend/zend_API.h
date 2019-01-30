@@ -951,7 +951,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_exception(int nu
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_exception(int num, char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_deprecated(int num, char *error);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, char *error);
 
 #define ZPP_ERROR_OK             0
@@ -1142,14 +1141,11 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 			if (!_error) { \
 				_expected_type = Z_EXPECTED_FUNC; \
 				_error_code = ZPP_ERROR_WRONG_ARG; \
-				break; \
 			} else { \
 				_error_code = ZPP_ERROR_WRONG_CALLBACK; \
-				break; \
 			} \
-		} else if (UNEXPECTED(_error != NULL)) { \
-			zend_wrong_callback_deprecated(_i, _error); \
-		}
+			break; \
+		} \
 
 #define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, separate) \
 	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, separate, separate)
