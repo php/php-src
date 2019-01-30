@@ -582,6 +582,7 @@ PHP_FUNCTION(posix_getgroups)
 #ifdef HAVE_GETLOGIN
 PHP_FUNCTION(posix_getlogin)
 {
+#ifndef HAVE_CUSERID
 	char *p;
 
 	PHP_POSIX_NO_ARGS;
@@ -592,6 +593,19 @@ PHP_FUNCTION(posix_getlogin)
 	}
 
 	RETURN_STRING(p);
+#else
+	char buf[33];
+	char *p;
+
+	PHP_POSIX_NO_ARGS;
+
+	if (NULL == (p = cuserid(buf))) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(p);
+#endif
 }
 #endif
 /* }}} */
