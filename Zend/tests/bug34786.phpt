@@ -10,13 +10,13 @@ function bar() {
 echo "bar: ".error_reporting()."\n";
 }
 
-error_reporting(E_WARNING);
+error_reporting(1);
 echo "before: ".error_reporting()."\n";
 @foo(1,@bar(),3);
 echo "after: ".error_reporting()."\n";
 ?>
 --EXPECT--
-before: 2
+before: 1
 bar: 0
 foo: 0
-after: 2
+after: 1
