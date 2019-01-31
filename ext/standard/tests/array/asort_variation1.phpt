@@ -63,10 +63,10 @@ $unexpected_values = array (
   19 => new stdclass(),
 
   // undefined data
-  20 => @undefined_var,
+  20 => @$undefined_var,
 
   // unset data
-  21 => @unset_var,
+  21 => @$unset_var,
 
   // resource variable
   22 => $fp
@@ -359,29 +359,29 @@ Warning: asort() expects parameter 1 to be array, object given in %s on line %d
 bool(false)
 -- Iteration 21 --
 
-Warning: asort() expects parameter 1 to be array, string given in %s on line %d
+Warning: asort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, string given in %s on line %d
+Warning: asort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, string given in %s on line %d
+Warning: asort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, string given in %s on line %d
+Warning: asort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 -- Iteration 22 --
 
-Warning: asort() expects parameter 1 to be array, string given in %s on line %d
+Warning: asort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, string given in %s on line %d
+Warning: asort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, string given in %s on line %d
+Warning: asort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, string given in %s on line %d
+Warning: asort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 -- Iteration 23 --
 
