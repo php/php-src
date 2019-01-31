@@ -25,8 +25,8 @@ NULL
 Warning: stristr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: stristr(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stristr() expects parameter 2 to be string, array given in %s on line %d
+NULL
 
 Warning: stristr() expects parameter 1 to be string, array given in %s on line %d
 NULL

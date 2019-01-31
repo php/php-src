@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -164,129 +164,6 @@ static const php_stream_filter_factory strfilter_toupper_factory = {
 static const php_stream_filter_factory strfilter_tolower_factory = {
 	strfilter_tolower_create
 };
-/* }}} */
-
-/* {{{ strip_tags filter implementation */
-typedef struct _php_strip_tags_filter {
-	const char *allowed_tags;
-	int allowed_tags_len;
-	uint8_t state;
-	uint8_t persistent;
-} php_strip_tags_filter;
-
-static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, zend_string *allowed_tags, int persistent)
-{
-	if (allowed_tags != NULL) {
-		if (NULL == (inst->allowed_tags = pemalloc(ZSTR_LEN(allowed_tags) + 1, persistent))) {
-			return FAILURE;
-		}
-		memcpy((char *)inst->allowed_tags, ZSTR_VAL(allowed_tags), ZSTR_LEN(allowed_tags) + 1);
-		inst->allowed_tags_len = (int)ZSTR_LEN(allowed_tags);
-	} else {
-		inst->allowed_tags = NULL;
-	}
-	inst->state = 0;
-	inst->persistent = persistent;
-
-	return SUCCESS;
-}
-
-static void php_strip_tags_filter_dtor(php_strip_tags_filter *inst)
-{
-	if (inst->allowed_tags != NULL) {
-		pefree((void *)inst->allowed_tags, inst->persistent);
-	}
-}
-
-static php_stream_filter_status_t strfilter_strip_tags_filter(
-	php_stream *stream,
-	php_stream_filter *thisfilter,
-	php_stream_bucket_brigade *buckets_in,
-	php_stream_bucket_brigade *buckets_out,
-	size_t *bytes_consumed,
-	int flags
-	)
-{
-	php_stream_bucket *bucket;
-	size_t consumed = 0;
-	php_strip_tags_filter *inst = (php_strip_tags_filter *) Z_PTR(thisfilter->abstract);
-
-	while (buckets_in->head) {
-		bucket = php_stream_bucket_make_writeable(buckets_in->head);
-		consumed = bucket->buflen;
-
-		bucket->buflen = php_strip_tags(bucket->buf, bucket->buflen, &(inst->state), inst->allowed_tags, inst->allowed_tags_len);
-
-		php_stream_bucket_append(buckets_out, bucket);
-	}
-
-	if (bytes_consumed) {
-		*bytes_consumed = consumed;
-	}
-
-	return PSFS_PASS_ON;
-}
-
-static void strfilter_strip_tags_dtor(php_stream_filter *thisfilter)
-{
-	assert(Z_PTR(thisfilter->abstract) != NULL);
-
-	php_strip_tags_filter_dtor((php_strip_tags_filter *)Z_PTR(thisfilter->abstract));
-
-	pefree(Z_PTR(thisfilter->abstract), ((php_strip_tags_filter *)Z_PTR(thisfilter->abstract))->persistent);
-}
-
-static const php_stream_filter_ops strfilter_strip_tags_ops = {
-	strfilter_strip_tags_filter,
-	strfilter_strip_tags_dtor,
-	"string.strip_tags"
-};
-
-static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zval *filterparams, uint8_t persistent)
-{
-	php_strip_tags_filter *inst;
-	php_stream_filter *filter = NULL;
-	zend_string *allowed_tags = NULL;
-
-	php_error_docref(NULL, E_DEPRECATED, "The string.strip_tags filter is deprecated");
-
-	inst = pemalloc(sizeof(php_strip_tags_filter), persistent);
-
-	if (filterparams != NULL) {
-		if (Z_TYPE_P(filterparams) == IS_ARRAY) {
-			smart_str tags_ss = {0};
-			zval *tmp;
-
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(filterparams), tmp) {
-				convert_to_string_ex(tmp);
-				smart_str_appendc(&tags_ss, '<');
-				smart_str_append(&tags_ss, Z_STR_P(tmp));
-				smart_str_appendc(&tags_ss, '>');
-			} ZEND_HASH_FOREACH_END();
-			smart_str_0(&tags_ss);
-			allowed_tags = tags_ss.s;
-		} else {
-			allowed_tags = zval_get_string(filterparams);
-		}
-	}
-
-	if (php_strip_tags_filter_ctor(inst, allowed_tags, persistent) == SUCCESS) {
-		filter = php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
-	} else {
-		pefree(inst, persistent);
-	}
-
-	if (allowed_tags) {
-		zend_string_release(allowed_tags);
-	}
-
-	return filter;
-}
-
-static const php_stream_filter_factory strfilter_strip_tags_factory = {
-	strfilter_strip_tags_create
-};
-
 /* }}} */
 
 /* {{{ base64 / quoted_printable stream filter implementation */
@@ -2037,7 +1914,6 @@ static const struct {
 	{ &strfilter_rot13_ops, &strfilter_rot13_factory },
 	{ &strfilter_toupper_ops, &strfilter_toupper_factory },
 	{ &strfilter_tolower_ops, &strfilter_tolower_factory },
-	{ &strfilter_strip_tags_ops, &strfilter_strip_tags_factory },
 	{ &strfilter_convert_ops, &strfilter_convert_factory },
 	{ &consumed_filter_ops, &consumed_filter_factory },
 	{ &chunked_filter_ops, &chunked_filter_factory },

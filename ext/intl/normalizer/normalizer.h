@@ -22,7 +22,6 @@
 #if U_ICU_VERSION_MAJOR_NUM < 56
 #include <unicode/unorm.h>
 
-#define NORMALIZER_NONE UNORM_NONE
 #define NORMALIZER_FORM_D UNORM_NFD
 #define NORMALIZER_NFD UNORM_NFD
 #define NORMALIZER_FORM_KD UNORM_NFKD
@@ -35,7 +34,6 @@
 #else
 #include <unicode/unorm2.h>
 
-#define NORMALIZER_NONE 0x2
 #define NORMALIZER_FORM_D 0x4
 #define NORMALIZER_NFD NORMALIZER_FORM_D
 #define NORMALIZER_FORM_KD 0x8

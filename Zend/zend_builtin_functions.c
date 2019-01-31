@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,6 @@ static ZEND_FUNCTION(strcmp);
 static ZEND_FUNCTION(strncmp);
 static ZEND_FUNCTION(strcasecmp);
 static ZEND_FUNCTION(strncasecmp);
-static ZEND_FUNCTION(each);
 static ZEND_FUNCTION(error_reporting);
 static ZEND_FUNCTION(define);
 static ZEND_FUNCTION(defined);
@@ -67,7 +66,6 @@ static ZEND_FUNCTION(get_declared_traits);
 static ZEND_FUNCTION(get_declared_interfaces);
 static ZEND_FUNCTION(get_defined_functions);
 static ZEND_FUNCTION(get_defined_vars);
-static ZEND_FUNCTION(create_function);
 static ZEND_FUNCTION(get_resource_type);
 static ZEND_FUNCTION(get_resources);
 static ZEND_FUNCTION(get_loaded_extensions);
@@ -107,10 +105,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_strncmp, 0, 0, 3)
 	ZEND_ARG_INFO(0, str1)
 	ZEND_ARG_INFO(0, str2)
 	ZEND_ARG_INFO(0, len)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_each, 0, 0, 1)
-	ZEND_ARG_INFO(1, arr)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_error_reporting, 0, 0, 0)
@@ -197,11 +191,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_defined_functions, 0, 0, 0)
 	ZEND_ARG_INFO(0, exclude_disabled)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_create_function, 0, 0, 2)
-	ZEND_ARG_INFO(0, args)
-	ZEND_ARG_INFO(0, code)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_resource_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, res)
 ZEND_END_ARG_INFO()
@@ -244,7 +233,6 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(strncmp,		arginfo_strncmp)
 	ZEND_FE(strcasecmp,		arginfo_strcmp)
 	ZEND_FE(strncasecmp,		arginfo_strncmp)
-	ZEND_FE(each,			arginfo_each)
 	ZEND_FE(error_reporting,	arginfo_error_reporting)
 	ZEND_FE(define,			arginfo_define)
 	ZEND_FE(defined,		arginfo_defined)
@@ -276,7 +264,6 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_declared_interfaces, 	arginfo_zend__void)
 	ZEND_FE(get_defined_functions, 		arginfo_get_defined_functions)
 	ZEND_FE(get_defined_vars,		arginfo_zend__void)
-	ZEND_DEP_FE(create_function,		arginfo_create_function)
 	ZEND_FE(get_resource_type,		arginfo_get_resource_type)
 	ZEND_FE(get_resources,			arginfo_get_resources)
 	ZEND_FE(get_loaded_extensions,		arginfo_get_loaded_extensions)
@@ -660,66 +647,6 @@ ZEND_FUNCTION(strncasecmp)
 }
 /* }}} */
 
-/* {{{ proto mixed each(array &arr)
-   Return the currently pointed key..value pair in the passed array, and advance the pointer to the next element, or false if there is no element at this place */
-ZEND_FUNCTION(each)
-{
-	zval *array, *entry, tmp;
-	zend_ulong num_key;
-	HashTable *target_hash;
-	zend_string *key;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/", &array) == FAILURE) {
-		return;
-	}
-
-	if (!EG(each_deprecation_thrown)) {
-		zend_error(E_DEPRECATED, "The each() function is deprecated. This message will be suppressed on further calls");
-		EG(each_deprecation_thrown) = 1;
-	}
-
-	target_hash = HASH_OF(array);
-	if (!target_hash) {
-		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
-		return;
-	}
-	while (1) {
-		entry = zend_hash_get_current_data(target_hash);
-		if (!entry) {
-			RETURN_FALSE;
-		} else if (Z_TYPE_P(entry) == IS_INDIRECT) {
-			entry = Z_INDIRECT_P(entry);
-			if (Z_TYPE_P(entry) == IS_UNDEF) {
-				zend_hash_move_forward(target_hash);
-				continue;
-			}
-		}
-		break;
-	}
-	array_init_size(return_value, 4);
-	zend_hash_real_init_mixed(Z_ARRVAL_P(return_value));
-
-	/* add value elements */
-	ZVAL_DEREF(entry);
-	if (Z_REFCOUNTED_P(entry)) {
-		GC_ADDREF_EX(Z_COUNTED_P(entry), 2);
-	}
-	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 1, entry);
-	zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_VALUE), entry);
-
-	/* add the key elements */
-	if (zend_hash_get_current_key(target_hash, &key, &num_key) == HASH_KEY_IS_STRING) {
-		ZVAL_STR_COPY(&tmp, key);
-		Z_TRY_ADDREF(tmp);
-	} else {
-		ZVAL_LONG(&tmp, num_key);
-	}
-	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);
-	zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_KEY), &tmp);
-	zend_hash_move_forward(target_hash);
-}
-/* }}} */
-
 /* {{{ proto int error_reporting([int new_error_level])
    Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
@@ -838,7 +765,6 @@ ZEND_FUNCTION(define)
 	zend_string *name;
 	zval *val, val_free;
 	zend_bool non_cs = 0;
-	int case_sensitive = CONST_CS;
 	zend_constant c;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -848,12 +774,14 @@ ZEND_FUNCTION(define)
 		Z_PARAM_BOOL(non_cs)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (non_cs) {
-		case_sensitive = 0;
-	}
-
 	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
 		zend_error(E_WARNING, "Class constants cannot be defined or redefined");
+		RETURN_FALSE;
+	}
+
+	if (non_cs) {
+		zend_error(E_WARNING,
+			"define(): Declaration of case-insensitive constants is no longer supported");
 		RETURN_FALSE;
 	}
 
@@ -904,13 +832,8 @@ repeat:
 	zval_ptr_dtor(&val_free);
 
 register_constant:
-	if (non_cs) {
-		zend_error(E_DEPRECATED,
-			"define(): Declaration of case-insensitive constants is deprecated");
-	}
-
 	/* non persistent */
-	ZEND_CONSTANT_SET_FLAGS(&c, case_sensitive, PHP_USER_CONSTANT);
+	ZEND_CONSTANT_SET_FLAGS(&c, CONST_CS, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
 	if (zend_register_constant(&c) == SUCCESS) {
 		RETURN_TRUE;
@@ -1892,78 +1815,6 @@ ZEND_FUNCTION(get_defined_vars)
 	}
 
 	RETURN_ARR(zend_array_dup(symbol_table));
-}
-/* }}} */
-
-#define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
-/* {{{ proto string create_function(string args, string code)
-   Creates an anonymous function, and returns its name (funny, eh?) */
-ZEND_FUNCTION(create_function)
-{
-    zend_string *function_name;
-	char *eval_code, *function_args, *function_code;
-	size_t eval_code_length, function_args_len, function_code_len;
-	int retval;
-	char *eval_name;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &function_args, &function_args_len, &function_code, &function_code_len) == FAILURE) {
-		return;
-	}
-
-	eval_code = (char *) emalloc(sizeof("function " LAMBDA_TEMP_FUNCNAME)
-			+function_args_len
-			+2	/* for the args parentheses */
-			+2	/* for the curly braces */
-			+function_code_len);
-
-	eval_code_length = sizeof("function " LAMBDA_TEMP_FUNCNAME "(") - 1;
-	memcpy(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(", eval_code_length);
-
-	memcpy(eval_code + eval_code_length, function_args, function_args_len);
-	eval_code_length += function_args_len;
-
-	eval_code[eval_code_length++] = ')';
-	eval_code[eval_code_length++] = '{';
-
-	memcpy(eval_code + eval_code_length, function_code, function_code_len);
-	eval_code_length += function_code_len;
-
-	eval_code[eval_code_length++] = '}';
-	eval_code[eval_code_length] = '\0';
-
-	eval_name = zend_make_compiled_string_description("runtime-created function");
-	retval = zend_eval_stringl(eval_code, eval_code_length, NULL, eval_name);
-	efree(eval_code);
-	efree(eval_name);
-
-	if (retval==SUCCESS) {
-		zend_op_array *func;
-		HashTable *static_variables;
-
-		func = zend_hash_str_find_ptr(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
-		if (!func) {
-			zend_error_noreturn(E_CORE_ERROR, "Unexpected inconsistency in create_function()");
-			RETURN_FALSE;
-		}
-		if (func->refcount) {
-			(*func->refcount)++;
-		}
-		static_variables = func->static_variables;
-		func->static_variables = NULL;
-		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
-		func->static_variables = static_variables;
-
-		function_name = zend_string_alloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG, 0);
-		ZSTR_VAL(function_name)[0] = '\0';
-
-		do {
-			ZSTR_LEN(function_name) = snprintf(ZSTR_VAL(function_name) + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count)) + 1;
-		} while (zend_hash_add_ptr(EG(function_table), function_name, func) == NULL);
-		RETURN_NEW_STR(function_name);
-	} else {
-		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
-		RETURN_FALSE;
-	}
 }
 /* }}} */
 

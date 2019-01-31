@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -302,7 +302,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 } /* }}} */
 
 /* {{{ proto void spl_autoload(string class_name [, string file_extensions])
- Default implementation for __autoload() */
+ Default autoloader implementation */
 PHP_FUNCTION(spl_autoload)
 {
 	int pos_len, pos1_len;
@@ -494,7 +494,7 @@ PHP_FUNCTION(spl_autoload_call)
 	} while (0)
 
 /* {{{ proto bool spl_autoload_register([mixed autoload_function [, bool throw [, bool prepend]]])
- Register given function as __autoload() implementation */
+ Register given function as autoloader */
 PHP_FUNCTION(spl_autoload_register)
 {
 	zend_string *func_name;
@@ -513,7 +513,7 @@ PHP_FUNCTION(spl_autoload_register)
 	}
 
 	if (ZEND_NUM_ARGS()) {
-		if (!zend_is_callable_ex(zcallable, NULL, IS_CALLABLE_STRICT, &func_name, &fcc, &error)) {
+		if (!zend_is_callable_ex(zcallable, NULL, 0, &func_name, &fcc, &error)) {
 			alfi.ce = fcc.calling_scope;
 			alfi.func_ptr = fcc.function_handler;
 			obj_ptr = fcc.object;
@@ -668,7 +668,7 @@ skip:
 } /* }}} */
 
 /* {{{ proto bool spl_autoload_unregister(mixed autoload_function)
- Unregister given function as __autoload() implementation */
+ Unregister given function as autoloader */
 PHP_FUNCTION(spl_autoload_unregister)
 {
 	zend_string *func_name = NULL;
@@ -752,7 +752,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 } /* }}} */
 
 /* {{{ proto false|array spl_autoload_functions()
- Return all registered __autoload() functionns */
+ Return all registered autoloader functions */
 PHP_FUNCTION(spl_autoload_functions)
 {
 	zend_function *fptr;
@@ -763,14 +763,6 @@ PHP_FUNCTION(spl_autoload_functions)
 	}
 
 	if (!EG(autoload_func)) {
-		if ((fptr = zend_hash_find_ptr(EG(function_table), ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD)))) {
-			zval tmp;
-
-			array_init(return_value);
-			ZVAL_STR_COPY(&tmp, ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD));
-			zend_hash_next_index_insert_new(Z_ARR_P(return_value), &tmp);
-			return;
-		}
 		RETURN_FALSE;
 	}
 

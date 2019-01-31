@@ -228,7 +228,6 @@ static const func_info_t func_infos[] = {
 	FC("strncmp",                 zend_lb_ssn_info),
 	FC("strcasecmp",              zend_l_ss_info),
 	FC("strncasecmp",             zend_lb_ssn_info),
-	F1("each",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_KEY_ANY),
 	F0("error_reporting",         MAY_BE_NULL | MAY_BE_LONG),
 	F0("define",                  MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_NULL), // TODO: inline
 	FC("defined",                 zend_b_s_info), // TODO: inline
@@ -258,7 +257,6 @@ static const func_info_t func_infos[] = {
 	I1("get_declared_interfaces", MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("get_defined_functions",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	I1("get_defined_vars",        MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
-	FN("create_function",         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 	F1("get_resource_type",       MAY_BE_NULL | MAY_BE_STRING),
 	F1("get_defined_constants",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_RESOURCE | MAY_BE_ARRAY_OF_ARRAY),
 	F0("debug_print_backtrace",   MAY_BE_NULL),
@@ -617,7 +615,6 @@ static const func_info_t func_infos[] = {
 	F0("feof",                         MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("fgetc",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fgets",                        MAY_BE_FALSE | MAY_BE_STRING),
-	F1("fgetss",                       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fread",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fopen",                        MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("fpassthru",                    MAY_BE_FALSE | MAY_BE_LONG),
@@ -1265,7 +1262,6 @@ static const func_info_t func_infos[] = {
 	F0("gzeof",                                 MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("gzgetc",                                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzgets",                                MAY_BE_FALSE | MAY_BE_STRING),
-	F1("gzgetss",                               MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzread",                                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzopen",                                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("gzpassthru",                            MAY_BE_FALSE | MAY_BE_LONG),

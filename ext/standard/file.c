@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1090,55 +1090,6 @@ PHPAPI PHP_FUNCTION(fgetc)
 }
 /* }}} */
 
-/* {{{ proto string fgetss(resource fp [, int length [, string allowable_tags]])
-   Get a line from file pointer and strip HTML tags */
-PHPAPI PHP_FUNCTION(fgetss)
-{
-	zval *fd;
-	zend_long bytes = 0;
-	size_t len = 0;
-	size_t actual_len, retval_len;
-	char *buf = NULL, *retval;
-	php_stream *stream;
-	char *allowed_tags=NULL;
-	size_t allowed_tags_len=0;
-
-	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_RESOURCE(fd)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(bytes)
-		Z_PARAM_STRING(allowed_tags, allowed_tags_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	PHP_STREAM_TO_ZVAL(stream, fd);
-
-	if (ZEND_NUM_ARGS() >= 2) {
-		if (bytes <= 0) {
-			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-			RETURN_FALSE;
-		}
-
-		len = (size_t) bytes;
-		buf = safe_emalloc(sizeof(char), (len + 1), 0);
-		/*needed because recv doesn't set null char at end*/
-		memset(buf, 0, len + 1);
-	}
-
-	if ((retval = php_stream_get_line(stream, buf, len, &actual_len)) == NULL)	{
-		if (buf != NULL) {
-			efree(buf);
-		}
-		RETURN_FALSE;
-	}
-
-	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(retval, retval_len);
-	efree(retval);
-}
-/* }}} */
-
 /* {{{ proto mixed fscanf(resource stream, string format [, string ...])
    Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
@@ -1985,8 +1936,6 @@ PHP_FUNCTION(fgetcsv)
 	char delimiter = ',';	/* allow this to be set as parameter */
 	char enclosure = '"';	/* allow this to be set as parameter */
 	int escape = (unsigned char) '\\';
-
-	/* first section exactly as php_fgetss */
 
 	zend_long len = 0;
 	size_t buf_len;

@@ -1,5 +1,7 @@
 --TEST--
 Phar web-based phar with fatal error
+--XFAIL--
+Uses no longer supported __autoload() function, new phar needed
 --INI--
 default_charset=UTF-8
 --SKIPIF--

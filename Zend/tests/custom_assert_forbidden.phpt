@@ -9,4 +9,4 @@ function assert() {}
 
 ?>
 --EXPECTF--
-Deprecated: Defining a custom assert() function is deprecated, as the function has special semantics in %s on line %d
+Fatal error: Defining a custom assert() function is not allowed, as the function has special semantics in %s on line %d

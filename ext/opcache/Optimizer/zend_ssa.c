@@ -1133,8 +1133,6 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 	for (i = 0; i < op_array->last_var; i++) {
 		if ((ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 			ssa_vars[i].alias = SYMTABLE_ALIAS;
-		} else if (zend_string_equals_literal(op_array->vars[i], "php_errormsg")) {
-			ssa_vars[i].alias = PHP_ERRORMSG_ALIAS;
 		} else if (zend_string_equals_literal(op_array->vars[i], "http_response_header")) {
 			ssa_vars[i].alias = HTTP_RESPONSE_HEADER_ALIAS;
 		}

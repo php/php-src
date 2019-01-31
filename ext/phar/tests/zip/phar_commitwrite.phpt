@@ -12,10 +12,9 @@ $p['file1.txt'] = 'hi';
 $p->stopBuffering();
 var_dump($p->getStub());
 $p->setStub("<?php
-function __autoload(\$class)
-{
+spl_autoload_register(function(\$class) {
     include 'phar://' . str_replace('_', '/', \$class);
-}
+});
 Phar::mapPhar('brandnewphar.phar');
 include 'phar://brandnewphar.phar/startup.php';
 __HALT_COMPILER();
@@ -28,14 +27,13 @@ var_dump($p->isFileFormat(Phar::ZIP));
 <?php
 unlink(dirname(__FILE__) . '/brandnewphar.phar.zip');
 ?>
---EXPECT--
+--EXPECTF--
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
-string(200) "<?php
-function __autoload($class)
-{
+string(%d) "<?php
+spl_autoload_register(function($class) {
     include 'phar://' . str_replace('_', '/', $class);
-}
+});
 Phar::mapPhar('brandnewphar.phar');
 include 'phar://brandnewphar.phar/startup.php';
 __HALT_COMPILER(); ?>

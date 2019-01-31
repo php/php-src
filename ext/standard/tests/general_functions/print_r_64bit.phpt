@@ -275,15 +275,7 @@ $misc_values = array (
 /* calling check_printr() to display miscelleneous data using print_r() */
 check_printr($misc_values);
 
-/* checking print_r() on functions */
-echo "\n*** Testing print_r() on anonymous functions ***\n";
-$newfunc = create_function('$a,$b', 'return "$a * $b = " . ($a * $b);');
-echo "New anonymous function: $newfunc\n";
-print_r( $newfunc(2, 3) );
-/* creating anonymous function dynamically */
-print_r( create_function('$a', 'return "$a * $a = " . ($a * $b);') );
-
-echo "\n\n*** Testing error conditions ***\n";
+echo "\n*** Testing error conditions ***\n";
 //passing zero argument
 var_dump( print_r() );
 
@@ -1718,14 +1710,6 @@ Array
 -- Iteration 4 --
 
 
-
-*** Testing print_r() on anonymous functions ***
-
-Deprecated: Function create_function() is deprecated in %s on line %d
-New anonymous function:  lambda_1
-2 * 3 = 6
-Deprecated: Function create_function() is deprecated in %s on line %d
- lambda_2
 
 *** Testing error conditions ***
 

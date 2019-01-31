@@ -19,10 +19,10 @@ catch(SoapFault $e)
 
 ?>
 --EXPECTF--
-Warning: SoapClient::SoapClient() expects parameter 2 to be array, null given in %sbug77088.php on line %d
+Warning: SoapClient::__construct() expects parameter 2 to be array, null given in %sbug77088.php on line %d
 object(SoapFault)#%d (%d) {
   ["message":protected]=>
-  string(44) "SoapClient::SoapClient(): Invalid parameters"
+  string(%d) "SoapClient::__construct(): Invalid parameters"
   ["string":"Exception":private]=>
   string(0) ""
   ["code":protected]=>
@@ -40,7 +40,7 @@ object(SoapFault)#%d (%d) {
       ["line"]=>
       int(6)
       ["function"]=>
-      string(10) "SoapClient"
+      string(11) "__construct"
       ["class"]=>
       string(10) "SoapClient"
       ["type"]=>
@@ -57,7 +57,7 @@ object(SoapFault)#%d (%d) {
   ["previous":"Exception":private]=>
   NULL
   ["faultstring"]=>
-  string(44) "SoapClient::SoapClient(): Invalid parameters"
+  string(%d) "SoapClient::__construct(): Invalid parameters"
   ["faultcode"]=>
   string(6) "Client"
   ["faultcodens"]=>

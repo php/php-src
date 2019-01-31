@@ -21,9 +21,6 @@ var_dump(idn_to_ascii("", 0, INTL_IDNA_VARIANT_UTS46 + 10));
 echo "empty domain:", "\n";
 var_dump(idn_to_ascii("", 0, INTL_IDNA_VARIANT_UTS46));
 
-echo "fourth arg for 2003 variant (only notice raised):", "\n";
-var_dump(idn_to_ascii("foo.com", 0, INTL_IDNA_VARIANT_2003, $foo));
-
 echo "with error, but no details arg:", "\n";
 var_dump(idn_to_ascii("www.fußball.com-", 0, INTL_IDNA_VARIANT_UTS46));
 
@@ -54,18 +51,12 @@ Warning: idn_to_ascii(): idn_to_ascii: bad arguments in %s on line %d
 NULL
 bad variant:
 
-Warning: idn_to_ascii(): idn_to_ascii: invalid variant, must be one of {INTL_IDNA_VARIANT_2003, INTL_IDNA_VARIANT_UTS46} in %s on line %d
+Warning: idn_to_ascii(): idn_to_ascii: invalid variant, must be INTL_IDNA_VARIANT_UTS46 in %s on line %d
 bool(false)
 empty domain:
 
 Warning: idn_to_ascii(): idn_to_ascii: empty domain name in %s on line %d
 bool(false)
-fourth arg for 2003 variant (only notice raised):
-
-Deprecated: idn_to_ascii(): INTL_IDNA_VARIANT_2003 is deprecated in %s on line %d
-
-Notice: idn_to_ascii(): 4 arguments were provided, but INTL_IDNA_VARIANT_2003 only takes 3 - extra argument ignored in %s on line %d
-string(7) "foo.com"
 with error, but no details arg:
 bool(false)
 with error, with details arg:
