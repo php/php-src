@@ -424,7 +424,7 @@ failure:
 			return &c->value;
 		}
 
-		if (!(flags & IS_CONSTANT_UNQUALIFIED)) {
+		if (!(flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE)) {
 			return NULL;
 		}
 

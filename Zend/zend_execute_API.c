@@ -566,29 +566,10 @@ ZEND_API int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, 
 	} else if ((colon = (char*)zend_memrchr(ZSTR_VAL(name), ':', ZSTR_LEN(name)))) {
 		zend_throw_error(NULL, "Undefined class constant '%s'", ZSTR_VAL(name));
 		return FAILURE;
-	} else if ((attr & IS_CONSTANT_UNQUALIFIED) == 0) {
+	} else {
 		zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(name));
 		return FAILURE;
-	} else {
-		char *actual = ZSTR_VAL(name);
-		size_t actual_len = ZSTR_LEN(name);
-		char *slash = (char *) zend_memrchr(actual, '\\', actual_len);
-
-		if (slash) {
-			actual = slash + 1;
-			actual_len -= (actual - ZSTR_VAL(name));
-		}
-
-		zend_error(E_WARNING, "Use of undefined constant %s - assumed '%s' (this will throw an Error in a future version of PHP)", actual, actual);
-		if (EG(exception)) {
-			return FAILURE;
-		} else {
-			zend_string *result_str = zend_string_init(actual, actual_len, 0);
-			zval_ptr_dtor_nogc(result);
-			ZVAL_NEW_STR(result, result_str);
-		}
 	}
-	return SUCCESS;
 }
 /* }}} */
 

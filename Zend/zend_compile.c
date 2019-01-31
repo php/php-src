@@ -7643,19 +7643,13 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
 	opline->op2_type = IS_CONST;
 
-	if (is_fully_qualified) {
+	if (is_fully_qualified || !FC(current_namespace)) {
 		opline->op2.constant = zend_add_const_name_literal(
 			resolved_name, 0);
 	} else {
-		opline->op1.num = IS_CONSTANT_UNQUALIFIED;
-		if (FC(current_namespace)) {
-			opline->op1.num |= IS_CONSTANT_IN_NAMESPACE;
-			opline->op2.constant = zend_add_const_name_literal(
-				resolved_name, 1);
-		} else {
-			opline->op2.constant = zend_add_const_name_literal(
-				resolved_name, 0);
-		}
+		opline->op1.num = IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE;
+		opline->op2.constant = zend_add_const_name_literal(
+			resolved_name, 1);
 	}
 	opline->extended_value = zend_alloc_cache_slot();
 }
@@ -7985,7 +7979,8 @@ void zend_compile_const_expr_const(zend_ast **ast_ptr) /* {{{ */
 	}
 
 	zend_ast_destroy(ast);
-	*ast_ptr = zend_ast_create_constant(resolved_name, !is_fully_qualified ? IS_CONSTANT_UNQUALIFIED : 0);
+	*ast_ptr = zend_ast_create_constant(resolved_name,
+		!is_fully_qualified && FC(current_namespace) ? IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE : 0);
 }
 /* }}} */
 

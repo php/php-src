@@ -62,10 +62,10 @@ $values = array (
 /*21*/  new stdclass(),
 
         // undefined data
-/*22*/  @undefined_var,
+/*22*/  @$undefined_var,
 
         // unset data
-/*23*/  @unset_var
+/*23*/  @$unset_var
 
 );
 
@@ -407,23 +407,23 @@ NULL
 
 -- Iteration 22 --
 
-Warning: array_chunk() expects parameter 2 to be int, string given in %s on line %d
+Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be int, string given in %s on line %d
+Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be int, string given in %s on line %d
+Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: array_chunk() expects parameter 2 to be int, string given in %s on line %d
+Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be int, string given in %s on line %d
+Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be int, string given in %s on line %d
+Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
 NULL
 Done
