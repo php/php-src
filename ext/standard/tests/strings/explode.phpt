@@ -16,7 +16,7 @@ var_dump(@explode(NULL, ""));
 var_dump(@explode("a", ""));
 var_dump(@explode("a", "a"));
 var_dump(@explode("a", NULL));
-var_dump(@explode(NULL, a));
+var_dump(@explode(NULL, "a"));
 var_dump(@explode("abc", "acb"));
 var_dump(@explode("somestring", "otherstring"));
 var_dump(@explode("somestring", "otherstring", -1));

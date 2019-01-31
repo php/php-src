@@ -102,7 +102,7 @@ $misc_values = array (
   @$undef_var,
 
  /* mixed types */
-  @TRUE123,
+  "TRUE123",
   "123string",
   "string123",
   "NULLstring"
