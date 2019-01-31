@@ -13,5 +13,8 @@ const A="hello";
 function getA() {return A;}
 ?>
 --EXPECTF--
-Warning: Use of undefined constant A - assumed 'A' (this will throw an Error in a future version of PHP) in %sbug66251.php on line 4
-A=A
+Fatal error: Uncaught Error: Undefined constant 'A' in %s:%d
+Stack trace:
+#0 %s(%d): getA()
+#1 {main}
+  thrown in %s on line %d

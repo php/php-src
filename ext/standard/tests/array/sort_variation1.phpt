@@ -63,10 +63,10 @@ $unexpected_values = array (
 /*20*/ new stdclass(),
 
        // undefined data
-/*21*/ @undefined_var,
+/*21*/ @$undefined_var,
 
        // unset data
-/*22*/ @unset_var,
+/*22*/ @$unset_var,
 
        // resource variable
 /*23*/ $fp
@@ -358,29 +358,29 @@ Warning: sort() expects parameter 1 to be array, object given in %s on line %d
 bool(false)
 -- Iteration 21 --
 
-Warning: sort() expects parameter 1 to be array, string given in %s on line %d
+Warning: sort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, string given in %s on line %d
+Warning: sort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, string given in %s on line %d
+Warning: sort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, string given in %s on line %d
+Warning: sort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 -- Iteration 22 --
 
-Warning: sort() expects parameter 1 to be array, string given in %s on line %d
+Warning: sort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, string given in %s on line %d
+Warning: sort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, string given in %s on line %d
+Warning: sort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, string given in %s on line %d
+Warning: sort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 -- Iteration 23 --
 

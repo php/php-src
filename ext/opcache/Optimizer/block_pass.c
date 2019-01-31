@@ -33,27 +33,9 @@
 /* Checks if a constant (like "true") may be replaced by its value */
 int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy)
 {
-	zend_constant *c;
-	char *lookup_name;
-	int retval = 1;
-	ALLOCA_FLAG(use_heap);
-
-	if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
-		lookup_name = do_alloca(ZSTR_LEN(name) + 1, use_heap);
-		memcpy(lookup_name, ZSTR_VAL(name), ZSTR_LEN(name) + 1);
-		zend_str_tolower(lookup_name, ZSTR_LEN(name));
-
-		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, ZSTR_LEN(name))) != NULL) {
-			if (!(ZEND_CONSTANT_FLAGS(c) & CONST_CT_SUBST) || (ZEND_CONSTANT_FLAGS(c) & CONST_CS)) {
-				retval = 0;
-			}
-		} else {
-			retval = 0;
-		}
-		free_alloca(lookup_name, use_heap);
-	}
-
-	if (retval) {
+	zval *zv;
+	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
+	if (c) {
 		if ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
 		 && (!(ZEND_CONSTANT_FLAGS(c) & CONST_NO_FILE_CACHE)
 		  || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE))) {
@@ -61,12 +43,19 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 			if (copy) {
 				Z_TRY_ADDREF_P(result);
 			}
+			return 1;
 		} else {
-			retval = 0;
+			return 0;
 		}
 	}
 
-	return retval;
+	/* Special constants null/true/false can always be substituted. */
+	zv = zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name));
+	if (zv) {
+		ZVAL_COPY_VALUE(result, zv);
+		return 1;
+	}
+	return 0;
 }
 
 /* CFG back references management */

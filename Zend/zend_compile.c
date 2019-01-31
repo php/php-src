@@ -585,10 +585,6 @@ static int zend_add_const_name_literal(zend_string *name, zend_bool unqualified)
 		zend_str_tolower(ZSTR_VAL(tmp_name), ns_len);
 		zend_add_literal_string(&tmp_name);
 
-		/* lowercased namespace name & lowercased constant name */
-		tmp_name = zend_string_tolower(name);
-		zend_add_literal_string(&tmp_name);
-
 		if (!unqualified) {
 			return ret;
 		}
@@ -598,11 +594,6 @@ static int zend_add_const_name_literal(zend_string *name, zend_bool unqualified)
 
 	/* original unqualified constant name */
 	tmp_name = zend_string_init(after_ns, after_ns_len, 0);
-	zend_add_literal_string(&tmp_name);
-
-	/* lowercased unqualified constant name */
-	tmp_name = zend_string_alloc(after_ns_len, 0);
-	zend_str_tolower_copy(ZSTR_VAL(tmp_name), after_ns, after_ns_len);
 	zend_add_literal_string(&tmp_name);
 
 	return ret;
@@ -1213,22 +1204,9 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 }
 /* }}} */
 
-static zend_constant *zend_lookup_reserved_const(const char *name, size_t len) /* {{{ */
-{
-	zend_constant *c = zend_hash_find_ptr_lc(EG(zend_constants), name, len);
-	if (c && !(ZEND_CONSTANT_FLAGS(c) & CONST_CS) && (ZEND_CONSTANT_FLAGS(c) & CONST_CT_SUBST)) {
-		return c;
-	}
-	return NULL;
-}
-/* }}} */
-
 static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool is_fully_qualified) /* {{{ */
 {
-	zend_constant *c;
-
-	/* Substitute case-sensitive (or lowercase) constants */
-	c = zend_hash_find_ptr(EG(zend_constants), name);
+	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c && (
 	      ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
 	      && !(CG(compiler_options) & ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION)
@@ -1243,19 +1221,19 @@ static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool i
 		/* Substitute true, false and null (including unqualified usage in namespaces) */
 		const char *lookup_name = ZSTR_VAL(name);
 		size_t lookup_len = ZSTR_LEN(name);
+		zval *val;
 
 		if (!is_fully_qualified) {
 			zend_get_unqualified_name(name, &lookup_name, &lookup_len);
 		}
 
-		c = zend_lookup_reserved_const(lookup_name, lookup_len);
-		if (c) {
-			ZVAL_COPY_OR_DUP(zv, &c->value);
+		if ((val = zend_get_special_const(lookup_name, lookup_len))) {
+			ZVAL_COPY_VALUE(zv, val);
 			return 1;
 		}
-	}
 
-	return 0;
+		return 0;
+	}
 }
 /* }}} */
 
@@ -3249,13 +3227,6 @@ int zend_compile_func_defined(znode *result, zend_ast_list *args) /* {{{ */
 	LITERAL_STR(opline->op1, name);
 	opline->extended_value = zend_alloc_cache_slot();
 
-	/* Lowercase constant name in a separate literal */
-	{
-		zval c;
-		zend_string *lcname = zend_string_tolower(name);
-		ZVAL_NEW_STR(&c, lcname);
-		zend_add_literal(&c);
-	}
 	return SUCCESS;
 }
 /* }}} */
@@ -6538,7 +6509,7 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		value_node.op_type = IS_CONST;
 		zend_const_expr_to_zval(value_zv, value_ast);
 
-		if (zend_lookup_reserved_const(ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name))) {
+		if (zend_get_special_const(ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name))) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot redeclare constant '%s'", ZSTR_VAL(unqualified_name));
 		}
@@ -7672,19 +7643,13 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
 	opline->op2_type = IS_CONST;
 
-	if (is_fully_qualified) {
+	if (is_fully_qualified || !FC(current_namespace)) {
 		opline->op2.constant = zend_add_const_name_literal(
 			resolved_name, 0);
 	} else {
-		opline->op1.num = IS_CONSTANT_UNQUALIFIED;
-		if (FC(current_namespace)) {
-			opline->op1.num |= IS_CONSTANT_IN_NAMESPACE;
-			opline->op2.constant = zend_add_const_name_literal(
-				resolved_name, 1);
-		} else {
-			opline->op2.constant = zend_add_const_name_literal(
-				resolved_name, 0);
-		}
+		opline->op1.num = IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE;
+		opline->op2.constant = zend_add_const_name_literal(
+			resolved_name, 1);
 	}
 	opline->extended_value = zend_alloc_cache_slot();
 }
@@ -8014,7 +7979,8 @@ void zend_compile_const_expr_const(zend_ast **ast_ptr) /* {{{ */
 	}
 
 	zend_ast_destroy(ast);
-	*ast_ptr = zend_ast_create_constant(resolved_name, !is_fully_qualified ? IS_CONSTANT_UNQUALIFIED : 0);
+	*ast_ptr = zend_ast_create_constant(resolved_name,
+		!is_fully_qualified && FC(current_namespace) ? IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE : 0);
 }
 /* }}} */
 

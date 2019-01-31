@@ -127,11 +127,8 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 	} else if (ZEND_VM_OP_CONSTRUCTOR == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " CONSTRUCTOR");
 	} else if (ZEND_VM_OP_CONST_FETCH == (flags & ZEND_VM_EXT_MASK)) {
-		if (op.num & IS_CONSTANT_UNQUALIFIED) {
-			fprintf(stderr, " (unqualified)");
-		}
-		if (op.num & IS_CONSTANT_IN_NAMESPACE) {
-			fprintf(stderr, " (in-namespace)");
+		if (op.num & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
+			fprintf(stderr, " (unqualified-in-namespace)");
 		}
 	}
 }
