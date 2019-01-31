@@ -3749,8 +3749,7 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 					}
 				} else if (kind == ZEND_LIVE_SILENCE) {
 					/* restore previous error_reporting value */
-					if (E_HAS_ONLY_FATAL_ERRORS(EG(error_reporting))
-							&& !E_HAS_ONLY_FATAL_ERRORS(Z_LVAL_P(var))) {
+					if (!EG(error_reporting) && Z_LVAL_P(var) != 0) {
 						EG(error_reporting) = Z_LVAL_P(var);
 					}
 				}
