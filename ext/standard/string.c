@@ -5962,6 +5962,107 @@ PHP_FUNCTION(money_format)
 /* }}} */
 #endif
 
+static zend_bool php_str_begins(zval *needle, zval *str, zend_bool icase) {
+	int(*scmp)(const char *, const char *, unsigned long);
+
+	if (!str || !needle || Z_ISNULL_P(str) || Z_ISNULL_P(needle))
+		return 0;
+
+
+	if (Z_STRLEN_P(str) < Z_STRLEN_P(needle))
+		return 0;
+
+	scmp = icase ? strncasecmp : strncmp;
+
+	if (scmp(Z_STRVAL_P(str), Z_STRVAL_P(needle), Z_STRLEN_P(needle)) == 0)
+		return 1;
+
+	return 0;
+}
+
+static zend_bool php_str_ends(zval *needle, zval *str, zend_bool icase) {
+	int(*scmp)(const char *, const char *, unsigned long);
+	const char *ps;
+
+	if (!str || !needle || Z_ISNULL_P(str) || Z_ISNULL_P(needle))
+		return 0;
+
+	if (Z_STRLEN_P(str) < (Z_STRLEN_P(needle)))
+		return 0;
+
+	ps = Z_STRVAL_P(str) + Z_STRLEN_P(str) - Z_STRLEN_P(needle);
+	scmp = icase ? strncasecmp : strncmp;
+
+	if (scmp(ps, Z_STRVAL_P(needle), Z_STRLEN_P(needle)) == 0)
+		return 1;
+
+	return 0;
+}
+
+/* {{{ proto array str_begins(string needle, string str])
+   Return true if str begins with needle/case sensitive case. */
+PHP_FUNCTION(str_begins)
+{
+	zval *needle = NULL, *str = NULL;
+	
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL_EX(needle, 1, 0)
+		Z_PARAM_ZVAL_EX(str, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_str_begins(needle, str, 0))
+		RETURN_TRUE;
+	RETURN_FALSE;
+}
+
+/* {{{ proto array str_ends(string needle, string str])
+   Return true if str ends with needle/case sensitive case. */
+PHP_FUNCTION(str_ends)
+{
+	zval *needle = NULL, *str = NULL;
+	
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(needle)
+		Z_PARAM_ZVAL(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_str_ends(needle, str, 0))
+		RETURN_TRUE;
+	RETURN_FALSE;
+}
+
+/* {{{ proto array str_ibegins(string needle, string str])
+   Return true if str begins with needle/case insensitive case. */
+PHP_FUNCTION(str_ibegins)
+{
+	zval *needle = NULL, *str = NULL;
+	
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL_EX(needle, 1, 0)
+		Z_PARAM_ZVAL_EX(str, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_str_begins(needle, str, 1))
+		RETURN_TRUE;
+	RETURN_FALSE;
+}
+
+/* {{{ proto array str_iends(string needle, string str])
+   Return true if str ends with needle/case insensitive case. */
+PHP_FUNCTION(str_iends)
+{
+	zval *needle = NULL, *str = NULL;
+	
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(needle)
+		Z_PARAM_ZVAL(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_str_ends(needle, str, 1))
+		RETURN_TRUE;
+	RETURN_FALSE;
+}
+
 /* {{{ proto array str_split(string str [, int split_length])
    Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(str_split)

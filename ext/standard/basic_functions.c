@@ -2464,6 +2464,16 @@ ZEND_BEGIN_ARG_INFO(arginfo_money_format, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_str_begins, 0, 0, 2)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, str)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_str_ends, 0, 0, 2)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, str)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_str_split, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, split_length)
@@ -2789,6 +2799,14 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(strrchr,															arginfo_strrchr)
 	PHP_FE(str_shuffle,														arginfo_str_shuffle)
 	PHP_FE(str_word_count,													arginfo_str_word_count)
+	PHP_FE(str_begins,
+   arginfo_str_begins)
+	PHP_FE(str_ends,
+   arginfo_str_ends)
+	PHP_FE(str_ibegins,
+   arginfo_str_begins)
+	PHP_FE(str_iends,
+   arginfo_str_ends)
 	PHP_FE(str_split,														arginfo_str_split)
 	PHP_FE(strpbrk,															arginfo_strpbrk)
 	PHP_FE(substr_compare,													arginfo_substr_compare)
