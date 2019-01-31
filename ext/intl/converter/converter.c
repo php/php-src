@@ -1042,9 +1042,9 @@ static zend_object *php_converter_create_object(zend_class_entry *ce) {
 	return retval;
 }
 
-static zend_object *php_converter_clone_object(zval *object) {
-	php_converter_object *objval, *oldobj = Z_INTL_CONVERTER_P(object);
-	zend_object *retval = php_converter_object_ctor(Z_OBJCE_P(object), &objval);
+static zend_object *php_converter_clone_object(zend_object *object) {
+	php_converter_object *objval, *oldobj = php_converter_fetch_object(object);
+	zend_object *retval = php_converter_object_ctor(object->ce, &objval);
 	UErrorCode error = U_ZERO_ERROR;
 
 	intl_errors_reset(&oldobj->error);

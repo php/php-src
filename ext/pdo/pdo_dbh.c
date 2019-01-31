@@ -419,13 +419,13 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args) /* {{{ */
 {
 	zval query_string;
-	zval z_key;
+	zend_string *key;
 
 	ZVAL_STRINGL(&query_string, stmt->query_string, stmt->query_stringlen);
-	ZVAL_STRINGL(&z_key, "queryString", sizeof("queryString") - 1);
-	zend_std_write_property(object, &z_key, &query_string, NULL);
+	key = zend_string_init("queryString", sizeof("queryString") - 1, 0);
+	zend_std_write_property(Z_OBJ_P(object), key, &query_string, NULL);
 	zval_ptr_dtor(&query_string);
-	zval_ptr_dtor(&z_key);
+	zend_string_release_ex(key, 0);
 
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
@@ -1350,9 +1350,9 @@ static int dbh_compare(zval *object1, zval *object2)
 	return -1;
 }
 
-static HashTable *dbh_get_gc(zval *object, zval **gc_data, int *gc_count)
+static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(object);
+	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(object);
 	*gc_data = &dbh->def_stmt_ctor_args;
 	*gc_count = 1;
 	return zend_std_get_properties(object);

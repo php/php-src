@@ -365,7 +365,7 @@ static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
 
 zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
-static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zval *orig, int clone_orig) /* {{{ */
+static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig) /* {{{ */
 {
 	spl_dllist_object *intern;
 	zend_class_entry  *parent = class_type;
@@ -380,7 +380,7 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zval 
 	intern->traverse_position = 0;
 
 	if (orig) {
-		spl_dllist_object *other = Z_SPLDLLIST_P(orig);
+		spl_dllist_object *other = spl_dllist_from_obj(orig);
 		intern->ce_get_iterator = other->ce_get_iterator;
 
 		if (clone_orig) {
@@ -455,13 +455,9 @@ static zend_object *spl_dllist_object_new(zend_class_entry *class_type) /* {{{ *
 }
 /* }}} */
 
-static zend_object *spl_dllist_object_clone(zval *zobject) /* {{{ */
+static zend_object *spl_dllist_object_clone(zend_object *old_object) /* {{{ */
 {
-	zend_object        *old_object;
-	zend_object        *new_object;
-
-	old_object  = Z_OBJ_P(zobject);
-	new_object = spl_dllist_object_new_ex(old_object->ce, zobject, 1);
+	zend_object *new_object = spl_dllist_object_new_ex(old_object->ce, old_object, 1);
 
 	zend_objects_clone_members(new_object, old_object);
 
@@ -469,9 +465,9 @@ static zend_object *spl_dllist_object_clone(zval *zobject) /* {{{ */
 }
 /* }}} */
 
-static int spl_dllist_object_count_elements(zval *object, zend_long *count) /* {{{ */
+static int spl_dllist_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
+	spl_dllist_object *intern = spl_dllist_from_obj(object);
 
 	if (intern->fptr_count) {
 		zval rv;
@@ -490,9 +486,9 @@ static int spl_dllist_object_count_elements(zval *object, zend_long *count) /* {
 }
 /* }}} */
 
-static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {{{{ */
+static HashTable* spl_dllist_object_get_debug_info(zend_object *obj, int *is_temp) /* {{{{ */
 {
-	spl_dllist_object     *intern  = Z_SPLDLLIST_P(obj);
+	spl_dllist_object     *intern  = spl_dllist_from_obj(obj);
 	spl_ptr_llist_element *current = intern->llist->head, *next;
 	zval tmp, dllist_array;
 	zend_string *pnstr;
@@ -534,9 +530,9 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 }
 /* }}}} */
 
-static HashTable *spl_dllist_object_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *spl_dllist_object_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
 {
-	spl_dllist_object *intern  = Z_SPLDLLIST_P(obj);
+	spl_dllist_object *intern = spl_dllist_from_obj(obj);
 	spl_ptr_llist_element *current = intern->llist->head;
 	int i = 0;
 
@@ -704,7 +700,7 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 		return;
 	}
 
-	spl_dllist_object_count_elements(ZEND_THIS, &count);
+	spl_dllist_object_count_elements(Z_OBJ_P(ZEND_THIS), &count);
 	RETURN_BOOL(count == 0);
 }
 /* }}} */

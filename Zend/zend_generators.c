@@ -308,9 +308,9 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 }
 /* }}} */
 
-static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {{{ */
+static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*) Z_OBJ_P(object);
+	zend_generator *generator = (zend_generator*)object;
 	zend_execute_data *execute_data = generator->execute_data;
 	zend_op_array *op_array;
 	zval *gc_buffer;

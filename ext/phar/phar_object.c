@@ -1224,7 +1224,7 @@ PHP_METHOD(Phar, __construct)
 	ZVAL_STRINGL(&arg1, fname, fname_len);
 	ZVAL_LONG(&arg2, flags);
 
-	zend_call_method_with_2_params(zobj, Z_OBJCE_P(zobj),
+	zend_call_method_with_2_params(Z_OBJ_P(zobj), Z_OBJCE_P(zobj),
 		&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg1, &arg2);
 
 	zval_ptr_dtor(&arg1);
@@ -1733,7 +1733,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	ZVAL_STRINGL(&arg, dir, dir_len);
 	ZVAL_LONG(&arg2, SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
 
-	zend_call_method_with_2_params(&iter, spl_ce_RecursiveDirectoryIterator,
+	zend_call_method_with_2_params(Z_OBJ(iter), spl_ce_RecursiveDirectoryIterator,
 			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg, &arg2);
 
 	zval_ptr_dtor(&arg);
@@ -1749,7 +1749,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 		RETURN_FALSE;
 	}
 
-	zend_call_method_with_1_params(&iteriter, spl_ce_RecursiveIteratorIterator,
+	zend_call_method_with_1_params(Z_OBJ(iteriter), spl_ce_RecursiveIteratorIterator,
 			&spl_ce_RecursiveIteratorIterator->constructor, "__construct", NULL, &iter);
 
 	if (EG(exception)) {
@@ -1772,7 +1772,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 		ZVAL_STRINGL(&arg2, regex, regex_len);
 
-		zend_call_method_with_2_params(&regexiter, spl_ce_RegexIterator,
+		zend_call_method_with_2_params(Z_OBJ(regexiter), spl_ce_RegexIterator,
 			&spl_ce_RegexIterator->constructor, "__construct", NULL, &iteriter, &arg2);
 		zval_ptr_dtor(&arg2);
 	}
@@ -2223,7 +2223,7 @@ its_ok:
 
 	ZVAL_STRINGL(&arg1, phar->fname, phar->fname_len);
 
-	zend_call_method_with_1_params(&ret, ce, &ce->constructor, "__construct", NULL, &arg1);
+	zend_call_method_with_1_params(Z_OBJ(ret), ce, &ce->constructor, "__construct", NULL, &arg1);
 	zval_ptr_dtor(&arg1);
 	return Z_OBJ(ret);
 }
@@ -4480,7 +4480,7 @@ PHP_METHOD(PharFileInfo, __construct)
 
 	ZVAL_STRINGL(&arg1, fname, fname_len);
 
-	zend_call_method_with_1_params(zobj, Z_OBJCE_P(zobj),
+	zend_call_method_with_1_params(Z_OBJ_P(zobj), Z_OBJCE_P(zobj),
 		&spl_ce_SplFileInfo->constructor, "__construct", NULL, &arg1);
 
 	zval_ptr_dtor(&arg1);
