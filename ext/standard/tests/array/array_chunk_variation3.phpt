@@ -53,10 +53,10 @@ $values = array(
 /*16*/  new stdclass(),
 
         // undefined data
-/*17*/  @undefined_var,
+/*17*/  @$undefined_var,
 
         // unset data
-/*18*/  @unset_var
+/*18*/  @$unset_var
 
 );
 
