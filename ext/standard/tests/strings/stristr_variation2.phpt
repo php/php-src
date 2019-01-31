@@ -83,85 +83,63 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing stristr() function: with unexpected inputs for 'needle' argument ***
 -- Iteration 1 --
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 2 --
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 3 --
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 4 --
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 5 --
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 6 --
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 7 --
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 8 --
 
-Warning: stristr(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stristr() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 9 --
 
-Warning: stristr(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stristr() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 10 --
 
-Warning: stristr(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stristr() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+Warning: stristr(): Empty needle in %s on line %d
 bool(false)
 -- Iteration 13 --
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 14 --
 
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+Warning: stristr(): Empty needle in %s on line %d
 bool(false)
 -- Iteration 15 --
 
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+Warning: stristr(): Empty needle in %s on line %d
 bool(false)
 -- Iteration 16 --
 
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+Warning: stristr(): Empty needle in %s on line %d
 bool(false)
 -- Iteration 17 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 18 --
 
-Warning: stristr(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stristr() expects parameter 2 to be string, resource given in %s on line %d
+NULL
 -- Iteration 19 --
 
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+Warning: stristr(): Empty needle in %s on line %d
 bool(false)
 -- Iteration 20 --
 
-Deprecated: stristr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+Warning: stristr(): Empty needle in %s on line %d
 bool(false)
 ===DONE===

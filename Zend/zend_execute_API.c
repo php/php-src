@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -176,8 +176,6 @@ void init_executor(void) /* {{{ */
 	EG(ht_iterators_used) = 0;
 	EG(ht_iterators) = EG(ht_iterators_slots);
 	memset(EG(ht_iterators), 0, sizeof(EG(ht_iterators_slots)));
-
-	EG(each_deprecation_thrown) = 0;
 
 	EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
 	EG(persistent_functions_count) = EG(function_table)->nNumUsed;
@@ -568,29 +566,10 @@ ZEND_API int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, 
 	} else if ((colon = (char*)zend_memrchr(ZSTR_VAL(name), ':', ZSTR_LEN(name)))) {
 		zend_throw_error(NULL, "Undefined class constant '%s'", ZSTR_VAL(name));
 		return FAILURE;
-	} else if ((attr & IS_CONSTANT_UNQUALIFIED) == 0) {
+	} else {
 		zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(name));
 		return FAILURE;
-	} else {
-		char *actual = ZSTR_VAL(name);
-		size_t actual_len = ZSTR_LEN(name);
-		char *slash = (char *) zend_memrchr(actual, '\\', actual_len);
-
-		if (slash) {
-			actual = slash + 1;
-			actual_len -= (actual - ZSTR_VAL(name));
-		}
-
-		zend_error(E_WARNING, "Use of undefined constant %s - assumed '%s' (this will throw an Error in a future version of PHP)", actual, actual);
-		if (EG(exception)) {
-			return FAILURE;
-		} else {
-			zend_string *result_str = zend_string_init(actual, actual_len, 0);
-			zval_ptr_dtor_nogc(result);
-			ZVAL_NEW_STR(result, result_str);
-		}
 	}
-	return SUCCESS;
 }
 /* }}} */
 
@@ -705,20 +684,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 				EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 			}
 			return FAILURE;
-		} else if (error) {
-			/* Capitalize the first latter of the error message */
-			if (error[0] >= 'a' && error[0] <= 'z') {
-				error[0] += ('A' - 'a');
-			}
-			zend_error(E_DEPRECATED, "%s", error);
-			efree(error);
-			if (UNEXPECTED(EG(exception))) {
-				if (EG(current_execute_data) == &dummy_execute_data) {
-					EG(current_execute_data) = dummy_execute_data.prev_execute_data;
-				}
-				return FAILURE;
-			}
 		}
+
+		ZEND_ASSERT(!error);
 	}
 
 	func = fci_cache->function_handler;
@@ -916,16 +884,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	}
 
 	if (!EG(autoload_func)) {
-		zend_function *func = zend_fetch_function(ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD));
-
-		if (func) {
-			EG(autoload_func) = func;
-		} else {
-			if (!key) {
-				zend_string_release_ex(lc_name, 0);
-			}
-			return NULL;
+		if (!key) {
+			zend_string_release_ex(lc_name, 0);
 		}
+		return NULL;
 
 	}
 

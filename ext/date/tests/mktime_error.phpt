@@ -33,8 +33,8 @@ var_dump( mktime($hour, $minute, $sec, $month, $day, $year, $extra_arg) );
 
 -- Testing mktime() function with Zero arguments --
 
-Deprecated: mktime(): You should be using the time() function instead in %s on line %d
-int(%d)
+Warning: mktime() expects at least 1 parameter, 0 given in %s on line %d
+bool(false)
 
 -- Testing mktime() function with more than expected no. of arguments --
 

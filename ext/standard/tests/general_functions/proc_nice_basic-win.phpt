@@ -8,10 +8,6 @@ if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
 	die('skip: Only for Windows');
 }
 
-if (PHP_SAPI != 'cli') {
-	die('skip: Only for CLI');
-}
-
 if (getenv('SKIP_SLOW_TESTS')) {
 	doe('skip: Slow test');
 }

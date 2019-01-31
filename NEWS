@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.0.0alpha1
 
 - Core:
-  . Fixed bug #NNNNN (Summary). (Author)
+  . Fixed bug #77546 (iptcembed broken function). (gdegoulet)
 
 - GD:
   . Removed deprecated image2wbmp(). (cmb)
@@ -11,5 +11,8 @@ PHP                                                                        NEWS
 
 - Intl:
   . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
+
+- phpdbg:
+  . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

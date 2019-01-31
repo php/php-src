@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -4452,10 +4452,6 @@ PHP_FUNCTION(imagecropauto)
 	}
 
 	switch (mode) {
-		case -1:
-			php_error_docref(NULL, E_DEPRECATED, "Crop mode -1 is deprecated. Use IMG_CROP_DEFAULT instead.");
-			mode = GD_CROP_DEFAULT;
-			/* FALLTHRU */
 		case GD_CROP_DEFAULT:
 		case GD_CROP_TRANSPARENT:
 		case GD_CROP_BLACK:

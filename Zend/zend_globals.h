@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -224,8 +224,6 @@ struct _zend_executor_globals {
 
 	zend_function trampoline;
 	zend_op       call_trampoline_op;
-
-	zend_bool each_deprecation_thrown;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

@@ -228,7 +228,6 @@ static const func_info_t func_infos[] = {
 	FC("strncmp",                 zend_lb_ssn_info),
 	FC("strcasecmp",              zend_l_ss_info),
 	FC("strncasecmp",             zend_lb_ssn_info),
-	F1("each",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_KEY_ANY),
 	F0("error_reporting",         MAY_BE_NULL | MAY_BE_LONG),
 	F0("define",                  MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_NULL), // TODO: inline
 	FC("defined",                 zend_b_s_info), // TODO: inline
@@ -616,7 +615,6 @@ static const func_info_t func_infos[] = {
 	F0("feof",                         MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("fgetc",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fgets",                        MAY_BE_FALSE | MAY_BE_STRING),
-	F1("fgetss",                       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fread",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fopen",                        MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("fpassthru",                    MAY_BE_FALSE | MAY_BE_LONG),
@@ -1264,7 +1262,6 @@ static const func_info_t func_infos[] = {
 	F0("gzeof",                                 MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("gzgetc",                                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzgets",                                MAY_BE_FALSE | MAY_BE_STRING),
-	F1("gzgetss",                               MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzread",                                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzopen",                                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("gzpassthru",                            MAY_BE_FALSE | MAY_BE_LONG),

@@ -59,10 +59,10 @@ $unexpected_values = array(
 /*16*/ new stdclass(),
 
        // undefined data
-/*17*/ @undefined_var,
+/*17*/ @$undefined_var,
 
        // unset data
-/*18*/ @unset_var,
+/*18*/ @$unset_var,
 
        // resource variable
 /*19*/ $fp
@@ -211,7 +211,7 @@ array(3) {
 }
 -- Iteration 13 --
 
-Warning: arsort() expects parameter 2 to be int, string given in %sarsort_variation2.php on line %d
+Warning: arsort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -223,7 +223,7 @@ array(3) {
 }
 -- Iteration 14 --
 
-Warning: arsort() expects parameter 2 to be int, string given in %sarsort_variation2.php on line %d
+Warning: arsort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -235,7 +235,7 @@ array(3) {
 }
 -- Iteration 15 --
 
-Warning: arsort() expects parameter 2 to be int, string given in %sarsort_variation2.php on line %d
+Warning: arsort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -247,7 +247,7 @@ array(3) {
 }
 -- Iteration 16 --
 
-Warning: arsort() expects parameter 2 to be int, string given in %sarsort_variation2.php on line %d
+Warning: arsort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -259,7 +259,7 @@ array(3) {
 }
 -- Iteration 17 --
 
-Warning: arsort() expects parameter 2 to be int, object given in %sarsort_variation2.php on line %d
+Warning: arsort() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -270,32 +270,28 @@ array(3) {
   int(45)
 }
 -- Iteration 18 --
-
-Warning: arsort() expects parameter 2 to be int, string given in %sarsort_variation2.php on line %d
-bool(false)
+bool(true)
 array(3) {
+  [3]=>
+  int(45)
   [1]=>
   int(10)
   [2]=>
   int(2)
-  [3]=>
-  int(45)
 }
 -- Iteration 19 --
-
-Warning: arsort() expects parameter 2 to be int, string given in %sarsort_variation2.php on line %d
-bool(false)
+bool(true)
 array(3) {
+  [3]=>
+  int(45)
   [1]=>
   int(10)
   [2]=>
   int(2)
-  [3]=>
-  int(45)
 }
 -- Iteration 20 --
 
-Warning: arsort() expects parameter 2 to be int, resource given in %sarsort_variation2.php on line %d
+Warning: arsort() expects parameter 2 to be int, resource given in %s on line %d
 bool(false)
 array(3) {
   [1]=>

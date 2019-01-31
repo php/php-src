@@ -1593,11 +1593,6 @@ zend.assertions = 1
 ; http://php.net/assert.callback
 ;assert.callback = 0
 
-; Eval the expression with current error_reporting().  Set to true if you want
-; error_reporting(0) around the eval().
-; http://php.net/assert.quiet-eval
-;assert.quiet_eval = 0
-
 [COM]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
 ; http://php.net/com.typelib-file

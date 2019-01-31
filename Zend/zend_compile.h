@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -281,10 +281,6 @@ typedef struct _zend_oparray_context {
 /* "main" op_array with                                   |     |     |     */
 /* ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes           |     |     |     */
 #define ZEND_ACC_EARLY_BINDING           (1 << 15) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* method flag (bc only), any method that has this        |     |     |     */
-/* flag can be used statically and non statically.        |     |     |     */
-#define ZEND_ACC_ALLOW_STATIC            (1 << 16) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* call through user function trampoline. e.g.            |     |     |     */
 /* __call, __callstatic                                   |     |     |     */
@@ -921,9 +917,8 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_DIM_IS 1
 
-#define IS_CONSTANT_UNQUALIFIED     0x010
 #define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
-#define IS_CONSTANT_IN_NAMESPACE    0x100
+#define IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE 0x100
 
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
@@ -1008,7 +1003,6 @@ END_EXTERN_C()
 #define ZEND_CALL_FUNC_NAME         "__call"
 #define ZEND_CALLSTATIC_FUNC_NAME   "__callstatic"
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
-#define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 #define ZEND_INVOKE_FUNC_NAME       "__invoke"
 #define ZEND_DEBUGINFO_FUNC_NAME    "__debuginfo"
 

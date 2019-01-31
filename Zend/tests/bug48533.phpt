@@ -26,8 +26,8 @@ $x->a();
 $x->b();
 $x->c();
 $x::a();
-$x::b();
 $x::c();
+$x::b();
 
 ?>
 --EXPECTF--
@@ -35,7 +35,9 @@ string(9) "__call::a"
 int(2)
 string(9) "__call::c"
 string(15) "__callStatic::a"
-
-Deprecated: Non-static method foo::b() should not be called statically in %s on line %d
-int(2)
 string(15) "__callStatic::c"
+
+Fatal error: Uncaught Error: Non-static method foo::b() cannot be called statically in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

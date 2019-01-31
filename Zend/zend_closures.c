@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,12 +84,8 @@ static zend_bool zend_valid_closure_binding(
 		}
 	} else if (is_fake_closure && func->common.scope
 			&& !(func->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (func->type == ZEND_INTERNAL_FUNCTION) {
-			zend_error(E_WARNING, "Cannot unbind $this of internal method");
-			return 0;
-		} else {
-			zend_error(E_DEPRECATED, "Unbinding $this of a method is deprecated");
-		}
+		zend_error(E_WARNING, "Cannot unbind $this of method");
+		return 0;
 	}
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {
@@ -323,7 +319,7 @@ ZEND_METHOD(Closure, fromCallable)
 	success = zend_create_closure_from_callable(return_value, callable, &error);
 	EG(current_execute_data) = execute_data;
 
-	if (success == FAILURE || error) {
+	if (success == FAILURE) {
 		if (error) {
 			zend_type_error("Failed to create closure from callable: %s", error);
 			efree(error);

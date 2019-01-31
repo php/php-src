@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,6 @@ static ZEND_FUNCTION(strcmp);
 static ZEND_FUNCTION(strncmp);
 static ZEND_FUNCTION(strcasecmp);
 static ZEND_FUNCTION(strncasecmp);
-static ZEND_FUNCTION(each);
 static ZEND_FUNCTION(error_reporting);
 static ZEND_FUNCTION(define);
 static ZEND_FUNCTION(defined);
@@ -106,10 +105,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_strncmp, 0, 0, 3)
 	ZEND_ARG_INFO(0, str1)
 	ZEND_ARG_INFO(0, str2)
 	ZEND_ARG_INFO(0, len)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_each, 0, 0, 1)
-	ZEND_ARG_INFO(1, arr)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_error_reporting, 0, 0, 0)
@@ -238,7 +233,6 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(strncmp,		arginfo_strncmp)
 	ZEND_FE(strcasecmp,		arginfo_strcmp)
 	ZEND_FE(strncasecmp,		arginfo_strncmp)
-	ZEND_FE(each,			arginfo_each)
 	ZEND_FE(error_reporting,	arginfo_error_reporting)
 	ZEND_FE(define,			arginfo_define)
 	ZEND_FE(defined,		arginfo_defined)
@@ -653,66 +647,6 @@ ZEND_FUNCTION(strncasecmp)
 }
 /* }}} */
 
-/* {{{ proto mixed each(array &arr)
-   Return the currently pointed key..value pair in the passed array, and advance the pointer to the next element, or false if there is no element at this place */
-ZEND_FUNCTION(each)
-{
-	zval *array, *entry, tmp;
-	zend_ulong num_key;
-	HashTable *target_hash;
-	zend_string *key;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/", &array) == FAILURE) {
-		return;
-	}
-
-	if (!EG(each_deprecation_thrown)) {
-		zend_error(E_DEPRECATED, "The each() function is deprecated. This message will be suppressed on further calls");
-		EG(each_deprecation_thrown) = 1;
-	}
-
-	target_hash = HASH_OF(array);
-	if (!target_hash) {
-		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
-		return;
-	}
-	while (1) {
-		entry = zend_hash_get_current_data(target_hash);
-		if (!entry) {
-			RETURN_FALSE;
-		} else if (Z_TYPE_P(entry) == IS_INDIRECT) {
-			entry = Z_INDIRECT_P(entry);
-			if (Z_TYPE_P(entry) == IS_UNDEF) {
-				zend_hash_move_forward(target_hash);
-				continue;
-			}
-		}
-		break;
-	}
-	array_init_size(return_value, 4);
-	zend_hash_real_init_mixed(Z_ARRVAL_P(return_value));
-
-	/* add value elements */
-	ZVAL_DEREF(entry);
-	if (Z_REFCOUNTED_P(entry)) {
-		GC_ADDREF_EX(Z_COUNTED_P(entry), 2);
-	}
-	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 1, entry);
-	zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_VALUE), entry);
-
-	/* add the key elements */
-	if (zend_hash_get_current_key(target_hash, &key, &num_key) == HASH_KEY_IS_STRING) {
-		ZVAL_STR_COPY(&tmp, key);
-		Z_TRY_ADDREF(tmp);
-	} else {
-		ZVAL_LONG(&tmp, num_key);
-	}
-	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);
-	zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_KEY), &tmp);
-	zend_hash_move_forward(target_hash);
-}
-/* }}} */
-
 /* {{{ proto int error_reporting([int new_error_level])
    Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
@@ -831,7 +765,6 @@ ZEND_FUNCTION(define)
 	zend_string *name;
 	zval *val, val_free;
 	zend_bool non_cs = 0;
-	int case_sensitive = CONST_CS;
 	zend_constant c;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -841,12 +774,14 @@ ZEND_FUNCTION(define)
 		Z_PARAM_BOOL(non_cs)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (non_cs) {
-		case_sensitive = 0;
-	}
-
 	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
 		zend_error(E_WARNING, "Class constants cannot be defined or redefined");
+		RETURN_FALSE;
+	}
+
+	if (non_cs) {
+		zend_error(E_WARNING,
+			"define(): Declaration of case-insensitive constants is no longer supported");
 		RETURN_FALSE;
 	}
 
@@ -897,13 +832,8 @@ repeat:
 	zval_ptr_dtor(&val_free);
 
 register_constant:
-	if (non_cs) {
-		zend_error(E_DEPRECATED,
-			"define(): Declaration of case-insensitive constants is deprecated");
-	}
-
 	/* non persistent */
-	ZEND_CONSTANT_SET_FLAGS(&c, case_sensitive, PHP_USER_CONSTANT);
+	ZEND_CONSTANT_SET_FLAGS(&c, CONST_CS, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
 	if (zend_register_constant(&c) == SUCCESS) {
 		RETURN_TRUE;
@@ -924,7 +854,7 @@ ZEND_FUNCTION(defined)
 		Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_get_constant_ex(name, zend_get_executed_scope(), ZEND_FETCH_CLASS_SILENT | ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK)) {
+	if (zend_get_constant_ex(name, zend_get_executed_scope(), ZEND_FETCH_CLASS_SILENT)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

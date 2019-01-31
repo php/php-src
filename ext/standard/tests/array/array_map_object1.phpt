@@ -22,7 +22,7 @@ echo "-- simple class with public variable and method --\n";
 class SimpleClass
 {
   public $var1 = 1;
-  public function square($n) {
+  public static function square($n) {
     return $n * $n;
   }
 }
@@ -36,7 +36,7 @@ echo "\n-- simple class with private variable and method --\n";
 class SimpleClassPri
 {
   private $var1 = 10;
-  private function add($n) {
+  private static function add($n) {
     return $var + $n;
   }
 }
@@ -46,7 +46,7 @@ echo "\n-- simple class with protected variable and method --\n";
 class SimpleClassPro
 {
   protected $var1 = 5;
-  protected function mul($n) {
+  protected static function mul($n) {
     return $var1 * $n;
   }
 }
@@ -62,14 +62,14 @@ echo "\n-- abstract class --\n";
 abstract class AbstractClass
 {
   protected $var2 = 5;
-  abstract function emptyFunction();
+  abstract static function emptyFunction();
 }
 
 // class deriving the above abstract class
 class ChildClass extends AbstractClass
 {
   private $var3;
-  public function emptyFunction() {
+  public static function emptyFunction() {
     echo "defined in child\n";
   }
 }
@@ -79,7 +79,7 @@ echo "\n-- class with final method --\n";
 class FinalClass
 {
   private $var4;
-  final function finalMethod() {
+  final static function finalMethod() {
     echo "This function can't be overloaded\n";
   }
 }
@@ -126,8 +126,6 @@ test(array('InterClass', 'square'), array(1, 2));
 *** Testing array_map() : object functionality ***
 -- simple class with public variable and method --
 SimpleClass::square
-
-Deprecated: array_map() expects parameter 1 to be a valid callback, non-static method SimpleClass::square() should not be called statically in %sarray_map_object1.php on line %d
 array(2) {
   [0]=>
   int(1)
@@ -155,8 +153,6 @@ NULL
 
 -- abstract class --
 ChildClass::emptyFunction
-
-Deprecated: array_map() expects parameter 1 to be a valid callback, non-static method ChildClass::emptyFunction() should not be called statically in %sarray_map_object1.php on line %d
 defined in child
 defined in child
 array(2) {
@@ -168,8 +164,6 @@ array(2) {
 
 -- class with final method --
 FinalClass::finalMethod
-
-Deprecated: array_map() expects parameter 1 to be a valid callback, non-static method FinalClass::finalMethod() should not be called statically in %sarray_map_object1.php on line %d
 This function can't be overloaded
 This function can't be overloaded
 array(2) {
