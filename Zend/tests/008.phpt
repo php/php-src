@@ -29,7 +29,9 @@ NULL
 
 Warning: define() expects at least 2 parameters, 1 given in %s on line %d
 NULL
-bool(true)
+
+Notice: Constant TRUE already defined in %s on line %d
+bool(false)
 
 Warning: define() expects parameter 3 to be bool, array given in %s on line %d
 NULL

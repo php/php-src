@@ -38,7 +38,7 @@ var_dump( fscanf($file_handle, "%d%s%f", $int_var, $string_var) );
 fclose($file_handle);
 
 // different invalid format strings
-$invalid_formats = array( $undefined_var, undefined_constant,
+$invalid_formats = array( $undefined_var,
                           "%", "%h", "%.", "%d%m"
                    );
 
@@ -76,10 +76,6 @@ Warning: fscanf(): Different numbers of variable names and field specifiers in %
 int(-1)
 
 Notice: Undefined variable: undefined_var in %s on line %d
-
-Warning: Use of undefined constant undefined_constant - assumed 'undefined_constant' (this will throw an Error in a future version of PHP) in %s on line %d
-array(0) {
-}
 array(0) {
 }
 

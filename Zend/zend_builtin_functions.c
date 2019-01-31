@@ -854,7 +854,7 @@ ZEND_FUNCTION(defined)
 		Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_get_constant_ex(name, zend_get_executed_scope(), ZEND_FETCH_CLASS_SILENT | ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK)) {
+	if (zend_get_constant_ex(name, zend_get_executed_scope(), ZEND_FETCH_CLASS_SILENT)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

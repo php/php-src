@@ -29,6 +29,9 @@ PHP 8.0 UPGRADE NOTES
     longer available. The error_get_last() function may be used instead.
   . Removed the ability to define case-insensitive constants. The third
     argument to define() may no longer be true.
+  . Access to undefined constants now always results in an Error exception.
+    Previously, unqualified constant accesses resulted in a warning and were
+    interpreted as strings.
   . Removed ability to specify an autoloader using an __autoload() function.
     spl_autoload_register() should be used instead.
   . Removed create_function(). Anonymous functions may be used instead.

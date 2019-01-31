@@ -19,8 +19,6 @@ var_dump( array_intersect_ukey($array1, $array2, "unknown_function") );
 //function name within single quotes
 var_dump( array_intersect_ukey($array1, $array2, 'unknown_function') );
 
-//function name without quotes
-var_dump( array_intersect_ukey($array1, $array2, unknown_function) );
 ?>
 ===DONE===
 --EXPECTF--
@@ -28,11 +26,6 @@ var_dump( array_intersect_ukey($array1, $array2, unknown_function) );
 
 Warning: array_intersect_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name in %s on line %d
 NULL
-
-Warning: array_intersect_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name in %s on line %d
-NULL
-
-Warning: Use of undefined constant unknown_function - assumed 'unknown_function' (this will throw an Error in a future version of PHP) in %s on line %d
 
 Warning: array_intersect_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name in %s on line %d
 NULL
