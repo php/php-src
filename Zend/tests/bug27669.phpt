@@ -3,7 +3,7 @@ Bug #27669 (PHP 5 didn't support all possibilities for calling static methods dy
 --FILE--
 <?php
 	class A {
-		function hello() {
+		static function hello() {
 			echo "Hello World\n";
 		}
 	}
@@ -12,6 +12,5 @@ Bug #27669 (PHP 5 didn't support all possibilities for calling static methods dy
 ?>
 ===DONE===
 --EXPECTF--
-Deprecated: Non-static method A::hello() should not be called statically in %s on line %d
 Hello World
 ===DONE===

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -174,25 +174,6 @@ static const php_mb_nls_ident_list php_mb_default_identify_list[] = {
 
 /* }}} */
 
-/* {{{ mb_overload_def mb_ovld[] */
-static const struct mb_overload_def mb_ovld[] = {
-	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", "mb_orig_mail"},
-	{MB_OVERLOAD_STRING, "strlen", "mb_strlen", "mb_orig_strlen"},
-	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strpos"},
-	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", "mb_orig_strrpos"},
-	{MB_OVERLOAD_STRING, "stripos", "mb_stripos", "mb_orig_stripos"},
-	{MB_OVERLOAD_STRING, "strripos", "mb_strripos", "mb_orig_strripos"},
-	{MB_OVERLOAD_STRING, "strstr", "mb_strstr", "mb_orig_strstr"},
-	{MB_OVERLOAD_STRING, "strrchr", "mb_strrchr", "mb_orig_strrchr"},
-	{MB_OVERLOAD_STRING, "stristr", "mb_stristr", "mb_orig_stristr"},
-	{MB_OVERLOAD_STRING, "substr", "mb_substr", "mb_orig_substr"},
-	{MB_OVERLOAD_STRING, "strtolower", "mb_strtolower", "mb_orig_strtolower"},
-	{MB_OVERLOAD_STRING, "strtoupper", "mb_strtoupper", "mb_orig_strtoupper"},
-	{MB_OVERLOAD_STRING, "substr_count", "mb_substr_count", "mb_orig_substr_count"},
-	{0, NULL, NULL, NULL}
-};
-/* }}} */
-
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_language, 0, 0, 0)
 	ZEND_ARG_INFO(0, language)
@@ -222,7 +203,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_preferred_mime_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_parse_str, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_parse_str, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoded_string)
 	ZEND_ARG_INFO(1, result)
 ZEND_END_ARG_INFO()
@@ -1486,8 +1467,6 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("mbstring.http_output", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_output)
 	STD_PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding, internal_encoding_name, zend_mbstring_globals, mbstring_globals)
 	PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
-	STD_PHP_INI_ENTRY("mbstring.func_overload", "0",
-	PHP_INI_SYSTEM, OnUpdateLong, func_overload, zend_mbstring_globals, mbstring_globals)
 
 	STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0",
 		PHP_INI_SYSTEM | PHP_INI_PERDIR,
@@ -1535,7 +1514,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	mbstring_globals->current_filter_illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	mbstring_globals->current_filter_illegal_substchar = 0x3f;	/* '?' */
 	mbstring_globals->illegalchars = 0;
-	mbstring_globals->func_overload = 0;
 	mbstring_globals->encoding_translation = 0;
 	mbstring_globals->strict_detection = 0;
 	mbstring_globals->outconv = NULL;
@@ -1584,10 +1562,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 		sapi_register_post_entries(mbstr_post_entries);
 	}
 
-	REGISTER_LONG_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_OVERLOAD_STRING", MB_OVERLOAD_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_OVERLOAD_REGEX", MB_OVERLOAD_REGEX, CONST_CS | CONST_PERSISTENT);
-
 	REGISTER_LONG_CONSTANT("MB_CASE_UPPER", PHP_UNICODE_CASE_UPPER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_CASE_LOWER", PHP_UNICODE_CASE_LOWER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_CASE_TITLE", PHP_UNICODE_CASE_TITLE, CONST_CS | CONST_PERSISTENT);
@@ -1613,39 +1587,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 		php_mb_rfc1867_getword_conf,
 		php_mb_rfc1867_basename);
 
-	/* override original function (deprecated). */
-	if (MBSTRG(func_overload)){
-		zend_function *func, *orig;
-		const struct mb_overload_def *p;
-		zend_string *str;
-
-		p = &(mb_ovld[0]);
-		while (p->type > 0) {
-			if ((MBSTRG(func_overload) & p->type) == p->type &&
-				!zend_hash_str_exists(CG(function_table), p->save_func, strlen(p->save_func))
-			) {
-				func = zend_hash_str_find_ptr(CG(function_table), p->ovld_func, strlen(p->ovld_func));
-
-				if ((orig = zend_hash_str_find_ptr(CG(function_table), p->orig_func, strlen(p->orig_func))) == NULL) {
-					php_error_docref("ref.mbstring", E_WARNING, "mbstring couldn't find function %s.", p->orig_func);
-					return FAILURE;
-				} else {
-					ZEND_ASSERT(orig->type == ZEND_INTERNAL_FUNCTION);
-					str = zend_string_init_interned(p->save_func, strlen(p->save_func), 1);
-					zend_hash_add_mem(CG(function_table), str, orig, sizeof(zend_internal_function));
-					zend_string_release_ex(str, 1);
-					function_add_ref(orig);
-
-					str = zend_string_init_interned(p->orig_func, strlen(p->orig_func), 1);
-					zend_hash_update_mem(CG(function_table), str, func, sizeof(zend_internal_function));
-					zend_string_release_ex(str, 1);
-					function_add_ref(func);
-				}
-			}
-			p++;
-		}
-	}
-
 	return SUCCESS;
 }
 /* }}} */
@@ -1653,24 +1594,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 /* {{{ PHP_MSHUTDOWN_FUNCTION(mbstring) */
 PHP_MSHUTDOWN_FUNCTION(mbstring)
 {
-	/*  clear overloaded function. */
-	if (MBSTRG(func_overload)){
-		const struct mb_overload_def *p;
-		zend_function *orig;
-
-		p = &(mb_ovld[0]);
-		while (p->type > 0) {
-			if ((MBSTRG(func_overload) & p->type) == p->type &&
-				(orig = zend_hash_str_find_ptr(CG(function_table), p->save_func, strlen(p->save_func)))) {
-
-				zend_hash_str_update_mem(CG(function_table), p->orig_func, strlen(p->orig_func), orig, sizeof(zend_internal_function));
-				function_add_ref(orig);
-				zend_hash_str_del(CG(function_table), p->save_func, strlen(p->save_func));
-			}
-			p++;
-		}
-	}
-
 	UNREGISTER_INI_ENTRIES();
 
 	zend_multibyte_restore_functions();
@@ -1695,12 +1618,6 @@ PHP_RINIT_FUNCTION(mbstring)
 
 	php_mb_populate_current_detect_order_list();
 
-	/* override original function. */
-	if (MBSTRG(func_overload)){
-		zend_error(E_DEPRECATED, "The mbstring.func_overload directive is deprecated");
-
-		CG(compiler_options) |= ZEND_COMPILE_NO_BUILTIN_STRLEN;
-	}
 #if HAVE_MBREGEX
 	PHP_RINIT(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -2120,26 +2037,24 @@ PHP_FUNCTION(mb_preferred_mime_name)
 #define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
 #define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
 
-/* {{{ proto bool mb_parse_str(string encoded_string [, array result])
+/* {{{ proto bool mb_parse_str(string encoded_string, array &result)
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(mb_parse_str)
 {
-	zval *track_vars_array = NULL;
-	char *encstr = NULL;
+	zval *track_vars_array;
+	char *encstr;
 	size_t encstr_len;
 	php_mb_encoding_handler_info_t info;
 	const mbfl_encoding *detected;
 
 	track_vars_array = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
 		return;
 	}
 
-	if (track_vars_array != NULL) {
-		track_vars_array = zend_try_array_init(track_vars_array);
-		if (!track_vars_array) {
-			return;
-		}
+	track_vars_array = zend_try_array_init(track_vars_array);
+	if (!track_vars_array) {
+		return;
 	}
 
 	encstr = estrndup(encstr, encstr_len);
@@ -2153,22 +2068,7 @@ PHP_FUNCTION(mb_parse_str)
 	info.num_from_encodings     = MBSTRG(http_input_list_size);
 	info.from_language          = MBSTRG(language);
 
-	if (track_vars_array != NULL) {
-		detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr);
-	} else {
-		zval tmp;
-		zend_array *symbol_table;
-		if (zend_forbid_dynamic_call("mb_parse_str() with a single argument") == FAILURE) {
-			efree(encstr);
-			return;
-		}
-
-		php_error_docref(NULL, E_DEPRECATED, "Calling mb_parse_str() without the result argument is deprecated");
-
-		symbol_table = zend_rebuild_symbol_table();
-		ZVAL_ARR(&tmp, symbol_table);
-		detected = _php_mb_encoding_handler_ex(&info, &tmp, encstr);
-	}
+	detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr);
 
 	MBSTRG(http_input_identify) = detected;
 
@@ -2780,11 +2680,6 @@ PHP_FUNCTION(mb_substr)
 		real_len = (mblen - real_from) + len;
 	} else {
 		real_len = 0;
-	}
-
-	if (((MBSTRG(func_overload) & MB_OVERLOAD_STRING) == MB_OVERLOAD_STRING)
-		&& (real_from > mbfl_strlen(&string))) {
-		RETURN_FALSE;
 	}
 
 	ret = mbfl_substr(&string, &result, real_from, real_len);
@@ -4411,8 +4306,7 @@ PHP_FUNCTION(mb_get_info)
 	size_t typ_len;
 	size_t n;
 	char *name;
-	const struct mb_overload_def *over_func;
-	zval row1, row2;
+	zval row;
 	const mbfl_language *lang = mbfl_no2language(MBSTRG(language));
 	const mbfl_encoding **entry;
 
@@ -4434,20 +4328,6 @@ PHP_FUNCTION(mb_get_info)
 		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)) != NULL) {
 			add_assoc_string(return_value, "http_output_conv_mimetypes", name);
 		}
-		add_assoc_long(return_value, "func_overload", MBSTRG(func_overload));
-		if (MBSTRG(func_overload)){
-			over_func = &(mb_ovld[0]);
-			array_init(&row1);
-			while (over_func->type > 0) {
-				if ((MBSTRG(func_overload) & over_func->type) == over_func->type ) {
-					add_assoc_string(&row1, over_func->orig_func, over_func->ovld_func);
-				}
-				over_func++;
-			}
-			add_assoc_zval(return_value, "func_overload_list", &row1);
-		} else {
-			add_assoc_string(return_value, "func_overload_list", "no overload");
- 		}
 		if (lang != NULL) {
 			if ((name = (char *)mbfl_no_encoding2name(lang->mail_charset)) != NULL) {
 				add_assoc_string(return_value, "mail_charset", name);
@@ -4472,12 +4352,12 @@ PHP_FUNCTION(mb_get_info)
 		entry = MBSTRG(current_detect_order_list);
 		if (n > 0) {
 			size_t i;
-			array_init(&row2);
+			array_init(&row);
 			for (i = 0; i < n; i++) {
-				add_next_index_string(&row2, (*entry)->name);
+				add_next_index_string(&row, (*entry)->name);
 				entry++;
 			}
-			add_assoc_zval(return_value, "detect_order", &row2);
+			add_assoc_zval(return_value, "detect_order", &row);
 		}
 		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
 			add_assoc_string(return_value, "substitute_character", "none");
@@ -4508,21 +4388,6 @@ PHP_FUNCTION(mb_get_info)
 	} else if (!strcasecmp("http_output_conv_mimetypes", typ)) {
 		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)) != NULL) {
 			RETVAL_STRING(name);
-		}
-	} else if (!strcasecmp("func_overload", typ)) {
- 		RETVAL_LONG(MBSTRG(func_overload));
-	} else if (!strcasecmp("func_overload_list", typ)) {
-		if (MBSTRG(func_overload)){
-				over_func = &(mb_ovld[0]);
-				array_init(return_value);
-				while (over_func->type > 0) {
-					if ((MBSTRG(func_overload) & over_func->type) == over_func->type ) {
-						add_assoc_string(return_value, over_func->orig_func, over_func->ovld_func);
-					}
-					over_func++;
-				}
-		} else {
-			RETVAL_STRING("no overload");
 		}
 	} else if (!strcasecmp("mail_charset", typ)) {
 		if (lang != NULL && (name = (char *)mbfl_no_encoding2name(lang->mail_charset)) != NULL) {

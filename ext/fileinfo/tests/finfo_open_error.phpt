@@ -49,5 +49,5 @@ resource(6) of type (file_info)
 
 Warning: finfo_open() expects parameter 1 to be int, string given in %sfinfo_open_error.php on line 16
 bool(false)
-finfo::finfo() expects parameter 1 to be int, string given
+finfo::__construct() expects parameter 1 to be int, string given
 ===DONE===

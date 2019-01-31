@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -415,7 +415,6 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_THIS,                   "this") \
 	_(ZEND_STR_VALUE,                  "value") \
 	_(ZEND_STR_KEY,                    "key") \
-	_(ZEND_STR_MAGIC_AUTOLOAD,         "__autoload") \
 	_(ZEND_STR_MAGIC_INVOKE,           "__invoke") \
 	_(ZEND_STR_PREVIOUS,               "previous") \
 	_(ZEND_STR_CODE,                   "code") \

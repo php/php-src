@@ -33,8 +33,7 @@
 /* }}} */
 
 enum {
-	INTL_IDN_VARIANT_2003 = 0,
-	INTL_IDN_VARIANT_UTS46
+	INTL_IDN_VARIANT_UTS46 = 1
 };
 
 /* {{{ grapheme_register_constants
@@ -73,7 +72,6 @@ void idn_register_constants( INIT_FUNC_ARGS )
 	REGISTER_LONG_CONSTANT("IDNA_NONTRANSITIONAL_TO_UNICODE", UIDNA_NONTRANSITIONAL_TO_UNICODE, CONST_CS | CONST_PERSISTENT);
 
 	/* VARIANTS */
-	REGISTER_LONG_CONSTANT("INTL_IDNA_VARIANT_2003", INTL_IDN_VARIANT_2003, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INTL_IDNA_VARIANT_UTS46", INTL_IDN_VARIANT_UTS46, CONST_CS | CONST_PERSISTENT);
 
 	/* PINFO ERROR CODES */
@@ -176,85 +174,11 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	uidna_close(uts46);
 }
 
-static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
-		const zend_string *domain, uint32_t option, int mode)
-{
-	UChar* ustring = NULL;
-	int ustring_len = 0;
-	UErrorCode status;
-	zend_string *u8str;
-
-	/* convert the string to UTF-16. */
-	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&ustring, &ustring_len, ZSTR_VAL(domain), ZSTR_LEN(domain), &status);
-
-	if (U_FAILURE(status)) {
-		intl_error_set_code(NULL, status);
-
-		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
-		if (ustring) {
-			efree(ustring);
-		}
-		RETURN_FALSE;
-	} else {
-		UChar       converted[MAXPATHLEN];
-		int32_t     converted_ret_len;
-
-		status = U_ZERO_ERROR;
-
-#if U_ICU_VERSION_MAJOR_NUM >= 55
-		UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-		UIDNA *idna = uidna_openUTS46((int32_t)option, &status);
-
-		if (U_FAILURE(status)) {
-			intl_error_set( NULL, status, "idn_to_ascii: failed to create an UIDNA instance", 0 );
-			RETURN_FALSE;
-		}
-
-		if (mode == INTL_IDN_TO_ASCII) {
-			converted_ret_len = uidna_nameToASCII(idna, ustring, ustring_len, converted, MAXPATHLEN, &info, &status);
-		} else {
-			converted_ret_len = uidna_nameToUnicode(idna, ustring, ustring_len, converted, MAXPATHLEN, &info, &status);
-		}
-		uidna_close(idna);
-#else
-		UParseError parse_error;
-		if (mode == INTL_IDN_TO_ASCII) {
-			converted_ret_len = uidna_IDNToASCII(ustring, ustring_len, converted, MAXPATHLEN, (int32_t)option, &parse_error, &status);
-		} else {
-			converted_ret_len = uidna_IDNToUnicode(ustring, ustring_len, converted, MAXPATHLEN, (int32_t)option, &parse_error, &status);
-		}
-#endif
-		efree(ustring);
-
-		if (U_FAILURE(status)) {
-			intl_error_set( NULL, status, "idn_to_ascii: cannot convert to ASCII", 0 );
-			RETURN_FALSE;
-		}
-
-		status = U_ZERO_ERROR;
-		u8str = intl_convert_utf16_to_utf8(converted, converted_ret_len, &status);
-
-		if (!u8str) {
-			/* Set global error code. */
-			intl_error_set_code(NULL, status);
-
-			/* Set error messages. */
-			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 );
-			RETURN_FALSE;
-		}
-	}
-
-	/* return the allocated string, not a duplicate */
-	RETVAL_NEW_STR(u8str);
-}
-
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zend_string *domain;
 	zend_long option = 0,
-		 variant = INTL_IDN_VARIANT_UTS46;
+	variant = INTL_IDN_VARIANT_UTS46;
 	zval *idna_info = NULL;
 
 	intl_error_reset(NULL);
@@ -265,9 +189,8 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */
 	}
 
-	if (variant != INTL_IDN_VARIANT_2003 && variant != INTL_IDN_VARIANT_UTS46) {
-		php_intl_bad_args("invalid variant, must be one of {"
-			"INTL_IDNA_VARIANT_2003, INTL_IDNA_VARIANT_UTS46}");
+	if (variant != INTL_IDN_VARIANT_UTS46) {
+		php_intl_bad_args("invalid variant, must be INTL_IDNA_VARIANT_UTS46");
 		RETURN_FALSE;
 	}
 
@@ -281,29 +204,14 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 	/* don't check options; it wasn't checked before */
 
-	if (variant == INTL_IDN_VARIANT_2003) {
-		php_error_docref(NULL, E_DEPRECATED, "INTL_IDNA_VARIANT_2003 is deprecated");
-	}
-
 	if (idna_info != NULL) {
-		if (variant == INTL_IDN_VARIANT_2003) {
-			php_error_docref0(NULL, E_NOTICE,
-				"4 arguments were provided, but INTL_IDNA_VARIANT_2003 only "
-				"takes 3 - extra argument ignored");
-		} else {
-			idna_info = zend_try_array_init(idna_info);
-			if (!idna_info) {
-				return;
-			}
+		idna_info = zend_try_array_init(idna_info);
+		if (!idna_info) {
+			return;
 		}
 	}
 
-	if (variant == INTL_IDN_VARIANT_2003) {
-		php_intl_idn_to(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (uint32_t)option, mode);
-	}
-	else {
-		php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (uint32_t)option, mode, idna_info);
-	}
+	php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (uint32_t)option, mode, idna_info);
 }
 
 /* {{{ proto string idn_to_ascii(string domain[, int options[, int variant[, array &idna_info]]])

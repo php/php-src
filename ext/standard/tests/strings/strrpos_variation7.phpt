@@ -22,15 +22,11 @@ var_dump( strrpos($empty_string, NULL) );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with heredoc strings ***
 -- With empty heredoc string --
 bool(false)
 bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
-
-Deprecated: strrpos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 *** Done ***

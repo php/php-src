@@ -274,14 +274,6 @@ echo "\n*** Testing var_dump() on multiple arguments ***\n";
 var_dump( $integers, $floats, $strings, $arrays, $booleans, $resources,
           $objects, $misc_values, $variations );
 
-/* checking var_dump() on functions */
-echo "\n*** Testing var_dump() on anonymous functions ***\n";
-$newfunc = create_function('$a,$b', 'return "$a * $b = " . ($a * $b);');
-echo "New anonymous function: $newfunc\n";
-var_dump( $newfunc(2, 3) );
-/* creating anonymous function dynamically */
-var_dump( create_function('$a', 'return "$a * $a = " . ($a * $b);') );
-
 echo "\n*** Testing error conditions ***\n";
 //passing zero argument
 var_dump();
@@ -1561,15 +1553,6 @@ array(6) {
     string(5) "/00\7"
   }
 }
-
-*** Testing var_dump() on anonymous functions ***
-
-Deprecated: Function create_function() is deprecated in %s on line %d
-New anonymous function:  lambda_1
-string(9) "2 * 3 = 6"
-
-Deprecated: Function create_function() is deprecated in %s on line %d
-string(9) " lambda_2"
 
 *** Testing error conditions ***
 

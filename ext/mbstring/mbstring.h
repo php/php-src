@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -155,7 +155,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int filter_illegal_substchar;
 	int current_filter_illegal_mode;
 	int current_filter_illegal_substchar;
-	zend_long func_overload;
 	enum mbfl_no_language language;
 	zend_bool encoding_translation;
 	zend_bool strict_detection;
@@ -168,17 +167,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	zend_string *last_used_encoding_name;
 	const mbfl_encoding *last_used_encoding;
 ZEND_END_MODULE_GLOBALS(mbstring)
-
-#define MB_OVERLOAD_MAIL 1
-#define MB_OVERLOAD_STRING 2
-#define MB_OVERLOAD_REGEX 4
-
-struct mb_overload_def {
-	int type;
-	char *orig_func;
-	char *ovld_func;
-	char *save_func;
-};
 
 #define MBSTRG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mbstring, v)
 

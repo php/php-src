@@ -95,101 +95,71 @@ echo "*** Done ***";
 *** Testing stripos() function with unexpected values for needle ***
 
 -- Iteration 1 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(7)
 
 -- Iteration 2 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(9)
 
 -- Iteration 3 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 
 -- Iteration 4 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 
 -- Iteration 5 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(16)
 
 -- Iteration 6 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(21)
 
 -- Iteration 7 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 
 -- Iteration 8 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 
 -- Iteration 9 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(17)
 
 -- Iteration 10 --
 
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 11 --
 
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 12 --
 
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 13 --
 
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 14 --
 
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 15 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(9)
 
 -- Iteration 16 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 
 -- Iteration 17 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(9)
 
 -- Iteration 18 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 
 -- Iteration 19 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(64)
 
 -- Iteration 20 --
 bool(false)
@@ -198,27 +168,19 @@ bool(false)
 bool(false)
 
 -- Iteration 22 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 
 -- Iteration 23 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 
 -- Iteration 24 --
 
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-%s
+Warning: stripos() expects parameter 2 to be string, resource given in %s on line %d
+NULL
 
 -- Iteration 25 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 
 -- Iteration 26 --
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 *** Done ***

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1340,12 +1340,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_gzread, 0)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_gzgetss, 0, 0, 1)
-	ZEND_ARG_INFO(0, fp)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, allowable_tags)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gzgets, 0, 0, 1)
 	ZEND_ARG_INFO(0, fp)
 	ZEND_ARG_INFO(0, length)
@@ -1391,7 +1385,6 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FALIAS(gzeof,		feof,			arginfo_gzpassthru)
 	PHP_FALIAS(gzgetc,		fgetc,			arginfo_gzpassthru)
 	PHP_FALIAS(gzgets,		fgets,			arginfo_gzgets)
-	PHP_DEP_FALIAS(gzgetss,	fgetss,			arginfo_gzgetss)
 	PHP_FALIAS(gzread,		fread,			arginfo_gzread)
 	PHP_FE(gzopen,							arginfo_gzopen)
 	PHP_FALIAS(gzpassthru,	fpassthru,		arginfo_gzpassthru)

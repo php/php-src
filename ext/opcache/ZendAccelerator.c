@@ -2624,6 +2624,12 @@ static void accel_gen_system_id(void)
 #  ifndef MAP_FAILED
 #   define MAP_FAILED ((void*)-1)
 #  endif
+#  ifdef MAP_ALIGNED_SUPER
+#   include <sys/types.h>
+#   include <sys/sysctl.h>
+#   include <sys/user.h>
+#   define MAP_HUGETLB MAP_ALIGNED_SUPER
+#  endif
 # endif
 
 # if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
@@ -2689,6 +2695,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 
 static void accel_move_code_to_huge_pages(void)
 {
+#if defined(__linux__)
 	FILE *f;
 	long unsigned int huge_page_size = 2 * 1024 * 1024;
 
@@ -2710,6 +2717,39 @@ static void accel_move_code_to_huge_pages(void)
 		}
 		fclose(f);
 	}
+#elif defined(__FreeBSD__)
+	size_t s = 0;
+	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_VMMAP, getpid()};
+	long unsigned int huge_page_size = 2 * 1024 * 1024;
+	if(sysctl(mib, 4, NULL, &s, NULL, 0) == 0) {
+		void *addr = mmap(NULL, s * sizeof (struct kinfo_vmentry), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
+		if (addr != MAP_FAILED) {
+			s = s * 4 / 3;
+			if (sysctl(mib, 4, addr, &s, NULL, 0) == 0) {
+				uintptr_t start = (uintptr_t)addr;
+				uintptr_t end = start + s;
+				while (start < end) {
+					struct kinfo_vmentry *entry = (struct kinfo_vmentry *)start;
+					size_t sz = entry->kve_structsize;
+					if (sz == 0) {
+						break;
+					}
+					int permflags = entry->kve_protection;
+					if ((permflags & KVME_PROT_READ) && !(permflags & KVME_PROT_WRITE) &&
+					    (permflags & KVME_PROT_EXEC) && entry->kve_path[0] != '\0') {
+						long unsigned int seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
+						long unsigned int seg_end = (end & ~(huge_page_size-1L));
+						if (seg_end > seg_start) {
+							zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, entry->kve_path);
+							accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, entry->kve_path, entry->kve_offset + seg_start - start);
+						}
+					}
+					start += sz;
+				}
+			}
+		}
+	}
+#endif
 }
 # else
 static void accel_move_code_to_huge_pages(void)

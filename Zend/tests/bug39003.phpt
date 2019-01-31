@@ -1,5 +1,5 @@
 --TEST--
-Bug #39003 (__autoload() is called for type hinting)
+Bug #39003 (autoloader is called for type hinting)
 --FILE--
 <?php
 

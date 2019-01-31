@@ -1,86 +1,18 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0alpha1
+?? ??? ????, PHP 8.0.0alpha1
 
 - Core:
-  . Implemented request #76148 (Add array_key_exists() to the list of
-    specially compiled functions). (Majkl578)
-
-- CURL:
-  . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
-    (Pierrick)
-
-- Date:
-  . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
-
-- FFI:
-  . Added FFI extension. (Dmitry)
-
-- FPM:
-  . Implemented FR #72510 (systemd service should be hardened). (Craig Andrews)
+  . Fixed bug #77546 (iptcembed broken function). (gdegoulet)
 
 - GD:
-  . Fixed bug #73291 (imagecropauto() $threshold differs from external libgd).
-    (cmb)
-  . Fixed bug #76324 (cannot detect recent versions of freetype with
-    pkg-config). (Eli Schwartz)
-  . The bundled libgd behaves now like system libgd wrt. IMG_CROP_DEFAULT never
-    falling back to IMG_CROP_SIDES.
-  . The default $mode parameter of imagecropauto() has been changed to
-    IMG_CROP_DEFAULT; passing -1 is now deprecated.
-  . Added support for aspect ratio preserving scaling to a fixed height for
-    imagescale(). (Andreas Treichel)
-
-- Hash:
-  . The hash extension is now an integral part of PHP and cannot be disabled
-    as per RFC: https://wiki.php.net/rfc/permanent_hash_ext. (Kalle)
+  . Removed deprecated image2wbmp(). (cmb)
+  . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
 
 - Intl:
-  . Raised requirements to ICU ≥ 50.1. (cmb)
-  . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
-    (cmb)
+  . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
 
-- Opcache:
-  . Implemented preloading RFC: https://wiki.php.net/rfc/preload. (Dmitry)
-
-- OpenSSL:
-  . Added openssl_x509_verify function. (Ben Scholzen)
-  . openssl_random_pseudo_bytes() now throws in error conditions.
-    (Sammy Kaye Powers)
-
-- PDO_OCI:
-  . Implemented FR #76908 (PDO_OCI getColumnMeta() not implemented).
-    (Valentin Collet, Chris Jones, Remi)
-
-- PDO_SQLite:
-  . Implemented sqlite_stmt_readonly in PDO_SQLite. (BohwaZ)
-  . Raised requirements to SQLite 3.5.0. (cmb)
-
-- Sockets:
-  . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
-
-- SQLite3:
-  . Unbundled libsqlite. (cmb)
-  . Raised requirements to SQLite 3.7.4. (cmb)
-  . Forbid (un)serialization of SQLite3, SQLite3Stmt and SQLite3Result. (cmb)
-  . Added support for the SQLite @name notation. (cmb, BohwaZ)
-  . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. (Bohwaz)
-
-- SPL:
-  . Fixed bug #77518 (SeekableIterator::seek() should accept 'int' typehint as
-    documented). (Nikita)
-
-- Standard:
-  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with
-    stream_socket_client). (Ville Hukkamäki)
-  . Implemented FR #38301 (field enclosure behavior in fputcsv). (cmb)
-  . Implemented FR #51496 (fgetcsv should take empty string as an escape). (cmb)
-
-- Reflection:
-  . Fixed bug #76737 (Unserialized reflection objects are broken, they
-    shouldn't be serializable). (Nikita)
-
-- Tidy:
-  . Added TIDY_TAG_* constants for HTML5 elements. (cmb)
+- phpdbg:
+  . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

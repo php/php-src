@@ -42,7 +42,6 @@ void normalizer_register_constants( INIT_FUNC_ARGS )
 	#define NORMALIZER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( Normalizer_ce_ptr, ZEND_STRS( name ) - 1, value );
 
 	/* Normalization form constants */
-	NORMALIZER_EXPOSE_CLASS_CONST( NONE );
 	NORMALIZER_EXPOSE_CLASS_CONST( FORM_D );
 	NORMALIZER_EXPOSE_CLASS_CONST( NFD );
 	NORMALIZER_EXPOSE_CLASS_CONST( FORM_KD );
