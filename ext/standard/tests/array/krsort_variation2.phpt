@@ -58,10 +58,10 @@ $unexpected_values = array (
 /*16*/ new stdclass(),
 
        // undefined data
-/*17*/ @undefined_var,
+/*17*/ @$undefined_var,
 
        // unset data
-/*18*/ @unset_var,
+/*18*/ @$unset_var,
 
        // resource variable
 /*19*/ $fp
@@ -269,28 +269,24 @@ array(3) {
   int(45)
 }
 -- Iteration 18 --
-
-Warning: krsort() expects parameter 2 to be int, string given in %s on line %d
-bool(false)
+bool(true)
 array(3) {
+  [45]=>
+  int(45)
   [10]=>
   int(10)
   [2]=>
   int(2)
-  [45]=>
-  int(45)
 }
 -- Iteration 19 --
-
-Warning: krsort() expects parameter 2 to be int, string given in %s on line %d
-bool(false)
+bool(true)
 array(3) {
+  [45]=>
+  int(45)
   [10]=>
   int(10)
   [2]=>
   int(2)
-  [45]=>
-  int(45)
 }
 -- Iteration 20 --
 
