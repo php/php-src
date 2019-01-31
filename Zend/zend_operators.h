@@ -801,14 +801,14 @@ static zend_always_inline int fast_is_not_identical_function(zval *op1, zval *op
 #define ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode, binary_op)                                            \
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                             \
 		&& op1 == result                                                                                   \
-		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, get))                                                           \
-		&& EXPECTED(Z_OBJ_HANDLER_P(op1, set))) {                                                          \
+		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, get))                                                          \
+		&& EXPECTED(Z_OBJ_HANDLER_P(op1, set))) {                                                         \
 		int ret;                                                                                           \
 		zval rv;                                                                                           \
-		zval *objval = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);                                      \
-		Z_TRY_ADDREF_P(objval);                                                                                \
-		ret = binary_op(objval, objval, op2);                                                    \
-		Z_OBJ_HANDLER_P(op1, set)(op1, objval);                                                  \
+		zval *objval = Z_OBJ_HANDLER_P(op1, get)(Z_OBJ_P(op1), &rv);                                      \
+		Z_TRY_ADDREF_P(objval);                                                                            \
+		ret = binary_op(objval, objval, op2);                                                              \
+		Z_OBJ_HANDLER_P(op1, set)(Z_OBJ_P(op1), objval);                                         \
 		zval_ptr_dtor(objval);                                                                             \
 		return ret;                                                                                        \
 	} else if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                      \

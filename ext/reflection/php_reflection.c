@@ -43,11 +43,8 @@
 #include "zend_smart_str.h"
 
 #define reflection_update_property(object, name, value) do { \
-		zval member; \
-		ZVAL_STR(&member, name); \
-		zend_std_write_property(object, &member, value, NULL); \
+		zend_std_write_property(Z_OBJ_P(object), name, value, NULL); \
 		Z_TRY_DELREF_P(value); \
-		zval_ptr_dtor(&member); \
 	} while (0)
 
 #define reflection_update_property_name(object, value) \
@@ -236,9 +233,9 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-static HashTable *reflection_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *reflection_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
 {
-	reflection_object *intern = Z_REFLECTION_P(obj);
+	reflection_object *intern = reflection_object_from_obj(obj);
 	*gc_data = &intern->obj;
 	*gc_data_count = 1;
 	return zend_std_get_properties(obj);
@@ -435,7 +432,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 	smart_str_append_printf(str, "%s  }\n", indent);
 
 	if (obj && Z_TYPE_P(obj) == IS_OBJECT) {
-		HashTable    *properties = Z_OBJ_HT_P(obj)->get_properties(obj);
+		HashTable    *properties = Z_OBJ_HT_P(obj)->get_properties(Z_OBJ_P(obj));
 		zend_string  *prop_name;
 		smart_str prop_str = {0};
 
@@ -1843,7 +1840,7 @@ ZEND_METHOD(reflection_function, invoke)
 
 	if (!Z_ISUNDEF(intern->obj)) {
 		Z_OBJ_HT(intern->obj)->get_closure(
-			&intern->obj, &fcc.called_scope, &fcc.function_handler, &fcc.object);
+			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object);
 	}
 
 	result = zend_call_function(&fci, &fcc);
@@ -1906,7 +1903,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 
 	if (!Z_ISUNDEF(intern->obj)) {
 		Z_OBJ_HT(intern->obj)->get_closure(
-			&intern->obj, &fcc.called_scope, &fcc.function_handler, &fcc.object);
+			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object);
 	}
 
 	result = zend_call_function(&fci, &fcc);
@@ -4180,7 +4177,6 @@ ZEND_METHOD(reflection_class, hasProperty)
 	zend_property_info *property_info;
 	zend_class_entry *ce;
 	zend_string *name;
-	zval property;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
@@ -4194,12 +4190,9 @@ ZEND_METHOD(reflection_class, hasProperty)
 		RETURN_TRUE;
 	} else {
 		if (Z_TYPE(intern->obj) != IS_UNDEF) {
-			ZVAL_STR_COPY(&property, name);
-			if (Z_OBJ_HANDLER(intern->obj, has_property)(&intern->obj, &property, 2, NULL)) {
-				zval_ptr_dtor(&property);
+			if (Z_OBJ_HANDLER(intern->obj, has_property)(Z_OBJ(intern->obj), name, 2, NULL)) {
 				RETURN_TRUE;
 			}
-			zval_ptr_dtor(&property);
 		}
 		RETURN_FALSE;
 	}
@@ -4229,7 +4222,7 @@ ZEND_METHOD(reflection_class, getProperty)
 		}
 	} else if (Z_TYPE(intern->obj) != IS_UNDEF) {
 		/* Check for dynamic properties */
-		if (zend_hash_exists(Z_OBJ_HT(intern->obj)->get_properties(&intern->obj), name)) {
+		if (zend_hash_exists(Z_OBJ_HT(intern->obj)->get_properties(Z_OBJ(intern->obj)), name)) {
 			zend_property_info property_info_tmp;
 			property_info_tmp.flags = ZEND_ACC_PUBLIC;
 			property_info_tmp.name = name;
@@ -4343,7 +4336,7 @@ ZEND_METHOD(reflection_class, getProperties)
 	} ZEND_HASH_FOREACH_END();
 
 	if (Z_TYPE(intern->obj) != IS_UNDEF && (filter & ZEND_ACC_PUBLIC) != 0) {
-		HashTable *properties = Z_OBJ_HT(intern->obj)->get_properties(&intern->obj);
+		HashTable *properties = Z_OBJ_HT(intern->obj)->get_properties(Z_OBJ(intern->obj));
 		zval *prop;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
 			_adddynproperty(prop, key, ce, return_value);
@@ -5248,7 +5241,7 @@ ZEND_METHOD(reflection_property, __construct)
 	  && property_info->ce != ce)) {
 		/* Check for dynamic properties */
 		if (property_info == NULL && Z_TYPE_P(classname) == IS_OBJECT) {
-			if (zend_hash_exists(Z_OBJ_HT_P(classname)->get_properties(classname), name)) {
+			if (zend_hash_exists(Z_OBJ_HT_P(classname)->get_properties(Z_OBJ_P(classname)), name)) {
 				dynam_prop = 1;
 			}
 		}
@@ -5514,7 +5507,6 @@ ZEND_METHOD(reflection_property, isInitialized)
 		}
 		RETURN_FALSE;
 	} else {
-		zval name_zv;
 		zend_class_entry *old_scope;
 		int retval;
 
@@ -5529,8 +5521,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 
 		old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
-		ZVAL_STR(&name_zv, ref->unmangled_name);
-		retval = Z_OBJ_HT_P(object)->has_property(object, &name_zv, ZEND_PROPERTY_EXISTS, NULL);
+		retval = Z_OBJ_HT_P(object)->has_property(Z_OBJ_P(object), ref->unmangled_name, ZEND_PROPERTY_EXISTS, NULL);
 		EG(fake_scope) = old_scope;
 
 		RETVAL_BOOL(retval);
@@ -6644,20 +6635,19 @@ static const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 }; /* }}} */
 
 /* {{{ _reflection_write_property */
-static zval *_reflection_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *_reflection_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	if ((Z_TYPE_P(member) == IS_STRING)
-		&& zend_hash_exists(&Z_OBJCE_P(object)->properties_info, Z_STR_P(member))
-		&& ((Z_STRLEN_P(member) == sizeof("name") - 1  && !memcmp(Z_STRVAL_P(member), "name",  sizeof("name")))
-			|| (Z_STRLEN_P(member) == sizeof("class") - 1 && !memcmp(Z_STRVAL_P(member), "class", sizeof("class")))))
+	if (zend_hash_exists(&object->ce->properties_info, name)
+		&& ((ZSTR_LEN(name) == sizeof("name") - 1  && !memcmp(ZSTR_VAL(name), "name",  sizeof("name")))
+			|| (ZSTR_LEN(name) == sizeof("class") - 1 && !memcmp(ZSTR_VAL(name), "class", sizeof("class")))))
 	{
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot set read-only property %s::$%s", ZSTR_VAL(Z_OBJCE_P(object)->name), Z_STRVAL_P(member));
+			"Cannot set read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 		return &EG(uninitialized_zval);
 	}
 	else
 	{
-		return zend_std_write_property(object, member, value, cache_slot);
+		return zend_std_write_property(object, name, value, cache_slot);
 	}
 }
 /* }}} */

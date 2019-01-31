@@ -176,7 +176,7 @@ PHP_FUNCTION( resourcebundle_create )
 /* }}} */
 
 /* {{{ resourcebundle_array_fetch */
-static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_value, int fallback)
+static void resourcebundle_array_fetch(zend_object *object, zval *offset, zval *return_value, int fallback)
 {
 	int32_t     meindex = 0;
 	char *      mekey = NULL;
@@ -185,7 +185,7 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 	ResourceBundle_object *rb;
 
 	intl_error_reset( NULL );
-	RESOURCEBUNDLE_METHOD_FETCH_OBJECT;
+	rb = php_intl_resourcebundle_fetch_object(object);
 
 	if(Z_TYPE_P(offset) == IS_LONG) {
 		is_numeric = 1;
@@ -230,7 +230,7 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-zval *resourcebundle_array_get(zval *object, zval *offset, int type, zval *rv)
+zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if(offset == NULL) {
 		php_error( E_ERROR, "Cannot apply [] to ResourceBundle object" );
@@ -264,15 +264,14 @@ PHP_FUNCTION( resourcebundle_get )
 		RETURN_FALSE;
 	}
 
-	resourcebundle_array_fetch(object, offset, return_value, fallback);
+	resourcebundle_array_fetch(Z_OBJ_P(object), offset, return_value, fallback);
 }
 /* }}} */
 
 /* {{{ resourcebundle_array_count */
-int resourcebundle_array_count(zval *object, zend_long *count)
+int resourcebundle_array_count(zend_object *object, zend_long *count)
 {
-	ResourceBundle_object *rb;
-	RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK;
+	ResourceBundle_object *rb = php_intl_resourcebundle_fetch_object(object);
 
 	if (rb->me == NULL) {
 		intl_errors_set(&rb->error, U_ILLEGAL_ARGUMENT_ERROR,

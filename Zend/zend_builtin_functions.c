@@ -811,11 +811,11 @@ repeat:
 			if (Z_TYPE(val_free) == IS_UNDEF) {
 				if (Z_OBJ_HT_P(val)->get) {
 					zval rv;
-					val = Z_OBJ_HT_P(val)->get(val, &rv);
+					val = Z_OBJ_HT_P(val)->get(Z_OBJ_P(val), &rv);
 					ZVAL_COPY_VALUE(&val_free, val);
 					goto repeat;
 				} else if (Z_OBJ_HT_P(val)->cast_object) {
-					if (Z_OBJ_HT_P(val)->cast_object(val, &val_free, IS_STRING) == SUCCESS) {
+					if (Z_OBJ_HT_P(val)->cast_object(Z_OBJ_P(val), &val_free, IS_STRING) == SUCCESS) {
 						val = &val_free;
 						break;
 					}
@@ -1097,12 +1097,11 @@ ZEND_FUNCTION(get_object_vars)
 		Z_PARAM_OBJECT(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	properties = Z_OBJ_HT_P(obj)->get_properties(obj);
+	zobj = Z_OBJ_P(obj);
+	properties = zobj->handlers->get_properties(zobj);
 	if (properties == NULL) {
 		RETURN_FALSE;
 	}
-
-	zobj = Z_OBJ_P(obj);
 
 	if (!zobj->ce->default_properties_count && properties == zobj->properties && !GC_IS_RECURSIVE(properties)) {
 		/* fast copy */
@@ -1292,7 +1291,6 @@ ZEND_FUNCTION(property_exists)
 	zend_string *property;
 	zend_class_entry *ce;
 	zend_property_info *property_info;
-	zval property_z;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS", &object, &property) == FAILURE) {
 		return;
@@ -1321,10 +1319,8 @@ ZEND_FUNCTION(property_exists)
 		RETURN_TRUE;
 	}
 
-	ZVAL_STR(&property_z, property);
-
 	if (Z_TYPE_P(object) ==  IS_OBJECT &&
-		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, NULL)) {
+		Z_OBJ_HANDLER_P(object, has_property)(Z_OBJ_P(object), property, 2, NULL)) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;

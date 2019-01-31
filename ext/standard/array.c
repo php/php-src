@@ -799,13 +799,13 @@ PHP_FUNCTION(count)
 			/* first, we check if the handler is defined */
 			if (Z_OBJ_HT_P(array)->count_elements) {
 				RETVAL_LONG(1);
-				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(array, &Z_LVAL_P(return_value))) {
+				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(Z_OBJ_P(array), &Z_LVAL_P(return_value))) {
 					return;
 				}
 			}
 			/* if not and the object implements Countable we call its count() method */
 			if (instanceof_function(Z_OBJCE_P(array), zend_ce_countable)) {
-				zend_call_method_with_0_params(array, NULL, NULL, "count", &retval);
+				zend_call_method_with_0_params(Z_OBJ_P(array), NULL, NULL, "count", &retval);
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					RETVAL_LONG(zval_get_long(&retval));
 					zval_ptr_dtor(&retval);
@@ -4152,9 +4152,12 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 		/* The has_property check is first performed in "exists" mode (which returns true for
 		 * properties that are null but exist) and then in "has" mode to handle objects that
 		 * implement __isset (which is not called in "exists" mode). */
-		if (Z_OBJ_HANDLER_P(data, has_property)(data, name, ZEND_PROPERTY_EXISTS, NULL)
-				|| Z_OBJ_HANDLER_P(data, has_property)(data, name, ZEND_PROPERTY_ISSET, NULL)) {
-			prop = Z_OBJ_HANDLER_P(data, read_property)(data, name, BP_VAR_R, NULL, rv);
+		zend_string *str, *tmp_str;
+
+		str = zval_get_tmp_string(name, &tmp_str);
+		if (Z_OBJ_HANDLER_P(data, has_property)(Z_OBJ_P(data), str, ZEND_PROPERTY_EXISTS, NULL)
+				|| Z_OBJ_HANDLER_P(data, has_property)(Z_OBJ_P(data), str, ZEND_PROPERTY_ISSET, NULL)) {
+			prop = Z_OBJ_HANDLER_P(data, read_property)(Z_OBJ_P(data), str, BP_VAR_R, NULL, rv);
 			if (prop) {
 				ZVAL_DEREF(prop);
 				if (prop != rv) {
@@ -4162,6 +4165,7 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 				}
 			}
 		}
+		zend_tmp_string_release(tmp_str);
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
 		if (Z_TYPE_P(name) == IS_STRING) {
 			prop = zend_symtable_find(Z_ARRVAL_P(data), Z_STR_P(name));

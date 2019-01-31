@@ -30,7 +30,7 @@ ZEND_API zend_class_entry *zend_ce_countable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
-ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
+ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
 {
 	int result;
 	zend_fcall_info fci;
@@ -45,7 +45,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 	}
 
 	fci.size = sizeof(fci);
-	fci.object = object ? Z_OBJ_P(object) : NULL;
+	fci.object = object;
 	fci.retval = retval_ptr ? retval_ptr : &retval;
 	fci.param_count = param_count;
 	fci.params = params;
@@ -62,7 +62,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		ZVAL_UNDEF(&fci.function_name); /* Unused */
 
 		if (!obj_ce) {
-			obj_ce = object ? Z_OBJCE_P(object) : NULL;
+			obj_ce = object ? object->ce : NULL;
 		}
 		if (!fn_proxy || !*fn_proxy) {
 			if (EXPECTED(obj_ce)) {
@@ -87,7 +87,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		}
 
 		if (object) {
-			fcic.called_scope = Z_OBJCE_P(object);
+			fcic.called_scope = object->ce;
 		} else {
 			zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
 
@@ -99,13 +99,13 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 				fcic.called_scope = called_scope;
 			}
 		}
-		fcic.object = object ? Z_OBJ_P(object) : NULL;
+		fcic.object = object;
 		result = zend_call_function(&fci, &fcic);
 	}
 	if (result == FAILURE) {
 		/* error at c-level */
 		if (!obj_ce) {
-			obj_ce = object ? Z_OBJCE_P(object) : NULL;
+			obj_ce = object ? object->ce : NULL;
 		}
 		if (!EG(exception)) {
 			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? ZSTR_VAL(obj_ce->name) : "", obj_ce ? "::" : "", function_name);
@@ -124,7 +124,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 /* {{{ zend_user_it_new_iterator */
 ZEND_API void zend_user_it_new_iterator(zend_class_entry *ce, zval *object, zval *retval)
 {
-	zend_call_method_with_0_params(object, ce, &ce->iterator_funcs_ptr->zf_new_iterator, "getiterator", retval);
+	zend_call_method_with_0_params(Z_OBJ_P(object), ce, &ce->iterator_funcs_ptr->zf_new_iterator, "getiterator", retval);
 }
 /* }}} */
 
@@ -160,7 +160,7 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
 		zval more;
 		int result;
 
-		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_valid, "valid", &more);
+		zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_valid, "valid", &more);
 		result = i_zend_is_true(&more);
 		zval_ptr_dtor(&more);
 		return result ? SUCCESS : FAILURE;
@@ -176,7 +176,7 @@ ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter)
 	zval *object = &iter->it.data;
 
 	if (Z_ISUNDEF(iter->value)) {
-		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_current, "current", &iter->value);
+		zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_current, "current", &iter->value);
 	}
 	return &iter->value;
 }
@@ -189,7 +189,7 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 	zval *object = &iter->it.data;
 	zval retval;
 
-	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_key, "key", &retval);
+	zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_key, "key", &retval);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		ZVAL_ZVAL(key, &retval, 1, 1);
@@ -210,7 +210,7 @@ ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter)
 	zval *object = &iter->it.data;
 
 	zend_user_it_invalidate_current(_iter);
-	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_next, "next", NULL);
+	zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_next, "next", NULL);
 }
 /* }}} */
 
@@ -221,7 +221,7 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 	zval *object = &iter->it.data;
 
 	zend_user_it_invalidate_current(_iter);
-	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs_ptr->zf_rewind, "rewind", NULL);
+	zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_rewind, "rewind", NULL);
 }
 /* }}} */
 
@@ -425,7 +425,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 	zval retval;
 	int result;
 
-	zend_call_method_with_0_params(object, ce, &ce->serialize_func, "serialize", &retval);
+	zend_call_method_with_0_params(Z_OBJ_P(object), ce, &ce->serialize_func, "serialize", &retval);
 
 
 	if (Z_TYPE(retval) == IS_UNDEF || EG(exception)) {
@@ -466,7 +466,7 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 
 	ZVAL_STRINGL(&zdata, (char*)buf, buf_len);
 
-	zend_call_method_with_1_params(object, ce, &ce->unserialize_func, "unserialize", NULL, &zdata);
+	zend_call_method_with_1_params(Z_OBJ_P(object), ce, &ce->unserialize_func, "unserialize", NULL, &zdata);
 
 	zval_ptr_dtor(&zdata);
 

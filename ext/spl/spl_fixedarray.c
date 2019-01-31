@@ -141,9 +141,9 @@ static void spl_fixedarray_copy(spl_fixedarray *to, spl_fixedarray *from) /* {{{
 }
 /* }}} */
 
-static HashTable* spl_fixedarray_object_get_gc(zval *obj, zval **table, int *n) /* {{{{ */
+static HashTable* spl_fixedarray_object_get_gc(zend_object *obj, zval **table, int *n) /* {{{{ */
 {
-	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(obj);
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(obj);
 	HashTable *ht = zend_std_get_properties(obj);
 
 	*table = intern->array.elements;
@@ -153,9 +153,9 @@ static HashTable* spl_fixedarray_object_get_gc(zval *obj, zval **table, int *n) 
 }
 /* }}}} */
 
-static HashTable* spl_fixedarray_object_get_properties(zval *obj) /* {{{{ */
+static HashTable* spl_fixedarray_object_get_properties(zend_object *obj) /* {{{{ */
 {
-	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(obj);
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(obj);
 	HashTable *ht = zend_std_get_properties(obj);
 	zend_long  i = 0;
 
@@ -202,7 +202,7 @@ static void spl_fixedarray_object_free_storage(zend_object *object) /* {{{ */
 
 zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
-static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, zval *orig, int clone_orig) /* {{{ */
+static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 	zend_class_entry     *parent = class_type;
@@ -218,7 +218,7 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	intern->flags = 0;
 
 	if (orig && clone_orig) {
-		spl_fixedarray_object *other = Z_SPLFIXEDARRAY_P(orig);
+		spl_fixedarray_object *other = spl_fixed_array_from_obj(orig);
 		intern->ce_get_iterator = other->ce_get_iterator;
 		spl_fixedarray_init(&intern->array, other->array.size);
 		spl_fixedarray_copy(&intern->array, &other->array);
@@ -296,13 +296,9 @@ static zend_object *spl_fixedarray_new(zend_class_entry *class_type) /* {{{ */
 }
 /* }}} */
 
-static zend_object *spl_fixedarray_object_clone(zval *zobject) /* {{{ */
+static zend_object *spl_fixedarray_object_clone(zend_object *old_object) /* {{{ */
 {
-	zend_object *old_object;
-	zend_object *new_object;
-
-	old_object  = Z_OBJ_P(zobject);
-	new_object = spl_fixedarray_object_new_ex(old_object->ce, zobject, 1);
+	zend_object *new_object = spl_fixedarray_object_new_ex(old_object->ce, old_object, 1);
 
 	zend_objects_clone_members(new_object, old_object);
 
@@ -338,11 +334,11 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 }
 /* }}} */
 
-static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
+static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 
-	intern = Z_SPLFIXEDARRAY_P(object);
+	intern = spl_fixed_array_from_obj(object);
 
 	if (type == BP_VAR_IS && intern->fptr_offset_has) {
 		SEPARATE_ARG_IF_REF(offset);
@@ -407,12 +403,12 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 }
 /* }}} */
 
-static void spl_fixedarray_object_write_dimension(zval *object, zval *offset, zval *value) /* {{{ */
+static void spl_fixedarray_object_write_dimension(zend_object *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 	zval tmp;
 
-	intern = Z_SPLFIXEDARRAY_P(object);
+	intern = spl_fixed_array_from_obj(object);
 
 	if (intern->fptr_offset_set) {
 		if (!offset) {
@@ -452,11 +448,11 @@ static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_o
 }
 /* }}} */
 
-static void spl_fixedarray_object_unset_dimension(zval *object, zval *offset) /* {{{ */
+static void spl_fixedarray_object_unset_dimension(zend_object *object, zval *offset) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 
-	intern = Z_SPLFIXEDARRAY_P(object);
+	intern = spl_fixed_array_from_obj(object);
 
 	if (intern->fptr_offset_del) {
 		SEPARATE_ARG_IF_REF(offset);
@@ -501,11 +497,11 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 }
 /* }}} */
 
-static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int check_empty) /* {{{ */
+static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset, int check_empty) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 
-	intern = Z_SPLFIXEDARRAY_P(object);
+	intern = spl_fixed_array_from_obj(object);
 
 	if (intern->fptr_offset_has) {
 		zval rv;
@@ -523,11 +519,11 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 }
 /* }}} */
 
-static int spl_fixedarray_object_count_elements(zval *object, zend_long *count) /* {{{ */
+static int spl_fixedarray_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 
-	intern = Z_SPLFIXEDARRAY_P(object);
+	intern = spl_fixed_array_from_obj(object);
 	if (intern->fptr_count) {
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
@@ -577,7 +573,7 @@ SPL_METHOD(SplFixedArray, __construct)
 SPL_METHOD(SplFixedArray, __wakeup)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
-	HashTable *intern_ht = zend_std_get_properties(ZEND_THIS);
+	HashTable *intern_ht = zend_std_get_properties(Z_OBJ_P(ZEND_THIS));
 	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {

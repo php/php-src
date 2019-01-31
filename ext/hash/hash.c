@@ -569,7 +569,7 @@ PHP_FUNCTION(hash_copy)
 		return;
 	}
 
-	RETVAL_OBJ(Z_OBJ_HANDLER_P(zhash, clone_obj)(zhash));
+	RETVAL_OBJ(Z_OBJ_HANDLER_P(zhash, clone_obj)(Z_OBJ_P(zhash)));
 
 	if (php_hashcontext_from_object(Z_OBJ_P(return_value))->context == NULL) {
 		zval_ptr_dtor(return_value);
@@ -1137,12 +1137,12 @@ static void php_hashcontext_dtor(zend_object *obj) {
 /* }}} */
 
 /* {{{ php_hashcontext_clone */
-static zend_object *php_hashcontext_clone(zval *pzv) {
-	php_hashcontext_object *oldobj = php_hashcontext_from_object(Z_OBJ_P(pzv));
-	zend_object *znew = php_hashcontext_create(Z_OBJCE_P(pzv));
+static zend_object *php_hashcontext_clone(zend_object *zobj) {
+	php_hashcontext_object *oldobj = php_hashcontext_from_object(zobj);
+	zend_object *znew = php_hashcontext_create(zobj->ce);
 	php_hashcontext_object *newobj = php_hashcontext_from_object(znew);
 
-	zend_objects_clone_members(znew, Z_OBJ_P(pzv));
+	zend_objects_clone_members(znew, zobj);
 
 	newobj->ops = oldobj->ops;
 	newobj->options = oldobj->options;
