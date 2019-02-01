@@ -14,6 +14,8 @@ var_dump($var1);
 --EXPECTF--
 Notice: Undefined variable: var in %s on line %d
 
+Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+
 Warning: mb_ereg_replace(): mbregex compile err: invalid code point value in %sbug72994.php on line %d
 bool(false)
 ===DONE===
