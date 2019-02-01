@@ -1136,8 +1136,7 @@ if test "$PHP_CLI" = "no"; then
 fi
 
 PHP_ARG_WITH(pear, [whether to install PEAR],
-[  --with-pear=DIR         Install PEAR in DIR @<:@PREFIX/lib/php@:>@
-  --without-pear          Do not install PEAR], DEFAULT, yes)
+[  --with-pear=DIR         Install PEAR in DIR @<:@PREFIX/lib/php@:>@], no, yes)
 
 if test "$PHP_PEAR" != "no"; then
 
@@ -1156,7 +1155,7 @@ if test "$PHP_PEAR" != "no"; then
   install_pear="install-pear"
   PEAR_INSTALLDIR=$PHP_PEAR
 
-  if test "$PHP_PEAR" = "DEFAULT" || test "$PHP_PEAR" = "yes"; then
+  if test "$PHP_PEAR" = "yes"; then
     case $PHP_LAYOUT in
       GNU) PEAR_INSTALLDIR=$datadir/pear;;
       *)   PEAR_INSTALLDIR=$libdir/php;;
