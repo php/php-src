@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
 
+- Standard:
+  . Fixed bug #77552 (Unintialized php_stream_statbuf in stat functions).
+    (John Stevenson)
+
 07 Feb 2019, PHP 7.2.15
 
 - Core:
