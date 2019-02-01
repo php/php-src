@@ -1049,6 +1049,10 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		arg_pattern = Z_STRVAL_P(arg_pattern_zval);
 		arg_pattern_len = Z_STRLEN_P(arg_pattern_zval);
 	} else {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Non-string patterns will be interpreted as strings in the future. "
+			"Use an explicit chr() call to preserve the current behavior");
+
 		/* FIXME: this code is not multibyte aware! */
 		convert_to_long_ex(arg_pattern_zval);
 		pat_buf[0] = (char)Z_LVAL_P(arg_pattern_zval);
