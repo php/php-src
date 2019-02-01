@@ -120,7 +120,7 @@ int(-10)
 int(%s)
 
 -- Iteration 9 --
-int(1)
+int(0)
 
 -- Iteration 10 --
 int(0)
@@ -141,22 +141,34 @@ int(0)
 int(1)
 
 -- Iteration 16 --
-int(0)
+
+Warning: session_cache_expire() expects parameter 1 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 17 --
-int(0)
+
+Warning: session_cache_expire() expects parameter 1 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 18 --
-int(0)
+
+Warning: session_cache_expire() expects parameter 1 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 19 --
-int(0)
+
+Warning: session_cache_expire() expects parameter 1 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 20 --
-int(0)
+
+Warning: session_cache_expire() expects parameter 1 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 21 --
-int(0)
+
+Warning: session_cache_expire() expects parameter 1 to be int, object given in %s on line %d
+NULL
 
 -- Iteration 22 --
 int(0)
@@ -165,5 +177,7 @@ int(0)
 int(0)
 
 -- Iteration 24 --
-int(0)
+
+Warning: session_cache_expire() expects parameter 1 to be int, resource given in %s on line %d
+NULL
 Done
