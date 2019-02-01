@@ -6014,22 +6014,25 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, JMP_ADDR)
 	} else if (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(array_ptr);
 		if (!zobj->ce->get_iterator) {
+			HashTable *properties;
+
 			result = EX_VAR(opline->result.var);
 			ZVAL_OBJ(result, zobj);
 			if (OP1_TYPE != IS_TMP_VAR) {
 				GC_ADDREF(zobj);
 			}
-			if (zobj->properties) {
-				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
-					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_DELREF(zobj->properties);
+			properties = zobj->properties;
+			if (properties) {
+				if (UNEXPECTED(GC_REFCOUNT(properties) > 1)) {
+					if (EXPECTED(!(GC_FLAGS(properties) & IS_ARRAY_IMMUTABLE))) {
+						GC_DELREF(properties);
 					}
-					zobj->properties = zend_array_dup(zobj->properties);
+					properties = zobj->properties = zend_array_dup(properties);
 				}
 			} else {
-				zobj->properties = zobj->handlers->get_properties(zobj);
+				properties = zobj->handlers->get_properties(zobj);
 			}
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(zobj->properties, 0);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(properties, 0);
 
 			FREE_OP1_IF_VAR();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
