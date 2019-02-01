@@ -44,9 +44,9 @@ listen = 127.0.0.1:9000
 ; BSD-derived systems allow connections regardless of permissions.
 ; Default Values: user and group are set as the running user
 ;                 mode is set to 0660
-;listen.owner = @php_fpm_user@
-;listen.group = @php_fpm_group@
-;listen.mode = 0660
+listen.owner = @php_fpm_user@
+listen.group = @php_fpm_group@
+listen.mode = 0660
 ; When POSIX Access Control Lists are supported you can set them using
 ; these options, value is a comma separated list of user/group names.
 ; When set, listen.owner and listen.group are ignored
