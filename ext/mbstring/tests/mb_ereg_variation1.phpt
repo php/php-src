@@ -89,7 +89,7 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_ereg() : usage variations ***
 
 -- Iteration 1 --
@@ -172,7 +172,8 @@ array(0) {
 }
 
 -- Iteration 16 --
+
+Warning: mb_ereg() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
-array(0) {
-}
+NULL
 Done
