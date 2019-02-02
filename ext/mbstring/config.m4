@@ -47,7 +47,13 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
   else
     PHP_ADD_SOURCES_X(PHP_EXT_DIR(mbstring),$PHP_MBSTRING_BASE_SOURCES,,shared_objects_mbstring,yes)
     if test -f "$ext_builddir/config.h.in"; then
-      out="$abs_builddir/config.h"
+dnl if is not empty $ext_abs_builddir from php-src/acinclude.m4
+      if ! test -z "$ext_abs_builddir"; then
+        out="$ext_abs_builddir/config.h"
+      else
+dnl use $abs_builddir from configure.ac
+        out="$abs_builddir/config.h"
+      fi
     else
       out="php_config.h"
     fi

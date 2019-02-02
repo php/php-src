@@ -945,6 +945,7 @@ dnl "cxx" can be used to indicate that a C++ shared module is desired.
 dnl "zend_ext" indicates a zend extension.
 AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
+  ext_abs_builddir=`readlink -f $ext_builddir`
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
   ext_dir=[]PHP_EXT_DIR($1)
 
