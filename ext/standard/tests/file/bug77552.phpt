@@ -3,7 +3,7 @@ Bug #77552 Unintialized php_stream_statbuf in stat functions
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-    die('skip.. only for Windows');
+    die('skip windows only test');
 }
 ?>
 --FILE--
