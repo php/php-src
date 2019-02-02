@@ -521,6 +521,7 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb, i
 		if (!skip_64bit_preamble(&tzf, tmp)) {
 			/* 64 bit preamble is not in place */
 			*error_code = TIMELIB_ERROR_CORRUPT_NO_64BIT_PREAMBLE;
+			timelib_tzinfo_dtor(tmp);
 			return NULL;
 		}
 		read_64bit_header(&tzf, tmp);
