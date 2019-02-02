@@ -393,7 +393,7 @@ save_entry(ScanEnv* env, enum SaveType type, int* id)
   c = ONIGENC_MBC_TO_CODE(enc, p, end); \
   pfetch_prev = p; \
   p += ONIGENC_MBC_ENC_LEN(enc, p); \
-  if(UNEXPECTED(p > end)) p = end; \
+  if(UNEXPECTED(p > end)) p = (UChar *)end; \
 } while (0)
 
 #define PINC_S     do { \
