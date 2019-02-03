@@ -399,6 +399,8 @@ Core:
     platform, the function returns false.
   . Added net_get_interfaces() to retrieve an array of available network
     interfaces including several details.
+  . Added the gc_status() function to retrieve status information regarding the
+    cyclic GC.
 
 Date:
   . Added the DateTime::createFromImmutable() method, which mirrors

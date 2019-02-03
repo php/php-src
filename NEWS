@@ -215,6 +215,7 @@ PHP                                                                        NEWS
   . Removed support for BeOS. (Kalle)
   . Add PHP_VERSION to phpinfo() <title/>. (github/MattJeevas)
   . Add net_get_interfaces(). (Sara, Joe, Anatol)
+  . Added gc_status(). (Benjamin Eberlei)
   . Implemented flexible heredoc and nowdoc syntax, per
     RFC https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes.
     (Thomas Punt)
