@@ -873,7 +873,7 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "array_merge")
 				|| zend_string_equals_literal(name, "array_replace")
 				|| zend_string_equals_literal(name, "array_merge_recursive")
-				|| zend_string_equals_literal(name, "array_merge_recursive")
+				|| zend_string_equals_literal(name, "array_replace_recursive")
 				|| zend_string_equals_literal(name, "array_diff")
 				|| zend_string_equals_literal(name, "array_diff_assoc")
 				|| zend_string_equals_literal(name, "array_diff_key")) {
@@ -937,7 +937,7 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "array_merge")
 				|| zend_string_equals_literal(name, "array_replace")
 				|| zend_string_equals_literal(name, "array_merge_recursive")
-				|| zend_string_equals_literal(name, "array_merge_recursive")
+				|| zend_string_equals_literal(name, "array_replace_recursive")
 				|| zend_string_equals_literal(name, "array_diff")
 				|| zend_string_equals_literal(name, "array_diff_assoc")
 				|| zend_string_equals_literal(name, "array_diff_key")) {
