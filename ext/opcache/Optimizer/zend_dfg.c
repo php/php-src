@@ -259,11 +259,3 @@ op2_use:
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

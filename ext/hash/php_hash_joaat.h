@@ -30,12 +30,3 @@ PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[16], PHP_JOAAT_CTX * conte
 static uint32_t joaat_buf(void *buf, size_t len, uint32_t hval);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

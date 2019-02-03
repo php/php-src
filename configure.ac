@@ -1696,7 +1696,3 @@ Check '[$]0 --help' for available options
 fi
 ])
 AC_OUTPUT
-
-dnl ## Local Variables:
-dnl ## tab-width: 4
-dnl ## End:

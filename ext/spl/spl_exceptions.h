@@ -40,12 +40,3 @@ extern PHPAPI zend_class_entry *spl_ce_UnexpectedValueException;
 PHP_MINIT_FUNCTION(spl_exceptions);
 
 #endif /* SPL_EXCEPTIONS_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

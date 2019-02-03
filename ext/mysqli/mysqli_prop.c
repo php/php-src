@@ -466,12 +466,3 @@ const mysqli_property_entry mysqli_stmt_property_entries[] = {
 	{"id",			sizeof("id") - 1,			stmt_id_read, NULL},
 	{NULL, 0, NULL, NULL}
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

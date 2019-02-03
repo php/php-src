@@ -56,12 +56,3 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int opt
 PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags);
 
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

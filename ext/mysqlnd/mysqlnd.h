@@ -338,13 +338,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
 
 #endif	/* MYSQLND_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

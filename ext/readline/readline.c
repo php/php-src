@@ -662,10 +662,3 @@ PHP_FUNCTION(readline_on_new_line)
 
 
 #endif /* HAVE_LIBREADLINE */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

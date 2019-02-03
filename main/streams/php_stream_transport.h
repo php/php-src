@@ -214,12 +214,3 @@ BEGIN_EXTERN_C()
 PHPAPI HashTable *php_stream_xport_get_hash(void);
 PHPAPI php_stream_transport_factory_func php_stream_generic_socket_factory;
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

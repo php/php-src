@@ -1211,12 +1211,3 @@ PHP_FUNCTION(memory_get_peak_usage) {
 	RETURN_LONG(zend_memory_peak_usage(real_usage));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

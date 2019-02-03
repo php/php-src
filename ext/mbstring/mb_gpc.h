@@ -48,12 +48,3 @@ int _php_mb_enable_encoding_translation(int flag);
 const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res);
 /* }}} */
 #endif /* HAVE_MBSTRING */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

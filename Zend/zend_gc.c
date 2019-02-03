@@ -1432,15 +1432,3 @@ ZEND_API void zend_gc_get_status(zend_gc_status *status)
 	status->threshold = GC_G(gc_threshold);
 	status->num_roots = GC_G(num_roots);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- *
- * vim:noexpandtab:
- */

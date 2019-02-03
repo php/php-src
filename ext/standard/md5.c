@@ -389,12 +389,3 @@ PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx)
 
 	ZEND_SECURE_ZERO(ctx, sizeof(*ctx));
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

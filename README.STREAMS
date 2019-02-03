@@ -374,5 +374,3 @@ the example above, you need to use mysql_free_result on the rowset, close the
 connection and then use pefree to dispose of the struct you allocated.
 You may read the stream->persistent field to determine if your struct was
 allocated in persistent mode or not.
-
-vim:tw=78:et

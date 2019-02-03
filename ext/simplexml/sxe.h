@@ -27,12 +27,3 @@ extern PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 PHP_MINIT_FUNCTION(sxe);
 
 #endif /* SXE_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

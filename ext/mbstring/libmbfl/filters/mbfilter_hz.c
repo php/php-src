@@ -276,11 +276,3 @@ static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

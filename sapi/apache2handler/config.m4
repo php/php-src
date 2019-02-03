@@ -123,7 +123,3 @@ if test "$PHP_APXS2" != "no"; then
 else
   AC_MSG_RESULT(no)
 fi
-
-dnl ## Local Variables:
-dnl ## tab-width: 4
-dnl ## End:

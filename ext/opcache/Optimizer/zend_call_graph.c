@@ -294,11 +294,3 @@ zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, z
 	return map;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

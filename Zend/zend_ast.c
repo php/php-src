@@ -2044,13 +2044,3 @@ ZEND_API ZEND_COLD zend_string *zend_ast_export(const char *prefix, zend_ast *as
 	smart_str_0(&str);
 	return str.s;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

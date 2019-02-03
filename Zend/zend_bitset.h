@@ -252,13 +252,3 @@ static inline int zend_bitset_pop_first(zend_bitset set, uint32_t len) {
 }
 
 #endif /* _ZEND_BITSET_H_ */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

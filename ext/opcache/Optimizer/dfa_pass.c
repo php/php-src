@@ -1227,11 +1227,3 @@ void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	/* Destroy SSA */
 	zend_arena_release(&ctx->arena, checkpoint);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

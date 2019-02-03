@@ -2290,12 +2290,3 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 	return nfiles;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
