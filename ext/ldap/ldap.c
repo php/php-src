@@ -4864,8 +4864,8 @@ static const zend_function_entry ldap_functions[] = {
 #endif
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
-	PHP_FE(ldap_control_paged_result,							arginfo_ldap_control_paged_result)
-	PHP_FE(ldap_control_paged_result_response,		arginfo_ldap_control_paged_result_response)
+	PHP_DEP_FE(ldap_control_paged_result,				arginfo_ldap_control_paged_result)
+	PHP_DEP_FE(ldap_control_paged_result_response,		arginfo_ldap_control_paged_result_response)
 #endif
 	PHP_FE_END
 };
