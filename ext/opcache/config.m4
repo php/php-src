@@ -11,7 +11,7 @@ PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HU
                           Disable copying PHP CODE pages into HUGE PAGES], yes, no)
 
 PHP_ARG_ENABLE(opcache-jit, whether to enable JIT,
-[  --disable-opcache-jit  Disable JIT], yes)
+[  --disable-opcache-jit  Disable JIT], yes, no)
 
 if test "$PHP_OPCACHE" != "no"; then
 
