@@ -3467,12 +3467,3 @@ void php_oci_dtrace_check_connection(php_oci_connection *connection, sb4 errcode
 /* }}} */
 
 #endif /* HAVE_OCI8 */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

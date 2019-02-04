@@ -94,6 +94,9 @@ PHP 8.0 UPGRADE NOTES
 
   . The 'e' modifier for mb_ereg_replace() has been removed.
     mb_ereg_replace_callback() should be used instead.
+  . A non-string pattern argument to mb_ereg_replace() will now be interpreted
+    as a string instead of an ASCII codepoint. The previous behavior may be
+    restored with an explicit call to chr().
 
 - SPL:
   . SplFileObject::fgetss() has been removed.

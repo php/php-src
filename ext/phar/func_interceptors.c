@@ -1155,12 +1155,3 @@ void phar_restore_orig_functions(void) /* {{{ */
 	PHAR_G(orig_stat)              = phar_orig_functions.orig_stat;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

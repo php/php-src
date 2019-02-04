@@ -26,12 +26,3 @@ PHPAPI struct st_mysqlnd_res_meta_methods * mysqlnd_result_metadata_get_methods(
 PHPAPI void ** _mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * meta, unsigned int plugin_id);
 
 #endif /* MYSQLND_RESULT_META_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

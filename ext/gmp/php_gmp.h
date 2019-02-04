@@ -95,11 +95,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #endif	/* PHP_GMP_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

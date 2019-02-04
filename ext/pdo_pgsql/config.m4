@@ -1,5 +1,4 @@
 dnl config.m4 for extension pdo_pgsql
-dnl vim:et:sw=2:ts=2:
 
 PHP_ARG_WITH(pdo-pgsql,for PostgreSQL support for PDO,
 [  --with-pdo-pgsql[=DIR]    PDO: PostgreSQL support.  DIR is the PostgreSQL base

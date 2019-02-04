@@ -2745,13 +2745,3 @@ PHP_MINFO_FUNCTION(simplexml)
 /* }}} */
 
 #endif
-
-/**
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * indent-tabs-mode: t
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

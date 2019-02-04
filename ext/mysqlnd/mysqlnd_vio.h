@@ -24,12 +24,3 @@ PHPAPI MYSQLND_VIO * mysqlnd_vio_init(zend_bool persistent, MYSQLND_CLASS_METHOD
 PHPAPI void mysqlnd_vio_free(MYSQLND_VIO * const vio, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 
 #endif /* MYSQLND_VIO_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

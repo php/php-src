@@ -49,11 +49,3 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object);
 END_EXTERN_C()
 
 #endif /* PHP_REFLECTION_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

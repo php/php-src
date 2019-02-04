@@ -52,13 +52,3 @@ ZEND_END_MODULE_GLOBALS(pdo_odbc)
 #endif
 
 #endif	/* PHP_PDO_ODBC_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -1,7 +1,7 @@
 --TEST--
 xml_parse_into_struct/umlauts in tags
 --SKIPIF--
-<?php // vim600: syn=php
+<?php
 include("skipif.inc");
 if(strtoupper("äöüß") != "ÄÖÜß")
 {

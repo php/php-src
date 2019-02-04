@@ -711,13 +711,3 @@ enum mysqlnd_buffered_type
 #define MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA	1
 
 #endif	/* MYSQLND_ENUM_N_DEF_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

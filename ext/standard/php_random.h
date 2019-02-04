@@ -49,10 +49,3 @@ extern PHPAPI php_random_globals random_globals;
 #endif
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

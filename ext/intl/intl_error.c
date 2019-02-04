@@ -315,12 +315,3 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 	smart_str_0( &ret );
 	return ret;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

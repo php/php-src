@@ -35,12 +35,3 @@ static int    phar_stream_flush(php_stream *stream);
 static int    phar_stream_seek( php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset);
 static int    phar_stream_stat( php_stream *stream, php_stream_statbuf *ssb);
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

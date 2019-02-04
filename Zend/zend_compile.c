@@ -8643,13 +8643,3 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 	*ast_ptr = zend_ast_create_zval(&result);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

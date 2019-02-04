@@ -119,11 +119,3 @@ static inline int zend_worklist_pop(zend_worklist *worklist)
 }
 
 #endif /* _ZEND_WORKLIST_H_ */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

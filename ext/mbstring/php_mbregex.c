@@ -853,16 +853,16 @@ PHP_FUNCTION(mb_regex_encoding)
 /* {{{ _php_mb_regex_ereg_exec */
 static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	zval *arg_pattern, *array = NULL;
-	char *string;
-	size_t string_len;
+	zval *array = NULL;
+	char *arg_pattern, *string;
+	size_t arg_pattern_len, string_len;
 	php_mb_regex_t *re;
 	OnigRegion *regs = NULL;
 	int i, match_len, beg, end;
 	OnigOptionType options;
 	char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z", &arg_pattern, &string, &string_len, &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|z", &arg_pattern, &arg_pattern_len, &string, &string_len, &array) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -886,23 +886,13 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		options |= ONIG_OPTION_IGNORECASE;
 	}
 
-	/* compile the regular expression from the supplied regex */
-	if (Z_TYPE_P(arg_pattern) != IS_STRING) {
-		/* we convert numbers to integers and treat them as a string */
-		if (Z_TYPE_P(arg_pattern) == IS_DOUBLE) {
-			convert_to_long_ex(arg_pattern);	/* get rid of decimal places */
-		}
-		convert_to_string_ex(arg_pattern);
-		/* don't bother doing an extended regex with just a number */
-	}
-
-	if (Z_STRLEN_P(arg_pattern) == 0) {
+	if (arg_pattern_len == 0) {
 		php_error_docref(NULL, E_WARNING, "empty pattern");
 		RETVAL_FALSE;
 		goto out;
 	}
 
-	re = php_mbregex_compile_pattern(Z_STRVAL_P(arg_pattern), Z_STRLEN_P(arg_pattern), options, MBREX(current_mbctype), MBREX(regex_default_syntax));
+	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(current_mbctype), MBREX(regex_default_syntax));
 	if (re == NULL) {
 		RETVAL_FALSE;
 		goto out;
@@ -967,8 +957,6 @@ PHP_FUNCTION(mb_eregi)
 /* {{{ _php_mb_regex_ereg_replace_exec */
 static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOptionType options, int is_callable)
 {
-	zval *arg_pattern_zval;
-
 	char *arg_pattern;
 	size_t arg_pattern_len;
 
@@ -991,7 +979,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	OnigUChar *pos;
 	OnigUChar *string_lim;
 	char *description = NULL;
-	char pat_buf[6];
 
 	const mbfl_encoding *enc;
 
@@ -1010,16 +997,16 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		size_t option_str_len = 0;
 
 		if (!is_callable) {
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zss|s",
-						&arg_pattern_zval,
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|s",
+						&arg_pattern, &arg_pattern_len,
 						&replace, &replace_len,
 						&string, &string_len,
 						&option_str, &option_str_len) == FAILURE) {
 				RETURN_FALSE;
 			}
 		} else {
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zfs|s",
-						&arg_pattern_zval,
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "sfs|s",
+						&arg_pattern, &arg_pattern_len,
 						&arg_replace_fci, &arg_replace_fci_cache,
 						&string, &string_len,
 						&option_str, &option_str_len) == FAILURE) {
@@ -1046,22 +1033,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		php_error_docref(NULL, E_WARNING, "The 'e' option is no longer supported, use mb_ereg_replace_callback instead");
 		RETURN_FALSE;
 	}
-	if (Z_TYPE_P(arg_pattern_zval) == IS_STRING) {
-		arg_pattern = Z_STRVAL_P(arg_pattern_zval);
-		arg_pattern_len = Z_STRLEN_P(arg_pattern_zval);
-	} else {
-		/* FIXME: this code is not multibyte aware! */
-		convert_to_long_ex(arg_pattern_zval);
-		pat_buf[0] = (char)Z_LVAL_P(arg_pattern_zval);
-		pat_buf[1] = '\0';
-		pat_buf[2] = '\0';
-		pat_buf[3] = '\0';
-		pat_buf[4] = '\0';
-		pat_buf[5] = '\0';
 
-		arg_pattern = pat_buf;
-		arg_pattern_len = 1;
-	}
 	/* create regex pattern buffer */
 	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(current_mbctype), syntax);
 	if (re == NULL) {
@@ -1667,12 +1639,3 @@ PHP_FUNCTION(mb_regex_set_options)
 /* }}} */
 
 #endif	/* HAVE_MBREGEX */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

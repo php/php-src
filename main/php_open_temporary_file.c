@@ -342,12 +342,3 @@ PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, zend_stri
 	return fp;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

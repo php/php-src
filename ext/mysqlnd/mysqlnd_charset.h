@@ -42,12 +42,3 @@ struct st_mysqlnd_plugin_charsets
 void mysqlnd_charsets_plugin_register(void);
 
 #endif /* MYSQLND_CHARSET_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

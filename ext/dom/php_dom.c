@@ -1560,12 +1560,3 @@ int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty)
 } /* }}} end dom_nodelist_has_dimension */
 
 #endif /* HAVE_DOM */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

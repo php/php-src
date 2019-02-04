@@ -39,12 +39,3 @@ typedef struct  {
 extern PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks();
 
 #endif /* CLI_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

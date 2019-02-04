@@ -70,7 +70,3 @@ fi
 if test "$PHP_PHPDBG_WEBHELPER" != "no"; then
   PHP_NEW_EXTENSION(phpdbg_webhelper, phpdbg_rinit_hook.c phpdbg_webdata_transfer.c, $ext_shared)
 fi
-
-dnl ## Local Variables:
-dnl ## tab-width: 4
-dnl ## End:

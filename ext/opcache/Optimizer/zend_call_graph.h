@@ -76,11 +76,3 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 END_EXTERN_C()
 
 #endif /* ZEND_CALL_GRAPH_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

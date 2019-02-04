@@ -210,12 +210,3 @@ ZEND_API int zend_multibyte_set_script_encoding_by_string(const char *new_value,
 
 	return SUCCESS;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1690,10 +1690,3 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path) /* {{{ */
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

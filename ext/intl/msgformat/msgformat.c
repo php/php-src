@@ -178,12 +178,3 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	RETURN_STR(message);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
