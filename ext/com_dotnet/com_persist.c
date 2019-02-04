@@ -709,9 +709,9 @@ static void helper_free_storage(zend_object *obj)
 }
 
 
-static zend_object* helper_clone(zval *obj)
+static zend_object* helper_clone(zend_object *obj)
 {
-	php_com_persist_helper *clone, *object = (php_com_persist_helper*)Z_OBJ_P(obj);
+	php_com_persist_helper *clone, *object = (php_com_persist_helper*) obj;
 
 	clone = emalloc(sizeof(*object));
 	memcpy(clone, object, sizeof(*object));
