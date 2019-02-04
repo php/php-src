@@ -9279,10 +9279,10 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 
 	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
 		|	mov r0,	EX->run_time_cache
-		|	mov r2, aword [r0 + opline->extended_value]
+		|	mov r2, aword [r0 + (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)]
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >5
-		|	mov r0, aword [r0 + opline->extended_value + sizeof(void*)]
+		|	mov r0, aword [r0 + (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)]
 		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 		if (may_be_dynamic) {
 			|	test r0, r0
@@ -9319,10 +9319,10 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 	|	LOAD_ADDR FCARG2a, member
 	|.if X64
 		|	LOAD_ZVAL_ADDR CARG3, res_addr
-		|	mov CARG4, opline->extended_value
+		|	mov CARG4, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
 	|.else
 		|	sub r4, 8
-		|	push opline->extended_value
+		|	push (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
 		|	PUSH_ZVAL_ADDR res_addr, r0
 	|.endif
 	|	SAVE_VALID_OPLINE opline
@@ -9386,10 +9386,10 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|.if X64
 			|	LOAD_ADDR CARG3, member
 			|	LOAD_ZVAL_ADDR CARG4, res_addr
-			|	mov CARG5, opline->extended_value
+			|	mov CARG5, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
 		|.else
 			|	sub r4, 4
-			|	push opline->extended_value
+			|	push (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
 			|	PUSH_ZVAL_ADDR res_addr, r0
 			|	PUSH_ADDR member, r0
 		|.endif
