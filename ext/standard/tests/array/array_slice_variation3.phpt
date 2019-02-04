@@ -81,7 +81,7 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_slice() : usage variations ***
 
 -- Iteration 1 --
@@ -171,28 +171,34 @@ array(0) {
 }
 
 -- Iteration 16 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 17 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 18 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be int, array given in %s on line %d
+NULL
 
 -- Iteration 19 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 20 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 21 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be int, string given in %s on line %d
+NULL
 
 -- Iteration 22 --
 array(2) {
