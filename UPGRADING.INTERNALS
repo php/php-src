@@ -15,7 +15,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 ========================
 
  a. Object Handlers API and some related functions, e.g. zend_call_method() and
-    zend_objects_clone_obj() were changed to recieve zend_object* instead of
+    zend_objects_clone_obj() were changed to receive zend_object* instead of
     zval* and zend_string* instead of zval* for property names.
 
 
