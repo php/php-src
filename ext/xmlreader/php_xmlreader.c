@@ -114,30 +114,20 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 /* }}} */
 
 /* {{{ xmlreader_get_property_ptr_ptr */
-zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot)
+zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	xmlreader_object *obj;
-	zval tmp_member;
 	zval *retval = NULL;
 	xmlreader_prop_handler *hnd = NULL;
 
- 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-	}
-
-	obj = Z_XMLREADER_P(object);
+	obj = php_xmlreader_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 
 	if (hnd == NULL) {
-		retval = zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
-	}
-
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
+		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
 
 	return retval;
@@ -145,22 +135,16 @@ zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, void 
 /* }}} */
 
 /* {{{ xmlreader_read_property */
-zval *xmlreader_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv)
+zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	xmlreader_object *obj;
-	zval tmp_member;
 	zval *retval = NULL;
 	xmlreader_prop_handler *hnd = NULL;
 
- 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-	}
-
-	obj = Z_XMLREADER_P(object);
+	obj = php_xmlreader_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 
 	if (hnd != NULL) {
@@ -170,41 +154,28 @@ zval *xmlreader_read_property(zval *object, zval *member, int type, void **cache
 			retval = rv;
 		}
 	} else {
-		retval = zend_std_read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, name, type, cache_slot, rv);
 	}
 
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
-	}
 	return retval;
 }
 /* }}} */
 
 /* {{{ xmlreader_write_property */
-zval *xmlreader_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	xmlreader_object *obj;
-	zval tmp_member;
 	xmlreader_prop_handler *hnd = NULL;
 
- 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-	}
-
-	obj = Z_XMLREADER_P(object);
+	obj = php_xmlreader_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 	if (hnd != NULL) {
 		php_error_docref(NULL, E_WARNING, "Cannot write to read-only property");
 	} else {
-		value = zend_std_write_property(object, member, value, cache_slot);
-	}
-
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
+		value = zend_std_write_property(object, name, value, cache_slot);
 	}
 
 	return value;

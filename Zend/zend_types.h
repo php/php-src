@@ -707,7 +707,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_OBJCE(zval)				(Z_OBJ(zval)->ce)
 #define Z_OBJCE_P(zval_p)			Z_OBJCE(*(zval_p))
 
-#define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(&(zval))
+#define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(Z_OBJ(zval))
 #define Z_OBJPROP_P(zval_p)			Z_OBJPROP(*(zval_p))
 
 #define Z_RES(zval)					(zval).value.res

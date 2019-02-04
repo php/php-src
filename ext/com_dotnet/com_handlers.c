@@ -27,7 +27,7 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 
-static zval *com_property_read(zval *object, zval *member, int type, void **cahce_slot, zval *rv)
+static zval *com_property_read(zend_object *object, zend_string *member, int type, void **cahce_slot, zval *rv)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -35,21 +35,22 @@ static zval *com_property_read(zval *object, zval *member, int type, void **cahc
 
 	ZVAL_NULL(rv);
 
-	obj = CDNO_FETCH(object);
+	obj = (php_com_dotnet_object*) object;
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		VariantInit(&v);
 
-		convert_to_string_ex(member);
-
-		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
+		res = php_com_do_invoke(obj, ZSTR_VAL(member), ZSTR_LEN(member),
 				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(rv, &v, obj->code_page);
 			VariantClear(&v);
 		} else if (res == DISP_E_BADPARAMCOUNT) {
-			php_com_saproxy_create(object, rv, member);
+			zval zv;
+
+			ZVAL_STR(&zv, member);
+			php_com_saproxy_create(object, rv, &zv);
 		}
 	} else {
 		php_com_throw_exception(E_INVALIDARG, "this variant has no properties");
@@ -58,18 +59,17 @@ static zval *com_property_read(zval *object, zval *member, int type, void **cahc
 	return rv;
 }
 
-static zval *com_property_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *com_property_write(zend_object *object, zend_string *member, zval *value, void **cache_slot)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
 
-	obj = CDNO_FETCH(object);
+	obj = (php_com_dotnet_object*) object;
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		VariantInit(&v);
 
-		convert_to_string_ex(member);
-		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
+		if (SUCCESS == php_com_do_invoke(obj, ZSTR_VAL(member), ZSTR_LEN(member),
 				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, value, 0)) {
 			VariantClear(&v);
 		}
@@ -79,14 +79,14 @@ static zval *com_property_write(zval *object, zval *member, zval *value, void **
 	return value;
 }
 
-static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv)
+static zval *com_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
 
 	ZVAL_NULL(rv);
 
-	obj = CDNO_FETCH(object);
+	obj = (php_com_dotnet_object*) object;
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		VariantInit(&v);
@@ -115,14 +115,14 @@ static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv)
 	return rv;
 }
 
-static void com_write_dimension(zval *object, zval *offset, zval *value)
+static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 {
 	php_com_dotnet_object *obj;
 	zval args[2];
 	VARIANT v;
 	HRESULT res;
 
-	obj = CDNO_FETCH(object);
+	obj = (php_com_dotnet_object*) object;
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		ZVAL_COPY_VALUE(&args[0], offset);
@@ -187,16 +187,15 @@ static zval *com_object_get(zval *property)
 }
 #endif
 
-static int com_property_exists(zval *object, zval *member, int check_empty, void **cache_slot)
+static int com_property_exists(zend_object *object, zend_string *member, int check_empty, void **cache_slot)
 {
 	DISPID dispid;
 	php_com_dotnet_object *obj;
 
-	obj = CDNO_FETCH(object);
+	obj = (php_com_dotnet_object*) object;
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		convert_to_string_ex(member);
-		if (SUCCEEDED(php_com_get_id_of_name(obj, Z_STRVAL_P(member), Z_STRLEN_P(member), &dispid))) {
+		if (SUCCEEDED(php_com_get_id_of_name(obj, ZSTR_VAL(member), ZSTR_LEN(member), &dispid))) {
 			/* TODO: distinguish between property and method! */
 			return 1;
 		}
@@ -207,23 +206,23 @@ static int com_property_exists(zval *object, zval *member, int check_empty, void
 	return 0;
 }
 
-static int com_dimension_exists(zval *object, zval *member, int check_empty)
+static int com_dimension_exists(zend_object *object, zval *member, int check_empty)
 {
 	php_error_docref(NULL, E_WARNING, "Operation not yet supported on a COM object");
 	return 0;
 }
 
-static void com_property_delete(zval *object, zval *member, void **cache_slot)
+static void com_property_delete(zend_object *object, zend_string *member, void **cache_slot)
 {
 	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
 }
 
-static void com_dimension_delete(zval *object, zval *offset)
+static void com_dimension_delete(zend_object *object, zval *offset)
 {
 	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
 }
 
-static HashTable *com_properties_get(zval *object)
+static HashTable *com_properties_get(zend_object *object)
 {
 	/* TODO: use type-info to get all the names and values ?
 	 * DANGER: if we do that, there is a strong possibility for
@@ -461,14 +460,14 @@ static int com_objects_compare(zval *object1, zval *object2)
 	return ret;
 }
 
-static int com_object_cast(zval *readobj, zval *writeobj, int type)
+static int com_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
 	VARTYPE vt = VT_EMPTY;
 	HRESULT res = S_OK;
 
-	obj = CDNO_FETCH(readobj);
+	obj = (php_com_dotnet_object*) readobj;
 	ZVAL_NULL(writeobj);
 	VariantInit(&v);
 
@@ -518,12 +517,12 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type)
 	return zend_std_cast_object_tostring(readobj, writeobj, type);
 }
 
-static int com_object_count(zval *object, zend_long *count)
+static int com_object_count(zend_object *object, zend_long *count)
 {
 	php_com_dotnet_object *obj;
 	LONG ubound = 0, lbound = 0;
 
-	obj = CDNO_FETCH(object);
+	obj = (php_com_dotnet_object*) object;
 
 	if (!V_ISARRAY(&obj->v)) {
 		return FAILURE;
@@ -617,11 +616,11 @@ void php_com_object_free_storage(zend_object *object)
 	}
 }
 
-zend_object* php_com_object_clone(zval *object)
+zend_object* php_com_object_clone(zend_object *object)
 {
 	php_com_dotnet_object *cloneobj, *origobject;
 
-	origobject = (php_com_dotnet_object*)Z_OBJ_P(object);
+	origobject = (php_com_dotnet_object*) object;
 	cloneobj = (php_com_dotnet_object*)emalloc(sizeof(php_com_dotnet_object));
 
 	memcpy(cloneobj, origobject, sizeof(*cloneobj));

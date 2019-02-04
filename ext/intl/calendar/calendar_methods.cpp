@@ -1133,7 +1133,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	if (!(Z_TYPE_P(zv_arg) == IS_OBJECT && instanceof_function(
 			Z_OBJCE_P(zv_arg), php_date_get_date_ce()))) {
 		object_init_ex(&zv_tmp, php_date_get_date_ce());
-		zend_call_method_with_1_params(&zv_tmp, NULL, &Z_OBJCE(zv_tmp)->constructor, "__construct", NULL, zv_arg);
+		zend_call_method_with_1_params(Z_OBJ(zv_tmp), NULL, &Z_OBJCE(zv_tmp)->constructor, "__construct", NULL, zv_arg);
 		zv_datetime = &zv_tmp;
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(Z_OBJ(zv_tmp));
@@ -1151,7 +1151,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 		goto error;
 	}
 
-	zend_call_method_with_0_params(zv_datetime, php_date_get_date_ce(), NULL, "gettimestamp", &zv_timestamp);
+	zend_call_method_with_0_params(Z_OBJ_P(zv_datetime), php_date_get_date_ce(), NULL, "gettimestamp", &zv_timestamp);
 	if (Z_TYPE(zv_timestamp) != IS_LONG) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_from_date_time: bad DateTime; call to "
@@ -1249,7 +1249,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 
 	/* Finally, instantiate object and call constructor */
 	object_init_ex(return_value, php_date_get_date_ce());
-	zend_call_method_with_2_params(return_value, NULL, &Z_OBJCE_P(return_value)->constructor, "__construct", NULL, &ts_zval, timezone_zval);
+	zend_call_method_with_2_params(Z_OBJ_P(return_value), NULL, &Z_OBJCE_P(return_value)->constructor, "__construct", NULL, &ts_zval, timezone_zval);
 	if (EG(exception)) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_to_date_time: DateTime constructor has thrown exception",
@@ -1264,7 +1264,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	zval_ptr_dtor(&ts_zval);
 
 	/* due to bug #40743, we have to set the time zone again */
-	zend_call_method_with_1_params(return_value, NULL, NULL, "settimezone",
+	zend_call_method_with_1_params(Z_OBJ_P(return_value), NULL, NULL, "settimezone",
 			&retval, timezone_zval);
 	if (Z_ISUNDEF(retval) || Z_TYPE(retval) == IS_FALSE) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,

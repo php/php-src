@@ -880,9 +880,9 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 /* }}} */
 #endif
 
-static zval* zend_ffi_cdata_get(zval *object, zval *rv) /* {{{ */
+static zval* zend_ffi_cdata_get(zend_object *obj, zval *rv) /* {{{ */
 {
-	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(object);
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 
 #if 0
@@ -897,9 +897,9 @@ static zval* zend_ffi_cdata_get(zval *object, zval *rv) /* {{{ */
 }
 /* }}} */
 
-static void zend_ffi_cdata_set(zval *object, zval *value) /* {{{ */
+static void zend_ffi_cdata_set(zend_object *obj, zval *value) /* {{{ */
 {
-	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(object);
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 
 #if 0
@@ -913,15 +913,15 @@ static void zend_ffi_cdata_set(zval *object, zval *value) /* {{{ */
 }
 /* }}} */
 
-static int zend_ffi_cdata_cast_object(zval *readobj, zval *writeobj, int type) /* {{{ */
+static int zend_ffi_cdata_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{{ */
 {
 	return FAILURE;
 }
 /* }}} */
 
-static zval *zend_ffi_cdata_read_field(zval *object, zval *member, int read_type, void **cache_slot, zval *rv) /* {{{ */
+static zval *zend_ffi_cdata_read_field(zend_object *obj, zend_string *field_name, int read_type, void **cache_slot, zval *rv) /* {{{ */
 {
-	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(object);
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 	void           *ptr = cdata->ptr;
 	zend_ffi_field *field;
@@ -929,28 +929,22 @@ static zval *zend_ffi_cdata_read_field(zval *object, zval *member, int read_type
 	if (cache_slot && *cache_slot == type) {
 		field = *(cache_slot + 1);
 	} else {
-		zend_string *tmp_field_name;
-		zend_string *field_name = zval_get_tmp_string(member, &tmp_field_name);
-
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
 			if (type->kind == ZEND_FFI_TYPE_POINTER) {
 				/* transparently dereference the pointer */
 				if (UNEXPECTED(!ptr)) {
 					zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-					zend_tmp_string_release(tmp_field_name);
 					return &EG(uninitialized_zval);
 				}
 				ptr = (void*)(*(char**)ptr);
 				if (UNEXPECTED(!ptr)) {
 					zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-					zend_tmp_string_release(tmp_field_name);
 					return &EG(uninitialized_zval);
 				}
 				type = ZEND_FFI_TYPE(type->pointer.type);
 			}
 			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
 				zend_throw_error(zend_ffi_exception_ce, "Attempt to read field '%s' of non C struct/union", ZSTR_VAL(field_name));
-				zend_tmp_string_release(tmp_field_name);
 				return &EG(uninitialized_zval);
 			}
 		}
@@ -958,11 +952,8 @@ static zval *zend_ffi_cdata_read_field(zval *object, zval *member, int read_type
 		field = zend_hash_find_ptr(&type->record.fields, field_name);
 		if (UNEXPECTED(!field)) {
 			zend_throw_error(zend_ffi_exception_ce, "Attempt to read undefined field '%s' of C struct/union", ZSTR_VAL(field_name));
-			zend_tmp_string_release(tmp_field_name);
 			return &EG(uninitialized_zval);
 		}
-
-		zend_tmp_string_release(tmp_field_name);
 
 		if (cache_slot) {
 			*cache_slot = type;
@@ -997,9 +988,9 @@ static zval *zend_ffi_cdata_read_field(zval *object, zval *member, int read_type
 }
 /* }}} */
 
-static zval *zend_ffi_cdata_write_field(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static zval *zend_ffi_cdata_write_field(zend_object *obj, zend_string *field_name, zval *value, void **cache_slot) /* {{{ */
 {
-	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(object);
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 	void           *ptr = cdata->ptr;
 	zend_ffi_field *field;
@@ -1007,28 +998,22 @@ static zval *zend_ffi_cdata_write_field(zval *object, zval *member, zval *value,
 	if (cache_slot && *cache_slot == type) {
 		field = *(cache_slot + 1);
 	} else {
-		zend_string *tmp_field_name;
-		zend_string *field_name = zval_get_tmp_string(member, &tmp_field_name);
-
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
 			if (type->kind == ZEND_FFI_TYPE_POINTER) {
 				/* transparently dereference the pointer */
 				if (UNEXPECTED(!ptr)) {
 					zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-					zend_tmp_string_release(tmp_field_name);
 					return value;
 				}
 				ptr = (void*)(*(char**)ptr);
 				if (UNEXPECTED(!ptr)) {
 					zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-					zend_tmp_string_release(tmp_field_name);
 					return value;
 				}
 				type = ZEND_FFI_TYPE(type->pointer.type);
 			}
 			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
 				zend_throw_error(zend_ffi_exception_ce, "Attempt to assign field '%s' of non C struct/union", ZSTR_VAL(field_name));
-				zend_tmp_string_release(tmp_field_name);
 				return value;
 			}
 		}
@@ -1036,11 +1021,8 @@ static zval *zend_ffi_cdata_write_field(zval *object, zval *member, zval *value,
 		field = zend_hash_find_ptr(&type->record.fields, field_name);
 		if (UNEXPECTED(!field)) {
 			zend_throw_error(zend_ffi_exception_ce, "Attempt to assign undefined field '%s' of C struct/union", ZSTR_VAL(field_name));
-			zend_tmp_string_release(tmp_field_name);
 			return value;
 		}
-
-		zend_tmp_string_release(tmp_field_name);
 
 		if (cache_slot) {
 			*cache_slot = type;
@@ -1059,10 +1041,7 @@ static zval *zend_ffi_cdata_write_field(zval *object, zval *member, zval *value,
 		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign read-only location");
 		return value;
 	} else if (UNEXPECTED(field->is_const)) {
-		zend_string *tmp_field_name;
-		zend_string *field_name = zval_get_tmp_string(member, &tmp_field_name);
 		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign read-only field '%s'", ZSTR_VAL(field_name));
-		zend_tmp_string_release(tmp_field_name);
 		return value;
 	}
 
@@ -1076,9 +1055,9 @@ static zval *zend_ffi_cdata_write_field(zval *object, zval *member, zval *value,
 }
 /* }}} */
 
-static zval *zend_ffi_cdata_read_dim(zval *object, zval *offset, int read_type, zval *rv) /* {{{ */
+static zval *zend_ffi_cdata_read_dim(zend_object *obj, zval *offset, int read_type, zval *rv) /* {{{ */
 {
-	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(object);
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 	zend_long       dim = zval_get_long(offset);
 	zend_ffi_type  *dim_type;
@@ -1134,9 +1113,9 @@ static zval *zend_ffi_cdata_read_dim(zval *object, zval *offset, int read_type, 
 }
 /* }}} */
 
-static void zend_ffi_cdata_write_dim(zval *object, zval *offset, zval *value) /* {{{ */
+static void zend_ffi_cdata_write_dim(zend_object *obj, zval *offset, zval *value) /* {{{ */
 {
-	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(object);
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 	zend_long       dim = zval_get_long(offset);
 	void           *ptr;
@@ -1388,9 +1367,9 @@ static int zend_ffi_cdata_compare_objects(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
-static int zend_ffi_cdata_count_elements(zval *object, zend_long *count) /* {{{ */
+static int zend_ffi_cdata_count_elements(zend_object *obj, zend_long *count) /* {{{ */
 {
-	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(object);
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 
 	if (type->kind != ZEND_FFI_TYPE_ARRAY) {
@@ -1640,9 +1619,9 @@ static zend_object_iterator *zend_ffi_cdata_get_iterator(zend_class_entry *ce, z
 }
 /* }}} */
 
-static HashTable *zend_ffi_cdata_get_debug_info(zval *object, int *is_temp) /* {{{ */
+static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
-	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(object);
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 	void           *ptr = cdata->ptr;
 	HashTable      *ht = NULL;
@@ -1739,9 +1718,9 @@ static HashTable *zend_ffi_cdata_get_debug_info(zval *object, int *is_temp) /* {
 }
 /* }}} */
 
-static int zend_ffi_cdata_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
+static int zend_ffi_cdata_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
 {
-	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(obj);
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 	zend_function  *func;
 
@@ -1870,7 +1849,7 @@ static int zend_ffi_ctype_compare_objects(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
-static HashTable *zend_ffi_ctype_get_debug_info(zval *object, int *is_temp) /* {{{ */
+static HashTable *zend_ffi_ctype_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
 	return NULL;
 }
@@ -2038,9 +2017,9 @@ static void zend_ffi_cdata_free_obj(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-static zend_object *zend_ffi_cdata_clone_obj(zval *zobject) /* {{{ */
+static zend_object *zend_ffi_cdata_clone_obj(zend_object *obj) /* {{{ */
 {
-	zend_ffi_cdata *old_cdata = (zend_ffi_cdata*)Z_OBJ_P(zobject);
+	zend_ffi_cdata *old_cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type *type = ZEND_FFI_TYPE(old_cdata->type);
 	zend_ffi_cdata *new_cdata;
 
@@ -2057,11 +2036,9 @@ static zend_object *zend_ffi_cdata_clone_obj(zval *zobject) /* {{{ */
 }
 /* }}} */
 
-static zval *zend_ffi_read_var(zval *object, zval *member, int read_type, void **cache_slot, zval *rv) /* {{{ */
+static zval *zend_ffi_read_var(zend_object *obj, zend_string *var_name, int read_type, void **cache_slot, zval *rv) /* {{{ */
 {
-	zend_ffi        *ffi = (zend_ffi*)Z_OBJ_P(object);
-	zend_string     *tmp_var_name;
-	zend_string     *var_name = zval_get_tmp_string(member, &tmp_var_name);
+	zend_ffi        *ffi = (zend_ffi*)obj;
 	zend_ffi_symbol *sym = NULL;
 
 	if (ffi->symbols) {
@@ -2072,11 +2049,8 @@ static zval *zend_ffi_read_var(zval *object, zval *member, int read_type, void *
 	}
 	if (!sym) {
 		zend_throw_error(zend_ffi_exception_ce, "Attempt to read undefined C variable '%s'", ZSTR_VAL(var_name));
-		zend_tmp_string_release(tmp_var_name);
 		return &EG(uninitialized_zval);
 	}
-
-	zend_tmp_string_release(tmp_var_name);
 
 	if (sym->kind == ZEND_FFI_SYM_VAR) {
 		zend_ffi_cdata_to_zval(NULL, sym->addr, ZEND_FFI_TYPE(sym->type), read_type, rv, (zend_ffi_flags)sym->is_const, 0);
@@ -2088,11 +2062,9 @@ static zval *zend_ffi_read_var(zval *object, zval *member, int read_type, void *
 }
 /* }}} */
 
-static zval *zend_ffi_write_var(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static zval *zend_ffi_write_var(zend_object *obj, zend_string *var_name, zval *value, void **cache_slot) /* {{{ */
 {
-	zend_ffi        *ffi = (zend_ffi*)Z_OBJ_P(object);
-	zend_string     *tmp_var_name;
-	zend_string     *var_name = zval_get_tmp_string(member, &tmp_var_name);
+	zend_ffi        *ffi = (zend_ffi*)obj;
 	zend_ffi_symbol *sym = NULL;
 
 	if (ffi->symbols) {
@@ -2103,11 +2075,8 @@ static zval *zend_ffi_write_var(zval *object, zval *member, zval *value, void **
 	}
 	if (!sym) {
 		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign undefined C variable '%s'", ZSTR_VAL(var_name));
-		zend_tmp_string_release(tmp_var_name);
 		return value;
 	}
-
-	zend_tmp_string_release(tmp_var_name);
 
 	if (sym->is_const) {
 		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign read-only C variable '%s'", ZSTR_VAL(var_name));
@@ -4270,33 +4239,29 @@ static ZEND_COLD zend_never_inline void zend_bad_array_access(zend_class_entry *
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_fake_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
+static ZEND_COLD zval *zend_fake_read_dimension(zend_object *obj, zval *offset, int type, zval *rv) /* {{{ */
 {
-	zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_bad_array_access(ce);
+    zend_bad_array_access(obj->ce);
 	return NULL;
 }
 /* }}} */
 
-static ZEND_COLD void zend_fake_write_dimension(zval *object, zval *offset, zval *value) /* {{{ */
+static ZEND_COLD void zend_fake_write_dimension(zend_object *obj, zval *offset, zval *value) /* {{{ */
 {
-	zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_bad_array_access(ce);
+    zend_bad_array_access(obj->ce);
 }
 /* }}} */
 
-static ZEND_COLD int zend_fake_has_dimension(zval *object, zval *offset, int check_empty) /* {{{ */
+static ZEND_COLD int zend_fake_has_dimension(zend_object *obj, zval *offset, int check_empty) /* {{{ */
 {
-	zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_bad_array_access(ce);
+    zend_bad_array_access(obj->ce);
 	return 0;
 }
 /* }}} */
 
-static ZEND_COLD void zend_fake_unset_dimension(zval *object, zval *offset) /* {{{ */
+static ZEND_COLD void zend_fake_unset_dimension(zend_object *obj, zval *offset) /* {{{ */
 {
-	zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_bad_array_access(ce);
+    zend_bad_array_access(obj->ce);
 }
 /* }}} */
 
@@ -4306,38 +4271,34 @@ static ZEND_COLD zend_never_inline void zend_bad_property_access(zend_class_entr
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_fake_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
+static ZEND_COLD zval *zend_fake_read_property(zend_object *obj, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
-	zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_bad_property_access(ce);
+    zend_bad_property_access(obj->ce);
 	return &EG(uninitialized_zval);
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_fake_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_fake_write_property(zend_object *obj, zend_string *member, zval *value, void **cache_slot) /* {{{ */
 {
-	zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_bad_array_access(ce);
+    zend_bad_array_access(obj->ce);
     return value;
 }
 /* }}} */
 
-static ZEND_COLD int zend_fake_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
+static ZEND_COLD int zend_fake_has_property(zend_object *obj, zend_string *member, int has_set_exists, void **cache_slot) /* {{{ */
 {
-	zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_bad_array_access(ce);
+    zend_bad_array_access(obj->ce);
 	return 0;
 }
 /* }}} */
 
-static ZEND_COLD void zend_fake_unset_property(zval *object, zval *member, void **cache_slot) /* {{{ */
+static ZEND_COLD void zend_fake_unset_property(zend_object *obj, zend_string *member, void **cache_slot) /* {{{ */
 {
-	zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_bad_array_access(ce);
+    zend_bad_array_access(obj->ce);
 }
 /* }}} */
 
-static zval *zend_fake_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
+static zval *zend_fake_get_property_ptr_ptr(zend_object *obj, zend_string *member, int type, void **cache_slot) /* {{{ */
 {
 	return NULL;
 }
@@ -4351,13 +4312,13 @@ static ZEND_COLD zend_function *zend_fake_get_method(zend_object **obj_ptr, zend
 }
 /* }}} */
 
-static HashTable *zend_fake_get_properties(zval *object) /* {{{ */
+static HashTable *zend_fake_get_properties(zend_object *obj) /* {{{ */
 {
 	return (HashTable*)&zend_empty_array;
 }
 /* }}} */
 
-static HashTable *zend_fake_get_gc(zval *object, zval **table, int *n) /* {{{ */
+static HashTable *zend_fake_get_gc(zend_object *ob, zval **table, int *n) /* {{{ */
 {
 	*table = NULL;
 	*n = 0;
@@ -4371,74 +4332,74 @@ static ZEND_COLD zend_never_inline void zend_ffi_use_after_free(void) /* {{{ */
 }
 /* }}} */
 
-static zend_object *zend_ffi_free_clone_obj(zval *zobject) /* {{{ */
+static zend_object *zend_ffi_free_clone_obj(zend_object *obj) /* {{{ */
 {
 	zend_ffi_use_after_free();
 	return NULL;
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_ffi_free_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
+static ZEND_COLD zval *zend_ffi_free_read_dimension(zend_object *obj, zval *offset, int type, zval *rv) /* {{{ */
 {
 	zend_ffi_use_after_free();
 	return NULL;
 }
 /* }}} */
 
-static ZEND_COLD void zend_ffi_free_write_dimension(zval *object, zval *offset, zval *value) /* {{{ */
+static ZEND_COLD void zend_ffi_free_write_dimension(zend_object *obj, zval *offset, zval *value) /* {{{ */
 {
 	zend_ffi_use_after_free();
 }
 /* }}} */
 
-static ZEND_COLD int zend_ffi_free_has_dimension(zval *object, zval *offset, int check_empty) /* {{{ */
+static ZEND_COLD int zend_ffi_free_has_dimension(zend_object *obj, zval *offset, int check_empty) /* {{{ */
 {
 	zend_ffi_use_after_free();
 	return 0;
 }
 /* }}} */
 
-static ZEND_COLD void zend_ffi_free_unset_dimension(zval *object, zval *offset) /* {{{ */
+static ZEND_COLD void zend_ffi_free_unset_dimension(zend_object *obj, zval *offset) /* {{{ */
 {
 	zend_ffi_use_after_free();
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_ffi_free_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
+static ZEND_COLD zval *zend_ffi_free_read_property(zend_object *obj, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	zend_ffi_use_after_free();
 	return &EG(uninitialized_zval);
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_ffi_free_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_ffi_free_write_property(zend_object *obj, zend_string *member, zval *value, void **cache_slot) /* {{{ */
 {
 	zend_ffi_use_after_free();
 	return value;
 }
 /* }}} */
 
-static ZEND_COLD int zend_ffi_free_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
+static ZEND_COLD int zend_ffi_free_has_property(zend_object *obj, zend_string *member, int has_set_exists, void **cache_slot) /* {{{ */
 {
 	zend_ffi_use_after_free();
 	return 0;
 }
 /* }}} */
 
-static ZEND_COLD void zend_ffi_free_unset_property(zval *object, zval *member, void **cache_slot) /* {{{ */
+static ZEND_COLD void zend_ffi_free_unset_property(zend_object *obj, zend_string *member, void **cache_slot) /* {{{ */
 {
 	zend_ffi_use_after_free();
 }
 /* }}} */
 
-static zval* zend_ffi_free_get(zval *object, zval *rv) /* {{{ */
+static zval* zend_ffi_free_get(zend_object *obj, zval *rv) /* {{{ */
 {
 	zend_ffi_use_after_free();
 	return NULL;
 }
 /* }}} */
 
-static HashTable *zend_ffi_free_get_debug_info(zval *object, int *is_temp) /* {{{ */
+static HashTable *zend_ffi_free_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
 	zend_ffi_use_after_free();
 	return NULL;

@@ -775,7 +775,7 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	EG(exception) = NULL;
 
 	ZVAL_OBJ(&zv, ex);
-	zend_call_method_with_0_params(&zv, ex->ce, &ex->ce->__tostring, "__tostring", &tmp);
+	zend_call_method_with_0_params(ex, ex->ce, &ex->ce->__tostring, "__tostring", &tmp);
 	file = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("file"), 1, &rv));
 	line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
 
