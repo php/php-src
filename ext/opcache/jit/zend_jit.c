@@ -297,19 +297,29 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 				name = ZSTR_VAL(str);
 			}
 		}
-	}
-#endif
-
 #ifdef HAVE_DISASM
-	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
-		zend_jit_disasm_add_symbol(name, (uintptr_t)entry, size);
-		zend_jit_disasm(
-			name,
-			(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
-			op_array,
-			&ssa->cfg,
-			entry,
-			size);
+	    if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+			zend_jit_disasm_add_symbol(name, (uintptr_t)entry, size);
+			zend_jit_disasm(
+				name,
+				(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
+				op_array,
+				&ssa->cfg,
+				entry,
+				size);
+		}
+	} else {
+	    if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM_STUBS) {
+			zend_jit_disasm_add_symbol(name, (uintptr_t)entry, size);
+			zend_jit_disasm(
+				name,
+				(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
+				op_array,
+				&ssa->cfg,
+				entry,
+				size);
+		}
+# endif
 	}
 #endif
 
@@ -3128,7 +3138,7 @@ ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 	zend_jit_protect();
 
 #ifdef HAVE_DISASM
-	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+	if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
 		if (!zend_jit_disasm_init()) {
 			// TODO: error reporting and cleanup ???
 			return FAILURE;
@@ -3169,7 +3179,7 @@ ZEND_API void zend_jit_shutdown(void)
 #endif
 
 #ifdef HAVE_DISASM
-	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+	if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
 		zend_jit_disasm_shutdown();
 	}
 #endif

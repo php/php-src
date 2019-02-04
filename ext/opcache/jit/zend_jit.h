@@ -68,12 +68,14 @@
 #define ZEND_JIT_DEBUG_ASM       (1<<0)
 #define ZEND_JIT_DEBUG_SSA       (1<<1)
 #define ZEND_JIT_DEBUG_REG_ALLOC (1<<2)
+#define ZEND_JIT_DEBUG_ASM_STUBS (1<<3)
 
-#define ZEND_JIT_DEBUG_GDB       (1<<4)
-#define ZEND_JIT_DEBUG_PERF      (1<<5)
+#define ZEND_JIT_DEBUG_PERF      (1<<4)
+#define ZEND_JIT_DEBUG_PERF_DUMP (1<<5)
 #define ZEND_JIT_DEBUG_OPROFILE  (1<<6)
 #define ZEND_JIT_DEBUG_VTUNE     (1<<7)
-#define ZEND_JIT_DEBUG_PERF_DUMP (1<<8)
+
+#define ZEND_JIT_DEBUG_GDB       (1<<8)
 
 ZEND_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
 ZEND_API int  zend_jit_script(zend_script *script);

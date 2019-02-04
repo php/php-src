@@ -481,7 +481,9 @@ static int zend_jit_gdb_unregister(void)
 
 static void zend_jit_gdb_init(void)
 {
-#if 1
+#if 0
+	/* This might enable registration of all JIT-ed code, but unfortunately,
+	 * in case of many functions, this takes enormous time. */
 	if (zend_gdb_present()) {
 		ZCG(accel_directives).jit_debug |= ZEND_JIT_DEBUG_GDB;
 	}
