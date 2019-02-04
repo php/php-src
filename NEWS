@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
     (cmb)
 
+- LDAP:
+  . Deprecated ldap_control_paged_result_response and ldap_control_paged_result
+
 - Opcache:
   . Implemented preloading RFC: https://wiki.php.net/rfc/preload. (Dmitry)
 

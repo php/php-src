@@ -144,6 +144,10 @@ PHP 7.4 UPGRADE NOTES
     non-string patterns are interpreted as ASCII codepoints. In PHP 8 the
     pattern will be interpreted as a string instead.
 
+- LDAP:
+  . ldap_control_paged_result_response and ldap_control_paged_result are deprecated.
+    Pagination controls can be sent along with ldap_search instead.
+
 ========================================
 5. Changed Functions
 ========================================
