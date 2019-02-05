@@ -68,6 +68,9 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecate-and-remove-intl_idna_variant_2003
   . The deprecated Normalizer::NONE constant has been removed.
 
+- LDAP:
+  . The deprecated function ldap_sort has been removed.
+
 - Mbstring:
   . The mbstring.func_overload directive has been removed. The related
     MB_OVERLOAD_MAIL, MB_OVERLOAD_STRING, and MB_OVERLOAD_REGEX constants have

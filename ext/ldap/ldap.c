@@ -2937,39 +2937,6 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool ldap_sort(resource link, resource result, string sortfilter)
-   Sort LDAP result entries */
-PHP_FUNCTION(ldap_sort)
-{
-	zval *link, *result;
-	ldap_linkdata *ld;
-	char *sortfilter;
-	size_t sflen;
-	zend_resource *le;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrs", &link, &result, &sortfilter, &sflen) != SUCCESS) {
-		RETURN_FALSE;
-	}
-
-	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	le = Z_RES_P(result);
-	if (le->type != le_result) {
-		php_error_docref(NULL, E_WARNING, "Supplied resource is not a valid ldap result resource");
-		RETURN_FALSE;
-	}
-
-	if (ldap_sort_entries(ld->link, (LDAPMessage **) &le->ptr, sflen ? sortfilter : NULL, strcmp) != LDAP_SUCCESS) {
-		php_error_docref(NULL, E_WARNING, "%s", ldap_err2string(errno));
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP
 /* {{{ proto bool ldap_get_option(resource link, int option, mixed retval)
    Get the current value of various session-wide parameters */
@@ -4613,12 +4580,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_compare, 0, 0, 4)
 	ZEND_ARG_INFO(0, servercontrols)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_sort, 0, 0, 3)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, result)
-	ZEND_ARG_INFO(0, sortfilter)
-ZEND_END_ARG_INFO()
-
 #ifdef LDAP_CONTROL_PAGEDRESULTS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_paged_result, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
@@ -4817,7 +4778,6 @@ static const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_err2str,								arginfo_ldap_err2str)
 	PHP_FE(ldap_error,									arginfo_ldap_resource)
 	PHP_FE(ldap_compare,								arginfo_ldap_compare)
-	PHP_DEP_FE(ldap_sort,									arginfo_ldap_sort)
 
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP
 	PHP_FE(ldap_rename,									arginfo_ldap_rename)
@@ -4864,8 +4824,8 @@ static const zend_function_entry ldap_functions[] = {
 #endif
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
-	PHP_FE(ldap_control_paged_result,							arginfo_ldap_control_paged_result)
-	PHP_FE(ldap_control_paged_result_response,		arginfo_ldap_control_paged_result_response)
+	PHP_DEP_FE(ldap_control_paged_result,				arginfo_ldap_control_paged_result)
+	PHP_DEP_FE(ldap_control_paged_result_response,		arginfo_ldap_control_paged_result_response)
 #endif
 	PHP_FE_END
 };

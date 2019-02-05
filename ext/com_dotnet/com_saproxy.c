@@ -433,7 +433,7 @@ int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index
 		proxy->obj = (php_com_dotnet_object*) com_object;
 	}
 
-	Z_ADDREF_P(&proxy->obj->zo);
+	GC_ADDREF(&proxy->obj->zo);
 	proxy->indices = safe_emalloc(proxy->dimensions, sizeof(zval *), 0);
 
 	if (rel) {
