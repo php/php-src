@@ -1528,35 +1528,14 @@ ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) /* {{{ */
 	va_end(va);
 } /* }}} */
 
-ZEND_API ZEND_COLD void zend_internal_type_error(zend_bool throw_exception, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
 
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
-	if (throw_exception) {
-		zend_throw_exception(zend_ce_type_error, message, 0);
-	} else {
-		zend_error(E_WARNING, "%s", message);
-	}
-	efree(message);
-
-	va_end(va);
-} /* }}} */
-
-ZEND_API ZEND_COLD void zend_internal_argument_count_error(zend_bool throw_exception, const char *format, ...) /* {{{ */
-{
-	va_list va;
-	char *message = NULL;
-
-	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	if (throw_exception) {
-		zend_throw_exception(zend_ce_argument_count_error, message, 0);
-	} else {
-		zend_error(E_WARNING, "%s", message);
-	}
+	zend_throw_exception(zend_ce_argument_count_error, message, 0);
 	efree(message);
 
 	va_end(va);

@@ -90,7 +90,7 @@ ZEND_API ZEND_COLD void zend_wrong_param_count(void) /* {{{ */
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
 
-	zend_internal_argument_count_error(ZEND_ARG_USES_STRICT_TYPES(), "Wrong parameter count for %s%s%s()", class_name, space, get_active_function_name());
+	zend_argument_count_error("Wrong parameter count for %s%s%s()", class_name, space, get_active_function_name());
 }
 /* }}} */
 
@@ -173,28 +173,7 @@ ZEND_API ZEND_COLD int ZEND_FASTCALL zend_wrong_parameters_none_error(void) /* {
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
 
-	zend_internal_argument_count_error(
-				ZEND_ARG_USES_STRICT_TYPES(),
-				"%s%s%s() expects %s %d parameter%s, %d given",
-				class_name, \
-				class_name[0] ? "::" : "", \
-				ZSTR_VAL(active_function->common.function_name),
-				"exactly",
-				0,
-				"s",
-				num_args);
-	return FAILURE;
-}
-/* }}} */
-
-ZEND_API ZEND_COLD int ZEND_FASTCALL zend_wrong_parameters_none_exception(void) /* {{{ */
-{
-	int num_args = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-	zend_function *active_function = EG(current_execute_data)->func;
-	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
-
-	zend_internal_argument_count_error(
-				1,
+	zend_argument_count_error(
 				"%s%s%s() expects %s %d parameter%s, %d given",
 				class_name, \
 				class_name[0] ? "::" : "", \
@@ -213,27 +192,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
 
-	zend_internal_argument_count_error(
-				ZEND_ARG_USES_STRICT_TYPES(),
-				"%s%s%s() expects %s %d parameter%s, %d given",
-				class_name, \
-				class_name[0] ? "::" : "", \
-				ZSTR_VAL(active_function->common.function_name),
-				min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
-				num_args < min_num_args ? min_num_args : max_num_args,
-				(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
-				num_args);
-}
-/* }}} */
-
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_exception(int min_num_args, int max_num_args) /* {{{ */
-{
-	int num_args = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-	zend_function *active_function = EG(current_execute_data)->func;
-	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
-
-	zend_internal_argument_count_error(
-				1,
+	zend_argument_count_error(
 				"%s%s%s() expects %s %d parameter%s, %d given",
 				class_name, \
 				class_name[0] ? "::" : "", \
@@ -254,21 +213,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, z
 		NULL
 	};
 
-	zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be %s, %s given",
-		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
-}
-/* }}} */
-
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_exception(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
-{
-	const char *space;
-	const char *class_name = get_active_class_name(&space);
-	static const char * const expected_error[] = {
-		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
-		NULL
-	};
-
-	zend_internal_type_error(1, "%s%s%s() expects parameter %d to be %s, %s given",
+	zend_type_error("%s%s%s() expects parameter %d to be %s, %s given",
 		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
 }
 /* }}} */
@@ -278,17 +223,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, 
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
 
-	zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be %s, %s given",
-		class_name, space, get_active_function_name(), num, name, zend_zval_type_name(arg));
-}
-/* }}} */
-
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_exception(int num, char *name, zval *arg) /* {{{ */
-{
-	const char *space;
-	const char *class_name = get_active_class_name(&space);
-
-	zend_internal_type_error(1, "%s%s%s() expects parameter %d to be %s, %s given",
+	zend_type_error("%s%s%s() expects parameter %d to be %s, %s given",
 		class_name, space, get_active_function_name(), num, name, zend_zval_type_name(arg));
 }
 /* }}} */
@@ -298,18 +233,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
 
-	zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be a valid callback, %s",
-		class_name, space, get_active_function_name(), num, error);
-	efree(error);
-}
-/* }}} */
-
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, char *error) /* {{{ */
-{
-	const char *space;
-	const char *class_name = get_active_class_name(&space);
-
-	zend_internal_type_error(1, "%s%s%s() expects parameter %d to be a valid callback, %s",
+	zend_type_error("%s%s%s() expects parameter %d to be a valid callback, %s",
 		class_name, space, get_active_function_name(), num, error);
 	efree(error);
 }
@@ -330,7 +254,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 			const char *space;
 			const char *class_name = get_active_class_name(&space);
 
-			zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
+			zend_type_error("%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
 				class_name, space, get_active_function_name(), num,
 				ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
 			*pce = NULL;
@@ -341,7 +265,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 		const char *space;
 		const char *class_name = get_active_class_name(&space);
 
-		zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be a valid class name, '%s' given",
+		zend_type_error("%s%s%s() expects parameter %d to be a valid class name, '%s' given",
 			class_name, space, get_active_function_name(), num,
 			Z_STRVAL_P(arg));
 		return 0;
@@ -803,16 +727,13 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET) && (*expected_type || error)) {
 			const char *space;
 			const char *class_name = get_active_class_name(&space);
-			zend_bool throw_exception =
-				ZEND_ARG_USES_STRICT_TYPES() || (flags & ZEND_PARSE_PARAMS_THROW);
 
 			if (error) {
-				zend_internal_type_error(throw_exception, "%s%s%s() expects parameter %d %s",
+				zend_type_error("%s%s%s() expects parameter %d %s",
 						class_name, space, get_active_function_name(), arg_num, error);
 				efree(error);
 			} else {
-				zend_internal_type_error(throw_exception,
-						"%s%s%s() expects parameter %d to be %s, %s given",
+				zend_type_error("%s%s%s() expects parameter %d to be %s, %s given",
 						class_name, space, get_active_function_name(), arg_num, expected_type,
 						zend_zval_type_name(arg));
 			}
@@ -919,8 +840,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
 			zend_function *active_function = EG(current_execute_data)->func;
 			const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
-			zend_bool throw_exception = ZEND_ARG_USES_STRICT_TYPES() || (flags & ZEND_PARSE_PARAMS_THROW);
-			zend_internal_argument_count_error(throw_exception, "%s%s%s() expects %s %d parameter%s, %d given",
+			zend_argument_count_error("%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
 					class_name[0] ? "::" : "",
 					ZSTR_VAL(active_function->common.function_name),
@@ -1013,7 +933,7 @@ ZEND_API int zend_parse_parameters_throw(int num_args, const char *type_spec, ..
 {
 	va_list va;
 	int retval;
-	int flags = ZEND_PARSE_PARAMS_THROW;
+	int flags = 0;
 
 	va_start(va, type_spec);
 	retval = zend_parse_va_args(num_args, type_spec, &va, flags);

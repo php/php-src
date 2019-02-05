@@ -82,14 +82,13 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constr
 	const char *locale;
 	size_t		locale_len = 0;
 	zend_bool	fallback = 1;
-	int         zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	zval                  *object = return_value;
 	ResourceBundle_object *rb = Z_INTL_RESOURCEBUNDLE_P( object );
 
 	intl_error_reset( NULL );
 
-	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "s!s!|b",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s!s!|b",
 		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

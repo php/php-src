@@ -2535,7 +2535,7 @@ static zend_never_inline uint32_t ZEND_FASTCALL zend_array_key_exists_slow(zval 
 		if (UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP2();
 		}
-		zend_internal_type_error(EX_USES_STRICT_TYPES(), "array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
+		zend_type_error("array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
 		return IS_NULL;
 	}
 }
