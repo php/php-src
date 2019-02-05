@@ -217,10 +217,3 @@ static zend_always_inline zend_bool zend_jit_same_addr(zend_jit_addr addr1, zend
 }
 
 #endif /* ZEND_JIT_X86_H */
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

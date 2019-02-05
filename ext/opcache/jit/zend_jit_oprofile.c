@@ -48,11 +48,3 @@ static void zend_jit_oprofile_shutdown(void)
 		op_close_agent(op_agent);
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -50,11 +50,3 @@ void ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
 int  ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 
 #endif /* ZEND_JIT_INTERNAL_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

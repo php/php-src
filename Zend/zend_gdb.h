@@ -25,11 +25,3 @@ ZEND_API void zend_gdb_unregister_all(void);
 ZEND_API int  zend_gdb_present(void);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id:$ */
-
 #ifndef HAVE_JIT_H
 #define HAVE_JIT_H
 
@@ -109,11 +107,3 @@ struct _zend_lifetime_interval {
 };
 
 #endif /* HAVE_JIT_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

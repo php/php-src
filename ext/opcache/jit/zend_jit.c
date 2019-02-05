@@ -477,6 +477,7 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 	uint32_t num;
 	int res;
 
+	return 1;
 	if (!ssa->ops || !ssa->var_info) {
 		return 1;
 	}
@@ -3273,11 +3274,3 @@ ZEND_API void zend_jit_deactivate(void)
 }
 
 #endif /* HAVE_JIT */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -205,11 +205,3 @@ static void zend_jit_perf_map_register(const char *name, void *start, size_t siz
 	}
 	fprintf(fp, "%zx %zx %s\n", (size_t)(uintptr_t)start, size, name);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */
