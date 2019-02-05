@@ -60,7 +60,6 @@ if (PHP_MBSTRING != "no") {
 	if (PHP_MBREGEX != "no") {
 		AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
 		AC_DEFINE('HAVE_MBREGEX', 1);
-		AC_DEFINE('HAVE_ONIG', 1);
 		ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
 		PHP_INSTALL_HEADERS("ext/mbstring", "php_mbregex.h");
 	}

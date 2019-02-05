@@ -56,18 +56,15 @@
 #include "mb_gpc.h"
 
 #if HAVE_MBREGEX
-#include "php_mbregex.h"
+# include "php_mbregex.h"
+# include "php_onig_compat.h"
+# include <oniguruma.h>
+# undef UChar
+#elif HAVE_PCRE || HAVE_BUNDLED_PCRE
+# include "ext/pcre/php_pcre.h"
 #endif
 
 #include "zend_multibyte.h"
-
-#if HAVE_ONIG
-#include "php_onig_compat.h"
-#include <oniguruma.h>
-#undef UChar
-#elif HAVE_PCRE || HAVE_BUNDLED_PCRE
-#include "ext/pcre/php_pcre.h"
-#endif
 /* }}} */
 
 #if HAVE_MBSTRING
@@ -1002,7 +999,7 @@ static void *_php_mb_compile_regex(const char *pattern);
 static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len);
 static void _php_mb_free_regex(void *opaque);
 
-#if HAVE_ONIG
+#if HAVE_MBREGEX
 /* {{{ _php_mb_compile_regex */
 static void *_php_mb_compile_regex(const char *pattern)
 {
@@ -1756,13 +1753,6 @@ PHP_MINFO_FUNCTION(mbstring)
 		snprintf(tmp, sizeof(tmp), "%d.%d.%d", MBFL_VERSION_MAJOR, MBFL_VERSION_MINOR, MBFL_VERSION_TEENY);
 		php_info_print_table_row(2, "libmbfl version", tmp);
 	}
-#if HAVE_ONIG
-	{
-		char tmp[256];
-		snprintf(tmp, sizeof(tmp), "%d.%d.%d", ONIGURUMA_VERSION_MAJOR, ONIGURUMA_VERSION_MINOR, ONIGURUMA_VERSION_TEENY);
-		php_info_print_table_row(2, "oniguruma version", tmp);
-	}
-#endif
 	php_info_print_table_end();
 
 	php_info_print_table_start();
