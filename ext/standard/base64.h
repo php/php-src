@@ -78,10 +78,3 @@ static inline zend_string *php_base64_decode_str(const zend_string *str) {
 }
 
 #endif /* BASE64_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

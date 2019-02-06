@@ -2268,13 +2268,3 @@ void _mysqlnd_init_ps_subsystem()
 	_mysqlnd_init_ps_fetch_subsystem();
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

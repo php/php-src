@@ -164,12 +164,3 @@ PHPAPI extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xe
 #define mysqlnd_error_info_set_methods(m)	mysqlnd_plugin_methods_xetters.error_info.set((m))
 
 #endif	/* MYSQLND_EXT_PLUGIN_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

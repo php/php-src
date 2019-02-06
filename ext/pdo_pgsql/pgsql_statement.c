@@ -727,12 +727,3 @@ const struct pdo_stmt_methods pgsql_stmt_methods = {
 	NULL,  /* next_rowset */
 	pdo_pgsql_stmt_cursor_closer
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

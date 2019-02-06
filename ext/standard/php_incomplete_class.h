@@ -27,7 +27,7 @@
 #define PHP_SET_CLASS_ATTRIBUTES(struc) \
 	/* OBJECTS_FIXME: Fix for new object model */	\
 	if (Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
-		class_name = php_lookup_class_name(struc); \
+		class_name = php_lookup_class_name(Z_OBJ_P(struc)); \
 		if (!class_name) { \
 			class_name = zend_string_init(INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1, 0); \
 		} \
@@ -51,7 +51,7 @@ extern "C" {
 #endif
 
 PHPAPI zend_class_entry *php_create_incomplete_class(void);
-PHPAPI zend_string *php_lookup_class_name(zval *object);
+PHPAPI zend_string *php_lookup_class_name(zend_object *object);
 PHPAPI void  php_store_class_name(zval *object, const char *name, size_t len);
 
 #ifdef __cplusplus

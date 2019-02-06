@@ -88,13 +88,3 @@ typedef struct {
 PHP_SXE_API zend_class_entry *sxe_get_element_class_entry();
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

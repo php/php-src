@@ -34,6 +34,7 @@ PHP 8.0 UPGRADE NOTES
     interpreted as strings.
   . Removed ability to specify an autoloader using an __autoload() function.
     spl_autoload_register() should be used instead.
+  . Removed the $errcontext argument for custom error handlers.
   . Removed create_function(). Anonymous functions may be used instead.
   . Removed each(). foreach or ArrayIterator should be used instead.
   . Removed ability to unbind $this from closures that were created from a
@@ -68,6 +69,9 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecate-and-remove-intl_idna_variant_2003
   . The deprecated Normalizer::NONE constant has been removed.
 
+- LDAP:
+  . The deprecated function ldap_sort has been removed.
+
 - Mbstring:
   . The mbstring.func_overload directive has been removed. The related
     MB_OVERLOAD_MAIL, MB_OVERLOAD_STRING, and MB_OVERLOAD_REGEX constants have
@@ -94,6 +98,9 @@ PHP 8.0 UPGRADE NOTES
 
   . The 'e' modifier for mb_ereg_replace() has been removed.
     mb_ereg_replace_callback() should be used instead.
+  . A non-string pattern argument to mb_ereg_replace() will now be interpreted
+    as a string instead of an ASCII codepoint. The previous behavior may be
+    restored with an explicit call to chr().
 
 - SPL:
   . SplFileObject::fgetss() has been removed.

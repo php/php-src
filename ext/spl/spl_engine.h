@@ -33,7 +33,7 @@ static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval *retval, z
 	zend_function *func = pce->constructor;
 	spl_instantiate(pce, retval);
 
-	zend_call_method(retval, pce, &func, ZSTR_VAL(func->common.function_name), ZSTR_LEN(func->common.function_name), NULL, 1, arg1, NULL);
+	zend_call_method(Z_OBJ_P(retval), pce, &func, ZSTR_VAL(func->common.function_name), ZSTR_LEN(func->common.function_name), NULL, 1, arg1, NULL);
 	return 0;
 }
 /* }}} */
@@ -44,7 +44,7 @@ static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval *retval, z
 	zend_function *func = pce->constructor;
 	spl_instantiate(pce, retval);
 
-	zend_call_method(retval, pce, &func, ZSTR_VAL(func->common.function_name), ZSTR_LEN(func->common.function_name), NULL, 2, arg1, arg2);
+	zend_call_method(Z_OBJ_P(retval), pce, &func, ZSTR_VAL(func->common.function_name), ZSTR_LEN(func->common.function_name), NULL, 2, arg1, arg2);
 	return 0;
 }
 /* }}} */
@@ -76,12 +76,3 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 /* }}} */
 
 #endif /* SPL_ENGINE_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

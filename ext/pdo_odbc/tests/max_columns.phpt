@@ -1,7 +1,7 @@
 --TEST--
 PDO ODBC varying character with max/no length
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo_odbc')) print 'skip not loaded';
 ?>
 --FILE--

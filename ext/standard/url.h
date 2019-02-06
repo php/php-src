@@ -59,10 +59,3 @@ PHP_FUNCTION(get_headers);
 #define PHP_QUERY_RFC3986 2
 
 #endif /* URL_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

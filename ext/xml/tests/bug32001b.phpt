@@ -104,7 +104,6 @@ foreach ($suite as $testcase) {
 	$testcase->run();
 }
 
-// vim600: sts=4 sw=4 ts=4 encoding=UTF-8
 ?>
 --EXPECTF--
 libxml2 Version => %s

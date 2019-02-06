@@ -203,11 +203,3 @@ static zend_always_inline int zend_cpu_supports_avx2() {
 #endif
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

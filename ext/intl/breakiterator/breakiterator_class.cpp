@@ -96,16 +96,16 @@ static int BreakIterator_compare_objects(zval *object1,
 /* }}} */
 
 /* {{{ clone handler for BreakIterator */
-static zend_object *BreakIterator_clone_obj(zval *object)
+static zend_object *BreakIterator_clone_obj(zend_object *object)
 {
 	BreakIterator_object	*bio_orig,
 							*bio_new;
 	zend_object				*ret_val;
 
-	bio_orig = Z_INTL_BREAKITERATOR_P(object);
+	bio_orig = php_intl_breakiterator_fetch_object(object);
 	intl_errors_reset(INTL_DATA_ERROR_P(bio_orig));
 
-	ret_val = BreakIterator_ce_ptr->create_object(Z_OBJCE_P(object));
+	ret_val = BreakIterator_ce_ptr->create_object(object->ce);
 	bio_new  = php_intl_breakiterator_fetch_object(ret_val);
 
 	zend_objects_clone_members(&bio_new->zo, &bio_orig->zo);
@@ -136,7 +136,7 @@ static zend_object *BreakIterator_clone_obj(zval *object)
 /* }}} */
 
 /* {{{ get_debug_info handler for BreakIterator */
-static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp)
+static HashTable *BreakIterator_get_debug_info(zend_object *object, int *is_temp)
 {
 	zval val;
 	HashTable *debug_info;
@@ -147,7 +147,7 @@ static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp)
 
 	debug_info = zend_new_array(8);
 
-	bio  = Z_INTL_BREAKITERATOR_P(object);
+	bio  = php_intl_breakiterator_fetch_object(object);
 	biter = bio->biter;
 
 	if (biter == NULL) {

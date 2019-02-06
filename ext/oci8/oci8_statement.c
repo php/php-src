@@ -1952,12 +1952,3 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_leng
 /* }}} */
 
 #endif /* HAVE_OCI8 */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -504,20 +504,22 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 		convert_to_string(arg);
 		*dest = Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		zend_object *zobj = Z_OBJ_P(arg);
+
 		if (Z_OBJ_HANDLER_P(arg, cast_object)) {
 			zval obj;
-			if (Z_OBJ_HANDLER_P(arg, cast_object)(arg, &obj, IS_STRING) == SUCCESS) {
-				zval_ptr_dtor(arg);
+			if (zobj->handlers->cast_object(zobj, &obj, IS_STRING) == SUCCESS) {
+				OBJ_RELEASE(zobj);
 				ZVAL_COPY_VALUE(arg, &obj);
 				*dest = Z_STR_P(arg);
 				return 1;
 			}
-		} else if (Z_OBJ_HANDLER_P(arg, get)) {
+		} else if (zobj->handlers->get) {
 			zval rv;
-			zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv);
+			zval *z = zobj->handlers->get(zobj, &rv);
 
 			if (Z_TYPE_P(z) != IS_OBJECT) {
-				zval_ptr_dtor(arg);
+				OBJ_RELEASE(zobj);
 				if (Z_TYPE_P(z) == IS_STRING) {
 					ZVAL_COPY_VALUE(arg, z);
 				} else {
@@ -1101,7 +1103,8 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args, zval *this
  * because it may call __set from the uninitialized object otherwise. */
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 {
-	const zend_object_handlers *obj_ht = Z_OBJ_HT_P(obj);
+	zend_object *zobj = Z_OBJ_P(obj);
+	zend_object_write_property_t write_property = zobj->handlers->write_property;
 	zend_class_entry *old_scope = EG(fake_scope);
 	zend_string *key;
 	zval *value;
@@ -1109,10 +1112,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 	EG(fake_scope) = Z_OBJCE_P(obj);
 	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, value) {
 		if (key) {
-			zval member;
-
-			ZVAL_STR(&member, key);
-			obj_ht->write_property(obj, &member, value, NULL);
+			write_property(zobj, key, value, NULL);
 		}
 	} ZEND_HASH_FOREACH_END();
 	EG(fake_scope) = old_scope;
@@ -1728,11 +1728,11 @@ ZEND_API int add_property_stringl_ex(zval *arg, const char *key, size_t key_len,
 
 ZEND_API int add_property_zval_ex(zval *arg, const char *key, size_t key_len, zval *value) /* {{{ */
 {
-	zval z_key;
+	zend_string *str;
 
-	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, value, NULL);
-	zval_ptr_dtor(&z_key);
+	str = zend_string_init(key, key_len, 0);
+	Z_OBJ_HANDLER_P(arg, write_property)(Z_OBJ_P(arg), str, value, NULL);
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -3143,16 +3143,18 @@ try_again:
 			zend_class_entry *calling_scope;
 			zend_function *fptr;
 			zend_object *object;
-			if (Z_OBJ_HANDLER_P(callable, get_closure)
-					&& Z_OBJ_HANDLER_P(callable, get_closure)(callable, &calling_scope, &fptr, &object) == SUCCESS) {
-				zend_class_entry *ce = Z_OBJCE_P(callable);
+			zend_object *zobj = Z_OBJ_P(callable);
+
+			if (zobj->handlers->get_closure
+					&& zobj->handlers->get_closure(zobj, &calling_scope, &fptr, &object) == SUCCESS) {
+				zend_class_entry *ce = zobj->ce;
 				zend_string *callable_name = zend_string_alloc(
 					ZSTR_LEN(ce->name) + sizeof("::__invoke") - 1, 0);
 				memcpy(ZSTR_VAL(callable_name), ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
 				memcpy(ZSTR_VAL(callable_name) + ZSTR_LEN(ce->name), "::__invoke", sizeof("::__invoke"));
 				return callable_name;
 			}
-			return zval_get_string(callable);
+			return zval_get_string_func(callable);
 		}
 		case IS_REFERENCE:
 			callable = Z_REFVAL_P(callable);
@@ -3277,7 +3279,7 @@ check_func:
 			}
 			return 0;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
+			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
 				return 1;
 			}
@@ -3944,13 +3946,11 @@ ZEND_API int zend_declare_class_constant_string(zend_class_entry *ce, const char
 
 ZEND_API void zend_update_property_ex(zend_class_entry *scope, zval *object, zend_string *name, zval *value) /* {{{ */
 {
-	zval property;
 	zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
-	ZVAL_STR(&property, name);
-	Z_OBJ_HT_P(object)->write_property(object, &property, value, NULL);
+	Z_OBJ_HT_P(object)->write_property(Z_OBJ_P(object), name, value, NULL);
 
 	EG(fake_scope) = old_scope;
 }
@@ -3958,14 +3958,14 @@ ZEND_API void zend_update_property_ex(zend_class_entry *scope, zval *object, zen
 
 ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zval *value) /* {{{ */
 {
-	zval property;
+	zend_string *property;
 	zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
-	ZVAL_STRINGL(&property, name, name_length);
-	Z_OBJ_HT_P(object)->write_property(object, &property, value, NULL);
-	zval_ptr_dtor(&property);
+	property = zend_string_init(name, name_length, 0);
+	Z_OBJ_HT_P(object)->write_property(Z_OBJ_P(object), property, value, NULL);
+	zend_string_release_ex(property, 0);
 
 	EG(fake_scope) = old_scope;
 }
@@ -3982,14 +3982,14 @@ ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, c
 
 ZEND_API void zend_unset_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length) /* {{{ */
 {
-	zval property;
+	zend_string *property;
 	zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
-	ZVAL_STRINGL(&property, name, name_length);
-	Z_OBJ_HT_P(object)->unset_property(object, &property, 0);
-	zval_ptr_dtor(&property);
+	property = zend_string_init(name, name_length, 0);
+	Z_OBJ_HT_P(object)->unset_property(Z_OBJ_P(object), property, 0);
+	zend_string_release_ex(property, 0);
 
 	EG(fake_scope) = old_scope;
 }
@@ -4148,13 +4148,12 @@ ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const 
 
 ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zval *object, zend_string *name, zend_bool silent, zval *rv) /* {{{ */
 {
-	zval property, *value;
+	zval *value;
 	zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
-	ZVAL_STR(&property, name);
-	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, rv);
+	value = Z_OBJ_HT_P(object)->read_property(Z_OBJ_P(object), name, silent?BP_VAR_IS:BP_VAR_R, NULL, rv);
 
 	EG(fake_scope) = old_scope;
 	return value;
@@ -4348,13 +4347,3 @@ ZEND_API zend_bool zend_is_countable(zval *countable) /* {{{ */
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

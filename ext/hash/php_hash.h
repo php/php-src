@@ -159,13 +159,3 @@ static inline void php_hash_bin2hex(char *out, const unsigned char *in, size_t i
 }
 
 #endif	/* PHP_HASH_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

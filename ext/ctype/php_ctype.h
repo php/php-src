@@ -34,11 +34,3 @@ extern zend_module_entry ctype_module_entry;
 #endif
 
 #endif	/* PHP_CTYPE_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

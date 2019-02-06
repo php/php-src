@@ -192,12 +192,3 @@ PHPAPI php_hrtime_t php_hrtime_current(void)
 {/*{{{*/
 	return _timer_current();
 }/*}}}*/
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

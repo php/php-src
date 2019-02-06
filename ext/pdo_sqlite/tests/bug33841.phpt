@@ -1,7 +1,7 @@
 --TEST--
 PDO SQLite Bug #33841 (rowCount() does not work on prepared statements)
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 ?>
 --FILE--

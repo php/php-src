@@ -127,10 +127,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define phpext_libxml_ptr libxml_module_ptr
 
 #endif /* PHP_LIBXML_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

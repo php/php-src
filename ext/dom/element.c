@@ -1277,12 +1277,3 @@ PHP_FUNCTION(dom_element_set_id_attribute_node)
 /* }}} end dom_element_set_id_attribute_node */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

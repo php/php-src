@@ -25,12 +25,3 @@ void phar_intercept_functions_shutdown(void);
 void phar_save_orig_functions(void);
 void phar_restore_orig_functions(void);
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

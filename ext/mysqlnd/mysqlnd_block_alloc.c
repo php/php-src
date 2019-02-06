@@ -208,12 +208,3 @@ mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool)
 	DBG_VOID_RETURN;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -85,12 +85,3 @@ mysqlnd_create_read_buffer(const size_t count)
 	DBG_RETURN(ret);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

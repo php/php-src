@@ -183,10 +183,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define phpext_mbstring_ptr mbstring_module_ptr
 
 #endif		/* _MBSTRING_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

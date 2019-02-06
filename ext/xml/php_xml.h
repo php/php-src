@@ -42,10 +42,3 @@ extern zend_module_entry xml_module_entry;
 #define phpext_xml_ptr xml_module_ptr
 
 #endif /* PHP_XML_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

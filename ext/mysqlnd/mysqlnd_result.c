@@ -2041,13 +2041,3 @@ mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_co
 	DBG_RETURN(ret);
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

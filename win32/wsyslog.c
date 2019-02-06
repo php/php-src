@@ -150,11 +150,3 @@ void openlog(const char *ident, int logopt, int facility)
 	PW32G(log_header) = malloc(header_len*sizeof(char));
 	sprintf_s(PW32G(log_header), header_len, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
 }
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

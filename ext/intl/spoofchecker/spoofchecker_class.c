@@ -108,15 +108,15 @@ static const zend_function_entry Spoofchecker_class_functions[] = {
 };
 /* }}} */
 
-static zend_object *spoofchecker_clone_obj(zval *object) /* {{{ */
+static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 {
 	zend_object *new_obj_val;
 	Spoofchecker_object *sfo, *new_sfo;
 
-    sfo = Z_INTL_SPOOFCHECKER_P(object);
+    sfo = php_intl_spoofchecker_fetch_object(object);
     intl_error_reset(SPOOFCHECKER_ERROR_P(sfo));
 
-	new_obj_val = Spoofchecker_ce_ptr->create_object(Z_OBJCE_P(object));
+	new_obj_val = Spoofchecker_ce_ptr->create_object(object->ce);
 	new_sfo = php_intl_spoofchecker_fetch_object(new_obj_val);
 	/* clone standard parts */
 	zend_objects_clone_members(&new_sfo->zo, &sfo->zo);
@@ -183,12 +183,3 @@ void spoofchecker_object_destroy(Spoofchecker_object* co)
 	intl_error_reset(SPOOFCHECKER_ERROR_P(co));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

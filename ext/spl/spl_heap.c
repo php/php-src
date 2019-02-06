@@ -126,7 +126,7 @@ static void spl_ptr_heap_pqueue_elem_ctor(zval *zv) { /* {{{ */
 static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, zend_long *result) { /* {{{ */
 	zval zresult;
 
-	zend_call_method_with_2_params(object, heap_object->std.ce, &heap_object->fptr_cmp, "compare", &zresult, a, b);
+	zend_call_method_with_2_params(Z_OBJ_P(object), heap_object->std.ce, &heap_object->fptr_cmp, "compare", &zresult, a, b);
 
 	if (EG(exception)) {
 		return FAILURE;
@@ -378,7 +378,7 @@ static void spl_heap_object_free_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *orig, int clone_orig) /* {{{ */
+static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig) /* {{{ */
 {
 	spl_heap_object   *intern;
 	zend_class_entry  *parent = class_type;
@@ -393,7 +393,7 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 	intern->fptr_cmp   = NULL;
 
 	if (orig) {
-		spl_heap_object *other = Z_SPLHEAP_P(orig);
+		spl_heap_object *other = spl_heap_from_obj(orig);
 		intern->ce_get_iterator = other->ce_get_iterator;
 
 		if (clone_orig) {
@@ -462,13 +462,9 @@ static zend_object *spl_heap_object_new(zend_class_entry *class_type) /* {{{ */
 }
 /* }}} */
 
-static zend_object *spl_heap_object_clone(zval *zobject) /* {{{ */
+static zend_object *spl_heap_object_clone(zend_object *old_object) /* {{{ */
 {
-	zend_object        *old_object;
-	zend_object        *new_object;
-
-	old_object  = Z_OBJ_P(zobject);
-	new_object = spl_heap_object_new_ex(old_object->ce, zobject, 1);
+	zend_object *new_object = spl_heap_object_new_ex(old_object->ce, old_object, 1);
 
 	zend_objects_clone_members(new_object, old_object);
 
@@ -476,9 +472,9 @@ static zend_object *spl_heap_object_clone(zval *zobject) /* {{{ */
 }
 /* }}} */
 
-static int spl_heap_object_count_elements(zval *object, zend_long *count) /* {{{ */
+static int spl_heap_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(object);
+	spl_heap_object *intern = spl_heap_from_obj(object);
 
 	if (intern->fptr_count) {
 		zval rv;
@@ -498,8 +494,8 @@ static int spl_heap_object_count_elements(zval *object, zend_long *count) /* {{{
 }
 /* }}} */
 
-static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zval *obj, int *is_temp) { /* {{{ */
-	spl_heap_object *intern = Z_SPLHEAP_P(obj);
+static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zend_object *obj, int *is_temp) { /* {{{ */
+	spl_heap_object *intern = spl_heap_from_obj(obj);
 	zval tmp, heap_array;
 	zend_string *pnstr;
 	HashTable *debug_info;
@@ -545,9 +541,9 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 }
 /* }}} */
 
-static HashTable *spl_heap_object_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *spl_heap_object_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(obj);
+	spl_heap_object *intern = spl_heap_from_obj(obj);
 	*gc_data = intern->heap->elements;
 	*gc_data_count = intern->heap->count;
 
@@ -555,13 +551,13 @@ static HashTable *spl_heap_object_get_gc(zval *obj, zval **gc_data, int *gc_data
 }
 /* }}} */
 
-static HashTable* spl_heap_object_get_debug_info(zval *obj, int *is_temp) /* {{{ */
+static HashTable* spl_heap_object_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
 	return spl_heap_object_get_debug_info_helper(spl_ce_SplHeap, obj, is_temp);
 }
 /* }}} */
 
-static HashTable* spl_pqueue_object_get_debug_info(zval *obj, int *is_temp) /* {{{ */
+static HashTable* spl_pqueue_object_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
 	return spl_heap_object_get_debug_info_helper(spl_ce_SplPriorityQueue, obj, is_temp);
 }
@@ -1244,12 +1240,3 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

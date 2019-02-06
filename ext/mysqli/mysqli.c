@@ -297,22 +297,16 @@ static int mysqli_write_na(mysqli_object *obj, zval *newval)
 /* }}} */
 
 /* {{{ mysqli_read_property */
-zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv)
+zval *mysqli_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
-	zval tmp_member;
 	zval *retval;
 	mysqli_object *obj;
 	mysqli_prop_handler *hnd = NULL;
 
-	obj = Z_MYSQLI_P(object);
-
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-	}
+	obj = php_mysqli_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 
 	if (hnd) {
@@ -321,11 +315,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		retval = zend_std_read_property(object, member, type, cache_slot, rv);
-	}
-
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
+		retval = zend_std_read_property(object, name, type, cache_slot, rv);
 	}
 
 	return retval;
@@ -333,31 +323,21 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 /* }}} */
 
 /* {{{ mysqli_write_property */
-zval *mysqli_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *mysqli_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	zval tmp_member;
 	mysqli_object *obj;
 	mysqli_prop_handler *hnd = NULL;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-	}
-
-	obj = Z_MYSQLI_P(object);
+	obj = php_mysqli_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		value = zend_std_write_property(object, member, value, cache_slot);
-	}
-
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
+		value = zend_std_write_property(object, name, value, cache_slot);
 	}
 
 	return value;
@@ -376,20 +356,20 @@ void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysq
 }
 /* }}} */
 
-static int mysqli_object_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
+static int mysqli_object_has_property(zend_object *object, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
 {
-	mysqli_object *obj = Z_MYSQLI_P(object);
+	mysqli_object *obj = php_mysqli_fetch_object(object);
 	mysqli_prop_handler	*p;
 	int ret = 0;
 
-	if ((p = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member))) != NULL) {
+	if ((p = zend_hash_find_ptr(obj->prop_handler, name)) != NULL) {
 		switch (has_set_exists) {
 			case ZEND_PROPERTY_EXISTS:
 				ret = 1;
 				break;
 			case ZEND_PROPERTY_NOT_EMPTY: {
 				zval rv;
-				zval *value = mysqli_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
+				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					convert_to_boolean(value);
 					ret = Z_TYPE_P(value) == IS_TRUE ? 1 : 0;
@@ -398,7 +378,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 			}
 			case ZEND_PROPERTY_ISSET: {
 				zval rv;
-				zval *value = mysqli_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
+				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					ret = Z_TYPE_P(value) != IS_NULL? 1 : 0;
 					zval_ptr_dtor(value);
@@ -409,27 +389,26 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				php_error_docref(NULL, E_WARNING, "Invalid value for has_set_exists");
 		}
 	} else {
-		ret = zend_std_has_property(object, member, has_set_exists, cache_slot);
+		ret = zend_std_has_property(object, name, has_set_exists, cache_slot);
 	}
 
 	return ret;
 } /* }}} */
 
-HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp)
+HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 {
-	mysqli_object *obj = Z_MYSQLI_P(object);
+	mysqli_object *obj = php_mysqli_fetch_object(object);
 	HashTable *retval, *props = obj->prop_handler;
 	mysqli_prop_handler *entry;
 
 	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
 	ZEND_HASH_FOREACH_PTR(props, entry) {
-		zval rv, member;
+		zval rv;
 		zval *value;
-		ZVAL_STR(&member, entry->name);
-		value = mysqli_read_property(object, &member, BP_VAR_IS, 0, &rv);
+		value = mysqli_read_property(object, entry->name, BP_VAR_IS, 0, &rv);
 		if (value != &EG(uninitialized_zval)) {
-			zend_hash_add(retval, Z_STR(member), value);
+			zend_hash_add(retval, entry->name, value);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1315,12 +1294,3 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
