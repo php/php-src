@@ -1148,7 +1148,7 @@ static void* dasm_labels[zend_lb_MAX];
 |			add dword [Z_LVAL_P(zv)], 2
 ||		}
 |	.else
-|		add dword [Z_LVAL_P(zv)], 1
+|		add dword [Z_LVAL_P(zv)], 2
 |	.endif
 |.endmacro
 
