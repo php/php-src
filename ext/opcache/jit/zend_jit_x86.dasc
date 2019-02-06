@@ -1195,13 +1195,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		if (has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 ||			zend_uchar type = concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 ||			if (type == IS_STRING && !ZEND_DEBUG) {
-|				test byte [FCARG1a + 5], IS_STR_PERSISTENT
-|				jnz >1
 |				EXT_CALL _efree, r0
-|				jmp >2
-|1:
-|				EXT_CALL free, r0
-|2:
 ||				break;
 ||			} else if (type == IS_ARRAY) {
 ||				if (opline) {
