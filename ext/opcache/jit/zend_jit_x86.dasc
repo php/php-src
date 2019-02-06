@@ -795,7 +795,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	if (Z_TYPE_P(zv) > IS_TRUE) {
 ||		if (Z_TYPE_P(zv) == IS_DOUBLE) {
 ||			zend_reg dst_reg = (Z_MODE(dst_addr) == IS_REG) ?
-||				Z_REG(dst_addr) : ((Z_MODE(dst_addr) == IS_REG) ? Z_MODE(res_addr) : ZREG_XMM0);
+||				Z_REG(dst_addr) : ((Z_MODE(res_addr) == IS_REG) ? Z_MODE(res_addr) : ZREG_XMM0);
 |			.if X64 or SSE
 ||				if (Z_DVAL_P(zv) == 0.0 && !is_signed(Z_DVAL_P(zv))) {
 ||					if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
