@@ -875,9 +875,7 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_INTERNAL_FUNCTION				1
 #define ZEND_USER_FUNCTION					2
-#define ZEND_OVERLOADED_FUNCTION			3
 #define	ZEND_EVAL_CODE						4
-#define ZEND_OVERLOADED_FUNCTION_TEMPORARY	5
 
 /* A quick check (type == ZEND_USER_FUNCTION || type == ZEND_EVAL_CODE) */
 #define ZEND_USER_CODE(type) ((type & 1) == 0)

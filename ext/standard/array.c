@@ -3498,7 +3498,7 @@ PHP_FUNCTION(array_slice)
 	}
 
 	/* Clamp the offset.. */
-	if (offset > num_in) {
+	if (offset > (zend_long) num_in) {
 		ZVAL_EMPTY_ARRAY(return_value);
 		return;
 	} else if (offset < 0 && (offset = (num_in + offset)) < 0) {

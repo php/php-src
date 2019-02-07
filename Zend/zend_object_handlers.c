@@ -1845,7 +1845,6 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_unset_dimension,				/* unset_dimension */
 	zend_std_get_properties,				/* get_properties */
 	zend_std_get_method,					/* get_method */
-	NULL,									/* call_method */
 	zend_std_get_constructor,				/* get_constructor */
 	zend_std_get_class_name,				/* get_class_name */
 	zend_std_compare_objects,				/* compare_objects */

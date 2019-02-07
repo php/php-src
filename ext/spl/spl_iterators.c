@@ -1367,47 +1367,6 @@ static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *
 	return function_handler;
 }
 
-#if MBO_0
-int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
-{
-	zval ***func_params, func;
-	zval retval;
-	int arg_count;
-	int current = 0;
-	int success;
-	void **p;
-	spl_dual_it_object   *intern;
-
-	intern = Z_SPLDUAL_IT_P(ZEND_THIS);
-
-	ZVAL_STRING(&func, method, 0);
-
-	p = EG(argument_stack).top_element-2;
-	arg_count = (zend_ulong) *p;
-
-	func_params = safe_emalloc(sizeof(zval **), arg_count, 0);
-
-	current = 0;
-	while (arg_count-- > 0) {
-		func_params[current] = (zval **) p - (arg_count-current);
-		current++;
-	}
-	arg_count = current; /* restore */
-
-	if (call_user_function_ex(EG(function_table), NULL, &func, &retval, arg_count, func_params, 0, NULL) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		RETURN_ZVAL(&retval, 0, 0);
-
-		success = SUCCESS;
-	} else {
-		zend_throw_error(NULL, "Unable to call %s::%s()", intern->inner.ce->name, method);
-		success = FAILURE;
-	}
-
-	efree(func_params);
-	return success;
-}
-#endif
-
 #define SPL_CHECK_CTOR(intern, classname) \
 	if (intern->dit_type == DIT_Unknown) { \
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Classes derived from %s must call %s::__construct()", \
@@ -3682,7 +3641,6 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	memcpy(&spl_handlers_dual_it, &std_object_handlers, sizeof(zend_object_handlers));
 	spl_handlers_dual_it.offset = XtOffsetOf(spl_dual_it_object, std);
 	spl_handlers_dual_it.get_method = spl_dual_it_get_method;
-	/*spl_handlers_dual_it.call_method = spl_dual_it_call_method;*/
 	spl_handlers_dual_it.clone_obj = NULL;
 	spl_handlers_dual_it.dtor_obj = spl_dual_it_dtor;
 	spl_handlers_dual_it.free_obj = spl_dual_it_free_storage;
