@@ -2,6 +2,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
   a. Object Handlers API
+  b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
 
 2. Build system changes
   a. Abstract
@@ -14,10 +15,15 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
- a. Object Handlers API and some related functions, e.g. zend_call_method() and
-    zend_objects_clone_obj() were changed to receive zend_object* instead of
-    zval* and zend_string* instead of zval* for property names.
+  a. Object Handlers API and some related functions, e.g. zend_call_method() and
+     zend_objects_clone_obj() were changed to receive zend_object* instead of
+     zval* and zend_string* instead of zval* for property names.
 
+  b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
+     were removed. ZEND_INTERNAL_FUNCTION with ZEND_ACC_CALL_VIA_HANDLER and
+     defined "handler" callback should be used instead. This "handler" callback
+     should also take care about function cleanup. See ext/zend_test/test.c
+     for example.
 
 ========================
 2. Build system changes

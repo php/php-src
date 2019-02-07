@@ -120,7 +120,6 @@ typedef zend_array *(*zend_object_get_properties_for_t)(zend_object *object, zen
 /* args on stack! */
 /* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback for this.
  */
-typedef int (*zend_object_call_method_t)(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS);
 typedef zend_function *(*zend_object_get_method_t)(zend_object **object, zend_string *method, const zval *key);
 typedef zend_function *(*zend_object_get_constructor_t)(zend_object *object);
 
@@ -171,7 +170,6 @@ struct _zend_object_handlers {
 	zend_object_unset_dimension_t			unset_dimension;      /* required */
 	zend_object_get_properties_t			get_properties;       /* required */
 	zend_object_get_method_t				get_method;           /* required */
-	zend_object_call_method_t				call_method;          /* optional */
 	zend_object_get_constructor_t			get_constructor;      /* required */
 	zend_object_get_class_name_t			get_class_name;       /* required */
 	zend_object_compare_t					compare_objects;      /* optional */

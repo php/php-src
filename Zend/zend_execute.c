@@ -4069,43 +4069,6 @@ already_compiled:
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zval *ret) /* {{{ */
-{
-	zend_function *fbc = call->func;
-	zend_object *object;
-
-	/* Not sure what should be done here if it's a static method */
-	if (UNEXPECTED(Z_TYPE(call->This) != IS_OBJECT)) {
-		zend_vm_stack_free_args(call);
-		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			zend_string_release_ex(fbc->common.function_name, 0);
-		}
-		efree(fbc);
-		zend_vm_stack_free_call_frame(call);
-
-		zend_throw_error(NULL, "Cannot call overloaded function for non-object");
-		return 0;
-	}
-
-	object = Z_OBJ(call->This);
-
-	ZVAL_NULL(ret);
-
-	EG(current_execute_data) = call;
-	object->handlers->call_method(fbc->common.function_name, object, call, ret);
-	EG(current_execute_data) = call->prev_execute_data;
-
-	zend_vm_stack_free_args(call);
-
-	if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-		zend_string_release_ex(fbc->common.function_name, 0);
-	}
-	efree(fbc);
-
-	return 1;
-}
-/* }}} */
-
 static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *array_ptr, int by_ref OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(array_ptr);

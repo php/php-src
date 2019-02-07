@@ -963,9 +963,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
 		}
-	} else if (EXPECTED(fbc->type < ZEND_USER_FUNCTION)) {
+	} else {
 		zval retval;
 
+		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
@@ -996,22 +997,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 		EG(current_execute_data) = execute_data;
 		zend_vm_stack_free_args(call);
-
-		if (!0) {
-			zval_ptr_dtor(ret);
-		}
-
-	} else { /* ZEND_OVERLOADED_FUNCTION */
-		zval retval;
-
-		ret = 0 ? EX_VAR(opline->result.var) : &retval;
-
-		call->prev_execute_data = execute_data;
-
-		if (UNEXPECTED(!zend_do_fcall_overloaded(call, ret))) {
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
 
 		if (!0) {
 			zval_ptr_dtor(ret);
@@ -1084,9 +1069,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
 		}
-	} else if (EXPECTED(fbc->type < ZEND_USER_FUNCTION)) {
+	} else {
 		zval retval;
 
+		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
@@ -1117,22 +1103,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 		EG(current_execute_data) = execute_data;
 		zend_vm_stack_free_args(call);
-
-		if (!1) {
-			zval_ptr_dtor(ret);
-		}
-
-	} else { /* ZEND_OVERLOADED_FUNCTION */
-		zval retval;
-
-		ret = 1 ? EX_VAR(opline->result.var) : &retval;
-
-		call->prev_execute_data = execute_data;
-
-		if (UNEXPECTED(!zend_do_fcall_overloaded(call, ret))) {
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
-		}
 
 		if (!1) {
 			zval_ptr_dtor(ret);
