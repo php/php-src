@@ -185,8 +185,6 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - Obsolescent macros AC_FUNC_VPRINTF and AC_FUNC_UTIME_NULL have been
       removed. Symbols HAVE_VPRINTF and HAVE_UTIME_NULL are no longer defined
       since they are not needed on the current systems.
-    - The disable|enable-opcache-file configure options have been removed in
-      favor of the opcache.file_cache ini directive.
 
   c. Windows build system changes
 

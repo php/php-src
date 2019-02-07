@@ -211,6 +211,10 @@ PHP 7.4 UPGRADE NOTES
 - Libxml:
   . All libxml based extensions now require libxml 2.7.6 or newer.
 
+- OPcache:
+  . The --disable|enable-opcache-file configure options have been removed in
+    favor of the opcache.file_cache INI directive.
+
 - Reflection:
   . Numeric value of class, property, function and constant modifiers was
     changed. Don't filter methods and properties through
