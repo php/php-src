@@ -1246,7 +1246,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 	va_list args;
 #endif
 	va_list usr_copy;
-	zval params[5];
+	zval params[4];
 	zval retval;
 	const char *error_filename;
 	uint32_t error_lineno = 0;
@@ -1255,7 +1255,6 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 	zend_class_entry *saved_class_entry;
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
-	zend_array *symbol_table;
 	zend_class_entry *orig_fake_scope;
 
 	/* Report about uncaught exception in case of fatal errors */
@@ -1385,15 +1384,6 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 
 			ZVAL_LONG(&params[3], error_lineno);
 
-			symbol_table = zend_rebuild_symbol_table();
-
-			/* during shutdown the symbol table table can be still null */
-			if (!symbol_table) {
-				ZVAL_NULL(&params[4]);
-			} else {
-				ZVAL_ARR(&params[4], zend_array_dup(symbol_table));
-			}
-
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
 			ZVAL_UNDEF(&EG(user_error_handler));
 
@@ -1414,7 +1404,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 			orig_fake_scope = EG(fake_scope);
 			EG(fake_scope) = NULL;
 
-			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params) == SUCCESS) {
+			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
 						zend_error_cb(type, error_filename, error_lineno, format, args);
@@ -1435,7 +1425,6 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 				CG(in_compilation) = 1;
 			}
 
-			zval_ptr_dtor(&params[4]);
 			zval_ptr_dtor(&params[2]);
 			zval_ptr_dtor(&params[1]);
 

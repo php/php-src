@@ -74069,8 +74069,8 @@ static const void* ZEND_FASTCALL zend_vm_get_opcode_handler_ex(uint32_t spec, co
 				offset += 1;
 			} else if (op->extended_value == ZEND_ASSIGN_OBJ) {
 				offset += 2;
-		} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {
-			offset += 3;
+			} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+				offset += 3;
 			}
 		} else if (spec & SPEC_RULE_ISSET) {
 			offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);
@@ -74124,11 +74124,13 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 			}
 		}
 		else if (spec & SPEC_RULE_DIM_OBJ) {
-			offset = offset * 3;
+			offset = offset * 4;
 			if (op->extended_value == ZEND_ASSIGN_DIM) {
 				offset += 1;
 			} else if (op->extended_value == ZEND_ASSIGN_OBJ) {
 				offset += 2;
+			} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+				offset += 3;
 			}
 		}
 		else if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);

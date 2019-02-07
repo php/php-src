@@ -2772,8 +2772,8 @@ function gen_vm($def, $skel) {
 				out($f,	"\t\t\t\toffset += 1;\n");
 				out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
 				out($f,	"\t\t\t\toffset += 2;\n");
-				out($f, "\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
-				out($f,	"\t\t\toffset += 3;\n");
+				out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
+				out($f,	"\t\t\t\toffset += 3;\n");
 				out($f, "\t\t\t}\n");
 				$else = "} else ";
 			}
@@ -2870,11 +2870,13 @@ function gen_vm($def, $skel) {
 				}
 				if (isset($used_extra_spec["DIM_OBJ"])) {
 					out($f, "\t\t{$else}if (spec & SPEC_RULE_DIM_OBJ) {\n");
-					out($f,	"\t\t\toffset = offset * 3;\n");
+					out($f,	"\t\t\toffset = offset * 4;\n");
 					out($f, "\t\t\tif (op->extended_value == ZEND_ASSIGN_DIM) {\n");
 					out($f,	"\t\t\t\toffset += 1;\n");
 					out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
 					out($f,	"\t\t\t\toffset += 2;\n");
+					out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
+					out($f,	"\t\t\t\toffset += 3;\n");
 					out($f, "\t\t\t}\n");
 					out($f, "\t\t}\n");
 					$else = "else ";
