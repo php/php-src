@@ -249,7 +249,6 @@ static ZEND_INI_MH(OnEnable)
 	}
 }
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 static ZEND_INI_MH(OnUpdateFileCache)
 {
 	if (new_value) {
@@ -274,7 +273,6 @@ static ZEND_INI_MH(OnUpdateFileCache)
 	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	return SUCCESS;
 }
-#endif
 
 ZEND_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("opcache.enable"             , "1", PHP_INI_ALL,    OnEnable,     enabled                             , zend_accel_globals, accel_globals)
@@ -316,11 +314,9 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.mmap_base", NULL, PHP_INI_SYSTEM,	OnUpdateString,	                             accel_directives.mmap_base,                 zend_accel_globals, accel_globals)
 #endif
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
-#endif
 #if ENABLE_FILE_CACHE_FALLBACK
 	STD_PHP_INI_ENTRY("opcache.file_cache_fallback"           , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_fallback,           zend_accel_globals, accel_globals)
 #endif
@@ -413,12 +409,10 @@ void zend_accel_override_file_functions(void)
 {
 	zend_function *old_function;
 	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
-#ifdef HAVE_OPCACHE_FILE_CACHE
 		if (file_cache_only) {
 			zend_accel_error(ACCEL_LOG_WARNING, "file_override_enabled has no effect when file_cache_only is set");
 			return;
 		}
-#endif
 		/* override file_exists */
 		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "file_exists", sizeof("file_exists")-1)) != NULL) {
 			orig_file_exists = old_function->internal_function.handler;
@@ -449,11 +443,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	php_info_print_table_start();
 
 	if (ZCG(enabled) && accel_startup_ok &&
-#ifdef HAVE_OPCACHE_FILE_CACHE
 		((ZCG(counted) || ZCSG(accelerator_enabled)) || file_cache_only)
-#else
-		(ZCG(counted) || ZCSG(accelerator_enabled))
-#endif
 	) {
 		php_info_print_table_row(2, "Opcode Caching", "Up and Running");
 	} else {
@@ -464,7 +454,6 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "Optimization", "Disabled");
 	}
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	if (!file_cache_only) {
 		php_info_print_table_row(2, "SHM Cache", "Enabled");
 	} else {
@@ -482,7 +471,6 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Startup", "OK");
 		}
 	} else
-#endif
 	if (ZCG(enabled)) {
 		if (!accel_startup_ok || zps_api_failure_reason) {
 			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
@@ -620,7 +608,6 @@ static ZEND_FUNCTION(opcache_get_status)
 	/* Trivia */
 	add_assoc_bool(return_value, "opcache_enabled", ZCG(enabled) && (ZCG(counted) || ZCSG(accelerator_enabled)));
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache) {
 		add_assoc_string(return_value, "file_cache", ZCG(accel_directives).file_cache);
 	}
@@ -628,7 +615,6 @@ static ZEND_FUNCTION(opcache_get_status)
 		add_assoc_bool(return_value, "file_cache_only", 1);
 		return;
 	}
-#endif
 
 	add_assoc_bool(return_value, "cache_full", ZSMMG(memory_exhausted));
 	add_assoc_bool(return_value, "restart_pending", ZCSG(restart_pending));
@@ -782,11 +768,9 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_string(&directives, "opcache.lockfile_path",          STRING_NOT_NULL(ZCG(accel_directives).lockfile_path));
 #endif
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	add_assoc_string(&directives, "opcache.file_cache",                    ZCG(accel_directives).file_cache ? ZCG(accel_directives).file_cache : "");
 	add_assoc_bool(&directives,   "opcache.file_cache_only",               ZCG(accel_directives).file_cache_only);
 	add_assoc_bool(&directives,   "opcache.file_cache_consistency_checks", ZCG(accel_directives).file_cache_consistency_checks);
-#endif
 
 	add_assoc_zval(return_value, "directives", &directives);
 
