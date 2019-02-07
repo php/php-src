@@ -29,7 +29,6 @@
 #include "zend_operators.h"
 #include "zend_interfaces.h"
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 #define zend_set_str_gc_flags(str) do { \
 	if (file_cache_only) { \
 		GC_TYPE_INFO(str) = IS_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
@@ -37,11 +36,6 @@
 		GC_TYPE_INFO(str) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
 	} \
 } while (0)
-#else
-#define zend_set_str_gc_flags(str) do {\
-	GC_TYPE_INFO(str) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
-} while (0)
-#endif
 
 #define zend_accel_store_string(str) do { \
 		zend_string *new_str = zend_shared_alloc_get_xlat_entry(str); \
