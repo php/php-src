@@ -2341,9 +2341,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		position= (int)Z_LVAL_P(parameter);
 		if (position < 0 || (uint32_t)position >= num_args) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
-					zend_string_release_ex(fptr->common.function_name, 0);
-				}
+				zend_string_release_ex(fptr->common.function_name, 0);
 				zend_free_trampoline(fptr);
 			}
 			if (is_closure) {
@@ -2380,9 +2378,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		}
 		if (position == -1) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
-					zend_string_release_ex(fptr->common.function_name, 0);
-				}
+				zend_string_release_ex(fptr->common.function_name, 0);
 				zend_free_trampoline(fptr);
 			}
 			if (is_closure) {

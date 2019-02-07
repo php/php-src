@@ -3014,8 +3014,7 @@ get_function_via_handler:
 					    (!fcc->function_handler->common.scope ||
 					     !instanceof_function(ce_org, fcc->function_handler->common.scope))) {
 						if (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-							if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION &&
-								fcc->function_handler->common.function_name) {
+							if (fcc->function_handler->common.function_name) {
 								zend_string_release_ex(fcc->function_handler->common.function_name, 0);
 							}
 							zend_free_trampoline(fcc->function_handler);
@@ -3206,11 +3205,8 @@ check_func:
 			ret = zend_is_callable_check_func(check_flags, callable, fcc, strict_class, error);
 			if (fcc == &fcc_local &&
 			    fcc->function_handler &&
-				((fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
-			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
-			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
-				if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION &&
-					fcc->function_handler->common.function_name) {
+				(fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+				if (fcc->function_handler->common.function_name) {
 					zend_string_release_ex(fcc->function_handler->common.function_name, 0);
 				}
 				zend_free_trampoline(fcc->function_handler);
@@ -3322,12 +3318,8 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_nam
 			add_next_index_str(callable, zend_string_copy(fcc.function_handler->common.function_name));
 		}
 		if (fcc.function_handler &&
-			((fcc.function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
-		     fcc.function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
-		     fcc.function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
-			if (fcc.function_handler->type != ZEND_OVERLOADED_FUNCTION) {
-				zend_string_release_ex(fcc.function_handler->common.function_name, 0);
-			}
+			(fcc.function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+			zend_string_release_ex(fcc.function_handler->common.function_name, 0);
 			zend_free_trampoline(fcc.function_handler);
 		}
 		return 1;

@@ -246,11 +246,42 @@ static void function_dtor(zval *zv)
 static PHP_FUNCTION(com_method_handler)
 {
 	zval *object = getThis();
+	zend_string *method = EX(func)->common.function_name;
+	zval *args = NULL;
+	php_com_dotnet_object *obj = CDNO_FETCH(object);
+	int nargs;
+	VARIANT v;
+	int ret = FAILURE;
 
-	Z_OBJ_HANDLER_P(object, call_method)(
-			((zend_internal_function*)EX(func))->function_name,
-			Z_OBJ_P(object),
-			INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (V_VT(&obj->v) != VT_DISPATCH) {
+		goto exit;
+	}
+
+	nargs = ZEND_NUM_ARGS();
+
+	if (nargs) {
+		args = (zval *)safe_emalloc(sizeof(zval), nargs, 0);
+		zend_get_parameters_array_ex(nargs, args);
+	}
+
+	VariantInit(&v);
+
+	if (SUCCESS == php_com_do_invoke_byref(obj, (zend_internal_function*)EX(func), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args)) {
+		php_com_zval_from_variant(return_value, &v, obj->code_page);
+		ret = SUCCESS;
+		VariantClear(&v);
+	}
+
+	if (args) {
+		efree(args);
+	}
+
+exit:
+	/* Cleanup trampoline */
+	ZEND_ASSERT(EX(func)->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+	zend_string_release(EX(func)->common.function_name);
+	zend_free_trampoline(EX(func));
+	EX(func) = NULL;
 }
 
 static zend_function *com_method_get(zend_object **object_ptr, zend_string *name, const zval *key)
@@ -270,7 +301,8 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 
 	/* check cache */
 	if (obj->method_cache == NULL || NULL == (fptr = zend_hash_find_ptr(obj->method_cache, name))) {
-		f.type = ZEND_OVERLOADED_FUNCTION;
+		memset(&f, 0, sizeof(zend_internal_function));
+		f.type = ZEND_INTERNAL_FUNCTION;
 		f.num_args = 0;
 		f.arg_info = NULL;
 		f.scope = obj->ce;
@@ -345,6 +377,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 	if (fptr) {
 		/* duplicate this into a new chunk of emalloc'd memory,
 		 * since the engine will efree it */
+		zend_string_addref(fptr->function_name);
 		func = emalloc(sizeof(*fptr));
 		memcpy(func, fptr, sizeof(*fptr));
 
@@ -352,40 +385,6 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 	}
 
 	return NULL;
-}
-
-static int com_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS)
-{
-	zval *args = NULL;
-	php_com_dotnet_object *obj = (php_com_dotnet_object*)object;
-	int nargs;
-	VARIANT v;
-	int ret = FAILURE;
-
-	if (V_VT(&obj->v) != VT_DISPATCH) {
-		return FAILURE;
-	}
-
-	nargs = ZEND_NUM_ARGS();
-
-	if (nargs) {
-		args = (zval *)safe_emalloc(sizeof(zval), nargs, 0);
-		zend_get_parameters_array_ex(nargs, args);
-	}
-
-	VariantInit(&v);
-
-	if (SUCCESS == php_com_do_invoke_byref(obj, (zend_internal_function*)EX(func), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args)) {
-		php_com_zval_from_variant(return_value, &v, obj->code_page);
-		ret = SUCCESS;
-		VariantClear(&v);
-	}
-
-	if (args) {
-		efree(args);
-	}
-
-	return ret;
 }
 
 static zend_function *com_constructor_get(zend_object *object)
@@ -554,7 +553,6 @@ zend_object_handlers php_com_object_handlers = {
 	com_dimension_delete,
 	com_properties_get,
 	com_method_get,
-	com_call_method,
 	com_constructor_get,
 	com_class_name_get,
 	com_objects_compare,

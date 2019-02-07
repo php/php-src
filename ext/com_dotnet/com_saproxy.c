@@ -319,11 +319,6 @@ static zend_function *saproxy_method_get(zend_object **object, zend_string *name
 	return NULL;
 }
 
-static int saproxy_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS)
-{
-	return FAILURE;
-}
-
 static zend_function *saproxy_constructor_get(zend_object *object)
 {
 	/* user cannot instantiate */
@@ -410,7 +405,6 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_dimension_delete,
 	saproxy_properties_get,
 	saproxy_method_get,
-	saproxy_call_method,
 	saproxy_constructor_get,
 	saproxy_class_name_get,
 	saproxy_objects_compare,

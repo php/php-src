@@ -2656,11 +2656,6 @@ static zend_function *row_method_get(
 	return fbc;
 }
 
-static int row_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS)
-{
-	return FAILURE;
-}
-
 static zend_function *row_get_ctor(zend_object *object)
 {
 	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
@@ -2739,7 +2734,6 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.unset_dimension = row_dim_delete;
 	pdo_row_object_handlers.get_properties_for = row_get_properties_for;
 	pdo_row_object_handlers.get_method = row_method_get;
-	pdo_row_object_handlers.call_method = row_call_method;
 	pdo_row_object_handlers.get_constructor = row_get_ctor;
 	pdo_row_object_handlers.get_class_name = row_get_classname;
 	pdo_row_object_handlers.compare_objects = row_compare;
