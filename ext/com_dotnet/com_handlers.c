@@ -377,6 +377,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 	if (fptr) {
 		/* duplicate this into a new chunk of emalloc'd memory,
 		 * since the engine will efree it */
+		zend_string_addref(fptr->function_name);
 		func = emalloc(sizeof(*fptr));
 		memcpy(func, fptr, sizeof(*fptr));
 
