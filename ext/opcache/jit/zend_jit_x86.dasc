@@ -7177,26 +7177,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	if (!func || func->type == ZEND_INTERNAL_FUNCTION) {
 		if (!func) {
 			|8:
-			if (opline->opcode == ZEND_DO_FCALL) {
-				|	jg >8
-				|.cold_code
-				|8:
-				if (!RETURN_VALUE_USED(opline)) {
-					|	sub r4, 16 /* alloca() */
-				}
-				|	// ZVAL_NULL(EX_VAR(opline->result.var));
-				|	LOAD_ZVAL_ADDR FCARG2a, res_addr
-				|	SET_Z_TYPE_INFO FCARG2a, IS_NULL
-				|	mov FCARG1a, RX
-				|	EXT_CALL zend_do_fcall_overloaded, r0
-				|	test r0, r0
-				|	jne >8
-				if (!RETURN_VALUE_USED(opline)) {
-					|	add r4, 16 /* revert alloca() */
-				}
-				|	jmp ->exception_handler
-				|.code
-			}
 		}
 		if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 			if (!func) {
