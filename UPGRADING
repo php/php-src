@@ -256,6 +256,14 @@ PHP 7.4 UPGRADE NOTES
   . MB_ONIGURUMA_VERSION specifies the version of the oniguruma library against
     which mbregex has been built.
 
+- Socket:
+  . Added FreeBSD-specific socket options:
+  . SO_LABEL
+  . SO_PEERLABEL
+  . SO_LISTENQLIMIT
+  . SO_LISTENQLEN
+  . SO_USER_COOKIE
+
 - Tidy:
   . TIDY_TAG_ARTICLE
   . TIDY_TAG_ASIDE
