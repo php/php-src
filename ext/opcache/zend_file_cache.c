@@ -27,8 +27,6 @@
 #include "ext/standard/md5.h"
 #endif
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
-
 #include "ZendAccelerator.h"
 #include "zend_file_cache.h"
 #include "zend_shared_alloc.h"
@@ -1691,5 +1689,3 @@ void zend_file_cache_invalidate(zend_string *full_path)
 	zend_file_cache_unlink(filename);
 	efree(filename);
 }
-
-#endif /* HAVE_OPCACHE_FILE_CACHE */
