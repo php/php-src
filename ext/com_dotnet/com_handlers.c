@@ -248,7 +248,7 @@ static PHP_FUNCTION(com_method_handler)
 	zval *object = getThis();
 	zend_string *method = EX(func)->common.function_name;
 	zval *args = NULL;
-	php_com_dotnet_object *obj = (php_com_dotnet_object*)object;
+	php_com_dotnet_object *obj = (php_com_dotnet_object*)CDNO_FETCH(object);
 	int nargs;
 	VARIANT v;
 	int ret = FAILURE;
