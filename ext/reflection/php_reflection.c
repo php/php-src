@@ -6185,7 +6185,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_function___construct, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_function_invoke, 0, 0, 0)
-	ZEND_ARG_INFO(0, args)
+	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_function_invokeArgs, 0)
@@ -6265,7 +6265,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_invoke, 0)
 	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, args)
+	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_invokeArgs, 0)
@@ -6360,7 +6360,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_isInstance, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstance, 0)
-	ZEND_ARG_INFO(0, args)
+	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstanceWithoutConstructor, 0)
