@@ -112,17 +112,17 @@ PHP_FUNCTION(mb_scrub);
 
 
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
-                                    size_t nbytes, const mbfl_encoding *enc);
+										  size_t nbytes, const mbfl_encoding *enc);
 MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
-                                 size_t nbytes);
+									   size_t nbytes);
 
 MBSTRING_API char *php_mb_convert_encoding_ex(
-		const char *input, size_t length,
-		const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding, size_t *output_len);
+	const char *input, size_t length,
+	const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding, size_t *output_len);
 MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length,
-                                      const char *_to_encoding,
-                                      const char *_from_encodings,
-                                      size_t *output_len);
+											const char *_to_encoding,
+											const char *_from_encodings,
+											size_t *output_len);
 
 MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list);
 
@@ -164,9 +164,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	zend_bool strict_detection;
 	size_t illegalchars;
 	mbfl_buffer_converter *outconv;
-    void *http_output_conv_mimetypes;
+	void *http_output_conv_mimetypes;
 #if HAVE_MBREGEX
-    struct _zend_mb_regex_globals *mb_regex_globals;
+	struct _zend_mb_regex_globals *mb_regex_globals;
 #endif
 	zend_string *last_used_encoding_name;
 	const mbfl_encoding *last_used_encoding;
