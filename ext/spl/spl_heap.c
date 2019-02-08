@@ -1188,7 +1188,7 @@ static const zend_function_entry spl_funcs_SplHeap[] = {
 	SPL_ME(SplHeap, valid,                 arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap, recoverFromCorruption, arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap, isCorrupted,           arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	ZEND_FENTRY(compare, NULL, NULL, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT)
+	ZEND_FENTRY(compare, NULL, arginfo_heap_compare, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT)
 	PHP_FE_END
 };
 /* }}} */

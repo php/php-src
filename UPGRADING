@@ -104,6 +104,9 @@ PHP 8.0 UPGRADE NOTES
 
 - SPL:
   . SplFileObject::fgetss() has been removed.
+  . SplHeap::compare($a, $b) now specifies a method signature. Inheriting
+    classes implementing this method will now have to use a compatible
+    method signature.
 
 - Standard:
   . assert() will no longer evaluate string arguments, instead they will be

@@ -712,6 +712,20 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_TRUE(_zv); \
 } while (0)
 
+#define ZEND_TRY_ASSIGN_BOOL(zv, bval) do { \
+	zval *_zv = zv; \
+	if (EXPECTED(Z_ISREF_P(_zv))) { \
+		zend_reference *ref = Z_REF_P(_zv); \
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
+			zend_try_assign_typed_ref_bool(ref, 1); \
+			break; \
+		} \
+		_zv = &ref->val; \
+	} \
+	zval_ptr_dtor(_zv); \
+	ZVAL_BOOL(_zv, bval); \
+} while (0)
+
 #define ZEND_TRY_ASSIGN_LONG(zv, lval) do { \
 	zval *_zv = zv; \
 	if (EXPECTED(Z_ISREF_P(_zv))) { \
