@@ -4012,7 +4012,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	PHP_VERSION,							/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2019",				/* copyright */
+	"Copyright (c)",						/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	NULL,									/* per-script activation */

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -320,7 +320,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 	}
 
 	if (auth_plugin && auth_plugin->methods.handle_server_response) {
-		auth_plugin->methods.handle_server_response(auth_plugin, conn, 
+		auth_plugin->methods.handle_server_response(auth_plugin, conn,
 				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len);
 	}
 
