@@ -1859,7 +1859,7 @@ data_accepted:
 						php_pollfd p;
 						int i;
 
-						p.fd = ftp->fd;
+						p.fd = data->fd;
 						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
 						p.revents = 0;
 
