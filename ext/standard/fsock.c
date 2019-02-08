@@ -100,8 +100,9 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (errstr) {
 			if (zerrstr) {
 				ZEND_TRY_ASSIGN_STR(zerrstr, errstr);
+			} else {
+				zend_string_release(errstr);
 			}
-			zend_string_release(errstr);
 		}
 
 		RETURN_FALSE;
