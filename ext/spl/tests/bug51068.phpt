@@ -3,19 +3,19 @@ SPL: glob wrapper interactions with DirectoryIterator
 --FILE--
 <?php
 touch('bug.51068');
-mkdir('bug.51068.dir');
-touch('bug.51068.dir/lvl2.bug.51068');
+mkdir('bug51068dir');
+touch('bug51068dir/lvl2.bug.51068');
 $iter = new DirectoryIterator('glob://*.51068');
 foreach ($iter as $f) {
 	var_dump($f->getFilename());
 	var_dump($f->getSize());
 }
-$iter = new DirectoryIterator('glob://bug.51068.dir/*.51068');
+$iter = new DirectoryIterator('glob://bug51068dir/*.51068');
 foreach ($iter as $f) {
   var_dump($f->getFilename());
   var_dump($f->getSize());
 }
-$iter = new DirectoryIterator('glob://bug.51068.dir');
+$iter = new DirectoryIterator('glob://bug51068dir');
 foreach ($iter as $f) {
   var_dump($f->getFilename());
   var_dump($f->getSize());
@@ -24,8 +24,8 @@ foreach ($iter as $f) {
 --CLEAN--
 <?php
 unlink('bug.51068');
-unlink('bug.51068.dir/lvl2.bug.51068');
-rmdir('bug.51068.dir');
+unlink('bug51068dir/lvl2.bug.51068');
+rmdir('bug51068dir');
 ?>
 --EXPECT--
 string(9) "bug.51068"
