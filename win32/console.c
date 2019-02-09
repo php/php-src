@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+#include "php.h"
+#include "SAPI.h"
 #include "win32/console.h"
 
 
@@ -108,3 +110,9 @@ PHP_WINUTIL_API BOOL php_win32_console_is_own(void)
 
 	return FALSE;
 }/*}}}*/
+
+PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void)
+{/*{{{*/
+	return strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1);
+}/*}}}*/
+
