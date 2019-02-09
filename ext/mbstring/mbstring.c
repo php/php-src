@@ -2279,11 +2279,11 @@ PHP_FUNCTION(mb_str_split)
     } else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE )) { /* 4 bytes */
         mb_len = string.len>>2; /* eq. string.len / 4 */
         chunk_len = split_length<<2; /* eq. split_length * 4 */
-        /*
-         * +----------------------------------------------------------------------+
-         * | second scenario: "variable width encodings with length table"        |
-         * +----------------------------------------------------------------------+
-         */
+    /*
+     * +----------------------------------------------------------------------+
+     * | second scenario: "variable width encodings with length table"        |
+     * +----------------------------------------------------------------------+
+     */
     } else if (mbfl_encoding->mblen_table != NULL) {
         char unsigned const *mbtab = mbfl_encoding->mblen_table;
 
@@ -2303,11 +2303,11 @@ PHP_FUNCTION(mb_str_split)
         }
         return;
 
-        /*
-         * +----------------------------------------------------------------------+
-         * | third scenario: "else multibyte encodings"                           |
-         * +----------------------------------------------------------------------+
-         */
+    /*
+     * +----------------------------------------------------------------------+
+     * | third scenario: "else multibyte encodings"                           |
+     * +----------------------------------------------------------------------+
+     */
     } else {
         mbfl_convert_filter *filter, *decoder;
 
