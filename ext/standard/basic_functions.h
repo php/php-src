@@ -138,6 +138,8 @@ PHP_FUNCTION(sapi_windows_cp_set);
 PHP_FUNCTION(sapi_windows_cp_get);
 PHP_FUNCTION(sapi_windows_cp_is_utf8);
 PHP_FUNCTION(sapi_windows_cp_conv);
+PHP_FUNCTION(sapi_windows_set_ctrl_handler);
+PHP_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
 
 PHP_FUNCTION(str_rot13);
