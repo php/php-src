@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.2.15
+?? ??? 2019, PHP 7.2.16
+
+07 Feb 2019, PHP 7.2.15
 
 - Core:
   . Fixed bug #77339 (__callStatic may get incorrect arguments). (Dmitry)
@@ -42,6 +44,9 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed bug #77273 (array_walk_recursive corrupts value types leading to PDO
     failure). (Nikita)
+
+- phpdbg:
+  . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
 
 - Sockets:
   . Fixed bug #76839 (socket_recvfrom may return an invalid 'from' address
