@@ -9,9 +9,9 @@ function phpt_notify($worker = WORKER_DEFAULT_NAME)
     ServerClientTestCase::getInstance()->notify($worker);
 }
 
-function phpt_wait($worker = WORKER_DEFAULT_NAME)
+function phpt_wait($worker = WORKER_DEFAULT_NAME, $timeout = null)
 {
-    ServerClientTestCase::getInstance()->wait($worker);
+    ServerClientTestCase::getInstance()->wait($worker, $timeout);
 }
 
 /**
@@ -121,9 +121,24 @@ class ServerClientTestCase
         }
     }
 
-    public function wait($worker)
+    public function wait($worker, $timeout = null)
     {
-        fgets($this->isWorker ? STDIN : $this->workerStdOut[$worker]);
+        $handle = $this->isWorker ? STDIN : $this->workerStdOut[$worker];
+        if ($timeout === null) {
+            fgets($handle);
+            return true;
+        }
+
+        stream_set_blocking($handle, false);
+        $read = [$handle];
+        $result = stream_select($read, $write, $except, $timeout);
+        if (!$result) {
+            return false;
+        }
+
+        fgets($handle);
+        stream_set_blocking($handle, true);
+        return true;
     }
 
     public function notify($worker)
