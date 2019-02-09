@@ -29,8 +29,10 @@ var_dump($zip->getNameIndex(0));
 var_dump($zip->getCommentIndex(0));
 
 var_dump(md5_file($file));
-
-unlink($file);
+?>
+--CLEAN--
+<?php
+unlink(__DIR__.'/__tmp_oo_unchangeIndex.zip');
 ?>
 --EXPECT--
 string(32) "cb753d0a812b2edb386bdcbc4cd7d131"
