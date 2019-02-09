@@ -2228,6 +2228,7 @@ PHP_FUNCTION(mb_str_split)
     size_t mb_len, chunks, chunk_len;
     char unsigned const *last, *p;
     mbfl_string string, result_string;
+    const mbfl_encoding *mbfl_encoding;
     zend_long split_length = 1;
 
     ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -2260,7 +2261,7 @@ PHP_FUNCTION(mb_str_split)
      * |                           3 scenarios                                |
      * +----------------------------------------------------------------------+
      */
-    const mbfl_encoding *mbfl_encoding = string.encoding;
+    mbfl_encoding = string.encoding;
 
     /*
      * +----------------------------------------------------------------------+
