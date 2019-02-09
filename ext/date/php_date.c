@@ -1156,6 +1156,9 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 			case 'n': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->m); break;
 			case 't': length = slprintf(buffer, sizeof(buffer), "%d", (int) timelib_days_in_month(t->y, t->m)); break;
 
+			/* quarter */
+			case 'q': length = slprintf(buffer, sizeof(buffer), "%d", (int) ceil(t->m / 3.0)); break;
+
 			/* year */
 			case 'L': length = slprintf(buffer, sizeof(buffer), "%d", timelib_is_leap((int) t->y)); break;
 			case 'y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) (t->y % 100)); break;

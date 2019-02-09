@@ -23,6 +23,7 @@ var_dump( $date->format( '\i\t \i\s \t\h\e jS \d\a\y.') );
 var_dump( $date->format( "D M j G:i:s T Y") );
 var_dump( $date->format( 'H:m:s \m \i\s\ \m\o\n\t\h') );
 var_dump( $date->format( "H:i:s") );
+var_dump( $date->format( "q") );
 
 ?>
 ===DONE===
@@ -37,4 +38,5 @@ string(19) "it is the 14th day."
 string(28) "Thu Jul 14 22:30:41 BST 2005"
 string(19) "22:07:41 m is month"
 string(8) "22:30:41"
+string(1) "3"
 ===DONE===
