@@ -114,6 +114,11 @@ PHP 7.4 UPGRADE NOTES
     native variables and create/access data structures defined in C libraries.
     RFC: https://wiki.php.net/rfc/ffi
 
+- Mbstring:
+  . Added mb_str_split() function, which provide the same functionality as
+    str_split(), but operating on code points rather than bytes.
+    RFC: https://wiki.php.net/rfc/mb_str_split
+
 - OPcache:
   . Support for preloading code has been added.
     RFC: https://wiki.php.net/rfc/preload
