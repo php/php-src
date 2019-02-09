@@ -14,5 +14,4 @@ var_dump(readline('Enter some text:'));
 --STDIN--
 I love PHP
 --EXPECTF--
-Enter some text:I love PHP
-string(10) "I love PHP"
+%Astring(10) "I love PHP"
