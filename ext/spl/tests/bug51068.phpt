@@ -18,7 +18,7 @@ foreach ($iter as $f) {
 $iter = new DirectoryIterator('glob://bug.51068.dir');
 foreach ($iter as $f) {
   var_dump($f->getFilename());
-  var_dump($f->getSize());
+  var_dump($f->getSize() >= 0);
 }
 ?>
 --CLEAN--
@@ -33,4 +33,4 @@ int(0)
 string(14) "lvl2.bug.51068"
 int(0)
 string(13) "bug.51068.dir"
-int(4096)
+bool(true)
