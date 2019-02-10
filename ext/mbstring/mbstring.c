@@ -2365,7 +2365,7 @@ PHP_FUNCTION(mb_str_split)
 
     /*
      * +----------------------------------------------------------------------+
-     * | first scenario:   1,2,4-bytes fixed width encodings (tail part)      |
+     * | first scenario:    1,2,4-bytes fixed width encodings (tail part)     |
      * +----------------------------------------------------------------------+
      */
     chunks = (mb_len + split_length - 1) / split_length; /* (round up idiom) */
