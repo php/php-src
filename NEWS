@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #77589 (Core dump using parse_ini_string with numeric sections).
     (Laruence)
 
+- Exif:
+  . Fixed bug #77564 (Memory leak in exif_process_IFD_TAG). (Ben Ramsey)
+
 - PDO_OCI:
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
