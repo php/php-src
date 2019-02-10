@@ -10,6 +10,6 @@ User Group: PHP-WVL & PHPGent #PHPTestFest
 var_dump(readline());
 var_dump(readline('Prompt:'));
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
-bool(false)
+%Abool(false)
