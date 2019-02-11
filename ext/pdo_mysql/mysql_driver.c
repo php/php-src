@@ -484,6 +484,12 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
 			ZVAL_LONG(return_value, H->max_buffer_size);
 			break;
+#else
+		case PDO_MYSQL_ATTR_LOCAL_INFILE:
+			ZVAL_BOOL(
+				return_value,
+				(H->server->data->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES);
+			break;
 #endif
 
 		default:
@@ -768,6 +774,15 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 					CLIENT_SSL_VERIFY_SERVER_CERT:
 					CLIENT_SSL_DONT_VERIFY_SERVER_CERT;
 			}
+		}
+#endif
+	} else {
+#if defined(MYSQL_OPT_LOCAL_INFILE) || defined(PDO_USE_MYSQLND)
+		// in case there are no driver options disable 'local infile' explicitly
+		zend_long local_infile = 0;
+		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
+			pdo_mysql_error(dbh);
+			goto cleanup;
 		}
 #endif
 	}
