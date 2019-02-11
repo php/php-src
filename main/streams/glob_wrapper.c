@@ -126,7 +126,7 @@ static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int ge
 		if (pglob->path) {
 			efree(pglob->path);
 		}
-		if (path != gpath) {
+		if ((path - gpath) > 1) {
 			path--;
 		}
 		pglob->path_len = path - gpath;

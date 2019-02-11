@@ -29,6 +29,10 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
 
+- SPL:
+  . Fixed bug #51068 (DirectoryIterator glob:// don't support current path
+    relative queries). (Ahmed Abdou)
+
 - Standard:
   . Fixed bug #77552 (Unintialized php_stream_statbuf in stat functions).
     (John Stevenson)
