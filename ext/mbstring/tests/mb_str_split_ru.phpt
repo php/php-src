@@ -38,7 +38,7 @@ foreach($charset as $cs){
     /* check content */
     echo "$cs:";
     for($i = 0; $i < $len; ++$i){
-        echo  " " . unpack("h*", $split[$i])[1];
+        echo  " " . unpack("H*", $split[$i])[1];
     }
     echo "\n";
 }
@@ -57,7 +57,7 @@ if($size !== $count) printf("Long string splitting error: actual array size: %d 
 $enc = mb_convert_encoding($string, "EUC-JP", "UTF-8");
 if(end($array) !== $enc){
     printf("Long string splitting error:
-        last array element: %s expected: %s\n", unpack("h*", end($array))[1],unpack("h*", $enc)[1]);
+        last array element: %s expected: %s\n", unpack("H*", end($array))[1],unpack("H*", $enc)[1]);
 }
 
 ?>
