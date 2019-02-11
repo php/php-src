@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.3
 
 - Core:
+  . Fixed bug #77589 (Core dump using parse_ini_string with numeric sections).
+    (Laruence)
   . Fixed bug #77329 (Buffer Overflow via overly long Error Messages).
     (Dmitry)
   . Fixed bug #77494 (Disabling class causes segfault on member access).
