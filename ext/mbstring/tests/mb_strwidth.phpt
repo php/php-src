@@ -1,5 +1,9 @@
 --TEST--
-mb_strwidth()
+mb_strwidth() & mb_strwidth() - unknown encoding
+--CREDITS--
+Yasuo Ohgaki
+Jachim Coudenys <jachimcoudenys@gmail.com>
+User Group: PHP-WVL & PHPGent #PHPTestFest
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
@@ -26,6 +30,9 @@ $str = mb_strwidth($euc_jp, 100, -10,'...','EUC-JP');
 $str = mb_strwidth($euc_jp, -100, 10,'...','EUC-JP');
 ($str !== "") ?	print "6 OK: $str\n" : print "NG: $str\n";
 */
+
+mb_strwidth('coudenys', 'jachim');
 ?>
---EXPECT--
+--EXPECTF--
 1: 68
+Warning: mb_strwidth(): Unknown encoding "jachim" in %s on line %d
