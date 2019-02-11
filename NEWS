@@ -18,6 +18,11 @@ PHP                                                                        NEWS
   . Fixed bug #77552 (Unintialized php_stream_statbuf in stat functions).
     (John Stevenson)
 
+- MySQL
+  . Disabled LOCAL INFILE by default, can be enabled using php.ini directive
+    mysqli.allow_local_infile for mysqli, or PDO::MYSQL_ATTR_LOCAL_INFILE
+    attribute for pdo_mysql. (Darek Slusarczyk)
+
 07 Feb 2019, PHP 7.2.15
 
 - Core:
