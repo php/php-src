@@ -19,5 +19,7 @@ try {
 } catch(Error $e) { echo $e->getMessage(); }
 ?>
 --EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
+
 Warning: wddx_deserialize(): Class throwable can not be instantiated in %sbug73831.php on line %d
 Cannot instantiate interface Throwable

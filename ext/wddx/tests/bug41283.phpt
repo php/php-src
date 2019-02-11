@@ -10,7 +10,10 @@ $data = array(
 
 var_dump(wddx_deserialize(wddx_serialize_vars('data')));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_serialize_vars() is deprecated in %s on line %d
+
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(1) {
   ["data"]=>
   array(1) {
