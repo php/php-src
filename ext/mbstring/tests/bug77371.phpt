@@ -6,5 +6,6 @@ Bug #77371 (heap buffer overflow in mb regex functions - compile_string_node)
 <?php
 var_dump(mb_ereg("()0\xfc00000\xfc00000\xfc00000\xfc",""));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: mb_ereg(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)

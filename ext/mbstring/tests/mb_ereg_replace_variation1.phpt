@@ -109,13 +109,17 @@ string(10) "string_val"
 string(10) "string_val"
 
 -- Iteration 4 --
-string(10) "string_val"
+
+Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
+bool(false)
 
 -- Iteration 5 --
 string(10) "string_val"
 
 -- Iteration 6 --
-string(10) "string_val"
+
+Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
+bool(false)
 
 -- Iteration 7 --
 string(10) "string_val"
