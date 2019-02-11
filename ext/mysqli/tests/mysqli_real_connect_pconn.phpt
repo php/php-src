@@ -10,6 +10,7 @@ if (!$IS_MYSQLND)
 	die("skip mysqlnd only test");
 ?>
 --INI--
+mysqli.allow_local_infile=1
 mysqli.allow_persistent=1
 mysqli.max_persistent=10
 --FILE--

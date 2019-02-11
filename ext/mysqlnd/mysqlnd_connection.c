@@ -489,7 +489,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 	MYSQLND_VIO * vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
-	/* we allow load data local infile by default */
+	/* allow CLIENT_LOCAL_FILES capability, although extensions basing on mysqlnd
+		shouldn't allow 'load data local infile' by default due to security issues */
 	mysql_flags |= MYSQLND_CAPABILITIES;
 
 	mysql_flags |= conn->options->flags; /* use the flags from set_client_option() */
