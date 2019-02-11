@@ -7,5 +7,5 @@ Bug #77370 (Buffer overflow on mb regex functions - fetch_token)
 var_dump(mb_split("   \xfd",""));
 ?>
 --EXPECTF--
-Warning: mb_split(): mbregex compile err: invalid code point value in %sbug77370.php on line %d
+Warning: mb_split(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)
