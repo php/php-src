@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug #77390 (feof might hang on TLS streams in case of fragmented TLS
     records). (Abyl Valg, Jakub Zelenka)
 
+- PDO_OCI:
+  . Support Oracle Database tracing attributes ACTION, MODULE,
+    CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
+
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
 
