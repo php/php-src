@@ -1259,6 +1259,11 @@ PHP_FUNCTION(mb_split)
 		count--;
 	}
 
+	if (!php_mb_check_encoding(string, string_len,
+			_php_mb_regex_mbctype2name(MBREX(current_mbctype)))) {
+		RETURN_FALSE;
+	}
+
 	/* create regex pattern buffer */
 	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, MBREX(regex_default_options), MBREX(current_mbctype), MBREX(regex_default_syntax))) == NULL) {
 		RETURN_FALSE;
@@ -1346,6 +1351,11 @@ PHP_FUNCTION(mb_ereg_match)
 			option |= MBREX(regex_default_options);
 			syntax = MBREX(regex_default_syntax);
 		}
+	}
+
+	if (!php_mb_check_encoding(string, string_len,
+			_php_mb_regex_mbctype2name(MBREX(current_mbctype)))) {
+		RETURN_FALSE;
 	}
 
 	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBREX(current_mbctype), syntax)) == NULL) {
