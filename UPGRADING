@@ -106,14 +106,24 @@ PHP 8.0 UPGRADE NOTES
     restored with an explicit call to chr().
 
 - Reflection:
-  . The following methods signatures have been changed:
+  . The method signatures
 
-    * ReflectionClass::newInstance(mixed $args)             -> ReflectionClass::newInstance([mixed ...$args])
-    * ReflectionFunction::invoke(mixed $args)               -> ReflectionFunction::invoke(mixed ...$args)
-    * ReflectionMethod::invoke(object $object, mixed $args) -> ReflectionMethod::invoke(object $object [, mixed ...$args])
+        ReflectionClass::newInstance($args)
+        ReflectionFunction::invoke($args)
+        ReflectionMethod::invoke($object, $args)
 
-    Inheriting classes implementing this method will now have to use
-    a compatible method signature.
+    have been changed to:
+
+        ReflectionClass::newInstance(...$args)
+        ReflectionFunction::invoke(...$args)
+        ReflectionMethod::invoke($object, ...$args)
+
+    Code that must be compatible with both PHP 7 and PHP 8 can use the following
+    signatures to be compatible with both versions:
+
+        ReflectionClass::newInstance($arg = null, ...$args)
+        ReflectionFunction::invoke($arg = null, ...$args)
+        ReflectionMethod::invoke($object, $arg = null, ...$args)
 
 - SPL:
   . SplFileObject::fgetss() has been removed.
