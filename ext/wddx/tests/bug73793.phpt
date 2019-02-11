@@ -13,6 +13,7 @@ setlocale(LC_NUMERIC , ['de_DE', 'de_DE.UTF-8', 'de-DE']);
 var_dump(wddx_serialize_value(['foo' => 5.1]));
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_serialize_value() is deprecated in %s on line %d
 string(120) "<wddxPacket version='1.0'><header/><data><struct><var name='foo'><number>5.1</number></var></struct></data></wddxPacket>"
 ===DONE===

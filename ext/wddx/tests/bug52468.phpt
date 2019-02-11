@@ -15,11 +15,14 @@ print_r(wddx_deserialize($message));
 print_r(wddx_deserialize($message));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 Array
 (
     [handle] => 0
 )
+
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 Array
 (
     [handle] => 0
