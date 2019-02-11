@@ -118,7 +118,7 @@ string(10) "string_val"
 
 Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 
-Warning: mb_ereg_replace(): mbregex compile err: invalid code point value in %s on line %d
+Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)
 
 -- Iteration 5 --
@@ -130,7 +130,7 @@ string(10) "string_val"
 
 Deprecated: mb_ereg_replace(): Non-string patterns will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 
-Warning: mb_ereg_replace(): mbregex compile err: invalid code point value in %s on line %d
+Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)
 
 -- Iteration 7 --
