@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.16
 
+- PDO_OCI:
+  . Support Oracle Database tracing attributes ACTION, MODULE,
+    CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
+
 07 Feb 2019, PHP 7.2.15
 
 - Core:
