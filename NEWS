@@ -53,6 +53,8 @@ PHP                                                                        NEWS
     (Sammy Kaye Powers)
 
 - PDO_OCI:
+  . Support Oracle Database tracing attributes ACTION, MODULE,
+    CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
   . Implemented FR #76908 (PDO_OCI getColumnMeta() not implemented).
     (Valentin Collet, Chris Jones, Remi)
 
