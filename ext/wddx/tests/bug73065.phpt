@@ -81,18 +81,27 @@ for($i=1;$i<=5;$i++) {
 }
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(0) {
 }
+
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(0) {
 }
+
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(0) {
 }
+
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(1) {
   [0]=>
   array(0) {
   }
 }
+
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(0) {
 }
 DONE

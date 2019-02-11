@@ -26,7 +26,8 @@ XML;
 $array = wddx_deserialize($xml);
 var_dump($array);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(1) {
   ["aDateTime3"]=>
   string(24) "2

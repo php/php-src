@@ -10,7 +10,8 @@ precision=14
 	$path = dirname(__FILE__);
 	var_dump(wddx_deserialize(file_get_contents("{$path}/wddx.xml")));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(11) {
   ["aNull"]=>
   NULL

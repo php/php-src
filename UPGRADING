@@ -241,6 +241,9 @@ PHP 7.4 UPGRADE NOTES
     possible, but unserialization yielded unusable objects.
   . The @param notation can now also be used to denote SQL query parameters.
 
+- WDDX:
+  . The WDDX extension has been deprecated.
+
 - Zip:
   . The bundled libzip library has been removed. A system libzip >= 0.11 is now
     necessary to build the extension.

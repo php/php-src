@@ -92,4 +92,7 @@ PHP                                                                        NEWS
 - Tidy:
   . Added TIDY_TAG_* constants for HTML5 elements. (cmb)
 
+- WDDX:
+  . Deprecated the WDDX extension. (cmb)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
