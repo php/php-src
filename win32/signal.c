@@ -72,7 +72,7 @@ PHP_WINUTIL_API void php_win32_signal_ctrl_handler_shutdown(void)
 	ZVAL_UNDEF(&ctrl_handler);
 }/*}}}*/
 
-static BOOL php_win32_signal_system_ctrl_handler(DWORD evt)
+static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
 {/*{{{*/
 	if (CTRL_C_EVENT != evt && CTRL_BREAK_EVENT != evt) {
 		return FALSE;
