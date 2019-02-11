@@ -148,6 +148,8 @@ PHP 8.0 UPGRADE NOTES
   . The 'salt' option of password_hash() is no longer supported. If the 'salt'
     option is used a warning is generated, the provided salt is ignored, and a
     generated salt is used instead.
+  . The quotemeta() function will now return an empty string if an empty string
+    was passed. Previously false was returned.
 
 - Zlib:
   . gzgetss() has been removed.
