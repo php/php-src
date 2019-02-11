@@ -10,12 +10,5 @@ if (!function_exists('mb_split')) die('mb_split() not available');
 mb_regex_encoding('UTF-8');
 var_dump(mb_split("\\w", "\xfc"));
 ?>
-===DONE===
 --EXPECT--
-array(2) {
-  [0]=>
-  string(0) ""
-  [1]=>
-  string(0) ""
-}
-===DONE===
+bool(false)
