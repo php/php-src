@@ -2273,12 +2273,12 @@ PHP_FUNCTION(mb_str_split)
         chunk_len = (size_t)split_length; /* chunk length in bytes */
 
     } else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE )) { /* 2 bytes */
-        mb_len = string.len>>1; /* eq. string.len / 2 String length in chars */
-        chunk_len = split_length<<1; /* eq. split_length * 2 chunk length in bytes */
+        mb_len = string.len / 2;
+        chunk_len = split_length * 2;
 
     } else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE )) { /* 4 bytes */
-        mb_len = string.len>>2; /* eq. string.len / 4 */
-        chunk_len = split_length<<2; /* eq. split_length * 4 */
+        mb_len = string.len / 4;
+        chunk_len = split_length * 4;
     /*
      * +----------------------------------------------------------------------+
      * | second scenario: "variable width encodings with length table"        |
@@ -2287,13 +2287,13 @@ PHP_FUNCTION(mb_str_split)
     } else if (mbfl_encoding->mblen_table != NULL) {
         char unsigned const *mbtab = mbfl_encoding->mblen_table;
 
-        /* assume that we have 2-bytes characters */
-        array_init_size(return_value, (string.len>>1 + split_length) / split_length);
+        /* assume that we have 1-bytes characters */
+        array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
 
         while (p < last) { /* split cycle work until the cursor has reached the last byte */
             char const *chunk_p = p; /* chunk first byte pointer */
             chunk_len = 0; /* chunk length in bytes */
-            for (uint32_t char_count = 0; char_count < split_length; ++char_count) {
+            for (zend_long char_count = 0; char_count < split_length; ++char_count) {
                 char unsigned const m = mbtab[*p]; /* single character length table */
                 chunk_len += m;
                 p += m;
@@ -2311,8 +2311,8 @@ PHP_FUNCTION(mb_str_split)
     } else {
         mbfl_convert_filter *filter, *decoder;
 
-        /* assume that we have 2-bytes characters */
-        array_init_size(return_value, (string.len>>1 + split_length) / split_length);
+        /* assume that we have 1-bytes characters */
+        array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
         p = string.val; /* reset string cursor position */
 
         /* decoder filter to decode wchar to encoding */
@@ -2323,11 +2323,11 @@ PHP_FUNCTION(mb_str_split)
                 &mbfl_encoding_wchar,
                 string.encoding,
                 mbfl_memory_device_output,
-                0,
+                NULL,
                 &device);
+        /* if something wrong with the decoded */
         if (decoder == NULL){
-            mbfl_convert_filter_delete(decoder);
-            RETURN_FALSE; /* something wrong with the filter */
+            RETURN_FALSE;
         }
 
         /* wchar filter */
@@ -2344,12 +2344,12 @@ PHP_FUNCTION(mb_str_split)
                 string.encoding,
                 &mbfl_encoding_wchar,
                 mbfl_split_output,
-                0,
+                NULL,
                 &params);
+        /* if something wrong with the filter */
         if (filter == NULL){
-            mbfl_convert_filter_delete(decoder);
-            mbfl_convert_filter_delete(filter);
-            RETURN_FALSE; /* something wrong with the filter */
+            mbfl_convert_filter_delete(decoder); /* this will free allocated memory for the decoded */
+            RETURN_FALSE;
         }
 
         while (p < last - 1) { /* cycle each byte except last with callback function */
@@ -2371,7 +2371,7 @@ PHP_FUNCTION(mb_str_split)
     chunks = (mb_len + split_length - 1) / split_length; /* (round up idiom) */
     array_init_size(return_value, chunks);
     if (chunks != 0) {
-        for (size_t i = 0; i < chunks - 1; p += chunk_len, ++i) {
+        for (zend_long i = 0; i < chunks - 1; p += chunk_len, ++i) {
             add_next_index_stringl(return_value, p, chunk_len);
         }
         add_next_index_stringl(return_value, p, last - p);
