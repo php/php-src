@@ -216,6 +216,11 @@ PHP 7.4 UPGRADE NOTES
 - Libxml:
   . All libxml based extensions now require libxml 2.7.6 or newer.
 
+- Mbstring:
+  . The oniguruma library is no longer bundled with PHP, instead libonig needs
+    to be available on the system. Alternatively --disable-mbregex can be used
+    to disable the mbregex component.
+
 - OPcache:
   . The --disable-opcache-file|--enable-opcache-file configure options have been
     removed in favor of the opcache.file_cache INI directive.
@@ -243,6 +248,10 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- Mbstring:
+  . MB_ONIGURUMA_VERSION specifies the version of the oniguruma library against
+    which mbregex has been built.
 
 - Tidy:
   . TIDY_TAG_ARTICLE
@@ -310,6 +319,10 @@ The following extensions are affected:
 - Intl:
   . --with-icu-dir has been removed. If --enable-intl is passed, then libicu is
     always required.
+
+- Mbstring:
+  . --with-onig has been removed. Unless --disable-mbregex has been passed,
+    libonig is required.
 
 - OpenSSL:
   . --with-openssl no longer accepts a directory.
