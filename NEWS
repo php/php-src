@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #77589 (Core dump using parse_ini_string with numeric sections).
     (Laruence)
+  . Fixed bug #75546 (function "defined" should ignore class constant
+    visibility). (Daniel Ciochiu)
 
 - Exif:
   . Fixed bug #77564 (Memory leak in exif_process_IFD_TAG). (Ben Ramsey)
