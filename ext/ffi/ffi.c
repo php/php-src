@@ -1138,10 +1138,16 @@ static void zend_ffi_cdata_write_dim(zval *object, zval *offset, zval *value) /*
 {
 	zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(object);
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
-	zend_long       dim = zval_get_long(offset);
+	zend_long       dim;
 	void           *ptr;
 	zend_ffi_flags  is_const;
 
+	if (offset == NULL) {
+		zend_throw_error(zend_ffi_exception_ce, "Cannot add next element to object of type FFI\\CData");
+		return;
+	}
+	
+	dim = zval_get_long(offset);
 	if (EXPECTED(type->kind == ZEND_FFI_TYPE_ARRAY)) {
 		if (UNEXPECTED((zend_ulong)(dim) >= (zend_ulong)type->array.length)
 		 && (UNEXPECTED(dim < 0) || UNEXPECTED(type->array.length != 0))) {
