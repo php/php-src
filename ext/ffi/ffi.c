@@ -1117,10 +1117,16 @@ static void zend_ffi_cdata_write_dim(zend_object *obj, zval *offset, zval *value
 {
 	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
-	zend_long       dim = zval_get_long(offset);
+	zend_long       dim;
 	void           *ptr;
 	zend_ffi_flags  is_const;
 
+	if (offset == NULL) {
+		zend_throw_error(zend_ffi_exception_ce, "Cannot add next element to object of type FFI\\CData");
+		return;
+	}
+	
+	dim = zval_get_long(offset);
 	if (EXPECTED(type->kind == ZEND_FFI_TYPE_ARRAY)) {
 		if (UNEXPECTED((zend_ulong)(dim) >= (zend_ulong)type->array.length)
 		 && (UNEXPECTED(dim < 0) || UNEXPECTED(type->array.length != 0))) {
@@ -5257,7 +5263,7 @@ void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t n
 		zend_ffi_parser_error("wrong type of bit field '%.*s' at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 	}
 
-	if (bits->kind == ZEND_FFI_VAL_INT32 || ZEND_FFI_VAL_INT64) {
+	if (bits->kind == ZEND_FFI_VAL_INT32 || bits->kind == ZEND_FFI_VAL_INT64) {
 		if (bits->i64 < 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
 			zend_ffi_parser_error("negative width in bit-field '%.*s' at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
@@ -5271,7 +5277,7 @@ void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t n
 			zend_ffi_cleanup_dcl(field_dcl);
 			zend_ffi_parser_error("width of '%.*s' exceeds its type at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 		}
-	} else if (ZEND_FFI_VAL_UINT32 || ZEND_FFI_VAL_UINT64) {
+	} else if (bits->kind == ZEND_FFI_VAL_UINT32 || bits->kind == ZEND_FFI_VAL_UINT64) {
 		if (bits->u64 == 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
 			if (name) {

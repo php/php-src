@@ -27,7 +27,8 @@ XML;
 $array = wddx_deserialize($xml);
 var_dump($array);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(1) {
   ["aBinary"]=>
   string(9) "µ‰¥¹…ÉFF"

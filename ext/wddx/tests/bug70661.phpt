@@ -53,7 +53,8 @@ function ptr2str($ptr)
 }
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(1) {
   [0]=>
   array(1) {
