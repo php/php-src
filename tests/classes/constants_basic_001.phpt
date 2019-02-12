@@ -73,7 +73,7 @@ float(-1.5)
 int(15)
 string(%d) "%s"
 string(1) "C"
-string(1) "C"
+string(0) ""
 string(0) ""
 int(1234)
 int(456)
