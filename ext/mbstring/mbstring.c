@@ -2299,7 +2299,7 @@ PHP_FUNCTION(mb_str_split)
         while (p < last) { /* split cycle work until the cursor has reached the last byte */
             char const *chunk_p = p; /* chunk first byte pointer */
             chunk_len = 0; /* chunk length in bytes */
-            for (zend_long char_count = 0; char_count < split_length; ++char_count) {
+            for (zend_long char_count = 0; char_count < split_length, p <= last; ++char_count) {
                 char unsigned const m = mbtab[*p]; /* single character length table */
                 chunk_len += m;
                 p += m;
