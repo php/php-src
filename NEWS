@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     property). (Nikita)
   . Fixed bug #77530 (PHP crashes when parsing `(2)::class`). (Ekin)
   . Fixed bug #77546 (iptcembed broken function). (gdegoulet)
+  . Fixed bug #75546 (function "defined" should ignore class constant
+    visibility). (Daniel Ciochiu)
 
 - Exif:
   . Fixed bug #77564 (Memory leak in exif_process_IFD_TAG). (Ben Ramsey)
