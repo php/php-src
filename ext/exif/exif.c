@@ -3377,6 +3377,10 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_USERCOMMENT:
+				EFREE_IF(ImageInfo->UserComment);
+				ImageInfo->UserComment = NULL;
+				EFREE_IF(ImageInfo->UserCommentEncoding);
+				ImageInfo->UserCommentEncoding = NULL;
 				ImageInfo->UserCommentLength = exif_process_user_comment(ImageInfo, &(ImageInfo->UserComment), &(ImageInfo->UserCommentEncoding), value_ptr, byte_count);
 				break;
 
