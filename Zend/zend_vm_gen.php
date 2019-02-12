@@ -1814,8 +1814,12 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
 			break;
 		case ZEND_VM_KIND_HYBRID:
 			out($f,"\t\t\tHYBRID_CASE(HYBRID_HALT):\n");
+			out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
 			out($f,"\t\t\t\texecute_data = orig_execute_data;\n");
+			out($f,"#endif\n");
+			out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
 			out($f,"\t\t\t\topline = orig_opline;\n");
+			out($f,"#endif\n");
 			out($f,"\t\t\t\treturn;\n");
 			out($f,"\t\t\tHYBRID_DEFAULT:\n");
 			out($f,"\t\t\t\tVM_TRACE(ZEND_NULL)\n");
