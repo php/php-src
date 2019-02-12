@@ -1888,6 +1888,8 @@ PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf
 	const char *path_to_open = path;
 	int ret;
 
+	memset(ssb, 0, sizeof(*ssb));
+
 	if (!(flags & PHP_STREAM_URL_STAT_NOCACHE)) {
 		/* Try to hit the cache first */
 		if (flags & PHP_STREAM_URL_STAT_LINK) {

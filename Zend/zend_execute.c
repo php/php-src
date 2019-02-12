@@ -1680,6 +1680,7 @@ static void zend_incdec_typed_ref(zend_reference *ref, zval *copy, int inc EXECU
 	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, copy);
+		ZVAL_UNDEF(copy);
 	} else if (copy == &tmp) {
 		zval_ptr_dtor(&tmp);
 	}
@@ -1707,6 +1708,7 @@ static void zend_incdec_typed_prop(zend_property_info *prop_info, zval *var_ptr,
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, copy);
+		ZVAL_UNDEF(copy);
 	} else if (copy == &tmp) {
 		zval_ptr_dtor(&tmp);
 	}
@@ -3755,7 +3757,8 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 					}
 				} else if (kind == ZEND_LIVE_SILENCE) {
 					/* restore previous error_reporting value */
-					if (!EG(error_reporting) && Z_LVAL_P(var) != 0) {
+					if (E_HAS_ONLY_FATAL_ERRORS(EG(error_reporting))
+							&& !E_HAS_ONLY_FATAL_ERRORS(Z_LVAL_P(var))) {
 						EG(error_reporting) = Z_LVAL_P(var);
 					}
 				}

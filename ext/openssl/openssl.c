@@ -6674,10 +6674,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(char *data, size_t data_len, ch
 				&iv, &iv_len, &free_iv, NULL, tag_len, options, 1) == FAILURE ||
 			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
 				data, data_len, aad, aad_len, 1) == FAILURE) {
-		if (outbuf)
-			zend_string_release_ex(outbuf, 0);
 		outbuf = NULL;
-		goto cleanup;
 	} else if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + outlen, &i)) {
 		outlen += i;
 		if (options & OPENSSL_RAW_DATA) {
@@ -6718,7 +6715,6 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(char *data, size_t data_len, ch
 		outbuf = NULL;
 	}
 
-cleanup:
 	if (free_password) {
 		efree(password);
 	}
@@ -6799,10 +6795,7 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(char *data, size_t data_len, ch
 				&iv, &iv_len, &free_iv, tag, tag_len, options, 0) == FAILURE ||
 			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
 				data, data_len, aad, aad_len, 0) == FAILURE) {
-		if (outbuf)
-			zend_string_release_ex(outbuf, 0);
 		outbuf = NULL;
-		goto cleanup;
 	} else if (mode.is_single_run_aead ||
 			EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + outlen, &i)) {
 		outlen += i;
@@ -6814,7 +6807,6 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(char *data, size_t data_len, ch
 		outbuf = NULL;
 	}
 
-cleanup:
 	if (free_password) {
 		efree(password);
 	}

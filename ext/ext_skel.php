@@ -183,7 +183,6 @@ function process_source_tags($file, $short_name) {
 
 		if (!$header) {
 			if ($options['std']) {
-				$year = date('Y');
 				$author_len = strlen($options['author']);
 				$credits = $options['author'] . ($author_len && $author_len <= 60 ? str_repeat(' ', 60 - $author_len) : '');
 
@@ -192,7 +191,7 @@ function process_source_tags($file, $short_name) {
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-$year The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |

@@ -29,7 +29,8 @@ foreach($wddx as $k=>$v)
 
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(8) "manhluat"

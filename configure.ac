@@ -183,8 +183,7 @@ AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
 AC_PROG_CC_C_O
-dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
-dnl AC_PROG_CC_STDC
+AC_PROG_CC_C99
 AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
@@ -1136,8 +1135,7 @@ if test "$PHP_CLI" = "no"; then
 fi
 
 PHP_ARG_WITH(pear, [whether to install PEAR],
-[  --with-pear=DIR         Install PEAR in DIR @<:@PREFIX/lib/php@:>@
-  --without-pear          Do not install PEAR], DEFAULT, yes)
+[  --with-pear=DIR         Install PEAR in DIR @<:@PREFIX/lib/php@:>@], no, yes)
 
 if test "$PHP_PEAR" != "no"; then
 
@@ -1153,10 +1151,12 @@ if test "$PHP_PEAR" != "no"; then
     AC_MSG_ERROR([$pear_error_msg])
   fi
 
+  AC_MSG_WARN([The --with-pear option is deprecated])
+
   install_pear="install-pear"
   PEAR_INSTALLDIR=$PHP_PEAR
 
-  if test "$PHP_PEAR" = "DEFAULT" || test "$PHP_PEAR" = "yes"; then
+  if test "$PHP_PEAR" = "yes"; then
     case $PHP_LAYOUT in
       GNU) PEAR_INSTALLDIR=$datadir/pear;;
       *)   PEAR_INSTALLDIR=$libdir/php;;

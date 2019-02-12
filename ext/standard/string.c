@@ -2592,8 +2592,8 @@ PHP_FUNCTION(quotemeta)
 
 	old_end = ZSTR_VAL(old) + ZSTR_LEN(old);
 
-	if (ZSTR_VAL(old) == old_end) {
-		RETURN_FALSE;
+	if (ZSTR_LEN(old) == 0) {
+		RETURN_EMPTY_STRING();
 	}
 
 	str = zend_string_safe_alloc(2, ZSTR_LEN(old), 0, 0);

@@ -38,7 +38,7 @@ if (!isset($config['ENV']['PDOTEST_DSN']) || $config['ENV']['PDOTEST_DSN']===fal
 //
 // easy way to compile:
 // configure --disable-all --enable-cli --enable-zts --enable-pdo --with-pdo-odbc --enable-debug
-// configure --disable-all --eanble-cli --enable-pdo --with-pdo-odbc=unixODBC,/usr,/usr --with-unixODBC=/usr --enable-debug
+// configure --disable-all --enable-cli --enable-pdo --with-pdo-odbc=unixODBC,/usr,/usr --with-unixODBC=/usr --enable-debug
 //
 
 require 'ext/pdo/tests/pdo_test.inc';

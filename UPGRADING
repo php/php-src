@@ -39,6 +39,33 @@ PHP 8.0 UPGRADE NOTES
   . Removed each(). foreach or ArrayIterator should be used instead.
   . Removed ability to unbind $this from closures that were created from a
     method, using Closure::fromCallable() or ReflectionMethod::getClosure().
+  . Any array that has a number n as its first numeric key will use n+1 for
+    its next implicit key. Even if n is negative.
+    RFC: https://wiki.php.net/rfc/negative_array_index
+  . The @ operator will no longer silence fatal errors (E_ERROR, E_CORE_ERROR,
+    E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR, E_PARSE). Error handlers
+    that expect error_reporting to be 0 when @ is used, should be adjusted to
+    use a mask check instead:
+
+        // Replace
+        function my_error_handler($err_no, $err_msg, $filename, $linenum) {
+            if (error_reporting() == 0) {
+                return; // Silenced
+            }
+            // ...
+        }
+
+        // With
+        function my_error_handler($err_no, $err_msg, $filename, $linenum) {
+            if (error_reporting() & $err_no) {
+                return; // Silenced
+            }
+            // ...
+        }
+
+    Additionally, care should be taken that error messages are not displayed in
+    production environments, which can result in information leaks. Please
+    ensure that display_errors=Off is used in conjunction with error logging.
 
 - Date:
   . mktime() and gmmktime() now require at least one argument. time() can be
@@ -102,6 +129,26 @@ PHP 8.0 UPGRADE NOTES
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
 
+- Reflection:
+  . The method signatures
+
+        ReflectionClass::newInstance($args)
+        ReflectionFunction::invoke($args)
+        ReflectionMethod::invoke($object, $args)
+
+    have been changed to:
+
+        ReflectionClass::newInstance(...$args)
+        ReflectionFunction::invoke(...$args)
+        ReflectionMethod::invoke($object, ...$args)
+
+    Code that must be compatible with both PHP 7 and PHP 8 can use the following
+    signatures to be compatible with both versions:
+
+        ReflectionClass::newInstance($arg = null, ...$args)
+        ReflectionFunction::invoke($arg = null, ...$args)
+        ReflectionMethod::invoke($object, $arg = null, ...$args)
+
 - SPL:
   . SplFileObject::fgetss() has been removed.
   . SplHeap::compare($a, $b) now specifies a method signature. Inheriting
@@ -125,6 +172,8 @@ PHP 8.0 UPGRADE NOTES
   . The 'salt' option of password_hash() is no longer supported. If the 'salt'
     option is used a warning is generated, the provided salt is ignored, and a
     generated salt is used instead.
+  . The quotemeta() function will now return an empty string if an empty string
+    was passed. Previously false was returned.
 
 - Zlib:
   . gzgetss() has been removed.

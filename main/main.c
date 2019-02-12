@@ -2165,6 +2165,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
 		return FAILURE;
 	}
+	php_win32_signal_ctrl_handler_init();
 #endif
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
@@ -2452,6 +2453,7 @@ void php_module_shutdown(void)
 
 #ifdef PHP_WIN32
 	(void)php_win32_shutdown_random_bytes();
+	php_win32_signal_ctrl_handler_shutdown();
 #endif
 
 	sapi_flush();

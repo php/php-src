@@ -59,4 +59,7 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 	http://support.microsoft.com/kb/99115 */
 PHP_WINUTIL_API BOOL php_win32_console_is_own(void);
 
+/* Check whether the current SAPI is run on console. */
+PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void);
+
 #endif

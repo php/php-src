@@ -50,7 +50,8 @@ WDX;
 
 var_dump(wddx_deserialize($wddx));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(1) {
   ["content_queries"]=>
   array(1) {
