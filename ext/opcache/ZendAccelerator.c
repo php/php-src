@@ -230,11 +230,12 @@ static inline void accel_restart_enter(void)
 #ifdef ZEND_WIN32
 	INCREMENT(restart_in);
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
-# else
-	static const FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
-#endif
+	struct flock restart_in_progress;
+
+	restart_in_progress.l_type = F_WRLCK;
+	restart_in_progress.l_whence = SEEK_SET;
+	restart_in_progress.l_start = 2;
+	restart_in_progress.l_len = 1;
 
 	if (fcntl(lock_file, F_SETLK, &restart_in_progress) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "RestartC(+1):  %s (%d)", strerror(errno), errno);
@@ -249,11 +250,12 @@ static inline void accel_restart_leave(void)
 	ZCSG(restart_in_progress) = 0;
 	DECREMENT(restart_in);
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
-# else
-	static const FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
-# endif
+	struct flock restart_finished;
+
+	restart_finished.l_type = F_UNLCK;
+	restart_finished.l_whence = SEEK_SET;
+	restart_finished.l_start = 2;
+	restart_finished.l_len = 1;
 
 	ZCSG(restart_in_progress) = 0;
 	if (fcntl(lock_file, F_SETLK, &restart_finished) == -1) {
@@ -266,7 +268,12 @@ static inline int accel_restart_is_active(void)
 {
 	if (ZCSG(restart_in_progress)) {
 #ifndef ZEND_WIN32
-		FLOCK_STRUCTURE(restart_check, F_WRLCK, SEEK_SET, 2, 1);
+		struct flock restart_check;
+
+		restart_check.l_type = F_WRLCK;
+		restart_check.l_whence = SEEK_SET;
+		restart_check.l_start = 2;
+		restart_check.l_len = 1;
 
 		if (fcntl(lock_file, F_GETLK, &restart_check) == -1) {
 			zend_accel_error(ACCEL_LOG_DEBUG, "RestartC:  %s (%d)", strerror(errno), errno);
@@ -291,11 +298,12 @@ static inline int accel_activate_add(void)
 #ifdef ZEND_WIN32
 	INCREMENT(mem_usage);
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
-# else
-	static const FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
-# endif
+	struct flock mem_usage_lock;
+
+	mem_usage_lock.l_type = F_RDLCK;
+	mem_usage_lock.l_whence = SEEK_SET;
+	mem_usage_lock.l_start = 1;
+	mem_usage_lock.l_len = 1;
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_lock) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(+1):  %s (%d)", strerror(errno), errno);
@@ -314,11 +322,12 @@ static inline void accel_deactivate_sub(void)
 		ZCG(counted) = 0;
 	}
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
-# else
-	static const FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
-# endif
+	struct flock mem_usage_unlock;
+
+	mem_usage_unlock.l_type = F_UNLCK;
+	mem_usage_unlock.l_whence = SEEK_SET;
+	mem_usage_unlock.l_start = 1;
+	mem_usage_unlock.l_len = 1;
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(-1):  %s (%d)", strerror(errno), errno);
@@ -331,11 +340,12 @@ static inline void accel_unlock_all(void)
 #ifdef ZEND_WIN32
 	accel_deactivate_sub();
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
-# else
-	static const FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
-# endif
+	struct flock mem_usage_unlock_all;
+
+	mem_usage_unlock_all.l_type = F_UNLCK;
+	mem_usage_unlock_all.l_whence = SEEK_SET;
+	mem_usage_unlock_all.l_start = 0;
+	mem_usage_unlock_all.l_len = 0;
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock_all) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UnlockAll:  %s (%d)", strerror(errno), errno);
@@ -730,8 +740,12 @@ static inline int accel_is_inactive(void)
 		return SUCCESS;
 	}
 #else
-	FLOCK_STRUCTURE(mem_usage_check, F_WRLCK, SEEK_SET, 1, 1);
+	struct flock mem_usage_check;
 
+	mem_usage_check.l_type = F_WRLCK;
+	mem_usage_check.l_whence = SEEK_SET;
+	mem_usage_check.l_start = 1;
+	mem_usage_check.l_len = 1;
 	mem_usage_check.l_pid = -1;
 	if (fcntl(lock_file, F_GETLK, &mem_usage_check) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC:  %s (%d)", strerror(errno), errno);

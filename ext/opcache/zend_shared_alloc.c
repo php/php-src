@@ -371,15 +371,15 @@ void zend_shared_alloc_safe_unlock(void)
 	}
 }
 
-#ifndef ZEND_WIN32
-/* name l_type l_whence l_start l_len */
-static FLOCK_STRUCTURE(mem_write_lock, F_WRLCK, SEEK_SET, 0, 1);
-static FLOCK_STRUCTURE(mem_write_unlock, F_UNLCK, SEEK_SET, 0, 1);
-#endif
-
 void zend_shared_alloc_lock(void)
 {
 #ifndef ZEND_WIN32
+	struct flock mem_write_lock;
+
+	mem_write_lock.l_type = F_WRLCK;
+	mem_write_lock.l_whence = SEEK_SET;
+	mem_write_lock.l_start = 0;
+	mem_write_lock.l_len = 1;
 
 #ifdef ZTS
 	tsrm_mutex_lock(zts_lock);
@@ -410,6 +410,15 @@ void zend_shared_alloc_lock(void)
 
 void zend_shared_alloc_unlock(void)
 {
+#ifndef ZEND_WIN32
+	struct flock mem_write_unlock;
+
+	mem_write_unlock.l_type = F_UNLCK;
+	mem_write_unlock.l_whence = SEEK_SET;
+	mem_write_unlock.l_start = 0;
+	mem_write_unlock.l_len = 1;
+#endif
+
 	ZCG(locked) = 0;
 
 #ifndef ZEND_WIN32
