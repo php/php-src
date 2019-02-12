@@ -30,7 +30,7 @@ $c();
 --EXPECT--
 string(7) "Baz\foo"
 string(7) "Baz\foo"
-string(7) "Baz\Foo"
+string(0) ""
 string(3) "bar"
 string(12) "Baz\Foo::bar"
 string(7) "Baz\Foo"
