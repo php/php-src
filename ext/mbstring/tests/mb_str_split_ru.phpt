@@ -32,7 +32,10 @@ foreach($charset as $cs){
     /* check chunks number */
     for($i = 1; $i <= $len; ++$i){
         $ceil = ceil($len / $i);
-        if($ceil != count(mb_str_split($enc,$i,$cs))) echo "$cs WRONG CHUNKS NUMBER ";
+        $cnt = count(mb_str_split($enc,$i,$cs));
+        if($ceil != $cnt){
+          echo "$cs WRONG CHUNKS NUMBER: expected/actual: $ceil/$cnt\n";
+        }
     }
 
     /* check content */

@@ -2226,7 +2226,7 @@ PHP_FUNCTION(mb_str_split)
 {
     zend_string *str, *encoding = NULL;
     size_t mb_len, chunks, chunk_len;
-    char unsigned const *last, *p;
+    const char  *p, *last; /* pointer for the string cursor and last string char */
     mbfl_string string, result_string;
     const mbfl_encoding *mbfl_encoding;
     zend_long split_length = 1;
@@ -2250,15 +2250,15 @@ PHP_FUNCTION(mb_str_split)
         RETURN_FALSE;
     }
 
-    p = (char unsigned *)ZSTR_VAL(str); /* string cursor pointer */
-    string.val = (char unsigned *)p;
+    p = ZSTR_VAL(str); /* string cursor pointer */
+    string.val = (unsigned char *)p;
     string.len = ZSTR_LEN(str);
     last = string.val + string.len; /* last string char pointer */
 
     /* check if split_length > string.len */
-    if(split_length > string.len){
+    if(split_length >= string.len){
         array_init_size(return_value, 1);
-        add_next_index_stringl(return_value, (const char *)p, string.len);
+        add_next_index_stringl(return_value, p, string.len);
         return;
     }
 
@@ -2299,13 +2299,13 @@ PHP_FUNCTION(mb_str_split)
         while (p < last) { /* split cycle work until the cursor has reached the last byte */
             char const *chunk_p = p; /* chunk first byte pointer */
             chunk_len = 0; /* chunk length in bytes */
-            for (zend_long char_count = 0; char_count < split_length, p <= last; ++char_count) {
-                char unsigned const m = mbtab[*p]; /* single character length table */
+            for (zend_long char_count = 0; char_count < split_length && p < last; ++char_count) {
+                char unsigned const m = mbtab[*(const unsigned char *)p]; /* single character length table */
                 chunk_len += m;
                 p += m;
             }
             if (p > last) chunk_len -= p - last; /* check if chunk is in bounds */
-            add_next_index_stringl(return_value, (const char *)chunk_p, chunk_len);
+            add_next_index_stringl(return_value, chunk_p, chunk_len);
         }
         return;
 
@@ -2378,9 +2378,9 @@ PHP_FUNCTION(mb_str_split)
     array_init_size(return_value, chunks);
     if (chunks != 0) {
         for (zend_long i = 0; i < chunks - 1; p += chunk_len, ++i) {
-            add_next_index_stringl(return_value, (const char *)p, chunk_len);
+            add_next_index_stringl(return_value, p, chunk_len);
         }
-        add_next_index_stringl(return_value, (const char *)p, last - p);
+        add_next_index_stringl(return_value, p, last - p);
     }
 
 }
