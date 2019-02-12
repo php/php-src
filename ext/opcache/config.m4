@@ -343,63 +343,6 @@ int main() {
     msg=yes,msg=no,msg=no)
   AC_MSG_RESULT([$msg])
 
-flock_type=unknown
-AC_MSG_CHECKING(for struct flock layout)
-
-if test "$flock_type" = "unknown"; then
-AC_TRY_RUN([
-  #include <fcntl.h>
-  struct flock lock = { 1, 2, 3, 4, 5, 6, 7 };
-  int main() {
-    if(lock.l_type == 1 && lock.l_whence == 2 && lock.l_start == 6 && lock.l_len== 7) {
-		return 0;
-    }
-    return 1;
-  }
-], [
-    flock_type=aix64
-    AC_DEFINE([HAVE_FLOCK_AIX64], [], [Struct flock is 64-bit AIX-type])
-], [])
-fi
-
-if test "$flock_type" = "unknown"; then
-AC_TRY_RUN([
-  #include <fcntl.h>
-  struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() {
-    if(lock.l_type == 1 && lock.l_whence == 2 && lock.l_start == 3 && lock.l_len == 4) {
-		return 0;
-    }
-    return 1;
-  }
-], [
-	flock_type=linux
-    AC_DEFINE([HAVE_FLOCK_LINUX], [], [Struct flock is Linux-type])
-], [])
-fi
-
-if test "$flock_type" = "unknown"; then
-AC_TRY_RUN([
-  #include <fcntl.h>
-  struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() {
-    if(lock.l_start == 1 && lock.l_len == 2 && lock.l_type == 4 && lock.l_whence == 5) {
-		return 0;
-    }
-    return 1;
-  }
-], [
-	flock_type=bsd
-    AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type])
-], [])
-fi
-
-AC_MSG_RESULT([$flock_type])
-
-if test "$flock_type" = "unknown"; then
-	AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])
-fi
-
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
 	zend_accelerator_blacklist.c \
