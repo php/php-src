@@ -5275,7 +5275,6 @@ PHP_METHOD(DatePeriod, __wakeup)
 /* {{{ date_period_read_property */
 static zval *date_period_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv)
 {
-	zval *zv;
 	if (type != BP_VAR_IS && type != BP_VAR_R) {
 		zend_throw_error(NULL, "Retrieval of DatePeriod properties for modification is unsupported");
 		return &EG(uninitialized_zval);
@@ -5283,13 +5282,7 @@ static zval *date_period_read_property(zval *object, zval *member, int type, voi
 
 	Z_OBJPROP_P(object); /* build properties hash table */
 
-	zv = zend_std_read_property(object, member, type, cache_slot, rv);
-	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJ_HANDLER_P(zv, clone_obj)) {
-		/* defensive copy */
-		ZVAL_OBJ(zv, Z_OBJ_HANDLER_P(zv, clone_obj)(zv));
-	}
-
-	return zv;
+	return zend_std_read_property(object, member, type, cache_slot, rv);
 }
 /* }}} */
 
