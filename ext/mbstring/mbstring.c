@@ -2215,7 +2215,7 @@ static int mbfl_split_output(int c, void *data)
         mbfl_memory_device *device = (mbfl_memory_device *)params->next_filter->data; /* chars container */
         mbfl_string *chunk = params->result_string;
         mbfl_memory_device_result(device, chunk); /* make chunk */
-        add_next_index_stringl(params->return_value, chunk->val, chunk->len); /* add chunk to the array */
+        add_next_index_stringl(params->return_value, (const char *)chunk->val, chunk->len); /* add chunk to the array */
         efree(chunk->val);
         params->mb_chunk_length = 0; /* reset mb_chunk size */
     }
@@ -2258,7 +2258,7 @@ PHP_FUNCTION(mb_str_split)
     /* check if split_length > string.len */
     if(split_length > string.len){
         array_init_size(return_value, 1);
-        add_next_index_stringl(return_value, p, string.len);
+        add_next_index_stringl(return_value, (const char *)p, string.len);
         return;
     }
 
@@ -2305,7 +2305,7 @@ PHP_FUNCTION(mb_str_split)
                 p += m;
             }
             if (p > last) chunk_len -= p - last; /* check if chunk is in bounds */
-            add_next_index_stringl(return_value, chunk_p, chunk_len);
+            add_next_index_stringl(return_value, (const char *)chunk_p, chunk_len);
         }
         return;
 
@@ -2378,9 +2378,9 @@ PHP_FUNCTION(mb_str_split)
     array_init_size(return_value, chunks);
     if (chunks != 0) {
         for (zend_long i = 0; i < chunks - 1; p += chunk_len, ++i) {
-            add_next_index_stringl(return_value, p, chunk_len);
+            add_next_index_stringl(return_value, (const char *)p, chunk_len);
         }
-        add_next_index_stringl(return_value, p, last - p);
+        add_next_index_stringl(return_value, (const char *)p, last - p);
     }
 
 }
