@@ -63,21 +63,28 @@
 # pragma GCC diagnostic ignored "-Wvolatile-register-var"
   register zend_execute_data* volatile execute_data __asm__(ZEND_VM_FP_GLOBAL_REG);
 # pragma GCC diagnostic warning "-Wvolatile-register-var"
+#endif
+
+#ifdef ZEND_VM_FP_GLOBAL_REG
 # define EXECUTE_DATA_D     void
 # define EXECUTE_DATA_C
 # define EXECUTE_DATA_DC
 # define EXECUTE_DATA_CC
 # define NO_EXECUTE_DATA_CC
-# define OPLINE_D           void
-# define OPLINE_C
-# define OPLINE_DC
-# define OPLINE_CC
 #else
 # define EXECUTE_DATA_D     zend_execute_data* execute_data
 # define EXECUTE_DATA_C     execute_data
 # define EXECUTE_DATA_DC    , EXECUTE_DATA_D
 # define EXECUTE_DATA_CC    , EXECUTE_DATA_C
 # define NO_EXECUTE_DATA_CC , NULL
+#endif
+
+#ifdef ZEND_VM_IP_GLOBAL_REG
+# define OPLINE_D           void
+# define OPLINE_C
+# define OPLINE_DC
+# define OPLINE_CC
+#else
 # define OPLINE_D           const zend_op* opline
 # define OPLINE_C           opline
 # define OPLINE_DC          , OPLINE_D
@@ -3306,7 +3313,7 @@ static zend_never_inline void zend_copy_extra_args(EXECUTE_DATA_D)
 
 	if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 		/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+#if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 		opline += first_extra_arg;
 #else
 		EX(opline) += first_extra_arg;
@@ -3358,7 +3365,7 @@ static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array,
 	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
-#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+#if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 	opline = op_array->opcodes;
 #else
 	EX(opline) = op_array->opcodes;
@@ -3375,7 +3382,7 @@ static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array,
 		}
 	} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 		/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+#if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 		opline += num_args;
 #else
 		EX(opline) += num_args;
@@ -3388,7 +3395,7 @@ static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array,
 	EX_LOAD_RUN_TIME_CACHE(op_array);
 
 	EG(current_execute_data) = execute_data;
-#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+#if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 	EX(opline) = opline;
 #endif
 }
@@ -3471,7 +3478,11 @@ ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *
 {
 #if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 	zend_execute_data *orig_execute_data = execute_data;
+#endif
+#if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 	const zend_op *orig_opline = opline;
+#endif
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 	execute_data = ex;
 #else
 	zend_execute_data *execute_data = ex;
@@ -3483,9 +3494,11 @@ ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *
 	}
 	i_init_func_execute_data(op_array, return_value, 1 EXECUTE_DATA_CC);
 
-#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+#if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
     EX(opline) = opline;
 	opline = orig_opline;
+#endif
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 	execute_data = orig_execute_data;
 #endif
 }

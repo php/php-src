@@ -67892,8 +67892,12 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(HYBRID_HALT):
+#ifdef ZEND_VM_FP_GLOBAL_REG
 				execute_data = orig_execute_data;
+#endif
+#ifdef ZEND_VM_IP_GLOBAL_REG
 				opline = orig_opline;
+#endif
 				return;
 			HYBRID_DEFAULT:
 				VM_TRACE(ZEND_NULL)
