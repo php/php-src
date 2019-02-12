@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #77530 (PHP crashes when parsing `(2)::class`). (Ekin)
   . Fixed bug #77546 (iptcembed broken function). (gdegoulet)
 
+- Exif:
+  . Fixed bug #77564 (Memory leak in exif_process_IFD_TAG). (Ben Ramsey)
+
 - Mbstring:
   . Fixed bug #77514 (mb_ereg_replace() with trailing backslash adds null byte).
     (Nikita)
