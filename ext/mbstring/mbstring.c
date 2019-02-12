@@ -2255,6 +2255,12 @@ PHP_FUNCTION(mb_str_split)
     string.len = ZSTR_LEN(str);
     last = string.val + string.len; /* last string char pointer */
 
+    /* check if split_length > string.len */
+    if(split_length > string.len){
+        array_init_size(return_value, 1);
+        add_next_index_stringl(return_value, p, string.len);
+        return;
+    }
 
     /*
      * +----------------------------------------------------------------------+
