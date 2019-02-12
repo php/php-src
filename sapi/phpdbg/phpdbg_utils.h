@@ -111,7 +111,7 @@ static zend_always_inline zend_execute_data *phpdbg_user_execute_data(zend_execu
 #define PHPDBG_OUTPUT_BACKUP_DEFINES() \
 	zend_output_globals *output_globals_ptr; \
 	zend_output_globals original_output_globals; \
-	output_globals_ptr = (zend_output_globals *) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(output_globals_id)];
+	output_globals_ptr = TSRMG_BULK(output_globals_id, zend_output_globals *);
 #else
 #define PHPDBG_OUTPUT_BACKUP_DEFINES() \
 	zend_output_globals *output_globals_ptr; \
