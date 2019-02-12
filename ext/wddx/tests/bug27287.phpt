@@ -16,5 +16,8 @@ Bug #27287 (segfault with deserializing object data)
 	echo "OK\n";
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_serialize_value() is deprecated in %s on line %d
+
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 OK

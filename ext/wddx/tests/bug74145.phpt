@@ -11,6 +11,7 @@ $wddx = wddx_deserialize($data);
 var_dump($wddx);
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 NULL
 DONE

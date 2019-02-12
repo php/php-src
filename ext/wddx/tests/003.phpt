@@ -13,7 +13,8 @@ precision=14
 	var_dump(wddx_deserialize($fp));
 	fclose($fp);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(4) {
   ["var1"]=>
   NULL

@@ -241,6 +241,9 @@ PHP 7.4 UPGRADE NOTES
     possible, but unserialization yielded unusable objects.
   . The @param notation can now also be used to denote SQL query parameters.
 
+- WDDX:
+  . The WDDX extension has been deprecated.
+
 - Zip:
   . The bundled libzip library has been removed. A system libzip >= 0.11 is now
     necessary to build the extension.
@@ -252,6 +255,14 @@ PHP 7.4 UPGRADE NOTES
 - Mbstring:
   . MB_ONIGURUMA_VERSION specifies the version of the oniguruma library against
     which mbregex has been built.
+
+- Socket:
+  . Added FreeBSD-specific socket options:
+  . SO_LABEL
+  . SO_PEERLABEL
+  . SO_LISTENQLIMIT
+  . SO_LISTENQLEN
+  . SO_USER_COOKIE
 
 - Tidy:
   . TIDY_TAG_ARTICLE
