@@ -418,6 +418,8 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 	int flags = MAP_PRIVATE | MAP_ANON;
 #if defined(MAP_EXCL)
 	flags |= MAP_FIXED | MAP_EXCL;
+#elif defined(MAP_FIXED_NOREPLACE)
+	flags |= MAP_FIXED_NOREPLACE;
 #endif
 	/* MAP_FIXED leads to discarding of the old mapping, so it can't be used. */
 	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
