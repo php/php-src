@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Intl:
   . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
 
+- LDAP:
+  . Removed deprecated ldap_sort. (mcmic)
+
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
 

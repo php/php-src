@@ -982,7 +982,7 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 		zend_string *str, *file = NULL;
 		zend_long line = 0;
 
-		zend_call_method_with_0_params(&exception, ce_exception, &ex->ce->__tostring, "__tostring", &tmp);
+		zend_call_method_with_0_params(Z_OBJ(exception), ce_exception, &ex->ce->__tostring, "__tostring", &tmp);
 		if (!EG(exception)) {
 			if (Z_TYPE(tmp) != IS_STRING) {
 				zend_error(E_WARNING, "%s::__toString() must return a string", ZSTR_VAL(ce_exception->name));
@@ -1046,13 +1046,3 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 	zend_throw_exception_internal(exception);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

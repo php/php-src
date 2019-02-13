@@ -10,5 +10,6 @@ $buf = wddx_serialize_value($var, 'name');
 echo "OK\n";
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_serialize_value() is deprecated in %s on line %d
 OK

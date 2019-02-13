@@ -1,7 +1,7 @@
 --TEST--
 gzopen(), gzread(), gzwrite()
 --SKIPIF--
-<?php # vim600:syn=php:
+<?php
 if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php

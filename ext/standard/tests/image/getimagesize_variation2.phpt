@@ -8,7 +8,7 @@ Test getimagesize() function : usage variations  - unexpected type for arg 2
  * Alias to functions:
  */
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 set_error_handler('test_error_handler');

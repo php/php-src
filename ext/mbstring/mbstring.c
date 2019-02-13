@@ -56,18 +56,15 @@
 #include "mb_gpc.h"
 
 #if HAVE_MBREGEX
-#include "php_mbregex.h"
+# include "php_mbregex.h"
+# include "php_onig_compat.h"
+# include <oniguruma.h>
+# undef UChar
+#elif HAVE_PCRE || HAVE_BUNDLED_PCRE
+# include "ext/pcre/php_pcre.h"
 #endif
 
 #include "zend_multibyte.h"
-
-#if HAVE_ONIG
-#include "php_onig_compat.h"
-#include <oniguruma.h>
-#undef UChar
-#elif HAVE_PCRE || HAVE_BUNDLED_PCRE
-#include "ext/pcre/php_pcre.h"
-#endif
 /* }}} */
 
 #if HAVE_MBSTRING
@@ -211,6 +208,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_output_handler, 0, 0, 2)
 	ZEND_ARG_INFO(0, contents)
 	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_split, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, split_length)
+	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strlen, 0, 0, 1)
@@ -510,6 +513,7 @@ static const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_parse_str,			arginfo_mb_parse_str)
 	PHP_FE(mb_output_handler,		arginfo_mb_output_handler)
 	PHP_FE(mb_preferred_mime_name,	arginfo_mb_preferred_mime_name)
+	PHP_FE(mb_str_split,			arginfo_mb_str_split)
 	PHP_FE(mb_strlen,				arginfo_mb_strlen)
 	PHP_FE(mb_strpos,				arginfo_mb_strpos)
 	PHP_FE(mb_strrpos,				arginfo_mb_strrpos)
@@ -983,7 +987,7 @@ static void *_php_mb_compile_regex(const char *pattern);
 static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len);
 static void _php_mb_free_regex(void *opaque);
 
-#if HAVE_ONIG
+#if HAVE_MBREGEX
 /* {{{ _php_mb_compile_regex */
 static void *_php_mb_compile_regex(const char *pattern)
 {
@@ -1673,13 +1677,6 @@ PHP_MINFO_FUNCTION(mbstring)
 		snprintf(tmp, sizeof(tmp), "%d.%d.%d", MBFL_VERSION_MAJOR, MBFL_VERSION_MINOR, MBFL_VERSION_TEENY);
 		php_info_print_table_row(2, "libmbfl version", tmp);
 	}
-#if HAVE_ONIG
-	{
-		char tmp[256];
-		snprintf(tmp, sizeof(tmp), "%d.%d.%d", ONIGURUMA_VERSION_MAJOR, ONIGURUMA_VERSION_MINOR, ONIGURUMA_VERSION_TEENY);
-		php_info_print_table_row(2, "oniguruma version", tmp);
-	}
-#endif
 	php_info_print_table_end();
 
 	php_info_print_table_start();
@@ -2179,6 +2176,169 @@ PHP_FUNCTION(mb_output_handler)
 		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
 		mbfl_buffer_converter_delete(MBSTRG(outconv));
 		MBSTRG(outconv) = NULL;
+	}
+}
+/* }}} */
+
+/* {{{ proto array mb_str_split(string str [, int split_length] [, string encoding])
+ Convert a multibyte string to an array. If split_length is specified,
+ break the string down into chunks each split_length characters long. */
+
+/* structure to pass split params to the callback */
+struct mbfl_split_params {
+    zval *return_value; /* php function return value structure pointer */
+    mbfl_string *result_string; /* string to store result chunk */
+    size_t mb_chunk_length; /* actual chunk length in chars */
+    size_t split_length; /* split length in chars */
+    mbfl_convert_filter *next_filter; /* widechar to encoding converter */
+};
+
+/* callback function to fill split array */
+static int mbfl_split_output(int c, void *data)
+{
+    struct mbfl_split_params *params = (struct mbfl_split_params *)data; /* cast passed data */
+
+    (*params->next_filter->filter_function)(c, params->next_filter); /* decoder filter */
+
+    if(params->split_length == ++params->mb_chunk_length) { /* if current chunk size reached defined chunk size or last char reached */
+        mbfl_convert_filter_flush(params->next_filter);/* concatenate separate decoded chars to the solid string */
+        mbfl_memory_device *device = (mbfl_memory_device *)params->next_filter->data; /* chars container */
+        mbfl_string *chunk = params->result_string;
+        mbfl_memory_device_result(device, chunk); /* make chunk */
+        add_next_index_stringl(params->return_value, (const char *)chunk->val, chunk->len); /* add chunk to the array */
+        efree(chunk->val);
+        params->mb_chunk_length = 0; /* reset mb_chunk size */
+    }
+    return 0;
+}
+
+PHP_FUNCTION(mb_str_split)
+{
+	zend_string *str, *encoding = NULL;
+	size_t mb_len, chunks, chunk_len;
+	const char *p, *last; /* pointer for the string cursor and last string char */
+	mbfl_string string, result_string;
+	const mbfl_encoding *mbfl_encoding;
+	zend_long split_length = 1;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(split_length)
+		Z_PARAM_STR(encoding)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (split_length <= 0) {
+		php_error_docref(NULL, E_WARNING, "The length of each segment must be greater than zero");
+		RETURN_FALSE;
+	}
+
+	/* fill mbfl_string structure */
+	string.val = (unsigned char *) ZSTR_VAL(str);
+	string.len = ZSTR_LEN(str);
+	string.no_language = MBSTRG(language);
+	string.encoding = php_mb_get_encoding(encoding);
+	if (!string.encoding) {
+		RETURN_FALSE;
+	}
+
+	p = ZSTR_VAL(str); /* string cursor pointer */
+	last = ZSTR_VAL(str) + ZSTR_LEN(str); /* last string char pointer */
+
+	mbfl_encoding = string.encoding;
+
+	/* first scenario: 1,2,4-bytes fixed width encodings (head part) */
+	if (mbfl_encoding->flag & MBFL_ENCTYPE_SBCS) { /* 1 byte */
+		mb_len = string.len;
+		chunk_len = (size_t)split_length; /* chunk length in bytes */
+	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) { /* 2 bytes */
+		mb_len = string.len / 2;
+		chunk_len = split_length * 2;
+	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) { /* 4 bytes */
+		mb_len = string.len / 4;
+		chunk_len = split_length * 4;
+	} else if (mbfl_encoding->mblen_table != NULL) {
+		/* second scenario: variable width encodings with length table */
+		char unsigned const *mbtab = mbfl_encoding->mblen_table;
+
+		/* assume that we have 1-bytes characters */
+		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
+
+		while (p < last) { /* split cycle work until the cursor has reached the last byte */
+			char const *chunk_p = p; /* chunk first byte pointer */
+			chunk_len = 0; /* chunk length in bytes */
+			for (zend_long char_count = 0; char_count < split_length && p < last; ++char_count) {
+				char unsigned const m = mbtab[*(const unsigned char *)p]; /* single character length table */
+				chunk_len += m;
+				p += m;
+			}
+			if (p >= last) chunk_len -= p - last; /* check if chunk is in bounds */
+			add_next_index_stringl(return_value, chunk_p, chunk_len);
+		}
+		return;
+	} else {
+		/* third scenario: other multibyte encodings */
+		mbfl_convert_filter *filter, *decoder;
+
+		/* assume that we have 1-bytes characters */
+		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
+
+		/* decoder filter to decode wchar to encoding */
+		mbfl_memory_device device;
+		mbfl_memory_device_init(&device, split_length + 1, 0);
+
+		decoder = mbfl_convert_filter_new(
+				&mbfl_encoding_wchar,
+				string.encoding,
+				mbfl_memory_device_output,
+				NULL,
+				&device);
+		/* if something wrong with the decoded */
+		if (decoder == NULL) {
+			RETURN_FALSE;
+		}
+
+		/* wchar filter */
+		mbfl_string_init(&result_string); /* mbfl_string to store chunk in the callback */
+		struct mbfl_split_params params = { /* init callback function params structure */
+			.return_value = return_value,
+			.result_string = &result_string,
+			.mb_chunk_length = 0,
+			.split_length = (size_t)split_length,
+			.next_filter = decoder,
+		};
+
+		filter = mbfl_convert_filter_new(
+				string.encoding,
+				&mbfl_encoding_wchar,
+				mbfl_split_output,
+				NULL,
+				&params);
+		/* if something wrong with the filter */
+		if (filter == NULL){
+			mbfl_convert_filter_delete(decoder); /* this will free allocated memory for the decoded */
+			RETURN_FALSE;
+		}
+
+		while (p < last - 1) { /* cycle each byte except last with callback function */
+			(*filter->filter_function)(*p++, filter);
+		}
+		params.mb_chunk_length = split_length - 1; /* force to finish current chunk */
+		(*filter->filter_function)(*p++, filter); /*process last char */
+
+		mbfl_convert_filter_delete(decoder);
+		mbfl_convert_filter_delete(filter);
+		return;
+	}
+
+	/* first scenario: 1,2,4-bytes fixed width encodings (tail part) */
+	chunks = (mb_len + split_length - 1) / split_length; /* (round up idiom) */
+	array_init_size(return_value, chunks);
+	if (chunks != 0) {
+		for (zend_long i = 0; i < chunks - 1; p += chunk_len, ++i) {
+			add_next_index_stringl(return_value, p, chunk_len);
+		}
+		add_next_index_stringl(return_value, p, last - p);
 	}
 }
 /* }}} */
@@ -5061,12 +5221,3 @@ static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding) /* {{{ 
 /* }}} */
 
 #endif	/* HAVE_MBSTRING */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

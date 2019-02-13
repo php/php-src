@@ -3377,6 +3377,10 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_USERCOMMENT:
+				EFREE_IF(ImageInfo->UserComment);
+				ImageInfo->UserComment = NULL;
+				EFREE_IF(ImageInfo->UserCommentEncoding);
+				ImageInfo->UserCommentEncoding = NULL;
 				ImageInfo->UserCommentLength = exif_process_user_comment(ImageInfo, &(ImageInfo->UserComment), &(ImageInfo->UserCommentEncoding), value_ptr, byte_count);
 				break;
 
@@ -4703,12 +4707,3 @@ PHP_FUNCTION(exif_imagetype)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
- */

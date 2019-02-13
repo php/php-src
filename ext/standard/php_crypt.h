@@ -28,10 +28,3 @@ PHP_MSHUTDOWN_FUNCTION(crypt);
 PHP_RINIT_FUNCTION(crypt);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

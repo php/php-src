@@ -707,7 +707,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_OBJCE(zval)				(Z_OBJ(zval)->ce)
 #define Z_OBJCE_P(zval_p)			Z_OBJCE(*(zval_p))
 
-#define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(&(zval))
+#define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(Z_OBJ(zval))
 #define Z_OBJPROP_P(zval_p)			Z_OBJPROP(*(zval_p))
 
 #define Z_RES(zval)					(zval).value.res
@@ -1255,13 +1255,3 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	} while (0)
 
 #endif /* ZEND_TYPES_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

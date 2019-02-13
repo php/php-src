@@ -1664,7 +1664,8 @@ phpdbg_main:
 
 	if (settings > (zend_phpdbg_globals *) 0x2) {
 #ifdef ZTS
-		*((zend_phpdbg_globals *) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(phpdbg_globals_id)]) = *settings;
+		zend_phpdbg_globals *ptr = TSRMG_BULK_STATIC(phpdbg_globals_id, zend_phpdbg_globals *);
+		*ptr = *settings;
 #else
 		phpdbg_globals = *settings;
 #endif
@@ -1690,7 +1691,7 @@ phpdbg_main:
 				phpdbg_do_help_cmd(exec);
 			} else if (show_version) {
 				phpdbg_out(
-					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2018 The PHP Group\n%s",
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) The PHP Group\n%s",
 					PHPDBG_VERSION,
 					__DATE__,
 					__TIME__,

@@ -622,10 +622,8 @@ tail_call:
 		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 			int n;
 			zval *zv, *end;
-			zval tmp;
 
-			ZVAL_OBJ(&tmp, obj);
-			ht = obj->handlers->get_gc(&tmp, &zv, &n);
+			ht = obj->handlers->get_gc(obj, &zv, &n);
 			end = zv + n;
 			if (EXPECTED(!ht)) {
 				if (!n) return;
@@ -730,10 +728,8 @@ tail_call:
 			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
-				zval tmp;
 
-				ZVAL_OBJ(&tmp, obj);
-				ht = obj->handlers->get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(obj, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return;
@@ -884,10 +880,8 @@ tail_call:
 				if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 					int n;
 					zval *zv, *end;
-					zval tmp;
 
-					ZVAL_OBJ(&tmp, obj);
-					ht = obj->handlers->get_gc(&tmp, &zv, &n);
+					ht = obj->handlers->get_gc(obj, &zv, &n);
 					end = zv + n;
 					if (EXPECTED(!ht)) {
 						if (!n) return;
@@ -1022,7 +1016,6 @@ tail_call:
 			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
-				zval tmp;
 
 				/* optimization: color is GC_BLACK (0) */
 				if (!GC_INFO(ref)) {
@@ -1032,8 +1025,7 @@ tail_call:
 						obj->ce->destructor != NULL) {
 					*flags |= GC_HAS_DESTRUCTORS;
 				}
-				ZVAL_OBJ(&tmp, obj);
-				ht = obj->handlers->get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(obj, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return count;
@@ -1189,10 +1181,8 @@ tail_call:
 			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
-				zval tmp;
 
-				ZVAL_OBJ(&tmp, obj);
-				ht = obj->handlers->get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(obj, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return;
@@ -1432,15 +1422,3 @@ ZEND_API void zend_gc_get_status(zend_gc_status *status)
 	status->threshold = GC_G(gc_threshold);
 	status->num_roots = GC_G(num_roots);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- *
- * vim:noexpandtab:
- */

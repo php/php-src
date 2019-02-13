@@ -1814,8 +1814,12 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
 			break;
 		case ZEND_VM_KIND_HYBRID:
 			out($f,"\t\t\tHYBRID_CASE(HYBRID_HALT):\n");
+			out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
 			out($f,"\t\t\t\texecute_data = orig_execute_data;\n");
+			out($f,"#endif\n");
+			out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
 			out($f,"\t\t\t\topline = orig_opline;\n");
+			out($f,"#endif\n");
 			out($f,"\t\t\t\treturn;\n");
 			out($f,"\t\t\tHYBRID_DEFAULT:\n");
 			out($f,"\t\t\t\tVM_TRACE(ZEND_NULL)\n");
@@ -2772,8 +2776,8 @@ function gen_vm($def, $skel) {
 				out($f,	"\t\t\t\toffset += 1;\n");
 				out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
 				out($f,	"\t\t\t\toffset += 2;\n");
-				out($f, "\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
-				out($f,	"\t\t\toffset += 3;\n");
+				out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
+				out($f,	"\t\t\t\toffset += 3;\n");
 				out($f, "\t\t\t}\n");
 				$else = "} else ";
 			}
@@ -2870,11 +2874,13 @@ function gen_vm($def, $skel) {
 				}
 				if (isset($used_extra_spec["DIM_OBJ"])) {
 					out($f, "\t\t{$else}if (spec & SPEC_RULE_DIM_OBJ) {\n");
-					out($f,	"\t\t\toffset = offset * 3;\n");
+					out($f,	"\t\t\toffset = offset * 4;\n");
 					out($f, "\t\t\tif (op->extended_value == ZEND_ASSIGN_DIM) {\n");
 					out($f,	"\t\t\t\toffset += 1;\n");
 					out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
 					out($f,	"\t\t\t\toffset += 2;\n");
+					out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
+					out($f,	"\t\t\t\toffset += 3;\n");
 					out($f, "\t\t\t}\n");
 					out($f, "\t\t}\n");
 					$else = "else ";

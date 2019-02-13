@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SCCP - Sparse Conditional Constant Propagation          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -873,7 +873,7 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "array_merge")
 				|| zend_string_equals_literal(name, "array_replace")
 				|| zend_string_equals_literal(name, "array_merge_recursive")
-				|| zend_string_equals_literal(name, "array_merge_recursive")
+				|| zend_string_equals_literal(name, "array_replace_recursive")
 				|| zend_string_equals_literal(name, "array_diff")
 				|| zend_string_equals_literal(name, "array_diff_assoc")
 				|| zend_string_equals_literal(name, "array_diff_key")) {
@@ -937,7 +937,7 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "array_merge")
 				|| zend_string_equals_literal(name, "array_replace")
 				|| zend_string_equals_literal(name, "array_merge_recursive")
-				|| zend_string_equals_literal(name, "array_merge_recursive")
+				|| zend_string_equals_literal(name, "array_replace_recursive")
 				|| zend_string_equals_literal(name, "array_diff")
 				|| zend_string_equals_literal(name, "array_diff_assoc")
 				|| zend_string_equals_literal(name, "array_diff_key")) {

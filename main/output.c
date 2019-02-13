@@ -159,7 +159,7 @@ PHPAPI void php_output_shutdown(void)
 PHPAPI int php_output_activate(void)
 {
 #ifdef ZTS
-	memset((*((void ***) ZEND_TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(output_globals_id)], 0, sizeof(zend_output_globals));
+	memset(TSRMG_BULK_STATIC(output_globals_id, zend_output_globals*), 0, sizeof(zend_output_globals));
 #else
 	memset(&output_globals, 0, sizeof(zend_output_globals));
 #endif
@@ -1565,12 +1565,3 @@ PHP_FUNCTION(output_add_rewrite_var)
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

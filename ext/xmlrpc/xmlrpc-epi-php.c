@@ -1452,10 +1452,3 @@ PHP_FUNCTION(xmlrpc_is_fault)
 	RETURN_FALSE;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

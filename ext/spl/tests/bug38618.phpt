@@ -1,7 +1,7 @@
 --TEST--
 Bug #38618 (RecursiveArrayIterator::hasChildren() follows objects)
 --FILE--
-<?php # vim:ft=php
+<?php
 
 class FruitPublic
 {

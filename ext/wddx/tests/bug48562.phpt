@@ -29,6 +29,10 @@ var_dump(wddx_serialize_vars($a));
 
 ?>
 --EXPECTF--
+Deprecated: Function wddx_serialize_vars() is deprecated in %s on line %d
+
 Warning: wddx_serialize_vars(): recursion detected in %s on line %d
 string(78) "<wddxPacket version='1.0'><header/><data><struct></struct></data></wddxPacket>"
+
+Deprecated: Function wddx_serialize_vars() is deprecated in %s on line %d
 string(120) "<wddxPacket version='1.0'><header/><data><struct><var name='foo'><string>bar</string></var></struct></data></wddxPacket>"

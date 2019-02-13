@@ -78,17 +78,17 @@ U_CFUNC void calendar_object_construct(zval *object,
 }
 
 /* {{{ clone handler for Calendar */
-static zend_object *Calendar_clone_obj(zval *object)
+static zend_object *Calendar_clone_obj(zend_object *object)
 {
 	Calendar_object		*co_orig,
 						*co_new;
 	zend_object 	    *ret_val;
 	intl_error_reset(NULL);
 
-	co_orig = Z_INTL_CALENDAR_P(object);
+	co_orig = php_intl_calendar_fetch_object(object);
 	intl_error_reset(INTL_DATA_ERROR_P(co_orig));
 
-	ret_val = Calendar_ce_ptr->create_object(Z_OBJCE_P(object));
+	ret_val = Calendar_ce_ptr->create_object(object->ce);
 	co_new  = php_intl_calendar_fetch_object(ret_val);
 
 	zend_objects_clone_members(&co_new->zo, &co_orig->zo);
@@ -147,7 +147,7 @@ static const struct {
 };
 
 /* {{{ get_debug_info handler for Calendar */
-static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
+static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 {
 	zval			zv,
 					zfields;
@@ -159,7 +159,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 
 	debug_info = zend_new_array(8);
 
-	co  = Z_INTL_CALENDAR_P(object);
+	co  = php_intl_calendar_fetch_object(object);
 	cal = co->ucal;
 
 	if (cal == NULL) {
@@ -179,7 +179,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 		HashTable	   *debug_info_tz;
 
 		timezone_object_construct(&cal->getTimeZone(), &ztz , 0);
-		debug_info_tz = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp);
+		debug_info_tz = Z_OBJ_HANDLER(ztz, get_debug_info)(Z_OBJ(ztz), &is_tmp);
 		assert(is_tmp == 1);
 
 		array_init(&ztz_debug);

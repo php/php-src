@@ -130,12 +130,12 @@ ZEND_END_ARG_INFO()
 /* {{{ wddx_functions[]
  */
 static const zend_function_entry wddx_functions[] = {
-	PHP_FE(wddx_serialize_value, arginfo_wddx_serialize_value)
-	PHP_FE(wddx_serialize_vars,	arginfo_wddx_serialize_vars)
-	PHP_FE(wddx_packet_start,	arginfo_wddx_serialize_start)
-	PHP_FE(wddx_packet_end,		arginfo_wddx_packet_end)
-	PHP_FE(wddx_add_vars,		arginfo_wddx_add_vars)
-	PHP_FE(wddx_deserialize,	arginfo_wddx_deserialize)
+	PHP_DEP_FE(wddx_serialize_value, arginfo_wddx_serialize_value)
+	PHP_DEP_FE(wddx_serialize_vars,	arginfo_wddx_serialize_vars)
+	PHP_DEP_FE(wddx_packet_start,	arginfo_wddx_serialize_start)
+	PHP_DEP_FE(wddx_packet_end,		arginfo_wddx_packet_end)
+	PHP_DEP_FE(wddx_add_vars,		arginfo_wddx_add_vars)
+	PHP_DEP_FE(wddx_deserialize,	arginfo_wddx_deserialize)
 	PHP_FE_END
 };
 /* }}} */
@@ -1328,12 +1328,3 @@ PHP_FUNCTION(wddx_deserialize)
 /* }}} */
 
 #endif /* HAVE_LIBEXPAT */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

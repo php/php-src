@@ -345,14 +345,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 ZEND_EXTERN_MODULE_GLOBALS(mysqli)
 
 #endif	/* PHP_MYSQLI_STRUCTS.H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

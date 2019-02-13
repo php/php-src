@@ -857,12 +857,3 @@ static void yy_error(const char *msg) {
 static void yy_error_sym(const char *msg, int sym) {
 	zend_ffi_parser_error("%s '%s' at line %d", msg, sym_name[sym], yy_line);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

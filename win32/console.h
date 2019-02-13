@@ -59,13 +59,7 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 	http://support.microsoft.com/kb/99115 */
 PHP_WINUTIL_API BOOL php_win32_console_is_own(void);
 
-#endif
+/* Check whether the current SAPI is run on console. */
+PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void);
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+#endif

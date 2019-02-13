@@ -29,12 +29,3 @@ extern PHPAPI zend_class_entry *spl_ce_SplStack;
 PHP_MINIT_FUNCTION(spl_dllist);
 
 #endif /* SPL_DLLIST_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

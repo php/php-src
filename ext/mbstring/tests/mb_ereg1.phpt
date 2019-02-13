@@ -43,7 +43,7 @@ array(3) {
   }
 }
 
-Notice: Array to string conversion in %s on line %d
+Warning: mb_ereg() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 array(3) {
   [0]=>
@@ -52,8 +52,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  array(0) {
-  }
+  string(0) ""
 }
 
 Warning: mb_ereg() expects parameter 2 to be string, array given in %s on line %d

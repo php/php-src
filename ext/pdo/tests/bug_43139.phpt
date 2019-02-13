@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #43139 (PDO ignore ATTR_DEFAULT_FETCH_MODE in some cases with fetchAll())
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');

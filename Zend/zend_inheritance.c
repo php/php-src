@@ -1812,6 +1812,9 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 			Z_TRY_ADDREF_P(prop_value);
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
+			if (ZEND_TYPE_IS_NAME(property_info->type)) {
+				zend_string_addref(ZEND_TYPE_NAME(property_info->type));
+			}
 			zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type);
 			zend_string_release_ex(prop_name, 0);
 		} ZEND_HASH_FOREACH_END();
@@ -2004,13 +2007,3 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent)
 	zend_build_properties_info_table(ce);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

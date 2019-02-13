@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #52098 Own PDOStatement implementation ignore __call()
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');

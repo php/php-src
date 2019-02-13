@@ -22,6 +22,7 @@ XML;
 var_dump(wddx_deserialize($xml));
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 NULL
 DONE

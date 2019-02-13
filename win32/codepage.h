@@ -151,12 +151,3 @@ __forceinline static char *php_win32_cp_conv_w_to_any(const wchar_t* in, size_t 
 #endif
 
 #endif /* PHP_WIN32_CODEPAGE_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

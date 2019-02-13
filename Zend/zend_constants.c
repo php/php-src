@@ -368,7 +368,9 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 				ret_constant = NULL;
 			} else {
 				if (!zend_verify_const_access(c, scope)) {
-					zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
+						zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					}
 					goto failure;
 				}
 				ret_constant = &c->value;
@@ -490,14 +492,3 @@ ZEND_API int zend_register_constant(zend_constant *c)
 	}
 	return ret;
 }
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

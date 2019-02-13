@@ -772,8 +772,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			/* We must re-initialize function again */
 			fci_cache->function_handler = NULL;
 		}
-	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+	} else {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
+
+		ZEND_ASSERT(func->type == ZEND_INTERNAL_FUNCTION);
 		ZVAL_NULL(fci->retval);
 		call->prev_execute_data = EG(current_execute_data);
 		call->return_value = NULL; /* this is not a constructor call */
@@ -795,30 +797,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		if (call_via_handler) {
 			/* We must re-initialize function again */
 			fci_cache->function_handler = NULL;
-		}
-	} else { /* ZEND_OVERLOADED_FUNCTION */
-		ZVAL_NULL(fci->retval);
-
-		/* Not sure what should be done here if it's a static method */
-		if (fci->object) {
-			call->prev_execute_data = EG(current_execute_data);
-			EG(current_execute_data) = call;
-			fci->object->handlers->call_method(func->common.function_name, fci->object, call, fci->retval);
-			EG(current_execute_data) = call->prev_execute_data;
-		} else {
-			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
-		}
-
-		zend_vm_stack_free_args(call);
-
-		if (func->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			zend_string_release_ex(func->common.function_name, 0);
-		}
-		efree(func);
-
-		if (EG(exception)) {
-			zval_ptr_dtor(fci->retval);
-			ZVAL_UNDEF(fci->retval);
 		}
 	}
 
@@ -1200,7 +1178,7 @@ static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 		timer, so we could end up with just an ignored timeout. Instead
 		delete and recreate. */
 	if (NULL != tq_timer) {
-		if (!DeleteTimerQueueTimer(NULL, tq_timer, NULL)) {
+		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
 			tq_timer = NULL;
 			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
 			return;
@@ -1274,7 +1252,7 @@ void zend_unset_timeout(void) /* {{{ */
 {
 #ifdef ZEND_WIN32
 	if (NULL != tq_timer) {
-		if (!DeleteTimerQueueTimer(NULL, tq_timer, NULL)) {
+		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
 			EG(timed_out) = 0;
 			tq_timer = NULL;
 			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
@@ -1595,13 +1573,3 @@ ZEND_API int zend_forbid_dynamic_call(const char *func_name) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

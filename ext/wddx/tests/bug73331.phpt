@@ -9,5 +9,7 @@ $wddx = "<wddxPacket version='1.0'><header/><data><struct><var name='php_class_n
 var_dump(wddx_deserialize($wddx));
 ?>
 --EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
+
 Warning: wddx_deserialize(): Class pdorow can not be unserialized in %s73331.php on line %d
 NULL

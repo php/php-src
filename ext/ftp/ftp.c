@@ -1857,7 +1857,7 @@ data_accepted:
 						php_pollfd p;
 						int i;
 
-						p.fd = ftp->fd;
+						p.fd = data->fd;
 						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
 						p.revents = 0;
 
@@ -2311,12 +2311,3 @@ bail:
 /* }}} */
 
 #endif /* HAVE_FTP */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

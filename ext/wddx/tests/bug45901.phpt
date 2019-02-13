@@ -14,6 +14,8 @@ echo wddx_serialize_value($xml, 'Variables') . "\n";
 echo "DONE";
 ?>
 --EXPECTF--
+Deprecated: Function wddx_serialize_value() is deprecated in %sbug45901.php on line %d
+
 Warning: wddx_serialize_value(): Class SimpleXMLElement can not be serialized in %sbug45901.php on line %d
 <wddxPacket version='1.0'><header><comment>Variables</comment></header><data></data></wddxPacket>
 DONE

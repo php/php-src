@@ -29,17 +29,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 
 ZEND_API void zend_object_std_dtor(zend_object *object);
 ZEND_API void zend_objects_destroy_object(zend_object *object);
-ZEND_API zend_object *zend_objects_clone_obj(zval *object);
+ZEND_API zend_object *zend_objects_clone_obj(zend_object *object);
 END_EXTERN_C()
 
 #endif /* ZEND_OBJECTS_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

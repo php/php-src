@@ -98,7 +98,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 			goto error;
 		}
 		ZVAL_STR(&arg, u8str);
-		zend_call_method_with_1_params(ret, NULL, &Z_OBJCE_P(ret)->constructor, "__construct", NULL, &arg);
+		zend_call_method_with_1_params(Z_OBJ_P(ret), NULL, &Z_OBJCE_P(ret)->constructor, "__construct", NULL, &arg);
 		if (EG(exception)) {
 			spprintf(&message, 0,
 				"%s: DateTimeZone constructor threw exception", func);
@@ -221,17 +221,17 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 /* }}} */
 
 /* {{{ clone handler for TimeZone */
-static zend_object *TimeZone_clone_obj(zval *object)
+static zend_object *TimeZone_clone_obj(zend_object *object)
 {
 	TimeZone_object		*to_orig,
 						*to_new;
 	zend_object			*ret_val;
 	intl_error_reset(NULL);
 
-	to_orig = Z_INTL_TIMEZONE_P(object);
+	to_orig = php_intl_timezone_fetch_object(object);
 	intl_error_reset(TIMEZONE_ERROR_P(to_orig));
 
-	ret_val = TimeZone_ce_ptr->create_object(Z_OBJCE_P(object));
+	ret_val = TimeZone_ce_ptr->create_object(object->ce);
 	to_new  = php_intl_timezone_fetch_object(ret_val);
 
 	zend_objects_clone_members(&to_new->zo, &to_orig->zo);
@@ -285,7 +285,7 @@ static int TimeZone_compare_objects(zval *object1, zval *object2)
 /* }}} */
 
 /* {{{ get_debug_info handler for TimeZone */
-static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
+static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 {
 	zval			zv;
 	TimeZone_object	*to;
@@ -299,7 +299,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 
 	debug_info = zend_new_array(8);
 
-	to = Z_INTL_TIMEZONE_P(object);
+	to = php_intl_timezone_fetch_object(object);
 	tz = to->utimezone;
 
 	if (tz == NULL) {

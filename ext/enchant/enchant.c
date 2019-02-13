@@ -921,12 +921,3 @@ PHP_FUNCTION(enchant_dict_describe)
 	enchant_dict_describe(pdict->pdict, describe_dict_fn, (void *)return_value);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

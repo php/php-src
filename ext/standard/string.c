@@ -2592,8 +2592,8 @@ PHP_FUNCTION(quotemeta)
 
 	old_end = ZSTR_VAL(old) + ZSTR_LEN(old);
 
-	if (ZSTR_VAL(old) == old_end) {
-		RETURN_FALSE;
+	if (ZSTR_LEN(old) == 0) {
+		RETURN_EMPTY_STRING();
 	}
 
 	str = zend_string_safe_alloc(2, ZSTR_LEN(old), 0, 0);
@@ -6173,12 +6173,3 @@ PHP_FUNCTION(utf8_decode)
 	RETURN_STR(php_utf8_decode(arg, arg_len));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

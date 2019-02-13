@@ -563,12 +563,3 @@ ZEND_EXTERN_MODULE_GLOBALS(oci)
 # define oci8_module_ptr NULL
 
 #endif /* HAVE_OCI8 */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

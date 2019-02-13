@@ -42,7 +42,7 @@ function print_help() {
 	printf('  --dir <path>		Path to the directory for where extension should be%s', PHP_EOL);
 	printf('                        created. Defaults to the directory of where this script%s', PHP_EOL);
 	printf(' 			lives%s', PHP_EOL);
-	printf('  --std			If passed, the standard header and vim rules footer used%s', PHP_EOL);
+	printf('  --std			If passed, the standard header used%s', PHP_EOL);
 	printf(' 			in extensions that is included in the core, will be used%s', PHP_EOL);
 	printf('  --onlyunix		Only generate configure scripts for Unix%s', PHP_EOL);
 	printf('  --onlywindows		Only generate configure scripts for Windows%s', PHP_EOL);
@@ -179,11 +179,10 @@ function process_source_tags($file, $short_name) {
 	$source = str_replace('%EXTNAMECAPS%', strtoupper($options['ext']), $source);
 
 	if (strpos($short_name, '.c') !== false || strpos($short_name, '.h') !== false) {
-		static $header, $footer;
+		static $header;
 
 		if (!$header) {
 			if ($options['std']) {
-				$year = date('Y');
 				$author_len = strlen($options['author']);
 				$credits = $options['author'] . ($author_len && $author_len <= 60 ? str_repeat(' ', 60 - $author_len) : '');
 
@@ -192,7 +191,7 @@ function process_source_tags($file, $short_name) {
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-$year The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -206,27 +205,16 @@ function process_source_tags($file, $short_name) {
    +----------------------------------------------------------------------+
 */
 HEADER;
-				$footer = <<<'FOOTER'
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
-FOOTER;
 			} else {
 				if ($options['author']) {
 					$header = sprintf('/* %s extension for PHP (c) %d %s */', $options['ext'], date('Y'), $options['author']);
 				} else {
 					$header = sprintf('/* %s extension for PHP */', $options['ext']);
 				}
-
-				$footer = '';
 			}
 		}
 
-		$source = str_replace(['%HEADER%', '%FOOTER%'], [$header, $footer], $source);
+		$source = str_replace('%HEADER%', $header, $source);
 	}
 
 	if (!file_put_contents($file, $source)) {

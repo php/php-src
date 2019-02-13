@@ -27,13 +27,3 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 END_EXTERN_C()
 
 #endif /* ZEND_BUILTIN_FUNCTIONS_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

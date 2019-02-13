@@ -299,12 +299,3 @@ PHP_FUNCTION(token_name)
 	RETVAL_STRING(get_token_type_name(type));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

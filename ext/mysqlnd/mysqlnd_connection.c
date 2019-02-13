@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -480,7 +480,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 	MYSQLND_VIO * vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
-	/* we allow load data local infile by default */
+	/* allow CLIENT_LOCAL_FILES capability, although extensions basing on mysqlnd
+		shouldn't allow 'load data local infile' by default due to security issues */
 	mysql_flags |= MYSQLND_CAPABILITIES;
 
 	mysql_flags |= conn->options->flags; /* use the flags from set_client_option() */
@@ -2711,13 +2712,3 @@ mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, M
 	DBG_RETURN(ret);
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

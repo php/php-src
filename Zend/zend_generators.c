@@ -308,9 +308,9 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 }
 /* }}} */
 
-static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {{{ */
+static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*) Z_OBJ_P(object);
+	zend_generator *generator = (zend_generator*)object;
 	zend_execute_data *execute_data = generator->execute_data;
 	zend_op_array *op_array;
 	zval *gc_buffer;
@@ -1225,13 +1225,3 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_ce_ClosedGeneratorException = zend_register_internal_class_ex(&ce, zend_ce_exception);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

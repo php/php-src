@@ -691,7 +691,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_OBJ_HT_P(data) != NULL) {
 				zval out;
 
-				if (zend_std_cast_object_tostring(data, &out, IS_STRING) == SUCCESS) {
+				if (zend_std_cast_object_tostring(Z_OBJ_P(data), &out, IS_STRING) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
 					if (numbytes != Z_STRLEN(out)) {
 						php_error_docref(NULL, E_WARNING, "Only "ZEND_LONG_FMT" of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
@@ -2467,12 +2467,3 @@ PHP_FUNCTION(sys_get_temp_dir)
 	RETURN_STRING((char *)php_get_temporary_directory());
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

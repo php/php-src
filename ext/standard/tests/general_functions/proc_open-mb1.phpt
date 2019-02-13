@@ -1,7 +1,7 @@
 --TEST--
 proc_open without bypass_shell subprocess parameter passing
 --SKIPIF--
-<?php # vim:syn=php
+<?php
 if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 ?>
 --FILE--
