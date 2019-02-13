@@ -1942,6 +1942,30 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 	return 1;
 }
 
+/*
+ * This code is based Mike Pall's "Hashed profile counters" idea, implemented
+ * in LuaJIT. The full description may be found in "LuaJIT 2.0 intellectual
+ * property disclosure and research opportunities" email
+ * at http://lua-users.org/lists/lua-l/2009-11/msg00089.html
+ *
+ * In addition we use a variation of Knuth's multiplicative hash function
+ * described at https://code.i-harness.com/en/q/a21ce
+ *
+ * uint64_t hash(uint64_t x) {
+ *    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+ *    x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+ *    x = x ^ (x >> 31);
+ *    return x;
+ * }
+ *
+ * uint_32_t hash(uint32_t x) {
+ *    x = ((x >> 16) ^ x) * 0x45d9f3b;
+ *    x = ((x >> 16) ^ x) * 0x45d9f3b;
+ *    x = (x >> 16) ^ x;
+ *    return x;
+ * }
+ *
+ */
 static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
 {
 	|->hybrid_func_counter:
