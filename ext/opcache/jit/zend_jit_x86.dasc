@@ -1711,7 +1711,7 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 	|	jne >2
 	|.if X64
 		|	movsxd r1, dword OP:r0->op2.constant
-		|   add r0, r1
+		|	add r0, r1
 	|.else
 		|	mov r0, aword OP:r0->op2.zv
 	|.endif
