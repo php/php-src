@@ -1989,8 +1989,10 @@ static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
 	|	sub r0, aword [r1 + offsetof(zend_op_array, opcodes)]
 	|	// divide by sizeof(zend_op)
 	|	.if X64
+	||		ZEND_ASSERT(sizeof(zend_op) == 32);
 	|		sar r0, 5
 	|	.else
+	||		ZEND_ASSERT(sizeof(zend_op) == 28);
 	|		sar r0, 2
 	|		imul r0, 0xb6db6db7
 	|	.endif
@@ -2065,8 +2067,10 @@ static int zend_jit_hybrid_loop_counter_stub(dasm_State **Dst)
 	|	sub r0, aword [r1 + offsetof(zend_op_array, opcodes)]
 	|	// divide by sizeof(zend_op)
 	|	.if X64
+	||		ZEND_ASSERT(sizeof(zend_op) == 32);
 	|		sar r0, 5
 	|	.else
+	||		ZEND_ASSERT(sizeof(zend_op) == 28);
 	|		sar r0, 2
 	|		imul r0, 0xb6db6db7
 	|	.endif
