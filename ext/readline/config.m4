@@ -74,6 +74,7 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
+  AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
 
 elif test "$PHP_LIBEDIT" != "no"; then
@@ -124,6 +125,13 @@ elif test "$PHP_LIBEDIT" != "no"; then
   PHP_CHECK_LIBRARY(edit, rl_completion_matches,
   [
     AC_DEFINE(HAVE_RL_COMPLETION_MATCHES, 1, [ ])
+  ],[],[
+    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
+  ])
+
+  PHP_CHECK_LIBRARY(edit, history_list,
+  [
+    AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
   ],[],[
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
