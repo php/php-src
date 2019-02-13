@@ -173,6 +173,8 @@ PHP 7.4 UPGRADE NOTES
     which disables the propriertary PHP escaping mechanism. The behavior of
     str_getcsv() has been adjusted accordingly (formerly, an empty string was
     identical to using the default).
+  . proc_open() on Windows can be passed a "create_process_group" option. It
+    is required, if the child process is supposed to handle CTRL events.
 
 ========================================
 6. New Functions
@@ -188,6 +190,13 @@ PHP 7.4 UPGRADE NOTES
   . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. If TRUE is
     passed as parameter, query parameters will be replaced in the return value
     by their currently bound value, if libsqlite ≥ 3.14 is used.
+
+- Standard
+  . bool sapi_windows_set_ctrl_handler(callable handler, [, bool add = true]) -
+    set or remove a handler function upon receiving a CTRL event. The handler
+    function is expected have a signature "function handler(int $event)".
+  . bool sapi_windows_generate_ctrl_event(int type, int pid) - send a CTRL event
+    to another process.
 
 ========================================
 7. New Classes and Interfaces
@@ -269,6 +278,10 @@ PHP 7.4 UPGRADE NOTES
   . SO_LISTENQLEN
   . SO_USER_COOKIE
 
+- Standard:
+  . PHP_WINDOWS_EVENT_CTRL_C
+  . PHP_WINDOWS_EVENT_CTRL_BREAK
+
 - Tidy:
   . TIDY_TAG_ARTICLE
   . TIDY_TAG_ASIDE
@@ -315,6 +328,9 @@ PHP 7.4 UPGRADE NOTES
   Note, that both values derived from the system and provided as is on 64-bit
   systems. On 32-bit system, these values might overflow the 32-bit integer in
   PHP, so they're a fake.
+
+- CTRL+C and CTRL+BREAK on console can be caught by setting a handler function
+  with sapi_windows_set_ctrl_handler(). 
 
 ========================================
 13. Migration to pkg-config
