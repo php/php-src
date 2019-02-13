@@ -2429,6 +2429,16 @@ static zend_bool is_this_fetch(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static zend_bool this_guaranteed_exists() /* {{{ */
+{
+	zend_op_array *op_array = CG(active_op_array);
+	/* Instance methods always have a $this.
+	 * This also includes closures that have a scope and use $this. */
+	return op_array->scope != NULL
+		&& (op_array->fn_flags & ZEND_ACC_STATIC) == 0;
+}
+/* }}} */
+
 static zend_op *zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
 {
 	if (is_this_fetch(ast)) {
@@ -2531,7 +2541,11 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 	zend_op *opline;
 
 	if (is_this_fetch(obj_ast)) {
-		obj_node.op_type = IS_UNUSED;
+		if (this_guaranteed_exists()) {
+			obj_node.op_type = IS_UNUSED;
+		} else {
+			zend_emit_op(&obj_node, ZEND_FETCH_THIS, NULL, NULL);
+		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 	} else {
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
@@ -3929,7 +3943,11 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 	zend_function *fbc = NULL;
 
 	if (is_this_fetch(obj_ast)) {
-		obj_node.op_type = IS_UNUSED;
+		if (this_guaranteed_exists()) {
+			obj_node.op_type = IS_UNUSED;
+		} else {
+			zend_emit_op(&obj_node, ZEND_FETCH_THIS, NULL, NULL);
+		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 	} else {
 		zend_compile_expr(&obj_node, obj_ast);
