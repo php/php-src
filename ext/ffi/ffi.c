@@ -5263,7 +5263,7 @@ void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t n
 		zend_ffi_parser_error("wrong type of bit field '%.*s' at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 	}
 
-	if (bits->kind == ZEND_FFI_VAL_INT32 || ZEND_FFI_VAL_INT64) {
+	if (bits->kind == ZEND_FFI_VAL_INT32 || bits->kind == ZEND_FFI_VAL_INT64) {
 		if (bits->i64 < 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
 			zend_ffi_parser_error("negative width in bit-field '%.*s' at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
@@ -5277,7 +5277,7 @@ void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t n
 			zend_ffi_cleanup_dcl(field_dcl);
 			zend_ffi_parser_error("width of '%.*s' exceeds its type at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 		}
-	} else if (ZEND_FFI_VAL_UINT32 || ZEND_FFI_VAL_UINT64) {
+	} else if (bits->kind == ZEND_FFI_VAL_UINT32 || bits->kind == ZEND_FFI_VAL_UINT64) {
 		if (bits->u64 == 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
 			if (name) {

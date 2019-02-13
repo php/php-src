@@ -1664,7 +1664,8 @@ phpdbg_main:
 
 	if (settings > (zend_phpdbg_globals *) 0x2) {
 #ifdef ZTS
-		*((zend_phpdbg_globals *) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(phpdbg_globals_id)]) = *settings;
+		zend_phpdbg_globals *ptr = TSRMG_BULK_STATIC(phpdbg_globals_id, zend_phpdbg_globals *);
+		*ptr = *settings;
 #else
 		phpdbg_globals = *settings;
 #endif

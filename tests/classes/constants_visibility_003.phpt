@@ -21,8 +21,4 @@ constant('A::privateConst');
 string(12) "privateConst"
 string(12) "privateConst"
 
-Fatal error: Uncaught Error: Cannot access private const A::privateConst in %s:14
-Stack trace:
-#0 %s(14): constant('A::privateConst')
-#1 {main}
-  thrown in %s on line 14
+Warning: constant(): Couldn't find constant A::privateConst in %s on line %d

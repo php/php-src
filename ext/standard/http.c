@@ -202,15 +202,6 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				case IS_TRUE:
 					smart_str_appendl(formstr, "1", sizeof("1")-1);
 					break;
-				case IS_DOUBLE:
-					{
-						char *ekey;
-					  	size_t ekey_len;
-						ekey_len = spprintf(&ekey, 0, "%.*G", (int) EG(precision), Z_DVAL_P(zdata));
-						smart_str_appendl(formstr, ekey, ekey_len);
-						efree(ekey);
-				  	}
-					break;
 				default:
 					{
 						zend_string *ekey;
