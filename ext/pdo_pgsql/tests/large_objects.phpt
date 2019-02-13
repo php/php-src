@@ -1,7 +1,7 @@
 --TEST--
 PDO PgSQL Large Objects
 --SKIPIF--
-<?php # vim:se ft=php:
+<?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require dirname(__FILE__) . '/config.inc';
 require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';

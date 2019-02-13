@@ -484,6 +484,12 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
 			ZVAL_LONG(return_value, H->max_buffer_size);
 			break;
+#else
+		case PDO_MYSQL_ATTR_LOCAL_INFILE:
+			ZVAL_BOOL(
+				return_value,
+				(H->server->data->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES);
+			break;
 #endif
 
 		default:
@@ -770,6 +776,15 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			}
 		}
 #endif
+	} else {
+#if defined(MYSQL_OPT_LOCAL_INFILE) || defined(PDO_USE_MYSQLND)
+		// in case there are no driver options disable 'local infile' explicitly
+		zend_long local_infile = 0;
+		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
+			pdo_mysql_error(dbh);
+			goto cleanup;
+		}
+#endif
 	}
 
 #ifdef PDO_MYSQL_HAS_CHARSET
@@ -841,12 +856,3 @@ const pdo_driver_t pdo_mysql_driver = {
 	PDO_DRIVER_HEADER(mysql),
 	pdo_mysql_handle_factory
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

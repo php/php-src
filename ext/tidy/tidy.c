@@ -215,8 +215,8 @@ static void tidy_object_free_storage(zend_object *);
 static zend_object *tidy_object_new_node(zend_class_entry *);
 static zend_object *tidy_object_new_doc(zend_class_entry *);
 static zval * tidy_instanciate(zend_class_entry *, zval *);
-static int tidy_doc_cast_handler(zval *, zval *, int);
-static int tidy_node_cast_handler(zval *, zval *, int);
+static int tidy_doc_cast_handler(zend_object *, zval *, int);
+static int tidy_node_cast_handler(zend_object *, zval *, int);
 static void tidy_doc_update_properties(PHPTidyObj *);
 static void tidy_add_default_properties(PHPTidyObj *, tidy_obj_type);
 static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType *);
@@ -752,7 +752,7 @@ static zval * tidy_instanciate(zend_class_entry *pce, zval *object)
 	return object;
 }
 
-static int tidy_doc_cast_handler(zval *in, zval *out, int type)
+static int tidy_doc_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer output;
 	PHPTidyObj *obj;
@@ -772,7 +772,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type)
 			break;
 
 		case IS_STRING:
-			obj = Z_TIDY_P(in);
+			obj = php_tidy_fetch_object(in);
 			tidyBufInit(&output);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
 			ZVAL_STRINGL(out, (char *) output.bp, output.size ? output.size-1 : 0);
@@ -786,7 +786,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type)
 	return SUCCESS;
 }
 
-static int tidy_node_cast_handler(zval *in, zval *out, int type)
+static int tidy_node_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer buf;
 	PHPTidyObj *obj;
@@ -806,7 +806,7 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type)
 			break;
 
 		case IS_STRING:
-			obj = Z_TIDY_P(in);
+			obj = php_tidy_fetch_object(in);
 			tidyBufInit(&buf);
 			if (obj->ptdoc) {
 				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
@@ -2054,12 +2054,3 @@ static void _php_tidy_register_tags(INIT_FUNC_ARGS)
 }
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

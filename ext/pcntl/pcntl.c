@@ -1265,6 +1265,12 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 				break;
 #endif
 		}
+#if defined(SIGRTMIN) && defined(SIGRTMAX)
+		if (SIGRTMIN <= signo && signo <= SIGRTMAX) {
+			add_assoc_long_ex(user_siginfo, "pid", sizeof("pid")-1, siginfo->si_pid);
+			add_assoc_long_ex(user_siginfo, "uid", sizeof("uid")-1, siginfo->si_uid);
+		}
+#endif
 	}
 }
 /* }}} */
@@ -1497,11 +1503,3 @@ static void pcntl_interrupt_function(zend_execute_data *execute_data)
 		orig_interrupt_function(execute_data);
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -632,7 +632,7 @@ END_EXTERN_C()
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
 
-#define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p)) : NULL)))
+#define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties(Z_OBJ_P(p)) : NULL)))
 #define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)
 
 /* For compatibility */
@@ -710,6 +710,20 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	} \
 	zval_ptr_dtor(_zv); \
 	ZVAL_TRUE(_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_BOOL(zv, bval) do { \
+	zval *_zv = zv; \
+	if (EXPECTED(Z_ISREF_P(_zv))) { \
+		zend_reference *ref = Z_REF_P(_zv); \
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
+			zend_try_assign_typed_ref_bool(ref, 1); \
+			break; \
+		} \
+		_zv = &ref->val; \
+	} \
+	zval_ptr_dtor(_zv); \
+	ZVAL_BOOL(_zv, bval); \
 } while (0)
 
 #define ZEND_TRY_ASSIGN_LONG(zv, lval) do { \
@@ -1501,15 +1515,16 @@ static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **des
 	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
 		*dest = Z_ARRVAL_P(arg);
 	} else if (or_object && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		zend_object *zobj = Z_OBJ_P(arg);
 		if (separate
-		 && Z_OBJ_P(arg)->properties
-		 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(arg)->properties) > 1)) {
-			if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(arg)->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_DELREF(Z_OBJ_P(arg)->properties);
+		 && zobj->properties
+		 && UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+			if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_DELREF(zobj->properties);
 			}
-			Z_OBJ_P(arg)->properties = zend_array_dup(Z_OBJ_P(arg)->properties);
+			zobj->properties = zend_array_dup(zobj->properties);
 		}
-		*dest = Z_OBJ_HT_P(arg)->get_properties(arg);
+		*dest = zobj->handlers->get_properties(zobj);
 	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*dest = NULL;
 	} else {
@@ -1571,14 +1586,3 @@ static zend_always_inline void zend_parse_arg_zval_deref(zval *arg, zval **dest,
 END_EXTERN_C()
 
 #endif /* ZEND_API_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

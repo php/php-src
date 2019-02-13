@@ -438,6 +438,7 @@ PHP_FUNCTION(proc_open)
 	int suppress_errors = 0;
 	int bypass_shell = 0;
 	int blocking_pipes = 0;
+	int create_process_group = 0;
 #endif
 #if PHP_CAN_DO_PTS
 	php_file_descriptor_t dev_ptmx = -1;	/* master */
@@ -476,6 +477,13 @@ PHP_FUNCTION(proc_open)
 		if (item != NULL) {
 			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
 				blocking_pipes = 1;
+			}
+		}
+
+		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "create_process_group", sizeof("create_process_group") - 1);
+		if (item != NULL) {
+			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
+				create_process_group = 1;
 			}
 		}
 	}
@@ -715,6 +723,9 @@ PHP_FUNCTION(proc_open)
 	dwCreateFlags = NORMAL_PRIORITY_CLASS;
 	if(strcmp(sapi_module.name, "cli") != 0) {
 		dwCreateFlags |= CREATE_NO_WINDOW;
+	}
+	if (create_process_group) {
+		dwCreateFlags |= CREATE_NEW_PROCESS_GROUP;
 	}
 
 	envpw = php_win32_cp_env_any_to_w(env.envp);
@@ -970,12 +981,3 @@ exit_fail:
 /* }}} */
 
 #endif /* PHP_CAN_SUPPORT_PROC_OPEN */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

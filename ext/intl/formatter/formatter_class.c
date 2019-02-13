@@ -61,13 +61,13 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 /* }}} */
 
 /* {{{ NumberFormatter_object_clone */
-zend_object *NumberFormatter_object_clone(zval *object)
+zend_object *NumberFormatter_object_clone(zend_object *object)
 {
 	NumberFormatter_object *nfo, *new_nfo;
 	zend_object *new_obj;
 
-	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
-	new_obj = NumberFormatter_ce_ptr->create_object(Z_OBJCE_P(object));
+	nfo = php_intl_number_format_fetch_object(object);
+	new_obj = NumberFormatter_ce_ptr->create_object(object->ce);
 	new_nfo = php_intl_number_format_fetch_object(new_obj);
 	/* clone standard parts */
 	zend_objects_clone_members(&new_nfo->zo, &nfo->zo);
@@ -191,12 +191,3 @@ void formatter_register_class( void )
 	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

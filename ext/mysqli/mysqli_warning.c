@@ -323,13 +323,3 @@ const mysqli_property_entry mysqli_warning_property_entries[] = {
 	{NULL, 0, NULL, NULL}
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

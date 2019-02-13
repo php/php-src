@@ -873,14 +873,11 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
 
-#define ZEND_INTERNAL_FUNCTION				1
-#define ZEND_USER_FUNCTION					2
-#define ZEND_OVERLOADED_FUNCTION			3
-#define	ZEND_EVAL_CODE						4
-#define ZEND_OVERLOADED_FUNCTION_TEMPORARY	5
+#define ZEND_INTERNAL_FUNCTION		1
+#define ZEND_USER_FUNCTION			2
+#define ZEND_EVAL_CODE				4
 
-/* A quick check (type == ZEND_USER_FUNCTION || type == ZEND_EVAL_CODE) */
-#define ZEND_USER_CODE(type) ((type & 1) == 0)
+#define ZEND_USER_CODE(type)		((type) != ZEND_INTERNAL_FUNCTION)
 
 #define ZEND_INTERNAL_CLASS         1
 #define ZEND_USER_CLASS             2
@@ -1065,13 +1062,3 @@ END_EXTERN_C()
 ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2);
 
 #endif /* ZEND_COMPILE_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

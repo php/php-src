@@ -104,12 +104,3 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif /* _WIN64 */
 
 #endif /* _MYSQLND_CONFIG_WIN_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

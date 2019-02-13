@@ -75,14 +75,14 @@ zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *
 
 /* com_handlers.c */
 zend_object* php_com_object_new(zend_class_entry *ce);
-zend_object* php_com_object_clone(zval *object);
+zend_object* php_com_object_clone(zend_object *object);
 void php_com_object_free_storage(zend_object *object);
 zend_object_handlers php_com_object_handlers;
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable);
 
 /* com_saproxy.c */
 zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *object, int by_ref);
-int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index);
+int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index);
 
 /* com_olechar.c */
 PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,

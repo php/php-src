@@ -37,13 +37,3 @@ extern zend_module_entry pdo_mysql_module_entry;
 
 
 #endif	/* PHP_PDO_MYSQL_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

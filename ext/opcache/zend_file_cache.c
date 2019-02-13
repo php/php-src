@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,8 +26,6 @@
 #ifdef ZEND_WIN32
 #include "ext/standard/md5.h"
 #endif
-
-#ifdef HAVE_OPCACHE_FILE_CACHE
 
 #include "ZendAccelerator.h"
 #include "zend_file_cache.h"
@@ -1691,5 +1689,3 @@ void zend_file_cache_invalidate(zend_string *full_path)
 	zend_file_cache_unlink(filename);
 	efree(filename);
 }
-
-#endif /* HAVE_OPCACHE_FILE_CACHE */

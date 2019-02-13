@@ -1,5 +1,4 @@
 dnl config.m4 for extension pdo_odbc
-dnl vim:et:sw=2:ts=2:
 
 define([PDO_ODBC_HELP_TEXT],[[
 			  include and lib dirs are looked for under 'dir'.

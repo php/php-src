@@ -435,25 +435,102 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 	zend_long lval = zval_get_long(val);
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
-	if (attr == PDO_ATTR_AUTOCOMMIT) {
-		if (dbh->in_txn) {
-			/* Assume they want to commit whatever is outstanding */
-			H->last_err = OCITransCommit(H->svc, H->err, 0);
+	switch (attr) {
+		case PDO_ATTR_AUTOCOMMIT:
+		{
+			if (dbh->in_txn) {
+				/* Assume they want to commit whatever is outstanding */
+				H->last_err = OCITransCommit(H->svc, H->err, 0);
 
+				if (H->last_err) {
+					H->last_err = oci_drv_error("OCITransCommit");
+					return 0;
+				}
+				dbh->in_txn = 0;
+			}
+
+			dbh->auto_commit = (unsigned int)lval? 1 : 0;
+			return 1;
+		}
+		case PDO_ATTR_PREFETCH:
+		{
+			H->prefetch = pdo_oci_sanitize_prefetch(lval);
+			return 1;
+		}
+		case PDO_OCI_ATTR_ACTION:
+		{
+#if (OCI_MAJOR_VERSION >= 10)
+			zend_string *action = zval_get_string(val);
+
+			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
+				(dvoid *) ZSTR_VAL(action), (ub4) ZSTR_LEN(action),
+				OCI_ATTR_ACTION, H->err);
 			if (H->last_err) {
-				H->last_err = oci_drv_error("OCITransCommit");
+				oci_drv_error("OCIAttrSet: OCI_ATTR_ACTION");
 				return 0;
 			}
-			dbh->in_txn = 0;
+			return 1;
+#else
+			oci_drv_error("Unsupported attribute type");
+			return 0;
+#endif
 		}
+		case PDO_OCI_ATTR_CLIENT_INFO:
+		{
+#if (OCI_MAJOR_VERSION >= 10)
+			zend_string *client_info = zval_get_string(val);
 
-		dbh->auto_commit = (unsigned int)lval? 1 : 0;
-		return 1;
-	} else if (attr == PDO_ATTR_PREFETCH) {
-		H->prefetch = pdo_oci_sanitize_prefetch(lval);
-		return 1;
-	} else {
-		return 0;
+			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
+				(dvoid *) ZSTR_VAL(client_info), (ub4) ZSTR_LEN(client_info),
+				OCI_ATTR_CLIENT_INFO, H->err);
+			if (H->last_err) {
+				oci_drv_error("OCIAttrSet: OCI_ATTR_CLIENT_INFO");
+				return 0;
+			}
+			return 1;
+#else
+			oci_drv_error("Unsupported attribute type");
+			return 0;
+#endif
+		}
+		case PDO_OCI_ATTR_CLIENT_IDENTIFIER:
+		{
+#if (OCI_MAJOR_VERSION >= 10)
+			zend_string *identifier = zval_get_string(val);
+
+			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
+				(dvoid *) ZSTR_VAL(identifier), (ub4) ZSTR_LEN(identifier),
+				OCI_ATTR_CLIENT_IDENTIFIER, H->err);
+			if (H->last_err) {
+				oci_drv_error("OCIAttrSet: OCI_ATTR_CLIENT_IDENTIFIER");
+				return 0;
+			}
+			return 1;
+#else
+			oci_drv_error("Unsupported attribute type");
+			return 0;
+#endif
+		}
+		case PDO_OCI_ATTR_MODULE:
+		{
+#if (OCI_MAJOR_VERSION >= 10)
+			zend_string *module = zval_get_string(val);
+
+			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
+				(dvoid *) ZSTR_VAL(module), (ub4) ZSTR_LEN(module),
+				OCI_ATTR_MODULE, H->err);
+			if (H->last_err) {
+				oci_drv_error("OCIAttrSet: OCI_ATTR_MODULE");
+				return 0;
+			}
+			return 1;
+#else
+			oci_drv_error("Unsupported attribute type");
+			return 0;
+#endif
+		}
+		default:
+			return 0;
 	}
 
 }
@@ -734,13 +811,3 @@ static inline ub4 pdo_oci_sanitize_prefetch(long prefetch) /* {{{ */
 	return ((ub4)prefetch);
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -26,6 +26,7 @@ var_dump($d);
 ?>
 DONE
 --EXPECTF--
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 object(stdClass)#%d (1) {
   ["php_class_name"]=>
   string(8) "stdClass"

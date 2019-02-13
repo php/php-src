@@ -50,7 +50,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(zend_test_func)
 {
-	/* dummy */
+	RETVAL_STR_COPY(EX(func)->common.function_name);
+
+	/* Cleanup trampoline */
+	ZEND_ASSERT(EX(func)->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+	zend_string_release(EX(func)->common.function_name);
+	zend_free_trampoline(EX(func));
+	EX(func) = NULL;
 }
 
 ZEND_FUNCTION(zend_test_array_return)
@@ -144,38 +150,42 @@ static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ 
 /* }}} */
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key) /* {{{ */ {
-	zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
-	fptr->type = ZEND_OVERLOADED_FUNCTION_TEMPORARY;
+	zend_internal_function *fptr;
+
+	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
+		fptr = &EG(trampoline);
+	} else {
+		fptr = emalloc(sizeof(zend_internal_function));
+	}
+	memset(fptr, 0, sizeof(zend_internal_function));
+	fptr->type = ZEND_INTERNAL_FUNCTION;
 	fptr->num_args = 1;
-	fptr->arg_info = NULL;
 	fptr->scope = (*object)->ce;
 	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 	fptr->function_name = zend_string_copy(name);
 	fptr->handler = ZEND_FN(zend_test_func);
-	zend_set_function_arg_flags((zend_function*)fptr);
 
 	return (zend_function*)fptr;
 }
 /* }}} */
 
 static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, zend_string *name) /* {{{ */ {
-	zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
-	fptr->type = ZEND_OVERLOADED_FUNCTION;
+	zend_internal_function *fptr;
+
+	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
+		fptr = &EG(trampoline);
+	} else {
+		fptr = emalloc(sizeof(zend_internal_function));
+	}
+	memset(fptr, 0, sizeof(zend_internal_function));
+	fptr->type = ZEND_INTERNAL_FUNCTION;
 	fptr->num_args = 1;
-	fptr->arg_info = NULL;
 	fptr->scope = ce;
 	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_STATIC;
-	fptr->function_name = name;
+	fptr->function_name = zend_string_copy(name);
 	fptr->handler = ZEND_FN(zend_test_func);
-	zend_set_function_arg_flags((zend_function*)fptr);
 
 	return (zend_function*)fptr;
-}
-/* }}} */
-
-static int zend_test_class_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
-	RETVAL_STR(zend_string_copy(method));
-	return 0;
 }
 /* }}} */
 
@@ -239,7 +249,6 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
-	zend_test_class_handlers.call_method = zend_test_class_call_method;
 
 	INIT_CLASS_ENTRY(class_entry, "_ZendTestTrait", zend_test_trait_methods);
 	zend_test_trait = zend_register_internal_class(&class_entry);

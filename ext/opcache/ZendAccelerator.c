@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,12 +41,9 @@
 #include "zend_virtual_cwd.h"
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
+#include "zend_file_cache.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/md5.h"
-
-#ifdef HAVE_OPCACHE_FILE_CACHE
-# include "zend_file_cache.h"
-#endif
 
 #ifndef ZEND_WIN32
 #include  <netdb.h>
@@ -114,9 +111,7 @@ zend_accel_shared_globals *accel_shared_globals = NULL;
 zend_bool accel_startup_ok = 0;
 static char *zps_failure_reason = NULL;
 char *zps_api_failure_reason = NULL;
-#ifdef HAVE_OPCACHE_FILE_CACHE
 zend_bool file_cache_only = 0;  /* process uses file cache only */
-#endif
 #if ENABLE_FILE_CACHE_FALLBACK
 zend_bool fallback_process = 0; /* process uses file cache fallback */
 #endif
@@ -243,11 +238,12 @@ static inline void accel_restart_enter(void)
 #ifdef ZEND_WIN32
 	INCREMENT(restart_in);
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
-# else
-	static const FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
-#endif
+	struct flock restart_in_progress;
+
+	restart_in_progress.l_type = F_WRLCK;
+	restart_in_progress.l_whence = SEEK_SET;
+	restart_in_progress.l_start = 2;
+	restart_in_progress.l_len = 1;
 
 	if (fcntl(lock_file, F_SETLK, &restart_in_progress) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "RestartC(+1):  %s (%d)", strerror(errno), errno);
@@ -262,11 +258,12 @@ static inline void accel_restart_leave(void)
 	ZCSG(restart_in_progress) = 0;
 	DECREMENT(restart_in);
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
-# else
-	static const FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
-# endif
+	struct flock restart_finished;
+
+	restart_finished.l_type = F_UNLCK;
+	restart_finished.l_whence = SEEK_SET;
+	restart_finished.l_start = 2;
+	restart_finished.l_len = 1;
 
 	ZCSG(restart_in_progress) = 0;
 	if (fcntl(lock_file, F_SETLK, &restart_finished) == -1) {
@@ -279,7 +276,12 @@ static inline int accel_restart_is_active(void)
 {
 	if (ZCSG(restart_in_progress)) {
 #ifndef ZEND_WIN32
-		FLOCK_STRUCTURE(restart_check, F_WRLCK, SEEK_SET, 2, 1);
+		struct flock restart_check;
+
+		restart_check.l_type = F_WRLCK;
+		restart_check.l_whence = SEEK_SET;
+		restart_check.l_start = 2;
+		restart_check.l_len = 1;
 
 		if (fcntl(lock_file, F_GETLK, &restart_check) == -1) {
 			zend_accel_error(ACCEL_LOG_DEBUG, "RestartC:  %s (%d)", strerror(errno), errno);
@@ -304,11 +306,12 @@ static inline int accel_activate_add(void)
 #ifdef ZEND_WIN32
 	INCREMENT(mem_usage);
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
-# else
-	static const FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
-# endif
+	struct flock mem_usage_lock;
+
+	mem_usage_lock.l_type = F_RDLCK;
+	mem_usage_lock.l_whence = SEEK_SET;
+	mem_usage_lock.l_start = 1;
+	mem_usage_lock.l_len = 1;
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_lock) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(+1):  %s (%d)", strerror(errno), errno);
@@ -327,11 +330,12 @@ static inline void accel_deactivate_sub(void)
 		ZCG(counted) = 0;
 	}
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
-# else
-	static const FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
-# endif
+	struct flock mem_usage_unlock;
+
+	mem_usage_unlock.l_type = F_UNLCK;
+	mem_usage_unlock.l_whence = SEEK_SET;
+	mem_usage_unlock.l_start = 1;
+	mem_usage_unlock.l_len = 1;
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(-1):  %s (%d)", strerror(errno), errno);
@@ -344,11 +348,12 @@ static inline void accel_unlock_all(void)
 #ifdef ZEND_WIN32
 	accel_deactivate_sub();
 #else
-# ifdef _AIX
-	static FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
-# else
-	static const FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
-# endif
+	struct flock mem_usage_unlock_all;
+
+	mem_usage_unlock_all.l_type = F_UNLCK;
+	mem_usage_unlock_all.l_whence = SEEK_SET;
+	mem_usage_unlock_all.l_start = 0;
+	mem_usage_unlock_all.l_len = 0;
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock_all) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UnlockAll:  %s (%d)", strerror(errno), errno);
@@ -457,11 +462,9 @@ zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 	uint32_t     pos, *hash_slot;
 	zend_string *s;
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	if (UNEXPECTED(file_cache_only)) {
 		return str;
 	}
-#endif
 
 	if (IS_ACCEL_INTERNED(str)) {
 		/* this is already an interned string */
@@ -819,8 +822,12 @@ static inline int accel_is_inactive(void)
 		return SUCCESS;
 	}
 #else
-	FLOCK_STRUCTURE(mem_usage_check, F_WRLCK, SEEK_SET, 1, 1);
+	struct flock mem_usage_check;
 
+	mem_usage_check.l_type = F_WRLCK;
+	mem_usage_check.l_whence = SEEK_SET;
+	mem_usage_check.l_start = 1;
+	mem_usage_check.l_len = 1;
 	mem_usage_check.l_pid = -1;
 	if (fcntl(lock_file, F_GETLK, &mem_usage_check) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC:  %s (%d)", strerror(errno), errno);
@@ -1278,11 +1285,9 @@ int zend_accel_invalidate(const char *filename, size_t filename_len, zend_bool f
 		return FAILURE;
 	}
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache) {
 		zend_file_cache_invalidate(realpath);
 	}
-#endif
 
 	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath);
 	if (persistent_script && !persistent_script->corrupted) {
@@ -1349,7 +1354,6 @@ static zend_always_inline zend_bool is_phar_file(zend_string *filename)
 		!strstr(ZSTR_VAL(filename), "://");
 }
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 static zend_persistent_script *store_script_in_file_cache(zend_persistent_script *new_persistent_script)
 {
 	uint32_t memory_used;
@@ -1415,7 +1419,6 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 	*from_shared_memory = 1;
 	return store_script_in_file_cache(new_persistent_script);
 }
-#endif
 
 static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_script *new_persistent_script, const char *key, unsigned int key_length, int *from_shared_memory)
 {
@@ -1429,11 +1432,9 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	}
 
 	orig_compiler_options = CG(compiler_options);
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache) {
 		CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 	}
-#endif
 	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
 		CG(compiler_options) = orig_compiler_options;
 		return new_persistent_script;
@@ -1466,12 +1467,10 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		ZSMMG(memory_exhausted) = 1;
 		zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_HASH);
 		zend_shared_alloc_unlock();
-#ifdef HAVE_OPCACHE_FILE_CACHE
 		if (ZCG(accel_directives).file_cache) {
 			new_persistent_script = store_script_in_file_cache(new_persistent_script);
 			*from_shared_memory = 1;
 		}
-#endif
 		return new_persistent_script;
 	}
 
@@ -1526,12 +1525,10 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		zend_shared_alloc_destroy_xlat_table();
 		zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
 		zend_shared_alloc_unlock();
-#ifdef HAVE_OPCACHE_FILE_CACHE
 		if (ZCG(accel_directives).file_cache) {
 			new_persistent_script = store_script_in_file_cache(new_persistent_script);
 			*from_shared_memory = 1;
 		}
-#endif
 		return new_persistent_script;
 	}
 
@@ -1581,13 +1578,11 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 
 	zend_shared_alloc_unlock();
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache) {
 		SHM_PROTECT();
 		zend_file_cache_script_store(new_persistent_script, 1);
 		SHM_UNPROTECT();
 	}
-#endif
 
 	*from_shared_memory = 1;
 	return new_persistent_script;
@@ -1734,11 +1729,9 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
-#ifdef HAVE_OPCACHE_FILE_CACHE
 		if (ZCG(accel_directives).file_cache) {
 			CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 		}
-#endif
 		op_array = *op_array_p = accelerator_orig_compile_file(file_handle, type);
 		CG(compiler_options) = orig_compiler_options;
 	} zend_catch {
@@ -1801,7 +1794,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	return new_persistent_script;
 }
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_persistent_script *persistent_script;
@@ -1873,7 +1865,6 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 
 	return op_array;
 }
-#endif
 
 /* zend_compile() replacement */
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
@@ -1886,17 +1877,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	if (!file_handle->filename || !ZCG(enabled) || !accel_startup_ok) {
 		/* The Accelerator is disabled, act as if without the Accelerator */
 		return accelerator_orig_compile_file(file_handle, type);
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	} else if (file_cache_only) {
 		return file_cache_compile_file(file_handle, type);
-#endif
 	} else if ((!ZCG(counted) && !ZCSG(accelerator_enabled)) ||
 	           (ZCSG(restart_in_progress) && accel_restart_is_active())) {
-#ifdef HAVE_OPCACHE_FILE_CACHE
 		if (ZCG(accel_directives).file_cache) {
 			return file_cache_compile_file(file_handle, type);
 		}
-#endif
 		return accelerator_orig_compile_file(file_handle, type);
 	}
 
@@ -1980,11 +1967,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
      */
 	if (!ZCG(counted)) {
 		if (accel_activate_add() == FAILURE) {
-#ifdef HAVE_OPCACHE_FILE_CACHE
 			if (ZCG(accel_directives).file_cache) {
 				return file_cache_compile_file(file_handle, type);
 			}
-#endif
 			return accelerator_orig_compile_file(file_handle, type);
 		}
 		ZCG(counted) = 1;
@@ -2051,12 +2036,10 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		}
 	}
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	/* Check the second level cache */
 	if (!persistent_script && ZCG(accel_directives).file_cache) {
 		persistent_script = zend_file_cache_script_load(file_handle);
 	}
-#endif
 
 	/* If script was not found or invalidated by validate_timestamps */
 	if (!persistent_script) {
@@ -2070,11 +2053,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		if (ZSMMG(memory_exhausted) || ZCSG(restart_pending)) {
 			SHM_PROTECT();
 			HANDLE_UNBLOCK_INTERRUPTIONS();
-#ifdef HAVE_OPCACHE_FILE_CACHE
 			if (ZCG(accel_directives).file_cache) {
 				return file_cache_compile_file(file_handle, type);
 			}
-#endif
 			return accelerator_orig_compile_file(file_handle, type);
 		}
 
@@ -2186,9 +2167,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 static zend_string* persistent_zend_resolve_path(const char *filename, size_t filename_len)
 {
 	if (ZCG(enabled) && accel_startup_ok &&
-#ifdef HAVE_OPCACHE_FILE_CACHE
 		!file_cache_only &&
-#endif
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
 	    !ZCSG(restart_in_progress)) {
 
@@ -2310,11 +2289,9 @@ int accel_activate(INIT_FUNC_ARGS)
 	ZCG(cwd_key_len) = 0;
 	ZCG(cwd_check) = 1;
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	if (file_cache_only) {
 		return SUCCESS;
 	}
-#endif
 
 #ifndef ZEND_WIN32
 	if (ZCG(accel_directives).validate_root) {
@@ -2834,12 +2811,8 @@ static int accel_post_startup(void)
 /********************************************/
 /* End of non-SHM dependent initializations */
 /********************************************/
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	file_cache_only = ZCG(accel_directives).file_cache_only;
 	if (!file_cache_only) {
-#else
-	if (1) {
-#endif
 		switch (zend_shared_alloc_startup(ZCG(accel_directives).memory_consumption)) {
 			case ALLOC_SUCCESS:
 				if (zend_accel_init_shm() == FAILURE) {
@@ -2887,7 +2860,6 @@ static int accel_post_startup(void)
 		zend_shared_alloc_unlock();
 
 		SHM_PROTECT();
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	} else if (!ZCG(accel_directives).file_cache) {
 		accel_startup_ok = 0;
 		zend_accel_error(ACCEL_LOG_FATAL, "opcache.file_cache_only is set without a proper setting of opcache.file_cache");
@@ -2897,7 +2869,6 @@ static int accel_post_startup(void)
 
 		/* Init auto-global strings */
 		zend_accel_init_auto_globals();
-#endif
 	}
 #if ENABLE_FILE_CACHE_FALLBACK
 file_cache_fallback:
@@ -2983,9 +2954,7 @@ void accel_shutdown(void)
 		preload_shutdown();
 	}
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	_file_cache_only = file_cache_only;
-#endif
 
 	accel_reset_pcre_cache();
 
@@ -4057,7 +4026,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	PHP_VERSION,							/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2018",				/* copyright */
+	"Copyright (c)",						/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	NULL,									/* per-script activation */

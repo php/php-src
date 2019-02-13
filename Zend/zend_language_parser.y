@@ -1369,13 +1369,3 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 	yystpcpy(yyres, yystr);
 	return strlen(yystr);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

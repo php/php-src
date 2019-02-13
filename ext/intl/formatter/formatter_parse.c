@@ -175,12 +175,3 @@ PHP_FUNCTION( numfmt_parse_currency )
 	RETVAL_DOUBLE( number );
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

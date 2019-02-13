@@ -98,3 +98,11 @@ extern const struct pdo_stmt_methods oci_stmt_methods;
 
 /* Arbitrary assumed row length for prefetch memory limit calcuation */
 #define PDO_OCI_PREFETCH_ROWSIZE 1024
+
+
+enum {
+	PDO_OCI_ATTR_ACTION = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_OCI_ATTR_CLIENT_INFO,
+	PDO_OCI_ATTR_CLIENT_IDENTIFIER,
+	PDO_OCI_ATTR_MODULE
+};

@@ -131,11 +131,3 @@ ZEND_API void ZEND_FASTCALL zval_copy_ctor_func(zval *zvalue)
 		ZVAL_NEW_STR(zvalue, zend_string_dup(Z_STR_P(zvalue), 0));
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

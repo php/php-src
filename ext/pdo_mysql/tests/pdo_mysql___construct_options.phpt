@@ -19,7 +19,7 @@ MySQLPDOTest::skip();
 		try {
 			$db = new PDO($dsn, $user, $pass, array($option => $value));
 			if (!is_object($db) || ($value !== ($tmp = @$db->getAttribute($option))))
-				printf("[%03d] Execting '%s'/%s got '%s'/%s' for options '%s'\n",
+				printf("[%03d] Expecting '%s'/%s got '%s'/%s' for options '%s'\n",
 					$offset,
 					$value, gettype($value),
 					$tmp, gettype($tmp),
@@ -172,8 +172,7 @@ MySQLPDOTest::skip();
 [016] PDO::MYSQL_ATTR_DIRECT_QUERY should be on
 [017] PDO::ATTR_EMULATE_PREPARES should be off
 [018] PDO::MYSQL_ATTR_DIRECT_QUERY should be off
-[021] Execting '1'/boolean got ''/boolean' for options 'PDO::MYSQL_ATTR_LOCAL_INFILE'
-[023] Execting 'SET @a=1'/string got ''/boolean' for options 'PDO::MYSQL_ATTR_INIT_COMMAND'
+[023] Expecting 'SET @a=1'/string got ''/boolean' for options 'PDO::MYSQL_ATTR_INIT_COMMAND'
 [024] SQLSTATE[42000] [1065] Query was empty
 [025] SQLSTATE[42S02] [1146] Table '%s.nonexistent' doesn't exist
 done!

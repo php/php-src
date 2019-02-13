@@ -10,6 +10,9 @@ var_dump($wddx);
 var_dump(wddx_deserialize($wddx));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function wddx_serialize_value() is deprecated in %s on line %d
 string(301) "<wddxPacket version='1.0'><header><comment>&lt;/comment&gt;&lt;/header&gt;&lt;data&gt;&lt;struct&gt;&lt;var name=&quot;php_class_name&quot;&gt;&lt;string&gt;stdClass&lt;/string&gt;&lt;/var&gt;&lt;/struct&gt;&lt;/data&gt;&lt;/wddxPacket&gt;</comment></header><data><string></string></data></wddxPacket>"
+
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 string(0) ""

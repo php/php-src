@@ -2716,6 +2716,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 0, 3)
 	ZEND_ARG_INFO(0, out_codepage)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_set_ctrl_handler, 0, 0, 1)
+	ZEND_ARG_INFO(0, callable)
+	ZEND_ARG_INFO(0, add)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_generate_ctrl_event, 0, 0, 1)
+	ZEND_ARG_INFO(0, event)
+	ZEND_ARG_INFO(0, pid)
+ZEND_END_ARG_INFO()
 #endif
 /* }}} */
 /* }}} */
@@ -3430,6 +3440,8 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(sapi_windows_cp_get, arginfo_sapi_windows_cp_get)
 	PHP_FE(sapi_windows_cp_is_utf8, arginfo_sapi_windows_cp_is_utf8)
 	PHP_FE(sapi_windows_cp_conv, arginfo_sapi_windows_cp_conv)
+	PHP_FE(sapi_windows_set_ctrl_handler, arginfo_sapi_windows_set_ctrl_handler)
+	PHP_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
 	PHP_FE_END
 };
@@ -6150,12 +6162,3 @@ PHP_FUNCTION(sys_getloadavg)
 }
 /* }}} */
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

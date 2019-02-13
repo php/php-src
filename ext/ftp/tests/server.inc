@@ -464,9 +464,12 @@ if ($pid) {
 		} elseif (preg_match('/^SITE CHMOD/', $buf, $matches)) {
 			fputs($s, "200 OK\r\n");
 
-		} elseif (preg_match('/^DELE/', $buf, $matches)) {
-			fputs($s, "250 OK\r\n");
-
+		} elseif (preg_match('/^DELE ([\w\h]+)/', $buf, $matches)) {
+			if (isset($matches[1]) && in_array($matches[1], ['file1', "file\nb0rk"])){
+				fputs($s, "250 Delete successful\r\n");
+			} else {
+				fputs($s, "550 No such file or directory\r\n");
+			}
 		} elseif (preg_match('/^ALLO (\d+)/', $buf, $matches)) {
 			fputs($s, "200 " . $matches[1] . " bytes allocated\r\n");
 

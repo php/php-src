@@ -126,7 +126,7 @@ static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int ge
 		if (pglob->path) {
 			efree(pglob->path);
 		}
-		if (path != gpath) {
+		if ((path - gpath) > 1) {
 			path--;
 		}
 		pglob->path_len = path - gpath;
@@ -279,12 +279,3 @@ const php_stream_wrapper  php_glob_stream_wrapper = {
 	0
 };
 #endif /* HAVE_GLOB */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

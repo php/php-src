@@ -39,14 +39,9 @@
 #define E_ALL (E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_RECOVERABLE_ERROR | E_DEPRECATED | E_USER_DEPRECATED | E_STRICT)
 #define E_CORE (E_CORE_ERROR | E_CORE_WARNING)
 
-#endif /* ZEND_ERRORS_H */
+/* Fatal errors that are ignored by the silence operator */
+#define E_FATAL_ERRORS (E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR | E_PARSE)
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+#define E_HAS_ONLY_FATAL_ERRORS(mask) !((mask) & ~E_FATAL_ERRORS)
+
+#endif /* ZEND_ERRORS_H */

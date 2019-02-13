@@ -13,7 +13,7 @@ try {
 } catch(Exception $e) {
   echo "This Exception should be caught\n";
 }
-function errorHandler($errno, $errstr, $errfile, $errline, $vars) {
+function errorHandler($errno, $errstr, $errfile, $errline) {
 	throw new Exception('Some Exception');
 }
 ?>

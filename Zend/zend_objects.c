@@ -283,14 +283,12 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 	}
 }
 
-ZEND_API zend_object *zend_objects_clone_obj(zval *zobject)
+ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
 {
-	zend_object *old_object;
 	zend_object *new_object;
 
 	/* assume that create isn't overwritten, so when clone depends on the
 	 * overwritten one then it must itself be overwritten */
-	old_object = Z_OBJ_P(zobject);
 	new_object = zend_objects_new(old_object->ce);
 
 	/* zend_objects_clone_members() expect the properties to be initialized. */
@@ -307,13 +305,3 @@ ZEND_API zend_object *zend_objects_clone_obj(zval *zobject)
 
 	return new_object;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

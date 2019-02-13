@@ -26,10 +26,3 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len);
 PHPAPI zend_string *php_uuencode(char *src, size_t src_len);
 
 #endif /* PHP_UUENCODE_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

@@ -209,6 +209,7 @@ void plist_entry_destructor(zval *zv)
 int zend_init_rsrc_list(void)
 {
 	zend_hash_init(&EG(regular_list), 8, NULL, list_entry_destructor, 0);
+	EG(regular_list).nNextFreeElement = 0;
 	return SUCCESS;
 }
 
@@ -349,13 +350,3 @@ ZEND_API zend_resource* zend_register_persistent_resource(const char *key, size_
 	zend_string_release_ex(str, 1);
 	return ret;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

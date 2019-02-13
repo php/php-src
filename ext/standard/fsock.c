@@ -100,8 +100,9 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (errstr) {
 			if (zerrstr) {
 				ZEND_TRY_ASSIGN_STR(zerrstr, errstr);
+			} else {
+				zend_string_release(errstr);
 			}
-			zend_string_release(errstr);
 		}
 
 		RETURN_FALSE;
@@ -138,12 +139,3 @@ PHP_FUNCTION(pfsockopen)
 	php_fsockopen_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

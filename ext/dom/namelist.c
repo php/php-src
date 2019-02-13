@@ -82,12 +82,3 @@ PHP_FUNCTION(dom_namelist_get_namespace_uri)
 /* }}} end dom_namelist_get_namespace_uri */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

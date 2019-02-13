@@ -286,12 +286,3 @@ DECLARE_SHA3_OPS(384);
 DECLARE_SHA3_OPS(512);
 
 #undef DECLARE_SHA3_OPS
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

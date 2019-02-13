@@ -68,20 +68,18 @@ else
   AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
   AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
 
-  if test "$PHP_PCRE_REGEX" != "no"; then
-    AC_MSG_CHECKING([whether to enable PCRE JIT functionality])
-    if test "$PHP_PCRE_JIT" != "no"; then
-      AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
-      AC_MSG_RESULT([yes])
-    else
+  AC_MSG_CHECKING([whether to enable PCRE JIT functionality])
+  if test "$PHP_PCRE_JIT" != "no"; then
+    AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
+    AC_MSG_RESULT([yes])
+  else
     AC_MSG_RESULT([no])
-    fi
   fi
 fi
 
 PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
                           Enable PCRE valgrind support. Developers only!], no, no)
-  if test "$PHP_PCRE_REGEX" != "yes" && test "$PHP_PCRE_REGEX" != "no"; then
+  if test "$PHP_EXTERNAL_PCRE" != "no"; then
     AC_MSG_WARN([PHP is going to be linked with an external PCRE, --with-pcre-valgrind has no effect])
   else
     if test "$PHP_PCRE_VALGRIND" != "no"; then

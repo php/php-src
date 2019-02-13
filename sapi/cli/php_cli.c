@@ -678,7 +678,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) 1997-2018 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZTS
 					"ZTS "
@@ -1104,7 +1104,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 
 					memset(&execute_data, 0, sizeof(zend_execute_data));
 					EG(current_execute_data) = &execute_data;
-					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, &arg);
+					zend_call_method_with_1_params(Z_OBJ(ref), pce, &pce->constructor, "__construct", NULL, &arg);
 
 					if (EG(exception)) {
 						zval tmp, *msg, rv;
@@ -1422,12 +1422,3 @@ out:
 	exit(exit_status);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

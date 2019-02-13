@@ -41,12 +41,3 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 	RETVAL_LONG(crc^0xFFFFFFFF);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

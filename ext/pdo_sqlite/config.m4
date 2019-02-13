@@ -1,5 +1,4 @@
 dnl config.m4 for extension pdo_sqlite
-dnl vim:et:sw=2:ts=2:
 
 PHP_ARG_WITH(pdo-sqlite, for sqlite 3 support for PDO,
 [  --without-pdo-sqlite[=DIR]

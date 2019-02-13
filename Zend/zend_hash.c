@@ -220,7 +220,7 @@ static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = 0;
 	ht->nInternalPointer = 0;
-	ht->nNextFreeElement = 0;
+	ht->nNextFreeElement = ZEND_LONG_MIN;
 	ht->pDestructor = pDestructor;
 	ht->nTableSize = zend_hash_check_size(nSize);
 }
@@ -935,6 +935,10 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
+	if (h == ZEND_LONG_MIN && (flag & HASH_ADD_NEXT)) {
+		h = 0;
+	}
+
 	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		if (h < ht->nNumUsed) {
 			p = ht->arData + h;
@@ -998,8 +1002,8 @@ convert_to_hash:
 	p = ht->arData + idx;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
-	if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-		ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
+	if ((zend_long)h >= ht->nNextFreeElement) {
+		ht->nNextFreeElement = (zend_long)h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 	}
 add:
 	ht->nNumOfElements++;
@@ -1665,7 +1669,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 	}
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = 0;
-	ht->nNextFreeElement = 0;
+	ht->nNextFreeElement = ZEND_LONG_MIN;
 	ht->nInternalPointer = 0;
 }
 
@@ -1704,7 +1708,7 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 	}
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = 0;
-	ht->nNextFreeElement = 0;
+	ht->nNextFreeElement = ZEND_LONG_MIN;
 	ht->nInternalPointer = 0;
 }
 
@@ -2018,7 +2022,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
 		target->nNumOfElements = 0;
-		target->nNextFreeElement = 0;
+		target->nNextFreeElement = ZEND_LONG_MIN;
 		target->nInternalPointer = 0;
 		target->nTableSize = HT_MIN_SIZE;
 		HT_SET_DATA_ADDR(target, &uninitialized_bucket);
@@ -2818,13 +2822,3 @@ convert:
 		return new_ht;
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

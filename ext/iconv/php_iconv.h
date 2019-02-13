@@ -116,10 +116,3 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char * in_p, size_t in_len,
 #define phpext_iconv_ptr iconv_module_ptr
 
 #endif	/* PHP_ICONV_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

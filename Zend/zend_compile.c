@@ -5737,6 +5737,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	zend_ast *return_type_ast = decl->child[3];
 	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
 
+	zend_class_entry *orig_class_entry = CG(active_class_entry);
 	zend_op_array *orig_op_array = CG(active_op_array);
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	zend_oparray_context orig_oparray_context;
@@ -5768,6 +5769,13 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	}
 
 	CG(active_op_array) = op_array;
+
+	/* Do not leak the class scope into free standing functions, even if they are dynamically
+	 * defined inside a class method. This is necessary for correct handling of magic constants.
+	 * For example __CLASS__ should always be "" inside a free standing function. */
+	if (decl->kind == ZEND_AST_FUNC_DECL) {
+		CG(active_class_entry) = NULL;
+	}
 
 	if (toplevel) {
 		op_array->fn_flags |= ZEND_ACC_TOP_LEVEL;
@@ -5816,6 +5824,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	zend_stack_del_top(&CG(loop_var_stack));
 
 	CG(active_op_array) = orig_op_array;
+	CG(active_class_entry) = orig_class_entry;
 }
 /* }}} */
 
@@ -6672,17 +6681,20 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			}
 			break;
 		case T_METHOD_C:
-			if ((op_array && !op_array->scope && op_array->function_name) || (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
-				ZVAL_STR_COPY(zv, op_array->function_name);
-			} else if (ce) {
-				if (op_array && op_array->function_name) {
-					ZVAL_NEW_STR(zv, zend_concat3(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), "::", 2,
+			/* Detect whether we are directly inside a class (e.g. a class constant) and treat
+			 * this as not being inside a function. */
+			if (op_array && ce && !op_array->scope && !(op_array->fn_flags & ZEND_ACC_CLOSURE)) {
+				op_array = NULL;
+			}
+			if (op_array && op_array->function_name) {
+				if (op_array->scope) {
+					ZVAL_NEW_STR(zv, zend_concat3(
+						ZSTR_VAL(op_array->scope->name), ZSTR_LEN(op_array->scope->name),
+						"::", 2,
 						ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name)));
 				} else {
-					ZVAL_STR_COPY(zv, ce->name);
+					ZVAL_STR_COPY(zv, op_array->function_name);
 				}
-			} else if (op_array && op_array->function_name) {
-				ZVAL_STR_COPY(zv, op_array->function_name);
 			} else {
 				ZVAL_EMPTY_STRING(zv);
 			}
@@ -8643,13 +8655,3 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 	*ast_ptr = zend_ast_create_zval(&result);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

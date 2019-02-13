@@ -164,7 +164,7 @@ php_stream_filter_status_t userfilter_filter(
 	zval func_name;
 	zval retval;
 	zval args[4];
-	zval zpropname;
+	zend_string *propname;
 	int call_result;
 
 	/* the userfilter object probably doesn't exist anymore */
@@ -239,9 +239,9 @@ php_stream_filter_status_t userfilter_filter(
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
-	ZVAL_STRINGL(&zpropname, "stream", sizeof("stream")-1);
-	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, NULL);
-	zval_ptr_dtor(&zpropname);
+	propname = zend_string_init("stream", sizeof("stream")-1, 0);
+	Z_OBJ_HANDLER_P(obj, unset_property)(Z_OBJ_P(obj), propname, NULL);
+	zend_string_release_ex(propname, 0);
 
 	zval_ptr_dtor(&args[3]);
 	zval_ptr_dtor(&args[2]);
@@ -591,13 +591,3 @@ PHP_FUNCTION(stream_filter_register)
 	}
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

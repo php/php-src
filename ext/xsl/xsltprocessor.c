@@ -397,7 +397,8 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xsl_object *intern;
 	int prevSubstValue, prevExtDtdValue, clone_docu = 0;
 	xmlNode *nodep = NULL;
-	zval *cloneDocu, member, rv;
+	zval *cloneDocu, rv;
+	zend_string *member;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &docp) == FAILURE) {
@@ -433,13 +434,13 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 
 	intern = Z_XSL_P(id);
 
-	ZVAL_STRING(&member, "cloneDocument");
-	cloneDocu = zend_std_read_property(id, &member, BP_VAR_IS, NULL, &rv);
+	member = zend_string_init("cloneDocument", sizeof("cloneDocument")-1, 0);
+	cloneDocu = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_IS, NULL, &rv);
 	if (Z_TYPE_P(cloneDocu) != IS_NULL) {
 		convert_to_long(cloneDocu);
 		clone_docu = Z_LVAL_P(cloneDocu);
 	}
-	zval_ptr_dtor(&member);
+	zend_string_release_ex(member, 0);
 	if (clone_docu == 0) {
 		/* check if the stylesheet is using xsl:key, if yes, we have to clone the document _always_ before a transformation */
 		nodep = xmlDocGetRootElement(sheetp->doc);
@@ -479,7 +480,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	php_libxml_node_object *object;
 	char **params = NULL;
 	int clone;
-	zval *doXInclude, member, rv;
+	zval *doXInclude, rv;
+	zend_string *member;
 	FILE *f;
 	int secPrefsError = 0;
 	int secPrefsValue;
@@ -529,13 +531,13 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	ctxt = xsltNewTransformContext(style, doc);
 	ctxt->_private = (void *) intern;
 
-	ZVAL_STRING(&member, "doXInclude");
-	doXInclude = zend_std_read_property(id, &member, BP_VAR_IS, NULL, &rv);
+	member = zend_string_init("doXInclude", sizeof("doXInclude")-1, 0);
+	doXInclude = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_IS, NULL, &rv);
 	if (Z_TYPE_P(doXInclude) != IS_NULL) {
 		convert_to_long(doXInclude);
 		ctxt->xinclude = Z_LVAL_P(doXInclude);
 	}
-	zval_ptr_dtor(&member);
+	zend_string_release_ex(member, 0);
 
 	secPrefsValue = intern->securityPrefs;
 
@@ -935,12 +937,3 @@ PHP_FUNCTION(xsl_xsltprocessor_has_exslt_support)
 #endif
 }
 /* }}} end xsl_xsltprocessor_has_exslt_support(); */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -77,14 +77,14 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 /* }}} */
 
 /* {{{ IntlDateFormatter_object_clone */
-zend_object *IntlDateFormatter_object_clone(zval *object)
+zend_object *IntlDateFormatter_object_clone(zend_object *object)
 {
 	IntlDateFormatter_object *dfo, *new_dfo;
 	zend_object *new_obj;
 
-	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
+	dfo = php_intl_dateformatter_fetch_object(object);
 
-	new_obj = IntlDateFormatter_ce_ptr->create_object(Z_OBJCE_P(object));
+	new_obj = IntlDateFormatter_ce_ptr->create_object(object->ce);
 	new_dfo = php_intl_dateformatter_fetch_object(new_obj);
 	/* clone standard parts */
 	zend_objects_clone_members(&new_dfo->zo, &dfo->zo);

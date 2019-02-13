@@ -14,7 +14,7 @@ $array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red");
 $array2 = array("a" => "green", "yellow", "red");
 $array3 = array("a"=>"green", "brown");
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
         if (error_reporting() != 0) {
                 // report non-silenced errors
                 echo "Error: $err_no - $err_msg, $filename($linenum)\n";
