@@ -2377,6 +2377,11 @@ static int zend_jit_jmp(dasm_State **Dst, unsigned int target_label)
 
 static int zend_jit_cond_jmp(dasm_State **Dst, const zend_op *next_opline, unsigned int target_label)
 {
+/* In 64-bit build we compare only low 32-bits.
+ * x86_64 cmp instruction doesn't support immediate 64-bit operand, and full
+ * comparison would require additinal load of 64-bit address into register.
+ * This is not a problem at all, while JIT buffer size is less than 4GB.
+ */
 	|	cmp IPl, next_opline
 	|	jne =>target_label
 
