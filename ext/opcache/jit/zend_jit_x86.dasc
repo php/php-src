@@ -41,11 +41,11 @@
  |.define CARG4d,  ecx
  |.define CARG5d,  r8d
  |.define CARG6d,  r9d
- |.define FCARG1a, CARG1    // Simulate x86 fastcall.
+ |.define FCARG1a, CARG1     // Simulate x86 fastcall.
  |.define FCARG2a, CARG2
  |.define FCARG1d, CARG1d
  |.define FCARG2d, CARG2d
- |.define SPAD,    8
+ |.define SPAD,    8         // padding for CPU stack alignment
  |.define SSE,     1
 |.else
  |.define FP,      esi
@@ -57,11 +57,17 @@
  |.define FCARG2a, edx
  |.define FCARG1d, ecx
  |.define FCARG2d, edx
- |.define SPAD,    12
+ |.define SPAD,    12        // padding for CPU stack alignment
  |.define SSE,     1
 |.endif
 
-|.define HYBRID_SPAD, 16
+|.define HYBRID_SPAD, 16     // padding for stack alignment
+
+/* According to x86 and x86_64 ABI, CPU stack has to be 16 byte aligned to
+ * guarantee proper alignment of 128-bit SSE data allocated on stack.
+ * With broken alignment any execution of SSE code, including calls to
+ * memcpy() and others, may lead to crash.
+ */
 
 #include "Zend/zend_cpuinfo.h"
 #include "jit/zend_jit_x86.h"
