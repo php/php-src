@@ -410,6 +410,7 @@ stderr_last_error(char *msg)
 /* OS Allocation */
 /*****************/
 
+#ifndef HAVE_MREMAP
 static void *zend_mm_mmap_fixed(void *addr, size_t size)
 {
 #ifdef _WIN32
@@ -438,6 +439,7 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 	return ptr;
 #endif
 }
+#endif
 
 static void *zend_mm_mmap(size_t size)
 {
@@ -797,7 +799,10 @@ static int zend_mm_chunk_extend(zend_mm_heap *heap, void *addr, size_t old_size,
 		}
 	}
 #endif
-#ifndef _WIN32
+#if HAVE_MREMAP
+	/* We don't use MREMAP_MAYMOVE due to alignment requirements. */
+	return mremap(addr, old_size, new_size, 0) != MAP_FAILED;
+#elif !defined(_WIN32)
 	return (zend_mm_mmap_fixed((char*)addr + old_size, new_size - old_size) != NULL);
 #else
 	return 0;
