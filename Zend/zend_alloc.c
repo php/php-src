@@ -84,11 +84,6 @@
 #include <errno.h>
 
 #ifndef _WIN32
-# ifdef HAVE_MREMAP
-#  ifndef _GNU_SOURCE
-#   define _GNU_SOURCE
-#  endif
-# endif
 # include <sys/mman.h>
 # ifndef MAP_ANON
 #  ifdef MAP_ANONYMOUS
@@ -112,6 +107,12 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 
 #ifndef REAL_PAGE_SIZE
 # define REAL_PAGE_SIZE ZEND_MM_PAGE_SIZE
+#endif
+
+/* NetBSD has an mremap() function with a signature that is incompatible with Linux (WTF?),
+ * so pretend it doesn't exist. */
+#ifndef __linux__
+# undef HAVE_MREMAP
 #endif
 
 #ifndef ZEND_MM_STAT
@@ -410,6 +411,7 @@ stderr_last_error(char *msg)
 /* OS Allocation */
 /*****************/
 
+#ifndef HAVE_MREMAP
 static void *zend_mm_mmap_fixed(void *addr, size_t size)
 {
 #ifdef _WIN32
@@ -438,6 +440,7 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 	return ptr;
 #endif
 }
+#endif
 
 static void *zend_mm_mmap(size_t size)
 {
@@ -797,7 +800,16 @@ static int zend_mm_chunk_extend(zend_mm_heap *heap, void *addr, size_t old_size,
 		}
 	}
 #endif
-#ifndef _WIN32
+#ifdef HAVE_MREMAP
+	/* We don't use MREMAP_MAYMOVE due to alignment requirements. */
+	void *ptr = mremap(addr, old_size, new_size, 0);
+	if (ptr == MAP_FAILED) {
+		return 0;
+	}
+	/* Sanity check: The mapping shouldn't have moved. */
+	ZEND_ASSERT(ptr == addr);
+	return 1;
+#elif !defined(_WIN32)
 	return (zend_mm_mmap_fixed((char*)addr + old_size, new_size - old_size) != NULL);
 #else
 	return 0;
