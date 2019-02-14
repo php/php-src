@@ -575,7 +575,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_SSSE3_FUNC_DECL(func)
 #endif
 
-#ifdef __SSE4_2__
+#if defined(HAVE_SSE4_2_DEF) || (defined(ZEND_WIN32) && defined(__SSE4_2__))
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSE4_2_NATIVE 1
 #elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2)) || defined(ZEND_WIN32)
