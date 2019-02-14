@@ -77,7 +77,7 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_ARRAY_INIT"  => 1<<19,
 	"ZEND_VM_EXT_REF"         => 1<<20,
 	"ZEND_VM_EXT_FETCH_REF"   => 1<<21,
-	"ZEND_VM_EXT_DIM_OBJ_WRITE" => 1<<22,
+	"ZEND_VM_EXT_DIM_WRITE"   => 1<<22,
 	"ZEND_VM_EXT_MASK"        => 0x0f000000,
 	"ZEND_VM_EXT_NUM"         => 0x01000000,
 	"ZEND_VM_EXT_LAST_CATCH"  => 0x02000000,
@@ -134,7 +134,7 @@ $vm_ext_decode = array(
 	"FETCH_REF"            => ZEND_VM_EXT_FETCH_REF,
 	"SRC"                  => ZEND_VM_EXT_SRC,
 	"CACHE_SLOT"           => ZEND_VM_EXT_CACHE_SLOT,
-	"DIM_OBJ_WRITE"        => ZEND_VM_EXT_DIM_OBJ_WRITE,
+	"DIM_WRITE"            => ZEND_VM_EXT_DIM_WRITE,
 );
 
 $vm_kind_name = array(
@@ -1095,12 +1095,18 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 		return true;
 	}
 
-	if (isset($extra_spec["DIM_OBJ"]) &&
-	    ((($op1 == "CONST" || $op1 == "TMP") && $extra_spec["DIM_OBJ"] != 3) ||
-	     ($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1 && $extra_spec["DIM_OBJ"] != 3) ||
-	     ($op2 == "CV" && $extra_spec["DIM_OBJ"] == 3) ||
-	     ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] != 2))) {
+	if (isset($extra_spec["DIM_OBJ"])) {
 	    // Skip useless handlers
+		switch ($extra_spec["DIM_OBJ"]) {
+		case 0:
+			return $op1 == "UNUSED" || $op1 == "CONST" || $op1 == "TMP" || $op2 == "UNUSED";
+		case 1: // DIM
+			return $op1 == "UNUSED" || $op1 == "CONST" || $op1 == "TMP";
+		case 2: // OBJ
+			return $op1 == "CONST" || $op2 == "UNUSED";
+		case 3: // STATIC_PROP
+			return $op1 == "UNUSED" || $op2 == "TMP" || $op2 == "CV";
+		}
 		return true;
 	}
 

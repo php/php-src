@@ -791,7 +791,7 @@ ZEND_VM_COLD_HELPER(zend_undefined_function_helper, ANY, ANY)
 	HANDLE_EXCEPTION();
 }
 
-ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, binary_op_type binary_op)
+ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, TMPVAR|UNUSED|CV, CONST|TMPVAR|CV, binary_op_type binary_op)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data;
@@ -805,7 +805,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 	zend_string *name, *tmp_name;
 
 	SAVE_OPLINE();
-	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	object = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -821,10 +821,8 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 				object = Z_REFVAL_P(object);
 				ZEND_VM_C_GOTO(assign_op_object);
 			}
-			object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
-			if (UNEXPECTED(!object)) {
-				break;
-			}
+			zend_throw_non_object_error(object, property OPLINE_CC EXECUTE_DATA_CC);
+			break;
 		}
 
 ZEND_VM_C_LABEL(assign_op_object):
@@ -882,7 +880,7 @@ ZEND_VM_C_LABEL(assign_op_object):
 
 	FREE_OP_DATA();
 	FREE_OP2();
-	FREE_OP1_VAR_PTR();
+	FREE_OP1();
 	/* assign_obj has two opcodes! */
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
@@ -890,7 +888,7 @@ ZEND_VM_C_LABEL(assign_op_object):
 /* No specialization for op_types (CONST|TMP|VAR|CV, UNUSED|CONST|TMPVAR) */
 ZEND_VM_HELPER(zend_binary_assign_op_static_prop_helper, ANY, ANY, binary_op_type binary_op)
 {
-	/* This helper actually never will receive IS_VAR as second op, and has the same handling for VAR and TMP in the first op, but for interoperability with the other binary_assign_op helpers, it is necessary to "include" it */
+	/* This helper actually never will receive IS_TMP as second op, and has the same handling for VAR and TMP in the first op, but for interoperability with the other binary_assign_op helpers, it is necessary to "include" it */
 
 	USE_OPLINE
 	zend_free_op free_op_data;
@@ -1076,34 +1074,30 @@ ZEND_VM_HELPER(zend_binary_assign_op_simple_helper, VAR|CV, CONST|TMPVAR|CV, bin
 
 ZEND_VM_INLINE_HELPER(zend_binary_assign_op_helper, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, SPEC(DIM_OBJ), binary_op_type binary_op)
 {
-#if defined(ZEND_VM_SPEC) && (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR)
+#if defined(ZEND_VM_SPEC)
+	/* These checks will be replaced with 0/1 during specialization, at which point they will be
+	 * valid preprocessor checks. */
+# if opline->extended_value == 0
+	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_simple_helper, binary_op, binary_op);
+# elif opline->extended_value == ZEND_ASSIGN_DIM
+	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_dim_helper, binary_op, binary_op);
+# elif opline->extended_value == ZEND_ASSIGN_OBJ
+	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_obj_helper, binary_op, binary_op);
+# else
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_static_prop_helper, binary_op, binary_op);
-#elif defined(ZEND_VM_SPEC) && (OP2_TYPE == IS_UNUSED)
-	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_dim_helper, binary_op, binary_op);
-	}
-
-	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_static_prop_helper, binary_op, binary_op);
+# endif
 #else
-# if !defined(ZEND_VM_SPEC) || OP1_TYPE != IS_UNUSED
-#  if !defined(ZEND_VM_SPEC)
-	/* opline->extended_value checks are specialized, don't need opline */
-	USE_OPLINE
-#  endif
-
 	if (EXPECTED(opline->extended_value == 0)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_simple_helper, binary_op, binary_op);
 	}
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_dim_helper, binary_op, binary_op);
 	}
-#  if !defined(ZEND_VM_SPEC) || OP2_TYPE == IS_CONST || OP2_TYPE == (IS_TMP_VAR|IS_VAR)
 	if (UNEXPECTED(opline->extended_value == ZEND_ASSIGN_STATIC_PROP)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_static_prop_helper, binary_op, binary_op);
 	}
-#  endif
-# endif
 
+	ZEND_ASSERT(opline->extended_value == ZEND_ASSIGN_OBJ);
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_obj_helper, binary_op, binary_op);
 #endif
 }
@@ -1168,7 +1162,7 @@ ZEND_VM_HANDLER(167, ZEND_ASSIGN_POW, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, pow_function);
 }
 
-ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, int inc)
+ZEND_VM_HELPER(zend_pre_incdec_property_helper, TMPVAR|UNUSED|CV, CONST|TMPVAR|CV, int inc)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -1181,7 +1175,7 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 	zend_string *name, *tmp_name;
 
 	SAVE_OPLINE();
-	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	object = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -1195,10 +1189,8 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 				object = Z_REFVAL_P(object);
 				ZEND_VM_C_GOTO(pre_incdec_object);
 			}
-			object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
-			if (UNEXPECTED(!object)) {
-				break;
-			}
+			zend_throw_non_object_error(object, property OPLINE_CC EXECUTE_DATA_CC);
+			break;
 		}
 
 ZEND_VM_C_LABEL(pre_incdec_object):
@@ -1232,21 +1224,21 @@ ZEND_VM_C_LABEL(pre_incdec_object):
 	} while (0);
 
 	FREE_OP2();
-	FREE_OP1_VAR_PTR();
+	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(132, ZEND_PRE_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
+ZEND_VM_HANDLER(132, ZEND_PRE_INC_OBJ, TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_property_helper, inc, 1);
 }
 
-ZEND_VM_HANDLER(133, ZEND_PRE_DEC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
+ZEND_VM_HANDLER(133, ZEND_PRE_DEC_OBJ, TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_property_helper, inc, 0);
 }
 
-ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, int inc)
+ZEND_VM_HELPER(zend_post_incdec_property_helper, TMPVAR|UNUSED|CV, CONST|TMPVAR|CV, int inc)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -1259,7 +1251,7 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 	zend_string *name, *tmp_name;
 
 	SAVE_OPLINE();
-	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	object = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -1273,10 +1265,8 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 				object = Z_REFVAL_P(object);
 				ZEND_VM_C_GOTO(post_incdec_object);
 			}
-			object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
-			if (UNEXPECTED(!object)) {
-				break;
-			}
+			zend_throw_non_object_error(object, property OPLINE_CC EXECUTE_DATA_CC);
+			break;
 		}
 
 ZEND_VM_C_LABEL(post_incdec_object):
@@ -1309,16 +1299,16 @@ ZEND_VM_C_LABEL(post_incdec_object):
 	} while (0);
 
 	FREE_OP2();
-	FREE_OP1_VAR_PTR();
+	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(134, ZEND_POST_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
+ZEND_VM_HANDLER(134, ZEND_POST_INC_OBJ, TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_property_helper, inc, 1);
 }
 
-ZEND_VM_HANDLER(135, ZEND_POST_DEC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
+ZEND_VM_HANDLER(135, ZEND_POST_DEC_OBJ, TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_property_helper, inc, 0);
 }
@@ -1743,7 +1733,7 @@ ZEND_VM_HANDLER(173, ZEND_FETCH_STATIC_PROP_R, CONST|TMPVAR|CV, UNUSED|CLASS_FET
 	ZEND_VM_DISPATCH_TO_HELPER(zend_fetch_static_prop_helper, type, BP_VAR_R);
 }
 
-ZEND_VM_HANDLER(174, ZEND_FETCH_STATIC_PROP_W, CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR, FETCH_REF|DIM_OBJ_WRITE|CACHE_SLOT)
+ZEND_VM_HANDLER(174, ZEND_FETCH_STATIC_PROP_W, CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR, FETCH_REF|DIM_WRITE|CACHE_SLOT)
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_fetch_static_prop_helper, type, BP_VAR_W);
 }
@@ -2021,7 +2011,7 @@ ZEND_VM_C_LABEL(fetch_obj_r_finish):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, FETCH_REF|DIM_OBJ_WRITE|CACHE_SLOT)
+ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, FETCH_REF|DIM_WRITE|CACHE_SLOT)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -2029,7 +2019,7 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, FETCH
 
 	SAVE_OPLINE();
 
-	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	container = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
 	}
@@ -2041,20 +2031,20 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, FETCH
 		((OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) : NULL),
 		BP_VAR_W, opline->extended_value & ZEND_FETCH_OBJ_FLAGS, 1 OPLINE_CC EXECUTE_DATA_CC);
 	FREE_OP2();
-	if (OP1_TYPE == IS_VAR) {
+	if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
+ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *property, *container, *result;
 
 	SAVE_OPLINE();
-	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -2063,7 +2053,7 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACH
 	result = EX_VAR(opline->result.var);
 	zend_fetch_property_address(result, container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_RW, 0, 1 OPLINE_CC EXECUTE_DATA_CC);
 	FREE_OP2();
-	if (OP1_TYPE == IS_VAR) {
+	if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -2167,11 +2157,10 @@ ZEND_VM_C_LABEL(fetch_obj_is_finish):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_COLD_CONST_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, FETCH_REF|CACHE_SLOT)
+ZEND_VM_COLD_CONST_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, FETCH_REF|CACHE_SLOT)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
-		/* Behave like FETCH_OBJ_W */
-		if ((OP1_TYPE & (IS_CONST|IS_TMP_VAR))) {
+		if (OP1_TYPE == IS_CONST) {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_use_tmp_in_write_context_helper);
 		}
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_OBJ_W);
@@ -2240,7 +2229,7 @@ ZEND_VM_HANDLER(198, ZEND_FETCH_LIST_W, VAR, CONST|TMPVAR|CV)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT, SPEC(OP_DATA=CONST|TMP|VAR|CV))
+ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT, SPEC(OP_DATA=CONST|TMP|VAR|CV))
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data;
@@ -2249,7 +2238,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE
 	zend_string *name, *tmp_name;
 
 	SAVE_OPLINE();
-	object = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	object = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -2263,11 +2252,9 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE
 			object = Z_REFVAL_P(object);
 			ZEND_VM_C_GOTO(assign_object);
 		}
-		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
-		if (UNEXPECTED(!object)) {
-			FREE_OP_DATA();
-			ZEND_VM_C_GOTO(exit_assign_obj);
-		}
+		zend_throw_non_object_error(object, property OPLINE_CC EXECUTE_DATA_CC);
+		FREE_OP_DATA();
+		ZEND_VM_C_GOTO(exit_assign_obj);
 	}
 
 ZEND_VM_C_LABEL(assign_object):
@@ -2381,7 +2368,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 	FREE_OP_DATA();
 ZEND_VM_C_LABEL(exit_assign_obj):
 	FREE_OP2();
-	FREE_OP1_VAR_PTR();
+	FREE_OP1();
 	/* assign_obj has two opcodes! */
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
@@ -2604,7 +2591,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT|SRC, SPEC(OP_DATA=VAR|CV))
+ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT|SRC, SPEC(OP_DATA=VAR|CV))
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data;
@@ -2616,7 +2603,7 @@ ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 
 	SAVE_OPLINE();
 
-	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	container = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -2679,7 +2666,7 @@ ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
 	}
 
-	FREE_OP1_VAR_PTR();
+	FREE_OP1();
 	FREE_OP2();
 	FREE_OP_DATA_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
