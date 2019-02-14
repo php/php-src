@@ -19,14 +19,12 @@ $xml = simplexml_load_string($xml_str);
 $val = 1;
 
 var_dump($val);
-$zml->pos["act_idx"] = $val;
+$xml->pos["act_idx"] = $val;
 var_dump($val);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 int(1)
-
-Warning: Creating default object from empty value in %sbug36611.php on line 17
 int(1)
 ===DONE===
