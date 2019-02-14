@@ -407,12 +407,13 @@ PHP_FUNCTION(readline_list_history)
 		int i;
 
 		using_history();
-		history = history_list();
 		hs = history_get_history_state();
-
-		if (history && hs) {
-			for (i = 0; i < hs->length; i++) {
-				add_next_index_string(return_value, history[i]->line);
+		if (hs && hs->length) {
+			history = history_list();
+			if (history) {
+				for (i = 0; i < hs->length; i++) {
+					add_next_index_string(return_value, history[i]->line);
+				}
 			}
 		}
     }
