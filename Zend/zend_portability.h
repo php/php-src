@@ -559,6 +559,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_SSSE3_RESOLVER 1
 #endif
 
+/* Do not use for conditional declaration of API functions! */
 #if ZEND_INTRIN_SSSE3_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
 # define ZEND_INTRIN_SSSE3_FUNC_PROTO 1
 #elif ZEND_INTRIN_SSSE3_RESOLVER
@@ -575,7 +576,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_SSSE3_FUNC_DECL(func)
 #endif
 
-#if defined(HAVE_SSE4_2_DEF) || (defined(ZEND_WIN32) && defined(__SSE4_2__))
+#if __SSE4_2__
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSE4_2_NATIVE 1
 #elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2)) || defined(ZEND_WIN32)
@@ -583,6 +584,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_SSE4_2_RESOLVER 1
 #endif
 
+/* Do not use for conditional declaration of API functions! */
 #if ZEND_INTRIN_SSE4_2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
 # define ZEND_INTRIN_SSE4_2_FUNC_PROTO 1
 #elif ZEND_INTRIN_SSE4_2_RESOLVER
@@ -605,6 +607,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_AVX2_RESOLVER 1
 #endif
 
+/* Do not use for conditional declaration of API functions! */
 #if ZEND_INTRIN_AVX2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
 # define ZEND_INTRIN_AVX2_FUNC_PROTO 1
 #elif ZEND_INTRIN_AVX2_RESOLVER
