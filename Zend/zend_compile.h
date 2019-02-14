@@ -316,6 +316,12 @@ typedef struct _zend_oparray_context {
 /* op_array is preloaded                                  |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 27) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* functions is a constructor                             |     |     |     */
+#define ZEND_ACC_CTOR                    (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* function is a destructor                               |     |     |     */
+#define ZEND_ACC_DTOR                    (1 << 29) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1 << 31) /*     |  X  |     |     */
 

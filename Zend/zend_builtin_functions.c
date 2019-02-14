@@ -1291,7 +1291,7 @@ ZEND_FUNCTION(get_class_methods)
 			if (!key) {
 				ZVAL_STR_COPY(&method_name, mptr->common.function_name);
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
-			} else if (mptr->common.scope->constructor != mptr ||
+			} else if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0 ||
 			    mptr->common.scope == ce ||
 			    zend_binary_strcasecmp(ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(mptr->common.function_name), len) == 0) {
 

@@ -272,7 +272,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
 	 */
-	if ((fe->common.scope->constructor == fe)
+	if ((fe->common.fn_flags & ZEND_ACC_CTOR)
 		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
 			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
 		return 1;
@@ -574,7 +574,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			zend_function *proto = parent->common.prototype ?
 				parent->common.prototype : parent;
 
-			if (parent->common.scope->constructor != parent) {
+			if (!(parent_flags & ZEND_ACC_CTOR)) {
 				if (!proto) {
 					proto = parent;
 				}
@@ -1322,10 +1322,11 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		zend_string *lowercase_name = zend_string_tolower(ce->name);
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		if (!memcmp(ZSTR_VAL(mname), ZSTR_VAL(lowercase_name), ZSTR_LEN(mname))) {
-			if (ce->constructor  && (!ce->parent || ce->constructor != ce->parent->constructor)) {
+			if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
 			}
 			ce->constructor = fe;
+			fe->common.fn_flags |= ZEND_ACC_CTOR;
 		}
 		zend_string_release_ex(lowercase_name, 0);
 	}
@@ -1986,7 +1987,7 @@ static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract
 		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 			ai->afn[ai->cnt] = fn;
 		}
-		if (fn->common.scope->constructor == fn) {
+		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
 			if (!ai->ctor) {
 				ai->cnt++;
 				ai->ctor = 1;
