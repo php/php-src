@@ -197,9 +197,10 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 				SysFreeString(bstr_ids);
 
 				/* sanity check for the case where the constant is already defined */
+				php_com_zval_from_variant(&value, pVarDesc->lpvarValue, codepage);
 				if ((exists = zend_get_constant(c.name)) != NULL) {
-					if (COMG(autoreg_verbose) && !compare_function(&results, &c.value, exists)) {
-						php_error_docref(NULL, E_WARNING, "Type library constant %s is already defined", c.name);
+					if (COMG(autoreg_verbose) && !compare_function(&results, &value, exists)) {
+						php_error_docref(NULL, E_WARNING, "Type library constant %s is already defined", ZSTR_VAL(c.name));
 					}
 					zend_string_release(c.name);
 					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
@@ -207,7 +208,6 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 				}
 
 				/* register the constant */
-				php_com_zval_from_variant(&value, pVarDesc->lpvarValue, codepage);
 				if (Z_TYPE(value) == IS_LONG) {
 					c.flags = mode;
 					ZVAL_LONG(&c.value, Z_LVAL(value));

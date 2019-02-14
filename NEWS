@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #77589 (Core dump using parse_ini_string with numeric sections).
     (Laruence)
 
+- COM:
+  . Fixed bug #77621 (Already defined constants are not properly reported).
+    (cmb)
+
 - PDO_OCI:
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
