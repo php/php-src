@@ -482,7 +482,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 				size_t len = ZSTR_LEN(mptr->common.function_name);
 
 				/* Do not display old-style inherited constructors */
-				if (mptr->common.scope->constructor != mptr
+				if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
 					|| mptr->common.scope == ce
 					|| !key
 					|| zend_binary_strcasecmp(ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(mptr->common.function_name), len) == 0)
@@ -753,10 +753,10 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	if (fptr->common.prototype && fptr->common.prototype->common.scope) {
 		smart_str_append_printf(str, ", prototype %s", ZSTR_VAL(fptr->common.prototype->common.scope->name));
 	}
-	if (fptr->common.scope && fptr->common.scope->constructor == fptr) {
+	if (fptr->common.fn_flags & ZEND_ACC_CTOR) {
 		smart_str_appends(str, ", ctor");
 	}
-	if (fptr->common.scope && fptr->common.scope->destructor == fptr) {
+	if (fptr->common.fn_flags & ZEND_ACC_DTOR) {
 		smart_str_appends(str, ", dtor");
 	}
 	smart_str_appends(str, "> ");
@@ -3396,7 +3396,7 @@ ZEND_METHOD(reflection_method, isConstructor)
 	/* we need to check if the ctor is the ctor of the class level we we
 	 * looking at since we might be looking at an inherited old style ctor
 	 * defined in base class. */
-	RETURN_BOOL(intern->ce->constructor == mptr);
+	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_CTOR && intern->ce->constructor && intern->ce->constructor->common.scope == mptr->common.scope);
 }
 /* }}} */
 
@@ -3411,7 +3411,7 @@ ZEND_METHOD(reflection_method, isDestructor)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
-	RETURN_BOOL(intern->ce->destructor == mptr);
+	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_DTOR);
 }
 /* }}} */
 

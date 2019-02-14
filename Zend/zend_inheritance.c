@@ -272,7 +272,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
 	 */
-	if ((fe->common.scope->constructor == fe)
+	if ((fe->common.fn_flags & ZEND_ACC_CTOR)
 		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
 			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
 		return 1;
@@ -574,7 +574,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			zend_function *proto = parent->common.prototype ?
 				parent->common.prototype : parent;
 
-			if (parent->common.scope->constructor != parent) {
+			if (!(parent_flags & ZEND_ACC_CTOR)) {
 				if (!proto) {
 					proto = parent;
 				}
@@ -1947,7 +1947,7 @@ static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract
 		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 			ai->afn[ai->cnt] = fn;
 		}
-		if (fn->common.scope->constructor == fn) {
+		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
 			if (!ai->ctor) {
 				ai->cnt++;
 				ai->ctor = 1;
