@@ -149,6 +149,10 @@ PHP 7.4 UPGRADE NOTES
     so is equivalent to calling a non-static method statically, which has been
     deprecated since PHP 7.0.
 
+- COM:
+  . Importing type libraries with case-insensitive constant registering has been
+    deprecated.
+
 - Mbstring:
   . Passing a non-string pattern to mb_ereg_replace() is deprecated. Currently
     non-string patterns are interpreted as ASCII codepoints. In PHP 8 the

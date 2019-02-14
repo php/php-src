@@ -265,11 +265,19 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 	return SUCCESS;
 }
 
+static ZEND_INI_MH(OnAutoregisterCasesensitive)
+{
+	if (!zend_ini_parse_bool(new_value)) {
+		php_error_docref("com.configuration", E_DEPRECATED, "Declaration of case-insensitive constants is deprecated");
+	}
+	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+}
+
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("com.allow_dcom",				"0", PHP_INI_SYSTEM, OnUpdateBool, allow_dcom, zend_com_dotnet_globals, com_dotnet_globals)
     STD_PHP_INI_ENTRY("com.autoregister_verbose",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_verbose, zend_com_dotnet_globals, com_dotnet_globals)
     STD_PHP_INI_ENTRY("com.autoregister_typelib",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_on, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"1", PHP_INI_ALL, OnUpdateBool, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
+    STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"1", PHP_INI_ALL, OnAutoregisterCasesensitive, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
 	STD_PHP_INI_ENTRY("com.code_page", "", PHP_INI_ALL, OnUpdateLong, code_page, zend_com_dotnet_globals, com_dotnet_globals)
 	PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypeLibFileUpdate)
 PHP_INI_END()

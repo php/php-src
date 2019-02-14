@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #75921 (Inconsistent: No warning in some cases when stdObj is
     created on the fly). (David Walker)
 
+- COM:
+  . Deprecated registering of case-insensitive constants from typelibs. (cmb)
+
 - CURL:
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
     (Pierrick)
