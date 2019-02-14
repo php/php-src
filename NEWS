@@ -36,6 +36,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #77552 (Unintialized php_stream_statbuf in stat functions).
     (John Stevenson)
+  . Fixed bug #77612 (setcookie() sets incorrect SameSite header if all of its
+    options filled). (Nikita)
 
 - MySQL
   . Disabled LOCAL INFILE by default, can be enabled using php.ini directive
