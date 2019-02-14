@@ -2683,7 +2683,7 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 	return 1;
 }
 
-static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t flags, zend_bool init_undef OPLINE_DC)
+static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t flags, zend_bool init_undef OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *ptr;
 	zend_object *zobj;
@@ -2701,7 +2701,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				return;
 			}
 
-			container = make_real_object(container, prop_ptr OPLINE_CC);
+			container = make_real_object(container, prop_ptr OPLINE_CC EXECUTE_DATA_CC);
 			if (UNEXPECTED(!container)) {
 				ZVAL_ERROR(result);
 				return;
