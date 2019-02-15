@@ -3837,7 +3837,14 @@ static int accel_preload(const char *config)
 	if (ret == SUCCESS) {
 		zend_persistent_script *script;
 		zend_string *filename;
+		int ping_auto_globals_mask;
 		int i;
+
+		if (PG(auto_globals_jit)) {
+			ping_auto_globals_mask = zend_accel_get_auto_globals();
+		} else {
+			ping_auto_globals_mask = zend_accel_get_auto_globals_no_jit();
+		}
 
 		/* Release stored values to avoid dangling pointers */
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
@@ -3859,14 +3866,7 @@ static int accel_preload(const char *config)
 		}
 
 		script = create_persistent_script();
-
-		/* Fill in the ping_auto_globals_mask for the new script. If jit for auto globals is enabled we
-		   will have to ping the used auto global variables before execution */
-		if (PG(auto_globals_jit)) {
-			script->ping_auto_globals_mask = zend_accel_get_auto_globals();
-		} else {
-			script->ping_auto_globals_mask = zend_accel_get_auto_globals_no_jit();
-		}
+		script->ping_auto_globals_mask = ping_auto_globals_mask;
 
 		/* Store all functions and classes in a single pseudo-file */
 		filename = zend_string_init("$PRELOAD$", strlen("$PRELOAD$"), 0);
