@@ -1,7 +1,7 @@
 --TEST--
 statement cache
 --SKIPIF--
-<?php 
+<?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 ?>
@@ -24,7 +24,7 @@ var_dump(oci_fetch_array($stmt));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(2) {
   [0]=>
   string(1) "4"

@@ -9,7 +9,7 @@ class C {
 	public $c = "Original c";
 	protected $d = "Original d";
 	private $e = "Original e";
-	
+
 }
 
 echo "\n\nSimple loop.\n";
@@ -35,8 +35,6 @@ echo "\nCheck key and value after the loop.\n";
 var_dump($k, $v);
 ?>
 --EXPECT--
-
-
 Simple loop.
 string(10) "Original a"
 string(10) "Original b"

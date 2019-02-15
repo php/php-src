@@ -20,7 +20,7 @@ var_dump($a, $b);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: stream_socket_client(): unable to connect to  (Failed to parse address "") in %s on line %d
 bool(false)
 int(0)

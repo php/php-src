@@ -1,5 +1,5 @@
 --TEST--
-Test strrpos() function : error conditions 
+Test strrpos() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );

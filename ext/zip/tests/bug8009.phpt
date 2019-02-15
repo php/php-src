@@ -2,7 +2,6 @@
 Bug #8009 (cannot add again same entry to an archive)
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -22,6 +21,5 @@ $zip->close();
 unlink($filename);
 echo "status: " . $zip->status . "\n";
 echo "\n";
-
 --EXPECT--
 status: 0

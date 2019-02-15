@@ -8,7 +8,6 @@ rand("one", 100);
 rand(1, "hundered");
 ?>
 --EXPECTF--
-
 Warning: rand() expects exactly 2 parameters, 1 given in %s on line 2
 
 Warning: rand() expects exactly 2 parameters, 3 given in %s on line 3

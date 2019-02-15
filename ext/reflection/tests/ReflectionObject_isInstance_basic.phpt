@@ -16,7 +16,7 @@ foreach ($classes as $class) {
 	$ro = new ReflectionObject(new $class);
 	foreach ($instances as $name => $instance) {
 		echo "is $name a $class? ";
-		var_dump($ro->isInstance($instance));	
+		var_dump($ro->isInstance($instance));
 	}
 }
 

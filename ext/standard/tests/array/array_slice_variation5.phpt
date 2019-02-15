@@ -3,7 +3,7 @@ Test array_slice() function : usage variations - Pass different integers as $off
 --FILE--
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
+ * Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 
@@ -27,7 +27,6 @@ var_dump(array_slice($input, -PHP_INT_MAX));
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_slice() : usage variations ***
 

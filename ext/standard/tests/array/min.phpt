@@ -19,7 +19,7 @@ var_dump(min(0, true, false, true));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: min() expects at least 1 parameter, 0 given in %s on line 3
 NULL
 

@@ -7,7 +7,7 @@ Bug #66109 (Option CURLOPT_CUSTOMREQUEST can't be reset to default.)
 include 'server.inc';
 $host = curl_cli_server_start();
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "{$host}/get.php?test=method");
+curl_setopt($ch, CURLOPT_URL, "{$host}/get.inc?test=method");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');

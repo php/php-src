@@ -6,12 +6,12 @@ Test fgetc() function : usage variations - read when file pointer at EOF
  Prototype: string fgetc ( resource $handle );
  Description: Gets character from file pointer
 */
-// include the header for common test function 
+// include the header for common test function
 include ("file.inc");
 
 echo "*** Testing fgetc() : usage variations ***\n";
 echo "-- Testing fgetc() with file whose file pointer is pointing to EOF --\n";
-// create a file 
+// create a file
 create_files(dirname(__FILE__), 1, "text_with_new_line", 0755, 1, "w", "fgetc_variation");
 
 $filename = dirname(__FILE__)."/fgetc_variation1.tmp";
@@ -20,9 +20,9 @@ $filename = dirname(__FILE__)."/fgetc_variation1.tmp";
 $file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t");
 $loop_counter =0;
 for(; $loop_counter < count($file_modes); $loop_counter++) {
-  // print the hearder 
+  // print the hearder
   echo "-- File opened in mode : $file_modes[$loop_counter] --\n";
-  // open the file 
+  // open the file
   $file_handle = fopen ($filename, $file_modes[$loop_counter]);
   if (!$file_handle) {
     echo "Error: failed to open file $filename! \n";
@@ -33,11 +33,11 @@ for(; $loop_counter < count($file_modes); $loop_counter++) {
   var_dump( fseek($file_handle, 0, SEEK_END) ); // set file pointer to eof
   var_dump( feof($file_handle) );  // expected false
   var_dump( ftell($file_handle) );  // ensure that file pointer is at eof
-  var_dump( fgetc($file_handle) ); // try n read a char, none expected 
+  var_dump( fgetc($file_handle) ); // try n read a char, none expected
   var_dump( feof($file_handle) ); // ensure that file pointer is at eof
   var_dump( ftell($file_handle) ); // file pointer position
 
-  // close the file handle 
+  // close the file handle
   fclose($file_handle);
 }
 echo "Done\n";

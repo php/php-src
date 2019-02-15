@@ -17,7 +17,6 @@ include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.pha
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
-
 Warning: file_put_contents(phar://%screate_new_phar_b.phar.tar/a.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %screate_new_phar_b.php on line %d
 
 Warning: include(phar://%screate_new_phar_b.phar.tar/a.php): failed to open stream: %s in %screate_new_phar_b.php on line %d

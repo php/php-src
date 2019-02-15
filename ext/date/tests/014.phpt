@@ -17,7 +17,7 @@ var_dump(timezone_offset_get($dto, $dtz));
 echo "Done\n";
 
 ?>
---EXPECTF-- 
+--EXPECTF--
 object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2006-12-12 00:00:00.000000"

@@ -19,7 +19,7 @@ internal_encoding=cp932
 #vim: set encoding=cp932
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc"; 
+include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 
 $item = "テストマルチバイト・パス77"; // cp932 string
@@ -35,7 +35,7 @@ remove_data("file_cp932");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s\テストマルチバイト・パス77"
 bool(true)
 bool(true)

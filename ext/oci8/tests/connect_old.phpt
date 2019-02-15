@@ -13,7 +13,7 @@ if (!empty($dbase)) {
 else {
 	var_dump(ocilogon($user, $password));
 }
-	
+
 echo "Done\n";
 
 ?>

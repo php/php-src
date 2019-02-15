@@ -17,7 +17,7 @@ var_dump(gmp_strval(gmp_init("993247326237679187178",3)));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 object(GMP)#%d (1) {
   ["num"]=>
   string(8) "98765678"

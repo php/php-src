@@ -16,9 +16,7 @@ var_dump($c->getMinimalDaysInFirstWeek(1));
 
 var_dump(intlcal_get_minimal_days_in_first_week($c, 1));
 var_dump(intlcal_get_minimal_days_in_first_week(1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::getMinimalDaysInFirstWeek() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlCalendar::getMinimalDaysInFirstWeek(): intlcal_get_minimal_days_in_first_week: bad arguments in %s on line %d

@@ -12,7 +12,7 @@ var_dump(strncmp("qwerty", "qwerty123", 7));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: strncmp() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 int(0)

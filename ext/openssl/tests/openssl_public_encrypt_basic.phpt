@@ -10,9 +10,9 @@ $pubkey = "file://" . dirname(__FILE__) . "/public.key";
 $wrong = "wrong";
 
 class test {
-	function __toString() {
-		return "test";
-	}
+    function __toString() {
+        return "test";
+    }
 }
 $obj = new test;
 
@@ -37,4 +37,3 @@ Warning: openssl_public_encrypt(): key parameter is not a valid public key in %s
 bool(false)
 bool(true)
 string(4) "test"
-

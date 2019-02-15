@@ -1,7 +1,7 @@
 --TEST--
 FIREBIRD
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo_firebird')) print 'skip'; ?>
 --REDIRECTTEST--
 # magic auto-configuration
@@ -9,7 +9,7 @@ if (!extension_loaded('pdo_firebird')) print 'skip'; ?>
 $config = array(
 	'TESTS' => 'ext/pdo/tests'
 );
-	
+
 
 if (false !== getenv('PDO_FIREBIRD_TEST_DSN')) {
 	# user set them from their shell

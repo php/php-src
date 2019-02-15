@@ -34,4 +34,3 @@ NULL
 bool(false)
 string(%d) "%stest_path%sfile"
 string(%d) "%stest_path%snested%sfile"
-

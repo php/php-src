@@ -16,4 +16,3 @@ var_dump($f->file(dirname(__FILE__) . "/bug67516.gif", FILEINFO_MIME));
 string(9) "image/gif"
 string(25) "image/gif; charset=binary"
 ===DONE===
-

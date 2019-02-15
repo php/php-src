@@ -18,7 +18,6 @@ var_dump($c->setTime("jjj"));
 var_dump(intlcal_set_time($c, 1, 2));
 var_dump(intlcal_set_time(1));
 --EXPECTF--
-
 Warning: IntlCalendar::setTime() expects exactly 1 parameter, 2 given in %s on line %d
 
 Warning: IntlCalendar::setTime(): intlcal_set_time: bad arguments in %s on line %d

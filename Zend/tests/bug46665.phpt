@@ -12,5 +12,5 @@ $baz = '\\Foo\\Bar\\Baz';
 new $baz();
 
 ?>
---EXPECTF--
+--EXPECT--
 string(11) "Foo\Bar\Baz"

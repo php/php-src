@@ -8,7 +8,7 @@ function_exists('mb_substr') or die("skip mb_substr() is not available in this b
 --FILE--
 <?php
 /* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
- * Description: Returns part of a string 
+ * Description: Returns part of a string
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -45,7 +45,7 @@ for ($i = -60; $i <= 60; $i += 10) {
 	} else {
 		echo "Difference in length of ASCII string and multibyte string\n";
 	}
-	
+
 }
 
 echo "Done";

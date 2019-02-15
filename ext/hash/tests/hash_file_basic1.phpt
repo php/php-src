@@ -1,14 +1,12 @@
 --TEST--
-Test hash_file() function : basic functionality 
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_file() function : basic functionality
 --FILE--
 <?php
 
 /* Prototype  : string hash_file ( string algo, string filename [, bool raw_output] )
  * Description: Generate a hash value using the contents of a given file
  * Source code: ext/hash/hash.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 echo "*** Testing hash_file() : basic functionality ***\n";
@@ -18,9 +16,9 @@ $file = dirname(__FILE__) . "hash_file.txt";
 if (($fp = fopen( $file, "w+")) == FALSE) {
 	echo "Cannot create file ($file)";
     exit;
-}	
+}
 
-/* Writing into file */ 
+/* Writing into file */
 $content = "This is a sample string used to test the hash_file function with various hashing algorithms";
 if (is_writable($file)) {
   if (fwrite($fp, $content) === FALSE) {
@@ -29,7 +27,7 @@ if (is_writable($file)) {
   }
 }
 
-// close the file 
+// close the file
 fclose($fp);
 
 echo "adler32: " . hash_file('adler32', $file) . "\n";

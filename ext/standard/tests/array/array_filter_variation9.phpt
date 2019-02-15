@@ -1,9 +1,9 @@
 --TEST--
-Test array_filter() function : usage variations - built-in functions as 'callback' argument 
+Test array_filter() function : usage variations - built-in functions as 'callback' argument
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -24,7 +24,7 @@ var_dump( array_filter($input, 'chr') );
 // using language construct 'echo' as 'callback'
 var_dump( array_filter($input, 'echo') );
 
-// using language construct 'exit' as 'callback' 
+// using language construct 'exit' as 'callback'
 var_dump( array_filter($input, 'exit') );
 
 echo "Done"

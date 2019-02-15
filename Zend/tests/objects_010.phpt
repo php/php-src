@@ -12,5 +12,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Done

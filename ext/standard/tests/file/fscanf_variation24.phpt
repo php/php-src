@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - char formats with strings
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different char format types with strings ***\n"; 
+echo "*** Test fscanf(): different char format types with strings ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation24.tmp";
@@ -43,9 +43,9 @@ $strings = array (
 );
 
 $char_formats = array( "%c",
-		       "%hc", "%lc", "%Lc", 
+		       "%hc", "%lc", "%Lc",
 		       " %c", "%c ", "% c",
-		       "\t%c", "\n%c", "%4c", 
+		       "\t%c", "\n%c", "%4c",
 		       "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
 
 $counter = 1;
@@ -991,4 +991,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

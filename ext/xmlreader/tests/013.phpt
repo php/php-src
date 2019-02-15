@@ -4,8 +4,7 @@ XMLReader: Schema validation
 <?php if (!extension_loaded('xmlreader')) die('skip');?>
 <?php if (!method_exists('XMLReader','setSchema')) die('skip XMLReader::setSchema() not supported');?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
 $xml =<<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>

@@ -1,7 +1,7 @@
 --TEST--
 Testing heredoc (double quotes) with escape sequences
 --FILE--
-<?php 
+<?php
 
 $test = <<<"TEST"
 TEST;

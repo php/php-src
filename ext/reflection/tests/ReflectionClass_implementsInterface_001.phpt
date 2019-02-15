@@ -12,7 +12,7 @@ class B extends A {}
 interface I2 extends I1 {}
 class C implements I2 {}
 
-$classNames = array('A', 'B', 'C', 'I1', 'I2'); 
+$classNames = array('A', 'B', 'C', 'I1', 'I2');
 
 foreach ($classNames as $className) {
 	$rcs[$className] = new ReflectionClass($className);
@@ -26,7 +26,7 @@ foreach ($rcs as $childName => $child) {
 			var_dump($child->implementsInterface($parent));
 		} catch (Exception $e) {
 			echo $e->getMessage() . "\n";
-		}		
+		}
 		echo "   - Using string argument: ";
 		try {
 			var_dump($child->implementsInterface($parentName));

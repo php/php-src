@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_ENABLE("json", "JavaScript Object Serialization support", "yes");
@@ -21,4 +20,3 @@ if (PHP_JSON != "no") {
 
 	PHP_INSTALL_HEADERS("ext/json/", "php_json.h php_json_parser.h php_json_scanner.h");
 }
-

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,12 +16,10 @@
    |          Nuno Lopes <nlopess@php.net>                                |
    |          Scott MacVicar <scottmac@php.net>                           |
    | Flex version authors:                                                |
-   |          Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #if 0
 # define YYDEBUG(s, c) printf("state: %d char: %c\n", s, c)
@@ -77,9 +75,7 @@
 # error ZEND_MMAP_AHEAD should be greater than or equal to YYMAXFILL
 #endif
 
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
+#include <stdarg.h>
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -560,7 +556,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	}
 
 	zend_set_compiled_filename(compiled_filename);
-	zend_string_release(compiled_filename);
+	zend_string_release_ex(compiled_filename, 0);
 
 	if (CG(start_lineno)) {
 		CG(zend_lineno) = CG(start_lineno);
@@ -593,6 +589,9 @@ static zend_op_array *zend_compile(int type)
 		op_array = emalloc(sizeof(zend_op_array));
 		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
 		CG(active_op_array) = op_array;
+
+		/* Use heap to not waste arena memory */
+		op_array->fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 
 		if (zend_ast_process) {
 			zend_ast_process(CG(ast));
@@ -668,7 +667,7 @@ zend_op_array *compile_filename(int type, zval *filename)
 		zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path);
 
 		if (opened_path) {
-			zend_string_release(opened_path);
+			zend_string_release_ex(opened_path, 0);
 		}
 	}
 	zend_destroy_file_handle(&file_handle);
@@ -718,7 +717,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename)
 
 	new_compiled_filename = zend_string_init(filename, strlen(filename), 0);
 	zend_set_compiled_filename(new_compiled_filename);
-	zend_string_release(new_compiled_filename);
+	zend_string_release_ex(new_compiled_filename, 0);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	RESET_DOC_COMMENT();
@@ -1109,69 +1108,90 @@ skip_escape_conversion:
 #define HEREDOC_USING_SPACES 1
 #define HEREDOC_USING_TABS 2
 
-static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline, int indentation, zend_bool using_spaces)
+static const char *next_newline(const char *str, const char *end, size_t *newline_len) {
+	for (; str < end; str++) {
+		if (*str == '\r') {
+			*newline_len = str + 1 < end && *(str + 1) == '\n' ? 2 : 1;
+		} else if (*str == '\n') {
+			*newline_len = 1;
+			return str;
+		}
+	}
+	*newline_len = 0;
+	return NULL;
+}
+
+static zend_bool strip_multiline_string_indentation(
+	zval *zendlval, int indentation, zend_bool using_spaces,
+	zend_bool newline_at_start, zend_bool newline_at_end)
 {
-	int len = Z_STRLEN_P(zendlval), new_len = len, i = 0, j = 0, skip, newline_count = 0;
+	const char *str = Z_STRVAL_P(zendlval), *end = str + Z_STRLEN_P(zendlval);
 	char *copy = Z_STRVAL_P(zendlval);
-	zend_bool trailing_newline = 0;
 
-	while (j < len) {
-		trailing_newline = 0;
+	int newline_count = 0;
+	size_t newline_len;
+	const char *nl;
 
-		for (skip = 0; skip < indentation; ++skip, ++j, --new_len) {
-			if (copy[j] == '\r' || copy[j] == '\n') {
-				goto skip;
+	if (!newline_at_start) {
+		nl = next_newline(str, end, &newline_len);
+		if (!nl) {
+			return 1;
+		}
+
+		str = nl + newline_len;
+		copy = (char *) nl + newline_len;
+		newline_count++;
+	} else {
+		nl = str;
+	}
+
+	/* <= intentional */
+	while (str <= end && nl) {
+		size_t skip;
+		nl = next_newline(str, end, &newline_len);
+		if (!nl && newline_at_end) {
+			nl = end;
+		}
+
+		/* Try to skip indentation */
+		for (skip = 0; skip < indentation; skip++, str++) {
+			if (str == nl) {
+				/* Don't require full indentation on whitespace-only lines */
+				break;
 			}
 
-			if (copy[j] != ' ' && copy[j] != '\t') {
+			if (str == end || (*str != ' ' && *str != '\t')) {
 				CG(zend_lineno) += newline_count;
-				zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
+				zend_throw_exception_ex(zend_ce_parse_error, 0,
+					"Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
 				goto error;
 			}
 
-			if ((!using_spaces && copy[j] == ' ') || (using_spaces && copy[j] == '\t')) {
+			if ((!using_spaces && *str == ' ') || (using_spaces && *str == '\t')) {
 				CG(zend_lineno) += newline_count;
-				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+				zend_throw_exception(zend_ce_parse_error,
+					"Invalid indentation - tabs and spaces cannot be mixed", 0);
 				goto error;
 			}
 		}
 
-		while (j < len && copy[j] != '\r' && copy[j] != '\n') {
-			copy[i++] = copy[j++];
-		}
-
-		if (j == len) {
+		if (str == end) {
 			break;
 		}
-skip:
-		if (copy[j] == '\r') {
-			copy[i++] = copy[j++];
-			trailing_newline = 1;
-		}
 
-		if (copy[j] == '\n') {
-			copy[i++] = copy[j++];
-			trailing_newline = 1;
-		}
-
-		if (trailing_newline) {
-			++newline_count;
-		}
+		size_t len = nl ? (nl - str + newline_len) : (end - str);
+		memmove(copy, str, len);
+		str += len;
+		copy += len;
+		newline_count++;
 	}
 
-	if (YYSTATE != STATE(ST_END_HEREDOC) && trailing_newline && indentation) {
-		CG(zend_lineno) += newline_count;
-		zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
-		goto error;
-	}
-
-	Z_STRVAL_P(zendlval)[new_len - newline] = '\0';
-	Z_STRLEN_P(zendlval) = new_len - newline;
-
+	*copy = '\0';
+	Z_STRLEN_P(zendlval) = copy - Z_STRVAL_P(zendlval);
 	return 1;
 
 error:
-	zval_dtor(zendlval);
+	zval_ptr_dtor_str(zendlval);
 	ZVAL_UNDEF(zendlval);
 
 	return 0;
@@ -1661,6 +1681,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_XOR_EQUAL);
 }
 
+<ST_IN_SCRIPTING>"??=" {
+	RETURN_TOKEN(T_COALESCE_EQUAL);
+}
+
 <ST_IN_SCRIPTING>"||" {
 	RETURN_TOKEN(T_BOOLEAN_OR);
 }
@@ -1916,7 +1940,7 @@ string:
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
-	if (EXPECTED(elem != NULL)) {
+	if (PARSER_MODE()) {
 		SKIP_TOKEN(T_OPEN_TAG);
 	}
 	RETURN_TOKEN(T_OPEN_TAG);
@@ -1926,7 +1950,7 @@ string:
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
 		BEGIN(ST_IN_SCRIPTING);
-		if (EXPECTED(elem != NULL)) {
+		if (PARSER_MODE()) {
 			SKIP_TOKEN(T_OPEN_TAG);
 		}
 		RETURN_TOKEN(T_OPEN_TAG);
@@ -2053,7 +2077,7 @@ inline_char_handler:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (EXPECTED(elem != NULL)) {
+	if (PARSER_MODE()) {
 		SKIP_TOKEN(T_COMMENT);
 	}
 	RETURN_TOKEN(T_COMMENT);
@@ -2086,13 +2110,13 @@ inline_char_handler:
 
 	if (doc_com) {
 		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
-		if (EXPECTED(elem != NULL)) {
+		if (PARSER_MODE()) {
 			SKIP_TOKEN(T_DOC_COMMENT);
 		}
 		RETURN_TOKEN(T_DOC_COMMENT);
 	}
 
-	if (EXPECTED(elem != NULL)) {
+	if (PARSER_MODE()) {
 		SKIP_TOKEN(T_COMMENT);
 	}
 	RETURN_TOKEN(T_COMMENT);
@@ -2328,13 +2352,14 @@ skip_escape_conversion:
 
 		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
 
+		zend_exception_save();
 		while (heredoc_nesting_level) {
 			zval zv;
 			int retval;
 
 			ZVAL_UNDEF(&zv);
 			retval = lex_scan(&zv, NULL);
-			zval_dtor(&zv);
+			zval_ptr_dtor_nogc(&zv);
 
 			if (EG(exception)) {
 				zend_clear_exception();
@@ -2356,6 +2381,7 @@ skip_escape_conversion:
 					heredoc_nesting_level = 0;
 			}
 		}
+		zend_exception_restore();
 
 		if (
 		    (first_token == T_VARIABLE
@@ -2610,21 +2636,24 @@ double_quotes_scan_done:
 heredoc_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	ZVAL_STRINGL(zendlval, yytext, yyleng - newline);
 
 	if (!SCNG(heredoc_scan_ahead) && !EG(exception) && PARSER_MODE()) {
+		zend_bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
 		zend_string *copy = Z_STR_P(zendlval);
 
-	    if (!strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
+		if (!strip_multiline_string_indentation(
+				zendlval, heredoc_label->indentation, heredoc_label->indentation_uses_spaces,
+				newline_at_start, newline != 0)) {
 			RETURN_TOKEN(T_ERROR);
 		}
 
 		if (UNEXPECTED(zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0) != SUCCESS)) {
-			zend_string_free(copy);
+			zend_string_efree(copy);
 			RETURN_TOKEN(T_ERROR);
 		}
 
-		zend_string_free(copy);
+		zend_string_efree(copy);
 	} else {
 		HANDLE_NEWLINES(yytext, yyleng - newline);
 	}
@@ -2705,11 +2734,15 @@ heredoc_scan_done:
 
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	ZVAL_STRINGL(zendlval, yytext, yyleng - newline);
 
-	if (!EG(exception) && spacing != -1 && PARSER_MODE()
-	    && !strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES)) {
-		RETURN_TOKEN(T_ERROR);
+	if (!EG(exception) && spacing != -1 && PARSER_MODE()) {
+		zend_bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
+		if (!strip_multiline_string_indentation(
+				zendlval, indentation, spacing == HEREDOC_USING_SPACES,
+				newline_at_start, newline != 0)) {
+			RETURN_TOKEN(T_ERROR);
+		}
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng - newline);

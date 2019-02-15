@@ -18,7 +18,7 @@ function_exists('mb_strtolower') or die("skip mb_strtolower() is not available i
 
 echo "*** Testing mb_strtolower() :  usage variations ***\n";
 
-$uppers = array('Basic Latin' => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+$uppers = array('Basic Latin' => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
                 'Characters With Accents' => base64_decode('w4DDgcOCw4PDhMOFw4bDh8OIw4nDisOLw4zDjcOOw4/DkMORw5LDk8OUw5XDlg=='),
                 'Russian' => base64_decode('0JDQkdCS0JPQlNCV0JbQlw=='));
 $lowers = array('Basic Latin' => 'abcdefghijklmnopqrstuvwxyz',
@@ -38,7 +38,6 @@ foreach ($uppers as $lang => $sourcestring) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing mb_strtolower() :  usage variations ***
 

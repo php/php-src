@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp2_set (without MIBs loading)
 --CREDITS--
 Boris Lytockin
@@ -7,9 +7,7 @@ Boris Lytockin
 require_once(dirname(__FILE__).'/skipif.inc');
 ?>
 --ENV--
-return <<<END
 MIBS=
-END;
 --FILE--
 <?php
 require_once(dirname(__FILE__).'/snmp_include.inc');

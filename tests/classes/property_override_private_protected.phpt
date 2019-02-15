@@ -10,7 +10,7 @@ Redeclare inherited private property as protected.
           echo $this->p . "\n";
       }
   }
-  
+
   class B extends A
   {
       protected $p = "B::p";
@@ -19,11 +19,11 @@ Redeclare inherited private property as protected.
           echo $this->p . "\n";
       }
   }
-  
-  
+
+
   $a = new A;
   $a->showA();
-  
+
   $b = new B;
   $b->showA();
   $b->showB();

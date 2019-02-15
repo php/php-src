@@ -1,14 +1,14 @@
 --TEST--
 Bug #14383 (8.0+) (using postgres with DBA causes DBA not to be able to find any keys)
 --SKIPIF--
-<?php 
+<?php
 require_once(dirname(__FILE__).'/../../dba/tests/skipif.inc');
 require_once('skipif.inc');
 ?>
 --FILE--
 <?php
 require_once('config.inc');
-	
+
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
 	die ("Could not connect to the server");

@@ -12,7 +12,6 @@ var_dump(in_array('ISO-8859-1', $avail));
 
 $latin1 = UConverter::getAliases('latin1');
 var_dump(in_array('ISO-8859-1', $latin1));
-
 --EXPECT--
 bool(true)
 bool(true)

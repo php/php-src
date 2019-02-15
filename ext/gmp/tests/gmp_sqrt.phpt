@@ -24,7 +24,7 @@ var_dump(gmp_sqrt(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_sqrt(): Number has to be greater than or equal to 0 in %s on line %d
 string(1) "0"
 

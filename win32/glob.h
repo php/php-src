@@ -1,4 +1,3 @@
-/*      $Id$ */
 /*	OpenBSD: glob.h,v 1.7 2002/02/17 19:42:21 millert Exp 	*/
 /*	NetBSD: glob.h,v 1.5 1994/10/26 00:55:56 cgd Exp 	*/
 
@@ -101,12 +100,3 @@ PHPAPI int	glob(const char *, int, int (*)(const char *, int), glob_t *);
 PHPAPI void	globfree(glob_t *);
 END_EXTERN_C()
 #endif /* !_GLOB_H_ */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

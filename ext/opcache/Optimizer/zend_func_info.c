@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Func Info                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id:$ */
 
 #include "php.h"
 #include "zend_compile.h"
@@ -65,7 +63,6 @@ typedef struct _func_info_t {
 
 static uint32_t zend_strlen_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 1) {
 		uint32_t tmp = 0;
 		if (call_info->arg_info[0].opline) {
@@ -82,26 +79,28 @@ static uint32_t zend_strlen_info(const zend_call_info *call_info, const zend_ssa
 			tmp |= MAY_BE_LONG | FUNC_MAY_WARN | MAY_BE_NULL;
 		}
 		return tmp;
-	} else {
+	} else if (call_info->num_args != -1) {
 		/* warning, and returns NULL */
 		return FUNC_MAY_WARN | MAY_BE_NULL;
+	} else {
+		return MAY_BE_LONG | FUNC_MAY_WARN | MAY_BE_NULL;
 	}
 }
 
 static uint32_t zend_dechex_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 1) {
 		return MAY_BE_RC1 | MAY_BE_STRING;
-	} else {
+	} else if (call_info->num_args != -1) {
 		/* warning, and returns NULL */
 		return FUNC_MAY_WARN | MAY_BE_NULL;
+	} else {
+		return FUNC_MAY_WARN | MAY_BE_RC1 | MAY_BE_STRING | MAY_BE_NULL;
 	}
 }
 
 static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 2 || call_info->num_args == 3) {
 
 		uint32_t t1 = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
@@ -134,7 +133,6 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 
 static uint32_t zend_is_type_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 1) {
 		return MAY_BE_FALSE | MAY_BE_TRUE;
 	} else {
@@ -144,7 +142,6 @@ static uint32_t zend_is_type_info(const zend_call_info *call_info, const zend_ss
 
 static uint32_t zend_l_ss_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 2) {
 
 		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
@@ -169,7 +166,6 @@ static uint32_t zend_l_ss_info(const zend_call_info *call_info, const zend_ssa *
 
 static uint32_t zend_lb_ssn_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 3) {
 		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
 		uint32_t arg2_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[1].opline);
@@ -196,7 +192,6 @@ static uint32_t zend_lb_ssn_info(const zend_call_info *call_info, const zend_ssa
 
 static uint32_t zend_b_s_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 1) {
 
 		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
@@ -233,7 +228,6 @@ static const func_info_t func_infos[] = {
 	FC("strncmp",                 zend_lb_ssn_info),
 	FC("strcasecmp",              zend_l_ss_info),
 	FC("strncasecmp",             zend_lb_ssn_info),
-	F1("each",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_KEY_ANY),
 	F0("error_reporting",         MAY_BE_NULL | MAY_BE_LONG),
 	F0("define",                  MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_NULL), // TODO: inline
 	FC("defined",                 zend_b_s_info), // TODO: inline
@@ -263,7 +257,6 @@ static const func_info_t func_infos[] = {
 	I1("get_declared_interfaces", MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("get_defined_functions",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	I1("get_defined_vars",        MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
-	FN("create_function",         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 	F1("get_resource_type",       MAY_BE_NULL | MAY_BE_STRING),
 	F1("get_defined_constants",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_RESOURCE | MAY_BE_ARRAY_OF_ARRAY),
 	F0("debug_print_backtrace",   MAY_BE_NULL),
@@ -347,7 +340,7 @@ static const func_info_t func_infos[] = {
 #endif
 	FN("substr",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	FN("substr_replace",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
-	F1("quotemeta",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("quotemeta",                    MAY_BE_NULL | MAY_BE_STRING),
 	FN("ucfirst",                      MAY_BE_NULL | MAY_BE_STRING),
 	FN("lcfirst",                      MAY_BE_NULL | MAY_BE_STRING),
 	F1("ucwords",                      MAY_BE_NULL | MAY_BE_STRING),
@@ -611,6 +604,7 @@ static const func_info_t func_infos[] = {
 	F0("is_scalar",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_callable",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_countable",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_iterable",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("pclose",                       MAY_BE_FALSE | MAY_BE_LONG),
 	F1("popen",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("readfile",                     MAY_BE_FALSE | MAY_BE_LONG),
@@ -621,7 +615,6 @@ static const func_info_t func_infos[] = {
 	F0("feof",                         MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("fgetc",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fgets",                        MAY_BE_FALSE | MAY_BE_STRING),
-	F1("fgetss",                       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fread",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fopen",                        MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("fpassthru",                    MAY_BE_FALSE | MAY_BE_LONG),
@@ -1269,7 +1262,6 @@ static const func_info_t func_infos[] = {
 	F0("gzeof",                                 MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("gzgetc",                                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzgets",                                MAY_BE_FALSE | MAY_BE_STRING),
-	F1("gzgetss",                               MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzread",                                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzopen",                                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("gzpassthru",                            MAY_BE_FALSE | MAY_BE_LONG),
@@ -1762,7 +1754,7 @@ int zend_func_info_startup(void)
 			if (zend_hash_add_ptr(&func_info, key, (void**)&func_infos[i]) == NULL) {
 				fprintf(stderr, "ERROR: Duplicate function info for \"%s\"\n", func_infos[i].name);
 			}
-			zend_string_release(key);
+			zend_string_release_ex(key, 1);
 		}
 	}
 
@@ -1777,11 +1769,3 @@ int zend_func_info_shutdown(void)
 	}
 	return SUCCESS;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

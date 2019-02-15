@@ -10,7 +10,7 @@ Redeclare inherited protected static property as protected static.
           echo self::$p . "\n";
       }
   }
-  
+
   class B extends A
   {
       protected static $p = "B::p (static)";
@@ -19,10 +19,10 @@ Redeclare inherited protected static property as protected static.
           echo self::$p . "\n";
       }
   }
-  
-  
+
+
   A::showA();
-  
+
   B::showA();
   B::showB();
 ?>

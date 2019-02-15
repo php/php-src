@@ -30,7 +30,7 @@ $b = new SubclassB;
 var_dump($b);
 
 ?>
---EXPECTF--	
+--EXPECTF--
 object(SubclassA)#%d (2) {
   ["hello":"SubclassA":private]=>
   int(0)

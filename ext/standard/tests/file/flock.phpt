@@ -40,7 +40,7 @@ echo "Done\n";
 $file = dirname(__FILE__)."/flock.dat";
 unlink($file);
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: flock() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 

@@ -1,7 +1,7 @@
 --TEST--
 fgetcsv() with tab delimited fields (BUG #8258)
 --FILE--
-<?php 
+<?php
 chdir(dirname(__FILE__));
 $fp=fopen("004.data","r");
 while($a=fgetcsv($fp,100,"\t")) {

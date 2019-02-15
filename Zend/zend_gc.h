@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,16 +13,22 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: David Wang <planetbeing@gmail.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_GC_H
 #define ZEND_GC_H
 
 BEGIN_EXTERN_C()
+
+typedef struct _zend_gc_status {
+	uint32_t runs;
+	uint32_t collected;
+	uint32_t threshold;
+	uint32_t num_roots;
+} zend_gc_status;
+
 ZEND_API extern int (*gc_collect_cycles)(void);
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref);
@@ -38,6 +44,8 @@ ZEND_API zend_bool gc_protected(void);
 
 /* The default implementation of the gc_collect_cycles callback. */
 ZEND_API int  zend_gc_collect_cycles(void);
+
+ZEND_API void zend_gc_get_status(zend_gc_status *status);
 
 void gc_globals_ctor(void);
 void gc_globals_dtor(void);
@@ -73,13 +81,3 @@ static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 }
 
 #endif /* ZEND_GC_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

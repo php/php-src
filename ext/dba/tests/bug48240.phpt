@@ -1,7 +1,7 @@
 --TEST--
 Bug #48240 (DBA Segmentation fault dba_nextkey)
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'db4';
 	require_once(dirname(__FILE__) .'/skipif.inc');
 ?>
@@ -20,8 +20,8 @@ dba_close($db);
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECT--
 bool(false)

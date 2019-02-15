@@ -15,4 +15,3 @@ echo "hi\n";
 ?>
 --EXPECT--
 hi
-

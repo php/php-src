@@ -11,7 +11,7 @@ $p->delMetaData();
 ?>
 DONE
 --CLEAN--
-<?php 
+<?php
 unlink(__DIR__."/bug71391.test.tar");
 ?>
 --EXPECT--

@@ -18,7 +18,6 @@ $three = new class extends Two {
 };
 $three->a();
 --EXPECTF--
-
 Fatal error: Uncaught TypeError: Return value of class@anonymous::a() must be an object, int returned in %s:13
 Stack trace:
 #0 %s(16): class@anonymous->a()

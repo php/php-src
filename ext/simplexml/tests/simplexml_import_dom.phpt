@@ -4,7 +4,7 @@ SimpleXML [interop]: simplexml_import_dom
 <?php if (!extension_loaded("simplexml")) die("skip"); ?>
 <?php if (!extension_loaded("dom")) die("skip dom extension not loaded"); ?>
 --FILE--
-<?php 
+<?php
 $dom = new domDocument;
 $dom->load(dirname(__FILE__)."/book.xml");
 if(!$dom) {

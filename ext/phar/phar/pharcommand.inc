@@ -402,7 +402,7 @@ class PharCommand extends CLICommand
 		$hash_avail = Phar::getSupportedSignatures();
 		if ($arg && !in_array('OpenSSL', $hash_avail))
 		{
-			self::error("Cannot specifiy private key without OpenSSL support.\n");
+			self::error("Cannot specify private key without OpenSSL support.\n");
 		}
 		return $arg;
 	}
@@ -648,7 +648,7 @@ class PharCommand extends CLICommand
 					self::phar_add_file($phar, $level, $dir->getSubPathName(), $file, $compress, $noloader);
 				}
 			}
-		} catch(Excpetion $e) {
+		} catch(Exception $e) {
 			self::error("Unable to complete operation on file '$file'\n" . $e->getMessage() . "\n");
 		}
 	}
@@ -896,7 +896,7 @@ class PharCommand extends CLICommand
 	 *
 	 * @param string $pn
 	 * @param string $f     The file name
-	 * @param array $args   The directory and Blen informations
+	 * @param array $args   The directory and Blen information
 	 */
 	public function phar_dir_extract($pn, $f, $args)
 	{
@@ -936,7 +936,7 @@ class PharCommand extends CLICommand
 	/**
 	 * The cli command argument for deleting.
 	 *
-	 * @return array informations about the arguments to use.
+	 * @return array information about the arguments to use.
 	 */
 	static function cli_cmd_arg_delete()
 	{
@@ -1103,7 +1103,7 @@ class PharCommand extends CLICommand
 	/**
 	 * Cli Command Inf Compress
 	 *
-	 * Cli Command compress informations
+	 * Cli Command compress information
 	 *
 	 * @return string A description of the command.
 	 */

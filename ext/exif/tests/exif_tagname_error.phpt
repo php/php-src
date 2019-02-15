@@ -1,5 +1,5 @@
 --TEST--
-Test exif_tagname() function : error conditions 
+Test exif_tagname() function : error conditions
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --FILE--
@@ -34,4 +34,3 @@ NULL
 Warning: exif_tagname() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 ===Done===
-

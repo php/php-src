@@ -4,11 +4,11 @@ Bug #33414 [2] (Comprehensive list of incorrect days returned after strotime() /
 <?php
 print "TZ=Pacific/Rarotonga - wrong day.\n";
 date_default_timezone_set("Pacific/Rarotonga");
-$tStamp = mktime (17, 17, 17, 1, 1, 1970);       
+$tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Tuesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Tuesday            00:00:00\n\n"; 
+print "wanted=Tuesday            00:00:00\n\n";
 
 print "TZ=Atlantic/South_Georgia - wrong day.\n";
 date_default_timezone_set("Atlantic/South_Georgia");
@@ -38,17 +38,17 @@ print "TZ=Pacific/Kiritimati - wrong day, off by 2 days.\n";
 date_default_timezone_set("Pacific/Kiritimati");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("next Monday", $tStamp);                 
+$strtotime_tstamp = strtotime("next Monday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Monday            00:00:00\n\n";
 
-print "TZ=America/Managua - wrong day.\n";     
+print "TZ=America/Managua - wrong day.\n";
 date_default_timezone_set("America/Managua");
 $tStamp = mktime (17, 17, 17, 1, 12879, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Tuesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Tuesday            00:00:00\n\n";     
+print "wanted=Tuesday            00:00:00\n\n";
 
 print "TZ=Pacific/Pitcairn - wrong day.\n";
 date_default_timezone_set("Pacific/Pitcairn");

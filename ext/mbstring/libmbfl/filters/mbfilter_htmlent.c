@@ -31,14 +31,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_htmlent.h"
 #include "html_entities.h"

@@ -1,11 +1,10 @@
 --TEST--
-Test popen() and pclose function: basic functionality 
+Test popen() and pclose function: basic functionality
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN' )
   die("skip Not Valid for Windows");
 ?>
-
 --FILE--
 <?php
 /*
@@ -71,7 +70,6 @@ unlink($dirpath."/popen_basic.tmp");
 unlink($dirpath."/popen_basic1.tmp");
 rmdir($dirpath);
 ?>
-
 --EXPECT--
 *** Testing popen() and pclose() with different processes ***
 -- Testing popen(): reading from the pipe --

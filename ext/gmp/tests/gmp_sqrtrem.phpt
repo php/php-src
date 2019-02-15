@@ -55,7 +55,7 @@ var_dump(gmp_sqrtrem());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_sqrtrem(): Number has to be greater than or equal to 0 in %s on line %d
 bool(false)
 string(1) "0"

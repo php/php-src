@@ -23,7 +23,7 @@ foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
 $db->query('DROP TABLE foobar');
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["testing(name)"]=>
   string(3) "php"

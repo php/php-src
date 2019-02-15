@@ -35,7 +35,10 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 
 	rt = timelib_rel_time_ctor();
 	rt->invert = 0;
-	if (one->sse > two->sse) {
+	if (
+		(one->sse > two->sse) ||
+		(one->sse == two->sse && one->us > two->us)
+	) {
 		swp = two;
 		two = one;
 		one = swp;

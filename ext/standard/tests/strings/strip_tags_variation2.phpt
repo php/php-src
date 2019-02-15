@@ -5,7 +5,7 @@ short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
- * Description: Strips HTML and PHP tags from a string 
+ * Description: Strips HTML and PHP tags from a string
  * Source code: ext/standard/string.c
 */
 
@@ -47,13 +47,6 @@ $values = array(
       10.5e10,
       10.6E-10,
       .5,
-
-      // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
 
       // null data
       NULL,
@@ -113,24 +106,14 @@ string(10) "helloworld"
 -- Iteration 9 --
 string(10) "helloworld"
 -- Iteration 10 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 11 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 12 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 13 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 14 --
-
-Notice: Array to string conversion in %s on line %d
 string(10) "helloworld"
 -- Iteration 15 --
 string(10) "helloworld"
@@ -145,15 +128,5 @@ string(10) "helloworld"
 -- Iteration 20 --
 string(10) "helloworld"
 -- Iteration 21 --
-string(10) "helloworld"
--- Iteration 22 --
-string(10) "helloworld"
--- Iteration 23 --
-string(10) "helloworld"
--- Iteration 24 --
-string(10) "helloworld"
--- Iteration 25 --
-string(10) "helloworld"
--- Iteration 26 --
 string(10) "helloworld"
 Done

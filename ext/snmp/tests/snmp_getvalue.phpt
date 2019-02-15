@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp_getvalue
 --CREDITS--
 Boris Lytochkin

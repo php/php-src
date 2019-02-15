@@ -1,5 +1,5 @@
 --TEST--
-Nullable return value 
+Nullable return value
 --FILE--
 <?php
 function foo($x) : ?array {

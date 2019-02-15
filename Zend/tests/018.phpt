@@ -17,7 +17,7 @@ var_dump(constant("TEST_CONST2"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: constant() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 

@@ -59,7 +59,6 @@ foreach ($functions as $type => $function) {
 echo PHP_EOL . "Done";
 ?>
 --EXPECTF--
-
 Testing 'int' type:
 
 *** Trying int(1)

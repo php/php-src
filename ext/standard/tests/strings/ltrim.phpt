@@ -36,7 +36,7 @@ var_dump( ltrim($str, "\nusi") );
  var_dump ( ltrim("ABCXYZltrim test", "A..Z") );                 /* with characters range as second Argument */
  var_dump ( ltrim("0123456789ltrim test", "0..9") );             /* with numbers range as second Argument */
  var_dump ( ltrim("@$#ltrim test", "#@$") );                     /* with some special characters as second Argument */
- 
+
 
  echo "\n *** Output for  scalar argument) ***\n";
  var_dump( ltrim(  12345  ) );                                   /* Scalar argument */

@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #44409 (PDO::FETCH_SERIALIZE calls __construct())
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -19,16 +19,16 @@ $db->exec("INSERT INTO test (dat) VALUES ('Data from DB')");
 
 class bug44409 implements Serializable
 {
-	public function __construct() 
+	public function __construct()
 	{
-		printf("Method called: %s()\n", __METHOD__); 
-	} 	
+		printf("Method called: %s()\n", __METHOD__);
+	}
 
 	public function serialize()
 	{
-		return "any data from serizalize()"; 
+		return "any data from serizalize()";
 	}
-	
+
 	public function unserialize($dat)
 	{
 		printf("Method called: %s(%s)\n", __METHOD__, var_export($dat, true));

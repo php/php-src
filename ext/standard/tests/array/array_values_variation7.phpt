@@ -3,7 +3,7 @@ Test array_values() function : usage variations - Internal order check
 --FILE--
 <?php
 /* Prototype  : array array_values(array $input)
- * Description: Return just the values from the input array 
+ * Description: Return just the values from the input array
  * Source code: ext/standard/array.c
  */
 
@@ -25,7 +25,6 @@ var_dump(array_values($input));
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_values() : usage variations ***
 

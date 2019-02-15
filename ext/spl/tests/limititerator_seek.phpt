@@ -13,6 +13,4 @@ $lt->seek(1,1); // Should throw a warning as seek expects only 1 argument
 
 ?>
 --EXPECTF--
-
 Warning: LimitIterator::seek() expects exactly 1 parameter, 2 given in %s on line %d
-

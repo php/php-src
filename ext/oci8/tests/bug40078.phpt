@@ -4,7 +4,7 @@ Bug #40078 (ORA-01405 when fetching NULL values using oci_bind_array_by_name())
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -42,7 +42,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(5) {
   [0]=>
   string(3) "one"

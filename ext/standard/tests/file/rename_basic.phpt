@@ -25,7 +25,7 @@ var_dump( file_exists($dest_name) ); // expecting true
 $new_stat = stat("$file_path/rename_basic_new.tmp");
 
 // checking statistics of old and renamed file - both should be same except ctime
-$keys_to_compare = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 
+$keys_to_compare = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12,
                        "dev", "ino", "mode", "nlink", "uid", "gid",
                        "rdev", "size", "atime", "mtime", "blksize", "blocks");
 var_dump( compare_stats($old_stat, $new_stat, $keys_to_compare) );

@@ -4,10 +4,10 @@ Test str_replace() function
 precision=14
 --FILE--
 <?php
-/* 
-  Prototype: mixed str_replace(mixed $search, mixed $replace, 
+/*
+  Prototype: mixed str_replace(mixed $search, mixed $replace,
                                mixed $subject [, int &$count]);
-  Description: Replace all occurrences of the search string with 
+  Description: Replace all occurrences of the search string with
                the replacement string
 */
 
@@ -27,13 +27,13 @@ var_dump( str_replace("long string here", "", "", $count) );
 var_dump( $count );
 
 $fp = fopen( __FILE__, "r" );
-$fp_copy = $fp; 
+$fp_copy = $fp;
 var_dump( str_replace($fp_copy, $fp_copy, $fp_copy, $fp_copy) );
 var_dump( $fp_copy );
 fclose($fp);
 
 echo "\n*** Testing str_replace() with various search values ***";
-$search_arr = array( TRUE, FALSE, 1, 0, -1, "1", "0", "-1",  NULL, 
+$search_arr = array( TRUE, FALSE, 1, 0, -1, "1", "0", "-1",  NULL,
                      array(), "php", "");
 
 $i = 0;
@@ -41,7 +41,7 @@ $i = 0;
 foreach( $search_arr as $value ) {
   echo "\n-- Iteration $i --\n";
   /* replace the string in array */
-  var_dump( str_replace($value, "FOUND", $search_arr, $count) ); 
+  var_dump( str_replace($value, "FOUND", $search_arr, $count) );
   var_dump( $count );
   $i++;
 }
@@ -52,7 +52,7 @@ $subject = "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE\000
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)";
 
 /* needles in an array to be compared in the string $string */
-$search_str = array ( 
+$search_str = array (
   "Hello, World",
   'Hello, World',
   '!!Hello, World',
@@ -97,20 +97,20 @@ for( $i = 0; $i < count($search_str); $i++ ) {
   var_dump( str_replace($search_str[$i], "FOUND", $subject, $count) );
   echo "-- search string has found '$count' times\n";
 }
-  
+
 
 echo "\n*** Testing Miscelleneous input data ***\n";
-/*  If replace has fewer values than search, then an empty 
+/*  If replace has fewer values than search, then an empty
     string is used for the rest of replacement values */
-var_dump( str_replace(array("a", "a", "b"), 
-		      array("q", "q"), 
+var_dump( str_replace(array("a", "a", "b"),
+		      array("q", "q"),
 		      "aaabb", $count
 		     )
 	);
 var_dump($count);
-var_dump( str_replace(array("a", "a", "b"), 
-                      array("q", "q"), 
-                      array("aaa", "bbb", "ccc"), 
+var_dump( str_replace(array("a", "a", "b"),
+                      array("q", "q"),
+                      array("aaa", "bbb", "ccc"),
                       $count
                      )
         );
@@ -122,7 +122,7 @@ echo "\n-- Testing objects --\n";
         to string" by default, when an object is passed instead of string:
 The error can be  avoided by choosing the __toString magix method as follows: */
 
-class subject 
+class subject
 {
   function __toString() {
     return "Hello, world";
@@ -130,7 +130,7 @@ class subject
 }
 $obj_subject = new subject;
 
-class search 
+class search
 {
   function __toString() {
     return "Hello, world";
@@ -138,7 +138,7 @@ class search
 }
 $obj_search = new search;
 
-class replace 
+class replace
 {
   function __toString() {
     return "Hello, world";
@@ -155,15 +155,15 @@ var_dump(str_replace(array("a", "a", "b"), "multi", "aaa", $count));
 var_dump($count);
 
 var_dump(str_replace( array("a", "a", "b"),
-                      array("q", "q", "c"), 
+                      array("q", "q", "c"),
                       "aaa", $count
                     )
 );
 var_dump($count);
 
 var_dump(str_replace( array("a", "a", "b"),
-                      array("q", "q", "c"), 
-                      array("aaa", "bbb"), 
+                      array("q", "q", "c"),
+                      array("aaa", "bbb"),
                       $count
                     )
 );
@@ -182,7 +182,7 @@ var_dump($count);
 echo "\n-- Testing Resources --\n";
 $resource1 = fopen( __FILE__, "r" );
 $resource2 = opendir( "." );
-var_dump(str_replace("stream", "FOUND", $resource1, $count)); 
+var_dump(str_replace("stream", "FOUND", $resource1, $count));
 var_dump($count);
 var_dump(str_replace("stream", "FOUND", $resource2, $count));
 var_dump($count);
@@ -237,7 +237,7 @@ closedir($resource2);
 echo "Done\n";
 
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing str_replace() on basic operations ***
 string(0) ""
 string(4) "tbst"

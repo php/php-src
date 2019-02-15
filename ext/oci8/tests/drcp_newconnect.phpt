@@ -40,4 +40,3 @@ resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 connection)
 First and second connections are different  OK
 Done
-

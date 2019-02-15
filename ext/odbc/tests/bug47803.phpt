@@ -73,7 +73,7 @@ if (!$result) {
 	print ('[sql] prep: '.$sql);
 	goto out;
 }
-foreach ($upd_params as $k) { 
+foreach ($upd_params as $k) {
 	if(!odbc_execute($result, array($k['id']))) {
 		print ('[sql] exec: '."array({$k['id']})");
 		goto out;

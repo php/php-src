@@ -128,7 +128,7 @@ How to create your PHP, PHP Documentation or PECL patch
 -------------------------------------------------------
 PHP and most PECL packages use Git for revision control. Some PECL
 packages use Subversion (SVN) Read http://www.php.net/git.php for help
-on using Git to get and build PHP source code.  We recommend to look 
+on using Git to get and build PHP source code.  We recommend to look
 at our workflow on https://wiki.php.net/vcs/gitworkflow and our FAQ
 https://wiki.php.net/vcs/gitfaq.
 
@@ -138,11 +138,10 @@ work on "master".
 
 Read CODING_STANDARDS before you start working.
 
-After modifying the source see README.TESTING and
-http://qa.php.net/write-test.php for how to test.  Submitting test
-scripts helps us to understand what functionality has changed.  It is
-important for the stability and maintainability of PHP that tests are
-comprehensive.
+After modifying the source see https://qa.php.net/write-test.php for
+how to test.  Submitting test scripts helps us to understand what
+functionality has changed.  It is important for the stability and
+maintainability of PHP that tests are comprehensive.
 
 After testing is finished, create a patch file using the command:
 

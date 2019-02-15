@@ -1,8 +1,8 @@
 --TEST--
-Testing clone on objects whoose class derived from DateTimeZone class 
+Testing clone on objects whoose class derived from DateTimeZone class
 --FILE--
 <?php
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 class DateTimeZoneExt1 extends DateTimeZone {

@@ -11,7 +11,7 @@ chdir(dirname(__FILE__));
 
 class myclass
 {
-	function startElement($parser, $name, $attribs) 
+	function startElement($parser, $name, $attribs)
 	{
 		print '{'.$name;
 		if (sizeof($attribs)) {

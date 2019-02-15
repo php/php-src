@@ -18,7 +18,6 @@ var_dump($c->setGregorianChange("sdfds"));
 var_dump(intlgregcal_set_gregorian_change($c));
 var_dump(intlgregcal_set_gregorian_change(1, 4.));
 --EXPECTF--
-
 Warning: IntlGregorianCalendar::setGregorianChange() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlGregorianCalendar::setGregorianChange(): intlgregcal_set_gregorian_change: bad arguments in %s on line %d

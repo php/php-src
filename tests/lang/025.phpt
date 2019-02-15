@@ -1,7 +1,7 @@
 --TEST--
 Mean recursion test
 --FILE--
-<?php 
+<?php
 function RekTest ($nr) {
 	echo " $nr ";
 	$j=$nr+1;

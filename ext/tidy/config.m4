@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension tidy
 
 PHP_ARG_WITH(tidy,for TIDY support,
 [  --with-tidy[=DIR]         Include TIDY support])

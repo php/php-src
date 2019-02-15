@@ -20,7 +20,7 @@ class Base
 
 class Child extends base
 {
-	
+
 }
 
 class Grand extends Child

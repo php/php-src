@@ -24,7 +24,7 @@ var_dump($long[$arr]);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 NULL
 NULL
 NULL

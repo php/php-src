@@ -30,4 +30,3 @@ PHP_FUNCTION(datefmt_set_calendar);
 PHP_FUNCTION(datefmt_get_calendar_object);
 
 #endif	/* DATEFORMAT_ATTRCPP_H */
-

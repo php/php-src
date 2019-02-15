@@ -25,7 +25,7 @@ $stmtarray = array(
 	"create table bind_char_tab (id number, c1 date)",
 	"insert into bind_char_tab values (1, '2008-04-20')",
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
@@ -85,7 +85,7 @@ function do_e_q($s)
 $stmtarray = array(
 	"drop table bind_char_tab"
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";

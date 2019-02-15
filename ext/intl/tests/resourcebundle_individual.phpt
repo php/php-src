@@ -27,7 +27,7 @@ function ut_main() {
 
 	$t = ut_resourcebundle_get( $r, 'nonexisting' );
 	$str_res .= debug( $t );
-	
+
 	return $str_res;
 }
 	include_once( 'ut_common.inc' );

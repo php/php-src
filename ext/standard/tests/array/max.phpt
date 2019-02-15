@@ -19,7 +19,7 @@ var_dump(max(0, true, false, true));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: max() expects at least 1 parameter, 0 given in %s on line 3
 NULL
 

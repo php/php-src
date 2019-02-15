@@ -1,5 +1,5 @@
 --TEST--
-Test stristr() function : error conditions 
+Test stristr() function : error conditions
 --FILE--
 <?php
 

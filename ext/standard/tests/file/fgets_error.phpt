@@ -17,13 +17,13 @@ echo "-- Testing fgets() with more than expected number of arguments --\n";
 $fp = fopen(__FILE__, "r");
 var_dump( fgets($fp, 10, $fp) );
 
-// invalid length argument 
+// invalid length argument
 echo "-- Testing fgets() with invalid length arguments --\n";
-$len = 0; 
+$len = 0;
 var_dump( fgets($fp, $len) );
 $len = -10;
 var_dump( fgets($fp, $len) );
-$len = 1; 
+$len = 1;
 var_dump( fgets($fp, $len) ); // return length - 1 always, expect false
 
 
@@ -105,4 +105,3 @@ bool(false)
 Warning: fgets() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
-

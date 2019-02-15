@@ -2,7 +2,6 @@
 stream_get_meta_data() on zip stream
 --SKIPIF--
 <?php
-/* $Id: oo_stream.phpt 260091 2008-05-21 09:27:41Z pajoye $ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--

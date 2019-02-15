@@ -26,7 +26,6 @@ print xmlwriter_output_memory($xw);
 --CREDITS--
 Koen Kuipers koenk82@gmail.com
 --EXPECTF--
-
 Warning: xmlwriter_write_attribute_ns() expects exactly %d parameters, %d given in %s on line %d
 <?xml version="1.0" encoding="UTF-8"?>
 <root>

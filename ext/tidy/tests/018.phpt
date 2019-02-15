@@ -4,8 +4,8 @@ binary safety
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
 <?php
-$x = tidy_repair_string("<p>abra\0cadabra</p>", 
-	array(	'show-body-only' => true, 
+$x = tidy_repair_string("<p>abra\0cadabra</p>",
+	array(	'show-body-only' => true,
 			'clean' => false,
 			'newline' => "\n")
 	);

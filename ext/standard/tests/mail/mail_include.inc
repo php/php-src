@@ -132,7 +132,7 @@ function populate_mailbox($imap_stream, $mailbox, $message_count, $msg_type = "s
 }
 
 /**
- * Get the mailbox name from a mailbox decription, i.e strip off server details.
+ * Get the mailbox name from a mailbox description, i.e strip off server details.
  *
  * @param string mailbox complete mailbox name
  * @return mailbox name

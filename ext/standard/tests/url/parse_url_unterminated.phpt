@@ -23,7 +23,6 @@ foreach ($urls as $url) {
 echo "Done";
 ?>
 --EXPECT--
-
 --> 64.246.30.37: array(1) {
   ["path"]=>
   string(12) "64.246.30.37"

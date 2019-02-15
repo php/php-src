@@ -8,9 +8,6 @@ if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
 if (!extension_loaded('sockets')) {
   die('SKIP sockets extension not available.');
 }
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip not for windows');
-}
 ?>
 --FILE--
 <?php

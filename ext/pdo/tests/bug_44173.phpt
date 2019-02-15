@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #44173 (PDO->query() parameter parsing/checking needs an update)
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -75,4 +75,3 @@ bool(false)
 
 Warning: PDO::query(): SQLSTATE[HY000]: General error: fetch mode requires the classname argument in %s
 bool(false)
-

@@ -20,7 +20,7 @@ include ("file.inc");
 echo "*** Testing ftruncate() : usage variations ***\n";
 
 /* test ftruncate with file opened in different modes */
-$file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t", 
+$file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t",
                     "w", "wb", "wt", "w+", "w+b", "w+t",
                     "x", "xb", "xt", "x+", "x+b", "x+t",
                     "a", "ab", "at", "a+", "a+b", "a+t");
@@ -45,15 +45,15 @@ foreach($file_content_types as $file_content_type) {
      $file_handle = fopen($filename, $file_modes[$mode_counter]);
    }
    if (!$file_handle) {
-     echo "Error: failed to open file $filename!\n"; 
+     echo "Error: failed to open file $filename!\n";
      exit();
    }
 
-   rewind($file_handle); // file pointer to 0 
- 
+   rewind($file_handle); // file pointer to 0
+
    echo "-- Testing ftruncate(): File pointer at the end --\n";
    /* try to truncate it to while file pointer at the end */
-   fseek($file_handle, 0, SEEK_END);  
+   fseek($file_handle, 0, SEEK_END);
    $new_size = 200;
    var_dump( filesize($filename) );  // current filesize
    var_dump( ftell($file_handle) );
@@ -62,8 +62,8 @@ foreach($file_content_types as $file_content_type) {
    var_dump( feof($file_handle) );
    fclose($file_handle);
    clearstatcache(); // clear previous size value in cache
-   var_dump( filesize($filename) ); 
- 
+   var_dump( filesize($filename) );
+
    //delete all files created
    delete_file($filename);
  }//end of inner for loop

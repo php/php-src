@@ -17,16 +17,24 @@ var_dump(empty($str[5])); // 1
 var_dump(empty($str[8]));
 var_dump(empty($str[10000]));
 // non-numeric offsets
-print "- string ---\n";
-var_dump(empty($str['-1']));
+print "- string literal ---\n";
+var_dump(empty($str['-1'])); // 3
 var_dump(empty($str['-10']));
-var_dump(empty($str['-4'])); // 0
 var_dump(empty($str['0']));
 var_dump(empty($str['1']));
 var_dump(empty($str['4'])); // 0
 var_dump(empty($str['1.5']));
 var_dump(empty($str['good']));
 var_dump(empty($str['3 and a half']));
+print "- string variable ---\n";
+var_dump(empty($str[$key = '-1'])); // 3
+var_dump(empty($str[$key = '-10']));
+var_dump(empty($str[$key = '0']));
+var_dump(empty($str[$key = '1']));
+var_dump(empty($str[$key = '4'])); // 0
+var_dump(empty($str[$key = '1.5']));
+var_dump(empty($str[$key = 'good']));
+var_dump(empty($str[$key = '3 and a half']));
 print "- bool ---\n";
 var_dump(empty($str[true]));
 var_dump(empty($str[false]));
@@ -65,9 +73,17 @@ bool(true)
 bool(false)
 bool(true)
 bool(true)
-- string ---
+- string literal ---
 bool(false)
 bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+- string variable ---
+bool(false)
 bool(true)
 bool(false)
 bool(false)

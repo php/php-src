@@ -36,4 +36,3 @@ var_dump($fi->file($f));
 --EXPECT--
 string(15) "video/quicktime"
 +++DONE+++
-

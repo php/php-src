@@ -40,6 +40,3 @@ NULL
 Warning: get_headers() expects at most 3 parameters, 4 given in %s on line 20
 NULL
 Done
-
-
-

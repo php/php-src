@@ -15,7 +15,7 @@ echo "*** Testing stripslashes() : with double dimensional arrays ***\n";
 
 // initialising the string array
 
-$str_array = array( 
+$str_array = array(
                     array("", array()),
                     array("", array("")),
                     array("f\\'oo", "b\\'ar", array("fo\\'o", "b\\'ar")),

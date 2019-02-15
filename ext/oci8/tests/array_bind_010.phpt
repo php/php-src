@@ -19,7 +19,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_bind_array_by_name(): ORA-01036: illegal variable name/number in %s on line %d
 array(5) {
   [0]=>

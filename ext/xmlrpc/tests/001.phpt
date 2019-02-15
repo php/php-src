@@ -12,7 +12,7 @@ var_dump(xmlrpc_encode_request(3.4, 1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(174) "<?xml version="1.0" encoding="iso-8859-1"?>
 <methodCall>
 <methodName>-1</methodName>

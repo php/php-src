@@ -1,5 +1,5 @@
 --TEST--
-Test mb_strrichr() function : error conditions 
+Test mb_strrichr() function : error conditions
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,9 +8,9 @@ function_exists('mb_strrichr') or die("skip mb_strrichr() is not available in th
 --FILE--
 <?php
 /* Prototype  : string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds the last occurrence of a character in a string within another, case insensitive 
+ * Description: Finds the last occurrence of a character in a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_strrichr() : error conditions ***\n";

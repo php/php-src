@@ -1,5 +1,5 @@
 --TEST--
-Test chr() function : basic functionality 
+Test chr() function : basic functionality
 --FILE--
 <?php
 

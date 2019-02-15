@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: PDO::FETCH_BOUND w/o :
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -47,10 +47,10 @@ while($stmt2->fetch(PDO::FETCH_BOUND)) {
 
 echo "===ALONE===\n";
 
-$stmt3 = $db->prepare('SELECT txt FROM test WHERE idx=:inp'); 
+$stmt3 = $db->prepare('SELECT txt FROM test WHERE idx=:inp');
 $stmt3->bindParam('inp', $idx); /* by foreign name */
 
-$stmt4 = $db->prepare('SELECT idx FROM test WHERE txt=:txt'); 
+$stmt4 = $db->prepare('SELECT idx FROM test WHERE txt=:txt');
 $stmt4->bindParam('txt', $txt);  /* using same name */
 
 foreach($cont as $idx => $txt)

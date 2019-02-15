@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -136,7 +136,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 
 					switch (brake->type) {
 						case PHPDBG_BREAK_FILE: {
-							zend_string *filename = php_addcslashes(zend_string_init(((phpdbg_breakfile_t*)brake)->filename, strlen(((phpdbg_breakfile_t*)brake)->filename), 0), 1, "\\\"\n", 3);
+							zend_string *filename = php_addcslashes_str(((phpdbg_breakfile_t*)brake)->filename, strlen(((phpdbg_breakfile_t*)brake)->filename), "\\\"\n", 3);
 							phpdbg_asprintf(&new_str,
 								"%sbreak \"%s\":%lu\n", *str,
 								ZSTR_VAL(filename),
@@ -173,7 +173,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 						} break;
 
 						case PHPDBG_BREAK_FILE_OPLINE: {
-							zend_string *filename = php_addcslashes(zend_string_init(((phpdbg_breakopline_t*)brake)->class_name, strlen(((phpdbg_breakopline_t*)brake)->class_name), 0), 1, "\\\"\n", 3);
+							zend_string *filename = php_addcslashes_str(((phpdbg_breakopline_t*)brake)->class_name, strlen(((phpdbg_breakopline_t*)brake)->class_name), "\\\"\n", 3);
 							phpdbg_asprintf(&new_str,
 								"%sbreak \"%s\":#%llu\n", *str,
 								ZSTR_VAL(filename),
@@ -205,7 +205,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 									break;
 
 									case FILE_PARAM: {
-										zend_string *filename = php_addcslashes(zend_string_init(conditional->param.file.name, strlen(conditional->param.file.name), 0), 1, "\\\"\n", 3);
+										zend_string *filename = php_addcslashes_str(conditional->param.file.name, strlen(conditional->param.file.name), "\\\"\n", 3);
 										phpdbg_asprintf(&new_str,
 											"%sbreak at \"%s\":%lu if %s\n", *str,
 											ZSTR_VAL(filename), conditional->param.file.line,
@@ -840,7 +840,7 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 
 	new_break.ops = zend_compile_string(&pv, "Conditional Breakpoint Code");
 
-	zval_dtor(&pv);
+	zval_ptr_dtor_str(&pv);
 
 	if (new_break.ops) {
 		brake = zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash, &new_break, sizeof(phpdbg_breakcond_t));

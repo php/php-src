@@ -1,4 +1,4 @@
-dnl $Id$
+dnl config.m4 for extension sysvmsg
 
 PHP_ARG_ENABLE(sysvmsg,whether to enable System V IPC support,
 [  --enable-sysvmsg        Enable sysvmsg support])

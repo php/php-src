@@ -8,14 +8,14 @@ if (!extension_loaded("xmlrpc")) print "skip";
 <?php
 
 class Foo {
-    
+
 }
 
 class Bar {
-    
+
     public $xmlrpc_type;
     public $scalar;
-    
+
 }
 
 $foo = new Foo();

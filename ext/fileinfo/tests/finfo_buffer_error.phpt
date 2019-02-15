@@ -1,13 +1,13 @@
 --TEST--
-Test finfo_buffer() function : error conditions 
+Test finfo_buffer() function : error conditions
 --SKIPIF--
 <?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
- * Description: Return infromation about a string buffer. 
+ * Description: Return infromation about a string buffer.
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';

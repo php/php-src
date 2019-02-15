@@ -21,5 +21,5 @@ $test->a();
 $test->b();
 
 ?>
---EXPECT--	
+--EXPECT--
 AA

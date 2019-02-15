@@ -7,10 +7,10 @@ Test session_destroy() function : variation
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_destroy(void)
  * Description : Destroys all data registered to a session
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_destroy() : variation ***\n";
@@ -38,4 +38,3 @@ string(%d) "%s"
 bool(true)
 string(0) ""
 Done
-

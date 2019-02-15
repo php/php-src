@@ -15,7 +15,7 @@ Test vfprintf() function : usage variations - scientific formats with non-scient
 echo "*** Testing vfprintf() : scientific formats and non-scientific values ***\n";
 
 // defining array of non-scientific formats
-$formats = 
+$formats =
   '%e %+e %-e 
    %le %Le %4e %-4e
    %10.4e %-10.4e %04e %04.4e
@@ -53,14 +53,14 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 /* creating dumping file */
 $data_file = dirname(__FILE__) . '/vfprintf_variation18.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 // looping to test vfprintf() with different scientific formats from the above $format array
 // and with non-scientific values from the above $args_array array
 $counter = 1;
@@ -74,7 +74,7 @@ fclose($fp);
 print_r(file_get_contents($data_file));
 echo "\n";
 
-unlink($data_file); 
+unlink($data_file);
 ?>
 ===DONE===
 --EXPECT--

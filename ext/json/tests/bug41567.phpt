@@ -12,6 +12,6 @@ var_dump(json_decode($a));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 float(123456789.12345)
 Done

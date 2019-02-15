@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -121,4 +120,3 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale)
      }
    bc_free_num (&power);
 }
-

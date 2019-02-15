@@ -27,7 +27,7 @@ var_dump(gmp_invert(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(7) "2293131"
 string(1) "0"
 string(4) "5827"

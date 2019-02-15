@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 EXTENSION("date", "php_date.c", false, "/Iext/date/lib /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 /DHAVE_TIMELIB_CONFIG_H=1");

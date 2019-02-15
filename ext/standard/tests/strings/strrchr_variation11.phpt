@@ -19,7 +19,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
@@ -91,23 +91,23 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing strrchr() function: with unexpected inputs for haystack and needle ***
 -- Iteration 1 --
-bool(false)
+string(1) "0"
 -- Iteration 2 --
-bool(false)
+string(1) "1"
 -- Iteration 3 --
-bool(false)
+string(5) "12345"
 -- Iteration 4 --
-bool(false)
+string(5) "-2345"
 -- Iteration 5 --
-bool(false)
+string(4) "10.5"
 -- Iteration 6 --
-bool(false)
+string(5) "-10.5"
 -- Iteration 7 --
-bool(false)
+string(10) "1234567000"
 -- Iteration 8 --
-bool(false)
+string(4) "1E-9"
 -- Iteration 9 --
-bool(false)
+string(3) "0.5"
 -- Iteration 10 --
 
 Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
@@ -129,17 +129,15 @@ NULL
 Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
-bool(false)
+string(1) "1"
 -- Iteration 16 --
 bool(false)
 -- Iteration 17 --
-bool(false)
+string(1) "1"
 -- Iteration 18 --
 bool(false)
 -- Iteration 19 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-bool(false)
+string(6) "object"
 -- Iteration 20 --
 bool(false)
 -- Iteration 21 --

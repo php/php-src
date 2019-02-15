@@ -45,7 +45,7 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/buildfromiterator3.phar');
 __HALT_COMPILER();
 ?>

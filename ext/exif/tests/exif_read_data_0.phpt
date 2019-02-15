@@ -11,4 +11,3 @@ exif_read_data($infile);
 --EXPECTF--
 Warning: exif_read_data(): Unable to open file in %sexif_read_data_0.php on line %d
 ===DONE===
-

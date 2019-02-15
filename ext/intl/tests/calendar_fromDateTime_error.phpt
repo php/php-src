@@ -31,9 +31,7 @@ $date = new DateTime('2012-01-01 00:00:00 WEST');
 var_dump(IntlCalendar::fromDateTime($date));
 
 var_dump(intlcal_from_date_time());
-
 --EXPECTF--
-
 Warning: IntlCalendar::fromDateTime() expects at least 1 parameter, 0 given in %s on line %d
 
 Warning: IntlCalendar::fromDateTime(): intlcal_from_date_time: bad arguments in %s on line %d

@@ -1,9 +1,9 @@
 --TEST--
 Test function gzgetc() by calling it more than or less than its expected arguments
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -20,7 +20,6 @@ gzclose($h);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzgetc() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 

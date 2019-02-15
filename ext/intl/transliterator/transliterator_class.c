@@ -130,16 +130,16 @@ static zend_object *Transliterator_object_create( zend_class_entry *ce )
  */
 
 /* {{{ clone handler for Transliterator */
-static zend_object *Transliterator_clone_obj( zval *object )
+static zend_object *Transliterator_clone_obj( zend_object *object )
 {
 	Transliterator_object *to_orig,
 	                      *to_new;
 	zend_object 		  *ret_val;
 	intl_error_reset( NULL );
 
-	to_orig = Z_INTL_TRANSLITERATOR_P( object );
+	to_orig = php_intl_transliterator_fetch_object( object );
 	intl_error_reset( INTL_DATA_ERROR_P( to_orig ) );
-	ret_val = Transliterator_ce_ptr->create_object( Z_OBJCE_P( object ) );
+	ret_val = Transliterator_ce_ptr->create_object( object->ce );
 	to_new  = php_intl_transliterator_fetch_object( ret_val );
 
 	zend_objects_clone_members( &to_new->zo, &to_orig->zo );
@@ -189,65 +189,41 @@ err:
 }
 /* }}} */
 
-#define TRANSLITERATOR_PROPERTY_HANDLER_PROLOG  \
-	zval tmp_member;							\
-	if( Z_TYPE_P( member ) != IS_STRING )		\
-	{											\
-		ZVAL_STR(&tmp_member,					\
-			zval_get_string_func(member));		\
-		member = &tmp_member;					\
-		cache_slot = NULL;						\
-    }
-
-#define TRANSLITERATOR_PROPERTY_HANDLER_EPILOG	\
-	if( member == &tmp_member )					\
-	{											\
-		zval_dtor( &tmp_member );				\
-	}
-
 /* {{{ get_property_ptr_ptr handler */
-static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, int type, void **cache_slot )
+static zval *Transliterator_get_property_ptr_ptr( zend_object *object, zend_string *name, int type, void **cache_slot )
 {
 	zval *retval;
 
-	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
-
 	if(zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 )
+		ZSTR_VAL( name ), ZSTR_LEN( name ) ) == 0 )
 	{
 		retval = NULL; /* fallback to read_property */
 	}
 	else
 	{
-		retval = std_object_handlers.get_property_ptr_ptr( object, member, type, cache_slot );
+		retval = zend_std_get_property_ptr_ptr( object, name, type, cache_slot );
 	}
-
-	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
 
 	return retval;
 }
 /* }}} */
 
 /* {{{ read_property handler */
-static zval *Transliterator_read_property( zval *object, zval *member, int type, void **cache_slot, zval *rv )
+static zval *Transliterator_read_property( zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv )
 {
 	zval *retval;
 
-	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
-
 	if( ( type != BP_VAR_R && type != BP_VAR_IS ) &&
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
+		ZSTR_VAL( name ), ZSTR_LEN( name ) ) == 0 ) )
 	{
 		php_error_docref0( NULL, E_WARNING, "The property \"id\" is read-only" );
 		retval = &EG( uninitialized_zval );
 	}
 	else
 	{
-		retval = std_object_handlers.read_property( object, member, type, cache_slot, rv );
+		retval = zend_std_read_property( object, name, type, cache_slot, rv );
 	}
-
-	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
 
 	return retval;
 }
@@ -255,11 +231,10 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 /* }}} */
 
 /* {{{ write_property handler */
-static void Transliterator_write_property( zval *object, zval *member, zval *value,
+static zval *Transliterator_write_property( zend_object *object, zend_string *name, zval *value,
 	void **cache_slot )
 {
 	zend_class_entry *scope;
-	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
 
 	if (EG(fake_scope)) {
 		scope = EG(fake_scope);
@@ -268,16 +243,16 @@ static void Transliterator_write_property( zval *object, zval *member, zval *val
 	}
 	if( ( scope != Transliterator_ce_ptr ) &&
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
+		ZSTR_VAL( name ), ZSTR_LEN( name ) ) == 0 ) )
 	{
 		php_error_docref0( NULL, E_WARNING, "The property \"id\" is read-only" );
 	}
 	else
 	{
-		std_object_handlers.write_property( object, member, value, cache_slot );
+		value = zend_std_write_property( object, name, value, cache_slot );
 	}
 
-	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
+	return value;
 }
 /* }}} */
 
@@ -311,7 +286,7 @@ ZEND_END_ARG_INFO()
  * Every 'Transliterator' class method has an entry in this table
  */
 static const zend_function_entry Transliterator_class_functions[] = {
-	PHP_ME( Transliterator,			__construct,						ainfo_trans_void,				ZEND_ACC_PRIVATE | ZEND_ACC_CTOR | ZEND_ACC_FINAL )
+	PHP_ME( Transliterator,			__construct,						ainfo_trans_void,				ZEND_ACC_PRIVATE | ZEND_ACC_FINAL )
 	PHP_ME_MAPPING( create,			transliterator_create,				ainfo_trans_create,				ZEND_ACC_STATIC |ZEND_ACC_PUBLIC )
 	PHP_ME_MAPPING( createFromRules,transliterator_create_from_rules,	ainfo_trans_create_from_rules,	ZEND_ACC_STATIC | ZEND_ACC_PUBLIC )
 	PHP_ME_MAPPING( createInverse,	transliterator_create_inverse,		ainfo_trans_void,				ZEND_ACC_PUBLIC )
@@ -334,7 +309,7 @@ void transliterator_register_Transliterator_class( void )
 	INIT_CLASS_ENTRY( ce, "Transliterator", Transliterator_class_functions );
 	ce.create_object = Transliterator_object_create;
 	Transliterator_ce_ptr = zend_register_internal_class( &ce );
-	memcpy( &Transliterator_handlers, zend_get_std_object_handlers(),
+	memcpy( &Transliterator_handlers, &std_object_handlers,
 		sizeof Transliterator_handlers );
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
 	Transliterator_handlers.free_obj = Transliterator_objects_free;
@@ -358,12 +333,3 @@ void transliterator_register_Transliterator_class( void )
 
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

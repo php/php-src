@@ -1,7 +1,7 @@
 --TEST--
 Set and get of connection attributes with all types of connections.
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
+<?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 
@@ -18,7 +18,7 @@ if (!(isset($matches[0]) && $matches[1] >= 10)) {
 <?php
 
 $testuser     = 'testuser_attr_1';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
 require(dirname(__FILE__)."/conn_attr.inc");
 

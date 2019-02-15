@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -89,7 +89,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result,
 																	  MYSQLND_RES_METADATA * const meta,
 																	  MYSQLND_STATS * stats,
-																	  zend_bool int_and_float_native)
+																	  const zend_bool int_and_float_native)
 {
 	unsigned int i;
 	enum_func_status ret = PASS;
@@ -108,7 +108,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 
 		for (i = 0; i < result->row_count; i++) {
 			/* (i / 8) & the_bit_for_i*/
-			if (initialized[i >> 3] & (1 << (i & 7))) {
+			if (ZEND_BIT_TEST(initialized, i)) {
 				continue;
 			}
 
@@ -568,9 +568,9 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
   completeness.
 */
 static const size_t *
-MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(MYSQLND_RES_BUFFERED * const result)
+MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(const MYSQLND_RES_BUFFERED * const result)
 {
-	const MYSQLND_RES_BUFFERED_ZVAL * set = (MYSQLND_RES_BUFFERED_ZVAL *) result;
+	const MYSQLND_RES_BUFFERED_ZVAL * const set = (const MYSQLND_RES_BUFFERED_ZVAL *) result;
 	/*
 	  If:
 	  - unbuffered result
@@ -600,9 +600,9 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(MYSQLND_RES_BUFFERED
   completeness.
 */
 static const size_t *
-MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(MYSQLND_RES_BUFFERED * const result)
+MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(const MYSQLND_RES_BUFFERED * const result)
 {
-	const MYSQLND_RES_BUFFERED_C * set = (MYSQLND_RES_BUFFERED_C *) result;
+	const MYSQLND_RES_BUFFERED_C * const set = (const MYSQLND_RES_BUFFERED_C *) result;
 	DBG_ENTER("mysqlnd_result_buffered_c::fetch_lengths");
 
 	if (set->current_row > set->row_count || set->current_row == 0) {
@@ -617,7 +617,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(MYSQLND_RES_BUFFERED * 
 
 /* {{{ mysqlnd_result_unbuffered::fetch_lengths */
 static const size_t *
-MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(MYSQLND_RES_UNBUFFERED * const result)
+MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(const MYSQLND_RES_UNBUFFERED * const result)
 {
 	/* simulate output of libmysql */
 	return (result->last_row_data || result->eof_reached)? result->lengths : NULL;
@@ -627,7 +627,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(MYSQLND_RES_UNBUFFERED 
 
 /* {{{ mysqlnd_res::fetch_lengths */
 static const size_t *
-MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(MYSQLND_RES * const result)
+MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(const MYSQLND_RES * const result)
 {
 	const size_t * ret;
 	DBG_ENTER("mysqlnd_res::fetch_lengths");
@@ -651,6 +651,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 	MYSQLND_PACKET_ROW	*row_packet = result->unbuf->row_packet;
 	MYSQLND_RES_METADATA * const meta = result->meta;
 	MYSQLND_CONN_DATA * const conn = result->conn;
+	void *checkpoint;
 
 	DBG_ENTER("mysqlnd_result_unbuffered::fetch_row_c");
 
@@ -669,6 +670,9 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 	}
 	/* Let the row packet fill our buffer and skip additional mnd_malloc + memcpy */
 	row_packet->skip_extraction = FALSE;
+
+	checkpoint = result->memory_pool->checkpoint;
+	mysqlnd_mempool_save_state(result->memory_pool);
 
 	/*
 	  If we skip rows (row == NULL) we have to
@@ -694,6 +698,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 											conn->options->int_and_float_native,
 											conn->stats);
 			if (PASS != rc) {
+				mysqlnd_mempool_restore_state(result->memory_pool);
+				result->memory_pool->checkpoint = checkpoint;
 				DBG_RETURN(FAIL);
 			}
 			{
@@ -756,6 +762,9 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 		}
 		result->unbuf->m.free_last_data(result->unbuf, conn->stats);
 	}
+
+	mysqlnd_mempool_restore_state(result->memory_pool);
+	result->memory_pool->checkpoint = checkpoint;
 
 	DBG_INF_FMT("ret=%s fetched=%u", ret == PASS? "PASS":"FAIL", *fetched_anything);
 	DBG_RETURN(PASS);
@@ -939,12 +948,12 @@ oom:
 
 /* {{{ mysqlnd_result_buffered::fetch_row_c */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything)
+MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * const fetched_anything)
 {
 	enum_func_status ret = FAIL;
 	MYSQLND_ROW_C * row = (MYSQLND_ROW_C *) param;
 	const MYSQLND_RES_METADATA * const meta = result->meta;
-	unsigned int field_count = meta->field_count;
+	const unsigned int field_count = meta->field_count;
 	MYSQLND_CONN_DATA * const conn = result->conn;
 	DBG_ENTER("mysqlnd_result_buffered::fetch_row_c");
 
@@ -1032,7 +1041,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 
 /* {{{ mysqlnd_result_buffered_zval::fetch_row */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * fetched_anything)
+MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * const fetched_anything)
 {
 	enum_func_status ret = FAIL;
 	zval * row = (zval *) param;
@@ -1151,7 +1160,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 		if (rc != PASS) {
 			DBG_RETURN(FAIL);
 		}
-		if (!(set->initialized[set->current_row >> 3] & (1 << (set->current_row & 7)))) {
+		if (!ZEND_BIT_TEST(set->initialized, set->current_row)) {
 			set->initialized[set->current_row >> 3] |= (1 << (set->current_row & 7)); /* mark initialized */
 
 			++set->initialized_rows;
@@ -1705,6 +1714,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 										enum_mysqlnd_extension extension ZEND_FILE_LINE_DC)
 {
 	zend_bool fetched_anything;
+	unsigned int array_size;
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
 
@@ -1712,13 +1722,17 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 	  Hint Zend how many elements we will have in the hash. Thus it won't
 	  extend and rehash the hash constantly.
 	*/
-	array_init_size(return_value, mysqlnd_num_fields(result) * 2);
+	array_size = result->field_count;
+	if ((flags & (MYSQLND_FETCH_NUM|MYSQLND_FETCH_ASSOC)) == (MYSQLND_FETCH_NUM|MYSQLND_FETCH_ASSOC)) {
+		array_size *= 2;
+	}
+	array_init_size(return_value, array_size);
 	if (FAIL == result->m.fetch_row(result, (void *)return_value, flags, &fetched_anything)) {
 		php_error_docref(NULL, E_WARNING, "Error while reading a row");
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	} else if (fetched_anything == FALSE) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		switch (extension) {
 			case MYSQLND_MYSQLI:
 				RETVAL_NULL();
@@ -1797,7 +1811,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int 
 
 /* {{{ mysqlnd_res::fetch_field_data */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int offset, zval *return_value)
+MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, const unsigned int offset, zval *return_value)
 {
 	zval row;
 	zval *entry;
@@ -1811,7 +1825,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 	*/
 	mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQL);
 	if (Z_TYPE(row) != IS_ARRAY) {
-		zval_dtor(&row);
+		zval_ptr_dtor_nogc(&row);
 		RETVAL_NULL();
 		DBG_VOID_RETURN;
 	}
@@ -1824,7 +1838,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 	entry = zend_hash_get_current_data(Z_ARRVAL(row));
 
 	ZVAL_COPY(return_value, entry);
-	zval_dtor(&row);
+	zval_ptr_dtor_nogc(&row);
 
 	DBG_VOID_RETURN;
 }
@@ -2027,13 +2041,3 @@ mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_co
 	DBG_RETURN(ret);
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

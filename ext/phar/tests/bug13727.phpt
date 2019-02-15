@@ -19,17 +19,17 @@ for ($i = 0; $i < 4*1024; $i++){
 	mkdir($fileDir, 0777, true);
 	file_put_contents("$fileDir/$i", "");
 	$p->addFile("$fileDir/$i", "$dirName");
-} 	
+}
 echo("\n Written Files($i)\n");
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 $dirName = dirname(__FILE__);
 $fileDir="$dirName/test_data";
 for ($i = 0; $i < 4*1024; $i++){
 	unlink("$fileDir/$i");
-} 	
+}
 rmdir($fileDir);
 unlink($dirName . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 __HALT_COMPILER();

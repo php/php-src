@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -44,9 +44,8 @@ static int phar_dir_close(php_stream *stream, int close_handle)  /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
-	if (data && HT_FLAGS(data)) {
+	if (data) {
 		zend_hash_destroy(data);
-		HT_FLAGS(data) = 0;
 		FREE_HASHTABLE(data);
 		stream->abstract = NULL;
 	}
@@ -145,7 +144,8 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)  /* {
 	zval dummy;
 
 	ZVAL_NULL(&dummy);
-	return (zend_hash_str_update(ht, arKey, nKeyLength, &dummy) != NULL) ? SUCCESS : FAILURE;
+	zend_hash_str_update(ht, arKey, nKeyLength, &dummy);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -361,7 +361,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return ret;
 	}
 
-	if (!HT_FLAGS(&phar->manifest)) {
+	if (!HT_IS_INITIALIZED(&phar->manifest)) {
 		php_url_free(resource);
 		return NULL;
 	}
@@ -666,12 +666,3 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	return 1;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

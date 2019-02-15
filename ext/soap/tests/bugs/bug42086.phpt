@@ -20,7 +20,7 @@ function firstFunctionWithoutParam() {
 	$ret->param	=	"firstFunctionWithoutParam";
 	return $ret;
 }
-	
+
 $server = new SoapServer(dirname(__FILE__).'/bug42086.wsdl',
 	array('features'=>SOAP_SINGLE_ELEMENT_ARRAYS));
 $server->addFunction('firstFunctionWithoutParam');

@@ -36,7 +36,7 @@ $o->setText('bar');
 
 var_dump($o->getText());
 ?>
---EXPECT--	
+--EXPECT--
 string(4) "test"
 string(3) "foo"
 string(3) "bar"

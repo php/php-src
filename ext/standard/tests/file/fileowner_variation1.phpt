@@ -14,7 +14,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
  *              FALSE in case of an error.
  */
 
-/* Creating soft and hard links to a file and applying fileowner() on links */ 
+/* Creating soft and hard links to a file and applying fileowner() on links */
 
 $file_path = dirname(__FILE__);
 fclose( fopen($file_path."/fileowner_variation1.tmp", "w") );
@@ -39,7 +39,6 @@ unlink($file_path."/fileowner_variation1_symlink.tmp");
 unlink($file_path."/fileowner_variation1_link.tmp");
 unlink($file_path."/fileowner_variation1.tmp");
 ?>
-
 --EXPECTF--
 *** Testing fileowner() with links ***
 int(%d)

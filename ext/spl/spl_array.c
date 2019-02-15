@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -167,7 +165,7 @@ static void spl_array_object_free_storage(zend_object *object)
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
 /* {{{ spl_array_object_new_ex */
-static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *orig, int clone_orig)
+static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig)
 {
 	spl_array_object *intern;
 	zend_class_entry *parent = class_type;
@@ -181,7 +179,7 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 	intern->ar_flags = 0;
 	intern->ce_get_iterator = spl_ce_ArrayIterator;
 	if (orig) {
-		spl_array_object *other = Z_SPLARRAY_P(orig);
+		spl_array_object *other = spl_array_from_obj(orig);
 
 		intern->ar_flags &= ~ SPL_ARRAY_CLONE_MASK;
 		intern->ar_flags |= (other->ar_flags & SPL_ARRAY_CLONE_MASK);
@@ -189,16 +187,18 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 		if (clone_orig) {
 			if (other->ar_flags & SPL_ARRAY_IS_SELF) {
 				ZVAL_UNDEF(&intern->array);
-			} else if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayObject) {
+			} else if (orig->handlers == &spl_handler_ArrayObject) {
 				ZVAL_ARR(&intern->array,
 					zend_array_dup(spl_array_get_hash_table(other)));
 			} else {
-				ZEND_ASSERT(Z_OBJ_HT_P(orig) == &spl_handler_ArrayIterator);
-				ZVAL_COPY(&intern->array, orig);
+				ZEND_ASSERT(orig->handlers == &spl_handler_ArrayIterator);
+				GC_ADDREF(orig);
+				ZVAL_OBJ(&intern->array, orig);
 				intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 			}
 		} else {
-			ZVAL_COPY(&intern->array, orig);
+			GC_ADDREF(orig);
+			ZVAL_OBJ(&intern->array, orig);
 			intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 		}
 	} else {
@@ -245,19 +245,21 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 	/* Cache iterator functions if ArrayIterator or derived. Check current's */
 	/* cache since only current is always required */
 	if (intern->std.handlers == &spl_handler_ArrayIterator) {
-		if (!class_type->iterator_funcs.zf_current) {
-			class_type->iterator_funcs.zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
-			class_type->iterator_funcs.zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
-			class_type->iterator_funcs.zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
-			class_type->iterator_funcs.zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
-			class_type->iterator_funcs.zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
+		zend_class_iterator_funcs *funcs_ptr = class_type->iterator_funcs_ptr;
+
+		if (!funcs_ptr->zf_current) {
+			funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
+			funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
+			funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
+			funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
+			funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
 		}
 		if (inherited) {
-			if (class_type->iterator_funcs.zf_rewind->common.scope  != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_REWIND;
-			if (class_type->iterator_funcs.zf_valid->common.scope   != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_VALID;
-			if (class_type->iterator_funcs.zf_key->common.scope     != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_KEY;
-			if (class_type->iterator_funcs.zf_current->common.scope != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_CURRENT;
-			if (class_type->iterator_funcs.zf_next->common.scope    != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_NEXT;
+			if (funcs_ptr->zf_rewind->common.scope  != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_REWIND;
+			if (funcs_ptr->zf_valid->common.scope   != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_VALID;
+			if (funcs_ptr->zf_key->common.scope     != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_KEY;
+			if (funcs_ptr->zf_current->common.scope != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_CURRENT;
+			if (funcs_ptr->zf_next->common.scope    != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_NEXT;
 		}
 	}
 
@@ -274,13 +276,11 @@ static zend_object *spl_array_object_new(zend_class_entry *class_type)
 /* }}} */
 
 /* {{{ spl_array_object_clone */
-static zend_object *spl_array_object_clone(zval *zobject)
+static zend_object *spl_array_object_clone(zend_object *old_object)
 {
-	zend_object *old_object;
 	zend_object *new_object;
 
-	old_object = Z_OBJ_P(zobject);
-	new_object = spl_array_object_new_ex(old_object->ce, zobject, 1);
+	new_object = spl_array_object_new_ex(old_object->ce, old_object, 1);
 
 	zend_objects_clone_members(new_object, old_object);
 
@@ -394,11 +394,11 @@ num_index:
 	}
 } /* }}} */
 
-static int spl_array_has_dimension(zval *object, zval *offset, int check_empty);
+static int spl_array_has_dimension(zend_object *object, zval *offset, int check_empty);
 
-static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval *offset, int type, zval *rv) /* {{{ */
+static zval *spl_array_read_dimension_ex(int check_inherited, zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 	zval *ret;
 
 	if (check_inherited &&
@@ -417,7 +417,7 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 			} else {
 				SEPARATE_ARG_IF_REF(offset);
 			}
-			zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", rv, offset);
+			zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_get, "offsetGet", rv, offset);
 			zval_ptr_dtor(offset);
 
 			if (!Z_ISUNDEF_P(rv)) {
@@ -443,14 +443,14 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 	return ret;
 } /* }}} */
 
-static zval *spl_array_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
+static zval *spl_array_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	return spl_array_read_dimension_ex(1, object, offset, type, rv);
 } /* }}} */
 
-static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval *offset, zval *value) /* {{{ */
+static void spl_array_write_dimension_ex(int check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 	zend_long index;
 	HashTable *ht;
 
@@ -463,7 +463,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
 		}
-		zend_call_method_with_2_params(object, Z_OBJCE_P(object), &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
+		zend_call_method_with_2_params(object, object->ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
 		zval_ptr_dtor(offset);
 		return;
 	}
@@ -518,20 +518,20 @@ num_index:
 	}
 } /* }}} */
 
-static void spl_array_write_dimension(zval *object, zval *offset, zval *value) /* {{{ */
+static void spl_array_write_dimension(zend_object *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_array_write_dimension_ex(1, object, offset, value);
 } /* }}} */
 
-static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval *offset) /* {{{ */
+static void spl_array_unset_dimension_ex(int check_inherited, zend_object *object, zval *offset) /* {{{ */
 {
 	zend_long index;
 	HashTable *ht;
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 
 	if (check_inherited && intern->fptr_offset_del) {
 		SEPARATE_ARG_IF_REF(offset);
-		zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_del, "offsetUnset", NULL, offset);
+		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_del, "offsetUnset", NULL, offset);
 		zval_ptr_dtor(offset);
 		return;
 	}
@@ -603,23 +603,23 @@ num_index:
 	}
 } /* }}} */
 
-static void spl_array_unset_dimension(zval *object, zval *offset) /* {{{ */
+static void spl_array_unset_dimension(zend_object *object, zval *offset) /* {{{ */
 {
 	spl_array_unset_dimension_ex(1, object, offset);
 } /* }}} */
 
-static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *offset, int check_empty) /* {{{ */
+static int spl_array_has_dimension_ex(int check_inherited, zend_object *object, zval *offset, int check_empty) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 	zend_long index;
 	zval rv, *value = NULL, *tmp;
 
 	if (check_inherited && intern->fptr_offset_has) {
 		SEPARATE_ARG_IF_REF(offset);
-		zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, offset);
+		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
 
-		if (!Z_ISUNDEF(rv) && zend_is_true(&rv)) {
+		if (zend_is_true(&rv)) {
 			zval_ptr_dtor(&rv);
 			if (check_empty != 1) {
 				return 1;
@@ -694,26 +694,9 @@ num_index:
 	}
 } /* }}} */
 
-static int spl_array_has_dimension(zval *object, zval *offset, int check_empty) /* {{{ */
+static int spl_array_has_dimension(zend_object *object, zval *offset, int check_empty) /* {{{ */
 {
 	return spl_array_has_dimension_ex(1, object, offset, check_empty);
-} /* }}} */
-
-/* {{{ spl_array_object_verify_pos_ex */
-static inline int spl_array_object_verify_pos_ex(spl_array_object *object, HashTable *ht, const char *msg_prefix)
-{
-	if (!ht) {
-		php_error_docref(NULL, E_NOTICE, "%sArray was modified outside object and is no longer an array", msg_prefix);
-		return FAILURE;
-	}
-
-	return SUCCESS;
-} /* }}} */
-
-/* {{{ spl_array_object_verify_pos */
-static inline int spl_array_object_verify_pos(spl_array_object *object, HashTable *ht)
-{
-	return spl_array_object_verify_pos_ex(object, ht, "");
 } /* }}} */
 
 /* {{{ proto bool ArrayObject::offsetExists(mixed $index)
@@ -725,7 +708,7 @@ SPL_METHOD(Array, offsetExists)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		return;
 	}
-	RETURN_BOOL(spl_array_has_dimension_ex(0, getThis(), index, 2));
+	RETURN_BOOL(spl_array_has_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, 2));
 } /* }}} */
 
 /* {{{ proto mixed ArrayObject::offsetGet(mixed $index)
@@ -737,10 +720,9 @@ SPL_METHOD(Array, offsetGet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		return;
 	}
-	value = spl_array_read_dimension_ex(0, getThis(), index, BP_VAR_R, return_value);
+	value = spl_array_read_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, BP_VAR_R, return_value);
 	if (value != return_value) {
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 } /* }}} */
 
@@ -753,25 +735,19 @@ SPL_METHOD(Array, offsetSet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &index, &value) == FAILURE) {
 		return;
 	}
-	spl_array_write_dimension_ex(0, getThis(), index, value);
+	spl_array_write_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, value);
 } /* }}} */
 
 void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	HashTable *aht = spl_array_get_hash_table(intern);
-
-	if (!aht) {
-		php_error_docref(NULL, E_NOTICE, "Array was modified outside object and is no longer an array");
-		return;
-	}
 
 	if (spl_array_is_object(intern)) {
 		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(Z_OBJCE_P(object)->name));
 		return;
 	}
 
-	spl_array_write_dimension(object, NULL, append_value);
+	spl_array_write_dimension(Z_OBJ_P(object), NULL, append_value);
 } /* }}} */
 
 /* {{{ proto void ArrayObject::append(mixed $newval)
@@ -784,7 +760,7 @@ SPL_METHOD(Array, append)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		return;
 	}
-	spl_array_iterator_append(getThis(), value);
+	spl_array_iterator_append(ZEND_THIS, value);
 } /* }}} */
 
 /* {{{ proto void ArrayObject::offsetUnset(mixed $index)
@@ -796,7 +772,7 @@ SPL_METHOD(Array, offsetUnset)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		return;
 	}
-	spl_array_unset_dimension_ex(0, getThis(), index);
+	spl_array_unset_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index);
 } /* }}} */
 
 /* {{{ proto array ArrayObject::getArrayCopy()
@@ -804,32 +780,55 @@ SPL_METHOD(Array, offsetUnset)
    Return a copy of the contained array */
 SPL_METHOD(Array, getArrayCopy)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	RETURN_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
 } /* }}} */
 
-static HashTable *spl_array_get_properties(zval *object) /* {{{ */
+static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_purpose purpose) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
+	HashTable *ht;
+	zend_bool dup;
 
 	if (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) {
-		if (!intern->std.properties) {
-			rebuild_object_properties(&intern->std);
-		}
-		return intern->std.properties;
+		return zend_std_get_properties_for(object, purpose);
 	}
 
-	return spl_array_get_hash_table(intern);
+	/* We are supposed to be the only owner of the internal hashtable.
+	 * The "dup" flag decides whether this is a "long-term" use where
+	 * we need to duplicate, or a "temporary" one, where we can expect
+	 * that no operations on the ArrayObject will be performed in the
+	 * meantime. */
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+			dup = 1;
+			break;
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+		case _ZEND_PROP_PURPOSE_ARRAY_KEY_EXISTS:
+			dup = 0;
+			break;
+		default:
+			return zend_std_get_properties_for(object, purpose);
+	}
+
+	ht = spl_array_get_hash_table(intern);
+	if (dup) {
+		ht = zend_array_dup(ht);
+	} else {
+		GC_ADDREF(ht);
+	}
+	return ht;
 } /* }}} */
 
-static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
+static HashTable* spl_array_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
 	zval *storage;
 	zend_string *zname;
 	zend_class_entry *base;
-	spl_array_object *intern = Z_SPLARRAY_P(obj);
+	spl_array_object *intern = spl_array_from_obj(obj);
 
 	if (!intern->std.properties) {
 		rebuild_object_properties(&intern->std);
@@ -848,86 +847,96 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 		storage = &intern->array;
 		Z_TRY_ADDREF_P(storage);
 
-		base = Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator
+		base = obj->handlers == &spl_handler_ArrayIterator
 			? spl_ce_ArrayIterator : spl_ce_ArrayObject;
 		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
 		zend_symtable_update(debug_info, zname, storage);
-		zend_string_release(zname);
+		zend_string_release_ex(zname, 0);
 
 		return debug_info;
 	}
 }
 /* }}} */
 
-static HashTable *spl_array_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *spl_array_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(obj);
+	spl_array_object *intern = spl_array_from_obj(obj);
 	*gc_data = &intern->array;
 	*gc_data_count = 1;
 	return zend_std_get_properties(obj);
 }
 /* }}} */
 
-static zval *spl_array_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
+static zval *spl_array_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
-		return spl_array_read_dimension(object, member, type, rv);
+		&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
+		zval member;
+		ZVAL_STR(&member, name);
+		return spl_array_read_dimension(object, &member, type, rv);
 	}
-	return std_object_handlers.read_property(object, member, type, cache_slot, rv);
+	return zend_std_read_property(object, name, type, cache_slot, rv);
 } /* }}} */
 
-static void spl_array_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static zval *spl_array_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-	&& !std_object_handlers.has_property(object, member, 2, NULL)) {
-		spl_array_write_dimension(object, member, value);
-		return;
+	&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
+		zval member;
+		ZVAL_STR(&member, name);
+		spl_array_write_dimension(object, &member, value);
+		return value;
 	}
-	std_object_handlers.write_property(object, member, value, cache_slot);
+	return zend_std_write_property(object, name, value, cache_slot);
 } /* }}} */
 
-static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
+static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
+		&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
 		/* If object has offsetGet() overridden, then fallback to read_property,
 		 * which will call offsetGet(). */
+		zval member;
 		if (intern->fptr_offset_get) {
 			return NULL;
 		}
-		return spl_array_get_dimension_ptr(1, intern, member, type);
+		ZVAL_STR(&member, name);
+		return spl_array_get_dimension_ptr(1, intern, &member, type);
 	}
-	return std_object_handlers.get_property_ptr_ptr(object, member, type, cache_slot);
+	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 } /* }}} */
 
-static int spl_array_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
+static int spl_array_has_property(zend_object *object, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
-		return spl_array_has_dimension(object, member, has_set_exists);
+		&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
+		zval member;
+		ZVAL_STR(&member, name);
+		return spl_array_has_dimension(object, &member, has_set_exists);
 	}
-	return std_object_handlers.has_property(object, member, has_set_exists, cache_slot);
+	return zend_std_has_property(object, name, has_set_exists, cache_slot);
 } /* }}} */
 
-static void spl_array_unset_property(zval *object, zval *member, void **cache_slot) /* {{{ */
+static void spl_array_unset_property(zend_object *object, zend_string *name, void **cache_slot) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
-		spl_array_unset_dimension(object, member);
+		&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
+		zval member;
+		ZVAL_STR(&member, name);
+		spl_array_unset_dimension(object, &member);
 		return;
 	}
-	std_object_handlers.unset_property(object, member, cache_slot);
+	zend_std_unset_property(object, name, cache_slot);
 } /* }}} */
 
 static int spl_array_compare_objects(zval *o1, zval *o2) /* {{{ */
@@ -947,7 +956,7 @@ static int spl_array_compare_objects(zval *o1, zval *o2) /* {{{ */
 	/* if we just compared std.properties, don't do it again */
 	if (result == 0 &&
 			!(ht1 == intern1->std.properties && ht2 == intern2->std.properties)) {
-		result = std_object_handlers.compare_objects(o1, o2);
+		result = zend_std_compare_objects(o1, o2);
 	}
 	return result;
 } /* }}} */
@@ -1017,10 +1026,6 @@ static int spl_array_it_valid(zend_object_iterator *iter) /* {{{ */
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_VALID) {
 		return zend_user_it_valid(iter);
 	} else {
-		if (spl_array_object_verify_pos_ex(object, aht, "ArrayIterator::valid(): ") == FAILURE) {
-			return FAILURE;
-		}
-
 		return zend_hash_has_more_elements_ex(aht, spl_array_get_pos_ptr(aht, object));
 	}
 }
@@ -1035,7 +1040,7 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 		return zend_user_it_get_current_data(iter);
 	} else {
 		zval *data = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, object));
-		if (Z_TYPE_P(data) == IS_INDIRECT) {
+		if (data && Z_TYPE_P(data) == IS_INDIRECT) {
 			data = Z_INDIRECT_P(data);
 		}
 		return data;
@@ -1051,11 +1056,7 @@ static void spl_array_it_get_current_key(zend_object_iterator *iter, zval *key) 
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_KEY) {
 		zend_user_it_get_current_key(iter, key);
 	} else {
-		if (spl_array_object_verify_pos_ex(object, aht, "ArrayIterator::current(): ") == FAILURE) {
-			ZVAL_NULL(key);
-		} else {
-			zend_hash_get_current_key_zval_ex(aht, key, spl_array_get_pos_ptr(aht, object));
-		}
+		zend_hash_get_current_key_zval_ex(aht, key, spl_array_get_pos_ptr(aht, object));
 	}
 }
 /* }}} */
@@ -1069,11 +1070,6 @@ static void spl_array_it_move_forward(zend_object_iterator *iter) /* {{{ */
 		zend_user_it_move_forward(iter);
 	} else {
 		zend_user_it_invalidate_current(iter);
-		if (!aht) {
-			php_error_docref(NULL, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and is no longer an array");
-			return;
-		}
-
 		spl_array_next_ex(object, aht);
 	}
 }
@@ -1082,11 +1078,6 @@ static void spl_array_it_move_forward(zend_object_iterator *iter) /* {{{ */
 static void spl_array_rewind(spl_array_object *intern) /* {{{ */
 {
 	HashTable *aht = spl_array_get_hash_table(intern);
-
-	if (!aht) {
-		php_error_docref(NULL, E_NOTICE, "ArrayIterator::rewind(): Array was modified outside object and is no longer an array");
-		return;
-	}
 
 	if (intern->ht_iter == (uint32_t)-1) {
 		spl_array_get_pos_ptr(aht, intern);
@@ -1141,7 +1132,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		} else {
 			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
-			if (handler != std_object_handlers.get_properties) {
+			if (handler != zend_std_get_properties) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
 					"Overloaded object of type %s is not compatible with %s",
 					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
@@ -1196,7 +1187,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
    Constructs a new array object from an array or object. */
 SPL_METHOD(Array, __construct)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern;
 	zval *array;
 	zend_long ar_flags = 0;
@@ -1226,7 +1217,7 @@ SPL_METHOD(Array, __construct)
    Constructs a new array iterator from an array or object. */
 SPL_METHOD(ArrayIterator, __construct)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern;
 	zval *array;
 	zend_long ar_flags = 0;
@@ -1251,7 +1242,7 @@ SPL_METHOD(ArrayIterator, __construct)
    Set the class used in getIterator. */
 SPL_METHOD(Array, setIteratorClass)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zend_class_entry * ce_get_iterator = spl_ce_Iterator;
 
@@ -1267,7 +1258,7 @@ SPL_METHOD(Array, setIteratorClass)
    Get the class used in getIterator. */
 SPL_METHOD(Array, getIteratorClass)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1283,7 +1274,7 @@ SPL_METHOD(Array, getIteratorClass)
    Get flags */
 SPL_METHOD(Array, getFlags)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1298,7 +1289,7 @@ SPL_METHOD(Array, getFlags)
    Set flags */
 SPL_METHOD(Array, setFlags)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zend_long ar_flags = 0;
 
@@ -1314,7 +1305,7 @@ SPL_METHOD(Array, setFlags)
    Replace the referenced array or object with a new one and return the old one (right now copy - to be changed) */
 SPL_METHOD(Array, exchangeArray)
 {
-	zval *object = getThis(), *array;
+	zval *object = ZEND_THIS, *array;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &array) == FAILURE) {
@@ -1335,20 +1326,14 @@ SPL_METHOD(Array, exchangeArray)
    Create a new iterator from a ArrayObject instance */
 SPL_METHOD(Array, getIterator)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	if (!aht) {
-		php_error_docref(NULL, E_NOTICE, "Array was modified outside object and is no longer an array");
-		return;
-	}
-
-	ZVAL_OBJ(return_value, spl_array_object_new_ex(intern->ce_get_iterator, object, 0));
+	ZVAL_OBJ(return_value, spl_array_object_new_ex(intern->ce_get_iterator, Z_OBJ_P(object), 0));
 }
 /* }}} */
 
@@ -1356,7 +1341,7 @@ SPL_METHOD(Array, getIterator)
    Rewind array back to the start */
 SPL_METHOD(Array, rewind)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1372,17 +1357,12 @@ SPL_METHOD(Array, rewind)
 SPL_METHOD(Array, seek)
 {
 	zend_long opos, position;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &position) == FAILURE) {
-		return;
-	}
-
-	if (!aht) {
-		php_error_docref(NULL, E_NOTICE, "Array was modified outside object and is no longer an array");
 		return;
 	}
 
@@ -1401,38 +1381,30 @@ SPL_METHOD(Array, seek)
 	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", opos);
 } /* }}} */
 
-static int spl_array_object_count_elements_helper(spl_array_object *intern, zend_long *count) /* {{{ */
+static zend_long spl_array_object_count_elements_helper(spl_array_object *intern) /* {{{ */
 {
 	HashTable *aht = spl_array_get_hash_table(intern);
-	HashPosition pos, *pos_ptr;
-
-	if (!aht) {
-		php_error_docref(NULL, E_NOTICE, "Array was modified outside object and is no longer an array");
-		*count = 0;
-		return FAILURE;
-	}
-
 	if (spl_array_is_object(intern)) {
-		/* We need to store the 'pos' since we'll modify it in the functions
-		 * we're going to call and which do not support 'pos' as parameter. */
-		pos_ptr = spl_array_get_pos_ptr(aht, intern);
-		pos = *pos_ptr;
-		*count = 0;
-		spl_array_rewind(intern);
-		while (*pos_ptr < aht->nNumUsed && spl_array_next(intern) == SUCCESS) {
-			(*count)++;
-		}
-		*pos_ptr = pos;
-		return SUCCESS;
+		zend_long count = 0;
+		zend_string *key;
+		zval *val;
+		/* Count public/dynamic properties */
+		ZEND_HASH_FOREACH_STR_KEY_VAL(aht, key, val) {
+			if (Z_TYPE_P(val) == IS_INDIRECT) {
+				if (Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF) continue;
+				if (key && ZSTR_VAL(key)[0] == '\0') continue;
+			}
+			count++;
+		} ZEND_HASH_FOREACH_END();
+		return count;
 	} else {
-		*count = zend_hash_num_elements(aht);
-		return SUCCESS;
+		return zend_hash_num_elements(aht);
 	}
 } /* }}} */
 
-int spl_array_object_count_elements(zval *object, zend_long *count) /* {{{ */
+int spl_array_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	spl_array_object *intern = spl_array_from_obj(object);
 
 	if (intern->fptr_count) {
 		zval rv;
@@ -1445,7 +1417,8 @@ int spl_array_object_count_elements(zval *object, zend_long *count) /* {{{ */
 		*count = 0;
 		return FAILURE;
 	}
-	return spl_array_object_count_elements_helper(intern, count);
+	*count = spl_array_object_count_elements_helper(intern);
+	return SUCCESS;
 } /* }}} */
 
 /* {{{ proto int ArrayObject::count()
@@ -1453,21 +1426,18 @@ int spl_array_object_count_elements(zval *object, zend_long *count) /* {{{ */
    Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {
-	zend_long count;
-	spl_array_object *intern = Z_SPLARRAY_P(getThis());
+	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	spl_array_object_count_elements_helper(intern, &count);
-
-	RETURN_LONG(count);
+	RETURN_LONG(spl_array_object_count_elements_helper(intern));
 } /* }}} */
 
 static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(getThis());
+	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 	HashTable *aht = spl_array_get_hash_table(intern);
 	zval function_name, params[2], *arg = NULL;
 
@@ -1479,7 +1449,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 
 	if (!use_arg) {
 		intern->nApplyCount++;
-		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, 1, params, 1, NULL);
+		call_user_function(EG(function_table), NULL, &function_name, return_value, 1, params);
 		intern->nApplyCount--;
 	} else if (use_arg == SPL_ARRAY_METHOD_MAY_USER_ARG) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
@@ -1490,7 +1460,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 			ZVAL_COPY_VALUE(&params[1], arg);
 		}
 		intern->nApplyCount++;
-		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, arg ? 2 : 1, params, 1, NULL);
+		call_user_function(EG(function_table), NULL, &function_name, return_value, arg ? 2 : 1, params);
 		intern->nApplyCount--;
 	} else {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
@@ -1499,7 +1469,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		}
 		ZVAL_COPY_VALUE(&params[1], arg);
 		intern->nApplyCount++;
-		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, 2, params, 1, NULL);
+		call_user_function(EG(function_table), NULL, &function_name, return_value, 2, params);
 		intern->nApplyCount--;
 	}
 
@@ -1556,16 +1526,12 @@ SPL_ARRAY_METHOD(Array, natcasesort, SPL_ARRAY_METHOD_NO_ARG) /* }}} */
    Return current array entry */
 SPL_METHOD(Array, current)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zval *entry;
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
 		return;
 	}
 
@@ -1578,8 +1544,7 @@ SPL_METHOD(Array, current)
 			return;
 		}
 	}
-	ZVAL_DEREF(entry);
-	ZVAL_COPY(return_value, entry);
+	ZVAL_COPY_DEREF(return_value, entry);
 }
 /* }}} */
 
@@ -1591,17 +1556,13 @@ SPL_METHOD(Array, key)
 		return;
 	}
 
-	spl_array_iterator_key(getThis(), return_value);
+	spl_array_iterator_key(ZEND_THIS, return_value);
 } /* }}} */
 
 void spl_array_iterator_key(zval *object, zval *return_value) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
-
-	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
-		return;
-	}
 
 	zend_hash_get_current_key_zval_ex(aht, return_value, spl_array_get_pos_ptr(aht, intern));
 }
@@ -1611,15 +1572,11 @@ void spl_array_iterator_key(zval *object, zval *return_value) /* {{{ */
    Move to next entry */
 SPL_METHOD(Array, next)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
 		return;
 	}
 
@@ -1631,7 +1588,7 @@ SPL_METHOD(Array, next)
    Check whether array contains more entries */
 SPL_METHOD(Array, valid)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
@@ -1639,11 +1596,7 @@ SPL_METHOD(Array, valid)
 		return;
 	}
 
-	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
-		RETURN_FALSE;
-	} else {
-		RETURN_BOOL(zend_hash_has_more_elements_ex(aht, spl_array_get_pos_ptr(aht, intern)) == SUCCESS);
-	}
+	RETURN_BOOL(zend_hash_has_more_elements_ex(aht, spl_array_get_pos_ptr(aht, intern)) == SUCCESS);
 }
 /* }}} */
 
@@ -1651,16 +1604,12 @@ SPL_METHOD(Array, valid)
    Check whether current element has children (e.g. is an array) */
 SPL_METHOD(Array, hasChildren)
 {
-	zval *object = getThis(), *entry;
+	zval *object = ZEND_THIS, *entry;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
-	}
-
-	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
-		RETURN_FALSE;
 	}
 
 	if ((entry = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, intern))) == NULL) {
@@ -1680,15 +1629,11 @@ SPL_METHOD(Array, hasChildren)
    Create a sub iterator for the current element (same class as $this) */
 SPL_METHOD(Array, getChildren)
 {
-	zval *object = getThis(), *entry, flags;
+	zval *object = ZEND_THIS, *entry, flags;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	if (spl_array_object_verify_pos(intern, aht) == FAILURE) {
 		return;
 	}
 
@@ -1705,7 +1650,7 @@ SPL_METHOD(Array, getChildren)
 		if ((intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) != 0) {
 			return;
 		}
-		if (instanceof_function(Z_OBJCE_P(entry), Z_OBJCE_P(getThis()))) {
+		if (instanceof_function(Z_OBJCE_P(entry), Z_OBJCE_P(ZEND_THIS))) {
 			ZVAL_OBJ(return_value, Z_OBJ_P(entry));
 			Z_ADDREF_P(return_value);
 			return;
@@ -1713,7 +1658,7 @@ SPL_METHOD(Array, getChildren)
 	}
 
 	ZVAL_LONG(&flags, intern->ar_flags);
-	spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), return_value, entry, &flags);
+	spl_instantiate_arg_ex2(Z_OBJCE_P(ZEND_THIS), return_value, entry, &flags);
 }
 /* }}} */
 
@@ -1721,19 +1666,13 @@ SPL_METHOD(Array, getChildren)
    Serialize the object */
 SPL_METHOD(Array, serialize)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	HashTable *aht = spl_array_get_hash_table(intern);
 	zval members, flags;
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	if (!aht) {
-		php_error_docref(NULL, E_NOTICE, "Array was modified outside object and is no longer an array");
 		return;
 	}
 
@@ -1775,7 +1714,7 @@ SPL_METHOD(Array, serialize)
  */
 SPL_METHOD(Array, unserialize)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	char *buf;
@@ -1846,7 +1785,9 @@ SPL_METHOD(Array, unserialize)
 
 		if (Z_TYPE_P(array) == IS_ARRAY) {
 			zval_ptr_dtor(&intern->array);
-			ZVAL_COPY(&intern->array, array);
+			ZVAL_COPY_VALUE(&intern->array, array);
+			ZVAL_NULL(array);
+			SEPARATE_ARRAY(&intern->array);
 		} else {
 			spl_array_set_array(object, intern, array, 0L, 1);
 		}
@@ -2006,7 +1947,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Serializable);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Countable);
-	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&spl_handler_ArrayObject, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_ArrayObject.offset = XtOffsetOf(spl_array_object, std);
 
@@ -2017,7 +1958,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.has_dimension = spl_array_has_dimension;
 	spl_handler_ArrayObject.count_elements = spl_array_object_count_elements;
 
-	spl_handler_ArrayObject.get_properties = spl_array_get_properties;
+	spl_handler_ArrayObject.get_properties_for = spl_array_get_properties_for;
 	spl_handler_ArrayObject.get_debug_info = spl_array_get_debug_info;
 	spl_handler_ArrayObject.get_gc = spl_array_get_gc;
 	spl_handler_ArrayObject.read_property = spl_array_read_property;
@@ -2054,12 +1995,3 @@ PHP_MINIT_FUNCTION(spl_array)
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

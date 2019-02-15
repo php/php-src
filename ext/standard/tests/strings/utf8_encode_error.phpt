@@ -3,9 +3,9 @@ Test utf8_encode() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto string utf8_encode(string data)
- * Description: Encodes an ISO-8859-1 string to UTF-8 
+ * Description: Encodes an ISO-8859-1 string to UTF-8
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing utf8_encode() : error conditions ***\n";
@@ -35,4 +35,3 @@ NULL
 Warning: utf8_encode() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-

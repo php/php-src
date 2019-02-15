@@ -22,7 +22,7 @@ foreach ($data as $val) {
 }
 echo "\n";
 ?>
---EXPECT--	
+--EXPECT--
 float(0.23)
 float(-42)
 float(42)

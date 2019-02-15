@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -402,6 +402,7 @@ int LSAPI_Inc_Req_Processed(int cnt);
 #define LSAPI_LOG_TIMESTAMP_BITS (0xff00)
 #define LSAPI_LOG_TIMESTAMP_FULL (0x100)
 #define LSAPI_LOG_TIMESTAMP_HMS  (0x200)
+#define LSAPI_LOG_TIMESTAMP_STDERR  (0x400)
 
 #define LSAPI_LOG_PID            (0x10000)
 
@@ -418,10 +419,3 @@ void LSAPI_Log(int flag, const char * fmt, ...)
 
 
 #endif
-
-
-
-
-
-
-

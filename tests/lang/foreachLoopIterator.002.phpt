@@ -14,7 +14,7 @@ class MyIterator implements Iterator {
 $f = new MyIterator;
 echo "-----( Try to iterate with &\$value: )-----\n";
 foreach ($f as $k=>&$v) {
-	echo "$k => $v\n";	
+	echo "$k => $v\n";
 }
 
 ?>

@@ -1,5 +1,5 @@
 --TEST--
-ReflectionClass::getStaticPropertyValue() - bad params
+ReflectionClass::setStaticPropertyValue() - bad params
 --CREDITS--
 Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>
@@ -44,7 +44,6 @@ try {
 
 ?>
 --EXPECTF--
-
 Warning: ReflectionClass::setStaticPropertyValue() expects exactly 2 parameters, 3 given in %s on line 8
 NULL
 

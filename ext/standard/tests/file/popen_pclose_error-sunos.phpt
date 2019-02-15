@@ -5,7 +5,6 @@ Test popen() and pclose function: error conditions
 if( substr(PHP_OS, 0, 3) != 'Sun')
   die("skip Only valid for Sun Solaris");
 ?>
-
 --FILE--
 <?php
 /*

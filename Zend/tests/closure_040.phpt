@@ -6,11 +6,11 @@ Closure 040: Rebinding closures, bad arguments
 class A {
 	private $x;
 	private static $xs = 10;
-	
+
 	public function __construct($v) {
 		$this->x = $v;
 	}
-	
+
 	public function getIncrementor() {
 		return function() { return ++$this->x; };
 	}

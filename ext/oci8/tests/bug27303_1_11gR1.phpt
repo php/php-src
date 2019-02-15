@@ -51,7 +51,7 @@ oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(1) "1"
 string(1) "2"
 string(1) "3"

@@ -13,7 +13,7 @@ var_dump(token_get_all(-1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: token_get_all() expects parameter 1 to be string, array given in %s on line %d
 NULL
 

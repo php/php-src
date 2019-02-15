@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: John Coggeshall <john@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -101,7 +99,7 @@
 		ce.create_object = tidy_object_new_ ## name; \
 		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent); \
 		tidy_ce_ ## name->ce_flags |= __flags;  \
-		memcpy(&tidy_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
+		memcpy(&tidy_object_handlers_ ## name, &std_object_handlers, sizeof(zend_object_handlers)); \
 		tidy_object_handlers_ ## name.clone_obj = NULL; \
 	}
 
@@ -217,8 +215,8 @@ static void tidy_object_free_storage(zend_object *);
 static zend_object *tidy_object_new_node(zend_class_entry *);
 static zend_object *tidy_object_new_doc(zend_class_entry *);
 static zval * tidy_instanciate(zend_class_entry *, zval *);
-static int tidy_doc_cast_handler(zval *, zval *, int);
-static int tidy_node_cast_handler(zval *, zval *, int);
+static int tidy_doc_cast_handler(zend_object *, zval *, int);
+static int tidy_node_cast_handler(zend_object *, zval *, int);
 static void tidy_doc_update_properties(PHPTidyObj *);
 static void tidy_add_default_properties(PHPTidyObj *, tidy_obj_type);
 static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType *);
@@ -398,7 +396,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_body, 0, 0, 1)
 	ZEND_ARG_INFO(0, tidy)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_construct, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_construct, 0, 0, 0)
     ZEND_ARG_INFO(0, filename)
     ZEND_ARG_INFO(0, config_file)
     ZEND_ARG_INFO(0, encoding)
@@ -653,7 +651,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 
 	if (is_file) {
-		zend_string_release(data);
+		zend_string_release_ex(data, 0);
 	}
 
 	tidyBufFree(errbuf);
@@ -754,7 +752,7 @@ static zval * tidy_instanciate(zend_class_entry *pce, zval *object)
 	return object;
 }
 
-static int tidy_doc_cast_handler(zval *in, zval *out, int type)
+static int tidy_doc_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer output;
 	PHPTidyObj *obj;
@@ -774,7 +772,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type)
 			break;
 
 		case IS_STRING:
-			obj = Z_TIDY_P(in);
+			obj = php_tidy_fetch_object(in);
 			tidyBufInit(&output);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
 			ZVAL_STRINGL(out, (char *) output.bp, output.size ? output.size-1 : 0);
@@ -788,7 +786,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type)
 	return SUCCESS;
 }
 
-static int tidy_node_cast_handler(zval *in, zval *out, int type)
+static int tidy_node_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer buf;
 	PHPTidyObj *obj;
@@ -808,7 +806,7 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type)
 			break;
 
 		case IS_STRING:
-			obj = Z_TIDY_P(in);
+			obj = php_tidy_fetch_object(in);
 			tidyBufInit(&buf);
 			if (obj->ptdoc) {
 				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
@@ -1098,7 +1096,7 @@ static PHP_MSHUTDOWN_FUNCTION(tidy)
 static PHP_MINFO_FUNCTION(tidy)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Tidy support", "enabled");
+	php_info_print_table_row(2, "Tidy support", "enabled");
 #if HAVE_TIDYBUFFIO_H
 	php_info_print_table_row(2, "libTidy Version", (char *)tidyLibraryVersion());
 #elif HAVE_TIDYP_H
@@ -1107,7 +1105,6 @@ static PHP_MINFO_FUNCTION(tidy)
 #if HAVE_TIDYRELEASEDATE
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
 #endif
-	php_info_print_table_row(2, "Extension Version", PHP_TIDY_VERSION " ($Id$)");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -1316,7 +1313,7 @@ static PHP_FUNCTION(tidy_parse_file)
 		RETVAL_FALSE;
 	}
 
-	zend_string_release(contents);
+	zend_string_release_ex(contents, 0);
 }
 /* }}} */
 
@@ -1635,7 +1632,7 @@ static TIDY_DOC_METHOD(__construct)
 
 		php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc);
 
-		zend_string_release(contents);
+		zend_string_release_ex(contents, 0);
 	}
 }
 
@@ -1675,7 +1672,7 @@ static TIDY_DOC_METHOD(parseFile)
 		RETVAL_TRUE;
 	}
 
-	zend_string_release(contents);
+	zend_string_release_ex(contents, 0);
 }
 
 static TIDY_DOC_METHOD(parseString)
@@ -2024,15 +2021,36 @@ static void _php_tidy_register_tags(INIT_FUNC_ARGS)
 	TIDY_TAG_CONST(VAR);
 	TIDY_TAG_CONST(WBR);
 	TIDY_TAG_CONST(XMP);
+# if HAVE_TIDYBUFFIO_H
+	TIDY_TAG_CONST(ARTICLE);
+	TIDY_TAG_CONST(ASIDE);
+	TIDY_TAG_CONST(AUDIO);
+	TIDY_TAG_CONST(BDI);
+	TIDY_TAG_CONST(CANVAS);
+	TIDY_TAG_CONST(COMMAND);
+	TIDY_TAG_CONST(DATALIST);
+	TIDY_TAG_CONST(DETAILS);
+	TIDY_TAG_CONST(DIALOG);
+	TIDY_TAG_CONST(FIGCAPTION);
+	TIDY_TAG_CONST(FIGURE);
+	TIDY_TAG_CONST(FOOTER);
+	TIDY_TAG_CONST(HEADER);
+	TIDY_TAG_CONST(HGROUP);
+	TIDY_TAG_CONST(MAIN);
+	TIDY_TAG_CONST(MARK);
+	TIDY_TAG_CONST(MENUITEM);
+	TIDY_TAG_CONST(METER);
+	TIDY_TAG_CONST(NAV);
+	TIDY_TAG_CONST(OUTPUT);
+	TIDY_TAG_CONST(PROGRESS);
+	TIDY_TAG_CONST(SECTION);
+	TIDY_TAG_CONST(SOURCE);
+	TIDY_TAG_CONST(SUMMARY);
+	TIDY_TAG_CONST(TEMPLATE);
+	TIDY_TAG_CONST(TIME);
+	TIDY_TAG_CONST(TRACK);
+	TIDY_TAG_CONST(VIDEO);
+# endif
 }
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,17 +12,16 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "zend_extensions.h"
 
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;
+ZEND_API int zend_op_array_extension_handles = 0;
 static int last_resource_number;
 
 int zend_load_extension(const char *path)
@@ -200,6 +199,7 @@ int zend_startup_extensions_mechanism()
 {
 	/* Startup extensions mechanism */
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
+	zend_op_array_extension_handles = 0;
 	last_resource_number = 0;
 	return SUCCESS;
 }
@@ -259,6 +259,10 @@ ZEND_API int zend_get_resource_handle(zend_extension *extension)
 	}
 }
 
+ZEND_API int zend_get_op_array_extension_handle(void)
+{
+	return zend_op_array_extension_handles++;
+}
 
 ZEND_API zend_extension *zend_get_extension(const char *extension_name)
 {
@@ -325,13 +329,3 @@ ZEND_API size_t zend_extensions_op_array_persist(zend_op_array *op_array, void *
 	}
 	return 0;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

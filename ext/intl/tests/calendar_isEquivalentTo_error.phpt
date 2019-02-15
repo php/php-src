@@ -48,7 +48,6 @@ try {
 } catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
-
 --EXPECT--
 error: 0, Argument 1 passed to IntlCalendar::isEquivalentTo() must be an instance of IntlCalendar, int given
 

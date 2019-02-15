@@ -16,7 +16,7 @@ $str = "abc";
 /* Various combinations of arrays to be used for the test */
 $mixed_array = array(
   array(),
-  array( 1,2,3,4,5,6,7,8,9 ), 
+  array( 1,2,3,4,5,6,7,8,9 ),
   array( "One", "_Two", "Three", "Four", "Five" ),
   array( 6, "six", 7, "seven", 8, "eight", 9, "nine" ),
   array( "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee" ),
@@ -52,13 +52,13 @@ var_dump( array_shift($empty_array) );
 echo "\n*** Testing with various array inputs ***\n";
 
 $counter = 1;
-foreach( $mixed_array as $sub_array ) { 
+foreach( $mixed_array as $sub_array ) {
   echo "\n-- Input Array for Iteration $counter is -- \n";
   print_r( $sub_array );
   echo "\nOutput after shift is :\n";
   var_dump( array_shift($sub_array) );
   $counter++;
-} 
+}
 
 /*Checking for internal array pointer beint reset when shift is called */
 

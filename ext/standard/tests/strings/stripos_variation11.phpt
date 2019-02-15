@@ -19,11 +19,11 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 // array with different values
 $values =  array (
@@ -91,31 +91,31 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing stripos() function with unexpected values for haystack and needle ***
 -- Iteration 1 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 2 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 3 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 4 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 5 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 6 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 7 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 8 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 9 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 10 --
 
@@ -153,7 +153,7 @@ NULL
 Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 16 --
 bool(false)
@@ -161,7 +161,7 @@ bool(false)
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 17 --
-bool(false)
+int(0)
 bool(false)
 -- Iteration 18 --
 bool(false)
@@ -169,11 +169,7 @@ bool(false)
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 19 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-bool(false)
-
-Notice: Object of class sample could not be converted to int in %s on line %d
+int(0)
 bool(false)
 -- Iteration 20 --
 bool(false)

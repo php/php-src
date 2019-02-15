@@ -20,7 +20,7 @@ function ut_main()
 		'en_UK',
 		'hi'
 	);
-	
+
 	$res_str = '';
 
 	foreach( $locale_arr as $locale_entry )

@@ -1,9 +1,7 @@
 --TEST--
 openssl_x509_fingerprint() tests
 --SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+<?php if (!extension_loaded("openssl")) die("skip"); ?>
 --FILE--
 <?php
 
@@ -51,4 +49,3 @@ bool(false)
 
 Warning: openssl_x509_fingerprint(): Unknown signature algorithm in %s on line %d
 bool(false)
-

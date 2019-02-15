@@ -10,7 +10,7 @@ require_once('skipif.inc');
 <?php
 $rng = dirname(__FILE__).'/DOMDocument_relaxNGValidate_basic.rng';
 $xml = <<< XML
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 <apple> 
   <pear>Pear</pear> 
   <pear>Pear</pear> 

@@ -1,4 +1,4 @@
-<?php /* $Id$ */
+<?php
 
 $user = 'SYSDBA';
 $password = 'masterkey';

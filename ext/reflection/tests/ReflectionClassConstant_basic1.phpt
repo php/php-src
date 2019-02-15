@@ -73,7 +73,7 @@ bool(false)
 isProtected():
 bool(false)
 getModifiers():
-int(256)
+int(1)
 getDeclaringClass():
 object(ReflectionClass)#3 (1) {
   ["name"]=>
@@ -107,7 +107,7 @@ bool(false)
 isProtected():
 bool(true)
 getModifiers():
-int(512)
+int(2)
 getDeclaringClass():
 object(ReflectionClass)#3 (1) {
   ["name"]=>
@@ -141,7 +141,7 @@ bool(true)
 isProtected():
 bool(false)
 getModifiers():
-int(1024)
+int(4)
 getDeclaringClass():
 object(ReflectionClass)#3 (1) {
   ["name"]=>
@@ -175,7 +175,7 @@ bool(true)
 isProtected():
 bool(false)
 getModifiers():
-int(1024)
+int(4)
 getDeclaringClass():
 object(ReflectionClass)#3 (1) {
   ["name"]=>

@@ -41,7 +41,6 @@ function rrmdir($dir) {
 $targetDir = __DIR__.DIRECTORY_SEPARATOR . "depth01";
 rrmdir($targetDir);
 ?>
-
 --EXPECTF--
 depth1
 depth1

@@ -10,4 +10,3 @@ var_dump(mb_detect_encoding(chr(0xff), array('CP-1251'))); // letter '?'
 --EXPECT--
 string(12) "Windows-1251"
 string(12) "Windows-1251"
-

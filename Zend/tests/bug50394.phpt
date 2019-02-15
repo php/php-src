@@ -17,8 +17,7 @@ $proxy = new Proxy;
 call_user_func_array( array( $proxy, 'bar' ), $args );
 call_user_func_array( array( $proxy, 'bar' ), array(&$arg) );
 var_dump($arg);
---EXPECT--	
+--EXPECT--
 bar called!
 bar called!
 int(3)
-

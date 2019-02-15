@@ -5,7 +5,7 @@ Testing alias of alias
 
 namespace test\baz;
 
-class foo { 
+class foo {
 }
 
 new foo;

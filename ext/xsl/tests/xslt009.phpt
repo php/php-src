@@ -1,5 +1,5 @@
 --TEST--
-Test 9: Stream Wrapper XPath-Document() 
+Test 9: Stream Wrapper XPath-Document()
 --SKIPIF--
 <?php
 	require_once dirname(__FILE__) .'/skipif.inc';
@@ -20,8 +20,6 @@ if(!$xsl) {
 $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXML($dom);
-
-
 --EXPECT--
 Test 9: Stream Wrapper XPath-Document()
 <?xml version="1.0" encoding="iso-8859-1"?>

@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
+ * Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
@@ -40,7 +40,7 @@ chdir($workingDir);
 
 //define the files to go into these directories, create one in dir2
 echo "\n--- testing include path ---\n";
-set_include_path($newIncludePath);   
+set_include_path($newIncludePath);
 $modes = array("r", "r+", "rt");
 foreach($modes as $mode) {
     test_fopen($mode);
@@ -59,7 +59,7 @@ rmdir($thisTestDir);
 
 function test_fopen($mode) {
    global $scriptFile, $secondFile, $firstFile, $filename;
-   
+
    // create a file in the middle directory
    $h = fopen($secondFile, "w");
    fwrite($h, "in dir2");
@@ -76,44 +76,44 @@ function test_fopen($mode) {
    $h = fopen($firstFile, "w");
    fwrite($h, "in dir1");
    fclose($h);
-   
+
    //should now read dir1 file
    $h = fopen($filename, $mode, true);
    fpassthru($h);
    fclose($h);
    echo "\n";
-   
+
    // create a file in working directory
    $h = fopen($filename, "w");
    fwrite($h, "in working dir");
    fclose($h);
-   
+
    //should read the dir1 file
    $h = fopen($filename, $mode, true);
    fpassthru($h);
    fclose($h);
    echo "\n";
-   
+
    unlink($firstFile);
    unlink($secondFile);
-   
+
    //should read the working dir file
    $h = fopen($filename, $mode, true);
    fpassthru($h);
    fclose($h);
    echo "\n";
-   
+
    // create a file in the script directory
    $h = fopen($scriptFile, "w");
    fwrite($h, "in script dir");
    fclose($h);
-   
+
    //should read the file in script dir
    $h = fopen($filename, $mode, true);
    fpassthru($h);
    fclose($h);
    echo "\n";
-     
+
    //cleanup
    unlink($filename);
    unlink($scriptFile);
@@ -123,7 +123,6 @@ function test_fopen($mode) {
 ?>
 ===DONE===
 --EXPECT--
-
 --- testing include path ---
 
 ** testing with mode=r **
@@ -147,4 +146,3 @@ in dir1
 in working dir
 in script dir
 ===DONE===
-

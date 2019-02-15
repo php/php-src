@@ -18,7 +18,6 @@ var_dump(preg_match('/(?P<3>)/', ''));
 
 ?>
 --EXPECTF--
-
 Warning: preg_match(): Empty regular expression in %smatch_flags3.php on line 3
 bool(false)
 int(1)

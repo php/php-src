@@ -2,10 +2,10 @@
 Test wrong number of arguments and wrong arg types for ob_start()
 --FILE--
 <?php
-/* 
+/*
  * proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
  * Function is implemented in main/output.c
-*/ 
+*/
 
 function justPrint($str) {
 	return $str;

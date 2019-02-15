@@ -1,13 +1,12 @@
 --TEST--
-XMLWriter: libxml2 XML Writer, comments 
+XMLWriter: libxml2 XML Writer, comments
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 if (!function_exists("xmlwriter_start_comment")) die("skip: libxml2 2.6.7+ required");
 ?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
 $doc_dest = '001.xml';
 $xw = new XMLWriter();

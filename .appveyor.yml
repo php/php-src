@@ -1,4 +1,3 @@
-
 version: "{branch}.build.{build}"
 
 image: Visual Studio 2017
@@ -8,22 +7,16 @@ branches:
                 - PHP-5.6
                 - PHP-7.0
 
-skip_commits:
-        files:
-                - NEWS
-                - UPGRADING*
-                - README.*
-
 clone_depth: 64
 
 cache:
         - c:\build-cache
 
 environment:
-        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache  
+        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
         PHP_BUILD_OBJ_DIR: c:\obj
         PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
-        PHP_BUILD_SDK_BRANCH: php-sdk-2.1.3
+        PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0beta3
         PHP_BUILD_CRT: vc15
         # ext and env setup for tests
         #MYSQL_TEST_PASSWD: Password12!
@@ -39,6 +32,7 @@ environment:
                   OPCACHE: 0
                 - THREAD_SAFE: 1
                   OPCACHE: 1
+                  INTRINSICS: AVX
 
 services:
         # the setup scripts have to be touched, once some other db version is used
@@ -55,4 +49,3 @@ build_script:
 
 test_script:
         - appveyor\test.bat
-

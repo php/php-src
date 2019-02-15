@@ -1,7 +1,7 @@
 --TEST--
 bug #13181, leaving a context frees the broker resources
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded('enchant')) {
 	echo "skip: Enchant extension not enabled\n";
 	exit;

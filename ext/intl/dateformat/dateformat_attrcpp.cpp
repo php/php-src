@@ -245,4 +245,3 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	RETURN_TRUE;
 }
 /* }}} */
-

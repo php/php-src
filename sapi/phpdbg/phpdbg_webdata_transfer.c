@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -171,5 +171,5 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, size_t *len) {
 		*len = ZSTR_LEN(buf.s);
 	}
 
-	zval_dtor(&array);
+	zend_array_destroy(Z_ARR(array));
 }

@@ -31,31 +31,31 @@ $link_arr = array (
 );
 
 echo "\n-- Testing readlink() and realpath() with softlink, linkname stored inside an array --\n";
-// creating the links 
-var_dump( symlink($filename, $link_arr[0]) );  
-var_dump( readlink($link_arr[0]) ); 
-var_dump( realpath($link_arr[0]) ); 
-var_dump( symlink($filename, $link_arr[1]) ); 
+// creating the links
+var_dump( symlink($filename, $link_arr[0]) );
+var_dump( readlink($link_arr[0]) );
+var_dump( realpath($link_arr[0]) );
+var_dump( symlink($filename, $link_arr[1]) );
 var_dump( readlink($link_arr[1]) );
 var_dump( realpath($link_arr[1]) );
 
 // deleting the link
 unlink($link_arr[0]);
-unlink($link_arr[1]);  
+unlink($link_arr[1]);
 
 echo "\n-- Testing readlink() and realpath() with hardlink, linkname stored inside an array --\n";
 // creating hard links
-var_dump( link($filename, $link_arr[0]) );  
+var_dump( link($filename, $link_arr[0]) );
 var_dump( readlink($link_arr[0]) );   // invalid because readlink doesn't work with hardlink
 var_dump( realpath($link_arr[0]) );
-var_dump( link($filename, $link_arr[1]) );  
+var_dump( link($filename, $link_arr[1]) );
 var_dump( readlink($link_arr[1]) );   // invalid because readlink doesn't work with hardlink
 var_dump( realpath($link_arr[1]) );
 
-// delete the links 
+// delete the links
 unlink($link_arr[0]);
-unlink($link_arr[1]);  
-  
+unlink($link_arr[1]);
+
 echo "Done\n";
 ?>
 --CLEAN--

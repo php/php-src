@@ -14,7 +14,7 @@ class B extends A {
 		echo "In " . __METHOD__ . "($strMethod, array(" . implode(',',$arrArgs) . "))\n";
 		var_dump($this);
 	}
-	
+
 	function test() {
 		A::test1(1,'a');
 		B::test2(1,'a');

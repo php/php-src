@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,12 +13,10 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Bob Weinand <bwoebi@php.net>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    |          Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_AST_H
 #define ZEND_AST_H
@@ -89,6 +87,7 @@ enum _zend_ast_kind {
 	ZEND_AST_POST_INC,
 	ZEND_AST_POST_DEC,
 	ZEND_AST_YIELD_FROM,
+	ZEND_AST_CLASS_NAME,
 
 	ZEND_AST_GLOBAL,
 	ZEND_AST_UNSET,
@@ -121,6 +120,7 @@ enum _zend_ast_kind {
 	ZEND_AST_INSTANCEOF,
 	ZEND_AST_YIELD,
 	ZEND_AST_COALESCE,
+	ZEND_AST_ASSIGN_COALESCE,
 
 	ZEND_AST_STATIC,
 	ZEND_AST_WHILE,
@@ -136,6 +136,7 @@ enum _zend_ast_kind {
 	ZEND_AST_USE_ELEM,
 	ZEND_AST_TRAIT_ALIAS,
 	ZEND_AST_GROUP_USE,
+	ZEND_AST_PROP_GROUP,
 
 	/* 3 child nodes */
 	ZEND_AST_METHOD_CALL = 3 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -202,29 +203,15 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_str(zend_string *str
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_long lval);
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, zend_ast_attr attr);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *class_name, zend_ast *name);
 
 #if ZEND_AST_SPEC
-# ifdef ZEND_WIN32
-#  define ZEND_AST_EXPAND_VA(a) a
-# endif
-
-# ifdef ZEND_WIN32
-#  define ZEND_AST_SPEC_CALL(name, ...) \
-	ZEND_AST_EXPAND_VA(ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
-# else
-#  define ZEND_AST_SPEC_CALL(name, ...) \
-	ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__)
-# endif
+# define ZEND_AST_SPEC_CALL(name, ...) \
+	ZEND_EXPAND_VA(ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
 # define ZEND_AST_SPEC_CALL_(name, _, _4, _3, _2, _1, suffix, ...) \
 	name ## suffix
-
-# ifdef ZEND_WIN32
-#  define ZEND_AST_SPEC_CALL_EX(name, ...) \
-	ZEND_AST_EXPAND_VA(ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
-# else
-#  define ZEND_AST_SPEC_CALL_EX(name, ...) \
-	ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__)
-# endif
+# define ZEND_AST_SPEC_CALL_EX(name, ...) \
+	ZEND_EXPAND_VA(ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
 # define ZEND_AST_SPEC_CALL_EX_(name, _, _5, _4, _3, _2, _1, suffix, ...) \
 	name ## suffix
 
@@ -348,13 +335,3 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 	return ast;
 }
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

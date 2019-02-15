@@ -19,7 +19,6 @@ var_dump($data);
 $file = dirname(__FILE__) .'/fgetcsv-test.csv';
 unlink($file);
 ?>
-
 --EXPECTF--
 Notice: Array to string conversion in %s on line %d
 array(7) {

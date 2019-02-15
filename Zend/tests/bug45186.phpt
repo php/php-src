@@ -20,7 +20,7 @@ class bar  {
 		call_user_func(array('self', 'y'));
 		call_user_func('self::y');
 	}
-	static function x() { 
+	static function x() {
 		print "ok\n";
 	}
 }

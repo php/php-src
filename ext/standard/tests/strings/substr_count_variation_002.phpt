@@ -31,7 +31,7 @@ var_dump(substr_count($str, "\0"));
 var_dump(substr_count($str, "\x000"));
 var_dump(substr_count($str, "0"));
 
-echo "Done\n";	
+echo "Done\n";
 
 ?>
 --EXPECT--

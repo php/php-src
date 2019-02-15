@@ -7,7 +7,7 @@ Test copy() function: basic functionality
  *              Returns TRUE on success or FALSE on failure.
  */
 
-echo "*** Testing copy() function: to copy file from source to destination --\n"; 
+echo "*** Testing copy() function: to copy file from source to destination --\n";
 
 var_dump( file_exists(__FILE__) );
 
@@ -32,7 +32,6 @@ echo "\n";
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
@@ -41,7 +40,6 @@ $file_name2 = $file_path."/copy_basic2.tmp";
 unlink($file_name1);
 unlink($file_name2);
 ?>
-
 --EXPECTF--
 *** Testing copy() function: to copy file from source to destination --
 bool(true)
@@ -55,4 +53,3 @@ bool(true)
 %d
 %d
 *** Done ***
-

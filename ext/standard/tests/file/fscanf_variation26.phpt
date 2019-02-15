@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - char formats with chars 
+Test fscanf() function: usage variations - char formats with chars
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - char formats with chars
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different char format types with chars ***\n"; 
+echo "*** Test fscanf(): different char format types with chars ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation26.tmp";
@@ -353,4 +353,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

@@ -52,7 +52,6 @@ var_dump($r);
 $r = socket_get_option($s, $level, IP_MULTICAST_TTL);
 var_dump($r);
 echo "\n";
-
 --EXPECTF--
 Setting IP_MULTICAST_LOOP with 256
 bool(true)

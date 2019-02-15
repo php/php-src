@@ -29,7 +29,7 @@ if ($return_code != true) die("Failed to open file: " . $return_code);
 
 $return_code = $zipfile->addfile($testfile_zip, basename($testfile_zip));
 if ($return_code != true) print("Failed to add file: " . $zipfile->getStatusString());
-		
+
 $return_code = $zipfile->close();
 if ($return_code != true) die("Failed to close archive: " . $zipfile->getStatusString());
 

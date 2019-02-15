@@ -24,7 +24,7 @@ var_dump(gmp_hamdist());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(13)
 int(-1)
 int(36)

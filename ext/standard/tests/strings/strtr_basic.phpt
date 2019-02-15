@@ -27,7 +27,7 @@ var_dump( strtr('test strtr', 'test', 'TEST') );
 var_dump( strtr($heredoc_str, "test", "TEST") );
 
 //$from and $to are of different lengths, extra chars in the longer one are ignored
-var_dump( strtr("test strtr", "test", "TESTz") ); 
+var_dump( strtr("test strtr", "test", "TESTz") );
 var_dump( strtr('test strtr', 'testz', 'TEST') );
 var_dump( strtr($heredoc_str, "test", "TESTz") );
 

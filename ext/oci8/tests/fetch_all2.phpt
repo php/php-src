@@ -1,10 +1,10 @@
 --TEST--
-oci_fetch_all() - 2 
+oci_fetch_all() - 2
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -50,7 +50,7 @@ var_dump(oci_fetch_all($s, $all, 0, 1, OCI_BOTH));
 var_dump($all);
 
 require dirname(__FILE__).'/drop_table.inc';
-	
+
 echo "Done\n";
 ?>
 --EXPECT--

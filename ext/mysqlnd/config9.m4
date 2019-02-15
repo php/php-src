@@ -1,5 +1,3 @@
-dnl
-dnl $Id$
 dnl config.m4 for mysqlnd driver
 
 PHP_ARG_ENABLE(mysqlnd, whether to enable mysqlnd,

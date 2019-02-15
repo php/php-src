@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +15,6 @@
    | Author: Jim Winstead <jimw@php.net>                                  |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -42,19 +41,19 @@
 PHPAPI void php_url_free(php_url *theurl)
 {
 	if (theurl->scheme)
-		zend_string_release(theurl->scheme);
+		zend_string_release_ex(theurl->scheme, 0);
 	if (theurl->user)
-		zend_string_release(theurl->user);
+		zend_string_release_ex(theurl->user, 0);
 	if (theurl->pass)
-		zend_string_release(theurl->pass);
+		zend_string_release_ex(theurl->pass, 0);
 	if (theurl->host)
-		zend_string_release(theurl->host);
+		zend_string_release_ex(theurl->host, 0);
 	if (theurl->path)
-		zend_string_release(theurl->path);
+		zend_string_release_ex(theurl->path, 0);
 	if (theurl->query)
-		zend_string_release(theurl->query);
+		zend_string_release_ex(theurl->query, 0);
 	if (theurl->fragment)
-		zend_string_release(theurl->fragment);
+		zend_string_release_ex(theurl->fragment, 0);
 	efree(theurl);
 }
 /* }}} */
@@ -666,8 +665,7 @@ PHP_FUNCTION(get_headers)
 	char *url;
 	size_t url_len;
 	php_stream *stream;
-	zval *prev_val, *hdr = NULL, *h;
-	HashTable *hashT;
+	zval *prev_val, *hdr = NULL;
 	zend_long format = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context;
@@ -692,19 +690,7 @@ PHP_FUNCTION(get_headers)
 
 	array_init(return_value);
 
-	/* check for curl-wrappers that provide headers via a special "headers" element */
-	if ((h = zend_hash_str_find(HASH_OF(&stream->wrapperdata), "headers", sizeof("headers")-1)) != NULL && Z_TYPE_P(h) == IS_ARRAY) {
-		/* curl-wrappers don't load data until the 1st read */
-		if (!Z_ARRVAL_P(h)->nNumOfElements) {
-			php_stream_getc(stream);
-		}
-		h = zend_hash_str_find(HASH_OF(&stream->wrapperdata), "headers", sizeof("headers")-1);
-		hashT = Z_ARRVAL_P(h);
-	} else {
-		hashT = HASH_OF(&stream->wrapperdata);
-	}
-
-	ZEND_HASH_FOREACH_VAL(hashT, hdr) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&stream->wrapperdata), hdr) {
 		if (Z_TYPE_P(hdr) != IS_STRING) {
 			continue;
 		}
@@ -740,12 +726,3 @@ no_name_header:
 	php_stream_close(stream);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

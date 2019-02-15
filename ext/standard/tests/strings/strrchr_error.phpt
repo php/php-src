@@ -1,9 +1,9 @@
 --TEST--
-Test strrchr() function : error conditions 
+Test strrchr() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string strrchr(string $haystack, string $needle);
- * Description: Finds the last occurrence of a character in a string. 
+ * Description: Finds the last occurrence of a character in a string.
  * Source code: ext/standard/string.c
 */
 

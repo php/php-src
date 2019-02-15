@@ -36,4 +36,3 @@ var_dump($dom->saveHTML($node));
 string(8) "hi there"
 bool(true)
 string(63) "<div id="test">&lt;p&gt;hello world &amp;trade;&lt;/p&gt;</div>"
-

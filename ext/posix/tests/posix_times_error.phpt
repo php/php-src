@@ -1,15 +1,15 @@
 --TEST--
-Test posix_times() function : error conditions 
+Test posix_times() function : error conditions
 --SKIPIF--
-<?php 
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+<?php
+	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
 /* Prototype  : proto array posix_times(void)
- * Description: Get process times (POSIX.1, 4.5.2) 
+ * Description: Get process times (POSIX.1, 4.5.2)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_times() : error conditions ***\n";

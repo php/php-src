@@ -1,5 +1,5 @@
 --TEST--
-Test mb_substitute_character() function : error conditions 
+Test mb_substitute_character() function : error conditions
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,9 +8,9 @@ function_exists('mb_substitute_character') or die("skip mb_substitute_character(
 --FILE--
 <?php
 /* Prototype  : mixed mb_substitute_character([mixed substchar])
- * Description: Sets the current substitute_character or returns the current substitute_character 
+ * Description: Sets the current substitute_character or returns the current substitute_character
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_substitute_character() : error conditions ***\n";
@@ -32,4 +32,3 @@ var_dump( mb_substitute_character($substchar, $extra_arg) );
 Warning: mb_substitute_character() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 ===DONE===
-

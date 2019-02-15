@@ -1,7 +1,7 @@
 --TEST--
 Bug #30725 (PHP segfaults when an exception is thrown in getIterator() within foreach)
 --FILE--
-<?php 
+<?php
 
 class Test implements IteratorAggregate
 {
@@ -12,7 +12,7 @@ class Test implements IteratorAggregate
 }
 
 try
-{           
+{
 	$it = new Test;
 	foreach($it as $v)
 	{

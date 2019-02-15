@@ -11,4 +11,3 @@ class foo {
 foo::bar();
 --EXPECT--
 Done
-

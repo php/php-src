@@ -4,7 +4,7 @@ collections and correct dates
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -18,7 +18,7 @@ $statement = OCIParse($c,$ora_sql);
 @OCIExecute($statement);
 
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF DATE";
-			  
+
 $statement = OCIParse($c,$ora_sql);
 OCIExecute($statement);
 

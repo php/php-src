@@ -75,7 +75,7 @@ foreach ($queries as $k => $query) {
 	$stmt = $db->prepare($query);
 	$stmt->bindParam(':id', $id);
 	$stmt->execute();
-	
+
 	printf("[%d] Query: [[%s]]\n", $k + 1, $query);
 	print implode(' - ', (($r = @$stmt->fetch(PDO::FETCH_NUM)) ? $r : array())) ."\n";
 	print implode(' - ', $stmt->errorinfo()) ."\n";

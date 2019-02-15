@@ -1,11 +1,11 @@
 --TEST--
-Test get_declared_traits() function : error conditions 
+Test get_declared_traits() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto array get_declared_traits()
- * Description: Returns an array of all declared traits. 
+ * Description: Returns an array of all declared traits.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing get_declared_traits() : error conditions ***\n";

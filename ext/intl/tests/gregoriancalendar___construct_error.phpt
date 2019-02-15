@@ -26,7 +26,6 @@ try {
 	print_exception($e);
 }
 --EXPECTF--
-
 Warning: intlgregcal_create_instance(): intlgregcal_create_instance: too many arguments in %s on line %d
 NULL
 

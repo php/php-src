@@ -30,13 +30,11 @@ var_dump( filesize($src_dir) );
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_copy_variation12");
 rmdir(dirname(__FILE__)."/copy_variation12");
 ?>
-
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of an existing dir ***
 

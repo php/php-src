@@ -4,7 +4,7 @@ oci_lob_write() and friends (with errors)
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -62,13 +62,13 @@ object(OCI-Lob)#%d (1) {
 }
 int(0)
 
-Warning: OCI-Lob::write() expects parameter 2 to be int, string given in %slob_002.php on line %d
+Warning: OCI-Lob::write() expects parameter 2 to be int%s string given in %slob_002.php on line %d
 NULL
 int(4)
 int(40000)
 int(40004)
 
-Warning: OCI-Lob::seek() expects parameter 1 to be int, string given in %slob_002.php on line %d
+Warning: OCI-Lob::seek() expects parameter 1 to be int%s string given in %slob_002.php on line %d
 NULL
 bool(false)
 int(40004)

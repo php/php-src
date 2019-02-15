@@ -1,11 +1,5 @@
 --TEST--
 Test support for PCRE marks
---SKIPIF--
-<?php
-if (version_compare(PCRE_VERSION, '8.1', '<')) {
-    die('skip PCRE_VERSION >= 8.1 is required for MARK support');
-}
-?>
 --FILE--
 <?php
 

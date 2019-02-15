@@ -13,7 +13,7 @@ var_dump($foo);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(2) {
   [0]=>
   string(3) "abc"

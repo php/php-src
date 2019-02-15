@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
 #ifdef PHP_WIN32
 
 #include "php.h"
@@ -44,9 +43,9 @@
 
 /*
 TODO:
-- Create php_readlink (done), php_link and php_symlink in win32/link.c
+- Create php_readlink (done), php_link (done) and php_symlink (done) in win32/link.c
 - Expose them (PHPAPI) so extensions developers can use them
-- define link/readlink/symlink to their php_ equivalent and use them in ext/standart/link.c
+- define link/readlink/symlink to their php_ equivalent and use them in ext/standard/link.c
 - this file is then useless and we have a portable link API
 */
 
@@ -88,6 +87,7 @@ PHP_FUNCTION(readlink)
 PHP_FUNCTION(linkinfo)
 {
 	char *link;
+	char *dirname;
 	size_t link_len;
 	zend_stat_t sb;
 	int ret;
@@ -96,12 +96,22 @@ PHP_FUNCTION(linkinfo)
 		return;
 	}
 
+	dirname = estrndup(link, link_len);
+	php_dirname(dirname, link_len);
+
+	if (php_check_open_basedir(dirname)) {
+		efree(dirname);
+		RETURN_FALSE;
+	}
+
 	ret = VCWD_STAT(link, &sb);
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+		efree(dirname);
 		RETURN_LONG(Z_L(-1));
 	}
 
+	efree(dirname);
 	RETURN_LONG((zend_long) sb.st_dev);
 }
 /* }}} */
@@ -112,13 +122,11 @@ PHP_FUNCTION(symlink)
 {
 	char *topath, *frompath;
 	size_t topath_len, frompath_len;
-	BOOLEAN ret;
+	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 	char dirname[MAXPATHLEN];
 	size_t len;
-	DWORD attr;
-	wchar_t *dstw, *srcw;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
@@ -152,37 +160,15 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-	dstw = php_win32_ioutil_any_to_w(topath);
-	if (!dstw) {
-		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
-		RETURN_FALSE;
-	}
-	if ((attr = GetFileAttributesW(dstw)) == INVALID_FILE_ATTRIBUTES) {
-		free(dstw);
-		php_error_docref(NULL, E_WARNING, "Could not fetch file information(error %d)", GetLastError());
-		RETURN_FALSE;
-	}
-
-	srcw = php_win32_ioutil_any_to_w(source_p);
-	if (!srcw) {
-		free(dstw);
-		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
-		RETURN_FALSE;
-	}
 	/* For the source, an expanded path must be used (in ZTS an other thread could have changed the CWD).
 	 * For the target the exact string given by the user must be used, relative or not, existing or not.
 	 * The target is relative to the link itself, not to the CWD. */
-	ret = CreateSymbolicLinkW(srcw, dstw, (attr & FILE_ATTRIBUTE_DIRECTORY ? 1 : 0));
+	ret = php_sys_symlink(topath, source_p);
 
-	if (!ret) {
-		free(dstw);
-		free(srcw);
-		php_error_docref(NULL, E_WARNING, "Cannot create symlink, error code(%d)", GetLastError());
+	if (ret == -1) {
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
-
-	free(dstw);
-	free(srcw);
 
 	RETURN_TRUE;
 }
@@ -225,12 +211,11 @@ PHP_FUNCTION(link)
 	}
 
 #ifndef ZTS
-	ret = CreateHardLinkA(topath, frompath, NULL);
+	ret = php_sys_link(topath, frompath);
 #else
-	ret = CreateHardLinkA(dest_p, source_p, NULL);
+	ret = php_sys_link(dest_p, source_p);
 #endif
-
-	if (ret == 0) {
+	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
@@ -240,12 +225,3 @@ PHP_FUNCTION(link)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

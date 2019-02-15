@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Kristian Koehntopp <kris@koehntopp.de>                       |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -36,11 +34,6 @@
 #endif
 
 #include <sys/resource.h>
-
-#if defined(_GNU_SOURCE) && !defined(__USE_GNU)
-# define __USE_GNU
-#endif
-
 #include <sys/utsname.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -51,6 +44,9 @@
 #include <pwd.h>
 #if HAVE_SYS_MKDEV_H
 # include <sys/mkdev.h>
+#endif
+#if HAVE_SYS_SYSMACROS_H
+# include <sys/sysmacros.h>
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
@@ -321,7 +317,7 @@ static const zend_function_entry posix_functions[] = {
 static PHP_MINFO_FUNCTION(posix)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Revision", "$Id$");
+	php_info_print_table_row(2, "POSIX support", "enabled");
 	php_info_print_table_end();
 }
 /* }}} */
@@ -1080,9 +1076,15 @@ PHP_FUNCTION(posix_getgrnam)
 		RETURN_FALSE;
 	}
 	buf = emalloc(buflen);
+try_again:
 	g = &gbuf;
 
 	if (getgrnam_r(name, g, buf, buflen, &g) || g == NULL) {
+		if (errno == ERANGE) {
+			buflen *= 2;
+			buf = erealloc(buf, buflen);
+			goto try_again;
+		}
 		POSIX_G(last_error) = errno;
 		efree(buf);
 		RETURN_FALSE;
@@ -1096,7 +1098,7 @@ PHP_FUNCTION(posix_getgrnam)
 	array_init(return_value);
 
 	if (!php_posix_group_to_array(g, return_value)) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		php_error_docref(NULL, E_WARNING, "unable to convert posix group to array");
 		RETVAL_FALSE;
 	}
@@ -1149,7 +1151,7 @@ PHP_FUNCTION(posix_getgrgid)
 	array_init(return_value);
 
 	if (!php_posix_group_to_array(g, return_value)) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		php_error_docref(NULL, E_WARNING, "unable to convert posix group struct to array");
 		RETVAL_FALSE;
 	}
@@ -1216,7 +1218,7 @@ PHP_FUNCTION(posix_getpwnam)
 	array_init(return_value);
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		php_error_docref(NULL, E_WARNING, "unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
@@ -1267,7 +1269,7 @@ PHP_FUNCTION(posix_getpwuid)
 	array_init(return_value);
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		php_error_docref(NULL, E_WARNING, "unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
@@ -1386,7 +1388,7 @@ PHP_FUNCTION(posix_getrlimit)
 
 	for (l=limits; l->name; l++) {
 		if (posix_addlimit(l->limit, l->name, return_value) == FAILURE) {
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_FALSE;
 		}
 	}
@@ -1472,12 +1474,3 @@ PHP_FUNCTION(posix_initgroups)
 }
 /* }}} */
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

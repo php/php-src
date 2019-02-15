@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author:  Jim Winstead <jimw@php.net>                                 |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "fopen_wrappers.h"
@@ -116,7 +114,9 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
@@ -210,7 +210,9 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
@@ -642,11 +644,7 @@ PHP_FUNCTION(touch)
 
 	switch (argc) {
 		case 1:
-#ifdef HAVE_UTIME_NULL
 			newtime = NULL;
-#else
-			newtime->modtime = newtime->actime = time(NULL);
-#endif
 			break;
 		case 2:
 			newtime->modtime = newtime->actime = filetime;
@@ -925,19 +923,8 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
 		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
 		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
-#ifdef HAVE_ST_RDEV
-# ifdef PHP_WIN32
-	/* It is unsigned, so if a negative came from userspace, it'll
-	   convert to UINT_MAX, but we wan't to keep the userspace value.
-	   Almost the same as in php_if_fstat. */
-	if ((int)stat_sb->st_rdev < 0) {
-		ZVAL_LONG(&stat_rdev, (int)stat_sb->st_rdev);
-	} else {
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
-	}
-# else
-	ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
-# endif
 #else
 		ZVAL_LONG(&stat_rdev, -1);
 #endif
@@ -945,12 +932,12 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
 		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
 		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
 		ZVAL_LONG(&stat_blksize,-1);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
 #else
 		ZVAL_LONG(&stat_blocks,-1);
@@ -1147,12 +1134,3 @@ PHP_FUNCTION(realpath_cache_get)
 		buckets++;
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

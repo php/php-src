@@ -73,4 +73,3 @@ NULL
 
 Warning: move_uploaded_file() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
-

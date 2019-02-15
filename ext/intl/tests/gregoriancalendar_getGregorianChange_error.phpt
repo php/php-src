@@ -16,7 +16,6 @@ var_dump($c->getGregorianChange(1));
 var_dump(intlgregcal_get_gregorian_change($c, 1));
 var_dump(intlgregcal_get_gregorian_change(1));
 --EXPECTF--
-
 Warning: IntlGregorianCalendar::getGregorianChange() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlGregorianCalendar::getGregorianChange(): intlgregcal_get_gregorian_change: bad arguments in %s on line %d

@@ -14,9 +14,7 @@ var_dump($tz->getOffset(time()*1000, true, $a));
 var_dump($tz->getOffset(time()*1000, true, $a, $a, $a));
 
 intltz_get_offset(null, time()*1000, false, $a, $a);
-
 --EXPECTF--
-
 Warning: IntlTimeZone::getOffset(): intltz_get_offset: error obtaining offset in %s on line %d
 bool(false)
 

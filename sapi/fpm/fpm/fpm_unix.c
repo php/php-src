@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_unix.c,v 1.25.2.1 2008/12/13 03:18:23 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -536,7 +534,7 @@ int fpm_unix_init_main() /* {{{ */
 						exit(FPM_EXIT_SOFTWARE);
 					} else {
 						if (readval == 1) {
-							zlog(ZLOG_DEBUG, "I received a valid acknoledge from the master process, I can exit without error");
+							zlog(ZLOG_DEBUG, "I received a valid acknowledge from the master process, I can exit without error");
 							fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
 							exit(FPM_EXIT_OK);
 						} else {
@@ -579,4 +577,3 @@ int fpm_unix_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

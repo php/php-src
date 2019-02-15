@@ -1,5 +1,5 @@
 --TEST--
-ReflectionObject::getConstants() - basic function test 
+ReflectionObject::getConstants() - basic function test
 --FILE--
 <?php
 class C {

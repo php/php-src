@@ -7,7 +7,7 @@ Test is_string() function
  */
 
 echo "*** Testing is_string() with valid string values ***\n";
-// different valid strings 
+// different valid strings
 
 /* string created using Heredoc (<<<) */
 $heredoc_string = <<<EOT
@@ -50,7 +50,7 @@ $strings = array(
   $heredoc_empty_string,
   $heredoc_null_string
 );
-/* loop to check that is_string() recognizes different 
+/* loop to check that is_string() recognizes different
    strings, expected output bool(true) */
 $loop_counter = 1;
 foreach ($strings as $string ) {
@@ -70,10 +70,10 @@ $unset_string2 = 'string';
 $unset_heredoc = <<<EOT
 this is heredoc string
 EOT;
-// unset the vars 
+// unset the vars
 unset($unset_string1, $unset_string2, $unset_heredoc);
 
-// other types in a array 
+// other types in a array
 $not_strings = array (
   /* integers */
   0,
@@ -130,9 +130,9 @@ $not_strings = array (
   @$unset_string1,
   @$unset_string2,
   @$unset_heredoc,
-  @$undefined_var 
+  @$undefined_var
 );
-/* loop through the $not_strings to see working of 
+/* loop through the $not_strings to see working of
    is_string() on non string types, expected output bool(false) */
 $loop_counter = 1;
 foreach ($not_strings as $type ) {
@@ -144,9 +144,9 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 var_dump( is_string() );
 
-//arguments more than expected 
+//arguments more than expected
 var_dump( is_string("string", "test") );
- 
+
 echo "Done\n";
 
 // close the resources used

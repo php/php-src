@@ -3,7 +3,7 @@ Test readdir() function : error conditions - Incorrect number of args
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -32,7 +32,7 @@ closedir($dir_handle);
 <?php
 $path = dirname(__FILE__) . "/readdir_error";
 rmdir($path);
-?> 
+?>
 --EXPECTF--
 *** Testing readdir() : error conditions ***
 

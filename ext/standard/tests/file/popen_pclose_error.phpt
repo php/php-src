@@ -5,7 +5,6 @@ Test popen() and pclose function: error conditions
 if(substr(PHP_OS, 0, 3) == 'WIN' || strtoupper( substr(PHP_OS, 0, 3) ) == 'SUN')
   die("skip Not Valid for Windows & Sun Solaris");
 ?>
-
 --FILE--
 <?php
 /*

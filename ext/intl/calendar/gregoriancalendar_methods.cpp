@@ -65,7 +65,7 @@ static void _php_intlgregcal_constructor_body(
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlgregcal_create_instance: too many arguments", 0);
 		if (!is_constructor) {
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETVAL_NULL();
 		}
 		return;
@@ -78,7 +78,7 @@ static void _php_intlgregcal_constructor_body(
 			"intlgregcal_create_instance: no variant with 4 arguments "
 			"(excluding trailing NULLs)", 0);
 		if (!is_constructor) {
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETVAL_NULL();
 		}
 		return;
@@ -91,7 +91,7 @@ static void _php_intlgregcal_constructor_body(
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlgregcal_create_instance: bad arguments", 0);
 			if (!is_constructor) {
-				zval_dtor(return_value);
+				zval_ptr_dtor(return_value);
 				RETVAL_NULL();
 			}
 			return;
@@ -103,7 +103,7 @@ static void _php_intlgregcal_constructor_body(
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlgregcal_create_instance: bad arguments", 0);
 		if (!is_constructor) {
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETVAL_NULL();
 		}
 		return;
@@ -121,7 +121,7 @@ static void _php_intlgregcal_constructor_body(
 				zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 			}
 			if (!is_constructor) {
-				zval_dtor(return_value);
+				zval_ptr_dtor(return_value);
 				RETVAL_NULL();
 			}
 			return;
@@ -140,7 +140,7 @@ static void _php_intlgregcal_constructor_body(
 			}
 			delete tz;
 			if (!is_constructor) {
-				zval_dtor(return_value);
+				zval_ptr_dtor(return_value);
 				RETVAL_NULL();
 			}
 			return;
@@ -153,7 +153,7 @@ static void _php_intlgregcal_constructor_body(
 					"intlgregcal_create_instance: at least one of the arguments"
 					" has an absolute value that is too large", 0);
 				if (!is_constructor) {
-					zval_dtor(return_value);
+					zval_ptr_dtor(return_value);
 					RETVAL_NULL();
 				}
 				return;
@@ -178,19 +178,14 @@ static void _php_intlgregcal_constructor_body(
 				delete gcal;
 			}
 			if (!is_constructor) {
-				zval_dtor(return_value);
+				zval_ptr_dtor(return_value);
 				RETVAL_NULL();
 			}
 			return;
 		}
 
 		timelib_tzinfo *tzinfo = get_timezone_info();
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 		UnicodeString tzstr = UnicodeString::fromUTF8(StringPiece(tzinfo->name));
-#else
-		UnicodeString tzstr = UnicodeString(tzinfo->name,
-			strlen(tzinfo->name), US_INV);
-#endif
 		if (tzstr.isBogus()) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlgregcal_create_instance: could not create UTF-8 string "
@@ -198,7 +193,7 @@ static void _php_intlgregcal_constructor_body(
 				0);
 			delete gcal;
 			if (!is_constructor) {
-				zval_dtor(return_value);
+				zval_ptr_dtor(return_value);
 				RETVAL_NULL();
 			}
 			return;
@@ -225,7 +220,7 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-	return_value = getThis();
+	return_value = ZEND_THIS;
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 	zend_restore_error_handling(&error_handling);
 }

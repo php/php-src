@@ -33,13 +33,11 @@ var_dump( filesize($dir) );
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_variation13_dir.tmp");
 rmdir(dirname(__FILE__)."/copy_variation13");
 ?>
-
 --EXPECTF--
 *** Test copy() function: Trying to copy dir to file ***
 *** Testing copy() in copying dir to file ***

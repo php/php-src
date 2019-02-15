@@ -6,16 +6,6 @@ Scalar type strict mode
 <?php
 declare(strict_types=1);
 
-$errnames = [
-    E_NOTICE => 'E_NOTICE',
-    E_WARNING => 'E_WARNING',
-    E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR'
-];
-set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames) {
-    echo "$errnames[$errno]: $errmsg on line $line\n";
-    return true;
-});
-
 $functions = [
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
@@ -106,11 +96,11 @@ int(9223372036854775807)
 }
 *** Caught Argument 1 passed to {closure}() must be of the type int, array given, called in %s on line %d
 
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass)#5 (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type int, object given, called in %s on line %d
 
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable)#6 (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type int, object given, called in %s on line %d
 
@@ -159,11 +149,11 @@ float(NAN)
 }
 *** Caught Argument 1 passed to {closure}() must be of the type float, array given, called in %s on line %d
 
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass)#5 (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type float, object given, called in %s on line %d
 
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable)#6 (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type float, object given, called in %s on line %d
 
@@ -212,11 +202,11 @@ string(0) ""
 }
 *** Caught Argument 1 passed to {closure}() must be of the type string, array given, called in %s on line %d
 
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass)#5 (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type string, object given, called in %s on line %d
 
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable)#6 (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type string, object given, called in %s on line %d
 
@@ -265,11 +255,11 @@ bool(false)
 }
 *** Caught Argument 1 passed to {closure}() must be of the type bool, array given, called in %s on line %d
 
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass)#5 (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
 
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable)#6 (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
 

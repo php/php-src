@@ -12,20 +12,20 @@ $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
 $config_arg = array('config' => $config);
 
 $dn = array(
-	"countryName" => "BR",
-	"stateOrProvinceName" => "Rio Grande do Sul",
-	"localityName" => "Porto Alegre",
-	"commonName" => "Henrique do N. Angelo",
-	"emailAddress" => "hnangelo@php.net"
-	);
+    "countryName" => "BR",
+    "stateOrProvinceName" => "Rio Grande do Sul",
+    "localityName" => "Porto Alegre",
+    "commonName" => "Henrique do N. Angelo",
+    "emailAddress" => "hnangelo@php.net"
+);
 
 $args = array(
-	"digest_alg" => "sha1",
-	"private_key_bits" => 2048,
-	"private_key_type" => OPENSSL_KEYTYPE_DSA,
-	"encrypt_key" => true,
-	"config" => $config
-	);
+    "digest_alg" => "sha1",
+    "private_key_bits" => 2048,
+    "private_key_type" => OPENSSL_KEYTYPE_DSA,
+    "encrypt_key" => true,
+    "config" => $config
+);
 
 $privkey = openssl_pkey_new($config_arg);
 $csr = openssl_csr_new($dn, $privkey, $args);
@@ -79,4 +79,3 @@ bool(false)
 Warning: openssl_csr_sign() expects parameter 4 to be int, array given in %s on line %d
 NULL
 resource(%d) of type (OpenSSL X.509)
-

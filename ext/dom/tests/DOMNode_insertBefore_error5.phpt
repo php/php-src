@@ -2,8 +2,8 @@
 Test DOMNode::insertBefore()  check the error code DOM_NOT_FOUND is raised
 --DESCRIPTION--
 DOMNode::insertBefore(newNode, [refNode])
-DOM_NOT_FOUND is raised if refnode is not a child 
-This test checks the error message is raised when the refnode is a descendant but not a child 
+DOM_NOT_FOUND is raised if refnode is not a child
+This test checks the error message is raised when the refnode is a descendant but not a child
 --CREDITS--
 Antonio Diaz Ruiz <dejalatele@gmail.com>
 --INI--

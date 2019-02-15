@@ -10,6 +10,5 @@ var_dump(xmlwriter_write_dtd($xmlwriter));
 --CREDITS--
 Koen Kuipers koenk82@gmail.com
 --EXPECTF--
-
 Warning: xmlwriter_write_dtd() expects at least %d parameters, %d given in %s on line %d
 NULL

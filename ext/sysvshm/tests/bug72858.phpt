@@ -15,6 +15,6 @@ shm_attach($v1,$v2);
 
 ?>
 ==DONE==
---EXPECTF--	
+--EXPECTF--
 Warning: shm_attach(): failed for key 0x64: Not enough space in %s on line %d
 ==DONE==

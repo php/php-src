@@ -25,7 +25,7 @@ $arrays = array(
   array("string", "test"),
   array('string', 'test')
 );
-/* loop to check that is_array() recognizes different 
+/* loop to check that is_array() recognizes different
    type of arrays, expected output bool(true) */
 $loop_counter = 1;
 foreach ($arrays as $var_array ) {
@@ -39,14 +39,14 @@ echo "\n*** Testing is_array() on non array types ***\n";
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
-// unset variables 
+// unset variables
 $unset_array = array(10);
 unset($unset_array);
 
-// other types in a array 
+// other types in a array
 $varient_arrays = array (
   /* integers */
-  543915, 
+  543915,
   -5322,
   0x55F,
   -0xCCF,
@@ -54,7 +54,7 @@ $varient_arrays = array (
   -0654,
 
   /* strings */
-  "",  
+  "",
   '',
   "0",
   '0',
@@ -68,20 +68,20 @@ $varient_arrays = array (
   .5E+8,
   -.5e+90,
   1e5,
-  
+
   /* objects */
-  new stdclass, 
-  
+  new stdclass,
+
   /* resources */
-  $fp, 
-  $dfp, 
+  $fp,
+  $dfp,
 
   /* nulls */
-  null,  
+  null,
   NULL,
 
   /* boolean */
-  true, 
+  true,
   TRUE,
   FALSE,
   false,
@@ -90,7 +90,7 @@ $varient_arrays = array (
   @$unset_array,
   @$undefined_array
 );
-/* loop through the $varient_array to see working of 
+/* loop through the $varient_array to see working of
    is_array() on non array types, expected output bool(false) */
 $loop_counter = 1;
 foreach ($varient_arrays as $type ) {
@@ -102,9 +102,9 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 var_dump( is_array() );
 
-//arguments more than expected 
+//arguments more than expected
 var_dump( is_array ($fp, $fp) );
- 
+
 echo "Done\n";
 /* close resources */
 fclose($fp);

@@ -5,7 +5,7 @@ Bug #50006 (Segfault caused by uksort()) - usort variant
 
 $data = array(
     'bar-bazbazbaz.',
-    'bar-bazbazbaz-', 
+    'bar-bazbazbaz-',
     'foo'
 );
 usort($data, 'magic_sort_cmp');

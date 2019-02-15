@@ -29,7 +29,7 @@ class ParentClass
   }
 }
 
-class ChildClass extends ParentClass 
+class ChildClass extends ParentClass
 {
   var $parent_obj;
   public function __construct ( ) {

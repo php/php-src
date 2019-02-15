@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: fsmagic.c,v 1.76 2015/04/09 20:01:41 christos Exp $")
+FILE_RCSID("@(#)$File: fsmagic.c,v 1.77 2017/05/24 19:17:50 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -68,16 +68,6 @@ FILE_RCSID("@(#)$File: fsmagic.c,v 1.76 2015/04/09 20:01:41 christos Exp $")
 
 # undef S_IFIFO
 #endif
-
-
-#ifndef S_ISDIR
-#define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#endif
-
-#ifndef S_ISREG
-#define S_ISREG(mode) ((mode) & _S_IFREG)
-#endif
-
 private int
 handle_mime(struct magic_set *ms, int mime, const char *str)
 {
@@ -98,6 +88,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 {
 	int ret, did = 0;
 	int mime = ms->flags & MAGIC_MIME;
+	int silent = ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION);
 
 	if (ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION))
 		return 0;
@@ -129,7 +120,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 	}
 
 	ret = 1;
-	if (!mime) {
+	if (!mime && !silent) {
 #ifdef S_ISUID
 		if (sb->st_mode & S_ISUID)
 			if (file_printf(ms, "%ssetuid", COMMA) == -1)
@@ -221,6 +212,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		if (mime) {
 			if (handle_mime(ms, mime, "socket") == -1)
 				return -1;
+		} else if (silent) {
 		} else if (file_printf(ms, "%ssocket", COMMA) == -1)
 			return -1;
 		break;
@@ -243,6 +235,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 			if (mime) {
 				if (handle_mime(ms, mime, "x-empty") == -1)
 					return -1;
+			} else if (silent) {
 			} else if (file_printf(ms, "%sempty", COMMA) == -1)
 				return -1;
 			break;
@@ -256,7 +249,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		/*NOTREACHED*/
 	}
 
-	if (!mime && did && ret == 0) {
+	if (!silent && !mime && did && ret == 0) {
 	    if (file_printf(ms, " ") == -1)
 		    return -1;
 	}

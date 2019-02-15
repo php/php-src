@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Rasmus Lerdorf <rasmus@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_incomplete_class.h"
@@ -47,40 +45,46 @@ PHP_FUNCTION(settype)
 {
 	zval *var;
 	char *type;
-	size_t type_len = 0;
+	size_t type_len;
+	zval tmp;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL_DEREF(var)
+		Z_PARAM_ZVAL(var)
 		Z_PARAM_STRING(type, type_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	ZVAL_COPY(&tmp, var);
 	if (!strcasecmp(type, "integer")) {
-		convert_to_long(var);
+		convert_to_long(&tmp);
 	} else if (!strcasecmp(type, "int")) {
-		convert_to_long(var);
+		convert_to_long(&tmp);
 	} else if (!strcasecmp(type, "float")) {
-		convert_to_double(var);
+		convert_to_double(&tmp);
 	} else if (!strcasecmp(type, "double")) { /* deprecated */
-		convert_to_double(var);
+		convert_to_double(&tmp);
 	} else if (!strcasecmp(type, "string")) {
-		convert_to_string(var);
+		convert_to_string(&tmp);
 	} else if (!strcasecmp(type, "array")) {
-		convert_to_array(var);
+		convert_to_array(&tmp);
 	} else if (!strcasecmp(type, "object")) {
-		convert_to_object(var);
+		convert_to_object(&tmp);
 	} else if (!strcasecmp(type, "bool")) {
-		convert_to_boolean(var);
+		convert_to_boolean(&tmp);
 	} else if (!strcasecmp(type, "boolean")) {
-		convert_to_boolean(var);
+		convert_to_boolean(&tmp);
 	} else if (!strcasecmp(type, "null")) {
-		convert_to_null(var);
+		convert_to_null(&tmp);
 	} else if (!strcasecmp(type, "resource")) {
+		zval_ptr_dtor(&tmp);
 		php_error_docref(NULL, E_WARNING, "Cannot convert to resource type");
 		RETURN_FALSE;
 	} else {
+		zval_ptr_dtor(&tmp);
 		php_error_docref(NULL, E_WARNING, "Invalid type");
 		RETURN_FALSE;
 	}
+
+	ZEND_TRY_ASSIGN_TMP(var, &tmp);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -359,7 +363,7 @@ PHP_FUNCTION(is_callable)
 		Z_PARAM_ZVAL(var)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(syntax_only)
-		Z_PARAM_ZVAL_DEREF(callable_name)
+		Z_PARAM_ZVAL(callable_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (syntax_only) {
@@ -367,8 +371,7 @@ PHP_FUNCTION(is_callable)
 	}
 	if (ZEND_NUM_ARGS() > 2) {
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
-		zval_ptr_dtor(callable_name);
-		ZVAL_STR(callable_name, name);
+		ZEND_TRY_ASSIGN_STR(callable_name, name);
 	} else {
 		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error);
 	}
@@ -408,12 +411,3 @@ PHP_FUNCTION(is_countable)
 	RETURN_BOOL(zend_is_countable(var));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

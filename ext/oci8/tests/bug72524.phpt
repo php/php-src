@@ -6,7 +6,6 @@ $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on th
 require(dirname(__FILE__).'/skipif.inc');
 ?>
 --FILE--
-
 <?php
 
 require(dirname(__FILE__).'/connect.inc');

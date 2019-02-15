@@ -813,8 +813,8 @@ static int bmp_read_1bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 		}
 	}
 
-	/* The line must be divisible by 4, else its padded with NULLs */
-	padding = ((int)ceil(0.1 * info->width)) % 4;
+	/* The line must be aligned on a 32 bits word, else it is padded with zeros */
+	padding = (info->width + 7) / 8 % 4;
 	if (padding) {
 		padding = 4 - padding;
 	}

@@ -13,9 +13,7 @@ $bi->setText("\x80sdfé\x90d888 dfsa9");
 
 var_dump($bi->next(1, 2));
 var_dump($bi->next(array()));
-
 --EXPECTF--
-
 Warning: IntlBreakIterator::next() expects exactly 1 parameter, 2 given in %s on line %d
 
 Warning: IntlBreakIterator::next(): breakiter_next: bad arguments in %s on line %d

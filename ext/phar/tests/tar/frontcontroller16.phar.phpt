@@ -14,4 +14,3 @@ files/frontcontroller8.phar.tar
 Content-type: text/html; charset=UTF-8
 --EXPECT--
 hio1
-

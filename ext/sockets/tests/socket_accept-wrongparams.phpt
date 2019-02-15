@@ -10,7 +10,7 @@ if (!extension_loaded('sockets')) {
 var_dump(socket_accept(null));
 --CREDITS--
 Till Klampaeckel, till@php.net
-Berlin TestFest 2009 
+Berlin TestFest 2009
 --EXPECTF--
 Warning: socket_accept() expects parameter 1 to be resource, null given in %s on line %d
 NULL

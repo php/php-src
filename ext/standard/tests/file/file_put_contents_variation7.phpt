@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written 
+ * Description: Write/Create a file with contents data and return the number of bytes written
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file_put_contents() : usage variation ***\n";
@@ -33,14 +33,14 @@ $allDirs = array(
   "$absSubDir/../../".$mainDir."/./".$subDir,
   "$absSubDir/..///".$subDir."//..//../".$subDir,
   "$absSubDir/BADDIR",
-  
+
   // relative paths
   $mainDir."/".$subDir,
-  $mainDir."//".$subDir, 
-   $mainDir."///".$subDir, 
+  $mainDir."//".$subDir,
+   $mainDir."///".$subDir,
   "./".$mainDir."/../".$mainDir."/".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
 );
 
 $filename = 'FileGetContentsVar7.tmp';
@@ -65,7 +65,7 @@ for($i = 0; $i<count($allDirs); $i++) {
   else {
      echo "No data written\n";
   }
-      
+
 }
 
 chdir($old_dir_path);

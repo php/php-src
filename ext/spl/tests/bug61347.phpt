@@ -22,8 +22,6 @@ var_dump(isset($b[37])); //true
 var_dump(isset($b['no_exists'])); //false
 var_dump(empty($b['b'])); //true
 var_dump(empty($b[37])); //true
-
-
 --EXPECT--
 bool(false)
 bool(false)

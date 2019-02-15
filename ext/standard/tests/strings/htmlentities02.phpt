@@ -1,5 +1,5 @@
 --TEST--
-htmlentities() test 2 (setlocale / fr_FR.ISO-8859-15) 
+htmlentities() test 2 (setlocale / fr_FR.ISO-8859-15)
 --SKIPIF--
 <?php
 $result = (bool)setlocale(LC_CTYPE, "fr_FR.ISO-8859-15", "fr_FR.ISO8859-15", 'fr_FR@euro');

@@ -1,5 +1,5 @@
 --TEST--
-Test count() function 
+Test count() function
 --FILE--
 <?php
 /* Prototype: int count ( mixed $var [, int $mode] );
@@ -117,7 +117,7 @@ var_dump( count() );  // No. of args = 0
 var_dump( count(array(), COUNT_NORMAL, 100) );  // No. of args > expected
 
 /* Testing Invalid type arguments */
-var_dump( count("string", ABCD) );
+var_dump( count("string", "ABCD") );
 var_dump( count(100, "string") );
 var_dump( count(array(), "") );
 
@@ -236,8 +236,6 @@ NULL
 
 Warning: count() expects at most 2 parameters, 3 given in %s on line %d
 NULL
-
-Warning: Use of undefined constant ABCD - assumed 'ABCD' (this will throw an Error in a future version of PHP) in %s on line %d
 
 Warning: count() expects parameter 2 to be int, %s given in %s on line %d
 NULL

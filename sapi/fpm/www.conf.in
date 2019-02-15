@@ -371,6 +371,13 @@ pm.max_spare_servers = 3
 ; Default Value: no
 ;catch_workers_output = yes
 
+; Decorate worker output with prefix and suffix containing information about
+; the child that writes to the log and if stdout or stderr is used as well as
+; log level and time. This options is used only if catch_workers_output is yes.
+; Settings to "no" will output data as written to the stdout or stderr.
+; Default value: yes
+;decorate_workers_output = no
+
 ; Clear environment in FPM workers
 ; Prevents arbitrary environment variables from reaching FPM worker processes
 ; by clearing the environment in workers before env vars specified in this

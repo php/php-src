@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Thies C. Arntzen <thies@thieso.net>                          |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* {{{ includes & prototypes */
 
@@ -509,7 +507,6 @@ static void _readline_long_zval(zval *ret, long l)
 static char **_readline_completion_cb(const char *text, int start, int end)
 {
 	zval params[3];
-	int i;
 	char **matches = NULL;
 
 	_readline_string_zval(&params[0], text);
@@ -531,9 +528,7 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 		}
 	}
 
-	for (i = 0; i < 3; i++) {
-		zval_ptr_dtor(&params[i]);
-	}
+	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&_readline_array);
 
 	return matches;
@@ -550,7 +545,7 @@ PHP_FUNCTION(readline_completion_function)
 	if (!zend_is_callable(arg, 0, NULL)) {
 		zend_string *name = zend_get_callable_name(arg);
 		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release(name);
+		zend_string_release_ex(name, 0);
 		RETURN_FALSE;
 	}
 
@@ -598,7 +593,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 	if (!zend_is_callable(callback, 0, NULL)) {
 		zend_string *name = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release(name);
+		zend_string_release_ex(name, 0);
 		RETURN_FALSE;
 	}
 
@@ -667,10 +662,3 @@ PHP_FUNCTION(readline_on_new_line)
 
 
 #endif /* HAVE_LIBREADLINE */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

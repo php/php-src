@@ -1,5 +1,5 @@
 --TEST--
-Test strncasecmp() function : error conditions 
+Test strncasecmp() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );

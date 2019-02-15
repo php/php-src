@@ -1,11 +1,11 @@
 --TEST--
-Test closelog() function : basic functionality 
+Test closelog() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool closelog(void)
- * Description: Close connection to system logger 
+ * Description: Close connection to system logger
  * Source code: ext/standard/syslog.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing closelog() : basic functionality ***\n";

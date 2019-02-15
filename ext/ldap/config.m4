@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension ldap
 
 AC_DEFUN([PHP_LDAP_CHECKS], [
   if test -f $1/include/ldap.h; then
@@ -92,7 +90,7 @@ PHP_ARG_WITH(ldap-sasl,for LDAP Cyrus SASL support,
 
 if test "$PHP_LDAP" != "no"; then
 
-  PHP_NEW_EXTENSION(ldap, ldap.c, $ext_shared,,-DLDAP_DEPRECATED=1)
+  PHP_NEW_EXTENSION(ldap, ldap.c, $ext_shared,,)
 
   if test "$PHP_LDAP" = "yes"; then
     for i in /usr/local /usr; do
@@ -198,8 +196,8 @@ if test "$PHP_LDAP" != "no"; then
 
   dnl Check for 3 arg ldap_set_rebind_proc
   AC_CACHE_CHECK([for 3 arg ldap_set_rebind_proc], ac_cv_3arg_setrebindproc,
-  [AC_TRY_COMPILE([#include <ldap.h>], [ldap_set_rebind_proc(0,0,0)],
-  ac_cv_3arg_setrebindproc=yes, ac_cv_3arg_setrebindproc=no)])
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <ldap.h>]], [[ldap_set_rebind_proc(0,0,0)]])],
+  [ac_cv_3arg_setrebindproc=yes], [ac_cv_3arg_setrebindproc=no])])
   if test "$ac_cv_3arg_setrebindproc" = yes; then
     AC_DEFINE(HAVE_3ARG_SETREBINDPROC,1,[Whether 3 arg set_rebind_proc()])
   fi

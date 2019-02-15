@@ -39,7 +39,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /* 7*/ "",
        '',
@@ -49,7 +49,7 @@ $inputs = array(
 /*10*/ "abcxyz",
        'abcxyz}',
        $heredoc,
-       
+
        // object data
 /*13*/ new classA(),
 

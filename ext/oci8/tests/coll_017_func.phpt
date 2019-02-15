@@ -4,7 +4,7 @@ collections and nulls (2)
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -18,7 +18,7 @@ $statement = OCIParse($c,$ora_sql);
 @OCIExecute($statement);
 
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF VARCHAR(10)";
-			  
+
 $statement = OCIParse($c,$ora_sql);
 OCIExecute($statement);
 

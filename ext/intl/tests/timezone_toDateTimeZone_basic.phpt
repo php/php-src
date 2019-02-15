@@ -22,7 +22,6 @@ function do_test(IntlTimeZone $tz, $proc = false) {
 do_test(IntlTimeZone::createTimeZone('CET'));
 do_test(IntlTimeZone::createTimeZone('Europe/Amsterdam'));
 do_test(IntlTimeZone::createTimeZone('GMT+0405'), true);
-
 --EXPECTF--
 string(3) "CET"
 int(3600000)

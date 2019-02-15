@@ -6,7 +6,7 @@ ZE2 An interface must be implemented
 interface if_a {
 	function f_a();
 }
-	
+
 class derived_a implements if_a {
 }
 

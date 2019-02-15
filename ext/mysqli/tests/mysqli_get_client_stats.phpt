@@ -12,6 +12,7 @@ if (!function_exists('mysqli_get_client_stats')) {
 --INI--
 mysqlnd.collect_statistics=1
 mysqlnd.collect_memory_statistics=1
+mysqli.allow_local_infile=1
 --FILE--
 <?php
 	/*

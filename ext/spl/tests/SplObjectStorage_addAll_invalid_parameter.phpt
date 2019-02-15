@@ -40,4 +40,3 @@ NULL
 
 Warning: SplObjectStorage::addAll() expects parameter 1 to be SplObjectStorage, null given in %s on line %d
 NULL
-

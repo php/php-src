@@ -16,7 +16,7 @@ fclose($fp);
 // open file in each access mode and get meta data
 foreach ($filemodes as $mode) {
 	if (strncmp($mode, 'x', 1) == 0) {
-		// x modes require that file does not exist	
+		// x modes require that file does not exist
 		unlink($filename);
 	}
 	$fp = fopen($filename, $mode);

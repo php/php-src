@@ -30,7 +30,7 @@ var_dump(gmp_pow(array(),10));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(4) "1024"
 string(4) "1024"
 string(5) "-2048"

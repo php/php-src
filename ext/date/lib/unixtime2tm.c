@@ -96,7 +96,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 	}
 	TIMELIB_DEBUG(printf("A: ts=%lld, year=%lld, month=%lld, day=%lld,", ts, cur_year, i + 1, tmp_days - months[i]););
 
-	/* That was the date, now we do the tiiiime */
+	/* That was the date, now we do the time */
 	hours = remainder / 3600;
 	minutes = (remainder - hours * 3600) / 60;
 	seconds = remainder % 60;
@@ -251,7 +251,7 @@ void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz)
 
 /* Converts the time stored in the struct to localtime if localtime = true,
  * otherwise it converts it to gmttime. This is only done when necessary
- * ofcourse. */
+ * of course. */
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime)
 {
 	if (localtime) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,11 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* {{{ includes
  */
@@ -53,6 +51,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_main.h"
+#include "php_syslog.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_string.h"
@@ -148,6 +147,143 @@ static char *get_safe_charset_hint(void) {
 
 /* {{{ PHP_INI_MH
  */
+static PHP_INI_MH(OnSetFacility)
+{
+	const char *facility = ZSTR_VAL(new_value);
+
+#ifdef LOG_AUTH
+	if (!strcmp(facility, "LOG_AUTH") || !strcmp(facility, "auth") || !strcmp(facility, "security")) {
+		PG(syslog_facility) = LOG_AUTH;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_AUTHPRIV
+	if (!strcmp(facility, "LOG_AUTHPRIV") || !strcmp(facility, "authpriv")) {
+		PG(syslog_facility) = LOG_AUTHPRIV;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_CRON
+	if (!strcmp(facility, "LOG_CRON") || !strcmp(facility, "cron")) {
+		PG(syslog_facility) = LOG_CRON;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_DAEMON
+	if (!strcmp(facility, "LOG_DAEMON") || !strcmp(facility, "daemon")) {
+		PG(syslog_facility) = LOG_DAEMON;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_FTP
+	if (!strcmp(facility, "LOG_FTP") || !strcmp(facility, "ftp")) {
+		PG(syslog_facility) = LOG_FTP;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_KERN
+	if (!strcmp(facility, "LOG_KERN") || !strcmp(facility, "kern")) {
+		PG(syslog_facility) = LOG_KERN;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LPR
+	if (!strcmp(facility, "LOG_LPR") || !strcmp(facility, "lpr")) {
+		PG(syslog_facility) = LOG_LPR;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_MAIL
+	if (!strcmp(facility, "LOG_MAIL") || !strcmp(facility, "mail")) {
+		PG(syslog_facility) = LOG_MAIL;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_INTERNAL_MARK
+	if (!strcmp(facility, "LOG_INTERNAL_MARK") || !strcmp(facility, "mark")) {
+		PG(syslog_facility) = LOG_INTERNAL_MARK;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_NEWS
+	if (!strcmp(facility, "LOG_NEWS") || !strcmp(facility, "news")) {
+		PG(syslog_facility) = LOG_NEWS;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_SYSLOG
+	if (!strcmp(facility, "LOG_SYSLOG") || !strcmp(facility, "syslog")) {
+		PG(syslog_facility) = LOG_SYSLOG;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_USER
+	if (!strcmp(facility, "LOG_USER") || !strcmp(facility, "user")) {
+		PG(syslog_facility) = LOG_USER;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_UUCP
+	if (!strcmp(facility, "LOG_UUCP") || !strcmp(facility, "uucp")) {
+		PG(syslog_facility) = LOG_UUCP;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL0
+	if (!strcmp(facility, "LOG_LOCAL0") || !strcmp(facility, "local0")) {
+		PG(syslog_facility) = LOG_LOCAL0;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL1
+	if (!strcmp(facility, "LOG_LOCAL1") || !strcmp(facility, "local1")) {
+		PG(syslog_facility) = LOG_LOCAL1;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL2
+	if (!strcmp(facility, "LOG_LOCAL2") || !strcmp(facility, "local2")) {
+		PG(syslog_facility) = LOG_LOCAL2;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL3
+	if (!strcmp(facility, "LOG_LOCAL3") || !strcmp(facility, "local3")) {
+		PG(syslog_facility) = LOG_LOCAL3;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL4
+	if (!strcmp(facility, "LOG_LOCAL4") || !strcmp(facility, "local4")) {
+		PG(syslog_facility) = LOG_LOCAL4;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL5
+	if (!strcmp(facility, "LOG_LOCAL5") || !strcmp(facility, "local5")) {
+		PG(syslog_facility) = LOG_LOCAL5;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL6
+	if (!strcmp(facility, "LOG_LOCAL6") || !strcmp(facility, "local6")) {
+		PG(syslog_facility) = LOG_LOCAL6;
+		return SUCCESS;
+	}
+#endif
+#ifdef LOG_LOCAL7
+	if (!strcmp(facility, "LOG_LOCAL7") || !strcmp(facility, "local7")) {
+		PG(syslog_facility) = LOG_LOCAL7;
+		return SUCCESS;
+	}
+#endif
+
+	return FAILURE;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnSetPrecision)
 {
 	zend_long i;
@@ -192,6 +328,28 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 }
 /* }}} */
 
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnSetLogFilter)
+{
+	const char *filter = ZSTR_VAL(new_value);
+
+	if (!strcmp(filter, "all")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_ALL;
+		return SUCCESS;
+	}
+	if (!strcmp(filter, "no-ctrl")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_NO_CTRL;
+		return SUCCESS;
+	}
+	if (!strcmp(filter, "ascii")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_ASCII;
+		return SUCCESS;
+	}
+
+	return FAILURE;
+}
+/* }}} */
 
 /* {{{ php_disable_functions
  */
@@ -396,7 +554,7 @@ static PHP_INI_DISP(display_errors_mode)
 	mode = php_get_display_errors_mode(tmp_value, tmp_value_length);
 
 	/* Display 'On' for other SAPIs instead of STDOUT or STDERR */
-	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi"));
+	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg"));
 
 	switch (mode) {
 		case PHP_DISPLAY_ERRORS_STDERR:
@@ -573,7 +731,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
-	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("serialize_precision",	"-1",	PHP_INI_ALL,		OnSetSerializePrecision,			serialize_precision,	php_core_globals,	core_globals)
@@ -636,6 +793,9 @@ PHP_INI_BEGIN()
 #ifdef PHP_WIN32
 	STD_PHP_INI_BOOLEAN("windows.show_crt_warning",		"0",		PHP_INI_ALL,		OnUpdateBool,			windows_show_crt_warning,			php_core_globals,	core_globals)
 #endif
+	STD_PHP_INI_ENTRY("syslog.facility",		"LOG_USER",		PHP_INI_SYSTEM,		OnSetFacility,		syslog_facility,	php_core_globals,		core_globals)
+	STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
+	STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -934,18 +1094,6 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		efree(docref_buf);
 	}
 
-	if (PG(track_errors) && module_initialized && EG(active) &&
-			(Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
-		zval tmp;
-		ZVAL_STRINGL(&tmp, buffer, buffer_len);
-		if (EG(current_execute_data)) {
-			if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0) == FAILURE) {
-				zval_ptr_dtor(&tmp);
-			}
-		} else {
-			zend_hash_str_update_ind(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
-		}
-	}
 	if (replace_buffer) {
 		zend_string_free(replace_buffer);
 	} else {
@@ -1001,24 +1149,18 @@ PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, 
 /* }}} */
 
 #ifdef PHP_WIN32
-#define PHP_WIN32_ERROR_MSG_BUFFER_SIZE 512
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
-	if (error == 0) {
-		php_error_docref2(NULL, param1, param2, E_WARNING, "%s", strerror(errno));
-	} else {
-		char buf[PHP_WIN32_ERROR_MSG_BUFFER_SIZE + 1];
-		size_t buf_len;
+	char *buf = php_win32_error_to_msg(error);
+	size_t buf_len;
 
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error, 0, buf, PHP_WIN32_ERROR_MSG_BUFFER_SIZE, NULL);
-		buf_len = strlen(buf);
-		if (buf_len >= 2) {
-			buf[buf_len - 1] = '\0';
-			buf[buf_len - 2] = '\0';
-		}
-		php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", (char *)buf, error);
+	buf_len = strlen(buf);
+	if (buf_len >= 2) {
+		buf[buf_len - 1] = '\0';
+		buf[buf_len - 2] = '\0';
 	}
+	php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", buf, error);
+	php_win32_error_msg_free(buf);
 }
-#undef PHP_WIN32_ERROR_MSG_BUFFER_SIZE
 #endif
 
 /* {{{ php_html_puts */
@@ -1182,7 +1324,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 					}
 				} else {
 					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
-					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi")) &&
+					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg")) &&
 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
 					) {
 						fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer, error_filename, error_lineno);
@@ -1257,19 +1399,6 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 	if (!display) {
 		efree(buffer);
 		return;
-	}
-
-	if (PG(track_errors) && module_initialized && EG(active)) {
-		zval tmp;
-
-		ZVAL_STRINGL(&tmp, buffer, buffer_len);
-		if (EG(current_execute_data)) {
-			if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0) == FAILURE) {
-				zval_ptr_dtor(&tmp);
-			}
-		} else {
-			zend_hash_str_update_ind(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
-		}
 	}
 
 	efree(buffer);
@@ -1366,7 +1495,7 @@ PHP_FUNCTION(set_time_limit)
 	} else {
 		RETVAL_FALSE;
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 	efree(new_timeout_str);
 }
 /* }}} */
@@ -1520,7 +1649,11 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 					snprintf(memory_leak_buf, 512, "Last leak repeated %lu time%s\n", leak_count, (leak_count>1?"s":""));
 				}
 #	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
+				if (IsDebuggerPresent()) {
+					OutputDebugString(memory_leak_buf);
+				} else {
+					fprintf(stderr, "%s", memory_leak_buf);
+				}
 #	else
 				fprintf(stderr, "%s", memory_leak_buf);
 #	endif
@@ -1534,7 +1667,11 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 
 				snprintf(memory_leak_buf, 512, "=== Total %d memory leaks detected ===\n", *((uint32_t *) data));
 #	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
+				if (IsDebuggerPresent()) {
+					OutputDebugString(memory_leak_buf);
+				} else {
+					fprintf(stderr, "%s", memory_leak_buf);
+				}
 #	else
 				fprintf(stderr, "%s", memory_leak_buf);
 #	endif
@@ -1557,7 +1694,11 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 					snprintf(memory_leak_buf, sizeof(memory_leak_buf), "[null]  Script:  '%s'\n", SAFE_FILENAME(SG(request_info).path_translated));
 				}
 #	if defined(PHP_WIN32)
-				OutputDebugString(memory_leak_buf);
+				if (IsDebuggerPresent()) {
+					OutputDebugString(memory_leak_buf);
+				} else {
+					fprintf(stderr, "%s", memory_leak_buf);
+				}
 #	else
 				fprintf(stderr, "%s", memory_leak_buf);
 #	endif
@@ -1820,14 +1961,6 @@ PHPAPI void php_com_initialize(void)
 }
 /* }}} */
 
-/* {{{ php_output_wrapper
- */
-static size_t php_output_wrapper(const char *str, size_t str_length)
-{
-	return php_output_write(str, str_length);
-}
-/* }}} */
-
 #ifdef ZTS
 /* {{{ core_globals_ctor
  */
@@ -2004,7 +2137,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	zuf.error_function = php_error_cb;
 	zuf.printf_function = php_printf;
-	zuf.write_function = php_output_wrapper;
+	zuf.write_function = php_output_write;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
 	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
@@ -2032,6 +2165,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
 		return FAILURE;
 	}
+	php_win32_signal_ctrl_handler_init();
 #endif
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
@@ -2051,7 +2185,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_LONG_CONSTANT("PHP_DEBUG", PHP_DEBUG, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS_FAMILY", PHP_OS_FAMILY, sizeof(PHP_OS_FAMILY)-1, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_STRINGL_CONSTANT("PHP_SAPI", sapi_module.name, strlen(sapi_module.name), CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_STRINGL_CONSTANT("PHP_SAPI", sapi_module.name, strlen(sapi_module.name), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
 	REGISTER_MAIN_STRINGL_CONSTANT("DEFAULT_INCLUDE_PATH", PHP_INCLUDE_PATH, sizeof(PHP_INCLUDE_PATH)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PEAR_INSTALL_DIR", PEAR_INSTALLDIR, sizeof(PEAR_INSTALLDIR)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PEAR_EXTENSION_DIR", PHP_EXTENSION_DIR, sizeof(PHP_EXTENSION_DIR)-1, CONST_PERSISTENT | CONST_CS);
@@ -2095,9 +2229,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	php_binary_init();
 	if (PG(php_binary)) {
-		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_CS);
+		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
 	} else {
-		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", "", 0, CONST_PERSISTENT | CONST_CS);
+		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", "", 0, CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
 	}
 
 	php_output_register_constants();
@@ -2118,7 +2252,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #ifdef ZEND_WIN32
 	/* Until the current ini values was setup, the current cp is 65001.
-		If the actual ini vaues are different, some stuff needs to be updated.
+		If the actual ini values are different, some stuff needs to be updated.
 		It concerns at least main_cwd_state and there might be more. As we're
 		still in the startup phase, lets use the chance and reinit the relevant
 		item according to the current codepage. Still, if ini_set() is used
@@ -2135,6 +2269,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		CWDG(realpath_cache_size_limit) = 0;
 	}
 
+	PG(have_called_openlog) = 0;
+
 	/* initialize stream wrappers registry
 	 * (this uses configuration parameters from php.ini)
 	 */
@@ -2144,8 +2280,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 
 	zuv.html_errors = 1;
-	zuv.import_use_extension = ".php";
-	zuv.import_use_extension_length = (uint32_t)strlen(zuv.import_use_extension);
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
@@ -2193,11 +2327,11 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->info_func = PHP_MINFO(php_core);
 	}
 
+	module_initialized = 1;
+
 	if (zend_post_startup() != SUCCESS) {
 		return FAILURE;
 	}
-
-	module_initialized = 1;
 
 	/* Check for deprecated directives */
 	/* NOTE: If you add anything here, remember to add it to Makefile.global! */
@@ -2205,13 +2339,12 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[17]; /* Remember to change this if the number of directives change */
+			const char *directives[18]; /* Remember to change this if the number of directives change */
 		} directives[2] = {
 			{
 				E_DEPRECATED,
 				"Directive '%s' is deprecated",
 				{
-					"track_errors",
 					NULL
 				}
 			},
@@ -2235,6 +2368,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 					"safe_mode_allowed_env_vars",
 					"safe_mode_protected_env_vars",
 					"zend.ze1_compatibility_mode",
+					"track_errors",
 					NULL
 				}
 			}
@@ -2319,6 +2453,7 @@ void php_module_shutdown(void)
 
 #ifdef PHP_WIN32
 	(void)php_win32_shutdown_random_bytes();
+	php_win32_signal_ctrl_handler_shutdown();
 #endif
 
 	sapi_flush();
@@ -2350,6 +2485,13 @@ void php_module_shutdown(void)
 #ifndef ZTS
 	zend_interned_strings_dtor();
 #endif
+
+	if (zend_post_shutdown_cb) {
+		void (*cb)(void) = zend_post_shutdown_cb;
+
+		zend_post_shutdown_cb = NULL;
+		cb();
+	}
 
 	module_initialized = 0;
 
@@ -2606,12 +2748,3 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 	return retval;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

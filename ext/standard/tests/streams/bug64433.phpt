@@ -2,15 +2,11 @@
 Bug #60180 ($_SERVER["PHP_SELF"] incorrect)
 --SKIPIF--
 <?php
-if(!file_exists(dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc")) 
+if(!file_exists(dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc"))
 	die("skip could not found cli server script");
 $res = @include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc";
 if(!$res) {
 	die("skip could not open cli server script");
-}
-
-if (CURL_WRAPPERS_ENABLED) {
-	die("skip curl wrappers used");
 }
 ?>
 --FILE--
@@ -27,7 +23,7 @@ foreach($codes as $code) {
 echo "follow=0\n";
 $arr = array('http'=>
                         array(
-                                'follow_location'=>0,	
+                                'follow_location'=>0,
                         )
                 );
 $context = stream_context_create($arr);
@@ -37,7 +33,7 @@ foreach($codes as $code) {
 echo "follow=1\n";
 $arr = array('http'=>
                         array(
-                                'follow_location'=>1,	
+                                'follow_location'=>1,
                         )
                 );
 $context = stream_context_create($arr);
@@ -82,5 +78,3 @@ follow=1
 307: REDIRECTED
 404: REDIRECTED
 500: REDIRECTED
-
-

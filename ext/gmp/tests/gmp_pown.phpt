@@ -38,7 +38,7 @@ var_dump(gmp_powm(10, $n, 10));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(1) "0"
 string(1) "5"
 string(1) "5"

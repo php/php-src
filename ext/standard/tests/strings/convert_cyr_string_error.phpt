@@ -1,5 +1,5 @@
 --TEST--
-Test convert_cyr_string() function : error conditions 
+Test convert_cyr_string() function : error conditions
 --FILE--
 <?php
 
@@ -33,7 +33,7 @@ var_dump(bin2hex( convert_cyr_string($str, $from, "?")) );
 echo "\n-- Testing convert_cyr_string() function with invalid 'from' and 'to' character set --\n";
 var_dump(bin2hex( convert_cyr_string($str, ">", "?")) );
 
-?> 
+?>
 ===DONE===
 --EXPECTF--
 *** Testing convert_cyr_string() : error conditions ***
@@ -69,5 +69,4 @@ Warning: convert_cyr_string(): Unknown source charset: > in %s on line %d
 
 Warning: convert_cyr_string(): Unknown destination charset: ? in %s on line %d
 string(10) "68656c6c6f"
- 
 ===DONE===

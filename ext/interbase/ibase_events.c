@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,7 +57,7 @@ void _php_ibase_free_event(ibase_event *event) /* {{{ */
 	}
 
 	if (Z_TYPE(event->callback) != IS_UNDEF) {
-		zval_dtor(&event->callback);
+		zval_ptr_dtor(&event->callback);
 		ZVAL_UNDEF(&event->callback);
 
 		_php_ibase_event_free(event->event_buffer,event->result_buffer);
@@ -320,7 +320,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	if (!zend_is_callable(cb_arg, 0, NULL)) {
 		zend_string *cb_name = zend_get_callable_name(cb_arg);
 		_php_ibase_module_error("Callback argument %s is not a callable function", ZSTR_VAL(cb_name));
-		zend_string_release(cb_name);
+		zend_string_release_ex(cb_name, 0);
 		RETURN_FALSE;
 	}
 
@@ -390,12 +390,3 @@ PHP_FUNCTION(ibase_free_event_handler)
 /* }}} */
 
 #endif /* HAVE_IBASE */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

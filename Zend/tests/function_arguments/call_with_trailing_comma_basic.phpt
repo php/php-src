@@ -17,12 +17,12 @@ class Foo
     echo __FUNCTION__ . "\n";
     var_dump($args);
   }
-  
+
   public function bar(...$args) {
     echo __FUNCTION__ . "\n";
     var_dump($args);
   }
-  
+
   public function __invoke(...$args) {
     echo __FUNCTION__ . "\n";
     var_dump($args);

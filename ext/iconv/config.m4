@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension iconv
 
 PHP_ARG_WITH(iconv, for iconv support,
 [  --without-iconv[=DIR]     Exclude iconv support], yes)
@@ -38,8 +36,7 @@ if test "$PHP_ICONV" != "no"; then
 	fi
 
     AC_MSG_CHECKING([if iconv is glibc's])
-    AC_TRY_LINK([#include <gnu/libc-version.h>],[gnu_get_libc_version();],
-    [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <gnu/libc-version.h>]], [[gnu_get_libc_version();]])],[
       AC_MSG_RESULT(yes)
       iconv_impl_name="glibc"
     ],[
@@ -50,28 +47,27 @@ if test "$PHP_ICONV" != "no"; then
       AC_MSG_CHECKING([if using GNU libiconv])
       php_iconv_old_ld="$LDFLAGS"
       LDFLAGS="-liconv $LDFLAGS"
-      AC_TRY_RUN([
+      AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <$PHP_ICONV_H_PATH>
 int main() {
   printf("%d", _libiconv_version);
   return 0;
 }
-      ],[
+      ]])],[
         AC_MSG_RESULT(yes)
         iconv_impl_name="gnu_libiconv"
       ],[
         AC_MSG_RESULT(no)
         LDFLAGS="$php_iconv_old_ld"
       ],[
-        AC_MSG_RESULT(no, cross-compiling)
+        AC_MSG_RESULT([no, cross-compiling])
         LDFLAGS="$php_iconv_old_ld"
       ])
     fi
 
     if test -z "$iconv_impl_name"; then
       AC_MSG_CHECKING([if iconv is Konstantin Chuguev's])
-      AC_TRY_LINK([#include <iconv.h>],[iconv_ccs_init(NULL, NULL);],
-      [
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>]], [[iconv_ccs_init(NULL, NULL);]])],[
         AC_MSG_RESULT(yes)
         iconv_impl_name="bsd"
       ],[
@@ -83,8 +79,7 @@ int main() {
       AC_MSG_CHECKING([if using IBM iconv])
       php_iconv_old_ld="$LDFLAGS"
       LDFLAGS="-liconv $LDFLAGS"
-      AC_TRY_LINK([#include <iconv.h>],[cstoccsid("");],
-      [
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>]], [[cstoccsid("");]])],[
         AC_MSG_RESULT(yes)
         iconv_impl_name="ibm"
       ],[
@@ -128,7 +123,7 @@ int main() {
     esac
 
     AC_MSG_CHECKING([if iconv supports errno])
-    AC_TRY_RUN([
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <$PHP_ICONV_H_PATH>
 #include <errno.h>
 
@@ -145,7 +140,7 @@ int main() {
   iconv_close( cd );
   return 2;
 }
-    ],[
+    ]])],[
       AC_MSG_RESULT(yes)
       PHP_DEFINE([ICONV_SUPPORTS_ERRNO],1,[ext/iconv])
       AC_DEFINE([ICONV_SUPPORTS_ERRNO],1,[Whether iconv supports error no or not])
@@ -160,7 +155,7 @@ int main() {
     ])
 
     AC_MSG_CHECKING([if iconv supports //IGNORE])
-    AC_TRY_RUN([
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <$PHP_ICONV_H_PATH>
 #include <stdlib.h>
 
@@ -176,7 +171,7 @@ int main() {
   }
   return 0;
 }
-   ],[
+   ]])],[
       AC_MSG_RESULT(yes)
       PHP_DEFINE([ICONV_BROKEN_IGNORE],0,[ext/iconv])
       AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
@@ -191,10 +186,10 @@ int main() {
     ])
 
     AC_MSG_CHECKING([if your cpp allows macro usage in include lines])
-    AC_TRY_COMPILE([
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #define FOO <$PHP_ICONV_H_PATH>
 #include FOO
-    ], [], [
+    ]], [])], [
       AC_MSG_RESULT([yes])
       PHP_DEFINE([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>],[ext/iconv])
       AC_DEFINE_UNQUOTED([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>], [Path to iconv.h])

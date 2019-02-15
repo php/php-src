@@ -25,7 +25,7 @@ foreach ($tz as $zone) {
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(1) "2"
 string(3) "177"
 string(1) "6"

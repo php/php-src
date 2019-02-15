@@ -13,10 +13,10 @@ In $a->$b[Y]() and $a->X[Y]() both $a->$b[Y] and $a->X[Y] represent a global fun
   $c = new C;
   $c->functions[0] = 'foo';
   $c->functions[1][2][3][4] = 'foo';
-  
+
   $c->$name[0](1, 2);
   $c->$name[1][2][3][4](3, 4);
-  
+
   $c->functions[0](5, 6);
   $c->functions[1][2][3][4](7, 8);
 ?>

@@ -1,9 +1,9 @@
 --TEST--
-Test sprintf() function : error conditions 
+Test sprintf() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
  */
 
@@ -21,7 +21,7 @@ $arg1 = 'one';
 $arg2 = 'two';
 
 // with one argument less than expected
-var_dump( sprintf($format1) );  
+var_dump( sprintf($format1) );
 var_dump( sprintf($format2,$arg1) );
 var_dump( sprintf($format3,$arg1,$arg2) );
 

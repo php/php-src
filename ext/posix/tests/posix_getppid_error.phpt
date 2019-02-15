@@ -1,15 +1,15 @@
 --TEST--
-Test posix_getppid() function : error conditions 
+Test posix_getppid() function : error conditions
 --SKIPIF--
-<?php 
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+<?php
+	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int posix_getppid(void)
- * Description: Get the parent process id (POSIX.1, 4.1.1) 
+ * Description: Get the parent process id (POSIX.1, 4.1.1)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_getppid() : error conditions ***\n";

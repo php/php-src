@@ -52,7 +52,7 @@ $bar->test();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: property_exists() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 

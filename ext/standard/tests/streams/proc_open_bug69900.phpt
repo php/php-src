@@ -6,7 +6,7 @@ Bug #69900 Commandline input/output weird behaviour with STDIO
 error_reporting(E_ALL);
 
 $fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
-$max_ms = ((bool)getenv('TRAVIS')) ? 10 : 1;
+$max_ms = ((bool)getenv('TRAVIS') || (bool)getenv('APPVEYOR')) ? 10 : 1;
 
 $test_content = '<?php
 
@@ -33,7 +33,7 @@ for($i = 0; $i < 10; $i++){
 	$s = fgets($pipes[1]);
 	$t1 = microtime(1);
 
-	echo $s;		
+	echo $s;
 	echo "fgets() took ", (($t1 - $t0)*1000 > $max_ms ? 'more' : 'less'), " than $max_ms ms\n";
 }
 

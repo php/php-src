@@ -29,7 +29,7 @@ var_dump(fileatime($filename));
 echo "Done\n";
 
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)
 int(101)
 int(101)

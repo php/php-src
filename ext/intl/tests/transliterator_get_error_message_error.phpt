@@ -9,7 +9,6 @@ $t = Transliterator::create("[\p{Bidi_Mirrored}] Hex");
 echo transliterator_get_error_message(), "\n";
 echo $t->getErrorMessage(null), "\n";
 echo transliterator_get_error_message(array()), "\n";
-
 --EXPECTF--
 Warning: transliterator_get_error_message() expects exactly 1 parameter, 0 given in %s on line %d
 

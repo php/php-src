@@ -32,4 +32,3 @@ for ($i = 0; $i < 3; $i++) {
 bool(true)
 SQLSTATE[23505]: %stest_pkey%s
 SQLSTATE[23505]: %stest_pkey%s
-

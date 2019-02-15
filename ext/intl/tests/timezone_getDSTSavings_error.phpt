@@ -12,9 +12,7 @@ $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getDSTSavings(array()));
 
 var_dump(intltz_get_dst_savings(null));
-
 --EXPECTF--
-
 Warning: IntlTimeZone::getDSTSavings() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlTimeZone::getDSTSavings(): intltz_get_dst_savings: bad arguments in %s on line %d

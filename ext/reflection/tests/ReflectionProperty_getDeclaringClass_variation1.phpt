@@ -16,7 +16,7 @@ var_dump($propInfo->getDeclaringClass());
 echo "Wrong number of params:\n";
 $propInfo->getDeclaringClass(1);
 
-?> 
+?>
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
   ["name"]=>

@@ -4,7 +4,7 @@ Bug #51291 (oci_error() doesn't report last error when called two times)
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs: different error messages from TimesTen
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -16,7 +16,7 @@ $s = oci_parse($c, "declare e exception; begin if :bv = 1 then raise e; end if; 
 $bv = 1;
 oci_bind_by_name($s, ":bv", $bv);
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $bv = 0;
     $r = oci_execute($s, OCI_DEFAULT);

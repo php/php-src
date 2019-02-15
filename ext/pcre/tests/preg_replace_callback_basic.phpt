@@ -1,5 +1,5 @@
 --TEST--
-Test preg_replace_callback() function : basic functionality 
+Test preg_replace_callback() function : basic functionality
 --FILE--
 <?php
 /*
@@ -13,7 +13,7 @@ $replacement = array('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seve
 function integer_word($matches) {
     global $replacement;
     return $replacement[$matches[0]]; //all examples will be looking for an integer value, if one is found it will be stored in $matches[0] which corresponds to a key in the $replacements array
-    
+
 }
 $subject1 = 'there are 7 words in this sentence.';
 $new_subject1 = preg_replace_callback('/\d/', "integer_word", $subject1);

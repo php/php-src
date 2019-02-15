@@ -12,7 +12,7 @@ var_dump(stream_filter_register("", array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: stream_filter_register(): Filter name cannot be empty in %s on line %d
 bool(false)
 

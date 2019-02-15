@@ -132,7 +132,7 @@ unlink($file);
 		printf("[001] %s [%s] %s\n",
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
-	
+
 	print "done!";
 ?>
 --CLEAN--

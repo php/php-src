@@ -1,8 +1,8 @@
 --TEST--
 Testing stack after early function return
 --FILE--
-<?php 
-function F () { 
+<?php
+function F () {
 	if(1) {
 		return("Hello");
 	}

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
   |          Wez Furlong <wez@php.net>                                   |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -165,6 +163,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 			pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 			return 0;
 		}
+		PQclear(S->result);
 
 		/* the cursor was declared correctly */
 		S->is_prepared = 1;
@@ -434,6 +433,11 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 				return 0;
 		}
 
+		if(S->result) {
+			PQclear(S->result);
+			S->result = NULL;
+		}
+
 		spprintf(&q, 0, "FETCH %s FROM %s", ori_str, S->cursor_name);
 		efree(ori_str);
 		S->result = PQexec(S->H->server, q);
@@ -549,7 +553,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulon
 				break;
 
 			case PDO_PARAM_BOOL:
-				S->cols[colno].boolval = **ptr == 't' ? 1: 0;
+				S->cols[colno].boolval = **ptr == 't';
 				*ptr = (char *) &(S->cols[colno].boolval);
 				*len = sizeof(zend_bool);
 				break;
@@ -723,12 +727,3 @@ const struct pdo_stmt_methods pgsql_stmt_methods = {
 	NULL,  /* next_rowset */
 	pdo_pgsql_stmt_cursor_closer
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

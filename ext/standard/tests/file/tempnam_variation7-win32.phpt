@@ -11,13 +11,13 @@ if(substr(PHP_OS, 0, 3) != "WIN")
    Description: Create file with unique file name.
 */
 
-/* Passing invalid/non-existing args for $dir, 
+/* Passing invalid/non-existing args for $dir,
      hence the unique files will be created in temporary dir */
- 
+
 echo "*** Testing tempnam() with invalid/non-existing directory names ***\n";
-/* An array of names, which will be passed as a dir name */ 
+/* An array of names, which will be passed as a dir name */
 $names_arr = array(
-	/* Invalid args */ 
+	/* Invalid args */
 	-1,
 	TRUE,
 	FALSE,
@@ -28,7 +28,7 @@ $names_arr = array(
 	array(),
 
 	/* Non-existing dirs */
-	"/no/such/file/dir", 
+	"/no/such/file/dir",
 	"php"
 );
 
@@ -120,4 +120,3 @@ File permissions are => 100666
 File created in => temp dir
 
 *** Done ***
-

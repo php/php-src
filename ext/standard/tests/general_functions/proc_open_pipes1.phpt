@@ -1,5 +1,5 @@
 --TEST--
-proc_open() with > 16 pipes 
+proc_open() with > 16 pipes
 --FILE--
 <?php
 

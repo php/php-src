@@ -1,9 +1,9 @@
 --TEST--
 InterBase: event handling
 --SKIPIF--
-<?php 
+<?php
 if (PHP_OS == "WINNT") echo "skip";
-include("skipif.inc"); 
+include("skipif.inc");
 ?>
 --FILE--
 <?php

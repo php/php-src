@@ -4,10 +4,10 @@ oci_lob_seek()/rewind()/append()
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
-	
+
 require dirname(__FILE__).'/connect.inc';
 require dirname(__FILE__).'/create_table.inc';
 
@@ -73,7 +73,7 @@ NULL
 bool(true)
 int(3)
 
-Warning: oci_lob_seek() expects parameter 1 to be OCI-Lob, int given in %s on line %d
+Warning: oci_lob_seek() expects parameter 1 to be OCI-Lob, int%sgiven in %s on line %d
 NULL
 bool(true)
 array(2) {

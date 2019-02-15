@@ -1,6 +1,4 @@
-dnl $Id$
 dnl config.m4 for extension pdo
-dnl vim:se ts=2 sw=2 et:
 
 AC_DEFUN([PHP_PDO_PEAR_CHECK],[
   pdo_running_under_pear=0
@@ -42,7 +40,7 @@ if test "$PHP_PDO" != "no"; then
   [
     PHP_ADD_EXTENSION_DEP(pdo, spl, true)
   ])
-  
+
   ifdef([PHP_INSTALL_HEADERS],
   [
     dnl Sadly, this is a complete NOP for pecl extensions
@@ -52,4 +50,3 @@ if test "$PHP_PDO" != "no"; then
   dnl so we always include the known-good working hack.
   PHP_ADD_MAKEFILE_FRAGMENT
 fi
-

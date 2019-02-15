@@ -1,7 +1,7 @@
 --TEST--
 Check how textdomain() with wrong parameters behaves.
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("skip\n");
 	}
@@ -10,7 +10,7 @@ Check how textdomain() with wrong parameters behaves.
 	}
 ?>
 --FILE--
-<?php // $Id$
+<?php
 
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');

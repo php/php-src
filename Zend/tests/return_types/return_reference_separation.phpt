@@ -1,6 +1,5 @@
 --TEST--
 Return value separation
-
 --FILE--
 <?php
 function test1(&$abc) : string {

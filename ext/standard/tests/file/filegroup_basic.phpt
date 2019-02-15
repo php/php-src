@@ -12,7 +12,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN') {
  * Description: Returns the group ID of the file, or FALSE in case of an error.
  */
 
-echo "*** Testing filegroup(): basic functionality ***\n"; 
+echo "*** Testing filegroup(): basic functionality ***\n";
 
 echo "-- Testing with the file or directory created by owner --\n";
 
@@ -41,7 +41,6 @@ var_dump( filegroup("/") );
 
 echo "\n*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 
@@ -51,7 +50,6 @@ $dir_name  = $file_path."/filegroup_basic";
 unlink($file_name);
 rmdir($dir_name);
 ?>
-
 --EXPECTF--
 *** Testing filegroup(): basic functionality ***
 -- Testing with the file or directory created by owner --

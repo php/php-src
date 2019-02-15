@@ -3,7 +3,7 @@ Test sprintf() function : usage variations - unsigned formats with resource valu
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -22,7 +22,7 @@ $resource_values = array (
 // array of unsigned formats
 $unsigned_formats = array(
   "%u", "%hu", "%lu",
-  "%Lu", " %u", "%u ", 
+  "%Lu", " %u", "%u ",
   "\t%u", "\n%u", "%4u",
    "%30u", "%[0-9]", "%*u"
 );
@@ -31,7 +31,7 @@ $unsigned_formats = array(
 $count = 1;
 foreach($resource_values as $resource_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($unsigned_formats as $format) {
     var_dump( sprintf($format, $resource_value) );
   }

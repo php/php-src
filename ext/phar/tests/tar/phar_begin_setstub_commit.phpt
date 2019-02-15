@@ -31,7 +31,7 @@ var_dump($p->getStub());
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/brandnewphar.phar.tar');
 ?>
 --EXPECT--

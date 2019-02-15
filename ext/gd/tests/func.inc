@@ -66,7 +66,7 @@ function get_libxpm_version()
  * The textual result is printed, so the EXPECT section should contain the line
  * "The images are equal."
  *
- * If the PNG file does not exists, or the images are not equal, a diagnostic
+ * If the PNG file does not exist, or the images are not equal, a diagnostic
  * message is printed, and the actual file is stored right beside the temporary
  * .php test file with the extension .out.png, to be able to manually inspect
  * the result.

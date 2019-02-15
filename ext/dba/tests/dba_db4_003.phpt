@@ -1,7 +1,7 @@
 --TEST--
 DBA DB4 File Creation open("c") with existing file
 --SKIPIF--
-<?php 
+<?php
 $handler = "db4";
 require_once(dirname(__FILE__) .'/skipif.inc');
 die("info $HND handler used");
@@ -32,8 +32,8 @@ echo "$s\n";
 
 ?>
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: db4

@@ -74,4 +74,3 @@ array(4) {
   string(5) "b.php"
 }
 bool(true)
-

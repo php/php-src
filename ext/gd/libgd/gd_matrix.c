@@ -246,7 +246,7 @@ int gdAffineShearHorizontal(double dst[6], const double angle)
 int gdAffineShearVertical(double dst[6], const double angle)
 {
 	dst[0] = 1;
-	dst[1] = tan(angle * M_PI / 180.0);;
+	dst[1] = tan(angle * M_PI / 180.0);
 	dst[2] = 0;
 	dst[3] = 1;
 	dst[4] = 0;
@@ -331,4 +331,3 @@ int gdAffineEqual (const double m1[6], const double m2[6])
 	  fabs (m1[4] - m2[4]) < GD_EPSILON &&
 	  fabs (m1[5] - m2[5]) < GD_EPSILON);
 }
-

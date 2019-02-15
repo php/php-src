@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '49') < 0)
-	die('skip for ICU 49+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -30,9 +28,7 @@ var_dump(intlcal_set_skipped_wall_time_option($c));
 var_dump(intlcal_set_repeated_wall_time_option($c));
 
 var_dump(intlcal_set_repeated_wall_time_option(1, 1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::setSkippedWallTimeOption() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlCalendar::setSkippedWallTimeOption(): intlcal_set_skipped_wall_time_option: bad arguments in %s on line %d

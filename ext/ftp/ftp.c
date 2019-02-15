@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Stefan Esser <sesser@php.net> (resume functions)            |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -59,6 +57,7 @@
 
 #ifdef HAVE_FTP_SSL
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 #endif
 
 #include "ftp.h"
@@ -99,6 +98,11 @@ static databuf_t*	data_close(ftpbuf_t *ftp, databuf_t *data);
 
 /* generic file lister */
 static char**		ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *path, const size_t path_len);
+
+#ifdef HAVE_FTP_SSL
+/* shuts down a TLS/SSL connection */
+static void		ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle);
+#endif
 
 /* IP and port conversion box */
 union ipbox {
@@ -173,8 +177,7 @@ ftp_close(ftpbuf_t *ftp)
 	if (ftp->fd != -1) {
 #ifdef HAVE_FTP_SSL
 		if (ftp->ssl_active) {
-			SSL_shutdown(ftp->ssl_handle);
-			SSL_free(ftp->ssl_handle);
+			ftp_ssl_shutdown(ftp, ftp->fd, ftp->ssl_handle);
 		}
 #endif
 		closesocket(ftp->fd);
@@ -1854,7 +1857,7 @@ data_accepted:
 						php_pollfd p;
 						int i;
 
-						p.fd = ftp->fd;
+						p.fd = data->fd;
 						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
 						p.revents = 0;
 
@@ -1881,6 +1884,64 @@ data_accepted:
 }
 /* }}} */
 
+/* {{{ ftp_ssl_shutdown
+ */
+#ifdef HAVE_FTP_SSL
+static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
+	/* In TLS 1.3 it's common to receive session tickets after the handshake has completed. We need to train
+	   the socket (read the tickets until EOF/close_notify alert) before closing the socket. Otherwise the
+	   server might get an ECONNRESET which might lead to data truncation on server side.
+	*/
+	char buf[256]; /* We will use this for the OpenSSL error buffer, so it has
+			  to be at least 256 bytes long.*/
+	int done = 1, err, nread;
+	unsigned long sslerror;
+
+	err = SSL_shutdown(ssl_handle);
+	if (err < 0) {
+		php_error_docref(NULL, E_WARNING, "SSL_shutdown failed");
+	}
+	else if (err == 0) {
+		/* The shutdown is not yet finished. Call SSL_read() to do a bidirectional shutdown. */
+		done = 0;
+	}
+
+	while (!done && data_available(ftp, fd)) {
+		ERR_clear_error();
+		nread = SSL_read(ssl_handle, buf, sizeof(buf));
+		if (nread <= 0) {
+			err = SSL_get_error(ssl_handle, nread);
+			switch (err) {
+				case SSL_ERROR_NONE: /* this is not an error */
+				case SSL_ERROR_ZERO_RETURN: /* no more data */
+					/* This is the expected response. There was no data but only
+					   the close notify alert */
+					done = 1;
+					break;
+				case SSL_ERROR_WANT_READ:
+					/* there's data pending, re-invoke SSL_read() */
+					break;
+				case SSL_ERROR_WANT_WRITE:
+					/* SSL wants a write. Really odd. Let's bail out. */
+					done = 1;
+					break;
+				default:
+					if ((sslerror = ERR_get_error())) {
+						ERR_error_string_n(sslerror, buf, sizeof(buf));
+						php_error_docref(NULL, E_WARNING, "SSL_read on shutdown: %s", buf);
+					} else if (errno) {
+						php_error_docref(NULL, E_WARNING, "SSL_read on shutdown: %s (%d)", strerror(errno), errno);
+					}
+					done = 1;
+					break;
+			}
+		}
+	}
+	(void)SSL_free(ssl_handle);
+}
+#endif
+/* }}} */
+
 /* {{{ data_close
  */
 databuf_t*
@@ -1893,8 +1954,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 #ifdef HAVE_FTP_SSL
 		if (data->ssl_active) {
 			/* don't free the data context, it's the same as the control */
-			SSL_shutdown(data->ssl_handle);
-			SSL_free(data->ssl_handle);
+			ftp_ssl_shutdown(ftp, data->listener, data->ssl_handle);
 			data->ssl_active = 0;
 		}
 #endif
@@ -1904,8 +1964,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 #ifdef HAVE_FTP_SSL
 		if (data->ssl_active) {
 			/* don't free the data context, it's the same as the control */
-			SSL_shutdown(data->ssl_handle);
-			SSL_free(data->ssl_handle);
+			ftp_ssl_shutdown(ftp, data->fd, data->ssl_handle);
 			data->ssl_active = 0;
 		}
 #endif
@@ -2252,12 +2311,3 @@ bail:
 /* }}} */
 
 #endif /* HAVE_FTP */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

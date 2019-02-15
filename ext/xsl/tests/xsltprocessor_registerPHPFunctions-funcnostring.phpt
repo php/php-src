@@ -4,7 +4,7 @@ Check xsltprocessor::registerPHPFunctions and a non-string function in xsl
 The XSL script tries to call a php function that is not a string which
 is expected to fail
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }

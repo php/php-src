@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* resource lists */
 
@@ -211,6 +209,7 @@ void plist_entry_destructor(zval *zv)
 int zend_init_rsrc_list(void)
 {
 	zend_hash_init(&EG(regular_list), 8, NULL, list_entry_destructor, 0);
+	EG(regular_list).nNextFreeElement = 0;
 	return SUCCESS;
 }
 
@@ -222,20 +221,15 @@ int zend_init_rsrc_plist(void)
 }
 
 
-static int zend_close_rsrc(zval *zv)
-{
-	zend_resource *res = Z_PTR_P(zv);
-
-	if (res->type >= 0) {
-		zend_resource_dtor(res);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-
-
 void zend_close_rsrc_list(HashTable *ht)
 {
-	zend_hash_reverse_apply(ht, zend_close_rsrc);
+	zend_resource *res;
+
+	ZEND_HASH_REVERSE_FOREACH_PTR(ht, res) {
+		if (res->type >= 0) {
+			zend_resource_dtor(res);
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 
 
@@ -247,11 +241,8 @@ void zend_destroy_rsrc_list(HashTable *ht)
 static int clean_module_resource(zval *zv, void *arg)
 {
 	int resource_id = *(int *)arg;
-	if (Z_RES_TYPE_P(zv) == resource_id) {
-		return 1;
-	} else {
-		return 0;
-	}
+
+	return Z_RES_TYPE_P(zv) == resource_id;
 }
 
 
@@ -347,10 +338,6 @@ ZEND_API zend_resource* zend_register_persistent_resource_ex(zend_string *key, v
 	GC_MAKE_PERSISTENT_LOCAL(key);
 
 	zv = zend_hash_update(&EG(persistent_list), key, &tmp);
-	if (UNEXPECTED(zv == NULL)) {
-		free(Z_RES(tmp));
-		return NULL;
-	}
 
 	return Z_RES_P(zv);
 }
@@ -360,16 +347,6 @@ ZEND_API zend_resource* zend_register_persistent_resource(const char *key, size_
 	zend_string *str = zend_string_init(key, key_len, 1);
 	zend_resource *ret  = zend_register_persistent_resource_ex(str, rsrc_pointer, rsrc_type);
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 	return ret;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

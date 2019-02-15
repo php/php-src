@@ -40,4 +40,3 @@ NULL
 
 Warning: SplObjectStorage::detach() expects parameter 1 to be object, null given in %s on line %d
 NULL
-

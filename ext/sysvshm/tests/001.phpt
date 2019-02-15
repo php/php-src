@@ -22,7 +22,7 @@ var_dump(ftok(__FILE__,"q"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: ftok() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 

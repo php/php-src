@@ -7,7 +7,7 @@ class Foo {
     const A = 'Foo::A';
     const B = self::A . ' and ' . self::C;
     const C = 'Foo::C';
-    
+
 }
 
 class Bar extends Foo {

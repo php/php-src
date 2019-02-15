@@ -1,9 +1,7 @@
 --TEST--
 openssl_x509_parse() tests
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; 
-if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
-?>
+<?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
 $cert = "file://" . dirname(__FILE__) . "/cert.crt";

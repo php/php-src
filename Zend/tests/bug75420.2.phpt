@@ -17,4 +17,3 @@ var_dump($name);
 string(6) "foofoo"
 int(42)
 int(24)
-

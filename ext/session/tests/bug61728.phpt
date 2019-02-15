@@ -3,7 +3,7 @@ Bug #61728 (PHP crash when calling ob_start in request_shutdown phase)
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
-<?php 
+<?php
 function output_html($ext) {
     return strlen($ext);
 }

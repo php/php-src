@@ -7,7 +7,7 @@ Test copy() function: usage variations - non existing src/dest
      Returns TRUE on success or FALSE on failure.
 */
 
-/* Test copy(): Trying to create a copy of non-existing source in an existing destination 
+/* Test copy(): Trying to create a copy of non-existing source in an existing destination
      and an existing source in non-existing destiantion */
 
 $file_path = dirname(__FILE__);
@@ -28,12 +28,10 @@ var_dump( filesize($file) );  //size of the source
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_variation14.tmp");
 ?>
-
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of non-existing source in existing destination ***
 Warning: copy(%s): %s

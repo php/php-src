@@ -12,6 +12,10 @@ function test($name)
 	var_dump($o->key());
 	while(($c = $o->fgetc()) !== false)
 	{
+        // Kinda ugly but works around new lines mess
+        if ($c === "\r") {
+            continue;
+        }
 		var_dump($o->key(), $c, $o->eof());
 	}
 	echo "===EOF?===\n";

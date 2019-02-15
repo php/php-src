@@ -1,9 +1,9 @@
 --TEST--
 Test inflate_init() error
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded"; 
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -12,7 +12,6 @@ var_dump(inflate_init());
 var_dump(inflate_init(42));
 ?>
 --EXPECTF--
-
 Warning: inflate_init() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

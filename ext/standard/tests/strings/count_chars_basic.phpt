@@ -1,5 +1,5 @@
 --TEST--
-Test count_chars() function : basic functionality 
+Test count_chars() function : basic functionality
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test preg_match_all() function : basic functionality 
+Test preg_match_all() function : basic functionality
 --FILE--
 <?php
 /*

@@ -12,9 +12,7 @@ $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getErrorCode(array()));
 
 var_dump(intltz_get_error_code(null));
-
 --EXPECTF--
-
 Warning: IntlTimeZone::getErrorCode() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlTimeZone::getErrorCode(): intltz_get_error_code: bad arguments in %s on line %d

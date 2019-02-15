@@ -10,7 +10,7 @@ Test bindec() function :  error conditions - incorrect input
 /*
  * Pass incorrect input to bindec() to test behaviour
  */
- 
+
 echo "*** Testing bindec() : error conditions ***\n";
 
 // get a class

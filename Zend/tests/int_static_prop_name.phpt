@@ -40,4 +40,3 @@ int(24)
 Access to undeclared static property: Foo::$42
 Access to undeclared static property: Foo::$42
 Access to undeclared static property: Foo::$42
-

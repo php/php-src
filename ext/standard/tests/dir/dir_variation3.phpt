@@ -17,7 +17,7 @@ unlink($filename);
 ?>
 --FILE--
 <?php
-/* 
+/*
  * Prototype  : object dir(string $directory[, resource $context])
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c
@@ -57,7 +57,7 @@ $permission_values = array(
 for($count = 0; $count < count($permission_values); $count++) {
   echo "\n-- Iteration ".($count + 1)." --\n";
 
-  // try to remove the dir if exists  & create 
+  // try to remove the dir if exists  & create
   $file_path = dirname(__FILE__);
   $dir_path = $file_path."/dir_variation3";
   @chmod ($dir_path, 0777); // change dir permission to allow all operation
@@ -71,7 +71,7 @@ for($count = 0; $count < count($permission_values); $count++) {
 
   // try to get dir handle
   $d = dir($dir_path);
-  var_dump($d);   // dump the handle 
+  var_dump($d);   // dump the handle
 
   // try read directory, expected : false
   echo "-- reading contents --\n";

@@ -20,7 +20,7 @@ var_dump(get_included_files());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(1) {
   [0]=>
   string(%d) "%s"

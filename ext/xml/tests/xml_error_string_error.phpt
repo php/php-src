@@ -1,17 +1,17 @@
 --TEST--
-Test xml_error_string() function : error conditions 
+Test xml_error_string() function : error conditions
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto string xml_error_string(int code)
- * Description: Get XML parser error string 
+ * Description: Get XML parser error string
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_error_string() : error conditions ***\n";
@@ -41,4 +41,3 @@ NULL
 Warning: xml_error_string() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-

@@ -7,8 +7,8 @@ Test stripos() function : usage variations - null terminated strings for 'haysta
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function with null terminated strings for 'haystack' argument 
- *  in order to check the binary safe 
+/* Test stripos() function with null terminated strings for 'haystack' argument
+ *  in order to check the binary safe
 */
 
 echo "*** Test stripos() function: binary safe ***\n";

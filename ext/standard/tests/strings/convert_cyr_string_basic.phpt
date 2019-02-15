@@ -1,5 +1,5 @@
 --TEST--
-Test convert_cyr_string() function : basic functionality 
+Test convert_cyr_string() function : basic functionality
 --FILE--
 <?php
 

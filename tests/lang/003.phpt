@@ -2,10 +2,10 @@
 Simple Switch Test
 --FILE--
 <?php
-$a=1; 
+$a=1;
 switch($a) {
 	case 0:
-		echo "bad";	
+		echo "bad";
 		break;
 	case 1:
 		echo "good";

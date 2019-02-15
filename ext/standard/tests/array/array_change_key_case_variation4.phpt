@@ -3,7 +3,7 @@ Test array_change_key_case() function : usage variations - different int values 
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Returns an array with all string keys lowercased [or uppercased] 
+ * Description: Returns an array with all string keys lowercased [or uppercased]
  * Source code: ext/standard/array.c
  */
 
@@ -22,7 +22,6 @@ for ($i = -5; $i <=5; $i += 1){
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 

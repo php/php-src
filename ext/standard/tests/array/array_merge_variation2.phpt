@@ -3,7 +3,7 @@ Test array_merge() function : usage variations - Pass different data types as $a
 --FILE--
 <?php
 /* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array 
+ * Description: Merges elements from passed arrays into one array
  * Source code: ext/standard/array.c
  */
 
@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -71,7 +71,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -102,87 +102,87 @@ echo "Done";
 
 -- Iteration 1 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, int given in %s on line %d
 NULL
 
 -- Iteration 2 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, int given in %s on line %d
 NULL
 
 -- Iteration 3 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, int given in %s on line %d
 NULL
 
 -- Iteration 4 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, int given in %s on line %d
 NULL
 
 -- Iteration 5 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
 NULL
 
 -- Iteration 10 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, null given in %s on line %d
 NULL
 
 -- Iteration 11 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, null given in %s on line %d
 NULL
 
 -- Iteration 12 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, bool given in %s on line %d
 NULL
 
 -- Iteration 13 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, bool given in %s on line %d
 NULL
 
 -- Iteration 14 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, bool given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, bool given in %s on line %d
 NULL
 
 -- Iteration 16 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -195,36 +195,36 @@ array(2) {
 
 -- Iteration 19 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, object given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, null given in %s on line %d
 NULL
 
 -- Iteration 24 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, null given in %s on line %d
 NULL
 
 -- Iteration 25 --
 
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
+Warning: array_merge(): Expected parameter 2 to be an array, resource given in %s on line %d
 NULL
 Done

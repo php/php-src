@@ -1,7 +1,7 @@
 --TEST--
 Check xsltprocessor::removeParameter wrong parameter handling
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }

@@ -1,9 +1,9 @@
 --TEST--
 Test incremental inflate_add() error functionality
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded"; 
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -15,7 +15,6 @@ $badFlushType = 6789;
 var_dump(inflate_add($resource, "test", $badFlushType));
 ?>
 --EXPECTF--
-
 Warning: inflate_add(): Invalid zlib.inflate resource in %s on line %d
 bool(false)
 

@@ -17,9 +17,9 @@ function Test()
 	echo "$a $c ";
 }
 
-Test();	
+Test();
 echo "$a $b $c ";
-Test();	
+Test();
 echo "$a $b $c ";
 Test();
 ?>

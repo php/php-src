@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension tokenizer
 
 dnl Otherwise use enable:

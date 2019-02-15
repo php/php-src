@@ -22,7 +22,7 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(1) {
   ["foo"]=>
   array(1) {

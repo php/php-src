@@ -1,7 +1,7 @@
 --TEST--
 DomDocument::createAttribute() - basic test for DomDocument::createAttribute()
 --CREDITS--
-Muhammad Khalid Adnan 
+Muhammad Khalid Adnan
 # TestFest 2008
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
@@ -23,4 +23,3 @@ echo $doc->saveXML();
 --EXPECT--
 <?xml version="1.0"?>
 <para hahaha=""/>
-

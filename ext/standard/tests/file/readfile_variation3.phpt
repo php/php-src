@@ -7,7 +7,7 @@ Test readfile() function: usage variation - include path
 */
 /* test readfile() by providing an include path, second argument */
 
-// include file.inc 
+// include file.inc
 require("file.inc");
 
 $file_path = dirname(__FILE__);

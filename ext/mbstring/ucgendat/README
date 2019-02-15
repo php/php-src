@@ -4,6 +4,3 @@ It's only necessary to rebuild unicode_data.h from Unicode ucd files.
 
 Example usage:
 php ucgendat.php UnicodeData.txt
-
-
-

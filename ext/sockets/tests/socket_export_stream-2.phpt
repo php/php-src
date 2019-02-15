@@ -5,7 +5,6 @@ socket_export_stream: Bad arguments
 if (!extension_loaded('sockets')) {
 	die('SKIP sockets extension not available.');
 }
-
 --FILE--
 <?php
 
@@ -45,4 +44,3 @@ resource(%d) of type (Socket)
 Warning: socket_export_stream(): supplied resource is not a valid Socket resource in %s on line %d
 bool(false)
 Done.
-

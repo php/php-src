@@ -3,7 +3,7 @@ Test rsort() function : error conditions - Pass incorrect number of args
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order 
+ * Description: Sort an array in reverse order
  * Source code: ext/standard/array.c
  */
 
@@ -29,7 +29,6 @@ var_dump($array_arg);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing rsort() : error conditions ***
 

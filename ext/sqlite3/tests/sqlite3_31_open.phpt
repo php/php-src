@@ -18,5 +18,5 @@ try {
 ?>
 --CLEAN--
 <?php @unlink(__DIR__ . '/db1.db'); ?>
---EXPECTF--
+--EXPECT--
 string(29) "Already initialised DB Object"

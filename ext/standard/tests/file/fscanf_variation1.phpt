@@ -23,7 +23,7 @@ if($file_handle == false)
 @fwrite($file_handle, 12345);
 fclose($file_handle);
 
-// open file for reading 
+// open file for reading
 $file_handle = fopen($filename, "r");
 // capturing the return value from fscanf() called without third argument
 $return_value = fscanf($file_handle, "%s");
@@ -36,7 +36,7 @@ echo "\n*** Done ***";
 <?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation1.tmp";
-unlink($filename); 
+unlink($filename);
 ?>
 --EXPECT--
 *** Testing fscanf(): for its return type without third argument ***
@@ -47,4 +47,3 @@ array(1) {
 }
 
 *** Done ***
-

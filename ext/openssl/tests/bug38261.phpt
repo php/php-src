@@ -1,16 +1,16 @@
 --TEST--
-openssl key from zval leaks 
+openssl key from zval leaks
 --SKIPIF--
-<?php 
-if (!extension_loaded("openssl")) die("skip"); 
+<?php
+if (!extension_loaded("openssl")) die("skip");
 ?>
 --FILE--
 <?php
 $cert = false;
 class test {
-	function __toString() {
-		return "test object";
-	}
+    function __toString() {
+        return "test object";
+    }
 }
 $t = new test;
 

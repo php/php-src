@@ -26,7 +26,7 @@ var_dump(gmp_div_r(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_div_r() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 

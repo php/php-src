@@ -24,4 +24,3 @@ NULL
 
 Warning: SplObjectStorage::unserialize() expects parameter 1 to be string, object given in %s on line %d
 NULL
-

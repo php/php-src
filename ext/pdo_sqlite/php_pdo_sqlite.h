@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,9 +15,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 
 #ifndef PHP_PDO_SQLITE_H
 #define PHP_PDO_SQLITE_H
@@ -55,4 +52,3 @@ ZEND_END_MODULE_GLOBALS(pdo_sqlite)
 #endif
 
 #endif	/* PHP_PDO_SQLITE_H */
-

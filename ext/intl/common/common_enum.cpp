@@ -219,8 +219,7 @@ static PHP_METHOD(IntlIterator, current)
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	data = ii->iterator->funcs->get_current_data(ii->iterator);
 	if (data) {
-		ZVAL_DEREF(data);
-		ZVAL_COPY(return_value, data);
+		ZVAL_COPY_DEREF(return_value, data);
 	}
 }
 
@@ -321,7 +320,7 @@ U_CFUNC void intl_register_IntlIterator_class(void)
 	zend_class_implements(IntlIterator_ce_ptr, 1,
 		zend_ce_iterator);
 
-	memcpy(&IntlIterator_handlers, zend_get_std_object_handlers(),
+	memcpy(&IntlIterator_handlers, &std_object_handlers,
 		sizeof IntlIterator_handlers);
 	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;

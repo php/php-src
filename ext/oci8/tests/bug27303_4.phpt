@@ -16,7 +16,7 @@ NLS_LANG=
 <?php
 
 require dirname(__FILE__).'/connect.inc';
-	
+
 $create_st = array();
 $create_st[] = "drop sequence myseq";
 $create_st[] = "drop table mytab";
@@ -51,7 +51,7 @@ oci8_test_sql_execute($c, $drop_st);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(1) "1"
 string(1) "2"
 string(1) "3"

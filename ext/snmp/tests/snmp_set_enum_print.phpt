@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp_set_enum_print
 --CREDITS--
 Olivier Doucet

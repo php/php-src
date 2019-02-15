@@ -1,13 +1,13 @@
 --TEST--
 Check how gettext() with wrong parameters behaves.
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("skip extension gettext not loaded\n");
 	}
 ?>
 --FILE--
-<?php 
+<?php
 gettext (array());
 ?>
 --EXPECTF--

@@ -14,10 +14,10 @@ $method = 'aes-128-gcm';
 $tests = openssl_get_cipher_tests($method);
 
 foreach ($tests as $idx => $test) {
-	echo "TEST $idx\n";
-	$pt = openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-		$test['iv'], $test['tag'], $test['aad']);
-	var_dump($test['pt'] === $pt);
+    echo "TEST $idx\n";
+    $pt = openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
+        $test['iv'], $test['tag'], $test['aad']);
+    var_dump($test['pt'] === $pt);
 }
 
 // no IV

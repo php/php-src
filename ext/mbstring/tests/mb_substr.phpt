@@ -4,7 +4,6 @@ mb_substr()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
 output_handler=
-mbstring.func_overload=0
 --FILE--
 <?php
 // TODO: Add more encodings
@@ -25,11 +24,8 @@ $str = mb_substr($euc_jp, -100, 10,'EUC-JP');
 ($str !== "") ? print "4 OK: ".bin2hex($str)."\n" : print "NG: ".bin2hex($str)."\n";
 
 ?>
-
 --EXPECT--
 1: c6fccbdcb8eca4c7a4b9a1a34555432d
 2: 30313233a4b3a4cecab8bbfacef3a4cfc6fccbdcb8eca4c7a4b9a1a34555432d4a50a4f2bbc8a4c3a4c6a4a4a4dea4b9a1a3c6fccbdcb8eca4cfccccc5ddbdada4a4a1a3
 3 OK
 4 OK: 30313233a4b3a4cecab8bbfacef3a4cf
-
-

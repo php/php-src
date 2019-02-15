@@ -7,7 +7,8 @@ namespace Foo\Bar {
     class One {
         const Baz = parent::class;
     }
+    var_dump(One::Baz);
 }
 ?>
 --EXPECTF--
-Fatal error: parent::class cannot be used for compile-time class name resolution in %s on line %d
+Fatal error: Cannot use "parent" when current class scope has no parent in %s on line %d

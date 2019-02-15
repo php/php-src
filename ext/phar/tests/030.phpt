@@ -34,7 +34,7 @@ echo $e->getMessage(),"\n";
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--

@@ -1,13 +1,13 @@
 --TEST--
-Test file_exists() function : error conditions 
+Test file_exists() function : error conditions
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : proto bool file_exists(string filename)
- * Description: Returns true if filename exists 
+ * Description: Returns true if filename exists
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file_exists() : error conditions ***\n";
@@ -37,4 +37,3 @@ NULL
 Warning: file_exists() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-

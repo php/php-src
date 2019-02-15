@@ -1,8 +1,8 @@
 --TEST--
 gmp_divexact() tests
 --SKIPIF--
-<?php 
-if (!extension_loaded("gmp")) die ("skip"); 
+<?php
+if (!extension_loaded("gmp")) die ("skip");
 if (!defined('GMP_VERSION') || version_compare("4.2.1", GMP_VERSION, ">=")) {
 	die("skip your GMP is too old and will crash");
 }
@@ -38,7 +38,7 @@ var_dump(gmp_strval($r));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_divexact() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 

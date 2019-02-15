@@ -11,4 +11,3 @@ $options = array(
 $found = $z->addGlob("/home/pierre/cvs/gd/libgd/tests/*.png", 0, $options);
 var_dump($found);
 $z->close();
-

@@ -12,4 +12,3 @@ $iterator->getSubIterator(0, 0);
 ?>
 --EXPECTF--
 Warning: RecursiveIteratorIterator::getSubIterator() expects at most 1 parameter, 2 given in %s on line 5
-

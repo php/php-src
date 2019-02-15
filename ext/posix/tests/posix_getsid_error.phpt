@@ -1,14 +1,14 @@
 --TEST--
-Test posix_getsid() function : error conditions 
+Test posix_getsid() function : error conditions
 --DESCRIPTION--
 cases: no params, wrong param, wrong param range
 --CREDITS--
 Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-10
 --SKIPIF--
-<?php 
+<?php
 	if(!extension_loaded("posix")) {
-        die("SKIP - POSIX extension not loaded"); 
+        die("SKIP - POSIX extension not loaded");
     }
 ?>
 --FILE--

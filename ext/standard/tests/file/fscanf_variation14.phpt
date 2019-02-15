@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - string formats with strings 
+Test fscanf() function: usage variations - string formats with strings
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - string formats with strings
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different string format types with different string ***\n"; 
+echo "*** Test fscanf(): different string format types with different string ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation14.tmp";
@@ -65,7 +65,7 @@ $valid_strings = array(
 );
 
 // various string formats
-$string_formats = array( "%s", 
+$string_formats = array( "%s",
                          "%hs", "%ls", "%Ls",
                          " %s", "%s ", "% s",
                          "\t%s", "\n%s", "%4s",
@@ -1076,4 +1076,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

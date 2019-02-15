@@ -1,9 +1,5 @@
 --TEST--
 Bug #65272: flock() correctly sets wouldblock out param in windows
---SKIPIF--
-<?php
-if (stripos(PHP_OS, 'win') !== 0) die("skip windows required");
-?>
 --FILE--
 <?php
 

@@ -5,11 +5,6 @@ Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>
 --FILE--
 <?php
-class A {
-	public function A() {
-		echo "In constructor of class A\n"; 
-	}	
-}
 
 class B {
 	public function __construct($a, $b) {
@@ -19,28 +14,23 @@ class B {
 
 class C {
 	protected function __construct() {
-		echo "In constructor of class C\n"; 
+		echo "In constructor of class C\n";
 	}
 }
 
 class D {
 	private function __construct() {
-		echo "In constructor of class D\n";		
+		echo "In constructor of class D\n";
 	}
 }
-class E {	
+
+class E {
 }
 
-
-$rcA = new ReflectionClass('A');
 $rcB = new ReflectionClass('B');
 $rcC = new ReflectionClass('C');
 $rcD = new ReflectionClass('D');
 $rcE = new ReflectionClass('E');
-
-$a1 = $rcA->newInstance();
-$a2 = $rcA->newInstance('x');
-var_dump($a1, $a2);
 
 try {
 	var_dump($rcB->newInstance());
@@ -78,13 +68,6 @@ try {
 }
 ?>
 --EXPECTF--
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; A has a deprecated constructor in %s on line %d
-In constructor of class A
-In constructor of class A
-object(A)#%d (0) {
-}
-object(A)#%d (0) {
-}
 Exception: Too few arguments to function B::__construct(), 0 passed and exactly 2 expected
 In constructor of class B with args x, 123
 object(B)#%d (0) {

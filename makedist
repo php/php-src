@@ -12,9 +12,9 @@
 #  php-X.Y.Z[sub]
 #
 # The distribution ends up in a .tar.gz file that contains the distribution
-# in a directory called php-<version>.  
+# in a directory called php-<version>.
 # A .tar.bz2 file is also created.
-# 
+#
 # Written by Stig Bakken <ssb@guardian.no> 1997-05-28.
 # Adapted to git by Stanislav Malyshev <stas@php.net>
 
@@ -44,7 +44,7 @@ if test "x$PHPROOT" = "x"; then
     PHPROOT=git@git.php.net:php-src.git;
 fi
 
-LT_TARGETS='ltconfig ltmain.sh config.guess config.sub'
+LT_TARGETS='build/ltmain.sh build/config.guess build/config.sub'
 
 if echo '\c' | grep -s c >/dev/null 2>&1
 then
@@ -65,8 +65,8 @@ DIR=php-$VER
 DIRPATH=$MY_OLDPWD/$DIR
 
 if test -d "$DIRPATH"; then
-    echo "The directory $DIR"
-    echo "already exists, rename or remove it and run makedist again."
+    echo "The directory $DIR" >&2
+    echo "already exists, rename or remove it and run makedist again." >&2
     exit 1
 fi
 
@@ -85,7 +85,7 @@ for i in $LT_TARGETS; do
   fi
 done
 
-# generate some files so people don't need bison, flex and autoconf
+# generate some files so people don't need bison, re2c and autoconf
 # to install
 set -x
 ./buildconf --copy --force
@@ -115,7 +115,7 @@ sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Z
 sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
 sed -i 's,^#ifndef YYTOKENTYPE,#include "zend.h"\n#ifndef YYTOKENTYPE,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
 
-# download pear 
+# download pear
 $ECHO_N "makedist: Attempting to download PEAR's phar archive"
 if test ! -x wget; then
 	wget https://pear.php.net/install-pear-nozlib.phar -nd -P pear/

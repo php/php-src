@@ -13,7 +13,7 @@ var_dump(trigger_error("error", E_USER_DEPRECATED));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: trigger_error() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

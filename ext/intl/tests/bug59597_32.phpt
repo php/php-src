@@ -18,4 +18,3 @@ var_dump($value);
 --EXPECT--
 int(2147483647)
 float(2147483650)
-

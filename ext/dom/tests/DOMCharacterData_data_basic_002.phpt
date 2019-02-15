@@ -2,7 +2,7 @@
 Create CDATA section and change it using DOMcreateCDATASection
 --CREDITS--
 Nic Rosental nicrosental@gmail.com
-# TestFest Atlanta 2009-5-28 
+# TestFest Atlanta 2009-5-28
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

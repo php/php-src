@@ -1,9 +1,9 @@
 --TEST--
 Test function gzclose() by calling it more than or less than its expected arguments
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -11,7 +11,7 @@ if (!extension_loaded("zlib")) {
 
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
-$extra_arg = 'nothing'; 
+$extra_arg = 'nothing';
 
 
 
@@ -24,7 +24,6 @@ gzclose($h);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzclose() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 

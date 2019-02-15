@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -156,15 +156,21 @@ static void PHP_SHA3_Init(PHP_SHA3_CTX* ctx,
 
 static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
                             const unsigned char* buf,
-                            unsigned int count,
+                            size_t count,
                             size_t block_size) {
 	while (count > 0) {
-		unsigned int len = block_size - ctx->pos;
-		if (len > count) len = count;
+		size_t len = block_size - ctx->pos;
+
+		if (len > count) {
+			len = count;
+		}
+
 		count -= len;
+
 		while (len-- > 0) {
 			ctx->state[ctx->pos++] ^= *(buf++);
 		}
+
 		if (ctx->pos >= block_size) {
 			permute(ctx);
 			ctx->pos = 0;
@@ -174,9 +180,9 @@ static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
 
 static void PHP_SHA3_Final(unsigned char* digest,
                            PHP_SHA3_CTX* ctx,
-                           int block_size,
-                           int digest_size) {
-	int len = digest_size;
+                           size_t block_size,
+                           size_t digest_size) {
+	size_t len = digest_size;
 
 	// Pad state to finalize
 	ctx->state[ctx->pos++] ^= 0x06;
@@ -205,7 +211,7 @@ void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
 } \
 void PHP_SHA3##bits##Update(PHP_SHA3_##bits##_CTX* ctx, \
                             const unsigned char* input, \
-                            unsigned int inputLen) { \
+                            size_t inputLen) { \
 	PHP_SHA3_Update(ctx, input, inputLen, \
                     (1600 - (2 * bits)) >> 3); \
 } \
@@ -251,7 +257,7 @@ void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
 } \
 void PHP_SHA3##bits##Update(PHP_SHA3_##bits##_CTX* ctx, \
                             const unsigned char* input, \
-                            unsigned int inputLen) { \
+                            size_t inputLen) { \
 	Keccak_HashUpdate((Keccak_HashInstance *)ctx->hashinstance, input, inputLen * 8); \
 } \
 void PHP_SHA3##bits##Final(unsigned char* digest, \
@@ -280,12 +286,3 @@ DECLARE_SHA3_OPS(384);
 DECLARE_SHA3_OPS(512);
 
 #undef DECLARE_SHA3_OPS
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

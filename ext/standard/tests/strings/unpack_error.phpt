@@ -1,5 +1,5 @@
 --TEST--
-Test unpack() function : error conditions 
+Test unpack() function : error conditions
 --FILE--
 <?php
 

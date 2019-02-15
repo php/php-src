@@ -6,7 +6,7 @@ display_errors=stderr
 <?php
 if (getenv("USE_ZEND_ALLOC") === "0") {
     die("skip Zend MM disabled");
-} 
+}
 --FILE--
 <?php
 echo __LINE__ . "\n";

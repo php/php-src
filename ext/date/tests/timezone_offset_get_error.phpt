@@ -13,14 +13,6 @@ date_default_timezone_set("GMT");
 $tz = timezone_open("Europe/London");
 $date = date_create("GMT");
 
-set_error_handler('err');
-
-function err($errno, $errstr) {
-	if ($errno === E_RECOVERABLE_ERROR) {
-		var_dump($errstr);
-	}
-}
-
 echo "*** Testing timezone_offset_get() : error conditions ***\n";
 
 echo "\n-- Testing timezone_offset_get() function with zero arguments --\n";
@@ -99,12 +91,18 @@ try {
 *** Testing timezone_offset_get() : error conditions ***
 
 -- Testing timezone_offset_get() function with zero arguments --
+
+Warning: timezone_offset_get() expects exactly 2 parameters, 0 given in %s on line %d
 bool(false)
 
 -- Testing timezone_offset_get() function with less than expected no. of arguments --
+
+Warning: timezone_offset_get() expects exactly 2 parameters, 1 given in %s on line %d
 bool(false)
 
 -- Testing timezone_offset_get() function with more than expected no. of arguments --
+
+Warning: timezone_offset_get() expects exactly 2 parameters, 3 given in %s on line %d
 bool(false)
 
 -- Testing timezone_offset_get() function with an invalid values for $object argument --

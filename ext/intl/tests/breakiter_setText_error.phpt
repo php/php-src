@@ -23,9 +23,7 @@ var_dump($bi->setText(new A));
 } catch (Exception $e) {
 var_dump($e->getMessage());
 }
-
 --EXPECTF--
-
 Warning: IntlBreakIterator::setText() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlBreakIterator::setText(): breakiter_set_text: bad arguments in %s on line %d

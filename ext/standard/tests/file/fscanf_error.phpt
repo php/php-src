@@ -1,6 +1,5 @@
 --TEST--
 Test fscanf() function: error conditions
-
 --FILE--
 <?php
 /*
@@ -13,7 +12,7 @@ $file_path = dirname(__FILE__);
 
 $filename = "$file_path/fscanf_error.tmp";
 $file_handle = fopen($filename, 'w');
-if ($file_handle == false) 
+if ($file_handle == false)
   exit("Error:failed to open file $filename");
 fwrite($file_handle, "hello world");
 fclose($file_handle);
@@ -23,7 +22,7 @@ var_dump( fscanf() );
 
 // single argument
 $file_handle = fopen($filename, 'r');
-if ($file_handle == false) 
+if ($file_handle == false)
   exit("Error:failed to open file $filename");
 var_dump( fscanf($file_handle) );
 fclose($file_handle);
@@ -33,13 +32,13 @@ var_dump( fscanf($file_handle, "%s") );
 
 // number of formats in format strings not matching the no of variables
 $file_handle = fopen($filename, 'r');
-if ($file_handle == false) 
+if ($file_handle == false)
   exit("Error:failed to open file $filename");
 var_dump( fscanf($file_handle, "%d%s%f", $int_var, $string_var) );
 fclose($file_handle);
 
 // different invalid format strings
-$invalid_formats = array( $undefined_var, undefined_constant,
+$invalid_formats = array( $undefined_var,
                           "%", "%h", "%.", "%d%m"
                    );
 
@@ -47,10 +46,10 @@ $invalid_formats = array( $undefined_var, undefined_constant,
 // looping to use various invalid formats with fscanf()
 foreach($invalid_formats as $format)  {
   $file_handle = fopen($filename, 'r');
-  if ($file_handle == false) 
+  if ($file_handle == false)
     exit("Error:failed to open file $filename");
   var_dump( fscanf($file_handle, $format) );
-  fclose($file_handle); 
+  fclose($file_handle);
 }
 
 echo "\n*** Done ***";
@@ -77,10 +76,6 @@ Warning: fscanf(): Different numbers of variable names and field specifiers in %
 int(-1)
 
 Notice: Undefined variable: undefined_var in %s on line %d
-
-Warning: Use of undefined constant undefined_constant - assumed 'undefined_constant' (this will throw an Error in a future version of PHP) in %s on line %d
-array(0) {
-}
 array(0) {
 }
 

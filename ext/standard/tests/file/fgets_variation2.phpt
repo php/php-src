@@ -11,8 +11,8 @@ Test fgets() function : usage variations - closed handle
     - closed file handle
     - unset file handle
 */
- 
-// include the header for common test function 
+
+// include the header for common test function
 include ("file.inc");
 
 echo "*** Testing fgets() : usage variations ***\n";
@@ -60,4 +60,3 @@ Notice: Undefined variable: file_handle in %s on line %d
 Warning: fgets() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
-

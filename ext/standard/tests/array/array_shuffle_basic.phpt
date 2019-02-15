@@ -1,5 +1,5 @@
 --TEST--
-array_shuffle(): Test return type and value for expected input 
+array_shuffle(): Test return type and value for expected input
 --FILE--
 <?php
 /*

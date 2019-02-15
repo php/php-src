@@ -5,7 +5,7 @@ end
 document set_ts
 	set the ts resource, it is impossible for gdb to
 	call ts_resource_ex while no process is running,
-	but we could get the resource from the argument 
+	but we could get the resource from the argument
 	of frame info.
 end
 
@@ -16,9 +16,11 @@ define ____executor_globals
 		end
 		set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
 		set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
+		set $eg_ptr = $eg
 	else
 		set $eg = executor_globals
 		set $cg = compiler_globals
+		set $eg_ptr = (zend_executor_globals*) &executor_globals
 	end
 end
 
@@ -151,7 +153,7 @@ end
 
 define printzv
 	set $ind = 1
-	____printzv $arg0 0 
+	____printzv $arg0 0
 end
 
 document printzv
@@ -188,7 +190,7 @@ define ____printzv_contents
 	if $type == 6
 		printf "string: %s", $zvalue->value.str->val
 	end
-	if $type == 7 
+	if $type == 7
 		printf "array: "
 		if ! $arg1
 			set $ind = $ind + 1
@@ -285,8 +287,18 @@ define ____printzv
 	if $arg1
 		____printzv_contents $zcontents $arg1
 	else
-		____printzv_contents $zcontents 0 
+		____printzv_contents $zcontents 0
 	end
+end
+
+define print_global_vars
+	____executor_globals
+	set $symtable = ((HashTable *)&($eg_ptr->symbol_table))
+	print_ht $symtable
+end
+
+document print_global_vars
+	Prints the global variables
 end
 
 define print_const_table
@@ -328,7 +340,7 @@ define ____print_ht
 				set $n = $n - 1
 			end
 			printf "[%d] ", $i
-			if $p->key 
+			if $p->key
 				printf "%s => ", $p->key->val
 			else
 				printf "%d => ", $p->h
@@ -377,7 +389,7 @@ document print_htptr
 end
 
 define print_htstr
-	set $ind = 0 
+	set $ind = 0
 	____print_ht $arg0 2
 end
 
@@ -531,10 +543,10 @@ define printzn
 	if $znode->op_type == 1
 		set $optype = "IS_CONST"
 	end
-	if $znode->op_type == 2 
+	if $znode->op_type == 2
 		set $optype = "IS_TMP_VAR"
 	end
-	if $znode->op_type == 4 
+	if $znode->op_type == 4
 		set $optype = "IS_VAR"
 	end
 	if $znode->op_type == 8
@@ -564,11 +576,11 @@ end
 
 document printzn
 	print type and content of znode.
-	usage: printzn &opline->op1 
+	usage: printzn &opline->op1
 end
 
 define printzops
-	printf "op1 => " 
+	printf "op1 => "
 	printzn &execute_data->opline.op1
 	printf "op2 => "
 	printzn &execute_data->opline.op2

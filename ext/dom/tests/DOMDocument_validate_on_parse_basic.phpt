@@ -35,4 +35,3 @@ var_dump($dom->validateOnParse);
 Checking documented default value: bool(false)
 Setting validateOnParse to TRUE: bool(true)
 Setting validateOnParse to FALSE: bool(false)
-

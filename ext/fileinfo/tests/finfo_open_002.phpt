@@ -6,12 +6,10 @@ FileInfo - Calling the constructor twice
 <?php
 
 $x = new finfo;
-$x->finfo();
+$x->__construct();
 
 echo "done!\n";
 
 ?>
 --EXPECT--
 done!
-
-

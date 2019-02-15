@@ -22,7 +22,6 @@ var_dump(datefmt_set_timezone(new stdclass, 'UTC'));
 ?>
 ==DONE==
 --EXPECTF--
-
 Warning: IntlDateFormatter::setTimeZone() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: unable to parse input params in %s on line %d

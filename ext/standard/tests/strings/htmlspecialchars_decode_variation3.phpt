@@ -7,7 +7,7 @@ Test htmlspecialchars_decode() function : usage variations - heredoc strings for
  * Source code: ext/standard/html.c
 */
 
-/* 
+/*
  * testing htmlspecialchars_decode() with various heredoc strings as argument for $string
 */
 

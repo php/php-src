@@ -2,7 +2,6 @@
 Testing xpath() with invalid XML
 --SKIPIF--
 <?php
-if (PHP_MAJOR_VERSION < 7) die("skip this test is for PHP 7+ only");
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platforms only");
 ?>
 --FILE--

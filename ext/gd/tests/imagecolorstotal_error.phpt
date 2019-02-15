@@ -8,7 +8,7 @@ if(!extension_loaded('gd')) {
 if(!function_exists('imagecolorstotal')) {
     die('skip imagecolorstotal function is not available');
 }
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : int imagecolorstotal  ( resource $image  )
@@ -31,7 +31,7 @@ var_dump( imagecolorstotal($im, $extra_arg) );
 echo "\n-- Testing imagecolorstotal() function with a invalid resource\n";
 var_dump( imagecolorstotal($im) );
 
-fclose($im); 
+fclose($im);
 ?>
 ===DONE===
 --EXPECTF--

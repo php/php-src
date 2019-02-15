@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.4') < 0)
-	die('skip for ICU 4.4+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -21,4 +19,4 @@ var_dump(intlcal_get_weekend_transition($intlcal, IntlCalendar::DOW_SUNDAY));
 --EXPECT--
 int(86400000)
 int(86400000)
-==DONE==
+==DONE==

@@ -28,5 +28,5 @@ class TheWorldIsNotEnough {
 $o = new TheWorldIsNotEnough();
 $o->sayHello(); // echos Hello Universe!
 ?>
---EXPECT--	
+--EXPECT--
 Hello Universe!

@@ -5,7 +5,6 @@ Test fflush() function: usage variations - files in different modes
 if( substr(PHP_OS, 0, 3) != "WIN" )
   die("skip.. only for Windows");
 ?>
-
 --FILE--
 <?php
 /*  Prototype: bool fflush ( resource $handle );
@@ -23,7 +22,7 @@ $file_modes = array("w", "wb", "wt", "w+", "w+b", "w+t",
                     "a", "ab", "at", "a+","a+b", "a+t",
                     "x", "xb", "xt", "x+", "x+b", "x+t");
 
-$file_name = "$file_path/fflush_variation私はガラスを食べられます1.tmp"; 
+$file_name = "$file_path/fflush_variation私はガラスを食べられます1.tmp";
 
 $count = 1;
 
@@ -31,26 +30,26 @@ foreach( $file_types as $type ) {
   echo "-- Iteration $count with file containing $type Data--\n";
   foreach( $file_modes as $mode ) {
     echo "-- File opened in $mode mode --\n";
-    
+
     // creating the file except for x mode
     if( substr($mode, 0, 1) != "x" ) {
       $file_handle = fopen($file_name, "w");
       if($file_handle == false)
         exit("Error:failed to open file $file_name");
-      
+
       // filling the file some data if mode is append mode
-      if( substr($mode, 0, 1) == "a") 
+      if( substr($mode, 0, 1) == "a")
         fill_file($file_handle, $type, 10);
       fclose($file_handle);
-    } 
-  
-    // opening the file in different modes 
+    }
+
+    // opening the file in different modes
     $file_handle = fopen($file_name, $mode);
-    if($file_handle == false) 
+    if($file_handle == false)
       exit("Error:failed to open file $file_name");
-    
+
     // writing data to the file
-    var_dump( fill_file($file_handle, $type, 50) ); 
+    var_dump( fill_file($file_handle, $type, 50) );
     var_dump( fflush($file_handle) );
     fclose($file_handle);
 
@@ -528,4 +527,3 @@ bool(true)
 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 int(50)
 
 *** Done ***
-

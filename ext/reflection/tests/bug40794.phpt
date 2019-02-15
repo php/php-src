@@ -20,7 +20,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(3) {
   ["prop1"]=>
   string(1) "1"

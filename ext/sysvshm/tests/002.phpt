@@ -35,7 +35,7 @@ shm_remove($s);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: shm_attach() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

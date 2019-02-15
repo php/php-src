@@ -19,7 +19,7 @@ include ("file.inc");
 echo "*** Testing ftruncate() : usage variations ***\n";
 
 /* test ftruncate with file opened in different modes */
-$file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t", 
+$file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t",
                     "w", "wb", "wt", "w+", "w+b", "w+t",
                     "x", "xb", "xt", "x+", "x+b", "x+t",
                     "a", "ab", "at", "a+", "a+b", "a+t");
@@ -44,7 +44,7 @@ foreach($file_content_types as $file_content_type) {
      $file_handle = fopen($filename, $file_modes[$mode_counter]);
    }
    if (!$file_handle) {
-     echo "Error: failed to open file $filename!\n"; 
+     echo "Error: failed to open file $filename!\n";
      exit();
    }
 
@@ -53,7 +53,7 @@ foreach($file_content_types as $file_content_type) {
    echo "-- Testing ftruncate(): try truncating file to a negative size --\n";
    /* try to truncate it to a negative size, size should not change*/
 
-   $new_size = -1000; 
+   $new_size = -1000;
    var_dump( filesize($filename) );  // current filesize
    var_dump( ftell($file_handle) );
    var_dump( ftruncate($file_handle, $new_size) ); // truncate it

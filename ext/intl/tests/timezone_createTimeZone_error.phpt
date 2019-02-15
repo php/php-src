@@ -12,9 +12,7 @@ var_dump(IntlTimeZone::createTimeZone());
 var_dump(IntlTimeZone::createTimeZone(new stdClass));
 var_dump(IntlTimeZone::createTimeZone("foo bar", 4));
 var_dump(IntlTimeZone::createTimeZone("foo\x80"));
-
 --EXPECTF--
-
 Warning: IntlTimeZone::createTimeZone() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlTimeZone::createTimeZone(): intltz_create_time_zone: bad arguments in %s on line %d

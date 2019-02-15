@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    |          Marcus Borger <helly@php.net>                               |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -308,36 +306,31 @@ static void dom_register_prop_handler(HashTable *prop_handler, char *name, size_
 	hnd.write_func = write_func ? write_func : dom_write_na;
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(dom_prop_handler));
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 }
 /* }}} */
 
-static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
+static zval *dom_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
 {
-	dom_object *obj = Z_DOMOBJ_P(object);
-	zend_string *member_str = zval_get_string(member);
+	dom_object *obj = php_dom_obj_from_obj(object);
 	zval *retval = NULL;
 
-	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, member_str)) {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot);
+	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, name)) {
+		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
-
-	zend_string_release(member_str);
 	return retval;
 }
 /* }}} */
 
 /* {{{ dom_read_property */
-zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv)
+zval *dom_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
-	dom_object *obj = Z_DOMOBJ_P(object);
-	zend_string *member_str = zval_get_string(member);
+	dom_object *obj = php_dom_obj_from_obj(object);
 	zval *retval;
 	dom_prop_handler *hnd = NULL;
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, member_str);
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	} else if (instanceof_function(obj->std.ce, dom_node_class_entry)) {
 		php_error(E_WARNING, "Couldn't fetch %s. Node no longer exists", ZSTR_VAL(obj->std.ce->name));
 	}
@@ -350,46 +343,41 @@ zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot,
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, name, type, cache_slot, rv);
 	}
 
-	zend_string_release(member_str);
 	return retval;
 }
 /* }}} */
 
 /* {{{ dom_write_property */
-void dom_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *dom_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	dom_object *obj = Z_DOMOBJ_P(object);
-	zend_string *member_str = zval_get_string(member);
+	dom_object *obj = php_dom_obj_from_obj(object);
 	dom_prop_handler *hnd = NULL;
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, member_str);
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value, cache_slot);
+		value = zend_std_write_property(object, name, value, cache_slot);
 	}
 
-	zend_string_release(member_str);
+	return value;
 }
 /* }}} */
 
 /* {{{ dom_property_exists */
-static int dom_property_exists(zval *object, zval *member, int check_empty, void **cache_slot)
+static int dom_property_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
-	dom_object *obj = Z_DOMOBJ_P(object);
-	zend_string *member_str = zval_get_string(member);
+	dom_object *obj = php_dom_obj_from_obj(object);
 	dom_prop_handler *hnd = NULL;
 	int retval = 0;
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, member_str);
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 	if (hnd) {
 		zval tmp;
@@ -402,21 +390,19 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, void
 			} else if (check_empty == 0) {
 				retval = (Z_TYPE(tmp) != IS_NULL);
 			}
-			zval_dtor(&tmp);
+			zval_ptr_dtor(&tmp);
 		}
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->has_property(object, member, check_empty, cache_slot);
+		retval = zend_std_has_property(object, name, check_empty, cache_slot);
 	}
 
-	zend_string_release(member_str);
 	return retval;
 }
 /* }}} */
 
-static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ */
+static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /* {{{ */
 {
-	dom_object			*obj = Z_DOMOBJ_P(object);
+	dom_object			*obj = php_dom_obj_from_obj(object);
 	HashTable			*debug_info,
 						*prop_handlers = obj->prop_handler,
 						*std_props;
@@ -443,7 +429,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 		}
 
 		if (Z_TYPE(value) == IS_OBJECT) {
-			zval_dtor(&value);
+			zval_ptr_dtor(&value);
 			ZVAL_NEW_STR(&value, object_str);
 			zend_string_addref(object_str);
 		}
@@ -451,13 +437,13 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 		zend_hash_add(debug_info, string_key, &value);
 	} ZEND_HASH_FOREACH_END();
 
-	zend_string_release(object_str);
+	zend_string_release_ex(object_str, 0);
 
 	return debug_info;
 }
 /* }}} */
 
-static HashTable* dom_get_debug_info(zval *object, int *is_temp) /* {{{ */
+static HashTable* dom_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
        return dom_get_debug_info_helper(object, is_temp);
 }
@@ -504,9 +490,9 @@ PHP_FUNCTION(dom_import_simplexml)
 
 static dom_object* dom_objects_set_class(zend_class_entry *class_type);
 
-static zend_object *dom_objects_store_clone_obj(zval *zobject) /* {{{ */
+static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 {
-	dom_object *intern = Z_DOMOBJ_P(zobject);
+	dom_object *intern = php_dom_obj_from_obj(zobject);
 	dom_object *clone = dom_objects_set_class(intern->std.ce);
 
 	clone->std.handlers = dom_get_obj_handlers();
@@ -587,7 +573,9 @@ ZEND_GET_MODULE(dom)
 
 void dom_objects_free_storage(zend_object *object);
 void dom_nnodemap_objects_free_storage(zend_object *object);
-static zend_object *dom_objects_store_clone_obj(zval *zobject);
+static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
+static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
+static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
 static void dom_nnodemap_object_dtor(zend_object *object);
 #if defined(LIBXML_XPATH_ENABLED)
 void dom_xpath_objects_free_storage(zend_object *object);
@@ -598,7 +586,7 @@ PHP_MINIT_FUNCTION(dom)
 {
 	zend_class_entry ce;
 
-	memcpy(&dom_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&dom_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	dom_object_handlers.offset = XtOffsetOf(dom_object, std);
 	dom_object_handlers.free_obj = dom_objects_free_storage;
 	dom_object_handlers.read_property = dom_read_property;
@@ -1534,7 +1522,7 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 }
 /* }}} end dom_get_nsdecl */
 
-zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
+static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	zval offset_copy;
 
@@ -1544,12 +1532,12 @@ zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv
 
 	ZVAL_LONG(&offset_copy, zval_get_long(offset));
 
-	zend_call_method_with_1_params(object, Z_OBJCE_P(object), NULL, "item", rv, &offset_copy);
+	zend_call_method_with_1_params(object, object->ce, NULL, "item", rv, &offset_copy);
 
 	return rv;
 } /* }}} end dom_nodelist_read_dimension */
 
-int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty)
+static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty)
 {
 	zend_long offset = zval_get_long(member);
 	zval rv;
@@ -1557,19 +1545,13 @@ int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty)
 	if (offset < 0) {
 		return 0;
 	} else {
-		zval *length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0, &rv);
+		zval obj;
+		zval *length;
 
+		ZVAL_OBJ(&obj, object);
+		length = zend_read_property(object->ce, &obj, "length", sizeof("length") - 1, 0, &rv);
 		return length && offset < Z_LVAL_P(length);
 	}
 } /* }}} end dom_nodelist_has_dimension */
 
 #endif /* HAVE_DOM */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

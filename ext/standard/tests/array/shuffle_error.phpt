@@ -1,14 +1,14 @@
 --TEST--
-Test shuffle() function : error conditions 
+Test shuffle() function : error conditions
 --FILE--
 <?php
 /* Prototype  : bool shuffle(array $array_arg)
- * Description: Randomly shuffle the contents of an array 
+ * Description: Randomly shuffle the contents of an array
  * Source code: ext/standard/array.c
 */
 
 /* Test shuffle() to see that warning messages are emitted
- * when invalid number of arguments are passed to the function 
+ * when invalid number of arguments are passed to the function
 */
 
 echo "*** Testing shuffle() : error conditions ***\n";
@@ -23,7 +23,7 @@ $array_arg = array(1, "two" => 2);
 $extra_arg = 10;
 var_dump( shuffle($array_arg, $extra_arg) );
 
-// printing the input array to check that it is not affected 
+// printing the input array to check that it is not affected
 // by above shuffle() function calls
 echo "\n-- original input array --\n";
 var_dump( $array_arg );
@@ -51,4 +51,3 @@ array(2) {
   int(2)
 }
 Done
-

@@ -762,6 +762,8 @@
 	{ "mdt",   1, -21600, "Canada/Mountain"               },
 	{ "mdt",   1, -21600, "Canada/Saskatchewan"           },
 	{ "mdt",   1, -21600, "Mexico/BajaSur"                },
+	{ "mest",  1,   7200, "MET"                           },
+	{ "met",   0,   3600, "MET"                           },
 	{ "mmt",   0,   9017, "Europe/Moscow"                 },
 	{ "mmt",   0,   9079, "Europe/Moscow"                 },
 	{ "mmt",   0, -13484, "America/Montevideo"            },

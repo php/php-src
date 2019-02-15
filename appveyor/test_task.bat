@@ -98,4 +98,3 @@ set EXIT_CODE=%errorlevel%
 powershell -Command "$wc = New-Object 'System.Net.WebClient'; $wc.UploadFile('https://ci.appveyor.com/api/testresults/junit/%APPVEYOR_JOB_ID%', 'c:\junit.out.xml')"
 
 exit /b %EXIT_CODE%
-

@@ -1,7 +1,7 @@
 --TEST--
 DBA FlatFile handler test
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'flatfile';
 	require_once(dirname(__FILE__) .'/skipif.inc');
 ?>
@@ -13,8 +13,8 @@ DBA FlatFile handler test
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECT--
 database handler: flatfile

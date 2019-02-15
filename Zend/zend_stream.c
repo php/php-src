@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,9 +18,6 @@
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 
 #include "zend.h"
 #include "zend_compile.h"
@@ -189,7 +186,7 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 				return FAILURE;
 			}
 			memset(&file_handle->handle.stream.mmap, 0, sizeof(zend_mmap));
-			file_handle->handle.stream.isatty     = isatty(fileno((FILE *)file_handle->handle.stream.handle)) ? 1 : 0;
+			file_handle->handle.stream.isatty     = isatty(fileno((FILE *)file_handle->handle.stream.handle));
 			file_handle->handle.stream.reader     = (zend_stream_reader_t)zend_stream_stdio_reader;
 			file_handle->handle.stream.closer     = (zend_stream_closer_t)zend_stream_stdio_closer;
 			file_handle->handle.stream.fsizer     = (zend_stream_fsizer_t)zend_stream_stdio_fsizer;
@@ -313,7 +310,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 			break;
 	}
 	if (fh->opened_path) {
-		zend_string_release(fh->opened_path);
+		zend_string_release_ex(fh->opened_path, 0);
 		fh->opened_path = NULL;
 	}
 	if (fh->free_filename && fh->filename) {
@@ -345,13 +342,3 @@ ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *
 	}
 	return 0;
 } /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

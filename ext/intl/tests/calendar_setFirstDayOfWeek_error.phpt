@@ -18,9 +18,7 @@ var_dump($c->setFirstDayOfWeek(0));
 
 var_dump(intlcal_set_first_day_of_week($c, 0));
 var_dump(intlcal_set_first_day_of_week(1, 2));
-
 --EXPECTF--
-
 Warning: IntlCalendar::setFirstDayOfWeek() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlCalendar::setFirstDayOfWeek(): intlcal_set_first_day_of_week: bad arguments in %s on line %d

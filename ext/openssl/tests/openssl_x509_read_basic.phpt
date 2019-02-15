@@ -6,7 +6,7 @@ openssl_x509_read() tests
 <?php
 $fp = fopen(dirname(__FILE__) . "/cert.crt","r");
 $a = fread($fp,8192);
-fclose($fp); 
+fclose($fp);
 
 $b = "file://" . dirname(__FILE__) . "/cert.crt";
 $c = "invalid cert";
@@ -34,4 +34,3 @@ bool(false)
 
 Warning: openssl_x509_read(): supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
 bool(false)
-

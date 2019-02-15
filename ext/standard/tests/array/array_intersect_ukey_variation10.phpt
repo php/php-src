@@ -3,7 +3,7 @@ Test array_intersect_ukey() function : usage variation - Passing class without s
 --FILE--
 <?php
 /* Prototype  : array array_intersect_ukey(array arr1, array arr2 [, array ...], callback key_compare_func)
- * Description: Computes the intersection of arrays using a callback function on the keys for comparison. 
+ * Description: Computes the intersection of arrays using a callback function on the keys for comparison.
  * Source code: ext/standard/array.c
  */
 
@@ -15,7 +15,7 @@ $array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
 $array3 = array("a"=>"green", "cyan");
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
         if (error_reporting() != 0) {
                 // report non-silenced errors
                 echo "Error: $err_no - $err_msg, $filename($linenum)\n";

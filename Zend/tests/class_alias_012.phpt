@@ -5,7 +5,7 @@ Testing dynamic alias name
 
 namespace test\baz;
 
-class foo { 
+class foo {
 }
 
 new foo;

@@ -1,7 +1,7 @@
 #  +----------------------------------------------------------------------+
 #  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
-#  | Copyright (c) 1997-2018 The PHP Group                                |
+#  | Copyright (c) The PHP Group                                          |
 #  +----------------------------------------------------------------------+
 #  | This source file is subject to version 3.01 of the PHP license,      |
 #  | that is bundled with this package in the file LICENSE, and is        |
@@ -13,15 +13,10 @@
 #  +----------------------------------------------------------------------+
 #  | Author: Sascha Schumann <sascha@schumann.cx>                         |
 #  +----------------------------------------------------------------------+
-#
-# $Id$ 
-#
 
 include generated_lists
 
 TOUCH_FILES = mkinstalldirs install-sh missing
-
-LT_TARGETS = ltmain.sh config.guess config.sub
 
 config_h_in = main/php_config.h.in
 
@@ -30,12 +25,12 @@ targets = $(TOUCH_FILES) configure $(config_h_in)
 PHP_AUTOCONF ?= 'autoconf'
 PHP_AUTOHEADER ?= 'autoheader'
 
-SUPPRESS_WARNINGS ?= 2>&1 | (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_DECL_YYTEXT is expanded from...|the top level)'||true)
+SUPPRESS_WARNINGS ?= 2>&1 | (egrep -v '(AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used)'||true)
 
 all: $(targets)
 
 $(config_h_in): configure
-# explicitly remove target since autoheader does not seem to work 
+# explicitly remove target since autoheader does not seem to work
 # correctly otherwise (timestamps are not updated)
 	@echo rebuilding $@
 	@rm -f $@
@@ -52,4 +47,3 @@ configure: aclocal.m4 configure.ac $(config_m4_files)
 	@echo rebuilding $@
 	@rm -f $@
 	$(PHP_AUTOCONF) -f $(SUPPRESS_WARNINGS)
-

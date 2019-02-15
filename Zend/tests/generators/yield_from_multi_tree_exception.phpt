@@ -29,7 +29,7 @@ for ($level = 1; $level < $levels; $level++) {
 	}
 }
 
-for ($i = 0; $i < 2; $i++) { 
+for ($i = 0; $i < 2; $i++) {
 	try {
 		foreach ($all as $gen) {
 			var_dump($gen->current());
@@ -75,4 +75,3 @@ Stack trace:
 #0 [internal function]: gen(Object(Generator), 1)
 #1 %s(%d): Generator->current()
 #2 {main}
-

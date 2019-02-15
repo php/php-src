@@ -61,4 +61,3 @@ $pdo->query($dropUser);
 ?>
 --EXPECT--
 int(1)
-

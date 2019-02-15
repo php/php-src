@@ -1,10 +1,10 @@
 --TEST--
-Bug #47189 (Multiple oci_fetch_all calls) 
+Bug #47189 (Multiple oci_fetch_all calls)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs: different error handling for this undefined behavior
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -17,7 +17,7 @@ oci_execute($s);
 oci_fetch_all($s, $rs, 0, -1, OCI_FETCHSTATEMENT_BY_ROW);
 var_dump($rs);
 oci_fetch_all($s, $rs1, 0, -1, OCI_FETCHSTATEMENT_BY_ROW);
-var_dump($rs1); 
+var_dump($rs1);
 
 echo "Test 2\n";
 
@@ -26,7 +26,7 @@ oci_execute($s);
 oci_fetch_all($s, $rs, 0, 1, OCI_FETCHSTATEMENT_BY_ROW);
 var_dump($rs);
 oci_fetch_all($s, $rs1, 0, 1, OCI_FETCHSTATEMENT_BY_ROW);
-var_dump($rs1); 
+var_dump($rs1);
 
 ?>
 ===DONE===

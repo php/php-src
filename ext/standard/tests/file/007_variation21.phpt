@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "ab" mode 
+Test fopen and fclose() functions - usage variations - "ab" mode
 --FILE--
 <?php
 /*
@@ -41,7 +41,7 @@ var_dump( filesize($file) ); //Check that data hasn't over written; Expected: Si
 unlink($file);  //Deleting the file
 fclose( fopen($file, "ab") );  //Opening the non-existing file in "ab" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/007_variation21.tmp");

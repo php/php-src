@@ -1,7 +1,5 @@
 --TEST--
 testing the behavior of string offsets
---INI--
-error_reporting=E_ALL | E_DEPRECATED
 --FILE--
 <?php
 $string = "foobar";
@@ -35,4 +33,3 @@ bool(true)
 Warning: Illegal string offset 'foo' in %s line %d
 string(1) "f"
 bool(false)
-

@@ -4,7 +4,7 @@ ARG_WITH("interbase", "InterBase support", "no");
 
 if (PHP_INTERBASE != "no") {
 
-	if (CHECK_HEADER_ADD_INCLUDE("ibase.h", "CFLAGS_INTERBASE", 
+	if (CHECK_HEADER_ADD_INCLUDE("ibase.h", "CFLAGS_INTERBASE",
 				PHP_PHP_BUILD + "\\include\\interbase;" + PHP_PHP_BUILD + "\\interbase\\include;" + PHP_INTERBASE) &&
 			(CHECK_LIB("fbclient_ms.lib", "interbase", PHP_PHP_BUILD + "\\interbase\\lib_ms;" + PHP_INTERBASE) ||
 			 CHECK_LIB("gds32_ms.lib", "interbase", PHP_PHP_BUILD + "\\interbase\\lib_ms;" + PHP_INTERBASE))) {

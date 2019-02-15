@@ -49,7 +49,7 @@ var_dump($a, $b);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 -- (1)
 
 Warning: filter_var_array() expects parameter 1 to be array, null given in %s on line %d

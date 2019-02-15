@@ -1,5 +1,5 @@
 --TEST--
-Test timezone_open() function : error conditions 
+Test timezone_open() function : error conditions
 --FILE--
 <?php
 /* Prototype  : DateTimeZone timezone_open  ( string $timezone  )
@@ -7,7 +7,7 @@ Test timezone_open() function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::__construct()
  */
- 
+
 echo "*** Testing timezone_open() : error conditions ***\n";
 
 echo "\n-- Testing timezone_open() function with zero arguments --\n";

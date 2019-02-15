@@ -6,7 +6,7 @@ $mailbox  = '{localhost/norsh}';
 $username = 'webmaster@something.com';
 $password = 'p4ssw0rd';
 $options = OP_HALFOPEN; // this should be enough to verify server present
-$retries = 0; // dont retry connect on failure
+$retries = 0; // don't retry connect on failure
 
 $mbox = @imap_open($mailbox, $username, $password, $options, $retries);
 if (!$mbox) {

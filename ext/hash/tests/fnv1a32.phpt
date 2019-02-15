@@ -1,7 +1,5 @@
 --TEST--
-FNV
---SKIPIF--
-<?php extension_loaded('hash') or die ('Skip - hash extension not available'); ?>
+Hash: FNV1a32 algorithm
 --FILE--
 <?php
 

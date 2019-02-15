@@ -8,7 +8,7 @@ class Test {
 	function __get($name) {
 		if (isset($this->x[$name])) {
 			return $this->x[$name];
-		} 
+		}
 		else
 		{
 			return NULL;

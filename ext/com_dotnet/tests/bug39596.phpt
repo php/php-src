@@ -1,10 +1,10 @@
 --TEST--
 Bug #39596 (Creating Variant of type VT_ARRAY)
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
 --FILE--
-<?php 
+<?php
 error_reporting(E_ALL);
 
 try {

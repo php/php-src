@@ -26,6 +26,3 @@ echo "Done";
 HEAD
 HEAD
 Done
-
-
-

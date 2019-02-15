@@ -10,7 +10,7 @@ Test abs() function :  error conditions - incorrect number of args
 /*
  * Pass incorrect number of arguments to abs() to test behaviour
  */
- 
+
 echo "*** Testing abs() : error conditions ***\n";
 
 $arg_0 = 1.0;

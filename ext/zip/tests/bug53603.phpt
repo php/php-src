@@ -27,9 +27,6 @@ if ($zip->open($file) !== TRUE) {
 
 $a = $zip->extractTo('teststream://test');
 var_dump($a);
-
 --EXPECTF--
-
 Warning: ZipArchive::extractTo(teststream://test/foo): failed to open stream: "TestStream::stream_open" call failed in %s on line %d
 bool(false)
-

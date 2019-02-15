@@ -32,4 +32,3 @@ catch(\Exception $e) {
 --EXPECT--
 callback
 Exception: oops
-

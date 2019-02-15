@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Sterling Hughes <sterling@php.net>                           |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
@@ -189,6 +187,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 }
 /* }}} */
 
+#if LIBCURL_VERSION_NUM < 0x071c00
 static void _make_timeval_struct(struct timeval *to, double timeout) /* {{{ */
 {
 	unsigned long conv;
@@ -198,6 +197,7 @@ static void _make_timeval_struct(struct timeval *to, double timeout) /* {{{ */
 	to->tv_usec = conv % 1000000;
 }
 /* }}} */
+#endif
 
 /* {{{ proto int curl_multi_select(resource mh[, double timeout])
    Get all the sockets associated with the cURL extension, which can then be "selected" */
@@ -205,12 +205,16 @@ PHP_FUNCTION(curl_multi_select)
 {
 	zval           *z_mh;
 	php_curlm      *mh;
+	double          timeout = 1.0;
+#if LIBCURL_VERSION_NUM >= 0x071c00 /* Available since 7.28.0 */
+	int             numfds = 0;
+#else
 	fd_set          readfds;
 	fd_set          writefds;
 	fd_set          exceptfds;
 	int             maxfd;
-	double          timeout = 1.0;
 	struct timeval  to;
+#endif
 	CURLMcode error = CURLM_OK;
 
 	ZEND_PARSE_PARAMETERS_START(1,2)
@@ -223,6 +227,15 @@ PHP_FUNCTION(curl_multi_select)
 		RETURN_FALSE;
 	}
 
+#if LIBCURL_VERSION_NUM >= 0x071c00 /* Available since 7.28.0 */
+	error = curl_multi_wait(mh->multi, NULL, 0, (unsigned long) timeout * 1000.0, &numfds);
+	if (CURLM_OK != error) {
+		SAVE_CURLM_ERROR(mh, error);
+		RETURN_LONG(-1);
+	}
+
+	RETURN_LONG(numfds);
+#else
 	_make_timeval_struct(&to, timeout);
 
 	FD_ZERO(&readfds);
@@ -236,6 +249,7 @@ PHP_FUNCTION(curl_multi_select)
 		RETURN_LONG(-1);
 	}
 	RETURN_LONG(select(maxfd + 1, &readfds, &writefds, &exceptfds, &to));
+#endif
 }
 /* }}} */
 
@@ -251,7 +265,7 @@ PHP_FUNCTION(curl_multi_exec)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(z_mh)
-		Z_PARAM_ZVAL_DEREF(z_still_running)
+		Z_PARAM_ZVAL(z_still_running)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((mh = (php_curlm *)zend_fetch_resource(Z_RES_P(z_mh), le_curl_multi_handle_name, le_curl_multi_handle)) == NULL) {
@@ -276,8 +290,7 @@ PHP_FUNCTION(curl_multi_exec)
 
 	still_running = zval_get_long(z_still_running);
 	error = curl_multi_perform(mh->multi, &still_running);
-	zval_ptr_dtor(z_still_running);
-	ZVAL_LONG(z_still_running, still_running);
+	ZEND_TRY_ASSIGN_LONG(z_still_running, still_running);
 
 	SAVE_CURLM_ERROR(mh, error);
 	RETURN_LONG((zend_long) error);
@@ -324,7 +337,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_RESOURCE(z_mh)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(zmsgs_in_queue)
+		Z_PARAM_ZVAL(zmsgs_in_queue)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((mh = (php_curlm *)zend_fetch_resource(Z_RES_P(z_mh), le_curl_multi_handle_name, le_curl_multi_handle)) == NULL) {
@@ -335,9 +348,9 @@ PHP_FUNCTION(curl_multi_info_read)
 	if (tmp_msg == NULL) {
 		RETURN_FALSE;
 	}
+
 	if (zmsgs_in_queue) {
-		zval_ptr_dtor(zmsgs_in_queue);
-		ZVAL_LONG(zmsgs_in_queue, queued_msgs);
+		ZEND_TRY_ASSIGN_LONG(zmsgs_in_queue, queued_msgs);
 	}
 
 	array_init(return_value);
@@ -488,6 +501,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	Z_ADDREF_P(pz_parent_ch);
 
 	res = zend_register_resource(ch, le_curl);
+	ch->res = res;
 	ZVAL_RES(&pz_ch, res);
 
 	size_t i;
@@ -510,7 +524,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 	error = zend_call_function(&fci, &t->fci_cache);
 	zend_fcall_info_args_clear(&fci, 1);
-	zval_dtor(&headers);
+	zval_ptr_dtor_nogc(&headers);
 
 	if (error == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Cannot call the CURLMOPT_PUSHFUNCTION");
@@ -581,11 +595,8 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 	}
 
 	SAVE_CURLM_ERROR(mh, error);
-	if (error != CURLM_OK) {
-		return 1;
-	} else {
-		return 0;
-	}
+
+	return error != CURLM_OK;
 }
 /* }}} */
 
@@ -616,12 +627,3 @@ PHP_FUNCTION(curl_multi_setopt)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -1,9 +1,9 @@
 --TEST--
-Test shuffle() function : usage variation - with MultiDimensional array 
+Test shuffle() function : usage variation - with MultiDimensional array
 --FILE--
 <?php
 /* Prototype  : bool shuffle(array $array_arg)
- * Description: Randomly shuffle the contents of an array 
+ * Description: Randomly shuffle the contents of an array
  * Source code: ext/standard/array.c
 */
 
@@ -26,7 +26,7 @@ $array_arg = array(
 
 );
 
-// calling shuffle() function with multi-dimensional array 
+// calling shuffle() function with multi-dimensional array
 var_dump( shuffle($array_arg) );
 echo "\nThe output array is:\n";
 var_dump( $array_arg );
@@ -37,9 +37,9 @@ echo "\n*** Testing shuffle() with arrays having different types of values ***\n
 $counter = 1;
 for($i=0; $i<=6; $i++) {
   echo "\n-- Iteration $counter --\n";
-  var_dump( shuffle($array_arg[$i]) );  
+  var_dump( shuffle($array_arg[$i]) );
   echo "\nThe output array is:\n";
-  var_dump( $array_arg[$i] ); 
+  var_dump( $array_arg[$i] );
   $counter++;
 }
 
@@ -209,4 +209,3 @@ array(3) {
   int(%d)
 }
 Done
-

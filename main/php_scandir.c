@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |         Ilia Alshanetsky <ilia@prohost.org>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_scandir.h"
@@ -44,9 +42,7 @@
 
 #ifndef HAVE_ALPHASORT
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
 
 PHPAPI int php_alphasort(const struct dirent **a, const struct dirent **b)
 {
@@ -123,12 +119,3 @@ fail:
 	return -1;
 }
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

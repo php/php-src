@@ -1,5 +1,5 @@
 --TEST--
-Phar: phar run without pecl/phar with default stub
+Phar: phar run without ext/phar with default stub
 --SKIPIF--
 <?php if (extension_loaded("phar")) die("skip Phar extension must be disabled for this test"); ?>
 --FILE--

@@ -1,5 +1,5 @@
 --TEST--
-Test mb_substr() function : basic functionality 
+Test mb_substr() function : basic functionality
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -10,7 +10,7 @@ mbstring.internal_encoding=ISO-8859-1
 --FILE--
 <?php
 /* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
- * Description: Returns part of a string 
+ * Description: Returns part of a string
  * Source code: ext/mbstring/mbstring.c
  */
 

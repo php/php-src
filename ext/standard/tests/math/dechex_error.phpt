@@ -9,7 +9,7 @@ Test dechex() - wrong params dechex()
 
 echo "*** Testing dechex() : error conditions ***\n";
 
-echo "\nIncorrect number of arguments\n"; 
+echo "\nIncorrect number of arguments\n";
 dechex();
 dechex(23,2,true);
 

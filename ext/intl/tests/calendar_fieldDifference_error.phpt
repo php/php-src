@@ -18,9 +18,7 @@ var_dump($c->fieldDifference(1));
 
 var_dump(intlcal_field_difference($c, 0, 1, 2));
 var_dump(intlcal_field_difference(1, 0, 1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::fieldDifference() expects exactly 2 parameters, 3 given in %s on line %d
 
 Warning: IntlCalendar::fieldDifference(): intlcal_field_difference: bad arguments in %s on line %d

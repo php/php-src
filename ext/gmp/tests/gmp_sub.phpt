@@ -22,7 +22,7 @@ var_dump(gmp_strval($g));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_sub() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 

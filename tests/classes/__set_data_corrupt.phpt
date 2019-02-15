@@ -6,7 +6,7 @@ $f = 'c="foo"';
 class foo {
         const foobar=1;
         public $pp = array('t'=>null);
-                                                                                                                                                            
+
         function bar() {
                 echo $this->t ='f';
         }

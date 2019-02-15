@@ -1,10 +1,10 @@
 --TEST--
-Test array_intersect_assoc() function : basic functionality 
+Test array_intersect_assoc() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments. 
- * Keys are used to do more restrictive check 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments.
+ * Keys are used to do more restrictive check
  * Source code: ext/standard/array.c
 */
 

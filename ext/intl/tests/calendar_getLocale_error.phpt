@@ -18,9 +18,7 @@ var_dump($c->getLocale(2, 3));
 
 var_dump(intlcal_get_locale($c));
 var_dump(intlcal_get_locale(1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::getLocale() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlCalendar::getLocale(): intlcal_get_locale: bad arguments in %s on line %d

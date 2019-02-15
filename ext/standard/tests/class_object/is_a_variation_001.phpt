@@ -3,11 +3,11 @@ Test is_a() function : usage variations  - wrong type for arg 1
 --FILE--
 <?php
 /* Prototype  : proto bool is_a(object object, string class_name)
- * Description: Returns true if the object is of this class or has this class as one of its parents 
+ * Description: Returns true if the object is of this class or has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
-// Note: basic use cases in Zend/tests/is_a.phpt 
+// Note: basic use cases in Zend/tests/is_a.phpt
 echo "*** Testing is_a() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -57,7 +57,7 @@ $values = array(
       // string data
       "string",
       'String',
-      
+
       // undefined data
       $undefined_var,
 

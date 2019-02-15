@@ -14,6 +14,4 @@ $sp->extract(1); // Should throw a warning as extract expects NO arguments
 
 ?>
 --EXPECTF--
-
 Warning: SplPriorityQueue::extract() expects exactly 0 parameters, 1 given in %s on line %d
-

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Bob Weinand <bobwei9@hotmail.com>                           |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "zend.h"
 #include "zend_API.h"
@@ -125,7 +123,8 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
 		zend_free_compiled_variables(execute_data);
 
-		if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
+		if ((EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) &&
+			EXPECTED(GC_TYPE(Z_OBJ(execute_data->This)) == IS_OBJECT)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		}
 
@@ -145,7 +144,8 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		}
 
 		/* Free closure object */
-		if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
+		if ((EX_CALL_INFO() & ZEND_CALL_CLOSURE) &&
+			EXPECTED(GC_TYPE(ZEND_CLOSURE_OBJECT(EX(func))) == IS_OBJECT)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
 
@@ -276,6 +276,25 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 		size += Z_TYPE(execute_data->This) == IS_OBJECT; /* $this */
 		size += (EX_CALL_INFO() & ZEND_CALL_CLOSURE) != 0; /* Closure object */
 
+		/* Live vars */
+		if (execute_data->opline != op_array->opcodes) {
+			/* -1 required because we want the last run opcode, not the next to-be-run one. */
+			uint32_t i, op_num = execute_data->opline - op_array->opcodes - 1;
+			for (i = 0; i < op_array->last_live_range; i++) {
+				const zend_live_range *range = &op_array->live_range[i];
+				if (range->start > op_num) {
+					/* Further ranges will not be relevant... */
+					break;
+				} else if (op_num < range->end) {
+					/* LIVE_ROPE and LIVE_SILENCE not relevant for GC */
+					uint32_t kind = range->var & ZEND_LIVE_MASK;
+					if (kind == ZEND_LIVE_TMPVAR || kind == ZEND_LIVE_LOOP) {
+						size++;
+					}
+				}
+			}
+		}
+
 		/* Yield from root references */
 		if (generator->node.children == 0) {
 			zend_generator *root = generator->node.ptr.root;
@@ -289,9 +308,9 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 }
 /* }}} */
 
-static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {{{ */
+static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*) Z_OBJ_P(object);
+	zend_generator *generator = (zend_generator*)object;
 	zend_execute_data *execute_data = generator->execute_data;
 	zend_op_array *op_array;
 	zval *gc_buffer;
@@ -340,6 +359,23 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 	}
 	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
 		ZVAL_OBJ(gc_buffer++, ZEND_CLOSURE_OBJECT(EX(func)));
+	}
+
+	if (execute_data->opline != op_array->opcodes) {
+		uint32_t i, op_num = execute_data->opline - op_array->opcodes - 1;
+		for (i = 0; i < op_array->last_live_range; i++) {
+			const zend_live_range *range = &op_array->live_range[i];
+			if (range->start > op_num) {
+				break;
+			} else if (op_num < range->end) {
+				uint32_t kind = range->var & ZEND_LIVE_MASK;
+				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
+				zval *var = EX_VAR(var_num);
+				if (kind == ZEND_LIVE_TMPVAR || kind == ZEND_LIVE_LOOP) {
+					ZVAL_COPY_VALUE(gc_buffer++, var);
+				}
+			}
+		}
 	}
 
 	if (generator->node.children == 0) {
@@ -841,7 +877,7 @@ ZEND_METHOD(Generator, rewind)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
 
 	zend_generator_rewind(generator);
 }
@@ -857,7 +893,7 @@ ZEND_METHOD(Generator, valid)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
 
 	zend_generator_ensure_initialized(generator);
 
@@ -877,7 +913,7 @@ ZEND_METHOD(Generator, current)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
 
 	zend_generator_ensure_initialized(generator);
 
@@ -885,8 +921,7 @@ ZEND_METHOD(Generator, current)
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->value) != IS_UNDEF)) {
 		zval *value = &root->value;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
 /* }}} */
@@ -901,7 +936,7 @@ ZEND_METHOD(Generator, key)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
 
 	zend_generator_ensure_initialized(generator);
 
@@ -909,8 +944,7 @@ ZEND_METHOD(Generator, key)
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->key) != IS_UNDEF)) {
 		zval *key = &root->key;
 
-		ZVAL_DEREF(key);
-		ZVAL_COPY(return_value, key);
+		ZVAL_COPY_DEREF(return_value, key);
 	}
 }
 /* }}} */
@@ -925,7 +959,7 @@ ZEND_METHOD(Generator, next)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
 
 	zend_generator_ensure_initialized(generator);
 
@@ -944,7 +978,7 @@ ZEND_METHOD(Generator, send)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
 
 	zend_generator_ensure_initialized(generator);
 
@@ -965,8 +999,7 @@ ZEND_METHOD(Generator, send)
 	if (EXPECTED(generator->execute_data)) {
 		zval *value = &root->value;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
 /* }}} */
@@ -984,7 +1017,7 @@ ZEND_METHOD(Generator, throw)
 
 	Z_TRY_ADDREF_P(exception);
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
 
 	zend_generator_ensure_initialized(generator);
 
@@ -999,8 +1032,7 @@ ZEND_METHOD(Generator, throw)
 		if (generator->execute_data) {
 			zval *value = &root->value;
 
-			ZVAL_DEREF(value);
-			ZVAL_COPY(return_value, value);
+			ZVAL_COPY_DEREF(return_value, value);
 		}
 	} else {
 		/* If the generator is already closed throw the exception in the
@@ -1020,7 +1052,7 @@ ZEND_METHOD(Generator, getReturn)
 		return;
 	}
 
-	generator = (zend_generator *) Z_OBJ_P(getThis());
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
 
 	zend_generator_ensure_initialized(generator);
 	if (UNEXPECTED(EG(exception))) {
@@ -1035,22 +1067,6 @@ ZEND_METHOD(Generator, getReturn)
 	}
 
 	ZVAL_COPY(return_value, &generator->retval);
-}
-/* }}} */
-
-/* {{{ proto Generator::__wakeup()
- * Throws an Exception as generators can't be serialized */
-ZEND_METHOD(Generator, __wakeup)
-{
-	/* Just specifying the zend_class_unserialize_deny handler is not enough,
-	 * because it is only invoked for C unserialization. For O the error has
-	 * to be thrown in __wakeup. */
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	zend_throw_exception(NULL, "Unserialization of 'Generator' is not allowed", 0);
 }
 /* }}} */
 
@@ -1099,8 +1115,7 @@ static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval
 	if (EXPECTED(Z_TYPE(root->key) != IS_UNDEF)) {
 		zval *zv = &root->key;
 
-		ZVAL_DEREF(zv);
-		ZVAL_COPY(key, zv);
+		ZVAL_COPY_DEREF(key, zv);
 	} else {
 		ZVAL_NULL(key);
 	}
@@ -1181,7 +1196,6 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, throw,    arginfo_generator_throw, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, getReturn,arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, __wakeup, arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1199,9 +1213,8 @@ void zend_register_generator_ce(void) /* {{{ */
 	/* get_iterator has to be assigned *after* implementing the inferface */
 	zend_class_implements(zend_ce_generator, 1, zend_ce_iterator);
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
-	zend_ce_generator->iterator_funcs.funcs = &zend_generator_iterator_functions;
 
-	memcpy(&zend_generator_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_generator_handlers.free_obj = zend_generator_free_storage;
 	zend_generator_handlers.dtor_obj = zend_generator_dtor_storage;
 	zend_generator_handlers.get_gc = zend_generator_get_gc;
@@ -1212,13 +1225,3 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_ce_ClosedGeneratorException = zend_register_internal_class_ex(&ce, zend_ce_exception);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

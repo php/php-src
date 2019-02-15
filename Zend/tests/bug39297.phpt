@@ -21,8 +21,8 @@ class MyTree implements ArrayAccess {
         $cannonicalName = strtolower($offset);
         $this->children[$cannonicalName] = $value;
         $value->parent = $this;
-    }    
-    
+    }
+
     public function offsetGet($offset) {
     	echo "offsetGet()\n";
         $cannonicalName = strtolower($offset);

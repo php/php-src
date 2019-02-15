@@ -23,7 +23,7 @@ output_handler=
 			array_shift( $regs );
 			printf( "(%s) (%d) %s\n", $test_enc, mb_ereg_search_getpos(), mb_convert_encoding( ( is_array( $regs ) ? implode( '-', $regs ): '' ), $in_enc, $test_enc ) );
 		}
-	}	
+	}
 	function do_tests( $enc, $opt ) {
 		test_search( $enc, "¢Ï¡¦ ¡¦¢Ï\n", ' (¡¦?¢Ï¡¦?)[[:space:]]', $opt );
 		test_search( $enc, 'abcde abdeabcf anvfabc odu abcd ', '(ab[a-z]+)', $opt );
@@ -34,7 +34,6 @@ output_handler=
 		do_tests( $enc, 'x' );
 	}
 ?>
-
 --EXPECT--
 (EUC-JP) (10) ¡¦¢Ï
 (EUC-JP) (5) abcde

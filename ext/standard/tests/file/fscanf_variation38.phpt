@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - hexa formats with boolean 
+Test fscanf() function: usage variations - hexa formats with boolean
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - hexa formats with boolean
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different hexa format types with boolean data ***\n"; 
+echo "*** Test fscanf(): different hexa format types with boolean data ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation38.tmp";
@@ -243,4 +243,3 @@ NULL
 bool(false)
 
 *** Done ***
-

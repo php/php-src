@@ -20,4 +20,3 @@ var_dump($doc->preserveWhiteSpace);
 --EXPECT--
 bool(true)
 bool(false)
-

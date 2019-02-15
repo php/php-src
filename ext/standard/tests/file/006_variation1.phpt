@@ -19,12 +19,12 @@ unlink($filename);
 ?>
 --FILE--
 <?php
-/* 
+/*
   Prototype: int fileperms ( string $filename );
   Description: Returns the permissions on the file, or FALSE in case of an error
 
   Prototype: bool chmod ( string $filename, int $mode );
-  Description: Attempts to change the mode of the file specified by 
+  Description: Attempts to change the mode of the file specified by
                filename to that given in mode
 */
 
@@ -40,7 +40,7 @@ $count = 1;
 echo "-- Testing all permission from octal 0000 to octal 0777 on file and dir --\n";
 for($mode = 0000; $mode <= 0777; $mode++) {
   echo "-- Iteration $count --\n";
-  var_dump( chmod($file_name, $mode) ); 
+  var_dump( chmod($file_name, $mode) );
   printf("%o", fileperms($file_name) );
   echo "\n";
   clearstatcache();
@@ -61,7 +61,7 @@ chmod(dirname(__FILE__)."/006_variation1", 0777);
 unlink(dirname(__FILE__)."/006_variation1.tmp");
 rmdir(dirname(__FILE__)."/006_variation1");
 ?>
---EXPECT--	
+--EXPECT--
 *** Testing fileperms() & chmod() : usage variations ***
 -- Testing all permission from octal 0000 to octal 0777 on file and dir --
 -- Iteration 1 --

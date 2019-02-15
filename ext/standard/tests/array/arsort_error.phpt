@@ -1,14 +1,14 @@
 --TEST--
-Test arsort() function : error conditions 
+Test arsort() function : error conditions
 --FILE--
 <?php
 /* Prototype  : bool arsort(array &array_arg [, int sort_flags])
- * Description: Sort an array 
+ * Description: Sort an array
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing arsort() function with all possible error conditions 
+* Testing arsort() function with all possible error conditions
 */
 
 echo "*** Testing arsort() : error conditions ***\n";

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -28,7 +28,6 @@
 #include <fcntl.h>
 #ifndef ZEND_WIN32
 # include <sys/types.h>
-# include <dirent.h>
 # include <signal.h>
 # include <sys/stat.h>
 # include <stdio.h>
@@ -260,6 +259,7 @@ int zend_shared_alloc_startup(size_t requested_size)
 void zend_shared_alloc_shutdown(void)
 {
 	zend_shared_segment **tmp_shared_segments;
+	zend_shared_segment *shared_segments_buf[16];
 	size_t shared_segments_array_size;
 	zend_smm_shared_globals tmp_shared_globals;
 	int i;
@@ -267,14 +267,20 @@ void zend_shared_alloc_shutdown(void)
 	tmp_shared_globals = *smm_shared_globals;
 	smm_shared_globals = &tmp_shared_globals;
 	shared_segments_array_size = ZSMMG(shared_segments_count) * (S_H(segment_type_size)() + sizeof(void *));
-	tmp_shared_segments = emalloc(shared_segments_array_size);
+	if (shared_segments_array_size > 16) {
+		tmp_shared_segments = malloc(shared_segments_array_size);
+	} else {
+		tmp_shared_segments = shared_segments_buf;
+	}
 	copy_shared_segments(tmp_shared_segments, ZSMMG(shared_segments)[0], ZSMMG(shared_segments_count), S_H(segment_type_size)());
 	ZSMMG(shared_segments) = tmp_shared_segments;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		S_H(detach_segment)(ZSMMG(shared_segments)[i]);
 	}
-	efree(ZSMMG(shared_segments));
+	if (shared_segments_array_size > 16) {
+		free(ZSMMG(shared_segments));
+	}
 	ZSMMG(shared_segments) = NULL;
 	g_shared_alloc_handler = NULL;
 #ifndef ZEND_WIN32
@@ -344,28 +350,82 @@ int zend_shared_memdup_size(void *source, size_t size)
 		/* we already duplicated this pointer */
 		return 0;
 	}
-	zend_shared_alloc_register_xlat_entry(source, source);
+	zend_hash_index_add_new_ptr(&ZCG(xlat_table), key, source);
 	return ZEND_ALIGNED_SIZE(size);
 }
 
-void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source)
+static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, zend_bool arena, zend_bool get_xlat, zend_bool set_xlat, zend_bool free_source)
 {
 	void *old_p, *retval;
-	zend_ulong key = (zend_ulong)source;
+	zend_ulong key;
 
-	key = (key >> 3) | (key << ((sizeof(key) * 8) - 3)); /* key  = _rotr(key, 3);*/
-	if ((old_p = zend_hash_index_find_ptr(&ZCG(xlat_table), key)) != NULL) {
-		/* we already duplicated this pointer */
-		return old_p;
+	if (get_xlat) {
+		key = (zend_ulong)source;
+		key = (key >> 3) | (key << ((sizeof(key) * 8) - 3)); /* key  = _rotr(key, 3);*/
+		if ((old_p = zend_hash_index_find_ptr(&ZCG(xlat_table), key)) != NULL) {
+			/* we already duplicated this pointer */
+			return old_p;
+		}
 	}
-	retval = ZCG(mem);
-	ZCG(mem) = (void*)(((char*)ZCG(mem)) + ZEND_ALIGNED_SIZE(size));
+	if (arena) {
+		retval = ZCG(arena_mem);
+		ZCG(arena_mem) = (void*)(((char*)ZCG(arena_mem)) + ZEND_ALIGNED_SIZE(size));
+	} else {
+		retval = ZCG(mem);
+		ZCG(mem) = (void*)(((char*)ZCG(mem)) + ZEND_ALIGNED_SIZE(size));
+	}
 	memcpy(retval, source, size);
-	zend_shared_alloc_register_xlat_entry(source, retval);
+	if (set_xlat) {
+		if (!get_xlat) {
+			key = (zend_ulong)source;
+			key = (key >> 3) | (key << ((sizeof(key) * 8) - 3)); /* key  = _rotr(key, 3);*/
+		}
+		zend_hash_index_add_new_ptr(&ZCG(xlat_table), key, retval);
+	}
 	if (free_source) {
 		efree(source);
 	}
 	return retval;
+}
+
+void *zend_shared_memdup_get_put_free(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 1, 1, 1);
+}
+
+void *zend_shared_memdup_put_free(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 0, 1, 1);
+}
+
+void *zend_shared_memdup_free(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 0, 0, 1);
+}
+
+void *zend_shared_memdup_get_put(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 1, 1, 0);
+}
+
+void *zend_shared_memdup_put(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 0, 1, 0);
+}
+
+void *zend_shared_memdup(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 0, 0, 0, 0);
+}
+
+void *zend_shared_memdup_arena_put(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 1, 0, 1, 0);
+}
+
+void *zend_shared_memdup_arena(void *source, size_t size)
+{
+	return _zend_shared_memdup(source, size, 1, 0, 0, 0);
 }
 
 void zend_shared_alloc_safe_unlock(void)
@@ -375,15 +435,15 @@ void zend_shared_alloc_safe_unlock(void)
 	}
 }
 
-#ifndef ZEND_WIN32
-/* name l_type l_whence l_start l_len */
-static FLOCK_STRUCTURE(mem_write_lock, F_WRLCK, SEEK_SET, 0, 1);
-static FLOCK_STRUCTURE(mem_write_unlock, F_UNLCK, SEEK_SET, 0, 1);
-#endif
-
 void zend_shared_alloc_lock(void)
 {
 #ifndef ZEND_WIN32
+	struct flock mem_write_lock;
+
+	mem_write_lock.l_type = F_WRLCK;
+	mem_write_lock.l_whence = SEEK_SET;
+	mem_write_lock.l_start = 0;
+	mem_write_lock.l_len = 1;
 
 #ifdef ZTS
 	tsrm_mutex_lock(zts_lock);
@@ -414,6 +474,15 @@ void zend_shared_alloc_lock(void)
 
 void zend_shared_alloc_unlock(void)
 {
+#ifndef ZEND_WIN32
+	struct flock mem_write_unlock;
+
+	mem_write_unlock.l_type = F_UNLCK;
+	mem_write_unlock.l_whence = SEEK_SET;
+	mem_write_unlock.l_start = 0;
+	mem_write_unlock.l_len = 1;
+#endif
+
 	ZCG(locked) = 0;
 
 #ifndef ZEND_WIN32
@@ -443,6 +512,16 @@ void zend_shared_alloc_destroy_xlat_table(void)
 void zend_shared_alloc_clear_xlat_table(void)
 {
 	zend_hash_clean(&ZCG(xlat_table));
+}
+
+uint32_t zend_shared_alloc_checkpoint_xlat_table(void)
+{
+	return ZCG(xlat_table).nNumUsed;
+}
+
+void zend_shared_alloc_restore_xlat_table(uint32_t checkpoint)
+{
+	zend_hash_discard(&ZCG(xlat_table), checkpoint);
 }
 
 void zend_shared_alloc_register_xlat_entry(const void *old, const void *new)

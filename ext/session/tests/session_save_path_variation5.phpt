@@ -1,7 +1,7 @@
 --TEST--
 Test session_save_path() function : variation
 --SKIPIF--
-<?php include('skipif.inc'); 
+<?php include('skipif.inc');
 if(substr(PHP_OS, 0, 3) == "WIN")
 	die("skip Not for Windows");
 ?>
@@ -13,10 +13,10 @@ session.name=PHPSESSID
 <?php
 
 ob_start();
-/* 
+/*
  * Prototype : string session_save_path([string $path])
  * Description : Get and/or set the current session save path
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_save_path() : variation ***\n";
@@ -52,4 +52,3 @@ Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within t
 string(0) ""
 bool(true)
 Done
-

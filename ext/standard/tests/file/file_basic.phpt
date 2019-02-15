@@ -2,7 +2,7 @@
 Test file() function : basic functionality
 --FILE--
 <?php
-/* 
+/*
  * Prototype: array file ( string filename [,int use-include_path [,resource context]] );
  * Description: Reads entire file into an array
  *              Returns the  file in an array
@@ -74,4 +74,3 @@ bool(true)
 bool(true)
 
 --- Done ---
-

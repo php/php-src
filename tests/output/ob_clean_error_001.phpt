@@ -1,11 +1,11 @@
 --TEST--
-Test ob_clean() function : error conditions 
+Test ob_clean() function : error conditions
 --FILE--
 <?php
 /* Prototype  : proto bool ob_clean(void)
- * Description: Clean (delete) the current output buffer 
+ * Description: Clean (delete) the current output buffer
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ob_clean() : error conditions ***\n";

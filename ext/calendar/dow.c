@@ -1,4 +1,3 @@
-
 /* $selId: dow.c,v 2.0 1995/10/24 01:13:06 lees Exp $
  * Copyright 1993-1995, Scott E. Lee, all rights reserved.
  * Permission granted to use, copy, modify, distribute and sell so long as
@@ -65,12 +64,3 @@ const char * const DayNameLong[7] =
 	"Friday",
 	"Saturday"
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

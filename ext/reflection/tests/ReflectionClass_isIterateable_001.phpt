@@ -26,7 +26,7 @@ Class ExtendsIteratorAggregateImpl extends IterarorAggregateImpl {
 Class A {
 }
 
-$classes = array('Traversable', 'Iterator', 'IteratorAggregate', 'ExtendsIterator', 'ExtendsIteratorAggregate', 
+$classes = array('Traversable', 'Iterator', 'IteratorAggregate', 'ExtendsIterator', 'ExtendsIteratorAggregate',
 	  'IteratorImpl', 'IterarorAggregateImpl', 'ExtendsIteratorImpl', 'ExtendsIteratorAggregateImpl', 'A');
 
 foreach($classes as $class) {

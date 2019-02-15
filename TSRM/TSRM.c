@@ -6,7 +6,7 @@
    | This source file is subject to the TSRM license, that is bundled     |
    | with this package in the file LICENSE                                |
    +----------------------------------------------------------------------+
-   | Authors:  Zeev Suraski <zeev@zend.com>                               |
+   | Authors:  Zeev Suraski <zeev@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -15,10 +15,7 @@
 #ifdef ZTS
 
 #include <stdio.h>
-
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 typedef struct _tsrm_tls_entry tsrm_tls_entry;
 
@@ -797,12 +794,3 @@ TSRM_API const char *tsrm_api_name(void)
 }/*}}}*/
 
 #endif /* ZTS */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

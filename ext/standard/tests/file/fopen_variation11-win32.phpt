@@ -14,9 +14,9 @@ if (!is_writable('c:\\fopen_variation10.tmp')) {
 --FILE--
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
+ * Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing fopen() : variation ***\n";
@@ -29,18 +29,18 @@ mkdir('c:\\'.$rootdir);
 
 $unixifiedDir = '/'.substr(str_replace('\\','/',$testdir),3);
 
-$paths = array('c:\\', 
-               'c:', 
-               'c', 
-               '\\', 
-               '/', 
-               'c:'.$rootdir, 
-               'c:adir', 
-               'c:\\/', 
+$paths = array('c:\\',
+               'c:',
+               'c',
+               '\\',
+               '/',
+               'c:'.$rootdir,
+               'c:adir',
+               'c:\\/',
                'c:\\'.$rootdir.'\\/',
-               'c:\\'.$rootdir.'\\', 
+               'c:\\'.$rootdir.'\\',
                'c:\\'.$rootdir.'/',
-               $unixifiedDir, 
+               $unixifiedDir,
                '/sortout');
 
 $file = "fopen_variation11.tmp";
@@ -144,4 +144,3 @@ file not opened for read
 
 Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
 ===DONE===
-

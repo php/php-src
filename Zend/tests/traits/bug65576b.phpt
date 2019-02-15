@@ -26,8 +26,6 @@ class B extends A
 }
 
 new B();
-
 --EXPECT--
 Parent constructor
 Trait constructor
-

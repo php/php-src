@@ -28,4 +28,3 @@ Warning: SplMinHeap::compare() expects exactly 2 parameters, 0 given in %s
 Warning: SplMinHeap::compare() expects exactly 2 parameters, 1 given in %s
 
 Warning: SplMinHeap::compare() expects exactly 2 parameters, 3 given in %s
-

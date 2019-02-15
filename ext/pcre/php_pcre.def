@@ -67,4 +67,3 @@ php_pcre2_substring_nametable_scan
 php_pcre2_substring_number_from_name
 php_pcre2_set_recursion_limit
 php_pcre2_set_recursion_memory_management
-

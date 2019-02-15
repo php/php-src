@@ -38,7 +38,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 			$found = false;
 			foreach ($engines as $k => $engine)
 				foreach ($engine as $k => $v)
-					if (stristr('MyISAM', $v)) {
+					if (stristr($v, 'MyISAM')) {
 						$found = true;
 						break;
 					}

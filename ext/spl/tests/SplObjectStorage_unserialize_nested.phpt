@@ -17,7 +17,6 @@ echo $s."\n";
 
 $so1 = unserialize($s);
 var_dump($so1);
-
 --EXPECTF--
 C:16:"SplObjectStorage":76:{x:i:2;O:8:"stdClass":1:{s:1:"a";O:8:"stdClass":0:{}},i:1;;r:4;,i:2;;m:a:0:{}}
 object(SplObjectStorage)#4 (1) {
@@ -44,4 +43,3 @@ object(SplObjectStorage)#4 (1) {
     }
   }
 }
-

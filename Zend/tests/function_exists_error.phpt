@@ -1,11 +1,11 @@
 --TEST--
-Test function_exists() function : error conditions 
+Test function_exists() function : error conditions
 --FILE--
 <?php
-/* 
+/*
  * proto bool function_exists(string function_name)
  * Function is implemented in Zend/zend_builtin_functions.c
-*/ 
+*/
 
 echo "*** Testing function_exists() : error conditions ***\n";
 
@@ -33,4 +33,3 @@ Too few arguments
 Warning: function_exists() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 ===Done===
-

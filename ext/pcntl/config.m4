@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension pcntl
 
 PHP_ARG_ENABLE(pcntl, whether to enable pcntl support,
 [  --enable-pcntl          Enable pcntl support (CLI/CGI only)])
@@ -12,14 +10,14 @@ if test "$PHP_PCNTL" != "no"; then
   AC_CHECK_FUNCS([getpriority setpriority wait3 wait4 sigprocmask sigwaitinfo sigtimedwait])
 
   AC_MSG_CHECKING([for siginfo_t])
-  AC_TRY_COMPILE([
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
     #include <signal.h>
     #ifdef HAVE_SIGINFO_H
       #include <siginfo.h>
     #endif
-  ],[
+  ]],[[
     siginfo_t info;
-  ],[
+  ]])],[
     AC_MSG_RESULT([yes])
     PCNTL_CFLAGS="-DHAVE_STRUCT_SIGINFO_T"
   ], [

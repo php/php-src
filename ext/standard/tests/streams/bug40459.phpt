@@ -48,7 +48,7 @@ class testwrapper {
 		echo $this->constructorCalled ? 'yes' : 'no';
 		return TRUE;
 	}
-	function stream_metadata() 
+	function stream_metadata()
 	{
 		echo $this->constructorCalled ? 'yes' : 'no';
 		return TRUE;

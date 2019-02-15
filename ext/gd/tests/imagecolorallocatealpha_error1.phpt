@@ -3,7 +3,7 @@ Testing imagecolorallocatealpha(): Wrong types for parameter 1
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--

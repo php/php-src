@@ -21,4 +21,3 @@ echo 'Done'.PHP_EOL;
 bool(true)
 string(51) "a:3:{i:-3;s:3:"foo";i:3;s:3:"bar";s:3:"var";i:123;}"
 Done
-

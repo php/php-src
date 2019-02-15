@@ -6,7 +6,7 @@ Testing parameter type-hinted with interface
 namespace foo;
 
 interface foo {
-	
+
 }
 
 class bar {
@@ -16,7 +16,7 @@ class bar {
 }
 
 class test implements foo {
-	
+
 }
 
 

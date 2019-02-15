@@ -30,7 +30,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: array_walk() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 

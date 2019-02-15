@@ -8,7 +8,7 @@ Test strrpos() function : usage variations - repetitive chars for 'haystack' arg
 */
 
 /* Test strrpos() function with strings containing multiple occurrences of 'needle' in the 'haystack'
- *  and with various needles & offsets 
+ *  and with various needles & offsets
 */
 
 echo "*** Testing strrpos() function: strings repetitive chars ***\n";

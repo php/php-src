@@ -1,5 +1,5 @@
 --TEST--
-mb_http_output()  
+mb_http_output()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
@@ -59,7 +59,6 @@ $enc = mb_http_output();
 print "$enc\n";
 
 ?>
-
 --EXPECT--
 OK_ASCII_SET
 ASCII
@@ -81,4 +80,3 @@ EUC-JP
 ERR: Warning
 OK_BAD_OBJ_SET
 EUC-JP
-

@@ -1,5 +1,5 @@
 --TEST--
-Test mkdir/rmdir big5 to UTF-8 path 
+Test mkdir/rmdir big5 to UTF-8 path
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -37,7 +37,7 @@ remove_data("dir_big5");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)

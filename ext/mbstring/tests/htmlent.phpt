@@ -1,9 +1,9 @@
 --TEST--
 HTML input/output
 --SKIPIF--
-<?php 
-	ini_set('include_path', dirname(__FILE__)); 
-	extension_loaded('mbstring') or die('skip mbstring not available'); 
+<?php
+	ini_set('include_path', dirname(__FILE__));
+	extension_loaded('mbstring') or die('skip mbstring not available');
 ?>
 --INI--
 output_buffering=4096
@@ -20,7 +20,7 @@ filter.default=unsafe_raw
 <?php
 // enable output encoding through output handler
 //ob_start("mb_output_handler");
-// &#64... are must be decoded on input these are not reencoded on output. 
+// &#64... are must be decoded on input these are not reencoded on output.
 // If you see &#64;&#65;&#66; on output this means input encoding fails.
 // If you do not see &auml;... on output this means output encoding fails.
 // Using UTF-8 internally allows to encode/decode ALL characters.

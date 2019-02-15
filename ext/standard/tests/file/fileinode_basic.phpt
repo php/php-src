@@ -2,7 +2,7 @@
 Test fileinode() function: Basic functionality
 --FILE--
 <?php
-/* 
+/*
 Prototype: int fileinode ( string $filename );
 Description: Returns the inode number of the file, or FALSE in case of an error.
 */

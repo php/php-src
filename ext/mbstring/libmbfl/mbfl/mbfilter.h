@@ -1,7 +1,3 @@
-/* charset=UTF-8
- * vim: encoding=utf-8:
- * */
-
 /*
  * "streamable kanji code filter and converter"
  *
@@ -123,6 +119,13 @@
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR 1
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG 2
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY 3
+
+/*
+ * convenience macros
+ */
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
 
 /*
  * buffering converter

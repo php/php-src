@@ -27,7 +27,7 @@ foreach ($types as $t => $v) {
 
     $s = oci_parse($c, "select * from dual where dummy = :c1");
     $c1 = "Doug";
-    oci_bind_by_name($s, ":c1", $c1, -1, $v);    
+    oci_bind_by_name($s, ":c1", $c1, -1, $v);
 }
 
 ?>

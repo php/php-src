@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp_set_oid_output_format
 --CREDITS--
 Olivier Doucet

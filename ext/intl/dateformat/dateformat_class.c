@@ -77,14 +77,14 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 /* }}} */
 
 /* {{{ IntlDateFormatter_object_clone */
-zend_object *IntlDateFormatter_object_clone(zval *object)
+zend_object *IntlDateFormatter_object_clone(zend_object *object)
 {
 	IntlDateFormatter_object *dfo, *new_dfo;
 	zend_object *new_obj;
 
-	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
+	dfo = php_intl_dateformatter_fetch_object(object);
 
-	new_obj = IntlDateFormatter_ce_ptr->create_object(Z_OBJCE_P(object));
+	new_obj = IntlDateFormatter_ce_ptr->create_object(object->ce);
 	new_dfo = php_intl_dateformatter_fetch_object(new_obj);
 	/* clone standard parts */
 	zend_objects_clone_members(&new_dfo->zo, &dfo->zo);
@@ -158,7 +158,7 @@ ZEND_END_ARG_INFO()
  * Every 'IntlDateFormatter' class method has an entry in this table
  */
 static const zend_function_entry IntlDateFormatter_class_functions[] = {
-	PHP_ME( IntlDateFormatter, __construct, arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
+	PHP_ME( IntlDateFormatter, __construct, arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC )
 	ZEND_FENTRY(  create, ZEND_FN( datefmt_create ), arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( getDateType, ZEND_FN( datefmt_get_datetype ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( getTimeType, ZEND_FN( datefmt_get_timetype ), arginfo_intldateformatter_getdatetype )
@@ -195,7 +195,7 @@ void dateformat_register_IntlDateFormatter_class( void )
 	ce.create_object = IntlDateFormatter_object_create;
 	IntlDateFormatter_ce_ptr = zend_register_internal_class( &ce );
 
-	memcpy(&IntlDateFormatter_handlers, zend_get_std_object_handlers(),
+	memcpy(&IntlDateFormatter_handlers, &std_object_handlers,
 		sizeof IntlDateFormatter_handlers);
 	IntlDateFormatter_handlers.offset = XtOffsetOf(IntlDateFormatter_object, zo);
 	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;

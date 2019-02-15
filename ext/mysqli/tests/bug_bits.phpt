@@ -42,7 +42,7 @@ while ($row = $res->fetch_assoc()) {
 
 $link->close();
 
-echo "Done\n";	
+echo "Done\n";
 ?>
 --CLEAN--
 <?php

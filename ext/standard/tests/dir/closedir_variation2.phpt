@@ -3,7 +3,7 @@ Test closedir() function : usage variations - close directory handle twice
 --FILE--
 <?php
 /* Prototype  : void closedir([resource $dir_handle])
- * Description: Close directory connection identified by the dir_handle 
+ * Description: Close directory connection identified by the dir_handle
  * Source code: ext/standard/dir.c
  * Alias to functions: close
  */

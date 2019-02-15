@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,8 +20,6 @@
    |          Boris Lytockin <lytboris@gmail.com>                         |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1750,7 +1748,7 @@ PHP_FUNCTION(snmp_read_mib)
 PHP_METHOD(snmp, __construct)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	char *a1, *a2;
 	size_t a1_len, a2_len;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
@@ -1797,7 +1795,7 @@ PHP_METHOD(snmp, __construct)
 PHP_METHOD(snmp, close)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 
 	snmp_object = Z_SNMP_P(object);
 
@@ -1848,7 +1846,7 @@ PHP_METHOD(snmp, set)
 PHP_METHOD(snmp, setSecurity)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	char *a1 = "", *a2 = "", *a3 = "", *a4 = "", *a5 = "", *a6 = "", *a7 = "";
 	size_t a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
 	int argc = ZEND_NUM_ARGS();
@@ -1873,7 +1871,7 @@ PHP_METHOD(snmp, setSecurity)
 PHP_METHOD(snmp, getErrno)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 
 	snmp_object = Z_SNMP_P(object);
 
@@ -1887,7 +1885,7 @@ PHP_METHOD(snmp, getErrno)
 PHP_METHOD(snmp, getError)
 {
 	php_snmp_object *snmp_object;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 
 	snmp_object = Z_SNMP_P(object);
 
@@ -1907,28 +1905,22 @@ void php_snmp_add_property(HashTable *h, const char *name, size_t name_length, p
 	p.write_func = (write_func) ? write_func : NULL;
 	str = zend_string_init_interned(name, name_length, 1);
 	zend_hash_add_mem(h, str, &p, sizeof(php_snmp_prop_handler));
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 }
 /* }}} */
 
 /* {{{ php_snmp_read_property(zval *object, zval *member, int type[, const zend_literal *key])
    Generic object property reader */
-zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv)
+zval *php_snmp_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
-	zval tmp_member;
 	zval *retval;
 	php_snmp_object *obj;
 	php_snmp_prop_handler *hnd;
 	int ret;
 
-	obj = Z_SNMP_P(object);
+	obj = php_snmp_fetch_object(object);
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-	}
-
-	hnd = zend_hash_find_ptr(&php_snmp_properties, Z_STR_P(member));
+	hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 
 	if (hnd && hnd->read_func) {
 		ret = hnd->read_func(obj, rv);
@@ -1938,12 +1930,7 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		const zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
-	}
-
-	if (member == &tmp_member) {
-		zval_ptr_dtor(member);
+		retval = zend_std_read_property(object, name, type, cache_slot, rv);
 	}
 
 	return retval;
@@ -1952,20 +1939,14 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_
 
 /* {{{ php_snmp_write_property(zval *object, zval *member, zval *value[, const zend_literal *key])
    Generic object property writer */
-void php_snmp_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *php_snmp_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	zval tmp_member;
 	php_snmp_object *obj;
 	php_snmp_prop_handler *hnd;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-	}
+	obj = php_snmp_fetch_object(object);
 
-	obj = Z_SNMP_P(object);
-
-	hnd = zend_hash_find_ptr(&php_snmp_properties, Z_STR_P(member));
+	hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 
 	if (hnd && hnd->write_func) {
 		hnd->write_func(obj, value);
@@ -1976,31 +1957,28 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, void **cac
 		}
 		*/
 	} else {
-		const zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value, cache_slot);
+		value = zend_std_write_property(object, name, value, cache_slot);
 	}
 
-	if (member == &tmp_member) {
-		zval_ptr_dtor(member);
-	}
+	return value;
 }
 /* }}} */
 
 /* {{{ php_snmp_has_property(zval *object, zval *member, int has_set_exists[, const zend_literal *key])
    Generic object property checker */
-static int php_snmp_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot)
+static int php_snmp_has_property(zend_object *object, zend_string *name, int has_set_exists, void **cache_slot)
 {
 	zval rv;
 	php_snmp_prop_handler *hnd;
 	int ret = 0;
 
-	if ((hnd = zend_hash_find_ptr(&php_snmp_properties, Z_STR_P(member))) != NULL) {
+	if ((hnd = zend_hash_find_ptr(&php_snmp_properties, name)) != NULL) {
 		switch (has_set_exists) {
-			case 2:
+			case ZEND_PROPERTY_EXISTS:
 				ret = 1;
 				break;
-			case 0: {
-				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
+			case ZEND_PROPERTY_ISSET: {
+				zval *value = php_snmp_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					ret = Z_TYPE_P(value) != IS_NULL? 1 : 0;
 					zval_ptr_dtor(value);
@@ -2008,7 +1986,7 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 				break;
 			}
 			default: {
-				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
+				zval *value = php_snmp_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					convert_to_boolean(value);
 					ret = Z_TYPE_P(value) == IS_TRUE? 1:0;
@@ -2017,14 +1995,13 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 			}
 		}
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		ret = std_hnd->has_property(object, member, has_set_exists, cache_slot);
+		ret = zend_std_has_property(object, name, has_set_exists, cache_slot);
 	}
 	return ret;
 }
 /* }}} */
 
-static HashTable *php_snmp_get_gc(zval *object, zval ***gc_data, int *gc_data_count) /* {{{ */
+static HashTable *php_snmp_get_gc(zend_object *object, zval **gc_data, int *gc_data_count) /* {{{ */
 {
 	*gc_data = NULL;
 	*gc_data_count = 0;
@@ -2034,7 +2011,7 @@ static HashTable *php_snmp_get_gc(zval *object, zval ***gc_data, int *gc_data_co
 
 /* {{{ php_snmp_get_properties(zval *object)
    Returns all object properties. Injects SNMP properties into object on first call */
-static HashTable *php_snmp_get_properties(zval *object)
+static HashTable *php_snmp_get_properties(zend_object *object)
 {
 	php_snmp_object *obj;
 	php_snmp_prop_handler *hnd;
@@ -2042,7 +2019,7 @@ static HashTable *php_snmp_get_properties(zval *object)
 	zval rv;
 	zend_string *key;
 
-	obj = Z_SNMP_P(object);
+	obj = php_snmp_fetch_object(object);
 	props = zend_std_get_properties(object);
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&php_snmp_properties, key, hnd) {
@@ -2279,7 +2256,7 @@ PHP_MINIT_FUNCTION(snmp)
 		logh->pri_max = LOG_ERR;
 	}
 
-	memcpy(&php_snmp_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&php_snmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_snmp_object_handlers.read_property = php_snmp_read_property;
 	php_snmp_object_handlers.write_property = php_snmp_write_property;
 	php_snmp_object_handlers.has_property = php_snmp_has_property;
@@ -2363,7 +2340,6 @@ PHP_MINFO_FUNCTION(snmp)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "NET-SNMP Support", "enabled");
 	php_info_print_table_row(2, "NET-SNMP Version", netsnmp_get_version());
-	php_info_print_table_row(2, "PHP SNMP Version", PHP_SNMP_VERSION);
 	php_info_print_table_end();
 }
 /* }}} */
@@ -2399,12 +2375,3 @@ zend_module_entry snmp_module_entry = {
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

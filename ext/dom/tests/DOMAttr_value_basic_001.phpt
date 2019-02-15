@@ -1,5 +1,5 @@
 --TEST--
-Read empty $value. 
+Read empty $value.
 --CREDITS--
 Jason Bouffard <jbouffard1@yahoo.com>
 # TestFest Atlanta 2009-05-14
@@ -13,4 +13,3 @@ print $attr->value."\n";
 ===DONE===
 --EXPECT--
 ===DONE===
-	

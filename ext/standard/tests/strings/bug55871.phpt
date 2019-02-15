@@ -17,7 +17,7 @@ class test2 {
 }
 
 class test3 {
-        public function __toString() {                
+        public function __toString() {
                 $GLOBALS['my_var'] .= "AAAAAAAA";
                 return '';
         }

@@ -50,7 +50,7 @@ $files = array (
 );
 
 $counter = 1;
-/* create soft/hard link to  the file 
+/* create soft/hard link to  the file
    and check linkinfo() and is_link() on the link created */
 foreach($files as $file) {
   echo "\n-- Iteration $counter --\n";

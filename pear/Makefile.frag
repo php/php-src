@@ -34,4 +34,3 @@ install-pear:
 	else \
 		cat $(srcdir)/install-pear.txt; \
 	fi
-

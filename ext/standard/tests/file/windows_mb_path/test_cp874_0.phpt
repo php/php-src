@@ -47,7 +47,7 @@ foreach ($names as $name) {
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 Active code page: %d
 getting basename of %sเป็นแฟ้มที่ทดสอบ1.txt
 string(%d) "เป็นแฟ้มที่ทดสอบ1.txt"

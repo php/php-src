@@ -35,7 +35,7 @@ using namespace PHP;
 
 using icu::UCharCharacterIterator;
 
-UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator);
+UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator)
 
 CodePointBreakIterator::CodePointBreakIterator()
 : BreakIterator(), fCharIter(NULL), lastCodePoint(U_SENTINEL)
@@ -53,7 +53,6 @@ CodePointBreakIterator::CodePointBreakIterator(const PHP::CodePointBreakIterator
 CodePointBreakIterator& CodePointBreakIterator::operator=(const CodePointBreakIterator& that)
 {
 	UErrorCode uec = UErrorCode();
-	UText *ut_clone = NULL;
 
 	if (this == &that) {
 		return *this;

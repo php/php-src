@@ -47,4 +47,3 @@ string(%d) "%sbug73877"
 string(%d) "%sСерёжка"
 string(%d) "%sbug73877"
 bool(true)
-

@@ -1,4 +1,3 @@
-dnl $Id$
 dnl config.m4 for extension phar
 
 PHP_ARG_ENABLE(phar, for phar archive support,

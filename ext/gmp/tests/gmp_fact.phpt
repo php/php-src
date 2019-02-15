@@ -28,7 +28,7 @@ var_dump(gmp_strval(gmp_fact(array())));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(1) "1"
 string(1) "1"
 string(1) "1"

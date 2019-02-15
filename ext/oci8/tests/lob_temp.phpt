@@ -4,10 +4,10 @@ temporary lobs
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
-	
+
 require dirname(__FILE__).'/connect.inc';
 
 $blob = oci_new_descriptor($c,OCI_D_LOB);

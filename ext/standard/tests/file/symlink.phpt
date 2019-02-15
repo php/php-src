@@ -44,7 +44,7 @@ var_dump(linkinfo("."));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 string(%d) "%ssymlink.dat"
 int(%d)

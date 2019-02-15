@@ -16,7 +16,7 @@ abstract class Derived extends Root implements MyInterface {
 
 class Leaf extends Derived
 {
-	static function MyInterfaceFunc() {}	
+	static function MyInterfaceFunc() {}
 }
 
 var_dump(new Leaf);

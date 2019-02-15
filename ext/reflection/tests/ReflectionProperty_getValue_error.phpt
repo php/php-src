@@ -75,7 +75,7 @@ Static property / wrong type of arg:
 string(15) "static property"
 
 Protected property:
-Cannot access non-public member TestClass::prot
+Cannot access non-public member TestClass::$prot
 
 Invalid instance:
 

@@ -29,12 +29,6 @@ foreach ($files as $n => $file) {
 $phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
-function err_handler($errno, $errstr, $errfile, $errline) {
-	echo "Recoverable fatal error: $errstr in $errfile on line $errline\n";
-}
-
-set_error_handler("err_handler", E_RECOVERABLE_ERROR);
-
 $fp = fopen($alias . '/b/c.php', 'wb');
 fwrite($fp, 'extra');
 fclose($fp);
@@ -47,7 +41,6 @@ include $alias . '/b/c.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
-
 Warning: fopen(phar://%sopen_for_write_existing_b.phar.tar/b/c.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_b.php on line %d
 
 Warning: fwrite() expects parameter 1 to be resource, bool given in %sopen_for_write_existing_b.php on line %d

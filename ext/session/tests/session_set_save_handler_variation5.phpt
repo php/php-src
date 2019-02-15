@@ -57,7 +57,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : variation ***
-
 string(0) ""
 *** Without lazy_write ***
 bool(true)

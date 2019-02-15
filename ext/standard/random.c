@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Sammy Kaye Powers <me@sammyk.me>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -33,8 +31,11 @@
 #ifdef __linux__
 # include <sys/syscall.h>
 #endif
-#if defined(__OpenBSD__) || defined(__NetBSD__)
+#if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
+# if __FreeBSD__ && __FreeBSD_version > 1200000
+#  include <sys/random.h>
+# endif
 #endif
 
 #ifdef ZTS
@@ -80,7 +81,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 }
 /* }}} */
 
-/* {{{ */
+/* {{{ php_random_bytes */
 PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 {
 #ifdef PHP_WIN32
@@ -96,8 +97,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 #else
 	size_t read_bytes = 0;
 	ssize_t n;
-#if defined(__linux__) && defined(SYS_getrandom)
-	/* Linux getrandom(2) syscall */
+#if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000)
+	/* Linux getrandom(2) syscall or FreeBSD getrandom(2) function*/
 	/* Keep reading until we get enough entropy */
 	while (read_bytes < size) {
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
@@ -110,7 +111,11 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 
 		*/
 		size_t amount_to_read = size - read_bytes;
+#if defined(__linux__)
 		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
+#else
+		n = getrandom(bytes + read_bytes, amount_to_read, 0);
+#endif
 
 		if (n == -1) {
 			if (errno == ENOSYS) {
@@ -201,7 +206,7 @@ PHP_FUNCTION(random_bytes)
 	bytes = zend_string_alloc(size, 0);
 
 	if (php_random_bytes_throw(ZSTR_VAL(bytes), size) == FAILURE) {
-		zend_string_release(bytes);
+		zend_string_release_ex(bytes, 0);
 		return;
 	}
 
@@ -280,12 +285,3 @@ PHP_FUNCTION(random_int)
 	RETURN_LONG(result);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

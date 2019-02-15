@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Zeev Suraski <zeev@zend.com>                                 |
+   | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "ext/standard/info.h"
@@ -31,6 +29,7 @@
 #include "php_scandir.h"
 #ifdef PHP_WIN32
 #include "win32/php_registry.h"
+#include "win32/winutil.h"
 #endif
 
 #if HAVE_SCANDIR && HAVE_ALPHASORT && HAVE_DIRENT_H
@@ -116,69 +115,48 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 }
 /* }}} */
 
-/* {{{ php_ini_displayer
- */
-static int php_ini_displayer(zval *el, void *arg)
-{
-	zend_ini_entry *ini_entry = (zend_ini_entry*)Z_PTR_P(el);
-	int module_number = *(int *)arg;
-
-	if (ini_entry->module_number != module_number) {
-		return 0;
-	}
-	if (!sapi_module.phpinfo_as_text) {
-		PUTS("<tr>");
-		PUTS("<td class=\"e\">");
-		PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
-		PUTS("</td><td class=\"v\">");
-		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
-		PUTS("</td><td class=\"v\">");
-		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
-		PUTS("</td></tr>\n");
-	} else {
-		PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
-		PUTS(" => ");
-		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
-		PUTS(" => ");
-		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
-		PUTS("\n");
-	}
-	return 0;
-}
-/* }}} */
-
-/* {{{ php_ini_available
- */
-static int php_ini_available(zval *el, void *arg)
-{
-	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
-	int *module_number_available = (int *)arg;
-	if (ini_entry->module_number == *(int *)module_number_available) {
-		*(int *)module_number_available = -1;
-		return ZEND_HASH_APPLY_STOP;
-	} else {
-		return ZEND_HASH_APPLY_KEEP;
-	}
-}
-/* }}} */
-
 /* {{{ display_ini_entries
  */
 PHPAPI void display_ini_entries(zend_module_entry *module)
 {
-	int module_number, module_number_available;
+	int module_number;
+	zend_ini_entry *ini_entry;
+	zend_bool first = 1;
 
 	if (module) {
 		module_number = module->module_number;
 	} else {
 		module_number = 0;
 	}
-	module_number_available = module_number;
-	zend_hash_apply_with_argument(EG(ini_directives), php_ini_available, &module_number_available);
-	if (module_number_available == -1) {
-		php_info_print_table_start();
-		php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
-		zend_hash_apply_with_argument(EG(ini_directives), php_ini_displayer, (void *)&module_number);
+
+	ZEND_HASH_FOREACH_PTR(EG(ini_directives), ini_entry) {
+		if (ini_entry->module_number != module_number) {
+			continue;
+		}
+		if (first) {
+			php_info_print_table_start();
+			php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
+			first = 0;
+		}
+		if (!sapi_module.phpinfo_as_text) {
+			PUTS("<tr>");
+			PUTS("<td class=\"e\">");
+			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			PUTS("</td><td class=\"v\">");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			PUTS("</td><td class=\"v\">");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+			PUTS("</td></tr>\n");
+		} else {
+			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			PUTS(" => ");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			PUTS(" => ");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+			PUTS("\n");
+		}
+	} ZEND_HASH_FOREACH_END();
+	if (!first) {
 		php_info_print_table_end();
 	}
 }
@@ -196,7 +174,7 @@ PHPAPI void config_zval_dtor(zval *zvalue)
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
 		free(Z_ARR_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		zend_string_release(Z_STR_P(zvalue));
+		zend_string_release_ex(Z_STR_P(zvalue), 1);
 	}
 }
 /* Reset / free active_ini_sectin global */
@@ -637,7 +615,7 @@ int php_init_config(void)
 			ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (opened_path) {
-				zend_string_release(opened_path);
+				zend_string_release_ex(opened_path, 0);
 			} else {
 				efree((char *)fh.filename);
 			}
@@ -968,13 +946,3 @@ PHPAPI HashTable* php_ini_get_configuration_hash(void) /* {{{ */
 {
 	return &configuration_hash;
 } /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

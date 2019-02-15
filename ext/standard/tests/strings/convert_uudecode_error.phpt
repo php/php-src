@@ -1,5 +1,5 @@
 --TEST--
-Test convert_uudecode() function : error conditions 
+Test convert_uudecode() function : error conditions
 --FILE--
 <?php
 
@@ -17,7 +17,7 @@ echo "\n-- Testing convert_uudecode() function with more than expected no. of ar
 $extra_arg = 10;
 var_dump( convert_uudecode(72, $extra_arg) );
 
-?> 
+?>
 ===DONE===
 --EXPECTF--
 *** Testing convert_uudecode() : error conditions ***
@@ -31,5 +31,4 @@ bool(false)
 
 Warning: convert_uudecode() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
- 
 ===DONE===

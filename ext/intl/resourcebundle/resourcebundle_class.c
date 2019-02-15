@@ -105,7 +105,7 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constr
 
 	if (bundlename_len >= MAXPATHLEN) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"Bundle name too long", 0 );
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		ZVAL_NULL(return_value);
 		return FAILURE;
 	}
@@ -152,7 +152,7 @@ PHP_METHOD( ResourceBundle, __construct )
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-	return_value = getThis();
+	return_value = ZEND_THIS;
 	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
@@ -176,7 +176,7 @@ PHP_FUNCTION( resourcebundle_create )
 /* }}} */
 
 /* {{{ resourcebundle_array_fetch */
-static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_value, int fallback)
+static void resourcebundle_array_fetch(zend_object *object, zval *offset, zval *return_value, int fallback)
 {
 	int32_t     meindex = 0;
 	char *      mekey = NULL;
@@ -185,7 +185,7 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 	ResourceBundle_object *rb;
 
 	intl_error_reset( NULL );
-	RESOURCEBUNDLE_METHOD_FETCH_OBJECT;
+	rb = php_intl_resourcebundle_fetch_object(object);
 
 	if(Z_TYPE_P(offset) == IS_LONG) {
 		is_numeric = 1;
@@ -230,7 +230,7 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-zval *resourcebundle_array_get(zval *object, zval *offset, int type, zval *rv)
+zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if(offset == NULL) {
 		php_error( E_ERROR, "Cannot apply [] to ResourceBundle object" );
@@ -264,15 +264,14 @@ PHP_FUNCTION( resourcebundle_get )
 		RETURN_FALSE;
 	}
 
-	resourcebundle_array_fetch(object, offset, return_value, fallback);
+	resourcebundle_array_fetch(Z_OBJ_P(object), offset, return_value, fallback);
 }
 /* }}} */
 
 /* {{{ resourcebundle_array_count */
-int resourcebundle_array_count(zval *object, zend_long *count)
+int resourcebundle_array_count(zend_object *object, zend_long *count)
 {
-	ResourceBundle_object *rb;
-	RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK;
+	ResourceBundle_object *rb = php_intl_resourcebundle_fetch_object(object);
 
 	if (rb->me == NULL) {
 		intl_errors_set(&rb->error, U_ILLEGAL_ARGUMENT_ERROR,
@@ -423,7 +422,7 @@ PHP_FUNCTION( resourcebundle_get_error_message )
  * Every 'ResourceBundle' class method has an entry in this table
  */
 static const zend_function_entry ResourceBundle_class_functions[] = {
-	PHP_ME( ResourceBundle, __construct, arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
+	PHP_ME( ResourceBundle, __construct, arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC )
 	ZEND_NAMED_ME( create, ZEND_FN( resourcebundle_create ), arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	ZEND_NAMED_ME( get, ZEND_FN(resourcebundle_get), arginfo_resourcebundle_get, ZEND_ACC_PUBLIC )
 	ZEND_NAMED_ME( count, ZEND_FN(resourcebundle_count), arginfo_resourcebundle_count, ZEND_ACC_PUBLIC )
@@ -458,12 +457,3 @@ void resourcebundle_register_class( void )
 	zend_class_implements(ResourceBundle_ce_ptr, 1, zend_ce_traversable);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

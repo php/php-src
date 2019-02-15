@@ -1,5 +1,5 @@
 --TEST--
-Test nl2br() function : error conditions 
+Test nl2br() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string nl2br(string $str)

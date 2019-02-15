@@ -10,8 +10,6 @@ $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
-
-
 --EXPECT--
 Test 1: Transform To XML String
 <?xml version="1.0" encoding="iso-8859-1"?>

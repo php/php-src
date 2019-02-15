@@ -23,7 +23,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* Variation 1 : Creating links across directories where linkname is stored as an object and array member */
 
-// creating temp directory which will contain temp file and links created 
+// creating temp directory which will contain temp file and links created
 $file_path = dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation1/test/home";
 mkdir($dirname, 0777, true);
@@ -58,11 +58,11 @@ clearstatcache();
 /* Testing on hard links */
 echo "\n-- Working with hard links --\n";
 // creating hard link
-var_dump( link($filename, $obj->linkname) ); 
+var_dump( link($filename, $obj->linkname) );
 // check if the link exists
 var_dump( linkinfo($obj->linkname) );
 // check if link is soft link; expected: false as the link is a hardlink
-var_dump( is_link($obj->linkname) ); 
+var_dump( is_link($obj->linkname) );
 // delete the link created
 unlink($obj->linkname);
 // clear the cache

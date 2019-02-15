@@ -23,8 +23,7 @@ var_dump(shm_remove($s));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-
+--EXPECTF--
 Warning: shm_remove() expects exactly 1 parameter, 0 given in %s007.php on line %d
 NULL
 
@@ -41,4 +40,3 @@ bool(true)
 Warning: shm_remove(): supplied resource is not a valid sysvshm resource in %s007.php on line %d
 bool(false)
 Done
-

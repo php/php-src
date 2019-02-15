@@ -212,5 +212,3 @@ int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 	}
 	return 0;
 }
-
-

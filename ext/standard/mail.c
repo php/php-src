@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Rasmus Lerdorf <rasmus@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -164,12 +162,10 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 
 static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *val)
 {
-	zend_ulong idx;
 	zend_string *tmp_key;
 	zval *tmp_val;
 
-	(void)(idx);
-	ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(val), idx, tmp_key, tmp_val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
 		if (tmp_key) {
 			php_error_docref(NULL, E_WARNING, "Multiple header key must be numeric index (%s)", ZSTR_VAL(tmp_key));
 			continue;
@@ -192,7 +188,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 
 	ZEND_ASSERT(Z_TYPE_P(headers) == IS_ARRAY);
 
-	ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(headers), idx, key, val) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(headers), idx, key, val) {
 		if (!key) {
 			php_error_docref(NULL, E_WARNING, "Found numeric header (" ZEND_LONG_FMT ")", idx);
 			continue;
@@ -300,7 +296,7 @@ PHP_FUNCTION(mail)
 		Z_PARAM_STRING(subject, subject_len)
 		Z_PARAM_STRING(message, message_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(headers)
+		Z_PARAM_ZVAL(headers)
 		Z_PARAM_STR(extra_cmd)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -314,7 +310,7 @@ PHP_FUNCTION(mail)
 				tmp_headers = zend_string_init(Z_STRVAL_P(headers), Z_STRLEN_P(headers), 0);
 				MAIL_ASCIIZ_CHECK(ZSTR_VAL(tmp_headers), ZSTR_LEN(tmp_headers));
 				str_headers = php_trim(tmp_headers, NULL, 0, 2);
-				zend_string_release(tmp_headers);
+				zend_string_release_ex(tmp_headers, 0);
 				break;
 			case IS_ARRAY:
 				str_headers = php_mail_build_headers(headers);
@@ -381,11 +377,11 @@ PHP_FUNCTION(mail)
 	}
 
 	if (str_headers) {
-		zend_string_release(str_headers);
+		zend_string_release_ex(str_headers, 0);
 	}
 
 	if (extra_cmd) {
-		zend_string_release(extra_cmd);
+		zend_string_release_ex(extra_cmd, 0);
 	}
 	if (to_r != to) {
 		efree(to_r);
@@ -531,7 +527,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		} else {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
 		}
-		zend_string_release(f);
+		zend_string_release_ex(f, 0);
 	}
 
 	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
@@ -661,12 +657,3 @@ PHP_MINFO_FUNCTION(mail)
 #endif
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

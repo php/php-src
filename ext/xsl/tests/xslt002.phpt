@@ -18,8 +18,6 @@ $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
-
-
 --EXPECT--
 Test 2: Transform To HTML String
 <html><body>bar

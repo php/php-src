@@ -16,9 +16,7 @@ var_dump($c->getTimeZone(1));
 
 var_dump(intlcal_get_time_zone($c, 1));
 var_dump(intlcal_get_time_zone(1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::getTimeZone() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlCalendar::getTimeZone(): intlcal_get_time_zone: bad arguments in %s on line %d

@@ -27,7 +27,7 @@ $classes = array("C", "iface", "ifaceImpl", "abstractClass", "D");
 foreach($classes  as $class ) {
 	$reflectionClass = new ReflectionClass($class);
 	echo "Is $class instantiable?  ";
-	var_dump($reflectionClass->IsInstantiable()); 
+	var_dump($reflectionClass->IsInstantiable());
 
 }
 

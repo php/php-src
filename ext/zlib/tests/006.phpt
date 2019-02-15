@@ -1,5 +1,5 @@
 --TEST--
-gzdeflate()/gzinflate() and invalid params 
+gzdeflate()/gzinflate() and invalid params
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
@@ -34,7 +34,7 @@ var_dump(gzinflate($data2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gzdeflate() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

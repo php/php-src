@@ -20,7 +20,6 @@ $str1 = " 0";
 $str2 = " 00";
 var_dump( strnatcmp( $str1, $str2) );
 ?>
-
 --EXPECT--
 -- Testing strnatcmp() function whitespace, left-align, digit --
 -- Leading whitespace, digits, string 1 longer --

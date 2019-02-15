@@ -1,7 +1,7 @@
 --TEST--
 gzopen(), gzread(), gzwrite() for non-compressed data
 --SKIPIF--
-<?php # vim600:syn=php:
+<?php
 if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php

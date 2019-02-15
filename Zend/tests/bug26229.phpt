@@ -5,7 +5,7 @@ Bug #26229 (getIterator() segfaults when it returns arrays or scalars)
 
 class array_iterator implements IteratorAggregate {
         public function getIterator() {
-                return array('foo', 'bar');     
+                return array('foo', 'bar');
         }
 }
 

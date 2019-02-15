@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("wddx", "WDDX support", "yes");
@@ -22,5 +21,3 @@ if (PHP_WDDX == "yes" &&
 	ADD_EXTENSION_DEP('wddx', 'xml')
 	CHECK_HEADER_ADD_INCLUDE("timelib_config.h", "CFLAGS_WDDX", "ext/date/lib");
 }
-
-

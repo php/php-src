@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -82,7 +80,7 @@ static void com_iter_get_key(zend_object_iterator *iter, zval *key)
 	}
 }
 
-static int com_iter_move_forwards(zend_object_iterator *iter)
+static void com_iter_move_forwards(zend_object_iterator *iter)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)Z_PTR(iter->data);
 	unsigned long n_fetched;
@@ -103,18 +101,18 @@ static int com_iter_move_forwards(zend_object_iterator *iter)
 		} else {
 			/* indicate that there are no more items */
 			I->key = (ulong)-1;
-			return FAILURE;
+			return;
 		}
 	} else {
 		/* safe array */
 		if (I->key >= (ULONG) I->sa_max) {
 			I->key = (ulong)-1;
-			return FAILURE;
+			return;
 		}
 		I->key++;
 		if (php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key) == 0) {
 			I->key = (ulong)-1;
-			return FAILURE;
+			return;
 		}
 	}
 
@@ -122,7 +120,6 @@ static int com_iter_move_forwards(zend_object_iterator *iter)
 	php_com_zval_from_variant(&ptr, &I->v, I->code_page);
 	/* php_com_wrap_variant(ptr, &I->v, I->code_page); */
 	ZVAL_COPY_VALUE(&I->zdata, &ptr);
-	return SUCCESS;
 }
 
 
@@ -245,4 +242,3 @@ fail:
 	}
 	return NULL;
 }
-

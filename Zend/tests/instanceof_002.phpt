@@ -1,7 +1,7 @@
 --TEST--
 Testing instanceof operator with class and interface inheriteds
 --FILE--
-<?php 
+<?php
 
 interface ITest {
 }

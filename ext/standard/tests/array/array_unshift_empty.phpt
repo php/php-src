@@ -16,7 +16,7 @@ var_dump( $array );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 int(3)
 int(3)
 array(3) {

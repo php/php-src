@@ -1,11 +1,11 @@
 --TEST--
-Test array_uintersect() function : usage variation 
+Test array_uintersect() function : usage variation
 --FILE--
 <?php
 /* Prototype  : array array_uintersect(array arr1, array arr2 [, array ...], callback data_compare_func)
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments. Data is compared by using an user-supplied callback. 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments. Data is compared by using an user-supplied callback.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_uintersect() : usage variation ***\n";

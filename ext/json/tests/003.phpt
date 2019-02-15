@@ -22,7 +22,7 @@ var_dump(json_last_error(), json_last_error_msg());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(1) {
   [0]=>
   &array(1) {

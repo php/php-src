@@ -1,5 +1,4 @@
 // vim:ft=javascript
-// $Id$
 // "Master" config file; think of it as a configure.ac
 // equivalent.
 
@@ -71,7 +70,7 @@ if (VS_TOOLSET) {
 		if(PHP_DEBUG == 'yes') {
 			STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
 		} else {
-			// no from disable-all 
+			// no from disable-all
 			if(PHP_MP == 'auto' || PHP_MP == 'no') {
 				ADD_FLAG('CFLAGS', ' /MP ');
 				PHP_MP_DISABLED = false;
@@ -240,6 +239,9 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_inheritance.c zend_smart_str.c zend_cpuinfo.c");
 
 ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+if (VS_TOOLSET && VCVERS >= 1914) {
+	ADD_FLAG("CFLAGS_BD_ZEND", "/d2FuncCache1");
+}
 
 /* XXX inspect this for other toolsets */
 //AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
@@ -250,19 +252,28 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c \
 	php_syslog.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+if (VS_TOOLSET && VCVERS >= 1914) {
+	ADD_FLAG("CFLAGS_BD_MAIN", "/d2FuncCache1");
+}
 
 AC_DEFINE('HAVE_STRNLEN', 1);
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");
 ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+if (VS_TOOLSET && VCVERS >= 1914) {
+	ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/d2FuncCache1");
+}
 
 ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
 	getrusage.c ftok.c ioutil.c codepage.c nice.c \
-	inet.c fnmatch.c sockets.c console.c");
+	inet.c fnmatch.c sockets.c console.c signal.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+if (VS_TOOLSET && VCVERS >= 1914) {
+	ADD_FLAG("CFLAGS_BD_WIN32", "/d2FuncCache1");
+}
 
 PHP_INSTALL_HEADERS("", "Zend/ TSRM/ main/ main/streams/ win32/");
 
@@ -314,9 +325,9 @@ if (PHP_SECURITY_FLAGS == "yes") {
 if (CLANG_TOOLSET) {
 	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
 	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
-		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces \
-		-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas \
-		-Wno-unused-command-line-argument");
+		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces " +
+		"-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas " +
+		"-Wno-unused-command-line-argument -Wno-unused-function -Wno-ignored-pragma-optimize");
 	}
 
 	ARG_ENABLE("sanitizer", "Enable address sanitizer extension", "no");
@@ -352,4 +363,3 @@ ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations
 	might not work properly, if the chosen instruction sets are not available on the target \
 	processor.", "no");
 toolset_setup_intrinsic_cflags();
-

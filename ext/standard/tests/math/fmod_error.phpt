@@ -9,7 +9,6 @@ fmod(23);
 fmod(23,2,true);
 ?>
 --EXPECTF--
-
 Warning: fmod() expects exactly 2 parameters, 0 given in %s on line 2
 
 Warning: fmod() expects exactly 2 parameters, 1 given in %s on line 3

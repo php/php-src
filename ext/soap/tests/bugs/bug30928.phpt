@@ -33,11 +33,11 @@ class LocalSoapClient extends SoapClient {
   }
 }
 
-$x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl", 
+$x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl",
                          array());
 var_dump($x->test(new foo()));
 
-$x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl", 
+$x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl",
                          array("classmap" => array('testType'=>'foo')));
 var_dump($x->test(new foo()));
 

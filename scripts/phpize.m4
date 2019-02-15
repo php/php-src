@@ -1,12 +1,13 @@
 dnl This file becomes configure.ac for self-contained extensions.
 
-AC_PREREQ(2.59)
+AC_PREREQ([2.68])
 AC_INIT(config.m4)
-ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
+AC_CONFIG_AUX_DIR([build])
+AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
 
-dnl 
+dnl
 AC_DEFUN([PHP_EXT_BUILDDIR],[.])dnl
 AC_DEFUN([PHP_EXT_DIR],[""])dnl
 AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir])dnl
@@ -45,7 +46,7 @@ phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
 INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
 EXTENSION_DIR=`$PHP_CONFIG --extension-dir 2>/dev/null`
 PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
- 
+
 if test -z "$prefix"; then
   AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])
 fi
@@ -195,8 +196,7 @@ PHP_GEN_BUILD_DIRS
 PHP_GEN_GLOBAL_MAKEFILE
 
 test -d modules || $php_shtool mkdir modules
-touch .deps
 
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 
-AC_OUTPUT()
+AC_OUTPUT

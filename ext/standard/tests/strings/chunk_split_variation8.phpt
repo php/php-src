@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 /*
@@ -31,8 +31,8 @@ $ending = ':::';
 
 // different values for 'chunklen'
 $values = array (
-  0,  
-  1,  
+  0,
+  1,
   -123,  //negative integer
   0234,  //octal number
   0x1A,  //hexadecimal number

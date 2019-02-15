@@ -2,7 +2,6 @@
 ziparchive::properties isset()/empty() checks
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -57,4 +56,3 @@ zip->filename (%d):
 zip->comment (19):
 	empty(): 0
 	isset(): 1
-

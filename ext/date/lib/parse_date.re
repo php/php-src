@@ -22,8 +22,6 @@
  * THE SOFTWARE.
  */
 
-/* $Id$ */
-
 #include "timelib.h"
 #include "timelib_private.h"
 
@@ -141,9 +139,9 @@ typedef struct _Scanner {
 } Scanner;
 
 typedef struct _timelib_lookup_table {
-    const char *name;
-    int         type;
-    int         value;
+	const char *name;
+	int         type;
+	int         value;
 } timelib_lookup_table;
 
 typedef struct _timelib_relunit {
@@ -619,7 +617,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	const timelib_relunit *tp, *value = NULL;
 
 	while (**ptr != '\0' && **ptr != ' ' && **ptr != ',' && **ptr != '\t' && **ptr != ';' && **ptr != ':' &&
-           **ptr != '/' && **ptr != '.' && **ptr != '-' && **ptr != '(' && **ptr != ')' ) {
+		**ptr != '/' && **ptr != '.' && **ptr != '-' && **ptr != '(' && **ptr != ')' ) {
 		++*ptr;
 	}
 	end = *ptr;
@@ -769,6 +767,37 @@ static timelib_long timelib_parse_tz_cor(char **ptr)
 			return tmp;
 	}
 	return 0;
+}
+
+static timelib_long timelib_parse_tz_minutes(char **ptr, timelib_time *t)
+{
+	timelib_long retval = TIMELIB_UNSET;
+	char *begin = *ptr;
+
+	/* First character must be +/- */
+	if (**ptr != '+' && **ptr != '-') {
+		return retval;
+	}
+
+	++*ptr;
+	while (isdigit(**ptr)) {
+		++*ptr;
+	}
+
+	if (*begin == '+') {
+		t->is_localtime = 1;
+		t->zone_type = TIMELIB_ZONETYPE_OFFSET;
+		t->dst = 0;
+
+		retval = sMIN(strtol(begin + 1, NULL, 10));
+	} else if (*begin == '-') {
+		t->is_localtime = 1;
+		t->zone_type = TIMELIB_ZONETYPE_OFFSET;
+		t->dst = 0;
+
+		retval = -1 * sMIN(strtol(begin + 1, NULL, 10));
+	}
+	return retval;
 }
 
 timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper)
@@ -1906,15 +1935,90 @@ static void timelib_time_reset_unset_fields(timelib_time *time)
 	if (time->us == TIMELIB_UNSET ) time->us = 0;
 }
 
+static const timelib_format_specifier default_format_map[] = {
+	{'+', TIMELIB_FORMAT_ALLOW_EXTRA_CHARACTERS},
+	{'#', TIMELIB_FORMAT_ANY_SEPARATOR},
+	{'j', TIMELIB_FORMAT_DAY_TWO_DIGIT},
+	{'d', TIMELIB_FORMAT_DAY_TWO_DIGIT_PADDED},
+	{'z', TIMELIB_FORMAT_DAY_OF_YEAR},
+	{'S', TIMELIB_FORMAT_DAY_SUFFIX},
+	{'U', TIMELIB_FORMAT_EPOCH_SECONDS},
+	{'\\', TIMELIB_FORMAT_ESCAPE},
+	{'h', TIMELIB_FORMAT_HOUR_TWO_DIGIT_12_MAX},
+	{'g', TIMELIB_FORMAT_HOUR_TWO_DIGIT_12_MAX_PADDED},
+	{'H', TIMELIB_FORMAT_HOUR_TWO_DIGIT_24_MAX},
+	{'G', TIMELIB_FORMAT_HOUR_TWO_DIGIT_24_MAX_PADDED},
+	{'a', TIMELIB_FORMAT_MERIDIAN},
+	{'A', TIMELIB_FORMAT_MERIDIAN},
+	{'u', TIMELIB_FORMAT_MICROSECOND_SIX_DIGIT},
+	{'v', TIMELIB_FORMAT_MILLISECOND_THREE_DIGIT},
+	{'i', TIMELIB_FORMAT_MINUTE_TWO_DIGIT},
+	{'n', TIMELIB_FORMAT_MONTH_TWO_DIGIT},
+	{'m', TIMELIB_FORMAT_MONTH_TWO_DIGIT_PADDED},
+	{'?', TIMELIB_FORMAT_RANDOM_CHAR},
+	{'!', TIMELIB_FORMAT_RESET_ALL},
+	{'|', TIMELIB_FORMAT_RESET_ALL_WHEN_NOT_SET},
+	{'s', TIMELIB_FORMAT_SECOND_TWO_DIGIT},
+	{';', TIMELIB_FORMAT_SEPARATOR},
+	{':', TIMELIB_FORMAT_SEPARATOR},
+	{'/', TIMELIB_FORMAT_SEPARATOR},
+	{'.', TIMELIB_FORMAT_SEPARATOR},
+	{',', TIMELIB_FORMAT_SEPARATOR},
+	{'-', TIMELIB_FORMAT_SEPARATOR},
+	{'(', TIMELIB_FORMAT_SEPARATOR},
+	{')', TIMELIB_FORMAT_SEPARATOR},
+	{'*', TIMELIB_FORMAT_SKIP_TO_SEPARATOR},
+	{'D', TIMELIB_FORMAT_TEXTUAL_DAY_3_LETTER},
+	{'l', TIMELIB_FORMAT_TEXTUAL_DAY_FULL},
+	{'M', TIMELIB_FORMAT_TEXTUAL_MONTH_3_LETTER},
+	{'F', TIMELIB_FORMAT_TEXTUAL_MONTH_FULL},
+	{'e', TIMELIB_FORMAT_TIMEZONE_OFFSET},
+	{'P', TIMELIB_FORMAT_TIMEZONE_OFFSET},
+	{'T', TIMELIB_FORMAT_TIMEZONE_OFFSET},
+	{'O', TIMELIB_FORMAT_TIMEZONE_OFFSET},
+	{' ', TIMELIB_FORMAT_WHITESPACE},
+	{'y', TIMELIB_FORMAT_YEAR_TWO_DIGIT},
+	{'Y', TIMELIB_FORMAT_YEAR_FOUR_DIGIT},
+	{'\0', TIMELIB_FORMAT_END}
+};
+
+static const timelib_format_config default_format_config = {
+	default_format_map,
+	// No prefix required by default.
+	'\0'
+};
+
+static timelib_format_specifier_code timelib_lookup_format(char input, const timelib_format_specifier* format_map)
+{
+	while (format_map && format_map->specifier != '\0') {
+		if (format_map->specifier == input) {
+			return format_map->code;
+		}
+		format_map++;
+	}
+	return TIMELIB_FORMAT_LITERAL;
+}
+
 timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
 {
-	char       *fptr = format;
-	char       *ptr = string;
-	char       *begin;
-	timelib_sll tmp;
-	Scanner in;
-	Scanner *s = &in;
-	int allow_extra = 0;
+	return timelib_parse_from_format_with_map(format, string, len, errors, tzdb, tz_get_wrapper, &default_format_config);
+}
+
+timelib_time *timelib_parse_from_format_with_map(char *format, char *string, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper, const timelib_format_config* format_config)
+{
+	char        *fptr = format;
+	char        *ptr = string;
+	char        *begin;
+	timelib_sll  tmp;
+	Scanner      in;
+	Scanner     *s = &in;
+	bool         allow_extra = false;
+	bool         prefix_found = false;
+	int          iso_year = TIMELIB_UNSET;
+	int          iso_week_of_year = TIMELIB_UNSET;
+	int          iso_day_of_week = TIMELIB_UNSET;
+	char         prefix_char = format_config->prefix_char;
+	const timelib_format_specifier *format_map = format_config->format_map;
 
 	memset(&in, 0, sizeof(in));
 	in.errors = timelib_malloc(sizeof(timelib_error_container));
@@ -1940,9 +2044,41 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 	/* Loop over the format string */
 	while (*fptr && *ptr) {
 		begin = ptr;
-		switch (*fptr) {
-			case 'D': /* three letter day */
-			case 'l': /* full day */
+
+		if (prefix_char) {
+			/* There are 2 cases where the input string and format string
+			 * should match the next literal:
+			 *
+			 * 1. No prefix has been specified yet in the format, so expect 1:1
+			 *    match.
+			 * 2. Sequential prefix characters indicating that the second
+			 *    prefix is escaped. (e.g. "%%" is expecting literal "%")
+			 */
+			if ((!prefix_found && *fptr != prefix_char) ||
+				(prefix_found && *fptr == prefix_char)) {
+				if (*fptr != *ptr) {
+					add_pbf_error(s, TIMELIB_ERR_FORMAT_LITERAL_MISMATCH, "Format literal not found", string, begin);
+				}
+				ptr++;
+				fptr++;
+				prefix_found = false;
+				continue;
+			}
+
+			if (*fptr == prefix_char) {
+				fptr++;
+				prefix_found = true;
+				continue;
+			}
+
+			/* Fall through case is that the prefix has been found and the next
+			 * character is the format specifier. */
+			prefix_found = false;
+		}
+
+		switch (timelib_lookup_format(*fptr, format_map)) {
+			case TIMELIB_FORMAT_TEXTUAL_DAY_3_LETTER: /* three letter day */
+			case TIMELIB_FORMAT_TEXTUAL_DAY_FULL: /* full day */
 				{
 					const timelib_relunit* tmprel = 0;
 
@@ -1958,17 +2094,17 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					}
 				}
 				break;
-			case 'd': /* two digit day, with leading zero */
-			case 'j': /* two digit day, without leading zero */
+			case TIMELIB_FORMAT_DAY_TWO_DIGIT: /* two digit day, without leading zero */
+			case TIMELIB_FORMAT_DAY_TWO_DIGIT_PADDED: /* two digit day, with leading zero */
 				TIMELIB_CHECK_NUMBER;
 				if ((s->time->d = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_DAY, "A two digit day could not be found", string, begin);
 				}
 				break;
-			case 'S': /* day suffix, ignored, nor checked */
+			case TIMELIB_FORMAT_DAY_SUFFIX: /* day suffix, ignored, nor checked */
 				timelib_skip_day_suffix((char **) &ptr);
 				break;
-			case 'z': /* day of year - resets month (0 based) - also initializes everything else to !TIMELIB_UNSET */
+			case TIMELIB_FORMAT_DAY_OF_YEAR: /* day of year - resets month (0 based) - also initializes everything else to !TIMELIB_UNSET */
 				TIMELIB_CHECK_NUMBER;
 				if ((tmp = timelib_get_nr((char **) &ptr, 3)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_THREE_DIGIT_DAY_OF_YEAR, "A three digit day-of-year could not be found", string, begin);
@@ -1979,15 +2115,15 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 				}
 				break;
 
-			case 'm': /* two digit month, with leading zero */
-			case 'n': /* two digit month, without leading zero */
+			case TIMELIB_FORMAT_MONTH_TWO_DIGIT: /* two digit month, without leading zero */
+			case TIMELIB_FORMAT_MONTH_TWO_DIGIT_PADDED: /* two digit month, with leading zero */
 				TIMELIB_CHECK_NUMBER;
 				if ((s->time->m = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_MONTH, "A two digit month could not be found", string, begin);
 				}
 				break;
-			case 'M': /* three letter month */
-			case 'F': /* full month */
+			case TIMELIB_FORMAT_TEXTUAL_MONTH_3_LETTER: /* three letter month */
+			case TIMELIB_FORMAT_TEXTUAL_MONTH_FULL: /* full month */
 				tmp = timelib_lookup_month((char **) &ptr);
 				if (!tmp) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TEXTUAL_MONTH, "A textual month could not be found", string, begin);
@@ -1995,7 +2131,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					s->time->m = tmp;
 				}
 				break;
-			case 'y': /* two digit year */
+			case TIMELIB_FORMAT_YEAR_TWO_DIGIT: /* two digit year */
 				{
 					int length = 0;
 					TIMELIB_CHECK_NUMBER;
@@ -2005,14 +2141,14 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					TIMELIB_PROCESS_YEAR(s->time->y, length);
 				}
 				break;
-			case 'Y': /* four digit year */
+			case TIMELIB_FORMAT_YEAR_FOUR_DIGIT: /* four digit year */
 				TIMELIB_CHECK_NUMBER;
 				if ((s->time->y = timelib_get_nr((char **) &ptr, 4)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_FOUR_DIGIT_YEAR, "A four digit year could not be found", string, begin);
 				}
 				break;
-			case 'g': /* two digit hour, with leading zero */
-			case 'h': /* two digit hour, without leading zero */
+			case TIMELIB_FORMAT_HOUR_TWO_DIGIT_12_MAX: /* two digit hour, without leading zero */
+			case TIMELIB_FORMAT_HOUR_TWO_DIGIT_12_MAX_PADDED: /* two digit hour, with leading zero */
 				TIMELIB_CHECK_NUMBER;
 				if ((s->time->h = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_HOUR, "A two digit hour could not be found", string, begin);
@@ -2021,15 +2157,14 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					add_pbf_error(s, TIMELIB_ERR_HOUR_LARGER_THAN_12, "Hour can not be higher than 12", string, begin);
 				}
 				break;
-			case 'G': /* two digit hour, with leading zero */
-			case 'H': /* two digit hour, without leading zero */
+			case TIMELIB_FORMAT_HOUR_TWO_DIGIT_24_MAX_PADDED: /* two digit hour, with leading zero */
+			case TIMELIB_FORMAT_HOUR_TWO_DIGIT_24_MAX: /* two digit hour, without leading zero */
 				TIMELIB_CHECK_NUMBER;
 				if ((s->time->h = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_HOUR, "A two digit hour could not be found", string, begin);
 				}
 				break;
-			case 'a': /* am/pm/a.m./p.m. */
-			case 'A': /* AM/PM/A.M./P.M. */
+			case TIMELIB_FORMAT_MERIDIAN: /* am/pm/a.m./p.m. AM/PM/A.M./P.M. */
 				if (s->time->h == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_MERIDIAN_BEFORE_HOUR, "Meridian can only come after an hour has been found", string, begin);
 				} else if ((tmp = timelib_meridian_with_check((char **) &ptr, s->time->h)) == TIMELIB_UNSET) {
@@ -2038,7 +2173,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					s->time->h += tmp;
 				}
 				break;
-			case 'i': /* two digit minute, with leading zero */
+			case TIMELIB_FORMAT_MINUTE_TWO_DIGIT: /* two digit minute, with leading zero */
 				{
 					int length;
 					timelib_sll min;
@@ -2052,7 +2187,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					}
 				}
 				break;
-			case 's': /* two digit second, with leading zero */
+			case TIMELIB_FORMAT_SECOND_TWO_DIGIT: /* two digit second, with leading zero */
 				{
 					int length;
 					timelib_sll sec;
@@ -2066,7 +2201,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					}
 				}
 				break;
-			case 'u': /* up to six digit microsecond */
+			case TIMELIB_FORMAT_MICROSECOND_SIX_DIGIT: /* up to six digit microsecond */
 				{
 					double f;
 					char *tptr;
@@ -2080,10 +2215,24 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					}
 				}
 				break;
-			case ' ': /* any sort of whitespace (' ' and \t) */
+			case TIMELIB_FORMAT_MILLISECOND_THREE_DIGIT: /* up to three digit millisecond */
+				{
+					double f;
+					char *tptr;
+
+					TIMELIB_CHECK_NUMBER;
+					tptr = ptr;
+					if ((f = timelib_get_nr((char **) &ptr, 3)) == TIMELIB_UNSET || (ptr - tptr < 1)) {
+						add_pbf_error(s, TIMELIB_ERR_NO_THREE_DIGIT_MILLISECOND, "A three digit millisecond could not be found", string, begin);
+					} else {
+						s->time->us = (f * pow(10, 3 - (ptr - tptr)) * 1000);
+					}
+				}
+				break;
+			case TIMELIB_FORMAT_WHITESPACE: /* any sort of whitespace (' ' and \t) */
 				timelib_eat_spaces((char **) &ptr);
 				break;
-			case 'U': /* epoch seconds */
+			case TIMELIB_FORMAT_EPOCH_SECONDS: /* epoch seconds */
 				TIMELIB_CHECK_SIGNED_NUMBER;
 				TIMELIB_HAVE_RELATIVE();
 				tmp = timelib_get_unsigned_nr((char **) &ptr, 24);
@@ -2097,36 +2246,15 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 				s->time->z = 0;
 				s->time->dst = 0;
 				break;
-
-			case 'e': /* timezone */
-			case 'P': /* timezone */
-			case 'T': /* timezone */
-			case 'O': /* timezone */
-				{
-					int tz_not_found;
-					s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
-					if (tz_not_found) {
-						add_pbf_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database", string, begin);
-					}
-				}
-				break;
-
-			case '#': /* separation symbol */
-				if (*ptr == ';' || *ptr == ':' || *ptr == '/' || *ptr == '.' || *ptr == ',' || *ptr == '-' || *ptr == '(' || *ptr == ')') {
+			case TIMELIB_FORMAT_ANY_SEPARATOR: /* separation symbol */
+				if (timelib_lookup_format(*ptr, format_map) == TIMELIB_FORMAT_SEPARATOR) {
 					++ptr;
 				} else {
 					add_pbf_error(s, TIMELIB_ERR_NO_SEP_SYMBOL, "The separation symbol ([;:/.,-]) could not be found", string, begin);
 				}
 				break;
 
-			case ';':
-			case ':':
-			case '/':
-			case '.':
-			case ',':
-			case '-':
-			case '(':
-			case ')':
+			case TIMELIB_FORMAT_SEPARATOR:
 				if (*ptr == *fptr) {
 					++ptr;
 				} else {
@@ -2134,19 +2262,19 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 				}
 				break;
 
-			case '!': /* reset all fields to default */
+			case TIMELIB_FORMAT_RESET_ALL: /* reset all fields to default */
 				timelib_time_reset_fields(s->time);
 				break; /* break intentionally not missing */
 
-			case '|': /* reset all fields to default when not set */
+			case TIMELIB_FORMAT_RESET_ALL_WHEN_NOT_SET: /* reset all fields to default when not set */
 				timelib_time_reset_unset_fields(s->time);
 				break; /* break intentionally not missing */
 
-			case '?': /* random char */
+			case TIMELIB_FORMAT_RANDOM_CHAR: /* random char */
 				++ptr;
 				break;
 
-			case '\\': /* escaped char */
+			case TIMELIB_FORMAT_ESCAPE: /* escaped char */
 				if(!fptr[1]) {
 					add_pbf_error(s, TIMELIB_ERR_EXPECTED_ESCAPE_CHAR, "Escaped character expected", string, begin);
 					break;
@@ -2159,14 +2287,52 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 				}
 				break;
 
-			case '*': /* random chars until a separator or number ([ \t.,:;/-0123456789]) */
+			case TIMELIB_FORMAT_SKIP_TO_SEPARATOR: /* random chars until a separator or number ([ \t.,:;/-0123456789]) */
 				timelib_eat_until_separator((char **) &ptr);
 				break;
 
-			case '+': /* allow extra chars in the format */
-				allow_extra = 1;
+			case TIMELIB_FORMAT_ALLOW_EXTRA_CHARACTERS: /* allow extra chars in the format */
+				allow_extra = true;
 				break;
+			case TIMELIB_FORMAT_YEAR_ISO:
+				if ((iso_year = timelib_get_nr((char **) &ptr, 4)) == TIMELIB_UNSET) {
+					add_pbf_error(s, TIMELIB_ERR_NO_FOUR_DIGIT_YEAR_ISO, "A four digit ISO year could not be found", string, begin);
+				}
+				break;
+			case TIMELIB_FORMAT_WEEK_OF_YEAR_ISO:
+				if ((iso_week_of_year = timelib_get_nr((char **) &ptr, 2)) == TIMELIB_UNSET) {
+					add_pbf_error(s, TIMELIB_ERR_NO_TWO_DIGIT_WEEK, "A two digit ISO week could not be found", string, begin);
+				}
+				/* Range is 1 - 53  for ISO week of year */
+				if (iso_week_of_year < 1 || iso_week_of_year > 53) {
+					add_pbf_error(s, TIMELIB_ERR_INVALID_WEEK, "ISO Week must be between 1 and 53", string, begin);
+				}
+				break;
+			case TIMELIB_FORMAT_DAY_OF_WEEK_ISO:
+				if ((iso_day_of_week = timelib_get_nr((char **) &ptr, 1)) == TIMELIB_UNSET) {
+					add_pbf_error(s, TIMELIB_ERR_NO_DAY_OF_WEEK, "A single digit day of week could not be found", string, begin);
+				}
+				if (iso_day_of_week < 1 || iso_day_of_week > 7) {
+					add_pbf_error(s, TIMELIB_ERR_INVALID_DAY_OF_WEEK, "Day of week must be between 1 and 7", string, begin);
+				}
+				break;
+			case TIMELIB_FORMAT_TIMEZONE_OFFSET: /* timezone */
+				{
+					int tz_not_found;
 
+					s->time->z = timelib_parse_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
+					if (tz_not_found) {
+						add_pbf_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database", string, begin);
+					}
+				}
+				break;
+			case TIMELIB_FORMAT_TIMEZONE_OFFSET_MINUTES: /* timezone format +/-mmm */
+				s->time->z = timelib_parse_tz_minutes((char **) &ptr, s->time);
+				if (s->time->z == TIMELIB_UNSET) {
+					add_pbf_error(s, TIMELIB_ERR_INVALID_TZ_OFFSET, "Invalid timezone offset in minutes", string, begin);
+				}
+				break;
+			case TIMELIB_FORMAT_LITERAL:
 			default:
 				if (*fptr != *ptr) {
 					add_pbf_error(s, TIMELIB_ERR_WRONG_FORMAT_SEP, "The format separator does not match", string, begin);
@@ -2182,32 +2348,32 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 			add_pbf_error(s, TIMELIB_ERR_TRAILING_DATA, "Trailing data", string, ptr);
 		}
 	}
-	/* ignore trailing +'s */
-	while (*fptr == '+') {
-		fptr++;
-	}
+
 	if (*fptr) {
-		/* Trailing | and ! specifiers are valid. */
+		/* Trailing reset specifiers are valid. */
 		int done = 0;
 		while (*fptr && !done) {
-			switch (*fptr++) {
-				case '!': /* reset all fields to default */
+			switch (timelib_lookup_format(*fptr, format_map)) {
+				case TIMELIB_FORMAT_RESET_ALL: /* reset all fields to default */
 					timelib_time_reset_fields(s->time);
 					break;
 
-				case '|': /* reset all fields to default when not set */
+				case TIMELIB_FORMAT_RESET_ALL_WHEN_NOT_SET: /* reset all fields to default when not set */
 					timelib_time_reset_unset_fields(s->time);
+					break;
+				case TIMELIB_FORMAT_ALLOW_EXTRA_CHARACTERS:
 					break;
 
 				default:
 					add_pbf_error(s, TIMELIB_ERR_DATA_MISSING, "Data missing", string, ptr);
 					done = 1;
 			}
+			fptr++;
 		}
 	}
 
 	/* clean up a bit */
-	if (s->time->h != TIMELIB_UNSET || s->time->i != TIMELIB_UNSET || s->time->s != TIMELIB_UNSET) {
+	if (s->time->h != TIMELIB_UNSET || s->time->i != TIMELIB_UNSET || s->time->s != TIMELIB_UNSET || s->time->us != TIMELIB_UNSET) {
 		if (s->time->h == TIMELIB_UNSET ) {
 			s->time->h = 0;
 		}
@@ -2217,6 +2383,31 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 		if (s->time->s == TIMELIB_UNSET ) {
 			s->time->s = 0;
 		}
+		if (s->time->us == TIMELIB_UNSET ) {
+			s->time->us = 0;
+		}
+	}
+
+	/* Check for mixing of ISO dates with natural dates. */
+	if (s->time->y != TIMELIB_UNSET && (iso_week_of_year != TIMELIB_UNSET || iso_year != TIMELIB_UNSET || iso_day_of_week != TIMELIB_UNSET)) {
+		add_pbf_error(s, TIMELIB_ERR_MIX_ISO_WITH_NATURAL, "Mixing of ISO dates with natural dates is not allowed", string, ptr);
+	}
+	if (iso_year != TIMELIB_UNSET && (s->time->y != TIMELIB_UNSET || s->time->m != TIMELIB_UNSET || s->time->d != TIMELIB_UNSET)) {
+		add_pbf_error(s, TIMELIB_ERR_MIX_ISO_WITH_NATURAL, "Mixing of ISO dates with natural dates is not allowed", string, ptr);
+	}
+
+	/* Convert ISO values */
+	if (iso_year != TIMELIB_UNSET) {
+		/* Default week of year and day of week to 1. */
+		if (iso_week_of_year == TIMELIB_UNSET) {
+			iso_week_of_year = 1;
+		}
+		if (iso_day_of_week == TIMELIB_UNSET) {
+			iso_day_of_week = 1;
+		}
+		timelib_date_from_isodate(iso_year, iso_week_of_year, iso_day_of_week, &s->time->y, &s->time->m, &s->time->d);
+	} else if (iso_week_of_year != TIMELIB_UNSET || iso_day_of_week != TIMELIB_UNSET) {
+		add_pbf_warning(s, TIMELIB_WARN_INVALID_DATE, "The parsed date was invalid", string, ptr);
 	}
 
 	/* do funky checking whether the parsed time was valid time */

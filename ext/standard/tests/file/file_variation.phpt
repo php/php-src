@@ -2,7 +2,7 @@
 Test file() function : usage variations
 --FILE--
 <?php
-/* 
+/*
  *  Prototype: array file ( string filename [,int use-include_path [,resource context]] );
  *  Description: Reads entire file into an array
                  Returns the  file in an array
@@ -17,8 +17,8 @@ foreach( $data_array as $data ) {
    echo "--Iteration $count --\n";
    $fh  = fopen($file_path."/file_variation.tmp", "w");
    fwrite($fh, $data);
-   var_dump( file($file_path."/file_variation.tmp", FILE_IGNORE_NEW_LINES) ); 
-   var_dump( file($file_path."/file_variation.tmp", FILE_SKIP_EMPTY_LINES) ); 
+   var_dump( file($file_path."/file_variation.tmp", FILE_IGNORE_NEW_LINES) );
+   var_dump( file($file_path."/file_variation.tmp", FILE_SKIP_EMPTY_LINES) );
    $count++;
    fclose($fh);
 }
@@ -53,7 +53,6 @@ fclose($file_handle2);
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
@@ -157,4 +156,3 @@ array(1) {
 }
 
 --- Done ---
-

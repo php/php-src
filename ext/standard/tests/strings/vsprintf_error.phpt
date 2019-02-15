@@ -1,9 +1,9 @@
 --TEST--
-Test vsprintf() function : error conditions 
+Test vsprintf() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string $format , array $args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
  */
 
@@ -19,7 +19,7 @@ echo "\n-- Testing vsprintf() function with Zero arguments --\n";
 var_dump( vsprintf() );
 
 echo "\n-- Testing vsprintf() function with less than expected no. of arguments --\n";
-var_dump( vsprintf($format) );  
+var_dump( vsprintf($format) );
 
 echo "\n-- testing vsprintf() function with more than expected no. of arguments --\n";
 var_dump( vsprintf($format, $args, $extra_arg) );
@@ -31,16 +31,16 @@ echo "Done";
 
 -- Testing vsprintf() function with Zero arguments --
 
-Warning: vsprintf() expects at least %d parameter, %d given in %s on line %d
+Warning: vsprintf() expects exactly 2 parameters, 0 given in %s on line %d
 bool(false)
 
 -- Testing vsprintf() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for vsprintf() in %s on line %d
+Warning: vsprintf() expects exactly 2 parameters, 1 given in %s on line %d
 bool(false)
 
 -- testing vsprintf() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for vsprintf() in %s on line %d
+Warning: vsprintf() expects exactly 2 parameters, 3 given in %s on line %d
 bool(false)
 Done

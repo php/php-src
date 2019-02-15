@@ -67,6 +67,5 @@ if (!have_innodb($link))
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-
 Warning: mysqli_savepoint(): Savepoint name cannot be empty in %s on line %d
 done!

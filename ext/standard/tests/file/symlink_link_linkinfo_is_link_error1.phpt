@@ -8,9 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 if (substr(PHP_OS, 0, 3) == 'SUN') {
   die('skip Not valid for Sun Solaris');
 }
-if (PHP_INT_SIZE != 4) {
-  die("skip this test is for 32bit platform only");
-}
 ?>
 --FILE--
 <?php

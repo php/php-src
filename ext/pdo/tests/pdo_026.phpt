@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: extending PDO (2)
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -22,13 +22,13 @@ $data = array(
 class PDOStatementX extends PDOStatement
 {
     public $dbh;
-    
+
     protected function __construct($dbh)
     {
     	$this->dbh = $dbh;
     	echo __METHOD__ . "()\n";
     }
-    
+
     function __destruct()
     {
     	echo __METHOD__ . "()\n";
@@ -41,7 +41,7 @@ class PDODatabase extends PDO
     {
     	echo __METHOD__ . "()\n";
     }
-    
+
     function query($sql)
     {
     	echo __METHOD__ . "()\n";

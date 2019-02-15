@@ -6,7 +6,7 @@ Test dirname() function : error conditions
    Description: Returns directory name component of path.
 */
 echo "*** Testing error conditions ***\n";
-// zero arguments 
+// zero arguments
 var_dump( dirname() );
 
 // Bad arg

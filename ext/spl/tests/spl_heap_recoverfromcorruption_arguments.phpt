@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplHeap check no arguments to be accepted on recoverFromCorruption 
+SPL: SplHeap check no arguments to be accepted on recoverFromCorruption
 --CREDITS--
 Rohan Abraham (rohanabrahams@gmail.com)
 TestFest London May 2009
@@ -10,6 +10,4 @@ TestFest London May 2009
   $h->recoverFromCorruption("no args");
 ?>
 --EXPECTF--
-
 Warning: SplHeap::recoverFromCorruption() expects exactly 0 parameters, 1 given in %s on line %d
-

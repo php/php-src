@@ -370,6 +370,3 @@ XMLRPC_VALUE xsm_system_get_capabilities_cb(XMLRPC_SERVER server, XMLRPC_REQUEST
 /*-***********************
 * End System Methods API *
 *************************/
-
-
-

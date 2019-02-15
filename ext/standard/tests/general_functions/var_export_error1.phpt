@@ -1,11 +1,11 @@
 --TEST--
-Test var_export() function : error conditions 
+Test var_export() function : error conditions
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing var_export() : error conditions ***\n";

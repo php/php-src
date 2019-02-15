@@ -4,15 +4,15 @@ Ensure __autoload() allows for recursive calls if the class name differs.
 <?php
 spl_autoload_register(function ($name) {
   echo "IN:  autoload($name)\n";
-  
+
   static $i = 0;
   if ($i++ > 10) {
       echo "-> Recursion detected - as expected.\n";
       return;
   }
-  
+
   class_exists('UndefinedClass' . $i);
-  
+
   echo "OUT: autoload($name)\n";
 });
 
@@ -44,4 +44,3 @@ OUT: autoload(UndefinedClass2)
 OUT: autoload(UndefinedClass1)
 OUT: autoload(UndefinedClass0)
 bool(false)
-

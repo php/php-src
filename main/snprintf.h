@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |         Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /*
 
@@ -46,7 +44,7 @@ spprintf is the dynamical version of snprintf. It allocates the buffer in size
          as needed and allows a maximum setting as snprintf (turn this feature
          off by setting max_len to 0). spprintf is a little bit slower than
          snprintf and offers possible memory leakes if you miss freeing the
-         buffer allocated by the function. Therfore this function should be
+         buffer allocated by the function. Therefore this function should be
          used where either no maximum is known or the maximum is much bigger
          than normal size required. spprintf always terminates the buffer.
 
@@ -172,12 +170,3 @@ PHPAPI char * ap_php_conv_p2(u_wide_int num, int nbits,
 #define FORMAT_CONV_MAX_PRECISION 500
 
 #endif /* SNPRINTF_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

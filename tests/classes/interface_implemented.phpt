@@ -6,7 +6,7 @@ ZE2 An interface is inherited
 interface if_a {
 	function f_a();
 }
-	
+
 interface if_b extends if_a {
 	function f_b();
 }

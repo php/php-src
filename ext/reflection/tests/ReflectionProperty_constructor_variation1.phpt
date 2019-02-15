@@ -5,14 +5,14 @@ ReflectionProperty::__construct(): ensure inherited private props can't be acces
 
 class C {
 	private $p = 1;
-	
+
 	static function testFromC() {
 		try {
 		  $rp = new ReflectionProperty("D", "p");
 		  var_dump($rp);
 		} catch (Exception $e) {
 			echo $e->getMessage();
-		}		
+		}
 	}
 }
 
@@ -23,7 +23,7 @@ class D extends C{
 		  var_dump($rp);
 		} catch (Exception $e) {
 			echo $e->getMessage();
-		}		
+		}
 	}
 }
 

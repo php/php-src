@@ -26,7 +26,7 @@ fclose($file_handle1);
 fclose($file_handle2);
 fclose($file_handle3);
 
-symlink("$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp", 
+symlink("$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp",
         "$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1_link.tmp");
 symlink("$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp",
         "$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1_link.tmp");
@@ -38,7 +38,7 @@ $linknames = array (
   "$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1//home/test//../test/./readlink_realpath_basic1_link.tmp",
-  
+
   /* linknames with invalid linkpath */
   "$file_path///readlink_realpath_basic1/home//..//././test//readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/home/../home/../test/../readlink_realpath_basic1_link.tmp",

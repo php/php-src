@@ -28,9 +28,7 @@
 #include "normalizer_class.h"
 #include "normalizer_normalize.h"
 #include "intl_convert.h"
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 #include <unicode/utf8.h>
-#endif
 
 
 #if U_ICU_VERSION_MAJOR_NUM >= 56
@@ -61,26 +59,8 @@ static const UNormalizer2 *intl_get_normalizer(zend_long form, UErrorCode *err)
 
 static int32_t intl_normalize(zend_long form, const UChar *src, int32_t src_len, UChar *dst, int32_t dst_len, UErrorCode *err)
 {/*{{{*/
-	const UNormalizer2 *norm;
-
-	/* Mimic the behavior of ICU < 56. */
-	if (UNEXPECTED(NORMALIZER_NONE == form)) {
-		/* FIXME This is a noop which should be removed somewhen after PHP 7.3.*/
-		zend_error(E_DEPRECATED, "Normalizer::NONE is obsolete with ICU 56 and above and will be removed in later PHP versions");
-
-		if (dst_len >= src_len) {
-			memmove(dst, src, sizeof(UChar) * src_len);
-			dst[src_len] = '\0';
-			*err = U_ZERO_ERROR;
-			return src_len;
-		}
-
-		*err = U_BUFFER_OVERFLOW_ERROR;
-		return -1;
-	}
-
-	norm = intl_get_normalizer(form, err);
-	if(U_FAILURE(*err)) {
+	const UNormalizer2 *norm = intl_get_normalizer(form, err);
+	if (U_FAILURE(*err)) {
 		return -1;
 	}
 
@@ -138,8 +118,6 @@ PHP_FUNCTION( normalizer_normalize )
 	expansion_factor = 1;
 
 	switch(form) {
-		case NORMALIZER_NONE:
-			break;
 		case NORMALIZER_FORM_D:
 			expansion_factor = 3;
 			break;
@@ -278,8 +256,6 @@ PHP_FUNCTION( normalizer_is_normalized )
 	}
 
 	switch(form) {
-		/* case NORMALIZER_NONE: not allowed - doesn't make sense */
-
 		case NORMALIZER_FORM_D:
 		case NORMALIZER_FORM_KD:
 		case NORMALIZER_FORM_C:
@@ -380,7 +356,7 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 		intl_error_set_custom_msg(NULL, "Code point out of range", 0);
 		return;
 	}
-	
+
 	decomposition_length = unorm2_getRawDecomposition(norm, codepoint, decomposition, 32, &status);
 	if (decomposition_length == -1) {
 		RETURN_NULL();
@@ -390,12 +366,3 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 }
 #endif
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

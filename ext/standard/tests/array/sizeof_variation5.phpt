@@ -1,5 +1,5 @@
 --TEST--
-Test sizeof() function : usage variations - different values for 'mode' argument 
+Test sizeof() function : usage variations - different values for 'mode' argument
 --FILE--
 <?php
 /* Prototype  : int sizeof($mixed var[, int $mode])
@@ -52,15 +52,15 @@ $mode_values = array (
             new test(),
   /* 22 */  $fp
 );
-  
-// loop through the each element of $modes_array for 'mode' argument 
+
+// loop through the each element of $modes_array for 'mode' argument
 // and check the working of sizeof()
 $counter = 1;
 for($i = 0; $i < count($mode_values); $i++)
 {
   echo "-- Iteration $counter --\n";
   $mode = $mode_values[$i];
-  
+
   var_dump( sizeof($array1, $mode) );
 
   $counter++;

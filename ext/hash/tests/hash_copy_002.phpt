@@ -1,7 +1,5 @@
 --TEST--
-hash_copy() errors
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: hash_copy() errors
 --FILE--
 <?php
 
@@ -12,7 +10,7 @@ var_dump(hash_copy($r, $r));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: hash_copy() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 object(HashContext)#%d (0) {

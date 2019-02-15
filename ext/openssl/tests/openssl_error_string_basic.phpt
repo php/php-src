@@ -6,35 +6,46 @@ openssl_error_string() tests
 <?php
 // helper function to check openssl errors
 function expect_openssl_errors($name, $expected_error_codes) {
-	$expected_errors = array_fill_keys($expected_error_codes, false);
-	while (($error_string = openssl_error_string()) !== false) {
-		if (strlen($error_string) > 14) {
-			$error_code = substr($error_string, 6, 8);
-			if (isset($expected_errors[$error_code])) {
-				$expected_errors[$error_code] = true;
-			}
+    $expected_errors = array_fill_keys($expected_error_codes, false);
+    $all_errors = array();
+    while (($error_string = openssl_error_string()) !== false) {
+	if (preg_match(",.+:([0-9A-F]+):.+,", $error_string, $m) > 0) {
+            $error_code = $m[1];
+            if (isset($expected_errors[$error_code])) {
+                $expected_errors[$error_code] = true;
+            }
+	    $all_errors[$error_code] = $error_string;
+        } else {
+		$all_errors[] = $error_string;
+	}
+    }
+
+    $fail = false;
+    foreach ($expected_errors as $error_code => $error_code_found) {
+        if (!$error_code_found) {
+            $fail = true;
+            echo "$name: no error code $error_code\n";
+        }
+    }
+
+    if (!$fail) {
+        echo "$name: ok\n";
+    } else {
+	echo "$name: uncaught errors\n";
+	foreach ($all_errors as $code => $str) {
+		if (!isset($expected_errors[$code]) || !$expected_errors[$code]) {
+			echo "\t", $code, ": ", $str, "\n";
 		}
 	}
-
-	$fail = false;
-	foreach ($expected_errors as $error_code => $error_code_found) {
-		if (!$error_code_found) {
-			$fail = true;
-			echo "$name: no error code $error_code\n";
-		}
-	}
-
-	if (!$fail) {
-		echo "$name: ok\n";
-	}
+    }
 }
 
 // helper for debugging errors
 function dump_openssl_errors($name) {
-	echo "\n$name\n";
-	while (($error_string = openssl_error_string()) !== false) {
-		var_dump($error_string);
-	}
+    echo "\n$name\n";
+    while (($error_string = openssl_error_string()) !== false) {
+        var_dump($error_string);
+    }
 }
 
 // common output file
@@ -71,10 +82,10 @@ for ($i = 0; $i < 20; $i++) {
 }
 $error_queue_size = 0;
 while (($enc_error_new = openssl_error_string()) !== false) {
-	if ($enc_error_new !== $enc_error) {
-		echo "The new encoding error doesn't match the expected one\n";
-	}
-	++$error_queue_size;
+    if ($enc_error_new !== $enc_error) {
+        echo "The new encoding error doesn't match the expected one\n";
+    }
+    ++$error_queue_size;
 }
 var_dump($error_queue_size);
 echo "\n";

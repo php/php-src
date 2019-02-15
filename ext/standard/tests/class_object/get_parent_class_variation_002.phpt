@@ -3,16 +3,16 @@ Test get_parent_class() function : usage variations  - unexpected argument type.
 --FILE--
 <?php
 /* Prototype  : proto string get_parent_class([mixed object])
- * Description: Retrieves the parent class name for object or class or current scope. 
+ * Description: Retrieves the parent class name for object or class or current scope.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 spl_autoload_register(function ($className) {
 	echo "In autoload($className)\n";
 });
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 set_error_handler('test_error_handler');

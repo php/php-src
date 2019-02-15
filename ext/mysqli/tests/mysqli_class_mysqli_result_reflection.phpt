@@ -49,7 +49,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -65,7 +65,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -81,7 +81,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -97,7 +97,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 1
 Number of Required Parameters: 1
 
@@ -120,7 +120,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 1
 Number of Required Parameters: 0
 
@@ -143,7 +143,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 1
 Number of Required Parameters: 0
 
@@ -166,7 +166,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -182,7 +182,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -198,7 +198,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 1
 Number of Required Parameters: 1
 
@@ -221,7 +221,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -237,7 +237,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 2
 Number of Required Parameters: 0
 
@@ -267,7 +267,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -283,7 +283,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 1
 Number of Required Parameters: 1
 
@@ -306,7 +306,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -322,7 +322,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -332,7 +332,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'field_count'
 isPublic: yes
@@ -340,7 +340,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'lengths'
 isPublic: yes
@@ -348,7 +348,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'num_rows'
 isPublic: yes
@@ -356,7 +356,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'type'
 isPublic: yes
@@ -364,7 +364,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 Default property 'current_field'
 Default property 'field_count'
 Default property 'lengths'

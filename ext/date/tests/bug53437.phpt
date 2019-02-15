@@ -23,15 +23,15 @@ foreach($dpu as $dt) {
 }
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 Original:
 2010-01-01 00:00:00
 2010-01-02 00:00:00
 2010-01-03 00:00:00
 
-object(DatePeriod)#1 (6) {
+object(DatePeriod)#%d (6) {
   ["start"]=>
-  object(DateTime)#2 (3) {
+  object(DateTime)#%d (3) {
     ["date"]=>
     string(26) "2010-01-01 00:00:00.000000"
     ["timezone_type"]=>
@@ -40,7 +40,7 @@ object(DatePeriod)#1 (6) {
     string(3) "UTC"
   }
   ["current"]=>
-  object(DateTime)#4 (3) {
+  object(DateTime)#%d (3) {
     ["date"]=>
     string(26) "2010-01-04 00:00:00.000000"
     ["timezone_type"]=>
@@ -51,7 +51,7 @@ object(DatePeriod)#1 (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#5 (16) {
+  object(DateInterval)#%d (16) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -90,9 +90,9 @@ object(DatePeriod)#1 (6) {
   ["include_start_date"]=>
   bool(true)
 }
-object(DatePeriod)#5 (6) {
+object(DatePeriod)#%d (6) {
   ["start"]=>
-  object(DateTime)#10 (3) {
+  object(DateTime)#%d (3) {
     ["date"]=>
     string(26) "2010-01-01 00:00:00.000000"
     ["timezone_type"]=>
@@ -101,7 +101,7 @@ object(DatePeriod)#5 (6) {
     string(3) "UTC"
   }
   ["current"]=>
-  object(DateTime)#7 (3) {
+  object(DateTime)#%d (3) {
     ["date"]=>
     string(26) "2010-01-04 00:00:00.000000"
     ["timezone_type"]=>
@@ -112,7 +112,7 @@ object(DatePeriod)#5 (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#8 (16) {
+  object(DateInterval)#%d (16) {
     ["y"]=>
     int(0)
     ["m"]=>

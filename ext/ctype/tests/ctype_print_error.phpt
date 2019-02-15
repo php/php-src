@@ -5,7 +5,7 @@ Test ctype_print() function : error conditions - incorrect number of args
 --FILE--
 <?php
 /* Prototype  : bool ctype_print(mixed $c)
- * Description: Checks for printable character(s) 
+ * Description: Checks for printable character(s)
  * Source code: ext/ctype/ctype.c
  */
 

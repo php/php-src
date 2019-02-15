@@ -3,7 +3,7 @@ Test is_object() function
 --FILE--
 <?php
 /* Prototype: bool is_object ( mixed $var );
- * Description: Finds whether the given variable is an object  
+ * Description: Finds whether the given variable is an object
  */
 
 echo "*** Testing is_object() with valid objects ***\n";
@@ -11,7 +11,7 @@ echo "*** Testing is_object() with valid objects ***\n";
 // class with no members
 class foo
 {
-// no members 
+// no members
 }
 
 // abstract class
@@ -31,10 +31,10 @@ class concreteClass extends abstractClass
   }
 }
 
-// interface class 
+// interface class
 interface IValue
 {
-   public function setVal ($name, $val); 
+   public function setVal ($name, $val);
    public function dumpVal ();
 }
 
@@ -42,18 +42,18 @@ interface IValue
 class Value implements IValue
 {
   private $vars = array ();
-  
+
   public function setVal ( $name, $val ) {
     $this->vars[$name] = $val;
   }
-  
+
   public function dumpVal () {
     var_dump ( $vars );
   }
 }
 
-// a gereral class 
-class myClass 
+// a gereral class
+class myClass
 {
   var       $foo_object;
   public    $public_var;
@@ -67,7 +67,7 @@ class myClass
     $this->public_var1 = new foo();
     $this->private_var = new foo();
     $this->proected_var = new foo();
-  }  
+  }
 }
 
 // create a object of each class defined above
@@ -88,9 +88,9 @@ $valid_objects = array(
   $foo_object,
   $Value_object,
   $concreteClass_object
-); 
-                  
-/* loop to check that is_object() recognizes different 
+);
+
+/* loop to check that is_object() recognizes different
    objects, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($valid_objects as $object ) {
@@ -104,11 +104,11 @@ echo "\n*** Testing is_object() on non object types ***\n";
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
-// unset object 
+// unset object
 $unset_object = new foo();
 unset ($unset_object);
 
-// other types in a array 
+// other types in a array
 $not_objects = array (
   0,
   -1,
@@ -130,7 +130,7 @@ $not_objects = array (
   @$unset_object, // unset object
   @$undefined_var, // undefined variable
 );
-/* loop through the $not_objects to see working of 
+/* loop through the $not_objects to see working of
    is_object() on non object types, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_objects as $type ) {
@@ -142,9 +142,9 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 var_dump( is_object() );
 
-//arguments more than expected 
+//arguments more than expected
 var_dump( is_object($myClass_object, $myClass_object) );
- 
+
 echo "Done\n";
 
 // close the resources used

@@ -17,7 +17,7 @@ var_dump(gmp_popcount());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(-1)
 int(0)
 int(10)

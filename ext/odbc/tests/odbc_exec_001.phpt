@@ -2,7 +2,7 @@
 odbc_exec(): Basic test
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
-<?php 
+<?php
 	if ("unixODBC" != ODBC_TYPE) {
 		die("skip ODBC_TYPE != unixODBC");
 	}

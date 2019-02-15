@@ -7,7 +7,7 @@ Test stripos() function : usage variations - multi line heredoc string for 'hays
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function by passing multi-line heredoc string for haystack and 
+/* Test stripos() function by passing multi-line heredoc string for haystack and
  *  with various needles & offsets
 */
 

@@ -3,7 +3,7 @@ Test usort() function : usage variations - use built in functions as $cmp_functi
 --FILE--
 <?php
 /* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
@@ -16,10 +16,10 @@ Test usort() function : usage variations - use built in functions as $cmp_functi
 echo "*** Testing usort() : usage variation ***\n";
 
 // Initializing variables
-$array_arg = array("b" => "Banana", "m" => "Mango", "a" => "apple", 
+$array_arg = array("b" => "Banana", "m" => "Mango", "a" => "apple",
                    "p" => "Pineapple", "o" => "orange");
 
-// Testing library functions as comparison function 
+// Testing library functions as comparison function
 echo "\n-- Testing usort() with built-in 'cmp_function': strcasecmp() --\n";
 $temp_array1 = $array_arg;
 var_dump( usort($temp_array1, 'strcasecmp') );

@@ -13,7 +13,7 @@ function test_64166($data) {
 		'line-length' => 74
     ));
     $str = "";
-    while(($c = fread($fd, 1))!= "") $str .= $c; 
+    while(($c = fread($fd, 1))!= "") $str .= $c;
     var_dump($str);
 
     stream_filter_remove($res);

@@ -1,5 +1,5 @@
 --TEST--
-Test extract() function (error conditions) 
+Test extract() function (error conditions)
 --FILE--
 <?php
 
@@ -30,7 +30,6 @@ var_dump( extract($arr,EXTR_PREFIX_IF_EXISTS) );
 
 echo "Done\n";
 ?>
-
 --EXPECTF--
 *** Testing Error Conditions ***
 

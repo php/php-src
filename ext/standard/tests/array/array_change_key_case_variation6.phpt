@@ -3,7 +3,7 @@ Test array_change_key_case() function : usage variations - multidimensional arra
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Returns an array with all string keys lowercased [or uppercased] 
+ * Description: Returns an array with all string keys lowercased [or uppercased]
  * Source code: ext/standard/array.c
  */
 
@@ -25,7 +25,6 @@ var_dump(array_change_key_case($input['English'], CASE_UPPER));
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 

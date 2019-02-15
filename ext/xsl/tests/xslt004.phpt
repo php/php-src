@@ -17,8 +17,6 @@ $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
-
-
 --EXPECT--
 Test 4: Checking UTF8 Output
 <?xml version="1.0" encoding="utf-8"?>

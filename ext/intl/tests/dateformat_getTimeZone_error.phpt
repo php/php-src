@@ -20,7 +20,6 @@ var_dump(datefmt_get_timezone(new stdclass));
 ?>
 ==DONE==
 --EXPECTF--
-
 Warning: IntlDateFormatter::getTimeZone() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlDateFormatter::getTimeZone(): datefmt_get_timezone: unable to parse input params in %s on line %d

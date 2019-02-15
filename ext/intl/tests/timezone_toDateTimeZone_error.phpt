@@ -19,9 +19,7 @@ try {
 
 var_dump(intltz_to_date_time_zone());
 var_dump(intltz_to_date_time_zone(1));
-
 --EXPECTF--
-
 Warning: IntlTimeZone::toDateTimeZone() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlTimeZone::toDateTimeZone(): intltz_to_date_time_zone: bad arguments in %s on line %d

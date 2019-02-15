@@ -1,13 +1,13 @@
 --TEST--
 Testing GOTO inside blocks
 --FILE--
-<?php 
+<?php
 
 goto A;
 
 {
 	B:
-		goto C;	
+		goto C;
 		return;
 }
 

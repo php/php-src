@@ -1,5 +1,5 @@
 --TEST--
-Test md5() function : basic functionality 
+Test md5() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string md5  ( string $str  [, bool $raw_output= false  ] )

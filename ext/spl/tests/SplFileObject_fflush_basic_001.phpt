@@ -1,5 +1,5 @@
 --TEST--
-SplFileObject::fflush function - basic test 
+SplFileObject::fflush function - basic test
 --FILE--
 <?php
 /*

@@ -1,5 +1,5 @@
 --TEST--
-Test token_get_all() function : basic functionality 
+Test token_get_all() function : basic functionality
 --SKIPIF--
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--

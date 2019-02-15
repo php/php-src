@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "at" mode 
+Test fopen and fclose() functions - usage variations - "at" mode
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) != "WIN" )
@@ -46,7 +46,7 @@ var_dump( filesize($file) ); //Check that data hasn't over written; Expected: Si
 unlink($file);  //Deleting the file
 fclose( fopen($file, "at") );  //Opening the non-existing file in "at" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/007_variation13.tmp");

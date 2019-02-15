@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.4') < 0)
-	die('skip for ICU 4.4+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -19,7 +17,6 @@ var_dump($c->isWeekend("jhhk"));
 
 var_dump(intlcal_is_weekend($c, "jj"));
 var_dump(intlcal_is_weekend(1));
-
 --EXPECTF--
 Warning: IntlCalendar::isWeekend() expects at most 1 parameter, 2 given in %s on line %d
 

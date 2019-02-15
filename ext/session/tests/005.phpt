@@ -149,4 +149,3 @@ array(1) {
 int(123)
 DESTROY: abtest
 CLOSE
-

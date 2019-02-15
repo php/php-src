@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Derick Rethans <derick@derickrethans.nl>                    |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_DATE_H
 #define PHP_DATE_H
@@ -224,6 +222,8 @@ PHPAPI zend_class_entry *php_date_get_date_ce(void);
 PHPAPI zend_class_entry *php_date_get_immutable_ce(void);
 PHPAPI zend_class_entry *php_date_get_interface_ce(void);
 PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
+PHPAPI zend_class_entry *php_date_get_interval_ce(void);
+PHPAPI zend_class_entry *php_date_get_period_ce(void);
 
 /* Functions for creating DateTime objects, and initializing them from a string */
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);

@@ -7,10 +7,10 @@ openssl_pkcs7_encrypt() tests
 $infile = dirname(__FILE__) . "/cert.crt";
 $outfile = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfile === false)
-	die("failed to get a temporary filename!");
+    die("failed to get a temporary filename!");
 $outfile2 = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfile2 === false)
-	die("failed to get a temporary filename!");
+    die("failed to get a temporary filename!");
 
 $single_cert = "file://" . dirname(__FILE__) . "/cert.crt";
 $privkey = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
@@ -37,12 +37,12 @@ var_dump(openssl_pkcs7_encrypt($infile, $outfile, $multi_certs, $headers));
 var_dump(openssl_pkcs7_encrypt($infile, $outfile, array_map('openssl_x509_read', $multi_certs) , $headers));
 
 if (file_exists($outfile)) {
-	echo "true\n";
-	unlink($outfile);
+    echo "true\n";
+    unlink($outfile);
 }
 if (file_exists($outfile2)) {
-	echo "true\n";
-	unlink($outfile2);
+    echo "true\n";
+    unlink($outfile2);
 }
 ?>
 --EXPECTF--

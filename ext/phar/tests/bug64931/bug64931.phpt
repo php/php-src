@@ -5,7 +5,7 @@ Bug #64931 (phar_add_file is too restrictive on filename)
 --INI--
 phar.readonly=0
 --FILE--
-<?php 
+<?php
 
 echo "Test\n";
 

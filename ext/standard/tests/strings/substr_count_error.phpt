@@ -11,14 +11,14 @@ var_dump( substr_count() );
 
 /* more than expected no. of args */
 var_dump( substr_count($str, "t", 0, 15, 30) );
-	
+
 /* offset before start */
 var_dump(substr_count($str, "t", -20));
 
 /* offset > size of the string */
 var_dump(substr_count($str, "t", 25));
 
-/* Using offset and length to go beyond the size of the string: 
+/* Using offset and length to go beyond the size of the string:
    Warning message expected, as length+offset > length of string */
 var_dump( substr_count($str, "i", 5, 7) );
 

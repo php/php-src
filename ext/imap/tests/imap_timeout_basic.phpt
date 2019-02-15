@@ -1,5 +1,5 @@
 --TEST--
-imap_timeout() function : basic functionality 
+imap_timeout() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--

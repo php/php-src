@@ -12,8 +12,10 @@ print strlen($wddx_str) . " bytes read.\n";
 
 var_dump(wddx_deserialize($wddx_str));
 ?>
---EXPECT--
+--EXPECTF--
 323 bytes read.
+
+Deprecated: Function wddx_deserialize() is deprecated in %s on line %d
 array(1) {
   ["aDateTime"]=>
   string(12) "frONt of 0 0"

@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp2_get
 --CREDITS--
 Olivier Doucet & Boris Lytochkin

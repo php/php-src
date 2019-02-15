@@ -1,13 +1,13 @@
 --TEST--
-Test finfo_open() function : error functionality 
+Test finfo_open() function : error functionality
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); 
+<?php require_once(dirname(__FILE__) . '/skipif.inc');
 --FILE--
 <?php
 /* Prototype  : resource finfo_open([int options [, string arg]])
- * Description: Create a new fileinfo resource. 
+ * Description: Create a new fileinfo resource.
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';
@@ -49,5 +49,5 @@ resource(6) of type (file_info)
 
 Warning: finfo_open() expects parameter 1 to be int, string given in %sfinfo_open_error.php on line 16
 bool(false)
-finfo::finfo() expects parameter 1 to be int, string given
+finfo::__construct() expects parameter 1 to be int, string given
 ===DONE===

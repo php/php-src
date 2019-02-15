@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,9 +15,6 @@
    | Author: Tsukada Takuya <tsukada@fminn.nagano.nagano.jp>              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
-
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -108,7 +105,13 @@ void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals)
 /* {{{ PHP_MINIT_FUNCTION(mb_regex) */
 PHP_MINIT_FUNCTION(mb_regex)
 {
+	char version[256];
+
 	onig_init();
+
+	snprintf(version, sizeof(version), "%d.%d.%d",
+		ONIGURUMA_VERSION_MAJOR, ONIGURUMA_VERSION_MINOR, ONIGURUMA_VERSION_TEENY);
+	REGISTER_STRING_CONSTANT("MB_ONIGURUMA_VERSION", version, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -161,13 +164,6 @@ PHP_MINFO_FUNCTION(mb_regex)
 			ONIGURUMA_VERSION_MAJOR,
 			ONIGURUMA_VERSION_MINOR,
 			ONIGURUMA_VERSION_TEENY);
-#ifdef PHP_ONIG_BUNDLED
-#ifdef USE_COMBINATION_EXPLOSION_CHECK
-	php_info_print_table_row(2, "Multibyte regex (oniguruma) backtrack check", "On");
-#else	/* USE_COMBINATION_EXPLOSION_CHECK */
-	php_info_print_table_row(2, "Multibyte regex (oniguruma) backtrack check", "Off");
-#endif	/* USE_COMBINATION_EXPLOSION_CHECK */
-#endif /* PHP_BUNDLED_ONIG */
 	php_info_print_table_row(2, "Multibyte regex (oniguruma) version", buf);
 	php_info_print_table_end();
 }
@@ -448,13 +444,18 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t p
 	OnigErrorInfo err_info;
 	OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 
+	if (!php_mb_check_encoding(pattern, patlen, _php_mb_regex_mbctype2name(enc))) {
+		php_error_docref(NULL, E_WARNING,
+			"Pattern is not valid under %s encoding", _php_mb_regex_mbctype2name(enc));
+		return NULL;
+	}
+
 	rc = zend_hash_str_find_ptr(&MBREX(ht_rc), (char *)pattern, patlen);
 	if (!rc || onig_get_options(rc) != options || onig_get_encoding(rc) != enc || onig_get_syntax(rc) != syntax) {
 		if ((err_code = onig_new(&retval, (OnigUChar *)pattern, (OnigUChar *)(pattern + patlen), options, enc, syntax, &err_info)) != ONIG_NORMAL) {
 			onig_error_code_to_str(err_str, err_code, &err_info);
 			php_error_docref(NULL, E_WARNING, "mbregex compile err: %s", err_str);
-			retval = NULL;
-			goto out;
+			return NULL;
 		}
 		if (rc == MBREX(search_re)) {
 			/* reuse the new rc? see bug #72399 */
@@ -464,7 +465,6 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t p
 	} else {
 		retval = rc;
 	}
-out:
 	return retval;
 }
 /* }}} */
@@ -646,6 +646,175 @@ _php_mb_regex_init_options(const char *parg, size_t narg, OnigOptionType *option
 }
 /* }}} */
 
+
+/*
+ * Callbacks for named subpatterns
+ */
+
+/* {{{ struct mb_ereg_groups_iter_arg */
+typedef struct mb_regex_groups_iter_args {
+	zval		*groups;
+	char		*search_str;
+	size_t		search_len;
+	OnigRegion	*region;
+} mb_regex_groups_iter_args;
+/* }}} */
+
+/* {{{ mb_ereg_groups_iter */
+static int
+mb_regex_groups_iter(const OnigUChar* name, const OnigUChar* name_end, int ngroup_num, int* group_nums, regex_t* reg, void* parg)
+{
+	mb_regex_groups_iter_args *args = (mb_regex_groups_iter_args *) parg;
+	int gn, beg, end;
+
+	/*
+	 * In case of duplicate groups, keep only the last succeeding one
+	 * to be consistent with preg_match with the PCRE_DUPNAMES option.
+	 */
+	gn = onig_name_to_backref_number(reg, name, name_end, args->region);
+	beg = args->region->beg[gn];
+	end = args->region->end[gn];
+	if (beg >= 0 && beg < end && end <= args->search_len) {
+		add_assoc_stringl_ex(args->groups, (char *)name, name_end - name, &args->search_str[beg], end - beg);
+	} else {
+		add_assoc_bool_ex(args->groups, (char *)name, name_end - name, 0);
+	}
+
+	return 0;
+}
+/* }}} */
+
+/*
+ * Helper for _php_mb_regex_ereg_replace_exec
+ */
+/* {{{ mb_regex_substitute */
+static inline void mb_regex_substitute(
+	smart_str *pbuf,
+	const char *subject,
+	size_t subject_len,
+	char *replace,
+	size_t replace_len,
+	php_mb_regex_t *regexp,
+	OnigRegion *regs,
+	const mbfl_encoding *enc
+) {
+	char *p, *sp, *eos;
+	int no; /* bakreference group number */
+	int clen; /* byte-length of the current character */
+
+	p = replace;
+	eos = replace + replace_len;
+
+	while (p < eos) {
+		clen = (int) php_mb_mbchar_bytes_ex(p, enc);
+		if (clen != 1 || p == eos || p[0] != '\\') {
+			/* skip anything that's not an ascii backslash */
+			smart_str_appendl(pbuf, p, clen);
+			p += clen;
+			continue;
+		}
+		sp = p; /* save position */
+		clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+		if (clen != 1 || p == eos) {
+			/* skip backslash followed by multibyte char */
+			smart_str_appendl(pbuf, sp, p - sp);
+			continue;
+		}
+		no = -1;
+		switch (p[0]) {
+			case '0':
+				no = 0;
+				p++;
+				break;
+			case '1': case '2': case '3': case '4':
+			case '5': case '6': case '7': case '8': case '9':
+				if (!onig_noname_group_capture_is_active(regexp)) {
+					/*
+					 * FIXME:
+					 * Oniguruma throws a compile error if numbered backrefs are used with named groups in the pattern.
+					 * For now we just ignore them, but in the future we might want to raise a warning
+					 * and abort the whole replace operation.
+					 */
+					p++;
+					smart_str_appendl(pbuf, sp, p - sp);
+					continue;
+				}
+				no = p[0] - '0';
+				p++;
+				break;
+			case 'k':
+				clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+				if (clen != 1 || p == eos || (p[0] != '<' && p[0] != '\'')) {
+					/* not a backref delimiter */
+					p += clen;
+					smart_str_appendl(pbuf, sp, p - sp);
+					continue;
+				}
+				/* try to consume everything until next delimiter */
+				char delim = p[0] == '<' ? '>' : '\'';
+				char *name, *name_end;
+				char maybe_num = 1;
+				name_end = name = p + 1;
+				while (name_end < eos) {
+					clen = (int) php_mb_mbchar_bytes_ex(name_end, enc);
+					if (clen != 1) {
+						name_end += clen;
+						maybe_num = 0;
+						continue;
+					}
+					if (name_end[0] == delim) break;
+					if (maybe_num && !isdigit(name_end[0])) maybe_num = 0;
+					name_end++;
+				}
+				p = name_end + 1;
+				if (name_end - name < 1 || name_end >= eos) {
+					/* the backref was empty or we failed to find the end delimiter */
+					smart_str_appendl(pbuf, sp, p - sp);
+					continue;
+				}
+				/* we have either a name or a number */
+				if (maybe_num) {
+					if (!onig_noname_group_capture_is_active(regexp)) {
+						/* see above note on mixing numbered & named backrefs */
+						smart_str_appendl(pbuf, sp, p - sp);
+						continue;
+					}
+					if (name_end - name == 1) {
+						no = name[0] - '0';
+						break;
+					}
+					if (name[0] == '0') {
+						/* 01 is not a valid number */
+						break;
+					}
+					no = (int) strtoul(name, NULL, 10);
+					break;
+				}
+				no = onig_name_to_backref_number(regexp, (OnigUChar *)name, (OnigUChar *)name_end, regs);
+				break;
+			default:
+				/* We're not treating \ as an escape character and will interpret something like
+				 * \\1 as \ followed by \1, rather than \\ followed by 1. This is because this
+				 * function has not supported escaping of backslashes historically. */
+				smart_str_appendl(pbuf, sp, p - sp);
+				continue;
+		}
+		if (no < 0 || no >= regs->num_regs) {
+			/* invalid group number reference, keep the escape sequence in the output */
+			smart_str_appendl(pbuf, sp, p - sp);
+			continue;
+		}
+		if (regs->beg[no] >= 0 && regs->beg[no] < regs->end[no] && (size_t)regs->end[no] <= subject_len) {
+			smart_str_appendl(pbuf, subject + regs->beg[no], regs->end[no] - regs->beg[no]);
+		}
+	}
+
+	if (p < eos) {
+		smart_str_appendl(pbuf, p, eos - p);
+	}
+}
+/* }}} */
+
 /*
  * php functions
  */
@@ -687,34 +856,32 @@ PHP_FUNCTION(mb_regex_encoding)
 /* {{{ _php_mb_regex_ereg_exec */
 static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	zval *arg_pattern, *array = NULL;
-	char *string;
-	size_t string_len;
+	zval *array = NULL;
+	char *arg_pattern, *string;
+	size_t arg_pattern_len, string_len;
 	php_mb_regex_t *re;
 	OnigRegion *regs = NULL;
 	int i, match_len, beg, end;
 	OnigOptionType options;
 	char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z/", &arg_pattern, &string, &string_len, &array) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (!php_mb_check_encoding(
-	string,
-	string_len,
-	_php_mb_regex_mbctype2name(MBREX(current_mbctype))
-	)) {
-		if (array != NULL) {
-			zval_dtor(array);
-			array_init(array);
-		}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|z", &arg_pattern, &arg_pattern_len, &string, &string_len, &array) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (array != NULL) {
-		zval_dtor(array);
-		array_init(array);
+		array = zend_try_array_init(array);
+		if (!array) {
+			return;
+		}
+	}
+
+	if (!php_mb_check_encoding(
+		string,
+		string_len,
+		_php_mb_regex_mbctype2name(MBREX(current_mbctype))
+	)) {
+		RETURN_FALSE;
 	}
 
 	options = MBREX(regex_default_options);
@@ -722,23 +889,13 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		options |= ONIG_OPTION_IGNORECASE;
 	}
 
-	/* compile the regular expression from the supplied regex */
-	if (Z_TYPE_P(arg_pattern) != IS_STRING) {
-		/* we convert numbers to integers and treat them as a string */
-		if (Z_TYPE_P(arg_pattern) == IS_DOUBLE) {
-			convert_to_long_ex(arg_pattern);	/* get rid of decimal places */
-		}
-		convert_to_string_ex(arg_pattern);
-		/* don't bother doing an extended regex with just a number */
-	}
-
-	if (Z_STRLEN_P(arg_pattern) == 0) {
+	if (arg_pattern_len == 0) {
 		php_error_docref(NULL, E_WARNING, "empty pattern");
 		RETVAL_FALSE;
 		goto out;
 	}
 
-	re = php_mbregex_compile_pattern(Z_STRVAL_P(arg_pattern), Z_STRLEN_P(arg_pattern), options, MBREX(current_mbctype), MBREX(regex_default_syntax));
+	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(current_mbctype), MBREX(regex_default_syntax));
 	if (re == NULL) {
 		RETVAL_FALSE;
 		goto out;
@@ -765,6 +922,11 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			} else {
 				add_index_bool(array, i, 0);
 			}
+		}
+
+		if (onig_number_of_names(re) > 0) {
+			mb_regex_groups_iter_args args = {array, string, string_len, regs};
+			onig_foreach_name(re, mb_regex_groups_iter, &args);
 		}
 	}
 
@@ -798,8 +960,6 @@ PHP_FUNCTION(mb_eregi)
 /* {{{ _php_mb_regex_ereg_replace_exec */
 static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOptionType options, int is_callable)
 {
-	zval *arg_pattern_zval;
-
 	char *arg_pattern;
 	size_t arg_pattern_len;
 
@@ -812,19 +972,16 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	char *string;
 	size_t string_len;
 
-	char *p;
 	php_mb_regex_t *re;
 	OnigSyntaxType *syntax;
 	OnigRegion *regs = NULL;
 	smart_str out_buf = {0};
 	smart_str eval_buf = {0};
 	smart_str *pbuf;
-	size_t i;
 	int err, eval, n;
 	OnigUChar *pos;
 	OnigUChar *string_lim;
 	char *description = NULL;
-	char pat_buf[6];
 
 	const mbfl_encoding *enc;
 
@@ -843,16 +1000,16 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		size_t option_str_len = 0;
 
 		if (!is_callable) {
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zss|s",
-						&arg_pattern_zval,
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|s",
+						&arg_pattern, &arg_pattern_len,
 						&replace, &replace_len,
 						&string, &string_len,
 						&option_str, &option_str_len) == FAILURE) {
 				RETURN_FALSE;
 			}
 		} else {
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zfs|s",
-						&arg_pattern_zval,
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "sfs|s",
+						&arg_pattern, &arg_pattern_len,
 						&arg_replace_fci, &arg_replace_fci_cache,
 						&string, &string_len,
 						&option_str, &option_str_len) == FAILURE) {
@@ -876,24 +1033,10 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		}
 	}
 	if (eval && !is_callable) {
-		php_error_docref(NULL, E_DEPRECATED, "The 'e' option is deprecated, use mb_ereg_replace_callback instead");
+		php_error_docref(NULL, E_WARNING, "The 'e' option is no longer supported, use mb_ereg_replace_callback instead");
+		RETURN_FALSE;
 	}
-	if (Z_TYPE_P(arg_pattern_zval) == IS_STRING) {
-		arg_pattern = Z_STRVAL_P(arg_pattern_zval);
-		arg_pattern_len = Z_STRLEN_P(arg_pattern_zval);
-	} else {
-		/* FIXME: this code is not multibyte aware! */
-		convert_to_long_ex(arg_pattern_zval);
-		pat_buf[0] = (char)Z_LVAL_P(arg_pattern_zval);
-		pat_buf[1] = '\0';
-		pat_buf[2] = '\0';
-		pat_buf[3] = '\0';
-		pat_buf[4] = '\0';
-		pat_buf[5] = '\0';
 
-		arg_pattern = pat_buf;
-		arg_pattern_len = 1;
-	}
 	/* create regex pattern buffer */
 	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(current_mbctype), syntax);
 	if (re == NULL) {
@@ -929,38 +1072,11 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 			break;
 		}
 		if (err >= 0) {
-#if moriyoshi_0
-			if (regs->beg[0] == regs->end[0]) {
-				php_error_docref(NULL, E_WARNING, "Empty regular expression");
-				break;
-			}
-#endif
 			/* copy the part of the string before the match */
 			smart_str_appendl(&out_buf, (char *)pos, (size_t)((OnigUChar *)(string + regs->beg[0]) - pos));
 
 			if (!is_callable) {
-				/* copy replacement and backrefs */
-				i = 0;
-				p = replace;
-				while (i < replace_len) {
-					int fwd = (int) php_mb_mbchar_bytes_ex(p, enc);
-					n = -1;
-					if ((replace_len - i) >= 2 && fwd == 1 &&
-					p[0] == '\\' && p[1] >= '0' && p[1] <= '9') {
-						n = p[1] - '0';
-					}
-					if (n >= 0 && n < regs->num_regs) {
-						if (regs->beg[n] >= 0 && regs->beg[n] < regs->end[n] && (size_t)regs->end[n] <= string_len) {
-							smart_str_appendl(pbuf, string + regs->beg[n], regs->end[n] - regs->beg[n]);
-						}
-						p += 2;
-						i += 2;
-					} else {
-						smart_str_appendl(pbuf, p, fwd);
-						p += fwd;
-						i += fwd;
-					}
-				}
+				mb_regex_substitute(pbuf, string, string_len, replace, replace_len, re, regs, enc);
 			}
 
 			if (eval) {
@@ -990,7 +1106,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRLEN(v));
 				/* Clean up */
 				smart_str_free(&eval_buf);
-				zval_dtor(&v);
+				zval_ptr_dtor_str(&v);
 			} else if (is_callable) {
 				zval args[1];
 				zval subpats, retval;
@@ -999,6 +1115,10 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				array_init(&subpats);
 				for (i = 0; i < regs->num_regs; i++) {
 					add_next_index_stringl(&subpats, string + regs->beg[i], regs->end[i] - regs->beg[i]);
+				}
+				if (onig_number_of_names(re) > 0) {
+					mb_regex_groups_iter_args args = {&subpats, string, string_len, regs};
+					onig_foreach_name(re, mb_regex_groups_iter, &args);
 				}
 
 				ZVAL_COPY_VALUE(&args[0], &subpats);
@@ -1097,7 +1217,6 @@ PHP_FUNCTION(mb_split)
 	size_t string_len;
 
 	int err;
-	size_t n;
 	zend_long count = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
@@ -1106,6 +1225,11 @@ PHP_FUNCTION(mb_split)
 
 	if (count > 0) {
 		count--;
+	}
+
+	if (!php_mb_check_encoding(string, string_len,
+			_php_mb_regex_mbctype2name(MBREX(current_mbctype)))) {
+		RETURN_FALSE;
 	}
 
 	/* create regex pattern buffer */
@@ -1150,13 +1274,13 @@ PHP_FUNCTION(mb_split)
 		OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 		onig_error_code_to_str(err_str, err);
 		php_error_docref(NULL, E_WARNING, "mbregex search failure in mbsplit(): %s", err_str);
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 
 	/* otherwise we just have one last element to add to the array */
-	n = ((OnigUChar *)(string + string_len) - chunk_pos);
-	if (n > 0) {
+	if ((OnigUChar *)(string + string_len) > chunk_pos) {
+		size_t n = ((OnigUChar *)(string + string_len) - chunk_pos);
 		add_next_index_stringl(return_value, (char *)chunk_pos, n);
 	} else {
 		add_next_index_stringl(return_value, "", 0);
@@ -1195,6 +1319,11 @@ PHP_FUNCTION(mb_ereg_match)
 			option |= MBREX(regex_default_options);
 			syntax = MBREX(regex_default_syntax);
 		}
+	}
+
+	if (!php_mb_check_encoding(string, string_len,
+			_php_mb_regex_mbctype2name(MBREX(current_mbctype)))) {
+		RETURN_FALSE;
 	}
 
 	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBREX(current_mbctype), syntax)) == NULL) {
@@ -1294,6 +1423,15 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 				} else {
 					add_index_bool(return_value, i, 0);
 				}
+			}
+			if (onig_number_of_names(MBREX(search_re)) > 0) {
+				mb_regex_groups_iter_args args = {
+					return_value,
+					Z_STRVAL(MBREX(search_str)),
+					Z_STRLEN(MBREX(search_str)),
+					MBREX(search_regs)
+				};
+				onig_foreach_name(MBREX(search_re), mb_regex_groups_iter, &args);
 			}
 			break;
 		default:
@@ -1421,6 +1559,15 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 				add_index_bool(return_value, i, 0);
 			}
 		}
+		if (onig_number_of_names(MBREX(search_re)) > 0) {
+			mb_regex_groups_iter_args args = {
+				return_value,
+				Z_STRVAL(MBREX(search_str)),
+				len,
+				MBREX(search_regs)
+			};
+			onig_foreach_name(MBREX(search_re), mb_regex_groups_iter, &args);
+		}
 	} else {
 		RETVAL_FALSE;
 	}
@@ -1505,12 +1652,3 @@ PHP_FUNCTION(mb_regex_set_options)
 /* }}} */
 
 #endif	/* HAVE_MBREGEX */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

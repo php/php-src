@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,14 +12,12 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Marcus Boerger <helly@php.net>                              |
    | New API: Michael Wallner <mike@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_OUTPUT_DEBUG
 # define PHP_OUTPUT_DEBUG 0
@@ -60,12 +58,12 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf);
 static inline zval *php_output_handler_status(php_output_handler *handler, zval *entry);
 
-static inline php_output_context *php_output_context_init(php_output_context *context, int op);
+static inline void php_output_context_init(php_output_context *context, int op);
 static inline void php_output_context_reset(php_output_context *context);
 static inline void php_output_context_swap(php_output_context *context);
 static inline void php_output_context_dtor(php_output_context *context);
 
-static inline int php_output_stack_pop(int flags);
+static int php_output_stack_pop(int flags);
 
 static int php_output_stack_apply_op(void *h, void *c);
 static int php_output_stack_apply_clean(void *h, void *c);
@@ -134,7 +132,7 @@ static void reverse_conflict_dtor(zval *zv)
 }
 
 /* {{{ void php_output_startup(void)
- * Set up module globals and initalize the conflict and reverse conflict hash tables */
+ * Set up module globals and initialize the conflict and reverse conflict hash tables */
 PHPAPI void php_output_startup(void)
 {
 	ZEND_INIT_MODULE_GLOBALS(output, php_output_init_globals, NULL);
@@ -161,7 +159,7 @@ PHPAPI void php_output_shutdown(void)
 PHPAPI int php_output_activate(void)
 {
 #ifdef ZTS
-	memset((*((void ***) ZEND_TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(output_globals_id)], 0, sizeof(zend_output_globals));
+	memset(TSRMG_BULK_STATIC(output_globals_id, zend_output_globals*), 0, sizeof(zend_output_globals));
 #else
 	memset(&output_globals, 0, sizeof(zend_output_globals));
 #endif
@@ -504,7 +502,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				efree(error);
 			}
 			if (handler_name) {
-				zend_string_release(handler_name);
+				zend_string_release_ex(handler_name, 0);
 			}
 	}
 
@@ -521,7 +519,7 @@ PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, 
 
 	handler = php_output_handler_init(str, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_INTERNAL);
 	handler->func.internal = output_handler;
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 
 	return handler;
 }
@@ -609,7 +607,6 @@ PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_n
  * Register a conflict checking function on MINIT */
 PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_len, php_output_handler_conflict_check_t check_func)
 {
-	int ret;
 	zend_string *str;
 
 	if (!EG(current_module)) {
@@ -617,9 +614,9 @@ PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_le
 		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
-	ret = zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func) ? SUCCESS : FAILURE;
-	zend_string_release(str);
-	return ret;
+	zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func);
+	zend_string_release_ex(str, 1);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -637,7 +634,6 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 	if (NULL != (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
 		return zend_hash_next_index_insert_ptr(rev_ptr, check_func) ? SUCCESS : FAILURE;
 	} else {
-		int ret;
 		zend_string *str;
 
 		zend_hash_init(&rev, 8, NULL, NULL, 1);
@@ -646,12 +642,9 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 			return FAILURE;
 		}
 		str = zend_string_init_interned(name, name_len, 1);
-		ret = zend_hash_update_mem(&php_output_handler_reverse_conflicts, str, &rev, sizeof(HashTable)) ? SUCCESS : FAILURE;
-		zend_string_release(str);
-		if (ret != SUCCESS) {
-			zend_hash_destroy(&rev);
-		}
-		return ret;
+		zend_hash_update_mem(&php_output_handler_reverse_conflicts, str, &rev, sizeof(HashTable));
+		zend_string_release_ex(str, 1);
+		return SUCCESS;
 	}
 }
 /* }}} */
@@ -668,7 +661,6 @@ PHPAPI php_output_handler_alias_ctor_t php_output_handler_alias(const char *name
  * Registers an internal output handler as alias for a user handler */
 PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, php_output_handler_alias_ctor_t func)
 {
-	int ret;
 	zend_string *str;
 
 	if (!EG(current_module)) {
@@ -676,9 +668,9 @@ PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, 
 		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
-	ret = zend_hash_update_ptr(&php_output_handler_aliases, str, func) ? SUCCESS : FAILURE;
-	zend_string_release(str);
-	return ret;
+	zend_hash_update_ptr(&php_output_handler_aliases, str, func);
+	zend_string_release_ex(str, 1);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -716,7 +708,7 @@ PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg)
 PHPAPI void php_output_handler_dtor(php_output_handler *handler)
 {
 	if (handler->name) {
-		zend_string_release(handler->name);
+		zend_string_release_ex(handler->name, 0);
 	}
 	if (handler->buffer.data) {
 		efree(handler->buffer.data);
@@ -789,16 +781,10 @@ static inline int php_output_lock_error(int op)
 
 /* {{{ static php_output_context *php_output_context_init(php_output_context *context, int op)
  * Initialize a new output context */
-static inline php_output_context *php_output_context_init(php_output_context *context, int op)
+static inline void php_output_context_init(php_output_context *context, int op)
 {
-	if (!context) {
-		context = emalloc(sizeof(php_output_context));
-	}
-
 	memset(context, 0, sizeof(php_output_context));
 	context->op = op;
-
-	return context;
 }
 /* }}} */
 
@@ -1207,7 +1193,7 @@ static inline zval *php_output_handler_status(php_output_handler *handler, zval 
 
 /* {{{ static int php_output_stack_pop(int flags)
  * Pops an output handler off the stack */
-static inline int php_output_stack_pop(int flags)
+static int php_output_stack_pop(int flags)
 {
 	php_output_context context;
 	php_output_handler **current, *orphan = OG(active);
@@ -1315,7 +1301,7 @@ PHP_FUNCTION(ob_start)
 	zend_long chunk_size = 0;
 	zend_long flags = PHP_OUTPUT_HANDLER_STDFLAGS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z/ll", &output_handler, &chunk_size, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zll", &output_handler, &chunk_size, &flags) == FAILURE) {
 		return;
 	}
 
@@ -1549,6 +1535,10 @@ PHP_FUNCTION(ob_implicit_flush)
    Reset(clear) URL rewriter values */
 PHP_FUNCTION(output_reset_rewrite_vars)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (php_url_scanner_reset_vars() == SUCCESS) {
 		RETURN_TRUE;
 	} else {
@@ -1575,12 +1565,3 @@ PHP_FUNCTION(output_add_rewrite_var)
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

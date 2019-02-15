@@ -17,7 +17,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource
@@ -32,36 +32,36 @@ $inputs =  array (
 		  -2,
 		   2147483647,
 		  -2147483648,
-		
+
 		  // float values
 /*6*/	  10.5,
 		  -20.5,
 		  10.1234567e10,
-		
+
 		  // array values
 /*9*/	  array(),
 		  array(0),
 		  array(1, 2),
-		
+
 		  // boolean values
 /*12*/	  true,
 		  false,
 		  TRUE,
 		  FALSE,
-		
+
 		  // null values
 /*16*/	  NULL,
 		  null,
-		
+
 		  // objects
 /*18*/	  new sample(),
-		
+
 		  // resource
 /*19*/	  $file_handle,
-		
+
 		  // undefined variable
 /*20*/	  @$undefined_var,
-		
+
 		  // unset variable
 /*21*/	  @$unset_var
 );

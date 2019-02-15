@@ -3,7 +3,7 @@ ctype on strings
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
-<?php 
+<?php
 
 setlocale(LC_ALL,"C");
 print "LOCALE is '" . setlocale(LC_ALL,0) . "'\n";
@@ -22,10 +22,10 @@ function ctype_test_002($function) {
 
 ctype_test_002("ctype_lower");
 ctype_test_002("ctype_upper");
-ctype_test_002("ctype_alpha");	
-ctype_test_002("ctype_digit");	
-ctype_test_002("ctype_alnum");		
-ctype_test_002("ctype_cntrl");	
+ctype_test_002("ctype_alpha");
+ctype_test_002("ctype_digit");
+ctype_test_002("ctype_alnum");
+ctype_test_002("ctype_cntrl");
 ctype_test_002("ctype_graph");
 ctype_test_002("ctype_print");
 ctype_test_002("ctype_punct");

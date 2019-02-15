@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Dmitry Stogov <dmitry@zend.com>                              |
+   | Author: Dmitry Stogov <dmitry@php.net>                               |
    +----------------------------------------------------------------------+
  */
 
@@ -114,7 +114,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char 
 	}
 }
 
-ZEND_API void ZEND_FASTCALL smart_str_append_printf(smart_str *dest, const char *format, ...) {
+ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...) {
 	va_list arg;
 	va_start(arg, format);
 	zend_printf_to_smart_str(dest, format, arg);
@@ -155,7 +155,12 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len)
 			str->c = emalloc(SMART_STRING_START_LEN + 1);
 		} else {
 			str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
-			str->c = emalloc_large(str->a + 1);
+			if (EXPECTED(str->a < (ZEND_MM_CHUNK_SIZE - SMART_STRING_OVERHEAD))) {
+				str->c = emalloc_large(str->a + 1);
+			} else {
+				/* allocate a huge chunk */
+				str->c = emalloc(str->a + 1);
+			}
 		}
 	} else {
 		if (UNEXPECTED((size_t) len > SIZE_MAX - str->len)) {
@@ -166,13 +171,3 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len)
 		str->c = erealloc2(str->c, str->a + 1, str->len);
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -228,7 +228,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	/* Try object's handlers. */
 	if( Z_OBJ_HT_P(obj)->get )
 	{
-		zstr = Z_OBJ_HT_P(obj)->get( obj, rv );
+		zstr = Z_OBJ_HT_P(obj)->get( Z_OBJ_P(obj), rv );
 
 		switch( Z_TYPE_P( zstr ) )
 		{
@@ -252,7 +252,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	{
 		zstr = rv;
 
-		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_STRING ) == FAILURE )
+		if( Z_OBJ_HT_P(obj)->cast_object( Z_OBJ_P(obj), zstr, IS_STRING ) == FAILURE )
 		{
 			/* cast_object failed => bail out. */
 			zval_ptr_dtor( zstr );
@@ -275,7 +275,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_object_to_string()" );
 
 	/* Cleanup zstr to hold utf16 string. */
-	zval_dtor( zstr );
+	zval_ptr_dtor_str( zstr );
 
 	/* Set string. */
 	ZVAL_STRINGL( zstr, (char*)ustr, UBYTES(ustr_len));
@@ -392,7 +392,7 @@ zval* collator_make_printable_zval( zval* arg, zval *rv)
 		if( use_copy )
 		{
 			str = collator_convert_zstr_utf8_to_utf16( &arg_copy, rv );
-			zval_dtor( &arg_copy );
+			zval_ptr_dtor_str( &arg_copy );
 		}
 		else
 		{
@@ -444,11 +444,3 @@ zval* collator_normalize_sort_argument( zval* arg, zval *rv )
 	return n_arg;
 }
 /* }}} */
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

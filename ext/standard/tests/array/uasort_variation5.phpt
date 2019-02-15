@@ -1,9 +1,9 @@
 --TEST--
-Test uasort() function : usage variations - sort diff. strings 
+Test uasort() function : usage variations - sort diff. strings
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -33,7 +33,7 @@ function cmp_function($value1, $value2)
   }
 }
 
-// Different heredoc strings to be sorted 
+// Different heredoc strings to be sorted
 $empty_heredoc =<<<EOT
 EOT;
 
@@ -64,7 +64,7 @@ var_dump($single_quoted_values);
 
 // Double quoted strings
 $double_quoted_values = array(
-  0 => " ", 1 => "test", 3 => "Hello", 4 => "HELLO", 
+  0 => " ", 1 => "test", 3 => "Hello", 4 => "HELLO",
   5 => "", 6 => "\t", 7 => "0", 8 => "123Hello", 9 => "\"", 10 => "@#$%"
 );
 echo "-- Sorting Double Quoted String values --\n";

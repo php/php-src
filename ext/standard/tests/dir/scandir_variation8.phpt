@@ -3,7 +3,7 @@ Test scandir() function : usage variations - different file names
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -36,7 +36,7 @@ $inputs = array(
        12.3456789000e10,
        12.3456789000E-10,
        .5,
-       
+
        // empty data
 /*10*/ "",
        array(),

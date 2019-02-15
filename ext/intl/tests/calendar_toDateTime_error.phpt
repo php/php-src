@@ -22,9 +22,7 @@ var_dump("exception: {$e->getMessage()}");
 }
 
 var_dump(intlcal_to_date_time(3));
-
 --EXPECTF--
-
 Warning: IntlCalendar::toDateTime() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlCalendar::toDateTime(): intlcal_to_date_time: bad arguments in %s on line %d

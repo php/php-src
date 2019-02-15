@@ -1,5 +1,5 @@
 --TEST--
-Test extract() function - ensure EXTR_REFS works when array is referenced and keys clash with variables in current scope. 
+Test extract() function - ensure EXTR_REFS works when array is referenced and keys clash with variables in current scope.
 --FILE--
 <?php
 $a = array('foo' => 'original.foo');

@@ -37,7 +37,7 @@ var_dump($rc->getProperty('x')->getDeclaringClass()->getName());
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(1) "C"
 string(1) "B"
 string(1) "A"

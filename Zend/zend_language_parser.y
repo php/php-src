@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,13 +13,11 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "zend_compile.h"
 #include "zend.h"
@@ -28,6 +26,7 @@
 #include "zend_API.h"
 #include "zend_constants.h"
 #include "zend_language_scanner.h"
+#include "zend_exceptions.h"
 
 #define YYSIZE_T size_t
 #define yytnamerr zend_yytnamerr
@@ -50,7 +49,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 }
 
 %destructor { zend_ast_destroy($$); } <ast>
-%destructor { if ($$) zend_string_release($$); } <str>
+%destructor { if ($$) zend_string_release_ex($$, 0); } <str>
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
 %left ','
@@ -61,7 +60,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %right T_YIELD
 %right T_DOUBLE_ARROW
 %right T_YIELD_FROM
-%left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
+%left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL
 %left '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
@@ -119,6 +118,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_XOR_EQUAL    "^= (T_XOR_EQUAL)"
 %token T_SL_EQUAL     "<<= (T_SL_EQUAL)"
 %token T_SR_EQUAL     ">>= (T_SR_EQUAL)"
+%token T_COALESCE_EQUAL "??= (T_COALESCE_EQUAL)"
 %token T_BOOLEAN_OR   "|| (T_BOOLEAN_OR)"
 %token T_BOOLEAN_AND  "&& (T_BOOLEAN_AND)"
 %token T_IS_EQUAL     "== (T_IS_EQUAL)"
@@ -233,7 +233,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type argument expr_without_variable global_var
+%type <ast> extends_from parameter optional_type argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
@@ -414,8 +414,8 @@ inner_statement:
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
-			{ $$ = NULL; zend_error_noreturn(E_COMPILE_ERROR,
-			      "__HALT_COMPILER() can only be used from the outermost scope"); }
+			{ $$ = NULL; zend_throw_exception(zend_ce_compile_error,
+			      "__HALT_COMPILER() can only be used from the outermost scope", 0); YYERROR; }
 ;
 
 
@@ -446,7 +446,7 @@ statement:
 		foreach_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOREACH, $3, $7, $5, $9); }
 	|	T_DECLARE '(' const_list ')'
-			{ zend_handle_encoding_declaration($3); }
+			{ if (!zend_handle_encoding_declaration($3)) { YYERROR; } }
 		declare_statement
 			{ $$ = zend_ast_create(ZEND_AST_DECLARE, $3, $6); }
 	|	';'	/* empty statement */ { $$ = NULL; }
@@ -511,7 +511,8 @@ class_declaration_statement:
 
 class_modifiers:
 		class_modifier 					{ $$ = $1; }
-	|	class_modifiers class_modifier 	{ $$ = zend_add_class_modifier($1, $2); }
+	|	class_modifiers class_modifier
+			{ $$ = zend_add_class_modifier($1, $2); if (!$$) { YYERROR; } }
 ;
 
 class_modifier:
@@ -716,8 +717,9 @@ class_statement_list:
 
 
 class_statement:
-		variable_modifiers property_list ';'
-			{ $$ = $2; $$->attr = $1; }
+		variable_modifiers optional_type property_list ';'
+			{ $$ = zend_ast_create(ZEND_AST_PROP_GROUP, $2, $3);
+			  $$->attr = $1; }
 	|	method_modifiers T_CONST class_const_list ';'
 			{ $$ = $3; $$->attr = $1; }
 	|	T_USE name_list trait_adaptations
@@ -797,7 +799,7 @@ method_modifiers:
 non_empty_member_modifiers:
 		member_modifier			{ $$ = $1; }
 	|	non_empty_member_modifiers member_modifier
-			{ $$ = zend_add_member_modifier($1, $2); }
+			{ $$ = zend_add_member_modifier($1, $2); if (!$$) { YYERROR; } }
 ;
 
 member_modifier:
@@ -869,8 +871,10 @@ new_expr:
 			{ $$ = $2; }
 ;
 
-expr_without_variable:
-		T_LIST '(' array_pair_list ')' '=' expr
+expr:
+		variable
+			{ $$ = $1; }
+	|	T_LIST '(' array_pair_list ')' '=' expr
 			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST; $$ = zend_ast_create(ZEND_AST_ASSIGN, $3, $6); }
 	|	'[' array_pair_list ']' '=' expr
 			{ $2->attr = ZEND_ARRAY_SYNTAX_SHORT; $$ = zend_ast_create(ZEND_AST_ASSIGN, $2, $5); }
@@ -903,6 +907,8 @@ expr_without_variable:
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_SL, $1, $3); }
 	|	variable T_SR_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_SR, $1, $3); }
+	|	variable T_COALESCE_EQUAL expr
+			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_COALESCE, $1, $3); }
 	|	variable T_INC { $$ = zend_ast_create(ZEND_AST_POST_INC, $1); }
 	|	T_INC variable { $$ = zend_ast_create(ZEND_AST_PRE_INC, $2); }
 	|	variable T_DEC { $$ = zend_ast_create(ZEND_AST_POST_DEC, $1); }
@@ -1019,7 +1025,7 @@ lexical_var_list:
 
 lexical_var:
 		T_VARIABLE		{ $$ = $1; }
-	|	'&' T_VARIABLE	{ $$ = $2; $$->attr = 1; }
+	|	'&' T_VARIABLE	{ $$ = $2; $$->attr = ZEND_BIND_REF; }
 ;
 
 function_call:
@@ -1093,14 +1099,9 @@ scalar:
 constant:
 		name { $$ = zend_ast_create(ZEND_AST_CONST, $1); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $3); }
+			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $3); }
-;
-
-expr:
-		variable					{ $$ = $1; }
-	|	expr_without_variable		{ $$ = $1; }
+			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
 ;
 
 optional_expr:
@@ -1368,13 +1369,3 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 	yystpcpy(yyres, yystr);
 	return strlen(yystr);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

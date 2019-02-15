@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 EXTENSION("reflection", "php_reflection.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");

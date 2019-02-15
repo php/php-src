@@ -32,7 +32,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$x = new LocalSoapClient(dirname(__FILE__)."/bug32776.wsdl",array("trace"=>true,"exceptions"=>false)); 
+$x = new LocalSoapClient(dirname(__FILE__)."/bug32776.wsdl",array("trace"=>true,"exceptions"=>false));
 var_dump($x->test("Hello"));
 var_dump($d);
 var_dump($x->__getLastRequest());

@@ -1,9 +1,9 @@
 $(srcdir)/phar_path_check.c: $(srcdir)/phar_path_check.re
 	@(cd $(top_srcdir); \
 	if test -f ./php_phar.h; then \
-		$(RE2C) --no-generation-date -b -o phar_path_check.c phar_path_check.re; \
+		$(RE2C) $(RE2C_FLAGS) --no-generation-date -b -o phar_path_check.c phar_path_check.re; \
 	else \
-		$(RE2C) --no-generation-date -b -o ext/phar/phar_path_check.c ext/phar/phar_path_check.re; \
+		$(RE2C) $(RE2C_FLAGS) --no-generation-date -b -o ext/phar/phar_path_check.c ext/phar/phar_path_check.re; \
 	fi)
 
 pharcmd: $(builddir)/phar.php $(builddir)/phar.phar
@@ -48,4 +48,3 @@ install-pharcmd: pharcmd
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
 	@$(INSTALL_DATA) $(builddir)/phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar.1
 	@$(INSTALL_DATA) $(builddir)/phar.phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar.phar.1
-

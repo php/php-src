@@ -1,8 +1,8 @@
 --TEST--
 xmlwriter_start/end_attribute()
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
 <?php

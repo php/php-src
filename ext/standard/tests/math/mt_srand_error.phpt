@@ -15,6 +15,3 @@ NULL
 
 Notice: A non well formed numeric value encountered in %s on line 4
 NULL
-
-
-

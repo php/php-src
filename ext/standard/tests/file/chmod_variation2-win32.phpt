@@ -32,7 +32,7 @@ var_dump(chmod($filepath, 0777));
 var_dump(chmod("./$test_dirname/bad_dir/../../$filename", 0755));
 clearstatcache();
 printf("%o\n", fileperms($filepath) & PERMISSIONS_MASK);
- 
+
 echo "\nchmod() on a relative path from a different working directory\n";
 chdir($test_dirname);
 var_dump(chmod("../$filename", 0777));

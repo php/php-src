@@ -1,9 +1,9 @@
 --TEST--
 inet_ntop() & inet_pton() tests
 --SKIPIF--
-<?php 
-if (!function_exists("inet_ntop")) die("skip no inet_ntop()"); 
-if (!function_exists("inet_pton")) die("skip no inet_pton()"); 
+<?php
+if (!function_exists("inet_ntop")) die("skip no inet_ntop()");
+if (!function_exists("inet_pton")) die("skip no inet_pton()");
 ?>
 --FILE--
 <?php
@@ -37,7 +37,7 @@ foreach ($array as $val) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(9) "127.0.0.1"
 string(13) "255.255.255.0"
 

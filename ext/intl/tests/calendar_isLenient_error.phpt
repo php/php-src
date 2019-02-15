@@ -16,9 +16,7 @@ var_dump($c->isLenient(1));
 
 var_dump(intlcal_is_lenient($c, 1));
 var_dump(intlcal_is_lenient(1));
-
 --EXPECTF--
-
 Warning: IntlCalendar::isLenient() expects exactly 0 parameters, 1 given in %s on line %d
 
 Warning: IntlCalendar::isLenient(): intlcal_is_lenient: bad arguments in %s on line %d

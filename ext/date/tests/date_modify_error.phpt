@@ -1,14 +1,14 @@
 --TEST--
-Test date_modify() function : error conditions 
+Test date_modify() function : error conditions
 --FILE--
 <?php
 /* Prototype  : DateTime date_modify  ( DateTime $object  , string $modify  )
- * Description: Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime(). 
+ * Description: Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime().
  * Source code: ext/date/php_date.c
  * Alias to functions: public DateTime DateTime::modify()
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_modify() : error conditions ***\n";
@@ -29,11 +29,11 @@ var_dump( date_modify($datetime, $modify, $extra_arg) );
 
 echo "\n-- Testing date_modify() function with an invalid values for \$object argument --\n";
 $invalid_obj = new stdClass();
-var_dump( date_modify($invalid_obj, $modify) );  
+var_dump( date_modify($invalid_obj, $modify) );
 $invalid_obj = 10;
 var_dump( date_modify($invalid_obj, $modify) );
 $invalid_obj = null;
-var_dump( date_modify($invalid_obj, $modify) );  
+var_dump( date_modify($invalid_obj, $modify) );
 
 ?>
 ===DONE===

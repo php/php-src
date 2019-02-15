@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - unsigned formats with boolean 
+Test fscanf() function: usage variations - unsigned formats with boolean
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - unsigned formats with boolean
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different unsigned format types with boolean data ***\n"; 
+echo "*** Test fscanf(): different unsigned format types with boolean data ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation44.tmp";
@@ -243,4 +243,3 @@ NULL
 bool(false)
 
 *** Done ***
-

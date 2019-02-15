@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -42,8 +42,8 @@ void php_clear_warnings(MYSQLI_WARNING *w)
 
 	while (w) {
 		n = w;
-		zval_dtor(&(w->reason));
-		zval_dtor(&(w->sqlstate));
+		zval_ptr_dtor_str(&(w->reason));
+		zval_ptr_dtor_str(&(w->sqlstate));
 		w = w->next;
 		efree(n);
 	}
@@ -323,13 +323,3 @@ const mysqli_property_entry mysqli_warning_property_entries[] = {
 	{NULL, 0, NULL, NULL}
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

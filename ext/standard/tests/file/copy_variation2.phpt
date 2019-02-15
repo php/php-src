@@ -18,7 +18,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 
 echo "*** Test copy() function: destination file names containing special characters ***\n";
 $file_path = dirname(__FILE__);
-$src_file_name = $file_path."/copy_variation2.tmp"; 
+$src_file_name = $file_path."/copy_variation2.tmp";
 $file_handle = fopen($src_file_name, "w");
 fwrite( $file_handle, str_repeat("Hello2World...\n", 100) );
 fclose($file_handle);
@@ -27,7 +27,7 @@ fclose($file_handle);
 $dest_files = array(
 
   /* File names containing special(non-alpha numeric) characters */
-  "_copy_variation2.tmp", 
+  "_copy_variation2.tmp",
   "@copy_variation2.tmp",
   "#copy_variation2.tmp",
   "+copy_variation2.tmp",
@@ -84,12 +84,10 @@ foreach($dest_files as $dest_file) {
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/copy_variation2.tmp");
 ?>
-
 --EXPECTF--
 *** Test copy() function: destination file names containing special characters ***
 Size of the source file before copy operation => int(1500)

@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension pdo_dblib
 
 PHP_ARG_WITH(pdo-dblib, for PDO_DBLIB support via FreeTDS,
 [  --with-pdo-dblib[=DIR]    PDO: DBLIB-DB support.  DIR is the FreeTDS home directory])
@@ -40,7 +38,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     else
       AC_MSG_ERROR(Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory)
     fi
-  fi  
+  fi
 
   if test "x$PHP_LIBDIR" = "x" ; then
     PHP_LIBDIR=lib

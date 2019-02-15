@@ -21,11 +21,11 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 // array with different values
 $values =  array (
@@ -91,7 +91,7 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing stripos() function with unexpected values for haystack, needle & offset ***
 -- Iteration 1 --
-bool(false)
+int(0)
 -- Iteration 2 --
 bool(false)
 -- Iteration 3 --
@@ -115,9 +115,9 @@ bool(false)
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 8 --
-bool(false)
+int(0)
 -- Iteration 9 --
-bool(false)
+int(0)
 -- Iteration 10 --
 
 Warning: stripos() expects parameter 1 to be string, array given in %s on line %d

@@ -16,7 +16,7 @@ var_dump(filter_id(0,0,0));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(513)
 int(513)
 int(518)

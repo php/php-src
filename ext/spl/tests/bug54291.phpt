@@ -10,4 +10,3 @@ Stack trace:
 #0 %s(%d): DirectoryIterator->__construct('\x00/abc')
 #1 {main}
   thrown in %s on line %d
-

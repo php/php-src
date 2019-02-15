@@ -33,7 +33,7 @@ $linkname = "$dir/symlink_link_linkinfo_is_link_link_variation7.tmp";
 $dirname = "$dir/home/test";
 mkdir($dirname, 0755, true);
 
-// create file 
+// create file
 $fp = fopen($filename, "w");
 fclose($fp);
 

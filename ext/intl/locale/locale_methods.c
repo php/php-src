@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -242,9 +240,9 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 
 	ini_name = zend_string_init(LOCALE_INI_NAME, sizeof(LOCALE_INI_NAME) - 1, 0);
 	zend_alter_ini_entry(ini_name, locale_name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-	zend_string_release(ini_name);
+	zend_string_release_ex(ini_name, 0);
 	if (default_locale != NULL) {
-		zend_string_release(locale_name);
+		zend_string_release_ex(locale_name, 0);
 	}
 
 	RETURN_TRUE;
@@ -342,10 +340,10 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 				continue;
 			}
 
-			/* Error in retriving data */
+			/* Error in retrieving data */
 			*result = 0;
 			if( tag_value ){
-				zend_string_release( tag_value );
+				zend_string_release_ex( tag_value, 0 );
 			}
 			if( mod_loc_name ){
 				efree( mod_loc_name);
@@ -358,7 +356,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 		/* No value found */
 		*result = -1;
 		if( tag_value ){
-			zend_string_release( tag_value );
+			zend_string_release_ex( tag_value, 0 );
 		}
 		if( mod_loc_name ){
 			efree( mod_loc_name);
@@ -419,7 +417,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	/* No value found */
 	if( result == -1 ) {
 		if( tag_value){
-			zend_string_release( tag_value);
+			zend_string_release_ex( tag_value, 0 );
 		}
 		RETURN_STRING( empty_result);
 	}
@@ -742,9 +740,9 @@ PHP_FUNCTION( locale_get_keywords )
 			if (U_FAILURE(status)) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "locale_get_keywords: Error encountered while getting the keyword  value for the  keyword", 0 );
 				if( kw_value_str){
-					zend_string_free( kw_value_str );
+					zend_string_efree( kw_value_str );
 				}
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
         		RETURN_FALSE;
 			}
 
@@ -1074,14 +1072,14 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 */
 		}
 		if (key_value) {
-			zend_string_release(key_value);
+			zend_string_release_ex(key_value, 0);
 		}
 	} else {
 		if( result == 1 ){
 			add_assoc_str( hash_arr, key_name , key_value);
 			cur_result = 1;
 		} else if (key_value) {
-			zend_string_release(key_value);
+			zend_string_release_ex(key_value, 0);
 		}
 	}
 
@@ -1192,7 +1190,7 @@ PHP_FUNCTION(locale_get_all_variants)
 			}
 		}
 		if( variant ){
-			zend_string_release( variant );
+			zend_string_release_ex( variant, 0 );
 		}
 	}
 
@@ -1308,7 +1306,7 @@ PHP_FUNCTION(locale_filter_matches)
 		result = strToMatch( can_lang_tag->val , cur_lang_tag);
 		if( result == 0) {
 			efree( cur_lang_tag );
-			zend_string_release( can_lang_tag );
+			zend_string_release_ex( can_lang_tag, 0 );
 			RETURN_FALSE;
 		}
 
@@ -1316,9 +1314,9 @@ PHP_FUNCTION(locale_filter_matches)
 		result = strToMatch( can_loc_range->val , cur_loc_range );
 		if( result == 0) {
 			efree( cur_lang_tag );
-			zend_string_release( can_lang_tag );
+			zend_string_release_ex( can_lang_tag, 0 );
 			efree( cur_loc_range );
-			zend_string_release( can_loc_range );
+			zend_string_release_ex( can_loc_range, 0 );
 			RETURN_FALSE;
 		}
 
@@ -1332,10 +1330,10 @@ PHP_FUNCTION(locale_filter_matches)
 				efree( cur_lang_tag );
 				efree( cur_loc_range );
 				if( can_lang_tag){
-					zend_string_release( can_lang_tag );
+					zend_string_release_ex( can_lang_tag, 0 );
 				}
 				if( can_loc_range){
-					zend_string_release( can_loc_range );
+					zend_string_release_ex( can_loc_range, 0 );
 				}
 				RETURN_TRUE;
 			}
@@ -1349,10 +1347,10 @@ PHP_FUNCTION(locale_filter_matches)
 			efree( cur_loc_range );
 		}
 		if( can_lang_tag){
-			zend_string_release( can_lang_tag );
+			zend_string_release_ex( can_lang_tag, 0 );
 		}
 		if( can_loc_range){
-			zend_string_release( can_loc_range );
+			zend_string_release_ex( can_loc_range, 0 );
 		}
 		RETURN_FALSE;
 
@@ -1455,14 +1453,14 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 			lang_tag = get_icu_value_internal(cur_arr[i*2], LOC_CANONICALIZE_TAG, &result, 0);
 			if(result != 1 || lang_tag == NULL || !lang_tag->val[0]) {
 				if(lang_tag) {
-					zend_string_release(lang_tag);
+					zend_string_release_ex(lang_tag, 0);
 				}
 				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
 				LOOKUP_CLEAN_RETURN(NULL);
 			}
 			cur_arr[i*2] = erealloc(cur_arr[i*2], lang_tag->len+1);
 			result = strToMatch(lang_tag->val, cur_arr[i*2]);
-			zend_string_release(lang_tag);
+			zend_string_release_ex(lang_tag, 0);
 			if(result == 0) {
 				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
 				LOOKUP_CLEAN_RETURN(NULL);
@@ -1478,7 +1476,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 			/* Error */
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize loc_range" , 0 );
 			if(can_loc_range) {
-				zend_string_release(can_loc_range);
+				zend_string_release_ex(can_loc_range, 0);
 			}
 			LOOKUP_CLEAN_RETURN(NULL);
 		} else {
@@ -1490,7 +1488,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	/* convert to lower and replace hyphens */
 	result = strToMatch(loc_range, cur_loc_range);
 	if(can_loc_range) {
-		zend_string_release(can_loc_range);
+		zend_string_release_ex(can_loc_range, 0);
 	}
 	if(result == 0) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
@@ -1519,12 +1517,12 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 /* }}} */
 
 /* {{{ proto string Locale::lookup(array $langtag, string $locale[, bool $canonicalize[, string $default = null]])
-* Searchs the items in $langtag for the best match to the language
+* Searches the items in $langtag for the best match to the language
 * range
 */
 /* }}} */
 /* {{{ proto string locale_lookup(array $langtag, string $locale[, bool $canonicalize[, string $default = null]])
-* Searchs the items in $langtag for the best match to the language
+* Searches the items in $langtag for the best match to the language
 * range
 */
 PHP_FUNCTION(locale_lookup)
@@ -1631,13 +1629,3 @@ PHP_FUNCTION(locale_accept_from_http)
 	RETURN_STRINGL(resultLocale, len);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- *can_loc_len
-*/

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -379,7 +379,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_server_option)(MYSQLND_CONN_DATA * const c
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::set_server_option");
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->run_command(COM_SET_OPTION, conn, option);
+		ret = conn->command->set_option(conn, option);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -480,7 +480,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 	MYSQLND_VIO * vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
-	/* we allow load data local infile by default */
+	/* allow CLIENT_LOCAL_FILES capability, although extensions basing on mysqlnd
+		shouldn't allow 'load data local infile' by default due to security issues */
 	mysql_flags |= MYSQLND_CAPABILITIES;
 
 	mysql_flags |= conn->options->flags; /* use the flags from set_client_option() */
@@ -531,7 +532,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	{
 		size_t client_flags = mysql_flags;
 
-		ret = conn->run_command(COM_HANDSHAKE, conn, username, password, database, client_flags);
+		ret = conn->command->handshake(conn, *username, *password, *database, client_flags);
 	}
 	DBG_RETURN(ret);
 }
@@ -666,9 +667,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	{
 		const MYSQLND_CSTRING scheme = { transport.s, transport.l };
+		/* This will be overwritten below with a copy, but we can use it during authentication */
+		conn->unix_socket.s = (char *)socket_or_pipe.s;
 		if (FAIL == conn->m->connect_handshake(conn, &scheme, &username, &password, &database, mysql_flags)) {
+			conn->unix_socket.s = NULL;
 			goto err;
 		}
+		conn->unix_socket.s = NULL;
 	}
 
 	{
@@ -873,7 +878,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 	{
 		const MYSQLND_CSTRING query_string = {query, query_len};
 
-		ret = conn->run_command(COM_QUERY, conn, query_string);
+		ret = conn->command->query(conn, query_string);
 
 		if (type == MYSQLND_SEND_QUERY_EXPLICIT) {
 			conn->m->local_tx_end(conn, this_func, ret);
@@ -897,7 +902,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn, enum_mys
 	DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 	if (type == MYSQLND_REAP_RESULT_IMPLICIT || PASS == conn->m->local_tx_start(conn, this_func))
 	{
-		ret = conn->run_command(COM_REAP_RESULT, conn);
+		ret = conn->command->reap_result(conn);
 
 		if (type == MYSQLND_REAP_RESULT_EXPLICIT) {
 			conn->m->local_tx_end(conn, this_func, ret);
@@ -1042,7 +1047,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, dump_debug_info)(MYSQLND_CONN_DATA * const con
 	DBG_ENTER("mysqlnd_conn_data::dump_debug_info");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->run_command(COM_DEBUG, conn);
+		ret = conn->command->debug(conn);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 
@@ -1064,7 +1069,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, con
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		const MYSQLND_CSTRING database = {db, db_len};
 
-		ret = conn->run_command(COM_INIT_DB, conn, database);
+		ret = conn->command->init_db(conn, database);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1083,7 +1088,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn)
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->run_command(COM_PING, conn);
+		ret = conn->command->ping(conn);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_INF_FMT("ret=%u", ret);
@@ -1103,7 +1108,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->run_command(COM_STATISTICS, conn, message);
+		ret = conn->command->statistics(conn, message);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1122,11 +1127,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 	DBG_INF_FMT("conn=%llu pid=%u", conn->thread_id, pid);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		unsigned int process_id = pid;
+		const unsigned int process_id = pid;
 		/* 'unsigned char' is promoted to 'int' when passed through '...' */
-		unsigned int read_response = (pid != conn->thread_id);
+		const unsigned int read_response = (pid != conn->thread_id);
 
-		ret = conn->run_command(COM_PROCESS_KILL, conn, process_id, read_response);
+		ret = conn->command->process_kill(conn, process_id, read_response);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1183,9 +1188,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 	DBG_INF_FMT("conn=%llu options=%lu", conn->thread_id, options);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		unsigned int options_param = (unsigned int) options;
-
-		ret = conn->run_command(COM_REFRESH, conn, options_param);
+		ret = conn->command->refresh(conn, options);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1203,9 +1206,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint
 	DBG_INF_FMT("conn=%llu level=%lu", conn->thread_id, level);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		unsigned int level_param = (unsigned int) level;
-
-		ret = conn->run_command(COM_SHUTDOWN, conn, level_param);
+		ret = conn->command->shutdown(conn, level);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1236,7 +1237,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
 			if (net_stream) {
-				ret = conn->run_command(COM_QUIT, conn);
+				ret = conn->command->quit(conn);
 				vio->data->m.close_stream(vio, conn->stats, conn->error_info);
 			}
 			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
@@ -1574,7 +1575,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 
 	DBG_ENTER("mysqlnd_conn_data::change_user");
 	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%u",
-				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"", (silent == TRUE)?1:0 );
+				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"", silent == TRUE);
 
 	if (PASS != conn->m->local_tx_start(conn, this_func)) {
 		goto end;
@@ -1805,17 +1806,24 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 				if (!conn->options->connect_attr) {
 					goto oom;
 				}
-				zend_hash_init(conn->options->connect_attr, 0, NULL, ZVAL_PTR_DTOR, conn->persistent);
+				zend_hash_init(conn->options->connect_attr, 0, NULL, conn->persistent ? ZVAL_INTERNAL_PTR_DTOR : ZVAL_PTR_DTOR, conn->persistent);
 			}
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
 				zval attrz;
-				zend_string *str = zend_string_init(key, strlen(key), 1);
-				GC_MAKE_PERSISTENT_LOCAL(str);
-				ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), conn->persistent));
-				GC_MAKE_PERSISTENT_LOCAL(Z_COUNTED(attrz));
+				zend_string *str;
+
+				if (conn->persistent) {
+					str = zend_string_init(key, strlen(key), 1);
+					GC_MAKE_PERSISTENT_LOCAL(str);
+					ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 1));
+					GC_MAKE_PERSISTENT_LOCAL(Z_COUNTED(attrz));
+				} else {
+					str = zend_string_init(key, strlen(key), 0);
+					ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 0));
+				}
 				zend_hash_update(conn->options->connect_attr, str, &attrz);
-				zend_string_release(str);
+				zend_string_release_ex(str, 1);
 			}
 			break;
 		default:
@@ -2704,13 +2712,3 @@ mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, M
 	DBG_RETURN(ret);
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

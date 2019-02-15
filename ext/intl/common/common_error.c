@@ -241,9 +241,7 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_IDNA_VERIFICATION_ERROR );
 	INTL_EXPOSE_CONST( U_IDNA_LABEL_TOO_LONG_ERROR );
 	INTL_EXPOSE_CONST( U_IDNA_ZERO_LENGTH_LABEL_ERROR );
-#if U_ICU_VERSION_MAJOR_NUM > 3 || U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM >= 8
 	INTL_EXPOSE_CONST( U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR );
-#endif
 	INTL_EXPOSE_CONST( U_IDNA_ERROR_LIMIT );
 
 	/* Aliases for StringPrep */
@@ -256,12 +254,3 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	#undef INTL_EXPOSE_CONST
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

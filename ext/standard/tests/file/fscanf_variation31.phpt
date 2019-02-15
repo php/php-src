@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - octal formats with strings
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different octal format types with strings ***\n"; 
+echo "*** Test fscanf(): different octal format types with strings ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation31.tmp";
@@ -943,4 +943,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

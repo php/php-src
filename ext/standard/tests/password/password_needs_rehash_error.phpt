@@ -7,11 +7,11 @@ var_dump(password_needs_rehash());
 
 var_dump(password_needs_rehash(''));
 
-var_dump(password_needs_rehash('', "foo"));
+var_dump(password_needs_rehash('', []));
 
-var_dump(password_needs_rehash(array(), 1));
+var_dump(password_needs_rehash(array(), PASSWORD_BCRYPT));
 
-var_dump(password_needs_rehash("", 1, "foo"));
+var_dump(password_needs_rehash("", PASSWORD_BCRYPT, "foo"));
 
 echo "OK!";
 ?>
@@ -21,9 +21,7 @@ NULL
 
 Warning: password_needs_rehash() expects at least 2 parameters, 1 given in %s on line %d
 NULL
-
-Warning: password_needs_rehash() expects parameter 2 to be int, string given in %s on line %d
-NULL
+bool(false)
 
 Warning: password_needs_rehash() expects parameter 1 to be string, array given in %s on line %d
 NULL

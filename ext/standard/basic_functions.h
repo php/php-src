@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef BASIC_FUNCTIONS_H
 #define BASIC_FUNCTIONS_H
@@ -34,7 +32,7 @@
 
 #include "url_scanner_ex.h"
 
-#if defined(_WIN32) && defined(__clang__)
+#if defined(_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
 
@@ -140,6 +138,8 @@ PHP_FUNCTION(sapi_windows_cp_set);
 PHP_FUNCTION(sapi_windows_cp_get);
 PHP_FUNCTION(sapi_windows_cp_is_utf8);
 PHP_FUNCTION(sapi_windows_cp_conv);
+PHP_FUNCTION(sapi_windows_set_ctrl_handler);
+PHP_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
 
 PHP_FUNCTION(str_rot13);

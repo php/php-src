@@ -1,4 +1,4 @@
-BCMATH FAQ: 
+BCMATH FAQ:
 
 1) Why BCMATH?
 
@@ -18,4 +18,3 @@ calculate an exact number of digits after the decimal point regardless
 of the number of digits in the integer part.  GMP floats have a
 "fixed, but arbitrary" mantissa and so multiplying two floats will end
 up dropping digits BC must calculate.
-

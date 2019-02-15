@@ -4,7 +4,7 @@ Basic test imagecolormatch() of GD library
 Paulo Alves de Sousa Filho <pspalves [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--

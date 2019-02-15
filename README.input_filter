@@ -12,7 +12,7 @@ enforced.  It is implemented as a SAPI hook and is called from the
 treat_data and post handler functions.  To implement your own security
 policy you will need to write a standard PHP extension.  There is also
 a powerful standard implementation in ext/filter that should suit most
-peoples' needs.  However, if you want to implement your own security 
+peoples' needs.  However, if you want to implement your own security
 policy, read on.
 
 A simple implementation might look like the following.  This stores the
@@ -86,7 +86,6 @@ PHP_MINFO_FUNCTION(my_input_filter)
 {
     php_info_print_table_start();
     php_info_print_table_row( 2, "My Input Filter Support", "enabled" );
-    php_info_print_table_row( 2, "Revision", "$Id$");
     php_info_print_table_end();
 }
 

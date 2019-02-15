@@ -10,7 +10,7 @@ if (!extension_loaded('zlib')) die ('skip zlib extension not available in this b
 
 $filename = dirname(__FILE__)."/004.txt.gz";
 $use_include_path = false;
-$extra_arg = 'nothing'; 
+$extra_arg = 'nothing';
 
 var_dump(readgzfile( $filename, $use_include_path, $extra_arg ) );
 
@@ -20,7 +20,6 @@ var_dump(readgzfile(  ) );
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: readgzfile() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 

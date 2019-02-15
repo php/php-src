@@ -1,17 +1,17 @@
 --TEST--
-Test sizeof() function : basic functionality - for scalar types 
+Test sizeof() function : basic functionality - for scalar types
 --FILE--
 <?php
 /* Prototype  : int sizeof(mixed $var[, int $mode] )
- * Description: Counts an elements in an array. If Standard PHP library is 
+ * Description: Counts an elements in an array. If Standard PHP library is
  *              installed, it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
  * Alias to functions: count()
  */
 
-/* Testing the sizeof() for some of the scalar types(integer, float) values 
+/* Testing the sizeof() for some of the scalar types(integer, float) values
  * in default, COUNT_NORMAL and COUNT_RECURSIVE modes.
- */ 
+ */
 
 echo "*** Testing sizeof() : basic functionality ***\n";
 

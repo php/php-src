@@ -31,7 +31,7 @@ var_dump(array_filter("", null));
 var_dump(array_filter($array1, 1));
 
 echo '== DONE ==';
-?> 
+?>
 --EXPECTF--
 Odd :
 array(3) {

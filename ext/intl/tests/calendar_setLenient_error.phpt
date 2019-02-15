@@ -18,9 +18,7 @@ var_dump($c->setLenient(1, 2));
 
 var_dump(intlcal_set_lenient($c, array()));
 var_dump(intlcal_set_lenient(1, false));
-
 --EXPECTF--
-
 Warning: IntlCalendar::setLenient() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlCalendar::setLenient(): intlcal_set_lenient: bad arguments in %s on line %d

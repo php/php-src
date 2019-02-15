@@ -19,7 +19,7 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </ns1:dotest2>
  </env:Body>
 <env:Header/>
-</env:Envelope>";	
+</env:Envelope>";
 
 function book_to_xml($book) {
 	throw new SoapFault("Server", "Conversion Fault");
@@ -31,13 +31,13 @@ class test{
 		$book->a = "foo";
 		$book->b = "bar";
 		return $book;
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 
 $options=Array(

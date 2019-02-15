@@ -2,7 +2,7 @@
 Test fpassthru() function: Variations
 --FILE--
 <?php
-/* 
+/*
 Prototype: int fpassthru ( resource $handle );
 Description: Reads to EOF on the given file pointer from the current position
   and writes the results to the output buffer.
@@ -22,7 +22,7 @@ $file_read = fopen($file_name, "r");
 $offset_arr = array(
   /* Positive offsets */
   0,
-  1, 
+  1,
   5,
   10,
   20,
@@ -30,10 +30,10 @@ $offset_arr = array(
   35,
   36,
   70,
-  /* Negative offsets, the file pointer should be at the end of file 
+  /* Negative offsets, the file pointer should be at the end of file
   to get data */
-  -1, 
-  -5, 
+  -1,
+  -5,
   -10,
   -20,
   -35,
@@ -48,12 +48,12 @@ for( $i=0; $i<count($offset_arr); $i++ ) {
     var_dump(fpassthru($file_read) );
     rewind( $file_read );
   }else
-    { 
+    {
       fseek($file_read, $offset_arr[$i], SEEK_END);
       var_dump( fpassthru($file_read) );
       rewind( $file_read );
-    } 
-} 
+    }
+}
 
 fclose($file_read);  // closing the handle
 

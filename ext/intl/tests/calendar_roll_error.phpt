@@ -19,7 +19,6 @@ var_dump($c->roll(1));
 var_dump(intlcal_roll($c, 1, 2, 3));
 var_dump(intlcal_roll(1, 2, 3));
 --EXPECTF--
-
 Warning: IntlCalendar::roll(): intlcal_set: too many arguments in %s on line %d
 bool(false)
 

@@ -1,5 +1,5 @@
 --TEST--
-SPL: CachingInterator constructor flag checks 
+SPL: CachingInterator constructor flag checks
 --CREDITS--
 Sean Burlington www.practicalweb.co.uk
 TestFest London May 2009

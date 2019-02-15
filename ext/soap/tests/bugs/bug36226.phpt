@@ -32,7 +32,7 @@ class TestSoapClient extends SoapClient {
 
 }
 
-$soapClient = new TestSoapClient($wsdl, 
+$soapClient = new TestSoapClient($wsdl,
 	array('trace' => 1, 'exceptions' => 0,
 		'classmap' => array('logOnEvent' => 'LogOnEvent',
 			'logOffEvent' => 'LogOffEvent',

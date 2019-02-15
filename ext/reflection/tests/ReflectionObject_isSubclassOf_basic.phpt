@@ -9,7 +9,7 @@ class C extends B {}
 interface I {}
 class X implements I {}
 
-$classNames = array('A', 'B', 'C', 'I', 'X'); 
+$classNames = array('A', 'B', 'C', 'I', 'X');
 
 //Create ReflectionClasses
 foreach ($classNames as $className) {
@@ -33,7 +33,7 @@ foreach ($ros as $childName => $child) {
 			var_dump($child->isSubclassOf($ros[$parentName]));
 		}
 		echo "   - Using string argument: ";
-		var_dump($child->isSubclassOf($parentName)); 
+		var_dump($child->isSubclassOf($parentName));
 	}
 }
 ?>

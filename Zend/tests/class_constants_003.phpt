@@ -27,7 +27,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 int(1)
 int(5)
 Done

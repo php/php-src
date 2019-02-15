@@ -12,7 +12,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
      Returns TRUE on success or FALSE on failure.
 */
 
-/* Test copy() function: Trying to create copy of source file 
+/* Test copy() function: Trying to create copy of source file
      into different destination dir paths given in various notations */
 
 echo "*** Test copy() function: copying file across directories ***\n";
@@ -80,7 +80,6 @@ rmdir($base_dir);
 
 echo "*** Done ***\n";
 ?>
-
 --EXPECTF--
 *** Test copy() function: copying file across directories ***
 Size of source file => int(0)

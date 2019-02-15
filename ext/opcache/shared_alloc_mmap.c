@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -31,6 +31,9 @@
 
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 # define MAP_ANONYMOUS MAP_ANON
+#endif
+#if defined(MAP_ALIGNED_SUPER)
+# define MAP_HUGETLB MAP_ALIGNED_SUPER
 #endif
 
 static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
@@ -48,10 +51,14 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 
 #ifdef MAP_HUGETLB
 	/* Try to allocate huge pages first to reduce dTLB misses.
-	 * OS has to be configured properly
+	 * OSes has to be configured properly
+	 * on Linux
 	 * (e.g. https://wiki.debian.org/Hugepages#Enabling_HugeTlbPage)
 	 * You may verify huge page usage with the following command:
 	 * `grep "Huge" /proc/meminfo`
+	 * on FreeBSD
+	 * sysctl vm.pmap.pg_ps_enabled entry
+	 * (boot time config only, but enabled by default on most arches).
 	 */
 	shared_segment->p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, -1, 0);
 	if (shared_segment->p != MAP_FAILED) {

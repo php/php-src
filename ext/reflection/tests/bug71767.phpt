@@ -16,7 +16,7 @@ class Foo {
         /** wrong docblock */
         $arg
     ) {
-        
+
     }
 }
 

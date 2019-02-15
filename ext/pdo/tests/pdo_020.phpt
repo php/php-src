@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: PDOStatement::columnCount
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -15,8 +15,8 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
-$db->exec("INSERT INTO test VALUES(1, 'A', 'A')"); 
-$db->exec("INSERT INTO test VALUES(2, 'B', 'B')"); 
+$db->exec("INSERT INTO test VALUES(1, 'A', 'A')");
+$db->exec("INSERT INTO test VALUES(2, 'B', 'B')");
 $db->exec("INSERT INTO test VALUES(3, 'C', 'C')");
 
 foreach (array('SELECT id, val FROM test', 'SELECT id, val, val2 FROM test', 'SELECT COUNT(*) FROM test') as $sql) {

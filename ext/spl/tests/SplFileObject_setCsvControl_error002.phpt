@@ -21,4 +21,3 @@ unlink('csv_control_data.csv');
 ?>
 --EXPECTF--
 Warning: SplFileObject::setCsvControl(): enclosure must be a character in %s on line %d
-

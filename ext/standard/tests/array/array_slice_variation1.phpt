@@ -20,42 +20,43 @@ var_dump(array_slice(range(1, 3), 0, $a));
 var_dump($a);
 
 ?>
+--EXPECTF--
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(0) {
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  int(3)
+}
+array(1) {
+  [2]=>
+  int(3)
+}
 
---EXPECT--
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(0) {
-}
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(1) {
-  [0]=>
-  int(3)
-}
-array(1) {
-  [2]=>
-  int(3)
-}
-array(0) {
-}
-array(0) {
-}
+Warning: array_slice() expects parameter 3 to be int, string given in %s on line %d
+NULL
+
+Warning: array_slice() expects parameter 3 to be int, string given in %s on line %d
+NULL
 string(3) "foo"

@@ -27,12 +27,12 @@ $filenames = array(
   FALSE,
   NULL,
   $file_handle,
-  
+
   /* scalars */
   1234,
   0
 );
-   
+
 /* loop through to test each element the above array */
 foreach( $filenames as $filename ) {
   var_dump( readlink($filename) );
@@ -75,4 +75,3 @@ Warning: readlink(): %s in %s on line %d
 bool(false)
 
 *** Done ***
-

@@ -17,7 +17,7 @@ var_dump(convert_uudecode(substr($enc, 0, -10)));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: convert_uuencode() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 

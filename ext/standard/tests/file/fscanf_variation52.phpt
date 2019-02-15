@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - empty file 
+Test fscanf() function: usage variations - empty file
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ Test fscanf() function: usage variations - empty file
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): to read an empty file ***\n"; 
+echo "*** Test fscanf(): to read an empty file ***\n";
 
 // various formats
 $formats = array( "%d", "%f", "%e", "%u", " %s", "%x", "%o");
@@ -28,7 +28,7 @@ $modes = array("r", "rb", "rt", "r+", "r+b", "r+t",
 $counter = 1;
 // reading the values from file using different integer formats
 foreach($modes as $mode) {
-  
+
   // create an empty file
   $filename = "$file_path/fscanf_variation52.tmp";
   $file_handle = fopen($filename, "w");
@@ -175,4 +175,3 @@ bool(false)
 bool(false)
 
 *** Done ***
-

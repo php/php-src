@@ -85,18 +85,7 @@
 #endif
 
 #include <stddef.h>
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
-#endif
 
 #include "mbfilter.h"
 #include "mbfl_filter_output.h"
@@ -147,7 +136,7 @@ mbfl_buffer_converter_new(
 
 	/* create convert filter */
 	convd->filter1 = NULL;
-convd->filter2 = NULL;
+	convd->filter2 = NULL;
 	if (mbfl_convert_filter_get_vtbl(convd->from, convd->to) != NULL) {
 		convd->filter1 = mbfl_convert_filter_new(convd->from, convd->to, mbfl_memory_device_output, NULL, &convd->device);
 	} else {
@@ -164,6 +153,7 @@ convd->filter2 = NULL;
 		}
 	}
 	if (convd->filter1 == NULL) {
+		mbfl_free(convd);
 		return NULL;
 	}
 
@@ -1687,7 +1677,7 @@ mbfl_strimwidth(
 	mbfl_string_init(result);
 	result->no_language = string->no_language;
 	result->encoding = string->encoding;
-	mbfl_memory_device_init(&pc.device, width, 0);
+	mbfl_memory_device_init(&pc.device, MIN(string->len, width), 0);
 
 	/* output code filter */
 	pc.decoder = mbfl_convert_filter_new(
@@ -2399,7 +2389,7 @@ mime_header_decoder_new(const mbfl_encoding *outcode)
 	mbfl_memory_device_init(&pd->tmpdev, 0, 0);
 	pd->cspos = 0;
 	pd->status = 0;
-	pd->encoding = &mbfl_encoding_pass;
+	pd->encoding = &mbfl_encoding_8bit;
 	pd->incode = &mbfl_encoding_ascii;
 	pd->outcode = outcode;
 	/* charset convert filter */
@@ -2902,10 +2892,3 @@ mbfl_html_numeric_entity(
 
 	return result;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

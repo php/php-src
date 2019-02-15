@@ -4,12 +4,12 @@ Bug #55719 (Argument restriction should come with a more specific error message)
 <?php
 Class Base {
 	public function &test($foo, array $bar, $option = NULL, $extra = "lllllllllllllllllllllllllllllllllllllllllllllllllll") {
-	}	
+	}
 }
 
 class Sub extends Base {
 	public function &test() {
-	}	
+	}
 }
 ?>
 --EXPECTF--

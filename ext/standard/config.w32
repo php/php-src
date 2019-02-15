@@ -1,15 +1,14 @@
 // vim:ft=javascript
-// $Id$
 
 ARG_WITH("password-argon2", "Argon2 support", "no");
 
 if (PHP_PASSWORD_ARGON2 != "no") {
 	if (CHECK_LIB("argon2_a.lib;argon2.lib", null, PHP_PASSWORD_ARGON2)
 	&& CHECK_HEADER_ADD_INCLUDE("argon2.h", "CFLAGS")) {
-		AC_DEFINE('HAVE_ARGON2LIB', 1);
-		if (CHECK_FUNC_IN_HEADER("argon2.h", "argon2id_hash_raw", PHP_PHP_BUILD + "\\include", "CFLAGS")) {
-			AC_DEFINE('HAVE_ARGON2ID', 1);
+		if (!CHECK_FUNC_IN_HEADER("argon2.h", "argon2id_hash_raw", PHP_PHP_BUILD + "\\include", "CFLAGS")) {
+			ERROR("Please verify that Argon2 header and libaries >= 20161029 are installed");
 		}
+		AC_DEFINE('HAVE_ARGON2LIB', 1);
 	} else {
 		WARNING("Argon2 not enabled; libaries and headers not found");
 	}

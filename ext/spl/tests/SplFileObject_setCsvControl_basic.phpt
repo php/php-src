@@ -27,4 +27,3 @@ unlink('csv_control_data.csv');
 groene appelen : 10
 gele bananen : 20
 rode kersen : 30
-

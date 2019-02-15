@@ -1,5 +1,5 @@
 --TEST--
-Test str_shuffle() function : error conditions 
+Test str_shuffle() function : error conditions
 --FILE--
 <?php
 

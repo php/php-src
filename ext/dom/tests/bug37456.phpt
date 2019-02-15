@@ -17,6 +17,4 @@ print $attr->nodeValue;
 
 ?>
 --EXPECT--
-
 newval
-

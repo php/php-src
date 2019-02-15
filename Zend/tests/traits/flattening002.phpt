@@ -1,5 +1,5 @@
 --TEST--
-parent:: works like in a method defined without traits. 
+parent:: works like in a method defined without traits.
 --FILE--
 <?php
 error_reporting(E_ALL);
@@ -9,7 +9,7 @@ class Base {
      echo 'Hello ';
    }
 }
- 
+
 trait SayWorld {
    public function sayHello() {
      parent::sayHello();
@@ -24,5 +24,5 @@ class MyHelloWorld extends Base {
 $o = new MyHelloWorld();
 $o->sayHello();
 ?>
---EXPECT--	
+--EXPECT--
 Hello World!

@@ -5,7 +5,6 @@ Test copy() function: usage variations - dir as source (Bug #42111)
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip Do not run on Windows");
 ?>
-
 --FILE--
 <?php
 /* Prototype: bool copy ( string $source, string $dest );
@@ -32,12 +31,10 @@ var_dump( filesize($dest) );
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
 rmdir(dirname(__FILE__)."/copy_variation12");
 ?>
-
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of an existing dir ***
 

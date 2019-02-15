@@ -19,7 +19,6 @@ var_dump($c->add(1));
 var_dump(intlcal_add($c, 1, 2, 3));
 var_dump(intlcal_add(1, 2, 3));
 --EXPECTF--
-
 Warning: IntlCalendar::add() expects exactly 2 parameters, 3 given in %s on line %d
 
 Warning: IntlCalendar::add(): intlcal_add: bad arguments in %s on line %d

@@ -27,7 +27,7 @@ foreach ($paths as $d) {
 }
 
 $myDirectory = opendir($prefix);
-while($entryName = readdir($myDirectory)) {	
+while($entryName = readdir($myDirectory)) {
 	echo get_basename_with_cp($prefix . $entryName, 65001, false) . "\n";
 }
 closedir($myDirectory);

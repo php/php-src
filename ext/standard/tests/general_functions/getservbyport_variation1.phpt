@@ -18,7 +18,7 @@ Simone Gentili (sensorario@gmail.com)
 	var_dump(getservbyport( 2, 2));
 	var_dump(getservbyport( "80", "tcp"));
 	var_dump(getservbyport( new stdClass(), new stdClass()));
-	
+
 ?>
 --EXPECTF--
 bool(false)

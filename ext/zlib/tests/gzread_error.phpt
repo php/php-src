@@ -1,9 +1,9 @@
 --TEST--
 Test function gzread() by calling it more than or less than its expected arguments
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -11,8 +11,8 @@ if (!extension_loaded("zlib")) {
 
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
-$length = 10; 
-$extra_arg = 'nothing'; 
+$length = 10;
+$extra_arg = 'nothing';
 
 var_dump(gzread( $h, $length, $extra_arg ) );
 
@@ -23,7 +23,6 @@ gzclose($h);
 ?>
 ===DONE===
 --EXPECTF--
-
 Warning: gzread() expects exactly 2 parameters, 3 given in %s on line %d
 bool(false)
 

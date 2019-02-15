@@ -13,4 +13,3 @@ var_dump($im);
 --EXPECTF--
 Warning: imagecreatefromxbm(): '%slibgd00094私はガラスを食べられます.xbm' is not a valid XBM file in %slibgd00094-mb.php on line %d
 bool(false)
-

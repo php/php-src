@@ -21,7 +21,7 @@ class string1
 $obj = new string1;
 var_dump( addcslashes($obj, "b") );
 
-echo "Done\n"; 
+echo "Done\n";
 
 ?>
 --EXPECT--

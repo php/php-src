@@ -1,9 +1,5 @@
 --TEST--
-hash_init() function - errors test
---SKIPIF--
-<?php
-if (!extension_loaded('hash')) die('skip hash extension not available');
-?>
+Hash: hash_init() function - errors test
 --FILE--
 <?php
 echo "*** Testing hash_init(): error conditions ***\n";

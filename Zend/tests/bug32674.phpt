@@ -34,7 +34,7 @@ class collection implements Iterator {
   }
 
   public function valid() {
-    throw new Exception('shit happend');
+    throw new Exception('shit happened');
 
     return ($this->current() !== false);
   }
@@ -52,7 +52,7 @@ try {
   	//irrelevant
 	}
 	echo 'shouldn`t get here';
-	//$dummy = 'this will not crash'; 
+	//$dummy = 'this will not crash';
 	$obj->dummy = 'this will crash';
 } catch (Exception $e) {
 	echo "ok\n";

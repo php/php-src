@@ -27,6 +27,5 @@ $str = mb_strwidth($euc_jp, -100, 10,'...','EUC-JP');
 ($str !== "") ?	print "6 OK: $str\n" : print "NG: $str\n";
 */
 ?>
-
 --EXPECT--
 1: 68

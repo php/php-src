@@ -18,9 +18,7 @@ var_dump($c->isSet(-1));
 
 var_dump(intlcal_is_set($c));
 var_dump(intlcal_is_set(1, 2));
-
 --EXPECTF--
-
 Warning: IntlCalendar::isSet() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: IntlCalendar::isSet(): intlcal_is_set: bad arguments in %s on line %d

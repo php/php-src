@@ -6,10 +6,9 @@ Basic class support - attempting to create a reference to a class constant
   {
       const myConst = "hello";
   }
-  
+
   echo "\nAttempting to create a reference to a class constant - should be parse error.\n";
   $a = &aclass::myConst;
 ?>
 --EXPECTF--
-
 Parse error: %s in %s on line %d

@@ -16,7 +16,7 @@ var_dump(quoted_printable_encode(false));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: quoted_printable_encode() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 string(0) ""

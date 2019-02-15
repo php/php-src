@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,16 +17,10 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_SCANDIR_H
 #define PHP_SCANDIR_H
 
 #include <sys/types.h>
-
-#ifdef HAVE_SYS_DIR_H
-#include <sys/dir.h>
-#endif
 
 #ifdef PHP_WIN32
 #include "config.w32.h"
@@ -52,11 +46,3 @@ PHPAPI int php_alphasort(const struct dirent **a, const struct dirent **b);
 #endif
 
 #endif /* PHP_SCANDIR_H */
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

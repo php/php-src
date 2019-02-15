@@ -72,4 +72,3 @@ foreach ($tests as $n=>$test)
 	}
 }
 if ($success) echo "OK";
-

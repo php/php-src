@@ -12,13 +12,13 @@ function withRefValue($elements, $transform) {
 		$a[] = "v.$i";
 	}
 	$counter=0;
-	
+
 	$ref = &$a;
-	
+
 	echo "--> State of referenced array before loop:\n";
 	var_dump($a);
-	
-	echo "--> Do loop:\n";	
+
+	echo "--> Do loop:\n";
 	foreach ($a as $k=>$v) {
 		echo "     iteration $counter:  \$k=$k; \$v=$v\n";
 		eval($transform);
@@ -28,7 +28,7 @@ function withRefValue($elements, $transform) {
 			break;
 		}
 	}
-	
+
 	echo "--> State of array after loop:\n";
 	var_dump($a);
 }

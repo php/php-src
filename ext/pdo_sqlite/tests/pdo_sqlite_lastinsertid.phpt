@@ -16,7 +16,7 @@ var_dump($db->lastInsertId());
 $db->query('DROP TABLE foo');
 
 ?>
---EXPECTF--
+--EXPECT--
 object(PDOStatement)#2 (1) {
   ["queryString"]=>
   string(17) "SELECT * FROM foo"

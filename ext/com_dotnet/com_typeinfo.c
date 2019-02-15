@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |         Harald Radi <h.radi@nme.at>                                  |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -197,21 +195,20 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 				SysFreeString(bstr_ids);
 
 				/* sanity check for the case where the constant is already defined */
+				php_com_zval_from_variant(&value, pVarDesc->lpvarValue, codepage);
 				if ((exists = zend_get_constant(c.name)) != NULL) {
-					if (COMG(autoreg_verbose) && !compare_function(&results, &c.value, exists)) {
-						php_error_docref(NULL, E_WARNING, "Type library constant %s is already defined", c.name);
+					if (COMG(autoreg_verbose) && !compare_function(&results, &value, exists)) {
+						php_error_docref(NULL, E_WARNING, "Type library constant %s is already defined", ZSTR_VAL(c.name));
 					}
-					zend_string_release(c.name);
+					zend_string_release_ex(c.name, 1);
 					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 					continue;
 				}
 
 				/* register the constant */
-				php_com_zval_from_variant(&value, pVarDesc->lpvarValue, codepage);
 				if (Z_TYPE(value) == IS_LONG) {
-					c.flags = mode;
+					ZEND_CONSTANT_SET_FLAGS(&c, mode, 0);
 					ZVAL_LONG(&c.value, Z_LVAL(value));
-					c.module_number = 0;
 					zend_register_constant(&c);
 				}
 				ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
@@ -223,9 +220,9 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 }
 
 /* Type-library stuff */
-void php_com_typelibrary_dtor(void *pDest)
+void php_com_typelibrary_dtor(zval *pDest)
 {
-	ITypeLib **Lib = (ITypeLib**)pDest;
+	ITypeLib **Lib = (ITypeLib**)Z_PTR_P(pDest);
 	ITypeLib_Release(*Lib);
 }
 
@@ -604,5 +601,3 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 
 	return ret;
 }
-
-

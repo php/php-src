@@ -1,7 +1,7 @@
 --TEST--
 ODBC
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo_odbc')) print 'skip';
 if (substr(PHP_OS, 0, 3) == 'WIN' &&
 	false === getenv('PDOTEST_DSN') &&
@@ -16,7 +16,7 @@ $config = array(
 	'TESTS' => 'ext/pdo/tests',
 	'ENV' => array()
 );
-	
+
 // try loading PDO driver using ENV vars and if none given, and on Windows, try using MS Access
 // and if not, skip the test
 //
@@ -27,7 +27,7 @@ if (false !== getenv('PDOTEST_DSN')) {
 	// 2. it detects if ODBC driver is not installed - to avoid test bug
 	// 3. it detects if ODBC driver is installed - so test will be run
 	// 4. so a specific ODBC driver can be tested - if system has multiple ODBC drivers
-	
+
 	$config['ENV']['PDOTEST_DSN'] = getenv('PDOTEST_DSN');
 	$config['ENV']['PDOTEST_USER'] = getenv('PDOTEST_USER');
 	$config['ENV']['PDOTEST_PASS'] = getenv('PDOTEST_PASS');
@@ -53,7 +53,7 @@ if (false !== getenv('PDOTEST_DSN')) {
 			$adox = new COM('ADOX.Catalog');
 			$adox->Create('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' . $path);
 			$adox = null;
-	
+
 		} catch (Exception $e) {
 		}
 	}
@@ -73,5 +73,5 @@ $DBNAME = 'SAMPLE';
 $CONNECTION = "odbc:DSN=$DBNAME;UID=$USER;PWD=$PASSWD;";
 */
 
-	
+
 return $config;

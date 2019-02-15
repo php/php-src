@@ -40,8 +40,7 @@ shm_remove($s);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-
+--EXPECTF--
 Warning: shm_get_var() expects exactly 2 parameters, 0 given in %s005.php on line %d
 NULL
 

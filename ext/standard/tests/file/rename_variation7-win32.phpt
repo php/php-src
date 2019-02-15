@@ -25,8 +25,8 @@ var_dump(readlink($tmp_link2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: symlink(): Could not fetch file information(error 2) in %srename_variation7-win32.php on line %d
+--EXPECTF--
+Warning: symlink(): No such file or directory in %srename_variation7-win32.php on line %d
 
 Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link), error 2) in %srename_variation7-win32.php on line %d
 bool(false)

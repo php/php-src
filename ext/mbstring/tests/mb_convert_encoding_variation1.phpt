@@ -8,7 +8,7 @@ function_exists('mb_convert_encoding') or die("skip mb_convert_encoding() is not
 --FILE--
 <?php
 /* Prototype  : string mb_convert_encoding(string $str, string $to_encoding [, mixed $from_encoding])
- * Description: Returns converted string in desired encoding 
+ * Description: Returns converted string in desired encoding
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -68,7 +68,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -77,7 +77,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -204,4 +204,3 @@ string(24) "68656c6c6f2c20776f726c64"
 Warning: mb_convert_encoding() expects parameter 2 to be string, resource given in %s on line %d
 string(0) ""
 Done
-

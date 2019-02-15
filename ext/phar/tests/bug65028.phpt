@@ -122,7 +122,7 @@ $files = array(
 	"style/Fusonic/40components.css",
 	"style/_emptyDirectory",
 	"index.php",
-//	"a", // This will make the test pass	
+//	"a", // This will make the test pass
 );
 
 // Create Phar with the filenames above
@@ -153,4 +153,3 @@ catch(UnexpectedValueException $ex)
 ?>
 --EXPECT--
 No exception thrown.
-

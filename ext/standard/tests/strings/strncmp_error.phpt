@@ -1,5 +1,5 @@
 --TEST--
-Test strncmp() function : error conditions 
+Test strncmp() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int strncmp ( string $str1, string $str2, int $len );

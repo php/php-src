@@ -1,5 +1,5 @@
 --TEST--
-Test trim() function : error conditions 
+Test trim() function : error conditions
 --FILE--
 <?php
 

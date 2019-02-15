@@ -33,7 +33,7 @@ $s = shm_attach($key);
 shm_remove($s);
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: shm_detach() expects exactly 1 parameter, 0 given in %s003.php on line %d
 NULL
 

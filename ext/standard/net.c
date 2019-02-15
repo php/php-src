@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,9 @@
 #endif
 
 #ifdef PHP_WIN32
+# ifndef __clang__
 # include <intrin.h>
+# endif
 # include <winsock2.h>
 # include <ws2ipdef.h>
 # include <Ws2tcpip.h>
@@ -56,7 +58,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 				ZSTR_LEN(ret) = strlen(ZSTR_VAL(ret));
 				return ret;
 			}
-			zend_string_free(ret);
+			zend_string_efree(ret);
 			break;
 		}
 #endif
@@ -66,7 +68,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 				ZSTR_LEN(ret) = strlen(ZSTR_VAL(ret));
 				return ret;
 			}
-			zend_string_free(ret);
+			zend_string_efree(ret);
 			break;
 		}
 	}
@@ -88,7 +90,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 				ZSTR_LEN(ret) = strlen(ZSTR_VAL(ret));
 				return ret;
 			}
-			zend_string_free(ret);
+			zend_string_efree(ret);
 			break;
 		}
 	}

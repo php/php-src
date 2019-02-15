@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
   |          Sara Golemon <pollita@php.net>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php_hash.h"
 #include "php_hash_sha.h"
@@ -329,7 +327,7 @@ static void SHA1Transform(uint32_t state[5], const unsigned char block[64])
    context.
  */
 PHP_HASH_API void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
-			   unsigned int inputLen)
+			   size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -539,7 +537,7 @@ PHP_HASH_API void PHP_SHA224Init(PHP_SHA224_CTX * context)
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -616,7 +614,7 @@ PHP_HASH_API void PHP_SHA224Final(unsigned char digest[28], PHP_SHA224_CTX * con
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -830,9 +828,9 @@ static void SHA512Transform(uint64_t state[8], const unsigned char block[128])
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX * context, const unsigned char *input, size_t inputLen)
 {
-	unsigned int i, index, partLen;
+	unsigned int i = 0, index, partLen;
 
 	/* Compute number of bytes mod 128 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x7F);
@@ -856,8 +854,6 @@ PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX * context, const unsigned char
 		}
 
 		index = 0;
-	} else {
-		i = 0;
 	}
 
 	/* Buffer remaining input */
@@ -981,7 +977,7 @@ PHP_HASH_API void PHP_SHA512_224Init(PHP_SHA512_CTX * context)
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -1115,12 +1111,3 @@ const php_hash_ops php_hash_sha512_224_ops = {
 	sizeof(PHP_SHA512_CTX),
 	1
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

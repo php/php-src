@@ -3,7 +3,7 @@ Test array_intersect() function : usage variations - assoc array with diff keys 
 --FILE--
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
@@ -48,7 +48,7 @@ $arrays = array (
              "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 
-       // array with unset variable 
+       // array with unset variable
 /*10*/ array( @$unset_var => "hello"),
 
        // array with mixed keys

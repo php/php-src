@@ -33,4 +33,3 @@ rmdir($sessdir);
 --EXPECT--
 hello world
 string(6) "100777"
-

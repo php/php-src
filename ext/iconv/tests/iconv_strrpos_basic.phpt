@@ -10,7 +10,7 @@ error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
 /* Prototype  : proto int iconv_strrpos(string haystack, string needle [, string charset])
- * Description: Find position of last occurrence of a string within another 
+ * Description: Find position of last occurrence of a string within another
  * Source code: ext/iconv/iconv.c
  */
 
@@ -57,4 +57,3 @@ int(20)
 -- Multibyte string 2 --
 bool(false)
 Done
-

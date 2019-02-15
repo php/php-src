@@ -51,7 +51,7 @@ PHP_FUNCTION( numfmt_parse )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz/!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -60,18 +60,17 @@ PHP_FUNCTION( numfmt_parse )
 		RETURN_FALSE;
 	}
 
+	if(zposition) {
+		position = (int32_t) zval_get_long(zposition);
+		position_p = &position;
+	}
+
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	/* Convert given string to UTF-16. */
 	intl_convert_utf8_to_utf16(&sstr, &sstr_len, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
-
-	if(zposition) {
-		ZVAL_DEREF(zposition);
-		position = (int32_t)zval_get_long( zposition );
-		position_p = &position;
-	}
 
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
 	/* need to copy here since setlocale may change it later */
@@ -106,8 +105,7 @@ PHP_FUNCTION( numfmt_parse )
 	efree(oldlocale);
 #endif
 	if(zposition) {
-		zval_dtor(zposition);
-		ZVAL_LONG(zposition, position);
+		ZEND_TRY_ASSIGN_LONG(zposition, position);
 	}
 
 	if (sstr) {
@@ -138,7 +136,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z/!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -155,15 +153,13 @@ PHP_FUNCTION( numfmt_parse_currency )
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
 	if(zposition) {
-		ZVAL_DEREF(zposition);
-		position = (int32_t)zval_get_long( zposition );
+		position = (int32_t) zval_get_long(zposition);
 		position_p = &position;
 	}
 
 	number = unum_parseDoubleCurrency(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, currency, &INTL_DATA_ERROR_CODE(nfo));
 	if(zposition) {
-		zval_dtor(zposition);
-		ZVAL_LONG(zposition, position);
+		ZEND_TRY_ASSIGN_LONG(zposition, position);
 	}
 	if (sstr) {
 		efree(sstr);
@@ -173,18 +169,9 @@ PHP_FUNCTION( numfmt_parse_currency )
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */
 	u8str = intl_convert_utf16_to_utf8(currency, u_strlen(currency), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-8 failed" );
-	zval_dtor( zcurrency );
+	zval_ptr_dtor( zcurrency );
 	ZVAL_NEW_STR(zcurrency, u8str);
 
 	RETVAL_DOUBLE( number );
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

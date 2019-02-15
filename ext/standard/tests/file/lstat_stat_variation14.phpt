@@ -1,5 +1,5 @@
 --TEST--
-Test lstat() and stat() functions: usage variations - hardlink  
+Test lstat() and stat() functions: usage variations - hardlink
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
@@ -28,7 +28,7 @@ fclose($fp);
 
 echo "*** Checking lstat() and stat() on hard link ***\n";
 $linkname = "$file_path/lstat_stat_variation14_hard.tmp";
-//ensure that link doesn't exists 
+//ensure that link doesn't exists
 @unlink($linkname);
 
 // create the link
@@ -45,7 +45,6 @@ clearstatcache();
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);

@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "w+t" mode 
+Test fopen and fclose() functions - usage variations - "w+t" mode
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) == "WIN" )
@@ -54,7 +54,7 @@ clearstatcache();
 unlink($file);  //Deleting the file
 fclose( fopen($file, "w+t") );  //Opening the non-existing file in "w+t" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/007_variation12.tmp");

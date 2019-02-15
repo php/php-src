@@ -54,8 +54,8 @@ sleep(2);
 $new_file_stat = stat($filename);
 clearstatcache();
 
-// stat contains 13 different values stored twice, can be accessed using 
-// numeric and named keys, compare them to see they are same  
+// stat contains 13 different values stored twice, can be accessed using
+// numeric and named keys, compare them to see they are same
 echo "*** Testing stat() and lstat() : validating the values stored in stat ***\n";
 // Initial stat values
 var_dump( compare_self_stat($file_stat) ); //expect true
@@ -66,7 +66,7 @@ var_dump( compare_self_stat($link_stat) ); // expect true
 var_dump( compare_self_stat($new_file_stat) ); //expect true
 var_dump( compare_self_stat($new_dir_stat) );  // expect true
 
-// compare the two stat values, initial stat and stat recorded after 
+// compare the two stat values, initial stat and stat recorded after
 // creating files and link, also dump the value of stats
 echo "*** Testing stat() and lstat() : comparing stats (recorded before and after file/link creation) ***\n";
 echo "-- comparing difference in dir stats before and after creating file in it --\n";

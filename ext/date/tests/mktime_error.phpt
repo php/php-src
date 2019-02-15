@@ -1,14 +1,14 @@
 --TEST--
-Test mktime() function : error conditions 
+Test mktime() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int mktime  ([ int $hour= date("H")  [, int $minute= date("i")  [, int $second= date("s")  [, int $month= date("n")  [, int $day= date("j")  [, int $year= date("Y")  [, int $is_dst= -1  ]]]]]]] )
  * Description: Get Unix timestamp for a date
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing mktime() : error conditions ***\n";
@@ -33,8 +33,8 @@ var_dump( mktime($hour, $minute, $sec, $month, $day, $year, $extra_arg) );
 
 -- Testing mktime() function with Zero arguments --
 
-Deprecated: mktime(): You should be using the time() function instead in %s on line %d
-int(%d)
+Warning: mktime() expects at least 1 parameter, 0 given in %s on line %d
+bool(false)
 
 -- Testing mktime() function with more than expected no. of arguments --
 

@@ -25,16 +25,6 @@ Array
             [name] => I6
         )
 
-    [I2] => ReflectionClass Object
-        (
-            [name] => I2
-        )
-
-    [I1] => ReflectionClass Object
-        (
-            [name] => I1
-        )
-
     [I4] => ReflectionClass Object
         (
             [name] => I4
@@ -43,6 +33,16 @@ Array
     [I3] => ReflectionClass Object
         (
             [name] => I3
+        )
+
+    [I2] => ReflectionClass Object
+        (
+            [name] => I2
+        )
+
+    [I1] => ReflectionClass Object
+        (
+            [name] => I1
         )
 
     [I5] => ReflectionClass Object

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Clayton Collie <clcollie@mindspring.com>                     |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /*
 	scanf.c --
@@ -741,9 +739,8 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = Z_REFVAL(args[objIndex++]);
-						zval_ptr_dtor(current);
-						ZVAL_LONG(current, (zend_long)(string - baseString) );
+						current = args + objIndex++;
+						ZEND_TRY_ASSIGN_LONG(current, (zend_long) (string - baseString));
 					} else {
 						add_index_long(return_value, objIndex++, string - baseString);
 					}
@@ -860,9 +857,8 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = Z_REFVAL(args[objIndex++]);
-						zval_ptr_dtor(current);
-						ZVAL_STRINGL(current, string, end-string);
+						current = args + objIndex++;
+						ZEND_TRY_ASSIGN_STRINGL(current, string, end - string);
 					} else {
 						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
@@ -901,9 +897,8 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = Z_REFVAL(args[objIndex++]);
-						zval_ptr_dtor(current);
-						ZVAL_STRINGL(current, string, end-string);
+						current = args + objIndex++;
+						ZEND_TRY_ASSIGN_STRINGL(current, string, end - string);
 					} else {
 						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
@@ -1054,10 +1049,9 @@ addToInt:
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {
-						  /* change passed value type to string */
-							current = Z_REFVAL(args[objIndex++]);
-							zval_ptr_dtor(current);
-							ZVAL_STRING(current, buf);
+							 /* change passed value type to string */
+							current = args + objIndex++;
+							ZEND_TRY_ASSIGN_STRING(current, buf);
 						} else {
 							add_index_string(return_value, objIndex++, buf);
 						}
@@ -1065,9 +1059,8 @@ addToInt:
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {
-							current = Z_REFVAL(args[objIndex++]);
-							zval_ptr_dtor(current);
-							ZVAL_LONG(current, value);
+							current = args + objIndex++;
+							ZEND_TRY_ASSIGN_LONG(current, value);
 						} else {
 							add_index_long(return_value, objIndex++, value);
 						}
@@ -1170,9 +1163,8 @@ addToFloat:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = Z_REFVAL(args[objIndex++]);
-						zval_ptr_dtor(current);
-						ZVAL_DOUBLE(current, dvalue);
+						current = args + objIndex++;
+						ZEND_TRY_ASSIGN_DOUBLE(current, dvalue);
 					} else {
 						add_index_double(return_value, objIndex++, dvalue );
 					}
@@ -1209,12 +1201,3 @@ static inline void scan_set_error_return(int numVars, zval *return_value) /* {{{
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

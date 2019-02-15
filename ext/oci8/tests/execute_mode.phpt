@@ -14,6 +14,6 @@ oci_execute($stmt, -1);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_execute(): Invalid execute mode given: -1 in %s on line %d
 Done

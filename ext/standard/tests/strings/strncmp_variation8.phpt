@@ -2,7 +2,7 @@
 Test strncmp() function: usage variations - single quoted strings
 --FILE--
 <?php
-/* Prototype  : int strncmp ( string $str1, string $str2, int $len ); 
+/* Prototype  : int strncmp ( string $str1, string $str2, int $len );
  * Description: Binary safe case-sensitive string comparison of the first n characters
  * Source code: Zend/zend_builtin_functions.c
 */

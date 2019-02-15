@@ -1,5 +1,5 @@
 --TEST--
-Test current() function : internal pointer maintenance at the end of array 
+Test current() function : internal pointer maintenance at the end of array
 --FILE--
 <?php
 $array = ["foo" => 1, "bar" => 2, "baz" => 3];

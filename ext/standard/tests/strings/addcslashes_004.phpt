@@ -13,7 +13,7 @@ var_dump( addcslashes() );
 var_dump( addcslashes("foo[]") );
 var_dump( addcslashes('foo[]', "o", "foo") );
 
-echo "Done\n"; 
+echo "Done\n";
 
 ?>
 --EXPECTF--
