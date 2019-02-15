@@ -388,7 +388,7 @@ static void zend_persist_class_entry_calc(zval *zv)
 		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
 
 		if (ce->properties_info_table) {
-			ADD_ARENA_SIZE(sizeof(zend_property_info *) * ce->default_properties_count);
+			ADD_SIZE_EX(sizeof(zend_property_info *) * ce->default_properties_count);
 		}
 
 		if (ce->num_interfaces) {

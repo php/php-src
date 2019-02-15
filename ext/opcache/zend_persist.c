@@ -874,9 +874,13 @@ static void zend_persist_class_entry(zval *zv)
 			int i;
 
 			size_t size = sizeof(zend_property_info *) * ce->default_properties_count;
-			memcpy(ZCG(arena_mem), ce->properties_info_table, size);
-			ce->properties_info_table = ZCG(arena_mem);
-			ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(size));
+			if (ZCG(is_immutable_class)) {
+				ce->properties_info_table = zend_shared_memdup_put(
+					ce->properties_info_table, size);
+			} else {
+				ce->properties_info_table = zend_shared_memdup_arena_put(
+					ce->properties_info_table, size);
+			}
 
 			for (i = 0; i < ce->default_properties_count; i++) {
 				ce->properties_info_table[i] = zend_shared_alloc_get_xlat_entry(ce->properties_info_table[i]);
