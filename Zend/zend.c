@@ -1492,6 +1492,11 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 		exception_ce = zend_ce_error;
 	}
 
+	/* Marker used to disable exception generation during preloading. */
+	if (EG(exception) == (void*)(uintptr_t)-1) {
+		return;
+	}
+
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
 
