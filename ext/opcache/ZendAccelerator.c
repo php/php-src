@@ -3335,7 +3335,14 @@ static void preload_link(void)
 				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
 				zend_string_release(key);
 				if (EXPECTED(zv)) {
+					/* Set filename & lineno information for inheritance errors */
+					CG(in_compilation) = 1;
+					CG(compiled_filename) = ce->info.user.filename;
+					CG(zend_lineno) = ce->info.user.line_start;
 					zend_do_link_class(ce, parent);
+					CG(in_compilation) = 0;
+					CG(compiled_filename) = NULL;
+
 					changed = 1;
 				}
 			}
@@ -3558,7 +3565,7 @@ static void preload_remove_empty_includes(void)
 						if (resolved_path) {
 							zend_persistent_script *incl = zend_hash_find_ptr(preload_scripts, resolved_path);
 							zend_string_release(resolved_path);
-							if (!incl->empty) {
+							if (!incl || !incl->empty) {
 								empty = 0;
 								break;
 							}
@@ -3597,7 +3604,7 @@ static void preload_remove_empty_includes(void)
 
 				if (resolved_path) {
 					zend_persistent_script *incl = zend_hash_find_ptr(preload_scripts, resolved_path);
-					if (incl->empty) {
+					if (incl && incl->empty) {
 						MAKE_NOP(opline);
 					} else {
 						if (!IS_ABSOLUTE_PATH(Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), Z_STRLEN_P(RT_CONSTANT(opline, opline->op1)))) {
@@ -3850,7 +3857,14 @@ static int accel_preload(const char *config)
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 		zend_hash_init(&EG(symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
 
-		preload_link();
+		/* Inheritance errors may be thrown during linking */
+		zend_try {
+			preload_link();
+		} zend_catch {
+			ret = FAILURE;
+			goto finish;
+		} zend_end_try();
+
 		preload_remove_empty_includes();
 
 		/* Don't preload constants */
@@ -3940,6 +3954,7 @@ static int accel_preload(const char *config)
 		zend_shared_alloc_destroy_xlat_table();
 	}
 
+finish:
 	zend_hash_destroy(preload_scripts);
 	efree(preload_scripts);
 	preload_scripts = NULL;
