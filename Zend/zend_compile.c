@@ -5504,22 +5504,22 @@ void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_check_modifiers(uint32_t mask, uint32_t modifiers, const char* entity){ /* {{{ */
+void zend_check_attr(uint32_t mask, uint32_t attr, const char* entity){ /* {{{ */
 	if (entity[0] == '_' && entity[1] == '_'){
 		/* magic methods */
-		if((mask & ZEND_ACC_PUBLIC) != (modifiers & ZEND_ACC_PUBLIC)
-			|| (mask & ZEND_ACC_STATIC) != (modifiers & ZEND_ACC_STATIC)){
+		if((mask & ZEND_ACC_PUBLIC) != (attr & ZEND_ACC_PUBLIC)
+			|| (mask & ZEND_ACC_STATIC) != (attr & ZEND_ACC_STATIC)){
 			zend_error(E_WARNING,
 				"The magic method %s() must have public visibility and %s",
 				entity,
 				mask & ZEND_ACC_STATIC ? "be static" : "cannot be static");
 		}
 	} else if(strcmp(entity, "constant") || strcmp(entity, "method")){
-		if ((mask & ZEND_ACC_STATIC) != (modifiers & ZEND_ACC_STATIC)){
+		if (attr & ZEND_ACC_STATIC){
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'static' as %s modifier", entity);
-		} else if ((mask & ZEND_ACC_ABSTRACT) != (modifiers & ZEND_ACC_ABSTRACT)){
+		} else if (attr & ZEND_ACC_ABSTRACT){
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'abstract' as %s modifier", entity);
-		} else if ((mask & ZEND_ACC_FINAL) != (modifiers & ZEND_ACC_FINAL)){
+		} else if (attr & ZEND_ACC_FINAL){
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'final' as %s modifier", entity);
 		}
 	}
@@ -5578,48 +5578,48 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 		} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
 			ce->clone = (zend_function *) op_array;
 		} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
-			zend_check_modifiers(ZEND_ACC_PUBLIC, fn_flags, "__call");
+			zend_check_attr(ZEND_ACC_PUBLIC, fn_flags, "__call");
 			if (!in_interface){
 				ce->__call = (zend_function *) op_array;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
-			zend_check_modifiers(ZEND_ACC_PUBLIC | ZEND_ACC_STATIC, fn_flags, "__callStatic");
+			zend_check_attr(ZEND_ACC_PUBLIC | ZEND_ACC_STATIC, fn_flags, "__callStatic");
 			if (!in_interface){
 				ce->__callstatic = (zend_function *) op_array;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
-			zend_check_modifiers(ZEND_ACC_PUBLIC, fn_flags, "__get");
+			zend_check_attr(ZEND_ACC_PUBLIC, fn_flags, "__get");
 			if (!in_interface){
 				ce->__get = (zend_function *) op_array;
 				ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
-			zend_check_modifiers(ZEND_ACC_PUBLIC, fn_flags, "__set");
+			zend_check_attr(ZEND_ACC_PUBLIC, fn_flags, "__set");
 			if (!in_interface){
 				ce->__set = (zend_function *) op_array;
 				ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
-			zend_check_modifiers(ZEND_ACC_PUBLIC, fn_flags, "__unset");
+			zend_check_attr(ZEND_ACC_PUBLIC, fn_flags, "__unset");
 			if (!in_interface){
 				ce->__unset = (zend_function *) op_array;
 				ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
-			zend_check_modifiers(ZEND_ACC_PUBLIC, fn_flags, "__isset");
+			zend_check_attr(ZEND_ACC_PUBLIC, fn_flags, "__isset");
 			if (!in_interface){
 				ce->__isset = (zend_function *) op_array;
 				ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
-			zend_check_modifiers(ZEND_ACC_PUBLIC, fn_flags, "__toString");
+			zend_check_attr(ZEND_ACC_PUBLIC, fn_flags, "__toString");
 			if (!in_interface){
 				ce->__tostring = (zend_function *) op_array;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
-			zend_check_modifiers(ZEND_ACC_PUBLIC, fn_flags, "__invoke");
+			zend_check_attr(ZEND_ACC_PUBLIC, fn_flags, "__invoke");
 		} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
-			zend_check_modifiers(ZEND_ACC_PUBLIC, fn_flags, "__debugInfo");
+			zend_check_attr(ZEND_ACC_PUBLIC, fn_flags, "__debugInfo");
 			if (!in_interface){
 				ce->__debugInfo = (zend_function *) op_array;
 			}
@@ -5914,7 +5914,7 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		zval value_zv;
 
 		if (UNEXPECTED(ast->attr & (ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_FINAL))) {
-			zend_check_modifiers(!(ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL), ast->attr, "constant");
+			zend_check_attr(!(ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL), ast->attr, "constant");
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
@@ -5966,7 +5966,7 @@ static void zend_compile_trait_alias(zend_ast *ast) /* {{{ */
 
 	zend_trait_alias *alias;
 
-	zend_check_modifiers(!(ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL), modifiers, "method");
+	zend_check_attr(!(ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL), modifiers, "method");
 
 	alias = emalloc(sizeof(zend_trait_alias));
 	zend_compile_method_ref(method_ref_ast, &alias->trait_method);
