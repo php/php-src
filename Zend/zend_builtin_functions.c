@@ -1206,26 +1206,16 @@ ZEND_FUNCTION(get_class_methods)
 		     (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
 		       zend_check_protected(mptr->common.scope, scope))
 		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
-		       scope == mptr->common.scope)))) {
-			size_t len = ZSTR_LEN(mptr->common.function_name);
-
-			/* Do not display old-style inherited constructors */
-			if (!key) {
+		       scope == mptr->common.scope)))
+		) {
+			if (mptr->type == ZEND_USER_FUNCTION &&
+				(!mptr->op_array.refcount || *mptr->op_array.refcount > 1) &&
+				 key && !same_name(key, mptr->common.function_name)) {
+				ZVAL_STR_COPY(&method_name, zend_find_alias_name(mptr->common.scope, key));
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
+			} else {
 				ZVAL_STR_COPY(&method_name, mptr->common.function_name);
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
-			} else if (mptr->common.scope->constructor != mptr ||
-			    mptr->common.scope == ce ||
-			    zend_binary_strcasecmp(ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(mptr->common.function_name), len) == 0) {
-
-				if (mptr->type == ZEND_USER_FUNCTION &&
-				    (!mptr->op_array.refcount || *mptr->op_array.refcount > 1) &&
-			    	 !same_name(key, mptr->common.function_name)) {
-					ZVAL_STR_COPY(&method_name, zend_find_alias_name(mptr->common.scope, key));
-					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
-				} else {
-					ZVAL_STR_COPY(&method_name, mptr->common.function_name);
-					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
-				}
 			}
 		}
 	} ZEND_HASH_FOREACH_END();

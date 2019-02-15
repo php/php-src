@@ -124,8 +124,14 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->clone)) {
 		ce->clone = parent->clone;
 	}
+	if (EXPECTED(!ce->serialize_func)) {
+		ce->serialize_func = parent->serialize_func;
+	}
 	if (EXPECTED(!ce->serialize)) {
 		ce->serialize = parent->serialize;
+	}
+	if (EXPECTED(!ce->unserialize_func)) {
+		ce->unserialize_func = parent->unserialize_func;
 	}
 	if (EXPECTED(!ce->unserialize)) {
 		ce->unserialize = parent->unserialize;
@@ -272,7 +278,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
 	 */
-	if ((fe->common.scope->constructor == fe)
+	if ((fe->common.fn_flags & ZEND_ACC_CTOR)
 		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
 			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
 		return 1;
@@ -574,7 +580,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			zend_function *proto = parent->common.prototype ?
 				parent->common.prototype : parent;
 
-			if (parent->common.scope->constructor != parent) {
+			if (!(parent_flags & ZEND_ACC_CTOR)) {
 				if (!proto) {
 					proto = parent;
 				}
@@ -1287,7 +1293,11 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
-	if (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_') {
+	if (zend_string_equals_literal(mname, "serialize")) {
+		ce->serialize_func = fe;
+	} else if (zend_string_equals_literal(mname, "unserialize")) {
+		ce->unserialize_func = fe;
+	} else if (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_') {
 		/* pass */
 	} else if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = fe;
@@ -1947,7 +1957,7 @@ static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract
 		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 			ai->afn[ai->cnt] = fn;
 		}
-		if (fn->common.scope->constructor == fn) {
+		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
 			if (!ai->ctor) {
 				ai->cnt++;
 				ai->ctor = 1;

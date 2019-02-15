@@ -3,7 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.0.0alpha1
 
 - Core:
-  . Fixed bug #77546 (iptcembed broken function). (gdegoulet)
+  . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
+    (Fabien Villepinte)
 
 - GD:
   . Removed deprecated image2wbmp(). (cmb)
