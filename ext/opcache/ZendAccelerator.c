@@ -3335,7 +3335,14 @@ static void preload_link(void)
 				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
 				zend_string_release(key);
 				if (EXPECTED(zv)) {
+					/* Set filename & lineno information for inheritance errors */
+					CG(in_compilation) = 1;
+					CG(compiled_filename) = ce->info.user.filename;
+					CG(zend_lineno) = ce->info.user.line_start;
 					zend_do_link_class(ce, parent);
+					CG(in_compilation) = 0;
+					CG(compiled_filename) = NULL;
+
 					changed = 1;
 				}
 			}

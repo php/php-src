@@ -11,5 +11,5 @@ opcache.preload={PWD}/preload_inheritance_error_ind.inc
 <?php
 echo "Foobar\n";
 ?>
---EXPECT--
-Fatal error: Declaration of B::foo($bar) must be compatible with A::foo() in Unknown on line 0
+--EXPECTF--
+Fatal error: Declaration of B::foo($bar) must be compatible with A::foo() in %spreload_inheritance_error.inc on line 7
