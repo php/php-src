@@ -124,8 +124,14 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->clone)) {
 		ce->clone = parent->clone;
 	}
+	if (EXPECTED(!ce->serialize_func)) {
+		ce->serialize_func = parent->serialize_func;
+	}
 	if (EXPECTED(!ce->serialize)) {
 		ce->serialize = parent->serialize;
+	}
+	if (EXPECTED(!ce->unserialize_func)) {
+		ce->unserialize_func = parent->unserialize_func;
 	}
 	if (EXPECTED(!ce->unserialize)) {
 		ce->unserialize = parent->unserialize;
@@ -1287,7 +1293,11 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
-	if (ZSTR_LEN(ce->name) != ZSTR_LEN(mname) && (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_')) {
+	if (zend_string_equals_literal(mname, "serialize")) {
+		ce->serialize_func = fe;
+	} else if (zend_string_equals_literal(mname, "unserialize")) {
+		ce->unserialize_func = fe;
+	} else if (ZSTR_LEN(ce->name) != ZSTR_LEN(mname) && (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_')) {
 		/* pass */
 	} else if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = fe;

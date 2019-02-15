@@ -5637,6 +5637,10 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 			if (!ce->constructor) {
 				ce->constructor = (zend_function *) op_array;
 			}
+		} else if (zend_string_equals_literal(lcname, "serialize")) {
+			ce->serialize_func = (zend_function *) op_array;
+		} else if (zend_string_equals_literal(lcname, "unserialize")) {
+			ce->unserialize_func = (zend_function *) op_array;
 		} else if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
 			if (!is_static) {
 				op_array->fn_flags |= ZEND_ACC_ALLOW_STATIC;
