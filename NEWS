@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #77621 (Already defined constants are not properly reported).
     (cmb)
+  . Fixed bug #77626 (Persistence confusion in php_com_import_typelib()). (cmb)
 
 - Mbstring:
   . Fixed bug #77514 (mb_ereg_replace() with trailing backslash adds null byte).
