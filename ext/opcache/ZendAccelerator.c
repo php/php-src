@@ -3850,7 +3850,14 @@ static int accel_preload(const char *config)
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 		zend_hash_init(&EG(symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
 
-		preload_link();
+		/* Inheritance errors may be thrown during linking */
+		zend_try {
+			preload_link();
+		} zend_catch {
+			ret = FAILURE;
+			goto finish;
+		} zend_end_try();
+
 		preload_remove_empty_includes();
 
 		/* Don't preload constants */
@@ -3940,6 +3947,7 @@ static int accel_preload(const char *config)
 		zend_shared_alloc_destroy_xlat_table();
 	}
 
+finish:
 	zend_hash_destroy(preload_scripts);
 	efree(preload_scripts);
 	preload_scripts = NULL;
