@@ -3565,7 +3565,7 @@ static void preload_remove_empty_includes(void)
 						if (resolved_path) {
 							zend_persistent_script *incl = zend_hash_find_ptr(preload_scripts, resolved_path);
 							zend_string_release(resolved_path);
-							if (!incl->empty) {
+							if (!incl || !incl->empty) {
 								empty = 0;
 								break;
 							}
@@ -3604,7 +3604,7 @@ static void preload_remove_empty_includes(void)
 
 				if (resolved_path) {
 					zend_persistent_script *incl = zend_hash_find_ptr(preload_scripts, resolved_path);
-					if (incl->empty) {
+					if (incl && incl->empty) {
 						MAKE_NOP(opline);
 					} else {
 						if (!IS_ABSOLUTE_PATH(Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), Z_STRLEN_P(RT_CONSTANT(opline, opline->op1)))) {
