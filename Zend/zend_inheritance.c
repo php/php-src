@@ -855,18 +855,21 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 void zend_build_properties_info_table(zend_class_entry *ce)
 {
 	zend_property_info **table, *prop;
+	size_t size;
 	if (ce->default_properties_count == 0) {
 		return;
 	}
 
 	ZEND_ASSERT(ce->properties_info_table == NULL);
+	size = sizeof(zend_property_info *) * ce->default_properties_count;
 	if (ce->type == ZEND_USER_CLASS) {
-		ce->properties_info_table = table = zend_arena_alloc(&CG(arena),
-			sizeof(zend_property_info *) * ce->default_properties_count);
+		ce->properties_info_table = table = zend_arena_alloc(&CG(arena), size);
 	} else {
-		ce->properties_info_table = table = pemalloc(
-			sizeof(zend_property_info *) * ce->default_properties_count, 1);
+		ce->properties_info_table = table = pemalloc(size, 1);
 	}
+
+	/* Dead slots may be left behind during inheritance. Make sure these are NULLed out. */
+	memset(table, 0, size);
 
 	if (ce->parent && ce->parent->default_properties_count != 0) {
 		zend_property_info **parent_table = ce->parent->properties_info_table;
