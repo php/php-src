@@ -3408,6 +3408,42 @@ static void preload_link(void)
 	} while (changed);
 	EG(exception) = NULL;
 
+	/* Resolve property types */
+	ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
+		ce = Z_PTR_P(zv);
+		if (ce->type == ZEND_INTERNAL_CLASS) {
+			break;
+		}
+		if ((ce->ce_flags & ZEND_ACC_LINKED)
+		 && !(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+			zend_bool ok = 1;
+			zend_property_info *prop;
+			if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+				ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+					zend_string *name, *lcname;
+					if (!ZEND_TYPE_IS_NAME(prop->type)) {
+						continue;
+					}
+
+					name = ZEND_TYPE_NAME(prop->type);
+					lcname = zend_string_tolower(name);
+					p = zend_hash_find_ptr(EG(class_table), lcname);
+					zend_string_release(lcname);
+					if (!p) {
+						ok = 0;
+						continue;
+					}
+
+					zend_string_release(name);
+					prop->type = ZEND_TYPE_ENCODE_CE(p, ZEND_TYPE_ALLOW_NULL(prop->type));
+				} ZEND_HASH_FOREACH_END();
+			}
+			if (ok) {
+				ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	/* Move unlinked clases (and with unresilved constants) back to scripts */
 	orig_dtor = EG(class_table)->pDestructor;
 	EG(class_table)->pDestructor = NULL;
@@ -3420,6 +3456,8 @@ static void preload_link(void)
 			zend_error(E_WARNING, "Can't preload unlinked class  %s at %s:%d\n", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
 		} else if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 			zend_error(E_WARNING, "Can't preload class %s with unresolved constants at %s:%d\n", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+		} else if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+			zend_error(E_WARNING, "Can't preload class %s with unresolved property types at %s:%d\n", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
 		} else {
 			continue;
 		}

@@ -40,4 +40,5 @@ class Y {
 
 class Z {
     public $foo;
+    public a $bar;
 }
