@@ -264,7 +264,6 @@ $ini_overwrites = array(
 	'log_errors_max_len=0',
 	'opcache.fast_shutdown=0',
 	'opcache.file_update_protection=0',
-	'opcache.preload=',
 	'zend.assertions=1',
 );
 
@@ -510,6 +509,7 @@ $temp_urlbase = null;
 $conf_passed = null;
 $no_clean = false;
 $slow_min_ms = INF;
+$preload = false;
 
 $cfgtypes = array('show', 'keep');
 $cfgfiles = array('skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem');
@@ -624,6 +624,9 @@ if (isset($argc) && $argc > 1) {
 					break;
 				case 'e':
 					$pass_options .= ' -e';
+					break;
+				case '--preload':
+					$preload = true;
 					break;
 				case '--no-clean':
 					$no_clean = true;
@@ -1256,6 +1259,7 @@ function run_test($php, $file, $env)
 	global $SHOW_ONLY_GROUPS;
 	global $no_file_cache;
 	global $slow_min_ms;
+	global $preload;
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1496,6 +1500,7 @@ TEST $file
 	$test_skipif = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'skip.php';
 	$temp_clean = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
 	$test_clean = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
+	$preload_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'preload.php';
 	$tmp_post = $temp_dir . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 	$tmp_relative_file = str_replace(__DIR__ . DIRECTORY_SEPARATOR, '', $test_file) . 't';
 
@@ -1546,6 +1551,7 @@ TEST $file
 	@unlink($tmp_post);
 	@unlink($temp_clean);
 	@unlink($test_clean);
+	@unlink($preload_filename);
 
 	// Reset environment from any previous test.
 	$env['REDIRECT_STATUS'] = '';
@@ -1790,6 +1796,14 @@ TEST $file
 
 	$args = isset($section_text['ARGS']) ? ' -- ' . $section_text['ARGS'] : '';
 
+	if ($preload) {
+		save_text($preload_filename, "<?php\nerror_reporting(0);\nopcache_compile_file('" . $test_file . "');");
+		$local_pass_options = $pass_options;
+		unset($pass_options);
+		$pass_options = $local_pass_options;
+		$pass_options .= " -d opcache.preload=" . $preload_filename;
+	}
+
 	if (array_key_exists('POST_RAW', $section_text) && !empty($section_text['POST_RAW'])) {
 
 		$post = trim($section_text['POST_RAW']);
@@ -1975,6 +1989,7 @@ COMMAND $cmd
 	}
 
 	@unlink($tmp_post);
+	@unlink($preload_filename);
 
 	$leaked = false;
 	$passed = false;

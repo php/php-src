@@ -59,12 +59,10 @@ PHP_FUNCTION(base64_encode);
 
 #if (ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR) && !ZEND_INTRIN_AVX2_NATIVE
 PHP_MINIT_FUNCTION(base64_intrin);
-PHPAPI extern zend_string *(*php_base64_encode)(const unsigned char *, size_t);
-PHPAPI extern zend_string *(*php_base64_decode_ex)(const unsigned char *, size_t, zend_bool);
-#else
+#endif
+
 PHPAPI extern zend_string *php_base64_encode(const unsigned char *, size_t);
 PHPAPI extern zend_string *php_base64_decode_ex(const unsigned char *, size_t, zend_bool);
-#endif
 
 static inline zend_string *php_base64_encode_str(const zend_string *str) {
 	return php_base64_encode((const unsigned char*)(ZSTR_VAL(str)), ZSTR_LEN(str));

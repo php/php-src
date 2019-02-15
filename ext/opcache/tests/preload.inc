@@ -37,3 +37,7 @@ trait T2 {
 class Y {
 	use T2;
 }
+
+class Z {
+    public $foo;
+}
