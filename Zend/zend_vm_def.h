@@ -1689,13 +1689,8 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 	SAVE_OPLINE();
 
 	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type, opline->extended_value & ZEND_FETCH_OBJ_FLAGS OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
-		if (EG(exception)) {
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
-		} else {
-			ZEND_ASSERT(type == BP_VAR_IS);
-			prop = &EG(uninitialized_zval);
-		}
+		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS));
+		prop = &EG(uninitialized_zval);
 	}
 
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
@@ -2435,9 +2430,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			if (OP2_TYPE == IS_UNUSED) {
 				zend_use_new_element_for_string();
 				FREE_UNFETCHED_OP_DATA();
-				FREE_OP1_VAR_PTR();
 				UNDEF_RESULT();
-				HANDLE_EXCEPTION();
 			} else {
 				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 				value = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
@@ -2448,14 +2441,13 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			zend_property_info *error_prop;
 			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
 				zend_throw_auto_init_in_ref_error(error_prop, "array");
-				FREE_UNFETCHED_OP2();
+				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 				FREE_UNFETCHED_OP_DATA();
-				FREE_OP1_VAR_PTR();
 				UNDEF_RESULT();
-				HANDLE_EXCEPTION();
+			} else {
+				ZVAL_ARR(object_ptr, zend_new_array(8));
+				ZEND_VM_C_GOTO(try_assign_dim_array);
 			}
-			ZVAL_ARR(object_ptr, zend_new_array(8));
-			ZEND_VM_C_GOTO(try_assign_dim_array);
 		} else {
 			if (OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
 				zend_use_scalar_as_array();
