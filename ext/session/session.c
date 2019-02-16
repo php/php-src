@@ -78,6 +78,7 @@ zend_class_entry *php_session_update_timestamp_class_entry;
 zend_class_entry *php_session_update_timestamp_iface_entry;
 
 #define PS_MAX_SID_LENGTH 256
+#define PW_TOK_LEN 32
 
 /* ***********
    * Helpers *
@@ -122,6 +123,7 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	PS(module_number) = my_module_number;
 #if defined(HAVE_OPENSSL_EXT)
 	PS(ssl_iv) = NULL;
+	PS(ssl_pw_tok) = NULL;
 #endif
 	ZVAL_UNDEF(&PS(http_session_vars));
 }
@@ -154,6 +156,11 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 	if (PS(ssl_iv)) {
 		zend_string_release_ex(PS(ssl_iv), 0);
 		PS(ssl_iv) = NULL;
+	}
+
+	if (PS(ssl_pw_tok)) {
+		zend_string_release_ex(PS(ssl_pw_tok), 0);
+		PS(ssl_pw_tok) = NULL;
 	}
 #endif
 
@@ -475,8 +482,9 @@ static int php_session_initialize(void) /* {{{ */
 			PS(ssl_encrypt) = 0;
 		} else {
 			zend_string *iv;
+			zend_string *pw_tok;
 			zend_long iv_len;
-			zend_long ssl_tag_len = strlen(PS(ssl_tag));
+			zend_long ssl_tag_len = PS(ssl_tag) ? strlen(PS(ssl_tag)) : 0;
 
 			if (PS(ssl_iv))
 				zend_string_release_ex(PS(ssl_iv), 0);
@@ -491,14 +499,19 @@ static int php_session_initialize(void) /* {{{ */
 				return FAILURE;
 			}
 
+			if ((pw_tok = php_openssl_random_pseudo_bytes(PW_TOK_LEN)) == NULL) {
+				php_error_docref(NULL, E_ERROR, "session token data failure");
+				return FAILURE;
+			}
+
 			if (!ssl_tag_len)
 				PS(ssl_tag) = NULL;
 			PS(ssl_tag_len) = ssl_tag_len;
 
-			ZSTR_VAL(iv)[iv_len] = 0;
 			PS(ssl_method_len) = ssl_method_len;
 			PS(ssl_iv) = iv;
 			PS(ssl_iv_len) = iv_len;
+			PS(ssl_pw_tok) = pw_tok;
 		}
 	}
 #endif
@@ -903,7 +916,7 @@ static int php_session_encrypt(smart_str *buf) /* {{{ */
 	}
 
 	if ((buffer = php_openssl_encrypt(ZSTR_VAL(buf->s), buf->a, PS(ssl_method), PS(ssl_method_len),
-					ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 0, ZSTR_VAL(PS(ssl_iv)), PS(ssl_iv_len),
+					ZSTR_VAL(PS(ssl_pw_tok)), PW_TOK_LEN, 0, ZSTR_VAL(PS(ssl_iv)), PS(ssl_iv_len),
 					ztag, PS(ssl_tag_len), NULL, 0)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Cannot encrypt the session data with method '%s', tag '%s'",
 						PS(ssl_method), PS(ssl_tag));
@@ -929,7 +942,7 @@ static zend_string *php_session_decrypt(PS_SERIALIZER_DECODE_ARGS) /* {{{ */
 		return NULL;
 
 	if ((buffer = php_openssl_decrypt((char *)val, vallen, PS(ssl_method), PS(ssl_method_len),
-					ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 0, ZSTR_VAL(PS(ssl_iv)), PS(ssl_iv_len),
+					ZSTR_VAL(PS(ssl_pw_tok)), PW_TOK_LEN, 0, ZSTR_VAL(PS(ssl_iv)), PS(ssl_iv_len),
 					PS(ssl_tag), PS(ssl_tag_len), NULL, 0)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Cannot decrypt the session data with method '%s'",
 						PS(ssl_method));
@@ -2358,6 +2371,17 @@ static PHP_FUNCTION(session_regenerate_id)
 	}
 	zend_string_release_ex(PS(id), 0);
 	PS(id) = NULL;
+#if defined(HAVE_OPENSSL_EXT)
+	zend_string_release_ex(PS(ssl_pw_tok), 0);
+	PS(ssl_pw_tok) = NULL;
+
+	PS(ssl_pw_tok) = php_openssl_random_pseudo_bytes(PW_TOK_LEN);
+	if (!PS(ssl_pw_tok)) {
+		PS(session_status) = php_session_none;
+		zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		RETURN_FALSE;
+	}
+#endif
 
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
 		PS(session_status) = php_session_none;
