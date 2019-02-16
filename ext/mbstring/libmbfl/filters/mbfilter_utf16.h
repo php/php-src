@@ -30,6 +30,12 @@
 #ifndef MBFL_MBFILTER_UTF16_H
 #define MBFL_MBFILTER_UTF16_H
 
+/* These macros will return UTF-16 char size in bytes 2 or 4.
+ * If passed char is high surrogate the size is 4, otherwise 2
+ * */
+#define UTF16_LE_CHAR_SIZE(s) ((s & 0xFC00) == 0xD800 ? 4 : 2)
+#define UTF16_BE_CHAR_SIZE(s) ((s & 0x00FC) == 0x00D8 ? 4 : 2)
+
 extern const mbfl_encoding mbfl_encoding_utf16;
 extern const mbfl_encoding mbfl_encoding_utf16be;
 extern const mbfl_encoding mbfl_encoding_utf16le;

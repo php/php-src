@@ -44,6 +44,7 @@
 #include "libmbfl/filters/mbfilter_qprint.h"
 #include "libmbfl/filters/mbfilter_ucs4.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
+#include "libmbfl/filters/mbfilter_utf16.h"
 
 #include "php_variables.h"
 #include "php_globals.h"
@@ -2358,10 +2359,10 @@ PHP_FUNCTION(mb_str_split)
 		mb_len = string.len / 4;
 		chunk_len = split_length * 4;
 	} else if (mbfl_encoding->mblen_table != NULL) {
-		/* second scenario: variable width encodings with length table */
+		/* second scenario: variable width encoding with length table (UTF-8) */
 		char unsigned const *mbtab = mbfl_encoding->mblen_table;
 
-		/* assume that we have 1-bytes characters */
+		/* assume that we have 1-byte characters */
 		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
 
 		while (p < last) { /* split cycle work until the cursor has reached the last byte */
@@ -2376,11 +2377,46 @@ PHP_FUNCTION(mb_str_split)
 			add_next_index_stringl(return_value, chunk_p, chunk_len);
 		}
 		return;
+	} else if (mbfl_encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) {
+		/* third scenario: 2/4-bytes variable width encodings (UTF16-BE, UTF-16LE) */
+
+		char is_big_endian = 0xff00 & 1; /* big-endian system detection */
+		/* assume that we have 2-byte characters */
+		array_init_size(return_value, (string.len / 2 + split_length) / split_length); /* round up */
+
+		if(is_big_endian && mbfl_encoding->flag & MBFL_ENCTYPE_MWC2BE /* UTF-16BE on big-endian machine */
+			|| !is_big_endian && mbfl_encoding->flag & MBFL_ENCTYPE_MWC2LE ) { /* UTF-16LE on little-endian machine */
+			while (p < last) { /* split cycle work until the cursor has reached the last byte */
+				char const *chunk_p = p; /* chunk first byte pointer */
+				chunk_len = 0; /* chunk length in bytes */
+				for (zend_long char_count = 0; char_count < split_length && p < last; ++char_count) {
+					char unsigned const m = UTF16_LE_CHAR_SIZE(*(uint16_t *)p); /* determine char size */
+					chunk_len += m;
+					p += m;
+				}
+				if (p > last) chunk_len -= p - last; /* check if chunk is in bounds */
+				add_next_index_stringl(return_value, chunk_p, chunk_len);
+			}
+		} else {
+			/* UTF-16LE on big-endian machine or UTF-16BE on little-endian machine */
+			while (p < last) { /* split cycle work until the cursor has reached the last byte */
+				char const *chunk_p = p; /* chunk first byte pointer */
+				chunk_len = 0; /* chunk length in bytes */
+				for (zend_long char_count = 0; char_count < split_length && p < last; ++char_count) {
+					char unsigned const m = UTF16_BE_CHAR_SIZE(*(uint16_t *)p); /* determine char size */
+					chunk_len += m;
+					p += m;
+				}
+				if (p > last) chunk_len -= p - last; /* check if chunk is in bounds */
+				add_next_index_stringl(return_value, chunk_p, chunk_len);
+			}
+		}
+		return;
 	} else {
-		/* third scenario: other multibyte encodings */
+		/* fourth scenario: other multibyte encodings */
 		mbfl_convert_filter *filter, *decoder;
 
-		/* assume that we have 1-bytes characters */
+		/* assume that we have 1-byte characters */
 		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
 
 		/* decoder filter to decode wchar to encoding */

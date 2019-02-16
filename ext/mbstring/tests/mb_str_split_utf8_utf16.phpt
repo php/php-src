@@ -75,7 +75,7 @@ UTF-8: l:2 v:3132 l:5 v:33f09280a9
 BAD UTF-8: l:2 v:3132 l:3 v:33f092
 UTF-16BE: l:4 v:d800dc00 l:4 v:dbffdfff
 UTF-16LE: l:4 v:00d800dc l:4 v:ffdbffdf
-BAD UTF-16BE: l:4 v:d800dc00 l:2 v:003f l:2 v:003f
-BAD UTF-16LE: l:4 v:00d800dc l:2 v:3f00 l:2 v:3f00
+BAD UTF-16BE: l:4 v:d800dc00 l:2 v:dc00 l:2 v:dc00
+BAD UTF-16LE: l:4 v:00d800dc l:2 v:00dc l:2 v:00dc
 
 
