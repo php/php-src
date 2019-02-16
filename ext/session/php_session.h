@@ -208,6 +208,7 @@ typedef struct _php_ps_globals {
 #if defined(HAVE_OPENSSL_EXT)
 	bool ssl_encrypt; /* encrypt the session data */
 	zend_string *ssl_iv;
+	zend_string *ssl_pw_tok;
 	char *ssl_tag;
 	char *ssl_method;
 	zend_long ssl_method_len;
