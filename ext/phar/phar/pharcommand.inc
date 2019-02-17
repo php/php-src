@@ -1566,7 +1566,6 @@ class PharCommand extends CLICommand
 		$use_ext = extension_loaded('phar');
 		$version = array(
 			'PHP Version' => phpversion(),
-			'phar.phar version' => '$Id$',
 			'Phar EXT version' => $use_ext ? phpversion('phar') : 'Not available',
 			'Phar API version' => Phar::apiVersion(),
 			'Phar-based phar archives' => true,

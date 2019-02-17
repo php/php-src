@@ -1,7 +1,6 @@
 # Replace $Id$ strings with 40-character hexadecimal blob object name.
 /ext/mysqlnd/mysqlnd.h          ident
 /ext/ext_skel.php               ident
-/ext/phar/phar/pharcommand.inc  ident
 /ext/dba/libinifile/inifile.c   ident
 /ext/dba/libflatfile/flatfile.c ident
 /ext/dba/libcdb/cdb_make.c      ident
