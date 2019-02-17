@@ -19,6 +19,7 @@
    |          Marcus Boerger <helly@php.net>                              |
    |          Derick Rethans <derick@php.net>                             |
    |          Sander Roobol <sander@php.net>                              |
+   |          Andrea Faulds <ajf@ajf.me>                                  |
    | (based on version by: Stig Bakken <ssb@php.net>)                     |
    | (based on the PHP 3 test framework by Rasmus Lerdorf)                |
    +----------------------------------------------------------------------+
@@ -53,6 +54,15 @@ function main()
 		   $temp_source, $temp_target, $temp_urlbase, $test_cnt, $test_dirs,
 		   $test_files, $test_idx, $test_list, $test_results, $testfile,
 		   $user_tests, $valgrind, $sum_results;
+	// Parallel testing
+	global $workers, $workerID;
+
+	$workerID = 0;
+	if (getenv("TEST_PHP_WORKER")) {
+		$workerID = intval(getenv("TEST_PHP_WORKER", 10));
+		run_worker();
+		die;
+	}
 
 	define('INIT_DIR', getcwd());
 
@@ -314,6 +324,7 @@ NO_PROC_OPEN_ERROR;
 	$no_clean = false;
 	$slow_min_ms = INF;
 	$preload = false;
+	$workers = null;
 
 	$cfgtypes = array('show', 'keep');
 	$cfgfiles = array('skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem');
@@ -374,6 +385,14 @@ NO_PROC_OPEN_ERROR;
 				$repeat = false;
 
 				switch ($switch) {
+					case 'j':
+						$workers = substr($argv[$i], 2);
+						if (!preg_match('/^\d+$/', $workers) || $workers == 0) {
+							error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
+						}
+						$workers = intval($workers, 10);
+						$environment['SKIP_IO_CAPTURE_TESTS'] = 1;
+						break;
 					case 'r':
 					case 'l':
 						$test_list = file($argv[++$i]);
@@ -518,6 +537,10 @@ Synopsis:
     php run-tests.php [options] [files] [directories]
 
 Options:
+    -j<workers> Run <workers> simultaneous testing processes in parallel for
+                quicker testing on systems with multiple logical processors.
+                Note that this is experimental feature.
+
     -l <file>   Read the testfiles to be executed from <file>. After the test
                 has finished all failed tests are written to the same <file>.
                 If the list is empty and no further test is specified then
@@ -1254,9 +1277,15 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
 	global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx;
+	// Parallel testing
+	global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
+
+	if ($workers !== null && !$workerID) {
+		run_all_tests_parallel($test_files, $env, $redir_tested);
+		return;
+	}
 
 	foreach ($test_files as $name) {
-
 		if (is_array($name)) {
 			$index = "# $name[1]: $name[0]";
 
@@ -1269,9 +1298,30 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 			$index = $name;
 		}
 		$test_idx++;
+
+		if ($workerID) {
+			$PHP_FAILED_TESTS = ['BORKED' => [], 'FAILED' => [], 'WARNED' => [], 'LEAKED' => [], 'XFAILED' => [], 'SLOW' => []];
+			ob_start();
+		}
+
 		$result = run_test($php, $name, $env);
+		if ($workerID) {
+			$resultText = ob_get_clean();
+		}
 
 		if (!is_array($name) && $result != 'REDIR') {
+			if ($workerID) {
+				send_message($workerSock, [
+					"type" => "test_result",
+					"name" => $name,
+					"index" => $index,
+					"result" => $result,
+					"text" => $resultText,
+					"PHP_FAILED_TESTS" => $PHP_FAILED_TESTS
+				]);
+				continue;
+			}
+
 			$test_results[$index] = $result;
 			if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
 				fwrite($failed_tests_file, "$index\n");
@@ -1281,6 +1331,370 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 			}
 		}
 	}
+}
+
+/** The heart of parallel testing. */
+function run_all_tests_parallel($test_files, $env, $redir_tested) {
+	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS;
+
+	// The PHP binary running run-tests.php, and run-tests.php itself
+	// This PHP executable is *not* necessarily the same as the tested version
+	$thisPHP = PHP_BINARY;
+	$thisScript = __FILE__;
+
+	$workerProcs = [];
+	$workerSocks = [];
+
+	echo "====⚡️===========================================================⚡️====\n";
+	echo "====⚡️==== WELCOME TO THE FUTURE: run-tests PARALLEL EDITION ====⚡️====\n";
+	echo "====⚡️===========================================================⚡️====\n";
+
+	// Because some of the PHP test suite has not been written with
+	// parallel execution in mind, it is not safe to just run any two tests
+	// concurrently.
+	// Therefore, we divide the test set into directories and test multiple
+	// directories at once, but not multiple tests within them.
+
+	$testDirsToGo = [];
+
+	foreach ($test_files as $file) {
+		$dirSeparator = strrpos($file, DIRECTORY_SEPARATOR);
+		if ($dirSeparator !== FALSE) {
+			$testDirsToGo[substr($file, 0, $dirSeparator)][] = $file;
+		} else {
+			$testDirsToGo[""][] = $file;
+		}
+	}
+
+	// We assume most test directories should be executed in serial, but for
+	// big directories, this would waste time if they can actually be parallel.
+	// Therefore, if a directory has a special '@CAN_BE_PARALLELISED' file, we
+	// will divide it up into smaller “directories” automatically.
+	foreach ($testDirsToGo as $dir => $tests) {
+		if (count($tests) < 64 || !is_string($dir)) {
+			continue;
+		}
+		if (file_exists($dir . DIRECTORY_SEPARATOR . '@CAN_BE_PARALLELISED')) {
+			foreach (array_chunk($tests, 64) as $testsChunk) {
+				$testDirsToGo[] = $testsChunk;
+			}
+			unset($testDirsToGo[$dir]);
+		}
+	}
+
+	// Sort test dirs so the biggest ones are handled first, so we spend less
+	// time waiting on workers tasked with very large dirs.
+	// This is an ascending sort because items are popped off the end.
+	// Thank you Rasmus for this idea :)
+	uasort($testDirsToGo, function ($a, $b) {
+		return count($a) <=> count($b);
+	});
+
+	$testDirsInProgress = 0;
+
+	echo "Isolated ", count($testDirsToGo), " directories to be tested in parallel.\n";
+
+	$shamedDirs = array_reverse(array_filter($testDirsToGo, function ($files) {
+		return count($files) > 100;
+	}), true);
+
+	if ($shamedDirs) {
+		$shameList = "";
+		foreach ($shamedDirs as $dir => $shame) {
+			$shameList .= "\n$dir: " .  count($shame) . " files";
+		}
+
+		echo <<<NAME_AND_SHAME
+----⚠️-----------------------------------------------------------⚠️----
+To effectively utilise parallelism, test directories should not contain
+large numbers of tests that can't be run simultaneously. The following
+directories contain more than 100 test files and do not contain a
+'@CAN_BE_PARALLELISED' file:
+$shameList
+----⚠️-----------------------------------------------------------⚠️----
+
+NAME_AND_SHAME;
+	}
+
+	echo "Spawning workers… ";
+
+	// We use sockets rather than STDIN/STDOUT for comms because on Windows,
+	// those can't be non-blocking for some reason.
+	$listenSock = stream_socket_server("tcp://127.0.0.1:0") or error("Couldn't create socket on localhost.");
+	$sockName = stream_socket_get_name($listenSock, false);
+	// PHP is terrible and returns IPv6 addresses not enclosed by []
+	$portPos = strrpos($sockName, ":");
+	$sockHost = substr($sockName, 0, $portPos);
+	if (FALSE !== strpos($sockHost, ":")) {
+		$sockHost = "[$sockHost]";
+	}
+	$sockPort = substr($sockName, $portPos + 1);
+	$sockUri = "tcp://$sockHost:$sockPort";
+
+	for ($i = 1; $i <= $workers; $i++) {
+		$proc = proc_open(
+			$thisPHP . ' ' . escapeshellarg($thisScript),
+			[
+				0 => ['pipe', 'r'],
+				1 => ['pipe', 'w'],
+				2 => ['pipe', 'w']
+			],
+			$pipes,
+			NULL,
+			$_ENV + [
+				"TEST_PHP_WORKER" => $i,
+				"TEST_PHP_URI" => $sockUri,
+			],
+			[
+				"suppress_errors" => TRUE
+			]
+		);
+		if ($proc === FALSE) {
+			kill_children($workerProcs);
+			error("Failed to spawn worker $i");
+		}
+		$workerProcs[$i] = $proc;
+
+		$workerSock = stream_socket_accept($listenSock, 5);
+		if ($workerSock === FALSE) {
+			kill_children($workerProcs);
+			error("Failed to accept connection from worker $i");
+		}
+
+		$greeting = base64_encode(serialize([
+			"type" => "hello",
+			"workerID" => $i,
+			"GLOBALS" => $GLOBALS,
+			"constants" => [
+				"INIT_DIR" => INIT_DIR,
+				"TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
+				"PHP_QA_EMAIL" => PHP_QA_EMAIL,
+				"QA_SUBMISSION_PAGE" => QA_SUBMISSION_PAGE,
+				"QA_REPORTS_PAGE" => QA_REPORTS_PAGE,
+				"TRAVIS_CI" => TRAVIS_CI
+			]
+		])) . "\n";
+
+		stream_set_timeout($workerSock, 5);
+		if (fwrite($workerSock, $greeting) === FALSE) {
+			kill_children($workerProcs);
+			error("Failed to send greeting to worker $i.");
+		}
+
+		$rawReply = fgets($workerSock);
+		if ($rawReply === FALSE) {
+			kill_children($workerProcs);
+			error("Failed to read greeting reply from worker $i.");
+		}
+
+		$reply = unserialize(base64_decode($rawReply));
+		if (!$reply || $reply["type"] !== "hello_reply" || $reply["workerID"] !== $i) {
+			kill_children($workerProcs);
+			error("Greeting reply from worker $i unexpected or could not be decoded: '$rawReply'");
+		}
+
+		stream_set_timeout($workerSock, 0);
+		stream_set_blocking($workerSock, FALSE);
+
+		$workerSocks[$i] = $workerSock;
+
+		echo "$i ";
+	}
+	echo "… done!\n";
+	echo "====⚡️===========================================================⚡️====\n";
+	echo "\n";
+
+	$rawMessageBuffers = [];
+
+escape:
+	while ($testDirsToGo || ($testDirsInProgress > 0)) {
+		$toRead = array_values($workerSocks);
+		$toWrite = NULL;
+		$toExcept = NULL;
+		if (stream_select($toRead, $toWrite, $toExcept, 10)) {
+			foreach ($toRead as $workerSock) {
+				$i = array_search($workerSock, $workerSocks);
+				if ($i === FALSE) {
+					kill_children($workerProcs);
+					error("Could not find worker stdout in array of worker stdouts, THIS SHOULD NOT HAPPEN.");
+				}
+				while (FALSE !== ($rawMessage = fgets($workerSock))) {
+					// work around fgets truncating things
+					if (($rawMessageBuffers[$i] ?? '') !== '') {
+						$rawMessage = $rawMessageBuffers[$i] . $rawMessage;
+						$rawMessageBuffers[$i] = '';
+					}
+					if ($rawMessage[-1] !== "\n") {
+						$rawMessageBuffers[$i] = $rawMessage;
+						continue;
+					}
+
+					$message = unserialize(base64_decode($rawMessage));
+					if (!$message) {
+						kill_children($workerProcs);
+						$stuff = fread($workerSock, 65536);
+						error("Could not decode message from worker $i: '$rawMessage$stuff'");
+					}
+
+					switch ($message["type"]) {
+						case "dir_finished":
+							$testDirsInProgress--;
+							// intentional fall-through
+						case "ready":
+							if ($testDir = array_pop($testDirsToGo)) {
+								$testDirsInProgress++;
+								send_message($workerSocks[$i], [
+									"type" => "run_tests",
+									"test_files" => $testDir,
+									"env" => $env,
+									"redir_tested" => $redir_tested
+								]);
+							} else {
+								proc_terminate($workerProcs[$i]);
+								unset($workerProcs[$i]);
+								unset($workerSocks[$i]);
+								goto escape;
+							}
+							break;
+						case "test_result":
+							[$name, $index, $result, $resultText] = [$message["name"], $message["index"], $message["result"], $message["text"]];
+							foreach ($message["PHP_FAILED_TESTS"] as $category => $tests) {
+								$PHP_FAILED_TESTS[$category] = array_merge($PHP_FAILED_TESTS[$category], $tests);
+							}
+							$test_idx++;
+							clear_show_test();
+							echo $resultText;
+							show_test($test_idx, "⚡️[" . count($workerProcs) . "/$workers concurrent test workers running]⚡️");
+
+							if (!is_array($name) && $result != 'REDIR') {
+								$test_results[$index] = $result;
+
+								if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
+									fwrite($failed_tests_file, "$index\n");
+								}
+								if ($result_tests_file) {
+									fwrite($result_tests_file, "$result\t$index\n");
+								}
+							}
+							break;
+						case "error":
+							kill_children($workerProcs);
+							error("Worker $i reported error: $message[msg]");
+							break;
+						case "php_error":
+							kill_children($workerProcs);
+							$error_consts = [
+								'E_ERROR',
+								'E_WARNING',
+								'E_PARSE',
+								'E_NOTICE',
+								'E_CORE_ERROR',
+								'E_CORE_WARNING',
+								'E_COMPILE_ERROR',
+								'E_COMPILE_WARNING',
+								'E_USER_ERROR',
+								'E_USER_WARNING',
+								'E_USER_NOTICE',
+								'E_STRICT',
+								'E_RECOVERABLE_ERROR',
+								'E_USER_DEPRECATED'
+							];
+							$error_consts = array_combine(array_map('constant', $error_consts), $error_consts);
+							error("Worker $i reported unexpected {$error_consts[$message['errno']]}: $message[errstr] in $message[errfile] on line $message[errline]");
+						default:
+							kill_children($workerProcs);
+							error("Unrecognised message type '$message[type]' from worker $i");
+					}
+				}
+			}
+		}
+	}
+
+	clear_show_test();
+
+	kill_children($workerProcs);
+
+	if ($testDirsInProgress < 0) {
+		error("$testDirsInProgress test directories “in progress”, which is less than zero. THIS SHOULD NOT HAPPEN.");
+	}
+}
+
+function send_message($stream, array $message) {
+	$blocking = stream_get_meta_data($stream)["blocked"];
+	stream_set_blocking($stream, true);
+	fwrite($stream, base64_encode(serialize($message)) . "\n");
+	stream_set_blocking($stream, $blocking);
+}
+
+function kill_children(array $children) {
+	foreach ($children as $child) {
+		if ($child) {
+			proc_terminate($child);
+		}
+	}
+}
+
+function run_worker() {
+	global $workerID, $workerSock;
+
+	$sockUri = getenv("TEST_PHP_URI");
+
+	$workerSock = stream_socket_client($sockUri, $_, $_, 5) or error("Couldn't connect to $sockUri");
+
+	$greeting = fgets($workerSock);
+	$greeting = unserialize(base64_decode($greeting)) or die("Could not decode greeting\n");
+	if ($greeting["type"] !== "hello" || $greeting["workerID"] !== $workerID) {
+		error("Unexpected greeting of type $greeting[type] and for worker $greeting[workerID]");
+	}
+
+	set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($workerSock) {
+		if (error_reporting() & $errno) {
+			send_message($workerSock, compact('errno', 'errstr', 'errfile', 'errline') + [
+				'type' => 'php_error'
+			]);
+		}
+
+		return true;
+	});
+
+	foreach ($greeting["GLOBALS"] as $var => $value) {
+		if ($var !== "workerID" && $var !== "workerSock" && $var !== "GLOBALS") {
+			$GLOBALS[$var] = $value;
+		}
+	}
+	foreach ($greeting["constants"] as $const => $value) {
+		define($const, $value);
+	}
+
+	send_message($workerSock, [
+		"type" => "hello_reply",
+		"workerID" => $workerID
+	]);
+
+	send_message($workerSock, [
+		"type" => "ready"
+	]);
+
+	while (($command = fgets($workerSock))) {
+		$command = unserialize(base64_decode($command));
+
+		switch ($command["type"]) {
+			case "run_tests":
+				run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
+				send_message($workerSock, [
+					"type" => "dir_finished"
+				]);
+				break;
+			default:
+				send_message($workerSock, [
+					"type" => "error",
+					"msg" => "Unrecognised message type: $command[type]"
+				]);
+				die;
+		}
+	}
+
+	die;
 }
 
 //
@@ -1315,6 +1729,8 @@ function run_test($php, $file, $env)
 	global $no_file_cache;
 	global $slow_min_ms;
 	global $preload;
+	// Parallel testing
+	global $workerID;
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1527,7 +1943,7 @@ TEST $file
 		}
 	}
 
-	if (!$SHOW_ONLY_GROUPS) {
+	if (!$SHOW_ONLY_GROUPS && !$workerID) {
 		show_test($test_idx, $shortname);
 	}
 
@@ -2728,8 +3144,7 @@ function show_redirect_start($tests, $tested, $tested_file)
 	if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
 		echo "REDIRECT $tests ($tested [$tested_file]) begin\n";
 	} else {
-		   // Write over the last line to avoid random trailing chars on next echo
-		echo str_repeat(" ", $line_length), "\r";
+		clear_show_test();
 	}
 }
 
@@ -2744,8 +3159,7 @@ function show_redirect_ends($tests, $tested, $tested_file)
 	if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
 		echo "REDIRECT $tests ($tested [$tested_file]) done\n";
 	} else {
-		   // Write over the last line to avoid random trailing chars on next echo
-		echo str_repeat(" ", $line_length), "\r";
+		clear_show_test();
 	}
 }
 
@@ -2760,6 +3174,17 @@ function show_test($test_idx, $shortname)
 	flush();
 }
 
+function clear_show_test() {
+	global $line_length;
+	// Parallel testing
+	global $workerID;
+
+	if (!$workerID) {
+		// Write over the last line to avoid random trailing chars on next echo
+		echo str_repeat(" ", $line_length), "\r";
+	}
+}
+
 function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
 {
 	global $html_output, $html_file, $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
@@ -2767,8 +3192,7 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 	if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
 		echo "$result $tested [$tested_file] $extra\n";
 	} else if (!$SHOW_ONLY_GROUPS) {
-		// Write over the last line to avoid random trailing chars on next echo
-		echo str_repeat(" ", $line_length), "\r";
+		clear_show_test();
 	}
 
 	if ($html_output) {
