@@ -691,6 +691,7 @@ PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh);
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt);
 
 
+PDO_API void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error);
 #endif /* PHP_PDO_DRIVER_H */
 /*
  * Local variables:

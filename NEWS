@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug #73060 (php failed with error after temp folder cleaned up).
     (cmb)
 
+- PDO:
+  . Fixed bug #64705 (errorInfo property of PDOException is null when
+    PDO::__construct() fails). (Ahmed Abdou)
+
 - Standard:
   . Fixed bug #79930 (array_merge_recursive() crashes when called with array
     with single reference). (Nikita)
