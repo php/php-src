@@ -86,6 +86,7 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "mbfilter.h"
 #include "mbfl_filter_output.h"
@@ -97,6 +98,7 @@
 #include "filters/mbfilter_qprint.h"
 #include "filters/mbfilter_tl_jisx0201_jisx0208.h"
 #include "filters/mbfilter_utf8.h"
+#include "filters/mbfilter_utf16.h"
 
 #include "eaw_table.h"
 
@@ -663,27 +665,54 @@ mbfl_strlen(mbfl_string *string)
 	const mbfl_encoding *encoding = string->encoding;
 
 	len = 0;
-	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+	if (encoding->flag & MBFL_ENCTYPE_SBCS) { /* 1-byte encoding */
 		len = string->len;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) { /* 2-byte encoding */
 		len = string->len/2;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) { /* 4-byte encoding */
 		len = string->len/4;
-	} else if (encoding->mblen_table != NULL) {
+	} else if (encoding->mblen_table != NULL) { /* UTF-8 char length lookup table */
 		const unsigned char *mbtab = encoding->mblen_table;
-		n = 0;
-		p = string->val;
-		k = string->len;
-		/* count */
+		n = 0; /* calculated string length */
+		p = string->val; /* string cursor pointer */
+		k = string->len; /* actual string length in bytes */
 		if (p != NULL) {
-			while (n < k) {
-				unsigned m = mbtab[*p];
+			while (n < k) { /* count chars while calculated string length in bytes less than actual length */
+				unsigned m = mbtab[*p]; /* current char length based on lookup table */
 				n += m;
 				p += m;
 				len++;
 			}
 		}
+	} else if (encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) { /* UTF16-BE, UTF-16LE bitwise AND based length detection */
+		char is_big_endian = 0xff00 & 1; /* big-endian system detection */
+		n = 0;
+		p = string->val;
+		k = string->len;
+		/* count */
+		if(is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2BE /* UTF-16BE on big-endian machine */
+		   || !is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2LE ) { /* UTF-16LE on little-endian machine */
+			if (p != NULL) {
+				while (n < k) {
+					char unsigned m = UTF16_LE_CHAR_SIZE(*(uint16_t *)p); /* determine char size */
+					n += m;
+					p += m;
+					len++;
+				}
+			}
+		} else {
+			/* UTF-16LE on big-endian machine or UTF-16BE on little-endian machine */
+			if (p != NULL) {
+				while (n < k) {
+					char unsigned m = UTF16_BE_CHAR_SIZE(*(uint16_t *)p); /* determine char size */
+					n += m;
+					p += m;
+					len++;
+				}
+			}
+		}
 	} else {
+		/* other variable with multibyte encodings */
 		/* wchar filter */
 		mbfl_convert_filter *filter = mbfl_convert_filter_new(
 		  string->encoding,
@@ -696,7 +725,7 @@ mbfl_strlen(mbfl_string *string)
 		n = string->len;
 		p = string->val;
 		if (p != NULL) {
-			while (n > 0) {
+			while (n > 0) { /* string length calculation inside the callback function */
 				(*filter->filter_function)(*p++, filter);
 				n--;
 			}
@@ -800,6 +829,34 @@ mbfl_oddlen(mbfl_string *string)
 				n += m;
 				p += m;
 			};
+		}
+		return n-k;
+	} else if (encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) { /* UTF16-BE, UTF-16LE bitwise AND based length detection */
+		char is_big_endian = 0xff00 & 1; /* big-endian system detection */
+		n = 0;
+		p = string->val;
+		k = string->len;
+		/* count */
+		if(is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2BE /* UTF-16BE on big-endian machine */
+		   || !is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2LE ) { /* UTF-16LE on little-endian machine */
+			if (p != NULL) {
+				while (n < k) {
+					char unsigned m = UTF16_LE_CHAR_SIZE(*(uint16_t *)p); /* determine char size */
+					n += m;
+					p += m;
+					len++;
+				}
+			}
+		} else {
+			/* UTF-16LE on big-endian machine or UTF-16BE on little-endian machine */
+			if (p != NULL) {
+				while (n < k) {
+					char unsigned m = UTF16_BE_CHAR_SIZE(*(uint16_t *)p); /* determine char size */
+					n += m;
+					p += m;
+					len++;
+				}
+			}
 		}
 		return n-k;
 	} else {
@@ -1136,8 +1193,9 @@ mbfl_substr(
 	result->no_language = string->no_language;
 	result->encoding = string->encoding;
 
-	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) ||
-	   encoding->mblen_table != NULL) {
+	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE
+		| MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) || /* UTF-16BE, UTF-16LE */
+	   encoding->mblen_table != NULL) { /* UTF-8 */
 		len = string->len;
 		if (encoding->flag & MBFL_ENCTYPE_SBCS) {
 			start = from;
@@ -1145,6 +1203,42 @@ mbfl_substr(
 			start = from*2;
 		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
 			start = from*4;
+		} else if (encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) { /* UTF16-BE, UTF-16LE bitwise AND based length detection */
+			char is_big_endian = 0xff00 & 1; /* big-endian system detection */
+			start = 0;
+			n = 0;
+			k = 0;
+			p = string->val;
+			/* search start position */
+			if(is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2BE /* UTF-16BE on big-endian machine */
+			   || !is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2LE ) { /* UTF-16LE on little-endian machine */
+				if (p != NULL) {
+					while (k <= from) {
+						start = n;
+						if (n >= len) {
+							break;
+						}
+						char unsigned m = UTF16_LE_CHAR_SIZE(*(uint16_t *)p); /* determine char size */
+						n += m;
+						p += m;
+						k++;
+					}
+				}
+			} else {
+				/* UTF-16LE on big-endian machine or UTF-16BE on little-endian machine */
+				if (p != NULL) {
+					while (k <= from) {
+						start = n;
+						if (n >= len) {
+							break;
+						}
+						char unsigned m = UTF16_BE_CHAR_SIZE(*(uint16_t *)p); /* determine char size */
+						n += m;
+						p += m;
+						k++;
+					}
+				}
+			}
 		} else {
 			const unsigned char *mbtab = encoding->mblen_table;
 			start = 0;
@@ -1293,8 +1387,9 @@ mbfl_strcut(
 				| MBFL_ENCTYPE_WCS2BE
 				| MBFL_ENCTYPE_WCS2LE
 				| MBFL_ENCTYPE_WCS4BE
-				| MBFL_ENCTYPE_WCS4LE))
-			|| encoding->mblen_table != NULL) {
+				| MBFL_ENCTYPE_WCS4LE
+				| MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) /* UTF-16BE, UTF-16LE */
+			|| encoding->mblen_table != NULL) { /* UTF-8 */
 		const unsigned char *start = NULL;
 		const unsigned char *end = NULL;
 		unsigned char *w;
@@ -1345,6 +1440,41 @@ mbfl_strcut(
 				end = string->val + string->len;
 			} else {
 				for (q = p + length; p < q; p += (m = mbtab[*p]));
+
+				if (p > q) {
+					p -= m;
+				}
+				end = p;
+			}
+		} else if (encoding->flag & (MBFL_ENCTYPE_MWC2BE | MBFL_ENCTYPE_MWC2LE)) { /* UTF16-BE, UTF-16LE bitwise AND based length detection */
+			char is_big_endian = 0xff00 & 1; /* big-endian system detection */
+			const unsigned char *p, *q;
+			char unsigned m;
+
+			if(is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2BE /* UTF-16BE on big-endian machine */
+			   || !is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2LE ) { /* UTF-16LE on little-endian machine */
+				/* search start position */
+				for (m = 0, p = string->val, q = p + from; p < q; p += (m = UTF16_LE_CHAR_SIZE(*(uint16_t *) p)));
+			} else {
+				for (m = 0, p = string->val, q = p + from; p < q; p += (m = UTF16_BE_CHAR_SIZE(*(uint16_t *) p)));
+			}
+
+			if (p > q) {
+				p -= m;
+			}
+
+			start = p;
+
+			/* search end position */
+			if (length >= string->len - (start - string->val)) {
+				end = string->val + string->len;
+			} else {
+				if(is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2BE /* UTF-16BE on big-endian machine */
+				   || !is_big_endian && encoding->flag & MBFL_ENCTYPE_MWC2LE ) { /* UTF-16LE on little-endian machine */
+					for (q = p + length; p < q; p += (m = UTF16_LE_CHAR_SIZE(*(uint16_t *)p)));
+				} else {
+					for (q = p + length; p < q; p += (m = UTF16_BE_CHAR_SIZE(*(uint16_t *)p)));
+				}
 
 				if (p > q) {
 					p -= m;
