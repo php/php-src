@@ -1,4 +1,4 @@
-# http://editorconfig.org/
+# https://editorconfig.org/
 
 root = true
 
@@ -31,5 +31,15 @@ insert_final_newline     = true
 charset                  = utf-8
 end_of_line              = lf
 indent_style             = space
-trim_trailing_whitespace = false
+trim_trailing_whitespace = true
 insert_final_newline     = true
+max_line_length          = 80
+
+[COMMIT_EDITMSG]
+charset                  = utf-8
+end_of_line              = lf
+indent_size              = 4
+indent_style             = space
+trim_trailing_whitespace = true
+insert_final_newline     = true
+max_line_length          = 80
