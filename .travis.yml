@@ -54,8 +54,9 @@ env:
       - PDO_MYSQL_TEST_HOST=127.0.0.1
       - REPORT_EXIT_STATUS=1
     matrix:
-      - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
-      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
+      - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0 PARALLEL_TESTS=0
+      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1 PARALLEL_TESTS=0
+      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1 PARALLEL_TESTS=2
 
 before_script:
     - ccache --version
@@ -74,7 +75,7 @@ before_script:
 
 # Run PHPs run-tests.php
 script:
-    - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d opcache.protect_memory=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --show-slow 1000 --set-timeout 120
+    - ./sapi/cli/php run-tests.php $(if [ $PARALLEL_TESTS -gt 0 ]; then echo "-j$PARALLEL_TESTS"; fi) -p `pwd`/sapi/cli/php $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d opcache.protect_memory=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --show-slow 1000 --set-timeout 120
 
 after_success:
     - ccache --show-stats
