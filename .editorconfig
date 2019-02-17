@@ -2,7 +2,7 @@
 
 root = true
 
-[*.{c,h,awk,w32,bat,mk,frag}]
+[*.{c,h,y,awk,w32,bat,mk,frag}]
 charset                  = utf-8
 end_of_line              = lf
 indent_size              = 4
