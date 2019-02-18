@@ -23,6 +23,26 @@ else
 	MAKE_QUIET=""
 fi
 
+if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+	WITH_GETTEXT="--with-gettext=/usr/local/opt/gettext"
+	WITH_READLINE="--with-libedit"
+
+	ENABLE_INTL=""
+	WITH_ENCHANT=""
+	WITH_PSPELL=""
+	WITH_XPM=""
+	WITH_PCRE_JIT="--without-pcre-jit"
+else
+	WITH_GETTEXT="--with-gettext"
+	WITH_READLINE="--with-readline"
+
+	ENABLE_INTL="--enable-intl"
+	WITH_ENCHANT="--with-enchant=/usr"
+	WITH_PSPELL="--with-pspell=/usr"
+	WITH_XPM="--with-xpm-dir=/usr"
+	WITH_PCRE_JIT=""
+fi
+
 MAKE_JOBS=${MAKE_JOBS:-2}
 
 ./buildconf --force
@@ -38,13 +58,13 @@ $TS \
 --with-pgsql \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
---enable-intl \
+$ENABLE_INTL \
 --without-pear \
 --enable-gd \
 --with-jpeg \
 --with-webp \
 --with-freetype \
---with-xpm \
+$WITH_XPM \
 --enable-exif \
 --enable-zip \
 --with-zlib \
@@ -58,10 +78,10 @@ $TS \
 --enable-sysvshm \
 --enable-shmop \
 --enable-pcntl \
---with-readline \
+$WITH_READLINE \
 --enable-mbstring \
 --with-curl \
---with-gettext \
+$WITH_GETTEXT \
 --enable-sockets \
 --with-bz2 \
 --with-openssl \
@@ -69,12 +89,13 @@ $TS \
 --enable-bcmath \
 --enable-calendar \
 --enable-ftp \
---with-pspell=/usr \
---with-enchant=/usr \
+$WITH_PSPELL \
+$WITH_ENCHANT \
 --enable-wddx \
 --with-kerberos \
 --enable-sysvmsg \
 --enable-zend-test \
+$WITH_PCRE_JIT \
 > "$CONFIG_LOG_FILE"
 
 make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
