@@ -64,7 +64,7 @@ ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_fun
 ZEND_API int zend_ts_hash_del(TsHashTable *ht, zend_string *key);
 ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h);
 
-/* Data retreival */
+/* Data retrieval */
 ZEND_API zval *zend_ts_hash_find(TsHashTable *ht, zend_string *key);
 ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong);
 
