@@ -391,7 +391,6 @@ NO_PROC_OPEN_ERROR;
 							error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
 						}
 						$workers = intval($workers, 10);
-						$environment['SKIP_IO_CAPTURE_TESTS'] = 1;
 						break;
 					case 'r':
 					case 'l':
@@ -1434,11 +1433,7 @@ NAME_AND_SHAME;
 	for ($i = 1; $i <= $workers; $i++) {
 		$proc = proc_open(
 			$thisPHP . ' ' . escapeshellarg($thisScript),
-			[
-				0 => ['pipe', 'r'],
-				1 => ['pipe', 'w'],
-				2 => ['pipe', 'w']
-			],
+			[], // Inherit our stdin, stdout and stderr
 			$pipes,
 			NULL,
 			$_ENV + [
