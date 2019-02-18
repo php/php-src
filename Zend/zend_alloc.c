@@ -190,9 +190,7 @@ typedef struct  _zend_mm_free_slot zend_mm_free_slot;
 typedef struct  _zend_mm_chunk     zend_mm_chunk;
 typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 
-#ifdef MAP_HUGETLB
 int zend_mm_use_huge_pages = 0;
-#endif
 
 /*
  * Memory is retrieved from OS by chunks of fixed size 2MB.
@@ -709,7 +707,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		return NULL;
 	} else if (ZEND_MM_ALIGNED_OFFSET(ptr, alignment) == 0) {
 #ifdef MADV_HUGEPAGE
-	    madvise(ptr, size, MADV_HUGEPAGE);
+		if (zend_mm_use_huge_pages) {
+			madvise(ptr, size, MADV_HUGEPAGE);
+		}
 #endif
 		return ptr;
 	} else {
@@ -740,7 +740,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 			zend_mm_munmap((char*)ptr + size, alignment - REAL_PAGE_SIZE);
 		}
 # ifdef MADV_HUGEPAGE
-	    madvise(ptr, size, MADV_HUGEPAGE);
+		if (zend_mm_use_huge_pages) {
+			madvise(ptr, size, MADV_HUGEPAGE);
+		}
 # endif
 #endif
 		return ptr;
@@ -2702,9 +2704,7 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown)
 
 static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 {
-#if ZEND_MM_CUSTOM || MAP_HUGETLB
 	char *tmp;
-#endif
 
 #if ZEND_MM_CUSTOM
 	tmp = getenv("USE_ZEND_ALLOC");
@@ -2718,12 +2718,11 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		return;
 	}
 #endif
-#ifdef MAP_HUGETLB
+
 	tmp = getenv("USE_ZEND_ALLOC_HUGE_PAGES");
 	if (tmp && zend_atoi(tmp, 0)) {
 		zend_mm_use_huge_pages = 1;
 	}
-#endif
 	ZEND_TSRMLS_CACHE_UPDATE();
 	alloc_globals->mm_heap = zend_mm_init();
 }
