@@ -379,17 +379,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_config_count, 0, 0, 1)
     ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_root, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_html, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_root, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_head, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_html, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_head, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_body, 0, 0, 1)
@@ -435,7 +443,7 @@ static const zend_function_entry tidy_functions[] = {
 };
 
 static const zend_function_entry tidy_funcs_doc[] = {
-	TIDY_METHOD_MAP(getOpt, tidy_getopt, arginfo_tidy_getopt)
+	TIDY_METHOD_MAP(getOpt, tidy_getopt, arginfo_tidy_getopt_method)
 	TIDY_METHOD_MAP(cleanRepair, tidy_clean_repair, NULL)
 	TIDY_DOC_ME(parseFile, arginfo_tidy_parse_file)
 	TIDY_DOC_ME(parseString, arginfo_tidy_parse_string)
