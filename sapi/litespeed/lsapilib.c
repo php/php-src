@@ -2819,7 +2819,12 @@ static void lsapi_sigchild( int signal )
         if ( WIFSIGNALED( status ))
         {
             int sig_num = WTERMSIG( status );
+
+#ifdef WCOREDUMP
             int dump = WCOREDUMP( status );
+#else
+            int dump = -1;
+#endif
             lsapi_log("Child process with pid: %d was killed by signal: "
                      "%d, core dump: %d\n", pid, sig_num, dump );
         }
