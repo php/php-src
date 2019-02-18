@@ -806,13 +806,13 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 	}
 
 	if (!zend_is_callable_ex(value, NULL, 0, NULL, &fcc, &error)) {
-		zend_throw_error(zend_ffi_exception_ce, "Attempt to assing an invalid callback, %s", error);
+		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, %s", error);
 		return NULL;
 	}
 
 	arg_count = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
 	if (arg_count < fcc.function_handler->common.required_num_args) {
-		zend_throw_error(zend_ffi_exception_ce, "Attempt to assing an invalid callback, insufficient number of arguments");
+		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, insufficient number of arguments");
 		return NULL;
 	}
 
