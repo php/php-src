@@ -1766,7 +1766,7 @@ PHP_FUNCTION(pathinfo)
 /* }}} */
 
 /* {{{ php_stristr
-   case insensitve strstr */
+   case insensitive strstr */
 PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 {
 	php_strtolower(s, s_len);

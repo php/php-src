@@ -3113,7 +3113,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	/* In case this is a static method, we should'nt pass an object_ptr
+	/* In case this is a static method, we shouldn't pass an object_ptr
 	 * (which is used as calling context aka $this). We can thus ignore the
 	 * first parameter.
 	 *
