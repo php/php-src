@@ -19,6 +19,9 @@
 #ifndef PHP_FFI_H
 #define PHP_FFI_H
 
+#include "php_version.h"
+#define ZEND_FFI_VERSION PHP_VERSION
+
 extern zend_module_entry ffi_module_entry;
 #define phpext_ffi_ptr &ffi_module_entry
 
