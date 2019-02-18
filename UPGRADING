@@ -190,6 +190,12 @@ PHP 7.4 UPGRADE NOTES
     OpenSSL's X509_verify() function.
     See <https://github.com/php/php-src/pull/3624>.
 
+- Pcntl:
+  . Added bool pcntl_unshare(int flags) function which allows to dissociate
+    parts of the process execution context which are currently being shared with
+    other processes. Explicitly, it allows you to unshare the mount, IPC, UTS,
+    network, PID, user and cgroup namespaces.
+
 - SQLite3:
   . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. If TRUE is
     passed as parameter, query parameters will be replaced in the return value
