@@ -3869,13 +3869,15 @@ static int accel_preload(const char *config)
 
 		/* Don't preload constants */
 		if (EG(zend_constants)) {
+			zend_string *key;
 			zval *zv;
-			ZEND_HASH_REVERSE_FOREACH_VAL(EG(zend_constants), zv) {
+			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
 				zend_constant *c = Z_PTR_P(zv);
 				if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
 					break;
 				}
 				EG(zend_constants)->pDestructor(zv);
+				zend_string_release(key);
 			} ZEND_HASH_FOREACH_END_DEL();
 		}
 

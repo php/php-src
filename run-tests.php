@@ -1852,7 +1852,7 @@ TEST $file
 	$args = isset($section_text['ARGS']) ? ' -- ' . $section_text['ARGS'] : '';
 
 	if ($preload) {
-		save_text($preload_filename, "<?php\nerror_reporting(0);\nopcache_compile_file('" . $test_file . "');");
+		save_text($preload_filename, "<?php opcache_compile_file('$test_file');");
 		$local_pass_options = $pass_options;
 		unset($pass_options);
 		$pass_options = $local_pass_options;
