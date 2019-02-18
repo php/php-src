@@ -1869,7 +1869,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce,
 							   ZSTR_VAL(cur_alias->trait_method.method_name));
 				} else {
 					/** Here are two possible cases:
-						1) this is an attempt to modifiy the visibility
+						1) this is an attempt to modify the visibility
 						   of a method introduce as part of another alias.
 						   Since that seems to violate the DRY principle,
 						   we check against it and abort.

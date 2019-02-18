@@ -2153,7 +2153,7 @@ static inline void zend_handle_numeric_dim(zend_op *opline, znode *dim_node) /* 
 		zend_ulong index;
 
 		if (ZEND_HANDLE_NUMERIC(Z_STR(dim_node->u.constant), index)) {
-			/* For numeric indexs we also keep the original value to use by ArrayAccess
+			/* For numeric indexes we also keep the original value to use by ArrayAccess
 			 * See bug #63217
 			 */
 			int c = zend_add_literal(&dim_node->u.constant);
