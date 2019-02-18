@@ -31,6 +31,8 @@ Notice: Undefined variable: x in %sbug52041.php on line 3
 
 Warning: Creating default object from empty value in %sbug52041.php on line 7
 
+Warning: Creating default object from empty value in %sbug52041.php on line 7
+
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
 Warning: Creating default object from empty value in %sbug52041.php on line 8
@@ -38,6 +40,8 @@ Warning: Creating default object from empty value in %sbug52041.php on line 8
 Notice: Undefined property: stdClass::$a in %sbug52041.php on line 8
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
+
+Warning: Creating default object from empty value in %sbug52041.php on line 9
 
 Notice: Undefined property: stdClass::$a in %sbug52041.php on line 9
 
@@ -52,6 +56,8 @@ Warning: Creating default object from empty value in %sbug52041.php on line 10
 Notice: Undefined property: stdClass::$a in %sbug52041.php on line 10
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
+
+Warning: Creating default object from empty value in %sbug52041.php on line 11
 
 Notice: Undefined property: stdClass::$a in %sbug52041.php on line 11
 

@@ -3745,7 +3745,7 @@ static void *resolve_addslashes() {
 	if (zend_cpu_supports_sse42()) {
 		return php_addslashes_sse42;
 	}
-	return  php_addslashes_default;
+	return php_addslashes_default;
 }
 
 ZEND_NO_SANITIZE_ADDRESS
@@ -3753,23 +3753,30 @@ static void *resolve_stripslashes() {
 	if (zend_cpu_supports_sse42()) {
 		return php_stripslashes_sse42;
 	}
-	return  php_stripslashes_default;
+	return php_stripslashes_default;
 }
 # else /* ZEND_INTRIN_SSE4_2_FUNC_PTR */
 
-PHPAPI zend_string *(*php_addslashes)(zend_string *str) = NULL;
-PHPAPI void (*php_stripslashes)(zend_string *str) = NULL;
+static zend_string *(*php_addslashes_ptr)(zend_string *str) = NULL;
+static void (*php_stripslashes_ptr)(zend_string *str) = NULL;
+
+PHPAPI zend_string *php_addslashes(zend_string *str) {
+	return php_addslashes_ptr(str);
+}
+PHPAPI void php_stripslashes(zend_string *str) {
+	php_stripslashes_ptr(str);
+}
 
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(string_intrin)
 {
 	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42)) {
-		php_addslashes = php_addslashes_sse42;
-		php_stripslashes = php_stripslashes_sse42;
+		php_addslashes_ptr = php_addslashes_sse42;
+		php_stripslashes_ptr = php_stripslashes_sse42;
 	} else {
-		php_addslashes = php_addslashes_default;
-		php_stripslashes = php_stripslashes_default;
+		php_addslashes_ptr = php_addslashes_default;
+		php_stripslashes_ptr = php_stripslashes_default;
 	}
 	return SUCCESS;
 }

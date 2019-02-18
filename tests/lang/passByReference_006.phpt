@@ -63,6 +63,18 @@ var_dump($u1, $u2, $u3, $u4, $u5);
 ?>
 --EXPECTF--
  ---- Pass uninitialised array & object by ref: function call ---
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -97,6 +109,18 @@ object(stdClass)#%d (1) {
 }
 
  ---- Pass uninitialised arrays & objects by ref: static method call ---
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -132,6 +156,18 @@ object(stdClass)#%d (1) {
 
 
 ---- Pass uninitialised arrays & objects by ref: constructor ---
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -166,6 +202,18 @@ object(stdClass)#%d (1) {
 }
 
  ---- Pass uninitialised arrays & objects by ref: instance method call ---
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+
+Warning: Creating default object from empty value in %spassByReference_006.php on line %d
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
