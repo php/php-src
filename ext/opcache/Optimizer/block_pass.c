@@ -1872,7 +1872,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (!(b->flags & ZEND_BB_REACHABLE)) {
 				continue;
 			}
-			/* we track data dependencies only insight a single basic block */
+			/* we track data dependencies only inside a single basic block */
 			if (!(b->flags & ZEND_BB_FOLLOW) ||
 			    (b->flags & ZEND_BB_TARGET)) {
 				/* Skip continuation of "extended" BB */
