@@ -98,6 +98,8 @@ PHP                                                                        NEWS
 
 - Tidy:
   . Added TIDY_TAG_* constants for HTML5 elements. (cmb)
+  . Fixed bug #76736 (wrong reflection for tidy_get_head, tidy_get_html,
+    tidy_get_root, and tidy_getopt) (tandre)
 
 - WDDX:
   . Deprecated the WDDX extension. (cmb)
