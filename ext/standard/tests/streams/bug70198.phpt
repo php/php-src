@@ -4,6 +4,8 @@ Bug #70198 Checking liveness does not work as expected
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
+--CONFLICTS--
+server
 --FILE--
 <?php
 

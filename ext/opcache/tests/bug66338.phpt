@@ -4,6 +4,8 @@ Bug #66338 (Optimization binding of class constants is not safely opcacheable)
 opcache.enable=0
 --SKIPIF--
 <?php if (!extension_loaded('Zend OPcache') || php_sapi_name() != "cli") die("skip CLI only"); ?>
+--CONFLICTS--
+server
 --FILE--
 <?php
 $root  = str_replace('.php', "", __FILE__);

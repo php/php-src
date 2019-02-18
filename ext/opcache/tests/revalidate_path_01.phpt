@@ -7,6 +7,8 @@ opcache.revalidate_path=1
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php if (php_sapi_name() != "cli") die("skip CLI only"); ?>
+--CONFLICTS--
+server
 --FILE--
 <?php
 $dir = dirname(__FILE__);

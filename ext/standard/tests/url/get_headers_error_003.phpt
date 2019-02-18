@@ -1,5 +1,7 @@
 --TEST--
 Test get_headers() function : test with context
+--CONFLICTS--
+server
 --FILE--
 <?php
 
