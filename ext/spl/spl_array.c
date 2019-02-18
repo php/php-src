@@ -206,7 +206,6 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 	while (parent) {
 		if (parent == spl_ce_ArrayIterator || parent == spl_ce_RecursiveArrayIterator) {
 			intern->std.handlers = &spl_handler_ArrayIterator;
-			class_type->get_iterator = spl_array_get_iterator;
 			break;
 		} else if (parent == spl_ce_ArrayObject) {
 			intern->std.handlers = &spl_handler_ArrayObject;
@@ -1969,6 +1968,8 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Countable);
 	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
+	spl_ce_ArrayIterator->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
+
 
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
@@ -1979,6 +1980,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveArrayIterator, ArrayIterator, spl_array_object_new, spl_funcs_RecursiveArrayIterator);
 	REGISTER_SPL_IMPLEMENTS(RecursiveArrayIterator, RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
+	spl_ce_RecursiveArrayIterator->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
 
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveArrayIterator, "CHILD_ARRAYS_ONLY", SPL_ARRAY_CHILD_ARRAYS_ONLY);
 

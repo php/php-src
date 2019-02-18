@@ -340,7 +340,13 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 			}
 		}
 	}
-	class_type->get_iterator = zend_user_it_get_new_iterator;
+	if (class_type->parent
+	 && (class_type->parent->ce_flags & ZEND_ACC_REUSE_GET_ITERATOR)) {
+		class_type->get_iterator = class_type->parent->get_iterator;
+		class_type->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
+	} else {
+		class_type->get_iterator = zend_user_it_get_new_iterator;
+	}
 	funcs_ptr = class_type->iterator_funcs_ptr;
 	if (class_type->type == ZEND_INTERNAL_CLASS) {
 		if (!funcs_ptr) {
@@ -381,7 +387,13 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 			return FAILURE;
 		}
 	}
-	class_type->get_iterator = zend_user_it_get_iterator;
+	if (class_type->parent
+	 && (class_type->parent->ce_flags & ZEND_ACC_REUSE_GET_ITERATOR)) {
+		class_type->get_iterator = class_type->parent->get_iterator;
+		class_type->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
+	} else {
+		class_type->get_iterator = zend_user_it_get_iterator;
+	}
 	funcs_ptr = class_type->iterator_funcs_ptr;
 	if (class_type->type == ZEND_INTERNAL_CLASS) {
 		if (!funcs_ptr) {

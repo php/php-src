@@ -263,6 +263,9 @@ typedef struct _zend_oparray_context {
 /* Whether all property types are resolved to CEs         |     |     |     */
 #define ZEND_ACC_PROPERTY_TYPES_RESOLVED (1 << 16) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Children must reuse parent get_iterator()              |     |     |     */
+#define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 17) /*  X  |     |     |     */
+/*                                                        |     |     |     */
 /* Function Flags (unused: 28...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
