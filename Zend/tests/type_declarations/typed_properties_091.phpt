@@ -135,6 +135,10 @@ Cannot auto-initialize an stdClass inside a reference held by property Test::$pr
 Warning: Creating default object from empty value in %s on line %d
 
 Warning: Creating default object from empty value in %s on line %d
+
+Warning: Creating default object from empty value in %s on line %d
+
+Warning: Creating default object from empty value in %s on line %d
 object(Test)#3 (3) {
   ["prop"]=>
   &NULL

@@ -183,7 +183,7 @@ DBA_UPDATE_FUNC(cdb)
 	if (!cdb->make)
 		return FAILURE; /* database was opened readonly */
 	if (!mode)
-		return FAILURE; /* cdb_make dosn't know replace */
+		return FAILURE; /* cdb_make doesn't know replace */
 	if (cdb_make_add(&cdb->m, key, keylen, val, vallen) != -1)
 		return SUCCESS;
 #endif

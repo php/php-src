@@ -124,8 +124,14 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->clone)) {
 		ce->clone = parent->clone;
 	}
+	if (EXPECTED(!ce->serialize_func)) {
+		ce->serialize_func = parent->serialize_func;
+	}
 	if (EXPECTED(!ce->serialize)) {
 		ce->serialize = parent->serialize;
+	}
+	if (EXPECTED(!ce->unserialize_func)) {
+		ce->unserialize_func = parent->unserialize_func;
 	}
 	if (EXPECTED(!ce->unserialize)) {
 		ce->unserialize = parent->unserialize;
@@ -272,7 +278,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
 	 */
-	if ((fe->common.scope->constructor == fe)
+	if ((fe->common.fn_flags & ZEND_ACC_CTOR)
 		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
 			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
 		return 1;
@@ -574,7 +580,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			zend_function *proto = parent->common.prototype ?
 				parent->common.prototype : parent;
 
-			if (parent->common.scope->constructor != parent) {
+			if (!(parent_flags & ZEND_ACC_CTOR)) {
 				if (!proto) {
 					proto = parent;
 				}
@@ -849,18 +855,21 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 void zend_build_properties_info_table(zend_class_entry *ce)
 {
 	zend_property_info **table, *prop;
+	size_t size;
 	if (ce->default_properties_count == 0) {
 		return;
 	}
 
 	ZEND_ASSERT(ce->properties_info_table == NULL);
+	size = sizeof(zend_property_info *) * ce->default_properties_count;
 	if (ce->type == ZEND_USER_CLASS) {
-		ce->properties_info_table = table = zend_arena_alloc(&CG(arena),
-			sizeof(zend_property_info *) * ce->default_properties_count);
+		ce->properties_info_table = table = zend_arena_alloc(&CG(arena), size);
 	} else {
-		ce->properties_info_table = table = pemalloc(
-			sizeof(zend_property_info *) * ce->default_properties_count, 1);
+		ce->properties_info_table = table = pemalloc(size, 1);
 	}
+
+	/* Dead slots may be left behind during inheritance. Make sure these are NULLed out. */
+	memset(table, 0, size);
 
 	if (ce->parent && ce->parent->default_properties_count != 0) {
 		zend_property_info **parent_table = ce->parent->properties_info_table;
@@ -1287,7 +1296,11 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
-	if (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_') {
+	if (zend_string_equals_literal(mname, "serialize")) {
+		ce->serialize_func = fe;
+	} else if (zend_string_equals_literal(mname, "unserialize")) {
+		ce->unserialize_func = fe;
+	} else if (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_') {
 		/* pass */
 	} else if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = fe;
@@ -1842,7 +1855,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce,
 							   ZSTR_VAL(cur_alias->trait_method.method_name));
 				} else {
 					/** Here are two possible cases:
-						1) this is an attempt to modifiy the visibility
+						1) this is an attempt to modify the visibility
 						   of a method introduce as part of another alias.
 						   Since that seems to violate the DRY principle,
 						   we check against it and abort.
@@ -1947,7 +1960,7 @@ static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract
 		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 			ai->afn[ai->cnt] = fn;
 		}
-		if (fn->common.scope->constructor == fn) {
+		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
 			if (!ai->ctor) {
 				ai->cnt++;
 				ai->ctor = 1;

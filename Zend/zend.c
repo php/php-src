@@ -1389,7 +1389,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 
 			/* User error handler may include() additinal PHP files.
 			 * If an error was generated during comilation PHP will compile
-			 * such scripts recursivly, but some CG() variables may be
+			 * such scripts recursively, but some CG() variables may be
 			 * inconsistent. */
 
 			in_compilation = CG(in_compilation);
@@ -1490,6 +1490,11 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 		}
 	} else {
 		exception_ce = zend_ce_error;
+	}
+
+	/* Marker used to disable exception generation during preloading. */
+	if (EG(exception) == (void*)(uintptr_t)-1) {
+		return;
 	}
 
 	va_start(va, format);

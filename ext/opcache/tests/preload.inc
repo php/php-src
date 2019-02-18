@@ -37,3 +37,12 @@ trait T2 {
 class Y {
 	use T2;
 }
+
+class Z {
+    public $foo;
+    public a $bar;
+}
+
+function get_anon() {
+    return new class {};
+}

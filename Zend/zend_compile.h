@@ -212,7 +212,7 @@ typedef struct _zend_oparray_context {
 /* Final class or method                                  |     |     |     */
 #define ZEND_ACC_FINAL                   (1 <<  5) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Abstarct method                                        |     |     |     */
+/* Abstract method                                        |     |     |     */
 #define ZEND_ACC_ABSTRACT                (1 <<  6) /*  X  |  X  |     |     */
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS (1 <<  6) /*  X  |     |     |     */
 /*                                                        |     |     |     */
@@ -259,6 +259,12 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
 #define ZEND_HAS_STATIC_IN_METHODS       (1 << 15) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Whether all property types are resolved to CEs         |     |     |     */
+#define ZEND_ACC_PROPERTY_TYPES_RESOLVED (1 << 16) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Children must reuse parent get_iterator()              |     |     |     */
+#define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 17) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 28...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
@@ -311,6 +317,12 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* op_array is preloaded                                  |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 27) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* functions is a constructor                             |     |     |     */
+#define ZEND_ACC_CTOR                    (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* function is a destructor                               |     |     |     */
+#define ZEND_ACC_DTOR                    (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1 << 31) /*     |  X  |     |     */

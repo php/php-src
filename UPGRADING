@@ -129,6 +129,11 @@ PHP 8.0 UPGRADE NOTES
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
 
+- PDO:
+  . The method PDOStatement::setFetchMode() now accepts the following signature:
+
+        PDOStatement::setFetchMode($mode, $classname, $params) 
+
 - Reflection:
   . The method signatures
 

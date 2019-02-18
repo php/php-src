@@ -1215,8 +1215,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_setflags, 0, 0, 1)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_construct, 0, 0, 0)
+        ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO();
+
 static const zend_function_entry spl_funcs_MultipleIterator[] = {
-	SPL_ME(MultipleIterator,  __construct,            arginfo_MultipleIterator_setflags,          0)
+	SPL_ME(MultipleIterator,  __construct,            arginfo_MultipleIterator_construct,         0)
 	SPL_ME(MultipleIterator,  getFlags,               arginfo_splobject_void,                     0)
 	SPL_ME(MultipleIterator,  setFlags,               arginfo_MultipleIterator_setflags,          0)
 	SPL_ME(MultipleIterator,  attachIterator,         arginfo_MultipleIterator_attachIterator,    0)

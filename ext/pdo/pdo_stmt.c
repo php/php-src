@@ -101,6 +101,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_setfetchmode, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, param)
 	ZEND_ARG_INFO(0, params)
 ZEND_END_ARG_INFO()
 /* }}} */

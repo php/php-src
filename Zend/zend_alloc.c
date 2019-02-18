@@ -84,11 +84,6 @@
 #include <errno.h>
 
 #ifndef _WIN32
-# ifdef HAVE_MREMAP
-#  ifndef _GNU_SOURCE
-#   define _GNU_SOURCE
-#  endif
-# endif
 # include <sys/mman.h>
 # ifndef MAP_ANON
 #  ifdef MAP_ANONYMOUS
@@ -112,6 +107,12 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 
 #ifndef REAL_PAGE_SIZE
 # define REAL_PAGE_SIZE ZEND_MM_PAGE_SIZE
+#endif
+
+/* NetBSD has an mremap() function with a signature that is incompatible with Linux (WTF?),
+ * so pretend it doesn't exist. */
+#ifndef __linux__
+# undef HAVE_MREMAP
 #endif
 
 #ifndef ZEND_MM_STAT
@@ -189,15 +190,13 @@ typedef struct  _zend_mm_free_slot zend_mm_free_slot;
 typedef struct  _zend_mm_chunk     zend_mm_chunk;
 typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 
-#ifdef MAP_HUGETLB
 int zend_mm_use_huge_pages = 0;
-#endif
 
 /*
  * Memory is retrieved from OS by chunks of fixed size 2MB.
  * Inside chunk it's managed by pages of fixed size 4096B.
  * So each chunk consists from 512 pages.
- * The first page of each chunk is reseved for chunk header.
+ * The first page of each chunk is reserved for chunk header.
  * It contains service information about all pages.
  *
  * free_pages - current number of free pages in this chunk
@@ -410,6 +409,7 @@ stderr_last_error(char *msg)
 /* OS Allocation */
 /*****************/
 
+#ifndef HAVE_MREMAP
 static void *zend_mm_mmap_fixed(void *addr, size_t size)
 {
 #ifdef _WIN32
@@ -438,6 +438,7 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 	return ptr;
 #endif
 }
+#endif
 
 static void *zend_mm_mmap(size_t size)
 {
@@ -706,7 +707,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		return NULL;
 	} else if (ZEND_MM_ALIGNED_OFFSET(ptr, alignment) == 0) {
 #ifdef MADV_HUGEPAGE
-	    madvise(ptr, size, MADV_HUGEPAGE);
+		if (zend_mm_use_huge_pages) {
+			madvise(ptr, size, MADV_HUGEPAGE);
+		}
 #endif
 		return ptr;
 	} else {
@@ -737,7 +740,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 			zend_mm_munmap((char*)ptr + size, alignment - REAL_PAGE_SIZE);
 		}
 # ifdef MADV_HUGEPAGE
-	    madvise(ptr, size, MADV_HUGEPAGE);
+		if (zend_mm_use_huge_pages) {
+			madvise(ptr, size, MADV_HUGEPAGE);
+		}
 # endif
 #endif
 		return ptr;
@@ -797,7 +802,16 @@ static int zend_mm_chunk_extend(zend_mm_heap *heap, void *addr, size_t old_size,
 		}
 	}
 #endif
-#ifndef _WIN32
+#ifdef HAVE_MREMAP
+	/* We don't use MREMAP_MAYMOVE due to alignment requirements. */
+	void *ptr = mremap(addr, old_size, new_size, 0);
+	if (ptr == MAP_FAILED) {
+		return 0;
+	}
+	/* Sanity check: The mapping shouldn't have moved. */
+	ZEND_ASSERT(ptr == addr);
+	return 1;
+#elif !defined(_WIN32)
 	return (zend_mm_mmap_fixed((char*)addr + old_size, new_size - old_size) != NULL);
 #else
 	return 0;
@@ -1998,7 +2012,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 					int pages_count = bin_pages[bin_num];
 
 					if (ZEND_MM_SRUN_FREE_COUNTER(info) == bin_elements[bin_num]) {
-						/* all elemens are free */
+						/* all elements are free */
 						zend_mm_free_pages_ex(heap, chunk, i, pages_count, 0);
 						collected += pages_count;
 					} else {
@@ -2690,9 +2704,7 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown)
 
 static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 {
-#if ZEND_MM_CUSTOM || MAP_HUGETLB
 	char *tmp;
-#endif
 
 #if ZEND_MM_CUSTOM
 	tmp = getenv("USE_ZEND_ALLOC");
@@ -2706,12 +2718,11 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		return;
 	}
 #endif
-#ifdef MAP_HUGETLB
+
 	tmp = getenv("USE_ZEND_ALLOC_HUGE_PAGES");
 	if (tmp && zend_atoi(tmp, 0)) {
 		zend_mm_use_huge_pages = 1;
 	}
-#endif
 	ZEND_TSRMLS_CACHE_UPDATE();
 	alloc_globals->mm_heap = zend_mm_init();
 }

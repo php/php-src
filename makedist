@@ -88,7 +88,7 @@ done
 # generate some files so people don't need bison, re2c and autoconf
 # to install
 set -x
-./buildconf --copy --force
+./buildconf --force
 
 # remove buildmk.stamp. Otherwise, buildcheck.sh might not be run,
 # when a user runs buildconf in the distribution.

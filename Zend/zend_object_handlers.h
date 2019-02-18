@@ -133,7 +133,7 @@ typedef zend_object* (*zend_object_clone_obj_t)(zend_object *object);
 typedef zend_string *(*zend_object_get_class_name_t)(const zend_object *object);
 
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2);
-typedef int (*zend_object_compare_zvals_t)(zval *resul, zval *op1, zval *op2);
+typedef int (*zend_object_compare_zvals_t)(zval *result, zval *op1, zval *op2);
 
 /* Cast an object to some other type.
  * readobj and retval must point to distinct zvals.

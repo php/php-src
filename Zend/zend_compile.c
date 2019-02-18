@@ -2131,7 +2131,7 @@ static inline void zend_handle_numeric_dim(zend_op *opline, znode *dim_node) /* 
 		zend_ulong index;
 
 		if (ZEND_HANDLE_NUMERIC(Z_STR(dim_node->u.constant), index)) {
-			/* For numeric indexs we also keep the original value to use by ArrayAccess
+			/* For numeric indexes we also keep the original value to use by ArrayAccess
 			 * See bug #63217
 			 */
 			int c = zend_add_literal(&dim_node->u.constant);
@@ -5600,8 +5600,14 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 					"public visibility and cannot be static");
 			}
 		}
-	} else if (ZSTR_VAL(lcname)[0] == '_' && ZSTR_VAL(lcname)[1] == '_') {
-		if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+	} else {
+		if (zend_string_equals_literal(lcname, "serialize")) {
+			ce->serialize_func = (zend_function *) op_array;
+		} else if (zend_string_equals_literal(lcname, "unserialize")) {
+			ce->unserialize_func = (zend_function *) op_array;
+		} else if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
+			/* pass */
+		} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 			ce->constructor = (zend_function *) op_array;
 		} else if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 			ce->destructor = (zend_function *) op_array;
@@ -6218,6 +6224,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 	CG(zend_lineno) = ast->lineno;
 
 	if (ce->constructor) {
+		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
@@ -6229,6 +6236,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		}
 	}
 	if (ce->destructor) {
+		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->destructor->common.function_name));
@@ -6244,7 +6252,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->clone->common.function_name));
 		} else if (ce->clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"%s::%s() cannot declare a return type",
+				"Clone method %s::%s() cannot declare a return type",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->clone->common.function_name));
 		}
 	}
