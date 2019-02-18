@@ -66,7 +66,7 @@ END_EXTERN_C()
     on how to do that?
 
  MS Visual C:
-  - Since MSVC users tipically don't use autoconf or CMake, we will detect
+  - Since MSVC users typically don't use autoconf or CMake, we will detect
     MSVC via compile time define. Floating point precision change isn't
     supported on 64 bit platforms, so it's NOP. See
     http://msdn.microsoft.com/en-us/library/c9676k6h(v=vs.110).aspx

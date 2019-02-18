@@ -112,8 +112,8 @@ ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
 #if PHP_HAVE_BUILTIN_CPU_SUPPORTS
 /* NOTE: you should use following inline function in
  * resolver functions (ifunc), as it could be called
- * before all PLT symbols are resloved. in other words,
- * resolver functions should not depends any external
+ * before all PLT symbols are resolved. in other words,
+ * resolver functions should not depend on any external
  * functions */
 ZEND_NO_SANITIZE_ADDRESS
 static zend_always_inline int zend_cpu_supports_sse2() {

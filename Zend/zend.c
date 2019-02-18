@@ -1389,7 +1389,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 
 			/* User error handler may include() additinal PHP files.
 			 * If an error was generated during comilation PHP will compile
-			 * such scripts recursivly, but some CG() variables may be
+			 * such scripts recursively, but some CG() variables may be
 			 * inconsistent. */
 
 			in_compilation = CG(in_compilation);

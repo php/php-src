@@ -3526,7 +3526,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	/* delete old call_frame from previous stack segment */
 	EG(vm_stack)->prev->top = (zval*)call;
 
-	/* delete previous stack segment if it becames empty */
+	/* delete previous stack segment if it became empty */
 	if (UNEXPECTED(EG(vm_stack)->prev->top == ZEND_VM_STACK_ELEMENTS(EG(vm_stack)->prev))) {
 		zend_vm_stack r = EG(vm_stack)->prev;
 
