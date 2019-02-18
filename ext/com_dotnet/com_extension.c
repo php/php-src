@@ -237,8 +237,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		modifier = php_strtok_r(NULL, "#", &strtok_buf);
 		if (modifier != NULL) {
 			if (!strcmp(modifier, "cis") || !strcmp(modifier, "case_insensitive")) {
-				php_error_docref("com.configuration", E_WARNING, "Declaration of case-insensitive constants is no longer supported");
-				return FAILURE;
+				php_error_docref("com.configuration", E_WARNING, "Declaration of case-insensitive constants is no longer supported; #cis modifier ignored");
 			}
 		}
 
