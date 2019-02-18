@@ -25,6 +25,8 @@ PHP 7.4 UPGRADE NOTES
   . Referencing parent:: inside a class that does not have a parent will now
     generate a compile-time error. Previously the error was only emitted at
     run-time.
+  . get_declared_classes() no longer returns anonymous classes that haven't
+    been instantiated yet.
 
 - Curl:
   . Attempting to serialize a CURLFile class will now generate an exception.
