@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #77652 (Anonymous classes can lose their interface information).
     (Nikita)
 
+- FPM:
+  . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
+    (Kevin Adler)
+
 - Date:
   . Fixed bug #50020 (DateInterval:createDateFromString() silently fails).
     (Derick)
