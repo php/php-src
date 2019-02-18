@@ -59,7 +59,7 @@ function main()
 
 	$workerID = 0;
 	if (getenv("TEST_PHP_WORKER")) {
-		$workerID = intval(getenv("TEST_PHP_WORKER", 10));
+		$workerID = intval(getenv("TEST_PHP_WORKER"));
 		run_worker();
 		die;
 	}
