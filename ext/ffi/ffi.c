@@ -4774,7 +4774,7 @@ zend_module_entry ffi_module_entry = {
 	NULL,					/* ZEND_RINIT - Request initialization */
 	ZEND_RSHUTDOWN(ffi),	/* ZEND_RSHUTDOWN - Request shutdown */
 	ZEND_MINFO(ffi),		/* ZEND_MINFO - Module info */
-	PHP_FFI_VERSION,		/* Version */
+	PHP_VERSION,			/* Version */
 	ZEND_MODULE_GLOBALS(ffi),
 	ZEND_GINIT(ffi),
 	ZEND_GSHUTDOWN(ffi),
