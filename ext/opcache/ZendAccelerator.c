@@ -3621,6 +3621,28 @@ static void preload_remove_empty_includes(void)
 	} ZEND_HASH_FOREACH_END();
 }
 
+static void preload_fix_trait_methods(zend_class_entry *ce)
+{
+	zend_op_array *op_array;
+
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+		if (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE) {
+			zend_op_array *orig_op_array = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
+			if (orig_op_array) {
+				zend_class_entry *scope = op_array->scope;
+				uint32_t fn_flags = op_array->fn_flags;
+				zend_function *prototype = op_array->prototype;
+				HashTable *ht = op_array->static_variables;
+				*op_array = *orig_op_array;
+				op_array->scope = scope;
+				op_array->fn_flags = fn_flags;
+				op_array->prototype = prototype;
+				op_array->static_variables = ht;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 static int preload_optimize(zend_persistent_script *script)
 {
 	zend_class_entry *ce;
@@ -3644,23 +3666,16 @@ static int preload_optimize(zend_persistent_script *script)
 
 	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
 		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-				if (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE) {
-					zend_op_array *orig_op_array = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
-					if (orig_op_array) {
-						zend_class_entry *scope = op_array->scope;
-						uint32_t fn_flags = op_array->fn_flags;
-						zend_function *prototype = op_array->prototype;
-						HashTable *ht = op_array->static_variables;
-						*op_array = *orig_op_array;
-						op_array->scope = scope;
-						op_array->fn_flags = fn_flags;
-						op_array->prototype = prototype;
-						op_array->static_variables = ht;
-					}
-				}
-			} ZEND_HASH_FOREACH_END();
+			preload_fix_trait_methods(ce);
 		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
+		ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
+			if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+				preload_fix_trait_methods(ce);
+			}
+		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
 	zend_shared_alloc_destroy_xlat_table();
@@ -3846,6 +3861,8 @@ static int accel_preload(const char *config)
 		zend_string *filename;
 		int ping_auto_globals_mask;
 		int i;
+		zend_class_entry *ce;
+		zend_op_array *op_array;
 
 		if (PG(auto_globals_jit)) {
 			ping_auto_globals_mask = zend_accel_get_auto_globals();
@@ -3924,6 +3941,19 @@ static int accel_preload(const char *config)
 
 		HANDLE_BLOCK_INTERRUPTIONS();
 		SHM_UNPROTECT();
+
+		/* Store method names first, because they may be shared between preloaded and non-preloaded classes */
+		ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
+			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+				zend_string *new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name);
+
+				if (!new_name) {
+					new_name = accel_new_interned_string(op_array->function_name);
+					zend_shared_alloc_register_xlat_entry(op_array->function_name, new_name);
+				}
+				op_array->function_name = new_name;
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 
 		ZCSG(preload_script) = preload_script_in_shared_memory(script);
 
