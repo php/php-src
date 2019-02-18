@@ -1796,7 +1796,8 @@ ZEND_FUNCTION(get_declared_classes)
 	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
 		if (key
 		 && ZSTR_VAL(key)[0] != 0
-		 && !(ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT))) {
+		 && !(ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT))
+		 && (ce->ce_flags & ZEND_ACC_LINKED)) {
 			copy_class_or_interface_name(return_value, key, ce);
 		}
 	} ZEND_HASH_FOREACH_END();
