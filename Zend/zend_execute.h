@@ -31,6 +31,9 @@ struct _zend_fcall_info;
 ZEND_API extern void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 
+ZEND_API extern void (*zend_vm_entering)(zend_execute_data*);
+ZEND_API extern void (*zend_vm_leaving)(zend_execute_data*);
+
 void init_executor(void);
 void shutdown_executor(void);
 void shutdown_destructors(void);

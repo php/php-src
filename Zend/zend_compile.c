@@ -3021,6 +3021,10 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
 {
+	if (zend_vm_entering || zend_vm_leaving) {
+		return ZEND_DO_FCALL;
+	}
+
 	if (fbc) {
 		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
 			if (init_op->opcode == ZEND_INIT_FCALL && !zend_execute_internal) {

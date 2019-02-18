@@ -1235,14 +1235,22 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 
-		if (EXPECTED(zend_execute_ex == execute_ex)) {
+		if (EXPECTED(zend_execute_ex == execute_ex && !zend_vm_entering && !zend_vm_leaving)) {
 			LOAD_OPLINE();
 			ZEND_VM_ENTER_EX();
 		} else {
 			execute_data = EX(prev_execute_data);
 			LOAD_OPLINE();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+			if (UNEXPECTED(zend_vm_entering)) {
+				zend_vm_entering(call);
+			}
+
 			zend_execute_ex(call);
+
+			if (UNEXPECTED(zend_vm_leaving)) {
+				zend_vm_leaving(call);
+			}
 		}
 	} else {
 		zval retval;
@@ -1260,13 +1268,18 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED(zend_vm_entering)) {
+			zend_vm_entering(call);
+		}
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
 			fbc->internal_function.handler(call, ret);
 		} else {
 			zend_execute_internal(call, ret);
 		}
-
+		if (UNEXPECTED(zend_vm_leaving)) {
+			zend_vm_leaving(call);
+		}
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
 			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
@@ -1341,14 +1354,22 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 
-		if (EXPECTED(zend_execute_ex == execute_ex)) {
+		if (EXPECTED(zend_execute_ex == execute_ex && !zend_vm_entering && !zend_vm_leaving)) {
 			LOAD_OPLINE();
 			ZEND_VM_ENTER_EX();
 		} else {
 			execute_data = EX(prev_execute_data);
 			LOAD_OPLINE();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+			if (UNEXPECTED(zend_vm_entering)) {
+				zend_vm_entering(call);
+			}
+
 			zend_execute_ex(call);
+
+			if (UNEXPECTED(zend_vm_leaving)) {
+				zend_vm_leaving(call);
+			}
 		}
 	} else {
 		zval retval;
@@ -1366,13 +1387,18 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED(zend_vm_entering)) {
+			zend_vm_entering(call);
+		}
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
 			fbc->internal_function.handler(call, ret);
 		} else {
 			zend_execute_internal(call, ret);
 		}
-
+		if (UNEXPECTED(zend_vm_leaving)) {
+			zend_vm_leaving(call);
+		}
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
 			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||

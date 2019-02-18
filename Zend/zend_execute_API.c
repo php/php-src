@@ -43,6 +43,9 @@
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 
+ZEND_API void (*zend_vm_entering)(zend_execute_data*);
+ZEND_API void (*zend_vm_leaving)(zend_execute_data*);
+
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = { 0, {{0}, {{0}}, {0}}, NULL, NULL, NULL, 0, 0 };
 ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { NULL, NULL, NULL, NULL };
