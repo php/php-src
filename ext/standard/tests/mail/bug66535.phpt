@@ -1,7 +1,7 @@
 --TEST--
 Bug #66535: Extra newline if add_x_header and no additional headers are used
 --INI--
-sendmail_path=tee mailBasic.out >/dev/null
+sendmail_path=tee mailBug66535.out >/dev/null
 mail.add_x_header = On
 --SKIPIF--
 <?php
@@ -23,7 +23,7 @@ $to = 'user@company.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 
-$outFile = "mailBasic.out";
+$outFile = "mailBug66535.out";
 @unlink($outFile);
 
 var_dump( mail($to, $subject, $message) );
