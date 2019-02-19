@@ -378,6 +378,9 @@ The following extensions are affected:
   . --with-pcre-regex has been removed. Instead --with-external-pcre is provided
     to opt into using an external PCRE library, rather than the bundled one.
 
+- Readline:
+  . --with-libedit no longer accepts a directory.
+
 - GD:
   . --with-gd becomes --enable-gd (whether to enable the extension at all) and
     --with-external-gd (to opt into using an external libgd, rather than the
