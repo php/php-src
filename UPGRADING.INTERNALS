@@ -16,6 +16,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   m. write_property return value
   n. Assignments to references
   o. ZEND_COMPILE_EXTENDED_INFO split
+  p. ZEND_EXT_FCALL_BEGIN can access arguments
 
 2. Build system changes
   a. Abstract
@@ -173,6 +174,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
        ZEND_COMPILE_EXTENDED_FCALL and ZEND_COMPILE_EXTENDED_STMT
      This allows tooling to choose between profiling and debugging behaviour
      ZEND_COMPILE_EXTENDED_INFO remains and preserves behaviour.
+
+  p. ZEND_EXT_BEGIN_FCALL is emitted after arguments are sent, this means
+     that handlers may access arguments.
 
 ========================
 2. Build system changes

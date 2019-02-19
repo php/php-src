@@ -3074,9 +3074,9 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	uint32_t arg_count;
 	uint32_t call_flags;
 
-	zend_do_extended_fcall_begin();
-
 	arg_count = zend_compile_args(args_ast, fbc);
+
+	zend_do_extended_fcall_begin();
 
 	opline = &CG(active_op_array)->opcodes[opnum_init];
 	opline->extended_value = arg_count;
