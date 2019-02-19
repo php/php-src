@@ -933,7 +933,7 @@ ZEND_API int zend_parse_parameters_throw(int num_args, const char *type_spec, ..
 {
 	va_list va;
 	int retval;
-	int flags = ZEND_PARSE_PARAMS_THROW;
+	int flags = 0;
 
 	va_start(va, type_spec);
 	retval = zend_parse_va_args(num_args, type_spec, &va, flags);

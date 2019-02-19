@@ -209,7 +209,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 	int call_factory = 1;
 	zend_error_handling zeh;
 
-	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 4)
+	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STRING(data_source, data_source_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_EX(username, usernamelen, 1, 0)
