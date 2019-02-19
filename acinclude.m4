@@ -1506,36 +1506,6 @@ main() {
 ])
 
 dnl
-dnl PHP_SOLARIS_PIC_WEIRDNESS
-dnl
-dnl Solaris requires main code to be position independent in order
-dnl to let shared objects find symbols.  Weird.  Ugly.
-dnl
-dnl Must be run after all --with-NN options that let the user
-dnl choose dynamic extensions, and after the gcc test.
-dnl
-AC_DEFUN([PHP_SOLARIS_PIC_WEIRDNESS],[
-  AC_MSG_CHECKING([whether -fPIC is required])
-  if test -n "$EXT_SHARED"; then
-    os=`uname -sr 2>/dev/null`
-    case $os in
-      "SunOS 5.6"|"SunOS 5.7"[)]
-        case $CC in
-          gcc*|egcs*)
-            CFLAGS="$CFLAGS -fPIC";;
-          *[)]
-            CFLAGS="$CFLAGS -fpic";;
-        esac
-        AC_MSG_RESULT([yes]);;
-      *[)]
-        AC_MSG_RESULT([no]);;
-    esac
-  else
-    AC_MSG_RESULT([no])
-  fi
-])
-
-dnl
 dnl PHP_SYS_LFS
 dnl
 dnl The problem is that the default compilation flags in Solaris 2.6 won't
