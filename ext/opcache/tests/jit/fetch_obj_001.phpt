@@ -62,6 +62,7 @@ function bar() {
 bar();
 ?>
 --EXPECTF--
+Warning: Creating default object from empty value in %s on line 14
 object(stdClass)#%d (1) {
   ["a"]=>
   int(2)
@@ -88,6 +89,8 @@ object(stdClass)#%d (2) {
   array(0) {
   }
 }
+
+Warning: Creating default object from empty value in %s on line 27
 object(stdClass)#%d (1) {
   ["a"]=>
   int(2)
@@ -118,10 +121,14 @@ object(stdClass)#%d (2) {
 Warning: Attempt to modify property 'abc' of non-object in %sfetch_obj_001.php on line 40
 array(0) {
 }
+
+Warning: Creating default object from empty value in %s on line 44
 object(stdClass)#%d (1) {
   ["abc"]=>
   int(2)
 }
+
+Warning: Creating default object from empty value in %s on line 48
 object(stdClass)#%d (1) {
   ["abc"]=>
   int(2)
