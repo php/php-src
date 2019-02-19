@@ -3839,8 +3839,11 @@ static int accel_preload(const char *config)
 	zend_file_handle file_handle;
 	int ret;
 	uint32_t orig_compiler_options;
+	char *orig_open_basedir;
 
 	ZCG(enabled) = 0;
+	orig_open_basedir = PG(open_basedir);
+	PG(open_basedir) = NULL;
 	preload_orig_compile_file = accelerator_orig_compile_file;
 	accelerator_orig_compile_file = preload_compile_file;
 
@@ -3892,6 +3895,7 @@ static int accel_preload(const char *config)
 	} zend_end_try();
 
 	CG(compiler_options) = orig_compiler_options;
+	PG(open_basedir) = orig_open_basedir;
 	accelerator_orig_compile_file = preload_orig_compile_file;
 	ZCG(enabled) = 1;
 
