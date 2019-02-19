@@ -3533,6 +3533,9 @@ static void preload_link(void)
 
 static zend_string *preload_resolve_path(zend_string *filename)
 {
+	if (is_stream_path(ZSTR_VAL(filename))) {
+		return NULL;
+	}
 	return zend_resolve_path(ZSTR_VAL(filename), ZSTR_LEN(filename));
 }
 
