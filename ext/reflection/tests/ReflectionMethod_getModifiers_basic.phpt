@@ -75,13 +75,9 @@ reflectMethodModifiers("DerivedClass");
 reflectMethodModifiers("TestInterface");
 reflectMethodModifiers("AbstractClass");
 
-echo "Wrong number of params:\n";
-$a = new ReflectionMethod('TestClass::foo');
-$a->getModifiers(1);
-
 $a = new ReflectionMethod('ReflectionMethod::getModifiers');
 
-echo "\nReflectionMethod::getModifiers() modifiers:\n";
+echo "ReflectionMethod::getModifiers() modifiers:\n";
 printf("0x%08x\n", $a->getModifiers());
 
 ?>
@@ -233,10 +229,6 @@ Modifiers for method TestInterface::__clone():
 Modifiers for method AbstractClass::foo():
 0x00000041
 
-
-Wrong number of params:
-
-Warning: ReflectionMethod::getModifiers() expects exactly 0 parameters, 1 given in %s on line %d
 
 ReflectionMethod::getModifiers() modifiers:
 0x00000001

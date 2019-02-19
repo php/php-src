@@ -300,14 +300,7 @@ echo "\n";
 $counter++;
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_export( var_export() );
-
-//arguments more than expected
-var_export( var_export(TRUE, FALSE, TRUE) );
-
-echo "\n\nDone";
+echo "\nDone";
 
 
 ?>
@@ -1134,12 +1127,5 @@ NULL
 NULL
 string(4) "NULL"
 
-
-*** Testing error conditions ***
-
-Warning: var_export() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-Warning: var_export() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 
 Done

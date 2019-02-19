@@ -9,8 +9,6 @@ Test is_dir() function: usage variations - invalid arguments
 
 /* Passing invalid arguments to is_dir() */
 
-$dir_handle = opendir( dirname(__FILE__) );
-
 echo "*** Testing is_dir() with Invalid arguments: expected bool(false) ***\n";
 $dirnames = array(
   /* Invalid dirnames */
@@ -19,7 +17,6 @@ $dirnames = array(
   FALSE,
   NULL,
   " ",
-  $dir_handle,
 
   /* scalars */
   0,
@@ -30,7 +27,6 @@ $dirnames = array(
 foreach($dirnames as $dirname) {
   var_dump( is_dir($dirname) );
 }
-closedir($dir_handle);
 
 echo "\n*** Done ***";
 ?>
@@ -41,9 +37,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-
-Warning: is_dir() expects parameter 1 to be a valid path, resource given in %s on line %d
-NULL
 bool(false)
 bool(false)
 

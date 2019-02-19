@@ -30,8 +30,12 @@ $callback_names = array(
 );
 for($count = 0; $count < count($callback_names); $count++)
 {
-  echo "-- Iteration ".($count + 1)." --\n";
-  var_dump( array_map($callback_names[$count], $arr1) );
+    echo "-- Iteration ".($count + 1)." --\n";
+    try {
+        var_dump( array_map($callback_names[$count], $arr1) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 echo "Done";
@@ -39,35 +43,19 @@ echo "Done";
 --EXPECTF--
 *** Testing array_map() : non-permmited built-in functions ***
 -- Iteration 1 --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function 'echo' not found or invalid function name
 -- Iteration 2 --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'array' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function 'array' not found or invalid function name
 -- Iteration 3 --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'empty' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function 'empty' not found or invalid function name
 -- Iteration 4 --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'eval' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function 'eval' not found or invalid function name
 -- Iteration 5 --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'exit' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function 'exit' not found or invalid function name
 -- Iteration 6 --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'isset' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function 'isset' not found or invalid function name
 -- Iteration 7 --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'list' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function 'list' not found or invalid function name
 -- Iteration 8 --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'print' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function 'print' not found or invalid function name
 Done

@@ -10,7 +10,11 @@ Phar::interceptFileFuncs();
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
-fopen(array(), 'r');
+try {
+    fopen(array(), 'r');
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 chdir(dirname(__FILE__));
 file_put_contents($fname, "blah\n");
 file_put_contents("foob", "test\n");
@@ -35,7 +39,7 @@ include $pname . '/foo/hi';
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>
 --EXPECTF--
-Warning: fopen() expects parameter 1 to be a valid path, array given in %sfopen_edgecases2.php on line %d
+fopen() expects parameter 1 to be a valid path, array given
 blah
 test
 

@@ -80,7 +80,11 @@ $values =  array (
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
-  var_dump( strrchr($values[$index], $values[$index]) );
+  try {
+    var_dump( strrchr($values[$index], $values[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter ++;
 }
 
@@ -88,7 +92,7 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrchr() function: with unexpected inputs for haystack and needle ***
 -- Iteration 1 --
 string(1) "0"
@@ -109,25 +113,15 @@ string(4) "1E-9"
 -- Iteration 9 --
 string(3) "0.5"
 -- Iteration 10 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 11 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 12 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 13 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 14 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 15 --
 string(1) "1"
 -- Iteration 16 --
@@ -147,9 +141,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-
-Warning: strrchr() expects parameter 1 to be string, resource given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, resource given
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

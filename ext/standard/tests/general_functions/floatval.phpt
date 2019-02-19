@@ -91,18 +91,6 @@ foreach ($not_float_types as $type ) {
    var_dump( doubleval($type) );
 }
 
-
-
-
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( floatval() );
-var_dump( doubleval() );
-
-//arguments more than expected
-var_dump( floatval(TRUE, FALSE) );
-var_dump( doubleval(TRUE, FALSE) );
-
 echo "\nDone\n";
 
 
@@ -193,19 +181,5 @@ float(0)
 float(1)
 float(0)
 float(0)
-
-*** Testing error conditions ***
-
-Warning: floatval() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: doubleval() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: floatval() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: doubleval() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 
 Done

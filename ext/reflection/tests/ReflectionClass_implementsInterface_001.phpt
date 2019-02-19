@@ -41,12 +41,12 @@ foreach ($rcs as $childName => $child) {
 echo "\n\nTest bad arguments:\n";
 try {
 	var_dump($rcs['A']->implementsInterface());
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 try {
 	var_dump($rcs['A']->implementsInterface('C', 'C'));
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 try {
@@ -144,12 +144,8 @@ Does I2 implement I2?
 
 
 Test bad arguments:
-
-Warning: ReflectionClass::implementsInterface() expects exactly 1 parameter, 0 given in %s on line 37
-NULL
-
-Warning: ReflectionClass::implementsInterface() expects exactly 1 parameter, 2 given in %s on line 42
-NULL
+ReflectionClass::implementsInterface() expects exactly 1 parameter, 0 given
+ReflectionClass::implementsInterface() expects exactly 1 parameter, 2 given
 Parameter one must either be a string or a ReflectionClass object
 Interface ThisClassDoesNotExist does not exist
 Parameter one must either be a string or a ReflectionClass object

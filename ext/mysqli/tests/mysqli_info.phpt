@@ -12,12 +12,6 @@ mysqli.allow_local_infile=1
 <?php
 	require_once("connect.inc");
 
-	if (!is_null($tmp = @mysqli_info()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_info(NULL)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require "table.inc";
 	if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'a')"))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

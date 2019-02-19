@@ -6,8 +6,6 @@ bzread() tests
 <?php
 
 $fd = bzopen(dirname(__FILE__)."/003私はガラスを食べられます.txt.bz2","r");
-var_dump(bzread());
-var_dump(bzread($fd, 1 ,0));
 var_dump(bzread($fd, 0));
 var_dump(bzread($fd, -10));
 var_dump(bzread($fd, 1));
@@ -17,11 +15,6 @@ var_dump(bzread($fd, 100000));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: bzread() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: bzread() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
 string(0) ""
 
 Warning: bzread(): length may not be negative in %s on line %d

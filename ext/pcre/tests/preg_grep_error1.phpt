@@ -20,10 +20,18 @@ $values = array('abcdef', //Regex without delimiter
 $array = array(123, 'abc', 'test');
 foreach($values as $value) {
     print "\nArg value is $value\n";
-    var_dump(preg_grep($value, $array));
+    try {
+        var_dump(preg_grep($value, $array));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 $value = new stdclass(); //Object
-var_dump(preg_grep($value, $array));
+try {
+    var_dump(preg_grep($value, $array));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 echo "Done"
 ?>
 --EXPECTF--
@@ -50,9 +58,7 @@ Warning: preg_grep(): Unknown modifier 'F' in %spreg_grep_error1.php on line %d
 bool(false)
 
 Arg value is Array
-
-Warning: preg_grep() expects parameter 1 to be string, array given in %spreg_grep_error1.php on line %d
-NULL
+preg_grep() expects parameter 1 to be string, array given
 
 Arg value is /[a-zA-Z]/
 array(2) {
@@ -61,7 +67,5 @@ array(2) {
   [2]=>
   string(4) "test"
 }
-
-Warning: preg_grep() expects parameter 1 to be string, object given in %spreg_grep_error1.php on line %d
-NULL
+preg_grep() expects parameter 1 to be string, object given
 Done

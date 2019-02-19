@@ -76,14 +76,15 @@ $ret = session_set_save_handler(array($handler, 'open'), array($handler, 'close'
 	array($handler, 'read'), 'good_write', array($handler, 'destroy'), array($handler, 'gc'));
 
 var_dump($ret);
-$ret = session_set_save_handler($handler);
-var_dump($ret);
+try {
+    $ret = session_set_save_handler($handler);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 session_start();
 --EXPECTF--
 *** Testing session_set_save_handler() function: interface wrong ***
 bool(true)
-
-Warning: session_set_save_handler() expects parameter 1 to be SessionHandlerInterface, object given in %s
-bool(false)
+session_set_save_handler() expects parameter 1 to be SessionHandlerInterface, object given
 good handler writing

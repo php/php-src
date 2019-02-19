@@ -37,7 +37,11 @@ $names_arr = array(
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
-  var_dump(file_get_contents($names_arr[$i]));
+  try {
+    var_dump(file_get_contents($names_arr[$i]));
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
 }
 
 echo "\n*** Done ***\n";
@@ -69,13 +73,9 @@ bool(false)
 Warning: file_get_contents( ): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 6 --
-
-Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+file_get_contents() expects parameter 1 to be a valid path, string given
 -- Iteration 7 --
-
-Warning: file_get_contents() expects parameter 1 to be a valid path, array given in %s on line %d
-NULL
+file_get_contents() expects parameter 1 to be a valid path, array given
 -- Iteration 8 --
 
 Warning: file_get_contents(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d

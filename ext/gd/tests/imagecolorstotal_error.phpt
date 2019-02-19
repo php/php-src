@@ -1,5 +1,5 @@
 --TEST--
-Test imagecolorstotal() function : error conditions  - Pass incorrect number of arguments
+Test imagecolorstotal() function : error conditions - Pass invalid resource type
 --SKIPIF--
 <?php
 if(!extension_loaded('gd')) {
@@ -21,13 +21,6 @@ echo "*** Testing imagecolorstotal() : error conditions ***\n";
 // Get a resource
 $im = fopen(__FILE__, 'r');
 
-echo "\n-- Testing imagecolorstotal() function with Zero arguments --\n";
-var_dump( imagecolorstotal() );
-
-echo "\n-- Testing imagecolorstotal() function with more than expected no. of arguments --\n";
-$extra_arg = false;
-var_dump( imagecolorstotal($im, $extra_arg) );
-
 echo "\n-- Testing imagecolorstotal() function with a invalid resource\n";
 var_dump( imagecolorstotal($im) );
 
@@ -36,16 +29,6 @@ fclose($im);
 ===DONE===
 --EXPECTF--
 *** Testing imagecolorstotal() : error conditions ***
-
--- Testing imagecolorstotal() function with Zero arguments --
-
-Warning: imagecolorstotal() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing imagecolorstotal() function with more than expected no. of arguments --
-
-Warning: imagecolorstotal() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 
 -- Testing imagecolorstotal() function with a invalid resource
 

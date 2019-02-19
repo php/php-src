@@ -32,12 +32,17 @@ gmp_setbit($n, 3);
 var_dump(gmp_strval($n));
 
 $b = "";
-gmp_setbit($b, 23);
-gmp_setbit($b);
-gmp_setbit($b, 23,1,1);
-gmp_setbit($b,array());
+try {
+    gmp_setbit($b, 23);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 $a = array();
-gmp_setbit($a,array());
+try {
+    gmp_setbit($a, array());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
@@ -52,14 +57,6 @@ string(1) "7"
 string(12) "100008388608"
 string(12) "100000000000"
 string(12) "100000000008"
-
-Warning: gmp_setbit() expects parameter 1 to be GMP, string given in %s on line %d
-
-Warning: gmp_setbit() expects at least 2 parameters, 1 given in %s on line %d
-
-Warning: gmp_setbit() expects at most 3 parameters, 4 given in %s on line %d
-
-Warning: gmp_setbit() expects parameter 1 to be GMP, string given in %s on line %d
-
-Warning: gmp_setbit() expects parameter 1 to be GMP, array given in %s on line %d
+gmp_setbit() expects parameter 1 to be GMP, string given
+gmp_setbit() expects parameter 1 to be GMP, array given
 Done

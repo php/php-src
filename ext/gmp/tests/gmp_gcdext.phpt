@@ -31,9 +31,6 @@ foreach ($a as $val) {
 
 var_dump(gmp_gcdext($val[0],array()));
 var_dump(gmp_gcdext(array(),array()));
-var_dump(gmp_gcdext(array(),array(),1));
-var_dump(gmp_gcdext(array()));
-var_dump(gmp_gcdext());
 
 echo "Done\n";
 ?>
@@ -64,13 +61,4 @@ bool(false)
 
 Warning: gmp_gcdext(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-
-Warning: gmp_gcdext() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_gcdext() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_gcdext() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
 Done

@@ -24,9 +24,6 @@ require_once('skipifconnectfailure.inc');
 		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
-	if (!is_null($tmp = @$res->fetch_assoc($link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$res = $mysqli->query("SELECT id, label FROM test ORDER BY id LIMIT 1")) {
 		printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}

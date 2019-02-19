@@ -1,5 +1,5 @@
 --TEST--
-Tests for DateTimeImmutable::createFromMutable.
+Tests for DateTimeImmutable::createFromMutable
 --INI--
 date.timezone=Europe/London
 --FILE--
@@ -9,8 +9,11 @@ $current = "2014-03-02 16:24:08";
 $i = DateTimeImmutable::createFromMutable( date_create( $current ) );
 var_dump( $i );
 
-$i = DateTimeImmutable::createFromMutable( date_create_immutable( $current ) );
-var_dump( $i );
+try {
+    DateTimeImmutable::createFromMutable( date_create_immutable( $current ) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
 object(DateTimeImmutable)#%d (3) {
@@ -21,6 +24,4 @@ object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(13) "Europe/London"
 }
-
-Warning: DateTimeImmutable::createFromMutable() expects parameter 1 to be DateTime, object given in %stests%eDateTimeImmutable_createFromMutable.php on line %d
-NULL
+DateTimeImmutable::createFromMutable() expects parameter 1 to be DateTime, object given

@@ -274,10 +274,6 @@ echo "\n*** Testing var_dump() on multiple arguments ***\n";
 var_dump( $integers, $floats, $strings, $arrays, $booleans, $resources,
           $objects, $misc_values, $variations );
 
-echo "\n*** Testing error conditions ***\n";
-//passing zero argument
-var_dump();
-
 /* closing resource handle used */
 closedir($dir_handle);
 
@@ -1553,8 +1549,4 @@ array(6) {
     string(5) "/00\7"
   }
 }
-
-*** Testing error conditions ***
-
-Warning: var_dump() expects at least 1 parameter, 0 given in %s on line %d
 Done

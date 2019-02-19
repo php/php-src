@@ -29,8 +29,8 @@ $ao = new ArrayObject($original);
 try {
 	$copy = $ao->exchangeArray();
 	$copy['addedToCopy'] = 'added To Copy';
-} catch (Exception $e) {
-	echo "Exception:" . $e->getMessage() . "\n";
+} catch (TypeError $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
 }
 $original->addedToOriginal = 'added To Original';
 var_dump($ao, $original, $copy);
@@ -81,8 +81,9 @@ array(2) {
 
 
 --> exchangeArray() with no arg:
+Exception: ArrayObject::exchangeArray() expects exactly 1 parameter, 0 given
 
-Warning: ArrayObject::exchangeArray() expects exactly 1 parameter, 0 given in %s on line 27
+Notice: Undefined variable: copy in %s on line %d
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#3 (2) {
@@ -98,10 +99,7 @@ object(C)#3 (2) {
   ["addedToOriginal"]=>
   string(17) "added To Original"
 }
-array(1) {
-  ["addedToCopy"]=>
-  string(13) "added To Copy"
-}
+NULL
 
 
 --> exchangeArray() with bad arg type:

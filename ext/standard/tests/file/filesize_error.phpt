@@ -14,13 +14,6 @@ echo "*** Testing filesize(): error conditions ***";
 var_dump( filesize("/no/such/file") );
 var_dump( filesize("/no/such/dir") );
 
-/* No.of arguments less than expected */
-var_dump( filesize() );
-
-/* No.of arguments greater than expected */
-var_dump( filesize(__FILE__, 2000) );
-echo "\n";
-
 echo "*** Done ***\n";
 ?>
 --EXPECTF--
@@ -30,11 +23,4 @@ bool(false)
 
 Warning: filesize(): stat failed for /no/such/dir in %s on line %d
 bool(false)
-
-Warning: filesize() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: filesize() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
 *** Done ***

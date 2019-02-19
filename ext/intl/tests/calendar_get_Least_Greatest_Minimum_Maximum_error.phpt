@@ -12,11 +12,6 @@ ini_set("intl.error_level", E_WARNING);
 
 $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 
-var_dump($c->getLeastMaximum());
-var_dump($c->getMaximum());
-var_dump($c->getGreatestMinimum());
-var_dump($c->getMinimum());
-
 var_dump($c->getLeastMaximum(-1));
 var_dump($c->getMaximum(-1));
 var_dump($c->getGreatestMinimum(-1));
@@ -53,26 +48,6 @@ try {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECTF--
-Warning: IntlCalendar::getLeastMaximum() expects exactly 1 parameter, 0 given in %s on line %d
-
-Warning: IntlCalendar::getLeastMaximum(): intlcal_get_least_maximum: bad arguments in %s on line %d
-bool(false)
-
-Warning: IntlCalendar::getMaximum() expects exactly 1 parameter, 0 given in %s on line %d
-
-Warning: IntlCalendar::getMaximum(): intlcal_get_maximum: bad arguments in %s on line %d
-bool(false)
-
-Warning: IntlCalendar::getGreatestMinimum() expects exactly 1 parameter, 0 given in %s on line %d
-
-Warning: IntlCalendar::getGreatestMinimum(): intlcal_get_greatest_minimum: bad arguments in %s on line %d
-bool(false)
-
-Warning: IntlCalendar::getMinimum() expects exactly 1 parameter, 0 given in %s on line %d
-
-Warning: IntlCalendar::getMinimum(): intlcal_get_minimum: bad arguments in %s on line %d
-bool(false)
-
 Warning: IntlCalendar::getLeastMaximum(): intlcal_get_least_maximum: invalid field in %s on line %d
 bool(false)
 

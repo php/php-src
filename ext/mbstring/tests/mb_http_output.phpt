@@ -47,16 +47,6 @@ $r = mb_http_output('BAD_NAME');
 $enc = mb_http_output();
 print "$enc\n";
 
-$r = mb_http_output($t_ary);
-($r === NULL) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
-$enc = mb_http_output();
-print "$enc\n";
-
-$r = mb_http_output($t_obj);
-($r === NULL) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
-$enc = mb_http_output();
-print "$enc\n";
-
 ?>
 --EXPECTF--
 OK_ASCII_SET
@@ -73,12 +63,4 @@ EUC-JP
 
 Warning: mb_http_output(): Unknown encoding "BAD_NAME" in %s on line %d
 OK_BAD_SET
-EUC-JP
-
-Warning: mb_http_output() expects parameter 1 to be string, array given in %s on line %d
-OK_BAD_ARY_SET
-EUC-JP
-
-Warning: mb_http_output() expects parameter 1 to be string, object given in %s on line %d
-OK_BAD_OBJ_SET
 EUC-JP

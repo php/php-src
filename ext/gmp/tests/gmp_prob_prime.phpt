@@ -28,7 +28,6 @@ var_dump(gmp_prob_prime($n));
 $n = gmp_init(0);
 var_dump(gmp_prob_prime($n));
 
-var_dump(gmp_prob_prime());
 var_dump(gmp_prob_prime(array()));
 
 echo "Done\n";
@@ -72,9 +71,6 @@ int(0)
 int(0)
 int(0)
 int(0)
-
-Warning: gmp_prob_prime() expects at least 1 parameter, 0 given in %s on line %d
-NULL
 
 Warning: gmp_prob_prime(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

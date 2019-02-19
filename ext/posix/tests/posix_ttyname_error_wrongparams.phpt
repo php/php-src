@@ -20,14 +20,11 @@ PHP Testfest Berlin 2009-05-10
 ?>
 --FILE--
 <?php
-    var_dump(posix_ttyname()); // param missing
     var_dump(posix_ttyname(0)); // param not a ressource
     var_dump(posix_ttyname(imagecreate(1, 1))); // wrong resource type
 ?>
 ===DONE===
 --EXPECTF--
-Warning: posix_ttyname() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
 bool(false)
 
 Warning: posix_ttyname(): supplied resource is not a valid stream resource in %s on line %d

@@ -10,10 +10,6 @@ Test parse_ini_file() function : error conditions
 
 echo "*** Testing parse_ini_file() : error conditions ***\n";
 
-// Zero arguments
-echo "\n-- Testing parse_ini_file() function with Zero arguments --\n";
-var_dump( parse_ini_file() );
-
 //Test parse_ini_file with one more than the expected number of arguments
 echo "\n-- Testing parse_ini_file() function with more than expected no. of arguments --\n";
 $filename = 'string_val';
@@ -29,11 +25,6 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing parse_ini_file() : error conditions ***
-
--- Testing parse_ini_file() function with Zero arguments --
-
-Warning: parse_ini_file() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
 
 -- Testing parse_ini_file() function with more than expected no. of arguments --
 

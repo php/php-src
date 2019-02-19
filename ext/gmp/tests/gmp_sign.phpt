@@ -13,9 +13,7 @@ var_dump(gmp_sign("-34535345345"));
 var_dump(gmp_sign("+34534573457345"));
 $n = gmp_init("098909878976786545");
 var_dump(gmp_sign($n));
-var_dump(gmp_sign($n, $n));
 var_dump(gmp_sign(array()));
-var_dump(gmp_sign());
 
 echo "Done\n";
 ?>
@@ -32,12 +30,6 @@ bool(false)
 Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 int(0)
 
-Warning: gmp_sign() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
 Warning: gmp_sign(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-
-Warning: gmp_sign() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
 Done

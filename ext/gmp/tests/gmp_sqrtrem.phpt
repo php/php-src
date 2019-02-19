@@ -51,7 +51,6 @@ var_dump(gmp_strval($r[0]));
 var_dump(gmp_strval($r[1]));
 
 var_dump(gmp_sqrtrem(array()));
-var_dump(gmp_sqrtrem());
 
 echo "Done\n";
 ?>
@@ -82,7 +81,4 @@ string(1) "1"
 
 Warning: gmp_sqrtrem(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-
-Warning: gmp_sqrtrem() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
 Done
