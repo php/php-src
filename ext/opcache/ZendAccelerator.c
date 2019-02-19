@@ -32,6 +32,7 @@
 #include "zend_list.h"
 #include "zend_execute.h"
 #include "zend_inheritance.h"
+#include "zend_exceptions.h"
 #include "main/php_main.h"
 #include "main/SAPI.h"
 #include "main/php_streams.h"
@@ -3845,7 +3846,29 @@ static int accel_preload(const char *config)
 	zend_hash_init(preload_scripts, 0, NULL, NULL, 0);
 
 	zend_try {
-		ret = zend_execute_scripts(ZEND_REQUIRE, NULL, 1, &file_handle);
+		zend_op_array *op_array;
+
+		ret = SUCCESS;
+		op_array = zend_compile_file(&file_handle, ZEND_REQUIRE);
+		if (file_handle.opened_path) {
+			zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path);
+		}
+		zend_destroy_file_handle(&file_handle);
+		if (op_array) {
+			zend_execute(op_array, NULL);
+			zend_exception_restore();
+			zend_try_exception_handler();
+			if (EG(exception)) {
+				zend_exception_error(EG(exception), E_ERROR);
+				CG(unclean_shutdown) = 1;
+				ret = FAILURE;
+			}
+			destroy_op_array(op_array);
+			efree_size(op_array, sizeof(zend_op_array));
+		} else {
+			CG(unclean_shutdown) = 1;
+			ret = FAILURE;
+		}
 	} zend_catch {
 		ret = FAILURE;
 	} zend_end_try();
