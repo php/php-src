@@ -8,9 +8,7 @@ Pedro Manoel Evangelista <pedro.evangelista at gmail dot com>
 <?php if (!READLINE_LIB != "libedit") die('skip READLINE_LIB != "libedit"'); ?>
 --FILE--
 <?php
-var_dump(readline_read_history());
 var_dump(readline_read_history('nofile'));
 ?>
 --EXPECT--
-bool(false)
 bool(false)
