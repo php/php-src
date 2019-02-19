@@ -29,6 +29,7 @@
 #include "zend_jit.h"
 #include "zend_jit_internal.h"
 
+#ifndef _WIN32
 #pragma GCC diagnostic ignored "-Wvolatile-register-var"
 #if defined(__x86_64__)
 register zend_execute_data* volatile execute_data __asm__("%r14");
@@ -38,6 +39,10 @@ register zend_execute_data* volatile execute_data __asm__("%esi");
 register const zend_op* volatile opline __asm__("%edi");
 #endif
 #pragma GCC diagnostic warning "-Wvolatile-register-var"
+#else
+static zend_execute_data* volatile execute_data;
+static const zend_op* volatile opline;
+#endif
 
 void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info)
 {
@@ -147,13 +152,25 @@ void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(void)
 	}
 }
 
+#if HAVE_GCC_GLOBAL_REGS
 void ZEND_FASTCALL zend_jit_profile_helper(void)
+#else
+int ZEND_FASTCALL zend_jit_profile_helper(void)
+#endif
 {
 	zend_op_array *op_array = (zend_op_array*)EX(func);
 	const void *handler = (const void*)ZEND_FUNC_INFO(op_array);
+#ifndef _WIN32
 	++(ZEND_COUNTER_INFO(op_array));
+#else
+	++((char*)ZEND_COUNTER_INFO(op_array));
+#endif
 	++zend_jit_profile_counter;
+#if HAVE_GCC_GLOBAL_REGS
+	((zend_vm_opcode_handler_t)handler)();
+#else
 	return ((zend_vm_opcode_handler_t)handler)();
+#endif
 }
 
 static zend_always_inline zend_long _op_array_hash(const zend_op_array *op_array)

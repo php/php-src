@@ -75,15 +75,15 @@
 
 #define ZEND_JIT_DEBUG_GDB       (1<<8)
 
-ZEND_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
-ZEND_API int  zend_jit_script(zend_script *script);
-ZEND_API void zend_jit_unprotect(void);
-ZEND_API void zend_jit_protect(void);
-ZEND_API int  zend_jit_startup(zend_long jit, size_t size);
-ZEND_API void zend_jit_shutdown(void);
-ZEND_API void zend_jit_activate(void);
-ZEND_API void zend_jit_deactivate(void);
-ZEND_API void zend_jit_status(zval *ret);
+ZEND_EXT_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
+ZEND_EXT_API int  zend_jit_script(zend_script *script);
+ZEND_EXT_API void zend_jit_unprotect(void);
+ZEND_EXT_API void zend_jit_protect(void);
+ZEND_EXT_API int  zend_jit_startup(zend_long jit, size_t size);
+ZEND_EXT_API void zend_jit_shutdown(void);
+ZEND_EXT_API void zend_jit_activate(void);
+ZEND_EXT_API void zend_jit_deactivate(void);
+ZEND_EXT_API void zend_jit_status(zval *ret);
 
 typedef struct _zend_lifetime_interval zend_lifetime_interval;
 typedef struct _zend_life_range zend_life_range;
