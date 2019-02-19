@@ -15,6 +15,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   l. HASH_FLAG_INITIALIZED
   m. write_property return value
   n. Assignments to references
+  o. ZEND_COMPILE_EXTENDED_INFO split
 
 2. Build system changes
   a. Abstract
@@ -167,6 +168,11 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      of the form ZEND_TRY_ASSIGN* needs to be used. You can find detailed
      porting instructions as well as a compatibility shim in the wiki:
      https://wiki.php.net/rfc/typed_properties_v2#assignments_to_references
+
+  o. ZEND_COMPILE_EXTENDED_INFO has been split into:
+       ZEND_COMPILE_EXTENDED_FCALL and ZEND_COMPILE_EXTENDED_STMT
+     This allows tooling to choose between profiling and debugging behaviour
+     ZEND_COMPILE_EXTENDED_INFO remains and preserves behaviour.
 
 ========================
 2. Build system changes
