@@ -4018,6 +4018,9 @@ static int accel_preload(const char *config)
 		i = 0;
 		ZCSG(saved_scripts) = zend_shared_alloc((zend_hash_num_elements(preload_scripts) + 1) * sizeof(void*));
 		ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
+			if (zend_hash_num_elements(&script->script.class_table) > 1) {
+				zend_hash_sort_ex(&script->script.class_table, preload_sort_classes, NULL, 0);
+			}
 			ZCSG(saved_scripts)[i++] = preload_script_in_shared_memory(script);
 		} ZEND_HASH_FOREACH_END();
 		ZCSG(saved_scripts)[i] = NULL;
