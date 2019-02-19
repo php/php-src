@@ -2528,7 +2528,7 @@ COMMAND $cmd
 	show_file_block('out', $output);
 
 	if ($preload) {
-		$output = trim(preg_replace("/Warning: Can't preload .*\n/", "", $output));
+		$output = trim(preg_replace("/Warning: Can't preload .*$/m", "", $output));
 	}
 
 	if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
