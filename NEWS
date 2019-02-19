@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.3
+21 Feb 2019, PHP 7.3.3
 
 - Core:
   . Fixed bug #77589 (Core dump using parse_ini_string with numeric sections).
