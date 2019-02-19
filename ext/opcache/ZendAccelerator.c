@@ -3281,6 +3281,15 @@ static void preload_link(void)
 			if ((ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
 			 && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 
+				if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
+					key = zend_string_tolower(ce->name);
+					if (zend_hash_exists(EG(class_table), key)) {
+						zend_string_release(key);
+						continue;
+					}
+					zend_string_release(key);
+				}
+
 				parent = NULL;
 
 				if (ce->parent_name) {
@@ -3332,9 +3341,10 @@ static void preload_link(void)
 					if (!found) continue;
 				}
 
-                key = zend_string_tolower(ce->name);
+				zend_string *key = zend_string_tolower(ce->name);
 				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
 				zend_string_release(key);
+
 				if (EXPECTED(zv)) {
 					/* Set filename & lineno information for inheritance errors */
 					CG(in_compilation) = 1;
@@ -3461,7 +3471,13 @@ static void preload_link(void)
 			break;
 		}
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
-			zend_error(E_WARNING, "Can't preload unlinked class %s at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+			zend_string *key = zend_string_tolower(ce->name);
+			if (zend_hash_exists(EG(class_table), key)) {
+				zend_error(E_WARNING, "Can't preload already declared class %s at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+			} else {
+				zend_error(E_WARNING, "Can't preload unlinked class %s at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+			}
+			zend_string_release(key);
 		} else if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 			zend_error(E_WARNING, "Can't preload class %s with unresolved constants at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
 		} else if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
@@ -3513,8 +3529,7 @@ static void preload_link(void)
 				case ZEND_DECLARE_INHERITED_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
 					key = Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1);
-					zv = zend_hash_find_ex(EG(class_table), key, 1);
-					if (EXPECTED(!zv)) {
+					if (!zend_hash_exists(&script->script.class_table, key)) {
 						MAKE_NOP(opline);
 					}
 					break;
