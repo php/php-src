@@ -22,8 +22,16 @@ namespace testing {
 	call_user_func(__NAMESPACE__ .'\foobar', 'foobar');
 
 	$class =  __NAMESPACE__ .'\foo';
-	call_user_func(array(new $class, 'priv'), 'foobar');
-	call_user_func(array(new $class, 'prot'), 'foobar');
+    try {
+        call_user_func(array(new $class, 'priv'), 'foobar');
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+	try {
+        call_user_func(array(new $class, 'prot'), 'foobar');
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 ?>
