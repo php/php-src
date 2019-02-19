@@ -832,7 +832,8 @@ PHP_FUNCTION(com_load_typelib)
 	}
 
 	if (!cs) {
-		php_error_docref(NULL, E_DEPRECATED, "Declaration of case-insensitive constants is deprecated");
+		php_error_docref(NULL, E_WARNING, "Declaration of case-insensitive constants is no longer supported");
+		RETURN_FALSE;
 	}
 
 	RETVAL_FALSE;

@@ -237,8 +237,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		modifier = php_strtok_r(NULL, "#", &strtok_buf);
 		if (modifier != NULL) {
 			if (!strcmp(modifier, "cis") || !strcmp(modifier, "case_insensitive")) {
-				php_error_docref("com.configuration", E_DEPRECATED, "Declaration of case-insensitive constants is deprecated");
-				mode &= ~CONST_CS;
+				php_error_docref("com.configuration", E_WARNING, "Declaration of case-insensitive constants is no longer supported; #cis modifier ignored");
 			}
 		}
 
@@ -269,7 +268,8 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 static ZEND_INI_MH(OnAutoregisterCasesensitive)
 {
 	if (!zend_ini_parse_bool(new_value)) {
-		php_error_docref("com.configuration", E_DEPRECATED, "Declaration of case-insensitive constants is deprecated");
+		php_error_docref("com.configuration", E_WARNING, "Declaration of case-insensitive constants is no longer supported");
+		return FAILURE;
 	}
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
