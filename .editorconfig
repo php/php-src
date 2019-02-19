@@ -2,12 +2,14 @@
 
 root = true
 
+[*]
+tab_width                = 4
+
 [*.{c,h,y,awk,w32,bat,mk,frag}]
 charset                  = utf-8
 end_of_line              = lf
 indent_size              = 4
 indent_style             = tab
-tab_width                = 4
 trim_trailing_whitespace = true
 insert_final_newline     = true
 
