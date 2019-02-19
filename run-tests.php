@@ -2262,7 +2262,7 @@ TEST $file
 
 	$args = isset($section_text['ARGS']) ? ' -- ' . $section_text['ARGS'] : '';
 
-	if ($preload) {
+	if ($preload && !empty($test_file)) {
 		save_text($preload_filename, "<?php opcache_compile_file('$test_file');");
 		$local_pass_options = $pass_options;
 		unset($pass_options);
