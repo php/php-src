@@ -1416,7 +1416,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 	int i;
 	zval *p;
 
-	if (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count) {
+	if (class_type->default_static_members_count && !CE_STATIC_MEMBERS(class_type)) {
 		if (class_type->parent) {
 			zend_class_init_statics(class_type->parent);
 		}
