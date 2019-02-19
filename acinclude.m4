@@ -272,25 +272,6 @@ dnl Compiler characteristics checks
 dnl -------------------------------------------------------------------------
 
 dnl
-dnl PHP_TARGET_RDYNAMIC
-dnl
-dnl Checks whether -rdynamic is supported by the compiler.  This
-dnl is necessary for some targets to populate the global symbol
-dnl table.  Otherwise, dynamic modules would not be able to resolve
-dnl PHP-related symbols.
-dnl
-dnl If successful, adds -rdynamic to PHP_LDFLAGS.
-dnl
-AC_DEFUN([PHP_TARGET_RDYNAMIC],[
-  if test -n "$GCC"; then
-    PHP_CHECK_GCC_ARG(-rdynamic, gcc_rdynamic=yes)
-    if test "$gcc_rdynamic" = "yes"; then
-      PHP_LDFLAGS="$PHP_LDFLAGS -rdynamic"
-    fi
-  fi
-])
-
-dnl
 dnl PHP_RUNPATH_SWITCH
 dnl
 dnl Checks for -R, etc. switch
