@@ -690,10 +690,12 @@ static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *scri
 		return FAILURE;
 	}
 
+#if 0
 	/* TODO: debugger and profiler supports? */
 	if ((ssa->cfg.flags & ZEND_FUNC_HAS_EXTENDED_INFO)) {
 		return FAILURE;
 	}
+#endif
 
 	if ((zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNC)
 	 && ssa->cfg.blocks
