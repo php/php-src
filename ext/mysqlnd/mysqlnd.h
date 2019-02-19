@@ -323,6 +323,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_long		debug_realloc_fail_threshold;
 	char *			sha256_server_public_key;
 	zend_bool		fetch_data_copy;
+	zend_bool		duplicate_column_warning;
 	zend_bool		collect_statistics;
 	zend_bool		collect_memory_statistics;
 ZEND_END_MODULE_GLOBALS(mysqlnd)

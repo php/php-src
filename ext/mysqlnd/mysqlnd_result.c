@@ -1049,6 +1049,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 	const unsigned int field_count = meta->field_count;
 	MYSQLND_RES_BUFFERED_ZVAL * set = (MYSQLND_RES_BUFFERED_ZVAL *) result->stored_data;
 	MYSQLND_CONN_DATA * const conn = result->conn;
+	zend_bool duplicate_column_warning = MYSQLND_G(duplicate_column_warning);
 
 	DBG_ENTER("mysqlnd_result_buffered_zval::fetch_row");
 
@@ -1103,6 +1104,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 				*/
 				Z_TRY_ADDREF_P(data);
 				if (meta->fields[i].is_numeric == FALSE) {
+					if (duplicate_column_warning && zend_hash_exists(Z_ARRVAL_P(row), meta->fields[i].sname))
+						php_error_docref(NULL, E_WARNING, "Result contains duplicate column name '%s'", meta->fields[i].name);
 					zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].sname, data);
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row), meta->fields[i].num_key, data);
