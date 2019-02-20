@@ -4042,14 +4042,28 @@ finish:
 	return ret;
 }
 
-size_t preload_ub_write(const char *str, size_t str_length)
+static size_t preload_ub_write(const char *str, size_t str_length)
 {
 	return fwrite(str, 1, str_length, stdout);
 }
 
-void preload_flush(void *server_context)
+static void preload_flush(void *server_context)
 {
 	fflush(stdout);
+}
+
+static int preload_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s)
+{
+	return 0;
+}
+
+static int preload_send_headers(sapi_headers_struct *sapi_headers)
+{
+	return SAPI_HEADER_SENT_SUCCESSFULLY;
+}
+
+static void preload_send_header(sapi_header_struct *sapi_header, void *server_context)
+{
 }
 
 static int accel_finish_startup(void)
@@ -4060,6 +4074,8 @@ static int accel_finish_startup(void)
 
 	if (ZCG(accel_directives).preload && *ZCG(accel_directives).preload) {
 		int ret = SUCCESS;
+		int rc;
+		int orig_error_reporting;
 
 		int (*orig_activate)(TSRMLS_D) = sapi_module.activate;
 		int (*orig_deactivate)(TSRMLS_D) = sapi_module.deactivate;
@@ -4092,9 +4108,9 @@ static int accel_finish_startup(void)
 		sapi_module.activate = NULL;
 		sapi_module.deactivate = NULL;
 		sapi_module.register_server_variables = NULL;
-		sapi_module.header_handler = NULL;
-		sapi_module.send_headers = NULL;
-		sapi_module.send_header = NULL;
+		sapi_module.header_handler = preload_header_handler;
+		sapi_module.send_headers = preload_send_headers;
+		sapi_module.send_header = preload_send_header;
 		sapi_module.getenv = NULL;
 		sapi_module.ub_write = preload_ub_write;
 		sapi_module.flush = preload_flush;
@@ -4104,7 +4120,15 @@ static int accel_finish_startup(void)
 #ifdef ZEND_SIGNALS
 		SIGG(reset) = 0;
 #endif
-		if (php_request_startup() == SUCCESS) {
+
+		orig_error_reporting = EG(error_reporting);
+		EG(error_reporting) = 0;
+
+		rc = php_request_startup();
+
+		EG(error_reporting) = orig_error_reporting;
+
+		if (rc == SUCCESS) {
 
 			/* don't send headers */
 			SG(headers_sent) = 1;
