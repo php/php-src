@@ -70,6 +70,9 @@ PHP_FUNCTION(pcntl_getpriority);
 PHP_FUNCTION(pcntl_setpriority);
 #endif
 PHP_FUNCTION(pcntl_async_signals);
+#ifdef HAVE_UNSHARE
+PHP_FUNCTION(pcntl_unshare);
+#endif
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;

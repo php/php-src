@@ -6,6 +6,8 @@ opcache.enable_cli=1
 opcache.revalidate_path=1
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--CONFLICTS--
+server
 --FILE--
 <?php
 $dir = dirname(__FILE__);

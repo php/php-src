@@ -299,3 +299,7 @@ sudo make install
 ### Real Usage
 
 FFI extension was used to implement [PHP TensorFlow binding](https://github.com/dstogov/php-tensorflow)
+
+### FFI Parser
+
+FFI C parser is generated using [LLK](https://github.com/dstogov/llk).

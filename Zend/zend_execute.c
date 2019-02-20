@@ -711,6 +711,7 @@ static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object(zval *ob
 				zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
 			} else if (opline->opcode == ZEND_FETCH_OBJ_W
 					|| opline->opcode == ZEND_FETCH_OBJ_RW
+					|| opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
 					|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
 				zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
 			} else {
@@ -3526,7 +3527,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	/* delete old call_frame from previous stack segment */
 	EG(vm_stack)->prev->top = (zval*)call;
 
-	/* delete previous stack segment if it becames empty */
+	/* delete previous stack segment if it became empty */
 	if (UNEXPECTED(EG(vm_stack)->prev->top == ZEND_VM_STACK_ELEMENTS(EG(vm_stack)->prev))) {
 		zend_vm_stack r = EG(vm_stack)->prev;
 

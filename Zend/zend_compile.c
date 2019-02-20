@@ -1409,11 +1409,11 @@ static void zend_add_to_list(void *result, void *item) /* {{{ */
 }
 /* }}} */
 
-void zend_do_extended_info(void) /* {{{ */
+void zend_do_extended_stmt(void) /* {{{ */
 {
 	zend_op *opline;
 
-	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT)) {
 		return;
 	}
 
@@ -1427,7 +1427,7 @@ void zend_do_extended_fcall_begin(void) /* {{{ */
 {
 	zend_op *opline;
 
-	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_FCALL)) {
 		return;
 	}
 
@@ -1441,7 +1441,7 @@ void zend_do_extended_fcall_end(void) /* {{{ */
 {
 	zend_op *opline;
 
-	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_FCALL)) {
 		return;
 	}
 
@@ -2130,7 +2130,7 @@ static inline void zend_handle_numeric_dim(zend_op *opline, znode *dim_node) /* 
 		zend_ulong index;
 
 		if (ZEND_HANDLE_NUMERIC(Z_STR(dim_node->u.constant), index)) {
-			/* For numeric indexs we also keep the original value to use by ArrayAccess
+			/* For numeric indexes we also keep the original value to use by ArrayAccess
 			 * See bug #63217
 			 */
 			int c = zend_add_literal(&dim_node->u.constant);
@@ -3051,9 +3051,9 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	uint32_t arg_count;
 	uint32_t call_flags;
 
-	zend_do_extended_fcall_begin();
-
 	arg_count = zend_compile_args(args_ast, fbc);
+
+	zend_do_extended_fcall_begin();
 
 	opline = &CG(active_op_array)->opcodes[opnum_init];
 	opline->extended_value = arg_count;
@@ -4535,7 +4535,7 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 
 	zend_update_jump_target_to_next(opnum_jmp);
 	zend_compile_expr_list(&result, cond_ast);
-	zend_do_extended_info();
+	zend_do_extended_stmt();
 
 	zend_emit_cond_jump(ZEND_JMPNZ, &result, opnum_start);
 
@@ -5721,7 +5721,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 
 	zend_oparray_context_begin(&orig_oparray_context);
 
-	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
+	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) {
 		zend_op *opline_ext = zend_emit_op(NULL, ZEND_EXT_NOP, NULL, NULL);
 		opline_ext->lineno = decl->start_lineno;
 	}
@@ -5752,7 +5752,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	/* put the implicit return on the really last line */
 	CG(zend_lineno) = decl->end_lineno;
 
-	zend_do_extended_info();
+	zend_do_extended_stmt();
 	zend_emit_final_return(0);
 
 	pass_two(CG(active_op_array));
@@ -8033,8 +8033,8 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 
 	CG(zend_lineno) = ast->lineno;
 
-	if ((CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) && !zend_is_unticked_stmt(ast)) {
-		zend_do_extended_info();
+	if ((CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) && !zend_is_unticked_stmt(ast)) {
+		zend_do_extended_stmt();
 	}
 
 	switch (ast->kind) {

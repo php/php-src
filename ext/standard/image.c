@@ -613,7 +613,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 	   "bit depth" answer somewhat problematic. For this implementation
 	   we'll use the highest depth encountered. */
 
-	/* Get the single byte that remains after the file type indentification */
+	/* Get the single byte that remains after the file type identification */
 	first_marker_id = php_stream_getc(stream);
 
 	/* Ensure that this marker is SIZ (as is mandated by the standard) */
