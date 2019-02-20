@@ -924,8 +924,11 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	if (func_flags & ZEND_FUNC_NO_LOOPS) {
 		fprintf(stderr, ", no_loops");
 	}
-	if (func_flags & ZEND_FUNC_HAS_EXTENDED_INFO) {
-		fprintf(stderr, ", extended_info");
+	if (func_flags & ZEND_FUNC_HAS_EXTENDED_STMT) {
+		fprintf(stderr, ", extended_stmt");
+	}
+	if (func_flags & ZEND_FUNC_HAS_EXTENDED_FCALL) {
+		fprintf(stderr, ", extended_fcall");
 	}
 //TODO: this is useful only for JIT???
 #if 0

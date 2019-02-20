@@ -23,16 +23,21 @@ $clientCode = <<<'CODE'
 
 	$read = [$fp];
 	$buf = '';
-	$printed = false;
+	$warmedUp = false;
 	while (stream_select($read, $write, $except, 1000)) {
 		$chunk = stream_get_contents($fp, 4096);
-		if ($chunk !== "") {
-		    var_dump($chunk);
-		    $buf .= $chunk;
-		} elseif (!$printed) {
-		    $printed = true;
-		    var_dump($chunk);
+		$buf .= $chunk;
+		phpt_notify('proxy');
+		if (!$warmedUp) {
+			if ($buf !== 'warmup') {
+				continue;
+			}
+			$warmedUp = true;
+			$buf = '';
+			phpt_notify('server');
+			continue;
 		}
+		var_dump($chunk);
 		if ($buf === 'hello, world') {
 			break;
 		}
@@ -51,6 +56,8 @@ $serverCode = <<<'CODE'
 	phpt_notify();
 	
 	$conn = stream_socket_accept($fp);
+	fwrite($conn, 'warmup');
+	phpt_wait();
 	fwrite($conn, 'hello, world');
 	
 	phpt_wait();
@@ -82,7 +89,7 @@ $proxyCode = <<<'CODE'
 					$parts = str_split($data, (int) ceil(strlen($data) / 3));
 					foreach ($parts as $part) {
 						fwrite($conn, $part);
-						usleep(1000);
+						phpt_wait(null, 1);
 					}
 				} else {
 					fwrite($conn, $data);
@@ -115,5 +122,6 @@ ServerClientTestCase::getInstance()->run($clientCode, [
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'bug77390-ca.pem.tmp');
 ?>
 --EXPECT--
+string(0) ""
 string(0) ""
 string(12) "hello, world"

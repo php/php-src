@@ -40,4 +40,9 @@ class Y {
 
 class Z {
     public $foo;
+    public a $bar;
+}
+
+function get_anon() {
+    return new class {};
 }

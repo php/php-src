@@ -79,10 +79,6 @@ AC_DEFUN([AC_ZEND_BROKEN_SPRINTF],[
   AC_DEFINE_UNQUOTED(ZEND_BROKEN_SPRINTF, $ac_result, [Whether sprintf is broken])
 ])
 
-AC_DEFUN([AM_SET_LIBTOOL_VARIABLE],[
-  LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
-])
-
 dnl x87 floating point internal precision control checks
 dnl See: http://wiki.php.net/rfc/rounding
 AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[

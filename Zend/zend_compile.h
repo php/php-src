@@ -212,7 +212,7 @@ typedef struct _zend_oparray_context {
 /* Final class or method                                  |     |     |     */
 #define ZEND_ACC_FINAL                   (1 <<  5) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Abstarct method                                        |     |     |     */
+/* Abstract method                                        |     |     |     */
 #define ZEND_ACC_ABSTRACT                (1 <<  6) /*  X  |  X  |     |     */
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS (1 <<  6) /*  X  |     |     |     */
 /*                                                        |     |     |     */
@@ -259,6 +259,12 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
 #define ZEND_HAS_STATIC_IN_METHODS       (1 << 15) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Whether all property types are resolved to CEs         |     |     |     */
+#define ZEND_ACC_PROPERTY_TYPES_RESOLVED (1 << 16) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Children must reuse parent get_iterator()              |     |     |     */
+#define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 17) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 28...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
@@ -1013,51 +1019,53 @@ END_EXTERN_C()
  * to change the default compiler behavior */
 
 /* generate extended debug information */
-#define ZEND_COMPILE_EXTENDED_INFO              (1<<0)
+#define ZEND_COMPILE_EXTENDED_STMT              (1<<0)
+#define ZEND_COMPILE_EXTENDED_FCALL             (1<<1)
+#define ZEND_COMPILE_EXTENDED_INFO              (ZEND_COMPILE_EXTENDED_STMT|ZEND_COMPILE_EXTENDED_FCALL)
 
 /* call op_array handler of extendions */
-#define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<1)
+#define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<2)
 
 /* generate ZEND_INIT_FCALL_BY_NAME for internal functions instead of ZEND_INIT_FCALL */
-#define ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS  (1<<2)
+#define ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS  (1<<3)
 
 /* don't perform early binding for classes inherited form internal ones;
  * in namespaces assume that internal class that doesn't exist at compile-time
  * may apper in run-time */
-#define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES    (1<<3)
+#define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES    (1<<4)
 
 /* generate ZEND_DECLARE_INHERITED_CLASS_DELAYED opcode to delay early binding */
-#define ZEND_COMPILE_DELAYED_BINDING            (1<<4)
+#define ZEND_COMPILE_DELAYED_BINDING            (1<<5)
 
 /* disable constant substitution at compile-time */
-#define ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION   (1<<5)
+#define ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION   (1<<6)
 
 /* disable substitution of persistent constants at compile-time */
-#define ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION	(1<<7)
+#define ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION	(1<<8)
 
 /* generate ZEND_INIT_FCALL_BY_NAME for userland functions instead of ZEND_INIT_FCALL */
-#define ZEND_COMPILE_IGNORE_USER_FUNCTIONS      (1<<8)
+#define ZEND_COMPILE_IGNORE_USER_FUNCTIONS      (1<<9)
 
 /* force ZEND_ACC_USE_GUARDS for all classes */
-#define ZEND_COMPILE_GUARDS						(1<<9)
+#define ZEND_COMPILE_GUARDS						(1<<10)
 
 /* disable builtin special case function calls */
-#define ZEND_COMPILE_NO_BUILTINS				(1<<10)
+#define ZEND_COMPILE_NO_BUILTINS				(1<<11)
 
 /* result of compilation may be stored in file cache */
-#define ZEND_COMPILE_WITH_FILE_CACHE			(1<<11)
+#define ZEND_COMPILE_WITH_FILE_CACHE			(1<<12)
 
 /* ignore functions and classes declared in other files */
-#define ZEND_COMPILE_IGNORE_OTHER_FILES			(1<<12)
+#define ZEND_COMPILE_IGNORE_OTHER_FILES			(1<<13)
 
 /* this flag is set when compiler invoked by opcache_compile_file() */
-#define ZEND_COMPILE_WITHOUT_EXECUTION          (1<<13)
+#define ZEND_COMPILE_WITHOUT_EXECUTION          (1<<14)
 
 /* this flag is set when compiler invoked during preloading */
-#define ZEND_COMPILE_PRELOAD                    (1<<14)
+#define ZEND_COMPILE_PRELOAD                    (1<<15)
 
 /* disable jumptable optimization for switch statements */
-#define ZEND_COMPILE_NO_JUMPTABLES				(1<<15)
+#define ZEND_COMPILE_NO_JUMPTABLES				(1<<16)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

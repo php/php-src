@@ -291,7 +291,7 @@ int dom_node_node_value_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	/* Access to Element node is implemented as a convience method */
+	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
 		case XML_TEXT_NODE:
@@ -329,7 +329,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	/* Access to Element node is implemented as a convience method */
+	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:

@@ -4898,7 +4898,7 @@ PHP_FUNCTION(error_clear_last)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_func(mixed function_name [, mixed parmeter] [, mixed ...])
+/* {{{ proto mixed call_user_func(mixed function_name [, mixed parameter] [, mixed ...])
    Call a user function which is the first parameter
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(call_user_func)
@@ -4951,7 +4951,7 @@ PHP_FUNCTION(call_user_func_array)
 }
 /* }}} */
 
-/* {{{ proto mixed forward_static_call(mixed function_name [, mixed parmeter] [, mixed ...]) U
+/* {{{ proto mixed forward_static_call(mixed function_name [, mixed parameter] [, mixed ...]) U
    Call a user function which is the first parameter */
 PHP_FUNCTION(forward_static_call)
 {

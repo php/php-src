@@ -419,9 +419,11 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				break;
 			case ZEND_EXT_NOP:
 			case ZEND_EXT_STMT:
+				flags |= ZEND_FUNC_HAS_EXTENDED_STMT;
+				break;
 			case ZEND_EXT_FCALL_BEGIN:
 			case ZEND_EXT_FCALL_END:
-				flags |= ZEND_FUNC_HAS_EXTENDED_INFO;
+				flags |= ZEND_FUNC_HAS_EXTENDED_FCALL;
 				break;
 			case ZEND_FREE:
 				if (opline->extended_value == ZEND_FREE_SWITCH) {

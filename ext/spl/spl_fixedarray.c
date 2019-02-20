@@ -227,7 +227,6 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	while (parent) {
 		if (parent == spl_ce_SplFixedArray) {
 			intern->std.handlers = &spl_handler_SplFixedArray;
-			class_type->get_iterator = spl_fixedarray_get_iterator;
 			break;
 		}
 
@@ -1083,6 +1082,7 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	REGISTER_SPL_IMPLEMENTS(SplFixedArray, Countable);
 
 	spl_ce_SplFixedArray->get_iterator = spl_fixedarray_get_iterator;
+	spl_ce_SplFixedArray->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
 
 	return SUCCESS;
 }

@@ -331,14 +331,21 @@ static void zend_persist_class_constant_calc(zval *zv)
 	}
 }
 
-static zend_bool has_unresolved_property_types(zend_class_entry *ce) {
+static void check_property_type_resolution(zend_class_entry *ce) {
 	zend_property_info *prop;
-	ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-		if (ZEND_TYPE_IS_NAME(prop->type)) {
-			return 1;
-		}
-	} ZEND_HASH_FOREACH_END();
-	return 0;
+	if (ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED) {
+		/* Preloading might have computed this already. */
+		return;
+	}
+
+	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+			if (ZEND_TYPE_IS_NAME(prop->type)) {
+				return;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
 }
 
 static void zend_persist_class_entry_calc(zval *zv)
@@ -346,10 +353,12 @@ static void zend_persist_class_entry_calc(zval *zv)
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_USER_CLASS) {
+		check_property_type_resolution(ce);
+
 		ZCG(is_immutable_class) =
 			(ce->ce_flags & ZEND_ACC_LINKED) &&
 			(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) &&
-			!has_unresolved_property_types(ce) &&
+			(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED) &&
 			!ZCG(current_persistent_script)->corrupted;
 
 		ADD_SIZE_EX(sizeof(zend_class_entry));

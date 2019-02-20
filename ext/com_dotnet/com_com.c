@@ -831,6 +831,11 @@ PHP_FUNCTION(com_load_typelib)
 		return;
 	}
 
+	if (!cs) {
+		php_error_docref(NULL, E_WARNING, "Declaration of case-insensitive constants is no longer supported");
+		RETURN_FALSE;
+	}
+
 	RETVAL_FALSE;
 
 	php_com_initialize();
