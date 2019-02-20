@@ -711,6 +711,7 @@ static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object(zval *ob
 				zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
 			} else if (opline->opcode == ZEND_FETCH_OBJ_W
 					|| opline->opcode == ZEND_FETCH_OBJ_RW
+					|| opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
 					|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
 				zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
 			} else {
