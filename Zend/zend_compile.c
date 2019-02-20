@@ -3961,7 +3961,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 				  || (CG(active_class_entry)
 				   && !(CG(active_class_entry)->ce_flags & ZEND_ACC_LINKED))
 				  || !zend_check_protected(zend_get_function_root_class(fbc), CG(active_class_entry)))) {
-					/* incompatibe function */
+					/* incompatible function */
 					fbc = NULL;
 				}
 			}
