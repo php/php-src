@@ -123,8 +123,6 @@ typedef struct _user_tick_function_entry {
 static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
-#undef sprintf
-
 /* {{{ arginfo */
 /* {{{ main/main.c */
 ZEND_BEGIN_ARG_INFO(arginfo_set_time_limit, 0)
