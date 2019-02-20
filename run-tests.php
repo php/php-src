@@ -53,7 +53,7 @@ function main()
 		   $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
 		   $temp_source, $temp_target, $temp_urlbase, $test_cnt, $test_dirs,
 		   $test_files, $test_idx, $test_list, $test_results, $testfile,
-		   $user_tests, $valgrind, $sum_results;
+		   $user_tests, $valgrind, $sum_results, $shuffle;
 	// Parallel testing
 	global $workers, $workerID;
 
@@ -320,6 +320,7 @@ NO_PROC_OPEN_ERROR;
 	$no_clean = false;
 	$slow_min_ms = INF;
 	$preload = false;
+	$shuffle = false;
 	$workers = null;
 
 	$cfgtypes = array('show', 'keep');
@@ -501,6 +502,9 @@ NO_PROC_OPEN_ERROR;
 						break;
 					case '--offline':
 						$environment['SKIP_ONLINE_TESTS'] = 1;
+						break;
+					case '--shuffle':
+						$shuffle = true;
 						break;
 					//case 'w'
 					case '-':
@@ -1333,7 +1337,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 
 /** The heart of parallel testing. */
 function run_all_tests_parallel($test_files, $env, $redir_tested) {
-	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS;
+	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle;
 
 	// The PHP binary running run-tests.php, and run-tests.php itself
 	// This PHP executable is *not* necessarily the same as the tested version
@@ -1377,6 +1381,11 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	// $test_files, so reverse its order here. This makes sure that order is preserved at least
 	// for tests with a common conflict key.
 	$test_files = array_reverse($test_files);
+
+	// To discover parallelization issues it is useful to randomize the test order.
+	if ($shuffle) {
+		shuffle($test_files);
+	}
 
 	echo "Spawning workers… ";
 
@@ -1518,7 +1527,7 @@ escape:
 						case "ready":
 							// Batch multiple tests to reduce communication overhead.
 							$files = [];
-							$batchSize = 32;
+							$batchSize = $shuffle ? 4 : 32;
 							while (count($files) <= $batchSize && $file = array_pop($test_files)) {
 								foreach ($fileConflictsWith[$file] as $conflictKey) {
 									if (isset($activeConflicts[$conflictKey])) {
