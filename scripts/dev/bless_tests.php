@@ -2,16 +2,11 @@
 <?php
 
 if ($argc < 2) {
-    die("Usage: php bless_tests.php dir/");
+    die("Usage: php bless_tests.php dir/\n");
 }
 
-$dir = $argv[1];
-$it = new RecursiveIteratorIterator(
-    new RecursiveDirectoryIterator($dir),
-    RecursiveIteratorIterator::LEAVES_ONLY
-);
-foreach ($it as $file) {
-    $path = $file->getPathName();
+$files = getFiles(array_slice($argv, 1));
+foreach ($files as $path) {
     if (!preg_match('/^(.*)\.phpt$/', $path, $matches)) {
         // Not a phpt test
         continue;
@@ -33,6 +28,24 @@ foreach ($it as $file) {
     $out = normalizeOutput($out);
     $phpt = insertOutput($phpt, $out);
     file_put_contents($path, $phpt);
+}
+
+function getFiles(array $dirsOrFiles): \Iterator {
+    foreach ($dirsOrFiles as $dirOrFile) {
+        if (is_dir($dirOrFile)) {
+            $it = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dirOrFile),
+                RecursiveIteratorIterator::LEAVES_ONLY
+            );
+            foreach ($it as $file) {
+                yield $file->getPathName();
+            }
+        } else if (is_file($dirOrFile)) {
+            yield $dirOrFile;
+        } else {
+            die("$dirOrFile is not a directory or file\n");
+        }
+    }
 }
 
 function normalizeOutput(string $out): string {

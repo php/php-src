@@ -160,10 +160,6 @@ NO_PROC_OPEN_ERROR;
 		$environment["SystemRoot"] = getenv("SystemRoot");
 	}
 
-	// Don't ever guess at the PHP executable location.
-	// Require the explicit specification.
-	// Otherwise we could end up testing the wrong file!
-
 	$php = null;
 	$php_cgi = null;
 	$phpdbg = null;
@@ -461,11 +457,7 @@ NO_PROC_OPEN_ERROR;
 						$environment['TEST_PHP_EXECUTABLE'] = $php;
 						break;
 					case 'P':
-						if (constant('PHP_BINARY')) {
-							$php = PHP_BINARY;
-						} else {
-							break;
-						}
+						$php = PHP_BINARY;
 						putenv("TEST_PHP_EXECUTABLE=$php");
 						$environment['TEST_PHP_EXECUTABLE'] = $php;
 						break;
@@ -567,7 +559,7 @@ Options:
 
     -p <php>    Specify PHP executable to run.
 
-    -P          Use PHP_BINARY as PHP executable to run.
+    -P          Use PHP_BINARY as PHP executable to run (default).
 
     -q          Quiet, no user interaction (same as environment NO_INTERACTION).
 
@@ -650,6 +642,13 @@ HELP;
 					}
 				}
 			}
+		}
+
+		// Default to PHP_BINARY as executable
+		if (!isset($environment['TEST_PHP_EXECUTABLE'])) {
+			$php = PHP_BINARY;
+			putenv("TEST_PHP_EXECUTABLE=$php");
+			$environment['TEST_PHP_EXECUTABLE'] = $php;
 		}
 
 		if (strlen($conf_passed)) {
