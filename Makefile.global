@@ -83,20 +83,21 @@ PHP_TEST_SHARED_EXTENSIONS =  ` \
 			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d $(ZEND_EXT_TYPE)=$(top_builddir)/modules/$$dlname"; \
 		done; \
 	fi`
-PHP_DEPRECATED_DIRECTIVES_REGEX = '^(magic_quotes_(gpc|runtime|sybase)?|(zend_)?extension(_debug)?(_ts)?)[\t\ ]*='
+PHP_DEPRECATED_DIRECTIVES_REGEX = '^(magic_quotes_(gpc|runtime|sybase)?'
+PHP_EXTENSION_PATH_FIX_REGEX = "/^extension *= *[^/]/s,extension *= *,extension=$(EXTENSION_DIR)/,g"
 
 test: all
 	@if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
 		INI_FILE=`$(PHP_EXECUTABLE) -d 'display_errors=stderr' -r 'echo php_ini_loaded_file();' 2> /dev/null`; \
 		if test "$$INI_FILE"; then \
-			$(EGREP) -h -v $(PHP_DEPRECATED_DIRECTIVES_REGEX) "$$INI_FILE" > $(top_builddir)/tmp-php.ini; \
+			$(EGREP) -h -v $(PHP_DEPRECATED_DIRECTIVES_REGEX) "$$INI_FILE" | $(SED) $(PHP_EXTENSION_PATH_FIX_REGEX) > $(top_builddir)/tmp-php.ini; \
 		else \
 			echo > $(top_builddir)/tmp-php.ini; \
 		fi; \
 		INI_SCANNED_PATH=`$(PHP_EXECUTABLE) -d 'display_errors=stderr' -r '$$a = explode(",\n", trim(php_ini_scanned_files())); echo $$a[0];' 2> /dev/null`; \
 		if test "$$INI_SCANNED_PATH"; then \
 			INI_SCANNED_PATH=`$(top_srcdir)/build/shtool path -d $$INI_SCANNED_PATH`; \
-			$(EGREP) -h -v $(PHP_DEPRECATED_DIRECTIVES_REGEX) "$$INI_SCANNED_PATH"/*.ini >> $(top_builddir)/tmp-php.ini; \
+			$(EGREP) -h -v $(PHP_DEPRECATED_DIRECTIVES_REGEX) "$$INI_SCANNED_PATH"/*.ini | $(SED) $(PHP_EXTENSION_PATH_FIX_REGEX) >> $(top_builddir)/tmp-php.ini; \
 		fi; \
 		TEST_PHP_EXECUTABLE=$(PHP_EXECUTABLE) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
