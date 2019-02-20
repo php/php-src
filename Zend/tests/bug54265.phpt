@@ -12,5 +12,6 @@ $my_var = str_repeat("A",$my_var[0]->errormsg = "xyz");
 echo "ok\n";
 ?>
 --EXPECT--
-EROOR: Creating default object from empty value
+EROOR: Undefined variable: my_var
+EROOR: Attempt to assign property 'errormsg' of non-object
 ok

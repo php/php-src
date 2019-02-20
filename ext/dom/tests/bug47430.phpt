@@ -21,9 +21,9 @@ print_r($arr);
 
 ?>
 --EXPECTF--
-Warning: Creating default object from empty value in %s on line %d
+Warning: Attempt to assign property 'nodeValue' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %s on line %d
+Warning: Attempt to assign property 'nodeValue' of non-object in %s on line %d
 Array
 (
     [0] => Value

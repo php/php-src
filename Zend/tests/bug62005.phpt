@@ -8,10 +8,4 @@ function add_points($player, $points) {
 }
 add_points(NULL, 2);
 --EXPECTF--
-Warning: Creating default object from empty value in %sbug62005.php on line %d
-
-Notice: Undefined property: stdClass::$energy in %sbug62005.php on line 3
-stdClass Object
-(
-    [energy] => 2
-)
+Warning: Attempt to assign property 'energy' of non-object in %s on line %d

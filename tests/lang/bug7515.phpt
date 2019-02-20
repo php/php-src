@@ -8,7 +8,8 @@ class obj {
 	function method() {}
 }
 
-$o->root=new obj();
+$o = new stdClass;
+$o->root = new obj();
 
 ob_start();
 var_dump($o);
@@ -30,6 +31,5 @@ y=$y
 ";
 }
 ?>
---EXPECTF--
-Warning: Creating default object from empty value in %s on line %d
+--EXPECT--
 success

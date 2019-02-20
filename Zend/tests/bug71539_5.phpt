@@ -8,13 +8,10 @@ $array[0] = 42;
 var_dump($array);
 ?>
 --EXPECTF--
-Warning: Creating default object from empty value in %sbug71539_5.php on line 3
-array(2) {
+Notice: Undefined index:  in %s on line %d
+
+Warning: Attempt to modify property 'prop' of non-object in %s on line %d
+array(1) {
   [0]=>
-  &int(42)
-  [""]=>
-  object(stdClass)#1 (1) {
-    ["prop"]=>
-    &int(42)
-  }
+  int(42)
 }

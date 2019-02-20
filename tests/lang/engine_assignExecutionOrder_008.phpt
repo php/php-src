@@ -66,21 +66,53 @@ ${'i'}=f(): good
 $i[0]=f(): good
 $i[0][0]=f(): good
 $i->p=f(): 
-Warning: Creating default object from empty value in %s on line %d
-good
+Warning: Attempt to assign property 'p' of non-object in %s on line %d
+
+Notice: Undefined variable: i in %s on line %d
+
+Warning: Attempt to increment/decrement property 'p' of non-object in %s on line %d
+
+Notice: Undefined index:  in %s on line %d
+
 $i->p->q=f(): 
-Warning: Creating default object from empty value in %s on line %d
+Notice: Undefined variable: i in %s on line %d
 
-Warning: Creating default object from empty value in %s on line %d
-good
+Notice: Trying to get property 'p' of non-object in %s on line %d
+
+Warning: Attempt to assign property 'q' of non-object in %s on line %d
+
+Notice: Undefined variable: i in %s on line %d
+
+Notice: Trying to get property 'p' of non-object in %s on line %d
+
+Warning: Attempt to increment/decrement property 'q' of non-object in %s on line %d
+
+Notice: Undefined index:  in %s on line %d
+
 $i->p[0]=f(): 
-Warning: Creating default object from empty value in %s on line %d
-good
-$i->p[0]->p=f(): 
-Warning: Creating default object from empty value in %s on line %d
+Warning: Attempt to modify property 'p' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %s on line %d
-good
+Notice: Undefined variable: i in %s on line %d
+
+Warning: Attempt to modify property 'p' of non-object in %s on line %d
+
+Notice: Undefined index:  in %s on line %d
+
+$i->p[0]->p=f(): 
+Notice: Undefined variable: i in %s on line %d
+
+Notice: Trying to get property 'p' of non-object in %s on line %d
+
+Warning: Attempt to assign property 'p' of non-object in %s on line %d
+
+Notice: Undefined variable: i in %s on line %d
+
+Notice: Trying to get property 'p' of non-object in %s on line %d
+
+Warning: Attempt to increment/decrement property 'p' of non-object in %s on line %d
+
+Notice: Undefined index:  in %s on line %d
+
 C::$p=f(): good
 C::$p[0]=f(): good
 C::$p->q=f(): good

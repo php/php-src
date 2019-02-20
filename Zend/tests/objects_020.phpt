@@ -5,6 +5,7 @@ Accessing members of standard object through of variable variable
 
 error_reporting(E_ALL);
 
+$stdclass = new stdClass;
 $test = 'stdclass';
 
 $$test->a =& $$test;
@@ -14,8 +15,7 @@ var_dump($$test);
 
 ?>
 --EXPECTF--
-Warning: Creating default object from empty value in %sobjects_020.php on line 7
-object(stdClass)#%d (2) {
+object(stdClass)#1 (2) {
   ["a"]=>
   *RECURSION*
   ["b"]=>

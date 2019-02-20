@@ -25,56 +25,39 @@ unset($null);
 
 ?>
 --EXPECTF--
-Warning: Creating default object from empty value in %sbug75921.php on line 3
-object(stdClass)#1 (1) {
-  ["a"]=>
-  int(42)
-}
+Warning: Attempt to assign property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %sbug75921.php on line 7
-object(stdClass)#1 (1) {
-  ["a"]=>
-  array(1) {
-    ["hello"]=>
-    int(42)
-  }
-}
+Notice: Undefined variable: null in %s on line %d
+NULL
 
-Warning: Creating default object from empty value in %sbug75921.php on line 11
+Warning: Attempt to modify property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %sbug75921.php on line 11
-object(stdClass)#1 (1) {
-  ["a"]=>
-  object(stdClass)#2 (1) {
-    ["b"]=>
-    int(42)
-  }
-}
+Notice: Undefined variable: null in %s on line %d
+NULL
 
-Warning: Creating default object from empty value in %sbug75921.php on line 15
+Notice: Undefined variable: null in %s on line %d
 
-Warning: Creating default object from empty value in %sbug75921.php on line 15
-object(stdClass)#1 (1) {
-  ["a"]=>
-  array(1) {
-    ["hello"]=>
-    object(stdClass)#2 (1) {
-      ["b"]=>
-      int(42)
-    }
-  }
-}
+Notice: Trying to get property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %sbug75921.php on line 19
+Warning: Attempt to assign property 'b' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %sbug75921.php on line 19
-object(stdClass)#1 (1) {
-  ["a"]=>
-  object(stdClass)#2 (1) {
-    ["b"]=>
-    array(1) {
-      ["hello"]=>
-      int(42)
-    }
-  }
-}
+Notice: Undefined variable: null in %s on line %d
+NULL
+
+Notice: Undefined variable: null in %s on line %d
+
+Notice: Trying to get property 'a' of non-object in %s on line %d
+
+Warning: Attempt to assign property 'b' of non-object in %s on line %d
+
+Notice: Undefined variable: null in %s on line %d
+NULL
+
+Notice: Undefined variable: null in %s on line %d
+
+Notice: Trying to get property 'a' of non-object in %s on line %d
+
+Warning: Attempt to modify property 'b' of non-object in %s on line %d
+
+Notice: Undefined variable: null in %s on line %d
+NULL

@@ -27,5 +27,5 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-string(40) "Creating default object from empty value"
+string(31) "Undefined property: test::$blah"
 Done

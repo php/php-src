@@ -62,19 +62,29 @@ var_dump($u1, $u2, $u3, $u4, $u5);
 
 ?>
 --EXPECTF--
- ---- Pass uninitialised array & object by ref: function call ---
+---- Pass uninitialised array & object by ref: function call ---
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Warning: Attempt to modify property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Undefined variable: u4 in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Trying to get property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Warning: Attempt to modify property 'b' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Undefined variable: u5 in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Trying to get property 'a' of non-object in %s on line %d
+
+Notice: Trying to get property 'b' of non-object in %s on line %d
+
+Warning: Attempt to modify property 'c' of non-object in %s on line %d
+
+Notice: Undefined variable: u3 in %s on line %d
+
+Notice: Undefined variable: u4 in %s on line %d
+
+Notice: Undefined variable: u5 in %s on line %d
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -86,41 +96,33 @@ array(1) {
     string(12) "Ref2 changed"
   }
 }
-object(stdClass)#%d (1) {
-  ["a"]=>
-  string(12) "Ref3 changed"
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  object(stdClass)#%d (1) {
-    ["b"]=>
-    string(12) "Ref4 changed"
-  }
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  object(stdClass)#%d (1) {
-    ["b"]=>
-    object(stdClass)#%d (1) {
-      ["c"]=>
-      string(12) "Ref5 changed"
-    }
-  }
-}
+NULL
+NULL
+NULL
 
  ---- Pass uninitialised arrays & objects by ref: static method call ---
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Warning: Attempt to modify property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Undefined variable: u4 in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Trying to get property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Warning: Attempt to modify property 'b' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Undefined variable: u5 in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Trying to get property 'a' of non-object in %s on line %d
+
+Notice: Trying to get property 'b' of non-object in %s on line %d
+
+Warning: Attempt to modify property 'c' of non-object in %s on line %d
+
+Notice: Undefined variable: u3 in %s on line %d
+
+Notice: Undefined variable: u4 in %s on line %d
+
+Notice: Undefined variable: u5 in %s on line %d
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -132,42 +134,34 @@ array(1) {
     string(12) "Ref2 changed"
   }
 }
-object(stdClass)#%d (1) {
-  ["a"]=>
-  string(12) "Ref3 changed"
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  object(stdClass)#%d (1) {
-    ["b"]=>
-    string(12) "Ref4 changed"
-  }
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  object(stdClass)#%d (1) {
-    ["b"]=>
-    object(stdClass)#%d (1) {
-      ["c"]=>
-      string(12) "Ref5 changed"
-    }
-  }
-}
+NULL
+NULL
+NULL
 
 
 ---- Pass uninitialised arrays & objects by ref: constructor ---
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Warning: Attempt to modify property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Undefined variable: u4 in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Trying to get property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Warning: Attempt to modify property 'b' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Undefined variable: u5 in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Trying to get property 'a' of non-object in %s on line %d
+
+Notice: Trying to get property 'b' of non-object in %s on line %d
+
+Warning: Attempt to modify property 'c' of non-object in %s on line %d
+
+Notice: Undefined variable: u3 in %s on line %d
+
+Notice: Undefined variable: u4 in %s on line %d
+
+Notice: Undefined variable: u5 in %s on line %d
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -179,41 +173,33 @@ array(1) {
     string(12) "Ref2 changed"
   }
 }
-object(stdClass)#%d (1) {
-  ["a"]=>
-  string(12) "Ref3 changed"
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  object(stdClass)#%d (1) {
-    ["b"]=>
-    string(12) "Ref4 changed"
-  }
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  object(stdClass)#%d (1) {
-    ["b"]=>
-    object(stdClass)#%d (1) {
-      ["c"]=>
-      string(12) "Ref5 changed"
-    }
-  }
-}
+NULL
+NULL
+NULL
 
  ---- Pass uninitialised arrays & objects by ref: instance method call ---
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Warning: Attempt to modify property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Undefined variable: u4 in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Trying to get property 'a' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Warning: Attempt to modify property 'b' of non-object in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Undefined variable: u5 in %s on line %d
 
-Warning: Creating default object from empty value in %spassByReference_006.php on line %d
+Notice: Trying to get property 'a' of non-object in %s on line %d
+
+Notice: Trying to get property 'b' of non-object in %s on line %d
+
+Warning: Attempt to modify property 'c' of non-object in %s on line %d
+
+Notice: Undefined variable: u3 in %s on line %d
+
+Notice: Undefined variable: u4 in %s on line %d
+
+Notice: Undefined variable: u5 in %s on line %d
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -225,24 +211,6 @@ array(1) {
     string(12) "Ref2 changed"
   }
 }
-object(stdClass)#%d (1) {
-  ["a"]=>
-  string(12) "Ref3 changed"
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  object(stdClass)#%d (1) {
-    ["b"]=>
-    string(12) "Ref4 changed"
-  }
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  object(stdClass)#%d (1) {
-    ["b"]=>
-    object(stdClass)#%d (1) {
-      ["c"]=>
-      string(12) "Ref5 changed"
-    }
-  }
-}
+NULL
+NULL
+NULL

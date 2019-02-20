@@ -25,45 +25,33 @@ var_dump(foo());
 --EXPECTF--
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Warning: Creating default object from empty value in %sbug52041.php on line 6
+Warning: Attempt to assign property 'a' of non-object in %sbug52041.php on line 6
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Warning: Creating default object from empty value in %sbug52041.php on line 7
+Notice: Trying to get property 'a' of non-object in %sbug52041.php on line 7
 
-Warning: Creating default object from empty value in %sbug52041.php on line 7
-
-Notice: Undefined variable: x in %sbug52041.php on line 3
-
-Warning: Creating default object from empty value in %sbug52041.php on line 8
-
-Notice: Undefined property: stdClass::$a in %sbug52041.php on line 8
+Warning: Attempt to assign property 'b' of non-object in %sbug52041.php on line 7
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Warning: Creating default object from empty value in %sbug52041.php on line 9
-
-Notice: Undefined property: stdClass::$a in %sbug52041.php on line 9
-
-Warning: Creating default object from empty value in %sbug52041.php on line 9
-
-Notice: Undefined property: stdClass::$b in %sbug52041.php on line 9
+Warning: Attempt to increment/decrement property 'a' of non-object in %sbug52041.php on line 8
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Warning: Creating default object from empty value in %sbug52041.php on line 10
+Notice: Trying to get property 'a' of non-object in %sbug52041.php on line 9
 
-Notice: Undefined property: stdClass::$a in %sbug52041.php on line 10
+Warning: Attempt to increment/decrement property 'b' of non-object in %sbug52041.php on line 9
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Warning: Creating default object from empty value in %sbug52041.php on line 11
+Warning: Attempt to assign property 'a' of non-object in %sbug52041.php on line 10
 
-Notice: Undefined property: stdClass::$a in %sbug52041.php on line 11
+Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Warning: Creating default object from empty value in %sbug52041.php on line 11
+Notice: Trying to get property 'a' of non-object in %sbug52041.php on line 11
 
-Notice: Undefined property: stdClass::$b in %sbug52041.php on line 11
+Warning: Attempt to assign property 'b' of non-object in %sbug52041.php on line 11
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 

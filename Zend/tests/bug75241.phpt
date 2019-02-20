@@ -6,6 +6,7 @@ function eh(){}
 
 set_error_handler('eh');
 
+$d = new stdClass;
 $d->d = &$d + $d->d/=0;
 var_dump($d);
 ?>

@@ -72,7 +72,7 @@ array(0) {
 array(0) {
 }
 
-Warning: Creating default object from empty value in %sbug52614.php on line 52
+Warning: Attempt to assign property 'a' of non-object in %s on line %d
 NULL
 object(stdClass)#%d (1) {
   ["a"]=>

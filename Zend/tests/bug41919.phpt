@@ -8,7 +8,7 @@ $foo[3]->bar[1] = "bang";
 echo "ok\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot use string offset as an object in %sbug41919.php:%d
-Stack trace:
-#0 {main}
-  thrown in %sbug41919.php on line %d
+Notice: Uninitialized string offset: 3 in %s on line %d
+
+Warning: Attempt to modify property 'bar' of non-object in %s on line %d
+ok

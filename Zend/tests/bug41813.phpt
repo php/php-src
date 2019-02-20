@@ -9,7 +9,5 @@ $foo[0]->bar = "xyz";
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot use string offset as an object in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+Warning: Attempt to assign property 'bar' of non-object in %s on line %d
+Done
