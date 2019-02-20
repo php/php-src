@@ -2,7 +2,6 @@
 ocipasswordchange()
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on thes
 require(dirname(__FILE__).'/skipif.inc');
 require(dirname(__FILE__).'/connect.inc');
