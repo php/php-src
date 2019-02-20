@@ -5345,36 +5345,42 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_info->type = ZEND_TYPE_ENCODE(0, 1);
 
 		if (type_ast) {
-			zend_bool has_null_default = default_ast && Z_TYPE(default_node.u.constant) == IS_NULL;
+			uint32_t default_type, arg_type;
+
+			default_type = Z_TYPE(default_node.u.constant);
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-			arg_info->type = zend_compile_typename(type_ast, has_null_default);
-
-			if (ZEND_TYPE_CODE(arg_info->type) == IS_VOID) {
+			arg_info->type = zend_compile_typename(type_ast, default_ast && default_type == IS_NULL);
+			
+			arg_type = ZEND_TYPE_CODE(arg_info->type);
+			
+			if (arg_type == IS_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
 			}
-			if (default_ast && !has_null_default && Z_TYPE(default_node.u.constant) != IS_CONSTANT_AST) {
-				if (type_ast->kind == ZEND_AST_TYPE) {
-					if (ZEND_TYPE_CODE(arg_info->type) == IS_ARRAY && Z_TYPE(default_node.u.constant) != IS_ARRAY) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with array type can only be an array or NULL");
-					} else if (ZEND_TYPE_CODE(arg_info->type) == IS_CALLABLE) {
+
+			if (default_ast && default_type != IS_NULL && default_type != IS_CONSTANT_AST) {
+				switch (arg_type) {
+					case IS_CALLABLE:
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with callable type can only be NULL");
-					}
-				} else if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-						"with a class type can only be NULL");
-				} else switch (ZEND_TYPE_CODE(arg_info->type)) {
+						break;
+
+					case IS_ARRAY:
+						if (default_type != IS_ARRAY) {
+							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+								"with array type can only be an array or NULL");
+						}
+						break;
+
 					case IS_DOUBLE:
-						if (Z_TYPE(default_node.u.constant) != IS_DOUBLE && Z_TYPE(default_node.u.constant) != IS_LONG) {
+						if (default_type != IS_DOUBLE && default_type != IS_LONG) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 								"with a float type can only be float, integer, or NULL");
 						}
 						break;
 
 					case IS_ITERABLE:
-						if (Z_TYPE(default_node.u.constant) != IS_ARRAY) {
+						if (default_type != IS_ARRAY) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 								"with iterable type can only be an array or NULL");
 						}
@@ -5386,12 +5392,14 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 						break;
 
 					default:
-						if (!ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(arg_info->type), Z_TYPE(default_node.u.constant))) {
+						if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
+							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+								"with a class type can only be NULL");
+						} else if (!ZEND_SAME_FAKE_TYPE(arg_type, default_type)) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 								"with a %s type can only be %s or NULL",
-								zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type)), zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type)));
+								zend_get_type_by_const(arg_type), zend_get_type_by_const(arg_type));
 						}
-						break;
 				}
 			}
 
