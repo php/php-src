@@ -4106,6 +4106,9 @@ static int accel_finish_startup(void)
 		zend_bool old_reset_signals = SIGG(reset);
 #endif
 
+		/* Cleanup heap, to avoid memory leak reports */
+		shutdown_memory_manager(1, 0);
+
 		if (UNEXPECTED(file_cache_only)) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"file_cache_only\" mode");
 			return SUCCESS;
