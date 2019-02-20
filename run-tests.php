@@ -1973,7 +1973,7 @@ TEST $file
 	$temp_clean = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
 	$test_clean = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
 	$preload_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'preload.php';
-	$tmp_post = $temp_dir . DIRECTORY_SEPARATOR . uniqid('/phpt.');
+	$tmp_post = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'post';
 	$tmp_relative_file = str_replace(__DIR__ . DIRECTORY_SEPARATOR, '', $test_file) . 't';
 
 	if ($temp_source && $temp_target) {
