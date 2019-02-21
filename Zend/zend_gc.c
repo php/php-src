@@ -51,7 +51,7 @@
  * gc_scan_roots will be called, and each root will be called with
  * gc_scan(root->ref)
  *
- * gc_scan checkes the colors of possible members.
+ * gc_scan checks the colors of possible members.
  *
  * If the node is marked as grey and the refcount > 0
  *    gc_scan_black will be called on that node to scan it's subgraph.
