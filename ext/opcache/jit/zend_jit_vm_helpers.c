@@ -41,7 +41,7 @@ register const zend_op* volatile opline __asm__("%edi");
 # pragma GCC diagnostic warning "-Wvolatile-register-var"
 #endif
 
-void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info EXECUTE_DATA_DC)
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info EXECUTE_DATA_DC)
 {
 	zend_execute_data *old_execute_data;
 
@@ -71,15 +71,20 @@ void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info EXECUTE_
 		if (old_opline->result_type != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR(old_opline->result.var));
 		}
+#ifndef HAVE_GCC_GLOBAL_REGS
+		return 2; // ZEND_VM_LEAVE
+#endif
 	} else {
 		EX(opline)++;
 #ifdef HAVE_GCC_GLOBAL_REGS
 		opline = EX(opline);
+#else
+		return 2; // ZEND_VM_LEAVE
 #endif
 	}
 }
 
-void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info EXECUTE_DATA_DC)
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info EXECUTE_DATA_DC)
 {
 	if (UNEXPECTED(call_info & (ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS))) {
 		if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
@@ -94,6 +99,8 @@ void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info EXECUTE_DAT
 	execute_data = EG(current_execute_data);
 #ifdef HAVE_GCC_GLOBAL_REGS
 	opline = zend_jit_halt_op;
+#else
+	return -1; // ZEND_VM_RETURN
 #endif
 }
 

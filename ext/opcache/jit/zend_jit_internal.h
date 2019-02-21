@@ -78,15 +78,16 @@ extern const zend_op *zend_jit_halt_op;
 typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *zend_vm_opcode_handler_t)(ZEND_OPCODE_HANDLER_ARGS);
 
 /* VM helpers */
-void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info EXECUTE_DATA_DC);
-void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info EXECUTE_DATA_DC);
-void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
-void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(OPLINE_D);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info EXECUTE_DATA_DC);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info EXECUTE_DATA_DC);
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS);
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
+
+void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
+void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(OPLINE_D);
 
 void ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
 int  ZEND_FASTCALL zend_jit_check_constant(const zval *key);

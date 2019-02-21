@@ -44,7 +44,8 @@
  |.define FCARG2a, CARG2
  |.define FCARG1d, CARG1d
  |.define FCARG2d, CARG2d
- |.define SPAD,    8         // padding for CPU stack alignment
+ |.define SPAD,    0x08      // padding for CPU stack alignment
+ |.define NR_SPAD, 0x18      // padding for CPU stack alignment
  |.define SSE,     1
 |.else
  |.define FP,      esi
@@ -56,6 +57,7 @@
  |.define FCARG1d, ecx
  |.define FCARG2d, edx
  |.define SPAD,    12        // padding for CPU stack alignment
+ |.define NR_SPAD, 12        // padding for CPU stack alignment
  |.define SSE,     1
 |.endif
 
@@ -81,6 +83,12 @@ const char* zend_reg_name[] = {
 	"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"
 #endif
 };
+
+#ifdef HAVE_GCC_GLOBAL_REGS
+# define GCC_GLOBAL_REGS 1
+#else
+# define GCC_GLOBAL_REGS 0
+#endif
 
 static uint32_t zend_jit_x86_flags = 0;
 
@@ -114,31 +122,49 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro SAVE_OPLINE
-|	mov aword EX->opline, IP
+||	if (GCC_GLOBAL_REGS) {
+|		mov aword EX->opline, IP
+||	}
 |.endmacro
 
 |.macro LOAD_OPLINE
-|	mov IP, aword EX->opline
+||	if (GCC_GLOBAL_REGS) {
+|		mov IP, aword EX->opline
+||	}
 |.endmacro
 
 |.macro LOAD_IP_ADDR, addr
-|	LOAD_ADDR IP, addr
+||	if (GCC_GLOBAL_REGS) {
+|		LOAD_ADDR IP, addr
+||	} else {
+|		LOAD_ADDR RX, addr
+|		mov aword EX->opline, RX
+||	}
 |.endmacro
 
-|.macro GET_IP, rm
-|	mov rm, IP
-|.endmacro
-
-|.macro SET_IP, val
-|	mov IP, val
+|.macro GET_IP, reg
+||	if (GCC_GLOBAL_REGS) {
+|		mov reg, IP
+||	} else {
+|		mov reg, aword EX->opline
+||	}
 |.endmacro
 
 |.macro ADD_IP, val
-|	add IP, val
+||	if (GCC_GLOBAL_REGS) {
+|		add IP, val
+||	} else {
+|		add aword EX->opline, val
+||	}
 |.endmacro
 
 |.macro JMP_IP
-|	jmp aword [IP]
+||	if (GCC_GLOBAL_REGS) {
+|		jmp aword [IP]
+||	} else {
+|		mov r0, aword EX:FCARG1a->opline
+|		jmp	aword [r0]
+||	}
 |.endmacro
 
 /* In 64-bit build we compare only low 32-bits.
@@ -147,7 +173,11 @@ static void* dasm_labels[zend_lb_MAX];
  * This is not a problem at all, while JIT buffer size is less than 4GB.
  */
 |.macro CMP_IP, addr
-|	cmp IPl, next_opline
+||	if (GCC_GLOBAL_REGS) {
+|		cmp IPl, addr
+||	} else {
+|		cmp dword EX->opline, addr
+||	}
 |.endmacro
 
 |.macro ADDR_OP1, addr_ins, addr, tmp_reg
@@ -1593,10 +1623,17 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	//ZEND_VM_CONTINUE()
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	add r4, HYBRID_SPAD
-	} else {
+		|	JMP_IP
+	} else if (GCC_GLOBAL_REGS) {
 		|	add r4, SPAD // stack alignment
+		|	JMP_IP
+	} else {
+		|	mov FP, aword [r4 + sizeof(void*)] // restore FP
+		|	mov RX, aword [r4 + sizeof(void*) * 2] // restore IP
+		|	add r4, NR_SPAD // stack alignment
+		|	mov r0, 1 // ZEND_VM_ENTER
+		|	ret
 	}
-	|	JMP_IP
 
 	return 1;
 }
@@ -1613,7 +1650,14 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 	} else {
 		const void *handler = EG(exception_op)->handler;
 
-		|	add r4, SPAD // stack alignment
+		if (GCC_GLOBAL_REGS) {
+			|	add r4, SPAD // stack alignment
+		} else {
+			|	mov FCARG1a, FP
+			|	mov FP, aword [r4 + sizeof(void*)] // restore FP
+			|	mov RX, aword [r4 + sizeof(void*) * 2] // restore IP
+			|	add r4, NR_SPAD // stack alignment
+		}
 		|	EXT_JMP handler, r0
 	}
 
@@ -1643,7 +1687,14 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 		|	add r4, HYBRID_SPAD // stack alignment
 		|	JMP_IP
 	} else {
-		|	add r4, SPAD
+		if (GCC_GLOBAL_REGS) {
+			|	add r4, SPAD
+		} else {
+			|	mov FCARG2a, FP
+			|	mov FP, aword [r4 + sizeof(void*)] // restore FP
+			|	mov RX, aword [r4 + sizeof(void*) * 2] // restore IP
+			|	add r4, NR_SPAD
+		}
 		|	test FCARG1d, ZEND_CALL_TOP
 		|	jnz >1
 		|	EXT_JMP zend_jit_leave_nested_func_helper, r0
@@ -1658,15 +1709,31 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 {
 	|->leave_throw_handler:
 	|	// if (opline->opcode != ZEND_HANDLE_EXCEPTION) {
-	|	cmp byte OP:IP->opcode, ZEND_HANDLE_EXCEPTION
-	|	je >5
-	|	// EG(opline_before_exception) = opline;
-	|	MEM_OP2_1 mov, aword, &EG(opline_before_exception), IP, r0
-	|5:
-	|	// opline = EG(exception_op);
-	|	LOAD_IP_ADDR &EG(exception_op)
-	|	//	HANDLE_EXCEPTION()
-	|	jmp ->exception_handler
+		if (GCC_GLOBAL_REGS) {
+		|	cmp byte OP:IP->opcode, ZEND_HANDLE_EXCEPTION
+		|	je >5
+		|	// EG(opline_before_exception) = opline;
+		|	MEM_OP2_1 mov, aword, &EG(opline_before_exception), IP, r0
+		|5:
+		|	// opline = EG(exception_op);
+		|	LOAD_IP_ADDR &EG(exception_op)
+		|	//	HANDLE_EXCEPTION()
+		|	jmp ->exception_handler
+	} else {
+		|	GET_IP FCARG1a
+		|	cmp byte OP:FCARG1a->opcode, ZEND_HANDLE_EXCEPTION
+		|	je >5
+		|	// EG(opline_before_exception) = opline;
+		|	MEM_OP2_1 mov, aword, &EG(opline_before_exception), FCARG1a, r0
+		|5:
+		|	// opline = EG(exception_op);
+		|	LOAD_IP_ADDR &EG(exception_op)
+		|	mov FP, aword [r4 + sizeof(void*)] // restore FP
+		|	mov RX, aword [r4 + sizeof(void*) * 2] // restore IP
+		|	add r4, NR_SPAD // stack alignment
+		|	mov r0, 2 // ZEND_VM_LEAVE
+		|	ret
+	}
 
 	return 1;
 }
@@ -2210,8 +2277,13 @@ static int zend_jit_prologue(dasm_State **Dst)
 {
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	sub r4, HYBRID_SPAD
-	} else {
+	} else if (GCC_GLOBAL_REGS) {
 		|	sub r4, SPAD // stack alignment
+	} else {
+		|	sub r4, NR_SPAD // stack alignment
+		|	mov aword [r4 + sizeof(void*)], FP // save FP
+		|	mov aword [r4 + sizeof(void*) * 2], RX // save IP
+		|	mov FP, FCARG1a
 	}
 	return 1;
 }
@@ -2244,7 +2316,11 @@ static int zend_jit_set_ip(dasm_State **Dst, const zend_op *opline)
 	if (!last_valid_opline) {
 		|	LOAD_IP_ADDR opline
 	} else if (last_valid_opline != opline) {
-		|	ADD_IP (opline - last_valid_opline) * sizeof(zend_op);
+		if (GCC_GLOBAL_REGS) {
+			|	ADD_IP (opline - last_valid_opline) * sizeof(zend_op);
+		} else {
+			|	LOAD_IP_ADDR opline
+		}
 	}
 	return 1;
 }
@@ -2318,6 +2394,9 @@ static int zend_jit_handler(dasm_State **Dst, const zend_op *opline, int may_thr
 	if (!zend_jit_set_valid_ip(Dst, opline)) {
 		return 0;
 	}
+	if (!GCC_GLOBAL_REGS) {
+		|	mov FCARG1a, FP
+	}
 	|	EXT_CALL handler, r0
 	if (may_throw) {
 		zend_jit_check_exception(Dst);
@@ -2370,7 +2449,14 @@ static int zend_jit_tail_handler(dasm_State **Dst, const zend_op *opline)
 	} else {
 		const void *handler = opline->handler;
 
-		|	add r4, SPAD // stack alignment
+		if (GCC_GLOBAL_REGS) {
+			|	add r4, SPAD // stack alignment
+		} else {
+			|	mov FCARG1a, FP
+			|	mov FP, aword [r4 + sizeof(void*)] // restore FP
+			|	mov RX, aword [r4 + sizeof(void*) * 2] // restore IP
+			|	add r4, NR_SPAD // stack alignment
+		}
 		|	EXT_JMP handler, r0
 	}
 	last_valid_opline = NULL;
@@ -7054,6 +7140,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	jnz >1
 			|.cold_code
 			|1:
+			if (!GCC_GLOBAL_REGS) {
+				|	mov FCARG1a, RX
+			}
 			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 			|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 			|	jne ->exception_handler
@@ -7062,9 +7151,15 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|.code
 			|1:
 		} else if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
+			if (!GCC_GLOBAL_REGS) {
+				|	mov FCARG1a, RX
+			}
 			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 			|	jmp ->exception_handler
 		} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			if (!GCC_GLOBAL_REGS) {
+				|	mov FCARG1a, RX
+			}
 			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 			|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 			|	jne ->exception_handler
@@ -7148,14 +7243,27 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				if (func) {
 					|	mov r0, EX->func
 				}
-				|	SET_IP aword [r0 + offsetof(zend_op_array, opcodes)]
-				if (num_args) {
-					|	ADD_IP (num_args * sizeof(zend_op))
+				if (GCC_GLOBAL_REGS) {
+					|	mov IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+					if (num_args) {
+						|	add IP, (num_args * sizeof(zend_op))
+					}
+				} else {
+					|	mov FCARG1a, aword [r0 + offsetof(zend_op_array, opcodes)]
+					if (num_args) {
+						|	add FCARG1a, (num_args * sizeof(zend_op))
+					}
+					|	mov aword EX->opline, FCARG1a
 				}
 			}
 		} else {
 			|	// opline = op_array->opcodes
-			|	SET_IP aword [r0 + offsetof(zend_op_array, opcodes)]
+			if (GCC_GLOBAL_REGS) {
+				|	mov IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+			} else {
+				|	mov FCARG1a, aword [r0 + offsetof(zend_op_array, opcodes)]
+				|	mov aword EX->opline, FCARG1a
+			}
 			|	// first_extra_arg = op_array->num_args;
 			|	mov edx, dword [r0 + offsetof(zend_op_array, num_args)]
 			|	// num_args = EX_NUM_ARGS();
@@ -7165,6 +7273,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	jl >1
 			|.cold_code
 			|1:
+			if (!GCC_GLOBAL_REGS) {
+				|	mov FCARG1a, FP
+			}
 			|	EXT_CALL zend_jit_copy_extra_args_helper, r0
 			|	mov r0, EX->func // reload
 			|	mov ecx, dword [FP + offsetof(zend_execute_data, This.u2.num_args)] // reload
@@ -7231,10 +7342,17 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 #else
 			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 				|	add r4, HYBRID_SPAD
-			} else {
+				|	JMP_IP
+			} else if (GCC_GLOBAL_REGS) {
 				|	add r4, SPAD // stack alignment
+				|	JMP_IP
+			} else {
+				|	mov FP, aword [r4 + sizeof(void*)] // restore FP
+				|	mov RX, aword [r4 + sizeof(void*) * 2] // restore IP
+				|	add r4, NR_SPAD // stack alignment
+				|	mov r0, 1 // ZEND_VM_ENTER
+				|	ret
 			}
-			|	JMP_IP
 #endif
 		}
 	}
@@ -7249,6 +7367,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	jnz >1
 				|.cold_code
 				|1:
+				if (!GCC_GLOBAL_REGS) {
+					|	mov FCARG1a, RX
+				}
 				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 				|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 				|	jne ->exception_handler
@@ -7257,9 +7378,15 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|.code
 				|1:
 			} else if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
+				if (!GCC_GLOBAL_REGS) {
+					|	mov FCARG1a, RX
+				}
 				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 				|	jmp ->exception_handler
 			} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
+				if (!GCC_GLOBAL_REGS) {
+					|	mov FCARG1a, RX
+				}
 				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 				|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 				|	jne ->exception_handler
@@ -8316,14 +8443,25 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 	|	ADD_IP sizeof(zend_op)
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	add r4, HYBRID_SPAD
-	} else {
-		|	add r4, SPAD // stack alignment
-	}
 #ifdef CONTEXT_THREADED_JIT
-	|	ret
+		|	ret
 #else
-	|	JMP_IP
+		|	JMP_IP
 #endif
+	} else if (GCC_GLOBAL_REGS) {
+		|	add r4, SPAD // stack alignment
+#ifdef CONTEXT_THREADED_JIT
+		|	ret
+#else
+		|	JMP_IP
+#endif
+	} else {
+		|	mov FP, aword [r4 + sizeof(void*)] // restore FP
+		|	mov RX, aword [r4 + sizeof(void*) * 2] // restore IP
+		|	add r4, NR_SPAD // stack alignment
+		|	mov r0, 2 // ZEND_VM_LEAVE
+		|	ret
+	}
 
 	return 1;
 }
