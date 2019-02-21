@@ -75,7 +75,7 @@ PHP                                                                        NEWS
   . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
 
 - sodium:
-  . Fixed bug #77646 (sign_detached() strings not terminated). (jedisct1)
+  . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
 - SQLite3:
   . Unbundled libsqlite. (cmb)
