@@ -27,8 +27,7 @@
  |.define FP,      r14
  |.define IP,      r15
  |.define IPl,     r15d
- |.define RX,      IP        // the same as VM IP reused as a general purpos reg
- |.define RXl,     IPl
+ |.define RX,      r15       // the same as VM IP reused as a general purpos reg
  |.define CARG1,   rdi       // x64/POSIX C call arguments.
  |.define CARG2,   rsi
  |.define CARG3,   rdx
@@ -51,8 +50,7 @@
  |.define FP,      esi
  |.define IP,      edi
  |.define IPl,     edi
- |.define RX,      IP        // the same as VM IP reused as a general purpos reg
- |.define RXl,     IPl
+ |.define RX,      edi       // the same as VM IP reused as a general purpos reg
  |.define FCARG1a, ecx       // x86 fastcall arguments.
  |.define FCARG2a, edx
  |.define FCARG1d, ecx
@@ -87,7 +85,7 @@ const char* zend_reg_name[] = {
 static uint32_t zend_jit_x86_flags = 0;
 
 |.type EX, zend_execute_data, FP
-|.type OP, zend_op, IP
+|.type OP, zend_op
 |.type ZVAL, zval
 
 |.actionlist dasm_actions
@@ -113,6 +111,43 @@ static void* dasm_labels[zend_lb_MAX];
 |	.else
 |		mov reg, ((ptrdiff_t)addr)
 |	.endif
+|.endmacro
+
+|.macro SAVE_OPLINE
+|	mov aword EX->opline, IP
+|.endmacro
+
+|.macro LOAD_OPLINE
+|	mov IP, aword EX->opline
+|.endmacro
+
+|.macro LOAD_IP_ADDR, addr
+|	LOAD_ADDR IP, addr
+|.endmacro
+
+|.macro GET_IP, rm
+|	mov rm, IP
+|.endmacro
+
+|.macro SET_IP, val
+|	mov IP, val
+|.endmacro
+
+|.macro ADD_IP, val
+|	add IP, val
+|.endmacro
+
+|.macro JMP_IP
+|	jmp aword [IP]
+|.endmacro
+
+/* In 64-bit build we compare only low 32-bits.
+ * x86_64 cmp instruction doesn't support immediate 64-bit operand, and full
+ * comparison would require additinal load of 64-bit address into register.
+ * This is not a problem at all, while JIT buffer size is less than 4GB.
+ */
+|.macro CMP_IP, addr
+|	cmp IPl, next_opline
 |.endmacro
 
 |.macro ADDR_OP1, addr_ins, addr, tmp_reg
@@ -1189,7 +1224,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro SAVE_VALID_OPLINE, op
 ||	if (op == last_valid_opline) {
-|		mov aword EX->opline, IP
+|		SAVE_OPLINE
 ||	} else {
 |		ADDR_OP2_2 mov, aword EX->opline, op, r0
 ||	}
@@ -1539,8 +1574,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|1:
 	|	//} else if (zend_interrupt_function) {
 	if (zend_interrupt_function) {
-		|	//SAVE_OPLINE();
-		|	mov EX->opline, IP
+		|	SAVE_OPLINE
 		|	//zend_interrupt_function(execute_data);
 		|.if X64
 			|	mov CARG1, FP
@@ -1554,9 +1588,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|	//ZEND_VM_ENTER();
 		|	//execute_data = EG(current_execute_data);
 		|	MEM_OP2_2 mov, FP, aword, &EG(current_execute_data), r0
-		|	// LOAD_OPLINE();
-		|	mov IP, EX->opline
-		|	//}
+		|	LOAD_OPLINE
 	}
 	|	//ZEND_VM_CONTINUE()
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
@@ -1564,7 +1596,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	} else {
 		|	add r4, SPAD // stack alignment
 	}
-	|	jmp aword [IP]
+	|	JMP_IP
 
 	return 1;
 }
@@ -1577,7 +1609,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 
 		|	add r4, HYBRID_SPAD
 		|	EXT_CALL handler, r0
-		|	jmp aword [IP]
+		|	JMP_IP
 	} else {
 		const void *handler = EG(exception_op)->handler;
 
@@ -1605,11 +1637,11 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 		|	jnz >1
 		|	EXT_CALL zend_jit_leave_nested_func_helper, r0
 		|	add r4, HYBRID_SPAD // stack alignment
-		|	jmp aword [IP]
+		|	JMP_IP
 		|1:
 		|	EXT_CALL zend_jit_leave_top_func_helper, r0
 		|	add r4, HYBRID_SPAD // stack alignment
-		|	jmp aword [IP]
+		|	JMP_IP
 	} else {
 		|	add r4, SPAD
 		|	test FCARG1d, ZEND_CALL_TOP
@@ -1632,7 +1664,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 	|	MEM_OP2_1 mov, aword, &EG(opline_before_exception), IP, r0
 	|5:
 	|	// opline = EG(exception_op);
-	|	LOAD_ADDR IP, &EG(exception_op)
+	|	LOAD_IP_ADDR &EG(exception_op)
 	|	//	HANDLE_EXCEPTION()
 	|	jmp ->exception_handler
 
@@ -1701,7 +1733,7 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 static int zend_jit_undefined_offset_ex_stub(dasm_State **Dst)
 {
 	|->undefined_offset_ex:
-	|	mov aword EX->opline, IP
+	|	SAVE_OPLINE
 	|	jmp ->undefined_offset
 
 	return 1;
@@ -1761,7 +1793,7 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 static int zend_jit_undefined_index_ex_stub(dasm_State **Dst)
 {
 	|->undefined_index_ex:
-	|	mov aword EX->opline, IP
+	|	SAVE_OPLINE
 	|	jmp ->undefined_index
 
 	return 1;
@@ -1824,7 +1856,7 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 static int zend_jit_cannot_add_element_ex_stub(dasm_State **Dst)
 {
 	|->cannot_add_element_ex:
-	|	mov aword EX->opline, IP
+	|	SAVE_OPLINE
 	|	jmp ->cannot_add_element
 
 	return 1;
@@ -1886,7 +1918,7 @@ static int zend_jit_not_obj_stub(dasm_State **Dst)
 static int zend_jit_negative_shift_stub(dasm_State **Dst)
 {
 	|->negative_shift:
-	|	mov aword EX->opline, IP
+	|	SAVE_OPLINE
 	|.if X64
 		|	LOAD_ADDR CARG1, zend_ce_arithmetic_error
 		|	LOAD_ADDR CARG2, "Bit shift by negative number"
@@ -1905,7 +1937,7 @@ static int zend_jit_negative_shift_stub(dasm_State **Dst)
 static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 {
 	|->mod_by_zero:
-	|	mov aword EX->opline, IP
+	|	SAVE_OPLINE
 	|.if X64
 		|	LOAD_ADDR CARG1, zend_ce_division_by_zero_error
 		|	LOAD_ADDR CARG2, "Modulo by zero"
@@ -1932,7 +1964,7 @@ static int zend_jit_hybrid_runtime_jit_stub(dasm_State **Dst)
 {
 	|->hybrid_runtime_jit:
 	|	EXT_CALL zend_runtime_jit, r0
-	|	jmp aword [IP]
+	|	JMP_IP
 	return 1;
 }
 
@@ -2024,7 +2056,7 @@ static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
 	|	.endif
 	|	jle >1
 	|	mov r1, EX->func
-	|	mov	r0, IP
+	|	GET_IP r0
 	|	sub r0, aword [r1 + offsetof(zend_op_array, opcodes)]
 	|	// divide by sizeof(zend_op)
 	|	.if X64
@@ -2048,9 +2080,9 @@ static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
 	|		mov word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_COUNTER_INIT
 	|	.endif
 	|	mov FCARG1a, FP
-	|	mov FCARG2a, IP
+	|	GET_IP FCARG2a
 	|	EXT_CALL zend_jit_hot_func, r0
-	|	jmp	aword [IP]
+	|	JMP_IP
 	return 1;
 }
 
@@ -2097,7 +2129,7 @@ static int zend_jit_hybrid_loop_counter_stub(dasm_State **Dst)
 	|	.endif
 	|	jle >1
 	|	mov r1, EX->func
-	|	mov	r0, IP
+	|	GET_IP r0
 	|	sub r0, aword [r1 + offsetof(zend_op_array, opcodes)]
 	|	// divide by sizeof(zend_op)
 	|	.if X64
@@ -2121,9 +2153,9 @@ static int zend_jit_hybrid_loop_counter_stub(dasm_State **Dst)
 	|		mov word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_COUNTER_INIT
 	|	.endif
 	|	mov FCARG1a, FP
-	|	mov FCARG2a, IP
+	|	GET_IP FCARG2a
 	|	EXT_CALL zend_jit_hot_func, r0
-	|	jmp	aword [IP]
+	|	JMP_IP
 	return 1;
 }
 
@@ -2210,9 +2242,9 @@ static int zend_jit_save_call_chain(dasm_State **Dst, uint32_t call_level)
 static int zend_jit_set_ip(dasm_State **Dst, const zend_op *opline)
 {
 	if (!last_valid_opline) {
-		|	LOAD_ADDR  IP, opline
+		|	LOAD_IP_ADDR opline
 	} else if (last_valid_opline != opline) {
-		|	add IP, (opline - last_valid_opline) * sizeof(zend_op);
+		|	ADD_IP (opline - last_valid_opline) * sizeof(zend_op);
 	}
 	return 1;
 }
@@ -2244,7 +2276,7 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline)
 		|	jne >1
 		|.cold_code
 		|1:
-		|	LOAD_ADDR  IP, opline
+		|	LOAD_IP_ADDR opline
 		|	jmp ->interrupt_handler
 		|.code
 		return 1;
@@ -2334,7 +2366,7 @@ static int zend_jit_tail_handler(dasm_State **Dst, const zend_op *opline)
 
 		|	add r4, HYBRID_SPAD
 		|	EXT_CALL handler, r0
-		|	jmp aword [IP]
+		|	JMP_IP
 	} else {
 		const void *handler = opline->handler;
 
@@ -2376,12 +2408,7 @@ static int zend_jit_jmp(dasm_State **Dst, unsigned int target_label)
 
 static int zend_jit_cond_jmp(dasm_State **Dst, const zend_op *next_opline, unsigned int target_label)
 {
-/* In 64-bit build we compare only low 32-bits.
- * x86_64 cmp instruction doesn't support immediate 64-bit operand, and full
- * comparison would require additinal load of 64-bit address into register.
- * This is not a problem at all, while JIT buffer size is less than 4GB.
- */
-	|	cmp IPl, next_opline
+	|	CMP_IP next_opline
 	|	jne =>target_label
 
 	last_valid_opline = next_opline;
@@ -2394,9 +2421,9 @@ static int zend_jit_smart_branch(dasm_State **Dst, const zend_op *opline, unsign
 	const zend_op *next_opline = opline + 1;
 	const zend_op *target_opline = OP_JMP_ADDR(opline, opline->op2);
 
-	|	cmp IPl, next_opline
+	|	CMP_IP next_opline
 	|	je =>next_label
-	|	cmp IPl, target_opline
+	|	CMP_IP target_opline
 	|	je =>target_label
 
 	return 1;
@@ -2412,7 +2439,7 @@ static int zend_jit_context_threaded_call(dasm_State **Dst, const zend_op *oplin
 	} else {
 		const zend_op *next_opline = opline + 1;
 
-		|	cmp IPl, next_opline
+		|	CMP_IP next_opline
 		|	je >1
 		|	call aword [IP]
 		zend_jit_check_exception(Dst);
@@ -7116,19 +7143,19 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				num_args = call_info->num_args;
 			}
 			if (func && zend_accel_in_shm(func->op_array.opcodes)) {
-				|	LOAD_ADDR IP, (func->op_array.opcodes + num_args)
+				|	LOAD_IP_ADDR (func->op_array.opcodes + num_args)
 			} else {
 				if (func) {
 					|	mov r0, EX->func
 				}
-				|	mov	IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+				|	SET_IP aword [r0 + offsetof(zend_op_array, opcodes)]
 				if (num_args) {
-					|	add IP, (num_args * sizeof(zend_op))
+					|	ADD_IP (num_args * sizeof(zend_op))
 				}
 			}
 		} else {
 			|	// opline = op_array->opcodes
-			|	mov	IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+			|	SET_IP aword [r0 + offsetof(zend_op_array, opcodes)]
 			|	// first_extra_arg = op_array->num_args;
 			|	mov edx, dword [r0 + offsetof(zend_op_array, num_args)]
 			|	// num_args = EX_NUM_ARGS();
@@ -7153,7 +7180,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|.else
 				|	imul r2, ecx, sizeof(zend_op)
 			|.endif
-			|	add IP, r2
+			|	ADD_IP r2
 			|1:
 			|	// if (EXPECTED((int)num_args < op_array->last_var)) {
 			|	mov edx, dword [r0 + offsetof(zend_op_array, last_var)]
@@ -7207,7 +7234,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			} else {
 				|	add r4, SPAD // stack alignment
 			}
-			|	jmp aword [IP]
+			|	JMP_IP
 #endif
 		}
 	}
@@ -7350,7 +7377,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	jne >1
 		|.cold_code
 		|1:
-		|	LOAD_ADDR IP, opline
+		|	LOAD_IP_ADDR opline
 		|	jmp ->icall_throw_handler
 		|.code
 
@@ -7361,7 +7388,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		if (opline->opcode != ZEND_DO_ICALL) {
 			uint32_t target_label = ssa->cfg.map[opline - op_array->opcodes] + 1;
 
-			|	LOAD_ADDR IP, (opline + 1)
+			|	LOAD_IP_ADDR (opline + 1)
 			|	jmp =>target_label
 		}
 	}
@@ -7412,7 +7439,7 @@ static int zend_jit_new(dasm_State **Dst, const zend_op *opline, int *opnum, zen
 		if (!ce || !(ce->ce_flags & ZEND_ACC_LINKED) || ce->constructor) {
 			const zend_op *next_opline = opline + 1;
 
-			|	cmp IPl, next_opline
+			|	CMP_IP next_opline
 			|	jne >6
 #if 0
 			zend_jit_call(Dst, next_opline);
@@ -8283,10 +8310,10 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 	}
 	|	// if (EG(exception))
 	|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
-	|	mov IP, EX->opline
+	|	LOAD_OPLINE
 	|	jne ->leave_throw_handler
 	|	// opline = EX(opline) + 1
-	|	add IP, sizeof(zend_op)
+	|	ADD_IP sizeof(zend_op)
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	add r4, HYBRID_SPAD
 	} else {
@@ -8295,7 +8322,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 #ifdef CONTEXT_THREADED_JIT
 	|	ret
 #else
-	|	jmp aword [IP]
+	|	JMP_IP
 #endif
 
 	return 1;
@@ -9109,7 +9136,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 		}
 	}
 	if (is_last) {
-	|	LOAD_ADDR IP, (opline + 1)
+	|	LOAD_IP_ADDR (opline + 1)
 		last_valid_opline = (opline + 1);
 	}
 
@@ -9487,8 +9514,7 @@ static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, zend_op_array 
 				if (!zend_jit_set_valid_ip(Dst, opline)) {
 					return 0;
 				}
-				|	//SAVE_OPLINE();
-				|	mov EX->opline, IP
+				|	SAVE_OPLINE
 				|.if X64
 					|	LOAD_ADDR CARG1, str
 					|	LOAD_ADDR CARG2, len
