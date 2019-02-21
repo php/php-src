@@ -6,6 +6,7 @@ opcache.enable_cli=1
 opcache.blacklist_filename={PWD}/opcache-*.blacklist
 opcache.file_update_protection=0
 opcache.file_cache_only=0
+opcache.preload=
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php

@@ -1,5 +1,7 @@
 --TEST--
 Bug #73037 SoapServer reports Bad Request when gzipped, var 0
+--CONFLICTS--
+server
 --SKIPIF--
 <?php
 	require_once('skipif.inc');

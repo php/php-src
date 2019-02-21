@@ -4631,8 +4631,6 @@ ZEND_MINFO_FUNCTION(ffi)
 }
 /* }}} */
 
-#define ZEND_FFI_VERSION "0.1.0"
-
 static const zend_ffi_type zend_ffi_type_void = {.kind=ZEND_FFI_TYPE_VOID, .size=1, .align=1};
 static const zend_ffi_type zend_ffi_type_char = {.kind=ZEND_FFI_TYPE_CHAR, .size=1, .align=_Alignof(char)};
 static const zend_ffi_type zend_ffi_type_bool = {.kind=ZEND_FFI_TYPE_BOOL, .size=1, .align=_Alignof(uint8_t)};
@@ -4737,7 +4735,7 @@ zend_module_entry ffi_module_entry = {
 	NULL,					/* ZEND_RINIT - Request initialization */
 	ZEND_RSHUTDOWN(ffi),	/* ZEND_RSHUTDOWN - Request shutdown */
 	ZEND_MINFO(ffi),		/* ZEND_MINFO - Module info */
-	ZEND_FFI_VERSION,		/* Version */
+	PHP_VERSION,			/* Version */
 	ZEND_MODULE_GLOBALS(ffi),
 	ZEND_GINIT(ffi),
 	ZEND_GSHUTDOWN(ffi),

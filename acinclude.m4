@@ -272,25 +272,6 @@ dnl Compiler characteristics checks
 dnl -------------------------------------------------------------------------
 
 dnl
-dnl PHP_TARGET_RDYNAMIC
-dnl
-dnl Checks whether -rdynamic is supported by the compiler.  This
-dnl is necessary for some targets to populate the global symbol
-dnl table.  Otherwise, dynamic modules would not be able to resolve
-dnl PHP-related symbols.
-dnl
-dnl If successful, adds -rdynamic to PHP_LDFLAGS.
-dnl
-AC_DEFUN([PHP_TARGET_RDYNAMIC],[
-  if test -n "$GCC"; then
-    PHP_CHECK_GCC_ARG(-rdynamic, gcc_rdynamic=yes)
-    if test "$gcc_rdynamic" = "yes"; then
-      PHP_LDFLAGS="$PHP_LDFLAGS -rdynamic"
-    fi
-  fi
-])
-
-dnl
 dnl PHP_RUNPATH_SWITCH
 dnl
 dnl Checks for -R, etc. switch
@@ -1522,82 +1503,6 @@ main() {
   else
     AC_DEFINE(PHP_BROKEN_SNPRINTF, 0, [Whether snprintf is C99 conform])
   fi
-])
-
-dnl
-dnl PHP_SOLARIS_PIC_WEIRDNESS
-dnl
-dnl Solaris requires main code to be position independent in order
-dnl to let shared objects find symbols.  Weird.  Ugly.
-dnl
-dnl Must be run after all --with-NN options that let the user
-dnl choose dynamic extensions, and after the gcc test.
-dnl
-AC_DEFUN([PHP_SOLARIS_PIC_WEIRDNESS],[
-  AC_MSG_CHECKING([whether -fPIC is required])
-  if test -n "$EXT_SHARED"; then
-    os=`uname -sr 2>/dev/null`
-    case $os in
-      "SunOS 5.6"|"SunOS 5.7"[)]
-        case $CC in
-          gcc*|egcs*)
-            CFLAGS="$CFLAGS -fPIC";;
-          *[)]
-            CFLAGS="$CFLAGS -fpic";;
-        esac
-        AC_MSG_RESULT([yes]);;
-      *[)]
-        AC_MSG_RESULT([no]);;
-    esac
-  else
-    AC_MSG_RESULT([no])
-  fi
-])
-
-dnl
-dnl PHP_SYS_LFS
-dnl
-dnl The problem is that the default compilation flags in Solaris 2.6 won't
-dnl let programs access large files;  you need to tell the compiler that
-dnl you actually want your programs to work on large files.  For more
-dnl details about this brain damage please see:
-dnl http://www.sas.com/standards/large.file/x_open.20Mar96.html
-dnl
-dnl Written by Paul Eggert <eggert@twinsun.com>.
-dnl
-AC_DEFUN([PHP_SYS_LFS],
-[dnl
-  # If available, prefer support for large files unless the user specified
-  # one of the CPPFLAGS, LDFLAGS, or LIBS variables.
-  AC_MSG_CHECKING([whether large file support needs explicit enabling])
-  ac_getconfs=''
-  ac_result=yes
-  ac_set=''
-  ac_shellvars='CPPFLAGS LDFLAGS LIBS'
-  for ac_shellvar in $ac_shellvars; do
-    case $ac_shellvar in
-      CPPFLAGS[)] ac_lfsvar=LFS_CFLAGS ;;
-      *[)] ac_lfsvar=LFS_$ac_shellvar ;;
-    esac
-    eval test '"${'$ac_shellvar'+set}"' = set && ac_set=$ac_shellvar
-    (getconf $ac_lfsvar) >/dev/null 2>&1 || { ac_result=no; break; }
-    ac_getconf=`getconf $ac_lfsvar`
-    ac_getconfs=$ac_getconfs$ac_getconf
-    eval ac_test_$ac_shellvar=\$ac_getconf
-  done
-  case "$ac_result$ac_getconfs" in
-    yes[)] ac_result=no ;;
-  esac
-  case "$ac_result$ac_set" in
-    yes?*[)] ac_result="yes, but $ac_set is already set, so use its settings"
-  esac
-  AC_MSG_RESULT([$ac_result])
-  case $ac_result in
-    yes[)]
-      for ac_shellvar in $ac_shellvars; do
-        eval $ac_shellvar=\$ac_test_$ac_shellvar
-      done ;;
-  esac
 ])
 
 dnl

@@ -53,7 +53,7 @@ function main()
 		   $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
 		   $temp_source, $temp_target, $temp_urlbase, $test_cnt, $test_dirs,
 		   $test_files, $test_idx, $test_list, $test_results, $testfile,
-		   $user_tests, $valgrind, $sum_results;
+		   $user_tests, $valgrind, $sum_results, $shuffle;
 	// Parallel testing
 	global $workers, $workerID;
 
@@ -159,10 +159,6 @@ NO_PROC_OPEN_ERROR;
 	if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
 		$environment["SystemRoot"] = getenv("SystemRoot");
 	}
-
-	// Don't ever guess at the PHP executable location.
-	// Require the explicit specification.
-	// Otherwise we could end up testing the wrong file!
 
 	$php = null;
 	$php_cgi = null;
@@ -324,6 +320,7 @@ NO_PROC_OPEN_ERROR;
 	$no_clean = false;
 	$slow_min_ms = INF;
 	$preload = false;
+	$shuffle = false;
 	$workers = null;
 
 	$cfgtypes = array('show', 'keep');
@@ -391,7 +388,6 @@ NO_PROC_OPEN_ERROR;
 							error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
 						}
 						$workers = intval($workers, 10);
-						$environment['SKIP_IO_CAPTURE_TESTS'] = 1;
 						break;
 					case 'r':
 					case 'l':
@@ -462,11 +458,7 @@ NO_PROC_OPEN_ERROR;
 						$environment['TEST_PHP_EXECUTABLE'] = $php;
 						break;
 					case 'P':
-						if (constant('PHP_BINARY')) {
-							$php = PHP_BINARY;
-						} else {
-							break;
-						}
+						$php = PHP_BINARY;
 						putenv("TEST_PHP_EXECUTABLE=$php");
 						$environment['TEST_PHP_EXECUTABLE'] = $php;
 						break;
@@ -510,6 +502,9 @@ NO_PROC_OPEN_ERROR;
 						break;
 					case '--offline':
 						$environment['SKIP_ONLINE_TESTS'] = 1;
+						break;
+					case '--shuffle':
+						$shuffle = true;
 						break;
 					//case 'w'
 					case '-':
@@ -568,7 +563,7 @@ Options:
 
     -p <php>    Specify PHP executable to run.
 
-    -P          Use PHP_BINARY as PHP executable to run.
+    -P          Use PHP_BINARY as PHP executable to run (default).
 
     -q          Quiet, no user interaction (same as environment NO_INTERACTION).
 
@@ -651,6 +646,13 @@ HELP;
 					}
 				}
 			}
+		}
+
+		// Default to PHP_BINARY as executable
+		if (!isset($environment['TEST_PHP_EXECUTABLE'])) {
+			$php = PHP_BINARY;
+			putenv("TEST_PHP_EXECUTABLE=$php");
+			$environment['TEST_PHP_EXECUTABLE'] = $php;
 		}
 
 		if (strlen($conf_passed)) {
@@ -1335,7 +1337,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 
 /** The heart of parallel testing. */
 function run_all_tests_parallel($test_files, $env, $redir_tested) {
-	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS;
+	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle;
 
 	// The PHP binary running run-tests.php, and run-tests.php itself
 	// This PHP executable is *not* necessarily the same as the tested version
@@ -1349,71 +1351,40 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	echo "====⚡️==== WELCOME TO THE FUTURE: run-tests PARALLEL EDITION ====⚡️====\n";
 	echo "====⚡️===========================================================⚡️====\n";
 
-	// Because some of the PHP test suite has not been written with
-	// parallel execution in mind, it is not safe to just run any two tests
-	// concurrently.
-	// Therefore, we divide the test set into directories and test multiple
-	// directories at once, but not multiple tests within them.
-
-	$testDirsToGo = [];
-
+	// Each test may specify a list of conflict keys. While a test that conflicts with
+	// key K is running, no other test that conflicts with K may run. Conflict keys are
+	// specified either in the --CONFLICTS-- section, or CONFLICTS file inside a directory.
+	$dirConflictsWith = [];
+	$fileConflictsWith = [];
 	foreach ($test_files as $file) {
-		$dirSeparator = strrpos($file, DIRECTORY_SEPARATOR);
-		if ($dirSeparator !== FALSE) {
-			$testDirsToGo[substr($file, 0, $dirSeparator)][] = $file;
+		$contents = file_get_contents($file);
+		if (preg_match('/^--CONFLICTS--(.+?)^--/ms', $contents, $matches)) {
+			$conflicts = array_map('trim', explode("\n", trim($matches[1])));
 		} else {
-			$testDirsToGo[""][] = $file;
-		}
-	}
-
-	// We assume most test directories should be executed in serial, but for
-	// big directories, this would waste time if they can actually be parallel.
-	// Therefore, if a directory has a special '@CAN_BE_PARALLELISED' file, we
-	// will divide it up into smaller “directories” automatically.
-	foreach ($testDirsToGo as $dir => $tests) {
-		if (count($tests) < 64 || !is_string($dir)) {
-			continue;
-		}
-		if (file_exists($dir . DIRECTORY_SEPARATOR . '@CAN_BE_PARALLELISED')) {
-			foreach (array_chunk($tests, 64) as $testsChunk) {
-				$testDirsToGo[] = $testsChunk;
+			// Cache per-directory conflicts in a separate map, so we compute these only once.
+			$dir = dirname($file);
+			if (!isset($dirConflictsWith[$dir])) {
+				$dirConflicts = [];
+				if (file_exists($dir . '/CONFLICTS')) {
+					$contents = file_get_contents($dir . '/CONFLICTS');
+					$dirConflicts = array_map('trim', explode("\n", trim($contents)));
+				}
+				$dirConflictsWith[$dir] = $dirConflicts;
 			}
-			unset($testDirsToGo[$dir]);
+			$conflicts = $dirConflictsWith[$dir];
 		}
+
+		$fileConflictsWith[$file] = $conflicts;
 	}
 
-	// Sort test dirs so the biggest ones are handled first, so we spend less
-	// time waiting on workers tasked with very large dirs.
-	// This is an ascending sort because items are popped off the end.
-	// Thank you Rasmus for this idea :)
-	uasort($testDirsToGo, function ($a, $b) {
-		return count($a) <=> count($b);
-	});
+	// Some tests assume that they are executed in a certain order. We will be popping from
+	// $test_files, so reverse its order here. This makes sure that order is preserved at least
+	// for tests with a common conflict key.
+	$test_files = array_reverse($test_files);
 
-	$testDirsInProgress = 0;
-
-	echo "Isolated ", count($testDirsToGo), " directories to be tested in parallel.\n";
-
-	$shamedDirs = array_reverse(array_filter($testDirsToGo, function ($files) {
-		return count($files) > 100;
-	}), true);
-
-	if ($shamedDirs) {
-		$shameList = "";
-		foreach ($shamedDirs as $dir => $shame) {
-			$shameList .= "\n$dir: " .  count($shame) . " files";
-		}
-
-		echo <<<NAME_AND_SHAME
-----⚠️-----------------------------------------------------------⚠️----
-To effectively utilise parallelism, test directories should not contain
-large numbers of tests that can't be run simultaneously. The following
-directories contain more than 100 test files and do not contain a
-'@CAN_BE_PARALLELISED' file:
-$shameList
-----⚠️-----------------------------------------------------------⚠️----
-
-NAME_AND_SHAME;
+	// To discover parallelization issues it is useful to randomize the test order.
+	if ($shuffle) {
+		shuffle($test_files);
 	}
 
 	echo "Spawning workers… ";
@@ -1434,11 +1405,7 @@ NAME_AND_SHAME;
 	for ($i = 1; $i <= $workers; $i++) {
 		$proc = proc_open(
 			$thisPHP . ' ' . escapeshellarg($thisScript),
-			[
-				0 => ['pipe', 'r'],
-				1 => ['pipe', 'w'],
-				2 => ['pipe', 'w']
-			],
+			[], // Inherit our stdin, stdout and stderr
 			$pipes,
 			NULL,
 			$_ENV + [
@@ -1505,9 +1472,15 @@ NAME_AND_SHAME;
 	echo "\n";
 
 	$rawMessageBuffers = [];
+	$testsInProgress = 0;
+
+	// Map from conflict key to worker ID.
+	$activeConflicts = [];
+	// Tests waiting due to conflicts. Map from conflict key to array.
+	$waitingTests = [];
 
 escape:
-	while ($testDirsToGo || ($testDirsInProgress > 0)) {
+	while ($test_files || $testsInProgress > 0) {
 		$toRead = array_values($workerSocks);
 		$toWrite = NULL;
 		$toExcept = NULL;
@@ -1537,15 +1510,43 @@ escape:
 					}
 
 					switch ($message["type"]) {
-						case "dir_finished":
-							$testDirsInProgress--;
+						case "tests_finished":
+							$testsInProgress--;
+							foreach ($activeConflicts as $key => $workerId) {
+								if ($workerId === $i) {
+									unset($activeConflicts[$key]);
+									if (isset($waitingTests[$key])) {
+										while ($test = array_pop($waitingTests[$key])) {
+											$test_files[] = $test;
+										}
+										unset($waitingTests[$key]);
+									}
+								}
+							}
 							// intentional fall-through
 						case "ready":
-							if ($testDir = array_pop($testDirsToGo)) {
-								$testDirsInProgress++;
+							// Batch multiple tests to reduce communication overhead.
+							$files = [];
+							$batchSize = $shuffle ? 4 : 32;
+							while (count($files) <= $batchSize && $file = array_pop($test_files)) {
+								foreach ($fileConflictsWith[$file] as $conflictKey) {
+									if (isset($activeConflicts[$conflictKey])) {
+										$waitingTests[$conflictKey][] = $file;
+										continue 2;
+									}
+								}
+								$files[] = $file;
+							}
+							if ($files) {
+								foreach ($files as $file) {
+									foreach ($fileConflictsWith[$file] as $conflictKey) {
+										$activeConflicts[$conflictKey] = $i;
+									}
+								}
+								$testsInProgress++;
 								send_message($workerSocks[$i], [
 									"type" => "run_tests",
-									"test_files" => $testDir,
+									"test_files" => $files,
 									"env" => $env,
 									"redir_tested" => $redir_tested
 								]);
@@ -1614,8 +1615,8 @@ escape:
 
 	kill_children($workerProcs);
 
-	if ($testDirsInProgress < 0) {
-		error("$testDirsInProgress test directories “in progress”, which is less than zero. THIS SHOULD NOT HAPPEN.");
+	if ($testsInProgress < 0) {
+		error("$testsInProgress test batches “in progress”, which is less than zero. THIS SHOULD NOT HAPPEN.");
 	}
 }
 
@@ -1682,7 +1683,7 @@ function run_worker() {
 			case "run_tests":
 				run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
 				send_message($workerSock, [
-					"type" => "dir_finished"
+					"type" => "tests_finished"
 				]);
 				break;
 			default:
@@ -1798,7 +1799,7 @@ TEST $file
 				'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
 				'INI', 'ENV', 'EXTENSIONS',
 				'SKIPIF', 'XFAIL', 'CLEAN',
-				'CREDITS', 'DESCRIPTION',
+				'CREDITS', 'DESCRIPTION', 'CONFLICTS',
 			))) {
 				$bork_info = 'Unknown section "' . $section . '"';
 			}
@@ -1972,7 +1973,7 @@ TEST $file
 	$temp_clean = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
 	$test_clean = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
 	$preload_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'preload.php';
-	$tmp_post = $temp_dir . DIRECTORY_SEPARATOR . uniqid('/phpt.');
+	$tmp_post = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'post';
 	$tmp_relative_file = str_replace(__DIR__ . DIRECTORY_SEPARATOR, '', $test_file) . 't';
 
 	if ($temp_source && $temp_target) {
@@ -2267,7 +2268,7 @@ TEST $file
 
 	$args = isset($section_text['ARGS']) ? ' -- ' . $section_text['ARGS'] : '';
 
-	if ($preload) {
+	if ($preload && !empty($test_file)) {
 		save_text($preload_filename, "<?php opcache_compile_file('$test_file');");
 		$local_pass_options = $pass_options;
 		unset($pass_options);
@@ -2526,6 +2527,10 @@ COMMAND $cmd
 	}
 
 	show_file_block('out', $output);
+
+	if ($preload) {
+		$output = trim(preg_replace("/\n?Warning: Can't preload [^\n]*\n?/", "", $output));
+	}
 
 	if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
 
