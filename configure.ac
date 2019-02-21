@@ -54,11 +54,7 @@ AH_BOTTOM([
 
 #include <string.h>
 
-#if ZEND_BROKEN_SPRINTF
-int zend_sprintf(char *buffer, const char *format, ...);
-#else
-# define zend_sprintf sprintf
-#endif
+#define zend_sprintf sprintf
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
 extern "C++" {
