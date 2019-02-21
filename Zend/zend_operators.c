@@ -1991,6 +1991,55 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 }
 /* }}} */
 
+static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
+{
+	zend_long str_lval;
+	double str_dval;
+	zend_uchar type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+
+	if (type == IS_LONG) {
+		return lval > str_lval ? 1 : lval < str_lval ? -1 : 0;
+	}
+
+	if (type == IS_DOUBLE) {
+		double diff = (double) lval - str_dval;
+		return ZEND_NORMALIZE_BOOL(diff);
+	}
+
+	zend_string *lval_as_str = zend_long_to_str(lval);
+	int cmp_result = zend_binary_strcmp(
+		ZSTR_VAL(lval_as_str), ZSTR_LEN(lval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
+	zend_string_release(lval_as_str);
+	return ZEND_NORMALIZE_BOOL(cmp_result);
+}
+/* }}} */
+
+static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
+{
+	zend_long str_lval;
+	double str_dval;
+	zend_uchar type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+
+	if (type == IS_LONG) {
+		double diff = dval - (double) str_lval;
+		return ZEND_NORMALIZE_BOOL(diff);
+	}
+
+	if (type == IS_DOUBLE) {
+		if (dval == str_dval) {
+			return 0;
+		}
+		return ZEND_NORMALIZE_BOOL(dval - str_dval);
+	}
+
+	zend_string *dval_as_str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
+	int cmp_result = zend_binary_strcmp(
+		ZSTR_VAL(dval_as_str), ZSTR_LEN(dval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
+	zend_string_release(dval_as_str);
+	return ZEND_NORMALIZE_BOOL(cmp_result);
+}
+/* }}} */
+
 ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 {
 	int converted = 0;
@@ -2041,6 +2090,26 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 
 			case TYPE_PAIR(IS_STRING, IS_NULL):
 				return Z_STRLEN_P(op1) == 0 ? 0 : 1;
+
+			case TYPE_PAIR(IS_LONG, IS_STRING):
+				return compare_long_to_string(Z_LVAL_P(op1), Z_STR_P(op2));
+
+			case TYPE_PAIR(IS_STRING, IS_LONG):
+				return -compare_long_to_string(Z_LVAL_P(op2), Z_STR_P(op1));
+
+			case TYPE_PAIR(IS_DOUBLE, IS_STRING):
+				if (zend_isnan(Z_DVAL_P(op1))) {
+					return 1;
+				}
+
+				return compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2));
+
+			case TYPE_PAIR(IS_STRING, IS_DOUBLE):
+				if (zend_isnan(Z_DVAL_P(op2))) {
+					return 1;
+				}
+
+				return -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1));
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
 				return 1;

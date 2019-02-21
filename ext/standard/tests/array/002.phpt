@@ -65,8 +65,6 @@ array(8) {
     [1]=>
     string(6) "orange"
   }
-  ["test"]=>
-  int(27)
   [1000]=>
   string(4) "test"
   [1001]=>
@@ -77,6 +75,8 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
+  ["test"]=>
+  int(27)
   [16777216]=>
   float(-0.3333333333333333)
 }
@@ -89,8 +89,6 @@ array(8) {
     [1]=>
     string(6) "orange"
   }
-  ["test"]=>
-  int(27)
   [1000]=>
   string(4) "test"
   [1001]=>
@@ -101,6 +99,8 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
+  ["test"]=>
+  int(27)
   [16777216]=>
   float(-0.3333333333333333)
 }
@@ -170,6 +170,8 @@ No second argument:
 array(8) {
   [16777216]=>
   float(-0.3333333333333333)
+  ["test"]=>
+  int(27)
   [0]=>
   string(3) "PHP"
   [17]=>
@@ -180,8 +182,6 @@ array(8) {
   string(6) "monkey"
   [1000]=>
   string(4) "test"
-  ["test"]=>
-  int(27)
   [-1000]=>
   array(2) {
     [0]=>
@@ -194,6 +194,8 @@ Using SORT_REGULAR:
 array(8) {
   [16777216]=>
   float(-0.3333333333333333)
+  ["test"]=>
+  int(27)
   [0]=>
   string(3) "PHP"
   [17]=>
@@ -204,8 +206,6 @@ array(8) {
   string(6) "monkey"
   [1000]=>
   string(4) "test"
-  ["test"]=>
-  int(27)
   [-1000]=>
   array(2) {
     [0]=>
@@ -480,17 +480,17 @@ array(8) {
     string(6) "orange"
   }
   [1]=>
-  int(27)
-  [2]=>
   string(4) "test"
-  [3]=>
+  [2]=>
   string(6) "monkey"
-  [4]=>
+  [3]=>
   string(4) "Test"
-  [5]=>
+  [4]=>
   string(27) "PHP: Hypertext Preprocessor"
-  [6]=>
+  [5]=>
   string(3) "PHP"
+  [6]=>
+  int(27)
   [7]=>
   float(-0.3333333333333333)
 }
@@ -504,17 +504,17 @@ array(8) {
     string(6) "orange"
   }
   [1]=>
-  int(27)
-  [2]=>
   string(4) "test"
-  [3]=>
+  [2]=>
   string(6) "monkey"
-  [4]=>
+  [3]=>
   string(4) "Test"
-  [5]=>
+  [4]=>
   string(27) "PHP: Hypertext Preprocessor"
-  [6]=>
+  [5]=>
   string(3) "PHP"
+  [6]=>
+  int(27)
   [7]=>
   float(-0.3333333333333333)
 }
@@ -585,17 +585,17 @@ array(8) {
   [0]=>
   float(-0.3333333333333333)
   [1]=>
-  string(3) "PHP"
-  [2]=>
-  string(27) "PHP: Hypertext Preprocessor"
-  [3]=>
-  string(4) "Test"
-  [4]=>
-  string(6) "monkey"
-  [5]=>
-  string(4) "test"
-  [6]=>
   int(27)
+  [2]=>
+  string(3) "PHP"
+  [3]=>
+  string(27) "PHP: Hypertext Preprocessor"
+  [4]=>
+  string(4) "Test"
+  [5]=>
+  string(6) "monkey"
+  [6]=>
+  string(4) "test"
   [7]=>
   array(2) {
     [0]=>
@@ -609,17 +609,17 @@ array(8) {
   [0]=>
   float(-0.3333333333333333)
   [1]=>
-  string(3) "PHP"
-  [2]=>
-  string(27) "PHP: Hypertext Preprocessor"
-  [3]=>
-  string(4) "Test"
-  [4]=>
-  string(6) "monkey"
-  [5]=>
-  string(4) "test"
-  [6]=>
   int(27)
+  [2]=>
+  string(3) "PHP"
+  [3]=>
+  string(27) "PHP: Hypertext Preprocessor"
+  [4]=>
+  string(4) "Test"
+  [5]=>
+  string(6) "monkey"
+  [6]=>
+  string(4) "test"
   [7]=>
   array(2) {
     [0]=>

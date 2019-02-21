@@ -78,11 +78,15 @@ array(0) {
 array(0) {
 }
 -- Callback function with parameter and return --
-array(3) {
+array(5) {
   [2]=>
   int(2)
   [3]=>
   float(0.0034)
+  [4]=>
+  string(5) "hello"
+  [5]=>
+  string(5) "value"
   ["key"]=>
   int(4)
 }

@@ -199,6 +199,11 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/inheritance_private_methods
   . If an object constructor exit()s, the object destructor will no longer be
     called. This matches the behavior when the constructor throws.
+  . Non-strict comparisons between numbers and non-numeric strings now work by
+    casting the number to string and comparing the strings. Comparisons between
+    numbers and numeric strings continue to work as before. Notably, this means
+    that `0 == "not-a-number"` is considered false now.
+    RFC: https://wiki.php.net/rfc/string_to_number_comparison
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

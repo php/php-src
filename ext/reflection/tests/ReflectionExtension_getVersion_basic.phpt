@@ -7,8 +7,7 @@ Leon Luijkx <leon@phpgg.nl>
 <?php
 $obj = new ReflectionExtension('reflection');
 $var = $obj->getVersion() ? $obj->getVersion() : null;
-$test = floatval($var) == $var ? true : false;
-var_dump($test);
+var_dump($var);
 ?>
---EXPECT--
-bool(true)
+--EXPECTF--
+string(9) "%d.%d.%s"

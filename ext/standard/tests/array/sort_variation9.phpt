@@ -196,17 +196,17 @@ array(6) {
 bool(true)
 array(2) {
   [0]=>
-  string(3) "baz"
-  [1]=>
   int(1)
+  [1]=>
+  string(3) "baz"
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
 array(2) {
   [0]=>
-  string(3) "baz"
-  [1]=>
   int(1)
+  [1]=>
+  string(3) "baz"
 }
 
 -- Iteration 5 --

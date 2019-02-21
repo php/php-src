@@ -54,15 +54,11 @@ array(1) {
   int(1)
 }
 int(0)
-array(4) {
+array(2) {
   [0]=>
   int(0)
   [1]=>
   int(2)
-  [2]=>
-  string(3) "php"
-  [3]=>
-  string(0) ""
 }
 int(-1)
 array(1) {

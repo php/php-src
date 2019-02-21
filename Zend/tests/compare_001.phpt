@@ -70,7 +70,7 @@ string(0) "" != array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 string(0) "" == string(0) ""
 string(0) "" != int(1)
 string(0) "" != float(2.5)
-string(0) "" == int(0)
+string(0) "" != int(0)
 string(0) "" != string(6) "string"
 string(0) "" != string(3) "123"
 string(0) "" != string(3) "2.5"
@@ -130,11 +130,11 @@ float(2.5) != array(0) {}
 float(2.5) != int(-2147483648)
 float(2.5) != string(11) "-2147483648"
 int(0) != array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-int(0) == string(0) ""
+int(0) != string(0) ""
 int(0) != int(1)
 int(0) != float(2.5)
 int(0) == int(0)
-int(0) == string(6) "string"
+int(0) != string(6) "string"
 int(0) != string(3) "123"
 int(0) != string(3) "2.5"
 int(0) == NULL
@@ -156,7 +156,7 @@ string(6) "string" != array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 string(6) "string" != string(0) ""
 string(6) "string" != int(1)
 string(6) "string" != float(2.5)
-string(6) "string" == int(0)
+string(6) "string" != int(0)
 string(6) "string" == string(6) "string"
 string(6) "string" != string(3) "123"
 string(6) "string" != string(3) "2.5"
