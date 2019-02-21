@@ -3414,23 +3414,16 @@ static void preload_link(void)
 					}
 				} ZEND_HASH_FOREACH_END();
 				if (ce->default_properties_count) {
-					zend_class_entry *pce = ce;
-
-					val = ce->default_properties_table + ce->default_properties_count - 1;
-					do {
-						uint32_t count = pce->parent ? pce->default_properties_count - pce->parent->default_properties_count : pce->default_properties_count;
-
-						while (count) {
-							if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-								if (UNEXPECTED(zval_update_constant_ex(val, pce) != SUCCESS)) {
-									ok = 0;
-								}
+					uint32_t i;
+					for (i = 0; i < ce->default_properties_count; i++) {
+						val = &ce->default_properties_table[i];
+						if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+							zend_property_info *prop = ce->properties_info_table[i];
+							if (UNEXPECTED(zval_update_constant_ex(val, prop->ce) != SUCCESS)) {
+								ok = 0;
 							}
-							val--;
-							count--;
 						}
-						pce = pce->parent;
-					} while (pce && pce-> default_properties_count);
+					}
 				}
 				if (ce->default_static_members_count) {
 					uint32_t count = ce->parent ? ce->default_static_members_count - ce->parent->default_static_members_count : ce->default_static_members_count;
