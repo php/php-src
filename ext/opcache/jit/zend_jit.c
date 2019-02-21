@@ -2744,7 +2744,7 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 	} ZEND_HASH_FOREACH_END();
 }
 
-void zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline)
+void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline)
 {
 	zend_op_array *op_array = &EX(func)->op_array;
 	const void **orig_handlers;

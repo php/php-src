@@ -31,7 +31,7 @@ extern int zend_jit_profile_counter_rid;
 
 extern int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
 
-void zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline);
+void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline);
 
 extern const zend_op *zend_jit_halt_op;
 

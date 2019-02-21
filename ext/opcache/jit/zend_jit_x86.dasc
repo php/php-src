@@ -2044,17 +2044,12 @@ static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
 	|1:
 	|	.if X64
 	|		mov word [r0+r1*2], ZEND_JIT_HOT_COUNTER_INIT
-	|		mov CARG1, FP
-	|		mov CARG2, IP
-	|		EXT_CALL zend_jit_hot_func, r0
 	|	.else
 	|		mov word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_COUNTER_INIT
-	|		sub r4, 8
-	|		push IP
-	|		push FP
-	|		EXT_CALL zend_jit_hot_func, r0
-	|		add r4, 16
 	|	.endif
+	|	mov FCARG1a, FP
+	|	mov FCARG2a, IP
+	|	EXT_CALL zend_jit_hot_func, r0
 	|	jmp	aword [IP]
 	return 1;
 }
@@ -2122,17 +2117,12 @@ static int zend_jit_hybrid_loop_counter_stub(dasm_State **Dst)
 	|1:
 	|	.if X64
 	|		mov word [r0+r1*2], ZEND_JIT_HOT_COUNTER_INIT
-	|		mov CARG1, FP
-	|		mov CARG2, IP
-	|		EXT_CALL zend_jit_hot_func, r0
 	|	.else
 	|		mov word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_COUNTER_INIT
-	|		sub r4, 8
-	|		push IP
-	|		push FP
-	|		EXT_CALL zend_jit_hot_func, r0
-	|		add r4, 16
 	|	.endif
+	|	mov FCARG1a, FP
+	|	mov FCARG2a, IP
+	|	EXT_CALL zend_jit_hot_func, r0
 	|	jmp	aword [IP]
 	return 1;
 }
