@@ -3258,6 +3258,34 @@ try_again:
 	}
 }
 
+static void get_unresolved_initializer(zend_class_entry *ce, const char **kind, const char **name) {
+	zend_string *key;
+	zend_class_constant *c;
+	zend_property_info *prop;
+
+	*kind = "unknown";
+	*name = "";
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
+		if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+			*kind = "constant ";
+			*name = ZSTR_VAL(key);
+		}
+	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop) {
+		zval *val;
+		if (prop->flags & ZEND_ACC_STATIC) {
+			val = &ce->default_static_members_table[OBJ_PROP_TO_NUM(prop->offset)];
+		} else {
+			val = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop->offset)];
+		}
+		if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+			*kind = (prop->flags & ZEND_ACC_STATIC) ? "static property $" : "property $";
+			*name = ZSTR_VAL(key);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 static void preload_link(void)
 {
 	zval *zv;
@@ -3479,7 +3507,9 @@ static void preload_link(void)
 			}
 			zend_string_release(key);
 		} else if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-			zend_error(E_WARNING, "Can't preload class %s with unresolved constants at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+			const char *kind, *name;
+			get_unresolved_initializer(ce, &kind, &name);
+			zend_error(E_WARNING, "Can't preload class %s with unresolved initializer for %s%s at %s:%d", ZSTR_VAL(ce->name), kind, name, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
 		} else if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
 			zend_error(E_WARNING, "Can't preload class %s with unresolved property types at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
 		} else {

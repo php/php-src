@@ -12,5 +12,5 @@ opcache.preload={PWD}/preload_undef_const.inc
 var_dump(class_exists('Foo'));
 ?>
 --EXPECTF--
-Warning: Can't preload class Foo with unresolved constants at %s:%d in Unknown on line 0
+Warning: Can't preload class Foo with unresolved initializer for constant A at %s:%d in Unknown on line 0
 bool(false)
