@@ -61,17 +61,17 @@ array(8) {
   [1]=>
   array(1) {
     [0]=>
-    int(-1)
+    string(0) ""
   }
   [2]=>
   array(1) {
     [0]=>
-    int(0)
+    int(-1)
   }
   [3]=>
   array(1) {
     [0]=>
-    string(0) ""
+    int(0)
   }
   [4]=>
   array(1) {

@@ -194,18 +194,18 @@ array(6) {
 - With default sort_flag -
 bool(true)
 array(2) {
-  ["foo"]=>
-  int(1)
   ["bar"]=>
   string(3) "baz"
+  ["foo"]=>
+  int(1)
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(2) {
-  ["foo"]=>
-  int(1)
   ["bar"]=>
   string(3) "baz"
+  ["foo"]=>
+  int(1)
 }
 
 -- Iteration 7 --

@@ -45,8 +45,8 @@ bool(true)
 array(3) {
   ["row3"]=>
   string(1) "1"
-  ["row2"]=>
-  string(2) "aa"
   ["row1"]=>
   int(2)
+  ["row2"]=>
+  string(2) "aa"
 }

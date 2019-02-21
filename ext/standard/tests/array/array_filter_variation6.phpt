@@ -33,7 +33,7 @@ echo "Done"
 ?>
 --EXPECT--
 *** Testing array_filter() : usage variations - 'input' containing references ***
-array(3) {
+array(4) {
   [0]=>
   &array(3) {
     [0]=>
@@ -54,6 +54,8 @@ array(3) {
     [2]=>
     int(4)
   }
+  [3]=>
+  string(5) "value"
 }
 array(4) {
   [0]=>

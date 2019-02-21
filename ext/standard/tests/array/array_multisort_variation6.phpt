@@ -21,9 +21,9 @@ var_dump($ar);
 *** Testing array_multisort() : Testing  all array sort specifiers ***
 array(3) {
   [0]=>
-  int(2)
-  [1]=>
   string(2) "aa"
+  [1]=>
+  int(2)
   [2]=>
   string(1) "1"
 }
