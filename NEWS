@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.4
 
+- MySQLi:
+  . Fixed bug #77597 (mysqli_fetch_field hangs scripts). (Nikita)
+
 21 Feb 2019, PHP 7.3.3
 
 - Core:
