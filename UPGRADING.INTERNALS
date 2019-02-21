@@ -17,7 +17,6 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   n. Assignments to references
   o. ZEND_COMPILE_EXTENDED_INFO split
   p. ZEND_EXT_FCALL_BEGIN can access arguments
-  q. ZEND_COMPILE_IGNORE_USER_FUNCTIONS and ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS
 
 2. Build system changes
   a. Abstract
@@ -179,11 +178,6 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   p. ZEND_EXT_BEGIN_FCALL is emitted after arguments are sent, this means
      that handlers may access arguments.
 
-  q. ZEND_COMPILE_IGNORE_USER_FUNCTIONS and ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS
-     are respected by zend_get_call_op such that when set, the only possible
-     call opcodes are ZEND_DO_FCALL and ZEND_DO_FCALL_BY_NAME, previously they
-     were ignored by zend_get_call_op.
-     
 ========================
 2. Build system changes
 ========================
