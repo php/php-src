@@ -478,7 +478,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	}
 }
 
-static void zend_update_extended_info(zend_op_array *op_array)
+static void zend_update_extended_stmts(zend_op_array *op_array)
 {
 	zend_op *opline = op_array->opcodes, *end=opline+op_array->last;
 
@@ -839,8 +839,8 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	if (!ZEND_USER_CODE(op_array->type)) {
 		return 0;
 	}
-	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
-		zend_update_extended_info(op_array);
+	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) {
+		zend_update_extended_stmts(op_array);
 	}
 	if (CG(compiler_options) & ZEND_COMPILE_HANDLE_OP_ARRAY) {
 		if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_HANDLER) {

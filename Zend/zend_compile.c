@@ -1410,11 +1410,11 @@ static void zend_add_to_list(void *result, void *item) /* {{{ */
 }
 /* }}} */
 
-void zend_do_extended_info(void) /* {{{ */
+void zend_do_extended_stmt(void) /* {{{ */
 {
 	zend_op *opline;
 
-	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT)) {
 		return;
 	}
 
@@ -1428,7 +1428,7 @@ void zend_do_extended_fcall_begin(void) /* {{{ */
 {
 	zend_op *opline;
 
-	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_FCALL)) {
 		return;
 	}
 
@@ -1442,7 +1442,7 @@ void zend_do_extended_fcall_end(void) /* {{{ */
 {
 	zend_op *opline;
 
-	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_FCALL)) {
 		return;
 	}
 
@@ -2131,7 +2131,7 @@ static inline void zend_handle_numeric_dim(zend_op *opline, znode *dim_node) /* 
 		zend_ulong index;
 
 		if (ZEND_HANDLE_NUMERIC(Z_STR(dim_node->u.constant), index)) {
-			/* For numeric indexs we also keep the original value to use by ArrayAccess
+			/* For numeric indexes we also keep the original value to use by ArrayAccess
 			 * See bug #63217
 			 */
 			int c = zend_add_literal(&dim_node->u.constant);
@@ -3022,7 +3022,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
 {
 	if (fbc) {
-		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+		if (fbc->type == ZEND_INTERNAL_FUNCTION && !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS)) {
 			if (init_op->opcode == ZEND_INIT_FCALL && !zend_execute_internal) {
 				if (!(fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_RETURN_REFERENCE))) {
 					return ZEND_DO_ICALL;
@@ -3030,7 +3030,7 @@ ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc)
 					return ZEND_DO_FCALL_BY_NAME;
 				}
 			}
-		} else {
+		} else if (!(CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS)){
 			if (zend_execute_ex == execute_ex && !(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 				return ZEND_DO_UCALL;
 			}
@@ -3052,9 +3052,9 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	uint32_t arg_count;
 	uint32_t call_flags;
 
-	zend_do_extended_fcall_begin();
-
 	arg_count = zend_compile_args(args_ast, fbc);
+
+	zend_do_extended_fcall_begin();
 
 	opline = &CG(active_op_array)->opcodes[opnum_init];
 	opline->extended_value = arg_count;
@@ -3930,7 +3930,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 				  || (CG(active_class_entry)
 				   && !(CG(active_class_entry)->ce_flags & ZEND_ACC_LINKED))
 				  || !zend_check_protected(zend_get_function_root_class(fbc), CG(active_class_entry)))) {
-					/* incompatibe function */
+					/* incompatible function */
 					fbc = NULL;
 				}
 			}
@@ -4529,7 +4529,7 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 
 	zend_update_jump_target_to_next(opnum_jmp);
 	zend_compile_expr_list(&result, cond_ast);
-	zend_do_extended_info();
+	zend_do_extended_stmt();
 
 	zend_emit_cond_jump(ZEND_JMPNZ, &result, opnum_start);
 
@@ -5789,7 +5789,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 
 	zend_oparray_context_begin(&orig_oparray_context);
 
-	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
+	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) {
 		zend_op *opline_ext = zend_emit_op(NULL, ZEND_EXT_NOP, NULL, NULL);
 		opline_ext->lineno = decl->start_lineno;
 	}
@@ -5820,7 +5820,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	/* put the implicit return on the really last line */
 	CG(zend_lineno) = decl->end_lineno;
 
-	zend_do_extended_info();
+	zend_do_extended_stmt();
 	zend_emit_final_return(0);
 
 	pass_two(CG(active_op_array));
@@ -8108,8 +8108,8 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 
 	CG(zend_lineno) = ast->lineno;
 
-	if ((CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) && !zend_is_unticked_stmt(ast)) {
-		zend_do_extended_info();
+	if ((CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) && !zend_is_unticked_stmt(ast)) {
+		zend_do_extended_stmt();
 	}
 
 	switch (ast->kind) {

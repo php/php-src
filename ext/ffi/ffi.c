@@ -806,13 +806,13 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 	}
 
 	if (!zend_is_callable_ex(value, NULL, 0, NULL, &fcc, &error)) {
-		zend_throw_error(zend_ffi_exception_ce, "Attempt to assing an invalid callback, %s", error);
+		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, %s", error);
 		return NULL;
 	}
 
 	arg_count = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
 	if (arg_count < fcc.function_handler->common.required_num_args) {
-		zend_throw_error(zend_ffi_exception_ce, "Attempt to assing an invalid callback, insufficient number of arguments");
+		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, insufficient number of arguments");
 		return NULL;
 	}
 
@@ -1755,13 +1755,11 @@ static int zend_ffi_cdata_get_closure(zend_object *obj, zend_class_entry **ce_pt
 	func->common.arg_flags[2] = 0;
 	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
 	func->common.function_name = ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE);
-	func->common.num_args = func->common.required_num_args = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
+	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
+	func->common.num_args = 0;
+	func->common.required_num_args = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
+	func->common.arg_info = NULL;
 	func->internal_function.handler = ZEND_FN(ffi_trampoline);
-
-	if (func->common.num_args > MAX_ARG_FLAG_NUM) {
-		func->common.arg_info = emalloc(sizeof(zend_arg_info) * func->common.num_args);
-		memset(func->common.arg_info, 0, sizeof(zend_arg_info) * func->common.num_args);
-	}
 
 	func->internal_function.reserved[0] = type;
 	func->internal_function.reserved[1] = *(void**)cdata->ptr;
@@ -2416,9 +2414,6 @@ static ZEND_FUNCTION(ffi_trampoline) /* {{{ */
 
 	zend_string_release(EX(func)->common.function_name);
 	if (EX(func)->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-		if (EX(func)->common.arg_info) {
-			efree(EX(func)->common.arg_info);
-		}
 		zend_free_trampoline(EX(func));
 		EX(func) = NULL;
 	}
@@ -2476,13 +2471,11 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	func->common.arg_flags[2] = 0;
 	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
 	func->common.function_name = zend_string_copy(name);
-	func->common.num_args = func->common.required_num_args = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
+	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
+	func->common.num_args = 0;
+	func->common.required_num_args = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
+	func->common.arg_info = NULL;
 	func->internal_function.handler = ZEND_FN(ffi_trampoline);
-
-	if (func->common.num_args > MAX_ARG_FLAG_NUM) {
-		func->common.arg_info = emalloc(sizeof(zend_arg_info) * func->common.num_args);
-		memset(func->common.arg_info, 0, sizeof(zend_arg_info) * func->common.num_args);
-	}
 
 	func->internal_function.reserved[0] = type;
 	func->internal_function.reserved[1] = sym->addr;
@@ -4638,8 +4631,6 @@ ZEND_MINFO_FUNCTION(ffi)
 }
 /* }}} */
 
-#define ZEND_FFI_VERSION "0.1.0"
-
 static const zend_ffi_type zend_ffi_type_void = {.kind=ZEND_FFI_TYPE_VOID, .size=1, .align=1};
 static const zend_ffi_type zend_ffi_type_char = {.kind=ZEND_FFI_TYPE_CHAR, .size=1, .align=_Alignof(char)};
 static const zend_ffi_type zend_ffi_type_bool = {.kind=ZEND_FFI_TYPE_BOOL, .size=1, .align=_Alignof(uint8_t)};
@@ -4744,7 +4735,7 @@ zend_module_entry ffi_module_entry = {
 	NULL,					/* ZEND_RINIT - Request initialization */
 	ZEND_RSHUTDOWN(ffi),	/* ZEND_RSHUTDOWN - Request shutdown */
 	ZEND_MINFO(ffi),		/* ZEND_MINFO - Module info */
-	ZEND_FFI_VERSION,		/* Version */
+	PHP_VERSION,			/* Version */
 	ZEND_MODULE_GLOBALS(ffi),
 	ZEND_GINIT(ffi),
 	ZEND_GSHUTDOWN(ffi),

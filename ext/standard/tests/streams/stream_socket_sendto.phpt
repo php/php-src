@@ -8,7 +8,7 @@ if (getenv("SKIP_ONLINE_TESTS")) { die('skip: online test'); }
 ?>
 --FILE--
 <?php
-$serverUri = "tcp://127.0.0.1:31854";
+$serverUri = "tcp://127.0.0.1:31857";
 $serverUrl = "http://php.net";
 $stringSocket = "out of band data.";
 $stringFWrite = "normal data to transmit";

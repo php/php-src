@@ -2102,7 +2102,6 @@ static uint32_t assign_dim_result_type(
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}
 	if (tmp & MAY_BE_ARRAY) {
-		tmp |= (value_type & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
 		if (value_type & MAY_BE_UNDEF) {
 			tmp |= MAY_BE_ARRAY_OF_NULL;
 		}
@@ -2122,6 +2121,11 @@ static uint32_t assign_dim_result_type(
 			if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
 				tmp |= MAY_BE_ARRAY_KEY_STRING;
 			}
+		}
+		/* Only add value type if we have a key type. It might be that the key type is illegal
+		 * for arrays. */
+		if (tmp & MAY_BE_ARRAY_KEY_ANY) {
+			tmp |= (value_type & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
 		}
 	}
 	return tmp;

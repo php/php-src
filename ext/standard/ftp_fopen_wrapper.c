@@ -1061,7 +1061,7 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 		php_stream_printf(stream, "MKD %s\r\n", ZSTR_VAL(resource->path));
 		result = GET_FTP_RESULT(stream);
     } else {
-        /* we look for directory separator from the end of string, thus hopefuly reducing our work load */
+        /* we look for directory separator from the end of string, thus hopefully reducing our work load */
         char *p, *e, *buf;
 
         buf = estrndup(ZSTR_VAL(resource->path), ZSTR_LEN(resource->path));

@@ -43,6 +43,9 @@
 #endif
 
 #include <errno.h>
+#ifdef HAVE_UNSHARE
+#include <sched.h>
+#endif
 
 #ifndef NSIG
 # ifdef SIGRTMAX
@@ -166,6 +169,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_async_signals, 0, 0, 1)
         ZEND_ARG_INFO(0, on)
 ZEND_END_ARG_INFO()
+
+#ifdef HAVE_UNSHARE
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_unshare, 0, 0, 1)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 
 static const zend_function_entry pcntl_functions[] = {
@@ -205,6 +214,9 @@ static const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_wifcontinued,	arginfo_pcntl_wifcontinued)
 #endif
 	PHP_FE(pcntl_async_signals,	arginfo_pcntl_async_signals)
+#ifdef HAVE_UNSHARE
+	PHP_FE(pcntl_unshare,		arginfo_pcntl_unshare)
+#endif
 	PHP_FE_END
 };
 
@@ -464,6 +476,29 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #endif
 #endif /* HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT */
 	/* }}} */
+
+	/* unshare(/clone) constants */
+#ifdef HAVE_UNSHARE
+	REGISTER_LONG_CONSTANT("CLONE_NEWNS",		CLONE_NEWNS, CONST_CS | CONST_PERSISTENT);
+#ifdef CLONE_NEWIPC
+	REGISTER_LONG_CONSTANT("CLONE_NEWIPC",		CLONE_NEWIPC, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef CLONE_NEWUTS
+	REGISTER_LONG_CONSTANT("CLONE_NEWUTS",		CLONE_NEWUTS, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef CLONE_NEWNET
+	REGISTER_LONG_CONSTANT("CLONE_NEWNET",		CLONE_NEWNET, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef CLONE_NEWPID
+	REGISTER_LONG_CONSTANT("CLONE_NEWPID",		CLONE_NEWPID, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef CLONE_NEWUSER
+	REGISTER_LONG_CONSTANT("CLONE_NEWUSER",		CLONE_NEWUSER, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef CLONE_NEWCGROUP
+	REGISTER_LONG_CONSTANT("CLONE_NEWCGROUP",	CLONE_NEWCGROUP, CONST_CS | CONST_PERSISTENT);
+#endif
+#endif
 }
 
 static void php_pcntl_register_errno_constants(INIT_FUNC_ARGS)
@@ -531,6 +566,12 @@ static void php_pcntl_register_errno_constants(INIT_FUNC_ARGS)
 #ifdef ETXTBSY
 	REGISTER_PCNTL_ERRNO_CONSTANT(ETXTBSY);
 #endif
+#ifdef ENOSPC
+	REGISTER_PCNTL_ERRNO_CONSTANT(ENOSPC);
+#endif
+#ifdef EUSERS
+	REGISTER_PCNTL_ERRNO_CONSTANT(EUSERS);
+#endif
 }
 
 static PHP_GINIT_FUNCTION(pcntl)
@@ -540,6 +581,7 @@ static PHP_GINIT_FUNCTION(pcntl)
 
 PHP_RINIT_FUNCTION(pcntl)
 {
+	php_add_tick_function(pcntl_signal_dispatch, NULL);
 	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, ZVAL_PTR_DTOR, 0);
 	PCNTL_G(head) = PCNTL_G(tail) = PCNTL_G(spares) = NULL;
 	PCNTL_G(async_signals) = 0;
@@ -550,7 +592,6 @@ PHP_MINIT_FUNCTION(pcntl)
 {
 	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_pcntl_register_errno_constants(INIT_FUNC_ARGS_PASSTHRU);
-	php_add_tick_function(pcntl_signal_dispatch, NULL);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
 
@@ -1495,6 +1536,59 @@ PHP_FUNCTION(pcntl_async_signals)
 	PCNTL_G(async_signals) = on;
 }
 /* }}} */
+
+#ifdef HAVE_UNSHARE
+/* {{{ proto bool pcntl_unshare(int flags)
+   disassociate parts of the process execution context */
+PHP_FUNCTION(pcntl_unshare)
+{
+	zend_long flags;
+	int ret;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ret = unshare(flags);
+	if (ret == -1) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+#ifdef EINVAL
+			case EINVAL:
+				php_error_docref(NULL, E_WARNING, "Error %d: Invalid flag specified", errno);
+				break;
+#endif
+#ifdef ENOMEM
+			case ENOMEM:
+				php_error_docref(NULL, E_WARNING, "Error %d: Insufficient memory for unshare", errno);
+				break;
+#endif
+#ifdef EPERM
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Error %d: No privilege to use these flags", errno);
+				break;
+#endif
+#ifdef ENOSPC
+			case ENOSPC:
+				php_error_docref(NULL, E_WARNING, "Error %d: Reached the maximum nesting limit for one of the specified namespaces", errno);
+				break;
+#endif
+#ifdef EUSERS
+			case EUSERS:
+				php_error_docref(NULL, E_WARNING, "Error %d: Reached the maximum nesting limit for the user namespace", errno);
+				break;
+#endif
+			default:
+				php_error_docref(NULL, E_WARNING, "Unknown error %d has occurred", errno);
+				break;
+		}
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
 
 static void pcntl_interrupt_function(zend_execute_data *execute_data)
 {

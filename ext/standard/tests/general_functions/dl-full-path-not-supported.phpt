@@ -1,6 +1,6 @@
 --TEST--
 dl() fails when trying to load full path to module
-+--CREDITS--
+--CREDITS--
 Tom Van Herreweghe <tom@theanalogguy.be>
 User Group: PHP-WVL & PHPGent #PHPTestFest
 --SKIPIF--

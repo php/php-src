@@ -7,6 +7,8 @@ phar.readonly=0
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--CONFLICTS--
+server
 --FILE--
 <?php
 $stub = '<?php

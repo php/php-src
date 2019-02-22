@@ -3,6 +3,7 @@ oci_password_change()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on thes
+require(dirname(__FILE__).'/skipif.inc');
 require(dirname(__FILE__).'/connect.inc');
 if (empty($dbase)) die ("skip requires database connection string be set");
 if ($test_drcp) die("skip password change not supported in DRCP Mode");

@@ -91,7 +91,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 																	  MYSQLND_STATS * stats,
 																	  const zend_bool int_and_float_native)
 {
-	unsigned int i;
+	unsigned int row, field;
 	enum_func_status ret = PASS;
 	const unsigned int field_count = meta->field_count;
 	const uint64_t row_count = result->row_count;
@@ -106,33 +106,33 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 			DBG_RETURN(FAIL);
 		}
 
-		for (i = 0; i < result->row_count; i++) {
-			/* (i / 8) & the_bit_for_i*/
-			if (ZEND_BIT_TEST(initialized, i)) {
+		for (row = 0; row < result->row_count; row++) {
+			/* (row / 8) & the_bit_for_row*/
+			if (ZEND_BIT_TEST(initialized, row)) {
 				continue;
 			}
 
-			rc = result->m.row_decoder(&result->row_buffers[i], current_row, field_count, meta->fields, int_and_float_native, stats);
+			rc = result->m.row_decoder(&result->row_buffers[row], current_row, field_count, meta->fields, int_and_float_native, stats);
 
 			if (rc != PASS) {
 				ret = FAIL;
 				break;
 			}
 			result->initialized_rows++;
-			initialized[i >> 3] |= (1 << (i & 7));
-			for (i = 0; i < field_count; i++) {
+			initialized[row >> 3] |= (1 << (row & 7));
+			for (field = 0; field < field_count; field++) {
 				/*
 				  NULL fields are 0 length, 0 is not more than 0
 				  String of zero size, definitely can't be the next max_length.
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
-				if (Z_TYPE(current_row[i]) == IS_STRING) {
-					const size_t len = Z_STRLEN(current_row[i]);
-					if (meta->fields[i].max_length < len) {
-						meta->fields[i].max_length = len;
+				if (Z_TYPE(current_row[field]) == IS_STRING) {
+					const size_t len = Z_STRLEN(current_row[field]);
+					if (meta->fields[field].max_length < len) {
+						meta->fields[field].max_length = len;
 					}
 				}
-				zval_ptr_dtor_nogc(&current_row[i]);
+				zval_ptr_dtor_nogc(&current_row[field]);
 			}
 		}
 		mnd_efree(current_row);

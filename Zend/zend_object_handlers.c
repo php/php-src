@@ -1194,7 +1194,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	func->opcodes = &EG(call_trampoline_op);
 	ZEND_MAP_PTR_INIT(func->run_time_cache, (void***)&dummy);
 	func->scope = fbc->common.scope;
-	/* reserve space for arguments, local and temorary variables */
+	/* reserve space for arguments, local and temporary variables */
 	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
 	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : ZSTR_EMPTY_ALLOC();
 	func->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
@@ -1387,7 +1387,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 	int i;
 	zval *p;
 
-	if (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count) {
+	if (class_type->default_static_members_count && !CE_STATIC_MEMBERS(class_type)) {
 		if (class_type->parent) {
 			zend_class_init_statics(class_type->parent);
 		}
