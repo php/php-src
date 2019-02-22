@@ -131,7 +131,7 @@ static zend_string *zend_build_runtime_definition_key(zend_string *name, unsigne
 {
 	zend_string *result;
 	char char_pos_buf[32];
-	size_t char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	size_t char_pos_len = sprintf(char_pos_buf, "%p", lex_pos);
 	zend_string *filename = CG(active_op_array)->filename;
 
 	/* NULL, name length, filename length, last accepting char position length */
@@ -6171,7 +6171,7 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 {
 	zend_string *result;
 	char char_pos_buf[32];
-	size_t char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	size_t char_pos_len = sprintf(char_pos_buf, "%p", lex_pos);
 	zend_string *filename = CG(active_op_array)->filename;
 
 	/* NULL, name length, filename length, last accepting char position length */
