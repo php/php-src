@@ -1356,10 +1356,11 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	// specified either in the --CONFLICTS-- section, or CONFLICTS file inside a directory.
 	$dirConflictsWith = [];
 	$fileConflictsWith = [];
-	foreach ($test_files as $file) {
+	$sequentialTests = [];
+	foreach ($test_files as $i => $file) {
 		$contents = file_get_contents($file);
 		if (preg_match('/^--CONFLICTS--(.+?)^--/ms', $contents, $matches)) {
-			$conflicts = array_map('trim', explode("\n", trim($matches[1])));
+			$conflicts = parse_conflicts($matches[1]);
 		} else {
 			// Cache per-directory conflicts in a separate map, so we compute these only once.
 			$dir = dirname($file);
@@ -1367,11 +1368,18 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 				$dirConflicts = [];
 				if (file_exists($dir . '/CONFLICTS')) {
 					$contents = file_get_contents($dir . '/CONFLICTS');
-					$dirConflicts = array_map('trim', explode("\n", trim($contents)));
+					$dirConflicts = parse_conflicts($contents);
 				}
 				$dirConflictsWith[$dir] = $dirConflicts;
 			}
 			$conflicts = $dirConflictsWith[$dir];
+		}
+
+		// For tests conflicting with "all", no other tests may run in parallel. We'll run these
+		// tests separately at the end, when only one worker is left.
+		if (in_array('all', $conflicts, true)) {
+			$sequentialTests[] = $file;
+			unset($test_files[$i]);
 		}
 
 		$fileConflictsWith[$file] = $conflicts;
@@ -1480,7 +1488,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	$waitingTests = [];
 
 escape:
-	while ($test_files || $testsInProgress > 0) {
+	while ($test_files || $sequentialTests || $testsInProgress > 0) {
 		$toRead = array_values($workerSocks);
 		$toWrite = NULL;
 		$toExcept = NULL;
@@ -1525,6 +1533,11 @@ escape:
 							}
 							// intentional fall-through
 						case "ready":
+							// Schedule sequential tests only once we are down to one worker.
+							if (count($workerProcs) === 1 && $sequentialTests) {
+								$test_files = array_merge($test_files, $sequentialTests);
+								$sequentialTests = [];
+							}
 							// Batch multiple tests to reduce communication overhead.
 							$files = [];
 							$batchSize = $shuffle ? 4 : 32;
@@ -3188,6 +3201,12 @@ function clear_show_test() {
 		// Write over the last line to avoid random trailing chars on next echo
 		echo str_repeat(" ", $line_length), "\r";
 	}
+}
+
+function parse_conflicts(string $text) : array {
+	// Strip comments
+	$text = preg_replace('/#.*/', '', $text);
+	return array_map('trim', explode("\n", trim($text)));
 }
 
 function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)

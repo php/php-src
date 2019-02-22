@@ -25,7 +25,7 @@ function writeAndDump($fp, $format, $args)
 echo "*** Testing vfprintf() : basic functionality ***\n";
 
 // Open handle
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_basic.txt';
 $fp = fopen( $file, "a+" );
 
 // Test vfprintf()
@@ -46,7 +46,7 @@ fclose( $fp );
 --CLEAN--
 <?php
 
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_basic.txt';
 unlink( $file );
 
 ?>

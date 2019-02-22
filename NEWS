@@ -19,4 +19,7 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
 
+- sodium:
+  . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
