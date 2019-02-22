@@ -9,7 +9,7 @@ phar.readonly=0
 <?php
 chdir(dirname(__FILE__));
 try {
-	$p = new Phar('brandnewphar.phar');
+	$p = new Phar('phar_create_in_cwd.phar');
 	$p['file1.txt'] = 'hi';
 	var_dump(strlen($p->getStub()));
 	$p->setStub("<?php
@@ -17,8 +17,8 @@ function __autoload(\$class)
 {
     include 'phar://' . str_replace('_', '/', \$class);
 }
-Phar::mapPhar('brandnewphar.phar');
-include 'phar://brandnewphar.phar/startup.php';
+Phar::mapPhar('phar_create_in_cwd.phar');
+include 'phar://phar_create_in_cwd.phar/startup.php';
 __HALT_COMPILER();
 ?>");
 	var_dump($p->getStub());
@@ -29,17 +29,17 @@ __HALT_COMPILER();
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/brandnewphar.phar');
+unlink(dirname(__FILE__) . '/phar_create_in_cwd.phar');
 ?>
---EXPECT--
+--EXPECTF--
 int(6641)
-string(200) "<?php
+string(%d) "<?php
 function __autoload($class)
 {
     include 'phar://' . str_replace('_', '/', $class);
 }
-Phar::mapPhar('brandnewphar.phar');
-include 'phar://brandnewphar.phar/startup.php';
+Phar::mapPhar('phar_create_in_cwd.phar');
+include 'phar://phar_create_in_cwd.phar/startup.php';
 __HALT_COMPILER(); ?>
 "
 ===DONE===
