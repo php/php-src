@@ -2722,6 +2722,7 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 	zend_op *opline;
 	zend_function *func;
 	zend_op_array *op_array;
+	zend_ulong counter;
 
 	ZEND_HASH_REVERSE_FOREACH_PTR(function_table, func) {
 		if (func->type == ZEND_INTERNAL_FUNCTION) {
@@ -2733,7 +2734,10 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 			opline++;
 		}
 		if (opline->handler == zend_jit_profile_jit_handler) {
-			zend_ulong counter = (zend_ulong)ZEND_COUNTER_INFO(op_array);
+			if (!RUN_TIME_CACHE(op_array)) {
+				continue;
+			}
+			counter = (zend_ulong)ZEND_COUNTER_INFO(op_array);
 			ZEND_COUNTER_INFO(op_array) = 0;
 			opline->handler = ZEND_FUNC_INFO(op_array);
 			ZEND_SET_FUNC_INFO(op_array, NULL);
@@ -3104,9 +3108,7 @@ ZEND_EXT_API int zend_jit_startup(zend_long jit, size_t size)
 	}
 
 	if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
-		zend_extension dummy;
-		zend_jit_profile_counter_rid = zend_get_resource_handle(&dummy);
-		ZEND_ASSERT(zend_jit_profile_counter_rid != -1);
+		zend_jit_profile_counter_rid = zend_get_op_array_extension_handle();
 	}
 
 #ifdef HAVE_GDB

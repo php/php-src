@@ -2047,8 +2047,22 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 	|	.endif
 	|	// op_array = (zend_op_array*)EX(func);
 	|	mov r0, EX->func
-	|	// ++(ZEND_COUNTER_INFO(op_array));
-	|	inc aword [r0 + offsetof(zend_op_array, reserved[zend_jit_profile_counter_rid])]
+	|	// ++ZEND_COUNTER_INFO(op_array)
+	|	mov r2, aword [r0 + offsetof(zend_op_array, run_time_cache__ptr)]
+#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
+	|	mov r2, aword [r2]
+#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
+	|	xor r1, r1
+	|	test r2, 1
+	|	jz >1
+	|	MEM_OP2_2 mov, r1, aword, &CG(map_ptr_base), r1
+	|	sub r1, 1
+	|1:
+	|	mov	r2, aword [r1 + r2]
+#else
+# error "Unknown ZEND_MAP_PTR_KIND"
+#endif
+	|	inc aword [r2 + zend_jit_profile_counter_rid * sizeof(void)]
 	|	// handler = (const void*)ZEND_FUNC_INFO(op_array);
 	|	mov r0, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	// return ((zend_vm_opcode_handler_t)handler)();

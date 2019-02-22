@@ -166,11 +166,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLE
 {
 	zend_op_array *op_array = (zend_op_array*)EX(func);
 	zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)ZEND_FUNC_INFO(op_array);
-#ifndef _WIN32
 	++(ZEND_COUNTER_INFO(op_array));
-#else
-	++((char*)ZEND_COUNTER_INFO(op_array));
-#endif
 	++zend_jit_profile_counter;
 	ZEND_OPCODE_TAIL_CALL(handler);
 }

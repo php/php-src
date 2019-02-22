@@ -2406,6 +2406,13 @@ int accel_activate(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
+#ifdef HAVE_JIT
+void accel_deactivate(void)
+{
+	zend_jit_deactivate();
+}
+#endif
+
 int accel_post_deactivate(void)
 {
 	if (ZCG(cwd)) {
@@ -2416,10 +2423,6 @@ int accel_post_deactivate(void)
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
 	}
-
-#ifdef HAVE_JIT
-	zend_jit_deactivate();
-#endif
 
 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
 	accel_unlock_all();
@@ -4259,7 +4262,11 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	NULL,									/* per-script activation */
+#ifdef HAVE_JIT
+    accel_deactivate,                       /* per-script deactivation */
+#else
 	NULL,									/* per-script deactivation */
+#endif
 	NULL,									/* message handler */
 	NULL,									/* op_array handler */
 	NULL,									/* extended statement handler */
