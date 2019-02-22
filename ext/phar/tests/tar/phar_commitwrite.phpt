@@ -7,7 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$p = new Phar(dirname(__FILE__) . '/brandnewphar.phar.tar', 0, 'brandnewphar.phar');
+$p = new Phar(dirname(__FILE__) . '/phar_commitwrite.phar.tar', 0, 'phar_commitwrite.phar');
 $p['file1.txt'] = 'hi';
 $p->stopBuffering();
 var_dump($p->getStub());
@@ -15,8 +15,8 @@ $p->setStub("<?php
 spl_autoload_register(function(\$class) {
     include 'phar://' . str_replace('_', '/', \$class);
 });
-Phar::mapPhar('brandnewphar.phar');
-include 'phar://brandnewphar.phar/startup.php';
+Phar::mapPhar('phar_commitwrite.phar');
+include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER();
 ?>");
 var_dump($p->getStub());
@@ -25,7 +25,7 @@ var_dump($p->isFileFormat(Phar::TAR));
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/brandnewphar.phar.tar');
+unlink(dirname(__FILE__) . '/phar_commitwrite.phar.tar');
 ?>
 --EXPECTF--
 string(60) "<?php // tar-based phar archive stub file
@@ -34,8 +34,8 @@ string(%d) "<?php
 spl_autoload_register(function($class) {
     include 'phar://' . str_replace('_', '/', $class);
 });
-Phar::mapPhar('brandnewphar.phar');
-include 'phar://brandnewphar.phar/startup.php';
+Phar::mapPhar('phar_commitwrite.phar');
+include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER(); ?>
 "
 bool(true)
