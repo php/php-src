@@ -10,6 +10,7 @@ addons:
       - locales
       - language-pack-de
       - re2c
+      - libedit-dev
       - libgmp-dev
       - libicu-dev
       - libtidy-dev

@@ -50,12 +50,7 @@
 #include <unixlib/local.h>
 #endif
 
-#if HAVE_LIBEDIT
 #include <editline/readline.h>
-#else
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif
 
 #include "zend_compile.h"
 #include "zend_execute.h"
@@ -667,11 +662,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		if (history_lines_to_write) {
-#if HAVE_LIBEDIT
 			write_history(history_file);
-#else
-			append_history(history_lines_to_write, history_file);
-#endif
 			history_lines_to_write = 0;
 		}
 
@@ -750,11 +741,7 @@ PHP_MINIT_FUNCTION(cli_readline)
 	ZEND_INIT_MODULE_GLOBALS(cli_readline, cli_readline_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
-#if HAVE_LIBEDIT
 	REGISTER_STRING_CONSTANT("READLINE_LIB", "libedit", CONST_CS|CONST_PERSISTENT);
-#else
-	REGISTER_STRING_CONSTANT("READLINE_LIB", "readline", CONST_CS|CONST_PERSISTENT);
-#endif
 
 	GET_SHELL_CB(cb);
 	if (cb) {

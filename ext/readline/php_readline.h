@@ -19,7 +19,7 @@
 #ifndef PHP_READLINE_H
 #define PHP_READLINE_H
 
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#if HAVE_LIBEDIT
 #ifndef PHP_WIN32
 #ifdef ZTS
 #warning Readline module will *NEVER* be thread-safe
@@ -36,6 +36,6 @@ extern zend_module_entry readline_module_entry;
 
 #define phpext_readline_ptr NULL
 
-#endif /* HAVE_LIBREADLINE */
+#endif /* HAVE_LIBEDIT */
 
 #endif /* PHP_READLINE_H */

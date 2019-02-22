@@ -58,7 +58,7 @@ $TS \
 --enable-sysvshm \
 --enable-shmop \
 --enable-pcntl \
---with-readline \
+--with-libedit \
 --enable-mbstring \
 --with-curl \
 --with-gettext \
