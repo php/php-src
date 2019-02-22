@@ -843,12 +843,19 @@ static ZEND_FUNCTION(opcache_compile_file)
 	orig_compiler_options = CG(compiler_options);
 	CG(compiler_options) |= ZEND_COMPILE_WITHOUT_EXECUTION;
 
-	zend_try {
+	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+		/* During preloading, a failure in opcache_compile_file() should result in an overall
+		 * preloading failure. Otherwise we may include partially compiled files in the preload
+		 * state. */
 		op_array = persistent_compile_file(&handle, ZEND_INCLUDE);
-	} zend_catch {
-		EG(current_execute_data) = orig_execute_data;
-		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s", handle.filename);
-	} zend_end_try();
+	} else {
+		zend_try {
+			op_array = persistent_compile_file(&handle, ZEND_INCLUDE);
+		} zend_catch {
+			EG(current_execute_data) = orig_execute_data;
+			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s", handle.filename);
+		} zend_end_try();
+	}
 
 	CG(compiler_options) = orig_compiler_options;
 

@@ -1700,6 +1700,10 @@ static PHP_FUNCTION(xmlwriter_open_memory)
 	zval *self = getThis();
 	ze_xmlwriter_object *ze_obj = NULL;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (self) {
 		/* We do not use XMLWRITER_FROM_OBJECT, xmlwriter init function here */
 		ze_obj = Z_XMLWRITER_P(self);

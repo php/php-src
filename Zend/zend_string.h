@@ -336,7 +336,7 @@ static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_str
  * constants, prime or not, has never been adequately explained by
  * anyone. So I try an explanation: if one experimentally tests all
  * multipliers between 1 and 256 (as RSE did now) one detects that even
- * numbers are not useable at all. The remaining 128 odd numbers
+ * numbers are not usable at all. The remaining 128 odd numbers
  * (except for the number 1) work more or less all equally well. They
  * all distribute in an acceptable way and this way fill a hash table
  * with an average percent of approx. 86%.

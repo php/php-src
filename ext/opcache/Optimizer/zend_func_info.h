@@ -31,7 +31,8 @@
 #define ZEND_FUNC_RECURSIVE                (1<<7)
 #define ZEND_FUNC_RECURSIVE_DIRECTLY       (1<<8)
 #define ZEND_FUNC_RECURSIVE_INDIRECTLY     (1<<9)
-#define ZEND_FUNC_HAS_EXTENDED_INFO        (1<<10)
+#define ZEND_FUNC_HAS_EXTENDED_FCALL       (1<<10)
+#define ZEND_FUNC_HAS_EXTENDED_STMT        (1<<11)
 
 /* The following flags are valid only for return values of internal functions
  * returned by zend_get_func_info()

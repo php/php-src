@@ -67,6 +67,12 @@ PHP 8.0 UPGRADE NOTES
     production environments, which can result in information leaks. Please
     ensure that display_errors=Off is used in conjunction with error logging.
 
+- COM:
+  . Removed the ability to import case-insensitive constants from type
+    libraries. The second argument to com_load_typelib() may no longer be false;
+    com.autoregister_casesensitive may no longer be disabled; case-insensitive
+    markers in com.typelib_file are ignored.
+
 - Date:
   . mktime() and gmmktime() now require at least one argument. time() can be
     used to get the current timestamp.

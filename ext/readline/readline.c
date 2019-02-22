@@ -43,7 +43,7 @@ PHP_FUNCTION(readline);
 PHP_FUNCTION(readline_add_history);
 PHP_FUNCTION(readline_info);
 PHP_FUNCTION(readline_clear_history);
-#ifndef HAVE_LIBEDIT
+#ifdef HAVE_HISTORY_LIST
 PHP_FUNCTION(readline_list_history);
 #endif
 PHP_FUNCTION(readline_read_history);
@@ -88,7 +88,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_readline_clear_history, 0)
 ZEND_END_ARG_INFO()
 
-#ifndef HAVE_LIBEDIT
+#ifdef HAVE_HISTORY_LIST
 ZEND_BEGIN_ARG_INFO(arginfo_readline_list_history, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -133,7 +133,7 @@ static const zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline_info,  	            arginfo_readline_info)
 	PHP_FE(readline_add_history, 		arginfo_readline_add_history)
 	PHP_FE(readline_clear_history, 		arginfo_readline_clear_history)
-#ifndef HAVE_LIBEDIT
+#ifdef HAVE_HISTORY_LIST
 	PHP_FE(readline_list_history, 		arginfo_readline_list_history)
 #endif
 	PHP_FE(readline_read_history, 		arginfo_readline_read_history)
@@ -394,9 +394,10 @@ PHP_FUNCTION(readline_clear_history)
 }
 
 /* }}} */
+
+#ifdef HAVE_HISTORY_LIST
 /* {{{ proto array readline_list_history(void)
    Lists the history */
-#ifndef HAVE_LIBEDIT
 PHP_FUNCTION(readline_list_history)
 {
 	HIST_ENTRY **history;
@@ -405,19 +406,49 @@ PHP_FUNCTION(readline_list_history)
 		return;
 	}
 
+	array_init(return_value);
+
+#if defined(HAVE_LIBEDIT) && defined(PHP_WIN32) /* Winedit on Windows */
 	history = history_list();
 
-	array_init(return_value);
+	if (history) {
+		int i, n = history_length();
+		for (i = 0; i < n; i++) {
+				add_next_index_string(return_value, history[i]->line);
+		}
+	}
+
+#elif defined(HAVE_LIBEDIT) /* libedit */
+    {
+		HISTORY_STATE *hs;
+		int i;
+
+		using_history();
+		hs = history_get_history_state();
+		if (hs && hs->length) {
+			history = history_list();
+			if (history) {
+				for (i = 0; i < hs->length; i++) {
+					add_next_index_string(return_value, history[i]->line);
+				}
+			}
+		}
+    }
+
+#else /* readline */
+	history = history_list();
 
 	if (history) {
 		int i;
 		for (i = 0; history[i]; i++) {
-			add_next_index_string(return_value,history[i]->line);
+			add_next_index_string(return_value, history[i]->line);
 		}
 	}
-}
 #endif
+}
 /* }}} */
+#endif
+
 /* {{{ proto bool readline_read_history([string filename])
    Reads the history */
 PHP_FUNCTION(readline_read_history)

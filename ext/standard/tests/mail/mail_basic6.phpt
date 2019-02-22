@@ -1,7 +1,7 @@
 --TEST--
 Test mail() function : basic functionality
 --INI--
-sendmail_path=tee mailBasic.out >/dev/null
+sendmail_path=tee mailBasic6.out >/dev/null
 mail.add_x_header = Off
 --SKIPIF--
 <?php
@@ -24,7 +24,7 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = "HEAD1: a\r\nHEAD2: b\r\n";
-$outFile = "mailBasic.out";
+$outFile = "mailBasic6.out";
 @unlink($outFile);
 
 echo "-- Valid Header --\n";

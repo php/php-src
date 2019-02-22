@@ -28,16 +28,6 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
   fi
 
-  AC_DEFUN([PDO_MYSQL_LIB_CHK], [
-    str="$PDO_MYSQL_DIR/$1/libmysqlclient*"
-    for j in `echo $str`; do
-      if test -r $j; then
-        PDO_MYSQL_LIB_DIR=$PDO_MYSQL_DIR/$1
-        break 2
-      fi
-    done
-  ])
-
   if test "$PHP_PDO_MYSQL" != "yes" && test "$PHP_PDO_MYSQL" != "mysqlnd"; then
     if test -f $PHP_PDO_MYSQL && test -x $PHP_PDO_MYSQL ; then
       PDO_MYSQL_CONFIG=$PHP_PDO_MYSQL

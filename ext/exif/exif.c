@@ -2968,7 +2968,7 @@ static int exif_process_string_raw(char **result, char *value, size_t byte_count
  * In contrast to exif_process_string this function does always return a string buffer */
 static int exif_process_string(char **result, char *value, size_t byte_count) {
 	/* we cannot use strlcpy - here the problem is that we cannot use strlen to
-	 * determin length of string and we cannot use strlcpy with len=byte_count+1
+	 * determine length of string and we cannot use strlcpy with len=byte_count+1
 	 * because then we might get into an EXCEPTION if we exceed an allocated
 	 * memory page...so we use php_strnlen in conjunction with memcpy and add the NUL
 	 * char.
@@ -3650,7 +3650,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process TIFF in JPEG done");
 #endif
 
-	/* Compute the CCD width, in milimeters. */
+	/* Compute the CCD width, in millimeters. */
 	if (ImageInfo->FocalplaneXRes != 0) {
 		ImageInfo->CCDWidth = (float)(ImageInfo->ExifImageWidth * ImageInfo->FocalplaneUnits / ImageInfo->FocalplaneXRes);
 	}
@@ -3715,7 +3715,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 
 		/* get marker byte, swallowing possible padding                           */
 		/* some software does not count the length bytes of COM section           */
-		/* one company doing so is very much envolved in JPEG... so we accept too */
+		/* one company doing so is very much involved in JPEG... so we accept too */
 		if (last_marker==M_COM && comment_correction) {
 			comment_correction = 2;
 		}
