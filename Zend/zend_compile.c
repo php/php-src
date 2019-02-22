@@ -5248,6 +5248,7 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 		}
 	}
 }
+/* }}} */
 
 void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 {
