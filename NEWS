@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #77652 (Anonymous classes can lose their interface information).
     (Nikita)
 
+- Apache2Handler:
+  . Fixed bug #77648 (BOM in sapi/apache2handler/php_functions.c). (cmb)
+
 - MySQLi:
   . Fixed bug #77597 (mysqli_fetch_field hangs scripts). (Nikita)
 
