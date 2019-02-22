@@ -217,7 +217,8 @@ enum { CAL_MONTH_GREGORIAN_SHORT, CAL_MONTH_GREGORIAN_LONG,
 	CAL_MONTH_FRENCH
 };
 
-/* for heb_number_to_chars */
+/* For heb_number_to_chars escape sequences of אבגדהוזחטיכלמנסעפצקרשת
+   ISO-8859-8 Hebrew alphabet */
 static char alef_bet[25] = "0\xE0\xE1\xE2\xE3\xE4\xE5\xE6\xE7\xE8\xE9\xEB\xEC\xEE\xF0\xF1\xF2\xF4\xF6\xF7\xF8\xF9\xFA";
 
 #define CAL_JEWISH_ADD_ALAFIM_GERESH 0x2
