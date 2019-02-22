@@ -533,6 +533,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 			p++;
 		}
 		if (CAL_JEWISH_ADD_ALAFIM & fl) {
+			/* Escape sequences of Hebrew characters in ISO-8859-8: אלפים */
 			strcpy(p, " \xE0\xEC\xF4\xE9\xED ");
 			p += 7;
 		}
