@@ -3941,7 +3941,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
+zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
 
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
@@ -3952,13 +3952,8 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	zend_op *opline;
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
-		uint32_t dcl_opnum = get_next_op_number();
-		zend_compile_class_decl(class_ast, 0);
 		/* jump over anon class declaration */
-		opline = &CG(active_op_array)->opcodes[dcl_opnum];
-		if (opline->opcode == ZEND_FETCH_CLASS) {
-			opline++;
-		}
+		opline = zend_compile_class_decl(class_ast, 0);
 		class_node.op_type = opline->result_type;
 		class_node.u.op.var = opline->result.var;
 		opline->extended_value = get_next_op_number();
@@ -6136,7 +6131,7 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
+zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -6291,7 +6286,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 					}
 					CG(zend_lineno) = ast->lineno;
 					zend_string_release(lcname);
-					return;
+					return NULL;
 				}
 			}
 		} else {
@@ -6299,7 +6294,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				zend_string_release(lcname);
 				zend_build_properties_info_table(ce);
 				ce->ce_flags |= ZEND_ACC_LINKED;
-				return;
+				return NULL;
 			}
 		}
 	}
@@ -6325,7 +6320,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			zval zv;
 			ZVAL_PTR(&zv, ce);
 			destroy_zend_class(&zv);
-			return;
+			return opline;
 		}
 	} else {
 		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
@@ -6352,6 +6347,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			opline->opcode = ZEND_DECLARE_CLASS;
 		}
 	}
+	return opline;
 }
 /* }}} */
 
