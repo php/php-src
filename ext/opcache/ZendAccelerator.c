@@ -4129,9 +4129,6 @@ static int accel_finish_startup(void)
 		zend_bool old_reset_signals = SIGG(reset);
 #endif
 
-		/* Cleanup heap, to avoid memory leak reports */
-		shutdown_memory_manager(1, 0);
-
 		if (UNEXPECTED(file_cache_only)) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"file_cache_only\" mode");
 			return SUCCESS;
@@ -4171,6 +4168,7 @@ static int accel_finish_startup(void)
 		EG(error_reporting) = orig_error_reporting;
 
 		if (rc == SUCCESS) {
+			zend_bool orig_report_memleaks;
 
 			/* don't send headers */
 			SG(headers_sent) = 1;
@@ -4192,7 +4190,10 @@ static int accel_finish_startup(void)
 				ret = FAILURE;
 			}
 
+			orig_report_memleaks = PG(report_memleaks);
+			PG(report_memleaks) = 0;
 			php_request_shutdown(NULL);
+			PG(report_memleaks) = orig_report_memleaks;
 		} else {
 			ret = FAILURE;
 		}
