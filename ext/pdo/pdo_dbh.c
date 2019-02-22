@@ -59,6 +59,7 @@ void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_e
 			sizeof("message")-1, 
 			pdo_exception_message
 		);
+		efree(pdo_exception_message);
 		zend_throw_exception_object(&pdo_exception);
 }
 
