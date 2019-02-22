@@ -3075,7 +3075,7 @@ static int zend_jit_make_stubs(void)
 		zend_jit_runtime_jit_handler = (const void*)zend_runtime_jit;
 		zend_jit_profile_jit_handler = (const void*)zend_jit_profile_helper;
 		zend_jit_func_counter_handler = (const void*)zend_jit_func_counter_helper;
-		zend_jit_loop_counter_handler = (const void*)zend_jit_loop_counter_handler;
+		zend_jit_loop_counter_handler = (const void*)zend_jit_loop_counter_helper;
 	}
 
 	dasm_free(&dasm_state);
