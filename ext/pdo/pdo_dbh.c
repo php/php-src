@@ -42,6 +42,7 @@ void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_e
 {
 		zval error_info,pdo_exception;
 		char *pdo_exception_message;
+
 		object_init_ex(&pdo_exception, php_pdo_get_exception());
 		array_init(&error_info);
 

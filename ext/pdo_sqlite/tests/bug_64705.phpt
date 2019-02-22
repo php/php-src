@@ -6,7 +6,7 @@ if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 ?>
 --FILE--
 <?php
-$dsn = 'sqlite:./bug64705NonExistingDb';
+$dsn = 'sqlite:./bug64705NonExistingDir/bug64705NonExistingDb';
 try {
   $pdo = new \PDO($dsn, null, null);
 } catch (\PDOException $e) {
