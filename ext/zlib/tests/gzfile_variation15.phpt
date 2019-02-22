@@ -8,6 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
+$thisTestDir = 'gzfile_variation15.dir';
 require_once('reading_include_path.inc');
 
 //define the files to go into these directories, create one in dir2
