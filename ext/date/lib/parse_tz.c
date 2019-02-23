@@ -668,7 +668,7 @@ timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *
 	int32_t offset = 0, leap_secs = 0;
 	char *abbr;
 	timelib_time_offset *tmp = timelib_time_offset_ctor();
-	timelib_sll                transition_time;
+	timelib_sll                transition_time = 0;
 
 	if ((to = fetch_timezone_offset(tz, ts, &transition_time))) {
 		offset = to->offset;
