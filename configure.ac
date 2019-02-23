@@ -651,7 +651,6 @@ setsockopt \
 setvbuf \
 shutdown \
 sin \
-snprintf \
 srand48 \
 srandom \
 statfs \
@@ -673,7 +672,6 @@ unlockpt \
 unsetenv \
 usleep \
 utime \
-vsnprintf \
 vasprintf \
 asprintf \
 nanosleep \
@@ -737,7 +735,6 @@ fi
 
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_ALLOCA
-dnl PHP_AC_BROKEN_SNPRINTF
 PHP_DECLARED_TIMEZONE
 PHP_TIME_R_TYPE
 PHP_READDIR_R_TYPE

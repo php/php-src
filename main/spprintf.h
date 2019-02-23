@@ -33,4 +33,4 @@ END_EXTERN_C()
 #define vspprintf zend_vspprintf
 #define vstrpprintf zend_vstrpprintf
 
-#endif /* SNPRINTF_H */
+#endif /* SPPRINTF_H */
