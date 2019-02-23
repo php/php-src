@@ -886,17 +886,6 @@ AC_DEFUN([PHP_SELECT_SAPI],[
   ])
 ])
 
-dnl deprecated
-AC_DEFUN([PHP_EXTENSION],[
-  sources=`$AWK -f $abs_srcdir/build/scan_makefile_in.awk < []PHP_EXT_SRCDIR($1)[]/Makefile.in`
-
-  PHP_NEW_EXTENSION($1, $sources, $2, $3)
-
-  if test -r "$ext_srcdir/Makefile.frag"; then
-    PHP_ADD_MAKEFILE_FRAGMENT
-  fi
-])
-
 AC_DEFUN([PHP_ADD_BUILD_DIR],[
   ifelse($2,,[
     BUILD_DIR="$BUILD_DIR $1"
