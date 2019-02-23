@@ -7,7 +7,6 @@ phpbuilddir = $(libdir)/build
 
 BUILD_FILES = \
 	scripts/phpize.m4 \
-	build/scan_makefile_in.awk \
 	build/libtool.m4 \
 	build/ltmain.sh \
 	build/ax_check_compile_flag.m4 \
