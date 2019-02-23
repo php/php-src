@@ -612,7 +612,7 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_length;
 			phar = PHAR_G(last_phar);
-			goto splitted;
+			goto split;
 		}
 		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 
@@ -625,7 +625,7 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 				efree(entry);
 				goto skip_phar;
 			}
-splitted:
+split:
 			entry = phar_fix_filepath(entry, &entry_len, 1);
 			if (entry[0] == '/') {
 				if (NULL != (data = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1))) {

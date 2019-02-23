@@ -265,7 +265,7 @@ zend_string *phar_find_in_include_path(char *filename, size_t filename_len, phar
 		arch = estrndup(PHAR_G(last_phar_name), PHAR_G(last_phar_name_len));
 		arch_len = PHAR_G(last_phar_name_len);
 		phar = PHAR_G(last_phar);
-		goto splitted;
+		goto split;
 	}
 
 	if (fname_len < 7 || memcmp(fname, "phar://", 7) || SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0)) {
@@ -281,7 +281,7 @@ zend_string *phar_find_in_include_path(char *filename, size_t filename_len, phar
 			efree(arch);
 			return phar_save_resolve_path(filename, filename_len);
 		}
-splitted:
+split:
 		if (pphar) {
 			*pphar = phar;
 		}

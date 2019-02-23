@@ -5816,7 +5816,7 @@ void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t na
 		 && val->i64 > 0 && val->i64 <= 0x80000000 && (val->i64 & (val->i64 - 1)) == 0) {
 			dcl->align = val->i64;
 		} else {
-			zend_ffi_parser_error("incorrect 'alignemnt' value at line %d", FFI_G(line));
+			zend_ffi_parser_error("incorrect 'alignment' value at line %d", FFI_G(line));
 		}
 	} else if (name_len == sizeof("format")-1 && memcmp(name, "format", sizeof("format")-1) == 0) {
 		/* ignore */
@@ -5835,7 +5835,7 @@ void zend_ffi_add_msvc_attribute_value(zend_ffi_dcl *dcl, const char *name, size
 		 && val->i64 > 0 && val->i64 <= 0x80000000 && (val->i64 & (val->i64 - 1)) == 0) {
 			dcl->align = val->i64;
 		} else {
-			zend_ffi_parser_error("incorrect 'alignemnt' value at line %d", FFI_G(line));
+			zend_ffi_parser_error("incorrect 'alignment' value at line %d", FFI_G(line));
 		}
 	} else {
 		/* ignore */

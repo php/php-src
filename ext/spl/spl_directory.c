@@ -218,7 +218,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 				if (intern->file_name) {
 					efree(intern->file_name);
 				}
-				/* if there is parent path, ammend it, otherwise just use the given path as is */
+				/* if there is parent path, amend it, otherwise just use the given path as is */
 				if (path_len == 0) {
 					intern->file_name_len = spprintf(
 						&intern->file_name, 0, "%s", intern->u.dir.entry.d_name);
