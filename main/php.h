@@ -36,8 +36,7 @@
 
 #include "zend_API.h"
 
-#undef sprintf
-#define sprintf php_sprintf
+#define php_sprintf sprintf
 
 /* Operating system family definition */
 #ifdef PHP_WIN32

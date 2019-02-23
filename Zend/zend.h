@@ -40,6 +40,8 @@
 #include "zend_smart_string_public.h"
 #include "zend_signal.h"
 
+#define zend_sprintf sprintf
+
 #define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPTIONS()
 #define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
 
