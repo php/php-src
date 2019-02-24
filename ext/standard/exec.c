@@ -31,9 +31,8 @@
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if HAVE_SIGNAL_H
+
 #include <signal.h>
-#endif
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>

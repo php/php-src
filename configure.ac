@@ -446,7 +446,6 @@ netdb.h \
 poll.h \
 pwd.h \
 resolv.h \
-signal.h \
 syslog.h \
 sysexits.h \
 sys/ioctl.h \

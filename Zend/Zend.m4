@@ -47,7 +47,6 @@ malloc.h \
 unistd.h \
 sys/types.h \
 sys/time.h \
-signal.h \
 unix.h \
 cpuid.h \
 dlfcn.h)
