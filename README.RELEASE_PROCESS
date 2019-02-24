@@ -90,7 +90,7 @@ Commit the changes to the main branch.
 ``git push origin {main branch}``
 ``git push origin {release branch}``
 
-12. run: ``PHPROOT=. ./makedist 5.4.2RC2``, this will export the tree, create configure
+12. run: ``PHPROOT=. ./scripts/dev/makedist 5.4.2RC2``, this will export the tree, create configure
 and build three tarballs (gz, bz2 and xz).
 
 13. run ``scripts/dev/gen_verify_stub <version> [identity]``, this will sign the tarballs
@@ -184,7 +184,7 @@ credits files in ext/standard.
 
 8. Push the tag f.e. "``git push origin php-5.4.1``"
 
-9. run: ``PHPROOT=. ./makedist php 5.4.1``, this will export the tag, create configure
+9. run: ``PHPROOT=. ./scripts/dev/makedist php 5.4.1``, this will export the tag, create configure
 and build three tarballs (gz, bz2 and xz).
    Check if the pear files are updated (phar).
    On some systems the behavior of GNU tar can default to produce POSIX compliant archives
