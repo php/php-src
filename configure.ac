@@ -434,7 +434,6 @@ grp.h \
 ieeefp.h \
 langinfo.h \
 limits.h \
-locale.h \
 monetary.h \
 netdb.h \
 poll.h \
@@ -628,8 +627,6 @@ random \
 rand_r \
 scandir \
 setitimer \
-setlocale \
-localeconv \
 setenv \
 setpgid \
 setsockopt \

@@ -25,9 +25,7 @@
 #include "pcre2.h"
 #endif
 
-#if HAVE_LOCALE_H
 #include <locale.h>
-#endif
 
 PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count);
 PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count);

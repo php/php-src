@@ -68,9 +68,7 @@
 #include <ctype.h>
 #include "php.h"
 #include "php_variables.h"
-#ifdef HAVE_LOCALE_H
 #include <locale.h>
-#endif
 #include "zend_execute.h"
 #include "zend_operators.h"
 #include "zend_strtod.h"

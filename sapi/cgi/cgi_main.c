@@ -47,9 +47,7 @@
 
 #include <signal.h>
 
-#if HAVE_SETLOCALE
-# include <locale.h>
-#endif
+#include <locale.h>
 
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
