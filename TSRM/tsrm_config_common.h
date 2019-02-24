@@ -35,9 +35,7 @@ char *alloca ();
 #include <unistd.h>
 #endif
 
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #ifndef MAXPATHLEN
 # if _WIN32

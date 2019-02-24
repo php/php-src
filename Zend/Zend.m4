@@ -42,7 +42,6 @@ fi
 AC_CHECK_HEADERS(
 inttypes.h \
 stdint.h \
-limits.h \
 malloc.h \
 unistd.h \
 sys/types.h \

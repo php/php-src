@@ -60,9 +60,7 @@
 # include <dlfcn.h>
 #endif
 
-#ifdef HAVE_LIMITS_H
-# include <limits.h>
-#endif
+#include <limits.h>
 
 #if HAVE_ALLOCA_H && !defined(_ALLOCA_H)
 # include <alloca.h>
