@@ -23,6 +23,7 @@ $clientCode = <<<'CODE'
 
     $read = [$fp];
     $buf = '';
+    $emptyChunkPrinted = false;
     $warmedUp = false;
     while (stream_select($read, $write, $except, 1000)) {
         $chunk = stream_get_contents($fp, 4096);
@@ -37,7 +38,10 @@ $clientCode = <<<'CODE'
             phpt_notify('server');
             continue;
         }
-        var_dump($chunk);
+        if ($chunk !== '' || !$emptyChunkPrinted) {
+            $emptyChunkPrinted = true;
+            var_dump($chunk);
+        }
         if ($buf === 'hello, world') {
             break;
         }
@@ -122,6 +126,5 @@ ServerClientTestCase::getInstance()->run($clientCode, [
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'bug77390-ca.pem.tmp');
 ?>
 --EXPECT--
-string(0) ""
 string(0) ""
 string(12) "hello, world"
