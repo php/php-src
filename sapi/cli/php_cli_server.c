@@ -43,10 +43,10 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
 #include <signal.h>
-#if HAVE_SETLOCALE
 #include <locale.h>
-#endif
+
 #if HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif

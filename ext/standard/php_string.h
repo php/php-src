@@ -98,7 +98,7 @@ PHP_FUNCTION(strcoll);
 PHP_FUNCTION(money_format);
 #endif
 
-#if defined(HAVE_LOCALECONV) && defined(ZTS)
+#if defined(ZTS)
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
 #endif
@@ -114,11 +114,7 @@ PHP_MINIT_FUNCTION(string_intrin);
 #define strnatcasecmp(a, b) \
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 1)
 PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case);
-
-#ifdef HAVE_LOCALECONV
 PHPAPI struct lconv *localeconv_r(struct lconv *out);
-#endif
-
 PHPAPI char *php_strtoupper(char *s, size_t len);
 PHPAPI char *php_strtolower(char *s, size_t len);
 PHPAPI zend_string *php_string_toupper(zend_string *s);

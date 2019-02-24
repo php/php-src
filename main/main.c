@@ -41,10 +41,7 @@
 #endif
 
 #include <signal.h>
-
-#if HAVE_SETLOCALE
 #include <locale.h>
-#endif
 #include "zend.h"
 #include "zend_types.h"
 #include "zend_extensions.h"
@@ -2176,11 +2173,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
 	zend_startup(&zuf);
-
-#if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
 	zend_update_current_locale();
-#endif
 
 #if HAVE_TZSET
 	tzset();
