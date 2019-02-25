@@ -287,7 +287,10 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 	}
 
 	/* create an instance of our class */
-	object_init_ex(object, uwrap->ce);
+	if (object_init_ex(object, uwrap->ce) == FAILURE) {
+		ZVAL_UNDEF(object);
+		return;
+	}
 
 	if (context) {
 		add_property_resource(object, "context", context->res);
