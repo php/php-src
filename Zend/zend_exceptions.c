@@ -400,11 +400,13 @@ ZEND_METHOD(error_exception, __construct)
    Get the file in which the exception occurred */
 ZEND_METHOD(exception, getFile)
 {
-	zval rv;
+	zval *prop, rv;
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_FILE));
+	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_FILE);
+	ZVAL_DEREF(prop);
+	ZVAL_COPY(return_value, prop);
 }
 /* }}} */
 
@@ -412,11 +414,13 @@ ZEND_METHOD(exception, getFile)
    Get the line in which the exception occurred */
 ZEND_METHOD(exception, getLine)
 {
-	zval rv;
+	zval *prop, rv;
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_LINE));
+	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_LINE);
+	ZVAL_DEREF(prop);
+	ZVAL_COPY(return_value, prop);
 }
 /* }}} */
 
@@ -424,11 +428,13 @@ ZEND_METHOD(exception, getLine)
    Get the exception message */
 ZEND_METHOD(exception, getMessage)
 {
-	zval rv;
+	zval *prop, rv;
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_MESSAGE));
+	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_MESSAGE);
+	ZVAL_DEREF(prop);
+	ZVAL_COPY(return_value, prop);
 }
 /* }}} */
 
@@ -436,11 +442,13 @@ ZEND_METHOD(exception, getMessage)
    Get the exception code */
 ZEND_METHOD(exception, getCode)
 {
-	zval rv;
+	zval *prop, rv;
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_CODE));
+	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_CODE);
+	ZVAL_DEREF(prop);
+	ZVAL_COPY(return_value, prop);
 }
 /* }}} */
 
@@ -448,11 +456,13 @@ ZEND_METHOD(exception, getCode)
    Get the stack trace for the location in which the exception occurred */
 ZEND_METHOD(exception, getTrace)
 {
-	zval rv;
+	zval *prop, rv;
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_TRACE));
+	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_TRACE);
+	ZVAL_DEREF(prop);
+	ZVAL_COPY(return_value, prop);
 }
 /* }}} */
 
@@ -460,11 +470,13 @@ ZEND_METHOD(exception, getTrace)
    Get the exception severity */
 ZEND_METHOD(error_exception, getSeverity)
 {
-	zval rv;
+	zval *prop, rv;
 
 	DEFAULT_0_PARAMS;
 
-	ZVAL_COPY(return_value, GET_PROPERTY(ZEND_THIS, ZEND_STR_SEVERITY));
+	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_SEVERITY);
+	ZVAL_DEREF(prop);
+	ZVAL_COPY(return_value, prop);
 }
 /* }}} */
 
