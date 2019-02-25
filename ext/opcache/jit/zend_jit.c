@@ -2722,7 +2722,7 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 	zend_op *opline;
 	zend_function *func;
 	zend_op_array *op_array;
-	zend_ulong counter;
+	uintptr_t counter;
 
 	ZEND_HASH_REVERSE_FOREACH_PTR(function_table, func) {
 		if (func->type == ZEND_INTERNAL_FUNCTION) {
@@ -2737,7 +2737,7 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 			if (!RUN_TIME_CACHE(op_array)) {
 				continue;
 			}
-			counter = (zend_ulong)ZEND_COUNTER_INFO(op_array);
+			counter = (uintptr_t)ZEND_COUNTER_INFO(op_array);
 			ZEND_COUNTER_INFO(op_array) = 0;
 			opline->handler = ZEND_FUNC_INFO(op_array);
 			ZEND_SET_FUNC_INFO(op_array, NULL);
