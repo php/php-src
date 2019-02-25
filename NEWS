@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
+- Standard:
+  . Fixed bug #77664 (Segmentation fault when using undefined constant in
+    custom wrapper). (Laruence)
+
 21 Feb 2019, PHP 7.3.3
 
 - Core:
