@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #77652 (Anonymous classes can lose their interface information).
     (Nikita)
 
+- Standard:
+  . Fixed bug #77664 (Segmentation fault when using undefined constant in
+    custom wrapper). (Laruence)
+
 - MySQLi:
   . Fixed bug #77597 (mysqli_fetch_field hangs scripts). (Nikita)
 
