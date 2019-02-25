@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2019, PHP 7.2.17
 
 - Core:
+  . Fixed bug #77660 (Segmentation fault on break 2147483648). (Laruence)
   . Fixed bug #77652 (Anonymous classes can lose their interface information).
     (Nikita)
 
