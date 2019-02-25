@@ -468,17 +468,17 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	/*The following two checks can be removed once we drop XP support */
 	type_len = (int)strlen(type);
-	if (type_len <1 || type_len > 2) {
+	if (type_len < 1 || type_len > 2) {
 		return NULL;
 	}
 
-	for (i=0; i < type_len; i++) {
-		if (!(*ptype == 'r' || *ptype == 'w' || *ptype == 'b' || *ptype == 't')) {
-			return NULL;
-		}
-		ptype++;
+	if (ptype[0] != 'r' && ptype[0] != 'w') {
+		return NULL;
+	}
+
+	if (type_len > 1 && (ptype[1] != 'b' && ptype[1] != 't')) {
+		return NULL;
 	}
 
 	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);

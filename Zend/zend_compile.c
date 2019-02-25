@@ -131,7 +131,7 @@ static zend_string *zend_build_runtime_definition_key(zend_string *name, unsigne
 {
 	zend_string *result;
 	char char_pos_buf[32];
-	size_t char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	size_t char_pos_len = sprintf(char_pos_buf, "%p", lex_pos);
 	zend_string *filename = CG(active_op_array)->filename;
 
 	/* NULL, name length, filename length, last accepting char position length */
@@ -3941,7 +3941,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
+zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
 
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
@@ -3952,13 +3952,8 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	zend_op *opline;
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
-		uint32_t dcl_opnum = get_next_op_number();
-		zend_compile_class_decl(class_ast, 0);
 		/* jump over anon class declaration */
-		opline = &CG(active_op_array)->opcodes[dcl_opnum];
-		if (opline->opcode == ZEND_FETCH_CLASS) {
-			opline++;
-		}
+		opline = zend_compile_class_decl(class_ast, 0);
 		class_node.op_type = opline->result_type;
 		class_node.u.op.var = opline->result.var;
 		opline->extended_value = get_next_op_number();
@@ -4277,7 +4272,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 	zend_ast *depth_ast = ast->child[0];
 
 	zend_op *opline;
-	int depth;
+	zend_long depth;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_BREAK || ast->kind == ZEND_AST_CONTINUE);
 
@@ -4304,7 +4299,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
 		if (!zend_handle_loops_and_finally_ex(depth, NULL)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' " ZEND_LONG_FMT " level%s",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue",
 				depth, depth == 1 ? "" : "s");
 		}
@@ -4321,12 +4316,12 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 			if (depth == 1) {
 				zend_error(E_WARNING,
 					"\"continue\" targeting switch is equivalent to \"break\". " \
-					"Did you mean to use \"continue %d\"?",
+					"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
 					depth + 1);
 			} else {
 				zend_error(E_WARNING,
-					"\"continue %d\" targeting switch is equivalent to \"break %d\". " \
-					"Did you mean to use \"continue %d\"?",
+					"\"continue " ZEND_LONG_FMT "\" targeting switch is equivalent to \"break " ZEND_LONG_FMT "\". " \
+					"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
 					depth, depth, depth + 1);
 			}
 		}
@@ -6126,7 +6121,7 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 {
 	zend_string *result;
 	char char_pos_buf[32];
-	size_t char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	size_t char_pos_len = sprintf(char_pos_buf, "%p", lex_pos);
 	zend_string *filename = CG(active_op_array)->filename;
 
 	/* NULL, name length, filename length, last accepting char position length */
@@ -6136,7 +6131,7 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
+zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -6291,7 +6286,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 					}
 					CG(zend_lineno) = ast->lineno;
 					zend_string_release(lcname);
-					return;
+					return NULL;
 				}
 			}
 		} else {
@@ -6299,7 +6294,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				zend_string_release(lcname);
 				zend_build_properties_info_table(ce);
 				ce->ce_flags |= ZEND_ACC_LINKED;
-				return;
+				return NULL;
 			}
 		}
 	}
@@ -6325,7 +6320,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			zval zv;
 			ZVAL_PTR(&zv, ce);
 			destroy_zend_class(&zv);
-			return;
+			return opline;
 		}
 	} else {
 		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
@@ -6352,6 +6347,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			opline->opcode = ZEND_DECLARE_CLASS;
 		}
 	}
+	return opline;
 }
 /* }}} */
 

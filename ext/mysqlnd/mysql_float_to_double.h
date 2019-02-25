@@ -42,7 +42,7 @@ static inline double mysql_float_to_double(float fp4, int decimals) {
 	if (decimals < 0) {
 		php_gcvt(fp4, FLT_DIG, '.', 'e', num_buf);
 	} else {
-		php_sprintf(num_buf, "%.*f", decimals, fp4);
+		sprintf(num_buf, "%.*f", decimals, fp4);
 	}
 
 	return zend_strtod(num_buf, NULL);

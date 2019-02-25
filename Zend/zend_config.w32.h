@@ -63,8 +63,6 @@ extern "C++" {
 #define zend_isnan(x)	_isnan(x)
 #endif
 
-#define zend_sprintf sprintf
-
 #ifndef __cplusplus
 /* This will cause the compilation process to be MUCH longer, but will generate
  * a much quicker PHP binary

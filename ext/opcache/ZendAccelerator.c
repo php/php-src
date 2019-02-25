@@ -3307,7 +3307,7 @@ static void get_unresolved_initializer(zend_class_entry *ce, const char **kind, 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop) {
 		zval *val;
 		if (prop->flags & ZEND_ACC_STATIC) {
-			val = &ce->default_static_members_table[OBJ_PROP_TO_NUM(prop->offset)];
+			val = &ce->default_static_members_table[prop->offset];
 		} else {
 			val = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop->offset)];
 		}

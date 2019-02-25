@@ -830,6 +830,7 @@ optimize_jmpnz:
 							MAKE_NOP(opline);
 							removed_ops++;
 							take_successor_1(ssa, block_num, block);
+							zend_ssa_remove_result_def(ssa, ssa_op);
 							goto optimize_nop;
 						}
 					}

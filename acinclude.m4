@@ -1447,28 +1447,6 @@ AC_DEFUN([PHP_MISSING_FCLOSE_DECL],[
 ])
 
 dnl
-dnl PHP_AC_BROKEN_SPRINTF
-dnl
-dnl Check for broken sprintf(), C99 conformance
-dnl
-AC_DEFUN([PHP_AC_BROKEN_SPRINTF],[
-  AC_CACHE_CHECK(whether sprintf is broken, ac_cv_broken_sprintf,[
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[main() {char buf[20];exit(sprintf(buf,"testing 123")!=11); }]])],[
-      ac_cv_broken_sprintf=no
-    ],[
-      ac_cv_broken_sprintf=yes
-    ],[
-      ac_cv_broken_sprintf=no
-    ])
-  ])
-  if test "$ac_cv_broken_sprintf" = "yes"; then
-    AC_DEFINE(PHP_BROKEN_SPRINTF, 1, [Whether sprintf is C99 conform])
-  else
-    AC_DEFINE(PHP_BROKEN_SPRINTF, 0, [Whether sprintf is C99 conform])
-  fi
-])
-
-dnl
 dnl PHP_AC_BROKEN_SNPRINTF
 dnl
 dnl Check for broken snprintf(), C99 conformance
