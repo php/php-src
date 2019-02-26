@@ -876,6 +876,9 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
+		if (EG(exception)) {
+			return NULL;
+		}
 	}
 
 	obj = Z_ZIP_P(object);
@@ -907,6 +910,9 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, void **
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
+		if (EG(exception)) {
+			return &EG(uninitialized_zval);
+		}
 	}
 
 	obj = Z_ZIP_P(object);
@@ -943,6 +949,9 @@ static int php_zip_has_property(zval *object, zval *member, int type, void **cac
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
+		if (EG(exception)) {
+			return 0;
+		}
 	}
 
 	obj = Z_ZIP_P(object);

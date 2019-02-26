@@ -801,10 +801,16 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 					sqlite3_result_double(context, Z_DVAL(retval));
 					break;
 
-				default:
-					convert_to_string_ex(&retval);
-					sqlite3_result_text(context, Z_STRVAL(retval), Z_STRLEN(retval), SQLITE_TRANSIENT);
+				default: {
+					zend_string *str = zval_get_string(&retval);
+					if (EG(exception)) {
+						ret = FAILURE;
+						break;
+					}
+					sqlite3_result_text(context, ZSTR_VAL(str), ZSTR_LEN(str), SQLITE_TRANSIENT);
+					zend_string_release(str);
 					break;
+				}
 			}
 		} else {
 			sqlite3_result_error(context, "failed to invoke callback", 0);
@@ -1480,13 +1486,18 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 					break;
 				}
 
-				case SQLITE3_TEXT:
-					convert_to_string(parameter);
-					return_code = sqlite3_bind_text(stmt_obj->stmt, param->param_number, Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), SQLITE_STATIC);
+				case SQLITE3_TEXT: {
+					zend_string *str = zval_get_string(parameter);
+					if (EG(exception)) {
+						return FAILURE;
+					}
+					return_code = sqlite3_bind_text(stmt_obj->stmt, param->param_number, ZSTR_VAL(str), ZSTR_LEN(str), SQLITE_TRANSIENT);
 					if (return_code != SQLITE_OK) {
 						php_sqlite3_error(stmt_obj->db_obj, "Unable to bind parameter number " ZEND_LONG_FMT " (%d)", param->param_number, return_code);
 					}
+					zend_string_release(str);
 					break;
+				}
 
 				case SQLITE_NULL:
 					return_code = sqlite3_bind_null(stmt_obj->stmt, param->param_number);
@@ -1526,7 +1537,7 @@ PHP_METHOD(sqlite3stmt, getSQL)
 
 	bind_rc = php_sqlite3_bind_params(stmt_obj);
 
-	if (bind_rc == FAILURE) {
+	if (bind_rc == FAILURE || EG(exception)) {
 		RETURN_FALSE;
 	}
 
@@ -1718,7 +1729,7 @@ PHP_METHOD(sqlite3stmt, execute)
 	/* Bind parameters to the statement */
 	bind_rc = php_sqlite3_bind_params(stmt_obj);
 
-	if (bind_rc == FAILURE) {
+	if (bind_rc == FAILURE || EG(exception)) {
 		RETURN_FALSE;
 	}
 

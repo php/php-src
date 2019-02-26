@@ -76,10 +76,9 @@ $values = array(
 // loop through each element of the array for class
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
       var_dump( get_class_methods($value) );
 };
-
 echo "Done";
 ?>
 --EXPECTF--
@@ -163,9 +162,8 @@ NULL
 
 Arg value string 
 NULL
-Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
 
-Arg value  
+Arg value stdClass 
 array(0) {
 }
 

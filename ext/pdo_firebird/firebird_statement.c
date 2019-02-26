@@ -728,7 +728,9 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 		default:
 			return 0;
 		case PDO_ATTR_CURSOR_NAME:
-			convert_to_string(val);
+			if (!try_convert_to_string(val)) {
+				return 0;
+			}
 
 			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
 				RECORD_ERROR(stmt);

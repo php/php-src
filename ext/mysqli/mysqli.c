@@ -309,6 +309,9 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
+		if (EG(exception)) {
+			return &EG(uninitialized_zval);
+		}
 	}
 
 	if (obj->prop_handler != NULL) {
@@ -342,6 +345,9 @@ zval *mysqli_write_property(zval *object, zval *member, zval *value, void **cach
 	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
+		if (EG(exception)) {
+			return value;
+		}
 	}
 
 	obj = Z_MYSQLI_P(object);

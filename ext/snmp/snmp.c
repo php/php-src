@@ -1920,6 +1920,9 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_
 	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
+		if (EG(exception)) {
+			return &EG(uninitialized_zval);
+		}
 	}
 
 	hnd = zend_hash_find_ptr(&php_snmp_properties, Z_STR_P(member));
@@ -1954,6 +1957,9 @@ zval *php_snmp_write_property(zval *object, zval *member, zval *value, void **ca
 	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
+		if (EG(exception)) {
+			return value;
+		}
 	}
 
 	obj = Z_SNMP_P(object);

@@ -187,6 +187,11 @@ PHP 7.4 UPGRADE NOTES
   . Support for WeakReferences has been added.
     RFC: https://wiki.php.net/rfc/weakrefs
 
+  . Throwing exceptions from __toString() is now permitted. Previously this
+    resulted in a fatal error. Existing recoverable fatals in string conversions
+    have been converted to Error exceptions.
+    RFC: https://wiki.php.net/rfc/tostring_exceptions
+
 - CURL:
   . CURLFile now supports stream wrappers in addition to plain file names, if
     the extension has been built against libcurl >= 7.56.0.  The streams may

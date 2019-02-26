@@ -307,7 +307,9 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 			ZVAL_STRINGL(parameter, p, len);
 			efree(p);
 		} else {
-			convert_to_string(parameter);
+			if (!try_convert_to_string(parameter)) {
+				return 0;
+			}
 		}
 	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && (Z_TYPE_P(parameter) == IS_FALSE || Z_TYPE_P(parameter) == IS_TRUE)) {
 		convert_to_long(parameter);
@@ -911,7 +913,9 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 					fetch_value(stmt, &val, i++, NULL);
 					if (Z_TYPE(val) != IS_NULL) {
-						convert_to_string(&val);
+						if (!try_convert_to_string(&val)) {
+							return 0;
+						}
 						if ((cep = zend_lookup_class(Z_STR(val))) == NULL) {
 							stmt->fetch.cls.ce = ZEND_STANDARD_CLASS_DEF_PTR;
 						} else {
@@ -2180,7 +2184,9 @@ static zval *dbstmt_prop_write(zval *object, zval *member, zval *value, void **c
 {
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
 
-	convert_to_string(member);
+	if (!try_convert_to_string(member)) {
+		return value;
+	}
 
 	if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
@@ -2194,7 +2200,9 @@ static void dbstmt_prop_delete(zval *object, zval *member, void **cache_slot)
 {
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
 
-	convert_to_string(member);
+	if (!try_convert_to_string(member)) {
+		return;
+	}
 
 	if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
@@ -2459,7 +2467,10 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 				fetch_value(stmt, rv, lval, NULL);
 			}
 		} else {
-			convert_to_string(member);
+			if (!try_convert_to_string(member)) {
+				return &EG(uninitialized_zval);
+			}
+
 			/* TODO: replace this with a hash of available column names to column
 			 * numbers */
 			for (colno = 0; colno < stmt->column_count; colno++) {
@@ -2511,7 +2522,9 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 				return lval >=0 && lval < stmt->column_count;
 			}
 		} else {
-			convert_to_string(member);
+			if (!try_convert_to_string(member)) {
+				return 0;
+			}
 		}
 
 		/* TODO: replace this with a hash of available column names to column

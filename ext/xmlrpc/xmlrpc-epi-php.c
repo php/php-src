@@ -522,7 +522,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					}
 					break;
 				case xmlrpc_datetime:
-					convert_to_string(&val);
+					if (!try_convert_to_string(&val)) {
+						return NULL;
+					}
 					xReturn = XMLRPC_CreateValueDateTime_ISO8601(key, Z_STRVAL(val));
 					break;
 				case xmlrpc_boolean:
@@ -538,7 +540,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					xReturn = XMLRPC_CreateValueDouble(key, Z_DVAL(val));
 					break;
 				case xmlrpc_string:
-					convert_to_string(&val);
+					if (!try_convert_to_string(&val)) {
+						return NULL;
+					}
 					xReturn = XMLRPC_CreateValueString(key, Z_STRVAL(val), Z_STRLEN(val));
 					break;
 				case xmlrpc_vector:
@@ -925,7 +929,10 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 				STRUCT_XMLRPC_ERROR err = {0};
 
 				/* return value should be a string */
-				convert_to_string(&retval);
+				if (!try_convert_to_string(&retval)) {
+					zend_string_release_ex(php_function_name, 0);
+					break;
+				}
 
 				xData = XMLRPC_IntrospectionCreateDescription(Z_STRVAL(retval), &err);
 

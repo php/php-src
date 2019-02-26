@@ -2298,7 +2298,10 @@ PHP_FUNCTION(imagecreatefromstring)
 		return;
 	}
 
-	convert_to_string_ex(data);
+	if (!try_convert_to_string(data)) {
+		return;
+	}
+
 	if (Z_STRLEN_P(data) < sizeof(sig)) {
 		php_error_docref(NULL, E_WARNING, "Empty string or invalid image");
 		RETURN_FALSE;

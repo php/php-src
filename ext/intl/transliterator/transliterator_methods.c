@@ -330,9 +330,8 @@ PHP_FUNCTION( transliterator_transliterate )
 		else
 		{ /* not a transliterator object as first argument */
 			int res;
-			if(Z_TYPE_P( arg1 ) != IS_STRING )
-			{
-				convert_to_string( arg1 );
+			if( !try_convert_to_string( arg1 ) ) {
+				return;
 			}
 			object = &tmp_object;
 			res = create_transliterator( Z_STRVAL_P( arg1 ), Z_STRLEN_P( arg1 ),

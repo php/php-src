@@ -19,6 +19,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   p. ZEND_EXT_FCALL_BEGIN can access arguments
   q. ZEND_COMPILE_IGNORE_USER_FUNCTIONS and ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS
   r. TSRM environment locking
+  s. Typed references support
+  t. Exceptions thrown by string conversions.
 
 2. Build system changes
   a. Abstract
@@ -197,6 +199,14 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      The above is not an exhaustive list of such functions, while getenv/putenv will
      behave as if they are safe, care should still be taken in multi-threaded
      environments.
+
+  s. Correct support for typed properties requires the use of new macros to
+     assign values to references. For more information see
+     https://wiki.php.net/rfc/typed_properties_v2#impact_on_extensions.
+
+  t. convert_to_string() and zval_get_string() are now more likely to result in
+     an exception. For instructions on how to gracefully handle this see
+     https://wiki.php.net/rfc/tostring_exceptions#extension_guidelines.
 
 ========================
 2. Build system changes

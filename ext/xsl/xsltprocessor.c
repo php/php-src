@@ -150,7 +150,10 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 			return NULL;
 		} else {
 			if (Z_TYPE_P(value) != IS_STRING) {
-				convert_to_string(value);
+				if (!try_convert_to_string(value)) {
+					efree(params);
+					return NULL;
+				}
 			}
 
 			if (!xpath_params) {
@@ -753,13 +756,16 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "sa", &namespace, &namespace_len, &array_value) == SUCCESS) {
 		intern = Z_XSL_P(id);
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array_value), string_key, entry) {
+			zval tmp;
 			if (string_key == NULL) {
 				php_error_docref(NULL, E_WARNING, "Invalid parameter array");
 				RETURN_FALSE;
 			}
-			convert_to_string_ex(entry);
-			Z_TRY_ADDREF_P(entry);
-			zend_hash_update(intern->parameter, string_key, entry);
+			ZVAL_STR(&tmp, zval_get_string(entry));
+			if (EG(exception)) {
+				return;
+			}
+			zend_hash_update(intern->parameter, string_key, &tmp);
 		} ZEND_HASH_FOREACH_END();
 		RETURN_TRUE;
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "sSS", &namespace, &namespace_len, &name, &value) == SUCCESS) {
@@ -841,9 +847,13 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 		intern = Z_XSL_P(id);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array_value), entry) {
-			convert_to_string_ex(entry);
-			ZVAL_LONG(&new_string ,1);
-			zend_hash_update(intern->registered_phpfunctions, Z_STR_P(entry), &new_string);
+			zend_string *str = zval_get_string(entry);
+			if (EG(exception)) {
+				return;
+			}
+			ZVAL_LONG(&new_string, 1);
+			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
+			zend_string_release(str);
 		} ZEND_HASH_FOREACH_END();
 
 		intern->registerPhpFunctions = 2;

@@ -19,4 +19,9 @@ $class = new ReflectionClass('A');
 echo $class;
 ?>
 --EXPECTF--
-Fatal error: Method ReflectionClass::__toString() must not throw an exception, caught Exception:  in %sbug74673.php on line %d
+Fatal error: Uncaught Exception in %s:%d
+Stack trace:
+#0 [internal function]: {closure}(2, 'Use of undefine...', %s, %d, Array)
+#1 %s(%d): ReflectionClass->__toString()
+#2 {main}
+  thrown in %s on line %d

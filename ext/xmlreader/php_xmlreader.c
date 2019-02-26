@@ -124,6 +124,9 @@ zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, void 
  	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
+		if (EG(exception)) {
+			return NULL;
+		}
 	}
 
 	obj = Z_XMLREADER_P(object);
@@ -155,6 +158,9 @@ zval *xmlreader_read_property(zval *object, zval *member, int type, void **cache
  	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
+		if (EG(exception)) {
+			return &EG(uninitialized_zval);
+		}
 	}
 
 	obj = Z_XMLREADER_P(object);
@@ -190,6 +196,9 @@ zval *xmlreader_write_property(zval *object, zval *member, zval *value, void **c
  	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
+		if (EG(exception)) {
+			return value;
+		}
 	}
 
 	obj = Z_XMLREADER_P(object);

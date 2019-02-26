@@ -5357,7 +5357,10 @@ PHP_FUNCTION(highlight_string)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(i)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-	convert_to_string_ex(expr);
+
+	if (!try_convert_to_string(expr)) {
+		return;
+	}
 
 	if (i) {
 		php_output_start_default();
