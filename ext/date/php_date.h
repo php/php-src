@@ -111,6 +111,7 @@ PHP_METHOD(DatePeriod, __set_state);
 PHP_METHOD(DatePeriod, getStartDate);
 PHP_METHOD(DatePeriod, getEndDate);
 PHP_METHOD(DatePeriod, getDateInterval);
+PHP_METHOD(DatePeriod, getRecurrences);
 
 /* Options and Configuration */
 PHP_FUNCTION(date_default_timezone_set);

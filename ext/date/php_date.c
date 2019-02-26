@@ -4666,6 +4666,28 @@ PHP_METHOD(DatePeriod, getDateInterval)
 }
 /* }}} */
 
+/* {{{ proto DatePeriod::getRecurrences()
+   Get recurrences.
+*/
+PHP_METHOD(DatePeriod, getRecurrences)
+{
+        php_period_obj   *dpobj;
+        php_date_obj     *dateobj;
+
+        if (zend_parse_parameters_none() == FAILURE) {
+                return;
+        }
+
+        dpobj = Z_PHPPERIOD_P(ZEND_THIS);
+
+        if (!dpobj->recurrences) {
+                return;
+        }
+
+        return RETURN_LONG(dpobj->recurrences);
+}
+/* }}} */
+
 static int check_id_allowed(char *id, zend_long what) /* {{{ */
 {
 	if (what & PHP_DATE_TIMEZONE_GROUP_AFRICA     && strncasecmp(id, "Africa/",      7) == 0) return 1;
