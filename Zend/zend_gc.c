@@ -397,6 +397,10 @@ static gc_refcounted_stack* gc_scan_black(zend_refcounted *ref, gc_refcounted_st
 	Bucket *p, *end;
 	zval *zv;
 
+	if (GC_REF_GET_COLOR(ref) == GC_BLACK) {
+		return stack;
+	}
+
 	ht = NULL;
 	GC_REF_SET_BLACK(ref);
 
@@ -423,19 +427,14 @@ static gc_refcounted_stack* gc_scan_black(zend_refcounted *ref, gc_refcounted_st
 				if (Z_REFCOUNTED_P(zv)) {
 					ref = Z_COUNTED_P(zv);
 					GC_REFCOUNT(ref)++;
-					if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
-						stack = gc_refcounted_stack_push(stack, ref);
-					}
+					stack = gc_refcounted_stack_push(stack, ref);
 				}
 				zv++;
 			}
 			if (EXPECTED(!ht)) {
 				ref = Z_COUNTED_P(zv);
 				GC_REFCOUNT(ref)++;
-				if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
-					stack = gc_refcounted_stack_push(stack, ref);
-				}
-				return stack;
+				return gc_refcounted_stack_push(stack, ref);
 			}
 		} else {
 			return stack;
@@ -450,9 +449,7 @@ static gc_refcounted_stack* gc_scan_black(zend_refcounted *ref, gc_refcounted_st
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 			ref = Z_COUNTED(((zend_reference*)ref)->val);
 			GC_REFCOUNT(ref)++;
-			if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
-				stack = gc_refcounted_stack_push(stack, ref);
-			}
+			stack = gc_refcounted_stack_push(stack, ref);
 		}
 		return stack;
 	} else {
@@ -481,9 +478,7 @@ static gc_refcounted_stack* gc_scan_black(zend_refcounted *ref, gc_refcounted_st
 		if (Z_REFCOUNTED_P(zv)) {
 			ref = Z_COUNTED_P(zv);
 			GC_REFCOUNT(ref)++;
-			if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
-				stack = gc_refcounted_stack_push(stack, ref);
-			}
+			stack = gc_refcounted_stack_push(stack, ref);
 		}
 		p++;
 	}
@@ -493,10 +488,7 @@ static gc_refcounted_stack* gc_scan_black(zend_refcounted *ref, gc_refcounted_st
 	}
 	ref = Z_COUNTED_P(zv);
 	GC_REFCOUNT(ref)++;
-	if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
-		stack = gc_refcounted_stack_push(stack, ref);
-	}
-	return stack;
+	return gc_refcounted_stack_push(stack, ref);
 }
 
 static gc_refcounted_stack* gc_mark_grey(zend_refcounted *ref, gc_refcounted_stack *stack)
