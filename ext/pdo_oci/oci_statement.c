@@ -222,6 +222,9 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 	} else if (!P->thing) {
 		/* regular string bind */
 		convert_to_string(parameter);
+		if (EG(exception)) {
+			return OCI_ERROR;
+		}
 		*bufpp = Z_STRVAL_P(parameter);
 		*alenp = (ub4) Z_STRLEN_P(parameter);
 	}
@@ -260,8 +263,7 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 		return OCI_CONTINUE;
 	}
 
-	convert_to_string(parameter);
-	zval_ptr_dtor_str(parameter);
+	zval_ptr_dtor(parameter);
 
 	Z_STR_P(parameter) = zend_string_alloc(param->max_value_len, 1);
 	P->used_for_output = 1;

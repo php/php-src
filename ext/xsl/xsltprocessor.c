@@ -151,6 +151,10 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 		} else {
 			if (Z_TYPE_P(value) != IS_STRING) {
 				convert_to_string(value);
+				if (EG(exception)) {
+					efree(params);
+					return NULL;
+				}
 			}
 
 			if (!xpath_params) {
@@ -758,6 +762,9 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(entry);
+			if (EG(exception)) {
+				return;
+			}
 			Z_TRY_ADDREF_P(entry);
 			zend_hash_update(intern->parameter, string_key, entry);
 		} ZEND_HASH_FOREACH_END();
@@ -842,7 +849,10 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array_value), entry) {
 			convert_to_string_ex(entry);
-			ZVAL_LONG(&new_string ,1);
+			if (EG(exception)) {
+				return;
+			}
+			ZVAL_LONG(&new_string, 1);
 			zend_hash_update(intern->registered_phpfunctions, Z_STR_P(entry), &new_string);
 		} ZEND_HASH_FOREACH_END();
 

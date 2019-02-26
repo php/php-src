@@ -658,6 +658,9 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 		}
 	} else {
 		convert_to_string(z_in_cp);
+		if (EG(exception)) {
+			return;
+		}
 
 		in_cp = php_win32_cp_get_by_enc(Z_STRVAL_P(z_in_cp));
 		if (!in_cp) {
@@ -679,6 +682,9 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 		}
 	} else {
 		convert_to_string(z_out_cp);
+		if (EG(exception)) {
+			return;
+		}
 
 		out_cp = php_win32_cp_get_by_enc(Z_STRVAL_P(z_out_cp));
 		if (!out_cp) {

@@ -280,6 +280,9 @@ PHP_FUNCTION(readline_info)
 			if (value) {
 				/* XXX if (rl_line_buffer) free(rl_line_buffer); */
 				convert_to_string_ex(value);
+				if (EG(exception)) {
+					return;
+				}
 				rl_line_buffer = strdup(Z_STRVAL_P(value));
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
@@ -303,6 +306,9 @@ PHP_FUNCTION(readline_info)
 			oldval = rl_pending_input;
 			if (value) {
 				convert_to_string_ex(value);
+				if (EG(exception)) {
+					return;
+				}
 				rl_pending_input = Z_STRVAL_P(value)[0];
 			}
 			RETVAL_LONG(oldval);
@@ -319,7 +325,10 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "completion_append_character")) {
 			oldval = rl_completion_append_character;
 			if (value) {
-				convert_to_string_ex(value)
+				convert_to_string_ex(value);
+				if (EG(exception)) {
+					return;
+				}
 				rl_completion_append_character = (int)Z_STRVAL_P(value)[0];
 			}
 			RETVAL_INTERNED_STR(
@@ -343,6 +352,9 @@ PHP_FUNCTION(readline_info)
 			if (value) {
 				/* XXX if (rl_readline_name) free(rl_readline_name); */
 				convert_to_string_ex(value);
+				if (EG(exception)) {
+					return;
+				}
 				rl_readline_name = strdup(Z_STRVAL_P(value));
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));

@@ -165,6 +165,9 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 	}
 
 	str = zval_get_string(newval);
+	if (EG(exception)) {
+		return FAILURE;
+	}
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 

@@ -139,6 +139,9 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 	}
 
 	str = zval_get_string(newval);
+	if (EG(exception)) {
+		return FAILURE;
+	}
 
 	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 

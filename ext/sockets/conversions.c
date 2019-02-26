@@ -333,6 +333,10 @@ double_case:
 		double dval;
 
 		convert_to_string(&lzval);
+		if (EG(exception)) {
+			ctx->err.has_error = 1;
+			break;
+		}
 
 		switch (is_numeric_string(Z_STRVAL(lzval), Z_STRLEN(lzval), &lval, &dval, 0)) {
 		case IS_DOUBLE:

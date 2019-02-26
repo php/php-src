@@ -925,6 +925,9 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			convert_to_long_ex(arg_pattern);	/* get rid of decimal places */
 		}
 		convert_to_string_ex(arg_pattern);
+		if (EG(exception)) {
+			return;
+		}
 		/* don't bother doing an extended regex with just a number */
 	}
 

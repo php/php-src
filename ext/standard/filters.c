@@ -250,8 +250,6 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 
 	php_error_docref(NULL, E_DEPRECATED, "The string.strip_tags filter is deprecated");
 
-	inst = pemalloc(sizeof(php_strip_tags_filter), persistent);
-
 	if (filterparams != NULL) {
 		if (Z_TYPE_P(filterparams) == IS_ARRAY) {
 			smart_str tags_ss = {0};
@@ -268,8 +266,17 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 		} else {
 			allowed_tags = zval_get_string(filterparams);
 		}
+
+		/* Exception during string conversion. */
+		if (EG(exception)) {
+			if (allowed_tags) {
+				zend_string_release(allowed_tags);
+			}
+			return NULL;
+		}
 	}
 
+	inst = pemalloc(sizeof(php_strip_tags_filter), persistent);
 	if (php_strip_tags_filter_ctor(inst, allowed_tags, persistent) == SUCCESS) {
 		filter = php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
 	} else {

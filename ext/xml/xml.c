@@ -1630,6 +1630,10 @@ PHP_FUNCTION(xml_parser_set_option)
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			const xml_encoding *enc;
 			convert_to_string_ex(val);
+			if (EG(exception)) {
+				return;
+			}
+
 			enc = xml_get_encoding((XML_Char*)Z_STRVAL_P(val));
 			if (enc == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unsupported target encoding \"%s\"", Z_STRVAL_P(val));

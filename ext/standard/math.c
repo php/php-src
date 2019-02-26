@@ -1090,7 +1090,11 @@ PHP_FUNCTION(base_convert)
 		Z_PARAM_LONG(frombase)
 		Z_PARAM_LONG(tobase)
 	ZEND_PARSE_PARAMETERS_END();
+
 	convert_to_string_ex(number);
+	if (EG(exception)) {
+		return;
+	}
 
 	if (frombase < 2 || frombase > 36) {
 		php_error_docref(NULL, E_WARNING, "Invalid `from base' (" ZEND_LONG_FMT ")", frombase);

@@ -19,7 +19,11 @@ foreach($replace as $value) {
     var_dump(preg_replace($regex, $value, $subject));
 }
 $value = new stdclass(); //Object
-var_dump(preg_replace($regex, $value, $subject));
+try {
+    var_dump(preg_replace($regex, $value, $subject));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 echo "Done";
 ?>
 --EXPECTF--
@@ -32,5 +36,5 @@ Arg value is: Array
 
 Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement is an array in %spreg_replace_error2.php on line %d
 bool(false)
-
-Recoverable fatal error: Object of class stdClass could not be converted to string in %spreg_replace_error2.php on line %d
+Object of class stdClass could not be converted to string
+Done

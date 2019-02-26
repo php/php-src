@@ -900,6 +900,10 @@ PHP_FUNCTION(mysqli_stmt_execute)
 				switch (stmt->stmt->params[i].buffer_type) {
 					case MYSQL_TYPE_VAR_STRING:
 						convert_to_string_ex(param);
+						if (EG(exception)) {
+							return;
+						}
+
 						stmt->stmt->params[i].buffer = Z_STRVAL_P(param);
 						stmt->stmt->params[i].buffer_length = Z_STRLEN_P(param);
 						break;
@@ -1782,6 +1786,9 @@ PHP_FUNCTION(mysqli_options)
 		switch (expected_type) {
 			case IS_STRING:
 				convert_to_string_ex(mysql_value);
+				if (EG(exception)) {
+					return;
+				}
 				break;
 			case IS_LONG:
 				convert_to_long_ex(mysql_value);

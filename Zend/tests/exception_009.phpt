@@ -25,4 +25,8 @@ throw new my_exception;
 
 ?>
 --EXPECT--
-Recoverable fatal error: Object of class stdClass could not be converted to string in Unknown on line 0
+Fatal error: Uncaught Error: Object of class stdClass could not be converted to string in [no active file]:0
+Stack trace:
+#0 [internal function]: Exception->__toString()
+#1 {main}
+  thrown in [no active file] on line 0

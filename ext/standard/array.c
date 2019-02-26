@@ -2459,6 +2459,10 @@ PHP_FUNCTION(extract)
 
 	if (prefix) {
 		convert_to_string(prefix);
+		if (EG(exception)) {
+			return;
+		}
+
 		if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
 			php_error_docref(NULL, E_WARNING, "prefix is not a valid identifier");
 			return;
@@ -4135,6 +4139,9 @@ zend_bool array_column_param_helper(zval *param,
 
 		case IS_OBJECT:
 			convert_to_string_ex(param);
+			if (EG(exception)) {
+				return 0;
+			}
 			/* fallthrough */
 		case IS_STRING:
 			return 1;

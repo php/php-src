@@ -2043,6 +2043,9 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
+		if (EG(exception)) {
+			return 0;
+		}
 	}
 
 	obj = Z_PHPINTERVAL_P(object);
@@ -4167,6 +4170,9 @@ static zval *date_interval_read_property(zval *object, zval *member, int type, v
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
+		if (EG(exception)) {
+			return &EG(uninitialized_zval);
+		}
 	}
 
 	obj = Z_PHPINTERVAL_P(object);
@@ -4235,6 +4241,9 @@ static zval *date_interval_write_property(zval *object, zval *member, zval *valu
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
+		if (EG(exception)) {
+			return value;
+		}
 	}
 
 	obj = Z_PHPINTERVAL_P(object);
@@ -4286,6 +4295,9 @@ static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int 
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
+		if (EG(exception)) {
+			return NULL;
+		}
 	}
 
 	if(zend_binary_strcmp("y", sizeof("y") - 1, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0 ||

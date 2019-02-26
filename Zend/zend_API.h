@@ -1181,7 +1181,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 #define ZEND_PARSE_PARAMETERS_END_EX(failure) \
 		} while (0); \
 		if (UNEXPECTED(_error_code != ZPP_ERROR_OK)) { \
-			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
+			if (!(_flags & ZEND_PARSE_PARAMS_QUIET) && !EG(exception)) { \
 				if (_error_code == ZPP_ERROR_WRONG_CALLBACK) { \
 					if (_flags & ZEND_PARSE_PARAMS_THROW) { \
 						zend_wrong_callback_exception(_i, _error); \

@@ -97,7 +97,10 @@
 #define GET_VER_OPT(name) \
 	(PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", name)) != NULL)
 #define GET_VER_OPT_STRING(name, str) \
-	if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_P(val); }
+	if (GET_VER_OPT(name)) { \
+		convert_to_string_ex(val); \
+		if (!EG(exception)) str = Z_STRVAL_P(val); \
+	}
 #define GET_VER_OPT_LONG(name, num) \
 	if (GET_VER_OPT(name)) { num = zval_get_long(val); }
 
@@ -1252,6 +1255,10 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 	}
 
 	convert_to_string_ex(zdhpath);
+	if (EG(exception)) {
+		return FAILURE;
+	}
+
 	bio = BIO_new_file(Z_STRVAL_P(zdhpath), PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 
 	if (bio == NULL) {
@@ -1296,6 +1303,10 @@ static int php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /
 #endif
 	} else {
 		convert_to_string_ex(zvcurve);
+		if (EG(exception)) {
+			return FAILURE;
+		}
+
 		curve_nid = OBJ_sn2nid(Z_STRVAL_P(zvcurve));
 		if (curve_nid == NID_undef) {
 			php_error_docref(NULL, E_WARNING, "invalid ecdh_curve specified");
@@ -1465,6 +1476,7 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 
 		if (Z_TYPE_P(current) == IS_ARRAY) {
 			zval *local_pk, *local_cert;
+			zend_string *local_pk_str, *local_cert_str;
 			char resolved_cert_path_buff[MAXPATHLEN], resolved_pk_path_buff[MAXPATHLEN];
 
 			local_cert = zend_hash_str_find(Z_ARRVAL_P(current), "local_cert", sizeof("local_cert")-1);
@@ -1474,14 +1486,21 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 				);
 				return FAILURE;
 			}
-			convert_to_string_ex(local_cert);
-			if (!VCWD_REALPATH(Z_STRVAL_P(local_cert), resolved_cert_path_buff)) {
-				php_error_docref(NULL, E_WARNING,
-					"failed setting local cert chain file `%s'; file not found",
-					Z_STRVAL_P(local_cert)
-				);
+
+			local_cert_str = zval_get_string(local_cert);
+			if (EG(exception)) {
 				return FAILURE;
 			}
+			if (!VCWD_REALPATH(ZSTR_VAL(local_cert_str), resolved_cert_path_buff)) {
+				php_error_docref(NULL, E_WARNING,
+					"failed setting local cert chain file `%s'; file not found",
+					ZSTR_VAL(local_cert_str)
+				);
+				zend_string_release(local_cert_str);
+				return FAILURE;
+			}
+			zend_string_release(local_cert_str);
+
 			local_pk = zend_hash_str_find(Z_ARRVAL_P(current), "local_pk", sizeof("local_pk")-1);
 			if (local_pk == NULL) {
 				php_error_docref(NULL, E_WARNING,
@@ -1489,14 +1508,20 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 				);
 				return FAILURE;
 			}
-			convert_to_string_ex(local_pk);
-			if (!VCWD_REALPATH(Z_STRVAL_P(local_pk), resolved_pk_path_buff)) {
-				php_error_docref(NULL, E_WARNING,
-					"failed setting local private key file `%s'; file not found",
-					Z_STRVAL_P(local_pk)
-				);
+
+			local_pk_str = zval_get_string(local_pk);
+			if (EG(exception)) {
 				return FAILURE;
 			}
+			if (!VCWD_REALPATH(ZSTR_VAL(local_pk_str), resolved_pk_path_buff)) {
+				php_error_docref(NULL, E_WARNING,
+					"failed setting local private key file `%s'; file not found",
+					ZSTR_VAL(local_pk_str)
+				);
+				zend_string_release(local_pk_str);
+				return FAILURE;
+			}
+			zend_string_release(local_pk_str);
 
 			ctx = php_openssl_create_sni_server_ctx(resolved_cert_path_buff, resolved_pk_path_buff);
 

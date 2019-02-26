@@ -258,10 +258,12 @@ PHP_FUNCTION(setcookie)
 		}
 	}
 
-	if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 1) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
+	if (!EG(exception)) {
+		if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 1) == SUCCESS) {
+			RETVAL_TRUE;
+		} else {
+			RETVAL_FALSE;
+		}
 	}
 
 	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {
@@ -311,10 +313,12 @@ PHP_FUNCTION(setrawcookie)
 		}
 	}
 
-	if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 0) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
+	if (!EG(exception)) {
+		if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 0) == SUCCESS) {
+			RETVAL_TRUE;
+		} else {
+			RETVAL_FALSE;
+		}
 	}
 
 	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {

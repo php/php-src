@@ -777,7 +777,11 @@ use_string:
 					}
 					the_var = &((*copies_param)[i]);
 				}
+
 				convert_to_string_ex(the_var);
+				if (EG(exception)) {
+					goto end;
+				}
 				*data_size += Z_STRLEN_P(the_var);
 				break;
 		}

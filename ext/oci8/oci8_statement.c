@@ -1190,6 +1190,9 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 			}
 			if (Z_TYPE_P(param) != IS_NULL) {
 				convert_to_string(param);
+				if (EG(exception)) {
+					return 1;
+				}
 			}
 			if ((maxlength == -1) || (maxlength == 0)) {
 				if (type == SQLT_LNG) {
@@ -1392,6 +1395,9 @@ sb4 php_oci_bind_in_callback(
 	} else	if ((phpbind->descriptor == 0) && (phpbind->statement == 0)) {
 		/* "normal string bind */
 		convert_to_string(val);
+		if (EG(exception)) {
+			return OCI_ERROR;
+		}
 
 		*bufpp = Z_STRVAL_P(val);
 		*alenp = (ub4) Z_STRLEN_P(val);
@@ -1483,7 +1489,6 @@ sb4 php_oci_bind_out_callback(
 		*indpp = &phpbind->indicator;
 		retval = OCI_CONTINUE;
 	} else {
-		convert_to_string(val);
 		zval_ptr_dtor(val);
 
 		{
@@ -1742,6 +1747,9 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 		zend_hash_internal_pointer_reset(hash);
 		while ((entry = zend_hash_get_current_data(hash)) != NULL) {
 			convert_to_string_ex(entry);
+			if (EG(exception)) {
+				return NULL;
+			}
 
 			if (maxlength == -1 || Z_STRLEN_P(entry) > (size_t) maxlength) {
 				maxlength = Z_STRLEN_P(entry) + 1;
@@ -1767,7 +1775,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 
 	for (i = 0; i < bind->array.current_length; i++) {
 		if ((entry = zend_hash_get_current_data(hash)) != NULL) {
-			convert_to_string_ex(entry);
+			ZEND_ASSERT(Z_TYPE_P(entry) == IS_STRING);
 			bind->array.element_lengths[i] = (ub2) Z_STRLEN_P(entry);
 			if (Z_STRLEN_P(entry) == 0) {
 				bind->array.indicators[i] = -1;
@@ -1783,7 +1791,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
 			int element_length;
 
-			convert_to_string_ex(entry);
+			ZEND_ASSERT(Z_TYPE_P(entry) == IS_STRING);
 			element_length = ((size_t) maxlength > Z_STRLEN_P(entry)) ? (int) Z_STRLEN_P(entry) : (int) maxlength;
 
 			memcpy((text *)bind->array.elements + i*maxlength, Z_STRVAL_P(entry), element_length);

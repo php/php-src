@@ -298,6 +298,12 @@ PHP_FUNCTION(pack)
 
 				if (arg < 0) {
 					convert_to_string(&argv[currentarg]);
+					if (EG(exception)) {
+						efree(formatcodes);
+						efree(formatargs);
+						return;
+					}
+
 					arg = Z_STRLEN(argv[currentarg]);
 					if (code == 'Z') {
 						/* add one because Z is always NUL-terminated:

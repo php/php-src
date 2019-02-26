@@ -553,6 +553,9 @@ PHP_FUNCTION(proc_open)
 
 			if ((ztype = zend_hash_index_find(Z_ARRVAL_P(descitem), 0)) != NULL) {
 				convert_to_string_ex(ztype);
+				if (EG(exception)) {
+					goto exit_fail;
+				}
 			} else {
 				php_error_docref(NULL, E_WARNING, "Missing handle qualifier in array");
 				goto exit_fail;
@@ -564,6 +567,9 @@ PHP_FUNCTION(proc_open)
 
 				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
 					convert_to_string_ex(zmode);
+					if (EG(exception)) {
+						goto exit_fail;
+					}
 				} else {
 					php_error_docref(NULL, E_WARNING, "Missing mode parameter for 'pipe'");
 					goto exit_fail;
@@ -603,6 +609,9 @@ PHP_FUNCTION(proc_open)
 
 				if ((zfile = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
 					convert_to_string_ex(zfile);
+					if (EG(exception)) {
+						goto exit_fail;
+					}
 				} else {
 					php_error_docref(NULL, E_WARNING, "Missing file name parameter for 'file'");
 					goto exit_fail;
@@ -610,6 +619,9 @@ PHP_FUNCTION(proc_open)
 
 				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 2)) != NULL) {
 					convert_to_string_ex(zmode);
+					if (EG(exception)) {
+						goto exit_fail;
+					}
 				} else {
 					php_error_docref(NULL, E_WARNING, "Missing mode parameter for 'file'");
 					goto exit_fail;

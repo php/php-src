@@ -670,6 +670,10 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		convert_to_string(&retval);
+		if (EG(exception)) {
+			return -1;
+		}
+
 		didread = Z_STRLEN(retval);
 		if (didread > count) {
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " - read " ZEND_LONG_FMT " bytes more data than requested (" ZEND_LONG_FMT " read, " ZEND_LONG_FMT " max) - excess data will be lost",

@@ -967,6 +967,7 @@ PHP_FUNCTION(pcntl_exec)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		/* Build argument list */
+		SEPARATE_ARRAY(args);
 		args_hash = Z_ARRVAL_P(args);
 		argc = zend_hash_num_elements(args_hash);
 
@@ -976,19 +977,25 @@ PHP_FUNCTION(pcntl_exec)
 		ZEND_HASH_FOREACH_VAL(args_hash, element) {
 			if (argi >= argc) break;
 			convert_to_string_ex(element);
+			if (EG(exception)) {
+				efree(argv);
+				return;
+			}
+
 			*current_arg = Z_STRVAL_P(element);
 			argi++;
 			current_arg++;
 		} ZEND_HASH_FOREACH_END();
-		*(current_arg) = NULL;
+		*current_arg = NULL;
 	} else {
 		argv = emalloc(2 * sizeof(char *));
-		*argv = path;
-		*(argv+1) = NULL;
+		argv[0] = path;
+		argv[1] = NULL;
 	}
 
 	if ( ZEND_NUM_ARGS() == 3 ) {
 		/* Build environment pair list */
+		SEPARATE_ARRAY(envs);
 		envs_hash = Z_ARRVAL_P(envs);
 		envc = zend_hash_num_elements(envs_hash);
 
@@ -1002,6 +1009,12 @@ PHP_FUNCTION(pcntl_exec)
 			}
 
 			convert_to_string_ex(element);
+			if (EG(exception)) {
+				zend_string_release(key);
+				efree(argv);
+				efree(envp);
+				return;
+			}
 
 			/* Length of element + equal sign + length of key + null */
 			pair_length = Z_STRLEN_P(element) + ZSTR_LEN(key) + 2;
