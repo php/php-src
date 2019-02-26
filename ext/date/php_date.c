@@ -4681,11 +4681,11 @@ PHP_METHOD(DatePeriod, getRecurrences)
 
         dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 
-        if (!dpobj->recurrences) {
+        if (0 == dpobj->recurrences - 1) {
                 return;
         }
 
-        RETURN_LONG(dpobj->recurrences);
+        RETURN_LONG(dpobj->recurrences - 1);
 }
 /* }}} */
 
