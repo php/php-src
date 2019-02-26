@@ -15,13 +15,15 @@ PHP                                                                        NEWS
   . Fixed bug #77742 (bcpow() implementation related to gcc compiler
     optimization). (Nikita)
 
-- FPM:
-  . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
-    (Kevin Adler)
-
 - Date:
   . Fixed bug #50020 (DateInterval:createDateFromString() silently fails).
     (Derick)
+  . Fixed bug #75113 (Added DatePeriod::getRecurrences() method). (Ignace
+    Nyamagana Butera)
+
+- FPM:
+  . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
+    (Kevin Adler)
 
 - GD:
   . Fixed bug #77700 (Writing truecolor images as GIF ignores interlace flag).
