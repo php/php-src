@@ -88,6 +88,8 @@ foreach($input as $var) {
 	}
 }
 
+fclose($file);
+
 include($filename);
 
 if($c === 0) {
