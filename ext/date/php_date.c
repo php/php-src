@@ -4684,7 +4684,7 @@ PHP_METHOD(DatePeriod, getRecurrences)
                 return;
         }
 
-        return RETURN_LONG(dpobj->recurrences);
+        RETURN_LONG(dpobj->recurrences);
 }
 /* }}} */
 
