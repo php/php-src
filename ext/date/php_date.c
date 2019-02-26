@@ -551,6 +551,7 @@ static const zend_function_entry date_funcs_period[] = {
 	PHP_ME(DatePeriod,                getStartDate,                NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                getEndDate,                  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                getDateInterval,             NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DatePeriod,                getRecurrences,              NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
