@@ -189,6 +189,9 @@ static zend_bool kept_alive_by_loop_var_free(scdf_ctx *scdf, uint32_t block_idx)
 	const zend_op_array *op_array = scdf->op_array;
 	const zend_cfg *cfg = &scdf->ssa->cfg;
 	const zend_basic_block *block = &cfg->blocks[block_idx];
+	if (!(cfg->flags & ZEND_FUNC_FREE_LOOP_VAR)) {
+		return 0;
+	}
 	for (i = block->start; i < block->start + block->len; i++) {
 		zend_op *opline = &op_array->opcodes[i];
 		if (opline->opcode == ZEND_FE_FREE ||
@@ -215,10 +218,6 @@ int scdf_remove_unreachable_blocks(scdf_ctx *scdf) {
 	zend_ssa *ssa = scdf->ssa;
 	int i;
 	int removed_ops = 0;
-
-	if (!(ssa->cfg.flags & ZEND_FUNC_FREE_LOOP_VAR)) {
-		return 0;
-	}
 	for (i = 0; i < ssa->cfg.blocks_count; i++) {
 		if (!zend_bitset_in(scdf->executable_blocks, i)
 				&& (ssa->cfg.blocks[i].flags & ZEND_BB_REACHABLE)

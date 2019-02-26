@@ -24,9 +24,11 @@ for ($i = 0; $i < $how_many; $i++) {
 }
 
 $start = realpath(dirname(__FILE__));
+$newstart = false;
 if (strlen($start) <= 248) {
 	// create the exact length
 	$start = $start . "\\" . str_repeat('a', 251 - strlen($start) - 1);
+	$newstart = true;
 }
 
 var_dump($start);
@@ -46,6 +48,9 @@ unlink($p7);
 for ($i = 0; $i < $how_many; $i++) {
 	$p0 = substr($p, 0, strlen($p) - $i*51);
 	rmdir($p0);
+}
+if ($newstart) {
+	rmdir($start);
 }
 
 ?>

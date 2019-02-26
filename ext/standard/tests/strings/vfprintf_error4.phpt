@@ -13,7 +13,7 @@ precision=14
  */
 
 // Open handle
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error4.txt';
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with other strangeties  --\n";
@@ -28,7 +28,7 @@ fclose( $fp );
 --CLEAN--
 <?php
 
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error4.txt';
 unlink( $file );
 
 ?>

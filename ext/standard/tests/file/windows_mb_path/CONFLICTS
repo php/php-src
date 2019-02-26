@@ -1,1 +1,3 @@
-windows_mb_path
+# These tests depend on the console codepage, which is shared across all parallel workers.
+# Force these tests to run sequentially to make sure the codepage isn't change by another process.
+all

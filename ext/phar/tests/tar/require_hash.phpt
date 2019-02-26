@@ -9,9 +9,9 @@ phar.require_hash=0
 <?php
 ini_set('phar.require_hash', 1);
 include dirname(__FILE__) . '/files/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/tar_004.phar.tar';
+$fname = dirname(__FILE__) . '/require_hash.phar.tar';
 $alias = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/tar_004.tar';
+$fname2 = dirname(__FILE__) . '/require_hash.tar';
 
 $tar = new tarmaker($fname, 'none');
 $tar->init();
@@ -41,11 +41,11 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_004.phar.tar');
-@unlink(dirname(__FILE__) . '/tar_004.tar');
+@unlink(dirname(__FILE__) . '/require_hash.phar.tar');
+@unlink(dirname(__FILE__) . '/require_hash.tar');
 ?>
 --EXPECTF--
-tar-based phar "%star_004.phar.tar" does not have a signature
+tar-based phar "%srequire_hash.phar.tar" does not have a signature
 bool(false)
 array(2) {
   ["hash"]=>
