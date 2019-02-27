@@ -1412,12 +1412,19 @@ function run_all_tests_parallel($test_files, $env) {
 	$sockUri = "tcp://$sockHost:$sockPort";
 
 	for ($i = 1; $i <= $workers; $i++) {
+		$workerEnv = $env;
+		// Use separate TEMP dir on Windows to get separate opcache instances.
+		if (PHP_OS_FAMILY == 'Windows') {
+			$workerEnv['TEMP'] .= '\\run-tests-' . $i;
+			@mkdir($workerEnv['TEMP']);
+		}
+
 		$proc = proc_open(
 			$thisPHP . ' ' . escapeshellarg($thisScript),
 			[], // Inherit our stdin, stdout and stderr
 			$pipes,
 			NULL,
-			$_ENV + [
+			$workerEnv + [
 				"TEST_PHP_WORKER" => $i,
 				"TEST_PHP_URI" => $sockUri,
 			],
@@ -1561,7 +1568,6 @@ escape:
 								send_message($workerSocks[$i], [
 									"type" => "run_tests",
 									"test_files" => $files,
-									"env" => $env,
 								]);
 							} else {
 								proc_terminate($workerProcs[$i]);
@@ -1672,7 +1678,7 @@ function run_worker() {
 	});
 
 	foreach ($greeting["GLOBALS"] as $var => $value) {
-		if ($var !== "workerID" && $var !== "workerSock" && $var !== "GLOBALS") {
+		if ($var !== "workerID" && $var !== "workerSock" && $var !== "GLOBALS" && $var !== "_ENV") {
 			$GLOBALS[$var] = $value;
 		}
 	}
@@ -1694,7 +1700,7 @@ function run_worker() {
 
 		switch ($command["type"]) {
 			case "run_tests":
-				run_all_tests($command["test_files"], $command["env"]);
+				run_all_tests($command["test_files"], $_ENV);
 				send_message($workerSock, [
 					"type" => "tests_finished"
 				]);
