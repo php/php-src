@@ -6814,6 +6814,16 @@ ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode,
 }
 /* }}} */
 
+ZEND_API zend_bool zend_binary_op_produces_array_conversion_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
+{
+	if (opcode == ZEND_CONCAT && (Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op2) == IS_ARRAY)) {
+		return 1;
+	}
+
+	return 0;
+}
+/* }}} */
+
 static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	binary_op_type fn = get_binary_op(opcode);
@@ -6829,6 +6839,10 @@ static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode
 
 	/* don't evaluate numeric string error-producing operations at compile-time */
 	if (zend_binary_op_produces_numeric_string_error(opcode, op1, op2)) {
+		return 0;
+	}
+	/* don't evaluate array to string conversions at compile-time */
+	if (zend_binary_op_produces_array_conversion_error(opcode, op1, op2)) {
 		return 0;
 	}
 
@@ -7000,10 +7014,18 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 		if (opcode == ZEND_CONCAT) {
 			/* convert constant operands to strings at compile-time */
 			if (left_node.op_type == IS_CONST) {
-				convert_to_string(&left_node.u.constant);
+				if (Z_TYPE(left_node.u.constant) == IS_ARRAY) {
+					zend_emit_op_tmp(&left_node, ZEND_CAST, &left_node, NULL)->extended_value = IS_STRING;
+				} else {
+					convert_to_string(&left_node.u.constant);
+				}
 			}
 			if (right_node.op_type == IS_CONST) {
-				convert_to_string(&right_node.u.constant);
+				if (Z_TYPE(right_node.u.constant) == IS_ARRAY) {
+					zend_emit_op_tmp(&right_node, ZEND_CAST, &right_node, NULL)->extended_value = IS_STRING;
+				} else {
+					convert_to_string(&right_node.u.constant);
+				}
 			}
 			if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
 				opcode = ZEND_FAST_CONCAT;
