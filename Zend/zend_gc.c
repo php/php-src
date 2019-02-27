@@ -152,6 +152,10 @@ typedef struct _gc_refcounted_stack {
 	struct _gc_refcounted_stack *next;
 } gc_refcounted_stack;
 
+typedef struct _gc_refcounted_stack_reference {
+	gc_refcounted_stack *stack;
+} gc_refcounted_stack_reference;
+
 static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
 {
 	root->next->prev = root->prev;
@@ -799,7 +803,7 @@ static void gc_add_garbage(zend_refcounted *ref)
 	}
 }
 
-static int gc_collect_white(zend_refcounted *ref, uint32_t *flags)
+static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_refcounted_stack_reference *stack_reference)
 {
 	int count = 0;
 	HashTable *ht;
@@ -856,7 +860,7 @@ tail_call:
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
 						GC_REFCOUNT(ref)++;
-						count += gc_collect_white(ref, flags);
+						stack_reference->stack = gc_refcounted_stack_push(stack_reference->stack, ref);
 					/* count non-refcounted for compatibility ??? */
 					} else if (Z_TYPE_P(zv) != IS_UNDEF) {
 						count++;
@@ -918,7 +922,7 @@ tail_call:
 			if (Z_REFCOUNTED_P(zv)) {
 				ref = Z_COUNTED_P(zv);
 				GC_REFCOUNT(ref)++;
-				count += gc_collect_white(ref, flags);
+				stack_reference->stack = gc_refcounted_stack_push(stack_reference->stack, ref);
 				/* count non-refcounted for compatibility ??? */
 			} else if (Z_TYPE_P(zv) != IS_UNDEF) {
 				count++;
@@ -940,6 +944,8 @@ static int gc_collect_roots(uint32_t *flags)
 {
 	int count = 0;
 	gc_root_buffer *current = GC_G(roots).next;
+	zend_refcounted *ref;
+	gc_refcounted_stack_reference *stack_reference;
 
 	/* remove non-garbage from the list */
 	while (current != &GC_G(roots)) {
@@ -955,13 +961,27 @@ static int gc_collect_roots(uint32_t *flags)
 		current = next;
 	}
 
+	stack_reference = (gc_refcounted_stack_reference*) emalloc(sizeof(gc_refcounted_stack_reference));
+
 	current = GC_G(roots).next;
 	while (current != &GC_G(roots)) {
 		if (GC_REF_GET_COLOR(current->ref) == GC_WHITE) {
-			count += gc_collect_white(current->ref, flags);
+			ref = current->ref;
+			stack_reference->stack = NULL;
+			do {
+				count += gc_collect_white(ref, flags, stack_reference);
+				if (stack_reference->stack != NULL) {
+					ref = stack_reference->stack->ref;
+					stack_reference->stack = gc_refcounted_stack_pop(stack_reference->stack);
+				} else {
+					ref = NULL;
+				}
+			} while (ref != NULL);
 		}
 		current = current->next;
 	}
+
+	efree(stack_reference);
 
 	/* relink remaining roots into list to free */
 	if (GC_G(roots).next != &GC_G(roots)) {
