@@ -1283,7 +1283,8 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 	global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
 
 	if ($workers !== null && !$workerID) {
-		run_all_tests_parallel($test_files, $env, $redir_tested);
+		if ($redir_tested) die("redir_tested set for coordinator process");
+		run_all_tests_parallel($test_files, $env);
 		return;
 	}
 
@@ -1336,7 +1337,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 }
 
 /** The heart of parallel testing. */
-function run_all_tests_parallel($test_files, $env, $redir_tested) {
+function run_all_tests_parallel($test_files, $env) {
 	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle;
 
 	// The PHP binary running run-tests.php, and run-tests.php itself
@@ -1561,7 +1562,6 @@ escape:
 									"type" => "run_tests",
 									"test_files" => $files,
 									"env" => $env,
-									"redir_tested" => $redir_tested
 								]);
 							} else {
 								proc_terminate($workerProcs[$i]);
@@ -1694,7 +1694,7 @@ function run_worker() {
 
 		switch ($command["type"]) {
 			case "run_tests":
-				run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
+				run_all_tests($command["test_files"], $command["env"]);
 				send_message($workerSock, [
 					"type" => "tests_finished"
 				]);
