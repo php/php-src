@@ -401,6 +401,7 @@ static gc_refcounted_stack* gc_scan_black(zend_refcounted *ref, gc_refcounted_st
 	Bucket *p, *end;
 	zval *zv;
 
+tail_call:
 	if (GC_REF_GET_COLOR(ref) == GC_BLACK) {
 		return stack;
 	}
@@ -438,7 +439,7 @@ static gc_refcounted_stack* gc_scan_black(zend_refcounted *ref, gc_refcounted_st
 			if (EXPECTED(!ht)) {
 				ref = Z_COUNTED_P(zv);
 				GC_REFCOUNT(ref)++;
-				return gc_refcounted_stack_push(stack, ref);
+				goto tail_call;
 			}
 		} else {
 			return stack;
@@ -453,7 +454,7 @@ static gc_refcounted_stack* gc_scan_black(zend_refcounted *ref, gc_refcounted_st
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 			ref = Z_COUNTED(((zend_reference*)ref)->val);
 			GC_REFCOUNT(ref)++;
-			stack = gc_refcounted_stack_push(stack, ref);
+			goto tail_call;
 		}
 		return stack;
 	} else {
@@ -492,7 +493,7 @@ static gc_refcounted_stack* gc_scan_black(zend_refcounted *ref, gc_refcounted_st
 	}
 	ref = Z_COUNTED_P(zv);
 	GC_REFCOUNT(ref)++;
-	return gc_refcounted_stack_push(stack, ref);
+	goto tail_call;
 }
 
 static gc_refcounted_stack* gc_mark_grey(zend_refcounted *ref, gc_refcounted_stack *stack)
@@ -501,6 +502,7 @@ static gc_refcounted_stack* gc_mark_grey(zend_refcounted *ref, gc_refcounted_sta
 	Bucket *p, *end;
 	zval *zv;
 
+tail_call:
 	if (GC_REF_GET_COLOR(ref) != GC_GREY) {
 		ht = NULL;
 		GC_BENCH_INC(zval_marked_grey);
@@ -536,8 +538,7 @@ static gc_refcounted_stack* gc_mark_grey(zend_refcounted *ref, gc_refcounted_sta
 				if (EXPECTED(!ht)) {
 					ref = Z_COUNTED_P(zv);
 					GC_REFCOUNT(ref)--;
-					stack = gc_refcounted_stack_push(stack, ref);
-					return stack;
+					goto tail_call;
 				}
 			} else {
 				return stack;
@@ -553,7 +554,7 @@ static gc_refcounted_stack* gc_mark_grey(zend_refcounted *ref, gc_refcounted_sta
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
 				GC_REFCOUNT(ref)--;
-				stack = gc_refcounted_stack_push(stack, ref);
+				goto tail_call;
 			}
 			return stack;
 		} else {
@@ -592,7 +593,7 @@ static gc_refcounted_stack* gc_mark_grey(zend_refcounted *ref, gc_refcounted_sta
 		}
 		ref = Z_COUNTED_P(zv);
 		GC_REFCOUNT(ref)--;
-		stack = gc_refcounted_stack_push(stack, ref);
+		goto tail_call;
 	}
 	return stack;
 }
@@ -629,6 +630,7 @@ static gc_refcounted_stack* gc_scan(zend_refcounted *ref, gc_refcounted_stack *s
 	zend_refcounted *ref_black;
 	gc_refcounted_stack *stack_black;
 
+tail_call:
 	if (GC_REF_GET_COLOR(ref) == GC_GREY) {
 		if (GC_REFCOUNT(ref) > 0) {
 			ref_black = ref;
@@ -672,8 +674,7 @@ static gc_refcounted_stack* gc_scan(zend_refcounted *ref, gc_refcounted_stack *s
 					}
 					if (EXPECTED(!ht)) {
 						ref = Z_COUNTED_P(zv);
-						stack = gc_refcounted_stack_push(stack, ref);
-						return stack;
+						goto tail_call;
 					}
 				} else {
 					return stack;
@@ -688,7 +689,7 @@ static gc_refcounted_stack* gc_scan(zend_refcounted *ref, gc_refcounted_stack *s
 			} else if (GC_TYPE(ref) == IS_REFERENCE) {
 				if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 					ref = Z_COUNTED(((zend_reference*)ref)->val);
-					stack = gc_refcounted_stack_push(stack, ref);
+					goto tail_call;
 				}
 				return stack;
 			} else {
@@ -725,7 +726,7 @@ static gc_refcounted_stack* gc_scan(zend_refcounted *ref, gc_refcounted_stack *s
 				zv = Z_INDIRECT_P(zv);
 			}
 			ref = Z_COUNTED_P(zv);
-			stack = gc_refcounted_stack_push(stack, ref);
+			goto tail_call;
 		}
 	}
 	return stack;
