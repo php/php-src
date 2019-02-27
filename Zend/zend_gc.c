@@ -673,7 +673,9 @@ tail_call:
 				if (Z_REFCOUNTED_P(zv)) {
 					ref = Z_COUNTED_P(zv);
 					GC_ADDREF(ref);
-					stack = gc_refcounted_stack_push(stack, ref);
+					if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
+						stack = gc_refcounted_stack_push(stack, ref);
+					}
 				}
 				zv++;
 			}
@@ -724,7 +726,9 @@ tail_call:
 		if (Z_REFCOUNTED_P(zv)) {
 			ref = Z_COUNTED_P(zv);
 			GC_ADDREF(ref);
-			stack = gc_refcounted_stack_push(stack, ref);
+			if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
+				stack = gc_refcounted_stack_push(stack, ref);
+			}
 		}
 		p++;
 	}
@@ -772,7 +776,9 @@ tail_call:
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
 						GC_DELREF(ref);
-						stack = gc_refcounted_stack_push(stack, ref);
+						if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+							stack = gc_refcounted_stack_push(stack, ref);
+						}
 					}
 					zv++;
 				}
@@ -824,7 +830,9 @@ tail_call:
 			if (Z_REFCOUNTED_P(zv)) {
 				ref = Z_COUNTED_P(zv);
 				GC_DELREF(ref);
-				stack = gc_refcounted_stack_push(stack, ref);
+				if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+					stack = gc_refcounted_stack_push(stack, ref);
+				}
 			}
 			p++;
 		}
@@ -952,7 +960,9 @@ tail_call:
 					while (zv != end) {
 						if (Z_REFCOUNTED_P(zv)) {
 							ref = Z_COUNTED_P(zv);
-							stack = gc_refcounted_stack_push(stack, ref);
+							if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+								stack = gc_refcounted_stack_push(stack, ref);
+							}
 						}
 						zv++;
 					}
@@ -1001,7 +1011,9 @@ tail_call:
 				}
 				if (Z_REFCOUNTED_P(zv)) {
 					ref = Z_COUNTED_P(zv);
-					stack = gc_refcounted_stack_push(stack, ref);
+					if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+						stack = gc_refcounted_stack_push(stack, ref);
+					}
 				}
 				p++;
 			}
@@ -1119,7 +1131,9 @@ tail_call:
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
 						GC_ADDREF(ref);
-						stack_reference->stack = gc_refcounted_stack_push(stack_reference->stack, ref);
+						if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+							stack_reference->stack = gc_refcounted_stack_push(stack_reference->stack, ref);
+						}
 					/* count non-refcounted for compatibility ??? */
 					} else if (Z_TYPE_P(zv) != IS_UNDEF) {
 						count++;
@@ -1177,7 +1191,9 @@ tail_call:
 			if (Z_REFCOUNTED_P(zv)) {
 				ref = Z_COUNTED_P(zv);
 				GC_ADDREF(ref);
-				stack_reference->stack = gc_refcounted_stack_push(stack_reference->stack, ref);
+				if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+					stack_reference->stack = gc_refcounted_stack_push(stack_reference->stack, ref);
+				}
 				/* count non-refcounted for compatibility ??? */
 			} else if (Z_TYPE_P(zv) != IS_UNDEF) {
 				count++;
