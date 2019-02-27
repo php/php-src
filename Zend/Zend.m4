@@ -83,8 +83,6 @@ AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol finite fpclass sigsetjmp)
 
 AC_CHECK_DECLS([isfinite, isnan, isinf], [], [], [[#include <math.h>]])
 
-ZEND_FP_EXCEPT
-
 ZEND_CHECK_FLOAT_PRECISION
 
 dnl test whether double cast to long preserves least significant bits
