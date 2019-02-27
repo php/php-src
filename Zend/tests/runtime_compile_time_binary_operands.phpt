@@ -149,7 +149,7 @@ if($c === 0) {
 --CLEAN--
 <?php
 $fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'compare_equality_temp.php';
-//@unlink($fl);
+@unlink($fl);
 ?>
 --EXPECTF--
 Failed: 0
