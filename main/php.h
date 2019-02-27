@@ -230,17 +230,7 @@ typedef unsigned int socklen_t;
 #include "zend_hash.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"
-
-#if STDC_HEADERS
-# include <string.h>
-#else
-# ifndef HAVE_MEMCPY
-#  define memcpy(d, s, n)	bcopy((s), (d), (n))
-# endif
-# ifndef HAVE_MEMMOVE
-#  define memmove(d, s, n)	bcopy ((s), (d), (n))
-# endif
-#endif
+#include <string.h>
 
 #ifndef HAVE_STRERROR
 char *strerror(int);

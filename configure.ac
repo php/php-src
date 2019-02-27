@@ -417,9 +417,6 @@ PHP_CHECK_FUNC(inet_aton, resolv, bind)
 dnl Then headers.
 dnl -------------------------------------------------------------------------
 
-dnl Checks for header files.
-AC_HEADER_STDC
-
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS([ \
 inttypes.h \
@@ -629,7 +626,6 @@ localtime_r \
 lockf \
 lchown \
 lrand48 \
-memcpy \
 memmove \
 mkstemp \
 mmap \
