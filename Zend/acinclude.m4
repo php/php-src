@@ -42,22 +42,6 @@ AC_DEFUN([LIBZEND_BISON_CHECK],[
   esac
 ])
 
-AC_DEFUN([ZEND_FP_EXCEPT],[
-  AC_CACHE_CHECK(whether fp_except is defined, ac_cv_type_fp_except,[
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <floatingpoint.h>
-]],[[
-fp_except x = (fp_except) 0;
-]])],[
-     ac_cv_type_fp_except=yes
-],[
-     ac_cv_type_fp_except=no
-])])
-  if test "$ac_cv_type_fp_except" = "yes"; then
-    AC_DEFINE(HAVE_FP_EXCEPT, 1, [whether floatingpoint.h defines fp_except])
-  fi
-])
-
 dnl x87 floating point internal precision control checks
 dnl See: http://wiki.php.net/rfc/rounding
 AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
