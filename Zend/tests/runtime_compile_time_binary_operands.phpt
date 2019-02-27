@@ -148,7 +148,7 @@ if($c === 0) {
 ===DONE===
 --CLEAN--
 <?php
-$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'compare_equality_temp.php';
+$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
 @unlink($fl);
 ?>
 --EXPECTF--
