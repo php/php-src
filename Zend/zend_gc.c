@@ -432,7 +432,9 @@ tail_call:
 				if (Z_REFCOUNTED_P(zv)) {
 					ref = Z_COUNTED_P(zv);
 					GC_REFCOUNT(ref)++;
-					stack = gc_refcounted_stack_push(stack, ref);
+					if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
+						stack = gc_refcounted_stack_push(stack, ref);
+					}
 				}
 				zv++;
 			}
@@ -483,7 +485,9 @@ tail_call:
 		if (Z_REFCOUNTED_P(zv)) {
 			ref = Z_COUNTED_P(zv);
 			GC_REFCOUNT(ref)++;
-			stack = gc_refcounted_stack_push(stack, ref);
+			if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
+				stack = gc_refcounted_stack_push(stack, ref);
+			}
 		}
 		p++;
 	}
