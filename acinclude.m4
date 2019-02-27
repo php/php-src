@@ -1030,10 +1030,8 @@ AC_DEFUN([_PHP_CHECK_SIZEOF], [
     old_LDFLAGS=$LDFLAGS
     LDFLAGS=
     AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <stdio.h>
-#if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
-#endif
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
@@ -1103,10 +1101,8 @@ AC_CACHE_VAL(ac_cv_type_in_addr_t,
 changequote(<<,>>)dnl
 <<in_addr_t[^a-zA-Z_0-9]>>dnl
 changequote([,]), [#include <sys/types.h>
-#if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
