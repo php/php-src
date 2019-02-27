@@ -86,8 +86,6 @@
 # define HAVE_SETVBUF 1
 #endif
 #define HAVE_SHUTDOWN 1
-#define HAVE_SNPRINTF 1
-#define HAVE_VSNPRINTF 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
 #define HAVE_STRERROR 1
