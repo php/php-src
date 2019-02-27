@@ -57,34 +57,35 @@ function makeParam($param){
 	return str_replace("\n", "", var_export($param, true));
 }
 
-$c = 0;
-$f = 0;
+$runtimeCompares = 0;
+$compiledCompares = 0;
+$failed = 0;
 
 function prepareLine($op1, $op2, $cmp, $type){
 	global $c;
 	$c++;
-	$cmp = (int) $cmp;           // runtime compare result (bool)
-	$op1_p = makeParam($op1);    // value of first operand as string, e.g. "array (  0 => 1,  2 => 2,)"
-	$op2_p = makeParam($op2);    // value of second operand as string
-	                             // $type is operation, e.g. '===', '>=' etc.
+	$cmp = (int) $cmp;         // runtime compare result (bool)
+	$op1 = makeParam($op1);    // value of first operand as string, e.g. "array (  0 => 1,  2 => 2,)"
+	$op2 = makeParam($op2);    // value of second operand as string
+	                           // $type is operation, e.g. '===', '>=' etc.
 	/*
 	 * Returns code snippet for writing into temp file
 	 *
 	 * For example:
 	 *
 	 * if (1 !== (int)(array (  0 => 1,  2 => 2,) >= '-0.1')) {
-	 *     echo "array (  0 => 1,  2 => 2,) >= '-0.1'\n";
-	 *     $f++;
+	 *     echo "(int)(array (  0 => 1,  2 => 2,) >= '-0.1') !== 1\n";
+	 *     $failed++;
 	 * }
-	 * $c--;
+	 * $compiledCompares++;
 	 */
 
 	return <<<EOT
-if ($cmp !== (int)($op1_p $type $op2_p)) {
-	echo "$op1_p $type $op2_p\\n";
-	\$f++;
+if ($cmp !== (int)($op1 $type $op2)) {
+	echo "(int)($op1 $type $op2) !== $cmp\\n";
+	\$failed++;
 }
-\$c--;
+\$compiledCompares++;
 
 EOT;
 }
@@ -93,10 +94,10 @@ $filename = __DIR__ . DIRECTORY_SEPARATOR . 'compare_equality_temp.php';
 $file = fopen($filename, "w");
 
 fwrite($file, "<?php\n");
-$var_cnt = count($input);
 
 foreach ($input as $var1) {
 	foreach ($input as $var2) {
+	    $runtimeCompares += 9;
 		fwrite($file, prepareLine($var1, $var2, $var1 ==  $var2, '=='));
 		fwrite($file, prepareLine($var1, $var2, $var1 !=  $var2, '!='));
 		fwrite($file, prepareLine($var1, $var2, $var1 === $var2, '==='));
@@ -113,10 +114,10 @@ fclose($file);
 
 include($filename);
 
-if ($c !== 0) {
-	echo "The number of checks does not match: $c\n";
+if ($runtimeCompares !== $compiledCompares) {
+	echo "The number of checks does not match: $runtimeCompares VS $compiledCompares\n";
 } else {
-	echo "Failed: $f\n";
+	echo "Failed: $failed\n";
 }
 ?>
 ===DONE===
