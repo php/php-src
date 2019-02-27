@@ -1461,29 +1461,6 @@ AC_DEFUN([PHP_SOCKADDR_CHECKS], [
 ])
 
 dnl
-dnl PHP_DECLARED_TIMEZONE
-dnl
-AC_DEFUN([PHP_DECLARED_TIMEZONE],[
-  AC_CACHE_CHECK(for declared timezone, ac_cv_declared_timezone,[
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <time.h>
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-]],[[
-    time_t foo = (time_t) timezone;
-]])],[
-  ac_cv_declared_timezone=yes
-],[
-  ac_cv_declared_timezone=no
-])])
-  if test "$ac_cv_declared_timezone" = "yes"; then
-    AC_DEFINE(HAVE_DECLARED_TIMEZONE, 1, [Whether system headers declare timezone])
-  fi
-])
-
-dnl
 dnl PHP_EBCDIC
 dnl
 AC_DEFUN([PHP_EBCDIC], [
