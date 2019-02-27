@@ -3761,7 +3761,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
 			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 		}
-		if (!prop) {
+		if (!prop || (prop_info->type && Z_ISUNDEF_P(prop))) {
 			continue;
 		}
 
