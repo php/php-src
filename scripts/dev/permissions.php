@@ -1,11 +1,11 @@
 #!/usr/bin/env php
-<?php
+<?php declare(strict_types=1);
 
 /*
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,40 +25,40 @@
 function help(): string
 {
     return <<<HELP
-  NAME
+    NAME
 
-    permissions.php - check php-src files 0644 and 0755 permissions
+        permissions.php - check php-src files for 0644 and 0755 permissions
 
-  SYNOPSIS:
+    SYNOPSIS:
 
-    php permissions.php [OPTION...] input-path
+        php permissions.php [OPTION...] input-path
 
-  DESCRIPTION:
+    DESCRIPTION:
 
-    Git can track executable (0755) and non-executable (0644) file
-    modes.
+        Git can track executable (0755) and non-executable (0644) file
+        modes.
 
-    This script checks and fixes file permissions in the php-src repository
-    according to the predefined executable files with 0755 permissions and
-    all others with 0644 permissions.
+        This script checks and fixes file permissions in the php-src repository
+        according to the predefined executable files with 0755 permissions and
+        all others with 0644 permissions.
 
-  OPTIONS:
+    OPTIONS:
 
-    -h, --help       Display this help
+        -h, --help       Display this help
 
-        --no-colors  Disable colors in the script output
+            --no-colors  Disable colors in the script output
 
-    -f, --fix        Change permissions according to the predefined settings
+        -f, --fix        Change permissions according to the predefined settings
 
-    -q, --quiet      Do not output any message
+        -q, --quiet      Do not output any message
 
-  EXAMPLES:
+    EXAMPLES:
 
-    Check php-src permissions: scripts/dev/permissions .
+        Check php-src permissions: scripts/dev/permissions .
 
-    Fix php-src permissions: scripts/dev/permissions.php -f .
+        Fix php-src permissions: scripts/dev/permissions.php -f .
 
-HELP;
+    HELP;
 }
 
 /**
@@ -137,14 +137,12 @@ $opt['executables'] = [
     'build/config-stubs',
     'build/genif.sh',
     'build/shtool',
+    'build/config.guess',
+    'build/config.sub',
+    'build/ltmain.sh',
     'buildconf',
-    'config.guess',
-    'config.sub',
     'genfiles',
-    'ltmain.sh',
     'makedist',
-    'snapshot',
-    'vcsclean',
 
     // Extensions scripts
     'ext/curl/sync-constants.php',
@@ -174,13 +172,16 @@ $opt['executables'] = [
     'sapi/phpdbg/create-test.php',
 
     // Internal common development scripts
+    'scripts/dev/bless_tests.php',
     'scripts/dev/check_parameters.php',
     'scripts/dev/credits',
     'scripts/dev/find_tested.php',
     'scripts/dev/gen_verify_stub',
+    'scripts/dev/permissions.php',
     'scripts/dev/phpextdist',
     'scripts/dev/search_underscores.php',
-    'scripts/dev/permissions.php',
+    'scripts/dev/snapshot',
+    'scripts/dev/vcsclean',
 
     // Travis CI scripts
     'travis/ext/curl/setup.sh',
@@ -191,8 +192,7 @@ $opt['executables'] = [
     'travis/ext/pdo_pgsql/setup.sh',
     'travis/compile.sh',
 
-    // Zend build files and scripts
-    'Zend/buildconf',
+    // Zend development scripts
     'Zend/zend_vm_gen.php',
 
     // Script for running phpt tests
