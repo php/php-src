@@ -2821,12 +2821,12 @@ static void lsapi_sigchild( int signal )
             int sig_num = WTERMSIG( status );
 
 #ifdef WCOREDUMP
-            int dump = WCOREDUMP( status );
+            const char * dump = WCOREDUMP( status ) ? "yes" : "no";
 #else
-            int dump = -1;
+            const char * dump = "unknown";
 #endif
             lsapi_log("Child process with pid: %d was killed by signal: "
-                     "%d, core dump: %d\n", pid, sig_num, dump );
+                     "%d, core dump: %s\n", pid, sig_num, dump );
         }
         if ( pid == s_pid_dump_debug_info )
         {
