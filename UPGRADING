@@ -40,6 +40,10 @@ PHP 7.4 UPGRADE NOTES
   . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
     INTL_IDNA_VARIANT_UTS46 instead of the deprecated INTL_IDNA_VARIANT_2003.
 
+- MySQLi:
+  . The embedded server functionality has been removed. It was broken since
+    at least PHP 7.0.
+
 - Openssl:
   . The openssl_random_pseudo_bytes() function will now throw an exception in
     error situations, similar to random_bytes(). In particular, an Error is

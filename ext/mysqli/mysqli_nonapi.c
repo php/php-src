@@ -219,15 +219,6 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		new_connection = TRUE;
 	}
 
-#ifdef HAVE_EMBEDDED_MYSQLI
-	if (hostname_len) {
-		unsigned int external=1;
-		mysql_options(mysql->mysql, MYSQL_OPT_USE_REMOTE_CONNECTION, (char *)&external);
-	} else {
-		mysql_options(mysql->mysql, MYSQL_OPT_USE_EMBEDDED_CONNECTION, 0);
-	}
-#endif
-
 #if !defined(MYSQLI_USE_MYSQLND)
 	/* BC for prior to bug fix #53425 */
 	flags |= CLIENT_MULTI_RESULTS;
