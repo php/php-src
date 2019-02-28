@@ -128,7 +128,7 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS);
 
 /* End Section filters declarations */
-static gdImagePtr _php_image_create_from_string (zval *Data, char *tn, gdImagePtr (*ioctx_func_p)());
+static gdImagePtr _php_image_create_from_string(zend_string *Data, char *tn, gdImagePtr (*ioctx_func_p)());
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static int _php_image_type(char data[12]);
@@ -2224,12 +2224,12 @@ static int _php_image_type (char data[12])
 
 /* {{{ _php_image_create_from_string
  */
-gdImagePtr _php_image_create_from_string(zval *data, char *tn, gdImagePtr (*ioctx_func_p)())
+gdImagePtr _php_image_create_from_string(zend_string *data, char *tn, gdImagePtr (*ioctx_func_p)())
 {
 	gdImagePtr im;
 	gdIOCtx *io_ctx;
 
-	io_ctx = gdNewDynamicCtxEx(Z_STRLEN_P(data), Z_STRVAL_P(data), 0);
+	io_ctx = gdNewDynamicCtxEx(ZSTR_LEN(data), ZSTR_VAL(data), 0);
 
 	if (!io_ctx) {
 		return NULL;
@@ -2252,22 +2252,21 @@ gdImagePtr _php_image_create_from_string(zval *data, char *tn, gdImagePtr (*ioct
    Create a new image from the image stream in the string */
 PHP_FUNCTION(imagecreatefromstring)
 {
-	zval *data;
+	zend_string *data;
 	gdImagePtr im;
 	int imtype;
 	char sig[12];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &data) == FAILURE) {
 		return;
 	}
 
-	convert_to_string_ex(data);
-	if (Z_STRLEN_P(data) < sizeof(sig)) {
+	if (ZSTR_LEN(data) < sizeof(sig)) {
 		php_error_docref(NULL, E_WARNING, "Empty string or invalid image");
 		RETURN_FALSE;
 	}
 
-	memcpy(sig, Z_STRVAL_P(data), sizeof(sig));
+	memcpy(sig, ZSTR_VAL(data), sizeof(sig));
 
 	imtype = _php_image_type(sig);
 
