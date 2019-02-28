@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #77664 (Segmentation fault when using undefined constant in
     custom wrapper). (Laruence)
+  . Fixed bug #77669 (Crash in extract() when overwriting extracted array).
+    (Nikita)
 
 21 Feb 2019, PHP 7.3.3
 
