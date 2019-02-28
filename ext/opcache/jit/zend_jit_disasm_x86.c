@@ -358,7 +358,7 @@ static int zend_jit_disasm(const char    *name,
 static int zend_jit_disasm_init(void)
 {
 	ud_init(&ud);
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(_WIN64)
 	ud_set_mode(&ud, 64);
 #else
 	ud_set_mode(&ud, 32);

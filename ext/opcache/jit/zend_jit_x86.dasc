@@ -23,7 +23,27 @@
  |.arch x86
 |.endif
 
-|.if X64
+|.if X64WIN
+ |.define FP,      r14
+ |.define IP,      r15
+ |.define IPl,     r15d
+ |.define RX,      r15       // the same as VM IP reused as a general purpos reg
+ |.define CARG1,   rcx       // x64/POSIX C call arguments.
+ |.define CARG2,   rdx
+ |.define CARG3,   r8
+ |.define CARG4,   r9
+ |.define CARG1d,  ecx
+ |.define CARG2d,  edx
+ |.define CARG3d,  r8d
+ |.define CARG4d,  r9d
+ |.define FCARG1a, CARG1     // Simulate x86 fastcall.
+ |.define FCARG2a, CARG2
+ |.define FCARG1d, CARG1d
+ |.define FCARG2d, CARG2d
+ |.define SPAD,    0x08      // padding for CPU stack alignment
+ |.define NR_SPAD, 0x18      // padding for CPU stack alignment
+ |.define SSE,     1
+|.elif X64
  |.define FP,      r14
  |.define IP,      r15
  |.define IPl,     r15d
@@ -1429,18 +1449,23 @@ static void* dasm_labels[zend_lb_MAX];
 ||#if ZEND_DEBUG
 ||		const char *filename = op_array->filename ? op_array->filename->val : NULL;
 |		LOAD_ADDR FCARG2a, filename
-|		.if X64
+|		.if X64WIN
+|			mov CARG3d, opline->lineno
+|			xor CARG4, CARG4
+|			push 0
+|			EXT_CALL _efree, r0
+|			add r4, 8
+|		.elif X64
 |			mov CARG3d, opline->lineno
 |			xor CARG4, CARG4
 |			xor CARG5, CARG5
+|			EXT_CALL _efree, r0
 |		.else
 |			sub r4, 4
 |			push 0
 |			push 0
 |			push opline->lineno
-|		.endif
-|		EXT_CALL _efree, r0
-|		.if not(X64)
+|			EXT_CALL _efree, r0
 |			add r4, 4
 |		.endif
 ||#else
@@ -1462,18 +1487,23 @@ static void* dasm_labels[zend_lb_MAX];
 ||		const char *filename = op_array->filename ? op_array->filename->val : NULL;
 |		mov FCARG1a, size
 |		LOAD_ADDR FCARG2a, filename
-|		.if X64
+|		.if X64WIN
+|			mov CARG3d, opline->lineno
+|			xor CARG4, CARG4
+|			push 0
+|			EXT_CALL _emalloc, r0
+|			add r4, 8
+|		.elif X64
 |			mov CARG3d, opline->lineno
 |			xor CARG4, CARG4
 |			xor CARG5, CARG5
+|			EXT_CALL _emalloc, r0
 |		.else
 |			sub r4, 4
 |			push 0
 |			push 0
 |			push opline->lineno
-|		.endif
-|		EXT_CALL _emalloc, r0
-|		.if not(X64)
+|			EXT_CALL _emalloc, r0
 |			add r4, 4
 |		.endif
 ||#else
@@ -6803,9 +6833,9 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	zend_jit_start_reuse_ip();
 
 	|	// if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
-	|	MEM_OP2_2 mov, RX, aword, &EG(vm_stack_top), r1
+	|	MEM_OP2_2 mov, RX, aword, &EG(vm_stack_top), RX
 	|	// Check Stack Overflow
-	|	MEM_OP2_2 mov, r2, aword, &EG(vm_stack_end), r1
+	|	MEM_OP2_2 mov, r2, aword, &EG(vm_stack_end), r2
 	|	sub r2, RX
 	if (func) {
 		|	cmp r2, used_stack
@@ -6830,9 +6860,9 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|.code
 
 	if (func) {
-		|	MEM_OP2_1 add, aword, &EG(vm_stack_top), used_stack, r1
+		|	MEM_OP2_1 add, aword, &EG(vm_stack_top), used_stack, r2
 	} else {
-		|	MEM_OP2_1 add, aword, &EG(vm_stack_top), FCARG1a, r1
+		|	MEM_OP2_1 add, aword, &EG(vm_stack_top), FCARG1a, r2
 	}
 	|	// zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
 	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
@@ -9126,19 +9156,24 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 					|	mov r0,	EX->run_time_cache
 					|	add r0, opline->op2.num
 					|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
-					|.if X64
+					|.if X64WIN
+						|	mov CARG3, arg_num
+						|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
+						|	push r0
+						|	EXT_CALL zend_jit_verify_arg_object, r0
+						|	add r4, 8
+					|.elif X64
 						|	mov CARG3, arg_num
 						|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 						|	mov CARG5, r0
+						|	EXT_CALL zend_jit_verify_arg_object, r0
 					|.else
 						|	sub r4, 4
 						|	push r0
 						|	push (ptrdiff_t)arg_info
 						|	push arg_num
-					|.endif
-					|	EXT_CALL zend_jit_verify_arg_object, r0
-					|.if not(X64)
-					|	add r4, 4
+						|	EXT_CALL zend_jit_verify_arg_object, r0
+						|	add r4, 4
 					|.endif
 					if (!zend_jit_check_exception(Dst)) {
 						return 0;
@@ -9153,18 +9188,26 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 				|	mov r0,	EX->run_time_cache
 				|	add r0, opline->op2.num
 				|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
-				|.if X64
+				|.if X64WIN
+					|	mov CARG3, arg_num
+					|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
+					|	push 0
+					|	push r0
+					|	EXT_CALL zend_jit_verify_arg_slow, r0
+					|	add r4, 16
+				|.elif X64
 					|	mov CARG3, arg_num
 					|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 					|	mov CARG5, r0
 					|	xor CARG6, CARG6
+					|	EXT_CALL zend_jit_verify_arg_slow, r0
 				|.else
 					|	push 0
 					|	push r0
 					|	push (ptrdiff_t)arg_info
 					|	push arg_num
+					|	EXT_CALL zend_jit_verify_arg_slow, r0
 				|.endif
-				|	EXT_CALL zend_jit_verify_arg_slow, r0
 				if (!zend_jit_check_exception(Dst)) {
 					return 0;
 				}
@@ -9264,19 +9307,24 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 			|	mov r0,	EX->run_time_cache
 			|	lea r0, [r0 + opline->extended_value]
 			|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
-			|.if X64
+			|.if X64WIN
+				|	mov CARG3, arg_num
+				|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
+				|	push r0
+				|	EXT_CALL zend_jit_verify_arg_object, r0
+				|	add r4, 8
+			|.elif X64
 				|	mov CARG3, arg_num
 				|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 				|	mov CARG5, r0
+				|	EXT_CALL zend_jit_verify_arg_object, r0
 			|.else
 				|	sub r4, 4
 				|	push r0
 				|	push (ptrdiff_t)arg_info
 				|	push arg_num
-			|.endif
-			|	EXT_CALL zend_jit_verify_arg_object, r0
-			|.if not(X64)
-			|	add r4, 4
+				|	EXT_CALL zend_jit_verify_arg_object, r0
+				|	add r4, 4
 			|.endif
 			}
 		} while (0);
@@ -9311,18 +9359,26 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 	|	mov r0,	EX->run_time_cache
 	|	lea r0, [r0 + opline->extended_value]
 	|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
-	|.if X64
+	|.if X64WIN
+		|	mov CARG3, arg_num
+		|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
+		|	push zv
+		|	push r0
+		|	EXT_CALL zend_jit_verify_arg_slow, r0
+		|	add r4, 16
+	|.elif X64
 		|	mov CARG3, arg_num
 		|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 		|	mov CARG5, r0
 		|	LOAD_ADDR CARG6, zv
+		|	EXT_CALL zend_jit_verify_arg_slow, r0
 	|.else
 		|	push zv
 		|	push r0
 		|	push (ptrdiff_t)arg_info
 		|	push arg_num
+		|	EXT_CALL zend_jit_verify_arg_slow, r0
 	|.endif
-	|	EXT_CALL zend_jit_verify_arg_slow, r0
 	|	jmp <9
 	}
 	|.code
@@ -9583,7 +9639,11 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 	if (offset == ZEND_WRONG_PROPERTY_OFFSET && may_be_dynamic) {
 		|8:
 		|	mov FCARG2a, r0
-		|.if X64
+		|.if X64WIN
+			|	LOAD_ADDR CARG3, member
+			|	LOAD_ZVAL_ADDR CARG4, res_addr
+			|	push (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
+		|.elif X64
 			|	LOAD_ADDR CARG3, member
 			|	LOAD_ZVAL_ADDR CARG4, res_addr
 			|	mov CARG5, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
@@ -9599,7 +9659,10 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 		} else if (opline->opcode == ZEND_FETCH_OBJ_IS) {
 			|	EXT_CALL zend_jit_fetch_obj_is_dynamic, r0
 		}
-		|.if not(X64)
+		|.if X64WIN
+		|	add r4, 8
+		|.elif X64
+		|.else
 		|	add r4, 4
 		|.endif
 		|	jmp >9
