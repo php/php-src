@@ -84,11 +84,7 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 /* {{{ property driver_embedded_read */
 static zval *driver_embedded_read(mysqli_object *obj, zval *retval)
 {
-#ifdef HAVE_EMBEDDED_MYSQLI
-	ZVAL_TRUE(retval);
-#else
 	ZVAL_FALSE(retval);
-#endif
 	return retval;
 }
 /* }}} */
@@ -146,10 +142,6 @@ const mysqli_property_entry mysqli_driver_property_entries[] = {
 /* {{{ mysqli_driver_methods[]
  */
 const zend_function_entry mysqli_driver_methods[] = {
-#if defined(HAVE_EMBEDDED_MYSQLI)
-	PHP_FALIAS(embedded_server_start, mysqli_embedded_server_start, NULL)
-	PHP_FALIAS(embedded_server_end, mysqli_embedded_server_end, NULL)
-#endif
 	PHP_FE_END
 };
 /* }}} */

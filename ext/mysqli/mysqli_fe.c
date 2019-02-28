@@ -420,10 +420,6 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_data_seek,							arginfo_mysqli_data_seek)
 	PHP_FE(mysqli_dump_debug_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_debug,								arginfo_mysqli_debug)
-#if defined(HAVE_EMBEDDED_MYSQLI)
-	PHP_FE(mysqli_embedded_server_end,					NULL)
-	PHP_FE(mysqli_embedded_server_start,				NULL)
-#endif
 	PHP_FE(mysqli_errno,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error_list,							arginfo_mysqli_only_link)
