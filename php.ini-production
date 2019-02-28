@@ -1019,8 +1019,6 @@ cli_server.color = On
 ; http://php.net/pdo-odbc.connection-pooling
 ;pdo_odbc.connection_pooling=strict
 
-;pdo_odbc.db2_instance_name
-
 [Pdo_mysql]
 ; Default socket name for local MySQL connects.  If empty, uses the built-in
 ; MySQL defaults.
