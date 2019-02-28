@@ -70,13 +70,6 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 #define VAR_SOURCE(op) Tsource[VAR_NUM(op.var)]
 #define SET_VAR_SOURCE(opline) Tsource[VAR_NUM(opline->result.var)] = opline
 
-#define convert_to_string_safe(v) \
-	if (Z_TYPE_P((v)) == IS_NULL) { \
-		ZVAL_STRINGL((v), "", 0); \
-	} else { \
-		convert_to_string((v)); \
-	}
-
 static void strip_leading_nops(zend_op_array *op_array, zend_basic_block *b)
 {
 	zend_op *opcodes = op_array->opcodes;
@@ -300,10 +293,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					int l, old_len;
 
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
-						convert_to_string_safe(&ZEND_OP1_LITERAL(opline));
+						convert_to_string(&ZEND_OP1_LITERAL(opline));
 					}
 					if (Z_TYPE(ZEND_OP1_LITERAL(last_op)) != IS_STRING) {
-						convert_to_string_safe(&ZEND_OP1_LITERAL(last_op));
+						convert_to_string(&ZEND_OP1_LITERAL(last_op));
 					}
 					old_len = Z_STRLEN(ZEND_OP1_LITERAL(last_op));
 					l = old_len + Z_STRLEN(ZEND_OP1_LITERAL(opline));
@@ -683,10 +676,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						int l, old_len;
 
 						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
-							convert_to_string_safe(&ZEND_OP2_LITERAL(opline));
+							convert_to_string(&ZEND_OP2_LITERAL(opline));
 						}
 						if (Z_TYPE(ZEND_OP2_LITERAL(src)) != IS_STRING) {
-							convert_to_string_safe(&ZEND_OP2_LITERAL(src));
+							convert_to_string(&ZEND_OP2_LITERAL(src));
 						}
 
 						VAR_SOURCE(opline->op1) = NULL;
@@ -715,7 +708,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					src = VAR_SOURCE(opline->op1);
 					if (src &&
 					    src->opcode == ZEND_CAST &&
-					    src->extended_value == IS_STRING) {
+					    src->extended_value == IS_STRING &&
+					    src->op1_type != IS_CONST) {
 						/* convert T1 = CAST(STRING, X), T2 = CONCAT(T1, Y) to T2 = CONCAT(X,Y) */
 						VAR_SOURCE(opline->op1) = NULL;
 						COPY_NODE(opline->op1, src->op1);
@@ -727,7 +721,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					src = VAR_SOURCE(opline->op2);
 					if (src &&
 					    src->opcode == ZEND_CAST &&
-					    src->extended_value == IS_STRING) {
+					    src->extended_value == IS_STRING &&
+					    src->op1_type != IS_CONST) {
 						/* convert T1 = CAST(STRING, X), T2 = CONCAT(Y, T1) to T2 = CONCAT(Y,X) */
 						zend_op *src = VAR_SOURCE(opline->op2);
 						VAR_SOURCE(opline->op2) = NULL;
