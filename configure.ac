@@ -626,7 +626,6 @@ localtime_r \
 lockf \
 lchown \
 lrand48 \
-memcpy \
 memmove \
 mkstemp \
 mmap \

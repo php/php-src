@@ -6,7 +6,7 @@ AC_DEFUN([XMLRPC_FUNCTION_CHECKS],[
 AC_CHECK_FUNCS( \
  strtoul strtoull snprintf \
  strstr strpbrk strerror\
- memcpy memmove)
+ memmove)
 
 ])
 

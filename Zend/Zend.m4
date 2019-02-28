@@ -78,7 +78,7 @@ LIBZEND_CHECK_INT_TYPE(uint32_t)
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
-AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol finite fpclass sigsetjmp)
+AC_CHECK_FUNCS(strdup getpid kill strtod strtol finite fpclass sigsetjmp)
 
 AC_CHECK_DECLS([isfinite, isnan, isinf], [], [], [[#include <math.h>]])
 
