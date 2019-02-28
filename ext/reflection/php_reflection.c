@@ -89,8 +89,7 @@ PHPAPI zend_class_entry *reflection_reference_ptr;
 
 /* Exception throwing macro */
 #define _DO_THROW(msg) \
-	zend_throw_exception(reflection_exception_ptr, msg, 0); \
-	return;
+	zend_throw_exception(reflection_exception_ptr, msg, 0);
 
 #define GET_REFLECTION_OBJECT() do { \
 	intern = Z_REFLECTION_P(ZEND_THIS); \
@@ -1305,6 +1304,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	/* Create object */
 	if (object_init_ex(&reflector, ce_ptr) == FAILURE) {
 		_DO_THROW("Could not create reflector");
+		return;
 	}
 
 	/* Call __construct() */
@@ -1332,6 +1332,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	if (result == FAILURE) {
 		zval_ptr_dtor(&reflector);
 		_DO_THROW("Could not create reflector");
+		return;
 	}
 
 	/* Call static reflection::export */
@@ -1353,6 +1354,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 		zval_ptr_dtor(&reflector);
 		zval_ptr_dtor(&retval);
 		_DO_THROW("Could not execute reflection::export()");
+		return;
 	}
 
 	if (return_output) {
@@ -1439,7 +1441,7 @@ ZEND_METHOD(reflection, export)
 
 	if (result == FAILURE) {
 		_DO_THROW("Invocation of method __toString() failed");
-		/* Returns from this function */
+		return;
 	}
 
 	if (Z_TYPE(retval) == IS_UNDEF) {
@@ -2286,7 +2288,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 					|| ((method = zend_hash_index_find(Z_ARRVAL_P(reference), 1)) == NULL))
 				{
 					_DO_THROW("Expected array($object, $method) or array($classname, $method)");
-					/* returns out of this function */
+					return;
 				}
 
 				if (Z_TYPE_P(classref) == IS_OBJECT) {
@@ -2334,7 +2336,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 		default:
 			_DO_THROW("The parameter class is expected to be either a string, an array(class, method) or a callable object");
-			/* returns out of this function */
+			return;
 	}
 
 	/* Now, search for the parameter */
@@ -2356,7 +2358,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				zval_ptr_dtor(reference);
 			}
 			_DO_THROW("The parameter specified by its offset could not be found");
-			/* returns out of this function */
+			return;
 		}
 	} else {
 		uint32_t i;
@@ -2395,7 +2397,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				zval_ptr_dtor(reference);
 			}
 			_DO_THROW("The parameter specified by its name could not be found");
-			/* returns out of this function */
+			return;
 		}
 	}
 
@@ -2980,7 +2982,7 @@ ZEND_METHOD(reflection_method, __construct)
 				zval_ptr_dtor_str(&ztmp);
 			}
 			_DO_THROW("The parameter class is expected to be either a string or an object");
-			/* returns out of this function */
+			return;
 	}
 
 	if (classname == &ztmp) {
@@ -3048,7 +3050,7 @@ ZEND_METHOD(reflection_method, getClosure)
 
 		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope)) {
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
-			/* Returns from this function */
+			return;
 		}
 
 		/* This is an original closure object and __invoke is to be called. */
@@ -3137,7 +3139,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 				efree(params);
 			}
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
-			/* Returns from this function */
+			return;
 		}
 	}
 
@@ -3520,7 +3522,7 @@ ZEND_METHOD(reflection_class_constant, __construct)
 
 		default:
 			_DO_THROW("The parameter class is expected to be either a string or an object");
-			/* returns out of this function */
+			return;
 	}
 
 	if ((constant = zend_hash_find_ptr(&ce->constants_table, constname)) == NULL) {
@@ -5242,7 +5244,7 @@ ZEND_METHOD(reflection_property, __construct)
 
 		default:
 			_DO_THROW("The parameter class is expected to be either a string or an object");
-			/* returns out of this function */
+			return;
 	}
 
 	property_info = zend_hash_find_ptr(&ce->properties_info, name);
@@ -5439,7 +5441,7 @@ ZEND_METHOD(reflection_property, getValue)
 
 		if (!instanceof_function(Z_OBJCE_P(object), ref->prop.ce)) {
 			_DO_THROW("Given object is not an instance of the class this property was declared in");
-			/* Returns from this function */
+			return;
 		}
 
 		member_p = zend_read_property_ex(intern->ce, object, ref->unmangled_name, 0, &rv);
@@ -5527,7 +5529,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 
 		if (!instanceof_function(Z_OBJCE_P(object), ref->prop.ce)) {
 			_DO_THROW("Given object is not an instance of the class this property was declared in");
-			/* Returns from this function */
+			return;
 		}
 
 		old_scope = EG(fake_scope);
@@ -6191,6 +6193,7 @@ ZEND_METHOD(reflection_reference, fromArrayElement)
 
 	if (!item) {
 		_DO_THROW("Array key not found");
+		return;
 	}
 
 	if (Z_TYPE_P(item) != IS_REFERENCE) {
@@ -6220,6 +6223,7 @@ ZEND_METHOD(reflection_reference, getId)
 	intern = Z_REFLECTION_P(getThis());
 	if (Z_TYPE(intern->obj) != IS_REFERENCE) {
 		_DO_THROW("Corrupted ReflectionReference object");
+		return;
 	}
 
 	if (!REFLECTION_G(key_initialized)) {
