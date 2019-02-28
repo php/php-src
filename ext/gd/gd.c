@@ -2595,7 +2595,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	int q = -1, i, t = 1;
 
 	/* The quality parameter for Wbmp stands for the foreground when called from image2wbmp() */
-	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 	/* The quality parameter for gd2 stands for chunk size */
 
 	if (zend_parse_parameters(argc, "r|pll", &imgind, &file, &file_len, &quality, &type) == FAILURE) {
@@ -2635,15 +2634,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				}
 				gdImageWBMP(im, q, fp);
 				break;
-			case PHP_GDIMG_TYPE_JPG:
-				(*func_p)(im, fp, q);
-				break;
-			case PHP_GDIMG_TYPE_WBM:
-				for (i = 0; i < gdImageColorsTotal(im); i++) {
-					if (gdImageRed(im, i) == 0) break;
-				}
-				(*func_p)(im, i, fp);
-				break;
 			case PHP_GDIMG_TYPE_GD:
 				(*func_p)(im, fp);
 				break;
@@ -2654,11 +2644,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				(*func_p)(im, fp, q, t);
 				break;
 			default:
-				if (q == -1) {
-					q = 128;
-				}
-				(*func_p)(im, fp, q, t);
-				break;
+				ZEND_ASSERT(0);
 		}
 		fflush(fp);
 		fclose(fp);
@@ -2684,17 +2670,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
   				}
 				gdImageWBMP(im, q, tmp);
 				break;
-			case PHP_GDIMG_TYPE_JPG:
-				(*func_p)(im, tmp, q);
-				break;
-			case PHP_GDIMG_TYPE_WBM:
-				for (i = 0; i < gdImageColorsTotal(im); i++) {
-					if (gdImageRed(im, i) == 0) {
-						break;
-					}
-				}
-				(*func_p)(im, q, tmp);
-				break;
 			case PHP_GDIMG_TYPE_GD:
 				(*func_p)(im, tmp);
 				break;
@@ -2705,8 +2680,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				(*func_p)(im, tmp, q, t);
 				break;
 			default:
-				(*func_p)(im, tmp);
-				break;
+				ZEND_ASSERT(0);
 		}
 
 		fseek(tmp, 0, SEEK_SET);
