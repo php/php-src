@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.0.0alpha1
 
 - Core:
+  . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
   . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
     (Fabien Villepinte)
 
