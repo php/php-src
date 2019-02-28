@@ -959,11 +959,13 @@ static void zend_resolve_property_types(void) /* {{{ */
 		if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS && ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (ZEND_TYPE_IS_NAME(prop_info->type)) {
-					zend_string *type_name = zend_string_tolower(ZEND_TYPE_NAME(prop_info->type));
-					zend_class_entry *prop_ce = zend_hash_find_ptr(CG(class_table), type_name);
+					zend_string *type_name = ZEND_TYPE_NAME(prop_info->type);
+					zend_string *lc_type_name = zend_string_tolower(type_name);
+					zend_class_entry *prop_ce = zend_hash_find_ptr(CG(class_table), lc_type_name);
 
 					ZEND_ASSERT(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
 					prop_info->type = ZEND_TYPE_ENCODE_CE(prop_ce, ZEND_TYPE_ALLOW_NULL(prop_info->type));
+					zend_string_release(lc_type_name);
 					zend_string_release(type_name);
 				}
 			} ZEND_HASH_FOREACH_END();
