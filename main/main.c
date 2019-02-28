@@ -747,6 +747,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("input_encoding",			NULL,			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("output_encoding",		NULL,			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateErrorLog,			error_log,				php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("error_date_format",		"d-M-Y H:i:s e",		PHP_INI_ALL,		OnUpdateStringUnempty,			error_date_format,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("sys_temp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("include_path",			PHP_INCLUDE_PATH,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
@@ -858,13 +859,14 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_ty
 
 			time(&error_time);
 #ifdef ZTS
+
 			if (!php_during_module_startup()) {
-				error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1);
+				error_time_str = php_format_date(PG(error_date_format), strlen(PG(error_date_format)), error_time, 1);
 			} else {
-				error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 0);
+				error_time_str = php_format_date(PG(error_date_format), strlen(PG(error_date_format)), error_time, 0);
 			}
 #else
-			error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1);
+			error_time_str = php_format_date(PG(error_date_format), strlen(PG(error_date_format)), error_time, 1);
 #endif
 			len = spprintf(&tmp, 0, "[%s] %s%s", ZSTR_VAL(error_time_str), log_message, PHP_EOL);
 #ifdef PHP_WIN32

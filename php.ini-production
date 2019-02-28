@@ -587,6 +587,11 @@ html_errors = On
 ; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
 
+; Date Format that is used to timestamp log messages in error_log
+; This value defaults to 'd-M-Y H:i:s e'
+; Example:
+;error_date_format = "Y-m-d H:i:s"
+
 ; The syslog ident is a string which is prepended to every message logged
 ; to syslog. Only used when error_log is set to syslog.
 ;syslog.ident = php
