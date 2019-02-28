@@ -1084,16 +1084,18 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 	int *block_order;
 	zend_ssa_phi *phi;
 	zend_lifetime_interval **intervals;
+	size_t mem_size;
 	ALLOCA_FLAG(use_heap);
 
 	set_size = zend_bitset_len(ssa->vars_count);
-	intervals = do_alloca(
+	mem_size =
 		ZEND_MM_ALIGNED_SIZE(ssa->vars_count * sizeof(zend_lifetime_interval*)) +
-		ZEND_MM_ALIGNED_SIZE((set_size * (ssa->cfg.blocks_count + 2)) * ZEND_BITSET_ELM_SIZE) +
+		ZEND_MM_ALIGNED_SIZE((set_size * ssa->cfg.blocks_count) * ZEND_BITSET_ELM_SIZE) +
+		ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE) +
+		ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE) +
 		ZEND_MM_ALIGNED_SIZE(zend_bitset_len(op_array->last) * ZEND_BITSET_ELM_SIZE) +
-		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(int)),
-		use_heap);
-
+		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(int));
+	intervals = do_alloca(mem_size, use_heap);
 	if (!intervals) {
 		*list = NULL;
 		return FAILURE;
