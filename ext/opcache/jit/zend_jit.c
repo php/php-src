@@ -2035,10 +2035,9 @@ static void zend_calc_checked_this_r(zend_bitset checked_this, zend_op_array *op
 			default:
 				break;
 		}
-		opline++;
 	}
 
-	if (cfg->blocks[b].flags && ZEND_BB_TRY) {
+	if (cfg->blocks[b].flags & ZEND_BB_TRY) {
 		checked = old_checked;
 	}
 
