@@ -2589,7 +2589,7 @@ ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr ZEND_FILE_LINE_DC Z
 
 ZEND_API void* ZEND_FASTCALL _safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	return emalloc_rel(zend_safe_address_guarded(nmemb, size, offset));
+	return _emalloc(zend_safe_address_guarded(nmemb, size, offset) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
 
 ZEND_API void* ZEND_FASTCALL _safe_malloc(size_t nmemb, size_t size, size_t offset)
@@ -2599,7 +2599,7 @@ ZEND_API void* ZEND_FASTCALL _safe_malloc(size_t nmemb, size_t size, size_t offs
 
 ZEND_API void* ZEND_FASTCALL _safe_erealloc(void *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	return erealloc_rel(ptr, zend_safe_address_guarded(nmemb, size, offset));
+	return _erealloc(ptr, zend_safe_address_guarded(nmemb, size, offset) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
 
 ZEND_API void* ZEND_FASTCALL _safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset)
@@ -2612,7 +2612,7 @@ ZEND_API void* ZEND_FASTCALL _ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_D
 	void *p;
 
 	size = zend_safe_address_guarded(nmemb, size, 0);
-	p = emalloc_rel(size);
+	p = _emalloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	memset(p, 0, size);
 	return p;
 }
