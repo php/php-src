@@ -3429,8 +3429,12 @@ PHP_FUNCTION(curl_error)
 		RETURN_FALSE;
 	}
 
-	ch->err.str[CURL_ERROR_SIZE] = 0;
-	RETURN_STRING(ch->err.str);
+	if (ch->err.no) {
+		ch->err.str[CURL_ERROR_SIZE] = 0;
+		RETURN_STRING(ch->err.str);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
