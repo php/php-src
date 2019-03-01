@@ -22,7 +22,8 @@ echo "*** Testing scandir() : usage variations ***\n";
 // include for create_files/delete_files functions
 include (dirname(__FILE__) . '/../file/file.inc');
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__ . '/scandir_variation4-win32-mb';
+@mkdir($base_dir_path);
 
 $level_one_dir_path = "$base_dir_path/私はガラスを食べられますlevel_one";
 $level_two_dir_path = "$level_one_dir_path/私はガラスを食べられますlevel_two";
@@ -67,9 +68,10 @@ var_dump(scandir('../../私はガラスを食べられますlevel_one'));
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__);
-rmdir("$dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
-rmdir("$dir_path/私はガラスを食べられますlevel_one");
+$base_dir_path = __DIR__ . '/scandir_variation4-win32-mb';
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one");
+rmdir($base_dir_path);
 ?>
 --EXPECT--
 *** Testing scandir() : usage variations ***
