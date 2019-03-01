@@ -2819,9 +2819,14 @@ static void lsapi_sigchild( int signal )
         if ( WIFSIGNALED( status ))
         {
             int sig_num = WTERMSIG( status );
-            int dump = WCOREDUMP( status );
+
+#ifdef WCOREDUMP
+            const char * dump = WCOREDUMP( status ) ? "yes" : "no";
+#else
+            const char * dump = "unknown";
+#endif
             lsapi_log("Child process with pid: %d was killed by signal: "
-                     "%d, core dump: %d\n", pid, sig_num, dump );
+                     "%d, core dumped: %s\n", pid, sig_num, dump );
         }
         if ( pid == s_pid_dump_debug_info )
         {
