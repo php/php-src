@@ -10,6 +10,10 @@ PHP                                                                        NEWS
 - Apache2Handler:
   . Fixed bug #77648 (BOM in sapi/apache2handler/php_functions.c). (cmb)
 
+- FPM:
+  . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
+    (Kevin Adler)
+
 - MySQLi:
   . Fixed bug #77597 (mysqli_fetch_field hangs scripts). (Nikita)
 
