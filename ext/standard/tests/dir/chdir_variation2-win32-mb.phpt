@@ -64,11 +64,6 @@ echo "\n-- \$directory = '../../'私はガラスを食べられますlevel_one':
 var_dump(chdir($level_two_dir_path));
 var_dump(chdir("../../$level_one_dir_name"));
 var_dump(getcwd());
-
-$file_path = dirname(__FILE__);
-chdir($file_path);/* not that PWD is accidentialy one of the dirs to be deleted. */
-rmdir("$file_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
-rmdir("$file_path/私はガラスを食べられますlevel_one");
 ?>
 ===DONE===
 --CLEAN--
