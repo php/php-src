@@ -3261,7 +3261,7 @@ ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data) /* {
  *                             +========================================+
  * EG(current_execute_data) -> | zend_execute_data                      |
  *                             +----------------------------------------+
- *     EX_CV_NUM(0) ---------> | VAR[0] = ARG[1]                        |
+ *     EX_VAR_NUM(0) --------> | VAR[0] = ARG[1]                        |
  *                             | ...                                    |
  *                             | VAR[op_array->num_args-1] = ARG[N]     |
  *                             | ...                                    |
@@ -3274,6 +3274,15 @@ ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data) /* {
  *                             +----------------------------------------+
  */
 
+/* zend_copy_extra_args is used when the actually passed number of arguments
+ * (EX_NUM_ARGS) is greater than what the function defined (op_array->num_args).
+ *
+ * The extra arguments will be copied into the call frame after all the compiled variables.
+ *
+ * If there are extra arguments copied, a flag "ZEND_CALL_FREE_EXTRA_ARGS" will be set
+ * on the zend_execute_data, and when the executor leaves the function, the
+ * args will be freed in zend_leave_helper.
+ */
 static zend_never_inline void zend_copy_extra_args(EXECUTE_DATA_D)
 {
 	zend_op_array *op_array = &EX(func)->op_array;
