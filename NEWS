@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #77660 (Segmentation fault on break 2147483648). (Laruence)
   . Fixed bug #77652 (Anonymous classes can lose their interface information).
     (Nikita)
+  . Fixed bug #77609 (Tests with shared extensions fails). (Ralf Habacker)
 
 - FPM:
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
