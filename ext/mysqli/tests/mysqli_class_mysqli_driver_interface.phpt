@@ -20,15 +20,6 @@ require_once('skipifconnectfailure.inc');
 	$methods = get_class_methods($driver);
 	$expected_methods = array();
 
-	if (!$IS_MYSQLND && (isset($methods['embedded_server_start']))) {
-		/* libmysql only - needs extra compile flag, no way to check properly in the
-		PHP user land if its compiled in or not */
-		$expected_methods = array_merge($expected_methods, array(
-				'embedded_server_start'         => true,
-				'embedded_server_end'           => true,
-		));
-	}
-
 	foreach ($methods as $k => $method) {
 		if (isset($expected_methods[$method])) {
 			unset($expected_methods[$method]);

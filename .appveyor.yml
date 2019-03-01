@@ -30,8 +30,10 @@ environment:
         matrix:
                 - THREAD_SAFE: 0
                   OPCACHE: 0
+                  PARALLEL: -j2
                 - THREAD_SAFE: 1
                   OPCACHE: 1
+                  PARALLEL:
                   INTRINSICS: AVX
 
 services:

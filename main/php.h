@@ -80,7 +80,6 @@
 /* Windows specific defines */
 #ifdef PHP_WIN32
 # define PHP_PROG_SENDMAIL		"Built in mailer"
-# define HAVE_DECLARED_TIMEZONE
 # define WIN32_LEAN_AND_MEAN
 # define NOOPENFILE
 

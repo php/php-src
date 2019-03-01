@@ -6605,7 +6605,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 {
 	int i = 0;
 
-	if (mode->is_single_run_aead && !EVP_EncryptUpdate(cipher_ctx, NULL, &i, NULL, (int)data_len)) {
+	if (mode->is_single_run_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, NULL, (int)data_len)) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of data length failed");
 		return FAILURE;

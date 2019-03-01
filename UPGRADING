@@ -140,6 +140,9 @@ PHP 8.0 UPGRADE NOTES
 
         PDOStatement::setFetchMode($mode, $classname, $params) 
 
+- PDO_ODBC:
+  . The php.ini directive pdo_odbc.db2_instance_name has been removed
+
 - Reflection:
   . The method signatures
 
