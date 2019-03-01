@@ -1076,7 +1076,7 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *objec
 	if (data) {
 		ZVAL_DEREF(data);
 		if (Z_TYPE_P(data) == IS_ARRAY) {
-			ZVAL_STRINGL(return_value, "Array", sizeof("Array")-1);
+			RETVAL_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED));
 		} else {
 			ZVAL_COPY(return_value, data);
 			convert_to_string(return_value);

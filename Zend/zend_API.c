@@ -3231,7 +3231,7 @@ try_again:
 			}
 
 			if (obj == NULL || method == NULL || Z_TYPE_P(method) != IS_STRING) {
-				return zend_string_init("Array", sizeof("Array")-1, 0);
+				return ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
 			}
 
 			if (Z_TYPE_P(obj) == IS_STRING) {
@@ -3239,7 +3239,7 @@ try_again:
 			} else if (Z_TYPE_P(obj) == IS_OBJECT) {
 				return zend_create_method_string(Z_OBJCE_P(obj)->name, Z_STR_P(method));
 			} else {
-				return zend_string_init("Array", sizeof("Array")-1, 0);
+				return ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
 			}
 		}
 		case IS_OBJECT:
