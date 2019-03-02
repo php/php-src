@@ -329,14 +329,10 @@ static void gc_trace_ref(zend_refcounted *ref) {
 }
 #endif
 
-typedef struct _gc_refcounted_stack_element {
-	zend_refcounted *ref;
-	struct _gc_refcounted_stack_element *next;
-} gc_refcounted_stack_element;
-
 typedef struct _gc_refcounted_stack {
 	int count;
-	gc_refcounted_stack_element *head;
+	int max;
+	zend_refcounted **bottom;
 } gc_refcounted_stack;
 
 static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
@@ -616,52 +612,42 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	gc_remove_from_roots(root);
 }
 
-static gc_refcounted_stack* gc_refcounted_stack_init()
+static gc_refcounted_stack* gc_refcounted_stack_init(int size)
 {
 	gc_refcounted_stack *stack;
 	stack = (gc_refcounted_stack*) emalloc(sizeof(gc_refcounted_stack));
 
-	stack->head = NULL;
 	stack->count = 0;
+	stack->max = size;
+	stack->bottom = (zend_refcounted**) emalloc(stack->max * sizeof(zend_refcounted*));
 
 	return stack;
 }
 
 static void gc_refcounted_stack_push(gc_refcounted_stack *stack, zend_refcounted *ref)
 {
-	gc_refcounted_stack_element *new_head;
-	new_head = (gc_refcounted_stack_element*) emalloc(sizeof(gc_refcounted_stack_element));
+	if (stack->count >= stack->max) { // if max capacity is full, double in size
+		stack->max *= 2;
+		stack->bottom = (zend_refcounted**) erealloc(stack->bottom, stack->max * sizeof(zend_refcounted*));
+	}
 
-	new_head->ref = ref;
-	new_head->next = stack->head;
-	stack->head = new_head;
+	*(stack->bottom + stack->count) = ref;
 	stack->count++;
 }
 
 static zend_refcounted* gc_refcounted_stack_pop(gc_refcounted_stack *stack)
 {
-	if (!stack->count) {
+	if (!stack->count) { // if stack is empty, return null
 		return NULL;
 	}
 
-	zend_refcounted* ref;
-	gc_refcounted_stack_element *old_head;
-
-	old_head = stack->head;
-	ref = old_head->ref;
-	stack->head = old_head->next;
 	stack->count--;
-
-	efree(old_head);
-
-	return ref;
+	return *(stack->bottom + stack->count);
 }
 
 static void gc_refcounted_stack_destroy(gc_refcounted_stack *stack)
 {
-	while (stack->count) {
-		gc_refcounted_stack_pop(stack);
-	}
+	efree(stack->bottom);
 	efree(stack);
 }
 
@@ -916,7 +902,7 @@ static void gc_mark_roots(void)
 {
 	gc_root_buffer *current, *last;
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init();
+	gc_refcounted_stack *stack = gc_refcounted_stack_init(8);
 
 	gc_compact();
 
@@ -938,24 +924,21 @@ static void gc_mark_roots(void)
 	gc_refcounted_stack_destroy(stack);
 }
 
-static void gc_scan(zend_refcounted *ref, gc_refcounted_stack *stack)
+static void gc_scan(zend_refcounted *ref, gc_refcounted_stack *stack, gc_refcounted_stack *stack_black)
 {
     HashTable *ht;
 	Bucket *p, *end;
 	zval *zv;
 	zend_refcounted *ref_black;
-	gc_refcounted_stack *stack_black;
 
 tail_call:
 	if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 		if (GC_REFCOUNT(ref) > 0) {
-			stack_black = gc_refcounted_stack_init();
 			gc_scan_black(ref, stack_black);
 			while (stack_black->count) {
 				ref_black = gc_refcounted_stack_pop(stack_black);
 				gc_scan_black(ref_black, stack_black);
 			}
-			gc_refcounted_stack_destroy(stack_black);
 		} else {
 			GC_REF_SET_COLOR(ref, GC_WHITE);
 			if (GC_TYPE(ref) == IS_OBJECT) {
@@ -1052,19 +1035,21 @@ static void gc_scan_roots(void)
 	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
 	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init();
+	gc_refcounted_stack *stack = gc_refcounted_stack_init(8);
+	gc_refcounted_stack *stack_black = gc_refcounted_stack_init(8);
 
 	while (current != last) {
 		if (GC_IS_ROOT(current->ref)) {
-			gc_scan(current->ref, stack);
+			gc_scan(current->ref, stack, stack_black);
 			while (stack->count) {
 				ref = gc_refcounted_stack_pop(stack);
-				gc_scan(ref, stack);
+				gc_scan(ref, stack, stack_black);
 			}
 		}
 		current++;
 	}
 
+	gc_refcounted_stack_destroy(stack_black);
 	gc_refcounted_stack_destroy(stack);
 }
 
@@ -1248,7 +1233,7 @@ static int gc_collect_roots(uint32_t *flags)
 
 	gc_compact();
 	
-	stack = gc_refcounted_stack_init();
+	stack = gc_refcounted_stack_init(8);
 	/* Root buffer might be reallocated during gc_collect_white,
 	 * make sure to reload pointers. */
 	idx = GC_FIRST_ROOT;
