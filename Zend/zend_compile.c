@@ -2945,7 +2945,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 				}
 			}
 		} else if (zend_is_variable(arg)) {
-			 if (fbc) {
+			if (fbc) {
 				if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
 					zend_compile_var(&arg_node, arg, BP_VAR_W, 1);
 					opcode = ZEND_SEND_REF;
@@ -5346,13 +5346,15 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_info->type = ZEND_TYPE_ENCODE(0, 1);
 
 		if (type_ast) {
-			uint32_t default_type, arg_type;
+			uint32_t default_type = Z_TYPE(default_node.u.constant);
 
-			default_type = Z_TYPE(default_node.u.constant);
+			uint32_t arg_type;
+			zend_bool is_class;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->type = zend_compile_typename(type_ast, default_ast && default_type == IS_NULL);
 
+			is_class = ZEND_TYPE_IS_CLASS(arg_info->type);
 			arg_type = ZEND_TYPE_CODE(arg_info->type);
 
 			if (arg_type == IS_VOID) {
@@ -5360,7 +5362,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			}
 
 			if (default_ast && default_type != IS_NULL && default_type != IS_CONSTANT_AST) {
-				switch (arg_type) {
+				if (is_class) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+						"with a class type can only be NULL");
+				} else switch (arg_type) {
 					case IS_CALLABLE:
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with callable type can only be NULL");
@@ -5393,10 +5398,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 						break;
 
 					default:
-						if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-								"with a class type can only be NULL");
-						} else if (!ZEND_SAME_FAKE_TYPE(arg_type, default_type)) {
+						if (!ZEND_SAME_FAKE_TYPE(arg_type, default_type)) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 								"with a %s type can only be %s or NULL",
 								zend_get_type_by_const(arg_type), zend_get_type_by_const(arg_type));
@@ -5406,10 +5408,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 
 			/* Allocate cache slot to speed-up run-time class resolution */
 			if (opline->opcode == ZEND_RECV_INIT) {
-				if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
+				if (is_class) {
 					opline->extended_value = zend_alloc_cache_slot();
 				}
-			} else if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
+			} else if (is_class) {
 				opline->op2.num = op_array->cache_size;
 				op_array->cache_size += sizeof(void*);
 			} else {
@@ -5504,16 +5506,16 @@ void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_check_magic_method_attr(uint32_t attr, const char* entity) /* {{{ */
+static void zend_check_magic_method_attr(uint32_t attr, const char* method) /* {{{ */
 {
-	if (memcmp(entity, "__callStatic", 12) == 0) {
+	if (memcmp(method, "__callStatic", sizeof("__callStatic") - 1) == 0) {
 		if (!(attr & ZEND_ACC_PUBLIC) || !(attr & ZEND_ACC_STATIC)) {
 			zend_error(E_WARNING, "The magic method __callStatic() must have public visibility and be static");
 		}
 	} else if (!(attr & ZEND_ACC_PUBLIC) || (attr & ZEND_ACC_STATIC)) {
 		zend_error(E_WARNING,
 				"The magic method %s() must have public visibility and cannot be static",
-				entity);
+				method);
 	}
 }
 /* }}} */
