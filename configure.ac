@@ -54,12 +54,6 @@ AH_BOTTOM([
 
 #include <string.h>
 
-#if ZEND_BROKEN_SPRINTF
-int zend_sprintf(char *buffer, const char *format, ...);
-#else
-# define zend_sprintf sprintf
-#endif
-
 #if defined(__cplusplus) && __cplusplus >= 201103L
 extern "C++" {
 #include <cmath>
@@ -656,7 +650,6 @@ setsockopt \
 setvbuf \
 shutdown \
 sin \
-snprintf \
 srand48 \
 srandom \
 statfs \
@@ -678,7 +671,6 @@ unlockpt \
 unsetenv \
 usleep \
 utime \
-vsnprintf \
 vasprintf \
 asprintf \
 nanosleep \
@@ -742,8 +734,6 @@ fi
 
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_ALLOCA
-dnl PHP_AC_BROKEN_SPRINTF
-dnl PHP_AC_BROKEN_SNPRINTF
 PHP_DECLARED_TIMEZONE
 PHP_TIME_R_TYPE
 PHP_READDIR_R_TYPE
@@ -1494,7 +1484,7 @@ PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
+PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
@@ -1517,7 +1507,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_execute_API.c zend_highlight.c zend_llist.c \
     zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
     zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
-    zend_list.c zend_builtin_functions.c zend_sprintf.c \
+    zend_list.c zend_builtin_functions.c \
     zend_ini.c zend_sort.c zend_multibyte.c zend_ts_hash.c zend_stream.c \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
     zend_closures.c zend_float.c zend_string.c zend_signal.c zend_generators.c \

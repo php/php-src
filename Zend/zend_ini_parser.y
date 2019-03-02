@@ -93,7 +93,7 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 			break;
 	}
 
-	str_len = zend_sprintf(str_result, "%d", i_result);
+	str_len = sprintf(str_result, "%d", i_result);
 	ZVAL_NEW_STR(result, zend_string_init(str_result, str_len, ZEND_SYSTEM_INI));
 }
 /* }}} */

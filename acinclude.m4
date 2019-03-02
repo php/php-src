@@ -886,17 +886,6 @@ AC_DEFUN([PHP_SELECT_SAPI],[
   ])
 ])
 
-dnl deprecated
-AC_DEFUN([PHP_EXTENSION],[
-  sources=`$AWK -f $abs_srcdir/build/scan_makefile_in.awk < []PHP_EXT_SRCDIR($1)[]/Makefile.in`
-
-  PHP_NEW_EXTENSION($1, $sources, $2, $3)
-
-  if test -r "$ext_srcdir/Makefile.frag"; then
-    PHP_ADD_MAKEFILE_FRAGMENT
-  fi
-])
-
 AC_DEFUN([PHP_ADD_BUILD_DIR],[
   ifelse($2,,[
     BUILD_DIR="$BUILD_DIR $1"
@@ -1444,65 +1433,6 @@ AC_DEFUN([PHP_MISSING_FCLOSE_DECL],[
     AC_DEFINE(MISSING_FCLOSE_DECL,1,[ ])
     AC_MSG_RESULT([missing])
   ])
-])
-
-dnl
-dnl PHP_AC_BROKEN_SPRINTF
-dnl
-dnl Check for broken sprintf(), C99 conformance
-dnl
-AC_DEFUN([PHP_AC_BROKEN_SPRINTF],[
-  AC_CACHE_CHECK(whether sprintf is broken, ac_cv_broken_sprintf,[
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[main() {char buf[20];exit(sprintf(buf,"testing 123")!=11); }]])],[
-      ac_cv_broken_sprintf=no
-    ],[
-      ac_cv_broken_sprintf=yes
-    ],[
-      ac_cv_broken_sprintf=no
-    ])
-  ])
-  if test "$ac_cv_broken_sprintf" = "yes"; then
-    AC_DEFINE(PHP_BROKEN_SPRINTF, 1, [Whether sprintf is C99 conform])
-  else
-    AC_DEFINE(PHP_BROKEN_SPRINTF, 0, [Whether sprintf is C99 conform])
-  fi
-])
-
-dnl
-dnl PHP_AC_BROKEN_SNPRINTF
-dnl
-dnl Check for broken snprintf(), C99 conformance
-dnl
-AC_DEFUN([PHP_AC_BROKEN_SNPRINTF],[
-  AC_CACHE_CHECK(whether snprintf is broken, ac_cv_broken_snprintf,[
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#define NULL (0L)
-main() {
-  char buf[20];
-  int res = 0;
-  res = res || (snprintf(buf, 2, "marcus") != 6);
-  res = res || (buf[1] != '\0');
-  /* Implementations may consider this as an encoding error */
-  snprintf(buf, 0, "boerger");
-  /* However, they MUST ignore the pointer */
-  res = res || (buf[0] != 'm');
-  res = res || (snprintf(NULL, 0, "boerger") != 7);
-  res = res || (snprintf(buf, sizeof(buf), "%f", 0.12345678) != 8);
-  exit(res);
-}
-    ]])],[
-      ac_cv_broken_snprintf=no
-    ],[
-      ac_cv_broken_snprintf=yes
-    ],[
-      ac_cv_broken_snprintf=no
-    ])
-  ])
-  if test "$ac_cv_broken_snprintf" = "yes"; then
-    AC_DEFINE(PHP_BROKEN_SNPRINTF, 1, [Whether snprintf is C99 conform])
-  else
-    AC_DEFINE(PHP_BROKEN_SNPRINTF, 0, [Whether snprintf is C99 conform])
-  fi
 ])
 
 dnl

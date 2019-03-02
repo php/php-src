@@ -131,7 +131,7 @@ static zend_string *zend_build_runtime_definition_key(zend_string *name, unsigne
 {
 	zend_string *result;
 	char char_pos_buf[32];
-	size_t char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	size_t char_pos_len = sprintf(char_pos_buf, "%p", lex_pos);
 	zend_string *filename = CG(active_op_array)->filename;
 
 	/* NULL, name length, filename length, last accepting char position length */
@@ -3947,7 +3947,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
+zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
 
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
@@ -3958,13 +3958,8 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	zend_op *opline;
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
-		uint32_t dcl_opnum = get_next_op_number();
-		zend_compile_class_decl(class_ast, 0);
 		/* jump over anon class declaration */
-		opline = &CG(active_op_array)->opcodes[dcl_opnum];
-		if (opline->opcode == ZEND_FETCH_CLASS) {
-			opline++;
-		}
+		opline = zend_compile_class_decl(class_ast, 0);
 		class_node.op_type = opline->result_type;
 		class_node.u.op.var = opline->result.var;
 		opline->extended_value = get_next_op_number();
@@ -4283,7 +4278,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 	zend_ast *depth_ast = ast->child[0];
 
 	zend_op *opline;
-	int depth;
+	zend_long depth;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_BREAK || ast->kind == ZEND_AST_CONTINUE);
 
@@ -4310,7 +4305,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
 		if (!zend_handle_loops_and_finally_ex(depth, NULL)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' " ZEND_LONG_FMT " level%s",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue",
 				depth, depth == 1 ? "" : "s");
 		}
@@ -4327,12 +4322,12 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 			if (depth == 1) {
 				zend_error(E_WARNING,
 					"\"continue\" targeting switch is equivalent to \"break\". " \
-					"Did you mean to use \"continue %d\"?",
+					"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
 					depth + 1);
 			} else {
 				zend_error(E_WARNING,
-					"\"continue %d\" targeting switch is equivalent to \"break %d\". " \
-					"Did you mean to use \"continue %d\"?",
+					"\"continue " ZEND_LONG_FMT "\" targeting switch is equivalent to \"break " ZEND_LONG_FMT "\". " \
+					"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
 					depth, depth, depth + 1);
 			}
 		}
@@ -6061,7 +6056,7 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 {
 	zend_string *result;
 	char char_pos_buf[32];
-	size_t char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	size_t char_pos_len = sprintf(char_pos_buf, "%p", lex_pos);
 	zend_string *filename = CG(active_op_array)->filename;
 
 	/* NULL, name length, filename length, last accepting char position length */
@@ -6071,7 +6066,7 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
+zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -6226,7 +6221,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 					}
 					CG(zend_lineno) = ast->lineno;
 					zend_string_release(lcname);
-					return;
+					return NULL;
 				}
 			}
 		} else if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
@@ -6258,7 +6253,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			zval zv;
 			ZVAL_PTR(&zv, ce);
 			destroy_zend_class(&zv);
-			return;
+			return opline;
 		}
 	} else {
 		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
@@ -6285,6 +6280,7 @@ void zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			opline->opcode = ZEND_DECLARE_CLASS;
 		}
 	}
+	return opline;
 }
 /* }}} */
 
@@ -6699,6 +6695,16 @@ ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode,
 }
 /* }}} */
 
+ZEND_API zend_bool zend_binary_op_produces_array_conversion_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
+{
+	if (opcode == ZEND_CONCAT && (Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op2) == IS_ARRAY)) {
+		return 1;
+	}
+
+	return 0;
+}
+/* }}} */
+
 static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	binary_op_type fn = get_binary_op(opcode);
@@ -6714,6 +6720,10 @@ static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode
 
 	/* don't evaluate numeric string error-producing operations at compile-time */
 	if (zend_binary_op_produces_numeric_string_error(opcode, op1, op2)) {
+		return 0;
+	}
+	/* don't evaluate array to string conversions at compile-time */
+	if (zend_binary_op_produces_array_conversion_error(opcode, op1, op2)) {
 		return 0;
 	}
 
@@ -6883,10 +6893,18 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 		if (opcode == ZEND_CONCAT) {
 			/* convert constant operands to strings at compile-time */
 			if (left_node.op_type == IS_CONST) {
-				convert_to_string(&left_node.u.constant);
+				if (Z_TYPE(left_node.u.constant) == IS_ARRAY) {
+					zend_emit_op_tmp(&left_node, ZEND_CAST, &left_node, NULL)->extended_value = IS_STRING;
+				} else {
+					convert_to_string(&left_node.u.constant);
+				}
 			}
 			if (right_node.op_type == IS_CONST) {
-				convert_to_string(&right_node.u.constant);
+				if (Z_TYPE(right_node.u.constant) == IS_ARRAY) {
+					zend_emit_op_tmp(&right_node, ZEND_CAST, &right_node, NULL)->extended_value = IS_STRING;
+				} else {
+					convert_to_string(&right_node.u.constant);
+				}
 			}
 			if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
 				opcode = ZEND_FAST_CONCAT;

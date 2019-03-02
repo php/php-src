@@ -82,7 +82,6 @@ PHPAPI int ap_php_snprintf(char *, size_t, const char *, ...) ZEND_ATTRIBUTE_FOR
 PHPAPI int ap_php_vsnprintf(char *, size_t, const char *, va_list ap);
 PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap);
 PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_0cvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_conv_fp(char format, double num,
@@ -117,11 +116,6 @@ END_EXTERN_C()
 #ifndef HAVE_ASPRINTF
 #define asprintf ap_php_asprintf
 #endif
-
-#ifdef sprintf
-#undef sprintf
-#endif
-#define sprintf php_sprintf
 
 typedef enum {
 	LM_STD = 0,

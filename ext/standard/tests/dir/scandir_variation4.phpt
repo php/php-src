@@ -16,7 +16,8 @@ echo "*** Testing scandir() : usage variations ***\n";
 // include for create_files/delete_files functions
 include (dirname(__FILE__) . '/../file/file.inc');
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__ . '/scandir_variation4';
+@mkdir($base_dir_path);
 
 $level_one_dir_path = "$base_dir_path/level_one";
 $level_two_dir_path = "$level_one_dir_path/level_two";
@@ -61,9 +62,10 @@ var_dump(scandir('../../level_one'));
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__);
-rmdir("$dir_path/level_one/level_two");
-rmdir("$dir_path/level_one");
+$base_dir_path = __DIR__ . '/scandir_variation4';
+rmdir("$base_dir_path/level_one/level_two");
+rmdir("$base_dir_path/level_one");
+rmdir($base_dir_path);
 ?>
 --EXPECT--
 *** Testing scandir() : usage variations ***

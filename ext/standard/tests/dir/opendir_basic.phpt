@@ -13,7 +13,8 @@ Test opendir() function : basic functionality
 
 echo "*** Testing opendir() : basic functionality ***\n";
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__ . '/opendir_basic';
+@mkdir($base_dir_path);
 
 $level_one_dir_name = "level_one";
 $level_one_dir_path = "$base_dir_path/$level_one_dir_name";
@@ -42,9 +43,10 @@ var_dump($dh2);
 ===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
-rmdir("$file_path/level_one/level_two");
-rmdir("$file_path/level_one");
+$base_dir_path = __DIR__ . '/opendir_basic';
+rmdir("$base_dir_path/level_one/level_two");
+rmdir("$base_dir_path/level_one");
+rmdir($base_dir_path);
 ?>
 --EXPECTF--
 *** Testing opendir() : basic functionality ***
