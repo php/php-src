@@ -176,10 +176,6 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	}
 
 	switch(image_type) {
-		case PHP_GDIMG_CONVERT_WBM:
-			if(q<0||q>255) {
-				php_error_docref(NULL, E_WARNING, "Invalid threshold value '%d'. It must be between 0 and 255", q);
-			}
 		case PHP_GDIMG_TYPE_JPG:
 			(*func_p)(im, ctx, q);
 			break;

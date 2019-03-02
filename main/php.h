@@ -80,7 +80,6 @@
 /* Windows specific defines */
 #ifdef PHP_WIN32
 # define PHP_PROG_SENDMAIL		"Built in mailer"
-# define HAVE_DECLARED_TIMEZONE
 # define WIN32_LEAN_AND_MEAN
 # define NOOPENFILE
 
@@ -231,17 +230,7 @@ typedef unsigned int socklen_t;
 #include "zend_hash.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"
-
-#if STDC_HEADERS
-# include <string.h>
-#else
-# ifndef HAVE_MEMCPY
-#  define memcpy(d, s, n)	bcopy((s), (d), (n))
-# endif
-# ifndef HAVE_MEMMOVE
-#  define memmove(d, s, n)	bcopy ((s), (d), (n))
-# endif
-#endif
+#include <string.h>
 
 #ifndef HAVE_STRERROR
 char *strerror(int);

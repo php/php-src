@@ -1700,16 +1700,16 @@ static zend_always_inline int php_valid_var_name(const char *var_name, size_t va
 }
 /* }}} */
 
-PHPAPI int php_prefix_varname(zval *result, const zval *prefix, const char *var_name, size_t var_name_len, zend_bool add_underscore) /* {{{ */
+PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, zend_bool add_underscore) /* {{{ */
 {
-	ZVAL_NEW_STR(result, zend_string_alloc(Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0) + var_name_len, 0));
-	memcpy(Z_STRVAL_P(result), Z_STRVAL_P(prefix), Z_STRLEN_P(prefix));
+	ZVAL_NEW_STR(result, zend_string_alloc(ZSTR_LEN(prefix) + (add_underscore ? 1 : 0) + var_name_len, 0));
+	memcpy(Z_STRVAL_P(result), ZSTR_VAL(prefix), ZSTR_LEN(prefix));
 
 	if (add_underscore) {
-		Z_STRVAL_P(result)[Z_STRLEN_P(prefix)] = '_';
+		Z_STRVAL_P(result)[ZSTR_LEN(prefix)] = '_';
 	}
 
-	memcpy(Z_STRVAL_P(result) + Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0), var_name, var_name_len + 1);
+	memcpy(Z_STRVAL_P(result) + ZSTR_LEN(prefix) + (add_underscore ? 1 : 0), var_name, var_name_len + 1);
 
 	return SUCCESS;
 }
@@ -1888,7 +1888,7 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 }
 /* }}} */
 
-static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1944,7 +1944,7 @@ static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *s
 }
 /* }}} */
 
-static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
+static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1995,7 +1995,7 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 }
 /* }}} */
 
-static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2069,7 +2069,7 @@ static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol
 }
 /* }}} */
 
-static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
+static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2135,7 +2135,7 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 }
 /* }}} */
 
-static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2182,7 +2182,7 @@ static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_
 }
 /* }}} */
 
-static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
+static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2229,7 +2229,7 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 }
 /* }}} */
 
-static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2283,7 +2283,7 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 }
 /* }}} */
 
-static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_table, zval *prefix) /* {{{ */
+static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2425,9 +2425,10 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
-	zval *var_array_param, *prefix = NULL;
+	zval *var_array_param;
 	zend_long extract_refs;
 	zend_long extract_type = EXTR_OVERWRITE;
+	zend_string *prefix = NULL;
 	zend_long count;
 	zend_array *symbol_table;
 
@@ -2435,7 +2436,7 @@ PHP_FUNCTION(extract)
 		Z_PARAM_ARRAY_EX2(var_array_param, 0, 1, 0)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(extract_type)
-		Z_PARAM_ZVAL(prefix)
+		Z_PARAM_STR(prefix)
 	ZEND_PARSE_PARAMETERS_END();
 
 	extract_refs = (extract_type & EXTR_REFS);
@@ -2455,8 +2456,7 @@ PHP_FUNCTION(extract)
 	}
 
 	if (prefix) {
-		convert_to_string(prefix);
-		if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
+		if (ZSTR_LEN(prefix) && !php_valid_var_name(ZSTR_VAL(prefix), ZSTR_LEN(prefix))) {
 			php_error_docref(NULL, E_WARNING, "prefix is not a valid identifier");
 			return;
 		}
@@ -2493,35 +2493,33 @@ PHP_FUNCTION(extract)
 				break;
 		}
 	} else {
+		/* The array might be stored in a local variable that will be overwritten */
+		zval array_copy;
+		ZVAL_COPY(&array_copy, var_array_param);
 		switch (extract_type) {
 			case EXTR_IF_EXISTS:
-				count = php_extract_if_exists(Z_ARRVAL_P(var_array_param), symbol_table);
+				count = php_extract_if_exists(Z_ARRVAL(array_copy), symbol_table);
 				break;
 			case EXTR_OVERWRITE:
-				{
-					zval zv;
-					/* The array might be stored in a local variable that will be overwritten */
-					ZVAL_COPY(&zv, var_array_param);
-					count = php_extract_overwrite(Z_ARRVAL(zv), symbol_table);
-					zval_ptr_dtor(&zv);
-				}
+				count = php_extract_overwrite(Z_ARRVAL(array_copy), symbol_table);
 				break;
 			case EXTR_PREFIX_IF_EXISTS:
-				count = php_extract_prefix_if_exists(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
+				count = php_extract_prefix_if_exists(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			case EXTR_PREFIX_SAME:
-				count = php_extract_prefix_same(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
+				count = php_extract_prefix_same(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			case EXTR_PREFIX_ALL:
-				count = php_extract_prefix_all(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
+				count = php_extract_prefix_all(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			case EXTR_PREFIX_INVALID:
-				count = php_extract_prefix_invalid(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
+				count = php_extract_prefix_invalid(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			default:
-				count = php_extract_skip(Z_ARRVAL_P(var_array_param), symbol_table);
+				count = php_extract_skip(Z_ARRVAL(array_copy), symbol_table);
 				break;
 		}
+		zval_ptr_dtor(&array_copy);
 	}
 
 	RETURN_LONG(count);

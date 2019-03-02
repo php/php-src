@@ -32,11 +32,6 @@ PHP_ARG_WITH(mysqli, for MySQLi support,
                           to mysql_config.  If no value or mysqlnd is passed
                           as FILE, the MySQL native driver will be used])
 
-PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
-[  --enable-embedded-mysqli
-                          MYSQLi: Enable embedded support
-                          Note: Does not work with MySQL native driver!], no, no)
-
 dnl ext/pdo_mysql/config.m4 also depends on this configure option.
 PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
 [  --with-mysql-sock[=SOCKPATH]
@@ -52,12 +47,7 @@ elif test "$PHP_MYSQLI" != "no"; then
   MYSQL_CONFIG=$PHP_MYSQLI
 
   MYSQL_LIB_NAME='mysqlclient'
-  if test "$PHP_EMBEDDED_MYSQLI" = "yes"; then
-    AC_DEFINE(HAVE_EMBEDDED_MYSQLI, 1, [embedded MySQL support enabled])
-    MYSQL_LIB_CFG='--libmysqld-libs'
-    dnl mysqlnd doesn't support embedded, so we have to add some extra stuff
-    mysqli_extra_sources="mysqli_embedded.c"
-  elif test "$enable_maintainer_zts" = "yes"; then
+  if test "$enable_maintainer_zts" = "yes"; then
     MYSQL_LIB_CFG='--libs_r'
     MYSQL_LIB_NAME='mysqlclient_r'
   else
@@ -116,7 +106,7 @@ if test "$PHP_MYSQLI" != "no"; then
 
   mysqli_sources="mysqli.c mysqli_api.c mysqli_prop.c mysqli_nonapi.c \
                   mysqli_fe.c mysqli_report.c mysqli_driver.c mysqli_warning.c \
-                  mysqli_exception.c mysqli_result_iterator.c $mysqli_extra_sources"
+                  mysqli_exception.c mysqli_result_iterator.c"
   PHP_NEW_EXTENSION(mysqli, $mysqli_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(MYSQLI_SHARED_LIBADD)
   PHP_INSTALL_HEADERS([ext/mysqli/php_mysqli_structs.h])

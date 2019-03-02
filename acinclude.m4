@@ -1030,10 +1030,8 @@ AC_DEFUN([_PHP_CHECK_SIZEOF], [
     old_LDFLAGS=$LDFLAGS
     LDFLAGS=
     AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <stdio.h>
-#if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
-#endif
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
@@ -1103,10 +1101,8 @@ AC_CACHE_VAL(ac_cv_type_in_addr_t,
 changequote(<<,>>)dnl
 <<in_addr_t[^a-zA-Z_0-9]>>dnl
 changequote([,]), [#include <sys/types.h>
-#if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
@@ -1457,29 +1453,6 @@ AC_DEFUN([PHP_SOCKADDR_CHECKS], [
   ])
   if test "$ac_cv_sockaddr_sa_len" = "yes"; then
     AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1, [Whether struct sockaddr has field sa_len])
-  fi
-])
-
-dnl
-dnl PHP_DECLARED_TIMEZONE
-dnl
-AC_DEFUN([PHP_DECLARED_TIMEZONE],[
-  AC_CACHE_CHECK(for declared timezone, ac_cv_declared_timezone,[
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <time.h>
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-]],[[
-    time_t foo = (time_t) timezone;
-]])],[
-  ac_cv_declared_timezone=yes
-],[
-  ac_cv_declared_timezone=no
-])])
-  if test "$ac_cv_declared_timezone" = "yes"; then
-    AC_DEFINE(HAVE_DECLARED_TIMEZONE, 1, [Whether system headers declare timezone])
   fi
 ])
 

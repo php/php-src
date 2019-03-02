@@ -101,8 +101,6 @@ PHP_FUNCTION(mysqli_stmt_prepare);
 PHP_FUNCTION(mysqli_stmt_fetch);
 PHP_FUNCTION(mysqli_stmt_param_count);
 PHP_FUNCTION(mysqli_stmt_send_long_data);
-PHP_FUNCTION(mysqli_embedded_server_end);
-PHP_FUNCTION(mysqli_embedded_server_start);
 PHP_FUNCTION(mysqli_sqlstate);
 PHP_FUNCTION(mysqli_ssl_set);
 PHP_FUNCTION(mysqli_stat);
