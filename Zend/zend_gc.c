@@ -147,14 +147,10 @@ static void gc_trace_ref(zend_refcounted *ref) {
 }
 #endif
 
-typedef struct _gc_refcounted_stack_element {
-	zend_refcounted *ref;
-} gc_refcounted_stack_element;
-
 typedef struct _gc_refcounted_stack {
 	int count;
 	int max;
-	gc_refcounted_stack_element *bottom;
+	zend_refcounted **bottom;
 } gc_refcounted_stack;
 
 static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
@@ -382,7 +378,7 @@ static gc_refcounted_stack* gc_refcounted_stack_init(int size)
 
 	stack->count = 0;
 	stack->max = size;
-	stack->bottom = (gc_refcounted_stack_element*) emalloc(stack->max * sizeof(gc_refcounted_stack_element));
+	stack->bottom = (zend_refcounted**) emalloc(stack->max * sizeof(zend_refcounted*));
 
 	return stack;
 }
@@ -391,10 +387,10 @@ static void gc_refcounted_stack_push(gc_refcounted_stack *stack, zend_refcounted
 {
 	if (stack->count >= stack->max) { // if max capacity is full, double in size
 		stack->max *= 2;
-		stack->bottom = (gc_refcounted_stack_element*) erealloc(stack->bottom, stack->max * sizeof(gc_refcounted_stack_element));
+		stack->bottom = (zend_refcounted**) erealloc(stack->bottom, stack->max * sizeof(zend_refcounted*));
 	}
 
-	(stack->bottom + stack->count)->ref = ref;
+	*(stack->bottom + stack->count) = ref;
 	stack->count++;
 }
 
@@ -405,7 +401,7 @@ static zend_refcounted* gc_refcounted_stack_pop(gc_refcounted_stack *stack)
 	}
 
 	stack->count--;
-	return (stack->bottom + stack->count)->ref;
+	return *(stack->bottom + stack->count);
 }
 
 static void gc_refcounted_stack_destroy(gc_refcounted_stack *stack)
