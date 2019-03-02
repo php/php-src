@@ -2864,7 +2864,7 @@ double_str:
 		}
 	} else {
 		zend_long low, high;
-		/* lstep is a ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
+		/* lstep is a zend_ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
 		zend_ulong lstep;
 		uint32_t i, size;
 long_str:

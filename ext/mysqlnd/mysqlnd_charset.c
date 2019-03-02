@@ -819,9 +819,9 @@ PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset,
 	*newstr = '\0';
 
 	if (escape_overflow) {
-		DBG_RETURN((ulong)~0);
+		DBG_RETURN((zend_ulong)~0);
 	}
-	DBG_RETURN((ulong)(newstr - newstr_s));
+	DBG_RETURN((zend_ulong)(newstr - newstr_s));
 }
 /* }}} */
 
@@ -899,9 +899,9 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 	*newstr = '\0';
 
 	if (escape_overflow) {
-		DBG_RETURN((ulong)~0);
+		DBG_RETURN((zend_ulong)~0);
 	}
-	DBG_RETURN((ulong)(newstr - newstr_s));
+	DBG_RETURN((zend_ulong)(newstr - newstr_s));
 }
 /* }}} */
 

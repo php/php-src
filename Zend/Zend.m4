@@ -39,10 +39,6 @@ _LT_AC_TRY_DLOPEN_SELF([
 ], [])
 ])
 
-dnl This is required for QNX and may be some BSD derived systems
-AC_CHECK_TYPE( uint, unsigned int )
-AC_CHECK_TYPE( ulong, unsigned long )
-
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(strdup getpid kill strtod strtol finite fpclass sigsetjmp)

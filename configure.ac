@@ -31,9 +31,6 @@ AH_TOP([
 #endif
 
 #define ZEND_DLIMPORT
-
-#undef uint
-#undef ulong
 ])
 AH_BOTTOM([
 #ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
