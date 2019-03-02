@@ -75,6 +75,8 @@
 /* one (0) is reserved */
 #define GC_ROOT_BUFFER_MAX_ENTRIES 10001
 
+#define GC_REFCOUNTED_STACK_INITIAL_SIZE 16
+
 #define GC_HAS_DESTRUCTORS  (1<<0)
 
 #ifndef ZEND_GC_DEBUG
@@ -624,7 +626,7 @@ static void gc_mark_roots(void)
 {
 	gc_root_buffer *current = GC_G(roots).next;
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init(8);
+	gc_refcounted_stack *stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 
 	while (current != &GC_G(roots)) {
 		if (GC_REF_GET_COLOR(current->ref) == GC_PURPLE) {
@@ -750,8 +752,8 @@ static void gc_scan_roots(void)
 {
 	gc_root_buffer *current = GC_G(roots).next;
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init(8);
-	gc_refcounted_stack *stack_black = gc_refcounted_stack_init(8);
+	gc_refcounted_stack *stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
+	gc_refcounted_stack *stack_black = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 
 	while (current != &GC_G(roots)) {
 		gc_scan(current->ref, stack, stack_black);
@@ -978,7 +980,7 @@ static int gc_collect_roots(uint32_t *flags)
 		current = next;
 	}
 
-	stack = gc_refcounted_stack_init(8);
+	stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 	current = GC_G(roots).next;
 	while (current != &GC_G(roots)) {
 		if (GC_REF_GET_COLOR(current->ref) == GC_WHITE) {
