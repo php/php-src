@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Fixed bug #77652 (Anonymous classes can lose their interface information).
     (Nikita)
   . Fixed bug #77609 (Tests with shared extensions fails). (Ralf Habacker)
+  . Fixed bug #77676 (Unable to run tests when building shared extension on
+    AIX). (Kevin Adler)
 
 - FPM:
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
