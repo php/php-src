@@ -33,7 +33,7 @@ else
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-opt64.c"
   ])
   EXT_HASH_SHA3_SOURCES="$SHA3_OPT_SRC $SHA3_DIR/KeccakHash.c $SHA3_DIR/KeccakSponge.c hash_sha3.c"
-  PHP_HASH_CFLAGS="-I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded"
+  PHP_HASH_CFLAGS="-I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
   PHP_ADD_BUILD_DIR(ext/hash/$SHA3_DIR, 1)
 fi
