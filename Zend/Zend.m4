@@ -10,12 +10,6 @@ AC_REQUIRE([AC_PROG_CC_C_O])
 
 LIBZEND_BISON_CHECK
 
-dnl Ugly hack to get around a problem with gcc on AIX.
-if test "$CC" = "gcc" -a "$ac_cv_prog_cc_g" = "yes" -a \
-   "`uname -sv`" = "AIX 4"; then
-	CFLAGS=`echo $CFLAGS | sed -e 's/-g//'`
-fi
-
 AC_CHECK_HEADERS(
 inttypes.h \
 stdint.h \
