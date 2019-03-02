@@ -644,24 +644,21 @@ static void gc_mark_roots(void)
 	gc_refcounted_stack_destroy(stack);
 }
 
-static void gc_scan(zend_refcounted *ref, gc_refcounted_stack *stack)
+static void gc_scan(zend_refcounted *ref, gc_refcounted_stack *stack, gc_refcounted_stack *stack_black)
 {
     HashTable *ht;
 	Bucket *p, *end;
 	zval *zv;
 	zend_refcounted *ref_black;
-	gc_refcounted_stack *stack_black;
 
 tail_call:
 	if (GC_REF_GET_COLOR(ref) == GC_GREY) {
 		if (GC_REFCOUNT(ref) > 0) {
-			stack_black = gc_refcounted_stack_init(8);
 			gc_scan_black(ref, stack_black);
 			while (stack_black->count) {
 				ref_black = gc_refcounted_stack_pop(stack_black);
 				gc_scan_black(ref_black, stack_black);
 			}
-			gc_refcounted_stack_destroy(stack_black);
 		} else {
 			GC_REF_SET_COLOR(ref, GC_WHITE);
 			if (GC_TYPE(ref) == IS_OBJECT) {
@@ -758,16 +755,18 @@ static void gc_scan_roots(void)
 	gc_root_buffer *current = GC_G(roots).next;
 	zend_refcounted *ref;
 	gc_refcounted_stack *stack = gc_refcounted_stack_init(8);
+	gc_refcounted_stack *stack_black = gc_refcounted_stack_init(8);
 
 	while (current != &GC_G(roots)) {
-		gc_scan(current->ref, stack);
+		gc_scan(current->ref, stack, stack_black);
 		while (stack->count) {
 			ref = gc_refcounted_stack_pop(stack);
-			gc_scan(ref, stack);
+			gc_scan(ref, stack, stack_black);
 		}
 		current = current->next;
 	}
 
+	gc_refcounted_stack_destroy(stack_black);
 	gc_refcounted_stack_destroy(stack);
 }
 
