@@ -28,7 +28,7 @@ if (!CHECK_HEADER_ADD_INCLUDE('KeccakHash.h', 'CFLAGS_HASH', hash_sha3_dir)) {
 	ERROR('Unable to locate SHA3 headers');
 }
 
-ADD_FLAG('CFLAGS_HASH', '/DKeccakP200_excluded /DKeccakP400_excluded /DKeccakP800_excluded');
+ADD_FLAG('CFLAGS_HASH', '/DKeccakP200_excluded /DKeccakP400_excluded /DKeccakP800_excluded /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 
 PHP_INSTALL_HEADERS('ext/hash/',	'php_hash.h php_hash_md.h php_hash_sha.h ' +
 									'php_hash_ripemd.h php_hash_haval.h php_hash_tiger.h ' +
