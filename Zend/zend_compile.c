@@ -6228,7 +6228,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			zend_string_release(lcname);
 			zend_build_properties_info_table(ce);
 			ce->ce_flags |= ZEND_ACC_LINKED;
-			return;
+			return NULL;
 		}
 	}
 
