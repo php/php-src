@@ -5398,6 +5398,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 								"with a %s type can only be %s or NULL",
 								zend_get_type_by_const(arg_type), zend_get_type_by_const(arg_type));
 						}
+						break;
 				}
 			}
 
