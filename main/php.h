@@ -95,8 +95,6 @@
 typedef int uid_t;
 typedef int gid_t;
 typedef char * caddr_t;
-typedef unsigned int uint;
-typedef unsigned long ulong;
 typedef int pid_t;
 
 # ifndef PHP_DEBUG

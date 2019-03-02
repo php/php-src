@@ -38,9 +38,6 @@
 
 #include <float.h>
 
-typedef unsigned long ulong;
-typedef unsigned int uint;
-
 #define HAVE_STDIOSTR_H 1
 #define HAVE_CLASS_ISTDIOSTREAM
 #define istdiostream stdiostream

@@ -100,18 +100,18 @@ static void com_iter_move_forwards(zend_object_iterator *iter)
 			I->key++;
 		} else {
 			/* indicate that there are no more items */
-			I->key = (ulong)-1;
+			I->key = (zend_ulong)-1;
 			return;
 		}
 	} else {
 		/* safe array */
 		if (I->key >= (ULONG) I->sa_max) {
-			I->key = (ulong)-1;
+			I->key = (zend_ulong)-1;
 			return;
 		}
 		I->key++;
 		if (php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key) == 0) {
-			I->key = (ulong)-1;
+			I->key = (zend_ulong)-1;
 			return;
 		}
 	}
@@ -193,7 +193,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 			php_com_zval_from_variant(&ptr, &I->v, I->code_page);
 			ZVAL_COPY_VALUE(&I->zdata, &ptr);
 		} else {
-			I->key = (ulong)-1;
+			I->key = (zend_ulong)-1;
 		}
 
 	} else {
@@ -228,7 +228,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 			ZVAL_COPY_VALUE(&I->zdata, &ptr);
 		} else {
 			/* indicate that there are no more items */
-			I->key = (ulong)-1;
+			I->key = (zend_ulong)-1;
 		}
 	}
 

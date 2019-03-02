@@ -26,7 +26,7 @@
 #include "zend_shared_alloc.h"
 
 #if SIZEOF_SIZE_T <= SIZEOF_ZEND_LONG
-/* If sizeof(void*) == sizeof(ulong) we can use zend_hash index functions */
+/* If sizeof(void*) == sizeof(zend_ulong) we can use zend_hash index functions */
 # define accel_xlat_set(old, new)	zend_hash_index_add_new_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old), (new))
 # define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old))
 #else

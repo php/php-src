@@ -206,7 +206,7 @@ typedef struct st_mysqlnd_infile
 
 typedef struct st_mysqlnd_session_options
 {
-	ulong		flags;
+	zend_ulong		flags;
 
 	/* init commands - we need to send them to server directly after connect */
 	unsigned int	num_commands;
@@ -231,7 +231,7 @@ typedef struct st_mysqlnd_session_options
 
 	char 		*charset_name;
 	/* maximum allowed packet size for communication */
-	ulong		max_allowed_packet;
+	zend_ulong		max_allowed_packet;
 
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	zend_bool	int_and_float_native;
