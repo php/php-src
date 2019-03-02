@@ -26,7 +26,6 @@ abs_builddir=`pwd`
 AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
-AC_PROG_CC_C_O
 
 dnl Support systems with system libraries in e.g. /usr/lib64
 PHP_ARG_WITH(libdir, for system library directory,
