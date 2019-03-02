@@ -4667,7 +4667,7 @@ PHP_METHOD(DatePeriod, getDateInterval)
 }
 /* }}} */
 
-/* {{{ proto DatePeriod::getRecurrences()
+/* {{{ proto int DatePeriod::getRecurrences()
    Get recurrences.
 */
 PHP_METHOD(DatePeriod, getRecurrences)
@@ -4681,11 +4681,11 @@ PHP_METHOD(DatePeriod, getRecurrences)
 
         dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 
-        if (0 == dpobj->recurrences - 1) {
+        if (0 == dpobj->recurrences - dpobj->include_start_date) {
                 return;
         }
 
-        RETURN_LONG(dpobj->recurrences - 1);
+        RETURN_LONG(dpobj->recurrences - dpobj->include_start_date);
 }
 /* }}} */
 

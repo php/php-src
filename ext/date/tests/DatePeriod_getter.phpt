@@ -23,6 +23,11 @@ $periodWithRecurrences = new DatePeriod($start, $interval, $recurrences);
 
 var_dump($periodWithRecurrences->getRecurrences());
 var_dump($periodWithRecurrences->getEndDate());
+
+$periodWithRecurrencesWithoutStart = new DatePeriod($start, $interval, $recurrences, DatePeriod::EXCLUDE_START_DATE);
+
+var_dump($periodWithRecurrences->getRecurrences());
+
 ?>
 --EXPECT--
 string(19) "2000-01-01 00:00:00"
@@ -33,3 +38,4 @@ string(12) "+0-0-1-0-0-0"
 NULL
 int(4)
 NULL
+int(4)
