@@ -4,30 +4,56 @@ dnl
 dnl Configure options
 dnl
 
-PHP_ARG_ENABLE(gd, for GD support,
-[  --enable-gd             Include GD support])
+PHP_ARG_ENABLE([gd],
+  [for GD support],
+  [AS_HELP_STRING([--enable-gd],
+    [Include GD support])])
 
-PHP_ARG_WITH(external-gd, for external libgd,
-[  --with-external-gd      Use external libgd], no, no)
+PHP_ARG_WITH([external-gd],
+  [for external libgd],
+  [AS_HELP_STRING([--with-external-gd],
+    [Use external libgd])],
+  [no],
+  [no])
 
 if test -z "$PHP_WEBP"; then
-  PHP_ARG_WITH(webp, for libwebp,
-  [  --with-webp             GD: Enable WEBP support], no, no)
+  PHP_ARG_WITH([webp],
+    [for libwebp],
+    [AS_HELP_STRING([--with-webp],
+      [GD: Enable WEBP support])],
+    [no],
+    [no])
 fi
 
 if test -z "$PHP_JPEG"; then
-  PHP_ARG_WITH(jpeg, for libjpeg,
-  [  --with-jpeg             GD: Enable JPEG support], no, no)
+  PHP_ARG_WITH([jpeg],
+    [for libjpeg],
+    [AS_HELP_STRING([--with-jpeg],
+      [GD: Enable JPEG support])],
+    [no],
+    [no])
 fi
 
-PHP_ARG_WITH(xpm, for libXpm,
-[  --with-xpm              GD: Enable XPM support], no, no)
+PHP_ARG_WITH([xpm],
+  [for libXpm],
+  [AS_HELP_STRING([--with-xpm],
+    [GD: Enable XPM support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(freetype, for FreeType 2,
-[  --with-freetype         GD: Enable FreeType 2 support], no, no)
+PHP_ARG_WITH([freetype],
+  [for FreeType 2],
+  [AS_HELP_STRING([--with-freetype],
+    [GD: Enable FreeType 2 support])],
+  [no],
+  [no])
 
-PHP_ARG_ENABLE(gd-jis-conv, whether to enable JIS-mapped Japanese font support in GD,
-[  --enable-gd-jis-conv    GD: Enable JIS-mapped Japanese font support], no, no)
+PHP_ARG_ENABLE([gd-jis-conv],
+  [whether to enable JIS-mapped Japanese font support in GD],
+  [AS_HELP_STRING([--enable-gd-jis-conv],
+    [GD: Enable JIS-mapped Japanese font support])],
+  [no],
+  [no])
 
 dnl
 dnl Checks for the configure options

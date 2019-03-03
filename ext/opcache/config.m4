@@ -1,11 +1,17 @@
 dnl config.m4 for extension opcache
 
-PHP_ARG_ENABLE(opcache, whether to enable Zend OPcache support,
-[  --disable-opcache       Disable Zend OPcache support], yes)
+PHP_ARG_ENABLE([opcache],
+  [whether to enable Zend OPcache support],
+  [AS_HELP_STRING([--disable-opcache],
+    [Disable Zend OPcache support])],
+  [yes])
 
-PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HUGE PAGES,
-[  --disable-huge-code-pages
-                          Disable copying PHP CODE pages into HUGE PAGES], yes, no)
+PHP_ARG_ENABLE([huge-code-pages],
+  [whether to enable copying PHP CODE pages into HUGE PAGES],
+  [AS_HELP_STRING([--disable-huge-code-pages],
+    [Disable copying PHP CODE pages into HUGE PAGES])],
+  [yes],
+  [no])
 
 if test "$PHP_OPCACHE" != "no"; then
 

@@ -1,10 +1,16 @@
 dnl config.m4 for extension zip
 
-PHP_ARG_ENABLE(zip, for zip archive read/writesupport,
-[  --enable-zip            Include Zip read/write support])
+PHP_ARG_ENABLE([zip],
+  [for zip archive read/writesupport],
+  [AS_HELP_STRING([--enable-zip],
+    [Include Zip read/write support])])
 
-PHP_ARG_WITH(libzip, libzip,
-[  --with-libzip[=DIR]       ZIP: use libzip], yes, no)
+PHP_ARG_WITH([libzip],
+  [libzip],
+  [AS_HELP_STRING([--with-libzip[=DIR]],
+    [ZIP: use libzip])],
+  [yes],
+  [no])
 
 if test "$PHP_ZIP" != "no"; then
 

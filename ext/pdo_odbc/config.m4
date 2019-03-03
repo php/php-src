@@ -17,10 +17,10 @@ define([PDO_ODBC_HELP_TEXT],[[
 
 			  When built as 'shared' the extension filename is always pdo_odbc.so]])
 
-PHP_ARG_WITH(pdo-odbc, for ODBC v3 support for PDO,
-[  --with-pdo-odbc=flavour,dir
-                          PDO: Support for 'flavour' ODBC driver.]PDO_ODBC_HELP_TEXT)
-
+PHP_ARG_WITH([pdo-odbc],
+  [for ODBC v3 support for PDO],
+  [AS_HELP_STRING([--with-pdo-odbc=flavour,dir],
+  [PDO: Support for 'flavour' ODBC driver.]PDO_ODBC_HELP_TEXT)])
 
 AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
   AC_MSG_CHECKING([for $1 in $PDO_ODBC_INCDIR])

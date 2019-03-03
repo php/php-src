@@ -67,40 +67,69 @@ dnl
 dnl Options
 dnl
 
-PHP_ARG_ENABLE(dba,,
-[  --enable-dba            Build DBA with bundled modules. To build shared DBA
-                          extension use --enable-dba=shared])
+PHP_ARG_ENABLE([dba],,
+  [AS_HELP_STRING([--enable-dba],
+    [Build DBA with bundled modules. To build shared DBA extension use --enable-dba=shared])])
 
-PHP_ARG_WITH(qdbm,,
-[  --with-qdbm[=DIR]         DBA: QDBM support], no, no)
+PHP_ARG_WITH([qdbm],,
+  [AS_HELP_STRING([--with-qdbm[=DIR]],
+    [DBA: QDBM support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(gdbm,,
-[  --with-gdbm[=DIR]         DBA: GDBM support], no, no)
+PHP_ARG_WITH([gdbm],,
+  [AS_HELP_STRING([--with-gdbm[=DIR]],
+    [DBA: GDBM support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(ndbm,,
-[  --with-ndbm[=DIR]         DBA: NDBM support], no, no)
+PHP_ARG_WITH([ndbm],,
+  [AS_HELP_STRING([--with-ndbm[=DIR]],
+    [DBA: NDBM support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(db4,,
-[  --with-db4[=DIR]          DBA: Oracle Berkeley DB 4.x or 5.x support], no, no)
+PHP_ARG_WITH([db4],,
+  [AS_HELP_STRING([--with-db4[=DIR]],
+    [DBA: Oracle Berkeley DB 4.x or 5.x support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(db3,,
-[  --with-db3[=DIR]          DBA: Oracle Berkeley DB 3.x support], no, no)
+PHP_ARG_WITH([db3],,
+  [AS_HELP_STRING([--with-db3[=DIR]],
+    [DBA: Oracle Berkeley DB 3.x support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(db2,,
-[  --with-db2[=DIR]          DBA: Oracle Berkeley DB 2.x support], no, no)
+PHP_ARG_WITH([db2],,
+  [AS_HELP_STRING([--with-db2[=DIR]],
+    [DBA: Oracle Berkeley DB 2.x support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(db1,,
-[  --with-db1[=DIR]          DBA: Oracle Berkeley DB 1.x support/emulation], no, no)
+PHP_ARG_WITH([db1],,
+  [AS_HELP_STRING([--with-db1[=DIR]],
+    [DBA: Oracle Berkeley DB 1.x support/emulation])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(dbm,,
-[  --with-dbm[=DIR]          DBA: DBM support], no, no)
+PHP_ARG_WITH([dbm],,
+  [AS_HELP_STRING([--with-dbm[=DIR]],
+    [DBA: DBM support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(tcadb,,
-[  --with-tcadb[=DIR]        DBA: Tokyo Cabinet abstract DB support], no, no)
+PHP_ARG_WITH([tcadb],,
+  [AS_HELP_STRING([--with-tcadb[=DIR]],
+    [DBA: Tokyo Cabinet abstract DB support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(lmdb,,
-[  --with-lmdb[=DIR]         DBA: Lightning memory-mapped database support], no, no)
-
+PHP_ARG_WITH([lmdb],,
+  [AS_HELP_STRING([--with-lmdb[=DIR]],
+    [DBA: Lightning memory-mapped database support])],
+  [no],
+  [no])
 
 dnl
 dnl Library checks
@@ -589,14 +618,23 @@ else
   php_dba_enable=no
 fi
 
-PHP_ARG_WITH(cdb,,
-[  --without-cdb[=DIR]       DBA: CDB support (bundled)], $php_dba_enable, no)
+PHP_ARG_WITH([cdb],,
+  [AS_HELP_STRING([--without-cdb[=DIR]],
+    [DBA: CDB support (bundled)])],
+    [$php_dba_enable],
+    [no])
 
-PHP_ARG_ENABLE(inifile,,
-[  --disable-inifile       DBA: INI support (bundled)], $php_dba_enable, no)
+PHP_ARG_ENABLE([inifile],,
+  [AS_HELP_STRING([--disable-inifile],
+    [DBA: INI support (bundled)])],
+  [$php_dba_enable],
+  [no])
 
-PHP_ARG_ENABLE(flatfile,,
-[  --disable-flatfile      DBA: FlatFile support (bundled)], $php_dba_enable, no)
+PHP_ARG_ENABLE([flatfile],,
+  [AS_HELP_STRING([--disable-flatfile],
+    [DBA: FlatFile support (bundled)])],
+  [$php_dba_enable],
+  [no])
 
 # CDB
 if test "$PHP_CDB" = "yes"; then

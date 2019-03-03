@@ -1,7 +1,10 @@
 dnl config.m4 for sapi fpm
 
-PHP_ARG_ENABLE(fpm,,
-[  --enable-fpm            Enable building of the fpm SAPI executable], no, no)
+PHP_ARG_ENABLE([fpm],,
+  [AS_HELP_STRING([--enable-fpm],
+    [Enable building of the fpm SAPI executable])],
+  [no],
+  [no])
 
 dnl configure checks {{{
 AC_DEFUN([AC_FPM_STDLIBS],
@@ -562,18 +565,29 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_SELECT
   AC_FPM_APPARMOR
 
-  PHP_ARG_WITH(fpm-user,,
-  [  --with-fpm-user[=USER]    Set the user for php-fpm to run as. (default: nobody)], nobody, no)
+  PHP_ARG_WITH([fpm-user],,
+    [AS_HELP_STRING([--with-fpm-user[=USER]],
+      [Set the user for php-fpm to run as. (default: nobody)])],
+    [nobody],
+    [no])
 
-  PHP_ARG_WITH(fpm-group,,
-  [  --with-fpm-group[=GRP]    Set the group for php-fpm to run as. For a system user, this
-                          should usually be set to match the fpm username (default: nobody)], nobody, no)
+  PHP_ARG_WITH([fpm-group],,
+    [AS_HELP_STRING([--with-fpm-group[=GRP]],
+      [Set the group for php-fpm to run as. For a system user, this should usually be set to match the fpm username (default: nobody)])],
+    [nobody],
+    [no])
 
-  PHP_ARG_WITH(fpm-systemd,,
-  [  --with-fpm-systemd      Activate systemd integration], no, no)
+  PHP_ARG_WITH([fpm-systemd],,
+    [AS_HELP_STRING([--with-fpm-systemd],
+      [Activate systemd integration])],
+    [no],
+    [no])
 
-  PHP_ARG_WITH(fpm-acl,,
-  [  --with-fpm-acl          Use POSIX Access Control Lists], no, no)
+  PHP_ARG_WITH([fpm-acl],,
+    [AS_HELP_STRING([--with-fpm-acl],
+      [Use POSIX Access Control Lists])],
+    [no],
+    [no])
 
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
     if test -z "$PKG_CONFIG"; then

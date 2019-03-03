@@ -1,11 +1,18 @@
 dnl config.m4 for extension xmlwriter
 
-PHP_ARG_ENABLE(xmlwriter, whether to enable XMLWriter support,
-[  --disable-xmlwriter     Disable XMLWriter support], yes)
+PHP_ARG_ENABLE([xmlwriter],
+  [whether to enable XMLWriter support],
+  [AS_HELP_STRING([--disable-xmlwriter],
+    [Disable XMLWriter support])],
+  [yes])
 
 if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR   XMLWriter: libxml2 install prefix], no, no)
+  PHP_ARG_WITH([libxml-dir],
+    [libxml2 install dir],
+    [AS_HELP_STRING([--with-libxml-dir=DIR],
+      [XMLWriter: libxml2 install prefix])],
+    [no],
+    [no])
 fi
 
 if test "$PHP_XMLWRITER" != "no"; then

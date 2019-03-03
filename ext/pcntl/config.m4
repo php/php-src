@@ -1,7 +1,9 @@
 dnl config.m4 for extension pcntl
 
-PHP_ARG_ENABLE(pcntl, whether to enable pcntl support,
-[  --enable-pcntl          Enable pcntl support (CLI/CGI only)])
+PHP_ARG_ENABLE([pcntl],
+  [whether to enable pcntl support],
+  [AS_HELP_STRING([--enable-pcntl],
+    [Enable pcntl support (CLI/CGI only)])])
 
 if test "$PHP_PCNTL" != "no"; then
   AC_CHECK_FUNCS(fork, [ AC_DEFINE(HAVE_FORK,1,[ ]) ], [ AC_MSG_ERROR(pcntl: fork() not supported by this platform) ])

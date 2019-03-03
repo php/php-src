@@ -53,10 +53,10 @@ AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
   AC_MSG_RESULT($PDO_OCI_LIB_DIR)
 ])
 
-PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
-[  --with-pdo-oci[=DIR]      PDO: Oracle OCI support. DIR defaults to [$]ORACLE_HOME.
-                          Use --with-pdo-oci=instantclient,/path/to/instant/client/lib
-                          for an Oracle Instant Client installation.])
+PHP_ARG_WITH([pdo-oci],
+  [Oracle OCI support for PDO],
+  [AS_HELP_STRING([--with-pdo-oci[=DIR]],
+    [PDO: Oracle OCI support. DIR defaults to [$]ORACLE_HOME. Use --with-pdo-oci=instantclient,/path/to/instant/client/lib for an Oracle Instant Client installation.])])
 
 if test "$PHP_PDO_OCI" != "no"; then
 

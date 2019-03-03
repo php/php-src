@@ -1,7 +1,9 @@
 dnl config.m4 for extension FFI
 
-PHP_ARG_WITH(ffi, for FFI support,
-[  --with-ffi             Include FFI support])
+PHP_ARG_WITH([ffi],
+  [for FFI support],
+  [AS_HELP_STRING([--with-ffi],
+    [Include FFI support])])
 
 if test "$PHP_FFI" != "no"; then
   if test -r $PHP_FFI/include/ffi.h; then
@@ -42,7 +44,7 @@ if test "$PHP_FFI" != "no"; then
 
   AC_CHECK_TYPES(long double)
 
-  PHP_CHECK_LIBRARY(ffi, ffi_call, 
+  PHP_CHECK_LIBRARY(ffi, ffi_call,
   [
     PHP_ADD_INCLUDE($FFI_INCDIR)
     PHP_ADD_LIBRARY_WITH_PATH(ffi, $FFI_LIBDIR, FFI_SHARED_LIBADD)
