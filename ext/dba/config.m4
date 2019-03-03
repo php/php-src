@@ -73,61 +73,61 @@ PHP_ARG_ENABLE([dba],,
     --enable-dba=shared])])
 
 PHP_ARG_WITH([qdbm],,
-  [AS_HELP_STRING([--with-qdbm[=DIR]],
+  [AS_HELP_STRING([--with-qdbm@<:@=DIR@:>@],
     [DBA: QDBM support])],
   [no],
   [no])
 
 PHP_ARG_WITH([gdbm],,
-  [AS_HELP_STRING([--with-gdbm[=DIR]],
+  [AS_HELP_STRING([--with-gdbm@<:@=DIR@:>@],
     [DBA: GDBM support])],
   [no],
   [no])
 
 PHP_ARG_WITH([ndbm],,
-  [AS_HELP_STRING([--with-ndbm[=DIR]],
+  [AS_HELP_STRING([--with-ndbm@<:@=DIR@:>@],
     [DBA: NDBM support])],
   [no],
   [no])
 
 PHP_ARG_WITH([db4],,
-  [AS_HELP_STRING([--with-db4[=DIR]],
+  [AS_HELP_STRING([--with-db4@<:@=DIR@:>@],
     [DBA: Oracle Berkeley DB 4.x or 5.x support])],
   [no],
   [no])
 
 PHP_ARG_WITH([db3],,
-  [AS_HELP_STRING([--with-db3[=DIR]],
+  [AS_HELP_STRING([--with-db3@<:@=DIR@:>@],
     [DBA: Oracle Berkeley DB 3.x support])],
   [no],
   [no])
 
 PHP_ARG_WITH([db2],,
-  [AS_HELP_STRING([--with-db2[=DIR]],
+  [AS_HELP_STRING([--with-db2@<:@=DIR@:>@],
     [DBA: Oracle Berkeley DB 2.x support])],
   [no],
   [no])
 
 PHP_ARG_WITH([db1],,
-  [AS_HELP_STRING([--with-db1[=DIR]],
+  [AS_HELP_STRING([--with-db1@<:@=DIR@:>@],
     [DBA: Oracle Berkeley DB 1.x support/emulation])],
   [no],
   [no])
 
 PHP_ARG_WITH([dbm],,
-  [AS_HELP_STRING([--with-dbm[=DIR]],
+  [AS_HELP_STRING([--with-dbm@<:@=DIR@:>@],
     [DBA: DBM support])],
   [no],
   [no])
 
 PHP_ARG_WITH([tcadb],,
-  [AS_HELP_STRING([--with-tcadb[=DIR]],
+  [AS_HELP_STRING([--with-tcadb@<:@=DIR@:>@],
     [DBA: Tokyo Cabinet abstract DB support])],
   [no],
   [no])
 
 PHP_ARG_WITH([lmdb],,
-  [AS_HELP_STRING([--with-lmdb[=DIR]],
+  [AS_HELP_STRING([--with-lmdb@<:@=DIR@:>@],
     [DBA: Lightning memory-mapped database support])],
   [no],
   [no])
@@ -620,7 +620,7 @@ else
 fi
 
 PHP_ARG_WITH([cdb],,
-  [AS_HELP_STRING([--without-cdb[=DIR]],
+  [AS_HELP_STRING([--without-cdb@<:@=DIR@:>@],
     [DBA: CDB support (bundled)])],
   [$php_dba_enable],
   [no])

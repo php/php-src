@@ -8,7 +8,7 @@ PHP_ARG_WITH([libedit],
 if test "$PHP_LIBEDIT" = "no"; then
   PHP_ARG_WITH([readline],
     [for readline support],
-    [AS_HELP_STRING([--with-readline[=DIR]],
+    [AS_HELP_STRING([--with-readline@<:@=DIR@:>@],
       [Include readline support (CLI/CGI only)])])
 else
   dnl "register" the --with-readline option to preven invalid "unknown configure option" warning

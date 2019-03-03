@@ -2,7 +2,7 @@ dnl config.m4 for extension tidy
 
 PHP_ARG_WITH([tidy],
   [for TIDY support],
-  [AS_HELP_STRING([--with-tidy[=DIR]],
+  [AS_HELP_STRING([--with-tidy@<:@=DIR@:>@],
     [Include TIDY support])])
 
 if test "$PHP_TIDY" != "no"; then

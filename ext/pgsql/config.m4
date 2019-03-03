@@ -2,7 +2,7 @@ dnl config.m4 for extension pgsql
 
 PHP_ARG_WITH([pgsql],
   [for PostgreSQL support],
-  [AS_HELP_STRING([--with-pgsql[=DIR]],
+  [AS_HELP_STRING([--with-pgsql@<:@=DIR@:>@],
     [Include PostgreSQL support. DIR is the PostgreSQL base install directory or
     the path to pg_config])])
 

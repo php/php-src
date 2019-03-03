@@ -69,7 +69,7 @@ dnl For the thread implementations, we always use --with-*
 dnl to maintain consistency
 
 AC_ARG_WITH([tsrm-pth],
-  [AS_HELP_STRING([--with-tsrm-pth[=pth-config]],
+  [AS_HELP_STRING([--with-tsrm-pth@<:@=pth-config@:>@],
     [Use GNU Pth])],
   [TSRM_PTH=$withval],
   [TSRM_PTH=no])

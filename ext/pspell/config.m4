@@ -2,7 +2,7 @@ dnl config.m4 for extension pspell
 
 PHP_ARG_WITH([pspell],
   [for PSPELL support],
-  [AS_HELP_STRING([--with-pspell[=DIR]],
+  [AS_HELP_STRING([--with-pspell@<:@=DIR@:>@],
     [Include PSPELL support. GNU Aspell version 0.50.0 or higher required])])
 
 if test "$PHP_PSPELL" != "no"; then

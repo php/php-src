@@ -2,7 +2,7 @@ dnl config.m4 for extension pdo_dblib
 
 PHP_ARG_WITH([pdo-dblib],
   [for PDO_DBLIB support via FreeTDS],
-  [AS_HELP_STRING([--with-pdo-dblib[=DIR]],
+  [AS_HELP_STRING([--with-pdo-dblib@<:@=DIR@:>@],
     [PDO: DBLIB-DB support. DIR is the FreeTDS home directory])])
 
 if test "$PHP_PDO_DBLIB" != "no"; then

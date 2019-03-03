@@ -1,6 +1,6 @@
 PHP_ARG_WITH([gmp],
   [for GNU MP support],
-  [AS_HELP_STRING([--with-gmp[=DIR]],
+  [AS_HELP_STRING([--with-gmp@<:@=DIR@:>@],
     [Include GNU MP support])])
 
 if test "$PHP_GMP" != "no"; then

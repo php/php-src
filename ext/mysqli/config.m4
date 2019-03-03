@@ -29,14 +29,14 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 PHP_ARG_WITH([mysqli],
   [for MySQLi support],
-  [AS_HELP_STRING([--with-mysqli[=FILE]],
+  [AS_HELP_STRING([--with-mysqli@<:@=FILE@:>@],
     [Include MySQLi support. FILE is the path to mysql_config. If no value or
     mysqlnd is passed as FILE, the MySQL native driver will be used])])
 
 dnl ext/pdo_mysql/config.m4 also depends on this configure option.
 PHP_ARG_WITH([mysql-sock],
   [for specified location of the MySQL UNIX socket],
-  [AS_HELP_STRING([--with-mysql-sock[=SOCKPATH]],
+  [AS_HELP_STRING([--with-mysql-sock@<:@=SOCKPATH@:>@],
     [MySQLi/PDO_MYSQL: Location of the MySQL unix socket pointer. If unspecified,
     the default locations are searched])],
   [no],

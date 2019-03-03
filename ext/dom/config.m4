@@ -9,7 +9,7 @@ PHP_ARG_ENABLE([dom],
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH([libxml-dir],
     [libxml2 install dir],
-    [AS_HELP_STRING([--with-libxml-dir[=DIR]],
+    [AS_HELP_STRING([--with-libxml-dir@<:@=DIR@:>@],
       [DOM: libxml2 install prefix])],
     [no],
     [no])

@@ -1180,7 +1180,7 @@ fi
 
 PHP_ARG_WITH([pear],
   [whether to install PEAR],
-  [AS_HELP_STRING([--with-pear=DIR],
+  [AS_HELP_STRING([--with-pear@<:@=DIR@:>@],
     [Install PEAR in DIR @<:@PREFIX/lib/php@:>@])],
   [no],
   [yes])

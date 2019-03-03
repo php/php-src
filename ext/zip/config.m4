@@ -7,7 +7,7 @@ PHP_ARG_ENABLE([zip],
 
 PHP_ARG_WITH([libzip],
   [libzip],
-  [AS_HELP_STRING([--with-libzip[=DIR]],
+  [AS_HELP_STRING([--with-libzip@<:@=DIR@:>@],
     [ZIP: use libzip])],
   [yes],
   [no])

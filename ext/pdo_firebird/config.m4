@@ -1,6 +1,6 @@
 PHP_ARG_WITH([pdo-firebird],
   [for Firebird support for PDO],
-  [AS_HELP_STRING([--with-pdo-firebird[=DIR]],
+  [AS_HELP_STRING([--with-pdo-firebird@<:@=DIR@:>@],
     [PDO: Firebird support. DIR is the Firebird base install directory
     @<:@/opt/firebird@:>@])])
 
