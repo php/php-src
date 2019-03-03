@@ -113,6 +113,11 @@ int dom_namednodemap_length_read(dom_object *obj, zval *retval);
 /* namelist properties */
 int dom_namelist_length_read(dom_object *obj, zval *retval);
 
+/* parent node properties */
+int dom_parent_node_first_element_child_read(dom_object *obj, zval *retval);
+int dom_parent_node_last_element_child_read(dom_object *obj, zval *retval);
+int dom_parent_node_child_element_count(dom_object *obj, zval *retval);
+
 /* node properties */
 int dom_node_node_name_read(dom_object *obj, zval *retval);
 int dom_node_node_value_read(dom_object *obj, zval *retval);

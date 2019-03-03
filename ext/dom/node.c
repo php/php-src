@@ -441,7 +441,6 @@ int dom_node_child_nodes_read(dom_object *obj, zval *retval)
 
 	return SUCCESS;
 }
-
 /* }}} */
 
 /* {{{ firstChild DomNode

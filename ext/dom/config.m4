@@ -14,6 +14,7 @@ if test "$PHP_DOM" != "no"; then
     AC_DEFINE(HAVE_DOM,1,[ ])
     PHP_NEW_EXTENSION(dom, [php_dom.c attr.c document.c domerrorhandler.c \
                             domstringlist.c domexception.c namelist.c \
+                            parentnode.c \
                             processinginstruction.c cdatasection.c \
                             documentfragment.c domimplementation.c \
                             element.c node.c string_extend.c characterdata.c \

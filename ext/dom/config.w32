@@ -9,6 +9,7 @@ if (PHP_DOM == "yes") {
 	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c domerrorhandler.c \
 			domstringlist.c domexception.c namelist.c processinginstruction.c \
+			parentnode.c \
 			cdatasection.c documentfragment.c domimplementation.c element.c \
 			node.c string_extend.c characterdata.c documenttype.c \
 			domimplementationlist.c entity.c nodelist.c text.c comment.c \

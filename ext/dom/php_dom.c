@@ -38,6 +38,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domexception_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domstringlist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_namelist_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_parentnode_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementationlist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementationsource_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
@@ -621,6 +622,9 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_namelist_prop_handlers, "length", sizeof("length")-1, dom_namelist_length_read, NULL);
 	zend_hash_add_ptr(&classes, ce.name, &dom_namelist_prop_handlers);
 
+	INIT_CLASS_ENTRY(ce, "DOMParentNode", php_dom_parent_node_class_functions);
+	dom_parentnode_class_entry = zend_register_internal_interface(&ce);
+
 	REGISTER_DOM_CLASS(ce, "DOMImplementationList", NULL, php_dom_domimplementationlist_class_functions, dom_domimplementationlist_class_entry);
 
 	zend_hash_init(&dom_domimplementationlist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
@@ -736,8 +740,13 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_init(&dom_element_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_element_prop_handlers, "tagName", sizeof("tagName")-1, dom_element_tag_name_read, NULL);
 	dom_register_prop_handler(&dom_element_prop_handlers, "schemaTypeInfo", sizeof("schemaTypeInfo")-1, dom_element_schema_type_info_read, NULL);
+	dom_register_prop_handler(&dom_element_prop_handlers, "firstElementChild", sizeof("firstElementChild")-1, dom_parent_node_first_element_child_read, NULL);
+	dom_register_prop_handler(&dom_element_prop_handlers, "lastElementChild", sizeof("lastElementChild")-1, dom_parent_node_last_element_child_read, NULL);
+	dom_register_prop_handler(&dom_element_prop_handlers, "childElementCount", sizeof("childElementCount")-1, dom_parent_node_child_element_count, NULL);
 	zend_hash_merge(&dom_element_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_element_prop_handlers);
+
+	zend_class_implements(dom_element_class_entry, 1, dom_parentnode_class_entry);
 
 	REGISTER_DOM_CLASS(ce, "DOMText", dom_characterdata_class_entry, php_dom_text_class_functions, dom_text_class_entry);
 
