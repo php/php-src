@@ -1,11 +1,18 @@
 dnl config.m4 for extension simplexml
 
-PHP_ARG_ENABLE(simplexml, whether to enable SimpleXML support,
-[  --disable-simplexml     Disable SimpleXML support], yes)
+PHP_ARG_ENABLE([simplexml],
+  [whether to enable SimpleXML support],
+  [AS_HELP_STRING([--disable-simplexml],
+    [Disable SimpleXML support])],
+  [yes])
 
 if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR   SimpleXML: libxml2 install prefix], no, no)
+  PHP_ARG_WITH([libxml-dir],
+    [libxml2 install dir],
+    [AS_HELP_STRING([--with-libxml-dir=DIR],
+      [SimpleXML: libxml2 install prefix])],
+    [no],
+    [no])
 fi
 
 if test "$PHP_SIMPLEXML" != "no"; then

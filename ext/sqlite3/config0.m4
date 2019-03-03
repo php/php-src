@@ -1,8 +1,11 @@
 dnl config.m4 for extension sqlite3
 
-PHP_ARG_WITH(sqlite3, whether to enable the SQLite3 extension,
-[  --without-sqlite3[=DIR]   Do not include SQLite3 support. DIR is the prefix to
-                          SQLite3 installation directory.], yes)
+PHP_ARG_WITH([sqlite3],
+  [whether to enable the SQLite3 extension],
+  [AS_HELP_STRING([[--without-sqlite3[=DIR]]],
+    [Do not include SQLite3 support. DIR is the prefix to SQLite3 installation
+    directory.])],
+  [yes])
 
 if test $PHP_SQLITE3 != "no"; then
   PHP_SQLITE3_CFLAGS=" -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 "

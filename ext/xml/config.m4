@@ -1,15 +1,26 @@
 dnl config.m4 for extension xml
 
-PHP_ARG_ENABLE(xml,whether to enable XML support,
-[  --disable-xml           Disable XML support], yes)
+PHP_ARG_ENABLE([xml],
+  [whether to enable XML support],
+  [AS_HELP_STRING([--disable-xml],
+    [Disable XML support])],
+  [yes])
 
 if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR   XML: libxml2 install prefix], no, no)
+  PHP_ARG_WITH([libxml-dir],
+    [libxml2 install dir],
+    [AS_HELP_STRING([--with-libxml-dir=DIR],
+      [XML: libxml2 install prefix])],
+    [no],
+    [no])
 fi
 
-PHP_ARG_WITH(libexpat-dir, libexpat install dir,
-[  --with-libexpat-dir=DIR XML: libexpat install prefix (deprecated)], no, no)
+PHP_ARG_WITH([libexpat-dir],
+  [libexpat install dir],
+  [AS_HELP_STRING([--with-libexpat-dir=DIR],
+    [XML: libexpat install prefix (deprecated)])],
+  [no],
+  [no])
 
 if test "$PHP_XML" != "no"; then
 

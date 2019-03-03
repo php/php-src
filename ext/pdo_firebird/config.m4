@@ -1,6 +1,8 @@
-PHP_ARG_WITH(pdo-firebird,for Firebird support for PDO,
-[  --with-pdo-firebird[=DIR] PDO: Firebird support.  DIR is the Firebird base
-                          install directory [/opt/firebird]])
+PHP_ARG_WITH([pdo-firebird],
+  [for Firebird support for PDO],
+  [AS_HELP_STRING([[--with-pdo-firebird[=DIR]]],
+    [PDO: Firebird support. DIR is the Firebird base install directory
+    [/opt/firebird]])])
 
 if test "$PHP_PDO_FIREBIRD" != "no"; then
 

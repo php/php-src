@@ -1,11 +1,17 @@
 dnl config.m4 for extension soap
 
-PHP_ARG_ENABLE(soap, whether to enable SOAP support,
-[  --enable-soap           Enable SOAP support])
+PHP_ARG_ENABLE([soap],
+  [whether to enable SOAP support],
+  [AS_HELP_STRING([--enable-soap],
+    [Enable SOAP support])])
 
 if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR   SOAP: libxml2 install prefix], no, no)
+  PHP_ARG_WITH([libxml-dir],
+    [libxml2 install dir],
+    [AS_HELP_STRING([--with-libxml-dir=DIR],
+      [SOAP: libxml2 install prefix])],
+    [no],
+    [no])
 fi
 
 if test "$PHP_SOAP" != "no"; then

@@ -3,10 +3,17 @@ dnl config.m4 for extension pcre
 dnl By default we'll compile and link against the bundled PCRE library
 dnl if DIR is supplied, we'll use that for linking
 
-PHP_ARG_WITH(external-pcre,,
-[  --with-external-pcre    Use external library for PCRE support], no, no)
+PHP_ARG_WITH([external-pcre],,
+  [AS_HELP_STRING([--with-external-pcre],
+    [Use external library for PCRE support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality], yes, no)
+PHP_ARG_WITH([pcre-jit],,
+  [AS_HELP_STRING([--with-pcre-jit],
+    [Enable PCRE JIT functionality])],
+  [yes],
+  [no])
 
 if test "$PHP_EXTERNAL_PCRE" != "no"; then
 
@@ -77,8 +84,12 @@ else
   fi
 fi
 
-PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
-                          Enable PCRE valgrind support. Developers only!], no, no)
+PHP_ARG_WITH([pcre-valgrind],,
+  [AS_HELP_STRING([--with-pcre-valgrind=DIR],
+    [Enable PCRE valgrind support. Developers only!])],
+  [no],
+  [no])
+
   if test "$PHP_EXTERNAL_PCRE" != "no"; then
     AC_MSG_WARN([PHP is going to be linked with an external PCRE, --with-pcre-valgrind has no effect])
   else

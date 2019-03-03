@@ -1,7 +1,9 @@
 dnl config.m4 for extension zlib
 
-PHP_ARG_WITH(zlib,for ZLIB support,
-[  --with-zlib               Include ZLIB support (requires zlib >= 1.2.0.4)])
+PHP_ARG_WITH([zlib],
+  [for ZLIB support],
+  [AS_HELP_STRING([--with-zlib],
+    [Include ZLIB support (requires zlib >= 1.2.0.4)])])
 
 if test "$PHP_ZLIB" != "no"; then
   PKG_CHECK_MODULES([ZLIB], [zlib >= 1.2.0.4])
