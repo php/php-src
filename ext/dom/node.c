@@ -561,6 +561,72 @@ int dom_node_next_sibling_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+/* {{{ previousElementSibling	DomNode
+readonly=yes
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
+Since:
+*/
+int dom_node_previous_element_sibling_read(dom_object *obj, zval *retval)
+{
+	xmlNode *nodep, *prevsib;
+
+	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		return FAILURE;
+	}
+
+	prevsib = nodep->prev;
+
+	while (prevsib && prevsib->type != XML_ELEMENT_NODE) {
+		prevsib = prevsib->prev;
+	}
+
+	if (!prevsib) {
+		ZVAL_NULL(retval);
+		return SUCCESS;
+	}
+
+	php_dom_create_object(prevsib, retval, obj);
+	return SUCCESS;
+}
+
+/* }}} */
+
+/* {{{ nextElementSibling	DomNode
+readonly=yes
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
+Since:
+*/
+int dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
+{
+	xmlNode *nodep, *nextsib;
+
+	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		return FAILURE;
+	}
+
+	nextsib = nodep->next;
+
+	while (nextsib != NULL && nextsib->type != XML_ELEMENT_NODE) {
+		nextsib = nextsib->next;
+	}
+
+	if (!nextsib) {
+		ZVAL_NULL(retval);
+		return SUCCESS;
+	}
+
+	php_dom_create_object(nextsib, retval, obj);
+	return SUCCESS;
+}
+
+/* }}} */
+
 /* {{{ attributes	DomNamedNodeMap
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-84CF096

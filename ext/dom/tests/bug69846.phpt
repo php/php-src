@@ -31,7 +31,7 @@ foreach ($dataNodes AS $node) {
 ===DONE===
 --EXPECTF--
 int(3)
-object(DOMText)#%d (19) {
+object(DOMText)#%d (21) {
   ["wholeText"]=>
   string(3) "
   "
@@ -59,6 +59,10 @@ object(DOMText)#%d (19) {
   NULL
   ["nextSibling"]=>
   NULL
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["attributes"]=>
   NULL
   ["ownerDocument"]=>
@@ -75,7 +79,7 @@ object(DOMText)#%d (19) {
   string(3) "
   "
 }
-object(DOMElement)#%d (21) {
+object(DOMElement)#%d (23) {
   ["tagName"]=>
   string(5) "form1"
   ["schemaTypeInfo"]=>
@@ -108,6 +112,10 @@ object(DOMElement)#%d (21) {
   NULL
   ["nextSibling"]=>
   NULL
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["attributes"]=>
   string(22) "(object value omitted)"
   ["ownerDocument"]=>
@@ -127,7 +135,7 @@ object(DOMElement)#%d (21) {
     Value C
   "
 }
-object(DOMText)#%d (19) {
+object(DOMText)#%d (21) {
   ["wholeText"]=>
   string(1) "
 "
@@ -154,6 +162,10 @@ object(DOMText)#%d (19) {
   ["previousSibling"]=>
   NULL
   ["nextSibling"]=>
+  NULL
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
   NULL
   ["attributes"]=>
   NULL

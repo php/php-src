@@ -51,6 +51,8 @@ DOMDocument Object
     [lastChild] => (object value omitted)
     [previousSibling] => 
     [nextSibling] => 
+    [previousElementSibling] => 
+    [nextElementSibling] => 
     [attributes] => 
     [ownerDocument] => 
     [namespaceURI] => 
