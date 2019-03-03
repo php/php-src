@@ -1338,20 +1338,6 @@ int readdir_r(DIR *, struct dirent *);
 ])
 
 dnl
-dnl PHP_TM_GMTOFF
-dnl
-AC_DEFUN([PHP_TM_GMTOFF],[
-AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <time.h>]], [[struct tm tm; tm.tm_gmtoff;]])],
-  [ac_cv_struct_tm_gmtoff=yes], [ac_cv_struct_tm_gmtoff=no])])
-
-if test "$ac_cv_struct_tm_gmtoff" = yes; then
-  AC_DEFINE(HAVE_TM_GMTOFF,1,[whether you have tm_gmtoff in struct tm])
-fi
-])
-
-dnl
 dnl PHP_STRUCT_FLOCK
 dnl
 AC_DEFUN([PHP_STRUCT_FLOCK],[

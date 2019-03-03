@@ -501,8 +501,6 @@ AC_STRUCT_TIMEZONE
 
 PHP_MISSING_TIME_R_DECL
 PHP_MISSING_FCLOSE_DECL
-
-PHP_TM_GMTOFF
 PHP_STRUCT_FLOCK
 PHP_SOCKLEN_T
 
@@ -551,7 +549,8 @@ PHP_CHECK_CPU_SUPPORTS([sse4.2])
 PHP_CHECK_CPU_SUPPORTS([avx])
 PHP_CHECK_CPU_SUPPORTS([avx2])
 
-dnl Check for members of the stat structure
+dnl Check for structure members
+AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
 dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exist
 dnl The WARNING_LEVEL required because cc in QNX hates -w option without an argument

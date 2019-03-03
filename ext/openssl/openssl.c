@@ -1022,7 +1022,7 @@ static time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 	thetime.tm_isdst = -1;
 	ret = mktime(&thetime);
 
-#if HAVE_TM_GMTOFF
+#if HAVE_STRUCT_TM_TM_GMTOFF
 	gmadjust = thetime.tm_gmtoff;
 #else
 	/*
@@ -2265,10 +2265,10 @@ PHP_FUNCTION(openssl_x509_verify)
 	if (key == NULL) {
 		X509_free(cert);
 		RETURN_LONG(err);
-	}	
-	
+	}
+
 	err = X509_verify(cert, key);
-	
+
 	if (err < 0) {
 		php_openssl_store_errors();
 	}
@@ -2279,7 +2279,7 @@ PHP_FUNCTION(openssl_x509_verify)
 	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
 	}
-	
+
 	RETURN_LONG(err);
 }
 /* }}} */
