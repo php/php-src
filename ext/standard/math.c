@@ -857,6 +857,8 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	char c, *s;
 	zend_long cutoff;
 	int cutlim;
+	int negative = 0;
+	int invalid_chars = 0;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
 		return FAILURE;
@@ -877,8 +879,12 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 			c -= 'A' - 10;
 		else if (c >= 'a' && c <= 'z')
 			c -= 'a' - 10;
-		else
+		else if (c == '-')
+			negative = !negative;
+		else {
+			invalid_chars++;
 			continue;
+		}
 
 		if (c >= base)
 			continue;
@@ -896,6 +902,15 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 		case 1: /* Float */
 			fnum = fnum * base + c;
 		}
+	}
+
+	if (invalid_chars > 0) {
+		php_error_docref(NULL, E_WARNING, "Invalid characters passed, these have been ignored");
+	}
+
+	if (negative == 1) {
+		fnum = -fnum;
+		num = -num;
 	}
 
 	if (mode == 1) {
@@ -917,21 +932,30 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 	char buf[(sizeof(zend_ulong) << 3) + 1];
 	char *ptr, *end;
-	zend_ulong value;
+	zend_long value;
+	int negative = 0;
 
 	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
 		return ZSTR_EMPTY_ALLOC();
 	}
 
 	value = Z_LVAL_P(arg);
+	if (value < 0) {
+		negative = 1;
+		value = -value;
+	}
 
-	end = ptr = buf + sizeof(buf) - 1;
+	end = ptr = buf + sizeof(buf) - 1 + negative;
 	*ptr = '\0';
 
 	do {
 		*--ptr = digits[value % base];
 		value /= base;
 	} while (ptr > buf && value);
+
+	if (negative) {
+		*--ptr = '-';
+	}
 
 	return zend_string_init(ptr, end - ptr, 0);
 }
