@@ -13,6 +13,11 @@ if(!$dom) {
   exit;
 }
 
+var_dump($dom instanceof DOMParentNode);
+print_node($dom->firstElementChild);
+print_node($dom->lastElementChild);
+var_dump($dom->childElementCount);
+
 $element = $dom->documentElement;
 var_dump($element instanceof DOMParentNode);
 print_node($element->firstElementChild);
@@ -22,6 +27,16 @@ var_dump($element->lastElementChild->firstElementChild);
 var_dump($element->lastElementChild->lastElementChild);
 var_dump($element->lastElementChild->childElementCount);
 --EXPECT--
+bool(true)
+Node Name: test
+Node Type: 1
+Num Children: 4
+
+Node Name: test
+Node Type: 1
+Num Children: 4
+
+int(1)
 bool(true)
 Node Name: bar
 Node Type: 1
