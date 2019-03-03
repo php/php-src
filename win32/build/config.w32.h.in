@@ -61,7 +61,6 @@
 #define HAVE_PUTENV 1
 #define HAVE_LIMITS_H 1
 #define HAVE_TZSET 1
-#define HAVE_TZNAME 1
 #undef HAVE_FLOCK
 #define HAVE_ALLOCA 1
 #undef HAVE_SYS_TIME_H
