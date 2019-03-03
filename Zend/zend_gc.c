@@ -73,6 +73,8 @@
 # define GC_BENCH 0
 #endif
 
+#define GC_REFCOUNTED_STACK_INITIAL_SIZE 16
+
 #ifndef ZEND_GC_DEBUG
 # define ZEND_GC_DEBUG 0
 #endif
@@ -902,7 +904,7 @@ static void gc_mark_roots(void)
 {
 	gc_root_buffer *current, *last;
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init(8);
+	gc_refcounted_stack *stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 
 	gc_compact();
 
@@ -1035,8 +1037,8 @@ static void gc_scan_roots(void)
 	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
 	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init(8);
-	gc_refcounted_stack *stack_black = gc_refcounted_stack_init(8);
+	gc_refcounted_stack *stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
+	gc_refcounted_stack *stack_black = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 
 	while (current != last) {
 		if (GC_IS_ROOT(current->ref)) {
@@ -1233,7 +1235,7 @@ static int gc_collect_roots(uint32_t *flags)
 
 	gc_compact();
 	
-	stack = gc_refcounted_stack_init(8);
+	stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 	/* Root buffer might be reallocated during gc_collect_white,
 	 * make sure to reload pointers. */
 	idx = GC_FIRST_ROOT;
