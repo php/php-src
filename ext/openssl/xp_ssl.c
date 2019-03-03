@@ -60,15 +60,6 @@
 #define STREAM_CRYPTO_METHOD_TLSv1_2       (1<<5)
 #define STREAM_CRYPTO_METHOD_TLSv1_3       (1<<6)
 
-#ifndef OPENSSL_NO_SSL3
-#define HAVE_SSL3 1
-#define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_SSLv3
-#else
-#define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_0
-#endif
-#define PHP_OPENSSL_MAX_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_3
-
-
 #define HAVE_TLS11 1
 #define HAVE_TLS12 1
 #if OPENSSL_VERSION_NUMBER >= 0x10101000
@@ -88,6 +79,18 @@
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
 #define HAVE_SEC_LEVEL 1
+#endif
+
+#ifndef OPENSSL_NO_SSL3
+#define HAVE_SSL3 1
+#define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_SSLv3
+#else
+#define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_0
+#endif
+#ifdef HAVE_TLS13
+#define PHP_OPENSSL_MAX_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_3
+#else
+#define PHP_OPENSSL_MAX_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_2
 #endif
 
 /* Simplify ssl context option retrieval */
@@ -1021,7 +1024,7 @@ static inline int php_openssl_get_min_proto_version_flag(int flags) /* {{{ */
 			return ver;
 		}
 	}
-	return STREAM_CRYPTO_METHOD_TLSv1_3;
+	return PHP_OPENSSL_MAX_PROTO_VERSION;
 }
 /* }}} */
 
@@ -1041,22 +1044,22 @@ static inline int php_openssl_get_max_proto_version_flag(int flags) /* {{{ */
 static inline int php_openssl_map_proto_version(int flag) /* {{{ */
 {
 	switch (flag) {
+#ifdef HAVE_TLS13
+		case STREAM_CRYPTO_METHOD_TLSv1_3:
+			return TLS1_3_VERSION;
+#endif
+		case STREAM_CRYPTO_METHOD_TLSv1_2:
+			return TLS1_2_VERSION;
+		case STREAM_CRYPTO_METHOD_TLSv1_1:
+			return TLS1_1_VERSION;
+		case STREAM_CRYPTO_METHOD_TLSv1_0:
+			return TLS1_VERSION;
 #ifdef HAVE_SSL3
 		case STREAM_CRYPTO_METHOD_SSLv3:
 			return SSL3_VERSION;
 #endif
-		case STREAM_CRYPTO_METHOD_TLSv1_0:
-			return TLS1_VERSION;
-		case STREAM_CRYPTO_METHOD_TLSv1_1:
-			return TLS1_1_VERSION;
-                case STREAM_CRYPTO_METHOD_TLSv1_2:
-                        return TLS1_2_VERSION;
-		/* case STREAM_CRYPTO_METHOD_TLSv1_3: */
-#ifdef HAVE_TLS13
 		default:
-			return TLS1_3_VERSION;
-#endif
-
+			return TLS1_2_VERSION;
 	}
 }
 /* }}} */
