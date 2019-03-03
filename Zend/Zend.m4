@@ -198,7 +198,6 @@ AC_MSG_RESULT(done)
 
 AC_CHECK_FUNCS(mremap)
 
-
 AC_ARG_ENABLE([zend-signals],
   [AS_HELP_STRING([--disable-zend-signals],
     [whether to enable zend signal handling])],
