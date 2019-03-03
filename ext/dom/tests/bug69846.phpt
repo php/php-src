@@ -75,11 +75,17 @@ object(DOMText)#%d (19) {
   string(3) "
   "
 }
-object(DOMElement)#%d (18) {
+object(DOMElement)#%d (21) {
   ["tagName"]=>
   string(5) "form1"
   ["schemaTypeInfo"]=>
   NULL
+  ["firstElementChild"]=>
+  string(22) "(object value omitted)"
+  ["lastElementChild"]=>
+  string(22) "(object value omitted)"
+  ["childElementCount"]=>
+  int(3)
   ["nodeName"]=>
   string(5) "form1"
   ["nodeValue"]=>

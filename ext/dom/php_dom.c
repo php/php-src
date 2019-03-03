@@ -82,6 +82,7 @@ static HashTable dom_domstringlist_prop_handlers;
 static HashTable dom_namelist_prop_handlers;
 static HashTable dom_domimplementationlist_prop_handlers;
 static HashTable dom_document_prop_handlers;
+static HashTable dom_documentfragment_prop_handlers;
 static HashTable dom_node_prop_handlers;
 static HashTable dom_nodelist_prop_handlers;
 static HashTable dom_namednodemap_prop_handlers;
@@ -669,7 +670,15 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add_ptr(&classes, ce.name, &dom_namespace_node_prop_handlers);
 
 	REGISTER_DOM_CLASS(ce, "DOMDocumentFragment", dom_node_class_entry, php_dom_documentfragment_class_functions, dom_documentfragment_class_entry);
-	zend_hash_add_ptr(&classes, ce.name, &dom_node_prop_handlers);
+	zend_hash_init(&dom_documentfragment_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
+
+	dom_register_prop_handler(&dom_documentfragment_prop_handlers, "firstElementChild", sizeof("firstElementChild")-1, dom_parent_node_first_element_child_read, NULL);
+	dom_register_prop_handler(&dom_documentfragment_prop_handlers, "lastElementChild", sizeof("lastElementChild")-1, dom_parent_node_last_element_child_read, NULL);
+	dom_register_prop_handler(&dom_documentfragment_prop_handlers, "childElementCount", sizeof("childElementCount")-1, dom_parent_node_child_element_count, NULL);
+
+	zend_hash_merge(&dom_documentfragment_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
+	zend_hash_add_ptr(&classes, ce.name, &dom_documentfragment_prop_handlers);
+	zend_class_implements(dom_documentfragment_class_entry, 1, dom_parentnode_class_entry);
 
 	REGISTER_DOM_CLASS(ce, "DOMDocument", dom_node_class_entry, php_dom_document_class_functions, dom_document_class_entry);
 	zend_hash_init(&dom_document_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
@@ -699,7 +708,6 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_merge(&dom_document_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_document_prop_handlers);
-
 	zend_class_implements(dom_document_class_entry, 1, dom_parentnode_class_entry);
 
 	INIT_CLASS_ENTRY(ce, "DOMNodeList", php_dom_nodelist_class_functions);
@@ -944,6 +952,7 @@ PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 	zend_hash_destroy(&dom_namelist_prop_handlers);
 	zend_hash_destroy(&dom_domimplementationlist_prop_handlers);
 	zend_hash_destroy(&dom_document_prop_handlers);
+	zend_hash_destroy(&dom_documentfragment_prop_handlers);
 	zend_hash_destroy(&dom_node_prop_handlers);
 	zend_hash_destroy(&dom_namespace_node_prop_handlers);
 	zend_hash_destroy(&dom_nodelist_prop_handlers);
