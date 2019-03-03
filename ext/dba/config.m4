@@ -69,7 +69,8 @@ dnl
 
 PHP_ARG_ENABLE([dba],,
   [AS_HELP_STRING([--enable-dba],
-    [Build DBA with bundled modules. To build shared DBA extension use --enable-dba=shared])])
+    [Build DBA with bundled modules. To build shared DBA extension use
+    --enable-dba=shared])])
 
 PHP_ARG_WITH([qdbm],,
   [AS_HELP_STRING([--with-qdbm[=DIR]],
@@ -621,8 +622,8 @@ fi
 PHP_ARG_WITH([cdb],,
   [AS_HELP_STRING([--without-cdb[=DIR]],
     [DBA: CDB support (bundled)])],
-    [$php_dba_enable],
-    [no])
+  [$php_dba_enable],
+  [no])
 
 PHP_ARG_ENABLE([inifile],,
   [AS_HELP_STRING([--disable-inifile],

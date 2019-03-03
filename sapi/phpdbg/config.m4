@@ -10,7 +10,8 @@ PHP_ARG_ENABLE([phpdbg],
 PHP_ARG_ENABLE([phpdbg-webhelper],
   [for phpdbg web SAPI support],
   [AS_HELP_STRING([--enable-phpdbg-webhelper],
-    [Build phpdbg web SAPI support])], no)
+    [Build phpdbg web SAPI support])],
+  [no])
 
 PHP_ARG_ENABLE([phpdbg-debug],
   [for phpdbg debug build],

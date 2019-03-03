@@ -3,9 +3,10 @@ dnl config.m4 for mysqlnd driver
 PHP_ARG_ENABLE([mysqlnd],
   [whether to enable mysqlnd],
   [AS_HELP_STRING([--enable-mysqlnd],
-    [Enable mysqlnd explicitly, will be done implicitly when required by other extensions])],
-    [no],
-    [yes])
+    [Enable mysqlnd explicitly, will be done implicitly when required by other
+    extensions])],
+  [no],
+  [yes])
 
 PHP_ARG_ENABLE([mysqlnd_compression_support],
   [whether to disable compressed protocol support in mysqlnd],

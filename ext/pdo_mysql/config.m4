@@ -3,7 +3,8 @@ dnl config.m4 for extension pdo_mysql
 PHP_ARG_WITH([pdo-mysql],
   [for MySQL support for PDO],
   [AS_HELP_STRING([--with-pdo-mysql[=DIR]],
-    [PDO: MySQL support. DIR is the MySQL base directory. If no value or mysqlnd is passed as DIR, the MySQL native driver will be used])])
+    [PDO: MySQL support. DIR is the MySQL base directory. If no value or mysqlnd
+    is passed as DIR, the MySQL native driver will be used])])
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH([zlib-dir],

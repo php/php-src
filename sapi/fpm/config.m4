@@ -573,7 +573,8 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_ARG_WITH([fpm-group],,
     [AS_HELP_STRING([--with-fpm-group[=GRP]],
-      [Set the group for php-fpm to run as. For a system user, this should usually be set to match the fpm username (default: nobody)])],
+      [Set the group for php-fpm to run as. For a system user, this should
+      usually be set to match the fpm username (default: nobody)])],
     [nobody],
     [no])
 

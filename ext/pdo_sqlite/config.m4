@@ -3,7 +3,8 @@ dnl config.m4 for extension pdo_sqlite
 PHP_ARG_WITH([pdo-sqlite],
   [for sqlite 3 support for PDO],
   [AS_HELP_STRING([--without-pdo-sqlite[=DIR]],
-    [PDO: sqlite 3 support. DIR is the sqlite base install directory [BUNDLED]])],
+    [PDO: sqlite 3 support. DIR is the sqlite base install directory
+    @<:@BUNDLED@:>@])],
   [$PHP_PDO])
 
 if test "$PHP_PDO_SQLITE" != "no"; then

@@ -100,13 +100,15 @@ dnl
 
 PHP_ARG_WITH([odbcver],,
   [AS_HELP_STRING([--with-odbcver[=HEX]],
-    [Force support for the passed ODBC version. A hex number is expected, default 0x0350. Use the special value of 0 to prevent an explicit ODBCVER to be defined.])],
+    [Force support for the passed ODBC version. A hex number is expected,
+    default 0x0350. Use the special value of 0 to prevent an explicit ODBCVER to
+    be defined.])],
   [0x0350])
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([adabas],,
   [AS_HELP_STRING([--with-adabas[=DIR]],
-    [Include Adabas D support [/usr/local]])])
+    [Include Adabas D support @<:@/usr/local@:>@])])
 
   AC_MSG_CHECKING([for Adabas support])
   if test "$PHP_ADABAS" != "no"; then
@@ -225,7 +227,8 @@ fi
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([empress],,
   [AS_HELP_STRING([--with-empress[=DIR]],
-    [Include Empress support [\$EMPRESSPATH] (Empress Version >= 8.60 required)])])
+    [Include Empress support [\$EMPRESSPATH] (Empress Version >= 8.60
+    required)])])
 
   AC_MSG_CHECKING(for Empress support)
   if test "$PHP_EMPRESS" != "no"; then
@@ -250,7 +253,8 @@ fi
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([empress-bcs],,
   [AS_HELP_STRING([--with-empress-bcs[=DIR]],
-    [Include Empress Local Access support [\$EMPRESSPATH] (Empress Version >= 8.60 required)])])
+    [Include Empress Local Access support [\$EMPRESSPATH] (Empress Version >=
+    8.60 required)])])
 
   AC_MSG_CHECKING(for Empress local access support)
   if test "$PHP_EMPRESS_BCS" != "no"; then
@@ -291,14 +295,12 @@ fi
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([custom-odbc],,
   [AS_HELP_STRING([--with-custom-odbc[=DIR]],
-    [Include user defined ODBC support. DIR is ODBC install base
-      directory [/usr/local]. Make sure to define CUSTOM_ODBC_LIBS and
-      have some odbc.h in your include dirs. f.e. you should define
-      following for Sybase SQL Anywhere 5.5.00 on QNX, prior to
-      running this configure script:
-      CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
-      LDFLAGS=-lunix
-      CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"])])
+    [Include user defined ODBC support. DIR is ODBC install base directory
+    @<:@/usr/local@:>@. Make sure to define CUSTOM_ODBC_LIBS and have some
+    odbc.h in your include dirs. f.e. you should define following for Sybase SQL
+    Anywhere 5.5.00 on QNX, prior to running this configure script:
+    CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\" LDFLAGS=-lunix
+    CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"])])
 
   AC_MSG_CHECKING(for a custom ODBC support)
   if test "$PHP_CUSTOM_ODBC" != "no"; then

@@ -3,7 +3,8 @@ dnl config.m4 for extension pdo_pgsql
 PHP_ARG_WITH([pdo-pgsql],
   [for PostgreSQL support for PDO],
   [AS_HELP_STRING([--with-pdo-pgsql[=DIR]],
-    [PDO: PostgreSQL support. DIR is the PostgreSQL base install directory or the path to pg_config])])
+    [PDO: PostgreSQL support. DIR is the PostgreSQL base install directory or
+    the path to pg_config])])
 
 if test "$PHP_PDO_PGSQL" != "no"; then
 

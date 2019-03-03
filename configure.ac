@@ -939,7 +939,8 @@ fi
 PHP_ARG_WITH([layout],
   [layout of installed files],
   [AS_HELP_STRING([--with-layout=TYPE],
-    [Set how installed files will be laid out. Type can be either PHP or GNU @<:@PHP@:>@])],
+    [Set how installed files will be laid out. Type can be either PHP or GNU 
+    @<:@PHP@:>@])],
   [PHP],
   [no])
 

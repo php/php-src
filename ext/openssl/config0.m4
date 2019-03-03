@@ -9,8 +9,8 @@ PHP_ARG_WITH([kerberos],
   [for Kerberos support],
   [AS_HELP_STRING([--with-kerberos[=DIR]],
     [OPENSSL: Include Kerberos support])],
-    [no],
-    [no])
+  [no],
+  [no])
 
 PHP_ARG_WITH([system-ciphers],
   [whether to use system default cipher list instead of hardcoded value],

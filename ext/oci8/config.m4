@@ -171,7 +171,9 @@ dnl --with-oci8=shared,/path/to/oracle/home
 PHP_ARG_WITH([oci8],
   [for Oracle Database OCI8 support],
   [AS_HELP_STRING([--with-oci8[=DIR]],
-    [Include Oracle Database OCI8 support. DIR defaults to [$]ORACLE_HOME. Use --with-oci8=instantclient,/path/to/instant/client/lib to use an Oracle Instant Client installation])])
+    [Include Oracle Database OCI8 support. DIR defaults to [$]ORACLE_HOME. Use
+    --with-oci8=instantclient,/path/to/instant/client/lib to use an Oracle
+    Instant Client installation])])
 
 if test "$PHP_OCI8" != "no"; then
 
