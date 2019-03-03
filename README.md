@@ -19,7 +19,7 @@ License v3.01.
 
 ## Documentation
 
-The PHP manual is available online at https://php.net/docs.
+The PHP manual is available online at [php.net/docs](https://php.net/docs).
 
 ## Installation
 
@@ -27,10 +27,11 @@ The PHP manual is available online at https://php.net/docs.
 
 Prebuilt packages and binaries can be used to get up and running fast with PHP.
 
-For Windows, the PHP binaries can be obtained from https://windows.php.net.
-After extracting the archive the `*.exe` files are ready to use.
+For Windows, the PHP binaries can be obtained from
+[windows.php.net](https://windows.php.net). After extracting the archive the
+`*.exe` files are ready to use.
 
-For other systems, see the documentation at https://php.net/install.
+For other systems, see the [installation chapter](https://php.net/install).
 
 ### Building PHP from source
 
@@ -42,34 +43,40 @@ On \*nix systems:
     make test
     sudo make install
 
-See `./configure -h` and `make -h` for all options. For example, the optional
-`-j` option allows parallel execution of the build recipes based on the number
-of available processor cores. On 8-core and 16-threads processor the command is
-then `make -j 16`.
+See `./configure -h` and `make -h` for configuration options. For example, the
+optional `-j` option allows parallel execution of the build recipes based on the
+number of available processor cores. For example, on 8-core and 16-threads
+processor the build command is then:
 
-For Windows see https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2.
+    make -j 16
+
+For Windows, see
+[wiki pages](https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2).
 
 ## PHP extensions
 
 Extensions provide additional functionality on top of PHP. PHP consists of many
 essential bundled extensions. Additional extensions can be found in the PHP
-Extension Community Library (PECL) at https://pecl.php.net.
+Extension Community Library ([PECL](https://pecl.php.net)).
 
 ## Contributing
 
-The PHP source code is located in the Git repository at https://git.php.net.
-Contributions are most welcome by forking the GitHub mirror repository
-https://github.com/php/php-src and sending a pull request.
+The PHP source code is located in the Git repository at
+[git.php.net](https://git.php.net). Contributions are most welcome by forking
+the [GitHub mirror repository](https://github.com/php/php-src) and sending a
+pull request.
 
 Discussions are done on GitHub, but depending on the topic can also be relayed
 to the official PHP developer mailing list internals@lists.php.net.
 
 New features require an RFC and must be accepted by the developers. See
-https://wiki.php.net/rfc and https://wiki.php.net/rfc/voting for more
-information on the process.
+[Request for Comments - RFC](https://wiki.php.net/rfc) and
+[Voting on PHP features](https://wiki.php.net/rfc/voting) for more information
+on the process.
 
 Bug fixes **do not** require an RFC, but require a bug tracker ticket. Open a
-ticket at https://bugs.php.net and reference the bug id using #NNNNNN.
+ticket at [bugs.php.net](https://bugs.php.net) and reference the bug id using
+`#NNNNNN`.
 
     Fix #55371: get_magic_quotes_gpc() throws deprecation warning
 
@@ -79,8 +86,8 @@ ticket at https://bugs.php.net and reference the bug id using #NNNNNN.
     The patch removes this warning.
 
 Pull requests are not merged directly on GitHub. All PRs will be pulled and
-pushed through https://git.php.net. See https://wiki.php.net/vcs/gitworkflow for
-more details.
+pushed through [git.php.net](https://git.php.net). See
+[Git workflow](https://wiki.php.net/vcs/gitworkflow) for more details.
 
 ### Guidelines for contributors
 
@@ -95,8 +102,10 @@ See further documents in the repository for more information how to contribute:
 ## Testing
 
 To run tests the `make test` is used after a successful compilation of the
-sources. For faster parallel execution, use `make -j N test`, where `N` is the
-number of cores.
+sources. The `-j` option provides faster parallel execution, where `N` is the
+number of cores:
 
-The https://qa.php.net site provides more detailed info about testing and
-quality assurance.
+    make -j N test
+
+The [qa.php.net](https://qa.php.net) site provides more detailed info about
+testing and quality assurance.
