@@ -3,18 +3,19 @@ PHP                                                                        NEWS
 ?? ??? 2019, PHP 7.1.27
 
 - Core:
-  . Fixed bug #77630 (rename() across the device may allow unwanted access during 
+  . Fixed bug #77630 (rename() across the device may allow unwanted access during
     processing). (Stas)
-	
+
 - EXIF:
   . Fixed bug #77509 (Uninitialized read in exif_process_IFD_in_TIFF). (Stas)
-  . Fixed bug #77540 (Invalid Read on exif_process_SOFn). (Stas) 
-  . Fixed bug #77563 (Uninitialized read in exif_process_IFD_in_MAKERNOTE). (Stas) 
+  . Fixed bug #77540 (Invalid Read on exif_process_SOFn). (Stas)
+  . Fixed bug #77563 (Uninitialized read in exif_process_IFD_in_MAKERNOTE). (Stas)
   . Fixed bug #77659 (Uninitialized read in exif_process_IFD_in_MAKERNOTE). (Stas)
 
 - PHAR:
   . Fixed bug #77396 (Null Pointer Dereference in phar_create_or_parse_filename).
-    (bishop) 
+    (bishop)
+  . Fixed bug #77586 (phar_tar_writeheaders_int() buffer overflow). (bishop)
 
 - SPL:
   . Fixed bug #77431 (openFile() silently truncates after a null byte). (cmb)
