@@ -1,24 +1,23 @@
  1. libmagic (ext/fileinfo) see ext/fileinfo/libmagic/LICENSE
- 2. Oniguruma (ext/mbstring) see ext/mbstring/oniguruma/COPYING
- 3. libmbfl (ext/mbstring) see ext/mbstring/libmbfl/LICENSE
- 4. pcre2lib (ext/pcre)
- 5. ext/standard crypt
- 6. ext/standard crypt's blowfish implementation
- 7. ext/standard/rand
- 8. ext/standard/scanf
- 9. ext/standard/strnatcmp.c
-10. ext/standard/uuencode
-11. libxmlrpc ext/xmlrpc
-12. main/snprintf.c
-13. main/strlcat
-14. main/strlcpy
-15. libgd see ext/gd/libgd/COPYING
-16. ext/phar portions of tar implementations
-17. ext/phar/zip.c portion extracted from libzip
-18. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/COPYING.LIB
+ 2. libmbfl (ext/mbstring) see ext/mbstring/libmbfl/LICENSE
+ 3. pcre2lib (ext/pcre)
+ 4. ext/standard crypt
+ 5. ext/standard crypt's blowfish implementation
+ 6. ext/standard/rand
+ 7. ext/standard/scanf
+ 8. ext/standard/strnatcmp.c
+ 9. ext/standard/uuencode
+10. libxmlrpc ext/xmlrpc
+11. main/snprintf.c
+12. main/strlcat
+13. main/strlcpy
+14. libgd see ext/gd/libgd/COPYING
+15. ext/phar portions of tar implementations
+16. ext/phar/zip.c portion extracted from libzip
+17. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/COPYING.LIB
 
 
-4. pcre2lib (ext/pcre)
+3. pcre2lib (ext/pcre)
 
 PCRE2 LICENCE
 -------------
@@ -116,7 +115,7 @@ PCRE2 independently.
 End
 
 
-5. ext/standard crypt
+4. ext/standard crypt
 
 FreeSec: libcrypt for NetBSD
 
@@ -148,7 +147,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 
-6. ext/standard crypt's blowfish implementation
+5. ext/standard crypt's blowfish implementation
 
 The crypt_blowfish homepage is:
 
@@ -194,7 +193,7 @@ Blowfish library (I can't be sure if I would think of something if I
 hadn't seen his code).
 
 
-7. ext/standard/rand
+6. ext/standard/rand
 
 The following php_mt_...() functions are based on a C++ class MTRand by
 Richard J. Wagner. For more information see the web page at
@@ -248,7 +247,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-8. ext/standard/scanf
+7. ext/standard/scanf
 
 scanf.c --
 
@@ -296,7 +295,7 @@ permission to use and distribute the software in accordance with the
 terms specified in this license.
 
 
-9. ext/standard/strnatcmp.c
+8. ext/standard/strnatcmp.c
 
 strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
 Copyright (C) 2000 by Martin Pool <mbp@humbug.org.au>
@@ -318,7 +317,7 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 
 
-10. ext/standard/uuencode
+9. ext/standard/uuencode
 
 Portions of this code are based on Berkeley's uuencode/uudecode
 implementation.
@@ -355,7 +354,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 
-11. libxmlrpc ext/xmlrpc
+10. libxmlrpc ext/xmlrpc
 
 Copyright 2000 Epinions, Inc.
 
@@ -380,7 +379,7 @@ NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
 DAMAGES.
 
 
-12. main/snprintf.c
+11. main/snprintf.c
 
 Copyright (c) 2002, 2006 Todd C. Miller <Todd.Miller@courtesan.com>
 
@@ -455,8 +454,8 @@ SIO stdio-replacement strx_* functions by Panos Tsirigotis
 <panos@alumni.cs.colorado.edu> for xinetd.
 
 
-13. main/strlcat
-14. main/strlcpy
+12. main/strlcat
+13. main/strlcpy
 
 Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
 All rights reserved.
@@ -484,7 +483,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-16. ext/phar portions of tar implementations
+15. ext/phar portions of tar implementations
 
 portions of tar implementations in ext/phar - phar_tar_octal() are based on an
 implementation by Tim Kientzle from libarchive, licensed with this license:
@@ -513,7 +512,7 @@ implementation by Tim Kientzle from libarchive, licensed with this license:
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-17. ext/phar/zip.c portion extracted from libzip
+16. ext/phar/zip.c portion extracted from libzip
 
 zip_dirent.c -- read directory entry (local or central), clean dirent
 Copyright (C) 1999, 2003, 2004, 2005 Dieter Baron and Thomas Klausner
