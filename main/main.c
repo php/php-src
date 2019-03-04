@@ -2334,7 +2334,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 
 	/* Check for deprecated directives */
-	/* NOTE: If you add anything here, remember to add it to Makefile.global! */
+	/* NOTE: If you add anything here, remember to add it to build/Makefile.global! */
 	{
 		struct {
 			const long error_level;
