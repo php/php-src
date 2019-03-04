@@ -83,7 +83,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_ELSEIF
 %left T_ELSE
 %left T_ENDIF
-%right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC
+%right T_STATIC T_ABSTRACT T_FINAL T_LOCKED T_PRIVATE T_PROTECTED T_PUBLIC
 
 %token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
 %token <ast> T_DNUMBER   "floating-point number (T_DNUMBER)"
@@ -178,6 +178,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_STATIC     "static (T_STATIC)"
 %token T_ABSTRACT   "abstract (T_ABSTRACT)"
 %token T_FINAL      "final (T_FINAL)"
+%token T_LOCKED     "locked (T_LOCKED)"
 %token T_PRIVATE    "private (T_PRIVATE)"
 %token T_PROTECTED  "protected (T_PROTECTED)"
 %token T_PUBLIC     "public (T_PUBLIC)"
@@ -278,7 +279,7 @@ reserved_non_modifiers:
 
 semi_reserved:
 	  reserved_non_modifiers
-	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
+	| T_STATIC | T_ABSTRACT | T_FINAL | T_LOCKED | T_PRIVATE | T_PROTECTED | T_PUBLIC
 ;
 
 identifier:
@@ -518,6 +519,7 @@ class_modifiers:
 class_modifier:
 		T_ABSTRACT 		{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
 	|	T_FINAL 		{ $$ = ZEND_ACC_FINAL; }
+	|	T_LOCKED 		{ $$ = ZEND_ACC_LOCKED; }
 ;
 
 trait_declaration_statement:

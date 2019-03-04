@@ -1561,6 +1561,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_FINAL);
 }
 
+<ST_IN_SCRIPTING>"locked" {
+	RETURN_TOKEN(T_LOCKED);
+}
+
 <ST_IN_SCRIPTING>"private" {
 	RETURN_TOKEN(T_PRIVATE);
 }

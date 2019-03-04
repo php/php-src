@@ -779,6 +779,8 @@ call_getter:
 			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(prop_info->ce->name),
 				ZSTR_VAL(name));
+		} else if ( zobj->ce->ce_flags & ZEND_ACC_LOCKED ) {
+			zend_throw_error(NULL, "Cannot access undefined property $%s on locked class %s", ZSTR_VAL(name), ZSTR_VAL(zobj->ce->name));
 		} else {
 			zend_error(E_NOTICE,"Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 		}
@@ -883,6 +885,11 @@ write_std_property:
 
 			ZVAL_COPY_VALUE(variable_ptr, value);
 		} else {
+			if ( zobj->ce->ce_flags & ZEND_ACC_LOCKED ) {
+				zend_throw_error(NULL, "Cannot write undefined property $%s on locked class %s", ZSTR_VAL(name), ZSTR_VAL(zobj->ce->name));
+				variable_ptr = &EG(error_zval);
+				goto exit;
+			}
 			if (!zobj->properties) {
 				rebuild_object_properties(zobj);
 			}
@@ -1071,6 +1078,11 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 
 	zobj = Z_OBJ_P(object);
 	name = zval_get_tmp_string(member, &tmp_name);
+
+	if ( zobj->ce->ce_flags & ZEND_ACC_LOCKED ) {
+		zend_throw_error(NULL, "Cannot unset property $%s of locked class %s", ZSTR_VAL(name), ZSTR_VAL(zobj->ce->name));
+		goto exit;
+	}
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__unset != NULL), cache_slot, &prop_info);
 
