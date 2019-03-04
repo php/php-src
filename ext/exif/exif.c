@@ -3124,7 +3124,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 		break;
 	}
 
-	if (maker_note->offset >= value_len) {
+	if (value_len < 2 || maker_note->offset >= value_len - 1) {
 		/* Do not go past the value end */
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data too short: 0x%04X offset 0x%04X", value_len, maker_note->offset);
 		return FALSE;
@@ -3179,6 +3179,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 #endif
 		default:
 		case MN_OFFSET_NORMAL:
+			data_len = value_len;
 			break;
 	}
 
@@ -3902,7 +3903,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo)
 			return FALSE;
 		marker = c;
 		length = php_jpg_get16(data+pos);
-		if (pos+length>=ImageInfo->Thumbnail.size) {
+		if (length > ImageInfo->Thumbnail.size || pos >= ImageInfo->Thumbnail.size - length) {
 			return FALSE;
 		}
 #ifdef EXIF_DEBUG
@@ -3923,6 +3924,10 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo)
 			case M_SOF14:
 			case M_SOF15:
 				/* handle SOFn block */
+				if (length < 8 || ImageInfo->Thumbnail.size - 8 < pos) {
+					/* exif_process_SOFn needs 8 bytes */
+					return FALSE;
+				}
 				exif_process_SOFn(data+pos, marker, &sof_info);
 				ImageInfo->Thumbnail.height   = sof_info.height;
 				ImageInfo->Thumbnail.width    = sof_info.width;
@@ -3960,10 +3965,10 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 	tag_table_type tag_table = exif_get_tag_table(section_index);
 
 	if (ImageInfo->ifd_nesting_level > MAX_IFD_NESTING_LEVEL) {
-                return FALSE;
-        }
+		return FALSE;
+	}
 
-	if (ImageInfo->FileSize >= dir_offset+2) {
+	if (ImageInfo->FileSize >= 2 && ImageInfo->FileSize - 2 >= dir_offset) {
 		sn = exif_file_sections_add(ImageInfo, M_PSEUDO, 2, NULL);
 #ifdef EXIF_DEBUG
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, 2);
@@ -3971,8 +3976,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 		php_stream_seek(ImageInfo->infile, dir_offset, SEEK_SET); /* we do not know the order of sections */
 		php_stream_read(ImageInfo->infile, (char*)ImageInfo->file.list[sn].data, 2);
 		num_entries = php_ifd_get16u(ImageInfo->file.list[sn].data, ImageInfo->motorola_intel);
-		dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
-		if (ImageInfo->FileSize >= dir_offset+dir_size) {
+		dir_size = 2/*num dir entries*/ +12/*length of entry*/*(size_t)num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
+		if (ImageInfo->FileSize >= dir_size && ImageInfo->FileSize - dir_size >= dir_offset) {
 #ifdef EXIF_DEBUG
 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X), IFD entries(%d)", ImageInfo->FileSize, dir_offset+2, dir_size-2, num_entries);
 #endif
@@ -4055,9 +4060,9 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					}
 				}
 			}
-			if (ImageInfo->FileSize >= dir_offset + ImageInfo->file.list[sn].size) {
+			if (ImageInfo->FileSize >= ImageInfo->file.list[sn].size && ImageInfo->FileSize - ImageInfo->file.list[sn].size >= dir_offset) {
 				if (ifd_size > dir_size) {
-					if (dir_offset + ifd_size > ImageInfo->FileSize) {
+					if (ImageInfo->FileSize < ifd_size || dir_offset > ImageInfo->FileSize - ifd_size) {
 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, ifd_size);
 						return FALSE;
 					}
@@ -4654,7 +4659,9 @@ PHP_FUNCTION(exif_thumbnail)
 	ZVAL_STRINGL(return_value, ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size);
 	if (arg_c >= 3) {
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
-			exif_scan_thumbnail(&ImageInfo);
+			if (!exif_scan_thumbnail(&ImageInfo)) {
+				ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
+			}
 		}
 		ZEND_TRY_ASSIGN_LONG(z_width,  ImageInfo.Thumbnail.width);
 		ZEND_TRY_ASSIGN_LONG(z_height, ImageInfo.Thumbnail.height);

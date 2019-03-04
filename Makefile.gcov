@@ -56,7 +56,7 @@ php_lcov.info: lcov-test
 			cp $$x.bbg  lcov_data/$$y.bbg ; \
 		fi; \
 	done; \
-	for dir in ext/date/lib ext/fileinfo/libmagic ext/gd/libgd ext/mbstring/oniguruma ext/pcre/pcre2lib ext/zip/lib; do \
+	for dir in ext/date/lib ext/fileinfo/libmagic ext/gd/libgd ext/pcre/pcre2lib; do \
 		if test -d lcov_data/$$dir; then \
 			rm -rf lcov_data/$$dir ; \
 		fi; \

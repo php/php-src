@@ -207,7 +207,11 @@ void fpm_children_bury() /* {{{ */
 
 		} else if (WIFSIGNALED(status)) {
 			const char *signame = fpm_signal_names[WTERMSIG(status)];
+#ifdef WCOREDUMP
 			const char *have_core = WCOREDUMP(status) ? " - core dumped" : "";
+#else
+			const char* have_core = "";
+#endif
 
 			if (signame == NULL) {
 				signame = "";

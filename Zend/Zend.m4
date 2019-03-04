@@ -2,42 +2,12 @@ dnl
 dnl This file contains Zend specific autoconf functions.
 dnl
 
-AC_DEFUN([LIBZEND_CHECK_INT_TYPE],[
-AC_MSG_CHECKING(for $1)
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_INTTYPES_H
-#include <inttypes.h>
-#elif HAVE_STDINT_H
-#include <stdint.h>
-#endif]],
-[[if (($1 *) 0)
-  return 0;
-if (sizeof ($1))
-  return 0;
-]])],[
-  AC_DEFINE_UNQUOTED([HAVE_]translit($1,a-z_-,A-Z__), 1,[Define if $1 type is present. ])
-  AC_MSG_RESULT(yes)
-], [AC_MSG_RESULT(no)
-])dnl
-])
-
 AC_DEFUN([LIBZEND_BASIC_CHECKS],[
 
 AC_REQUIRE([AC_PROG_YACC])
 AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([AC_PROG_CC_C_O])
-AC_REQUIRE([AC_HEADER_STDC])
 
 LIBZEND_BISON_CHECK
-
-dnl Ugly hack to get around a problem with gcc on AIX.
-if test "$CC" = "gcc" -a "$ac_cv_prog_cc_g" = "yes" -a \
-   "`uname -sv`" = "AIX 4"; then
-	CFLAGS=`echo $CFLAGS | sed -e 's/-g//'`
-fi
 
 AC_CHECK_HEADERS(
 inttypes.h \
@@ -73,13 +43,9 @@ dnl This is required for QNX and may be some BSD derived systems
 AC_CHECK_TYPE( uint, unsigned int )
 AC_CHECK_TYPE( ulong, unsigned long )
 
-dnl Check if int32_t and uint32_t are defined
-LIBZEND_CHECK_INT_TYPE(int32_t)
-LIBZEND_CHECK_INT_TYPE(uint32_t)
-
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
-AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol finite fpclass sigsetjmp)
+AC_CHECK_FUNCS(strdup getpid kill strtod strtol finite fpclass sigsetjmp)
 
 AC_CHECK_DECLS([isfinite, isnan, isinf], [], [], [[#include <math.h>]])
 

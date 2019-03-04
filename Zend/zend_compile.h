@@ -950,7 +950,7 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
 	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_PREFER_REF)
 
-/* Quick API to check firat 12 arguments */
+/* Quick API to check first 12 arguments */
 #define MAX_ARG_FLAG_NUM 12
 
 #ifdef WORDS_BIGENDIAN
