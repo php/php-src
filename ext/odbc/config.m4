@@ -227,7 +227,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([empress],,
   [AS_HELP_STRING([--with-empress@<:@=DIR@:>@],
-    [Include Empress support [\$EMPRESSPATH] (Empress Version >= 8.60
+    [Include Empress support @S|@EMPRESSPATH (Empress Version >= 8.60
     required)])])
 
   AC_MSG_CHECKING(for Empress support)
@@ -253,7 +253,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([empress-bcs],,
   [AS_HELP_STRING([--with-empress-bcs@<:@=DIR@:>@],
-    [Include Empress Local Access support [\$EMPRESSPATH] (Empress Version >=
+    [Include Empress Local Access support @S|@EMPRESSPATH (Empress Version >=
     8.60 required)])])
 
   AC_MSG_CHECKING(for Empress local access support)
