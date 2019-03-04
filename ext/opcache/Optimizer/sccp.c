@@ -1581,7 +1581,10 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 					removed_ops++;
 				}
-			} else if (ssa_op->op1_def == i) {
+			} else if (ssa_op->op1_def == i &&
+					(ssa_op->result_def < 0 ||
+					 (ssa->vars[ssa_op->result_def].use_chain < 0 &&
+					  ssa->vars[ssa_op->result_def].phi_use_chain == NULL))) {
 				/* Compound assign or incdec -> convert to direct ASSIGN */
 
 				/* Destroy previous op2 */
@@ -1595,10 +1598,8 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 					ssa_op->op2_use_chain = -1;
 				}
 
-				/* Mark result unused, if possible */
-				if (ssa_op->result_def >= 0
-						&& ssa->vars[ssa_op->result_def].use_chain < 0
-						&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
+				/* We checked that result has no uses, mark unused */
+				if (ssa_op->result_def >= 0) {
 					if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
 						zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
 					}

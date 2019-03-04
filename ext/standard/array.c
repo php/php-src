@@ -2528,35 +2528,33 @@ PHP_FUNCTION(extract)
 				break;
 		}
 	} else {
+		/* The array might be stored in a local variable that will be overwritten */
+		zval array_copy;
+		ZVAL_COPY(&array_copy, var_array_param);
 		switch (extract_type) {
 			case EXTR_IF_EXISTS:
-				count = php_extract_if_exists(Z_ARRVAL_P(var_array_param), symbol_table);
+				count = php_extract_if_exists(Z_ARRVAL(array_copy), symbol_table);
 				break;
 			case EXTR_OVERWRITE:
-				{
-					zval zv;
-					/* The array might be stored in a local variable that will be overwritten */
-					ZVAL_COPY(&zv, var_array_param);
-					count = php_extract_overwrite(Z_ARRVAL(zv), symbol_table);
-					zval_ptr_dtor(&zv);
-				}
+				count = php_extract_overwrite(Z_ARRVAL(array_copy), symbol_table);
 				break;
 			case EXTR_PREFIX_IF_EXISTS:
-				count = php_extract_prefix_if_exists(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
+				count = php_extract_prefix_if_exists(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			case EXTR_PREFIX_SAME:
-				count = php_extract_prefix_same(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
+				count = php_extract_prefix_same(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			case EXTR_PREFIX_ALL:
-				count = php_extract_prefix_all(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
+				count = php_extract_prefix_all(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			case EXTR_PREFIX_INVALID:
-				count = php_extract_prefix_invalid(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
+				count = php_extract_prefix_invalid(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			default:
-				count = php_extract_skip(Z_ARRVAL_P(var_array_param), symbol_table);
+				count = php_extract_skip(Z_ARRVAL(array_copy), symbol_table);
 				break;
 		}
+		zval_ptr_dtor(&array_copy);
 	}
 
 	RETURN_LONG(count);

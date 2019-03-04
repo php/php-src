@@ -2,6 +2,38 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.17
 
+- Core:
+  . Fixed bug #77660 (Segmentation fault on break 2147483648). (Laruence)
+  . Fixed bug #77652 (Anonymous classes can lose their interface information).
+    (Nikita)
+  . Fixed bug #77609 (Tests with shared extensions fails). (Ralf Habacker)
+  . Fixed bug #77676 (Unable to run tests when building shared extension on
+    AIX). (Kevin Adler)
+
+- FPM:
+  . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
+    (Kevin Adler)
+
+- Date:
+  . Fixed bug #50020 (DateInterval:createDateFromString() silently fails).
+    (Derick)
+
+- MySQLi:
+  . Fixed bug #77597 (mysqli_fetch_field hangs scripts). (Nikita)
+
+- Opcache:
+  . Fixed bug #77691 (Opcache passes wrong value for inline array push
+    assignments). (Nikita)
+
+- sodium:
+  . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
+
+- Standard:
+  . Fixed bug #77664 (Segmentation fault when using undefined constant in
+    custom wrapper). (Laruence)
+  . Fixed bug #77669 (Crash in extract() when overwriting extracted array).
+    (Nikita)
+
 07 Mar 2019, PHP 7.2.16
 
 - Core:
@@ -12,6 +44,12 @@ PHP                                                                        NEWS
   . Fixed bug #77621 (Already defined constants are not properly reported).
     (cmb)
 
+- EXIF:
+  . Fixed bug #77509 (Uninitialized read in exif_process_IFD_in_TIFF). (Stas)
+  . Fixed bug #77540 (Invalid Read on exif_process_SOFn). (Stas)
+  . Fixed bug #77563 (Uninitialized read in exif_process_IFD_in_MAKERNOTE). (Stas)
+  . Fixed bug #77659 (Uninitialized read in exif_process_IFD_in_MAKERNOTE). (Stas)
+
 - PDO_OCI:
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
@@ -19,6 +57,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #51068 (DirectoryIterator glob:// don't support current path
     relative queries). (Ahmed Abdou)
+  . Fixed bug #77431 (openFile() silently truncates after a null byte). (cmb)
 
 - Standard:
   . Fixed bug #77552 (Unintialized php_stream_statbuf in stat functions).
@@ -28,6 +67,10 @@ PHP                                                                        NEWS
   . Disabled LOCAL INFILE by default, can be enabled using php.ini directive
     mysqli.allow_local_infile for mysqli, or PDO::MYSQL_ATTR_LOCAL_INFILE
     attribute for pdo_mysql. (Darek Slusarczyk)
+
+- PHAR:
+  . Fixed bug #77396 (Null Pointer Dereference in phar_create_or_parse_filename).
+    (bishop)
 
 07 Feb 2019, PHP 7.2.15
 
