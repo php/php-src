@@ -150,8 +150,8 @@ static void gc_trace_ref(zend_refcounted *ref) {
 #endif
 
 typedef struct _gc_refcounted_stack {
-	int count;
-	int max;
+	size_t count;
+	size_t max;
 	zend_refcounted **bottom;
 } gc_refcounted_stack;
 
@@ -373,16 +373,11 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	}
 }
 
-static gc_refcounted_stack* gc_refcounted_stack_init(int size)
+static void gc_refcounted_stack_init(gc_refcounted_stack *stack, int size)
 {
-	gc_refcounted_stack *stack;
-	stack = (gc_refcounted_stack*) emalloc(sizeof(gc_refcounted_stack));
-
 	stack->count = 0;
 	stack->max = size;
 	stack->bottom = (zend_refcounted**) emalloc(stack->max * sizeof(zend_refcounted*));
-
-	return stack;
 }
 
 static void gc_refcounted_stack_push(gc_refcounted_stack *stack, zend_refcounted *ref)
@@ -392,7 +387,7 @@ static void gc_refcounted_stack_push(gc_refcounted_stack *stack, zend_refcounted
 		stack->bottom = (zend_refcounted**) erealloc(stack->bottom, stack->max * sizeof(zend_refcounted*));
 	}
 
-	*(stack->bottom + stack->count) = ref;
+	stack->bottom[stack->count] = ref;
 	stack->count++;
 }
 
@@ -403,13 +398,12 @@ static zend_refcounted* gc_refcounted_stack_pop(gc_refcounted_stack *stack)
 	}
 
 	stack->count--;
-	return *(stack->bottom + stack->count);
+	return stack->bottom[stack->count];
 }
 
 static void gc_refcounted_stack_destroy(gc_refcounted_stack *stack)
 {
 	efree(stack->bottom);
-	efree(stack);
 }
 
 static void gc_scan_black(zend_refcounted *ref, gc_refcounted_stack *stack)
@@ -639,11 +633,10 @@ tail_call:
 	}
 }
 
-static void gc_mark_roots(void)
+static void gc_mark_roots(gc_refcounted_stack *stack)
 {
 	gc_root_buffer *current = GC_G(roots).next;
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 
 	while (current != &GC_G(roots)) {
 		if (GC_REF_GET_COLOR(current->ref) == GC_PURPLE) {
@@ -656,8 +649,6 @@ static void gc_mark_roots(void)
 		}
 		current = current->next;
 	}
-
-	gc_refcounted_stack_destroy(stack);
 }
 
 static void gc_scan(zend_refcounted *ref, gc_refcounted_stack *stack, gc_refcounted_stack *stack_black)
@@ -778,27 +769,27 @@ tail_call:
 	}
 }
 
-static void gc_scan_roots(void)
+static void gc_scan_roots(gc_refcounted_stack *stack)
 {
 	gc_root_buffer *current = GC_G(roots).next;
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
-	gc_refcounted_stack *stack_black = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
+	gc_refcounted_stack stack_black;
+
+	gc_refcounted_stack_init(&stack_black, GC_REFCOUNTED_STACK_INITIAL_SIZE);
 
 	while (current != &GC_G(roots)) {
 		if (GC_REF_GET_COLOR(current->ref) == GC_GREY) {
 			GC_REF_SET_COLOR(current->ref, GC_WHITE);
-			gc_scan(current->ref, stack, stack_black);
+			gc_scan(current->ref, stack, &stack_black);
 			while (stack->count) {
 				ref = gc_refcounted_stack_pop(stack);
-				gc_scan(ref, stack, stack_black);
+				gc_scan(ref, stack, &stack_black);
 			}
 		}
 		current = current->next;
 	}
 
-	gc_refcounted_stack_destroy(stack_black);
-	gc_refcounted_stack_destroy(stack);
+	gc_refcounted_stack_destroy(&stack_black);
 }
 
 static void gc_add_garbage(zend_refcounted *ref)
@@ -1001,12 +992,11 @@ tail_call:
 	return count;
 }
 
-static int gc_collect_roots(uint32_t *flags)
+static int gc_collect_roots(uint32_t *flags, gc_refcounted_stack *stack)
 {
 	int count = 0;
 	gc_root_buffer *current = GC_G(roots).next;
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack;
 
 	/* remove non-garbage from the list */
 	while (current != &GC_G(roots)) {
@@ -1022,7 +1012,6 @@ static int gc_collect_roots(uint32_t *flags)
 		current = next;
 	}
 
-	stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 	current = GC_G(roots).next;
 	while (current != &GC_G(roots)) {
 		if (GC_REF_GET_COLOR(current->ref) == GC_WHITE) {
@@ -1035,7 +1024,6 @@ static int gc_collect_roots(uint32_t *flags)
 		}
 		current = current->next;
 	}
-	gc_refcounted_stack_destroy(stack);
 
 	/* relink remaining roots into list to free */
 	if (GC_G(roots).next != &GC_G(roots)) {
@@ -1171,6 +1159,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 		gc_root_buffer to_free;
 		uint32_t gc_flags = 0;
 		gc_additional_buffer *additional_buffer_snapshot;
+		gc_refcounted_stack stack;
 #if ZEND_GC_DEBUG
 		zend_bool orig_gc_full;
 #endif
@@ -1183,10 +1172,12 @@ ZEND_API int zend_gc_collect_cycles(void)
 		GC_G(gc_runs)++;
 		GC_G(gc_active) = 1;
 
+		gc_refcounted_stack_init(&stack, GC_REFCOUNTED_STACK_INITIAL_SIZE);
+
 		GC_TRACE("Marking roots");
-		gc_mark_roots();
+		gc_mark_roots(&stack);
 		GC_TRACE("Scanning roots");
-		gc_scan_roots();
+		gc_scan_roots(&stack);
 
 #if ZEND_GC_DEBUG
 		orig_gc_full = GC_G(gc_full);
@@ -1195,7 +1186,10 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 		GC_TRACE("Collecting roots");
 		additional_buffer_snapshot = GC_G(additional_buffer);
-		count = gc_collect_roots(&gc_flags);
+		count = gc_collect_roots(&gc_flags, &stack);
+
+		gc_refcounted_stack_destroy(&stack);
+
 #if ZEND_GC_DEBUG
 		GC_G(gc_full) = orig_gc_full;
 #endif
