@@ -1133,7 +1133,7 @@ SPL_METHOD(SplFileInfo, __construct)
 	char *path;
 	size_t len;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &path, &len) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "p", &path, &len) == FAILURE) {
 		return;
 	}
 

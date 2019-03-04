@@ -123,8 +123,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
 		zend_free_compiled_variables(execute_data);
 
-		if ((EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) &&
-			EXPECTED(GC_TYPE(Z_OBJ(execute_data->This)) == IS_OBJECT)) {
+		if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		}
 
@@ -144,8 +143,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		}
 
 		/* Free closure object */
-		if ((EX_CALL_INFO() & ZEND_CALL_CLOSURE) &&
-			EXPECTED(GC_TYPE(ZEND_CLOSURE_OBJECT(EX(func))) == IS_OBJECT)) {
+		if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
 

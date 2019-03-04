@@ -822,7 +822,11 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_
 	}
 
 	if (var_hash && (var_already = php_add_var_hash(var_hash, struc))) {
-		if (Z_ISREF_P(struc)) {
+		if (var_already == -1) {
+			/* Reference to an object that failed to serialize, replace with null. */
+			smart_str_appendl(buf, "N;", 2);
+			return;
+		} else if (Z_ISREF_P(struc)) {
 			smart_str_appendl(buf, "R:", 2);
 			smart_str_append_long(buf, var_already);
 			smart_str_appendc(buf, ';');
@@ -886,6 +890,10 @@ again:
 						smart_str_appendl(buf, (char *) serialized_data, serialized_length);
 						smart_str_appendc(buf, '}');
 					} else {
+						/* Mark this value in the var_hash, to avoid creating references to it. */
+						zval *var_idx = zend_hash_index_find(&var_hash->ht,
+							(zend_ulong) (zend_uintptr_t) Z_COUNTED_P(struc));
+						ZVAL_LONG(var_idx, -1);
 						smart_str_appendl(buf, "N;", 2);
 					}
 					if (serialized_data) {

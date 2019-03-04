@@ -4528,7 +4528,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 	zend_ast *depth_ast = ast->child[0];
 
 	zend_op *opline;
-	int depth;
+	zend_long depth;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_BREAK || ast->kind == ZEND_AST_CONTINUE);
 
@@ -4555,7 +4555,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
 		if (!zend_handle_loops_and_finally_ex(depth, NULL)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' " ZEND_LONG_FMT " level%s",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue",
 				depth, depth == 1 ? "" : "s");
 		}
@@ -4572,12 +4572,12 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 			if (depth == 1) {
 				zend_error(E_WARNING,
 					"\"continue\" targeting switch is equivalent to \"break\". " \
-					"Did you mean to use \"continue %d\"?",
+					"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
 					depth + 1);
 			} else {
 				zend_error(E_WARNING,
-					"\"continue %d\" targeting switch is equivalent to \"break %d\". " \
-					"Did you mean to use \"continue %d\"?",
+					"\"continue " ZEND_LONG_FMT "\" targeting switch is equivalent to \"break " ZEND_LONG_FMT "\". " \
+					"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
 					depth, depth, depth + 1);
 			}
 		}
@@ -6440,10 +6440,32 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		if (!zend_hash_exists(CG(class_table), lcname)) {
 			zend_hash_add_ptr(CG(class_table), lcname, ce);
 		} else {
-			/* this anonymous class has been included */
+			/* This anonymous class has been included, reuse the existing definition.
+			 * NB: This behavior is buggy, and this should always result in a separate
+			 * class declaration. However, until the problem of RTD key collisions is
+			 * solved, this gives a behavior close to what is expected. */
 			zval zv;
 			ZVAL_PTR(&zv, ce);
 			destroy_zend_class(&zv);
+			ce = zend_hash_find_ptr(CG(class_table), lcname);
+
+			/* Manually replicate emission of necessary inheritance opcodes here. We cannot
+			 * reuse the general code, as we only want to emit the opcodes, without modifying
+			 * the reused class definition. */
+			if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+				zend_emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL);
+			}
+			if (implements_ast) {
+				zend_ast_list *iface_list = zend_ast_get_list(implements_ast);
+				uint32_t i;
+				for (i = 0; i < iface_list->children; i++) {
+					opline = zend_emit_op(NULL, ZEND_ADD_INTERFACE, &declare_node, NULL);
+					opline->op2_type = IS_CONST;
+					opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
+						zend_resolve_class_name_ast(iface_list->child[i]));
+				}
+				zend_emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL);
+			}
 			return;
 		}
 	} else {

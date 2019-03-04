@@ -1677,7 +1677,8 @@ PHP_FUNCTION(sodium_crypto_sign_detached)
 		zend_throw_exception(sodium_exception_ce, "signature has a bogus size", 0);
 		return;
 	}
-	ZEND_ASSERT(ZSTR_VAL(signature)[signature_real_len] == 0);
+	PHP_SODIUM_ZSTR_TRUNCATE(signature, (size_t) signature_real_len);
+	ZSTR_VAL(signature)[signature_real_len] = 0;
 
 	RETURN_NEW_STR(signature);
 }

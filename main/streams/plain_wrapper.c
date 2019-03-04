@@ -1198,34 +1198,51 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 # ifdef EXDEV
 		if (errno == EXDEV) {
 			zend_stat_t sb;
+# if !defined(ZTS) && !defined(TSRM_WIN32)
+            /* not sure what to do in ZTS case, umask is not thread-safe */
+			int oldmask = umask(077);
+# endif
+			int success = 0;
 			if (php_copy_file(url_from, url_to) == SUCCESS) {
 				if (VCWD_STAT(url_from, &sb) == 0) {
-#  ifndef TSRM_WIN32
-					if (VCWD_CHMOD(url_to, sb.st_mode)) {
-						if (errno == EPERM) {
-							php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
-							VCWD_UNLINK(url_from);
-							return 1;
-						}
-						php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
-						return 0;
-					}
+					success = 1;
+#  if !defined(TSRM_WIN32)
+					/*
+					 * Try to set user and permission info on the target.
+					 * If we're not root, then some of these may fail.
+					 * We try chown first, to set proper group info, relying
+					 * on the system environment to have proper umask to not allow
+					 * access to the file in the meantime.
+					 */
 					if (VCWD_CHOWN(url_to, sb.st_uid, sb.st_gid)) {
-						if (errno == EPERM) {
-							php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
-							VCWD_UNLINK(url_from);
-							return 1;
-						}
 						php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
-						return 0;
+						if (errno != EPERM) {
+							success = 0;
+						}
+					}
+
+					if (success) {
+						if (VCWD_CHMOD(url_to, sb.st_mode)) {
+							php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+							if (errno != EPERM) {
+								success = 0;
+							}
+						}
 					}
 #  endif
-					VCWD_UNLINK(url_from);
-					return 1;
+					if (success) {
+						VCWD_UNLINK(url_from);
+					}
+				} else {
+					php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
 				}
+			} else {
+				php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
 			}
-			php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
-			return 0;
+#  if !defined(ZTS) && !defined(TSRM_WIN32)
+			umask(oldmask);
+#  endif
+			return success;
 		}
 # endif
 #endif

@@ -2,7 +2,31 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.4
 
-21 Feb 2019, PHP 7.3.3
+- Core:
+  . Fixed bug #77660 (Segmentation fault on break 2147483648). (Laruence)
+  . Fixed bug #77652 (Anonymous classes can lose their interface information).
+    (Nikita)
+
+- Apache2Handler:
+  . Fixed bug #77648 (BOM in sapi/apache2handler/php_functions.c). (cmb)
+
+- FPM:
+  . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
+    (Kevin Adler)
+
+- MySQLi:
+  . Fixed bug #77597 (mysqli_fetch_field hangs scripts). (Nikita)
+
+- sodium:
+  . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
+
+- Standard:
+  . Fixed bug #77664 (Segmentation fault when using undefined constant in
+    custom wrapper). (Laruence)
+  . Fixed bug #77669 (Crash in extract() when overwriting extracted array).
+    (Nikita)
+
+07 Mar 2019, PHP 7.3.3
 
 - Core:
   . Fixed bug #77589 (Core dump using parse_ini_string with numeric sections).
@@ -15,15 +39,28 @@ PHP                                                                        NEWS
     property). (Nikita)
   . Fixed bug #77530 (PHP crashes when parsing `(2)::class`). (Ekin)
   . Fixed bug #77546 (iptcembed broken function). (gdegoulet)
+  . Fixed bug #77630 (rename() across the device may allow unwanted access
+    during processing). (Stas)
 
 - COM:
   . Fixed bug #77621 (Already defined constants are not properly reported).
     (cmb)
   . Fixed bug #77626 (Persistence confusion in php_com_import_typelib()). (cmb)
 
+- EXIF:
+  . Fixed bug #77509 (Uninitialized read in exif_process_IFD_in_TIFF). (Stas)
+  . Fixed bug #77540 (Invalid Read on exif_process_SOFn). (Stas)
+  . Fixed bug #77563 (Uninitialized read in exif_process_IFD_in_MAKERNOTE). (Stas)
+  . Fixed bug #77659 (Uninitialized read in exif_process_IFD_in_MAKERNOTE). (Stas)
+
 - Mbstring:
   . Fixed bug #77514 (mb_ereg_replace() with trailing backslash adds null byte).
     (Nikita)
+
+- MySQL
+  . Disabled LOCAL INFILE by default, can be enabled using php.ini directive
+    mysqli.allow_local_infile for mysqli, or PDO::MYSQL_ATTR_LOCAL_INFILE
+    attribute for pdo_mysql. (Darek Slusarczyk)
 
 - OpenSSL:
   . Fixed bug #77390 (feof might hang on TLS streams in case of fragmented TLS
@@ -33,23 +70,24 @@ PHP                                                                        NEWS
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
 
+- PHAR:
+  . Fixed bug #77396 (Null Pointer Dereference in phar_create_or_parse_filename).
+    (bishop)
+  . Fixed bug #77586 (phar_tar_writeheaders_int() buffer overflow). (bishop)
+
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
 
 - SPL:
   . Fixed bug #51068 (DirectoryIterator glob:// don't support current path
     relative queries). (Ahmed Abdou)
+  . Fixed bug #77431 (openFile() silently truncates after a null byte). (cmb)
 
 - Standard:
   . Fixed bug #77552 (Unintialized php_stream_statbuf in stat functions).
     (John Stevenson)
   . Fixed bug #77612 (setcookie() sets incorrect SameSite header if all of its
     options filled). (Nikita)
-
-- MySQL
-  . Disabled LOCAL INFILE by default, can be enabled using php.ini directive
-    mysqli.allow_local_infile for mysqli, or PDO::MYSQL_ATTR_LOCAL_INFILE
-    attribute for pdo_mysql. (Darek Slusarczyk)
 
 07 Feb 2019, PHP 7.3.2
 
