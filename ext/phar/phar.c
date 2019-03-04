@@ -1403,6 +1403,9 @@ int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, si
 	/* set up our manifest */
 	mydata = ecalloc(1, sizeof(phar_archive_data));
 	mydata->fname = expand_filepath(fname, NULL);
+	if (mydata->fname == NULL) {
+		return FAILURE;
+	}
 	fname_len = strlen(mydata->fname);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(mydata->fname, fname_len);
