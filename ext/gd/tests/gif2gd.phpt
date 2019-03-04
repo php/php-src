@@ -15,15 +15,15 @@ gif --> gd1/gd2 conversion test
 	$cwd = dirname(__FILE__);
 
 	echo "GIF to GD1 conversion: ";
-	echo imagegd(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test.gd1") ? 'ok' : 'failed';
+	echo imagegd(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test_gif.gd1") ? 'ok' : 'failed';
 	echo "\n";
 
 	echo "GIF to GD2 conversion: ";
-	echo imagegd2(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test.gd2") ? 'ok' : 'failed';
+	echo imagegd2(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test_gif.gd2") ? 'ok' : 'failed';
 	echo "\n";
 
-	@unlink($cwd . "/test.gd1");
-	@unlink($cwd . "/test.gd2");
+	@unlink($cwd . "/test_gif.gd1");
+	@unlink($cwd . "/test_gif.gd2");
 ?>
 --EXPECT--
 GIF to GD1 conversion: ok
