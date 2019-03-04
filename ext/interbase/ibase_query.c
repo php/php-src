@@ -1390,7 +1390,7 @@ format_date_time:
 			   always sets tm_isdst to 0, sometimes incorrectly (InterBase 6 bug?)
 			*/
 			t.tm_isdst = -1;
-#if HAVE_TM_ZONE
+#if HAVE_STRUCT_TM_TM_ZONE
 			t.tm_zone = tzname[0];
 #endif
 			if (flag & PHP_IBASE_UNIXTIME) {
