@@ -29,6 +29,11 @@ PHP                                                                        NEWS
   . Fixed bug #77514 (mb_ereg_replace() with trailing backslash adds null byte).
     (Nikita)
 
+- MySQL
+  . Disabled LOCAL INFILE by default, can be enabled using php.ini directive
+    mysqli.allow_local_infile for mysqli, or PDO::MYSQL_ATTR_LOCAL_INFILE
+    attribute for pdo_mysql. (Darek Slusarczyk)
+
 - OpenSSL:
   . Fixed bug #77390 (feof might hang on TLS streams in case of fragmented TLS
     records). (Abyl Valg, Jakub Zelenka)
@@ -55,11 +60,6 @@ PHP                                                                        NEWS
     (John Stevenson)
   . Fixed bug #77612 (setcookie() sets incorrect SameSite header if all of its
     options filled). (Nikita)
-
-- MySQL
-  . Disabled LOCAL INFILE by default, can be enabled using php.ini directive
-    mysqli.allow_local_infile for mysqli, or PDO::MYSQL_ATTR_LOCAL_INFILE
-    attribute for pdo_mysql. (Darek Slusarczyk)
 
 07 Feb 2019, PHP 7.3.2
 
