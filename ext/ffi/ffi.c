@@ -750,6 +750,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 {
 	zend_ffi_callback_data *callback_data = (zend_ffi_callback_data*)data;
 	zend_fcall_info fci;
+	zend_ffi_type *ret_type;
 	zval retval;
 	ALLOCA_FLAG(use_heap)
 
@@ -787,7 +788,10 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	}
 	free_alloca(fci.params, use_heap);
 
-	zend_ffi_zval_to_cdata(ret, ZEND_FFI_TYPE(callback_data->type->func.ret_type), &retval);
+	ret_type = ZEND_FFI_TYPE(callback_data->type->func.ret_type);
+	if (ret_type->kind != ZEND_FFI_TYPE_VOID) {
+		zend_ffi_zval_to_cdata(ret, ret_type, &retval);
+	}
 }
 /* }}} */
 
