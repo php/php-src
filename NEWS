@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.16
 
-
-21 Feb 2019, PHP 7.2.16RC1
-
 - Core:
   . Fixed bug #77589 (Core dump using parse_ini_string with numeric sections).
     (Laruence)
@@ -13,13 +10,24 @@ PHP                                                                        NEWS
   . Fixed bug #77621 (Already defined constants are not properly reported).
     (cmb)
 
+- EXIF:
+  . Fixed bug #77509 (Uninitialized read in exif_process_IFD_in_TIFF). (Stas)
+  . Fixed bug #77540 (Invalid Read on exif_process_SOFn). (Stas)
+  . Fixed bug #77563 (Uninitialized read in exif_process_IFD_in_MAKERNOTE). (Stas)
+  . Fixed bug #77659 (Uninitialized read in exif_process_IFD_in_MAKERNOTE). (Stas)
+
 - PDO_OCI:
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
 
+- PHAR:
+  . Fixed bug #77396 (Null Pointer Dereference in phar_create_or_parse_filename).
+    (bishop)
+
 - SPL:
   . Fixed bug #51068 (DirectoryIterator glob:// don't support current path
     relative queries). (Ahmed Abdou)
+  . Fixed bug #77431 (openFile() silently truncates after a null byte). (cmb)
 
 - Standard:
   . Fixed bug #77552 (Unintialized php_stream_statbuf in stat functions).
