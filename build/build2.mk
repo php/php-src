@@ -16,11 +16,9 @@
 
 include generated_lists
 
-TOUCH_FILES = mkinstalldirs install-sh missing
-
 config_h_in = main/php_config.h.in
 
-targets = $(TOUCH_FILES) configure $(config_h_in)
+targets = configure $(config_h_in)
 
 PHP_AUTOCONF ?= 'autoconf'
 PHP_AUTOHEADER ?= 'autoheader'
@@ -35,9 +33,6 @@ $(config_h_in): configure
 	@echo rebuilding $@
 	@rm -f $@
 	$(PHP_AUTOHEADER) $(SUPPRESS_WARNINGS)
-
-$(TOUCH_FILES):
-	touch $(TOUCH_FILES)
 
 aclocal.m4: configure.ac acinclude.m4
 	@echo rebuilding $@
