@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 - Hash:
   . The hash extension is now an integral part of PHP and cannot be disabled
     as per RFC: https://wiki.php.net/rfc/permanent_hash_ext. (Kalle)
+  . Implemented FR #71890 (crc32c checksum algorithm). (Andrew Brampton)
 
 - Intl:
   . Raised requirements to ICU ≥ 50.1. (cmb)

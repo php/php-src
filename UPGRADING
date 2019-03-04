@@ -117,6 +117,10 @@ PHP 7.4 UPGRADE NOTES
     native variables and create/access data structures defined in C libraries.
     RFC: https://wiki.php.net/rfc/ffi
 
+- Hash:
+  . Added "crc32c" hash using Castagnoli's polynomial. This crc32 variant is
+    used by storage systems, such as iSCSI, SCTP, Btrfs and ext4.
+
 - Mbstring:
   . Added mb_str_split() function, which provide the same functionality as
     str_split(), but operating on code points rather than bytes.
