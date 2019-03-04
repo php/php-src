@@ -39,6 +39,8 @@ PHP                                                                        NEWS
     property). (Nikita)
   . Fixed bug #77530 (PHP crashes when parsing `(2)::class`). (Ekin)
   . Fixed bug #77546 (iptcembed broken function). (gdegoulet)
+  . Fixed bug #77630 (rename() across the device may allow unwanted access
+    during processing). (Stas)
 
 - COM:
   . Fixed bug #77621 (Already defined constants are not properly reported).
