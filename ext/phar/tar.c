@@ -764,7 +764,12 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 	header.typeflag = entry->tar_type;
 
 	if (entry->link) {
-		strncpy(header.linkname, entry->link, strlen(entry->link));
+		if (strlcpy(header.linkname, entry->link, sizeof(header.linkname)) >= sizeof(header.linkname)) {
+			if (fp->error) {
+				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, link \"%s\" is too long for format", entry->phar->fname, entry->link);
+			}
+			return ZEND_HASH_APPLY_STOP;
+		}
 	}
 
 	strncpy(header.magic, "ustar", sizeof("ustar")-1);
