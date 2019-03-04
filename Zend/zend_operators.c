@@ -2019,6 +2019,89 @@ static void ZEND_FASTCALL convert_compare_result_to_long(zval *result) /* {{{ */
 }
 /* }}} */
 
+static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
+{
+	zend_long str_lval;
+	double str_dval;
+	int num_cmp_result;
+	zend_uchar type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 1);
+
+	if (type == IS_LONG) {
+		num_cmp_result = lval > str_lval ? 1 : lval < str_lval ? -1 : 0;
+	} else if (type == IS_DOUBLE) {
+		double diff = (double) lval - str_dval;
+		num_cmp_result = ZEND_NORMALIZE_BOOL(diff);
+	} else {
+		num_cmp_result = ZEND_NORMALIZE_BOOL(lval);
+	}
+
+	/* TODO Avoid duplicate is_numeric_string call. */
+	zend_bool is_numeric = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+	if (is_numeric) {
+		/* For numeric strings, the comparison result stays the same. */
+		return num_cmp_result;
+	}
+
+	zend_string *lval_as_str = zend_long_to_str(lval);
+	int str_cmp_result = zend_binary_strcmp(
+		ZSTR_VAL(lval_as_str), ZSTR_LEN(lval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
+	str_cmp_result = ZEND_NORMALIZE_BOOL(str_cmp_result);
+	zend_string_release(lval_as_str);
+
+	if (str_cmp_result != num_cmp_result) {
+		zend_error(E_WARNING,
+			"Result of comparison between " ZEND_LONG_FMT " and \"%s\" will change (%d to %d)",
+			lval, ZSTR_VAL(str), num_cmp_result, str_cmp_result);
+	}
+
+	/* Return old (numeric) comparison result. */
+	return num_cmp_result;
+}
+/* }}} */
+
+static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
+{
+	zend_long str_lval;
+	double str_dval;
+	int num_cmp_result;
+	zend_uchar type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+
+	if (type == IS_LONG) {
+		double diff = dval - (double) str_lval;
+		num_cmp_result = ZEND_NORMALIZE_BOOL(diff);
+	} else if (type == IS_DOUBLE) {
+		if (dval == str_dval) {
+			return 0;
+		}
+		num_cmp_result = ZEND_NORMALIZE_BOOL(dval - str_dval);
+	} else {
+		num_cmp_result = ZEND_NORMALIZE_BOOL(dval);
+	}
+
+	/* TODO Avoid duplicate is_numeric_string call. */
+	zend_bool is_numeric = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+	if (is_numeric) {
+		/* For numeric strings, the comparison result stays the same. */
+		return num_cmp_result;
+	}
+
+	zend_string *dval_as_str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
+	int str_cmp_result = zend_binary_strcmp(
+		ZSTR_VAL(dval_as_str), ZSTR_LEN(dval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
+	str_cmp_result = ZEND_NORMALIZE_BOOL(str_cmp_result);
+	zend_string_release(dval_as_str);
+
+	if (str_cmp_result != num_cmp_result) {
+		zend_error(E_WARNING,
+			"Result of comparison between %G and \"%s\" will change (%d to %d)",
+			dval, ZSTR_VAL(str), num_cmp_result, str_cmp_result);
+	}
+
+	/* Return old (numeric) comparison result. */
+	return num_cmp_result;
+}
+/* }}} */
+
 ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	int ret;
@@ -2086,6 +2169,32 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 			case TYPE_PAIR(IS_STRING, IS_NULL):
 				ZVAL_LONG(result, Z_STRLEN_P(op1) == 0 ? 0 : 1);
 				return SUCCESS;
+
+			case TYPE_PAIR(IS_LONG, IS_STRING):
+				ZVAL_LONG(result, compare_long_to_string(Z_LVAL_P(op1), Z_STR_P(op2)));
+				return SUCCESS;
+
+			case TYPE_PAIR(IS_STRING, IS_LONG):
+				ZVAL_LONG(result, -compare_long_to_string(Z_LVAL_P(op2), Z_STR_P(op1)));
+				return SUCCESS;
+
+			case TYPE_PAIR(IS_DOUBLE, IS_STRING):
+				if (zend_isnan(Z_DVAL_P(op1))) {
+					ZVAL_LONG(result, 1);
+					return SUCCESS;
+				}
+
+				ZVAL_LONG(result, compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2)));
+				return SUCCESS;
+
+			case TYPE_PAIR(IS_STRING, IS_DOUBLE):
+				if (zend_isnan(Z_DVAL_P(op2))) {
+					ZVAL_LONG(result, 1);
+					return SUCCESS;
+				}
+
+				ZVAL_LONG(result, -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1)));
+return SUCCESS;
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
 				ZVAL_LONG(result, 1);
