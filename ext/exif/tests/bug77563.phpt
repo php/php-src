@@ -8,7 +8,7 @@ $s = exif_thumbnail(__DIR__."/bug77563.jpg");
 ?>
 DONE
 --EXPECTF--
-Warning: exif_thumbnail(bug77563.jpg): Illegal IFD offset in %s/bug77563.php on line %d
+Warning: exif_thumbnail(bug77563.jpg): IFD data too short: 0x0009 offset 0x0008 in %s/bug77563.php on line %d
 
 Warning: exif_thumbnail(bug77563.jpg): File structure corrupted in %s/bug77563.php on line %d
 
