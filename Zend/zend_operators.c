@@ -2019,7 +2019,7 @@ static void ZEND_FASTCALL convert_compare_result_to_long(zval *result) /* {{{ */
 }
 /* }}} */
 
-static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
+static int compare_long_to_string(zend_long lval, zend_string *str, zend_bool equality_only) /* {{{ */
 {
 	zend_long str_lval;
 	double str_dval;
@@ -2048,7 +2048,10 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 	str_cmp_result = ZEND_NORMALIZE_BOOL(str_cmp_result);
 	zend_string_release(lval_as_str);
 
-	if (str_cmp_result != num_cmp_result) {
+	/* Don't report a warning if we're using == and the comparison changed between 1/-1. */
+	zend_bool cmp_result_changed_observably = str_cmp_result != num_cmp_result &&
+		(!equality_only || str_cmp_result == 0 || num_cmp_result == 0);
+	if (cmp_result_changed_observably) {
 		zend_error(E_WARNING,
 			"Result of comparison between " ZEND_LONG_FMT " and \"%s\" will change (%d to %d)",
 			lval, ZSTR_VAL(str), num_cmp_result, str_cmp_result);
@@ -2059,7 +2062,7 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 }
 /* }}} */
 
-static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
+static int compare_double_to_string(double dval, zend_string *str, zend_bool equality_only) /* {{{ */
 {
 	zend_long str_lval;
 	double str_dval;
@@ -2091,7 +2094,10 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 	str_cmp_result = ZEND_NORMALIZE_BOOL(str_cmp_result);
 	zend_string_release(dval_as_str);
 
-	if (str_cmp_result != num_cmp_result) {
+	/* Don't report a warning if we're using == and the comparison changed between 1/-1. */
+	zend_bool cmp_result_changed_observably = str_cmp_result != num_cmp_result &&
+		(!equality_only || str_cmp_result == 0 || num_cmp_result == 0);
+	if (cmp_result_changed_observably) {
 		zend_error(E_WARNING,
 			"Result of comparison between %G and \"%s\" will change (%d to %d)",
 			dval, ZSTR_VAL(str), num_cmp_result, str_cmp_result);
@@ -2102,7 +2108,7 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API int ZEND_FASTCALL compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool equality_only) /* {{{ */
 {
 	int ret;
 	int converted = 0;
@@ -2135,7 +2141,7 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
-				ZVAL_LONG(result, zend_compare_arrays(op1, op2));
+				ZVAL_LONG(result, zend_compare_arrays_ex(op1, op2, equality_only));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_NULL, IS_NULL):
@@ -2171,11 +2177,11 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_LONG, IS_STRING):
-				ZVAL_LONG(result, compare_long_to_string(Z_LVAL_P(op1), Z_STR_P(op2)));
+				ZVAL_LONG(result, compare_long_to_string(Z_LVAL_P(op1), Z_STR_P(op2), equality_only));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_STRING, IS_LONG):
-				ZVAL_LONG(result, -compare_long_to_string(Z_LVAL_P(op2), Z_STR_P(op1)));
+				ZVAL_LONG(result, -compare_long_to_string(Z_LVAL_P(op2), Z_STR_P(op1), equality_only));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_STRING):
@@ -2184,7 +2190,7 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 					return SUCCESS;
 				}
 
-				ZVAL_LONG(result, compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2)));
+				ZVAL_LONG(result, compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2), equality_only));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_STRING, IS_DOUBLE):
@@ -2193,8 +2199,8 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 					return SUCCESS;
 				}
 
-				ZVAL_LONG(result, -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1)));
-return SUCCESS;
+				ZVAL_LONG(result, -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1), equality_only));
+				return SUCCESS;
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
 				ZVAL_LONG(result, 1);
@@ -2242,7 +2248,7 @@ return SUCCESS;
 					if (Z_OBJ_HT_P(op1)->get) {
 						zval rv;
 						op_free = Z_OBJ_HT_P(op1)->get(op1, &rv);
-						ret = compare_function(result, op_free, op2);
+						ret = compare_function_ex(result, op_free, op2, equality_only);
 						zend_free_obj_get_result(op_free);
 						return ret;
 					} else if (Z_TYPE_P(op2) != IS_OBJECT && Z_OBJ_HT_P(op1)->cast_object) {
@@ -2252,7 +2258,7 @@ return SUCCESS;
 							zend_free_obj_get_result(&tmp_free);
 							return SUCCESS;
 						}
-						ret = compare_function(result, &tmp_free, op2);
+						ret = compare_function_ex(result, &tmp_free, op2, equality_only);
 						zend_free_obj_get_result(&tmp_free);
 						return ret;
 					}
@@ -2261,7 +2267,7 @@ return SUCCESS;
 					if (Z_OBJ_HT_P(op2)->get) {
 						zval rv;
 						op_free = Z_OBJ_HT_P(op2)->get(op2, &rv);
-						ret = compare_function(result, op1, op_free);
+						ret = compare_function_ex(result, op1, op_free, equality_only);
 						zend_free_obj_get_result(op_free);
 						return ret;
 					} else if (Z_TYPE_P(op1) != IS_OBJECT && Z_OBJ_HT_P(op2)->cast_object) {
@@ -2271,7 +2277,7 @@ return SUCCESS;
 							zend_free_obj_get_result(&tmp_free);
 							return SUCCESS;
 						}
-						ret = compare_function(result, op1, &tmp_free);
+						ret = compare_function_ex(result, op1, &tmp_free, equality_only);
 						zend_free_obj_get_result(&tmp_free);
 						return ret;
 					} else if (Z_TYPE_P(op1) == IS_OBJECT) {
@@ -2319,6 +2325,12 @@ return SUCCESS;
 				}
 		}
 	}
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	return compare_function_ex(result, op1, op2, 0);
 }
 /* }}} */
 
@@ -2380,7 +2392,7 @@ ZEND_API int ZEND_FASTCALL is_not_identical_function(zval *result, zval *op1, zv
 
 ZEND_API int ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	if (compare_function(result, op1, op2) == FAILURE) {
+	if (compare_function_ex(result, op1, op2, 1) == FAILURE) {
 		return FAILURE;
 	}
 	ZVAL_BOOL(result, (Z_LVAL_P(result) == 0));
@@ -2390,7 +2402,7 @@ ZEND_API int ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2)
 
 ZEND_API int ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	if (compare_function(result, op1, op2) == FAILURE) {
+	if (compare_function_ex(result, op1, op2, 1) == FAILURE) {
 		return FAILURE;
 	}
 	ZVAL_BOOL(result, (Z_LVAL_P(result) != 0));
@@ -3076,15 +3088,44 @@ static int hash_zval_compare_function(zval *z1, zval *z2) /* {{{ */
 }
 /* }}} */
 
+static int hash_zval_compare_function_equality(zval *z1, zval *z2) /* {{{ */
+{
+	zval result;
+
+	if (compare_function_ex(&result, z1, z2, 1)==FAILURE) {
+		return 1;
+	}
+	return Z_LVAL(result);
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables_ex(HashTable *ht1, HashTable *ht2, zend_bool equality_only) /* {{{ */
+{
+	if (ht1 == ht2) {
+		return 0;
+	}
+	return zend_hash_compare(ht1, ht2,
+		equality_only
+			? (compare_func_t) hash_zval_compare_function_equality
+			: (compare_func_t) hash_zval_compare_function, 0);
+}
+/* }}} */
+
 ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2) /* {{{ */
 {
-	return ht1 == ht2 ? 0 : zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0);
+	return zend_compare_symbol_tables_ex(ht1, ht2, 0);
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL zend_compare_arrays_ex(zval *a1, zval *a2, zend_bool equality_only) /* {{{ */
+{
+	return zend_compare_symbol_tables_ex(Z_ARRVAL_P(a1), Z_ARRVAL_P(a2), equality_only);
 }
 /* }}} */
 
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2) /* {{{ */
 {
-	return zend_compare_symbol_tables(Z_ARRVAL_P(a1), Z_ARRVAL_P(a2));
+	return zend_compare_symbol_tables_ex(Z_ARRVAL_P(a1), Z_ARRVAL_P(a2), 0);
 }
 /* }}} */
 

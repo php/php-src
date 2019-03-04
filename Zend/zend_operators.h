@@ -388,6 +388,7 @@ again:
 	return result;
 }
 
+ZEND_API int ZEND_FASTCALL compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool equality_only);
 ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2);
@@ -417,7 +418,9 @@ ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp_l(const char *s1, size_t len1
 
 ZEND_API int ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2);
 ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2);
+ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables_ex(HashTable *ht1, HashTable *ht2, zend_bool equality_only);
 ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2);
+ZEND_API int ZEND_FASTCALL zend_compare_arrays_ex(zval *a1, zval *a2, zend_bool equality_only);
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2);
 ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);
 
@@ -860,7 +863,7 @@ static zend_always_inline int fast_equal_check_function(zval *op1, zval *op2)
 			return zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 		}
 	}
-	compare_function(&result, op1, op2);
+	compare_function_ex(&result, op1, op2, 1);
 	return Z_LVAL(result) == 0;
 }
 
@@ -870,7 +873,7 @@ static zend_always_inline int fast_equal_check_long(zval *op1, zval *op2)
 	if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 		return Z_LVAL_P(op1) == Z_LVAL_P(op2);
 	}
-	compare_function(&result, op1, op2);
+	compare_function_ex(&result, op1, op2, 1);
 	return Z_LVAL(result) == 0;
 }
 
@@ -880,7 +883,7 @@ static zend_always_inline int fast_equal_check_string(zval *op1, zval *op2)
 	if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
 		return zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 	}
-	compare_function(&result, op1, op2);
+	compare_function_ex(&result, op1, op2, 1);
 	return Z_LVAL(result) == 0;
 }
 
