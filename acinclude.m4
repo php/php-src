@@ -160,7 +160,7 @@ EOF
     eval echo "$i = \$$i" >> Makefile
   done
 
-  cat $abs_srcdir/Makefile.global Makefile.fragments Makefile.objects >> Makefile
+  cat $abs_srcdir/build/Makefile.global Makefile.fragments Makefile.objects >> Makefile
 ])
 
 dnl
