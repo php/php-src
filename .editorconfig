@@ -5,7 +5,7 @@ root = true
 [*]
 tab_width                = 4
 
-[*.{c,h,y,awk,w32,bat,mk,frag}]
+[*.{c,h,y,awk,w32,bat,mk,frag,cpp}]
 charset                  = utf-8
 end_of_line              = lf
 indent_size              = 4
@@ -13,7 +13,7 @@ indent_style             = tab
 trim_trailing_whitespace = true
 insert_final_newline     = true
 
-[*.{php,phpt}]
+[*.{php,phpt,inc}]
 charset                  = utf-8
 end_of_line              = lf
 indent_size              = 4
