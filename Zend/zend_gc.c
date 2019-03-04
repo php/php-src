@@ -73,7 +73,7 @@
 # define GC_BENCH 0
 #endif
 
-#define GC_REFCOUNTED_STACK_INITIAL_SIZE 16
+#define GC_REFCOUNTED_STACK_INITIAL_SIZE 512
 
 #ifndef ZEND_GC_DEBUG
 # define ZEND_GC_DEBUG 0
@@ -332,8 +332,8 @@ static void gc_trace_ref(zend_refcounted *ref) {
 #endif
 
 typedef struct _gc_refcounted_stack {
-	int count;
-	int max;
+	size_t count;
+	size_t max;
 	zend_refcounted **bottom;
 } gc_refcounted_stack;
 
@@ -614,16 +614,11 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	gc_remove_from_roots(root);
 }
 
-static gc_refcounted_stack* gc_refcounted_stack_init(int size)
+static void gc_refcounted_stack_init(gc_refcounted_stack *stack, int size)
 {
-	gc_refcounted_stack *stack;
-	stack = (gc_refcounted_stack*) emalloc(sizeof(gc_refcounted_stack));
-
 	stack->count = 0;
 	stack->max = size;
 	stack->bottom = (zend_refcounted**) emalloc(stack->max * sizeof(zend_refcounted*));
-
-	return stack;
 }
 
 static void gc_refcounted_stack_push(gc_refcounted_stack *stack, zend_refcounted *ref)
@@ -633,7 +628,7 @@ static void gc_refcounted_stack_push(gc_refcounted_stack *stack, zend_refcounted
 		stack->bottom = (zend_refcounted**) erealloc(stack->bottom, stack->max * sizeof(zend_refcounted*));
 	}
 
-	*(stack->bottom + stack->count) = ref;
+	stack->bottom[stack->count] = ref;
 	stack->count++;
 }
 
@@ -644,13 +639,12 @@ static zend_refcounted* gc_refcounted_stack_pop(gc_refcounted_stack *stack)
 	}
 
 	stack->count--;
-	return *(stack->bottom + stack->count);
+	return stack->bottom[stack->count];
 }
 
 static void gc_refcounted_stack_destroy(gc_refcounted_stack *stack)
 {
 	efree(stack->bottom);
-	efree(stack);
 }
 
 static void gc_scan_black(zend_refcounted *ref, gc_refcounted_stack *stack)
@@ -917,11 +911,10 @@ static void gc_compact(void)
 	}
 }
 
-static void gc_mark_roots(void)
+static void gc_mark_roots(gc_refcounted_stack *stack)
 {
 	gc_root_buffer *current, *last;
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 
 	gc_compact();
 
@@ -940,8 +933,6 @@ static void gc_mark_roots(void)
 		}
 		current++;
 	}
-
-	gc_refcounted_stack_destroy(stack);
 }
 
 static void gc_scan(zend_refcounted *ref, gc_refcounted_stack *stack, gc_refcounted_stack *stack_black)
@@ -1062,30 +1053,30 @@ tail_call:
 	}
 }
 
-static void gc_scan_roots(void)
+static void gc_scan_roots(gc_refcounted_stack *stack)
 {
 	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
 	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
 	zend_refcounted *ref;
-	gc_refcounted_stack *stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
-	gc_refcounted_stack *stack_black = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
+	gc_refcounted_stack stack_black;
+
+	gc_refcounted_stack_init(&stack_black, GC_REFCOUNTED_STACK_INITIAL_SIZE);
 
 	while (current != last) {
 		if (GC_IS_ROOT(current->ref)) {
 			if (GC_REF_CHECK_COLOR(current->ref, GC_GREY)) {
 				GC_REF_SET_COLOR(current->ref, GC_WHITE);
-				gc_scan(current->ref, stack, stack_black);
+				gc_scan(current->ref, stack, &stack_black);
 				while (stack->count) {
 					ref = gc_refcounted_stack_pop(stack);
-					gc_scan(ref, stack, stack_black);
+					gc_scan(ref, stack, &stack_black);
 				}
 			}
 		}
 		current++;
 	}
 
-	gc_refcounted_stack_destroy(stack_black);
-	gc_refcounted_stack_destroy(stack);
+	gc_refcounted_stack_destroy(&stack_black);
 }
 
 static void gc_add_garbage(zend_refcounted *ref)
@@ -1255,14 +1246,13 @@ tail_call:
 	return count;
 }
 
-static int gc_collect_roots(uint32_t *flags)
+static int gc_collect_roots(uint32_t *flags, gc_refcounted_stack *stack)
 {
 	uint32_t idx, end;
 	zend_refcounted *ref;
 	int count = 0;
 	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
 	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
-	gc_refcounted_stack *stack;
 
 	/* remove non-garbage from the list */
 	while (current != last) {
@@ -1277,7 +1267,6 @@ static int gc_collect_roots(uint32_t *flags)
 
 	gc_compact();
 	
-	stack = gc_refcounted_stack_init(GC_REFCOUNTED_STACK_INITIAL_SIZE);
 	/* Root buffer might be reallocated during gc_collect_white,
 	 * make sure to reload pointers. */
 	idx = GC_FIRST_ROOT;
@@ -1297,7 +1286,6 @@ static int gc_collect_roots(uint32_t *flags)
 		}
 		idx++;
 	}
-	gc_refcounted_stack_destroy(stack);
 
 	return count;
 }
@@ -1409,6 +1397,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
 		uint32_t idx, end;
+		gc_refcounted_stack stack;
 
 		if (GC_G(gc_active)) {
 			return 0;
@@ -1418,13 +1407,18 @@ ZEND_API int zend_gc_collect_cycles(void)
 		GC_G(gc_runs)++;
 		GC_G(gc_active) = 1;
 
+		gc_refcounted_stack_init(&stack, GC_REFCOUNTED_STACK_INITIAL_SIZE);
+
 		GC_TRACE("Marking roots");
-		gc_mark_roots();
+		gc_mark_roots(&stack);
 		GC_TRACE("Scanning roots");
-		gc_scan_roots();
+		gc_scan_roots(&stack);
 
 		GC_TRACE("Collecting roots");
-		count = gc_collect_roots(&gc_flags);
+		count = gc_collect_roots(&gc_flags, &stack);
+
+		gc_refcounted_stack_destroy(&stack);
+
 
 		if (!GC_G(num_roots)) {
 			/* nothing to free */
