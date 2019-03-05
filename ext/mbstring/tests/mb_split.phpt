@@ -3,7 +3,6 @@ mb_split()
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');
-extension_loaded('pcre') or die('skip pcre not available');
 function_exists('mb_split') or die("skip mb_split() is not available in this build");
 ?>
 --INI--
