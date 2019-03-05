@@ -2050,13 +2050,23 @@ static int zend_jit_negative_shift_stub(dasm_State **Dst)
 	|->negative_shift:
 	|	SAVE_OPLINE
 	|.if X64
+		|.if WIN
+		|	LOAD_ADDR CARG1, &zend_ce_arithmetic_error
+		|	mov CARG1, aword [CARG1]
+		|.else
 		|	LOAD_ADDR CARG1, zend_ce_arithmetic_error
+		|.endif
 		|	LOAD_ADDR CARG2, "Bit shift by negative number"
 		|	EXT_CALL zend_throw_error, r0
 	|.else
 		|	sub r4, 8
 		|	push "Bit shift by negative number"
+		|.if WIN
+		|	LOAD_ADDR r0, &zend_ce_arithmetic_error
+		|	push aword [r0]
+		|.else
 		|	PUSH_ADDR zend_ce_arithmetic_error, r0
+		|.endif
 		|	EXT_CALL zend_throw_error, r0
 		|	add r4, 16
 	|.endif
@@ -2069,13 +2079,23 @@ static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 	|->mod_by_zero:
 	|	SAVE_OPLINE
 	|.if X64
+		|.if WIN
+		|	LOAD_ADDR CARG1, &zend_ce_division_by_zero_error
+		|	mov CARG1, aword [CARG1]
+		|.else
 		|	LOAD_ADDR CARG1, zend_ce_division_by_zero_error
+		|.endif
 		|	LOAD_ADDR CARG2, "Modulo by zero"
 		|	EXT_CALL zend_throw_error, r0
 	|.else
 		|	sub r4, 8
 		|	push "Modulo by zero"
+		|.if WIN
+		|	LOAD_ADDR r0, &zend_ce_division_by_zero_error
+		|	push aword [r0]
+		|.else
 		|	PUSH_ADDR zend_ce_division_by_zero_error, r0
+		|.endif
 		|	EXT_CALL zend_throw_error, r0
 		|	add r4, 16
 	|.endif
@@ -6882,7 +6902,11 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	if (func) {
 		|	mov FCARG1d, used_stack
 	}
+#ifdef _WIN32
+	if (0) {
+#else
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+#endif
 		|	EXT_CALL zend_jit_int_extend_stack_helper, r0
 	} else {
 		|	mov FCARG2a, r0
@@ -6901,7 +6925,11 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
 	|	mov dword EX:RX->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
 	|	// call->func = func;
+#ifdef _WIN32
+	if (0) {
+#else
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+#endif
 		|1:
 		|	ADDR_OP2_2 mov, aword EX:RX->func, func, r1
 	} else {
@@ -7047,7 +7075,11 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		}
 	}
 
+#ifdef _WIN32
+	if (0) {
+#else
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+#endif
 		/* load constant address later */
 	} else if (func && op_array == &func->op_array) {
 		/* recursive call */

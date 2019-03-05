@@ -79,7 +79,7 @@ ZEND_EXT_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script
 ZEND_EXT_API int  zend_jit_script(zend_script *script);
 ZEND_EXT_API void zend_jit_unprotect(void);
 ZEND_EXT_API void zend_jit_protect(void);
-ZEND_EXT_API int  zend_jit_startup(zend_long jit, size_t size);
+ZEND_EXT_API int  zend_jit_startup(zend_long jit, void *jit_buffer, size_t size, zend_bool reattached);
 ZEND_EXT_API void zend_jit_shutdown(void);
 ZEND_EXT_API void zend_jit_activate(void);
 ZEND_EXT_API void zend_jit_deactivate(void);

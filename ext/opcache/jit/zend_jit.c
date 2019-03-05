@@ -35,7 +35,6 @@
 #include "Optimizer/zend_dump.h"
 
 //#define CONTEXT_THREADED_JIT
-#define PREFER_MAP_32BIT
 #define ZEND_JIT_USE_RC_INFERENCE
 
 #ifdef ZEND_JIT_USE_RC_INFERENCE
@@ -79,6 +78,8 @@ static int zend_jit_vm_kind = 0;
 static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
 static void **dasm_ptr = NULL;
+
+static size_t dasm_size = 0;
 
 static const void *zend_jit_runtime_jit_handler = NULL;
 static const void *zend_jit_profile_jit_handler = NULL;
@@ -383,97 +384,6 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 #endif
 
 	return entry;
-}
-
-static size_t jit_page_size(void)
-{
-#ifdef _WIN32
-	SYSTEM_INFO system_info;
-	GetSystemInfo(&system_info);
-	return system_info.dwPageSize;
-#else
-	return getpagesize();
-#endif
-}
-
-static void *jit_alloc(size_t size, int shared)
-{
-#ifdef _WIN32
-	return VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-#else
-	void *p;
-	int prot;
-# ifdef MAP_HUGETLB
-	size_t huge_page_size = 2 * 1024 * 1024;
-# endif
-
-# ifdef HAVE_MPROTECT
-	if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
-		prot = PROT_EXEC | PROT_READ | PROT_WRITE;
-	} else {
-		prot = PROT_NONE;
-	}
-# else
-	prot = PROT_EXEC | PROT_READ | PROT_WRITE;
-# endif
-
-	shared = shared? MAP_SHARED : MAP_PRIVATE;
-
-# ifdef MAP_HUGETLB
-	if (size >= huge_page_size && size % huge_page_size == 0) {
-#  if defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
-		void *p2;
-		/* to got HUGE PAGES in low 32-bit address we have to reseve address
-		   space and then remap it using MAP_HUGETLB */
-		p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
-		if (p != MAP_FAILED) {
-			munmap(p, size);
-			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
-			p2 = mmap(p, size, prot, shared | MAP_ANONYMOUS | MAP_HUGETLB | MAP_FIXED, -1, 0);
-			if (p2 != MAP_FAILED) {
-				return p2;
-			} else {
-				p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
-				if (p != MAP_FAILED) {
-					return p;
-				}
-			}
-		}
-#  endif
-		p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
-		if (p != MAP_FAILED) {
-			return p;
-		}
-#  if defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
-	} else {
-		p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
-		if (p != MAP_FAILED) {
-			return p;
-		}
-#  endif
-	}
-# elif defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
-	p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
-	if (p != MAP_FAILED) {
-		return p;
-	}
-# endif
-	p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS, -1, 0);
-	if (p == MAP_FAILED) {
-		return NULL;
-	}
-
-	return (void*)p;
-#endif
-}
-
-static void jit_free(void *p, size_t size)
-{
-#ifdef _WIN32
-    VirtualFree(p, 0, MEM_RELEASE);
-#else
-	munmap(p, size);
-#endif
 }
 
 static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
@@ -3000,8 +2910,16 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
-		if (mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_WRITE) != 0) {
+		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+		}
+	}
+#elif _WIN32
+	if (!(ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
+		DWORD old;
+
+		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_READWRITE, &old)) {
+			fprintf(stderr, "VirtualProtect() failed\n");
 		}
 	}
 #endif
@@ -3011,8 +2929,16 @@ ZEND_EXT_API void zend_jit_protect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
-		if (mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_EXEC) != 0) {
+		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+		}
+	}
+#elif _WIN32
+	if (!(ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
+		DWORD old;
+
+		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READ, &old)) {
+			fprintf(stderr, "VirtualProtect() failed\n");
 		}
 	}
 #endif
@@ -3083,10 +3009,8 @@ static int zend_jit_make_stubs(void)
 	return 1;
 }
 
-ZEND_EXT_API int zend_jit_startup(zend_long jit, size_t size)
+ZEND_EXT_API int zend_jit_startup(zend_long jit, void *buf, size_t size, zend_bool reattached)
 {
-	size_t page_size = jit_page_size();
-	int shared = 1;
 	int ret;
 
 	zend_jit_level = ZEND_JIT_LEVEL(jit);
@@ -3098,7 +3022,7 @@ ZEND_EXT_API int zend_jit_startup(zend_long jit, size_t size)
 	if (zend_jit_vm_kind != ZEND_VM_KIND_CALL &&
 	    zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
 		// TODO: error reporting and cleanup ???
-		return FAILURE;	
+		return FAILURE;
 	}
 
 	zend_jit_halt_op = zend_get_halt_op();
@@ -3118,7 +3042,6 @@ ZEND_EXT_API int zend_jit_startup(zend_long jit, size_t size)
 
 #ifdef HAVE_OPROFILE
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_OPROFILE) {
-		shared = 0;
 		if (!zend_jit_oprofile_startup()) {
 			// TODO: error reporting and cleanup ???
 			return FAILURE;
@@ -3126,25 +3049,45 @@ ZEND_EXT_API int zend_jit_startup(zend_long jit, size_t size)
 	}
 #endif
 
-	/* Round up to the page size, which should be a power of two.  */
-	page_size = jit_page_size();
+	dasm_buf = buf;
+	dasm_size = size;
 
-	if (!page_size || (page_size & (page_size - 1))) {
-		abort();
+#ifdef HAVE_MPROTECT
+	if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
+		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+		}
+	} else {
+		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
+			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+		}
 	}
+#elif _WIN32
+	if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
+		DWORD old;
 
-	size = ZEND_MM_ALIGNED_SIZE_EX(size, page_size);
+		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READWRITE, &old)) {
+			fprintf(stderr, "VirtualProtect() failed\n");
+		}
+	} else {
+		DWORD old;
 
-	dasm_buf = jit_alloc(size, shared);
-
-	if (!dasm_buf) {
-		return FAILURE;
+		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READ, &old)) {
+			fprintf(stderr, "VirtualProtect() failed\n");
+		}
 	}
+#endif
 
 	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr));
-	zend_jit_unprotect();
-	*dasm_ptr = dasm_buf;
-	zend_jit_protect();
+	if (!reattached) {
+		zend_jit_unprotect();
+		*dasm_ptr = dasm_buf;
+#if _WIN32
+		/* reserve space for global labels */
+		*dasm_ptr = (void**)*dasm_ptr + zend_lb_MAX;
+#endif
+		zend_jit_protect();
+	}
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
@@ -3161,13 +3104,23 @@ ZEND_EXT_API int zend_jit_startup(zend_long jit, size_t size)
 	}
 #endif
 
-	zend_jit_unprotect();
-	ret = zend_jit_make_stubs();
-	zend_jit_protect();
-
-	if (!ret) {
-		// TODO: error reporting and cleanup ???
-		return FAILURE;
+	if (!reattached) {
+		zend_jit_unprotect();
+		ret = zend_jit_make_stubs();
+#if _WIN32
+		/* save global labels */
+		memcpy(dasm_buf, dasm_labels, sizeof(void*) * zend_lb_MAX);
+#endif
+		zend_jit_protect();
+		if (!ret) {
+			// TODO: error reporting and cleanup ???
+			return FAILURE;
+		}
+	} else {
+#if _WIN32
+		/* restore global labels */
+		memcpy(dasm_labels, dasm_buf, sizeof(void*) * zend_lb_MAX);
+#endif
 	}
 
 	return SUCCESS;
@@ -3198,10 +3151,6 @@ ZEND_EXT_API void zend_jit_shutdown(void)
 		zend_jit_perf_jitdump_close();
 	}
 #endif
-
-	if (dasm_buf) {
-		jit_free(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf));
-	}
 }
 
 ZEND_EXT_API void zend_jit_activate(void)
