@@ -5,8 +5,6 @@ gzencode() and invalid params
 --FILE--
 <?php
 
-var_dump(gzencode());
-var_dump(gzencode(1,1,1,1));
 var_dump(gzencode("", -10));
 var_dump(gzencode("", 100));
 var_dump(gzencode("", 1, 100));
@@ -27,12 +25,6 @@ var_dump(gzencode($string, 9, ZLIB_ENCODING_DEFLATE));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: gzencode() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: gzencode() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
 Warning: gzencode(): compression level (-10) must be within -1..9 in %s on line %d
 bool(false)
 

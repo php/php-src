@@ -125,18 +125,6 @@ $r = mb_stripos($euc_jp, '´Ú¹ñ¸ì');
 $r = mb_stripos($euc_jp, "\n");
 ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
 
-
-// Invalid Parameters
-echo "== INVALID PARAMETER TEST ==\n";
-
-$r = mb_stripos($euc_jp,'','EUC-JP');
-($r === NULL) ? print("OK_NULL\n") : print("NG_NULL\n");
-$r = mb_stripos($euc_jp, $t_ary, 'EUC-JP');
-($r === NULL) ? print("OK_ARRAY\n") : print("NG_ARRAY\n");
-$r = mb_stripos($euc_jp, $t_obj, 'EUC-JP');
-($r === NULL) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
-$r = mb_stripos($euc_jp, $t_obj, 'BAD_ENCODING');
-($r === NULL) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
 ?>
 ==DONE==
 --EXPECTF--
@@ -213,17 +201,4 @@ OK_NEWLINE
 0
 OK_STR
 OK_NEWLINE
-== INVALID PARAMETER TEST ==
-
-Warning: mb_stripos() expects parameter 3 to be int, string given in %s on line %d
-OK_NULL
-
-Warning: mb_stripos() expects parameter 2 to be string, array given in %s on line %d
-OK_ARRAY
-
-Warning: mb_stripos() expects parameter 2 to be string, object given in %s on line %d
-OK_OBJECT
-
-Warning: mb_stripos() expects parameter 2 to be string, object given in %s on line %d
-OK_BAD_ENCODING
 ==DONE==
