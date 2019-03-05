@@ -18,22 +18,22 @@ var_dump($matches);
 $input = array(array('this is', 'a subarray'), 'test',);
 foreach($input as $value) {
     print "\nArg value is: $value\n";
-    var_dump(preg_match_all($regex, $value, $matches));
+    try {
+        var_dump(preg_match_all($regex, $value, $matches));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
     var_dump($matches);
 }
 echo "Done";
 ?>
 --EXPECTF--
 *** Testing preg_match_all() : error conditions ***
-
-Warning: preg_match_all() expects parameter 2 to be string, object given in %spreg_match_all_error2.php on line %d
-bool(false)
+preg_match_all() expects parameter 2 to be string, object given
 NULL
 
 Arg value is: Array
-
-Warning: preg_match_all() expects parameter 2 to be string, array given in %spreg_match_all_error2.php on line %d
-bool(false)
+preg_match_all() expects parameter 2 to be string, array given
 NULL
 
 Arg value is: test
