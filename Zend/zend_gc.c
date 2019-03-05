@@ -767,110 +767,112 @@ static void gc_mark_grey(zend_refcounted *ref, gc_refcounted_stack *stack)
 	zval *zv;
 
 tail_call:
-	ht = NULL;
-	GC_BENCH_INC(zval_marked_grey);
+	if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+		ht = NULL;
+		GC_BENCH_INC(zval_marked_grey);
 
-	if (GC_TYPE(ref) == IS_OBJECT) {
-		zend_object_get_gc_t get_gc;
-		zend_object *obj = (zend_object*)ref;
+		if (GC_TYPE(ref) == IS_OBJECT) {
+			zend_object_get_gc_t get_gc;
+			zend_object *obj = (zend_object*)ref;
 
-		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-					 (get_gc = obj->handlers->get_gc) != NULL)) {
-			int n;
-			zval *zv, *end;
-			zval tmp;
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+						 (get_gc = obj->handlers->get_gc) != NULL)) {
+				int n;
+				zval *zv, *end;
+				zval tmp;
 
-			ZVAL_OBJ(&tmp, obj);
-			ht = get_gc(&tmp, &zv, &n);
-			end = zv + n;
-			if (EXPECTED(!ht)) {
-				if (!n) return;
-				while (!Z_REFCOUNTED_P(--end)) {
-					if (zv == end) return;
+				ZVAL_OBJ(&tmp, obj);
+				ht = get_gc(&tmp, &zv, &n);
+				end = zv + n;
+				if (EXPECTED(!ht)) {
+					if (!n) return;
+					while (!Z_REFCOUNTED_P(--end)) {
+						if (zv == end) return;
+					}
 				}
-			}
-			while (zv != end) {
-				if (Z_REFCOUNTED_P(zv)) {
+				while (zv != end) {
+					if (Z_REFCOUNTED_P(zv)) {
+						ref = Z_COUNTED_P(zv);
+						GC_DELREF(ref);
+						if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+							GC_REF_SET_COLOR(ref, GC_GREY);
+							gc_refcounted_stack_push(stack, ref);
+						}
+					}
+					zv++;
+				}
+				if (EXPECTED(!ht)) {
 					ref = Z_COUNTED_P(zv);
 					GC_DELREF(ref);
 					if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 						GC_REF_SET_COLOR(ref, GC_GREY);
-						gc_refcounted_stack_push(stack, ref);
+						goto tail_call;
 					}
+					return;
 				}
-				zv++;
+			} else {
+				return;
 			}
-			if (EXPECTED(!ht)) {
-				ref = Z_COUNTED_P(zv);
+		} else if (GC_TYPE(ref) == IS_ARRAY) {
+			if (((zend_array*)ref) == &EG(symbol_table)) {
+				GC_REF_SET_BLACK(ref);
+				return;
+			} else {
+				ht = (zend_array*)ref;
+			}
+		} else if (GC_TYPE(ref) == IS_REFERENCE) {
+			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
+				ref = Z_COUNTED(((zend_reference*)ref)->val);
 				GC_DELREF(ref);
 				if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 					GC_REF_SET_COLOR(ref, GC_GREY);
 					goto tail_call;
 				}
-				return;
 			}
+			return;
 		} else {
 			return;
 		}
-	} else if (GC_TYPE(ref) == IS_ARRAY) {
-		if (((zend_array*)ref) == &EG(symbol_table)) {
-			GC_REF_SET_BLACK(ref);
-			return;
-		} else {
-			ht = (zend_array*)ref;
-		}
-	} else if (GC_TYPE(ref) == IS_REFERENCE) {
-		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
-			ref = Z_COUNTED(((zend_reference*)ref)->val);
-			GC_DELREF(ref);
-			if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-				GC_REF_SET_COLOR(ref, GC_GREY);
-				goto tail_call;
-			}
-		}
-		return;
-	} else {
-		return;
-	}
 
-	if (!ht->nNumUsed) return;
-	p = ht->arData;
-	end = p + ht->nNumUsed;
-	while (1) {
-		end--;
-		zv = &end->val;
-		if (Z_TYPE_P(zv) == IS_INDIRECT) {
-			zv = Z_INDIRECT_P(zv);
+		if (!ht->nNumUsed) return;
+		p = ht->arData;
+		end = p + ht->nNumUsed;
+		while (1) {
+			end--;
+			zv = &end->val;
+			if (Z_TYPE_P(zv) == IS_INDIRECT) {
+				zv = Z_INDIRECT_P(zv);
+			}
+			if (Z_REFCOUNTED_P(zv)) {
+				break;
+			}
+			if (p == end) return;
 		}
-		if (Z_REFCOUNTED_P(zv)) {
-			break;
+		while (p != end) {
+			zv = &p->val;
+			if (Z_TYPE_P(zv) == IS_INDIRECT) {
+				zv = Z_INDIRECT_P(zv);
+			}
+			if (Z_REFCOUNTED_P(zv)) {
+				ref = Z_COUNTED_P(zv);
+				GC_DELREF(ref);
+				if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+					GC_REF_SET_COLOR(ref, GC_GREY);
+					gc_refcounted_stack_push(stack, ref);
+				}
+			}
+			p++;
 		}
-		if (p == end) return;
-	}
-	while (p != end) {
 		zv = &p->val;
 		if (Z_TYPE_P(zv) == IS_INDIRECT) {
 			zv = Z_INDIRECT_P(zv);
 		}
-		if (Z_REFCOUNTED_P(zv)) {
-			ref = Z_COUNTED_P(zv);
-			GC_DELREF(ref);
-			if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-				GC_REF_SET_COLOR(ref, GC_GREY);
-				gc_refcounted_stack_push(stack, ref);
-			}
+		ref = Z_COUNTED_P(zv);
+		GC_DELREF(ref);
+		if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+			GC_REF_SET_COLOR(ref, GC_GREY);
+			goto tail_call;
 		}
-		p++;
-	}
-	zv = &p->val;
-	if (Z_TYPE_P(zv) == IS_INDIRECT) {
-		zv = Z_INDIRECT_P(zv);
-	}
-	ref = Z_COUNTED_P(zv);
-	GC_DELREF(ref);
-	if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-		GC_REF_SET_COLOR(ref, GC_GREY);
-		goto tail_call;
 	}
 }
 
@@ -943,112 +945,114 @@ static void gc_scan(zend_refcounted *ref, gc_refcounted_stack *stack, gc_refcoun
 	zend_refcounted *ref_black;
 
 tail_call:
-	if (GC_REFCOUNT(ref) > 0) {
-		if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
-			GC_REF_SET_BLACK(ref);
-			gc_scan_black(ref, stack_black);
-			while (stack_black->count) {
-				ref_black = gc_refcounted_stack_pop(stack_black);
-				gc_scan_black(ref_black, stack_black);
-			}
-		}
-	} else {
-		if (GC_TYPE(ref) == IS_OBJECT) {
-			zend_object_get_gc_t get_gc;
-			zend_object *obj = (zend_object*)ref;
-
-			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-						 (get_gc = obj->handlers->get_gc) != NULL)) {
-				int n;
-				zval *zv, *end;
-				zval tmp;
-
-				ZVAL_OBJ(&tmp, obj);
-				ht = get_gc(&tmp, &zv, &n);
-				end = zv + n;
-				if (EXPECTED(!ht)) {
-					if (!n) return;
-					while (!Z_REFCOUNTED_P(--end)) {
-						if (zv == end) return;
-					}
+	if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+		if (GC_REFCOUNT(ref) > 0) {
+			if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
+				GC_REF_SET_BLACK(ref);
+				gc_scan_black(ref, stack_black);
+				while (stack_black->count) {
+					ref_black = gc_refcounted_stack_pop(stack_black);
+					gc_scan_black(ref_black, stack_black);
 				}
-				while (zv != end) {
-					if (Z_REFCOUNTED_P(zv)) {
+			}
+		} else {
+			if (GC_TYPE(ref) == IS_OBJECT) {
+				zend_object_get_gc_t get_gc;
+				zend_object *obj = (zend_object*)ref;
+
+				if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+							 (get_gc = obj->handlers->get_gc) != NULL)) {
+					int n;
+					zval *zv, *end;
+					zval tmp;
+
+					ZVAL_OBJ(&tmp, obj);
+					ht = get_gc(&tmp, &zv, &n);
+					end = zv + n;
+					if (EXPECTED(!ht)) {
+						if (!n) return;
+						while (!Z_REFCOUNTED_P(--end)) {
+							if (zv == end) return;
+						}
+					}
+					while (zv != end) {
+						if (Z_REFCOUNTED_P(zv)) {
+							ref = Z_COUNTED_P(zv);
+							if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+								GC_REF_SET_COLOR(ref, GC_WHITE);
+								gc_refcounted_stack_push(stack, ref);
+							}
+						}
+						zv++;
+					}
+					if (EXPECTED(!ht)) {
 						ref = Z_COUNTED_P(zv);
 						if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 							GC_REF_SET_COLOR(ref, GC_WHITE);
-							gc_refcounted_stack_push(stack, ref);
+							goto tail_call;
 						}
+						return;
 					}
-					zv++;
+				} else {
+					return;
 				}
-				if (EXPECTED(!ht)) {
-					ref = Z_COUNTED_P(zv);
+			} else if (GC_TYPE(ref) == IS_ARRAY) {
+				if ((zend_array*)ref == &EG(symbol_table)) {
+					GC_REF_SET_BLACK(ref);
+					return;
+				} else {
+					ht = (zend_array*)ref;
+				}
+			} else if (GC_TYPE(ref) == IS_REFERENCE) {
+				if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
+					ref = Z_COUNTED(((zend_reference*)ref)->val);
 					if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 						GC_REF_SET_COLOR(ref, GC_WHITE);
 						goto tail_call;
 					}
-					return;
 				}
+				return;
 			} else {
 				return;
 			}
-		} else if (GC_TYPE(ref) == IS_ARRAY) {
-			if ((zend_array*)ref == &EG(symbol_table)) {
-				GC_REF_SET_BLACK(ref);
-				return;
-			} else {
-				ht = (zend_array*)ref;
-			}
-		} else if (GC_TYPE(ref) == IS_REFERENCE) {
-			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
-				ref = Z_COUNTED(((zend_reference*)ref)->val);
-				if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-					GC_REF_SET_COLOR(ref, GC_WHITE);
-					goto tail_call;
-				}
-			}
-			return;
-		} else {
-			return;
-		}
 
-		if (!ht->nNumUsed) return;
-		p = ht->arData;
-		end = p + ht->nNumUsed;
-		while (1) {
-			end--;
-			zv = &end->val;
-			if (Z_TYPE_P(zv) == IS_INDIRECT) {
-				zv = Z_INDIRECT_P(zv);
+			if (!ht->nNumUsed) return;
+			p = ht->arData;
+			end = p + ht->nNumUsed;
+			while (1) {
+				end--;
+				zv = &end->val;
+				if (Z_TYPE_P(zv) == IS_INDIRECT) {
+					zv = Z_INDIRECT_P(zv);
+				}
+				if (Z_REFCOUNTED_P(zv)) {
+					break;
+				}
+				if (p == end) return;
 			}
-			if (Z_REFCOUNTED_P(zv)) {
-				break;
+			while (p != end) {
+				zv = &p->val;
+				if (Z_TYPE_P(zv) == IS_INDIRECT) {
+					zv = Z_INDIRECT_P(zv);
+				}
+				if (Z_REFCOUNTED_P(zv)) {
+					ref = Z_COUNTED_P(zv);
+					if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+						GC_REF_SET_COLOR(ref, GC_WHITE);
+						gc_refcounted_stack_push(stack, ref);
+					}
+				}
+				p++;
 			}
-			if (p == end) return;
-		}
-		while (p != end) {
 			zv = &p->val;
 			if (Z_TYPE_P(zv) == IS_INDIRECT) {
 				zv = Z_INDIRECT_P(zv);
 			}
-			if (Z_REFCOUNTED_P(zv)) {
-				ref = Z_COUNTED_P(zv);
-				if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-					GC_REF_SET_COLOR(ref, GC_WHITE);
-					gc_refcounted_stack_push(stack, ref);
-				}
+			ref = Z_COUNTED_P(zv);
+			if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+				GC_REF_SET_COLOR(ref, GC_WHITE);
+				goto tail_call;
 			}
-			p++;
-		}
-		zv = &p->val;
-		if (Z_TYPE_P(zv) == IS_INDIRECT) {
-			zv = Z_INDIRECT_P(zv);
-		}
-		ref = Z_COUNTED_P(zv);
-		if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-			GC_REF_SET_COLOR(ref, GC_WHITE);
-			goto tail_call;
 		}
 	}
 }
@@ -1112,136 +1116,138 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_refcounted
 	zval *zv;
 
 tail_call:
-	ht = NULL;
+	if (!GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+		ht = NULL;
 
-	/* don't count references for compatibility ??? */
-	if (GC_TYPE(ref) != IS_REFERENCE) {
-		count++;
-	}
+		/* don't count references for compatibility ??? */
+		if (GC_TYPE(ref) != IS_REFERENCE) {
+			count++;
+		}
 
-	if (GC_TYPE(ref) == IS_OBJECT) {
-		zend_object_get_gc_t get_gc;
-		zend_object *obj = (zend_object*)ref;
+		if (GC_TYPE(ref) == IS_OBJECT) {
+			zend_object_get_gc_t get_gc;
+			zend_object *obj = (zend_object*)ref;
 
-		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-					 (get_gc = obj->handlers->get_gc) != NULL)) {
-			int n;
-			zval *zv, *end;
-			zval tmp;
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+						 (get_gc = obj->handlers->get_gc) != NULL)) {
+				int n;
+				zval *zv, *end;
+				zval tmp;
 
-			/* optimization: color is GC_BLACK (0) */
-			if (!GC_INFO(ref)) {
-				gc_add_garbage(ref);
-			}
-			if (obj->handlers->dtor_obj &&
-				((obj->handlers->dtor_obj != zend_objects_destroy_object) ||
-				 (obj->ce->destructor != NULL))) {
-				*flags |= GC_HAS_DESTRUCTORS;
-			}
-			ZVAL_OBJ(&tmp, obj);
-			ht = get_gc(&tmp, &zv, &n);
-			end = zv + n;
-			if (EXPECTED(!ht)) {
-				if (!n) return count;
-				while (!Z_REFCOUNTED_P(--end)) {
+				/* optimization: color is GC_BLACK (0) */
+				if (!GC_INFO(ref)) {
+					gc_add_garbage(ref);
+				}
+				if (obj->handlers->dtor_obj &&
+					((obj->handlers->dtor_obj != zend_objects_destroy_object) ||
+					 (obj->ce->destructor != NULL))) {
+					*flags |= GC_HAS_DESTRUCTORS;
+				}
+				ZVAL_OBJ(&tmp, obj);
+				ht = get_gc(&tmp, &zv, &n);
+				end = zv + n;
+				if (EXPECTED(!ht)) {
+					if (!n) return count;
+					while (!Z_REFCOUNTED_P(--end)) {
+						/* count non-refcounted for compatibility ??? */
+						if (Z_TYPE_P(zv) != IS_UNDEF) {
+							count++;
+						}
+						if (zv == end) return count;
+					}
+				}
+				while (zv != end) {
+					if (Z_REFCOUNTED_P(zv)) {
+						ref = Z_COUNTED_P(zv);
+						GC_ADDREF(ref);
+						if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+							GC_REF_SET_BLACK(ref);
+							gc_refcounted_stack_push(stack, ref);
+						}
 					/* count non-refcounted for compatibility ??? */
-					if (Z_TYPE_P(zv) != IS_UNDEF) {
+					} else if (Z_TYPE_P(zv) != IS_UNDEF) {
 						count++;
 					}
-					if (zv == end) return count;
+					zv++;
 				}
-			}
-			while (zv != end) {
-				if (Z_REFCOUNTED_P(zv)) {
+				if (EXPECTED(!ht)) {
 					ref = Z_COUNTED_P(zv);
 					GC_ADDREF(ref);
 					if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 						GC_REF_SET_BLACK(ref);
-						gc_refcounted_stack_push(stack, ref);
+						goto tail_call;
 					}
-				/* count non-refcounted for compatibility ??? */
-				} else if (Z_TYPE_P(zv) != IS_UNDEF) {
-					count++;
+					return count;
 				}
-				zv++;
+			} else {
+				return count;
 			}
-			if (EXPECTED(!ht)) {
-				ref = Z_COUNTED_P(zv);
+		} else if (GC_TYPE(ref) == IS_ARRAY) {
+			/* optimization: color is GC_BLACK (0) */
+			if (!GC_INFO(ref)) {
+				gc_add_garbage(ref);
+			}
+			ht = (zend_array*)ref;
+		} else if (GC_TYPE(ref) == IS_REFERENCE) {
+			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
+				ref = Z_COUNTED(((zend_reference*)ref)->val);
 				GC_ADDREF(ref);
 				if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 					GC_REF_SET_BLACK(ref);
 					goto tail_call;
 				}
-				return count;
 			}
+			return count;
 		} else {
 			return count;
 		}
-	} else if (GC_TYPE(ref) == IS_ARRAY) {
-		/* optimization: color is GC_BLACK (0) */
-		if (!GC_INFO(ref)) {
-			gc_add_garbage(ref);
-		}
-		ht = (zend_array*)ref;
-	} else if (GC_TYPE(ref) == IS_REFERENCE) {
-		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
-			ref = Z_COUNTED(((zend_reference*)ref)->val);
-			GC_ADDREF(ref);
-			if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
-				GC_REF_SET_BLACK(ref);
-				goto tail_call;
-			}
-		}
-		return count;
-	} else {
-		return count;
-	}
 
-	if (!ht->nNumUsed) return count;
-	p = ht->arData;
-	end = p + ht->nNumUsed;
-	while (1) {
-		end--;
-		zv = &end->val;
-		if (Z_TYPE_P(zv) == IS_INDIRECT) {
-			zv = Z_INDIRECT_P(zv);
+		if (!ht->nNumUsed) return count;
+		p = ht->arData;
+		end = p + ht->nNumUsed;
+		while (1) {
+			end--;
+			zv = &end->val;
+			if (Z_TYPE_P(zv) == IS_INDIRECT) {
+				zv = Z_INDIRECT_P(zv);
+			}
+			if (Z_REFCOUNTED_P(zv)) {
+				break;
+			}
+			/* count non-refcounted for compatibility ??? */
+			if (Z_TYPE_P(zv) != IS_UNDEF) {
+				count++;
+			}
+			if (p == end) return count;
 		}
-		if (Z_REFCOUNTED_P(zv)) {
-			break;
+		while (p != end) {
+			zv = &p->val;
+			if (Z_TYPE_P(zv) == IS_INDIRECT) {
+				zv = Z_INDIRECT_P(zv);
+			}
+			if (Z_REFCOUNTED_P(zv)) {
+				ref = Z_COUNTED_P(zv);
+				GC_ADDREF(ref);
+				if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+					GC_REF_SET_BLACK(ref);
+					gc_refcounted_stack_push(stack, ref);
+				}
+				/* count non-refcounted for compatibility ??? */
+			} else if (Z_TYPE_P(zv) != IS_UNDEF) {
+				count++;
+			}
+			p++;
 		}
-		/* count non-refcounted for compatibility ??? */
-		if (Z_TYPE_P(zv) != IS_UNDEF) {
-			count++;
-		}
-		if (p == end) return count;
-	}
-	while (p != end) {
 		zv = &p->val;
 		if (Z_TYPE_P(zv) == IS_INDIRECT) {
 			zv = Z_INDIRECT_P(zv);
 		}
-		if (Z_REFCOUNTED_P(zv)) {
-			ref = Z_COUNTED_P(zv);
-			GC_ADDREF(ref);
-			if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
-				GC_REF_SET_BLACK(ref);
-				gc_refcounted_stack_push(stack, ref);
-			}
-			/* count non-refcounted for compatibility ??? */
-		} else if (Z_TYPE_P(zv) != IS_UNDEF) {
-			count++;
+		ref = Z_COUNTED_P(zv);
+		GC_ADDREF(ref);
+		if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+			GC_REF_SET_BLACK(ref);
+			goto tail_call;
 		}
-		p++;
-	}
-	zv = &p->val;
-	if (Z_TYPE_P(zv) == IS_INDIRECT) {
-		zv = Z_INDIRECT_P(zv);
-	}
-	ref = Z_COUNTED_P(zv);
-	GC_ADDREF(ref);
-	if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
-		GC_REF_SET_BLACK(ref);
-		goto tail_call;
 	}
 	return count;
 }
