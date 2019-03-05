@@ -78,5 +78,4 @@ echo $r."\n";
 101
 == WRONG PARAMETERS ==
 
-
 Warning: mb_strlen(): Unknown encoding "BAD_NAME" in %s on line %d
