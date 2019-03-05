@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.1.27
+?? ??? 2018, PHP 7.1.28
+
+
+
+28 Mar 2019, PHP 7.1.27
 
 - Core:
   . Fixed bug #77630 (rename() across the device may allow unwanted access during
