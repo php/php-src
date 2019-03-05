@@ -7,9 +7,6 @@ mbstring.language=Japanese
 --FILE--
 <?php
 // TODO: Add more tests
-//$debug = true; // Uncomment this line to view error/warning/notice message in *.out file
-ini_set('include_path', dirname(__FILE__));
-include_once('common.inc');
 
 // SJIS string (BASE64 encoded)
 $sjis = base64_decode('k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==');
@@ -96,7 +93,7 @@ print("MP: $s\n"); // Missing parameter
 
 
 ?>
---EXPECT--
+--EXPECTF--
 == BASIC TEST ==
 SJIS: SJIS
 JIS: JIS
@@ -113,7 +110,9 @@ SJIS: SJIS
 == INVALID PARAMETER ==
 INT: EUC-JP
 EUC-JP: EUC-JP
-ERR: Warning
+
+Warning: mb_detect_encoding(): Illegal argument in %s on line %d
 BAD: EUC-JP
-ERR: Warning
+
+Warning: mb_detect_encoding() expects at least 1 parameter, 0 given in %s on line %d
 MP: 
