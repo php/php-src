@@ -587,12 +587,12 @@ static zend_always_inline int zend_mm_bitset_is_set(zend_mm_bitset *bitset, int 
 
 static zend_always_inline void zend_mm_bitset_set_bit(zend_mm_bitset *bitset, int bit)
 {
-	bitset[bit / ZEND_MM_BITSET_LEN] |= (Z_L(1) << (bit & (ZEND_MM_BITSET_LEN-1)));
+	bitset[bit / ZEND_MM_BITSET_LEN] |= (Z_UL(1) << (bit & (ZEND_MM_BITSET_LEN-1)));
 }
 
 static zend_always_inline void zend_mm_bitset_reset_bit(zend_mm_bitset *bitset, int bit)
 {
-	bitset[bit / ZEND_MM_BITSET_LEN] &= ~(Z_L(1) << (bit & (ZEND_MM_BITSET_LEN-1)));
+	bitset[bit / ZEND_MM_BITSET_LEN] &= ~(Z_UL(1) << (bit & (ZEND_MM_BITSET_LEN-1)));
 }
 
 static zend_always_inline void zend_mm_bitset_set_range(zend_mm_bitset *bitset, int start, int len)
