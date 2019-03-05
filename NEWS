@@ -39,6 +39,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #77589 (Core dump using parse_ini_string with numeric sections).
     (Laruence)
+  . Fixed bug #77630 (rename() across the device may allow unwanted access
+    during processing). (Stas)
 
 - COM:
   . Fixed bug #77621 (Already defined constants are not properly reported).
@@ -54,6 +56,10 @@ PHP                                                                        NEWS
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
 
+- PHAR:
+  . Fixed bug #77396 (Null Pointer Dereference in phar_create_or_parse_filename).
+    (bishop)
+
 - SPL:
   . Fixed bug #51068 (DirectoryIterator glob:// don't support current path
     relative queries). (Ahmed Abdou)
@@ -67,10 +73,6 @@ PHP                                                                        NEWS
   . Disabled LOCAL INFILE by default, can be enabled using php.ini directive
     mysqli.allow_local_infile for mysqli, or PDO::MYSQL_ATTR_LOCAL_INFILE
     attribute for pdo_mysql. (Darek Slusarczyk)
-
-- PHAR:
-  . Fixed bug #77396 (Null Pointer Dereference in phar_create_or_parse_filename).
-    (bishop)
 
 07 Feb 2019, PHP 7.2.15
 
