@@ -10,19 +10,7 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 $image = imagecreatetruecolor(50, 50);
-$resource = tmpfile();
-
-imagetruecolortopalette($image, true, 'string');
-imagetruecolortopalette($image, true, $resource);
-imagetruecolortopalette($image, true, array());
 imagetruecolortopalette($image, true, null);
-
 ?>
 --EXPECTF--
-Warning: imagetruecolortopalette() expects parameter 3 to be int, string given in %s on line %d
-
-Warning: imagetruecolortopalette() expects parameter 3 to be int, resource given in %s on line %d
-
-Warning: imagetruecolortopalette() expects parameter 3 to be int, array given in %s on line %d
-
 Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s on line %d
