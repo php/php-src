@@ -8,8 +8,8 @@ $path = '../' . str_repeat("x", PHP_MAXPATHLEN) . '.tar';
 $phar = new PharData($path);
 ?>
 --EXPECTF--
-Fatal error: Uncaught UnexpectedValueException: Phar creation or opening failed in %s/bug77396.php:%d
+Fatal error: Uncaught UnexpectedValueException: Phar creation or opening failed in %s%ebug77396.php:%d
 Stack trace:
-#0 %s/bug77396.php(%d): PharData->__construct(%s)
+#0 %s%ebug77396.php(%d): PharData->__construct(%s)
 #1 {main}
-  thrown in %s/bug77396.php on line %d
+  thrown in %s%ebug77396.php on line %d

@@ -160,7 +160,7 @@ EOF
     eval echo "$i = \$$i" >> Makefile
   done
 
-  cat $abs_srcdir/Makefile.global Makefile.fragments Makefile.objects >> Makefile
+  cat $abs_srcdir/build/Makefile.global Makefile.fragments Makefile.objects >> Makefile
 ])
 
 dnl
@@ -1335,20 +1335,6 @@ int readdir_r(DIR *, struct dirent *);
       AC_DEFINE(HAVE_OLD_READDIR_R,1,[whether you have old-style readdir_r]);;
     esac
   fi
-])
-
-dnl
-dnl PHP_TM_GMTOFF
-dnl
-AC_DEFUN([PHP_TM_GMTOFF],[
-AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <time.h>]], [[struct tm tm; tm.tm_gmtoff;]])],
-  [ac_cv_struct_tm_gmtoff=yes], [ac_cv_struct_tm_gmtoff=no])])
-
-if test "$ac_cv_struct_tm_gmtoff" = yes; then
-  AC_DEFINE(HAVE_TM_GMTOFF,1,[whether you have tm_gmtoff in struct tm])
-fi
 ])
 
 dnl

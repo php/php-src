@@ -40,7 +40,7 @@ $TS \
 --with-pdo-sqlite \
 --enable-intl \
 --without-pear \
---with-gd \
+--enable-gd \
 --with-jpeg \
 --with-webp \
 --with-freetype \

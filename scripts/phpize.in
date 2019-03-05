@@ -9,10 +9,10 @@ includedir="`eval echo @includedir@`/php"
 builddir="`pwd`"
 SED="@SED@"
 
-FILES_BUILD="shtool libtool.m4 ax_check_compile_flag.m4 ax_gcc_func_attribute.m4 php_cxx_compile_stdcxx.m4 pkg.m4 config.guess config.sub ltmain.sh"
-FILES="acinclude.m4 Makefile.global run-tests*.php"
-CLEAN_FILES="$FILES *.o *.lo *.la .libs/ build/ modules/ install-sh \
-	mkinstalldirs missing config.nice configure configure.ac \
+FILES_BUILD="shtool libtool.m4 ax_check_compile_flag.m4 ax_gcc_func_attribute.m4 php_cxx_compile_stdcxx.m4 pkg.m4 config.guess config.sub ltmain.sh Makefile.global"
+FILES="acinclude.m4 run-tests*.php"
+CLEAN_FILES="$FILES *.o *.lo *.la .libs/ build/ modules/ \
+	config.nice configure configure.ac \
 	aclocal.m4 config.h config.h.in conftest* libtool config.cache autom4te.cache/ \
 	config.log config.status Makefile Makefile.fragments Makefile.objects confdefs.h \
 	run-tests*.php tests/*.diff tests/*.exp tests/*.log tests/*.out tests/*.php"
@@ -195,8 +195,6 @@ case "$1" in
      phpize_copy_files
 
      phpize_replace_prefix
-
-     touch install-sh mkinstalldirs missing
 
      phpize_check_shtool
 
