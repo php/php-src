@@ -19,8 +19,6 @@ $n1 = gmp_init("3498273496234234523451");
 var_dump(gmp_strval(gmp_invert($n, $n1)));
 var_dump(gmp_strval(gmp_invert($n1, $n)));
 
-var_dump(gmp_invert($n1, $n, 10));
-var_dump(gmp_invert($n1));
 var_dump(gmp_invert(array(), 1));
 var_dump(gmp_invert(1, array()));
 var_dump(gmp_invert(array(), array()));
@@ -37,12 +35,6 @@ string(1) "0"
 string(1) "0"
 string(22) "3498273496234234523441"
 string(1) "1"
-
-Warning: gmp_invert() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_invert() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
 
 Warning: gmp_invert(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

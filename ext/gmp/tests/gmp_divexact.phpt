@@ -10,9 +10,6 @@ if (!defined('GMP_VERSION') || version_compare("4.2.1", GMP_VERSION, ">=")) {
 --FILE--
 <?php
 
-var_dump(gmp_divexact(1, 1, 1));
-var_dump(gmp_divexact());
-
 $r = gmp_divexact("233", "23345555555555555555555555");
 var_dump(gmp_strval($r));
 
@@ -39,11 +36,6 @@ var_dump(gmp_strval($r));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: gmp_divexact() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_divexact() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
 string(1) "0"
 
 Warning: gmp_divexact(): Zero operand not allowed in %s on line %d

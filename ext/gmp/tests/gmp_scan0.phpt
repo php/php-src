@@ -15,8 +15,6 @@ $n = gmp_init("24234527465274");
 var_dump(gmp_scan0($n, 10));
 
 var_dump(gmp_scan0(array(), 200));
-var_dump(gmp_scan0(array()));
-var_dump(gmp_scan0());
 
 echo "Done\n";
 ?>
@@ -31,10 +29,4 @@ int(13)
 
 Warning: gmp_scan0(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-
-Warning: gmp_scan0() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_scan0() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
 Done

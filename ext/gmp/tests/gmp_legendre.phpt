@@ -24,10 +24,6 @@ var_dump(gmp_legendre(3, array()));
 var_dump(gmp_legendre(array(), 3));
 var_dump(gmp_legendre(array(), array()));
 
-var_dump(gmp_legendre(array(), array(), 1));
-var_dump(gmp_legendre(array()));
-var_dump(gmp_legendre());
-
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -57,13 +53,4 @@ bool(false)
 
 Warning: gmp_legendre(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-
-Warning: gmp_legendre() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_legendre() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_legendre() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
 Done

@@ -16,11 +16,9 @@ var_dump(gmp_hamdist($n, "8333765434567897654333334567"));
 var_dump(gmp_hamdist($n, $n));
 var_dump(gmp_hamdist($n, $n1));
 
-var_dump(gmp_hamdist($n, $n1, 1));
 var_dump(gmp_hamdist($n, array()));
 var_dump(gmp_hamdist(array(), $n));
 var_dump(gmp_hamdist(array(), array()));
-var_dump(gmp_hamdist());
 
 echo "Done\n";
 ?>
@@ -33,9 +31,6 @@ int(43)
 int(0)
 int(26)
 
-Warning: gmp_hamdist() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
 Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
@@ -44,7 +39,4 @@ bool(false)
 
 Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-
-Warning: gmp_hamdist() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
 Done
