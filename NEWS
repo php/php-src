@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #77589 (Core dump using parse_ini_string with numeric sections).
     (Laruence)
+  . Fixed bug #77630 (rename() across the device may allow unwanted access
+    during processing). (Stas)
 
 - COM:
   . Fixed bug #77621 (Already defined constants are not properly reported).
