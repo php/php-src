@@ -1829,7 +1829,11 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			return FAILURE;
 #endif
 		case PHAR_SIG_OPENSSL: {
+#if (PLATFORM_BYTE_ORDER == IS_BIG_ENDIAN)
+			unsigned int siglen;
+#else 
 			size_t siglen;
+#endif
 			unsigned char *sigbuf;
 #ifdef PHAR_HAVE_OPENSSL
 			BIO *in;
