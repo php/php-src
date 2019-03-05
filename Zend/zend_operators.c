@@ -3077,11 +3077,19 @@ process_double:
 	}
 
 	if (ptr != str + length) {
-		if (!allow_errors) {
-			return 0;
+		const char *endptr = ptr;
+		while (*endptr == ' ' || *endptr == '\t' || *endptr == '\n' || *endptr == '\r' || *endptr == '\v' || *endptr == '\f') {
+			endptr++;
+			length--;
 		}
-		if (allow_errors == -1) {
-			zend_error(E_NOTICE, "A non well formed numeric value encountered");
+
+		if (ptr != str + length) {
+			if (!allow_errors) {
+				return 0;
+			}
+			if (allow_errors == -1) {
+				zend_error(E_NOTICE, "A non well formed numeric value encountered");
+			}
 		}
 	}
 
