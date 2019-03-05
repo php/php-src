@@ -38,8 +38,6 @@ PHP_FUNCTION( datefmt_get_datetype )
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_datetype: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -64,8 +62,6 @@ PHP_FUNCTION( datefmt_get_timetype )
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_timetype: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -95,8 +91,6 @@ PHP_FUNCTION( datefmt_get_pattern )
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_pattern: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -140,8 +134,6 @@ PHP_FUNCTION( datefmt_set_pattern )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, IntlDateFormatter_ce_ptr,  &value, &value_len ) == FAILURE )
 	{
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_set_pattern: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -178,8 +170,6 @@ PHP_FUNCTION( datefmt_get_locale )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O|l",
 		&object, IntlDateFormatter_ce_ptr,&loc_type) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_locale: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -207,8 +197,6 @@ PHP_FUNCTION( datefmt_is_lenient )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_is_lenient: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -235,8 +223,6 @@ PHP_FUNCTION( datefmt_set_lenient )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ob",
 	&object, IntlDateFormatter_ce_ptr,&isLenient ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_set_lenient: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 

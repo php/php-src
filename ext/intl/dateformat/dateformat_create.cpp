@@ -72,8 +72,6 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
-				"unable to parse input parameters", 0);
 		return FAILURE;
 	}
 

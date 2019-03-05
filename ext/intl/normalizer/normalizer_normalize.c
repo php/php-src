@@ -109,9 +109,6 @@ PHP_FUNCTION( normalizer_normalize )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
 				&input, &input_len, &form ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						 "normalizer_normalize: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -249,9 +246,6 @@ PHP_FUNCTION( normalizer_is_normalized )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
 				&input, &input_len, &form) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"normalizer_is_normalized: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 

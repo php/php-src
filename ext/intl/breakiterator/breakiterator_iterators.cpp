@@ -277,8 +277,6 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlPartsIterator::getBreakIterator: bad arguments", 0);
 		return;
 	}
 

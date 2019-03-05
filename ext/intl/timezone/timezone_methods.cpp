@@ -55,8 +55,6 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str_id, &str_id_len) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_create_time_zone: bad arguments", 0);
 		RETURN_NULL();
 	}
 
@@ -82,8 +80,6 @@ U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O",
 			&zv_timezone, php_date_get_timezone_ce()) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_from_date_time_zone: bad arguments", 0);
 		RETURN_NULL();
 	}
 
@@ -109,8 +105,6 @@ U_CFUNC PHP_FUNCTION(intltz_create_default)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_create_default: bad arguments", 0);
 		RETURN_NULL();
 	}
 
@@ -123,8 +117,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_gmt)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_gmt: bad arguments", 0);
 		RETURN_NULL();
 	}
 
@@ -136,8 +128,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_unknown)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_unknown: bad arguments", 0);
 		RETURN_NULL();
 	}
 
@@ -153,8 +143,6 @@ U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 	/* double indirection to have the zend engine destroy the new zval that
 	 * results from separation */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_create_enumeration: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -213,8 +201,6 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 			&str_id, &str_id_len) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_count_equivalent_ids: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -244,8 +230,6 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!l!",
 			&zoneType, &region, &region_len, &offset_arg, &arg3isnull) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_create_time_zone_id_enumeration: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -285,8 +269,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z",
 			&str_id, &str_id_len, &is_systemid) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_canonical_id: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -324,8 +306,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_region)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 			&str_id, &str_id_len) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_region: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -348,8 +328,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_tz_data_version: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -371,8 +349,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl",
 			&str_id, &str_id_len, &index) == FAILURE ||
 			index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_equivalent_id: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -399,8 +375,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, TimeZone_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_id: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -424,8 +398,6 @@ U_CFUNC PHP_FUNCTION(intltz_use_daylight_time)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, TimeZone_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_use_daylight_time: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -447,8 +419,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Odbz/z/", &object, TimeZone_ce_ptr, &date, &local, &rawOffsetArg,
 			&dstOffsetArg) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_offset: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -473,8 +443,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_raw_offset)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, TimeZone_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_raw_offset: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -492,8 +460,6 @@ U_CFUNC PHP_FUNCTION(intltz_has_same_rules)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"OO", &object, TimeZone_ce_ptr, &other_object, TimeZone_ce_ptr)
 			== FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_has_same_rules: bad arguments", 0);
 		RETURN_FALSE;
 	}
 	TIMEZONE_METHOD_FETCH_OBJECT;
@@ -525,8 +491,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O|bls!", &object, TimeZone_ce_ptr, &daylight, &display_type,
 			&locale_str, &dummy) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_display_name: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -564,8 +528,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_dst_savings)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, TimeZone_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_dst_savings: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -581,8 +543,6 @@ U_CFUNC PHP_FUNCTION(intltz_to_date_time_zone)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, TimeZone_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_to_date_time_zone: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -604,8 +564,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_code)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, TimeZone_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_error_code: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -624,8 +582,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_message)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, TimeZone_ce_ptr) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_error_message: bad arguments", 0 );
 		RETURN_FALSE;
 	}
 

@@ -63,8 +63,6 @@ PHP_FUNCTION(grapheme_strlen)
 	UErrorCode status;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &string, &string_len) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strlen: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -116,8 +114,6 @@ PHP_FUNCTION(grapheme_strpos)
 	zend_long ret_pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strpos: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -179,8 +175,6 @@ PHP_FUNCTION(grapheme_stripos)
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_stripos: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -248,8 +242,6 @@ PHP_FUNCTION(grapheme_strrpos)
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strrpos: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -311,8 +303,6 @@ PHP_FUNCTION(grapheme_strripos)
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strrpos: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -391,8 +381,6 @@ PHP_FUNCTION(grapheme_substr)
 	zend_bool no_length = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!", &str, &str_len, &lstart, &length, &no_length) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_substr: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -598,10 +586,6 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	zend_bool part = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &haystack, &haystack_len, &needle, &needle_len, &part) == FAILURE) {
-
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strstr: unable to parse input param", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -789,8 +773,6 @@ PHP_FUNCTION(grapheme_extract)
 	zval *next = NULL; /* return offset of next part of the string */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|llz", &str, &str_len, &size, &extract_type, &lstart, &next) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_extract: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
