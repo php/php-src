@@ -11,10 +11,6 @@ IDN UTS #46 API error tests
 ini_set("intl.error_level", E_WARNING);
 echo "=> PHP level errors", "\n";
 
-echo "bad args:", "\n";
-var_dump(idn_to_ascii("", 0, array()));
-var_dump(idn_to_ascii("", 0, INTL_IDNA_VARIANT_UTS46, $foo, null));
-
 echo "bad variant:", "\n";
 var_dump(idn_to_ascii("", 0, INTL_IDNA_VARIANT_UTS46 + 10));
 
@@ -36,19 +32,10 @@ var_dump(idn_to_ascii(
 		INTL_IDNA_VARIANT_UTS46, $foo));
 var_dump($foo);
 var_dump($foo["errors"]==IDNA_ERROR_CONTEXTJ);
+
+?>
 --EXPECTF--
 => PHP level errors
-bad args:
-
-Warning: idn_to_ascii() expects parameter 3 to be int, array given in %s on line %d
-
-Warning: idn_to_ascii(): idn_to_ascii: bad arguments in %s on line %d
-NULL
-
-Warning: idn_to_ascii() expects at most 4 parameters, 5 given in %s on line %d
-
-Warning: idn_to_ascii(): idn_to_ascii: bad arguments in %s on line %d
-NULL
 bad variant:
 
 Warning: idn_to_ascii(): idn_to_ascii: invalid variant, must be INTL_IDNA_VARIANT_UTS46 in %s on line %d
