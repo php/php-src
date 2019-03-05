@@ -35,7 +35,7 @@
 #define ZEND_BB_LOOP_HEADER      (1<<16)
 #define ZEND_BB_IRREDUCIBLE_LOOP (1<<17)
 
-#define ZEND_BB_REACHABLE        (1<<31)
+#define ZEND_BB_REACHABLE        (1U<<31)
 
 #define ZEND_BB_PROTECTED        (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY|ZEND_BB_TRY|ZEND_BB_CATCH|ZEND_BB_FINALLY|ZEND_BB_FINALLY_END|ZEND_BB_UNREACHABLE_FREE)
 
@@ -92,7 +92,7 @@ typedef struct _zend_cfg {
 } zend_cfg;
 
 /* Build Flags */
-#define ZEND_RT_CONSTANTS              (1<<31)
+#define ZEND_RT_CONSTANTS              (1U<<31)
 #define ZEND_CFG_STACKLESS             (1<<30)
 #define ZEND_SSA_DEBUG_LIVENESS        (1<<29)
 #define ZEND_SSA_DEBUG_PHI_PLACEMENT   (1<<28)

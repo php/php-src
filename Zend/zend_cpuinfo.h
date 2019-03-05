@@ -22,7 +22,7 @@
 #include "zend.h"
 
 #define ZEND_CPU_EBX_MASK     (1<<30)
-#define ZEND_CPU_EDX_MASK     (1<<31)
+#define ZEND_CPU_EDX_MASK     (1U<<31)
 
 typedef enum _zend_cpu_feature {
 	/* ECX */
