@@ -38,8 +38,6 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 		&locale, &locale_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_create: unable to parse input params", 0 );
 		return FAILURE;
 	}
 

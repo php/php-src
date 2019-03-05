@@ -43,8 +43,6 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "ss",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_create: unable to parse input parameters", 0 );
 		return FAILURE;
 	}
 
@@ -136,9 +134,6 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_code: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -164,9 +159,6 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_message: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 

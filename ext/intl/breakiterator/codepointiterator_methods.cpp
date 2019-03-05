@@ -33,8 +33,6 @@ U_CFUNC PHP_FUNCTION(cpbi_get_last_code_point)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"cpbi_get_last_code_point: bad arguments", 0);
 		RETURN_FALSE;
 	}
 

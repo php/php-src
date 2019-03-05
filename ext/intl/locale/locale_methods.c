@@ -227,9 +227,6 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(),  "S", &locale_name) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 	"locale_set_default: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -397,10 +394,6 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 	&loc_name ,&loc_name_len ) == FAILURE) {
-		spprintf(&msg , 0, "locale_get_%s : unable to parse input params", tag_name );
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  msg , 1 );
-		efree(msg);
-
 		RETURN_FALSE;
     }
 
@@ -506,9 +499,6 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 		&loc_name, &loc_name_len ,
 		&disp_loc_name ,&disp_loc_name_len ) == FAILURE)
 	{
-		spprintf(&msg , 0, "locale_get_display_%s : unable to parse input params", tag_name );
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  msg , 1 );
-		efree(msg);
 		RETURN_FALSE;
 	}
 
@@ -698,9 +688,6 @@ PHP_FUNCTION( locale_get_keywords )
     if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
         &loc_name, &loc_name_len ) == FAILURE)
     {
-        intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-             "locale_get_keywords: unable to parse input params", 0 );
-
         RETURN_FALSE;
     }
 
@@ -920,8 +907,6 @@ PHP_FUNCTION(locale_compose)
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "a",
 		&arr) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "locale_compose: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -1108,9 +1093,6 @@ PHP_FUNCTION(locale_parse)
     if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
         &loc_name, &loc_name_len ) == FAILURE)
     {
-        intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-             "locale_parse: unable to parse input params", 0 );
-
         RETURN_FALSE;
     }
 
@@ -1158,9 +1140,6 @@ PHP_FUNCTION(locale_get_all_variants)
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 	&loc_name, &loc_name_len ) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-	     "locale_parse: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -1264,9 +1243,6 @@ PHP_FUNCTION(locale_filter_matches)
 		&lang_tag, &lang_tag_len , &loc_range , &loc_range_len ,
 		&boolCanonical) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-		"locale_filter_matches: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -1540,7 +1516,6 @@ PHP_FUNCTION(locale_lookup)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS", &arr, &loc_range, &loc_range_len,
 		&boolCanonical,	&fallback_loc_str) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"locale_lookup: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -1594,8 +1569,6 @@ PHP_FUNCTION(locale_accept_from_http)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s", &http_accept, &http_accept_len) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-		"locale_accept_from_http: unable to parse input parameters", 0 );
 		RETURN_FALSE;
 	}
 	if(http_accept_len > ULOC_FULLNAME_CAPACITY) {
