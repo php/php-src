@@ -12,13 +12,6 @@ $ikm = 'input key material';
 
 echo "*** Testing hash_hkdf(): error conditions ***\n";
 
-echo "\n-- Testing hash_hkdf() function with less than expected no. of arguments --\n";
-var_dump(hash_hkdf());
-var_dump(hash_hkdf('sha1'));
-
-echo "\n-- Testing hash_hkdf() function with more than expected no. of arguments --\n";
-var_dump(hash_hkdf('sha1', $ikm, 20, '', '', 'extra parameter'));
-
 echo "\n-- Testing hash_hkdf() function with invalid hash algorithm --\n";
 var_dump(hash_hkdf('foo', $ikm));
 
@@ -40,19 +33,6 @@ var_dump(hash_hkdf('sha1', $ikm, 20 * 255 + 1)); // Length can't be more than 25
 ===Done===
 --EXPECTF--
 *** Testing hash_hkdf(): error conditions ***
-
--- Testing hash_hkdf() function with less than expected no. of arguments --
-
-Warning: hash_hkdf() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: hash_hkdf() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
--- Testing hash_hkdf() function with more than expected no. of arguments --
-
-Warning: hash_hkdf() expects at most 5 parameters, 6 given in %s on line %d
-NULL
 
 -- Testing hash_hkdf() function with invalid hash algorithm --
 
