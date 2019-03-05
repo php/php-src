@@ -132,7 +132,7 @@ void gdImageGifCtx(gdImagePtr im, gdIOCtxPtr out)
 	BitsPerPixel = colorstobpp(tim->colorsTotal);
 	/* All set, let's do it. */
 	GIFEncode(
-		out, tim->sx, tim->sy, tim->interlace, 0, tim->transparent, BitsPerPixel,
+		out, tim->sx, tim->sy, interlace, 0, tim->transparent, BitsPerPixel,
 		tim->red, tim->green, tim->blue, tim);
 	if (pim) {
 		/* Destroy palette based temporary image. */

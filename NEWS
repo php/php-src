@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
     (Kevin Adler)
 
+- GD:
+  . Fixed bug #77700 (Writing truecolor images as GIF ignores interlace flag).
+    (cmb)
+
 - MySQLi:
   . Fixed bug #77597 (mysqli_fetch_field hangs scripts). (Nikita)
 
