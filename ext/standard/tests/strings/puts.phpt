@@ -10,56 +10,51 @@ Test puts() function : basic functionality
 
 echo "*** Testing puts() : basic functionality ***\n";
 
-echo "\n-- Iteration 1 --\n";
+echo "-- Iteration 1 --\n";
 puts("Hello World");
 
-echo "\n-- Iteration 2 --\n";
+echo "-- Iteration 2 --\n";
 puts("This spans
 multiple lines. The newlines will be
 output as well");
 
-echo "\n-- Iteration 3 --\n";
-puts("This also spans\nmultiple lines. The newlines will be\noutput as well.");
-
-echo "\n-- Iteration 4 --\n";
+echo "-- Iteration 3 --\n";
 puts("escaping characters is done \"Like this\".");
 
 // You can use variables inside of a puts statement
 $foo = "foobar";
 $bar = "barbaz";
 
-echo "\n-- Iteration 5 --\n";
+echo "-- Iteration 4 --\n";
 puts("foo is $foo"); // foo is foobar
 
 // You can also use arrays
 $bar = array("value" => "foo");
 
-echo "\n-- Iteration 6 --\n";
+echo "-- Iteration 5 --\n";
 puts("this is {$bar['value']} !"); // this is foo !
 
 // Using single quotes will output the variable name, not the value
-echo "\n-- Iteration 7 --\n";
+echo "-- Iteration 6 --\n";
 puts('foo is $foo'); // foo is $foo
 
 // If you are not using any other characters, you can just output variables
-echo "\n-- Iteration 8 --\n";
+echo "-- Iteration 7 --\n";
 puts($foo); // foobar
 
-echo "\n-- Iteration 9 --\n";
+echo "-- Iteration 8 --\n";
 $variable = "VARIABLE";
 puts(<<<END
 This uses the "here document" syntax to output
 multiple lines with $variable interpolation. Note
 that the here document terminator must appear on a
-line with just a semicolon no extra whitespace!\n
+line with just a semicolon no extra whitespace!
 END
 );
-
 ?>
 ===DONE===
 --EXPECT--
 *** Testing puts() : basic functionality ***
-
 -- Iteration 1 --
 Hello World
 -- Iteration 2 --
@@ -67,20 +62,16 @@ This spans
 multiple lines. The newlines will be
 output as well
 -- Iteration 3 --
-This also spans
-multiple lines. The newlines will be
-output as well.
--- Iteration 4 --
 escaping characters is done "Like this".
--- Iteration 5 --
+-- Iteration 4 --
 foo is foobar
--- Iteration 6 --
+-- Iteration 5 --
 this is foo !
--- Iteration 7 --
+-- Iteration 6 --
 foo is $foo
--- Iteration 8 --
+-- Iteration 7 --
 foobar
--- Iteration 9 --
+-- Iteration 8 --
 This uses the "here document" syntax to output
 multiple lines with VARIABLE interpolation. Note
 that the here document terminator must appear on a
