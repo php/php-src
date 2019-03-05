@@ -6,7 +6,6 @@ mb_strpos()
 <?php
 // TODO: Add more encodings
 
-//$debug=true;
 ini_set('include_path','.');
 include_once('common.inc');
 
@@ -140,7 +139,7 @@ $r = mb_strpos($euc_jp, $t_obj, 'BAD_ENCODING');
 ($r === NULL) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 String len: 43
 == POSITIVE OFFSET ==
 10
@@ -158,25 +157,35 @@ String len: 43
 30
 0
 == INVALID OFFSET ==
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
 == OUT OF RANGE ==
 OK_OUT_RANGE
@@ -205,12 +214,16 @@ OK_NEWLINE
 OK_STR
 OK_NEWLINE
 == INVALID PARAMETER TEST ==
-ERR: Warning
+
+Warning: mb_strpos() expects parameter 3 to be int, string given in %s on line %d
 OK_NULL
-ERR: Warning
+
+Warning: mb_strpos() expects parameter 2 to be string, array given in %s on line %d
 OK_ARRAY
-ERR: Warning
+
+Warning: mb_strpos() expects parameter 2 to be string, object given in %s on line %d
 OK_OBJECT
-ERR: Warning
+
+Warning: mb_strpos() expects parameter 2 to be string, object given in %s on line %d
 OK_BAD_ENCODING
 ==DONE==

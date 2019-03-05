@@ -5,7 +5,6 @@ mb_http_output()
 --FILE--
 <?php
 //TODO: Add more encoding. Wrong parameter type test.
-//$debug = true;
 ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');
 
@@ -59,7 +58,7 @@ $enc = mb_http_output();
 print "$enc\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 OK_ASCII_SET
 ASCII
 OK_SJIS_SET
@@ -71,12 +70,15 @@ UTF-8
 OK_EUC-JP_SET
 EUC-JP
 == INVALID PARAMETER ==
-ERR: Warning
+
+Warning: mb_http_output(): Unknown encoding "BAD_NAME" in %s on line %d
 OK_BAD_SET
 EUC-JP
-ERR: Warning
+
+Warning: mb_http_output() expects parameter 1 to be string, array given in %s on line %d
 OK_BAD_ARY_SET
 EUC-JP
-ERR: Warning
+
+Warning: mb_http_output() expects parameter 1 to be string, object given in %s on line %d
 OK_BAD_OBJ_SET
 EUC-JP
