@@ -30,8 +30,12 @@ $callback_names = array(
 );
 for($count = 0; $count < count($callback_names); $count++)
 {
-  echo "-- Iteration ".($count + 1)." --\n";
-  var_dump( array_map($callback_names[$count], $arr1) );
+    echo "-- Iteration ".($count + 1)." --\n";
+    try {
+        var_dump( array_map($callback_names[$count], $arr1) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 echo "Done";

@@ -5,7 +5,6 @@ precision=14
 --FILE--
 <?php
 
-var_dump(max());
 var_dump(max(1));
 var_dump(max(array()));
 var_dump(max(new stdclass));
@@ -20,9 +19,6 @@ var_dump(max(0, true, false, true));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: max() expects at least 1 parameter, 0 given in %s on line 3
-NULL
-
 Warning: max(): When only one parameter is given, it must be an array in %s on line 4
 NULL
 

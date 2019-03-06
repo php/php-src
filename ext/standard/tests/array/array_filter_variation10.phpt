@@ -48,7 +48,11 @@ var_dump(array_filter($mixed, 'is_numeric', ARRAY_FILTER_USE_KEY));
 
 var_dump(array_filter($mixed, 'is_numeric', 0));
 
-var_dump(array_filter($mixed, 'is_numeric', ARRAY_FILTER_USE_BOTH));
+try {
+    var_dump(array_filter($mixed, 'is_numeric', ARRAY_FILTER_USE_BOTH));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done"
 ?>

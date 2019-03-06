@@ -20,10 +20,18 @@ echo "-- with built-in function 'pow' and two parameters --\n";
 var_dump( array_map('pow', $array1, $array2));
 
 echo "-- with built-in function 'pow' and one parameter --\n";
-var_dump( array_map('pow', $array1));
+try {
+    var_dump( array_map('pow', $array1));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "-- with language construct --\n";
-var_dump( array_map('echo', $array1));
+try {
+    var_dump( array_map('echo', $array1));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>

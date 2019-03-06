@@ -66,8 +66,12 @@ $unexpected_callbacks = array(
 
 // loop through each element of $inputs to check the behavior of array_map
 for($count = 0; $count < count($unexpected_callbacks); $count++) {
-  echo "\n-- Iteration ".($count + 1)." --";
-  var_dump( array_map($unexpected_callbacks[$count], $arr1));
+    echo "\n-- Iteration ".($count + 1)." --";
+    try {
+        var_dump( array_map($unexpected_callbacks[$count], $arr1));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 };
 
 fclose($fp);

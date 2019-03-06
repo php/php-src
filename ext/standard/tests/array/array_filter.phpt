@@ -26,9 +26,6 @@ var_dump(array_filter($array2, "even"));
 var_dump(array_filter($array3, "even"));
 
 var_dump(array_filter(array()));
-var_dump(array_filter(array(), array()));
-var_dump(array_filter("", null));
-var_dump(array_filter($array1, 1));
 
 echo '== DONE ==';
 ?>
@@ -81,13 +78,4 @@ array(2) {
 }
 array(0) {
 }
-
-Warning: array_filter() expects parameter 2 to be a valid callback, array must have exactly two members in %s on line %d
-NULL
-
-Warning: array_filter() expects parameter 1 to be array, string given in %s on line %d
-NULL
-
-Warning: array_filter() expects parameter 2 to be a valid callback, no array or string given in %s on line %d
-NULL
 == DONE ==

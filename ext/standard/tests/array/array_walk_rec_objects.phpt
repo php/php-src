@@ -24,7 +24,11 @@ array_walk_recursive($t, "walk");
 $var = array();
 array_walk_recursive($var, "walk");
 $var = "";
-array_walk_recursive($var, "walk");
+try {
+    array_walk_recursive($var, "walk");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
@@ -39,6 +43,5 @@ string(10) "%r\0%r*%r\0%rvar_pro"
 string(14) "test_protected"
 string(7) "var_pub"
 string(11) "test_public"
-
-Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
+array_walk_recursive() expects parameter 1 to be array, string given
 Done
