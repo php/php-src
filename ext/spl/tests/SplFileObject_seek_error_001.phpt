@@ -9,5 +9,5 @@ try {
 	echo($e->getMessage());
 }
 ?>
---EXPECT--
-Can't seek file %s to negative line %s
+--EXPECTF--
+Can't seek file %s to negative line -1
