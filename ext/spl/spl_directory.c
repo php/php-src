@@ -1344,15 +1344,12 @@ SPL_METHOD(SplFileInfo, setFileClass)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_class_entry *ce = spl_ce_SplFileObject;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == SUCCESS) {
-		intern->file_class = ce;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
+	intern->file_class = ce;
 }
 /* }}} */
 
@@ -1362,15 +1359,12 @@ SPL_METHOD(SplFileInfo, setInfoClass)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_class_entry *ce = spl_ce_SplFileInfo;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling );
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == SUCCESS) {
-		intern->info_class = ce;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
+	intern->info_class = ce;
 }
 /* }}} */
 
@@ -1380,15 +1374,12 @@ SPL_METHOD(SplFileInfo, getFileInfo)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_class_entry *ce = intern->info_class;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == SUCCESS) {
-		spl_filesystem_object_create_type(ZEND_NUM_ARGS(), intern, SPL_FS_INFO, ce, return_value);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
+	spl_filesystem_object_create_type(ZEND_NUM_ARGS(), intern, SPL_FS_INFO, ce, return_value);
 }
 /* }}} */
 
@@ -1398,22 +1389,20 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_class_entry *ce = intern->info_class;
-	zend_error_handling error_handling;
+	size_t path_len;
+	char *path;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == SUCCESS) {
-		size_t path_len;
-		char *path = spl_filesystem_object_get_pathname(intern, &path_len);
-		if (path) {
-			char *dpath = estrndup(path, path_len);
-			path_len = php_dirname(dpath, path_len);
-			spl_filesystem_object_create_info(intern, dpath, path_len, 1, ce, return_value);
-			efree(dpath);
-		}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
+	path = spl_filesystem_object_get_pathname(intern, &path_len);
+	if (path) {
+		char *dpath = estrndup(path, path_len);
+		path_len = php_dirname(dpath, path_len);
+		spl_filesystem_object_create_info(intern, dpath, path_len, 1, ce, return_value);
+		efree(dpath);
+	}
 }
 /* }}} */
 
