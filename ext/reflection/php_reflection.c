@@ -325,6 +325,9 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		if (ce->ce_flags & ZEND_ACC_FINAL) {
 			smart_str_append_printf(str, "final ");
 		}
+		if (ce->ce_flags & ZEND_ACC_LOCKED) {
+			smart_str_append_printf(str, "locked ");
+		}
 		smart_str_append_printf(str, "class ");
 	}
 	smart_str_append_printf(str, "%s", ZSTR_VAL(ce->name));
@@ -1477,6 +1480,9 @@ ZEND_METHOD(reflection, getModifierNames)
 	}
 	if (modifiers & ZEND_ACC_FINAL) {
 		add_next_index_stringl(return_value, "final", sizeof("final")-1);
+	}
+	if (modifiers & ZEND_ACC_LOCKED) {
+		add_next_index_stringl(return_value, "locked", sizeof("locked")-1);
 	}
 
 	/* These are mutually exclusive */
@@ -4579,6 +4585,14 @@ ZEND_METHOD(reflection_class, isAbstract)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionClass::isLocked()
+   Returns whether this class is locked */
+ZEND_METHOD(reflection_class, isLocked)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LOCKED);
+}
+/* }}} */
+
 /* {{{ proto public int ReflectionClass::getModifiers()
    Returns a bitfield of the access modifiers for this class */
 ZEND_METHOD(reflection_class, getModifiers)
@@ -4586,7 +4600,8 @@ ZEND_METHOD(reflection_class, getModifiers)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	uint32_t keep_flags = ZEND_ACC_FINAL
-		| ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+		| ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS
+		| ZEND_ACC_LOCKED;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -6513,6 +6528,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, isTrait, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isAbstract, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isFinal, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isLocked, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInstance, arginfo_reflection_class_isInstance, 0)
 	ZEND_ME(reflection_class, newInstance, arginfo_reflection_class_newInstance, 0)
@@ -6846,6 +6862,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_FINAL", ZEND_ACC_FINAL);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_LOCKED", ZEND_ACC_LOCKED);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionObject", reflection_object_functions);
 	reflection_init_class_handlers(&_reflection_entry);

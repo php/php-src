@@ -11,10 +11,11 @@ echo $rc;
 --EXPECT--
 Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
-  - Constants [3] {
+  - Constants [4] {
     Constant [ public int IS_IMPLICIT_ABSTRACT ] { 16 }
     Constant [ public int IS_EXPLICIT_ABSTRACT ] { 64 }
     Constant [ public int IS_FINAL ] { 32 }
+    Constant [ public int IS_LOCKED ] { 262144 }
   }
 
   - Static properties [0] {
@@ -34,7 +35,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [53] {
+  - Methods [54] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -244,6 +245,12 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method isFinal ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method isLocked ] {
 
       - Parameters [0] {
       }
