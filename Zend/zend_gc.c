@@ -73,8 +73,6 @@
 # define GC_BENCH 0
 #endif
 
-#define GC_REFCOUNTED_STACK_INITIAL_SIZE 512
-
 #ifndef ZEND_GC_DEBUG
 # define ZEND_GC_DEBUG 0
 #endif
@@ -247,6 +245,56 @@ static zend_gc_globals gc_globals;
 # define GC_TRACE(str)
 #endif
 
+
+#define GC_STACK_SEGMENT_SIZE (((4096 - ZEND_MM_OVERHEAD) / sizeof(void*)) - 2)
+
+typedef struct _gc_stack gc_stack;
+
+struct _gc_stack {
+	gc_stack        *prev;
+	gc_stack        *next;
+	zend_refcounted *data[GC_STACK_SEGMENT_SIZE];
+};
+
+#define GC_STACK_DCL(init) \
+	gc_stack *_stack = init; \
+	size_t    _top = 0;
+
+#define GC_STACK_PUSH(ref) \
+	do { \
+		if (UNEXPECTED(_top == GC_STACK_SEGMENT_SIZE)) { \
+			if (UNEXPECTED(!_stack->next)) { \
+				gc_stack *segment = emalloc(sizeof(gc_stack)); \
+				segment->prev = _stack; \
+				segment->next = NULL; \
+				_stack->next = segment; \
+			} \
+			_stack = _stack->next; \
+			_top = 0; \
+		} \
+		_stack->data[_top++] = (ref); \
+	} while (0)
+
+#define GC_STACK_POP() \
+	(UNEXPECTED(_top == 0) \
+		? ((!_stack->prev) \
+			? NULL \
+			: ( _stack = _stack->prev, \
+				_top = GC_STACK_SEGMENT_SIZE - 1, \
+				_stack->data[_top])) \
+		: _stack->data[--_top])
+
+static void gc_stack_free(gc_stack *stack)
+{
+	gc_stack *p = stack->next;
+
+	while (p) {
+		stack = p->next;
+		efree(p);
+		p = stack;
+	}
+}
+
 static zend_always_inline uint32_t gc_compress(uint32_t idx)
 {
 	return idx % GC_MAX_UNCOMPRESSED;
@@ -330,12 +378,6 @@ static void gc_trace_ref(zend_refcounted *ref) {
 	}
 }
 #endif
-
-typedef struct _gc_refcounted_stack {
-	size_t count;
-	size_t max;
-	zend_refcounted **bottom;
-} gc_refcounted_stack;
 
 static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
 {
@@ -614,49 +656,14 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	gc_remove_from_roots(root);
 }
 
-static void gc_refcounted_stack_init(gc_refcounted_stack *stack, int size)
+static void gc_scan_black(zend_refcounted *ref, gc_stack *stack)
 {
-	stack->count = 0;
-	stack->max = size;
-	stack->bottom = (zend_refcounted**) emalloc(stack->max * sizeof(zend_refcounted*));
-}
-
-static void gc_refcounted_stack_push(gc_refcounted_stack *stack, zend_refcounted *ref)
-{
-	if (stack->count >= stack->max) { // if max capacity is full, double in size
-		stack->max *= 2;
-		stack->bottom = (zend_refcounted**) erealloc(stack->bottom, stack->max * sizeof(zend_refcounted*));
-	}
-
-	stack->bottom[stack->count] = ref;
-	stack->count++;
-}
-
-static zend_refcounted* gc_refcounted_stack_pop(gc_refcounted_stack *stack)
-{
-	if (!stack->count) { // if stack is empty, return null
-		return NULL;
-	}
-
-	stack->count--;
-	return stack->bottom[stack->count];
-}
-
-static void gc_refcounted_stack_destroy(gc_refcounted_stack *stack)
-{
-	efree(stack->bottom);
-}
-
-static void gc_scan_black(zend_refcounted *ref, gc_refcounted_stack *stack)
-{
-	HashTable *ht;
+	HashTable *ht = NULL;
 	Bucket *p, *end;
 	zval *zv;
+	GC_STACK_DCL(stack);
 
 tail_call:
-	ht = NULL;
-	GC_REF_SET_BLACK(ref);
-
 	if (GC_TYPE(ref) == IS_OBJECT) {
 		zend_object_get_gc_t get_gc;
 		zend_object *obj = (zend_object*)ref;
@@ -671,9 +678,9 @@ tail_call:
 			ht = get_gc(&tmp, &zv, &n);
 			end = zv + n;
 			if (EXPECTED(!ht)) {
-				if (!n) return;
+				if (!n) goto next;
 				while (!Z_REFCOUNTED_P(--end)) {
-					if (zv == end) return;
+					if (zv == end) goto next;
 				}
 			}
 			while (zv != end) {
@@ -682,7 +689,7 @@ tail_call:
 					GC_ADDREF(ref);
 					if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 						GC_REF_SET_BLACK(ref);
-						gc_refcounted_stack_push(stack, ref);
+						GC_STACK_PUSH(ref);
 					}
 				}
 				zv++;
@@ -694,16 +701,16 @@ tail_call:
 					GC_REF_SET_BLACK(ref);
 					goto tail_call;
 				}
-				return;
+				goto next;
 			}
 		} else {
-			return;
+			goto next;
 		}
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		if ((zend_array*)ref != &EG(symbol_table)) {
 			ht = (zend_array*)ref;
 		} else {
-			return;
+			goto next;
 		}
 	} else if (GC_TYPE(ref) == IS_REFERENCE) {
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
@@ -714,12 +721,12 @@ tail_call:
 				goto tail_call;
 			}
 		}
-		return;
+		goto next;
 	} else {
-		return;
+		goto next;
 	}
 
-	if (!ht->nNumUsed) return;
+	if (!ht->nNumUsed) goto next;
 	p = ht->arData;
 	end = p + ht->nNumUsed;
 	while (1) {
@@ -731,7 +738,7 @@ tail_call:
 		if (Z_REFCOUNTED_P(zv)) {
 			break;
 		}
-		if (p == end) return;
+		if (p == end) goto next;
 	}
 	while (p != end) {
 		zv = &p->val;
@@ -743,7 +750,7 @@ tail_call:
 			GC_ADDREF(ref);
 			if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 				GC_REF_SET_BLACK(ref);
-				gc_refcounted_stack_push(stack, ref);
+				GC_STACK_PUSH(ref);
 			}
 		}
 		p++;
@@ -758,17 +765,22 @@ tail_call:
 		GC_REF_SET_BLACK(ref);
 		goto tail_call;
 	}
+
+next:
+	ref = GC_STACK_POP();
+	if (ref) {
+		goto tail_call;
+	}
 }
 
-static void gc_mark_grey(zend_refcounted *ref, gc_refcounted_stack *stack)
+static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 {
-    HashTable *ht;
+    HashTable *ht = NULL;
 	Bucket *p, *end;
 	zval *zv;
+	GC_STACK_DCL(stack);
 
-tail_call:
-	if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-		ht = NULL;
+	do {
 		GC_BENCH_INC(zval_marked_grey);
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
@@ -785,9 +797,9 @@ tail_call:
 				ht = get_gc(&tmp, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
-					if (!n) return;
+					if (!n) goto next;
 					while (!Z_REFCOUNTED_P(--end)) {
-						if (zv == end) return;
+						if (zv == end) goto next;
 					}
 				}
 				while (zv != end) {
@@ -796,7 +808,7 @@ tail_call:
 						GC_DELREF(ref);
 						if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 							GC_REF_SET_COLOR(ref, GC_GREY);
-							gc_refcounted_stack_push(stack, ref);
+							GC_STACK_PUSH(ref);
 						}
 					}
 					zv++;
@@ -806,17 +818,17 @@ tail_call:
 					GC_DELREF(ref);
 					if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 						GC_REF_SET_COLOR(ref, GC_GREY);
-						goto tail_call;
+						continue;
 					}
-					return;
+					goto next;
 				}
 			} else {
-				return;
+				goto next;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
 			if (((zend_array*)ref) == &EG(symbol_table)) {
 				GC_REF_SET_BLACK(ref);
-				return;
+				goto next;
 			} else {
 				ht = (zend_array*)ref;
 			}
@@ -826,15 +838,15 @@ tail_call:
 				GC_DELREF(ref);
 				if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 					GC_REF_SET_COLOR(ref, GC_GREY);
-					goto tail_call;
+					continue;
 				}
 			}
-			return;
+			goto next;
 		} else {
-			return;
+			goto next;
 		}
 
-		if (!ht->nNumUsed) return;
+		if (!ht->nNumUsed) goto next;
 		p = ht->arData;
 		end = p + ht->nNumUsed;
 		while (1) {
@@ -846,7 +858,7 @@ tail_call:
 			if (Z_REFCOUNTED_P(zv)) {
 				break;
 			}
-			if (p == end) return;
+			if (p == end) goto next;
 		}
 		while (p != end) {
 			zv = &p->val;
@@ -858,7 +870,7 @@ tail_call:
 				GC_DELREF(ref);
 				if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 					GC_REF_SET_COLOR(ref, GC_GREY);
-					gc_refcounted_stack_push(stack, ref);
+					GC_STACK_PUSH(ref);
 				}
 			}
 			p++;
@@ -871,9 +883,12 @@ tail_call:
 		GC_DELREF(ref);
 		if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 			GC_REF_SET_COLOR(ref, GC_GREY);
-			goto tail_call;
+			continue;
 		}
-	}
+
+next:
+		ref = GC_STACK_POP();
+	} while (ref);
 }
 
 /* Two-Finger compaction algorithm */
@@ -913,10 +928,9 @@ static void gc_compact(void)
 	}
 }
 
-static void gc_mark_roots(gc_refcounted_stack *stack)
+static void gc_mark_roots(gc_stack *stack)
 {
 	gc_root_buffer *current, *last;
-	zend_refcounted *ref;
 
 	gc_compact();
 
@@ -927,22 +941,18 @@ static void gc_mark_roots(gc_refcounted_stack *stack)
 			if (GC_REF_CHECK_COLOR(current->ref, GC_PURPLE)) {
 				GC_REF_SET_COLOR(current->ref, GC_GREY);
 				gc_mark_grey(current->ref, stack);
-				while (stack->count) {
-					ref = gc_refcounted_stack_pop(stack);
-					gc_mark_grey(ref, stack);
-				}
 			}
 		}
 		current++;
 	}
 }
 
-static void gc_scan(zend_refcounted *ref, gc_refcounted_stack *stack, gc_refcounted_stack *stack_black)
+static void gc_scan(zend_refcounted *ref, gc_stack *stack, gc_stack *stack_black)
 {
-    HashTable *ht;
+	HashTable *ht = NULL;
 	Bucket *p, *end;
 	zval *zv;
-	zend_refcounted *ref_black;
+	GC_STACK_DCL(stack);
 
 tail_call:
 	if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
@@ -950,10 +960,6 @@ tail_call:
 			if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 				GC_REF_SET_BLACK(ref);
 				gc_scan_black(ref, stack_black);
-				while (stack_black->count) {
-					ref_black = gc_refcounted_stack_pop(stack_black);
-					gc_scan_black(ref_black, stack_black);
-				}
 			}
 		} else {
 			if (GC_TYPE(ref) == IS_OBJECT) {
@@ -970,9 +976,9 @@ tail_call:
 					ht = get_gc(&tmp, &zv, &n);
 					end = zv + n;
 					if (EXPECTED(!ht)) {
-						if (!n) return;
+						if (!n) goto next;
 						while (!Z_REFCOUNTED_P(--end)) {
-							if (zv == end) return;
+							if (zv == end) goto next;
 						}
 					}
 					while (zv != end) {
@@ -980,7 +986,7 @@ tail_call:
 							ref = Z_COUNTED_P(zv);
 							if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 								GC_REF_SET_COLOR(ref, GC_WHITE);
-								gc_refcounted_stack_push(stack, ref);
+								GC_STACK_PUSH(ref);
 							}
 						}
 						zv++;
@@ -991,15 +997,15 @@ tail_call:
 							GC_REF_SET_COLOR(ref, GC_WHITE);
 							goto tail_call;
 						}
-						return;
+						goto next;
 					}
 				} else {
-					return;
+					goto next;
 				}
 			} else if (GC_TYPE(ref) == IS_ARRAY) {
 				if ((zend_array*)ref == &EG(symbol_table)) {
 					GC_REF_SET_BLACK(ref);
-					return;
+					goto next;
 				} else {
 					ht = (zend_array*)ref;
 				}
@@ -1011,12 +1017,12 @@ tail_call:
 						goto tail_call;
 					}
 				}
-				return;
+				goto next;
 			} else {
-				return;
+				goto next;
 			}
 
-			if (!ht->nNumUsed) return;
+			if (!ht->nNumUsed) goto next;
 			p = ht->arData;
 			end = p + ht->nNumUsed;
 			while (1) {
@@ -1028,7 +1034,7 @@ tail_call:
 				if (Z_REFCOUNTED_P(zv)) {
 					break;
 				}
-				if (p == end) return;
+				if (p == end) goto next;
 			}
 			while (p != end) {
 				zv = &p->val;
@@ -1039,7 +1045,7 @@ tail_call:
 					ref = Z_COUNTED_P(zv);
 					if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 						GC_REF_SET_COLOR(ref, GC_WHITE);
-						gc_refcounted_stack_push(stack, ref);
+						GC_STACK_PUSH(ref);
 					}
 				}
 				p++;
@@ -1055,32 +1061,28 @@ tail_call:
 			}
 		}
 	}
+
+next:
+	ref = GC_STACK_POP();
+	if (ref) {
+		goto tail_call;
+	}
 }
 
-static void gc_scan_roots(gc_refcounted_stack *stack)
+static void gc_scan_roots(gc_stack *stack, gc_stack *stack_black)
 {
 	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
 	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
-	zend_refcounted *ref;
-	gc_refcounted_stack stack_black;
-
-	gc_refcounted_stack_init(&stack_black, GC_REFCOUNTED_STACK_INITIAL_SIZE);
 
 	while (current != last) {
 		if (GC_IS_ROOT(current->ref)) {
 			if (GC_REF_CHECK_COLOR(current->ref, GC_GREY)) {
 				GC_REF_SET_COLOR(current->ref, GC_WHITE);
-				gc_scan(current->ref, stack, &stack_black);
-				while (stack->count) {
-					ref = gc_refcounted_stack_pop(stack);
-					gc_scan(ref, stack, &stack_black);
-				}
+				gc_scan(current->ref, stack, stack_black);
 			}
 		}
 		current++;
 	}
-
-	gc_refcounted_stack_destroy(&stack_black);
 }
 
 static void gc_add_garbage(zend_refcounted *ref)
@@ -1108,17 +1110,15 @@ static void gc_add_garbage(zend_refcounted *ref)
 	GC_G(num_roots)++;
 }
 
-static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_refcounted_stack *stack)
+static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *stack)
 {
 	int count = 0;
-	HashTable *ht;
+	HashTable *ht = NULL;
 	Bucket *p, *end;
 	zval *zv;
+	GC_STACK_DCL(stack);
 
-tail_call:
-	if (!GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
-		ht = NULL;
-
+	do {
 		/* don't count references for compatibility ??? */
 		if (GC_TYPE(ref) != IS_REFERENCE) {
 			count++;
@@ -1147,13 +1147,13 @@ tail_call:
 				ht = get_gc(&tmp, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
-					if (!n) return count;
+					if (!n) goto next;
 					while (!Z_REFCOUNTED_P(--end)) {
 						/* count non-refcounted for compatibility ??? */
 						if (Z_TYPE_P(zv) != IS_UNDEF) {
 							count++;
 						}
-						if (zv == end) return count;
+						if (zv == end) goto next;
 					}
 				}
 				while (zv != end) {
@@ -1162,7 +1162,7 @@ tail_call:
 						GC_ADDREF(ref);
 						if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 							GC_REF_SET_BLACK(ref);
-							gc_refcounted_stack_push(stack, ref);
+							GC_STACK_PUSH(ref);
 						}
 					/* count non-refcounted for compatibility ??? */
 					} else if (Z_TYPE_P(zv) != IS_UNDEF) {
@@ -1175,12 +1175,12 @@ tail_call:
 					GC_ADDREF(ref);
 					if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 						GC_REF_SET_BLACK(ref);
-						goto tail_call;
+						continue;
 					}
-					return count;
+					goto next;
 				}
 			} else {
-				return count;
+				goto next;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
 			/* optimization: color is GC_BLACK (0) */
@@ -1194,15 +1194,15 @@ tail_call:
 				GC_ADDREF(ref);
 				if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 					GC_REF_SET_BLACK(ref);
-					goto tail_call;
+					continue;
 				}
 			}
-			return count;
+			goto next;
 		} else {
-			return count;
+			goto next;
 		}
 
-		if (!ht->nNumUsed) return count;
+		if (!ht->nNumUsed) goto next;
 		p = ht->arData;
 		end = p + ht->nNumUsed;
 		while (1) {
@@ -1218,7 +1218,7 @@ tail_call:
 			if (Z_TYPE_P(zv) != IS_UNDEF) {
 				count++;
 			}
-			if (p == end) return count;
+			if (p == end) goto next;
 		}
 		while (p != end) {
 			zv = &p->val;
@@ -1230,7 +1230,7 @@ tail_call:
 				GC_ADDREF(ref);
 				if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 					GC_REF_SET_BLACK(ref);
-					gc_refcounted_stack_push(stack, ref);
+					GC_STACK_PUSH(ref);
 				}
 				/* count non-refcounted for compatibility ??? */
 			} else if (Z_TYPE_P(zv) != IS_UNDEF) {
@@ -1246,13 +1246,17 @@ tail_call:
 		GC_ADDREF(ref);
 		if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 			GC_REF_SET_BLACK(ref);
-			goto tail_call;
+			continue;
 		}
-	}
+
+next:
+		ref = GC_STACK_POP();
+	} while (ref);
+
 	return count;
 }
 
-static int gc_collect_roots(uint32_t *flags, gc_refcounted_stack *stack)
+static int gc_collect_roots(uint32_t *flags, gc_stack *stack)
 {
 	uint32_t idx, end;
 	zend_refcounted *ref;
@@ -1285,10 +1289,6 @@ static int gc_collect_roots(uint32_t *flags, gc_refcounted_stack *stack)
 		if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 			GC_REF_SET_BLACK(ref);
 			count += gc_collect_white(ref, flags, stack);
-			while (stack->count) {
-				ref = gc_refcounted_stack_pop(stack);
-				count += gc_collect_white(ref, flags, stack);
-			}
 		}
 		idx++;
 	}
@@ -1403,7 +1403,12 @@ ZEND_API int zend_gc_collect_cycles(void)
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
 		uint32_t idx, end;
-		gc_refcounted_stack stack;
+		gc_stack stack, stack_black;
+
+		stack.prev = NULL;
+		stack.next = NULL;
+		stack_black.prev = NULL;
+		stack_black.next = NULL;
 
 		if (GC_G(gc_active)) {
 			return 0;
@@ -1413,18 +1418,16 @@ ZEND_API int zend_gc_collect_cycles(void)
 		GC_G(gc_runs)++;
 		GC_G(gc_active) = 1;
 
-		gc_refcounted_stack_init(&stack, GC_REFCOUNTED_STACK_INITIAL_SIZE);
-
 		GC_TRACE("Marking roots");
 		gc_mark_roots(&stack);
 		GC_TRACE("Scanning roots");
-		gc_scan_roots(&stack);
+		gc_scan_roots(&stack, &stack_black);
 
 		GC_TRACE("Collecting roots");
 		count = gc_collect_roots(&gc_flags, &stack);
 
-		gc_refcounted_stack_destroy(&stack);
-
+		gc_stack_free(&stack_black);
+		gc_stack_free(&stack);
 
 		if (!GC_G(num_roots)) {
 			/* nothing to free */
