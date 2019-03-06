@@ -54,10 +54,6 @@
 #define WE_HAD_MBSTATE_T
 #endif
 
-#if defined(ulong) && !defined(HAVE_ULONG)
-#define HAVE_ULONG
-#endif
-
 #include <my_global.h>
 
 #if !defined(HAVE_MBRLEN) && defined(WE_HAD_MBRLEN)

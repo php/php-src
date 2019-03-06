@@ -2379,7 +2379,7 @@ static void pdo_stmt_iter_get_key(zend_object_iterator *iter, zval *key)
 {
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter;
 
-	if (I->key == (ulong)-1) {
+	if (I->key == (zend_ulong)-1) {
 		ZVAL_NULL(key);
 	} else {
 		ZVAL_LONG(key, I->key);
@@ -2399,7 +2399,7 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter)
 			PDO_FETCH_ORI_NEXT, 0, 0)) {
 
 		PDO_HANDLE_STMT_ERR();
-		I->key = (ulong)-1;
+		I->key = (zend_ulong)-1;
 		ZVAL_UNDEF(&I->fetch_ahead);
 
 		return;
@@ -2436,7 +2436,7 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 	if (!do_fetch(stmt, 1, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
 			PDO_FETCH_ORI_NEXT, 0, 0)) {
 		PDO_HANDLE_STMT_ERR();
-		I->key = (ulong)-1;
+		I->key = (zend_ulong)-1;
 		ZVAL_UNDEF(&I->fetch_ahead);
 	}
 

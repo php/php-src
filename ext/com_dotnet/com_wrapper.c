@@ -397,7 +397,7 @@ static HRESULT STDMETHODCALLTYPE disp_getnextdispid(
 	/* [in] */ DISPID id,
 	/* [out] */ DISPID *pid)
 {
-	ulong next = id+1;
+	zend_ulong next = id+1;
 	FETCH_DISP("GetNextDispID");
 
 	while(!zend_hash_index_exists(disp->dispid_to_name, next))

@@ -573,7 +573,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 	const phpdbg_command_t *command = commands;
 	phpdbg_param_t *name = *top;
 	const phpdbg_command_t *matched[3] = {NULL, NULL, NULL};
-	ulong matches = 0L;
+	zend_ulong matches = 0L;
 
 	while (command && command->name && command->handler) {
 		if (name->len == 1 || command->name_len >= name->len) {
