@@ -7,7 +7,7 @@ PHP_ARG_ENABLE([ftp],
 
 PHP_ARG_WITH([openssl-dir],
   [OpenSSL dir for FTP],
-  [AS_HELP_STRING([--with-openssl-dir@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-openssl-dir[=DIR]]],
     [FTP: openssl install prefix])],
   [no],
   [no])

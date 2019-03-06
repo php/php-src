@@ -93,19 +93,19 @@ AC_DEFUN([PHP_IMAP_SSL_CHK], [
 
 PHP_ARG_WITH([imap],
   [for IMAP support],
-  [AS_HELP_STRING([--with-imap@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-imap[=DIR]]],
     [Include IMAP support. DIR is the c-client install prefix])])
 
 PHP_ARG_WITH([kerberos],
   [for IMAP Kerberos support],
-  [AS_HELP_STRING([--with-kerberos@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-kerberos[=DIR]]],
     [IMAP: Include Kerberos support. DIR is the Kerberos install prefix])],
   [no],
   [no])
 
 PHP_ARG_WITH([imap-ssl],
   [for IMAP SSL support],
-  [AS_HELP_STRING([--with-imap-ssl@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-imap-ssl[=DIR]]],
     [IMAP: Include SSL support. DIR is the OpenSSL install prefix])],
   [no],
   [no])

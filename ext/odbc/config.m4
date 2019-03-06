@@ -99,7 +99,7 @@ dnl configure options
 dnl
 
 PHP_ARG_WITH([odbcver],,
-  [AS_HELP_STRING([--with-odbcver@<:@=HEX@:>@],
+  [AS_HELP_STRING([[--with-odbcver[=HEX]]],
     [Force support for the passed ODBC version. A hex number is expected,
     default 0x0350. Use the special value of 0 to prevent an explicit ODBCVER to
     be defined.])],
@@ -107,8 +107,8 @@ PHP_ARG_WITH([odbcver],,
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([adabas],,
-  [AS_HELP_STRING([--with-adabas@<:@=DIR@:>@],
-    [Include Adabas D support @<:@/usr/local@:>@])])
+  [AS_HELP_STRING([[--with-adabas[=DIR]]],
+    [Include Adabas D support [/usr/local]])])
 
   AC_MSG_CHECKING([for Adabas support])
   if test "$PHP_ADABAS" != "no"; then
@@ -137,7 +137,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([sapdb],,
-  [AS_HELP_STRING([--with-sapdb@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-sapdb[=DIR]]],
     [Include SAP DB support [/usr/local]])])
 
   AC_MSG_CHECKING([for SAP DB support])
@@ -158,7 +158,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([solid],,
-  [AS_HELP_STRING([--with-solid@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-solid[=DIR]]],
     [Include Solid support [/usr/local/solid]])])
 
   AC_MSG_CHECKING(for Solid support)
@@ -186,7 +186,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([ibm-db2],,
-  [AS_HELP_STRING([--with-ibm-db2@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-ibm-db2[=DIR]]],
     [Include IBM DB2 support [/home/db2inst1/sqllib]])])
 
   AC_MSG_CHECKING(for IBM DB2 support)
@@ -226,8 +226,8 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([empress],,
-  [AS_HELP_STRING([--with-empress@<:@=DIR@:>@],
-    [Include Empress support @S|@EMPRESSPATH (Empress Version >= 8.60
+  [AS_HELP_STRING([[--with-empress[=DIR]]],
+    [Include Empress support $EMPRESSPATH (Empress Version >= 8.60
     required)])])
 
   AC_MSG_CHECKING(for Empress support)
@@ -252,8 +252,8 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([empress-bcs],,
-  [AS_HELP_STRING([--with-empress-bcs@<:@=DIR@:>@],
-    [Include Empress Local Access support @S|@EMPRESSPATH (Empress Version >=
+  [AS_HELP_STRING([[--with-empress-bcs[=DIR]]],
+    [Include Empress Local Access support $EMPRESSPATH (Empress Version >=
     8.60 required)])])
 
   AC_MSG_CHECKING(for Empress local access support)
@@ -294,11 +294,11 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([custom-odbc],,
-  [AS_HELP_STRING([--with-custom-odbc@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-custom-odbc[=DIR]]],
     [Include user defined ODBC support. DIR is ODBC install base directory
-    @<:@/usr/local@:>@. Make sure to define CUSTOM_ODBC_LIBS and have some
-    odbc.h in your include dirs. f.e. you should define following for Sybase SQL
-    Anywhere 5.5.00 on QNX, prior to running this configure script:
+    [/usr/local]. Make sure to define CUSTOM_ODBC_LIBS and have some odbc.h in
+    your include dirs. f.e. you should define following for Sybase SQL Anywhere
+    5.5.00 on QNX, prior to running this configure script:
     CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\" LDFLAGS=-lunix
     CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"])])
 
@@ -322,7 +322,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([iodbc],,
-  [AS_HELP_STRING([--with-iodbc@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-iodbc[=DIR]]],
     [Include iODBC support [/usr/local]])])
 
   AC_MSG_CHECKING(for iODBC support)
@@ -361,7 +361,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([esoob],,
-  [AS_HELP_STRING([--with-esoob@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-esoob[=DIR]]],
     [Include Easysoft OOB support [/usr/local/easysoft/oob/client]])])
 
   AC_MSG_CHECKING(for Easysoft ODBC-ODBC Bridge support)
@@ -384,7 +384,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([unixODBC],,
-  [AS_HELP_STRING([--with-unixODBC@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-unixODBC[=DIR]]],
     [Include unixODBC support [/usr/local]])])
 
   AC_MSG_CHECKING(for unixODBC support)
@@ -408,7 +408,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([dbmaker],,
-  [AS_HELP_STRING([--with-dbmaker@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-dbmaker[=DIR]]],
     [Include DBMaker support])])
 
   AC_MSG_CHECKING(for DBMaker support)

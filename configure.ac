@@ -939,8 +939,7 @@ fi
 PHP_ARG_WITH([layout],
   [layout of installed files],
   [AS_HELP_STRING([--with-layout=TYPE],
-    [Set how installed files will be laid out. Type can be either PHP or GNU 
-    @<:@PHP@:>@])],
+    [Set how installed files will be laid out. Type can be either PHP or GNU [PHP]])],
   [PHP],
   [no])
 
@@ -956,7 +955,7 @@ esac
 PHP_ARG_WITH([config-file-path],
   [path to configuration file],
   [AS_HELP_STRING([--with-config-file-path=PATH],
-    [Set the path in which to look for php.ini @<:@PREFIX/lib@:>@])],
+    [Set the path in which to look for php.ini [PREFIX/lib]])],
   [DEFAULT],
   [no])
 
@@ -1180,8 +1179,8 @@ fi
 
 PHP_ARG_WITH([pear],
   [whether to install PEAR],
-  [AS_HELP_STRING([--with-pear@<:@=DIR@:>@],
-    [Install PEAR in DIR @<:@PREFIX/lib/php@:>@])],
+  [AS_HELP_STRING([[--with-pear[=DIR]]],
+    [Install PEAR in DIR [PREFIX/lib/php]])],
   [no],
   [yes])
 

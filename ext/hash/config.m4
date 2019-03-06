@@ -2,7 +2,7 @@ dnl config.m4 for extension hash
 
 PHP_ARG_WITH([mhash],
   [for mhash support],
-  [AS_HELP_STRING([--with-mhash@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-mhash[=DIR]]],
     [Include mhash support])])
 
 if test "$PHP_MHASH" != "no"; then

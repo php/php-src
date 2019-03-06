@@ -7,7 +7,7 @@ sinclude(libxmlrpc/xmlrpc.m4)
 
 PHP_ARG_WITH([xmlrpc],
   [for XMLRPC-EPI support],
-  [AS_HELP_STRING([--with-xmlrpc@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-xmlrpc[=DIR]]],
     [Include XMLRPC-EPI support])])
 
 if test -z "$PHP_LIBXML_DIR"; then

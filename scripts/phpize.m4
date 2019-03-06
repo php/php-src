@@ -41,7 +41,7 @@ PHP_SHLIB_SUFFIX_NAMES
 dnl Find php-config script
 PHP_ARG_WITH([php-config],,
   [AS_HELP_STRING([--with-php-config=PATH],
-    [Path to php-config @<:@[php-config]@:>@])],
+    [Path to php-config [php-config]])],
   [php-config],
   [no])
 

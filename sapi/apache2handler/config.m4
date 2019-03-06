@@ -1,7 +1,7 @@
 dnl config.m4 for sapi apache2handler
 
 PHP_ARG_WITH([apxs2],,
-  [AS_HELP_STRING([--with-apxs2@<:@=FILE@:>@],
+  [AS_HELP_STRING([[--with-apxs2[=FILE]]],
     [Build shared Apache 2.0 Handler module. FILE is the optional pathname to
     the Apache apxs tool [apxs]])],
   [no],

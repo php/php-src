@@ -8,7 +8,7 @@ PHP_ARG_ENABLE([session],
 
 PHP_ARG_WITH([mm],
   [for mm support],
-  [AS_HELP_STRING([--with-mm@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-mm[=DIR]]],
     [SESSION: Include mm support for session storage])],
   [no],
   [no])

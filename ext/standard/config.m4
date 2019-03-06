@@ -409,7 +409,7 @@ dnl Check for argon2
 dnl
 PHP_ARG_WITH([password-argon2],
   [for Argon2 support],
-  [AS_HELP_STRING([--with-password-argon2@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-password-argon2[=DIR]]],
     [Include Argon2 support in password_*. DIR is the Argon2 shared library
     path])])
 

@@ -1,8 +1,8 @@
 PHP_ARG_WITH([interbase],
   [for Firebird support],
-  [AS_HELP_STRING([--with-interbase@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--with-interbase[=DIR]]],
     [Include Firebird support. DIR is the Firebird base install directory
-    @<:@/opt/firebird@:>@])])
+    [/opt/firebird]])])
 
 if test "$PHP_INTERBASE" != "no"; then
 

@@ -2,7 +2,7 @@ dnl config.m4 for extension iconv
 
 PHP_ARG_WITH([iconv],
   [for iconv support],
-  [AS_HELP_STRING([--without-iconv@<:@=DIR@:>@],
+  [AS_HELP_STRING([[--without-iconv[=DIR]]],
     [Exclude iconv support])],
   [yes])
 
