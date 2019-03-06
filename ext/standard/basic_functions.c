@@ -1262,6 +1262,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_touch, 0, 0, 1)
 ZEND_END_ARG_INFO()
 #endif
 
+#if HAVE_GETFSENT
+ZEND_BEGIN_ARG_INFO(arginfo_fstab, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_clearstatcache, 0, 0, 0)
 	ZEND_ARG_INFO(0, clear_realpath_cache)
 	ZEND_ARG_INFO(0, filename)
@@ -3284,6 +3289,9 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(chmod,															arginfo_chmod)
 #if HAVE_UTIME
 	PHP_FE(touch,															arginfo_touch)
+#endif
+#if HAVE_GETFSENT
+	PHP_FE(fstab,														arginfo_fstab)
 #endif
 	PHP_FE(clearstatcache,													arginfo_clearstatcache)
 	PHP_FE(disk_total_space,												arginfo_disk_total_space)

@@ -76,6 +76,10 @@
 # endif
 #endif
 
+#if HAVE_GETFSENT
+# include <fstab.h>
+#endif
+
 #ifdef PHP_WIN32
 #include "win32/winutil.h"
 #endif
@@ -705,6 +709,37 @@ PHP_FUNCTION(touch)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif
+
+#if HAVE_GETFSENT
+PHP_FUNCTION(fstab)
+{
+	struct fstab *entry;
+	zend_long i;
+
+	if (setfsent() == 0) {
+		RETURN_FALSE;
+	}
+
+	i = 0;
+	array_init(return_value);
+
+	while ((entry = getfsent())) {
+		zval inner;
+		array_init(&inner);
+		add_assoc_string(&inner, "fs_spec", entry->fs_spec);
+		add_assoc_string(&inner, "fs_file", entry->fs_file);
+		add_assoc_string(&inner, "fs_vfstype", entry->fs_vfstype);
+		add_assoc_string(&inner, "fs_mntops", entry->fs_mntops);
+		add_assoc_string(&inner, "fs_type", entry->fs_type);
+		add_assoc_long(&inner, "fs_freq", (zend_long)entry->fs_freq);
+		add_assoc_long(&inner, "fs_passno", (zend_long)entry->fs_passno);
+		add_index_zval(return_value, i, &inner);
+		i ++;
+	}
+
+	endfsent();
+}
 #endif
 
 /* {{{ php_clear_stat_cache()
