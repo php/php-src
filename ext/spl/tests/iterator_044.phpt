@@ -52,9 +52,6 @@ catch(Exception $e)
 
 $it = new MyCachingIterator(new ArrayIterator(array(0, 'foo'=>1, 2, 'bar'=>3, 4)), CachingIterator::FULL_CACHE);
 
-var_dump($it->offsetExists());
-var_dump($it->offsetGet());
-
 $checks = array(0, new stdClass, new MyFoo, NULL, 2, 'foo', 3);
 
 $it->test($checks);
@@ -72,11 +69,6 @@ $it->test($checks);
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 
-Warning: CachingIterator::offsetExists() expects exactly 1 parameter, 0 given in %siterator_044.php on line %d
-NULL
-
-Warning: CachingIterator::offsetGet() expects exactly 1 parameter, 0 given in %siterator_044.php on line %d
-NULL
 ===0===
 int(0)
 bool(false)

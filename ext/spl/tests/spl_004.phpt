@@ -44,11 +44,19 @@ var_dump(iterator_apply($it, 'test'));
 echo "===ERRORS===\n";
 try {
 	var_dump(iterator_apply($it, 'test', 1));
-} catch (Error $e) {
-	my_error_handler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
 }
-var_dump(iterator_apply($it, 'non_existing_function'));
-var_dump(iterator_apply($it, 'non_existing_function', NULL, 2));
+try {
+    var_dump(iterator_apply($it, 'non_existing_function'));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(iterator_apply($it, 'non_existing_function', NULL, 2));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===

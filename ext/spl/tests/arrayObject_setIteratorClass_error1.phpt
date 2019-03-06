@@ -8,7 +8,7 @@ try {
   foreach($ao as $key=>$value) {
     echo "  $key=>$value\n";
   }
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	var_dump($e->getMessage());
 }
 
@@ -18,7 +18,7 @@ try {
   foreach($ao as $key=>$value) {
     echo "  $key=>$value\n";
   }
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	var_dump($e->getMessage());
 }
 

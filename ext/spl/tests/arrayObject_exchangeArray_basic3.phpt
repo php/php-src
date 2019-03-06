@@ -29,7 +29,7 @@ $ao = new ArrayObject($original);
 try {
 	$copy = $ao->exchangeArray();
 	$copy['addedToCopy'] = 'added To Copy';
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	echo "Exception:" . $e->getMessage() . "\n";
 }
 $original->addedToOriginal = 'added To Original';
