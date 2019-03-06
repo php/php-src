@@ -337,7 +337,7 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gmp
-PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2000 - 2018)
+PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2000 - 2019)
                      Antony Dovgal <tony2001@php.net> (2005 - 2010)
 MAINTENANCE:         Maintained
 STATUS:              Working
@@ -357,7 +357,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           intl
-PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2018)
+PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2019)
                      Anatol Belski <ab@php.net> (2017 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working
