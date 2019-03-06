@@ -717,7 +717,12 @@ PHP_FUNCTION(fstab)
 	struct fstab *entry;
 	zend_long i;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	if (setfsent() == 0) {
+		php_error_docref(NULL, E_WARNING, "fstab failed: %s", strerror(errno));
 		RETURN_FALSE;
 	}
 

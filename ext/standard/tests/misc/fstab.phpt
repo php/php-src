@@ -1,5 +1,5 @@
 --TEST--
-fstab - /etc/fstab entries
+fstab() - /etc/fstab entries
 --SKIPIF--
 <?php if (!function_exists('fstab')) die("skip");
 ?>
@@ -17,7 +17,7 @@ if ($entries === false) {
     echo "has fs_mntops entry " . (isset($cur["fs_mntops"]) && strlen($cur["fs_mntops"])) . "\n";
     echo "has fs_type entry " . (isset($cur["fs_type"]) && strlen($cur["fs_type"])) . "\n";
     echo "has fs_freq entry " . (isset($cur["fs_freq"])) . "\n";
-    echo "has fs_passno entry " . (isset($cur["fs_passno"]));
+    echo "has fs_passno entry " . (isset($cur["fs_passno"])) . "\n";
 }
 ?>
 --EXPECT--
