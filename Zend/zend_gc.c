@@ -1272,7 +1272,7 @@ static int gc_collect_roots(uint32_t *flags, gc_refcounted_stack *stack)
 	}
 
 	gc_compact();
-	
+
 	/* Root buffer might be reallocated during gc_collect_white,
 	 * make sure to reload pointers. */
 	idx = GC_FIRST_ROOT;
