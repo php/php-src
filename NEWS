@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #77956 (When mysqli.allow_local_infile = Off, use a meaningful
     error message). (Sjon Hortensius)
+  . Fixed bug #38546 (bindParam incorrect processing of bool types).
+    (camporter)
 
 - OpenSSL:
   . Fixed bug #78079 (openssl_encrypt_ccm.phpt fails with OpenSSL 1.1.1c).
