@@ -16,8 +16,6 @@ $sock = stream_socket_server($serverUri, $errno, $errstr);
 
 if (is_resource($sock)) {
     fwrite($sock, $stringFWrite);
-    var_dump(stream_socket_sendto());
-    var_dump(stream_socket_sendto($sock));
     var_dump(stream_socket_sendto($sock, $stringSocket));
     var_dump(stream_socket_sendto($sock, $stringSocket, STREAM_OOB));
     var_dump(stream_socket_sendto($sock, $stringSocket, STREAM_OOB, $serverUri));
@@ -28,12 +26,6 @@ if (is_resource($sock)) {
 ?>
 --EXPECTF--
 Notice: fwrite(): send of %i bytes failed with errno=%i Broken pipe in %s on line %d
-
-Warning: stream_socket_sendto() expects at least %i parameters, %i given in %s on line %d
-bool(%s)
-
-Warning: stream_socket_sendto() expects at least %i parameters, %i given in %s on line %d
-bool(%s)
 
 Warning: stream_socket_sendto(): Broken pipe
  in %s on line %d
