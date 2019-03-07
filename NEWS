@@ -6,7 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #77660 (Segmentation fault on break 2147483648). (Laruence)
   . Fixed bug #77652 (Anonymous classes can lose their interface information).
     (Nikita)
-
+  . Fixed bug #77345 (Stack Overflow caused by circular reference in garbage
+    collection). (Alexandru Patranescu, Nikita, Dmitry)
 - Apache2Handler:
   . Fixed bug #77648 (BOM in sapi/apache2handler/php_functions.c). (cmb)
 
