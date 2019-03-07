@@ -21,7 +21,6 @@ $values = array(23,
 		"23",
 		"23.45",
 		"2.345e1",
-		"nonsense",
 		"1000",
 		"1000ABC",
 		null,
@@ -44,9 +43,6 @@ float(0.401425728)
 float(0.401425728)
 float(0.4092797096)
 float(0.4092797096)
-
-Warning: deg2rad() expects parameter 1 to be float, string given in %s on line %d
-NULL
 float(17.45329252)
 
 Notice: A non well formed numeric value encountered in %s on line %d

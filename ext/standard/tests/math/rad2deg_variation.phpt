@@ -21,7 +21,6 @@ $values = array(23,
 		"23",
 		"23.45",
 		"2.345e1",
-		"nonsense",
 		"1000",
 		"1000ABC",
 		null,
@@ -44,9 +43,6 @@ float(1317.802929)
 float(1317.802929)
 float(1343.58603)
 float(1343.58603)
-
-Warning: rad2deg() expects parameter 1 to be float, string given in %s on line %d
-NULL
 float(57295.77951)
 
 Notice: A non well formed numeric value encountered in %s on line %d
