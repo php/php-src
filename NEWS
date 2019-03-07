@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #77345 (Stack Overflow caused by circular reference in garbage
     collection). (Alexandru Patranescu, Nikita, Dmitry)
+
 - Apache2Handler:
   . Fixed bug #77648 (BOM in sapi/apache2handler/php_functions.c). (cmb)
 
