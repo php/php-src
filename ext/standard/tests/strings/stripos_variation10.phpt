@@ -83,7 +83,11 @@ $needles =  array (
 $counter = 1;
 for($index = 0; $index < count($needles); $index ++) {
   echo "\n-- Iteration $counter --\n";
-  var_dump( stripos($haystack, $needles[$index]) );
+  try {
+    var_dump( stripos($haystack, $needles[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter ++;
 }
 

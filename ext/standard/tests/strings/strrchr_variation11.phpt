@@ -80,7 +80,11 @@ $values =  array (
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
-  var_dump( strrchr($values[$index], $values[$index]) );
+  try {
+    var_dump( strrchr($values[$index], $values[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter ++;
 }
 

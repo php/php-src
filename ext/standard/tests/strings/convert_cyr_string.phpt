@@ -3,9 +3,6 @@ basic convert_cyr_string() tests
 --FILE--
 <?php
 
-var_dump(convert_cyr_string());
-var_dump(convert_cyr_string(""));
-var_dump(convert_cyr_string("", ""));
 var_dump(convert_cyr_string("", "", ""));
 var_dump(convert_cyr_string(array(), array(), array()));
 
@@ -20,15 +17,6 @@ var_dump(convert_cyr_string("", "d", "i"));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: convert_cyr_string() expects exactly 3 parameters, 0 given in %s on line %d
-NULL
-
-Warning: convert_cyr_string() expects exactly 3 parameters, 1 given in %s on line %d
-NULL
-
-Warning: convert_cyr_string() expects exactly 3 parameters, 2 given in %s on line %d
-NULL
-
 Warning: convert_cyr_string(): Unknown source charset:  in %s on line %d
 
 Warning: convert_cyr_string(): Unknown destination charset:  in %s on line %d

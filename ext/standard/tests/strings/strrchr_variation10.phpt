@@ -121,7 +121,11 @@ $needles =  array (
 $count = 1;
 for($index = 0; $index < count($haystacks); $index++) {
   echo "-- Iteration $count --\n";
-  var_dump( strrchr($haystacks[$index], $needles[$index]) );
+  try {
+    var_dump( strrchr($haystacks[$index], $needles[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $count ++;
 }
 

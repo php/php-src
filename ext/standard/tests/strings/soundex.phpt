@@ -5,7 +5,6 @@ soundex() tests
 
 var_dump(soundex(""));
 var_dump(soundex(-1));
-var_dump(soundex(array()));
 
 $array = array(
 "From",
@@ -34,9 +33,6 @@ echo "Done\n";
 --EXPECTF--
 bool(false)
 string(4) "0000"
-
-Warning: soundex() expects parameter 1 to be string, array given in %s on line %d
-NULL
 string(4) "F650"
 string(4) "T300"
 string(4) "T500"
