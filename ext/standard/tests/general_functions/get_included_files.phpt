@@ -22,9 +22,6 @@ include(dirname(__FILE__)."/get_included_files_inc2.inc");
 echo "\n-- List included files atfter including inc2 which will include inc3 which includes inc1 --\n";
 var_dump(get_included_files());
 
-echo "\n-- Error cases --\n";
-var_dump(get_included_files(true));
-
 ?>
 ===DONE===
 --EXPECTF--
@@ -56,8 +53,4 @@ array(4) {
   string(%d) "%sget_included_files_inc3.inc"
 }
 
--- Error cases --
-
-Warning: get_included_files() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
 ===DONE===

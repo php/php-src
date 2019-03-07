@@ -127,13 +127,6 @@ foreach ($not_null_types as $type ) {
   var_dump( is_null($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_null() );
-
-//arguments more than expected
-var_dump( is_null(NULL, null) );
-
 echo "Done\n";
 
 // close the resources used
@@ -284,13 +277,5 @@ bool(false)
 -- Iteration 58 --
 bool(false)
 -- Iteration 59 --
-bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_null() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_null() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done

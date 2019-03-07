@@ -19,10 +19,6 @@ if (ini_get("include_path") == get_include_path()) {
 	echo "FAILED\n";
 }
 
-echo "\nError cases:\n";
-var_dump(get_include_path(TRUE));
-
-
 ?>
 ===DONE===
 --EXPECTF--
@@ -30,8 +26,4 @@ var_dump(get_include_path(TRUE));
 string(1) "."
 PASSED
 
-Error cases:
-
-Warning: get_include_path() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
 ===DONE===

@@ -8,8 +8,6 @@ parse_ini_file() multiple calls
 $filename = dirname(__FILE__)."/parse_ini_file.dat";
 @unlink($filename); /* Make sure the file really does not exist! */
 
-var_dump(parse_ini_file());
-var_dump(parse_ini_file(1,1,1,1));
 var_dump(parse_ini_file($filename));
 var_dump(parse_ini_file($filename, true));
 
@@ -121,12 +119,6 @@ var_dump(parse_ini_file($filename, true));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: parse_ini_file() expects at least 1 parameter, 0 given in %sparse_ini_file.php on line 6
-bool(false)
-
-Warning: parse_ini_file() expects at most 3 parameters, 4 given in %sparse_ini_file.php on line 7
-bool(false)
-
 Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 8
 bool(false)
 
