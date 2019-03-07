@@ -16,9 +16,6 @@ assert(1);
 assert_options(ASSERT_ACTIVE, 1);
 assert(2, "failure", 3);
 
-/* Wrong parameter count in assert_options */
-assert_options(ASSERT_ACTIVE, 0, 2);
-
 /* Wrong parameter name in assert_options */
 $test="ASSERT_FRED";
 assert_options($test, 1);
@@ -35,8 +32,6 @@ echo "not reached\n";
 
 ?>
 --EXPECTF--
-Warning: assert() expects at most 2 parameters, 3 given in %s on line %d
-
 Warning: assert_options() expects at most 2 parameters, 3 given in %s on line %d
 
 Warning: assert_options() expects parameter 1 to be int, string given in %s on line %d

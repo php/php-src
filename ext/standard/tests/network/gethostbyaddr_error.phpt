@@ -11,16 +11,6 @@ Test gethostbyaddr() function : error conditions
 
 echo "Testing gethostbyaddr : error conditions\n";
 
-// Zero arguments
-echo "\n-- Testing gethostbyaddr function with Zero arguments --\n";
-var_dump( gethostbyaddr() );
-
-//Test gethostbyaddr with one more than the expected number of arguments
-echo "\n-- Testing gethostbyaddr function with more than expected no. of arguments --\n";
-$ip_address = 'string_val';
-$extra_arg = 10;
-var_dump( gethostbyaddr($ip_address, $extra_arg) );
-
 echo "\n-- Testing gethostbyaddr function with invalid addresses --\n";
 
 $ip_address = 'invalid';
@@ -36,16 +26,6 @@ echo "Done";
 ?>
 --EXPECTREGEX--
 Testing gethostbyaddr : error conditions
-
--- Testing gethostbyaddr function with Zero arguments --
-
-Warning: gethostbyaddr\(\) expects exactly 1 parameter, 0 given in .* on line \d+
-NULL
-
--- Testing gethostbyaddr function with more than expected no. of arguments --
-
-Warning: gethostbyaddr\(\) expects exactly 1 parameter, 2 given in .* on line \d+
-NULL
 
 -- Testing gethostbyaddr function with invalid addresses --
 
