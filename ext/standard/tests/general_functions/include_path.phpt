@@ -35,7 +35,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 string(1) "."
-string(1) "."
+NULL
 string(1) "."
 string(3) "var"
 NULL

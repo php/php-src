@@ -19,5 +19,4 @@ var_dump( php_uname('z') == php_uname('z') );
 
 -- Testing php_uname() function with invalid mode --
 bool(true)
-
 ===DONE===

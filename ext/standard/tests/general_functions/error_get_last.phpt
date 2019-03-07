@@ -19,6 +19,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 NULL
+error_get_last() expects exactly 0 parameters, 1 given
 NULL
 
 Notice: Undefined variable: b in %s on line %d
@@ -30,6 +31,6 @@ array(4) {
   ["file"]=>
   string(%i) "%s"
   ["line"]=>
-  int(7)
+  int(11)
 }
 Done
