@@ -5500,7 +5500,7 @@ static void zend_check_magic_method_attr(uint32_t attr, const char* method, zend
 {
 	if (is_static) {
 		if (!(attr & ZEND_ACC_PUBLIC) || !(attr & ZEND_ACC_STATIC)) {
-			zend_error(E_WARNING, "The magic method %s() must have public visibility and be static");
+			zend_error(E_WARNING, "The magic method %s() must have public visibility and be static", method);
 		}
 	} else if (!(attr & ZEND_ACC_PUBLIC) || (attr & ZEND_ACC_STATIC)) {
 		zend_error(E_WARNING,
