@@ -964,7 +964,7 @@ static void gc_mark_roots(gc_stack *stack)
 	}
 }
 
-static void gc_scan(zend_refcounted *ref, gc_stack *stack, gc_stack *stack_black)
+static void gc_scan(zend_refcounted *ref, gc_stack *stack)
 {
 	HashTable *ht = NULL;
 	Bucket *p, *end;
@@ -976,7 +976,13 @@ tail_call:
 		if (GC_REFCOUNT(ref) > 0) {
 			if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 				GC_REF_SET_BLACK(ref);
-				gc_scan_black(ref, stack_black);
+				if (UNEXPECTED(!_stack->next)) {
+					gc_stack_next(_stack);
+				}
+				/* Split stack and reuse the tail */
+				_stack->next->prev = NULL;
+				gc_scan_black(ref, _stack->next);
+				_stack->next->prev = _stack;
 			}
 		} else {
 			if (GC_TYPE(ref) == IS_OBJECT) {
@@ -1086,7 +1092,7 @@ next:
 	}
 }
 
-static void gc_scan_roots(gc_stack *stack, gc_stack *stack_black)
+static void gc_scan_roots(gc_stack *stack)
 {
 	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
 	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
@@ -1095,7 +1101,7 @@ static void gc_scan_roots(gc_stack *stack, gc_stack *stack_black)
 		if (GC_IS_ROOT(current->ref)) {
 			if (GC_REF_CHECK_COLOR(current->ref, GC_GREY)) {
 				GC_REF_SET_COLOR(current->ref, GC_WHITE);
-				gc_scan(current->ref, stack, stack_black);
+				gc_scan(current->ref, stack);
 			}
 		}
 		current++;
@@ -1420,12 +1426,10 @@ ZEND_API int zend_gc_collect_cycles(void)
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
 		uint32_t idx, end;
-		gc_stack stack, stack_black;
+		gc_stack stack;
 
 		stack.prev = NULL;
 		stack.next = NULL;
-		stack_black.prev = NULL;
-		stack_black.next = NULL;
 
 		if (GC_G(gc_active)) {
 			return 0;
@@ -1438,12 +1442,11 @@ ZEND_API int zend_gc_collect_cycles(void)
 		GC_TRACE("Marking roots");
 		gc_mark_roots(&stack);
 		GC_TRACE("Scanning roots");
-		gc_scan_roots(&stack, &stack_black);
+		gc_scan_roots(&stack);
 
 		GC_TRACE("Collecting roots");
 		count = gc_collect_roots(&gc_flags, &stack);
 
-		gc_stack_free(&stack_black);
 		gc_stack_free(&stack);
 
 		if (!GC_G(num_roots)) {
