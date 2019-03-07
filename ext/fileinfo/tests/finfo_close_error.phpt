@@ -12,33 +12,14 @@ Test finfo_close() function : error conditions
 
 echo "*** Testing finfo_close() : error conditions ***\n";
 
-$magicFile = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'magic';
-$finfo = finfo_open( FILEINFO_MIME, $magicFile );
-$fp = fopen( __FILE__, 'r' );
-
-echo "\n-- Testing finfo_close() function with Zero arguments --\n";
-var_dump( finfo_close() );
-
-echo "\n-- Testing finfo_close() function with more than expected no. of arguments --\n";
-var_dump( finfo_close( $finfo, '10') );
-
 echo "\n-- Testing finfo_close() function with wrong resource type --\n";
+$fp = fopen( __FILE__, 'r' );
 var_dump( finfo_close( $fp ) );
 
 ?>
 ===DONE===
 --EXPECTF--
 *** Testing finfo_close() : error conditions ***
-
--- Testing finfo_close() function with Zero arguments --
-
-Warning: finfo_close() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
--- Testing finfo_close() function with more than expected no. of arguments --
-
-Warning: finfo_close() expects exactly 1 parameter, 2 given in %s on line %d
-bool(false)
 
 -- Testing finfo_close() function with wrong resource type --
 
