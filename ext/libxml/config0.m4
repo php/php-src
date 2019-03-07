@@ -1,11 +1,18 @@
 dnl config.m4 for extension libxml
 
-PHP_ARG_ENABLE(libxml, whether to enable LIBXML support,
-[  --disable-libxml        Disable LIBXML support], yes)
+PHP_ARG_ENABLE([libxml],
+  [whether to enable LIBXML support],
+  [AS_HELP_STRING([--disable-libxml],
+    [Disable LIBXML support])],
+  [yes])
 
 if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir[=DIR]   LIBXML: libxml2 install prefix], no, no)
+  PHP_ARG_WITH([libxml-dir],
+    [libxml2 install dir],
+    [AS_HELP_STRING([[--with-libxml-dir[=DIR]]],
+      [LIBXML: libxml2 install prefix])],
+    [no],
+    [no])
 fi
 
 if test "$PHP_LIBXML" != "no"; then

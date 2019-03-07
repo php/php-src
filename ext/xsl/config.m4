@@ -1,8 +1,10 @@
 dnl config.m4 for extension xsl
 
-PHP_ARG_WITH(xsl, for XSL support,
-[  --with-xsl[=DIR]          Include XSL support.  DIR is the libxslt base
-                          install directory (libxslt >= 1.1.0 required)])
+PHP_ARG_WITH([xsl],
+  [for XSL support],
+  [AS_HELP_STRING([[--with-xsl[=DIR]]],
+    [Include XSL support. DIR is the libxslt base install directory (libxslt >=
+    1.1.0 required)])])
 
 if test "$PHP_XSL" != "no"; then
 

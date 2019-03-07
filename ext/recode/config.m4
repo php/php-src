@@ -1,7 +1,9 @@
 dnl config.m4 for extension recode
 
-PHP_ARG_WITH(recode,for recode support,
-[  --with-recode[=DIR]       Include recode support])
+PHP_ARG_WITH([recode],
+  [for recode support],
+  [AS_HELP_STRING([[--with-recode[=DIR]]],
+    [Include recode support])])
 
 if test "$PHP_RECODE" != "no"; then
   RECODE_LIST="$PHP_RECODE /usr/local /usr /opt"

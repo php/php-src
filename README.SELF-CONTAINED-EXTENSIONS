@@ -79,8 +79,10 @@ CREATING THE M4 CONFIGURATION FILE
   macro calls.
 
 ------------------------------------------------------------------------------
-PHP_ARG_ENABLE(foobar,whether to enable foobar,
-[  --enable-foobar            Enable foobar])
+PHP_ARG_ENABLE([foobar],
+  [whether to enable foobar],
+  [AS_HELP_STRING([--enable-foobar],
+    [Enable foobar])])
 
 if test "$PHP_FOOBAR" != "no"; then
   PHP_NEW_EXTENSION(foobar, foo.c bar.c, $ext_shared)

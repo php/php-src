@@ -1,11 +1,18 @@
 dnl config.m4 for extension dom
 
-PHP_ARG_ENABLE(dom, whether to enable DOM support,
-[  --disable-dom           Disable DOM support], yes)
+PHP_ARG_ENABLE([dom],
+  [whether to enable DOM support],
+  [AS_HELP_STRING([--disable-dom],
+    [Disable DOM support])],
+  [yes])
 
 if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir[=DIR]   DOM: libxml2 install prefix], no, no)
+  PHP_ARG_WITH([libxml-dir],
+    [libxml2 install dir],
+    [AS_HELP_STRING([[--with-libxml-dir[=DIR]]],
+      [DOM: libxml2 install prefix])],
+    [no],
+    [no])
 fi
 
 if test "$PHP_DOM" != "no"; then

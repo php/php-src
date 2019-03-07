@@ -1,8 +1,10 @@
 dnl config.m4 for sapi cli
 
-PHP_ARG_ENABLE(cli,,
-[  --disable-cli           Disable building CLI version of PHP
-                          (this forces --without-pear)], yes, no)
+PHP_ARG_ENABLE([cli],,
+  [AS_HELP_STRING([--disable-cli],
+    [Disable building CLI version of PHP (this forces --without-pear)])],
+  [yes],
+  [no])
 
 AC_CHECK_FUNCS(setproctitle)
 

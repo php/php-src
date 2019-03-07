@@ -1,7 +1,9 @@
 dnl config.m4 for extension curl
 
-PHP_ARG_WITH(curl, for cURL support,
-[  --with-curl               Include cURL support])
+PHP_ARG_WITH([curl],
+  [for cURL support],
+  [AS_HELP_STRING([--with-curl],
+    [Include cURL support])])
 
 if test "$PHP_CURL" != "no"; then
   PKG_CHECK_MODULES([CURL], [libcurl >= 7.15.5])

@@ -1,10 +1,17 @@
 dnl config.m4 for input filtering extension
 
-PHP_ARG_ENABLE(filter, whether to enable input filter support,
-[  --disable-filter        Disable input filter support], yes)
+PHP_ARG_ENABLE([filter],
+  [whether to enable input filter support],
+  [AS_HELP_STRING([--disable-filter],
+    [Disable input filter support])],
+  [yes])
 
-PHP_ARG_WITH(pcre-dir, pcre install prefix,
-[  --with-pcre-dir         FILTER: pcre install prefix], no, no)
+PHP_ARG_WITH([pcre-dir],
+  [pcre install prefix],
+  [AS_HELP_STRING([--with-pcre-dir],
+    [FILTER: pcre install prefix])],
+  [no],
+  [no])
 
 if test "$PHP_FILTER" != "no"; then
 

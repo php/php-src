@@ -1,7 +1,10 @@
 dnl config.m4 for extension iconv
 
-PHP_ARG_WITH(iconv, for iconv support,
-[  --without-iconv[=DIR]     Exclude iconv support], yes)
+PHP_ARG_WITH([iconv],
+  [for iconv support],
+  [AS_HELP_STRING([[--without-iconv[=DIR]]],
+    [Exclude iconv support])],
+  [yes])
 
 if test "$PHP_ICONV" != "no"; then
 

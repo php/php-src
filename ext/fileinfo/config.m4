@@ -1,7 +1,10 @@
 dnl config.m4 for extension fileinfo
 
-PHP_ARG_ENABLE(fileinfo, for fileinfo support,
-[  --disable-fileinfo      Disable fileinfo support], yes)
+PHP_ARG_ENABLE([fileinfo],
+  [for fileinfo support],
+  [AS_HELP_STRING([--disable-fileinfo],
+    [Disable fileinfo support])],
+  [yes])
 
 if test "$PHP_FILEINFO" != "no"; then
 
