@@ -18,6 +18,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 strripos() expects parameter 3 to be int, float given
+
 Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 

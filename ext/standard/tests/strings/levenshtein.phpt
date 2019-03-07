@@ -65,7 +65,6 @@ echo ($n==0)?"all passed\n":"$n failed\n";
 
 var_dump(levenshtein("", "", -1, -1, -1));
 var_dump(levenshtein("", "", 10, 10, 10));
-var_dump(levenshtein(""));
 
 ?>
 --EXPECTF--
@@ -77,6 +76,3 @@ Warning: levenshtein(): Argument string(s) too long in %s on line %d
 all passed
 int(0)
 int(0)
-
-Warning: Wrong parameter count for levenshtein() in %s on line %d
-NULL

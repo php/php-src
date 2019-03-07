@@ -126,40 +126,20 @@ bool(false)
 int(0)
 bool(false)
 -- Iteration 10 --
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 1 to be string, array given
+stripos() expects parameter 1 to be string, array given
 -- Iteration 11 --
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 1 to be string, array given
+stripos() expects parameter 1 to be string, array given
 -- Iteration 12 --
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 1 to be string, array given
+stripos() expects parameter 1 to be string, array given
 -- Iteration 13 --
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 1 to be string, array given
+stripos() expects parameter 1 to be string, array given
 -- Iteration 14 --
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 1 to be string, array given
+stripos() expects parameter 1 to be string, array given
 -- Iteration 15 --
 int(0)
 bool(false)
@@ -200,12 +180,8 @@ bool(false)
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 24 --
-
-Warning: stripos() expects parameter 1 to be string, resource given in %s on line %d
-NULL
-
-Warning: stripos() expects parameter 1 to be string, resource given in %s on line %d
-NULL
+stripos() expects parameter 1 to be string, resource given
+stripos() expects parameter 1 to be string, resource given
 -- Iteration 25 --
 bool(false)
 

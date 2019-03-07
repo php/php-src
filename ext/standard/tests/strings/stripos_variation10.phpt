@@ -126,29 +126,19 @@ bool(false)
 int(17)
 
 -- Iteration 10 --
-
-Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 2 to be string, array given
 
 -- Iteration 11 --
-
-Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 2 to be string, array given
 
 -- Iteration 12 --
-
-Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 2 to be string, array given
 
 -- Iteration 13 --
-
-Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 2 to be string, array given
 
 -- Iteration 14 --
-
-Warning: stripos() expects parameter 2 to be string, array given in %s on line %d
-NULL
+stripos() expects parameter 2 to be string, array given
 
 -- Iteration 15 --
 int(9)
@@ -178,9 +168,7 @@ bool(false)
 bool(false)
 
 -- Iteration 24 --
-
-Warning: stripos() expects parameter 2 to be string, resource given in %s on line %d
-NULL
+stripos() expects parameter 2 to be string, resource given
 
 -- Iteration 25 --
 bool(false)

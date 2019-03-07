@@ -72,7 +72,11 @@ $pad_length = "20";
 $count = 1;
 foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
-  var_dump( stristr("Hello World", $input) );
+  try {
+    var_dump( stristr("Hello World", $input) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $count ++;
 }
 
@@ -97,17 +101,11 @@ bool(false)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
-
-Warning: stristr() expects parameter 2 to be string, array given in %s on line %d
-NULL
+stristr() expects parameter 2 to be string, array given
 -- Iteration 9 --
-
-Warning: stristr() expects parameter 2 to be string, array given in %s on line %d
-NULL
+stristr() expects parameter 2 to be string, array given
 -- Iteration 10 --
-
-Warning: stristr() expects parameter 2 to be string, array given in %s on line %d
-NULL
+stristr() expects parameter 2 to be string, array given
 -- Iteration 11 --
 bool(false)
 -- Iteration 12 --
@@ -131,9 +129,7 @@ bool(false)
 -- Iteration 17 --
 bool(false)
 -- Iteration 18 --
-
-Warning: stristr() expects parameter 2 to be string, resource given in %s on line %d
-NULL
+stristr() expects parameter 2 to be string, resource given
 -- Iteration 19 --
 
 Warning: stristr(): Empty needle in %s on line %d

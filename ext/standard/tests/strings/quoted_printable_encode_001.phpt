@@ -12,10 +12,9 @@ var_dump(quoted_printable_encode(false));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(0) ""
 string(4) "test"
-
 string(1) "1"
 string(0) ""
 string(0) ""

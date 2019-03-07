@@ -95,7 +95,7 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function with unexpected values for needle ***
 -- Iteration 1 --
 int(42)
@@ -116,25 +116,15 @@ bool(false)
 -- Iteration 9 --
 int(28)
 -- Iteration 10 --
-
-Warning: strrpos() expects parameter 2 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 11 --
-
-Warning: strrpos() expects parameter 2 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 12 --
-
-Warning: strrpos() expects parameter 2 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 13 --
-
-Warning: strrpos() expects parameter 2 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 14 --
-
-Warning: strrpos() expects parameter 2 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 15 --
 int(41)
 -- Iteration 16 --
@@ -154,9 +144,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-
-Warning: strrpos() expects parameter 2 to be string, resource given in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, resource given
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
