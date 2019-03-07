@@ -299,8 +299,8 @@ PHP_ARG_WITH([custom-odbc],,
     [/usr/local]. Make sure to define CUSTOM_ODBC_LIBS and have some odbc.h in
     your include dirs. f.e. you should define following for Sybase SQL Anywhere
     5.5.00 on QNX, prior to running this configure script:
-    CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\" LDFLAGS=-lunix
-    CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"])])
+    CPPFLAGS="-DODBC_QNX -DSQLANY_BUG" LDFLAGS=-lunix
+    CUSTOM_ODBC_LIBS="-ldblib -lodbc"])])
 
   AC_MSG_CHECKING(for a custom ODBC support)
   if test "$PHP_CUSTOM_ODBC" != "no"; then
