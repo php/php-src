@@ -62,7 +62,5 @@ array(3) {
   NULL
 }
 -- with language construct --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function 'echo' not found or invalid function name
 Done

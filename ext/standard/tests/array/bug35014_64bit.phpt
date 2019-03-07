@@ -22,7 +22,6 @@ foreach ($tests as $v) {
 }
 ?>
 --EXPECT--
-NULL
 int(1)
 int(0)
 int(3)

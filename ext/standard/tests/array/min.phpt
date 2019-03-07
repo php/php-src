@@ -19,13 +19,13 @@ var_dump(min(0, true, false, true));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: min(): When only one parameter is given, it must be an array in %s on line 4
+Warning: min(): When only one parameter is given, it must be an array in %s on line %d
 NULL
 
-Warning: min(): Array must contain at least one element in %s on line 5
+Warning: min(): Array must contain at least one element in %s on line %d
 bool(false)
 
-Warning: min(): When only one parameter is given, it must be an array in %s on line 6
+Warning: min(): When only one parameter is given, it must be an array in %s on line %d
 NULL
 int(1)
 float(2.09)

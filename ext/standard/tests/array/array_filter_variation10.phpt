@@ -92,14 +92,5 @@ array(2) {
   ["b"]=>
   int(2)
 }
-
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 48
-
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 48
-
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 48
-
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 48
-array(0) {
-}
+is_numeric() expects exactly 1 parameter, 2 given
 Done

@@ -40,11 +40,7 @@ try {
 
 // Testing array_diff_uassoc with one less than the expected number of arguments
 echo "\n-- Testing array_diff_uassoc() function with less than expected no. of arguments --\n";
-try {
-    var_dump( array_diff_uassoc($array1, $array2) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump( array_diff_uassoc($array1, $array2) );
 
 ?>
 ===DONE===
@@ -57,6 +53,6 @@ array_diff_uassoc() expects parameter 6 to be a valid callback, array must have 
 
 -- Testing array_diff_uassoc() function with less than expected no. of arguments --
 
-array_diff_uassoc(): at least 3 parameters are required, 2 given
-
+Warning: array_diff_uassoc(): at least 3 parameters are required, 2 given in %s on line %d
+NULL
 ===DONE===

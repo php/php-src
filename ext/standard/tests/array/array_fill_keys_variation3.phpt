@@ -31,5 +31,4 @@ array(2) {
   ["two"]=>
   resource(%d) of type (stream)
 }
-
 Done

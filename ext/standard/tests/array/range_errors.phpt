@@ -65,7 +65,6 @@ Warning: range(): step exceeds the specified range in %s on line %d
 bool(false)
 
 -- Testing other conditions --
-
 Warning: range(): step exceeds the specified range in %s on line %d
 bool(false)
 

@@ -3,7 +3,7 @@ Test array_keys() function (error conditions)
 --FILE--
 <?php
 
-echo "\n*** Testing error conditions ***";
+echo "\n*** Testing error conditions ***\n";
 try {
     var_dump(array_keys(new stdclass));  // object
 } catch (TypeError $e) {

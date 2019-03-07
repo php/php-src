@@ -18,10 +18,6 @@ array(1) {
   [0]=>
   string(0) ""
 }
-array(1) {
-  [0]=>
-  string(0) ""
-}
 int(2)
 array(2) {
   [0]=>

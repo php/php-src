@@ -43,6 +43,7 @@ if (!extension_loaded('sockets')) {
 
     socket_close($socket);
 --EXPECT--
+bool(false)
 Received Ping! from remote address 127.0.0.1 and remote port 1223
 --CREDITS--
 Falko Menge <mail at falko-menge dot de>

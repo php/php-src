@@ -62,7 +62,6 @@ echo"\nDone";
 ?>
 --EXPECTF--
 *** Testing Edge Conditions ***
-
 int(11)
 int(1)
 

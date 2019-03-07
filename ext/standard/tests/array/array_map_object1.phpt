@@ -28,7 +28,11 @@ class SimpleClass
 }
 function test($cb, $args) {
   echo join('::', $cb) . "\n";
-  var_dump(array_map($cb, $args));
+  try {
+    var_dump(array_map($cb, $args));
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
 }
 test(array('SimpleClass', 'square'), array(1, 2));
 
@@ -135,21 +139,15 @@ array(2) {
 
 -- simple class with private variable and method --
 SimpleClassPri::add
-
-Warning: array_map() expects parameter 1 to be a valid callback, cannot access private method SimpleClassPri::add() in %sarray_map_object1.php on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, cannot access private method SimpleClassPri::add()
 
 -- simple class with protected variable and method --
 SimpleClassPro::mul
-
-Warning: array_map() expects parameter 1 to be a valid callback, cannot access protected method SimpleClassPro::mul() in %sarray_map_object1.php on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, cannot access protected method SimpleClassPro::mul()
 
 -- class without members --
 EmptyClass
-
-Warning: array_map() expects parameter 1 to be a valid callback, array must have exactly two members in %sarray_map_object1.php on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, array must have exactly two members
 
 -- abstract class --
 ChildClass::emptyFunction
@@ -182,13 +180,9 @@ array(2) {
   int(4)
 }
 StaticClass::cube
-
-Warning: array_map() expects parameter 1 to be a valid callback, cannot access private method StaticClass::cube() in %sarray_map_object1.php on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, cannot access private method StaticClass::cube()
 StaticClass::retVal
-
-Warning: array_map() expects parameter 1 to be a valid callback, cannot access protected method StaticClass::retVal() in %sarray_map_object1.php on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, cannot access protected method StaticClass::retVal()
 -- class implementing an interface --
 InterClass::square
 array(2) {
