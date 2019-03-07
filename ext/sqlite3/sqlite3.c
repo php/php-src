@@ -1286,7 +1286,7 @@ PHP_METHOD(sqlite3, backup)
 	php_sqlite3_db_object *destination_obj;
 	char *source_dbname = "main", *destination_dbname = "main";
 	size_t source_dbname_length, destination_dbname_length;
-	zval *source_zval = getThis();
+	zval *source_zval = ZEND_THIS;
 	zval *destination_zval;
 	zend_error_handling error_handling;
 	sqlite3_backup *dbBackup;
@@ -1308,11 +1308,7 @@ PHP_METHOD(sqlite3, backup)
 	if (dbBackup) {
 		do {
 			rc = sqlite3_backup_step(dbBackup, -1);
-
-			if (rc == SQLITE_OK || rc == SQLITE_BUSY || rc == SQLITE_LOCKED) {
-				sqlite3_sleep(250);
-			}
-		} while (rc == SQLITE_OK || rc == SQLITE_BUSY || rc == SQLITE_LOCKED);
+		} while (rc == SQLITE_OK);
 
 		/* Release resources allocated by backup_init(). */
 		rc = sqlite3_backup_finish(dbBackup);
@@ -1322,7 +1318,15 @@ PHP_METHOD(sqlite3, backup)
 	}
 
 	if (rc != SQLITE_OK) {
-		php_sqlite3_error(source_obj, "Backup failed: %d, %s", rc, sqlite3_errmsg(source_obj->db));
+		if (rc == SQLITE_BUSY) {
+			php_sqlite3_error(source_obj, "Backup failed: source database is busy");
+		}
+		else if (rc == SQLITE_LOCKED) {
+			php_sqlite3_error(source_obj, "Backup failed: source database is locked");
+		}
+		else {
+			php_sqlite3_error(source_obj, "Backup failed: %d, %s", rc, sqlite3_errmsg(source_obj->db));
+		}
 		RETURN_FALSE;
 	}
 

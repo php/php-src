@@ -7,8 +7,6 @@ SQLite3::backup test
 
 require_once(__DIR__ . '/new_db.inc');
 
-$db->enableExceptions(true);
-
 echo "Creating table\n";
 $db->exec('CREATE TABLE test (a, b);');
 $db->exec('INSERT INTO test VALUES (42, \'php\');');
@@ -24,17 +22,21 @@ var_dump($db->backup($db2));
 echo "Checking if table has been copied\n";
 var_dump($db2->querySingle('SELECT COUNT(*) FROM sqlite_master;'));
 
-echo "Closing DB1\n";
-var_dump($db->close());
-
 echo "Checking backup contents\n";
 var_dump($db2->querySingle('SELECT a FROM test;'));
 var_dump($db2->querySingle('SELECT b FROM test;'));
 
-echo "Closing DB2\n";
-var_dump($db2->close());
+echo "Resetting DB2\n";
 
-echo "Done\n";
+$db2->close();
+$db2 = new SQLite3(':memory:');
+
+echo "Locking DB1\n";
+var_dump($db->exec('BEGIN EXCLUSIVE;'));
+
+echo "Backup to DB2 (should fail)\n";
+var_dump($db->backup($db2));
+
 ?>
 --EXPECTF--
 Creating table
@@ -44,11 +46,13 @@ Backup to DB2
 bool(true)
 Checking if table has been copied
 int(1)
-Closing DB1
-bool(true)
 Checking backup contents
 int(42)
 string(3) "php"
-Closing DB2
+Resetting DB2
+Locking DB1
 bool(true)
-Done
+Backup to DB2 (should fail)
+
+Warning: SQLite3::backup(): Backup failed: source database is busy in %s on line %d
+bool(false)
