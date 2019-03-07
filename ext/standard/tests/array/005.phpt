@@ -71,7 +71,6 @@ echo"Done";
 ?>
 --EXPECTF--
 *** Testing Error Conditions ***
-
 NULL
 
 *** Testing with various array inputs ***
