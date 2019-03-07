@@ -1,7 +1,5 @@
 dnl config.m4 for extension intl
 
-dnl ##########################################################################
-dnl Initialize the extension
 PHP_ARG_ENABLE([intl],
   [whether to enable internationalization support],
   [AS_HELP_STRING([--enable-intl],

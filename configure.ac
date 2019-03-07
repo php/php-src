@@ -1,4 +1,3 @@
-## -*- autoconf -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
 dnl include Zend specific macro definitions first
@@ -140,8 +139,6 @@ fi
 
 dnl Settings we want to make before the checks.
 dnl -------------------------------------------------------------------------
-
-cwd=`pwd`
 
 php_shtool=$srcdir/build/shtool
 T_MD=`$php_shtool echo -n -e %B`

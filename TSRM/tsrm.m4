@@ -3,7 +3,6 @@ m4_include([TSRM/m4/ax_func_which_gethostbyname_r.m4])
 AC_DEFUN([TSRM_BASIC_CHECKS],[
 
 AC_REQUIRE([AC_PROG_CC])dnl
-dnl AC_REQUIRE([AM_PROG_CC_STDC])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
 
 AC_CHECK_FUNCS(sigprocmask)

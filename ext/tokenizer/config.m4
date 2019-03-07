@@ -1,7 +1,5 @@
 dnl config.m4 for extension tokenizer
 
-dnl Otherwise use enable:
-
 PHP_ARG_ENABLE([tokenizer],
   [whether to enable tokenizer support],
   [AS_HELP_STRING([--disable-tokenizer],
