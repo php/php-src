@@ -278,11 +278,11 @@ to upgrade.
 
  b. Add the content for the news entry
 
-7. **Check mirrors have been synced before announcing or pushing news**
+7. Commit and push all the changes to their respective git repos
+
+8. **Check mirrors have been synced before announcing or pushing news**
   Try, f.e. http://www.php.net/get/php-5.5.1.tar.bz2/from/a/mirror
   Try several mirrors, mirrors may update slowly (may take an hour)
-
-8. Commit all the changes to their respective git repos
 
 9. Please note down the sha256 and the PGP signature (.asc). These *must* be
    included in the release mail.
