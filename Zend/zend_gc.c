@@ -261,28 +261,45 @@ struct _gc_stack {
 	size_t    _top = 0;
 
 #define GC_STACK_PUSH(ref) \
-	do { \
-		if (UNEXPECTED(_top == GC_STACK_SEGMENT_SIZE)) { \
-			if (UNEXPECTED(!_stack->next)) { \
-				gc_stack *segment = emalloc(sizeof(gc_stack)); \
-				segment->prev = _stack; \
-				segment->next = NULL; \
-				_stack->next = segment; \
-			} \
-			_stack = _stack->next; \
-			_top = 0; \
-		} \
-		_stack->data[_top++] = (ref); \
-	} while (0)
+	gc_stack_push(&_stack, &_top, ref);
 
 #define GC_STACK_POP() \
-	(UNEXPECTED(_top == 0) \
-		? ((!_stack->prev) \
-			? NULL \
-			: ( _stack = _stack->prev, \
-				_top = GC_STACK_SEGMENT_SIZE - 1, \
-				_stack->data[_top])) \
-		: _stack->data[--_top])
+	gc_stack_pop(&_stack, &_top)
+
+static zend_never_inline gc_stack* gc_stack_next(gc_stack *stack)
+{
+	if (UNEXPECTED(!stack->next)) {
+		gc_stack *segment = emalloc(sizeof(gc_stack));
+		segment->prev = stack;
+		segment->next = NULL;
+		stack->next = segment;
+	}
+	return stack->next;
+}
+
+static zend_always_inline void gc_stack_push(gc_stack **stack, size_t *top, zend_refcounted *ref)
+{
+	if (UNEXPECTED(*top == GC_STACK_SEGMENT_SIZE)) {
+		(*stack) = gc_stack_next(*stack);
+		(*top) = 0;
+	}
+	(*stack)->data[(*top)++] = ref;
+}
+
+static zend_always_inline zend_refcounted* gc_stack_pop(gc_stack **stack, size_t *top)
+{
+	if (UNEXPECTED((*top) == 0)) {
+		if (!(*stack)->prev) {
+			return NULL;
+		} else {
+			(*stack) = (*stack)->prev;
+			(*top) = GC_STACK_SEGMENT_SIZE - 1;
+			return (*stack)->data[GC_STACK_SEGMENT_SIZE - 1];
+		}
+	} else {
+		return (*stack)->data[--(*top)];
+	}
+}
 
 static void gc_stack_free(gc_stack *stack)
 {
