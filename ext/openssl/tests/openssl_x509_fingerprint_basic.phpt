@@ -7,9 +7,6 @@ openssl_x509_fingerprint() tests
 
 $cert = "file://" . dirname(__FILE__) . "/cert.crt";
 
-echo "** Testing with no parameters **\n";
-var_dump(openssl_x509_fingerprint());
-
 echo "** Testing default functionality **\n";
 var_dump(openssl_x509_fingerprint($cert));
 
@@ -29,10 +26,6 @@ echo "** Testing bad hash method **\n";
 var_dump(openssl_x509_fingerprint($cert, 'xx45'));
 ?>
 --EXPECTF--
-** Testing with no parameters **
-
-Warning: openssl_x509_fingerprint() expects at least 1 parameter, 0 given in %s on line %d
-NULL
 ** Testing default functionality **
 string(40) "6e6fd1ea10a5a23071d61c728ee9b40df6dbc33c"
 ** Testing hash method md5 **
