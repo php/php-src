@@ -1,17 +1,19 @@
-# http://editorconfig.org/
+# https://editorconfig.org/
 
 root = true
 
-[*.{c,h,awk,w32,bat,mk,frag}]
+[*]
+tab_width                = 4
+
+[*.{c,h,y,awk,w32,bat,mk,frag,cpp}]
 charset                  = utf-8
 end_of_line              = lf
 indent_size              = 4
 indent_style             = tab
-tab_width                = 4
 trim_trailing_whitespace = true
 insert_final_newline     = true
 
-[*.{php,phpt}]
+[*.{php,phpt,inc}]
 charset                  = utf-8
 end_of_line              = lf
 indent_size              = 4
@@ -31,5 +33,15 @@ insert_final_newline     = true
 charset                  = utf-8
 end_of_line              = lf
 indent_style             = space
-trim_trailing_whitespace = false
+trim_trailing_whitespace = true
 insert_final_newline     = true
+max_line_length          = 80
+
+[COMMIT_EDITMSG]
+charset                  = utf-8
+end_of_line              = lf
+indent_size              = 4
+indent_style             = space
+trim_trailing_whitespace = true
+insert_final_newline     = true
+max_line_length          = 80
