@@ -792,7 +792,7 @@ next:
 
 static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 {
-    HashTable *ht = NULL;
+	HashTable *ht = NULL;
 	Bucket *p, *end;
 	zval *zv;
 	GC_STACK_DCL(stack);
