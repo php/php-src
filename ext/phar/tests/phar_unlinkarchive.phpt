@@ -28,7 +28,11 @@ Phar::unlinkArchive($pdname);
 } catch (Exception $e) {
 echo $e->getMessage(),"\n";
 }
-Phar::unlinkArchive(array());
+try {
+    Phar::unlinkArchive(array());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $pname = 'phar://' . $fname;
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
@@ -89,8 +93,7 @@ __HALT_COMPILER();
 Unknown phar archive ""
 Unknown phar archive "%sphar_unlinkarchive.phar"
 Unknown phar archive "%sphar_unlinkarchive.phar.tar": internal corruption of phar "%sphar_unlinkarchive.phar.tar" (truncated entry)
-
-Warning: Phar::unlinkArchive() expects parameter 1 to be a valid path, array given in %sphar_unlinkarchive.php on line %d
+Phar::unlinkArchive() expects parameter 1 to be a valid path, array given
 bool(false)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 phar archive "%sphar_unlinkarchive.phar" has open file handles or objects.  fclose() all file handles, and unset() all objects prior to calling unlinkArchive()

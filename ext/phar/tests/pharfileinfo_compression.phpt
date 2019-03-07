@@ -17,7 +17,6 @@ $phar['a/b'] = 'hi there';
 
 $b = $phar['a/b'];
 
-$b->isCompressed(array());
 try {
 $b->isCompressed(25);
 } catch (Exception $e) {
@@ -76,7 +75,6 @@ var_dump($b->decompress());
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
 --EXPECTF--
-Warning: PharFileInfo::isCompressed() expects parameter 1 to be int, array given in %spharfileinfo_compression.php on line 11
 Unknown compression type specified
 Unknown compression type specified
 Cannot compress with Gzip compression, not possible with tar-based phar archives

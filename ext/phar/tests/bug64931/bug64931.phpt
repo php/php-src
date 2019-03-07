@@ -38,7 +38,7 @@ try {
 
 try {
 	$phar->addFromString(".phar\0", "gotcha");
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	echo "CAUGHT: ". $e->getMessage() ."\n";
 }
 
@@ -54,6 +54,5 @@ CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
-
-Warning: Phar::addFromString() expects parameter 1 to be a valid path, string given in %s%ebug64931.php on line %d
+CAUGHT: Phar::addFromString() expects parameter 1 to be a valid path, string given
 ===DONE===

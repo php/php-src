@@ -19,7 +19,6 @@ $phar['a']->chmod(066);
 } catch (Exception $e) {
 echo $e->getMessage(), "\n";
 }
-$b->chmod(array());
 lstat($pname . '/a/b'); // sets BG(CurrentLStatFile)
 $b->chmod(0666);
 ?>
@@ -28,6 +27,4 @@ $b->chmod(0666);
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECTF--
 Phar entry "a" is a temporary directory (not an actual entry in the archive), cannot chmod
-
-Warning: PharFileInfo::chmod() expects parameter 1 to be int, array given in %spharfileinfo_chmod.php on line %d
 ===DONE===
