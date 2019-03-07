@@ -1,4 +1,3 @@
-## -*- autoconf -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
 dnl include Zend specific macro definitions first
@@ -141,8 +140,6 @@ fi
 dnl Settings we want to make before the checks.
 dnl -------------------------------------------------------------------------
 
-cwd=`pwd`
-
 php_shtool=$srcdir/build/shtool
 T_MD=`$php_shtool echo -n -e %B`
 T_ME=`$php_shtool echo -n -e %b`
@@ -173,8 +170,6 @@ PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
-dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
-dnl AC_PROG_CC_STDC
 AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
