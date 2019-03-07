@@ -229,7 +229,6 @@ snap: build-snap build-devel build-dist
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
 	$(CC) /nologo /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
 
-# need to redirect, since INSTALL is a file in the root...
 install: really-install install-sdk
 
 build-lib: build-ext-libs
