@@ -2592,7 +2592,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	FILE *fp;
 	size_t file_len = 0;
 	int argc = ZEND_NUM_ARGS();
-	int q = -1, i, t = 1;
+	int q = -1, t = 1;
 
 	/* The quality parameter for Wbmp stands for the foreground when called from image2wbmp() */
 	/* The quality parameter for gd2 stands for chunk size */

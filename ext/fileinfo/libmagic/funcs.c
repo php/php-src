@@ -60,15 +60,14 @@ protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
 	va_list ap;
-	size_t len;
 	char *buf = NULL, *newstr;
 
 	va_start(ap, fmt);
-	len = vspprintf(&buf, 0, fmt, ap);
+	vspprintf(&buf, 0, fmt, ap);
 	va_end(ap);
 
 	if (ms->o.buf != NULL) {
-		len = spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
+		spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
 		if (buf) {
 			efree(buf);
 		}

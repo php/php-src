@@ -363,7 +363,7 @@ php_sprintf_getnumber(char **buffer, size_t *len)
 
 	if (endptr != NULL) {
 		i = (endptr - *buffer);
-		*len -= endptr - *buffer;
+		*len -= i;
 		*buffer = endptr;
 	}
 	PRINTF_DEBUG(("sprintf_getnumber: number was %d bytes long\n", i));
