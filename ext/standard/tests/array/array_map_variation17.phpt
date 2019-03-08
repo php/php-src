@@ -77,86 +77,66 @@ for($count = 0; $count < count($unexpected_callbacks); $count++) {
 fclose($fp);
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : unexpected values for 'callback' argument ***
 
 -- Iteration 1 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 2 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 3 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 4 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 5 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 6 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 7 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 8 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 9 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 10 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 11 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 12 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 13 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 14 --
-Warning: array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name
 
 -- Iteration 15 --
-Warning: array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name
 
 -- Iteration 16 --
-Warning: array_map() expects parameter 1 to be a valid callback, array must have exactly two members in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, array must have exactly two members
 
 -- Iteration 17 --
-Warning: array_map() expects parameter 1 to be a valid callback, first array member is not a valid class name or object in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, first array member is not a valid class name or object
 
 -- Iteration 18 --
-Warning: array_map() expects parameter 1 to be a valid callback, first array member is not a valid class name or object in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, first array member is not a valid class name or object
 
 -- Iteration 19 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 
 -- Iteration 20 --
-Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, no array or string given
 Done

@@ -5,6 +5,10 @@ fwrite() tests
 
 $filename = dirname(__FILE__)."/fwrite.dat";
 
+$fp = fopen($filename, "w");
+var_dump(fwrite($fp, ""));
+fclose($fp);
+
 $fp = fopen($filename, "r");
 var_dump(fwrite($fp, "data"));
 
@@ -21,6 +25,7 @@ var_dump(file_get_contents($filename));
 echo "Done\n";
 ?>
 --EXPECTF--
+int(0)
 int(0)
 int(0)
 int(4)

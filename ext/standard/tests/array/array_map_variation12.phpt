@@ -47,20 +47,7 @@ array(3) {
   int(243)
 }
 -- with built-in function 'pow' and one parameter --
-
-Warning: pow() expects exactly 2 parameters, 1 given in %s on line %d
-
-Warning: pow() expects exactly 2 parameters, 1 given in %s on line %d
-
-Warning: pow() expects exactly 2 parameters, 1 given in %s on line %d
-array(3) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
+pow() expects exactly 2 parameters, 1 given
 -- with language construct --
 array_map() expects parameter 1 to be a valid callback, function 'echo' not found or invalid function name
 Done

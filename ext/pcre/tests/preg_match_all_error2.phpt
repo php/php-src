@@ -12,9 +12,6 @@ error_reporting(E_ALL&~E_NOTICE);
 */
 echo "*** Testing preg_match_all() : error conditions ***\n";
 $regex = '/[a-zA-Z]/';
-$value = new stdclass(); //Object
-var_dump(preg_match_all($regex, $value, $matches));
-var_dump($matches);
 $input = array(array('this is', 'a subarray'), 'test',);
 foreach($input as $value) {
     print "\nArg value is: $value\n";
@@ -29,8 +26,6 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing preg_match_all() : error conditions ***
-preg_match_all() expects parameter 2 to be string, object given
-NULL
 
 Arg value is: Array
 preg_match_all() expects parameter 2 to be string, array given
