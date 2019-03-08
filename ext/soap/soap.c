@@ -1111,11 +1111,11 @@ PHP_METHOD(SoapServer, __construct)
 	zend_long cache_wsdl;
 	HashTable *typemap_ht = NULL;
 
-	SOAP_SERVER_BEGIN_CODE();
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|a", &wsdl, &options) == FAILURE) {
-		php_error_docref(NULL, E_ERROR, "Invalid parameters");
+		return;
 	}
+
+	SOAP_SERVER_BEGIN_CODE();
 
 	if (Z_TYPE_P(wsdl) != IS_STRING && Z_TYPE_P(wsdl) != IS_NULL) {
 		php_error_docref(NULL, E_ERROR, "Invalid parameters");
@@ -2267,11 +2267,11 @@ PHP_METHOD(SoapClient, __construct)
 	HashTable *typemap_ht = NULL;
 	zval *this_ptr = ZEND_THIS;
 
-	SOAP_CLIENT_BEGIN_CODE();
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|a", &wsdl, &options) == FAILURE) {
-		php_error_docref(NULL, E_ERROR, "Invalid parameters");
+		return;
 	}
+
+	SOAP_CLIENT_BEGIN_CODE();
 
 	if (Z_TYPE_P(wsdl) != IS_STRING && Z_TYPE_P(wsdl) != IS_NULL) {
 		php_error_docref(NULL, E_ERROR, "$wsdl must be string or null");
