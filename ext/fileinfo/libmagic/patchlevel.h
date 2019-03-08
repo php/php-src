@@ -7,7 +7,7 @@
  *
  * $Log$
  * Revision 2.1  2018/04/26 22:27:12 ab
- * Update libmagic to 5.31
+ * Update libmagic to 5.33
  *
  * $Log$
  * Revision 2.0  2017/10/11 22:27:12 ab
