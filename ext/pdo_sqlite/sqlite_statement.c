@@ -253,6 +253,7 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 					(param = zend_hash_find_ptr(stmt->bound_columns, stmt->columns[colno].name)) != NULL)) {
 
 				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
+					/* fall through */
 					stmt->columns[colno].param_type = PDO_PARAM_LOB;
 					break;
 				}
