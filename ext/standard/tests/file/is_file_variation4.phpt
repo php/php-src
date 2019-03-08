@@ -38,7 +38,11 @@ $count = 1;
 /* loop through to test each element in the above array */
 foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
-  var_dump( is_file( $file_path."/".$file ) );
+  try {
+    var_dump( is_file( $file_path."/".$file ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   clearstatcache();
   $count++;
 }
@@ -67,12 +71,8 @@ bool(false)
 - Iteration 6 -
 bool(false)
 - Iteration 7 -
-
-Warning: is_file() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_file() expects parameter 1 to be a valid path, string given
 - Iteration 8 -
-
-Warning: is_file() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_file() expects parameter 1 to be a valid path, string given
 
 *** Done ***

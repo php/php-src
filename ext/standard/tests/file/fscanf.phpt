@@ -5,10 +5,6 @@ fscanf() tests
 
 $filename = dirname(__FILE__)."/fscanf.dat";
 
-var_dump(fscanf());
-var_dump(fscanf(array()));
-var_dump(fscanf(array(), array()));
-
 file_put_contents($filename, "data");
 
 $fp = fopen($filename, "rt");
@@ -64,14 +60,6 @@ $filename = dirname(__FILE__)."/fscanf.dat";
 unlink($filename);
 ?>
 --EXPECTF--
-Warning: fscanf() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: fscanf() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: fscanf() expects parameter 1 to be resource, array given in %s on line %d
-NULL
 int(0)
 NULL
 int(1)

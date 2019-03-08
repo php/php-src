@@ -38,7 +38,6 @@ $invalid_files = array(
   FALSE,
   NULL,
   " ",
-  @array(),
   @$file_handle
 );
 /* loop through to test each element in the above array
@@ -61,8 +60,5 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-
-Warning: is_executable() expects parameter 1 to be a valid path, array given in %s on line %d
-NULL
 bool(false)
 Done

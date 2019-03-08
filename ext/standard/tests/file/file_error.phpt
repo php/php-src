@@ -8,14 +8,10 @@ Test file() function : error conditions
                 Returns the  file in an array
 */
 $file_path = dirname(__FILE__);
-echo "\n*** Testing error conditions ***";
+echo "\n*** Testing error conditions ***\n";
 $file_handle = fopen($file_path."/file.tmp", "w");
-var_dump( file() );  // Zero No. of args
 
 $filename = $file_path."/file.tmp";
-var_dump( file($filename, $filename, $filename, $filename) );  // more than expected number of arguments
-
-var_dump( file($filename, "INCORRECT_FLAG", NULL) );  //  Incorrect flag
 var_dump( file($filename, 10, NULL) );  //  Incorrect flag
 
 var_dump( file("temp.tmp") );  // non existing filename
@@ -30,14 +26,6 @@ unlink($file_path."/file.tmp");
 ?>
 --EXPECTF--
 *** Testing error conditions ***
-Warning: file() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: file() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
-Warning: file() expects parameter 2 to be int, string given in %s on line %d
-NULL
 array(0) {
 }
 
