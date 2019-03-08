@@ -2840,17 +2840,16 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  {
 -	int rv;
  	va_list ap;
-+	size_t len;
 +	char *buf = NULL, *newstr;
  
  	va_start(ap, fmt);
 -	rv = file_vprintf(ms, fmt, ap);
-+	len = vspprintf(&buf, 0, fmt, ap);
++	vspprintf(&buf, 0, fmt, ap);
  	va_end(ap);
 -	return rv;
 +
 +	if (ms->o.buf != NULL) {
-+		len = spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
++		spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
 +		if (buf) {
 +			efree(buf);
 +		}
@@ -2904,7 +2903,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  	ms->event_flags |= EVENT_HAD_ERR;
  	ms->error = error;
  }
-@@ -160,7 +158,6 @@
+@@ -160,7 +157,6 @@
  	file_error(ms, errno, "error reading");
  }
  
@@ -2912,7 +2911,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
  static int
  checkdone(struct magic_set *ms, int *rv)
-@@ -174,8 +171,8 @@
+@@ -174,8 +170,8 @@
  
  /*ARGSUSED*/
  protected int
@@ -2923,7 +2922,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  {
  	int m = 0, rv = 0, looks_text = 0;
  	const char *code = NULL;
-@@ -184,7 +181,8 @@
+@@ -184,7 +180,8 @@
  	const char *def = "data";
  	const char *ftype = NULL;
  	struct buffer b;
@@ -2933,7 +2932,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  	buffer_init(&b, fd, buf, nb);
  
  	if (nb == 0) {
-@@ -216,8 +214,8 @@
+@@ -216,8 +213,8 @@
  		}
  	}
  #endif
@@ -2944,7 +2943,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0) {
  		m = file_zmagic(ms, &b, inname);
  		if ((ms->flags & MAGIC_DEBUG) != 0)
-@@ -239,13 +237,22 @@
+@@ -239,13 +236,22 @@
  	}
  
  	/* Check if we have a CDF file */
@@ -2974,7 +2973,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		}
  	}
  
-@@ -315,7 +322,7 @@
+@@ -315,7 +321,7 @@
  		if (file_printf(ms, "%s", code_mime) == -1)
  			rv = -1;
  	}
@@ -2983,7 +2982,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
   done_encoding:
  #endif
  	buffer_fini(&b);
-@@ -324,7 +331,6 @@
+@@ -324,7 +330,6 @@
  
  	return m;
  }
@@ -2991,7 +2990,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
  protected int
  file_reset(struct magic_set *ms, int checkloaded)
-@@ -334,11 +340,11 @@
+@@ -334,11 +339,11 @@
  		return -1;
  	}
  	if (ms->o.buf) {
@@ -3005,7 +3004,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		ms->o.pbuf = NULL;
  	}
  	ms->event_flags &= ~EVENT_HAD_ERR;
-@@ -376,7 +382,7 @@
+@@ -376,7 +381,7 @@
  		return NULL;
  	}
  	psize = len * 4 + 1;
@@ -3014,7 +3013,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		file_oomem(ms, psize);
  		return NULL;
  	}
-@@ -440,8 +446,8 @@
+@@ -440,8 +445,8 @@
  	if (level >= ms->c.len) {
  		len = (ms->c.len = 20 + level) * sizeof(*ms->c.li);
  		ms->c.li = CAST(struct level_info *, (ms->c.li == NULL) ?
@@ -3025,7 +3024,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		if (ms->c.li == NULL) {
  			file_oomem(ms, len);
  			return -1;
-@@ -464,76 +470,41 @@
+@@ -464,76 +469,41 @@
  protected int
  file_replace(struct magic_set *ms, const char *pat, const char *rep)
  {
@@ -3131,7 +3130,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  }
  
  protected file_pushbuf_t *
-@@ -544,7 +515,7 @@
+@@ -544,7 +514,7 @@
  	if (ms->event_flags & EVENT_HAD_ERR)
  		return NULL;
  
@@ -3140,7 +3139,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		return NULL;
  
  	pb->buf = ms->o.buf;
-@@ -562,8 +533,8 @@
+@@ -562,8 +532,8 @@
  	char *rbuf;
  
  	if (ms->event_flags & EVENT_HAD_ERR) {
@@ -3151,7 +3150,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  		return NULL;
  	}
  
-@@ -572,7 +543,7 @@
+@@ -572,7 +542,7 @@
  	ms->o.buf = pb->buf;
  	ms->offset = pb->offset;
  
