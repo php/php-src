@@ -232,6 +232,7 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+	struct pdo_bound_param_data *param;
 	const char *str;
 
 	if(colno >= sqlite3_column_count(S->stmt)) {
@@ -246,10 +247,19 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 	stmt->columns[colno].precision = 0;
 
 	switch (sqlite3_column_type(S->stmt, colno)) {
+		case SQLITE_BLOB:
+			if (stmt->bound_columns && (
+					(param = zend_hash_index_find_ptr(stmt->bound_columns, colno)) != NULL ||
+					(param = zend_hash_find_ptr(stmt->bound_columns, stmt->columns[colno].name)) != NULL)) {
+
+				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
+					stmt->columns[colno].param_type = PDO_PARAM_LOB;
+					break;
+				}
+			}
 		case SQLITE_INTEGER:
 		case SQLITE_FLOAT:
 		case SQLITE3_TEXT:
-		case SQLITE_BLOB:
 		case SQLITE_NULL:
 		default:
 			stmt->columns[colno].param_type = PDO_PARAM_STR;
