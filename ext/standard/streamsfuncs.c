@@ -1671,8 +1671,7 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
 	}
 	else {
-		zend_internal_type_error(
-			ZEND_ARG_USES_STRICT_TYPES(),
+		zend_type_error(
 			"%s() was not able to analyze the specified stream",
 			get_active_function_name()
 		);
