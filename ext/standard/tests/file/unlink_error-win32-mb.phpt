@@ -25,13 +25,6 @@ $context = stream_context_create();
 
 echo "*** Testing unlink() : error conditions ***\n";
 
-echo "-- Testing unlink() on unexpected no. of arguments --\n";
-// arg < expected
-var_dump( unlink() );
-// args > expected
-var_dump( unlink($filename, $context, true) );
-var_dump( file_exists($filename) ); // expected: true
-
 echo "\n-- Testing unlink() on invalid arguments --\n";
 // invalid arguments
 var_dump( unlink('') );  // $filename as empty string
@@ -42,9 +35,6 @@ var_dump( file_exists(NULL) );  // confirm file doesnt exist
 
 var_dump( unlink(false) );  // $filename as boolean false
 var_dump( file_exists(false) );  // confirm file doesnt exist
-
-var_dump( unlink($filename, '') );  // $context as empty string
-var_dump( unlink($filename, false) );  // $context as boolean false
 
 
 echo "\n-- Testing unlink() on non-existent file --\n";
@@ -68,14 +58,6 @@ rmdir(dirname(__FILE__)."/私はガラスを食べられます");
 ?>
 --EXPECTF--
 *** Testing unlink() : error conditions ***
--- Testing unlink() on unexpected no. of arguments --
-
-Warning: unlink() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: unlink() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
-bool(true)
 
 -- Testing unlink() on invalid arguments --
 
@@ -89,12 +71,6 @@ bool(false)
 
 Warning: unlink(): %s in %s on line %d
 bool(false)
-bool(false)
-
-Warning: unlink() expects parameter 2 to be resource, string given in %s on line %d
-bool(false)
-
-Warning: unlink() expects parameter 2 to be resource, bool given in %s on line %d
 bool(false)
 
 -- Testing unlink() on non-existent file --

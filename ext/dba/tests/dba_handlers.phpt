@@ -35,13 +35,9 @@ check(dba_handlers(null));
 
 echo "Test 3\n";
 
-check(dba_handlers(1, 2));
-
-echo "Test 4\n";
-
 check(dba_handlers(0));
 
-echo "Test 5 - full info\n";
+echo "Test 4 - full info\n";
 $h = dba_handlers(1);
 foreach ($h as $key => $val) {
     if ($key === "flatfile") {
@@ -61,9 +57,6 @@ Success: flatfile enabled
 Test 2
 Success: flatfile enabled
 Test 3
-
-Warning: dba_handlers() expects at most 1 parameter, 2 given in %sdba_handlers.php on line %d
-Test 4
 Success: flatfile enabled
-Test 5 - full info
+Test 4 - full info
 Success: flatfile enabled
