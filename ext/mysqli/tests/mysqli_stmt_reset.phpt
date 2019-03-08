@@ -16,15 +16,6 @@ require_once('skipifconnectfailure.inc');
 	// fetch tests, because the fetch tests would have to call prepare/execute etc.
 	// anyway.
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_reset()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_reset($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	if (!$stmt = mysqli_stmt_init($link))

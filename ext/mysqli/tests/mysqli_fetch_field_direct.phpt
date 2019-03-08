@@ -10,18 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_fetch_field_direct()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_fetch_field_direct($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_fetch_field_direct($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {

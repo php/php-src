@@ -10,19 +10,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_store_result()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_store_result($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
-
-	if (false !== ($tmp = @mysqli_stmt_store_result(new mysqli_stmt())))
-		printf("[003] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

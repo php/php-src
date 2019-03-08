@@ -18,9 +18,6 @@ mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
-	if (!is_null($tmp = @$mysqli->character_set_name($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$res = $mysqli->query('SELECT version() AS server_version'))
 		printf("[003] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	$tmp = $res->fetch_assoc();
