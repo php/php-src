@@ -111,6 +111,6 @@ disk_total_space() expects parameter 1 to be a valid path, string given
 -- Iteration 12 --
 disk_total_space() expects parameter 1 to be a valid path, string given
 *** Testing with Binary Input ***
-float(294216040448)
+float(%s)
 
 --- Done ---
