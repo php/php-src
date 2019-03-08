@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2018-03-11 01:46:42.000000000 +0100
-+++ libmagic/apprentice.c	2018-11-05 21:33:14.919371593 +0100
++++ libmagic/apprentice.c	2018-11-05 00:16:58.812821826 +0100
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -1245,7 +1245,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	switch (m->str_flags & PSTRING_LEN) {
 diff -u libmagic.orig/apptype.c libmagic/apptype.c
 --- libmagic.orig/apptype.c	2011-09-07 23:57:15.000000000 +0200
-+++ libmagic/apptype.c	2018-08-10 11:51:05.107276763 +0200
++++ libmagic/apptype.c	2018-08-10 11:46:29.210671445 +0200
 @@ -1,15 +1,15 @@
  /*
   * Adapted from: apptype.c, Written by Eberhard Mattes and put into the
@@ -1280,7 +1280,7 @@ diff -u libmagic.orig/apptype.c libmagic/apptype.c
  #include "file.h"
 diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
 --- libmagic.orig/ascmagic.c	2017-11-02 21:25:39.000000000 +0100
-+++ libmagic/ascmagic.c	2018-08-10 11:51:05.107276763 +0200
++++ libmagic/ascmagic.c	2018-08-10 11:46:29.210671445 +0200
 @@ -90,7 +90,7 @@
  		rv = file_ascmagic_with_encoding(ms, &bb,
  		    ubuf, ulen, code, type, text);
@@ -1311,7 +1311,7 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  }
 diff -u libmagic.orig/buffer.c libmagic/buffer.c
 --- libmagic.orig/buffer.c	2018-03-11 01:46:42.000000000 +0100
-+++ libmagic/buffer.c	2018-08-10 11:51:05.107276763 +0200
++++ libmagic/buffer.c	2018-08-10 11:46:29.210671445 +0200
 @@ -31,7 +31,11 @@
  #endif	/* lint */
  
@@ -1362,7 +1362,7 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2018-03-11 01:46:42.000000000 +0100
-+++ libmagic/cdf.c	2018-08-10 11:51:05.107276763 +0200
++++ libmagic/cdf.c	2018-08-10 11:46:29.214671395 +0200
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1620,7 +1620,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  #endif
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
 --- libmagic.orig/cdf.h	2017-03-09 17:57:17.000000000 +0100
-+++ libmagic/cdf.h	2018-08-10 11:51:05.107276763 +0200
++++ libmagic/cdf.h	2018-08-10 11:46:29.214671395 +0200
 @@ -35,10 +35,10 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1646,8 +1646,16 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
 --- libmagic.orig/cdf_time.c	2017-03-29 17:57:48.000000000 +0200
-+++ libmagic/cdf_time.c	2018-08-10 11:51:05.107276763 +0200
-@@ -56,7 +56,7 @@
++++ libmagic/cdf_time.c	2019-03-08 21:00:46.636733574 +0100
+@@ -23,6 +23,7 @@
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
++#include "php.h"
+ 
+ #include "file.h"
+ 
+@@ -56,7 +57,7 @@
  
  	for (y = CDF_BASE_YEAR; y < year; y++)
  		days += isleap(y) + 365;
@@ -1656,7 +1664,7 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	return days;
  }
  
-@@ -77,7 +77,7 @@
+@@ -77,7 +78,7 @@
  	return days;
  }
  
@@ -1665,9 +1673,27 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
   * Return the 0...11 month number.
   */
  static int
+@@ -152,7 +153,7 @@
+ #endif
+ #ifdef notyet
+ 	struct tm tm;
+-	if (gmtime_r(&ts->ts_sec, &tm) == NULL) {
++	if (php_gmtime_r(&ts->ts_sec, &tm) == NULL) {
+ 		errno = EINVAL;
+ 		return -1;
+ 	}
+@@ -168,7 +169,7 @@
+ char *
+ cdf_ctime(const time_t *sec, char *buf)
+ {
+-	char *ptr = ctime_r(sec, buf);
++	char *ptr = php_ctime_r(sec, buf);
+ 	if (ptr != NULL)
+ 		return buf;
+ 	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 diff -u libmagic.orig/compress.c libmagic/compress.c
 --- libmagic.orig/compress.c	2017-11-02 21:25:39.000000000 +0100
-+++ libmagic/compress.c	2018-08-10 11:51:05.111276714 +0200
++++ libmagic/compress.c	2018-08-10 11:46:29.214671395 +0200
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -1968,7 +1994,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
 diff -u libmagic.orig/der.c libmagic/der.c
 --- libmagic.orig/der.c	2017-02-10 19:14:01.000000000 +0100
-+++ libmagic/der.c	2018-08-10 11:51:05.111276714 +0200
++++ libmagic/der.c	2018-08-10 11:46:29.214671395 +0200
 @@ -51,7 +51,9 @@
  #include "magic.h"
  #include "der.h"
@@ -2025,7 +2051,7 @@ diff -u libmagic.orig/der.c libmagic/der.c
  		    der_tag(buf, sizeof(buf), tag), len);
 diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
 --- libmagic.orig/elfclass.h	2014-12-17 00:18:40.000000000 +0100
-+++ libmagic/elfclass.h	2018-08-10 11:51:05.111276714 +0200
++++ libmagic/elfclass.h	2018-08-10 11:46:29.214671395 +0200
 @@ -1,7 +1,7 @@
  /*
   * Copyright (c) Christos Zoulas 2008.
@@ -2073,7 +2099,7 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    (int)elf_getu16(swap, elfhdr.e_shstrndx),
 diff -u libmagic.orig/encoding.c libmagic/encoding.c
 --- libmagic.orig/encoding.c	2017-11-02 21:25:39.000000000 +0100
-+++ libmagic/encoding.c	2018-08-10 11:51:05.111276714 +0200
++++ libmagic/encoding.c	2018-08-10 11:46:29.214671395 +0200
 @@ -88,12 +88,12 @@
  	*code_mime = "binary";
  
@@ -2103,7 +2129,7 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  }
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2018-03-11 01:46:42.000000000 +0100
-+++ libmagic/file.h	2018-11-05 21:33:14.919371593 +0100
++++ libmagic/file.h	2018-11-05 21:31:59.339653700 +0100
 @@ -27,21 +27,15 @@
   */
  /*
@@ -2390,7 +2416,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  #endif
 diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
 --- libmagic.orig/fsmagic.c	2017-05-24 21:17:50.000000000 +0200
-+++ libmagic/fsmagic.c	2018-08-10 11:51:05.111276714 +0200
++++ libmagic/fsmagic.c	2018-08-10 11:46:29.214671395 +0200
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -2751,7 +2777,7 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  	case S_IFSOCK:
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
 --- libmagic.orig/funcs.c	2017-11-02 21:25:39.000000000 +0100
-+++ libmagic/funcs.c	2018-11-05 21:33:14.919371593 +0100
++++ libmagic/funcs.c	2018-11-05 21:31:59.339653700 +0100
 @@ -31,7 +31,6 @@
  #endif	/* lint */
  
@@ -3136,7 +3162,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
 diff -u libmagic.orig/magic.c libmagic/magic.c
 --- libmagic.orig/magic.c	2017-08-28 15:39:18.000000000 +0200
-+++ libmagic/magic.c	2018-08-10 11:51:05.111276714 +0200
++++ libmagic/magic.c	2018-08-10 11:46:29.214671395 +0200
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -3612,8 +3638,8 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  public const char *
  magic_error(struct magic_set *ms)
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2018-04-23 20:45:58.824428000 +0200
-+++ libmagic/magic.h	2018-08-10 11:51:05.111276714 +0200
+--- libmagic.orig/magic.h	2018-11-13 21:40:06.272616270 +0100
++++ libmagic/magic.h	2018-08-10 11:46:29.214671395 +0200
 @@ -122,6 +122,7 @@
  
  const char *magic_getpath(const char *, int);
@@ -3624,7 +3650,7 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	2017-02-10 19:14:01.000000000 +0100
-+++ libmagic/print.c	2018-08-10 11:51:05.111276714 +0200
++++ libmagic/print.c	2019-03-08 21:00:46.636733574 +0100
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -3643,28 +3669,15 @@ diff -u libmagic.orig/print.c libmagic/print.c
   * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
   * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
   * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-@@ -28,6 +28,8 @@
+@@ -28,6 +28,7 @@
  /*
   * print.c - debugging printout routines
   */
-+#define _GNU_SOURCE
 +#include "php.h"
  
  #include "file.h"
  
-@@ -43,6 +45,11 @@
- #endif
- #include <time.h>
- 
-+#ifdef PHP_WIN32
-+# define asctime_r php_asctime_r
-+# define ctime_r php_ctime_r
-+#endif
-+
- #define SZOF(a)	(sizeof(a) / sizeof(a[0]))
- 
- #include "cdf.h"
-@@ -75,7 +82,7 @@
+@@ -75,7 +76,7 @@
  	if (m->mask_op & FILE_OPINVERSE)
  		(void) fputc('~', stderr);
  
@@ -3673,7 +3686,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
  		if (m->str_flags) {
  			(void) fputc('/', stderr);
  			if (m->str_flags & STRING_COMPACT_WHITESPACE) 
-@@ -215,26 +222,26 @@
+@@ -215,18 +216,18 @@
  file_magwarn(struct magic_set *ms, const char *f, ...)
  {
  	va_list va;
@@ -3701,51 +3714,26 @@ diff -u libmagic.orig/print.c libmagic/print.c
  }
  
  protected const char *
- file_fmttime(uint64_t v, int flags, char *buf)
- {
- 	char *pp;
--	time_t t;
--	struct tm *tm, tmz;
-+	time_t t = (time_t)v;
-+	struct tm *tm = NULL;
- 
- 	if (flags & FILE_T_WINDOWS) {
- 		struct timespec ts;
-@@ -247,9 +254,29 @@
+@@ -247,13 +248,13 @@
  	}
  
  	if (flags & FILE_T_LOCAL) {
 -		tm = localtime_r(&t, &tmz);
-+		pp = ctime_r(&t, buf);
++		tm = php_localtime_r(&t, &tmz);
  	} else {
 -		tm = gmtime_r(&t, &tmz);
-+#ifndef HAVE_DAYLIGHT
-+		private int daylight = 0;
-+#ifdef HAVE_TM_ISDST
-+		private time_t now = (time_t)0;
-+
-+		if (now == (time_t)0) {
-+			struct tm *tm1;
-+			(void)time(&now);
-+			tm1 = localtime(&now);
-+			if (tm1 == NULL)
-+				goto out;
-+			daylight = tm1->tm_isdst;
-+		}
-+#endif /* HAVE_TM_ISDST */
-+#endif /* HAVE_DAYLIGHT */
-+		if (daylight)
-+			t += 3600;
-+		tm = gmtime(&t);
-+		if (tm == NULL)
-+			goto out;
-+		pp = asctime_r(tm, buf);
++		tm = php_gmtime_r(&t, &tmz);
  	}
  	if (tm == NULL)
  		goto out;
+-	pp = asctime_r(tm, buf);
++	pp = php_asctime_r(tm, buf);
+ 
+ 	if (pp == NULL)
+ 		goto out;
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
 --- libmagic.orig/readcdf.c	2017-11-02 21:25:39.000000000 +0100
-+++ libmagic/readcdf.c	2018-08-10 11:51:05.111276714 +0200
++++ libmagic/readcdf.c	2018-08-10 11:46:29.214671395 +0200
 @@ -31,7 +31,11 @@
  
  #include <assert.h>
@@ -3882,7 +3870,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  	    if (NOTMIME(ms)) {
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2018-04-15 20:49:15.000000000 +0200
-+++ libmagic/softmagic.c	2018-11-10 12:18:21.864916065 +0100
++++ libmagic/softmagic.c	2018-11-11 21:42:27.860274508 +0100
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
@@ -4241,7 +4229,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	case FILE_INDIRECT:
 diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
 --- libmagic.orig/strcasestr.c	2014-05-13 18:48:12.000000000 +0200
-+++ libmagic/strcasestr.c	2018-08-10 11:51:05.111276714 +0200
++++ libmagic/strcasestr.c	2018-08-10 11:46:29.214671395 +0200
 @@ -39,6 +39,8 @@
  
  #include "file.h"
