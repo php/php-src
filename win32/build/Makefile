@@ -193,7 +193,7 @@ run: set-tmp-env
 	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" $(ARGS)
 !else
 test: set-tmp-env
-	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
 
 run: set-tmp-env
 	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(ARGS)
