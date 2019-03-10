@@ -173,21 +173,21 @@ typedef enum {
 	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT = (1 << 5 | 1),
 	STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT = (1 << 6 | 1),
 	/* TLS equates to TLS_ANY as of PHP 7.2 */
-	STREAM_CRYPTO_METHOD_TLS_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | 1),
-	STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | 1),
-	STREAM_CRYPTO_METHOD_ANY_CLIENT = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | 1),
+	STREAM_CRYPTO_METHOD_TLS_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | 1),
+	STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | 1),
+	STREAM_CRYPTO_METHOD_ANY_CLIENT = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | 1),
 	STREAM_CRYPTO_METHOD_SSLv2_SERVER = (1 << 1),
 	STREAM_CRYPTO_METHOD_SSLv3_SERVER = (1 << 2),
 	/* v23 no longer negotiates SSL2 or SSL3 */
-	STREAM_CRYPTO_METHOD_SSLv23_SERVER = ((1 << 3) | (1 << 4) | (1 << 5)),
+	STREAM_CRYPTO_METHOD_SSLv23_SERVER = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
 	STREAM_CRYPTO_METHOD_TLSv1_0_SERVER = (1 << 3),
 	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER = (1 << 4),
 	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER = (1 << 5),
 	STREAM_CRYPTO_METHOD_TLSv1_3_SERVER = (1 << 6),
 	/* TLS equates to TLS_ANY as of PHP 7.2 */
-	STREAM_CRYPTO_METHOD_TLS_SERVER = ((1 << 3) | (1 << 4) | (1 << 5)),
-	STREAM_CRYPTO_METHOD_TLS_ANY_SERVER = ((1 << 3) | (1 << 4) | (1 << 5)),
-	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5))
+	STREAM_CRYPTO_METHOD_TLS_SERVER = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
+	STREAM_CRYPTO_METHOD_TLS_ANY_SERVER = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
+	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6))
 } php_stream_xport_crypt_method_t;
 
 /* These functions provide crypto support on the underlying transport */
