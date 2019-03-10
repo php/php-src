@@ -14,6 +14,18 @@ function phpt_wait($worker = WORKER_DEFAULT_NAME, $timeout = null)
     ServerClientTestCase::getInstance()->wait($worker, $timeout);
 }
 
+function phpt_has_sslv3() {
+    static $result = null;
+    if (!is_null($result)) {
+        return $result;
+    }
+    $server = @stream_socket_server('sslv3://127.0.0.1:10013');
+    if ($result = !!$server) {
+        fclose($server);
+    }
+    return $result;
+}
+
 /**
  * This is a singleton to let the wait/notify functions work
  * I know it's horrible, but it's a means to an end
