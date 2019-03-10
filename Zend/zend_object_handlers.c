@@ -1079,14 +1079,14 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 	zobj = Z_OBJ_P(object);
 	name = zval_get_tmp_string(member, &tmp_name);
 
-	if ( zobj->ce->ce_flags & ZEND_ACC_LOCKED ) {
-		zend_throw_error(NULL, "Cannot unset property $%s of locked class %s", ZSTR_VAL(name), ZSTR_VAL(zobj->ce->name));
-		goto exit;
-	}
-
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__unset != NULL), cache_slot, &prop_info);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
+		if ( zobj->ce->ce_flags & ZEND_ACC_LOCKED ) {
+			zend_throw_error(NULL, "Cannot unset property $%s of locked class %s", ZSTR_VAL(name), ZSTR_VAL(zobj->ce->name));
+			goto exit;
+		}
+
 		zval *slot = OBJ_PROP(zobj, property_offset);
 
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
@@ -1105,6 +1105,11 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))
 	 && EXPECTED(zobj->properties != NULL)) {
+		if ( zobj->ce->ce_flags & ZEND_ACC_LOCKED ) {
+			zend_throw_error(NULL, "Cannot unset property $%s of locked class %s", ZSTR_VAL(name), ZSTR_VAL(zobj->ce->name));
+			goto exit;
+		}
+
 		if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 			if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
 				GC_DELREF(zobj->properties);
