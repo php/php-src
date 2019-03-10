@@ -894,7 +894,7 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
 	/* Use same C function for all methods */
 
 	/* php func prototype: function user_func($method_name, $xmlrpc_params, $user_params) */
-	call_user_function(CG(function_table), NULL, &pData->php_function, &pData->return_data, 3, callback_params);
+	call_user_function(NULL, NULL, &pData->php_function, &pData->return_data, 3, callback_params);
 
 	pData->php_executed = 1;
 
@@ -920,7 +920,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(pData->server->introspection_map), php_function) {
 		if (zend_is_callable(php_function, 0, &php_function_name)) {
 			/* php func prototype: function string user_func($user_params) */
-			if (call_user_function(CG(function_table), NULL, php_function, &retval, 1, callback_params) == SUCCESS) {
+			if (call_user_function(NULL, NULL, php_function, &retval, 1, callback_params) == SUCCESS) {
 				XMLRPC_VALUE xData;
 				STRUCT_XMLRPC_ERROR err = {0};
 
