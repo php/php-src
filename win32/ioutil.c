@@ -1004,6 +1004,13 @@ static ssize_t php_win32_ioutil_readlink_int(HANDLE h, wchar_t *buf, size_t buf_
 
 	if (reparse_data->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
 		/* Real symlink */
+
+		/* BC - relative links are shown as absolute */
+		if (reparse_data->SymbolicLinkReparseBuffer.Flags & SYMLINK_FLAG_RELATIVE) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_SYMLINK_NOT_SUPPORTED);
+			return -1;
+		}
+
 		reparse_target = reparse_data->SymbolicLinkReparseBuffer.ReparseTarget +
 			(reparse_data->SymbolicLinkReparseBuffer.SubstituteNameOffset /
 			sizeof(wchar_t));
@@ -1095,6 +1102,7 @@ PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, si
 	HANDLE h;
 	ssize_t ret;
 
+	/* Get a handle to the symbolic link (if path is a symbolic link) */
 	h = CreateFileW(path,
 					0,
 					0,
@@ -1110,11 +1118,27 @@ PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, si
 
 	ret = php_win32_ioutil_readlink_int(h, buf, buf_len);
 
-	if (ret < 0) {
-		/* BC */
-		wchar_t target[PHP_WIN32_IOUTIL_MAXPATHLEN];
-		size_t offset = 0,
-			   target_len = GetFinalPathNameByHandleW(h, target, PHP_WIN32_IOUTIL_MAXPATHLEN, VOLUME_NAME_DOS);
+	if (ret < 0) {		
+		wchar_t target[PHP_WIN32_IOUTIL_MAXPATHLEN];		
+		size_t target_len;
+		size_t offset = 0;
+
+		/* BC - get a handle to the target (if path is a symbolic link) */
+		CloseHandle(h);
+		h = CreateFileW(path,
+						0,
+						0,
+						NULL,
+						OPEN_EXISTING,
+						FILE_FLAG_BACKUP_SEMANTICS,
+						NULL);
+
+		if (h == INVALID_HANDLE_VALUE) {
+			SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+			return -1;
+		}
+
+		target_len = GetFinalPathNameByHandleW(h, target, PHP_WIN32_IOUTIL_MAXPATHLEN, VOLUME_NAME_DOS);
 
 		if(target_len >= buf_len || target_len >= PHP_WIN32_IOUTIL_MAXPATHLEN || target_len == 0) {
 			CloseHandle(h);
