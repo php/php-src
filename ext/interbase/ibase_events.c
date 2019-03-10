@@ -232,7 +232,7 @@ static isc_callback  _php_ibase_callback(ibase_event *event, /* {{{ */
 			}
 
 			/* call the callback provided by the user */
-			if (SUCCESS != call_user_function(EG(function_table), NULL,
+			if (SUCCESS != call_user_function(NULL, NULL,
 					&event->callback, &return_value, 2, args)) {
 				_php_ibase_module_error("Error calling callback %s", Z_STRVAL(event->callback));
 				break;

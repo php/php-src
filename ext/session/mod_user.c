@@ -35,7 +35,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 		return;
 	}
 	PS(in_save_handler) = 1;
-	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv) == FAILURE) {
+	if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
 		zval_ptr_dtor(retval);
 		ZVAL_UNDEF(retval);
 	} else if (Z_ISUNDEF_P(retval)) {

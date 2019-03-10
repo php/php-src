@@ -719,7 +719,7 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 
 	ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
 	BG(serialize_lock)++;
-	res = call_user_function(CG(function_table), struc, &fname, retval, 0, 0);
+	res = call_user_function(NULL, struc, &fname, retval, 0, 0);
 	BG(serialize_lock)--;
 	zval_ptr_dtor_str(&fname);
 

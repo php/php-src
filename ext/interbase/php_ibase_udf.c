@@ -285,7 +285,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 		LOCK();
 
 		/* now call the function */
-		if (FAILURE == call_user_function(EG(function_table), NULL,
+		if (FAILURE == call_user_function(NULL, NULL,
 				&callback, &return_value, argc, args)) {
 			UNLOCK();
 			break;
