@@ -43,8 +43,7 @@ install-modules: build-modules
 	@test -d modules && \
 	$(mkinstalldirs) $(INSTALL_ROOT)$(EXTENSION_DIR)
 	@echo "Installing shared extensions:     $(INSTALL_ROOT)$(EXTENSION_DIR)/"
-	@rm -f modules/*.la >/dev/null 2>&1
-	@$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR)
+	@find ./modules -type f ! -name '*.la' | xargs -0 -I {} $(INSTALL) {} $(INSTALL_ROOT)$(EXTENSION_DIR)
 
 install-headers:
 	-@if test "$(INSTALL_HEADERS)"; then \
@@ -72,7 +71,7 @@ install-headers:
 	fi
 
 PHP_TEST_SETTINGS = -d 'open_basedir=' -d 'output_buffering=0' -d 'memory_limit=-1'
-PHP_TEST_SHARED_EXTENSIONS =  ` \
+PHP_SHARED_EXTENSIONS =  ` \
 	if test "x$(PHP_MODULES)" != "x"; then \
 		for i in $(PHP_MODULES)""; do \
 			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d extension=$$dlname"; \
@@ -102,7 +101,7 @@ test: all
 		TEST_PHP_EXECUTABLE=$(PHP_EXECUTABLE) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
-			$(PHP_EXECUTABLE) -n -c $(top_builddir)/tmp-php.ini $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -n -c $(top_builddir)/tmp-php.ini -d extension_dir=$(top_builddir)/modules/ $(PHP_TEST_SHARED_EXTENSIONS) $(TESTS); \
+			$(PHP_EXECUTABLE) -n -c $(top_builddir)/tmp-php.ini $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -n -c $(top_builddir)/tmp-php.ini -d extension_dir=$(top_builddir)/modules/ $(PHP_SHARED_EXTENSIONS) $(TESTS); \
 		TEST_RESULT_EXIT_CODE=$$?; \
 		rm $(top_builddir)/tmp-php.ini; \
 		exit $$TEST_RESULT_EXIT_CODE; \
