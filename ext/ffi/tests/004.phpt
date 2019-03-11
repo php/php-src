@@ -52,19 +52,19 @@ try {
 echo "ok\n";
 ?>
 --EXPECTF--
-object(FFI\CData:<enum>)#%d (1) {
+object(FFI\CData:enum _a)#%d (1) {
   ["cdata"]=>
   int(0)
 }
-object(FFI\CData:<enum>)#%d (1) {
+object(FFI\CData:enum _b)#%d (1) {
   ["cdata"]=>
   int(0)
 }
-object(FFI\CData:<enum>)#%d (1) {
+object(FFI\CData:enum _c)#%d (1) {
   ["cdata"]=>
   int(0)
 }
-object(FFI\CData:<enum>)#%d (1) {
+object(FFI\CData:enum _d)#%d (1) {
   ["cdata"]=>
   int(0)
 }
