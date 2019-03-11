@@ -54,7 +54,7 @@ $y->handle($request);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 array(6) {
   [1]=>
   int(123)

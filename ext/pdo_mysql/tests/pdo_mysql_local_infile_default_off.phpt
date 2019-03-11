@@ -21,6 +21,6 @@ $db = new PDO($dsn, $user, $pass);
 echo var_export($db->getAttribute(PDO::MYSQL_ATTR_LOCAL_INFILE)), "\n";
 echo "done!\n";
 ?>
---EXPECTF--
+--EXPECT--
 false
 done!

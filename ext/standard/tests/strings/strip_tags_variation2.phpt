@@ -85,7 +85,7 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(10) "helloworld"

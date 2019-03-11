@@ -151,6 +151,6 @@ if($c === 0) {
 $fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
 @unlink($fl);
 ?>
---EXPECTF--
+--EXPECT--
 Failed: 0
 ===DONE===

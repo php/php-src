@@ -6,5 +6,5 @@ Mark Niebergall mbniebergall@gmail.com UPHPU TestFest 2017
 <?php
 var_dump(date_create_immutable('Invalid'));
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)

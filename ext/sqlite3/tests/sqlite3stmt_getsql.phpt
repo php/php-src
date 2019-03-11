@@ -29,7 +29,7 @@ var_dump($db->close());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Getting non-expanded SQL statement
 string(17) "SELECT :a, :b, ?;"
 Execute statement
