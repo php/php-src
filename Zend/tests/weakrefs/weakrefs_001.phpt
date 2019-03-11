@@ -8,21 +8,18 @@ debug_zval_dump($std);
 
 $wr = WeakReference::of($std);
 $wr2 = WeakReference::of($std);
-$wr3 = clone $wr2;
 
 debug_zval_dump($std);
 
-var_dump($wr, $wr2, $wr3);
+var_dump($wr, $wr2);
 
 debug_zval_dump($wr->get());
 debug_zval_dump($wr2->get());
-debug_zval_dump($wr3->get());
 
 unset($std);
 
 debug_zval_dump($wr->get());
 debug_zval_dump($wr2->get());
-debug_zval_dump($wr3->get());
 ?>
 --EXPECT--
 object(stdClass)#1 (0) refcount(2){
@@ -33,15 +30,10 @@ object(WeakReference)#2 (0) {
 }
 object(WeakReference)#2 (0) {
 }
-object(WeakReference)#2 (0) {
-}
 object(stdClass)#1 (0) refcount(2){
 }
 object(stdClass)#1 (0) refcount(2){
 }
-object(stdClass)#1 (0) refcount(2){
-}
-NULL
 NULL
 NULL
 

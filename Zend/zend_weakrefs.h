@@ -22,13 +22,13 @@
 BEGIN_EXTERN_C()
 
 ZEND_API zend_class_entry *zend_ce_weakref;
-ZEND_API void zend_weakref_construct(zval *weakref, zval *referent);
 
 void zend_register_weakref_ce(void);
 
 void zend_weakrefs_init();
-ZEND_API void zend_weakrefs_notify(zend_object *object);
 void zend_weakrefs_shutdown();
+
+ZEND_API void zend_weakrefs_notify(zend_object *object);
 
 END_EXTERN_C()
 

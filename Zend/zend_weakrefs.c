@@ -22,7 +22,7 @@
 #include "zend_weakrefs.h"
 
 typedef struct _zend_weakref {
-	zval referent;
+	zend_object *referent;
 	zend_object std;
 } zend_weakref;
 
@@ -35,9 +35,9 @@ static zend_object_handlers zend_weakref_handlers;
 static void zend_weakref_unref(zval *zv) {
 	zend_weakref *wr = (zend_weakref*) Z_PTR_P(zv);
 
-	GC_DEL_FLAGS(Z_OBJ(wr->referent), IS_OBJ_WEAKLY_REFERENCED);
+	GC_DEL_FLAGS(wr->referent, IS_OBJ_WEAKLY_REFERENCED);
 
-	ZVAL_NULL(&wr->referent);
+	wr->referent = NULL;
 }
 
 void zend_weakrefs_init() {
@@ -50,12 +50,6 @@ void zend_weakrefs_notify(zend_object *object) {
 
 void zend_weakrefs_shutdown() {
 	zend_hash_destroy(&EG(weakrefs));
-}
-
-static zend_object* zend_weakref_clone(zval *zv) {
-	Z_ADDREF_P(zv);
-
-	return Z_OBJ_P(zv);
 }
 
 static zend_object* zend_weakref_new(zend_class_entry *ce) {
@@ -88,25 +82,28 @@ static zend_always_inline void zend_weakref_create(zval *referent, zval *return_
 
 	wr = zend_weakref_fetch(return_value);
 
-	ZVAL_COPY_VALUE(&wr->referent, referent);
+    wr->referent = Z_OBJ_P(referent);
 
-	zend_hash_index_add_ptr(&EG(weakrefs), (zend_ulong) Z_OBJ_P(referent), wr);
+	zend_hash_index_add_ptr(&EG(weakrefs), (zend_ulong) wr->referent, wr);
 
-	GC_ADD_FLAGS(Z_OBJ_P(referent), IS_OBJ_WEAKLY_REFERENCED);
+	GC_ADD_FLAGS(wr->referent, IS_OBJ_WEAKLY_REFERENCED);
 }
 
 static zend_always_inline void zend_weakref_get(zval *weakref, zval *return_value) {
 	zend_weakref *wr = zend_weakref_fetch(weakref);
 
-	ZVAL_COPY(return_value, &wr->referent);
+	if (wr->referent) {
+		ZVAL_OBJ(return_value, wr->referent);
+		Z_ADDREF_P(return_value);
+	}
 }
 
 static void zend_weakref_free(zend_object *zo) {
 	zend_weakref *wr = zend_weakref_from(zo);
 
-	if (Z_TYPE(wr->referent) == IS_OBJECT) {
+	if (wr->referent) {
 		zend_hash_index_del(
-			&EG(weakrefs), (zend_ulong) Z_OBJ(wr->referent));
+			&EG(weakrefs), (zend_ulong) wr->referent);
 	}
 
 	zend_object_std_dtor(&wr->std);
@@ -152,14 +149,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(zend_weakref_get_arginfo, 0, 0, IS_OBJECT, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_COLD ZEND_METHOD(WeakRef, __construct)
+ZEND_COLD ZEND_METHOD(WeakReference, __construct)
 {
 	zend_throw_error(NULL,
 	    "Direct instantiation of 'WeakReference' is not allowed, "
 	    "use WeakReference::of instead");
 }
 
-ZEND_METHOD(WeakRef, of)
+ZEND_METHOD(WeakReference, of)
 {
 	zval *referent;
 
@@ -174,7 +171,7 @@ ZEND_METHOD(WeakRef, of)
 	zend_weakref_create(referent, return_value);
 }
 
-ZEND_METHOD(WeakRef, get)
+ZEND_METHOD(WeakReference, get)
 {
 	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 0, 0)
 	ZEND_PARSE_PARAMETERS_END();
@@ -183,9 +180,9 @@ ZEND_METHOD(WeakRef, get)
 }
 
 static const zend_function_entry zend_weakref_methods[] = {
-	ZEND_ME(WeakRef, __construct, NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakRef, of,  zend_weakref_of_arginfo, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(WeakRef, get, zend_weakref_get_arginfo, ZEND_ACC_PUBLIC)
+	ZEND_ME(WeakReference, __construct, NULL, ZEND_ACC_PUBLIC)
+	ZEND_ME(WeakReference, of,  zend_weakref_of_arginfo, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(WeakReference, get, zend_weakref_get_arginfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -210,8 +207,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_weakref_handlers.has_property = zend_weakref_no_isset;
 	zend_weakref_handlers.unset_property = zend_weakref_no_unset;
 	zend_weakref_handlers.get_property_ptr_ptr = zend_weakref_no_read_ptr;
-
-	zend_weakref_handlers.clone_obj = zend_weakref_clone;
+	zend_weakref_handlers.clone_obj = NULL;
 }
 /* }}} */
 
