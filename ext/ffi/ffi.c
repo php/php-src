@@ -1877,8 +1877,11 @@ static int zend_ffi_cdata_get_closure(zval *obj, zend_class_entry **ce_ptr, zend
 	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
 	func->common.num_args = 0;
 	func->common.required_num_args = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
+	func->common.scope = NULL;
+	func->common.prototype = NULL;
 	func->common.arg_info = NULL;
 	func->internal_function.handler = ZEND_FN(ffi_trampoline);
+	func->internal_function.module = NULL;
 
 	func->internal_function.reserved[0] = type;
 	func->internal_function.reserved[1] = *(void**)cdata->ptr;
@@ -2607,8 +2610,11 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
 	func->common.num_args = 0;
 	func->common.required_num_args = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
+	func->common.scope = NULL;
+	func->common.prototype = NULL;
 	func->common.arg_info = NULL;
 	func->internal_function.handler = ZEND_FN(ffi_trampoline);
+	func->internal_function.module = NULL;
 
 	func->internal_function.reserved[0] = type;
 	func->internal_function.reserved[1] = sym->addr;
