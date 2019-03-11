@@ -269,10 +269,10 @@ ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_f
 	int retval;
 
 	begin_write(ht);
-	retval = zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);
+	zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);
 	end_write(ht);
 
-	return retval;
+	return SUCCESS;
 }
 
 ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered)
