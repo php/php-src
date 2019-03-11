@@ -88,7 +88,8 @@ struct _zend_ffi_type {
 	uint32_t               attr;
 	union {
 		struct {
-			zend_ffi_type_kind kind;
+			zend_string        *tag_name;
+			zend_ffi_type_kind  kind;
 		} enumeration;
 		struct {
 			zend_ffi_type *type;
@@ -98,6 +99,7 @@ struct _zend_ffi_type {
 			zend_ffi_type *type;
 		} pointer;
 		struct {
+			zend_string   *tag_name;
 			HashTable      fields;
 		} record;
 		struct {
@@ -1242,7 +1244,12 @@ static int zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_type
 				name = "int64_t";
 				break;
 			case ZEND_FFI_TYPE_ENUM:
-				name = "<enum>";
+				if (type->enumeration.tag_name) {
+					zend_ffi_ctype_name_prepend(buf, ZSTR_VAL(type->enumeration.tag_name), ZSTR_LEN(type->enumeration.tag_name));
+				} else {
+					zend_ffi_ctype_name_prepend(buf, "<anonymous>", sizeof("<anonymous>")-1);
+				}
+				name = "enum ";
 				break;
 			case ZEND_FFI_TYPE_BOOL:
 				name = "bool";
@@ -1301,9 +1308,19 @@ static int zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_type
 				break;
 			case ZEND_FFI_TYPE_STRUCT:
 				if (type->attr & ZEND_FFI_ATTR_UNION) {
-					name = "<union>";
+					if (type->record.tag_name) {
+						zend_ffi_ctype_name_prepend(buf, ZSTR_VAL(type->record.tag_name), ZSTR_LEN(type->record.tag_name));
+					} else {
+						zend_ffi_ctype_name_prepend(buf, "<anonymous>", sizeof("<anonymous>")-1);
+					}
+					name = "union ";
 				} else {
-					name = "<struct>";
+					if (type->record.tag_name) {
+						zend_ffi_ctype_name_prepend(buf, ZSTR_VAL(type->record.tag_name), ZSTR_LEN(type->record.tag_name));
+					} else {
+						zend_ffi_ctype_name_prepend(buf, "<anonymous>", sizeof("<anonymous>")-1);
+					}
+					name = "struct ";
 				}
 				break;
 			default:
@@ -1963,7 +1980,15 @@ static void _zend_ffi_type_dtor(zend_ffi_type *type) /* {{{ */
 	type = ZEND_FFI_TYPE(type);
 
 	switch (type->kind) {
+		case ZEND_FFI_TYPE_ENUM:
+			if (type->enumeration.tag_name) {
+				zend_string_release(type->enumeration.tag_name);
+			}
+			break;
 		case ZEND_FFI_TYPE_STRUCT:
+			if (type->record.tag_name) {
+				zend_string_release(type->record.tag_name);
+			}
 			zend_hash_destroy(&type->record.fields);
 			break;
 		case ZEND_FFI_TYPE_POINTER:
@@ -5025,6 +5050,7 @@ void zend_ffi_make_enum_type(zend_ffi_dcl *dcl) /* {{{ */
 	zend_ffi_type *type = pemalloc(sizeof(zend_ffi_type), FFI_G(persistent));
 	type->kind = ZEND_FFI_TYPE_ENUM;
 	type->attr = FFI_G(default_type_attr) | (dcl->attr & ZEND_FFI_ENUM_ATTRS);
+	type->enumeration.tag_name = NULL;
 	if (type->attr & ZEND_FFI_ATTR_PACKED) {
 		type->size = zend_ffi_type_uint8.size;
 		type->align = zend_ffi_type_uint8.align;
@@ -5160,6 +5186,7 @@ void zend_ffi_make_struct_type(zend_ffi_dcl *dcl) /* {{{ */
 		type->attr |= ZEND_FFI_ATTR_UNION;
 	}
 	dcl->type = ZEND_FFI_TYPE_MAKE_OWNED(type);
+	type->record.tag_name = NULL;
 	zend_hash_init(&type->record.fields, 0, NULL, FFI_G(persistent) ? zend_ffi_field_hash_persistent_dtor :zend_ffi_field_hash_dtor, FFI_G(persistent));
 	dcl->attr &= ~ZEND_FFI_STRUCT_ATTRS;
 	dcl->align = 0;
@@ -5726,6 +5753,7 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, zend_bool incomplete) /* {{{ */
 {
 	zend_ffi_tag *tag;
+	zend_ffi_type *type;
 
 	if (!FFI_G(tags)) {
 		FFI_G(tags) = pemalloc(sizeof(HashTable), FFI_G(persistent));
@@ -5769,16 +5797,23 @@ void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, 
 		}
 	} else {
 		zend_ffi_tag *tag = pemalloc(sizeof(zend_ffi_tag), FFI_G(persistent));
+		zend_string *tag_name = zend_string_init(name, name_len, FFI_G(persistent));
 
 		if (dcl->flags & ZEND_FFI_DCL_STRUCT) {
 			tag->kind = ZEND_FFI_TAG_STRUCT;
 			zend_ffi_make_struct_type(dcl);
+			type = ZEND_FFI_TYPE(dcl->type);
+			type->record.tag_name = zend_string_copy(tag_name);
 		} else if (dcl->flags & ZEND_FFI_DCL_UNION) {
 			tag->kind = ZEND_FFI_TAG_UNION;
 			zend_ffi_make_struct_type(dcl);
+			type = ZEND_FFI_TYPE(dcl->type);
+			type->record.tag_name = zend_string_copy(tag_name);
 		} else if (dcl->flags & ZEND_FFI_DCL_ENUM) {
 			tag->kind = ZEND_FFI_TAG_ENUM;
 			zend_ffi_make_enum_type(dcl);
+			type = ZEND_FFI_TYPE(dcl->type);
+			type->enumeration.tag_name = zend_string_copy(tag_name);
 		} else {
 			ZEND_ASSERT(0);
 		}
@@ -5787,7 +5822,8 @@ void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, 
 		if (incomplete) {
 			dcl->type->attr |= ZEND_FFI_ATTR_INCOMPLETE_TAG;
 		}
-		zend_hash_str_add_new_ptr(FFI_G(tags), name, name_len, tag);
+		zend_hash_add_new_ptr(FFI_G(tags), tag_name, tag);
+		zend_string_release(tag_name);
 	}
 }
 /* }}} */
