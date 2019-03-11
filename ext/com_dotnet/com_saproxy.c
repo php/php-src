@@ -369,6 +369,9 @@ static void saproxy_free_storage(zend_object *object)
 //???	}
 
 	OBJ_RELEASE(&proxy->obj->zo);
+
+	zend_object_std_dtor(object);
+
 	efree(proxy->indices);
 }
 

@@ -33,6 +33,7 @@
 #include "zend_generators.h"
 #include "zend_vm.h"
 #include "zend_float.h"
+#include "zend_weakrefs.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -181,6 +182,8 @@ void init_executor(void) /* {{{ */
 	EG(persistent_functions_count) = EG(function_table)->nNumUsed;
 	EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
 
+	zend_weakrefs_init();
+
 	EG(active) = 1;
 }
 /* }}} */
@@ -274,6 +277,8 @@ void shutdown_executor(void) /* {{{ */
 	}
 
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
+
+	zend_weakrefs_shutdown();
 
 	/* All resources and objects are destroyed. */
 	/* No PHP callback functions may be called after this point. */

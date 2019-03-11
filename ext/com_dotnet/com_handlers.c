@@ -612,6 +612,8 @@ void php_com_object_free_storage(zend_object *object)
 		zend_hash_destroy(obj->id_of_name_cache);
 		FREE_HASHTABLE(obj->id_of_name_cache);
 	}
+
+	zend_object_std_dtor(object);
 }
 
 zend_object* php_com_object_clone(zend_object *object)
