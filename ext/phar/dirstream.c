@@ -285,10 +285,7 @@ PHAR_ADD_ENTRY:
 
 	if (FAILURE != zend_hash_has_more_elements(data)) {
 		efree(dir);
-		if (zend_hash_sort(data, phar_compare_dir_name, 0) == FAILURE) {
-			FREE_HASHTABLE(data);
-			return NULL;
-		}
+		zend_hash_sort(data, phar_compare_dir_name, 0);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	} else {
 		efree(dir);
