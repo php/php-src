@@ -25,5 +25,5 @@ N2IRPU2MF6S0S6i44MU=
 echo bin2hex(openssl_pkey_derive($pub,$priv));
 echo "\n";
 ?>
---EXPECTF--
+--EXPECT--
 01171967cc0ddc553b46c6a821502aaea44aa04e6933d897ea11222efa0556f2d5d972816676c9ccf4e2430a26e07193ad39373050f6e54e4059f17720d7dd667635
