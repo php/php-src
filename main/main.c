@@ -2174,7 +2174,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.printf_to_smart_str_function = php_printf_to_smart_str;
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
-	zend_startup(&zuf, NULL);
+	zend_startup(&zuf);
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
