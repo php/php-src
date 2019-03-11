@@ -103,9 +103,6 @@ File created in => temp dir
 tempnam() expects parameter 1 to be a valid path, string given
 -- Iteration 7 --
 tempnam() expects parameter 1 to be a valid path, array given
--- File is not created --
-
-Warning: unlink(): %r(Invalid argument|No such file or directory)%r in %s on line %d
 -- Iteration 8 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d
