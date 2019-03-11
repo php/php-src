@@ -79,6 +79,9 @@ static void php_sqlite3_error(php_sqlite3_db_object *db_obj, char *format, ...)
 */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("sqlite3.extension_dir",  NULL, PHP_INI_SYSTEM, OnUpdateString, extension_dir, zend_sqlite3_globals, sqlite3_globals)
+#if SQLITE_VERSION_NUMBER >= 3026000
+	STD_PHP_INI_ENTRY("sqlite3.defensive",  "1", PHP_INI_SYSTEM, OnUpdateBool, dbconfig_defensive, zend_sqlite3_globals, sqlite3_globals)
+#endif
 PHP_INI_END()
 /* }}} */
 
@@ -159,6 +162,12 @@ PHP_METHOD(sqlite3, open)
 	if (PG(open_basedir) && *PG(open_basedir)) {
 		sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, NULL);
 	}
+
+#if SQLITE_VERSION_NUMBER >= 3026000
+	if (SQLITE3G(dbconfig_defensive)) {
+		sqlite3_db_config(db_obj->db, SQLITE_DBCONFIG_DEFENSIVE, 1, NULL);
+	}
+#endif
 
 	if (fullpath != filename) {
 		efree(fullpath);
