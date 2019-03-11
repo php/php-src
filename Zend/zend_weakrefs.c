@@ -82,7 +82,7 @@ static zend_always_inline void zend_weakref_create(zval *referent, zval *return_
 
 	wr = zend_weakref_fetch(return_value);
 
-    wr->referent = Z_OBJ_P(referent);
+	wr->referent = Z_OBJ_P(referent);
 
 	zend_hash_index_add_ptr(&EG(weakrefs), (zend_ulong) wr->referent, wr);
 
