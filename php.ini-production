@@ -1011,7 +1011,18 @@ cli_server.color = On
 ;intl.use_exceptions = 0
 
 [sqlite3]
+; Directory pointing to SQLite3 extensions
+; http://php.net/sqlite3.extension-dir
 ;sqlite3.extension_dir =
+
+; SQLite defensive mode flag (only available from SQLite 3.26+)
+; When the defensive flag is enabled, language features that allow ordinary
+; SQL to deliberately corrupt the database file are disabled. This forbids
+; writing directly to the schema, shadow tables (eg. FTS data tables), or
+; the sqlite_dbpage virtual table.
+; https://www.sqlite.org/c3ref/c_dbconfig_defensive.html
+; (for older SQLite versions, this flag has no use)
+sqlite3.defensive = 1
 
 [Pcre]
 ; PCRE library backtracking limit.
