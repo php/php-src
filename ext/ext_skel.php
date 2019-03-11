@@ -31,23 +31,23 @@ function error($message) {
 /* {{{ print_help
  */
 function print_help() {
-    echo <<< HELP
+    echo <<<HELP
 WHAT IT IS
 
   It's a tool for automatically creating the basic framework for a PHP extension.
 
 HOW TO USE IT
 
-  Very simple. First, change to the ext/ directory of the PHP sources. Then
-  run the following
+  Very simple. First, change to the ext/ directory of the PHP sources. Then run
+  the following
 
     php ext_skel.php --ext extension_name
 
   and everything you need will be placed in directory ext/extension_name.
 
   If you don't need to test the existence of any external header files,
-  libraries or functions in them, the extension is ready to be compiled in
-  PHP. To compile the extension, run the following:
+  libraries or functions in them, the extension is ready to be compiled in PHP.
+  To compile the extension, run the following:
 
     ./buildconf; ./configure --enable-extension_name; make
 
@@ -74,24 +74,25 @@ SOURCE AND HEADER FILE NAME
 
 OPTIONS
 
-HELP;
-	printf('php ext_skel.php --ext <name> [--experimental] [--author <name>]%s', PHP_EOL);
-	printf('                 [--dir <path>] [--std] [--onlyunix]%s', PHP_EOL);
-	printf('                 [--onlywindows] [--help]%1$s%1$s', PHP_EOL);
-	printf('  --ext <name>		The name of the extension defined as <name>%s', PHP_EOL);
-	printf('  --experimental	Passed if this extension is experimental, this creates%s', PHP_EOL);
-	printf('                        the EXPERIMENTAL file in the root of the extension%s', PHP_EOL);
-	printf('  --author <name>       Your name, this is used if --std is passed and%s', PHP_EOL);
-	printf('                        for the CREDITS file%s', PHP_EOL);
-	printf('  --dir <path>		Path to the directory for where extension should be%s', PHP_EOL);
-	printf('                        created. Defaults to the directory of where this script%s', PHP_EOL);
-	printf(' 			lives%s', PHP_EOL);
-	printf('  --std			If passed, the standard header used%s', PHP_EOL);
-	printf(' 			in extensions that is included in the core, will be used%s', PHP_EOL);
-	printf('  --onlyunix		Only generate configure scripts for Unix%s', PHP_EOL);
-	printf('  --onlywindows		Only generate configure scripts for Windows%s', PHP_EOL);
-	printf('  --help                This help%s', PHP_EOL);
+  php ext_skel.php --ext <name> [--experimental] [--author <name>]
+                   [--dir <path>] [--std] [--onlyunix]
+                   [--onlywindows] [--help]
 
+  --ext <name>          The name of the extension defined as <name>
+  --experimental        Passed if this extension is experimental, this creates
+                        the EXPERIMENTAL file in the root of the extension
+  --author <name>       Your name, this is used if --std is passed and for the
+                        CREDITS file
+  --dir <path>          Path to the directory for where extension should be
+                        created. Defaults to the directory of where this script
+                        lives
+  --std                 If passed, the standard header used in extensions that
+                        is included in the core, will be used
+  --onlyunix            Only generate configure scripts for Unix
+  --onlywindows         Only generate configure scripts for Windows
+  --help                This help
+
+HELP;
 	exit;
 }
 /* }}} */
