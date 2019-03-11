@@ -459,6 +459,13 @@ again:
 			smart_str_appendl(buf, "NULL", 4);
 			break;
 		case IS_LONG:
+			/* INT_MIN as a literal will be parsed as a float. Emit something like
+			 * -9223372036854775807-1 to avoid this. */
+			if (Z_LVAL_P(struc) == ZEND_LONG_MIN) {
+				smart_str_append_long(buf, ZEND_LONG_MIN+1);
+				smart_str_appends(buf, "-1");
+				break;
+			}
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:

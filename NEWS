@@ -37,6 +37,8 @@ PHP                                                                        NEWS
     custom wrapper). (Laruence)
   . Fixed bug #77669 (Crash in extract() when overwriting extracted array).
     (Nikita)
+  . Fixed bug #76717 (var_export() does not create a parsable value for
+    PHP_INT_MIN). (Nikita)
 
 07 Mar 2019, PHP 7.2.16
 
