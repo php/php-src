@@ -3044,11 +3044,15 @@ function toolset_setup_project_tools()
 	PATH_PROG('7za');
 
 	// avoid picking up midnight commander from cygwin
-	PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
+	if (!PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"))) {
+		ERROR('mc is required')
+	}
 
 	// Try locating the manifest tool
 	if (VS_TOOLSET) {
-		PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
+		if (!PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"))) {
+			ERROR('mt is required')
+		}
 	}
 }
 /* Get compiler if the toolset is supported */
