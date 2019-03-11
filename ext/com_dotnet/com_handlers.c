@@ -615,6 +615,10 @@ void php_com_object_free_storage(zend_object *object)
 		zend_hash_destroy(obj->id_of_name_cache);
 		FREE_HASHTABLE(obj->id_of_name_cache);
 	}
+
+	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
+		zend_weakrefs_notify(object);
+	}
 }
 
 zend_object* php_com_object_clone(zval *object)

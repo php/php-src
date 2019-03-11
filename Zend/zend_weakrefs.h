@@ -27,7 +27,7 @@ ZEND_API void zend_weakref_construct(zval *weakref, zval *referent);
 void zend_register_weakref_ce(void);
 
 void zend_weakrefs_init();
-void zend_weakrefs_notify(zend_object *object);
+ZEND_API void zend_weakrefs_notify(zend_object *object);
 void zend_weakrefs_shutdown();
 
 END_EXTERN_C()

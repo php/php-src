@@ -374,6 +374,10 @@ static void saproxy_free_storage(zend_object *object)
 //???		}
 //???	}
 
+	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
+		zend_weakrefs_notify(object);
+	}
+
 	zval_ptr_dtor(proxy->zobj);
 	efree(proxy->indices);
 }
