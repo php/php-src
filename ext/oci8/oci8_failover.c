@@ -62,7 +62,7 @@ sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_even
 	ZVAL_LONG(&params[2], fo_type);
 
 	/* Call user function (if possible) */
-	if (call_user_function(EG(function_table), NULL, &connection->taf_callback, &retval, 3, params) == FAILURE) {
+	if (call_user_function(NULL, NULL, &connection->taf_callback, &retval, 3, params) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Unable to call Oracle TAF callback function");
 	}
 
