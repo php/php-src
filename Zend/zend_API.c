@@ -2907,6 +2907,19 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 }
 /* }}} */
 
+static void free_fcc(zend_fcall_info_cache *fcc) {
+	if (fcc->function_handler &&
+		((fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
+		 fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
+		 fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
+		if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION &&
+			fcc->function_handler->common.function_name) {
+			zend_string_release_ex(fcc->function_handler->common.function_name, 0);
+		}
+		zend_free_trampoline(fcc->function_handler);
+	}
+}
+
 static zend_always_inline int zend_is_callable_check_func(int check_flags, zval *callable, zend_fcall_info_cache *fcc, int strict_class, char **error) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
@@ -3269,16 +3282,8 @@ again:
 
 check_func:
 			ret = zend_is_callable_check_func(check_flags, callable, fcc, strict_class, error);
-			if (fcc == &fcc_local &&
-			    fcc->function_handler &&
-				((fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
-			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
-			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
-				if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION &&
-					fcc->function_handler->common.function_name) {
-					zend_string_release_ex(fcc->function_handler->common.function_name, 0);
-				}
-				zend_free_trampoline(fcc->function_handler);
+			if (fcc == &fcc_local) {
+				free_fcc(fcc);
 			}
 			return ret;
 
@@ -3346,6 +3351,9 @@ check_func:
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
+				if (fcc == &fcc_local) {
+					free_fcc(fcc);
+				}
 				return 1;
 			}
 			if (error) *error = estrdup("no array or string given");
@@ -3386,15 +3394,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_nam
 			add_next_index_str(callable, zend_string_copy(fcc.calling_scope->name));
 			add_next_index_str(callable, zend_string_copy(fcc.function_handler->common.function_name));
 		}
-		if (fcc.function_handler &&
-			((fcc.function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
-		     fcc.function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
-		     fcc.function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
-			if (fcc.function_handler->type != ZEND_OVERLOADED_FUNCTION) {
-				zend_string_release_ex(fcc.function_handler->common.function_name, 0);
-			}
-			zend_free_trampoline(fcc.function_handler);
-		}
+		free_fcc(&fcc);
 		return 1;
 	}
 	return 0;
