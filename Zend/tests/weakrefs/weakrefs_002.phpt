@@ -2,7 +2,7 @@
 WeakReference serials
 --FILE--
 <?php
-$wr = WeakReference::of(new stdClass);
+$wr = WeakReference::create(new stdClass);
 
 try {
 	serialize($wr);

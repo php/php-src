@@ -2,7 +2,7 @@
 WeakReference object handlers
 --FILE--
 <?php
-$wr = WeakReference::of(new stdClass);
+$wr = WeakReference::create(new stdClass);
 
 try {
 	$wr->disallow;

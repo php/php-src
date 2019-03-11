@@ -142,7 +142,7 @@ static void zend_weakref_no_unset(zval *object, zval *member, void **rtc) {
 	zend_weakref_unsupported("properties");
 }
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(zend_weakref_of_arginfo, 0, 1, WeakReference, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(zend_weakref_create_arginfo, 0, 1, WeakReference, 0)
 	ZEND_ARG_TYPE_INFO(0, referent, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
@@ -153,10 +153,10 @@ ZEND_COLD ZEND_METHOD(WeakReference, __construct)
 {
 	zend_throw_error(NULL,
 	    "Direct instantiation of 'WeakReference' is not allowed, "
-	    "use WeakReference::of instead");
+	    "use WeakReference::create instead");
 }
 
-ZEND_METHOD(WeakReference, of)
+ZEND_METHOD(WeakReference, create)
 {
 	zval *referent;
 
@@ -181,7 +181,7 @@ ZEND_METHOD(WeakReference, get)
 
 static const zend_function_entry zend_weakref_methods[] = {
 	ZEND_ME(WeakReference, __construct, NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakReference, of,  zend_weakref_of_arginfo, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(WeakReference, create,  zend_weakref_create_arginfo, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(WeakReference, get, zend_weakref_get_arginfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

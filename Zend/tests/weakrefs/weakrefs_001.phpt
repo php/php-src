@@ -6,8 +6,8 @@ $std = new stdClass;
 
 debug_zval_dump($std);
 
-$wr = WeakReference::of($std);
-$wr2 = WeakReference::of($std);
+$wr = WeakReference::create($std);
+$wr2 = WeakReference::create($std);
 
 debug_zval_dump($std);
 
