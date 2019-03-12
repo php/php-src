@@ -112,6 +112,9 @@ PHP 7.4 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/null_coalesce_equal_operator
 
+  . Support for WeakReferences has been added.
+    RFC: https://wiki.php.net/rfc/weakrefs
+
 - FFI:
   . A new extension which provides a simple way to call native functions, access
     native variables and create/access data structures defined in C libraries.
