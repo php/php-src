@@ -119,7 +119,7 @@
 #if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
 
 #ifdef ZTS
-# define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
+# define PHPDBG_G(v) ZEND_TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
 #else
 # define PHPDBG_G(v) (phpdbg_globals.v)
 #endif
