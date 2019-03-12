@@ -1,5 +1,13 @@
 dnl This file becomes configure.ac for self-contained extensions.
 
+dnl Include external macro definitions before AC_INIT to remove comments.
+m4_include([build/ax_check_compile_flag.m4])
+m4_include([build/ax_gcc_func_attribute.m4])
+m4_include([build/libtool.m4])
+m4_include([build/php_cxx_compile_stdcxx.m4])
+m4_include([build/php.m4])
+m4_include([build/pkg.m4])
+
 AC_PREREQ([2.68])
 AC_INIT
 AC_CONFIG_SRCDIR([config.m4])

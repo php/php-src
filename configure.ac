@@ -1,5 +1,14 @@
 dnl ## Process this file with autoconf to produce a configure script.
 
+dnl Include external macro definitions before AC_INIT to remove comments.
+m4_include([build/ax_check_compile_flag.m4])
+m4_include([build/ax_gcc_func_attribute.m4])
+m4_include([build/libtool.m4])
+m4_include([build/php_cxx_compile_stdcxx.m4])
+m4_include([build/php.m4])
+m4_include([build/pkg.m4])
+m4_include([Zend/acinclude.m4])
+
 dnl Basic autoconf initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
