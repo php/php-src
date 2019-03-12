@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #77345 (Stack Overflow caused by circular reference in garbage
     collection). (Alexandru Patranescu, Nikita, Dmitry)
 
+- CLI Server:
+  . Fixed bug #77722 (Incorrect IP set to $_SERVER['REMOTE_ADDR'] on the
+    localhost). (Nikita)
+
 - Apache2Handler:
   . Fixed bug #77648 (BOM in sapi/apache2handler/php_functions.c). (cmb)
 
