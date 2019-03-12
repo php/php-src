@@ -1248,7 +1248,9 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 	(void)ts_resource(0);
+# ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
 #endif
 
 	zend_signal_startup();

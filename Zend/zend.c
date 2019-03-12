@@ -679,8 +679,6 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 
 static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{{ */
 {
-	ZEND_TSRMLS_CACHE_UPDATE();
-
 	zend_startup_constants();
 	zend_copy_constants(executor_globals->zend_constants, GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
@@ -780,7 +778,6 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_executor_globals *executor_globals;
 	extern ZEND_API ts_rsrc_id ini_scanner_globals_id;
 	extern ZEND_API ts_rsrc_id language_scanner_globals_id;
-	ZEND_TSRMLS_CACHE_UPDATE();
 #else
 	extern zend_ini_scanner_globals ini_scanner_globals;
 	extern zend_php_scanner_globals language_scanner_globals;

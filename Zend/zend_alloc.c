@@ -2723,7 +2723,6 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 	if (tmp && zend_atoi(tmp, 0)) {
 		zend_mm_use_huge_pages = 1;
 	}
-	ZEND_TSRMLS_CACHE_UPDATE();
 	alloc_globals->mm_heap = zend_mm_init();
 }
 

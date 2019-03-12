@@ -79,7 +79,6 @@ static int php_output_handler_devnull_func(void **handler_context, php_output_co
  * Initialize the module globals on MINIT */
 static inline void php_output_init_globals(zend_output_globals *G)
 {
-	ZEND_TSRMLS_CACHE_UPDATE();
 	memset(G, 0, sizeof(*G));
 }
 /* }}} */
