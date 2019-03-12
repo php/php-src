@@ -46,6 +46,13 @@ install-modules: build-modules
 	@rm -f modules/*.la >/dev/null 2>&1
 	@$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR)
 
+WIN_HEADERS = \
+	TSRM/tsrm_win32.h \
+	TSRM/tsrm_config.w32.h \
+	Zend/zend_config.w32.h \
+	ext/mysqlnd/config-win.h \
+	ext/standard/winver.h
+
 install-headers:
 	-@if test "$(INSTALL_HEADERS)"; then \
 		for i in `echo $(INSTALL_HEADERS)`; do \
@@ -68,6 +75,11 @@ install-headers:
 				(cd $(top_srcdir)/$$src && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
 				cd $(top_builddir)/$$src && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
 			fi \
+		done; \
+		for i in `echo $(WIN_HEADERS)`; do \
+			if test -f "$(INSTALL_ROOT)$(phpincludedir)/$$i"; then \
+				rm -f $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+			fi; \
 		done; \
 	fi
 
