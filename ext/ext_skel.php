@@ -31,6 +31,14 @@ function error($message) {
 /* {{{ print_help
  */
 function print_help() {
+    if (PHP_OS_FAMILY != 'Windows') {
+        $file_prefix = './';
+        $make_prefix = '';
+    } else {
+        $file_prefix = '';
+        $make_prefix = 'n';
+    }
+
     echo <<<HELP
 WHAT IT IS
 
@@ -47,9 +55,19 @@ HOW TO USE IT
 
   If you don't need to test the existence of any external header files,
   libraries or functions in them, the extension is ready to be compiled in PHP.
-  To compile the extension, run the following:
+  To compile the extension in the PHP, run the following:
 
-    ./buildconf; ./configure --enable-extension_name; make
+    cd /path/to/php-src
+    {$file_prefix}buildconf
+    {$file_prefix}configure --enable-extension_name
+    {$make_prefix}make
+
+  Alternatively, to compile extension as shared:
+
+    cd extension_name
+    phpize
+    {$file_prefix}configure
+    {$make_prefix}make
 
   The definition of PHP_extension_NAME_VERSION will be present in the
   php_extension_name.h and injected into the zend_extension_entry definition.
