@@ -37,9 +37,6 @@ zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
 
-ZEND_DECLARE_MODULE_GLOBALS(pdo)
-static PHP_GINIT_FUNCTION(pdo);
-
 /* True global resources - no need for thread safety here */
 
 /* the registry of PDO drivers */
@@ -132,11 +129,7 @@ zend_module_entry pdo_module_entry = {
 	NULL,
 	PHP_MINFO(pdo),
 	PHP_PDO_VERSION,
-	PHP_MODULE_GLOBALS(pdo),
-	PHP_GINIT(pdo),
-	NULL,
-	NULL,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -146,13 +139,6 @@ zend_module_entry pdo_module_entry = {
 #ifdef COMPILE_DL_PDO
 ZEND_GET_MODULE(pdo)
 #endif
-
-/* {{{ PHP_GINIT_FUNCTION */
-static PHP_GINIT_FUNCTION(pdo)
-{
-	pdo_globals->global_value = 0;
-}
-/* }}} */
 
 PDO_API int php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
 {

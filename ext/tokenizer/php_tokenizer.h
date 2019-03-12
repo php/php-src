@@ -39,10 +39,4 @@ PHP_MINFO_FUNCTION(tokenizer);
 PHP_FUNCTION(token_get_all);
 PHP_FUNCTION(token_name);
 
-#ifdef ZTS
-#define TOKENIZER_G(v) TSRMG(tokenizer_globals_id, zend_tokenizer_globals *, v)
-#else
-#define TOKENIZER_G(v) (tokenizer_globals.v)
-#endif
-
 #endif	/* PHP_TOKENIZER_H */
