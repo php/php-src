@@ -198,8 +198,10 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - Obsolescent macros AC_FUNC_VPRINTF and AC_FUNC_UTIME_NULL have been
       removed. Symbols HAVE_VPRINTF and HAVE_UTIME_NULL are no longer defined
       since they are not needed on the current systems.
-    - Local PHP macros PHP_TARGET_RDYNAMIC, PHP_SOLARIS_PIC_WEIRDNESS,
-      PHP_SYS_LFS have been removed.
+    - Local PHP m4 unused or obsolete macros have been removed:
+      PHP_TARGET_RDYNAMIC, PHP_SOLARIS_PIC_WEIRDNESS, PHP_SYS_LFS,
+      PHP_AC_BROKEN_SPRINTF, PHP_EXTENSION, PHP_DECLARED_TIMEZONE,
+      PHP_CHECK_TYPES, PHP_TM_GMTOFF.
     - new --enable-rtld-now build option allow to switch dlopen behavior
       from RTLD_LAZY to RTLD_NOW
 
