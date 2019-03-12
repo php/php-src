@@ -53,7 +53,7 @@ The full syntax:
 PHP_NEW_EXTENSION(extname, sources [, shared [,sapi_class[, extra-cflags]]])
 ```
 
-Please have a look at `acinclude.m4` for the gory details and meanings of the
+Please have a look at `build/php.m4` for the gory details and meanings of the
 other parameters.
 
 And that's basically it for the extension side.
@@ -118,4 +118,4 @@ contexts. With the help of macros you can define special flags for each
 source-file, where it is located, in which target context it can work, etc.
 
 Have a look at the well documented macros `PHP_ADD_SOURCES(_X)` in
-`acinclude.m4`.
+`build/php.m4`.

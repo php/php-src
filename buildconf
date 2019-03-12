@@ -27,12 +27,12 @@ while test $# -gt 0; do
 PHP buildconf
 
 A wrapper around the autoconf and autoheader that generate files for building
-PHP on *nix systems (configure, main/php_config.h.in, aclocal.m4...). The
-configure script is used to customize the PHP build based on the provided
-options and system. PHP releases downloaded from PHP.net already include the
-configure script so installing Autoconf and running buildconf is not needed. For
-the PHP sources from the Git repository, buildconf is used for generating a new
-configure script and required files.
+PHP on *nix systems (configure and main/php_config.h.in). The configure script
+is used to customize the PHP build based on the provided options and system. PHP
+releases downloaded from PHP.net already include the configure script so
+installing Autoconf and running buildconf is not needed. For the PHP sources
+from the Git repository, buildconf is used for generating a new configure script
+and required files.
 
 SYNOPSIS:
   buildconf [<options>]
@@ -103,4 +103,4 @@ $MAKE -s -f build/build.mk \
   PHP_AUTOCONF="$PHP_AUTOCONF" \
   PHP_AUTOHEADER="$PHP_AUTOHEADER" \
   PHP_AUTOCONF_FLAGS="$autoconf_flags" \
-  PHP_M4_FILES="$(echo TSRM/*.m4 Zend/Zend.m4 ext/*/config*.m4 sapi/*/config*.m4)"
+  PHP_M4_FILES="$(echo TSRM/*.m4 Zend/Zend.m4 build/*.m4 ext/*/config*.m4 sapi/*/config*.m4)"
