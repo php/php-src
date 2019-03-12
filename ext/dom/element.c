@@ -1280,7 +1280,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_node)
 }
 /* }}} end dom_element_set_id_attribute_node */
 
-/* {{{ proto DomChildNode DOMElement::remove();
+/* {{{ proto void DOMElement::remove();
 URL:
 Since:
 */
@@ -1299,7 +1299,7 @@ PHP_METHOD(domelement, remove)
 	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
 
 	if (dom_node_children_valid(child) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	stricterror = dom_get_strict_error(intern->document);
@@ -1307,31 +1307,30 @@ PHP_METHOD(domelement, remove)
 	if (dom_node_is_read_only(child) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	if (!child->parent) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	children = child->parent->children;
 	if (!children) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	while (children) {
 		if (children == child) {
 			xmlUnlinkNode(child);
-			DOM_RET_OBJ(child, &ret, intern);
-			return;
+			RETURN_NULL();
 		}
 		children = children->next;
 	}
 
 	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-	RETURN_FALSE
+	RETURN_NULL();
 }
 /* }}} end dom_node_remove_child */
 
