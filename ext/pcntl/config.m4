@@ -26,5 +26,5 @@ if test "$PHP_PCNTL" != "no"; then
     AC_MSG_RESULT([no])
   ])
 
-  PHP_NEW_EXTENSION(pcntl, pcntl.c php_signal.c, $ext_shared, cli, $PCNTL_CFLAGS)
+  PHP_NEW_EXTENSION(pcntl, pcntl.c php_signal.c, $ext_shared, cli, $PCNTL_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi

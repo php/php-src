@@ -96,6 +96,9 @@ static PHP_GINIT_FUNCTION(ldap);
 static int le_link, le_result, le_result_entry;
 
 #ifdef COMPILE_DL_LDAP
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(ldap)
 #endif
 
@@ -661,6 +664,9 @@ PHP_INI_END()
  */
 static PHP_GINIT_FUNCTION(ldap)
 {
+#if defined(COMPILE_DL_LDAP) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	ldap_globals->num_links = 0;
 }
 /* }}} */

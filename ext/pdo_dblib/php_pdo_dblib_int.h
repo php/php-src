@@ -145,11 +145,12 @@ ZEND_BEGIN_MODULE_GLOBALS(dblib)
 	char sqlstate[6];
 ZEND_END_MODULE_GLOBALS(dblib)
 
-#ifdef ZTS
-# define DBLIB_G(v) TSRMG(dblib_globals_id, zend_dblib_globals *, v)
-#else
-# define DBLIB_G(v) (dblib_globals.v)
+#if defined(ZTS) && (defined(COMPILE_DL_PDO_DBLIB) || defined(COMPILE_DL_PDO_MSSQL))
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(dblib)
+#define DBLIB_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(dblib, v)
 
 ZEND_EXTERN_MODULE_GLOBALS(dblib)
 

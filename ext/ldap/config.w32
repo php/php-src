@@ -10,7 +10,7 @@ if (PHP_LDAP != "no") {
 			CHECK_LIB("oldap32_a.lib", "ldap", PHP_LDAP) &&
 			CHECK_LIB("olber32_a.lib", "ldap", PHP_LDAP)&&
 			CHECK_LIB("libsasl.lib", "ldap", PHP_LDAP)) {
-		EXTENSION('ldap', 'ldap.c');
+		EXTENSION('ldap', 'ldap.c', null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 		AC_DEFINE('HAVE_LDAP_PARSE_RESULT', 1);
 		AC_DEFINE('HAVE_LDAP_PARSE_REFERENCE', 1);

@@ -29,14 +29,12 @@ ZEND_BEGIN_MODULE_GLOBALS(sqlite3)
 	int dbconfig_defensive;
 ZEND_END_MODULE_GLOBALS(sqlite3)
 
-#ifdef ZTS
-# define SQLITE3G(v) TSRMG(sqlite3_globals_id, zend_sqlite3_globals *, v)
-# ifdef COMPILE_DL_SQLITE3
+#if defined(ZTS) && defined(COMPILE_DL_SQLITE3)
 ZEND_TSRMLS_CACHE_EXTERN()
-# endif
-#else
-# define SQLITE3G(v) (sqlite3_globals.v)
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(sqlite3)
+#define SQLITE3G(v) ZEND_MODULE_GLOBALS_ACCESSOR(sqlite3, v)
 
 #define PHP_SQLITE3_ASSOC	1<<0
 #define PHP_SQLITE3_NUM		1<<1

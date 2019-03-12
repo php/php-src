@@ -91,11 +91,12 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	zend_bool async_signals;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
-#ifdef ZTS
-#define PCNTL_G(v) TSRMG(pcntl_globals_id, zend_pcntl_globals *, v)
-#else
-#define PCNTL_G(v)	(pcntl_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_PCNTL)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(pcntl)
+#define PCNTL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(pcntl, v)
 
 #define REGISTER_PCNTL_ERRNO_CONSTANT(name) REGISTER_LONG_CONSTANT("PCNTL_" #name, name, CONST_CS | CONST_PERSISTENT)
 
