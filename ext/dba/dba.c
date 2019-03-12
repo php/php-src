@@ -160,11 +160,7 @@ ZEND_END_MODULE_GLOBALS(dba)
 
 ZEND_DECLARE_MODULE_GLOBALS(dba)
 
-#ifdef ZTS
-#define DBA_G(v) TSRMG(dba_globals_id, zend_dba_globals *, v)
-#else
-#define DBA_G(v) (dba_globals.v)
-#endif
+#define DBA_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(dba, v)
 
 static PHP_GINIT_FUNCTION(dba);
 
@@ -186,6 +182,9 @@ zend_module_entry dba_module_entry = {
 };
 
 #ifdef COMPILE_DL_DBA
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(dba)
 #endif
 
@@ -515,6 +514,9 @@ PHP_INI_END()
  */
 static PHP_GINIT_FUNCTION(dba)
 {
+#if defined(COMPILE_DL_DBA) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	dba_globals->default_handler = "";
 	dba_globals->default_hptr    = NULL;
 }

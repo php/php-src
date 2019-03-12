@@ -59,5 +59,5 @@ recode_format_table();
   PHP_ADD_INCLUDE($RECODE_DIR/$RECODE_INC)
   PHP_SUBST(RECODE_SHARED_LIBADD)
   AC_CHECK_HEADERS(stdbool.h)
-  PHP_NEW_EXTENSION(recode, recode.c, $ext_shared)
+  PHP_NEW_EXTENSION(recode, recode.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi

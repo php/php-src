@@ -232,11 +232,12 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 	zend_bool enable_rsh;
 ZEND_END_MODULE_GLOBALS(imap)
 
-#ifdef ZTS
-# define IMAPG(v) TSRMG(imap_globals_id, zend_imap_globals *, v)
-#else
-# define IMAPG(v) (imap_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_IMAP)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(imap)
+#define IMAPG(v) ZEND_MODULE_GLOBALS_ACCESSOR(imap, v)
 
 #else
 
