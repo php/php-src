@@ -13,7 +13,7 @@ echo $tags['GPSLatitude'][2], PHP_EOL;
 echo $tags['GPSLongitude'][2], PHP_EOL;
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 156691934/70000000
 2672193571/70000000
 ===DONE===

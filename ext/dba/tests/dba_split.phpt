@@ -7,7 +7,6 @@ DBA Split Test
 ?>
 --FILE--
 <?php
-var_dump(dba_key_split("key1", "name"));
 var_dump(dba_key_split(1));
 var_dump(dba_key_split(null));
 var_dump(dba_key_split(""));
@@ -23,8 +22,6 @@ var_dump(dba_key_split("[key1]name1"));
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Warning: Wrong parameter count for dba_key_split() in %sdba_split.php on line %d
-NULL
 array(2) {
   [0]=>
   string(0) ""

@@ -2044,6 +2044,19 @@ function generate_tmp_php_ini()
 
 		if (!is_on_exclude_list_for_test_ini(ext_list, ext_name)) {
 			INI.WriteLine(directive + "=php_" + ext_name + ".dll");
+
+			if ("opcache" == ext_name) {
+				var dir = get_define("BUILD_DIR") + "\\" + "test_file_cache";
+				if (FSO.FolderExists(dir)) {
+					STDOUT.Write(execute("powershell -Command Remove-Item -path \"\\\\?\\" + dir + "\" -recurse"));
+				}
+				FSO.CreateFolder(dir);
+
+				/* Fallback is implied, if filecache is enabled. */
+				INI.WriteLine("opcache.file_cache=" + dir);
+				INI.WriteLine("opcache.enable=1");
+				INI.WriteLine("opcache.enable_cli=1");
+			}
 		}
 	}
 
@@ -3031,11 +3044,15 @@ function toolset_setup_project_tools()
 	PATH_PROG('7za');
 
 	// avoid picking up midnight commander from cygwin
-	PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
+	if (!PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"))) {
+		ERROR('mc is required')
+	}
 
 	// Try locating the manifest tool
 	if (VS_TOOLSET) {
-		PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
+		if (!PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"))) {
+			ERROR('mt is required')
+		}
 	}
 }
 /* Get compiler if the toolset is supported */

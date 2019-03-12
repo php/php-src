@@ -18,15 +18,6 @@ $instance = new TestClass();
 $invalidInstance = new AnotherClass();
 $propInfo = new ReflectionProperty('TestClass', 'pub2');
 
-echo "Too few args:\n";
-var_dump($propInfo->getValue());
-
-echo "\nToo many args:\n";
-var_dump($propInfo->getValue($instance, true));
-
-echo "\nWrong type of arg:\n";
-var_dump($propInfo->getValue(true));
-
 echo "\nInstance without property:\n";
 $propInfo = new ReflectionProperty('TestClass', 'stat');
 
@@ -51,21 +42,6 @@ var_dump($propInfo->getValue($invalidInstance));
 
 ?>
 --EXPECTF--
-Too few args:
-
-Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Too many args:
-
-Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Wrong type of arg:
-
-Warning: ReflectionProperty::getValue() expects parameter 1 to be object, bool given in %s on line %d
-NULL
-
 Instance without property:
 
 Static property / too many args:
@@ -79,8 +55,8 @@ Cannot access non-public member TestClass::$prot
 
 Invalid instance:
 
-Fatal error: Uncaught ReflectionException: Given object is not an instance of the class this property was declared in in %s:47
+Fatal error: Uncaught ReflectionException: Given object is not an instance of the class this property was declared in in %s:%d
 Stack trace:
-#0 %s(47): ReflectionProperty->getValue(Object(AnotherClass))
+#0 %s(%d): ReflectionProperty->getValue(Object(AnotherClass))
 #1 {main}
-  thrown in %s on line 47
+  thrown in %s on line %d

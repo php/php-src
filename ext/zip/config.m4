@@ -1,10 +1,16 @@
 dnl config.m4 for extension zip
 
-PHP_ARG_ENABLE(zip, for zip archive read/writesupport,
-[  --enable-zip            Include Zip read/write support])
+PHP_ARG_ENABLE([zip],
+  [for zip archive read/writesupport],
+  [AS_HELP_STRING([--enable-zip],
+    [Include Zip read/write support])])
 
-PHP_ARG_WITH(libzip, libzip,
-[  --with-libzip[=DIR]       ZIP: use libzip], yes, no)
+PHP_ARG_WITH([libzip],
+  [libzip],
+  [AS_HELP_STRING([[--with-libzip[=DIR]]],
+    [ZIP: use libzip])],
+  [yes],
+  [no])
 
 if test "$PHP_ZIP" != "no"; then
 
@@ -43,7 +49,7 @@ if test "$PHP_ZIP" != "no"; then
 
     if test -z "$LIBZIP_LIBDIR"; then
       AC_MSG_RESULT(not found)
-      AC_MSG_ERROR(Please reinstall the libzip distribution)
+      AC_MSG_ERROR(Please reinstall the libzip. Header zip.h not found.)
     fi
 
     dnl Could not think of a simple way to check libzip for overwrite support

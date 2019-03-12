@@ -16,7 +16,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 /* Testing readlink() with invalid arguments -int, float, bool, NULL, resource */
 
 $file_path = dirname(__FILE__);
-$file_handle = fopen($file_path."/readlink_variation2.tmp", "w");
 
 echo "*** Testing Invalid file types ***\n";
 $filenames = array(
@@ -26,7 +25,6 @@ $filenames = array(
   TRUE,
   FALSE,
   NULL,
-  $file_handle,
 
   /* scalars */
   1234,
@@ -38,7 +36,6 @@ foreach( $filenames as $filename ) {
   var_dump( readlink($filename) );
   clearstatcache();
 }
-fclose($file_handle);
 
 echo "\n*** Done ***";
 ?>
@@ -64,9 +61,6 @@ bool(false)
 
 Warning: readlink(): %s in %s on line %d
 bool(false)
-
-Warning: readlink() expects parameter 1 to be a valid path, resource given in %s on line %d
-NULL
 
 Warning: readlink(): %s in %s on line %d
 bool(false)

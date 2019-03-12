@@ -9,7 +9,6 @@ die("info $HND handler used");
 <?php
 require_once(dirname(__FILE__) .'/test.inc');
 echo "database handler: $handler\n";
-var_dump(dba_open($db_file));
 var_dump(dba_open($db_file, 'n'));
 var_dump(dba_open($db_file, 'n', 'bogus'));
 var_dump(dba_open($db_file, 'q', $handler));
@@ -22,9 +21,6 @@ require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile
-
-Warning: Wrong parameter count for dba_open() in %sdba011.php on line %d
-NULL
 resource(%d) of type (dba)
 
 Warning: dba_open(%stest0.dbm,n): No such handler: bogus in %sdba011.php on line %d

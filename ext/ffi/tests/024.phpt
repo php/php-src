@@ -29,7 +29,7 @@ ffi.enable=1
 ?>
 --EXPECTF--
 int(20)
-object(FFI\CData:<struct>)#%d (6) {
+object(FFI\CData:struct <anonymous>)#%d (6) {
   ["a"]=>
   int(1)
   ["b"]=>

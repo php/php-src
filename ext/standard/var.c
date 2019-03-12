@@ -487,6 +487,13 @@ again:
 			smart_str_appendl(buf, "NULL", 4);
 			break;
 		case IS_LONG:
+			/* INT_MIN as a literal will be parsed as a float. Emit something like
+			 * -9223372036854775807-1 to avoid this. */
+			if (Z_LVAL_P(struc) == ZEND_LONG_MIN) {
+				smart_str_append_long(buf, ZEND_LONG_MIN+1);
+				smart_str_appends(buf, "-1");
+				break;
+			}
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
@@ -719,7 +726,7 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 
 	ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
 	BG(serialize_lock)++;
-	res = call_user_function(CG(function_table), struc, &fname, retval, 0, 0);
+	res = call_user_function(NULL, struc, &fname, retval, 0, 0);
 	BG(serialize_lock)--;
 	zval_ptr_dtor_str(&fname);
 

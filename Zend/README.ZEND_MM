@@ -7,12 +7,6 @@ General:
 The goal of the new memory manager (available since PHP 5.2) is to reduce memory
 allocation overhead and speedup memory management.
 
-The new manager's "configure" has no "--disable-zend-memory-manager" option,
-but it has "--enable-malloc-mm" instead.  It is enabled by default in DEBUG
-build and disabled by default in RELEASE build. When enabled it allows selecting
-between malloc and emalloc at runtime so you can use internal and external memory
-debuggers without recompilation.
-
 Debugging:
 ----------
 

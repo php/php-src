@@ -858,7 +858,7 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	ZVAL_LONG(&zvs[4], bytes_sofar);
 	ZVAL_LONG(&zvs[5], bytes_max);
 
-	if (FAILURE == call_user_function_ex(EG(function_table), NULL, callback, &retval, 6, zvs, 0, NULL)) {
+	if (FAILURE == call_user_function_ex(NULL, NULL, callback, &retval, 6, zvs, 0, NULL)) {
 		php_error_docref(NULL, E_WARNING, "failed to call user notifier");
 	}
 	for (i = 0; i < 6; i++) {
@@ -1671,8 +1671,7 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
 	}
 	else {
-		zend_internal_type_error(
-			ZEND_ARG_USES_STRICT_TYPES(),
+		zend_type_error(
 			"%s() was not able to analyze the specified stream",
 			get_active_function_name()
 		);

@@ -9,12 +9,6 @@ Test ltrim() function
 
  echo "\n *** Output for Error Conditions ***\n";
 
- echo "\n *** Output for zero argument ***\n";
- var_dump( ltrim() );
-
- echo "\n *** Output for more than valid number of arguments (Valid are 1 or 2 arguments) ***\n";
- var_dump( ltrim("", " ", 1) );
-
 /* heredoc string */
 $str = <<<EOD
 us
@@ -49,16 +43,6 @@ echo "\nDone\n";
 ?>
 --EXPECTF--
 *** Output for Error Conditions ***
-
- *** Output for zero argument ***
-
-Warning: ltrim() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
- *** Output for more than valid number of arguments (Valid are 1 or 2 arguments) ***
-
-Warning: ltrim() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 
  *** Using heredoc string ***
 string(17) "ng heredoc string"

@@ -18,15 +18,6 @@ if (!function_exists('mysqli_stmt_get_result'))
 	*/
 	require_once("connect.inc");
 
-	$tmp	= NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_get_result()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_get_result($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	if (!$stmt = mysqli_stmt_init($link))

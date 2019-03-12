@@ -43,8 +43,6 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|b",
 			&rules, &rules_len, &compiled) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_create_instance: bad arguments", 0);
 		return;
 	}
 
@@ -105,8 +103,6 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_rules: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -132,8 +128,6 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_rule_status: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -148,8 +142,6 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_rule_status_vec: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -188,8 +180,6 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_binary_rules: bad arguments", 0);
 		RETURN_FALSE;
 	}
 

@@ -24,7 +24,7 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
-
+#include "zend_weakrefs.h"
 
 ZEND_API void zend_register_default_classes(void)
 {
@@ -33,4 +33,5 @@ ZEND_API void zend_register_default_classes(void)
 	zend_register_iterator_wrapper();
 	zend_register_closure_ce();
 	zend_register_generator_ce();
+	zend_register_weakref_ce();
 }

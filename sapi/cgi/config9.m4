@@ -1,7 +1,10 @@
 dnl config.m4 for sapi cgi
 
-PHP_ARG_ENABLE(cgi,,
-[  --disable-cgi           Disable building CGI version of PHP], yes, no)
+PHP_ARG_ENABLE([cgi],,
+  [AS_HELP_STRING([--disable-cgi],
+    [Disable building CGI version of PHP])],
+  [yes],
+  [no])
 
 dnl
 dnl CGI setup

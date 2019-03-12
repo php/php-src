@@ -14,7 +14,7 @@ function bar() {
 }
 function foo() {
     try { return bar(); }
-    finally { @fclose(null); }
+    finally { @str_repeat("foo", -10); }
 }
 
 var_dump(foo());

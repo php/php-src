@@ -325,7 +325,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_DTOR                    (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
-#define ZEND_ACC_STRICT_TYPES            (1 << 31) /*     |  X  |     |     */
+#define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 
 
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)

@@ -10,7 +10,6 @@ phar.readonly=0
 Phar::interceptFileFuncs();
 $a = fopen(__FILE__, 'rb'); // this satisfies 1 line of code coverage
 fclose($a);
-$a = fopen(); // this satisfies another line of code coverage
 
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $a = new Phar($fname);
@@ -36,7 +35,6 @@ include $fname;
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-Warning: fopen() expects at least 2 parameters, 0 given in %sfopen.php on line %d
 hihi
 Warning: fopen(notfound.txt): failed to open stream: No such file or directory in phar://%sfopen.phar.php/index.php on line %d
 ===DONE===

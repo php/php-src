@@ -4,25 +4,31 @@ Test error operation of password_hash()
 <?php
 //-=-=-=-
 
-var_dump(password_hash());
-
-var_dump(password_hash("foo"));
+try {
+    var_dump(password_hash("foo"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 var_dump(password_hash("foo", array()));
 
 var_dump(password_hash("foo", 19, new StdClass));
 
-var_dump(password_hash("foo", PASSWORD_BCRYPT, "baz"));
+try {
+    var_dump(password_hash("foo", PASSWORD_BCRYPT, "baz"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
-var_dump(password_hash(array(), PASSWORD_BCRYPT));
+try {
+    var_dump(password_hash(array(), PASSWORD_BCRYPT));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECTF--
-Warning: password_hash() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: password_hash() expects at least 2 parameters, 1 given in %s on line %d
-NULL
+password_hash() expects at least 2 parameters, 1 given
 
 Notice: Array to string conversion in %s on line %d
 
@@ -31,9 +37,5 @@ NULL
 
 Warning: password_hash(): Unknown password hashing algorithm: 19 in %s on line %d
 NULL
-
-Warning: password_hash() expects parameter 3 to be array, string given in %s on line %d
-NULL
-
-Warning: password_hash() expects parameter 1 to be string, array given in %s on line %d
-NULL
+password_hash() expects parameter 3 to be array, string given
+password_hash() expects parameter 1 to be string, array given

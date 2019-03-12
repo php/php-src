@@ -22,7 +22,7 @@
 #include "zend.h"
 
 #define ZEND_CPU_EBX_MASK     (1<<30)
-#define ZEND_CPU_EDX_MASK     (1<<31)
+#define ZEND_CPU_EDX_MASK     (1U<<31)
 
 typedef enum _zend_cpu_feature {
 	/* ECX */
@@ -100,11 +100,22 @@ typedef enum _zend_cpu_feature {
 void zend_cpu_startup();
 ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
 
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+#ifndef __has_feature
+# define __has_feature(x) 0
+#endif
+
 /* Address sanitizer is incompatible with ifunc resolvers, so exclude the
  * CPU support helpers from asan.
  * See also https://github.com/google/sanitizers/issues/342. */
 #if __has_attribute(no_sanitize_address)
-# define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
+# if __has_feature(memory_sanitizer)
+#  define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address)) __attribute__((no_sanitize("memory")))
+# else
+#  define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
+# endif
 #else
 # define ZEND_NO_SANITIZE_ADDRESS
 #endif

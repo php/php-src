@@ -65,16 +65,13 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	UChar*      svalue		= NULL;		/* UTF-16 pattern_str */
 	int32_t     slength		= 0;
 	IntlDateFormatter_object* dfo;
-	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	intl_error_reset(NULL);
 	object = return_value;
 	/* Parse parameters. */
-	if (zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(), "sll|zzs",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
-				"unable to parse input parameters", 0);
 		return FAILURE;
 	}
 

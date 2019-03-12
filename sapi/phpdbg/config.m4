@@ -1,14 +1,24 @@
 dnl config.m4 for sapi phpdbg
 
-PHP_ARG_ENABLE(phpdbg, for phpdbg support,
-[  --enable-phpdbg         Build phpdbg], yes, yes)
+PHP_ARG_ENABLE([phpdbg],
+  [for phpdbg support],
+  [AS_HELP_STRING([--enable-phpdbg],
+    [Build phpdbg])],
+  [yes],
+  [yes])
 
-PHP_ARG_ENABLE(phpdbg-webhelper, for phpdbg web SAPI support,
-[  --enable-phpdbg-webhelper
-                          Build phpdbg web SAPI support], no)
+PHP_ARG_ENABLE([phpdbg-webhelper],
+  [for phpdbg web SAPI support],
+  [AS_HELP_STRING([--enable-phpdbg-webhelper],
+    [Build phpdbg web SAPI support])],
+  [no])
 
-PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
-[  --enable-phpdbg-debug   Build phpdbg in debug mode], no, no)
+PHP_ARG_ENABLE([phpdbg-debug],
+  [for phpdbg debug build],
+  [AS_HELP_STRING([--enable-phpdbg-debug],
+    [Build phpdbg in debug mode])],
+  [no],
+  [no])
 
 if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   AC_HEADER_TIOCGWINSZ

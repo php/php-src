@@ -14,10 +14,14 @@ $result = get_extension_funcs("standard");
 var_dump(gettype($result));
 var_dump(in_array("cos", $result));
 
+// Unknown extension
+var_dump(get_extension_funcs("foo"));
+
 ?>
 ===DONE===
 --EXPECT--
 Simple testcase for get_extension_funcs() function
 string(5) "array"
 bool(true)
+bool(false)
 ===DONE===

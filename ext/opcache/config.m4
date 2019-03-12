@@ -1,11 +1,17 @@
 dnl config.m4 for extension opcache
 
-PHP_ARG_ENABLE(opcache, whether to enable Zend OPcache support,
-[  --disable-opcache       Disable Zend OPcache support], yes)
+PHP_ARG_ENABLE([opcache],
+  [whether to enable Zend OPcache support],
+  [AS_HELP_STRING([--disable-opcache],
+    [Disable Zend OPcache support])],
+  [yes])
 
-PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HUGE PAGES,
-[  --disable-huge-code-pages
-                          Disable copying PHP CODE pages into HUGE PAGES], yes, no)
+PHP_ARG_ENABLE([huge-code-pages],
+  [whether to enable copying PHP CODE pages into HUGE PAGES],
+  [AS_HELP_STRING([--disable-huge-code-pages],
+    [Disable copying PHP CODE pages into HUGE PAGES])],
+  [yes],
+  [no])
 
 PHP_ARG_ENABLE(opcache-jit, whether to enable JIT,
 [  --disable-opcache-jit  Disable JIT], yes, no)
@@ -267,7 +273,7 @@ int main() {
   char *shm;
   char tmpname[4096];
 
-  sprintf(tmpname,"test.shm.%dXXXXXX", getpid());
+  sprintf(tmpname,"/opcache.test.shm.%dXXXXXX", getpid());
   if (mktemp(tmpname) == NULL) {
     return 1;
   }
@@ -336,7 +342,7 @@ int main() {
   char *shm;
   char tmpname[4096];
 
-  sprintf(tmpname,"test.shm.%dXXXXXX", getpid());
+  sprintf(tmpname,"/opcache.test.shm.%dXXXXXX", getpid());
   if (mktemp(tmpname) == NULL) {
     return 1;
   }

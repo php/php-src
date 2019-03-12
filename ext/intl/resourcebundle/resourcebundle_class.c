@@ -82,18 +82,15 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constr
 	const char *locale;
 	size_t		locale_len = 0;
 	zend_bool	fallback = 1;
-	int         zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	zval                  *object = return_value;
 	ResourceBundle_object *rb = Z_INTL_RESOURCEBUNDLE_P( object );
 
 	intl_error_reset( NULL );
 
-	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "s!s!|b",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s!s!|b",
 		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_ctor: unable to parse input parameters", 0 );
 		return FAILURE;
 	}
 
@@ -259,8 +256,6 @@ PHP_FUNCTION( resourcebundle_get )
 	zval *      object;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oz|b",	&object, ResourceBundle_ce_ptr, &offset, &fallback ) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_get: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -300,8 +295,6 @@ PHP_FUNCTION( resourcebundle_count )
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
 
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, ResourceBundle_ce_ptr ) == FAILURE ) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_count: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -334,8 +327,6 @@ PHP_FUNCTION( resourcebundle_locales )
 
 	if( zend_parse_parameters(ZEND_NUM_ARGS(), "s", &bundlename, &bundlename_len ) == FAILURE )
 	{
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_locales: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -379,8 +370,6 @@ PHP_FUNCTION( resourcebundle_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, ResourceBundle_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_get_error_code: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -407,8 +396,6 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, ResourceBundle_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_get_error_message: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 

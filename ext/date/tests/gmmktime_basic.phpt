@@ -21,15 +21,9 @@ $year = 2008;
 // Calling gmmktime() with all possible arguments
 var_dump( gmmktime($hour, $min, $sec, $mon, $day, $year) );
 
-// Calling gmmktime() with mandatory arguments
-var_dump( gmmktime() );
-
 ?>
 ===DONE===
 --EXPECTF--
 *** Testing gmmktime() : basic functionality ***
 int(1218182888)
-
-Warning: gmmktime() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
 ===DONE===

@@ -5,15 +5,18 @@ dnl Remove where necessary.
 
 dnl If your extension references something external, use with:
 
-dnl PHP_ARG_WITH(%EXTNAME%, for %EXTNAME% support,
-dnl Make sure that the comment is aligned:
-dnl [  --with-%EXTNAME%             Include %EXTNAME% support])
+dnl PHP_ARG_WITH([%EXTNAME%],
+dnl   [for %EXTNAME% support],
+dnl   [AS_HELP_STRING([--with-%EXTNAME%],
+dnl     [Include %EXTNAME% support])])
 
 dnl Otherwise use enable:
 
-PHP_ARG_ENABLE(%EXTNAME%, whether to enable %EXTNAME% support,
-dnl Make sure that the comment is aligned:
-[  --enable-%EXTNAME%          Enable %EXTNAME% support], no)
+PHP_ARG_ENABLE([%EXTNAME%],
+  [whether to enable %EXTNAME% support],
+  [AS_HELP_STRING([--enable-%EXTNAME%],
+    [Enable %EXTNAME% support])],
+  [no])
 
 if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl Write more examples of tests here...

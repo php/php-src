@@ -39,10 +39,6 @@ _LT_AC_TRY_DLOPEN_SELF([
 ], [])
 ])
 
-dnl This is required for QNX and may be some BSD derived systems
-AC_CHECK_TYPE( uint, unsigned int )
-AC_CHECK_TYPE( ulong, unsigned long )
-
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(strdup getpid kill strtod strtol finite fpclass sigsetjmp)
@@ -87,20 +83,17 @@ int main()
 
 AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
-AC_ARG_ENABLE(maintainer-zts,
-[  --enable-maintainer-zts Enable thread safety - for code maintainers only!!],[
-  ZEND_MAINTAINER_ZTS=$enableval
-],[
-  ZEND_MAINTAINER_ZTS=no
-])
+AC_ARG_ENABLE([maintainer-zts],
+  [AS_HELP_STRING([--enable-maintainer-zts],
+    [Enable thread safety - for code maintainers only!!])],
+  [ZEND_MAINTAINER_ZTS=$enableval],
+  [ZEND_MAINTAINER_ZTS=no])
 
-AC_ARG_ENABLE(inline-optimization,
-[  --disable-inline-optimization
-                          If building zend_execute.lo fails, try this switch],[
-  ZEND_INLINE_OPTIMIZATION=$enableval
-],[
-  ZEND_INLINE_OPTIMIZATION=yes
-])
+AC_ARG_ENABLE([inline-optimization],
+  [AS_HELP_STRING([--disable-inline-optimization],
+    [If building zend_execute.lo fails, try this switch])],
+  [ZEND_INLINE_OPTIMIZATION=$enableval],
+  [ZEND_INLINE_OPTIMIZATION=yes])
 
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_MAINTAINER_ZTS)
@@ -201,13 +194,11 @@ AC_MSG_RESULT(done)
 
 AC_CHECK_FUNCS(mremap)
 
-
-AC_ARG_ENABLE(zend-signals,
-[  --disable-zend-signals  whether to enable zend signal handling],[
-  ZEND_SIGNALS=$enableval
-],[
-  ZEND_SIGNALS=yes
-])
+AC_ARG_ENABLE([zend-signals],
+  [AS_HELP_STRING([--disable-zend-signals],
+    [whether to enable zend signal handling])],
+  [ZEND_SIGNALS=$enableval],
+  [ZEND_SIGNALS=yes])
 
 AC_CHECK_FUNC(sigaction, [
 	AC_DEFINE(HAVE_SIGACTION, 1, [Whether sigaction() is available])
@@ -240,13 +231,12 @@ else
   AC_MSG_RESULT(no)
 fi
 
-AC_ARG_ENABLE(gcc-global-regs,
-[  --disable-gcc-global-regs
-                          whether to enable GCC global register variables],[
-  ZEND_GCC_GLOBAL_REGS=$enableval
-],[
-  ZEND_GCC_GLOBAL_REGS=yes
-])
+AC_ARG_ENABLE([gcc-global-regs],
+  [AS_HELP_STRING([--disable-gcc-global-regs],
+    [whether to enable GCC global register variables])],
+  [ZEND_GCC_GLOBAL_REGS=$enableval],
+  [ZEND_GCC_GLOBAL_REGS=yes])
+
 AC_MSG_CHECKING(for global register variables support)
 if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[

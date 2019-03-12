@@ -91,6 +91,7 @@ extern const php_hash_ops php_hash_gost_crypto_ops;
 extern const php_hash_ops php_hash_adler32_ops;
 extern const php_hash_ops php_hash_crc32_ops;
 extern const php_hash_ops php_hash_crc32b_ops;
+extern const php_hash_ops php_hash_crc32c_ops;
 extern const php_hash_ops php_hash_fnv132_ops;
 extern const php_hash_ops php_hash_fnv1a32_ops;
 extern const php_hash_ops php_hash_fnv164_ops;

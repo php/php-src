@@ -4,7 +4,6 @@ mb_encoding_aliases()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
-mb_encoding_aliases();
 $list = mb_encoding_aliases("ASCII");
 sort($list);
 var_dump($list);
@@ -13,7 +12,6 @@ var_dump(mb_encoding_aliases("8bit"));
 var_dump(mb_encoding_aliases("BAD"));
 ?>
 --EXPECTF--
-Warning: mb_encoding_aliases() expects exactly 1 parameter, 0 given in %s on line 2
 array(11) {
   [0]=>
   string(14) "ANSI_X3.4-1968"

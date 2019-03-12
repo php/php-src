@@ -68,15 +68,23 @@ $perms_array = array(
 $count = 1;
 foreach($perms_array as $permission) {
   echo "-- Iteration $count --\n";
-  var_dump( chmod($file_name, $permission) );
-  printf("%o", fileperms($file_name) );
-  echo "\n";
-  clearstatcache();
+  try {
+    var_dump( chmod($file_name, $permission) );
+    printf("%o", fileperms($file_name) );
+    echo "\n";
+    clearstatcache();
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
 
-  var_dump( chmod($dir_name, $permission) );
-  printf("%o", fileperms($dir_name) );
-  echo "\n";
-  clearstatcache();
+  try {
+    var_dump( chmod($dir_name, $permission) );
+    printf("%o", fileperms($dir_name) );
+    echo "\n";
+    clearstatcache();
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $count++;
 }
 echo "*** Done ***\n";
@@ -148,39 +156,15 @@ bool(true)
 bool(true)
 43567
 -- Iteration 12 --
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-103567
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-43567
+chmod() expects parameter 2 to be int, string given
+chmod() expects parameter 2 to be int, string given
 -- Iteration 13 --
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-103567
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-43567
+chmod() expects parameter 2 to be int, string given
+chmod() expects parameter 2 to be int, string given
 -- Iteration 14 --
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-103567
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-43567
+chmod() expects parameter 2 to be int, string given
+chmod() expects parameter 2 to be int, string given
 -- Iteration 15 --
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-103567
-
-Warning: chmod() expects parameter 2 to be int, string given in %s on line %d
-NULL
-43567
+chmod() expects parameter 2 to be int, string given
+chmod() expects parameter 2 to be int, string given
 *** Done ***

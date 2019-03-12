@@ -1128,7 +1128,7 @@ static void php_openssl_limit_handshake_reneg(const SSL *ssl) /* {{{ */
 
 			/* Closing the stream inside this callback would segfault! */
 			stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
-			if (FAILURE == call_user_function_ex(EG(function_table), NULL, val, &retval, 1, &param, 0, NULL)) {
+			if (FAILURE == call_user_function_ex(NULL, NULL, val, &retval, 1, &param, 0, NULL)) {
 				php_error(E_WARNING, "SSL: failed invoking reneg limit notification callback");
 			}
 			stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;

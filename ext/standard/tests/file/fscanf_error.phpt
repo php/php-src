@@ -17,16 +17,6 @@ if ($file_handle == false)
 fwrite($file_handle, "hello world");
 fclose($file_handle);
 
-// zero argument
-var_dump( fscanf() );
-
-// single argument
-$file_handle = fopen($filename, 'r');
-if ($file_handle == false)
-  exit("Error:failed to open file $filename");
-var_dump( fscanf($file_handle) );
-fclose($file_handle);
-
 // invalid file handle
 var_dump( fscanf($file_handle, "%s") );
 
@@ -62,12 +52,6 @@ unlink($filename);
 ?>
 --EXPECTF--
 *** Testing fscanf() for error conditions ***
-
-Warning: fscanf() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: fscanf() expects at least 2 parameters, 1 given in %s on line %d
-NULL
 
 Warning: fscanf(): supplied resource is not a valid File-Handle resource in %s on line %d
 bool(false)

@@ -1,9 +1,9 @@
 dnl config.m4 for extension intl
 
-dnl ##########################################################################
-dnl Initialize the extension
-PHP_ARG_ENABLE(intl, whether to enable internationalization support,
-[  --enable-intl           Enable internationalization support])
+PHP_ARG_ENABLE([intl],
+  [whether to enable internationalization support],
+  [AS_HELP_STRING([--enable-intl],
+    [Enable internationalization support])])
 
 if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU(INTL_SHARED_LIBADD)

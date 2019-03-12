@@ -10,5 +10,5 @@ try {
     echo $e->getMessage().PHP_EOL;
 }
 ?>
---EXPECTF--
+--EXPECT--
 Length must be greater than 0

@@ -398,6 +398,8 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 1314 */   ,  {   ERROR_PRIVILEGE_NOT_HELD        ,   EACCES          }
         /* 1816 */  ,   {   ERROR_NOT_ENOUGH_QUOTA          ,   ENOMEM          }
 					,   {   ERROR_ABANDONED_WAIT_0          ,   EIO }
+		/* 1464 */	,	{	ERROR_SYMLINK_NOT_SUPPORTED		,	EINVAL			}
+		/* 4390 */	,	{	ERROR_NOT_A_REPARSE_POINT		,	EINVAL			}
     };
 
     for(i = 0; i < sizeof(errmap)/sizeof(struct code_to_errno_map); ++i)

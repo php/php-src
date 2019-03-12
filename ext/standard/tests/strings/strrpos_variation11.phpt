@@ -81,14 +81,22 @@ $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $haystack = $values[$index];
-  var_dump( strrpos($values[$index], $values[$index]) );
-  var_dump( strrpos($values[$index], $values[$index], 1) );
+  try {
+    var_dump( strrpos($values[$index], $values[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
+  try {
+    var_dump( strrpos($values[$index], $values[$index], 1) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter ++;
 }
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function with unexpected values for haystack and needle ***
 -- Iteration 1 --
 int(0)
@@ -118,40 +126,20 @@ bool(false)
 int(0)
 bool(false)
 -- Iteration 10 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 1 to be string, array given
+strrpos() expects parameter 1 to be string, array given
 -- Iteration 11 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 1 to be string, array given
+strrpos() expects parameter 1 to be string, array given
 -- Iteration 12 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 1 to be string, array given
+strrpos() expects parameter 1 to be string, array given
 -- Iteration 13 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 1 to be string, array given
+strrpos() expects parameter 1 to be string, array given
 -- Iteration 14 --
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+strrpos() expects parameter 1 to be string, array given
+strrpos() expects parameter 1 to be string, array given
 -- Iteration 15 --
 int(0)
 bool(false)
@@ -180,12 +168,8 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 24 --
-
-Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
-bool(false)
-
-Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
-bool(false)
+strrpos() expects parameter 1 to be string, resource given
+strrpos() expects parameter 1 to be string, resource given
 -- Iteration 25 --
 bool(false)
 bool(false)

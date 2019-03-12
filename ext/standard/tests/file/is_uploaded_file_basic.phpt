@@ -29,19 +29,9 @@ var_dump(is_uploaded_file('random_filename.txt'));
 // not an uploaded file
 var_dump(is_uploaded_file('__FILE__'));
 
-// Error cases
-var_dump(is_uploaded_file());
-var_dump(is_uploaded_file('a', 'b'));
-
 ?>
 --EXPECTF--
 bool(true)
 bool(false)
 bool(false)
 bool(false)
-
-Warning: is_uploaded_file() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_uploaded_file() expects exactly 1 parameter, 2 given in %s on line %d
-NULL

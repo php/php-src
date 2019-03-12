@@ -63,8 +63,6 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zs!",
 			&zv_timezone, &locale_str, &dummy) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_create_calendar: bad arguments", 0);
 		RETURN_NULL();
 	}
 
@@ -154,8 +152,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssb",
 			&key, &key_len, &locale, &locale_len, &commonly_used) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_keyword_values_for_locale: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -190,8 +186,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_now)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_now: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -203,8 +197,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_available_locales)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_available_locales: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -228,9 +220,6 @@ static void _php_intlcal_field_uec_ret_in32t_method(
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &field) == FAILURE) {
-		spprintf(&message, 0, "%s: bad arguments", method_name);
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-		efree(message);
 		RETURN_FALSE;
 	}
 
@@ -262,8 +251,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_time: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -283,8 +270,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Od",
 			&object, Calendar_ce_ptr, &time_arg) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set_time: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -304,8 +289,6 @@ U_CFUNC PHP_FUNCTION(intlcal_add)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Oll", &object, Calendar_ce_ptr, &field, &amount) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_add: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -336,8 +319,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Oz!", &object, Calendar_ce_ptr, &zv_timezone) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set_time_zone: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -370,8 +351,6 @@ static void _php_intlcal_before_after(
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"OO", &object, Calendar_ce_ptr, &when_object, Calendar_ce_ptr)
 			== FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_before/after: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -430,8 +409,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 			zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
 			"Oll|llll",	&object, Calendar_ce_ptr, &arg1, &arg2, &arg3, &arg4,
 			&arg5, &arg6) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -489,15 +466,11 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
 				"Olb", &object, Calendar_ce_ptr, &field, &bool_variant_val)
 				== FAILURE) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"intlcal_roll: bad arguments", 0);
 			RETURN_FALSE;
 		}
 		bool_variant_val = Z_TYPE(args[1]) == IS_TRUE? 1 : 0;
 	} else if (zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
 			"Oll", &object, Calendar_ce_ptr, &field, &value) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_roll: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -535,8 +508,6 @@ U_CFUNC PHP_FUNCTION(intlcal_clear)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(),
 			getThis(), "O|l!", &object, Calendar_ce_ptr, &field, &field_is_null) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_clear: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -565,8 +536,6 @@ U_CFUNC PHP_FUNCTION(intlcal_field_difference)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Odl", &object, Calendar_ce_ptr, &when, &field)	== FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_field_difference: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -605,8 +574,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &dow) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_day_of_week_type: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -632,8 +599,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_first_day_of_week)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_first_day_of_week: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -657,9 +622,6 @@ static void _php_intlcal_field_ret_in32t_method(
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &field) == FAILURE) {
-		spprintf(&message, 0, "%s: bad arguments", method_name);
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-		efree(message);
 		RETURN_FALSE;
 	}
 
@@ -697,8 +659,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_locale)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &locale_type) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_locale: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -730,8 +690,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_minimal_days_in_first_week)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_minimal_days_in_first_week: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -756,8 +714,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time_zone)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_time_zone: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -779,8 +735,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_type)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_type: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -796,8 +750,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &dow) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_weekend_transition: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -823,8 +775,6 @@ U_CFUNC PHP_FUNCTION(intlcal_in_daylight_time)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_in_daylight_time: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -846,8 +796,6 @@ U_CFUNC PHP_FUNCTION(intlcal_is_equivalent_to)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"OO", &object, Calendar_ce_ptr, &other_object, Calendar_ce_ptr)
 			== FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_is_equivalent_to: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -869,8 +817,6 @@ U_CFUNC PHP_FUNCTION(intlcal_is_lenient)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_is_lenient: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -886,8 +832,6 @@ U_CFUNC PHP_FUNCTION(intlcal_is_set)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &field) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_is_set: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -910,8 +854,6 @@ U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 				"O|d!", &object, Calendar_ce_ptr, &date, &date_is_null) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_is_weekend: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -935,8 +877,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_first_day_of_week)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &dow) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set_first_day_of_week: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -960,8 +900,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_lenient)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ob", &object, Calendar_ce_ptr, &is_lenient) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set_lenient: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -979,8 +917,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_minimal_days_in_first_week)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &num_days) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set_minimal_days_in_first_week: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -1007,8 +943,6 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"OO", &object, Calendar_ce_ptr, &other_object, Calendar_ce_ptr)
 			== FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_equals: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -1032,8 +966,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_repeated_wall_time_option)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_repeated_wall_time_option: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -1048,8 +980,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_skipped_wall_time_option)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_skipped_wall_time_option: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -1065,8 +995,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &option) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set_repeated_wall_time_option: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -1090,8 +1018,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &option) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set_skipped_wall_time_option: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -1125,8 +1051,6 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s!",
 			&zv_arg, &locale_str, &locale_str_len) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_from_date_time: bad arguments", 0);
 		RETURN_NULL();
 	}
 
@@ -1206,8 +1130,6 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_to_date_time: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -1286,8 +1208,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_error_code)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_error_code: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -1306,8 +1226,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_error_message)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, Calendar_ce_ptr) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_get_error_message: bad arguments", 0 );
 		RETURN_FALSE;
 	}
 

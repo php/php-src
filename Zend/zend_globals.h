@@ -225,6 +225,8 @@ struct _zend_executor_globals {
 	zend_function trampoline;
 	zend_op       call_trampoline_op;
 
+	HashTable weakrefs;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

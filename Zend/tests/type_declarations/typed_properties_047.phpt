@@ -28,7 +28,7 @@ try {
 	echo $e->getMessage()."\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 object(Foo)#1 (1) {
   ["foo"]=>
   NULL

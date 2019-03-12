@@ -234,7 +234,7 @@ typedef int (*zend_write_func_t)(const char *str, size_t str_length);
 #define zend_first_try		EG(bailout)=NULL;	zend_try
 
 BEGIN_EXTERN_C()
-int zend_startup(zend_utility_functions *utility_functions, char **extensions);
+int zend_startup(zend_utility_functions *utility_functions);
 void zend_shutdown(void);
 void zend_register_standard_ini_entries(void);
 int zend_post_startup(void);
@@ -303,8 +303,7 @@ extern ZEND_API void (*zend_post_shutdown_cb)(void);
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
-ZEND_API ZEND_COLD void zend_internal_type_error(zend_bool throw_exception, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-ZEND_API ZEND_COLD void zend_internal_argument_count_error(zend_bool throw_exception, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
 
 ZEND_COLD void zenderror(const char *error);
 

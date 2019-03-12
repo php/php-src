@@ -10,7 +10,6 @@ Phar::interceptFileFuncs();
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
-readfile(array());
 chdir(dirname(__FILE__));
 file_put_contents($fname, "blah\n");
 file_put_contents("foob", "test\n");
@@ -35,7 +34,6 @@ include $pname . '/foo/hi';
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>
 --EXPECTF--
-Warning: readfile() expects parameter 1 to be a valid path, array given in %sreadfile_edgecases.php on line %d
 blah
 <?php
 readfile("foo/" . basename(__FILE__));

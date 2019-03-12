@@ -26,9 +26,6 @@ var_dump(gmp_powm(array(),$e,$m));
 var_dump(gmp_powm($n,array(),$m));
 var_dump(gmp_powm($n,$e,array()));
 var_dump(gmp_powm(array(),array(),array()));
-var_dump(gmp_powm(array(),array()));
-var_dump(gmp_powm(array()));
-var_dump(gmp_powm());
 
 $n = gmp_init("-5");
 var_dump(gmp_powm(10, $n, 10));
@@ -66,15 +63,6 @@ bool(false)
 
 Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-
-Warning: gmp_powm() expects exactly 3 parameters, 2 given in %s on line %d
-NULL
-
-Warning: gmp_powm() expects exactly 3 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_powm() expects exactly 3 parameters, 0 given in %s on line %d
-NULL
 
 Warning: gmp_powm(): Second parameter cannot be less than 0 in %s on line %d
 bool(false)

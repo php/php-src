@@ -1,11 +1,18 @@
 dnl config.m4 for extension xmlreader
 
-PHP_ARG_ENABLE(xmlreader, whether to enable XMLReader support,
-[  --disable-xmlreader     Disable XMLReader support], yes)
+PHP_ARG_ENABLE([xmlreader],
+  [whether to enable XMLReader support],
+  [AS_HELP_STRING([--disable-xmlreader],
+    [Disable XMLReader support])],
+  [yes])
 
 if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR   XMLReader: libxml2 install prefix], no, no)
+  PHP_ARG_WITH([libxml-dir],
+    [libxml2 install dir],
+    [AS_HELP_STRING([--with-libxml-dir=DIR],
+      [XMLReader: libxml2 install prefix])],
+    [no],
+    [no])
 fi
 
 if test "$PHP_XMLREADER" != "no"; then

@@ -42,19 +42,19 @@ try {
 echo "ok\n";
 ?>
 --EXPECTF--
-object(FFI\CData:<struct>)#%d (1) {
+object(FFI\CData:struct _a)#%d (1) {
   ["x"]=>
   int(0)
 }
-object(FFI\CData:<struct>)#%d (1) {
+object(FFI\CData:struct _b)#%d (1) {
   ["x"]=>
   int(0)
 }
-object(FFI\CData:<struct>)#%d (1) {
+object(FFI\CData:struct _c)#%d (1) {
   ["x"]=>
   int(0)
 }
-object(FFI\CData:<struct>)#%d (1) {
+object(FFI\CData:struct _d)#%d (1) {
   ["x"]=>
   int(0)
 }

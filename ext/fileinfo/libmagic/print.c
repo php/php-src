@@ -28,7 +28,6 @@
 /*
  * print.c - debugging printout routines
  */
-#define _GNU_SOURCE
 #include "php.h"
 
 #include "file.h"
@@ -44,11 +43,6 @@ FILE_RCSID("@(#)$File: print.c,v 1.82 2017/02/10 18:14:01 christos Exp $")
 #include <unistd.h>
 #endif
 #include <time.h>
-
-#ifdef PHP_WIN32
-# define asctime_r php_asctime_r
-# define ctime_r php_ctime_r
-#endif
 
 #define SZOF(a)	(sizeof(a) / sizeof(a[0]))
 
@@ -240,8 +234,8 @@ protected const char *
 file_fmttime(uint64_t v, int flags, char *buf)
 {
 	char *pp;
-	time_t t = (time_t)v;
-	struct tm *tm = NULL;
+	time_t t;
+	struct tm *tm, tmz;
 
 	if (flags & FILE_T_WINDOWS) {
 		struct timespec ts;
@@ -254,33 +248,13 @@ file_fmttime(uint64_t v, int flags, char *buf)
 	}
 
 	if (flags & FILE_T_LOCAL) {
-		pp = ctime_r(&t, buf);
+		tm = php_localtime_r(&t, &tmz);
 	} else {
-#ifndef HAVE_DAYLIGHT
-		private int daylight = 0;
-#ifdef HAVE_TM_ISDST
-		private time_t now = (time_t)0;
-
-		if (now == (time_t)0) {
-			struct tm *tm1;
-			(void)time(&now);
-			tm1 = localtime(&now);
-			if (tm1 == NULL)
-				goto out;
-			daylight = tm1->tm_isdst;
-		}
-#endif /* HAVE_TM_ISDST */
-#endif /* HAVE_DAYLIGHT */
-		if (daylight)
-			t += 3600;
-		tm = gmtime(&t);
-		if (tm == NULL)
-			goto out;
-		pp = asctime_r(tm, buf);
+		tm = php_gmtime_r(&t, &tmz);
 	}
 	if (tm == NULL)
 		goto out;
-	pp = asctime_r(tm, buf);
+	pp = php_asctime_r(tm, buf);
 
 	if (pp == NULL)
 		goto out;

@@ -171,7 +171,7 @@ COMMENT:             Use PostgreSQL 7.0.x or later. PostgreSQL 6.5.3 or less hav
 -------------------------------------------------------------------------------
 EXTENSION:           sqlite3
 PRIMARY MAINTAINER:  Scott MacVicar <scottmac@php.net> (2008 - 2011)
-                     Christoph M. Becker <cmb@php.net> (2016 - 2018)
+                     Christoph M. Becker <cmb@php.net> (2016 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -327,7 +327,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gd
 PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net> (2002 - 2016)
-                     Christoph M. Becker <cmb@php.net> (2015 - 2018)
+                     Christoph M. Becker <cmb@php.net> (2015 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -337,7 +337,7 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gmp
-PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2000 - 2018)
+PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2000 - 2019)
                      Antony Dovgal <tony2001@php.net> (2005 - 2010)
 MAINTENANCE:         Maintained
 STATUS:              Working
@@ -357,7 +357,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           intl
-PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2018)
+PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2019)
                      Anatol Belski <ab@php.net> (2017 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working

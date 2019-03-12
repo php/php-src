@@ -60,13 +60,13 @@ static int create_segments(size_t requested_size, zend_shared_segment_shm ***sha
 	int shmget_flags;
 	zend_shared_segment_shm *shared_segments;
 
-    seg_allocate_size = SEG_ALLOC_SIZE_MAX;
-    /* determine segment size we _really_ need:
-     * no more than to include requested_size
-     */
-    while (requested_size * 2 <= seg_allocate_size && seg_allocate_size > SEG_ALLOC_SIZE_MIN) {
-        seg_allocate_size >>= 1;
-    }
+	seg_allocate_size = SEG_ALLOC_SIZE_MAX;
+	/* determine segment size we _really_ need:
+	 * no more than to include requested_size
+	 */
+	while (requested_size * 2 <= seg_allocate_size && seg_allocate_size > SEG_ALLOC_SIZE_MIN) {
+		seg_allocate_size >>= 1;
+	}
 
 	shmget_flags = IPC_CREAT|SHM_R|SHM_W|IPC_EXCL;
 

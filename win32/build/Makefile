@@ -193,7 +193,7 @@ run: set-tmp-env
 	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" $(ARGS)
 !else
 test: set-tmp-env
-	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
 
 run: set-tmp-env
 	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(ARGS)
@@ -229,7 +229,6 @@ snap: build-snap build-devel build-dist
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
 	$(CC) /nologo /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
 
-# need to redirect, since INSTALL is a file in the root...
 install: really-install install-sdk
 
 build-lib: build-ext-libs

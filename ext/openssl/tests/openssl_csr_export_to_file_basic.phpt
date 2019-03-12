@@ -36,9 +36,12 @@ $privkey_file = 'file://' . dirname(__FILE__) . '/private_rsa_2048.key';
 $csr = openssl_csr_new($dn, $privkey_file, $args);
 var_dump(openssl_csr_export_to_file($csr, $csrfile));
 var_dump(file_get_contents($csrfile));
-var_dump(openssl_csr_export_to_file($wrong, $csrfile));
+try {
+    var_dump(openssl_csr_export_to_file($wrong, $csrfile));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(openssl_csr_export_to_file($dh, $csrfile));
-var_dump(openssl_csr_export_to_file(array(), $csrfile));
 var_dump(openssl_csr_export_to_file($csr, $csrfile, false));
 ?>
 --CLEAN--
@@ -69,15 +72,10 @@ sfBgVeqg0P4SWez5fHXqBNcjMdMI5f0bikcDZSIfTHS8FX+PMurLBC8UPB0YNIOl
 JViHkCA9x6m8RJXAFvqmgLlWlUzbDv/cRrDfjWjR
 -----END CERTIFICATE REQUEST-----
 "
-
-Warning: openssl_csr_export_to_file() expects parameter 1 to be resource, string given in %s on line %d
-NULL
+openssl_csr_export_to_file() expects parameter 1 to be resource, string given
 
 Warning: openssl_csr_export_to_file(): supplied resource is not a valid OpenSSL X.509 CSR resource in %s on line %d
 
 Warning: openssl_csr_export_to_file(): cannot get CSR from parameter 1 in %s on line %d
 bool(false)
-
-Warning: openssl_csr_export_to_file() expects parameter 1 to be resource, array given in %s on line %d
-NULL
 bool(true)

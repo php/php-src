@@ -276,6 +276,19 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 	if (mptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 		memset(&call, 0, sizeof(zend_internal_function));
 
+		if (!mptr->common.scope) {
+			return FAILURE;
+		}
+		if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
+			if (!mptr->common.scope->__callstatic) {
+				return FAILURE;
+			}
+		} else {
+			if (!mptr->common.scope->__call) {
+				return FAILURE;
+			}
+		}
+
 		call.type = ZEND_INTERNAL_FUNCTION;
 		call.fn_flags = mptr->common.fn_flags & ZEND_ACC_STATIC;
 		call.handler = zend_closure_call_magic;

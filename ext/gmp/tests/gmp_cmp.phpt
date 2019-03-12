@@ -17,10 +17,7 @@ var_dump(gmp_cmp(0,$n) < 0);
 $n1 = gmp_init("827278512385463739");
 var_dump(gmp_cmp($n1,$n));
 
-var_dump(gmp_cmp($n1,$n,1));
 var_dump(gmp_cmp(array(),array()));
-var_dump(gmp_cmp(array()));
-var_dump(gmp_cmp());
 
 echo "Done\n";
 ?>
@@ -34,15 +31,6 @@ int(-1)
 bool(true)
 int(0)
 
-Warning: gmp_cmp() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
 Warning: gmp_cmp(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-
-Warning: gmp_cmp() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_cmp() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
 Done

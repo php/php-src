@@ -3,7 +3,6 @@ m4_include([TSRM/m4/ax_func_which_gethostbyname_r.m4])
 AC_DEFUN([TSRM_BASIC_CHECKS],[
 
 AC_REQUIRE([AC_PROG_CC])dnl
-dnl AC_REQUIRE([AM_PROG_CC_STDC])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
 
 AC_CHECK_FUNCS(sigprocmask)
@@ -68,27 +67,23 @@ AC_DEFUN([TSRM_THREADS_CHECKS],[
 dnl For the thread implementations, we always use --with-*
 dnl to maintain consistency
 
-AC_ARG_WITH(tsrm-pth,
-[  --with-tsrm-pth[=pth-config]
-                          Use GNU Pth],[
-  TSRM_PTH=$withval
-],[
-  TSRM_PTH=no
-])
+AC_ARG_WITH([tsrm-pth],
+  [AS_HELP_STRING([[--with-tsrm-pth[=pth-config]]],
+    [Use GNU Pth])],
+  [TSRM_PTH=$withval],
+  [TSRM_PTH=no])
 
-AC_ARG_WITH(tsrm-st,
-[  --with-tsrm-st          Use SGI's State Threads],[
-  TSRM_ST=$withval
-],[
-  TSRM_ST=no
-])
+AC_ARG_WITH([tsrm-st],
+  [AS_HELP_STRING([--with-tsrm-st],
+    [Use SGI's State Threads])],
+  [TSRM_ST=$withval],
+  [TSRM_ST=no])
 
-AC_ARG_WITH(tsrm-pthreads,
-[  --with-tsrm-pthreads    Use POSIX threads (default)],[
-  TSRM_PTHREADS=$withval
-],[
-  TSRM_PTHREADS=yes
-])
+AC_ARG_WITH([tsrm-pthreads],
+  [AS_HELP_STRING([--with-tsrm-pthreads],
+    [Use POSIX threads (default)])],
+  [TSRM_PTHREADS=$withval],
+  [TSRM_PTHREADS=yes])
 
 test "$TSRM_PTH" = "yes" && TSRM_PTH=pth-config
 

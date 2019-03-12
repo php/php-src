@@ -46,7 +46,11 @@ $values = array (
 // loop through each element of values for 'chunklen'
 for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration ".($count+1). " --\n";
-  var_dump( chunk_split($heredoc_str, $values[$count], $ending) );
+  try {
+    var_dump( chunk_split($heredoc_str, $values[$count], $ending) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
 }
 
 echo "Done"
@@ -82,9 +86,7 @@ string(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-
-Warning: chunk_split() expects parameter 2 to be int, float given in %s on line %d
-NULL
+chunk_split() expects parameter 2 to be int, float given
 -- Iteration 8 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d

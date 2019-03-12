@@ -211,8 +211,6 @@ static PHP_METHOD(IntlIterator, current)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::current: bad arguments", 0);
 		return;
 	}
 
@@ -228,8 +226,6 @@ static PHP_METHOD(IntlIterator, key)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::key: bad arguments", 0);
 		return;
 	}
 
@@ -247,8 +243,6 @@ static PHP_METHOD(IntlIterator, next)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::next: bad arguments", 0);
 		return;
 	}
 
@@ -264,8 +258,6 @@ static PHP_METHOD(IntlIterator, rewind)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::rewind: bad arguments", 0);
 		return;
 	}
 
@@ -283,8 +275,6 @@ static PHP_METHOD(IntlIterator, valid)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::valid: bad arguments", 0);
 		return;
 	}
 

@@ -202,11 +202,17 @@ dnl
 dnl Main config
 dnl
 
-PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
-[  --enable-mbstring       Enable multibyte string support])
+PHP_ARG_ENABLE([mbstring],
+  [whether to enable multibyte string support],
+  [AS_HELP_STRING([--enable-mbstring],
+    [Enable multibyte string support])])
 
-PHP_ARG_ENABLE([mbregex], [whether to enable multibyte regex support (requires oniguruma)],
-[  --disable-mbregex       MBSTRING: Disable multibyte regex support], yes, no)
+PHP_ARG_ENABLE([mbregex],
+  [whether to enable multibyte regex support (requires oniguruma)],
+  [AS_HELP_STRING([--disable-mbregex],
+    [MBSTRING: Disable multibyte regex support])],
+  [yes],
+  [no])
 
 if test "$PHP_MBSTRING" != "no"; then
   AC_DEFINE([HAVE_MBSTRING],1,[whether to have multibyte string support])

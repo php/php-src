@@ -46,12 +46,6 @@ var_dump( sha1_file(12) );
 echo "\n-- NULL as filename --\n";
 var_dump( sha1_file(NULL) );
 
-echo "\n-- Zero arguments --\n";
- var_dump ( sha1_file() );
-
-echo "\n-- More than valid number of arguments ( valid is 2) --\n";
-var_dump ( sha1_file("EmptyFileSHA1.txt", true, NULL) );
-
 echo "\n-- Hexadecimal Output for Empty file as Argument --\n";
 var_dump( sha1_file("EmptyFileSHA1.txt") );
 
@@ -94,16 +88,6 @@ bool(false)
 
 Warning: sha1_file(): Filename cannot be empty in %s on line %d
 bool(false)
-
--- Zero arguments --
-
-Warning: sha1_file() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- More than valid number of arguments ( valid is 2) --
-
-Warning: sha1_file() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 
 -- Hexadecimal Output for Empty file as Argument --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"

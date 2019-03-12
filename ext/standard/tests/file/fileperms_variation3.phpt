@@ -39,7 +39,11 @@ $count = 1;
 /* loop through to test each element in the above array */
 foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
-  var_dump( fileperms( $file_path."/".$file ) );
+  try {
+    var_dump( fileperms( $file_path."/".$file ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   clearstatcache();
   $count++;
 }
@@ -74,12 +78,8 @@ bool(false)
 Warning: fileperms(): stat failed for %s/fileperms_variation3/fileperms*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-
-Warning: fileperms() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+fileperms() expects parameter 1 to be a valid path, string given
 - Iteration 8 -
-
-Warning: fileperms() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+fileperms() expects parameter 1 to be a valid path, string given
 
 *** Done ***

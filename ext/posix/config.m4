@@ -1,7 +1,10 @@
 dnl config.m4 for extension posix
 
-PHP_ARG_ENABLE(posix,whether to enable POSIX-like functions,
-[  --disable-posix         Disable POSIX-like functions], yes)
+PHP_ARG_ENABLE([posix],
+  [whether to enable POSIX-like functions],
+  [AS_HELP_STRING([--disable-posix],
+    [Disable POSIX-like functions])],
+  [yes])
 
 if test "$PHP_POSIX" = "yes"; then
   AC_DEFINE(HAVE_POSIX, 1, [whether to include POSIX-like functions])

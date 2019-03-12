@@ -88,6 +88,11 @@ typedef unsigned short mode_t;
 #define F_OK 0x00
 #endif
 
+/* from ntifs.h */
+#ifndef SYMLINK_FLAG_RELATIVE
+#define SYMLINK_FLAG_RELATIVE 0x01
+#endif
+
 typedef struct {
 	DWORD access;
 	DWORD share;

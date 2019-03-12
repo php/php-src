@@ -21,7 +21,6 @@ $values = array(23,
 		"23",
 		"23.45",
 		"2.345e1",
-		"nonsense",
 		"1000",
 		"1000ABC",
 		null,
@@ -44,9 +43,6 @@ float(1.588153083)
 float(1.588153083)
 float(8.895619796)
 float(8.895619796)
-
-Warning: tan() expects parameter 1 to be float, string given in %s on line %d
-NULL
 float(1.470324156)
 
 Notice: A non well formed numeric value encountered in %s on line %d

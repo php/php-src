@@ -45,9 +45,8 @@ try {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECT--
-error: 2, IntlCalendar::equals() expects exactly 1 parameter, 0 given
-error: 2, IntlCalendar::equals(): intlcal_equals: bad arguments
-bool(false)
+error: 0, IntlCalendar::equals() expects exactly 1 parameter, 0 given
+
 error: 0, Argument 1 passed to IntlCalendar::equals() must be an instance of IntlCalendar, instance of stdClass given
 
 error: 0, Argument 1 passed to IntlCalendar::equals() must be an instance of IntlCalendar, int given

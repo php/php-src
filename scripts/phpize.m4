@@ -28,15 +28,22 @@ PHP_DETECT_ICC
 PHP_DETECT_SUNCC
 
 dnl Support systems with system libraries in e.g. /usr/lib64
-PHP_ARG_WITH(libdir, for system library directory,
-[  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib], lib, no)
+PHP_ARG_WITH([libdir],
+  [for system library directory],
+  [AS_HELP_STRING([--with-libdir=NAME],
+    [Look for libraries in .../NAME rather than .../lib])],
+  [lib],
+  [no])
 
 PHP_RUNPATH_SWITCH
 PHP_SHLIB_SUFFIX_NAMES
 
 dnl Find php-config script
-PHP_ARG_WITH(php-config,,
-[  --with-php-config=PATH  Path to php-config [php-config]], php-config, no)
+PHP_ARG_WITH([php-config],,
+  [AS_HELP_STRING([--with-php-config=PATH],
+    [Path to php-config [php-config]])],
+  [php-config],
+  [no])
 
 dnl For BC
 PHP_CONFIG=$PHP_PHP_CONFIG

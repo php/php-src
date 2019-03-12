@@ -31,16 +31,13 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	size_t           locale_len = 0;
 	zval*            object;
 	Collator_object* co;
-	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	intl_error_reset( NULL );
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "s",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 		&locale, &locale_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_create: unable to parse input params", 0 );
 		return FAILURE;
 	}
 
