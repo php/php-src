@@ -43,10 +43,4 @@ PHP_FUNCTION(finfo_file);
 PHP_FUNCTION(finfo_buffer);
 PHP_FUNCTION(mime_content_type);
 
-#ifdef ZTS
-#define FILEINFO_G(v) TSRMG(fileinfo_globals_id, zend_fileinfo_globals *, v)
-#else
-#define FILEINFO_G(v) (fileinfo_globals.v)
-#endif
-
 #endif	/* PHP_FILEINFO_H */

@@ -102,21 +102,4 @@ PHP_RINIT_FUNCTION(xsl);
 PHP_RSHUTDOWN_FUNCTION(xsl);
 PHP_MINFO_FUNCTION(xsl);
 
-
-/*
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:
-
-ZEND_BEGIN_MODULE_GLOBALS(xsl)
-	long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(xsl)
-*/
-
-#ifdef ZTS
-#define XSL_G(v) TSRMG(xsl_globals_id, zend_xsl_globals *, v)
-#else
-#define XSL_G(v) (xsl_globals.v)
-#endif
-
 #endif	/* PHP_XSL_H */

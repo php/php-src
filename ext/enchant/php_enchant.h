@@ -61,10 +61,4 @@ PHP_FUNCTION(enchant_dict_get_error);
 PHP_FUNCTION(enchant_dict_describe);
 PHP_FUNCTION(enchant_dict_quick_check);
 
-#ifdef ZTS
-#define ENCHANT_G(v) TSRMG(enchant_globals_id, zend_enchant_globals *, v)
-#else
-#define ENCHANT_G(v) (enchant_globals.v)
-#endif
-
 #endif	/* PHP_ENCHANT_H */
