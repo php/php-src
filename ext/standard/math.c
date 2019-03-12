@@ -853,12 +853,14 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	zend_long num = 0;
 	double fnum = 0;
 	zend_long i;
+	zend_long length;
 	int mode = 0;
 	char c, *s;
 	zend_long cutoff;
 	int cutlim;
 	int negative = 0;
 	int invalid_chars = 0;
+	int last_char = 0;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
 		return FAILURE;
@@ -869,7 +871,8 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	cutoff = ZEND_LONG_MAX / base;
 	cutlim = ZEND_LONG_MAX % base;
 
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+	length = Z_STRLEN_P(arg);
+	for (i = length; i > 0; i--) {
 		c = *s++;
 
 		/* might not work for EBCDIC */
@@ -881,13 +884,39 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 			c -= 'a' - 10;
 		else if (c == '-')
 			negative = !negative;
+		else if (isspace(c)) {
+			if (num == 0 && fnum == 0) {
+				continue;
+			}
+
+			last_char = 1;
+			continue;
+		}
 		else {
 			invalid_chars++;
 			continue;
 		}
 
-		if (c >= base)
+		if (last_char == 1 && c > 0 && c < base) {
+			invalid_chars ++;
+		}
+
+		if (c >= base) {
+			if (i == length -1) {
+				if (base == 16 && c == 33) { /* allow the second char to be x */
+					continue;
+				}
+				if (base == 8 && c == 24) { /* allow the second char to be o */
+					continue;
+				}
+				if (base == 2 && c == 11) { /* allow the second char to be b */
+					continue;
+				}
+			}
+
+			invalid_chars ++;
 			continue;
+		}
 
 		switch (mode) {
 		case 0: /* Integer */
