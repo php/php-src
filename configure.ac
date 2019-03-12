@@ -928,6 +928,17 @@ else
   ZEND_DEBUG=no
 fi
 
+PHP_ARG_ENABLE([rtld-now],
+  [whether to dlopen extensions with RTLD_NOW instead of RTLD_LAZY],
+  [AS_HELP_STRING([--enable-rtld-now],
+    [Use dlopen with RTLD_NOW instead of RTLD_LAZY])],
+  [no],
+  [no])
+
+if test "$PHP_RTLD_NOW" = "yes"; then
+  AC_DEFINE(PHP_USE_RTLD_NOW, 1, [ Use dlopen with RTLD_NOW instead of RTLD_LAZY ])
+fi
+
 PHP_ARG_WITH([layout],
   [layout of installed files],
   [AS_HELP_STRING([--with-layout=TYPE],
