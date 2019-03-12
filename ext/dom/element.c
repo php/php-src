@@ -115,6 +115,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_remove, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -144,6 +147,7 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 	PHP_FALIAS(setIdAttributeNS, dom_element_set_id_attribute_ns, arginfo_dom_element_set_id_attribute_ns)
 	PHP_FALIAS(setIdAttributeNode, dom_element_set_id_attribute_node, arginfo_dom_element_set_id_attribute_node)
 	PHP_ME(domelement, __construct, arginfo_dom_element_construct, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, remove, arginfo_dom_element_remove, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -1275,5 +1279,60 @@ PHP_FUNCTION(dom_element_set_id_attribute_node)
 	RETURN_NULL();
 }
 /* }}} end dom_element_set_id_attribute_node */
+
+/* {{{ proto DomChildNode DOMElement::remove();
+URL:
+Since:
+*/
+PHP_METHOD(domelement, remove)
+{
+	zval *id, *node;
+	xmlNodePtr children, child;
+	dom_object *intern, *childobj;
+	int ret, stricterror;
+
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) == FAILURE) {
+		return;
+	}
+
+	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
+
+	if (dom_node_children_valid(child) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	stricterror = dom_get_strict_error(intern->document);
+
+	if (dom_node_is_read_only(child) == SUCCESS ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		RETURN_FALSE;
+	}
+
+	if (!child->parent) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		RETURN_FALSE;
+	}
+
+	children = child->parent->children;
+	if (!children) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		RETURN_FALSE;
+	}
+
+	while (children) {
+		if (children == child) {
+			xmlUnlinkNode(child);
+			DOM_RET_OBJ(child, &ret, intern);
+			return;
+		}
+		children = children->next;
+	}
+
+	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+	RETURN_FALSE
+}
+/* }}} end dom_node_remove_child */
 
 #endif

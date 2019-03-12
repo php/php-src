@@ -24,6 +24,7 @@ extern const zend_function_entry php_dom_domexception_class_functions[];
 extern const zend_function_entry php_dom_domstringlist_class_functions[];
 extern const zend_function_entry php_dom_namelist_class_functions[];
 extern const zend_function_entry php_dom_parent_node_class_functions[];
+extern const zend_function_entry php_dom_child_node_class_functions[];
 extern const zend_function_entry php_dom_domimplementationlist_class_functions[];
 extern const zend_function_entry php_dom_domimplementationsource_class_functions[];
 extern const zend_function_entry php_dom_domimplementation_class_functions[];
@@ -215,6 +216,7 @@ PHP_FUNCTION(dom_element_set_id_attribute);
 PHP_FUNCTION(dom_element_set_id_attribute_ns);
 PHP_FUNCTION(dom_element_set_id_attribute_node);
 PHP_METHOD(domelement, __construct);
+PHP_METHOD(domelement, remove);
 
 /* domtext methods */
 PHP_FUNCTION(dom_text_split_text);

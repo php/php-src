@@ -121,6 +121,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14NFile, 0, 0, 1)
 	ZEND_ARG_ARRAY_INFO(0, xpath, 1)
 	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 1)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_child_node_remove, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -153,6 +156,12 @@ const zend_function_entry php_dom_node_class_functions[] = { /* {{{ */
 	PHP_ME(domnode, getLineNo, arginfo_dom_node_getLineNo, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, C14N, arginfo_dom_node_C14N, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, C14NFile, arginfo_dom_node_C14NFile, ZEND_ACC_PUBLIC)
+	PHP_FE_END
+};
+/* }}} */
+
+const zend_function_entry php_dom_child_node_class_functions[] = { /* {{{ */
+	PHP_ABSTRACT_ME(DOMChildNode, remove, arginfo_dom_child_node_remove)
 	PHP_FE_END
 };
 /* }}} */

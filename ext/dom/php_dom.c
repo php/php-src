@@ -39,6 +39,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_domexception_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domstringlist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_namelist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_parentnode_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_childnode_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementationlist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementationsource_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
@@ -626,6 +627,9 @@ PHP_MINIT_FUNCTION(dom)
 	INIT_CLASS_ENTRY(ce, "DOMParentNode", php_dom_parent_node_class_functions);
 	dom_parentnode_class_entry = zend_register_internal_interface(&ce);
 
+	INIT_CLASS_ENTRY(ce, "DOMChildNode", php_dom_child_node_class_functions);
+	dom_childnode_class_entry = zend_register_internal_interface(&ce);
+
 	REGISTER_DOM_CLASS(ce, "DOMImplementationList", NULL, php_dom_domimplementationlist_class_functions, dom_domimplementationlist_class_entry);
 
 	zend_hash_init(&dom_domimplementationlist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
@@ -763,6 +767,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add_ptr(&classes, ce.name, &dom_element_prop_handlers);
 
 	zend_class_implements(dom_element_class_entry, 1, dom_parentnode_class_entry);
+	zend_class_implements(dom_element_class_entry, 1, dom_childnode_class_entry);
 
 	REGISTER_DOM_CLASS(ce, "DOMText", dom_characterdata_class_entry, php_dom_text_class_functions, dom_text_class_entry);
 
