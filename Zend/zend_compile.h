@@ -123,6 +123,7 @@ typedef union _zend_parser_stack_elem {
 	zend_ast *ast;
 	zend_string *str;
 	zend_ulong num;
+	unsigned char *ptr;
 } zend_parser_stack_elem;
 
 void zend_compile_top_stmt(zend_ast *ast);
