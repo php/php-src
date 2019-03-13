@@ -8,6 +8,5 @@ $b = 1;
 var_dump((fn() => $b)());
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
-

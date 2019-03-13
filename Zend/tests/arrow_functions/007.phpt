@@ -1,13 +1,21 @@
 --TEST--
-Closure use inside arrow function
+Variable-variables inside arrow functions
 --FILE--
 <?php
 
-$b = 1;
+$a = 1;
+$var = "a";
+$fn = fn() => $$var;
+var_dump($fn());
 
-var_dump((fn () => function () use ($b) { return $b; })()());
+${5} = 2;
+$fn = fn() => ${5};
+var_dump($fn());
 
 ?>
 --EXPECTF--
-int(1)
+Notice: Undefined variable: a in %s on line %d
+NULL
 
+Notice: Undefined variable: 5 in %s on line %d
+NULL
