@@ -348,6 +348,9 @@ PHP 7.4 UPGRADE NOTES
         $a ? $b : ($c ? $d : $e)
 
     RFC: https://wiki.php.net/rfc/ternary_associativity
+  . The array and string offset access syntax using curly braces is deprecated.
+    Use $str[$idx] instead of $str{$idx}.
+    RFC: https://wiki.php.net/rfc/deprecate_curly_braces_array_access
   . Unbinding $this of a non-static method through a combination of
     ReflectionMethod::getClosure() and closure rebinding is deprecated. Doing
     so is equivalent to calling a non-static method statically, which has been

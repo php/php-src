@@ -29,7 +29,7 @@ var_dump(gzinflate("asdf", 9));
 
 var_dump(gzinflate($data1));
 var_dump(gzinflate($data2));
-$data2{4} = 0;
+$data2[4] = 0;
 var_dump(gzinflate($data2));
 
 echo "Done\n";
