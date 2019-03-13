@@ -55,19 +55,24 @@ HOW TO USE IT
 
   If you don't need to test the existence of any external header files,
   libraries or functions in them, the extension is ready to be compiled in PHP.
-  To compile the extension in the PHP, run the following:
-
-    cd /path/to/php-src
-    {$file_prefix}buildconf
-    {$file_prefix}configure --enable-extension_name
-    {$make_prefix}make
-
-  Alternatively, to compile extension as shared:
+  To compile the extension run the following:
 
     cd extension_name
     phpize
     {$file_prefix}configure
     {$make_prefix}make
+
+  Don't forget to run tests once the compilation is done:
+
+    {$make_prefix}make test
+
+  Alternatively, to compile extension in the PHP:
+
+    cd /path/to/php-src
+    {$file_prefix}buildconf
+    {$file_prefix}configure --enable-extension_name
+    {$make_prefix}make
+    {$make_prefix}make test TESTS=ext/extension_name/tests
 
   The definition of PHP_extension_NAME_VERSION will be present in the
   php_extension_name.h and injected into the zend_extension_entry definition.
