@@ -5,10 +5,9 @@ Arrow function closing over variable by value
 
 $b = 2;
 
-var_dump((fn () => ++$b)());
+var_dump((fn() => ++$b)());
 var_dump($b);
 ?>
---EXPECTF--
+--EXPECT--
 int(3)
 int(2)
-

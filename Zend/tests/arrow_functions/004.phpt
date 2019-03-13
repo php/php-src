@@ -11,4 +11,3 @@ var_dump((fn() => $b + $c)());
 --EXPECTF--
 Notice: Undefined variable: c in %s on line %d
 int(1)
-
