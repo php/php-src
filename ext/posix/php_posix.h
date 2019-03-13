@@ -125,11 +125,12 @@ ZEND_BEGIN_MODULE_GLOBALS(posix)
 	int last_error;
 ZEND_END_MODULE_GLOBALS(posix)
 
-#ifdef ZTS
-# define POSIX_G(v) TSRMG(posix_globals_id, zend_posix_globals *, v)
-#else
-# define POSIX_G(v)	(posix_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_POSIX)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(posix)
+#define POSIX_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(posix, v)
 
 #else
 

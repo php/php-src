@@ -685,7 +685,7 @@ if test "$PHP_FPM" != "no"; then
     PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"
   fi
 
-  PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm"
+  PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
   PHP_FPM_FILES="fpm/fpm.c \
     fpm/fpm_children.c \

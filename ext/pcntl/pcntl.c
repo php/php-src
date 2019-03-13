@@ -238,6 +238,9 @@ zend_module_entry pcntl_module_entry = {
 };
 
 #ifdef COMPILE_DL_PCNTL
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(pcntl)
 #endif
 
@@ -576,6 +579,9 @@ static void php_pcntl_register_errno_constants(INIT_FUNC_ARGS)
 
 static PHP_GINIT_FUNCTION(pcntl)
 {
+#if defined(COMPILE_DL_PCNTL) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	memset(pcntl_globals, 0, sizeof(*pcntl_globals));
 }
 

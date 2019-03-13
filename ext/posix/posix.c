@@ -324,6 +324,9 @@ static PHP_MINFO_FUNCTION(posix)
 
 static PHP_GINIT_FUNCTION(posix) /* {{{ */
 {
+#if defined(COMPILE_DL_POSIX) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	posix_globals->last_error = 0;
 }
 /* }}} */
@@ -427,6 +430,9 @@ zend_module_entry posix_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_POSIX
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(posix)
 #endif
 

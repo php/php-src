@@ -69,12 +69,6 @@ typedef struct {
 	zend_object zo;
 } php_sxe_object;
 
-#ifdef ZTS
-#define SIMPLEXML_G(v) TSRMG(simplexml_globals_id, zend_simplexml_globals *, v)
-#else
-#define SIMPLEXML_G(v) (simplexml_globals.v)
-#endif
-
 #ifdef PHP_WIN32
 #	ifdef PHP_SIMPLEXML_EXPORTS
 #		define PHP_SXE_API __declspec(dllexport)

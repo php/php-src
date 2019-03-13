@@ -49,16 +49,6 @@ PHP_MINIT_FUNCTION(pdo);
 PHP_MSHUTDOWN_FUNCTION(pdo);
 PHP_MINFO_FUNCTION(pdo);
 
-ZEND_BEGIN_MODULE_GLOBALS(pdo)
-	zend_long  global_value;
-ZEND_END_MODULE_GLOBALS(pdo)
-
-#ifdef ZTS
-# define PDOG(v) TSRMG(pdo_globals_id, zend_pdo_globals *, v)
-#else
-# define PDOG(v) (pdo_globals.v)
-#endif
-
 #define REGISTER_PDO_CLASS_CONST_LONG(const_name, value) \
 	zend_declare_class_constant_long(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (zend_long)value);
 

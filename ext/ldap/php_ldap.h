@@ -43,11 +43,12 @@ ZEND_BEGIN_MODULE_GLOBALS(ldap)
 	zend_long max_links;
 ZEND_END_MODULE_GLOBALS(ldap)
 
-#ifdef ZTS
-# define LDAPG(v) TSRMG(ldap_globals_id, zend_ldap_globals *, v)
-#else
-# define LDAPG(v) (ldap_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_LDAP)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(ldap)
+#define LDAPG(v) ZEND_MODULE_GLOBALS_ACCESSOR(ldap, v)
 
 #define phpext_ldap_ptr ldap_module_ptr
 

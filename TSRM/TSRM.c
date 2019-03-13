@@ -19,9 +19,8 @@
 
 typedef struct _tsrm_tls_entry tsrm_tls_entry;
 
-#if defined(TSRM_WIN32)
 /* TSRMLS_CACHE_DEFINE; is already done in Zend, this is being always compiled statically. */
-#endif
+TSRMLS_CACHE_EXTERN();
 
 struct _tsrm_tls_entry {
 	void **storage;
@@ -300,6 +299,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 
 	/* Set thread local storage to this new thread resources structure */
 	tsrm_tls_set(*thread_resources_ptr);
+	TSRMLS_CACHE = *thread_resources_ptr;
 
 	if (tsrm_new_thread_begin_handler) {
 		tsrm_new_thread_begin_handler(thread_id);

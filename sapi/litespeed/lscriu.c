@@ -88,6 +88,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include "lscriu.h"
 
+#include <Zend/zend_portability.h>
+
 #define  LSCRIU_PATH    256
 
 // Begin CRIU inclusion
@@ -262,8 +264,8 @@ static int LSCRIU_load_liblscapi(void)
     int error = 1;
     char *last;
 
-    if (!(lib_handle = dlopen(last = "liblscapi.so", RTLD_LAZY)) /*||
-        !(pthread_lib_handle = dlopen(last = "libpthread.so", RTLD_LAZY))*/)
+    if (!(lib_handle = DL_LOAD(last = "liblscapi.so")) /*||
+        !(pthread_lib_handle = DL_LOAD(last = "libpthread.so"))*/)
         fprintf(stderr, "LSCRIU (%d): failed to dlopen %s: %s - ignore CRIU\n",
                 s_pid, last, dlerror());
     else if (!(s_lscapi_dump_me = dlsym(lib_handle, last = "lscapi_dump_me")) ||

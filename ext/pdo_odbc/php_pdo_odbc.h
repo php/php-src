@@ -35,20 +35,4 @@ PHP_RINIT_FUNCTION(pdo_odbc);
 PHP_RSHUTDOWN_FUNCTION(pdo_odbc);
 PHP_MINFO_FUNCTION(pdo_odbc);
 
-/*
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:
-
-ZEND_BEGIN_MODULE_GLOBALS(pdo_odbc)
-	long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(pdo_odbc)
-*/
-
-#ifdef ZTS
-#define PDO_ODBC_G(v) TSRMG(pdo_odbc_globals_id, zend_pdo_odbc_globals *, v)
-#else
-#define PDO_ODBC_G(v) (pdo_odbc_globals.v)
-#endif
-
 #endif	/* PHP_PDO_ODBC_H */

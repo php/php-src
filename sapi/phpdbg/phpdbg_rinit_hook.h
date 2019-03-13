@@ -27,7 +27,7 @@ extern zend_module_entry phpdbg_webhelper_module_entry;
 #define phpext_phpdbg_webhelper_ptr &phpdbg_webhelper_module_entry
 
 #ifdef ZTS
-# define PHPDBG_WG(v) TSRMG(phpdbg_webhelper_globals_id, zend_phpdbg_webhelper_globals *, v)
+# define PHPDBG_WG(v) ZEND_TSRMG(phpdbg_webhelper_globals_id, zend_phpdbg_webhelper_globals *, v)
 #else
 # define PHPDBG_WG(v) (phpdbg_webhelper_globals.v)
 #endif
