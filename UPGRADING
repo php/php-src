@@ -57,7 +57,7 @@ PHP 8.0 UPGRADE NOTES
 
         // With
         function my_error_handler($err_no, $err_msg, $filename, $linenum) {
-            if (error_reporting() & $err_no) {
+            if (!(error_reporting() & $err_no)) {
                 return; // Silenced
             }
             // ...
