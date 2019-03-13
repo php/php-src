@@ -7327,11 +7327,10 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 
 	if (Z_TYPE(EX(This)) == IS_OBJECT) {
 		called_scope = Z_OBJCE(EX(This));
-		if (UNEXPECTED((Z_FUNC_P(zfunc)->common.fn_flags & ZEND_ACC_STATIC) ||
-				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
-			object = NULL;
-		} else {
+		if (opline->extended_value == ZEND_CLOSURE_BIND_THIS) {
 			object = &EX(This);
+		} else {
+			object = NULL;
 		}
 	} else {
 		called_scope = Z_CE(EX(This));

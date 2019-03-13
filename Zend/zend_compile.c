@@ -5455,8 +5455,9 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array, zend_ast_list *list) /* {{{ */
+static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array, zend_ast *uses_ast) /* {{{ */
 {
+	zend_ast_list *list = zend_ast_get_list(uses_ast);
 	uint32_t i;
 
 	if (!op_array->static_variables) {
@@ -5549,6 +5550,12 @@ static void _find_implicit_binds_recursively(closure_info *info, zend_ast *ast) 
 		for (i = 0; i < children; i++) {
 			_find_implicit_binds_recursively(info, ast->child[i]);
 		}
+
+		/* Static calls may inherit $this if it is compatible.
+		 * Conservatively assume that this is going to happen. */
+		if (ast->kind == ZEND_AST_STATIC_CALL) {
+			info->this_used = 1;
+		}
 	}
 }
 
@@ -5566,6 +5573,13 @@ static void _find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_
 		zend_ast *param_ast = param_list->child[i];
 		zend_hash_del(&info->uses, zend_ast_get_str(param_ast->child[1]));
 	}
+
+	/* $this might be used through varvars */
+	if (info->varvars_used) {
+		info->this_used = 1;
+	}
+
+	// TODO Do we want to support a full scope binding if varvars are used?
 }
 
 static void _compile_implicit_lexical_binds(
@@ -5574,8 +5588,6 @@ static void _compile_implicit_lexical_binds(
 	zend_string *var_name;
 	zend_op *opline;
 
-	// TODO $this
-	// TODO What to do with info.varvars_used?
 	if (zend_hash_num_elements(&info->uses) == 0) {
 		return;
 	}
@@ -5815,7 +5827,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 }
 /* }}} */
 
-static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, zend_bool toplevel) /* {{{ */
+static zend_op *zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, zend_bool toplevel) /* {{{ */
 {
 	zend_ast *params_ast = decl->child[0];
 	zend_string *unqualified_name, *name, *lcname, *key;
@@ -5855,7 +5867,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 			do_bind_function_error(lcname, op_array, 1);
 		}
 		zend_string_release_ex(lcname, 0);
-		return;
+		return NULL;
 	}
 
 	key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
@@ -5874,6 +5886,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		zend_add_literal_string(&key);
 	}
 	zend_string_release_ex(lcname, 0);
+	return opline;
 }
 /* }}} */
 
@@ -5891,6 +5904,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	zend_oparray_context orig_oparray_context;
 	closure_info info = {0};
+	zend_bool is_short_closure = 0;
 
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
@@ -5906,20 +5920,36 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	}
 	if (decl->kind == ZEND_AST_CLOSURE) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
+
+		/* Short closures are marked with an empty use list */
+		if (uses_ast != NULL && !zend_ast_get_list(uses_ast)->children) {
+			is_short_closure = 1;
+		}
 	}
 
 	if (is_method) {
 		zend_bool has_body = stmt_ast != NULL;
 		zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
-		zend_begin_func_decl(result, op_array, decl, toplevel);
-		if (uses_ast) {
-			zend_ast_list *uses_list = zend_ast_get_list(uses_ast);
-			if (uses_list->children) {
-				zend_compile_closure_binding(result, op_array, uses_list);
-			} else {
+		zend_op *opline = zend_begin_func_decl(result, op_array, decl, toplevel);
+		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			ZEND_ASSERT(opline != NULL);
+			if (is_short_closure) {
 				_find_implicit_binds(&info, params_ast, stmt_ast);
 				_compile_implicit_lexical_binds(&info, result, op_array);
+				if (info.this_used) {
+					opline->extended_value |= ZEND_CLOSURE_BIND_THIS;
+				}
+			} else {
+				if (uses_ast) {
+					zend_compile_closure_binding(result, op_array, uses_ast);
+				}
+				/* For traditional closures $this is bound even if it's not used, as long as
+				 * we're in a non-static context and the closure is non-static. */
+				if (!(op_array->fn_flags & ZEND_ACC_STATIC) &&
+						!(orig_op_array->fn_flags & ZEND_ACC_STATIC)) {
+					opline->extended_value |= ZEND_CLOSURE_BIND_THIS;
+				}
 			}
 		}
 	}
