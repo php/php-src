@@ -1396,9 +1396,7 @@ format_date_time:
 			if (flag & PHP_IBASE_UNIXTIME) {
 				ZVAL_LONG(val, mktime(&t));
 			} else {
-#if HAVE_STRFTIME
 				l = strftime(string_data, sizeof(string_data), format, &t);
-#else
 				switch (type & ~1) {
 					default:
 						l = slprintf(string_data, sizeof(string_data), "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday,
