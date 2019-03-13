@@ -409,12 +409,8 @@ static const zend_function_entry date_functions[] = {
 	PHP_FE(mktime, arginfo_mktime)
 	PHP_FE(gmmktime, arginfo_gmmktime)
 	PHP_FE(checkdate, arginfo_checkdate)
-
-#ifdef HAVE_STRFTIME
 	PHP_FE(strftime, arginfo_strftime)
 	PHP_FE(gmstrftime, arginfo_gmstrftime)
-#endif
-
 	PHP_FE(time, arginfo_time)
 	PHP_FE(localtime, arginfo_localtime)
 	PHP_FE(getdate, arginfo_getdate)
@@ -1636,7 +1632,6 @@ PHP_FUNCTION(checkdate)
 }
 /* }}} */
 
-#ifdef HAVE_STRFTIME
 /* {{{ php_strftime - (gm)strftime helper */
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
@@ -1748,7 +1743,6 @@ PHP_FUNCTION(gmstrftime)
 	php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-#endif
 
 /* {{{ proto int time(void)
    Return current UNIX timestamp */

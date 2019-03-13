@@ -105,7 +105,6 @@
 #define HAVE_LIBM 1
 #define HAVE_CUSERID 0
 #undef HAVE_RINT
-#define HAVE_STRFTIME 1
 #define SIZEOF_SHORT 2
 /* int and long are stll 32bit in 64bit compiles */
 #define SIZEOF_INT 4
