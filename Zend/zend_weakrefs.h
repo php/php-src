@@ -21,7 +21,7 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API zend_class_entry *zend_ce_weakref;
+extern ZEND_API zend_class_entry *zend_ce_weakref;
 
 void zend_register_weakref_ce(void);
 
