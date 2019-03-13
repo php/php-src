@@ -2787,7 +2787,9 @@ PHPAPI void php_reserve_tsrm_memory(void)
 		TSRM_ALIGNED_SIZE(sizeof(zend_php_scanner_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_ini_scanner_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(virtual_cwd_globals)) +
+#ifdef ZEND_SIGNALS
 		TSRM_ALIGNED_SIZE(sizeof(zend_signal_globals_t)) +
+#endif
 		TSRM_ALIGNED_SIZE(zend_mm_globals_size()) +
 		TSRM_ALIGNED_SIZE(zend_gc_globals_size()) +
 		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
