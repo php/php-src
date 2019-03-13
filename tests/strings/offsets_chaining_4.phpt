@@ -5,7 +5,7 @@ error_reporting=E_ALL | E_DEPRECATED
 --FILE--
 <?php
 $string = "foobar";
-var_dump(isset($string{0}{0}[0][0]));
+var_dump(isset($string[0][0][0][0]));
 ?>
 --EXPECT--
 bool(true)

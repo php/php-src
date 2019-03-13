@@ -2371,6 +2371,10 @@ static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) 
 
 static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
+	if (ast->attr == T_DEPRECATED) {
+		zend_error(E_DEPRECATED, "Array and string offset access syntax with curly braces is deprecated");
+	}
+
 	zend_ast *var_ast = ast->child[0];
 	zend_ast *dim_ast = ast->child[1];
 	zend_op *opline;
