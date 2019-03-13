@@ -144,14 +144,14 @@ function print_success() {
 		$make_prefix = 'n';
 	}
 
-	printf('%1$sSuccess. The extension is now ready to be compiled into PHP. To do so, use the%s', PHP_EOL);
+	printf('%1$sSuccess. The extension is now ready to be compiled. To do so, use the%s', PHP_EOL);
 	printf('following steps:%1$s%1$s', PHP_EOL);
-	printf('cd /path/to/php-src%s', PHP_EOL);
-	printf('%sbuildconf%s', $file_prefix, PHP_EOL);
-	printf('%sconfigure --enable-%s%s', $file_prefix, $options['ext'], PHP_EOL);
+	printf('cd /path/to/php-src/%s%s', $options['ext'], PHP_EOL);
+	printf('phpize%s', PHP_EOL);
+	printf('%sconfigure%s', $file_prefix, PHP_EOL);
 	printf('%smake%2$s%2$s', $make_prefix, PHP_EOL);
 	printf('Don\'t forget to run tests once the compilation is done:%s', PHP_EOL);
-	printf('%smake test TESTS=ext/%s/tests%3$s%3$s', $make_prefix, $options['ext'], PHP_EOL);
+	printf('%smake test%2$s%2$s', $make_prefix, PHP_EOL);
 	printf('Thank you for using PHP!%s', PHP_EOL);
 }
 /* }}} */
