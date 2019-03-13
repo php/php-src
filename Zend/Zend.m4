@@ -22,8 +22,6 @@ unix.h \
 cpuid.h \
 dlfcn.h)
 
-AC_TYPE_SIZE_T
-
 AC_DEFUN([LIBZEND_DLSYM_CHECK],[
 dnl
 dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
@@ -40,8 +38,7 @@ _LT_AC_TRY_DLOPEN_SELF([
 ])
 
 dnl Checks for library functions.
-AC_FUNC_ALLOCA
-AC_CHECK_FUNCS(strdup getpid kill strtod strtol finite fpclass sigsetjmp)
+AC_CHECK_FUNCS(getpid kill strtod strtol finite fpclass sigsetjmp)
 
 AC_CHECK_DECLS([isfinite, isnan, isinf], [], [], [[#include <math.h>]])
 
