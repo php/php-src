@@ -1090,4 +1090,7 @@ END_EXTERN_C()
 
 ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2);
 
+/* Array/string access syntax with curly braces is used */
+#define ZEND_ALTERNATIVE_ARRAY_SYNTAX			1
+
 #endif /* ZEND_COMPILE_H */

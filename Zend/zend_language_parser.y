@@ -225,7 +225,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
-%token T_DEPRECATED
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
 %type <ast> class_declaration_statement trait_declaration_statement
@@ -1156,7 +1155,7 @@ callable_variable:
 	|	constant '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
 	|	dereferencable '{' expr '}'
-			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, T_DEPRECATED, $1, $3); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_ALTERNATIVE_ARRAY_SYNTAX, $1, $3); }
 	|	dereferencable T_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_METHOD_CALL, $1, $3, $4); }
 	|	function_call { $$ = $1; }
