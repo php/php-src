@@ -9363,10 +9363,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_C
 
 	if (Z_TYPE(EX(This)) == IS_OBJECT) {
 		called_scope = Z_OBJCE(EX(This));
-		if (opline->extended_value == ZEND_CLOSURE_BIND_THIS) {
-			object = &EX(This);
-		} else {
+		if (UNEXPECTED((Z_FUNC_P(zfunc)->common.fn_flags & ZEND_ACC_STATIC) ||
+				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
 			object = NULL;
+		} else {
+			object = &EX(This);
 		}
 	} else {
 		called_scope = Z_CE(EX(This));
