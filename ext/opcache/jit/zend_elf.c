@@ -68,8 +68,10 @@ void zend_elf_load_symbols(void)
 						 && (str_tbl = (char*)zend_elf_read_sect(fd, &sect)) != NULL) {
 							for (n = 0; n < count; n++) {
 								if (syms[n].name
-								 && (syms[n].info & ELFSYM_TYPE_FUNC)
-								 &&	!(syms[n].info & ELFSYM_BIND_GLOBAL)) {
+								 && (ELFSYM_TYPE(syms[n].info) == ELFSYM_TYPE_FUNC
+								  /*|| ELFSYM_TYPE(syms[n].info) == ELFSYM_TYPE_DATA*/)
+								 && (ELFSYM_BIND(syms[n].info) == ELFSYM_BIND_LOCAL
+								  /*|| ELFSYM_BIND(syms[n].info) == ELFSYM_BIND_GLOBAL*/)) {
 									zend_jit_disasm_add_symbol(str_tbl + syms[n].name, syms[n].value, syms[n].size);
 								}
 							}

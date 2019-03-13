@@ -266,14 +266,14 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 	sym = &ctx->obj.sym[GDBJIT_SYM_FILE];
 	sym->name = zend_gdbjit_strz(ctx, "JIT code");
 	sym->sectidx = ELFSECT_IDX_ABS;
-	sym->info = ELFSYM_TYPE_FILE|ELFSYM_BIND_LOCAL;
+	sym->info = ELFSYM_INFO(ELFSYM_BIND_LOCAL, ELFSYM_TYPE_FILE);
 
 	sym = &ctx->obj.sym[GDBJIT_SYM_FUNC];
 	sym->name = zend_gdbjit_strz(ctx, ctx->name);
 	sym->sectidx = GDBJIT_SECT_text;
 	sym->value = 0;
 	sym->size = ctx->szmcode;
-	sym->info = ELFSYM_TYPE_FUNC|ELFSYM_BIND_GLOBAL;
+	sym->info = ELFSYM_INFO(ELFSYM_BIND_GLOBAL, ELFSYM_TYPE_FUNC);
 }
 
 #define SECTALIGN(p, a) \

@@ -72,9 +72,10 @@ enum {
 	ELFSECT_TYPE_DYNSYM = 11,
 };
 
-#define ELFSECT_FLAGS_WRITE 1
-#define ELFSECT_FLAGS_ALLOC 2
-#define ELFSECT_FLAGS_EXEC  4
+#define ELFSECT_FLAGS_WRITE (1 << 0)
+#define ELFSECT_FLAGS_ALLOC (1 << 1)
+#define ELFSECT_FLAGS_EXEC  (1 << 2)
+#define ELFSECT_FLAGS_TLS   (1 << 10)
 
 typedef struct zend_elf_symbol {
 #ifdef ELF64
@@ -94,11 +95,19 @@ typedef struct zend_elf_symbol {
 #endif
 } zend_elf_symbol;
 
+#define ELFSYM_BIND(info)       ((info) >> 4)
+#define ELFSYM_TYPE(info)       ((info) & 0xf)
+#define ELFSYM_INFO(bind, type) (((bind) << 4) | (type))
+
 enum {
+	ELFSYM_TYPE_DATA = 2,
 	ELFSYM_TYPE_FUNC = 2,
 	ELFSYM_TYPE_FILE = 4,
-	ELFSYM_BIND_LOCAL = 0 << 4,
-	ELFSYM_BIND_GLOBAL = 1 << 4,
+};
+
+enum {
+	ELFSYM_BIND_LOCAL  = 0,
+	ELFSYM_BIND_GLOBAL = 1,
 };
 
 void zend_elf_load_symbols(void);
