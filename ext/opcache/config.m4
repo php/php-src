@@ -41,6 +41,10 @@ if test "$PHP_OPCACHE" != "no"; then
     fi
     rm -rf conftest*
 
+    if test "$enable_maintainer_zts" = "yes"; then
+      DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
+    fi
+
     AC_MSG_CHECKING(for opagent in default path)
     for i in /usr/local /usr; do
       if test -r $i/include/opagent.h; then

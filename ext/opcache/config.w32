@@ -21,6 +21,9 @@ if (PHP_OPCACHE != "no") {
 	if (PHP_OPCACHE_JIT == "yes") {
 		if (CHECK_HEADER_ADD_INCLUDE("dynasm/dasm_x86.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
 			var dasm_flags = (X64 ? "-D X64=1" : "") + (X64 ? " -D X64WIN=1" : "") + " -D WIN=1";
+			if (PHP_ZTS == "yes") {
+				dasm_flags += " -D ZTS=1";
+			}
 			DEFINE("DASM_FLAGS", dasm_flags);
 
 			AC_DEFINE('HAVE_JIT', 1, 'Define to enable JIT');
