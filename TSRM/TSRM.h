@@ -154,6 +154,7 @@ TSRM_API void *tsrm_set_interpreter_context(void *new_ctx);
 TSRM_API void tsrm_free_interpreter_context(void *context);
 
 TSRM_API void *tsrm_get_ls_cache(void);
+TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void);
 TSRM_API uint8_t tsrm_is_main_thread(void);
 TSRM_API const char *tsrm_api_name(void);
 
