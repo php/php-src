@@ -15,11 +15,6 @@ fi
 
 AC_DEFINE(HAVE_HASH_EXT,1,[Have HASH Extension])
 
-AC_CHECK_SIZEOF(short, 2)
-AC_CHECK_SIZEOF(int, 4)
-AC_CHECK_SIZEOF(long, 4)
-AC_CHECK_SIZEOF(long long, 8)
-
 if test $ac_cv_c_bigendian_php = yes; then
   EXT_HASH_SHA3_SOURCES="hash_sha3.c"
   AC_DEFINE(HAVE_SLOW_HASH3, 1, [Define is hash3 algo is available])

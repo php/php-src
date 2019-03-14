@@ -30,15 +30,11 @@ AC_DEFUN([AC_PDO_OCI_VERSION],[
 ])
 
 AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
-  AC_CHECK_SIZEOF(long int, 4)
-  AC_MSG_CHECKING([if we're on a 64-bit platform])
-  if test "$ac_cv_sizeof_long_int" = "4" ; then
-    AC_MSG_RESULT([no])
+  PHP_CHECK_64BIT([
     TMP_PDO_OCI_LIB_DIR="$PDO_OCI_DIR/lib32"
-  else
-    AC_MSG_RESULT([yes])
+  ],[
     TMP_PDO_OCI_LIB_DIR="$PDO_OCI_DIR/lib"
-  fi
+  ])
 
   AC_MSG_CHECKING([OCI8 libraries dir])
   if test -d "$PDO_OCI_DIR/lib" && test ! -d "$PDO_OCI_DIR/lib32"; then
@@ -82,12 +78,12 @@ if test "$PHP_PDO_OCI" != "no"; then
   fi
 
   if test "instantclient" = "`echo $PDO_OCI_DIR | cut -d, -f1`" ; then
-    AC_CHECK_SIZEOF(long int, 4)
-    if test "$ac_cv_sizeof_long_int" = "4" ; then
+    PHP_CHECK_64BIT([
       PDO_OCI_CLIENT_DIR="client"
-    else
+    ],[
       PDO_OCI_CLIENT_DIR="client64"
-    fi
+    ])
+
     PDO_OCI_LIB_DIR="`echo $PDO_OCI_DIR | cut -d, -f2`"
     AC_PDO_OCI_VERSION($PDO_OCI_LIB_DIR)
 

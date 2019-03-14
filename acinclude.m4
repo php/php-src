@@ -1753,9 +1753,9 @@ dnl It could be useful for those external libs, that have different precompiled
 dnl versions in different directories.
 dnl
 AC_DEFUN([PHP_CHECK_64BIT],[
-  AC_CHECK_SIZEOF(long int, 4)
+  AC_CHECK_SIZEOF([long])
   AC_MSG_CHECKING([checking if we're at 64-bit platform])
-  if test "$ac_cv_sizeof_long_int" = "4" ; then
+  if test "$ac_cv_sizeof_long" = "4" ; then
     AC_MSG_RESULT([no])
     $1
   else
@@ -2601,10 +2601,11 @@ dnl
 dnl PHP_CHECK_STDINT_TYPES
 dnl
 AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
-  AC_CHECK_SIZEOF([short], 2)
-  AC_CHECK_SIZEOF([int], 4)
-  AC_CHECK_SIZEOF([long], 4)
-  AC_CHECK_SIZEOF([long long], 8)
+  AC_CHECK_SIZEOF([short])
+  AC_CHECK_SIZEOF([int])
+  AC_CHECK_SIZEOF([long])
+  AC_CHECK_SIZEOF([long long])
+  AC_CHECK_SIZEOF([size_t])
   AC_CHECK_TYPES([int8, int16, int32, int64, int8_t, int16_t, int32_t, int64_t, uint8, uint16, uint32, uint64, uint8_t, uint16_t, uint32_t, uint64_t, u_int8_t, u_int16_t, u_int32_t, u_int64_t], [], [], [
 #if HAVE_STDINT_H
 # include <stdint.h>
