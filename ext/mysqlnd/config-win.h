@@ -55,7 +55,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Type information */
 
-#define SIZEOF_CHAR		1
 #define SIZEOF_LONG		4
 #define SIZEOF_LONG_LONG	8
 

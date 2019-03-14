@@ -507,12 +507,6 @@ PHP_MISSING_FCLOSE_DECL
 PHP_STRUCT_FLOCK
 PHP_SOCKLEN_T
 
-AC_CHECK_SIZEOF(size_t, 8)
-AC_CHECK_SIZEOF(long long, 8)
-AC_CHECK_SIZEOF(long long int, 8)
-AC_CHECK_SIZEOF(long, 8)
-AC_CHECK_SIZEOF(int, 4)
-
 dnl These are defined elsewhere than stdio.h
 PHP_CHECK_SIZEOF(intmax_t, 0)
 PHP_CHECK_SIZEOF(ssize_t, 8)
