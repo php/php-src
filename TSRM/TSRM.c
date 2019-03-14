@@ -869,10 +869,16 @@ TSRM_API void *tsrm_get_ls_cache(void)
 /* Returns offset of tsrm_ls_cache slot from Thread Control Block address */
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 {/*{{{*/
-#if (defined(__i386__) || defined(__x86_64__)) && defined(__GNUC__)
+#if defined(__x86_64__) && defined(__GNUC__)
 	size_t ret;
 
-	asm ("mov $_tsrm_ls_cache@tpoff,%0"
+	asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
+          : "=r" (ret));
+	return ret;
+#elif defined(__i386__) && defined(__GNUC__)
+	size_t ret;
+
+	asm ("leal _tsrm_ls_cache@ntpoff,%0"
           : "=r" (ret));
 	return ret;
 #else

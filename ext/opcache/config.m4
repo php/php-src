@@ -35,7 +35,6 @@ if test "$PHP_OPCACHE" != "no"; then
       case `/usr/bin/file conftest.o` in
         *64-bit*)
           DASM_FLAGS="-D X64=1"
-          PHP_SUBST(DASM_FLAGS)
         ;;
       esac
     fi
@@ -44,6 +43,8 @@ if test "$PHP_OPCACHE" != "no"; then
     if test "$enable_maintainer_zts" = "yes"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
     fi
+
+    PHP_SUBST(DASM_FLAGS)
 
     AC_MSG_CHECKING(for opagent in default path)
     for i in /usr/local /usr; do

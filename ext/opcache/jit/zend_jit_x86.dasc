@@ -124,7 +124,9 @@ const char* zend_reg_name[] = {
 static uint32_t zend_jit_x86_flags = 0;
 
 #if ZTS
-static size_t tsrm_ls_cache_tcb_offset;
+static size_t tsrm_ls_cache_tcb_offset = 0;
+static size_t tsrm_tls_index;
+static size_t tsrm_tls_offset;
 #endif
 
 |.type EX, zend_execute_data, FP
@@ -157,12 +159,34 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro LOAD_TSRM_CACHE, reg
-|	.if X64
+|	.if X64WIN
+|		gs
+|		mov reg, aword [0x58]
+|		mov reg, aword [reg + tsrm_tls_index]
+|		mov reg, aword [reg + tsrm_tls_offset]
+|	.elif WIN
 |		fs
-|		mov reg, aword [tsrm_ls_cache_tcb_offset]  // mov reg, aword fs:tsrm_ls_cache_tcb_offset
+|		mov reg, aword [0x2c]
+|		mov reg, aword [reg + tsrm_tls_index]
+|		mov reg, aword [reg + tsrm_tls_offset]
+|	.elif X64
+|		fs
+||		if (tsrm_ls_cache_tcb_offset) {
+|			mov reg, aword [tsrm_ls_cache_tcb_offset]
+||		} else {
+|			mov reg, [0x8]
+|			mov reg, aword [reg + tsrm_tls_index]
+|			mov reg, aword [reg + tsrm_tls_offset]
+||		}
 |	.else
 |		gs
-|		mov reg, aword [tsrm_ls_cache_tcb_offset]  // mov reg, aword gs:tsrm_ls_cache_tcb_offset
+||		if (tsrm_ls_cache_tcb_offset) {
+|			mov reg, aword [tsrm_ls_cache_tcb_offset]
+||		} else {
+|			mov reg, [0x4]
+|			mov reg, aword [reg + tsrm_tls_index]
+|			mov reg, aword [reg + tsrm_tls_offset]
+||		}
 |	.endif
 |.endmacro
 
@@ -2424,8 +2448,55 @@ static int zend_jit_setup(void)
 	|.endif
 
 #if ZTS
+# ifdef _WIN64
+	// TODO: ???
+	tsrm_tls_index  = _tls_index * sizeof(void*);
+	// TODO: how to get this magic value?
+	tsrm_tls_offset = 0x110;
+# elif ZEND_WIN32
+	// TODO: ???
+	tsrm_tls_index  = _tls_index * sizeof(void*);
+	// TODO: how to get this magic value?
+	tsrm_tls_offset = 0x110;
+# elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
-	ZEND_ASSERT(tsrm_ls_cache_tcb_offset != 0);
+	if (tsrm_ls_cache_tcb_offset == 0) {
+		size_t *ti;
+
+		__asm__(
+			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
+			: "=a" (ti));
+		tsrm_tls_offset = ti[1];
+		tsrm_tls_index = ti[0] * 16;
+	}
+# elif defined(__GNUC__) && defined(__i386__)
+	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
+	if (tsrm_ls_cache_tcb_offset == 0) {
+#if 1
+		size_t ret;
+
+		asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
+			: "=a" (ret));
+		tsrm_ls_cache_tcb_offset = ret;
+#else
+		size_t *ti, _ebx, _ecx, _edx;
+
+		__asm__(
+			"call 1f\n"
+			".subsection 1\n"
+			"1:\tmovl (%%esp), %%ebx\n\t"
+			"ret\n"
+			".previous\n\t"
+			"addl $_GLOBAL_OFFSET_TABLE_, %%ebx\n\t"
+			"leal _tsrm_ls_cache@tlsldm(%%ebx), %0\n\t"
+			"call ___tls_get_addr@plt\n\t"
+			"leal _tsrm_ls_cache@tlsldm(%%ebx), %0\n"
+			: "=a" (ti), "=&b" (_ebx), "=&c" (_ecx), "=&d" (_edx));
+		tsrm_tls_offset = ti[1];
+		tsrm_tls_index = ti[0] * 8;
+#endif
+	}
+# endif
 #endif
 
 	return SUCCESS;
