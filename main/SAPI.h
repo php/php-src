@@ -137,8 +137,9 @@ typedef struct _sapi_globals_struct {
 
 BEGIN_EXTERN_C()
 #ifdef ZTS
-# define SG(v) ZEND_TSRMG(sapi_globals_id, sapi_globals_struct *, v)
+# define SG(v) ZEND_TSRMG_FAST(sapi_globals_offset, sapi_globals_struct *, v)
 SAPI_API extern int sapi_globals_id;
+SAPI_API extern size_t sapi_globals_offset;
 #else
 # define SG(v) (sapi_globals.v)
 extern SAPI_API sapi_globals_struct sapi_globals;
