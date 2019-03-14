@@ -104,6 +104,7 @@
 #define SCNG	INI_SCNG
 #ifdef ZTS
 ZEND_API ts_rsrc_id ini_scanner_globals_id;
+ZEND_API size_t ini_scanner_globals_offset;
 #else
 ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #endif

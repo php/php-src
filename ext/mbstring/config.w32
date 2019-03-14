@@ -10,7 +10,7 @@ if (PHP_MBSTRING != "no") {
 		EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", PHP_MBSTRING_SHARED);
 
 		/* XXX libonig is only usable as a static library ATM, code change required to link with a DLL. */
-		ADD_FLAG("CFLAGS_MBSTRING", "/DONIG_EXTERN=extern /DPHP_ONIG_BAD_KOI8_ENTRY=1");
+		ADD_FLAG("CFLAGS_MBSTRING", "/DONIG_EXTERN=extern /DPHP_ONIG_BAD_KOI8_ENTRY=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 		STDOUT.WriteLine("Using bundled libmbfl...");
 
