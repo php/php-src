@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #77676 (Unable to run tests when building shared extension on
     AIX). (Kevin Adler)
 
+- Bcmath:
+  . Fixed bug #77742 (bcpow() implementation related to gcc compiler
+    optimization). (Nikita)
+
 - FPM:
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
     (Kevin Adler)
