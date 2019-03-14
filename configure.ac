@@ -658,7 +658,6 @@ strcasecmp \
 strcoll \
 strdup \
 strerror \
-strftime \
 strnlen \
 strptime \
 strstr \
