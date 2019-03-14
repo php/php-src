@@ -5,7 +5,7 @@ Arrow functions implicit use must be throwing notices only upon actual use
 
 $b = 1;
 
-var_dump((fn() => $b + $c)());
+var_dump((() ==> $b + $c)());
 
 ?>
 --EXPECTF--

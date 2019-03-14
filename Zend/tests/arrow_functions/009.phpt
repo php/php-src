@@ -6,24 +6,24 @@ Arrow function $this binding
 class Test {
     public function method() {
         // It would be okay if this is NULL, but the rest should work
-        $fn = fn() => 42;
+        $fn = () ==> 42;
         $r = new ReflectionFunction($fn);
         var_dump($r->getClosureThis());
 
-        $fn = fn() => $this;
+        $fn = () ==> $this;
         var_dump($fn());
 
-        $fn = fn() => Test::method2();
+        $fn = () ==> Test::method2();
         $fn();
 
-        $fn = fn() => call_user_func('Test::method2');
+        $fn = () ==> call_user_func('Test::method2');
         $fn();
 
         $thisName = "this";
-        $fn = fn() => $$thisName;
+        $fn = () ==> $$thisName;
         var_dump($fn());
 
-        $fn = fn() => self::class;
+        $fn = () ==> self::class;
         var_dump($fn());
     }
 

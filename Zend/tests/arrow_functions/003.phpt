@@ -5,7 +5,7 @@ Arrow function closing over variable
 
 $b = 1;
 
-var_dump((fn() => $b)());
+var_dump((() ==> $b)());
 
 ?>
 --EXPECT--

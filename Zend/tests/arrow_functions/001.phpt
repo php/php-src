@@ -3,13 +3,13 @@ Basic arrow function functionality check
 --FILE--
 <?php
 
-$foo = fn() => 1;
+$foo = () ==> 1;
 var_dump($foo());
 
-$foo = fn($x) => $x;
+$foo = ($x) ==> $x;
 var_dump($foo(2));
 
-$foo = fn($x, $y) => $x + $y;
+$foo = ($x, $y) ==> $x + $y;
 var_dump($foo(1, 2));
 
 ?>

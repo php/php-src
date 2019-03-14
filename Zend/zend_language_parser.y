@@ -167,7 +167,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_CONTINUE   "continue (T_CONTINUE)"
 %token T_GOTO       "goto (T_GOTO)"
 %token T_FUNCTION   "function (T_FUNCTION)"
-%token T_FN         "fn (T_FN)"
 %token T_CONST      "const (T_CONST)"
 %token T_RETURN     "return (T_RETURN)"
 %token T_TRY        "try (T_TRY)"
@@ -195,6 +194,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
 %token T_OBJECT_OPERATOR "-> (T_OBJECT_OPERATOR)"
 %token T_DOUBLE_ARROW    "=> (T_DOUBLE_ARROW)"
+%token T_LONG_ARROW      "==> (T_LONG_ARROW)"
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CALLABLE        "callable (T_CALLABLE)"
@@ -223,6 +223,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "?? (T_COALESCE)"
 %token T_POW             "** (T_POW)"
 %token T_POW_EQUAL       "**= (T_POW_EQUAL)"
+%token T_ARROW_START     "'('"
 
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
@@ -255,9 +256,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <ast> isset_variable type return_type type_expr
 %type <ast> identifier
-%type <ast> inline_function fn
+%type <ast> inline_function
 
-%type <num> returns_ref function is_reference is_variadic variable_modifiers
+%type <num> returns_ref function is_reference is_variadic variable_modifiers arrow_start long_arrow
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
 
@@ -990,6 +991,21 @@ expr:
 	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	inline_function { $$ = $1; }
 	|	T_STATIC inline_function { $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
+	|	returns_ref arrow_start parameter_list ')' return_type backup_doc_comment T_LONG_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $1 | $11, $2, $6,
+				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
+				  $3, zend_ast_create_list(0, ZEND_AST_CLOSURE_USES), zend_ast_create(ZEND_AST_RETURN, $10), $5);
+				  ((zend_ast_decl *) $$)->lex_pos = $9;
+				  CG(extra_fn_flags) = $8; }
+	|	T_VARIABLE long_arrow backup_doc_comment backup_fn_flags backup_lex_pos expr backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $7, $2, $3,
+				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
+				  zend_ast_create_list(1, ZEND_AST_PARAM_LIST,
+					  zend_ast_create(ZEND_AST_PARAM, NULL, $1, NULL)),
+				  zend_ast_create_list(0, ZEND_AST_CLOSURE_USES),
+				  zend_ast_create(ZEND_AST_RETURN, $6), NULL);
+				  ((zend_ast_decl *) $$)->lex_pos = $5;
+				  CG(extra_fn_flags) = $4; }
 ;
 
 
@@ -999,16 +1015,13 @@ inline_function:
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 				  $5, $7, $11, $8); CG(extra_fn_flags) = $9; }
-	|	fn returns_ref '(' parameter_list ')' return_type backup_doc_comment T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $12, $1, $7,
-				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-				  $4, zend_ast_create_list(0, ZEND_AST_CLOSURE_USES), zend_ast_create(ZEND_AST_RETURN, $11), $6);
-				  ((zend_ast_decl *) $$)->lex_pos = $10;
-				  CG(extra_fn_flags) = $9; }
 ;
 
-fn:
-	T_FN { $$ = CG(zend_lineno); }
+arrow_start:
+	T_ARROW_START { $$ = CG(zend_lineno); }
+;
+long_arrow:
+	T_LONG_ARROW { $$ = CG(zend_lineno); }
 ;
 
 function:
