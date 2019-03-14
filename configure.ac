@@ -632,7 +632,6 @@ memmove \
 mkstemp \
 mmap \
 nl_langinfo \
-perror \
 poll \
 ptsname \
 putenv \
@@ -660,7 +659,6 @@ strdup \
 strerror \
 strnlen \
 strptime \
-strstr \
 strtok_r \
 symlink \
 tempnam \
