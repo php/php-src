@@ -51,6 +51,10 @@ void gc_globals_ctor(void);
 void gc_globals_dtor(void);
 void gc_reset(void);
 
+#ifdef ZTS
+size_t zend_gc_globals_size(void);
+#endif
+
 END_EXTERN_C()
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \

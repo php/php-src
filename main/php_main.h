@@ -49,6 +49,12 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 /* environment module */
 extern int php_init_environ(void);
 extern int php_shutdown_environ(void);
+
+#ifdef ZTS
+PHPAPI void php_reserve_tsrm_memory(void);
+PHPAPI int php_tsrm_startup(void);
+#endif
+
 END_EXTERN_C()
 
 #endif

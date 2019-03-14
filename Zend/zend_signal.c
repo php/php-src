@@ -45,6 +45,7 @@
 
 #ifdef ZTS
 ZEND_API int zend_signal_globals_id;
+ZEND_API size_t zend_signal_globals_offset;
 #else
 ZEND_API zend_signal_globals_t zend_signal_globals;
 #endif /* not ZTS */
@@ -403,7 +404,7 @@ ZEND_API void zend_signal_startup(void)
 {
 
 #ifdef ZTS
-	ts_allocate_id(&zend_signal_globals_id, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, NULL);
+	ts_allocate_fast_id(&zend_signal_globals_id, &zend_signal_globals_offset, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, NULL);
 #else
 	zend_signal_globals_ctor(&zend_signal_globals);
 #endif

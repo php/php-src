@@ -86,7 +86,6 @@ zend_compiler_globals    *compiler_globals;
 zend_executor_globals    *executor_globals;
 php_core_globals         *core_globals;
 sapi_globals_struct      *sapi_globals;
-void ***tsrm_ls;
 #endif
 
 zend_module_entry litespeed_module_entry;
@@ -1234,7 +1233,7 @@ int main( int argc, char * argv[] )
 #endif
 
 #ifdef ZTS
-    tsrm_startup(1, 1, 0, NULL);
+    php_tsrm_startup();
 #endif
 
 #if PHP_MAJOR_VERSION >= 7
@@ -1262,7 +1261,6 @@ int main( int argc, char * argv[] )
     executor_globals = ts_resource(executor_globals_id);
     core_globals = ts_resource(core_globals_id);
     sapi_globals = ts_resource(sapi_globals_id);
-    tsrm_ls = ts_resource(0);
 
     SG(request_info).path_translated = NULL;
 #endif

@@ -1550,10 +1550,6 @@ int main(int argc, char *argv[])
 	int ini_entries_len = 0;
 	/* end of temporary locals */
 
-#ifdef ZTS
-	void ***tsrm_ls;
-#endif
-
 	int max_requests = 0;
 	int requests = 0;
 	int fcgi_fd = 0;
@@ -1583,8 +1579,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef ZTS
-	tsrm_startup(1, 1, 0, NULL);
-	tsrm_ls = ts_resource(0);
+	php_tsrm_startup();
 #endif
 
 	zend_signal_startup();
