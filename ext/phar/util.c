@@ -1829,9 +1829,9 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			return FAILURE;
 #endif
 		case PHAR_SIG_OPENSSL: {
-			size_t siglen;
 			unsigned char *sigbuf;
 #ifdef PHAR_HAVE_OPENSSL
+			unsigned int siglen;
 			BIO *in;
 			EVP_PKEY *key;
 			EVP_MD_CTX *md_ctx;
@@ -1878,7 +1878,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 				}
 			}
 
-			if (!EVP_SignFinal (md_ctx, sigbuf,(unsigned int *)&siglen, key)) {
+			if (!EVP_SignFinal (md_ctx, sigbuf, &siglen, key)) {
 				efree(sigbuf);
 				if (error) {
 					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
@@ -1889,6 +1889,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			sigbuf[siglen] = '\0';
 			EVP_MD_CTX_destroy(md_ctx);
 #else
+			size_t siglen;
 			sigbuf = NULL;
 			siglen = 0;
 			php_stream_seek(fp, 0, SEEK_END);
