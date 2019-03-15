@@ -9,7 +9,7 @@ Mark Baker mark@lange.demon.co.uk at the PHPNW2017 Conference for PHP Testfest 2
 // Set up test data in a new file
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books xmlns:ns1="http://www.ns1.namespace.org/" xmlns:ns2="http://www.ns2.namespace.org/"><book ns1:num="1" ns2:idx="2" ns1:idx="3" ns2:isbn="4">book1</book></books>';
-$filename = dirname(__FILE__) . '/_014.xml';
+$filename = __DIR__ . '/015.xml';
 file_put_contents($filename, $xmlstring);
 
 // Load test data into a new XML Reader
@@ -55,7 +55,7 @@ $reader->close();
 ===DONE===
 --CLEAN--
 <?php
-unlink(__DIR__.'/_014.xml');
+unlink(__DIR__.'/015.xml');
 ?>
 --EXPECT--
 ns1:idx: 3
