@@ -1233,7 +1233,7 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 		goto skip_token; \
 	} while (0)
 
-int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
+int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem, zend_ast_loc *loc)
 {
 int token;
 int offset;
@@ -2363,9 +2363,10 @@ skip_escape_conversion:
 		while (heredoc_nesting_level) {
 			zval zv;
 			int retval;
+            zend_ast_loc loc;
 
 			ZVAL_UNDEF(&zv);
-			retval = lex_scan(&zv, NULL);
+			retval = lex_scan(&zv, NULL, &loc);
 			zval_ptr_dtor_nogc(&zv);
 
 			if (EG(exception)) {
@@ -2773,16 +2774,16 @@ emit_token_with_str:
 
 emit_token_with_val:
 	if (PARSER_MODE()) {
-		zend_ast_loc loc;
-		loc.start_line = start_line;
 		ZEND_ASSERT(Z_TYPE_P(zendlval) != IS_UNDEF);
-		elem->ast = zend_ast_create_zval(&loc, zendlval);
+		loc->start_line = start_line;
+		elem->ast = zend_ast_create_zval(loc, zendlval);
 	}
 
 emit_token:
 	if (SCNG(on_event)) {
 		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));
 	}
+    loc->start_line = start_line;
 	return token;
 
 return_whitespace:
@@ -2794,6 +2795,7 @@ return_whitespace:
 		start_line = CG(zend_lineno);
 		goto restart;
 	} else {
+        loc->start_line = start_line;
 		return T_WHITESPACE;
 	}
 

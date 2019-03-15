@@ -40,7 +40,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 	if (N) { \
 		(Res).start_line = YYRHSLOC(RHS, 1).start_line; \
 	} else { \
-		(Res).start_line = YYRHSLOC(RHS, 0).start_line; \
+		(Res).start_line = yylloc.start_line; \
 	} \
 } while (0)
 

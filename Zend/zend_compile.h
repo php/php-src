@@ -732,7 +732,7 @@ void zend_file_context_end(zend_file_context *prev_context);
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename);
 
-ZEND_API int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem);
+ZEND_API int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem, zend_ast_loc *loc);
 void startup_scanner(void);
 void shutdown_scanner(void);
 
