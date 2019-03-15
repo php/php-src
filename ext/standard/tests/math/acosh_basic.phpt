@@ -9,7 +9,7 @@ precision = 14
  * Function is implemented in ext/standard/math.c
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/allowed_rounding_error.inc");
 
 echo "acosh  1.1276259652064= ";

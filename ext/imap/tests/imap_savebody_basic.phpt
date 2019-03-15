@@ -4,7 +4,7 @@ imap_savebody() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -15,12 +15,12 @@ echo  "Checking with incorrect parameter type\n";
 imap_savebody('');
 imap_savebody(false);
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 $stream_id = setup_test_mailbox('', 1);
 
 imap_savebody($stream_id);
 
-$file = dirname(__FILE__).'/tmpsavebody.txt';
+$file = __DIR__.'/tmpsavebody.txt';
 
 //with URL
 $z = imap_savebody($stream_id, $file, 1);
@@ -38,7 +38,7 @@ imap_close($stream_id);
 ?>
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__).'/tmpsavebody.txt');
+@unlink(__DIR__.'/tmpsavebody.txt');
 require_once('clean.inc');
 ?>
 --EXPECTF--

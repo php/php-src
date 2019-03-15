@@ -35,7 +35,7 @@ var_dump(isset($phar['b']));
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/files/phar_oo_010.phar.php');
+unlink(__DIR__ . '/files/phar_oo_010.phar.php');
 __halt_compiler();
 ?>
 --EXPECT--

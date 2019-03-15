@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description: Changes the current umask
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 /* Check umask() on file/dir */
 

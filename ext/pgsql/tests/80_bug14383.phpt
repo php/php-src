@@ -2,7 +2,7 @@
 Bug #14383 (8.0+) (using postgres with DBA causes DBA not to be able to find any keys)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/../../dba/tests/skipif.inc');
+require_once(__DIR__.'/../../dba/tests/skipif.inc');
 require_once('skipif.inc');
 ?>
 --FILE--
@@ -15,8 +15,8 @@ if (!$dbh) {
 }
 pg_close($dbh);
 
-require_once(dirname(__FILE__).'/../../dba/tests/test.inc');
-require_once(dirname(__FILE__).'/../../dba/tests/dba_handler.inc');
+require_once(__DIR__.'/../../dba/tests/test.inc');
+require_once(__DIR__.'/../../dba/tests/dba_handler.inc');
 
 ?>
 --EXPECTF--

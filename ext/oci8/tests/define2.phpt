@@ -3,12 +3,12 @@ Test oci_define_by_name types
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmtarray = array(
 	"drop table phptestrawtable",
@@ -19,7 +19,7 @@ oci8_test_sql_execute($c, $stmtarray);
 
 $stmt = oci_parse ($c, "insert into phptestrawtable (id, fileimage) values (:id, :fileimage)");
 $i=1;
-$fileimage = file_get_contents( dirname(__FILE__)."/test.gif");
+$fileimage = file_get_contents( __DIR__."/test.gif");
 $fileimage = substr($fileimage, 0, 300);
 var_dump(md5($fileimage));
 

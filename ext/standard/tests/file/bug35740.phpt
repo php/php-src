@@ -3,7 +3,7 @@ Bug #35740 (memory leak when including a directory)
 --FILE--
 <?php
 
-include (dirname(__FILE__));
+include (__DIR__);
 
 echo "Done\n";
 ?>

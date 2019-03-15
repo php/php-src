@@ -8,7 +8,7 @@ if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
 <?php
 include("prepare.inc");
 
-$outputfile = dirname(__FILE__)."/bug54446test.txt";
+$outputfile = __DIR__."/bug54446test.txt";
 if (file_exists($outputfile)) {
     unlink($outputfile);
 }

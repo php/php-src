@@ -14,7 +14,7 @@ echo "*** Testing resource type with array_search() ***\n";
 $file_handle = fopen(__FILE__, "r");
 
 //directory type resource
-$dir_handle = opendir( dirname(__FILE__) );
+$dir_handle = opendir( __DIR__ );
 
 //store resources in array for comparison.
 $resources = array($file_handle, $dir_handle);

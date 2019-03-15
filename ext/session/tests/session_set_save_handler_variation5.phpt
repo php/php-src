@@ -30,7 +30,7 @@ function noisy_gc($maxlifetime) {
 echo "*** Testing session_set_save_handler() : variation ***\n";
 
 require_once "save_handler.inc";
-$path = dirname(__FILE__);
+$path = __DIR__;
 var_dump(session_save_path($path));
 
 echo "*** Without lazy_write ***\n";

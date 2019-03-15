@@ -9,7 +9,7 @@ GetImageSize() for xbm format
  */
 
 echo "*** Testing getimagesize() : xbm format ***\n";
-var_dump(getimagesize(dirname(__FILE__) . "/75x50.xbm", $arr));
+var_dump(getimagesize(__DIR__ . "/75x50.xbm", $arr));
 var_dump($arr);
 
 ?>

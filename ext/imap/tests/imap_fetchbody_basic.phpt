@@ -2,7 +2,7 @@
 Test imap_fetchbody() function : basic functionality
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -13,7 +13,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
  */
 
 echo "*** Testing imap_fetchbody() : basic functionality ***\n";
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 // Initialise all required variables
 
@@ -59,7 +59,7 @@ var_dump( $overview[0]->seen );
 ===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__).'/clean.inc');
+require_once(__DIR__.'/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetchbody() : basic functionality ***

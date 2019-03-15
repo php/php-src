@@ -13,7 +13,7 @@ Test readdir() function : usage variations - empty directories
 
 echo "*** Testing readdir() : usage variations ***\n";
 
-$path = dirname(__FILE__) . '/readdir_variation2';
+$path = __DIR__ . '/readdir_variation2';
 mkdir($path);
 $dir_handle = opendir($path);
 
@@ -36,7 +36,7 @@ foreach($entries as $entry) {
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . '/readdir_variation2';
+$path = __DIR__ . '/readdir_variation2';
 rmdir($path);
 ?>
 --EXPECT--

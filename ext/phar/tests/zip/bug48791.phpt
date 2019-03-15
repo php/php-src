@@ -5,7 +5,7 @@ Phar: Bug #48791: open office documents always reported as corrupted by phar ext
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --FILE--
 <?php
-echo file_get_contents('phar://' . dirname(__FILE__) . '/files/test.odt/content.xml'), "\n";
+echo file_get_contents('phar://' . __DIR__ . '/files/test.odt/content.xml'), "\n";
 ?>
 ===DONE===
 --EXPECT--

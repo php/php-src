@@ -33,7 +33,7 @@ function testme() {
 	}
 
 
-	$scriptDirFile = dirname(__FILE__).'/'.$tmpfile;
+	$scriptDirFile = __DIR__.'/'.$tmpfile;
 	$h = @fopen($scriptDirFile, "r");
 	if ($h === false) {
 	   echo "Not created in script dir\n";

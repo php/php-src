@@ -5,7 +5,7 @@ oci_connect() with invalid character set
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 var_dump($c1 = oci_connect($user, $password, $dbase));
 var_dump($c2 = oci_connect($user, $password, $dbase, ""));

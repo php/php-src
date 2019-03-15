@@ -10,9 +10,9 @@ phar.require_hash=0
 Phar::interceptFileFuncs();
 var_dump(is_file(__FILE__));
 
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
-copy(dirname(__FILE__) . '/tar/files/links.tar', $fname2);
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
+copy(__DIR__ . '/tar/files/links.tar', $fname2);
 $a = new PharData($fname2);
 $b = $a->convertToExecutable(Phar::TAR, Phar::NONE, '.phar.tar');
 unset($a);
@@ -34,8 +34,8 @@ include $fname3;
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
 --EXPECTF--
 bool(true)
 is_link

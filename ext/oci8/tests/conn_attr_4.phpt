@@ -3,7 +3,7 @@ Set and get of connection attributes with errors.
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
@@ -24,7 +24,7 @@ if (!(isset($matches[0]) &&
 $testuser     = 'testuser_attr_4';  // Used in conn_attr.inc
 $testpassword = 'testuser';
 
-require(dirname(__FILE__)."/conn_attr.inc");
+require(__DIR__."/conn_attr.inc");
 
 $attr_array = array('MODULE','ACTION','CLIENT_INFO','CLIENT_IDENTIFIER');
 

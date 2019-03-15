@@ -39,8 +39,8 @@ foreach($file_content_types as $file_content_type) {
     echo "-- Opening file in $file_mode --\n";
 
     // create temp file and fill it content of type $file_content_type
-    $filename = dirname(__FILE__)."/fwrite_variation3.tmp"; // this is name of the file
-    create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "fwrite_variation", 3);
+    $filename = __DIR__."/fwrite_variation3.tmp"; // this is name of the file
+    create_files ( __DIR__, 1, $file_content_type, 0755, 1, "w", "fwrite_variation", 3);
 
     $file_handle = fopen($filename, $file_mode);
     if(!$file_handle) {

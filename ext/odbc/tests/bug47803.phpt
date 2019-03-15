@@ -5,7 +5,7 @@ Bug #47803 Executing prepared statements is successful only for the first two st
 --FILE--
 <?php
 
-include dirname(__FILE__) . "/config.inc";
+include __DIR__ . "/config.inc";
 
 $create_table = "CREATE TABLE FOO(
 		[PAR_ID] [int] NOT NULL,

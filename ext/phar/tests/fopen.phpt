@@ -11,7 +11,7 @@ Phar::interceptFileFuncs();
 $a = fopen(__FILE__, 'rb'); // this satisfies 1 line of code coverage
 fclose($a);
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $a = new Phar($fname);
 $a['index.php'] = '<?php
 $a = fopen("dir/file1.txt", "r");
@@ -33,7 +33,7 @@ include $fname;
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 hihi
 Warning: fopen(notfound.txt): failed to open stream: No such file or directory in phar://%sfopen.phar.php/index.php on line %d

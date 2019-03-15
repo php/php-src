@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - float formats with float values
 
 /* Test fscanf() to scan different float values using different format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): different float format types with different float values ***\n";
 
@@ -94,7 +94,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation8.tmp";
 unlink($filename);
 ?>

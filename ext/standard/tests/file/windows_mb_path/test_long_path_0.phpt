@@ -2,7 +2,7 @@
 Basic long path test
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -21,7 +21,7 @@ for ($i = 0; $i < $how_many; $i++) {
 	$p .= DIRECTORY_SEPARATOR;
 }
 
-$p = realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . $p;
+$p = realpath(__DIR__) . DIRECTORY_SEPARATOR . $p;
 
 echo strlen($p), "\n", $p, "\n";
 
@@ -34,7 +34,7 @@ for ($i = 0; $i < $how_many; $i++) {
 	rmdir($p0);
 }
 
-var_dump(file_exists(realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . $s));
+var_dump(file_exists(realpath(__DIR__) . DIRECTORY_SEPARATOR . $s));
 
 ?>
 ===DONE===

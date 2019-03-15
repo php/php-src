@@ -8,7 +8,7 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 
 $phar = new Phar($fname);
 $phar->setStub('<?php echo "first stub\n"; __HALT_COMPILER(); ?>');
@@ -30,7 +30,7 @@ echo $phar->getAlias() . "\n";
 $phar->setAlias('test');
 echo $phar->getAlias() . "\n";
 $b = $phar;
-$phar = new Phar(dirname(__FILE__) . '/notphar.phar');
+$phar = new Phar(__DIR__ . '/notphar.phar');
 
 try {
 	$phar->setAlias('test');
@@ -42,8 +42,8 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phartmp.tar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

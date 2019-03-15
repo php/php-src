@@ -9,7 +9,7 @@ ZE2 Autoload and recursion
 
 spl_autoload_register(function ($class_name) {
 	var_dump(class_exists($class_name));
-	require_once(dirname(__FILE__) . '/' . $class_name . '.inc');
+	require_once(__DIR__ . '/' . $class_name . '.inc');
 	echo 'autoload(' . $class_name . ")\n";
 });
 

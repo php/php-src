@@ -2,7 +2,7 @@
 Test imap_fetchheader() function : basic function
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -12,7 +12,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
  */
 
 echo "*** Testing imap_fetchheader() : basic functionality ***\n";
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 // Initialise all required variables
 $stream_id = setup_test_mailbox('', 1, $mailbox, 'multiPart'); // setup temp mailbox with 1 msg
@@ -39,7 +39,7 @@ var_dump( imap_fetchheader($stream_id, $msg_no) );
 ===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__).'/clean.inc');
+require_once(__DIR__.'/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetchheader() : basic functionality ***

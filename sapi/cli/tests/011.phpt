@@ -7,7 +7,7 @@ syntax check
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
-$filename = dirname(__FILE__)."/011.test.php";
+$filename = __DIR__."/011.test.php";
 
 $code = '
 <?php

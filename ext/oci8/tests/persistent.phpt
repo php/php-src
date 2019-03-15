@@ -5,7 +5,7 @@ reusing persistent connections
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 var_dump(oci_pconnect($user, $password, $dbase));
 var_dump(oci_pconnect($user, $password, $dbase));

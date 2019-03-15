@@ -8,7 +8,7 @@ if (!extension_loaded("phar")) die("skip");
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
 
@@ -23,7 +23,7 @@ include 'files/phar_test.inc';
 
 function dump($phar, $base)
 {
-	var_dump(str_replace(dirname(__FILE__), '*', $phar) . $base);
+	var_dump(str_replace(__DIR__, '*', $phar) . $base);
 	$dir = opendir($phar . $base);
 	if ($base == '/')
 	{
@@ -58,7 +58,7 @@ var_dump(opendir("phar://foo.phar/hi"));
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 string(%d) "phar://*/027.phar.php/"
 string(6) "/a.php"

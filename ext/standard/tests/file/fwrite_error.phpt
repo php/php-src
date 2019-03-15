@@ -15,7 +15,7 @@ include ("file.inc");
 
 echo "*** Testing fwrite() : error conditions ***\n";
 
-$filename = dirname(__FILE__)."/fwrite_error.tmp";
+$filename = __DIR__."/fwrite_error.tmp";
 $file_handle  = fopen ( $filename, "w");
 $data = "data";
 
@@ -35,7 +35,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$filename = dirname(__FILE__)."/fwrite_error.tmp";
+$filename = __DIR__."/fwrite_error.tmp";
 unlink( $filename );
 ?>
 --EXPECTF--

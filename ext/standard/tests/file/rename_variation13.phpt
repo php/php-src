@@ -16,7 +16,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
  */
 
 echo "*** Testing rename() with obscure files ***\n";
-$file_path = dirname(__FILE__)."/renameVar13";
+$file_path = __DIR__."/renameVar13";
 $aFile = $file_path.'/afile.tmp';
 
 mkdir($file_path);

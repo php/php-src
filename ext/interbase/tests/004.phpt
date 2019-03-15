@@ -18,7 +18,7 @@ InterBase: BLOB test
     /* create 100k blob file  */
     $blob_str = rand_binstr(100*1024);
 
-    $name = tempnam(dirname(__FILE__),"blob.tmp");
+    $name = tempnam(__DIR__,"blob.tmp");
     $ftmp = fopen($name,"w");
     fwrite($ftmp,$blob_str);
     fclose($ftmp);

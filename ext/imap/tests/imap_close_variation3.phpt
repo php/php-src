@@ -23,7 +23,7 @@ var_dump(imap_close($file_handle));
 var_dump($file_handle);
 
 echo "\n-- Directory Resource opened with opendir() --\n";
-var_dump($dir_handle = opendir(dirname(__FILE__)));
+var_dump($dir_handle = opendir(__DIR__));
 var_dump(imap_close($dir_handle));
 var_dump($dir_handle);
 ?>

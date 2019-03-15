@@ -7,7 +7,7 @@ oci8.privileged_connect=1
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 oci_connect("", "", "", false, OCI_SYSOPER);
 oci_connect("", "", "", false, OCI_SYSDBA);

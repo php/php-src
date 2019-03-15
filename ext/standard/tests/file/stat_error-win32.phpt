@@ -13,7 +13,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    Description: Gives information about a file
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $arr = array(__FILE__);
 
 echo "\n*** Testing stat() for error conditions ***\n";

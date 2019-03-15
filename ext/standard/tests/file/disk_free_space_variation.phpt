@@ -9,7 +9,7 @@ Test disk_free_space and its alias diskfreespace() functions : Usage Variations
  *               filesystem or disk partition
  */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing with a directory ***\n";
 var_dump( disk_free_space($file_path."/..") );
@@ -65,7 +65,7 @@ echo"\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir($file_path."/disk_free_space");
 ?>
 --EXPECTF--

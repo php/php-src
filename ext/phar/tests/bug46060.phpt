@@ -7,8 +7,8 @@ Phar: Bug #46060: addEmptyDir() breaks
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.tar';
 
 $phar = new PharData($fname);
 $phar->addEmptyDir('blah/');
@@ -22,8 +22,8 @@ var_dump($phar['blah']->isDir(), $phar['test']->isDir());
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
 __HALT_COMPILER();
 ?>
 --EXPECT--

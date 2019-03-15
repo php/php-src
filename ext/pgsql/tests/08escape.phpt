@@ -6,7 +6,7 @@ PostgreSQL escape functions
 <?php
 
 include 'config.inc';
-define('FILE_NAME', dirname(__FILE__) . '/php.gif');
+define('FILE_NAME', __DIR__ . '/php.gif');
 
 // pg_escape_string() test
 $before = "ABC\\ABC\'";

@@ -5,7 +5,7 @@ SPL: ArrayIterator::append
 
 if (!class_exists('NoRewindIterator', false))
 {
-	require_once(dirname(__FILE__) . '/../examples/norewinditerator.inc');
+	require_once(__DIR__ . '/../examples/norewinditerator.inc');
 }
 
 echo "===Array===\n";

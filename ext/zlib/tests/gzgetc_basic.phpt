@@ -16,7 +16,7 @@ if (version_compare(get_zlib_version(), '1.2.5') > 0) {
 // note that gzgets is an alias to fgets. parameter checking tests will be
 // the same as gzgets
 
-$f = dirname(__FILE__)."/004.txt.gz";
+$f = __DIR__."/004.txt.gz";
 $h = gzopen($f, 'r');
 
 $count = 0;

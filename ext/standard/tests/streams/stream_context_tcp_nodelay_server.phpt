@@ -39,7 +39,7 @@ CODE;
 
 include sprintf(
 	"%s/../../../openssl/tests/ServerClientTestCase.inc",
-	dirname(__FILE__));
+	__DIR__);
 ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
 ?>
 --EXPECT--

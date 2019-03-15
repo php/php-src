@@ -3,13 +3,13 @@ PDO_DBLIB: driver supports a batch of queries containing SELECT, INSERT, UPDATE,
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 
 if (!driver_supports_batch_statements_without_select($db)) die('xfail test will fail with this version of FreeTDS');
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 
 // creating a proc need to be a statement in it's own batch, so we need to do a little setup first
 $db->query("create table #php_pdo(id int); ");

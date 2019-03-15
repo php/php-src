@@ -19,7 +19,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* test the effects of touch() on stats of dir */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -52,7 +52,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/lstat_stat_variation5");
 ?>
 --EXPECT--

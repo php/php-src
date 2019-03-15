@@ -8,7 +8,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $alias = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -38,14 +38,14 @@ if ($md5 == $md52) echo 'file was not modified';
 ?>
 ===AFTER===
 <?php
-include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip/a.php';
-include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip/b.php';
-include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip/b/c.php';
+include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip/a.php';
+include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip/b.php';
+include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip/b/c.php';
 ?>
 
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
 This is a
 This is b

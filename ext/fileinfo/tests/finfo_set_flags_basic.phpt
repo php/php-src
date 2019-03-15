@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_set_flags() function : basic functionality
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : bool finfo_set_flags(resource finfo, int options)
@@ -10,7 +10,7 @@ Test finfo_set_flags() function : basic functionality
  * Alias to functions:
  */
 
-$magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';
+$magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 $finfo = finfo_open( FILEINFO_MIME, $magicFile );
 
 echo "*** Testing finfo_set_flags() : basic functionality ***\n";

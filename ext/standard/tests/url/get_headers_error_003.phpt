@@ -5,7 +5,7 @@ server
 --FILE--
 <?php
 
-include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc";
+include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
 php_cli_server_start('header("X-Request-Method: ".$_SERVER["REQUEST_METHOD"]);');
 
 $opts = array(

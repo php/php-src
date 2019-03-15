@@ -17,7 +17,7 @@ var_dump( readfile('') );  // empty string as $filename
 var_dump( readfile(false) );  // boolean false as $filename
 
 echo "\n-- Testing readfile() with non-existent file --\n";
-$non_existent_file = dirname(__FILE__)."/non_existent_file.tmp";
+$non_existent_file = __DIR__."/non_existent_file.tmp";
 var_dump( readfile($non_existent_file) );
 
 echo "Done\n";

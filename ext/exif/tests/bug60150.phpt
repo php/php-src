@@ -7,7 +7,7 @@ output_handler=
 zlib.output_compression=0
 --FILE--
 <?php
-$infile = dirname(__FILE__).'/bug60150.jpg';
+$infile = __DIR__.'/bug60150.jpg';
 var_dump(exif_read_data($infile));
 ?>
 ===DONE===

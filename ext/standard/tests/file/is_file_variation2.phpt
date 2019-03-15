@@ -14,7 +14,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* Creating soft and hard links to a file and applying is_file() on links */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 fclose( fopen($file_path."/is_file_variation2.tmp", "w") );
 
 echo "*** Testing is_file() with links ***\n";
@@ -32,7 +32,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/is_file_variation2_symlink.tmp");
 unlink($file_path."/is_file_variation2_link.tmp");
 unlink($file_path."/is_file_variation2.tmp");

@@ -8,8 +8,8 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$dirName = dirname(__FILE__);
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+$dirName = __DIR__;
 $pname = 'phar://' . $fname;
 $pArchive="DataArchive.phar";
 $p = new Phar($fname, 0, $pArchive);
@@ -25,7 +25,7 @@ echo("\n Written Files($i)\n");
 ===DONE===
 --CLEAN--
 <?php
-$dirName = dirname(__FILE__);
+$dirName = __DIR__;
 $fileDir="$dirName/test_data";
 for ($i = 0; $i < 4*1024; $i++){
 	unlink("$fileDir/$i");

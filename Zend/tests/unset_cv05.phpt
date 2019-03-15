@@ -6,7 +6,7 @@ session.save_handler=files
 --SKIPIF--
 <?php
 
-include(dirname(__FILE__).'/../../ext/session/tests/skipif.inc');
+include(__DIR__.'/../../ext/session/tests/skipif.inc');
 
 ?>
 --FILE--

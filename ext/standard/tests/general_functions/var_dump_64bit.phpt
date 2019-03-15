@@ -229,7 +229,7 @@ echo "\n*** Testing var_dump() on resources ***\n";
 $file_handle = fopen(__FILE__, "r");
 
 /* directory type resource */
-$dir_handle = opendir( dirname(__FILE__) );
+$dir_handle = opendir( __DIR__ );
 
 $resources = array (
   $file_handle,

@@ -14,7 +14,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 
 /* Test copy() function: Trying to create copy of links */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing copy() with symlink and hardlink ***\n";
 $file = $file_path."/copy_variation7.tmp";
@@ -55,7 +55,7 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/copy_copy_variation7_symlink.tmp");
 unlink($file_path."/copy_copy_variation7_hardlink.tmp");
 unlink($file_path."/copy_variation7_symlink.tmp");

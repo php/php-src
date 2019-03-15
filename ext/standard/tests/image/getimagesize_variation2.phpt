@@ -16,7 +16,7 @@ set_error_handler('test_error_handler');
 echo "*** Testing getimagesize() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$imagefile = dirname(__FILE__)."/test1pix.jpg";
+$imagefile = __DIR__."/test1pix.jpg";
 
 //get an unset variable
 $unset_var = 10;

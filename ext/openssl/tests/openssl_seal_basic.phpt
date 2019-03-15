@@ -15,7 +15,7 @@ var_dump(openssl_seal($a, $a, $a, array()));
 
 // tests with cert
 $data = "openssl_open() test";
-$pub_key = "file://" . dirname(__FILE__) . "/public.key";
+$pub_key = "file://" . __DIR__ . "/public.key";
 $wrong = "wrong";
 
 var_dump(openssl_seal($data, $sealed, $ekeys, array($pub_key)));                  // no output

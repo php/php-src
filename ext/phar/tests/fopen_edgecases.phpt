@@ -7,15 +7,15 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.3.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.php';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.3.phar.php';
 $pname = 'phar://' . $fname;
 $pname2 = 'phar://' . $fname2;
 $pname3 = 'phar://' . $fname3;
 
 // create in cwd
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 file_put_contents('phar://fopen_edgetest.phar/hi', 'hi');
 // append
 $a = fopen($pname . '/b/c.php', 'a');
@@ -68,9 +68,9 @@ include $pname . '/test.php';
 
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/fopen_edgetest.phar');
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
+<?php unlink(__DIR__ . '/fopen_edgetest.phar');
 --EXPECTF--
 Warning: fopen(phar://%sfopen_edgecases.phar.php/b/c.php): failed to open stream: phar error: open mode append not supported in %sfopen_edgecases.php on line %d
 

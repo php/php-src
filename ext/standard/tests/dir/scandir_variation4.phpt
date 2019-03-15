@@ -14,7 +14,7 @@ Test scandir() function : usage variations - different relative paths
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include (dirname(__FILE__) . '/../file/file.inc');
+include (__DIR__ . '/../file/file.inc');
 
 $base_dir_path = __DIR__ . '/scandir_variation4';
 @mkdir($base_dir_path);

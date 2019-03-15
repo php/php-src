@@ -3,7 +3,7 @@ oci_password_change() for persistent connections
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
-require(dirname(__FILE__)."/details.inc");
+require(__DIR__."/details.inc");
 if (empty($dbase)) die ("skip requires database connection string be set");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip password change not supported in DRCP Mode");
@@ -11,7 +11,7 @@ if ($test_drcp) die("skip password change not supported in DRCP Mode");
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmtarray = array(
 	"drop user testuser_pw2 cascade",
@@ -63,7 +63,7 @@ echo "Done\n";
 --CLEAN--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmtarray = array(
     "drop user testuser_pw2 cascade"

@@ -6,7 +6,7 @@ imagecreatefromgd2
 ?>
 --FILE--
 <?php
-$file = dirname(__FILE__) . '/src.gd2';
+$file = __DIR__ . '/src.gd2';
 
 $im2 = imagecreatefromgd2($file);
 echo 'test create from gd2: ';

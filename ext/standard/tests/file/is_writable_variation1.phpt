@@ -5,7 +5,7 @@ Test is_writable() and its alias is_writeable() function: usage variations - dif
 if (substr(PHP_OS, 0, 3) != 'WIN') {
 
   // Skip if being run by root (files are always readable, writeable and executable)
-  $filename = dirname(__FILE__)."/is_writable_root_check.tmp";
+  $filename = __DIR__."/is_writable_root_check.tmp";
   $fp = fopen($filename, 'w');
   fclose($fp);
   if(fileowner($filename) == 0) {
@@ -24,10 +24,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    is_writeable() is an alias of is_writable()
 */
 /* test is_writable() & is_writeable() with file having different filepath notation */
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 echo "*** Testing is_writable(): usage variations ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/is_writable_variation1");
 
 // create a new temporary file
@@ -80,8 +80,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/is_writable_variation1/bar.tmp");
-rmdir(dirname(__FILE__)."/is_writable_variation1/");
+unlink(__DIR__."/is_writable_variation1/bar.tmp");
+rmdir(__DIR__."/is_writable_variation1/");
 ?>
 --EXPECTF--
 *** Testing is_writable(): usage variations ***

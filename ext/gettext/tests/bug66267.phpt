@@ -30,7 +30,7 @@ foreach ($loc as $l) {
 	putenv("LC_ALL=$l");
 	setlocale(LC_ALL, $l);
 
-	$path = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . "66265");
+	$path = realpath(__DIR__ . DIRECTORY_SEPARATOR . "66265");
 	bindtextdomain($domain, $path);
 	bind_textdomain_codeset($domain, "UTF-8");
 	textdomain($domain);

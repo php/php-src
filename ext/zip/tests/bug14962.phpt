@@ -7,7 +7,7 @@ if(!extension_loaded('zip')) die('skip');
 --FILE--
 <?php
 
-$dir = dirname(__FILE__);
+$dir = __DIR__;
 $file = '__tmp14962.txt';
 $fullpath = $dir . '/' . $file;
 $za = new ZipArchive;

@@ -41,7 +41,7 @@ EOF;
 	}
 }
 for ($i = 0; $i < 10; $i++) {
-	$ws=new TestSoapClient(dirname(__FILE__).'/bug37083.wsdl',
+	$ws=new TestSoapClient(__DIR__.'/bug37083.wsdl',
                    array('encoding'=>'ISO-8859-1',
                          'cache_wsdl'=>WSDL_CACHE_BOTH));
 	$search=new stdClass();

@@ -24,7 +24,7 @@ foreach ($ctxs as $ctx) {
         echo $e->getMessage(), "\n";
     }
 	$dom = new DOMDocument();
-	var_dump($dom->load(dirname(__FILE__).'/test.xml'));
+	var_dump($dom->load(__DIR__.'/test.xml'));
 }
 
 echo "Done\n";

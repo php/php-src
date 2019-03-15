@@ -5,7 +5,7 @@ send/receive serialized message.
 if (!extension_loaded("sysvmsg")) print "skip"; ?>
 --FILE--
 <?php
-$key = ftok(dirname(__FILE__) . "/001.phpt", "p");
+$key = ftok(__DIR__ . "/001.phpt", "p");
 $q = msg_get_queue($key);
 msg_send($q, 1, "hello") or print "FAIL\n";
 $type = null;

@@ -9,8 +9,8 @@ Test is_writable() and its alias is_writeable() function: error conditions
 */
 
 echo "\n*** Testing is_writable() on non-existent file ***\n";
-var_dump( is_writable(dirname(__FILE__)."/is_writable") );
-var_dump( is_writeable(dirname(__FILE__)."/is_writable") );
+var_dump( is_writable(__DIR__."/is_writable") );
+var_dump( is_writeable(__DIR__."/is_writable") );
 
 echo "Done\n";
 ?>

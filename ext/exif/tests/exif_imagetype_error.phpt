@@ -13,7 +13,7 @@ Test exif_imagetype() function : error conditions
 echo "*** Testing exif_imagetype() : error conditions ***\n";
 
 echo "\n-- Testing exif_imagetype() function with an unknown file  --\n";
-var_dump( exif_imagetype(dirname(__FILE__).'/foo.jpg') );
+var_dump( exif_imagetype(__DIR__.'/foo.jpg') );
 
 
 ?>

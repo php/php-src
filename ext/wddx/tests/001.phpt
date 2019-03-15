@@ -7,7 +7,7 @@ wddx deserialization test (32-bit)
 precision=14
 --FILE--
 <?php
-	$path = dirname(__FILE__);
+	$path = __DIR__;
 	var_dump(wddx_deserialize(file_get_contents("{$path}/wddx.xml")));
 ?>
 --EXPECTF--

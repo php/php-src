@@ -9,7 +9,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$p = new Phar(dirname(__FILE__) . '/phar_setsignaturealgo1.phar', 0, 'phar_setsignaturealgo1.phar');
+$p = new Phar(__DIR__ . '/phar_setsignaturealgo1.phar', 0, 'phar_setsignaturealgo1.phar');
 $p['file1.txt'] = 'hi';
 var_dump($p->getSignature());
 $p->setSignatureAlgorithm(Phar::MD5);
@@ -38,7 +38,7 @@ echo $e->getMessage();
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/phar_setsignaturealgo1.phar');
+unlink(__DIR__ . '/phar_setsignaturealgo1.phar');
 ?>
 --EXPECTF--
 array(2) {

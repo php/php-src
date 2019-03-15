@@ -4,13 +4,13 @@ Writing temporary lob before binding
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
-require(dirname(__FILE__).'/create_table.inc');
+require(__DIR__.'/connect.inc');
+require(__DIR__.'/create_table.inc');
 
 $ora_sql = "INSERT INTO ".$schema.$table_name." (clob) VALUES (:v_clob)";
 

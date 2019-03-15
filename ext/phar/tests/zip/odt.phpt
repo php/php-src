@@ -5,7 +5,7 @@ Phar: test a zip archive created by openoffice
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --FILE--
 <?php
-$a = new PharData(dirname(__FILE__) . '/files/odt.odt');
+$a = new PharData(__DIR__ . '/files/odt.odt');
 foreach (new RecursiveIteratorIterator($a, RecursiveIteratorIterator::LEAVES_ONLY) as $b) {
 	if ($b->isDir()) {
 		echo "dir " . $b->getPathName() . "\n";
@@ -15,7 +15,7 @@ foreach (new RecursiveIteratorIterator($a, RecursiveIteratorIterator::LEAVES_ONL
 }
 // this next line is for increased code coverage
 try {
-	$b = new Phar(dirname(__FILE__) . '/files/odt.odt');
+	$b = new Phar(__DIR__ . '/files/odt.odt');
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }

@@ -32,9 +32,9 @@ $args = array(
     "config" => $config,
 );
 
-$privkey_file = 'file://' . dirname(__FILE__) . '/private_rsa_2048.key';
+$privkey_file = 'file://' . __DIR__ . '/private_rsa_2048.key';
 $csr = openssl_csr_new($dn, $privkey_file, $args);
-$csr_file = file_get_contents(dirname(__FILE__) . '/cert.csr');
+$csr_file = file_get_contents(__DIR__ . '/cert.csr');
 
 var_dump(openssl_csr_get_public_key($csr));
 var_dump(openssl_csr_get_public_key($csr_file));

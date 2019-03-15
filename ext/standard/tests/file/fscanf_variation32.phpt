@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - octal formats with boolean
 
 /* Test fscanf() to scan boolean data using different octal format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): different octal format types with boolean data ***\n";
 
@@ -67,7 +67,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation32.tmp";
 unlink($filename);
 ?>

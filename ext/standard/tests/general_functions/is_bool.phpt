@@ -26,7 +26,7 @@ echo "\n*** Testing is_bool() on non boolean values ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset variable
 $unset_bool1 = true;

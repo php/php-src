@@ -16,7 +16,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 */
 
 echo "*** Testing lstat() for error conditions ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 var_dump( lstat("$file_path/temp.tmp") ); // non existing file
 var_dump( lstat(22) ); // scalar argument
 

@@ -7,7 +7,7 @@ precision=14
 default_charset=UTF-8
 --FILE--
 <?php
-include dirname(__FILE__) . '/033_run.inc';
+include __DIR__ . '/033_run.inc';
 ?>
 --EXPECT--
 int                      1                                               123                                                         

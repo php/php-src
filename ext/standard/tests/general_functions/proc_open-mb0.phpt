@@ -9,7 +9,7 @@ if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 
 $php = PHP_BINARY;
 
-$f = dirname(__FILE__) . DIRECTORY_SEPARATOR . "proc_only_mb0.php";
+$f = __DIR__ . DIRECTORY_SEPARATOR . "proc_only_mb0.php";
 file_put_contents($f,'<?php var_dump($argv); ?>');
 
 $ds = array(

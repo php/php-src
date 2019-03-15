@@ -16,16 +16,16 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 */
 
 echo "\n*** Testing readlink() on a non-existent link ***\n";
-var_dump( readlink(dirname(__FILE__)."/readlink_error.tmp") );
+var_dump( readlink(__DIR__."/readlink_error.tmp") );
 
 echo "\n*** Testing readlink() on existing file ***\n";
 var_dump( readlink(__FILE__) );
 
 echo "\n*** Testing readlink() on existing directory ***\n";
-var_dump( readlink(dirname(__FILE__)) );
+var_dump( readlink(__DIR__) );
 
 echo "\n*** Testing realpath() on a non-existent file ***\n";
-var_dump( realpath(dirname(__FILE__)."/realpath_error.tmp") );
+var_dump( realpath(__DIR__."/realpath_error.tmp") );
 
 echo "Done\n";
 ?>

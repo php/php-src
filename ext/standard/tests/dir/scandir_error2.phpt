@@ -19,7 +19,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 echo "*** Testing scandir() : error conditions ***\n";
 
-$directory = dirname(__FILE__) . '/idonotexist';
+$directory = __DIR__ . '/idonotexist';
 
 echo "\n-- Pass scandir() an absolute path that does not exist --\n";
 var_dump(scandir($directory));

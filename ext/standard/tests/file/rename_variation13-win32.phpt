@@ -36,7 +36,7 @@ $names_arr = array(
 error_reporting(E_ALL ^ E_NOTICE);
 
 echo "*** Testing rename() with obscure files ***\n";
-$file_path = dirname(__FILE__)."/renameVar13";
+$file_path = __DIR__."/renameVar13";
 $aFile = $file_path.'/afile.tmp';
 
 if (!mkdir($file_path)) {

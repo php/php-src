@@ -31,7 +31,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$client = new LocalSoapClient(dirname(__FILE__)."/bug29844.wsdl", array("trace"=>1));
+$client = new LocalSoapClient(__DIR__."/bug29844.wsdl", array("trace"=>1));
 var_dump($client->hello('davey'));
 ?>
 --EXPECT--

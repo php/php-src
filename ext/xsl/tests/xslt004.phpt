@@ -1,7 +1,7 @@
 --TEST--
 Test 4: Checking UTF8 Output
 --SKIPIF--
-<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>
+<?php require_once __DIR__ .'/skipif.inc'; ?>
 --FILE--
 <?php
 echo "Test 4: Checking UTF8 Output";

@@ -9,7 +9,7 @@ Description: PHP supports a portable way of locking complete files
 */
 
 echo "*** Testing flock() fun with file and dir ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $file_handle = fopen("$file_path/lock.tmp", "w");
 var_dump(flock($file_handle, LOCK_SH|LOCK_NB));

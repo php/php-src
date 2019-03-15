@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - hexa formats with boolean
 
 /* Test fscanf() to scan boolean data using different hexa format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): different hexa format types with boolean data ***\n";
 
@@ -62,7 +62,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation38.tmp";
 unlink($filename);
 ?>

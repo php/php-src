@@ -14,10 +14,10 @@ Test scandir() function : basic functionality
 echo "*** Testing scandir() : basic functionality ***\n";
 
 // include file.inc for create_files function
-include (dirname(__FILE__) . '/../file/file.inc');
+include (__DIR__ . '/../file/file.inc');
 
 // set up directory
-$directory = dirname(__FILE__) . '/scandir_basic';
+$directory = __DIR__ . '/scandir_basic';
 mkdir($directory);
 create_files($directory, 3);
 
@@ -34,7 +34,7 @@ delete_files($directory, 3);
 ===DONE===
 --CLEAN--
 <?php
-$directory = dirname(__FILE__) . '/scandir_basic';
+$directory = __DIR__ . '/scandir_basic';
 rmdir($directory);
 ?>
 --EXPECT--

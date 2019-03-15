@@ -8,7 +8,7 @@ if (!extension_loaded("phar")) die("skip");
 phar.readonly=0
 --FILE--
 <?php
-$p = new Phar(dirname(__FILE__) . '/phar_begin_setstub_commit.phar.tar', 0, 'phar_begin_setstub_commit.phar');
+$p = new Phar(__DIR__ . '/phar_begin_setstub_commit.phar.tar', 0, 'phar_begin_setstub_commit.phar');
 var_dump($p->isFileFormat(Phar::TAR));
 //var_dump($p->getStub());
 var_dump($p->isBuffering());
@@ -32,7 +32,7 @@ var_dump($p->getStub());
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/phar_begin_setstub_commit.phar.tar');
+unlink(__DIR__ . '/phar_begin_setstub_commit.phar.tar');
 ?>
 --EXPECTF--
 bool(true)

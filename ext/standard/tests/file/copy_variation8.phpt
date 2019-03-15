@@ -17,7 +17,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 
 echo "*** Testing copy() function: copying links across different directories ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $base_dir = $file_path."/copy_variation8";
 mkdir($base_dir);

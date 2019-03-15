@@ -18,7 +18,7 @@ echo "*** Testing gzopen() : basic functionality ***\n";
 
 
 // Initialise all required variables
-$filename = dirname(__FILE__)."/004.txt.gz";
+$filename = __DIR__."/004.txt.gz";
 $mode = 'r';
 $use_include_path = false;
 

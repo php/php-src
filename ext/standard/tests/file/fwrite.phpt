@@ -3,7 +3,7 @@ fwrite() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/fwrite.dat";
+$filename = __DIR__."/fwrite.dat";
 
 $fp = fopen($filename, "w");
 var_dump(fwrite($fp, ""));
